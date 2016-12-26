@@ -1,16 +1,14 @@
-description: Account Tampering
-comment: This method uses uncommon error codes on failed logons to determine suspicious activity and tampering with accounts that have been disabled or somehow restricted.
-detection:
-    EventLog: Security
-    EventID:
-        - 4625
-        - 4776
-    Status:
-        - 0xC0000072
-        - 0xC000006F
-        - 0xC0000070
-        - 0xC0000413
-        - 0xC000018C
+description: Eventlog Cleared
+comment: Some threat groups tend to delete the local 'Security'' Eventlog using certain utitlities
+condition:
+    selection:
+        EventLog: Security
+        EventID:
+            - 517
+            - 1102
+    asset: any
+    count: 1
+    time: last 15m
 falsepositives:
     - Rollout of log collection agents (the setup routine often includes a reset of the local Eventlog)
     - System provisioning (system reset before the golden image creation)
