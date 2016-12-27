@@ -1,13 +1,19 @@
-description: Account 
-comment: 
+description: Multiple Failed Logins with Different Accounts from Single Source System
+comment: Detects suspicious failed logins with different user accounts from a single source system 
 detection:
     selection:
-        EventLog: Security
-        EventID:
-            - 529
-            - 4625
-            - 4776
-    condition: 1 of selection
+        - EventLog: Security
+          EventID:
+              - 529
+              - 4625
+              - 4776
+          UserName: not null
+          SourceWorkstation: not null
+    timeframe: last 24h 
+    condition: selection[0] | ( count(UserName) by SourceWorkstation ) > 3
 falsepositives:
-    - User using a disabled account
-level: 70
+    - Terminal servers
+    - Jump servers
+    - Other multiuser systems like Citrix server farms
+    - Workstations with frequently changing users 
+level: 40
