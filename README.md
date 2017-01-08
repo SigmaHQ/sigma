@@ -51,18 +51,18 @@ The lists contain strings that are applied to the full log message and are logic
 
 Example:
 
-'''
+```
 detection:
   keywords:
     - EVILSERVICE
     - svchost.exe -n evil
-'''
+```
 
-Is combined in the resulting search statement like:
+This example results in the following search expression:
 
-'''
+```
 EvilService OR "svchost.exe -n evil"
-'''
+```
 
 ### Maps
 
@@ -70,7 +70,7 @@ Maps (or dictionaries) consist of key/value pairs, in which the key is a field i
 
 Examples:
 
-'''
+```
 detection:
   selection:
     - EventLog: Security
@@ -78,13 +78,13 @@ detection:
         - 517
         - 1102
 condition: selection
-'''
+```
 
-Splunk Search:
+Splunk Search (implicit AND):
 
-'''
+```
 EventLog=Security ( EventID=517 OR EventID=1102 )
-'''
+```
 
 ### TimeFrame
 
@@ -92,24 +92,47 @@ A relative time frame definition using the typical abbreviations for day, hour, 
 
 Examples:
 
-'''
+```
 15s
 30m
 12h
 7d
 3M
-'''
+```
 
 Note: The time frame is often a manual setting that has to be defined within the SIEM system and is not part of the generated query.
 
-### Condition
+## Condition
 
+The condition is the most complex part of the specification and will be subject to change over time and arising requirements. In the first release it will support the following expressions.
 
-### FalsePositives
+- Logical AND/OR
+
+  ```keywords1 or keywords2```
+
+- X of search-identifier
+
+  ```1 of keywords```
+
+  Same as just 'keywords' if keywords are dafined in a list
+
+- Negation with 'not'
+
+  ```keywords and not filters```
+
+- Sub searches
+
+  ```expression1 | expression2```
+
+- Brackets
+
+  ```selection1 and (keywords1 or keywords2)```
+
+## FalsePositives
 
 A list of known false positives that may occur.
 
-### Level
+## Level
 
 A score between 0 and 100 to define the degree of likelyhood that generated events are actually incidents.
 
