@@ -1,0 +1,14 @@
+title: Multiple Failed Logins with Different Accounts from Single Source System
+description: Detects suspicious failed logins with different user accounts from a single source system 
+detection:
+    selection:
+        - log: auth
+          pam_user: not null
+          pam_rhost: not null
+    timeframe: last 24h 
+    condition: selection | count(pam_user) by pam_rhost > 3
+falsepositives:
+    - Terminal servers
+    - Jump servers
+    - Workstations with frequently changing users 
+level: 40
