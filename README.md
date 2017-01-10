@@ -115,19 +115,57 @@ The condition is the most complex part of the specification and will be subject 
 
   ```1 of keywords```
 
-  Same as just 'keywords' if keywords are dafined in a list
+  Same as just 'keywords' if keywords are dafined in a list. X may be:
+
+  - 1 (logical or across alternatives)
+  - all (logical and across alternatives)
 
 - Negation with 'not'
 
   ```keywords and not filters```
 
-- Sub searches
+- Pipe
 
   ```expression1 | expression2```
+
+  A pipe indicates that the result of search *expression1* is:
+
+  - filtered by search *expression2* (equivalent to logical *and*)
+  - aggregated by aggregation *expression2* and possibly compared with a value
+
+  The first expression must be a search expression that may be followed by an arbitrary number of filtering search
+  expressions and finally followed by an aggregation expression with a condition.
 
 - Brackets
 
   ```selection1 and (keywords1 or keywords2)```
+
+- Aggregation expression
+
+  agg-function(agg-field) [ by group-field ] comparison-op value
+
+  agg-function may be:
+
+  - count
+  - distcount (count distinct values)
+  - min
+  - max
+  - avg
+  - sum
+
+  Example: ```count(UserName) by SourceWorkstation > 3```
+
+  The comparison operates on the result values of all aggregation groups or buckets. It is sufficient when one group matches
+  the condition.
+
+Operator Precedence (least to most binding)
+
+- |
+- or
+- and
+- not
+- x of search-identifier
+- ( expression )
 
 ## FalsePositives
 
