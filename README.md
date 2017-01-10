@@ -17,6 +17,7 @@ The rules consist of a few required sections and several optional ones.
 
 ```
 title
+status [optional]
 description [optional]
 reference [optional]
 detection
@@ -33,6 +34,15 @@ level [optional]
 ## Title
 
 A brief title for the rule that should contain what the rules is supposed to detect (max. 256 characters)
+
+## Status
+
+Declares the status of the rule:
+
+- stable: the rule is considered as stable and may be used in production systems or dashboards.
+- test: an almost stable rule that possibly could require some fine tuning.
+- experimental: an experimental rule that could lead to false results or be noisy, but could also identify interesting
+  events.
 
 ## Description
 
