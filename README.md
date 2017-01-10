@@ -18,6 +18,7 @@ The rules consist of a few required sections and several optional ones.
 ```
 title
 description [optional]
+reference [optional]
 detection
   {search-identifier} [optional]
     {string-list} [optional]
@@ -147,8 +148,8 @@ A rough guideline would be:
 ## Examples
 
 ```
-description: Eventlog Cleared
-comment: Some threat groups tend to delete the local 'Security'' Eventlog using certain utitlities
+title: Eventlog Cleared
+description: Some threat groups tend to delete the local 'Security'' Eventlog using certain utitlities
 detection:
     selection:
         - EventLog: Security
