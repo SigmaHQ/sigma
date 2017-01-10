@@ -1,0 +1,19 @@
+title: Shells spawned by Web Servers
+status: experimental
+description: Web servers that spawn shell processes could be the result of a successfully placed web shell or an other attack
+detection:
+    selection:
+        - EventLog: Microsoft-Windows-Sysmon/Operational
+          EventID: 1
+          ParentImage:
+              - '*\w3wp.exe'
+              - '*\httpd.exe'
+              - '*\nginx.exe'
+          Image:
+              - '*\cmd.exe'
+              - '*\sh.exe'
+              - '*\bash.exe'
+    condition: selection
+falsepositives:
+    - Particular web applications may spawn a shell process legitimately
+level: 70
