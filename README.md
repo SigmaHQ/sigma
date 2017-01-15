@@ -177,6 +177,8 @@ Operator Precedence (least to most binding)
 - x of search-identifier
 - ( expression )
 
+If multiple conditions are given, they are logically linked with OR.
+
 ## FalsePositives
 
 A list of known false positives that may occur.

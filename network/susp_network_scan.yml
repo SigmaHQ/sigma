@@ -1,0 +1,10 @@
+title: Network Scans
+description: Detects many failed connection attempts to different ports or hosts
+detection:
+    selection:
+        - log: network
+          action: denied
+    timeframe: last 24h
+    condition:
+        - selection | count(dst_port) > 10 by src_ip
+        - selection | count(dst_ip) > 10 by src_ip
