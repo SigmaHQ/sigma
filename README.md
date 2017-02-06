@@ -1,15 +1,19 @@
 ![sigma_logo](./images/Sigma_0.3.png)
 
 # Sigma
-Generic Signatures for SIEM Systems
+Generic Signature Format for SIEM Systems
 
 # What is Sigma?
 
-- Generic signature format to describe relevant events in log files
+Sigma is a generic signature format that allows you to describe relevant log events in a straight forward manner.  
 - Open repository for sigma signatures
 - Set of converters that generate searches/queries for different SIEM systems
 
 ![sigma_description](./images/Sigma-description.png)
+
+See the first slide deck that I prepared for a private conference in mid January 2017.
+
+[Sigma - Make Security Monitoring Great Again](https://www.slideshare.net/secret/gvgxeXoKblXRcA)
 
 # Specification
 
@@ -192,6 +196,10 @@ A rough guideline would be:
 - 60 : Relevant event that should be reviewed manually on a more frequent basis. A security analyst has to review the events and spot anomalies or suspcious indicators. List the events in a dashboard panel for manual review.
 - 80 : Relevant event that should trigger an internal alert and has to be reviewed immediately.
 - 100 : Highly relevant event that triggers an internal alert and causes external notifications (eMail, SMS, ticket). Events are clear matches with no known false positives.    
+
+## Placeholders
+
+
 
 ## Examples
 
