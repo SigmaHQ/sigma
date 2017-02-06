@@ -15,6 +15,8 @@ This repository contains:
 * Open repository for sigma signatures in the ```./rules```subfolder
 * Collection of converters that generate searches/queries for different SIEM systems [Pending]
 
+# Slides
+
 See the first slide deck that I prepared for a private conference in mid January 2017.
 
 [Sigma - Make Security Monitoring Great Again](https://www.slideshare.net/secret/gvgxeXoKblXRcA)
