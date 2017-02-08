@@ -21,6 +21,7 @@ See the first slide deck that I prepared for a private conference in mid January
 
 [Sigma - Make Security Monitoring Great Again](https://www.slideshare.net/secret/gvgxeXoKblXRcA)
 
+
 # Specification
 
 The specifications can be found in the [Wiki](https://github.com/Neo23x0/sigma/wiki/Specification). 
