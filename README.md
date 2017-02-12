@@ -28,6 +28,23 @@ The specifications can be found in the [Wiki](https://github.com/Neo23x0/sigma/w
 
 The current specification can be seen as a proposal. Feedback is requested.
 
+# Examples
+
+Windows 'Security' Eventlog: Access to LSASS Process with Certain Access Mask / Object Type (experimental)
+![sigma_rule example2](./images/Sigma_rule_example2.png)
+
+Sysmon: Remote Thread Creation in LSASS Process
+![sigma_rule example1](./images/Sigma_rule_example1.png)
+
+Web Server Access Logs: Web Shell Detection
+![sigma_rule example3](./images/Sigma_rule_example3.png)
+
+Sysmon: Web Shell Detection
+![sigma_rule example4](./images/Sigma_rule_example4.png)
+
+Windows 'Security' Eventlog: Suspicious Number of Failed Logons from a Single Source Workstation
+![sigma_rule example5](./images/Sigma_rule_example5.png)
+
 # Next Steps 
 
 * Creation of a reasonable set of sample rules
