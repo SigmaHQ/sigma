@@ -13,7 +13,11 @@ This repository contains:
 
 * Sigma rule specification in the [Wiki](https://github.com/Neo23x0/sigma/wiki/Specification)
 * Open repository for sigma signatures in the ```./rules```subfolder
-* Collection of converters that generate searches/queries for different SIEM systems [Pending]
+* A converter that generate searches/queries for different SIEM systems [in development]
+
+# Converter
+
+The converter is written in Python 3 and requires PyYAML. Invoke it with `--help` for usage instructions.
 
 # Slides
 
