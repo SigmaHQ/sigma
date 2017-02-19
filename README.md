@@ -85,4 +85,4 @@ Windows 'Security' Eventlog: Suspicious Number of Failed Logons from a Single So
 
 This is a private project mainly developed by Florian Roth and Thomas Patzke with feedback from many fellow analysts and friends.  
 
-Copyright for Tree Image: [studiobarcelona / 123RF Stock Photo](href='http://www.123rf.com/profile_studiobarcelona)
+Copyright for Tree Image: [studiobarcelona / 123RF Stock Photo](http://www.123rf.com/profile_studiobarcelona)
