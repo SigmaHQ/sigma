@@ -28,7 +28,7 @@ This repository contains:
 
 # Sigma Converters
 
-We are already working on the first converters in the 'devel' branch of this project. They are not ready yet, but you can already read the base rule set and create searches and panels in your SIEM system based on these rules. The first converters will be for Elastic Search and Splunk as those 
+We are already working on the first converters in the '[devel](https://github.com/Neo23x0/sigma/tree/devel-sigmac/tools)' branch of this project. They are not ready yet, but you can already read the base rule set and create searches and panels in your SIEM system based on these rules. The first converters will be for Elastic Search and Splunk as those 
 
 ![sigma_description](./images/Sigma-description.png)
 
