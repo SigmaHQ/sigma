@@ -37,10 +37,12 @@ for sigmafile in cmdargs.inputs:
     try:
         f = open(sigmafile)
         parser = SigmaParser(f)
-        print_debug(json.dumps(parser.parsedyaml, indent=2))
+        print_debug("Parsed YAML:\n", json.dumps(parser.parsedyaml, indent=2))
         parser.parse_sigma()
         for condtoken in parser.condtoken:
-            print_debug(condtoken)
+            print_debug("Condition Tokens:", condtoken)
+        for condparsed in parser.condparsed:
+            print_debug("Condition Parse Tree:", condparsed)
     except OSError as e:
         print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)))
     except yaml.parser.ParserError as e:

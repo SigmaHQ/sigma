@@ -47,7 +47,7 @@ class SigmaParser:
 
         if type(definition) == list:    # list of values or maps
             if condOverride:    # condition given through rule detection condition, e.g. 1 of x
-                cond = condOverride
+                cond = condOverride()
             else:               # no condition given, use default from spec
                 cond = ConditionOR()
 
@@ -139,20 +139,25 @@ class SigmaConditionTokenizer:
             ]
 
     def __init__(self, condition):
-        self.tokens = list()
-        pos = 1
+        if type(condition) == str:          # String that is parsed
+            self.tokens = list()
+            pos = 1
 
-        while len(condition) > 0:
-            for tokendef in self.tokendefs:     # iterate over defined tokens and try to recognize the next one
-                match = tokendef[1].match(condition)
-                if match:
-                    if tokendef[0] != None:
-                        self.tokens.append(SigmaConditionToken(tokendef, match, pos + match.start()))
-                    pos += match.end()      # increase position and cut matched prefix from condition
-                    condition = condition[match.end():]
-                    break
-            else:   # no valid token identified
-                raise SigmaParseError("Unexpected token in condition at position %d")
+            while len(condition) > 0:
+                for tokendef in self.tokendefs:     # iterate over defined tokens and try to recognize the next one
+                    match = tokendef[1].match(condition)
+                    if match:
+                        if tokendef[0] != None:
+                            self.tokens.append(SigmaConditionToken(tokendef, match, pos + match.start()))
+                        pos += match.end()      # increase position and cut matched prefix from condition
+                        condition = condition[match.end():]
+                        break
+                else:   # no valid token identified
+                    raise SigmaParseError("Unexpected token in condition at position %d")
+        elif type(condition) == list:       # List of tokens to be converted into SigmaConditionTokenizer class
+            self.tokens = condition
+        else:
+            raise TypeError("SigmaConditionTokenizer constructor expects string or list, got %s" % (type(condition)))
 
     def __str__(self):
         return " ".join([str(token) for token in self.tokens])
@@ -161,7 +166,20 @@ class SigmaConditionTokenizer:
         return iter(self.tokens)
 
     def __getitem__(self, i):
-        return self.tokens[i]
+        if type(i) == int:
+            return self.tokens[i]
+        elif type(i) == slice:
+            return SigmaConditionTokenizer(self.tokens[i])
+        else:
+            raise IndexError("Expected index or slice")
+
+    def __add__(self, other):
+        if isinstance(other, SigmaConditionTokenizer):
+            return SigmaConditionTokenizer(self.tokens + other.tokens)
+        elif isinstance(other, (SigmaConditionToken, ParseTreeNode)):
+            return SigmaConditionTokenizer(self.tokens + [ other ])
+        else:
+            raise TypeError("+ operator expects SigmaConditionTokenizer or token type, got %s: %s" % (type(other), str(other)))
 
     def index(self, item):
         return self.tokens.index(item)
@@ -170,7 +188,15 @@ class SigmaParseError(Exception):
     pass
 
 ### Parse Tree Node Classes ###
-class ConditionBase:
+class ParseTreeNode:
+    """Parse Tree Node Base Class"""
+    def __init__(self):
+        raise NotImplementedError("ConditionBase is no usable class")
+
+    def __str__(self):
+        return "[ %s: %s ]" % (self.__doc__, str([str(item) for item in self.items]))
+
+class ConditionBase(ParseTreeNode):
     """Base class for conditional operations"""
     op = COND_NONE
     items = None
@@ -201,29 +227,29 @@ class ConditionNOT(ConditionBase):
 
     def __init__(self, sigma=None, op=None, val=None):
         if sigma == None and op == None and val == None:    # no parameters given - initialize empty
-            self.items = None
+            self.items = list()
         else:       # called by parser, use given values
-            self.items = val
+            self.items = [ val ]
 
     def add(self, item):
-        if self.items == None:
+        if len(self.items) == 0:
             super.add(item)
         else:
             raise ValueError("Only one element allowed in NOT condition")
 
-class NodeSubexpression:
-    """Subexpression in parentheses"""
+class NodeSubexpression(ParseTreeNode):
+    """Subexpression"""
     def __init__(self, subexpr):
-        self.subexpr = subexpr
+        self.items = subexpr
 
 # Parse tree converters: convert something into one of the parse tree node classes defined above
-def convertAllFrom(sigma, op, val):
-    """Convert 'all from x' into ConditionAND"""
-    return sigma.parse_definition(val, ConditionAND)
+def convertAllOf(sigma, op, val):
+    """Convert 'all of x' into ConditionAND"""
+    return sigma.parse_definition(val.matched, ConditionAND)
 
-def convertOneFrom(sigma, op, val):
-    """Convert '1 from x' into ConditionOR"""
-    return sigma.parse_definition(val, ConditionAND)
+def convertOneOf(sigma, op, val):
+    """Convert '1 of x' into ConditionOR"""
+    return sigma.parse_definition(val.matched, ConditionOR)
 
 def convertId(sigma, op):
     """Convert search identifiers (lists or maps) into condition nodes according to spec defaults"""
@@ -233,8 +259,8 @@ def convertId(sigma, op):
 class SigmaConditionParser:
     """Parser for Sigma condition expression"""
     searchOperators = [     # description of operators: (token id, number of operands, parse tree node class) - order == precedence
-            (SigmaConditionToken.TOKEN_ALL, 1, convertAllFrom),
-            (SigmaConditionToken.TOKEN_ONE, 1, convertOneFrom),
+            (SigmaConditionToken.TOKEN_ALL, 1, convertAllOf),
+            (SigmaConditionToken.TOKEN_ONE, 1, convertOneOf),
             (SigmaConditionToken.TOKEN_ID,  0, convertId),
             (SigmaConditionToken.TOKEN_NOT, 1, ConditionNOT),
             (SigmaConditionToken.TOKEN_AND, 2, ConditionAND),
@@ -246,7 +272,7 @@ class SigmaConditionParser:
             raise NotImplementedError("Aggregation expressions are not yet supported")
 
         self.sigmaParser = sigmaParser
-        parsedSearch = self.parseSearch(tokens)
+        self.parsedSearch = self.parseSearch(tokens)
 
     def parseSearch(self, tokens):
         """
@@ -266,30 +292,31 @@ class SigmaConditionParser:
             if lPos > rPos:
                 raise SigmaParseError("Closing parentheses at position " + str(rTok.pos) + " precedes opening at position " + str(lTok.pos))
 
-            subparsed = self.parseSearch(tokens[lPos + 1:rPos - 1])
-            tokens = tokens[:lPos] + [ NodeSubexpression(subparsed) ] + tokens[rPos + 1:]   # replace parentheses + expression with group node that contains parsed subexpression
+            subparsed = self.parseSearch(tokens[lPos + 1:rPos])
+            tokens = tokens[:lPos] + NodeSubexpression(subparsed) + tokens[rPos + 1:]   # replace parentheses + expression with group node that contains parsed subexpression
 
         # 2. Iterate over all known operators in given precedence
         for operator in self.searchOperators:
             # 3. reduce all occurrences into corresponding parse tree nodes
             while operator[0] in tokens:
-                print(tokens)
                 pos_op = tokens.index(operator[0])
                 tok_op = tokens[pos_op]
                 if operator[1] == 0:    # operator
                     treenode = operator[2](self.sigmaParser, tok_op)
-                    tokens = tokens[:pos_op] + [ treenode ] + tokens[pos_op + 1:]
+                    tokens = tokens[:pos_op] + treenode + tokens[pos_op + 1:]
                 elif operator[1] == 1:    # operator value
                     pos_val = pos_op + 1
                     tok_val = tokens[pos_val]
                     treenode = operator[2](self.sigmaParser, tok_op, tok_val)
-                    tokens = tokens[:pos_op] + [ treenode ] + tokens[pos_val + 1:]
+                    tokens = tokens[:pos_op] + treenode + tokens[pos_val + 1:]
                 elif operator[1] == 2:    # value1 operator value2
-                    print(operator, pos_op)
                     pos_val1 = pos_op - 1
                     pos_val2 = pos_op + 1
                     tok_val1 = tokens[pos_val1]
                     tok_val2 = tokens[pos_val2]
                     treenode = operator[2](self.sigmaParser, tok_op, tok_val1, tok_val2)
-                    tokens = tokens[:pos_val1] + [ treenode ] + tokens[pos_val2 + 1:]
+                    tokens = tokens[:pos_val1] + treenode + tokens[pos_val2 + 1:]
         return tokens
+
+    def __str__(self):
+        return str(self.parsedSearch)
