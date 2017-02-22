@@ -28,7 +28,7 @@ This repository contains:
 
 # Sigma Converters
 
-We are already working on the first converters in the '[devel](https://github.com/Neo23x0/sigma/tree/devel-sigmac/tools)' branch of this project. They are not ready yet, but you can already read the base rule set and create searches and panels in your SIEM system based on these rules. The first converters will be for Elastic Search and Splunk as those 
+We are already working on the first converters in the '[devel](https://github.com/Neo23x0/sigma/tree/devel-sigmac/tools)' branch of this project. They are not ready yet, but you can already read the base rule set and create searches and panels in your SIEM system based on these rules. The first converters will convert Sigma rules for ElasticSearch and Splunk as those are the most accessible ones. 
 
 ![sigma_description](./images/Sigma-description.png)
 
@@ -78,7 +78,7 @@ Windows 'Security' Eventlog: Suspicious Number of Failed Logons from a Single So
 * Creation of a reasonable set of sample rules
 * Release of the first rule converters for Elastic Search and Splunk
 * Integration of feedback into the rule specifications
-* Collecting rule input from fellow researchers and analysts
+* Integration into Threat Intel Exchanges, e.g. MISP
 * Attempts to convince others to use the rule format in their reports, threat feeds, blog posts, threat sharing platforms
 
 # Credits
