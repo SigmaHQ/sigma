@@ -89,7 +89,7 @@ Windows 'Security' Eventlog: Suspicious Number of Failed Logons from a Single So
 * Creation of a reasonable set of sample rules
 * Release of the first rule converters for Elastic Search and Splunk
 * Integration of feedback into the rule specifications
-* Collecting rule input from fellow researchers and analysts
+* Integration into Threat Intel Exchanges, e.g. MISP
 * Attempts to convince others to use the rule format in their reports, threat feeds, blog posts, threat sharing platforms
 
 # Credits
