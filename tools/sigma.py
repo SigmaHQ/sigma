@@ -37,11 +37,14 @@ class SigmaParser:
         for tokens in self.condtoken:
             self.condparsed.append(SigmaConditionParser(self, tokens))
 
-    def parse_definition(self, definitionName, condOverride=None):
+    def parse_definition_byname(self, definitionName, condOverride=None):
         try:
             definition = self.definitions[definitionName]
         except KeyError as e:
             raise SigmaParseError("Unknown definition '%s'" % (definitionName)) from e
+        return self.parse_definition(definition, condOverride)
+
+    def parse_definition(self, definition, condOverride=None):
         if type(definition) not in (dict, list):
             raise SigmaParseError("Expected map or list, got type %s: '%s'" % (type(definition), str(definition)))
 
@@ -51,9 +54,12 @@ class SigmaParser:
             else:               # no condition given, use default from spec
                 cond = ConditionOR()
 
+            subcond = None
             for value in definition:
-                if type(value) in (str, int, dict):
+                if type(value) in (str, int):
                     cond.add(value)
+                elif type(value) in (dict, list):
+                    cond.add(self.parse_definition(value))
                 else:
                     raise SigmaParseError("Definition list may only contain plain values or maps")
         elif type(definition) == dict:      # map
@@ -165,6 +171,9 @@ class SigmaConditionTokenizer:
     def __iter__(self):
         return iter(self.tokens)
 
+    def __len__(self):
+        return len(self.tokens)
+
     def __getitem__(self, i):
         if type(i) == int:
             return self.tokens[i]
@@ -207,6 +216,9 @@ class ConditionBase(ParseTreeNode):
     def add(self, item):
         self.items.append(item)
 
+    def __iter__(self):
+        return iter(self.items)
+
 class ConditionAND(ConditionBase):
     """AND Condition"""
     op = COND_AND
@@ -237,6 +249,13 @@ class ConditionNOT(ConditionBase):
         else:
             raise ValueError("Only one element allowed in NOT condition")
 
+    @property
+    def item(self):
+        try:
+            return self.items[0]
+        except IndexError:
+            return None
+
 class NodeSubexpression(ParseTreeNode):
     """Subexpression"""
     def __init__(self, subexpr):
@@ -245,15 +264,15 @@ class NodeSubexpression(ParseTreeNode):
 # Parse tree converters: convert something into one of the parse tree node classes defined above
 def convertAllOf(sigma, op, val):
     """Convert 'all of x' into ConditionAND"""
-    return sigma.parse_definition(val.matched, ConditionAND)
+    return NodeSubexpression(sigma.parse_definition_byname(val.matched, ConditionAND))
 
 def convertOneOf(sigma, op, val):
     """Convert '1 of x' into ConditionOR"""
-    return sigma.parse_definition(val.matched, ConditionOR)
+    return NodeSubexpression(sigma.parse_definition_byname(val.matched, ConditionOR))
 
 def convertId(sigma, op):
     """Convert search identifiers (lists or maps) into condition nodes according to spec defaults"""
-    return sigma.parse_definition(op.matched)
+    return NodeSubexpression(sigma.parse_definition_byname(op.matched))
 
 # Condition parser class
 class SigmaConditionParser:
@@ -292,7 +311,7 @@ class SigmaConditionParser:
             if lPos > rPos:
                 raise SigmaParseError("Closing parentheses at position " + str(rTok.pos) + " precedes opening at position " + str(lTok.pos))
 
-            subparsed = self.parseSearch(tokens[lPos + 1:rPos])
+            subparsed = self.parseSearch(tokens[lPos + 1:rPos])[0]
             tokens = tokens[:lPos] + NodeSubexpression(subparsed) + tokens[rPos + 1:]   # replace parentheses + expression with group node that contains parsed subexpression
 
         # 2. Iterate over all known operators in given precedence
@@ -316,7 +335,17 @@ class SigmaConditionParser:
                     tok_val2 = tokens[pos_val2]
                     treenode = operator[2](self.sigmaParser, tok_op, tok_val1, tok_val2)
                     tokens = tokens[:pos_val1] + treenode + tokens[pos_val2 + 1:]
+
+        if len(tokens) != 1:     # parse tree must begin with exactly one node
+            raise ValueError("Parse tree must have exactly one start node!")
+
         return tokens
 
     def __str__(self):
         return str(self.parsedSearch)
+
+    def __len__(self):
+        return len(self.parsedSearch)
+
+    def getParseTree(self):
+        return(self.parsedSearch[0])

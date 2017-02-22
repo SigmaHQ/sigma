@@ -32,6 +32,12 @@ if cmdargs.target_list:
         print("%10s: %s" % (backend.identifier, backend.__doc__))
     sys.exit(0)
 
+try:
+    backend = backends.getBackend(cmdargs.target)()
+except LookupError as e:
+    print("Backend not found!")
+    sys.exit(1)
+
 for sigmafile in cmdargs.inputs:
     print_verbose("* Processing Sigma input %s" % (sigmafile))
     try:
@@ -43,6 +49,7 @@ for sigmafile in cmdargs.inputs:
             print_debug("Condition Tokens:", condtoken)
         for condparsed in parser.condparsed:
             print_debug("Condition Parse Tree:", condparsed)
+            print(backend.generate(condparsed))
     except OSError as e:
         print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)))
     except yaml.parser.ParserError as e:
@@ -50,7 +57,7 @@ for sigmafile in cmdargs.inputs:
     except SigmaParseError as e:
         print("Sigma parse error in %s: %s" % (sigmafile, str(e)))
     except NotImplementedError as e:
-        print("This tool currently doesn't support the provided input: " + str(e))
+        print("An unsupported feature is required for this Sigma rule: " + str(e))
         print("Feel free to contribute for fun and fame, this is open source :) -> https://github.com/Neo23x0/sigma")
     finally:
         f.close()
