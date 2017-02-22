@@ -5,7 +5,7 @@ import sys
 import argparse
 import yaml
 import json
-from sigma import SigmaParser
+from sigma import SigmaParser, SigmaParseError
 import backends
 
 def print_verbose(*args, **kwargs):
@@ -33,16 +33,23 @@ if cmdargs.target_list:
     sys.exit(0)
 
 for sigmafile in cmdargs.inputs:
-    print_verbose("Processing Sigma input %s" % (sigmafile))
+    print_verbose("* Processing Sigma input %s" % (sigmafile))
     try:
         f = open(sigmafile)
         parser = SigmaParser(f)
         print_debug(json.dumps(parser.parsedyaml, indent=2))
+        parser.parse_sigma()
         for condtoken in parser.condtoken:
             print_debug(condtoken)
     except OSError as e:
         print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)))
     except yaml.parser.ParserError as e:
         print("Sigma file %s is no valid YAML: %s" % (sigmafile, str(e)))
+    except SigmaParseError as e:
+        print("Sigma parse error in %s: %s" % (sigmafile, str(e)))
+    except NotImplementedError as e:
+        print("This tool currently doesn't support the provided input: " + str(e))
+        print("Feel free to contribute for fun and fame, this is open source :) -> https://github.com/Neo23x0/sigma")
     finally:
         f.close()
+        print_debug()
