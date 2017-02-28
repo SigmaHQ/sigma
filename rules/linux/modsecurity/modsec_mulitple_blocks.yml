@@ -1,0 +1,17 @@
+title: Multiple Modsecurity Blocks
+description: Detects multiple blocks by the mod_security module (Web Application Firewall) 
+logsource:
+    product: linux
+    service: modsecurity
+detection:
+    selection:
+        - 'mod_security: Access denied'
+        - 'ModSecurity: Access denied'
+        - 'mod_security-message: Access denied'
+    timeframe: 120m 
+    condition: selection | count() > 6
+falsepositives:
+    - Vulnerability scanners
+    - Frequent attacks if system faces Internet
+level: medium
+
