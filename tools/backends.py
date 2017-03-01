@@ -23,7 +23,46 @@ class BaseBackend:
     active = False
 
     def generate(self, parsed):
-        raise NotImplementedError("Backend is not implemented yet")
+        return self.generateNode(parsed.getParseTree())
+
+    def generateNode(self, node):
+        if type(node) == sigma.ConditionAND:
+            return self.generateANDNode(node)
+        elif type(node) == sigma.ConditionOR:
+            return self.generateORNode(node)
+        elif type(node) == sigma.ConditionNOT:
+            return self.generateNOTNode(node)
+        elif type(node) == sigma.NodeSubexpression:
+            return self.generateSubexpressionNode(node)
+        elif type(node) == tuple:
+            return self.generateMapItemNode(node)
+        elif type(node) in (str, int):
+            return self.generateValueNode(node)
+        elif type(node) == list:
+            return self.generateListNode(node)
+        else:
+            raise TypeError("Node type %s was not expected in Sigma parse tree" % (str(type(node))))
+
+    def generateANDNode(self, node):
+        raise NotImplementedError("Node type not implemented for this backend")
+
+    def generateORNode(self, node):
+        raise NotImplementedError("Node type not implemented for this backend")
+
+    def generateNOTNode(self, node):
+        raise NotImplementedError("Node type not implemented for this backend")
+
+    def generateSubexpressionNode(self, node):
+        raise NotImplementedError("Node type not implemented for this backend")
+
+    def generateListNode(self, node):
+        raise NotImplementedError("Node type not implemented for this backend")
+
+    def generateMapItemNode(self, node):
+        raise NotImplementedError("Node type not implemented for this backend")
+
+    def generateValueNode(self, node):
+        raise NotImplementedError("Node type not implemented for this backend")
 
 class ElasticsearchQuerystringBackend(BaseBackend):
     """Converts Sigma rule into Elasticsearch query string. Only searches, no aggregations."""
@@ -32,35 +71,35 @@ class ElasticsearchQuerystringBackend(BaseBackend):
     reEscape = re.compile("([+\\-=!(){}\\[\\]^\"~*?:\\\\/]|&&|\\|\\|)")
     reClear = re.compile("[<>]")
 
-    def generate(self, parsed):
-        return self.generateNode(parsed.getParseTree())
-
     def cleanValue(self, val):
         val = self.reEscape.sub("\\\\\g<1>", val)
         return self.reClear.sub("", val)
 
-    def generateNode(self, node):
-        if type(node) == sigma.ConditionAND:
-            return " AND ".join([self.generateNode(val) for val in node])
-        elif type(node) == sigma.ConditionOR:
-            return " OR ".join([self.generateNode(val) for val in node])
-        elif type(node) == sigma.ConditionNOT:
-            return "NOT " + self.generateNode(node.item)
-        elif type(node) == sigma.NodeSubexpression:
-            return "(%s)" % self.generateNode(node.items)
-        elif type(node) == tuple:
-            key, value = node
-            if type(value) not in (str, int, list):
-                raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
-            return "%s:%s" % (key, self.generateNode(value))
-        elif type(node) in (str, int):
-            return "\"%s\"" % (self.cleanValue(str(node)))
-        elif type(node) == list:
-            if not set([type(value) for value in node]).issubset({str, int}):
-                raise TypeError("List values must be strings or numbers")
-            return "(%s)" % (" ".join([self.generateNode(value) for value in node]))
-        else:
-            raise TypeError("Node type %s was not expected in Sigma parse tree" % (str(type(node))))
+    def generateANDNode(self, node):
+        return " AND ".join([self.generateNode(val) for val in node])
+
+    def generateORNode(self, node):
+        return " OR ".join([self.generateNode(val) for val in node])
+
+    def generateNOTNode(self, node):
+        return "NOT " + self.generateNode(node.item)
+
+    def generateSubexpressionNode(self, node):
+        return "(%s)" % self.generateNode(node.items)
+
+    def generateListNode(self, node):
+        if not set([type(value) for value in node]).issubset({str, int}):
+            raise TypeError("List values must be strings or numbers")
+        return "(%s)" % (" ".join([self.generateNode(value) for value in node]))
+
+    def generateMapItemNode(self, node):
+        key, value = node
+        if type(value) not in (str, int, list):
+            raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
+        return "%s:%s" % (key, self.generateNode(value))
+
+    def generateValueNode(self, node):
+        return "\"%s\"" % (self.cleanValue(str(node)))
 
 class ElasticsearchDSLBackend(BaseBackend):
     """Converts Sigma rule into Elasticsearch DSL query (JSON)."""
