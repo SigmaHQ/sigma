@@ -18,7 +18,7 @@ def print_debug(*args, **kwargs):
 
 argparser = argparse.ArgumentParser(description="Convert Sigma rules into SIEM signatures.")
 argparser.add_argument("--recurse", "-r", help="Recurse into subdirectories")
-argparser.add_argument("--target", "-t", default="null", choices=backends.getBackendDict().keys(), help="Output target format")
+argparser.add_argument("--target", "-t", default="es-qs", choices=backends.getBackendDict().keys(), help="Output target format")
 argparser.add_argument("--target-list", "-l", action="store_true", help="List available output target formats")
 argparser.add_argument("--config", "-c", help="Configuration mit field name and index mapping for target environment")
 argparser.add_argument("--output", "-o", help="Output file or filename prefix if multiple files are generated")
