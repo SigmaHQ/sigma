@@ -13,7 +13,7 @@ This repository contains:
 
 * Sigma rule specification in the [Wiki](https://github.com/Neo23x0/sigma/wiki/Specification)
 * Open repository for sigma signatures in the ```./rules```subfolder
-* Collection of converters that generate searches/queries for different SIEM systems [work in progress]
+* A converter that generate searches/queries for different SIEM systems [work in progress]
 
 # Use Cases
 
@@ -25,9 +25,20 @@ This repository contains:
 * Write a rule converter for your custom log analysis tool and process new Sigma rules automatically
 * Provide a free or commercial feed for Sigma signatures
 
-# Sigma Converters
+# Sigma Converter
 
-We are already working on the first converters in the '[devel](https://github.com/Neo23x0/sigma/tree/devel-sigmac/tools)' branch of this project. They are not ready yet, but you can already read the base rule set and create searches and panels in your SIEM system based on these rules. The first converters will convert Sigma rules for ElasticSearch and Splunk. 
+The converter is currently under development in the *devel-sigmac* branch of this project. It has currently the
+following capabilities:
+
+* Parsing of Sigma rule files
+* Conversion of searches into Elasticsearch and Splunk queries
+
+Planned main features are:
+
+* Conversion of aggregation expressions (after the pipe character)
+* Output of Kibana JSON configurations
+
+Support for further SIEM solutions can be added by developing an corresponsing output backend class.
 
 ![sigma_description](./images/Sigma-description.png)
 
