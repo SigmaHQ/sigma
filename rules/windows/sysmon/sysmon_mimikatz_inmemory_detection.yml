@@ -5,20 +5,15 @@ reference: https://securityriskadvisors.com/blog/post/detecting-in-memory-mimika
 logsource:
     product: sysmon
 detection:
-    dllload1:
+    selector:
         EventLog: Microsoft-Windows-Sysmon/Operational
         EventID: 7
         Image: 'C:\Windows\System32\rundll32.exe'
+    dllload1:
         ImageLoaded: '*\vaultcli.dll'
     dllload2:
-        EventLog: Microsoft-Windows-Sysmon/Operational
-        EventID: 7
-        Image: 'C:\Windows\System32\rundll32.exe'
         ImageLoaded: '*\wlanapi.dll'        
     exclusion:
-        EventLog: Microsoft-Windows-Sysmon/Operational
-        EventID: 7
-        Image: 'C:\Windows\System32\rundll32.exe'
         ImageLoaded:
             - 'ntdsapi.dll'
             - 'netapi32.dll'
@@ -31,7 +26,7 @@ detection:
             - 'cryptdll.dll'
             - 'logoncli.dll'
     timeframe: last 30s
-    condition: ( dllload1 and dllload2 ) and not exclusion
+    condition: selector | dllload1 and dllload2 and not exclusion
 falsepositives:
     - unknown
 level: medium
