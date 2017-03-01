@@ -20,15 +20,14 @@ This repository contains:
 * Describe your once discovered detection method in Sigma to make it sharable 
 * Share the signature in the appendix of your analysis along with file hashes and C2 servers
 * Share the signature in threat intel communities - e.g. via MISP
-* Provide Sigma signatures for malicious behaviour in your application (Error messages, access violations, manipulations) 
+* Provide Sigma signatures for malicious behaviour in your own application (Error messages, access violations, manipulations) 
 * Integrate a new log into your SIEM and check the Sigma repository for available rules
-* Develop an experimental detection method, write a Sigma rule, share it and ask for feedback
 * Write a rule converter for your custom log analysis tool and process new Sigma rules automatically
 * Provide a free or commercial feed for Sigma signatures
 
 # Sigma Converters
 
-We are already working on the first converters in the '[devel](https://github.com/Neo23x0/sigma/tree/devel-sigmac/tools)' branch of this project. They are not ready yet, but you can already read the base rule set and create searches and panels in your SIEM system based on these rules. The first converters will convert Sigma rules for ElasticSearch and Splunk as those are the most accessible ones. 
+We are already working on the first converters in the '[devel](https://github.com/Neo23x0/sigma/tree/devel-sigmac/tools)' branch of this project. They are not ready yet, but you can already read the base rule set and create searches and panels in your SIEM system based on these rules. The first converters will convert Sigma rules for ElasticSearch and Splunk. 
 
 ![sigma_description](./images/Sigma-description.png)
 
@@ -54,7 +53,7 @@ See the first slide deck that I prepared for a private conference in mid January
 
 The specifications can be found in the [Wiki](https://github.com/Neo23x0/sigma/wiki/Specification). 
 
-The current specification can be seen as a proposal. Feedback is requested.
+The current specification is a proposal. Feedback is requested.
 
 # Examples
 
@@ -81,13 +80,13 @@ The beta version of the rule converter 'sigmac' converting a non-correlation rul
 # Next Steps 
 
 * Creation of a reasonable set of sample rules
-* Release of the first rule converters for Elastic Search and Splunk
+* Release of the first rule converters for ElasticSearch and Splunk
 * Integration of feedback into the rule specifications
-* Integration into Threat Intel Exchanges, e.g. MISP
+* Integration into Threat Intel Exchanges, e.g. [MISP](http://www.misp-project.org/)
 * Attempts to convince others to use the rule format in their reports, threat feeds, blog posts, threat sharing platforms
 
 # Credits
 
-This is a private project mainly developed by Florian Roth and Thomas Patzke with feedback from many fellow analysts and friends.  
+This is a private project mainly developed by Florian Roth and Thomas Patzke with feedback from many fellow analysts and friends. Rules are our own or have been drived from blog posts, tweets or other public sources that are referenced in the rules.   
 
 Copyright for Tree Image: [studiobarcelona / 123RF Stock Photo](http://www.123rf.com/profile_studiobarcelona)
