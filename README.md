@@ -73,6 +73,11 @@ Sysmon: Web Shell Detection
 Windows 'Security' Eventlog: Suspicious Number of Failed Logons from a Single Source Workstation
 ![sigma_rule example5](./images/Sigma_rule_example5.png)
 
+## Sigmac
+
+The beta version of the rule converter 'sigmac' converting a non-correlation rule into an ElasticSearch query
+![sigmac_converter](./images/Sigmac-win_susp_rc4_kerberos.png)
+
 # Next Steps 
 
 * Creation of a reasonable set of sample rules
