@@ -68,7 +68,7 @@ class ElasticsearchQuerystringBackend(BaseBackend):
     """Converts Sigma rule into Elasticsearch query string. Only searches, no aggregations."""
     identifier = "es-qs"
     active = True
-    reEscape = re.compile("([+\\-=!(){}\\[\\]^\"~*?:\\\\/]|&&|\\|\\|)")
+    reEscape = re.compile("([+\\-=!(){}\\[\\]^\"~:\\\\/]|&&|\\|\\|)")
     reClear = re.compile("[<>]")
 
     def cleanValue(self, val):
