@@ -1,0 +1,18 @@
+title: PowerShell Download from URL
+status: experimental
+description: Detetcs a Powershell process that contains download commands in its command line string
+author: Florian Roth
+logsource:
+    product: sysmon
+detection:
+    selection:
+        EventID: 1
+        Image: '*\powershell.exe'
+        CommandLine: 
+            - '*new-object system.net.webclient).downloadstring(*'
+            - '*new-object system.net.webclient).downloadfile(*'
+    condition: selection
+falsepositives:
+    - unknown
+level: medium
+
