@@ -114,7 +114,40 @@ class KibanaBackend(ElasticsearchDSLBackend):
 class SplunkBackend(BaseBackend):
     """Converts Sigma rule into Splunk Search Processing Language (SPL)."""
     identifier = "splunk"
-    active = False
+    active = True
+    reEscape = re.compile('(["|\\\\])')
+
+    def cleanValue(self, val):
+        return self.reEscape.sub("\\\\\g<1>", val)
+
+    def generateANDNode(self, node):
+        return " AND ".join([self.generateNode(val) for val in node])
+
+    def generateORNode(self, node):
+        return " OR ".join([self.generateNode(val) for val in node])
+
+    def generateNOTNode(self, node):
+        return "NOT " + self.generateNode(node.item)
+
+    def generateSubexpressionNode(self, node):
+        return "(%s)" % self.generateNode(node.items)
+
+    def generateListNode(self, node):
+        if not set([type(value) for value in node]).issubset({str, int}):
+            raise TypeError("List values must be strings or numbers")
+        return "(%s)" % (" ".join([self.generateNode(value) for value in node]))
+
+    def generateMapItemNode(self, node):
+        key, value = node
+        if type(value) in (str, int):
+            return '%s=%s' % (key, self.generateNode(value))
+        elif type(value) == list:
+            return "(" + (" OR ".join(['%s=%s' % (key, self.generateValueNode(item)) for item in value])) + ")"
+        else:
+            raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
+
+    def generateValueNode(self, node):
+        return "\"%s\"" % (self.cleanValue(str(node)))
 
 class NullBackend(BaseBackend):
     """Does nothing, for debugging purposes."""
