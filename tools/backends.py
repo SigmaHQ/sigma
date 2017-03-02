@@ -104,22 +104,22 @@ class ElasticsearchQuerystringBackend(BaseBackend):
 class ElasticsearchDSLBackend(BaseBackend):
     """Converts Sigma rule into Elasticsearch DSL query (JSON)."""
     identifier = "es-dsl"
-    active = True
+    active = False
 
 class KibanaBackend(ElasticsearchDSLBackend):
     """Converts Sigma rule into Kibana JSON Configurations."""
     identifier = "kibana"
-    active = True
+    active = False
 
 class SplunkBackend(BaseBackend):
     """Converts Sigma rule into Splunk Search Processing Language (SPL)."""
     identifier = "splunk"
-    active = True
+    active = False
 
 class NullBackend(BaseBackend):
     """Does nothing, for debugging purposes."""
     identifier = "null"
-    active = True
+    active = False
 
     def generate(self, parsed):
         pass
