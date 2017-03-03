@@ -20,7 +20,7 @@ argparser = argparse.ArgumentParser(description="Convert Sigma rules into SIEM s
 argparser.add_argument("--recurse", "-r", help="Recurse into subdirectories")
 argparser.add_argument("--target", "-t", default="es-qs", choices=backends.getBackendDict().keys(), help="Output target format")
 argparser.add_argument("--target-list", "-l", action="store_true", help="List available output target formats")
-argparser.add_argument("--config", "-c", help="Configuration mit field name and index mapping for target environment")
+argparser.add_argument("--config", "-c", help="Configuration with field name and index mapping for target environment")
 argparser.add_argument("--output", "-o", help="Output file or filename prefix if multiple files are generated")
 argparser.add_argument("--verbose", "-v", action="store_true", help="Be verbose")
 argparser.add_argument("--debug", "-d", action="store_true", help="Debugging output")
