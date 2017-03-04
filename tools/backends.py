@@ -115,13 +115,13 @@ class SplunkBackend(BaseBackend):
     """Converts Sigma rule into Splunk Search Processing Language (SPL)."""
     identifier = "splunk"
     active = True
-    reEscape = re.compile('(["|\\\\])')
+    reEscape = re.compile('(["\\\\])')
 
     def cleanValue(self, val):
         return self.reEscape.sub("\\\\\g<1>", val)
 
     def generateANDNode(self, node):
-        return " AND ".join([self.generateNode(val) for val in node])
+        return " ".join([self.generateNode(val) for val in node])
 
     def generateORNode(self, node):
         return " OR ".join([self.generateNode(val) for val in node])
