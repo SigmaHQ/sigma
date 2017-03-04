@@ -17,11 +17,11 @@ def print_debug(*args, **kwargs):
         print(*args, **kwargs)
 
 argparser = argparse.ArgumentParser(description="Convert Sigma rules into SIEM signatures.")
-argparser.add_argument("--recurse", "-r", help="Recurse into subdirectories")
+argparser.add_argument("--recurse", "-r", help="Recurse into subdirectories (not yet implemented)")
 argparser.add_argument("--target", "-t", default="es-qs", choices=backends.getBackendDict().keys(), help="Output target format")
 argparser.add_argument("--target-list", "-l", action="store_true", help="List available output target formats")
-argparser.add_argument("--config", "-c", help="Configuration with field name and index mapping for target environment")
-argparser.add_argument("--output", "-o", help="Output file or filename prefix if multiple files are generated")
+argparser.add_argument("--config", "-c", help="Configuration with field name and index mapping for target environment (not yet implemented)")
+argparser.add_argument("--output", "-o", help="Output file or filename prefix if multiple files are generated (not yet implemented)")
 argparser.add_argument("--verbose", "-v", action="store_true", help="Be verbose")
 argparser.add_argument("--debug", "-d", action="store_true", help="Debugging output")
 argparser.add_argument("inputs", nargs="*", help="Sigma input files")
@@ -31,6 +31,16 @@ if cmdargs.target_list:
     for backend in backends.getBackendList():
         print("%10s: %s" % (backend.identifier, backend.__doc__))
     sys.exit(0)
+
+if cmdargs.recurse:
+    print("--recurse/-r not yet implemented", file=sys.stderr)
+    sys.exit(99)
+if cmdargs.output:
+    print("--output/-o not yet implemented", file=sys.stderr)
+    sys.exit(99)
+if cmdargs.config:
+    print("--config/-c not yet implemented", file=sys.stderr)
+    sys.exit(99)
 
 try:
     backend = backends.getBackend(cmdargs.target)()
