@@ -192,7 +192,7 @@ class SigmaConditionTokenizer:
 
     def index(self, item):
         return self.tokens.index(item)
-                
+
 class SigmaParseError(Exception):
     pass
 
@@ -349,3 +349,30 @@ class SigmaConditionParser:
 
     def getParseTree(self):
         return(self.parsedSearch[0])
+
+# Configuration
+class SigmaConfiguration:
+    def __init__(self, configyaml):
+        config = yaml.safe_load(configyaml)
+
+        self.fieldmappings = config['fieldmappings']
+        if type(self.fieldmappings) != dict:
+            raise SigmaConfigParseError("Fieldmappings must be a map")
+
+        self.logsources = config['logsources']
+        if type(self.logsources) != dict:
+            raise SigmaConfigParseError("Logsources must be a map")
+        for name, logsource in self.logsources.items():
+            if type(logsource) != dict:
+                raise SigmaConfigParseError("Logsource definitions must be maps")
+            if type(logsource.category) != str or type(logsource.product) != str or type(logsource.service) != str:
+                raise SigmaConfigParseError("Logsource category, product or service must be a string")
+            if type(logsource.index) not in (str, list):
+                raise SigmaConfigParseError("Logsource index must be string or list of strings")
+            if type(logsource.index) == list and set([type(index) for index in logsource.index]).issubset({str}):
+                raise SigmaConfigParseError("Logsource index patterns must be strings")
+        if type(self.conditions) != dict:
+            raise SigmaConfigParseError("Logsource conditions must be a map")
+
+class SigmaConfigParseError(Exception):
+    pass
