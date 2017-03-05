@@ -1,0 +1,22 @@
+title: Malicious Service Install
+description: This method detects well-known keywords of malicious services in the Windows System Eventlog 
+author: Florian Roth
+logsource:
+    product: windows
+    service: system
+detection:
+    selection:
+        EventID: 
+          - 7045
+          - 4697
+    keywords:
+      - 'WCE SERVICE'
+      - 'WCESERVICE'
+      - 'DumpSvc'
+    quarkspwdump:
+        EventID: 16
+        HiveName: '*\AppData\Local\Temp\SAM*.dmp'
+    condition: ( selection and keywords ) or quarkspwdump
+falsepositives:
+    - Unlikely
+level: high
