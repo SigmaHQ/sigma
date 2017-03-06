@@ -7,7 +7,7 @@ import yaml
 import json
 import pathlib
 import itertools
-from sigma import SigmaParser, SigmaParseError
+from sigma import SigmaParser, SigmaParseError, SigmaConfiguration, SigmaConfigParseError
 import backends
 
 def print_verbose(*args, **kwargs):
@@ -50,12 +50,22 @@ if cmdargs.target_list:
 if cmdargs.output:
     print("--output/-o not yet implemented", file=sys.stderr)
     sys.exit(99)
+
+sigmaconfig = SigmaConfiguration()
 if cmdargs.config:
-    print("--config/-c not yet implemented", file=sys.stderr)
-    sys.exit(99)
+    try:
+        conffile = cmdargs.config
+        f = open(conffile)
+        sigmaconfig = SigmaConfiguration(f)
+    except OSError as e:
+        print("Failed to open Sigma configuration file %s: %s" % (conffile, str(e)))
+    except yaml.parser.ParserError as e:
+        print("Sigma configuration file %s is no valid YAML: %s" % (conffile, str(e)))
+    except SigmaParseError as e:
+        print("Sigma configuration parse error in %s: %s" % (conffile, str(e)))
 
 try:
-    backend = backends.getBackend(cmdargs.target)()
+    backend = backends.getBackend(cmdargs.target)(sigmaconfig)
 except LookupError as e:
     print("Backend not found!")
     sys.exit(1)
