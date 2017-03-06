@@ -192,7 +192,7 @@ class SigmaConditionTokenizer:
 
     def index(self, item):
         return self.tokens.index(item)
-                
+
 class SigmaParseError(Exception):
     pass
 
@@ -349,3 +349,52 @@ class SigmaConditionParser:
 
     def getParseTree(self):
         return(self.parsedSearch[0])
+
+# Configuration
+class SigmaConfiguration:
+    """Sigma converter configuration. Contains field mappings and logsource descriptions"""
+    def __init__(self, configyaml=None):
+        if configyaml == None:
+            self.fieldmappings = dict()
+            self.logsources = dict()
+        else:
+            config = yaml.safe_load(configyaml)
+
+            try:
+                self.fieldmappings = config['fieldmappings']
+            except KeyError:
+                self.fieldmappings = dict()
+            if type(self.fieldmappings) != dict:
+                raise SigmaConfigParseError("Fieldmappings must be a map")
+
+            try:
+                self.logsources = config['logsources']
+            except KeyError:
+                self.logsources = dict()
+
+            if type(self.logsources) != dict:
+                raise SigmaConfigParseError("Logsources must be a map")
+            for name, logsource in self.logsources.items():
+                if type(logsource) != dict:
+                    raise SigmaConfigParseError("Logsource definitions must be maps")
+                if 'category' in logsource and type(logsource['category']) != str \
+                        or 'product' in logsource and type(logsource['product']) != str \
+                        or 'service' in logsource and type(logsource['service']) != str:
+                    raise SigmaConfigParseError("Logsource category, product or service must be a string")
+                if 'index' in logsource:
+                    if type(logsource['index']) not in (str, list):
+                        raise SigmaConfigParseError("Logsource index must be string or list of strings")
+                    if type(logsource['index']) == list and not set([type(index) for index in logsource['index']]).issubset({str}):
+                        raise SigmaConfigParseError("Logsource index patterns must be strings")
+            if 'conditions' in logsource and type(logsource['conditions']) != dict:
+                raise SigmaConfigParseError("Logsource conditions must be a map")
+
+    def get_fieldmapping(self, fieldname):
+        """Return mapped fieldname if mapping defined or field name given in parameter value"""
+        try:
+            return self.fieldmappings[fieldname]
+        except KeyError:
+            return fieldname
+
+class SigmaConfigParseError(Exception):
+    pass

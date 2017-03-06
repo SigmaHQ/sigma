@@ -22,6 +22,11 @@ class BaseBackend:
     identifier = "base"
     active = False
 
+    def __init__(self, sigmaconfig):
+        if not isinstance(sigmaconfig, (sigma.SigmaConfiguration, None)):
+            raise TypeError("SigmaConfiguration object expected")
+        self.sigmaconfig = sigmaconfig
+
     def generate(self, parsed):
         return self.generateNode(parsed.getParseTree())
 
@@ -96,7 +101,7 @@ class ElasticsearchQuerystringBackend(BaseBackend):
         key, value = node
         if type(value) not in (str, int, list):
             raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
-        return "%s:%s" % (key, self.generateNode(value))
+        return "%s:%s" % (self.sigmaconfig.get_fieldmapping(key), self.generateNode(value))
 
     def generateValueNode(self, node):
         return "\"%s\"" % (self.cleanValue(str(node)))
@@ -140,11 +145,53 @@ class SplunkBackend(BaseBackend):
     def generateMapItemNode(self, node):
         key, value = node
         if type(value) in (str, int):
-            return '%s=%s' % (key, self.generateNode(value))
+            return '%s=%s' % (self.sigmaconfig.get_fieldmapping(key), self.generateNode(value))
         elif type(value) == list:
-            return "(" + (" OR ".join(['%s=%s' % (key, self.generateValueNode(item)) for item in value])) + ")"
+            return "(" + (" OR ".join(['%s=%s' % (self.sigmaconfig.get_fieldmapping(key), self.generateValueNode(item)) for item in value])) + ")"
         else:
             raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
 
     def generateValueNode(self, node):
         return "\"%s\"" % (self.cleanValue(str(node)))
+
+class FieldnameListBackend(BaseBackend):
+    """List all fieldnames from given Sigma rules for creation of a field mapping configuration."""
+    identifier = "fieldlist"
+    active = True
+
+    def generate(self, parsed):
+        return "\n".join(sorted(set(list(flatten(self.generateNode(parsed.getParseTree()))))))
+
+    def generateANDNode(self, node):
+        return [self.generateNode(val) for val in node]
+
+    def generateORNode(self, node):
+        return self.generateANDNode(node)
+
+    def generateNOTNode(self, node):
+        return self.generateNode(node.item)
+
+    def generateSubexpressionNode(self, node):
+        return self.generateNode(node.items)
+
+    def generateListNode(self, node):
+        if not set([type(value) for value in node]).issubset({str, int}):
+            raise TypeError("List values must be strings or numbers")
+        return [self.generateNode(value) for value in node]
+
+    def generateMapItemNode(self, node):
+        key, value = node
+        if type(value) not in (str, int, list):
+            raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
+        return [self.sigmaconfig.get_fieldmapping(key)]
+
+    def generateValueNode(self, node):
+        return []
+
+# Helpers
+def flatten(l):
+  for i in l:
+      if type(i) == list:
+          yield from flatten(i)
+      else:
+          yield i
