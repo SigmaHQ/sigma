@@ -148,11 +148,3 @@ class SplunkBackend(BaseBackend):
 
     def generateValueNode(self, node):
         return "\"%s\"" % (self.cleanValue(str(node)))
-
-class NullBackend(BaseBackend):
-    """Does nothing, for debugging purposes."""
-    identifier = "null"
-    active = False
-
-    def generate(self, parsed):
-        pass
