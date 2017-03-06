@@ -5,6 +5,8 @@ import sys
 import argparse
 import yaml
 import json
+import pathlib
+import itertools
 from sigma import SigmaParser, SigmaParseError
 import backends
 
@@ -16,8 +18,21 @@ def print_debug(*args, **kwargs):
     if cmdargs.debug:
         print(*args, **kwargs)
 
+def alliter(path):
+    for sub in path.iterdir():
+        if sub.is_dir():
+            yield from alliter(sub)
+        else:
+            yield sub
+
+def get_inputs(paths, recursive):
+    if recursive:
+        return list(itertools.chain.from_iterable([list(alliter(pathlib.Path(p))) for p in paths]))
+    else:
+        return paths
+
 argparser = argparse.ArgumentParser(description="Convert Sigma rules into SIEM signatures.")
-argparser.add_argument("--recurse", "-r", help="Recurse into subdirectories")
+argparser.add_argument("--recurse", "-r", action="store_true", help="Recurse into subdirectories (not yet implemented)")
 argparser.add_argument("--target", "-t", default="es-qs", choices=backends.getBackendDict().keys(), help="Output target format")
 argparser.add_argument("--target-list", "-l", action="store_true", help="List available output target formats")
 argparser.add_argument("--config", "-c", help="Configuration with field name and index mapping for target environment")
@@ -32,13 +47,20 @@ if cmdargs.target_list:
         print("%10s: %s" % (backend.identifier, backend.__doc__))
     sys.exit(0)
 
+if cmdargs.output:
+    print("--output/-o not yet implemented", file=sys.stderr)
+    sys.exit(99)
+if cmdargs.config:
+    print("--config/-c not yet implemented", file=sys.stderr)
+    sys.exit(99)
+
 try:
     backend = backends.getBackend(cmdargs.target)()
 except LookupError as e:
     print("Backend not found!")
     sys.exit(1)
 
-for sigmafile in cmdargs.inputs:
+for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
     print_verbose("* Processing Sigma input %s" % (sigmafile))
     try:
         f = open(sigmafile)
