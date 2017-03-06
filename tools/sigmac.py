@@ -58,16 +58,16 @@ if cmdargs.config:
         f = open(conffile)
         sigmaconfig = SigmaConfiguration(f)
     except OSError as e:
-        print("Failed to open Sigma configuration file %s: %s" % (conffile, str(e)))
+        print("Failed to open Sigma configuration file %s: %s" % (conffile, str(e)), file=sys.stderr)
     except yaml.parser.ParserError as e:
-        print("Sigma configuration file %s is no valid YAML: %s" % (conffile, str(e)))
+        print("Sigma configuration file %s is no valid YAML: %s" % (conffile, str(e)), file=sys.stderr)
     except SigmaParseError as e:
-        print("Sigma configuration parse error in %s: %s" % (conffile, str(e)))
+        print("Sigma configuration parse error in %s: %s" % (conffile, str(e)), file=sys.stderr)
 
 try:
     backend = backends.getBackend(cmdargs.target)(sigmaconfig)
 except LookupError as e:
-    print("Backend not found!")
+    print("Backend not found!", file=sys.stderr)
     sys.exit(1)
 
 for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
@@ -83,14 +83,14 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
             print_debug("Condition Parse Tree:", condparsed)
             print(backend.generate(condparsed))
     except OSError as e:
-        print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)))
+        print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
     except yaml.parser.ParserError as e:
-        print("Sigma file %s is no valid YAML: %s" % (sigmafile, str(e)))
+        print("Sigma file %s is no valid YAML: %s" % (sigmafile, str(e)), file=sys.stderr)
     except SigmaParseError as e:
-        print("Sigma parse error in %s: %s" % (sigmafile, str(e)))
+        print("Sigma parse error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
     except NotImplementedError as e:
-        print("An unsupported feature is required for this Sigma rule: " + str(e))
-        print("Feel free to contribute for fun and fame, this is open source :) -> https://github.com/Neo23x0/sigma")
+        print("An unsupported feature is required for this Sigma rule: " + str(e), file=sys.stderr)
+        print("Feel free to contribute for fun and fame, this is open source :) -> https://github.com/Neo23x0/sigma", file=sys.stderr)
     finally:
         f.close()
         print_debug()
