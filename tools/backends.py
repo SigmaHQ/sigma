@@ -22,6 +22,11 @@ class BaseBackend:
     identifier = "base"
     active = False
 
+    def __init__(self, sigmaconfig):
+        if not isinstance(sigmaconfig, (sigma.SigmaConfiguration, None)):
+            raise TypeError("SigmaConfiguration object expected")
+        self.sigmaconfig = sigmaconfig
+
     def generate(self, parsed):
         return self.generateNode(parsed.getParseTree())
 
@@ -96,7 +101,7 @@ class ElasticsearchQuerystringBackend(BaseBackend):
         key, value = node
         if type(value) not in (str, int, list):
             raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
-        return "%s:%s" % (key, self.generateNode(value))
+        return "%s:%s" % (self.sigmaconfig.get_fieldmapping(key), self.generateNode(value))
 
     def generateValueNode(self, node):
         return "\"%s\"" % (self.cleanValue(str(node)))
@@ -140,9 +145,9 @@ class SplunkBackend(BaseBackend):
     def generateMapItemNode(self, node):
         key, value = node
         if type(value) in (str, int):
-            return '%s=%s' % (key, self.generateNode(value))
+            return '%s=%s' % (self.sigmaconfig.get_fieldmapping(key), self.generateNode(value))
         elif type(value) == list:
-            return "(" + (" OR ".join(['%s=%s' % (key, self.generateValueNode(item)) for item in value])) + ")"
+            return "(" + (" OR ".join(['%s=%s' % (self.sigmaconfig.get_fieldmapping(key), self.generateValueNode(item)) for item in value])) + ")"
         else:
             raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
 

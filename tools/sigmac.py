@@ -50,11 +50,13 @@ if cmdargs.target_list:
 if cmdargs.output:
     print("--output/-o not yet implemented", file=sys.stderr)
     sys.exit(99)
+
+sigmaconfig = SigmaConfiguration()
 if cmdargs.config:
     try:
         conffile = cmdargs.config
         f = open(conffile)
-        config = SigmaConfiguration(f)
+        sigmaconfig = SigmaConfiguration(f)
     except OSError as e:
         print("Failed to open Sigma configuration file %s: %s" % (conffile, str(e)))
     except yaml.parser.ParserError as e:
@@ -63,7 +65,7 @@ if cmdargs.config:
         print("Sigma configuration parse error in %s: %s" % (conffile, str(e)))
 
 try:
-    backend = backends.getBackend(cmdargs.target)()
+    backend = backends.getBackend(cmdargs.target)(sigmaconfig)
 except LookupError as e:
     print("Backend not found!")
     sys.exit(1)
