@@ -29,7 +29,7 @@ def get_inputs(paths, recursive):
     if recursive:
         return list(itertools.chain.from_iterable([list(alliter(pathlib.Path(p))) for p in paths]))
     else:
-        return paths
+        return [pathlib.Path(p) for p in paths]
 
 argparser = argparse.ArgumentParser(description="Convert Sigma rules into SIEM signatures.")
 argparser.add_argument("--recurse", "-r", action="store_true", help="Recurse into subdirectories (not yet implemented)")
