@@ -1,0 +1,41 @@
+title: Malicious PowerShell Commandlets
+status: experimental
+description: Detects Commandlet names from well-known PowerShell exploitation frameworks
+reference: https://adsecurity.org/?p=2921
+author: Sean Metcalf (source), Florian Roth (rule)
+logsource:
+    platform: windows
+    product: powershell
+    description: 'It is recommanded to use the new "Script Block Logging" of PowerShell v5 https://adsecurity.org/?p=2277'
+detection:
+    keywords:
+        - AdjustTokenPrivileges
+        - IMAGE_NT_OPTIONAL_HDR64_MAGIC
+        - Management.Automation.RuntimeException
+        - Microsoft.Win32.UnsafeNativeMethods
+        - ReadProcessMemory.Invoke
+        - Runtime.InteropServices
+        - SE_PRIVILEGE_ENABLED
+        - System.Security.Cryptography
+        - System.Runtime.InteropServices
+        - LSA_UNICODE_STRING
+        - MiniDumpWriteDump
+        - PAGE_EXECUTE_READ
+        - Net.Sockets.SocketFlags
+        - Reflection.Assembly
+        - SECURITY_DELEGATION
+        - TOKEN_ADJUST_PRIVILEGES
+        - TOKEN_ALL_ACCESS
+        - TOKEN_ASSIGN_PRIMARY
+        - TOKEN_DUPLICATE
+        - TOKEN_ELEVATION
+        - TOKEN_IMPERSONATE
+        - TOKEN_INFORMATION_CLASS
+        - TOKEN_PRIVILEGES
+        - TOKEN_QUERY
+        - Metasploit
+        - Mimikatz
+    condition: keywords
+falsepositives:
+    - Penetration tests
+level: high
