@@ -1,0 +1,16 @@
+title: Rare Service Installs
+description: Detects rare service installs that only appear a few times per timeframe and could reveal password dumpers, backdoor installs or other types of malicious services 
+status: experimental
+author: Florian Roth
+logsource:
+    product: windows
+    service: system
+detection:
+    selection:
+        EventID: 7045
+    timeframe: 7d
+    condition: selection | count(ServiceFileName) < 5 
+falsepositives: 
+    - Software installation
+    - Software updates
+level: low
