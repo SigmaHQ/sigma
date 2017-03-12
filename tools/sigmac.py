@@ -74,7 +74,7 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
     print_verbose("* Processing Sigma input %s" % (sigmafile))
     try:
         f = sigmafile.open()
-        parser = SigmaParser(f)
+        parser = SigmaParser(f, sigmaconfig)
         print_debug("Parsed YAML:\n", json.dumps(parser.parsedyaml, indent=2))
         parser.parse_sigma()
         for condtoken in parser.condtoken:
