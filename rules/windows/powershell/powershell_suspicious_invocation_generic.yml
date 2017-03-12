@@ -1,0 +1,22 @@
+title: Suspicious PowerShell Invocations - Generic
+status: experimental
+description: Detects suspicious PowerShell invocation command parameters
+author: Florian Roth (rule)
+logsource:
+    platform: windows
+    product: powershell
+detection:
+    encoded:
+        - ' -enc '
+        - ' -EncodedCommand '
+    hidden:
+        - ' -w hidden '
+        - ' -window hidden '
+        - ' - windowstyle hidden '
+    noninteractive:
+        - ' -noni '
+        - ' -noninteractive '
+    condition: encoded and hidden and noninteractive
+falsepositives:
+    - Penetration tests
+level: high
