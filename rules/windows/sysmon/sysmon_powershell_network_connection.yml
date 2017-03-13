@@ -1,6 +1,6 @@
 title: PowerShell Network Connections
 status: experimental
-description: Detetcs a Powershell process that opens network connections - check for suspicious target ports and target systems
+description: "Detetcs a Powershell process that opens network connections - check for suspicious target ports and target systems - adjust to your environment (e.g. extend filters with company's ip range')"  
 author: Florian Roth
 reference: https://www.youtube.com/watch?v=DLtJTxMWZ2o
 logsource:
@@ -10,8 +10,14 @@ detection:
     selection:
         EventID: 3
         Image: '*\powershell.exe'
-    condition: selection
+    filter:
+        DestinationIp: 
+            - '10.*'
+            - '192.168.*'
+            - '172.*'
+            - '127.0.0.1'
+        DestinationIsIpv6: 'false'
+    condition: selection and not filter
 falsepositives:
     - Administrative scripts
 level: low
-
