@@ -1,0 +1,21 @@
+title: Suspicious Activity in Shell Commands
+description: Detects suspicious shell commands used in various exploit codes (see references)
+reference: 
+    - http://www.threatgeek.com/2017/03/widespread-exploitation-attempts-using-cve-2017-5638.html
+    - https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/multi/http/struts_code_exec_exception_delegator.rb#L121
+logsource:
+    product: linux
+detection:
+    keywords:
+        # Apache Struts in-the-wild exploit codes  
+        - 'stop;service iptables stop;'
+        - 'stop;SuSEfirewall2 stop;'
+        - 'wget * - http* | perl'
+        - 'wget * - http* | sh'
+        - 'wget * - http* | bash'
+        # Metasploit framework exploit codes
+        - 'base64 -d /tmp/'
+    condition: keywords
+falsepositives:
+    - Unknown
+level: high
