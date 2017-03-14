@@ -1,0 +1,18 @@
+title: Scheduled Task Creation
+status: experimental
+description: "Detetcs a Powershell process that opens network connections - check for suspicious target ports and target systems - adjust to your environment (e.g. extend filters with company's ip range')"  
+author: Florian Roth
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+        Image: '*\schtasks.exe'
+        CommandLine: '* /create *'
+    filter:
+        User: 'NT AUTHORITY\SYSTEM'
+    condition: selection and not filter
+falsepositives:
+    - Administrative activity
+level: low

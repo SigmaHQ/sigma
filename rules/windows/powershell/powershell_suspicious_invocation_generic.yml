@@ -1,25 +1,23 @@
-title: Suspicious PowerShell Parameter Combination
+title: Suspicious PowerShell Invocations - Generic
 status: experimental
 description: Detects suspicious PowerShell invocation command parameters
-author: Florian Roth
+author: Florian Roth (rule)
 logsource:
-    product: windows
-    service: sysmon
+    platform: windows
+    product: powershell
 detection:
-    keywords:
-        - 'powershell'
     encoded:
         - ' -enc '
         - ' -EncodedCommand '
     hidden:
         - ' -w hidden '
         - ' -window hidden '
-        - ' -windowstyle hidden '
+        - ' - windowstyle hidden '
     noninteractive:
         - ' -noni '
         - ' -noninteractive '
-    condition: keywords and encoded and hidden and noninteractive
+    condition: encoded and hidden and noninteractive
 falsepositives:
     - Penetration tests
-    - Very special / sneaky PowerShell scripts
 level: high
+
