@@ -70,6 +70,28 @@ class SigmaParser:
 
         return cond
 
+    def get_logsource(self):
+        """Returns logsource configuration object for current rule"""
+        try:
+            ls_rule = self.parsedyaml['logsource']
+        except KeyError:
+            return None
+
+        try:
+            category = ls_rule['category']
+        except KeyError:
+            category = None
+        try:
+            product = ls_rule['product']
+        except KeyError:
+            product = None
+        try:
+            service = ls_rule['service']
+        except KeyError:
+            service = None
+
+        return self.config.get_logsource(category, product, service)
+
 class SigmaConditionToken:
     """Token of a Sigma condition expression"""
     TOKEN_AND  = 1
@@ -341,7 +363,15 @@ class SigmaConditionParser:
         if len(tokens) != 1:     # parse tree must begin with exactly one node
             raise ValueError("Parse tree must have exactly one start node!")
 
-        return tokens
+        # 4. Integrate conditions from configuration
+        logsource = self.sigmaParser.get_logsource()
+        if logsource != None:
+            cond = ConditionAND()
+            cond.add(logsource.conditions)
+            cond.add(tokens[0])
+            return [ cond ]
+        else:
+            return tokens
 
     def __str__(self):
         return str(self.parsedSearch)
@@ -369,13 +399,17 @@ class SigmaConfiguration:
             if type(self.fieldmappings) != dict:
                 raise SigmaConfigParseError("Fieldmappings must be a map")
 
+            try:
+                self.logsourcemerging = config['logsourcemerging']
+            except KeyError:
+                self.logsourcemerging = SigmaLogsourceConfiguration.MM_AND
             self.logsources = list()
             if 'logsources' in config:
                 logsources = config['logsources']
-                if type(self.logsources) != dict:
+                if type(logsources) != dict:
                     raise SigmaConfigParseError("Logsources must be a map")
-                for name, logsource in self.logsources.items():
-                    self.logsources.append(SigmaLogsourceConfiguration(logsource, name))
+                for name, logsource in logsources.items():
+                    self.logsources.append(SigmaLogsourceConfiguration(logsource, name, self.logsourcemerging))
 
     def get_fieldmapping(self, fieldname):
         """Return mapped fieldname if mapping defined or field name given in parameter value"""
@@ -386,13 +420,13 @@ class SigmaConfiguration:
 
     def get_logsource(self, category, product, service):
         """Return merged log source definition of all logosurces that match criteria"""
-        matching = [logsource for logsource in self.logsources if logosurce.matches(category, product, service)]
+        matching = [logsource for logsource in self.logsources if logsource.matches(category, product, service)]
         return SigmaLogsourceConfiguration(matching)
 
 class SigmaLogsourceConfiguration:
     """Contains the definition of a log source"""
-    MM_AND     = 1      # Merge all conditions with AND
-    MM_OR      = 2      # Merge all conditions with OR
+    MM_AND = "and"  # Merge all conditions with AND
+    MM_OR  = "or"   # Merge all conditions with OR
 
     def __init__(self, logsource=None, name=None, mergemethod=MM_AND):
         self.name = name
@@ -427,14 +461,14 @@ class SigmaLogsourceConfiguration:
             self.index = list(set([index for ls in logsource for index in ls.index]))       # unique(flat(logsources.index))
 
             # Merge conditions according to mergemethod
-            if mergemethod == MM_AND:
+            if mergemethod == self.MM_AND:
                 cond = ConditionAND()
-            elif mergemethod == MM_OR:
+            elif mergemethod == self.MM_OR:
                 cond = ConditionOR()
             else:
-                raise ValueError("Mergemethod must be MM_AND or MM_OR")
+                raise ValueError("Mergemethod must be '%s' or '%s'" % (self.MM_AND, self.MM_OR))
             for ls in logsource:
-                cond.add(NodeSubexpression(ls.conditions))
+                cond.add(ls.conditions)
             self.conditions = cond
         elif type(logsource) == dict:       # create logsource configuration from parsed yaml
             if 'category' in logsource and type(logsource['category']) != str \
@@ -463,7 +497,7 @@ class SigmaLogsourceConfiguration:
                     raise SigmaConfigParseError("Logsource index patterns must be strings")
                 self.index = logsource['index']
             else:
-                self.index = None
+                self.index = []
 
             if 'conditions' in logsource:
                 if type(logsource['conditions']) != dict:
