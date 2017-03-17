@@ -21,11 +21,13 @@ class BaseBackend:
     """Base class for all backends"""
     identifier = "base"
     active = False
+    index_field = None      # field name that is used to address indices
 
     def __init__(self, sigmaconfig):
         if not isinstance(sigmaconfig, (sigma.SigmaConfiguration, None)):
             raise TypeError("SigmaConfiguration object expected")
         self.sigmaconfig = sigmaconfig
+        self.sigmaconfig.set_backend(self)
 
     def generate(self, parsed):
         return self.generateNode(parsed.getParseTree())
@@ -120,6 +122,7 @@ class SplunkBackend(BaseBackend):
     """Converts Sigma rule into Splunk Search Processing Language (SPL)."""
     identifier = "splunk"
     active = True
+    index_field = "index"
     reEscape = re.compile('(["\\\\])')
 
     def cleanValue(self, val):
