@@ -338,7 +338,7 @@ class SigmaConditionParser:
             if lPos > rPos:
                 raise SigmaParseError("Closing parentheses at position " + str(rTok.pos) + " precedes opening at position " + str(lTok.pos))
 
-            subparsed = self.parseSearch(tokens[lPos + 1:rPos])[0]
+            subparsed = self.parseSearch(tokens[lPos + 1:rPos])
             tokens = tokens[:lPos] + NodeSubexpression(subparsed) + tokens[rPos + 1:]   # replace parentheses + expression with group node that contains parsed subexpression
 
         # 2. Iterate over all known operators in given precedence
