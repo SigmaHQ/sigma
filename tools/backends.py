@@ -118,6 +118,41 @@ class KibanaBackend(ElasticsearchDSLBackend):
     identifier = "kibana"
     active = False
 
+class LogPointBackend(BaseBackend):
+    """Converts Sigma rule into LogPoint query"""
+    identifier = "logpoint"
+    active = True
+    reEscape = re.compile('(["\\\\])')
+
+    def cleanValue(self, val):
+        return self.reEscape.sub("\\\\\g<1>", val)
+    
+    def generateANDNode(self, node):
+        return " ".join([self.generateNode(val) for val in node])
+    
+    def generateORNode(self, node):
+        return " OR ".join([self.generateNode(val) for val in node])
+    
+    def generateNOTNode(self, node):
+        return " -" + self.generateNode(node.item)
+        
+    def generateSubexpressionNode(self, node):
+        return "(%s)" % self.generateNode(node.items)
+        
+    def generateListNode(self, node):
+        if not set([type(value) for value in node]).issubset({str, int}):
+            raise TypeError("List values must be strings or numbers")
+        return "(%s)" % (", ".join([self.generateNode(value) for value in node]))
+    
+    def generateMapItemNode(self, node):
+        key, value = node
+        if type(value) not in (str, int, list):
+            raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
+        return "%s=%s" % (self.sigmaconfig.get_fieldmapping(key), self.generateNode(value))
+        
+    def generateValueNode(self, node):
+        return "\"%s\"" % (self.cleanValue(str(node)))
+    
 class SplunkBackend(BaseBackend):
     """Converts Sigma rule into Splunk Search Processing Language (SPL)."""
     identifier = "splunk"
