@@ -3,7 +3,6 @@ status: experimental
 description: Detects UAC bypass method using Windows event viewer
 reference: 
     - https://enigma0x3.net/2016/08/15/fileless-uac-bypass-using-eventvwr-exe-and-registry-hijacking/
-    - https://www.hybrid-analysis.com/sample/406c3d9277e69011abe7c02214aa205a466696d656ab3cdeaa9235cdc1826018
 author: Florian Roth
 logsource:
     product: windows
@@ -12,8 +11,9 @@ detection:
     selection:
         EventID: 1
         ParentImage: '*\eventvwr.exe'
+    filter:
         Image: '*\mmc.exe'
-    condition: selection
+    condition: selection and not filter
 falsepositives:
     - unknown
 level: high
