@@ -142,12 +142,14 @@ class LogPointBackend(BaseBackend):
     def generateListNode(self, node):
         if not set([type(value) for value in node]).issubset({str, int}):
             raise TypeError("List values must be strings or numbers")
-        return "(%s)" % (", ".join([self.generateNode(value) for value in node]))
+        return "[%s]" % (", ".join([self.generateNode(value) for value in node]))
     
     def generateMapItemNode(self, node):
         key, value = node
         if type(value) not in (str, int, list):
             raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
+        if type(value) == list:
+            return "%s IN %s" % (self.sigmaconfig.get_fieldmapping(key), self.generateNode(value))
         return "%s=%s" % (self.sigmaconfig.get_fieldmapping(key), self.generateNode(value))
         
     def generateValueNode(self, node):
