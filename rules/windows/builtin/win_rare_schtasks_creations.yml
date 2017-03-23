@@ -1,0 +1,17 @@
+title: Rare SchTasks Creations
+description: Detects rare scheduled tasks creations that only appear a few times per time frame and could reveal password dumpers, backdoor installs or other types of malicious code
+status: experimental
+author: Florian Roth
+logsource:
+    product: windows
+    service: security
+    description: 'The Advanced Audit Policy setting Object Access > Audit Other Object Access Events has to be configured to allow this detection (not in the baseline recommendations by Microsoft)'
+detection:
+    selection:
+        EventID: 4719
+    timeframe: 7d
+    condition: selection | count(TaskName) < 5 
+falsepositives: 
+    - Software installation
+    - Software updates
+level: low
