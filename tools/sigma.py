@@ -11,6 +11,7 @@ COND_NOT  = 3
 class SigmaParser:
     def __init__(self, sigma, config):
         self.definitions = dict()
+        self.values = dict()
         self.parsedyaml = yaml.safe_load(sigma)
         self.config = config
 
@@ -20,6 +21,7 @@ class SigmaParser:
                 if definitionName in self.definitions:
                     raise SigmaParseError("Definition '%s' was already defined" % (definitionName))
                 self.definitions[definitionName] = definition
+                self.extract_values(definition)     # builds key-values-table in self.values
         except KeyError:
             raise SigmaParseError("No detection definitions found")
 
@@ -66,9 +68,26 @@ class SigmaParser:
         elif type(definition) == dict:      # map
             cond = ConditionAND()
             for key, value in definition.items():
-                cond.add((key, value))
+                mapping = self.config.get_fieldmapping(key)
+                cond.add(mapping.resolve(key, value, self))
 
         return cond
+
+    def extract_values(self, definition):
+        """Extract all values from map key:value pairs info self.values"""
+        if type(definition) == list:     # iterate through items of list
+            for item in definition:
+                self.extract_values(item)
+        elif type(definition) == dict:  # add dict items to map
+            for key, value in definition.items():
+                self.add_value(key, value)
+
+    def add_value(self, key, value):
+        """Add value to values table, create key if it doesn't exist"""
+        if key in self.values:
+            self.values[key].append(value)
+        else:
+            self.values[key] = [ value ]
 
     def get_logsource(self):
         """Returns logsource configuration object for current rule"""
@@ -395,6 +414,29 @@ class SigmaConditionParser:
     def getParseTree(self):
         return(self.parsedSearch)
 
+# Field Mapping Definitions
+def FieldMapping(source, target=None):
+    """Determines target type and instantiate appropriate mapping type"""
+    if target == None:
+        return SimpleFieldMapping(source, source)
+    elif type(target) == str:
+        return SimpleFieldMapping(source, target)
+
+class SimpleFieldMapping:
+    """1:1 field mapping"""
+    target_type = str
+
+    def __init__(self, source, target):
+        """Initialization with generic target type check"""
+        if type(target) != self.target_type:
+            raise TypeError("Target type mismatch: wrong mapping type for this target")
+        self.source = source
+        self.target = target
+
+    def resolve(self, key, value, sigmaparser):
+        """Return mapped field name"""
+        return (self.target, value)
+
 # Configuration
 class SigmaConfiguration:
     """Sigma converter configuration. Contains field mappings and logsource descriptions"""
@@ -409,10 +451,12 @@ class SigmaConfiguration:
             config = yaml.safe_load(configyaml)
             self.config = config
 
+            self.fieldmappings = dict()
             try:
-                self.fieldmappings = config['fieldmappings']
+                for source, target in config['fieldmappings'].items():
+                    self.fieldmappings[source] = FieldMapping(source, target)
             except KeyError:
-                self.fieldmappings = dict()
+                pass
             if type(self.fieldmappings) != dict:
                 raise SigmaConfigParseError("Fieldmappings must be a map")
 
@@ -429,7 +473,7 @@ class SigmaConfiguration:
         try:
             return self.fieldmappings[fieldname]
         except KeyError:
-            return fieldname
+            return FieldMapping(fieldname)
 
     def get_logsource(self, category, product, service):
         """Return merged log source definition of all logosurces that match criteria"""

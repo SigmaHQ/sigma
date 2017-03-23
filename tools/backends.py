@@ -103,7 +103,7 @@ class ElasticsearchQuerystringBackend(BaseBackend):
         key, value = node
         if type(value) not in (str, int, list):
             raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
-        return "%s:%s" % (self.sigmaconfig.get_fieldmapping(key), self.generateNode(value))
+        return "%s:%s" % (key, self.generateNode(value))
 
     def generateValueNode(self, node):
         return "\"%s\"" % (self.cleanValue(str(node)))
@@ -149,8 +149,8 @@ class LogPointBackend(BaseBackend):
         if type(value) not in (str, int, list):
             raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
         if type(value) == list:
-            return "%s IN %s" % (self.sigmaconfig.get_fieldmapping(key), self.generateNode(value))
-        return "%s=%s" % (self.sigmaconfig.get_fieldmapping(key), self.generateNode(value))
+            return "%s IN %s" % (key, self.generateNode(value))
+        return "%s=%s" % (key, self.generateNode(value))
         
     def generateValueNode(self, node):
         return "\"%s\"" % (self.cleanValue(str(node)))
@@ -185,9 +185,9 @@ class SplunkBackend(BaseBackend):
     def generateMapItemNode(self, node):
         key, value = node
         if type(value) in (str, int):
-            return '%s=%s' % (self.sigmaconfig.get_fieldmapping(key), self.generateNode(value))
+            return '%s=%s' % (key, self.generateNode(value))
         elif type(value) == list:
-            return "(" + (" OR ".join(['%s=%s' % (self.sigmaconfig.get_fieldmapping(key), self.generateValueNode(item)) for item in value])) + ")"
+            return "(" + (" OR ".join(['%s=%s' % (key, self.generateValueNode(item)) for item in value])) + ")"
         else:
             raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
 
@@ -223,7 +223,7 @@ class FieldnameListBackend(BaseBackend):
         key, value = node
         if type(value) not in (str, int, list):
             raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
-        return [self.sigmaconfig.get_fieldmapping(key)]
+        return [key]
 
     def generateValueNode(self, node):
         return []
