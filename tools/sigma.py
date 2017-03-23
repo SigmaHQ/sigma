@@ -421,6 +421,8 @@ def FieldMapping(source, target=None):
         return SimpleFieldMapping(source, source)
     elif type(target) == str:
         return SimpleFieldMapping(source, target)
+    elif type(target) == list:
+        return MultiFieldMapping(source, target)
 
 class SimpleFieldMapping:
     """1:1 field mapping"""
@@ -436,6 +438,17 @@ class SimpleFieldMapping:
     def resolve(self, key, value, sigmaparser):
         """Return mapped field name"""
         return (self.target, value)
+
+class MultiFieldMapping(SimpleFieldMapping):
+    """1:n field mapping that expands target field names into OR conditions"""
+    target_type = list
+
+    def resolve(self, key, value, sigmaparser):
+        """Returns multiple target field names as OR condition"""
+        cond = ConditionOR()
+        for fieldname in self.target:
+            cond.add((fieldname, value))
+        return cond
 
 # Configuration
 class SigmaConfiguration:
