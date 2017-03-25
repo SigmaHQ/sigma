@@ -1,0 +1,20 @@
+title: Suspicious PowerShell Invocation based on Parent Process
+status: experimental
+description: Detects suspicious powershell invocations from interpreters or unusual programs
+author: Florian Roth
+reference: https://www.carbonblack.com/2017/03/15/attackers-leverage-excel-powershell-dns-latest-non-malware-attack/
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+        ParentImage:
+            - '*\wscript.exe'
+            - '*\cscript.exe'
+        Image:
+            - '*\powershell.exe'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

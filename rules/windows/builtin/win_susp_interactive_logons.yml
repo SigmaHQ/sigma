@@ -1,0 +1,26 @@
+title: Interactive Logon to Server Systems
+description: Detects interactive console logons to 
+author: Florian Roth
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID:
+            - 528
+            - 529
+            - 4624
+            - 4625
+        LogonType: 2
+        ComputerName:
+            - '%ServerSystems%'
+            - '%DomainControllers%'
+    filter:
+        LogonProcessName: Advapi
+        ComputerName: '%Workstations%'
+    condition: selection and not filter
+falsepositives:
+    - Administrative activity via KVM or ILO board
+level: medium
+
+

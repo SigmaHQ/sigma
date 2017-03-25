@@ -21,11 +21,13 @@ class BaseBackend:
     """Base class for all backends"""
     identifier = "base"
     active = False
+    index_field = None      # field name that is used to address indices
 
     def __init__(self, sigmaconfig):
         if not isinstance(sigmaconfig, (sigma.SigmaConfiguration, None)):
             raise TypeError("SigmaConfiguration object expected")
         self.sigmaconfig = sigmaconfig
+        self.sigmaconfig.set_backend(self)
 
     def generate(self, parsed):
         return self.generateNode(parsed.getParseTree())
@@ -101,7 +103,7 @@ class ElasticsearchQuerystringBackend(BaseBackend):
         key, value = node
         if type(value) not in (str, int, list):
             raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
-        return "%s:%s" % (self.sigmaconfig.get_fieldmapping(key), self.generateNode(value))
+        return "%s:%s" % (key, self.generateNode(value))
 
     def generateValueNode(self, node):
         return "\"%s\"" % (self.cleanValue(str(node)))
@@ -116,10 +118,48 @@ class KibanaBackend(ElasticsearchDSLBackend):
     identifier = "kibana"
     active = False
 
+class LogPointBackend(BaseBackend):
+    """Converts Sigma rule into LogPoint query"""
+    identifier = "logpoint"
+    active = True
+    reEscape = re.compile('(["\\\\])')
+
+    def cleanValue(self, val):
+        return self.reEscape.sub("\\\\\g<1>", val)
+    
+    def generateANDNode(self, node):
+        return " ".join([self.generateNode(val) for val in node])
+    
+    def generateORNode(self, node):
+        return " OR ".join([self.generateNode(val) for val in node])
+    
+    def generateNOTNode(self, node):
+        return " -" + self.generateNode(node.item)
+        
+    def generateSubexpressionNode(self, node):
+        return "(%s)" % self.generateNode(node.items)
+        
+    def generateListNode(self, node):
+        if not set([type(value) for value in node]).issubset({str, int}):
+            raise TypeError("List values must be strings or numbers")
+        return "[%s]" % (", ".join([self.generateNode(value) for value in node]))
+    
+    def generateMapItemNode(self, node):
+        key, value = node
+        if type(value) not in (str, int, list):
+            raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
+        if type(value) == list:
+            return "%s IN %s" % (key, self.generateNode(value))
+        return "%s=%s" % (key, self.generateNode(value))
+        
+    def generateValueNode(self, node):
+        return "\"%s\"" % (self.cleanValue(str(node)))
+    
 class SplunkBackend(BaseBackend):
     """Converts Sigma rule into Splunk Search Processing Language (SPL)."""
     identifier = "splunk"
     active = True
+    index_field = "index"
     reEscape = re.compile('(["\\\\])')
 
     def cleanValue(self, val):
@@ -145,9 +185,9 @@ class SplunkBackend(BaseBackend):
     def generateMapItemNode(self, node):
         key, value = node
         if type(value) in (str, int):
-            return '%s=%s' % (self.sigmaconfig.get_fieldmapping(key), self.generateNode(value))
+            return '%s=%s' % (key, self.generateNode(value))
         elif type(value) == list:
-            return "(" + (" OR ".join(['%s=%s' % (self.sigmaconfig.get_fieldmapping(key), self.generateValueNode(item)) for item in value])) + ")"
+            return "(" + (" OR ".join(['%s=%s' % (key, self.generateValueNode(item)) for item in value])) + ")"
         else:
             raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
 
@@ -183,7 +223,7 @@ class FieldnameListBackend(BaseBackend):
         key, value = node
         if type(value) not in (str, int, list):
             raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
-        return [self.sigmaconfig.get_fieldmapping(key)]
+        return [key]
 
     def generateValueNode(self, node):
         return []

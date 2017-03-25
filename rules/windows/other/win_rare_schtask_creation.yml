@@ -1,0 +1,15 @@
+title: Rare Scheduled Task Creations
+status: experimental
+description: This rule detects rare scheduled task creations. Typically software gets installed on multiple systems and not only on a few. The aggregation and count function selects tasks with rare names. 
+author: Florian Roth
+logsource:
+    product: windows
+    service: taskscheduler
+detection:
+    selection:
+        EventID: 106
+    timeframe: 7d
+    condition: selection | count() by TaskName < 5 
+falsepositives:
+    - Software installation
+level: low
