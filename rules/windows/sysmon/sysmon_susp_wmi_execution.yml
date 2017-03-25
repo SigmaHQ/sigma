@@ -1,0 +1,20 @@
+title: WMI execution
+status: experimental
+description: Detects WMI executing suspicious commands.
+reference: https://digital-forensics.sans.org/blog/2010/06/04/wmic-draft/
+author: Michael Haag
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+        Image:
+            - '*\wmic.exe'
+        CommandLine:
+            - '*process call create*'
+            - '*/NODE:*'
+    condition: selection
+falsepositives:
+    - Will need to be tuned. If using Splunk, I recommend | stats count by Computer,CommandLine following for easy hunting by computer/CommandLine.
+level: medium
