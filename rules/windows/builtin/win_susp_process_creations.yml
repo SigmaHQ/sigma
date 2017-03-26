@@ -10,33 +10,36 @@ logsource:
     service: security
     description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
 detection:
-    selection1:
+    selection:
         EventID: 4688
         ProcessCommandLine: 
             # Hacking activity
-            - '*vssadmin.exe delete shadows*'
-            - '*vssadmin delete shadows*'
-            - '*\certutil.exe -decode *'
-            - 'vssadmin create shadow /for=C:'
-            - 'copy \\?\GLOBALROOT\Device\*\windows\ntds\ntds.dit'
-            - 'copy \\?\GLOBALROOT\Device\*\config\SAM'
-            - 'reg SAVE HKLM\SYSTEM ' 
+            - 'vssadmin.exe delete shadows*'
+            - 'vssadmin delete shadows*'
+            - 'certutil.exe -decode *'
+            - 'vssadmin create shadow /for=C:*'
+            - 'copy \\?\GLOBALROOT\Device\*\windows\ntds\ntds.dit*'
+            - 'copy \\?\GLOBALROOT\Device\*\config\SAM*'
+            - 'reg SAVE HKLM\SYSTEM *'
+            - '* sekurlsa:*'
+            - 'net localgroup adminstrators * /add'
+            - 'net group "Domain Admins" * /ADD /DOMAIN'
             # Malware
-            - '*netsh advfirewall firewall *\AppData\*'
+            - 'netsh advfirewall firewall *\AppData\*'
             - 'attrib +S +H +R *\AppData\*'
-            - '*schtasks* /create *\AppData\*'
-            - '*Regasm.exe *\AppData\*'
-            - '*Regasm *\AppData\*'
-            - '*bitsadmin* /transfer*'
+            - 'schtasks* /create *\AppData\*'
+            - 'Regasm.exe *\AppData\*'
+            - 'Regasm *\AppData\*'
+            - 'bitsadmin* /transfer*'
             # Scripts
-            - '*\wscript.exe *.jse'
-            - '*\wscript.exe *.js'
-            - '*\wscript.exe *.vba'
-            - '*\wscript.exe *.vbe'
-            - '*\cscript.exe *.jse'
-            - '*\cscript.exe *.js'
-            - '*\cscript.exe *.vba'
-            - '*\cscript.exe *.vbe'
+            - 'wscript.exe *.jse'
+            - 'wscript.exe *.js'
+            - 'wscript.exe *.vba'
+            - 'wscript.exe *.vbe'
+            - 'cscript.exe *.jse'
+            - 'cscript.exe *.js'
+            - 'cscript.exe *.vba'
+            - 'cscript.exe *.vbe'
     condition: selection
 falsepositives: 
     - False positives depend on scripts and administrative tools used in the monitored environment
