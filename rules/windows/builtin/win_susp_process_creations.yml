@@ -1,0 +1,43 @@
+title: Detects Suspicious Process Creations
+description: Detects suspicious process starts on Windows systems bsed on keywords
+status: experimental
+reference: 
+    - https://www.swordshield.com/2015/07/getting-hashes-from-ntds-dit-file/
+    - https://www.youtube.com/watch?v=H3t_kHQG1Js&feature=youtu.be&t=15m35s
+author: Florian Roth
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection1:
+        EventID: 4688
+        ProcessCommandLine: 
+            # Hacking activity
+            - '*vssadmin.exe delete shadows*'
+            - '*vssadmin delete shadows*'
+            - '*\certutil.exe -decode *'
+            - 'vssadmin create shadow /for=C:'
+            - 'copy \\?\GLOBALROOT\Device\*\windows\ntds\ntds.dit'
+            - 'copy \\?\GLOBALROOT\Device\*\config\SAM'
+            - 'reg SAVE HKLM\SYSTEM ' 
+            # Malware
+            - '*netsh advfirewall firewall *\AppData\*'
+            - 'attrib +S +H +R *\AppData\*'
+            - '*schtasks* /create *\AppData\*'
+            - '*Regasm.exe *\AppData\*'
+            - '*Regasm *\AppData\*'
+            - '*bitsadmin* /transfer*'
+            # Scripts
+            - '*\wscript.exe *.jse'
+            - '*\wscript.exe *.js'
+            - '*\wscript.exe *.vba'
+            - '*\wscript.exe *.vbe'
+            - '*\cscript.exe *.jse'
+            - '*\cscript.exe *.js'
+            - '*\cscript.exe *.vba'
+            - '*\cscript.exe *.vbe'
+    condition: selection
+falsepositives: 
+    - False positives depend on scripts and administrative tools used in the monitored environment
+level: medium
