@@ -3,6 +3,7 @@ description: Detects suspicious shell commands used in various exploit codes (se
 reference: 
     - http://www.threatgeek.com/2017/03/widespread-exploitation-attempts-using-cve-2017-5638.html
     - https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/multi/http/struts_code_exec_exception_delegator.rb#L121
+    - http://pastebin.com/FtygZ1cg
 author: Florian Roth
 logsource:
     product: linux
@@ -13,6 +14,10 @@ detection:
         - 'wget * - http* | sh'
         - 'wget * - http* | bash'
         - 'python -m SimpleHTTPServer'
+        # Malware 
+        - '*wget *; chmod +x*'
+        - '*wget *; chmod 777 *'
+        - '*cd /tmp || cd /var/run || cd /mnt*'
         # Apache Struts in-the-wild exploit codes  
         - 'stop;service iptables stop;'
         - 'stop;SuSEfirewall2 stop;'
