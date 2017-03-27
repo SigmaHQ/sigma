@@ -1,0 +1,28 @@
+title: Malicious Service Installs
+description: Detects known malicious service installs that only appear in cases of lateral movement, credential dumping and other suspicious activity
+author: Florian Roth
+logsource:
+    product: windows
+    service: system
+detection:
+    selection:
+        EventID: 7045
+    wce:
+        ServiceName: 
+            - 'WCESERVICE'
+            - 'WCE SERVICE'
+    paexec:
+        ServiceFileName: '*\PAExec*'
+    winexe:
+        ServiceFileName: 'winexesvc.exe*'
+    pwdumpx:
+        ServiceFileName: '*\DumpSvc.exe'
+    others:
+        ServiceName:
+            - 'pwdump*'
+            - 'gsecdump*'
+            - 'cachedump*'
+    condition: selection and ( wce or paexec or winexe or pwdumpx or others )
+falsepositives: 
+    - Penetration testing
+level: critical
