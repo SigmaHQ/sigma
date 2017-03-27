@@ -88,13 +88,22 @@ Windows 'Security' Eventlog: Suspicious Number of Failed Logons from a Single So
 The beta version of the rule converter 'sigmac' converting a non-correlation rule into an ElasticSearch query
 ![sigmac_converter](./images/Sigmac-win_susp_rc4_kerberos.png)
 
+## Supported Targets
+
+* [Splunk](https://www.splunk.com/)
+* [ElasticSearch](https://www.elastic.co/)
+* [Logpoint](https://www.logpoint.com)
+
 # Next Steps 
 
-* Creation of a reasonable set of sample rules
-* Release of the first rule converters for ElasticSearch and Splunk
 * Integration of feedback into the rule specifications
 * Integration into Threat Intel Exchanges, e.g. [MISP](http://www.misp-project.org/)
 * Attempts to convince others to use the rule format in their reports, threat feeds, blog posts, threat sharing platforms
+
+# Projects that use Sigma
+
+* [Augmentd](https://augmentd.co/)
+* [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 
 # Credits
 
