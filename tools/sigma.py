@@ -737,7 +737,7 @@ class SigmaLogsourceConfiguration:
             products = set([ ls.product for ls in logsource if ls.product != None ])
             services = set([ ls.service for ls in logsource if ls.service != None])
             if len(categories) > 1 or len(products) > 1 or len(services) > 1:
-                raise ValueError("Merged SigmaLogsourceConfigurations must have disjunct categories, products and services")
+                raise ValueError("Merged SigmaLogsourceConfigurations must have disjunct categories (%s), products (%s) and services (%s)" % (str(categories), str(products), str(services)))
 
             try:
                 self.category = categories.pop()
@@ -825,7 +825,9 @@ class SigmaLogsourceConfiguration:
         """Match log source definition against given criteria, None = ignore"""
         searched = 0
         for searchval, selfval in zip((category, product, service), (self.category, self.product, self.service)):
-            if searchval != None and selfval != None:
+            if searchval == None and selfval != None:   #
+                return False
+            if searchval != None:
                 searched += 1
                 if searchval != selfval:
                     return False
