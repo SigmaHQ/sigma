@@ -417,9 +417,6 @@ class SigmaConditionParser:
     def __len__(self):
         return len(self.parsedSearch)
 
-    def getParseTree(self):
-        return(self.parsedSearch)
-
 class SimpleParser:
     """
     Rule-defined parser that converts a token stream into a Python object.
