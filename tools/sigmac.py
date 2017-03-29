@@ -97,4 +97,9 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
         print("Feel free to contribute for fun and fame, this is open source :) -> https://github.com/Neo23x0/sigma", file=sys.stderr)
     finally:
         f.close()
+        try:
+            for condtoken in parser.condtoken:
+                print_debug("Condition Tokens:", condtoken)
+        except AttributeError:
+            print_debug("Sigma rule didn't reached condition tokenization")
         print_debug()
