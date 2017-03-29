@@ -30,7 +30,7 @@ class BaseBackend:
         self.sigmaconfig.set_backend(self)
 
     def generate(self, parsed):
-        return self.generateNode(parsed.getParseTree())
+        return self.generateNode(parsed.parsedSearch) + self.generateAggregation(parsed.parsedAgg)
 
     def generateNode(self, node):
         if type(node) == sigma.ConditionAND:
@@ -70,6 +70,9 @@ class BaseBackend:
 
     def generateValueNode(self, node):
         raise NotImplementedError("Node type not implemented for this backend")
+
+    def generateAggregation(self, agg):
+        raise NotImplementedError("Aggregations not implemented for this backend")
 
 class ElasticsearchQuerystringBackend(BaseBackend):
     """Converts Sigma rule into Elasticsearch query string. Only searches, no aggregations."""
@@ -194,13 +197,21 @@ class SplunkBackend(BaseBackend):
     def generateValueNode(self, node):
         return "\"%s\"" % (self.cleanValue(str(node)))
 
+    def generateAggregation(self, agg):
+        if agg == None:
+            return ""
+        if agg.groupfield == None:
+            return " | stats %s(%s) as val | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.cond_op, agg.condition)
+        else:
+            return " | stats %s(%s) as val by %s | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.groupfield, agg.cond_op, agg.condition)
+
 class FieldnameListBackend(BaseBackend):
     """List all fieldnames from given Sigma rules for creation of a field mapping configuration."""
     identifier = "fieldlist"
     active = True
 
     def generate(self, parsed):
-        return "\n".join(sorted(set(list(flatten(self.generateNode(parsed.getParseTree()))))))
+        return "\n".join(sorted(set(list(flatten(self.generateNode(parsed.parsedSearch))))))
 
     def generateANDNode(self, node):
         return [self.generateNode(val) for val in node]

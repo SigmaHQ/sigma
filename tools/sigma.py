@@ -158,6 +158,8 @@ class SigmaConditionToken:
     def __eq__(self, other):
         if type(other) == int:      # match against type
             return self.type == other
+        if type(other) == str:      # match against content
+            return self.matched == other
         else:
             raise NotImplementedError("SigmaConditionToken can only be compared against token type constants")
 
@@ -170,7 +172,7 @@ class SigmaConditionTokenizer:
             (SigmaConditionToken.TOKEN_ONE,  re.compile("1 of", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_ALL,  re.compile("all of", re.IGNORECASE)),
             (None,       re.compile("[\\s\\r\\n]+")),
-            (SigmaConditionToken.TOKEN_AGG,  re.compile("count|distcount|min|max|avg|sum", re.IGNORECASE)),
+            (SigmaConditionToken.TOKEN_AGG,  re.compile("count|min|max|avg|sum", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_BY,   re.compile("by", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_EQ,   re.compile("==")),
             (SigmaConditionToken.TOKEN_LT,   re.compile("<")),
@@ -332,12 +334,16 @@ class SigmaConditionParser:
             ]
 
     def __init__(self, sigmaParser, tokens):
-        if SigmaConditionToken.TOKEN_PIPE in tokens:    # aggregations are not yet supported
-            raise NotImplementedError("Aggregation expressions are not yet supported")
-
         self.sigmaParser = sigmaParser
         self.config = sigmaParser.config
-        self.parsedSearch = self.parseSearch(tokens)
+
+        if SigmaConditionToken.TOKEN_PIPE in tokens:    # Condition contains atr least one aggregation expression
+            pipepos = tokens.index(SigmaConditionToken.TOKEN_PIPE)
+            self.parsedSearch = self.parseSearch(tokens[:pipepos])
+            self.parsedAgg = SigmaAggregationParser(tokens[pipepos + 1:], self.config)
+        else:
+            self.parsedSearch = self.parseSearch(tokens)
+            self.parsedAgg = None
 
     def parseSearch(self, tokens):
         """
@@ -411,8 +417,130 @@ class SigmaConditionParser:
     def __len__(self):
         return len(self.parsedSearch)
 
-    def getParseTree(self):
-        return(self.parsedSearch)
+class SimpleParser:
+    """
+    Rule-defined parser that converts a token stream into a Python object.
+
+    Rules are defined in the class property parsingrules, a list of dict of tuples with the following format:
+    [ { token_0_0: parsing_rule_0_0, token_0_1: parsing_rule_0_1, ..., token_0_n: parsing_rule_0_n } , ... , { token_m_0: parsing_rule_m_0, ... } ]
+
+    Each list index of parsing rules represents a parser state.
+    Each parser state is defined by a dict with associates a token with a rule definition.
+    The rule definition is a tuple that defines what is done next when the parser encounters a token in the current parser state:
+
+    ( storage attribute, transformation function, next ruleset)
+
+    * storage attribute: the name of the object attribute that is used for storage of the attribute
+    * transformation method: name of an object method that is called before storage. It gets a parameter and returns the value that is stored
+    * next state: next parser state
+
+    A None value means that the action (transformation, storage or state change) is not conducted.
+
+    A negative state has the special meaning that no further token is expected and may be used as return value.
+    The set or list finalstates contains valid final states. The parser verifies after the last token that it
+    has reached one of these states. if not, a parse error is raised.
+    """
+
+    def __init__(self, tokens, init_state=0):
+        self.state = init_state
+
+        for token in tokens:
+            if self.state < 0:
+                raise SigmaParseError("No further token expected, but read %s" % (str(token)))
+            try:
+                rule = self.parsingrules[self.state][token.type]
+            except KeyError as e:
+                raise SigmaParseError("Unexpected token %s at %d in aggregation expression" % (str(token), token.pos)) from e
+
+            value = token.matched
+            trans_value = value
+            if rule[1] != None:
+                trans_value = getattr(self, rule[1])(value)
+            if rule[0] != None:
+                setattr(self, rule[0], trans_value)
+                setattr(self, rule[0] + "_notrans", value)
+            if rule[2] != None:
+                self.state = rule[2]
+        if self.state not in self.finalstates:
+            raise SigmaParseError("Unexpected end of aggregation expression, state=%d" % (self.state))
+
+    def __str__(self):
+        return "[ Parsed: %s ]" % (" ".join(["%s=%s" % (key, val) for key, val in self.__dict__.items() ]))
+
+class SigmaAggregationParser(SimpleParser):
+    """Parse Sigma aggregation expression and provide parsed data"""
+    parsingrules = [
+            {   # State 0
+                SigmaConditionToken.TOKEN_AGG: ("aggfunc", "trans_aggfunc", 1)
+            },
+            {   # State 1
+                SigmaConditionToken.TOKEN_LPAR: (None, None, 2)
+            },
+            {   # State 2
+                SigmaConditionToken.TOKEN_RPAR: (None, None, 4),
+                SigmaConditionToken.TOKEN_ID: ("aggfield", "trans_fieldname", 3)
+            },
+            {   # State 3
+                SigmaConditionToken.TOKEN_RPAR: (None, None, 4)
+            },
+            {   # State 4
+                SigmaConditionToken.TOKEN_BY: ("cond_op", None, 5),
+                SigmaConditionToken.TOKEN_EQ: ("cond_op", None, 7),
+                SigmaConditionToken.TOKEN_LT: ("cond_op", None, 7),
+                SigmaConditionToken.TOKEN_LTE: ("cond_op", None, 7),
+                SigmaConditionToken.TOKEN_GT: ("cond_op", None, 7),
+                SigmaConditionToken.TOKEN_GTE: ("cond_op", None, 7),
+            },
+            {   # State 5
+                SigmaConditionToken.TOKEN_ID: ("groupfield", "trans_fieldname", 6)
+            },
+            {   # State 6
+                SigmaConditionToken.TOKEN_EQ: ("cond_op", None, 7),
+                SigmaConditionToken.TOKEN_LT: ("cond_op", None, 7),
+                SigmaConditionToken.TOKEN_LTE: ("cond_op", None, 7),
+                SigmaConditionToken.TOKEN_GT: ("cond_op", None, 7),
+                SigmaConditionToken.TOKEN_GTE: ("cond_op", None, 7),
+            },
+            {   # State 7
+                SigmaConditionToken.TOKEN_ID: ("condition", None, -1)
+            },
+            ]
+    finalstates = { -1 }
+
+    # Aggregation functions
+    AGGFUNC_COUNT = 1
+    AGGFUNC_MIN = 2
+    AGGFUNC_MAX = 3
+    AGGFUNC_AVG = 4
+    AGGFUNC_SUM = 5
+    aggfuncmap = {
+            "count": AGGFUNC_COUNT,
+            "min": AGGFUNC_MIN,
+            "max": AGGFUNC_MAX,
+            "avg": AGGFUNC_AVG,
+            "sum": AGGFUNC_SUM,
+            }
+
+    def __init__(self, tokens, config):
+        self.config = config
+        self.aggfield = ""
+        self.groupfield = None
+        super().__init__(tokens)
+
+    def trans_aggfunc(self, name):
+        """Translate aggregation function name into constant"""
+        try:
+            return self.aggfuncmap[name]
+        except KeyError:
+            raise SigmaParseError("Unknown aggregation function '%s'" % (name))
+
+    def trans_fieldname(self, fieldname):
+        """Translate field name into configured mapped name"""
+        mapped = self.config.get_fieldmapping(fieldname).resolve_fieldname(fieldname)
+        if type(mapped) == str:
+            return mapped
+        else:
+            raise NotImplementedError("Field mappings in aggregations must be single valued")
 
 # Field Mapping Definitions
 def FieldMapping(source, target=None):
@@ -441,6 +569,9 @@ class SimpleFieldMapping:
         """Return mapped field name"""
         return (self.target, value)
 
+    def resolve_fieldname(self, fieldname):
+        return self.target
+
 class MultiFieldMapping(SimpleFieldMapping):
     """1:n field mapping that expands target field names into OR conditions"""
     target_type = list
@@ -451,6 +582,9 @@ class MultiFieldMapping(SimpleFieldMapping):
         for fieldname in self.target:
             cond.add((fieldname, value))
         return cond
+
+    def resolve_fieldname(self, fieldname):
+        return self.target
 
 class ConditionalFieldMapping(SimpleFieldMapping):
     """
@@ -517,6 +651,12 @@ class ConditionalFieldMapping(SimpleFieldMapping):
             return cond
         else:                       # no mapping found
             return (key, value)
+
+    def resolve_fieldname(self, fieldname):
+        if self.default != None:
+            return self.default
+        else:
+            return fieldname
 
 # Configuration
 class SigmaConfiguration:
@@ -597,7 +737,7 @@ class SigmaLogsourceConfiguration:
             products = set([ ls.product for ls in logsource if ls.product != None ])
             services = set([ ls.service for ls in logsource if ls.service != None])
             if len(categories) > 1 or len(products) > 1 or len(services) > 1:
-                raise ValueError("Merged SigmaLogsourceConfigurations must have disjunct categories, products and services")
+                raise ValueError("Merged SigmaLogsourceConfigurations must have disjunct categories (%s), products (%s) and services (%s)" % (str(categories), str(products), str(services)))
 
             try:
                 self.category = categories.pop()
@@ -685,7 +825,9 @@ class SigmaLogsourceConfiguration:
         """Match log source definition against given criteria, None = ignore"""
         searched = 0
         for searchval, selfval in zip((category, product, service), (self.category, self.product, self.service)):
-            if searchval != None and selfval != None:
+            if searchval == None and selfval != None:   #
+                return False
+            if searchval != None:
                 searched += 1
                 if searchval != selfval:
                     return False
