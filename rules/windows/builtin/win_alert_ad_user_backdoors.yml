@@ -1,0 +1,26 @@
+title: Active Directory User Backdoors
+description: Detects scenarios where one can control another users account without having to use their credentials via msDS-AllowedToDelegateTo and or service principal names (SPN).
+reference:
+    -https://msdn.microsoft.com/en-us/library/cc220234.aspx
+    -https://adsecurity.org/?p=3466
+author: @neu5ron
+logsource:
+    product: windows
+    service: security
+    description1: 'Requirements: Audit Policy : Account Management > Audit User Account Management, Group Policy : Computer Configuration\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies\Account Management\Audit User Account Management'
+    description2: 'Requirements: Audit Policy : DS Access > Audit Directory Service Changes, Group Policy : Computer Configuration\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies\DS Access\Audit Directory Service Changes'
+detection:
+    selection1:
+        EventID: 4738
+        AllowedToDelegateTo: *
+    selection2:
+        EventID: 5136
+        AttributeLDAPDisplayName: 'msDS-AllowedToDelegateTo'
+    selection3:
+        EventID: 5136
+        ObjectClass: 'user'
+        AttributeLDAPDisplayName: 'servicePrincipalName'
+    condition: selection1 or selection2 or selection3
+falsepositives: 
+    - Unknown
+level: high
