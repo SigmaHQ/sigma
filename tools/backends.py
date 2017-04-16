@@ -30,7 +30,10 @@ class BaseBackend:
         self.sigmaconfig.set_backend(self)
 
     def generate(self, parsed):
-        return self.generateNode(parsed.parsedSearch) + self.generateAggregation(parsed.parsedAgg)
+        result = self.generateNode(parsed.parsedSearch)
+        if parsed.parsedAgg:
+            result += self.generateAggregation(parsed.parsedAgg)
+        return result
 
     def generateNode(self, node):
         if type(node) == sigma.ConditionAND:
