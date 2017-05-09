@@ -1,0 +1,26 @@
+title: Microsoft Malware Protection Engine Crash
+description: This rule detects a suspicious crash of the Microsoft Malware Protection Engine
+status: experimental
+date: 2017/05/09
+reference: 
+    - https://bugs.chromium.org/p/project-zero/issues/detail?id=1252&desc=5
+    - https://technet.microsoft.com/en-us/library/security/4022344
+author: Florian Roth
+logsource:
+    product: windows
+    service: application
+detection:
+    selection1:
+        Source: 'Application Error'
+        EventID: 1000 
+    selection2:
+        Source: 'Windows Error Reporting'
+        EventID: 1001
+    keyword1:
+        - 'MsMpEng.exe'
+    keyword2:
+        - 'mpengine.dll'
+    condition: selection1 or selection2 and keyword1 and 1 of keyword2
+falsepositives: 
+    - Unknown
+level: high
