@@ -2,7 +2,7 @@ title: Net.exe execution
 status: experimental
 description: Detects execution of Net.exe, whether suspicious or benign.
 reference: https://pentest.blog/windows-privilege-escalation-methods-for-pentesters/
-author: Michael Haag
+author: Michael Haag, Mark Woan (improvements)
 logsource:
     product: windows
     service: sysmon
@@ -11,14 +11,15 @@ detection:
         EventID: 1
         Image:
             - '*\net.exe'
+            - '*\net1.exe'
         CommandLine:
-            - 'net group*'
-            - 'net localgroup*'
-            - 'net user*'
-            - 'net view*'
-            - 'net share'
-            - 'net accounts*'
-            - 'net use*'
+            - '* group*'
+            - '* localgroup*'
+            - '* user*'
+            - '* view*'
+            - '* share'
+            - '* accounts*'
+            - '* use*'
     condition: selection
 falsepositives:
     - Will need to be tuned. If using Splunk, I recommend | stats count by Computer,CommandLine following the search for easy hunting by computer/CommandLine.
