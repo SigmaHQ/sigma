@@ -17,6 +17,8 @@ def getBackend(name):
     except KeyError as e:
         raise LookupError("Backend not found") from e
 
+### Generic base classes
+
 class BaseBackend:
     """Base class for all backends"""
     identifier = "base"
@@ -76,6 +78,8 @@ class BaseBackend:
 
     def generateAggregation(self, agg):
         raise NotImplementedError("Aggregations not implemented for this backend")
+
+### Backends for specific SIEMs
 
 class ElasticsearchQuerystringBackend(BaseBackend):
     """Converts Sigma rule into Elasticsearch query string. Only searches, no aggregations."""
@@ -207,6 +211,8 @@ class SplunkBackend(BaseBackend):
             return " | stats %s(%s) as val | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.cond_op, agg.condition)
         else:
             return " | stats %s(%s) as val by %s | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.groupfield, agg.cond_op, agg.condition)
+
+### Backends for developement purposes
 
 class FieldnameListBackend(BaseBackend):
     """List all fieldnames from given Sigma rules for creation of a field mapping configuration."""
