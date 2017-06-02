@@ -17,6 +17,8 @@ def getBackend(name):
     except KeyError as e:
         raise LookupError("Backend not found") from e
 
+### Generic base classes
+
 class BaseBackend:
     """Base class for all backends"""
     identifier = "base"
@@ -77,42 +79,83 @@ class BaseBackend:
     def generateAggregation(self, agg):
         raise NotImplementedError("Aggregations not implemented for this backend")
 
-class ElasticsearchQuerystringBackend(BaseBackend):
-    """Converts Sigma rule into Elasticsearch query string. Only searches, no aggregations."""
-    identifier = "es-qs"
-    active = True
-    reEscape = re.compile("([+\\-=!(){}\\[\\]^\"~:\\\\/]|&&|\\|\\|)")
-    reClear = re.compile("[<>]")
+class SingleTextQueryBackend(BaseBackend):
+    """Base class for backends that generate one text-based expression from a Sigma rule"""
+    identifier = "base-textquery"
+    active = False
+
+    # the following class variables define the generation and behavior of queries from a parse tree some are prefilled with default values that are quite usual
+    reEscape = None                     # match characters that must be quoted
+    escapeSubst = "\\\\\g<1>"           # Substitution that is applied to characters/strings matched for escaping by reEscape
+    reClear = None                      # match characters that are cleaned out completely
+    andToken = None                     # Token used for linking expressions with logical AND
+    orToken = None                      # Same for OR
+    notToken = None                     # Same for NOT
+    subExpression = None                # Syntax for subexpressions, usually parenthesis around it. %s is inner expression
+    listExpression = None               # Syntax for lists, %s are list items separated with listSeparator
+    listSeparator = None                # Character for separation of list items
+    valueExpression = None              # Expression of values, %s represents value
+    mapExpression = None                # Syntax for field/value conditions. First %s is key, second is value
+    mapListsSpecialHandling = False     # Same handling for map items with list values as for normal values (strings, integers) if True, generateMapItemListNode method is called with node
+    mapListValueExpression = None       # Syntax for field/value condititons where map value is a list
 
     def cleanValue(self, val):
-        val = self.reEscape.sub("\\\\\g<1>", val)
-        return self.reClear.sub("", val)
+        if self.reEscape:
+            val = self.reEscape.sub(self.escapeSubst, val)
+        if self.reClear:
+            val = self.reClear.sub("", val)
+        return val
 
     def generateANDNode(self, node):
-        return " AND ".join([self.generateNode(val) for val in node])
+        return self.andToken.join([self.generateNode(val) for val in node])
 
     def generateORNode(self, node):
-        return " OR ".join([self.generateNode(val) for val in node])
+        return self.orToken.join([self.generateNode(val) for val in node])
 
     def generateNOTNode(self, node):
-        return "NOT " + self.generateNode(node.item)
+        return self.notToken + self.generateNode(node.item)
 
     def generateSubexpressionNode(self, node):
-        return "(%s)" % self.generateNode(node.items)
+        return self.subExpression % self.generateNode(node.items)
 
     def generateListNode(self, node):
         if not set([type(value) for value in node]).issubset({str, int}):
             raise TypeError("List values must be strings or numbers")
-        return "(%s)" % (" ".join([self.generateNode(value) for value in node]))
+        return self.listExpression % (self.listSeparator.join([self.generateNode(value) for value in node]))
 
     def generateMapItemNode(self, node):
         key, value = node
-        if type(value) not in (str, int, list):
-            raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
-        return "%s:%s" % (key, self.generateNode(value))
+        if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
+            return self.mapExpression % (key, self.generateNode(value))
+        elif type(value) == list:
+            return self.generateMapItemListNode(key, value)
+        else:
+            raise TypeError("Backend does not support map values of type " + str(type(value)))
+
+    def generateMapItemListNode(self, key, value):
+        return self.mapListValueExpression % (key, self.generateNode(value))
 
     def generateValueNode(self, node):
-        return "\"%s\"" % (self.cleanValue(str(node)))
+        return self.valueExpression % (self.cleanValue(str(node)))
+
+### Backends for specific SIEMs
+
+class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
+    """Converts Sigma rule into Elasticsearch query string. Only searches, no aggregations."""
+    identifier = "es-qs"
+    active = True
+
+    reEscape = re.compile("([+\\-=!(){}\\[\\]^\"~:\\\\/]|&&|\\|\\|)")
+    reClear = re.compile("[<>]")
+    andToken = " AND "
+    orToken = " OR "
+    notToken = "NOT "
+    subExpression = "(%s)"
+    listExpression = "(%s)"
+    listSeparator = " "
+    valueExpression = "\"%s\""
+    mapExpression = "%s:%s"
+    mapListsSpecialHandling = False
 
 class ElasticsearchDSLBackend(BaseBackend):
     """Converts Sigma rule into Elasticsearch DSL query (JSON)."""
@@ -124,81 +167,45 @@ class KibanaBackend(ElasticsearchDSLBackend):
     identifier = "kibana"
     active = False
 
-class LogPointBackend(BaseBackend):
+class LogPointBackend(SingleTextQueryBackend):
     """Converts Sigma rule into LogPoint query"""
     identifier = "logpoint"
     active = True
-    reEscape = re.compile('(["\\\\])')
 
-    def cleanValue(self, val):
-        return self.reEscape.sub("\\\\\g<1>", val)
+    reEscape = re.compile('(["\\\\])')
+    reClear = None
+    andToken = " "
+    orToken = " OR "
+    notToken = " -"
+    subExpression = "(%s)"
+    listExpression = "[%s]"
+    listSeparator = ", "
+    valueExpression = "\"%s\""
+    mapExpression = "%s=%s"
+    mapListsSpecialHandling = True
+    mapListValueExpression = "%s IN %s"
     
-    def generateANDNode(self, node):
-        return " ".join([self.generateNode(val) for val in node])
-    
-    def generateORNode(self, node):
-        return " OR ".join([self.generateNode(val) for val in node])
-    
-    def generateNOTNode(self, node):
-        return " -" + self.generateNode(node.item)
-        
-    def generateSubexpressionNode(self, node):
-        return "(%s)" % self.generateNode(node.items)
-        
-    def generateListNode(self, node):
-        if not set([type(value) for value in node]).issubset({str, int}):
-            raise TypeError("List values must be strings or numbers")
-        return "[%s]" % (", ".join([self.generateNode(value) for value in node]))
-    
-    def generateMapItemNode(self, node):
-        key, value = node
-        if type(value) not in (str, int, list):
-            raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
-        if type(value) == list:
-            return "%s IN %s" % (key, self.generateNode(value))
-        return "%s=%s" % (key, self.generateNode(value))
-        
-    def generateValueNode(self, node):
-        return "\"%s\"" % (self.cleanValue(str(node)))
-    
-class SplunkBackend(BaseBackend):
+class SplunkBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Splunk Search Processing Language (SPL)."""
     identifier = "splunk"
     active = True
     index_field = "index"
+
     reEscape = re.compile('(["\\\\])')
+    reClear = None
+    andToken = " "
+    orToken = " OR "
+    notToken = "NOT "
+    subExpression = "(%s)"
+    listExpression = "(%s)"
+    listSeparator = " "
+    valueExpression = "\"%s\""
+    mapExpression = "%s=%s"
+    mapListsSpecialHandling = False
+    mapListValueExpression = "%s IN %s"
 
-    def cleanValue(self, val):
-        return self.reEscape.sub("\\\\\g<1>", val)
-
-    def generateANDNode(self, node):
-        return " ".join([self.generateNode(val) for val in node])
-
-    def generateORNode(self, node):
-        return " OR ".join([self.generateNode(val) for val in node])
-
-    def generateNOTNode(self, node):
-        return "NOT " + self.generateNode(node.item)
-
-    def generateSubexpressionNode(self, node):
-        return "(%s)" % self.generateNode(node.items)
-
-    def generateListNode(self, node):
-        if not set([type(value) for value in node]).issubset({str, int}):
-            raise TypeError("List values must be strings or numbers")
-        return "(%s)" % (" ".join([self.generateNode(value) for value in node]))
-
-    def generateMapItemNode(self, node):
-        key, value = node
-        if type(value) in (str, int):
-            return '%s=%s' % (key, self.generateNode(value))
-        elif type(value) == list:
-            return "(" + (" OR ".join(['%s=%s' % (key, self.generateValueNode(item)) for item in value])) + ")"
-        else:
-            raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
-
-    def generateValueNode(self, node):
-        return "\"%s\"" % (self.cleanValue(str(node)))
+    def generateMapItemListNode(self, node):
+        return "(" + (" OR ".join(['%s=%s' % (key, self.generateValueNode(item)) for item in value])) + ")"
 
     def generateAggregation(self, agg):
         if agg == None:
@@ -207,6 +214,8 @@ class SplunkBackend(BaseBackend):
             return " | stats %s(%s) as val | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.cond_op, agg.condition)
         else:
             return " | stats %s(%s) as val by %s | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.groupfield, agg.cond_op, agg.condition)
+
+### Backends for developement purposes
 
 class FieldnameListBackend(BaseBackend):
     """List all fieldnames from given Sigma rules for creation of a field mapping configuration."""
