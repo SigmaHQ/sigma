@@ -6,15 +6,22 @@ logsource:
     product: windows
     service: sysmon
 detection:
+    # Loads from Temp folder
     selection1:
         EventID: 1
         Image: '*\regsvr32.exe'
         CommandLine: '*\Temp\*'
+    # Loaded by powershell
     selection2:
         EventID: 1
         Image: '*\regsvr32.exe'
         ParentImage: '*\powershell.exe'
-    condition: any of them
+    # Regsvr32.exe used with http(s) address
+    selection3:
+        EventID: 1
+        Image: '*\regsvr32.exe'
+        Commandline: '/i:http'
+    condition: selection1 or selection2 or selection3
 falsepositives:
     - Unknown
 level: high
