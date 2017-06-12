@@ -203,7 +203,7 @@ class SigmaConditionTokenizer:
                         condition = condition[match.end():]
                         break
                 else:   # no valid token identified
-                    raise SigmaParseError("Unexpected token in condition at position %d")
+                    raise SigmaParseError("Unexpected token in condition at position %s" % condition)
         elif type(condition) == list:       # List of tokens to be converted into SigmaConditionTokenizer class
             self.tokens = condition
         else:
