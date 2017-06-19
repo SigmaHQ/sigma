@@ -1,0 +1,18 @@
+title: Possible remote password change (NTLM hash only) through SAMR 
+description: Detects a possible remote NTLM hash change through SAMR API SamiChangePasswordUser() or SamSetInformationUser(). "Audit User Account Management" in "Advanced Audit Policy Configuration" has to be enabled in your local security policy / GPO to see this events.
+author: Dimitrios Slamaris
+logsource:
+    product: windows
+    service: security
+detection:
+    samrpipe:
+            - EventLog: Security
+              EventID: 5145
+              RelativeTargetName: samr
+    passwordchanged:
+            - EventLog: Security
+              EventID: 4738
+              PasswordLastSet: (any) 
+    timeframe: 15s 
+    condition: samrpipe | near passwordchanged within timeframe
+level: medium
