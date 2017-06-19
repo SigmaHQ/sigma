@@ -185,6 +185,14 @@ class LogPointBackend(SingleTextQueryBackend):
     mapListsSpecialHandling = True
     mapListValueExpression = "%s IN %s"
     
+    def generateAggregation(self, agg):
+        if agg == None:
+            return ""
+        if agg.groupfield == None:
+            return " | chart %s(%s) as val | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.cond_op, agg.condition)
+        else:
+            return " | chart %s(%s) as val by %s | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.groupfield, agg.cond_op, agg.condition)
+    
 class SplunkBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Splunk Search Processing Language (SPL)."""
     identifier = "splunk"
