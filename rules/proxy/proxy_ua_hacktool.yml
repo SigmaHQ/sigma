@@ -1,0 +1,63 @@
+title: Hack Tool User Agent
+status: experimental
+description: Detects suspicious user agent strings user by hack tools in proxy logs
+reference:
+    - https://github.com/fastly/waf_testbed/blob/master/templates/default/scanners-user-agents.data.erb
+    - http://rules.emergingthreats.net/open/snort-2.9.0/rules/emerging-user_agents.rules
+author: Florian Roth
+logsource:
+    type: proxy
+detection:
+    selection:
+      UserAgent:
+        # Vulnerbility scanner and brute force tools
+        - '*(hydra)*'
+        - '* arachni/*'
+        - '* BFAC *'
+        - '* brutus *'
+        - '* cgichk *'
+        - '*core-project/1.0*'
+        - '* crimscanner/*'
+        - '*datacha0s*'
+        - '*dirbuster*'
+        - '*domino hunter*'
+        - '*dotdotpwn*'
+        - 'FHScan Core'
+        - '*floodgate*'
+        - '*get-minimal*'
+        - '*gootkit auto-rooter scanner*'
+        - '*grendel-scan*'
+        - '* inspath *'
+        - '*internet ninja*'
+        - '*jaascois*'
+        - '* zmeu *'
+        - '*masscan*'
+        - '* metis *'
+        - '*morfeus fucking scanner*'
+        - '*n-stealth*'
+        - '*nsauditor*'
+        - '*pmafind*'
+        - '*security scan*'
+        - '*springenwerk*'
+        - '*teh forest lobster*'
+        - '*toata dragostea*'
+        - '* vega/*'
+        - '*voideye*'
+        - '*webshag*'
+        - '*webvulnscan*'
+        - '* whcc/*'
+
+        # SQL Injection
+        - '* Havij'
+        - '*absinthe*'
+        - '*bsqlbf*'
+        - '*mysqloit*'
+        - '*pangolin*'
+        - '*sql power injector*'
+        - '*sqlmap*'
+        - '*sqlninja*'
+        - '*uil2pn*'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

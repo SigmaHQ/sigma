@@ -1,0 +1,30 @@
+title: APT User Agent
+status: experimental
+description: Detects suspicious user agent strings used in APT malware in proxy logs
+reference: Internal Research
+author: Florian Roth
+logsource:
+    type: proxy
+detection:
+    selection:
+      UserAgent:
+         # APT Related
+        - 'SJZJ (compatible; MSIE 6.0; Win32)'  # APT Backspace
+        - 'Mozilla/5.0 (Windows NT 6.; WOW64; rv:20.0) Gecko/20100101 Firefox/20.0'  # APT GrizzlySteppe - ChopStick - US CERT https://goo.gl/1DTHwi
+        - 'User-Agent: Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; SLCC'  # Comment Crew Miniasp
+        - 'Mozilla/4.0 (compatible; MSIE 7.4; Win32;32-bit)'  # Comment Crew Miniasp
+        - 'webclient'  # Naikon APT
+        - 'Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-EN; rv:1.7.12) Gecko/200'  # Naikon APT
+        - 'Mozilla/4.0 (compatible; MSI 6.0;'  # SnowGlobe Babar - yes, it is cut
+        - 'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:28.0) Gecko/20100101 Firefox/28.0'  # Sofacy - Xtunnel
+        - 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:20.0) Gecko/20100101 Firefox/'  # Sofacy - Xtunnel
+        - 'Mozilla/5.0 (Windows NT 6.; WOW64; rv:20.0) Gecko/20100101 Firefox/2'  # Sofacy - Xtunnel
+        - 'Mozilla/4.0'  # Derusbi backdoor ELF https://github.com/fideliscyber/indicators/tree/master/FTA-1021
+        - 'Netscape'  # Unit78020 Malware 
+        - 'Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-EN; rv:1.7.12) Gecko/20100719 Firefox/1.0.7'  # Unit78020 Malware
+        - 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.13) Firefox/3.6.13 GTB7.1'  # Winnti related
+        - 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)'  # Winnti related
+    condition: selection
+falsepositives:
+    - Old browsers
+level: high

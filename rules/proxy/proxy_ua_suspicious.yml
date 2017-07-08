@@ -1,0 +1,26 @@
+title: Suspicious User Agent
+status: experimental
+description: Detects suspicious malformed user agent strings in proxy logs
+reference:
+    - https://github.com/fastly/waf_testbed/blob/master/templates/default/scanners-user-agents.data.erb
+author: Florian Roth
+logsource:
+    type: proxy
+detection:
+    selection:
+      UserAgent:
+        # Badly scripted UA
+        - 'user-agent'  # User-Agent: User-Agent:
+        - '* (compatible;MSIE *'  # typical typo - missing space
+        - '*.0;Windows NT *'  # typical typo - missing space
+        - 'Mozilla/3.0 *'
+        - 'Mozilla/2.0 *'
+        - 'Mozilla/1.0 *'
+        - 'Mozilla *'  # missing slash
+        - ' Mozilla/*'  # leading space 
+        - 'Mozila/*'  # single 'l'
+        - '_'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
