@@ -1,15 +1,70 @@
-title: Empty User Agent
+title: Suspicious User Agent
 status: experimental
-description: Detects an empty User-Agent string that is suspicious and used by PowerShell web requests under certain conditions
-reference: https://twitter.com/Carlos_Perez/status/883455096645931008
+description: Detects suspicious user agent strings in proxy logs
+reference:
+    - https://github.com/fastly/waf_testbed/blob/master/templates/default/scanners-user-agents.data.erb
+    - http://www.botopedia.org/search?searchword=scan&searchphrase=all
+    - https://twitter.com/Carlos_Perez/status/883455096645931008
 author: Florian Roth
 logsource:
     type: proxy
 detection:
     selection:
-      UserAgent: ''
+      UserAgent:
+        # Empty string - as used by Powershell's (New-Object Net.WebClient).DownloadString 
+        - ''
+        # Vulnerbility scanner and brute force tools
+        - '*(hydra)*'
+        - '* arachni/*'
+        - '* BFAC *'
+        - '* brutus *'
+        - '* cgichk *'
+        - '*core-project/1.0*'
+        - '* crimscanner/*'
+        - '*datacha0s*'
+        - '*dirbuster*'
+        - '*domino hunter*'
+        - '*dotdotpwn*'
+        - 'FHScan Core'
+        - '*floodgate*'
+        - '*get-minimal*'
+        - '*gootkit auto-rooter scanner*'
+        - '*grendel-scan*'
+        - '* inspath *'
+        - '*internet ninja*'
+        - '*jaascois*'
+        - '* zmeu *'
+        - '*masscan*'
+        - '* metis *'
+        - '*morfeus fucking scanner*'
+        - '*n-stealth*'
+        - '*nsauditor*'
+        - '*pmafind*'
+        - '*security scan*'
+        - '*springenwerk*'
+        - '*teh forest lobster*'
+        - '*toata dragostea*'
+        - '* vega/*'
+        - '*voideye*'
+        - '*webshag*'
+        - '*webvulnscan*'
+        - '* whcc/*'
+        # SQL Injection
+        - '* Havij'
+        - '*absinthe*'
+        - '*bsqlbf*'
+        - '*mysqloit*'
+        - '*pangolin*'
+        - '*sql power injector*'
+        - '*sqlmap*'
+        - '*sqlninja*'
+        - '*uil2pn*'
+        # Exploits
+        - '*wordpress hash grabber*'
+        - '*exploit*'
+        # Badly scripted UA, User-Agent: User-Agent:
+        - 'user-agent'
     condition: selection
 falsepositives:
-    - Administrative scripts that download files from the Internet
-    - Administrative scripts that retrieve certain website contents
+    - Unknown
 level: medium
