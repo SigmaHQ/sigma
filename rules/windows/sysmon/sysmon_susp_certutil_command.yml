@@ -1,6 +1,6 @@
-title: Certutil Decode in AppData
+title: Suspicious Certutil Command
 status: experimental
-description: Detetcs a Microsoft certutil execution with the 'decode' sub command, which is sometimes used to decode malicious code with the built-in certutil utility
+description: Detetcs a suspicious Microsoft certutil execution with sub commands like 'decode' sub command, which is sometimes used to decode malicious code with the built-in certutil utility
 author: Florian Roth
 reference: https://twitter.com/JohnLaTwC/status/835149808817991680
 logsource:
@@ -12,6 +12,7 @@ detection:
         Image: 
             - '*\certutil.exe * -decode *'
             - '*\certutil.exe * -decodehex *'
+            - '*\certutil.exe -urlcache -split -f'  # https://twitter.com/subTee/status/888102593838362624
     condition: selection
 falsepositives:
     - unknown
