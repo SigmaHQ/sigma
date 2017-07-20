@@ -2,7 +2,9 @@ title: Suspicious Certutil Command
 status: experimental
 description: Detetcs a suspicious Microsoft certutil execution with sub commands like 'decode' sub command, which is sometimes used to decode malicious code with the built-in certutil utility
 author: Florian Roth
-reference: https://twitter.com/JohnLaTwC/status/835149808817991680
+reference: 
+    - https://twitter.com/JohnLaTwC/status/835149808817991680
+    - https://twitter.com/subTee/status/888102593838362624
 logsource:
     product: windows
     service: sysmon
@@ -12,7 +14,9 @@ detection:
         Image: 
             - '*\certutil.exe * -decode *'
             - '*\certutil.exe * -decodehex *'
-            - '*\certutil.exe -urlcache -split -f'  # https://twitter.com/subTee/status/888102593838362624
+            - '*\certutil.exe -urlcache -split -f'
+            - '*\certutil.exe *-f http*'
+            - '*\certutil.exe *-f ftp*'
     condition: selection
 falsepositives:
     - unknown
