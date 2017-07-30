@@ -72,7 +72,7 @@ try:
     backend = backends.getBackend(cmdargs.target)(sigmaconfig)
 except LookupError as e:
     print("Backend not found!", file=sys.stderr)
-    sys.exit(1)
+    sys.exit(2)
 
 for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
     print_verbose("* Processing Sigma input %s" % (sigmafile))
@@ -90,11 +90,14 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
         print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
     except yaml.parser.ParserError as e:
         print("Sigma file %s is no valid YAML: %s" % (sigmafile, str(e)), file=sys.stderr)
+        sys.exit(3)
     except SigmaParseError as e:
         print("Sigma parse error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
+        sys.exit(4)
     except NotImplementedError as e:
         print("An unsupported feature is required for this Sigma rule: " + str(e), file=sys.stderr)
         print("Feel free to contribute for fun and fame, this is open source :) -> https://github.com/Neo23x0/sigma", file=sys.stderr)
+        sys.exit(42)
     finally:
         f.close()
         try:
