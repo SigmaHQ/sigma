@@ -1,0 +1,24 @@
+title: Detects Suspicious certutil activity
+description: Detects suspicious process related to certutil based on arguments
+status: experimental
+reference: 
+    - https://twitter.com/subTee/status/888071631528235010
+    - https://twitter.com/subTee/status/888101536475344896
+    - https://blogs.technet.microsoft.com/pki/2006/11/30/basic-crl-checking-with-certutil/
+    - https://www.trustedsec.com/2017/07/new-tool-release-nps_payload/
+author: juju4
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection:
+        EventID: 4688
+        CommandLine: 
+            - 'certutil* -URL*'
+            # NotPowershell (nps) attack
+            - '*\certutil.exe *-ping*'
+    condition: selection
+falsepositives: 
+    - False positives depend on scripts and administrative tools used in the monitored environment
+level: medium
