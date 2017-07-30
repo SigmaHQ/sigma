@@ -1,0 +1,34 @@
+title: Detects Suspicious Rundll32 activity
+description: Detects suspicious process related to rundll32 based on arguments
+status: experimental
+reference: 
+    - http://www.hexacorn.com/blog/2017/05/01/running-programs-via-proxy-jumping-on-a-edr-bypass-trampoline/
+    - https://twitter.com/Hexacorn/status/885258886428725250
+    - https://gist.github.com/ryhanson/227229866af52e2d963cf941af135a52
+author: juju4
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection:
+        EventID: 4688
+        CommandLine: 
+            # match with or without rundll32.exe to try to catch evasion
+            - 'rundll32* url.dll,*OpenURL '
+            - 'rundll32* url.dll,*OpenURLA '
+            - 'rundll32* url.dll,*FileProtocolHandler '
+            - 'rundll32* zipfldr.dll,*RouteTheCall '
+            - 'rundll32* Shell32.dll,*Control_RunDLL '
+            - 'rundll32.exe javascript:'
+            - ' url.dll,*OpenURL '
+            - ' url.dll,*OpenURLA '
+            - ' url.dll,*FileProtocolHandler '
+            - ' zipfldr.dll,*RouteTheCall '
+            - ' Shell32.dll,*Control_RunDLL '
+            - ' javascript:'
+            - '.RegisterXLL'
+    condition: selection
+falsepositives: 
+    - False positives depend on scripts and administrative tools used in the monitored environment
+level: medium
