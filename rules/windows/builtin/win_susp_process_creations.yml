@@ -4,6 +4,13 @@ status: experimental
 reference: 
     - https://www.swordshield.com/2015/07/getting-hashes-from-ntds-dit-file/
     - https://www.youtube.com/watch?v=H3t_kHQG1Js&feature=youtu.be&t=15m35s
+    - https://winscripting.blog/2017/05/12/first-entry-welcome-and-uac-bypass/
+    - https://twitter.com/subTee/status/872244674609676288
+    - https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/remote-tool-examples
+    - https://tyranidslair.blogspot.ca/2017/07/dg-on-windows-10-s-executing-arbitrary.html
+    - https://www.trustedsec.com/2017/07/new-tool-release-nps_payload/
+    - https://subt0x10.blogspot.ca/2017/04/bypassing-application-whitelisting.html
+    - https://gist.github.com/subTee/7937a8ef07409715f15b84781e180c46#file-rat-bat
 author: Florian Roth
 logsource:
     product: windows
@@ -45,6 +52,19 @@ detection:
             - '*\cscript.exe *.js'
             - '*\cscript.exe *.vba'
             - '*\cscript.exe *.vbe'
+            # UAC bypass
+            - '*\fodhelper.exe'
+            # persistence
+            - '*waitfor*/s*'
+            - '*waitfor*/si persist*'
+            # remote
+            - '*remote*/s*'
+            - '*remote*/c*'
+            - '*remote*/q*'
+            # AddInProcess
+            - '*AddInProcess*'
+            # NotPowershell (nps) attack
+            - '*msbuild*'
     condition: selection
 falsepositives: 
     - False positives depend on scripts and administrative tools used in the monitored environment
