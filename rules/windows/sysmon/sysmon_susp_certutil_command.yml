@@ -1,24 +1,31 @@
 title: Suspicious Certutil Command
 status: experimental
 description: Detetcs a suspicious Microsoft certutil execution with sub commands like 'decode' sub command, which is sometimes used to decode malicious code with the built-in certutil utility
-author: Florian Roth
+author:
+    - Florian Roth
+    - juju4
 reference: 
     - https://twitter.com/JohnLaTwC/status/835149808817991680
     - https://twitter.com/subTee/status/888102593838362624
+    - https://twitter.com/subTee/status/888071631528235010
+    - https://blogs.technet.microsoft.com/pki/2006/11/30/basic-crl-checking-with-certutil/
+    - https://www.trustedsec.com/2017/07/new-tool-release-nps_payload/
 logsource:
     product: windows
     service: sysmon
 detection:
     selection:
         EventID: 1
-        Image: 
+        CommandLine: 
             - '*\certutil.exe * -decode *'
             - '*\certutil.exe * -decodehex *'
             - '*\certutil.exe *-urlcache* http*'
             - '*\certutil.exe *-urlcache* ftp*'
+            - '*\certutil.exe *-URL*'
+            - '*\certutil.exe *-ping*'
     condition: selection
 falsepositives:
-    - unknown
+    - False positives depend on scripts and administrative tools used in the monitored environment
 level: high
 
 
