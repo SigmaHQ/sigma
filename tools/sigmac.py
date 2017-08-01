@@ -37,8 +37,10 @@ argparser.add_argument("--target", "-t", default="es-qs", choices=backends.getBa
 argparser.add_argument("--target-list", "-l", action="store_true", help="List available output target formats")
 argparser.add_argument("--config", "-c", help="Configuration with field name and index mapping for target environment (not yet implemented)")
 argparser.add_argument("--output", "-o", help="Output file or filename prefix if multiple files are generated (not yet implemented)")
+argparser.add_argument("--defer-abort", "-d", action="store_true", help="Don't abort on parse or conversion errors, proceed with next rule. The exit code from the last error is returned")
+argparser.add_argument("--ignore-not-implemented", "-I", action="store_true", help="Only return error codes for parse errors and ignore errors for rules with not implemented features")
 argparser.add_argument("--verbose", "-v", action="store_true", help="Be verbose")
-argparser.add_argument("--debug", "-d", action="store_true", help="Debugging output")
+argparser.add_argument("--debug", "-D", action="store_true", help="Debugging output")
 argparser.add_argument("inputs", nargs="*", help="Sigma input files")
 cmdargs = argparser.parse_args()
 
@@ -74,6 +76,7 @@ except LookupError as e:
     print("Backend not found!", file=sys.stderr)
     sys.exit(2)
 
+error = 0
 for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
     print_verbose("* Processing Sigma input %s" % (sigmafile))
     try:
@@ -90,14 +93,21 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
         print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
     except yaml.parser.ParserError as e:
         print("Sigma file %s is no valid YAML: %s" % (sigmafile, str(e)), file=sys.stderr)
-        sys.exit(3)
+        error = 3
+        if not cmdargs.defer_abort:
+            sys.exit(error)
     except SigmaParseError as e:
         print("Sigma parse error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
-        sys.exit(4)
+        error = 4
+        if not cmdargs.defer_abort:
+            sys.exit(error)
     except NotImplementedError as e:
         print("An unsupported feature is required for this Sigma rule: " + str(e), file=sys.stderr)
         print("Feel free to contribute for fun and fame, this is open source :) -> https://github.com/Neo23x0/sigma", file=sys.stderr)
-        sys.exit(42)
+        if not cmdargs.ignore_not_implemented:
+            error = 42
+            if not cmdargs.defer_abort:
+                sys.exit(error)
     finally:
         f.close()
         try:
@@ -106,3 +116,5 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
         except AttributeError:
             print_debug("Sigma rule didn't reached condition tokenization")
         print_debug()
+
+sys.exit(error)
