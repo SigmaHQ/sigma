@@ -113,22 +113,24 @@ class SigmaParser:
 
 class SigmaConditionToken:
     """Token of a Sigma condition expression"""
-    TOKEN_AND  = 1
-    TOKEN_OR   = 2
-    TOKEN_NOT  = 3
-    TOKEN_ID   = 4
-    TOKEN_LPAR = 5
-    TOKEN_RPAR = 6
-    TOKEN_PIPE = 7
-    TOKEN_ONE  = 8
-    TOKEN_ALL  = 9
-    TOKEN_AGG  = 10
-    TOKEN_EQ   = 11
-    TOKEN_LT   = 12
-    TOKEN_LTE  = 13
-    TOKEN_GT   = 14
-    TOKEN_GTE  = 15
-    TOKEN_BY   = 16
+    TOKEN_AND    = 1
+    TOKEN_OR     = 2
+    TOKEN_NOT    = 3
+    TOKEN_ID     = 4
+    TOKEN_LPAR   = 5
+    TOKEN_RPAR   = 6
+    TOKEN_PIPE   = 7
+    TOKEN_ONE    = 8
+    TOKEN_ALL    = 9
+    TOKEN_AGG    = 10
+    TOKEN_EQ     = 11
+    TOKEN_LT     = 12
+    TOKEN_LTE    = 13
+    TOKEN_GT     = 14
+    TOKEN_GTE    = 15
+    TOKEN_BY     = 16
+    TOKEN_NEAR   = 17
+    TOKEN_WITHIN = 18
 
     tokenstr = [
             "INVALID",
@@ -148,6 +150,8 @@ class SigmaConditionToken:
             "GT",
             "GTE",
             "BY",
+            "NEAR",
+            "WITHIN",
             ]
 
     def __init__(self, tokendef, match, pos):
@@ -169,23 +173,25 @@ class SigmaConditionToken:
 class SigmaConditionTokenizer:
     """Tokenize condition string into token sequence"""
     tokendefs = [      # list of tokens, preferred recognition in given order, (token identifier, matching regular expression). Ignored if token id == None
-            (SigmaConditionToken.TOKEN_ONE,  re.compile("1 of", re.IGNORECASE)),
-            (SigmaConditionToken.TOKEN_ALL,  re.compile("all of", re.IGNORECASE)),
+            (SigmaConditionToken.TOKEN_ONE,    re.compile("1 of", re.IGNORECASE)),
+            (SigmaConditionToken.TOKEN_ALL,    re.compile("all of", re.IGNORECASE)),
             (None,       re.compile("[\\s\\r\\n]+")),
-            (SigmaConditionToken.TOKEN_AGG,  re.compile("count|min|max|avg|sum", re.IGNORECASE)),
-            (SigmaConditionToken.TOKEN_BY,   re.compile("by", re.IGNORECASE)),
-            (SigmaConditionToken.TOKEN_EQ,   re.compile("==")),
-            (SigmaConditionToken.TOKEN_LT,   re.compile("<")),
-            (SigmaConditionToken.TOKEN_LTE,  re.compile("<=")),
-            (SigmaConditionToken.TOKEN_GT,   re.compile(">")),
-            (SigmaConditionToken.TOKEN_GTE,  re.compile(">=")),
-            (SigmaConditionToken.TOKEN_PIPE, re.compile("\\|")),
-            (SigmaConditionToken.TOKEN_AND,  re.compile("and", re.IGNORECASE)),
-            (SigmaConditionToken.TOKEN_OR,   re.compile("or", re.IGNORECASE)),
-            (SigmaConditionToken.TOKEN_NOT,  re.compile("not", re.IGNORECASE)),
-            (SigmaConditionToken.TOKEN_ID,   re.compile("\\w+")),
-            (SigmaConditionToken.TOKEN_LPAR, re.compile("\\(")),
-            (SigmaConditionToken.TOKEN_RPAR, re.compile("\\)")),
+            (SigmaConditionToken.TOKEN_AGG,    re.compile("count|min|max|avg|sum", re.IGNORECASE)),
+            (SigmaConditionToken.TOKEN_NEAR,   re.compile("near", re.IGNORECASE)),
+            (SigmaConditionToken.TOKEN_WITHIN, re.compile("within", re.IGNORECASE)),
+            (SigmaConditionToken.TOKEN_BY,     re.compile("by", re.IGNORECASE)),
+            (SigmaConditionToken.TOKEN_EQ,     re.compile("==")),
+            (SigmaConditionToken.TOKEN_LT,     re.compile("<")),
+            (SigmaConditionToken.TOKEN_LTE,    re.compile("<=")),
+            (SigmaConditionToken.TOKEN_GT,     re.compile(">")),
+            (SigmaConditionToken.TOKEN_GTE,    re.compile(">=")),
+            (SigmaConditionToken.TOKEN_PIPE,   re.compile("\\|")),
+            (SigmaConditionToken.TOKEN_AND,    re.compile("and", re.IGNORECASE)),
+            (SigmaConditionToken.TOKEN_OR,     re.compile("or", re.IGNORECASE)),
+            (SigmaConditionToken.TOKEN_NOT,    re.compile("not", re.IGNORECASE)),
+            (SigmaConditionToken.TOKEN_ID,     re.compile("\\w+")),
+            (SigmaConditionToken.TOKEN_LPAR,   re.compile("\\(")),
+            (SigmaConditionToken.TOKEN_RPAR,   re.compile("\\)")),
             ]
 
     def __init__(self, condition):
@@ -466,19 +472,20 @@ class SimpleParser:
 
     def __str__(self):
         return "[ Parsed: %s ]" % (" ".join(["%s=%s" % (key, val) for key, val in self.__dict__.items() ]))
-
+ 
 class SigmaAggregationParser(SimpleParser):
     """Parse Sigma aggregation expression and provide parsed data"""
     parsingrules = [
             {   # State 0
-                SigmaConditionToken.TOKEN_AGG: ("aggfunc", "trans_aggfunc", 1)
+                SigmaConditionToken.TOKEN_AGG:  ("aggfunc", "trans_aggfunc", 1),
+                SigmaConditionToken.TOKEN_NEAR: (None, None, 8),
             },
             {   # State 1
                 SigmaConditionToken.TOKEN_LPAR: (None, None, 2)
             },
             {   # State 2
                 SigmaConditionToken.TOKEN_RPAR: (None, None, 4),
-                SigmaConditionToken.TOKEN_ID: ("aggfield", "trans_fieldname", 3)
+                SigmaConditionToken.TOKEN_ID: ("aggfield", "trans_fieldname", 3),
             },
             {   # State 3
                 SigmaConditionToken.TOKEN_RPAR: (None, None, 4)
@@ -503,6 +510,20 @@ class SigmaAggregationParser(SimpleParser):
             },
             {   # State 7
                 SigmaConditionToken.TOKEN_ID: ("condition", None, -1)
+            },
+            {   # State 8
+                SigmaConditionToken.TOKEN_ID: (None, None, 9)
+            },
+            {   # State 9
+                SigmaConditionToken.TOKEN_AND: (None, None, 10),
+                SigmaConditionToken.TOKEN_WITHIN: (None, None, 11),
+            },
+            {   # State 10
+                SigmaConditionToken.TOKEN_NOT: (None, None, 8),
+                SigmaConditionToken.TOKEN_ID: (None, None, 9),
+            },
+            {   # State 11
+                SigmaConditionToken.TOKEN_ID: (None, None, -1),
             },
             ]
     finalstates = { -1 }
