@@ -346,7 +346,7 @@ class SigmaConditionParser:
         if SigmaConditionToken.TOKEN_PIPE in tokens:    # Condition contains atr least one aggregation expression
             pipepos = tokens.index(SigmaConditionToken.TOKEN_PIPE)
             self.parsedSearch = self.parseSearch(tokens[:pipepos])
-            self.parsedAgg = SigmaAggregationParser(tokens[pipepos + 1:], self.config)
+            self.parsedAgg = SigmaAggregationParser(tokens[pipepos + 1:], self.sigmaParser, self.config)
         else:
             self.parsedSearch = self.parseSearch(tokens)
             self.parsedAgg = None
@@ -478,7 +478,7 @@ class SigmaAggregationParser(SimpleParser):
     parsingrules = [
             {   # State 0
                 SigmaConditionToken.TOKEN_AGG:  ("aggfunc", "trans_aggfunc", 1),
-                SigmaConditionToken.TOKEN_NEAR: (None, None, 8),
+                SigmaConditionToken.TOKEN_NEAR: ("aggfunc", "init_near_parsing", 8),
             },
             {   # State 1
                 SigmaConditionToken.TOKEN_LPAR: (None, None, 2)
@@ -512,37 +512,40 @@ class SigmaAggregationParser(SimpleParser):
                 SigmaConditionToken.TOKEN_ID: ("condition", None, -1)
             },
             {   # State 8
-                SigmaConditionToken.TOKEN_ID: (None, None, 9)
+                SigmaConditionToken.TOKEN_ID: (None, "store_search_id", 9)
             },
             {   # State 9
-                SigmaConditionToken.TOKEN_AND: (None, None, 10),
+                SigmaConditionToken.TOKEN_AND: (None, "set_include", 10),
                 SigmaConditionToken.TOKEN_WITHIN: (None, None, 11),
             },
             {   # State 10
-                SigmaConditionToken.TOKEN_NOT: (None, None, 8),
-                SigmaConditionToken.TOKEN_ID: (None, None, 9),
+                SigmaConditionToken.TOKEN_NOT: (None, "set_exclude", 8),
+                SigmaConditionToken.TOKEN_ID: (None, "store_search_id", 9),
             },
             {   # State 11
-                SigmaConditionToken.TOKEN_ID: (None, None, -1),
+                SigmaConditionToken.TOKEN_ID: ("timeframe", "trans_timeframe", -1),
             },
             ]
     finalstates = { -1 }
 
     # Aggregation functions
     AGGFUNC_COUNT = 1
-    AGGFUNC_MIN = 2
-    AGGFUNC_MAX = 3
-    AGGFUNC_AVG = 4
-    AGGFUNC_SUM = 5
+    AGGFUNC_MIN   = 2
+    AGGFUNC_MAX   = 3
+    AGGFUNC_AVG   = 4
+    AGGFUNC_SUM   = 5
+    AGGFUNC_NEAR  = 6
     aggfuncmap = {
             "count": AGGFUNC_COUNT,
-            "min": AGGFUNC_MIN,
-            "max": AGGFUNC_MAX,
-            "avg": AGGFUNC_AVG,
-            "sum": AGGFUNC_SUM,
+            "min":   AGGFUNC_MIN,
+            "max":   AGGFUNC_MAX,
+            "avg":   AGGFUNC_AVG,
+            "sum":   AGGFUNC_SUM,
+            "near":  AGGFUNC_NEAR,
             }
 
-    def __init__(self, tokens, config):
+    def __init__(self, tokens, parser, config):
+        self.parser = parser
         self.config = config
         self.aggfield = ""
         self.groupfield = None
@@ -562,6 +565,26 @@ class SigmaAggregationParser(SimpleParser):
             return mapped
         else:
             raise NotImplementedError("Field mappings in aggregations must be single valued")
+
+    def init_near_parsing(self, name):
+        """Initialize data structures for 'near" aggregation operator parsing"""
+        self.include = list()
+        self.exclude = list()
+        self.current = self.include
+        return self.trans_aggfunc(name)
+
+    def store_search_id(self, name):
+        self.current.append(name)
+        return name
+
+    def set_include(self, name):
+        self.current = self.include
+
+    def set_exclude(self, name):
+        self.current = self.exclude
+
+    def trans_timeframe(self, name):
+        return self.parser.parsedyaml["detection"][name]
 
 # Field Mapping Definitions
 def FieldMapping(source, target=None):
