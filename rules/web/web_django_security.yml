@@ -1,0 +1,29 @@
+title: Django framework security errors
+description: Detects suspicious Django web application framework that could indicate exploitation attempts
+reference:
+    - https://docs.djangoproject.com/en/1.11/ref/exceptions/
+    - https://docs.djangoproject.com/en/1.11/topics/logging/#django-security
+logsource:
+    product: django
+detection:
+    keywords:
+        - SuspiciousOperation
+        # Subclasses of SuspiciousOperation
+        - DisallowedHost
+        - DisallowedModelAdminLookup
+        - DisallowedModelAdminToField
+        - DisallowedRedirect
+        - InvalidSessionKey
+        - RequestDataTooBig
+        - SuspiciousFileOperation
+        - SuspiciousMultipartForm
+        - SuspiciousSession
+        - TooManyFieldsSent
+        # Further security-related exceptions
+        - PermissionDenied
+    condition: keywords
+falsepositives:
+    - Application bugs
+    - Penetration testing
+level: medium
+
