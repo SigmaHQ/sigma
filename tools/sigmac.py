@@ -91,6 +91,7 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
             print(backend.generate(condparsed), file=out)
     except OSError as e:
         print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
+        error = 5
     except yaml.parser.ParserError as e:
         print("Sigma file %s is no valid YAML: %s" % (sigmafile, str(e)), file=sys.stderr)
         error = 3
@@ -109,11 +110,14 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
             if not cmdargs.defer_abort:
                 sys.exit(error)
     finally:
-        f.close()
+        try:
+            f.close()
+        except:
+            pass
         try:
             for condtoken in parser.condtoken:
                 print_debug("Condition Tokens:", condtoken)
-        except AttributeError:
+        except:
             print_debug("Sigma rule didn't reached condition tokenization")
         print_debug()
 
