@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Neo23x0/sigma.svg?branch=master)](https://travis-ci.org/juju4/sigma)
+[![Build Status](https://travis-ci.org/Neo23x0/sigma.svg?branch=master)](https://travis-ci.org/Neo23x0/sigma)
 
 ![sigma_logo](./images/Sigma_0.3.png)
 
