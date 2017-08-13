@@ -1,0 +1,29 @@
+title: Detects Possible Applocker Bypass
+description: Detects execution of executables that can be used to bypass Applocker whitelisting
+status: experimental
+reference:
+    - https://github.com/subTee/ApplicationWhitelistBypassTechniques/blob/master/TheList.txt
+    - https://room362.com/post/2014/2014-01-16-application-whitelist-bypass-using-ieexec-dot-exe/
+author: juju4
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection:
+        EventID: 4688
+        CommandLine: 
+            - '*\msdt.exe*'
+            - '*\installutil.exe*'
+            - '*\regsvcs.exe*'
+            - '*\regasm.exe*'
+            - '*\regsvr32.exe*'
+            - '*\msbuild.exe*'
+            - '*\ieexec.exe*'
+            - '*\mshta.exe*'
+            # higher risk of false positives
+#            - '*\cscript.EXE*'
+    condition: selection
+falsepositives: 
+    - False positives depend on scripts and administrative tools used in the monitored environment
+level: medium
