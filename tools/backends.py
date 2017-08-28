@@ -1,5 +1,6 @@
 # Output backends for sigmac
 
+import sys
 import json
 import re
 import sigma
@@ -17,25 +18,50 @@ def getBackend(name):
     except KeyError as e:
         raise LookupError("Backend not found") from e
 
-### Generic base classes
+### Output classes
+class OutputSingle:
+    """
+    Single file output
 
+    By default, this opens the given file or stdin and passes everything into this.
+    """
+    def __init__(self, filename=None):
+        if type(filename) == str:
+            self.fd = open(filename, "w")
+        else:
+            self.fd = sys.stdout
+
+    def print(self, *args, **kwargs):
+        print(*args, file=self.fd, **kwargs)
+
+    def close(self):
+        self.fd.close()
+
+### Generic backend base classes
 class BaseBackend:
     """Base class for all backends"""
     identifier = "base"
     active = False
-    index_field = None      # field name that is used to address indices
+    index_field = None    # field name that is used to address indices
+    output_class = None   # one of the above output classes
+    file_list = None
 
-    def __init__(self, sigmaconfig):
+    def __init__(self, sigmaconfig, filename=None):
+        """
+        Initialize backend. This gets a sigmaconfig object, which is notified about the used backend class by
+        passing the object instance to it. Further, output files are initialized by the output class defined in output_class.
+        """
         if not isinstance(sigmaconfig, (sigma.SigmaConfiguration, None)):
             raise TypeError("SigmaConfiguration object expected")
         self.sigmaconfig = sigmaconfig
         self.sigmaconfig.set_backend(self)
+        self.output = self.output_class(filename)
 
     def generate(self, parsed):
         result = self.generateNode(parsed.parsedSearch)
         if parsed.parsedAgg:
             result += self.generateAggregation(parsed.parsedAgg)
-        return result
+        self.output.print(result)
 
     def generateNode(self, node):
         if type(node) == sigma.ConditionAND:
@@ -83,6 +109,7 @@ class SingleTextQueryBackend(BaseBackend):
     """Base class for backends that generate one text-based expression from a Sigma rule"""
     identifier = "base-textquery"
     active = False
+    output_class = OutputSingle
 
     # the following class variables define the generation and behavior of queries from a parse tree some are prefilled with default values that are quite usual
     reEscape = None                     # match characters that must be quoted
@@ -233,9 +260,10 @@ class FieldnameListBackend(BaseBackend):
     """List all fieldnames from given Sigma rules for creation of a field mapping configuration."""
     identifier = "fieldlist"
     active = True
+    output_class = OutputSingle
 
     def generate(self, parsed):
-        return "\n".join(sorted(set(list(flatten(self.generateNode(parsed.parsedSearch))))))
+        self.output.print("\n".join(sorted(set(list(flatten(self.generateNode(parsed.parsedSearch)))))))
 
     def generateANDNode(self, node):
         return [self.generateNode(val) for val in node]
