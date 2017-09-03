@@ -79,12 +79,11 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
         f = sigmafile.open()
         parser = SigmaParser(f, sigmaconfig)
         print_debug("Parsed YAML:\n", json.dumps(parser.parsedyaml, indent=2))
-        parser.parse_sigma()
         for condtoken in parser.condtoken:
             print_debug("Condition Tokens:", condtoken)
         for condparsed in parser.condparsed:
             print_debug("Condition Parse Tree:", condparsed)
-            backend.generate(condparsed)
+        backend.generate(parser)
     except OSError as e:
         print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
         error = 5
@@ -116,5 +115,6 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
         except:
             print_debug("Sigma rule didn't reached condition tokenization")
         print_debug()
+backend.finalize()
 
 sys.exit(error)

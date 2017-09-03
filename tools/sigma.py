@@ -12,8 +12,9 @@ class SigmaParser:
     def __init__(self, sigma, config):
         self.definitions = dict()
         self.values = dict()
-        self.parsedyaml = yaml.safe_load(sigma)
         self.config = config
+        self.parsedyaml = yaml.safe_load(sigma)
+        self.parse_sigma()
 
     def parse_sigma(self):
         try:    # definition uniqueness check

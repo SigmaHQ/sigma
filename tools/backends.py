@@ -19,7 +19,7 @@ def getBackend(name):
         raise LookupError("Backend not found") from e
 
 ### Output classes
-class OutputSingle:
+class SingleOutput:
     """
     Single file output
 
@@ -36,6 +36,61 @@ class OutputSingle:
 
     def close(self):
         self.fd.close()
+
+class MultiOutput:
+    """
+    Multiple file output
+
+    Prepares multiple SingleOutput instances with basename + suffix as file names, on for each suffix.
+    The switch() method is used to switch between these outputs.
+
+    This class must be inherited and suffixes must be a dict as follows: file id -> suffix
+    """
+    suffixes = None
+
+    def __init__(self, basename):
+        """Initializes all outputs with basename and corresponding suffix as SingleOutput object."""
+        if suffixes == None:
+            raise NotImplementedError("OutputMulti must be derived, at least suffixes must be set")
+        if type(basename) != str:
+            raise TypeError("OutputMulti constructor basename parameter must be string")
+
+        self.outputs = dict()
+        self.output = None
+        for name, suffix in self.suffixes:
+            self.outputs[name] = SingleOutput(basename + suffix)
+
+    def select(self, name):
+        """Select an output as current output"""
+        self.output = self.outputs[name]
+
+    def print(self, *args, **kwargs):
+        self.output.print(*args, **kwargs)
+
+    def close(self):
+        for out in self.outputs:
+            out.close()
+
+class StringOutput(SingleOutput):
+    """Collect input silently and return resulting string."""
+    def __init__(self, filename=None):
+        self.out = ""
+
+    def print(self, *args, **kwargs):
+        try:
+            del kwargs['file']
+        except KeyError:
+            pass
+        print(*args, file=self, **kwargs)
+
+    def write(self, s):
+        self.out += s
+
+    def result(self):
+        return self.out
+
+    def close(self):
+        pass
 
 ### Generic backend base classes
 class BaseBackend:
@@ -57,11 +112,13 @@ class BaseBackend:
         self.sigmaconfig.set_backend(self)
         self.output = self.output_class(filename)
 
-    def generate(self, parsed):
-        result = self.generateNode(parsed.parsedSearch)
-        if parsed.parsedAgg:
-            result += self.generateAggregation(parsed.parsedAgg)
-        self.output.print(result)
+    def generate(self, sigmaparser):
+        """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
+        for parsed in sigmaparser.condparsed:
+            result = self.generateNode(parsed.parsedSearch)
+            if parsed.parsedAgg:
+                result += self.generateAggregation(parsed.parsedAgg)
+            self.output.print(result)
 
     def generateNode(self, node):
         if type(node) == sigma.ConditionAND:
@@ -105,11 +162,18 @@ class BaseBackend:
     def generateAggregation(self, agg):
         raise NotImplementedError("Aggregations not implemented for this backend")
 
+    def finalize(self):
+        """
+        Is called after the last file was processed with generate(). The right place if this backend is not intended to
+        look isolated at each rule, but generates an output which incorporates multiple rules, e.g. dashboards.
+        """
+        pass
+
 class SingleTextQueryBackend(BaseBackend):
     """Base class for backends that generate one text-based expression from a Sigma rule"""
     identifier = "base-textquery"
     active = False
-    output_class = OutputSingle
+    output_class = SingleOutput
 
     # the following class variables define the generation and behavior of queries from a parse tree some are prefilled with default values that are quite usual
     reEscape = None                     # match characters that must be quoted
@@ -260,10 +324,11 @@ class FieldnameListBackend(BaseBackend):
     """List all fieldnames from given Sigma rules for creation of a field mapping configuration."""
     identifier = "fieldlist"
     active = True
-    output_class = OutputSingle
+    output_class = SingleOutput
 
-    def generate(self, parsed):
-        self.output.print("\n".join(sorted(set(list(flatten(self.generateNode(parsed.parsedSearch)))))))
+    def generate(self, sigmaparser):
+        for parsed in sigmaparser.condparsed:
+            self.output.print("\n".join(sorted(set(list(flatten(self.generateNode(parsed.parsedSearch)))))))
 
     def generateANDNode(self, node):
         return [self.generateNode(val) for val in node]
