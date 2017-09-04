@@ -248,15 +248,67 @@ class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     mapExpression = "%s:%s"
     mapListsSpecialHandling = False
 
-class ElasticsearchDSLBackend(BaseBackend):
-    """Converts Sigma rule into Elasticsearch DSL query (JSON)."""
-    identifier = "es-dsl"
-    active = False
-
-class KibanaBackend(ElasticsearchDSLBackend):
-    """Converts Sigma rule into Kibana JSON Configurations."""
+class KibanaBackend(ElasticsearchQuerystringBackend):
+    """Converts Sigma rule into Kibana JSON Configuration files (Searches, Visualizations, Dashboards)."""
     identifier = "kibana"
-    active = False
+    active = True
+    output_class = SingleOutput
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.kibanaconf = list()
+        self.searches = set()
+
+    def generate(self, sigmaparser):
+        rulename = sigmaparser.parsedyaml["title"].replace(" ", "-")
+        for parsed in sigmaparser.condparsed:
+            result = self.generateNode(parsed.parsedSearch)
+            if rulename in self.searches:   # add counter if name collides
+                cnt = 0
+                while "%s-%d" % (rulename, cnt) in self.searches:
+                    cnt += 1
+                rulename = "%s-%d" % (rulename, cnt)
+            self.searches.add(rulename)
+
+            try:
+                description = sigmaparser.parsedyaml["description"]
+            except KeyError:
+                description = ""
+            self.kibanaconf.append({
+                    "_id": rulename,
+                    "_type": "search",
+                    "_source": {
+                        "title": sigmaparser.parsedyaml["title"],
+                        "description": description,
+                        "hits": 0,
+                        "columns": [],   # TODO: add columns used in search
+                        "sort": ["@timestamp", "desc"],
+                        "version": 1,
+                        "kibanaSavedObjectMeta": {
+                            "searchSourceJSON": json.dumps({
+                                "index": "logstash-*",      # TODO: index from rule
+                                "filter":  [],
+                                "highlight": {
+                                    "pre_tags": ["@kibana-highlighted-field@"],
+                                    "post_tags": ["@/kibana-highlighted-field@"],
+                                    "fields": { "*":{} },
+                                    "require_field_match": False,
+                                    "fragment_size": 2147483647
+                                    },
+                                "query": {
+                                    "query_string": {
+                                        "query": result,
+                                        "analyze_wildcard": True
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                    }
+                })
+
+    def finalize(self):
+        self.output.print(json.dumps(self.kibanaconf))
 
 class LogPointBackend(SingleTextQueryBackend):
     """Converts Sigma rule into LogPoint query"""
