@@ -1,0 +1,21 @@
+title: Simultaneous Service Installs
+description: Detects multiple service installs that appear in a small time frame. could reveal automated attacks. ex: psexec and fgdump
+status: experimental
+author: juju4
+reference:
+  - https://www.first.org/resources/papers/conf2017/Windows-Credentials-Attacks-and-Mitigation-Techniques.pdf
+logsource:
+    product: windows
+    service: system
+detection:
+    selection:
+        EventID: 7045
+    timeframe: 1min
+    condition: selection | count(ServiceFileName) > 1
+falsepositives: 
+    - Software installation
+    - Software updates
+    - Orchestration tool usage
+    - Products using multiple cascading services
+    - Can prefer to whitelist Security and Infrastructure services
+level: low
