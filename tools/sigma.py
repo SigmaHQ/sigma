@@ -681,7 +681,6 @@ class ConditionalFieldMapping(SimpleFieldMapping):
                 rulefieldvalues = sigmaparser.values[condfield]
                 for condvalue in self.conditions[condfield]:
                     if condvalue in rulefieldvalues:
-                        print("found!")
                         targets.update(self.conditions[condfield][condvalue])
         if len(targets) == 0:       # no matching condition, try with default mapping
             if self.default != None:
@@ -870,7 +869,7 @@ class SigmaLogsourceConfiguration:
         """Match log source definition against given criteria, None = ignore"""
         searched = 0
         for searchval, selfval in zip((category, product, service), (self.category, self.product, self.service)):
-            if searchval == None and selfval != None:   #
+            if searchval == None and selfval != None:
                 return False
             if searchval != None:
                 searched += 1
