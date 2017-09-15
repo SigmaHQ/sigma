@@ -871,7 +871,7 @@ class SigmaLogsourceConfiguration:
         for searchval, selfval in zip((category, product, service), (self.category, self.product, self.service)):
             if searchval == None and selfval != None:
                 return False
-            if searchval != None:
+            if selfval != None:
                 searched += 1
                 if searchval != selfval:
                     return False
