@@ -308,7 +308,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend):
                 })
 
     def finalize(self):
-        self.output.print(self.kibanaconf)
+        self.output.print(json.dumps(self.kibanaconf))
 
 class XpackWatcher(ElasticsearchQuerystringBackend):
     """Converts Sigma Rule into X-pack Watcher Json for alerting"""
