@@ -274,9 +274,23 @@ class KibanaBackend(ElasticsearchQuerystringBackend):
                 description = sigmaparser.parsedyaml["description"]
             except KeyError:
                 description = ""
-            
+
+            columns = list()
+            try:
+                for field in sigmaparser.parsedyaml["fields"]:
+                    mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field)
+                    if type(mapped) == str:
+                        columns.append(mapped)
+                    elif type(mapped) == list:
+                        columns.extend(mapped)
+                    else:
+                        raise TypeError("Field mapping must return string or list")
+            except KeyError:    # no 'fields' attribute
+                pass
 
             indices = sigmaparser.get_logsource().index
+            if len(indices) == 0:
+                indices = ["logstash-*"]
             for index in indices:
                 if len(indices) > 1:     # add index names if rule must be replicated because of ambigiuous index patterns
                     rulename += "-" + indexname
@@ -290,7 +304,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend):
                             "title": title,
                             "description": description,
                             "hits": 0,
-                            "columns": [],   # TODO: add columns used in search
+                            "columns": columns,
                             "sort": ["@timestamp", "desc"],
                             "version": 1,
                             "kibanaSavedObjectMeta": {
