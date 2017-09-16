@@ -24,7 +24,16 @@ detection:
         Commandline: 
             - '*/i:http* scrobj.dll'
             - '*/i:ftp* scrobj.dll'
-    condition: selection1 or selection2 or selection3
+    # Regsvr32.exe spawned wscript.exe process - indicator of COM scriptlet
+    # https://www.hybrid-analysis.com/sample/f34da6d84a9663928606894fbc494cd9bf2f03c98cf0c775462802558d3a50ef?environmentId=100
+    selection4:
+        EventID: 1
+        Image: '*\wscript.exe'
+        ParentImage: '*\regsvr32.exe'
+    condition: selection1 or selection2 or selection3 or selection4
+fields:
+    - CommandLine
+    - ParentCommandLine
 falsepositives:
     - Unknown
 level: high
