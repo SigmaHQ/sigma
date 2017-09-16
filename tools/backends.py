@@ -269,7 +269,7 @@ class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     mapListsSpecialHandling = False
 
 class KibanaBackend(ElasticsearchQuerystringBackend):
-    """Converts Sigma rule into Kibana JSON Configuration files (Searches, Visualizations, Dashboards)."""
+    """Converts Sigma rule into Kibana JSON Configuration files (searches only)."""
     identifier = "kibana"
     active = True
     output_class = SingleOutput
