@@ -18,6 +18,25 @@ def getBackend(name):
     except KeyError as e:
         raise LookupError("Backend not found") from e
 
+class BackendOptions(dict):
+    """Object contains all options that should be passed to the backend from command line (or other user interfaces)"""
+
+    def __init__(self, options):
+        """
+        Receives the argparser result from the backend option paramater value list (nargs=*) and builds the dict from it. There are two option types:
+
+        * key=value: self{key} = value
+        * key: self{key} = True
+        """
+        if options == None:
+            return
+        for option in options:
+            parsed = option.split("=", 1)
+            try:
+                self[parsed[0]] = parsed[1]
+            except IndexError:
+                self[parsed[0]] = True
+
 ### Output classes
 class SingleOutput:
     """
@@ -101,13 +120,14 @@ class BaseBackend:
     output_class = None   # one of the above output classes
     file_list = None
 
-    def __init__(self, sigmaconfig, filename=None):
+    def __init__(self, sigmaconfig, backend_options=None, filename=None):
         """
         Initialize backend. This gets a sigmaconfig object, which is notified about the used backend class by
         passing the object instance to it. Further, output files are initialized by the output class defined in output_class.
         """
         if not isinstance(sigmaconfig, (sigma.SigmaConfiguration, None)):
             raise TypeError("SigmaConfiguration object expected")
+        self.options = backend_options
         self.sigmaconfig = sigmaconfig
         self.sigmaconfig.set_backend(self)
         self.output = self.output_class(filename)
@@ -297,6 +317,11 @@ class KibanaBackend(ElasticsearchQuerystringBackend):
                     title = "%s (%s)" % (sigmaparser.parsedyaml["title"], index)
                 else:
                     title = sigmaparser.parsedyaml["title"]
+                try:
+                    title = self.options["prefix"] + title
+                except KeyError:
+                    pass
+
                 self.kibanaconf.append({
                         "_id": rulename,
                         "_type": "search",

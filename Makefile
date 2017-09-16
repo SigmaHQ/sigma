@@ -7,6 +7,7 @@ test-yaml:
 test-sigmac:
 	tools/sigmac.py -l
 	tools/sigmac.py -rvdI -t es-qs rules/ 
+	tools/sigmac.py -rvdI -t kibana rules/ 
 	tools/sigmac.py -rvdI -t splunk rules/ 
 	tools/sigmac.py -rvdI -t logpoint rules/ 
 	tools/sigmac.py -rvdI -t fieldlist rules/ 
