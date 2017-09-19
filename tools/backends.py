@@ -358,6 +358,98 @@ class KibanaBackend(ElasticsearchQuerystringBackend):
     def finalize(self):
         self.output.print(json.dumps(self.kibanaconf, indent=2))
 
+class XpackWatcher(ElasticsearchQuerystringBackend):
+    """Converts Sigma Rule into X-pack Watcher Json for alerting"""
+    identifier = "xpack-watcher"
+    active = True
+    output_class = SingleOutput
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.watcher_alert = dict()
+        self.searches = set()
+
+    def generate(self, sigmaparser):
+        rulename = sigmaparser.parsedyaml["title"].replace(" ", "-")
+        for parsed in sigmaparser.condparsed:
+            result = self.generateNode(parsed.parsedSearch)
+            if rulename in self.searches:   # add counter if name collides
+                cnt = 0
+                while "%s-%d" % (rulename, cnt) in self.searches:
+                    cnt += 1
+                rulename = "%s-%d" % (rulename, cnt)
+            self.searches.add(rulename)
+        # get the details if this alert occurs
+        try:
+            description = sigmaparser.parsedyaml["description"]
+        except KeyError:
+            description = ""
+        try:
+            false_positives = sigmaparser.parsedyaml["falsepositives"]
+        except KeyError:
+            false_positives = ""
+        try:
+            level = sigmaparser.parsedyaml["level"]
+        except KeyError:
+            level = ""
+        logging_result = "Rule description: "+str(description)+", false positives: "+str(false_positives)+", level: "+level
+        # Get time frame if exists
+        try:
+            interval = sigmaparser.parsedyaml["detection"]["timeframe"]
+        except KeyError:
+            interval = "30m"
+        # creating condition
+        try:
+            condition = sigmaparser.parsedyaml["detection"]["condition"]
+            if condition.find('>') != -1:
+                alert_condition = {"gt": int(condition[condition.find('>')+2:])}
+            else:
+                alert_condition = {"not_eq": 0}
+        except KeyError:
+            alert_condition = {"not_eq": 0}
+
+        self.watcher_alert[rulename] = {
+                          "trigger": {
+                            "schedule": {
+                              "interval": interval  # how often the watcher should check
+                            }
+                          },
+                          "input": {
+                            "search": {
+                              "request": {
+                                "body": {
+                                  "size": 0,
+                                  "query": {
+                                    "query_string": {
+                                        "query": result,  # this is where the elasticsearch query syntax goes
+                                        "analyze_wildcard": True
+                                    }
+                                  }
+                                },
+                                "indices": [
+                                  "*"  # put the index here
+                                ]
+                              }
+                            }
+                          },
+                          "condition": {
+                            "compare": {
+                              "ctx.payload.hits.total": alert_condition
+                            }
+                          },
+                          "actions": {
+                            "logging-action": {
+                              "logging": {
+                                "text": logging_result
+                              }
+                            }
+                          }
+                        }
+
+    def finalize(self):
+        for key, value in self.watcher_alert.items():
+            self.output.print(key, ':', json.dumps(self.watcher_alert[key]))
+
 class LogPointBackend(SingleTextQueryBackend):
     """Converts Sigma rule into LogPoint query"""
     identifier = "logpoint"
