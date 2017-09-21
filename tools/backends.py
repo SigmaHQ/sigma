@@ -358,6 +358,127 @@ class KibanaBackend(ElasticsearchQuerystringBackend):
     def finalize(self):
         self.output.print(json.dumps(self.kibanaconf, indent=2))
 
+class XPackWatcherBackend(ElasticsearchQuerystringBackend):
+    """Converts Sigma Rule into X-Pack Watcher JSON for alerting"""
+    identifier = "xpack-watcher"
+    active = True
+    output_class = SingleOutput
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.watcher_alert = dict()
+        self.searches = set()
+        try:
+            self.output_type = self.options["output"]
+        except KeyError:
+            self.output_type = "curl"
+
+        try:
+            self.es = self.options["es"]
+        except KeyError:
+            self.es = "localhost:9200"
+
+    def generate(self, sigmaparser):
+        rulename = sigmaparser.parsedyaml["title"].replace(" ", "-")
+        for parsed in sigmaparser.condparsed:
+            result = self.generateNode(parsed.parsedSearch)
+            try:        # add prefix if available
+                rulename = self.options["prefix"] + rulename
+            except KeyError:
+                pass
+            if rulename in self.searches:   # add counter if name collides
+                cnt = 0
+                while "%s-%d" % (rulename, cnt) in self.searches:
+                    cnt += 1
+                rulename = "%s-%d" % (rulename, cnt)
+            self.searches.add(rulename)
+
+        # get the details if this alert occurs
+        try:
+            description = sigmaparser.parsedyaml["description"]
+        except KeyError:
+            description = ""
+        try:
+            false_positives = sigmaparser.parsedyaml["falsepositives"]
+        except KeyError:
+            false_positives = ""
+        try:
+            level = sigmaparser.parsedyaml["level"]
+        except KeyError:
+            level = ""
+        logging_result = "Rule description: "+str(description)+", false positives: "+str(false_positives)+", level: "+level
+        # Get time frame if exists
+        try:
+            interval = sigmaparser.parsedyaml["detection"]["timeframe"]
+        except KeyError:
+            interval = "30m"
+        # creating condition
+        for condition in sigmaparser.condparsed:
+            try:
+                if condition.parsedAgg.cond_op == ">":
+                    alert_condition = { "gt": int(condition.parsedAgg.condition) }
+                elif condition.parsedAgg.cond_op == ">=":
+                    alert_condition = { "gte": int(condition.parsedAgg.condition) }
+                elif condition.parsedAgg.cond_op == "<":
+                    alert_condition = { "lt": int(condition.parsedAgg.condition) }
+                elif condition.parsedAgg.cond_op == "<=":
+                    alert_condition = { "lte": int(condition.parsedAgg.condition) }
+                else:
+                    alert_condition = {"not_eq": 0}
+            except KeyError:
+                alert_condition = {"not_eq": 0}
+            except AttributeError:
+                alert_condition = {"not_eq": 0}
+
+            indices = sigmaparser.get_logsource().index
+            if len(indices) == 0:
+                indices = ["logstash-*"]
+
+            self.watcher_alert[rulename] = {
+                              "trigger": {
+                                "schedule": {
+                                  "interval": interval  # how often the watcher should check
+                                }
+                              },
+                              "input": {
+                                "search": {
+                                  "request": {
+                                    "body": {
+                                      "size": 0,
+                                      "query": {
+                                        "query_string": {
+                                            "query": result,  # this is where the elasticsearch query syntax goes
+                                            "analyze_wildcard": True
+                                        }
+                                      }
+                                    },
+                                    "indices": indices
+                                  }
+                                }
+                              },
+                              "condition": {
+                                  "compare": {    # TODO: Issue #49
+                                  "ctx.payload.hits.total": alert_condition
+                                }
+                              },
+                              "actions": {
+                                "logging-action": {
+                                  "logging": {
+                                    "text": logging_result
+                                  }
+                                }
+                              }
+                            }
+
+    def finalize(self):
+        for rulename, rule in self.watcher_alert.items():
+            if self.output_type == "plain":     # output request line + body
+                self.output.print("PUT _xpack/watcher/watch/%s\n%s\n" % (rulename, json.dumps(rule, indent=2)))
+            elif self.output_type == "curl":      # output curl command line
+                self.output.print("curl -s -XPUT --data-binary @- %s/_xpack/watcher/watch/%s <<EOF\n%s\nEOF" % (self.es, rulename, json.dumps(rule, indent=2)))
+            else:
+                raise NotImplementedError("Output type '%s' not supported" % self.output_type)
+
 class LogPointBackend(SingleTextQueryBackend):
     """Converts Sigma rule into LogPoint query"""
     identifier = "logpoint"

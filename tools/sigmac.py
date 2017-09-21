@@ -37,7 +37,7 @@ argparser.add_argument("--target", "-t", default="es-qs", choices=backends.getBa
 argparser.add_argument("--target-list", "-l", action="store_true", help="List available output target formats")
 argparser.add_argument("--config", "-c", help="Configuration with field name and index mapping for target environment (not yet implemented)")
 argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix if multiple files are generated (not yet implemented)")
-argparser.add_argument("--backend-option", "-O", nargs="*", help="Options and switches that are passed to the backend")
+argparser.add_argument("--backend-option", "-O", action="append", help="Options and switches that are passed to the backend")
 argparser.add_argument("--defer-abort", "-d", action="store_true", help="Don't abort on parse or conversion errors, proceed with next rule. The exit code from the last error is returned")
 argparser.add_argument("--ignore-not-implemented", "-I", action="store_true", help="Only return error codes for parse errors and ignore errors for rules with not implemented features")
 argparser.add_argument("--verbose", "-v", action="store_true", help="Be verbose")
