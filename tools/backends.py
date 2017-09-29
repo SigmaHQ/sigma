@@ -111,7 +111,7 @@ class StringOutput(SingleOutput):
     def close(self):
         pass
 
-### Generic backend base classes
+### Generic backend base classes and mixins
 class BaseBackend:
     """Base class for all backends"""
     identifier = "base"
@@ -125,6 +125,7 @@ class BaseBackend:
         Initialize backend. This gets a sigmaconfig object, which is notified about the used backend class by
         passing the object instance to it. Further, output files are initialized by the output class defined in output_class.
         """
+        super().__init__()
         if not isinstance(sigmaconfig, (sigma.SigmaConfiguration, None)):
             raise TypeError("SigmaConfiguration object expected")
         self.options = backend_options
@@ -249,6 +250,32 @@ class SingleTextQueryBackend(BaseBackend):
     def generateValueNode(self, node):
         return self.valueExpression % (self.cleanValue(str(node)))
 
+class MultiRuleOutputMixin:
+    """Mixin with common for multi-rule outputs"""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.rulenames = set()
+
+    def getRuleName(self, sigmaparser):
+        """
+        Generate a rule name from the title of the Sigma rule with following properties:
+
+        * Spaces are replaced with -
+        * Unique name by addition of a counter if generated name already in usage
+
+        Generated names are tracked by the Mixin.
+        
+        """
+        rulename = sigmaparser.parsedyaml["title"].replace(" ", "-")
+        if rulename in self.rulenames:   # add counter if name collides
+            cnt = 2
+            while "%s-%d" % (rulename, cnt) in self.rulenames:
+                cnt += 1
+            rulename = "%s-%d" % (rulename, cnt)
+        self.rulenames.add(rulename)
+
+        return rulename
+
 ### Backends for specific SIEMs
 
 class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
@@ -268,7 +295,7 @@ class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     mapExpression = "%s:%s"
     mapListsSpecialHandling = False
 
-class KibanaBackend(ElasticsearchQuerystringBackend):
+class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     """Converts Sigma rule into Kibana JSON Configuration files (searches only)."""
     identifier = "kibana"
     active = True
@@ -277,18 +304,11 @@ class KibanaBackend(ElasticsearchQuerystringBackend):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.kibanaconf = list()
-        self.searches = set()
 
     def generate(self, sigmaparser):
-        rulename = sigmaparser.parsedyaml["title"].replace(" ", "-")
         for parsed in sigmaparser.condparsed:
+            rulename = self.getRuleName(sigmaparser)
             result = self.generateNode(parsed.parsedSearch)
-            if rulename in self.searches:   # add counter if name collides
-                cnt = 0
-                while "%s-%d" % (rulename, cnt) in self.searches:
-                    cnt += 1
-                rulename = "%s-%d" % (rulename, cnt)
-            self.searches.add(rulename)
 
             try:
                 description = sigmaparser.parsedyaml["description"]
@@ -358,7 +378,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend):
     def finalize(self):
         self.output.print(json.dumps(self.kibanaconf, indent=2))
 
-class XPackWatcherBackend(ElasticsearchQuerystringBackend):
+class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     """Converts Sigma Rule into X-Pack Watcher JSON for alerting"""
     identifier = "xpack-watcher"
     active = True
@@ -367,7 +387,6 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.watcher_alert = dict()
-        self.searches = set()
         try:
             self.output_type = self.options["output"]
         except KeyError:
@@ -379,19 +398,9 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend):
             self.es = "localhost:9200"
 
     def generate(self, sigmaparser):
-        rulename = sigmaparser.parsedyaml["title"].replace(" ", "-")
         for parsed in sigmaparser.condparsed:
+            rulename = self.getRuleName(sigmaparser)
             result = self.generateNode(parsed.parsedSearch)
-            try:        # add prefix if available
-                rulename = self.options["prefix"] + rulename
-            except KeyError:
-                pass
-            if rulename in self.searches:   # add counter if name collides
-                cnt = 0
-                while "%s-%d" % (rulename, cnt) in self.searches:
-                    cnt += 1
-                rulename = "%s-%d" % (rulename, cnt)
-            self.searches.add(rulename)
 
         # get the details if this alert occurs
         try:
