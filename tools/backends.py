@@ -306,34 +306,33 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
         self.kibanaconf = list()
 
     def generate(self, sigmaparser):
+        rulename = self.getRuleName(sigmaparser)
+        description = sigmaparser.parsedyaml.setdefault("description", "")
+
+        columns = list()
+        try:
+            for field in sigmaparser.parsedyaml["fields"]:
+                mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field)
+                if type(mapped) == str:
+                    columns.append(mapped)
+                elif type(mapped) == list:
+                    columns.extend(mapped)
+                else:
+                    raise TypeError("Field mapping must return string or list")
+        except KeyError:    # no 'fields' attribute
+            pass
+
+        indices = sigmaparser.get_logsource().index
+        if len(indices) == 0:
+            indices = ["logstash-*"]
+
         for parsed in sigmaparser.condparsed:
-            rulename = self.getRuleName(sigmaparser)
             result = self.generateNode(parsed.parsedSearch)
 
-            try:
-                description = sigmaparser.parsedyaml["description"]
-            except KeyError:
-                description = ""
-
-            columns = list()
-            try:
-                for field in sigmaparser.parsedyaml["fields"]:
-                    mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field)
-                    if type(mapped) == str:
-                        columns.append(mapped)
-                    elif type(mapped) == list:
-                        columns.extend(mapped)
-                    else:
-                        raise TypeError("Field mapping must return string or list")
-            except KeyError:    # no 'fields' attribute
-                pass
-
-            indices = sigmaparser.get_logsource().index
-            if len(indices) == 0:
-                indices = ["logstash-*"]
             for index in indices:
+                final_rulename = rulename
                 if len(indices) > 1:     # add index names if rule must be replicated because of ambigiuous index patterns
-                    rulename += "-" + indexname
+                    final_rulename += "-" + indexname
                     title = "%s (%s)" % (sigmaparser.parsedyaml["title"], index)
                 else:
                     title = sigmaparser.parsedyaml["title"]
@@ -343,7 +342,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
                     pass
 
                 self.kibanaconf.append({
-                        "_id": rulename,
+                        "_id": final_rulename,
                         "_type": "search",
                         "_source": {
                             "title": title,
@@ -398,31 +397,22 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
             self.es = "localhost:9200"
 
     def generate(self, sigmaparser):
-        for parsed in sigmaparser.condparsed:
-            rulename = self.getRuleName(sigmaparser)
-            result = self.generateNode(parsed.parsedSearch)
-
         # get the details if this alert occurs
-        try:
-            description = sigmaparser.parsedyaml["description"]
-        except KeyError:
-            description = ""
-        try:
-            false_positives = sigmaparser.parsedyaml["falsepositives"]
-        except KeyError:
-            false_positives = ""
-        try:
-            level = sigmaparser.parsedyaml["level"]
-        except KeyError:
-            level = ""
+        rulename = self.getRuleName(sigmaparser)
+        description = sigmaparser.parsedyaml.setdefault("description", "")
+        false_positives = sigmaparser.parsedyaml.setdefault("falsepositives", "")
+        level = sigmaparser.parsedyaml.setdefault("level", "")
         logging_result = "Rule description: "+str(description)+", false positives: "+str(false_positives)+", level: "+level
         # Get time frame if exists
-        try:
-            interval = sigmaparser.parsedyaml["detection"]["timeframe"]
-        except KeyError:
-            interval = "30m"
+        interval = sigmaparser.parsedyaml["detection"].setdefault("timeframe", "30m")
+
         # creating condition
+        indices = sigmaparser.get_logsource().index
+        if len(indices) == 0:
+            indices = ["logstash-*"]
+
         for condition in sigmaparser.condparsed:
+            result = self.generateNode(condition.parsedSearch)
             try:
                 if condition.parsedAgg.cond_op == ">":
                     alert_condition = { "gt": int(condition.parsedAgg.condition) }
@@ -438,10 +428,6 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                 alert_condition = {"not_eq": 0}
             except AttributeError:
                 alert_condition = {"not_eq": 0}
-
-            indices = sigmaparser.get_logsource().index
-            if len(indices) == 0:
-                indices = ["logstash-*"]
 
             self.watcher_alert[rulename] = {
                               "trigger": {
