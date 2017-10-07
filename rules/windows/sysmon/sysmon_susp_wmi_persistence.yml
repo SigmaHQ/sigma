@@ -1,0 +1,26 @@
+title: Suspicious WMI persistence
+status: experimental
+description: Detects WMI persistence
+reference: 
+    - https://rawsec.lu/blog/posts/2017/Sep/19/sysmon-v610-vs-wmi-persistence/
+author: @0xrawsec, juju4
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID:
+            - 19
+            - 20
+            - 21
+    selection2:
+        EventID: 1
+        ParentImage:
+            - '*\wmic.exe'
+            - '*\wmiprvse.exe'
+    condition: selection or selection2
+fields:
+    - ParentImage
+falsepositives:
+    - Will need to be tuned
+level: medium
