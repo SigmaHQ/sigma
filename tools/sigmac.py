@@ -36,7 +36,8 @@ argparser.add_argument("--recurse", "-r", action="store_true", help="Recurse int
 argparser.add_argument("--target", "-t", default="es-qs", choices=backends.getBackendDict().keys(), help="Output target format")
 argparser.add_argument("--target-list", "-l", action="store_true", help="List available output target formats")
 argparser.add_argument("--config", "-c", help="Configuration with field name and index mapping for target environment (not yet implemented)")
-argparser.add_argument("--output", "-o", help="Output file or filename prefix if multiple files are generated (not yet implemented)")
+argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix if multiple files are generated (not yet implemented)")
+argparser.add_argument("--backend-option", "-O", action="append", help="Options and switches that are passed to the backend")
 argparser.add_argument("--defer-abort", "-d", action="store_true", help="Don't abort on parse or conversion errors, proceed with next rule. The exit code from the last error is returned")
 argparser.add_argument("--ignore-not-implemented", "-I", action="store_true", help="Only return error codes for parse errors and ignore errors for rules with not implemented features")
 argparser.add_argument("--verbose", "-v", action="store_true", help="Be verbose")
@@ -50,13 +51,6 @@ if cmdargs.target_list:
     sys.exit(0)
 
 out = sys.stdout
-if cmdargs.output:
-    try:
-        out = open(cmdargs.output, mode='w')
-    except IOError:
-        print("Failed to open output file '%s': %s" % (cmdargs.output, str(e)), file=sys.stderr)
-        exit(1)
-
 sigmaconfig = SigmaConfiguration()
 if cmdargs.config:
     try:
@@ -70,11 +64,16 @@ if cmdargs.config:
     except SigmaParseError as e:
         print("Sigma configuration parse error in %s: %s" % (conffile, str(e)), file=sys.stderr)
 
+backend_options = backends.BackendOptions(cmdargs.backend_option)
+
 try:
-    backend = backends.getBackend(cmdargs.target)(sigmaconfig)
+    backend = backends.getBackend(cmdargs.target)(sigmaconfig, backend_options, cmdargs.output)
 except LookupError as e:
     print("Backend not found!", file=sys.stderr)
     sys.exit(2)
+except IOError:
+    print("Failed to open output file '%s': %s" % (cmdargs.output, str(e)), file=sys.stderr)
+    exit(1)
 
 error = 0
 for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
@@ -83,12 +82,11 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
         f = sigmafile.open()
         parser = SigmaParser(f, sigmaconfig)
         print_debug("Parsed YAML:\n", json.dumps(parser.parsedyaml, indent=2))
-        parser.parse_sigma()
         for condtoken in parser.condtoken:
             print_debug("Condition Tokens:", condtoken)
         for condparsed in parser.condparsed:
             print_debug("Condition Parse Tree:", condparsed)
-            print(backend.generate(condparsed), file=out)
+        backend.generate(parser)
     except OSError as e:
         print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
         error = 5
@@ -120,5 +118,6 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
         except:
             print_debug("Sigma rule didn't reached condition tokenization")
         print_debug()
+backend.finalize()
 
 sys.exit(error)
