@@ -329,8 +329,6 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
             pass
 
         indices = sigmaparser.get_logsource().index
-        if len(indices) == 0:
-            indices = ["logstash-*"]
 
         for parsed in sigmaparser.condparsed:
             result = self.generateNode(parsed.parsedSearch)
@@ -414,8 +412,6 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
 
         # creating condition
         indices = sigmaparser.get_logsource().index
-        if len(indices) == 0:
-            indices = ["logstash-*"]
 
         for condition in sigmaparser.condparsed:
             result = self.generateNode(condition.parsedSearch)

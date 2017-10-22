@@ -711,6 +711,7 @@ class SigmaConfiguration:
             self.fieldmappings = dict()
             self.logsources = dict()
             self.logsourcemerging = SigmaLogsourceConfiguration.MM_AND
+            self.defaultindex = None
             self.backend = None
         else:
             config = yaml.safe_load(configyaml)
@@ -730,6 +731,11 @@ class SigmaConfiguration:
             except KeyError:
                 self.logsourcemerging = SigmaLogsourceConfiguration.MM_AND
 
+            try:
+                self.defaultindex = config['defaultindex']
+            except KeyError:
+                self.defaultindex = None
+
             self.logsources = list()
             self.backend = None
 
@@ -743,7 +749,7 @@ class SigmaConfiguration:
     def get_logsource(self, category, product, service):
         """Return merged log source definition of all logosurces that match criteria"""
         matching = [logsource for logsource in self.logsources if logsource.matches(category, product, service)]
-        return SigmaLogsourceConfiguration(matching)
+        return SigmaLogsourceConfiguration(matching, self.defaultindex)
 
     def set_backend(self, backend):
         """Set backend. This is used by other code to determine target properties for index addressing"""
@@ -754,7 +760,7 @@ class SigmaConfiguration:
                 if type(logsources) != dict:
                     raise SigmaConfigParseError("Logsources must be a map")
                 for name, logsource in logsources.items():
-                    self.logsources.append(SigmaLogsourceConfiguration(logsource, name, self.logsourcemerging, self.get_indexfield()))
+                    self.logsources.append(SigmaLogsourceConfiguration(logsource, self.defaultindex, name, self.logsourcemerging, self.get_indexfield()))
 
     def get_indexfield(self):
         """Get index condition if index field name is configured"""
@@ -766,7 +772,7 @@ class SigmaLogsourceConfiguration:
     MM_AND = "and"  # Merge all conditions with AND
     MM_OR  = "or"   # Merge all conditions with OR
 
-    def __init__(self, logsource=None, name=None, mergemethod=MM_AND, indexfield=None):
+    def __init__(self, logsource=None, defaultindex=None, name=None, mergemethod=MM_AND, indexfield=None):
         self.name = name
         self.indexfield = indexfield
         if logsource == None:               # create empty object
@@ -798,6 +804,13 @@ class SigmaLogsourceConfiguration:
 
             # Merge all index patterns
             self.index = list(set([index for ls in logsource for index in ls.index]))       # unique(flat(logsources.index))
+            if len(self.index) == 0 and defaultindex is not None:   # if no index pattern matched and default index is present: use default index
+                if type(defaultindex) == str:
+                    self.index = [defaultindex]
+                elif type(defaultindex) == list and all([type(i) == str for i in defaultindex]):
+                    self.index = defaultindex
+                else:
+                    raise TypeError("Default index must be string or list of strings")
 
             # "merge" index field (should never differ between instances because it is provided by backend class
             indexfields = [ ls.indexfield for ls in logsource if ls.indexfield != None ]
@@ -844,13 +857,16 @@ class SigmaLogsourceConfiguration:
                 index = logsource['index']
                 if type(index) not in (str, list):
                     raise SigmaConfigParseError("Logsource index must be string or list of strings")
-                if type(index) == list and not set([type(index) for index in logsource['index']]).issubset({str}):
+                if type(index) == list and not all([type(index) == str for index in logsource['index']]):
                     raise SigmaConfigParseError("Logsource index patterns must be strings")
                 if type(index) == list:
                     self.index = index
                 else:
                     self.index = [ index ]
             else:
+                # no default index handling here - this branch is executed if log source definitions are parsed from
+                # config and these must not necessarily contain an index definition. A valid index may later be result
+                # from a merge, where default index handling applies.
                 self.index = []
 
             if 'conditions' in logsource:
