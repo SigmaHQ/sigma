@@ -101,6 +101,11 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
         error = 4
         if not cmdargs.defer_abort:
             sys.exit(error)
+    except backends.BackendError as e:
+        print("Backend error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
+        error = 8
+        if not cmdargs.defer_abort:
+            sys.exit(error)
     except NotImplementedError as e:
         print("An unsupported feature is required for this Sigma rule: " + str(e), file=sys.stderr)
         print("Feel free to contribute for fun and fame, this is open source :) -> https://github.com/Neo23x0/sigma", file=sys.stderr)

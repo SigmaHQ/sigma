@@ -336,8 +336,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
             for index in indices:
                 final_rulename = rulename
                 if len(indices) > 1:     # add index names if rule must be replicated because of ambigiuous index patterns
-                    final_rulename += "-" + indexname
-                    title = "%s (%s)" % (sigmaparser.parsedyaml["title"], index)
+                    raise NotSupportedError("Multiple target indices are not supported by Kibana")
                 else:
                     title = sigmaparser.parsedyaml["title"]
                 try:
@@ -576,7 +575,6 @@ class GrepBackend(BaseBackend, QuoteCharMixin):
     def generateValueNode(self, node):
         return self.cleanValue(str(node))
 
-
 ### Backends for developement purposes
 
 class FieldnameListBackend(BaseBackend):
@@ -622,3 +620,12 @@ def flatten(l):
           yield from flatten(i)
       else:
           yield i
+
+# Exceptions
+class BackendError(Exception):
+    """Base exception for backend-specific errors."""
+    pass
+
+class NotSupportedError(BackendError):
+    """Exception is raised if some output is required that is not supported by the target language."""
+    pass
