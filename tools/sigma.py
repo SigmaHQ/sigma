@@ -19,8 +19,6 @@ class SigmaParser:
     def parse_sigma(self):
         try:    # definition uniqueness check
             for definitionName, definition in self.parsedyaml["detection"].items():
-                if definitionName in self.definitions:
-                    raise SigmaParseError("Definition '%s' was already defined" % (definitionName))
                 self.definitions[definitionName] = definition
                 self.extract_values(definition)     # builds key-values-table in self.values
         except KeyError:
@@ -45,7 +43,7 @@ class SigmaParser:
         try:
             definition = self.definitions[definitionName]
         except KeyError as e:
-            raise SigmaParseError("Unknown definition '%s'" % (definitionName)) from e
+            raise SigmaParseError("Unknown definition '%s'" % definitionName) from e
         return self.parse_definition(definition, condOverride)
 
     def parse_definition(self, definition, condOverride=None):
