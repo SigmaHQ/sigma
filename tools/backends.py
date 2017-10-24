@@ -56,61 +56,6 @@ class SingleOutput:
     def close(self):
         self.fd.close()
 
-class MultiOutput:
-    """
-    Multiple file output
-
-    Prepares multiple SingleOutput instances with basename + suffix as file names, on for each suffix.
-    The switch() method is used to switch between these outputs.
-
-    This class must be inherited and suffixes must be a dict as follows: file id -> suffix
-    """
-    suffixes = None
-
-    def __init__(self, basename):
-        """Initializes all outputs with basename and corresponding suffix as SingleOutput object."""
-        if suffixes == None:
-            raise NotImplementedError("OutputMulti must be derived, at least suffixes must be set")
-        if type(basename) != str:
-            raise TypeError("OutputMulti constructor basename parameter must be string")
-
-        self.outputs = dict()
-        self.output = None
-        for name, suffix in self.suffixes:
-            self.outputs[name] = SingleOutput(basename + suffix)
-
-    def select(self, name):
-        """Select an output as current output"""
-        self.output = self.outputs[name]
-
-    def print(self, *args, **kwargs):
-        self.output.print(*args, **kwargs)
-
-    def close(self):
-        for out in self.outputs:
-            out.close()
-
-class StringOutput(SingleOutput):
-    """Collect input silently and return resulting string."""
-    def __init__(self, filename=None):
-        self.out = ""
-
-    def print(self, *args, **kwargs):
-        try:
-            del kwargs['file']
-        except KeyError:
-            pass
-        print(*args, file=self, **kwargs)
-
-    def write(self, s):
-        self.out += s
-
-    def result(self):
-        return self.out
-
-    def close(self):
-        pass
-
 ### Generic backend base classes and mixins
 class BaseBackend:
     """Base class for all backends"""
@@ -519,10 +464,10 @@ class SplunkBackend(SingleTextQueryBackend):
     listSeparator = " "
     valueExpression = "\"%s\""
     mapExpression = "%s=%s"
-    mapListsSpecialHandling = False
+    mapListsSpecialHandling = True
     mapListValueExpression = "%s IN %s"
 
-    def generateMapItemListNode(self, node):
+    def generateMapItemListNode(self, key, value):
         return "(" + (" OR ".join(['%s=%s' % (key, self.generateValueNode(item)) for item in value])) + ")"
 
     def generateAggregation(self, agg):
