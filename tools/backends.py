@@ -81,10 +81,13 @@ class BaseBackend:
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
         for parsed in sigmaparser.condparsed:
-            result = self.generateNode(parsed.parsedSearch)
-            if parsed.parsedAgg:
-                result += self.generateAggregation(parsed.parsedAgg)
-            self.output.print(result)
+            self.output.print(self.generateQuery(parsed))
+
+    def generateQuery(self, parsed):
+        result = self.generateNode(parsed.parsedSearch)
+        if parsed.parsedAgg:
+            result += self.generateAggregation(parsed.parsedAgg)
+        return result
 
     def generateNode(self, node):
         if type(node) == sigma.ConditionAND:
@@ -488,9 +491,8 @@ class GrepBackend(BaseBackend, QuoteCharMixin):
 
     reEscape = re.compile("([\\|()\[\]{}.^$])")
 
-    def generate(self, sigmaparser):
-        for parsed in sigmaparser.condparsed:
-            self.output.print("grep -P '^%s'" % self.generateNode(parsed.parsedSearch))
+    def generateQuery(self, parsed):
+        return "grep -P '^%s'" % self.generateNode(parsed.parsedSearch)
 
     def cleanValue(self, val):
         val = super().cleanValue(val)
@@ -528,9 +530,8 @@ class FieldnameListBackend(BaseBackend):
     active = True
     output_class = SingleOutput
 
-    def generate(self, sigmaparser):
-        for parsed in sigmaparser.condparsed:
-            self.output.print("\n".join(sorted(set(list(flatten(self.generateNode(parsed.parsedSearch)))))))
+    def generateQuery(self, parsed):
+        return "\n".join(sorted(set(list(flatten(self.generateNode(parsed.parsedSearch))))))
 
     def generateANDNode(self, node):
         return [self.generateNode(val) for val in node]
