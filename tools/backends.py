@@ -464,10 +464,10 @@ class SplunkBackend(SingleTextQueryBackend):
     listSeparator = " "
     valueExpression = "\"%s\""
     mapExpression = "%s=%s"
-    mapListsSpecialHandling = False
+    mapListsSpecialHandling = True
     mapListValueExpression = "%s IN %s"
 
-    def generateMapItemListNode(self, node):
+    def generateMapItemListNode(self, key, value):
         return "(" + (" OR ".join(['%s=%s' % (key, self.generateValueNode(item)) for item in value])) + ")"
 
     def generateAggregation(self, agg):
