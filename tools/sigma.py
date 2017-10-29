@@ -143,7 +143,6 @@ class SigmaConditionToken:
     TOKEN_GTE    = 15
     TOKEN_BY     = 16
     TOKEN_NEAR   = 17
-    TOKEN_WITHIN = 18
 
     tokenstr = [
             "INVALID",
@@ -164,7 +163,6 @@ class SigmaConditionToken:
             "GTE",
             "BY",
             "NEAR",
-            "WITHIN",
             ]
 
     def __init__(self, tokendef, match, pos):
@@ -191,7 +189,6 @@ class SigmaConditionTokenizer:
             (None,       re.compile("[\\s\\r\\n]+")),
             (SigmaConditionToken.TOKEN_AGG,    re.compile("count|min|max|avg|sum", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_NEAR,   re.compile("near", re.IGNORECASE)),
-            (SigmaConditionToken.TOKEN_WITHIN, re.compile("within", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_BY,     re.compile("by", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_EQ,     re.compile("==")),
             (SigmaConditionToken.TOKEN_LT,     re.compile("<")),
@@ -537,17 +534,13 @@ class SigmaAggregationParser(SimpleParser):
             },
             {   # State 9
                 SigmaConditionToken.TOKEN_AND: (None, "set_include", 10),
-                SigmaConditionToken.TOKEN_WITHIN: (None, None, 11),
             },
             {   # State 10
                 SigmaConditionToken.TOKEN_NOT: (None, "set_exclude", 8),
                 SigmaConditionToken.TOKEN_ID: (None, "store_search_id", 9),
             },
-            {   # State 11
-                SigmaConditionToken.TOKEN_ID: ("timeframe", "trans_timeframe", -1),
-            },
             ]
-    finalstates = { -1 }
+    finalstates = { -1, 9 }
 
     # Aggregation functions
     AGGFUNC_COUNT = 1
