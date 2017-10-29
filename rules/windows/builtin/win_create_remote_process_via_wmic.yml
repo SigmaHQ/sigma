@@ -1,0 +1,21 @@
+title: Create Remote Process via WMIC
+description: Detects suspicious process created by WMIC remotely
+status: experimental
+reference: 
+    - https://car.mitre.org/wiki/CAR-2016-03-002
+author: juju4
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection:
+        EventID: 4688
+        CommandLine: 
+            - '*\wmic.exe*'
+            - '* process call create *'
+            - '* /node:*'
+    condition: selection
+falsepositives: 
+    - False positives depend on scripts and administrative tools used in the monitored environment
+level: medium
