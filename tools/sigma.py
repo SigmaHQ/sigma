@@ -7,6 +7,7 @@ COND_NONE = 0
 COND_AND  = 1
 COND_OR   = 2
 COND_NOT  = 3
+COND_NULL = 4
 
 class SigmaParser:
     def __init__(self, sigma, config):
@@ -68,7 +69,20 @@ class SigmaParser:
             cond = ConditionAND()
             for key, value in definition.items():
                 mapping = self.config.get_fieldmapping(key)
-                cond.add(mapping.resolve(key, value, self))
+                if value == None:
+                    fields = mapping.resolve_fieldname(key)
+                    if type(fields) == str:
+                        fields = [ fields ]
+                    for field in fields:
+                        cond.add(ConditionNULLValue(val=field))
+                elif value == "not null":
+                    fields = mapping.resolve_fieldname(key)
+                    if type(fields) == str:
+                        fields = [ fields ]
+                    for field in fields:
+                        cond.add(ConditionNotNULLValue(val=field))
+                else:
+                    cond.add(mapping.resolve(key, value, self))
 
         return cond
 
@@ -299,7 +313,7 @@ class ConditionNOT(ConditionBase):
         if len(self.items) == 0:
             super.add(item)
         else:
-            raise ValueError("Only one element allowed in NOT condition")
+            raise ValueError("Only one element allowed")
 
     @property
     def item(self):
@@ -307,6 +321,14 @@ class ConditionNOT(ConditionBase):
             return self.items[0]
         except IndexError:
             return None
+
+class ConditionNULLValue(ConditionNOT):
+    """Condition: Field value is empty or doesn't exists"""
+    pass
+
+class ConditionNotNULLValue(ConditionNULLValue):
+    """Condition: Field value is not empty"""
+    pass
 
 class NodeSubexpression(ParseTreeNode):
     """Subexpression"""
