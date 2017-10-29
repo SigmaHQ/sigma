@@ -1,0 +1,22 @@
+title: Detects Suspicious Run Locations
+description: Detects suspicious process run from unusual locations
+status: experimental
+reference: 
+    - https://car.mitre.org/wiki/CAR-2013-05-002
+author: juju4
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection:
+        EventID: 4688
+        CommandLine:
+            - "*:\\RECYCLER\\*"
+            - "*:\\SystemVolumeInformation\\*"
+            - "%windir%\\Tasks\\*"
+            - "%systemroot%\\debug\\*"
+    condition: selection
+falsepositives: 
+    - False positives depend on scripts and administrative tools used in the monitored environment
+level: medium
