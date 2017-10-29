@@ -59,19 +59,20 @@ if cmdargs.config:
         sigmaconfig = SigmaConfiguration(f)
     except OSError as e:
         print("Failed to open Sigma configuration file %s: %s" % (conffile, str(e)), file=sys.stderr)
-    except yaml.parser.ParserError as e:
+        exit(5)
+    except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
         print("Sigma configuration file %s is no valid YAML: %s" % (conffile, str(e)), file=sys.stderr)
-    except SigmaParseError as e:
+        exit(6)
+    except SigmaConfigParseError as e:
         print("Sigma configuration parse error in %s: %s" % (conffile, str(e)), file=sys.stderr)
+        exit(7)
 
 backend_options = backends.BackendOptions(cmdargs.backend_option)
 
 try:
     backend = backends.getBackend(cmdargs.target)(sigmaconfig, backend_options, cmdargs.output)
-except LookupError as e:
-    print("Backend not found!", file=sys.stderr)
-    sys.exit(2)
-except IOError:
+    # not existing backend is already detected by argument parser
+except IOError as e:
     print("Failed to open output file '%s': %s" % (cmdargs.output, str(e)), file=sys.stderr)
     exit(1)
 
@@ -90,7 +91,7 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
     except OSError as e:
         print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
         error = 5
-    except yaml.parser.ParserError as e:
+    except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
         print("Sigma file %s is no valid YAML: %s" % (sigmafile, str(e)), file=sys.stderr)
         error = 3
         if not cmdargs.defer_abort:
@@ -98,6 +99,11 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
     except SigmaParseError as e:
         print("Sigma parse error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
         error = 4
+        if not cmdargs.defer_abort:
+            sys.exit(error)
+    except backends.BackendError as e:
+        print("Backend error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
+        error = 8
         if not cmdargs.defer_abort:
             sys.exit(error)
     except NotImplementedError as e:
