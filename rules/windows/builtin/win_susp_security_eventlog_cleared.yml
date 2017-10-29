@@ -1,15 +1,23 @@
 title: Security Eventlog Cleared
 description: Some threat groups tend to delete the local 'Security' Eventlog using certain utitlities
+reference:
+  - https://car.mitre.org/wiki/CAR-2016-04-002
 author: Florian Roth
 logsource:
     product: windows
-    service: security
 detection:
-    selection:
+    selection1:
+        service: security
         EventID:
             - 517
             - 1102
-    condition: selection
+            - 104
+    selection2:
+        service: system
+        EventID:
+            - 1100
+            - 1102
+    condition: selection1 or selection2
 falsepositives:
     - Rollout of log collection agents (the setup routine often includes a reset of the local Eventlog)
     - System provisioning (system reset before the golden image creation)
