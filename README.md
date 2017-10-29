@@ -9,13 +9,17 @@ Generic Signature Format for SIEM Systems
 
 Sigma is a generic and open signature format that allows you to describe relevant log events in a straight forward manner. The rule format is very flexible, easy to write and applicable to any type of log file. The main purpose of this project is to provide a structured form in which researchers or analysts can describe their once developed detection methods and make them shareable with others.
 
-Sigma is for log files what [Snort](https://www.snort.org/) is for network traffic and [YARA](https://github.com/VirusTotal/yara) is for files.   
+Sigma is for log files what [Snort](https://www.snort.org/) is for network traffic and [YARA](https://github.com/VirusTotal/yara) is for files.
 
 This repository contains:
 
 * Sigma rule specification in the [Wiki](https://github.com/Neo23x0/sigma/wiki/Specification)
 * Open repository for sigma signatures in the ```./rules```subfolder
 * A converter that generate searches/queries for different SIEM systems [work in progress]
+
+## Hack.lu 2017 Talk
+
+[![Sigma - Generic Signatures for Log Events](https://preview.ibb.co/cMCigR/Screen_Shot_2017_10_18_at_15_47_15.png)](https://www.youtube.com/watch?v=OheVuE9Ifhs "Sigma - Generic Signatures for Log Events")
 
 # Use Cases
 

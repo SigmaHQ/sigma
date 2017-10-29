@@ -56,61 +56,6 @@ class SingleOutput:
     def close(self):
         self.fd.close()
 
-class MultiOutput:
-    """
-    Multiple file output
-
-    Prepares multiple SingleOutput instances with basename + suffix as file names, on for each suffix.
-    The switch() method is used to switch between these outputs.
-
-    This class must be inherited and suffixes must be a dict as follows: file id -> suffix
-    """
-    suffixes = None
-
-    def __init__(self, basename):
-        """Initializes all outputs with basename and corresponding suffix as SingleOutput object."""
-        if suffixes == None:
-            raise NotImplementedError("OutputMulti must be derived, at least suffixes must be set")
-        if type(basename) != str:
-            raise TypeError("OutputMulti constructor basename parameter must be string")
-
-        self.outputs = dict()
-        self.output = None
-        for name, suffix in self.suffixes:
-            self.outputs[name] = SingleOutput(basename + suffix)
-
-    def select(self, name):
-        """Select an output as current output"""
-        self.output = self.outputs[name]
-
-    def print(self, *args, **kwargs):
-        self.output.print(*args, **kwargs)
-
-    def close(self):
-        for out in self.outputs:
-            out.close()
-
-class StringOutput(SingleOutput):
-    """Collect input silently and return resulting string."""
-    def __init__(self, filename=None):
-        self.out = ""
-
-    def print(self, *args, **kwargs):
-        try:
-            del kwargs['file']
-        except KeyError:
-            pass
-        print(*args, file=self, **kwargs)
-
-    def write(self, s):
-        self.out += s
-
-    def result(self):
-        return self.out
-
-    def close(self):
-        pass
-
 ### Generic backend base classes and mixins
 class BaseBackend:
     """Base class for all backends"""
@@ -190,16 +135,29 @@ class BaseBackend:
         """
         pass
 
-class SingleTextQueryBackend(BaseBackend):
+class QuoteCharMixin:
+    """
+    This class adds the cleanValue method that quotes and filters characters according to the configuration in
+    the attributes provided by the mixin.
+    """
+    reEscape = None                     # match characters that must be quoted
+    escapeSubst = "\\\\\g<1>"           # Substitution that is applied to characters/strings matched for escaping by reEscape
+    reClear = None                      # match characters that are cleaned out completely
+
+    def cleanValue(self, val):
+        if self.reEscape:
+            val = self.reEscape.sub(self.escapeSubst, val)
+        if self.reClear:
+            val = self.reClear.sub("", val)
+        return val
+
+class SingleTextQueryBackend(BaseBackend, QuoteCharMixin):
     """Base class for backends that generate one text-based expression from a Sigma rule"""
     identifier = "base-textquery"
     active = False
     output_class = SingleOutput
 
     # the following class variables define the generation and behavior of queries from a parse tree some are prefilled with default values that are quite usual
-    reEscape = None                     # match characters that must be quoted
-    escapeSubst = "\\\\\g<1>"           # Substitution that is applied to characters/strings matched for escaping by reEscape
-    reClear = None                      # match characters that are cleaned out completely
     andToken = None                     # Token used for linking expressions with logical AND
     orToken = None                      # Same for OR
     notToken = None                     # Same for NOT
@@ -210,13 +168,6 @@ class SingleTextQueryBackend(BaseBackend):
     mapExpression = None                # Syntax for field/value conditions. First %s is key, second is value
     mapListsSpecialHandling = False     # Same handling for map items with list values as for normal values (strings, integers) if True, generateMapItemListNode method is called with node
     mapListValueExpression = None       # Syntax for field/value condititons where map value is a list
-
-    def cleanValue(self, val):
-        if self.reEscape:
-            val = self.reEscape.sub(self.escapeSubst, val)
-        if self.reClear:
-            val = self.reClear.sub("", val)
-        return val
 
     def generateANDNode(self, node):
         return self.andToken.join([self.generateNode(val) for val in node])
@@ -323,8 +274,6 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
             pass
 
         indices = sigmaparser.get_logsource().index
-        if len(indices) == 0:
-            indices = ["logstash-*"]
 
         for parsed in sigmaparser.condparsed:
             result = self.generateNode(parsed.parsedSearch)
@@ -332,8 +281,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
             for index in indices:
                 final_rulename = rulename
                 if len(indices) > 1:     # add index names if rule must be replicated because of ambigiuous index patterns
-                    final_rulename += "-" + indexname
-                    title = "%s (%s)" % (sigmaparser.parsedyaml["title"], index)
+                    raise NotSupportedError("Multiple target indices are not supported by Kibana")
                 else:
                     title = sigmaparser.parsedyaml["title"]
                 try:
@@ -408,8 +356,6 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
 
         # creating condition
         indices = sigmaparser.get_logsource().index
-        if len(indices) == 0:
-            indices = ["logstash-*"]
 
         for condition in sigmaparser.condparsed:
             result = self.generateNode(condition.parsedSearch)
@@ -518,10 +464,10 @@ class SplunkBackend(SingleTextQueryBackend):
     listSeparator = " "
     valueExpression = "\"%s\""
     mapExpression = "%s=%s"
-    mapListsSpecialHandling = False
+    mapListsSpecialHandling = True
     mapListValueExpression = "%s IN %s"
 
-    def generateMapItemListNode(self, node):
+    def generateMapItemListNode(self, key, value):
         return "(" + (" OR ".join(['%s=%s' % (key, self.generateValueNode(item)) for item in value])) + ")"
 
     def generateAggregation(self, agg):
@@ -533,6 +479,46 @@ class SplunkBackend(SingleTextQueryBackend):
             return " | stats %s(%s) as val | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.cond_op, agg.condition)
         else:
             return " | stats %s(%s) as val by %s | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.groupfield, agg.cond_op, agg.condition)
+
+class GrepBackend(BaseBackend, QuoteCharMixin):
+    """Generates Perl compatible regular expressions and puts 'grep -P' around it"""
+    identifier = "grep"
+    active = True
+    output_class = SingleOutput
+
+    reEscape = re.compile("([\\|()\[\]{}.^$])")
+
+    def generate(self, sigmaparser):
+        for parsed in sigmaparser.condparsed:
+            self.output.print("grep -P '^%s'" % self.generateNode(parsed.parsedSearch))
+
+    def cleanValue(self, val):
+        val = super().cleanValue(val)
+        return re.sub("\\*", ".*", val)
+
+    def generateORNode(self, node):
+        return "(?:%s)" % "|".join([".*" + self.generateNode(val) for val in node])
+
+    def generateANDNode(self, node):
+        return "".join(["(?=.*%s)" % self.generateNode(val) for val in node])
+
+    def generateNOTNode(self, node):
+        return "(?!.*%s)" % self.generateNode(node.item)
+
+    def generateSubexpressionNode(self, node):
+        return "(?:.*%s)" % self.generateNode(node.items)
+
+    def generateListNode(self, node):
+        if not set([type(value) for value in node]).issubset({str, int}):
+            raise TypeError("List values must be strings or numbers")
+        return self.generateORNode(node)
+
+    def generateMapItemNode(self, node):
+        key, value = node
+        return self.generateNode(value)
+
+    def generateValueNode(self, node):
+        return self.cleanValue(str(node))
 
 ### Backends for developement purposes
 
@@ -579,3 +565,12 @@ def flatten(l):
           yield from flatten(i)
       else:
           yield i
+
+# Exceptions
+class BackendError(Exception):
+    """Base exception for backend-specific errors."""
+    pass
+
+class NotSupportedError(BackendError):
+    """Exception is raised if some output is required that is not supported by the target language."""
+    pass
