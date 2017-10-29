@@ -81,10 +81,13 @@ class BaseBackend:
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
         for parsed in sigmaparser.condparsed:
-            result = self.generateNode(parsed.parsedSearch)
-            if parsed.parsedAgg:
-                result += self.generateAggregation(parsed.parsedAgg)
-            self.output.print(result)
+            self.output.print(self.generateQuery(parsed))
+
+    def generateQuery(self, parsed):
+        result = self.generateNode(parsed.parsedSearch)
+        if parsed.parsedAgg:
+            result += self.generateAggregation(parsed.parsedAgg)
+        return result
 
     def generateNode(self, node):
         if type(node) == sigma.ConditionAND:
@@ -93,6 +96,10 @@ class BaseBackend:
             return self.generateORNode(node)
         elif type(node) == sigma.ConditionNOT:
             return self.generateNOTNode(node)
+        elif type(node) == sigma.ConditionNULLValue:
+            return self.generateNULLValueNode(node)
+        elif type(node) == sigma.ConditionNotNULLValue:
+            return self.generateNotNULLValueNode(node)
         elif type(node) == sigma.NodeSubexpression:
             return self.generateSubexpressionNode(node)
         elif type(node) == tuple:
@@ -123,6 +130,12 @@ class BaseBackend:
         raise NotImplementedError("Node type not implemented for this backend")
 
     def generateValueNode(self, node):
+        raise NotImplementedError("Node type not implemented for this backend")
+
+    def generateNULLValueNode(self, node):
+        raise NotImplementedError("Node type not implemented for this backend")
+
+    def generateNotNULLValueNode(self, node):
         raise NotImplementedError("Node type not implemented for this backend")
 
     def generateAggregation(self, agg):
@@ -165,6 +178,8 @@ class SingleTextQueryBackend(BaseBackend, QuoteCharMixin):
     listExpression = None               # Syntax for lists, %s are list items separated with listSeparator
     listSeparator = None                # Character for separation of list items
     valueExpression = None              # Expression of values, %s represents value
+    nullExpression = None               # Expression of queries for null values or non-existing fields. %s is field name
+    notNullExpression = None            # Expression of queries for not null values. %s is field name
     mapExpression = None                # Syntax for field/value conditions. First %s is key, second is value
     mapListsSpecialHandling = False     # Same handling for map items with list values as for normal values (strings, integers) if True, generateMapItemListNode method is called with node
     mapListValueExpression = None       # Syntax for field/value condititons where map value is a list
@@ -200,6 +215,12 @@ class SingleTextQueryBackend(BaseBackend, QuoteCharMixin):
 
     def generateValueNode(self, node):
         return self.valueExpression % (self.cleanValue(str(node)))
+
+    def generateNULLValueNode(self, node):
+        return self.nullExpression % (node.item)
+
+    def generateNotNULLValueNode(self, node):
+        return self.notNullExpression % (node.item)
 
 class MultiRuleOutputMixin:
     """Mixin with common for multi-rule outputs"""
@@ -243,6 +264,8 @@ class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     listExpression = "(%s)"
     listSeparator = " "
     valueExpression = "\"%s\""
+    nullExpression = "NOT _exists_:%s"
+    notNullExpression = "_exists_:%s"
     mapExpression = "%s:%s"
     mapListsSpecialHandling = False
 
@@ -434,6 +457,8 @@ class LogPointBackend(SingleTextQueryBackend):
     listExpression = "[%s]"
     listSeparator = ", "
     valueExpression = "\"%s\""
+    nullExpression = "-%s=*"
+    notNullExpression = "%s=*"
     mapExpression = "%s=%s"
     mapListsSpecialHandling = True
     mapListValueExpression = "%s IN %s"
@@ -463,6 +488,8 @@ class SplunkBackend(SingleTextQueryBackend):
     listExpression = "(%s)"
     listSeparator = " "
     valueExpression = "\"%s\""
+    nullExpression = "NOT %s=\"*\""
+    notNullExpression = "%s=\"*\""
     mapExpression = "%s=%s"
     mapListsSpecialHandling = True
     mapListValueExpression = "%s IN %s"
@@ -488,9 +515,8 @@ class GrepBackend(BaseBackend, QuoteCharMixin):
 
     reEscape = re.compile("([\\|()\[\]{}.^$])")
 
-    def generate(self, sigmaparser):
-        for parsed in sigmaparser.condparsed:
-            self.output.print("grep -P '^%s'" % self.generateNode(parsed.parsedSearch))
+    def generateQuery(self, parsed):
+        return "grep -P '^%s'" % self.generateNode(parsed.parsedSearch)
 
     def cleanValue(self, val):
         val = super().cleanValue(val)
@@ -528,9 +554,8 @@ class FieldnameListBackend(BaseBackend):
     active = True
     output_class = SingleOutput
 
-    def generate(self, sigmaparser):
-        for parsed in sigmaparser.condparsed:
-            self.output.print("\n".join(sorted(set(list(flatten(self.generateNode(parsed.parsedSearch)))))))
+    def generateQuery(self, parsed):
+        return "\n".join(sorted(set(list(flatten(self.generateNode(parsed.parsedSearch))))))
 
     def generateANDNode(self, node):
         return [self.generateNode(val) for val in node]
