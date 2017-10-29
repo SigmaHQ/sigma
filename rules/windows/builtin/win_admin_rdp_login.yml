@@ -1,0 +1,25 @@
+title: Admin user remote login
+description: Detect remote login by Administrator user depending on internal pattern
+reference:
+  - https://car.mitre.org/wiki/CAR-2016-04-005
+status: experimental
+author: juju4
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Identifiable administrators usernames (pattern or special unique character. ex: "Admin-*"), internal policy mandating use only as secondary account'
+detection:
+    selection:
+        EventID: 4624
+        LogonType: 10
+        AuthenticationPackageName: Negotiate
+        Severity: Information
+#        LogonProcess:
+#          - C:\Windows\System32\winlogon.exe
+#          - C:\Windows\System32\lsass.exe
+    filter:
+        NewAccountName: 'Admin-*'
+    condition: selection and filter
+falsepositives: 
+    - Legitimate administrative activity
+level: low
