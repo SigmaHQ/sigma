@@ -12,12 +12,24 @@ COND_OR   = 2
 COND_NOT  = 3
 COND_NULL = 4
 
+class SigmaCollectionParser:
+    """Parses a Sigma file that may contain multiple Sigma rules as different YAML documents."""
+    def __init__(self, content, config):
+        self.yamls = yaml.safe_load_all(content)
+        self.parsers = [ SigmaParser(yaml, config) for yaml in self.yamls ]
+        self.config = config
+
+    def generate(self, backend):
+        for parser in self.parsers:
+            backend.generate(parser)
+
 class SigmaParser:
+    """Parse a Sigma rule (definitions, conditions and aggregations)"""
     def __init__(self, sigma, config):
         self.definitions = dict()
         self.values = dict()
         self.config = config
-        self.parsedyaml = yaml.safe_load(sigma)
+        self.parsedyaml = sigma
         self.parse_sigma()
 
     def parse_sigma(self):
@@ -41,7 +53,10 @@ class SigmaParser:
 
         self.condparsed = list()        # list of parsed conditions
         for tokens in self.condtoken:
-            self.condparsed.append(SigmaConditionParser(self, tokens))
+            logger.debug("Condition tokens: %s", str(tokens))
+            condparsed = SigmaConditionParser(self, tokens)
+            logger.debug("Condition parse tree: %s", str(condparsed))
+            self.condparsed.append(condparsed)
 
     def parse_definition_byname(self, definitionName, condOverride=None):
         try:

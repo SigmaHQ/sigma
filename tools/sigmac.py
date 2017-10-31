@@ -8,7 +8,7 @@ import json
 import pathlib
 import itertools
 import logging
-from sigma import SigmaParser, SigmaParseError, SigmaConfiguration, SigmaConfigParseError
+from sigma import SigmaCollectionParser, SigmaParseError, SigmaConfiguration, SigmaConfigParseError
 import backends
 
 logger = logging.getLogger(__name__)
@@ -48,6 +48,9 @@ argparser.add_argument("--debug", "-D", action="store_true", help="Debugging out
 argparser.add_argument("inputs", nargs="*", help="Sigma input files")
 cmdargs = argparser.parse_args()
 
+if cmdargs.debug:
+    logger.setLevel(logging.DEBUG)
+
 if cmdargs.target_list:
     for backend in backends.getBackendList():
         print("%10s: %s" % (backend.identifier, backend.__doc__))
@@ -84,13 +87,8 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
     print_verbose("* Processing Sigma input %s" % (sigmafile))
     try:
         f = sigmafile.open()
-        parser = SigmaParser(f, sigmaconfig)
-        print_debug("Parsed YAML:\n", json.dumps(parser.parsedyaml, indent=2))
-        for condtoken in parser.condtoken:
-            print_debug("Condition Tokens:", condtoken)
-        for condparsed in parser.condparsed:
-            print_debug("Condition Parse Tree:", condparsed)
-        backend.generate(parser)
+        parser = SigmaCollectionParser(f, sigmaconfig)
+        parser.generate(backend)
     except OSError as e:
         print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
         error = 5
@@ -121,12 +119,6 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
             f.close()
         except:
             pass
-        try:
-            for condtoken in parser.condtoken:
-                print_debug("Condition Tokens:", condtoken)
-        except:
-            print_debug("Sigma rule didn't reached condition tokenization")
-        print_debug()
 backend.finalize()
 
 sys.exit(error)
