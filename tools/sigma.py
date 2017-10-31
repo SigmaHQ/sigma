@@ -13,15 +13,57 @@ COND_NOT  = 3
 COND_NULL = 4
 
 class SigmaCollectionParser:
-    """Parses a Sigma file that may contain multiple Sigma rules as different YAML documents."""
+    """
+    Parses a Sigma file that may contain multiple Sigma rules as different YAML documents.
+
+    Special processing of YAML document if 'action' attribute is set to:
+
+    * global: merges attributes from document in all following documents. Accumulates attributes from previous set_global documents
+    * reset: resets global attributes from previous set_global statements
+    * repeat: takes attributes from this YAML document, merges into previous rule YAML and regenerates the rule
+    """
     def __init__(self, content, config):
         self.yamls = yaml.safe_load_all(content)
-        self.parsers = [ SigmaParser(yaml, config) for yaml in self.yamls ]
+        globalyaml = dict()
+        self.parsers = list()
+        prevrule = None
+        for yamldoc in self.yamls:
+            action = None
+            try:
+                action = yamldoc['action']
+                del yamldoc['action']
+            except KeyError:
+                pass
+
+            if action == "global":
+                deep_update_dict(globalyaml, yamldoc)
+            elif action == "reset":
+                globalyaml = dict()
+            elif action == "repeat":
+                if prevrule is None:
+                    raise SigmaCollectionParseError("action 'repeat' is only applicable after first valid Sigma rule")
+                deep_update_dict(prevrule, yamldoc)
+                self.parsers.append(SigmaParser(prevrule, config))
+            else:
+                deep_update_dict(yamldoc, globalyaml)
+                self.parsers.append(SigmaParser(yamldoc, config))
+                prevrule = yamldoc
         self.config = config
 
     def generate(self, backend):
+        """Calls backend for all parsed rules"""
         for parser in self.parsers:
             backend.generate(parser)
+
+def deep_update_dict(dest, src):
+    for key, value in src.items():
+        if isinstance(value, dict) and key in dest and isinstance(dest[key], dict):     # source is dict, destination key already exists and is dict: merge
+                deep_update_dict(dest[key], value)
+        else:
+            dest[key] = value
+
+class SigmaCollectionParseError(Exception):
+    pass
 
 class SigmaParser:
     """Parse a Sigma rule (definitions, conditions and aggregations)"""
