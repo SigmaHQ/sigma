@@ -7,8 +7,11 @@ import yaml
 import json
 import pathlib
 import itertools
+import logging
 from sigma import SigmaParser, SigmaParseError, SigmaConfiguration, SigmaConfigParseError
 import backends
+
+logger = logging.getLogger(__name__)
 
 def print_verbose(*args, **kwargs):
     if cmdargs.verbose or cmdargs.debug:

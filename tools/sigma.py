@@ -2,6 +2,9 @@
 
 import yaml
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 COND_NONE = 0
 COND_AND  = 1
