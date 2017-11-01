@@ -14,16 +14,8 @@ reference:
     - https://subt0x10.blogspot.ca/2017/04/bypassing-application-whitelisting.html
     - https://gist.github.com/subTee/7937a8ef07409715f15b84781e180c46#file-rat-bat
 author: Florian Roth
-falsepositives: 
-    - False positives depend on scripts and administrative tools used in the monitored environment
-level: medium
----
-logsource:
-    product: windows
-    service: sysmon
 detection:
     selection:
-        EventID: 1
         CommandLine: 
             # Hacking activity
             - 'vssadmin.exe delete shadows*'
@@ -73,8 +65,17 @@ detection:
             # NotPowershell (nps) attack
             - '*msbuild*'
     condition: selection
+falsepositives: 
+    - False positives depend on scripts and administrative tools used in the monitored environment
+level: medium
 ---
-action: repeat
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+---
 logsource:
     product: windows
     service: security
