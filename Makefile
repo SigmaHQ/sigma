@@ -1,4 +1,5 @@
-    .PHONY: test test-yaml test-sigmac
+.PHONY: test test-yaml test-sigmac
+TMPOUT = $(shell tempfile)
 test: test-yaml test-sigmac
 
 test-yaml:
@@ -23,7 +24,8 @@ test-sigmac:
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/logpoint-windows-all.yml -t logpoint rules/ > /dev/null
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -t grep rules/ > /dev/null
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -t fieldlist rules/ > /dev/null
-	coverage run -a --include=tools/*  tools/sigmac.py -t xpack-watcher -O output=plain -O es=es -O foobar rules/windows/builtin/win_susp_failed_logons_single_source.yml > /dev/null
+	coverage run -a --include=tools/* tools/sigmac.py -t xpack-watcher -O output=plain -O es=es -O foobar rules/windows/builtin/win_susp_failed_logons_single_source.yml > /dev/null
+	coverage run -a --include=tools/* tools/sigmac.py -t es-qs -o $(TMPOUT) tests/collection_repeat.yml > /dev/null
 	! coverage run -a --include=tools/*  tools/sigmac.py -t xpack-watcher -O output=foobar -O es=es -O foobar rules/windows/builtin/win_susp_failed_logons_single_source.yml > /dev/null
 	! coverage run -a --include=tools/* tools/sigmac.py -t es-qs tests/not_existing.yml > /dev/null
 	! coverage run -a --include=tools/* tools/sigmac.py -t es-qs tests/invalid_yaml.yml > /dev/null
@@ -39,3 +41,4 @@ test-sigmac:
 	! coverage run -a --include=tools/* tools/sigmac.py -t es-qs -c tests/invalid_config.yml rules/windows/sysmon/sysmon_mimikatz_detection_lsass.yml
 	! coverage run -a --include=tools/* tools/sigmac.py -rvI -c tools/config/elk-defaultindex.yml -t kibana rules/ > /dev/null
 	coverage report --fail-under=90
+	rm -f $(TMPOUT)
