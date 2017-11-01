@@ -1,3 +1,4 @@
+action: global
 title: Detects Suspicious Rundll32 activity
 description: Detects suspicious process related to rundll32 based on arguments
 status: experimental
@@ -6,13 +7,8 @@ reference:
     - https://twitter.com/Hexacorn/status/885258886428725250
     - https://gist.github.com/ryhanson/227229866af52e2d963cf941af135a52
 author: juju4
-logsource:
-    product: windows
-    service: security
-    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
 detection:
     selection:
-        EventID: 4688
         CommandLine: 
             # match with or without rundll32.exe to try to catch evasion
             - '*\rundll32.exe* url.dll,*OpenURL *'
@@ -31,4 +27,21 @@ detection:
     condition: selection
 falsepositives: 
     - False positives depend on scripts and administrative tools used in the monitored environment
+---
+# Windows Audit Log
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection:
+        EventID: 4688
+---
+# Sysmon
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
 level: medium

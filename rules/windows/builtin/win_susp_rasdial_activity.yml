@@ -1,9 +1,20 @@
+action: global
 title: Detects Suspicious rasdial activity
 description: Detects suspicious process related to rasdial.exe
 status: experimental
 reference: 
     - https://twitter.com/subTee/status/891298217907830785
 author: juju4
+detection:
+    selection:
+        CommandLine: 
+            - 'rasdial'
+    condition: selection
+falsepositives: 
+    - False positives depend on scripts and administrative tools used in the monitored environment
+level: medium
+---
+# Windows Audit Log
 logsource:
     product: windows
     service: security
@@ -11,9 +22,11 @@ logsource:
 detection:
     selection:
         EventID: 4688
-        CommandLine: 
-            - 'rasdial'
-    condition: selection
-falsepositives: 
-    - False positives depend on scripts and administrative tools used in the monitored environment
-level: medium
+---
+# Sysmon
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
