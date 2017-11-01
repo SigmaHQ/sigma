@@ -13,6 +13,12 @@ test-sigmac:
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -t xpack-watcher rules/ > /dev/null
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -t splunk rules/ > /dev/null
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -t logpoint rules/ > /dev/null
+	coverage run -a --include=tools/* tools/sigmac.py -rvdI -t splunk -f 'level>=high,level<=critical,status=stable,logsource=windows' rules/ > /dev/null
+	! coverage run -a --include=tools/* tools/sigmac.py -rvdI -t splunk -f 'level>=high,level<=critical,status=xstable,logsource=windows' rules/ > /dev/null
+	! coverage run -a --include=tools/* tools/sigmac.py -rvdI -t splunk -f 'level>=high,level<=xcritical,status=stable,logsource=windows' rules/ > /dev/null
+	coverage run -a --include=tools/* tools/sigmac.py -rvdI -t splunk -f 'level=critical' rules/ > /dev/null
+	! coverage run -a --include=tools/* tools/sigmac.py -rvdI -t splunk -f 'level=xcritical' rules/ > /dev/null
+	! coverage run -a --include=tools/* tools/sigmac.py -rvdI -t splunk -f 'foo=bar' rules/ > /dev/null
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/elk-windows.yml -t es-qs rules/ > /dev/null
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/elk-linux.yml -t es-qs rules/ > /dev/null
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/elk-windows.yml -t kibana rules/ > /dev/null
