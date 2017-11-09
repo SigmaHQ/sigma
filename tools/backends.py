@@ -297,6 +297,8 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
             pass
 
         indices = sigmaparser.get_logsource().index
+        if len(indices) == 0:   # fallback if no index is given
+            indices = ["*"]
 
         for parsed in sigmaparser.condparsed:
             result = self.generateNode(parsed.parsedSearch)
