@@ -23,7 +23,7 @@ test-sigmac:
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/elk-linux.yml -t es-qs rules/ > /dev/null
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/elk-windows.yml -t kibana rules/ > /dev/null
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/elk-linux.yml -t kibana rules/ > /dev/null
-	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/elk-defaultindex.yml -t kibana rules/ > /dev/null
+	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/elk-defaultindex-filebeat.yml -t kibana rules/ > /dev/null
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/elk-windows.yml -t xpack-watcher rules/ > /dev/null
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/elk-linux.yml -t xpack-watcher rules/ > /dev/null
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/elk-defaultindex.yml -t xpack-watcher rules/ > /dev/null
