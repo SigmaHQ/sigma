@@ -1,12 +1,18 @@
 .PHONY: test test-yaml test-sigmac
 TMPOUT = $(shell tempfile)
-test: test-yaml test-sigmac
+test: clearcov test-yaml test-sigmac test-merge finish
+
+clearcov:
+	rm -f .coverage
+
+finish:
+	coverage report --fail-under=90
+	rm -f $(TMPOUT)
 
 test-yaml:
 	yamllint rules
 
 test-sigmac:
-	rm -f .coverage
 	coverage run -a --include=tools/* tools/sigmac.py -l
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -t es-qs rules/ > /dev/null
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -t kibana rules/ > /dev/null
@@ -23,7 +29,6 @@ test-sigmac:
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/elk-linux.yml -t es-qs rules/ > /dev/null
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/elk-windows.yml -t kibana rules/ > /dev/null
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/elk-linux.yml -t kibana rules/ > /dev/null
-	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/elk-defaultindex-filebeat.yml -t kibana rules/ > /dev/null
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/elk-windows.yml -t xpack-watcher rules/ > /dev/null
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/elk-linux.yml -t xpack-watcher rules/ > /dev/null
 	coverage run -a --include=tools/* tools/sigmac.py -rvdI -c tools/config/elk-defaultindex.yml -t xpack-watcher rules/ > /dev/null
@@ -47,5 +52,7 @@ test-sigmac:
 	! coverage run -a --include=tools/* tools/sigmac.py -t es-qs -c tests/invalid_yaml.yml rules/windows/sysmon/sysmon_mimikatz_detection_lsass.yml
 	! coverage run -a --include=tools/* tools/sigmac.py -t es-qs -c tests/invalid_config.yml rules/windows/sysmon/sysmon_mimikatz_detection_lsass.yml
 	! coverage run -a --include=tools/* tools/sigmac.py -rvI -c tools/config/elk-defaultindex.yml -t kibana rules/ > /dev/null
-	coverage report --fail-under=90
-	rm -f $(TMPOUT)
+
+test-merge:
+	tests/test-merge.sh
+	! coverage run -a --include=tools/* tools/merge_sigma.py tests/not_existing.yml > /dev/null
