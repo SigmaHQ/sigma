@@ -1,0 +1,22 @@
+title: Rundll32 Internet Connection
+status: experimental
+description: Detects a rundll32 that communicates with piblic IP addresses
+reference: https://www.hybrid-analysis.com/sample/759fb4c0091a78c5ee035715afe3084686a8493f39014aea72dae36869de9ff6?environmentId=100
+author: Florian Roth
+date: 2017/11/04
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 3
+        Image: '*\rundll32.exe'
+    filter:
+        DestinationIp: 
+            - '10.*'
+            - '192.168.*'
+            - '172.*'
+    condition: selection and not filter
+falsepositives:
+    - Communication to other corporate systems that use IP addresses from public address spaces
+level: medium

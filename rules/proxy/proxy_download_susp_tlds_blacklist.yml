@@ -1,0 +1,102 @@
+title: Download from Suspicious TLD
+status: experimental
+description: Detects download of certain file types from hosts in suspicious TLDs 
+reference: 
+    - https://www.symantec.com/connect/blogs/shady-tld-research-gdn-and-our-2016-wrap
+    - https://promos.mcafee.com/en-US/PDF/MTMW_Report.pdf
+    - https://www.spamhaus.org/statistics/tlds/
+author: Florian Roth
+date: 2017/11/07
+logsource:
+    category: proxy
+detection:
+    selection:
+        c-uri-extension: 
+            - 'exe'
+            - 'vbs'
+            - 'bat'
+            - 'rar'
+            - 'ps1'
+            - 'doc'
+            - 'docm'
+            - 'xls'
+            - 'xlsm'
+            - 'pptm'
+            - 'rtf'
+            - 'hta'
+            - 'dll'
+            - 'ws'
+            - 'wsf'
+            - 'sct'
+            - 'zip'
+            # If you want to add more extensions - see https://docs.google.com/spreadsheets/d/1TWS238xacAto-fLKh1n5uTsdijWdCEsGIM0Y0Hvmc5g/
+        r-dns: 
+            # Symantec / Chris Larsen analysis 
+            - '*.country'
+            - '*.stream'
+            - '*.gdn'
+            - '*.mom'
+            - '*.xin'
+            - '*.kim'
+            - '*.men'
+            - '*.loan'
+            - '*.download'
+            - '*.racing'
+            - '*.online'
+            - '*.science'
+            - '*.ren'
+            - '*.gb'
+            - '*.win'
+            - '*.top'
+            - '*.review'
+            - '*.vip'
+            - '*.party'
+            - '*.tech'
+            - '*.tech'
+            - '*.xyz'
+            - '*.date'
+            - '*.faith'
+            - '*.zip'
+            - '*.cricket'
+            - '*.space'
+            - '*.top'
+            # McAfee report
+            - '*.info'
+            - '*.vn'
+            - '*.cm'
+            - '*.am'
+            - '*.cc'
+            - '*.asia'
+            - '*.ws'
+            - '*.tk'
+            - '*.biz'
+            - '*.su'
+            - '*.st'
+            - '*.ro'
+            - '*.ge'
+            - '*.ms'
+            - '*.pk'
+            - '*.nu'
+            - '*.me'
+            - '*.ph'
+            - '*.to'
+            - '*.tt'
+            - '*.name'
+            - '*.tv'
+            - '*.tv'
+            - '*.kz'
+            - '*.tc'
+            - '*.mobi'
+            # Spamhaus
+            - '*.study'
+            - '*.click'
+            - '*.link'
+            - '*.trade'
+            - '*.accountant'
+    condition: selection
+fields:
+    - ClientIP
+    - URL
+falsepositives:
+    - All kind of software downloads
+level: low

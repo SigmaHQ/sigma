@@ -22,7 +22,9 @@ class SigmaCollectionParser:
     * reset: resets global attributes from previous set_global statements
     * repeat: takes attributes from this YAML document, merges into previous rule YAML and regenerates the rule
     """
-    def __init__(self, content, config, rulefilter=None):
+    def __init__(self, content, config=None, rulefilter=None):
+        if config is None:
+            config = SigmaConfiguration()
         self.yamls = yaml.safe_load_all(content)
         globalyaml = dict()
         self.parsers = list()
@@ -58,6 +60,9 @@ class SigmaCollectionParser:
         """Calls backend for all parsed rules"""
         for parser in self.parsers:
             backend.generate(parser)
+
+    def __iter__(self):
+        return iter([parser.parsedyaml for parser in self.parsers])
 
 def deep_update_dict(dest, src):
     for key, value in src.items():
