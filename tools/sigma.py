@@ -2,18 +2,80 @@
 
 import yaml
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 COND_NONE = 0
 COND_AND  = 1
 COND_OR   = 2
 COND_NOT  = 3
+COND_NULL = 4
+
+class SigmaCollectionParser:
+    """
+    Parses a Sigma file that may contain multiple Sigma rules as different YAML documents.
+
+    Special processing of YAML document if 'action' attribute is set to:
+
+    * global: merges attributes from document in all following documents. Accumulates attributes from previous set_global documents
+    * reset: resets global attributes from previous set_global statements
+    * repeat: takes attributes from this YAML document, merges into previous rule YAML and regenerates the rule
+    """
+    def __init__(self, content, config, rulefilter=None):
+        self.yamls = yaml.safe_load_all(content)
+        globalyaml = dict()
+        self.parsers = list()
+        prevrule = None
+        for yamldoc in self.yamls:
+            action = None
+            try:
+                action = yamldoc['action']
+                del yamldoc['action']
+            except KeyError:
+                pass
+
+            if action == "global":
+                deep_update_dict(globalyaml, yamldoc)
+            elif action == "reset":
+                globalyaml = dict()
+            elif action == "repeat":
+                if prevrule is None:
+                    raise SigmaCollectionParseError("action 'repeat' is only applicable after first valid Sigma rule")
+                newrule = prevrule.copy()
+                deep_update_dict(newrule, yamldoc)
+                if rulefilter is None or rulefilter is not None and not rulefilter.match(newrule):
+                    self.parsers.append(SigmaParser(newrule, config))
+                    prevrule = newrule
+            else:
+                deep_update_dict(yamldoc, globalyaml)
+                if rulefilter is None or rulefilter is not None and rulefilter.match(yamldoc):
+                    self.parsers.append(SigmaParser(yamldoc, config))
+                    prevrule = yamldoc
+        self.config = config
+
+    def generate(self, backend):
+        """Calls backend for all parsed rules"""
+        for parser in self.parsers:
+            backend.generate(parser)
+
+def deep_update_dict(dest, src):
+    for key, value in src.items():
+        if isinstance(value, dict) and key in dest and isinstance(dest[key], dict):     # source is dict, destination key already exists and is dict: merge
+                deep_update_dict(dest[key], value)
+        else:
+            dest[key] = value
+
+class SigmaCollectionParseError(Exception):
+    pass
 
 class SigmaParser:
+    """Parse a Sigma rule (definitions, conditions and aggregations)"""
     def __init__(self, sigma, config):
         self.definitions = dict()
         self.values = dict()
         self.config = config
-        self.parsedyaml = yaml.safe_load(sigma)
+        self.parsedyaml = sigma
         self.parse_sigma()
 
     def parse_sigma(self):
@@ -37,7 +99,10 @@ class SigmaParser:
 
         self.condparsed = list()        # list of parsed conditions
         for tokens in self.condtoken:
-            self.condparsed.append(SigmaConditionParser(self, tokens))
+            logger.debug("Condition tokens: %s", str(tokens))
+            condparsed = SigmaConditionParser(self, tokens)
+            logger.debug("Condition parse tree: %s", str(condparsed))
+            self.condparsed.append(condparsed)
 
     def parse_definition_byname(self, definitionName, condOverride=None):
         try:
@@ -68,7 +133,20 @@ class SigmaParser:
             cond = ConditionAND()
             for key, value in definition.items():
                 mapping = self.config.get_fieldmapping(key)
-                cond.add(mapping.resolve(key, value, self))
+                if value == None:
+                    fields = mapping.resolve_fieldname(key)
+                    if type(fields) == str:
+                        fields = [ fields ]
+                    for field in fields:
+                        cond.add(ConditionNULLValue(val=field))
+                elif value == "not null":
+                    fields = mapping.resolve_fieldname(key)
+                    if type(fields) == str:
+                        fields = [ fields ]
+                    for field in fields:
+                        cond.add(ConditionNotNULLValue(val=field))
+                else:
+                    cond.add(mapping.resolve(key, value, self))
 
         return cond
 
@@ -129,7 +207,6 @@ class SigmaConditionToken:
     TOKEN_GTE    = 15
     TOKEN_BY     = 16
     TOKEN_NEAR   = 17
-    TOKEN_WITHIN = 18
 
     tokenstr = [
             "INVALID",
@@ -150,7 +227,6 @@ class SigmaConditionToken:
             "GTE",
             "BY",
             "NEAR",
-            "WITHIN",
             ]
 
     def __init__(self, tokendef, match, pos):
@@ -177,7 +253,6 @@ class SigmaConditionTokenizer:
             (None,       re.compile("[\\s\\r\\n]+")),
             (SigmaConditionToken.TOKEN_AGG,    re.compile("count|min|max|avg|sum", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_NEAR,   re.compile("near", re.IGNORECASE)),
-            (SigmaConditionToken.TOKEN_WITHIN, re.compile("within", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_BY,     re.compile("by", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_EQ,     re.compile("==")),
             (SigmaConditionToken.TOKEN_LT,     re.compile("<")),
@@ -299,7 +374,7 @@ class ConditionNOT(ConditionBase):
         if len(self.items) == 0:
             super.add(item)
         else:
-            raise ValueError("Only one element allowed in NOT condition")
+            raise ValueError("Only one element allowed")
 
     @property
     def item(self):
@@ -307,6 +382,14 @@ class ConditionNOT(ConditionBase):
             return self.items[0]
         except IndexError:
             return None
+
+class ConditionNULLValue(ConditionNOT):
+    """Condition: Field value is empty or doesn't exists"""
+    pass
+
+class ConditionNotNULLValue(ConditionNULLValue):
+    """Condition: Field value is not empty"""
+    pass
 
 class NodeSubexpression(ParseTreeNode):
     """Subexpression"""
@@ -515,17 +598,13 @@ class SigmaAggregationParser(SimpleParser):
             },
             {   # State 9
                 SigmaConditionToken.TOKEN_AND: (None, "set_include", 10),
-                SigmaConditionToken.TOKEN_WITHIN: (None, None, 11),
             },
             {   # State 10
                 SigmaConditionToken.TOKEN_NOT: (None, "set_exclude", 8),
                 SigmaConditionToken.TOKEN_ID: (None, "store_search_id", 9),
             },
-            {   # State 11
-                SigmaConditionToken.TOKEN_ID: ("timeframe", "trans_timeframe", -1),
-            },
             ]
-    finalstates = { -1 }
+    finalstates = { -1, 9 }
 
     # Aggregation functions
     AGGFUNC_COUNT = 1
@@ -906,4 +985,96 @@ class SigmaLogsourceConfiguration:
         return "[ LogSourceConfiguration: %s %s %s indices: %s ]" % (self.category, self.product, self.service, str(self.index))
 
 class SigmaConfigParseError(Exception):
+    pass
+
+# Rule Filtering
+class SigmaRuleFilter:
+    """Filter for Sigma rules with conditions"""
+    LEVELS = {
+            "low"      : 0,
+            "medium"   : 1,
+            "high"     : 2,
+            "critical" : 3
+            }
+    STATES = ["experimental", "testing", "stable"]
+
+    def __init__(self, expr):
+        self.minlevel   = None 
+        self.maxlevel   = None 
+        self.status     = None
+        self.logsources = list()
+
+        for cond in [c.replace(" ", "") for c in expr.split(",")]:
+            if cond.startswith("level<="):
+                try:
+                    level = cond[cond.index("=") + 1:]
+                    self.maxlevel = self.LEVELS[level]
+                except KeyError as e:
+                    raise SigmaRuleFilterParseException("Unknown level '%s' in condition '%s'" % (level, cond)) from e
+            elif cond.startswith("level>="):
+                try:
+                    level = cond[cond.index("=") + 1:]
+                    self.minlevel = self.LEVELS[level]
+                except KeyError as e:
+                    raise SigmaRuleFilterParseException("Unknown level '%s' in condition '%s'" % (level, cond)) from e
+            elif cond.startswith("level="):
+                try:
+                    level = cond[cond.index("=") + 1:]
+                    self.minlevel = self.LEVELS[level]
+                    self.maxlevel = self.minlevel
+                except KeyError as e:
+                    raise SigmaRuleFilterParseException("Unknown level '%s' in condition '%s'" % (level, cond)) from e
+            elif cond.startswith("status="):
+                self.status = cond[cond.index("=") + 1:]
+                if self.status not in self.STATES:
+                    raise SigmaRuleFilterParseException("Unknown status '%s' in condition '%s'" % (self.status, cond))
+            elif cond.startswith("logsource="):
+                self.logsources.append(cond[cond.index("=") + 1:])
+            else:
+                raise SigmaRuleFilterParseException("Unknown condition '%s'" % cond)
+
+    def match(self, yamldoc):
+        """Match filter conditions against rule"""
+        # Levels
+        if self.minlevel is not None or self.maxlevel is not None:
+            try:
+                level = self.LEVELS[yamldoc['level']]
+            except KeyError:    # missing or invalid level
+                return False    # User wants level restriction, but it's not possible here
+
+            # Minimum level
+            if self.minlevel is not None:
+                if level < self.minlevel:
+                    return False
+            # Maximum level
+            if self.maxlevel is not None:
+                if level > self.maxlevel:
+                    return False
+
+        # Status
+        if self.status is not None:
+            try:
+                status = yamldoc['status']
+            except KeyError:    # missing status
+                return False    # User wants status restriction, but it's not possible here
+            if status != self.status:
+                return False
+
+        # Log Sources
+        if len(self.logsources) > 0:
+            try:
+                logsources = { value for key, value in yamldoc['logsource'].items() }
+            except (KeyError, AttributeError):    # no log source set
+                return False    # User wants status restriction, but it's not possible here
+
+            for logsrc in self.logsources:
+                if logsrc not in logsources:
+                    return False
+
+        # all tests passed
+        return True
+
+
+
+class SigmaRuleFilterParseException(Exception):
     pass

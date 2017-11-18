@@ -1,3 +1,4 @@
+action: global
 title: Detects Phantom DLLs usage
 description: Detects Phantom DLLs usage and matching executable
 status: experimental
@@ -5,13 +6,8 @@ reference:
     - http://www.hexacorn.com/blog/2013/12/08/beyond-good-ol-run-key-part-5/
     - http://www.hexacorn.com/blog/2015/02/23/beyond-good-ol-run-key-part-28/
 author: juju4
-logsource:
-    product: windows
-    service: security
-    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
 detection:
     selection:
-        EventID: 4688
         CommandLine: 
             - '*ntbackup*'
             - '*\edbbcli.dll*'
@@ -68,3 +64,20 @@ detection:
 falsepositives: 
     - False positives depend on environment
 level: medium
+---
+# Windows Audit Log
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection:
+        EventID: 4688
+---
+# Sysmon
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1

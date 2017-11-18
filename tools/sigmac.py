@@ -7,8 +7,11 @@ import yaml
 import json
 import pathlib
 import itertools
-from sigma import SigmaParser, SigmaParseError, SigmaConfiguration, SigmaConfigParseError
+import logging
+from sigma import SigmaCollectionParser, SigmaCollectionParseError, SigmaParseError, SigmaConfiguration, SigmaConfigParseError, SigmaRuleFilter, SigmaRuleFilterParseException
 import backends
+
+logger = logging.getLogger(__name__)
 
 def print_verbose(*args, **kwargs):
     if cmdargs.verbose or cmdargs.debug:
@@ -33,6 +36,14 @@ def get_inputs(paths, recursive):
 
 argparser = argparse.ArgumentParser(description="Convert Sigma rules into SIEM signatures.")
 argparser.add_argument("--recurse", "-r", action="store_true", help="Recurse into subdirectories (not yet implemented)")
+argparser.add_argument("--filter", "-f", help="""
+Define comma-separated filters that must match (AND-linked) to rule to be processed.
+Valid filters: level<=x, level>=x, level=x, status=y, logsource=z.
+x is one of: low, medium, high, critical.
+y is one of: experimental, testing, stable.
+z is a word appearing in an arbitrary log source attribute.
+Multiple log source specifications are AND linked.
+        """)
 argparser.add_argument("--target", "-t", default="es-qs", choices=backends.getBackendDict().keys(), help="Output target format")
 argparser.add_argument("--target-list", "-l", action="store_true", help="List available output target formats")
 argparser.add_argument("--config", "-c", help="Configuration with field name and index mapping for target environment (not yet implemented)")
@@ -45,10 +56,21 @@ argparser.add_argument("--debug", "-D", action="store_true", help="Debugging out
 argparser.add_argument("inputs", nargs="*", help="Sigma input files")
 cmdargs = argparser.parse_args()
 
+if cmdargs.debug:
+    logger.setLevel(logging.DEBUG)
+
 if cmdargs.target_list:
     for backend in backends.getBackendList():
         print("%10s: %s" % (backend.identifier, backend.__doc__))
     sys.exit(0)
+
+rulefilter = None
+if cmdargs.filter:
+    try:
+        rulefilter = SigmaRuleFilter(cmdargs.filter)
+    except SigmaRuleFilterParseException as e:
+        print("Parse error in Sigma rule filter expression: %s" % str(e), file=sys.stderr)
+        sys.exit(9)
 
 out = sys.stdout
 sigmaconfig = SigmaConfiguration()
@@ -81,13 +103,8 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
     print_verbose("* Processing Sigma input %s" % (sigmafile))
     try:
         f = sigmafile.open()
-        parser = SigmaParser(f, sigmaconfig)
-        print_debug("Parsed YAML:\n", json.dumps(parser.parsedyaml, indent=2))
-        for condtoken in parser.condtoken:
-            print_debug("Condition Tokens:", condtoken)
-        for condparsed in parser.condparsed:
-            print_debug("Condition Parse Tree:", condparsed)
-        backend.generate(parser)
+        parser = SigmaCollectionParser(f, sigmaconfig, rulefilter)
+        parser.generate(backend)
     except OSError as e:
         print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
         error = 5
@@ -96,7 +113,7 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
         error = 3
         if not cmdargs.defer_abort:
             sys.exit(error)
-    except SigmaParseError as e:
+    except (SigmaParseError, SigmaCollectionParseError) as e:
         print("Sigma parse error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
         error = 4
         if not cmdargs.defer_abort:
@@ -118,12 +135,6 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
             f.close()
         except:
             pass
-        try:
-            for condtoken in parser.condtoken:
-                print_debug("Condition Tokens:", condtoken)
-        except:
-            print_debug("Sigma rule didn't reached condition tokenization")
-        print_debug()
 backend.finalize()
 
 sys.exit(error)
