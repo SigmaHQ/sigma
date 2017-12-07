@@ -14,7 +14,7 @@ Sigma is for log files what [Snort](https://www.snort.org/) is for network traff
 This repository contains:
 
 * Sigma rule specification in the [Wiki](https://github.com/Neo23x0/sigma/wiki/Specification)
-* Open repository for sigma signatures in the ```./rules```subfolder
+* Open repository for sigma signatures in the `./rules`subfolder
 * A converter that generate searches/queries for different SIEM systems [work in progress]
 
 ## Hack.lu 2017 Talk
@@ -89,16 +89,24 @@ Sysmon: Web Shell Detection
 Windows 'Security' Eventlog: Suspicious Number of Failed Logons from a Single Source Workstation
 ![sigma_rule example5](./images/Sigma_rule_example5.png)
 
-## Sigmac
+## Sigma Toolchain
 
-The beta version of the rule converter 'sigmac' converting a non-correlation rule into an ElasticSearch query
+Sigmac converts sigma rules into queries or inputs of the supported targets listed below. It acts as a frontend to the
+Sigma library that may be used to integrate Sigma support in other projects. Further, there's `merge_sigma.py` which
+merges multiple YAML documents of a Sigma rule collection into simple Sigma rules.
+
 ![sigmac_converter](./images/Sigmac-win_susp_rc4_kerberos.png)
 
-## Supported Targets
+### Supported Targets
 
 * [Splunk](https://www.splunk.com/)
 * [ElasticSearch](https://www.elastic.co/)
+* [Elastic X-Pack Watcher](https://www.elastic.co/guide/en/x-pack/current/xpack-alerting.html)
 * [Logpoint](https://www.logpoint.com)
+
+### Requirements
+
+The usage of Sigmac or the underlying library requires Python >= 3.4 and PyYAML.
 
 # Next Steps 
 
