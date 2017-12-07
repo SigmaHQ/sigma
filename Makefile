@@ -1,6 +1,6 @@
 .PHONY: test test-yaml test-sigmac
 TMPOUT = $(shell tempfile)
-test: clearcov test-yaml test-sigmac test-merge finish
+test: clearcov test-yaml test-sigmac test-merge test-packaging finish
 
 clearcov:
 	rm -f .coverage
@@ -56,3 +56,6 @@ test-sigmac:
 test-merge:
 	tests/test-merge.sh
 	! coverage run -a --include=tools/* tools/merge_sigma.py tests/not_existing.yml > /dev/null
+
+test-packaging:
+	python3 setup.py bdist_wheel
