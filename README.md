@@ -14,7 +14,7 @@ Sigma is for log files what [Snort](https://www.snort.org/) is for network traff
 This repository contains:
 
 * Sigma rule specification in the [Wiki](https://github.com/Neo23x0/sigma/wiki/Specification)
-* Open repository for sigma signatures in the ```./rules```subfolder
+* Open repository for sigma signatures in the `./rules` subfolder
 * A converter that generate searches/queries for different SIEM systems [work in progress]
 
 ## Hack.lu 2017 Talk
@@ -113,6 +113,14 @@ The beta version of the rule converter 'sigmac' converting a non-correlation rul
 
 # Credits
 
-This is a private project mainly developed by Florian Roth and Thomas Patzke with feedback from many fellow analysts and friends. Rules are our own or have been drived from blog posts, tweets or other public sources that are referenced in the rules.   
+This is a private project mainly developed by Florian Roth and Thomas Patzke with feedback from many fellow analysts and friends. Rules are our own or have been drived from blog posts, tweets or other public sources that are referenced in the rules.
 
 Copyright for Tree Image: [studiobarcelona / 123RF Stock Photo](http://www.123rf.com/profile_studiobarcelona)
+
+# Licenses
+
+The content of this repository is released under the following licenses:
+
+* The toolchain (everything under `tools/`) is licensed under the [GNU Lesser General Public License](https://www.gnu.org/licenses/lgpl-3.0.en.html).
+* The [Sigma specification](https://github.com/Neo23x0/sigma/wiki) is public domain.
+* Everything else, especially the rules contained in the `rules/` directory is released under the [GNU General Public License](https://www.gnu.org/licenses/gpl-3.0.en.html).
