@@ -17,7 +17,7 @@ setup(
     description='Tools for the Generic Signature Format for SIEM Systems',
     long_description=long_description,
     url='https://github.com/Neo23x0/sigma',
-    author='Thomas Patzke',
+    author='Sigma Project',
     author_email='thomas@patzke.org',
     license='LGPLv3',
     classifiers=[
@@ -40,6 +40,6 @@ setup(
     extras_require={
         'test': ['coverage', 'yamllint'],
     },
-    data_files=[('config', ['config/elk-windows.yml', 'config/elk-linux.yml', 'config/elk-defaultindex.yml', 'config/splunk-windows-all.yml', 'config/splunk-windows-all.yml'])],
-    scripts=['sigmac.py', 'merge_sigma.py']
+    data_files=[('etc/sigma', ['config/elk-windows.yml', 'config/elk-linux.yml', 'config/elk-defaultindex.yml', 'config/splunk-windows-all.yml', 'config/splunk-windows-all.yml', 'config/logpoint-windows-all.yml'])],
+    scripts=['sigmac', 'merge_sigma']
 )
