@@ -1,7 +1,7 @@
 .PHONY: test test-yaml test-sigmac
 TMPOUT = $(shell tempfile)
 COVSCOPE = tools/sigma/*.py,tools/sigmac.py,tools/merge_sigma.py
-test: clearcov test-yaml test-sigmac test-merge test-packaging finish
+test: clearcov test-yaml test-sigmac test-merge build finish
 
 clearcov:
 	rm -f .coverage
@@ -58,5 +58,9 @@ test-merge:
 	tests/test-merge.sh
 	! coverage run -a --include=$(COVSCOPE) tools/merge_sigma.py tests/not_existing.yml > /dev/null
 
-test-packaging:
+build:
 	cd tools && python3 setup.py bdist_wheel
+
+clean:
+	cd tools; rm -fr build dist Sigma.egg-info
+	find tools/ -type d -name __pycache__ -exec rm -fr {} \;
