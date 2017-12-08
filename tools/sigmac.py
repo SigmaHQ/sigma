@@ -22,8 +22,9 @@ import json
 import pathlib
 import itertools
 import logging
-from sigma import SigmaCollectionParser, SigmaCollectionParseError, SigmaParseError, SigmaConfiguration, SigmaConfigParseError, SigmaRuleFilter, SigmaRuleFilterParseException
-import backends
+from sigma.parser import SigmaCollectionParser, SigmaCollectionParseError, SigmaParseError
+from sigma.config import SigmaConfiguration, SigmaConfigParseError, SigmaRuleFilter, SigmaRuleFilterParseException
+import sigma.backends as backends
 
 logger = logging.getLogger(__name__)
 

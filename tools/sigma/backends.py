@@ -85,7 +85,7 @@ class BaseBackend:
         passing the object instance to it. Further, output files are initialized by the output class defined in output_class.
         """
         super().__init__()
-        if not isinstance(sigmaconfig, (sigma.SigmaConfiguration, None)):
+        if not isinstance(sigmaconfig, (sigma.config.SigmaConfiguration, None)):
             raise TypeError("SigmaConfiguration object expected")
         self.options = backend_options
         self.sigmaconfig = sigmaconfig
@@ -104,17 +104,17 @@ class BaseBackend:
         return result
 
     def generateNode(self, node):
-        if type(node) == sigma.ConditionAND:
+        if type(node) == sigma.parser.ConditionAND:
             return self.generateANDNode(node)
-        elif type(node) == sigma.ConditionOR:
+        elif type(node) == sigma.parser.ConditionOR:
             return self.generateORNode(node)
-        elif type(node) == sigma.ConditionNOT:
+        elif type(node) == sigma.parser.ConditionNOT:
             return self.generateNOTNode(node)
-        elif type(node) == sigma.ConditionNULLValue:
+        elif type(node) == sigma.parser.ConditionNULLValue:
             return self.generateNULLValueNode(node)
-        elif type(node) == sigma.ConditionNotNULLValue:
+        elif type(node) == sigma.parser.ConditionNotNULLValue:
             return self.generateNotNULLValueNode(node)
-        elif type(node) == sigma.NodeSubexpression:
+        elif type(node) == sigma.parser.NodeSubexpression:
             return self.generateSubexpressionNode(node)
         elif type(node) == tuple:
             return self.generateMapItemNode(node)
@@ -482,7 +482,7 @@ class LogPointBackend(SingleTextQueryBackend):
     def generateAggregation(self, agg):
         if agg == None:
             return ""
-        if agg.aggfunc == sigma.SigmaAggregationParser.AGGFUNC_NEAR:
+        if agg.aggfunc == sigma.parser.SigmaAggregationParser.AGGFUNC_NEAR:
             raise NotImplementedError("The 'near' aggregation operator is not yet implemented for this backend")
         if agg.groupfield == None:
             return " | chart %s(%s) as val | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.cond_op, agg.condition)
@@ -516,7 +516,7 @@ class SplunkBackend(SingleTextQueryBackend):
     def generateAggregation(self, agg):
         if agg == None:
             return ""
-        if agg.aggfunc == sigma.SigmaAggregationParser.AGGFUNC_NEAR:
+        if agg.aggfunc == sigma.parser.SigmaAggregationParser.AGGFUNC_NEAR:
             raise NotImplementedError("The 'near' aggregation operator is not yet implemented for this backend")
         if agg.groupfield == None:
             return " | stats %s(%s) as val | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.cond_op, agg.condition)

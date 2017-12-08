@@ -19,7 +19,7 @@ import sys
 import argparse
 import yaml
 
-from sigma import SigmaCollectionParser
+from sigma.parser import SigmaCollectionParser
 
 argparser = argparse.ArgumentParser(description="Convert Sigma rules into SIEM signatures.")
 argparser.add_argument("input", help="Sigma input file")

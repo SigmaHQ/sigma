@@ -35,11 +35,11 @@ setup(
     ],
     keywords='security monitoring siem logging signatures elasticsearch splunk ids sysmon',
     packages=['sigma'],
-    python_requires='~=3.3',
+    python_requires='~=3.4',
     install_requires=['PyYAML'],
     extras_require={
         'test': ['coverage', 'yamllint'],
     },
-    data_files=[('config', ['tools/config/elk-windows.yml', 'tools/config/elk-linux.yml', 'tools/config/elk-defaultindex.yml', 'tools/config/splunk-windows-all.yml', 'tools/config/splunk-windows-all.yml'])],
-    scripts=['tools/sigmac.py', 'tools/merge_sigma.py']
+    data_files=[('config', ['config/elk-windows.yml', 'config/elk-linux.yml', 'config/elk-defaultindex.yml', 'config/splunk-windows-all.yml', 'config/splunk-windows-all.yml'])],
+    scripts=['sigmac.py', 'merge_sigma.py']
 )
