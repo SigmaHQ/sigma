@@ -1093,7 +1093,5 @@ class SigmaRuleFilter:
         # all tests passed
         return True
 
-
-
 class SigmaRuleFilterParseException(Exception):
     pass
