@@ -108,6 +108,14 @@ merges multiple YAML documents of a Sigma rule collection into simple Sigma rule
 
 The usage of Sigmac or the underlying library requires Python >= 3.4 and PyYAML.
 
+### Installation
+
+It's available on PyPI. Install with:
+
+```
+pip3 install sigmatools
+```
+
 # Next Steps 
 
 * Integration of feedback into the rule specifications
