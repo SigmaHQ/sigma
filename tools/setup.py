@@ -8,12 +8,12 @@ from os import path
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
-with open(path.join(here, '../README.md'), encoding='utf-8') as f:
+with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
     name='sigmatools',
-    version='0.1',
+    version='0.1.1',
     description='Tools for the Generic Signature Format for SIEM Systems',
     long_description=long_description,
     url='https://github.com/Neo23x0/sigma',
