@@ -60,7 +60,7 @@ class SingleOutput:
     """
     def __init__(self, filename=None):
         if type(filename) == str:
-            self.fd = open(filename, "w")
+            self.fd = open(filename, "w", encoding='utf-8')
         else:
             self.fd = sys.stdout
 
