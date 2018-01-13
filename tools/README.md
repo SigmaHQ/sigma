@@ -1,3 +1,10 @@
-Tools in this section are currently in public beta status. 
+This package contains libraries for processing of [Sigma rules](https://github.com/Neo23x0/sigma) and the following
+command line tools:
 
-The ```--output``` and ```--config``` parameters are not usable yet. 
+* *sigmac*: converter between Sigma rules and SIEM queries:
+    * Elasticsearch query strings
+    * Kibana JSON with searches
+    * Splunk SPL queries
+    * Elasticsearch X-Pack Watcher
+    * Logpoint queries
+* *merge_sigma*: Merge Sigma collections into simple Sigma rules.

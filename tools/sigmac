@@ -1,5 +1,19 @@
 #!/usr/bin/env python3
 # A Sigma to SIEM converter
+# Copyright 2016-2017 Thomas Patzke, Florian Roth
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
 import argparse
@@ -8,8 +22,12 @@ import json
 import pathlib
 import itertools
 import logging
-from sigma import SigmaCollectionParser, SigmaCollectionParseError, SigmaParseError, SigmaConfiguration, SigmaConfigParseError, SigmaRuleFilter, SigmaRuleFilterParseException
-import backends
+from sigma.parser import SigmaCollectionParser, SigmaCollectionParseError, SigmaParseError
+from sigma.config import SigmaConfiguration, SigmaConfigParseError, SigmaRuleFilter, SigmaRuleFilterParseException
+import sigma.backends as backends
+import codecs
+
+sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +41,8 @@ def print_debug(*args, **kwargs):
 
 def alliter(path):
     for sub in path.iterdir():
+        if sub.name.startswith("."):
+            continue
         if sub.is_dir():
             yield from alliter(sub)
         else:
@@ -63,6 +83,9 @@ if cmdargs.target_list:
     for backend in backends.getBackendList():
         print("%10s: %s" % (backend.identifier, backend.__doc__))
     sys.exit(0)
+elif len(cmdargs.inputs) == 0:
+    print("Nothing to do!")
+    argparser.print_usage()
 
 rulefilter = None
 if cmdargs.filter:
@@ -102,7 +125,7 @@ error = 0
 for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
     print_verbose("* Processing Sigma input %s" % (sigmafile))
     try:
-        f = sigmafile.open()
+        f = sigmafile.open(encoding='utf-8')
         parser = SigmaCollectionParser(f, sigmaconfig, rulefilter)
         parser.generate(backend)
     except OSError as e:
