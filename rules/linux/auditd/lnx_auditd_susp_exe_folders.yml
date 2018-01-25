@@ -1,0 +1,37 @@
+title: Detects program executions in suspicious folders
+status: experimental
+description: Detects program executions in suspicious non-program folders related to malware or hacking activity
+reference: 'Internal Research'
+date: 2018/01/23
+author: Florian Roth
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+        type: 'SYSCALL'
+        exe:
+            # Temporary folder
+            - '/tmp/*'
+            # Web server 
+            - '/var/www/*'            # Standard
+            - '/usr/local/apache2/*'  # Classical Apache
+            - '/usr/local/httpd/*'    # Old SuSE Linux 6.*
+            - '/var/apache/*'         # Solaris
+            - '/srv/www/*'            # SuSE Linux 9.*
+            - '/home/httpd/html/*'    # Redhat 6 or older
+            # Data dirs of typically exploited services (incomplete list)
+            - '/var/lib/pgsql/data/*'
+            - '/usr/local/mysql/data/*'
+            - '/var/lib/mysql/*'
+            - '/var/vsftpd/*'
+            - '/etc/bind/*'
+            - '/var/named/*'
+            # Others
+            - '*/public_html/*'
+    condition: selection
+falsepositives:
+    - Admin activity (especially in /tmp folders)
+    - Crazy web applications
+level: medium
+
