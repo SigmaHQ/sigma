@@ -95,7 +95,9 @@ class BaseBackend:
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
         for parsed in sigmaparser.condparsed:
+            self.output.print(self.generateBefore(parsed), end="")
             self.output.print(self.generateQuery(parsed))
+            self.output.print(self.generateAfter(parsed), end="")
 
     def generateQuery(self, parsed):
         result = self.generateNode(parsed.parsedSearch)
@@ -155,6 +157,12 @@ class BaseBackend:
     def generateAggregation(self, agg):
         raise NotImplementedError("Aggregations not implemented for this backend")
 
+    def generateBefore(self, parsed):
+        return ""
+
+    def generateAfter(self, parsed):
+        return ""
+
     def finalize(self):
         """
         Is called after the last file was processed with generate(). The right place if this backend is not intended to
@@ -178,7 +186,18 @@ class QuoteCharMixin:
             val = self.reClear.sub("", val)
         return val
 
-class SingleTextQueryBackend(BaseBackend, QuoteCharMixin):
+class RulenameCommentMixin:
+    """Prefixes each rule with the rule title."""
+    prefix = "# "
+
+    def generateBefore(self, parsed):
+        if "rulecomment" in self.options:
+            try:
+                return "\n%s%s\n" % (self.prefix, parsed.sigmaParser.parsedyaml['title'])
+            except KeyError:
+                return ""
+
+class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
     """Base class for backends that generate one text-based expression from a Sigma rule"""
     identifier = "base-textquery"
     active = False
