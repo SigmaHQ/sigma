@@ -1,0 +1,38 @@
+---
+action: global
+title: Elise Backdoor
+status: experimental
+description: Detects Elise backdoor acitivty as used by APT32 
+references: 
+    - https://community.rsa.com/community/products/netwitness/blog/2018/01/30/apt32-continues-asean-targeting
+author: Florian Roth
+date: 2018/01/31
+detection:
+    selection1:
+        EventID: 1
+        Image: 'C:\Windows\SysWOW64\cmd.exe'
+        CommandLine: '*\Windows\Caches\NavShExt.dll *'
+    selection2:
+        EventID: 1
+        CommandLine: '*\AppData\Roaming\MICROS~1\Windows\Caches\NavShExt.dll,Setting'
+    condition: selection1 or selection2
+falsepositives:
+    - Unknown
+level: critical
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+---
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection:
+        EventID: 4688
+
+
