@@ -680,6 +680,3 @@ class SigmaAggregationParser(SimpleParser):
 
     def set_exclude(self, name):
         self.current = self.exclude
-
-    def trans_timeframe(self, name):
-        return self.parser.parsedyaml["detection"][name]
