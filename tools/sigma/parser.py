@@ -645,7 +645,7 @@ class SigmaAggregationParser(SimpleParser):
     def __init__(self, tokens, parser, config):
         self.parser = parser
         self.config = config
-        self.aggfield = ""
+        self.aggfield = None
         self.groupfield = None
         super().__init__(tokens)
 

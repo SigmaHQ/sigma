@@ -409,10 +409,11 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
     def generate(self, sigmaparser):
         # get the details if this alert occurs
         rulename = self.getRuleName(sigmaparser)
+        title = sigmaparser.parsedyaml.setdefault("title", "")
         description = sigmaparser.parsedyaml.setdefault("description", "")
         false_positives = sigmaparser.parsedyaml.setdefault("falsepositives", "")
         level = sigmaparser.parsedyaml.setdefault("level", "")
-        logging_result = "Rule description: "+str(description)+", false positives: "+str(false_positives)+", level: "+level
+        log_prefix = "Sigma Rule '%s': " % title
         # Get time frame if exists
         interval = sigmaparser.parsedyaml["detection"].setdefault("timeframe", "30m")
 
@@ -421,21 +422,74 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
 
         for condition in sigmaparser.condparsed:
             result = self.generateNode(condition.parsedSearch)
+            agg = {}
+            alert_value_location = ""
+            log_detail = "Alert!"
             try:
+                condition_value = int(condition.parsedAgg.condition)
+                min_doc_count = {}
                 if condition.parsedAgg.cond_op == ">":
-                    alert_condition = { "gt": int(condition.parsedAgg.condition) }
+                    alert_condition = { "gt": condition_value }
+                    min_doc_count = { "min_doc_count": condition_value + 1 }
+                    order = "desc"
                 elif condition.parsedAgg.cond_op == ">=":
-                    alert_condition = { "gte": int(condition.parsedAgg.condition) }
+                    alert_condition = { "gte": condition_value }
+                    min_doc_count = { "min_doc_count": condition_value }
+                    order = "desc"
                 elif condition.parsedAgg.cond_op == "<":
-                    alert_condition = { "lt": int(condition.parsedAgg.condition) }
+                    alert_condition = { "lt": condition_value }
+                    order = "asc"
                 elif condition.parsedAgg.cond_op == "<=":
-                    alert_condition = { "lte": int(condition.parsedAgg.condition) }
+                    alert_condition = { "lte": condition_value }
+                    order = "asc"
                 else:
                     alert_condition = {"not_eq": 0}
+
+                if condition.parsedAgg.aggfield is not None:    # e.g. ... count(aggfield) ...
+                    agg = {
+                            "aggs": {
+                                "agg": {
+                                    "terms": {
+                                        "field": condition.parsedAgg.aggfield + ".keyword",
+                                        "size": 10,
+                                        "order": {
+                                            "_count": order
+                                            },
+                                        **min_doc_count
+                                        },
+                                    **agg
+                                    }
+                                }
+                            }
+                    alert_value_location = "agg.buckets.0."
+                if condition.parsedAgg.groupfield is not None:    # e.g. ... by groupfield ...
+                    agg = {
+                            "aggs": {
+                                "by": {
+                                    "terms": {
+                                        "field": condition.parsedAgg.groupfield + ".keyword",
+                                        "size": 10,
+                                        "order": {
+                                            "_count": order
+                                            },
+                                        **min_doc_count
+                                        },
+                                    **agg
+                                    }
+                                }
+                            }
+                    alert_value_location = "by.buckets.0." + alert_value_location
             except KeyError:
                 alert_condition = {"not_eq": 0}
             except AttributeError:
                 alert_condition = {"not_eq": 0}
+
+            if agg != {}:
+                alert_value_location = "ctx.payload.aggregations." + alert_value_location + "doc_count"
+            else:
+                alert_value_location = "ctx.payload.hits.total"
+
+            log = log_prefix + log_detail
 
             self.watcher_alert[rulename] = {
                               "trigger": {
@@ -453,21 +507,22 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                                             "query": result,  # this is where the elasticsearch query syntax goes
                                             "analyze_wildcard": True
                                         }
-                                      }
+                                      },
+                                      **agg
                                     },
                                     "indices": indices
                                   }
                                 }
                               },
                               "condition": {
-                                  "compare": {    # TODO: Issue #49
-                                  "ctx.payload.hits.total": alert_condition
+                                  "compare": {
+                                  alert_value_location: alert_condition
                                 }
                               },
                               "actions": {
                                 "logging-action": {
                                   "logging": {
-                                    "text": logging_result
+                                    "text": log
                                   }
                                 }
                               }
