@@ -413,7 +413,6 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
         description = sigmaparser.parsedyaml.setdefault("description", "")
         false_positives = sigmaparser.parsedyaml.setdefault("falsepositives", "")
         level = sigmaparser.parsedyaml.setdefault("level", "")
-        log_prefix = "Sigma Rule '%s': " % title
         # Get time frame if exists
         interval = sigmaparser.parsedyaml["detection"].setdefault("timeframe", "30m")
 
@@ -424,7 +423,6 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
             result = self.generateNode(condition.parsedSearch)
             agg = {}
             alert_value_location = ""
-            log_detail = "Alert!"
             try:
                 condition_value = int(condition.parsedAgg.condition)
                 min_doc_count = {}
@@ -445,6 +443,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                 else:
                     alert_condition = {"not_eq": 0}
 
+                agg_iter = list()
                 if condition.parsedAgg.aggfield is not None:    # e.g. ... count(aggfield) ...
                     agg = {
                             "aggs": {
@@ -462,6 +461,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                                 }
                             }
                     alert_value_location = "agg.buckets.0."
+                    agg_iter.append("agg.buckets")
                 if condition.parsedAgg.groupfield is not None:    # e.g. ... by groupfield ...
                     agg = {
                             "aggs": {
@@ -479,6 +479,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                                 }
                             }
                     alert_value_location = "by.buckets.0." + alert_value_location
+                    agg_iter.append("by.buckets")
             except KeyError:
                 alert_condition = {"not_eq": 0}
             except AttributeError:
@@ -486,10 +487,56 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
 
             if agg != {}:
                 alert_value_location = "ctx.payload.aggregations." + alert_value_location + "doc_count"
+                agg_iter[0] = "aggregations." + agg_iter[0]
+                action_body = "Hits:\n"
+                action_body += "\n".join([
+                    ("{{#%s}}\n" + (2 * i * "-") + " {{key}} {{doc_count}}\n") % (agg_item) for i, agg_item in enumerate(agg_iter)
+                    ])
+                action_body += "\n".join([
+                    "{{/%s}}\n" % agg_item for agg_item in reversed(agg_iter)
+                    ])
             else:
                 alert_value_location = "ctx.payload.hits.total"
+                action_body = "Hits:\n{{#ctx.payload.hits.hits}}"
+                try:    # extract fields if these are given in rule
+                    fields = sigmaparser.parsedyaml['fields']
+                    max_field_len = max([len(field) for field in fields])
+                    action_body += "Hit on {{_source.@timestamp}}:\n" + "\n".join([
+                        ("%" + str(max_field_len) + "s = {{_source.%s}}") % (field, field) for field in fields
+                        ]) + (80 * "=") + "\n"
+                except KeyError:    # no fields given, extract all hits
+                    action_body += "{{_source}}\n"
+                    action_body += (80 * "=") + "\n"
+                action_body += "{{/ctx.payload.hits.hits}}"
 
-            log = log_prefix + log_detail
+            # Building the action
+            action_subject = "Sigma Rule '%s'" % title
+            try:    # mail notification if mail address is given
+                email = self.options['mail']
+                action = {
+                        "send_email": {
+                            "email": {
+                                "to": email,
+                                "subject": action_subject,
+                                "body": action_body,
+                                "attachments": {
+                                    "data.json": {
+                                        "data": {
+                                            "format": "json"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+            except KeyError:    # no mail address given, generate log action
+                action = {
+                        "logging-action": {
+                            "logging": {
+                                "text": action_subject + ": " + action_body
+                                }
+                            }
+                        }
 
             self.watcher_alert[rulename] = {
                               "trigger": {
@@ -519,13 +566,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                                   alert_value_location: alert_condition
                                 }
                               },
-                              "actions": {
-                                "logging-action": {
-                                  "logging": {
-                                    "text": log
-                                  }
-                                }
-                              }
+                              "actions": { **action }
                             }
 
     def finalize(self):
