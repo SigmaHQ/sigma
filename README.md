@@ -3,9 +3,10 @@
 ![sigma_logo](./images/Sigma_0.3.png)
 
 # Sigma
+
 Generic Signature Format for SIEM Systems
 
-# What is Sigma?
+# What is Sigma
 
 Sigma is a generic and open signature format that allows you to describe relevant log events in a straight forward manner. The rule format is very flexible, easy to write and applicable to any type of log file. The main purpose of this project is to provide a structured form in which researchers or analysts can describe their once developed detection methods and make them shareable with others.
 
@@ -72,6 +73,10 @@ The specifications can be found in the [Wiki](https://github.com/Neo23x0/sigma/w
 
 The current specification is a proposal. Feedback is requested.
 
+# Getting Started
+
+Florian wrote a short [rule creation tutorial](https://www.nextron-systems.com/2018/02/10/write-sigma-rules/) that can help you getting started.
+
 # Examples
 
 Windows 'Security' Eventlog: Access to LSASS Process with Certain Access Mask / Object Type (experimental)
@@ -112,11 +117,11 @@ The usage of Sigmac or the underlying library requires Python >= 3.4 and PyYAML.
 
 It's available on PyPI. Install with:
 
-```
+```bash
 pip3 install sigmatools
 ```
 
-# Next Steps 
+# Next Steps
 
 * Integration of feedback into the rule specifications
 * Integration into Threat Intel Exchanges, e.g. [MISP](http://www.misp-project.org/)
