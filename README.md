@@ -106,7 +106,7 @@ merges multiple YAML documents of a Sigma rule collection into simple Sigma rule
 
 ### Requirements
 
-The usage of Sigmac or the underlying library requires Python >= 3.4 and PyYAML.
+The usage of Sigmac or the underlying library requires Python >= 3.5 and PyYAML.
 
 ### Installation
 
