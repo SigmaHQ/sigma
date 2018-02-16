@@ -1,27 +1,17 @@
 ---
 action: global
-title: Reconnaissance Activity with Net Command
+title: MsiExec Web Install
 status: experimental
-description: 'Detects a set of commands often used in recon stages by different attack groups' 
+description: Detects suspicious msiexec proess starts with web addreses as parameter
 references:
-    - https://twitter.com/haroonmeer/status/939099379834658817
-    - https://twitter.com/c_APT_ure/status/939475433711722497
+    - https://blog.trendmicro.com/trendlabs-security-intelligence/attack-using-windows-installer-msiexec-exe-leads-lokibot/
 author: Florian Roth
-date: 2017/12/12
+date: 2018/02/09
 detection:
     selection:
         CommandLine: 
-            - 'tasklist'
-            - 'net time'
-            - 'systeminfo'
-            - 'whoami'
-            - 'nbtstat'
-            - 'net start'
-            - '*\net1 start'
-            - 'qprocess'
-            - 'nslookup'
-    timeframe: 1m 
-    condition: selection | count() > 2
+            - '* msiexec*:\/\/*'
+    condition: selection
 falsepositives: 
     - False positives depend on scripts and administrative tools used in the monitored environment
 level: medium
