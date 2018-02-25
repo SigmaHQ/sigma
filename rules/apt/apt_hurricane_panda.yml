@@ -1,0 +1,35 @@
+---
+action: global
+title: Hurricane Panda Activity
+status: experimental
+description: Detects Hurricane Panda Activity 
+references: 
+    - https://www.crowdstrike.com/blog/crowdstrike-discovers-use-64-bit-zero-day-privilege-escalation-exploit-cve-2014-4113-hurricane-panda/
+author: Florian Roth
+date: 2018/02/25
+detection:
+    selection:
+        CommandLine: 
+            - '* localgroup administrators admin /add'
+            - '*\Win64.exe*'
+    condition: selection1 or selection2
+falsepositives:
+    - Unknown
+level: high
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+---
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection:
+        EventID: 4688
+
+
