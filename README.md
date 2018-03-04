@@ -121,6 +121,15 @@ It's available on PyPI. Install with:
 pip3 install sigmatools
 ```
 
+## Contributed Scripts
+
+The directory `contrib` contains scripts that were contributed by the community:
+
+* `sigma2elastalert.py`i by David Routin: A script that converts Sigma rules to Elastalert configurations. This tool
+  uses *sigmac* and expects it in its path.
+
+These tools are not part of the main toolchain and maintained separately by their authors.
+
 # Next Steps
 
 * Integration of feedback into the rule specifications
