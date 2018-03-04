@@ -574,7 +574,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
             if self.output_type == "plain":     # output request line + body
                 self.output.print("PUT _xpack/watcher/watch/%s\n%s\n" % (rulename, json.dumps(rule, indent=2)))
             elif self.output_type == "curl":      # output curl command line
-                self.output.print("curl -s -XPUT --data-binary @- %s/_xpack/watcher/watch/%s <<EOF\n%s\nEOF" % (self.es, rulename, json.dumps(rule, indent=2)))
+                self.output.print("curl -s -XPUT -H 'Content-Type: application/json' --data-binary @- %s/_xpack/watcher/watch/%s <<EOF\n%s\nEOF" % (self.es, rulename, json.dumps(rule, indent=2)))
             else:
                 raise NotImplementedError("Output type '%s' not supported" % self.output_type)
 
