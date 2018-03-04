@@ -409,10 +409,10 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
     def generate(self, sigmaparser):
         # get the details if this alert occurs
         rulename = self.getRuleName(sigmaparser)
+        title = sigmaparser.parsedyaml.setdefault("title", "")
         description = sigmaparser.parsedyaml.setdefault("description", "")
         false_positives = sigmaparser.parsedyaml.setdefault("falsepositives", "")
         level = sigmaparser.parsedyaml.setdefault("level", "")
-        logging_result = "Rule description: "+str(description)+", false positives: "+str(false_positives)+", level: "+level
         # Get time frame if exists
         interval = sigmaparser.parsedyaml["detection"].setdefault("timeframe", "30m")
 
@@ -421,21 +421,122 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
 
         for condition in sigmaparser.condparsed:
             result = self.generateNode(condition.parsedSearch)
+            agg = {}
+            alert_value_location = ""
             try:
+                condition_value = int(condition.parsedAgg.condition)
+                min_doc_count = {}
                 if condition.parsedAgg.cond_op == ">":
-                    alert_condition = { "gt": int(condition.parsedAgg.condition) }
+                    alert_condition = { "gt": condition_value }
+                    min_doc_count = { "min_doc_count": condition_value + 1 }
+                    order = "desc"
                 elif condition.parsedAgg.cond_op == ">=":
-                    alert_condition = { "gte": int(condition.parsedAgg.condition) }
+                    alert_condition = { "gte": condition_value }
+                    min_doc_count = { "min_doc_count": condition_value }
+                    order = "desc"
                 elif condition.parsedAgg.cond_op == "<":
-                    alert_condition = { "lt": int(condition.parsedAgg.condition) }
+                    alert_condition = { "lt": condition_value }
+                    order = "asc"
                 elif condition.parsedAgg.cond_op == "<=":
-                    alert_condition = { "lte": int(condition.parsedAgg.condition) }
+                    alert_condition = { "lte": condition_value }
+                    order = "asc"
                 else:
                     alert_condition = {"not_eq": 0}
+
+                agg_iter = list()
+                if condition.parsedAgg.aggfield is not None:    # e.g. ... count(aggfield) ...
+                    agg = {
+                            "aggs": {
+                                "agg": {
+                                    "terms": {
+                                        "field": condition.parsedAgg.aggfield + ".keyword",
+                                        "size": 10,
+                                        "order": {
+                                            "_count": order
+                                            },
+                                        **min_doc_count
+                                        },
+                                    **agg
+                                    }
+                                }
+                            }
+                    alert_value_location = "agg.buckets.0."
+                    agg_iter.append("agg.buckets")
+                if condition.parsedAgg.groupfield is not None:    # e.g. ... by groupfield ...
+                    agg = {
+                            "aggs": {
+                                "by": {
+                                    "terms": {
+                                        "field": condition.parsedAgg.groupfield + ".keyword",
+                                        "size": 10,
+                                        "order": {
+                                            "_count": order
+                                            },
+                                        **min_doc_count
+                                        },
+                                    **agg
+                                    }
+                                }
+                            }
+                    alert_value_location = "by.buckets.0." + alert_value_location
+                    agg_iter.append("by.buckets")
             except KeyError:
                 alert_condition = {"not_eq": 0}
             except AttributeError:
                 alert_condition = {"not_eq": 0}
+
+            if agg != {}:
+                alert_value_location = "ctx.payload.aggregations." + alert_value_location + "doc_count"
+                agg_iter[0] = "aggregations." + agg_iter[0]
+                action_body = "Hits:\n"
+                action_body += "\n".join([
+                    ("{{#%s}}\n" + (2 * i * "-") + " {{key}} {{doc_count}}\n") % (agg_item) for i, agg_item in enumerate(agg_iter)
+                    ])
+                action_body += "\n".join([
+                    "{{/%s}}\n" % agg_item for agg_item in reversed(agg_iter)
+                    ])
+            else:
+                alert_value_location = "ctx.payload.hits.total"
+                action_body = "Hits:\n{{#ctx.payload.hits.hits}}"
+                try:    # extract fields if these are given in rule
+                    fields = sigmaparser.parsedyaml['fields']
+                    max_field_len = max([len(field) for field in fields])
+                    action_body += "Hit on {{_source.@timestamp}}:\n" + "\n".join([
+                        ("%" + str(max_field_len) + "s = {{_source.%s}}") % (field, field) for field in fields
+                        ]) + (80 * "=") + "\n"
+                except KeyError:    # no fields given, extract all hits
+                    action_body += "{{_source}}\n"
+                    action_body += (80 * "=") + "\n"
+                action_body += "{{/ctx.payload.hits.hits}}"
+
+            # Building the action
+            action_subject = "Sigma Rule '%s'" % title
+            try:    # mail notification if mail address is given
+                email = self.options['mail']
+                action = {
+                        "send_email": {
+                            "email": {
+                                "to": email,
+                                "subject": action_subject,
+                                "body": action_body,
+                                "attachments": {
+                                    "data.json": {
+                                        "data": {
+                                            "format": "json"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+            except KeyError:    # no mail address given, generate log action
+                action = {
+                        "logging-action": {
+                            "logging": {
+                                "text": action_subject + ": " + action_body
+                                }
+                            }
+                        }
 
             self.watcher_alert[rulename] = {
                               "trigger": {
@@ -453,24 +554,19 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                                             "query": result,  # this is where the elasticsearch query syntax goes
                                             "analyze_wildcard": True
                                         }
-                                      }
+                                      },
+                                      **agg
                                     },
                                     "indices": indices
                                   }
                                 }
                               },
                               "condition": {
-                                  "compare": {    # TODO: Issue #49
-                                  "ctx.payload.hits.total": alert_condition
+                                  "compare": {
+                                  alert_value_location: alert_condition
                                 }
                               },
-                              "actions": {
-                                "logging-action": {
-                                  "logging": {
-                                    "text": logging_result
-                                  }
-                                }
-                              }
+                              "actions": { **action }
                             }
 
     def finalize(self):
@@ -478,7 +574,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
             if self.output_type == "plain":     # output request line + body
                 self.output.print("PUT _xpack/watcher/watch/%s\n%s\n" % (rulename, json.dumps(rule, indent=2)))
             elif self.output_type == "curl":      # output curl command line
-                self.output.print("curl -s -XPUT --data-binary @- %s/_xpack/watcher/watch/%s <<EOF\n%s\nEOF" % (self.es, rulename, json.dumps(rule, indent=2)))
+                self.output.print("curl -s -XPUT -H 'Content-Type: application/json' --data-binary @- %s/_xpack/watcher/watch/%s <<EOF\n%s\nEOF" % (self.es, rulename, json.dumps(rule, indent=2)))
             else:
                 raise NotImplementedError("Output type '%s' not supported" % self.output_type)
 
