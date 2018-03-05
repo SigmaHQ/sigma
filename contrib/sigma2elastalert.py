@@ -22,10 +22,12 @@ Description: This script creates elastalert configuration files from Sigma SIEM 
 """
 
 import re
+import os
 import glob
 import subprocess
 import argparse
 import yaml
+import traceback
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--eshost", help="Elasticsearch host", type=str, required=True)
@@ -34,7 +36,9 @@ parser.add_argument("--ruledir", help="sigma rule directory path to convert", ty
 parser.add_argument("--index", help="Elasticsearch index name egs: \"winlogbeat-*\"", type=str, required=True)
 parser.add_argument("--email", help="email address to send mail alert", type=str, required=True)
 parser.add_argument("--outdir", help="output directory to create elastalert rules", type=str, required=True)
+parser.add_argument("--sigmac", help="Sigmac location", default="../tools/sigmac", type=str)
 parser.add_argument("--realerttime", help="Realert time (optional value, default 5 minutes)", type=str, default=5)
+parser.add_argument("--debug", help="Show debug output", type=bool, default=False)
 args = parser.parse_args()
 
 custom_query_keys = ["sensor", "Hostname", "EventID", "src_ip", "dst_ip"]
@@ -118,8 +122,9 @@ def get_rule_as_esqs(file):
     :param file: rule filename
     :return: string es query
     """
-    cmd = "sigmac " + file + " --target es-qs"
-    cmd = cmd.split()
+    if not os.path.exists(args.sigmac):
+        print("Cannot find sigmac rule coverter at '%s', please set a correct location via '--sigmac'")
+    cmd = [args.sigmac, file, "--target", "es-qs"]
     output = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout.read()
     if "unsupported" in output:
         raise Exception('Unsupported output at this time')
@@ -143,8 +148,10 @@ convert_args = {
 for file in glob.glob(args.ruledir + "/*"):
     output_elast_config = template
     try:
+        print("Processing %s ..." % file)
         with open(file, "rb") as f:
             file_content = f.read()
+
         # Dictionary that contains args with values returned by functions
         translate_func = {'QUERY': get_rule_as_esqs(file),
                         'TITLE': rule_element(file_content, ["title", "name"]),
@@ -152,13 +159,15 @@ for file in glob.glob(args.ruledir + "/*"):
                         'UNIQKEYS': str(return_json_obj(get_rule_as_esqs(file), custom_query_keys))
                         }
         for entry in convert_args:
-            output_elast_config = re.sub(entry, convert_args[entry], output_elast_config)
+            output_elast_config = re.sub(entry, str(convert_args[entry]), output_elast_config)
         for entry in translate_func:
             output_elast_config = re.sub(entry, translate_func[entry], output_elast_config)
         print "Converting file " + file
-        with open(args.outdir + "/sigma-" + file.split("/")[-1], "w") as f:
+        with open(os.path.join(args.outdir, "sigma-" + file.split("/")[-1]), "w") as f:
                 f.write(output_elast_config)
     except Exception as e:
+        if args.debug:
+            traceback.print_exc()
         print "error " + str(file) + "----" + str(e)
         pass
 
