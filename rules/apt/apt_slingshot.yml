@@ -1,3 +1,5 @@
+---
+action: global
 title: Defrag Deactivation
 description: Detects the deactivation of the Scheduled defragmentation task as seen by Slingshot APT group
 references:
@@ -9,10 +11,25 @@ logsource:
     service: security
     description: 'Requirements: Audit Policy : Audit Other Object Access Events > Success'       
 detection:
-    selection:
-        EventID: 4701
-        TaskName: '\Microsoft\Windows\Defrag\ScheduledDefrag'
     condition: selection
 falsepositives:
     - Unknown
 level: medium
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+        CommandLine: 
+            - '*schtasks* /delete *Defrag\ScheduledDefrag*'
+---
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Audit Other Object Access Events > Success'       
+detection:
+    selection:
+        EventID: 4701
+        TaskName: '\Microsoft\Windows\Defrag\ScheduledDefrag'
