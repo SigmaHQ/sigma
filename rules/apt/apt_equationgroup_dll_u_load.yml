@@ -9,11 +9,12 @@ references:
 author: Florian Roth
 date: 2018/03/10 
 detection:
-    selection:
-        CommandLine: 
-            - '*rundll32.exe *,dll_u'
-            - '* -export dll_u *'
-    condition: selection
+    selection1:
+        Image: '*\rundll32.exe'
+        CommandLine: '*,dll_u'
+    selection2:
+        CommandLine: '* -export dll_u *'
+    condition: 1 of them
 falsepositives:
     - Unknown
 level: critical
@@ -22,7 +23,9 @@ logsource:
     product: windows
     service: sysmon
 detection:
-    selection:
+    selection1:
+        EventID: 1
+    selection2:
         EventID: 1
 ---
 logsource:
@@ -30,5 +33,7 @@ logsource:
     service: security
     description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
 detection:
-    selection:
+    selection1:
+        EventID: 4688
+    selection2:
         EventID: 4688
