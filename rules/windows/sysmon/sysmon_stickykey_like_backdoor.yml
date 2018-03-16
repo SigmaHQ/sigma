@@ -1,14 +1,14 @@
 title: Sticky Key Like Backdoor Usage
-description: Detects the usage of a backdoor that uses an option to register a malicious debugger for built-in tools that are accessible in the login screen
+description: Detects the usage and installation of a backdoor that uses an option to register a malicious debugger for built-in tools that are accessible in the login screen
 references:
     - https://blogs.technet.microsoft.com/jonathantrull/2016/10/03/detecting-sticky-key-backdoors/
-author: Florian Roth
+author: Florian Roth, Roman Burkhardt
 date: 2018/03/15
 logsource:
     product: windows
     service: sysmon
 detection:
-    selection:
+    selection_process:
         EventID: 1
         ParentImage:
             - '*\winlogon.exe'
@@ -16,7 +16,14 @@ detection:
             - '*\cmd.exe sethc.exe *'
             - '*\cmd.exe utilman.exe *'
             - '*\cmd.exe osk.exe *'
-    condition: selection
+    selection_registry:
+        EventID: 13
+        TargetObject: 
+            - '*\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\sethc.exe\Debugger'
+            - '*\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\utilman.exe\Debugger'
+            - '*\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\osk.exe\Debugger'
+        EventType: 'SetValue'
+    condition: 1 of them
 falsepositives:
     - Unlikely
 level: critical
