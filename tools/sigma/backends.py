@@ -315,6 +315,11 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.kibanaconf = list()
+        self.indexsearch = list()
+        self.output_type = self.options.setdefault("output", "import")
+        self.es = self.options.setdefault("es", "localhost:9200")
+        self.index = self.options.setdefault("index", ".kibana")
+        self.prefix = self.options.setdefault("prefix", "Sigma: ")
 
     def generate(self, sigmaparser):
         rulename = self.getRuleName(sigmaparser)
@@ -345,12 +350,16 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
                 if len(indices) > 1:     # add index names if rule must be replicated because of ambigiuous index patterns
                     raise NotSupportedError("Multiple target indices are not supported by Kibana")
                 else:
-                    title = sigmaparser.parsedyaml["title"]
-                try:
-                    title = self.options["prefix"] + title
-                except KeyError:
-                    pass
+                    title = self.prefix + sigmaparser.parsedyaml["title"]
 
+                self.indexsearch.append(
+                        "export {indexvar}=$(curl -s '{es}/{index}/_search?q=index-pattern.title:{indexpattern}' | jq -r '.hits.hits[0]._id | ltrimstr(\"index-pattern:\")')".format(
+                            es=self.es,
+                            index=self.index,
+                            indexpattern=index.replace("*", "\\*"),
+                            indexvar=self.index_variable_name(index)
+                            )
+                        )
                 self.kibanaconf.append({
                         "_id": final_rulename,
                         "_type": "search",
@@ -362,7 +371,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
                             "sort": ["@timestamp", "desc"],
                             "version": 1,
                             "kibanaSavedObjectMeta": {
-                                "searchSourceJSON": json.dumps({
+                                "searchSourceJSON": {
                                     "index": index,
                                     "filter":  [],
                                     "highlight": {
@@ -379,13 +388,38 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
                                             }
                                         }
                                     }
-                                )
                             }
                         }
                     })
 
     def finalize(self):
-        self.output.print(json.dumps(self.kibanaconf, indent=2))
+        if self.output_type == "import":        # output format that can be imported via Kibana UI
+            for item in self.kibanaconf:    # JSONize kibanaSavedObjectMeta.searchSourceJSON
+                item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'] = json.dumps(item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'])
+            self.output.print(json.dumps(self.kibanaconf, indent=2))
+        elif self.output_type == "curl":
+            for item in self.indexsearch:
+                self.output.print(item)
+            for item in self.kibanaconf:
+                item['_source']['kibanaSavedObjectMeta']['searchSourceJSON']['index'] = "$" + self.index_variable_name(item['_source']['kibanaSavedObjectMeta']['searchSourceJSON']['index'])   # replace index pattern with reference to variable that will contain Kibana index UUID at script runtime
+                item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'] = json.dumps(item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'])     # Convert it to JSON string as expected by Kibana
+                item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'] = item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'].replace("\\", "\\\\")      # Add further escaping for escaped quotes for shell
+                self.output.print(
+                        "curl -s -XPUT -H 'Content-Type: application/json' --data-binary @- {es}/{index}/doc/{doc_id} <<EOF\n{doc}\nEOF".format(
+                            es=self.es,
+                            index=self.index,
+                            doc_id="search:" + item['_id'],
+                            doc=json.dumps({
+                                "type": "search",
+                                "search": item['_source']
+                                }, indent=2)
+                            )
+                        )
+        else:
+            raise NotImplementedError("Output type '%s' not supported" % self.output_type)
+
+    def index_variable_name(self, index):
+        return "index_" + index.replace("-", "__").replace("*", "X")
 
 class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     """Converts Sigma Rule into X-Pack Watcher JSON for alerting"""
