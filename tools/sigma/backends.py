@@ -315,7 +315,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.kibanaconf = list()
-        self.indexsearch = list()
+        self.indexsearch = set()
         self.output_type = self.options.setdefault("output", "import")
         self.es = self.options.setdefault("es", "localhost:9200")
         self.index = self.options.setdefault("index", ".kibana")
@@ -352,7 +352,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
                 else:
                     title = self.prefix + sigmaparser.parsedyaml["title"]
 
-                self.indexsearch.append(
+                self.indexsearch.add(
                         "export {indexvar}=$(curl -s '{es}/{index}/_search?q=index-pattern.title:{indexpattern}' | jq -r '.hits.hits[0]._id | ltrimstr(\"index-pattern:\")')".format(
                             es=self.es,
                             index=self.index,
