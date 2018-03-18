@@ -101,8 +101,9 @@ class SigmaParser:
     def parse_sigma(self):
         try:    # definition uniqueness check
             for definitionName, definition in self.parsedyaml["detection"].items():
-                self.definitions[definitionName] = definition
-                self.extract_values(definition)     # builds key-values-table in self.values
+                if definitionName != "condition":
+                    self.definitions[definitionName] = definition
+                    self.extract_values(definition)     # builds key-values-table in self.values
         except KeyError:
             raise SigmaParseError("No detection definitions found")
 
@@ -283,7 +284,7 @@ class SigmaConditionTokenizer:
             (SigmaConditionToken.TOKEN_AND,    re.compile("and", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_OR,     re.compile("or", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_NOT,    re.compile("not", re.IGNORECASE)),
-            (SigmaConditionToken.TOKEN_ID,     re.compile("\\w+")),
+            (SigmaConditionToken.TOKEN_ID,     re.compile("[\\w*]+")),
             (SigmaConditionToken.TOKEN_LPAR,   re.compile("\\(")),
             (SigmaConditionToken.TOKEN_RPAR,   re.compile("\\)")),
             ]
@@ -417,13 +418,36 @@ class NodeSubexpression(ParseTreeNode):
         self.items = subexpr
 
 # Parse tree converters: convert something into one of the parse tree node classes defined above
+def convertXOf(sigma, val, condclass):
+    """
+    Generic implementation of (1|all) of x expressions.
+        
+    * condclass across all list items if x is name of definition
+    * condclass across all definitions if x is keyword 'them'
+    * condclass across all matching definition if x is wildcard expression, e.g. 'selection*'
+    """
+    if val.matched == "them":           # OR across all definitions
+        cond = condclass()
+        for definition in sigma.definitions.values():
+            cond.add(NodeSubexpression(sigma.parse_definition(definition)))
+        return NodeSubexpression(cond)
+    elif val.matched.find("*") > 0:     # OR across all matching definitions
+        cond = condclass()
+        reDefPat = re.compile("^" + val.matched.replace("*", ".*") + "$")
+        for name, definition in sigma.definitions.items():
+            if reDefPat.match(name):
+                cond.add(NodeSubexpression(sigma.parse_definition(definition)))
+        return NodeSubexpression(cond)
+    else:                               # OR across all items of definition
+        return NodeSubexpression(sigma.parse_definition_byname(val.matched, condclass))
+
 def convertAllOf(sigma, op, val):
-    """Convert 'all of x' into ConditionAND"""
-    return NodeSubexpression(sigma.parse_definition_byname(val.matched, ConditionAND))
+    """Convert 'all of x' expressions into ConditionAND"""
+    return convertXOf(sigma, val, ConditionAND)
 
 def convertOneOf(sigma, op, val):
-    """Convert '1 of x' into ConditionOR"""
-    return NodeSubexpression(sigma.parse_definition_byname(val.matched, ConditionOR))
+    """Convert '1 of x' expressions into ConditionOR"""
+    return convertXOf(sigma, val, ConditionOR)
 
 def convertId(sigma, op):
     """Convert search identifiers (lists or maps) into condition nodes according to spec defaults"""
@@ -645,7 +669,7 @@ class SigmaAggregationParser(SimpleParser):
     def __init__(self, tokens, parser, config):
         self.parser = parser
         self.config = config
-        self.aggfield = ""
+        self.aggfield = None
         self.groupfield = None
         super().__init__(tokens)
 
@@ -680,6 +704,3 @@ class SigmaAggregationParser(SimpleParser):
 
     def set_exclude(self, name):
         self.current = self.exclude
-
-    def trans_timeframe(self, name):
-        return self.parser.parsedyaml["detection"][name]

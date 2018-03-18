@@ -1,0 +1,39 @@
+---
+action: global
+title: Equation Group DLL_U Load
+description: Detects a specific tool and export used by EquationGroup
+references:
+    - https://github.com/adamcaudill/EquationGroupLeak/search?utf8=%E2%9C%93&q=dll_u&type=
+    - https://securelist.com/apt-slingshot/84312/
+    - https://twitter.com/cyb3rops/status/972186477512839170
+author: Florian Roth
+date: 2018/03/10 
+detection:
+    selection1:
+        Image: '*\rundll32.exe'
+        CommandLine: '*,dll_u'
+    selection2:
+        CommandLine: '* -export dll_u *'
+    condition: 1 of them
+falsepositives:
+    - Unknown
+level: critical
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection1:
+        EventID: 1
+    selection2:
+        EventID: 1
+---
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection1:
+        EventID: 4688
+    selection2:
+        EventID: 4688
