@@ -30,7 +30,9 @@ test-sigmac:
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/elk-windows.yml -t es-qs rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/elk-linux.yml -t es-qs rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/elk-windows.yml -t kibana rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/elk-windows.yml -Ooutput=curl -t kibana rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/elk-linux.yml -t kibana rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/elk-linux.yml -Ooutput=curl -t kibana rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/elk-windows.yml -t xpack-watcher rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/elk-linux.yml -t xpack-watcher rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/elk-defaultindex.yml -t xpack-watcher rules/ > /dev/null
@@ -57,7 +59,7 @@ test-sigmac:
 
 test-merge:
 	tests/test-merge.sh
-	! coverage run -a --include=$(COVSCOPE) tools/merge_sigma.py tests/not_existing.yml > /dev/null
+	! coverage run -a --include=$(COVSCOPE) tools/merge_sigma tests/not_existing.yml > /dev/null
 
 build: tools/sigmac tools/merge_sigma tools/sigma/*.py tools/setup.py tools/setup.cfg
 	cd tools && python3 setup.py bdist_wheel

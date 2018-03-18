@@ -111,7 +111,7 @@ merges multiple YAML documents of a Sigma rule collection into simple Sigma rule
 
 ### Requirements
 
-The usage of Sigmac or the underlying library requires Python >= 3.4 and PyYAML.
+The usage of Sigmac or the underlying library requires Python >= 3.5 and PyYAML.
 
 ### Installation
 
@@ -120,6 +120,15 @@ It's available on PyPI. Install with:
 ```bash
 pip3 install sigmatools
 ```
+
+## Contributed Scripts
+
+The directory `contrib` contains scripts that were contributed by the community:
+
+* `sigma2elastalert.py`i by David Routin: A script that converts Sigma rules to Elastalert configurations. This tool
+  uses *sigmac* and expects it in its path.
+
+These tools are not part of the main toolchain and maintained separately by their authors.
 
 # Next Steps
 
