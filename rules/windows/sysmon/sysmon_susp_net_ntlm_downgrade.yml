@@ -1,0 +1,21 @@
+title: NetNTLM Downgrade Attack
+description: Detects post exploitation using NetNTLM downgrade attacks
+reference: 
+    - https://www.optiv.com/blog/post-exploitation-using-netntlm-downgrade-attacks
+author: Florian Roth
+date: 2018/03/20
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 13
+        TargetObject: 
+            - '*SYSTEM\CurrentControlSet\Control\Lsa\lmcompatibilitylevel'
+            - '*SYSTEM\CurrentControlSet\Control\Lsa\NtlmMinClientSec'
+            - '*SYSTEM\CurrentControlSet\Control\Lsa\RestrictSendingNTLMTraffic'
+        EventType: 'SetValue'
+    condition: selection
+falsepositives:
+    - Unknown
+level: critical
