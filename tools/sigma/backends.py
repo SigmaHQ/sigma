@@ -405,7 +405,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
                 item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'] = json.dumps(item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'])     # Convert it to JSON string as expected by Kibana
                 item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'] = item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'].replace("\\", "\\\\")      # Add further escaping for escaped quotes for shell
                 self.output.print(
-                        "curl -s -XPUT -H 'Content-Type: application/json' --data-binary @- {es}/{index}/doc/{doc_id} <<EOF\n{doc}\nEOF".format(
+                        "curl -s -XPUT -H 'Content-Type: application/json' --data-binary @- '{es}/{index}/doc/{doc_id}' <<EOF\n{doc}\nEOF".format(
                             es=self.es,
                             index=self.index,
                             doc_id="search:" + item['_id'],
