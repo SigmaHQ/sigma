@@ -200,9 +200,12 @@ class QuoteCharMixin:
 class RulenameCommentMixin:
     """Prefixes each rule with the rule title."""
     prefix = "# "
+    options = (
+            ("rulecomment", False, "Prefix generated query with comment containing title", None),
+            )
 
     def generateBefore(self, parsed):
-        if "rulecomment" in self.options:
+        if self.rulecomment:
             try:
                 return "\n%s%s\n" % (self.prefix, parsed.sigmaParser.parsedyaml['title'])
             except KeyError:
