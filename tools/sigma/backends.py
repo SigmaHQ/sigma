@@ -105,7 +105,9 @@ class BaseBackend:
             before = self.generateBefore(parsed)
             if before is not None:
                 self.output.print(before, end="")
-            self.output.print(self.generateQuery(parsed))
+            query = self.generateQuery(parsed)
+            if query is not None:
+                self.output.print(query)
             after = self.generateAfter(parsed)
             if after is not None:
                 self.output.print(after, end="")
@@ -731,8 +733,15 @@ class FieldnameListBackend(BaseBackend):
     active = True
     output_class = SingleOutput
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields = set()
+
     def generateQuery(self, parsed):
-        return "\n".join(sorted(set(list(flatten(self.generateNode(parsed.parsedSearch))))))
+        fields = list(flatten(self.generateNode(parsed.parsedSearch)))
+        if parsed.parsedAgg:
+            fields += self.generateAggregation(parsed.parsedAgg)
+        self.fields.update(fields)
 
     def generateANDNode(self, node):
         return [self.generateNode(val) for val in node]
@@ -759,6 +768,23 @@ class FieldnameListBackend(BaseBackend):
 
     def generateValueNode(self, node):
         return []
+
+    def generateNULLValueNode(self, node):
+        return [node.item]
+
+    def generateNotNULLValueNode(self, node):
+        return [node.item]
+
+    def generateAggregation(self, agg):
+        fields = list()
+        if agg.groupfield is not None:
+            fields.append(agg.groupfield)
+        if agg.aggfield is not None:
+            fields.append(agg.aggfield)
+        return fields
+
+    def finalize(self):
+        self.output.print("\n".join(sorted(self.fields)))
 
 # Helpers
 def flatten(l):
