@@ -1,0 +1,49 @@
+---
+action: global
+title: Chafer Activity
+description: Detects Chafer activity attributed to OilRig as reported in Nyotron report in March 2018 
+references:
+    - https://nyotron.com/nyotron-discovers-next-generation-oilrig-attacks/
+detection:
+    condition: 1 of them
+falsepositives:
+    - Unknown
+level: critical
+---
+logsource:
+    product: windows
+    service: system
+detection:
+    selection_service:
+        EventID: 7045
+        ServiceName:
+            - 'SC Scheduled Scan'
+            - 'UpdatMachine'
+---
+logsource:
+   product: windows
+   service: sysmon
+detection:
+    selection_reg1:
+        EventID: 13 
+        TargetObject: 
+            - '*SOFTWARE\Microsoft\Windows\CurrentVersion\UMe'
+            - '*SOFTWARE\Microsoft\Windows\CurrentVersion\UT'
+        EventType: 'SetValue'
+    selection_reg2:
+        EventID: 13 
+        TargetObject: 
+            - '*\Control\SecurityProviders\WDigest\UseLogonCredential'
+        EventType: 'SetValue'
+        Details: 'DWORD (0x00000001)'
+    selection_process1:
+        EventID: 1 
+        CommandLine: 
+            - '*\Service.exe i'
+            - '*\Service.exe u'
+            - '*\microsoft\Taskbar\autoit3.exe'
+            - 'C:\wsc.exe*'
+    selection_process2:
+        EventID: 1
+        Image:
+            - '*\Windows\Temp\DB\*.exe'
