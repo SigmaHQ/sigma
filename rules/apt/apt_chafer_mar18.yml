@@ -4,6 +4,8 @@ title: Chafer Activity
 description: Detects Chafer activity attributed to OilRig as reported in Nyotron report in March 2018 
 references:
     - https://nyotron.com/nyotron-discovers-next-generation-oilrig-attacks/
+date: 2018/03/23
+author: Florian Roth, Markus Neis
 detection:
     condition: 1 of them
 falsepositives:
@@ -32,8 +34,7 @@ detection:
         EventType: 'SetValue'
     selection_reg2:
         EventID: 13 
-        TargetObject: 
-            - '*\Control\SecurityProviders\WDigest\UseLogonCredential'
+        TargetObject: '*\Control\SecurityProviders\WDigest\UseLogonCredential'
         EventType: 'SetValue'
         Details: 'DWORD (0x00000001)'
     selection_process1:
@@ -45,5 +46,8 @@ detection:
             - 'C:\wsc.exe*'
     selection_process2:
         EventID: 1
-        Image:
-            - '*\Windows\Temp\DB\*.exe'
+        Image: '*\Windows\Temp\DB\*.exe'
+    selection_process3:
+        EventID: 1
+        CommandLine: '*\nslookup.exe -q=TXT*'
+        ParentImage: '*\Autoit*'
