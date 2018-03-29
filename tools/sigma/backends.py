@@ -304,7 +304,7 @@ class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     identifier = "es-qs"
     active = True
 
-    reEscape = re.compile("([+\\-=!(){}\\[\\]^\"~:\\\\/]|&&|\\|\\|)")
+    reEscape = re.compile("([+\\-=!(){}\\[\\]^\"~:/]|\\\\(!>[*?])|&&|\\|\\|)")
     reClear = re.compile("[<>]")
     andToken = " AND "
     orToken = " OR "
@@ -627,7 +627,7 @@ class LogPointBackend(SingleTextQueryBackend):
     identifier = "logpoint"
     active = True
 
-    reEscape = re.compile('(["\\\\])')
+    reEscape = re.compile('("|\\\\(!>[*?]))')
     reClear = None
     andToken = " "
     orToken = " OR "
@@ -658,7 +658,7 @@ class SplunkBackend(SingleTextQueryBackend):
     active = True
     index_field = "index"
 
-    reEscape = re.compile('(["\\\\])')
+    reEscape = re.compile('("|\\\\(!>[*?]))')
     reClear = None
     andToken = " "
     orToken = " OR "
