@@ -61,6 +61,9 @@ test-merge:
 	tests/test-merge.sh
 	! coverage run -a --include=$(COVSCOPE) tools/merge_sigma tests/not_existing.yml > /dev/null
 
+test-backend-es-qs:
+	tests/test-backend-es-qs.sh
+
 build: tools/sigmac tools/merge_sigma tools/sigma/*.py tools/setup.py tools/setup.cfg
 	cd tools && python3 setup.py bdist_wheel
 
