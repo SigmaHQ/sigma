@@ -213,6 +213,152 @@ class RulenameCommentMixin:
             except KeyError:
                 return ""
 
+class ElasticsearchDSLBackend(RulenameCommentMixin, BaseBackend):
+    """ElasticSearch DSL backend"""
+    identifier = 'es-dsl'
+    active = True
+    output_class = SingleOutput
+    options = (
+        ("es", "http://localhost:9200", "Host and port of Elasticsearch instance", None),
+        ("output", "import", "Output format: import = JSON search request, curl = Shell script that do the search queries via curl", "output_type"),
+    )
+    interval = None
+    title = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.queries = []
+
+    def generate(self, sigmaparser):
+        """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
+        self.title = sigmaparser.parsedyaml["title"]
+        self.indices = sigmaparser.get_logsource().index
+        if len(self.indices) == 0:
+            self.indices = None
+
+        try:
+            self.interval = sigmaparser.parsedyaml['detection']['timeframe']
+        except:
+            pass
+
+        for parsed in sigmaparser.condparsed:
+            self.generateBefore(parsed)
+            self.generateQuery(parsed)
+            self.generateAfter(parsed)
+
+    def generateQuery(self, parsed):
+        self.queries[-1]['query']['constant_score']['filter'] = self.generateNode(parsed.parsedSearch)
+        if parsed.parsedAgg:
+            self.generateAggregation(parsed.parsedAgg)
+        # if parsed.parsedAgg:
+        #     fields += self.generateAggregation(parsed.parsedAgg)
+        # self.fields.update(fields)
+
+    def generateANDNode(self, node):
+        andNode = {'bool': {'must': []}}
+        for val in node:
+            andNode['bool']['must'].append(self.generateNode(val))
+        return andNode
+
+    def generateORNode(self, node):
+        orNode = {'bool': {'should': []}}
+        for val in node:
+            orNode['bool']['should'].append(self.generateNode(val))
+        return orNode
+
+    def generateNOTNode(self, node):
+        notNode = {'bool': {'must_not': []}}
+        for val in node:
+            notNode['bool']['must_not'].append(self.generateNode(val))
+        return notNode
+
+    def generateSubexpressionNode(self, node):
+        return self.generateNode(node.items)
+
+    def generateListNode(self, node):
+        raise NotImplementedError("%s : (%s) Node type not implemented for this backend"%(self.title, 'generateListNode'))
+
+    def generateMapItemNode(self, node):
+        key, value = node
+        if type(value) not in (str, int, list):
+            raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
+        if type(value) is list:
+            res = {'bool': {'should': []}}
+            for v in value:
+                res['bool']['should'].append({'match': {key: v}})
+            return res
+        else:
+            return {'match': {key: value}}
+
+    def generateValueNode(self, node):
+        return {'multi_match': {'query': node, 'fields': []}}
+
+    def generateNULLValueNode(self, node):
+        return {'missing': {'field': node.item}}
+
+    def generateNotNULLValueNode(self, node):
+        return {'exists': {'field': node.item}}
+
+    def generateAggregation(self, agg):
+        if agg:
+            if agg.aggfunc == sigma.parser.SigmaAggregationParser.AGGFUNC_COUNT:
+                if agg.groupfield is not None:
+                    self.queries[-1]['aggs'] = {
+                        '%s_count'%agg.groupfield: {
+                            'terms': {
+                                'field': '%s'%agg.groupfield
+                            },
+                            'aggs': {
+                                'limit': {
+                                    'bucket_selector': {
+                                        'buckets_path': {
+                                            'count': '_count'
+                                        },
+                                        'script': 'params.count %s %s'%(agg.cond_op, agg.condition)
+                                    }
+                                }
+                            }
+                        }
+                    }
+            else:
+                for name, idx in agg.aggfuncmap.items():
+                    if idx == agg.aggfunc:
+                        funcname = name
+                        break
+                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend"%(self.title, funcname))
+
+
+    def generateBefore(self, parsed):
+        self.queries.append({'query': {'constant_score': {'filter': {}}}})
+
+    def generateAfter(self, parsed):
+        dateField = 'date'
+        if self.sigmaconfig.config and 'dateField' in self.sigmaconfig.config:
+            dateField = self.sigmaconfig.config['dateField']
+        if self.interval:
+            if 'bool' not in self.queries[-1]['query']['constant_score']['filter']:
+                self.queries[-1]['query']['constant_score']['filter'] = {'bool': {'must': []}}
+            if 'must' not in self.queries[-1]['query']['constant_score']['filter']['bool']:
+                self.queries[-1]['query']['constant_score']['filter']['bool']['must'] = []
+
+            self.queries[-1]['query']['constant_score']['filter']['bool']['must'].append({'range': {dateField: {'gte': 'now-%s'%self.interval}}})
+
+    def finalize(self):
+        """
+        Is called after the last file was processed with generate(). The right place if this backend is not intended to
+        look isolated at each rule, but generates an output which incorporates multiple rules, e.g. dashboards.
+        """
+        index = ''
+        if self.indices is not None and len(self.indices) == 1:
+            index = '%s/'%self.indices[0]
+
+        for query in self.queries:
+            if self.output_type == 'curl':
+                self.output.print("\curl -XGET '%s/%s_search?pretty' -H 'Content-Type: application/json' -d'"%(self.es, index))
+            self.output.print(json.dumps(query, indent=2))
+            if self.output_type == 'curl':
+                self.output.print("'")
+
 class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
     """Base class for backends that generate one text-based expression from a Sigma rule"""
     identifier = "base-textquery"
@@ -285,7 +431,7 @@ class MultiRuleOutputMixin:
         * Unique name by addition of a counter if generated name already in usage
 
         Generated names are tracked by the Mixin.
-        
+
         """
         rulename = sigmaparser.parsedyaml["title"].replace(" ", "-").replace("(", "").replace(")", "")
         if rulename in self.rulenames:   # add counter if name collides
@@ -317,6 +463,8 @@ class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     notNullExpression = "_exists_:%s"
     mapExpression = "%s:%s"
     mapListsSpecialHandling = False
+
+
 
 class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     """Converts Sigma rule into Kibana JSON Configuration files (searches only)."""
@@ -641,7 +789,7 @@ class LogPointBackend(SingleTextQueryBackend):
     mapExpression = "%s=%s"
     mapListsSpecialHandling = True
     mapListValueExpression = "%s IN %s"
-    
+
     def generateAggregation(self, agg):
         if agg == None:
             return ""
@@ -651,7 +799,7 @@ class LogPointBackend(SingleTextQueryBackend):
             return " | chart %s(%s) as val | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.cond_op, agg.condition)
         else:
             return " | chart %s(%s) as val by %s | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.groupfield, agg.cond_op, agg.condition)
-    
+
 class SplunkBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Splunk Search Processing Language (SPL)."""
     identifier = "splunk"
