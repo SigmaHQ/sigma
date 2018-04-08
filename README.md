@@ -18,6 +18,8 @@ This repository contains:
 * Open repository for sigma signatures in the `./rules`subfolder
 * A converter that generate searches/queries for different SIEM systems [work in progress]
 
+![sigma_description](./images/Sigma-description.png)
+
 ## Hack.lu 2017 Talk
 
 [![Sigma - Generic Signatures for Log Events](https://preview.ibb.co/cMCigR/Screen_Shot_2017_10_18_at_15_47_15.png)](https://www.youtube.com/watch?v=OheVuE9Ifhs "Sigma - Generic Signatures for Log Events")
@@ -32,22 +34,6 @@ This repository contains:
 * Write a rule converter for your custom log analysis tool and process new Sigma rules automatically
 * Provide a free or commercial feed for Sigma signatures
 
-# Sigma Converter
-
-The converter is currently under development in the *devel-sigmac* branch of this project. It has currently the
-following capabilities:
-
-* Parsing of Sigma rule files
-* Conversion of searches into Elasticsearch and Splunk queries
-
-Planned main features are:
-
-* Conversion of aggregation expressions (after the pipe character)
-* Output of Kibana JSON configurations
-
-Support for further SIEM solutions can be added by developing an corresponsing output backend class.
-
-![sigma_description](./images/Sigma-description.png)
 
 # Why Sigma
 
@@ -94,7 +80,7 @@ Sysmon: Web Shell Detection
 Windows 'Security' Eventlog: Suspicious Number of Failed Logons from a Single Source Workstation
 ![sigma_rule example5](./images/Sigma_rule_example5.png)
 
-## Sigma Toolchain
+## Sigma Tools
 
 Sigmac converts sigma rules into queries or inputs of the supported targets listed below. It acts as a frontend to the
 Sigma library that may be used to integrate Sigma support in other projects. Further, there's `merge_sigma.py` which
@@ -105,9 +91,13 @@ merges multiple YAML documents of a Sigma rule collection into simple Sigma rule
 ### Supported Targets
 
 * [Splunk](https://www.splunk.com/)
-* [ElasticSearch](https://www.elastic.co/)
+* [Elasticsearch](https://www.elastic.co/)
+* [Kibana](https://www.elastic.co/de/products/kibana)
 * [Elastic X-Pack Watcher](https://www.elastic.co/guide/en/x-pack/current/xpack-alerting.html)
 * [Logpoint](https://www.logpoint.com)
+* Grep with Perl-compatible regular expression support
+
+New targets are continuously developed. A current list can be obtained with `sigmac --target-list` or `sigmac -l`.
 
 ### Requirements
 
@@ -119,6 +109,18 @@ It's available on PyPI. Install with:
 
 ```bash
 pip3 install sigmatools
+```
+
+Alternatively, if used from the Sigma Github repository, the Python dependencies can be installed with:
+
+```bash
+pip3 install -r tools/requirements.txt
+```
+
+For development (e.g. execution of integration tests with `make` and packaging), further dependencies are required and can be installed with:
+
+```bash
+pip3 install -r tools/requirements-devel.txt
 ```
 
 ## Contributed Scripts

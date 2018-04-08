@@ -78,6 +78,7 @@ class BaseBackend:
     index_field = None    # field name that is used to address indices
     output_class = None   # one of the above output classes
     file_list = None
+    options = tuple()     # a list of tuples with following elements: option name, default value, help text, target attribute name (option name if None)
 
     def __init__(self, sigmaconfig, backend_options=None, filename=None):
         """
@@ -87,10 +88,16 @@ class BaseBackend:
         super().__init__()
         if not isinstance(sigmaconfig, (sigma.config.SigmaConfiguration, None)):
             raise TypeError("SigmaConfiguration object expected")
-        self.options = backend_options
+        self.backend_options = backend_options
         self.sigmaconfig = sigmaconfig
         self.sigmaconfig.set_backend(self)
         self.output = self.output_class(filename)
+
+        # Parse options
+        for option, default_value, _, target in self.options:
+            if target is None:
+                target = option
+            setattr(self, target, self.backend_options.setdefault(option, default_value))
 
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
@@ -98,7 +105,9 @@ class BaseBackend:
             before = self.generateBefore(parsed)
             if before is not None:
                 self.output.print(before, end="")
-            self.output.print(self.generateQuery(parsed))
+            query = self.generateQuery(parsed)
+            if query is not None:
+                self.output.print(query)
             after = self.generateAfter(parsed)
             if after is not None:
                 self.output.print(after, end="")
@@ -193,9 +202,12 @@ class QuoteCharMixin:
 class RulenameCommentMixin:
     """Prefixes each rule with the rule title."""
     prefix = "# "
+    options = (
+            ("rulecomment", False, "Prefix generated query with comment containing title", None),
+            )
 
     def generateBefore(self, parsed):
-        if "rulecomment" in self.options:
+        if self.rulecomment:
             try:
                 return "\n%s%s\n" % (self.prefix, parsed.sigmaParser.parsedyaml['title'])
             except KeyError:
@@ -292,7 +304,7 @@ class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     identifier = "es-qs"
     active = True
 
-    reEscape = re.compile("([+\\-=!(){}\\[\\]^\"~:\\\\/]|&&|\\|\\|)")
+    reEscape = re.compile("([+\\-=!(){}\\[\\]^\"~:/]|\\\\(!>[*?])|&&|\\|\\|)")
     reClear = re.compile("[<>]")
     andToken = " AND "
     orToken = " OR "
@@ -311,15 +323,17 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     identifier = "kibana"
     active = True
     output_class = SingleOutput
+    options = (
+            ("output", "import", "Output format: import = JSON file manually imported in Kibana, curl = Shell script that imports queries in Kibana via curl (jq is additionally required)", "output_type"),
+            ("es", "localhost:9200", "Host and port of Elasticsearch instance", None),
+            ("index", ".kibana", "Kibana index", None),
+            ("prefix", "Sigma: ", "Title prefix of Sigma queries", None),
+            )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.kibanaconf = list()
         self.indexsearch = set()
-        self.output_type = self.options.setdefault("output", "import")
-        self.es = self.options.setdefault("es", "localhost:9200")
-        self.index = self.options.setdefault("index", ".kibana")
-        self.prefix = self.options.setdefault("prefix", "Sigma: ")
 
     def generate(self, sigmaparser):
         rulename = self.getRuleName(sigmaparser)
@@ -405,7 +419,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
                 item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'] = json.dumps(item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'])     # Convert it to JSON string as expected by Kibana
                 item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'] = item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'].replace("\\", "\\\\")      # Add further escaping for escaped quotes for shell
                 self.output.print(
-                        "curl -s -XPUT -H 'Content-Type: application/json' --data-binary @- {es}/{index}/doc/{doc_id} <<EOF\n{doc}\nEOF".format(
+                        "curl -s -XPUT -H 'Content-Type: application/json' --data-binary @- '{es}/{index}/doc/{doc_id}' <<EOF\n{doc}\nEOF".format(
                             es=self.es,
                             index=self.index,
                             doc_id="search:" + item['_id'],
@@ -426,19 +440,15 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
     identifier = "xpack-watcher"
     active = True
     output_class = SingleOutput
+    options = (
+            ("output", "curl", "Output format: curl = Shell script that imports queries in Watcher index with curl", "output_type"),
+            ("es", "localhost:9200", "Host and port of Elasticsearch instance", None),
+            ("mail", None, "Mail address for Watcher notification (only logging if not set)", None),
+            )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.watcher_alert = dict()
-        try:
-            self.output_type = self.options["output"]
-        except KeyError:
-            self.output_type = "curl"
-
-        try:
-            self.es = self.options["es"]
-        except KeyError:
-            self.es = "localhost:9200"
 
     def generate(self, sigmaparser):
         # get the details if this alert occurs
@@ -546,7 +556,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
             # Building the action
             action_subject = "Sigma Rule '%s'" % title
             try:    # mail notification if mail address is given
-                email = self.options['mail']
+                email = self.mail
                 action = {
                         "send_email": {
                             "email": {
@@ -617,7 +627,7 @@ class LogPointBackend(SingleTextQueryBackend):
     identifier = "logpoint"
     active = True
 
-    reEscape = re.compile('(["\\\\])')
+    reEscape = re.compile('("|\\\\(!>[*?]))')
     reClear = None
     andToken = " "
     orToken = " OR "
@@ -648,7 +658,7 @@ class SplunkBackend(SingleTextQueryBackend):
     active = True
     index_field = "index"
 
-    reEscape = re.compile('(["\\\\])')
+    reEscape = re.compile('("|\\\\(!>[*?]))')
     reClear = None
     andToken = " "
     orToken = " OR "
@@ -723,8 +733,15 @@ class FieldnameListBackend(BaseBackend):
     active = True
     output_class = SingleOutput
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields = set()
+
     def generateQuery(self, parsed):
-        return "\n".join(sorted(set(list(flatten(self.generateNode(parsed.parsedSearch))))))
+        fields = list(flatten(self.generateNode(parsed.parsedSearch)))
+        if parsed.parsedAgg:
+            fields += self.generateAggregation(parsed.parsedAgg)
+        self.fields.update(fields)
 
     def generateANDNode(self, node):
         return [self.generateNode(val) for val in node]
@@ -751,6 +768,23 @@ class FieldnameListBackend(BaseBackend):
 
     def generateValueNode(self, node):
         return []
+
+    def generateNULLValueNode(self, node):
+        return [node.item]
+
+    def generateNotNULLValueNode(self, node):
+        return [node.item]
+
+    def generateAggregation(self, agg):
+        fields = list()
+        if agg.groupfield is not None:
+            fields.append(agg.groupfield)
+        if agg.aggfield is not None:
+            fields.append(agg.aggfield)
+        return fields
+
+    def finalize(self):
+        self.output.print("\n".join(sorted(self.fields)))
 
 # Helpers
 def flatten(l):
