@@ -5,15 +5,20 @@ logsource:
     product: windows
     service: security
 detection:
-    selection:
+    selection1:
         EventID:
             - 529
             - 4625
-            - 4776
         UserName: not null
-        SourceWorkstation: not null
+        WorkstationName: not null
+    selection2:
+        EventID: 4776
+        UserName: not null
+        Workstation: not null
     timeframe: 24h 
-    condition: selection | count(UserName) by SourceWorkstation > 3
+    condition:
+        - selection1 | count(UserName) by WorkstationName > 3
+        - selection2 | count(UserName) by Workstation > 3
 falsepositives:
     - Terminal servers
     - Jump servers

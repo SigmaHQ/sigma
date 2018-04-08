@@ -54,7 +54,19 @@ def get_inputs(paths, recursive):
     else:
         return [pathlib.Path(p) for p in paths]
 
-argparser = argparse.ArgumentParser(description="Convert Sigma rules into SIEM signatures.")
+class SigmacArgumentParser(argparse.ArgumentParser):
+    def format_help(self):
+        helptext = super().format_help() + "\nBackend options:\n"
+
+        for backend in backends.getBackendList():
+            if len(backend.options) > 0:
+                helptext += "  " + backend.identifier + "\n"
+                for option, default, help, _ in backend.options:
+                    helptext += "    {:10}: {} (default: {})".format(option, help, default) + "\n"
+
+        return helptext
+
+argparser = SigmacArgumentParser(description="Convert Sigma rules into SIEM signatures.")
 argparser.add_argument("--recurse", "-r", action="store_true", help="Recurse into subdirectories (not yet implemented)")
 argparser.add_argument("--filter", "-f", help="""
 Define comma-separated filters that must match (AND-linked) to rule to be processed.
