@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#set -vx
 
 curl -XPUT 'localhost:9200/test?pretty' -H 'Content-Type: application/json' -d'
 {
@@ -12,7 +12,7 @@ curl -XPUT 'localhost:9200/test?pretty' -H 'Content-Type: application/json' -d'
 }
 '
 tools/sigmac -t es-qs -Orulecomment -I -r rules/ > es-queries.txt
-while read line
+while read -r line
 do
     if [[ $line == \#* ]]
     then
