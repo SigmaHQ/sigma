@@ -18,8 +18,10 @@
 import asyncio
 import functools
 import sys
+import pprint
 import elasticsearch
 import elasticsearch_async
+pp = pprint.PrettyPrinter()
 
 # Configuration
 eshost = "localhost:9200"
@@ -76,15 +78,18 @@ async def check_queries():
         rule, query = await queries.get()
         if query is not None:
             print("# Checking query (rule {}): {}".format(rule, query))
-            result = await esa.indices.validate_query(
-                    index=index,
-                    q=query
-                    )
+            result = await esa.indices.validate_query(index=index, q=query)
             valid = result['valid']
 
             print("# Received Result for rule {} query={}: {}".format(rule, query, valid))
             if not valid:
-                failed.append((rule, query))
+                try:
+                    detail_result = await esa.search(index=index, q=query)
+                except Exception as e:
+                    #error = e.info['error']['root_cause']
+                    error = e.info
+
+                failed.append((rule, query, error))
             queries.task_done()
         else:
             queries.task_done()
@@ -104,6 +109,7 @@ loop = asyncio.get_event_loop()
 done, pending = loop.run_until_complete(asyncio.wait(tasks))
 loop.close()
 esa.transport.close()
+print()
 
 # Check if sigmac runned successfully
 try:
@@ -124,8 +130,11 @@ except Exception:
 query_check_result_cnt = len(query_check_result)
 if query_check_result_cnt > 0:
     print("!!! {} queries failed to check:".format(query_check_result_cnt))
-    for rule, query in query_check_result:
+    for rule, query, error in query_check_result:
         print("- {}: {}".format(rule, query))
+        print("Error:")
+        pp.pprint(error)
+        print()
     sys.exit(4)
 else:
     print("All query checks passed!")
