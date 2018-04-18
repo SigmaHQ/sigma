@@ -8,7 +8,9 @@ author: Markus Neis / Florian Roth
 falsepositives:
     - Unknown
 level: medium
-
+logsource:
+   product: windows
+   service: sysmon
 detection:
     selection1:
         EventID: 1
@@ -24,12 +26,8 @@ detection:
              - '1B1A3F43BF37B5BFE60751F2EE2F326E'
              - '37777A96245A3C74EB217308F3546F4C'
              - '9D87C9D67CE724033C0B40CC4CA1B206'
-
         CommandLine:
             - '* *format:\"http*'
             - "* /format:'http"
             - '* /format:http*'
     condition: 1 of them
-logsource:
-   product: windows
-   service: sysmon
