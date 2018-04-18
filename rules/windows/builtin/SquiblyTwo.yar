@@ -13,7 +13,9 @@ detection:
         Image:
             - '*\wmic.exe'
         CommandLine:
-            - 'wmic*os*get*/format:\"http*'
+            - 'wmic * /format:\"http*'
+            - 'wmic * /format:\'http'
+            - 'wmic * /format:http'
     condition: 1 of selection
 falsepositives:
     - Unknown 
