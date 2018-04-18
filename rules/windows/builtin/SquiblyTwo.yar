@@ -13,7 +13,7 @@ detection:
         Image:
             - '*\wmic.exe'
         CommandLine:
-            - 'wmic*os*get*/format:\"https*'
+            - 'wmic*os*get*/format:\"http*'
     condition: 1 of selection
 falsepositives:
     - Unknown 
