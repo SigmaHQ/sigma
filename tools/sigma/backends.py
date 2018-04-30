@@ -450,7 +450,7 @@ class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     identifier = "es-qs"
     active = True
 
-    reEscape = re.compile("([+\\-=!(){}\\[\\]^\"~:/]|\\\\(!>[*?])|\\\\u|&&|\\|\\|)")
+    reEscape = re.compile("([+\\-=!(){}\\[\\]^\"~:/]|\\\\(?![*?])|\\\\u|&&|\\|\\|)")
     reClear = re.compile("[<>]")
     andToken = " AND "
     orToken = " OR "
@@ -463,8 +463,6 @@ class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     notNullExpression = "_exists_:%s"
     mapExpression = "%s:%s"
     mapListsSpecialHandling = False
-
-
 
 class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     """Converts Sigma rule into Kibana JSON Configuration files (searches only)."""
@@ -775,7 +773,7 @@ class LogPointBackend(SingleTextQueryBackend):
     identifier = "logpoint"
     active = True
 
-    reEscape = re.compile('("|\\\\(!>[*?]))')
+    reEscape = re.compile('("|\\\\(?![*?]))')
     reClear = None
     andToken = " "
     orToken = " OR "
@@ -806,7 +804,7 @@ class SplunkBackend(SingleTextQueryBackend):
     active = True
     index_field = "index"
 
-    reEscape = re.compile('("|\\\\(!>[*?]))')
+    reEscape = re.compile('("|\\\\(?![*?]))')
     reClear = None
     andToken = " "
     orToken = " OR "
