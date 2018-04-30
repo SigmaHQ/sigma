@@ -86,7 +86,6 @@ async def check_queries():
                 try:
                     detail_result = await esa.search(index=index, q=query)
                 except Exception as e:
-                    #error = e.info['error']['root_cause']
                     error = e.info
 
                 failed.append((rule, query, error))
