@@ -450,7 +450,7 @@ class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     identifier = "es-qs"
     active = True
 
-    reEscape = re.compile("([+\\-=!(){}\\[\\]^\"~:/]|\\\\(!>[*?])|&&|\\|\\|)")
+    reEscape = re.compile("([+\\-=!(){}\\[\\]^\"~:/]|\\\\(!>[*?])|\\\\u|&&|\\|\\|)")
     reClear = re.compile("[<>]")
     andToken = " AND "
     orToken = " OR "
