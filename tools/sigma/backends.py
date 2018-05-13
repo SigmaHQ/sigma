@@ -209,9 +209,13 @@ class RulenameCommentMixin:
     def generateBefore(self, parsed):
         if self.rulecomment:
             try:
-                return "\n%s%s\n" % (self.prefix, parsed.sigmaParser.parsedyaml['title'])
+                return "%s%s\n" % (self.prefix, parsed.sigmaParser.parsedyaml['title'])
             except KeyError:
                 return ""
+
+    def generateAfter(self, parsed):
+        if self.rulecomment:
+            return "\n"
 
 class ElasticsearchDSLBackend(RulenameCommentMixin, BaseBackend):
     """ElasticSearch DSL backend"""
