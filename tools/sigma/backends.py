@@ -209,9 +209,13 @@ class RulenameCommentMixin:
     def generateBefore(self, parsed):
         if self.rulecomment:
             try:
-                return "\n%s%s\n" % (self.prefix, parsed.sigmaParser.parsedyaml['title'])
+                return "%s%s\n" % (self.prefix, parsed.sigmaParser.parsedyaml['title'])
             except KeyError:
                 return ""
+
+    def generateAfter(self, parsed):
+        if self.rulecomment:
+            return "\n"
 
 class ElasticsearchDSLBackend(RulenameCommentMixin, BaseBackend):
     """ElasticSearch DSL backend"""
@@ -285,16 +289,16 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, BaseBackend):
         if type(value) is list:
             res = {'bool': {'should': []}}
             for v in value:
-                res['bool']['should'].append({'match': {key: v}})
+                res['bool']['should'].append({'match_phrase': {key: v}})
             return res
         else:
-            return {'match': {key: value}}
+            return {'match_phrase': {key: value}}
 
     def generateValueNode(self, node):
-        return {'multi_match': {'query': node, 'fields': []}}
+        return {'multi_match': {'query': node, 'fields': [], 'type': 'phrase'}}
 
     def generateNULLValueNode(self, node):
-        return {'missing': {'field': node.item}}
+        return {'bool': {'must_not': {'exists': {'field': node.item}}}}
 
     def generateNotNULLValueNode(self, node):
         return {'exists': {'field': node.item}}
@@ -352,12 +356,19 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, BaseBackend):
         if self.indices is not None and len(self.indices) == 1:
             index = '%s/'%self.indices[0]
 
-        for query in self.queries:
-            if self.output_type == 'curl':
+        if self.output_type == 'curl':
+            for query in self.queries:
                 self.output.print("\curl -XGET '%s/%s_search?pretty' -H 'Content-Type: application/json' -d'"%(self.es, index))
-            self.output.print(json.dumps(query, indent=2))
-            if self.output_type == 'curl':
+                self.output.print(json.dumps(query, indent=2))
                 self.output.print("'")
+        else:
+            if len(self.queries) == 1:
+                self.output.print(json.dumps(self.queries[0], indent=2))
+            else:
+                self.output.print(json.dumps(self.queries, indent=2))
+
+
+
 
 class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
     """Base class for backends that generate one text-based expression from a Sigma rule"""
@@ -450,7 +461,7 @@ class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     identifier = "es-qs"
     active = True
 
-    reEscape = re.compile("([+\\-=!(){}\\[\\]^\"~:/]|\\\\(!>[*?])|&&|\\|\\|)")
+    reEscape = re.compile("([+\\-=!(){}\\[\\]^\"~:/]|\\\\(?![*?])|\\\\u|&&|\\|\\|)")
     reClear = re.compile("[<>]")
     andToken = " AND "
     orToken = " OR "
@@ -463,8 +474,6 @@ class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     notNullExpression = "_exists_:%s"
     mapExpression = "%s:%s"
     mapListsSpecialHandling = False
-
-
 
 class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     """Converts Sigma rule into Kibana JSON Configuration files (searches only)."""
@@ -775,7 +784,7 @@ class LogPointBackend(SingleTextQueryBackend):
     identifier = "logpoint"
     active = True
 
-    reEscape = re.compile('("|\\\\(!>[*?]))')
+    reEscape = re.compile('("|\\\\(?![*?]))')
     reClear = None
     andToken = " "
     orToken = " OR "
@@ -806,7 +815,7 @@ class SplunkBackend(SingleTextQueryBackend):
     active = True
     index_field = "index"
 
-    reEscape = re.compile('("|\\\\(!>[*?]))')
+    reEscape = re.compile('("|\\\\(?![*?]))')
     reClear = None
     andToken = " "
     orToken = " OR "

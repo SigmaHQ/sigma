@@ -34,7 +34,6 @@ This repository contains:
 * Write a rule converter for your custom log analysis tool and process new Sigma rules automatically
 * Provide a free or commercial feed for Sigma signatures
 
-
 # Why Sigma
 
 Today, everyone collects log data for analysis. People start working on their own, processing numerous white papers, blog posts and log analysis guidelines, extracting the necessary information and build their own searches and dashboard. Some of their searches and correlations are great and very useful but they lack a standardized format in which they can share their work with others. 
@@ -91,13 +90,18 @@ merges multiple YAML documents of a Sigma rule collection into simple Sigma rule
 ### Supported Targets
 
 * [Splunk](https://www.splunk.com/)
-* [Elasticsearch](https://www.elastic.co/)
+* [ElasticSearch](https://www.elastic.co/)
+* [ElasticSearch Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html)
 * [Kibana](https://www.elastic.co/de/products/kibana)
 * [Elastic X-Pack Watcher](https://www.elastic.co/guide/en/x-pack/current/xpack-alerting.html)
 * [Logpoint](https://www.logpoint.com)
 * Grep with Perl-compatible regular expression support
 
-New targets are continuously developed. A current list can be obtained with `sigmac --target-list` or `sigmac -l`.
+Current work-in-progress
+* [Splunk Data Models](https://docs.splunk.com/Documentation/Splunk/7.1.0/Knowledge/Aboutdatamodels)
+* [Windows Defender Advanced Threat Protection (WDATP)](https://www.microsoft.com/en-us/windowsforbusiness/windows-atp)
+
+New targets are continuously developed. You can get a list of supported targets with `sigmac --target-list` or `sigmac -l`.
 
 ### Requirements
 
