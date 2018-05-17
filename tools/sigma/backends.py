@@ -289,16 +289,16 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, BaseBackend):
         if type(value) is list:
             res = {'bool': {'should': []}}
             for v in value:
-                res['bool']['should'].append({'match': {key: v}})
+                res['bool']['should'].append({'match_phrase': {key: v}})
             return res
         else:
-            return {'match': {key: value}}
+            return {'match_phrase': {key: value}}
 
     def generateValueNode(self, node):
-        return {'multi_match': {'query': node, 'fields': []}}
+        return {'multi_match': {'query': node, 'fields': [], 'type': 'phrase'}}
 
     def generateNULLValueNode(self, node):
-        return {'missing': {'field': node.item}}
+        return {'bool': {'must_not': {'exists': {'field': node.item}}}}
 
     def generateNotNULLValueNode(self, node):
         return {'exists': {'field': node.item}}
@@ -356,12 +356,19 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, BaseBackend):
         if self.indices is not None and len(self.indices) == 1:
             index = '%s/'%self.indices[0]
 
-        for query in self.queries:
-            if self.output_type == 'curl':
+        if self.output_type == 'curl':
+            for query in self.queries:
                 self.output.print("\curl -XGET '%s/%s_search?pretty' -H 'Content-Type: application/json' -d'"%(self.es, index))
-            self.output.print(json.dumps(query, indent=2))
-            if self.output_type == 'curl':
+                self.output.print(json.dumps(query, indent=2))
                 self.output.print("'")
+        else:
+            if len(self.queries) == 1:
+                self.output.print(json.dumps(self.queries[0], indent=2))
+            else:
+                self.output.print(json.dumps(self.queries, indent=2))
+
+
+
 
 class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
     """Base class for backends that generate one text-based expression from a Sigma rule"""
