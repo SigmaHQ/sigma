@@ -475,6 +475,29 @@ class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     mapExpression = "%s:%s"
     mapListsSpecialHandling = False
 
+# Graylog reserved characters in search && || : \ / + - ! ( ) { } [ ] ^ " ~ * ?
+# Modified from Elasticsearch backend reserved character at https://www.elastic.co/guide/en/elasticsearch/reference/2.1/query-dsl-query-string-query.html#_reserved_characters
+# Elasticsearch characters + - = && || > < ! ( ) { } [ ] ^ " ~ * ? : \ /
+
+class GraylogQuerystringBackend(SingleTextQueryBackend):
+    """Converts Sigma rule into Graylog query string. Only searches, no aggregations."""     
+    identifier = "graylog"
+    active = True
+
+    reEscape = re.compile("([+\\-!(){}\\[\\]^\"~:/]|\\\\(?![*?])|&&|\\|\\|)")
+    reClear = None
+    andToken = " AND "
+    orToken = " OR "
+    notToken = "NOT "
+    subExpression = "(%s)"
+    listExpression = "(%s)"
+    listSeparator = " "
+    valueExpression = "\"%s\""
+    nullExpression = "NOT _exists_:%s"
+    notNullExpression = "_exists_:%s"
+    mapExpression = "%s:%s"
+    mapListsSpecialHandling = False
+
 class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     """Converts Sigma rule into Kibana JSON Configuration files (searches only)."""
     identifier = "kibana"
