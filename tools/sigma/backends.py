@@ -102,13 +102,14 @@ class BaseBackend:
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
         for parsed in sigmaparser.condparsed:
+            query = self.generateQuery(parsed)
             before = self.generateBefore(parsed)
+            after = self.generateAfter(parsed)
+
             if before is not None:
                 self.output.print(before, end="")
-            query = self.generateQuery(parsed)
             if query is not None:
                 self.output.print(query)
-            after = self.generateAfter(parsed)
             if after is not None:
                 self.output.print(after, end="")
 
