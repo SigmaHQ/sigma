@@ -381,16 +381,34 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
     mapListValueExpression = None       # Syntax for field/value condititons where map value is a list
 
     def generateANDNode(self, node):
-        return self.andToken.join([self.generateNode(val) for val in node])
+        generated = [ self.generateNode(val) for val in node ]
+        filtered = [ g for g in generated if g is not None ]
+        if filtered:
+            return self.andToken.join(filtered)
+        else:
+            return None
 
     def generateORNode(self, node):
-        return self.orToken.join([self.generateNode(val) for val in node])
+        generated = [ self.generateNode(val) for val in node ]
+        filtered = [ g for g in generated if g is not None ]
+        if filtered:
+            return self.orToken.join(filtered)
+        else:
+            return None
 
     def generateNOTNode(self, node):
-        return self.notToken + self.generateNode(node.item)
+        generated = self.generateNode(node.item)
+        if generated is not None:
+            return self.notToken + generated
+        else:
+            return None
 
     def generateSubexpressionNode(self, node):
-        return self.subExpression % self.generateNode(node.items)
+        generated = self.generateNode(node.items)
+        if generated:
+            return self.subExpression % generated
+        else:
+            return None
 
     def generateListNode(self, node):
         if not set([type(value) for value in node]).issubset({str, int}):
