@@ -145,11 +145,12 @@ These tools are not part of the main toolchain and maintained separately by thei
 # Next Steps
 
 * Integration of feedback into the rule specifications
-* Integration into Threat Intel Exchanges, e.g. [MISP](http://www.misp-project.org/)
+* Integration into Threat Intel Exchanges
 * Attempts to convince others to use the rule format in their reports, threat feeds, blog posts, threat sharing platforms
 
 # Projects that use Sigma
 
+* [MISP](http://www.misp-project.org/2017/03/26/MISP.2.4.70.released.html) (since version 2.4.70, March 2017)
 * [Augmentd](https://augmentd.co/)
 * [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 
