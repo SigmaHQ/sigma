@@ -1121,10 +1121,7 @@ class ArcSightBackend(SingleTextQueryBackend):
         return "(" + self.orToken.join([self.generateNode(val) for val in node]) + ")"
         
 class QualysBackend(SingleTextQueryBackend):
-    """
-    Converts Sigma rule into Qualys saved search.
-    Contributed by SOC Prime. https://socprime.com
-    """
+    """Converts Sigma rule into Qualys saved search. Contributed by SOC Prime. https://socprime.com"""
     identifier = "qualys"
     active = True
     andToken = " and "
@@ -1149,7 +1146,6 @@ class QualysBackend(SingleTextQueryBackend):
             else:
                 fl.append(item.target)
         self.allowedFieldsList = list(set(fl))
-
 
     def generateORNode(self, node):
         new_list = []
@@ -1197,13 +1193,13 @@ class QualysBackend(SingleTextQueryBackend):
         all_keys = set()
 
         for parsed in sigmaparser.condparsed:
-            if self.generateQuery(parsed) == "()":
+            query = self.generateQuery(parsed)
+            if query == "()":
                 self.PartialMatchFlag = None
-            sigmaparser_parsedyaml = sigmaparser.parsedyaml
+
             if self.PartialMatchFlag == True:
-                raise PartialMatchError(self.generateQuery(parsed))
+                raise PartialMatchError(query)
             elif self.PartialMatchFlag == None:
-                raise FullMatchError(self.generateQuery(parsed))
+                raise FullMatchError(query)
             else:
-                print(self.generateQuery(parsed))
-    
+                self.output.print(query)
