@@ -990,11 +990,8 @@ class FullMatchError(Exception):
     pass    
 
 class ArcSightBackend(SingleTextQueryBackend):
-    """
-    Converts Sigma rule into ArcSight saved search.
-    Contributed by SOC Prime. https://socprime.com
-    """
-    identifier = "as"
+    """Converts Sigma rule into ArcSight saved search. Contributed by SOC Prime. https://socprime.com"""
+    identifier = "arcsight"
     active = True
     andToken = " AND "
     orToken = " OR "
@@ -1028,7 +1025,7 @@ class ArcSightBackend(SingleTextQueryBackend):
     def CleanNode(self, node):
         search_ptrn = re.compile(r"[\/\\@?#&_%*',\(\)\" ]")
         replace_ptrn = re.compile(r"[ \/\\@?#&_%*',\(\)\" ]")
-        match = search_ptrn.search(node)
+        match = search_ptrn.search(str(node))
         new_node = list()
         if match:
             replaced_str = replace_ptrn.sub('*', node)
@@ -1122,7 +1119,6 @@ class ArcSightBackend(SingleTextQueryBackend):
                     new_value.append(value)
             return "(" + self.orToken.join([self.generateNode(val) for val in new_value]) + ")"
         return "(" + self.orToken.join([self.generateNode(val) for val in node]) + ")"
-
         
 class QualysBackend(SingleTextQueryBackend):
     """

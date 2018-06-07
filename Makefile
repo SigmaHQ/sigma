@@ -23,6 +23,7 @@ test-sigmac:
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t logpoint rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-dsl rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t arcsight -c tools/config/arcsight.yml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -f 'level>=high,level<=critical,status=stable,logsource=windows' rules/ > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -f 'level>=high,level<=critical,status=xstable,logsource=windows' rules/ > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -f 'level>=high,level<=xcritical,status=stable,logsource=windows' rules/ > /dev/null
