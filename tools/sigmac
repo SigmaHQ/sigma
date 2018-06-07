@@ -165,6 +165,16 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
             error = 42
             if not cmdargs.defer_abort:
                 sys.exit(error)
+    except backends.PartialMatchError as e:
+        print("%s" % (str(e),), file=sys.stderr)
+        error = 80
+        if not cmdargs.defer_abort:
+            sys.exit(error)
+    except backends.FullMatchError as e:
+        print("Full Mismatch Error", file=sys.stderr)
+        error = 90
+        if not cmdargs.defer_abort:
+            sys.exit(error)                
     finally:
         try:
             f.close()
