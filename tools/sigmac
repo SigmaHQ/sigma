@@ -82,7 +82,8 @@ argparser.add_argument("--config", "-c", help="Configuration with field name and
 argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix if multiple files are generated (not yet implemented)")
 argparser.add_argument("--backend-option", "-O", action="append", help="Options and switches that are passed to the backend")
 argparser.add_argument("--defer-abort", "-d", action="store_true", help="Don't abort on parse or conversion errors, proceed with next rule. The exit code from the last error is returned")
-argparser.add_argument("--ignore-not-implemented", "-I", action="store_true", help="Only return error codes for parse errors and ignore errors for rules with not implemented features")
+argparser.add_argument("--ignore-not-implemented", "-I", action="store_true", help="Ignore errors for rules with not implemented features")
+argparser.add_argument("--ignore-not-supported", "-S", action="store_true", help="Ignore errors for rules which require features that are not supported by the target system")
 argparser.add_argument("--verbose", "-v", action="store_true", help="Be verbose")
 argparser.add_argument("--debug", "-D", action="store_true", help="Debugging output")
 argparser.add_argument("inputs", nargs="*", help="Sigma input files")
@@ -153,6 +154,12 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
         error = 4
         if not cmdargs.defer_abort:
             sys.exit(error)
+    except backends.NotSupportedError as e:
+        print("The Sigma rule requires a feature that is not supported by the target system: " + str(e), file=sys.stderr)
+        if not cmdargs.ignore_not_supported:
+            error = 9
+            if not cmdargs.defer_abort:
+                sys.exit(error)
     except backends.BackendError as e:
         print("Backend error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
         error = 8
