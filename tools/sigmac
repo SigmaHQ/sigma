@@ -153,6 +153,12 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
         error = 4
         if not cmdargs.defer_abort:
             sys.exit(error)
+    except backends.NotSupportedError as e:
+        print("The Sigma rule requires a feature that is not supported by the target system: " + str(e), file=sys.stderr)
+        if not cmdargs.ignore_backend_errors:
+            error = 9
+            if not cmdargs.defer_abort:
+                sys.exit(error)
     except backends.BackendError as e:
         print("Backend error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
         if not cmdargs.ignore_backend_errors:
