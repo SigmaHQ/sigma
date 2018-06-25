@@ -157,6 +157,7 @@ These tools are not part of the main toolchain and maintained separately by thei
 * [Augmentd](https://augmentd.co/)
 * [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 * [SOC Prime - Sigma Rule Editor](https://tdm.socprime.com/sigma/)
+* [ypsilon](https://github.com/P4T12ICK/ypsilon) - Automated Use Case Testing 
 
 # Licenses
 
