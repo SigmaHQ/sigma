@@ -21,6 +21,7 @@ test-sigmac:
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t graylog rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t xpack-watcher rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunkxml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t logpoint rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t wdatp rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-dsl rules/ > /dev/null
