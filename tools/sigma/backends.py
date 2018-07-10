@@ -1027,14 +1027,14 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                     return None
                 elif self.service == "sysmon" and value == 8:      # Create Remote Thread
                     self.table = "MiscEvents"
-                    return "ActionType == \"CreateRemoteThread\""
+                    return "ActionType == \"CreateRemoteThreadApiCall\""
                 elif self.service == "sysmon" and value == 11:     # File Creation
                     self.table = "FileCreationEvents"
                     return None
                 elif self.service == "sysmon" and value == 13 \
                     or self.service == "security" and value == 4657:    # Set Registry Value
                     self.table = "RegistryEvents"
-                    return "ActionType == \"SetValue\""
+                    return "ActionType == \"RegistryValueSet\""
                 elif self.service == "security" and value == 4624:
                     self.table = "LogonEvents"
                     return None
