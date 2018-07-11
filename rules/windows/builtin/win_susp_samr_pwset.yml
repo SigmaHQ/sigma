@@ -6,11 +6,12 @@ logsource:
     service: security
 detection:
     samrpipe:
-              EventID: 5145
-              RelativeTargetName: samr
+        EventID: 5145
+        RelativeTargetName: samr
     passwordchanged:
-              EventID: 4738
-              PasswordLastSet: (any) 
+        EventID: 4738
+    passwordchanged_filter:
+        PasswordLastSet: null
     timeframe: 15s 
-    condition: samrpipe | near passwordchanged
+    condition: ( passwordchanged and not passwordchanged_filter ) | near samrpipe
 level: medium

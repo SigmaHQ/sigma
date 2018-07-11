@@ -1,0 +1,23 @@
+title: Default PowerSploit Schtasks Persistence 
+status: experimental
+description: Detects the creation of a schtask via PowerSploit Default Configuration 
+references:
+    - https://github.com/0xdeadbeefJERKY/PowerSploit/blob/8690399ef70d2cad10213575ac67e8fa90ddf7c3/Persistence/Persistence.psm1
+author: Markus Neis
+date: 2018/03/06
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        ParentImage:
+            - '*\Powershell.exe'
+        CommandLine:
+            - '*\schtasks.exe*/Create*/RU*system*/SC*ONLOGON*'
+            - '*\schtasks.exe*/Create*/RU*system*/SC*DAILY*'
+            - '*\schtasks.exe*/Create*/RU*system*/SC*ONIDLE*'
+            - '*\schtasks.exe*/Create*/RU*system*/SC*HOURLY*'
+    condition: selection
+falsepositives:
+    - False positives are possible, depends on organisation and processes
+level: high

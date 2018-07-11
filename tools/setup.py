@@ -13,7 +13,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='sigmatools',
-    version='0.4',
+    version='0.5',
     description='Tools for the Generic Signature Format for SIEM Systems',
     long_description=long_description,
     url='https://github.com/Neo23x0/sigma',
@@ -39,6 +39,22 @@ setup(
     extras_require={
         'test': ['coverage', 'yamllint'],
     },
-    data_files=[('etc/sigma', ['config/elk-windows.yml', 'config/elk-linux.yml', 'config/elk-defaultindex.yml', 'config/splunk-windows-all.yml', 'config/splunk-windows-all.yml', 'config/logpoint-windows-all.yml'])],
-    scripts=['sigmac', 'merge_sigma']
+    data_files=[
+        ('etc/sigma', [
+            'config/arcsight.yml',
+            'config/elk-defaultindex-filebeat.yml',
+            'config/elk-defaultindex-logstash.yml',
+            'config/elk-defaultindex.yml',
+            'config/elk-linux.yml',
+            'config/elk-windows.yml',
+            'config/helk.yml',
+            'config/logpoint-windows-all.yml',
+            'config/qualys.yml',
+            'config/spark.yml',
+            'config/splunk-windows-all.yml',
+        ])],
+    scripts=[
+        'sigmac',
+        'merge_sigma'
+        ]
 )
