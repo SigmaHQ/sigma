@@ -94,13 +94,16 @@ merges multiple YAML documents of a Sigma rule collection into simple Sigma rule
 
 ### Supported Targets
 
-* [Splunk](https://www.splunk.com/)
-* [ElasticSearch](https://www.elastic.co/)
+* [Splunk](https://www.splunk.com/) (plainqueries and dashboards)
+* [ElasticSearch Query Strings](https://www.elastic.co/)
 * [ElasticSearch Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html)
 * [Kibana](https://www.elastic.co/de/products/kibana)
 * [Elastic X-Pack Watcher](https://www.elastic.co/guide/en/x-pack/current/xpack-alerting.html)
 * [Logpoint](https://www.logpoint.com)
 * [Windows Defender Advanced Threat Protection (WDATP)](https://www.microsoft.com/en-us/windowsforbusiness/windows-atp)
+* [ArcSight](https://software.microfocus.com/en-us/products/siem-security-information-event-management/overview)
+* [QRadar](https://www.ibm.com/de-de/marketplace/ibm-qradar-siem)
+* [Qualys](https://www.qualys.com/apps/threat-protection/)
 * Grep with Perl-compatible regular expression support
 
 Current work-in-progress
