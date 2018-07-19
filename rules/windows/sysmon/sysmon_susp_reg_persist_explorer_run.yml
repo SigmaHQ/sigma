@@ -1,0 +1,29 @@
+title: Registry Persistence Explorer Run
+status: experimental
+description: Detects a possible persistence mechanism using Explorer RUN registry key
+author: Florian Roth
+date: 2018/07/18
+reference:
+    - https://researchcenter.paloaltonetworks.com/2018/07/unit42-upatre-continues-evolve-new-anti-analysis-techniques/
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 13
+        TargetObject: '*\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run'
+        Details: 
+            - 'C:\Windows\Temp\*'
+            - 'C:\ProgramData\*'
+            - '*\AppData\*'
+            - 'C:\$Recycle.bin\*'
+            - 'C:\Temp\*'
+            - 'C:\Users\Public\*'
+            - 'C:\Users\Default\*'
+    condition: selection
+fields:
+    - Image
+    - ParentImage
+falsepositives:
+    - Unknown
+level: high
