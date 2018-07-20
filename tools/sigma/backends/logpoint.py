@@ -14,10 +14,9 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
-import json
 import re
 import sigma
+from .base import SingleTextQueryBackend
 
 class LogPointBackend(SingleTextQueryBackend):
     """Converts Sigma rule into LogPoint query"""

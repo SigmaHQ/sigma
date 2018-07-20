@@ -17,11 +17,27 @@
 import sys
 import json
 import re
-import sigma
+import sigma.backends
+from .base import BaseBackend
+import pkgutil
+import importlib
+import os
+
+def getAllSubclasses(cls):
+    for subcls in cls.__subclasses__():
+        yield from getAllSubclasses(subcls)
+        yield cls
 
 def getBackendList():
     """Return list of backend classes"""
-    return list(filter(lambda cls: type(cls) == type and issubclass(cls, BaseBackend) and cls.active, [item[1] for item in globals().items()]))
+    path = os.path.dirname(__file__)
+    backend_classes = list()
+    for finder, name, ispkg in pkgutil.iter_modules([ path ]):
+        module = importlib.import_module("." + name, __package__)
+        for name, cls in vars(module).items():
+            if type(cls) == type and issubclass(cls, BaseBackend) and cls.active:
+                backend_classes.append(cls)
+    return backend_classes
 
 def getBackendDict():
     return {cls.identifier: cls for cls in getBackendList() }

@@ -14,17 +14,9 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
-import json
-import re
 import sigma
-
-# Exceptions (backend specific)
-class PartialMatchError(Exception):
-    pass
-
-class FullMatchError(Exception):
-    pass    
+from .base import SingleTextQueryBackend
+from .exceptions import PartialMatchError, FullMatchError
         
 class QualysBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Qualys saved search. Contributed by SOC Prime. https://socprime.com"""

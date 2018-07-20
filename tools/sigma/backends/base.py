@@ -14,10 +14,9 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
-import json
-import re
 import sigma
+from .mixins import RulenameCommentMixin, QuoteCharMixin
+from .output import SingleOutput
 
 class BackendOptions(dict):
     """Object contains all options that should be passed to the backend from command line (or other user interfaces)"""

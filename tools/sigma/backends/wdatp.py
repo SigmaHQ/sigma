@@ -14,10 +14,9 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
-import json
 import re
-import sigma
+from .base import SingleTextQueryBackend
+from .exceptions import NotSupportedError
 
 class WindowsDefenderATPBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Windows Defender ATP Hunting Queries."""

@@ -14,10 +14,12 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
 import json
 import re
 import sigma
+from .base import BaseBackend, SingleTextQueryBackend
+from .mixins import RulenameCommentMixin, MultiRuleOutputMixin
+from .output import SingleOutput
 
 class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Elasticsearch query string. Only searches, no aggregations."""

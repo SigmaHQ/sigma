@@ -1,5 +1,5 @@
-# Output backends for sigmac
-# Copyright 2016-2017 Thomas Patzke, Florian Roth, Ben de Haan, Devin Ferguson
+# ArcSight backend for sigmac created by SOC Prime
+# Copyright 2016-2018 SOC Prime
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -14,10 +14,9 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
-import json
 import re
-import sigma
+from sigma.parser import ConditionOR
+from .base import SingleTextQueryBackend
 
 class ArcSightBackend(SingleTextQueryBackend):
     """Converts Sigma rule into ArcSight saved search. Contributed by SOC Prime. https://socprime.com"""
@@ -139,7 +138,7 @@ class ArcSightBackend(SingleTextQueryBackend):
 
     # generateORNode algorithm for ArcSightBackend class.
     def generateORNode(self, node):
-        if type(node) == sigma.parser.ConditionOR and all(isinstance(item, str) for item in node):
+        if type(node) == ConditionOR and all(isinstance(item, str) for item in node):
             new_value = list()
             for value in node:
                 value = self.CleanNode(value)

@@ -14,11 +14,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
-import json
-import re
-import sigma
-
 # Exceptions
 class BackendError(Exception):
     """Base exception for backend-specific errors."""
@@ -27,3 +22,10 @@ class BackendError(Exception):
 class NotSupportedError(BackendError):
     """Exception is raised if some output is required that is not supported by the target language."""
     pass
+
+# Exceptions (backend specific Qualys) - TODO: no backend specific exceptions
+class PartialMatchError(Exception):
+    pass
+
+class FullMatchError(Exception):
+    pass    
