@@ -20,6 +20,7 @@ import sigma
 from .base import BaseBackend, SingleTextQueryBackend
 from .mixins import RulenameCommentMixin, MultiRuleOutputMixin
 from .output import SingleOutput
+from .exceptions import NotSupportedError
 
 class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Elasticsearch query string. Only searches, no aggregations."""
