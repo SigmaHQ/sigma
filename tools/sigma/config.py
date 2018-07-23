@@ -19,8 +19,6 @@ import re
 import logging
 from sigma.parser import ConditionAND, ConditionOR
 
-logger = logging.getLogger(__name__)
-
 # Field Mapping Definitions
 def FieldMapping(source, target=None):
     """Determines target type and instantiate appropriate mapping type"""

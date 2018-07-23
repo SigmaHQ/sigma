@@ -18,8 +18,6 @@ import yaml
 import re
 import logging
 
-logger = logging.getLogger(__name__)
-
 COND_NONE = 0
 COND_AND  = 1
 COND_OR   = 2
@@ -120,9 +118,7 @@ class SigmaParser:
 
         self.condparsed = list()        # list of parsed conditions
         for tokens in self.condtoken:
-            logger.debug("Condition tokens: %s", str(tokens))
             condparsed = SigmaConditionParser(self, tokens)
-            logger.debug("Condition parse tree: %s", str(condparsed))
             self.condparsed.append(condparsed)
 
     def parse_definition_byname(self, definitionName, condOverride=None):
