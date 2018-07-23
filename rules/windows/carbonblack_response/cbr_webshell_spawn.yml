@@ -1,0 +1,26 @@
+title: Shells Spawned by Web Servers
+status: experimental
+description: Web servers that spawn shell processes could be the result of a successfully placed web shell or an other attack
+author: Thomas Patzke
+logsource:
+    product: bit9:carbonblack:json
+    service: cbr
+detection:
+    selection:
+        parent_path:
+            - '*\w3wp.exe'
+            - '*\httpd.exe'
+            - '*\nginx.exe'
+            - '*\php-cgi.exe'
+        process:
+            - 'cmd.exe'
+            - 'sh.exe'
+            - 'bash.exe'
+            - 'powershell.exe'
+    condition: selection
+fields:
+    - command_line
+    - parent_path
+falsepositives:
+    - Particular web applications may spawn a shell process legitimately
+level: high

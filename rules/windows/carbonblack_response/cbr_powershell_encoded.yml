@@ -1,0 +1,35 @@
+title: Powershell Encoded Command
+status: experimental
+description: Detects usage of Powershell Encoded Commands
+references:
+author: Michael Haag
+logsource:
+    product: bit9:carbonblack:json
+    service: cbr
+detection:
+    selection:
+        process:
+            - 'powershell.exe'
+        command_line:
+            - 'base64'
+            - '-enc'
+            - '-enco'
+            - '-encod'
+            - '-encode'
+            - '-encoded'
+            - '-ec'
+            - '-en'
+            - '-encodedC'
+            - '-encodedCo'
+            - '-encodedCom'
+            - '-encodedComm'
+            - '-encodedComma'
+            - '-encodedComman'
+            - '-encodedCommand'
+    condition: selection
+fields:
+    - command_line
+    - process
+falsepositives:
+    - Some legitimate apps use this, but limited.
+level: medium

@@ -1,0 +1,22 @@
+title: Suspicious Reconnaissance Activity
+status: experimental
+description: Detects suspicious command line activity on Windows systems
+author: Florian Roth
+logsource:
+    product: bit9:carbonblack:json
+    service: cbr
+detection:
+    selection:
+        command_line:
+            - 'net group "domain admins" /domain'
+            - 'net localgroup administrators'
+    condition: selection
+fields:
+    - command_line
+falsepositives:
+    - Inventory tool runs
+    - Penetration tests
+    - Administrative activity
+analysis:
+    recommendation: Check if the user that executed the commands is suspicious (e.g. service accounts, LOCAL_SYSTEM)
+level: medium

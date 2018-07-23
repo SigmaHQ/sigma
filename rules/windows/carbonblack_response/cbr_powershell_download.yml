@@ -1,0 +1,23 @@
+title: Powershell Download
+status: experimental
+description: Detects usage of Powershell Download commands
+references:
+author: Michael Haag
+logsource:
+    product: bit9:carbonblack:json
+    service: cbr
+detection:
+    selection:
+        process:
+            - 'powershell.exe'
+        command_line:
+            - '*DownloadFile*'
+            - '*invoke-webrequest*'
+            - '*iwr'
+    condition: selection
+fields:
+    - command_line
+    - process
+falsepositives:
+    - Some legitimate apps use this, but limited.
+level: medium

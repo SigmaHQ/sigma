@@ -1,0 +1,33 @@
+title: MSHTA Spawning Windows Shell
+status: experimental
+description: Detects a Windows command line executable started from MSHTA.
+references:
+    - https://www.trustedsec.com/july-2015/malicious-htas/
+author: Michael Haag
+logsource:
+    product: bit9:carbonblack:json
+    service: cbr
+detection:
+    selection:
+        parent_path: '*\mshta.exe'
+        process:
+            - '*\cmd.exe'
+            - '*\powershell.exe'
+            - '*\wscript.exe'
+            - '*\cscript.exe'
+            - '*\sh.exe'
+            - '*\bash.exe'
+            - '*\reg.exe'
+            - '*\regsvr32.exe'
+            - '*\BITSADMIN*'
+    filter:
+        command_line:
+            - '*/HP/HP*'
+            - '*\HP\HP*'
+    condition: selection and not filter
+fields:
+    - parent_path
+    - process
+falsepositives:
+    - Printer software / driver installations
+level: high

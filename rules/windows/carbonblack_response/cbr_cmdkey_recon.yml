@@ -1,0 +1,22 @@
+title: cmdkey Cached Credentials Recon
+status: experimental
+description: Detects usage of cmdkey to look for cached credentials.
+reference:
+    - https://www.peew.pw/blog/2017/11/26/exploring-cmdkey-an-edge-case-for-privilege-escalation
+    - https://technet.microsoft.com/en-us/library/cc754243(v=ws.11).aspx
+author: jmallette
+logsource:
+    product: bit9:carbonblack:json
+    service: cbr
+detection:
+    selection:
+        process: 'cmdkey.exe'
+        command_line: '* /list *'
+    condition: selection
+fields:
+    - command_line
+    - process
+    - username
+falsepositives:
+    - Legitimate administrative tasks.
+level: low

@@ -1,0 +1,22 @@
+title: Suspicious Svchost Process
+status: experimental
+description: Detects a suspicious svchost process start
+author: Florian Roth
+date: 2017/08/15
+logsource:
+    product: bit9:carbonblack:json
+    service: cbr
+detection:
+    selection:
+        process: 'svchost.exe'
+    filter:
+        parent_path:
+            - '*\services.exe'
+            - '*\MsMpEng.exe'
+    condition: selection and not filter
+fields:
+    - command_line
+    - parent_path
+falsepositives:
+    - Unknown
+level: high
