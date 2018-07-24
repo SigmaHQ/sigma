@@ -102,13 +102,13 @@ def rule_element(file_content, elements):
     :return: the value of the key in the yaml document
     """
     try:
-        yaml.load(file_content.replace("---",""))
+        yaml.safe_load(file_content.replace("---",""))
     except:
         raise Exception('Unsupported')
     element_output = ""
     for e in elements:
         try:
-            element_output = yaml.load(file_content.replace("---",""))[e]
+            element_output = yaml.safe_load(file_content.replace("---",""))[e]
         except:
             pass
     if element_output is None:
