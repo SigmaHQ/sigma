@@ -1,5 +1,5 @@
 # Output backends for sigmac
-# Copyright 2016-2017 Thomas Patzke, Florian Roth, Ben de Haan, Devin Ferguson
+# Copyright 2016-2018 Thomas Patzke, Florian Roth, Devin Ferguson, Julien Bachmann
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -129,7 +129,7 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, BaseBackend):
 
     def generateAggregation(self, agg):
         if agg:
-            if agg.aggfunc == sigma.parser.SigmaAggregationParser.AGGFUNC_COUNT:
+            if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT:
                 if agg.groupfield is not None:
                     self.queries[-1]['aggs'] = {
                         '%s_count'%agg.groupfield: {

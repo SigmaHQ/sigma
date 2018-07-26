@@ -17,9 +17,7 @@
 import yaml
 import re
 import logging
-from sigma.parser import ConditionAND, ConditionOR
-
-logger = logging.getLogger(__name__)
+from sigma.parser.condition import ConditionAND, ConditionOR
 
 # Field Mapping Definitions
 def FieldMapping(source, target=None):

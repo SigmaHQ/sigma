@@ -1,4 +1,4 @@
-# Output backends for sigmac
+# Sigma parser
 # Copyright 2016-2018 Thomas Patzke, Florian Roth
 
 # This program is free software: you can redistribute it and/or modify
@@ -14,18 +14,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Exceptions
-class BackendError(Exception):
-    """Base exception for backend-specific errors."""
+class SigmaCollectionParseError(Exception):
     pass
 
-class NotSupportedError(BackendError):
-    """Exception is raised if some output is required that is not supported by the target language."""
+class SigmaParseError(Exception):
     pass
-
-# Exceptions (backend specific Qualys) - TODO: no backend specific exceptions
-class PartialMatchError(Exception):
-    pass
-
-class FullMatchError(Exception):
-    pass    
