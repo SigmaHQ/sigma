@@ -87,17 +87,17 @@ class BaseBackend:
         return result
 
     def generateNode(self, node):
-        if type(node) == sigma.parser.ConditionAND:
+        if type(node) == sigma.parser.condition.ConditionAND:
             return self.generateANDNode(node)
-        elif type(node) == sigma.parser.ConditionOR:
+        elif type(node) == sigma.parser.condition.ConditionOR:
             return self.generateORNode(node)
-        elif type(node) == sigma.parser.ConditionNOT:
+        elif type(node) == sigma.parser.condition.ConditionNOT:
             return self.generateNOTNode(node)
-        elif type(node) == sigma.parser.ConditionNULLValue:
+        elif type(node) == sigma.parser.condition.ConditionNULLValue:
             return self.generateNULLValueNode(node)
-        elif type(node) == sigma.parser.ConditionNotNULLValue:
+        elif type(node) == sigma.parser.condition.ConditionNotNULLValue:
             return self.generateNotNULLValueNode(node)
-        elif type(node) == sigma.parser.NodeSubexpression:
+        elif type(node) == sigma.parser.condition.NodeSubexpression:
             return self.generateSubexpressionNode(node)
         elif type(node) == tuple:
             return self.generateMapItemNode(node)

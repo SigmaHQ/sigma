@@ -46,7 +46,7 @@ class SplunkBackend(SingleTextQueryBackend):
     def generateAggregation(self, agg):
         if agg == None:
             return ""
-        if agg.aggfunc == sigma.parser.SigmaAggregationParser.AGGFUNC_NEAR:
+        if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_NEAR:
             raise NotImplementedError("The 'near' aggregation operator is not yet implemented for this backend")
         if agg.groupfield == None:
             return " | stats %s(%s) as val | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.cond_op, agg.condition)
@@ -94,7 +94,7 @@ class SplunkXMLBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
     def generateAggregation(self, agg):
         if agg == None:
             return ""
-        if agg.aggfunc == sigma.parser.SigmaAggregationParser.AGGFUNC_NEAR:
+        if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_NEAR:
             return ""
         if agg.groupfield == None:
             return " | stats %s(%s) as val | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.cond_op, agg.condition)

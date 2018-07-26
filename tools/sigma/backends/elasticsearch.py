@@ -129,7 +129,7 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, BaseBackend):
 
     def generateAggregation(self, agg):
         if agg:
-            if agg.aggfunc == sigma.parser.SigmaAggregationParser.AGGFUNC_COUNT:
+            if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT:
                 if agg.groupfield is not None:
                     self.queries[-1]['aggs'] = {
                         '%s_count'%agg.groupfield: {

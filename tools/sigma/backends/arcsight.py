@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-from sigma.parser import ConditionOR
+from sigma.parser.condition import ConditionOR
 from .base import SingleTextQueryBackend
 
 class ArcSightBackend(SingleTextQueryBackend):

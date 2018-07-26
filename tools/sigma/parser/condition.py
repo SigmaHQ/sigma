@@ -15,6 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
+from .base import SimpleParser
+from .exceptions import SigmaParseError
 
 COND_NONE = 0
 COND_AND  = 1
@@ -228,8 +230,8 @@ class NodeSubexpression(ParseTreeNode):
     def __init__(self, subexpr):
         self.items = subexpr
 
-# Parse tree converters: convert something into one of the parse tree node classes defined above
-def convertXOf(sigma, val, condclass):
+# Parse tree generators: generate parse tree nodes from extended conditions
+def generateXOf(sigma, val, condclass):
     """
     Generic implementation of (1|all) of x expressions.
         
@@ -252,13 +254,13 @@ def convertXOf(sigma, val, condclass):
     else:                               # OR across all items of definition
         return NodeSubexpression(sigma.parse_definition_byname(val.matched, condclass))
 
-def convertAllOf(sigma, op, val):
+def generateAllOf(sigma, op, val):
     """Convert 'all of x' expressions into ConditionAND"""
-    return convertXOf(sigma, val, ConditionAND)
+    return generateXOf(sigma, val, ConditionAND)
 
-def convertOneOf(sigma, op, val):
+def generateOneOf(sigma, op, val):
     """Convert '1 of x' expressions into ConditionOR"""
-    return convertXOf(sigma, val, ConditionOR)
+    return generateXOf(sigma, val, ConditionOR)
 
 def convertId(sigma, op):
     """Convert search identifiers (lists or maps) into condition nodes according to spec defaults"""
@@ -268,8 +270,8 @@ def convertId(sigma, op):
 class SigmaConditionParser:
     """Parser for Sigma condition expression"""
     searchOperators = [     # description of operators: (token id, number of operands, parse tree node class) - order == precedence
-            (SigmaConditionToken.TOKEN_ALL, 1, convertAllOf),
-            (SigmaConditionToken.TOKEN_ONE, 1, convertOneOf),
+            (SigmaConditionToken.TOKEN_ALL, 1, generateAllOf),
+            (SigmaConditionToken.TOKEN_ONE, 1, generateOneOf),
             (SigmaConditionToken.TOKEN_ID,  0, convertId),
             (SigmaConditionToken.TOKEN_NOT, 1, ConditionNOT),
             (SigmaConditionToken.TOKEN_AND, 2, ConditionAND),
