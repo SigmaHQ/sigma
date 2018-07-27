@@ -29,7 +29,7 @@ class SigmaCollectionParser:
     """
     def __init__(self, content, config=None, rulefilter=None):
         if config is None:
-            from sigma.config import SigmaConfiguration
+            from sigma.configuration import SigmaConfiguration
             config = SigmaConfiguration()
         self.yamls = yaml.safe_load_all(content)
         globalyaml = dict()
