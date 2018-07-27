@@ -1,5 +1,5 @@
 # Sigma parser
-# Copyright 2016-2017 Thomas Patzke, Florian Roth
+# Copyright 2016-2018 Thomas Patzke, Florian Roth
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -13,11 +13,6 @@
 
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-import yaml
-import re
-import logging
-from sigma.parser.condition import ConditionAND, ConditionOR
 
 class SigmaConfigParseError(Exception):
     pass

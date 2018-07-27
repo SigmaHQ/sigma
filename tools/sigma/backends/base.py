@@ -53,7 +53,7 @@ class BaseBackend:
         passing the object instance to it. Further, output files are initialized by the output class defined in output_class.
         """
         super().__init__()
-        if not isinstance(sigmaconfig, (sigma.config.SigmaConfiguration, None)):
+        if not isinstance(sigmaconfig, (sigma.configuration.SigmaConfiguration, None)):
             raise TypeError("SigmaConfiguration object expected")
         self.backend_options = backend_options
         self.sigmaconfig = sigmaconfig
