@@ -3,22 +3,22 @@ status: experimental
 description: Detects suspicious file execution by wscript and cscript
 author: Michael Haag
 logsource:
-    product: bit9:carbonblack:json
-    service: cbr
+    product: crowdstrike:falconhost:json
+    service: cs
 detection:
     selection:
-        process:
+        FileName:
             - 'wscript.exe'
             - 'cscript.exe'
-        command_line:
+        CommandLine:
             - '*.jse'
             - '*.vbe'
             - '*.js'
             - '*.vba'
     condition: selection
 fields:
-    - command_line
-    - process
+    - CommandLine
+    - FileName
 falsepositives:
     - Will need to be tuned. I recommend adding the user profile path in CommandLine if it is getting too noisy.
 level: medium

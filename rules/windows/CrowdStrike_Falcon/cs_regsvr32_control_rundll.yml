@@ -1,0 +1,21 @@
+title: Detect Regsvr32 Control_RunDLL Usage
+status: experimental
+description: Detects regsvr32 with Control_RunDLL
+references:
+author: Michael Haag
+logsource:
+    product: crowdstrike:falconhost:json
+    service: cs
+detection:
+    selection:
+        FileName:
+            - 'regsvr32.exe'
+        CommandLine:
+            - '*,Control_RunDLL'
+    condition: selection
+fields:
+    - CommandLine
+    - FileName
+falsepositives:
+    - Some legitimate apps use this, but limited.
+level: medium

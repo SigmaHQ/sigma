@@ -1,0 +1,21 @@
+title: VSSadmin Delete
+status: experimental
+description: Detects vssadmin shadow copy delete method
+references:
+author: Michael Haag
+logsource:
+    product: crowdstrike:falconhost:json
+    service: cs
+detection:
+    selection:
+        FileName:
+            - 'vssadmin.exe'
+        CommandLine:
+            - 'vssadmin.exe Delete Shadows /All /Quiet'
+    condition: selection
+fields:
+    - CommandLine
+    - FileName
+falsepositives:
+    - Not many legitimate use cases, usually a ransomware sort.
+level: medium

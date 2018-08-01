@@ -1,0 +1,22 @@
+title: SquiblyTwo
+status: experimental
+description: Detects WMI SquiblyTwo Attack with possible renamed WMI by looking for imphash
+references:
+    - https://subt0x11.blogspot.ch/2018/04/wmicexe-whitelisting-bypass-hacking.html
+    - https://twitter.com/mattifestation/status/986280382042595328
+author: Markus Neis / Florian Roth
+falsepositives:
+    - Unknown
+level: medium
+logsource:
+    product: crowdstrike:falconhost:json
+    service: cs
+detection:
+    selection:
+        FileName:
+            - 'wmic.exe'
+        CommandLine:
+            - 'wmic * *format:\"http*'
+            - "wmic * /format:'http"
+            - 'wmic * /format:http*'
+    condition: 1 of them

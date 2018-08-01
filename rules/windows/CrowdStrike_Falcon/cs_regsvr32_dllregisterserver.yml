@@ -1,0 +1,21 @@
+title: Detect Regsvr32 Control_RunDLL Usage
+status: experimental
+description: Detects usage of DllRegisterServer with regsvr32
+references:
+author: Michael Haag
+logsource:
+    product: crowdstrike:falconhost:json
+    service: cs
+detection:
+    selection:
+        FileName:
+            - 'regsvr32.exe'
+        CommandLine:
+            - '*DllRegisterServer'
+    condition: selection
+fields:
+    - CommandLine
+    - FileName
+falsepositives:
+    - Some legitimate apps use this, but limited.
+level: medium
