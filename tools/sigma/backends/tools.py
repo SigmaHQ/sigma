@@ -15,7 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from .base import BaseBackend
-from .output import SingleOutput
 
 ### Backends for developement purposes
 
@@ -23,7 +22,6 @@ class FieldnameListBackend(BaseBackend):
     """List all fieldnames from given Sigma rules for creation of a field mapping configuration."""
     identifier = "fieldlist"
     active = True
-    output_class = SingleOutput
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -76,7 +74,7 @@ class FieldnameListBackend(BaseBackend):
         return fields
 
     def finalize(self):
-        self.output.print("\n".join(sorted(self.fields)))
+        return "\n".join(sorted(self.fields))
 
 # Helpers
 def flatten(l):

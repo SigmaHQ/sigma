@@ -104,4 +104,4 @@ class QualysBackend(SingleTextQueryBackend):
             elif self.PartialMatchFlag == None:
                 raise FullMatchError(query)
             else:
-                self.output.print(query)
+                return query

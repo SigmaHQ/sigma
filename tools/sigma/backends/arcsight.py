@@ -130,7 +130,7 @@ class ArcSightBackend(SingleTextQueryBackend):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
         const_title = ' AND type != 2 | rex field = flexString1 mode=sed "s//Sigma: {}/g"'
         for parsed in sigmaparser.condparsed:
-            self.output.print(self.generateQuery(parsed) + const_title.format(sigmaparser.parsedyaml["title"]))
+            return self.generateQuery(parsed) + const_title.format(sigmaparser.parsedyaml["title"])
 
     # Add "( )" for values
     def generateSubexpressionNode(self, node):

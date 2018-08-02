@@ -143,4 +143,4 @@ class QRadarBackend(SingleTextQueryBackend):
 
     def generate(self, sigmaparser):
         for parsed in sigmaparser.condparsed:
-            self.output.print(self.const_start + self.generateQuery(parsed))                
+            return self.const_start + self.generateQuery(parsed)                

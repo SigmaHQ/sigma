@@ -101,7 +101,6 @@ class SplunkXMLBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
         else:
             return " | stats %s(%s) as val by %s | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.groupfield, agg.cond_op, agg.condition)
 
-
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
         for parsed in sigmaparser.condparsed:
@@ -117,4 +116,4 @@ class SplunkXMLBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
 
     def finalize(self):
         self.queries += self.dash_suf
-        self.output.print(self.queries)
+        return self.queries

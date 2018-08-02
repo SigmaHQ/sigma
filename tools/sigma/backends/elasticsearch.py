@@ -19,7 +19,6 @@ import re
 import sigma
 from .base import BaseBackend, SingleTextQueryBackend
 from .mixins import RulenameCommentMixin, MultiRuleOutputMixin
-from .output import SingleOutput
 from .exceptions import NotSupportedError
 
 class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
@@ -45,7 +44,6 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, BaseBackend):
     """ElasticSearch DSL backend"""
     identifier = 'es-dsl'
     active = True
-    output_class = SingleOutput
     options = (
         ("es", "http://localhost:9200", "Host and port of Elasticsearch instance", None),
         ("output", "import", "Output format: import = JSON search request, curl = Shell script that do the search queries via curl", "output_type"),
@@ -182,20 +180,17 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, BaseBackend):
 
         if self.output_type == 'curl':
             for query in self.queries:
-                self.output.print("\curl -XGET '%s/%s_search?pretty' -H 'Content-Type: application/json' -d'"%(self.es, index))
-                self.output.print(json.dumps(query, indent=2))
-                self.output.print("'")
+                return "\curl -XGET '%s/%s_search?pretty' -H 'Content-Type: application/json' -d'%s'" % (self.es, index, json.dumps(query, indent=2))
         else:
             if len(self.queries) == 1:
-                self.output.print(json.dumps(self.queries[0], indent=2))
+                return json.dumps(self.queries[0], indent=2)
             else:
-                self.output.print(json.dumps(self.queries, indent=2))
+                return json.dumps(self.queries, indent=2)
 
 class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     """Converts Sigma rule into Kibana JSON Configuration files (searches only)."""
     identifier = "kibana"
     active = True
-    output_class = SingleOutput
     options = (
             ("output", "import", "Output format: import = JSON file manually imported in Kibana, curl = Shell script that imports queries in Kibana via curl (jq is additionally required)", "output_type"),
             ("es", "localhost:9200", "Host and port of Elasticsearch instance", None),
@@ -283,24 +278,22 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
         if self.output_type == "import":        # output format that can be imported via Kibana UI
             for item in self.kibanaconf:    # JSONize kibanaSavedObjectMeta.searchSourceJSON
                 item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'] = json.dumps(item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'])
-            self.output.print(json.dumps(self.kibanaconf, indent=2))
+            return json.dumps(self.kibanaconf, indent=2)
         elif self.output_type == "curl":
             for item in self.indexsearch:
-                self.output.print(item)
+                return item
             for item in self.kibanaconf:
                 item['_source']['kibanaSavedObjectMeta']['searchSourceJSON']['index'] = "$" + self.index_variable_name(item['_source']['kibanaSavedObjectMeta']['searchSourceJSON']['index'])   # replace index pattern with reference to variable that will contain Kibana index UUID at script runtime
                 item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'] = json.dumps(item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'])     # Convert it to JSON string as expected by Kibana
                 item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'] = item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'].replace("\\", "\\\\")      # Add further escaping for escaped quotes for shell
-                self.output.print(
-                        "curl -s -XPUT -H 'Content-Type: application/json' --data-binary @- '{es}/{index}/doc/{doc_id}' <<EOF\n{doc}\nEOF".format(
-                            es=self.es,
-                            index=self.index,
-                            doc_id="search:" + item['_id'],
-                            doc=json.dumps({
-                                "type": "search",
-                                "search": item['_source']
-                                }, indent=2)
-                            )
+                return "curl -s -XPUT -H 'Content-Type: application/json' --data-binary @- '{es}/{index}/doc/{doc_id}' <<EOF\n{doc}\nEOF".format(
+                        es=self.es,
+                        index=self.index,
+                        doc_id="search:" + item['_id'],
+                        doc=json.dumps({
+                            "type": "search",
+                            "search": item['_source']
+                            }, indent=2)
                         )
         else:
             raise NotImplementedError("Output type '%s' not supported" % self.output_type)
@@ -312,7 +305,6 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
     """Converts Sigma Rule into X-Pack Watcher JSON for alerting"""
     identifier = "xpack-watcher"
     active = True
-    output_class = SingleOutput
     options = (
             ("output", "curl", "Output format: curl = Shell script that imports queries in Watcher index with curl", "output_type"),
             ("es", "localhost:9200", "Host and port of Elasticsearch instance", None),
@@ -487,10 +479,12 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                             }
 
     def finalize(self):
+        result = ""
         for rulename, rule in self.watcher_alert.items():
             if self.output_type == "plain":     # output request line + body
-                self.output.print("PUT _xpack/watcher/watch/%s\n%s\n" % (rulename, json.dumps(rule, indent=2)))
+                result += "PUT _xpack/watcher/watch/%s\n%s\n" % (rulename, json.dumps(rule, indent=2))
             elif self.output_type == "curl":      # output curl command line
-                self.output.print("curl -s -XPUT -H 'Content-Type: application/json' --data-binary @- %s/_xpack/watcher/watch/%s <<EOF\n%s\nEOF" % (self.es, rulename, json.dumps(rule, indent=2)))
+                result += "curl -s -XPUT -H 'Content-Type: application/json' --data-binary @- %s/_xpack/watcher/watch/%s <<EOF\n%s\nEOF\n" % (self.es, rulename, json.dumps(rule, indent=2))
             else:
                 raise NotImplementedError("Output type '%s' not supported" % self.output_type)
+        return result

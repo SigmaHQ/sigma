@@ -17,13 +17,11 @@
 import re
 from .base import BaseBackend
 from .mixins import QuoteCharMixin
-from .output import SingleOutput
 
 class GrepBackend(BaseBackend, QuoteCharMixin):
     """Generates Perl compatible regular expressions and puts 'grep -P' around it"""
     identifier = "grep"
     active = True
-    output_class = SingleOutput
 
     reEscape = re.compile("([\\|()\[\]{}.^$])")
 

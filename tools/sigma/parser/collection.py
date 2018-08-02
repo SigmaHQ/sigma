@@ -64,8 +64,10 @@ class SigmaCollectionParser:
 
     def generate(self, backend):
         """Calls backend for all parsed rules"""
-        for parser in self.parsers:
-            backend.generate(parser)
+        return filter(
+                lambda x: bool(x),      # filter None's and empty strings
+                [ backend.generate(parser) for parser in self.parsers ]
+                )
 
     def __iter__(self):
         return iter([parser.parsedyaml for parser in self.parsers])
