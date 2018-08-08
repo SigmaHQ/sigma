@@ -1,0 +1,21 @@
+title: Hiding files with attrib.exe
+status: experimental
+description: Detects usage of attrib.exe to hide files from users.
+author: Sami Ruohonen
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+        Image: '*\attrib.exe'
+        CommandLine: '* +h *'
+    condition: selection
+fields:
+    - CommandLine
+    - ParentCommandLine
+    - User
+falsepositives:
+    - igfxCUIService.exe hiding *.cui files via .bat script (attrib.exe a child of cmd.exe and igfxCUIService.exe is the parent of the cmd.exe)
+    - msiexec.exe hiding desktop.ini
+level: low
