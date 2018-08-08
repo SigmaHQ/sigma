@@ -153,7 +153,6 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, BaseBackend):
                         break
                 raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend"%(self.title, funcname))
 
-
     def generateBefore(self, parsed):
         self.queries.append({'query': {'constant_score': {'filter': {}}}})
 
