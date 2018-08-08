@@ -10,9 +10,13 @@ detection:
         EventID: 1
         Image: '*\attrib.exe'
         CommandLine: '* +h *'
-    filter:
+    ini:
         CommandLine: '*\desktop.ini *'
-    condition: selection and not filter
+    intel:
+        ParentImage: '*\cmd.exe'
+        CommandLine: '+R +H +S +A *.cui'
+        ParentCommandLine: 'C:\WINDOWS\system32\*.bat'
+    condition: selection and not (ini or intel)
 fields:
     - CommandLine
     - ParentCommandLine
