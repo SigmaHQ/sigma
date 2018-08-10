@@ -130,9 +130,9 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, BaseBackend):
             if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT:
                 if agg.groupfield is not None:
                     self.queries[-1]['aggs'] = {
-                        '%s_count'%agg.groupfield: {
+                        '%s_count'%(agg.groupfield or ""): {
                             'terms': {
-                                'field': '%s'%agg.groupfield
+                                'field': '%s'%(agg.groupfield or "")
                             },
                             'aggs': {
                                 'limit': {
