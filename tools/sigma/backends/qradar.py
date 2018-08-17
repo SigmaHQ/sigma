@@ -50,13 +50,9 @@ class QRadarBackend(SingleTextQueryBackend):
 
     def generateMapItemNode(self, node):
         key, value = node
-        if key == 'deviceProduct':
-            return self.generateValueNode(value)
-        if key == 'aql_database':
-            return ""
         if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
             if type(value) == str and "*" in value:
-                self.value = value.replace("*", "%")
+                value = value.replace("*", "%")
                 return "%s ilike %s" % (self.cleanKey(key), self.generateNode(value))
             else:
                 return self.mapExpression % (self.cleanKey(key), self.generateNode(value))
@@ -95,9 +91,30 @@ class QRadarBackend(SingleTextQueryBackend):
             self.qradarSuffixAgg = " group by %s having agg_val %s %s" % (agg.groupfield, agg.cond_op, agg.condition)
             return self.qradarPrefixAgg, self.qradarSuffixAgg
 
-    def generateQuery(self, parsed):
+    def generate(self, sigmaparser):
+        """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
+        for parsed in sigmaparser.condparsed:
+            query = self.generateQuery(parsed, sigmaparser)
+            before = self.generateBefore(parsed)
+            after = self.generateAfter(parsed)
+
+            if before is not None:
+                self.output.print(before, end="")
+            if query is not None:
+                self.output.print(query)
+            if after is not None:
+                self.output.print(after, end="")
+
+
+
+    def generateQuery(self, parsed, sigmaparser):
         result = self.generateNode(parsed.parsedSearch)
-        qradarPrefix = "SELECT UTF8(payload) as search_payload from %s where " % (self.aql_database)
+        self.parsedlogsource = sigmaparser.get_logsource().index
+        if any("flow" in i for i in self.parsedlogsource):
+            aql_database = "flows"
+        else:
+            aql_database = "events"
+        qradarPrefix = "SELECT UTF8(payload) as search_payload from %s where " % (aql_database)
         if parsed.parsedAgg:
             (qradarPrefix, qradarSuffixAgg) = self.generateAggregation(parsed.parsedAgg)
             result = qradarPrefix + result
