@@ -1,5 +1,5 @@
 # Output backends for sigmac
-# Copyright 2016-2017 Thomas Patzke, Florian Roth, Ben de Haan, Devin Ferguson
+# Copyright 2016-2018 Thomas Patzke, Florian Roth
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -16,7 +16,6 @@
 
 import sigma
 from .mixins import RulenameCommentMixin, QuoteCharMixin
-from .output import SingleOutput
 
 class BackendOptions(dict):
     """Object contains all options that should be passed to the backend from command line (or other user interfaces)"""
@@ -43,22 +42,20 @@ class BaseBackend:
     identifier = "base"
     active = False
     index_field = None    # field name that is used to address indices
-    output_class = None   # one of the above output classes
     file_list = None
     options = tuple()     # a list of tuples with following elements: option name, default value, help text, target attribute name (option name if None)
 
-    def __init__(self, sigmaconfig, backend_options=None, filename=None):
+    def __init__(self, sigmaconfig, backend_options=None):
         """
         Initialize backend. This gets a sigmaconfig object, which is notified about the used backend class by
-        passing the object instance to it. Further, output files are initialized by the output class defined in output_class.
+        passing the object instance to it.
         """
         super().__init__()
-        if not isinstance(sigmaconfig, (sigma.config.SigmaConfiguration, None)):
+        if not isinstance(sigmaconfig, (sigma.configuration.SigmaConfiguration, None)):
             raise TypeError("SigmaConfiguration object expected")
         self.backend_options = backend_options
         self.sigmaconfig = sigmaconfig
         self.sigmaconfig.set_backend(self)
-        self.output = self.output_class(filename)
 
         # Parse options
         for option, default_value, _, target in self.options:
@@ -73,12 +70,15 @@ class BaseBackend:
             before = self.generateBefore(parsed)
             after = self.generateAfter(parsed)
 
+            result = ""
             if before is not None:
-                self.output.print(before, end="")
+                result = before
             if query is not None:
-                self.output.print(query)
+                result += query
             if after is not None:
-                self.output.print(after, end="")
+                result += after
+
+            return result
 
     def generateQuery(self, parsed):
         result = self.generateNode(parsed.parsedSearch)
@@ -87,17 +87,17 @@ class BaseBackend:
         return result
 
     def generateNode(self, node):
-        if type(node) == sigma.parser.ConditionAND:
+        if type(node) == sigma.parser.condition.ConditionAND:
             return self.generateANDNode(node)
-        elif type(node) == sigma.parser.ConditionOR:
+        elif type(node) == sigma.parser.condition.ConditionOR:
             return self.generateORNode(node)
-        elif type(node) == sigma.parser.ConditionNOT:
+        elif type(node) == sigma.parser.condition.ConditionNOT:
             return self.generateNOTNode(node)
-        elif type(node) == sigma.parser.ConditionNULLValue:
+        elif type(node) == sigma.parser.condition.ConditionNULLValue:
             return self.generateNULLValueNode(node)
-        elif type(node) == sigma.parser.ConditionNotNULLValue:
+        elif type(node) == sigma.parser.condition.ConditionNotNULLValue:
             return self.generateNotNULLValueNode(node)
-        elif type(node) == sigma.parser.NodeSubexpression:
+        elif type(node) == sigma.parser.condition.NodeSubexpression:
             return self.generateSubexpressionNode(node)
         elif type(node) == tuple:
             return self.generateMapItemNode(node)
@@ -155,7 +155,6 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
     """Base class for backends that generate one text-based expression from a Sigma rule"""
     identifier = "base-textquery"
     active = False
-    output_class = SingleOutput
 
     # the following class variables define the generation and behavior of queries from a parse tree some are prefilled with default values that are quite usual
     andToken = None                     # Token used for linking expressions with logical AND

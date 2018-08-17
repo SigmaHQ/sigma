@@ -1,5 +1,5 @@
 # Output backends for sigmac
-# Copyright 2016-2017 Thomas Patzke, Florian Roth, Ben de Haan, Devin Ferguson
+# Copyright 2018 SOC Prime
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -33,6 +33,7 @@ class QRadarBackend(SingleTextQueryBackend):
     mapExpression = "%s=%s"
     mapListsSpecialHandling = True
     allKeys_aFL = True
+    const_start = "SELECT UTF8(payload) as search_payload from events where "
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -74,7 +75,6 @@ class QRadarBackend(SingleTextQueryBackend):
             if self.allKeys_aFL == True:
                 self.const_start = "*"
             return self.cleanValue(str(value))
-
 
     def generateMapItemNode(self, node):
         key, value = node
@@ -142,6 +142,5 @@ class QRadarBackend(SingleTextQueryBackend):
         return self.notNullExpression % (node.item)
 
     def generate(self, sigmaparser):
-        self.const_start = "SELECT UTF8(payload) as search_payload from events where "
         for parsed in sigmaparser.condparsed:
-            self.output.print(self.const_start + self.generateQuery(parsed))                
+            return self.const_start + self.generateQuery(parsed)                

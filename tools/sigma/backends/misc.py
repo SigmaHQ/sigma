@@ -1,5 +1,5 @@
 # Output backends for sigmac
-# Copyright 2016-2017 Thomas Patzke, Florian Roth, Ben de Haan, Devin Ferguson
+# Copyright 2016-2017 Thomas Patzke
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -17,13 +17,11 @@
 import re
 from .base import BaseBackend
 from .mixins import QuoteCharMixin
-from .output import SingleOutput
 
 class GrepBackend(BaseBackend, QuoteCharMixin):
     """Generates Perl compatible regular expressions and puts 'grep -P' around it"""
     identifier = "grep"
     active = True
-    output_class = SingleOutput
 
     reEscape = re.compile("([\\|()\[\]{}.^$])")
 

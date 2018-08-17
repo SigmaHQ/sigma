@@ -1,5 +1,5 @@
 # Output backends for sigmac
-# Copyright 2016-2017 Thomas Patzke, Florian Roth, Ben de Haan, Devin Ferguson
+# Copyright 2016-2018 Thomas Patzke, Florian Roth, Roey
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -46,12 +46,12 @@ class SplunkBackend(SingleTextQueryBackend):
     def generateAggregation(self, agg):
         if agg == None:
             return ""
-        if agg.aggfunc == sigma.parser.SigmaAggregationParser.AGGFUNC_NEAR:
+        if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_NEAR:
             raise NotImplementedError("The 'near' aggregation operator is not yet implemented for this backend")
         if agg.groupfield == None:
-            return " | stats %s(%s) as val | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.cond_op, agg.condition)
+            return " | stats %s(%s) as val | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.cond_op, agg.condition)
         else:
-            return " | stats %s(%s) as val by %s | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.groupfield, agg.cond_op, agg.condition)
+            return " | stats %s(%s) as val by %s | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)
 
 class SplunkXMLBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
     """Converts Sigma rule into XML used for Splunk Dashboard Panels"""
@@ -94,13 +94,12 @@ class SplunkXMLBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
     def generateAggregation(self, agg):
         if agg == None:
             return ""
-        if agg.aggfunc == sigma.parser.SigmaAggregationParser.AGGFUNC_NEAR:
+        if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_NEAR:
             return ""
         if agg.groupfield == None:
-            return " | stats %s(%s) as val | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.cond_op, agg.condition)
+            return " | stats %s(%s) as val | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.cond_op, agg.condition)
         else:
-            return " | stats %s(%s) as val by %s | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield, agg.groupfield, agg.cond_op, agg.condition)
-
+            return " | stats %s(%s) as val by %s | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)
 
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
@@ -117,4 +116,4 @@ class SplunkXMLBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
 
     def finalize(self):
         self.queries += self.dash_suf
-        self.output.print(self.queries)
+        return self.queries

@@ -1,5 +1,5 @@
 # Output backends for sigmac
-# Copyright 2016-2017 Thomas Patzke, Florian Roth, Ben de Haan, Devin Ferguson
+# Copyright 2016-2018 Thomas Patzke
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -15,7 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from .base import BaseBackend
-from .output import SingleOutput
 
 ### Backends for developement purposes
 
@@ -23,7 +22,6 @@ class FieldnameListBackend(BaseBackend):
     """List all fieldnames from given Sigma rules for creation of a field mapping configuration."""
     identifier = "fieldlist"
     active = True
-    output_class = SingleOutput
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -76,7 +74,7 @@ class FieldnameListBackend(BaseBackend):
         return fields
 
     def finalize(self):
-        self.output.print("\n".join(sorted(self.fields)))
+        return "\n".join(sorted(self.fields))
 
 # Helpers
 def flatten(l):

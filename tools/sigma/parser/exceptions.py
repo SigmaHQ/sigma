@@ -1,5 +1,5 @@
-# Output backends for sigmac
-# Copyright 2016-2017 Thomas Patzke, Florian Roth, Ben de Haan, Devin Ferguson
+# Sigma parser
+# Copyright 2016-2018 Thomas Patzke, Florian Roth
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -14,23 +14,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
+class SigmaCollectionParseError(Exception):
+    pass
 
-### Output classes
-class SingleOutput:
-    """
-    Single file output
-
-    By default, this opens the given file or stdin and passes everything into this.
-    """
-    def __init__(self, filename=None):
-        if type(filename) == str:
-            self.fd = open(filename, "w", encoding='utf-8')
-        else:
-            self.fd = sys.stdout
-
-    def print(self, *args, **kwargs):
-        print(*args, file=self.fd, **kwargs)
-
-    def close(self):
-        self.fd.close()
+class SigmaParseError(Exception):
+    pass

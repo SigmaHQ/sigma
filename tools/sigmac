@@ -22,8 +22,11 @@ import json
 import pathlib
 import itertools
 import logging
-from sigma.parser import SigmaCollectionParser, SigmaCollectionParseError, SigmaParseError
-from sigma.config import SigmaConfiguration, SigmaConfigParseError, SigmaRuleFilter, SigmaRuleFilterParseException
+from sigma.parser.collection import SigmaCollectionParser
+from sigma.parser.exceptions import SigmaCollectionParseError, SigmaParseError
+from sigma.configuration import SigmaConfiguration
+from sigma.config.exceptions import SigmaConfigParseError, SigmaRuleFilterParseException
+from sigma.filter import SigmaRuleFilter
 import sigma.backends.discovery as backends
 from sigma.backends.base import BackendOptions
 from sigma.backends.exceptions import BackendError, NotSupportedError, PartialMatchError, FullMatchError
@@ -80,8 +83,8 @@ Multiple log source specifications are AND linked.
         """)
 argparser.add_argument("--target", "-t", default="es-qs", choices=backends.getBackendDict().keys(), help="Output target format")
 argparser.add_argument("--target-list", "-l", action="store_true", help="List available output target formats")
-argparser.add_argument("--config", "-c", help="Configuration with field name and index mapping for target environment (not yet implemented)")
-argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix if multiple files are generated (not yet implemented)")
+argparser.add_argument("--config", "-c", help="Configuration with field name and index mapping for target environment")
+argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix if multiple files are generated")
 argparser.add_argument("--backend-option", "-O", action="append", help="Options and switches that are passed to the backend")
 argparser.add_argument("--defer-abort", "-d", action="store_true", help="Don't abort on parse or conversion errors, proceed with next rule. The exit code from the last error is returned")
 argparser.add_argument("--ignore-backend-errors", "-I", action="store_true", help="Only return error codes for parse errors and ignore errors for rules that cause backend errors. Useful, when you want to get as much queries as possible.")
@@ -100,6 +103,7 @@ if cmdargs.target_list:
 elif len(cmdargs.inputs) == 0:
     print("Nothing to do!")
     argparser.print_usage()
+    sys.exit(0)
 
 rulefilter = None
 if cmdargs.filter:
@@ -109,7 +113,6 @@ if cmdargs.filter:
         print("Parse error in Sigma rule filter expression: %s" % str(e), file=sys.stderr)
         sys.exit(9)
 
-out = sys.stdout
 sigmaconfig = SigmaConfiguration()
 if cmdargs.config:
     try:
@@ -127,13 +130,16 @@ if cmdargs.config:
         exit(7)
 
 backend_options = BackendOptions(cmdargs.backend_option)
-
-try:
-    backend = backends.getBackend(cmdargs.target)(sigmaconfig, backend_options, cmdargs.output)
-    # not existing backend is already detected by argument parser
-except IOError as e:
-    print("Failed to open output file '%s': %s" % (cmdargs.output, str(e)), file=sys.stderr)
-    exit(1)
+backend = backends.getBackend(cmdargs.target)(sigmaconfig, backend_options)
+filename = cmdargs.output
+if filename:
+    try:
+        out = open(filename, "w", encoding='utf-8')
+    except (IOError, OSError) as e:
+        print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
+        exit(1)
+else:
+    out = sys.stdout
 
 error = 0
 for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
@@ -141,7 +147,9 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
     try:
         f = sigmafile.open(encoding='utf-8')
         parser = SigmaCollectionParser(f, sigmaconfig, rulefilter)
-        parser.generate(backend)
+        results = parser.generate(backend)
+        for result in results:
+            print(result, file=out)
     except OSError as e:
         print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
         error = 5
@@ -191,6 +199,10 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
             f.close()
         except:
             pass
-backend.finalize()
+
+result = backend.finalize()
+if result:
+    print(result, file=out)
+out.close()
 
 sys.exit(error)
