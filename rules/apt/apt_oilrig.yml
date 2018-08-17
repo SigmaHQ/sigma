@@ -1,0 +1,35 @@
+title: Oilrig Information Gathering on local system
+status: experimental
+description: Detects automated information gathering on local system seen in Oilrig activity
+references:
+    - https://www.fireeye.com/blog/threat-research/2016/05/targeted_attacksaga.html
+tags:
+    - attack.T1012
+    - attack.T1033
+author: Markus Neis
+date: 2018/08/10
+logsource:
+   product: windows
+   service: sysmon
+detection:
+    selection:
+      EventID: 1
+      CommandLine:
+         - '*whoami*'
+         - '*reg query*'
+         - '*hostname*'
+         - '*net user /domain'
+         - '*net group /domain'
+         - '*net group "domain admins" /domain'
+         - '*net group "Exchange Trusted Subsystem" /domain'
+         - '*sc query*'
+         - '*tasklist*'
+         - '*systeminfo'
+         - '*net accounts /domain' 
+         - '*net user net localgroup administrators' 
+         - '*netstat -an'
+    timeframe: 10s   
+    condition: selection | count() > 5
+falsepositives:
+    - Administrative Scripts or Activity 
+level: high
