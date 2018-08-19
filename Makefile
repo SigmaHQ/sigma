@@ -1,6 +1,6 @@
 .PHONY: test test-yaml test-sigmac
 TMPOUT = $(shell tempfile)
-COVSCOPE = tools/sigma/*.py,tools/sigmac,tools/merge_sigma
+COVSCOPE = tools/sigma/*.py,tools/sigma/backends/*.py,tools/sigmac,tools/merge_sigma
 test: clearcov test-yaml test-sigmac test-merge build finish
 
 clearcov:
@@ -21,10 +21,12 @@ test-sigmac:
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t graylog rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t xpack-watcher rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunkxml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t logpoint rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t wdatp rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-dsl rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t arcsight -c tools/config/arcsight.yml rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t qradar -c tools/config/arcsight.yml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t qualys -c tools/config/qualys.yml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -f 'level>=high,level<=critical,status=stable,logsource=windows' rules/ > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -f 'level>=high,level<=critical,status=xstable,logsource=windows' rules/ > /dev/null
