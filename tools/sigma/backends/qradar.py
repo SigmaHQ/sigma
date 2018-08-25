@@ -14,12 +14,19 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+import re
+import sigma
 from .base import SingleTextQueryBackend
+from .mixins import MultiRuleOutputMixin
+
 
 class QRadarBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Qradar saved search. Contributed by SOC Prime. https://socprime.com"""
     identifier = "qradar"
     active = True
+    reEscape = re.compile('(")')
+    reClear = None
     andToken = " and "
     orToken = " or "
     notToken = "not "
@@ -27,113 +34,73 @@ class QRadarBackend(SingleTextQueryBackend):
     listExpression = "%s"
     listSeparator = " "
     valueExpression = "\'%s\'"
-    keyExpression = "\"%s\""
+    keyExpression = "%s"
     nullExpression = "%s is null"
     notNullExpression = "not (%s is null)"
     mapExpression = "%s=%s"
     mapListsSpecialHandling = True
-    allKeys_aFL = True
-    const_start = "SELECT UTF8(payload) as search_payload from events where "
+    aql_database = "events"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.allKeys_aFL = True
-        aFL = ["deviceVendor", "categoryDeviceGroup", "deviceProduct"]
-        for item in self.sigmaconfig.fieldmappings.values():
-            if item.target_type == list:
-                aFL.extend(item.target)
-            else:
-                aFL.append(item.target)
-        self.allowedFieldsList = list(set(aFL))
-
-
-    def generateANDNode(self, node):
-        return '(' + self.andToken.join([self.generateNode(val) for val in node]) + ')'
-
-    def generateORNode(self, node):
-        return '('+self.orToken.join([self.generateNode(val) for val in node])+')'
-
-    def generateNOTNode(self, node):
-        return self.notToken + self.generateNode(node.item)
-
-    def generateSubexpressionNode(self, node):
-        return self.subExpression % self.generateNode(node.items)
-
-    def generateListNode(self, node):
-        if not set([type(value) for value in node]).issubset({str, int}):
-            raise TypeError("List values must be strings or numbers")
-        return self.listExpression % (self.listSeparator.join([self.generateNode(value) for value in node]))
-
-    def generateSCValueNodeLogsource(self, value):
-        if value == 'Microsoft':
-            if self.allKeys_aFL == True:
-                self.const_start = "*"
-            return self.cleanValue(str(value))
-
+    def cleanKey(self, key):
+        if " " in key:
+            key = "\"%s\"" % (key)
+            return key
         else:
-            if self.allKeys_aFL == True:
-                self.const_start = "*"
-            return self.cleanValue(str(value))
+            return key
+
+    def generateNode(self, node):
+        if type(node) == sigma.parser.condition.ConditionAND:
+            return self.generateANDNode(node)
+        elif type(node) == sigma.parser.condition.ConditionOR:
+            return self.generateORNode(node)
+        elif type(node) == sigma.parser.condition.ConditionNOT:
+            return self.generateNOTNode(node)
+        elif type(node) == sigma.parser.condition.ConditionNULLValue:
+            return self.generateNULLValueNode(node)
+        elif type(node) == sigma.parser.condition.ConditionNotNULLValue:
+            return self.generateNotNULLValueNode(node)
+        elif type(node) == sigma.parser.condition.NodeSubexpression:
+            return self.generateSubexpressionNode(node)
+        elif type(node) == tuple:
+            return self.generateMapItemNode(node)
+        elif type(node) in (str, int):
+            return self.generateValueNode(node, False)
+        elif type(node) == list:
+            return self.generateListNode(node)
+        else:
+            raise TypeError("Node type %s was not expected in Sigma parse tree" % (str(type(node))))
+
 
     def generateMapItemNode(self, node):
         key, value = node
-
-        if key in self.allowedFieldsList:
-            if key == 'deviceProduct':
-                return self.generateSCValueNodeLogsource(value)
-            if self.mapListsSpecialHandling == False and type(value) in (
-                    str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
-                return self.mapExpression % (self.keyExpression % key, self.valueExpression % self.generateSCValueNodeLogsource(value))
-            elif type(value) == list:
-                return self.generateMapItemListNode(key, value)
+        if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
+            if type(value) == str and "*" in value:
+                value = value.replace("*", "%")
+                return "%s ilike %s" % (self.cleanKey(key), self.generateValueNode(value, True))
+            elif type(value) in (str, int):
+                return self.mapExpression % (self.cleanKey(key), self.generateValueNode(value, True))
             else:
-                raise TypeError("Backend does not support map values of type " + str(type(value)))
-
+                return self.mapExpression % (self.cleanKey(key), self.generateNode(value))
+        elif type(value) == list:
+            return self.generateMapItemListNode(key, value)
         else:
-            if self.mapListsSpecialHandling == False and type(value) in (
-                    str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
-                if type(value) == str:
-                    new_value = list()
-
-                    if type(value) == list:
-                        new_value.append(self.andToken.join([val for val in value]))
-                    else:
-                        new_value.append(value)
-                    if len(new_value)==1:
-                        return self.generateValueNode(value)
-                    else:
-                        return "(" + self.generateORNode(new_value) + ")"
-                else:
-                    return self.generateValueNode(value)
-            elif type(value) == list:
-                new_value = list()
-                for item in value:
-                    # item = self.CleanNode(item)
-                    if type(item) == list and len(item) == 1:
-                        new_value.append(self.valueExpression % item[0])
-                    elif type(item) == list:
-                        new_value.append(self.andToken.join([val for val in item]))
-                    else:
-                        new_value.append(item)
-                return self.generateORNode(new_value)
-            else:
-                raise TypeError("Backend does not support map values of type " + str(type(value)))
+            raise TypeError("Backend does not support map values of type " + str(type(value)))
 
     def generateMapItemListNode(self, key, value):
         itemslist = list()
         for item in value:
-            if key in self.allowedFieldsList:
-                itemslist.append('%s = %s' % (self.keyExpression % key, self.valueExpression % self.generateSCValueNodeLogsource(item)))
+            if type(item) == str and "*" in item:
+                item = item.replace("*", "%")
+                itemslist.append('%s ilike %s' % (self.cleanKey(key), self.generateValueNode(item, True)))
             else:
-                itemslist.append('%s' % (self.generateValueNode(item)))
+                itemslist.append('%s = %s' % (self.cleanKey(key), self.generateValueNode(item, True)))
         return '('+" or ".join(itemslist)+')'
 
-    def generateValueNode(self, node):
-        if type(node) == str and "*" in node:
-            self.node = node.replace("*", "%")
-            return "{} '{}'".format("search_payload ilike", self.cleanValue(str(self.node)))
-        return "{} '{}'".format("search_payload ilike", self.cleanValue(str(node)))
+    def generateValueNode(self, node, keypresent):
+        if keypresent == False:
+            return "UTF8(payload) ilike \'{0}{1}{2}\'".format("%", self.cleanValue(str(node)), "%")
+        else:
+            return self.valueExpression % (self.cleanValue(str(node)))
 
     def generateNULLValueNode(self, node):
         return self.nullExpression % (node.item)
@@ -141,6 +108,49 @@ class QRadarBackend(SingleTextQueryBackend):
     def generateNotNULLValueNode(self, node):
         return self.notNullExpression % (node.item)
 
+    def generateAggregation(self, agg):
+        if agg == None:
+            return ""
+        if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_NEAR:
+            raise NotImplementedError("The 'near' aggregation operator is not yet implemented for this backend")
+        if agg.groupfield == None:
+            self.qradarPrefixAgg = "SELECT %s(%s) as agg_val from %s where" % (agg.aggfunc_notrans, agg.aggfield, self.aql_database)
+            self.qradarSuffixAgg = " group by %s having agg_val %s %s" % (agg.aggfield, agg.cond_op, agg.condition)
+            return self.qradarPrefixAgg, self.qradarSuffixAgg
+        else:
+            self.qradarPrefixAgg = " SELECT %s(%s) as agg_val from %s where " % (agg.aggfunc_notrans, agg.aggfield, self.aql_database)
+            self.qradarSuffixAgg = " group by %s having agg_val %s %s" % (agg.groupfield, agg.cond_op, agg.condition)
+            return self.qradarPrefixAgg, self.qradarSuffixAgg
+
     def generate(self, sigmaparser):
+        """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
         for parsed in sigmaparser.condparsed:
-            return self.const_start + self.generateQuery(parsed)                
+            query = self.generateQuery(parsed, sigmaparser)
+            before = self.generateBefore(parsed)
+            after = self.generateAfter(parsed)
+
+            result = ""
+            if before is not None:
+                result = before
+            if query is not None:
+                result += query
+            if after is not None:
+                result += after
+
+            return result
+
+    def generateQuery(self, parsed, sigmaparser):
+        result = self.generateNode(parsed.parsedSearch)
+        self.parsedlogsource = sigmaparser.get_logsource().index
+        if any("flow" in i for i in self.parsedlogsource):
+            aql_database = "flows"
+        else:
+            aql_database = "events"
+        qradarPrefix = "SELECT UTF8(payload) as search_payload from %s where " % (aql_database)
+        if parsed.parsedAgg:
+            (qradarPrefix, qradarSuffixAgg) = self.generateAggregation(parsed.parsedAgg)
+            result = qradarPrefix + result
+            result += qradarSuffixAgg
+        else:
+            result = qradarPrefix + result
+        return result
