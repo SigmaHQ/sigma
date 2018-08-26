@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from sigma.parser.condition import ConditionOR
-from .exceptions import SigmaConfigParseError
+from .exceptions import SigmaConfigParseError, FieldMappingError
 
 # Field Mapping Definitions
 def FieldMapping(source, target=None):
@@ -47,6 +47,9 @@ class SimpleFieldMapping:
     def resolve_fieldname(self, fieldname):
         return self.target
 
+    def __str__(self):
+        return "SimpleFieldMapping: {} -> {}".format(self.source, self.target)
+
 class MultiFieldMapping(SimpleFieldMapping):
     """1:n field mapping that expands target field names into OR conditions"""
     target_type = list
@@ -58,8 +61,8 @@ class MultiFieldMapping(SimpleFieldMapping):
             cond.add((fieldname, value))
         return cond
 
-    def resolve_fieldname(self, fieldname):
-        return self.target
+    def __str__(self):
+        return "MultiFieldMapping: {} -> [{}]".format(self.source, ", ".join(self.target))
 
 class ConditionalFieldMapping(SimpleFieldMapping):
     """
@@ -131,3 +134,59 @@ class ConditionalFieldMapping(SimpleFieldMapping):
             return self.default
         else:
             return fieldname
+
+# Field mappimg chain
+class FieldMappingChain(object):
+    """
+    Chain of field mappings and fields used for calculation of a field mapping in chained conversion
+    configurations.
+
+    A chain of field mappings may fan out, as one field can map into multiple target fields and these
+    must be propagated further. As the whole chain must be completed at configuration parse time, a
+    restriction applies to conditional field mappings. These are calculated at rule conversion time and
+    therefore it is not possible to decide further mappings after conditionals and these may only appear
+    in the last configuration. This case could be solved by calculation of field mappings at rule conversion
+    time, but it is not considered as important enough to be implemented at this time.
+    """
+    def __init__(self, fieldname):
+        """Initialize field mapping chain with given field name."""
+        self.fieldmappings = set([fieldname])
+
+    def append(self, config):
+        """Propagate current possible field mappings with field mapping from configuration"""
+        if ConditionalFieldMapping in { type(fieldmapping) for fieldmapping in self.fieldmappings }:   # conditional field mapping appeared before, abort.
+            raise FieldMappingError("Conditional field mappings are only allowed in last configuration if configurations are chained.")
+
+        fieldmappings = set()
+        if type(self.fieldmappings) == str:
+            current_fieldmappings = {self.fieldmappings}
+        else:
+            current_fieldmappings = self.fieldmappings
+
+        for fieldname in current_fieldmappings:
+            mapping = config.get_fieldmapping(fieldname)
+            if type(mapping) in (SimpleFieldMapping, ConditionalFieldMapping):
+                fieldmappings.add(mapping.resolve_fieldname(fieldname))
+            elif type(mapping) == MultiFieldMapping:
+                fieldmappings.update(mapping.resolve_fieldname(fieldname))
+            else:
+                raise TypeError("Type '{}' is not supported by FieldMappingChain".format(str(type(mapping))))
+
+        if len(fieldmappings) == 1:
+            self.fieldmappings = fieldmappings.pop()
+        else:
+            self.fieldmappings = fieldmappings
+
+    def resolve(self, key, value, sigmaparser):
+        if type(self.fieldmappings) == str:     # one field mapping
+            return (self.fieldmappings, value)
+        elif isinstance(self.fieldmappings, SimpleFieldMapping):
+            return self.fieldmappings.resolve(key, value, sigmaparser)
+        elif type(self.fieldmappings) == set:
+            cond = ConditionOR()
+            for mapping in self.fieldmappings:
+                if type(mapping) == str:
+                    cond.add((mapping, value))
+                elif isinstance(mapping, SimpleFieldMapping):
+                    cond.add(mapping.resolve(key, value, sigmaparser))
+            return cond

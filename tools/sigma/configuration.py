@@ -17,7 +17,49 @@
 import yaml
 from sigma.parser.condition import ConditionAND, ConditionOR
 from sigma.config.exceptions import SigmaConfigParseError
-from sigma.config.mapping import FieldMapping
+from sigma.config.mapping import FieldMapping, FieldMappingChain
+
+# Chain of multiple configurations
+class SigmaConfigurationChain(list):
+    """
+    Chain of SigmaConfiguration objects. Behaves like a list of Sigma configuration objects on the one side and
+    like a SigmaConfiguration object on the other. All methods are applied to the given parameters in the order
+    of addition of the configurations.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.backend = None
+        self.defaultindex = None
+
+    def append(self, config):
+        super().append(config)
+        self.defaultindex = config.defaultindex
+
+    def get_fieldmapping(self, fieldname):
+        """Return mapped fieldname by iterative application of each config stored in configuration chain."""
+        if self:
+            fieldmappings = FieldMappingChain(fieldname)
+            for config in self:
+                fieldmappings.append(config)
+            return fieldmappings
+        else:
+            return FieldMapping(fieldname)
+
+    def get_logsource(self, category, product, service):
+        """Return merged log source definition of all logosurces that match criteria across all Sigma conversion configurations in chain."""
+        matching = [logsource for config in self for logsource in config.logsources if logsource.matches(category, product, service)]
+        return SigmaLogsourceConfiguration(matching, self.defaultindex)
+
+    def set_backend(self, backend):
+        """Set backend for all sigma conversion configurations in chain."""
+        self.backend = backend
+        for config in self:
+            config.set_backend(backend)
+
+    def get_indexfield(self):
+        """Get index condition if index field name is configured"""
+        if self.backend is not None:
+            return self.backend.index_field
 
 # Configuration
 class SigmaConfiguration:
@@ -81,7 +123,7 @@ class SigmaConfiguration:
 
     def get_indexfield(self):
         """Get index condition if index field name is configured"""
-        if self.backend != None:
+        if self.backend is not None:
             return self.backend.index_field
 
 class SigmaLogsourceConfiguration:

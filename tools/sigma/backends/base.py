@@ -51,7 +51,7 @@ class BaseBackend:
         passing the object instance to it.
         """
         super().__init__()
-        if not isinstance(sigmaconfig, (sigma.configuration.SigmaConfiguration, None)):
+        if not isinstance(sigmaconfig, (sigma.configuration.SigmaConfiguration, sigma.configuration.SigmaConfigurationChain, None)):
             raise TypeError("SigmaConfiguration object expected")
         self.backend_options = backend_options
         self.sigmaconfig = sigmaconfig

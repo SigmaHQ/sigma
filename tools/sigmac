@@ -24,7 +24,7 @@ import itertools
 import logging
 from sigma.parser.collection import SigmaCollectionParser
 from sigma.parser.exceptions import SigmaCollectionParseError, SigmaParseError
-from sigma.configuration import SigmaConfiguration
+from sigma.configuration import SigmaConfiguration, SigmaConfigurationChain
 from sigma.config.exceptions import SigmaConfigParseError, SigmaRuleFilterParseException
 from sigma.filter import SigmaRuleFilter
 import sigma.backends.discovery as backends
@@ -83,7 +83,7 @@ Multiple log source specifications are AND linked.
         """)
 argparser.add_argument("--target", "-t", default="es-qs", choices=backends.getBackendDict().keys(), help="Output target format")
 argparser.add_argument("--target-list", "-l", action="store_true", help="List available output target formats")
-argparser.add_argument("--config", "-c", help="Configuration with field name and index mapping for target environment")
+argparser.add_argument("--config", "-c", action="append", help="Configurations with field name and index mapping for target environment. Multiple configurations are merged into one. Last config is authorative in case of conflicts.")
 argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix if multiple files are generated")
 argparser.add_argument("--backend-option", "-O", action="append", help="Options and switches that are passed to the backend")
 argparser.add_argument("--defer-abort", "-d", action="store_true", help="Don't abort on parse or conversion errors, proceed with next rule. The exit code from the last error is returned")
@@ -113,24 +113,25 @@ if cmdargs.filter:
         print("Parse error in Sigma rule filter expression: %s" % str(e), file=sys.stderr)
         sys.exit(9)
 
-sigmaconfig = SigmaConfiguration()
+sigmaconfigs = SigmaConfigurationChain()
 if cmdargs.config:
-    try:
-        conffile = cmdargs.config
-        f = open(conffile)
-        sigmaconfig = SigmaConfiguration(f)
-    except OSError as e:
-        print("Failed to open Sigma configuration file %s: %s" % (conffile, str(e)), file=sys.stderr)
-        exit(5)
-    except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
-        print("Sigma configuration file %s is no valid YAML: %s" % (conffile, str(e)), file=sys.stderr)
-        exit(6)
-    except SigmaConfigParseError as e:
-        print("Sigma configuration parse error in %s: %s" % (conffile, str(e)), file=sys.stderr)
-        exit(7)
+    for conffile in cmdargs.config:
+        try:
+            f = open(conffile)
+            sigmaconfig = SigmaConfiguration(f)
+            sigmaconfigs.append(sigmaconfig)
+        except OSError as e:
+            print("Failed to open Sigma configuration file %s: %s" % (conffile, str(e)), file=sys.stderr)
+            exit(5)
+        except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
+            print("Sigma configuration file %s is no valid YAML: %s" % (conffile, str(e)), file=sys.stderr)
+            exit(6)
+        except SigmaConfigParseError as e:
+            print("Sigma configuration parse error in %s: %s" % (conffile, str(e)), file=sys.stderr)
+            exit(7)
 
 backend_options = BackendOptions(cmdargs.backend_option)
-backend = backends.getBackend(cmdargs.target)(sigmaconfig, backend_options)
+backend = backends.getBackend(cmdargs.target)(sigmaconfigs, backend_options)
 filename = cmdargs.output
 if filename:
     try:
@@ -146,7 +147,7 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
     print_verbose("* Processing Sigma input %s" % (sigmafile))
     try:
         f = sigmafile.open(encoding='utf-8')
-        parser = SigmaCollectionParser(f, sigmaconfig, rulefilter)
+        parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter)
         results = parser.generate(backend)
         for result in results:
             print(result, file=out)
