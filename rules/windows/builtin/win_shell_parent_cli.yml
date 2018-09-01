@@ -1,0 +1,93 @@
+action: global
+title: Execution of Reconnaissance Commands under a Shell
+description: Detects suspicious command-line process with a shell process as parent
+status: experimental
+references:
+    - https://expel.io/blog/how-to-hunt-for-reconnaissance/
+author: juju4
+detection:
+    selection:
+        ParentImage:
+            - cmd.exe
+            - powershell.exe
+        CommandLine: 
+            - arp.exe
+            - at.exe
+            - attrib.exe
+            - bcedit.exe
+            - bitsadmin.exe
+            - certutil.exe
+            - copy.exe
+            - cscript.exe
+            - csvde.exe
+            - diskpart.exe
+            - dsget.exe
+            - dsquery.exe
+            - find.exe
+            - findstr.exe
+            - fsutil.exe
+            - hostname.exe
+            - icacls.exe
+            - ipconfig.exe
+            - mimikatz.exe
+            - nbstat.exe
+            - nbtstat.exe
+            - net.exe
+            - net1.exe
+            - netsh.exe
+            - nltest.exe
+            - netdom.exe
+            - netstat.exe
+            - nslookup.exe
+            - ntdsutil.exe
+            - ping.exe
+            - powershell.exe
+            - pscp.exe
+            - psexec.exe
+            - qprocess.exe
+            - query.exe
+            - quser.exe
+            - qwinsta.exe
+            - reg.exe
+            - robocopy.exe
+            - runas.exe
+            - rundll32.exe
+            - sc.exe
+            - schtasks.exe
+            - ssh.exe
+            - systeminfo.exe
+            - taskkill.exe
+            - tasklist.exe
+            - tcping.exe
+            - telnet.exe
+            - tracert.exe
+            - type.exe
+            - ver.exe
+            - vssadmin.exe
+            - wbadmin.exe
+            - wevtutil.exe
+            - whoami.exe
+            - wmic.exe
+            - wscript.exe
+            - wusa.exe
+            - xcopy.exe
+falsepositives:
+    - False positives depend on scripts and administrative tools used in the monitored environment
+level: low
+---
+# Windows Audit Log
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection:
+        EventID: 4688
+---
+# Sysmon
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
