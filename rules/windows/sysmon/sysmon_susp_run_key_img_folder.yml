@@ -1,23 +1,40 @@
 title: New RUN Key Pointing to Suspicious Folder
 status: experimental
 description: Detects suspicious new RUN key element pointing to an executable in a suspicious folder
-author: Florian Roth
-date: 2017/10/17
+references:
+    - https://www.fireeye.com/blog/threat-research/2018/08/fin7-pursuing-an-enigmatic-and-evasive-global-criminal-operation.html
+author: Florian Roth, Markus Neis
+tags:
+    - attack.persistence
+    - attack.t1060
+date: 2018/25/08
 logsource:
     product: windows
     service: sysmon
 detection:
-    selection:
+    selection1:
         EventID: 13
         TargetObject: '\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\*'
-        Details: 
+        Details:
           - 'C:\Windows\Temp\*'
           - '*\AppData\*'
           - 'C:\$Recycle.bin\*'
           - 'C:\Temp\*'
           - 'C:\Users\Public\*'
           - 'C:\Users\Default\*'
-    condition: selection
+          - 'C:\Users\Desktop\*'
+    selection2:
+        EventID: 13
+        TargetObject: '\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce\*'
+        Details:
+          - 'C:\Windows\Temp\*'
+          - '*\AppData\*'
+          - 'C:\$Recycle.bin\*'
+          - 'C:\Temp\*'
+          - 'C:\Users\Public\*'
+          - 'C:\Users\Default\*'
+          - 'C:\Users\Desktop\*'
+    condition: selection1 or selection2
 fields:
     - Image
 falsepositives:
