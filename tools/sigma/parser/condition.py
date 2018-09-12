@@ -335,26 +335,17 @@ class SigmaConditionParser:
 
         if len(tokens) != 1:     # parse tree must begin with exactly one node
             raise ValueError("Parse tree must have exactly one start node!")
-        querycond = tokens[0]
+        query_cond = tokens[0]
 
-        logsource = self.sigmaParser.get_logsource()
-        if logsource != None:
-            # 4. Integrate conditions from configuration
-            if logsource.conditions != None:
-                cond = ConditionAND()
-                cond.add(logsource.conditions)
-                cond.add(querycond)
-                querycond = cond
+        # 4. Integrate conditions from logsources in configurations
+        ls_cond = self.sigmaParser.get_logsource_condition()
+        if ls_cond is not None:
+            cond = ConditionAND()
+            cond.add(ls_cond)
+            cond.add(query_cond)
+            query_cond = cond
 
-            # 5. Integrate index conditions if applicable for backend
-            indexcond = logsource.get_indexcond()
-            if indexcond != None:
-                cond = ConditionAND()
-                cond.add(indexcond)
-                cond.add(querycond)
-                querycond = cond
-
-        return querycond
+        return query_cond
 
     def __str__(self):
         return str(self.parsedSearch)
