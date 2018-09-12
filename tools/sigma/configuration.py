@@ -142,9 +142,9 @@ class SigmaLogsourceConfiguration:
             self.conditions = None
         elif type(logsource) == list and all([isinstance(o, SigmaLogsourceConfiguration) for o in logsource]):      # list of SigmaLogsourceConfigurations: merge according to mergemethod
             # Merge category, product and service
-            categories = set([ ls.category for ls in logsource if ls.category != None ])
-            products = set([ ls.product for ls in logsource if ls.product != None ])
-            services = set([ ls.service for ls in logsource if ls.service != None])
+            categories = { ls.category for ls in logsource if ls.category is not None }
+            products = { ls.product for ls in logsource if ls.product is not None }
+            services = { ls.service for ls in logsource if ls.service is not None }
             if len(categories) > 1 or len(products) > 1 or len(services) > 1:
                 raise ValueError("Merged SigmaLogsourceConfigurations must have disjunct categories (%s), products (%s) and services (%s)" % (str(categories), str(products), str(services)))
 
