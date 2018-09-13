@@ -30,10 +30,18 @@ class SigmaConfigurationChain(list):
         super().__init__(*args, **kwargs)
         self.backend = None
         self.defaultindex = None
+        self.config = dict()
+
+        for config in self:
+            self.postprocess_config(config)
 
     def append(self, config):
         super().append(config)
+        self.postprocess_config(config)
+
+    def postprocess_config(self, config):
         self.defaultindex = config.defaultindex
+        self.config.update(config.config)
 
     def get_fieldmapping(self, fieldname):
         """Return mapped fieldname by iterative application of each config stored in configuration chain."""
