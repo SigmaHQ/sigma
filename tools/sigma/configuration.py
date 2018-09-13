@@ -31,6 +31,8 @@ class SigmaConfigurationChain(list):
         self.backend = None
         self.defaultindex = None
         self.config = dict()
+        self.fieldmappings = dict()
+        self.logsources = dict()
 
         for config in self:
             self.postprocess_config(config)
@@ -42,6 +44,8 @@ class SigmaConfigurationChain(list):
     def postprocess_config(self, config):
         self.defaultindex = config.defaultindex
         self.config.update(config.config)
+        self.fieldmappings.update(config.fieldmappings)
+        self.logsources.update(config.logsources)
 
     def get_fieldmapping(self, fieldname):
         """Return mapped fieldname by iterative application of each config stored in configuration chain."""
