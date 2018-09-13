@@ -166,7 +166,11 @@ class FieldMappingChain(object):
         for fieldname in current_fieldmappings:
             mapping = config.get_fieldmapping(fieldname)
             if type(mapping) in (SimpleFieldMapping, ConditionalFieldMapping):
-                fieldmappings.add(mapping.resolve_fieldname(fieldname))
+                resolved_mapping = mapping.resolve_fieldname(fieldname)
+                if type(resolved_mapping) is list:
+                    fieldmappings.update(resolved_mapping)
+                else:
+                    fieldmappings.add(resolved_mapping)
             elif type(mapping) == MultiFieldMapping:
                 fieldmappings.update(mapping.resolve_fieldname(fieldname))
             else:
@@ -203,8 +207,8 @@ class FieldMappingChain(object):
                     mappings.add(mapping)
                 elif isinstance(mapping, SimpleFieldMapping):
                     resolved_mapping = mapping.resolve_fieldname(fieldname)
-                    try:
-                        mappings.update(iter(resolved_mapping))
-                    except TypeError:
+                    if type(resolved_mapping) is list:
+                        mappings.update(resolved_mapping)
+                    else:
                         mappings.add(resolved_mapping)
             return list(mappings)
