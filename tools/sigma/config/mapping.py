@@ -190,3 +190,21 @@ class FieldMappingChain(object):
                 elif isinstance(mapping, SimpleFieldMapping):
                     cond.add(mapping.resolve(key, value, sigmaparser))
             return cond
+
+    def resolve_fieldname(self, fieldname):
+        if type(self.fieldmappings) == str:     # one field mapping
+            return self.fieldmappings
+        elif isinstance(self.fieldmappings, SimpleFieldMapping):
+            return self.fieldmappings.resolve_fieldname(fieldname)
+        elif type(self.fieldmappings) == set:
+            mappings = set()
+            for mapping in self.fieldmappings:
+                if type(mapping) == str:
+                    mappings.add(mapping)
+                elif isinstance(mapping, SimpleFieldMapping):
+                    resolved_mapping = mapping.resolve_fieldname(fieldname)
+                    try:
+                        mappings.update(iter(resolved_mapping))
+                    except TypeError:
+                        mappings.add(resolved_mapping)
+            return list(mappings)
