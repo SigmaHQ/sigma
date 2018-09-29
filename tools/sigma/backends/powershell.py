@@ -111,9 +111,13 @@ class PowerShellBackend(SingleTextQueryBackend):
     def generateMapItemNode(self, node):
         key, value = node
         if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
-            if key in ("LogName"):
+            if key in ("LogName","source"):
+                if key == "source":
+                    key = "LogName"
                 return self.mapExpression % (key, self.generateValueNode(value, True))
-            elif key in ("ID"):
+            elif key in ("ID", "EventID"):
+                if key == "EventID":
+                    key = "ID"
                 return self.mapExpression % (key, self.generateValueNode(value, True))
             elif type(value) == str and "*" in value:
                 value = value.replace("*", ".*")
