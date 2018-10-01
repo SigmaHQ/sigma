@@ -104,7 +104,8 @@ merges multiple YAML documents of a Sigma rule collection into simple Sigma rule
 * [ArcSight](https://software.microfocus.com/en-us/products/siem-security-information-event-management/overview)
 * [QRadar](https://www.ibm.com/de-de/marketplace/ibm-qradar-siem)
 * [Qualys](https://www.qualys.com/apps/threat-protection/)
-* Grep with Perl-compatible regular expression support
+* [PowerShell](https://docs.microsoft.com/en-us/powershell/scripting/getting-started/getting-started-with-windows-powershell?view=powershell-6)
+* [Grep](https://www.gnu.org/software/grep/manual/grep.html) with Perl-compatible regular expression support
 
 Current work-in-progress
 * [Splunk Data Models](https://docs.splunk.com/Documentation/Splunk/7.1.0/Knowledge/Aboutdatamodels)
@@ -160,6 +161,7 @@ These tools are not part of the main toolchain and maintained separately by thei
 * [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 * [SOC Prime - Sigma Rule Editor](https://tdm.socprime.com/sigma/)
 * [ypsilon](https://github.com/P4T12ICK/ypsilon) - Automated Use Case Testing 
+* [uncoder.io](https://uncoder.io/) - Online Translator for SIEM Searches
 * [SPARK](https://www.nextron-systems.com/2018/06/28/spark-applies-sigma-rules-in-eventlog-scan/) - Scan with Sigma rules on endpoints
 
 # Licenses
