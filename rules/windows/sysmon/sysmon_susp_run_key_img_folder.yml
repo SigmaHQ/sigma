@@ -12,9 +12,11 @@ logsource:
     product: windows
     service: sysmon
 detection:
-    selection1:
+    selection:
         EventID: 13
-        TargetObject: '\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\*'
+        TargetObject: 
+          - '*\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\*'
+          - '*\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce\*'
         Details:
           - 'C:\Windows\Temp\*'
           - '*\AppData\*'
@@ -23,18 +25,7 @@ detection:
           - 'C:\Users\Public\*'
           - 'C:\Users\Default\*'
           - 'C:\Users\Desktop\*'
-    selection2:
-        EventID: 13
-        TargetObject: '\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce\*'
-        Details:
-          - 'C:\Windows\Temp\*'
-          - '*\AppData\*'
-          - 'C:\$Recycle.bin\*'
-          - 'C:\Temp\*'
-          - 'C:\Users\Public\*'
-          - 'C:\Users\Default\*'
-          - 'C:\Users\Desktop\*'
-    condition: selection1 or selection2
+    condition: selection
 fields:
     - Image
 falsepositives:
