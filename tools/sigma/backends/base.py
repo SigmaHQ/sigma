@@ -139,6 +139,9 @@ class BaseBackend:
             # Remove empty OR(X), AND(X)
             if len(node.items) == 0:
                 return None, True
+            if None in node.items:
+                node.items = [item for item in node.items if item != None]
+                return self.optimizeNode(node, changes=True)
 
             # OR(X), AND(X)                 =>  X
             if len(node.items) == 1:
