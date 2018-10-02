@@ -114,8 +114,7 @@ class BaseBackend:
         Recursively adds brackets around AND and OR operations in the AST.
         """
         if type(node) in (sigma.parser.condition.ConditionAND,
-                          sigma.parser.condition.ConditionOR,
-                          sigma.parser.condition.ConditionNOT):
+                          sigma.parser.condition.ConditionOR):
             newnode = sigma.parser.condition.NodeSubexpression(node)
             node.items = list(map(self.unstripSubexpressionNode, node.items))
             return newnode
@@ -128,7 +127,7 @@ class BaseBackend:
         invocation or any of the sub-invocations.
 
         You MUST remove all subexpression nodes from the AST before calling
-        this function.  Subexpressions are implicit around AND/OR/NOT nodes.
+        this function.  Subexpressions are implicit around AND/OR nodes.
         """
         def ordered_uniq(l):
             """
@@ -203,11 +202,24 @@ class BaseBackend:
                     return self.optimizeNode(newnode, changes=True)
             # fallthrough
         elif type(node) == sigma.parser.condition.ConditionNOT:
-            # NOT(NOT(X))                   =>  X
             assert(len(node.items) == 1)
+
+            # NOT(NOT(X))                   =>  X
             if type(node.items[0]) == sigma.parser.condition.ConditionNOT:
                 assert(len(node.items[0].items) == 1)
                 return self.optimizeNode(node.items[0].items[0], changes=True)
+
+            # NOT(ConditionNULLValue)       => ConditionNotNULLValue
+            if type(node.items[0]) == sigma.parser.condition.ConditionNULLValue:
+                newnode = sigma.parser.condition.ConditionNotNULLValue(val=node.items[0].items[0])
+                return self.optimizeNode(newnode, changes=True)
+
+            # NOT(ConditionNotNULLValue)    => ConditionNULLValue
+            if type(node.items[0]) == sigma.parser.condition.ConditionNotNULLValue:
+                newnode = sigma.parser.condition.ConditionNULLValue(val=node.items[0].items[0])
+                return self.optimizeNode(newnode, changes=True)
+
+
             # fallthrough
         else:
             return node, changes
@@ -234,6 +246,8 @@ class BaseBackend:
         -   OR(X, OR(Y))                  =>  OR(X, Y)
         -   OR(AND(X, ...), AND(X, ...))  =>  AND(X, OR(AND(...), AND(...)))
         -   NOT(NOT(X))                   =>  X
+        -   NOT(ConditionNULLValue)       => ConditionNotNULLValue
+        -   NOT(ConditionNotNULLValue)    => ConditionNULLValue
 
         A common example for when these suboptimal rules actually occur in
         practice is when a rule has multiple alternative detections that are
@@ -245,11 +259,11 @@ class BaseBackend:
         """
         #self.dumpNode(tree)
         tree = self.stripSubexpressionNode(tree)
+        #self.dumpNode(tree)
         changes = True
         while changes:
-            #self.dumpNode(tree)
             tree, changes = self.optimizeNode(tree)
-        #self.dumpNode(tree)
+            #self.dumpNode(tree)
         tree = self.unstripSubexpressionNode(tree)
         #self.dumpNode(tree)
         return tree
