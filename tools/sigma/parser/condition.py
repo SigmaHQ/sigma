@@ -266,6 +266,200 @@ def convertId(sigma, op):
     """Convert search identifiers (lists or maps) into condition nodes according to spec defaults"""
     return NodeSubexpression(sigma.parse_definition_byname(op.matched))
 
+# Optimizer
+class SigmaConditionOptimizer:
+    """
+    Optimizer for the parsed AST.
+    """
+    def _dumpNode(self, node, indent=''):
+        """
+        Recursively print the AST rooted at *node* for debugging.
+        """
+        import sys
+        if hasattr(node, 'items'):
+            print("%s%s<%s>" % (indent, type(node).__name__,
+                                type(node.items).__name__), file=sys.stderr)
+            if type(node.items) != list:
+                self._dumpNode(node.items, indent + '  ')
+            else:
+                for item in node.items:
+                    self._dumpNode(item, indent + '  ')
+        else:
+            print("%s%s=%s" % (indent, type(node).__name__,
+                                       repr(node)), file=sys.stderr)
+        return node
+
+    def _stripSubexpressionNode(self, node):
+        """
+        Recursively strips all subexpressions (i.e. brackets) from the AST.
+        """
+        if type(node) == NodeSubexpression:
+            assert(type(node.items) != list)
+            return self._stripSubexpressionNode(node.items)
+        if hasattr(node, 'items'):
+            node.items = list(map(self._stripSubexpressionNode, node.items))
+        return node
+
+    def _unstripSubexpressionNode(self, node):
+        """
+        Recursively adds brackets around AND and OR operations in the AST.
+        """
+        if type(node) in (ConditionAND, ConditionOR):
+            newnode = NodeSubexpression(node)
+            node.items = list(map(self._unstripSubexpressionNode, node.items))
+            return newnode
+        return node
+
+    def _ordered_uniq(self, l):
+        """
+        Remove duplicate entries in list *l* while preserving order.
+
+        Used to be fast before it needed to work around list instead of
+        tuple being used for lists within definitions in the AST.
+        """
+        seen = set()
+        #return [x for x in l if x not in seen and not seen.add(x)]
+        uniq = []
+        for x in l:
+            if type(x) == tuple and type(x[1]) == list:
+                x = (x[0], tuple(x[1]))
+            if x not in seen and not seen.add(x):
+                uniq.append(x)
+        out = []
+        for x in uniq:
+            if type(x) == tuple and type(x[1]) == tuple:
+                out.append((x[0], list(x[1])))
+            else:
+                out.append(x)
+        return out
+
+    def _optimizeNode(self, node, changes=False):
+        """
+        Recursively optimize the AST rooted at *node* once.  Returns the new
+        root node and a boolean indicating if the tree was changed in this
+        invocation or any of the sub-invocations.
+
+        You MUST remove all subexpression nodes from the AST before calling
+        this function.  Subexpressions are implicit around AND/OR nodes.
+        """
+        if type(node) in (ConditionOR, ConditionAND):
+            # Remove empty OR(X), AND(X)
+            if len(node.items) == 0:
+                return None, True
+            if None in node.items:
+                node.items = [item for item in node.items if item != None]
+                return self._optimizeNode(node, changes=True)
+
+            # OR(X), AND(X)                 =>  X
+            if len(node.items) == 1:
+                return self._optimizeNode(node.items[0], changes=True)
+
+            # OR(X, X, ...), AND(X, X, ...) =>  OR(X, ...), AND(X, ...)
+            uniq_items = self._ordered_uniq(node.items)
+            if len(uniq_items) < len(node.items):
+                node.items = uniq_items
+                return self._optimizeNode(node, changes=True)
+
+            # OR(X, OR(Y))                  =>  OR(X, Y)
+            if any(type(child) == type(node) for child in node.items) and \
+               all(type(child) in (type(node), tuple) for child in node.items):
+                newitems = []
+                for child in node.items:
+                    if hasattr(child, 'items'):
+                        newitems.extend(child.items)
+                    else:
+                        newitems.append(child)
+                node.items = newitems
+                return self._optimizeNode(node, changes=True)
+
+            # OR(AND(X, ...), AND(X, ...))  =>  AND(X, OR(AND(...), AND(...)))
+            if type(node) == ConditionOR:
+                othertype = ConditionAND
+            else:
+                othertype = ConditionOR
+            if all(type(child) == othertype for child in node.items):
+                promoted = []
+                for cand in node.items[0]:
+                    if all(cand in child for child in node.items[1:]):
+                        promoted.append(cand)
+                if len(promoted) > 0:
+                    for child in node.items:
+                        for cand in promoted:
+                            child.items.remove(cand)
+                    newnode = othertype()
+                    newnode.items = promoted
+                    newnode.add(node)
+                    return self._optimizeNode(newnode, changes=True)
+
+            # fallthrough
+
+        elif type(node) == ConditionNOT:
+            assert(len(node.items) == 1)
+
+            # NOT(NOT(X))                   =>  X
+            if type(node.items[0]) == ConditionNOT:
+                assert(len(node.items[0].items) == 1)
+                return self._optimizeNode(node.items[0].items[0], changes=True)
+
+            # NOT(ConditionNULLValue)       => ConditionNotNULLValue
+            if type(node.items[0]) == ConditionNULLValue:
+                newnode = ConditionNotNULLValue(val=node.items[0].items[0])
+                return self._optimizeNode(newnode, changes=True)
+
+            # NOT(ConditionNotNULLValue)    => ConditionNULLValue
+            if type(node.items[0]) == ConditionNotNULLValue:
+                newnode = ConditionNULLValue(val=node.items[0].items[0])
+                return self._optimizeNode(newnode, changes=True)
+
+            # fallthrough
+
+        else:
+            return node, changes
+
+        itemresults = [self._optimizeNode(item, changes) for item in node.items]
+        node.items = [res[0] for res in itemresults]
+        if any(res[1] for res in itemresults):
+            changes = True
+        return node, changes
+
+    def optimizeTree(self, tree):
+        """
+        Optimize the boolean expressions in the AST rooted at *node*.
+
+        The main idea behind optimizing the AST is that less repeated terms is
+        generally better for backend performance.  This is especially relevant
+        to backends that do not perform any query language optimization down
+        the road, such as those that generate code.
+
+        The following optimizations are currently performed:
+        -   Removal of empty OR(), AND()
+        -   OR(X), AND(X)                 =>  X
+        -   OR(X, X, ...), AND(X, X, ...) =>  OR(X, ...), AND(X, ...)
+        -   OR(X, OR(Y))                  =>  OR(X, Y)
+        -   OR(AND(X, ...), AND(X, ...))  =>  AND(X, OR(AND(...), AND(...)))
+        -   NOT(NOT(X))                   =>  X
+        -   NOT(ConditionNULLValue)       => ConditionNotNULLValue
+        -   NOT(ConditionNotNULLValue)    => ConditionNULLValue
+
+        A common example for when these suboptimal rules actually occur in
+        practice is when a rule has multiple alternative detections that are
+        OR'ed together in the condition, and all of the detections include a
+        common element, such as the same EventID.
+
+        This implementation is not optimized for performance and will perform
+        poorly on very large expressions.
+        """
+        #self._dumpNode(tree)
+        tree = self._stripSubexpressionNode(tree)
+        #self._dumpNode(tree)
+        changes = True
+        while changes:
+            tree, changes = self._optimizeNode(tree)
+            #self._dumpNode(tree)
+        tree = self._unstripSubexpressionNode(tree)
+        #self._dumpNode(tree)
+        return tree
+
 # Condition parser
 class SigmaConditionParser:
     """Parser for Sigma condition expression"""
@@ -281,6 +475,7 @@ class SigmaConditionParser:
     def __init__(self, sigmaParser, tokens):
         self.sigmaParser = sigmaParser
         self.config = sigmaParser.config
+        self._optimizer = SigmaConditionOptimizer()
 
         if SigmaConditionToken.TOKEN_PIPE in tokens:    # Condition contains atr least one aggregation expression
             pipepos = tokens.index(SigmaConditionToken.TOKEN_PIPE)
@@ -354,7 +549,7 @@ class SigmaConditionParser:
                 cond.add(querycond)
                 querycond = cond
 
-        return querycond
+        return self._optimizer.optimizeTree(querycond)
 
     def __str__(self):
         return str(self.parsedSearch)
