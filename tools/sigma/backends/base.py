@@ -130,9 +130,27 @@ class BaseBackend:
         You MUST remove all subexpression nodes from the AST before calling
         this function.  Subexpressions are implicit around AND/OR/NOT nodes.
         """
-        def fast_ordered_uniq(l):
+        def ordered_uniq(l):
+            """
+            Remove duplicate entries in list *l* while preserving order.
+            Used to be fast before it needed to work around list instead of
+            tuple being used for lists within definitions in the AST.
+            """
             seen = set()
-            return [x for x in node.items if x not in seen and not seen.add(x)]
+            #return [x for x in l if x not in seen and not seen.add(x)]
+            uniq = []
+            for x in l:
+                if type(x) == tuple and type(x[1]) == list:
+                    x = (x[0], tuple(x[1]))
+                if x not in seen and not seen.add(x):
+                    uniq.append(x)
+            out = []
+            for x in uniq:
+                if type(x) == tuple and type(x[1]) == tuple:
+                    out.append((x[0], list(x[1])))
+                else:
+                    out.append(x)
+            return out
 
         if type(node) in (sigma.parser.condition.ConditionOR,
                           sigma.parser.condition.ConditionAND):
@@ -148,7 +166,7 @@ class BaseBackend:
                 return self.optimizeNode(node.items[0], changes=True)
 
             # OR(X, X, ...), AND(X, X, ...) =>  OR(X, ...), AND(X, ...)
-            uniq_items = fast_ordered_uniq(node.items)
+            uniq_items = ordered_uniq(node.items)
             if len(uniq_items) < len(node.items):
                 node.items = uniq_items
                 return self.optimizeNode(node, changes=True)
@@ -227,9 +245,9 @@ class BaseBackend:
         """
         #self.dumpNode(tree)
         tree = self.stripSubexpressionNode(tree)
-        #self.dumpNode(tree)
         changes = True
         while changes:
+            #self.dumpNode(tree)
             tree, changes = self.optimizeNode(tree)
         #self.dumpNode(tree)
         tree = self.unstripSubexpressionNode(tree)
