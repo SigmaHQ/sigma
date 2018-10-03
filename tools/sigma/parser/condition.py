@@ -337,7 +337,7 @@ class SigmaConditionOptimizer:
         """
         Recursively optimize the AST rooted at *node* once.  Returns the new
         root node and a boolean indicating if the tree was changed in this
-        invocation or any of the sub-invocations.
+        invocation or any of the recursive sub-invocations.
 
         You MUST remove all subexpression nodes from the AST before calling
         this function.  Subexpressions are implicit around AND/OR nodes.
@@ -401,12 +401,12 @@ class SigmaConditionOptimizer:
                 assert(len(node.items[0].items) == 1)
                 return self._optimizeNode(node.items[0].items[0], changes=True)
 
-            # NOT(ConditionNULLValue)       => ConditionNotNULLValue
+            # NOT(ConditionNULLValue)       =>  ConditionNotNULLValue
             if type(node.items[0]) == ConditionNULLValue:
                 newnode = ConditionNotNULLValue(val=node.items[0].items[0])
                 return self._optimizeNode(newnode, changes=True)
 
-            # NOT(ConditionNotNULLValue)    => ConditionNULLValue
+            # NOT(ConditionNotNULLValue)    =>  ConditionNULLValue
             if type(node.items[0]) == ConditionNotNULLValue:
                 newnode = ConditionNULLValue(val=node.items[0].items[0])
                 return self._optimizeNode(newnode, changes=True)
@@ -424,12 +424,17 @@ class SigmaConditionOptimizer:
 
     def optimizeTree(self, tree):
         """
-        Optimize the boolean expressions in the AST rooted at *node*.
+        Optimize the boolean expressions in the AST rooted at *tree*.
 
         The main idea behind optimizing the AST is that less repeated terms is
         generally better for backend performance.  This is especially relevant
         to backends that do not perform any query language optimization down
         the road, such as those that generate code.
+
+        A common example for when these suboptimal rules actually occur in
+        practice is when a rule has multiple alternative detections that are
+        OR'ed together in the condition, and all of the detections include a
+        common element, such as the same EventID.
 
         The following optimizations are currently performed:
         -   Removal of empty OR(), AND()
@@ -438,16 +443,15 @@ class SigmaConditionOptimizer:
         -   OR(X, OR(Y))                  =>  OR(X, Y)
         -   OR(AND(X, ...), AND(X, ...))  =>  AND(X, OR(AND(...), AND(...)))
         -   NOT(NOT(X))                   =>  X
-        -   NOT(ConditionNULLValue)       => ConditionNotNULLValue
-        -   NOT(ConditionNotNULLValue)    => ConditionNULLValue
+        -   NOT(ConditionNULLValue)       =>  ConditionNotNULLValue
+        -   NOT(ConditionNotNULLValue)    =>  ConditionNULLValue
 
-        A common example for when these suboptimal rules actually occur in
-        practice is when a rule has multiple alternative detections that are
-        OR'ed together in the condition, and all of the detections include a
-        common element, such as the same EventID.
-
-        This implementation is not optimized for performance and will perform
-        poorly on very large expressions.
+        Boolean logic simplification is NP-hard.  To avoid backtracking,
+        speculative transformations that may or may not lead to a more optimal
+        expression were not implemented.  These include for example factoring
+        out common operands that are not in all, but only some AND()s within an
+        OR(), or vice versa.  Nevertheless, it is safe to assume that this
+        implementation performs poorly on very large expressions.
         """
         #self._dumpNode(tree)
         tree = self._stripSubexpressionNode(tree)
