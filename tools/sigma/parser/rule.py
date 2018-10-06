@@ -146,9 +146,15 @@ class SigmaParser:
             else:                   # Simple log sources already contain flat list of conditions items
                 kvconds = logsource.conditions
 
+            # Apply field mappings
+            mapped_kvconds = list()
+            for field, value in kvconds:
+                mapping = self.config.get_fieldmapping(field)
+                mapped_kvconds.append(mapping.resolve(field, value, self))
+
             # AND-link condition items
             cond = ConditionAND()
-            for kvcond in kvconds:
+            for kvcond in mapped_kvconds:
                 cond.add(kvcond)
 
             # Add index condition if supported by backend and defined in log source
