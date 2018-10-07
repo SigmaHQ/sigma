@@ -23,6 +23,9 @@ class PowerShellBackend(SingleTextQueryBackend):
     """Converts Sigma rule into PowerShell event log cmdlets."""
     identifier = "powershell"
     active = True
+    options = (
+        ("csv", False, "Return the results in CSV format instead of Powershell objects", None),
+    )
 
     reEscape = re.compile('("|\\\\(?![*?])|\+)')
     reClear = None
@@ -72,6 +75,8 @@ class PowerShellBackend(SingleTextQueryBackend):
         return "Get-WinEvent | where {"
 
     def generateAfter(self, parsed):
+        if self.csv:
+            return " | ConvertTo-CSV -NoTypeInformation"
         return ""
 
     def generateNode(self, node):
