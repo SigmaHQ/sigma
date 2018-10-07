@@ -1,5 +1,5 @@
 .PHONY: test test-yaml test-sigmac
-TMPOUT = $(shell tempfile)
+TMPOUT = $(shell tempfile||mktemp)
 COVSCOPE = tools/sigma/*.py,tools/sigma/backends/*.py,tools/sigmac,tools/merge_sigma
 test: clearcov test-yaml test-sigmac test-merge build finish
 

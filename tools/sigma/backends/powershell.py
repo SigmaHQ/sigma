@@ -139,7 +139,9 @@ class PowerShellBackend(SingleTextQueryBackend):
     def generateMapItemListNode(self, key, value):
         itemslist = list()
         for item in value:
-            if key in ("ID"):
+            if key in ("ID", "EventID"):
+                if key == "EventID":
+                    key = "ID"
                 itemslist.append(self.mapExpression % (key, self.generateValueNode(item, True)))
             elif type(item) == str and "*" in item:
                 item = item.replace("*", ".*")
