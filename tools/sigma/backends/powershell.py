@@ -68,7 +68,11 @@ class PowerShellBackend(SingleTextQueryBackend):
             Search for "| where { $_.LogName -eq "Security" -and" and replace with "-LogName "Security" | where { ...
 
             """
+            # First attempt
             result = re.sub("\| where {\$_\.LogName -eq \"(.*?)\" -and ","-LogName \"\g<1>\" | where { ",result)
+
+            # Second attempt (accounts for sub-expression)
+            result = re.sub("\| where {\(\$_\.LogName -eq \"(.*?)\" -and ","-LogName \"\g<1>\" | where {(",result)
             return result
 
     def generateBefore(self, parsed):
