@@ -58,12 +58,12 @@ class PowerShellBackend(SingleTextQueryBackend):
                 result += query
             if after is not None:
                 result += after
-                
+
             return result
 
     def generateBefore(self, parsed):
         if self.logname:
-            return "Get-WinEvent -LogName {} | where {".format(self.logname)
+            return "Get-WinEvent -LogName %s | where {" % self.logname
         return "Get-WinEvent | where {"
 
     def generateAfter(self, parsed):
