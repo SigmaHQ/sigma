@@ -165,14 +165,14 @@ class FieldMappingChain(object):
 
         for fieldname in current_fieldmappings:
             mapping = config.get_fieldmapping(fieldname)
-            if type(mapping) in (SimpleFieldMapping, ConditionalFieldMapping):
+            if type(mapping) in (SimpleFieldMapping,  MultiFieldMapping):
                 resolved_mapping = mapping.resolve_fieldname(fieldname)
                 if type(resolved_mapping) is list:
                     fieldmappings.update(resolved_mapping)
                 else:
                     fieldmappings.add(resolved_mapping)
-            elif type(mapping) == MultiFieldMapping:
-                fieldmappings.update(mapping.resolve_fieldname(fieldname))
+            elif type(mapping) == ConditionalFieldMapping:
+                fieldmappings.add(mapping)
             else:
                 raise TypeError("Type '{}' is not supported by FieldMappingChain".format(str(type(mapping))))
 
