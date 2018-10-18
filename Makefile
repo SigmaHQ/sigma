@@ -49,6 +49,7 @@ test-sigmac:
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t grep rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t fieldlist rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -t xpack-watcher -O output=plain -O es=es -O foobar rules/windows/builtin/win_susp_failed_logons_single_source.yml > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -t xpack-watcher -O output=json -O es=es -O foobar rules/windows/builtin/win_susp_failed_logons_single_source.yml > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -t es-qs -o $(TMPOUT) tests/collection_repeat.yml > /dev/null
 	! coverage run -a --include=$(COVSCOPE)  tools/sigmac -t xpack-watcher -O output=foobar -O es=es -O foobar rules/windows/builtin/win_susp_failed_logons_single_source.yml > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -t es-qs tests/not_existing.yml > /dev/null
