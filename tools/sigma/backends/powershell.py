@@ -23,6 +23,9 @@ class PowerShellBackend(SingleTextQueryBackend):
     """Converts Sigma rule into PowerShell event log cmdlets."""
     identifier = "powershell"
     active = True
+    options = (
+        ("csv", False, "Return the results in CSV format instead of Powershell objects", None),
+    )
 
     reEscape = re.compile('("|\\\\(?![*?])|\+)')
     reClear = None
@@ -37,6 +40,8 @@ class PowerShellBackend(SingleTextQueryBackend):
     notNullExpression = "%s=\"*\""
     mapExpression = "$_.%s -eq %s"
     mapListsSpecialHandling = True
+
+    logname = None
 
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
@@ -54,24 +59,16 @@ class PowerShellBackend(SingleTextQueryBackend):
             if after is not None:
                 result += after
 
-            # TODO fix dirty hack for logname due to performance impact when using the default query
-            """
-            Convert From
-               PS> Get-WinEvent | where { $_.LogName -eq "Security" -and ($_.ID -eq "4624" ..
-
-            into the following
-               PS> Get-WinEvent -LogName "Security"  | where { ($_.ID -eq "4624" ...
-
-            Search for "| where { $_.LogName -eq "Security" -and" and replace with "-LogName "Security" | where { ...
-
-            """
-            result = re.sub("\| where {\$_\.LogName -eq \"(.*?)\" -and ","-LogName \"\g<1>\" | where { ",result)
             return result
 
     def generateBefore(self, parsed):
+        if self.logname:
+            return "Get-WinEvent -LogName %s | where {" % self.logname
         return "Get-WinEvent | where {"
 
     def generateAfter(self, parsed):
+        if self.csv:
+            return " | ConvertTo-CSV -NoTypeInformation"
         return ""
 
     def generateNode(self, node):
@@ -112,9 +109,7 @@ class PowerShellBackend(SingleTextQueryBackend):
         key, value = node
         if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
             if key in ("LogName","source"):
-                if key == "source":
-                    key = "LogName"
-                return self.mapExpression % (key, self.generateValueNode(value, True))
+                self.logname = value
             elif key in ("ID", "EventID"):
                 if key == "EventID":
                     key = "ID"

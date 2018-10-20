@@ -25,7 +25,7 @@ test-sigmac:
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t logpoint rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t wdatp rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-dsl rules/ > /dev/null
-	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t powershell rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t powershell -c tools/config/powershell-windows-all.yml -Ocsv rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t arcsight -c tools/config/arcsight.yml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t qradar -c tools/config/arcsight.yml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t qualys -c tools/config/qualys.yml rules/ > /dev/null
@@ -49,7 +49,8 @@ test-sigmac:
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t grep rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t fieldlist rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -t xpack-watcher -O output=plain -O es=es -O foobar rules/windows/builtin/win_susp_failed_logons_single_source.yml > /dev/null
-	coverage run -a --include=$(COVSCOPE) tools/sigmac -t es-qs -o $(TMPOUT) tests/collection_repeat.yml > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -t xpack-watcher -O output=json -O es=es -O foobar rules/windows/builtin/win_susp_failed_logons_single_source.yml > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -t es-qs -o $(TMPOUT) - < tests/collection_repeat.yml > /dev/null
 	! coverage run -a --include=$(COVSCOPE)  tools/sigmac -t xpack-watcher -O output=foobar -O es=es -O foobar rules/windows/builtin/win_susp_failed_logons_single_source.yml > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -t es-qs tests/not_existing.yml > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -t es-qs tests/invalid_yaml.yml > /dev/null
