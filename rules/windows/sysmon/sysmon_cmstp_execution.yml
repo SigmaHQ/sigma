@@ -1,0 +1,39 @@
+title: CMSTP Execution
+status: stable
+description: Detects various indicators of Microsoft Connection Manager Profile Installer execution
+tags:
+    - attack.defense_evasion
+    - attack.execution
+    - attack.t1191
+    - attack.g0069
+author: Nik Seetharaman
+references:
+    - http://www.endurant.io/cmstp/detecting-cmstp-enabled-code-execution-and-uac-bypass-with-sysmon/
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    # CMSTP Spawning Child Process
+    selection1:
+        EventID: 1
+        ParentImage: '*\cmstp.exe'
+    # Registry Object Add
+    selection2:
+        EventID: 12
+        TargetObject: '*\cmmgr32.exe*'
+    # Registry Object Value Set
+    selection3:
+        EventID: 13
+        TargetObject: '*\cmmgr32.exe*'
+    # Process Access Call Trace
+    selection4:
+        EventID: 10
+        CallTrace: '*cmlua.dll*'
+    condition: 1 of them
+fields:
+    - CommandLine
+    - ParentCommandLine
+    - Details
+falsepositives:
+    - Legitimate CMSTP use (unlikely in modern enterprise environments)
+level: high

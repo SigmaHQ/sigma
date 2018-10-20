@@ -1,0 +1,26 @@
+title: Mimikatz DC Sync
+description: Detects Mimikatz DC sync security events
+status: experimental
+date: 2018/06/03
+author: Benjamin Delpy, Florian Roth
+references:
+    - https://twitter.com/gentilkiwi/status/1003236624925413376
+    - https://gist.github.com/gentilkiwi/dcc132457408cf11ad2061340dcb53c2
+tags:
+    - attack.credential_access
+    - attack.s0002
+    - attack.t1003
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4662
+        Properties: 
+            - '*Replicating Directory Changes All*'
+            - '*1131f6ad-9c07-11d1-f79f-00c04fc2dcd2*'
+    condition: selection
+falsepositives:
+    - Unkown
+level: critical
+
