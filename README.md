@@ -136,6 +136,30 @@ For development (e.g. execution of integration tests with `make` and packaging),
 pip3 install -r tools/requirements-devel.txt
 ```
 
+## Sigma2MISP
+
+Import Sigma rules to MISP events. Depends on PyMISP.
+
+Parameters that aren't changed frequently (`--url`, `--key`) can be put without the prefixing dashes `--` into a file
+and included with `@filename` as parameter on the command line.
+
+Example:
+*misp.conf*:
+```
+url https://host
+key foobarfoobarfoobarfoobarfoobarfoobarfoo 
+```
+
+Load Sigma rule into MISP event 1234:
+```
+sigma2misp @misp.conf --event 1234 sigma_rule.py
+```
+
+Load Sigma rules in directory sigma_rules/ into one newly created MISP event with info set to *Test Event*:
+```
+sigma2misp @misp.conf --same-event --info "Test Event" -r sigma_rules/
+```
+
 ## Evt2Sigma
 
 [Evt2Sigma](https://github.com/Neo23x0/evt2sigma) helps you with the rule creation. It generates a Sigma rule from a log entry. 
