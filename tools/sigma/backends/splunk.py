@@ -41,6 +41,8 @@ class SplunkBackend(SingleTextQueryBackend):
     mapListValueExpression = "%s IN %s"
 
     def generateMapItemListNode(self, key, value):
+        if not set([type(val) for val in value]).issubset({str, int}):
+            raise TypeError("List values must be strings or numbers")
         return "(" + (" OR ".join(['%s=%s' % (key, self.generateValueNode(item)) for item in value])) + ")"
 
     def generateAggregation(self, agg):
