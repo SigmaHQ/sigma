@@ -5,17 +5,21 @@ status: experimental
 references:
     - Internal Research
 author: Florian Roth
-date: 2018/08/26
+date: 2018/10/30
 tags:
     - attack.defense_evasion
     - attack.t1036
     - attack.credential_access
     - attack.t1003
 detection:
-    selection:
+    # Procdump on lsass.exe
+    selection1:
         CommandLine:
-            - "* -ma lsass.exe*"
-    condition: selection
+            - "* -ma *"
+    selection2: 
+        CommandLine:
+            - '* lsass.exe*'
+    condition: selection1 and selection2
 falsepositives: 
     - Unlikely, because no one should dump an lsass process memory
     - Another tool that uses the command line switches of Procdump
