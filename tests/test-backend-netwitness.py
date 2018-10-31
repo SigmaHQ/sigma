@@ -31,7 +31,7 @@ queries = asyncio.Queue()
 # sigmac runner coroutinne
 async def run_sigmac():
     sigmac = asyncio.create_subprocess_exec(
-            sigmac_cmd, "-t", "netwitness", "-v", "-I", "-r", "rules/", "--config", "tools/config/netwitness.yml",
+            sigmac_cmd, "-t", "netwitness", "-v", "-I", "-r", "rules/",
             stdout=asyncio.subprocess.PIPE,
             )
     print("* Launching sigmac")
@@ -47,7 +47,6 @@ async def run_sigmac():
             break
         else:
             strline = str(line, 'utf-8').rstrip()
-            print(strline)
             if strline.startswith(sigmac_processing_prefix):
                 cur_rule = strline[len(sigmac_processing_prefix):]
             else:
