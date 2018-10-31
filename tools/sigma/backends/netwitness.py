@@ -31,13 +31,13 @@ class NetWitnessBackend(SingleTextQueryBackend):
     orToken = " || "
     notToken = "NOT"
     subExpression = "(%s)"
-    listExpression = "%s"
+    listExpression = "(%s)"
     listSeparator = ", "
     valueExpression = "\'%s\'"
     keyExpression = "%s"
     nullExpression = "%s exists"
     notNullExpression = "%s exists"
-    mapExpression = "%s=%s"
+    mapExpression = "(%s=%s)"
     mapListsSpecialHandling = True
 
     def __init__(self, *args, **kwargs):
@@ -74,10 +74,10 @@ class NetWitnessBackend(SingleTextQueryBackend):
                 value = re.sub('([".^$]|\\\\(?![*?]))', '\\\\\g<1>', value)
                 value = re.sub('\\*', '.*', value)
                 value = re.sub('\\?', '.', value)
-                return "%s regex %s" %(key, self.generateValueNode(value, True))
+                return "(%s regex %s)" %(key, self.generateValueNode(value, True))
             elif type(value) == str and "*" in value:
                 value = re.sub("(\*\\\\)|(\*)", "", value)
-                return "%s contains %s" % (key, self.generateValueNode(value, True))
+                return "(%s contains %s)" % (key, self.generateValueNode(value, True))
             elif type(value) in (str, int):
                 return self.mapExpression % (key, self.generateValueNode(value, True))
             else:
