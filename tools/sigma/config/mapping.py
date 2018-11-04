@@ -135,6 +135,9 @@ class ConditionalFieldMapping(SimpleFieldMapping):
         else:
             return fieldname
 
+    def __str__(self):
+        return "ConditionalFieldMapping: {} -> {}".format(self.source, self.target)
+
 # Field mappimg chain
 class FieldMappingChain(object):
     """
@@ -212,3 +215,6 @@ class FieldMappingChain(object):
                     else:
                         mappings.add(resolved_mapping)
             return list(mappings)
+
+    def __str__(self):
+        return "FieldMappingChain: {}".format(self.fieldmappings)
