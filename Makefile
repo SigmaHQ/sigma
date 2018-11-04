@@ -14,7 +14,10 @@ test-yaml:
 	yamllint rules
 
 test-sigmac:
+	coverage run -a --include=$(COVSCOPE) tools/sigmac
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -h
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -l
+	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvd -t es-qs rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-qs rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -O rulecomment -rvdI -t es-qs rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t kibana rules/ > /dev/null

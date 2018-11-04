@@ -63,5 +63,5 @@ class SimpleParser:
         if self.state not in self.finalstates:
             raise SigmaParseError("Unexpected end of aggregation expression, state=%d" % (self.state))
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return "[ Parsed: %s ]" % (" ".join(["%s=%s" % (key, val) for key, val in self.__dict__.items() ]))

@@ -79,7 +79,7 @@ class SigmaConditionToken:
         else:
             raise NotImplementedError("SigmaConditionToken can only be compared against token type constants")
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return "[ Token: %s: '%s' ]" % (self.tokenstr[self.type], self.matched)
 
 class SigmaConditionTokenizer:
@@ -126,7 +126,7 @@ class SigmaConditionTokenizer:
         else:
             raise TypeError("SigmaConditionTokenizer constructor expects string or list, got %s" % (type(condition)))
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return " ".join([str(token) for token in self.tokens])
 
     def __iter__(self):
@@ -160,7 +160,7 @@ class ParseTreeNode:
     def __init__(self):
         raise NotImplementedError("ConditionBase is no usable class")
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return "[ %s: %s ]" % (self.__doc__, str([str(item) for item in self.items]))
 
 class ConditionBase(ParseTreeNode):
@@ -347,7 +347,7 @@ class SigmaConditionParser:
 
         return query_cond
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return str(self.parsedSearch)
 
     def __len__(self):

@@ -47,7 +47,7 @@ class SimpleFieldMapping:
     def resolve_fieldname(self, fieldname):
         return self.target
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return "SimpleFieldMapping: {} -> {}".format(self.source, self.target)
 
 class MultiFieldMapping(SimpleFieldMapping):
@@ -61,7 +61,7 @@ class MultiFieldMapping(SimpleFieldMapping):
             cond.add((fieldname, value))
         return NodeSubexpression(cond)
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return "MultiFieldMapping: {} -> [{}]".format(self.source, ", ".join(self.target))
 
 class ConditionalFieldMapping(SimpleFieldMapping):
@@ -135,7 +135,7 @@ class ConditionalFieldMapping(SimpleFieldMapping):
         else:
             return fieldname
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return "ConditionalFieldMapping: {} -> {}".format(self.source, self.target)
 
 # Field mappimg chain
@@ -217,5 +217,5 @@ class FieldMappingChain(object):
                         mappings.add(resolved_mapping)
             return list(mappings)
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return "FieldMappingChain: {}".format(self.fieldmappings)

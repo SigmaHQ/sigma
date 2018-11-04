@@ -263,5 +263,5 @@ class SigmaLogsourceConfiguration:
         if searched:
             return True
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return "[ LogSourceConfiguration: %s %s %s indices: %s ]" % (self.category, self.product, self.service, str(self.index))
