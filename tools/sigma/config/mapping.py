@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from sigma.parser.condition import ConditionOR
+from sigma.parser.condition import ConditionOR, NodeSubexpression
 from .exceptions import SigmaConfigParseError, FieldMappingError
 
 # Field Mapping Definitions
@@ -59,7 +59,7 @@ class MultiFieldMapping(SimpleFieldMapping):
         cond = ConditionOR()
         for fieldname in self.target:
             cond.add((fieldname, value))
-        return cond
+        return NodeSubexpression(cond)
 
     def __str__(self):
         return "MultiFieldMapping: {} -> [{}]".format(self.source, ", ".join(self.target))
@@ -125,7 +125,7 @@ class ConditionalFieldMapping(SimpleFieldMapping):
             cond = ConditionOR()
             for target in targets:
                 cond.add((target, value))
-            return cond
+            return NodeSubexpression(cond)
         else:                       # no mapping found
             return (key, value)
 
@@ -185,6 +185,7 @@ class FieldMappingChain(object):
             self.fieldmappings = fieldmappings
 
     def resolve(self, key, value, sigmaparser):
+        print(key, value)
         if type(self.fieldmappings) == str:     # one field mapping
             return (self.fieldmappings, value)
         elif isinstance(self.fieldmappings, SimpleFieldMapping):
@@ -196,7 +197,7 @@ class FieldMappingChain(object):
                     cond.add((mapping, value))
                 elif isinstance(mapping, SimpleFieldMapping):
                     cond.add(mapping.resolve(key, value, sigmaparser))
-            return cond
+            return NodeSubexpression(cond)
 
     def resolve_fieldname(self, fieldname):
         if type(self.fieldmappings) == str:     # one field mapping
