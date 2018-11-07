@@ -40,33 +40,6 @@ class NetWitnessBackend(SingleTextQueryBackend):
     mapExpression = "(%s=%s)"
     mapListsSpecialHandling = True
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-
-    def generateNode(self, node):
-        if type(node) == sigma.parser.condition.ConditionAND:
-            return self.generateANDNode(node)
-        elif type(node) == sigma.parser.condition.ConditionOR:
-            return self.generateORNode(node)
-        elif type(node) == sigma.parser.condition.ConditionNOT:
-            return self.generateNOTNode(node)
-        elif type(node) == sigma.parser.condition.ConditionNULLValue:
-            return self.generateNULLValueNode(node)
-        elif type(node) == sigma.parser.condition.ConditionNotNULLValue:
-            return self.generateNotNULLValueNode(node)
-        elif type(node) == sigma.parser.condition.NodeSubexpression:
-            return self.generateSubexpressionNode(node)
-        elif type(node) == tuple:
-            return self.generateMapItemNode(node)
-        elif type(node) in (str, int):
-            return self.generateValueNode(node, False)
-        elif type(node) == list:
-            return self.generateListNode(node)
-        else:
-            raise TypeError("Node type %s was not expected in Sigma parse tree" % (str(type(node))))
-
-
     def generateMapItemNode(self, node):
         key, value = node
         if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
@@ -74,12 +47,12 @@ class NetWitnessBackend(SingleTextQueryBackend):
                 value = re.sub('([".^$]|\\\\(?![*?]))', '\\\\\g<1>', value)
                 value = re.sub('\\*', '.*', value)
                 value = re.sub('\\?', '.', value)
-                return "(%s regex %s)" %(key, self.generateValueNode(value, True))
+                return "(%s regex %s)" %(key, self.generateValueNode(value))
             elif type(value) == str and "*" in value:
                 value = re.sub("(\*\\\\)|(\*)", "", value)
-                return "(%s contains %s)" % (key, self.generateValueNode(value, True))
+                return "(%s contains %s)" % (key, self.generateValueNode(value))
             elif type(value) in (str, int):
-                return self.mapExpression % (key, self.generateValueNode(value, True))
+                return self.mapExpression % (key, self.generateValueNode(value))
             else:
                 return self.mapExpression % (key, self.generateNode(value))
         elif type(value) == list:
@@ -96,12 +69,12 @@ class NetWitnessBackend(SingleTextQueryBackend):
                 item = re.sub('([".^$]|\\\\(?![*?]))', '\\\\\g<1>', item)
                 item = re.sub('\\*', '.*', item)
                 item = re.sub('\\?', '.', item)
-                regexlist.append(self.generateValueNode(item, True))
+                regexlist.append(self.generateValueNode(item))
             elif type(item) == str and (item.endswith("*") or item.startswith("*")):
                 item = re.sub("(\*\\\\)|(\*)", "", item)
-                containlist.append(self.generateValueNode(item, True))
+                containlist.append(self.generateValueNode(item))
             else:
-                equallist.append(self.generateValueNode(item, True))
+                equallist.append(self.generateValueNode(item))
         fmtitems = list()
         if equallist:
             fmtitems.append("%s = %s" % (key, ", ".join(equallist)))
@@ -112,14 +85,8 @@ class NetWitnessBackend(SingleTextQueryBackend):
         fmtquery = "("+" || ".join(filter(None, fmtitems))+")"
         return fmtquery
 
-    def generateValueNode(self, node, keypresent):
+    def generateValueNode(self, node):
         return self.valueExpression % (str(node))
-
-    def generateNULLValueNode(self, node):
-        return self.nullExpression % (node.item)
-
-    def generateNotNULLValueNode(self, node):
-        return self.notNullExpression % (node.item)
 
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
@@ -129,7 +96,6 @@ class NetWitnessBackend(SingleTextQueryBackend):
         for parsed in sigmaparser.condparsed:
             query = self.generateQuery(parsed, sigmaparser)
             return query
-
 
     def generateQuery(self, parsed, sigmaparser):
         result = self.generateNode(parsed.parsedSearch)
