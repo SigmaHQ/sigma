@@ -271,14 +271,13 @@ class SigmaConditionOptimizer:
     """
     Optimizer for the parsed AST.
     """
-    def _dumpNode(self, node, indent=''):
+    def _dumpNode(self, node, indent=''):   # pragma: no cover
         """
         Recursively print the AST rooted at *node* for debugging.
         """
-        import sys
         if hasattr(node, 'items'):
             print("%s%s<%s>" % (indent, type(node).__name__,
-                                type(node.items).__name__), file=sys.stderr)
+                                type(node.items).__name__))
             if type(node.items) != list:
                 self._dumpNode(node.items, indent + '  ')
             else:
@@ -286,7 +285,7 @@ class SigmaConditionOptimizer:
                     self._dumpNode(item, indent + '  ')
         else:
             print("%s%s=%s" % (indent, type(node).__name__,
-                                       repr(node)), file=sys.stderr)
+                                       repr(node)))
         return node
 
     def _stripSubexpressionNode(self, node):
@@ -395,7 +394,6 @@ class SigmaConditionOptimizer:
 
         elif type(node) == ConditionNOT:
             assert(len(node.items) == 1)
-
             # NOT(NOT(X))                   =>  X
             if type(node.items[0]) == ConditionNOT:
                 assert(len(node.items[0].items) == 1)
@@ -453,15 +451,11 @@ class SigmaConditionOptimizer:
         OR(), or vice versa.  Nevertheless, it is safe to assume that this
         implementation performs poorly on very large expressions.
         """
-        #self._dumpNode(tree)
         tree = self._stripSubexpressionNode(tree)
-        #self._dumpNode(tree)
         changes = True
         while changes:
             tree, changes = self._optimizeNode(tree)
-            #self._dumpNode(tree)
         tree = self._unstripSubexpressionNode(tree)
-        #self._dumpNode(tree)
         return tree
 
 # Condition parser
