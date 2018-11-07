@@ -104,6 +104,7 @@ merges multiple YAML documents of a Sigma rule collection into simple Sigma rule
 * [ArcSight](https://software.microfocus.com/en-us/products/siem-security-information-event-management/overview)
 * [QRadar](https://www.ibm.com/de-de/marketplace/ibm-qradar-siem)
 * [Qualys](https://www.qualys.com/apps/threat-protection/)
+* [RSA NetWitness](https://www.rsa.com/en-us/products/threat-detection-response)
 * [PowerShell](https://docs.microsoft.com/en-us/powershell/scripting/getting-started/getting-started-with-windows-powershell?view=powershell-6)
 * [Grep](https://www.gnu.org/software/grep/manual/grep.html) with Perl-compatible regular expression support
 
