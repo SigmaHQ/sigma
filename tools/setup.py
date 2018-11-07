@@ -52,6 +52,7 @@ setup(
             'config/qualys.yml',
             'config/qradar.yml',
             'config/spark.yml',
+            'config/netwitness.yml',
             'config/splunk-windows-all.yml',
         ])],
     scripts=[
