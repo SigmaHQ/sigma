@@ -295,7 +295,7 @@ class SigmaConditionOptimizer:
         if type(node) == NodeSubexpression:
             assert(type(node.items) != list)
             return self._stripSubexpressionNode(node.items)
-        if hasattr(node, 'items'):
+        if hasattr(node, 'items') and type(node) is not ConditionNOT:
             node.items = list(map(self._stripSubexpressionNode, node.items))
         return node
 
