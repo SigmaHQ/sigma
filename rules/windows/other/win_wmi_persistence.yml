@@ -1,9 +1,14 @@
 title: WMI Persistence
 status: experimental
-description: Detects suspicious WMI event filter and command line event consumer based on event id 5861 (Windows 10, 2012 and higher)
+description: Detects suspicious WMI event filter and command line event consumer based on event id 5861 and 5859 (Windows 10, 2012 and higher)
 author: Florian Roth
 references:
     - https://twitter.com/mattifestation/status/899646620148539397
+    - https://www.eideon.com/2018-03-02-THL03-WMIBackdoors/
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.t1047
 logsource:
     product: windows
     service: wmi
@@ -11,10 +16,13 @@ detection:
     selection:
         EventID: 5861
     keywords:
+        - 'ActiveScriptEventConsumer'
         - 'CommandLineEventConsumer'
         - 'CommandLineTemplate'
         - 'Binding EventFilter'
-    condition: selection and 1 of keywords
+    selection2:
+        EventID: 5859
+    condition: selection and 1 of keywords or selection2
 falsepositives:
     - Unknown (data set is too small; further testing needed)
 level: high

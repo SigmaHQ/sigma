@@ -14,11 +14,9 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import yaml
 import re
-import logging
-
-logger = logging.getLogger(__name__)
+from .base import SimpleParser
+from .exceptions import SigmaParseError
 
 COND_NONE = 0
 COND_AND  = 1
@@ -26,188 +24,7 @@ COND_OR   = 2
 COND_NOT  = 3
 COND_NULL = 4
 
-class SigmaCollectionParser:
-    """
-    Parses a Sigma file that may contain multiple Sigma rules as different YAML documents.
-
-    Special processing of YAML document if 'action' attribute is set to:
-
-    * global: merges attributes from document in all following documents. Accumulates attributes from previous set_global documents
-    * reset: resets global attributes from previous set_global statements
-    * repeat: takes attributes from this YAML document, merges into previous rule YAML and regenerates the rule
-    """
-    def __init__(self, content, config=None, rulefilter=None):
-        if config is None:
-            from sigma.config import SigmaConfiguration
-            config = SigmaConfiguration()
-        self.yamls = yaml.safe_load_all(content)
-        globalyaml = dict()
-        self.parsers = list()
-        prevrule = None
-        for yamldoc in self.yamls:
-            action = None
-            try:
-                action = yamldoc['action']
-                del yamldoc['action']
-            except KeyError:
-                pass
-
-            if action == "global":
-                deep_update_dict(globalyaml, yamldoc)
-            elif action == "reset":
-                globalyaml = dict()
-            elif action == "repeat":
-                if prevrule is None:
-                    raise SigmaCollectionParseError("action 'repeat' is only applicable after first valid Sigma rule")
-                newrule = prevrule.copy()
-                deep_update_dict(newrule, yamldoc)
-                if rulefilter is None or rulefilter is not None and not rulefilter.match(newrule):
-                    self.parsers.append(SigmaParser(newrule, config))
-                    prevrule = newrule
-            else:
-                deep_update_dict(yamldoc, globalyaml)
-                if rulefilter is None or rulefilter is not None and rulefilter.match(yamldoc):
-                    self.parsers.append(SigmaParser(yamldoc, config))
-                    prevrule = yamldoc
-        self.config = config
-
-    def generate(self, backend):
-        """Calls backend for all parsed rules"""
-        for parser in self.parsers:
-            backend.generate(parser)
-
-    def __iter__(self):
-        return iter([parser.parsedyaml for parser in self.parsers])
-
-def deep_update_dict(dest, src):
-    for key, value in src.items():
-        if isinstance(value, dict) and key in dest and isinstance(dest[key], dict):     # source is dict, destination key already exists and is dict: merge
-                deep_update_dict(dest[key], value)
-        else:
-            dest[key] = value
-
-class SigmaCollectionParseError(Exception):
-    pass
-
-class SigmaParser:
-    """Parse a Sigma rule (definitions, conditions and aggregations)"""
-    def __init__(self, sigma, config):
-        self.definitions = dict()
-        self.values = dict()
-        self.config = config
-        self.parsedyaml = sigma
-        self.parse_sigma()
-
-    def parse_sigma(self):
-        try:    # definition uniqueness check
-            for definitionName, definition in self.parsedyaml["detection"].items():
-                self.definitions[definitionName] = definition
-                self.extract_values(definition)     # builds key-values-table in self.values
-        except KeyError:
-            raise SigmaParseError("No detection definitions found")
-
-        try:    # tokenization
-            conditions = self.parsedyaml["detection"]["condition"]
-            self.condtoken = list()     # list of tokenized conditions
-            if type(conditions) == str:
-                self.condtoken.append(SigmaConditionTokenizer(conditions))
-            elif type(conditions) == list:
-                for condition in conditions:
-                    self.condtoken.append(SigmaConditionTokenizer(condition))
-        except KeyError:
-            raise SigmaParseError("No condition found")
-
-        self.condparsed = list()        # list of parsed conditions
-        for tokens in self.condtoken:
-            logger.debug("Condition tokens: %s", str(tokens))
-            condparsed = SigmaConditionParser(self, tokens)
-            logger.debug("Condition parse tree: %s", str(condparsed))
-            self.condparsed.append(condparsed)
-
-    def parse_definition_byname(self, definitionName, condOverride=None):
-        try:
-            definition = self.definitions[definitionName]
-        except KeyError as e:
-            raise SigmaParseError("Unknown definition '%s'" % definitionName) from e
-        return self.parse_definition(definition, condOverride)
-
-    def parse_definition(self, definition, condOverride=None):
-        if type(definition) not in (dict, list):
-            raise SigmaParseError("Expected map or list, got type %s: '%s'" % (type(definition), str(definition)))
-
-        if type(definition) == list:    # list of values or maps
-            if condOverride:    # condition given through rule detection condition, e.g. 1 of x
-                cond = condOverride()
-            else:               # no condition given, use default from spec
-                cond = ConditionOR()
-
-            subcond = None
-            for value in definition:
-                if type(value) in (str, int):
-                    cond.add(value)
-                elif type(value) in (dict, list):
-                    cond.add(self.parse_definition(value))
-                else:
-                    raise SigmaParseError("Definition list may only contain plain values or maps")
-        elif type(definition) == dict:      # map
-            cond = ConditionAND()
-            for key, value in definition.items():
-                mapping = self.config.get_fieldmapping(key)
-                if value == None:
-                    fields = mapping.resolve_fieldname(key)
-                    if type(fields) == str:
-                        fields = [ fields ]
-                    for field in fields:
-                        cond.add(ConditionNULLValue(val=field))
-                elif value == "not null":
-                    fields = mapping.resolve_fieldname(key)
-                    if type(fields) == str:
-                        fields = [ fields ]
-                    for field in fields:
-                        cond.add(ConditionNotNULLValue(val=field))
-                else:
-                    cond.add(mapping.resolve(key, value, self))
-
-        return cond
-
-    def extract_values(self, definition):
-        """Extract all values from map key:value pairs info self.values"""
-        if type(definition) == list:     # iterate through items of list
-            for item in definition:
-                self.extract_values(item)
-        elif type(definition) == dict:  # add dict items to map
-            for key, value in definition.items():
-                self.add_value(key, value)
-
-    def add_value(self, key, value):
-        """Add value to values table, create key if it doesn't exist"""
-        if key in self.values:
-            self.values[key].add(str(value))
-        else:
-            self.values[key] = { str(value) }
-
-    def get_logsource(self):
-        """Returns logsource configuration object for current rule"""
-        try:
-            ls_rule = self.parsedyaml['logsource']
-        except KeyError:
-            return None
-
-        try:
-            category = ls_rule['category']
-        except KeyError:
-            category = None
-        try:
-            product = ls_rule['product']
-        except KeyError:
-            product = None
-        try:
-            service = ls_rule['service']
-        except KeyError:
-            service = None
-
-        return self.config.get_logsource(category, product, service)
-
+# Condition Tokenizer
 class SigmaConditionToken:
     """Token of a Sigma condition expression"""
     TOKEN_AND    = 1
@@ -283,7 +100,7 @@ class SigmaConditionTokenizer:
             (SigmaConditionToken.TOKEN_AND,    re.compile("and", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_OR,     re.compile("or", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_NOT,    re.compile("not", re.IGNORECASE)),
-            (SigmaConditionToken.TOKEN_ID,     re.compile("\\w+")),
+            (SigmaConditionToken.TOKEN_ID,     re.compile("[\\w*]+")),
             (SigmaConditionToken.TOKEN_LPAR,   re.compile("\\(")),
             (SigmaConditionToken.TOKEN_RPAR,   re.compile("\\)")),
             ]
@@ -336,9 +153,6 @@ class SigmaConditionTokenizer:
 
     def index(self, item):
         return self.tokens.index(item)
-
-class SigmaParseError(Exception):
-    pass
 
 ### Parse Tree Node Classes ###
 class ParseTreeNode:
@@ -416,25 +230,240 @@ class NodeSubexpression(ParseTreeNode):
     def __init__(self, subexpr):
         self.items = subexpr
 
-# Parse tree converters: convert something into one of the parse tree node classes defined above
-def convertAllOf(sigma, op, val):
-    """Convert 'all of x' into ConditionAND"""
-    return NodeSubexpression(sigma.parse_definition_byname(val.matched, ConditionAND))
+# Parse tree generators: generate parse tree nodes from extended conditions
+def generateXOf(sigma, val, condclass):
+    """
+    Generic implementation of (1|all) of x expressions.
+        
+    * condclass across all list items if x is name of definition
+    * condclass across all definitions if x is keyword 'them'
+    * condclass across all matching definition if x is wildcard expression, e.g. 'selection*'
+    """
+    if val.matched == "them":           # OR across all definitions
+        cond = condclass()
+        for definition in sigma.definitions.values():
+            cond.add(NodeSubexpression(sigma.parse_definition(definition)))
+        return NodeSubexpression(cond)
+    elif val.matched.find("*") > 0:     # OR across all matching definitions
+        cond = condclass()
+        reDefPat = re.compile("^" + val.matched.replace("*", ".*") + "$")
+        for name, definition in sigma.definitions.items():
+            if reDefPat.match(name):
+                cond.add(NodeSubexpression(sigma.parse_definition(definition)))
+        return NodeSubexpression(cond)
+    else:                               # OR across all items of definition
+        return NodeSubexpression(sigma.parse_definition_byname(val.matched, condclass))
 
-def convertOneOf(sigma, op, val):
-    """Convert '1 of x' into ConditionOR"""
-    return NodeSubexpression(sigma.parse_definition_byname(val.matched, ConditionOR))
+def generateAllOf(sigma, op, val):
+    """Convert 'all of x' expressions into ConditionAND"""
+    return generateXOf(sigma, val, ConditionAND)
+
+def generateOneOf(sigma, op, val):
+    """Convert '1 of x' expressions into ConditionOR"""
+    return generateXOf(sigma, val, ConditionOR)
 
 def convertId(sigma, op):
     """Convert search identifiers (lists or maps) into condition nodes according to spec defaults"""
     return NodeSubexpression(sigma.parse_definition_byname(op.matched))
 
-# Condition parser class
+# Optimizer
+class SigmaConditionOptimizer:
+    """
+    Optimizer for the parsed AST.
+    """
+    def _dumpNode(self, node, indent=''):   # pragma: no cover
+        """
+        Recursively print the AST rooted at *node* for debugging.
+        """
+        if hasattr(node, 'items'):
+            print("%s%s<%s>" % (indent, type(node).__name__,
+                                type(node.items).__name__))
+            if type(node.items) != list:
+                self._dumpNode(node.items, indent + '  ')
+            else:
+                for item in node.items:
+                    self._dumpNode(item, indent + '  ')
+        else:
+            print("%s%s=%s" % (indent, type(node).__name__,
+                                       repr(node)))
+        return node
+
+    def _stripSubexpressionNode(self, node):
+        """
+        Recursively strips all subexpressions (i.e. brackets) from the AST.
+        """
+        if type(node) == NodeSubexpression:
+            assert(type(node.items) != list)
+            return self._stripSubexpressionNode(node.items)
+        if hasattr(node, 'items') and type(node) is not ConditionNOT:
+            node.items = list(map(self._stripSubexpressionNode, node.items))
+        return node
+
+    def _unstripSubexpressionNode(self, node):
+        """
+        Recursively adds brackets around AND and OR operations in the AST.
+        """
+        if type(node) in (ConditionAND, ConditionOR):
+            newnode = NodeSubexpression(node)
+            node.items = list(map(self._unstripSubexpressionNode, node.items))
+            return newnode
+        return node
+
+    def _ordered_uniq(self, l):
+        """
+        Remove duplicate entries in list *l* while preserving order.
+
+        Used to be fast before it needed to work around list instead of
+        tuple being used for lists within definitions in the AST.
+        """
+        seen = set()
+        #return [x for x in l if x not in seen and not seen.add(x)]
+        uniq = []
+        for x in l:
+            if type(x) == tuple and type(x[1]) == list:
+                x = (x[0], tuple(x[1]))
+            if x not in seen and not seen.add(x):
+                uniq.append(x)
+        out = []
+        for x in uniq:
+            if type(x) == tuple and type(x[1]) == tuple:
+                out.append((x[0], list(x[1])))
+            else:
+                out.append(x)
+        return out
+
+    def _optimizeNode(self, node, changes=False):
+        """
+        Recursively optimize the AST rooted at *node* once.  Returns the new
+        root node and a boolean indicating if the tree was changed in this
+        invocation or any of the recursive sub-invocations.
+
+        You MUST remove all subexpression nodes from the AST before calling
+        this function.  Subexpressions are implicit around AND/OR nodes.
+        """
+        if type(node) in (ConditionOR, ConditionAND):
+            # Remove empty OR(X), AND(X)
+            if len(node.items) == 0:
+                return None, True
+            if None in node.items:
+                node.items = [item for item in node.items if item != None]
+                return self._optimizeNode(node, changes=True)
+
+            # OR(X), AND(X)                 =>  X
+            if len(node.items) == 1:
+                return self._optimizeNode(node.items[0], changes=True)
+
+            # OR(X, X, ...), AND(X, X, ...) =>  OR(X, ...), AND(X, ...)
+            uniq_items = self._ordered_uniq(node.items)
+            if len(uniq_items) < len(node.items):
+                node.items = uniq_items
+                return self._optimizeNode(node, changes=True)
+
+            # OR(X, OR(Y))                  =>  OR(X, Y)
+            if any(type(child) == type(node) for child in node.items) and \
+               all(type(child) in (type(node), tuple) for child in node.items):
+                newitems = []
+                for child in node.items:
+                    if hasattr(child, 'items'):
+                        newitems.extend(child.items)
+                    else:
+                        newitems.append(child)
+                node.items = newitems
+                return self._optimizeNode(node, changes=True)
+
+            # OR(AND(X, ...), AND(X, ...))  =>  AND(X, OR(AND(...), AND(...)))
+            if type(node) == ConditionOR:
+                othertype = ConditionAND
+            else:
+                othertype = ConditionOR
+            if all(type(child) == othertype for child in node.items):
+                promoted = []
+                for cand in node.items[0]:
+                    if all(cand in child for child in node.items[1:]):
+                        promoted.append(cand)
+                if len(promoted) > 0:
+                    for child in node.items:
+                        for cand in promoted:
+                            child.items.remove(cand)
+                    newnode = othertype()
+                    newnode.items = promoted
+                    newnode.add(node)
+                    return self._optimizeNode(newnode, changes=True)
+
+            # fallthrough
+
+        elif type(node) == ConditionNOT:
+            assert(len(node.items) == 1)
+            # NOT(NOT(X))                   =>  X
+            if type(node.items[0]) == ConditionNOT:
+                assert(len(node.items[0].items) == 1)
+                return self._optimizeNode(node.items[0].items[0], changes=True)
+
+            # NOT(ConditionNULLValue)       =>  ConditionNotNULLValue
+            if type(node.items[0]) == ConditionNULLValue:
+                newnode = ConditionNotNULLValue(val=node.items[0].items[0])
+                return self._optimizeNode(newnode, changes=True)
+
+            # NOT(ConditionNotNULLValue)    =>  ConditionNULLValue
+            if type(node.items[0]) == ConditionNotNULLValue:
+                newnode = ConditionNULLValue(val=node.items[0].items[0])
+                return self._optimizeNode(newnode, changes=True)
+
+            # fallthrough
+
+        else:
+            return node, changes
+
+        itemresults = [self._optimizeNode(item, changes) for item in node.items]
+        node.items = [res[0] for res in itemresults]
+        if any(res[1] for res in itemresults):
+            changes = True
+        return node, changes
+
+    def optimizeTree(self, tree):
+        """
+        Optimize the boolean expressions in the AST rooted at *tree*.
+
+        The main idea behind optimizing the AST is that less repeated terms is
+        generally better for backend performance.  This is especially relevant
+        to backends that do not perform any query language optimization down
+        the road, such as those that generate code.
+
+        A common example for when these suboptimal rules actually occur in
+        practice is when a rule has multiple alternative detections that are
+        OR'ed together in the condition, and all of the detections include a
+        common element, such as the same EventID.
+
+        The following optimizations are currently performed:
+        -   Removal of empty OR(), AND()
+        -   OR(X), AND(X)                 =>  X
+        -   OR(X, X, ...), AND(X, X, ...) =>  OR(X, ...), AND(X, ...)
+        -   OR(X, OR(Y))                  =>  OR(X, Y)
+        -   OR(AND(X, ...), AND(X, ...))  =>  AND(X, OR(AND(...), AND(...)))
+        -   NOT(NOT(X))                   =>  X
+        -   NOT(ConditionNULLValue)       =>  ConditionNotNULLValue
+        -   NOT(ConditionNotNULLValue)    =>  ConditionNULLValue
+
+        Boolean logic simplification is NP-hard.  To avoid backtracking,
+        speculative transformations that may or may not lead to a more optimal
+        expression were not implemented.  These include for example factoring
+        out common operands that are not in all, but only some AND()s within an
+        OR(), or vice versa.  Nevertheless, it is safe to assume that this
+        implementation performs poorly on very large expressions.
+        """
+        tree = self._stripSubexpressionNode(tree)
+        changes = True
+        while changes:
+            tree, changes = self._optimizeNode(tree)
+        tree = self._unstripSubexpressionNode(tree)
+        return tree
+
+# Condition parser
 class SigmaConditionParser:
     """Parser for Sigma condition expression"""
     searchOperators = [     # description of operators: (token id, number of operands, parse tree node class) - order == precedence
-            (SigmaConditionToken.TOKEN_ALL, 1, convertAllOf),
-            (SigmaConditionToken.TOKEN_ONE, 1, convertOneOf),
+            (SigmaConditionToken.TOKEN_ALL, 1, generateAllOf),
+            (SigmaConditionToken.TOKEN_ONE, 1, generateOneOf),
             (SigmaConditionToken.TOKEN_ID,  0, convertId),
             (SigmaConditionToken.TOKEN_NOT, 1, ConditionNOT),
             (SigmaConditionToken.TOKEN_AND, 2, ConditionAND),
@@ -444,6 +473,7 @@ class SigmaConditionParser:
     def __init__(self, sigmaParser, tokens):
         self.sigmaParser = sigmaParser
         self.config = sigmaParser.config
+        self._optimizer = SigmaConditionOptimizer()
 
         if SigmaConditionToken.TOKEN_PIPE in tokens:    # Condition contains atr least one aggregation expression
             pipepos = tokens.index(SigmaConditionToken.TOKEN_PIPE)
@@ -517,64 +547,15 @@ class SigmaConditionParser:
                 cond.add(querycond)
                 querycond = cond
 
-        return querycond
+        return self._optimizer.optimizeTree(querycond)
 
     def __str__(self):
         return str(self.parsedSearch)
 
     def __len__(self):
         return len(self.parsedSearch)
-
-class SimpleParser:
-    """
-    Rule-defined parser that converts a token stream into a Python object.
-
-    Rules are defined in the class property parsingrules, a list of dict of tuples with the following format:
-    [ { token_0_0: parsing_rule_0_0, token_0_1: parsing_rule_0_1, ..., token_0_n: parsing_rule_0_n } , ... , { token_m_0: parsing_rule_m_0, ... } ]
-
-    Each list index of parsing rules represents a parser state.
-    Each parser state is defined by a dict with associates a token with a rule definition.
-    The rule definition is a tuple that defines what is done next when the parser encounters a token in the current parser state:
-
-    ( storage attribute, transformation function, next ruleset)
-
-    * storage attribute: the name of the object attribute that is used for storage of the attribute
-    * transformation method: name of an object method that is called before storage. It gets a parameter and returns the value that is stored
-    * next state: next parser state
-
-    A None value means that the action (transformation, storage or state change) is not conducted.
-
-    A negative state has the special meaning that no further token is expected and may be used as return value.
-    The set or list finalstates contains valid final states. The parser verifies after the last token that it
-    has reached one of these states. if not, a parse error is raised.
-    """
-
-    def __init__(self, tokens, init_state=0):
-        self.state = init_state
-
-        for token in tokens:
-            if self.state < 0:
-                raise SigmaParseError("No further token expected, but read %s" % (str(token)))
-            try:
-                rule = self.parsingrules[self.state][token.type]
-            except KeyError as e:
-                raise SigmaParseError("Unexpected token %s at %d in aggregation expression" % (str(token), token.pos)) from e
-
-            value = token.matched
-            trans_value = value
-            if rule[1] != None:
-                trans_value = getattr(self, rule[1])(value)
-            if rule[0] != None:
-                setattr(self, rule[0], trans_value)
-                setattr(self, rule[0] + "_notrans", value)
-            if rule[2] != None:
-                self.state = rule[2]
-        if self.state not in self.finalstates:
-            raise SigmaParseError("Unexpected end of aggregation expression, state=%d" % (self.state))
-
-    def __str__(self):
-        return "[ Parsed: %s ]" % (" ".join(["%s=%s" % (key, val) for key, val in self.__dict__.items() ]))
  
+# Aggregation parser
 class SigmaAggregationParser(SimpleParser):
     """Parse Sigma aggregation expression and provide parsed data"""
     parsingrules = [
@@ -645,7 +626,7 @@ class SigmaAggregationParser(SimpleParser):
     def __init__(self, tokens, parser, config):
         self.parser = parser
         self.config = config
-        self.aggfield = ""
+        self.aggfield = None
         self.groupfield = None
         super().__init__(tokens)
 
@@ -680,6 +661,3 @@ class SigmaAggregationParser(SimpleParser):
 
     def set_exclude(self, name):
         self.current = self.exclude
-
-    def trans_timeframe(self, name):
-        return self.parser.parsedyaml["detection"][name]

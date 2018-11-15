@@ -1,0 +1,43 @@
+---
+action: global
+title: Suspicious Encoded PowerShell Command Line
+description: Detects suspicious powershell process starts with base64 encoded commands
+status: experimental
+references:
+    - https://app.any.run/tasks/6217d77d-3189-4db2-a957-8ab239f3e01e
+author: Florian Roth
+date: 2018/09/03
+detection:
+    selection:
+        CommandLine:
+            # Command starts with '$' symbol
+            - '* -e JAB*'
+            - '* -enc JAB*'
+            - '* -encodedcommand JAB*'
+    # Google Rapid Response
+    falsepositive1:
+        ImagePath: '*\GRR\*'
+    # PowerSponse deployments
+    falsepositive2: 
+        CommandLine: '* -ExecutionPolicy remotesigned *'
+    condition: selection and not 1 of falsepositive*
+falsepositives: 
+    - GRR powershell hacks
+    - PowerSponse Deployments
+level: high
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+---
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection:
+        EventID: 4688
+

@@ -4,6 +4,10 @@ description: Detects various anomalies in relation to regsvr32.exe
 author: Florian Roth
 references:
     - https://subt0x10.blogspot.de/2017/04/bypass-application-whitelisting-script.html
+tags:
+    - attack.t1117
+    - attack.defense_evasion
+    - attack.execution
 logsource:
     product: windows
     service: sysmon
@@ -22,7 +26,7 @@ detection:
     selection3:
         EventID: 1
         Image: '*\regsvr32.exe'
-        Commandline: 
+        CommandLine: 
             - '*/i:http* scrobj.dll'
             - '*/i:ftp* scrobj.dll'
     # Regsvr32.exe spawned wscript.exe process - indicator of COM scriptlet
@@ -31,7 +35,12 @@ detection:
         EventID: 1
         Image: '*\wscript.exe'
         ParentImage: '*\regsvr32.exe'
-    condition: selection1 or selection2 or selection3 or selection4
+    # https://twitter.com/danielhbohannon/status/974321840385531904
+    selection5:
+        EventID: 1
+        Image: '*\EXCEL.EXE'
+        CommandLine: '*..\..\..\Windows\System32\regsvr32.exe *'
+    condition: 1 of them
 fields:
     - CommandLine
     - ParentCommandLine
