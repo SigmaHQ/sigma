@@ -12,14 +12,7 @@ tags:
     - attack.credential_access
     - attack.t1003
 detection:
-    # Procdump on lsass.exe
-    selection1:
-        CommandLine:
-            - "* -ma *"
-    selection2: 
-        CommandLine:
-            - '* lsass.exe*'
-    condition: selection1 and selection2
+    condition: selection and selection1 and selection2
 falsepositives: 
     - Unlikely, because no one should dump an lsass process memory
     - Another tool that uses the command line switches of Procdump
@@ -33,6 +26,12 @@ logsource:
 detection:
     selection:
         EventID: 4688
+    selection1:
+        ProcessCommandLine:
+            - "* -ma *"
+    selection2: 
+        ProcessCommandLine:
+            - '* lsass.exe*'
 ---
 # Sysmon
 logsource:
@@ -41,4 +40,10 @@ logsource:
 detection:
     selection:
         EventID: 1
+    selection1:
+        CommandLine:
+            - "* -ma *"
+    selection2: 
+        CommandLine:
+            - '* lsass.exe*'
 
