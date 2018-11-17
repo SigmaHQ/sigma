@@ -1,0 +1,44 @@
+action: global
+title: PowerShell Base64 Encoded Shellcode
+description: Detects Base64 encoded Shellcode 
+status: experimental
+references:
+    - https://twitter.com/cyb3rops/status/1063072865992523776
+author: Florian Roth
+date: 2018/11/17
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+detection:
+    condition: selection1 and selection2
+falsepositives: 
+    - Unknown
+level: critical
+---
+# Windows Audit Log
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection1:
+        EventID: 4688
+        ProcesssCommandLine: '*AAAAYInlM*'
+    selection2:
+        ProcesssCommandLine: 
+            - '*OiCAAAAYInlM*'
+            - '*OiJAAAAYInlM*'
+---
+# Sysmon
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection1:
+        EventID: 1
+        CommandLine: '*AAAAYInlM*'
+    selection2:
+        CommandLine: 
+            - '*OiCAAAAYInlM*'
+            - '*OiJAAAAYInlM*'
+
