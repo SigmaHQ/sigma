@@ -40,6 +40,13 @@ class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     mapExpression = "%s:%s"
     mapListsSpecialHandling = False
 
+    def generateValueNode(self, node):
+        result = super().generateValueNode(node)
+        if result == "" or result.isspace():
+            return '""'
+        else:
+            return result
+
 class ElasticsearchDSLBackend(RulenameCommentMixin, BaseBackend):
     """ElasticSearch DSL backend"""
     identifier = 'es-dsl'
