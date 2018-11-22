@@ -26,7 +26,7 @@ class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     identifier = "es-qs"
     active = True
 
-    reEscape = re.compile("([+\\-=!(){}\\[\\]^\"~:/]|\\\\(?![*?])|\\\\u|&&|\\|\\|)")
+    reEscape = re.compile("([\\s+\\-=!(){}\\[\\]^\"~:/]|\\\\(?![*?])|\\\\u|&&|\\|\\|)")
     reClear = re.compile("[<>]")
     andToken = " AND "
     orToken = " OR "
@@ -34,11 +34,18 @@ class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     subExpression = "(%s)"
     listExpression = "(%s)"
     listSeparator = " "
-    valueExpression = "\"%s\""
+    valueExpression = "%s"
     nullExpression = "NOT _exists_:%s"
     notNullExpression = "_exists_:%s"
     mapExpression = "%s:%s"
     mapListsSpecialHandling = False
+
+    def generateValueNode(self, node):
+        result = super().generateValueNode(node)
+        if result == "" or result.isspace():
+            return '""'
+        else:
+            return result
 
 class ElasticsearchDSLBackend(RulenameCommentMixin, BaseBackend):
     """ElasticSearch DSL backend"""
