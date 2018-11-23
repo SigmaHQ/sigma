@@ -53,6 +53,8 @@ class SplunkBackend(SingleTextQueryBackend):
         if agg.groupfield == None:
             return " | stats %s(%s) as val | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.cond_op, agg.condition)
         else:
+            if agg.aggfunc_notrans == 'count':
+                agg.aggfunc_notrans = 'dc'
             return " | stats %s(%s) as val by %s | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)
 
 class SplunkXMLBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
