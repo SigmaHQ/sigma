@@ -75,6 +75,7 @@ class SplunkBackend(SingleTextQueryBackend):
             fields = " | table " + fields
 
         except KeyError:    # no 'fields' attribute
+            mapped = None
             pass
 
         for parsed in sigmaparser.condparsed:
