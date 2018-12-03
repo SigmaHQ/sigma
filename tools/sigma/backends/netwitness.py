@@ -98,6 +98,7 @@ class NetWitnessBackend(SingleTextQueryBackend):
                 item = re.sub('\\?', '.', item)
                 regexlist.append(self.generateValueNode(item, True))
             elif type(item) == str and (item.endswith("*") or item.startswith("*")):
+                item = re.sub('([".^$]|\\\\(?![*?]))', '\\\\\g<1>', item)
                 item = re.sub("(\*\\\\)|(\*)", "", item)
                 containlist.append(self.generateValueNode(item, True))
             else:
