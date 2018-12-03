@@ -1,0 +1,44 @@
+action: global
+title: Unidentified Attacker November 2018
+status: stable
+description: A sigma rule detecting an unidetefied attacker who used phishing emails to target high profile orgs on November 2018. The Actor shares some TTPs with YYTRIUM/APT29 campaign in 2016.
+references:
+    - https://twitter.com/DrunkBinary/status/1063075530180886529
+author: 
+    - "@41thexplorer, Windows Defender ATP"
+date: 2018/11/20
+tags:
+    - attack.execution
+    - attack.t1085
+detection:
+    condition: selection
+level: high
+---
+# Windows Security Eventlog: Process Creation with Full Command Line
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection:
+        EventID: 4688
+        CommandLine: '*cyzfc.dat, PointFunctionCall'
+---
+# Sysmon: Process Creation (ID 1)
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+        CommandLine: '*cyzfc.dat, PointFunctionCall'
+---
+# Sysmon: File Creation (ID 11)
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 11
+        TargetFilename: 
+            - '*ds7002.lnk*' 
