@@ -53,8 +53,48 @@ class SplunkBackend(SingleTextQueryBackend):
         if agg.groupfield == None:
             return " | stats %s(%s) as val | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.cond_op, agg.condition)
         else:
+            if agg.aggfunc_notrans == 'count':
+                agg.aggfunc_notrans = 'dc'
             return " | stats %s(%s) as val by %s | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)
 
+        
+    def generate(self, sigmaparser):
+        """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
+        columns = list()
+        try:
+            for field in sigmaparser.parsedyaml["fields"]:
+                mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field)
+                if type(mapped) == str:
+                    columns.append(mapped)
+                elif type(mapped) == list:
+                    columns.extend(mapped)
+                else:
+                    raise TypeError("Field mapping must return string or list")
+
+            fields = ",".join(str(x) for x in columns)
+            fields = " | table " + fields
+
+        except KeyError:    # no 'fields' attribute
+            mapped = None
+            pass
+
+        for parsed in sigmaparser.condparsed:
+            query = self.generateQuery(parsed)
+            before = self.generateBefore(parsed)
+            after = self.generateAfter(parsed)
+
+            result = ""
+            if before is not None:
+                result = before
+            if query is not None:
+                result += query
+            if after is not None:
+                result += after
+            if mapped is not None:
+                result += fields
+
+            return result
+    
 class SplunkXMLBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
     """Converts Sigma rule into XML used for Splunk Dashboard Panels"""
     identifier = "splunkxml"
