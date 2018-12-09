@@ -551,7 +551,8 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
             #Handle aggregation
             if parsed.parsedAgg:
                 if parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MIN or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MAX or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_AVG or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_SUM:
-                    rule_object['query_key'] = parsed.parsedAgg.groupfield
+                    if parsed.parsedAgg.groupfield is not None:
+                        rule_object['query_key'] = parsed.parsedAgg.groupfield + ".keyword"
                     rule_object['type'] = "metric_aggregation"
                     rule_object['buffer_time'] = interval
                     rule_object['doc_type'] = "doc"
@@ -562,7 +563,7 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
                         rule_object['metric_agg_type'] = parsed.parsedAgg.aggfunc_notrans
 
                     if parsed.parsedAgg.aggfield:
-                        rule_object['metric_agg_key'] = parsed.parsedAgg.aggfield
+                        rule_object['metric_agg_key'] = parsed.parsedAgg.aggfield + ".keyword"
                     else:
                         rule_object['metric_agg_key'] = "_id"
 
