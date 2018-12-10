@@ -31,6 +31,7 @@ class SumoLogicBackend(SingleTextQueryBackend):
     identifier = "sumologic"
     active = True
 
+    index_field = "_index"
     reEscape = re.compile('("|\\\\(?![*?]))')
     reClear = None
     andToken = " AND "
