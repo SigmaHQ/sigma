@@ -54,6 +54,7 @@ setup(
             'config/spark.yml',
             'config/netwitness.yml',
             'config/splunk-windows-all.yml',
+            'config/sumologic.yml',
         ])],
     scripts=[
         'sigmac',
