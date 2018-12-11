@@ -9,12 +9,24 @@ references:
     - https://www.fireeye.com/blog/threat-research/2016/05/targeted_attacksaga.html
 author:  Florian Roth, Markus Neis
 date: 2018/08/22
+modified: 2018/12/11
 tags:
     - attack.discovery
     - attack.t1073
     - attack.t1012 
 detection:
+    timeframe: 15s 
+    condition: selection | count() by CommandLine > 4
+falsepositives: 
+    - False positives depend on scripts and administrative tools used in the monitored environment
+level: medium
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
     selection:
+        EventID: 1
         CommandLine: 
             - 'tasklist'
             - 'net time'
@@ -33,18 +45,6 @@ detection:
             - '*\net1 accounts /domain' 
             - '*\net1 user net localgroup administrators' 
             - 'netstat -an'
-    timeframe: 15s 
-    condition: selection | count() by CommandLine > 4
-falsepositives: 
-    - False positives depend on scripts and administrative tools used in the monitored environment
-level: medium
----
-logsource:
-    product: windows
-    service: sysmon
-detection:
-    selection:
-        EventID: 1
 ---
 logsource:
     product: windows
@@ -53,3 +53,21 @@ logsource:
 detection:
     selection:
         EventID: 4688
+        ProcessCommandLine: 
+            - 'tasklist'
+            - 'net time'
+            - 'systeminfo'
+            - 'whoami'
+            - 'nbtstat'
+            - 'net start'
+            - '*\net1 start'
+            - 'qprocess'
+            - 'nslookup'
+            - 'hostname.exe'
+            - '*\net1 user /domain'
+            - '*\net1 group /domain'
+            - '*\net1 group "domain admins" /domain'
+            - '*\net1 group "Exchange Trusted Subsystem" /domain'
+            - '*\net1 accounts /domain' 
+            - '*\net1 user net localgroup administrators' 
+            - 'netstat -an'
