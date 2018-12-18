@@ -26,8 +26,12 @@ class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Elasticsearch query string. Only searches, no aggregations."""
     identifier = "es-qs"
     active = True
+    options = SingleTextQueryBackend.options + (
+            ("keyword_field", "keyword", "Keyword sub-field name", None),
+            ("keyword_blacklist", None, "Fields that don't have a keyword subfield", None)
+            )
 
-    reEscape = re.compile("([+\\-=!(){}\\[\\]^\"~:/]|\\\\(?![*?])|\\\\u|&&|\\|\\|)")
+    reEscape = re.compile("([\s+\\-=!(){}\\[\\]^\"~:/]|\\\\(?![*?])|\\\\u|&&|\\|\\|)")
     reClear = re.compile("[<>]")
     andToken = " AND "
     orToken = " OR "
@@ -35,18 +39,52 @@ class ElasticsearchQuerystringBackend(SingleTextQueryBackend):
     subExpression = "(%s)"
     listExpression = "(%s)"
     listSeparator = " "
-    valueExpression = "\"%s\""
+    valueExpression = "%s"
     nullExpression = "NOT _exists_:%s"
     notNullExpression = "_exists_:%s"
     mapExpression = "%s:%s"
     mapListsSpecialHandling = False
+
+    reContainsWildcard = re.compile("(?<!\\\\)\\*").search
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.quoteValue = True
+        try:
+            self.blacklist = self.keyword_blacklist.split(",")
+        except AttributeError:
+            self.blacklist = list()
 
     def generateValueNode(self, node):
         result = super().generateValueNode(node)
         if result == "" or result.isspace():
             return '""'
         else:
-            return result
+            if self.quoteValue:
+                return "\"%s\"" % result
+            else:
+                return result
+
+    def containsWildcard(self, value):
+        if type(value) == str:
+            return self.reContainsWildcard(value)
+        else:
+            return False
+
+    def fieldNameMapping(self, fieldname, value):
+        """
+        Determine if values contain wildcards. If yes, match on keyword field else on analyzed one.
+        Decide if field value should be quoted based on the field name decision and store it in object property.
+        """
+        if fieldname not in self.blacklist and (
+                type(value) == list and any(map(self.containsWildcard, value)) \
+                or self.containsWildcard(value)
+                ):
+            self.quoteValue = False
+            return fieldname + "." + self.keyword_field
+        else:
+            self.quoteValue = True
+            return fieldname
 
 class ElasticsearchDSLBackend(RulenameCommentMixin, BaseBackend):
     """ElasticSearch DSL backend"""
@@ -199,7 +237,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     """Converts Sigma rule into Kibana JSON Configuration files (searches only)."""
     identifier = "kibana"
     active = True
-    options = (
+    options = ElasticsearchQuerystringBackend.options + (
             ("output", "import", "Output format: import = JSON file manually imported in Kibana, curl = Shell script that imports queries in Kibana via curl (jq is additionally required)", "output_type"),
             ("es", "localhost:9200", "Host and port of Elasticsearch instance", None),
             ("index", ".kibana", "Kibana index", None),
@@ -313,7 +351,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
     """Converts Sigma Rule into X-Pack Watcher JSON for alerting"""
     identifier = "xpack-watcher"
     active = True
-    options = (
+    options = ElasticsearchQuerystringBackend.options + (
             ("output", "curl", "Output format: curl = Shell script that imports queries in Watcher index with curl", "output_type"),
             ("es", "localhost:9200", "Host and port of Elasticsearch instance", None),
             ("mail", None, "Mail address for Watcher notification (only logging if not set)", None),
@@ -503,7 +541,7 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
     """Elastalert backend"""
     identifier = 'elastalert'
     active = True
-    options = (
+    options = ElasticsearchQuerystringBackend.options + (
         ("emails", None, "Email addresses for Elastalert notification, if you want to alert several email addresses put them coma separated", None),
         ("smtp_host", None, "SMTP server address", None),
         ("from_addr", None, "Email sender address", None),
