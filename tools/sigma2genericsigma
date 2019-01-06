@@ -23,7 +23,7 @@ class SingleFileOutput(Output):
         if self.first:
             self.first = False
         else:
-            self.write("---")
+            self.f.write("---\n")
         self.f.write("# Sigma rule: {}\n".format(name))
 
     def finish(self):
@@ -43,11 +43,16 @@ class DirectoryOutput(Output):
     def __init__(self, dirpath):
         self.d = dirpath
         self.f = None
+        self.path = None
 
     def new_output(self, path):
-        if self.f is not None:
-            self.f.close()
-        self.f = (self.d / path.name).open("x")
+        if self.path is None or self.path != path:
+            if self.f is not None:
+                self.f.close()
+            self.f = (self.d / path.name).open("x")
+            self.path = path
+        else:   # same file, just ourpur separator
+            self.f.write("---\n")
 
 def get_output(output):
     if output is None:
@@ -74,8 +79,12 @@ class AmbiguousRuleException(TypeError):
 
 def convert_to_generic(yamldoc):
     changed = False
-    product = yamldoc["logsource"]["product"]
-    service = yamldoc["logsource"]["service"]
+    try:
+        product = yamldoc["logsource"]["product"]
+        service = yamldoc["logsource"]["service"]
+    except KeyError:
+        return False
+
     if product == "windows" and service in ("sysmon", "security"):
         # Currently, only Windows Security or Sysmon are relevant
         eventids = set()
