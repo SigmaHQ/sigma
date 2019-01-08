@@ -15,16 +15,18 @@ class SingleFileOutput(Output):
     """Output into single file with multiple YAML documents. Each input file is announced with comment."""
     def __init__(self, name):
         self.f = open(name, "x")
+        self.path = None
         self.first = True
 
-    def new_output(self, name):
+    def new_output(self, path):
         """Announce new Sigma rule as input and start new YAML document."""
-        self.current = name
-        if self.first:
-            self.first = False
-        else:
-            self.f.write("---\n")
-        self.f.write("# Sigma rule: {}\n".format(name))
+        if self.path is None or self.path != path:
+            if self.first:
+                self.first = False
+            else:
+                self.f.write("---\n")
+            self.path = path
+            self.f.write("# Sigma rule: {}\n".format(path))
 
     def finish(self):
         self.f.close()
@@ -33,6 +35,7 @@ class StdoutOutput(SingleFileOutput):
     """Like SingleFileOutput, just for standard output"""
     def __init__(self):
         self.f = sys.stdout
+        self.path = None
         self.first = True
 
     def finish(self):
@@ -51,8 +54,6 @@ class DirectoryOutput(Output):
                 self.f.close()
             self.f = (self.d / path.name).open("x")
             self.path = path
-        else:   # same file, just ourpur separator
-            self.f.write("---\n")
 
 def get_output(output):
     if output is None:
@@ -148,24 +149,27 @@ for path in input_paths:
         sys.exit(1)
 
     try:
-        yamldocs = yaml.safe_load_all(f)
+        yamldocs = list(yaml.safe_load_all(f))
     except yaml.YAMLError as e:
         print("YAML parse error while parsing Sigma rule {}: {}".format(path, str(e)), file=sys.stderr)
         sys.exit(2)
 
     yamldoc_num = 0
+    changed = False
     for yamldoc in yamldocs:
         yamldoc_num += 1
+        output.new_output(path)
         try:
-            if convert_to_generic(yamldoc):
-                # only write output if changed
-                try:
-                    output.new_output(path)
-                    output.write(yaml.dump(yamldoc, Dumper=SigmaYAMLDumper, width=160, default_flow_style=False))
-                except OSError as e:
-                    print("Error while writing result: {}".format(str(e)), file=sys.stderr)
-                    sys.exit(2)
+            changed |= convert_to_generic(yamldoc)
         except AmbiguousRuleException as e:
+            changed = False
             print("Rule {} in file {} contains multiple EventIDs: {}".format(yamldoc_num, str(path), str(e)), file=sys.stderr)
+
+    if changed:     # only write output if changed
+        try:
+            output.write(yaml.dump_all(yamldocs, Dumper=SigmaYAMLDumper, width=160, default_flow_style=False))
+        except OSError as e:
+            print("Error while writing result: {}".format(str(e)), file=sys.stderr)
+            sys.exit(2)
 
 output.finish()
