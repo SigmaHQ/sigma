@@ -108,7 +108,7 @@ class QRadarBackend(SingleTextQueryBackend):
     def generateNotNULLValueNode(self, node):
         return self.notNullExpression % (node.item)
 
-    def generateAggregation(self, agg):
+    def generateAggregation(self, agg, timeframe='00'):
         if agg == None:
             return ""
         if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_NEAR:
@@ -117,10 +117,35 @@ class QRadarBackend(SingleTextQueryBackend):
             self.qradarPrefixAgg = "SELECT %s(%s) as agg_val from %s where" % (agg.aggfunc_notrans, agg.aggfield, self.aql_database)
             self.qradarSuffixAgg = " group by %s having agg_val %s %s" % (agg.aggfield, agg.cond_op, agg.condition)
             return self.qradarPrefixAgg, self.qradarSuffixAgg
+        elif agg.groupfield != None and timeframe == '00':
+                self.qradarPrefixAgg = " SELECT %s(%s) as agg_val from %s where " % (agg.aggfunc_notrans, agg.aggfield, self.aql_database)
+                self.qradarSuffixAgg = " group by %s having agg_val %s %s" % (agg.groupfield, agg.cond_op, agg.condition)
+                return self.qradarPrefixAgg, self.qradarSuffixAgg
+        elif agg.groupfield != None and timeframe != None:
+            for key, duration in self.generateTimeframe(timeframe).items():
+                self.qradarPrefixAgg = " SELECT %s(%s) as agg_val from %s where " % (agg.aggfunc_notrans, agg.aggfield, self.aql_database)
+                self.qradarSuffixAgg = " group by %s having agg_val %s %s LAST %s %s" % (agg.groupfield, agg.cond_op, agg.condition, duration, key)
+                return self.qradarPrefixAgg, self.qradarSuffixAgg
         else:
             self.qradarPrefixAgg = " SELECT %s(%s) as agg_val from %s where " % (agg.aggfunc_notrans, agg.aggfield, self.aql_database)
             self.qradarSuffixAgg = " group by %s having agg_val %s %s" % (agg.groupfield, agg.cond_op, agg.condition)
             return self.qradarPrefixAgg, self.qradarSuffixAgg
+
+    def generateTimeframe(self, timeframe):
+        time_unit = timeframe[-1:]
+        duration = timeframe[:-1]
+        timeframe_object = {}
+        if time_unit == "s":
+            timeframe_object['seconds'] = int(duration)
+        elif time_unit == "m":
+            timeframe_object['minutes'] = int(duration)
+        elif time_unit == "h":
+            timeframe_object['hours'] = int(duration)
+        elif time_unit == "d":
+            timeframe_object['days'] = int(duration)
+        else:
+            timeframe_object['months'] = int(duration)
+        return timeframe_object
 
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
@@ -147,8 +172,18 @@ class QRadarBackend(SingleTextQueryBackend):
         else:
             aql_database = "events"
         qradarPrefix = "SELECT UTF8(payload) as search_payload from %s where " % (aql_database)
-        if parsed.parsedAgg:
+
+        try:
+            timeframe = sigmaparser.parsedyaml['detection']['timeframe']
+        except:
+            timeframe = None
+
+        if parsed.parsedAgg and timeframe == None:
             (qradarPrefix, qradarSuffixAgg) = self.generateAggregation(parsed.parsedAgg)
+            result = qradarPrefix + result
+            result += qradarSuffixAgg
+        elif parsed.parsedAgg != None and timeframe != None:
+            (qradarPrefix, qradarSuffixAgg) = self.generateAggregation(parsed.parsedAgg, timeframe)
             result = qradarPrefix + result
             result += qradarSuffixAgg
         else:
