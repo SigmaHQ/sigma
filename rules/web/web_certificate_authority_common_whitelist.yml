@@ -1,0 +1,62 @@
+title: CA issuer whitelist
+description: Detects all other CA issuers other than listed
+author: Yulli Chong - InfoSec Innovations
+date: 2019/01/11
+status: experimental
+references:
+    - https://www.godaddy.com/help/verify-domain-ownership-html-or-dns-7452
+    - https://www.alexa.com/topsites
+    - https://www.pluralsight.com/blog/software-development/top-reliable-ssl-certificates
+
+logsource:
+    category: ssl
+detection:
+    selection:
+      CA Issuer:
+        # most common and popular CA
+        - CN = Go Daddy Secure Certificate Authority - G2 , OU = http://certs.godaddy.com/repository/ , O = GoDaddy.com, Inc. , C = US
+
+        - CN = DigiCert SHA2 Extended Validation Server CA , OU = www.digicert.com , O = DigiCert Inc , C = US
+        - CN = DigiCert High Assurance CA-3 , OU = www.digicert.com , O = DigiCert Inc , C = US
+        - CN = DigiCert Cloud Services CA-1 , O = DigiCert Inc , C = US
+        - CN = DigiCert SHA2 High Assurance Server CA , OU = www.digicert.com , O = DigiCert Inc , C = US
+        - CN = DigiCert ECC Secure Server CA , O = DigiCert Inc , C = US
+
+        - CN = Entrust Certification Authority - L1M , OU = (c) 2014 Entrust, Inc. - for authorized use only , OU = See www.entrust.net/legal-terms , O = Entrust, Inc. , C = US
+
+        - CN = Network Solutions EV Server CA 2 , O = Network Solutions L.L.C. , C = US
+
+        - CN = COMODO RSA Extended Validation Secure Server CA , O = COMODO CA Limited , C = GB
+        - CN = COMODO RSA Organization Validation Secure Server CA , O = COMODO CA Limited , C = GB
+
+        - CN = SSL.com RSA SSL subCA , O = SSL Corporation , C = US
+
+        - CN = GeoTrust SSL CA , O = GeoTrust\, Inc. , C = US
+        - CN = GeoTrust RSA CA 2018 , OU = www.digicert.com , O = DigiCert Inc , C = US
+
+        - CN = RapidSSL CA , O = GeoTrust\, Inc. , C = US
+
+        - CN = Google Internet Authority G3 , O = Google Trust Services , C = US
+
+        - CN = Microsoft IT TLS CA 5 , OU = Microsoft IT , O = Microsoft Corporation , C = US
+
+        - CN = GlobalSign Organization Validation CA - G2 , O = GlobalSign nv-sa , C = BE
+        - CN = GlobalSign Organization Validation CA - SHA256 - G2 , O = GlobalSign nv-sa , C = BE
+        - CN = GlobalSign Extended Validation CA - SHA256 - G3 , O = GlobalSign nv-sa , C = BE
+        - CN = GlobalSign CloudSSL CA - SHA256 - G3 , O = GlobalSign nv-sa , C = BE
+
+        - CN = Cybertrust Public SureServer SV CA , O = Cybertrust Inc
+        - CN = Cybertrust Japan Public CA G3 , O = Cybertrust Japan Co., Ltd. , C = JP
+
+        - CN = Thawte SSL CA , O = Thawte\, Inc. , C = US
+
+        # Not common CA but some top sites
+        - CN = Yandex CA , OU = Yandex Certification Authority , O = Yandex LLC , C = RU
+        - CN = WoSign OV SSL CA , O = WoSign CA Limited , C = CN
+
+    condition: selection
+fields:
+    - issuer
+falsepositives:
+    - variations of CN
+level: high
