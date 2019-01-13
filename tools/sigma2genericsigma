@@ -47,13 +47,23 @@ class DirectoryOutput(Output):
         self.d = dirpath
         self.f = None
         self.path = None
+        self.opened = None
 
     def new_output(self, path):
         if self.path is None or self.path != path:
             if self.f is not None:
                 self.f.close()
-            self.f = (self.d / path.name).open("x")
             self.path = path
+            self.opened = False     # opening file is deferred to first write
+
+    def write(self, *args, **kwargs):
+        if not self.opened:
+            self.f = (self.d / self.path.name).open("x")
+        super().write(*args, **kwargs)
+
+    def finish(self):
+        if self.f is not None:
+            self.f.close()
 
 def get_output(output):
     if output is None:
@@ -106,6 +116,7 @@ def convert_to_generic(yamldoc):
                 4688 in eventids and service == "security":
             if len(eventids) == 1:      # only convert if one EventID collected, else it gets complicated
                 # remove all EventID definitions
+                empty_name = list()
                 for name, detection in yamldoc["detection"].items():
                     if name == "condition" or type(detection) is not dict:
                         continue
@@ -113,6 +124,15 @@ def convert_to_generic(yamldoc):
                         del detection["EventID"]
                     except KeyError:
                         pass
+
+                    if detection == {}:     # detection was reduced to nothing - remove it later
+                        empty_name.append(name)
+
+                for name in empty_name:     # delete empty detections
+                    del yamldoc["detection"][name]
+
+                if yamldoc["detection"] == {}:  # delete detection section if empty
+                    del yamldoc["detection"]
 
                 # rewrite log source
                 yamldoc["logsource"] = {
@@ -164,6 +184,29 @@ for path in input_paths:
         except AmbiguousRuleException as e:
             changed = False
             print("Rule {} in file {} contains multiple EventIDs: {}".format(yamldoc_num, str(path), str(e)), file=sys.stderr)
+
+    yamldocs_idx = list(zip(range(len(yamldocs)), yamldocs))
+    delete = set()
+    for i, yamldoc_a in yamldocs_idx:     # iterate over all yaml document pairs
+        for j, yamldoc_b in yamldocs_idx:
+            if j <= i:      # symmetric relation, skip same comparisons
+                continue
+            if yamldoc_a == yamldoc_b:
+                delete.add(j)
+
+    for i in reversed(sorted(delete)):  # delete double yaml documents
+        del yamldocs[i]
+
+    # Common special case: two yaml docs, one global and one remainder of multiple following docs - merge them
+    try:
+        if len(yamldocs) == 2 and \
+                yamldocs[0]["action"] == "global" and \
+                "action" not in yamldocs[1] and \
+                set(yamldocs[0].keys()) & set(yamldocs[1].keys()) == set():   # last condition: no common keys
+            yamldocs[0].update(yamldocs[1])
+            del yamldocs[1]
+    except KeyError:
+        pass
 
     if changed:     # only write output if changed
         try:
