@@ -185,7 +185,6 @@ class FieldMappingChain(object):
             self.fieldmappings = fieldmappings
 
     def resolve(self, key, value, sigmaparser):
-        print(key, value)
         if type(self.fieldmappings) == str:     # one field mapping
             return (self.fieldmappings, value)
         elif isinstance(self.fieldmappings, SimpleFieldMapping):
