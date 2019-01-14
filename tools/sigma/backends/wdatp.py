@@ -129,7 +129,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
             self.product = None
             self.service = None
 
-        super().generate(sigmaparser)
+        return super().generate(sigmaparser)
 
     def generateBefore(self, parsed):
         if self.table is None:

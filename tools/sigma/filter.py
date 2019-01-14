@@ -30,6 +30,7 @@ class SigmaRuleFilter:
         self.maxlevel   = None 
         self.status     = None
         self.logsources = list()
+        self.tags       = list()
 
         for cond in [c.replace(" ", "") for c in expr.split(",")]:
             if cond.startswith("level<="):
@@ -57,6 +58,8 @@ class SigmaRuleFilter:
                     raise SigmaRuleFilterParseException("Unknown status '%s' in condition '%s'" % (self.status, cond))
             elif cond.startswith("logsource="):
                 self.logsources.append(cond[cond.index("=") + 1:])
+            elif cond.startswith("tag="):
+                self.tags.append(cond[cond.index("=") + 1:].lower())
             else:
                 raise SigmaRuleFilterParseException("Unknown condition '%s'" % cond)
 
@@ -88,7 +91,7 @@ class SigmaRuleFilter:
                 return False
 
         # Log Sources
-        if len(self.logsources) > 0:
+        if self.logsources:
             try:
                 logsources = { value for key, value in yamldoc['logsource'].items() }
             except (KeyError, AttributeError):    # no log source set
@@ -96,6 +99,17 @@ class SigmaRuleFilter:
 
             for logsrc in self.logsources:
                 if logsrc not in logsources:
+                    return False
+
+        # Tags
+        if self.tags:
+            try:
+                tags = [ tag.lower() for tag in yamldoc['tags']]
+            except (KeyError, AttributeError):    # no tags set
+                return False
+
+            for tag in self.tags:
+                if tag not in tags:
                     return False
 
         # all tests passed

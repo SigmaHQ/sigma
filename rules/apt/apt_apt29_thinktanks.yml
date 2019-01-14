@@ -1,0 +1,32 @@
+---
+action: global
+title: APT29 
+description: 'This method detects a suspicious powershell command line combination as used by APT29 in a campaign against US think tanks' 
+references:
+    - https://cloudblogs.microsoft.com/microsoftsecure/2018/12/03/analysis-of-cyberattack-on-u-s-think-tanks-non-profits-public-sector-by-unidentified-attackers/
+logsource:
+    product: windows
+author: Florian Roth
+date: 2018/12/04 
+detection:
+    condition: selection
+falsepositives:
+    - unknown
+level: critical
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+        CommandLine: '*-noni -ep bypass $*'
+---
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection:
+        EventID: 4688
+        ProcessCommandLine: '*-noni -ep bypass $*'

@@ -166,7 +166,7 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
     valueExpression = None              # Expression of values, %s represents value
     nullExpression = None               # Expression of queries for null values or non-existing fields. %s is field name
     notNullExpression = None            # Expression of queries for not null values. %s is field name
-    mapExpression = None                # Syntax for field/value conditions. First %s is key, second is value
+    mapExpression = None                # Syntax for field/value conditions. First %s is fieldname, second is value
     mapListsSpecialHandling = False     # Same handling for map items with list values as for normal values (strings, integers) if True, generateMapItemListNode method is called with node
     mapListValueExpression = None       # Syntax for field/value condititons where map value is a list
 
@@ -206,16 +206,18 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
         return self.listExpression % (self.listSeparator.join([self.generateNode(value) for value in node]))
 
     def generateMapItemNode(self, node):
-        key, value = node
+        fieldname, value = node
+
+        transformed_fieldname = self.fieldNameMapping(fieldname, value)
         if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
-            return self.mapExpression % (key, self.generateNode(value))
+            return self.mapExpression % (transformed_fieldname, self.generateNode(value))
         elif type(value) == list:
-            return self.generateMapItemListNode(key, value)
+            return self.generateMapItemListNode(transformed_fieldname, value)
         else:
             raise TypeError("Backend does not support map values of type " + str(type(value)))
 
-    def generateMapItemListNode(self, key, value):
-        return self.mapListValueExpression % (key, self.generateNode(value))
+    def generateMapItemListNode(self, fieldname, value):
+        return self.mapListValueExpression % (fieldname, self.generateNode(value))
 
     def generateValueNode(self, node):
         return self.valueExpression % (self.cleanValue(str(node)))
@@ -225,3 +227,11 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
     def generateNotNULLValueNode(self, node):
         return self.notNullExpression % (node.item)
+
+    def fieldNameMapping(self, fieldname, value):
+        """
+        Alter field names depending on the value(s). Backends may use this method to perform a final transformation of the field name
+        in addition to the field mapping defined in the conversion configuration. The field name passed to this method was already
+        transformed from the original name given in the Sigma rule.
+        """
+        return fieldname

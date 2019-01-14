@@ -87,12 +87,6 @@ class SigmaParser:
                         fields = [ fields ]
                     for field in fields:
                         cond.add(ConditionNULLValue(val=field))
-                elif value == "not null":
-                    fields = mapping.resolve_fieldname(key)
-                    if type(fields) == str:
-                        fields = [ fields ]
-                    for field in fields:
-                        cond.add(ConditionNotNULLValue(val=field))
                 else:
                     cond.add(mapping.resolve(key, value, self))
 

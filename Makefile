@@ -1,5 +1,5 @@
 .PHONY: test test-yaml test-sigmac
-TMPOUT = $(shell tempfile)
+TMPOUT = $(shell tempfile||mktemp)
 COVSCOPE = tools/sigma/*.py,tools/sigma/backends/*.py,tools/sigmac,tools/merge_sigma
 test: clearcov test-yaml test-sigmac test-merge build finish
 
@@ -23,15 +23,19 @@ test-sigmac:
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t kibana rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t graylog rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t xpack-watcher rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t elastalert rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunkxml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t logpoint rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t wdatp rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-dsl rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t powershell -c tools/config/powershell-windows-all.yml -Ocsv rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t arcsight -c tools/config/arcsight.yml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t qradar -c tools/config/arcsight.yml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t qualys -c tools/config/qualys.yml rules/ > /dev/null
-	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -f 'level>=high,level<=critical,status=stable,logsource=windows' rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t netwitness -c tools/config/netwitness.yml rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t sumologic -c tools/config/sumologic.yml rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -f 'level>=high,level<=critical,status=stable,logsource=windows,tag=attack.execution' rules/ > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -f 'level>=high,level<=critical,status=xstable,logsource=windows' rules/ > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -f 'level>=high,level<=xcritical,status=stable,logsource=windows' rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -f 'level=critical' rules/ > /dev/null
@@ -54,8 +58,9 @@ test-sigmac:
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t grep rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t fieldlist rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -t xpack-watcher -O output=plain -O es=es -O foobar rules/windows/builtin/win_susp_failed_logons_single_source.yml > /dev/null
-	coverage run -a --include=$(COVSCOPE) tools/sigmac -t es-qs -o $(TMPOUT) tests/collection_repeat.yml > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -t kibana -c tests/config-multiple_mapping.yml -c tests/config-multiple_mapping-2.yml tests/mapping-conditional-multi.yml > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -t xpack-watcher -O output=json -O es=es -O foobar rules/windows/builtin/win_susp_failed_logons_single_source.yml > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -t es-qs -o $(TMPOUT) - < tests/collection_repeat.yml > /dev/null
 	! coverage run -a --include=$(COVSCOPE)  tools/sigmac -t xpack-watcher -O output=foobar -O es=es -O foobar rules/windows/builtin/win_susp_failed_logons_single_source.yml > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -t es-qs tests/not_existing.yml > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -t es-qs tests/invalid_yaml.yml > /dev/null
