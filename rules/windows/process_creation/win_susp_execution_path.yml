@@ -1,0 +1,26 @@
+title: Execution in Non-Executable Folder
+status: experimental
+description: Detects a suspicious exection from an uncommon folder
+author: Florian Roth
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image:
+      - '*\$Recycle.bin'
+      - '*\Users\All Users\*'
+      - '*\Users\Default\*'
+      - '*\Users\Public\*'
+      - C:\Perflogs\*
+      - '*\config\systemprofile\*'
+      - '*\Windows\Fonts\*'
+      - '*\Windows\IME\*'
+      - '*\Windows\addins\*'
+  condition: selection
+fields:
+  - CommandLine
+  - ParentCommandLine
+falsepositives:
+  - Unknown
+level: high
