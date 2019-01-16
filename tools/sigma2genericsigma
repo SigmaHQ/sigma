@@ -158,6 +158,12 @@ argparser.add_argument("--converted-list", "-c", help="Write list of rule files 
 argparser.add_argument("sigma", nargs="+", help="Sigma rule file(s) that should be converted")
 args = argparser.parse_args()
 
+# Define order-preserving representer from dicts/maps
+def yaml_preserve_order(self, dict_data):
+    return self.represent_mapping("tag:yaml.org,2002:map", dict_data.items())
+
+yaml.add_representer(dict, yaml_preserve_order)
+
 input_paths = get_input_paths(args)
 output = get_output(args.output)
 if args.converted_list:
