@@ -104,6 +104,7 @@ merges multiple YAML documents of a Sigma rule collection into simple Sigma rule
 * [ArcSight](https://software.microfocus.com/en-us/products/siem-security-information-event-management/overview)
 * [QRadar](https://www.ibm.com/de-de/marketplace/ibm-qradar-siem)
 * [Qualys](https://www.qualys.com/apps/threat-protection/)
+* [RSA NetWitness](https://www.rsa.com/en-us/products/threat-detection-response)
 * [PowerShell](https://docs.microsoft.com/en-us/powershell/scripting/getting-started/getting-started-with-windows-powershell?view=powershell-6)
 * [Grep](https://www.gnu.org/software/grep/manual/grep.html) with Perl-compatible regular expression support
 
@@ -134,6 +135,30 @@ For development (e.g. execution of integration tests with `make` and packaging),
 
 ```bash
 pip3 install -r tools/requirements-devel.txt
+```
+
+## Sigma2MISP
+
+Import Sigma rules to MISP events. Depends on PyMISP.
+
+Parameters that aren't changed frequently (`--url`, `--key`) can be put without the prefixing dashes `--` into a file
+and included with `@filename` as parameter on the command line.
+
+Example:
+*misp.conf*:
+```
+url https://host
+key foobarfoobarfoobarfoobarfoobarfoobarfoo 
+```
+
+Load Sigma rule into MISP event 1234:
+```
+sigma2misp @misp.conf --event 1234 sigma_rule.py
+```
+
+Load Sigma rules in directory sigma_rules/ into one newly created MISP event with info set to *Test Event*:
+```
+sigma2misp @misp.conf --same-event --info "Test Event" -r sigma_rules/
 ```
 
 ## Evt2Sigma

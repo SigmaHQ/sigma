@@ -20,6 +20,7 @@ test-sigmac:
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t kibana rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t graylog rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t xpack-watcher rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t elastalert rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunkxml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t logpoint rules/ > /dev/null
@@ -29,6 +30,8 @@ test-sigmac:
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t arcsight -c tools/config/arcsight.yml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t qradar -c tools/config/arcsight.yml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t qualys -c tools/config/qualys.yml rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t netwitness -c tools/config/netwitness.yml rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t sumologic -c tools/config/sumologic.yml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -f 'level>=high,level<=critical,status=stable,logsource=windows,tag=attack.execution' rules/ > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -f 'level>=high,level<=critical,status=xstable,logsource=windows' rules/ > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -f 'level>=high,level<=xcritical,status=stable,logsource=windows' rules/ > /dev/null

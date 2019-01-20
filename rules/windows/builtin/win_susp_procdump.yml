@@ -5,17 +5,14 @@ status: experimental
 references:
     - Internal Research
 author: Florian Roth
-date: 2018/08/26
+date: 2018/10/30
 tags:
     - attack.defense_evasion
     - attack.t1036
     - attack.credential_access
     - attack.t1003
 detection:
-    selection:
-        CommandLine:
-            - "* -ma lsass.exe*"
-    condition: selection
+    condition: selection and selection1 and selection2
 falsepositives: 
     - Unlikely, because no one should dump an lsass process memory
     - Another tool that uses the command line switches of Procdump
@@ -25,10 +22,16 @@ level: medium
 logsource:
     product: windows
     service: security
-    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+    definition: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
 detection:
     selection:
         EventID: 4688
+    selection1:
+        ProcessCommandLine:
+            - "* -ma *"
+    selection2: 
+        ProcessCommandLine:
+            - '* lsass.exe*'
 ---
 # Sysmon
 logsource:
@@ -37,4 +40,10 @@ logsource:
 detection:
     selection:
         EventID: 1
+    selection1:
+        CommandLine:
+            - "* -ma *"
+    selection2: 
+        CommandLine:
+            - '* lsass.exe*'
 
