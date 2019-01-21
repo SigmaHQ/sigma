@@ -8,19 +8,25 @@ tags:
     - attack.command_and_control
     - attack.g0016
     - attack.t1172
-logsource:
-    product: windows
 detection:
-    service:
-        EventID: 7045
-        ServiceName: 'Google Update'
-    timeframe: 5m
     condition: service | near process
 falsepositives:
     - Unknown
 level: high
 ---
-# Windows Audit Log
+logsource:
+    product: windows
+    service: system
+detection:
+    service:
+        EventID: 7045
+        ServiceName: 'Google Update'
+    timeframe: 5m
+---
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
 detection:
     process:
         EventID: 4688 
@@ -28,7 +34,9 @@ detection:
             - 'C:\Program Files(x86)\Google\GoogleService.exe'
             - 'C:\Program Files(x86)\Google\GoogleUpdate.exe'
 ---
-# Sysmon
+logsource:
+    product: windows
+    service: sysmon
 detection:
     process:
         EventID: 1 
