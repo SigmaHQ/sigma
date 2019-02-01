@@ -68,7 +68,7 @@ class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, Single
     identifier = "es-qs"
     active = True
 
-    reEscape = re.compile("([\s+\\-=!(){}\\[\\]^\"~:/]|\\\\(?![*?])|\\\\u|&&|\\|\\|)")
+    reEscape = re.compile("([\s+\\-=!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|\\\\u|&&|\\|\\|)")
     reClear = re.compile("[<>]")
     andToken = " AND "
     orToken = " OR "
