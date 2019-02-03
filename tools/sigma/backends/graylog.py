@@ -22,7 +22,7 @@ class GraylogQuerystringBackend(SingleTextQueryBackend):
     identifier = "graylog"
     active = True
 
-    reEscape = re.compile("([+\\-!(){}\\[\\]^\"~:/]|\\\\(?![*?])|&&|\\|\\|)")
+    reEscape = re.compile("([+\\-!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|&&|\\|\\|)")
     reClear = None
     andToken = " AND "
     orToken = " OR "

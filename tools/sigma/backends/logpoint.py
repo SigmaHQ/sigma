@@ -23,7 +23,10 @@ class LogPointBackend(SingleTextQueryBackend):
     identifier = "logpoint"
     active = True
 
-    reEscape = re.compile('("|\\\\(?![*?]))')
+    # \   -> \\
+    # \*  -> \*
+    # \\* -> \\*
+    reEscape = re.compile('("|(?<!\\\\)\\\\(?![*?\\\\]))')
     reClear = None
     andToken = " "
     orToken = " OR "

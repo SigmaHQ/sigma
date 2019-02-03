@@ -1,7 +1,7 @@
-.PHONY: test test-yaml test-sigmac
+.PHONY: test test-rules test-sigmac
 TMPOUT = $(shell tempfile||mktemp)
 COVSCOPE = tools/sigma/*.py,tools/sigma/backends/*.py,tools/sigmac,tools/merge_sigma
-test: clearcov test-yaml test-sigmac test-merge build finish
+test: clearcov test-rules test-sigmac test-merge build finish
 
 clearcov:
 	rm -f .coverage
@@ -10,8 +10,9 @@ finish:
 	coverage report --fail-under=90
 	rm -f $(TMPOUT)
 
-test-yaml:
+test-rules:
 	yamllint rules
+	tests/test_rules.py
 
 test-sigmac:
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -l

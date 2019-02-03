@@ -25,7 +25,10 @@ class SplunkBackend(SingleTextQueryBackend):
     active = True
     index_field = "index"
 
-    reEscape = re.compile('("|\\\\(?![*?]))')
+    # \   -> \\
+    # \*  -> \*
+    # \\* -> \\*
+    reEscape = re.compile('("|(?<!\\\\)\\\\(?![*?\\\\]))')
     reClear = None
     andToken = " "
     orToken = " OR "
@@ -115,7 +118,7 @@ class SplunkXMLBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
     queries = dash_pre
 
 
-    reEscape = re.compile('("|\\\\(?![*?]))')
+    reEscape = re.compile('("|(?<!\\\\)\\\\(?![*?\\\\]))')
     reClear = SplunkBackend.reClear
     andToken = SplunkBackend.andToken
     orToken = SplunkBackend.orToken

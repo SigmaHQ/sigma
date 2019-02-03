@@ -32,7 +32,7 @@ class SumoLogicBackend(SingleTextQueryBackend):
     active = True
 
     index_field = "_index"
-    reEscape = re.compile('("|\\\\(?![*?]))')
+    reEscape = re.compile('("|(?<!\\\\)\\\\(?![*?\\\\]))')
     reClear = None
     andToken = " AND "
     orToken = " OR "

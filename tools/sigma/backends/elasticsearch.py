@@ -68,7 +68,7 @@ class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, Single
     identifier = "es-qs"
     active = True
 
-    reEscape = re.compile("([\s+\\-=!(){}\\[\\]^\"~:/]|\\\\(?![*?])|\\\\u|&&|\\|\\|)")
+    reEscape = re.compile("([\s+\\-=!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|\\\\u|&&|\\|\\|)")
     reClear = re.compile("[<>]")
     andToken = " AND "
     orToken = " OR "
@@ -156,6 +156,12 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
     def generateListNode(self, node):
         raise NotImplementedError("%s : (%s) Node type not implemented for this backend"%(self.title, 'generateListNode'))
 
+    def cleanValue(self, value):
+        """
+        Remove Sigma quoting from value. Currently, this appears only in one case: \\\\*
+        """
+        return value.replace("\\\\*", "\\*")
+
     def generateMapItemNode(self, node):
         key, value = node
         if type(value) not in (str, int, list):
@@ -169,7 +175,7 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
                 else:
                     queryType = 'match_phrase'
 
-                res['bool']['should'].append({queryType: {key_mapped: v}})
+                res['bool']['should'].append({queryType: {key_mapped: self.cleanValue(str(v))}})
             return res
         else:
             key_mapped = self.fieldNameMapping(key, value)
@@ -177,7 +183,7 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
                 queryType = 'wildcard'
             else:
                 queryType = 'match_phrase'
-            return {queryType: {key_mapped: value}}
+            return {queryType: {key_mapped: self.cleanValue(str(value))}}
 
     def generateValueNode(self, node):
         return {'multi_match': {'query': node, 'fields': [], 'type': 'phrase'}}
