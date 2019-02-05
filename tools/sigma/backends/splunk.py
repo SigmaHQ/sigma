@@ -56,17 +56,17 @@ class SplunkBackend(SingleTextQueryBackend):
         if agg.groupfield == None:
             if agg.aggfunc_notrans == 'count':
                 if agg.aggfield == None :
-                    return " | stats count as val | search val %s %s" % (agg.cond_op, agg.condition)
+                    return " | eventstats count as val | search val %s %s" % (agg.cond_op, agg.condition)
                 else:
                     agg.aggfunc_notrans = 'dc'
-            return " | stats %s(%s) as val | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.cond_op, agg.condition)
+            return " | eventstats %s(%s) as val | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.cond_op, agg.condition)
         else:
             if agg.aggfunc_notrans == 'count':
                 if agg.aggfield == None :
-                    return " | stats count as val by %s| search val %s %s" % (agg.groupfield, agg.cond_op, agg.condition)
+                    return " | eventstats count as val by %s| search val %s %s" % (agg.groupfield, agg.cond_op, agg.condition)
                 else:
                     agg.aggfunc_notrans = 'dc'
-            return " | stats %s(%s) as val by %s | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)
+            return " | eventstats %s(%s) as val by %s | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)
 
         
     def generate(self, sigmaparser):
