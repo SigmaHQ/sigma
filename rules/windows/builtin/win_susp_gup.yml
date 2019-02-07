@@ -1,0 +1,35 @@
+---
+action: global
+title: Suspicious GUP Usage
+description: Detects execution of the Notepad++ updater in a suspicious directory, which is often used in DLL side-loading attacks
+status: experimental
+references:
+    - https://www.fireeye.com/blog/threat-research/2018/09/apt10-targeting-japanese-corporations-using-updated-ttps.html
+author: Florian Roth
+date: 2019/02/06
+detection:
+    condition: selection and not filter
+falsepositives: 
+    - 'Execution of tools named GUP.exe and located in folders different than Notepad++\updater'
+level: high
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+        Image: '*\GUP.exe'
+    filter:
+        Image: '*\updater\*'
+---
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection:
+        EventID: 4688
+        NewProcessName: '*\GUP.exe'
+    filter:
+        NewProcessName: '*\updater\*'

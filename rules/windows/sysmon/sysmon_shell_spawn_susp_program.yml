@@ -5,6 +5,7 @@ references:
     - https://mgreen27.github.io/posts/2018/04/02/DownloadCradle.html
 author: Florian Roth
 date: 2018/04/06
+modified: 2019/02/05
 logsource:
     product: windows
     service: sysmon
@@ -25,11 +26,14 @@ detection:
             - '*\certutil.exe'
             - '*\bitsadmin.exe'
             - '*\mshta.exe'
-    condition: selection
+    falsepositives:
+        CurrentDirectory: '*\ccmcache\*'
+    condition: selection and not falsepositives
 fields:
     - CommandLine
     - ParentCommandLine
 falsepositives:
     - Administrative scripts
+    - Microsoft SCCM
 level: high
 

@@ -2,7 +2,7 @@
 action: global
 title: NetNTLM Downgrade Attack
 description: Detects post exploitation using NetNTLM downgrade attacks
-reference: 
+references: 
     - https://www.optiv.com/blog/post-exploitation-using-netntlm-downgrade-attacks
 author: Florian Roth
 date: 2018/03/20
@@ -22,19 +22,19 @@ detection:
     selection1:
         EventID: 13
         TargetObject: 
-            - '*SYSTEM\*ControlSet*\Control\Lsa\lmcompatibilitylevel'
-            - '*SYSTEM\*ControlSet*\Control\Lsa\NtlmMinClientSec'
-            - '*SYSTEM\*ControlSet*\Control\Lsa\RestrictSendingNTLMTraffic'
+            - '*SYSTEM\\*ControlSet*\Control\Lsa\lmcompatibilitylevel'
+            - '*SYSTEM\\*ControlSet*\Control\Lsa\NtlmMinClientSec'
+            - '*SYSTEM\\*ControlSet*\Control\Lsa\RestrictSendingNTLMTraffic'
 ---
 # Windows Security Eventlog: Process Creation with Full Command Line
 logsource:
     product: windows
     service: security
-    description: 'Requirements: Audit Policy : Object Access > Audit Registry (Success)'
+    definition: 'Requirements: Audit Policy : Object Access > Audit Registry (Success)'
 detection:
     selection2:
         EventID: 4657
-        ObjectName: '\REGISTRY\MACHINE\SYSTEM\*ControlSet*\Control\Lsa'
+        ObjectName: '\REGISTRY\MACHINE\SYSTEM\\*ControlSet*\Control\Lsa'
         ObjectValueName: 
             - 'LmCompatibilityLevel'
             - 'NtlmMinClientSec'

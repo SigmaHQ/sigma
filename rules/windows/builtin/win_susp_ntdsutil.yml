@@ -10,8 +10,6 @@ tags:
     - attack.credential_access
     - attack.t1003
 detection:
-    selection:
-        CommandLine: '*\ntdsutil.exe *'
     condition: selection
 falsepositives: 
     - NTDS maintenance
@@ -23,12 +21,13 @@ logsource:
 detection:
     selection:
         EventID: 1
+        CommandLine: '*\ntdsutil*'
 ---
 logsource:
     product: windows
     service: security
-    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+    definition: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
 detection:
     selection:
         EventID: 4688
-
+        ProcessCommandLine: '*\ntdsutil*'
