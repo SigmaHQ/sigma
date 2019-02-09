@@ -201,4 +201,6 @@ The content of this repository is released under the following licenses:
 
 This is a private project mainly developed by Florian Roth and Thomas Patzke with feedback from many fellow analysts and friends. Rules are our own or have been drived from blog posts, tweets or other public sources that are referenced in the rules.
 
-Copyright for Tree Image: [studiobarcelona / 123RF Stock Photo](http://www.123rf.com/profile_studiobarcelona)
+# Info Graphic
+
+![sigmac_info_graphic](./images/sigma_infographic_lq.png)
