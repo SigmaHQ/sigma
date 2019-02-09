@@ -1,0 +1,39 @@
+---
+action: global
+title: Possible SPN Enumeration 
+description: Detects Service Principal Name Enumeration used for Kerberoasting
+status: experimental
+references:
+    - https://p16.praetorian.com/blog/how-to-use-kerberoasting-t1208-for-privilege-escalation
+author: Markus Neis
+date: 2018/11/14
+tags:
+    - attack.credential_access
+    - attack.t1208
+detection:
+    selection:
+         Image: '*\setspn.exe'
+    selection1:
+        Description: '*Query or reset the computer* SPN attribute*'
+    cmd:
+        CommandLine: '*-q*'
+    condition: (selection or selection1) and cmd 
+falsepositives: 
+    - Administrator Activity 
+level: medium
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+---
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection:
+        EventID: 4688
+
