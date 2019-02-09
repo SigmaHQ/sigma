@@ -78,6 +78,35 @@ class TestRules(unittest.TestCase):
                          "There are rules with incorrect MITRE Tags")
 
 
+    def test_look_for_duplicate_filters(self):
+        def check_list_or_recurse_on_dict(item, depth:int) -> None:
+            if type(item) == list:
+                check_if_list_contain_duplicates(item, depth)
+            elif type(item) == dict and depth <= MAX_DEPTH:
+                for sub_item in item.values():
+                    check_list_or_recurse_on_dict(sub_item, depth + 1)
+
+        def check_if_list_contain_duplicates(item:list, depth:int) -> None:
+            try:
+                if len(item) != len(set(item)):
+                    print("Rule {} has duplicate filters".format(file))
+                    files_with_duplicate_filters.append(file)
+            except:
+                # unhashable types like dictionaries
+                for sub_item in item:
+                    if type(sub_item) == dict and depth <= MAX_DEPTH:
+                        check_list_or_recurse_on_dict(sub_item, depth + 1)
+
+        MAX_DEPTH = 3
+        files_with_duplicate_filters = []
+
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            detection = self.get_rule_part(file_path=file, part_name="detection")
+            check_list_or_recurse_on_dict(detection, 1)
+
+        self.assertEqual(files_with_duplicate_filters, [],
+                         "There are rules with duplicate filters")
+
 
 if __name__ == "__main__":
     unittest.main()
