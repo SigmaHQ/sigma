@@ -180,20 +180,45 @@ class SumoLogicBackend(SingleTextQueryBackend):
             else:
                 raise TypeError("Backend does not support map values of type " + str(type(value)))
 
+    # from mixins.py
+    #FIXME! input in simple quotes are not passing through this function. ex: rules/windows/sysmon/sysmon_vul_java_remote_debugging.yml, rules/apt/apt_sofacy_zebrocy.yml
+    #   => OK only if field entry with list, not string
+    def cleanValue(self, val, key = ''):
+        print("DEBUG cleanValue0: %s" % val)
+        if self.reEscape:
+            val = self.reEscape.sub(self.escapeSubst, val)
+        if self.reClear:
+            val = self.reClear.sub("", val)
+        # in sumologic, if key, can use wildcard outside of double quotes. if inside, it's litteral
+        if key:
+            val = re.sub(r'(.+?)\*(.+?)', '\g<1>"*"\g<2>', val, 0)
+            val = re.sub(r'^\*', '*"', val)
+            val = re.sub(r'\*$', '"*', val)
+            # if unbalanced wildcard?
+            if val.startswith('*"') and not (val.endswith('"*') or val.endswith('"')):
+                val = val + '"'
+            if val.endswith('"*') and not (val.startswith('*"') or val.startswith('"')):
+                val = '"' + val
+            # double escape if end quote
+            if val.endswith('\\"*') and not val.endswith('\\\\"*'):
+                val = re.sub(r'\\"\*$', '\\\\\\"*', val)
+        print("DEBUG cleanValue1: %s" % val)
+        return val
+
     # for keywords values with space
-    def generateValueNode(self, node):
+    def generateValueNode(self, node, key = ''):
         if type(node) is int:
-            return self.cleanValue(str(node))
+            return self.cleanValue(str(node), key)
         if 'AND' in node:
-            return "(" + self.cleanValue(str(node)) + ")"
+            return "(" + self.cleanValue(str(node), key) + ")"
         else:
-            return self.cleanValue(str(node))
+            return self.cleanValue(str(node), key)
 
     def generateMapItemListNode(self, key, value):
         itemslist = list()
         for item in value:
             if key in self.allowedFieldsList:
-                itemslist.append('%s = %s' % (key, self.generateValueNode(item)))
+                itemslist.append('%s = %s' % (key, self.generateValueNode(item, key)))
             else:
                 itemslist.append('%s' % (self.generateValueNode(item)))
         return "(" + " OR ".join(itemslist) + ")"
