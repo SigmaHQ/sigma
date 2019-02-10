@@ -3,7 +3,7 @@ action: global
 title: Suspicious Certutil Command
 status: experimental
 description: Detects a suspicious Microsoft certutil execution with sub commands like 'decode' sub command, which is sometimes used to decode malicious code with the built-in certutil utility
-author: Florian Roth, juju4
+author: Florian Roth, juju4, keepwatch
 modified: 2019/01/22
 references:
     - https://twitter.com/JohnLaTwC/status/835149808817991680
@@ -12,6 +12,7 @@ references:
     - https://blogs.technet.microsoft.com/pki/2006/11/30/basic-crl-checking-with-certutil/
     - https://www.trustedsec.com/2017/07/new-tool-release-nps_payload/
     - https://twitter.com/egre55/status/1087685529016193025
+    - https://lolbas-project.github.io/lolbas/Binaries/Certutil/
 detection:
     condition: selection
 fields:
@@ -20,6 +21,7 @@ fields:
 tags:
     - attack.defense_evasion
     - attack.t1140
+    - attack.t1105
     - attack.s0189
     - attack.g0007
 falsepositives:
@@ -33,18 +35,20 @@ detection:
     selection:
         EventID: 1
         CommandLine: 
-            - '*certutil * -decode *'
-            - '*certutil * -decodehex *'
-            - '* -urlcache * http*'
-            - '* -urlcache * ftp*'
-            - '* -verifyctl * http*'
-            - '* -verifyctl * ftp*'
-            - '*certutil *-URL*'
-            - '*certutil *-ping*'
-            - '*certutil.exe * -decode *'
-            - '*certutil.exe * -decodehex *'
-            - '*certutil.exe *-URL*'
-            - '*certutil.exe *-ping*'
+            - '* -decode *'
+            - '* /decode *'
+            - '* -decodehex *'
+            - '* /decodehex *'
+            - '* -urlcache *'
+            - '* /urlcache *'
+            - '* -verifyctl *'
+            - '* /verifyctl *'
+            - '* -encode *'
+            - '* /encode *'
+            - '*certutil* -URL*'
+            - '*certutil* /URL*'
+            - '*certutil* -ping*'
+            - '*certutil* /ping*'
 ---
 logsource:
     product: windows
@@ -54,15 +58,17 @@ detection:
     selection:
         EventID: 4688
         ProcessCommandLine: 
-            - '*certutil * -decode *'
-            - '*certutil * -decodehex *'
-            - '* -urlcache * http*'
-            - '* -urlcache * ftp*'
-            - '* -verifyctl * http*'
-            - '* -verifyctl * ftp*'
-            - '*certutil *-URL*'
-            - '*certutil *-ping*'
-            - '*certutil.exe * -decode *'
-            - '*certutil.exe * -decodehex *'
-            - '*certutil.exe *-URL*'
-            - '*certutil.exe *-ping*'
+            - '* -decode *'
+            - '* /decode *'
+            - '* -decodehex *'
+            - '* /decodehex *'
+            - '* -urlcache *'
+            - '* /urlcache *'
+            - '* -verifyctl *'
+            - '* /verifyctl *'
+            - '* -encode *'
+            - '* /encode *'
+            - '*certutil* -URL*'
+            - '*certutil* /URL*'
+            - '*certutil* -ping*'
+            - '*certutil* /ping*'

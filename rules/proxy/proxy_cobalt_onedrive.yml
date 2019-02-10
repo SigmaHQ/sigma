@@ -1,0 +1,21 @@
+title: CobaltStrike Malleable OneDrive browsing traffic profile
+status: experimental
+description: Detects Malleable OneDrive Profile 
+references:
+    - https://github.com/rsmudge/Malleable-C2-Profiles/blob/master/normal/onedrive_getonly.profile    
+author: Markus Neis
+tags:
+    - attack.t1102
+logsource:
+    category: proxy
+detection:
+    selection:
+      HttpMethod: 'GET'
+      URL: '*?manifest=wac'
+      Host: 'onedrive.live.com'
+    filter:
+      URL: 'http*://onedrive.live.com/*'     
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high
