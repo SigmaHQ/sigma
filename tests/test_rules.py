@@ -108,5 +108,25 @@ class TestRules(unittest.TestCase):
                          "There are rules with duplicate filters")
 
 
+    def test_single_named_condition_with_x_of_them(self):
+        faulty_detections = []
+
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            yaml = self.get_rule_yaml(file_path = file)
+            detection = self.get_rule_part(file_path = file, part_name = "detection")
+            
+            has_them_in_condition = "them" in detection["condition"]
+            has_only_one_named_condition = len(detection) == 2
+            not_multipart_yaml_file = len(yaml) == 1
+
+            if has_them_in_condition and \
+                has_only_one_named_condition and \
+                    not_multipart_yaml_file:
+                faulty_detections.append(file)
+
+        self.assertEqual(faulty_detections, [], 
+                         "There are rules using '1/all of them' style conditions but only have one condition")
+
+
 if __name__ == "__main__":
     unittest.main()
