@@ -2,7 +2,7 @@
 """
 Checks for noncompliance or common errors on all rules
 
-Run using the command 
+Run using the command
 # python -m unittest test_rules.py
 """
 
@@ -59,7 +59,7 @@ class TestRules(unittest.TestCase):
                 if extension != ".yml":
                     files_with_incorrect_extensions.append(file)
 
-        self.assertEqual(files_with_incorrect_extensions, [], 
+        self.assertEqual(files_with_incorrect_extensions, [],
                         "There are rule files with extensions other than .yml")
 
 
@@ -73,7 +73,7 @@ class TestRules(unittest.TestCase):
                     if tag not in self.MITRE_ALL and tag.startswith("attack."):
                         print("Rule {} has the following incorrect tag {}".format(file, tag))
                         files_with_incorrect_mitre_tags.append(file)
-        
+
         self.assertEqual(files_with_incorrect_mitre_tags, [],
                          "There are rules with incorrect MITRE Tags")
 
@@ -114,7 +114,7 @@ class TestRules(unittest.TestCase):
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             yaml = self.get_rule_yaml(file_path = file)
             detection = self.get_rule_part(file_path = file, part_name = "detection")
-            
+
             has_them_in_condition = "them" in detection["condition"]
             has_only_one_named_condition = len(detection) == 2
             not_multipart_yaml_file = len(yaml) == 1
@@ -124,8 +124,79 @@ class TestRules(unittest.TestCase):
                     not_multipart_yaml_file:
                 faulty_detections.append(file)
 
-        self.assertEqual(faulty_detections, [], 
+        self.assertEqual(faulty_detections, [],
                          "There are rules using '1/all of them' style conditions but only have one condition")
+
+
+    def test_duplicate_titles(self):
+        def compare_detections(detection1:dict, detection2:dict) -> bool:
+
+            # detections not the same length can't be the same
+            if len(detection1) != len(detection2):
+                return False
+
+            for named_condition in detection1:
+                # condition clause must be the same too 
+                if named_condition == "condition":
+                    if detection1["condition"] != detection2["condition"]:
+                        return False
+                    else:
+                        continue
+
+                # Named condition must exist in both rule files
+                if named_condition not in detection2:
+                    return False
+
+                if len(detection1[named_condition]) != len(detection2[named_condition]):
+                    return False
+
+                for condition in detection1[named_condition]:
+                    if type(condition) != str:
+                        return False
+
+                    if condition not in detection2[named_condition]:
+                        return False
+
+                    condition_value1 = detection1[named_condition][condition]
+                    condition_value2 = detection2[named_condition][condition]
+
+                    if condition_value1 != condition_value2:
+                        return False
+
+            return True
+
+        faulty_detections = []
+        files_and_their_detections = {}
+
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            detection = self.get_rule_part(file_path = file, part_name = "detection")
+            yaml = self.get_rule_yaml(file_path = file)
+
+            is_multipart_yaml_file = len(yaml) != 1
+            if is_multipart_yaml_file:
+                continue
+
+            for key in files_and_their_detections:
+                if compare_detections(detection, files_and_their_detections[key]):
+                    faulty_detections.append((key, file))
+
+            files_and_their_detections[file] = detection
+
+        self.assertEqual(faulty_detections, [],
+                         "There are rule files with exactly the same detection logic.")
+
+
+    def test_source_eventlog(self):
+        faulty_detections = []
+
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            detection = self.get_rule_part(file_path = file, part_name = "detection")
+            detection_str = str(detection).lower()
+            if "'source': 'eventlog'" in detection_str:
+                faulty_detections.append(file)
+
+        self.assertEqual(faulty_detections, [],
+                         "There are detections with 'Source: Eventlog'. This does not add value to the detection.")
 
 
 if __name__ == "__main__":
