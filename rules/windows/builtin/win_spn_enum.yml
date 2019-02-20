@@ -5,19 +5,19 @@ description: Detects Service Principal Name Enumeration used for Kerberoasting
 status: experimental
 references:
     - https://p16.praetorian.com/blog/how-to-use-kerberoasting-t1208-for-privilege-escalation
-author: Markus Neis
+author: Markus Neis, keepwatch
 date: 2018/11/14
 tags:
     - attack.credential_access
     - attack.t1208
 detection:
-    selection:
+    selection_image:
          Image: '*\setspn.exe'
-    selection1:
+    selection_desc:
         Description: '*Query or reset the computer* SPN attribute*'
     cmd:
         CommandLine: '*-q*'
-    condition: (selection or selection1) and cmd 
+    condition: selection and (selection_image or selection_desc) and cmd
 falsepositives: 
     - Administrator Activity 
 level: medium
