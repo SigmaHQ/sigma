@@ -9,7 +9,7 @@ logsource:
 author: Florian Roth
 date: 2019/02/21 
 detection:
-    condition: selection
+    condition: selection1 or selection2
 falsepositives:
     - unknown
 level: critical
@@ -38,9 +38,17 @@ logsource:
     service: security
     description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
 detection:
-    selection:
+    selection1:
         EventID: 4688
         ProcessCommandLine:
             - '*\ldifde.exe -f -n *'
             - '*\7za.exe a 1.7z *'
             - '* eprod.ldf'
+            - '*\aaaa\procdump64.exe*'
+            - '*\aaaa\netsess.exe*'
+            - '*\aaaa\7za.exe*'
+            - '*copy .\1.7z \\*'
+            - '*copy \\client\c$\aaaa\*'
+    selection2:
+        EventID: 1
+        NewProcessName: 'C:\Users\Public\7za.exe'
