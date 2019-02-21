@@ -1,0 +1,44 @@
+---
+action: global
+title: Judgement Panda Exfil Activity 
+description: 'Detects Russian group activity as described in Global Threat Report 2019 by Crowdstrike' 
+references:
+    - https://www.crowdstrike.com/resources/reports/2019-crowdstrike-global-threat-report/
+logsource:
+    product: windows
+author: Florian Roth
+date: 2019/02/21 
+tags: 
+    - attack.credential_access
+    - attack.t1098
+detection:
+    condition: selection1 or selection2
+falsepositives:
+    - unknown
+level: critical
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection1:
+        EventID: 1
+        Image: '*\xcopy.exe'
+        CommandLine: '* /S /E /C /Q /H \\*'
+    selection2:
+        EventID: 1
+        Image: '*\adexplorer.exe'
+        CommandLine: '* -snapshot "" c:\users\*'
+---
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection1:
+        EventID: 4688
+        ProcessCommandLine: '*\xcopy.exe /S /E /C /Q /H \\*'
+    selection2:
+        EventID: 4688
+        NewProcessName: '*\adexplorer.exe'
+        ProcessCommandLine: '* -snapshot "" c:\users\*'
