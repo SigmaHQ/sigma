@@ -1,0 +1,39 @@
+title: Windows processes with wrong parent
+status: experimental
+description: Detect scenarios when malicious program is disguised as legitimate process
+author: 'vburov'
+references:
+    - https://securitybytes.io/blue-team-fundamentals-part-two-windows-processes-759fe15965e2
+    - https://attack.mitre.org/techniques/T1036/	
+date: 2019/02/23
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+    filter1:
+        Image: 
+		        - '*\svchost.exe'
+		        - '*\taskhost.exe'
+      	ParentImage: '*\services.exe'	
+    filter2:
+        Image: 
+            - '*\lsm.exe'
+		        - '*\lsass.exe'
+		        - '*\services.exe'
+	      ParentImage: '*\wininit.exe'
+    filter3:
+	      Image: 
+		        - '*\csrss.exe'
+		        - '*\wininit.exe'
+		        - '*\winlogon.exe'
+	      ParentImage: '*\smss.exe'
+    filter4:
+	      Image: '*\explorer.exe'
+	      ParentImage: '*\userinit.exe'
+    condition: selection and not ( filter1 or filter2 or filter3 or filter4 )
+level: high
