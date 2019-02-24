@@ -7,6 +7,7 @@ references:
     - https://room362.com/post/2013/2013-06-10-volume-shadow-copy-ntdsdit-domain-hashes-remotely-part-1/
     - https://www.trustwave.com/Resources/SpiderLabs-Blog/Tutorial-for-NTDS-goodness-(VSSADMIN,-WMIS,-NTDS-dit,-SYSTEM)/
     - https://securingtomorrow.mcafee.com/mcafee-labs/new-teslacrypt-ransomware-arrives-via-spam/
+    - https://dfironthemountain.wordpress.com/2018/12/06/locked-file-access-using-esentutl-exe/
 logsource:
     product: windows
     service: sysmon
@@ -22,6 +23,7 @@ detection:
             - 'copy \\?\GLOBALROOT\Device\\*\config\SAM'
             - 'vssadmin delete shadows /for=C:'
             - 'reg SAVE HKLM\SYSTEM '
+            - 'esentutl.exe /y /vss *\ntds.dit*'
     condition: selection
 fields:
     - CommandLine
