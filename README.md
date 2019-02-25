@@ -24,6 +24,12 @@ This repository contains:
 
 [![Sigma - Generic Signatures for Log Events](https://preview.ibb.co/cMCigR/Screen_Shot_2017_10_18_at_15_47_15.png)](https://www.youtube.com/watch?v=OheVuE9Ifhs "Sigma - Generic Signatures for Log Events")
 
+## SANS Webcast on MITRE ATT&CK and Sigma
+
+The SANS webcast on Sigma contains a very good 20 min introduction to the project by John Hubbart from minute 39 onward. (SANS account required; registration is free)
+
+[MITRE ATT&CK and Sigma Alerting Webcast Recording](https://www.sans.org/webcasts/mitre-att-ck-sigma-alerting-110010 "MITRE ATT&CK and Sigma Alerting")
+
 # Use Cases
 
 * Describe your detection method in Sigma to make it sharable
@@ -201,4 +207,6 @@ The content of this repository is released under the following licenses:
 
 This is a private project mainly developed by Florian Roth and Thomas Patzke with feedback from many fellow analysts and friends. Rules are our own or have been drived from blog posts, tweets or other public sources that are referenced in the rules.
 
-Copyright for Tree Image: [studiobarcelona / 123RF Stock Photo](http://www.123rf.com/profile_studiobarcelona)
+# Info Graphic
+
+![sigmac_info_graphic](./images/sigma_infographic_lq.png)

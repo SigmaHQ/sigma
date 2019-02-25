@@ -1,0 +1,31 @@
+title: RDP over Reverse SSH Tunnel WFP
+status: experimental
+description: Detects svchost hosting RDP termsvcs communicating with the loopback address and on TCP port 3389
+references:
+    - https://twitter.com/SBousseaden/status/1096148422984384514
+author: Samir Bousseaden
+date: 2019/02/16
+tags:
+    - attack.defense_evasion
+    - attack.command_and_control
+    - attack.t1076
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 5156
+    sourceRDP:
+        SourcePort: 3389
+        DestinationAddress:
+            - '127.*'
+            - '::1'
+    destinationRDP:
+        DestinationPort: 3389
+        SourceAddress:
+            - '127.*'
+            - '::1'
+    condition: selection and ( sourceRDP or destinationRDP )
+falsepositives:
+    - unknown
+level: high

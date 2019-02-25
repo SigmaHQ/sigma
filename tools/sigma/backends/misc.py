@@ -23,7 +23,7 @@ class GrepBackend(BaseBackend, QuoteCharMixin):
     identifier = "grep"
     active = True
 
-    reEscape = re.compile("([\\|()\[\]{}.^$])")
+    reEscape = re.compile("([\\|()\[\]{}.^$+])")
 
     def generateQuery(self, parsed):
         return "grep -P '^%s'" % self.generateNode(parsed.parsedSearch)

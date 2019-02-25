@@ -23,7 +23,10 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
     identifier = "wdatp"
     active = True
 
-    reEscape = re.compile('("|\\\\(?![*?]))')
+    # \   -> \\
+    # \*  -> \*
+    # \\* -> \\*
+    reEscape = re.compile('("|(?<!\\\\)\\\\(?![*?\\\\]))')
     reClear = None
     andToken = " and "
     orToken = " or "
