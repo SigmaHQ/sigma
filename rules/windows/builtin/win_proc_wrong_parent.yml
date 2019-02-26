@@ -14,34 +14,33 @@ logsource:
     service: sysmon
     definition: 'Requirements: Sysmon'
 detection:
-    selection:
+    selection1:
         EventID: 1
-    filter1:
         Image:
             - '*\svchost.exe'
             - '*\taskhost.exe'
+    filter:1
         ParentImage:
             - '*\services.exe'
-    filter2:
+    selection2:
+        EventID: 1
         Image:
             - '*\lsm.exe'
             - '*\lsass.exe'
             - '*\services.exe'
+    filter2:
         ParentImage:
             - '*\wininit.exe'
-    filter3:
+    selection3:
+        EventID: 1
         Image:
             - '*\csrss.exe'
             - '*\wininit.exe'
             - '*\winlogon.exe'
+    filter3:
         ParentImage:
             - '*\smss.exe'
-    filter4:
-        Image:
-            - '*\explorer.exe'
-        ParentImage:
-            - '*\userinit.exe'
-    condition: selection and not ( filter1 or filter2 or filter3 or filter4 )
+    condition: ( selection1 and not filter1 ) or ( selection2 and not filter2 ) or ( selection3 and not filter3 )
 falsepositives:
     - None
 level: high
