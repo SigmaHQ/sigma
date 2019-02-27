@@ -1,0 +1,69 @@
+action: global
+title: MSHTA Suspicious Execution 01
+status: testing
+description: Detection for mshta.exe suspicious execution patterns sometimes involving file polyglotism
+date: 22/02/2019
+modified: 22/02/2019
+author: Diego Perez (@darkquassar)
+references:
+    - http://blog.sevagas.com/?Hacking-around-HTA-files
+    - https://0x00sec.org/t/clientside-exploitation-in-2018-how-pentesting-has-changed/7356
+    - https://docs.microsoft.com/en-us/dotnet/standard/data/xml/xslt-stylesheet-scripting-using-msxsl-script
+    - https://medium.com/tsscyber/pentesting-and-hta-bypassing-powershell-constrained-language-mode-53a42856c997
+tags:
+    - attack.defense_evasion
+    - attack.t1140
+detection:
+    condition: 1 of selection*
+falsepositives: 
+    - False positives depend on scripts and administrative tools used in the monitored environment
+level: medium
+---
+# Windows Audit Log
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection-1:
+        EventID: 4688
+        ProcessCommandLine: 
+            - '*mshta vbscript:CreateObject("Wscript.Shell")*'
+            - '*mshta vbscript:Execute("Execute*'
+            - '*mshta vbscript:CreateObject("Wscript.Shell").Run("mshta.exe*'
+    selection-2:
+        EventID: 4688
+        NewProcessName:
+            - 'C:\Windows\system32\mshta.exe'
+        ProcessCommandLine: 
+            - '*.jpg*'
+            - '*.png*'
+            - '*.lnk*'
+            - '*.chm*'
+            - '*.xls*'
+            - '*.doc*'
+            - '*.zip*'
+---
+# Sysmon
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection-1:
+        EventID: 1
+        CommandLine: 
+            - '*mshta vbscript:CreateObject("Wscript.Shell")*'
+            - '*mshta vbscript:Execute("Execute*'
+            - '*mshta vbscript:CreateObject("Wscript.Shell").Run("mshta.exe*'
+    selection-2:
+        EventID: 1
+        Image:
+            - 'C:\Windows\system32\mshta.exe'
+        ProcessCommandLine: 
+            - '*.jpg*'
+            - '*.png*'
+            - '*.lnk*'
+            - '*.chm*'
+            - '*.xls*'
+            - '*.doc*'
+            - '*.zip*'
