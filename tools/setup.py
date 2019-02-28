@@ -13,7 +13,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='sigmatools',
-    version='0.7.1',
+    version='0.8',
     description='Tools for the Generic Signature Format for SIEM Systems',
     long_description=long_description,
     url='https://github.com/Neo23x0/sigma',
@@ -21,7 +21,7 @@ setup(
     author_email='thomas@patzke.org',
     license='LGPLv3',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Intended Audience :: Information Technology',
         'Intended Audience :: System Administrators',
