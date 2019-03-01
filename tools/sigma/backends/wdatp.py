@@ -126,11 +126,16 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
     def generate(self, sigmaparser):
         self.table = None
         try:
-            self.product = sigmaparser.parsedyaml['logsource']['product']
-            self.service = sigmaparser.parsedyaml['logsource']['service']
+            self.category = sigmaparser.parsedyaml['logsource'].setdefault('category', None)
+            self.product = sigmaparser.parsedyaml['logsource'].setdefault('product', None)
+            self.service = sigmaparser.parsedyaml['logsource'].setdefault('service', None)
         except KeyError:
+            self.category = None
             self.product = None
             self.service = None
+
+        if (self.category, self.product, self.service) == ("process_creation", "windows", None):
+            self.table = "ProcessCreationEvents"
 
         return super().generate(sigmaparser)
 

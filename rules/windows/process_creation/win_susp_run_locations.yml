@@ -1,0 +1,23 @@
+title: Suspicious Process Start Locations
+description: Detects suspicious process run from unusual locations
+status: experimental
+references:
+    - https://car.mitre.org/wiki/CAR-2013-05-002
+author: juju4
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine:
+            - '*:\RECYCLER\\*'
+            - '*:\SystemVolumeInformation\\*'
+            - '%windir%\Tasks\\*'
+            - '%systemroot%\debug\\*'
+    condition: selection
+falsepositives:
+    - False positives depend on scripts and administrative tools used in the monitored environment
+level: medium

@@ -97,7 +97,7 @@ class SigmaConditionToken:
         else:
             raise NotImplementedError("SigmaConditionToken can only be compared against token type constants")
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return "[ Token: %s: '%s' ]" % (self.tokenstr[self.type], self.matched)
 
 class SigmaConditionTokenizer:
@@ -144,7 +144,7 @@ class SigmaConditionTokenizer:
         else:
             raise TypeError("SigmaConditionTokenizer constructor expects string or list, got %s" % (type(condition)))
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return " ".join([str(token) for token in self.tokens])
 
     def __iter__(self):
@@ -178,7 +178,7 @@ class ParseTreeNode:
     def __init__(self):
         raise NotImplementedError("ConditionBase is no usable class")
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return "[ %s: %s ]" % (self.__doc__, str([str(item) for item in self.items]))
 
 class ConditionBase(ParseTreeNode):
@@ -529,31 +529,22 @@ class SigmaConditionParser:
 
         if len(tokens) != 1:     # parse tree must begin with exactly one node
             raise ValueError("Parse tree must have exactly one start node!")
-        querycond = tokens[0]
+        query_cond = tokens[0]
 
-        logsource = self.sigmaParser.get_logsource()
-        if logsource != None:
-            # 4. Integrate conditions from configuration
-            if logsource.conditions != None:
-                cond = ConditionAND()
-                cond.add(logsource.conditions)
-                cond.add(querycond)
-                querycond = cond
+        # 4. Integrate conditions from logsources in configurations
+        ls_cond = self.sigmaParser.get_logsource_condition()
+        if ls_cond is not None:
+            cond = ConditionAND()
+            cond.add(ls_cond)
+            cond.add(query_cond)
+            query_cond = cond
 
-            # 5. Integrate index conditions if applicable for backend
-            indexcond = logsource.get_indexcond()
-            if indexcond != None:
-                cond = ConditionAND()
-                cond.add(indexcond)
-                cond.add(querycond)
-                querycond = cond
+        return self._optimizer.optimizeTree(query_cond)
 
-        return self._optimizer.optimizeTree(querycond)
-
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return str(self.parsedSearch)
 
-    def __len__(self):
+    def __len__(self):  # pragma: no cover
         return len(self.parsedSearch)
  
 # Aggregation parser
