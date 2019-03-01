@@ -13,7 +13,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='sigmatools',
-    version='0.8',
+    version='0.9',
     description='Tools for the Generic Signature Format for SIEM Systems',
     long_description=long_description,
     url='https://github.com/Neo23x0/sigma',
@@ -58,6 +58,10 @@ setup(
             'config/splunk-windows-all.yml',
             'config/qradar.yml',
             'config/powershell-windows-all.yml',
+            ]),
+        ('etc/sigma/generic', [
+            'config/generic/sysmon.yml',
+            'config/generic/windows-audit.yml',
         ])],
     scripts=[
         'sigmac',
