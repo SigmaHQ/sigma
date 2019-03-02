@@ -151,22 +151,27 @@ optional arguments:
 
 ### Examples
 
+#### Single Rule Translation
 Translate a single rule
 ```
 tools/sigmac -t splunk rules/windows/sysmon/sysmon_susp_image_load.yml
 ```
+#### Rule Set Translation
 Translate a whole rule directory and ignore backend errors (`-I`) in rule conversion for the selected backend (`-t splunk`)
 ```
 tools/sigmac -I -t splunk -r rules/windows/sysmon/
 ```
+#### Rule Set Translation with Custom Config 
 Apply your own config file (`-c ~/my-elk-winlogbeat.yml`) during conversion, which can contain you custom field and source mappings
 ```
 tools/sigmac -t es-qs -c ~/my-elk-winlogbeat.yml -r rules/windows/sysmon
 ```
+#### Generic Rule Set Translation
 Use a config file for `process_creation` rules (`-r rules/windows/process_creation`) that instructs sigmac to create queries for a Sysmon log source (`-c tools/config/generic/sysmon.yml`) and the ElasticSearch target backend (`-t es-qs`) 
 ```
 tools/sigmac -t es-qs -c tools/config/generic/sysmon.yml -r rules/windows/process_creation
 ```
+#### Generic Rule Set Translation with Custom Config
 Use a config file for a single `process_creation` rule (`./rules/windows/process_creation/win_susp_outlook.yml`) that instructs sigmac to create queries for process creation events generated in the Windows Security Eventlog (`-c tools/config/generic/windows-audit.yml`) and a Splunk target backend (`-t splunk`)
 ```
 tools/sigmac -t splunk -c ~/my-splunk-mapping.yml -c tools/config/generic/windows-audit.yml ./rules/windows/process_creation/win_susp_outlook.yml
