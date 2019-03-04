@@ -54,7 +54,10 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
         schema_keys = []
         abs_path = os.path.abspath(os.path.dirname(__file__))
         sysmon_schema = os.path.join(abs_path, "../../../contrib/sysmon-schema.xml")
-        tree = xml.parse(sysmon_schema)
+        try:
+            tree = xml.parse(sysmon_schema)
+        except:
+            raise NotSupportedError("Required Sysmon schema not provided")
         root = tree.getroot()
         for child in root.iter('event'):
             if child.attrib['value'] == str(eventid):
