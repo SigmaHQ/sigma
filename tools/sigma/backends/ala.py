@@ -25,7 +25,8 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
     identifier = "ala"
     active = True
 
-    reEscape = re.compile('("|\\\\(?![*?]))')
+#    reEscape = re.compile('("|\\\\(?![*?]))')
+    reEscape = re.compile('("|(?<!\\\\)\\\\(?![*?\\\\]))')
     reClear = None
     andToken = " and "
     orToken = " or "
@@ -46,8 +47,6 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
 
     def id_mapping(self, src):
         """Identity mapping, source == target field name"""
-        if self.product == "sysmon":
-            src = src + "_CF"
         return src
 
     def map_sysmon_schema(self, eventid):
@@ -70,13 +69,12 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
 
     def default_value_mapping(self, val):
         op = "=="
-        if type(val) == str and "*" in val[1:-1]:     # value contains * inside string - use regex match
+        if "*" in val[1:-1]:     # value contains * inside string - use regex match
             op = "matches regex"
-            val = re.sub('(\\\\(?![*?]))', '\\\\\\\\\\\\\g<1>', val)
-            val = re.sub('([".^$])', '\\\\\\\\\g<1>', val)
+            val = re.sub('([".^$]|\\\\(?![*?]))', '\\\\\g<1>', val)
             val = re.sub('\\*', '.*', val)
             val = re.sub('\\?', '.', val)
-        elif type(val) == str:                           # value possibly only starts and/or ends with *, use prefix/postfix match
+        else:                           # value possibly only starts and/or ends with *, use prefix/postfix match
             if val.endswith("*") and val.startswith("*"):
                 op = "contains"
                 val = self.cleanValue(val[1:-1])
@@ -92,11 +90,17 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
     def generate(self, sigmaparser):
         self.table = None
         try:
-            self.product = sigmaparser.parsedyaml['logsource']['product']
-            self.service = sigmaparser.parsedyaml['logsource']['service']
+            self.category = sigmaparser.parsedyaml['logsource'].setdefault('category', None)
+            self.product = sigmaparser.parsedyaml['logsource'].setdefault('product', None)
+            self.service = sigmaparser.parsedyaml['logsource'].setdefault('service', None)
         except KeyError:
+            self.category = None
             self.product = None
             self.service = None
+
+        if (self.category, self.product, self.service) == ("process_creation", "windows", None):
+            self.table = "Event"
+            self.eventid = "1"
 
         return super().generate(sigmaparser)
 
@@ -121,11 +125,11 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
                     [(key, v) for v in value]
                     )
         elif key == "EventID":            # EventIDs are not reflected in condition but in table selection
-            if self.service == "security":
-                self.table = "SecurityEvent"
             if self.service == "sysmon":
                 self.table = "Event"
                 self.eventid = value
+            else:
+                self.table = "SecurityEvent"
         elif type(value) in (str, int):     # default value processing
             mapping = (key, self.default_value_mapping)
             if len(mapping) == 1:
