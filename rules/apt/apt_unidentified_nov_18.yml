@@ -1,3 +1,4 @@
+---
 action: global
 title: Unidentified Attacker November 2018
 status: stable
@@ -11,26 +12,14 @@ tags:
     - attack.execution
     - attack.t1085
 detection:
-    condition: selection
+    condition: 1 of them
 level: high
 ---
-# Windows Security Eventlog: Process Creation with Full Command Line
 logsource:
+    category: process_creation
     product: windows
-    service: security
-    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
 detection:
-    selection:
-        EventID: 4688
-        ProcessCommandLine: '*cyzfc.dat, PointFunctionCall'
----
-# Sysmon: Process Creation (ID 1)
-logsource:
-    product: windows
-    service: sysmon
-detection:
-    selection:
-        EventID: 1
+    selection1:
         CommandLine: '*cyzfc.dat, PointFunctionCall'
 ---
 # Sysmon: File Creation (ID 11)
@@ -38,7 +27,7 @@ logsource:
     product: windows
     service: sysmon
 detection:
-    selection:
+    selection2:
         EventID: 11
         TargetFilename: 
             - '*ds7002.lnk*' 

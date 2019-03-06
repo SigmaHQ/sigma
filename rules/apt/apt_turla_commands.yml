@@ -11,14 +11,13 @@ tags:
 author: Markus Neis
 date: 2017/11/07
 logsource:
-   product: windows
-   service: sysmon
+    category: process_creation
+    product: windows
 falsepositives:
    - Unknown
 ---
 detection:
    selection:
-      EventID: 1
       CommandLine: 
          - 'net use \\%DomainController%\C$ "P@ssw0rd" *'
          - 'dir c:\\*.doc* /s'
@@ -28,13 +27,10 @@ level: critical
 ---
 detection:
    netCommand1:
-      EventID: 1
       CommandLine: 'net view /DOMAIN'
    netCommand2:
-      EventID: 1
       CommandLine: 'net session'
    netCommand3:
-      EventID: 1
       CommandLine: 'net share'
    timeframe: 1m
    condition: netCommand1 | near netCommand2 and netCommand3 
