@@ -1,6 +1,5 @@
-action: global
 title: MSHTA Suspicious Execution 01
-status: testing
+status: experimental
 description: Detection for mshta.exe suspicious execution patterns sometimes involving file polyglotism
 date: 22/02/2019
 modified: 22/02/2019
@@ -13,25 +12,19 @@ references:
 tags:
     - attack.defense_evasion
     - attack.t1140
-detection:
-    condition: 1 of selection*
+logsource:
+    category: process_creation
+    product: windows
 falsepositives: 
     - False positives depend on scripts and administrative tools used in the monitored environment
-level: medium
----
-# Windows Audit Log
-logsource:
-    product: windows
-    service: security
-    definition: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+level: high
 detection:
-    selection-1:
-        EventID: 4688
-        ProcessCommandLine: 
+    selection1:
+        CommandLine: 
             - '*mshta vbscript:CreateObject("Wscript.Shell")*'
             - '*mshta vbscript:Execute("Execute*'
             - '*mshta vbscript:CreateObject("Wscript.Shell").Run("mshta.exe*'
-    selection-2:
+    selection2:
         EventID: 4688
         NewProcessName:
             - 'C:\Windows\system32\mshta.exe'
@@ -39,31 +32,9 @@ detection:
             - '*.jpg*'
             - '*.png*'
             - '*.lnk*'
-            - '*.chm*'
+            # - '*.chm*'  # could be prone to false positives
             - '*.xls*'
             - '*.doc*'
             - '*.zip*'
----
-# Sysmon
-logsource:
-    product: windows
-    service: sysmon
-detection:
-    selection-1:
-        EventID: 1
-        CommandLine: 
-            - '*mshta vbscript:CreateObject("Wscript.Shell")*'
-            - '*mshta vbscript:Execute("Execute*'
-            - '*mshta vbscript:CreateObject("Wscript.Shell").Run("mshta.exe*'
-    selection-2:
-        EventID: 1
-        Image:
-            - 'C:\Windows\system32\mshta.exe'
-        ProcessCommandLine: 
-            - '*.jpg*'
-            - '*.png*'
-            - '*.lnk*'
-            - '*.chm*'
-            - '*.xls*'
-            - '*.doc*'
-            - '*.zip*'
+    condition:
+        selection1 or selection2
