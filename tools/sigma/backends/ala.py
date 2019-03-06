@@ -109,7 +109,7 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
             raise NotSupportedError("No table could be determined from Sigma rule")
         if self.table is "Event":
             parse_string = self.map_sysmon_schema(self.eventid) 
-            before = "{0} | parse EventData with * {1} | where ".format(self.table, parse_string)
+            before = "{0} | parse EventData with * {1} | where EventID == {2} | where ".format(self.table, parse_string, self.eventid)
         else:
             before = "%s | where " % self.table
         return before 
