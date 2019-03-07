@@ -97,22 +97,24 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
             self.product = None
             self.service = None
 
-        if (self.category, self.product, self.service) == ("process_creation", "windows", None):
-            if self.service == "sysmon":
-                self.table = "Event"
-                self.eventid = "1"
-            else:
-                self.table = "SecurityEvent"
-                self.eventid = "4688"
+        if (self.category, self.product, self.service) == ("process_creation", "windows", "sysmon"):
+            self.table = "Event"
+            self.eventid = "1"
+        else:
+            self.table = "securityEvent"
+            self.eventid = "4688"
 
         return super().generate(sigmaparser)
 
     def generateBefore(self, parsed):
         if self.table is None:
             raise NotSupportedError("No table could be determined from Sigma rule")
-        if self.service == "sysmon":
+        if self.category == "process_creation" and self.service == "sysmon":
+            parse_string = self.map_sysmon_schema(self.eventid)
+            before = "%s | parse EventData with * %s | where EventID == \"%s\" | where " % (self.table, parse_string, self.eventid)
+        elif self.service == "sysmon":
             parse_string = self.map_sysmon_schema(self.eventid) 
-            before = "%s | parse EventData with * %s | where EventID == %s | where " % (self.table, parse_string, self.eventid)
+            before = "%s | parse EventData with * %s | where " % (self.table, parse_string)
         elif self.category == "process_creation":
             before = "%s | where EventID == %s | where " % (self.table, self.eventid)
         else:
@@ -133,7 +135,7 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
             if self.service == "sysmon":
                 self.table = "Event"
                 self.eventid = value
-            else:
+            elif self.service == "security":
                 self.table = "SecurityEvent"
         elif type(value) in (str, int):     # default value processing
             mapping = (key, self.default_value_mapping)
