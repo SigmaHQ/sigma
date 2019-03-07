@@ -25,7 +25,6 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
     identifier = "ala"
     active = True
 
-#    reEscape = re.compile('("|\\\\(?![*?]))')
     reEscape = re.compile('("|(?<!\\\\)\\\\(?![*?\\\\]))')
     reClear = None
     andToken = " and "
@@ -69,12 +68,12 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
 
     def default_value_mapping(self, val):
         op = "=="
-        if "*" in val[1:-1]:     # value contains * inside string - use regex match
+        if type(val) == str and "*" in val[1:-1]:     # value contains * inside string - use regex match
             op = "matches regex"
             val = re.sub('([".^$]|\\\\(?![*?]))', '\\\\\g<1>', val)
             val = re.sub('\\*', '.*', val)
             val = re.sub('\\?', '.', val)
-        else:                           # value possibly only starts and/or ends with *, use prefix/postfix match
+        elif type(val) == str:                           # value possibly only starts and/or ends with *, use prefix/postfix match
             if val.endswith("*") and val.startswith("*"):
                 op = "contains"
                 val = self.cleanValue(val[1:-1])
@@ -99,17 +98,23 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
             self.service = None
 
         if (self.category, self.product, self.service) == ("process_creation", "windows", None):
-            self.table = "Event"
-            self.eventid = "1"
+            if self.service == "sysmon":
+                self.table = "Event"
+                self.eventid = "1"
+            else:
+                self.table = "SecurityEvent"
+                self.eventid = "4688"
 
         return super().generate(sigmaparser)
 
     def generateBefore(self, parsed):
         if self.table is None:
             raise NotSupportedError("No table could be determined from Sigma rule")
-        if self.table is "Event":
+        if self.service == "sysmon":
             parse_string = self.map_sysmon_schema(self.eventid) 
-            before = "{0} | parse EventData with * {1} | where EventID == {2} | where ".format(self.table, parse_string, self.eventid)
+            before = "%s | parse EventData with * %s | where EventID == %s | where " % (self.table, parse_string, self.eventid)
+        elif self.category == "process_creation":
+            before = "%s | where EventID == %s | where " % (self.table, self.eventid)
         else:
             before = "%s | where " % self.table
         return before 
