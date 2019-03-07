@@ -133,7 +133,7 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
             if self.service == "sysmon":
                 self.table = "Event"
                 self.eventid = value
-            else:
+            elif self.service == "security":
                 self.table = "SecurityEvent"
         elif type(value) in (str, int):     # default value processing
             mapping = (key, self.default_value_mapping)
