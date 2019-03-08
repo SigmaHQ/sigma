@@ -97,12 +97,13 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
             self.product = None
             self.service = None
 
-        if (self.category, self.product, self.service) == ("process_creation", "windows", "sysmon"):
-            self.table = "Event"
-            self.eventid = "1"
-        else:
-            self.table = "securityEvent"
-            self.eventid = "4688"
+        if self.category == "process_creation":
+            if self.service == "sysmon":
+                self.table = "Event"
+                self.eventid = "1"
+            else:
+                self.table = "SecurityEvent"
+                self.eventid = "4688"
 
         return super().generate(sigmaparser)
 
@@ -116,7 +117,7 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
             parse_string = self.map_sysmon_schema(self.eventid) 
             before = "%s | parse EventData with * %s | where " % (self.table, parse_string)
         elif self.category == "process_creation":
-            before = "%s | where EventID == %s | where " % (self.table, self.eventid)
+            before = "%s | where EventID == \"%s\" | where " % (self.table, self.eventid)
         else:
             before = "%s | where " % self.table
         return before 
