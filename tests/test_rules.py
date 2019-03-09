@@ -200,7 +200,7 @@ class TestRules(unittest.TestCase):
                          "There are detections with 'Source: Eventlog'. This does not add value to the detection.")
 
 
-    def test_event_id_instead_of_process_create(self):
+    def test_event_id_instead_of_process_creation(self):
         faulty_detections = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             with open(file) as f:
@@ -208,17 +208,8 @@ class TestRules(unittest.TestCase):
                     if re.search(r'.*EventID: (?:1|4688)\s*$', line) and file not in faulty_detections:
                         faulty_detections.append(file)
 
-        # Tareq won't enable until all existing rules are migrated to prevent breaking all CI builds
-        # self.assertEqual(faulty_detections, [],
-        #                  "There are rules still using Sysmon 1 or Event ID 4688. Please migrate to the process_creation category.")
-
-        # Report but do not throw an error
-        if faulty_detections:
-            print("The following rules still use Sysmon 1 or Event ID 4688.")
-            print("Please migrate to the process_creation category.")
-            print("List length is: {}".format(len(faulty_detections)))
-            print("------------------------------------------------")
-            print(*faulty_detections, sep='\n')
+        self.assertEqual(faulty_detections, [],
+                         "There are rules still using Sysmon 1 or Event ID 4688. Please migrate to the process_creation category.")
 
 
 if __name__ == "__main__":
