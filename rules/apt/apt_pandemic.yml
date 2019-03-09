@@ -1,3 +1,5 @@
+---
+action: global
 title: Pandemic Registry Key
 status: experimental
 description: Detects Pandemic Windows Implant
@@ -8,19 +10,7 @@ tags:
     - attack.lateral_movement
     - attack.t1105
 author: Florian Roth
-logsource:
-    product: windows
-    service: sysmon
 detection:
-    selection1:
-        EventID: 13
-        TargetObject: 
-            - '\REGISTRY\MACHINE\SYSTEM\CurrentControlSet\services\null\Instance*'
-            - '\REGISTRY\MACHINE\SYSTEM\ControlSet001\services\null\Instance*'
-            - '\REGISTRY\MACHINE\SYSTEM\ControlSet002\services\null\Instance*'
-    selection2:
-        EventID: 1
-        Command: 'loaddll -a *'
     condition: 1 of them
 fields:
     - EventID
@@ -32,4 +22,22 @@ fields:
 falsepositives:
     - unknown
 level: critical
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection1:
+        EventID: 13
+        TargetObject: 
+            - '\REGISTRY\MACHINE\SYSTEM\CurrentControlSet\services\null\Instance*'
+            - '\REGISTRY\MACHINE\SYSTEM\ControlSet001\services\null\Instance*'
+            - '\REGISTRY\MACHINE\SYSTEM\ControlSet002\services\null\Instance*'
+---
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection2:
+        Command: 'loaddll -a *'
 

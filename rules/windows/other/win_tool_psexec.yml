@@ -1,3 +1,5 @@
+---
+action: global
 title: PsExec Tool Execution
 status: experimental
 description: Detects PsExec service installation and execution events (service and Sysmon)
@@ -9,20 +11,7 @@ tags:
     - attack.execution
     - attack.t1035
     - attack.s0029
-logsource:
-    product: windows
 detection:
-    service_installation:
-        EventID: 7045
-        ServiceName: 'PSEXESVC'
-        ServiceFileName: '*\PSEXESVC.exe'
-    service_execution:
-        EventID: 7036
-        ServiceName: 'PSEXESVC'
-    sysmon_processcreation:
-        EventID: 1
-        Image: '*\PSEXESVC.exe'
-        User: 'NT AUTHORITY\SYSTEM'
     condition: 1 of them
 fields:
     - EventID
@@ -33,3 +22,24 @@ fields:
 falsepositives:
     - unknown
 level: low
+---
+logsource:
+    product: windows
+    service: system
+detection:
+    service_installation:
+        EventID: 7045
+        ServiceName: 'PSEXESVC'
+        ServiceFileName: '*\PSEXESVC.exe'
+    service_execution:
+        EventID: 7036
+        ServiceName: 'PSEXESVC'
+---
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    sysmon_processcreation:
+        Image: '*\PSEXESVC.exe'
+        User: 'NT AUTHORITY\SYSTEM'
+

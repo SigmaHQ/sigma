@@ -8,27 +8,33 @@ tags:
     - attack.persistence
     - attack.lateral_movement
 author: Tom Ueltschi (@c_APT_ure)
+detection:
+    condition: (exec_selection and not exec_exclusion) or (create_selection and create_keywords)
+falsepositives:
+    - exclude legitimate logon scripts
+    - penetration tests, red teaming
+level: high
+---
 logsource:
     product: windows
     service: sysmon
 detection:
-    exec_selection:
-        EventID: 1
-        ParentImage: '*\userinit.exe'
-    exec_exclusion:
-        Image: '*\explorer.exe'
-        CommandLine: '*\netlogon.bat'
     create_selection:
         EventID:
-            - 1
+            - 1 # This too should be in the process_creation source but it's not worth the effort given the structure of the filter.
             - 11
             - 12
             - 13
             - 14
     create_keywords:
         - UserInitMprLogonScript
-    condition: (exec_selection and not exec_exclusion) or (create_selection and create_keywords)
-falsepositives:
-    - exclude legitimate logon scripts
-    - penetration tests, red teaming
-level: high
+---
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    exec_selection:
+        ParentImage: '*\userinit.exe'
+    exec_exclusion:
+        Image: '*\explorer.exe'
+        CommandLine: '*\netlogon.bat'

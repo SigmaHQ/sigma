@@ -1,3 +1,5 @@
+---
+action: global
 title: DNS ServerLevelPluginDll Install
 status: experimental
 description: Detects the installation of a plugin DLL via ServerLevelPluginDll parameter in Registry, which can be used to execute code in context of the DNS server (restart required)
@@ -8,16 +10,7 @@ author: Florian Roth
 tags:
     - attack.defense_evasion
     - attack.t1073
-logsource:
-    product: windows
-    service: sysmon
 detection:
-    dnsadmin:
-        EventID: 1
-        CommandLine: 'dnscmd.exe /config /serverlevelplugindll *'
-    dnsregmod:
-        EventID: 13
-        TargetObject: '*\services\DNS\Parameters\ServerLevelPluginDll'
     condition: 1 of them
 fields:
     - EventID
@@ -29,5 +22,18 @@ fields:
 falsepositives:
     - unknown
 level: high
-
-
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    dnsregmod:
+        EventID: 13
+        TargetObject: '*\services\DNS\Parameters\ServerLevelPluginDll'
+---
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    dnsadmin:
+        CommandLine: 'dnscmd.exe /config /serverlevelplugindll *'
