@@ -205,7 +205,7 @@ class TestRules(unittest.TestCase):
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             with open(file) as f:
                 for line in f:
-                    if re.search(r'.*EventID: (?:1|4688).*', line) and file not in faulty_detections:
+                    if re.search(r'.*EventID: (?:1|4688)\s*$', line) and file not in faulty_detections:
                         faulty_detections.append(file)
 
         # Tareq won't enable until all existing rules are migrated to prevent breaking all CI builds
