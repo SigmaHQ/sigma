@@ -24,6 +24,9 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Azure Log Analytics Queries."""
     identifier = "ala"
     active = True
+    options = SingleTextQueryBackend.options + (
+            ("sysmon", False, "Generate Sysmon event queries for generic rules", None),
+            )
 
     reEscape = re.compile('("|(?<!\\\\)\\\\(?![*?\\\\]))')
     reClear = None
@@ -98,7 +101,7 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
             self.service = None
 
         if self.category == "process_creation":
-            if self.service == "sysmon":
+            if self.sysmon:
                 self.table = "Event"
                 self.eventid = "1"
             else:
@@ -110,10 +113,10 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
     def generateBefore(self, parsed):
         if self.table is None:
             raise NotSupportedError("No table could be determined from Sigma rule")
-        if self.category == "process_creation" and self.service == "sysmon":
+        if self.category == "process_creation" and self.sysmon:
             parse_string = self.map_sysmon_schema(self.eventid)
             before = "%s | parse EventData with * %s | where EventID == \"%s\" | where " % (self.table, parse_string, self.eventid)
-        elif self.service == "sysmon":
+        elif self.sysmon:
             parse_string = self.map_sysmon_schema(self.eventid) 
             before = "%s | parse EventData with * %s | where " % (self.table, parse_string)
         elif self.category == "process_creation":

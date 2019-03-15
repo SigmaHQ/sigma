@@ -30,6 +30,7 @@ test-sigmac:
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t logpoint rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t wdatp rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t ala rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t ala -Osysmon rules/windows/process_creation/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-dsl rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t powershell -c tools/config/powershell-windows-all.yml -Ocsv rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t arcsight -c tools/config/arcsight.yml rules/ > /dev/null
