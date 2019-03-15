@@ -16,8 +16,8 @@
 
 import re
 import xml.etree.ElementTree as xml
-import os
 from .base import SingleTextQueryBackend
+from .data import sysmon_schema
 from .exceptions import NotSupportedError
 
 class AzureLogAnalyticsBackend(SingleTextQueryBackend):
@@ -53,10 +53,8 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
 
     def map_sysmon_schema(self, eventid):
         schema_keys = []
-        abs_path = os.path.abspath(os.path.dirname(__file__))
-        sysmon_schema = os.path.join(abs_path, "../../../contrib/sysmon-schema.xml")
         try:
-            tree = xml.parse(sysmon_schema)
+            tree = xml.ElementTree(xml.fromstring(sysmon_schema))
         except:
             raise NotSupportedError("Required Sysmon schema not provided")
         root = tree.getroot()

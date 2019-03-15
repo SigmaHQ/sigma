@@ -1,3 +1,6 @@
+# Static data required by backends
+
+sysmon_schema = """
 <manifest schemaversion="4.2" binaryversion="8.00">
   <configuration>
     <options>
@@ -254,3 +257,4 @@
     </event>
   </events>
 </manifest>
+"""
