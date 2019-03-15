@@ -74,6 +74,7 @@ class BackendOptions(dict):
                 backend_config = yaml.safe_load(config_file.read())
                 for key in backend_config:
                     self[key] = backend_config[key]
+                    print(key, self[key])
         except (IOError, OSError) as e:
             print("Failed to open backend configuration file '%s': %s" % (path, str(e)), file=sys.stderr)
             exit(1)
