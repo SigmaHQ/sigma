@@ -13,7 +13,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='sigmatools',
-    version='0.9',
+    version='0.10',
     description='Tools for the Generic Signature Format for SIEM Systems',
     long_description=long_description,
     url='https://github.com/Neo23x0/sigma',
@@ -28,14 +28,13 @@ setup(
         'Topic :: Security',
         'Topic :: Internet :: Log Analysis',
         'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Environment :: Console',
     ],
     keywords='security monitoring siem logging signatures elasticsearch splunk ids sysmon',
     packages=['sigma', 'sigma.backends', 'sigma.config', 'sigma.parser'],
-    python_requires='~=3.5',
+    python_requires='~=3.6',
     install_requires=['PyYAML', 'pymisp'],
     extras_require={
         'test': ['coverage', 'yamllint'],
