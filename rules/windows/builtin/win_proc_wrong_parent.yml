@@ -1,4 +1,4 @@
-title: Windows Processes Suspicious Parent
+title: Windows Processes Suspicious Parent Directory
 status: experimental
 description: Detect suspicious parent processes of well-known Windows processes
 author: 'vburov'
@@ -12,41 +12,25 @@ tags:
     - attack.defense_evasion
     - attack.t1036
 logsource:
+    category: process_creation
     product: windows
-    service: sysmon
-    definition: 'Requirements: Sysmon'
 detection:
-    selection1:
-        EventID: 1
+    selection:
         Image:
             - '*\svchost.exe'
             - '*\taskhost.exe'
-    filter1:
-        ParentImage:
-            - '*\services.exe'
-            - '*\MsMpEng.exe'
-            - '*\rpcnet.exe'
-            - '*\svchost.exe'
-    selection2:
-        EventID: 1
-        Image:
             - '*\lsm.exe'
             - '*\lsass.exe'
             - '*\services.exe'
             - '*\lsaiso.exe'
-    filter2:
-        ParentImage:
-            - '*\wininit.exe'
-    selection3:
-        EventID: 1
-        Image:
             - '*\csrss.exe'
             - '*\wininit.exe'
             - '*\winlogon.exe'
-    filter3:
+    filter:
         ParentImage:
-            - '*\smss.exe'
-    condition: ( selection1 and not filter1 ) or ( selection2 and not filter2 ) or ( selection3 and not filter3 )
+            - '*\System32\*'
+            - '*\SysWOW64\*'
+    condition: selection and not filter
 falsepositives:
     - Unknown please report back
 level: high
