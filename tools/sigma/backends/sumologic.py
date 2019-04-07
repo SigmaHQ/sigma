@@ -124,8 +124,9 @@ class SumoLogicBackend(SingleTextQueryBackend):
     # Clearing values from special characters.
     # Sumologic: only removing '*' (in quotes, is litteral. without, is wildcard) and '"'
     def CleanNode(self, node):
-        search_ptrn = re.compile(r"[\/@?#&%*\(\)\"]")
-        replace_ptrn = re.compile(r"[\/@?#&%*\(\)\"]")
+        #search_ptrn = re.compile(r"[\/@?#&%*\(\)\"]")
+        search_ptrn = re.compile(r"[*]")
+        replace_ptrn = re.compile(r"[*]")
         match = search_ptrn.search(str(node))
         new_node = list()
         if match:
