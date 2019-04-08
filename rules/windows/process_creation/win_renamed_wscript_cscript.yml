@@ -1,0 +1,31 @@
+title: Renamed Wscript|Cscript execution of malicious scripts 
+status: experimental
+description: Detects possibile renamed cscript or wscript executing malicious scripts via cmd line arguments and imphash 
+references:
+    - sha256: 23160972c6ae07f740800fa28e421a81d7c0ca5d5cab95bc082b4a986fbac57c 
+    - https://blog.morphisec.com/fin7-not-finished-morphisec-spots-new-campaign
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+    - FIN7
+
+author: Jason Lynch 
+falsepositives:
+    - Unknown
+level: medium
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        CommandLine:
+            - '*/E:jscript*' 
+    selection2:
+        Imphash:
+            - 7B5674BD1C2BBF9E981DAD834013AF2E  
+            - 868868189BCCA665C0C780D6EECD10A7  
+    filter1:
+        Image: 'C:\Windows\System32\cscript.exe'
+    filter2:
+        Image: 'C:\Windows\System32\wscript.exe' 
+    condition: (selection1 and selection2) and not (filter1 or filter2)
