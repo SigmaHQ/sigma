@@ -581,7 +581,7 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
         ("smtp_auth_file", None, "Local path with login info", None),
 
         # Generic alerting options
-        ("realert_time", "0m", "Ignore repeating alerts for a period of time", None),
+        ("realert_time", "1m", "Ignore repeating alerts for a period of time", None),
         ("expo_realert_time", "60m", "This option causes the value of realert to exponentially increase while alerts continue to fire", None)
     )
     interval = None
