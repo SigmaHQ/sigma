@@ -1,0 +1,29 @@
+title: Suspicious Encoded PowerShell Command Line
+description: Detects suspicious powershell process starts with base64 encoded commands
+status: experimental
+references:
+    - https://app.any.run/tasks/6217d77d-3189-4db2-a957-8ab239f3e01e
+author: Florian Roth, Markus Neis
+date: 2018/09/03
+tags:
+  - attack.execution
+  - attack.t1086
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine:
+            - '* -e JAB*'
+            - '* -enc JAB*'
+            - '* -encodedcommand JAB*'
+            - '* BA^J e-'
+    falsepositive1:
+        Image: '*\GRR\\*'
+    falsepositive2:
+        CommandLine: '* -ExecutionPolicy remotesigned *'
+    condition: selection and not 1 of falsepositive*
+falsepositives:
+    - GRR powershell hacks
+    - PowerSponse Deployments
+level: high

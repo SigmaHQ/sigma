@@ -1,0 +1,28 @@
+title: PowerShell ShellCode
+status: experimental
+description: Detects Base64 encoded Shellcode
+references:
+    - https://twitter.com/cyb3rops/status/1063072865992523776
+tags:
+    - attack.privilege_escalation
+    - attack.execution
+    - attack.t1055
+    - attack.t1086
+author: David Ledbetter (shellcode), Florian Roth (rule)
+date: 2018/11/17
+logsource:
+    product: windows
+    service: powershell
+    description: 'Script block logging must be enabled'
+detection:
+    selection:
+        EventID: 4104
+    keyword1: 
+        - '*AAAAYInlM*'
+    keyword2: 
+        - '*OiCAAAAYInlM*'
+        - '*OiJAAAAYInlM*'
+    condition: selection and keyword1 and keyword2
+falsepositives:
+    - Unknown
+level: critical

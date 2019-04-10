@@ -1,0 +1,33 @@
+title: WannaCry Ransomware
+description: Detects WannaCry Ransomware Activity
+status: experimental
+references:
+    - https://www.hybrid-analysis.com/sample/ed01ebfbc9eb5bbea545af4d01bf5f1071661840480439c6e5babe8e080e41aa
+author: Florian Roth
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        CommandLine:
+            - '*vssadmin delete shadows*'
+            - '*icacls * /grant Everyone:F /T /C /Q*'
+            - '*bcdedit /set {default} recoveryenabled no*'
+            - '*wbadmin delete catalog -quiet*'
+    selection2:
+        Image:
+            - '*\tasksche.exe'
+            - '*\mssecsvc.exe'
+            - '*\taskdl.exe'
+            - '*\WanaDecryptor*'
+            - '*\taskhsvc.exe'
+            - '*\taskse.exe'
+            - '*\111.exe'
+            - '*\lhdfrgui.exe'
+            - '*\diskpart.exe'
+            - '*\linuxnew.exe'
+            - '*\wannacry.exe'
+    condition: 1 of them
+falsepositives:
+    - Unknown
+level: critical

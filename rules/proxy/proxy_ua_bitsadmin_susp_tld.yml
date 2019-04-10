@@ -1,0 +1,26 @@
+title: Bitsadmin to Uncommon TLD
+status: experimental
+description: Detects Bitsadmin connections to domains with uncommon TLDs 
+    - https://twitter.com/jhencinski/status/1102695118455349248
+    - https://isc.sans.edu/forums/diary/Investigating+Microsoft+BITS+Activity/23281/
+author: Florian Roth
+date: 2019/03/07
+logsource:
+    category: proxy
+detection:
+    selection:
+        UserAgent:
+            - 'Microsoft BITS/*'
+    falsepositives:
+        r-dns:
+            - '*.com' 
+            - '*.net' 
+            - '*.org' 
+    condition: selection and not falsepositives
+fields:
+    - ClientIP
+    - URL
+    - UserAgent
+falsepositives:
+    - Rare programs that use Bitsadmin and update from regional TLDs e.g. .uk or .ca
+level: high

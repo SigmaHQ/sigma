@@ -1,0 +1,26 @@
+title: Microsoft Binary Suspicious Communication Endpoint
+status: experimental
+description: Detects an executable in the Windows folder accessing suspicious domains
+references:
+    - https://twitter.com/M_haggis/status/900741347035889665
+    - https://twitter.com/M_haggis/status/1032799638213066752
+author: Florian Roth
+date: 2018/08/30
+tags:
+    - attack.lateral_movement
+    - attack.t1105
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 3
+        DestinationHostname: 
+            - '*dl.dropboxusercontent.com'
+            - '*.pastebin.com'
+        Image: 'C:\Windows\\*'
+    condition: selection
+falsepositives:
+    - 'Unknown'
+level: high
+

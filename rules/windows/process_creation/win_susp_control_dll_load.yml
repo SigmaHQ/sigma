@@ -1,0 +1,27 @@
+title: Suspicious Control Panel DLL Load
+status: experimental
+description: Detects suspicious Rundll32 execution from control.exe as used by Equation Group and Exploit Kits
+author: Florian Roth
+date: 2017/04/15
+references:
+    - https://twitter.com/rikvduijn/status/853251879320662017
+tags:
+    - attack.defense_evasion
+    - attack.t1073
+    - attack.t1085
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage: '*\System32\control.exe'
+        CommandLine: '*\rundll32.exe *'
+    filter:
+        CommandLine: '*Shell32.dll*'
+    condition: selection and not filter
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Unknown
+level: high

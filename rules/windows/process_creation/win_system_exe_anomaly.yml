@@ -1,0 +1,34 @@
+title: System File Execution Location Anomaly
+status: experimental
+description: Detects a Windows program executable started in a suspicious folder
+references:
+    - https://twitter.com/GelosSnake/status/934900723426439170
+author: Florian Roth
+date: 2017/11/27
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image:
+            - '*\svchost.exe'
+            - '*\rundll32.exe'
+            - '*\services.exe'
+            - '*\powershell.exe'
+            - '*\regsvr32.exe'
+            - '*\spoolsv.exe'
+            - '*\lsass.exe'
+            - '*\smss.exe'
+            - '*\csrss.exe'
+            - '*\conhost.exe'
+    filter:
+        Image:
+            - '*\System32\\*'
+            - '*\SysWow64\\*'
+    condition: selection and not filter
+falsepositives:
+    - Exotic software
+level: high

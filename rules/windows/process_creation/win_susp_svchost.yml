@@ -1,0 +1,25 @@
+title: Suspicious Svchost Process
+status: experimental
+description: Detects a suspicious svchost process start
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+author: Florian Roth
+date: 2017/08/15
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image: '*\svchost.exe'
+    filter:
+        ParentImage:
+            - '*\services.exe'
+            - '*\MsMpEng.exe'
+    condition: selection and not filter
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Unknown
+level: high

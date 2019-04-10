@@ -1,0 +1,102 @@
+logsources:
+  windows:
+    product: windows
+    index: winlogbeat-*
+  windows-application:
+    product: windows
+    service: application
+    conditions:
+      log_name: Application
+  windows-security:
+    product: windows
+    service: security
+    conditions:
+      log_name: Security
+  windows-sysmon:
+    product: windows
+    service: sysmon
+    conditions:
+      log_name: 'Microsoft-Windows-Sysmon/Operational'
+  windows-dns-server:
+    product: windows
+    service: dns-server
+    conditions:
+      log_name: 'DNS Server'
+  windows-driver-framework:
+    product: windows
+    service: driver-framework
+    conditions:
+      source: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
+  windows-dhcp:
+    product: windows
+    service: dhcp
+    conditions: 
+      source: 'Microsoft-Windows-DHCP-Server/Operational'
+defaultindex: winlogbeat-*
+# Extract all field names qith yq:
+# yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: event_data.\1/g'
+# Keep EventID! Clean up the list afterwards!
+fieldmappings:
+    EventID: event_id
+    AccessMask: event_data.AccessMask
+    AccountName: event_data.AccountName
+    AllowedToDelegateTo: event_data.AllowedToDelegateTo
+    AttributeLDAPDisplayName: event_data.AttributeLDAPDisplayName
+    AuditPolicyChanges: event_data.AuditPolicyChanges
+    AuthenticationPackageName: event_data.AuthenticationPackageName
+    CallingProcessName: event_data.CallingProcessName
+    CallTrace: event_data.CallTrace
+    CommandLine: event_data.CommandLine
+    ComputerName: event_data.ComputerName
+    CurrentDirectory: event_data.CurrentDirectory
+    Description: event_data.Description
+    DestinationHostname: event_data.DestinationHostname
+    DestinationIp: event_data.DestinationIp
+    DestinationIsIpv6: event_data.DestinationIsIpv6
+    DestinationPort: event_data.DestinationPort
+    Details: event_data.Details
+    EngineVersion: event_data.EngineVersion
+    EventType: event_data.EventType
+    FailureCode: event_data.FailureCode
+    FileName: event_data.FileName
+    GrantedAccess: event_data.GrantedAccess
+    GroupName: event_data.GroupName
+    Hashes: event_data.Hashes
+    HiveName: event_data.HiveName
+    HostVersion: event_data.HostVersion
+    Image: event_data.Image
+    ImageLoaded: event_data.ImageLoaded
+    ImagePath: event_data.ImagePath
+    Imphash: event_data.Imphash
+    IpAddress: event_data.IpAddress
+    LogonProcessName: event_data.LogonProcessName
+    LogonType: event_data.LogonType
+    NewProcessName: event_data.NewProcessName
+    ObjectClass: event_data.ObjectClass
+    ObjectName: event_data.ObjectName
+    ObjectType: event_data.ObjectType
+    ObjectValueName: event_data.ObjectValueName
+    ParentCommandLine: event_data.ParentCommandLine
+    ParentProcessName: event_data.ParentProcessName
+    ParentImage: event_data.ParentImage
+    Path: event_data.Path
+    PipeName: event_data.PipeName
+    ProcessCommandLine: event_data.ProcessCommandLine
+    ProcessName: event_data.ProcessName
+    Properties: event_data.Properties
+    ServiceFileName: event_data.ServiceFileName
+    ServiceName: event_data.ServiceName
+    ShareName: event_data.ShareName
+    Signature: event_data.Signature
+    Source: event_data.Source
+    SourceImage: event_data.SourceImage
+    StartModule: event_data.StartModule
+    Status: event_data.Status
+    SubjectUserName: event_data.SubjectUserName
+    TargetFilename: event_data.TargetFilename
+    TargetImage: event_data.TargetImage
+    TargetObject: event_data.TargetObject
+    TicketEncryptionType: event_data.TicketEncryptionType
+    TicketOptions: event_data.TicketOptions
+    User: event_data.User
+    WorkstationName: event_data.WorkstationName

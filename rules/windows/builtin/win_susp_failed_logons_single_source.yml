@@ -1,19 +1,28 @@
 title: Multiple Failed Logins with Different Accounts from Single Source System
 description: Detects suspicious failed logins with different user accounts from a single source system 
 author: Florian Roth
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1078
 logsource:
     product: windows
     service: security
 detection:
-    selection:
+    selection1:
         EventID:
             - 529
             - 4625
-            - 4776
-        UserName: not null
-        SourceWorkstation: not null
+        UserName: '*'
+        WorkstationName: '*'
+    selection2:
+        EventID: 4776
+        UserName: '*'
+        Workstation: '*'
     timeframe: 24h 
-    condition: selection | count(UserName) by SourceWorkstation > 3
+    condition:
+        - selection1 | count(UserName) by WorkstationName > 3
+        - selection2 | count(UserName) by Workstation > 3
 falsepositives:
     - Terminal servers
     - Jump servers
