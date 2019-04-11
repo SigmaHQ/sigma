@@ -581,8 +581,9 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
         ("smtp_auth_file", None, "Local path with login info", None),
 
         # Generic alerting options
-        ("realert_time", "0m", "Ignore repeating alerts for a period of time", None),
-        ("expo_realert_time", "60m", "This option causes the value of realert to exponentially increase while alerts continue to fire", None)
+        ## Removed for now, testing setting realert to buffer_time
+        #("realert_time", "0m", "Ignore repeating alerts for a period of time", None),
+        #("expo_realert_time", "60m", "This option causes the value of realert to exponentially increase while alerts continue to fire", None)
     )
     interval = None
     title = None
@@ -616,7 +617,7 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
                 "description": description,
                 "index": index,
                 "priority": self.convertLevel(level),
-                "realert": self.generateTimeframe(self.realert_time),
+                #"realert": self.generateTimeframe(self.realert_time),
                 #"exponential_realert": self.generateTimeframe(self.expo_realert_time)
             }
             rule_object['filter'] = self.generateQuery(parsed)
@@ -628,6 +629,7 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
                         rule_object['query_key'] = parsed.parsedAgg.groupfield + ".keyword"
                     rule_object['type'] = "metric_aggregation"
                     rule_object['buffer_time'] = interval
+                    rule_object['realert_time'] = interval
                     rule_object['doc_type'] = "doc"
 
                     if parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT:
@@ -742,7 +744,12 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
 
     def finalize(self):
         result = ""
+        # If buffer_time and realert are not the same then rule spam will occour.
+        # by setting them the same, an issue with aliases came up.
+        # - http://signal0.com/2013/02/06/disabling_aliases_in_pyyaml.html
+        noalias_dumper = yaml.dumper.SafeDumper
+        noalias_dumper.ignore_aliases = lambda self, data: True
         for rulename, rule in self.elastalert_alerts.items():
-            result += yaml.dump(rule, default_flow_style=False)
+            result += yaml.dump(rule, default_flow_style=False, Dumper=noalias_dumper)
             result += '\n'
         return result
