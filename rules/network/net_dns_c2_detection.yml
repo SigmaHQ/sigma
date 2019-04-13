@@ -1,0 +1,19 @@
+title: DNS C2 Detection
+status: experimental
+description: Normally, there exists a limited amount of different dns queries for a single domain. If a huge number of dns queries were performed for a single domain, this can be an indicator that DNS is used for transferring data. 
+references:
+    - https://zeltser.com/c2-dns-tunneling/
+author: Patrick Bareiss
+date: 2019/04/07
+logsource:
+    product: dns
+detection:
+    selection:
+        parent_domain: '*'
+    condition: selection | count(dns_query) by parent_domain > 1000
+falsepositives:
+    - Valid software, which uses dns for transferring data
+level: high
+tags:
+    - attack.c2
+    - attack.t1043
