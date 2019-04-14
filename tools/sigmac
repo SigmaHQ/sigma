@@ -85,7 +85,7 @@ z is a word appearing in an arbitrary log source attribute.
 t is a tag that must appear in the rules tag list, case-insensitive matching.
 Multiple log source specifications are AND linked.
         """)
-argparser.add_argument("--target", "-t", default="es-qs", choices=backends.getBackendDict().keys(), help="Output target format")
+argparser.add_argument("--target", "-t", choices=backends.getBackendDict().keys(), help="Output target format")
 argparser.add_argument("--target-list", "-l", action="store_true", help="List available output target formats")
 argparser.add_argument("--config", "-c", action="append", help="Configurations with field name and index mapping for target environment. Multiple configurations are merged into one. Last config is authorative in case of conflicts.")
 argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix if multiple files are generated")
@@ -109,6 +109,11 @@ elif len(cmdargs.inputs) == 0:
     print("Nothing to do!")
     argparser.print_usage()
     sys.exit(0)
+
+if cmdargs.target is None:
+    print("No target selected, select one with -t/--target")
+    argparser.print_usage()
+    sys.exit(10)
 
 rulefilter = None
 if cmdargs.filter:
