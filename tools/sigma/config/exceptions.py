@@ -17,5 +17,8 @@
 class SigmaConfigParseError(Exception):
     pass
 
+class FieldMappingError(SigmaConfigParseError):
+    pass
+
 class SigmaRuleFilterParseException(Exception):
     pass

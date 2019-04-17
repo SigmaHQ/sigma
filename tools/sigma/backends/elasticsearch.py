@@ -16,6 +16,8 @@
 
 import json
 import re
+import sys
+
 import sigma
 import yaml
 from .base import BaseBackend, SingleTextQueryBackend
@@ -563,11 +565,22 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
     """Elastalert backend"""
     identifier = 'elastalert'
     active = True
+    supported_alert_methods = {'email', 'http_post'}
+
     options = ElasticsearchQuerystringBackend.options + (
+        ("alert_methods", "", "Alert method(s) to use when the rule triggers, comma separated. Supported: " + ', '.join(supported_alert_methods), None),
+
+        # Options for HTTP POST alerting
+        ("http_post_url", None, "Webhook URL used for HTTP POST alert notification", None),
+        ("http_post_include_rule_metadata", None, "Indicates if metadata about the rule which triggered should be included in the paylod of the HTTP POST alert notification", None),
+
+        # Options for email alerting
         ("emails", None, "Email addresses for Elastalert notification, if you want to alert several email addresses put them coma separated", None),
         ("smtp_host", None, "SMTP server address", None),
         ("from_addr", None, "Email sender address", None),
         ("smtp_auth_file", None, "Local path with login info", None),
+
+        # Generic alerting options
         ("realert_time", "0m", "Ignore repeating alerts for a period of time", None),
         ("expo_realert_time", "60m", "This option causes the value of realert to exponentially increase while alerts continue to fire", None)
     )
@@ -644,7 +657,8 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
 
             #Handle alert action
             rule_object['alert'] = []
-            if self.emails:
+            alert_methods = self.alert_methods.split(',')
+            if 'email' in alert_methods:
                 rule_object['alert'].append('email')
                 rule_object['email'] = []
                 for address in self.emails.split(','):
@@ -655,6 +669,21 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
                     rule_object['from_addr'] = self.from_addr
                 if self.smtp_auth_file:
                     rule_object['smtp_auth_file'] = self.smtp_auth_file
+            if 'http_post' in alert_methods:
+                if self.http_post_url is None:
+                    print('Warning: the Elastalert HTTP POST method is selected but no URL has been provided. This alert method will be ignored', file=sys.stderr)
+                else:
+                    rule_object['alert'].append('post')
+                    rule_object['http_post_url'] = self.http_post_url
+                    if self.http_post_include_rule_metadata:
+                        rule_object['http_post_static_payload'] = {
+                            'sigma_rule_metadata': {
+                                'title': title,
+                                'description': description,
+                                'level': level,
+                                'tags': rule_tag
+                            }
+                        }
             #If alert is not define put debug as default
             if len(rule_object['alert']) == 0:
                 rule_object['alert'].append('debug')

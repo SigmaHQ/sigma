@@ -1,0 +1,32 @@
+title: CMSTP UAC Bypass via COM Object Access
+status: stable
+description: Detects UAC Bypass Attempt Using Microsoft Connection Manager Profile Installer Autoelevate-capable COM Objects
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.execution
+    - attack.t1088
+    - attack.t1191
+    - attack.g0069
+author: Nik Seetharaman
+references:
+    - http://www.endurant.io/cmstp/detecting-cmstp-enabled-code-execution-and-uac-bypass-with-sysmon/
+    - https://twitter.com/hFireF0X/status/897640081053364225
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        ParentCommandLine: '*\DllHost.exe'
+    selection2:
+        ParentCommandLine:
+            - '*\{3E5FC7F9-9A51-4367-9063-A120244FBEC7}'
+            - '*\{3E000D72-A845-4CD9-BD83-80C07C3B881F}'
+    condition: selection1 and selection2
+fields:
+    - CommandLine
+    - ParentCommandLine
+    - Hashes
+falsepositives:
+    - Legitimate CMSTP use (unlikely in modern enterprise environments)
+level: high

@@ -1,6 +1,5 @@
----
-action: global
 title: Sofacy Zebrocy
+author: Florian Roth
 description: Detects Sofacy's Zebrocy malware execution
 references:
     - https://app.any.run/tasks/54acca9a-394e-4384-a0c8-91a96d36c81d
@@ -8,27 +7,13 @@ tags:
     - attack.execution
     - attack.g0020
     - attack.t1059
-author: Florian Roth
-date: 2018/03/10
+logsource:
+    category: process_creation
+    product: windows
 detection:
+    selection:
+        CommandLine: '*cmd.exe /c SYSTEMINFO & TASKLIST'
     condition: selection
 falsepositives:
     - Unknown
 level: critical
----
-logsource:
-    product: windows
-    service: sysmon
-detection:
-    selection:
-        EventID: 1
-        CommandLine: '*cmd.exe /c SYSTEMINFO & TASKLIST'
----
-logsource:
-    product: windows
-    service: security
-    description: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
-detection:
-    selection:
-        EventID: 4688
-        ProcessCommandLine: '*cmd.exe /c SYSTEMINFO & TASKLIST'

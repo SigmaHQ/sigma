@@ -14,27 +14,73 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
+
 import sigma
+import yaml
+
 from .mixins import RulenameCommentMixin, QuoteCharMixin
 
+
 class BackendOptions(dict):
-    """Object contains all options that should be passed to the backend from command line (or other user interfaces)"""
+    """
+    Object containing all the options that should be passed to the backend.
+    
+    The options can come from command line and a YAML configuration file, and will be merged together.
+    Options from the command line take precedence.
+    """
 
-    def __init__(self, options):
+    def __init__(self, options, config_file):
         """
-        Receives the argparser result from the backend option paramater value list (nargs=*) and builds the dict from it. There are two option types:
+        :param options: unparsed options coming from the CLI
+        :param config_file: path to a YAML configuration file
+        """
 
-        * key=value: self{key} = value
-        * key: self{key} = True
+        self._load_config_file(config_file)
+        self._parse_options(options)
+
+    def _parse_options(self, options):
         """
-        if options == None:
+        Populates options from the unparsed options of the CLI
+
+        :param options: list unparsed options from the CLI.
+            Each option can have one of the following formats:
+            - "key=value": the option key:value will be passed to the backend
+            - "key": the option key:True will be passed to the backend
+        """
+
+        if options is None:
             return
+
         for option in options:
             parsed = option.split("=", 1)
             try:
                 self[parsed[0]] = parsed[1]
             except IndexError:
+                # If the option is present but doesn't map to a value, treat it as a boolean flag
                 self[parsed[0]] = True
+
+    def _load_config_file(self, path):
+        """
+        Populates options from a configuration file
+
+        :param path: Path to the configuration file
+        """
+        if path is None:
+            return
+
+        try:
+            with open(path, 'r') as config_file:
+                backend_config = yaml.safe_load(config_file.read())
+                for key in backend_config:
+                    self[key] = backend_config[key]
+                    print(key, self[key])
+        except (IOError, OSError) as e:
+            print("Failed to open backend configuration file '%s': %s" % (path, str(e)), file=sys.stderr)
+            exit(1)
+        except yaml.YAMLError as e:
+            print("Failed to parse backend configuration file '%s' as valid YAML: %s" % (path, str(e)), file=sys.stderr)
+            exit(1)
 
 ### Generic backend base classes
 class BaseBackend:
@@ -51,7 +97,7 @@ class BaseBackend:
         passing the object instance to it.
         """
         super().__init__()
-        if not isinstance(sigmaconfig, (sigma.configuration.SigmaConfiguration, None)):
+        if not isinstance(sigmaconfig, (sigma.configuration.SigmaConfiguration, sigma.configuration.SigmaConfigurationChain, None)):
             raise TypeError("SigmaConfiguration object expected")
         self.backend_options = backend_options
         self.sigmaconfig = sigmaconfig

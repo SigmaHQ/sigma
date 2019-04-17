@@ -1,0 +1,39 @@
+title: MSHTA Suspicious Execution 01
+status: experimental
+description: Detection for mshta.exe suspicious execution patterns sometimes involving file polyglotism
+date: 22/02/2019
+modified: 22/02/2019
+author: Diego Perez (@darkquassar)
+references:
+    - http://blog.sevagas.com/?Hacking-around-HTA-files
+    - https://0x00sec.org/t/clientside-exploitation-in-2018-how-pentesting-has-changed/7356
+    - https://docs.microsoft.com/en-us/dotnet/standard/data/xml/xslt-stylesheet-scripting-using-msxsl-script
+    - https://medium.com/tsscyber/pentesting-and-hta-bypassing-powershell-constrained-language-mode-53a42856c997
+tags:
+    - attack.defense_evasion
+    - attack.t1140
+logsource:
+    category: process_creation
+    product: windows
+falsepositives: 
+    - False positives depend on scripts and administrative tools used in the monitored environment
+level: high
+detection:
+    selection1:
+        CommandLine: 
+            - '*mshta vbscript:CreateObject("Wscript.Shell")*'
+            - '*mshta vbscript:Execute("Execute*'
+            - '*mshta vbscript:CreateObject("Wscript.Shell").Run("mshta.exe*'
+    selection2:
+        Image:
+            - 'C:\Windows\system32\mshta.exe'
+        CommandLine: 
+            - '*.jpg*'
+            - '*.png*'
+            - '*.lnk*'
+            # - '*.chm*'  # could be prone to false positives
+            - '*.xls*'
+            - '*.doc*'
+            - '*.zip*'
+    condition:
+        selection1 or selection2

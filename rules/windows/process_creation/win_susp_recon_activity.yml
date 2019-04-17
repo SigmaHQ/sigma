@@ -1,0 +1,26 @@
+title: Suspicious Reconnaissance Activity
+status: experimental
+description: Detects suspicious command line activity on Windows systems
+author: Florian Roth
+tags:
+    - attack.discovery
+    - attack.t1087
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine:
+            - net group "domain admins" /domain
+            - net localgroup administrators
+    condition: selection
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Inventory tool runs
+    - Penetration tests
+    - Administrative activity
+analysis:
+    recommendation: Check if the user that executed the commands is suspicious (e.g. service accounts, LOCAL_SYSTEM)
+level: medium

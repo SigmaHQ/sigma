@@ -1,0 +1,29 @@
+title: Suspicious PowerShell Invocation based on Parent Process
+status: experimental
+description: Detects suspicious powershell invocations from interpreters or unusual programs
+author: Florian Roth
+references:
+    - https://www.carbonblack.com/2017/03/15/attackers-leverage-excel-powershell-dns-latest-non-malware-attack/
+tags:
+    - attack.execution
+    - attack.t1086
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage:
+            - '*\wscript.exe'
+            - '*\cscript.exe'
+        Image:
+            - '*\powershell.exe'
+    falsepositive:
+        CurrentDirectory: '*\Health Service State\\*'
+    condition: selection and not falsepositive
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Microsoft Operations Manager (MOM)
+    - Other scripts
+level: medium

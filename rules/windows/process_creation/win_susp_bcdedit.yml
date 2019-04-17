@@ -1,0 +1,24 @@
+title: Possible Ransomware or unauthorized MBR modifications
+status: experimental
+description: Detects, possibly, malicious unauthorized usage of bcdedit.exe
+references:
+    - https://docs.microsoft.com/en-us/windows-hardware/drivers/devtest/bcdedit--set
+author: '@neu5ron'
+date: 2019/02/07
+tags:
+    - attack.defense_evasion
+    - attack.t1070
+    - attack.persistence
+    - attack.t1067
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        NewProcessName: '*\fsutil.exe'
+        ProcessCommandLine:
+            - '*delete*'
+            - '*deletevalue*'
+            - '*import*'
+    condition: selection
+level: medium

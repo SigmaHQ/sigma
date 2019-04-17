@@ -1,0 +1,21 @@
+title: Netsh RDP Port Forwarding
+description: Detects netsh commands that configure a port forwarding of port 3389 used for RDP
+references:
+    - https://www.fireeye.com/blog/threat-research/2019/01/bypassing-network-restrictions-through-rdp-tunneling.html
+date: 2019/01/29
+tags:
+    - attack.lateral_movement
+    - attack.t1021
+status: experimental
+author: Florian Roth
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine:
+            - netsh i* p*=3389 c*
+    condition: selection
+falsepositives:
+    - Legitimate administration
+level: high

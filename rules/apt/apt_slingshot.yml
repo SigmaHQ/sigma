@@ -1,29 +1,25 @@
 ---
 action: global
 title: Defrag Deactivation
+author: Florian Roth
 description: Detects the deactivation of the Scheduled defragmentation task as seen by Slingshot APT group
 references:
     - https://securelist.com/apt-slingshot/84312/
 tags:
     - attack.persistence
-author: Florian Roth
-date: 2018/03/10
-logsource:
-    product: windows
-    service: security
-    definition: 'Requirements: Audit Policy : Audit Other Object Access Events > Success'       
+    - attack.t1053
+    - attack.s0111
 detection:
-    condition: selection
+    condition: 1 of them
 falsepositives:
     - Unknown
 level: medium
 ---
 logsource:
+    category: process_creation
     product: windows
-    service: sysmon
 detection:
-    selection:
-        EventID: 1
+    selection1:
         CommandLine: 
             - '*schtasks* /delete *Defrag\ScheduledDefrag*'
 ---
@@ -32,6 +28,6 @@ logsource:
     service: security
     definition: 'Requirements: Audit Policy : Audit Other Object Access Events > Success'       
 detection:
-    selection:
+    selection2:
         EventID: 4701
         TaskName: '\Microsoft\Windows\Defrag\ScheduledDefrag'

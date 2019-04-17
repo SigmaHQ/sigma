@@ -5,33 +5,28 @@ description: 'This method detects malicious services mentioned in APT29 report b
 references:
     - https://www.fireeye.com/blog/threat-research/2017/03/apt29_domain_frontin.html
 tags:
-    - attack.command_and_control
+    - attack.persistence
     - attack.g0016
-    - attack.t1172
+    - attack.t1050
 logsource:
     product: windows
+    service: system
 detection:
-    service:
+    service_install:
         EventID: 7045
         ServiceName: 'Google Update'
     timeframe: 5m
-    condition: service | near process
+    condition: service_install | near process
 falsepositives:
     - Unknown
 level: high
+
 ---
-# Windows Audit Log
+logsource:
+    category: process_creation
+    product: windows
 detection:
     process:
-        EventID: 4688 
-        NewProcessName: 
-            - 'C:\Program Files(x86)\Google\GoogleService.exe'
-            - 'C:\Program Files(x86)\Google\GoogleUpdate.exe'
----
-# Sysmon
-detection:
-    process:
-        EventID: 1 
         Image: 
             - 'C:\Program Files(x86)\Google\GoogleService.exe'
             - 'C:\Program Files(x86)\Google\GoogleUpdate.exe'
