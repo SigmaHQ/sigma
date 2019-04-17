@@ -1,0 +1,46 @@
+title: Masquerading
+status: experimental
+description: Malware often uses well-known windows process names for their malicious process name to avoid detection. This technique is called masquerading.
+references:
+    - https://github.com/Azure/Azure-Sentinel/blob/master/Hunting%20Queries/SecurityEvent/masquerading_files.txt
+    - https://niiconsulting.com/checkmate/2017/08/threat-hunting-for-masquerading-windows-processes/
+    - https://patrick-bareiss.com/detecting-masquerading-of-malware-with-sigma/
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+author: Patrick Bareiss
+date: 2019/04/17
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventCode: 1
+        Image:
+            - '*\rundll32.exe'
+            - '*\svchost.exe'
+            - '*\smss.exe'
+            - '*\csrss.exe'
+            - '*\wininit.exe'
+            - '*\services.exe'
+            - '*\lsass.exe'
+            - '*\lsm.exe'
+            - '*\winlogon.exe'
+            - '*\explorer.exe'
+            - '*\taskhost.exe'             
+    filter:
+        Image: 
+            - '*\Windows\System32\*'
+            - '*\Windows\Syswow64\*'
+    known_false_positives:
+        Image: 
+            - 'C:\Windows\Explorer.EXE'
+    condition: selection and not filter and not known_false_positives
+fields:
+    - User
+    - Image
+    - CommandLine
+falsepositives:
+    - unknown
+level: critical
+
