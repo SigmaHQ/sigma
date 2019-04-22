@@ -44,7 +44,7 @@ queries = asyncio.Queue()
 # sigmac runner coroutinne
 async def run_sigmac():
     sigmac = asyncio.create_subprocess_exec(
-            sigmac_cmd, "-t", "es-qs", "-v", "-I", "-r", "rules/",
+            sigmac_cmd, "-t", "es-qs", "-c", "tools/config/elk-winlogbeat.yml", "-v", "-I", "-r", "rules/",
             stdout=asyncio.subprocess.PIPE,
             )
     print("* Launching sigmac")
