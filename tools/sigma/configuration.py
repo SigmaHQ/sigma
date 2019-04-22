@@ -85,6 +85,7 @@ class SigmaConfiguration:
     def __init__(self, configyaml=None):
         if configyaml == None:
             self.config = None
+            self.order = None
             self.fieldmappings = dict()
             self.logsources = dict()
             self.defaultindex = None
@@ -102,10 +103,8 @@ class SigmaConfiguration:
             if type(self.fieldmappings) != dict:
                 raise SigmaConfigParseError("Fieldmappings must be a map")
 
-            try:
-                self.defaultindex = config['defaultindex']
-            except KeyError:
-                self.defaultindex = None
+            self.order = config.setdefault("order", None)
+            self.defaultindex = config.setdefault('defaultindex', None)
 
             self.logsources = list()
             self.backend = None

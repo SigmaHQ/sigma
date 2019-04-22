@@ -145,10 +145,18 @@ if cmdargs.filter:
 
 sigmaconfigs = SigmaConfigurationChain()
 if cmdargs.config:
+    order = 0
     for conffile in cmdargs.config:
         try:
             f = open(conffile)
             sigmaconfig = SigmaConfiguration(f)
+            if sigmaconfig.order is not None:
+                if sigmaconfig.order <= order and not cmdargs.shoot_yourself_in_the_foot:
+                    print("The configurations were provided in the wrong order (order key check in config file)", file=sys.stderr)
+                    print("This error can be ignored with --shoot-yourself-in-the-foot.", file=sys.stderr)
+                    sys.exit(ERR_CONFIG_ORDER)
+                order = sigmaconfig.order
+
             sigmaconfigs.append(sigmaconfig)
         except OSError as e:
             print("Failed to open Sigma configuration file %s: %s" % (conffile, str(e)), file=sys.stderr)
