@@ -90,6 +90,7 @@ class BaseBackend:
     index_field = None    # field name that is used to address indices
     file_list = None
     options = tuple()     # a list of tuples with following elements: option name, default value, help text, target attribute name (option name if None)
+    config_required = True
 
     def __init__(self, sigmaconfig, backend_options=None):
         """

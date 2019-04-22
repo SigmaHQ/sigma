@@ -22,6 +22,7 @@ class GrepBackend(BaseBackend, QuoteCharMixin):
     """Generates Perl compatible regular expressions and puts 'grep -P' around it"""
     identifier = "grep"
     active = True
+    config_required = False
 
     reEscape = re.compile("([\\|()\[\]{}.^$+])")
 

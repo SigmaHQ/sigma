@@ -27,6 +27,7 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
     options = SingleTextQueryBackend.options + (
             ("sysmon", False, "Generate Sysmon event queries for generic rules", None),
             )
+    config_required = False
 
     reEscape = re.compile('("|(?<!\\\\)\\\\(?![*?\\\\]))')
     reClear = None

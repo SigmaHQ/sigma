@@ -21,6 +21,7 @@ class GraylogQuerystringBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Graylog query string. Only searches, no aggregations."""     
     identifier = "graylog"
     active = True
+    config_required = False
 
     reEscape = re.compile("([+\\-!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|&&|\\|\\|)")
     reClear = None

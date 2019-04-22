@@ -22,6 +22,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Windows Defender ATP Hunting Queries."""
     identifier = "wdatp"
     active = True
+    config_required = False
 
     # \   -> \\
     # \*  -> \*

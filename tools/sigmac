@@ -107,6 +107,7 @@ argparser.add_argument("--backend-option", "-O", action="append", help="Options 
 argparser.add_argument("--backend-config", help="Configuration file containing options to pass to the backend")
 argparser.add_argument("--defer-abort", "-d", action="store_true", help="Don't abort on parse or conversion errors, proceed with next rule. The exit code from the last error is returned")
 argparser.add_argument("--ignore-backend-errors", "-I", action="store_true", help="Only return error codes for parse errors and ignore errors for rules that cause backend errors. Useful, when you want to get as much queries as possible.")
+argparser.add_argument("--shoot-yourself-in-the-foot", action="store_true", help="Ignore errors caused by misusage of the converter and proceed. You know what you do. Don't complain about the results.")
 argparser.add_argument("--verbose", "-v", action="store_true", help="Be verbose")
 argparser.add_argument("--debug", "-D", action="store_true", help="Debugging output")
 argparser.add_argument("inputs", nargs="*", help="Sigma input files ('-' for stdin)")
@@ -156,6 +157,11 @@ if cmdargs.config:
 
 backend_options = BackendOptions(cmdargs.backend_option, cmdargs.backend_config)
 backend = backends.getBackend(cmdargs.target)(sigmaconfigs, backend_options)
+if backend.config_required and cmdargs.config is None and not cmdargs.shoot_yourself_in_the_foot:
+    print("The backend you want to use usually requires a configuration to generate valid results. Please provide one.", file=sys.stderr)
+    print("This error can be ignored with --shoot-yourself-in-the-foot.", file=sys.stderr)
+    sys.exit(ERR_CONFIG_REQUIRED)
+
 filename = cmdargs.output
 if filename:
     try:

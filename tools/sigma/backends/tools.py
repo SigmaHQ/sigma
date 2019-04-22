@@ -22,6 +22,7 @@ class FieldnameListBackend(BaseBackend):
     """List all fieldnames from given Sigma rules for creation of a field mapping configuration."""
     identifier = "fieldlist"
     active = True
+    config_required = False
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
