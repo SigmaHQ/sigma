@@ -38,14 +38,19 @@ logger = logging.getLogger(__name__)
 
 # Error codes
 
+ERR_OUTPUT = 1
 ERR_INVALID_YAML = 3
 ERR_SIGMA_PARSING = 4
 ERR_OPEN_SIGMA_RULE = 5
+ERR_OPEN_CONFIG_FILE = 5
+ERR_CONFIG_INVALID_YAML = 6
+ERR_CONFIG_PARSING = 6
 ERR_BACKEND = 8
 ERR_NOT_SUPPORTED = 9
 ERR_NO_TARGET = 10
 ERR_RULE_FILTER_PARSING = 11
 ERR_CONFIG_REQUIRED = 20
+ERR_CONFIG_ORDER = 21
 ERR_NOT_IMPLEMENTED = 42
 ERR_PARTIAL_FIELD_MATCH = 80
 ERR_FULL_FIELD_MATCH = 90
@@ -147,13 +152,13 @@ if cmdargs.config:
             sigmaconfigs.append(sigmaconfig)
         except OSError as e:
             print("Failed to open Sigma configuration file %s: %s" % (conffile, str(e)), file=sys.stderr)
-            exit(5)
+            exit(ERR_OPEN_CONFIG_FILE)
         except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
             print("Sigma configuration file %s is no valid YAML: %s" % (conffile, str(e)), file=sys.stderr)
-            exit(6)
+            exit(ERR_CONFIG_INVALID_YAML)
         except SigmaConfigParseError as e:
             print("Sigma configuration parse error in %s: %s" % (conffile, str(e)), file=sys.stderr)
-            exit(7)
+            exit(ERR_CONFIG_PARSING)
 
 backend_options = BackendOptions(cmdargs.backend_option, cmdargs.backend_config)
 backend = backends.getBackend(cmdargs.target)(sigmaconfigs, backend_options)
@@ -168,7 +173,7 @@ if filename:
         out = open(filename, "w", encoding='utf-8')
     except (IOError, OSError) as e:
         print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
-        exit(1)
+        exit(ERR_OUTPUT)
 else:
     out = sys.stdout
 
