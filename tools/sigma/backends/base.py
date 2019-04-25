@@ -260,6 +260,8 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
             return self.mapExpression % (transformed_fieldname, self.generateNode(value))
         elif type(value) == list:
             return self.generateMapItemListNode(transformed_fieldname, value)
+        elif value is None:
+            return self.nullExpression % (transformed_fieldname, )
         else:
             raise TypeError("Backend does not support map values of type " + str(type(value)))
 

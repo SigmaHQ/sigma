@@ -177,6 +177,8 @@ class SumoLogicBackend(SingleTextQueryBackend):
                     else:
                         new_value.append(item)
                 return self.generateORNode(new_value)
+            elif value is None:
+                return self.nullExpression % (key, )
             else:
                 raise TypeError("Backend does not support map values of type " + str(type(value)))
 

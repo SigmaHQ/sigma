@@ -170,8 +170,8 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
 
     def generateMapItemNode(self, node):
         key, value = node
-        if type(value) not in (str, int, list):
-            raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
+        if type(value) not in (str, int, list, type(None)):
+            raise TypeError("Map values must be strings, numbers, lists or null, not " + str(type(value)))
         if type(value) is list:
             res = {'bool': {'should': []}}
             for v in value:
@@ -183,6 +183,9 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
 
                 res['bool']['should'].append({queryType: {key_mapped: self.cleanValue(str(v))}})
             return res
+        elif value is None:
+            key_mapped = self.fieldNameMapping(key, value)
+            return { "bool": { "must_not": { "exists": { "field": key_mapped } } } }
         else:
             key_mapped = self.fieldNameMapping(key, value)
             if self.matchKeyword:   # searches against keyowrd fields are wildcard searches, phrases otherwise

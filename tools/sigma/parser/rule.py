@@ -81,14 +81,7 @@ class SigmaParser:
             cond = ConditionAND()
             for key, value in definition.items():
                 mapping = self.config.get_fieldmapping(key)
-                if value == None:
-                    fields = mapping.resolve_fieldname(key)
-                    if type(fields) == str:
-                        fields = [ fields ]
-                    for field in fields:
-                        cond.add(ConditionNULLValue(val=field))
-                else:
-                    cond.add(mapping.resolve(key, value, self))
+                cond.add(mapping.resolve(key, value, self))
 
         return cond
 
