@@ -51,7 +51,7 @@ setup(
             'config/elk-defaultindex-logstash.yml',
             'config/elk-linux.yml',
             'config/logpoint-windows-all.yml',
-            'config/spark.yml',
+            'config/thor.yml',
             'config/elk-winlogbeat.yml',
             'config/elk-defaultindex-filebeat.yml',
             'config/splunk-windows-all.yml',
