@@ -111,10 +111,14 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
 
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
-        self.title = sigmaparser.parsedyaml["title"]
-        self.indices = sigmaparser.get_logsource().index
-        if len(self.indices) == 0:
+        self.title = sigmaparser.parsedyaml.setdefault("title", "")
+        logsource = sigmaparser.get_logsource()
+        if logsource is None:
             self.indices = None
+        else:
+            self.indices = logsource.index
+            if len(self.indices) == 0:
+                self.indices = None
 
         try:
             self.interval = sigmaparser.parsedyaml['detection']['timeframe']
