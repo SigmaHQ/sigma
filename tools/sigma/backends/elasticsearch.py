@@ -683,19 +683,20 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
                     rule_object['smtp_auth_file'] = self.smtp_auth_file
             if 'http_post' in alert_methods:
                 if self.http_post_url is None:
-                    print('Warning: the Elastalert HTTP POST method is selected but no URL has been provided. This alert method will be ignored', file=sys.stderr)
+                    print('Warning: the Elastalert HTTP POST method is selected but no URL has been provided.', file=sys.stderr)
                 else:
-                    rule_object['alert'].append('post')
                     rule_object['http_post_url'] = self.http_post_url
-                    if self.http_post_include_rule_metadata:
-                        rule_object['http_post_static_payload'] = {
-                            'sigma_rule_metadata': {
-                                'title': title,
-                                'description': description,
-                                'level': level,
-                                'tags': rule_tag
-                            }
+
+                rule_object['alert'].append('post')
+                if self.http_post_include_rule_metadata:
+                    rule_object['http_post_static_payload'] = {
+                        'sigma_rule_metadata': {
+                            'title': title,
+                            'description': description,
+                            'level': level,
+                            'tags': rule_tag
                         }
+                    }
             #If alert is not define put debug as default
             if len(rule_object['alert']) == 0:
                 rule_object['alert'].append('debug')
