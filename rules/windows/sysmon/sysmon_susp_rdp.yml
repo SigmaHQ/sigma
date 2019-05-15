@@ -1,0 +1,40 @@
+title: Suspicious Outbound RDP Connections 
+status: experimental
+description: Detects Non-Standard Tools Connecting to TCP port 3389 indicating possible lateral movement
+references:
+    - https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2019-0708
+author: Markus Neis
+ Swisscom 
+date: 2019/05/15
+tags:
+    - attack.lateral_movement
+    - attack.t1210
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 3
+        DestinationPort: 3389 
+    filter:
+        - Image: "*\\mstsc.exe"
+        - Image: "*\\RTSApp.exe"
+        - Image: "*\\RTS2App.exe"
+        - Image: "*\\RDCMan.exe"
+        - Image: "*\\ws_TunnelService.exe"
+        - Image: "*\\RSSensor.exe"
+        - Image: "*\\RemoteDesktopManagerFree.exe"
+        - Image: "*\\RemoteDesktopManager.exe"
+        - Image: "*\\RemoteDesktopManager64.exe"
+        - Image: "*\\mRemoteNG.exe"
+        - Image: "*\\mRemote.exe"
+        - Image: "*\\Terminals.exe"
+        - Image: "*\\spiceworks-finder.exe"
+        - Image: "*\\FSDiscovery.exe"
+        - Image: "*\\FSAssessment.exe"
+        - Image: "*\\MobaRTE.exe"
+        - Image: "*\\chrome.exe"
+    condition: selection and not filter 
+falsepositives:
+    - likely from other RDP tools 
+level: high
