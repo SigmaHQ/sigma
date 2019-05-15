@@ -78,7 +78,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
 
     def default_value_mapping(self, val):
         op = "=="
-        if "*" in val[1:-1]:     # value contains * inside string - use regex match
+        if type(val) == str and "*" in val[1:-1]:     # value contains * inside string - use regex match
             op = "matches regex"
             val = re.sub('([".^$]|\\\\(?![*?]))', '\\\\\g<1>', val)
             val = re.sub('\\*', '.*', val)
