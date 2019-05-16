@@ -98,8 +98,11 @@ class SigmaConfiguration:
             try:
                 for source, target in config['fieldmappings'].items():
                     self.fieldmappings[source] = FieldMapping(source, target)
+            except TypeError as e:
+                raise SigmaConfigParseError("Configuration has wrong type, should be map") from e
             except KeyError:
                 pass
+
             if type(self.fieldmappings) != dict:
                 raise SigmaConfigParseError("Fieldmappings must be a map")
 
