@@ -25,6 +25,7 @@ import logging
 from sigma.parser.collection import SigmaCollectionParser
 from sigma.parser.exceptions import SigmaCollectionParseError, SigmaParseError
 from sigma.configuration import SigmaConfiguration, SigmaConfigurationChain
+from sigma.config.collection import SigmaConfigurationManager
 from sigma.config.exceptions import SigmaConfigParseError, SigmaRuleFilterParseException
 from sigma.filter import SigmaRuleFilter
 import sigma.backends.discovery as backends
@@ -105,7 +106,7 @@ t is a tag that must appear in the rules tag list, case-insensitive matching.
 Multiple log source specifications are AND linked.
         """)
 argparser.add_argument("--target", "-t", choices=backends.getBackendDict().keys(), help="Output target format")
-argparser.add_argument("--target-list", "-l", action="store_true", help="List available output target formats")
+argparser.add_argument("--lists", "-l", action="store_true", help="List available output target formats and configurations")
 argparser.add_argument("--config", "-c", action="append", help="Configurations with field name and index mapping for target environment. Multiple configurations are merged into one. Last config is authorative in case of conflicts.")
 argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix if multiple files are generated")
 argparser.add_argument("--backend-option", "-O", action="append", help="Options and switches that are passed to the backend")
@@ -118,12 +119,20 @@ argparser.add_argument("--debug", "-D", action="store_true", help="Debugging out
 argparser.add_argument("inputs", nargs="*", help="Sigma input files ('-' for stdin)")
 cmdargs = argparser.parse_args()
 
+scm = SigmaConfigurationManager()
+
 if cmdargs.debug:   # pragma: no cover
     logger.setLevel(logging.DEBUG)
 
-if cmdargs.target_list:
+if cmdargs.lists:
+    print("Backends:")
     for backend in backends.getBackendList():
         print("%10s: %s" % (backend.identifier, backend.__doc__))
+
+    print()
+    print("Configurations:")
+    for conf_id, title in scm.list():
+        print("{:>30} : {}".format(conf_id, title))
     sys.exit(0)
 elif len(cmdargs.inputs) == 0:
     print("Nothing to do!")
