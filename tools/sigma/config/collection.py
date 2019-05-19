@@ -17,6 +17,7 @@
 from collections import Iterable
 from pathlib import Path
 import sys
+import re
 from sigma.configuration import SigmaConfiguration
 from sigma.config.exceptions import SigmaConfigParseError
 
@@ -25,6 +26,7 @@ class SigmaConfigurationManager(object):
     Locate Sigma configuration files in a directory and provide them as well as informations
     about them.
     """
+    re_identifier = re.compile("^[\\w-]+$")
     def __init__(self, paths=None):
         """
         Initialize configuration collection. If paths is not given, some default locations are used:
@@ -74,3 +76,14 @@ class SigmaConfigurationManager(object):
         """Returns a list of (identifier, title) tuples of found configurations."""
         return [ (conf_id, config.config.setdefault("title", "")) for conf_id, config in self.configs.items() ]
 
+    def get(self, name):
+        """
+        Return a config by identifier or file path. First, it tries to resolve identifier from
+        discovered configurations (file name stem). If this fails, the parameter value is treated
+        as file name.
+        """
+        try:                # Lookup in discovered configurations
+            return self.configs[name]
+        except KeyError:    # identifier not found, try with filename
+            f = open(name)
+            return SigmaConfiguration(f)

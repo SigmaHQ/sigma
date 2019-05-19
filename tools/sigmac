@@ -155,10 +155,9 @@ if cmdargs.filter:
 sigmaconfigs = SigmaConfigurationChain()
 if cmdargs.config:
     order = 0
-    for conffile in cmdargs.config:
+    for conf_name in cmdargs.config:
         try:
-            f = open(conffile)
-            sigmaconfig = SigmaConfiguration(f)
+            sigmaconfig = scm.get(conf_name)
             if sigmaconfig.order is not None:
                 if sigmaconfig.order <= order and not cmdargs.shoot_yourself_in_the_foot:
                     print("The configurations were provided in the wrong order (order key check in config file)", file=sys.stderr)
@@ -167,13 +166,13 @@ if cmdargs.config:
 
             sigmaconfigs.append(sigmaconfig)
         except OSError as e:
-            print("Failed to open Sigma configuration file %s: %s" % (conffile, str(e)), file=sys.stderr)
+            print("Failed to open Sigma configuration file %s: %s" % (conf_name, str(e)), file=sys.stderr)
             exit(ERR_OPEN_CONFIG_FILE)
         except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
-            print("Sigma configuration file %s is no valid YAML: %s" % (conffile, str(e)), file=sys.stderr)
+            print("Sigma configuration file %s is no valid YAML: %s" % (conf_name, str(e)), file=sys.stderr)
             exit(ERR_CONFIG_INVALID_YAML)
         except SigmaConfigParseError as e:
-            print("Sigma configuration parse error in %s: %s" % (conffile, str(e)), file=sys.stderr)
+            print("Sigma configuration parse error in %s: %s" % (conf_name, str(e)), file=sys.stderr)
             exit(ERR_CONFIG_PARSING)
 
 backend_options = BackendOptions(cmdargs.backend_option, cmdargs.backend_config)
