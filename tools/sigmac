@@ -52,6 +52,7 @@ ERR_NO_TARGET           = 10
 ERR_RULE_FILTER_PARSING = 11
 ERR_CONFIG_REQUIRED     = 20
 ERR_CONFIG_ORDER        = 21
+ERR_CONFIG_BACKEND      = 22
 ERR_NOT_IMPLEMENTED     = 42
 ERR_PARTIAL_FIELD_MATCH = 80
 ERR_FULL_FIELD_MATCH    = 90
@@ -163,6 +164,13 @@ if cmdargs.config:
                     print("The configurations were provided in the wrong order (order key check in config file)", file=sys.stderr)
                     sys.exit(ERR_CONFIG_ORDER)
                 order = sigmaconfig.order
+
+            try:
+                if cmdargs.target not in sigmaconfig.config["backends"]:
+                    print("The configuration '{}' is not valid for backend '{}'. Valid choices are: {}".format(conf_name, cmdargs.target, ", ".join(sigmaconfig.config["backends"])), file=sys.stderr)
+                    sys.exit(ERR_CONFIG_ORDER)
+            except KeyError:
+                pass
 
             sigmaconfigs.append(sigmaconfig)
         except OSError as e:

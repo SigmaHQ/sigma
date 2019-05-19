@@ -48,6 +48,7 @@ test-sigmac:
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -c tools/config/splunk-windows-all-index.yml -f 'foo=bar' rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/elk-windows.yml -t es-qs rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c sysmon -c elk-windows -t es-qs rules/ > /dev/null
+	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c sysmon -c elk-windows -t splunk rules/ > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/elk-windows.yml -c tools/config/generic/sysmon.yml -t es-qs rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/elk-linux.yml -t es-qs rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/elk-windows.yml -t kibana rules/ > /dev/null
