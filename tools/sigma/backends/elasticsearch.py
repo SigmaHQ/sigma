@@ -564,9 +564,9 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
         result = ""
         for rulename, rule in self.watcher_alert.items():
             if self.output_type == "plain":     # output request line + body
-                result += "PUT _xpack/watcher/watch/%s\n%s\n" % (rulename, json.dumps(rule, indent=2))
+                result += "PUT _watcher/watch/%s\n%s\n" % (rulename, json.dumps(rule, indent=2))
             elif self.output_type == "curl":      # output curl command line
-                result += "curl -s -XPUT -H 'Content-Type: application/json' --data-binary @- %s/_xpack/watcher/watch/%s <<EOF\n%s\nEOF\n" % (self.es, rulename, json.dumps(rule, indent=2))
+                result += "curl -s -XPUT -H 'Content-Type: application/json' --data-binary @- %s/_watcher/watch/%s <<EOF\n%s\nEOF\n" % (self.es, rulename, json.dumps(rule, indent=2))
             elif self.output_type == "json":    # output compressed watcher json, one per line
                 result += json.dumps(rule) + "\n"
             else:
