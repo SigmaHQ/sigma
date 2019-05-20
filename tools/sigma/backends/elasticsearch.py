@@ -390,12 +390,18 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
     options = ElasticsearchQuerystringBackend.options + (
             ("output", "curl", "Output format: curl = Shell script that imports queries in Watcher index with curl", "output_type"),
             ("es", "localhost:9200", "Host and port of Elasticsearch instance", None),
+            ("watcher_url", "watcher", "Watcher URL: watcher (default)=_watcher/..., xpack=_xpack/wacher/... (deprecated)", None),
             ("mail", None, "Mail address for Watcher notification (only logging if not set)", None),
             )
+    watcher_urls = {
+            "watcher": "_watcher",
+            "xpack": "_xpack/watcher",
+            }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.watcher_alert = dict()
+        self.url_prefix = self.watcher_urls[self.watcher_url]
 
     def generate(self, sigmaparser):
         # get the details if this alert occurs
@@ -564,9 +570,9 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
         result = ""
         for rulename, rule in self.watcher_alert.items():
             if self.output_type == "plain":     # output request line + body
-                result += "PUT _watcher/watch/%s\n%s\n" % (rulename, json.dumps(rule, indent=2))
+                result += "PUT %s/watch/%s\n%s\n" % (self.url_prefix, rulename, json.dumps(rule, indent=2))
             elif self.output_type == "curl":      # output curl command line
-                result += "curl -s -XPUT -H 'Content-Type: application/json' --data-binary @- %s/_watcher/watch/%s <<EOF\n%s\nEOF\n" % (self.es, rulename, json.dumps(rule, indent=2))
+                result += "curl -s -XPUT -H 'Content-Type: application/json' --data-binary @- %s/%s/watch/%s <<EOF\n%s\nEOF\n" % (self.es, self.url_prefix, rulename, json.dumps(rule, indent=2))
             elif self.output_type == "json":    # output compressed watcher json, one per line
                 result += json.dumps(rule) + "\n"
             else:
