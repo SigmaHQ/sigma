@@ -286,7 +286,6 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
         self.indexsearch = set()
 
     def generate(self, sigmaparser):
-        rulename = self.getRuleName(sigmaparser)
         description = sigmaparser.parsedyaml.setdefault("description", "")
 
         columns = list()
@@ -310,7 +309,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
             result = self.generateNode(parsed.parsedSearch)
 
             for index in indices:
-                final_rulename = rulename
+                rulename = self.getRuleName(sigmaparser)
                 if len(indices) > 1:     # add index names if rule must be replicated because of ambigiuous index patterns
                     raise NotSupportedError("Multiple target indices are not supported by Kibana")
                 else:
@@ -325,7 +324,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
                             )
                         )
                 self.kibanaconf.append({
-                        "_id": final_rulename,
+                        "_id": rulename,
                         "_type": "search",
                         "_source": {
                             "title": title,
@@ -405,7 +404,6 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
 
     def generate(self, sigmaparser):
         # get the details if this alert occurs
-        rulename = self.getRuleName(sigmaparser)
         title = sigmaparser.parsedyaml.setdefault("title", "")
         description = sigmaparser.parsedyaml.setdefault("description", "")
         false_positives = sigmaparser.parsedyaml.setdefault("falsepositives", "")
@@ -417,6 +415,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
         indices = sigmaparser.get_logsource().index
 
         for condition in sigmaparser.condparsed:
+            rulename = self.getRuleName(sigmaparser)
             result = self.generateNode(condition.parsedSearch)
             agg = {}
             alert_value_location = ""
