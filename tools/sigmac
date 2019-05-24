@@ -125,15 +125,22 @@ scm = SigmaConfigurationManager()
 if cmdargs.debug:   # pragma: no cover
     logger.setLevel(logging.DEBUG)
 
-if cmdargs.lists:
-    print("Backends:")
+def list_backends():
     for backend in backends.getBackendList():
         print("%10s: %s" % (backend.identifier, backend.__doc__))
 
+def list_configurations(backend=None):
+    for conf_id, title, backends in scm.list():
+        if backend is not None and backend in backends or backend is None or len(backends) == 0:
+            print("{:>30} : {}".format(conf_id, title))
+
+if cmdargs.lists:
+    print("Backends:")
+    list_backends()
+
     print()
     print("Configurations:")
-    for conf_id, title in scm.list():
-        print("{:>30} : {}".format(conf_id, title))
+    list_configurations(cmdargs.target)
     sys.exit(0)
 elif len(cmdargs.inputs) == 0:
     print("Nothing to do!")
@@ -187,6 +194,8 @@ backend_options = BackendOptions(cmdargs.backend_option, cmdargs.backend_config)
 backend = backends.getBackend(cmdargs.target)(sigmaconfigs, backend_options)
 if backend.config_required and cmdargs.config is None and not cmdargs.shoot_yourself_in_the_foot:
     print("The backend you want to use usually requires a configuration to generate valid results. Please provide one.", file=sys.stderr)
+    print("Available choices for this backend (get complete list with --lists/-l):")
+    list_configurations(cmdargs.target)
     sys.exit(ERR_CONFIG_REQUIRED)
 
 filename = cmdargs.output

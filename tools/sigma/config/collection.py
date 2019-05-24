@@ -74,7 +74,7 @@ class SigmaConfigurationManager(object):
 
     def list(self):
         """Returns a list of (identifier, title) tuples of found configurations."""
-        return [ (conf_id, config.config.setdefault("title", "")) for conf_id, config in self.configs.items() ]
+        return [ (conf_id, config.config.setdefault("title", ""), config.config.setdefault("backends", list())) for conf_id, config in self.configs.items() ]
 
     def get(self, name):
         """
