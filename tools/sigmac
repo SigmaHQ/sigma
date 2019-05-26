@@ -31,6 +31,7 @@ from sigma.filter import SigmaRuleFilter
 import sigma.backends.discovery as backends
 from sigma.backends.base import BackendOptions
 from sigma.backends.exceptions import BackendError, NotSupportedError, PartialMatchError, FullMatchError
+from sigma.parser.modifiers import modifiers
 import codecs
 
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
@@ -134,6 +135,10 @@ def list_configurations(backend=None):
         if backend is not None and backend in backends or backend is None or len(backends) == 0:
             print("{:>30} : {}".format(conf_id, title))
 
+def list_modifiers():
+    for modifier_id, modifier in modifiers.items():
+        print("{:>10} : {}".format(modifier_id, modifier.__doc__))
+
 if cmdargs.lists:
     print("Backends:")
     list_backends()
@@ -141,6 +146,10 @@ if cmdargs.lists:
     print()
     print("Configurations:")
     list_configurations(cmdargs.target)
+
+    print()
+    print("Modifiers:")
+    list_modifiers()
     sys.exit(0)
 elif len(cmdargs.inputs) == 0:
     print("Nothing to do!")
