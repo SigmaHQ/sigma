@@ -247,7 +247,8 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
             if 'bool' not in self.queries[-1]['query']['constant_score']['filter']:
                 saved_simple_query = self.queries[-1]['query']['constant_score']['filter']
                 self.queries[-1]['query']['constant_score']['filter'] = {'bool': {'must': []}}
-                self.queries[-1]['query']['constant_score']['filter']['bool']['must'].append(saved_simple_query)
+                if len(saved_simple_query.keys()) > 0:
+                    self.queries[-1]['query']['constant_score']['filter']['bool']['must'].append(saved_simple_query)
             if 'must' not in self.queries[-1]['query']['constant_score']['filter']['bool']:
                 self.queries[-1]['query']['constant_score']['filter']['bool']['must'] = []
 
