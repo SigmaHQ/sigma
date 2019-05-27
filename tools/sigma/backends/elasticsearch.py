@@ -55,6 +55,10 @@ class ElasticsearchWildcardHandlingMixin(object):
         Determine if values contain wildcards. If yes, match on keyword field else on analyzed one.
         Decide if field value should be quoted based on the field name decision and store it in object property.
         """
+        if self.keyword_field == '':
+            self.matchKeyword = True
+            return fieldname
+
         if fieldname not in self.blacklist and (
                 type(value) == list and any(map(self.containsWildcard, value)) \
                 or self.containsWildcard(value)
@@ -642,7 +646,7 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
             if parsed.parsedAgg:
                 if parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MIN or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MAX or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_AVG or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_SUM:
                     if parsed.parsedAgg.groupfield is not None:
-                        rule_object['query_key'] = parsed.parsedAgg.groupfield + ".keyword"
+                        rule_object['query_key'] = self.fieldNameMapping(parsed.parsedAgg.groupfield, '*')
                     rule_object['type'] = "metric_aggregation"
                     rule_object['buffer_time'] = interval
                     rule_object['doc_type'] = "doc"
@@ -653,7 +657,7 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
                         rule_object['metric_agg_type'] = parsed.parsedAgg.aggfunc_notrans
 
                     if parsed.parsedAgg.aggfield:
-                        rule_object['metric_agg_key'] = parsed.parsedAgg.aggfield + ".keyword"
+                        rule_object['metric_agg_key'] = self.fieldNameMapping(parsed.parsedAgg.aggfield, '*')
                     else:
                         rule_object['metric_agg_key'] = "_id"
 
@@ -748,7 +752,7 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
                     if idx == agg.aggfunc:
                         funcname = name
                         break
-                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend"%(self.title, funcname)) 
+                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend"%(self.title, funcname))
 
     def convertLevel(self, level):
     	return {
