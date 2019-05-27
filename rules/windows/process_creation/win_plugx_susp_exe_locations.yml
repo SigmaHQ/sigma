@@ -1,0 +1,95 @@
+title: Executable used by PlugX in Uncommon Location - Sysmon Version
+status: experimental
+description: Detects the execution of an executable that is typically used by PlugX for DLL side loading started from an uncommon location
+references:
+    - http://www.hexacorn.com/blog/2016/03/10/beyond-good-ol-run-key-part-36/
+    - https://countuponsecurity.com/2017/06/07/threat-hunting-in-the-enterprise-with-appcompatprocessor/
+author: Florian Roth
+date: 2017/06/12
+tags:
+    - attack.s0013
+    - attack.defense_evasion
+    - attack.t1073
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_cammute:
+        Image: '*\CamMute.exe'
+    filter_cammute:
+        Image: '*\Lenovo\Communication Utility\\*'
+    selection_chrome_frame:
+        Image: '*\chrome_frame_helper.exe'
+    filter_chrome_frame:
+        Image: '*\Google\Chrome\application\\*'
+    selection_devemu:
+        Image: '*\dvcemumanager.exe'
+    filter_devemu:
+        Image: '*\Microsoft Device Emulator\\*'
+    selection_gadget:
+        Image: '*\Gadget.exe'
+    filter_gadget:
+        Image: '*\Windows Media Player\\*'
+    selection_hcc:
+        Image: '*\hcc.exe'
+    filter_hcc:
+        Image: '*\HTML Help Workshop\\*'
+    selection_hkcmd:
+        Image: '*\hkcmd.exe'
+    filter_hkcmd:
+        Image:
+            - '*\System32\\*'
+            - '*\SysNative\\*'
+            - '*\SysWowo64\\*'
+    selection_mc:
+        Image: '*\Mc.exe'
+    filter_mc:
+        Image:
+            - '*\Microsoft Visual Studio*'
+            - '*\Microsoft SDK*'
+            - '*\Windows Kit*'
+    selection_msmpeng:
+        Image: '*\MsMpEng.exe'
+    filter_msmpeng:
+        Image:
+            - '*\Microsoft Security Client\\*'
+            - '*\Windows Defender\\*'
+            - '*\AntiMalware\\*'
+    selection_msseces:
+        Image: '*\msseces.exe'
+    filter_msseces:
+        Image: 
+            - '*\Microsoft Security Center\\*'
+            - '*\Microsoft Security Client\\*'
+            - '*\Microsoft Security Essentials\\*'
+    selection_oinfo:
+        Image: '*\OInfoP11.exe'
+    filter_oinfo:
+        Image: '*\Common Files\Microsoft Shared\\*'
+    selection_oleview:
+        Image: '*\OleView.exe'
+    filter_oleview:
+        Image:
+            - '*\Microsoft Visual Studio*'
+            - '*\Microsoft SDK*'
+            - '*\Windows Kit*'
+            - '*\Windows Resource Kit\\*'
+    selection_rc:
+        Image: '*\rc.exe'
+    filter_rc:
+        Image:
+            - '*\Microsoft Visual Studio*'
+            - '*\Microsoft SDK*'
+            - '*\Windows Kit*'
+            - '*\Windows Resource Kit\\*'
+            - '*\Microsoft.NET\\*'
+    condition: ( selection_cammute and not filter_cammute ) or ( selection_chrome_frame and not filter_chrome_frame ) or ( selection_devemu and not filter_devemu )
+        or ( selection_gadget and not filter_gadget ) or ( selection_hcc and not filter_hcc ) or ( selection_hkcmd and not filter_hkcmd ) or ( selection_mc and not filter_mc
+        ) or ( selection_msmpeng and not filter_msmpeng ) or ( selection_msseces and not filter_msseces ) or ( selection_oinfo and not filter_oinfo ) or ( selection_oleview
+        and not filter_oleview ) or ( selection_rc and not filter_rc )
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Unknown
+level: high

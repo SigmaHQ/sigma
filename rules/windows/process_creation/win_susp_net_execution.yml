@@ -1,0 +1,33 @@
+title: Net.exe Execution
+status: experimental
+description: Detects execution of Net.exe, whether suspicious or benign.
+references:
+    - https://pentest.blog/windows-privilege-escalation-methods-for-pentesters/
+author: Michael Haag, Mark Woan (improvements)
+tags:
+    - attack.s0039
+    - attack.lateral_movement
+    - attack.discovery
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image:
+            - '*\net.exe'
+            - '*\net1.exe'
+        CommandLine:
+            - '* group*'
+            - '* localgroup*'
+            - '* user*'
+            - '* view*'
+            - '* share'
+            - '* accounts*'
+            - '* use*'
+    condition: selection
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Will need to be tuned. If using Splunk, I recommend | stats count by Computer,CommandLine following the search for easy hunting by computer/CommandLine.
+level: low

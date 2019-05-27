@@ -22,6 +22,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Windows Defender ATP Hunting Queries."""
     identifier = "wdatp"
     active = True
+    config_required = False
 
     # \   -> \\
     # \*  -> \*
@@ -77,21 +78,22 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
 
     def default_value_mapping(self, val):
         op = "=="
-        if "*" in val[1:-1]:     # value contains * inside string - use regex match
-            op = "matches regex"
-            val = re.sub('([".^$]|\\\\(?![*?]))', '\\\\\g<1>', val)
-            val = re.sub('\\*', '.*', val)
-            val = re.sub('\\?', '.', val)
-        else:                           # value possibly only starts and/or ends with *, use prefix/postfix match
-            if val.endswith("*") and val.startswith("*"):
-                op = "contains"
-                val = self.cleanValue(val[1:-1])
-            elif val.endswith("*"):
-                op = "startswith"
-                val = self.cleanValue(val[:-1])
-            elif val.startswith("*"):
-                op = "endswith"
-                val = self.cleanValue(val[1:])
+        if type(val) == str:
+            if "*" in val[1:-1]:     # value contains * inside string - use regex match
+                op = "matches regex"
+                val = re.sub('([".^$]|\\\\(?![*?]))', '\\\\\g<1>', val)
+                val = re.sub('\\*', '.*', val)
+                val = re.sub('\\?', '.', val)
+            else:                           # value possibly only starts and/or ends with *, use prefix/postfix match
+                if val.endswith("*") and val.startswith("*"):
+                    op = "contains"
+                    val = self.cleanValue(val[1:-1])
+                elif val.endswith("*"):
+                    op = "startswith"
+                    val = self.cleanValue(val[:-1])
+                elif val.startswith("*"):
+                    op = "endswith"
+                    val = self.cleanValue(val[1:])
 
         return "%s \"%s\"" % (op, val)
 
@@ -126,11 +128,16 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
     def generate(self, sigmaparser):
         self.table = None
         try:
-            self.product = sigmaparser.parsedyaml['logsource']['product']
-            self.service = sigmaparser.parsedyaml['logsource']['service']
+            self.category = sigmaparser.parsedyaml['logsource'].setdefault('category', None)
+            self.product = sigmaparser.parsedyaml['logsource'].setdefault('product', None)
+            self.service = sigmaparser.parsedyaml['logsource'].setdefault('service', None)
         except KeyError:
+            self.category = None
             self.product = None
             self.service = None
+
+        if (self.category, self.product, self.service) == ("process_creation", "windows", None):
+            self.table = "ProcessCreationEvents"
 
         return super().generate(sigmaparser)
 

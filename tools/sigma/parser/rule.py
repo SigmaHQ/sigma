@@ -81,14 +81,7 @@ class SigmaParser:
             cond = ConditionAND()
             for key, value in definition.items():
                 mapping = self.config.get_fieldmapping(key)
-                if value == None:
-                    fields = mapping.resolve_fieldname(key)
-                    if type(fields) == str:
-                        fields = [ fields ]
-                    for field in fields:
-                        cond.add(ConditionNULLValue(val=field))
-                else:
-                    cond.add(mapping.resolve(key, value, self))
+                cond.add(mapping.resolve(key, value, self))
 
         return cond
 
@@ -129,3 +122,38 @@ class SigmaParser:
             service = None
 
         return self.config.get_logsource(category, product, service)
+
+    def get_logsource_condition(self):
+        logsource = self.get_logsource()
+        if logsource is None:
+            return None
+        else:
+            if logsource.merged:    # Merged log source, flatten nested list of condition items
+                kvconds = [ item for sublscond in logsource.conditions for item in sublscond ]
+            else:                   # Simple log sources already contain flat list of conditions items
+                kvconds = logsource.conditions
+
+            # Apply field mappings
+            mapped_kvconds = list()
+            for field, value in kvconds:
+                mapping = self.config.get_fieldmapping(field)
+                mapped_kvconds.append(mapping.resolve(field, value, self))
+
+            # AND-link condition items
+            cond = ConditionAND()
+            for kvcond in mapped_kvconds:
+                cond.add(kvcond)
+
+            # Add index condition if supported by backend and defined in log source
+            index_field = self.config.get_indexfield()
+            indices = logsource.index
+            if len(indices) > 0 and index_field is not None:        # at least one index given and backend knows about indices in conditions
+                if len(indices) > 1:      # More than one index, search in all by ORing them together
+                    index_cond = ConditionOR()
+                    for index in indices:
+                        index_cond.add((index_field, index))
+                    cond.add(index_cond)
+                else:           # only one index, add directly to AND from above
+                    cond.add((index_field, indices[0]))
+
+            return cond

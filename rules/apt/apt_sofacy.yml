@@ -1,6 +1,5 @@
----
-action: global
 title: Sofacy Trojan Loader Activity
+author: Florian Roth
 status: experimental
 description: Detects Trojan loader acitivty as used by APT28 
 references: 
@@ -9,32 +8,19 @@ references:
     - https://twitter.com/ClearskySec/status/960924755355369472
 tags:
     - attack.g0007
-author: Florian Roth
-date: 2018/03/01
-modified: 2018/12/11
+    - attack.execution
+    - attack.t1059
+    - attack.defense_evasion
+    - attack.t1085
+logsource:
+    category: process_creation
+    product: windows
 detection:
+    selection:
+        CommandLine: 
+            - 'rundll32.exe %APPDATA%\\*.dat",*'
+            - 'rundll32.exe %APPDATA%\\*.dll",#1'
     condition: selection
 falsepositives:
     - Unknown
 level: critical
----
-logsource:
-    product: windows
-    service: sysmon
-detection:
-    selection:
-        EventID: 1
-        CommandLine: 
-            - 'rundll32.exe %APPDATA%\\*.dat",*'
-            - 'rundll32.exe %APPDATA%\\*.dll",#1'
----
-logsource:
-    product: windows
-    service: security
-    definition: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
-detection:
-    selection:
-        EventID: 4688
-        ProcessCommandLine: 
-            - 'rundll32.exe %APPDATA%\\*.dat",*'
-            - 'rundll32.exe %APPDATA%\\*.dll",#1'

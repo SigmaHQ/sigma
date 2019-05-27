@@ -1,0 +1,38 @@
+title: Executables Started in Suspicious Folder
+status: experimental
+description: Detects process starts of binaries from a suspicious folder
+author: Florian Roth
+date: 2017/10/14
+modified: 2019/02/21
+references:
+    - https://github.com/mbevilacqua/appcompatprocessor/blob/master/AppCompatSearch.txt
+    - https://www.secureworks.com/research/bronze-butler-targets-japanese-businesses
+    - https://www.crowdstrike.com/resources/reports/2019-crowdstrike-global-threat-report/
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image:
+            - C:\PerfLogs\\*
+            - C:\$Recycle.bin\\*
+            - C:\Intel\Logs\\*
+            - C:\Users\Default\\*
+            - C:\Users\Public\\*
+            - C:\Users\NetworkService\\*
+            - C:\Windows\Fonts\\*
+            - C:\Windows\Debug\\*
+            - C:\Windows\Media\\*
+            - C:\Windows\Help\\*
+            - C:\Windows\addins\\*
+            - C:\Windows\repair\\*
+            - C:\Windows\security\\*
+            - '*\RSA\MachineKeys\\*'
+            - C:\Windows\system32\config\systemprofile\\*
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

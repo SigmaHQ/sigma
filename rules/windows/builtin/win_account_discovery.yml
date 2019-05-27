@@ -1,0 +1,34 @@
+title: AD Privileged Users or Groups Reconnaissance
+description: Detect priv users or groups recon based on 4661 eventid and known privileged users or groups SIDs
+references:
+    - https://blog.menasec.net/2019/02/threat-hunting-5-detecting-enumeration.html
+tags:
+    - attack.discovery
+    - attack.t1087
+status: experimental
+author: Samir Bousseaden
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: enable Object Access SAM on your Domain Controllers'
+detection:
+    selection:
+        EventID: 4661
+        ObjectType:
+        - 'SAM_USER'
+        - 'SAM_GROUP'
+        ObjectName:
+         - '*-512'
+         - '*-502'
+         - '*-500'
+         - '*-505'
+         - '*-519'
+         - '*-520'
+         - '*-544'
+         - '*-551'
+         - '*-555'
+         - '*admin*'
+    condition: selection
+falsepositives:
+    - if source account name is not an admin then its super suspicious
+level: high

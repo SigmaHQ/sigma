@@ -1,0 +1,28 @@
+title: Bitsadmin Download
+status: experimental
+description: Detects usage of bitsadmin downloading a file
+references:
+        - https://blog.netspi.com/15-ways-to-download-a-file/#bitsadmin
+        - https://isc.sans.edu/diary/22264
+tags:
+        - attack.defense_evasion
+        - attack.persistence
+        - attack.t1197
+        - attack.s0190
+author: Michael Haag
+logsource:
+        category: process_creation
+        product: windows
+detection:
+        selection:
+                Image:
+                        - '*\bitsadmin.exe'
+                CommandLine:
+                        - '/transfer'
+        condition: selection
+fields:
+        - CommandLine
+        - ParentCommandLine
+falsepositives:
+        - Some legitimate apps use this, but limited.
+level: medium

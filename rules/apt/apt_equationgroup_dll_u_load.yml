@@ -1,6 +1,5 @@
----
-action: global
 title: Equation Group DLL_U Load
+author: Florian Roth
 description: Detects a specific tool and export used by EquationGroup
 references:
     - https://github.com/adamcaudill/EquationGroupLeak/search?utf8=%E2%9C%93&q=dll_u&type=
@@ -10,36 +9,18 @@ tags:
     - attack.execution
     - attack.g0020
     - attack.t1059
-author: Florian Roth
-date: 2018/03/10 
-modified: 2018/12/11
+    - attack.defense_evasion
+    - attack.t1085
+logsource:
+    category: process_creation
+    product: windows
 detection:
+    selection1:
+        Image: '*\rundll32.exe'
+        CommandLine: '*,dll_u'
+    selection2:
+        CommandLine: '* -export dll_u *'
     condition: 1 of them
 falsepositives:
     - Unknown
 level: critical
----
-logsource:
-    product: windows
-    service: sysmon
-detection:
-    selection1:
-        EventID: 1
-        Image: '*\rundll32.exe'
-        CommandLine: '*,dll_u'
-    selection2:
-        EventID: 1
-        CommandLine: '* -export dll_u *'
----
-logsource:
-    product: windows
-    service: security
-    definition: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
-detection:
-    selection1:
-        EventID: 4688
-        Image: '*\rundll32.exe'
-        ProcessCommandLine: '*,dll_u'
-    selection2:
-        EventID: 4688
-        ProcessCommandLine: '* -export dll_u *'
