@@ -4,6 +4,10 @@ description: Detects WMI persistence
 reference: 
     - https://rawsec.lu/blog/posts/2017/Sep/19/sysmon-v610-vs-wmi-persistence/
 author: '@0xrawsec, juju4'
+falsepositives:
+    - Will need to be tuned
+level: medium
+---
 logsource:
     product: windows
     service: sysmon
@@ -13,14 +17,15 @@ detection:
             - 19
             - 20
             - 21
-    selection2:
-        EventID: 1
+    condition: selection
+---
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
         ParentImage:
             - '*\wmic.exe'
             - '*\wmiprvse.exe'
-    condition: selection or selection2
-fields:
-    - ParentImage
-falsepositives:
-    - Will need to be tuned
-level: medium
+    condition: selection
+---
