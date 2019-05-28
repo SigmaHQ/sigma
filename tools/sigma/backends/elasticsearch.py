@@ -408,6 +408,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
         description = sigmaparser.parsedyaml.setdefault("description", "")
         false_positives = sigmaparser.parsedyaml.setdefault("falsepositives", "")
         level = sigmaparser.parsedyaml.setdefault("level", "")
+        tags = sigmaparser.parsedyaml.setdefault("tags", "")
         # Get time frame if exists
         interval = sigmaparser.parsedyaml["detection"].setdefault("timeframe", "30m")
 
@@ -535,6 +536,11 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                         }
 
             self.watcher_alert[rulename] = {
+                              "metadata": {
+                                  "title": title,
+                                  "description": description,
+                                  "tags": tags
+                              },     
                               "trigger": {
                                 "schedule": {
                                   "interval": interval  # how often the watcher should check
