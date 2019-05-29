@@ -637,6 +637,7 @@ class ElastalertBackend(MultiRuleOutputMixin):
             }
 
             rule_object['filter'] = self.generateQuery(parsed)
+            self.queries = []
 
             #Handle aggregation
             if parsed.parsedAgg:
@@ -772,7 +773,7 @@ class ElastalertBackendDsl(ElastalertBackend, ElasticsearchDSLBackend):
         super().generateBefore(parsed)
         super().generateQuery(parsed)
         super().generateAfter(parsed)
-        return [self.queries[-1]]
+        return self.queries
 
 class ElastalertBackendQs(ElastalertBackend, ElasticsearchQuerystringBackend):
     """Elastalert backend"""
