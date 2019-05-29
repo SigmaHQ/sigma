@@ -744,7 +744,7 @@ class ElastalertBackend(MultiRuleOutputMixin):
                     if idx == agg.aggfunc:
                         funcname = name
                         break
-                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend"%(self.title, funcname)) 
+                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend"%(self.title, funcname))
 
     def convertLevel(self, level):
         return {
@@ -772,7 +772,7 @@ class ElastalertBackendDsl(ElastalertBackend, ElasticsearchDSLBackend):
         super().generateBefore(parsed)
         super().generateQuery(parsed)
         super().generateAfter(parsed)
-        return self.queries
+        return [self.queries[-1]]
 
 class ElastalertBackendQs(ElastalertBackend, ElasticsearchQuerystringBackend):
     """Elastalert backend"""
