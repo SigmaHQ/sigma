@@ -588,9 +588,8 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                 raise NotImplementedError("Output type '%s' not supported" % self.output_type)
         return result
 
-class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
+class ElastalertBackend(MultiRuleOutputMixin):
     """Elastalert backend"""
-    identifier = 'elastalert'
     active = True
     supported_alert_methods = {'email', 'http_post'}
 
@@ -646,7 +645,9 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
                 "realert": self.generateTimeframe(self.realert_time),
                 #"exponential_realert": self.generateTimeframe(self.expo_realert_time)
             }
+
             rule_object['filter'] = self.generateQuery(parsed)
+            self.queries = []
 
             #Handle aggregation
             if parsed.parsedAgg:
@@ -722,10 +723,6 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
             #Clear fields
             self.fields = []
 
-    def generateQuery(self, parsed):
-        #Generate ES QS Query
-        return [{ 'query' : { 'query_string' : { 'query' : super().generateQuery(parsed) } } }]
-
     def generateNode(self, node):
         #Save fields for adding them in query_key
         #if type(node) == sigma.parser.NodeSubexpression:
@@ -761,12 +758,12 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
                 raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend"%(self.title, funcname))
 
     def convertLevel(self, level):
-    	return {
-        	'critical': 1,
-        	'high': 2,
-        	'medium': 3,
-        	'low': 4
-    	}.get(level, 2)
+        return {
+            'critical': 1,
+            'high': 2,
+            'medium': 3,
+            'low': 4
+        }.get(level, 2)
 
     def finalize(self):
         result = ""
@@ -774,3 +771,27 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
             result += yaml.dump(rule, default_flow_style=False)
             result += '\n'
         return result
+
+class ElastalertBackendDsl(ElastalertBackend, ElasticsearchDSLBackend):
+    """Elastalert backend"""
+    identifier = 'elastalert-dsl'
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def generateQuery(self, parsed):
+        #Generate ES DSL Query
+        super().generateBefore(parsed)
+        super().generateQuery(parsed)
+        super().generateAfter(parsed)
+        return self.queries
+
+class ElastalertBackendQs(ElastalertBackend, ElasticsearchQuerystringBackend):
+    """Elastalert backend"""
+    identifier = 'elastalert'
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def generateQuery(self, parsed):
+        #Generate ES QS Query
+        return [{ 'query' : { 'query_string' : { 'query' : super().generateQuery(parsed) } } }]
+
