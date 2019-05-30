@@ -25,7 +25,7 @@ from .mixins import RulenameCommentMixin, QuoteCharMixin
 class BackendOptions(dict):
     """
     Object containing all the options that should be passed to the backend.
-    
+
     The options can come from command line and a YAML configuration file, and will be merged together.
     Options from the command line take precedence.
     """
