@@ -55,6 +55,10 @@ class ElasticsearchWildcardHandlingMixin(object):
         Determine if values contain wildcards. If yes, match on keyword field else on analyzed one.
         Decide if field value should be quoted based on the field name decision and store it in object property.
         """
+        if self.keyword_field == '':
+            self.matchKeyword = True
+            return fieldname
+
         if fieldname not in self.blacklist and (
                 type(value) == list and any(map(self.containsWildcard, value)) \
                 or self.containsWildcard(value)
@@ -245,7 +249,10 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
             dateField = self.sigmaconfig.config['dateField']
         if self.interval:
             if 'bool' not in self.queries[-1]['query']['constant_score']['filter']:
+                saved_simple_query = self.queries[-1]['query']['constant_score']['filter']
                 self.queries[-1]['query']['constant_score']['filter'] = {'bool': {'must': []}}
+                if len(saved_simple_query.keys()) > 0:
+                    self.queries[-1]['query']['constant_score']['filter']['bool']['must'].append(saved_simple_query)
             if 'must' not in self.queries[-1]['query']['constant_score']['filter']['bool']:
                 self.queries[-1]['query']['constant_score']['filter']['bool']['must'] = []
 
@@ -408,6 +415,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
         description = sigmaparser.parsedyaml.setdefault("description", "")
         false_positives = sigmaparser.parsedyaml.setdefault("falsepositives", "")
         level = sigmaparser.parsedyaml.setdefault("level", "")
+        tags = sigmaparser.parsedyaml.setdefault("tags", "")
         # Get time frame if exists
         interval = sigmaparser.parsedyaml["detection"].setdefault("timeframe", "30m")
 
@@ -535,6 +543,11 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                         }
 
             self.watcher_alert[rulename] = {
+                              "metadata": {
+                                  "title": title,
+                                  "description": description,
+                                  "tags": tags
+                              },     
                               "trigger": {
                                 "schedule": {
                                   "interval": interval  # how often the watcher should check
@@ -578,9 +591,8 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                 raise NotImplementedError("Output type '%s' not supported" % self.output_type)
         return result
 
-class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
+class ElastalertBackend(MultiRuleOutputMixin):
     """Elastalert backend"""
-    identifier = 'elastalert'
     active = True
     supported_alert_methods = {'email', 'http_post'}
 
@@ -636,13 +648,15 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
                 "realert": self.generateTimeframe(self.realert_time),
                 #"exponential_realert": self.generateTimeframe(self.expo_realert_time)
             }
+
             rule_object['filter'] = self.generateQuery(parsed)
+            self.queries = []
 
             #Handle aggregation
             if parsed.parsedAgg:
                 if parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MIN or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MAX or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_AVG or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_SUM:
                     if parsed.parsedAgg.groupfield is not None:
-                        rule_object['query_key'] = parsed.parsedAgg.groupfield + ".keyword"
+                        rule_object['query_key'] = self.fieldNameMapping(parsed.parsedAgg.groupfield, '*')
                     rule_object['type'] = "metric_aggregation"
                     rule_object['buffer_time'] = interval
                     rule_object['doc_type'] = "doc"
@@ -653,7 +667,7 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
                         rule_object['metric_agg_type'] = parsed.parsedAgg.aggfunc_notrans
 
                     if parsed.parsedAgg.aggfield:
-                        rule_object['metric_agg_key'] = parsed.parsedAgg.aggfield + ".keyword"
+                        rule_object['metric_agg_key'] = self.fieldNameMapping(parsed.parsedAgg.aggfield, '*')
                     else:
                         rule_object['metric_agg_key'] = "_id"
 
@@ -712,10 +726,6 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
             #Clear fields
             self.fields = []
 
-    def generateQuery(self, parsed):
-        #Generate ES QS Query
-        return [{ 'query' : { 'query_string' : { 'query' : super().generateQuery(parsed) } } }]
-
     def generateNode(self, node):
         #Save fields for adding them in query_key
         #if type(node) == sigma.parser.NodeSubexpression:
@@ -748,15 +758,15 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
                     if idx == agg.aggfunc:
                         funcname = name
                         break
-                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend"%(self.title, funcname)) 
+                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend"%(self.title, funcname))
 
     def convertLevel(self, level):
-    	return {
-        	'critical': 1,
-        	'high': 2,
-        	'medium': 3,
-        	'low': 4
-    	}.get(level, 2)
+        return {
+            'critical': 1,
+            'high': 2,
+            'medium': 3,
+            'low': 4
+        }.get(level, 2)
 
     def finalize(self):
         result = ""
@@ -764,3 +774,27 @@ class ElastalertBackend(MultiRuleOutputMixin, ElasticsearchQuerystringBackend):
             result += yaml.dump(rule, default_flow_style=False)
             result += '\n'
         return result
+
+class ElastalertBackendDsl(ElastalertBackend, ElasticsearchDSLBackend):
+    """Elastalert backend"""
+    identifier = 'elastalert-dsl'
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def generateQuery(self, parsed):
+        #Generate ES DSL Query
+        super().generateBefore(parsed)
+        super().generateQuery(parsed)
+        super().generateAfter(parsed)
+        return self.queries
+
+class ElastalertBackendQs(ElastalertBackend, ElasticsearchQuerystringBackend):
+    """Elastalert backend"""
+    identifier = 'elastalert'
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def generateQuery(self, parsed):
+        #Generate ES QS Query
+        return [{ 'query' : { 'query_string' : { 'query' : super().generateQuery(parsed) } } }]
+
