@@ -35,8 +35,6 @@ import codecs
 
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
 
-logger = logging.getLogger(__name__)
-
 # Error codes
 
 ERR_OUTPUT              = 1
@@ -56,14 +54,6 @@ ERR_CONFIG_BACKEND      = 22
 ERR_NOT_IMPLEMENTED     = 42
 ERR_PARTIAL_FIELD_MATCH = 80
 ERR_FULL_FIELD_MATCH    = 90
-
-def print_verbose(*args, **kwargs):
-    if cmdargs.verbose or cmdargs.debug:
-        print(*args, **kwargs)
-
-def print_debug(*args, **kwargs):   # pragme: no cover
-    if cmdargs.debug:
-        print(*args, **kwargs)
 
 def alliter(path):
     for sub in path.iterdir():
@@ -95,33 +85,41 @@ class SigmacArgumentParser(argparse.ArgumentParser):
 
         return helptext
 
-argparser = SigmacArgumentParser(description="Convert Sigma rules into SIEM signatures.")
-argparser.add_argument("--recurse", "-r", action="store_true", help="Use directory as input (recurse into subdirectories is not implemented yet)")
-argparser.add_argument("--filter", "-f", help="""
-Define comma-separated filters that must match (AND-linked) to rule to be processed.
-Valid filters: level<=x, level>=x, level=x, status=y, logsource=z, tag=t.
-x is one of: low, medium, high, critical.
-y is one of: experimental, testing, stable.
-z is a word appearing in an arbitrary log source attribute.
-t is a tag that must appear in the rules tag list, case-insensitive matching.
-Multiple log source specifications are AND linked.
-        """)
-argparser.add_argument("--target", "-t", choices=backends.getBackendDict().keys(), help="Output target format")
-argparser.add_argument("--lists", "-l", action="store_true", help="List available output target formats and configurations")
-argparser.add_argument("--config", "-c", action="append", help="Configurations with field name and index mapping for target environment. Multiple configurations are merged into one. Last config is authorative in case of conflicts.")
-argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix if multiple files are generated")
-argparser.add_argument("--backend-option", "-O", action="append", help="Options and switches that are passed to the backend")
-argparser.add_argument("--backend-config", "-C", help="Configuration file containing options to pass to the backend")
-argparser.add_argument("--defer-abort", "-d", action="store_true", help="Don't abort on parse or conversion errors, proceed with next rule. The exit code from the last error is returned")
-argparser.add_argument("--ignore-backend-errors", "-I", action="store_true", help="Only return error codes for parse errors and ignore errors for rules that cause backend errors. Useful, when you want to get as much queries as possible.")
-argparser.add_argument("--shoot-yourself-in-the-foot", action="store_true", help=argparse.SUPPRESS)
-argparser.add_argument("--verbose", "-v", action="store_true", help="Be verbose")
-argparser.add_argument("--debug", "-D", action="store_true", help="Debugging output")
-argparser.add_argument("inputs", nargs="*", help="Sigma input files ('-' for stdin)")
+def set_argparser():
+    """Sets up and parses the command line arguments for Sigmac.
+    Returns the argparser"""
+    argparser = SigmacArgumentParser(description="Convert Sigma rules into SIEM signatures.")
+    argparser.add_argument("--recurse", "-r", action="store_true", help="Use directory as input (recurse into subdirectories is not implemented yet)")
+    argparser.add_argument("--filter", "-f", help="""
+    Define comma-separated filters that must match (AND-linked) to rule to be processed.
+    Valid filters: level<=x, level>=x, level=x, status=y, logsource=z, tag=t.
+    x is one of: low, medium, high, critical.
+    y is one of: experimental, testing, stable.
+    z is a word appearing in an arbitrary log source attribute.
+    t is a tag that must appear in the rules tag list, case-insensitive matching.
+    Multiple log source specifications are AND linked.
+            """)
+    argparser.add_argument("--target", "-t", choices=backends.getBackendDict().keys(), help="Output target format")
+    argparser.add_argument("--lists", "-l", action="store_true", help="List available output target formats and configurations")
+    argparser.add_argument("--config", "-c", action="append", help="Configurations with field name and index mapping for target environment. Multiple configurations are merged into one. Last config is authorative in case of conflicts.")
+    argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix if multiple files are generated")
+    argparser.add_argument("--backend-option", "-O", action="append", help="Options and switches that are passed to the backend")
+    argparser.add_argument("--backend-config", "-C", help="Configuration file containing options to pass to the backend")
+    argparser.add_argument("--defer-abort", "-d", action="store_true", help="Don't abort on parse or conversion errors, proceed with next rule. The exit code from the last error is returned")
+    argparser.add_argument("--ignore-backend-errors", "-I", action="store_true", help="Only return error codes for parse errors and ignore errors for rules that cause backend errors. Useful, when you want to get as much queries as possible.")
+    argparser.add_argument("--shoot-yourself-in-the-foot", action="store_true", help=argparse.SUPPRESS)
+    argparser.add_argument("--verbose", "-v", action="store_true", help="Be verbose")
+    argparser.add_argument("--debug", "-D", action="store_true", help="Debugging output")
+    argparser.add_argument("inputs", nargs="*", help="Sigma input files ('-' for stdin)")
+    
+    return argparser
+
+argparser = set_argparser()
 cmdargs = argparser.parse_args()
 
 scm = SigmaConfigurationManager()
 
+logger = logging.getLogger(__name__)
 if cmdargs.debug:   # pragma: no cover
     logger.setLevel(logging.DEBUG)
 
@@ -201,7 +199,7 @@ else:
 
 error = 0
 for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
-    print_verbose("* Processing Sigma input %s" % (sigmafile))
+    logger.debug("* Processing Sigma input %s" % (sigmafile))
     try:
         if cmdargs.inputs == ['-']:
             f = sigmafile
