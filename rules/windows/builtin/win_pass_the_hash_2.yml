@@ -1,0 +1,32 @@
+title: Pass the Hash Activity
+status: production
+description: 'Detects the attack technique pass the hash which is used to move laterally inside the network'
+references:
+    - https://github.com/iadgov/Event-Forwarding-Guidance/tree/master/Events
+    - https://blog.binarydefense.com/reliably-detecting-pass-the-hash-through-event-log-analysis
+    - https://blog.stealthbits.com/how-to-detect-pass-the-hash-attacks/
+author: Dave Kennedy, Jeff Warren (method) / David Vassallo (rule)
+tags:
+    - attack.lateral_movement
+    - attack.t1075
+logsource:
+    product: windows
+    service: security
+    definition: The successful use of PtH for lateral movement between workstations would trigger event ID 4624
+detection:
+    selection:
+        - EventID: 4624
+          SecurityID: 'NULL SID'
+          LogonType: '3'
+          LogonProcessName: 'NtLmSsp'
+          KeyLength: '0'
+        - EventID: 4624
+          LogonType: '9'
+          LogonProcessName: 'seclogo'
+    filter:
+        AccountName: 'ANONYMOUS LOGON'
+    condition: selection and not filter
+falsepositives:
+    - Administrator activity
+    - Penetration tests
+level: medium
