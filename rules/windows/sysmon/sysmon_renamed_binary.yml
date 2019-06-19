@@ -1,0 +1,56 @@
+title: Renamed Binary
+status: experimental
+description: Detects the execution of a renamed binary often used by attackers or malware leveraging new Sysmon OriginalFileName datapoint.
+author: Matthew Green - @mgreen27 
+date: 2019/06/15
+references:
+    - https://attack.mitre.org/techniques/T1036/
+    - https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html
+    - https://mgreen27.github.io/posts/2019/05/29/BinaryRename2.html
+tags:
+    - ATT&CK.T1036
+    - ATT&CK.Masquerading
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+        OriginalFileName:
+            - Cmd.Exe
+            - PowerShell.EXE
+            - powershell_ise.EXE
+            - psexec.c
+            - cscript.exe          
+            - wscript.exe
+            - MSHTA.EXE
+            - REGSVR32.EXE
+            - wmic.exe
+            - CertUtil.exe
+            - RUNDLL32.EXE
+            - CMSTP.EXE
+            - msiexec.exe
+            - 7z.exe
+            - WinRAR.exe
+    filter:
+        Image:
+            -  '*\cmd.exe'
+            - '*\powershell.exe'
+            - '*\powershell_ise.exe'
+            - '*\PsExec.exe'
+            - '*\PsExec64.exe'
+            - '*\cscript.exe'
+            - '*\wscript.exe'
+            - '*\mshta.exe'
+            - '*\regsvr32.exe'
+            - '*\wmic.exe'
+            - '*\certutil.exe'
+            - '*\rundll32.exe'
+            - '*\cmstp.exe'
+            - '*\msiexec.exe'
+            - '*\7z.exe'
+            - '*\WinRAR.exe'
+    condition: selection and not filter
+falsepositives:
+    - Custom applications use renamed binaries adding slight change to binary name. Typically this is easy to spot and add to whitelist
+level: high
