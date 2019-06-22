@@ -273,8 +273,7 @@ class SumoLogicBackend(SingleTextQueryBackend):
             val = self.reClear.sub("", val)
         # in sumologic, if key, can use wildcard outside of double quotes. if inside, it's litteral
         if key:
-            # FIXME! few rules like apt_unidentified_nov_18.yml trigger an exception on following line???
-            val = re.sub(r'\"', '\\"', val)
+            val = re.sub(r'\"', '\\"', str(val))
             val = re.sub(r'(.+)\*(.+)', '"\g<1>"*"\g<2>"', val, 0)
             val = re.sub(r'^\*', '*"', val)
             val = re.sub(r'\*$', '"*', val)
