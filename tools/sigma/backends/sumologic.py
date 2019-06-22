@@ -27,15 +27,16 @@ from .base import SingleTextQueryBackend
 # No regex match, must use 'parse regex' https://help.sumologic.com/05Search/Search-Query-Language/01-Parse-Operators/02-Parse-Variable-Patterns-Using-Regex
 # For some strings like Windows ProcessCmdline or LogonProcess, it might be good to force case lower and upper as Windows is inconsistent in logs
 
+
 class SumoLogicBackend(SingleTextQueryBackend):
     """Converts Sigma rule into SumoLogic query"""
     identifier = "sumologic"
     active = True
-    #debug = True
+    # debug = True
     debug = False
 
     index_field = "_index"
-    #reEscape = re.compile('("|\\\\(?![*?]))')
+    # reEscape = re.compile('("|\\\\(?![*?]))')
     reClear = None
     andToken = " AND "
     orToken = " OR "
@@ -53,10 +54,10 @@ class SumoLogicBackend(SingleTextQueryBackend):
     logname = None
 
     def generateAggregation(self, agg):
-        if agg == None:
+        if not agg:
             return ""
         # lnx_shell_priv_esc_prep.yml
-        #print("DEBUG generateAggregation(): %s, %s, %s, %s" % (agg.aggfunc_notrans, agg.aggfield, agg.groupfield, agg.cond_op))
+        # print("DEBUG generateAggregation(): %s, %s, %s, %s" % (agg.aggfunc_notrans, agg.aggfield, agg.groupfield, agg.cond_op))
         if agg.groupfield == 'host':
             agg.groupfield = 'hostname'
         if agg.aggfunc_notrans == 'count() by':
@@ -68,12 +69,12 @@ class SumoLogicBackend(SingleTextQueryBackend):
             # (QUERY) | timeslice 5m
             # | count_distinct(process) _timeslice,hostname
             # | where _count_distinct > 5
-            #return " | timeslice %s | count_distinct(%s) %s | where _count_distinct > 0" % (self.interval, agg.aggfunc_notrans or "", agg.aggfield or "", agg.groupfield or "")
-            #return " | timeslice %s | count_distinct(%s) %s | where _count_distinct %s %s" % (self.interval, agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)
-        if agg.groupfield == None:
-            #return " | %s(%s) | when _count %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.cond_op, agg.condition)
+            # return " | timeslice %s | count_distinct(%s) %s | where _count_distinct > 0" % (self.interval, agg.aggfunc_notrans or "", agg.aggfield or "", agg.groupfield or "")
+            # return " | timeslice %s | count_distinct(%s) %s | where _count_distinct %s %s" % (self.interval, agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)
+        if not agg.groupfield:
+            # return " | %s(%s) | when _count %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.cond_op, agg.condition)
             return " | %s %s | where _count %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.cond_op, agg.condition)
-        elif agg.groupfield != None:
+        elif agg.groupfield:
             return " | %s by %s | where _count %s %s" % (agg.aggfunc_notrans, agg.groupfield or "", agg.cond_op, agg.condition)
         else:
             return " | %s(%s) by %s | where _count %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)
@@ -126,7 +127,7 @@ class SumoLogicBackend(SingleTextQueryBackend):
             self.indices = None
         try:
             self.interval = sigmaparser.parsedyaml['detection']['timeframe']
-        except:
+        except TypeError:
             pass
 
         for parsed in sigmaparser.condparsed:
@@ -164,7 +165,7 @@ class SumoLogicBackend(SingleTextQueryBackend):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # TODO/FIXME! depending on deployment configuration, existing FER must be populate here (or backend config?)
-        #aFL = ["EventID"]
+        # aFL = ["EventID"]
         aFL = ["EventID", "sourcename", "CommandLine", "NewProcessName", "Image", "ParentImage", "ParentCommandLine", "ParentProcessName"]
         for item in self.sigmaconfig.fieldmappings.values():
             if item.target_type is list:
@@ -174,7 +175,7 @@ class SumoLogicBackend(SingleTextQueryBackend):
         self.allowedFieldsList = list(set(aFL))
 
     # Skip logsource value from sigma document for separate path.
-    #def generateCleanValueNodeLogsource(self, value):
+    # def generateCleanValueNodeLogsource(self, value):
     #    return self.valueExpression % (self.cleanValue(str(value)))
 
     # Clearing values from special characters.
@@ -182,8 +183,8 @@ class SumoLogicBackend(SingleTextQueryBackend):
     def CleanNode(self, node):
         if self.debug:
             print("DEBUG CleanNode0: %s" % node)
-        #search_ptrn = re.compile(r"[\/@?#&%*\(\)\"]")
-        #search_ptrn = re.compile(r"[*\"\\]")
+        # search_ptrn = re.compile(r"[\/@?#&%*\(\)\"]")
+        # search_ptrn = re.compile(r"[*\"\\]")
         search_ptrn = re.compile(r"[*\"\\]")
         replace_ptrn = re.compile(r"[*\"\\]")
         match = search_ptrn.search(str(node))
@@ -208,9 +209,9 @@ class SumoLogicBackend(SingleTextQueryBackend):
                 print("EXCEPT generateMapItemNode0")
         key, value = node
         if key in self.allowedFieldsList:
-            if self.mapListsSpecialHandling == False and type(value) in (
-                    str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
-                if key in ("LogName","source"):
+            if not self.mapListsSpecialHandling and type(value) in (
+                    str, int, list) or self.mapListsSpecialHandling and type(value) in (str, int):
+                if key in ("LogName", "source"):
                     self.logname = value
                 if self.debug:
                     try:
@@ -224,8 +225,8 @@ class SumoLogicBackend(SingleTextQueryBackend):
             else:
                 raise TypeError("Backend does not support map values of type " + str(type(value)))
         else:
-            if self.mapListsSpecialHandling == False and type(value) in (
-                    str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
+            if not self.mapListsSpecialHandling and type(value) in (
+                    str, int, list) or self.mapListsSpecialHandling and type(value) in (str, int):
                 if type(value) is str:
                     new_value = list()
                     value = self.CleanNode(value)
@@ -233,7 +234,7 @@ class SumoLogicBackend(SingleTextQueryBackend):
                         new_value.append(self.andToken.join([self.valueExpression % val for val in value]))
                     else:
                         new_value.append(value)
-                    if len(new_value)==1:
+                    if len(new_value) == 1:
                         if self.generateANDNode(new_value):
                             return "(" + self.generateANDNode(new_value) + ")"
                         else:
@@ -263,7 +264,7 @@ class SumoLogicBackend(SingleTextQueryBackend):
     # input in simple quotes are not passing through this function. ex: rules/windows/sysmon/sysmon_vul_java_remote_debugging.yml, rules/apt/apt_sofacy_zebrocy.yml
     #   => OK only if field entry with list, not string
     #   => generateNode: call cleanValue
-    def cleanValue(self, val, key = ''):
+    def cleanValue(self, val, key=''):
         if self.debug:
             print("DEBUG cleanValue0: %s" % val)
         if self.reEscape:
@@ -291,7 +292,7 @@ class SumoLogicBackend(SingleTextQueryBackend):
                 val = re.sub(r'\\"\*$', '\\\\\\"*', val)
             if self.debug:
                 print("DEBUG cleanValue0c: %s" % val)
-        #if not key and not (val.startswith('"') and val.endswith('"')) and not (val.startswith('(') and val.endswith(')')) and not ('|' in val) and val:
+        # if not key and not (val.startswith('"') and val.endswith('"')) and not (val.startswith('(') and val.endswith(')')) and not ('|' in val) and val:
         # apt_babyshark.yml
         if not (val.startswith('"') and val.endswith('"')) and not (val.startswith('(') and val.endswith(')')) and not ('|' in val) and not ('*' in val) and val:
             val = '"%s"' % val
@@ -300,7 +301,7 @@ class SumoLogicBackend(SingleTextQueryBackend):
         return val
 
     # for keywords values with space
-    def generateValueNode(self, node, key = ''):
+    def generateValueNode(self, node, key=''):
         if self.debug:
             print("DEBUG generateValueNode0: %s, %s" % (node, key))
         cV = self.cleanValue(str(node), key)
