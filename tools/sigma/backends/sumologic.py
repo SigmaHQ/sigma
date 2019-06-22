@@ -348,8 +348,10 @@ class SumoLogicBackend(SingleTextQueryBackend):
 
     def fieldNameMapping(self, fieldname, value):
         """
-        Alter field names depending on the value(s). Backends may use this method to perform a final transformation of the field name
-        in addition to the field mapping defined in the conversion configuration. The field name passed to this method was already
+        Alter field names depending on the value(s). Backends may use this
+        method to perform a final transformation of the field name
+        in addition to the field mapping defined in the conversion
+        configuration. The field name passed to this method was already
         transformed from the original name given in the Sigma rule.
         TODO/FIXME!
         """
