@@ -127,7 +127,7 @@ class SumoLogicBackend(SingleTextQueryBackend):
             self.indices = None
         try:
             self.interval = sigmaparser.parsedyaml['detection']['timeframe']
-        except TypeError:
+        except:
             pass
 
         for parsed in sigmaparser.condparsed:
