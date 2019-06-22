@@ -1,0 +1,22 @@
+title: Ransomware Deleting Shadow Volume Copies
+status: experimental
+description: Detects a command that deletes all local shadow volume copies as often used by Ransomware
+references:
+    - https://www.hybrid-analysis.com/sample/ed01ebfbc9eb5bbea545af4d01bf5f1071661840480439c6e5babe8e080e41aa?environmentId=100
+author: Florian Roth
+date: 2019/06/01
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine:
+            - '*vssadmin delete shadows*'
+            - '*wmic SHADOWCOPY DELETE*'
+    condition: selection
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Adminsitrative scripts - e.g. to prepare image for golden image creation
+level: critical

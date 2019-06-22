@@ -3,7 +3,7 @@ status: experimental
 description: Detects a Windows program executable started in a suspicious folder
 references:
     - https://twitter.com/GelosSnake/status/934900723426439170
-author: Florian Roth
+author: Florian Roth, Patrick Bareiss
 date: 2017/11/27
 tags:
     - attack.defense_evasion
@@ -24,10 +24,17 @@ detection:
             - '*\smss.exe'
             - '*\csrss.exe'
             - '*\conhost.exe'
+            - '*\wininit.exe'
+            - '*\lsm.exe'
+            - '*\winlogon.exe'
+            - '*\explorer.exe'
+            - '*\taskhost.exe' 
     filter:
         Image:
-            - '*\System32\\*'
-            - '*\SysWow64\\*'
+            - 'C:\Windows\System32\\*'
+            - 'C:\Windows\SysWow64\\*'
+            - 'C:\Windows\explorer.exe'
+            - 'C:\Windows\winsxs\*'
     condition: selection and not filter
 falsepositives:
     - Exotic software

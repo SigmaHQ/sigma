@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from sigma.parser.condition import ConditionOR, NodeSubexpression
+from sigma.parser.condition import ConditionOR, NodeSubexpression, ConditionNULLValue
 from .exceptions import SigmaConfigParseError, FieldMappingError
 
 # Field Mapping Definitions
@@ -120,14 +120,23 @@ class ConditionalFieldMapping(SimpleFieldMapping):
                 targets = self.default
 
         if len(targets) == 1:     # result set contains only one target, return mapped item (like SimpleFieldMapping)
-            return (targets.pop(), value)
+            if value is None:
+                return ConditionNULLValue(val=targets.pop())
+            else:
+                return (targets.pop(), value)
         elif len(targets) > 1:        # result set contains multiple targets, return all linked as OR condition (like MultiFieldMapping)
             cond = ConditionOR()
             for target in targets:
-                cond.add((target, value))
+                if value is None:
+                    cond.add(ConditionNULLValue(val=target))
+                else:
+                    cond.add((target, value))
             return NodeSubexpression(cond)
         else:                       # no mapping found
-            return (key, value)
+            if value is None:
+                return ConditionNULLValue(val=key)
+            else:
+                return (key, value)
 
     def resolve_fieldname(self, fieldname):
         if self.default != None:

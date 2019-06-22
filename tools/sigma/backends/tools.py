@@ -22,6 +22,7 @@ class FieldnameListBackend(BaseBackend):
     """List all fieldnames from given Sigma rules for creation of a field mapping configuration."""
     identifier = "fieldlist"
     active = True
+    config_required = False
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -52,7 +53,7 @@ class FieldnameListBackend(BaseBackend):
 
     def generateMapItemNode(self, node):
         key, value = node
-        if type(value) not in (str, int, list):
+        if type(value) not in (str, int, list, type(None)):
             raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
         return [key]
 

@@ -42,7 +42,7 @@ class TestRules(unittest.TestCase):
         data = []
 
         with open(file_path) as f:
-            yaml_parts = yaml.load_all(f)
+            yaml_parts = yaml.safe_load_all(f)
             for part in yaml_parts:
                 data.append(part)
 

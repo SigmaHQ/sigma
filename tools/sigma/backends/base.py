@@ -25,7 +25,7 @@ from .mixins import RulenameCommentMixin, QuoteCharMixin
 class BackendOptions(dict):
     """
     Object containing all the options that should be passed to the backend.
-    
+
     The options can come from command line and a YAML configuration file, and will be merged together.
     Options from the command line take precedence.
     """
@@ -72,9 +72,7 @@ class BackendOptions(dict):
         try:
             with open(path, 'r') as config_file:
                 backend_config = yaml.safe_load(config_file.read())
-                for key in backend_config:
-                    self[key] = backend_config[key]
-                    print(key, self[key])
+                self.update(backend_config)
         except (IOError, OSError) as e:
             print("Failed to open backend configuration file '%s': %s" % (path, str(e)), file=sys.stderr)
             exit(1)
@@ -90,6 +88,7 @@ class BaseBackend:
     index_field = None    # field name that is used to address indices
     file_list = None
     options = tuple()     # a list of tuples with following elements: option name, default value, help text, target attribute name (option name if None)
+    config_required = True
 
     def __init__(self, sigmaconfig, backend_options=None):
         """
@@ -259,6 +258,8 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
             return self.mapExpression % (transformed_fieldname, self.generateNode(value))
         elif type(value) == list:
             return self.generateMapItemListNode(transformed_fieldname, value)
+        elif value is None:
+            return self.nullExpression % (transformed_fieldname, )
         else:
             raise TypeError("Backend does not support map values of type " + str(type(value)))
 

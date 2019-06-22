@@ -1,4 +1,32 @@
+title: THOR
+order: 20
+backends:
+  - thor
+# this configuration differs from other configurations and can not be used
+# with the sigmac tool. This configuration is used by the ioc scanners THOR and SPARK.
 logsources:
+  # log source configurations for generic sigma rules
+  process_creation_1:
+    category: process_creation
+    product: windows
+    conditions:
+      EventID: 1
+    rewrite:
+      product: windows
+      service: sysmon
+  process_creation_2:
+    category: process_creation
+    product: windows
+    conditions:
+      EventID: 4688
+    rewrite:
+      product: windows
+      service: security
+    fieldmappings:
+      Image: NewProcessName
+      ParentImage: ParentProcessName
+      CommandLine: ProcessCommandLine
+  # target system configurations
   windows-application:
     product: windows
     service: application
@@ -50,10 +78,14 @@ logsources:
     service: auth
     sources:
       - 'File:/var/log/auth.log'
-      - 'File:/var/log/auth.log.?' # auth.log.1, auth.log.2, ...
+      - 'File:/var/log/auth.log.?'
   linux-syslog:
     product: linux
     service: syslog
     sources:
       - 'File:/var/log/syslog'
-      - 'File:/var/log/syslog.?' # syslog.1, syslog.2 ...
+      - 'File:/var/log/syslog.?'
+  logfiles:
+    category: logfile
+    sources:
+      - 'File:*.log'

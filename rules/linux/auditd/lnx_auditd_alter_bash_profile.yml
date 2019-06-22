@@ -1,0 +1,30 @@
+title: Detects Suspicious edit of .bash_profile and .bashrc on Linux systems
+status: experimental
+description: Detects change of user environment. Adversaries can insert code into these files to gain persistence each time a user logs in or opens a new shell.
+references:
+    - 'MITRE Attack technique T1156; .bash_profile and .bashrc. '
+date: 2019/05/12
+tags:
+    - attack.s0003
+    - attack.t1156
+    - attack.persistence
+author: Peter Matkovski
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+        type: 'PATH'
+        name:
+            - '/home/*/.bashrc'
+            - '/home/*/.bash_profile' 
+            - '/home/*/.profile'
+            - '/etc/profile'
+            - '/etc/shells'
+            - '/etc/bashrc'
+            - '/etc/csh.cshrc'
+            - '/etc/csh.login'
+    condition: selection
+falsepositives:
+    - Admin or User activity
+level: medium

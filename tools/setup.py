@@ -13,9 +13,10 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='sigmatools',
-    version='0.10',
+    version='0.11',
     description='Tools for the Generic Signature Format for SIEM Systems',
     long_description=long_description,
+    long_description_content_type="text/markdown",
     url='https://github.com/Neo23x0/sigma',
     author='Sigma Project',
     author_email='thomas@patzke.org',
@@ -51,7 +52,7 @@ setup(
             'config/elk-defaultindex-logstash.yml',
             'config/elk-linux.yml',
             'config/logpoint-windows-all.yml',
-            'config/spark.yml',
+            'config/thor.yml',
             'config/elk-winlogbeat.yml',
             'config/elk-defaultindex-filebeat.yml',
             'config/splunk-windows-all.yml',

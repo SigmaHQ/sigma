@@ -1,0 +1,22 @@
+title: Empire PowerShell Launch Parameters
+description: Detects suspicious powershell command line parameters used in Empire
+status: experimental
+references:
+    - https://github.com/EmpireProject/Empire/blob/c2ba61ca8d2031dad0cfc1d5770ba723e8b710db/lib/common/helpers.py#L165
+    - https://github.com/EmpireProject/Empire/blob/e37fb2eef8ff8f5a0a689f1589f424906fe13055/lib/modules/powershell/persistence/powerbreach/deaduser.py#L191
+    - https://github.com/EmpireProject/Empire/blob/e37fb2eef8ff8f5a0a689f1589f424906fe13055/lib/modules/powershell/persistence/powerbreach/resolver.py#L178
+author: Florian Roth
+date: 2019/04/20
+tags:
+  - attack.execution
+  - attack.t1086
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine:
+            - '* -NoP -sta -NonI -W Hidden -Enc *'
+            - '* -noP -sta -w 1 -enc *'
+    condition: selection
+level: critical
