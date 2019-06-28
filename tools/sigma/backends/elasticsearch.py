@@ -393,11 +393,32 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
     """Converts Sigma Rule into X-Pack Watcher JSON for alerting"""
     identifier = "xpack-watcher"
     active = True
+    supported_alert_methods = {'email', 'webhook','index'}
     options = ElasticsearchQuerystringBackend.options + (
             ("output", "curl", "Output format: curl = Shell script that imports queries in Watcher index with curl", "output_type"),
             ("es", "localhost:9200", "Host and port of Elasticsearch instance", None),
             ("watcher_url", "watcher", "Watcher URL: watcher (default)=_watcher/..., xpack=_xpack/wacher/... (deprecated)", None),
-            ("mail", None, "Mail address for Watcher notification (only logging if not set)", None),
+            ("filter_range","30m","Watcher time filter",None),
+
+            ("alert_methods", "email", "Alert method(s) to use when the rule triggers, comma separated. Supported: " + ', '.join(supported_alert_methods), None),
+            # Options for Email Action            
+            ("mail", "root@localhost", "Mail address for Watcher notification (only logging if not set)", None),
+
+            # Options for WebHook Action
+	    ("http_host", "localhost", "Webhook host used for alert notification", None),
+	    ("http_port", "80", "Webhook port used for alert notification", None),
+	    ("http_scheme", "http", "Webhook scheme used for alert notification", None),
+	    ("http_user", None, "Webhook User used for alert notification", None),
+	    ("http_pass", None, "Webhook Password used for alert notification", None),
+	    ("http_uri_path", "/", "Webhook Uri used for alert notification", None),
+	    ("http_method", "POST", "Webhook Method used for alert notification", None),
+
+	    ("http_phost", None, "Webhook proxy host", None),
+	    ("http_pport", None, "Webhook Proxy port", None),
+            # Options for Index Action
+            ("index", "<log2alert-{now/d}>","Index name used to add the alerts", None), #by default it creates a new index every day
+            ("type", "_doc","Index Type used to add the alerts", None)
+	    
             )
     watcher_urls = {
             "watcher": "_watcher",
@@ -418,9 +439,11 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
         tags = sigmaparser.parsedyaml.setdefault("tags", "")
         # Get time frame if exists
         interval = sigmaparser.parsedyaml["detection"].setdefault("timeframe", "30m")
-
+        
         # creating condition
         indices = sigmaparser.get_logsource().index
+        # How many results to be returned. Usually 0 but for index action we need it.
+        size = 0
 
         for condition in sigmaparser.condparsed:
             rulename = self.getRuleName(sigmaparser)
@@ -515,25 +538,92 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
 
             # Building the action
             action_subject = "Sigma Rule '%s'" % title
-            try:    # mail notification if mail address is given
-                email = self.mail
-                action = {
-                        "send_email": {
-                            "email": {
-                                "to": email,
-                                "subject": action_subject,
-                                "body": action_body,
-                                "attachments": {
-                                    "data.json": {
-                                        "data": {
-                                            "format": "json"
-                                            }
-                                        }
-                                    }
-                                }
+            try:
+                eaction={} #email action
+                waction={} #webhook action
+                iaction={} #index action
+                action={} 
+                alert_methods = self.alert_methods.split(',')
+                if 'email' in alert_methods:
+                    # mail notification if mail address is given
+                    email = self.mail
+                    eaction = {
+    	                "send_email": {
+    	                        "email": {
+    		                    "to": email,
+            		            "subject": action_subject,
+                    	            "body": action_body,
+                        	    "attachments": {
+                                	"data.json": {
+                                    	    "data": {
+                                        	"format": "json"
+                                                }
+	                                    }
+    		                        }
+    	    	                    }
+                	        }
+                    	    }
+                if 'webhook' in alert_methods: # WebHook Action. Sending metadata to a webservice. Added timestamp to metadata
+                    http_scheme = self.http_scheme
+                    http_host = self.http_host
+                    http_port = self.http_port
+                    http_uri_path = self.http_uri_path
+                    http_method = self.http_method
+                    http_phost = self.http_phost
+                    http_pport = self.http_pport
+                    http_user = self.http_user
+                    http_pass = self.http_pass
+                    waction = {
+			"httppost":{
+                            "transform":{
+                                "script": "ctx.metadata.timestamp=ctx.trigger.scheduled_time;" 
+                                },
+                    	    "webhook":{
+                        	"scheme"  : http_scheme,
+                        	"host"    : http_host,
+                        	"port"    : int(http_port),
+            	        	"method"  : http_method,
+    	                        "path"    : http_uri_path,
+    		                "params"  : {},
+	                        "headers" : {"Content-Type"                      : "application/json"},
+                        	"body"    : "{{#toJson}}ctx.metadata{{/toJson}}"
+                    	    }
+			}
+		    }
+                    if (http_user) and (http_pass):
+                        auth={
+                            "basic":{
+                                "username":http_user,
+                                "password":http_pass
                             }
                         }
-            except KeyError:    # no mail address given, generate log action
+                        waction['httppost']['webhook']['auth']={}
+                        waction['httppost']['webhook']['auth']=auth
+
+                    if (http_phost) and (http_pport): #As defined in documentation
+                        waction['httppost']['webhook']['proxy']={}
+                        waction['httppost']['webhook']['proxy']['host']=http_phost
+                        waction['httppost']['webhook']['proxy']['port']=http_pport
+
+                if 'index' in alert_methods: #Index Action. Adding metadata to actual events and send them in another index
+                    index = self.index
+                    dtype = self.type
+                    size=1000 #I presume it will not be more than 1000 events detected
+                    iaction = {
+                            "elastic":{
+                                "transform":{ #adding title, description, tags on the event 
+                                    "script": "ctx.payload.transform = [];for (int j=0;j<ctx.payload.hits.total;j++){ctx.payload.hits.hits[j]._source.alerttimestamp=ctx.trigger.scheduled_time;ctx.payload.hits.hits[j]._source.alerttitle=ctx.metadata.title;ctx.payload.hits.hits[j]._source.alertquery=ctx.metadata.query;ctx.payload.hits.hits[j]._source.alertdescription=ctx.metadata.description;ctx.payload.hits.hits[j]._source.tags=ctx.metadata.tags;ctx.payload.transform.add(ctx.payload.hits.hits[j]._source)} return ['_doc': ctx.payload.transform];"
+                                },
+                                "index":{
+                                    "index": index,
+                                    "doc_type":dtype 
+                                }
+                            }
+                    }
+
+                action = {**eaction,**waction, **iaction}
+
+            except KeyError as k:    # no mail address given, generate log action
                 action = {
                         "logging-action": {
                             "logging": {
@@ -546,7 +636,8 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                               "metadata": {
                                   "title": title,
                                   "description": description,
-                                  "tags": tags
+                                  "tags": tags,
+                                  "query":result #addede query to metadata. very useful in kibana to do drill down directly from discover
                               },     
                               "trigger": {
                                 "schedule": {
@@ -557,13 +648,25 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                                 "search": {
                                   "request": {
                                     "body": {
-                                      "size": 0,
+                                      "size": size,
                                       "query": {
-                                        "query_string": {
-                                            "query": result,  # this is where the elasticsearch query syntax goes
-                                            "analyze_wildcard": True
-                                        }
-                                      },
+                                        "bool": {
+                                            "must":[{
+                                                "query_string": {
+                                                    "query": result,  # this is where the elasticsearch query syntax goes
+                                                    "analyze_wildcard": True
+                                                }
+                                                }],
+                                            "filter":
+                                                {
+                                                    "range":{
+                                                        "timestamp":{
+                                                            "gte":"now-%s/m"%self.filter_range #filter only for the last x minutes events
+                                                            }
+                                                        }
+                                                }
+                                            }
+                                        },
                                       **agg
                                     },
                                     "indices": indices
