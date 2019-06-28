@@ -402,22 +402,22 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
 
             ("alert_methods", "email", "Alert method(s) to use when the rule triggers, comma separated. Supported: " + ', '.join(supported_alert_methods), None),
             # Options for Email Action            
-            ("mail", None, "Mail address for Watcher notification (only logging if not set)", None),
+            ("mail", "root@localhost", "Mail address for Watcher notification (only logging if not set)", None),
 
             # Options for WebHook Action
-	    ("http_host", None, "Webhook host used for alert notification", None),
-	    ("http_port", None, "Webhook port used for alert notification", None),
+	    ("http_host", "localhost", "Webhook host used for alert notification", None),
+	    ("http_port", "80", "Webhook port used for alert notification", None),
 	    ("http_scheme", "http", "Webhook scheme used for alert notification", None),
 	    ("http_user", None, "Webhook User used for alert notification", None),
 	    ("http_pass", None, "Webhook Password used for alert notification", None),
-	    ("http_uri", None, "Webhook Uri used for alert notification", None),
+	    ("http_uri_path", "/", "Webhook Uri used for alert notification", None),
 	    ("http_method", "POST", "Webhook Method used for alert notification", None),
 
 	    ("http_phost", None, "Webhook proxy host", None),
 	    ("http_pport", None, "Webhook Proxy port", None),
             # Options for Index Action
-            ("index","<log2alert-{now/d}>","Index name used to add the alerts", None), #by default it creates a new index every day
-            ("type","_doc","Index Type  used to add the alerts", None)
+            ("index", "<log2alert-{now/d}>","Index name used to add the alerts", None), #by default it creates a new index every day
+            ("type", "_doc","Index Type used to add the alerts", None)
 	    
             )
     watcher_urls = {
@@ -567,7 +567,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                     http_scheme = self.http_scheme
                     http_host = self.http_host
                     http_port = self.http_port
-                    http_uri = self.http_uri
+                    http_uri_path = self.http_uri_path
                     http_method = self.http_method
                     http_phost = self.http_phost
                     http_pport = self.http_pport
@@ -579,14 +579,14 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                                 "script": "ctx.metadata.timestamp=ctx.trigger.scheduled_time;" 
                                 },
                     	    "webhook":{
-                        	"scheme":http_scheme,
-                        	"host":http_host,
-                        	"port":int(http_port),
-            	        	"method":http_method,
-    	                        "path":http_uri,
-    		                "params":{},
-	                        "headers":{"Content-Type": "application/json"},
-                        	"body":"{{#toJson}}ctx.metadata{{/toJson}}"
+                        	"scheme"  : http_scheme,
+                        	"host"    : http_host,
+                        	"port"    : int(http_port),
+            	        	"method"  : http_method,
+    	                        "path"    : http_uri_path,
+    		                "params"  : {},
+	                        "headers" : {"Content-Type"                      : "application/json"},
+                        	"body"    : "{{#toJson}}ctx.metadata{{/toJson}}"
                     	    }
 			}
 		    }
