@@ -25,11 +25,13 @@ Workflow:
     3. Format
     4. Get results and save to txt/xlsx files
 Requirements:
-    $ pip install sumologic-sdk pyyaml pandas
+    $ pip install sumologic-sdk pyyaml pandas openpyxl
 """
 
 import re
-import os, sys, stat
+import os
+import sys
+import stat
 import glob
 import subprocess
 import argparse
@@ -64,6 +66,7 @@ args = parser.parse_args()
 LIMIT = 100
 delay = 5
 
+
 def rule_element(file_content, elements):
     """
     Function used to get specific element from yaml document and return content
@@ -75,18 +78,19 @@ def rule_element(file_content, elements):
     """
     try:
         logger.debug("file_content: %s" % file_content)
-        yaml.safe_load(file_content.replace("---",""))
-    except:
+        yaml.safe_load(file_content.replace("---", ""))
+    except TypeError:
         raise Exception('Unsupported')
     element_output = ""
     for e in elements:
         try:
-            element_output = yaml.safe_load(file_content.replace("---",""))[e]
-        except:
+            element_output = yaml.safe_load(file_content.replace("---", ""))[e]
+        except TypeError:
             pass
     if element_output is None:
         return ""
     return element_output
+
 
 def get_rule_as_sumologic(file):
     """
@@ -99,7 +103,7 @@ def get_rule_as_sumologic(file):
         logger.error("Cannot find sigmac rule coverter at '%s', please set a correct location via '--sigmac'")
     cmd = [args.sigmac, file, "--target", "sumologic"]
     logger.info('get_rule_as_sumologic cmd: %s' % cmd)
-    process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, err = process.communicate()
 
     # output is byte-string...
@@ -133,7 +137,7 @@ if args.conf:
     args.sigmac = cfg['sigmac']
     try:
         args.recursive = cfg['recursive']
-    except:
+    except TypeError:
         args.recursive = False
     if args.recursive:
         globpath = args.ruledir + "/**/*.yml"
@@ -145,10 +149,10 @@ if args.conf:
 if args.outdir and not os.path.isdir(args.outdir):
     os.mkdir(args.outdir, stat.S_IRWXU)
 
-# recursive
-for file in glob.iglob(globpath):
 # non-recursive (above, not working...)
-#for file in glob.iglob(args.ruledir + "/*.yml"):
+# for file in glob.iglob(args.ruledir + "/*.yml"):
+# recursive
+for file in glob.iglob(globpath, recursive=True):
 
     file_basename = os.path.basename(os.path.splitext(file)[0])
     file_basenamepath = os.path.splitext(file)[0]
@@ -170,26 +174,34 @@ for file in glob.iglob(globpath):
             # FIXME! want to add something in the middle for parsing for example...
             logger.info("  Adding custom part to end query from: %s" % file_basenamepath + '.custom')
             with open(file_basenamepath + '.custom', "rb") as f:
-                sumo_query += " " + f.read().decode('utf-8')
+                # FIXME ! manage pipe inside queries
+                if "| count" in sumo_query:
+                    pos = sumo_query.find('| count')
+                    sumo_query = sumo_query[:pos] + f.read().decode('utf-8') + sumo_query[pos:]
+                else:
+                    sumo_query += " " + f.read().decode('utf-8')
         elif 'count ' not in sumo_query and ('EventID=' in sumo_query):
-                sumo_query += " | count _sourceCategory, hostname, EventID, msg_summary, _raw"
+            sumo_query += " | count _sourceCategory, hostname, EventID, msg_summary, _raw"
         elif 'count ' not in sumo_query:
-                sumo_query += " | count _sourceCategory, hostname, _raw"
+            sumo_query += " | count _sourceCategory, hostname, _raw"
 
-        logger.info("Final sumo query: %s" % sumo_query)
+        logger.debug("Final sumo query: %s" % sumo_query)
 
     except Exception as e:
         if args.debug:
             traceback.print_exc()
         logger.exception("error generating sumo query " + str(file) + "----" + str(e))
-        pass
+        with open(os.path.join(args.outdir, "sigma-" + file_basename + '-error-generation.txt'), "w") as f:
+            # f.write(json.dumps(r, indent=4, sort_keys=True) + " ERROR: %s\n\nQUERY: %s" % (e, sumo_query))
+            f.write(" ERROR for file: %s\n\Exception:\n %s" % (file, e))
+        continue
 
     try:
         # Run query
         # https://github.com/SumoLogic/sumologic-python-sdk/blob/master/scripts/search-job.py
         sumo = SumoLogic(args.accessid, args.accesskey, args.endpoint)
         toTime = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-        fromTime = datetime.datetime.strptime(toTime, "%Y-%m-%dT%H:%M:%S") - datetime.timedelta(hours = 24)
+        fromTime = datetime.datetime.strptime(toTime, "%Y-%m-%dT%H:%M:%S") - datetime.timedelta(hours=24)
         fromTime = fromTime.strftime("%Y-%m-%dT%H:%M:%S")
         timeZone = 'UTC'
         byReceiptTime = True
@@ -208,19 +220,21 @@ for file in glob.iglob(globpath):
             traceback.print_exc()
         logger.exception("error seaching sumo  " + str(file) + "----" + str(e))
         with open(os.path.join(args.outdir, "sigma-" + file_basename + '-error.txt'), "w") as f:
-            f.write(json.dumps(r, indent=4, sort_keys=True) + " ERROR: %s\n\nQUERY: %s" % (e, sumo_query))
+            # f.write(json.dumps(r, indent=4, sort_keys=True) + " ERROR: %s\n\nQUERY: %s" % (e, sumo_query))
+            f.write(" ERROR: %s\n\nQUERY: %s" % (e, sumo_query))
         pass
 
-    logger.info("Sumo search job status: %s" % status['state'])
+    logger.debug("Sumo search job status: %s" % status['state'])
 
     try:
         if status['state'] == 'DONE GATHERING RESULTS':
             count = status['recordCount']
-            limit = count if count < LIMIT and count != 0 else LIMIT # compensate bad limit check
+            # compensate bad limit check
+            limit = count if count < LIMIT and count != 0 else LIMIT
             r = sumo.search_job_records(sj, limit=limit)
-            logger.info("Sumo search results: %s" % r)
+            logger.debug("Sumo search results: %s" % r)
 
-        logger.info("Saving final sumo query for %s to %s" % (file, os.path.join(args.outdir, "sigma-" + file_basename + '.sumo')))
+        logger.debug("Saving final sumo query for %s to %s" % (file, os.path.join(args.outdir, "sigma-" + file_basename + '.sumo')))
         with open(os.path.join(args.outdir, "sigma-" + file_basename + '.sumo'), "w") as f:
             f.write(sumo_query)
         if r and r['records'] != []:
@@ -236,7 +250,7 @@ for file in glob.iglob(globpath):
                     "timeframe: from %s to %s" % (fromTime, toTime),
                     "Sumo endpoint: %s" % args.endpoint,
                     "Sumo query: %s" % sumo_query
-                    ]}).to_excel(writer, 'comments')
+                ]}).to_excel(writer, 'comments')
 
         # and do whatever you want, email alert, report, ticket...
 
