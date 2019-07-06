@@ -130,7 +130,7 @@ class SumoLogicBackend(SingleTextQueryBackend):
         super().__init__(*args, **kwargs)
         # TODO/FIXME! depending on deployment configuration, existing FER must be populate here (or backend config?)
         # aFL = ["EventID"]
-        aFL = ["_index", "EventID", "sourcename", "CommandLine", "NewProcessName", "Image", "ParentImage", "ParentCommandLine", "ParentProcessName"]
+        aFL = ["_index", "_sourceCategory", "_view", "EventID", "sourcename", "CommandLine", "NewProcessName", "Image", "ParentImage", "ParentCommandLine", "ParentProcessName"]
         for item in self.sigmaconfig.fieldmappings.values():
             if item.target_type is list:
                 aFL.extend(item.target)
@@ -231,7 +231,7 @@ class SumoLogicBackend(SingleTextQueryBackend):
                 val = re.sub(r'\\"\*$', '\\\\\\"*', val)
         # if not key and not (val.startswith('"') and val.endswith('"')) and not (val.startswith('(') and val.endswith(')')) and not ('|' in val) and val:
         # apt_babyshark.yml
-        if not (val.startswith('"') and val.endswith('"')) and not (val.startswith('(') and val.endswith(')')) and not ('|' in val) and not ('*' in val) and val and not '_index' in key:
+        if not (val.startswith('"') and val.endswith('"')) and not (val.startswith('(') and val.endswith(')')) and not ('|' in val) and not ('*' in val) and val and not '_index' in key and not '_sourceCategory' in key and not '_view' in key:
             val = '"%s"' % val
         return val
 
