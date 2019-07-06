@@ -1,0 +1,20 @@
+title: Users with a high count of failed MFA challenges
+status: experimental
+description: detect accounts for which the password was compromised but the authentication failed because MFA was enabled
+references:
+  - https://0x00sec.org/t/a-blue-team-guide-to-azure-office-365-monitoring/14411
+author: 'juju4 (rule), 0x00sec.org (idea)'
+tags:
+    - attack.t1078
+logsource:
+    product: o365
+falsepositives:
+    - Penetration Test
+    - Buggy products
+    - Unknown
+level: medium
+detection:
+    selection:
+      LogonError: UserStrongAuthClientAuthNRequiredInterrupt
+    condition:
+      - selection | count(user) by clientip > 10

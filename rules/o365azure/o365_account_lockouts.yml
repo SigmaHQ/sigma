@@ -1,0 +1,22 @@
+title: Account Lockouts regular sources
+status: experimental
+description: Build a list of known attackers
+references:
+  - https://0x00sec.org/t/a-blue-team-guide-to-azure-office-365-monitoring/14411
+author: 'juju4 (rule), 0x00sec.org (idea)'
+tags:
+  - attack.t1078
+logsource:
+    product: o365
+falsepositives:
+    - Penetration Test
+    - Unknown
+level: medium
+detection:
+    selection:
+      Operation: UserLoginFailed
+      LogonError: IdsLocked
+# filter? unique
+# filter? not existing in current blacklist 
+# iplocation clientip
+    condition: selection | count(clientip) > 5

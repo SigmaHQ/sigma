@@ -1,0 +1,22 @@
+title: Compliance search started or exported
+status: experimental
+description: Anytime actions such as an eDiscovery compliance search is ran, it should be reported and validated by whoever is responsible for overseeing legal cases or HR in your company, due to the sensitivity of the information.
+references:
+  - https://0x00sec.org/t/a-blue-team-guide-to-azure-office-365-monitoring/14411
+author: 'juju4 (rule), 0x00sec.org (idea)'
+logsource:
+    product: o365
+falsepositives:
+    - Penetration Test
+    - Unknown
+level: medium
+detection:
+    selection:
+      Workload: SecurityComplianceCenter 
+      Operation: AlertTriggered
+      Category: ThreatManagement
+      Name: "eDiscovery search started or exported"
+# `comment("Use regex to re-write the user field with the user name that triggered the alert.
+#       Otherwise, the user appearing by default is 'SecurityComplianceAlerts'")`
+# | rex "(?<user>[\w\-\.]+@[\w\-]+\.+[\w\-]{2,4})"
+    condition: selection

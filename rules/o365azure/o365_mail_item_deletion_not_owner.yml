@@ -1,0 +1,24 @@
+title: Mailbox item deleted by a user other than a mailbox owner
+status: experimental
+description: monitor users with permissions on another user’s mailbox deleting items that could be sensitive or that shouldn’t be deleted in the first place.
+references:
+  - https://0x00sec.org/t/a-blue-team-guide-to-azure-office-365-monitoring/14411
+author: 'juju4 (rule), 0x00sec.org (idea)'
+logsource:
+    product: o365
+falsepositives:
+    - Penetration Test
+    - Unknown
+level: medium
+detection:
+    selection:
+      Workload: Exchange
+    selection2:
+      - Operation: HardDelete
+      - Operation: SoftDelete
+# FIXME!
+#    filter:
+#      MailboxOwnerUPN != user
+#    condition: selection and selection2 and filter | count(MailboxOwnerUPN, Operation, user)
+#    condition: selection and selection2 and filter | count(MailboxOwnerUPN)
+    condition: selection and selection2 | count(MailboxOwnerUPN) > 5

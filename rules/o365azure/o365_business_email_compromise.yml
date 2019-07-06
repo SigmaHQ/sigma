@@ -1,0 +1,72 @@
+title: Business Email Compromise
+status: experimental
+description: Detects Business Email Compromise (BEC)
+references:
+  - https://expel.io/blog/seven-ways-to-spot-business-email-compromise-office-365/
+tags:
+    - attack.exfiltration
+    - attack.automated_exfiltration
+    - attack.t1020
+    - attack.exfiltration_over_alternative_protocol
+    - attack.t1048
+author: 'juju4 (rule), @expel_io (idea)'
+falsepositives:
+    - Penetration Test
+    - Unknown
+level: medium
+logsource:
+    product: o365
+detection:
+    action:
+# Inbox rules to automatically forward emails to any of the following folders: RSS subscriptions, junk email or notes
+      - "Name\":\"MoveToFolder\", \"Value\":\"RSS Subscriptions\""
+# Inbox rules to automatically delete messages
+      - "Name\":\"DeleteMessage\", \"Value\":\"True\""
+# Inbox rules to redirect messages to an external email address
+      - "Name\":\"RedirectTo\""
+# Inbox rules that contain BEC keywords
+      - "wetransfer"
+      - "document"
+      - "invoice"
+      - "postmaster"
+      - "Virus"
+      - "Dropbox"
+      - "Password"
+      - "Fraud"
+      - "W2"
+      - "Invoice"
+      - "Docusign"
+      - "Deposit"
+      - "Wire"
+      - "Tax"
+      - "Postmaster"
+      - "Utilpro"
+      - "Payroll"
+    selection:
+      - "\"New-InboxRule\""
+      - "\"Set-InboxRule\""
+    condition: action and selection
+---
+logsource:
+    product: o365
+# New mailbox forwarding to an external address
+detection:
+    action:
+      - "Name\":\"DeliverToMailboxAndForward\""
+    selection:
+      - "\"New-InboxRule\""
+      - "\"Set-InboxRule\""
+      - "\"Set-Mailbox\""
+    condition: action and selection
+---
+logsource:
+    product: o365
+# New mailbox delegates
+detection:
+    action:
+      - "Add-MailboxPermission"
+    name:
+      - "Name\":\"AccessRights\""
+    value:
+      - "Value\":\"FullAccess\""
+    condition: action and name and value
