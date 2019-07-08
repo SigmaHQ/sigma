@@ -81,7 +81,7 @@ class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, Single
     notToken = "NOT "
     subExpression = "(%s)"
     listExpression = "(%s)"
-    listSeparator = " "
+    listSeparator = " OR "
     valueExpression = "%s"
     nullExpression = "NOT _exists_:%s"
     notNullExpression = "_exists_:%s"
