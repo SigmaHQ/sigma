@@ -20,6 +20,7 @@ import sys
 
 import sigma
 import yaml
+from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
 from .base import BaseBackend, SingleTextQueryBackend
 from .mixins import RulenameCommentMixin, MultiRuleOutputMixin
 from .exceptions import NotSupportedError
@@ -79,6 +80,9 @@ class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, Single
     listExpression = "(%s)"
     listSeparator = " "
     valueExpression = "%s"
+    typedValueExpression = {
+                SigmaRegularExpressionModifier: "/%s/"
+            }
     nullExpression = "NOT _exists_:%s"
     notNullExpression = "_exists_:%s"
     mapExpression = "%s:%s"

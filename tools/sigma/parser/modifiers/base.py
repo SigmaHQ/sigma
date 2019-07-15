@@ -76,3 +76,9 @@ class SigmaTypeModifier(SigmaModifier):
     """Modify the type of the value. This must be handled by the backend."""
     identifier = "type_base"
     modifier_type = SigmaModifierTypes.TYPE
+
+    def apply(self):
+        return self
+
+    def __str__(self):
+        return str(self.value)
