@@ -17,6 +17,7 @@
 from .base import SigmaTransformModifier
 from .mixins import ListOrStringModifierMixin
 from sigma.parser.condition import ConditionAND
+from base64 import b64encode
 
 class SigmaContainsModifier(ListOrStringModifierMixin, SigmaTransformModifier):
     """Add *-wildcard before and after all string(s)"""
@@ -25,9 +26,9 @@ class SigmaContainsModifier(ListOrStringModifierMixin, SigmaTransformModifier):
 
     def apply_str(self, val : str):
         if not val.startswith("*"):
-            val = "* " + val
+            val = "*" + val
         if not val.endswith("*"):
-            val += " *"
+            val += "*"
         return val
 
 class SigmaAllValuesModifier(SigmaTransformModifier):
@@ -42,3 +43,31 @@ class SigmaAllValuesModifier(SigmaTransformModifier):
         for val in self.value:
             cond.add(val)
         return cond
+
+class SigmaBase64Modifier(ListOrStringModifierMixin, SigmaTransformModifier):
+    """Encode strings with Base64"""
+    identifier = "base64"
+    active = True
+
+    def apply_str(self, val : str):
+        return b64encode(val.encode()).decode()
+
+class SigmaBase64OffsetModifier(ListOrStringModifierMixin, SigmaTransformModifier):
+    """Encode string(s) with Base64 in all three possible shifted offsets"""
+    identifier = "base64offset"
+    active = True
+
+    start_offsets = (0, 2, 3)
+    end_offsets = (None, -3, -2)
+
+    def apply_str(self, val : str):
+        bval = val.encode()
+        return [
+                b64encode(
+                    i * b' ' + bval
+                    )[
+                        self.start_offsets[i]:
+                        self.end_offsets[(len(bval) + i) % 3]
+                        ].decode()
+                for i in range(3)
+                ]
