@@ -35,7 +35,14 @@ class ListOrStringModifierMixin(object):
 
     def apply_list(self):
         """Method is called if modifier value contains a list"""
-        return [ self.apply_str(val) for val in self.value ]
+        l = [ self.apply_str(val) for val in self.value ]
+        rl = list()
+        for i in l:
+            if type(i) in { list, tuple, set }:
+                rl.extend(i)
+            else:
+                rl.append(i)
+        return rl
 
     def apply_str(self, val : str):
         """Method is called if modifier input value contains a string or once for each list element"""
