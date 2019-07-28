@@ -27,13 +27,13 @@ from .base import SingleTextQueryBackend
 # No regex match, must use 'parse regex' https://help.sumologic.com/05Search/Search-Query-Language/01-Parse-Operators/02-Parse-Variable-Patterns-Using-Regex
 # For some strings like Windows ProcessCmdline or LogonProcess, it might be good to force case lower and upper as Windows is inconsistent in logs
 
+
 class SumoLogicBackend(SingleTextQueryBackend):
     """Converts Sigma rule into SumoLogic query"""
     identifier = "sumologic"
     active = True
 
     index_field = "_index"
-    #reEscape = re.compile('("|\\\\(?![*?]))')
     reClear = None
     andToken = " AND "
     orToken = " OR "
@@ -51,8 +51,12 @@ class SumoLogicBackend(SingleTextQueryBackend):
     logname = None
 
     def generateAggregation(self, agg):
-        if agg == None:
-            return ""
+        # lnx_shell_priv_esc_prep.yml
+        # print("DEBUG generateAggregation(): %s, %s, %s, %s" % (agg.aggfunc_notrans, agg.aggfield, agg.groupfield, agg.cond_op))
+        if agg.groupfield == 'host':
+            agg.groupfield = 'hostname'
+        if agg.aggfunc_notrans == 'count() by':
+            agg.aggfunc_notrans = 'count by'
         if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_NEAR:
             raise NotImplementedError("The 'near' aggregation operator is not yet implemented for this backend")
             # WIP
@@ -60,30 +64,56 @@ class SumoLogicBackend(SingleTextQueryBackend):
             # (QUERY) | timeslice 5m
             # | count_distinct(process) _timeslice,hostname
             # | where _count_distinct > 5
-            #return " | timeslice %s | count_distinct(%s) %s | where _count_distinct > 0" % (self.interval, agg.aggfunc_notrans or "", agg.aggfield or "", agg.groupfield or "")
-            #return " | timeslice %s | count_distinct(%s) %s | where _count_distinct %s %s" % (self.interval, agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)
-        if agg.groupfield == None:
-            #return " | %s(%s) | when _count %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.cond_op, agg.condition)
+            # return " | timeslice %s | count_distinct(%s) %s | where _count_distinct > 0" % (self.interval, agg.aggfunc_notrans or "", agg.aggfield or "", agg.groupfield or "")
+            # return " | timeslice %s | count_distinct(%s) %s | where _count_distinct %s %s" % (self.interval, agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)
+        if not agg.groupfield:
+            # return " | %s(%s) | when _count %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.cond_op, agg.condition)
             return " | %s %s | where _count %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.cond_op, agg.condition)
+        elif agg.groupfield:
+            return " | %s by %s | where _count %s %s" % (agg.aggfunc_notrans, agg.groupfield or "", agg.cond_op, agg.condition)
         else:
-            return " | %s %s by %s | where _count %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)
+            return " | %s(%s) by %s | where _count %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)
 
     def generateBefore(self, parsed):
         # not required but makes query faster, especially if no FER or _index/_sourceCategory
         if self.logname:
             return "%s " % self.logname
-        if self.service:
-            return "%s %s " % (self.product, self.service)
+        # FIXME! don't get backend config mapping through generate() => mapping inside script
+        if not self.indices and self.product == 'windows' and self.service:
+            return "_index=WINDOWS %s " % (self.service)
+        if not self.indices and self.product == 'windows':
+            return "_index=WINDOWS "
+        if not self.indices and self.product == 'linux' and self.service == 'auditd':
+            return "_index=AUDITD "
+        if not self.indices and self.product == 'linux' and self.service == 'osqueryd':
+            return "_index=OSQUERY "
+        if not self.indices and self.product == 'linux':
+            return "_index=LINUX "
+        if self.product == 'antivirus':
+            return "_index=ANTIVIRUS "
+        if self.category == 'firewall':
+            return "_index=FIREWALL "
+        if self.indices:
+            return "_index=%s " % self.indices
         return ""
 
     def generate(self, sigmaparser):
         try:
             self.product = sigmaparser.parsedyaml['logsource']['product']   # OS or Software
-            self.service = sigmaparser.parsedyaml['logsource']['service']   # Channel
         except KeyError:
             self.product = None
+        try:
+            self.service = sigmaparser.parsedyaml['logsource']['service']   # Channel
+        except KeyError:
             self.service = None
-
+        try:
+            self.category = sigmaparser.parsedyaml['logsource']['category']   # Channel
+        except KeyError:
+            self.category = None
+        # FIXME! don't get backend config mapping
+        self.indices = sigmaparser.get_logsource().index
+        if len(self.indices) == 0:
+            self.indices = None
         try:
             self.interval = sigmaparser.parsedyaml['detection']['timeframe']
         except:
@@ -91,6 +121,10 @@ class SumoLogicBackend(SingleTextQueryBackend):
 
         for parsed in sigmaparser.condparsed:
             query = self.generateQuery(parsed)
+            # FIXME! exclude if expression is regexp but anyway, not directly supported.
+            #   Not doing if aggregation ('| count') or key ('=')
+            if not (query.startswith('"') and query.endswith('"')) and not (query.startswith('(') and query.endswith(')')) and not ('|' in query) and not ('=' in query):
+                query = '"%s"' % query
             before = self.generateBefore(parsed)
             after = self.generateAfter(parsed)
 
@@ -103,12 +137,16 @@ class SumoLogicBackend(SingleTextQueryBackend):
                 result += after
 
             # adding parenthesis here in case 2 rules are aggregated together - ex: win_possible_applocker_bypass
-            return "(" + result + ")"
+            # but does not work if count, where or other piped statements...
+            if '|' in result:
+                return result
+            else:
+                return "(" + result + ")"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # TODO/FIXME! depending on deployment configuration, existing FER must be populate here (or backend config?)
-        #aFL = ["EventID"]
+        # aFL = ["EventID"]
         aFL = ["EventID", "sourcename", "CommandLine", "NewProcessName", "Image", "ParentImage", "ParentCommandLine", "ParentProcessName"]
         for item in self.sigmaconfig.fieldmappings.values():
             if item.target_type is list:
@@ -118,14 +156,14 @@ class SumoLogicBackend(SingleTextQueryBackend):
         self.allowedFieldsList = list(set(aFL))
 
     # Skip logsource value from sigma document for separate path.
-    #def generateCleanValueNodeLogsource(self, value):
+    # def generateCleanValueNodeLogsource(self, value):
     #    return self.valueExpression % (self.cleanValue(str(value)))
 
     # Clearing values from special characters.
     # Sumologic: only removing '*' (in quotes, is litteral. without, is wildcard) and '"'
     def CleanNode(self, node):
-        search_ptrn = re.compile(r"[\/@?#&%*\(\)\"]")
-        replace_ptrn = re.compile(r"[\/@?#&%*\(\)\"]")
+        search_ptrn = re.compile(r"[*\"\\]")
+        replace_ptrn = re.compile(r"[*\"\\]")
         match = search_ptrn.search(str(node))
         new_node = list()
         if match:
@@ -141,18 +179,21 @@ class SumoLogicBackend(SingleTextQueryBackend):
     def generateMapItemNode(self, node):
         key, value = node
         if key in self.allowedFieldsList:
-            if self.mapListsSpecialHandling == False and type(value) in (
-                    str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
-                if key in ("LogName","source"):
+            if not self.mapListsSpecialHandling and type(value) in (
+                    str, int, list) or self.mapListsSpecialHandling and type(value) in (str, int):
+                if key in ("LogName", "source"):
                     self.logname = value
-                return self.mapExpression % (key, value)
+                # need cleanValue if sigma entry with single quote
+                return self.mapExpression % (key, self.cleanValue(value, key))
             elif type(value) is list:
                 return self.generateMapItemListNode(key, value)
+            elif value is None:
+                return self.nullExpression % (key, )
             else:
                 raise TypeError("Backend does not support map values of type " + str(type(value)))
         else:
-            if self.mapListsSpecialHandling == False and type(value) in (
-                    str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
+            if not self.mapListsSpecialHandling and type(value) in (
+                    str, int, list) or self.mapListsSpecialHandling and type(value) in (str, int):
                 if type(value) is str:
                     new_value = list()
                     value = self.CleanNode(value)
@@ -160,8 +201,12 @@ class SumoLogicBackend(SingleTextQueryBackend):
                         new_value.append(self.andToken.join([self.valueExpression % val for val in value]))
                     else:
                         new_value.append(value)
-                    if len(new_value)==1:
-                        return "(" + self.generateANDNode(new_value) + ")"
+                    if len(new_value) == 1:
+                        if self.generateANDNode(new_value):
+                            return "(" + self.generateANDNode(new_value) + ")"
+                        else:
+                            # if after cleaning node, it is empty but there is AND statement... make it true.
+                            return "true"
                     else:
                         return "(" + self.generateORNode(new_value) + ")"
                 else:
@@ -183,17 +228,14 @@ class SumoLogicBackend(SingleTextQueryBackend):
                 raise TypeError("Backend does not support map values of type " + str(type(value)))
 
     # from mixins.py
-    #FIXME! input in simple quotes are not passing through this function. ex: rules/windows/sysmon/sysmon_vul_java_remote_debugging.yml, rules/apt/apt_sofacy_zebrocy.yml
+    # input in simple quotes are not passing through this function. ex: rules/windows/sysmon/sysmon_vul_java_remote_debugging.yml, rules/apt/apt_sofacy_zebrocy.yml
     #   => OK only if field entry with list, not string
-    def cleanValue(self, val, key = ''):
-        print("DEBUG cleanValue0: %s" % val)
-        if self.reEscape:
-            val = self.reEscape.sub(self.escapeSubst, val)
-        if self.reClear:
-            val = self.reClear.sub("", val)
+    #   => generateNode: call cleanValue
+    def cleanValue(self, val, key=''):
         # in sumologic, if key, can use wildcard outside of double quotes. if inside, it's litteral
         if key:
-            val = re.sub(r'(.+?)\*(.+?)', '\g<1>"*"\g<2>', val, 0)
+            val = re.sub(r'\"', '\\"', str(val))
+            val = re.sub(r'(.+)\*(.+)', '"\g<1>"*"\g<2>"', val, 0)
             val = re.sub(r'^\*', '*"', val)
             val = re.sub(r'\*$', '"*', val)
             # if unbalanced wildcard?
@@ -204,17 +246,21 @@ class SumoLogicBackend(SingleTextQueryBackend):
             # double escape if end quote
             if val.endswith('\\"*') and not val.endswith('\\\\"*'):
                 val = re.sub(r'\\"\*$', '\\\\\\"*', val)
-        print("DEBUG cleanValue1: %s" % val)
+        # if not key and not (val.startswith('"') and val.endswith('"')) and not (val.startswith('(') and val.endswith(')')) and not ('|' in val) and val:
+        # apt_babyshark.yml
+        if not (val.startswith('"') and val.endswith('"')) and not (val.startswith('(') and val.endswith(')')) and not ('|' in val) and not ('*' in val) and val:
+            val = '"%s"' % val
         return val
 
     # for keywords values with space
-    def generateValueNode(self, node, key = ''):
+    def generateValueNode(self, node, key=''):
+        cV = self.cleanValue(str(node), key)
         if type(node) is int:
-            return self.cleanValue(str(node), key)
-        if 'AND' in node:
-            return "(" + self.cleanValue(str(node), key) + ")"
+            return cV
+        if 'AND' in node and cV:
+            return "(" + cV + ")"
         else:
-            return self.cleanValue(str(node), key)
+            return cV
 
     def generateMapItemListNode(self, key, value):
         itemslist = list()
@@ -237,12 +283,3 @@ class SumoLogicBackend(SingleTextQueryBackend):
                     new_value.append(value)
             return "(" + self.orToken.join([self.generateNode(val) for val in new_value]) + ")"
         return "(" + self.orToken.join([self.generateNode(val) for val in node]) + ")"
-
-    def fieldNameMapping(self, fieldname, value):
-        """
-        Alter field names depending on the value(s). Backends may use this method to perform a final transformation of the field name
-        in addition to the field mapping defined in the conversion configuration. The field name passed to this method was already
-        transformed from the original name given in the Sigma rule.
-        TODO/FIXME!
-        """
-        return fieldname
