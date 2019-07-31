@@ -21,6 +21,7 @@ test-sigmac:
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvd -t es-qs rules/ > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-qs rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-qs --shoot-yourself-in-the-foot rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -t es-qs -c elk-winlogbeat tests/test-modifiers.yml > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -O rulecomment -rvdI -c tools/config/elk-winlogbeat.yml -t es-qs rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t kibana -c tools/config/elk-winlogbeat.yml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t graylog rules/ > /dev/null

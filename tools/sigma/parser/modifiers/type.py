@@ -1,5 +1,5 @@
-# Output backend discovery
-# Copyright 2016-2019 Thomas Patzke, Florian Roth
+# Sigma value modifiers
+# Copyright 2019 Thomas Patzke, Florian Roth
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -14,24 +14,10 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
-import json
-import re
-import os
-import sigma.backends
-from .base import BaseBackend
-from sigma.tools import getAllSubclasses, getClassDict
+from .base import SigmaTypeModifier
 
-def getBackendList():
-    """Return list of backend classes"""
-    path = os.path.dirname(__file__)
-    return getAllSubclasses(path, "backends", BaseBackend)
-
-def getBackendDict():
-    return getClassDict(getBackendList())
-
-def getBackend(name):
-    try:
-        return getBackendDict()[name]
-    except KeyError as e:
-        raise LookupError("Backend not found") from e
+class SigmaRegularExpressionModifier(SigmaTypeModifier):
+    """Treat value as regular expression"""
+    identifier = "re"
+    active = True
+    valid_input_types = (str,)
