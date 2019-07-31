@@ -282,7 +282,7 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
     def generateTypedValueNode(self, node):
         try:
-            return self.typedValueExpression[type(node)] % (self.cleanValue(str(node)))
+            return self.typedValueExpression[type(node)] % (str(node))
         except KeyError:
             raise NotImplementedError("Type modifier '{}' is not supported by backend".format(node.identifier))
 
