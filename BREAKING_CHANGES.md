@@ -22,9 +22,9 @@ Columns:
 * Release: [PyPI release](https://pypi.org/project/sigmatools/) that implements or will implement the change.
 * Description: contains a short description of the change.
 
-| Date       | Status      | Issues              | Commit/Branch   | Release | Description                                                                                                                                                 |
-|------------|-------------|---------------------|-----------------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 2019-10-01 | Planned     | -                   | -               | -       | Field name cleanup                                                                                                                                          |
-| 2019-08-01 | Development | -                   | config-cleanup  | 0.12    | Configuration name cleanup                                                                                                                                  |
-| 2019-08-01 | Development | -                   | devel-modifiers | 0.12    | Pipe character must be escaped with backslash in field value names due to introduction of value modifiers                                                   |
-| 2019-03-02 | Released    | #136 #137 #139 #147 | 56a1ed1         | 0.9     | Introduction of [generic log sources](https://patzke.org/introducing-generic-log-sources-in-sigma.html) and *process_creation* as first generic log source. |
+| Date       | Status   | Issues              | Commit/Branch   | Release | Description                                                                                                                                                 |
+|------------|----------|---------------------|-----------------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 2019-10-01 | Planned  | -                   | -               | -       | Field name cleanup                                                                                                                                          |
+| 2019-08-01 | Released | -                   | config-cleanup  | 0.12    | Configuration name cleanup                                                                                                                                  |
+| 2019-08-01 | Released | -                   | devel-modifiers | 0.12    | Pipe character must be escaped with backslash in field value names due to introduction of value modifiers                                                   |
+| 2019-03-02 | Released | #136 #137 #139 #147 | 56a1ed1         | 0.9     | Introduction of [generic log sources](https://patzke.org/introducing-generic-log-sources-in-sigma.html) and *process_creation* as first generic log source. |
