@@ -13,7 +13,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='sigmatools',
-    version='0.12',
+    version='0.12.1',
     description='Tools for the Generic Signature Format for SIEM Systems',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -34,7 +34,7 @@ setup(
         'Environment :: Console',
     ],
     keywords='security monitoring siem logging signatures elasticsearch splunk ids sysmon',
-    packages=['sigma', 'sigma.backends', 'sigma.config', 'sigma.parser'],
+    packages=['sigma', 'sigma.backends', 'sigma.config', 'sigma.parser', 'sigma.parser.modifiers'],
     python_requires='~=3.6',
     install_requires=['PyYAML', 'pymisp'],
     extras_require={
