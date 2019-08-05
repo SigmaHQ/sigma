@@ -1,6 +1,6 @@
 title: Processes created by MMC
 status: experimental
-description: Processes started by MMC could be a sign of lateral movement using MMC application COM object
+description: Processes started by MMC could be a sign of lateral movement.
 references:
     - https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/
 tags:
@@ -13,13 +13,13 @@ logsource:
 detection:
     selection:
         ParentImage: '*\mmc.exe'
-        Image: '*\cmd.exe'
     exclusion:
-        CommandLine: '*\RunCmd.cmd'
+        Image: 
+            - 'C:\Windows\System32\mmc.exe'
+            - 'C:\Windows\System32\certreq.exe'
     condition: selection and not exclusion
 fields:
+    - Image
     - CommandLine
     - ParentCommandLine
-falsepositives:
-    - unknown
 level: medium
