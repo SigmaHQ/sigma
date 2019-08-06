@@ -279,7 +279,7 @@ These tools are not part of the main toolchain and maintained separately by thei
 
 # Contribution
 
-If you want to contribute, you are more then welcome, there are numerous ways to help this project.
+If you want to contribute, you are more then welcome. There are numerous ways to help this project.
 
 ## Use it and provide feedback
 
