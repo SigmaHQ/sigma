@@ -1,11 +1,11 @@
 # Breaking Changes in Sigma
 
-Improvement sometimes makes it inavoidable to break with the past. This file describes the planned and implemented
+Improvement sometimes makes it unavoidable to break with the past. This file describes the planned and implemented
 breaking changes since 2019. Monitor this file if you use Sigma in productive environments.
 
 Columns:
 
-* Date: The date the change was or will be implemented. Planned dates may be sunject of changes.
+* Date: The date the change was or will be implemented. Planned dates may be subject of changes.
 * Status may be one of:
     * Planned: there's the idea, but work hasn't begun.
     * Development: the change is currently developed.
