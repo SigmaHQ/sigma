@@ -132,15 +132,17 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
         """
         key, value = node
         if type(value) == list:         # handle map items with values list like multiple OR-chained conditions
-            return self.generateORNode(
+            return "(" + self.generateORNode(
                     [(key, v) for v in value]
-                    )
+                    ) + ")"
         elif key == "EventID":            # EventIDs are not reflected in condition but in table selection
             if self.service == "sysmon":
                 self.table = "Event"
                 self.eventid = value
             elif self.service == "security":
                 self.table = "SecurityEvent"
+            elif self.service == "system":
+                self.table = "Event"
         elif type(value) in (str, int):     # default value processing
             mapping = (key, self.default_value_mapping)
             if len(mapping) == 1:
