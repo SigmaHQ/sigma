@@ -3,19 +3,26 @@ status: stable
 description: An attacker can use the SID history attribute to gain additional privileges.
 references:
     - https://adsecurity.org/?p=1772
-author: Thomas Patzke
+author: "Thomas Patzke, @atc_project (improvements)"
 tags:
+    - attack.persistence               # https://adsecurity.org/?p=1772
     - attack.privilege_escalation
     - attack.t1178
 logsource:
     product: windows
     service: security
 detection:
-    selection:
+    selection1:
         EventID:
             - 4765
             - 4766
-    condition: selection
+    selection2:
+        EventID: 4738
+    selection3:
+        SidHistory: 
+            - '-'
+            - '%%1793'
+    condition: selection1 or (selection2 and not selection3)
 falsepositives:
     - Migration of an account into a new domain
 level: medium
