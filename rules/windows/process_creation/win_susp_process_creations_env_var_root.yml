@@ -1,0 +1,17 @@
+title: Process Creation in ENV Variable Root
+description: Detects suspicious process creations in the root folder of an environment variable like %ProgramData% or %AppData%
+status: experimental
+author: Florian Roth
+date: 2018/08/24
+tags:
+    - car.2013-07-001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|re: '^.*\\(ProgramData|AppData\\Local|AppData\\Roaming)\\[^\]+\.(exe|vbs|bat|ps1|js)$'
+    condition: selection
+falsepositives:
+    - False positives depend on scripts and administrative tools used in the monitored environment but should be very rare
+level: high
