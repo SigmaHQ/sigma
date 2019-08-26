@@ -180,15 +180,12 @@ class QRadarBackend(SingleTextQueryBackend):
         try:
             for field in sigmaparser.parsedyaml["fields"]:
                     mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field)
-                    #if type(mapped) == str:
-                    #    qradarPrefix += mapped +", "
-                    #else:
-                    #    raise TypeError("Field mapping must return string or list")
             qradarPrefix += str(sigmaparser.parsedyaml["fields"]).strip('[]')
-            qradarPrefix += " from %s where " % (aql_database)
         except KeyError:    # no 'fields' attribute
             mapped = None
+            qradarPrefix+="UTF8(payload) as search_payload"
             pass
+        qradarPrefix += " from %s where " % (aql_database)
 
         try:
             timeframe = sigmaparser.parsedyaml['detection']['timeframe']
