@@ -1,0 +1,30 @@
+title: File Creation Webserver Root Folder
+status: experimental
+description: Detects a suspicious file creation in a web service root folder 
+author: Lep - VuNX
+tags:
+    - attack.persistence
+    - attack.t1100
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        TargetFileName_lc:
+            - '*\wwwroot\\*'
+            - '*\wmpub\\*'
+            - '*\htdocs\\*'
+            - '*inetpub*'
+        EventID:
+            11
+    filter:
+        Image_lc:
+            - '*explorer.exe'
+    blank:
+        Image: null
+    condition: selection and not filter and not blank
+fields:
+    - TargetFileName
+falsepositives:
+    - Deploy new codes
+level: medium

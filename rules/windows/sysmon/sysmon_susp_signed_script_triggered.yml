@@ -1,0 +1,21 @@
+title: Signed Script Proxy Execution
+description: Detect suspicious signed script like PubPrn triggered for validation bypassing
+author: Lep
+date: 2019/08/16
+tags:
+    - attack.execution
+    - attack.t1216
+    - attack.g0050
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+        ParentImage_lc: '*cscript.exe*'
+    selection2:
+        CommandLine_lc: '*pubprn.vbs*'
+    condition: selection or selection2
+falsepositives:
+    - Real PubPrn usage
+level: low

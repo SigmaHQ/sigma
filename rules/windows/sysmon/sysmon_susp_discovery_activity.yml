@@ -1,0 +1,26 @@
+title: Discovery Activity with Command
+status: experimental
+description: Detects discovery activity command
+author: Lep
+date: 2019/09/26
+tags:
+    - attack.discovery
+    - attack.t1018
+    - attack.t1012
+    - attack.t1083
+logsource:
+    product: windows
+detection:
+    selection:
+        CommandLine_lc:
+            - 'dir *'
+            - 'tree *'
+            - 'reg query*'
+            - '*arp.exe*'
+            - 'ipconfig /all'
+            - 'new-psdrive*'
+    timeframe: 15s
+    condition: selection | count() by CommandLine_lc > 4
+falsepositives:
+    - Admin activities
+level: medium
