@@ -1,17 +1,17 @@
+---
+action: global
 title: Modify Existing Service
 description: Detect persistence technique by modifying existing services
 author: Lep
 date: 2019/08/17
 tags:
-    - attack.persistence
-    - attack.t1031
-    - attack.g0050
+  - attack.persistence
+  - attack.t1031
+  - attack.g0050
 logsource:
-    product: windows
-    service: sysmon
+  category: process_creation
+  product: windows
 detection:
-    process_creation:
-        EventID: 1
     sc:
         Image_lc:
             -'*\sc.exe'
@@ -20,10 +20,12 @@ detection:
         Image_lc: 
             -'*\reg.exe'
         CommandLine_lc: '*hklm\system\currentcontrolset\services*'
+    condition: 1 of them
+---
+detection:
     registry_edit:
-        EventID: 13
+        EventID: 12
         TargetObject: 'HKLM\SYSTEM\CurrentControlSet\Services*'
-    condition: (process_creation and sc) or (process_creation and reg) or registry_edit
 falsepositives:
     - Real service edit
 level: low
