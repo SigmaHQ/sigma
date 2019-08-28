@@ -1,0 +1,25 @@
+title: Control Panel Items
+status: experimental
+description: Detects the use of a control panel item (.cpl) outside of the System32 folder
+reference: 
+  - https://attack.mitre.org/techniques/T1196/
+tags: 
+  - attack.execution
+  - attack.t1196
+  - attack.defense_evasion
+author: Kyaw Min Thein
+date: 2019/08/27
+level: critical
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    CommandLine: '*.cpl'
+  filter:
+    CommandLine:
+      - '*\System32\*'
+      - '*%System%*'
+  condition: selection and not filter
+falsepositives:
+  - Unknown
