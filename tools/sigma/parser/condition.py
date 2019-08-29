@@ -259,14 +259,16 @@ def generateXOf(sigma, val, condclass):
     """
     if val.matched == "them":           # OR across all definitions
         cond = condclass()
-        for definition in sigma.definitions.values():
+        for name, definition in sigma.definitions.items():
+            if name == "timeframe":
+                continue
             cond.add(NodeSubexpression(sigma.parse_definition(definition)))
         return NodeSubexpression(cond)
     elif val.matched.find("*") > 0:     # OR across all matching definitions
         cond = condclass()
         reDefPat = re.compile("^" + val.matched.replace("*", ".*") + "$")
         for name, definition in sigma.definitions.items():
-            if reDefPat.match(name):
+            if name != "timeframe" and reDefPat.match(name):
                 cond.add(NodeSubexpression(sigma.parse_definition(definition)))
         return NodeSubexpression(cond)
     else:                               # OR across all items of definition

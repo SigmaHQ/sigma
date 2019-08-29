@@ -1,4 +1,4 @@
-# Output backend discovery
+# Code used across all Sigma modules
 # Copyright 2016-2019 Thomas Patzke, Florian Roth
 
 # This program is free software: you can redistribute it and/or modify
@@ -14,24 +14,19 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
-import json
-import re
-import os
-import sigma.backends
-from .base import BaseBackend
-from sigma.tools import getAllSubclasses, getClassDict
+import pkgutil
+import importlib
 
-def getBackendList():
-    """Return list of backend classes"""
-    path = os.path.dirname(__file__)
-    return getAllSubclasses(path, "backends", BaseBackend)
+def getAllSubclasses(path, import_base, base_class):
+    """Return list of all classes derived from a superclass contained in a module."""
+    classes = list()
+    for finder, name, ispkg in pkgutil.iter_modules([ path ]):
+        module = importlib.import_module(".{}.{}".format(import_base, name), __package__)
+        for name, cls in vars(module).items():
+            if type(cls) == type and issubclass(cls, base_class) and cls.active:
+                classes.append(cls)
+    return classes
 
-def getBackendDict():
-    return getClassDict(getBackendList())
-
-def getBackend(name):
-    try:
-        return getBackendDict()[name]
-    except KeyError as e:
-        raise LookupError("Backend not found") from e
+def getClassDict(clss):
+    """Return a dictionary: class.identifier -> class"""
+    return {cls.identifier: cls for cls in clss }

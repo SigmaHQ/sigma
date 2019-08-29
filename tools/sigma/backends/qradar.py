@@ -42,6 +42,8 @@ class QRadarBackend(SingleTextQueryBackend):
     aql_database = "events"
 
     def cleanKey(self, key):
+        if key == None:
+            return ""
         if " " in key:
             key = "\"%s\"" % (key)
             return key
@@ -116,21 +118,21 @@ class QRadarBackend(SingleTextQueryBackend):
         if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_NEAR:
             raise NotImplementedError("The 'near' aggregation operator is not yet implemented for this backend")
         if agg.groupfield == None:
-            self.qradarPrefixAgg = "SELECT %s(%s) as agg_val from %s where" % (agg.aggfunc_notrans, agg.aggfield, self.aql_database)
-            self.qradarSuffixAgg = " group by %s having agg_val %s %s" % (agg.aggfield, agg.cond_op, agg.condition)
+            self.qradarPrefixAgg = "SELECT %s(%s) as agg_val from %s where" % (agg.aggfunc_notrans, self.cleanKey(agg.aggfield), self.aql_database)
+            self.qradarSuffixAgg = " group by %s having agg_val %s %s" % (self.cleanKey(agg.aggfield), agg.cond_op, agg.condition)
             return self.qradarPrefixAgg, self.qradarSuffixAgg
         elif agg.groupfield != None and timeframe == '00':
-                self.qradarPrefixAgg = " SELECT %s(%s) as agg_val from %s where " % (agg.aggfunc_notrans, agg.aggfield, self.aql_database)
-                self.qradarSuffixAgg = " group by %s having agg_val %s %s" % (agg.groupfield, agg.cond_op, agg.condition)
+                self.qradarPrefixAgg = " SELECT %s(%s) as agg_val from %s where " % (agg.aggfunc_notrans, self.cleanKey(agg.aggfield), self.aql_database)
+                self.qradarSuffixAgg = " group by %s having agg_val %s %s" % (self.cleanKey(agg.groupfield), agg.cond_op, agg.condition)
                 return self.qradarPrefixAgg, self.qradarSuffixAgg
         elif agg.groupfield != None and timeframe != None:
             for key, duration in self.generateTimeframe(timeframe).items():
-                self.qradarPrefixAgg = " SELECT %s(%s) as agg_val from %s where " % (agg.aggfunc_notrans, agg.aggfield, self.aql_database)
-                self.qradarSuffixAgg = " group by %s having agg_val %s %s LAST %s %s" % (agg.groupfield, agg.cond_op, agg.condition, duration, key)
+                self.qradarPrefixAgg = " SELECT %s(%s) as agg_val from %s where " % (agg.aggfunc_notrans, self.cleanKey(agg.aggfield), self.aql_database)
+                self.qradarSuffixAgg = " group by %s having agg_val %s %s LAST %s %s" % (self.cleanKey(agg.groupfield), agg.cond_op, agg.condition, duration, key)
                 return self.qradarPrefixAgg, self.qradarSuffixAgg
         else:
-            self.qradarPrefixAgg = " SELECT %s(%s) as agg_val from %s where " % (agg.aggfunc_notrans, agg.aggfield, self.aql_database)
-            self.qradarSuffixAgg = " group by %s having agg_val %s %s" % (agg.groupfield, agg.cond_op, agg.condition)
+            self.qradarPrefixAgg = " SELECT %s(%s) as agg_val from %s where " % (agg.aggfunc_notrans, self.cleanKey(agg.aggfield), self.aql_database)
+            self.qradarSuffixAgg = " group by %s having agg_val %s %s" % (self.cleanKey(agg.groupfield), agg.cond_op, agg.condition)
             return self.qradarPrefixAgg, self.qradarSuffixAgg
 
     def generateTimeframe(self, timeframe):

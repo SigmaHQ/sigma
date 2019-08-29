@@ -20,6 +20,7 @@ import sys
 
 import sigma
 import yaml
+from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
 from .base import BaseBackend, SingleTextQueryBackend
 from .mixins import RulenameCommentMixin, MultiRuleOutputMixin
 from .exceptions import NotSupportedError
@@ -81,8 +82,11 @@ class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, Single
     notToken = "NOT "
     subExpression = "(%s)"
     listExpression = "(%s)"
-    listSeparator = " "
+    listSeparator = " OR "
     valueExpression = "%s"
+    typedValueExpression = {
+                SigmaRegularExpressionModifier: "/%s/"
+            }
     nullExpression = "NOT _exists_:%s"
     notNullExpression = "_exists_:%s"
     mapExpression = "%s:%s"
@@ -177,6 +181,9 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
         """
         return value.replace("\\\\*", "\\*")
 
+    def escapeSlashes(self, value):
+        return value.replace("\\", "\\\\")
+
     def generateMapItemNode(self, node):
         key, value = node
         if type(value) not in (str, int, list, type(None)):
@@ -187,10 +194,12 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
                 key_mapped = self.fieldNameMapping(key, v)
                 if self.matchKeyword:   # searches against keyowrd fields are wildcard searches, phrases otherwise
                     queryType = 'wildcard'
+                    value_cleaned = self.escapeSlashes(self.cleanValue(str(v)))
                 else:
                     queryType = 'match_phrase'
+                    value_cleaned = self.cleanValue(str(v))
 
-                res['bool']['should'].append({queryType: {key_mapped: self.cleanValue(str(v))}})
+                res['bool']['should'].append({queryType: {key_mapped: value_cleaned}})
             return res
         elif value is None:
             key_mapped = self.fieldNameMapping(key, value)
@@ -199,9 +208,11 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
             key_mapped = self.fieldNameMapping(key, value)
             if self.matchKeyword:   # searches against keyowrd fields are wildcard searches, phrases otherwise
                 queryType = 'wildcard'
+                value_cleaned = self.escapeSlashes(self.cleanValue(str(value)))
             else:
                 queryType = 'match_phrase'
-            return {queryType: {key_mapped: self.cleanValue(str(value))}}
+                value_cleaned = self.cleanValue(str(value))
+            return {queryType: {key_mapped: value_cleaned}}
 
     def generateValueNode(self, node):
         return {'multi_match': {'query': node, 'fields': [], 'type': 'phrase'}}
@@ -405,20 +416,20 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
             ("mail", "root@localhost", "Mail address for Watcher notification (only logging if not set)", None),
 
             # Options for WebHook Action
-	    ("http_host", "localhost", "Webhook host used for alert notification", None),
-	    ("http_port", "80", "Webhook port used for alert notification", None),
-	    ("http_scheme", "http", "Webhook scheme used for alert notification", None),
-	    ("http_user", None, "Webhook User used for alert notification", None),
-	    ("http_pass", None, "Webhook Password used for alert notification", None),
-	    ("http_uri_path", "/", "Webhook Uri used for alert notification", None),
-	    ("http_method", "POST", "Webhook Method used for alert notification", None),
+        ("http_host", "localhost", "Webhook host used for alert notification", None),
+        ("http_port", "80", "Webhook port used for alert notification", None),
+        ("http_scheme", "http", "Webhook scheme used for alert notification", None),
+        ("http_user", None, "Webhook User used for alert notification", None),
+        ("http_pass", None, "Webhook Password used for alert notification", None),
+        ("http_uri_path", "/", "Webhook Uri used for alert notification", None),
+        ("http_method", "POST", "Webhook Method used for alert notification", None),
 
-	    ("http_phost", None, "Webhook proxy host", None),
-	    ("http_pport", None, "Webhook Proxy port", None),
+        ("http_phost", None, "Webhook proxy host", None),
+        ("http_pport", None, "Webhook Proxy port", None),
             # Options for Index Action
             ("index", "<log2alert-{now/d}>","Index name used to add the alerts", None), #by default it creates a new index every day
             ("type", "_doc","Index Type used to add the alerts", None)
-	    
+        
             )
     watcher_urls = {
             "watcher": "_watcher",
@@ -548,21 +559,21 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                     # mail notification if mail address is given
                     email = self.mail
                     eaction = {
-    	                "send_email": {
-    	                        "email": {
-    		                    "to": email,
-            		            "subject": action_subject,
-                    	            "body": action_body,
-                        	    "attachments": {
-                                	"data.json": {
-                                    	    "data": {
-                                        	"format": "json"
+                        "send_email": {
+                                "email": {
+                                "to": email,
+                                "subject": action_subject,
+                                    "body": action_body,
+                                "attachments": {
+                                    "data.json": {
+                                            "data": {
+                                            "format": "json"
                                                 }
-	                                    }
-    		                        }
-    	    	                    }
-                	        }
-                    	    }
+                                        }
+                                    }
+                                    }
+                            }
+                            }
                 if 'webhook' in alert_methods: # WebHook Action. Sending metadata to a webservice. Added timestamp to metadata
                     http_scheme = self.http_scheme
                     http_host = self.http_host
@@ -574,22 +585,22 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                     http_user = self.http_user
                     http_pass = self.http_pass
                     waction = {
-			"httppost":{
+            "httppost":{
                             "transform":{
                                 "script": "ctx.metadata.timestamp=ctx.trigger.scheduled_time;" 
                                 },
-                    	    "webhook":{
-                        	"scheme"  : http_scheme,
-                        	"host"    : http_host,
-                        	"port"    : int(http_port),
-            	        	"method"  : http_method,
-    	                        "path"    : http_uri_path,
-    		                "params"  : {},
-	                        "headers" : {"Content-Type"                      : "application/json"},
-                        	"body"    : "{{#toJson}}ctx.metadata{{/toJson}}"
-                    	    }
-			}
-		    }
+                            "webhook":{
+                            "scheme"  : http_scheme,
+                            "host"    : http_host,
+                            "port"    : int(http_port),
+                            "method"  : http_method,
+                                "path"    : http_uri_path,
+                            "params"  : {},
+                            "headers" : {"Content-Type"                      : "application/json"},
+                            "body"    : "{{#toJson}}ctx.metadata{{/toJson}}"
+                            }
+            }
+            }
                     if (http_user) and (http_pass):
                         auth={
                             "basic":{

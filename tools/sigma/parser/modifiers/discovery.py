@@ -1,4 +1,4 @@
-# Output backend discovery
+# Discovery of modifier modules
 # Copyright 2016-2019 Thomas Patzke, Florian Roth
 
 # This program is free software: you can redistribute it and/or modify
@@ -14,24 +14,24 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
-import json
-import re
 import os
-import sigma.backends
-from .base import BaseBackend
 from sigma.tools import getAllSubclasses, getClassDict
+from .base import SigmaModifier
 
-def getBackendList():
-    """Return list of backend classes"""
+def getModifierList():
+    """Return list of modifier classes"""
     path = os.path.dirname(__file__)
-    return getAllSubclasses(path, "backends", BaseBackend)
+    return getAllSubclasses(path, "parser.modifiers", SigmaModifier)
 
-def getBackendDict():
-    return getClassDict(getBackendList())
+modifiers = getClassDict(getModifierList())
 
-def getBackend(name):
-    try:
-        return getBackendDict()[name]
-    except KeyError as e:
-        raise LookupError("Backend not found") from e
+def apply_modifiers(value, modifier_list):
+    """
+    Apply modifiers to value.
+
+    value: value from Sigma rule
+    modifiers: list of modifier names
+    """
+    for modifier in modifier_list:      # apply modifiers in given order
+        value = modifiers[modifier](value).apply()
+    return value
