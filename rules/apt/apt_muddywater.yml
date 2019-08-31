@@ -1,0 +1,26 @@
+title: MuddyWater Code Execution
+description: Detects a suspicious execution of wscript and cscript poiting to *.vbe and *.jpg files in Windows temp folder
+status: experimental
+references:
+  - https://www.clearskysec.com/wp-content/uploads/2018/11/MuddyWater-Operations-in-Lebanon-and-Oman.pdf
+  - https://attack.mitre.org/techniques/T1500/
+author: Florian Roth
+date: 2019/08/31
+tags:
+  - attack.defense_evasion
+  - attack.t1500
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image: 
+      - '*\wscript.exe'
+      - '*\cscript.exe'
+    CommandLine: 
+      - '*\Windows\Temp\*.vbe'
+      - '*\Windows\Temp\*.jpg'
+  condition: selection
+falsepositives:
+    - Unkown
+level: high
