@@ -17,6 +17,8 @@
 
 import re
 import sigma
+from sigma.parser.modifiers.base import SigmaTypeModifier
+from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
 from .base import SingleTextQueryBackend
 from .mixins import MultiRuleOutputMixin
 
@@ -85,6 +87,8 @@ class QRadarBackend(SingleTextQueryBackend):
                 return self.mapExpression % (self.cleanKey(key), self.generateNode(value))
         elif type(value) == list:
             return self.generateMapItemListNode(key, value)
+        elif isinstance(value, SigmaTypeModifier):
+            return self.generateMapItemTypedNode(key, value)
         elif value is None:
             return self.nullExpression % (key, )
         else:
@@ -99,6 +103,19 @@ class QRadarBackend(SingleTextQueryBackend):
             else:
                 itemslist.append('%s = %s' % (self.cleanKey(key), self.generateValueNode(item, True)))
         return '('+" or ".join(itemslist)+')'
+
+    def generateMapItemTypedNode(self, fieldname, value):
+        if type(value) == SigmaRegularExpressionModifier:
+            regex = str(value)
+            # Regular Expressions have to match the full value in QRadar
+            if len(regex) > 0:
+                if regex[0] != '^':
+                    regex = '.*' + regex
+                if regex[-1] != '$':
+                    regex = regex + '.*'
+            return "%s imatches %s" % (self.cleanKey(fieldname), self.generateValueNode(regex, True))
+        else:
+            raise NotImplementedError("Type modifier '{}' is not supported by backend".format(node.identifier))
 
     def generateValueNode(self, node, keypresent):
         if keypresent == False:
