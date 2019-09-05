@@ -16,6 +16,7 @@
 
 import json
 import re
+from fnmatch import fnmatch
 import sys
 
 import sigma
@@ -32,7 +33,7 @@ class ElasticsearchWildcardHandlingMixin(object):
     """
     options = SingleTextQueryBackend.options + (
             ("keyword_field", "keyword", "Keyword sub-field name", None),
-            ("keyword_blacklist", None, "Fields that don't have a keyword subfield", None)
+            ("keyword_blacklist", None, "Fields that don't have a keyword subfield (wildcards * and ? allowed)", None)
             )
     reContainsWildcard = re.compile("(?<!\\\\)[*?]").search
 
@@ -60,7 +61,7 @@ class ElasticsearchWildcardHandlingMixin(object):
             self.matchKeyword = True
             return fieldname
 
-        if fieldname not in self.blacklist and (
+        if not any([ fnmatch(fieldname, pattern) for pattern in self.blacklist ]) and (
                 type(value) == list and any(map(self.containsWildcard, value)) \
                 or self.containsWildcard(value)
                 ):
