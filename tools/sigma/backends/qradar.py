@@ -108,11 +108,10 @@ class QRadarBackend(SingleTextQueryBackend):
         if type(value) == SigmaRegularExpressionModifier:
             regex = str(value)
             # Regular Expressions have to match the full value in QRadar
-            if len(regex) > 0:
-                if regex[0] != '^':
-                    regex = '.*' + regex
-                if regex[-1] != '$':
-                    regex = regex + '.*'
+            if not (regex.startswith('^') or regex.startswith('.*')):
+                regex = '.*' + regex
+            if not (regex.endswith('$') or regex.endswith('.*')):
+                regex = regex + '.*'
             return "%s imatches %s" % (self.cleanKey(fieldname), self.generateValueNode(regex, True))
         else:
             raise NotImplementedError("Type modifier '{}' is not supported by backend".format(node.identifier))
