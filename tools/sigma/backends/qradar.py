@@ -175,7 +175,17 @@ class QRadarBackend(SingleTextQueryBackend):
             aql_database = "flows"
         else:
             aql_database = "events"
-        qradarPrefix = "SELECT UTF8(payload) as search_payload from %s where " % (aql_database)
+        
+        qradarPrefix="SELECT "
+        try:
+            for field in sigmaparser.parsedyaml["fields"]:
+                    mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field)
+            qradarPrefix += str(sigmaparser.parsedyaml["fields"]).strip('[]')
+        except KeyError:    # no 'fields' attribute
+            mapped = None
+            qradarPrefix+="UTF8(payload) as search_payload"
+            pass
+        qradarPrefix += " from %s where " % (aql_database)
 
         try:
             timeframe = sigmaparser.parsedyaml['detection']['timeframe']
