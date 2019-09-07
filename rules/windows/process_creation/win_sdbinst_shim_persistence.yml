@@ -1,13 +1,12 @@
 title: Possible Shim Database Persistence via sdbinst.exe
 status: experimental
-description: Detects execution of sdbinst writing to default shim database path C:\Windows\AppPatch\*
+description: Detects installation of a new shim using sdbinst.exe. A shim can be used to load malicious DLLs into applications.
 references:
     - https://www.fireeye.com/blog/threat-research/2017/05/fin7-shim-databases-persistence.html
 tags:
     - attack.persistence
     - attack.t1138
 author: Markus Neis
-date: 2018/08/03
 logsource:
     category: process_creation
     product: windows
@@ -16,7 +15,7 @@ detection:
         Image:
             - '*\sdbinst.exe'
         CommandLine:
-            - '*\AppPatch\\*}.sdb*'
+            - '*.sdb*'
     condition: selection
 falsepositives:
     - Unknown
