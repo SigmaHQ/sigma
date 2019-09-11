@@ -452,6 +452,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
         tags = sigmaparser.parsedyaml.setdefault("tags", "")
         # Get time frame if exists
         interval = sigmaparser.parsedyaml["detection"].setdefault("timeframe", "30m")
+        dateField = self.sigmaconfig.config.get("dateField", "timestamp")
         
         # creating condition
         indices = sigmaparser.get_logsource().index
@@ -673,7 +674,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                                             "filter":
                                                 {
                                                     "range":{
-                                                        "timestamp":{
+                                                        dateField:{
                                                             "gte":"now-%s/m"%self.filter_range #filter only for the last x minutes events
                                                             }
                                                         }
