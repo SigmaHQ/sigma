@@ -452,7 +452,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
         tags = sigmaparser.parsedyaml.setdefault("tags", "")
         # Get time frame if exists
         interval = sigmaparser.parsedyaml["detection"].setdefault("timeframe", "30m")
-        dateField = self.sigmaconfig.config.get("dateField", "date")
+        dateField = self.sigmaconfig.config.get("dateField", "timestamp")
         
         # creating condition
         indices = sigmaparser.get_logsource().index
