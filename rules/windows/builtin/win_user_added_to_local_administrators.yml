@@ -1,5 +1,5 @@
 title: User Added to Local Administrators
-description: This rule triggers on user accounts that are added to the local Administrators group, which could be legitimate activity or a sign of privilege escalation activity 
+description: This rule triggers on user accounts that are added to the local Administrators group, which could be legitimate activity or a sign of privilege escalation activity
 status: stable
 author: Florian Roth
 tags:
@@ -11,10 +11,13 @@ logsource:
 detection:
     selection:
         EventID: 4732
-        GroupName: Administrators
+    selection_group1:
+        GroupName: 'Administrators'
+    selection_group2:
+        GroupSid: 'S-1-5-32-544'
     filter:
         SubjectUserName: '*$'
-    condition: selection and not filter
-falsepositives: 
+    condition: selection and (1 of selection_group*) and not filter
+falsepositives:
     - Legitimate administrative activity
-level: low
+level: medium
