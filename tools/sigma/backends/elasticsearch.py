@@ -232,13 +232,13 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
                     self.queries[-1]['aggs'] = {
                         '%s_count'%(agg.groupfield or ""): {
                             'terms': {
-                                'field': '%s'%(agg.groupfield or "")
+                                'field': '%s'%(agg.groupfield + ".keyword" or "")
                             },
                             'aggs': {
                                 'limit': {
                                     'bucket_selector': {
                                         'buckets_path': {
-                                            'count': '_count'
+                                            'count': '%s_count'%(agg.groupfield or "")
                                         },
                                         'script': 'params.count %s %s'%(agg.cond_op, agg.condition)
                                     }
