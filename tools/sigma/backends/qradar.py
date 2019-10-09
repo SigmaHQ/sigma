@@ -195,7 +195,7 @@ class QRadarBackend(SingleTextQueryBackend):
         qradarPrefix="SELECT "
         try:
             for field in sigmaparser.parsedyaml["fields"]:
-                    mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field)
+                    mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
             qradarPrefix += str(sigmaparser.parsedyaml["fields"]).strip('[]')
         except KeyError:    # no 'fields' attribute
             mapped = None
