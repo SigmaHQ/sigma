@@ -1,3 +1,5 @@
+---
+action: global
 title: Sudo Privilege Escalation CVE-2019-14287
 status: experimental
 description: Detects users trying to exploit sudo vulnerability reported in CVE-2019-14287
@@ -13,11 +15,19 @@ tags:
     - attack.t1169
 logsource:
     product: linux
-detection:
-    keywords:
-        - '* -u#-1*'
-        - '* -u#4294967295*'
-    condition: keywords
 falsepositives:
     - Unlikely
 level: critical
+---
+detection:
+    selection_keywords:
+        - '* -u#-1*'
+        - '* -u#4294967295*'
+    condition: selection_keywords
+--- 
+detection:
+    selection_user:
+        USER:
+            - '#-1'
+            - '#4294967295'
+    condition: selection_user
