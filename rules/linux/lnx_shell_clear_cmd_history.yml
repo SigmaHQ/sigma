@@ -4,6 +4,7 @@ description: Clear command history in linux which is used for defense evasion.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1146/T1146.yaml
     - https://attack.mitre.org/techniques/T1146/
+    - https://www.hackers-arise.com/single-post/2016/06/20/Covering-your-BASH-Shell-Tracks-AntiForensics
 author: Patrick Bareiss
 date: 2019/03/24
 logsource:
@@ -18,6 +19,8 @@ detection:
         # - 'unset HISTFILE'  # prone to false positives
         - 'export HISTFILESIZE=0'
         - 'history -c'
+        - 'history -w'
+        - 'shred *bash_history'
     condition: keywords
 falsepositives:
     - Unknown
