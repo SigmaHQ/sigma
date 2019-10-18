@@ -36,10 +36,10 @@ class SplunkBackend(SingleTextQueryBackend):
     subExpression = "%s"
     listExpression = "%s"
     listSeparator = " "
-    valueExpression = "\"%s\""
+    valueExpression = "%s"
     nullExpression = "NOT %s=\"*\""
     notNullExpression = "%s=\"*\""
-    mapExpression = "%s=%s"
+    mapExpression = "%s:%s"
     mapListsSpecialHandling = True
     mapListValueExpression = "%s IN %s"
 
@@ -72,22 +72,6 @@ class SplunkBackend(SingleTextQueryBackend):
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
         columns = list()
-        try:
-            for field in sigmaparser.parsedyaml["fields"]:
-                mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
-                if type(mapped) == str:
-                    columns.append(mapped)
-                elif type(mapped) == list:
-                    columns.extend(mapped)
-                else:
-                    raise TypeError("Field mapping must return string or list")
-
-            fields = ",".join(str(x) for x in columns)
-            fields = " | table " + fields
-
-        except KeyError:    # no 'fields' attribute
-            mapped = None
-            pass
 
         for parsed in sigmaparser.condparsed:
             query = self.generateQuery(parsed)

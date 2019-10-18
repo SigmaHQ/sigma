@@ -278,7 +278,7 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
     def generateMapItemNode_CarbonBlack(self, node):
         fieldname, value = node
-        if(fieldname == "EventID" and event[value][0] not null):
+        if(fieldname == "EventID" and event[value] is not ''):
             fieldname = event[value][0]
             value = event[value][1]
         transformed_fieldname = self.fieldNameMapping(fieldname, value)
