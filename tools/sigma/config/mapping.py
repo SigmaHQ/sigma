@@ -44,7 +44,7 @@ class SimpleFieldMapping:
         """Return mapped field name"""
         return (self.target, value)
 
-    def resolve_fieldname(self, fieldname):
+    def resolve_fieldname(self, fieldname, sigmaparser=None):
         return self.target
 
     def __str__(self):  # pragma: no cover
@@ -106,7 +106,7 @@ class ConditionalFieldMapping(SimpleFieldMapping):
         elif type(target) == list:
             self.conditions[field][value].extend(target)
 
-    def resolve(self, key, value, sigmaparser):
+    def _targets(self, sigmaparser):
         # build list of matching target mappings
         targets = set()
         for condfield in self.conditions:
@@ -115,6 +115,10 @@ class ConditionalFieldMapping(SimpleFieldMapping):
                 for condvalue in self.conditions[condfield]:
                     if condvalue in rulefieldvalues:
                         targets.update(self.conditions[condfield][condvalue])
+        return targets
+
+    def resolve(self, key, value, sigmaparser):
+        targets = self._targets(sigmaparser)
         if len(targets) == 0:       # no matching condition, try with default mapping
             if self.default != None:
                 targets = self.default
@@ -138,11 +142,18 @@ class ConditionalFieldMapping(SimpleFieldMapping):
             else:
                 return (key, value)
 
-    def resolve_fieldname(self, fieldname):
-        if self.default != None:
-            return self.default
+    def resolve_fieldname(self, fieldname, sigmaparser=None):
+        if sigmaparser is None:
+            if self.default != None:
+                return self.default
+            else:
+                return fieldname
         else:
-            return fieldname
+            targets = self._targets(sigmaparser)
+            if len(targets) == 0:
+                return self.default
+            else:
+                return targets.pop()       # TODO: this case should be documented
 
     def __str__(self):  # pragma: no cover
         return "ConditionalFieldMapping: {} -> {}".format(self.source, self.target)
@@ -207,18 +218,18 @@ class FieldMappingChain(object):
                     cond.add(mapping.resolve(key, value, sigmaparser))
             return NodeSubexpression(cond)
 
-    def resolve_fieldname(self, fieldname):
+    def resolve_fieldname(self, fieldname, sigmaparser=None):
         if type(self.fieldmappings) == str:     # one field mapping
             return self.fieldmappings
         elif isinstance(self.fieldmappings, SimpleFieldMapping):
-            return self.fieldmappings.resolve_fieldname(fieldname)
+            return self.fieldmappings.resolve_fieldname(fieldname, sigmaparser)
         elif type(self.fieldmappings) == set:
             mappings = set()
             for mapping in self.fieldmappings:
                 if type(mapping) == str:
                     mappings.add(mapping)
                 elif isinstance(mapping, SimpleFieldMapping):
-                    resolved_mapping = mapping.resolve_fieldname(fieldname)
+                    resolved_mapping = mapping.resolve_fieldname(fieldname, sigmaparser)
                     if type(resolved_mapping) is list:
                         mappings.update(resolved_mapping)
                     else:

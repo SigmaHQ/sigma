@@ -16,6 +16,7 @@
 
 import json
 import re
+from fnmatch import fnmatch
 import sys
 
 import sigma
@@ -32,9 +33,9 @@ class ElasticsearchWildcardHandlingMixin(object):
     """
     options = SingleTextQueryBackend.options + (
             ("keyword_field", "keyword", "Keyword sub-field name", None),
-            ("keyword_blacklist", None, "Fields that don't have a keyword subfield", None)
+            ("keyword_blacklist", None, "Fields that don't have a keyword subfield (wildcards * and ? allowed)", None)
             )
-    reContainsWildcard = re.compile("(?<!\\\\)[*?]").search
+    reContainsWildcard = re.compile("(?:(?<!\\\\)|\\\\\\\\)[*?]").search
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -47,7 +48,8 @@ class ElasticsearchWildcardHandlingMixin(object):
     def containsWildcard(self, value):
         """Determine if value contains wildcard."""
         if type(value) == str:
-            return self.reContainsWildcard(value)
+            res = self.reContainsWildcard(value)
+            return res
         else:
             return False
 
@@ -60,7 +62,7 @@ class ElasticsearchWildcardHandlingMixin(object):
             self.matchKeyword = True
             return fieldname
 
-        if fieldname not in self.blacklist and (
+        if not any([ fnmatch(fieldname, pattern) for pattern in self.blacklist ]) and (
                 type(value) == list and any(map(self.containsWildcard, value)) \
                 or self.containsWildcard(value)
                 ):
@@ -230,13 +232,13 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
                     self.queries[-1]['aggs'] = {
                         '%s_count'%(agg.groupfield or ""): {
                             'terms': {
-                                'field': '%s'%(agg.groupfield or "")
+                                'field': '%s'%(agg.groupfield + ".keyword" or "")
                             },
                             'aggs': {
                                 'limit': {
                                     'bucket_selector': {
                                         'buckets_path': {
-                                            'count': '_count'
+                                            'count': '%s_count'%(agg.groupfield or "")
                                         },
                                         'script': 'params.count %s %s'%(agg.cond_op, agg.condition)
                                     }
@@ -309,7 +311,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
         columns = list()
         try:
             for field in sigmaparser.parsedyaml["fields"]:
-                mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field)
+                mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
                 if type(mapped) == str:
                     columns.append(mapped)
                 elif type(mapped) == list:
@@ -450,6 +452,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
         tags = sigmaparser.parsedyaml.setdefault("tags", "")
         # Get time frame if exists
         interval = sigmaparser.parsedyaml["detection"].setdefault("timeframe", "30m")
+        dateField = self.sigmaconfig.config.get("dateField", "timestamp")
         
         # creating condition
         indices = sigmaparser.get_logsource().index
@@ -671,7 +674,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                                             "filter":
                                                 {
                                                     "range":{
-                                                        "timestamp":{
+                                                        dateField:{
                                                             "gte":"now-%s/m"%self.filter_range #filter only for the last x minutes events
                                                             }
                                                         }
