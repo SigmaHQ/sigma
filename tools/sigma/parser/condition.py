@@ -633,7 +633,7 @@ class SigmaAggregationParser(SimpleParser):
 
     def trans_fieldname(self, fieldname):
         """Translate field name into configured mapped name"""
-        mapped = self.config.get_fieldmapping(fieldname).resolve_fieldname(fieldname)
+        mapped = self.config.get_fieldmapping(fieldname).resolve_fieldname(fieldname, self.parser)
         if type(mapped) == str:
             return mapped
         else:

@@ -2,6 +2,7 @@ title: Mimikatz DC Sync
 description: Detects Mimikatz DC sync security events
 status: experimental
 date: 2018/06/03
+modified: 2019/10/08
 author: Benjamin Delpy, Florian Roth
 references:
     - https://twitter.com/gentilkiwi/status/1003236624925413376
@@ -19,8 +20,14 @@ detection:
         Properties: 
             - '*Replicating Directory Changes All*'
             - '*1131f6ad-9c07-11d1-f79f-00c04fc2dcd2*'
-    condition: selection
+    filter1:
+        SubjectDomainName: 'Window Manager'
+    filter2: 
+        SubjectUserName:
+            - 'NT AUTHORITY*'
+            - '*$'
+    condition: selection and not filter1 and not filter2
 falsepositives:
-    - Unkown
-level: critical
+    - Valid DC Sync that is not covered by the filters; please report
+level: high
 

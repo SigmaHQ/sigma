@@ -232,13 +232,13 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
                     self.queries[-1]['aggs'] = {
                         '%s_count'%(agg.groupfield or ""): {
                             'terms': {
-                                'field': '%s'%(agg.groupfield or "")
+                                'field': '%s'%(agg.groupfield + ".keyword" or "")
                             },
                             'aggs': {
                                 'limit': {
                                     'bucket_selector': {
                                         'buckets_path': {
-                                            'count': '_count'
+                                            'count': '%s_count'%(agg.groupfield or "")
                                         },
                                         'script': 'params.count %s %s'%(agg.cond_op, agg.condition)
                                     }
@@ -311,7 +311,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
         columns = list()
         try:
             for field in sigmaparser.parsedyaml["fields"]:
-                mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field)
+                mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
                 if type(mapped) == str:
                     columns.append(mapped)
                 elif type(mapped) == list:
@@ -452,6 +452,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
         tags = sigmaparser.parsedyaml.setdefault("tags", "")
         # Get time frame if exists
         interval = sigmaparser.parsedyaml["detection"].setdefault("timeframe", "30m")
+        dateField = self.sigmaconfig.config.get("dateField", "timestamp")
         
         # creating condition
         indices = sigmaparser.get_logsource().index
@@ -673,7 +674,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                                             "filter":
                                                 {
                                                     "range":{
-                                                        "timestamp":{
+                                                        dateField:{
                                                             "gte":"now-%s/m"%self.filter_range #filter only for the last x minutes events
                                                             }
                                                         }
