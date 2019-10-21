@@ -270,6 +270,7 @@ These tools are not part of the main toolchain and maintained separately by thei
 
 # Projects or Products that use Sigma
 
+* [Joe Sandbox](https://www.joesecurity.org/)
 * [MISP](http://www.misp-project.org/2017/03/26/MISP.2.4.70.released.html) (since version 2.4.70, March 2017)
 * [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 * [SOC Prime - Sigma Rule Editor](https://tdm.socprime.com/sigma/)
