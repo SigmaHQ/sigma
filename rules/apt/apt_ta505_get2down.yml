@@ -1,33 +1,20 @@
 title: Get2Downloader
 status: experimental
-description: Get2 downloader associated with TA505
+description: Detects Get2 downloader associated with TA505
 author: Joe Security
+date: 2019/10/21
 references:
-    -https://www.proofpoint.com/us/threat-insight/post/ta505-distributes-new-sdbbot-remote-access-trojan-get2-downloader
-id: 200003
-threatname: Get2Downloader
-behaviorgroup: 2
-classification: 4
-mitreattack:
+    - https://www.proofpoint.com/us/threat-insight/post/ta505-distributes-new-sdbbot-remote-access-trojan-get2-downloader
+logsource:
+      service: sysmon
+      product: windows
+detection:
+      selection:
+          EventID: 11
+          Image: '*\Microsoft Office\Office*'
+          TargetFilename: 
+              - '*Temp\oleObject1.bin'
+              - '*.dll'
 detection:
     condition: all of them 
 level: high
----
-logsource:
-      service: sysmon
-      product: windows
-detection:
-      selection:
-          EventID: 11
-          Image: '*\Microsoft Office\Office*'
-          TargetFilename: '*Temp\oleObject1.bin'
----
-logsource:
-      service: sysmon
-      product: windows
-detection:
-      selection:
-          EventID: 11
-          Image: '*\Microsoft Office\Office*'
-          TargetFilename: '*.dll'
-level:critical
