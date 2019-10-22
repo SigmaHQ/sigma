@@ -1,0 +1,35 @@
+title: Windows webshell creation
+status: experimental
+description: Posible webshell file creation on a static web site
+references:
+    - PT ESC rule and personal experience
+author: Beyu Denis, oscd.community
+date: 2019/10/22
+tags:
+    - attack.persistence
+    - attack.t1100
+level: critical
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        # Sysmon: File Creation (ID 11)
+        EventID: 11
+        #.NET webshells
+        TargetFilename: '*\inetpub\wwwroot\*.asp'
+        TargetFilename: '*\inetpub\wwwroot\*.aspx'
+        TargetFilename: '*\inetpub\wwwroot\*.ashx'
+        #php webshells
+        TargetFilename: '*\inetpub\wwwroot\*.ph*'
+        TargetFilename: '*\www\*.ph*'
+        TargetFilename: '*\htdocs\*.ph*'
+        TargetFilename: '*\html\*.ph*'
+        #apache tomcap webshell
+        TargetFilename: '*\*.jsp*'
+        #cgi-bin perl webshell
+        TargetFilename: '*\cgi-bin\*.pl'
+    condition: selection
+falsepositives:
+    - Unknown
+    - Admin activity
