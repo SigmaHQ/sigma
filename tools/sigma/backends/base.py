@@ -147,10 +147,7 @@ class BaseBackend:
         elif type(node) == sigma.parser.condition.NodeSubexpression:
             return self.generateSubexpressionNode(node)
         elif type(node) == tuple:
-            if(self.identifier == 'carbonblack'):
-                return self.generateMapItemNode_CarbonBlack(node)
-            else:
-                return self.generateMapItemNode(node)
+            return self.generateMapItemNode(node)
         elif type(node) in (str, int):
             return self.generateValueNode(node)
         elif type(node) == list:
@@ -276,22 +273,6 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
         else:
             raise TypeError("Backend does not support map values of type " + str(type(value)))
 
-    def generateMapItemNode_CarbonBlack(self, node):
-        fieldname, value = node
-        if(fieldname == "EventID" and event[value] is not ''):
-            fieldname = event[value][0]
-            value = event[value][1]
-        transformed_fieldname = self.fieldNameMapping(fieldname, value)
-        if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
-            return self.mapExpression % (transformed_fieldname, self.generateNode(value))
-        elif type(value) == list:
-            return self.generateMapItemListNode(transformed_fieldname, value)
-        elif isinstance(value, SigmaTypeModifier):
-            return self.generateMapItemTypedNode(transformed_fieldname, value)
-        elif value is None:
-            return self.nullExpression % (transformed_fieldname, )
-        else:
-            raise TypeError("Backend does not support map values of type " + str(type(value)))
     def generateMapItemListNode(self, fieldname, value):
         return self.mapListValueExpression % (fieldname, self.generateNode(value))
 
