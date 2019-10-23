@@ -1,0 +1,27 @@
+title: Cred access
+description: The following GrantedAccess  only privileged levels of memory access to specific processes. This will typically be very low volume, with Sysmon events only being logged in the event of attacker activity. 
+Most characteristic of powershell offensive tools.
+references:
+  - https://azure.microsoft.com/en-ca/blog/detecting-in-memory-attacks-with-sysmon-and-azure-security-center/
+tags:
+  - attack.credential_access
+  - attack.t1003
+status: experimental
+author: Aleksey Potapov, oscd.community
+date: 2019/10/23
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 10
+    TargetImage: 'C:\windows\system32\lsass.exe'
+    GrantedAccess:
+      - '0x1f0fff'
+      - '0x1f1fff'
+      - '0x1f2fff'
+      - '0x1f3fff'
+  condition: selection
+falsepositives:
+  - unknown
+level: high
