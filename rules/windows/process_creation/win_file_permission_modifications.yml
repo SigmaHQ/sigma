@@ -1,0 +1,28 @@
+title: File or folder permissions modifications
+status: experimental
+description: Detects a file or folder permissions modifications
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1222/T1222.yaml
+author: Jakob Weinzettl, oscd.community
+date: 2019/10/23
+tags:
+    - attack.defense_evasion
+    - attack.t1222
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        CommandLine: 'takeown.exe'
+    selection2:
+        CommandLine: 'cacls.exe' # covers both cacls and icacls
+    selection3:
+        CommandLine: '/grant'
+    selection4:
+        CommandLine: 'attrib.exe'
+    selection5:
+        CommandLine: '-r'
+    condition: selection1 or selection2 and selection3 or selection4 and selection5
+falsepositives:
+    - Users interacting with the files on their own (unlikely unless power users)
+level: medium
