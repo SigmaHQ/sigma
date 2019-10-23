@@ -4,56 +4,57 @@ description: Detects the execution of a renamed binary often used by attackers o
 author: Aleksey Potapov, oscd.community
 date: 2019/10/22
 references:
-    - https://attack.mitre.org/techniques/T1036/
+  - https://attack.mitre.org/techniques/T1036/
 tags:
-    - attack.t1036
-    - attack.defense_evasion
+  - attack.t1036
+  - attack.defense_evasion
 logsource:
-    category: process_creation
-    product: windows
-    service: sysmon
+  category: process_creation
+  product: windows
+  service: sysmon
 detection:
-    selection:
-        Description:
-            -"active directory editor"
-            -"sysinternals process dump utility"
-            -"msbuild.exe"
-            -".net core host"
-            -"windows command processor"
-            -"windows powershell"
-            -"execute processes remotely"
-            -".net framework installation utility"
-            -"microsoft ® console based script host"
-            -"microsoft ® windows based script host"
-            -"microsoft (r) html application host"
-            -"microsoft(c) register server"
-            -"wmi commandline utility"
-            -"certutil.exe"
-            -"windows host process (rundll32)"
-            -"microsoft connection manager profile Installer"
-            -"windows ® installer"
-            -"7-zip console"
-    filter:
-        Image:
-            -'*\adexplorer.exe'
-            -'*\procdump.exe'
-            -'*\msbuild.exe'
-            -'*\dotnet.exe'
-            -'*\cmd.exe'
-            -'*\powershell.exe'
-            -'*\psexec.exe'
-            -'*\installutil.exe'
-            -'*\cscript.exe'
-            -'*\wscript.exe'
-            -'*\mshta.exe'
-            -'*\regsvr32.exe'
-            -'*\wmic.exe'
-            -'*\certutil.exe'
-            -'*\rundll32.exe'
-            -'*\cmstp.exe'
-            -'*\msiexec.exe'
-            -'*\7z.exe'
-    condition: selection and not filter
+	selection:
+    Description:
+      - "active directory editor"
+      - "sysinternals process dump utility"
+      - "msbuild.exe"
+      - ".net core host"
+      - "windows command processor"
+      - "windows powershell"
+      - "execute processes remotely"
+      - ".net framework installation utility"
+      - "microsoft ® console based script host"
+      - "microsoft ® windows based script host"
+      - "microsoft (r) html application host"
+      - "microsoft(c) register server"
+      - "wmi commandline utility"
+      - "certutil.exe"
+      - "windows host process (rundll32)"
+      - "microsoft connection manager profile Installer"
+      - "windows ® installer"
+      - "7-zip console"
+
+	filter:
+		Image:
+			- '*\adexplorer.exe'
+			- '*\procdump.exe'
+			- '*\msbuild.exe'
+			- '*\dotnet.exe'
+			- '*\cmd.exe'
+			- '*\powershell.exe'
+			- '*\psexec.exe'
+			- '*\installutil.exe'
+			- '*\cscript.exe'
+			- '*\wscript.exe'
+			- '*\mshta.exe'
+			- '*\regsvr32.exe'
+			- '*\wmic.exe'
+			- '*\certutil.exe'
+			- '*\rundll32.exe'
+			- '*\cmstp.exe'
+			- '*\msiexec.exe'
+			- '*\7z.exe'
+	condition: selection and not filter
 falsepositives:
-    - Custom applications use renamed binaries adding slight change to binary name. Typically this is easy to spot and add to whitelist
+	- Custom applications use renamed binaries adding slight change to binary name. Typically this is easy to spot and add to whitelist
 level: medium
