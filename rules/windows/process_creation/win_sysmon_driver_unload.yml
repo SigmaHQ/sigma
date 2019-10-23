@@ -1,0 +1,32 @@
+action: global
+title: Sysmon driver unload
+status: experimental
+author: Kirill Kiryanov, oscd.community
+description: Detect possible shutdown Sysmon
+date: 2019/10/23
+references: 
+  - https://www.darkoperator.com/blog/2018/10/5/operating-offensively-against-sysmon
+fields:
+  - CommandLine
+  - Details
+falsepositives: Unknown
+level: high
+detection: 
+  condition: selection and selection1
+---
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image: '*\fltMC.exe'
+    CommandLine: '*unload*Sys*'
+---
+logsource:
+  product: windows
+  service: security
+detection:
+  selection1:
+    EventID: 4673
+    PrivilegeList: '*\SeLoadDriverPrivilege'
+  
