@@ -1,0 +1,42 @@
+title: Windows PowerShell Web Request
+status: experimental
+description: Detects the use of various web request methods (including aliases) via Windows PowerShell
+references:
+    - https://4sysops.com/archives/use-powershell-to-download-a-file-with-http-https-and-ftp/
+    - https://blog.jourdant.me/post/3-ways-to-download-files-with-powershell
+author: James Pemberton / @4A616D6573
+date: 2019/10/24
+tags:
+    - attack.execution
+    - attack.t1059
+    - attack.t1086
+logsource:
+    category: powershell/sysmon
+    product: windows
+    definition: 'Recommended: Turn on PowerShell Script Block Logging = Enabled - see https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_logging_windows?view=powershell-6#enabling-script-block-logging'
+detection:
+    eventcode:
+        EventCode:
+            - '1'
+            - '4688'
+            - '4104'
+    powershell:
+        ScriptBlockText:
+            - '*Invoke-WebRequest*'
+            - '*iwr *'
+            - '*wget *'
+            - '*curl *'
+            - '*Net.WebClient*'
+            - '*Start-BitsTransfer*'
+    cmdsysmon:
+        CommandLine:
+            - '*Invoke-WebRequest*'
+            - '*iwr *'
+            - '*wget *'
+            - '*curl *'
+            - '*Net.WebClient*'
+            - '*Start-BitsTransfer*'
+    condition: eventcode and (powershell or cmdsysmon)
+falsepositives:
+    - Use of Get-Command and Get-Help modules to reference Invoke-WebRequest and Start-BitsTransfer.
+level: medium
