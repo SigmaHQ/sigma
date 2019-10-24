@@ -1,0 +1,20 @@
+title: T1047 Wmiprvse Spawning Process
+description: Detects wmiprvse spawning processes
+status: experimental
+date: 2019/08/15
+author: Roberto Rodriguez @Cyb3rWard0g
+references:
+    - https://github.com/Cyb3rWard0g/ThreatHunter-Playbook/tree/master/playbooks/windows/02_execution/T1047_windows_management_instrumentation/wmi_win32_process_create_remote.md
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection: 
+        EventID: 1
+        ParentImage:  '*WmiPrvSe.exe'
+    filter:
+        LogonId:  '0x3e7'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: critical
