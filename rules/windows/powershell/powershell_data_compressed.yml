@@ -1,0 +1,26 @@
+title: Data Compressed
+status: experimental
+description: An adversary may compress data (e.g., sensitive documents) that is collected prior to exfiltration in order to make it portable and minimize the amount of data sent over the network
+author: Timur Zinniatullin, oscd.community
+references:
+    - https://attack.mitre.org/techniques/T1002/
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1002/T1002.yaml
+logsource:
+    product: windows
+    service: powershell
+    description: 'Script block logging must be enabled'
+detection:
+    selection:
+        EventID: 4104
+    keyword: 
+        - '*-Recurse | Compress-Archive*'
+        - '*-Recurse| Compress-Archive*'
+        - '*-Recurse |Compress-Archive*'
+        - '*-Recurse|Compress-Archive*'
+    condition: selection and keyword
+falsepositives:
+    - highly likely if archive ops are done via PS
+level: low
+tags:
+    - attack.exfiltration
+    - attack.t1002
