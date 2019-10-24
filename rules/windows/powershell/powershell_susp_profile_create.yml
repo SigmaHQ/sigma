@@ -1,0 +1,24 @@
+title: Powershell profile modify
+status: experimental
+description: 'Detects a change in profile.ps1 of Powershell profile'
+references:
+    - 'https://www.welivesecurity.com/2019/05/29/turla-powershell-usage/'
+tags:
+    - attack.persistence
+    - attack.privellege_escalation 
+    - attack.t1502
+author: HieuTT35
+date: 2019/10/24
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 11
+        TargetFilename|re:
+            - '.*\\My Documents\\PowerShell\\(Microsoft\.)?.*(Profile|profile)\.ps1'
+            - 'C\:\\Windows\\System32\\WindowsPowerShell\\v1\.0\\(Microsoft\.)?.*(Profile|profile)\.ps1'
+    condition: selection
+falsepositives:
+    - unknown
+level: high
