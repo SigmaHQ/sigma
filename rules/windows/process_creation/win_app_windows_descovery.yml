@@ -1,0 +1,31 @@
+title: Application Window Discovery
+status: experimental
+description: Adversaries may attempt to get a listing of open application windows. Window listings could convey information about how the system is used or give context to information collected by a keylogger. In Mac, this can be done natively with a small AppleScript script - https://attack.mitre.org/techniques/T1155/
+author: Timur Zinniatullin, oscd.community
+references:
+    - https://attack.mitre.org/techniques/T1010/
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1010/T1010.yaml
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Image:
+            - '*\csc.exe'
+        CommandLine:
+            - '*-out:*.cs*'
+    condition: selection1
+fields:
+    - Image
+    - CommandLine
+    - User
+    - LogonGuid
+    - Hashes
+    - ParentProcessGuid
+    - ParentCommandLine
+falsepositives:
+    - Unknown
+level: low
+tags:
+    - attack.exfiltration
+    - attack.t1010
