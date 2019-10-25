@@ -1,0 +1,27 @@
+title: Autorun key modification from powershell/cmd
+description: Detects possible persistence from powershell/cmd scripts
+status: test
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1060/T1060.yaml
+tags:
+    - attack.persistence
+    - attack.t1060
+date: 2019/10/21
+modified: 2019/10/21
+author: Victor Sergeev, oscd.community
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 13
+        Image: 
+            - '*\powershell.exe'
+            - '*\cmd.exe'
+        TargetObject: 
+			- '*\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\\*'
+			- '*\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce\\*'
+    condition: selection
+falsepositives:
+    - Admin scripts
+level: medium
