@@ -1,0 +1,26 @@
+title: Brute Force
+description: Detects many authentication failures from one source to one destination which is may indicate Brute Force activity
+references:
+    - https://attack.mitre.org/techniques/T1110/
+tags:
+    - attack.t1110
+author: Aleksandr Akhremchik, oscd.community
+date: 2019/10/25
+status: experimental
+logsource:
+    category: authentication
+detection:
+    selection:
+         action: failure
+    timeframe: 600s
+    condition: selection | count(category) by dst_ip > 30
+fields:
+    - src_ip
+    - dst_ip
+    - user
+falsepositives:
+    - Inventarization
+    - Penetration testing
+    - Vulnerability scanner
+    - Legitimate application
+level: medium

@@ -1,0 +1,34 @@
+title: Regsvr32 network activity
+description: Detects network connections and DNS queries initiated by Regsvr32.exe
+references:
+    - https://pentestlab.blog/2017/05/11/applocker-bypass-regsvr32/
+    - https://oddvar.moe/2017/12/13/applocker-case-study-how-insecure-is-it-really-part-1/
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1117/T1117.md
+tags:
+    - attack.execution
+    - attack.defense_evasion
+    - attack.t1117
+author: Dmitriy Lifanov, oscd community
+status: experimental
+date: 2019/10/25
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    condition: 1 of them
+    selection1:
+        EventID: 3
+        Image: '*\System32\regsvr32.exe'
+    selection2:
+        EventID: 22
+        Image: '*\System32\regsvr32.exe'
+# The 32-bit version of Regsvr32.exe on a 64-bit Windows version
+    selection3:
+        EventID: 3
+        Image: '*\SysWoW64\regsvr32.exe'
+    selection4:
+        EventID: 22
+        Image: '*\SysWoW64\regsvr32.exe'
+falsepositives:
+    - unknown
+level: high
