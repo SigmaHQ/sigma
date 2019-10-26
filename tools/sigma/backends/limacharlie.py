@@ -71,7 +71,8 @@ class LimaCharlieBackend(BaseBackend):
 
     def generate(self, sigmaparser):
         # Take the log source information and figure out which set of mappings to use.
-        ls_rule = sigmaparser.parsedyaml['logsource']
+        ruleConfig = sigmaparser.parsedyaml
+        ls_rule = ruleConfig['logsource']
         try:
             category = ls_rule['category']
         except KeyError:
@@ -99,7 +100,39 @@ class LimaCharlieBackend(BaseBackend):
         self._preCondition = preCond
         self._isAllStringValues = isAllStringValues
 
-        return super().generate(sigmaparser)
+        detectComponent = super().generate(sigmaparser)
+        if not isinstance( detectComponent, str):
+            return detectComponent
+
+        # This redundant to deserialize it right after
+        # generating the yaml, but we try to use the parent
+        # official class code as much as possible for future
+        # compatibility.
+        detectComponent = yaml.safe_load(detectComponent)
+        respondComponents = [{
+            "action": "report",
+            "name": ruleConfig["title"],
+        }]
+
+        if ruleConfig.get("tags", None) is not None:
+            respondComponents[0].setdefault("metatdata", {})["tags"] = ruleConfig["tags"]
+
+        if ruleConfig.get("description", None) is not None:
+            respondComponents[0].setdefault("metatdata", {})["description"] = ruleConfig["description"]
+
+        if ruleConfig.get("references", None) is not None:
+            respondComponents[0].setdefault("metatdata", {})["references"] = ruleConfig["references"]
+
+        if ruleConfig.get("level", None) is not None:
+            respondComponents[0].setdefault("metatdata", {})["level"] = ruleConfig["level"]
+
+        if ruleConfig.get("author", None) is not None:
+            respondComponents[0].setdefault("metatdata", {})["author"] = ruleConfig["author"]
+
+        return yaml.safe_dump({
+            "detect": detectComponent,
+            "respond": respondComponents,
+        })
 
     def generateQuery(self, parsed):
         result = self.generateNode(parsed.parsedSearch)
