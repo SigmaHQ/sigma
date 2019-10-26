@@ -24,21 +24,24 @@ from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
 # on the log source and category.
 # Top level is product.
 # Second level is category.
-# Third level is a tuple (pre-condition, field mappings).
+# Thirs level is service.
+# Fourth level is a tuple (pre-condition, field mappings).
 _allFieldMappings = {
     "windows": {
-        "process_creation": ({
-            "op": "is windows",
-            "events": [
-                "NEW_PROCESS",
-                "EXISTING_PROCESS",
-            ]
-        },{
-            "CommandLine": "event/COMMAND_LINE",
-            "Image": "event/FILE_PATH",
-            "ParentImage": "event/PARENT/FILE_PATH",
-            "ParentCommandLine": "event/PARENT/COMMAND_LINE",
-        })
+        "process_creation": {
+            "*": ({
+                "op": "is windows",
+                "events": [
+                    "NEW_PROCESS",
+                    "EXISTING_PROCESS",
+                ]
+            }, {
+                "CommandLine": "event/COMMAND_LINE",
+                "Image": "event/FILE_PATH",
+                "ParentImage": "event/PARENT/FILE_PATH",
+                "ParentCommandLine": "event/PARENT/COMMAND_LINE",
+            })
+        }
     }
 }
 
@@ -58,14 +61,12 @@ class LimaCharlieBackend(BaseBackend):
             product = ls_rule['product']
         except KeyError:
             product = None
+        try:
+            service = ls_rule['service']
+        except KeyError:
+            service = "*"
 
-        # We don't use service at the moment.
-        # try:
-        #     service = ls_rule['service']
-        # except KeyError:
-        #     service = None
-
-        preCond, mappings = _allFieldMappings.get(product, {}).get(category, tuple([None, None]))
+        preCond, mappings = _allFieldMappings.get(product, {}).get(category, {}).get(service, tuple([None, None]))
         if mappings is None:
             raise NotImplementedError("Log source %s/%s not supported by backend." % (product, category))
 
