@@ -27,22 +27,18 @@ from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
 # Thirs level is service.
 # Fourth level is a tuple (pre-condition, field mappings).
 _allFieldMappings = {
-    "windows": {
-        "process_creation": {
-            "*": ({
-                "op": "is windows",
-                "events": [
-                    "NEW_PROCESS",
-                    "EXISTING_PROCESS",
-                ]
-            }, {
-                "CommandLine": "event/COMMAND_LINE",
-                "Image": "event/FILE_PATH",
-                "ParentImage": "event/PARENT/FILE_PATH",
-                "ParentCommandLine": "event/PARENT/COMMAND_LINE",
-            })
-        }
-    }
+    "windows/process_creation/": ({
+        "op": "is windows",
+        "events": [
+            "NEW_PROCESS",
+            "EXISTING_PROCESS",
+        ]
+    }, {
+        "CommandLine": "event/COMMAND_LINE",
+        "Image": "event/FILE_PATH",
+        "ParentImage": "event/PARENT/FILE_PATH",
+        "ParentCommandLine": "event/PARENT/COMMAND_LINE",
+    }),
 }
 
 class LimaCharlieBackend(BaseBackend):
@@ -64,9 +60,10 @@ class LimaCharlieBackend(BaseBackend):
         try:
             service = ls_rule['service']
         except KeyError:
-            service = "*"
+            service = ""
 
-        preCond, mappings = _allFieldMappings.get(product, {}).get(category, {}).get(service, tuple([None, None]))
+        mappingKey = "%s/%s/%s" % (product, category, service)
+        preCond, mappings = _allFieldMappings.get(mappingKey, tuple([None, None]))
         if mappings is None:
             raise NotImplementedError("Log source %s/%s not supported by backend." % (product, category))
 
