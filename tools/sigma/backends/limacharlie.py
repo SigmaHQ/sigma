@@ -20,12 +20,20 @@ from .base import BaseBackend
 from sigma.parser.modifiers.base import SigmaTypeModifier
 from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
 
+# A few helper functions for cases where field mapping cannot be done
+# as easily one by one, or can be done more efficiently.
+def _windowsEventLogFieldName(fieldName):
+    if 'EventID' == fieldName:
+        return 'Event/System/EventID'
+    return 'Event/EventData/%s' % (fieldName,)
+
 # We support many different log sources so we keep different mapping depending
 # on the log source and category.
-# Top level is product.
-# Second level is category.
-# Thirs level is service.
-# Fourth level is a tuple (pre-condition, field mappings).
+# The mapping key is product/category/service.
+# The mapping value is (pre-condition, field mappings, isAllStringValues).
+# - pre-condition is a D&R rule node filtering relevant events.
+# - field mappings is a dict with a mapping or a callable to convert the field name.
+# - isAllStringValues is a bool indicating whether all values should be converted to string.
 _allFieldMappings = {
     "windows/process_creation/": ({
         "op": "is windows",
@@ -38,7 +46,11 @@ _allFieldMappings = {
         "Image": "event/FILE_PATH",
         "ParentImage": "event/PARENT/FILE_PATH",
         "ParentCommandLine": "event/PARENT/COMMAND_LINE",
-    }),
+    }, False),
+    "windows//security": ({
+        "target": "log",
+        "log type": "wel",
+    }, _windowsEventLogFieldName, True)
 }
 
 class LimaCharlieBackend(BaseBackend):
@@ -52,23 +64,24 @@ class LimaCharlieBackend(BaseBackend):
         try:
             category = ls_rule['category']
         except KeyError:
-            category = None
+            category = ""
         try:
             product = ls_rule['product']
         except KeyError:
-            product = None
+            product = ""
         try:
             service = ls_rule['service']
         except KeyError:
             service = ""
 
         mappingKey = "%s/%s/%s" % (product, category, service)
-        preCond, mappings = _allFieldMappings.get(mappingKey, tuple([None, None]))
+        preCond, mappings, isAllStringValues = _allFieldMappings.get(mappingKey, tuple([None, None, None]))
         if mappings is None:
             raise NotImplementedError("Log source %s/%s not supported by backend." % (product, category))
 
         self._fieldMappingInEffect = mappings
         self._preCondition = preCond
+        self._isAllStringValues = isAllStringValues
 
         return super().generate(sigmaparser)
 
@@ -88,6 +101,8 @@ class LimaCharlieBackend(BaseBackend):
         generated = [ self.generateNode(val) for val in node ]
         filtered = [ g for g in generated if g is not None ]
         if filtered:
+            if 1 == len(filtered):
+                return filtered[0]
             return {
                 "op": "and",
                 "rules": filtered,
@@ -127,9 +142,14 @@ class LimaCharlieBackend(BaseBackend):
     def generateMapItemNode(self, node):
         fieldname, value = node
 
-        fieldname = self._fieldMappingInEffect.get(fieldname, None)
-        if fieldname is None:
-            raise NotImplementedError("Field name %s not supported by backend." % (fieldname,))
+        # The mapping can be a dictionary of mapping or a callable
+        # to get the correct value.
+        if callable(self._fieldMappingInEffect):
+            fieldname = self._fieldMappingInEffect(fieldname)
+        else:
+            fieldname = self._fieldMappingInEffect.get(fieldname, None)
+            if fieldname is None:
+                raise NotImplementedError("Field name %s not supported by backend." % (fieldname,))
 
         if isinstance(value, (int, str)):
             op, newVal = self._valuePatternToLcOp(value)
@@ -137,6 +157,7 @@ class LimaCharlieBackend(BaseBackend):
                 "op": op,
                 "path": fieldname,
                 "value": newVal,
+                "case sensitive": False,
             }
         elif isinstance(value, list):
             subOps = []
@@ -146,6 +167,7 @@ class LimaCharlieBackend(BaseBackend):
                     "op": op,
                     "path": fieldname,
                     "value": newVal,
+                    "case sensitive": False,
                 })
             if 1 == len(subOps):
                 return subOps[0]
@@ -194,7 +216,7 @@ class LimaCharlieBackend(BaseBackend):
 
     def _valuePatternToLcOp(self, val):
         if not isinstance(val, str):
-            return ("is", val)
+            return ("is", str(val) if self._isAllStringValues else val)
         # The following logic is taken from the WDATP backend to translate
         # the basic wildcard format into proper regular expression.
         if "*" in val[1:-1]:
