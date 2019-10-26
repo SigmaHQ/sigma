@@ -174,7 +174,7 @@ class LimaCharlieBackend(BaseBackend):
             raise TypeError("Backend does not support map values of type " + str(type(value)))
 
     def generateValueNode(self, node):
-        return self.valueExpression % (str(node),)
+        return node
 
     def generateNULLValueNode(self, node):
         generated = self.generateNode(node.item)
