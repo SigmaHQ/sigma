@@ -46,11 +46,22 @@ _allFieldMappings = {
         "Image": "event/FILE_PATH",
         "ParentImage": "event/PARENT/FILE_PATH",
         "ParentCommandLine": "event/PARENT/COMMAND_LINE",
+        "User": "event/USER_NAME",
+        # This field is redundant in LC, it seems to always be used with Image
+        # so we will ignore it.
+        "OriginalFileName": None,
+        # Custom field names coming from somewhere unknown.
+        "NewProcessName": "event/FILE_PATH",
+        "ProcessCommandLine": "event/COMMAND_LINE",
     }, False),
-    "windows//security": ({
+    "windows//": ({
         "target": "log",
         "log type": "wel",
-    }, _windowsEventLogFieldName, True)
+    }, _windowsEventLogFieldName, True),
+    "windows_defender//": ({
+        "target": "log",
+        "log type": "wel",
+    }, _windowsEventLogFieldName, True),
 }
 
 class LimaCharlieBackend(BaseBackend):
@@ -69,15 +80,20 @@ class LimaCharlieBackend(BaseBackend):
             product = ls_rule['product']
         except KeyError:
             product = ""
-        try:
-            service = ls_rule['service']
-        except KeyError:
-            service = ""
+        # try:
+        #     service = ls_rule['service']
+        # except KeyError:
+        #     service = ""
+        # Don't use service for now, most Windows Event Logs
+        # uses a different service with no category, since we
+        # treat all Windows Event Logs together we can ignore
+        # the service.
+        service = ""
 
         mappingKey = "%s/%s/%s" % (product, category, service)
         preCond, mappings, isAllStringValues = _allFieldMappings.get(mappingKey, tuple([None, None, None]))
         if mappings is None:
-            raise NotImplementedError("Log source %s/%s not supported by backend." % (product, category))
+            raise NotImplementedError("Log source %s/%s/%s not supported by backend." % (product, category, service))
 
         self._fieldMappingInEffect = mappings
         self._preCondition = preCond
@@ -111,9 +127,11 @@ class LimaCharlieBackend(BaseBackend):
             return None
 
     def generateORNode(self, node):
-        generated = [ self.generateNode(val) for val in node ]
-        filtered = [ g for g in generated if g is not None ]
+        generated = [self.generateNode(val) for val in node]
+        filtered = [g for g in generated if g is not None]
         if filtered:
+            if 1 == len(filtered):
+                return filtered[0]
             return {
                 "op": "or",
                 "rules": filtered,
@@ -147,9 +165,15 @@ class LimaCharlieBackend(BaseBackend):
         if callable(self._fieldMappingInEffect):
             fieldname = self._fieldMappingInEffect(fieldname)
         else:
-            fieldname = self._fieldMappingInEffect.get(fieldname, None)
-            if fieldname is None:
+            try:
+                fieldname = self._fieldMappingInEffect[fieldname]
+            except:
                 raise NotImplementedError("Field name %s not supported by backend." % (fieldname,))
+
+        # If fieldname returned is None, it's a special case where we
+        # ignore the node.
+        if fieldname is None:
+            return None
 
         if isinstance(value, (int, str)):
             op, newVal = self._valuePatternToLcOp(value)
