@@ -85,6 +85,7 @@ class LimaCharlieBackend(BaseBackend):
         #     service = ls_rule['service']
         # except KeyError:
         #     service = ""
+
         # Don't use service for now, most Windows Event Logs
         # uses a different service with no category, since we
         # treat all Windows Event Logs together we can ignore
@@ -96,11 +97,21 @@ class LimaCharlieBackend(BaseBackend):
         if mappings is None:
             raise NotImplementedError("Log source %s/%s/%s not supported by backend." % (product, category, service))
 
+        # Field name conversions.
         self._fieldMappingInEffect = mappings
+
+        # LC event type pre-selector for the type of data.
         self._preCondition = preCond
+
+        # Are all the values treated as strings?
         self._isAllStringValues = isAllStringValues
 
+        # Call the original generation code.
         detectComponent = super().generate(sigmaparser)
+
+        # We expect a string (yaml) as output, so if
+        # we get anything else we assume it's a core
+        # library value and just return it as-is.
         if not isinstance( detectComponent, str):
             return detectComponent
 
@@ -114,6 +125,7 @@ class LimaCharlieBackend(BaseBackend):
             "name": ruleConfig["title"],
         }]
 
+        # Add a lot of the metadata available to the report.
         if ruleConfig.get("tags", None) is not None:
             respondComponents[0].setdefault("metatdata", {})["tags"] = ruleConfig["tags"]
 
@@ -129,12 +141,17 @@ class LimaCharlieBackend(BaseBackend):
         if ruleConfig.get("author", None) is not None:
             respondComponents[0].setdefault("metatdata", {})["author"] = ruleConfig["author"]
 
+        # Assemble it all as a single, complete D&R rule.
         return yaml.safe_dump({
             "detect": detectComponent,
             "respond": respondComponents,
         })
 
     def generateQuery(self, parsed):
+        # We override the generateQuery function because
+        # we generate proper JSON structures internally
+        # and only convert to string (yaml) once the
+        # whole thing is assembled.
         result = self.generateNode(parsed.parsedSearch)
         if self._preCondition is not None:
             result = {
@@ -272,6 +289,11 @@ class LimaCharlieBackend(BaseBackend):
             return None
 
     def _valuePatternToLcOp(self, val):
+        # Here we convert the string values supported by Sigma that
+        # can include wildcards into either proper values (string or int)
+        # or into altered values to be functionally equivalent using
+        # a few different LC D&R rule operators.
+
         if not isinstance(val, str):
             return ("is", str(val) if self._isAllStringValues else val)
         # The following logic is taken from the WDATP backend to translate
