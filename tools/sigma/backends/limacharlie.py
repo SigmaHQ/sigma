@@ -79,6 +79,14 @@ _allFieldMappings = {
         "op": "is linux",
     }, {
         "keywords": "event/COMMAND_LINE",
+        "exe": "event/FILE_PATH",
+        "type": None,
+    }, False, True),
+    "netflow//": ({
+        "event": "NETWORK_CONNECTIONS",
+    }, None, {
+        "destination.port": "event/NETWORK_ACTIVITY/DESTINATION/PORT",
+        "source.port": "event/NETWORK_ACTIVITY/SOURCE/PORT",
     }, False, True)
 }
 
@@ -111,7 +119,7 @@ class LimaCharlieBackend(BaseBackend):
         service = ""
 
         mappingKey = "%s/%s/%s" % (product, category, service)
-        topFilter, preCond, mappings, isAllStringValues, isKeywordsSupported = _allFieldMappings.get(mappingKey, tuple([None, None, None, None]))
+        topFilter, preCond, mappings, isAllStringValues, isKeywordsSupported = _allFieldMappings.get(mappingKey, tuple([None, None, None, None, None]))
         if mappings is None:
             raise NotImplementedError("Log source %s/%s/%s not supported by backend." % (product, category, service))
 
