@@ -56,6 +56,8 @@ _allFieldMappings = {
         # Custom field names coming from somewhere unknown.
         "NewProcessName": "event/FILE_PATH",
         "ProcessCommandLine": "event/COMMAND_LINE",
+        # Another one-off command line.
+        "Command": "event/COMMAND_LINE",
     }, False, False),
     "windows//": ({
         "target": "log",
@@ -71,6 +73,18 @@ _allFieldMappings = {
         "query": "event/DOMAIN_NAME",
     }, False, False),
     "linux//": ({
+        "events": [
+            "NEW_PROCESS",
+            "EXISTING_PROCESS",
+        ]
+    }, {
+        "op": "is linux",
+    }, {
+        "keywords": "event/COMMAND_LINE",
+        "exe": "event/FILE_PATH",
+        "type": None,
+    }, False, True),
+    "unix//": ({
         "events": [
             "NEW_PROCESS",
             "EXISTING_PROCESS",
