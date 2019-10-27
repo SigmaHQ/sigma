@@ -31,16 +31,18 @@ def _windowsEventLogFieldName(fieldName):
 # on the log source and category.
 # The mapping key is product/category/service.
 # The mapping value is (pre-condition, field mappings, isAllStringValues).
+# - top-level parameters
 # - pre-condition is a D&R rule node filtering relevant events.
 # - field mappings is a dict with a mapping or a callable to convert the field name.
 # - isAllStringValues is a bool indicating whether all values should be converted to string.
 _allFieldMappings = {
     "windows/process_creation/": ({
-        "op": "is windows",
         "events": [
             "NEW_PROCESS",
             "EXISTING_PROCESS",
         ]
+    }, {
+        "op": "is windows",
     }, {
         "CommandLine": "event/COMMAND_LINE",
         "Image": "event/FILE_PATH",
@@ -57,11 +59,11 @@ _allFieldMappings = {
     "windows//": ({
         "target": "log",
         "log type": "wel",
-    }, _windowsEventLogFieldName, True),
+    }, None, _windowsEventLogFieldName, True),
     "windows_defender//": ({
         "target": "log",
         "log type": "wel",
-    }, _windowsEventLogFieldName, True),
+    }, None, _windowsEventLogFieldName, True),
 }
 
 class LimaCharlieBackend(BaseBackend):
@@ -93,7 +95,7 @@ class LimaCharlieBackend(BaseBackend):
         service = ""
 
         mappingKey = "%s/%s/%s" % (product, category, service)
-        preCond, mappings, isAllStringValues = _allFieldMappings.get(mappingKey, tuple([None, None, None]))
+        topFilter, preCond, mappings, isAllStringValues = _allFieldMappings.get(mappingKey, tuple([None, None, None]))
         if mappings is None:
             raise NotImplementedError("Log source %s/%s/%s not supported by backend." % (product, category, service))
 
@@ -140,6 +142,9 @@ class LimaCharlieBackend(BaseBackend):
 
         if ruleConfig.get("author", None) is not None:
             respondComponents[0].setdefault("metatdata", {})["author"] = ruleConfig["author"]
+
+        # Apply top level filter.
+        detectComponent.update(topFilter)
 
         # Assemble it all as a single, complete D&R rule.
         return yaml.safe_dump({
