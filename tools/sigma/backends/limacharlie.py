@@ -30,11 +30,12 @@ def _windowsEventLogFieldName(fieldName):
 # We support many different log sources so we keep different mapping depending
 # on the log source and category.
 # The mapping key is product/category/service.
-# The mapping value is (pre-condition, field mappings, isAllStringValues).
+# The mapping value is (top-level, pre-condition, field mappings, isAllStringValues, isKeywordsSupported).
 # - top-level parameters
 # - pre-condition is a D&R rule node filtering relevant events.
 # - field mappings is a dict with a mapping or a callable to convert the field name.
 # - isAllStringValues is a bool indicating whether all values should be converted to string.
+# - isKeywordsSupported is a bool indicating if full-text keyword searches are supported.
 _allFieldMappings = {
     "windows/process_creation/": ({
         "events": [
@@ -55,15 +56,30 @@ _allFieldMappings = {
         # Custom field names coming from somewhere unknown.
         "NewProcessName": "event/FILE_PATH",
         "ProcessCommandLine": "event/COMMAND_LINE",
-    }, False),
+    }, False, False),
     "windows//": ({
         "target": "log",
         "log type": "wel",
-    }, None, _windowsEventLogFieldName, True),
+    }, None, _windowsEventLogFieldName, True, False),
     "windows_defender//": ({
         "target": "log",
         "log type": "wel",
-    }, None, _windowsEventLogFieldName, True),
+    }, None, _windowsEventLogFieldName, True, False),
+    "dns//": ({
+        "event": "DNS_REQUEST",
+    }, None, {
+        "query": "event/DOMAIN_NAME",
+    }, False, False),
+    "linux//": ({
+        "events": [
+            "NEW_PROCESS",
+            "EXISTING_PROCESS",
+        ]
+    }, {
+        "op": "is linux",
+    }, {
+        "keywords": "event/COMMAND_LINE",
+    }, False, True)
 }
 
 class LimaCharlieBackend(BaseBackend):
@@ -95,7 +111,7 @@ class LimaCharlieBackend(BaseBackend):
         service = ""
 
         mappingKey = "%s/%s/%s" % (product, category, service)
-        topFilter, preCond, mappings, isAllStringValues = _allFieldMappings.get(mappingKey, tuple([None, None, None, None]))
+        topFilter, preCond, mappings, isAllStringValues, isKeywordsSupported = _allFieldMappings.get(mappingKey, tuple([None, None, None, None]))
         if mappings is None:
             raise NotImplementedError("Log source %s/%s/%s not supported by backend." % (product, category, service))
 
@@ -107,6 +123,9 @@ class LimaCharlieBackend(BaseBackend):
 
         # Are all the values treated as strings?
         self._isAllStringValues = isAllStringValues
+
+        # Are we supporting keywords full text search?
+        self._isKeywordsSupported = isKeywordsSupported
 
         # Call the original generation code.
         detectComponent = super().generate(sigmaparser)
@@ -186,7 +205,20 @@ class LimaCharlieBackend(BaseBackend):
         filtered = [g for g in generated if g is not None]
         if filtered:
             if isinstance(filtered[0], str):
-                raise NotImplementedError("Full-text keyboard searches not supported.")
+                if not self._isKeywordsSupported:
+                    raise NotImplementedError("Full-text keyboard searches not supported.")
+                # This seems to be indicative only of "keywords" which are mostly
+                # representative of full-text searches. We don't suport that but
+                # in some data sources we can alias them to an actual field.
+                mappedFiltered = []
+                for k in filtered:
+                    op, newVal = self._valuePatternToLcOp(k)
+                    mappedFiltered.append({
+                        "op": op,
+                        "path": self._fieldMappingInEffect["keywords"],
+                        "value": newVal,
+                    })
+                filtered = mappedFiltered
             if 1 == len(filtered):
                 return filtered[0]
             return {
