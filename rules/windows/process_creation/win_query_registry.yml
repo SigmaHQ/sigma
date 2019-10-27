@@ -1,0 +1,39 @@
+title: Query Registry
+status: experimental
+description: Adversaries may interact with the Windows Registry to gather information about the system, configuration, and installed software.
+author: Timur Zinniatullin, oscd.community
+references:
+    - https://attack.mitre.org/techniques/T1012/
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1012/T1012.yaml
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine:
+            - '*reg query*currentVersion\windows*'
+            - '*reg query*currentVersion\runServicesOnce*'
+            - '*reg query*currentVersion\runServices*'
+            - '*reg query*winlogon\*'
+            - '*reg query*currentVersion\shellServiceObjectDelayLoad*'
+            - '*reg query*currentVersion\runOnce*'
+            - '*reg query*currentVersion\runOnceEx*'
+            - '*reg query*currentVersion\run*'
+            - '*reg query*currentVersion\policies\explorer\run*'
+            - '*reg query*currentcontrolset\services*'
+            - '*reg save hklm\security*'
+            - '*reg save hklm\system*'
+            - '*reg save hklm\sam*'
+    condition: selection
+fields:
+    - Image
+    - CommandLine
+    - User
+    - LogonGuid
+    - Hashes
+    - ParentProcessGuid
+    - ParentCommandLine
+level: low
+tags:
+    - attack.discovery
+    - attack.t1012
