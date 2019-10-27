@@ -1,0 +1,30 @@
+title: Possible privilege escalation via service registry permissions weakness
+description: Detect modification of services configuration (ImagePath, FailureCommand and ServiceDLL) in registry by processes with Medium integrity level
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-privilege-escalation-in-windows-environment
+    - https://pentestlab.blog/2017/03/31/insecure-registry-permissions/
+tags:
+    - attack.privilege_escalation
+    - attack.t1058
+status: experimental
+author: Teymur Kheirkhabarov
+date: 2019/10/26
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        EventID: 13
+        IntegrityLevel: 'Medium'
+        TargetObject":
+            - '*\services\*\ImagePath'
+            - '*\services\*\FailureCommand'
+            - '*\services\*\Parameters\ServiceDll'
+    condition: selection
+falsepositives:
+    - Unknown
+    - Penetration Test
+level: high
+enrichment:
+    - EN_0001_cache_sysmon_event_id_1_info                      # http://bit.ly/314zc6x
+    - EN_0003_enrich_other_sysmon_events_with_event_id_1_data   # http://bit.ly/2ojW7fw

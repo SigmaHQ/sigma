@@ -1,0 +1,27 @@
+title: Possible privilege escalation via weak service permissions
+description: Detection of sc utility spawning by user with Medium integrity level to change service ImagePath or FailureCommand 
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-privilege-escalation-in-windows-environment
+    - https://pentestlab.blog/2017/03/30/weak-service-permissions/
+tags:
+    - attack.privilege_escalation
+    - attack.t11134
+status: experimental
+author: Teymur Kheirkhabarov
+date: 2019/10/26
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    scbynonadmin:
+        Image: '*\sc.exe'
+        IntegrityLevel: 'Medium'
+    binpath:
+        CommandLine: '*config*binPath*'
+    failurecommand:
+        CommandLine: '*failure*command*'
+    condition: scbynonadmin and (binpath or failurecommand)
+falsepositives:
+    - Unknown
+    - Penetration Test
+level: high
