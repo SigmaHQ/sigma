@@ -185,6 +185,8 @@ class LimaCharlieBackend(BaseBackend):
         generated = [self.generateNode(val) for val in node]
         filtered = [g for g in generated if g is not None]
         if filtered:
+            if isinstance(filtered[0], str):
+                raise NotImplementedError("Full-text keyboard searches not supported.")
             if 1 == len(filtered):
                 return filtered[0]
             return {
