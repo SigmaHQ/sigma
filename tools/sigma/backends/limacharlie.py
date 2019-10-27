@@ -95,7 +95,7 @@ class LimaCharlieBackend(BaseBackend):
         service = ""
 
         mappingKey = "%s/%s/%s" % (product, category, service)
-        topFilter, preCond, mappings, isAllStringValues = _allFieldMappings.get(mappingKey, tuple([None, None, None]))
+        topFilter, preCond, mappings, isAllStringValues = _allFieldMappings.get(mappingKey, tuple([None, None, None, None]))
         if mappings is None:
             raise NotImplementedError("Log source %s/%s/%s not supported by backend." % (product, category, service))
 
