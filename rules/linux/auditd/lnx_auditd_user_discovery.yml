@@ -1,0 +1,27 @@
+title: System Owner/User Discovery
+status: experimental
+description: Adversaries may use the information from System Owner/User Discovery during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.
+author: Timur Zinniatullin, oscd.community
+references:
+    - https://attack.mitre.org/techniques/T1033/
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1033/T1033.yaml
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection1:
+        type: 'EXECVE'
+        a0: 'users'
+    selection2:
+        type: 'EXECVE'
+        a0: 'u'
+    selection2:
+        type: 'EXECVE'
+        a0: 'who'
+    condition: 1 of them
+falsepositives:
+    - Admin activity
+level: low
+tags:
+    - attack.discovery
+    - attack.t1033
