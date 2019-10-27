@@ -192,7 +192,9 @@ class LimaCharlieBackend(BaseBackend):
     def generateNOTNode(self, node):
         generated = self.generateNode(node.item)
         if generated is not None:
-            generated[ 'not' ] = True
+            if not isinstance(generated, dict):
+                raise NotImplementedError("Not operator not available on non-dict nodes.")
+            generated['not'] = True
             return generated
         else:
             return None

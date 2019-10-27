@@ -60,6 +60,7 @@ setup(
             'config/winlogbeat-modules-enabled.yml',
             'config/winlogbeat.yml',
             'config/winlogbeat-old.yml',
+            'config/limacharlie.yml',
             ]),
         ('etc/sigma/generic', [
             'config/generic/sysmon.yml',
