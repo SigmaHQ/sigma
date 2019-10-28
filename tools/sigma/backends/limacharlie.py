@@ -16,6 +16,7 @@
 
 import re
 import yaml
+from collections import namedtuple
 from .base import BaseBackend
 from sigma.parser.modifiers.base import SigmaTypeModifier
 from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
@@ -30,78 +31,124 @@ def _windowsEventLogFieldName(fieldName):
 # We support many different log sources so we keep different mapping depending
 # on the log source and category.
 # The mapping key is product/category/service.
-# The mapping value is (top-level, pre-condition, field mappings, isAllStringValues, isKeywordsSupported).
+# The mapping value is tuple like:
 # - top-level parameters
 # - pre-condition is a D&R rule node filtering relevant events.
 # - field mappings is a dict with a mapping or a callable to convert the field name.
 # - isAllStringValues is a bool indicating whether all values should be converted to string.
 # - isKeywordsSupported is a bool indicating if full-text keyword searches are supported.
+SigmaLCConfig = namedtuple('SigmaLCConfig', [
+    'topLevelParams',
+    'preConditions',
+    'fieldMappings',
+    'isAllStringValues',
+    'isKeywordsSupported',
+])
 _allFieldMappings = {
-    "windows/process_creation/": ({
-        "events": [
-            "NEW_PROCESS",
-            "EXISTING_PROCESS",
-        ]
-    }, {
-        "op": "is windows",
-    }, {
-        "CommandLine": "event/COMMAND_LINE",
-        "Image": "event/FILE_PATH",
-        "ParentImage": "event/PARENT/FILE_PATH",
-        "ParentCommandLine": "event/PARENT/COMMAND_LINE",
-        "User": "event/USER_NAME",
-        # This field is redundant in LC, it seems to always be used with Image
-        # so we will ignore it.
-        "OriginalFileName": None,
-        # Custom field names coming from somewhere unknown.
-        "NewProcessName": "event/FILE_PATH",
-        "ProcessCommandLine": "event/COMMAND_LINE",
-        # Another one-off command line.
-        "Command": "event/COMMAND_LINE",
-    }, False, False),
-    "windows//": ({
-        "target": "log",
-        "log type": "wel",
-    }, None, _windowsEventLogFieldName, True, False),
-    "windows_defender//": ({
-        "target": "log",
-        "log type": "wel",
-    }, None, _windowsEventLogFieldName, True, False),
-    "dns//": ({
-        "event": "DNS_REQUEST",
-    }, None, {
-        "query": "event/DOMAIN_NAME",
-    }, False, False),
-    "linux//": ({
-        "events": [
-            "NEW_PROCESS",
-            "EXISTING_PROCESS",
-        ]
-    }, {
-        "op": "is linux",
-    }, {
-        "keywords": "event/COMMAND_LINE",
-        "exe": "event/FILE_PATH",
-        "type": None,
-    }, False, True),
-    "unix//": ({
-        "events": [
-            "NEW_PROCESS",
-            "EXISTING_PROCESS",
-        ]
-    }, {
-        "op": "is linux",
-    }, {
-        "keywords": "event/COMMAND_LINE",
-        "exe": "event/FILE_PATH",
-        "type": None,
-    }, False, True),
-    "netflow//": ({
-        "event": "NETWORK_CONNECTIONS",
-    }, None, {
-        "destination.port": "event/NETWORK_ACTIVITY/DESTINATION/PORT",
-        "source.port": "event/NETWORK_ACTIVITY/SOURCE/PORT",
-    }, False, True)
+    "windows/process_creation/": SigmaLCConfig(
+        topLevelParams = {
+            "events": [
+                "NEW_PROCESS",
+                "EXISTING_PROCESS",
+            ]
+        },
+        preConditions = {
+            "op": "is windows",
+        },
+        fieldMappings = {
+            "CommandLine": "event/COMMAND_LINE",
+            "Image": "event/FILE_PATH",
+            "ParentImage": "event/PARENT/FILE_PATH",
+            "ParentCommandLine": "event/PARENT/COMMAND_LINE",
+            "User": "event/USER_NAME",
+            # This field is redundant in LC, it seems to always be used with Image
+            # so we will ignore it.
+            "OriginalFileName": None,
+            # Custom field names coming from somewhere unknown.
+            "NewProcessName": "event/FILE_PATH",
+            "ProcessCommandLine": "event/COMMAND_LINE",
+            # Another one-off command line.
+            "Command": "event/COMMAND_LINE",
+        },
+        isAllStringValues = False,
+        isKeywordsSupported = False
+    ),
+    "windows//": SigmaLCConfig(
+        topLevelParams = {
+            "target": "log",
+            "log type": "wel",
+        },
+        preConditions = None,
+        fieldMappings = _windowsEventLogFieldName,
+        isAllStringValues = True,
+        isKeywordsSupported = False
+    ),
+    "windows_defender//": SigmaLCConfig(
+        topLevelParams = {
+            "target": "log",
+            "log type": "wel",
+        },
+        preConditions = None,
+        fieldMappings = _windowsEventLogFieldName,
+        isAllStringValues = True,
+        isKeywordsSupported = False
+    ),
+    "dns//": SigmaLCConfig(
+        topLevelParams = {
+            "event": "DNS_REQUEST",
+        },
+        preConditions = None,
+        fieldMappings = {
+            "query": "event/DOMAIN_NAME",
+        },
+        isAllStringValues = False,
+        isKeywordsSupported = False
+    ),
+    "linux//": SigmaLCConfig(
+        topLevelParams = {
+            "events": [
+                "NEW_PROCESS",
+                "EXISTING_PROCESS",
+            ]
+        },
+        preConditions = {
+            "op": "is linux",
+        },
+        fieldMappings = {
+            "keywords": "event/COMMAND_LINE",
+            "exe": "event/FILE_PATH",
+            "type": None,
+        },
+        isAllStringValues = False,
+        isKeywordsSupported = True),
+    "unix//": SigmaLCConfig(
+        topLevelParams = {
+            "events": [
+                "NEW_PROCESS",
+                "EXISTING_PROCESS",
+            ]
+        },
+        preConditions = {
+            "op": "is linux",
+        },
+        fieldMappings = {
+            "keywords": "event/COMMAND_LINE",
+            "exe": "event/FILE_PATH",
+            "type": None,
+        },
+        isAllStringValues = False,
+        isKeywordsSupported = True),
+    "netflow//": SigmaLCConfig(
+        topLevelParams = {
+            "event": "NETWORK_CONNECTIONS",
+        },
+        preConditions = None,
+        fieldMappings = {
+            "destination.port": "event/NETWORK_ACTIVITY/DESTINATION/PORT",
+            "source.port": "event/NETWORK_ACTIVITY/SOURCE/PORT",
+        },
+        isAllStringValues = False,
+        isKeywordsSupported = True)
 }
 
 class LimaCharlieBackend(BaseBackend):
@@ -132,6 +179,7 @@ class LimaCharlieBackend(BaseBackend):
         # the service.
         service = ""
 
+        # See if we have a definition for the source combination.
         mappingKey = "%s/%s/%s" % (product, category, service)
         topFilter, preCond, mappings, isAllStringValues, isKeywordsSupported = _allFieldMappings.get(mappingKey, tuple([None, None, None, None, None]))
         if mappings is None:
@@ -163,6 +211,16 @@ class LimaCharlieBackend(BaseBackend):
         # official class code as much as possible for future
         # compatibility.
         detectComponent = yaml.safe_load(detectComponent)
+
+        # Check that we got a proper node and not just a string
+        # which we don't really know what to do with.
+        if not isinstance(detectComponent, dict):
+            raise NotImplementedError("Selection combination not supported.")
+
+        # Apply top level filter.
+        detectComponent.update(topFilter)
+
+        # Now prepare the Response component.
         respondComponents = [{
             "action": "report",
             "name": ruleConfig["title"],
@@ -183,9 +241,6 @@ class LimaCharlieBackend(BaseBackend):
 
         if ruleConfig.get("author", None) is not None:
             respondComponents[0].setdefault("metatdata", {})["author"] = ruleConfig["author"]
-
-        # Apply top level filter.
-        detectComponent.update(topFilter)
 
         # Assemble it all as a single, complete D&R rule.
         return yaml.safe_dump({
@@ -212,60 +267,53 @@ class LimaCharlieBackend(BaseBackend):
     def generateANDNode(self, node):
         generated = [ self.generateNode(val) for val in node ]
         filtered = [ g for g in generated if g is not None ]
-        if filtered:
-            if 1 == len(filtered):
-                return filtered[0]
-            return {
-                "op": "and",
-                "rules": filtered,
-            }
-        else:
+        if not filtered:
             return None
+        if 1 == len(filtered):
+            return filtered[0]
+        return {
+            "op": "and",
+            "rules": filtered,
+        }
 
     def generateORNode(self, node):
         generated = [self.generateNode(val) for val in node]
         filtered = [g for g in generated if g is not None]
-        if filtered:
-            if isinstance(filtered[0], str):
-                if not self._isKeywordsSupported:
-                    raise NotImplementedError("Full-text keyboard searches not supported.")
-                # This seems to be indicative only of "keywords" which are mostly
-                # representative of full-text searches. We don't suport that but
-                # in some data sources we can alias them to an actual field.
-                mappedFiltered = []
-                for k in filtered:
-                    op, newVal = self._valuePatternToLcOp(k)
-                    mappedFiltered.append({
-                        "op": op,
-                        "path": self._fieldMappingInEffect["keywords"],
-                        "value": newVal,
-                    })
-                filtered = mappedFiltered
-            if 1 == len(filtered):
-                return filtered[0]
-            return {
-                "op": "or",
-                "rules": filtered,
-            }
-        else:
+        if not filtered:
             return None
+        if isinstance(filtered[0], str):
+            if not self._isKeywordsSupported:
+                raise NotImplementedError("Full-text keyboard searches not supported.")
+            # This seems to be indicative only of "keywords" which are mostly
+            # representative of full-text searches. We don't suport that but
+            # in some data sources we can alias them to an actual field.
+            mappedFiltered = []
+            for k in filtered:
+                op, newVal = self._valuePatternToLcOp(k)
+                mappedFiltered.append({
+                    "op": op,
+                    "path": self._fieldMappingInEffect["keywords"],
+                    "value": newVal,
+                })
+            filtered = mappedFiltered
+        if 1 == len(filtered):
+            return filtered[0]
+        return {
+            "op": "or",
+            "rules": filtered,
+        }
 
     def generateNOTNode(self, node):
         generated = self.generateNode(node.item)
-        if generated is not None:
-            if not isinstance(generated, dict):
-                raise NotImplementedError("Not operator not available on non-dict nodes.")
-            generated['not'] = True
-            return generated
-        else:
+        if generated is None:
             return None
+        if not isinstance(generated, dict):
+            raise NotImplementedError("Not operator not available on non-dict nodes.")
+        generated['not'] = True
+        return generated
 
     def generateSubexpressionNode(self, node):
-        generated = self.generateNode(node.items)
-        if generated:
-            return generated
-        else:
-            return None
+        return self.generateNode(node.items)
 
     def generateListNode(self, node):
         return [self.generateNode(value) for value in node]
@@ -332,24 +380,6 @@ class LimaCharlieBackend(BaseBackend):
 
     def generateValueNode(self, node):
         return node
-
-    def generateNULLValueNode(self, node):
-        generated = self.generateNode(node.item)
-        if generated is not None:
-            generated[ "op" ] = "exists"
-            generated[ "not" ] = True
-            return generated
-        else:
-            return None
-
-    def generateNotNULLValueNode(self, node):
-        generated = self.generateNode(node.item)
-        if generated is not None:
-            generated[ "op" ] = "exists"
-            generated[ "not" ] = False
-            return generated
-        else:
-            return None
 
     def _valuePatternToLcOp(self, val):
         # Here we convert the string values supported by Sigma that
