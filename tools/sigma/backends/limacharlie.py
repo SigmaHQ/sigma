@@ -228,19 +228,19 @@ class LimaCharlieBackend(BaseBackend):
 
         # Add a lot of the metadata available to the report.
         if ruleConfig.get("tags", None) is not None:
-            respondComponents[0].setdefault("metatdata", {})["tags"] = ruleConfig["tags"]
+            respondComponents[0].setdefault("metadata", {})["tags"] = ruleConfig["tags"]
 
         if ruleConfig.get("description", None) is not None:
-            respondComponents[0].setdefault("metatdata", {})["description"] = ruleConfig["description"]
+            respondComponents[0].setdefault("metadata", {})["description"] = ruleConfig["description"]
 
         if ruleConfig.get("references", None) is not None:
-            respondComponents[0].setdefault("metatdata", {})["references"] = ruleConfig["references"]
+            respondComponents[0].setdefault("metadata", {})["references"] = ruleConfig["references"]
 
         if ruleConfig.get("level", None) is not None:
-            respondComponents[0].setdefault("metatdata", {})["level"] = ruleConfig["level"]
+            respondComponents[0].setdefault("metadata", {})["level"] = ruleConfig["level"]
 
         if ruleConfig.get("author", None) is not None:
-            respondComponents[0].setdefault("metatdata", {})["author"] = ruleConfig["author"]
+            respondComponents[0].setdefault("metadata", {})["author"] = ruleConfig["author"]
 
         # Assemble it all as a single, complete D&R rule.
         return yaml.safe_dump({
