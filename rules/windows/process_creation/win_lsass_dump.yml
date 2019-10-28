@@ -1,0 +1,28 @@
+title: LSASS Memory Dumping
+description: Detect creation of dump files containing the memory space of lsass.exe, which contains sensitive credentials. Identifies usage of Sysinternals procdump.exe to export the memory space of lsass.exe which contains sensitive credentials.
+status: experimental
+author: E.M. Anhaus (orignally from Atomic Blue Detections, Tony Lambert)
+date: 2019/10/24
+tags:
+    - attack.credential_access
+    - attack.t1003
+detection:
+    selection1:
+        CommandLine:
+            - '* lsass*.dmp*'
+    selection2:
+        Image:
+            - '*werfault.exe'
+    selection3:
+        Image:
+            - '*procdump*.exe'
+    selection4:
+        CommandLine:
+            - '* lsass*'
+    condition: selection1 and not selection2 or selection3 and selection4
+falsepositives:
+    - unlike
+level: high
+logsource:
+    category: process_creation
+    product: windows

@@ -1,0 +1,26 @@
+title: Modification of Boot Configuration
+description: Identifies use of the bcdedit command to delete boot configuration data. This tactic is sometimes used as by malware or an attacker as a destructive technique.
+status: experimental
+author: E.M. Anhaus (orignally from Atomic Blue Detections, Endgame)
+date: 2019/10/24
+tags:
+    - attack.impact
+    - attack.t1490
+detection:
+    selection1:
+        Image:
+            - '*bcdedit.exe'
+    selection2:
+        CommandLine:
+            - '* set*'
+    selection3:
+        CommandLine:
+            - '* bootstatuspolicy *ignoreallfailures*'
+            - '* recoveryenabled* no*'
+    condition: selection1 and selection2 and selection3
+falsepositives:
+    - unlike
+level: high
+logsource:
+    category: process_creation
+    product: windows
