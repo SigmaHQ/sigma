@@ -19,10 +19,12 @@ detection:
             - '*cmd*'
             - '*COMSPEC*'
     getsystem_technique_1:
-        CommandLine: '*/c echo * > \\.\pipe\*'      #%COMSPEC% /c echo 559891bb017 > \\.\pipe\5e120a
+        CommandLine: '*cmd* /c echo * > \\.\pipe\*'      #cmd.exe /c echo 559891bb017 > \\.\pipe\5e120a    cmd /c echo 559891bb017 > \\.\pipe\5e120a
+    getsystem_cobaltstrike_technique_1:
+        CommandLine: '%COMSPEC% /c echo * > \\.\pipe\*'      #%COMSPEC% /c echo 559891bb017 > \\.\pipe\5e120a
     getsystem_technique_2:
         CommandLine: '*rundll32*.dll,a /p:*'        #rundll32.exe C:\Users\test\AppData\Local\Temp\tmexsn.dll,a /p:tmexsn
-    condition: service_start and ((cmd_or_comspec and getsystem_technique_1) or getsystem_technique_2)
+    condition: service_start and (getsystem_technique_1 or getsystem_cobaltstrike_technique_1 or getsystem_technique_2)
 falsepositives:
     - Penetration Test
     - Unknown

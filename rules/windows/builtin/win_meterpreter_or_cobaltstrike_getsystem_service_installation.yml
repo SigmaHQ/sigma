@@ -21,10 +21,12 @@ detection:
             - '*cmd*'
             - '*COMSPEC*'
     getsystem_technique_1:
-        ServiceFileName: '*/c echo * > \\.\pipe\*'      #%COMSPEC% /c echo 559891bb017 > \\.\pipe\5e120a
+        ServiceFileName: '*cmd* /c echo * > \\.\pipe\*'      #cmd.exe /c echo 559891bb017 > \\.\pipe\5e120a    cmd /c echo 559891bb017 > \\.\pipe\5e120a
+    getsystem_cobaltstrike_technique_1:
+        ServiceFileName: '%COMSPEC% /c echo * > \\.\pipe\*'      #%COMSPEC% /c echo 559891bb017 > \\.\pipe\5e120a
     getsystem_technique_2:
         ServiceFileName: '*rundll32*.dll,a /p:*'        #rundll32.exe C:\Users\test\AppData\Local\Temp\tmexsn.dll,a /p:tmexsn
-    condition: service_installation_event and ((cmd_or_comspec and getsystem_technique_1) or getsystem_technique_2)
+    condition: service_installation_event and (getsystem_technique_1 or getsystem_cobaltstrike_technique_1 or getsystem_technique_2)
 fields:
     - ServiceFileName
 falsepositives:
