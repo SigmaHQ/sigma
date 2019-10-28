@@ -66,3 +66,11 @@ class VASTQuerystringBackend(SingleTextQueryBackend):
         if result is not None:
             return result
         return "\"%s\"" % value.replace("\'","\\\'")
+
+    # We must override this method because a map expression for a pattern
+    # differs from a normal equality lookup.
+    def generateMapItemTypedNode(self, fieldname, value):
+        predicate = self.mapExpression
+        if type(value) is SigmaRegularExpressionModifier:
+            predicate = "%s ~ %s"
+        return predicate % (fieldname, self.generateTypedValueNode(value))
