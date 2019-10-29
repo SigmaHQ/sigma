@@ -888,7 +888,7 @@ class ElastalertBackend(MultiRuleOutputMixin):
     def finalize(self):
         result = ""
         for rulename, rule in self.elastalert_alerts.items():
-            result += yaml.dump(rule, default_flow_style=False)
+            result += yaml.dump(rule, default_flow_style=False, width=10000)
             result += '\n'
         return result
 
