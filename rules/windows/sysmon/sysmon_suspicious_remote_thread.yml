@@ -1,0 +1,75 @@
+title: Suspicious Remote Thread Created
+description: Offensive tradecraft is switching away from using APIs like "CreateRemoteThread", however, this is still largely observed in the wild. This rule aims to detect suspicious processes (those we would not expect to behave in this way like word.exe or outlook.exe) creating remote threads on other processes. It is a generalistic rule, but it should have a low FP ratio due to the selected range of processes.
+notes: 
+    - MonitoringHost.exe is a process that loads .NET CLR by default and thus a favorite for process injection for .NET in-memory offensive tools.
+status: experimental
+date: 27/10/2019
+author: Perez Diego (@darkquassar), oscd.community
+references:
+    - Personal research, statistical analysis
+    - https://lolbas-project.github.io
+logsource:
+    product: windows
+    service: sysmon
+tags:
+    - attack.privilege_escalation
+    - attack.T1055
+detection:
+    selection: 
+        EventID: 8
+        SourceImage:
+            - '*msbuild.exe*'
+            - '*powershell.exe*'
+            - '*word.exe*'
+            - '*excel.exe*'
+            - '*powerpnt.exe*'
+            - '*outlook.exe*'
+            - '*mspaint.exe*'
+            - '*winscp.exe*'
+            - '*w3wp.exe*'        
+            - '*ping.exe*'
+            - '*taskhost.exe*'
+            - '*monitoringhost.exe*'
+            - '*wmic.exe*'
+            - '*find.exe*'
+            - '*findstr.exe*'
+            - '*smartscreen.exe*'
+            - '*gpupdate.exe*'
+            - '*iexplore.exe*'
+            - '*explorer.exe*'
+            - '*sapcimc.exe*'
+            - '*msiexec.exe*'
+            - '*git.exe*'
+            - '*vssvc.exe*'
+            - '*vssadmin.exe*'
+            - '*lync.exe*'
+            - '*python.exe*'
+            - '*provtool.exe*'
+            - '*robocopy.exe*'
+            - '*userinit.exe*'
+            - '*runonce.exe*'
+            - '*winlogon.exe*'
+            - '*defrag.exe*'
+            - '*bash.exe*'
+            - '*spoolsv.exe*'
+            - '*cvtres.exe*'
+            - '*esentutl.exe*'
+            - '*wscript.exe*'
+            - '*expand.exe*'
+            - '*forfiles.exe*'
+            - '*hh.exe*'
+            - '*installutil.exe*'
+            - '*makecab.exe*'
+            - '*mshta.exe*'
+            - '*regsvr32.exe*'
+            - '*schtasks.exe*'
+            - '*dnx.exe*' 
+            - '*mDNSResponder.exe*'
+            - '*tstheme.exe*'
+    filter:
+        SourceImage:
+            - "*Visual Studio*"
+    condition: selection AND NOT filter
+level: high
+falsepositives:
+    - Unknown
