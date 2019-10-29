@@ -1,0 +1,47 @@
+title: New DLL added to AppInit_DLLs registry key
+status: experimental
+description: DLLs that are specified in the AppInit_DLLs value in the Registry key HKLM\Software\Microsoft\Windows NT\CurrentVersion\Windows are loaded by user32.dll into every process that loads user32.dll 
+references:
+    - https://eqllib.readthedocs.io/en/latest/analytics/822dc4c5-b355-4df8-bd37-29c458997b8f.html
+tags:
+    - attack.persistence
+    - attack.t1103
+author: Ilyas Ochkov, oscd.community
+date:  2019/10/25
+detection:
+    condition: 1 of them
+fields:
+    - EventID
+    - Image
+    - TargetObject
+    - NewName
+falsepositives:
+    - Unkown
+level: medium
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    key_create:
+        EventID: 12
+        TargetObject: 
+            - '*\SOFTWARE\*\Windows\AppInit_Dlls'
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    value_set:
+        EventID: 13
+        TargetObject: 
+            - '*\SOFTWARE\*\Windows\AppInit_Dlls'
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    key_rename:
+        EventID: 14
+        NewName: 
+            - '*\SOFTWARE\*\Windows\AppInit_Dlls'
