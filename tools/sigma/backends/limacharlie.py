@@ -292,11 +292,15 @@ class LimaCharlieBackend(BaseBackend):
             mappedFiltered = []
             for k in filtered:
                 op, newVal = self._valuePatternToLcOp(k)
-                mappedFiltered.append({
+                newOp = {
                     "op": op,
                     "path": self._fieldMappingInEffect["keywords"],
-                    "value": newVal,
-                })
+                }
+                if op == "matches":
+                    newOp["re"] = newVal
+                else:
+                    newOp["value"] = newVal
+                mappedFiltered.append(newOp)
             filtered = mappedFiltered
         if 1 == len(filtered):
             return filtered[0]
