@@ -1,0 +1,29 @@
+title: Network Sniffing
+status: experimental
+description: Network sniffing refers to using the network interface on a system to monitor or capture information sent over a wired or wireless connection. An adversary may place a network interface into promiscuous mode to passively access data in transit over the network, or use span ports to capture a larger amount of data.
+author: Timur Zinniatullin, oscd.community
+references:
+    - https://attack.mitre.org/techniques/T1040/
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1040/T1040.yaml
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection1:
+        type: 'execve'
+        a0: 'tcpdump'
+        a1: '-c'
+        a3: '-nnni' # you don't need "n" three times, but ART's test is like this, they say "we don't know why, but we've seen people do that just for emphasis" ¯\_(ツ)_/¯
+    selection2:
+        type: 'execve'
+        a0: 'tshark'
+        a1: '-c'
+        a3: '-i'
+    condition: 1 of them
+falsepositives:
+    - Admin activity
+level: low
+tags:
+    - attack.credential_access
+    - attack.discovery
+    - attack.t1040
