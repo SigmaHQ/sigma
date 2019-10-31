@@ -334,7 +334,6 @@ class LimaCharlieBackend(BaseBackend):
                 else:
                     fieldname = self._fieldMappingInEffect[fieldname]
             except:
-                raise
                 raise NotImplementedError("Field name %s not supported by backend." % (fieldname,))
 
         # If fieldname returned is None, it's a special case where we
