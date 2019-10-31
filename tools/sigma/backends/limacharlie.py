@@ -42,7 +42,7 @@ SigmaLCConfig = namedtuple('SigmaLCConfig', [
     'preConditions',
     'fieldMappings',
     'isAllStringValues',
-    'isKeywordsSupported',
+    'keywordField',
 ])
 _allFieldMappings = {
     "windows/process_creation/": SigmaLCConfig(
@@ -71,7 +71,7 @@ _allFieldMappings = {
             "Command": "event/COMMAND_LINE",
         },
         isAllStringValues = False,
-        isKeywordsSupported = False
+        keywordField = "event/COMMAND_LINE"
     ),
     "windows//": SigmaLCConfig(
         topLevelParams = {
@@ -81,7 +81,7 @@ _allFieldMappings = {
         preConditions = None,
         fieldMappings = _windowsEventLogFieldName,
         isAllStringValues = True,
-        isKeywordsSupported = False
+        keywordField = None
     ),
     "windows_defender//": SigmaLCConfig(
         topLevelParams = {
@@ -91,7 +91,7 @@ _allFieldMappings = {
         preConditions = None,
         fieldMappings = _windowsEventLogFieldName,
         isAllStringValues = True,
-        isKeywordsSupported = False
+        keywordField = None
     ),
     "dns//": SigmaLCConfig(
         topLevelParams = {
@@ -102,7 +102,7 @@ _allFieldMappings = {
             "query": "event/DOMAIN_NAME",
         },
         isAllStringValues = False,
-        isKeywordsSupported = False
+        keywordField = None
     ),
     "linux//": SigmaLCConfig(
         topLevelParams = {
@@ -115,12 +115,12 @@ _allFieldMappings = {
             "op": "is linux",
         },
         fieldMappings = {
-            "keywords": "event/COMMAND_LINE",
             "exe": "event/FILE_PATH",
             "type": None,
         },
         isAllStringValues = False,
-        isKeywordsSupported = True),
+        keywordField = 'event/COMMAND_LINE'
+    ),
     "unix//": SigmaLCConfig(
         topLevelParams = {
             "events": [
@@ -132,12 +132,12 @@ _allFieldMappings = {
             "op": "is linux",
         },
         fieldMappings = {
-            "keywords": "event/COMMAND_LINE",
             "exe": "event/FILE_PATH",
             "type": None,
         },
         isAllStringValues = False,
-        isKeywordsSupported = True),
+        keywordField = 'event/COMMAND_LINE'
+    ),
     "netflow//": SigmaLCConfig(
         topLevelParams = {
             "event": "NETWORK_CONNECTIONS",
@@ -148,7 +148,8 @@ _allFieldMappings = {
             "source.port": "event/NETWORK_ACTIVITY/SOURCE/PORT",
         },
         isAllStringValues = False,
-        isKeywordsSupported = True)
+        keywordField = None
+    ),
 }
 
 class LimaCharlieBackend(BaseBackend):
@@ -183,7 +184,7 @@ class LimaCharlieBackend(BaseBackend):
 
         # See if we have a definition for the source combination.
         mappingKey = "%s/%s/%s" % (product, category, service)
-        topFilter, preCond, mappings, isAllStringValues, isKeywordsSupported = _allFieldMappings.get(mappingKey, tuple([None, None, None, None, None]))
+        topFilter, preCond, mappings, isAllStringValues, keywordField = _allFieldMappings.get(mappingKey, tuple([None, None, None, None, None]))
         if mappings is None:
             raise NotImplementedError("Log source %s/%s/%s not supported by backend." % (product, category, service))
 
@@ -197,7 +198,7 @@ class LimaCharlieBackend(BaseBackend):
         self._isAllStringValues = isAllStringValues
 
         # Are we supporting keywords full text search?
-        self._isKeywordsSupported = isKeywordsSupported
+        self._keywordField = keywordField
 
         # Call the original generation code.
         detectComponent = super().generate(sigmaparser)
@@ -256,6 +257,7 @@ class LimaCharlieBackend(BaseBackend):
         # and only convert to string (yaml) once the
         # whole thing is assembled.
         result = self.generateNode(parsed.parsedSearch)
+
         if self._preCondition is not None:
             result = {
                 "op": "and",
@@ -271,6 +273,10 @@ class LimaCharlieBackend(BaseBackend):
         filtered = [ g for g in generated if g is not None ]
         if not filtered:
             return None
+
+        # Map any possible keywords.
+        filtered = self._mapKeywordVals(filtered)
+
         if 1 == len(filtered):
             return filtered[0]
         return {
@@ -283,25 +289,10 @@ class LimaCharlieBackend(BaseBackend):
         filtered = [g for g in generated if g is not None]
         if not filtered:
             return None
-        if isinstance(filtered[0], str):
-            if not self._isKeywordsSupported:
-                raise NotImplementedError("Full-text keyboard searches not supported.")
-            # This seems to be indicative only of "keywords" which are mostly
-            # representative of full-text searches. We don't suport that but
-            # in some data sources we can alias them to an actual field.
-            mappedFiltered = []
-            for k in filtered:
-                op, newVal = self._valuePatternToLcOp(k)
-                newOp = {
-                    "op": op,
-                    "path": self._fieldMappingInEffect["keywords"],
-                }
-                if op == "matches":
-                    newOp["re"] = newVal
-                else:
-                    newOp["value"] = newVal
-                mappedFiltered.append(newOp)
-            filtered = mappedFiltered
+
+        # Map any possible keywords.
+        filtered = self._mapKeywordVals(filtered)
+
         if 1 == len(filtered):
             return filtered[0]
         return {
@@ -485,3 +476,30 @@ class LimaCharlieBackend(BaseBackend):
         val = ''.join(segments)
 
         return ("matches", val)
+
+    def _mapKeywordVals(self, values):
+        mapped = []
+
+        for val in values:
+            if not isinstance(val, str):
+                mapped.append(val)
+                continue
+
+            if self._keywordField is None:
+                raise NotImplementedError("Full-text keyboard searches not supported.")
+
+            # This seems to be indicative only of "keywords" which are mostly
+            # representative of full-text searches. We don't suport that but
+            # in some data sources we can alias them to an actual field.
+            op, newVal = self._valuePatternToLcOp(val)
+            newOp = {
+                "op": op,
+                "path": self._keywordField,
+            }
+            if op == "matches":
+                newOp["re"] = newVal
+            else:
+                newOp["value"] = newVal
+            mapped.append(newOp)
+
+        return mapped
