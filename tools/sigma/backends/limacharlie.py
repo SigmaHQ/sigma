@@ -425,7 +425,13 @@ class LimaCharlieBackend(BaseBackend):
             tmpVal = tmpVal[1:]
         if tmpVal.endswith("*") and not (tmpVal.endswith("\\*") and not tmpVal.endswith("\\\\*")):
             isEndsWithWildcard = True
-            tmpVal = tmpVal[:-1]
+            if tmpVal.endswith("\\\\*"):
+                # An extra \ had to be there so it didn't escapte the
+                # *, but since we plan on removing the *, we can also
+                # remove one \.
+                tmpVal = tmpVal[:-2]
+            else:
+                tmpVal = tmpVal[:-1]
 
         # Check to see if there are any other wildcards. If there are
         # we cannot use our shortcuts.
