@@ -344,22 +344,30 @@ class LimaCharlieBackend(BaseBackend):
 
         if isinstance(value, (int, str)):
             op, newVal = self._valuePatternToLcOp(value)
-            return {
+            newOp = {
                 "op": op,
                 "path": fieldname,
-                "value": newVal,
                 "case sensitive": False,
             }
+            if op == "matches":
+                newOp["re"] = newVal
+            else:
+                newOp["value"] = newVal
+            return newOp
         elif isinstance(value, list):
             subOps = []
             for v in value:
                 op, newVal = self._valuePatternToLcOp(v)
-                subOps.append({
+                newOp = {
                     "op": op,
                     "path": fieldname,
-                    "value": newVal,
                     "case sensitive": False,
-                })
+                }
+                if op == "matches":
+                    newOp["re"] = newVal
+                else:
+                    newOp["value"] = newVal
+                subOps.append(newOp)
             if 1 == len(subOps):
                 return subOps[0]
             return {
@@ -395,24 +403,85 @@ class LimaCharlieBackend(BaseBackend):
 
         if not isinstance(val, str):
             return ("is", str(val) if self._isAllStringValues else val)
-        # The following logic is taken from the WDATP backend to translate
-        # the basic wildcard format into proper regular expression.
-        if "*" in val[1:-1]:
-            # Contains a wildcard within, must be translated.
-            # TODO: getting a W605 from the \g escape, this may be broken.
-            val = re.sub('([".^$]|\\\\(?![*?]))', '\\\\\g<1>', val)
-            val = re.sub('\\*', '.*', val)
-            val = re.sub('\\?', '.', val)
-            return ("matches", val)
-        # value possibly only starts and/or ends with *, use prefix/postfix match
-        # TODO: this is actually not correct since the string could end with
-        # a \* expression which would mean it's NOT a wildcard. We'll gloss over
-        # it for now to get something out but it should eventually be fixed
-        # so that it's accurate in all corner cases.
-        if val.endswith("*") and val.startswith("*"):
-            return ("contains", val[1:-1])
-        elif val.endswith("*"):
-            return ("starts with", val[:-1])
-        elif val.startswith("*"):
-            return ("ends with", val[1:])
-        return ("is", val)
+
+        # Is there any wildcard in this string? If not, we can short circuit.
+        if "*" not in val and "?" not in val:
+            return ("is", val)
+
+        # Now we do a small optimization for the shortcut operators
+        # available in LC.
+        isStartsWithWildcard = False
+        isEndsWithWildcard = False
+        tmpVal = val
+        if tmpVal.startswith("*"):
+            isStartsWithWildcard = True
+            tmpVal = tmpVal[1:]
+        if tmpVal.endswith("*") and not tmpVal.endswith("\\*"):
+            isEndsWithWildcard = True
+            tmpVal = tmpVal[:-1]
+
+        # Check to see if there are any other wildcards. If there are
+        # we cannot use our shortcuts.
+        if "*" not in tmpVal and "?" not in tmpVal:
+            if isStartsWithWildcard and isEndsWithWildcard:
+                return ("contains", tmpVal)
+
+            if isStartsWithWildcard:
+                return ("ends with", tmpVal)
+
+            if isEndsWithWildcard:
+                return ("starts with", tmpVal)
+
+        # This is messy, but it is accurate in generating a RE based on
+        # the simplified wildcard system, while also supporting the
+        # escaping of those wildcards.
+        segments = []
+        tmpVal = val
+        while True:
+            nEscapes = 0
+            for i in range(len(tmpVal)):
+                # We keep a running count of backslash escape
+                # characters we see so that if we meet a wildcard
+                # we can tell whether the wildcard is escaped
+                # (with odd number of escapes) or if it's just a
+                # backslash literal before a wildcard (even number).
+                if "\\" == tmpVal[i]:
+                    nEscapes += 1
+                    continue
+
+                if "*" == tmpVal[i]:
+                    if 0 == nEscapes:
+                        segments.append(re.escape(tmpVal[:i]))
+                        segments.append(".*")
+                    elif nEscapes % 2 == 0:
+                        segments.append(re.escape(tmpVal[:i - nEscapes]))
+                        segments.append(tmpVal[i - nEscapes:i])
+                        segments.append(".*")
+                    else:
+                        segments.append(re.escape(tmpVal[:i - nEscapes]))
+                        segments.append(tmpVal[i - nEscapes:i + 1])
+                    tmpVal = tmpVal[i + 1:]
+                    break
+
+                if "?" == tmpVal[i]:
+                    if 0 == nEscapes:
+                        segments.append(re.escape(tmpVal[:i]))
+                        segments.append(".")
+                    elif nEscapes % 2 == 0:
+                        segments.append(re.escape(tmpVal[:i - nEscapes]))
+                        segments.append(tmpVal[i - nEscapes:i])
+                        segments.append(".")
+                    else:
+                        segments.append(re.escape(tmpVal[:i - nEscapes]))
+                        segments.append(tmpVal[i - nEscapes:i + 1])
+                    tmpVal = tmpVal[i + 1:]
+                    break
+
+                nEscapes = 0
+            else:
+                segments.append(re.escape(tmpVal))
+                break
+
+        val = ''.join(segments)
+
+        return ("matches", val)
