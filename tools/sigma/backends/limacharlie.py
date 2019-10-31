@@ -35,8 +35,9 @@ def _windowsEventLogFieldName(fieldName):
 # - top-level parameters
 # - pre-condition is a D&R rule node filtering relevant events.
 # - field mappings is a dict with a mapping or a callable to convert the field name.
+#       Individual mapping values can also be callabled(fieldname, value) returning a new fieldname and value.
 # - isAllStringValues is a bool indicating whether all values should be converted to string.
-# - isKeywordsSupported is a bool indicating if full-text keyword searches are supported.
+# - keywordField is the field name to alias for keywords if supported or None if not.
 SigmaLCConfig = namedtuple('SigmaLCConfig', [
     'topLevelParams',
     'preConditions',
@@ -63,7 +64,7 @@ _allFieldMappings = {
             "User": "event/USER_NAME",
             # This field is redundant in LC, it seems to always be used with Image
             # so we will ignore it.
-            "OriginalFileName": None,
+            "OriginalFileName": lambda fn, fv: ("event/FILE_PATH", "*" + fv),
             # Custom field names coming from somewhere unknown.
             "NewProcessName": "event/FILE_PATH",
             "ProcessCommandLine": "event/COMMAND_LINE",
@@ -318,14 +319,22 @@ class LimaCharlieBackend(BaseBackend):
     def generateMapItemNode(self, node):
         fieldname, value = node
 
+        fieldNameAndValCallback = None
+
         # The mapping can be a dictionary of mapping or a callable
         # to get the correct value.
         if callable(self._fieldMappingInEffect):
             fieldname = self._fieldMappingInEffect(fieldname)
         else:
             try:
-                fieldname = self._fieldMappingInEffect[fieldname]
+                # The mapping can also be a callable that will
+                # return a mapped key AND value.
+                if callable(self._fieldMappingInEffect[fieldname]):
+                    fieldNameAndValCallback = self._fieldMappingInEffect[fieldname]
+                else:
+                    fieldname = self._fieldMappingInEffect[fieldname]
             except:
+                raise
                 raise NotImplementedError("Field name %s not supported by backend." % (fieldname,))
 
         # If fieldname returned is None, it's a special case where we
@@ -334,6 +343,8 @@ class LimaCharlieBackend(BaseBackend):
             return None
 
         if isinstance(value, (int, str)):
+            if fieldNameAndValCallback is not None:
+                fieldname, value = fieldNameAndValCallback(fieldname, value)
             op, newVal = self._valuePatternToLcOp(value)
             newOp = {
                 "op": op,
@@ -348,6 +359,8 @@ class LimaCharlieBackend(BaseBackend):
         elif isinstance(value, list):
             subOps = []
             for v in value:
+                if fieldNameAndValCallback is not None:
+                    fieldname, v = fieldNameAndValCallback(fieldname, v)
                 op, newVal = self._valuePatternToLcOp(v)
                 newOp = {
                     "op": op,
@@ -367,6 +380,8 @@ class LimaCharlieBackend(BaseBackend):
             }
         elif isinstance(value, SigmaTypeModifier):
             if isinstance(value, SigmaRegularExpressionModifier):
+                if fieldNameAndValCallback is not None:
+                    fieldname, value = fieldNameAndValCallback(fieldname, value)
                 return {
                     "op": "matches",
                     "path": fieldname,
@@ -375,6 +390,8 @@ class LimaCharlieBackend(BaseBackend):
             else:
                 raise TypeError("Backend does not support TypeModifier: %s" % (str(type(value))))
         elif value is None:
+            if fieldNameAndValCallback is not None:
+                fieldname, value = fieldNameAndValCallback(fieldname, value)
             return {
                 "op": "exists",
                 "not": True,
@@ -478,6 +495,11 @@ class LimaCharlieBackend(BaseBackend):
         return ("matches", val)
 
     def _mapKeywordVals(self, values):
+        # This function ensures that the list of values passed
+        # are proper D&R operations, if they are strings it indicates
+        # they were requested as keyword matches. We only support
+        # keyword matches when specific in the config where we just
+        # map them to the most common field in LC that makes sense.
         mapped = []
 
         for val in values:
