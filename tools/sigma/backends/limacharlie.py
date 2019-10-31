@@ -416,7 +416,7 @@ class LimaCharlieBackend(BaseBackend):
         if tmpVal.startswith("*"):
             isStartsWithWildcard = True
             tmpVal = tmpVal[1:]
-        if tmpVal.endswith("*") and not tmpVal.endswith("\\*"):
+        if tmpVal.endswith("*") and not (tmpVal.endswith("\\*") and not tmpVal.endswith("\\\\*")):
             isEndsWithWildcard = True
             tmpVal = tmpVal[:-1]
 
