@@ -28,6 +28,23 @@ def _windowsEventLogFieldName(fieldName):
         return 'Event/System/EventID'
     return 'Event/EventData/%s' % (fieldName,)
 
+def _mapProcessCreationOperations(node):
+    # Here we fix some common pitfalls found in rules
+    # in a consistent fashion (already process to D&R rule).
+
+    # First fixup is looking for a specific path prefix
+    # based on a specific drive letter. There are many cases
+    # where the driver letter can change or where the early
+    # boot process refers to it as "\Device\HarddiskVolume1\".
+    if ("starts with" == node["op"] and
+        "event/FILE_PATH" == node["path"] and
+        node["value"].lower().startswith("c:\\")):
+        node["op"] = "matches"
+        node["re"] = "^(?:(?:.:)|(?:\\\\Device\\\\HarddiskVolume.))\\\\%s" % (re.escape(node["value"][3:]),)
+        del(node["value"])
+
+    return node
+
 # We support many different log sources so we keep different mapping depending
 # on the log source and category.
 # The mapping key is product/category/service.
@@ -38,12 +55,14 @@ def _windowsEventLogFieldName(fieldName):
 #       Individual mapping values can also be callabled(fieldname, value) returning a new fieldname and value.
 # - isAllStringValues is a bool indicating whether all values should be converted to string.
 # - keywordField is the field name to alias for keywords if supported or None if not.
+# - postOpMapper is a callback that can modify an operation once it has been generated.
 SigmaLCConfig = namedtuple('SigmaLCConfig', [
     'topLevelParams',
     'preConditions',
     'fieldMappings',
     'isAllStringValues',
     'keywordField',
+    'postOpMapper',
 ])
 _allFieldMappings = {
     "windows/process_creation/": SigmaLCConfig(
@@ -72,7 +91,8 @@ _allFieldMappings = {
             "Command": "event/COMMAND_LINE",
         },
         isAllStringValues = False,
-        keywordField = "event/COMMAND_LINE"
+        keywordField = "event/COMMAND_LINE",
+        postOpMapper = _mapProcessCreationOperations
     ),
     "windows//": SigmaLCConfig(
         topLevelParams = {
@@ -82,7 +102,8 @@ _allFieldMappings = {
         preConditions = None,
         fieldMappings = _windowsEventLogFieldName,
         isAllStringValues = True,
-        keywordField = None
+        keywordField = None,
+        postOpMapper = None
     ),
     "windows_defender//": SigmaLCConfig(
         topLevelParams = {
@@ -92,7 +113,8 @@ _allFieldMappings = {
         preConditions = None,
         fieldMappings = _windowsEventLogFieldName,
         isAllStringValues = True,
-        keywordField = None
+        keywordField = None,
+        postOpMapper = None
     ),
     "dns//": SigmaLCConfig(
         topLevelParams = {
@@ -103,7 +125,8 @@ _allFieldMappings = {
             "query": "event/DOMAIN_NAME",
         },
         isAllStringValues = False,
-        keywordField = None
+        keywordField = None,
+        postOpMapper = None
     ),
     "linux//": SigmaLCConfig(
         topLevelParams = {
@@ -120,7 +143,8 @@ _allFieldMappings = {
             "type": None,
         },
         isAllStringValues = False,
-        keywordField = 'event/COMMAND_LINE'
+        keywordField = 'event/COMMAND_LINE',
+        postOpMapper = None
     ),
     "unix//": SigmaLCConfig(
         topLevelParams = {
@@ -137,7 +161,8 @@ _allFieldMappings = {
             "type": None,
         },
         isAllStringValues = False,
-        keywordField = 'event/COMMAND_LINE'
+        keywordField = 'event/COMMAND_LINE',
+        postOpMapper = None
     ),
     "netflow//": SigmaLCConfig(
         topLevelParams = {
@@ -149,7 +174,8 @@ _allFieldMappings = {
             "source.port": "event/NETWORK_ACTIVITY/SOURCE/PORT",
         },
         isAllStringValues = False,
-        keywordField = None
+        keywordField = None,
+        postOpMapper = None
     ),
 }
 
@@ -185,7 +211,7 @@ class LimaCharlieBackend(BaseBackend):
 
         # See if we have a definition for the source combination.
         mappingKey = "%s/%s/%s" % (product, category, service)
-        topFilter, preCond, mappings, isAllStringValues, keywordField = _allFieldMappings.get(mappingKey, tuple([None, None, None, None, None]))
+        topFilter, preCond, mappings, isAllStringValues, keywordField, postOpMapper = _allFieldMappings.get(mappingKey, tuple([None, None, None, None, None, None]))
         if mappings is None:
             raise NotImplementedError("Log source %s/%s/%s not supported by backend." % (product, category, service))
 
@@ -200,6 +226,9 @@ class LimaCharlieBackend(BaseBackend):
 
         # Are we supporting keywords full text search?
         self._keywordField = keywordField
+
+        # Call to fixup all operations after the fact.
+        self._postOpMapper = postOpMapper
 
         # Call the original generation code.
         detectComponent = super().generate(sigmaparser)
@@ -267,6 +296,8 @@ class LimaCharlieBackend(BaseBackend):
                     result,
                 ]
             }
+            if self._postOpMapper is not None:
+                result = self._postOpMapper(result)
         return yaml.safe_dump(result)
 
     def generateANDNode(self, node):
@@ -279,11 +310,16 @@ class LimaCharlieBackend(BaseBackend):
         filtered = self._mapKeywordVals(filtered)
 
         if 1 == len(filtered):
+            if self._postOpMapper is not None:
+                filtered[0] = self._postOpMapper(filtered[0])
             return filtered[0]
-        return {
+        result = {
             "op": "and",
             "rules": filtered,
         }
+        if self._postOpMapper is not None:
+            result = self._postOpMapper(result)
+        return result
 
     def generateORNode(self, node):
         generated = [self.generateNode(val) for val in node]
@@ -295,11 +331,16 @@ class LimaCharlieBackend(BaseBackend):
         filtered = self._mapKeywordVals(filtered)
 
         if 1 == len(filtered):
+            if self._postOpMapper is not None:
+                filtered[0] = self._postOpMapper(filtered[0])
             return filtered[0]
-        return {
+        result = {
             "op": "or",
             "rules": filtered,
         }
+        if self._postOpMapper is not None:
+            result = self._postOpMapper(result)
+        return result
 
     def generateNOTNode(self, node):
         generated = self.generateNode(node.item)
@@ -307,7 +348,7 @@ class LimaCharlieBackend(BaseBackend):
             return None
         if not isinstance(generated, dict):
             raise NotImplementedError("Not operator not available on non-dict nodes.")
-        generated['not'] = True
+        generated["not"] = not generated.get("not", False)
         return generated
 
     def generateSubexpressionNode(self, node):
@@ -354,6 +395,8 @@ class LimaCharlieBackend(BaseBackend):
                 newOp["re"] = newVal
             else:
                 newOp["value"] = newVal
+            if self._postOpMapper is not None:
+                newOp = self._postOpMapper(newOp)
             return newOp
         elif isinstance(value, list):
             subOps = []
@@ -370,6 +413,8 @@ class LimaCharlieBackend(BaseBackend):
                     newOp["re"] = newVal
                 else:
                     newOp["value"] = newVal
+                if self._postOpMapper is not None:
+                    newOp = self._postOpMapper(newOp)
                 subOps.append(newOp)
             if 1 == len(subOps):
                 return subOps[0]
@@ -381,21 +426,27 @@ class LimaCharlieBackend(BaseBackend):
             if isinstance(value, SigmaRegularExpressionModifier):
                 if fieldNameAndValCallback is not None:
                     fieldname, value = fieldNameAndValCallback(fieldname, value)
-                return {
+                result = {
                     "op": "matches",
                     "path": fieldname,
                     "re": re.compile(value),
                 }
+                if self._postOpMapper is not None:
+                    result = self._postOpMapper(result)
+                return result
             else:
                 raise TypeError("Backend does not support TypeModifier: %s" % (str(type(value))))
         elif value is None:
             if fieldNameAndValCallback is not None:
                 fieldname, value = fieldNameAndValCallback(fieldname, value)
-            return {
+            result = {
                 "op": "exists",
                 "not": True,
                 "path": fieldname,
             }
+            if self._postOpMapper is not None:
+                result = self._postOpMapper(result)
+            return result
         else:
             raise TypeError("Backend does not support map values of type " + str(type(value)))
 
