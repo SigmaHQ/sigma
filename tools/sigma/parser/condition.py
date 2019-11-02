@@ -202,11 +202,11 @@ class ConditionAND(ConditionBase):
     """AND Condition"""
     op = COND_AND
 
-    def __init__(self, sigma=None, op=None, val1=None, val2=None):
-        if sigma == None and op == None and val1 == None and val2 == None:    # no parameters given - initialize empty
+    def __init__(self, sigma=None, op=None, *args):
+        if sigma == None and op == None and len(args) == 0:    # no parameters given - initialize empty
             self.items = list()
         else:       # called by parser, use given values
-            self.items = [ val1, val2 ]
+            self.items = args
 
 class ConditionOR(ConditionAND):
     """OR Condition"""
