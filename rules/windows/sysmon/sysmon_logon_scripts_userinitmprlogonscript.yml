@@ -18,16 +18,22 @@ detection:
     exec_exclusion:
         Image: '*\explorer.exe'
         CommandLine: '*\netlogon.bat'
-    create_selection:
+    create_selection_cli:
         EventID:
             - 1
+    create_selection_reg:
+        EventID:
             - 11
             - 12
             - 13
             - 14
-    create_keywords:
-        - UserInitMprLogonScript
-    condition: (exec_selection and not exec_exclusion) or (create_selection and create_keywords)
+    create_keywords_reg:
+        TargetObject:
+            - '*UserInitMprLogonScript*'
+    create_keywords_cli:
+        CommandLine:
+            - '*UserInitMprLogonScript*'
+    condition: (exec_selection and not exec_exclusion) or (create_selection_reg and create_keywords_reg) or (create_selection_cli and create_keywords_cli)
 falsepositives:
     - exclude legitimate logon scripts
     - penetration tests, red teaming
