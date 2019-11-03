@@ -155,6 +155,8 @@ class LimaCharlieBackend(BaseBackend):
     """Converts Sigma rule into LimaCharlie D&R rules. Contributed by LimaCharlie. https://limacharlie.io"""
     identifier = "limacharlie"
     active = True
+    config_required = False
+    default_config = ["limacharlie"]
 
     def generate(self, sigmaparser):
         # Take the log source information and figure out which set of mappings to use.
