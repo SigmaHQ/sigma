@@ -89,8 +89,9 @@ class BaseBackend:
     file_list = None
     options = tuple()     # a list of tuples with following elements: option name, default value, help text, target attribute name (option name if None)
     config_required = True
+    default_config = None
 
-    def __init__(self, sigmaconfig, backend_options=None):
+    def __init__(self, sigmaconfig, backend_options=dict()):
         """
         Initialize backend. This gets a sigmaconfig object, which is notified about the used backend class by
         passing the object instance to it.
@@ -221,10 +222,14 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
     mapListsSpecialHandling = False     # Same handling for map items with list values as for normal values (strings, integers) if True, generateMapItemListNode method is called with node
     mapListValueExpression = None       # Syntax for field/value condititons where map value is a list
 
+    sort_condition_lists = False        # Sort condition items for AND and OR conditions
+
     def generateANDNode(self, node):
         generated = [ self.generateNode(val) for val in node ]
         filtered = [ g for g in generated if g is not None ]
         if filtered:
+            if self.sort_condition_lists:
+                filtered = sorted(filtered)
             return self.andToken.join(filtered)
         else:
             return None
@@ -233,6 +238,8 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
         generated = [ self.generateNode(val) for val in node ]
         filtered = [ g for g in generated if g is not None ]
         if filtered:
+            if self.sort_condition_lists:
+                filtered = sorted(filtered)
             return self.orToken.join(filtered)
         else:
             return None

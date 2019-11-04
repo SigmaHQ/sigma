@@ -27,6 +27,8 @@ class QRadarBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Qradar saved search. Contributed by SOC Prime. https://socprime.com"""
     identifier = "qradar"
     active = True
+    config_required = False
+    default_config = ["sysmon", "qradar"]
     reEscape = re.compile('(")')
     reClear = None
     andToken = " and "

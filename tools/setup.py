@@ -13,7 +13,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='sigmatools',
-    version='0.12.1',
+    version='0.13',
     description='Tools for the Generic Signature Format for SIEM Systems',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -57,8 +57,10 @@ setup(
             'config/logpoint-windows.yml',
             'config/helk.yml',
             'config/qradar.yml',
+            'config/winlogbeat-modules-enabled.yml',
             'config/winlogbeat.yml',
             'config/winlogbeat-old.yml',
+            'config/limacharlie.yml',
             ]),
         ('etc/sigma/generic', [
             'config/generic/sysmon.yml',
