@@ -1,12 +1,16 @@
-title: Bypassing Application Whitelisting by using dxcap.exe
+title: Application Whitelisting bypass via dxcap.exe
 status: experimental
-description: Local execution of a process as a subprocess of Dxcap.exe
+description: Detects execution of of Dxcap.exe
 references:
     - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OtherMSBinaries/Dxcap.yml
     - https://twitter.com/harr0ey/status/992008180904419328
-author: Beyu Denis
+author: Beyu Denis, oscd.community
 date: 2019/10/26
-tags: attack.persistence
+modified: 2019/11/04
+tags:
+    - attack.defense_evasion
+    - attack.execution
+    - attack.t1218
 level: medium
 logsource:
     category: process_creation
@@ -14,7 +18,9 @@ logsource:
 detection:
   selection:
     Image: '*\dxcap.exe'
-    CommandLine: '* -c *.exe'
+    CommandLine|contains|all:
+        - '-c'
+        - '.exe'
   condition: selection
 falsepositives:
-    - Unknown
+    - Legitimate execution of dxcap.exe by legitimate user
