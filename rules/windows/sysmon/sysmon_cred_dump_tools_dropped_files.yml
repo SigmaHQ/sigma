@@ -1,0 +1,44 @@
+title: Cred dump tools dropped files
+description: Files with well-known filenames (parts of credential dump software or files produced by them) creation
+author: Teymur Kheirkhabarov, oscd.communityvvcncicjjtvrtfvkbnvfrunkungddlckvrjvnflitrgi
+date: 2019/11/01
+references:
+    - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
+tags:
+    - attack.credential_access
+    - attack.t1003
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 11
+        TargetFilename: 
+            - '*\pwdump*'
+            - '*\kirbi*'
+            - '*\pwhashes*'
+            - '*\test.pwd'
+            - '*\lsremora.dll'
+            - '*\lsremora64.dll'
+            - '*\fgexec.exe'
+            - '*\wce_ccache*'
+            - '*\wce_krbtkts*'
+            - '*\wceaux.dll'
+            - '*\SAM.out'
+            - '*\SECURITY.out'
+            - '*\SYSTEM.out'
+            - '*\NTDS.out'
+            - '*\DumpExt.dll'
+            - '*\DumpSvc.exe'
+            - '*\cachedump64.exe'
+            - '*\cachedump.exe'
+            - '*\pstgdump.exe'
+            - '*\servpw.exe'
+            - '*\servpw64.exe'
+            - '*\pwdump.exe'
+            - '*\fgdump-log*'
+    condition: selection
+falsepositives:
+    - Legitimate Administrator using tool for password recovery
+level: medium
+status: experimental

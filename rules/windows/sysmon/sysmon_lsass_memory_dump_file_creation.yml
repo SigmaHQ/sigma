@@ -1,0 +1,23 @@
+title: LSASS memory dump file creation
+description: LSASS memory dump creation using operating systems utilities. Procdump will use process name in output file if no name is specified 
+author: Teymur Kheirkhabarov, oscd.community
+references:
+    - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
+date: 2019/10/22
+tags:
+    - attack.credential_access
+    - attack.t1003
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 11
+        TargetFilename|all:
+            - "*lsass*"
+            - "*dmp"
+    condition: selection
+falsepositives:
+    - Dumping lsass memory for forensic investigation purposes by legitimate incident responder or forensic invetigator
+level: medium
+status: experimental

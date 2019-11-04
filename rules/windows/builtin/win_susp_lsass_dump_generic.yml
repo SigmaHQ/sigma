@@ -1,37 +1,40 @@
-title: Mimikatz Detection LSASS Access
+title: Generic Password Dumper Activity on LSASS
+description: Detects process handle on LSASS process with certain access mask
 status: experimental
-description: Detects process access to LSASS which is typical for Mimikatz (0x1000 PROCESS_QUERY_ LIMITED_INFORMATION, 0x0400 PROCESS_QUERY_ INFORMATION "only old versions", 0x0010 PROCESS_VM_READ)
-author: Florian Roth, Roberto Rodriguez, Dimitrios Slamaris, Mark Russinovich, Thomas Patzke, Teymur Kheirkhabarov, Sherif Eldeeb, James Dickenson, oscd.community (update)
-date: 2017/02/16
-modified: 2019/11/01
+author: Roberto Rodriguez, Teymur Kheirkhabarov, Dimitrios Slamaris, Mark Russinovich, oscd.community (update)
+date: 2019/11/01
 references:
-    - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
     - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
 tags:
-    - attack.t1003
-    - attack.s0002
     - attack.credential_access
+    - attack.t1003
     - car.2019-04-004
 logsource:
     product: windows
-    service: sysmon
+    service: security
 detection:
-    selection:
-        EventID: 10
-        TargetImage: '*\lsass.exe'
-        GrantedAccess|contains:
+    selection_1:
+        EventID: 4656
+        ObjectName: '*\lsass.exe'
+        AccessMask|contains:
             - '0x40'
-            - '0x1000'
             - '0x1400'
+            - '0x1000'
             - '0x100000'
             - '0x1410'    # car.2019-04-004
             - '0x1010'    # car.2019-04-004
             - '0x1438'    # car.2019-04-004
             - '0x143a'    # car.2019-04-004
             - '0x1418'    # car.2019-04-004
+    selection_2:
+        EventID: 4663
+        ObjectName: '*\lsass.exe'
+        AccessList|contains:
+            - '4484'
+            - '4416'
     filter:
-        ProcessName:
+        ProcessName: 
             - '*\wmiprvse.exe'
             - '*\taskmgr.exe'
             - '*\procexp64.exe'
@@ -40,7 +43,7 @@ detection:
             - '*\csrss.exe'
             - '*\wininit.exe'
             - '*\vmtoolsd.exe'
-    condition: selection and not filter
+    condition: selection_1 or selection_2 and not filter
 falsepositives:
     - Legitimate software accessing LSASS process for legitimate reason; update the whitelist with it
 level: high
