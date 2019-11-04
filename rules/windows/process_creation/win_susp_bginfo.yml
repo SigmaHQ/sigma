@@ -1,13 +1,16 @@
-title: BYPASSING APPLICATION WHITELISTING WITH BGINFO
+title: Application whitelisting bypass via bginfo
 status: experimental
 description: Execute VBscript code that is referenced within the *.bgi file.
 references:
     - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OtherMSBinaries/Bginfo.yml
     - https://oddvar.moe/2017/05/18/bypassing-application-whitelisting-with-bginfo/
-author: Beyu Denis
+author: Beyu Denis, oscd.community
 date: 2019/10/26
+modified: 2019/11/04
 tags:
-    - attack.persistence
+    - attack.defense_evasion
+    - attack.execution
+    - attack.t1218
 level: medium
 logsource:
     category: process_creation
@@ -15,8 +18,9 @@ logsource:
 detection:
   selection:
     Image: '*\bginfo.exe'
-    CommandLine: '* /popup /nolicprompt'
+    CommandLine|contains|all:
+        - '/popup'
+        - '/nolicprompt'
   condition: selection
 falsepositives:
     - Unknown
-
