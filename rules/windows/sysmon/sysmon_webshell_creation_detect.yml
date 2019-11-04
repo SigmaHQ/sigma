@@ -5,6 +5,7 @@ references:
     - PT ESC rule and personal experience
 author: Beyu Denis, oscd.community
 date: 2019/10/22
+modified: 2019/11/04
 tags:
     - attack.persistence
     - attack.t1100
@@ -13,24 +14,31 @@ logsource:
     product: windows
     service: sysmon
 detection:
-    selection:
-        # Sysmon: File Creation (ID 11)
+    selection_1:
         EventID: 11
-        #.NET webshells
-        TargetFilename: 
-            - '*\inetpub\wwwroot\*.asp'
-            - '*\inetpub\wwwroot\*.aspx'
-            - '*\inetpub\wwwroot\*.ashx'
-            #php webshells
-            - '*\inetpub\wwwroot\*.ph*'
-            - '*\www\*.ph*'
-            - '*\htdocs\*.ph*'
-            - '*\html\*.ph*'
-            #apache tomcap webshell
-            - '*\*.jsp*'
-            #cgi-bin perl webshell
-            - '*\cgi-bin\*.pl'
-    condition: selection
+    selection_2:
+        TargetFilename|contains: '\inetpub\wwwroot\'
+    selection_3:        
+        TargetFilename|contains:
+            - '.asp'
+            - '.ashx'
+            - '.ph'
+    selection_4: 
+        TargetFilename|contains:
+            - '\www\'
+            - '\htdocs\'
+            - '\html\'
+    selection_5:
+        TargetFilename|contains: '.ph'
+    selection_6:
+        - TargetFilename|contains|all: 
+            - '\'
+            - '.jsp'
+        - TargetFilename|contains|all: 
+            - '\cgi-bin\'
+            - '.pl'
+    condition: selection_1 and ( selection_2 and selection_3 ) or
+               selection_1 and ( selection_4 and selection_5 ) or
+               selection_1 and selection_6
 falsepositives:
-    - Unknown
-    - Admin activity
+    - Legitimate administrator or developer creating legitimate executable files in a web application folder
