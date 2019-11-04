@@ -1,22 +1,29 @@
-title: Service Execution
+title: Custom Service Execution
 status: experimental 
 description: Adversaries may execute a binary, command, or script via a method that interacts with Windows services, such as the Service Control Manager. This can be done by either creating a new service or modifying an existing service. This technique is the execution used in conjunction with New Service and Modify Existing Service during service persistence or privilege escalation.
-author: Timur Zinniatullin, oscd.community
+author: Timur Zinniatullin, Daniil Yugoslavskiy, oscd.community
+date: 2019/10/21
+modified: 2019/11/04
 references:
-    - https://attack.mitre.org/techniques/T1035/
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1035/T1035.yaml
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image:
-            - '*\sc.exe'
-        CommandLine:
-            - '*create*binPath=*'
-            - '*start*'
-            - '*delete*'
-    condition: selection
+    selection_1:
+        Image: '*\sc.exe'
+    selection_2:
+        Image: 
+            - '*\net.exe'
+            - '*\net1.exe'
+    selection_3:
+        CommandLine|contains|all:
+            - 'create'
+            - 'binpath'
+    selection_4:
+        CommandLine|contains: 'start'
+    condition:  selection_1 and ( selection_3 or selection_4 ) or
+               ( selection_2 and selection_4 )
 fields:
     - Image
     - CommandLine
@@ -27,7 +34,7 @@ fields:
     - ParentImage
     - ParentCommandLine
 falsepositives:
-    - Admin activity
+    - Legitimate administrator or user creates and executes a service for legitimate reason
 level: low
 tags:
     - attack.execution
