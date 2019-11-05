@@ -30,7 +30,7 @@ def _windowsEventLogFieldName(fieldName):
 
 def _mapProcessCreationOperations(node):
     # Here we fix some common pitfalls found in rules
-    # in a consistent fashion (already process to D&R rule).
+    # in a consistent fashion (already processed to D&R rule).
 
     # First fixup is looking for a specific path prefix
     # based on a specific drive letter. There are many cases
@@ -459,6 +459,7 @@ class LimaCharlieBackend(BaseBackend):
         # or into altered values to be functionally equivalent using
         # a few different LC D&R rule operators.
 
+        # No point evaluating non-strings.
         if not isinstance(val, str):
             return ("is", str(val) if self._isAllStringValues else val)
 
@@ -467,7 +468,9 @@ class LimaCharlieBackend(BaseBackend):
             return ("is", val)
 
         # Now we do a small optimization for the shortcut operators
-        # available in LC.
+        # available in LC. We try to see if the wildcards are around
+        # the main value, but NOT within. If that's the case we can
+        # use the "starts with", "ends with" or "contains" operators.
         isStartsWithWildcard = False
         isEndsWithWildcard = False
         tmpVal = val
@@ -554,11 +557,12 @@ class LimaCharlieBackend(BaseBackend):
         # This function ensures that the list of values passed
         # are proper D&R operations, if they are strings it indicates
         # they were requested as keyword matches. We only support
-        # keyword matches when specific in the config where we just
+        # keyword matches when specified in the config. We generally just
         # map them to the most common field in LC that makes sense.
         mapped = []
 
         for val in values:
+            # Non-keywords are just passed through.
             if not isinstance(val, str):
                 mapped.append(val)
                 continue
