@@ -1,9 +1,10 @@
 title: Winlogon Helper DLL
-status: test
+status: experimental
 description: Winlogon.exe is a Windows component responsible for actions at logon/logoff as well as the secure attention sequence (SAS) triggered by Ctrl-Alt-Delete. Registry entries in HKLM\Software[Wow6432Node]Microsoft\Windows NT\CurrentVersion\Winlogon\ and HKCU\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\ are used to manage additional helper programs and functionalities that support Winlogon. Malicious modifications to these Registry keys may cause Winlogon to load and execute malicious DLLs and/or executables. 
 author: Timur Zinniatullin, oscd.community
+date: 2019/10/21
+modified: 2019/11/04
 references:
-    - https://attack.mitre.org/techniques/T1004/
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1004/T1004.yaml
 logsource:
     product: windows
@@ -14,11 +15,10 @@ detection:
         EventID: 4104
     keyword1: 
         - '*Set-ItemProperty*'
-    keyword2:
         - '*New-Item*'
-    keyword3: 
+    keyword2: 
         - '*CurrentVersion\Winlogon*'
-    condition: selection and (keyword1 or keyword2) and keyword3
+    condition: selection and ( keyword1 and keyword2 )
 falsepositives:
     - Unknown
 level: medium
