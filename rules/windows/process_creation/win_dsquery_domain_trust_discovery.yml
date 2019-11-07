@@ -2,10 +2,10 @@ title: Domain Trust Discovery
 status: experimental
 description: Detects a discovery of domain trusts
 references:
-    - https://attack.mitre.org/techniques/T1482/
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1482/T1482.yaml
 author: Jakob Weinzettl, oscd.community
 date: 2019/10/23
+modified: 2019/11/08
 tags:
     - attack.discovery
     - attack.t1482
@@ -13,17 +13,14 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection1:
-        CommandLine: 'dsquery'
-    selection2:
-        CommandLine: '-filter'
-    selection3:
-        CommandLine: '(objectClass=trustedDomain)'
-    selection4:
-        CommandLine: 'nltest'
-    selection5:
-        CommandLine: 'domain_trusts'
-    condition: selection1 and selection2 and selection3 or selection4 and selection5
+    selection:
+      - Image|endswith: '\dsquery.exe'
+        CommandLine|contains|all:
+            - '-filter'
+            - 'trustedDomain'
+      - Image|endswith: '\nltest.exe'
+        CommandLine|contains: 'domain_trusts'
+    condition: selection
 falsepositives:
     - Administrators script of some sort
 level: medium
