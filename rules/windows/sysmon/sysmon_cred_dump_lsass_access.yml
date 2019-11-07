@@ -1,13 +1,14 @@
-title: Mimikatz Detection LSASS Access
+title: Credentials Dumping tools accessing LSASS memory
 status: experimental
-description: Detects process access to LSASS which is typical for Mimikatz (0x1000 PROCESS_QUERY_ LIMITED_INFORMATION, 0x0400 PROCESS_QUERY_ INFORMATION "only old versions", 0x0010 PROCESS_VM_READ)
+description: Detects process access LSASS memory which is typical for credentials dumping tools
 author: Florian Roth, Roberto Rodriguez, Dimitrios Slamaris, Mark Russinovich, Thomas Patzke, Teymur Kheirkhabarov, Sherif Eldeeb, James Dickenson, Aleksey Potapov, oscd.community (update)
 date: 2017/02/16
-modified: 2019/11/01
+modified: 2019/11/08
 references:
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
     - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
+    - http://security-research.dyndns.org/pub/slides/FIRST2017/FIRST-2017_Tom-Ueltschi_Sysmon_FINAL_notes.pdf
 tags:
     - attack.t1003
     - attack.s0002
@@ -19,7 +20,7 @@ logsource:
 detection:
     selection:
         EventID: 10
-        TargetImage: '*\lsass.exe'
+        TargetImage|endswith: '\lsass.exe'
         GrantedAccess|contains:
             - '0x40'
             - '0x1000'
@@ -35,15 +36,15 @@ detection:
             - '0x1f2fff'
             - '0x1f3fff'
     filter:
-        ProcessName:
-            - '*\wmiprvse.exe'
-            - '*\taskmgr.exe'
-            - '*\procexp64.exe'
-            - '*\procexp.exe'
-            - '*\lsm.exe'
-            - '*\csrss.exe'
-            - '*\wininit.exe'
-            - '*\vmtoolsd.exe'
+        ProcessName|endswith: # easy to bypass. need to implement supportive rule to detect bypass attempts
+            - '\wmiprvse.exe'
+            - '\taskmgr.exe'
+            - '\procexp64.exe'
+            - '\procexp.exe'
+            - '\lsm.exe'
+            - '\csrss.exe'
+            - '\wininit.exe'
+            - '\vmtoolsd.exe'
     condition: selection and not filter
 falsepositives:
     - Legitimate software accessing LSASS process for legitimate reason; update the whitelist with it
