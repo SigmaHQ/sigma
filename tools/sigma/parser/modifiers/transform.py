@@ -31,6 +31,26 @@ class SigmaContainsModifier(ListOrStringModifierMixin, SigmaTransformModifier):
             val += "*"
         return val
 
+class SigmaStartswithModifier(ListOrStringModifierMixin, SigmaTransformModifier):
+    """Add *-wildcard before and after all string(s)"""
+    identifier = "startswith"
+    active = True
+
+    def apply_str(self, val : str):
+        if not val.endswith("*"):
+            val += "*"
+        return val
+
+class SigmaEndswithModifier(ListOrStringModifierMixin, SigmaTransformModifier):
+    """Add *-wildcard before and after all string(s)"""
+    identifier = "endswith"
+    active = True
+
+    def apply_str(self, val : str):
+        if not val.startswith("*"):
+            val = "*" + val
+        return val
+
 class SigmaAllValuesModifier(SigmaTransformModifier):
     """Override default OR-linking behavior for list with AND-linking of all list values"""
     identifier = "all"

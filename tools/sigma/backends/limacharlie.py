@@ -28,6 +28,23 @@ def _windowsEventLogFieldName(fieldName):
         return 'Event/System/EventID'
     return 'Event/EventData/%s' % (fieldName,)
 
+def _mapProcessCreationOperations(node):
+    # Here we fix some common pitfalls found in rules
+    # in a consistent fashion (already processed to D&R rule).
+
+    # First fixup is looking for a specific path prefix
+    # based on a specific drive letter. There are many cases
+    # where the driver letter can change or where the early
+    # boot process refers to it as "\Device\HarddiskVolume1\".
+    if ("starts with" == node["op"] and
+        "event/FILE_PATH" == node["path"] and
+        node["value"].lower().startswith("c:\\")):
+        node["op"] = "matches"
+        node["re"] = "^(?:(?:.:)|(?:\\\\Device\\\\HarddiskVolume.))\\\\%s" % (re.escape(node["value"][3:]),)
+        del(node["value"])
+
+    return node
+
 # We support many different log sources so we keep different mapping depending
 # on the log source and category.
 # The mapping key is product/category/service.
@@ -35,14 +52,17 @@ def _windowsEventLogFieldName(fieldName):
 # - top-level parameters
 # - pre-condition is a D&R rule node filtering relevant events.
 # - field mappings is a dict with a mapping or a callable to convert the field name.
+#       Individual mapping values can also be callabled(fieldname, value) returning a new fieldname and value.
 # - isAllStringValues is a bool indicating whether all values should be converted to string.
-# - isKeywordsSupported is a bool indicating if full-text keyword searches are supported.
+# - keywordField is the field name to alias for keywords if supported or None if not.
+# - postOpMapper is a callback that can modify an operation once it has been generated.
 SigmaLCConfig = namedtuple('SigmaLCConfig', [
     'topLevelParams',
     'preConditions',
     'fieldMappings',
     'isAllStringValues',
-    'isKeywordsSupported',
+    'keywordField',
+    'postOpMapper',
 ])
 _allFieldMappings = {
     "windows/process_creation/": SigmaLCConfig(
@@ -63,7 +83,7 @@ _allFieldMappings = {
             "User": "event/USER_NAME",
             # This field is redundant in LC, it seems to always be used with Image
             # so we will ignore it.
-            "OriginalFileName": None,
+            "OriginalFileName": lambda fn, fv: ("event/FILE_PATH", "*" + fv),
             # Custom field names coming from somewhere unknown.
             "NewProcessName": "event/FILE_PATH",
             "ProcessCommandLine": "event/COMMAND_LINE",
@@ -71,7 +91,8 @@ _allFieldMappings = {
             "Command": "event/COMMAND_LINE",
         },
         isAllStringValues = False,
-        isKeywordsSupported = False
+        keywordField = "event/COMMAND_LINE",
+        postOpMapper = _mapProcessCreationOperations
     ),
     "windows//": SigmaLCConfig(
         topLevelParams = {
@@ -81,7 +102,8 @@ _allFieldMappings = {
         preConditions = None,
         fieldMappings = _windowsEventLogFieldName,
         isAllStringValues = True,
-        isKeywordsSupported = False
+        keywordField = None,
+        postOpMapper = None
     ),
     "windows_defender//": SigmaLCConfig(
         topLevelParams = {
@@ -91,7 +113,8 @@ _allFieldMappings = {
         preConditions = None,
         fieldMappings = _windowsEventLogFieldName,
         isAllStringValues = True,
-        isKeywordsSupported = False
+        keywordField = None,
+        postOpMapper = None
     ),
     "dns//": SigmaLCConfig(
         topLevelParams = {
@@ -102,7 +125,8 @@ _allFieldMappings = {
             "query": "event/DOMAIN_NAME",
         },
         isAllStringValues = False,
-        isKeywordsSupported = False
+        keywordField = None,
+        postOpMapper = None
     ),
     "linux//": SigmaLCConfig(
         topLevelParams = {
@@ -115,12 +139,13 @@ _allFieldMappings = {
             "op": "is linux",
         },
         fieldMappings = {
-            "keywords": "event/COMMAND_LINE",
             "exe": "event/FILE_PATH",
             "type": None,
         },
         isAllStringValues = False,
-        isKeywordsSupported = True),
+        keywordField = 'event/COMMAND_LINE',
+        postOpMapper = None
+    ),
     "unix//": SigmaLCConfig(
         topLevelParams = {
             "events": [
@@ -132,12 +157,13 @@ _allFieldMappings = {
             "op": "is linux",
         },
         fieldMappings = {
-            "keywords": "event/COMMAND_LINE",
             "exe": "event/FILE_PATH",
             "type": None,
         },
         isAllStringValues = False,
-        isKeywordsSupported = True),
+        keywordField = 'event/COMMAND_LINE',
+        postOpMapper = None
+    ),
     "netflow//": SigmaLCConfig(
         topLevelParams = {
             "event": "NETWORK_CONNECTIONS",
@@ -148,7 +174,9 @@ _allFieldMappings = {
             "source.port": "event/NETWORK_ACTIVITY/SOURCE/PORT",
         },
         isAllStringValues = False,
-        isKeywordsSupported = True)
+        keywordField = None,
+        postOpMapper = None
+    ),
 }
 
 class LimaCharlieBackend(BaseBackend):
@@ -183,7 +211,7 @@ class LimaCharlieBackend(BaseBackend):
 
         # See if we have a definition for the source combination.
         mappingKey = "%s/%s/%s" % (product, category, service)
-        topFilter, preCond, mappings, isAllStringValues, isKeywordsSupported = _allFieldMappings.get(mappingKey, tuple([None, None, None, None, None]))
+        topFilter, preCond, mappings, isAllStringValues, keywordField, postOpMapper = _allFieldMappings.get(mappingKey, tuple([None, None, None, None, None, None]))
         if mappings is None:
             raise NotImplementedError("Log source %s/%s/%s not supported by backend." % (product, category, service))
 
@@ -197,7 +225,10 @@ class LimaCharlieBackend(BaseBackend):
         self._isAllStringValues = isAllStringValues
 
         # Are we supporting keywords full text search?
-        self._isKeywordsSupported = isKeywordsSupported
+        self._keywordField = keywordField
+
+        # Call to fixup all operations after the fact.
+        self._postOpMapper = postOpMapper
 
         # Call the original generation code.
         detectComponent = super().generate(sigmaparser)
@@ -256,6 +287,7 @@ class LimaCharlieBackend(BaseBackend):
         # and only convert to string (yaml) once the
         # whole thing is assembled.
         result = self.generateNode(parsed.parsedSearch)
+
         if self._preCondition is not None:
             result = {
                 "op": "and",
@@ -264,6 +296,8 @@ class LimaCharlieBackend(BaseBackend):
                     result,
                 ]
             }
+            if self._postOpMapper is not None:
+                result = self._postOpMapper(result)
         return yaml.safe_dump(result)
 
     def generateANDNode(self, node):
@@ -271,39 +305,42 @@ class LimaCharlieBackend(BaseBackend):
         filtered = [ g for g in generated if g is not None ]
         if not filtered:
             return None
+
+        # Map any possible keywords.
+        filtered = self._mapKeywordVals(filtered)
+
         if 1 == len(filtered):
+            if self._postOpMapper is not None:
+                filtered[0] = self._postOpMapper(filtered[0])
             return filtered[0]
-        return {
+        result = {
             "op": "and",
             "rules": filtered,
         }
+        if self._postOpMapper is not None:
+            result = self._postOpMapper(result)
+        return result
 
     def generateORNode(self, node):
         generated = [self.generateNode(val) for val in node]
         filtered = [g for g in generated if g is not None]
         if not filtered:
             return None
-        if isinstance(filtered[0], str):
-            if not self._isKeywordsSupported:
-                raise NotImplementedError("Full-text keyboard searches not supported.")
-            # This seems to be indicative only of "keywords" which are mostly
-            # representative of full-text searches. We don't suport that but
-            # in some data sources we can alias them to an actual field.
-            mappedFiltered = []
-            for k in filtered:
-                op, newVal = self._valuePatternToLcOp(k)
-                mappedFiltered.append({
-                    "op": op,
-                    "path": self._fieldMappingInEffect["keywords"],
-                    "value": newVal,
-                })
-            filtered = mappedFiltered
+
+        # Map any possible keywords.
+        filtered = self._mapKeywordVals(filtered)
+
         if 1 == len(filtered):
+            if self._postOpMapper is not None:
+                filtered[0] = self._postOpMapper(filtered[0])
             return filtered[0]
-        return {
+        result = {
             "op": "or",
             "rules": filtered,
         }
+        if self._postOpMapper is not None:
+            result = self._postOpMapper(result)
+        return result
 
     def generateNOTNode(self, node):
         generated = self.generateNode(node.item)
@@ -311,7 +348,7 @@ class LimaCharlieBackend(BaseBackend):
             return None
         if not isinstance(generated, dict):
             raise NotImplementedError("Not operator not available on non-dict nodes.")
-        generated['not'] = True
+        generated["not"] = not generated.get("not", False)
         return generated
 
     def generateSubexpressionNode(self, node):
@@ -323,13 +360,20 @@ class LimaCharlieBackend(BaseBackend):
     def generateMapItemNode(self, node):
         fieldname, value = node
 
+        fieldNameAndValCallback = None
+
         # The mapping can be a dictionary of mapping or a callable
         # to get the correct value.
         if callable(self._fieldMappingInEffect):
             fieldname = self._fieldMappingInEffect(fieldname)
         else:
             try:
-                fieldname = self._fieldMappingInEffect[fieldname]
+                # The mapping can also be a callable that will
+                # return a mapped key AND value.
+                if callable(self._fieldMappingInEffect[fieldname]):
+                    fieldNameAndValCallback = self._fieldMappingInEffect[fieldname]
+                else:
+                    fieldname = self._fieldMappingInEffect[fieldname]
             except:
                 raise NotImplementedError("Field name %s not supported by backend." % (fieldname,))
 
@@ -339,23 +383,39 @@ class LimaCharlieBackend(BaseBackend):
             return None
 
         if isinstance(value, (int, str)):
+            if fieldNameAndValCallback is not None:
+                fieldname, value = fieldNameAndValCallback(fieldname, value)
             op, newVal = self._valuePatternToLcOp(value)
-            return {
+            newOp = {
                 "op": op,
                 "path": fieldname,
-                "value": newVal,
                 "case sensitive": False,
             }
+            if op == "matches":
+                newOp["re"] = newVal
+            else:
+                newOp["value"] = newVal
+            if self._postOpMapper is not None:
+                newOp = self._postOpMapper(newOp)
+            return newOp
         elif isinstance(value, list):
             subOps = []
             for v in value:
+                if fieldNameAndValCallback is not None:
+                    fieldname, v = fieldNameAndValCallback(fieldname, v)
                 op, newVal = self._valuePatternToLcOp(v)
-                subOps.append({
+                newOp = {
                     "op": op,
                     "path": fieldname,
-                    "value": newVal,
                     "case sensitive": False,
-                })
+                }
+                if op == "matches":
+                    newOp["re"] = newVal
+                else:
+                    newOp["value"] = newVal
+                if self._postOpMapper is not None:
+                    newOp = self._postOpMapper(newOp)
+                subOps.append(newOp)
             if 1 == len(subOps):
                 return subOps[0]
             return {
@@ -364,19 +424,29 @@ class LimaCharlieBackend(BaseBackend):
             }
         elif isinstance(value, SigmaTypeModifier):
             if isinstance(value, SigmaRegularExpressionModifier):
-                return {
+                if fieldNameAndValCallback is not None:
+                    fieldname, value = fieldNameAndValCallback(fieldname, value)
+                result = {
                     "op": "matches",
                     "path": fieldname,
                     "re": re.compile(value),
                 }
+                if self._postOpMapper is not None:
+                    result = self._postOpMapper(result)
+                return result
             else:
                 raise TypeError("Backend does not support TypeModifier: %s" % (str(type(value))))
         elif value is None:
-            return {
+            if fieldNameAndValCallback is not None:
+                fieldname, value = fieldNameAndValCallback(fieldname, value)
+            result = {
                 "op": "exists",
                 "not": True,
                 "path": fieldname,
             }
+            if self._postOpMapper is not None:
+                result = self._postOpMapper(result)
+            return result
         else:
             raise TypeError("Backend does not support map values of type " + str(type(value)))
 
@@ -389,26 +459,129 @@ class LimaCharlieBackend(BaseBackend):
         # or into altered values to be functionally equivalent using
         # a few different LC D&R rule operators.
 
+        # No point evaluating non-strings.
         if not isinstance(val, str):
             return ("is", str(val) if self._isAllStringValues else val)
-        # The following logic is taken from the WDATP backend to translate
-        # the basic wildcard format into proper regular expression.
-        if "*" in val[1:-1]:
-            # Contains a wildcard within, must be translated.
-            # TODO: getting a W605 from the \g escape, this may be broken.
-            val = re.sub('([".^$]|\\\\(?![*?]))', '\\\\\g<1>', val)
-            val = re.sub('\\*', '.*', val)
-            val = re.sub('\\?', '.', val)
-            return ("matches", val)
-        # value possibly only starts and/or ends with *, use prefix/postfix match
-        # TODO: this is actually not correct since the string could end with
-        # a \* expression which would mean it's NOT a wildcard. We'll gloss over
-        # it for now to get something out but it should eventually be fixed
-        # so that it's accurate in all corner cases.
-        if val.endswith("*") and val.startswith("*"):
-            return ("contains", val[1:-1])
-        elif val.endswith("*"):
-            return ("starts with", val[:-1])
-        elif val.startswith("*"):
-            return ("ends with", val[1:])
-        return ("is", val)
+
+        # Is there any wildcard in this string? If not, we can short circuit.
+        if "*" not in val and "?" not in val:
+            return ("is", val)
+
+        # Now we do a small optimization for the shortcut operators
+        # available in LC. We try to see if the wildcards are around
+        # the main value, but NOT within. If that's the case we can
+        # use the "starts with", "ends with" or "contains" operators.
+        isStartsWithWildcard = False
+        isEndsWithWildcard = False
+        tmpVal = val
+        if tmpVal.startswith("*"):
+            isStartsWithWildcard = True
+            tmpVal = tmpVal[1:]
+        if tmpVal.endswith("*") and not (tmpVal.endswith("\\*") and not tmpVal.endswith("\\\\*")):
+            isEndsWithWildcard = True
+            if tmpVal.endswith("\\\\*"):
+                # An extra \ had to be there so it didn't escapte the
+                # *, but since we plan on removing the *, we can also
+                # remove one \.
+                tmpVal = tmpVal[:-2]
+            else:
+                tmpVal = tmpVal[:-1]
+
+        # Check to see if there are any other wildcards. If there are
+        # we cannot use our shortcuts.
+        if "*" not in tmpVal and "?" not in tmpVal:
+            if isStartsWithWildcard and isEndsWithWildcard:
+                return ("contains", tmpVal)
+
+            if isStartsWithWildcard:
+                return ("ends with", tmpVal)
+
+            if isEndsWithWildcard:
+                return ("starts with", tmpVal)
+
+        # This is messy, but it is accurate in generating a RE based on
+        # the simplified wildcard system, while also supporting the
+        # escaping of those wildcards.
+        segments = []
+        tmpVal = val
+        while True:
+            nEscapes = 0
+            for i in range(len(tmpVal)):
+                # We keep a running count of backslash escape
+                # characters we see so that if we meet a wildcard
+                # we can tell whether the wildcard is escaped
+                # (with odd number of escapes) or if it's just a
+                # backslash literal before a wildcard (even number).
+                if "\\" == tmpVal[i]:
+                    nEscapes += 1
+                    continue
+
+                if "*" == tmpVal[i]:
+                    if 0 == nEscapes:
+                        segments.append(re.escape(tmpVal[:i]))
+                        segments.append(".*")
+                    elif nEscapes % 2 == 0:
+                        segments.append(re.escape(tmpVal[:i - nEscapes]))
+                        segments.append(tmpVal[i - nEscapes:i])
+                        segments.append(".*")
+                    else:
+                        segments.append(re.escape(tmpVal[:i - nEscapes]))
+                        segments.append(tmpVal[i - nEscapes:i + 1])
+                    tmpVal = tmpVal[i + 1:]
+                    break
+
+                if "?" == tmpVal[i]:
+                    if 0 == nEscapes:
+                        segments.append(re.escape(tmpVal[:i]))
+                        segments.append(".")
+                    elif nEscapes % 2 == 0:
+                        segments.append(re.escape(tmpVal[:i - nEscapes]))
+                        segments.append(tmpVal[i - nEscapes:i])
+                        segments.append(".")
+                    else:
+                        segments.append(re.escape(tmpVal[:i - nEscapes]))
+                        segments.append(tmpVal[i - nEscapes:i + 1])
+                    tmpVal = tmpVal[i + 1:]
+                    break
+
+                nEscapes = 0
+            else:
+                segments.append(re.escape(tmpVal))
+                break
+
+        val = ''.join(segments)
+
+        return ("matches", val)
+
+    def _mapKeywordVals(self, values):
+        # This function ensures that the list of values passed
+        # are proper D&R operations, if they are strings it indicates
+        # they were requested as keyword matches. We only support
+        # keyword matches when specified in the config. We generally just
+        # map them to the most common field in LC that makes sense.
+        mapped = []
+
+        for val in values:
+            # Non-keywords are just passed through.
+            if not isinstance(val, str):
+                mapped.append(val)
+                continue
+
+            if self._keywordField is None:
+                raise NotImplementedError("Full-text keyboard searches not supported.")
+
+            # This seems to be indicative only of "keywords" which are mostly
+            # representative of full-text searches. We don't suport that but
+            # in some data sources we can alias them to an actual field.
+            op, newVal = self._valuePatternToLcOp(val)
+            newOp = {
+                "op": op,
+                "path": self._keywordField,
+            }
+            if op == "matches":
+                newOp["re"] = newVal
+            else:
+                newOp["value"] = newVal
+            mapped.append(newOp)
+
+        return mapped
