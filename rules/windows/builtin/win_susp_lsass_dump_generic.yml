@@ -1,8 +1,9 @@
 title: Generic Password Dumper Activity on LSASS
 description: Detects process handle on LSASS process with certain access mask
 status: experimental
-author: Roberto Rodriguez, Teymur Kheirkhabarov, Dimitrios Slamaris, Mark Russinovich, oscd.community (update)
+author: Roberto Rodriguez, Teymur Kheirkhabarov, Dimitrios Slamaris, Mark Russinovich, Aleksey Potapov, oscd.community (update)
 date: 2019/11/01
+modified: 2019/11/07
 references:
     - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
@@ -16,7 +17,7 @@ logsource:
 detection:
     selection_1:
         EventID: 4656
-        ObjectName: '*\lsass.exe'
+        ObjectName|endswith: '\lsass.exe'
         AccessMask|contains:
             - '0x40'
             - '0x1400'
@@ -29,20 +30,20 @@ detection:
             - '0x1418'    # car.2019-04-004
     selection_2:
         EventID: 4663
-        ObjectName: '*\lsass.exe'
+        ObjectName|endswith: '\lsass.exe'
         AccessList|contains:
             - '4484'
             - '4416'
     filter:
-        ProcessName: 
-            - '*\wmiprvse.exe'
-            - '*\taskmgr.exe'
-            - '*\procexp64.exe'
-            - '*\procexp.exe'
-            - '*\lsm.exe'
-            - '*\csrss.exe'
-            - '*\wininit.exe'
-            - '*\vmtoolsd.exe'
+        ProcessName|endswith: 
+            - '\wmiprvse.exe'
+            - '\taskmgr.exe'
+            - '\procexp64.exe'
+            - '\procexp.exe'
+            - '\lsm.exe'
+            - '\csrss.exe'
+            - '\wininit.exe'
+            - '\vmtoolsd.exe'
     condition: selection_1 or selection_2 and not filter
 falsepositives:
     - Legitimate software accessing LSASS process for legitimate reason; update the whitelist with it
