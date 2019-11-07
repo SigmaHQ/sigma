@@ -1,6 +1,6 @@
-title: Capture a Network Trace with netsh
+title: Capture a Network Trace with netsh.exe
 status: experimental
-description: Detects capture a network trace via netsh trace functionality
+description: Detects capture a network trace via netsh.exe trace functionality
 references:
     - https://blogs.msdn.microsoft.com/canberrapfe/2012/03/30/capture-a-network-trace-without-installing-anything-capture-a-network-trace-of-a-reboot/
 author: Kutepov Anton, oscd.community
@@ -13,8 +13,11 @@ logsource:
     product: windows
 detection:
     selection:
-        CommandLine: netsh* trace* start*           
+        CommandLine|contains|all: 
+            - netsh
+            - trace
+            - start
     condition: selection    
 falsepositives: 
-    - Legitimate administration
+    - Legitimate administrator or user uses netsh.exe trace functionality for legitimate reason
 level: medium
