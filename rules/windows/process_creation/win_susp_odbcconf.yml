@@ -1,11 +1,12 @@
 title: Possible Application Whitelisting Bypass via dll loaded by odbcconf.exe
-description: Defence evasion via odbcconf.exe loading DLL specified in target .RSP file
+description: Detects defence evasion attempt via odbcconf.exe execution to load DLL
 status: experimental
 references:
     - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OSBinaries/Odbcconf.yml
-author: Beyu Denis, Daniil Yugoslavskiy, oscd.community
+    - https://twitter.com/Hexacorn/status/1187143326673330176
+author: Kirill Kiryanov, Beyu Denis, Daniil Yugoslavskiy, oscd.community
 date: 2019/10/25
-modified: 2019/11/04
+modified: 2019/11/07
 tags:
     - attack.defense_evasion
     - attack.execution
@@ -15,16 +16,14 @@ logsource:
     product: windows
 detection:
     selection_1:
-        Image: '*\odbcconf.exe'
-    selection_2:
-        CommandLine|contains|all:
+        Image|endswith: '\odbcconf.exe'
+        CommandLine|contains: 
             - '-f'
-            - '.rsp'
-    selection_3:    
-        CommandLine|contains|all:
             - 'regsvr'
-            - '.dll'
-    condition: selection_1 and ( selection_2 or selection_3 )
+    selection_2:
+        ParentImage|endswith: '\odbcconf.exe'
+        Image|endswith: '\rundll32.exe'
+    condition: selection_1 or selection_2
 level: medium
 falsepositives:
     - Legitimate use of odbcconf.exe by legitimate user
