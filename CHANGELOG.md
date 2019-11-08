@@ -15,6 +15,7 @@ Changes from this section will be contained in the next release.
 * sigma-similarity tool
 * LimaCharlie backend
 * Default configurations for some backends that are used if no configuration is passed.
+* Regular expression support for es-dsl backend (propagates to backends derived from this like elastalert-dsl)
 * Value modifiers:
     * startswith
     * endswith
