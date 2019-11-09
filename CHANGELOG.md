@@ -10,6 +10,8 @@ from version 0.14.0.
 
 Changes from this section will be contained in the next release.
 
+## 0.14
+
 ### Added
 
 * sigma-similarity tool
@@ -25,6 +27,11 @@ Changes from this section will be contained in the next release.
 * Removal of line breaks in elastalert output
 * Searches not bound to fields are restricted to keyword fields in es-qs backend
 * Graylog backend now based on es-qs backend
+
+### Fixed
+
+* Removed ProcessCommandLine mapping for Windows Security EventID 4688 in generic
+  process creation log source configuration.
 
 ## 0.13
 
