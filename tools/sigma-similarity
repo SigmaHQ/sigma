@@ -18,6 +18,7 @@ argparser.add_argument("--recursive", "-r", action="store_true", help="Recurse i
 argparser.add_argument("--verbose", "-v", action="count", help="Be verbose. Use once more for debug output.")
 argparser.add_argument("--top", "-t", type=int, help="Only output the n most similar rule pairs.")
 argparser.add_argument("--min-similarity", "-m", type=int, help="Only output pairs with a similarity above this threshold (percent)")
+argparser.add_argument("--primary", "-p", help="File with list of paths to primary rules. If given, only rule combinations with at leat one primary rule are compared. Primary rules must also be contained in input rule set.")
 argparser.add_argument("inputs", nargs="+", help="Sigma input files")
 args = argparser.parse_args()
 
@@ -62,6 +63,11 @@ if args.recursive:
 else:
     paths = [ pathlib.Path(pathname) for pathname in args.inputs ]
 
+primary_paths = None
+if args.primary:
+    with open(args.primary, "r") as f:
+        primary_paths = { pathname.strip() for pathname in f.readlines() }
+
 parsed = {
             str(path): SigmaCollectionParser(path.open().read())
             for path in paths
@@ -75,7 +81,11 @@ converted_flat = (
             for path, nlist in converted.items()
             for i, normalized in zip(range(len(nlist)), nlist)
         )
-converted_pairs = list(itertools.combinations(converted_flat, 2))
+converted_pairs_iter = itertools.combinations(converted_flat, 2)
+if primary_paths:
+    converted_pairs = [ pair for pair in converted_pairs_iter if pair[0][0] in primary_paths or pair[1][0] in paths ]
+else:
+    converted_pairs = list(converted_pairs_iter)
 similarities = [
         (item1[:2], item2[:2], difflib.SequenceMatcher(None, item1[2], item2[2]).ratio())
             for item1, item2 in progressbar.progressbar(converted_pairs)

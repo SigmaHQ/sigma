@@ -1,0 +1,21 @@
+title: T1086 Remote PowerShell Session
+description: Detects remote PowerShell seccions by monitoring for wsmprovhost as a parent or child process (sign of an active ps remote sessionn)
+status: experimental
+date: 2019/09/12
+author: Roberto Rodriguez @Cyb3rWard0g
+references:
+    - https://github.com/Cyb3rWard0g/ThreatHunter-Playbook/tree/master/playbooks/windows/02_execution/T1086_powershell/powershell_remote_session.md
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection_one: 
+        EventID: 1
+        Image: '*\wsmprovhost.exe'
+    selection_two:
+        EventID: 1
+        ParentImage: '*\wsmprovhost.exe'
+    condition: selection_one or selection_two
+falsepositives:
+    - Unknown
+level: critical
