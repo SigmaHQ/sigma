@@ -1,0 +1,32 @@
+title: Logging configuration changes on linux host
+description: Detect changes of syslog daemons configuration files
+    # Example config for this one (place it at the top of audit.rules)
+    # -w /etc/syslog.conf -p wa -k etc_modify_syslogconfig
+    # -w /etc/rsyslog.conf -p wa -k etc_modify_rsyslogconfig
+    # -w /etc/syslog-ng/syslog-ng.conf -p wa -k etc_modify_syslogngconfig
+references:
+    - self experience
+tags:
+    - attack.defense_evasion
+    - attack.t1054
+author: Mikhail Larin, oscd.community
+status: experimental
+date: 2019/10/25
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+        type: 'SYSCALL'
+        key:
+          - 'etc_modify_syslogconfig'
+          - 'etc_modify_rsyslogconfig'
+          - 'etc_modify_syslogngconfig'
+    condition: selection
+fields:
+    - exe
+    - comm
+    - key
+falsepositives:
+    - Legitimate administrative activity
+level: high
