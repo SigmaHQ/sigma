@@ -15,8 +15,9 @@ detection:
     exec_selection:
         EventID: 1 # Migration to process_creation requires multipart YAML
         ParentImage: '*\userinit.exe'
-    exec_exclusion:
+    exec_exclusion1:
         Image: '*\explorer.exe'
+    exec_exclusion2:
         CommandLine: '*\netlogon.bat'
     create_selection_cli:
         EventID:
@@ -33,7 +34,7 @@ detection:
     create_keywords_cli:
         CommandLine:
             - '*UserInitMprLogonScript*'
-    condition: (exec_selection and not exec_exclusion) or (create_selection_reg and create_keywords_reg) or (create_selection_cli and create_keywords_cli)
+    condition: (exec_selection and not exec_exclusion1 and not exec_exclusion2) or (create_selection_reg and create_keywords_reg) or (create_selection_cli and create_keywords_cli)
 falsepositives:
     - exclude legitimate logon scripts
     - penetration tests, red teaming
