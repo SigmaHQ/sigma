@@ -7,16 +7,13 @@ author: Roberto Rodriguez @Cyb3rWard0g
 references:
     - https://github.com/Cyb3rWard0g/ThreatHunter-Playbook/tree/master/playbooks/windows/02_execution/T1086_powershell/powershell_remote_session.md
 logsource:
+    category: process_creation
     product: windows
-    service: sysmon
 detection:
-    selection_1: 
-        EventID: 1
-        Image|endswith: '\wsmprovhost.exe'
-    selection_2:
-        EventID: 1
-        ParentImage|endswith: '\wsmprovhost.exe'
-    condition: selection_1 or selection_2
+    selection:
+        - Image|endswith: '\wsmprovhost.exe'
+        - ParentImage|endswith: '\wsmprovhost.exe'
+    condition: selection
 falsepositives:
     - Unknown
 level: critical
