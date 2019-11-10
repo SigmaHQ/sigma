@@ -9,21 +9,22 @@ tags:
 status: experimental
 author: Teymur Kheirkhabarov
 date: 2019/10/26
+modified: 2019/11/11
 logsource:
-    category: process_creation
     product: windows
+    service: sysmon
 detection:
     selection:
         EventID: 13
         IntegrityLevel: 'Medium'
-        TargetObject:
-            - '*\services\*\ImagePath'
-            - '*\services\*\FailureCommand'
-            - '*\services\*\Parameters\ServiceDll'
+        TargetObject|contains: '\services\'
+        TargetObject|endswith:
+            - '\ImagePath'
+            - '\FailureCommand'
+            - '\Parameters\ServiceDll'
     condition: selection
 falsepositives:
     - Unknown
-    - Penetration Test
 level: high
 enrichment:
     - EN_0001_cache_sysmon_event_id_1_info                      # http://bit.ly/314zc6x
