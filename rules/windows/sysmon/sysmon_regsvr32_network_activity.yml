@@ -11,24 +11,17 @@ tags:
 author: Dmitriy Lifanov, oscd.community
 status: experimental
 date: 2019/10/25
+modified: 2019/11/10
 logsource:
     product: windows
     service: sysmon
 detection:
-    condition: 1 of them
-    selection1:
-        EventID: 3
-        Image: '*\System32\regsvr32.exe'
-    selection2:
-        EventID: 22
-        Image: '*\System32\regsvr32.exe'
-# The 32-bit version of Regsvr32.exe on a 64-bit Windows version
-    selection3:
-        EventID: 3
-        Image: '*\SysWoW64\regsvr32.exe'
-    selection4:
-        EventID: 22
-        Image: '*\SysWoW64\regsvr32.exe'
+    selection:
+        EventID:
+         - 3
+         - 22
+        Image|endswith: '\regsvr32.exe'
+    condition: selection
 falsepositives:
     - unknown
 level: high
