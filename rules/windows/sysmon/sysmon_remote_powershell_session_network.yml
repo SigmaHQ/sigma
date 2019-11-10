@@ -1,0 +1,22 @@
+title: T1086 Remote PowerShell Session
+description: Detects remote PowerShell seccions by monitoring network outbount connections to ports 5985 or 5986 from not network service account
+status: experimental
+date: 2019/09/12
+author: Roberto Rodriguez @Cyb3rWard0g
+references:
+    - https://github.com/Cyb3rWard0g/ThreatHunter-Playbook/tree/master/playbooks/windows/02_execution/T1086_powershell/powershell_remote_session.md
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection: 
+        EventID: 3
+        DestinationPort:
+            - 5985
+            - 5986
+    filter:
+        User: 'NT AUTHORITY\NETWORK SERVICE'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: critical

@@ -1,0 +1,21 @@
+title: T1112 RDP Registry Modification
+description: Detects potential malicious modification of the property value of fDenyTSConnections and UserAuthentication to enable remote desktop connections.
+status: experimental
+date: 2019/09/12
+author: Roberto Rodriguez @Cyb3rWard0g
+references:
+    - https://github.com/Cyb3rWard0g/ThreatHunter-Playbook/tree/master/playbooks/windows/02_execution/T1086_powershell/powershell_remote_session.md
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection_one: 
+        EventID: 13
+        TargetObject:
+            - '*\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp\UserAuthentication'
+            - '*\CurrentControlSet\Control\Terminal Server\fDenyTSConnections'
+        Details: 'DWORD (0x00000000)'
+    condition: selection
+falsepositives:
+    - Unknown
+level: critical

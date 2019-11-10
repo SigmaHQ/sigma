@@ -1,0 +1,32 @@
+title: T1047 WMI Modules Loaded
+description: Detects non wmiprvse loading WMI modules
+status: experimental
+date: 2019/08/10
+author: Roberto Rodriguez @Cyb3rWard0g
+references:
+    - https://github.com/Cyb3rWard0g/ThreatHunter-Playbook/tree/master/playbooks/windows/02_execution/T1047_windows_management_instrumentation/wmi_wmi_module_load.md
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection: 
+        EventID: 7
+        ImageLoaded:
+            - '*wmiclnt.dll'
+            - '*WmiApRpl.dll'
+            - '*wmiprov.dll'
+            - '*wmiutils.dll'
+            - '*wbemcomn.dll'
+            - '*wbemprox.dll'
+            - '*WMINet_Utils.dll'
+            - '*wbemsvc.dll'
+            - '*fastprox.dll'
+    filter:
+        Image:
+            - '*WmiPrvSe.exe'
+            - '*WmiAPsrv.exe'
+            - '*svchost.exe'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: critical

@@ -1,0 +1,21 @@
+title: T1086 Alternate PowerShell Hosts
+description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
+status: experimental
+date: 2019/08/11
+author: Roberto Rodriguez @Cyb3rWard0g
+references:
+    - https://github.com/Cyb3rWard0g/ThreatHunter-Playbook/tree/master/playbooks/windows/02_execution/T1086_powershell/alternate_signed_powershell_hosts.md
+logsource:
+    product: windows
+    service: powershell
+detection:
+    selection: 
+        EventID:
+            - 4103
+            - 400
+    filter:
+        HostApplication: 'powershell.exe'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: critical
