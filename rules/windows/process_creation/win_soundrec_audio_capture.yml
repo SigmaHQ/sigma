@@ -1,20 +1,21 @@
 title: Audio Capture via SoundRecorder
-description: Detect attacker collecting audio via SoundRecorder application.
+description: Detect attacker collecting audio via SoundRecorder application
 status: experimental
-author: E.M. Anhaus (orignally from Atomic Blue Detections, Endgame)
+author: E.M. Anhaus (orignally from Atomic Blue Detections, Endgame), oscd.community
 date: 2019/10/24
+modified: 2019/11/11
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1123/T1123.yaml
 tags:
     - attack.collection
     - attack.t1123
 detection:
     selection:
-        Image:
-            - "*\SoundRecorder.exe"
-        CommandLine:
-            - "* /FILE *"
+        Image|endswith: '\SoundRecorder.exe'
+        CommandLine|contains: '/FILE'
     condition: selection
 falsepositives:
-    - legit audio capture
+    - Legitimate audio capture by legitimate user
 level: medium
 logsource:
     category: process_creation
