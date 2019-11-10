@@ -4,23 +4,23 @@ references:
     - https://giuliocomi.blogspot.com/2019/10/abusing-windows-10-narrators-feedback.html
 tags:
     - attack.persistence
+    - attack.t1060
 author: Dmitriy Lifanov, oscd.community
 status: experimental
 date: 2019/10/25
+modified: 2019/11/10
 logsource:
     product: windows
     service: sysmon
 detection:
     condition: 1 of them
-    # Registry Object Delete
     selection1:
         EventID: 12
         EventType: DeleteValue
-        TargetObject: '*\AppXypsaf9f1qserqevf0sws76dx4k9a5206\Shell\open\command\DelegateExecute'
-    # Registry Object Value Set
+        TargetObject|endswith: '\AppXypsaf9f1qserqevf0sws76dx4k9a5206\Shell\open\command\DelegateExecute'
     selection2:
         EventID: 13
-        TargetObject: '*\AppXypsaf9f1qserqevf0sws76dx4k9a5206\Shell\open\command\(Default)'
+        TargetObject|endswith: '\AppXypsaf9f1qserqevf0sws76dx4k9a5206\Shell\open\command\(Default)'
 falsepositives:
     - unknown
 level: high
