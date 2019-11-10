@@ -9,6 +9,7 @@ tags:
 status: experimental
 author: Teymur Kheirkhabarov
 date: 2019/10/26
+modified: 2019/11/11
 logsource:
     category: process_creation
     product: windows
@@ -19,12 +20,11 @@ detection:
             - 'NT AUTHORITY\LOCAL SERVICE'
         User: 'NT AUTHORITY\SYSTEM'
     rundllexception:
-        Image: '*\rundll32.exe'
-        CommandLine: '*DavSetCookie*'
+        Image|endswith: '\rundll32.exe'
+        CommandLine|contains: 'DavSetCookie'
     condition: selection and not rundllexception
 falsepositives:
     - Unknown
-    - Penetration Test
 level: high
 enrichment:
     - EN_0001_cache_sysmon_event_id_1_info                # http://bit.ly/314zc6x
