@@ -5,6 +5,7 @@ references:
     - https://eqllib.readthedocs.io/en/latest/analytics/b8a94d2f-dc75-4630-9d73-1edc6bd26fff.html
 author: Endgame, JHasenbusch (ported for oscd.community)
 date: 2018/11/30
+modified: 2019/11/11
 tags:
     - attack.discovery
     - attack.t1018
@@ -13,11 +14,13 @@ logsource:
     product: windows
 detection:
     selection:
-        Image: '*\net.exe'
-        CommandLine: '* view*'
+        Image|endswith: 
+            - '\net.exe'
+            - '\net1.exe'
+        CommandLine|contains: 'view'
     filter:
-        CommandLine: '*\\\\*'
+        CommandLine|contains: '\\'
     condition: selection and not filter
 falsepositives:
-    - unknown
+    - Legitimate use of net.exe utility by legitimate user
 level: low 
