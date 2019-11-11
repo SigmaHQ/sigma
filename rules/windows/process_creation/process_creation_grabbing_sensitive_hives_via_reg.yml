@@ -1,9 +1,11 @@
 title: Grabbing sensitive hives via reg utility
-description: Dump sam, system and security hives using REG.exe utility
-author: Teymur Kheirkhabarov, Daniil Yugoslavskiy, oscd.community
+description: Dump sam, system or security hives using REG.exe utility
+author: Teymur Kheirkhabarov, Endgame, JHasenbusch, Daniil Yugoslavskiy, oscd.community
 date: 2019/10/22
 references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
+    - https://eqllib.readthedocs.io/en/latest/analytics/aed95fc6-5e3f-49dc-8b35-06508613f979.html
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1003/T1003.md
 tags:
     - attack.credential_access
     - attack.t1003
@@ -14,18 +16,20 @@ logsource:
 detection:
     selection_1:
         NewProcessName: '*\reg.exe'
-        CommandLine|contains: save
+        CommandLine|contains: 
+            - 'save'
+            - 'export'
     selection_2:
-        - CommandLine|contains: 
+        CommandLine|contains: 
             - 'hklm'
             - 'hkey_local_machine'
     selection_3:
-        CommandLine|contains:
-            - 'system'
-            - 'sam'
-            - 'security'
+        CommandLine|endswith:
+            - '\system'
+            - '\sam'
+            - '\security'
     condition: selection_1 and selection_2 and selection_3
 falsepositives:
-    - Dumping hives for legitimate purpouse like backup or forensic investigation
+    - Dumping hives for legitimate purpouse i.e. backup or forensic investigation
 level: medium
 status: experimental
