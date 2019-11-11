@@ -1,0 +1,25 @@
+title: Mshta Network Connections
+description: Identifies suspicious mshta.exe commands
+status: experimental
+author: E.M. Anhaus (orignally from Atomic Blue Detections, Endgame), oscd.community
+date: 2019/10/24
+modified: 2019/11/11
+references:
+    - https://eqllib.readthedocs.io/en/latest/analytics/6bc283c4-21f2-4aed-a05c-a9a3ffa95dd4.html
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1170/T1170.yaml
+tags:
+    - attack.execution
+    - attack.defense_evasion
+    - attack.t1170
+detection:
+    selection:
+        Image|endswith: '\mshta.exe'
+        CommandLine|contains: 'javascript'
+    condition: selection
+falsepositives:
+    - unknown
+level: high
+logsource:
+    category: process_creation
+    product: windows
+## todo — add sysmon eid 3 for this rule
