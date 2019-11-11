@@ -8,7 +8,9 @@ from version 0.14.0.
 
 ## Unreleased
 
-Changes from this section will be contained in the next release.
+### Added
+
+* sigma-uuid tool
 
 ## 0.14
 

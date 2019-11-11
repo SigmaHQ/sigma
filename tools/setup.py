@@ -34,7 +34,14 @@ setup(
         'Environment :: Console',
     ],
     keywords='security monitoring siem logging signatures elasticsearch splunk ids sysmon',
-    packages=['sigma', 'sigma.backends', 'sigma.config', 'sigma.parser', 'sigma.parser.modifiers'],
+    packages=[
+        'sigma',
+        'sigma.backends',
+        'sigma.config',
+        'sigma.parser',
+        'sigma.parser.modifiers',
+        'sigma.output',
+        ],
     python_requires='~=3.6',
     install_requires=['PyYAML', 'pymisp', 'progressbar2'],
     extras_require={
@@ -71,5 +78,6 @@ setup(
         'merge_sigma',
         'sigma2misp',
         'sigma-similarity',
+        'sigma-uuid',
         ]
 )
