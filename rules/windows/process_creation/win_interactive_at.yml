@@ -1,20 +1,19 @@
 title: Interactive AT Job
 description: Detect an interactive AT job, which may be used as a form of privilege escalation.
 status: experimental
-author: E.M. Anhaus (orignally from Atomic Blue Detections, Endgame)
+author: E.M. Anhaus (orignally from Atomic Blue Detections, Endgame), oscd.community
 date: 2019/10/24
+modified: 2019/11/11
 tags:
     - attack.privilege_escalation
     - attack.t1053
 detection:
     selection:
-        Image:
-            - '*at.exe'
-        CommandLine:
-            - '* interactive*'
+        Image|endswith: '\at.exe'
+        CommandLine|contains: 'interactive'
     condition: selection
 falsepositives:
-    - unlike (at.exe deprecated as of Windows 8)
+    - Unlikely (at.exe deprecated as of Windows 8)
 level: high
 logsource:
     category: process_creation
