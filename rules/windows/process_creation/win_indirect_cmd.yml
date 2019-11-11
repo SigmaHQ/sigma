@@ -1,19 +1,24 @@
 title: Indirect Command Execution
-description: Detect indirect command execution via Program Compatibility Assistant pcalua.exe or forfiles.exe.
+description: Detect indirect command execution via Program Compatibility Assistant pcalua.exe or forfiles.exe
 status: experimental
-author: E.M. Anhaus (orignally from Atomic Blue Detections, Endgame)
+author: E.M. Anhaus (orignally from Atomic Blue Detections, Endgame), oscd.community
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1202/T1202.yaml
+    - https://eqllib.readthedocs.io/en/latest/analytics/884a7ccd-7305-4130-82d0-d4f90bc118b6.html
 date: 2019/10/24
+modified: 2019/11/11
 tags:
     - attack.defense_evasion
     - attack.t1202
 detection:
     selection:
-        ParentImage:
-            - '*pcalua.exe'
-            - '*forfiles.exe'
-    condition: selection | count(CommandLine) > 10
+        ParentImage|endswith:
+            - '\pcalua.exe'
+            - '\forfiles.exe'
+    condition: selection
 falsepositives:
-    - legit usage of scripts
+    - Need to use extra processing with 'unique_count' / 'filter' to focus on outliers as opposed to commonly seen artifacts
+    - Legit usage of scripts
 level: high
 logsource:
     category: process_creation
