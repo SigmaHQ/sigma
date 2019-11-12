@@ -10,6 +10,10 @@ from version 0.14.0.
 
 Changes from this section will be contained in the next release.
 
+### Changed
+
+* Type errors are now ignored with -I
+
 ## 0.14
 
 ### Added
@@ -32,8 +36,6 @@ Changes from this section will be contained in the next release.
 
 * Removed ProcessCommandLine mapping for Windows Security EventID 4688 in generic
   process creation log source configuration.
-
-## 0.13
 
 ### Added
 
