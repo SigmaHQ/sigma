@@ -27,6 +27,7 @@ from .base import BaseBackend, SingleTextQueryBackend
 from .mixins import RulenameCommentMixin, MultiRuleOutputMixin
 from .exceptions import NotSupportedError
 
+
 class ElasticsearchWildcardHandlingMixin(object):
     """
     Determine field mapping to keyword subfields depending on existence of wildcards in search values. Further,
@@ -73,6 +74,7 @@ class ElasticsearchWildcardHandlingMixin(object):
             self.matchKeyword = False
             return fieldname
 
+
 class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
     """Converts Sigma rule into Elasticsearch query string. Only searches, no aggregations."""
     identifier = "es-qs"
@@ -113,7 +115,7 @@ class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, Single
     def generateSubexpressionNode(self, node):
         """Check for search not bound to a field and restrict search to keyword fields"""
         nodetype = type(node.items)
-        if nodetype in { ConditionAND, ConditionOR } and type(node.items.items) == list and { type(item) for item in node.items.items }.issubset({str, int}):
+        if nodetype in {ConditionAND, ConditionOR} and type(node.items.items) == list and {type(item) for item in node.items.items }.issubset({str, int}):
             newitems = list()
             for item in node.items:
                 newitem = item
@@ -132,6 +134,7 @@ class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, Single
             return result
         else:
             return super().generateSubexpressionNode(node)
+
 
 class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlingMixin, BaseBackend):
     """ElasticSearch DSL backend"""
@@ -316,6 +319,7 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
             else:
                 return json.dumps(self.queries, indent=2)
 
+
 class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     """Converts Sigma rule into Kibana JSON Configuration files (searches only)."""
     identifier = "kibana"
@@ -403,7 +407,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
                     })
 
     def finalize(self):
-        if self.output_type == "import":        # output format that can be imported via Kibana UI
+        if self.output_type == "import": # output format that can be imported via Kibana UI
             for item in self.kibanaconf:    # JSONize kibanaSavedObjectMeta.searchSourceJSON
                 item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'] = json.dumps(item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'])
             return json.dumps(self.kibanaconf, indent=2)
@@ -429,6 +433,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     def index_variable_name(self, index):
         return "index_" + index.replace("-", "__").replace("*", "X")
 
+
 class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     """Converts Sigma Rule into X-Pack Watcher JSON for alerting"""
     identifier = "xpack-watcher"
@@ -438,25 +443,26 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
             ("output", "curl", "Output format: curl = Shell script that imports queries in Watcher index with curl", "output_type"),
             ("es", "localhost:9200", "Host and port of Elasticsearch instance", None),
             ("watcher_url", "watcher", "Watcher URL: watcher (default)=_watcher/..., xpack=_xpack/wacher/... (deprecated)", None),
-            ("filter_range","30m","Watcher time filter",None),
+            ("filter_range","30m","Watcher time filter", None),
 
             ("alert_methods", "email", "Alert method(s) to use when the rule triggers, comma separated. Supported: " + ', '.join(supported_alert_methods), None),
             # Options for Email Action            
             ("mail", "root@localhost", "Mail address for Watcher notification (only logging if not set)", None),
 
             # Options for WebHook Action
-        ("http_host", "localhost", "Webhook host used for alert notification", None),
-        ("http_port", "80", "Webhook port used for alert notification", None),
-        ("http_scheme", "http", "Webhook scheme used for alert notification", None),
-        ("http_user", None, "Webhook User used for alert notification", None),
-        ("http_pass", None, "Webhook Password used for alert notification", None),
-        ("http_uri_path", "/", "Webhook Uri used for alert notification", None),
-        ("http_method", "POST", "Webhook Method used for alert notification", None),
+            ("http_host", "localhost", "Webhook host used for alert notification", None),
+            ("http_port", "80", "Webhook port used for alert notification", None),
+            ("http_scheme", "http", "Webhook scheme used for alert notification", None),
+            ("http_user", None, "Webhook User used for alert notification", None),
+            ("http_pass", None, "Webhook Password used for alert notification", None),
+            ("http_uri_path", "/", "Webhook Uri used for alert notification", None),
+            ("http_method", "POST", "Webhook Method used for alert notification", None),
 
-        ("http_phost", None, "Webhook proxy host", None),
-        ("http_pport", None, "Webhook Proxy port", None),
+            ("http_phost", None, "Webhook proxy host", None),
+            ("http_pport", None, "Webhook Proxy port", None),
+
             # Options for Index Action
-            ("index", "<log2alert-{now/d}>","Index name used to add the alerts", None), #by default it creates a new index every day
+            ("index", "<log2alert-{now/d}>","Index name used to add the alerts", None), # by default it creates a new index every day
             ("type", "_doc","Index Type used to add the alerts", None)
         
             )
@@ -591,11 +597,11 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                     eaction = {
                         "send_email": {
                                 "email": {
-                                "to": email,
-                                "subject": action_subject,
+                                    "to": email,
+                                    "subject": action_subject,
                                     "body": action_body,
-                                "attachments": {
-                                    "data.json": {
+                                    "attachments": {
+                                        "data.json": {
                                             "data": {
                                             "format": "json"
                                                 }
@@ -615,51 +621,52 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                     http_user = self.http_user
                     http_pass = self.http_pass
                     waction = {
-            "httppost":{
+                        "httppost":{
                             "transform":{
                                 "script": "ctx.metadata.timestamp=ctx.trigger.scheduled_time;" 
                                 },
-                            "webhook":{
-                            "scheme"  : http_scheme,
-                            "host"    : http_host,
-                            "port"    : int(http_port),
-                            "method"  : http_method,
-                                "path"    : http_uri_path,
-                            "params"  : {},
-                            "headers" : {"Content-Type"                      : "application/json"},
-                            "body"    : "{{#toJson}}ctx.metadata{{/toJson}}"
-                            }
-            }
-            }
-                    if (http_user) and (http_pass):
-                        auth={
-                            "basic":{
-                                "username":http_user,
-                                "password":http_pass
+                            "webhook": {
+                                "scheme"  : http_scheme,
+                                "host"    : http_host,
+                                "port"    : int(http_port),
+                                "method"  : http_method,
+                                "path": http_uri_path,
+                                "params"  : {},
+                                "headers" : {"Content-Type": "application/json"},
+                                "body"    : "{{#toJson}}ctx.metadata{{/toJson}}"
                             }
                         }
-                        waction['httppost']['webhook']['auth']={}
-                        waction['httppost']['webhook']['auth']=auth
+                    }
 
-                    if (http_phost) and (http_pport): #As defined in documentation
-                        waction['httppost']['webhook']['proxy']={}
-                        waction['httppost']['webhook']['proxy']['host']=http_phost
-                        waction['httppost']['webhook']['proxy']['port']=http_pport
+                    if http_user and http_pass:
+                        auth = {
+                            "basic": {
+                                "username": http_user,
+                                "password": http_pass
+                            }
+                        }
+                        waction['httppost']['webhook']['auth'] = {}
+                        waction['httppost']['webhook']['auth'] = auth
 
-                if 'index' in alert_methods: #Index Action. Adding metadata to actual events and send them in another index
+                    if http_phost and http_pport: # As defined in documentation
+                        waction['httppost']['webhook']['proxy'] = {}
+                        waction['httppost']['webhook']['proxy']['host'] = http_phost
+                        waction['httppost']['webhook']['proxy']['port'] = http_pport
+
+                if 'index' in alert_methods: # Index Action. Adding metadata to actual events and send them in another index
                     index = self.index
                     dtype = self.type
-                    size=1000 #I presume it will not be more than 1000 events detected
+                    size = 1000  # I presume it will not be more than 1000 events detected
                     iaction = {
-                            "elastic":{
-                                "transform":{ #adding title, description, tags on the event 
-                                    "script": "ctx.payload.transform = [];for (int j=0;j<ctx.payload.hits.total;j++){ctx.payload.hits.hits[j]._source.alerttimestamp=ctx.trigger.scheduled_time;ctx.payload.hits.hits[j]._source.alerttitle=ctx.metadata.title;ctx.payload.hits.hits[j]._source.alertquery=ctx.metadata.query;ctx.payload.hits.hits[j]._source.alertdescription=ctx.metadata.description;ctx.payload.hits.hits[j]._source.tags=ctx.metadata.tags;ctx.payload.transform.add(ctx.payload.hits.hits[j]._source)} return ['_doc': ctx.payload.transform];"
-                                },
-                                "index":{
-                                    "index": index,
-                                    "doc_type":dtype 
-                                }
+                        "elastic": {
+                            "transform": { # adding title, description, tags on the event
+                                "script": "ctx.payload.transform = [];for (int j=0;j<ctx.payload.hits.total;j++){ctx.payload.hits.hits[j]._source.alerttimestamp=ctx.trigger.scheduled_time;ctx.payload.hits.hits[j]._source.alerttitle=ctx.metadata.title;ctx.payload.hits.hits[j]._source.alertquery=ctx.metadata.query;ctx.payload.hits.hits[j]._source.alertdescription=ctx.metadata.description;ctx.payload.hits.hits[j]._source.tags=ctx.metadata.tags;ctx.payload.transform.add(ctx.payload.hits.hits[j]._source)} return ['_doc': ctx.payload.transform];"
+                            },
+                            "index": {
+                                "index": index,
+                                "doc_type": dtype
                             }
+                        }
                     }
 
                 action = {**eaction,**waction, **iaction}
@@ -678,7 +685,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                                   "title": title,
                                   "description": description,
                                   "tags": tags,
-                                  "query":result #addede query to metadata. very useful in kibana to do drill down directly from discover
+                                  "query": result # addede query to metadata. very useful in kibana to do drill down directly from discover
                               },     
                               "trigger": {
                                 "schedule": {
@@ -692,7 +699,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                                       "size": size,
                                       "query": {
                                         "bool": {
-                                            "must":[{
+                                            "must": [{
                                                 "query_string": {
                                                     "query": result,  # this is where the elasticsearch query syntax goes
                                                     "analyze_wildcard": True
@@ -701,8 +708,8 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                                             "filter":
                                                 {
                                                     "range":{
-                                                        dateField:{
-                                                            "gte":"now-%s/m"%self.filter_range #filter only for the last x minutes events
+                                                        dateField: {
+                                                            "gte": "now-%s/m" % self.filter_range # filter only for the last x minutes events
                                                             }
                                                         }
                                                 }
@@ -716,8 +723,8 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                               },
                               "condition": {
                                   "compare": {
-                                  alert_value_location: alert_condition
-                                }
+                                      alert_value_location: alert_condition
+                                  }
                               },
                               "actions": { **action }
                             }
@@ -734,6 +741,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
             else:
                 raise NotImplementedError("Output type '%s' not supported" % self.output_type)
         return result
+
 
 class ElastalertBackend(MultiRuleOutputMixin):
     """Elastalert backend"""
@@ -764,6 +772,7 @@ class ElastalertBackend(MultiRuleOutputMixin):
         super().__init__(*args, **kwargs)
         self.elastalert_alerts = dict()
         self.fields = []
+        self.queries = []
 
     def generate(self, sigmaparser):
         rulename = self.getRuleName(sigmaparser)
@@ -780,23 +789,22 @@ class ElastalertBackend(MultiRuleOutputMixin):
             index = "logstash-*"
         elif len(index) > 0:
             index = index[0]
-        #Init a rule number cpt in case there are several elastalert rules generated fron one Sigma rule
+        # Init a rule number cpt in case there are several elastalert rules generated fron one Sigma rule
         rule_number = 0
         for parsed in sigmaparser.condparsed:
-            #Static data
+            # Static data
             rule_object = {
                 "name": rulename + "_" + str(rule_number),
                 "description": description,
                 "index": index,
                 "priority": self.convertLevel(level),
                 "realert": self.generateTimeframe(self.realert_time),
-                #"exponential_realert": self.generateTimeframe(self.expo_realert_time)
+                # "exponential_realert": self.generateTimeframe(self.expo_realert_time)
             }
 
             rule_object['filter'] = self.generateQuery(parsed)
-            self.queries = []
 
-            #Handle aggregation
+            # Handle aggregation
             if parsed.parsedAgg:
                 if parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MIN or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MAX or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_AVG or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_SUM:
                     if parsed.parsedAgg.groupfield is not None:
@@ -830,7 +838,7 @@ class ElastalertBackend(MultiRuleOutputMixin):
             else:
                 rule_object['type'] = "any"
 
-            #Handle alert action
+            # Handle alert action
             rule_object['alert'] = []
             alert_methods = self.alert_methods.split(',')
             if 'email' in alert_methods:
@@ -860,19 +868,19 @@ class ElastalertBackend(MultiRuleOutputMixin):
                             'tags': rule_tag
                         }
                     }
-            #If alert is not define put debug as default
+            # If alert is not define put debug as default
             if len(rule_object['alert']) == 0:
                 rule_object['alert'].append('debug')
 
-            #Increment rule number
+            # Increment rule number
             rule_number += 1
             self.elastalert_alerts[rule_object['name']] = rule_object
-            #Clear fields
+            # Clear fields
             self.fields = []
 
     def generateNode(self, node):
-        #Save fields for adding them in query_key
-        #if type(node) == sigma.parser.NodeSubexpression:
+        # Save fields for adding them in query_key
+        # if type(node) == sigma.parser.NodeSubexpression:
         #    for k,v in node.items.items:
         #        self.fields.append(k)
         return super().generateNode(node)
@@ -902,7 +910,7 @@ class ElastalertBackend(MultiRuleOutputMixin):
                     if idx == agg.aggfunc:
                         funcname = name
                         break
-                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend"%(self.title, funcname))
+                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend" % (self.title, funcname))
 
     def convertLevel(self, level):
         return {
@@ -919,26 +927,30 @@ class ElastalertBackend(MultiRuleOutputMixin):
             result += '\n'
         return result
 
+
 class ElastalertBackendDsl(ElastalertBackend, ElasticsearchDSLBackend):
     """Elastalert backend"""
     identifier = 'elastalert-dsl'
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def generateQuery(self, parsed):
-        #Generate ES DSL Query
+        # Generate ES DSL Query
         super().generateBefore(parsed)
         super().generateQuery(parsed)
         super().generateAfter(parsed)
         return self.queries
 
+
 class ElastalertBackendQs(ElastalertBackend, ElasticsearchQuerystringBackend):
     """Elastalert backend"""
     identifier = 'elastalert'
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def generateQuery(self, parsed):
-        #Generate ES QS Query
-        return [{ 'query' : { 'query_string' : { 'query' : super().generateQuery(parsed) } } }]
+        # Generate ES QS Query
+        return [{'query': {'query_string': {'query': super().generateQuery(parsed)}}}]
 
