@@ -1,3 +1,4 @@
+action: global
 title: Logon Scripts (UserInitMprLogonScript)
 status: experimental
 description: Detects creation or execution of UserInitMprLogonScript persistence method
@@ -8,19 +9,35 @@ tags:
     - attack.persistence
     - attack.lateral_movement
 author: Tom Ueltschi (@c_APT_ure)
+falsepositives:
+    - exclude legitimate logon scripts
+    - penetration tests, red teaming
+level: high
+---
 logsource:
+    category: process_creation
     product: windows
-    service: sysmon
 detection:
     exec_selection:
-        EventID: 1 # Migration to process_creation requires multipart YAML
         ParentImage: '*\userinit.exe'
     exec_exclusion1:
         Image: '*\explorer.exe'
     exec_exclusion2:
         CommandLine: '*\netlogon.bat'
-    create_selection_cli:
-        EventID: 1
+    condition: exec_selection and not exec_exclusion1 and not exec_exclusion2
+---
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    create_keywords_cli:
+        CommandLine: '*UserInitMprLogonScript*'
+    condition: create_keywords_cli
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
     create_selection_reg:
         EventID:
             - 11
@@ -29,10 +46,4 @@ detection:
             - 14
     create_keywords_reg:
         TargetObject: '*UserInitMprLogonScript*'
-    create_keywords_cli:
-        CommandLine: '*UserInitMprLogonScript*'
-    condition: (exec_selection and not exec_exclusion1 and not exec_exclusion2) or (create_selection_reg and create_keywords_reg) or (create_selection_cli and create_keywords_cli)
-falsepositives:
-    - exclude legitimate logon scripts
-    - penetration tests, red teaming
-level: high
+    condition: create_selection_reg and create_keywords_reg
