@@ -294,7 +294,7 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
                                                 "buckets_path": {
                                                     "count": count_distinct_agg_name
                                                 },
-                                                'script': script_limit
+                                                "script": script_limit
                                             }
                                         }
                                     }
