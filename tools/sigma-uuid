@@ -73,5 +73,11 @@ for path in paths:
             with path.open("w") as f:
                 yaml.dump_all(newrules, f, Dumper=SigmaYAMLDumper, indent=4, width=160, default_flow_style=False)
 
-if args.error and not passed:
-    exit(10)
+if not passed:
+    print("The Sigma rules listed above don't have an ID. The ID must be:")
+    print("* Contained in the 'id' attribute")
+    print("* a valid UUIDv4 (randomly generated)")
+    print("* Unique in this repository")
+    print("Please generate one with the sigma-uuid tool or here: https://www.uuidgenerator.net/version4")
+    if args.error:
+        exit(10)
