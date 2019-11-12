@@ -40,7 +40,6 @@ setup(
         'sigma.config',
         'sigma.parser',
         'sigma.parser.modifiers',
-        'sigma.output',
         ],
     python_requires='~=3.6',
     install_requires=['PyYAML', 'pymisp', 'progressbar2'],
