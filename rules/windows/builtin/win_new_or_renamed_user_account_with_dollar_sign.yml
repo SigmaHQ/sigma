@@ -6,7 +6,16 @@ tags:
     - attack.t1036
 author: Ilyas Ochkov, oscd.community
 date: 2019/10/25
+modified: 2019/11/13
+logsource:
+    product: windows
+    service: security
 detection:
+    selection:
+        EventID: 
+            - 4720 # create user
+            - 4781 # rename user
+        UserName|contains: '$'    #SamAccountName
     condition: 1 of them
 fields:
     - EventID
@@ -15,19 +24,3 @@ fields:
 falsepositives:
     - Unkown
 level: medium
----
-logsource:
-    product: windows
-    service: security
-detection:
-    create_user:
-        EventID: 4720
-        UserName: '*$*'     #SamAccountName
----
-logsource:
-    product: windows
-    service: security
-detection:
-    rename_user:
-        EventID: 4781
-        UserName: '*$*'      #NewTargetUserName
