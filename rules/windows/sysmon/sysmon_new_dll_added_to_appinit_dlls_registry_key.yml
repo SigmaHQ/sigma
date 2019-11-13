@@ -8,8 +8,21 @@ tags:
     - attack.t1103
 author: Ilyas Ochkov, oscd.community
 date: 2019/10/25
+modified: 2019/11/13
+logsource:
+    product: windows
+    service: sysmon
 detection:
-    condition: 1 of them
+    selection:
+      - EventID: 
+            - 12 # key create
+            - 13 # value set
+        TargetObject|contains: '\SOFTWARE\'
+        TargetObject|endswith: '\Windows\AppInit_Dlls'
+      - EventID: 14 # key rename
+        NewName|contains: '\SOFTWARE\'
+        NewName|endswith: '\Windows\AppInit_Dlls'
+    condition: selection
 fields:
     - EventID
     - Image
@@ -18,30 +31,3 @@ fields:
 falsepositives:
     - Unkown
 level: medium
----
-logsource:
-    product: windows
-    service: sysmon
-detection:
-    key_create:
-        EventID: 12
-        TargetObject: 
-            - '*\SOFTWARE\*\Windows\AppInit_Dlls'
----
-logsource:
-    product: windows
-    service: sysmon
-detection:
-    value_set:
-        EventID: 13
-        TargetObject: 
-            - '*\SOFTWARE\*\Windows\AppInit_Dlls'
----
-logsource:
-    product: windows
-    service: sysmon
-detection:
-    key_rename:
-        EventID: 14
-        NewName: 
-            - '*\SOFTWARE\*\Windows\AppInit_Dlls'
