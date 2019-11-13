@@ -9,7 +9,21 @@ tags:
     - attack.t1182
 author: Ilyas Ochkov, oscd.community
 date: 2019/10/25
+modified: 2019/11/13
 detection:
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+      - EventID: 
+            - 12  # key create
+            - 13  # value set
+        TargetObject|contains: '\SYSTEM\'
+        TargetObject|endswith: '\Control\Session Manager\AppCertDlls'
+      - EventID: 14  # key rename
+        NewName|contains: '\SYSTEM\'
+        NewName|endswith: '\Control\Session Manager\AppCertDlls'
     condition: 1 of them
 fields:
     - EventID
@@ -19,30 +33,3 @@ fields:
 falsepositives:
     - Unkown
 level: medium
----
-logsource:
-    product: windows
-    service: sysmon
-detection:
-    key_create:
-        EventID: 12
-        TargetObject: 
-            - '*\SYSTEM\*\Control\Session Manager\AppCertDlls'
----
-logsource:
-    product: windows
-    service: sysmon
-detection:
-    value_set:
-        EventID: 13
-        TargetObject: 
-            - '*\SYSTEM\*\Control\Session Manager\AppCertDlls'
----
-logsource:
-    product: windows
-    service: sysmon
-detection:
-    key_rename:
-        EventID: 14
-        NewName: 
-            - '*\SYSTEM\*\Control\Session Manager\AppCertDlls'
