@@ -89,6 +89,7 @@ class BaseBackend:
     file_list = None
     options = tuple()     # a list of tuples with following elements: option name, default value, help text, target attribute name (option name if None)
     config_required = True
+    default_config = None
 
     def __init__(self, sigmaconfig, backend_options=dict()):
         """

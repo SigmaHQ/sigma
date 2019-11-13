@@ -22,6 +22,7 @@ import sys
 import sigma
 import yaml
 from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
+from sigma.parser.condition import ConditionOR, ConditionAND, NodeSubexpression
 from .base import BaseBackend, SingleTextQueryBackend
 from .mixins import RulenameCommentMixin, MultiRuleOutputMixin
 from .exceptions import NotSupportedError
@@ -109,6 +110,29 @@ class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, Single
         if expression:
             return "(%s%s)" % (self.notToken, expression)
 
+    def generateSubexpressionNode(self, node):
+        """Check for search not bound to a field and restrict search to keyword fields"""
+        nodetype = type(node.items)
+        if nodetype in { ConditionAND, ConditionOR } and type(node.items.items) == list and { type(item) for item in node.items.items }.issubset({str, int}):
+            newitems = list()
+            for item in node.items:
+                newitem = item
+                if type(item) == str:
+                    if not item.startswith("*"):
+                        newitem = "*" + newitem
+                    if not item.endswith("*"):
+                        newitem += "*"
+                    newitems.append(newitem)
+                else:
+                    newitems.append(item)
+            newnode = NodeSubexpression(nodetype(None, None, *newitems))
+            self.matchKeyword = True
+            result = "\\*.keyword:" + super().generateSubexpressionNode(newnode)
+            self.matchKeyword = False       # one of the reasons why the converter needs some major overhaul
+            return result
+        else:
+            return super().generateSubexpressionNode(node)
+
 class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlingMixin, BaseBackend):
     """ElasticSearch DSL backend"""
     identifier = 'es-dsl'
@@ -188,8 +212,6 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
 
     def generateMapItemNode(self, node):
         key, value = node
-        if type(value) not in (str, int, list, type(None)):
-            raise TypeError("Map values must be strings, numbers, lists or null, not " + str(type(value)))
         if type(value) is list:
             res = {'bool': {'should': []}}
             for v in value:
@@ -206,7 +228,7 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
         elif value is None:
             key_mapped = self.fieldNameMapping(key, value)
             return { "bool": { "must_not": { "exists": { "field": key_mapped } } } }
-        else:
+        elif type(value) in (str, int):
             key_mapped = self.fieldNameMapping(key, value)
             if self.matchKeyword:   # searches against keyowrd fields are wildcard searches, phrases otherwise
                 queryType = 'wildcard'
@@ -215,6 +237,11 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
                 queryType = 'match_phrase'
                 value_cleaned = self.cleanValue(str(value))
             return {queryType: {key_mapped: value_cleaned}}
+        elif isinstance(value, SigmaRegularExpressionModifier):
+            key_mapped = self.fieldNameMapping(key, value)
+            return { 'regexp': { key_mapped: str(value) } }
+        else:
+            raise TypeError("Map values must be strings, numbers, lists, null or regular expression, not " + str(type(value)))
 
     def generateValueNode(self, node):
         return {'multi_match': {'query': node, 'fields': [], 'type': 'phrase'}}
@@ -888,7 +915,7 @@ class ElastalertBackend(MultiRuleOutputMixin):
     def finalize(self):
         result = ""
         for rulename, rule in self.elastalert_alerts.items():
-            result += yaml.dump(rule, default_flow_style=False)
+            result += yaml.dump(rule, default_flow_style=False, width=10000)
             result += '\n'
         return result
 
