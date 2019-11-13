@@ -1,7 +1,8 @@
 title: Dumping ntds.dit remotely via DCSync
 description: ntds.dit retrieving using synchronisation with legitimate domain controller using Directory Replication Service Remote Protocol
 author: Teymur Kheirkhabarov, oscd.community
-date: 2019/04/10
+date: 2019/10/24
+modified: 2019/11/13
 references:
     - https://twitter.com/gentilkiwi/status/1003236624925413376
     - https://gist.github.com/gentilkiwi/dcc132457408cf11ad2061340dcb53c2
@@ -22,9 +23,9 @@ detection:
         EventID: 4662
         ComputerName: '%DomainControllersNamesList%'
         SubjectLogonId: '%SuspiciousTargetLogonIdList%'
-        Properties: 
-            - "*1131f6aa-9c07-11d1-f79f-00c04fc2dcd2*"
-            - "*1131f6ad-9c07-11d1-f79f-00c04fc2dcd2*"
+        Properties|contains: 
+            - '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2'
+            - '1131f6ad-9c07-11d1-f79f-00c04fc2dcd2'
     condition: write TargetLogonId from selection1 (if not selection2) to list %SuspiciousTargetLogonIdList%; then if selection3 -> alert
 falsepositives:
     - Legitimate administrator adding new domain controller to already existing domain
