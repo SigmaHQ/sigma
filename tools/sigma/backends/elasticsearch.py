@@ -278,15 +278,14 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
                         count_distinct_agg_name = "{}_distinct".format(agg.aggfield)
                         script_limit = "params.count {} {}".format(agg.cond_op, agg.condition)
                         self.queries[-1]['aggs'] = {
-                            "aggs": {
-                                count_agg_group_name: {
+                            count_agg_group_name: {
                                     "terms": {
-                                        "field": agg.groupfield
+                                        "field": "{}.keyword".format(agg.groupfield)
                                     },
                                     "aggs": {
                                         count_distinct_agg_name: {
                                             "cardinality": {
-                                                "field": agg.aggfield
+                                                "field": "{}.keyword".format(agg.aggfield)
                                             }
                                         },
                                         "limit": {
@@ -300,9 +299,8 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
                                     }
                                 }
                             }
-                        }
                     else:  # if the condition is count() by MyGroupedField > XYZ
-                        group_aggname = "%s_count".format(agg.groupfield)
+                        group_aggname = "{}_count".format(agg.groupfield)
                         self.queries[-1]['aggs'] = {
                             group_aggname: {
                                 'terms': {
