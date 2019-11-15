@@ -8,7 +8,7 @@ def main():
         outDir = d.replace( '/', '_' )
         print( "Creating dir: %s" % ( outDir, ) )
         os.system( 'mkdir ./dr_rules/%s' % ( outDir, ) )
-        thisPath = './sigma/rules/%s/' % ( d, )
+        thisPath = './rules/%s/' % ( d, )
         for f in os.listdir( thisPath ):
             thisFile = os.path.join( thisPath, f )
             if not os.path.isfile( thisFile ):
