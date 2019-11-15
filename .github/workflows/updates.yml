@@ -10,13 +10,17 @@ jobs:
     name: Generate Rules
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Master
+      - name: Checkout Rule Branch
         uses: actions/checkout@v1
         with:
-          ref: master
+          ref: lc-rules
+      - name: Rebase Latest
+        run: git rebase master
       - name: Get Generation Script
         run: wget https://raw.githubusercontent.com/refractionPOINT/sigma/lc-automation/.github/workflows/generate_all.py
       - name: Generate
         run: python3 ./generate_all.py
       - name: List Rules
-        run: ls -lahR ./dr_rules/
+        run: ls -lahR ./sigma/lc-rules
+      - name: Commit Rules
+        run: git add --all ./sigma/lc-rules/ ; git commit -m "Update to rules."
