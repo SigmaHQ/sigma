@@ -1,7 +1,7 @@
 import os
 
 def main():
-    os.system( 'mkdir ./dr_rules' )
+    os.system( 'mkdir ./sigma/lc-rules' )
     for d in ( 'windows/builtin',
                'windows/process_creation',
                'windows/sysmon', ):
