@@ -8,14 +8,14 @@ def main():
         outDir = d.replace( '/', '_' )
         print( "Creating dir: %s" % ( outDir, ) )
         os.system( 'mkdir ./dr_rules/%s' % ( outDir, ) )
-        thisPath = './rules/%s/' % ( d, )
+        thisPath = './sigma/rules/%s/' % ( d, )
         for f in os.listdir( thisPath ):
             thisFile = os.path.join( thisPath, f )
             if not os.path.isfile( thisFile ):
                 continue
             print( "Process rule %s" % ( thisFile, ) )
             outFile = "./dr_rules/%s/%s" % ( outDir, f )
-            os.system( "python3 ./tools/sigmac -t limacharlie -c ./tools/config/limacharlie.yml %s > %s" % ( thisFile, outFile ) )
+            os.system( "python3 ./sigma/tools/sigmac -t limacharlie -c ./sigma/tools/config/limacharlie.yml %s > %s" % ( thisFile, outFile ) )
             if os.path.getsize( outFile ) == 0:
                 os.system( 'rm %s' % ( outFile, ) )
 
