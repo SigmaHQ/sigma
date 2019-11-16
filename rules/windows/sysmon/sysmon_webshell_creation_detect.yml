@@ -1,0 +1,45 @@
+title: Windows webshell creation
+id: 39f1f9f2-9636-45de-98f6-a4046aa8e4b9
+status: experimental
+description: Posible webshell file creation on a static web site
+references:
+    - PT ESC rule and personal experience
+author: Beyu Denis, oscd.community
+date: 2019/10/22
+modified: 2019/11/04
+tags:
+    - attack.persistence
+    - attack.t1100
+level: critical
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection_1:
+        EventID: 11
+    selection_2:
+        TargetFilename|contains: '\inetpub\wwwroot\'
+    selection_3:        
+        TargetFilename|contains:
+            - '.asp'
+            - '.ashx'
+            - '.ph'
+    selection_4: 
+        TargetFilename|contains:
+            - '\www\'
+            - '\htdocs\'
+            - '\html\'
+    selection_5:
+        TargetFilename|contains: '.ph'
+    selection_6:
+        - TargetFilename|contains|all: 
+            - '\'
+            - '.jsp'
+        - TargetFilename|contains|all: 
+            - '\cgi-bin\'
+            - '.pl'
+    condition: selection_1 and ( selection_2 and selection_3 ) or
+               selection_1 and ( selection_4 and selection_5 ) or
+               selection_1 and selection_6
+falsepositives:
+    - Legitimate administrator or developer creating legitimate executable files in a web application folder

@@ -1,0 +1,34 @@
+title: Data Compressed
+id: 6f3e2987-db24-4c78-a860-b4f4095a7095
+status: experimental
+description: An adversary may compress data (e.g., sensitive documents) that is collected prior to exfiltration in order to make it portable and minimize the amount
+    of data sent over the network
+author: Timur Zinniatullin, oscd.community
+date: 2019/10/21
+modified: 2019/11/04
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1002/T1002.yaml
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\rar.exe'
+        CommandLine|contains|all:
+            - ' a '
+            - '-r'
+    condition: selection
+fields:
+    - Image
+    - CommandLine
+    - User
+    - LogonGuid
+    - Hashes
+    - ParentProcessGuid
+    - ParentCommandLine
+falsepositives:
+    - highly likely if rar is default archiver in the monitored environment
+level: low
+tags:
+    - attack.exfiltration
+    - attack.t1002

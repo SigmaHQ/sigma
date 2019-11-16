@@ -100,7 +100,7 @@ merges multiple YAML documents of a Sigma rule collection into simple Sigma rule
 
 ```
 usage: sigmac [-h] [--recurse] [--filter FILTER]
-              [--target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,wdatp}]
+              [--target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,wdatp}]
               [--target-list] [--config CONFIG] [--output OUTPUT]
               [--backend-option BACKEND_OPTION] [--defer-abort]
               [--ignore-backend-errors] [--verbose] [--debug]
@@ -125,7 +125,7 @@ optional arguments:
                         tag that must appear in the rules tag list, case-
                         insensitive matching. Multiple log source
                         specifications are AND linked.
-  --target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,wdatp}, -t {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,wdatp}
+  --target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,wdatp}, -t {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,wdatp}
                         Output target format
   --target-list, -l     List available output target formats
   --config CONFIG, -c CONFIG
@@ -195,6 +195,7 @@ tools/sigmac -t splunk -c ~/my-splunk-mapping.yml -c tools/config/generic/window
 * [RSA NetWitness](https://www.rsa.com/en-us/products/threat-detection-response)
 * [PowerShell](https://docs.microsoft.com/en-us/powershell/scripting/getting-started/getting-started-with-windows-powershell?view=powershell-6)
 * [Grep](https://www.gnu.org/software/grep/manual/grep.html) with Perl-compatible regular expression support
+* [LimaCharlie](https://limacharlie.io)
 
 Current work-in-progress
 * [Splunk Data Models](https://docs.splunk.com/Documentation/Splunk/7.1.0/Knowledge/Aboutdatamodels)
@@ -271,12 +272,13 @@ These tools are not part of the main toolchain and maintained separately by thei
 # Projects or Products that use Sigma
 
 * [MISP](http://www.misp-project.org/2017/03/26/MISP.2.4.70.released.html) (since version 2.4.70, March 2017)
-* [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 * [SOC Prime - Sigma Rule Editor](https://tdm.socprime.com/sigma/)
-* [ypsilon](https://github.com/P4T12ICK/ypsilon) - Automated Use Case Testing 
 * [uncoder.io](https://uncoder.io/) - Online Translator for SIEM Searches
-* [SPARK](https://www.nextron-systems.com/2018/06/28/spark-applies-sigma-rules-in-eventlog-scan/) - Scan with Sigma rules on endpoints
+* [THOR](https://www.nextron-systems.com/2018/06/28/spark-applies-sigma-rules-in-eventlog-scan/) - Scan with Sigma rules on endpoints
+* [Joe Sandbox](https://www.joesecurity.org/)
+* [ypsilon](https://github.com/P4T12ICK/ypsilon) - Automated Use Case Testing 
 * [RANK VASA](https://globenewswire.com/news-release/2019/03/04/1745907/0/en/RANK-Software-to-Help-MSSPs-Scale-Cybersecurity-Offerings.html)
+* [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 
 # Contribution
 

@@ -32,6 +32,8 @@ class SumoLogicBackend(SingleTextQueryBackend):
     """Converts Sigma rule into SumoLogic query"""
     identifier = "sumologic"
     active = True
+    config_required = False
+    default_config = ["sysmon", "sumologic"]
 
     index_field = "_index"
     reClear = None
