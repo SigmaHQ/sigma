@@ -282,7 +282,7 @@ class LimaCharlieBackend(BaseBackend):
         return yaml.safe_dump({
             "detect": detectComponent,
             "respond": respondComponents,
-        })
+        }, default_flow_style = False)
 
     def generateQuery(self, parsed):
         # We override the generateQuery function because
