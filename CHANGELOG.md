@@ -8,7 +8,15 @@ from version 0.14.0.
 
 ## Unreleased
 
-Changes from this section will be contained in the next release.
+### Added
+
+* sigma-uuid tool
+
+### Changed
+
+* Type errors are now ignored with -I
+
+## 0.14
 
 ### Added
 
@@ -25,9 +33,11 @@ Changes from this section will be contained in the next release.
 * Removal of line breaks in elastalert output
 * Searches not bound to fields are restricted to keyword fields in es-qs backend
 * Graylog backend now based on es-qs backend
-* Type errors are now ignored with -I
 
-## 0.13
+### Fixed
+
+* Removed ProcessCommandLine mapping for Windows Security EventID 4688 in generic
+  process creation log source configuration.
 
 ### Added
 
