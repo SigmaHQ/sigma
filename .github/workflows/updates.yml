@@ -1,26 +1,16 @@
 name: Update LimaCharlie Sigma Rules
 on:
-  push:
-    branches:
-      - master
+  schedule:
+    - cron:  '0,30 * * * *'
 
 jobs:
-  build:
-    name: Generate Rules
+  update:
+    name: Update Upstream
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Rule Branch
-        uses: actions/checkout@master
-        with:
-          ref: lc-rules
-          token: ${{ github.token }}
-      - name: Set Git Ident
-        run: git config --global user.email "ops@limacharlie.io"; git config --global user.name "LimaCharlie Ops"
-      - name: Rebase Latest
-        run: git rebase origin/master
-      - name: Get Generation Script
-        run: wget https://raw.githubusercontent.com/refractionPOINT/sigma/lc-automation/.github/workflows/generate_all.py
-      - name: Generate
-        run: ls -lah ./ ; python3 ./generate_all.py
-      - name: Commit Rules
-        run: git add --all ./lc-rules/ ; git commit -m "Update to rules." ; git push -f
+      - name: Set Upstream
+        run: git remote add upstream https://github.com/Neo23x0/sigma.git && git fetch upstream
+      - name: Merge
+        run: git checkout master && git merge upstream/master
+      - name: Commit
+        run: git push -f
