@@ -1,0 +1,16 @@
+name: Update LimaCharlie Sigma Rules
+on:
+  schedule:
+    - cron:  '0,30 * * * *'
+
+jobs:
+  update:
+    name: Update Upstream
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Upstream
+        run: git remote add upstream https://github.com/Neo23x0/sigma.git && git fetch upstream
+      - name: Merge
+        run: git checkout master && git merge upstream/master
+      - name: Commit
+        run: git push -f
