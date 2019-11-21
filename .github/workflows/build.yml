@@ -1,0 +1,26 @@
+name: Generate LimaCharlie Sigma Rules
+on:
+  push:
+    branches:
+      - source
+
+jobs:
+  build:
+    name: Generate Rules
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Rule Branch
+        uses: actions/checkout@e8bd1dffb6451bb0d84dbcd3ed059daca1371180
+        with:
+          ref: lc-rules
+          token: ${{ github.token }}
+      - name: Set Git Ident
+        run: git config --global user.email "ops@limacharlie.io"; git config --global user.name "LimaCharlie Ops"
+      - name: Rebase Latest
+        run: git rebase origin/source
+      - name: Get Generation Script
+        run: wget https://raw.githubusercontent.com/refractionPOINT/sigma/master/.github/workflows/generate_all.py
+      - name: Generate
+        run: ls -lah ./ ; python3 ./generate_all.py
+      - name: Commit Rules
+        run: git add --all ./lc-rules/ ; git commit -m "Update to rules." ; git push -f
