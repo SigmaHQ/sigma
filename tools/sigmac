@@ -224,7 +224,11 @@ for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
         else:
             f = sigmafile.open(encoding='utf-8')
         parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter)
-        results = parser.generate(backend)
+        try:
+            results = parser.generate(backend)
+        except:
+            print("An exception occurred")
+        
         for result in results:
             print(result, file=out)
     except OSError as e:

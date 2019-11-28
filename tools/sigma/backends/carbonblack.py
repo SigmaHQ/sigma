@@ -153,9 +153,10 @@ class SplunkBackend(SingleTextQueryBackend):
         header = {
             "X-Auth-Token": "6ff62a0dd9cf895b806fbd3190f3c0b18d98a9ae"
         }
-        x = requests.post(url, data =json.dumps(body), headers = header, verify=False)
+        print(title)
+        # x = requests.post(url, data =json.dumps(body), headers = header, verify=False)
 
-        print(x.text)
+        # print(x.text)
 
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
