@@ -18,4 +18,4 @@
 
 Example:
     
-    **python3 sigmac  -t carbonblack -c carbonblack -r ../rules/windows/process_creation**
+    python3 sigmac  -t carbonblack -c carbonblack -r /sigmaRules_tuned
