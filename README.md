@@ -1,7 +1,7 @@
-1. Sửa host và API Token trong code: 
-    Đường dẫn "sigma/tools/sigma/backends/carbonblack.py" line 145.
-    Sửa url = host CarbonBlack
-        X-Auth-Token = API Token từ profile admin
+1. Sửa host và API Token trong code:
+2. Đường dẫn "sigma/tools/sigma/backends/carbonblack.py" line 145.
+3. Sửa url = host CarbonBlack
+4. X-Auth-Token = API Token từ profile admin
 
 2. Chạy lệnh gọi chuyển rules lên watchlist qua API:
     cd /sigma/tools:
