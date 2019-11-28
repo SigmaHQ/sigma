@@ -20,9 +20,21 @@ import sigma
 from .base import SingleTextQueryBackend
 from .mixins import MultiRuleOutputMixin
 from sigma.parser.modifiers.base import SigmaTypeModifier
+import requests
+import argparse
 
 from .. eventdict import event
-
+# parser = argparse.ArgumentParser()
+# parser.add_argument("--eshost", help="Elasticsearch host", type=str, required=True)
+# parser.add_argument("--esport", help="Elasticsearch port", type=str, required=True)
+# parser.add_argument("--ruledir", help="sigma rule directory path to convert", type=str, required=True)
+# parser.add_argument("--index", help="Elasticsearch index name egs: \"winlogbeat-*\"", type=str, required=True)
+# parser.add_argument("--email", help="email address to send mail alert", type=str, required=True)
+# parser.add_argument("--outdir", help="output directory to create elastalert rules", type=str, required=True)
+# parser.add_argument("--sigmac", help="Sigmac location", default="../tools/sigmac", type=str)
+# parser.add_argument("--realerttime", help="Realert time (optional value, default 5 minutes)", type=str, default=5)
+# parser.add_argument("--debug", help="Show debug output", type=bool, default=False)
+# args = parser.parse_args()
 class SplunkBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Splunk Search Processing Language (SPL)."""
     identifier = "carbonblack"
@@ -101,7 +113,6 @@ class SplunkBackend(SingleTextQueryBackend):
                 new_value = re.sub(r'\\\/', r'\/' , new_value)
                 new_value = re.sub(r'\\\"', r'\"' , new_value)
                 new_value = re.sub(r"\\\'", r"\'" , new_value)
-            print (new_value)
         if type(value) is list:
             for vl in value:
                 vl = self.cleanValue(vl)
@@ -124,10 +135,24 @@ class SplunkBackend(SingleTextQueryBackend):
                 vl = self.cleanIPRange(vl)
         return new_value
 
+    def postAPI(self,result,title,desc):
+        url = '<host>/api/v1/watchlist'
+        body = {
+                "name":title,
+                "search_query":"q="+sult,
+                "description":desc,
+                "index_type":"events"
+                }
+
+        x = requests.post(url, data = body)
+
+        print(x.text)
+
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
         columns = list()
-
+        title = sigmaparser.parsedyaml["title"]
+        desc = sigmaparser.parsedyaml["description"]
         for parsed in sigmaparser.condparsed:
             query = self.generateQuery(parsed)
             before = self.generateBefore(parsed)
@@ -142,6 +167,6 @@ class SplunkBackend(SingleTextQueryBackend):
                 result += after
             # if mapped is not None:
             #     result += fields
-
+            postAPI(result,title,desc)
             return result
     
