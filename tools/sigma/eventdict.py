@@ -11,6 +11,14 @@ event = {
     10: ('crossproc_type', 'process_open'),
     11: ('filemod_count','[1 to *]'),
     12: ('regmod_count','[1 to *]'),
-    14: ('regmod_count','[1 to *]')
+    13: ('regmod_count','[1 to *]'),
+    14: ('',''),
+    15: ('',''),
+    16: ('',''),
+    17: ('',''),
+    18: ('',''),
+    19: ('',''),
+    20: ('',''),
+    21: ('',''),
     # 15 File create stream hash
 }
