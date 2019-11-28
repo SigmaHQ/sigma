@@ -22,8 +22,15 @@ from .mixins import MultiRuleOutputMixin
 from sigma.parser.modifiers.base import SigmaTypeModifier
 import requests
 import argparse
-
+import urllib3
+import json
 from .. eventdict import event
+urllib3.disable_warnings()
+import os, ssl
+if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
+    getattr(ssl, '_create_unverified_context', None)): 
+    ssl._create_default_https_context = ssl._create_unverified_context
+ssl._create_default_https_context = ssl._create_unverified_context
 # parser = argparse.ArgumentParser()
 # parser.add_argument("--eshost", help="Elasticsearch host", type=str, required=True)
 # parser.add_argument("--esport", help="Elasticsearch port", type=str, required=True)
@@ -136,15 +143,17 @@ class SplunkBackend(SingleTextQueryBackend):
         return new_value
 
     def postAPI(self,result,title,desc):
-        url = '<host>/api/v1/watchlist'
+        url = 'https://10.14.132.6/api/v1/watchlist'
         body = {
                 "name":title,
-                "search_query":"q="+sult,
+                "search_query":"q="+result,
                 "description":desc,
                 "index_type":"events"
                 }
-
-        x = requests.post(url, data = body)
+        header = {
+            "X-Auth-Token": "6ff62a0dd9cf895b806fbd3190f3c0b18d98a9ae"
+        }
+        x = requests.post(url, data =json.dumps(body), headers = header, verify=False)
 
         print(x.text)
 
@@ -167,6 +176,5 @@ class SplunkBackend(SingleTextQueryBackend):
                 result += after
             # if mapped is not None:
             #     result += fields
-            postAPI(result,title,desc)
+            self.postAPI(result,title,desc)
             return result
-    
