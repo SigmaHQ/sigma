@@ -6,13 +6,15 @@ tags:
     - attack.t1485
 logsource:
     product: linux
+    service: auditd
 detection:
-    keywords1:
-        - 'dd'   
-    keywords2:
-        - 'if=/dev/null'    
-        - 'if=/dev/zero'    
-    condition: keywords1 and keywords2
+    selection:
+        type: 'EXECVE'
+        a0: 'dd'   
+        a1:
+            - 'if=/dev/null'    
+            - 'if=/dev/zero'    
+    condition: selection
 falsepositives:
     - Unknown
 level: low
