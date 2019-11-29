@@ -39,6 +39,8 @@ from version 0.14.0.
 * Removed ProcessCommandLine mapping for Windows Security EventID 4688 in generic
   process creation log source configuration.
 
+## 0.13
+
 ### Added
 
 * Index mappings for Sumologic
