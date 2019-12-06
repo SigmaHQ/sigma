@@ -6,15 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 from version 0.14.0.
 
-## Unreleased
+## 0.15.0
 
 ### Added
 
-* sigma-uuid tool
+* sigma-uuid tool for addition and check of Sigma rule identifiers
+* Default configurations
+* Restriction of compared rules in sigma-similarity
+* Regular expression support in es-dsl backend
+* LimaCharlie support for proxy rule category
+* Source distribution for PyPI
 
 ### Changed
 
 * Type errors are now ignored with -I
+
+### Fixed
+
+* Removed wrong mapping of CommandLine field mapping in THOR config
 
 ## 0.14
 
