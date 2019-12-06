@@ -10,17 +10,22 @@ tags:
     - attack.persistence
     - attack.t1197
     - attack.s0190
+date: 2017/03/09
+modified: 2019/12/06
 author: Michael Haag
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection1:
         Image:
             - '*\bitsadmin.exe'
         CommandLine:
-            - /transfer
-    condition: selection
+            - '* /transfer *'
+    selection2:
+        CommandLine:
+            - '*copy bitsadmin.exe*'
+    condition: selection1 or selection2
 fields:
     - CommandLine
     - ParentCommandLine
