@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 from version 0.14.0.
 
-## 0.15.0
+## 0.15.0 - 2019-12-06
 
 ### Added
 
@@ -25,7 +25,7 @@ from version 0.14.0.
 
 * Removed wrong mapping of CommandLine field mapping in THOR config
 
-## 0.14
+## 0.14 - 2019-11-10
 
 ### Added
 
@@ -48,7 +48,7 @@ from version 0.14.0.
 * Removed ProcessCommandLine mapping for Windows Security EventID 4688 in generic
   process creation log source configuration.
 
-## 0.13
+## 0.13 - 2019-10-21
 
 ### Added
 
@@ -81,13 +81,13 @@ from version 0.14.0.
 * Elasticsearch wildcard detection pattern
 * Aggregation on keyword field in es-dsl backend
 
-## 0.12.1
+## 0.12.1 - 2019-08-05
 
 ### Fixed
 
 * Missing build dependency
 
-## 0.12
+## 0.12 - 2019-08-01
 
 ### Added
 
