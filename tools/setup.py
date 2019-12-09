@@ -66,6 +66,7 @@ setup(
             'config/winlogbeat-modules-enabled.yml',
             'config/winlogbeat.yml',
             'config/winlogbeat-old.yml',
+            'config/ecs-proxy.yml',
             'config/limacharlie.yml',
             ]),
         ('etc/sigma/generic', [

@@ -51,6 +51,7 @@ test-sigmac:
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -c tools/config/splunk-windows-index.yml -f 'level=xcritical' rules/ > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -c tools/config/splunk-windows-index.yml -f 'foo=bar' rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/logstash-windows.yml -t es-qs rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c ecs-proxy -t es-qs rules/proxy > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c sysmon -c logstash-windows -t es-qs rules/ > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c sysmon -c logstash-windows -t splunk rules/ > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/logstash-windows.yml -c tools/config/generic/sysmon.yml -t es-qs rules/ > /dev/null
