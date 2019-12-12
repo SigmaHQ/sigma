@@ -10,11 +10,26 @@ from version 0.14.0.
 
 ### Added
 
-* sigma-uuid tool
+* Proxy field names to ECS mapping (ecs-proxy) configuration
+
+## 0.15.0
+
+### Added
+
+* sigma-uuid tool for addition and check of Sigma rule identifiers
+* Default configurations
+* Restriction of compared rules in sigma-similarity
+* Regular expression support in es-dsl backend
+* LimaCharlie support for proxy rule category
+* Source distribution for PyPI
 
 ### Changed
 
 * Type errors are now ignored with -I
+
+### Fixed
+
+* Removed wrong mapping of CommandLine field mapping in THOR config
 
 ## 0.14
 

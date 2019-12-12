@@ -177,6 +177,22 @@ _allFieldMappings = {
         keywordField = None,
         postOpMapper = None
     ),
+    "/proxy/": SigmaLCConfig(
+        topLevelParams = {
+            "event": "HTTP_REQUEST",
+        },
+        preConditions = None,
+        fieldMappings = {
+            "c-uri|contains": "event/URL",
+            "c-uri": "event/URL",
+            "URL": "event/URL",
+            "cs-uri-query": "event/URL",
+            "cs-uri-stem": "event/URL",
+        },
+        isAllStringValues = False,
+        keywordField = None,
+        postOpMapper = None
+    ),
 }
 
 class LimaCharlieBackend(BaseBackend):
