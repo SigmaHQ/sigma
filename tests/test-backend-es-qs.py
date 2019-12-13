@@ -16,7 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import asyncio
-import functools
 import sys
 import pprint
 import elasticsearch
@@ -40,6 +39,7 @@ except elasticsearch.exceptions.RequestError as e:
         raise e
 
 queries = asyncio.Queue()
+
 
 # sigmac runner coroutinne
 async def run_sigmac():
@@ -69,6 +69,7 @@ async def run_sigmac():
     exitcode = proc.returncode
     print("* sigmac returned with exit code {}".format(exitcode))
     return exitcode
+
 
 # Generated query checker loop
 async def check_queries():
