@@ -11,6 +11,8 @@ from version 0.14.0.
 ### Added
 
 * Proxy field names to ECS mapping (ecs-proxy) configuration
+* False positives metadata to LimaCharlie backend
+* Additional aggregation capabilitied for es-dsl backend.
 
 ## 0.15.0 - 2019-12-06
 
