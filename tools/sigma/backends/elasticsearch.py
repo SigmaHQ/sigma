@@ -173,9 +173,6 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
         self.queries[-1]['query']['constant_score']['filter'] = self.generateNode(parsed.parsedSearch)
         if parsed.parsedAgg:
             self.generateAggregation(parsed.parsedAgg)
-        # if parsed.parsedAgg:
-        #     fields += self.generateAggregation(parsed.parsedAgg)
-        # self.fields.update(fields)
 
     def generateANDNode(self, node):
         andNode = {'bool': {'must': []}}
@@ -253,32 +250,81 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
         return {'exists': {'field': node.item}}
 
     def generateAggregation(self, agg):
+        """
+        Generates an Elasticsearch nested aggregation given a SigmaAggregationParser object
+
+        Two conditions are handled here:
+        a) "count() by MyGroupedField > X"
+        b) "count(MyDistinctFieldName) by MyGroupedField > X'
+
+        The case (b) is translated to a the following equivalent SQL query
+
+        ```
+        SELECT MyDistinctFieldName, COUNT(DISTINCT MyDistinctFieldName) FROM Table
+        GROUP BY MyGroupedField HAVING COUNT(DISTINCT MyDistinctFieldName) > 1
+        ```
+
+        The resulting aggregation is set on 'self.queries[-1]["aggs"]' as a Python dict
+
+        :param agg: Input SigmaAggregationParser object that defines a condition
+        :return: None
+        """
         if agg:
             if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT:
                 if agg.groupfield is not None:
-                    self.queries[-1]['aggs'] = {
-                        '%s_count'%(agg.groupfield or ""): {
-                            'terms': {
-                                'field': '%s'%(agg.groupfield + ".keyword" or "")
-                            },
-                            'aggs': {
-                                'limit': {
-                                    'bucket_selector': {
-                                        'buckets_path': {
-                                            'count': '%s_count'%(agg.groupfield or "")
+                    # If the aggregation is 'count(MyDistinctFieldName) by MyGroupedField > XYZ'
+                    if agg.aggfield is not None:
+                        count_agg_group_name = "{}_count".format(agg.groupfield)
+                        count_distinct_agg_name = "{}_distinct".format(agg.aggfield)
+                        script_limit = "params.count {} {}".format(agg.cond_op, agg.condition)
+                        self.queries[-1]['aggs'] = {
+                            count_agg_group_name: {
+                                    "terms": {
+                                        "field": "{}.keyword".format(agg.groupfield)
+                                    },
+                                    "aggs": {
+                                        count_distinct_agg_name: {
+                                            "cardinality": {
+                                                "field": "{}.keyword".format(agg.aggfield)
+                                            }
                                         },
-                                        'script': 'params.count %s %s'%(agg.cond_op, agg.condition)
+                                        "limit": {
+                                            "bucket_selector": {
+                                                "buckets_path": {
+                                                    "count": count_distinct_agg_name
+                                                },
+                                                "script": script_limit
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                    else:  # if the condition is count() by MyGroupedField > XYZ
+                        group_aggname = "{}_count".format(agg.groupfield)
+                        self.queries[-1]['aggs'] = {
+                            group_aggname: {
+                                'terms': {
+                                    'field': '%s' % (agg.groupfield + ".keyword")
+                                },
+                                'aggs': {
+                                    'limit': {
+                                        'bucket_selector': {
+                                            'buckets_path': {
+                                                'count': group_aggname
+                                            },
+                                            'script': 'params.count %s %s' % (agg.cond_op, agg.condition)
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
             else:
+                funcname = ""
                 for name, idx in agg.aggfuncmap.items():
                     if idx == agg.aggfunc:
                         funcname = name
                         break
-                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend"%(self.title, funcname))
+                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend" % (self.title, funcname))
 
     def generateBefore(self, parsed):
         self.queries.append({'query': {'constant_score': {'filter': {}}}})
@@ -895,14 +941,18 @@ class ElastalertBackend(MultiRuleOutputMixin):
 
     def generateAggregation(self, agg):
         if agg:
-            if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT or agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MIN or agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MAX or agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_AVG or agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_SUM:
+            if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT or \
+                    agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MIN or \
+                    agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MAX or \
+                    agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_AVG or \
+                    agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_SUM:
                 return ""
             else:
                 for name, idx in agg.aggfuncmap.items():
                     if idx == agg.aggfunc:
                         funcname = name
                         break
-                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend"%(self.title, funcname))
+                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend" % ( self.title, funcname))
 
     def convertLevel(self, level):
         return {

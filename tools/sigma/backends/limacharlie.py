@@ -177,6 +177,22 @@ _allFieldMappings = {
         keywordField = None,
         postOpMapper = None
     ),
+    "/proxy/": SigmaLCConfig(
+        topLevelParams = {
+            "event": "HTTP_REQUEST",
+        },
+        preConditions = None,
+        fieldMappings = {
+            "c-uri|contains": "event/URL",
+            "c-uri": "event/URL",
+            "URL": "event/URL",
+            "cs-uri-query": "event/URL",
+            "cs-uri-stem": "event/URL",
+        },
+        isAllStringValues = False,
+        keywordField = None,
+        postOpMapper = None
+    ),
 }
 
 class LimaCharlieBackend(BaseBackend):
@@ -275,11 +291,14 @@ class LimaCharlieBackend(BaseBackend):
         if ruleConfig.get("author", None) is not None:
             respondComponents[0].setdefault("metadata", {})["author"] = ruleConfig["author"]
 
+        if ruleConfig.get("falsepositives", None) is not None:
+            respondComponents[0].setdefault("metadata", {})["falsepositives"] = ruleConfig["falsepositives"]
+
         # Assemble it all as a single, complete D&R rule.
         return yaml.safe_dump({
             "detect": detectComponent,
             "respond": respondComponents,
-        })
+        }, default_flow_style = False)
 
     def generateQuery(self, parsed):
         # We override the generateQuery function because

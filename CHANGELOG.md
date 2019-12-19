@@ -10,13 +10,30 @@ from version 0.14.0.
 
 ### Added
 
-* sigma-uuid tool
+* Proxy field names to ECS mapping (ecs-proxy) configuration
+* False positives metadata to LimaCharlie backend
+* Additional aggregation capabilitied for es-dsl backend.
+
+## 0.15.0 - 2019-12-06
+
+### Added
+
+* sigma-uuid tool for addition and check of Sigma rule identifiers
+* Default configurations
+* Restriction of compared rules in sigma-similarity
+* Regular expression support in es-dsl backend
+* LimaCharlie support for proxy rule category
+* Source distribution for PyPI
 
 ### Changed
 
 * Type errors are now ignored with -I
 
-## 0.14
+### Fixed
+
+* Removed wrong mapping of CommandLine field mapping in THOR config
+
+## 0.14 - 2019-11-10
 
 ### Added
 
@@ -38,6 +55,8 @@ from version 0.14.0.
 
 * Removed ProcessCommandLine mapping for Windows Security EventID 4688 in generic
   process creation log source configuration.
+
+## 0.13 - 2019-10-21
 
 ### Added
 
@@ -70,13 +89,13 @@ from version 0.14.0.
 * Elasticsearch wildcard detection pattern
 * Aggregation on keyword field in es-dsl backend
 
-## 0.12.1
+## 0.12.1 - 2019-08-05
 
 ### Fixed
 
 * Missing build dependency
 
-## 0.12
+## 0.12 - 2019-08-01
 
 ### Added
 
