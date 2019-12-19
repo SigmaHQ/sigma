@@ -1,5 +1,6 @@
-title: High DNS subdomain requests rate per domain
-description: High rate of unique Fully Qualified Domain Names (FQDN) requests per root domain (eTLD+1) in short period of time
+title: Large domain name request
+id: 14aa0d9e-c70a-4a49-bdc1-e5cbc4fc6af7
+description: Detects large DNS domain names
 author: Daniil Yugoslavskiy, oscd.community
 date: 2019/10/21
 modified: 2019/11/04
@@ -9,10 +10,10 @@ tags:
 logsource:
     category: dns
 detection:
-    dns_question_name:
-        query: "*"
+    selection:
+        query_length: "> 70"              # IS MORE THAN 70 bytes
     default_list_of_well_known_domains:
-        query_etld_plus_one: 
+        query_etld_plus_one:
             - "akadns.net"
             - "akamaiedge.net"
             - "amazonaws.com"
@@ -29,12 +30,7 @@ detection:
             - "s-microsoft.com"
             - "office365.com"
             - "linkedin.com"
-    timeframe: 15m
-    condition: count(subdomain) per query_etld_plus_one per computer_name > 200 and not default_list_of_well_known_domains
-    #    for each host in timeframe
-    #                for each dns_question_etld_plus_one
-    #                    if number of dns_question_name > 200
-    #                        dns_question_etld_plus_one is not in default_list_of_well_known_domains
+    condition: selection and not default_list_of_well_known_domains
 falsepositives:
     - Legitimate domain name requested, which should be added to whitelist
 level: high
