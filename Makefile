@@ -1,7 +1,7 @@
-.PHONY: test test-rules test-sigmac
+.PHONY: test test-rules test-sigmac test-sigma2attack
 TMPOUT = $(shell tempfile||mktemp)
-COVSCOPE = tools/sigma/*.py,tools/sigma/backends/*.py,tools/sigmac,tools/merge_sigma
-test: clearcov test-rules test-sigmac test-merge build finish
+COVSCOPE = tools/sigma/*.py,tools/sigma/backends/*.py,tools/sigmac,tools/merge_sigma,tools/sigma2attack
+test: clearcov test-rules test-sigmac test-merge test-sigma2attack build finish
 
 clearcov:
 	rm -f .coverage
@@ -91,6 +91,9 @@ test-merge:
 
 test-backend-es-qs:
 	tests/test-backend-es-qs.py
+
+test-sigma2attack:
+	coverage run -a --include=$(COVSCOPE) tools/sigma2attack
 
 build: tools/sigmac tools/merge_sigma tools/sigma/*.py tools/setup.py tools/setup.cfg
 	cd tools && python3 setup.py bdist_wheel sdist
