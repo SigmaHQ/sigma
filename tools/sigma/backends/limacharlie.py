@@ -291,11 +291,14 @@ class LimaCharlieBackend(BaseBackend):
         if ruleConfig.get("author", None) is not None:
             respondComponents[0].setdefault("metadata", {})["author"] = ruleConfig["author"]
 
+        if ruleConfig.get("falsepositives", None) is not None:
+            respondComponents[0].setdefault("metadata", {})["falsepositives"] = ruleConfig["falsepositives"]
+
         # Assemble it all as a single, complete D&R rule.
         return yaml.safe_dump({
             "detect": detectComponent,
             "respond": respondComponents,
-        })
+        }, default_flow_style = False)
 
     def generateQuery(self, parsed):
         # We override the generateQuery function because

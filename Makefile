@@ -1,7 +1,7 @@
-.PHONY: test test-rules test-sigmac
+.PHONY: test test-rules test-sigmac test-sigma2attack
 TMPOUT = $(shell tempfile||mktemp)
-COVSCOPE = tools/sigma/*.py,tools/sigma/backends/*.py,tools/sigmac,tools/merge_sigma
-test: clearcov test-rules test-sigmac test-merge build finish
+COVSCOPE = tools/sigma/*.py,tools/sigma/backends/*.py,tools/sigmac,tools/merge_sigma,tools/sigma2attack
+test: clearcov test-rules test-sigmac test-merge test-sigma2attack build finish
 
 clearcov:
 	rm -f .coverage
@@ -51,6 +51,7 @@ test-sigmac:
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -c tools/config/splunk-windows-index.yml -f 'level=xcritical' rules/ > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -c tools/config/splunk-windows-index.yml -f 'foo=bar' rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/logstash-windows.yml -t es-qs rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c ecs-proxy -t es-qs rules/proxy > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c sysmon -c logstash-windows -t es-qs rules/ > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c sysmon -c logstash-windows -t splunk rules/ > /dev/null
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/logstash-windows.yml -c tools/config/generic/sysmon.yml -t es-qs rules/ > /dev/null
@@ -90,6 +91,9 @@ test-merge:
 
 test-backend-es-qs:
 	tests/test-backend-es-qs.py
+
+test-sigma2attack:
+	coverage run -a --include=$(COVSCOPE) tools/sigma2attack
 
 build: tools/sigmac tools/merge_sigma tools/sigma/*.py tools/setup.py tools/setup.cfg
 	cd tools && python3 setup.py bdist_wheel sdist
