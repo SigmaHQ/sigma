@@ -254,6 +254,27 @@ sigma2misp @misp.conf --same-event --info "Test Event" -r sigma_rules/
 
 [Evt2Sigma](https://github.com/Neo23x0/evt2sigma) helps you with the rule creation. It generates a Sigma rule from a log entry. 
 
+## Sigma2attack
+
+Generates a [MITRE ATT&CK Navigator](https://github.com/mitre/attack-navigator/) heatmap from a directory containing sigma rules.
+
+Requirements:
+- Sigma rules tagged with a `attack.tXXXX` tag (e.g.: `attack.t1086`)
+
+Usage samples:
+
+```
+# Use the default "rules" folder
+./tools/sigma2attack
+
+# ... or specify your own
+./tools/sigma2attack --rules-directory ~/hunting/rules
+```
+
+Result once imported in the MITRE ATT&CK Navigator ([online version](https://mitre-attack.github.io/attack-navigator/enterprise/)):
+
+![Sigma2attack result](./images/sigma2attack.png)
+
 ## Contributed Scripts
 
 The directory `contrib` contains scripts that were contributed by the community:
