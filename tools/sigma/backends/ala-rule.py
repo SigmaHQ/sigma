@@ -1,5 +1,4 @@
-# Azure Log Analytics output backend for sigmac
-# John Tuckner (@tuckner)
+# Azure Log Analytics Rule output backend for sigmac
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -49,13 +48,15 @@ class AzureAPIBackend(AzureLogAnalyticsBackend):
                     tag_list = tag.split("_")
                     tag_list = [item.title() for item in tag_list]
                     tactics.append("".join(tag_list))
+                else:
+                    tactics.append(tag.title())
 
         rule = {
             "analytics":
                 [
                     {
                         "displayName": "{} by {}".format(config.get("title"), config.get('author')),
-                        "description": "{} {}".format(config.get("description"), "Technics: {}.".format(",".join(technics))),
+                        "description": "{} {}".format(config.get("description"), "Technique: {}.".format(",".join(technics))),
                         "severity": config.get("level"),
                         "enabled": True,
                         "query": config.get("translation"),
