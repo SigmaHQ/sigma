@@ -1,0 +1,23 @@
+title: Certutil Encode
+id: e62a9f0c-ca1e-46b2-85d5-a6da77f86d1a
+status: experimental
+description: Detects suspicious a certutil command that used to encode files, which is sometimes used for data exfiltration
+references:
+    - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/certutil
+    - https://unit42.paloaltonetworks.com/new-babyshark-malware-targets-u-s-national-security-think-tanks/
+author: Florian Roth
+date: 2019/02/24
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine:
+            - certutil -f -encode *
+            - certutil.exe -f -encode *
+            - certutil -encode -f *
+            - certutil.exe -encode -f *
+    condition: selection
+falsepositives:
+    - unknown
+level: medium

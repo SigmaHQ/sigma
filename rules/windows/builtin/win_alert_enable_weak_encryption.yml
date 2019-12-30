@@ -1,22 +1,28 @@
 title: Weak Encryption Enabled and Kerberoast
+id: f6de9536-0441-4b3f-a646-f4e00f300ffd
 description: Detects scenario where weak encryption is enabled for a user profile which could be used for hash/password cracking.
 references:
     - https://adsecurity.org/?p=2053
     - https://www.harmj0y.net/blog/activedirectory/roasting-as-reps/
 author: '@neu5ron'
+tags:
+    - attack.defense_evasion
+    - attack.t1089
 logsource:
     product: windows
     service: security
-    description: 'Requirements: Audit Policy : Account Management > Audit User Account Management, Group Policy : Computer Configuration\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies\Account Management\Audit User Account Management'
+    definition: 'Requirements: Audit Policy : Account Management > Audit User Account Management, Group Policy : Computer Configuration\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies\Account Management\Audit User Account Management'
 detection:
     selection:
         EventID: 4738
     keywords:
-        - 'DES'
-        - 'Preauth'
-        - 'Encrypted'
+        Message:
+        - '*DES*'
+        - '*Preauth*'
+        - '*Encrypted*'
     filters:
-        - 'Enabled'
+        Message:
+            - '*Enabled*'
     condition: selection and keywords and filters
 falsepositives: 
     - Unknown

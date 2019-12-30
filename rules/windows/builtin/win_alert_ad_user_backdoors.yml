@@ -1,19 +1,27 @@
 title: Active Directory User Backdoors
-description: Detects scenarios where one can control another users account without having to use their credentials via msDS-AllowedToDelegateTo and or service principal names (SPN).
+id: 300bac00-e041-4ee2-9c36-e262656a6ecc
+description: Detects scenarios where one can control another users or computers account without having to use their credentials.
 references:
     - https://msdn.microsoft.com/en-us/library/cc220234.aspx
     - https://adsecurity.org/?p=3466
+    - https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/
 author: '@neu5ron'
+tags:
+    - attack.t1098
+    - attack.credential_access
+    - attack.persistence
 logsource:
     product: windows
     service: security
-    description1: 'Requirements: Audit Policy : Account Management > Audit User Account Management, Group Policy : Computer Configuration\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies\Account Management\Audit User Account Management'
-    description2: 'Requirements: Audit Policy : DS Access > Audit Directory Service Changes, Group Policy : Computer Configuration\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies\DS Access\Audit Directory Service Changes'
+    definition1: 'Requirements: Audit Policy : Account Management > Audit User Account Management, Group Policy : Computer Configuration\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies\Account Management\Audit User Account Management'
+    definition2: 'Requirements: Audit Policy : DS Access > Audit Directory Service Changes, Group Policy : Computer Configuration\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies\DS Access\Audit Directory Service Changes'
 detection:
     selection1:
         EventID: 4738
     filter1:
         AllowedToDelegateTo: null
+    filter2:
+        AllowedToDelegateTo: '-'
     selection2:
         EventID: 5136
         AttributeLDAPDisplayName: 'msDS-AllowedToDelegateTo'
@@ -21,7 +29,10 @@ detection:
         EventID: 5136
         ObjectClass: 'user'
         AttributeLDAPDisplayName: 'servicePrincipalName'
-    condition: (selection1 and not filter1) or selection2 or selection3
+    selection4:
+        EventID: 5136
+        AttributeLDAPDisplayName: 'msDS-AllowedToActOnBehalfOfOtherIdentity'        
+    condition: (selection1 and not 1 of filter*) or selection2 or selection3 or selection4
 falsepositives: 
     - Unknown
 level: high

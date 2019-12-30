@@ -1,4 +1,5 @@
 title: Suspicious Program Location with Network Connections
+id: 7b434893-c57d-4f41-908d-6a17bf1ae98f
 status: experimental
 description: Detects programs with network connections running in suspicious files system locations
 references:
@@ -8,21 +9,23 @@ date: 2017/03/19
 logsource:
     product: windows
     service: sysmon
-    description: 'Use the following config to generate the necessary Event ID 3 Network Connection events'
+    definition: 'Use the following config to generate the necessary Event ID 3 Network Connection events'
 detection:
     selection:
         EventID: 3
         Image: 
-            - '*\ProgramData\*'
+            # - '*\ProgramData\\*'  # too many false positives, e.g. with Webex for Windows
             - '*\$Recycle.bin'
-            - '*\Users\All Users\*'
-            - '*\Users\Default\*'
-            - '*\Users\Public\*'
-            - 'C:\Perflogs\*'
-            - '*\config\systemprofile\*'
-            - '*\Windows\Fonts\*'
-            - '*\Windows\IME\*'
-            - '*\Windows\addins\*'
+            - '*\Users\All Users\\*'
+            - '*\Users\Default\\*'
+            - '*\Users\Public\\*'
+            - '*\Users\Contacts\\*'
+            - '*\Users\Searches\\*' 
+            - 'C:\Perflogs\\*'
+            - '*\config\systemprofile\\*'
+            - '*\Windows\Fonts\\*'
+            - '*\Windows\IME\\*'
+            - '*\Windows\addins\\*'
     condition: selection
 falsepositives:
     - unknown

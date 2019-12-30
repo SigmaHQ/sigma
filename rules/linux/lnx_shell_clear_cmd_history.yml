@@ -1,0 +1,31 @@
+title: Clear Command History
+id: fdc88d25-96fb-4b7c-9633-c0e417fdbd4e
+status: experimental
+description: Clear command history in linux which is used for defense evasion.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1146/T1146.yaml
+    - https://attack.mitre.org/techniques/T1146/
+    - https://www.hackers-arise.com/single-post/2016/06/20/Covering-your-BASH-Shell-Tracks-AntiForensics
+author: Patrick Bareiss
+date: 2019/03/24
+logsource:
+    product: linux
+detection:
+    keywords:
+        - 'rm *bash_history'
+        - 'echo "" > *bash_history'
+        - 'cat /dev/null > *bash_history' 
+        - 'ln -sf /dev/null *bash_history'
+        - 'truncate -s0 *bash_history'
+        # - 'unset HISTFILE'  # prone to false positives
+        - 'export HISTFILESIZE=0'
+        - 'history -c'
+        - 'history -w'
+        - 'shred *bash_history'
+    condition: keywords
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1146

@@ -1,0 +1,23 @@
+title: Remote Service Activity Detected via SVCCTL named pipe
+id: 586a8d6b-6bfe-4ad9-9d78-888cd2fe50c3
+description: Detects remote remote service activity via remote access to the svcctl named pipe
+author: Samir Bousseaden
+references:
+    - https://blog.menasec.net/2019/03/threat-hunting-26-remote-windows.html
+tags:
+    - attack.lateral_movement
+    - attack.persistence
+logsource:
+    product: windows
+    service: security
+    description: 'The advanced audit policy setting "Object Access > Audit Detailed File Share" must be configured for Success/Failure'
+detection:
+    selection:
+        EventID: 5145
+        ShareName: \\*\IPC$
+        RelativeTargetName: svcctl
+        Accesses: '*WriteData*'
+    condition: selection
+falsepositives: 
+    - pentesting
+level: medium

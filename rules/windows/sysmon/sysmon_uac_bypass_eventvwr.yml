@@ -1,4 +1,5 @@
 title: UAC Bypass via Event Viewer
+id: 7c81fec3-1c1d-43b0-996a-46753041b1b6
 status: experimental
 description: Detects UAC bypass method using Windows event viewer
 references:
@@ -11,9 +12,9 @@ logsource:
 detection:
     methregistry:
         EventID: 13
-        TargetObject: 'HKEY_USERS\*\mscfile\shell\open\command'
+        TargetObject: 'HKEY_USERS\\*\mscfile\shell\open\command'
     methprocess:
-        EventID: 1
+        EventID: 1 # Migration to process_creation requires multipart YAML
         ParentImage: '*\eventvwr.exe'
     filterprocess:
         Image: '*\mmc.exe'
@@ -21,8 +22,11 @@ detection:
 fields:
     - CommandLine
     - ParentCommandLine
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1088
+    - car.2019-04-001
 falsepositives:
     - unknown
 level: critical
-
-

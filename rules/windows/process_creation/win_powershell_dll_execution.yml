@@ -1,0 +1,30 @@
+title: Detection of PowerShell Execution via DLL
+id: 6812a10b-60ea-420c-832f-dfcc33b646ba
+status: experimental
+description: Detects PowerShell Strings applied to rundllas seen in PowerShdll.dll
+references:
+    - https://github.com/p3nt4/PowerShdll/blob/master/README.md
+tags:
+    - attack.execution
+    - attack.t1086
+    - car.2014-04-003
+author: Markus Neis
+date: 2018/08/25
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Image:
+            - '*\rundll32.exe'
+    selection2:
+        Description:
+            - '*Windows-Hostprozess (Rundll32)*'
+    selection3:
+        CommandLine:
+            - '*Default.GetString*'
+            - '*FromBase64String*'
+    condition: (selection1 or selection2) and selection3
+falsepositives:
+    - Unknown
+level: high
