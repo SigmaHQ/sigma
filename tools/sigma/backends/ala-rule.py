@@ -23,7 +23,7 @@ from .data import sysmon_schema
 from .exceptions import NotSupportedError
 
 class AzureAPIBackend(AzureLogAnalyticsBackend):
-    """Converts Sigma rule into Azure Log Analytics Queries."""
+    """Converts Sigma rule into Azure Log Analytics Rule."""
     identifier = "ala-rule"
     active = True
     options = SingleTextQueryBackend.options + (
