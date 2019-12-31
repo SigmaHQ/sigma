@@ -81,9 +81,7 @@ _allFieldMappings = {
             "ParentImage": "event/PARENT/FILE_PATH",
             "ParentCommandLine": "event/PARENT/COMMAND_LINE",
             "User": "event/USER_NAME",
-            # This field is redundant in LC, it seems to always be used with Image
-            # so we will ignore it.
-            "OriginalFileName": lambda fn, fv: ("event/FILE_PATH", "*" + fv),
+            "OriginalFileName": "event/ORIGINAL_FILE_NAME",
             # Custom field names coming from somewhere unknown.
             "NewProcessName": "event/FILE_PATH",
             "ProcessCommandLine": "event/COMMAND_LINE",
