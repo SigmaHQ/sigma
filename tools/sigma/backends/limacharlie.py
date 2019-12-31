@@ -81,7 +81,7 @@ _allFieldMappings = {
             "ParentImage": "event/PARENT/FILE_PATH",
             "ParentCommandLine": "event/PARENT/COMMAND_LINE",
             "User": "event/USER_NAME",
-            "OriginalFileName": "event/INTERNAL_NAME",
+            "OriginalFileName": "event/ORIGINAL_FILE_NAME",
             # Custom field names coming from somewhere unknown.
             "NewProcessName": "event/FILE_PATH",
             "ProcessCommandLine": "event/COMMAND_LINE",
