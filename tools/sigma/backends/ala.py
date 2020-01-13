@@ -87,6 +87,10 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
                     op = "endswith"
                     val = self.cleanValue(val[1:])
 
+                if "\\" in val:
+                    #val = val.replace("\\", "\\\\")
+                    return "%s @\"%s\"" % (op, val)
+
         return "%s \"%s\"" % (op, val)
 
     def generate(self, sigmaparser):
