@@ -1,0 +1,31 @@
+title: Monitoring for writing of malicious files to system32 and syswow64 folders
+description: System32 and syswow64 folders are a globally writable path. Adversaries can take advantage of this and load or influence any script hosts or ANY .NET Application in System32 to load and execute a custom assembly into cscript, wscript, regsvr32, mshta, eventvwr 
+date: 2020/13/01
+author: Sreeman
+tags:
+    - attack.t1064
+    - attack.t1211
+    - attack.t1059
+    - attack.defense_evasion
+    - attack.persistence
+logsource:
+    product: Windows
+detection:
+    selection1:
+        CommandLine:
+            - "*echo*"
+            - "*copy*"
+            - "*type*"
+            - "*file createnew"
+    selection2:
+        CommandLine:
+            - "*C:\\Windows\\System32\\Tasks\\*"
+            - "*C:\\Windows\\SysWow64\\Tasks\\*"
+condition: selection1 and selection2
+fields:
+    - CommandLine
+    - ParentProcess
+    - CommandLine
+falsepositives:
+    - Unknown
+level: medium
