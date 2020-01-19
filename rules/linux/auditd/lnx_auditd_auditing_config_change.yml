@@ -1,6 +1,6 @@
 title: Auditing configuration changes on linux host
 id: 977ef627-4539-4875-adf4-ed8f780c4922
-description: Detect changes if auditd configuration files
+description: Detect changes in auditd configuration files
     # Example config for this one (place it at the top of audit.rules)
     # -w /etc/audit/ -p wa -k etc_modify_auditconfig
     # -w /etc/libaudit.conf -p wa -k etc_modify_libauditconfig
@@ -19,11 +19,11 @@ logsource:
     service: auditd
 detection:
     selection:
-        type: 'SYSCALL'
-        key:
-          - 'etc_modify_auditconfig'
-          - 'etc_modify_libauditconfig'
-          - 'etc_modify_audispconfig'
+        type: PATH
+        name:
+            - /etc/audit/*
+            - /etc/libaudit.conf
+            - /etc/audisp/*
     condition: selection
 fields:
     - exe
