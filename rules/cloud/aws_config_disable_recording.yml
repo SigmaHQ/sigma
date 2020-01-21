@@ -1,0 +1,20 @@
+title: AWS Config disabling
+id: 07330162-dba1-4746-8121-a9647d49d297
+status: experimental
+author: vitaliy0x1
+description: Detects AWS Config Service disabling
+logsource:
+  service: CloudTrail
+detection:
+  selection_source:
+    - eventSource: config.amazonaws.com
+  events:
+    - eventName:
+        - DeleteDeliveryChannel
+        - StopConfigurationRecorder
+  condition: selection_source AND events
+level: high
+falsepositives:
+    - Valid change in AWS Config Service
+tags:
+  - attack.t1089
