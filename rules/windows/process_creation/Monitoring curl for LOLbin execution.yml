@@ -1,0 +1,28 @@
+Reference: https://medium.com/@reegun/curl-exe-is-the-new-rundll32-exe-lolbin-3f79c5f35983
+author: Sreeman
+description: Adversaries can use curl to download payloads remotely and execute them
+  without touching disk. Curl is included by default in Windows 10 build 17063 and
+  later.
+detection:
+  condition: selection
+  selection:
+    CommandLine|re:
+    - .*(?i)curl.*(http|https|ftp|ftps)://\b(?:\d{1,3}\.){3}\d{1,3}\b./*.* &[&]?
+      start.*
+    - .*(?i)curl.*(http|https|ftp|ftps)://.*/.* &[&]? start.*
+falsepositives:
+- unlikely
+fields:
+- CommandLine
+level: medium
+logsource:
+  category: process_creation
+  product: windows
+status: stable
+title: Monitoring curl for LOLbin execution
+tags:
+- attack.defense evasion
+- attack.execution
+- attack.g0032
+- attack.g0068
+- attack.t1059
