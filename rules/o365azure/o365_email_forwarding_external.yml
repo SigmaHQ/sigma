@@ -1,9 +1,11 @@
 title: Mail forwarding to external recipients
+id: bd1a451e-620e-493f-82b7-016b2796cbbb
 status: experimental
 description: Email forwarding can be set up by both administrators and users. It’s very important to monitor these kind of events to detect insider threats. The difference is that administrators can set up new mail transport rules that affect one or multiple users within Exchange Online while users can only do it on their own mailbox from the Outlook client.
 references:
   - https://0x00sec.org/t/a-blue-team-guide-to-azure-office-365-monitoring/14411
 author: 'juju4 (rule), 0x00sec.org (idea)'
+date: 2019/06/06
 falsepositives:
     - Penetration Test
     - Unknown
@@ -13,8 +15,8 @@ logsource:
 # Forwarding to an external recipient by an administrator
 detection:
     selection:
-      Workload: Exchange
-      Operation: "New-TransportRule"
+        Workload: Exchange
+        Operation: "New-TransportRule"
 #    keywords: true
 #    condition: selection | count(user, src, dest)
 #    condition: selection | count(user)
@@ -25,10 +27,10 @@ logsource:
 # Forwarding to an external recipient by a user
 detection:
     selection:
-      Workload: Exchange
-      Operation: "UpdateInboxRules" 
+        Workload: Exchange
+        Operation: "UpdateInboxRules" 
     keywords:
-      - "Forward"
+        - "Forward"
 #    condition: selection and keywords | count(user,dest,operation,ruleactions)
 #    condition: selection and keywords | count(user)
     condition: selection and keywords | count(user) > 3
