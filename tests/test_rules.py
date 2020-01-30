@@ -203,6 +203,20 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_detections, [], Fore.YELLOW + 
                          "There are rules still using Sysmon 1 or Event ID 4688. Please migrate to the process_creation category.")
 
+    def test_missing_id(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            id = self.get_rule_part(file_path=file, part_name="id")
+            if not id:
+                print(Fore.YELLOW + "Rule {} has no field 'id'.".format(file))
+                faulty_rules.append(file)
+            elif len(id) != 36:
+                print(Fore.YELLOW + "Rule {} has a malformed 'id' (not 36 chars).".format(file))
+                faulty_rules.append(file)                
+
+        self.assertEqual(faulty_rules, [], Fore.RED + 
+                         "There are rules with missing or malformed 'id' fields. Create an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).")
+    
 
 if __name__ == "__main__":
     init(autoreset=True)
