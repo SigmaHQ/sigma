@@ -1,4 +1,4 @@
-title: Fsutil suspicious invocation
+title: Fsutil Suspicious Invocation
 id: add64136-62e5-48ea-807e-88638d02df1e
 description: Detects suspicious parameters of fsutil (deleting USN journal, configuring it with small size..). Might be used by ransomwares during the attack (seen
     by NotPetya and others)
@@ -16,12 +16,12 @@ detection:
     binary_2:
         OriginalFileName: 'fsutil.exe'
     selection:
-        CommandLine: 
+        CommandLine:
             - '* deletejournal *'  # usn deletejournal ==> generally ransomware or attacker
             - '* createjournal *'  # usn createjournal ==> can modify config to set it to a tiny size
- 
+
     condition: (1 of binary_*) and selection
-    
+
 falsepositives:
     - Admin activity
     - Scripts and administrative tools used in the monitored environment
