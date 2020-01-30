@@ -1,6 +1,8 @@
 title: Business Email Compromise
+id: a03b27b4-90a3-449b-878a-d2b042415b73
 status: experimental
 description: Detects Business Email Compromise (BEC)
+date: 2019/06/06
 references:
   - https://expel.io/blog/seven-ways-to-spot-business-email-compromise-office-365/
 tags:
@@ -19,32 +21,32 @@ logsource:
 detection:
     action:
 # Inbox rules to automatically forward emails to any of the following folders: RSS subscriptions, junk email or notes
-      - "Name\":\"MoveToFolder\", \"Value\":\"RSS Subscriptions\""
+        - 'Name":"MoveToFolder", "Value":"RSS Subscriptions"'
 # Inbox rules to automatically delete messages
-      - "Name\":\"DeleteMessage\", \"Value\":\"True\""
+        - 'Name":"DeleteMessage", "Value":"True"'
 # Inbox rules to redirect messages to an external email address
-      - "Name\":\"RedirectTo\""
+        - 'Name":"RedirectTo"'
 # Inbox rules that contain BEC keywords
-      - "wetransfer"
-      - "document"
-      - "invoice"
-      - "postmaster"
-      - "Virus"
-      - "Dropbox"
-      - "Password"
-      - "Fraud"
-      - "W2"
-      - "Invoice"
-      - "Docusign"
-      - "Deposit"
-      - "Wire"
-      - "Tax"
-      - "Postmaster"
-      - "Utilpro"
-      - "Payroll"
+        - "wetransfer"
+        - "document"
+        - "invoice"
+        - "postmaster"
+        - "Virus"
+        - "Dropbox"
+        - "Password"
+        - "Fraud"
+        # - "W2"
+        - "Invoice"
+        - "Docusign"
+        - "Deposit"
+        - "Wire"
+        - "Tax"
+        - "Postmaster"
+        - "Utilpro"
+        - "Payroll"
     selection:
-      - "\"New-InboxRule\""
-      - "\"Set-InboxRule\""
+        - "New-InboxRule"
+        - "Set-InboxRule"
     condition: action and selection
 ---
 logsource:
@@ -52,11 +54,11 @@ logsource:
 # New mailbox forwarding to an external address
 detection:
     action:
-      - "Name\":\"DeliverToMailboxAndForward\""
+      - 'Name":"DeliverToMailboxAndForward"'
     selection:
-      - "\"New-InboxRule\""
-      - "\"Set-InboxRule\""
-      - "\"Set-Mailbox\""
+      - "New-InboxRule"
+      - "Set-InboxRule"
+      - "Set-Mailbox"
     condition: action and selection
 ---
 logsource:
@@ -66,7 +68,7 @@ detection:
     action:
       - "Add-MailboxPermission"
     name:
-      - "Name\":\"AccessRights\""
+      - 'Name":"AccessRights"'
     value:
-      - "Value\":\"FullAccess\""
+      - 'Value":"FullAccess"'
     condition: action and name and value
