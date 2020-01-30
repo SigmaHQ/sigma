@@ -1,9 +1,11 @@
 title: Users sharing OneDrive items with individuals outside of the organizations
+id: 0436c5b3-e1ab-4302-be90-7f52b0137e3d
 status: experimental
 description: detect individuals voluntarily sharing confidential information with external party or typo mistakes. Here too, a list of trusted third-party (partners, subsidiaries, etc) emails could be useful to filter out the noise.
 references:
-  - https://0x00sec.org/t/a-blue-team-guide-to-azure-office-365-monitoring/14411
+    - https://0x00sec.org/t/a-blue-team-guide-to-azure-office-365-monitoring/14411
 author: 'juju4 (rule), 0x00sec.org (idea)'
+date: 2019/06/06
 logsource:
     product: o365
 falsepositives:
@@ -12,8 +14,8 @@ falsepositives:
 level: medium
 detection:
     selection:
-      Workload: OneDrive
-      Operation: AddedToSecureLink
+        Workload: OneDrive
+        Operation: AddedToSecureLink
     filter:
-      TargetUserOrGroupName: '*@organization.tld'
+        TargetUserOrGroupName|endswith: '@organization.tld'
     condition: selection and not filter
