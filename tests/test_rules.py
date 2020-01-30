@@ -62,7 +62,7 @@ class TestRules(unittest.TestCase):
                 if extension != ".yml":
                     files_with_incorrect_extensions.append(file)
 
-        self.assertEqual(files_with_incorrect_extensions, [],
+        self.assertEqual(files_with_incorrect_extensions, [], Fore.RED + 
                         "There are rule files with extensions other than .yml")
 
 
@@ -74,11 +74,11 @@ class TestRules(unittest.TestCase):
             if tags:
                 for tag in tags:
                     if tag not in self.MITRE_ALL and tag.startswith("attack."):
-                        print_error("Rule {} has the following incorrect tag {}".format(file, tag))
+                        print(Fore.RED + "Rule {} has the following incorrect tag {}".format(file, tag))
                         files_with_incorrect_mitre_tags.append(file)
 
-        self.assertEqual(files_with_incorrect_mitre_tags, [],
-                         Fore.RED + "There are rules with incorrect MITRE Tags")
+        self.assertEqual(files_with_incorrect_mitre_tags, [], Fore.RED + 
+                         "There are rules with incorrect MITRE Tags. (please inform us about new tags that are not yet supported in our tests)")
 
 
     def test_look_for_duplicate_filters(self):
@@ -92,7 +92,7 @@ class TestRules(unittest.TestCase):
         def check_if_list_contain_duplicates(item:list, depth:int) -> None:
             try:
                 if len(item) != len(set(item)):
-                    print_error("Rule {} has duplicate filters".format(file))
+                    print(Fore.RED + "Rule {} has duplicate filters".format(file))
                     files_with_duplicate_filters.append(file)
             except:
                 # unhashable types like dictionaries
@@ -107,7 +107,7 @@ class TestRules(unittest.TestCase):
             detection = self.get_rule_part(file_path=file, part_name="detection")
             check_list_or_recurse_on_dict(detection, 1)
 
-        self.assertEqual(files_with_duplicate_filters, [],
+        self.assertEqual(files_with_duplicate_filters, [], Fore.RED + 
                          "There are rules with duplicate filters")
 
 
@@ -127,7 +127,7 @@ class TestRules(unittest.TestCase):
                     not_multipart_yaml_file:
                 faulty_detections.append(file)
 
-        self.assertEqual(faulty_detections, [],
+        self.assertEqual(faulty_detections, [], Fore.RED +
                          "There are rules using '1/all of them' style conditions but only have one condition")
 
 
@@ -185,7 +185,7 @@ class TestRules(unittest.TestCase):
 
             files_and_their_detections[file] = detection
 
-        self.assertEqual(faulty_detections, [],
+        self.assertEqual(faulty_detections, [], Fore.YELLOW + 
                          "There are rule files with exactly the same detection logic.")
 
 
@@ -198,7 +198,7 @@ class TestRules(unittest.TestCase):
             if "'source': 'eventlog'" in detection_str:
                 faulty_detections.append(file)
 
-        self.assertEqual(faulty_detections, [],
+        self.assertEqual(faulty_detections, [], Fore.YELLOW + 
                          "There are detections with 'Source: Eventlog'. This does not add value to the detection.")
 
 
@@ -210,11 +210,9 @@ class TestRules(unittest.TestCase):
                     if re.search(r'.*EventID: (?:1|4688)\s*$', line) and file not in faulty_detections:
                         faulty_detections.append(file)
 
-        self.assertEqual(faulty_detections, [],
+        self.assertEqual(faulty_detections, [], Fore.YELLOW + 
                          "There are rules still using Sysmon 1 or Event ID 4688. Please migrate to the process_creation category.")
 
-def print_error(message):
-    print(Fore.RED + message)
 
 if __name__ == "__main__":
     init(autoreset=True)
