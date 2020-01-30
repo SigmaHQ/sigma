@@ -1,9 +1,11 @@
 title: Users sending large amount of emails to external recipients
+id: 1f752c48-9e8c-41ac-8bb3-2d63ecaaebfb
 status: experimental
 description: Attempts to detect potentially compromised hosts spamming external recipients. In large organization, this might generate multiple false-positive due to internal communications, mass mailing, etc so I recommend filtering by excluding some legitimate senders.
 references:
-  - https://0x00sec.org/t/a-blue-team-guide-to-azure-office-365-monitoring/14411
+    - https://0x00sec.org/t/a-blue-team-guide-to-azure-office-365-monitoring/14411
 author: 'juju4 (rule), 0x00sec.org (idea)'
+date: 2019/06/06
 logsource:
     product: o365
 falsepositives:
@@ -12,8 +14,8 @@ falsepositives:
 level: medium
 detection:
     selection:
-      - messagetrace
+        - messagetrace
     filter:
-      RecipientAddress: '*@yourdomain.tld'
+        RecipientAddress|endswith: '@yourdomain.tld'
 #    condition: selection and not filter | count(RecipientAddress) by SenderAddress, Subject > 100
     condition: selection and not filter | count(RecipientAddress) by SenderAddress > 100
