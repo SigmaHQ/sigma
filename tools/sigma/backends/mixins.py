@@ -67,7 +67,10 @@ class MultiRuleOutputMixin:
         Generated names are tracked by the Mixin.
 
         """
-        rulename = sigmaparser.parsedyaml["title"].replace(" ", "-").replace("(", "").replace(")", "")
+        try:
+            rulename = sigmaparser.parsedyaml["id"]
+        except KeyError:
+            rulename = sigmaparser.parsedyaml["title"].replace(" ", "-").replace("(", "").replace(")", "")
         if rulename in self.rulenames:   # add counter if name collides
             cnt = 2
             while "%s-%d" % (rulename, cnt) in self.rulenames:
