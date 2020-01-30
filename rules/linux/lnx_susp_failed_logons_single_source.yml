@@ -1,18 +1,18 @@
 title: Multiple Failed Logins with Different Accounts from Single Source System
+id: fc947f8e-ea81-4b14-9a7b-13f888f94e18
 description: Detects suspicious failed logins with different user accounts from a single source system
 logsource:
     product: linux
     service: auth
 detection:
     selection:
-        pam_message: "authentication failure"
+        pam_message: authentication failure
         pam_user: '*'
         pam_rhost: '*'
-    timeframe: 24h 
+    timeframe: 24h
     condition: selection | count(pam_user) by pam_rhost > 3
 falsepositives:
     - Terminal servers
     - Jump servers
-    - Workstations with frequently changing users 
+    - Workstations with frequently changing users
 level: medium
-

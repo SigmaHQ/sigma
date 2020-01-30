@@ -16,10 +16,13 @@
 
 import json
 import re
+from fnmatch import fnmatch
 import sys
 
 import sigma
 import yaml
+from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
+from sigma.parser.condition import ConditionOR, ConditionAND, NodeSubexpression
 from .base import BaseBackend, SingleTextQueryBackend
 from .mixins import RulenameCommentMixin, MultiRuleOutputMixin
 from .exceptions import NotSupportedError
@@ -31,9 +34,9 @@ class ElasticsearchWildcardHandlingMixin(object):
     """
     options = SingleTextQueryBackend.options + (
             ("keyword_field", "keyword", "Keyword sub-field name", None),
-            ("keyword_blacklist", None, "Fields that don't have a keyword subfield", None)
+            ("keyword_blacklist", None, "Fields that don't have a keyword subfield (wildcards * and ? allowed)", None)
             )
-    reContainsWildcard = re.compile("(?<!\\\\)[*?]").search
+    reContainsWildcard = re.compile("(?:(?<!\\\\)|\\\\\\\\)[*?]").search
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -46,7 +49,8 @@ class ElasticsearchWildcardHandlingMixin(object):
     def containsWildcard(self, value):
         """Determine if value contains wildcard."""
         if type(value) == str:
-            return self.reContainsWildcard(value)
+            res = self.reContainsWildcard(value)
+            return res
         else:
             return False
 
@@ -59,7 +63,7 @@ class ElasticsearchWildcardHandlingMixin(object):
             self.matchKeyword = True
             return fieldname
 
-        if fieldname not in self.blacklist and (
+        if not any([ fnmatch(fieldname, pattern) for pattern in self.blacklist ]) and (
                 type(value) == list and any(map(self.containsWildcard, value)) \
                 or self.containsWildcard(value)
                 ):
@@ -81,8 +85,11 @@ class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, Single
     notToken = "NOT "
     subExpression = "(%s)"
     listExpression = "(%s)"
-    listSeparator = " "
+    listSeparator = " OR "
     valueExpression = "%s"
+    typedValueExpression = {
+                SigmaRegularExpressionModifier: "/%s/"
+            }
     nullExpression = "NOT _exists_:%s"
     notNullExpression = "_exists_:%s"
     mapExpression = "%s:%s"
@@ -102,6 +109,29 @@ class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, Single
         expression = super().generateNode(node.item)
         if expression:
             return "(%s%s)" % (self.notToken, expression)
+
+    def generateSubexpressionNode(self, node):
+        """Check for search not bound to a field and restrict search to keyword fields"""
+        nodetype = type(node.items)
+        if nodetype in { ConditionAND, ConditionOR } and type(node.items.items) == list and { type(item) for item in node.items.items }.issubset({str, int}):
+            newitems = list()
+            for item in node.items:
+                newitem = item
+                if type(item) == str:
+                    if not item.startswith("*"):
+                        newitem = "*" + newitem
+                    if not item.endswith("*"):
+                        newitem += "*"
+                    newitems.append(newitem)
+                else:
+                    newitems.append(item)
+            newnode = NodeSubexpression(nodetype(None, None, *newitems))
+            self.matchKeyword = True
+            result = "\\*.keyword:" + super().generateSubexpressionNode(newnode)
+            self.matchKeyword = False       # one of the reasons why the converter needs some major overhaul
+            return result
+        else:
+            return super().generateSubexpressionNode(node)
 
 class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlingMixin, BaseBackend):
     """ElasticSearch DSL backend"""
@@ -143,9 +173,6 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
         self.queries[-1]['query']['constant_score']['filter'] = self.generateNode(parsed.parsedSearch)
         if parsed.parsedAgg:
             self.generateAggregation(parsed.parsedAgg)
-        # if parsed.parsedAgg:
-        #     fields += self.generateAggregation(parsed.parsedAgg)
-        # self.fields.update(fields)
 
     def generateANDNode(self, node):
         andNode = {'bool': {'must': []}}
@@ -177,31 +204,41 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
         """
         return value.replace("\\\\*", "\\*")
 
+    def escapeSlashes(self, value):
+        return value.replace("\\", "\\\\")
+
     def generateMapItemNode(self, node):
         key, value = node
-        if type(value) not in (str, int, list, type(None)):
-            raise TypeError("Map values must be strings, numbers, lists or null, not " + str(type(value)))
         if type(value) is list:
             res = {'bool': {'should': []}}
             for v in value:
                 key_mapped = self.fieldNameMapping(key, v)
                 if self.matchKeyword:   # searches against keyowrd fields are wildcard searches, phrases otherwise
                     queryType = 'wildcard'
+                    value_cleaned = self.escapeSlashes(self.cleanValue(str(v)))
                 else:
                     queryType = 'match_phrase'
+                    value_cleaned = self.cleanValue(str(v))
 
-                res['bool']['should'].append({queryType: {key_mapped: self.cleanValue(str(v))}})
+                res['bool']['should'].append({queryType: {key_mapped: value_cleaned}})
             return res
         elif value is None:
             key_mapped = self.fieldNameMapping(key, value)
             return { "bool": { "must_not": { "exists": { "field": key_mapped } } } }
-        else:
+        elif type(value) in (str, int):
             key_mapped = self.fieldNameMapping(key, value)
             if self.matchKeyword:   # searches against keyowrd fields are wildcard searches, phrases otherwise
                 queryType = 'wildcard'
+                value_cleaned = self.escapeSlashes(self.cleanValue(str(value)))
             else:
                 queryType = 'match_phrase'
-            return {queryType: {key_mapped: self.cleanValue(str(value))}}
+                value_cleaned = self.cleanValue(str(value))
+            return {queryType: {key_mapped: value_cleaned}}
+        elif isinstance(value, SigmaRegularExpressionModifier):
+            key_mapped = self.fieldNameMapping(key, value)
+            return { 'regexp': { key_mapped: str(value) } }
+        else:
+            raise TypeError("Map values must be strings, numbers, lists, null or regular expression, not " + str(type(value)))
 
     def generateValueNode(self, node):
         return {'multi_match': {'query': node, 'fields': [], 'type': 'phrase'}}
@@ -213,32 +250,81 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
         return {'exists': {'field': node.item}}
 
     def generateAggregation(self, agg):
+        """
+        Generates an Elasticsearch nested aggregation given a SigmaAggregationParser object
+
+        Two conditions are handled here:
+        a) "count() by MyGroupedField > X"
+        b) "count(MyDistinctFieldName) by MyGroupedField > X'
+
+        The case (b) is translated to a the following equivalent SQL query
+
+        ```
+        SELECT MyDistinctFieldName, COUNT(DISTINCT MyDistinctFieldName) FROM Table
+        GROUP BY MyGroupedField HAVING COUNT(DISTINCT MyDistinctFieldName) > 1
+        ```
+
+        The resulting aggregation is set on 'self.queries[-1]["aggs"]' as a Python dict
+
+        :param agg: Input SigmaAggregationParser object that defines a condition
+        :return: None
+        """
         if agg:
             if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT:
                 if agg.groupfield is not None:
-                    self.queries[-1]['aggs'] = {
-                        '%s_count'%(agg.groupfield or ""): {
-                            'terms': {
-                                'field': '%s'%(agg.groupfield or "")
-                            },
-                            'aggs': {
-                                'limit': {
-                                    'bucket_selector': {
-                                        'buckets_path': {
-                                            'count': '_count'
+                    # If the aggregation is 'count(MyDistinctFieldName) by MyGroupedField > XYZ'
+                    if agg.aggfield is not None:
+                        count_agg_group_name = "{}_count".format(agg.groupfield)
+                        count_distinct_agg_name = "{}_distinct".format(agg.aggfield)
+                        script_limit = "params.count {} {}".format(agg.cond_op, agg.condition)
+                        self.queries[-1]['aggs'] = {
+                            count_agg_group_name: {
+                                    "terms": {
+                                        "field": "{}.keyword".format(agg.groupfield)
+                                    },
+                                    "aggs": {
+                                        count_distinct_agg_name: {
+                                            "cardinality": {
+                                                "field": "{}.keyword".format(agg.aggfield)
+                                            }
                                         },
-                                        'script': 'params.count %s %s'%(agg.cond_op, agg.condition)
+                                        "limit": {
+                                            "bucket_selector": {
+                                                "buckets_path": {
+                                                    "count": count_distinct_agg_name
+                                                },
+                                                "script": script_limit
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                    else:  # if the condition is count() by MyGroupedField > XYZ
+                        group_aggname = "{}_count".format(agg.groupfield)
+                        self.queries[-1]['aggs'] = {
+                            group_aggname: {
+                                'terms': {
+                                    'field': '%s' % (agg.groupfield + ".keyword")
+                                },
+                                'aggs': {
+                                    'limit': {
+                                        'bucket_selector': {
+                                            'buckets_path': {
+                                                'count': group_aggname
+                                            },
+                                            'script': 'params.count %s %s' % (agg.cond_op, agg.condition)
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
             else:
+                funcname = ""
                 for name, idx in agg.aggfuncmap.items():
                     if idx == agg.aggfunc:
                         funcname = name
                         break
-                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend"%(self.title, funcname))
+                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend" % (self.title, funcname))
 
     def generateBefore(self, parsed):
         self.queries.append({'query': {'constant_score': {'filter': {}}}})
@@ -298,7 +384,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
         columns = list()
         try:
             for field in sigmaparser.parsedyaml["fields"]:
-                mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field)
+                mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
                 if type(mapped) == str:
                     columns.append(mapped)
                 elif type(mapped) == list:
@@ -405,20 +491,20 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
             ("mail", "root@localhost", "Mail address for Watcher notification (only logging if not set)", None),
 
             # Options for WebHook Action
-	    ("http_host", "localhost", "Webhook host used for alert notification", None),
-	    ("http_port", "80", "Webhook port used for alert notification", None),
-	    ("http_scheme", "http", "Webhook scheme used for alert notification", None),
-	    ("http_user", None, "Webhook User used for alert notification", None),
-	    ("http_pass", None, "Webhook Password used for alert notification", None),
-	    ("http_uri_path", "/", "Webhook Uri used for alert notification", None),
-	    ("http_method", "POST", "Webhook Method used for alert notification", None),
+        ("http_host", "localhost", "Webhook host used for alert notification", None),
+        ("http_port", "80", "Webhook port used for alert notification", None),
+        ("http_scheme", "http", "Webhook scheme used for alert notification", None),
+        ("http_user", None, "Webhook User used for alert notification", None),
+        ("http_pass", None, "Webhook Password used for alert notification", None),
+        ("http_uri_path", "/", "Webhook Uri used for alert notification", None),
+        ("http_method", "POST", "Webhook Method used for alert notification", None),
 
-	    ("http_phost", None, "Webhook proxy host", None),
-	    ("http_pport", None, "Webhook Proxy port", None),
+        ("http_phost", None, "Webhook proxy host", None),
+        ("http_pport", None, "Webhook Proxy port", None),
             # Options for Index Action
             ("index", "<log2alert-{now/d}>","Index name used to add the alerts", None), #by default it creates a new index every day
             ("type", "_doc","Index Type used to add the alerts", None)
-	    
+        
             )
     watcher_urls = {
             "watcher": "_watcher",
@@ -439,6 +525,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
         tags = sigmaparser.parsedyaml.setdefault("tags", "")
         # Get time frame if exists
         interval = sigmaparser.parsedyaml["detection"].setdefault("timeframe", "30m")
+        dateField = self.sigmaconfig.config.get("dateField", "timestamp")
         
         # creating condition
         indices = sigmaparser.get_logsource().index
@@ -548,21 +635,21 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                     # mail notification if mail address is given
                     email = self.mail
                     eaction = {
-    	                "send_email": {
-    	                        "email": {
-    		                    "to": email,
-            		            "subject": action_subject,
-                    	            "body": action_body,
-                        	    "attachments": {
-                                	"data.json": {
-                                    	    "data": {
-                                        	"format": "json"
+                        "send_email": {
+                                "email": {
+                                "to": email,
+                                "subject": action_subject,
+                                    "body": action_body,
+                                "attachments": {
+                                    "data.json": {
+                                            "data": {
+                                            "format": "json"
                                                 }
-	                                    }
-    		                        }
-    	    	                    }
-                	        }
-                    	    }
+                                        }
+                                    }
+                                    }
+                            }
+                            }
                 if 'webhook' in alert_methods: # WebHook Action. Sending metadata to a webservice. Added timestamp to metadata
                     http_scheme = self.http_scheme
                     http_host = self.http_host
@@ -574,22 +661,22 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                     http_user = self.http_user
                     http_pass = self.http_pass
                     waction = {
-			"httppost":{
+            "httppost":{
                             "transform":{
                                 "script": "ctx.metadata.timestamp=ctx.trigger.scheduled_time;" 
                                 },
-                    	    "webhook":{
-                        	"scheme"  : http_scheme,
-                        	"host"    : http_host,
-                        	"port"    : int(http_port),
-            	        	"method"  : http_method,
-    	                        "path"    : http_uri_path,
-    		                "params"  : {},
-	                        "headers" : {"Content-Type"                      : "application/json"},
-                        	"body"    : "{{#toJson}}ctx.metadata{{/toJson}}"
-                    	    }
-			}
-		    }
+                            "webhook":{
+                            "scheme"  : http_scheme,
+                            "host"    : http_host,
+                            "port"    : int(http_port),
+                            "method"  : http_method,
+                                "path"    : http_uri_path,
+                            "params"  : {},
+                            "headers" : {"Content-Type"                      : "application/json"},
+                            "body"    : "{{#toJson}}ctx.metadata{{/toJson}}"
+                            }
+            }
+            }
                     if (http_user) and (http_pass):
                         auth={
                             "basic":{
@@ -660,7 +747,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                                             "filter":
                                                 {
                                                     "range":{
-                                                        "timestamp":{
+                                                        dateField:{
                                                             "gte":"now-%s/m"%self.filter_range #filter only for the last x minutes events
                                                             }
                                                         }
@@ -854,14 +941,18 @@ class ElastalertBackend(MultiRuleOutputMixin):
 
     def generateAggregation(self, agg):
         if agg:
-            if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT or agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MIN or agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MAX or agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_AVG or agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_SUM:
+            if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT or \
+                    agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MIN or \
+                    agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MAX or \
+                    agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_AVG or \
+                    agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_SUM:
                 return ""
             else:
                 for name, idx in agg.aggfuncmap.items():
                     if idx == agg.aggfunc:
                         funcname = name
                         break
-                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend"%(self.title, funcname))
+                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend" % ( self.title, funcname))
 
     def convertLevel(self, level):
         return {
@@ -874,7 +965,7 @@ class ElastalertBackend(MultiRuleOutputMixin):
     def finalize(self):
         result = ""
         for rulename, rule in self.elastalert_alerts.items():
-            result += yaml.dump(rule, default_flow_style=False)
+            result += yaml.dump(rule, default_flow_style=False, width=10000)
             result += '\n'
         return result
 

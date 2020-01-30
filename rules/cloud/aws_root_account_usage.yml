@@ -1,0 +1,21 @@
+title: AWS Root Credentials
+id: 8ad1600d-e9dc-4251-b0ee-a65268f29add
+status: experimental
+author: vitaliy0x1
+date: 2020/01/21
+description: Detects AWS root account usage
+references:
+  - https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html
+logsource:
+  service: cloudtrail
+detection:
+  selection_usertype:
+    - userIdentity.type: Root
+  selection_eventtype:
+    - eventType: AwsServiceEvent
+  condition: selection_usertype AND NOT selection_eventtype
+level: medium
+falsepositives:
+    - AWS Tasks That Require AWS Account Root User Credentials https://docs.aws.amazon.com/general/latest/gr/aws_tasks-that-require-root.html
+tags:
+  - attack.t1078

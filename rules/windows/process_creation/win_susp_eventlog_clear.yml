@@ -1,0 +1,31 @@
+title: Suspicious eventlog clear or configuration using wevtutil
+id: cc36992a-4671-4f21-a91d-6c2b72a2edf5
+description: Detects clearing or configuration of eventlogs uwing wevtutil. Might be used by ransomwares during the attack (seen by NotPetya and others)
+author: Ecco
+date: 2019/09/26
+tags:
+    - attack.execution
+    - attack.t1070
+    - car.2016-04-002
+level: high
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_binary_1:
+        Image: '*\wevtutil.exe'
+    selection_binary_2:
+        OriginalFileName: 'wevtutil.exe'
+    selection_clear_1:
+        CommandLine: '* cl *'
+    selection_clear_2:
+        CommandLine: '* clear-log *'
+    selection_disable_1:
+        CommandLine: '* sl *'
+    selection_disable_2:
+        CommandLine: '* set-log *'
+    condition: (1 of selection_binary_*) and (1 of selection_clear_* or 1 of selection_disable_*)
+    
+falsepositives:
+    - Admin activity
+    - Scripts and administrative tools used in the monitored environment

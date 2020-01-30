@@ -1,0 +1,149 @@
+title: Logpoint
+order: 20
+backends:
+  - logpoint
+logsources:
+  windows-security:
+    product: windows
+    service: security
+    conditions:
+      event_source: 'Microsoft-Windows-Security-Auditing'
+  windows-system:
+    product: windows
+    service: system
+    conditions:
+      event_source: 'Microsoft-Windows-Security-Auditing'
+  windows-dns-server:
+    product: windows
+    service: dns-server
+    conditions:
+      event_source: 'DNS Server'
+  windows-driver-framework:
+    product: windows
+    service: driver-framework
+    conditions:
+      source: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
+  windows-dhcp:
+    product: windows
+    service: dhcp
+    conditions: 
+      source: 'Microsoft-Windows-DHCP-Server/Operational'
+
+fieldmappings:
+    EventID: event_id
+    FailureCode: result_code
+    GroupName: group_name
+    GroupSid: group_sid
+    KeyLength: key_length
+    LogonProcessName: logon_process
+    LogonType: logon_type
+    ServiceName: service
+    SubjectAccountName:
+        EventID=4611:
+            - user
+        EventID=4624:
+            - target_user
+            - caller_user
+        EventID=4625:
+            - target_user
+            - caller_user
+        EventID=4634:
+            - user
+        EventID=4648:
+            - target_user
+            - caller_user
+        EventID=4662:
+            - user
+        EventID=4672:
+            - user
+        EventID=4688:
+            - user
+        EventID=4719:
+            - user
+        EventID=4720:
+            - target_user
+            - caller_user
+        EventID=4722:
+            - target_user
+            - caller_user
+        EventID=4723:
+            - target_user
+            - caller_user
+        EventID=4724:
+            - target_user
+            - caller_user
+        EventID=4728:
+            - user
+            - member
+        EventID=4729:
+            - user
+            - member
+        EventID=4731:
+            - user
+        EventID=4732:
+            - user
+            - member
+        EventID=4735:
+            - user
+        EventID=4737:
+            - user
+        EventID=4738:
+            - target_user
+            - caller_user
+        EventID=4740:
+            - target_user
+            - caller_user
+        EventID=4742:
+            - target_user
+            - caller_user
+        EventID=4755:
+            - user
+        EventID=4756:
+            - user
+            - member
+        EventID=4757:
+            - user
+            - member
+        EventID=4767:
+            - target_user
+            - caller_user
+        EventID=4768:
+            - user
+        EventID=4769:
+            - user
+        EventID=4770:
+            - user
+        EventID=4771:
+            - user
+        EventID=4774:
+            - user
+        EventID=4776:
+            - user
+        EventID=4781:
+            - target_user
+            - caller_user
+        EventID=4904:
+            - user
+        EventID=4905:
+            - user
+        EventID=5061:
+            - user
+        EventID=5136:
+            - user
+        EventID=5137:
+            - user
+        default:
+            - caller_user
+            - target_user
+            - user
+            - member
+    TicketOptions: ticket_options
+    TicketEnctyption: ticket_encryption
+    Type: event_type
+    UserName:
+        default:
+            - caller_user
+            - target_user
+            - user
+            - member
+    SourceWorkstation: workstation
