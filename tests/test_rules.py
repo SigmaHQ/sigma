@@ -23,13 +23,11 @@ class TestRules(unittest.TestCase):
 
     path_to_rules = "rules"
 
-
     # Helper functions
     def yield_next_rule_file_path(self, path_to_rules:str) -> str:
         for root, _, files in os.walk(path_to_rules):
             for file in files:
                 yield os.path.join(root, file)
-
 
     def get_rule_part(self, file_path:str, part_name:str):
         yaml_dicts = self.get_rule_yaml(file_path)
@@ -38,7 +36,6 @@ class TestRules(unittest.TestCase):
                 return yaml_part[part_name]
 
         return None
-
 
     def get_rule_yaml(self, file_path:str) -> dict:
         data = []
@@ -49,7 +46,6 @@ class TestRules(unittest.TestCase):
                 data.append(part)
 
         return data
-
 
     # Tests
     def test_confirm_extension_is_yml(self):
@@ -65,7 +61,6 @@ class TestRules(unittest.TestCase):
         self.assertEqual(files_with_incorrect_extensions, [], Fore.RED + 
                         "There are rule files with extensions other than .yml")
 
-
     def test_confirm_correct_mitre_tags(self):
         files_with_incorrect_mitre_tags = []
 
@@ -79,7 +74,6 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(files_with_incorrect_mitre_tags, [], Fore.RED + 
                          "There are rules with incorrect MITRE Tags. (please inform us about new tags that are not yet supported in our tests)")
-
 
     def test_look_for_duplicate_filters(self):
         def check_list_or_recurse_on_dict(item, depth:int) -> None:
@@ -110,7 +104,6 @@ class TestRules(unittest.TestCase):
         self.assertEqual(files_with_duplicate_filters, [], Fore.RED + 
                          "There are rules with duplicate filters")
 
-
     def test_single_named_condition_with_x_of_them(self):
         faulty_detections = []
 
@@ -129,7 +122,6 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(faulty_detections, [], Fore.RED +
                          "There are rules using '1/all of them' style conditions but only have one condition")
-
 
     def test_duplicate_titles(self):
         def compare_detections(detection1:dict, detection2:dict) -> bool:
@@ -188,7 +180,6 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_detections, [], Fore.YELLOW + 
                          "There are rule files with exactly the same detection logic.")
 
-
     def test_source_eventlog(self):
         faulty_detections = []
 
@@ -200,7 +191,6 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(faulty_detections, [], Fore.YELLOW + 
                          "There are detections with 'Source: Eventlog'. This does not add value to the detection.")
-
 
     def test_event_id_instead_of_process_creation(self):
         faulty_detections = []
