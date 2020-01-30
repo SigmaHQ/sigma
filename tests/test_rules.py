@@ -213,8 +213,8 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_detections, [],
                          "There are rules still using Sysmon 1 or Event ID 4688. Please migrate to the process_creation category.")
 
-    def print_error(self, message):
-        print(Fore.RED + message)
+def print_error(message):
+    print(Fore.RED + message)
 
 if __name__ == "__main__":
     init(autoreset=True)
