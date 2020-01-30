@@ -217,6 +217,19 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules with missing or malformed 'id' fields. Create an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).")
     
+    def test_missing_date(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            datefield = self.get_rule_part(file_path=file, part_name="date")
+            if not datefield:
+                print(Fore.YELLOW + "Rule {} has no field 'date'.".format(file))
+                faulty_rules.append(file)
+            elif len(datefield) != 10:
+                print(Fore.YELLOW + "Rule {} has a malformed 'date' (not 10 chars, should be YYYY/MM/DD).".format(file))
+                faulty_rules.append(file)                
+
+        self.assertEqual(faulty_rules, [], Fore.RED + 
+                         "There are rules with missing or malformed 'date' fields. (create one, e.g. date: 2019/01/14)")
 
 if __name__ == "__main__":
     init(autoreset=True)
