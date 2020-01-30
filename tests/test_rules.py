@@ -231,6 +231,32 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules with missing or malformed 'date' fields. (create one, e.g. date: 2019/01/14)")
 
+    def test_title(self):
+        faulty_rules = []
+        allowed_lowercase_words = ['the', 'for', 'in', 'with', 'via', 'on', 'to', 'without', 'of', 'through', 'from', 'by', 'as', 'a', 'or', 'at', 'and', 'an', 'over']
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            title = self.get_rule_part(file_path=file, part_name="title")
+            if not title:
+                print(Fore.RED + "Rule {} has no field 'title'.".format(file))
+                faulty_rules.append(file)
+                continue
+            elif len(title) > 70:
+                print(Fore.YELLOW + "Rule {} has a title field with too many characters (>70)".format(file))
+                faulty_rules.append(file)
+            if title.startswith("Detects "):
+                print(Fore.RED + "Rule {} has a title that starts with 'Detects'".format(file))
+                faulty_rules.append(file)
+            wrong_casing = []
+            for word in title.split(" "):
+                if word.islower() and not word.lower() in allowed_lowercase_words and not "." in word and not word[0].isdigit():
+                    wrong_casing.append(word)
+            if len(wrong_casing) > 0:
+                print(Fore.RED + "Rule {} has a title that has not title capitalization. Words: '{}'".format(file, ", ".join(wrong_casing)))
+                faulty_rules.append(file)
+
+        self.assertEqual(faulty_rules, [], Fore.RED + 
+                         "There are rules with non-conform 'title' fields. Please check: https://github.com/Neo23x0/sigma/wiki/Rule-Creation-Guide#title")
+
 if __name__ == "__main__":
     init(autoreset=True)
     unittest.main()
