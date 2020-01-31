@@ -138,12 +138,17 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
 
         if (self.category, self.product, self.service) == ("process_creation", "windows", None):
             self.table = "ProcessCreationEvents"
+        elif (self.category, self.product, self.service) == (None, "windows", "powershell"):
+            self.table = "MiscEvents"
+            self.orToken = ", "
 
         return super().generate(sigmaparser)
 
     def generateBefore(self, parsed):
         if self.table is None:
             raise NotSupportedError("No WDATP table could be determined from Sigma rule")
+        if self.table == "MiscEvents" and self.service == "powershell":
+            return "%s | where tostring(extractjson('$.Command', AdditionalFields)) in~ " % self.table
         return "%s | where " % self.table
 
     def generateMapItemNode(self, node):

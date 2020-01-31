@@ -5,6 +5,7 @@ from argparse import ArgumentParser
 import yaml
 import sys
 from pathlib import Path
+from sigma.output import SigmaYAMLDumper
 
 class Output(object):
     """Output base class"""
@@ -74,11 +75,6 @@ def get_output(output):
         return DirectoryOutput(path)
     else:
         return SingleFileOutput(output)
-
-class SigmaYAMLDumper(yaml.Dumper):
-    """YAML dumper that increases amount of indentation, e.g. for lists"""
-    def increase_indent(self, flow=False, indentless=False):
-        return super().increase_indent(flow, False)
 
 class AmbiguousRuleException(TypeError):
     def __init__(self, ids):
