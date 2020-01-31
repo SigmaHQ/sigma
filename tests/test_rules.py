@@ -23,13 +23,11 @@ class TestRules(unittest.TestCase):
 
     path_to_rules = "rules"
 
-
     # Helper functions
     def yield_next_rule_file_path(self, path_to_rules:str) -> str:
         for root, _, files in os.walk(path_to_rules):
             for file in files:
                 yield os.path.join(root, file)
-
 
     def get_rule_part(self, file_path:str, part_name:str):
         yaml_dicts = self.get_rule_yaml(file_path)
@@ -38,7 +36,6 @@ class TestRules(unittest.TestCase):
                 return yaml_part[part_name]
 
         return None
-
 
     def get_rule_yaml(self, file_path:str) -> dict:
         data = []
@@ -49,7 +46,6 @@ class TestRules(unittest.TestCase):
                 data.append(part)
 
         return data
-
 
     # Tests
     def test_confirm_extension_is_yml(self):
@@ -65,7 +61,6 @@ class TestRules(unittest.TestCase):
         self.assertEqual(files_with_incorrect_extensions, [], Fore.RED + 
                         "There are rule files with extensions other than .yml")
 
-
     def test_confirm_correct_mitre_tags(self):
         files_with_incorrect_mitre_tags = []
 
@@ -79,7 +74,6 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(files_with_incorrect_mitre_tags, [], Fore.RED + 
                          "There are rules with incorrect MITRE Tags. (please inform us about new tags that are not yet supported in our tests)")
-
 
     def test_look_for_duplicate_filters(self):
         def check_list_or_recurse_on_dict(item, depth:int) -> None:
@@ -110,7 +104,6 @@ class TestRules(unittest.TestCase):
         self.assertEqual(files_with_duplicate_filters, [], Fore.RED + 
                          "There are rules with duplicate filters")
 
-
     def test_single_named_condition_with_x_of_them(self):
         faulty_detections = []
 
@@ -129,7 +122,6 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(faulty_detections, [], Fore.RED +
                          "There are rules using '1/all of them' style conditions but only have one condition")
-
 
     def test_duplicate_titles(self):
         def compare_detections(detection1:dict, detection2:dict) -> bool:
@@ -188,7 +180,6 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_detections, [], Fore.YELLOW + 
                          "There are rule files with exactly the same detection logic.")
 
-
     def test_source_eventlog(self):
         faulty_detections = []
 
@@ -201,7 +192,6 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_detections, [], Fore.YELLOW + 
                          "There are detections with 'Source: Eventlog'. This does not add value to the detection.")
 
-
     def test_event_id_instead_of_process_creation(self):
         faulty_detections = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
@@ -213,6 +203,59 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_detections, [], Fore.YELLOW + 
                          "There are rules still using Sysmon 1 or Event ID 4688. Please migrate to the process_creation category.")
 
+    def test_missing_id(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            id = self.get_rule_part(file_path=file, part_name="id")
+            if not id:
+                print(Fore.YELLOW + "Rule {} has no field 'id'.".format(file))
+                faulty_rules.append(file)
+            elif len(id) != 36:
+                print(Fore.YELLOW + "Rule {} has a malformed 'id' (not 36 chars).".format(file))
+                faulty_rules.append(file)                
+
+        self.assertEqual(faulty_rules, [], Fore.RED + 
+                         "There are rules with missing or malformed 'id' fields. Create an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).")
+    
+    def test_missing_date(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            datefield = self.get_rule_part(file_path=file, part_name="date")
+            if not datefield:
+                print(Fore.YELLOW + "Rule {} has no field 'date'.".format(file))
+                faulty_rules.append(file)
+            elif len(datefield) != 10:
+                print(Fore.YELLOW + "Rule {} has a malformed 'date' (not 10 chars, should be YYYY/MM/DD).".format(file))
+                faulty_rules.append(file)                
+
+        self.assertEqual(faulty_rules, [], Fore.RED + 
+                         "There are rules with missing or malformed 'date' fields. (create one, e.g. date: 2019/01/14)")
+
+    def test_title(self):
+        faulty_rules = []
+        allowed_lowercase_words = ['the', 'for', 'in', 'with', 'via', 'on', 'to', 'without', 'of', 'through', 'from', 'by', 'as', 'a', 'or', 'at', 'and', 'an', 'over']
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            title = self.get_rule_part(file_path=file, part_name="title")
+            if not title:
+                print(Fore.RED + "Rule {} has no field 'title'.".format(file))
+                faulty_rules.append(file)
+                continue
+            elif len(title) > 70:
+                print(Fore.YELLOW + "Rule {} has a title field with too many characters (>70)".format(file))
+                faulty_rules.append(file)
+            if title.startswith("Detects "):
+                print(Fore.RED + "Rule {} has a title that starts with 'Detects'".format(file))
+                faulty_rules.append(file)
+            wrong_casing = []
+            for word in title.split(" "):
+                if word.islower() and not word.lower() in allowed_lowercase_words and not "." in word and not word[0].isdigit():
+                    wrong_casing.append(word)
+            if len(wrong_casing) > 0:
+                print(Fore.RED + "Rule {} has a title that has not title capitalization. Words: '{}'".format(file, ", ".join(wrong_casing)))
+                faulty_rules.append(file)
+
+        self.assertEqual(faulty_rules, [], Fore.RED + 
+                         "There are rules with non-conform 'title' fields. Please check: https://github.com/Neo23x0/sigma/wiki/Rule-Creation-Guide#title")
 
 if __name__ == "__main__":
     init(autoreset=True)
