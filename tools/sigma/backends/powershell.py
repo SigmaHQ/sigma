@@ -23,6 +23,8 @@ class PowerShellBackend(SingleTextQueryBackend):
     """Converts Sigma rule into PowerShell event log cmdlets."""
     identifier = "powershell"
     active = True
+    config_required = False
+    default_config = ["sysmon", "powershell"]
     options = (
         ("csv", False, "Return the results in CSV format instead of Powershell objects", None),
     )

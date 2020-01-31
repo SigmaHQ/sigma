@@ -1,0 +1,25 @@
+title: Possible App Whitelisting Bypass via WinDbg/CDB as a Shellcode Runner
+id: b5c7395f-e501-4a08-94d4-57fe7a9da9d2
+status: experimental
+description: Launch 64-bit shellcode from the x64_calc.wds file using cdb.exe.
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OtherMSBinaries/Cdb.yml
+    - http://www.exploit-monday.com/2016/08/windbg-cdb-shellcode-runner.html
+author: Beyu Denis, oscd.community
+date: 2019/10/26
+modified: 2019/11/04
+tags:
+    - attack.defense_evasion
+    - attack.execution
+    - attack.t1218
+level: medium
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\cdb.exe'
+        CommandLine|contains: '-cf'
+    condition: selection
+falsepositives:
+    - Legitimate use of debugging tools

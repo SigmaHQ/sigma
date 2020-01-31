@@ -74,7 +74,7 @@ class SplunkBackend(SingleTextQueryBackend):
         columns = list()
         try:
             for field in sigmaparser.parsedyaml["fields"]:
-                mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field)
+                mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
                 if type(mapped) == str:
                     columns.append(mapped)
                 elif type(mapped) == list:

@@ -1,0 +1,115 @@
+title: Elastic Winlogbeat (from 7.x) index pattern and field mapping
+order: 20
+backends:
+  - es-qs
+  - es-dsl
+  - kibana
+  - xpack-watcher
+  - elastalert
+  - elastalert-dsl
+logsources:
+  windows:
+    product: windows
+    index: winlogbeat-*
+  windows-application:
+    product: windows
+    service: application
+    conditions:
+      winlog.channel: Application
+  windows-security:
+    product: windows
+    service: security
+    conditions:
+      winlog.channel: Security
+  windows-sysmon:
+    product: windows
+    service: sysmon
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+  windows-dns-server:
+    product: windows
+    service: dns-server
+    conditions:
+      winlog.channel: 'DNS Server'
+  windows-driver-framework:
+    product: windows
+    service: driver-framework
+    conditions:
+      winlog.provider_name: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
+  windows-dhcp:
+    product: windows
+    service: dhcp
+    conditions:
+      winlog.provider_name: 'Microsoft-Windows-DHCP-Server/Operational'
+defaultindex: winlogbeat-*
+# Extract all field names qith yq:
+# yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: winlog.event_data.\1/g'
+# Keep EventID! Clean up the list afterwards!
+fieldmappings:
+  EventID: winlog.event_id
+  AccessMask: winlog.event_data.AccessMask
+  AccountName: winlog.event_data.AccountName
+  AllowedToDelegateTo: winlog.event_data.AllowedToDelegateTo
+  AttributeLDAPDisplayName: winlog.event_data.AttributeLDAPDisplayName
+  AuditPolicyChanges: winlog.event_data.AuditPolicyChanges
+  AuthenticationPackageName: winlog.event_data.AuthenticationPackageName
+  CallingProcessName: winlog.event_data.CallingProcessName
+  CallTrace: winlog.event_data.CallTrace
+  CommandLine: winlog.event_data.CommandLine
+  ComputerName: winlog.ComputerName
+  CurrentDirectory: winlog.event_data.CurrentDirectory
+  Description: winlog.event_data.Description
+  DestinationHostname: winlog.event_data.DestinationHostname
+  DestinationIp: winlog.event_data.DestinationIp
+  DestinationIsIpv6: winlog.event_data.DestinationIsIpv6
+  DestinationPort: winlog.event_data.DestinationPort
+  Details: winlog.event_data.Details
+  EngineVersion: winlog.event_data.EngineVersion
+  EventType: winlog.event_data.EventType
+  FailureCode: winlog.event_data.FailureCode
+  FileName: winlog.event_data.FileName
+  GrantedAccess: winlog.event_data.GrantedAccess
+  GroupName: winlog.event_data.GroupName
+  GroupSid: winlog.event_data.GroupSid
+  Hashes: winlog.event_data.Hashes
+  HiveName: winlog.event_data.HiveName
+  HostVersion: winlog.event_data.HostVersion
+  Image: winlog.event_data.Image
+  ImageLoaded: winlog.event_data.ImageLoaded
+  ImagePath: winlog.event_data.ImagePath
+  Imphash: winlog.event_data.Imphash
+  IpAddress: winlog.event_data.IpAddress
+  KeyLength: winlog.event_data.KeyLength
+  LogonProcessName: winlog.event_data.LogonProcessName
+  LogonType: winlog.event_data.LogonType
+  NewProcessName: winlog.event_data.NewProcessName
+  ObjectClass: winlog.event_data.ObjectClass
+  ObjectName: winlog.event_data.ObjectName
+  ObjectType: winlog.event_data.ObjectType
+  ObjectValueName: winlog.event_data.ObjectValueName
+  ParentCommandLine: winlog.event_data.ParentCommandLine
+  ParentProcessName: winlog.event_data.ParentProcessName
+  ParentImage: winlog.event_data.ParentImage
+  Path: winlog.event_data.Path
+  PipeName: winlog.event_data.PipeName
+  ProcessCommandLine: winlog.event_data.ProcessCommandLine
+  ProcessName: winlog.event_data.ProcessName
+  Properties: winlog.event_data.Properties
+  SecurityID: winlog.event_data.SecurityID
+  ServiceFileName: winlog.event_data.ServiceFileName
+  ServiceName: winlog.event_data.ServiceName
+  ShareName: winlog.event_data.ShareName
+  Signature: winlog.event_data.Signature
+  Source: winlog.event_data.Source
+  SourceImage: winlog.event_data.SourceImage
+  StartModule: winlog.event_data.StartModule
+  Status: winlog.event_data.Status
+  SubjectUserName: winlog.event_data.SubjectUserName
+  SubjectUserSid: winlog.event_data.SubjectUserSid
+  TargetFilename: winlog.event_data.TargetFilename
+  TargetImage: winlog.event_data.TargetImage
+  TargetObject: winlog.event_data.TargetObject
+  TicketEncryptionType: winlog.event_data.TicketEncryptionType
+  TicketOptions: winlog.event_data.TicketOptions
+  User: winlog.event_data.User
+  WorkstationName: winlog.event_data.WorkstationName
