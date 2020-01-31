@@ -1,0 +1,24 @@
+title: Ransomware Deletes Volume Shadow Copies
+id: 4eebe114-4b24-4a9d-9a6c-c7bd7c8eaa61
+status: experimental
+description: Detects commands that delete all local volume shadow copies as used by different Ransomware families
+references:
+    - https://www.bleepingcomputer.com/news/security/why-everyone-should-disable-vssadmin-exe-now/
+    - https://www.hybrid-analysis.com/sample/ed01ebfbc9eb5bbea545af4d01bf5f1071661840480439c6e5babe8e080e41aa?environmentId=100
+author: Florian Roth
+date: 2019/06/01
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine:
+            - '*vssadmin delete shadows*'
+            - '*wmic SHADOWCOPY DELETE*'
+    condition: selection
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Adminsitrative scripts - e.g. to prepare image for golden image creation
+level: critical

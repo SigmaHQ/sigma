@@ -33,7 +33,7 @@ The SANS webcast on Sigma contains a very good 20 min introduction to the projec
 # Use Cases
 
 * Describe your detection method in Sigma to make it sharable
-* Write and your SIEM searches in Sigma to avoid a vendor lock-in
+* Write your SIEM searches in Sigma to avoid a vendor lock-in
 * Share the signature in the appendix of your analysis along with IOCs and YARA rules
 * Share the signature in threat intel communities - e.g. via MISP
 * Provide Sigma signatures for malicious behaviour in your own application
@@ -100,7 +100,7 @@ merges multiple YAML documents of a Sigma rule collection into simple Sigma rule
 
 ```
 usage: sigmac [-h] [--recurse] [--filter FILTER]
-              [--target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,wdatp}]
+              [--target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,wdatp}]
               [--target-list] [--config CONFIG] [--output OUTPUT]
               [--backend-option BACKEND_OPTION] [--defer-abort]
               [--ignore-backend-errors] [--verbose] [--debug]
@@ -125,7 +125,7 @@ optional arguments:
                         tag that must appear in the rules tag list, case-
                         insensitive matching. Multiple log source
                         specifications are AND linked.
-  --target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,wdatp}, -t {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,wdatp}
+  --target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,wdatp}, -t {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,wdatp}
                         Output target format
   --target-list, -l     List available output target formats
   --config CONFIG, -c CONFIG
@@ -187,12 +187,15 @@ tools/sigmac -t splunk -c ~/my-splunk-mapping.yml -c tools/config/generic/window
 * [Elastic X-Pack Watcher](https://www.elastic.co/guide/en/x-pack/current/xpack-alerting.html)
 * [Logpoint](https://www.logpoint.com)
 * [Windows Defender Advanced Threat Protection (WDATP)](https://www.microsoft.com/en-us/windowsforbusiness/windows-atp)
+* [Azure Sentinel / Azure Log Analytics](https://azure.microsoft.com/en-us/services/azure-sentinel/)
+* [Sumologic](https://www.sumologic.com/)
 * [ArcSight](https://software.microfocus.com/en-us/products/siem-security-information-event-management/overview)
 * [QRadar](https://www.ibm.com/de-de/marketplace/ibm-qradar-siem)
 * [Qualys](https://www.qualys.com/apps/threat-protection/)
 * [RSA NetWitness](https://www.rsa.com/en-us/products/threat-detection-response)
 * [PowerShell](https://docs.microsoft.com/en-us/powershell/scripting/getting-started/getting-started-with-windows-powershell?view=powershell-6)
 * [Grep](https://www.gnu.org/software/grep/manual/grep.html) with Perl-compatible regular expression support
+* [LimaCharlie](https://limacharlie.io)
 
 Current work-in-progress
 * [Splunk Data Models](https://docs.splunk.com/Documentation/Splunk/7.1.0/Knowledge/Aboutdatamodels)
@@ -251,6 +254,27 @@ sigma2misp @misp.conf --same-event --info "Test Event" -r sigma_rules/
 
 [Evt2Sigma](https://github.com/Neo23x0/evt2sigma) helps you with the rule creation. It generates a Sigma rule from a log entry. 
 
+## Sigma2attack
+
+Generates a [MITRE ATT&CK Navigator](https://github.com/mitre/attack-navigator/) heatmap from a directory containing sigma rules.
+
+Requirements:
+- Sigma rules tagged with a `attack.tXXXX` tag (e.g.: `attack.t1086`)
+
+Usage samples:
+
+```
+# Use the default "rules" folder
+./tools/sigma2attack
+
+# ... or specify your own
+./tools/sigma2attack --rules-directory ~/hunting/rules
+```
+
+Result once imported in the MITRE ATT&CK Navigator ([online version](https://mitre-attack.github.io/attack-navigator/enterprise/)):
+
+![Sigma2attack result](./images/sigma2attack.png)
+
 ## Contributed Scripts
 
 The directory `contrib` contains scripts that were contributed by the community:
@@ -269,12 +293,37 @@ These tools are not part of the main toolchain and maintained separately by thei
 # Projects or Products that use Sigma
 
 * [MISP](http://www.misp-project.org/2017/03/26/MISP.2.4.70.released.html) (since version 2.4.70, March 2017)
-* [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 * [SOC Prime - Sigma Rule Editor](https://tdm.socprime.com/sigma/)
-* [ypsilon](https://github.com/P4T12ICK/ypsilon) - Automated Use Case Testing 
 * [uncoder.io](https://uncoder.io/) - Online Translator for SIEM Searches
-* [SPARK](https://www.nextron-systems.com/2018/06/28/spark-applies-sigma-rules-in-eventlog-scan/) - Scan with Sigma rules on endpoints
+* [THOR](https://www.nextron-systems.com/2018/06/28/spark-applies-sigma-rules-in-eventlog-scan/) - Scan with Sigma rules on endpoints
+* [Joe Sandbox](https://www.joesecurity.org/)
+* [ypsilon](https://github.com/P4T12ICK/ypsilon) - Automated Use Case Testing 
 * [RANK VASA](https://globenewswire.com/news-release/2019/03/04/1745907/0/en/RANK-Software-to-Help-MSSPs-Scale-Cybersecurity-Offerings.html)
+* [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
+
+# Contribution
+
+If you want to contribute, you are more then welcome. There are numerous ways to help this project.
+
+## Use it and provide feedback
+
+If you use it, let us know what works and what does not work. 
+
+E.g.
+- Tell us about false positives (issues section) 
+- Try to provide an improved rule (new filter) via [pull request](https://help.github.com/en/articles/editing-files-in-another-users-repository) on that rule
+
+## Work on open issues
+
+The github issue tracker is a good place to start tackling some issues others raised to the project. It could be as easy as a review of the documentation.
+
+## Provide Backends / Backend Features / Bugfixes
+
+Various requests for sigmac (sigma converter) backends exist. Some backends are very limited and need features. We are working on a documentation on how to write new backends but our time for this project is currently mostly spent for issue resolutions. 
+
+## Spread the word
+
+Last but not least, the more people use Sigma, the better, so help promote it by sharing it via social media. If you are using it, consider giving a talk about your journey and tell us about it.
 
 # Licenses
 

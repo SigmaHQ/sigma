@@ -1,0 +1,125 @@
+title: Elastic Winlogbeat (from 7.x) index pattern and field mapping following Elastic enabled Modules
+order: 20
+backends:
+  - es-qs
+  - es-dsl
+  - kibana
+  - xpack-watcher
+  - elastalert
+  - elastalert-dsl
+logsources:
+  windows:
+    product: windows
+    index: winlogbeat-*
+  windows-application:
+    product: windows
+    service: application
+    conditions:
+      winlog.channel: Application
+  windows-security:
+    product: windows
+    service: security
+    conditions:
+      winlog.channel: Security
+  windows-sysmon:
+    product: windows
+    service: sysmon
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+  windows-dns-server:
+    product: windows
+    service: dns-server
+    conditions:
+      winlog.channel: 'DNS Server'
+  windows-driver-framework:
+    product: windows
+    service: driver-framework
+    conditions:
+      winlog.provider_name: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
+  windows-dhcp:
+    product: windows
+    service: dhcp
+    conditions:
+      winlog.provider_name: 'Microsoft-Windows-DHCP-Server/Operational'
+defaultindex: winlogbeat-*
+# Extract all field names qith yq:
+# yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: winlog.event_data.\1/g'
+# Keep EventID! Clean up the list afterwards!
+fieldmappings:
+  EventID: winlog.event_id
+  AccessMask: winlog.event_data.AccessMask
+  AccountName: winlog.event_data.AccountName
+  AllowedToDelegateTo: winlog.event_data.AllowedToDelegateTo
+  AttributeLDAPDisplayName: winlog.event_data.AttributeLDAPDisplayName
+  AuditPolicyChanges: winlog.event_data.AuditPolicyChanges
+  AuthenticationPackageName: winlog.event_data.AuthenticationPackageName
+  CallingProcessName: winlog.event_data.CallingProcessName
+  CallTrace: winlog.event_data.CallTrace
+  CommandLine: process.args
+  ComputerName: winlog.ComputerName
+  CurrentDirectory: process.working_directory
+  Description: winlog.event_data.Description
+  DestinationHostname: destination.domain
+  DestinationIp: destination.ip
+  #DestinationIsIpv6: winlog.event_data.DestinationIsIpv6 #=gets deleted and not boolean...https://github.com/elastic/beats/blob/71eee76e7cfb8d5b18dfacad64864370ddb14ce7/x-pack/winlogbeat/module/sysmon/config/winlogbeat-sysmon.js#L278-L279
+  DestinationPort: destination.port
+  DestinationPortName: network.protocol
+  Details: winlog.event_data.Details
+  EngineVersion: winlog.event_data.EngineVersion
+  EventType: winlog.event_data.EventType
+  FailureCode: winlog.event_data.FailureCode
+  FileName: file.path
+  GrantedAccess: winlog.event_data.GrantedAccess
+  GroupName: winlog.event_data.GroupName
+  GroupSid: winlog.event_data.GroupSid
+  Hashes: winlog.event_data.Hashes
+  HiveName: winlog.event_data.HiveName
+  HostVersion: winlog.event_data.HostVersion
+  Image: process.executable
+  ImageLoaded: file.path
+  ImagePath: winlog.event_data.ImagePath
+  Imphash: winlog.event_data.Imphash
+  IpAddress: source.ip
+  IpPort: source.port
+  KeyLength: winlog.event_data.KeyLength
+  LogonProcessName: winlog.event_data.LogonProcessName
+  LogonType: winlog.event_data.LogonType
+  NewProcessName: winlog.event_data.NewProcessName
+  ObjectClass: winlog.event_data.ObjectClass
+  ObjectName: winlog.event_data.ObjectName
+  ObjectType: winlog.event_data.ObjectType
+  ObjectValueName: winlog.event_data.ObjectValueName
+  ParentCommandLine: process.parent.args
+  ParentProcessName: process.parent.name
+  ParentImage: process.parent.executable
+  Path: winlog.event_data.Path
+  PipeName: file.name
+  ProcessCommandLine: winlog.event_data.ProcessCommandLine
+  ProcessName: process.executable
+  Properties: winlog.event_data.Properties
+  SecurityID: winlog.event_data.SecurityID
+  ServiceFileName: winlog.event_data.ServiceFileName
+  ServiceName: winlog.event_data.ServiceName
+  ShareName: winlog.event_data.ShareName
+  Signature: winlog.event_data.Signature
+  Source: winlog.event_data.Source
+  SourceHostname: source.domain
+  SourceImage: process.executable
+  SourceIp: source.ip
+  SourcePort: source.port
+  #SourceIsIpv6: winlog.event_data.SourceIsIpv6 #=gets deleted and not boolean...https://github.com/elastic/beats/blob/71eee76e7cfb8d5b18dfacad64864370ddb14ce7/x-pack/winlogbeat/module/sysmon/config/winlogbeat-sysmon.js#L278-L279
+  StartModule: winlog.event_data.StartModule
+  Status: winlog.event_data.Status
+  SubjectDomainName: user.domain
+  SubjectUserName: user.name
+  SubjectUserSid: user.id
+  TargetFilename: file.path
+  TargetImage: winlog.event_data.TargetImage
+  TargetObject: winlog.event_data.TargetObject
+  TicketEncryptionType: winlog.event_data.TicketEncryptionType
+  TicketOptions: winlog.event_data.TicketOptions
+  TargetDomainName: user.domain
+  TargetUserName: user.name
+  TargetUserSid: user.id
+  User: user.name
+  WorkstationName: source.domain

@@ -1,5 +1,5 @@
 # Sigma parser
-# Copyright 2016-2018 Thomas Patzke, Florian Roth
+# Copyright 2016-2019 Thomas Patzke, Florian Roth
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -17,6 +17,7 @@
 import re
 from .exceptions import SigmaParseError
 from .condition import SigmaConditionTokenizer, SigmaConditionParser, ConditionAND, ConditionOR, ConditionNULLValue
+from .modifiers import apply_modifiers
 
 class SigmaParser:
     """Parse a Sigma rule (definitions, conditions and aggregations)"""
@@ -80,8 +81,18 @@ class SigmaParser:
         elif type(definition) == dict:      # map
             cond = ConditionAND()
             for key, value in definition.items():
-                mapping = self.config.get_fieldmapping(key)
-                cond.add(mapping.resolve(key, value, self))
+                if "|" in key:  # field name contains value modifier
+                    fieldname, *modifiers = key.split("|")
+                    value = apply_modifiers(value, modifiers)
+                else:
+                    fieldname = key
+                mapping = self.config.get_fieldmapping(fieldname)
+                if isinstance(value, (ConditionAND, ConditionOR)):    # value is condition node (by transformation modifier)
+                    value.items = [ mapping.resolve(key, item, self) for item in value.items ]
+                    cond.add(value)
+                else:           # plain value or something unexpected (catched by backends)
+                    mapped = mapping.resolve(key, value, self)
+                    cond.add(mapped)
 
         return cond
 
