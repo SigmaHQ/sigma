@@ -73,7 +73,7 @@ class TestRules(unittest.TestCase):
                         files_with_incorrect_mitre_tags.append(file)
 
         self.assertEqual(files_with_incorrect_mitre_tags, [], Fore.RED + 
-                         "There are rules with incorrect MITRE Tags. (please inform us about new tags that are not yet supported in our tests)")
+                         "There are rules with incorrect MITRE Tags. (please inform us about new tags that are not yet supported in our tests) Check the correct tags here: https://attack.mitre.org/ ")
 
     def test_look_for_duplicate_filters(self):
         def check_list_or_recurse_on_dict(item, depth:int) -> None:
