@@ -33,7 +33,7 @@ The SANS webcast on Sigma contains a very good 20 min introduction to the projec
 # Use Cases
 
 * Describe your detection method in Sigma to make it sharable
-* Write and your SIEM searches in Sigma to avoid a vendor lock-in
+* Write your SIEM searches in Sigma to avoid a vendor lock-in
 * Share the signature in the appendix of your analysis along with IOCs and YARA rules
 * Share the signature in threat intel communities - e.g. via MISP
 * Provide Sigma signatures for malicious behaviour in your own application
@@ -253,6 +253,27 @@ sigma2misp @misp.conf --same-event --info "Test Event" -r sigma_rules/
 ## Evt2Sigma
 
 [Evt2Sigma](https://github.com/Neo23x0/evt2sigma) helps you with the rule creation. It generates a Sigma rule from a log entry. 
+
+## Sigma2attack
+
+Generates a [MITRE ATT&CK Navigator](https://github.com/mitre/attack-navigator/) heatmap from a directory containing sigma rules.
+
+Requirements:
+- Sigma rules tagged with a `attack.tXXXX` tag (e.g.: `attack.t1086`)
+
+Usage samples:
+
+```
+# Use the default "rules" folder
+./tools/sigma2attack
+
+# ... or specify your own
+./tools/sigma2attack --rules-directory ~/hunting/rules
+```
+
+Result once imported in the MITRE ATT&CK Navigator ([online version](https://mitre-attack.github.io/attack-navigator/enterprise/)):
+
+![Sigma2attack result](./images/sigma2attack.png)
 
 ## Contributed Scripts
 
