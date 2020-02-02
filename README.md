@@ -154,12 +154,17 @@ optional arguments:
 #### Single Rule Translation
 Translate a single rule
 ```
-tools/sigmac -t splunk rules/windows/sysmon/sysmon_susp_image_load.yml
+tools/sigmac -t splunk -c splunk-windows rules/windows/sysmon/sysmon_susp_image_load.yml
 ```
 #### Rule Set Translation
 Translate a whole rule directory and ignore backend errors (`-I`) in rule conversion for the selected backend (`-t splunk`)
 ```
-tools/sigmac -I -t splunk -r rules/windows/sysmon/
+tools/sigmac -I -t splunk -c splunk-windows -r rules/windows/sysmon/
+```
+#### Translate Only Rules of Level High or Critical
+Translate a whole rule directory and ignore backend errors (`-I`) in rule conversion for the selected backend (`-t splunk`) and select only rules of level `high` and `critical`
+```
+tools/sigmac -I -t splunk -c splunk-windows -f 'level>=high' -r rules/windows/sysmon/
 ```
 #### Rule Set Translation with Custom Config 
 Apply your own config file (`-c ~/my-elk-winlogbeat.yml`) during conversion, which can contain you custom field and source mappings
