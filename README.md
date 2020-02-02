@@ -14,9 +14,9 @@ Sigma is for log files what [Snort](https://www.snort.org/) is for network traff
 
 This repository contains:
 
-* Sigma rule specification in the [Wiki](https://github.com/Neo23x0/sigma/wiki/Specification)
-* Open repository for sigma signatures in the `./rules`subfolder
-* A converter that generate searches/queries for different SIEM systems [work in progress]
+1. Sigma rule specification in the [Wiki](https://github.com/Neo23x0/sigma/wiki/Specification)
+2. Open repository for sigma signatures in the `./rules` subfolder
+3- A converter named `sigmac` located in the `./tools/` sub folder that generates search queries for different SIEM systems from Sigma rules
 
 ![sigma_description](./images/Sigma-description.png)
 
