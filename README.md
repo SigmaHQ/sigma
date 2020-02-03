@@ -14,9 +14,9 @@ Sigma is for log files what [Snort](https://www.snort.org/) is for network traff
 
 This repository contains:
 
-* Sigma rule specification in the [Wiki](https://github.com/Neo23x0/sigma/wiki/Specification)
-* Open repository for sigma signatures in the `./rules`subfolder
-* A converter that generate searches/queries for different SIEM systems [work in progress]
+1. Sigma rule specification in the [Wiki](https://github.com/Neo23x0/sigma/wiki/Specification)
+2. Open repository for sigma signatures in the `./rules` subfolder
+3. A converter named `sigmac` located in the `./tools/` sub folder that generates search queries for different SIEM systems from Sigma rules
 
 ![sigma_description](./images/Sigma-description.png)
 
@@ -154,12 +154,17 @@ optional arguments:
 #### Single Rule Translation
 Translate a single rule
 ```
-tools/sigmac -t splunk rules/windows/sysmon/sysmon_susp_image_load.yml
+tools/sigmac -t splunk -c splunk-windows rules/windows/sysmon/sysmon_susp_image_load.yml
 ```
 #### Rule Set Translation
 Translate a whole rule directory and ignore backend errors (`-I`) in rule conversion for the selected backend (`-t splunk`)
 ```
-tools/sigmac -I -t splunk -r rules/windows/sysmon/
+tools/sigmac -I -t splunk -c splunk-windows -r rules/windows/sysmon/
+```
+#### Translate Only Rules of Level High or Critical
+Translate a whole rule directory and ignore backend errors (`-I`) in rule conversion for the selected backend (`-t splunk`) and select only rules of level `high` and `critical`
+```
+tools/sigmac -I -t splunk -c splunk-windows -f 'level>=high' -r rules/windows/sysmon/
 ```
 #### Rule Set Translation with Custom Config 
 Apply your own config file (`-c ~/my-elk-winlogbeat.yml`) during conversion, which can contain you custom field and source mappings

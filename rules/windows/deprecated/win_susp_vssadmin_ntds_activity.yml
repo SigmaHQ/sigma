@@ -3,6 +3,7 @@ id: b932b60f-fdda-4d53-8eda-a170c1d97bbd
 status: experimental
 description: Detects suspicious commands that could be related to activity that uses volume shadow copy to steal and retrieve hashes from the NTDS.dit file remotely
 author: Florian Roth, Michael Haag
+date: 2019/01/16
 references:
     - https://www.swordshield.com/2015/07/getting-hashes-from-ntds-dit-file/
     - https://room362.com/post/2013/2013-06-10-volume-shadow-copy-ntdsdit-domain-hashes-remotely-part-1/
@@ -25,6 +26,8 @@ detection:
             - 'vssadmin delete shadows /for=C:'
             - 'reg SAVE HKLM\SYSTEM '
             - esentutl.exe /y /vss *\ntds.dit*
+            - esentutl.exe /y /vss *\SAM
+            - esentutl.exe /y /vss *\SYSTEM
     condition: selection
 fields:
     - CommandLine

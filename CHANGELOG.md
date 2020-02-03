@@ -14,6 +14,11 @@ from version 0.14.0.
 * False positives metadata to LimaCharlie backend
 * Additional aggregation capabilitied for es-dsl backend.
 
+### Changed
+
+* Kibana object id is now Sigma rule id if available. Else
+  the old naming scheme is used.
+
 ## 0.15.0 - 2019-12-06
 
 ### Added

@@ -14,8 +14,10 @@ logsource:
 detection:
     selection:
         Image|contains: '\whoami.exe'
-        User: 'NT AUTHORITY\SYSTEM' 
-    condition: selection
+        User: 'NT AUTHORITY\SYSTEM'
+    filter1:
+        ParentImage|endswith: '\monitoringhost.exe'  # SCCM False Positives
+    condition: selection and not filter1
 falsepositives:
     - Admin activity
     - Scripts and administrative tools used in the monitored environment
