@@ -4,7 +4,7 @@ event = {
     3: ('netconn_count','[1 to *]'),
     # 4: sysmon state change
     # 5: Process termincated
-    6: ('modload',"*\System32\Drivers*]"),
+    6: ('modload_count','[1 to *]'),
     7: ('modload_count','[1 to *]'),
     8: ('crossproc_type', 'remote_thread'),
     # 9: Raw Access Read

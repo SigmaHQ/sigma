@@ -55,12 +55,12 @@ class SplunkBackend(SingleTextQueryBackend):
     reClear = None
     andToken = " and "
     orToken = " OR "
-    notToken = "NOT "
-    subExpression = "%s"
+    notToken = "-"
+    subExpression = "(%s)"
     listExpression = "%s"
     listSeparator = " "
     valueExpression = "%s"
-    nullExpression = "NOT %s=\"*\""
+    nullExpression = "- %s=\"*\""
     notNullExpression = "%s=\"*\""
     mapExpression = "%s:%s"
     mapListsSpecialHandling = True
@@ -143,7 +143,7 @@ class SplunkBackend(SingleTextQueryBackend):
         return new_value
 
     def postAPI(self,result,title,desc):
-        url = 'https://10.14.132.6/api/v1/watchlist'
+        url = 'https://10.1.8.204//api/v1/watchlist'
         body = {
                 "name":title,
                 "search_query":"q="+result,
@@ -151,12 +151,12 @@ class SplunkBackend(SingleTextQueryBackend):
                 "index_type":"events"
                 }
         header = {
-            "X-Auth-Token": "6ff62a0dd9cf895b806fbd3190f3c0b18d98a9ae"
+            "X-Auth-Token": "36822f6cf6fca5a598060b518f2c197b16f6b226"
         }
         print(title)
-        # x = requests.post(url, data =json.dumps(body), headers = header, verify=False)
+        x = requests.post(url, data =json.dumps(body), headers = header, verify=False)
 
-        # print(x.text)
+        print(x.text)
 
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
