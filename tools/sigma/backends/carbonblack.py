@@ -42,8 +42,8 @@ ssl._create_default_https_context = ssl._create_unverified_context
 # parser.add_argument("--realerttime", help="Realert time (optional value, default 5 minutes)", type=str, default=5)
 # parser.add_argument("--debug", help="Show debug output", type=bool, default=False)
 # args = parser.parse_args()
-class SplunkBackend(SingleTextQueryBackend):
-    """Converts Sigma rule into Splunk Search Processing Language (SPL)."""
+class CarbonBlackBackend(SingleTextQueryBackend):
+    """Converts Sigma rule into Carbon Black Query Language (SPL)."""
     identifier = "carbonblack"
     active = True
     index_field = "index"
@@ -67,19 +67,24 @@ class SplunkBackend(SingleTextQueryBackend):
     mapListValueExpression = "%s IN %s"
 
     def generateMapItemListNode(self, key, value):
-        if not set([type(val) for val in value]).issubset({str, int}):
+        if(key == "EventID"):
+            return ("( OR ".join(['%s:%s )' % (self.generateEventKey(item), self.generateEventValue(item)) for item in value if self.generateEventKey(item)!= '']))
+
+        elif not set([type(val) for val in value]).issubset({str, int}):
             raise TypeError("List values must be strings or numbers")
-        return "(" + (" OR ".join(['%s=%s' % (key, self.generateValueNode(item)) for item in value])) + ")"
+        return "(" + (" OR ".join(['%s:%s' % (key, self.generateValueNode(item)) for item in value])) + ")"
 
     def generateMapItemNode(self, node):
         fieldname, value = node
         value = self.cleanValue(value)
-        if(fieldname == "EventID" and value in event):
-            fieldname = event[value][0]
-            value = event[value][1]
+        if(fieldname == "EventID" and (type(value) is str or type(value) is int )):
+            fieldname = self.generateEventKey(value)
+            value = self.generateEventValue(value)
         transformed_fieldname = self.fieldNameMapping(fieldname, value)
         if(transformed_fieldname == "ipaddr"):
             value = self.cleanIPRange(value)
+        if(transformed_fieldname == ''):
+            return ''
         if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
             return self.mapExpression % (transformed_fieldname, self.generateNode(value))
         elif type(value) == list:
@@ -115,15 +120,39 @@ class SplunkBackend(SingleTextQueryBackend):
     def cleanValue(self, value):
         new_value = value
         if type(value) is str:
-            while re.search(r'\\[\/\\\"]',str(new_value)):
-                new_value = re.sub(r'\\\\', r'\\' , new_value)
-                new_value = re.sub(r'\\\/', r'\/' , new_value)
-                new_value = re.sub(r'\\\"', r'\"' , new_value)
-                new_value = re.sub(r"\\\'", r"\'" , new_value)
+            if (new_value[:2] in ("*\/","*\\")):
+                new_value = new_value[2:]
+            if (new_value[:1] == '*'):
+                new_value = new_value.replace("*", "", 1)
+            if ( "1 to" not in new_value):    
+                new_value = new_value.replace("* ", "*")
+                new_value = new_value.replace(" *", "*")
+            if ( "(" in new_value or " " in new_value and "1 to" not in new_value):
+                new_value = '"' + new_value +'"'
+
+            # while re.search(r'\\[\/\\\"]',str(new_value)):
+            #     new_value = re.sub(r'\\\\', r'\\' , new_value)
+            #     new_value = re.sub(r'\\\/', r'\/' , new_value)
+            #     new_value = re.sub(r'\\\"', r'\"' , new_value)
+            #     new_value = re.sub(r"\\\'", r"\'" , new_value)
+
+            new_value = new_value.strip()
         if type(value) is list:
             for vl in value:
                 vl = self.cleanValue(vl)
         return new_value
+
+    def generateEventKey(self, value):
+        if (value in event):
+            return event[value][0]
+        else:
+            return ''
+
+    def generateEventValue(self, value):
+        if (value in event):
+            return event[value][1]
+        else:
+            return ''
 
     def cleanIPRange(self,value):
         new_value = value
@@ -143,7 +172,7 @@ class SplunkBackend(SingleTextQueryBackend):
         return new_value
 
     def postAPI(self,result,title,desc):
-        url = 'https://10.1.8.204//api/v1/watchlist'
+        url = 'https://10.14.132.6//api/v1/watchlist'
         body = {
                 "name":title,
                 "search_query":"q="+result,
@@ -151,7 +180,7 @@ class SplunkBackend(SingleTextQueryBackend):
                 "index_type":"events"
                 }
         header = {
-            "X-Auth-Token": "36822f6cf6fca5a598060b518f2c197b16f6b226"
+            "X-Auth-Token": "6ff62a0dd9cf895b806fbd3190f3c0b18d98a9ae"
         }
         print(title)
         x = requests.post(url, data =json.dumps(body), headers = header, verify=False)
@@ -178,4 +207,6 @@ class SplunkBackend(SingleTextQueryBackend):
             # if mapped is not None:
             #     result += fields
             self.postAPI(result,title,desc)
+            # print (title)
+            # print (result)
             return result
