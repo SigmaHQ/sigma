@@ -77,6 +77,7 @@ class CarbonBlackBackend(SingleTextQueryBackend):
     def generateMapItemNode(self, node):
         fieldname, value = node
         value = self.cleanValue(value)
+        print(str(value))
         if(fieldname == "EventID" and (type(value) is str or type(value) is int )):
             fieldname = self.generateEventKey(value)
             value = self.generateEventValue(value)
@@ -130,7 +131,8 @@ class CarbonBlackBackend(SingleTextQueryBackend):
                 new_value = new_value.replace('"', '\"')
             # need tuning    
             if (( "(" in new_value or " " in new_value or ")" in new_value or ":" in new_value) and "1 to" not in new_value):
-                new_value = '"' + new_value +'"'
+                if (new_value[0] != '"' and new_value[-1] != '"'):
+                    new_value = '"' + new_value +'"'
                 new_value = new_value.replace("(", "\(")
                 new_value = new_value.replace(")", "\)")
                 new_value = new_value.replace(" ", "\ ")
@@ -174,7 +176,7 @@ class CarbonBlackBackend(SingleTextQueryBackend):
         url = 'https://10.14.132.6//api/v1/watchlist'
         body = {
                 "name":title,
-                "search_query":"q="+result,
+                "search_query":"q="+str(result),
                 "description":desc,
                 "index_type":"events"
                 }
@@ -197,6 +199,7 @@ class CarbonBlackBackend(SingleTextQueryBackend):
             after = self.generateAfter(parsed)
 
             result = ""
+            # print(query.replace("\\\\","\\"))
             if before is not None:
                 result = before
             if query is not None:
@@ -205,7 +208,7 @@ class CarbonBlackBackend(SingleTextQueryBackend):
                 result += after
             # if mapped is not None:
             #     result += fields
-            self.postAPI(result,title,desc)
+            # self.postAPI(result,title,desc)
             # print (title)
-            # print (result)
+            # print (str(result))
             return result
