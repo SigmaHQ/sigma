@@ -120,17 +120,17 @@ class CarbonBlackBackend(SingleTextQueryBackend):
 
     def cleanValue(self, value):
         new_value = value
-        if type(value) is str:
+        if type(new_value) is str:
             if (new_value[:2] in ("*\/","*\\")):
                 new_value = new_value[2:]
             if (new_value[:1] == '*'):
                 new_value = new_value.replace("*", "", 1)
-            if ( "1 to" not in new_value):    
+            if ( " to " not in new_value):    
                 new_value = new_value.replace("* ", "*")
                 new_value = new_value.replace(" *", "*")
                 new_value = new_value.replace('"', '\"')
             # need tuning    
-            if (( "(" in new_value or " " in new_value or ")" in new_value or ":" in new_value) and "1 to" not in new_value):
+            if (( "(" in new_value or " " in new_value or ")" in new_value or ":" in new_value) and " to " not in new_value):
                 if (new_value[0] != '"' and new_value[-1] != '"'):
                     new_value = '"' + new_value +'"'
                 new_value = new_value.replace("(", "\(")
@@ -138,9 +138,9 @@ class CarbonBlackBackend(SingleTextQueryBackend):
                 new_value = new_value.replace(" ", "\ ")
 
             new_value = new_value.strip()
-        if type(value) is list:
-            for vl in value:
-                vl = self.cleanValue(vl)
+        if type(new_value) is list:
+            for index, vl in enumerate(new_value):
+                new_value[index] = self.cleanValue(vl)
         return new_value
 
     def generateEventKey(self, value):
@@ -157,19 +157,19 @@ class CarbonBlackBackend(SingleTextQueryBackend):
 
     def cleanIPRange(self,value):
         new_value = value
-        if type(value) is str and value.find('*') :
+        if type(new_value) is str and value.find('*') :
             sub =  value.count('.')
             if(value[-2:] == '.*'):
                 value = value[:-2]
             min_ip = value + '.0' * (4 - sub)
             max_ip = value + '.255' * (4 - sub)
-            new_value = '['+ min_ip + ' TO ' + max_ip + ']'
+            new_value = '['+ min_ip + ' to ' + max_ip + ']'
             # ip = IPNetwork(value + '/' + str(sub))
             # min_ip = str(ip[0])
             # max_ip = str(ip[-1])
-        if type(value) is list:
-            for vl in value:
-                vl = self.cleanIPRange(vl)
+        if type(new_value) is list:
+            for index, vl in enumerate(new_value):
+                new_value[index] = self.cleanIPRange(vl)
         return new_value
 
     def postAPI(self,result,title,desc):
@@ -208,7 +208,7 @@ class CarbonBlackBackend(SingleTextQueryBackend):
                 result += after
             # if mapped is not None:
             #     result += fields
-            # self.postAPI(result,title,desc)
+            self.postAPI(result,title,desc)
             # print (title)
             # print (str(result))
             return result
