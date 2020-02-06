@@ -127,14 +127,13 @@ class CarbonBlackBackend(SingleTextQueryBackend):
             if ( "1 to" not in new_value):    
                 new_value = new_value.replace("* ", "*")
                 new_value = new_value.replace(" *", "*")
-            if ( "(" in new_value or " " in new_value and "1 to" not in new_value):
+                new_value = new_value.replace('"', '\"')
+            # need tuning    
+            if (( "(" in new_value or " " in new_value or ")" in new_value or ":" in new_value) and "1 to" not in new_value):
                 new_value = '"' + new_value +'"'
-
-            # while re.search(r'\\[\/\\\"]',str(new_value)):
-            #     new_value = re.sub(r'\\\\', r'\\' , new_value)
-            #     new_value = re.sub(r'\\\/', r'\/' , new_value)
-            #     new_value = re.sub(r'\\\"', r'\"' , new_value)
-            #     new_value = re.sub(r"\\\'", r"\'" , new_value)
+                new_value = new_value.replace("(", "\(")
+                new_value = new_value.replace(")", "\)")
+                new_value = new_value.replace(" ", "\ ")
 
             new_value = new_value.strip()
         if type(value) is list:
