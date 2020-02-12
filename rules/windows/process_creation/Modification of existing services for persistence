@@ -1,25 +1,23 @@
---- 
+title: Modification of existing services for persistence
 author: Sreeman
-description: "Detects modification of an existing service on a compromised host in order to execute an arbitrary payload when the service is started or killed as a method of persistence."
-detection: 
+description: Detects modification of an existing service on a compromised host in order to execute an arbitrary payload when the service is started or killed as a method of persistence.
+detection:
   condition: selection
-  selection_cmdline: 
-    ? "CommandLine|matches regex"
-    : 
-      - "(?i)sc config.*binpath=.*"
-      - "(?i)sc failure.*command=.*"
-      - "(?i).*reg add.*(FailureCommand|ImagePath.*(\\.sh|\\.exe|\\.dll|\\.bin^|\\.bat|\\.cmd|\\.js|\\.msh^|\\.reg^|\\.scr|\\.ps|\\.vb|\\.jar|\\.pl).*"
-falsepositives: 
-  - unknown
+  selection_cmdline:
+    CommandLine|matches regex:
+        - (?i)sc config.*binpath=.*
+        - (?i)sc failure.*command=.*
+        - (?i).*reg add.*(FailureCommand|ImagePath.*(\.sh|\.exe|\.dll|\.bin^|\.bat|\.cmd|\.js|\.msh^|\.reg^|\.scr|\.ps|\.vb|\.jar|\.pl).*
+falsepositives:
+- unknown
 level: medium
-logsource: 
+logsource:
   category: process_creation
   product: windows
-reference: 
-  - "https://pentestlab.blog/2020/01/22/persistence-modify-existing-service/"
+reference:
+- https://pentestlab.blog/2020/01/22/persistence-modify-existing-service/
 status: experimental
-tags: 
-  - attack.persistence
-  - attack.t1031
-  - attack.t1058
-title: "Modification of existing services for persistence"
+tags:
+- attack.persistence
+- attack.t1031
+- attack.t1058
