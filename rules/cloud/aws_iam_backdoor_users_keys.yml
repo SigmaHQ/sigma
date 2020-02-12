@@ -5,25 +5,25 @@ author: faloker
 date: 2020/02/12
 description: Detects AWS API key creation for a user by another user. Backdoored users can be used to obtain persistence in the AWS environment. Also with this alert, you can detect a flow of AWS keys in your org.
 references:
-  - https://github.com/RhinoSecurityLabs/pacu/blob/master/modules/iam__backdoor_users_keys/main.py#L6
+    - https://github.com/RhinoSecurityLabs/pacu/blob/master/modules/iam__backdoor_users_keys/main.py#L6
 logsource:
-  service: cloudtrail
+    service: cloudtrail
 detection:
-  selection_source:
-    - eventSource: iam.amazonaws.com
-  selection_eventname:
-    - eventName: CreateAccessKey
-  filter:
-    userIdentity.arn|contains: responseElements.accessKey.userName
-  condition: all of selection* and not filter
+    selection_source:
+        - eventSource: iam.amazonaws.com
+    selection_eventname:
+        - eventName: CreateAccessKey
+    filter:
+        userIdentity.arn|contains: responseElements.accessKey.userName
+    condition: all of selection* and not filter
 fields:
-  - userIdentity.arn
-  - responseElements.accessKey.userName
-  - errorCode
-  - errorMessage
-level: high
+    - userIdentity.arn
+    - responseElements.accessKey.userName
+    - errorCode
+    - errorMessage
+level: medium
 falsepositives:
     - Adding user keys to their own accounts (the filter cannot cover all possible variants of user naming)
     - AWS API keys legitimate exchange workflows
 tags:
-  - attack.t1098
+    - attack.t1098
