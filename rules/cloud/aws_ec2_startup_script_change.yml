@@ -1,0 +1,23 @@
+title: AWS EC2 Startup Shell Script Change
+id: 1ab3c5ed-5baf-417b-bb6b-78ca33f6c3df
+status: experimental
+author: faloker
+date: 2020/02/12
+description: Detects changes to the EC2 instance startup script. The shell script will be executed as root/SYSTEM everytime the specific instances are booted up.
+references:
+    - https://github.com/RhinoSecurityLabs/pacu/blob/master/modules/ec2__startup_shell_script/main.py#L9
+logsource:
+    service: cloudtrail
+detection:
+    selection_source:
+        - eventSource: ec2.amazonaws.com
+    selection_userdata:
+        - requestParameters.userData: "*"
+    selection_eventname:
+        - eventName: ModifyInstanceAttribute
+    condition: all of them
+level: high
+falsepositives:
+    - Valid changes to the startup script
+tags:
+    - attack.t1064
