@@ -18,15 +18,17 @@ logsource:
 detection:
     selection:
         EventID: 7045
-    keywords:
-        Message:
-          - '*WCE SERVICE*'
-          - '*WCESERVICE*'
-          - '*DumpSvc*'
-    quarkspwdump:
-        EventID: 16
-        HiveName: '*\AppData\Local\Temp\SAM*.dmp'
-    condition: ( selection and keywords ) or quarkspwdump
+        ServiceName:
+            - '*WCE SERVICE*'
+            - '*WCESERVICE*'
+            - '*DumpSvc*'
+    malsvc_paexec:
+        ServiceFileName|contains: '\PAExec'
+    malsvc_wannacry:
+        ServiceName: 'mssecsvc2.0'
+    malsvc_persistence:
+        ServiceFileName|contains: 'net user'
+    condition: selection and 1 of malsvc_*
 falsepositives:
     - Legitimate Administrator using credential dumping tool for password recovery
 level: high
