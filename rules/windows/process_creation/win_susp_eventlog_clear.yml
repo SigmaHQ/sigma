@@ -1,4 +1,4 @@
-title: Suspicious eventlog clear or configuration using wevtutil
+title: Suspicious Eventlog Clear or Configuration Using Wevtutil
 id: cc36992a-4671-4f21-a91d-6c2b72a2edf5
 description: Detects clearing or configuration of eventlogs uwing wevtutil, powershell and wmic. Might be used by ransomwares during the attack (seen by NotPetya and others)
 author: Ecco, Daniil Yugoslavskiy, oscd.community
@@ -16,23 +16,24 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_wevtutil:
+    selection_wevtutil_binary:
         Image|endswith: '\wevtutil.exe'
+    selection_wevtutil_command:
         CommandLine|contains:  
             - 'clear-log' # clears specified log 
             - 'cl'        # short version of 'clear-log'
             - 'set-log'   # modifies config of specified log. could be uset to set it to a tiny size
             - 'sl'        # short version of 'set-log'
-    selection_ps:
+    selection_other_ps:
         Image|endswith: '\powershell.exe'
         CommandLine|contains: 
             - 'Clear-EventLog'
             - 'Remove-EventLog'
             - 'Limit-EventLog'
-    selection_wmic:
+    selection_other_wmic:
         Image|endswith: '\wmic.exe'
         CommandLine|contains: 'ClearEventLog'
-    condition: 1 of them
+    condition: 1 of selection_other_* or (selection_wevtutil_binary and selection_wevtutil_command)
 falsepositives:
     - Admin activity
     - Scripts and administrative tools used in the monitored environment
