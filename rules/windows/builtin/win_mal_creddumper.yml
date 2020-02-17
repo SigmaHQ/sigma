@@ -1,3 +1,5 @@
+---
+action: global
 title: Credential dumping tools service execution
 description: Detects well-known credential dumping tools execution via service execution events
 author: Florian Roth, Teymur Kheirkhabarov, Daniil Yugoslavskiy, oscd.community
@@ -12,22 +14,6 @@ tags:
     - attack.t1003
     - attack.t1035
     - attack.s0005
-logsource:
-    product: windows
-    service: system
-detection:
-    selection:
-        EventID: 7045
-        ServiceName:
-            - '*WCE SERVICE*'
-            - '*WCESERVICE*'
-            - '*DumpSvc*'
-    condition: selection
-falsepositives:
-    - Legitimate Administrator using credential dumping tool for password recovery
-level: high
----
-action: global
 detection:
     selection_1:
         - ServiceName|contains:
@@ -49,6 +35,16 @@ detection:
             - 'pwdump'
         - ImagePath|re: '((\\\\.*\\.*|.*\\)([{]?[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}[}])?\.(exe|scr|cpl|bat|js|cmd|vbs).*)'
     condition: selection and selection_1
+falsepositives:
+    - Legitimate Administrator using credential dumping tool for password recovery
+level: high
+---
+logsource:
+    product: windows
+    service: system
+detection:
+    selection:
+        EventID: 7045
 ---
 logsource:
     product: windows
