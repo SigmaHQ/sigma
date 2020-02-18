@@ -1,0 +1,23 @@
+title: Using sticky-keys to obtain unauthenticated, privileged console access
+description: By replacing the sticky keys executable with the local admins CMD executable, an attacker is able to access a privileged windows console session without authenticating to the system. When the sticky keys are "activated" the privilleged shell is launched.
+date: 2020/18/02
+author: Sreeman
+tags:
+    - attack.t1015
+    - attack.Privilege Escalation
+logsource:
+    product: Windows
+detection:
+    selection1:
+        CommandLine:
+            - "copy /y C:\\windows\\system32\\cmd.exe C:\\windows\\system32\\sethc.exe"
+condition: selection
+fields:
+    - CommandLine
+    - ParentProcess
+falsepositives:
+    - Unknown
+level: medium
+Reference: 
+    - https://www.fireeye.com/blog/threat-research/2017/03/apt29_domain_frontin.html
+    - https://www.clearskysec.com/wp-content/uploads/2020/02/ClearSky-Fox-Kitten-Campaign-v1.pdf
