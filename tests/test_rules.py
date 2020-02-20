@@ -501,7 +501,28 @@ class TestRules(unittest.TestCase):
 
     def test_title(self):
         faulty_rules = []
-        allowed_lowercase_words = ['the', 'for', 'in', 'with', 'via', 'on', 'to', 'without', 'of', 'through', 'from', 'by', 'as', 'a', 'or', 'at', 'and', 'an', 'over']
+        allowed_lowercase_words = [
+                'the',
+                'for',
+                'in',
+                'with',
+                'via',
+                'on',
+                'to',
+                'without',
+                'of',
+                'through',
+                'from',
+                'by',
+                'as',
+                'a',
+                'or',
+                'at',
+                'and',
+                'an',
+                'over',
+                'new',
+                ]
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             title = self.get_rule_part(file_path=file, part_name="title")
             if not title:
