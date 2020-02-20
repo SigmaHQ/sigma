@@ -11,8 +11,13 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection_1:
         Image|endswith: '\reg.exe'
+        CommandLine|contains: 
+            - 'query'
+            - 'save'
+            - 'export'
+    selection_2:
         CommandLine|contains:
             - 'currentVersion\windows'
             - 'currentVersion\runServicesOnce'
@@ -24,7 +29,7 @@ detection:
             - 'currentVersion\run'
             - 'currentVersion\policies\explorer\run'
             - 'currentcontrolset\services'
-    condition: selection
+    condition: selection_1 and selection_2
 fields:
     - Image
     - CommandLine
