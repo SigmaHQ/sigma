@@ -13,9 +13,6 @@ class LogiqBackend(BaseBackend, QuoteCharMixin):
 
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
-        print ("XXXXXX LogiqBackend definitions",sigmaparser.definitions)
-        print ("XXXXXX LogiqBackend values",sigmaparser.values)
-        print ("XXXXXX LogiqBackend config",sigmaparser.config)
 
         eventRule = dict()
         eventRule["name"] = sigmaparser.parsedyaml["title"]
@@ -24,10 +21,8 @@ class LogiqBackend(BaseBackend, QuoteCharMixin):
         eventRule["condition"] = sigmaparser.parsedyaml["detection"]
         eventRule["level"] = sigmaparser.parsedyaml["level"]
 
-
-        for key,value in eventRule.items():
-            print(key, ":", value)
-        print ("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+        # for key,value in eventRule.items():
+        #     print(key, ":", value)
 
         for parsed in sigmaparser.condparsed:
             query = self.generateQuery(parsed)
@@ -42,32 +37,29 @@ class LogiqBackend(BaseBackend, QuoteCharMixin):
             if after is not None:
                 eventRule["condition"] += after
 
-            result = json.dumps(eventRule)
-
-            return result
+            return json.dumps(eventRule)
 
     def generateQuery(self, parsed):
         # print("generateQuery: ", parsed)
         return "%s" % self.generateNode(parsed.parsedSearch)
 
     def cleanValue(self, val):
-        # val = super().cleanValue(val)
         if val[0] == '*':
             val = val.replace("*","/*")
-        
-        print("cleanValue: ", val)
+      
+        # print("cleanValue: ", val)
         return val
 
     def generateORNode(self, node):
-        print("generateORNode: ", node)
+        # print("generateORNode: ", node)
         return "%s" % " || ".join([self.generateNode(val) for val in node])
 
     def generateANDNode(self, node):
-        print("generateORNode: ", node)
+        # print("generateORNode: ", node)
         return "%s" % " && ".join([self.generateNode(val) for val in node])
         
     def generateNOTNode(self, node):
-        print("generateNOTNode: ", node)        
+        # print("generateNOTNode: ", node)        
         return "%s" % self.generateNode(node.item)
 
     def generateSubexpressionNode(self, node):
@@ -81,7 +73,7 @@ class LogiqBackend(BaseBackend, QuoteCharMixin):
         return self.generateORNode(node)
 
     def generateMapItemNode(self, node):
-        print("generateMapItemNode: ", node)
+        # print("generateMapItemNode: ", node)
         key, value = node
         if value is None:
             return self.generateNULLValueNode(node)
@@ -89,10 +81,10 @@ class LogiqBackend(BaseBackend, QuoteCharMixin):
             return self.generateNode(value)
 
     def generateValueNode(self, node):
-        print("generateValueNode: ", node)
+        # print("generateValueNode: ", node)
         return "message =~ '" + self.cleanValue(str(node)).strip() + "'"
 
     def generateNULLValueNode(self, node):
-        print("generateNULLValueNode: ", node)
+        # print("generateNULLValueNode: ", node)
         key, value = node
         return "%s" % key
