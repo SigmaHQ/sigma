@@ -18,6 +18,7 @@ from version 0.14.0.
 
 * Kibana object id is now Sigma rule id if available. Else
   the old naming scheme is used.
+* Backend and configuration lists are sorted.
 
 ## 0.15.0 - 2019-12-06
 
