@@ -13,11 +13,22 @@ from version 0.14.0.
 * Proxy field names to ECS mapping (ecs-proxy) configuration
 * False positives metadata to LimaCharlie backend
 * Additional aggregation capabilitied for es-dsl backend.
+* Azure log analytics rule backend (ala-rule)
+* SQL backend
+* Splunk Zeek sourcetype mapping config
+* sigma2attack script
 
 ### Changed
 
 * Kibana object id is now Sigma rule id if available. Else
   the old naming scheme is used.
+* sigma2misp: replacement of deprecated method usage.
+* Various configuration updates
+
+### Fixed
+
+* Fixed aggregation queries for Elastalert backend
+* Fixed aggregation queries for es-dsl backend
 
 ## 0.15.0 - 2019-12-06
 
