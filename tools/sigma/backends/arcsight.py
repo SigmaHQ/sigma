@@ -151,9 +151,8 @@ class ArcSightBackend(SingleTextQueryBackend):
             return "(" + self.orToken.join([self.generateNode(val) for val in new_value]) + ")"
         return "(" + self.orToken.join([self.generateNode(val) for val in node]) + ")"
 
-
-class ArcSightBackend(SingleTextQueryBackend):
-    """Converts Sigma rule into ArcSight saved search. Contributed by SOC Prime. https://socprime.com"""
+class ArcSightESMBackend(SingleTextQueryBackend):
+    """Converts Sigma rule into ArcSight ESM saved search. Contributed by SOC Prime. https://socprime.com"""
     reEscape = re.compile('(["\\\()])')
     identifier = "arcsight-esm"
     active = True
@@ -188,12 +187,10 @@ class ArcSightBackend(SingleTextQueryBackend):
     def generateCleanValueNodeLogsource(self, value):
         return self.valueExpression % (self.cleanValue(str(value)))
 
-
     def CleanNode(self, node):
         if isinstance(node, str) and "*" in node and not node.startswith("*") and not node.endswith("*"):
             node = ["*{}*".format(x) for x in node.split('*') if x]
         return node
-
 
     #Clearing values from special characters.
     def generateMapItemNode(self, node):
@@ -244,8 +241,6 @@ class ArcSightBackend(SingleTextQueryBackend):
                 return self.nullExpression % (key, )
             else:
                 raise TypeError("Backend does not support map values of type " + str(type(value)))
-
-
 
     # for keywords values with space
     def generateValueNode(self, node):

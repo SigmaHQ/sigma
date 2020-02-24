@@ -40,6 +40,7 @@ test-sigmac:
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-dsl -c tools/config/winlogbeat.yml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-rule -c tools/config/winlogbeat.yml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t powershell -c tools/config/powershell.yml -Ocsv rules/ > /dev/null
+	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t arcsight -c tools/config/arcsight.yml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t arcsight-esm -c tools/config/arcsight.yml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t qradar -c tools/config/qradar.yml rules/ > /dev/null
 	coverage run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t limacharlie -c tools/config/limacharlie.yml rules/ > /dev/null
