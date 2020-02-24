@@ -18,6 +18,8 @@ import json
 import re
 from fnmatch import fnmatch
 import sys
+import os
+from random import randrange
 
 import sigma
 import yaml
@@ -992,16 +994,14 @@ class ElastalertBackendQs(ElastalertBackend, ElasticsearchQuerystringBackend):
         #Generate ES QS Query
         return [{ 'query' : { 'query_string' : { 'query' : super().generateQuery(parsed) } } }]
 
-
 class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
-    identifier = "elasticsearch-rule"
+    identifier = "es-rule"
     active = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tactics = self._load_mitre_file("tactics")
         self.techniques = self._load_mitre_file("techniques")
-
 
     def _load_mitre_file(self, mitre_type):
         try:
@@ -1013,7 +1013,7 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
         except (IOError, OSError) as e:
             print("Failed to open {} configuration file '%s': %s".format(path, str(e)), file=sys.stderr)
             return []
-        except json.JSONDecoder as e:
+        except json.JSONDecodeError as e:
             print("Failed to parse {} configuration file '%s' as valid YAML: %s" % (path, str(e)), file=sys.stderr)
             return []
 
@@ -1024,7 +1024,6 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
             configs.update({"translation": translation})
             rule = self.create_rule(configs)
             return rule
-
 
     def create_threat_description(self, tactics_list, techniques_list):
         threat_list = list()
