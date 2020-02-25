@@ -17,6 +17,9 @@ from version 0.14.0.
 * SQL backend
 * Splunk Zeek sourcetype mapping config
 * sigma2attack script
+* Carbon Black backend and configuration
+* ArcSight ESM backend
+* Elasticsearch detection rule backend
 
 ### Changed
 
@@ -24,11 +27,14 @@ from version 0.14.0.
   the old naming scheme is used.
 * sigma2misp: replacement of deprecated method usage.
 * Various configuration updates
+* Extended ArcSight mapping
 
 ### Fixed
 
 * Fixed aggregation queries for Elastalert backend
 * Fixed aggregation queries for es-dsl backend
+* Backend and configuration lists are sorted.
+* Escaping in ala backend
 
 ## 0.15.0 - 2019-12-06
 
