@@ -1,11 +1,14 @@
 title: Malicious Service Installations
 id: 5a105d34-05fc-401e-8553-272b45c1522d
 description: Detects known malicious service installs that only appear in cases of lateral movement, credential dumping and other suspicious activity
-author: Florian Roth
+author: Florian Roth, Daniil Yugoslavskiy, oscd.community (update)
 date: 2017/03/27
+modified: 2019/11/01
 tags:
     - attack.persistence
     - attack.privilege_escalation
+    - attack.t1003
+    - attack.t1035
     - attack.t1050
     - car.2013-09-005
 logsource:
@@ -14,26 +17,13 @@ logsource:
 detection:
     selection:
         EventID: 7045
-    malsvc_wce:
-        ServiceName:
-            - 'WCESERVICE'
-            - 'WCE SERVICE'
     malsvc_paexec:
-        ServiceFileName: '*\PAExec*'
-    malsvc_winexe:
-        ServiceFileName: 'winexesvc.exe*'
-    malsvc_pwdumpx:
-        ServiceFileName: '*\DumpSvc.exe'
+        ServiceFileName|contains: '\PAExec'
     malsvc_wannacry:
         ServiceName: 'mssecsvc2.0'
     malsvc_persistence:
-        ServiceFileName: '* net user *'
-    malsvc_others:
-        ServiceName:
-            - 'pwdump*'
-            - 'gsecdump*'
-            - 'cachedump*'
+        ServiceFileName|contains: 'net user'
     condition: selection and 1 of malsvc_*
-falsepositives:
+falsepositives: 
     - Penetration testing
 level: critical

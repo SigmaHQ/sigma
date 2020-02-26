@@ -1,0 +1,19 @@
+title: High TXT Records Requests Rate
+id: f0a8cedc-1d22-4453-9c44-8d9f4ebd5d35
+description: Extremely high rate of TXT record type DNS requests from host per short period of time. Possible result of Do-exfiltration tool execution
+status: experimental
+author: Daniil Yugoslavskiy, oscd.community
+date: 2019/10/24
+tags:
+    - attack.exfiltration
+    - attack.t1048
+logsource:
+    category: dns
+detection:
+    selection:
+        record_type: "TXT"
+    timeframe: 1m
+    condition: selection | count() by src_ip > 50
+falsepositives:
+    - Legitimate high DNS TXT requests rate to domain name which should be added to whitelist
+level: medium

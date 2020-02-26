@@ -14,9 +14,9 @@ references:
     - https://gist.github.com/subTee/7937a8ef07409715f15b84781e180c46#file-rat-bat
     - https://twitter.com/vector_sec/status/896049052642533376
     - http://security-research.dyndns.org/pub/slides/FIRST-TC-2018/FIRST-TC-2018_Tom-Ueltschi_Sysmon_PUBLIC.pdf
-author: Florian Roth
+author: Florian Roth, Daniil Yugoslavskiy, oscd.community (update)
 date: 2018/01/01
-modified: 2018/12/11
+modified: 2019/11/01
 tags:
     - car.2013-07-001
 logsource:
@@ -25,17 +25,6 @@ logsource:
 detection:
     selection:
         CommandLine:
-            - vssadmin.exe delete shadows*
-            - vssadmin delete shadows*
-            - vssadmin create shadow /for=C:*
-            - copy \\?\GLOBALROOT\Device\\*\windows\ntds\ntds.dit*
-            - copy \\?\GLOBALROOT\Device\\*\config\SAM*
-            - copy \\?\GLOBALROOT\Device\\*\config\SYSTEM*
-            - type \\?\GLOBALROOT\Device\\*\config\SAM*
-            - type \\?\GLOBALROOT\Device\\*\config\SYSTEM*
-            - type \\?\GLOBALROOT\Device\\*\windows\ntds\ntds.dit*
-            - reg SAVE HKLM\SYSTEM *
-            - reg SAVE HKLM\SAM *
             - '* sekurlsa:*'
             - net localgroup administrators * /add
             - net group "Domain Admins" * /ADD /DOMAIN
@@ -52,8 +41,6 @@ detection:
             - '*\certutil.exe * -decodehex *'
             - '*\certutil.exe -ping *'
             - icacls * /grant Everyone:F /T /C /Q
-            - '* wmic shadowcopy delete *'
-            - '* wmic shadowcopy call create Volume=*'
             - '* wbadmin.exe delete catalog -quiet*'
             - '*\wscript.exe *.jse'
             - '*\wscript.exe *.js'
@@ -78,6 +65,10 @@ detection:
             - '* /sverhtml *'
             - '* /sxml *'
     condition: selection
+fields:
+    - ComputerName
+    - User
+    - CommandLine
 falsepositives:
     - False positives depend on scripts and administrative tools used in the monitored environment
 level: medium

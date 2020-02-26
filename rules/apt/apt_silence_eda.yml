@@ -1,0 +1,34 @@
+title: Silence.EDA Detection
+id: 3ceb2083-a27f-449a-be33-14ec1b7cc973
+status: experimental
+description: Detects Silence empireDNSagent
+author: Alina Stepchenkova, Group-IB, oscd.community
+date: 2019/11/01
+modified: 2019/11/20
+tags:
+    - attack.g0091
+    - attack.s0363
+logsource:
+    product: windows
+    service: powershell
+detection:
+    empire:
+        ScriptBlockText|contains|all:           # better to randomise the order
+            - 'System.Diagnostics.Process'
+            - 'Stop-Computer'
+            - 'Restart-Computer'
+            - 'Exception in execution'
+            - '$cmdargs'
+            - 'Close-Dnscat2Tunnel'
+    dnscat:
+         ScriptBlockText|contains|all:          # better to randomise the order
+            - 'set type=$LookupType`nserver'
+            - '$Command | nslookup 2>&1 | Out-String'
+            - 'New-RandomDNSField'
+            - '[Convert]::ToString($SYNOptions, 16)'
+            - '$Session.Dead = $True'
+            - '$Session["Driver"] -eq'
+    condition: empire and dnscat
+falsepositives:
+    - Unknown
+level: critical

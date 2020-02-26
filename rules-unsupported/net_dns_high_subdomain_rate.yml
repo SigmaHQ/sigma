@@ -1,0 +1,42 @@
+title: High DNS subdomain requests rate per domain
+id: 8198e9a8-e38f-4ba5-8f16-882b1c0f880e
+description: High rate of unique Fully Qualified Domain Names (FQDN) requests per root domain (eTLD+1) in short period of time
+author: Daniil Yugoslavskiy, oscd.community
+date: 2019/10/21
+modified: 2019/11/04
+tags:
+    - attack.exfiltration
+    - attack.t1048
+logsource:
+    category: dns
+detection:
+    dns_question_name:
+        query: "*"
+    default_list_of_well_known_domains:
+        query_etld_plus_one: 
+            - "akadns.net"
+            - "akamaiedge.net"
+            - "amazonaws.com"
+            - "apple.com"
+            - "apple-dns.net"
+            - "cloudfront.net"
+            - "icloud.com"
+            - "in-addr.arpa"
+            - "google.com"
+            - "yahoo.com"
+            - "dropbox.com"
+            - "windowsupdate.com"
+            - "microsoftonline.com"
+            - "s-microsoft.com"
+            - "office365.com"
+            - "linkedin.com"
+    timeframe: 15m
+    condition: count(subdomain) per query_etld_plus_one per computer_name > 200 and not default_list_of_well_known_domains
+    #    for each host in timeframe
+    #                for each dns_question_etld_plus_one
+    #                    if number of dns_question_name > 200
+    #                        dns_question_etld_plus_one is not in default_list_of_well_known_domains
+falsepositives:
+    - Legitimate domain name requested, which should be added to whitelist
+level: high
+status: experimental

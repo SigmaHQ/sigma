@@ -4,12 +4,20 @@ status: experimental
 description: Detects execution of Net.exe, whether suspicious or benign.
 references:
     - https://pentest.blog/windows-privilege-escalation-methods-for-pentesters/
-author: Michael Haag, Mark Woan (improvements)
+    - https://eqllib.readthedocs.io/en/latest/analytics/4d2e7fc1-af0b-4915-89aa-03d25ba7805e.html
+    - https://eqllib.readthedocs.io/en/latest/analytics/e61f557c-a9d0-4c25-ab5b-bbc46bb24deb.html
+    - https://eqllib.readthedocs.io/en/latest/analytics/9b3dd402-891c-4c4d-a662-28947168ce61.html
+author: Michael Haag, Mark Woan (improvements), James Pemberton / @4A616D6573 / oscd.community (improvements)
 date: 2019/01/16
 tags:
     - attack.s0039
+    - attack.t1027
+    - attack.t1049
+    - attack.t1077
+    - attack.t1135
     - attack.lateral_movement
     - attack.discovery
+    - attack.defense_evasion
 logsource:
     category: process_creation
     product: windows
@@ -18,6 +26,7 @@ detection:
         Image:
             - '*\net.exe'
             - '*\net1.exe'
+    cmdline:
         CommandLine:
             - '* group*'
             - '* localgroup*'
@@ -27,8 +36,10 @@ detection:
             - '* accounts*'
             - '* use*'
             - '* stop *'
-    condition: selection
+    condition: selection and cmdline
 fields:
+    - ComputerName
+    - User
     - CommandLine
     - ParentCommandLine
 falsepositives:

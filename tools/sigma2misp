@@ -8,7 +8,13 @@ urllib3.disable_warnings()
 from pymisp import PyMISP
 
 def create_new_event():
-    return misp.new_event(info=args.info)["Event"]["id"]
+    if hasattr(misp, "new_event"):
+        return misp.new_event(info=args.info)["Event"]["id"]
+    
+    event = misp.MISPEvent()
+    event.info = args.info
+    return misp.add_event(event)["Event"]["id"]
+
 
 class MISPImportArgumentParser(argparse.ArgumentParser):
     def __init__(self, *args, **kwargs):
@@ -39,14 +45,25 @@ else:
 
 misp = PyMISP(args.url, args.key, args.insecure)
 if args.event:
-    eventid = misp.get(args.event)["Event"]["id"]
+    if hasattr(misp, "get"):
+        eventid = misp.get(args.event)["Event"]["id"]
+    else:
+        eventid = misp.get_event(args.event)["Event"]["id"]
 
 first = True
+
 for sigma in paths:
     if not args.event and (first or not args.same_event):
         eventid = create_new_event()
     print("Importing Sigma rule {} into MISP event {}...".format(sigma, eventid, end=""))
     f = sigma.open("rt")
-    misp.add_named_attribute(eventid, "sigma", f.read())
+
+    if hasattr(misp, "add_named_attribute"):
+        misp.add_named_attribute(eventid, "sigma", f.read())
+    else:
+        event = misp.get_event(eventid, pythonify=True)
+        event.add_attribute("sigma", f.read())
+        misp.update_event(event)
+
     f.close()
     first = False
