@@ -27,6 +27,8 @@ class QRadarBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Qradar saved search. Contributed by SOC Prime. https://socprime.com"""
     identifier = "qradar"
     active = True
+    config_required = False
+    default_config = ["sysmon", "qradar"]
     reEscape = re.compile('(")')
     reClear = None
     andToken = " and "
@@ -51,6 +53,10 @@ class QRadarBackend(SingleTextQueryBackend):
             return key
         else:
             return key
+
+    def cleanValue(self, value):
+        """Remove quotes in text"""
+        return value.replace("\'","\\\'")
 
     def generateNode(self, node):
         if type(node) == sigma.parser.condition.ConditionAND:
@@ -194,9 +200,17 @@ class QRadarBackend(SingleTextQueryBackend):
         
         qradarPrefix="SELECT "
         try:
+<<<<<<< HEAD
             for field in sigmaparser.parsedyaml["fields"]:
                     mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
             qradarPrefix += str(sigmaparser.parsedyaml["fields"]).strip('[]')
+=======
+            mappedFields = []
+            for field in sigmaparser.parsedyaml["fields"]:
+                    mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
+                    mappedFields.append(mapped)
+            qradarPrefix += str(mappedFields).strip('[]')
+>>>>>>> 9e86170d7937bf37694a5763e82ca6635735129c
         except KeyError:    # no 'fields' attribute
             mapped = None
             qradarPrefix+="UTF8(payload) as search_payload"

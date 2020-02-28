@@ -18,10 +18,13 @@ import json
 import re
 from fnmatch import fnmatch
 import sys
+import os
+from random import randrange
 
 import sigma
 import yaml
 from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
+from sigma.parser.condition import ConditionOR, ConditionAND, NodeSubexpression
 from .base import BaseBackend, SingleTextQueryBackend
 from .mixins import RulenameCommentMixin, MultiRuleOutputMixin
 from .exceptions import NotSupportedError
@@ -109,6 +112,29 @@ class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, Single
         if expression:
             return "(%s%s)" % (self.notToken, expression)
 
+    def generateSubexpressionNode(self, node):
+        """Check for search not bound to a field and restrict search to keyword fields"""
+        nodetype = type(node.items)
+        if nodetype in { ConditionAND, ConditionOR } and type(node.items.items) == list and { type(item) for item in node.items.items }.issubset({str, int}):
+            newitems = list()
+            for item in node.items:
+                newitem = item
+                if type(item) == str:
+                    if not item.startswith("*"):
+                        newitem = "*" + newitem
+                    if not item.endswith("*"):
+                        newitem += "*"
+                    newitems.append(newitem)
+                else:
+                    newitems.append(item)
+            newnode = NodeSubexpression(nodetype(None, None, *newitems))
+            self.matchKeyword = True
+            result = "\\*.keyword:" + super().generateSubexpressionNode(newnode)
+            self.matchKeyword = False       # one of the reasons why the converter needs some major overhaul
+            return result
+        else:
+            return super().generateSubexpressionNode(node)
+
 class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlingMixin, BaseBackend):
     """ElasticSearch DSL backend"""
     identifier = 'es-dsl'
@@ -149,9 +175,6 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
         self.queries[-1]['query']['constant_score']['filter'] = self.generateNode(parsed.parsedSearch)
         if parsed.parsedAgg:
             self.generateAggregation(parsed.parsedAgg)
-        # if parsed.parsedAgg:
-        #     fields += self.generateAggregation(parsed.parsedAgg)
-        # self.fields.update(fields)
 
     def generateANDNode(self, node):
         andNode = {'bool': {'must': []}}
@@ -188,8 +211,6 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
 
     def generateMapItemNode(self, node):
         key, value = node
-        if type(value) not in (str, int, list, type(None)):
-            raise TypeError("Map values must be strings, numbers, lists or null, not " + str(type(value)))
         if type(value) is list:
             res = {'bool': {'should': []}}
             for v in value:
@@ -206,7 +227,7 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
         elif value is None:
             key_mapped = self.fieldNameMapping(key, value)
             return { "bool": { "must_not": { "exists": { "field": key_mapped } } } }
-        else:
+        elif type(value) in (str, int):
             key_mapped = self.fieldNameMapping(key, value)
             if self.matchKeyword:   # searches against keyowrd fields are wildcard searches, phrases otherwise
                 queryType = 'wildcard'
@@ -215,6 +236,11 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
                 queryType = 'match_phrase'
                 value_cleaned = self.cleanValue(str(value))
             return {queryType: {key_mapped: value_cleaned}}
+        elif isinstance(value, SigmaRegularExpressionModifier):
+            key_mapped = self.fieldNameMapping(key, value)
+            return { 'regexp': { key_mapped: str(value) } }
+        else:
+            raise TypeError("Map values must be strings, numbers, lists, null or regular expression, not " + str(type(value)))
 
     def generateValueNode(self, node):
         return {'multi_match': {'query': node, 'fields': [], 'type': 'phrase'}}
@@ -226,9 +252,29 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
         return {'exists': {'field': node.item}}
 
     def generateAggregation(self, agg):
+        """
+        Generates an Elasticsearch nested aggregation given a SigmaAggregationParser object
+
+        Two conditions are handled here:
+        a) "count() by MyGroupedField > X"
+        b) "count(MyDistinctFieldName) by MyGroupedField > X'
+
+        The case (b) is translated to a the following equivalent SQL query
+
+        ```
+        SELECT MyDistinctFieldName, COUNT(DISTINCT MyDistinctFieldName) FROM Table
+        GROUP BY MyGroupedField HAVING COUNT(DISTINCT MyDistinctFieldName) > 1
+        ```
+
+        The resulting aggregation is set on 'self.queries[-1]["aggs"]' as a Python dict
+
+        :param agg: Input SigmaAggregationParser object that defines a condition
+        :return: None
+        """
         if agg:
             if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT:
                 if agg.groupfield is not None:
+<<<<<<< HEAD
                     self.queries[-1]['aggs'] = {
                         '%s_count'%(agg.groupfield or ""): {
                             'terms': {
@@ -239,19 +285,61 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
                                     'bucket_selector': {
                                         'buckets_path': {
                                             'count': '%s_count'%(agg.groupfield or "")
+=======
+                    # If the aggregation is 'count(MyDistinctFieldName) by MyGroupedField > XYZ'
+                    if agg.aggfield is not None:
+                        count_agg_group_name = "{}_count".format(agg.groupfield)
+                        count_distinct_agg_name = "{}_distinct".format(agg.aggfield)
+                        script_limit = "params.count {} {}".format(agg.cond_op, agg.condition)
+                        self.queries[-1]['aggs'] = {
+                            count_agg_group_name: {
+                                    "terms": {
+                                        "field": "{}.keyword".format(agg.groupfield)
+                                    },
+                                    "aggs": {
+                                        count_distinct_agg_name: {
+                                            "cardinality": {
+                                                "field": "{}.keyword".format(agg.aggfield)
+                                            }
+>>>>>>> 9e86170d7937bf37694a5763e82ca6635735129c
                                         },
-                                        'script': 'params.count %s %s'%(agg.cond_op, agg.condition)
+                                        "limit": {
+                                            "bucket_selector": {
+                                                "buckets_path": {
+                                                    "count": count_distinct_agg_name
+                                                },
+                                                "script": script_limit
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                    else:  # if the condition is count() by MyGroupedField > XYZ
+                        group_aggname = "{}_count".format(agg.groupfield)
+                        self.queries[-1]['aggs'] = {
+                            group_aggname: {
+                                'terms': {
+                                    'field': '%s' % (agg.groupfield + ".keyword")
+                                },
+                                'aggs': {
+                                    'limit': {
+                                        'bucket_selector': {
+                                            'buckets_path': {
+                                                'count': group_aggname
+                                            },
+                                            'script': 'params.count %s %s' % (agg.cond_op, agg.condition)
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
             else:
+                funcname = ""
                 for name, idx in agg.aggfuncmap.items():
                     if idx == agg.aggfunc:
                         funcname = name
                         break
-                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend"%(self.title, funcname))
+                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend" % (self.title, funcname))
 
     def generateBefore(self, parsed):
         self.queries.append({'query': {'constant_score': {'filter': {}}}})
@@ -868,14 +956,18 @@ class ElastalertBackend(MultiRuleOutputMixin):
 
     def generateAggregation(self, agg):
         if agg:
-            if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT or agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MIN or agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MAX or agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_AVG or agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_SUM:
+            if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT or \
+                    agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MIN or \
+                    agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MAX or \
+                    agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_AVG or \
+                    agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_SUM:
                 return ""
             else:
                 for name, idx in agg.aggfuncmap.items():
                     if idx == agg.aggfunc:
                         funcname = name
                         break
-                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend"%(self.title, funcname))
+                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend" % ( self.title, funcname))
 
     def convertLevel(self, level):
         return {
@@ -888,7 +980,7 @@ class ElastalertBackend(MultiRuleOutputMixin):
     def finalize(self):
         result = ""
         for rulename, rule in self.elastalert_alerts.items():
-            result += yaml.dump(rule, default_flow_style=False)
+            result += yaml.dump(rule, default_flow_style=False, width=10000)
             result += '\n'
         return result
 
@@ -915,3 +1007,143 @@ class ElastalertBackendQs(ElastalertBackend, ElasticsearchQuerystringBackend):
         #Generate ES QS Query
         return [{ 'query' : { 'query_string' : { 'query' : super().generateQuery(parsed) } } }]
 
+class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
+    identifier = "es-rule"
+    active = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.tactics = self._load_mitre_file("tactics")
+        self.techniques = self._load_mitre_file("techniques")
+
+    def _load_mitre_file(self, mitre_type):
+        try:
+            backend_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "config", "mitre"))
+            path = os.path.join(backend_dir,"{}.json".format(mitre_type))
+            with open(path, 'r') as config_file:
+                config = json.load(config_file)
+                return config
+        except (IOError, OSError) as e:
+            print("Failed to open {} configuration file '%s': %s".format(path, str(e)), file=sys.stderr)
+            return []
+        except json.JSONDecodeError as e:
+            print("Failed to parse {} configuration file '%s' as valid YAML: %s" % (path, str(e)), file=sys.stderr)
+            return []
+
+    def generate(self, sigmaparser):
+        translation = super().generate(sigmaparser)
+        if translation:
+            configs = sigmaparser.parsedyaml
+            configs.update({"translation": translation})
+            rule = self.create_rule(configs)
+            return rule
+
+    def create_threat_description(self, tactics_list, techniques_list):
+        threat_list = list()
+        for tactic in tactics_list:
+            temp_tactics = {
+                "tactic": {
+                    "id": tactic.get("external_id", ""),
+                    "reference": tactic.get("url", ""),
+                    "name": tactic.get("tactic", "")
+                },
+                "framework": "MITRE ATT&CK"
+            }
+            temp_techniques = list()
+            for tech in techniques_list:
+                if tactic.get("tactic", "") in tech.get("tactic", []):
+                    temp_techniques.append({
+                                "id": tech.get("technique_id", ""),
+                                "name": tech.get("technique", ""),
+                                "reference": tech.get("url", "")
+                            })
+            temp_tactics.update({"technique": temp_techniques})
+            threat_list.append(temp_tactics)
+        return threat_list
+
+    def find_tactics(self, key_name=None, key_id=None):
+        for tactic in self.tactics:
+            if key_name and key_name == tactic.get("tactic", ""):
+                return tactic
+            if key_id and key_id == tactic.get("external_id", ""):
+                return tactic
+
+    def find_technique(self, key_id=None):
+        for technique in self.techniques:
+            if key_id and key_id == technique.get("technique_id", ""):
+                return technique
+
+    def map_risk_score(self, level):
+        if level == "low":
+            return randrange(0,22)
+        elif level == "medium":
+            return randrange(22,48)
+        elif level == "high":
+            return randrange(48,74)
+        elif level == "critical":
+            return randrange(74,101)
+
+    def create_rule(self, configs):
+        tags = configs.get("tags", [])
+        tactics_list = list()
+        technics_list = list()
+
+        for tag in tags:
+            tag = tag.replace("attack.", "")
+            if re.match("[t][0-9]{4}", tag, re.IGNORECASE):
+                tech = self.find_technique(tag.title())
+                if tech:
+                    technics_list.append(tech)
+            else:
+                if "_" in tag:
+                    tag_list = tag.split("_")
+                    tag_list = [item.title() for item in tag_list]
+                    tact = self.find_tactics(key_name=" ".join(tag_list))
+                    if tact:
+                        tactics_list.append(tact)
+                elif re.match("[ta][0-9]{4}", tag, re.IGNORECASE):
+                    tact = self.find_tactics(key_id=tag.upper())
+                    if tact:
+                        tactics_list.append(tact)
+                else:
+                    tact = self.find_tactics(key_name=tag.title())
+                    if tact:
+                        tactics_list.append(tact)
+        threat = self.create_threat_description(tactics_list=tactics_list, techniques_list=technics_list)
+        rule_id = configs.get("title", "").lower().replace(" ", "_")
+        risk_score = self.map_risk_score(configs.get("level", "medium"))
+        rule = {
+            "description": configs.get("description", ""),
+            "enabled": True,
+            "false_positives": configs.get('falsepositives'),
+            "filters": [],
+            "from": "now-360s",
+            "immutable": False,
+            "index": [
+                "apm-*-transaction*",
+                "auditbeat-*",
+                "endgame-*",
+                "filebeat-*",
+                "packetbeat-*",
+                "winlogbeat-*"
+            ],
+            "interval": "5m",
+            "rule_id": rule_id,
+            "language": "lucene",
+            "output_index": ".siem-signals-default",
+            "max_signals": 100,
+            "risk_score": risk_score,
+            "name": configs.get("title", ""),
+            "query":configs.get("translation"),
+            "references": configs.get("references"),
+            "meta": {
+                "from": "1m"
+            },
+            "severity": configs.get("level", "medium"),
+            "tags": tags,
+            "to": "now",
+            "type": "query",
+            "threat": threat,
+            "version": 1
+        }
+        return json.dumps(rule)

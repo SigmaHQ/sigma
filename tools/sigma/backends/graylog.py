@@ -15,24 +15,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-from .base import SingleTextQueryBackend
+from .elasticsearch import ElasticsearchQuerystringBackend
 
-class GraylogQuerystringBackend(SingleTextQueryBackend):
+class GraylogQuerystringBackend(ElasticsearchQuerystringBackend):
     """Converts Sigma rule into Graylog query string. Only searches, no aggregations."""     
     identifier = "graylog"
     active = True
     config_required = False
 
     reEscape = re.compile("([+\\-!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|&&|\\|\\|)")
-    reClear = None
-    andToken = " AND "
-    orToken = " OR "
-    notToken = "NOT "
-    subExpression = "(%s)"
-    listExpression = "(%s)"
     listSeparator = " "
-    valueExpression = "\"%s\""
-    nullExpression = "NOT _exists_:%s"
-    notNullExpression = "_exists_:%s"
-    mapExpression = "%s:%s"
-    mapListsSpecialHandling = False

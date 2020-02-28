@@ -1,0 +1,51 @@
+title: Highly Relevant Renamed Binary
+id: 0ba1da6d-b6ce-4366-828c-18826c9de23e
+status: experimental
+description: Detects the execution of a renamed binary often used by attackers or malware leveraging new Sysmon OriginalFileName datapoint.
+author: Matthew Green - @mgreen27, Florian Roth
+date: 2019/06/15
+references:
+    - https://attack.mitre.org/techniques/T1036/
+    - https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html
+    - https://mgreen27.github.io/posts/2019/05/29/BinaryRename2.html
+tags:
+    - attack.t1036
+    - attack.defense_evasion
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        OriginalFileName:
+            - "powershell.exe"
+            - "powershell_ise.exe"
+            - "psexec.exe"
+            - "psexec.c"  # old versions of psexec (2016 seen)
+            - "cscript.exe"
+            - "wscript.exe"
+            - "mshta.exe"
+            - "regsvr32.exe"
+            - "wmic.exe"
+            - "certutil.exe"
+            - "rundll32.exe"
+            - "cmstp.exe"
+            - "msiexec.exe"
+    filter:
+        Image:
+            - '*\powershell.exe'
+            - '*\powershell_ise.exe'
+            - '*\psexec.exe'
+            - '*\psexec64.exe'
+            - '*\cscript.exe'
+            - '*\wscript.exe'
+            - '*\mshta.exe'
+            - '*\regsvr32.exe'
+            - '*\wmic.exe'
+            - '*\certutil.exe'
+            - '*\rundll32.exe'
+            - '*\cmstp.exe'
+            - '*\msiexec.exe'
+    condition: selection and not filter
+falsepositives:
+    - Custom applications use renamed binaries adding slight change to binary name. Typically this is easy to spot and add to whitelist
+level: high

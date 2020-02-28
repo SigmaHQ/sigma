@@ -1,9 +1,9 @@
 language: python
 dist: xenial
 python:
-  # - 3.5  # Deactivated because Travis CI tests failed randomly (Travis's problem)
-  - 3.6
-  - 3.7
+    # - 3.5  # Deactivated because Travis CI tests failed randomly (Travis's problem)
+    - 3.6
+    - 3.7
 sudo: true
 services:
     - elasticsearch
@@ -11,14 +11,15 @@ cache: pip
 before_install:
     - curl -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.2.4.deb && sudo dpkg -i --force-confnew elasticsearch-6.2.4.deb && sudo service elasticsearch restart
 install:
-  - pip install -r tools/requirements-devel.txt 
+    - pip install -r tools/requirements-devel.txt
+    - pip install -r tests/requirements-test.txt 
 script:
-  - make test
-  - make test-backend-es-qs
+    - make test
+    - make test-backend-es-qs
 notifications:
-  email:
-    recipients:
-      - venom14@gmail.com
-      - thomas@patzke.org
-    on_success: change
-    on_failure: always
+    email:
+        recipients:
+            - venom14@gmail.com
+            - thomas@patzke.org
+        on_success: change
+        on_failure: always

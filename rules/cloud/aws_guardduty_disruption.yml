@@ -1,0 +1,21 @@
+title: AWS GuardDuty Important Change
+id: 6e61ee20-ce00-4f8d-8aee-bedd8216f7e3
+status: experimental
+author: faloker
+date: 2020/02/11
+description: Detects updates of the GuardDuty list of trusted IPs, perhaps to disable security alerts against malicious IPs.
+references:
+    - https://github.com/RhinoSecurityLabs/pacu/blob/master/modules/guardduty__whitelist_ip/main.py#L9
+logsource:
+    service: cloudtrail
+detection:
+    selection_source:
+        - eventSource: guardduty.amazonaws.com
+    selection_eventName:
+        - eventName: CreateIPSet
+    condition: all of them
+level: high
+falsepositives:
+    - Valid change in the GuardDuty (e.g. to ignore internal scanners)
+tags:
+    - attack.t1089

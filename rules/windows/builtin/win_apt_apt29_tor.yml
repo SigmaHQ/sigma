@@ -1,0 +1,38 @@
+action: global
+title: APT29 Google Update Service Install
+id: c069f460-2b87-4010-8dcf-e45bab362624
+description: This method detects malicious services mentioned in APT29 report by FireEye. The legitimate path for the Google update service is C:\Program Files (x86)\Google\Update\GoogleUpdate.exe
+    so the service names and executable locations used by APT29 are specific enough to be detected in log files.
+references:
+    - https://www.fireeye.com/blog/threat-research/2017/03/apt29_domain_frontin.html
+tags:
+    - attack.persistence
+    - attack.g0016
+    - attack.t1050
+date: 2017/11/01
+author: Thomas Patzke 
+logsource:
+    product: windows
+    service: system
+detection:
+    service_install:
+        EventID: 7045
+        ServiceName: 'Google Update'
+    timeframe: 5m
+    condition: service_install | near process
+falsepositives:
+    - Unknown
+level: high
+---
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    process:
+        Image:
+            - 'C:\Program Files(x86)\Google\GoogleService.exe'
+            - 'C:\Program Files(x86)\Google\GoogleUpdate.exe'
+fields:
+    - ComputerName
+    - User
+    - CommandLine
