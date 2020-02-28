@@ -6,9 +6,9 @@ event = {
     # 5: Process termincated
     6: ('modload_count','[1 to *]'),
     7: ('modload_count','[1 to *]'),
-    8: ('crossproc_type', 'remote_thread'),
+    8: ('crossproc_count', '[1 to *]'),
     # 9: Raw Access Read
-    10: ('crossproc_type', 'process_open'),
+    10: ('crossproc_count', '[1 to *]'),
     11: ('filemod_count','[1 to *]'),
     12: ('regmod_count','[1 to *]'),
     13: ('regmod_count','[1 to *]'),
