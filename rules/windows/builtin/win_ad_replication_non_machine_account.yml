@@ -3,7 +3,7 @@ id: 17d619c1-e020-4347-957e-1d1207455c93
 description: Detects potential abuse of Active Directory Replication Service (ADRS) from a non machine account to request credentials.
 status: experimental
 date: 2019/07/26
-modified: 2019/11/10
+modified: 2020/03/02
 author: Roberto Rodriguez @Cyb3rWard0g
 references:
     - https://github.com/Cyb3rWard0g/ThreatHunter-Playbook/tree/master/playbooks/windows/06_credential_access/T1003_credential_dumping/ad_replication_non_machine_account.md
@@ -22,7 +22,8 @@ detection:
             - '1131f6ad-9c07-11d1-f79f-00c04fc2dcd2'
             - '89e95b76-444d-4c62-991a-0facbeda640c'
     filter:
-        SubjectUserName|endswith: '$'
+        - SubjectUserName|endswith: '$'
+        - SubjectUserName|startswith: 'MSOL_' #https://docs.microsoft.com/en-us/azure/active-directory/hybrid/reference-connect-accounts-permissions#ad-ds-connector-account
     condition: selection and not filter
 fields:
     - ComputerName
