@@ -125,11 +125,14 @@ if cmdargs.debug:   # pragma: no cover
     logger.setLevel(logging.DEBUG)
 
 def list_backends():
-    for backend in backends.getBackendList():
-        print("{:>15} : {}".format(backend.identifier, backend.__doc__))
+    for backend in sorted(backends.getBackendList(), key=lambda backend: backend.identifier):
+        if cmdargs.debug:
+            print("{:>15} : {} ({})".format(backend.identifier, backend.__doc__, backend.__name__))
+        else:
+            print("{:>15} : {}".format(backend.identifier, backend.__doc__))
 
 def list_configurations(backend=None):
-    for conf_id, title, backends in scm.list():
+    for conf_id, title, backends in sorted(scm.list(), key=lambda config: config[0]):
         if backend is not None and backend in backends or backend is None or len(backends) == 0:
             print("{:>30} : {}".format(conf_id, title))
 

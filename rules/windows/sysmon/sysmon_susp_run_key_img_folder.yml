@@ -9,7 +9,7 @@ tags:
     - attack.persistence
     - attack.t1060
 date: 2018/25/08
-modified: 2019/10/01
+modified: 2020/02/26
 logsource:
     product: windows
     service: sysmon
@@ -17,23 +17,26 @@ detection:
     selection:
         EventID: 13
         TargetObject: 
-          - '*\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\\*'
-          - '*\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce\\*'
+            - '*\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\\*'
+            - '*\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce\\*'
         Details:
-          - '*C:\Windows\Temp\\*'
-          - '*\AppData\\*'
-          - '%AppData%\\*'
-          - '*C:\$Recycle.bin\\*'
-          - '*C:\Temp\\*'
-          - '*C:\Users\Public\\*'
-          - '%Public%\\*'
-          - '*C:\Users\Default\\*'
-          - '*C:\Users\Desktop\\*'
-          - 'wscript*'
-          - 'cscript*'
-    condition: selection
+            - '*C:\Windows\Temp\\*'
+            - '*\AppData\\*'
+            - '%AppData%\\*'
+            - '*C:\$Recycle.bin\\*'
+            - '*C:\Temp\\*'
+            - '*C:\Users\Public\\*'
+            - '%Public%\\*'
+            - '*C:\Users\Default\\*'
+            - '*C:\Users\Desktop\\*'
+            - 'wscript*'
+            - 'cscript*'
+    filter:
+        Details|contains:
+          - '\AppData\Local\Microsoft\OneDrive\'  # OneDrive False Positives
+    condition: selection and not filter
 fields:
     - Image
 falsepositives:
-    - Software with rare behaviour
+    - Software using the AppData folders for updates
 level: high

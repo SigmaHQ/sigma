@@ -1,35 +1,61 @@
+---
 action: global
-title: Malicious Service Install
+title: Credential Dumping Tools Service Execution
+description: Detects well-known credential dumping tools execution via service execution events
+author: Florian Roth, Teymur Kheirkhabarov, Daniil Yugoslavskiy, oscd.community
 id: 4976aa50-8f41-45c6-8b15-ab3fc10e79ed
-description: This method detects well-known keywords of malicious services in the Windows System Eventlog
-author: Florian Roth
+date: 2017/03/05
+modified: 2019/11/01
+references:
+    - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
 tags:
     - attack.credential_access
+    - attack.execution
     - attack.t1003
+    - attack.t1035
     - attack.s0005
+detection:
+    selection_1:
+        - ServiceName|contains:
+            - 'fgexec'
+            - 'wceservice'
+            - 'wce service'
+            - 'pwdump'
+            - 'gsecdump'
+            - 'cachedump'
+            - 'mimikatz'
+            - 'mimidrv'
+        - ImagePath|contains:
+            - 'fgexec'
+            - 'dumpsvc'
+            - 'cachedump'
+            - 'mimidrv'
+            - 'gsecdump'
+            - 'servpw'
+            - 'pwdump'
+        - ImagePath|re: '((\\\\.*\\.*|.*\\)([{]?[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}[}])?\.(exe|scr|cpl|bat|js|cmd|vbs).*)'
+    condition: selection and selection_1
+falsepositives:
+    - Legitimate Administrator using credential dumping tool for password recovery
+level: high
+---
 logsource:
     product: windows
     service: system
 detection:
-    selection1:
-        EventID: 
-          - 7045
-    keywords:
-        Message:
-          - '*WCE SERVICE*'
-          - '*WCESERVICE*'
-          - '*DumpSvc*'
-    quarkspwdump:
-        EventID: 16
-        HiveName: '*\AppData\Local\Temp\SAM*.dmp'
-    condition: ( selection1 and keywords ) or ( selection2 and keywords ) or quarkspwdump
-falsepositives:
-    - Unlikely
-level: high
+    selection:
+        EventID: 7045
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 6
 ---
 logsource:
     product: windows
     service: security
 detection:
-    selection2:
+    selection:
         EventID: 4697

@@ -160,7 +160,7 @@ class SplunkXMLBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
             query = self.generateQuery(parsed)
             if query is not None:
                 self.queries += self.panel_pre
-                self.queries += self.getRuleName(sigmaparser)
+                self.queries += sigmaparser.parsedyaml.get("title") or ""
                 self.queries += self.panel_inf
                 query = query.replace("<", "&lt;")
                 query = query.replace(">", "&gt;")

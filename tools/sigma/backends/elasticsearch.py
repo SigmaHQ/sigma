@@ -18,6 +18,8 @@ import json
 import re
 from fnmatch import fnmatch
 import sys
+import os
+from random import randrange
 
 import sigma
 import yaml
@@ -992,3 +994,143 @@ class ElastalertBackendQs(ElastalertBackend, ElasticsearchQuerystringBackend):
         #Generate ES QS Query
         return [{ 'query' : { 'query_string' : { 'query' : super().generateQuery(parsed) } } }]
 
+class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
+    identifier = "es-rule"
+    active = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.tactics = self._load_mitre_file("tactics")
+        self.techniques = self._load_mitre_file("techniques")
+
+    def _load_mitre_file(self, mitre_type):
+        try:
+            backend_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "config", "mitre"))
+            path = os.path.join(backend_dir,"{}.json".format(mitre_type))
+            with open(path, 'r') as config_file:
+                config = json.load(config_file)
+                return config
+        except (IOError, OSError) as e:
+            print("Failed to open {} configuration file '%s': %s".format(path, str(e)), file=sys.stderr)
+            return []
+        except json.JSONDecodeError as e:
+            print("Failed to parse {} configuration file '%s' as valid YAML: %s" % (path, str(e)), file=sys.stderr)
+            return []
+
+    def generate(self, sigmaparser):
+        translation = super().generate(sigmaparser)
+        if translation:
+            configs = sigmaparser.parsedyaml
+            configs.update({"translation": translation})
+            rule = self.create_rule(configs)
+            return rule
+
+    def create_threat_description(self, tactics_list, techniques_list):
+        threat_list = list()
+        for tactic in tactics_list:
+            temp_tactics = {
+                "tactic": {
+                    "id": tactic.get("external_id", ""),
+                    "reference": tactic.get("url", ""),
+                    "name": tactic.get("tactic", "")
+                },
+                "framework": "MITRE ATT&CK"
+            }
+            temp_techniques = list()
+            for tech in techniques_list:
+                if tactic.get("tactic", "") in tech.get("tactic", []):
+                    temp_techniques.append({
+                                "id": tech.get("technique_id", ""),
+                                "name": tech.get("technique", ""),
+                                "reference": tech.get("url", "")
+                            })
+            temp_tactics.update({"technique": temp_techniques})
+            threat_list.append(temp_tactics)
+        return threat_list
+
+    def find_tactics(self, key_name=None, key_id=None):
+        for tactic in self.tactics:
+            if key_name and key_name == tactic.get("tactic", ""):
+                return tactic
+            if key_id and key_id == tactic.get("external_id", ""):
+                return tactic
+
+    def find_technique(self, key_id=None):
+        for technique in self.techniques:
+            if key_id and key_id == technique.get("technique_id", ""):
+                return technique
+
+    def map_risk_score(self, level):
+        if level == "low":
+            return randrange(0,22)
+        elif level == "medium":
+            return randrange(22,48)
+        elif level == "high":
+            return randrange(48,74)
+        elif level == "critical":
+            return randrange(74,101)
+
+    def create_rule(self, configs):
+        tags = configs.get("tags", [])
+        tactics_list = list()
+        technics_list = list()
+
+        for tag in tags:
+            tag = tag.replace("attack.", "")
+            if re.match("[t][0-9]{4}", tag, re.IGNORECASE):
+                tech = self.find_technique(tag.title())
+                if tech:
+                    technics_list.append(tech)
+            else:
+                if "_" in tag:
+                    tag_list = tag.split("_")
+                    tag_list = [item.title() for item in tag_list]
+                    tact = self.find_tactics(key_name=" ".join(tag_list))
+                    if tact:
+                        tactics_list.append(tact)
+                elif re.match("[ta][0-9]{4}", tag, re.IGNORECASE):
+                    tact = self.find_tactics(key_id=tag.upper())
+                    if tact:
+                        tactics_list.append(tact)
+                else:
+                    tact = self.find_tactics(key_name=tag.title())
+                    if tact:
+                        tactics_list.append(tact)
+        threat = self.create_threat_description(tactics_list=tactics_list, techniques_list=technics_list)
+        rule_id = configs.get("title", "").lower().replace(" ", "_")
+        risk_score = self.map_risk_score(configs.get("level", "medium"))
+        rule = {
+            "description": configs.get("description", ""),
+            "enabled": True,
+            "false_positives": configs.get('falsepositives'),
+            "filters": [],
+            "from": "now-360s",
+            "immutable": False,
+            "index": [
+                "apm-*-transaction*",
+                "auditbeat-*",
+                "endgame-*",
+                "filebeat-*",
+                "packetbeat-*",
+                "winlogbeat-*"
+            ],
+            "interval": "5m",
+            "rule_id": rule_id,
+            "language": "lucene",
+            "output_index": ".siem-signals-default",
+            "max_signals": 100,
+            "risk_score": risk_score,
+            "name": configs.get("title", ""),
+            "query":configs.get("translation"),
+            "references": configs.get("references"),
+            "meta": {
+                "from": "1m"
+            },
+            "severity": configs.get("level", "medium"),
+            "tags": tags,
+            "to": "now",
+            "type": "query",
+            "threat": threat,
+            "version": 1
+        }
+        return json.dumps(rule)

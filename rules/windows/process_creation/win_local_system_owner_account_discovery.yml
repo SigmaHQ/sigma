@@ -25,14 +25,17 @@ detection:
       - Image|endswith: '\cmd.exe'
         CommandLine|contains|all: 
             - '/c'
-            - 'dir'
+            - 'dir '
             - '\Users\'
+    filter_1:
+        CommandLine|contains:
+            - ' rmdir '       # don't match on 'dir'   "C:\Windows\System32\cmd.exe" /q /c rmdir /s /q "C:\Users\XX\AppData\Local\Microsoft\OneDrive\19.232.1124.0005"
     selection_2:
         Image|endswith:
             - '\net.exe'
             - '\net1.exe'
         CommandLine|contains: 'user'
-    filter:
+    filter_2:
         CommandLine|contains:
             - '/domain'       # local account discovery only
             - '/add'          # discovery only
@@ -43,7 +46,7 @@ detection:
             - '/scriptpath'   # discovery only
             - '/times'        # discovery only
             - '/workstations' # discovery only
-    condition: selection_1 or ( selection_2 and not filter )
+    condition: (selection_1 and not filter_1) or ( selection_2 and not filter_2)
 fields:
     - Image
     - CommandLine
