@@ -19,8 +19,8 @@ from .base import SingleTextQueryBackend
 from .exceptions import NotSupportedError
 
 class WindowsDefenderATPBackend(SingleTextQueryBackend):
-    """Converts Sigma rule into Windows Defender ATP Hunting Queries."""
-    identifier = "wdatp"
+    """Converts Sigma rule into Microsoft Defender ATP Hunting Queries."""
+    identifier = "mdatp"
     active = True
     config_required = False
 
@@ -52,7 +52,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 # (replacement, ): Replaces field occurrence with static string
                 "AccountName"               : (self.id_mapping, self.default_value_mapping),
                 "CommandLine"               : ("ProcessCommandLine", self.default_value_mapping),
-                "ComputerName"              : (self.id_mapping, self.default_value_mapping),
+                "DeviceName"                : (self.id_mapping, self.default_value_mapping),
                 "DestinationHostname"       : ("RemoteUrl", self.default_value_mapping),
                 "DestinationIp"             : ("RemoteIP", self.default_value_mapping),
                 "DestinationIsIpv6"         : ("RemoteIP has \":\"", ),
@@ -137,17 +137,17 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
             self.service = None
 
         if (self.category, self.product, self.service) == ("process_creation", "windows", None):
-            self.table = "ProcessCreationEvents"
+            self.table = "DeviceProcessEvents"
         elif (self.category, self.product, self.service) == (None, "windows", "powershell"):
-            self.table = "MiscEvents"
+            self.table = "DeviceEvents"
             self.orToken = ", "
 
         return super().generate(sigmaparser)
 
     def generateBefore(self, parsed):
         if self.table is None:
-            raise NotSupportedError("No WDATP table could be determined from Sigma rule")
-        if self.table == "MiscEvents" and self.service == "powershell":
+            raise NotSupportedError("No MDATP table could be determined from Sigma rule")
+        if self.table == "DeviceEvents" and self.service == "powershell":
             return "%s | where tostring(extractjson('$.Command', AdditionalFields)) in~ " % self.table
         return "%s | where " % self.table
 
@@ -165,26 +165,26 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
             if self.product == "windows":
                 if self.service == "sysmon" and value == 1 \
                     or self.service == "security" and value == 4688:    # Process Execution
-                    self.table = "ProcessCreationEvents"
+                    self.table = "DeviceProcessEvents"
                     return None
                 elif self.service == "sysmon" and value == 3:      # Network Connection
-                    self.table = "NetworkCommunicationEvents"
+                    self.table = "DeviceNetworkEvents"
                     return None
                 elif self.service == "sysmon" and value == 7:      # Image Load
-                    self.table = "ImageLoadEvents"
+                    self.table = "DeviceImageLoadEvents"
                     return None
                 elif self.service == "sysmon" and value == 8:      # Create Remote Thread
-                    self.table = "MiscEvents"
+                    self.table = "DeviceEvents"
                     return "ActionType == \"CreateRemoteThreadApiCall\""
                 elif self.service == "sysmon" and value == 11:     # File Creation
-                    self.table = "FileCreationEvents"
+                    self.table = "DeviceFileEvents"
                     return None
                 elif self.service == "sysmon" and value == 13 \
                     or self.service == "security" and value == 4657:    # Set Registry Value
-                    self.table = "RegistryEvents"
+                    self.table = "DeviceRegistryEvents"
                     return "ActionType == \"RegistryValueSet\""
                 elif self.service == "security" and value == 4624:
-                    self.table = "LogonEvents"
+                    self.table = "DeviceLogonEvents"
                     return None
         elif type(value) in (str, int):     # default value processing
             try:
