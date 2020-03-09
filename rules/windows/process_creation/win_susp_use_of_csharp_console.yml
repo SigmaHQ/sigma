@@ -10,18 +10,14 @@ tags:
     - attack.execution
     - attack.t1127
 logsource:
+    category: process_creation
     product: windows
-    service: sysmon
 detection:
-    selection1:
-        EventID: 1
-        Image:
-            - '*\csi.exe'
-        ParentImage:
-            - '*\powershell.exe'
-        OriginalFileName:
-            - 'csi.exe'
-    condition: selection1
+    selection:
+        Image|endswith: '\csi.exe'
+        ParentImage|endswith: '\powershell.exe'
+        OriginalFileName: 'csi.exe'
+    condition: selection
 falsepositives:
     - Possible depending on environment. Pair with other factors such as net connections, command-line args, etc.
 level: high
