@@ -35,18 +35,48 @@ class ElasticsearchWildcardHandlingMixin(object):
     provide configurability with backend parameters.
     """
     options = SingleTextQueryBackend.options + (
-            ("keyword_field", "keyword", "Keyword sub-field name", None),
-            ("keyword_blacklist", None, "Fields that don't have a keyword subfield (wildcards * and ? allowed)", None)
+            ("keyword_field", "keyword", "Keyword sub-field name (default is: '.keyword'). Set blank value if all keyword fields are the base(top-level) field. Additionally see 'keyword_base_fields' for more granular control of the base & subfield situation.", None),
+            ("analyzed_sub_field_name", "", "Analyzed sub-field name. By default analyzed field is the base field. Therefore, use this option to make the analyzed field a subfield. An example value would be '.text' ", None),
+            ("analyzed_sub_fields", None, "Fields that have an analyzed sub-field.", None),
+            ("keyword_base_fields", None, "Fields that the keyword is base (top-level) field. By default analyzed field is the base field. So use this option to change that logic. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
+            ("keyword_whitelist", None, "Fields to always set as keyword. Bypasses case insensitive options. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
+            ("keyword_blacklist", None, "Fields to never set as keyword (ie: always set as analyzed field). Bypasses case insensitive options. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
+            ("case_insensitive_whitelist", None, "Fields to make the values case insensitive regex. Automatically sets the field as a keyword. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
+            ("case_insensitive_blacklist", None, "Fields to exclude from being made into case insensitive regex. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None)
             )
     reContainsWildcard = re.compile("(?:(?<!\\\\)|\\\\\\\\)[*?]").search
+    uuid_regex = re.compile( "[0-9a-fA-F]{8}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{12}", re.IGNORECASE )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.matchKeyword = True
+        self.CaseInSensitiveField = False
+        self.keyword_field = self.keyword_field.strip().strip('.') # Prevent mistake if user added a '.' or field has spaces
+        self.analyzed_sub_field_name = self.analyzed_sub_field_name.strip().strip('.') # Prevent mistake if user added a '.' or field has spaces
         try:
-            self.blacklist = self.keyword_blacklist.split(",")
+            self.keyword_base_fields = self.keyword_base_fields.replace(' ','').split(',')
         except AttributeError:
-            self.blacklist = list()
+            self.keyword_base_fields = list()
+        try:
+            self.analyzed_sub_fields = self.analyzed_sub_fields.replace(' ','').split(',')
+        except AttributeError:
+            self.analyzed_sub_fields = list()
+        try:
+            self.keyword_whitelist = self.keyword_whitelist.replace(' ','').split(',')
+        except AttributeError:
+            self.keyword_whitelist = list()
+        try:
+            self.keyword_blacklist = self.keyword_blacklist.replace(' ','').split(',')
+        except AttributeError:
+            self.keyword_blacklist = list()
+        try:
+            self.case_insensitive_whitelist = self.case_insensitive_whitelist.replace(' ','').split(',')
+        except AttributeError:
+            self.case_insensitive_whitelist = list()
+        try:
+            self.case_insensitive_blacklist = self.case_insensitive_blacklist.replace(' ','').split(',')
+        except AttributeError:
+            self.case_insensitive_blacklist = list()
 
     def containsWildcard(self, value):
         """Determine if value contains wildcard."""
@@ -58,22 +88,93 @@ class ElasticsearchWildcardHandlingMixin(object):
 
     def fieldNameMapping(self, fieldname, value):
         """
-        Determine if values contain wildcards. If yes, match on keyword field else on analyzed one.
-        Decide if field value should be quoted based on the field name decision and store it in object property.
+        Decide whether to use a keyword field or analyzed field. Using options on fields to make into keywords OR not and the field naming of keyword.
+        Further, determine if values contain wildcards. Additionally, determine if case insensitive regex should be used. Finally,
+        if field value should be quoted based on the field name decision and store it in object property.
         """
-        if self.keyword_field == '':
-            self.matchKeyword = True
-            return fieldname
+        force_keyword_whitelist = False # override everything AND set keyword and turn off case insensitivity
+        force_keyword_blacklist = False # override everything AND set analyzed field and turn off case insensitivity
+        force_keyword_type = False # make keyword
+        keyword_subfield_name = self.keyword_field
+        analyzed_subfield_name = self.analyzed_sub_field_name
 
-        if not any([ fnmatch(fieldname, pattern) for pattern in self.blacklist ]) and (
-                type(value) == list and any(map(self.containsWildcard, value)) \
-                or self.containsWildcard(value)
-                ):
+        # Set naming for keyword fields
+        if keyword_subfield_name == '':
+            force_keyword_type = True
+        elif len(self.keyword_base_fields) != 0 and any ([ fnmatch(fieldname, pattern) for pattern in self.keyword_base_fields ]):
+            keyword_subfield_name = ''
+        else:
+            keyword_subfield_name = '.%s'%keyword_subfield_name
+
+        # Set naming for analyzed fields
+        if analyzed_subfield_name != '' and not keyword_subfield_name.startswith('.'):
+            analyzed_subfield_name = '.%s'%analyzed_subfield_name
+        else:
+            analyzed_subfield_name = ''
+
+        # Only some analyzed subfield, so if not in this list then has to be keyword
+        if len(self.analyzed_sub_fields) != 0 and not any ([ fnmatch(fieldname, pattern) for pattern in self.analyzed_sub_fields ]):
+            force_keyword_type = True
+
+        # Keyword (force) exclude
+        if len(self.keyword_blacklist) != 0 and any ([ fnmatch(fieldname, pattern.strip()) for pattern in self.keyword_blacklist ]):
+            force_keyword_blacklist = True
+        # Keyword (force) include
+        elif len(self.keyword_whitelist) != 0 and any ([ fnmatch(fieldname, pattern.strip()) for pattern in self.keyword_whitelist ]):
+            force_keyword_whitelist = True
+
+        # Set case insensitive regex
+        if not (len( self.case_insensitive_blacklist ) != 0 and any([ fnmatch( fieldname, pattern ) for pattern in self.case_insensitive_blacklist ])) and len( self.case_insensitive_whitelist ) != 0 and any([ fnmatch( fieldname, pattern ) for pattern in self.case_insensitive_whitelist ]):
+            self.CaseInSensitiveField = True
+        else:
+            self.CaseInSensitiveField = False
+
+        # Set type and value
+        if force_keyword_blacklist:
+            self.matchKeyword = False
+            self.CaseInSensitiveField = False
+        elif force_keyword_whitelist:
             self.matchKeyword = True
-            return fieldname + "." + self.keyword_field
+            self.CaseInSensitiveField = False
+        elif force_keyword_type:
+            self.matchKeyword = True
+        elif self.CaseInSensitiveField:
+            self.matchKeyword = True
+        elif (type(value) == list and any(map(self.containsWildcard, value))) or self.containsWildcard(value):
+            self.matchKeyword = True
         else:
             self.matchKeyword = False
-            return fieldname
+
+        # Return compiled field name
+        if self.matchKeyword:
+            return '%s%s'%(fieldname, keyword_subfield_name)
+        else:
+            return '%s%s'%(fieldname, analyzed_subfield_name)
+
+    def makeCaseInSensitiveValue(self, value):
+        """
+        Returns dictionary of if should be a regex (`is_regex`) and if regex the query value ('value')
+        Converts the query(value) into a case insensitive regular expression (regex). ie: 'http' would get converted to '[hH][tT][pP][pP]'
+        Adds the beginning and ending '/' to make regex query if still determined that it should be a regex
+        """
+        if value and not value == 'null' and not re.match(r'^/.*/$', value) and (re.search('[a-zA-Z]', value) and not re.match(self.uuid_regex, value) or self.containsWildcard(value)):  # re.search for alpha is fastest:
+            # Make upper/lower
+            value = re.sub( r"[A-Za-z]", lambda x: "[" + x.group( 0 ).upper() + x.group( 0 ).lower() + "]", value )
+            # Turn `*` into wildcard, only if odd number of '\'(because this would mean already escaped)
+            value = re.sub( r"(((?<!\\)(\\\\)+)|(?<!\\))\*", "\g<1>.*", value )
+            # Escape additional values that are treated as specific "operators" within Elastic. (ie: @, ?, &, <, >, and ~)
+            # reference: https://www.elastic.co/guide/en/elasticsearch/reference/current/regexp-syntax.html#regexp-optional-operators
+            value = re.sub( r"(((?<!\\)(\\\\)+)|(?<!\\))([@?&~<>])", "\g<1>\\\\\g<4>", value )
+            # Validate regex
+            try:
+                re.compile(value)
+                return {'is_regex': True, 'value': value}
+            # Regex failed
+            except re.error:
+                raise TypeError( "Regular expression validation error for: '%s')" %str(value) )
+        else:
+            return { 'is_regex': False, 'value': value }
+
 
 class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
     """Converts Sigma rule into Elasticsearch query string. Only searches, no aggregations."""
@@ -81,7 +182,6 @@ class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, Single
     active = True
 
     reEscape = re.compile("([\s+\\-=!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|\\\\u|&&|\\|\\|)")
-    reClear = re.compile("[<>]")
     andToken = " AND "
     orToken = " OR "
     notToken = "NOT "
@@ -103,6 +203,11 @@ class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, Single
             return '""'
         else:
             if self.matchKeyword:   # don't quote search value on keyword field
+                if self.CaseInSensitiveField:
+                    make_ci = self.makeCaseInSensitiveValue(result)
+                    result = make_ci.get('value')
+                    if make_ci.get('is_regex'): # Determine if still should be a regex
+                        result = "/%s/" % result # Regex place holders for regex
                 return result
             else:
                 return "\"%s\"" % result
@@ -145,6 +250,7 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
     )
     interval = None
     title = None
+    reEscape = re.compile( "([\s+\\-=!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|\\\\u|&&|\\|\\|)" )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -215,13 +321,20 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
             res = {'bool': {'should': []}}
             for v in value:
                 key_mapped = self.fieldNameMapping(key, v)
-                if self.matchKeyword:   # searches against keyowrd fields are wildcard searches, phrases otherwise
-                    queryType = 'wildcard'
-                    value_cleaned = self.escapeSlashes(self.cleanValue(str(v)))
+                if self.matchKeyword:   # searches against keyword fields are wildcard searches, phrases otherwise
+                    if self.CaseInSensitiveField:
+                        queryType = 'regexp'
+                        make_ci = self.makeCaseInSensitiveValue(self.reEscape.sub("\\\\\g<1>", str(v)))
+                        value_cleaned = make_ci.get('value')
+                        if not make_ci.get( 'is_regex' ):  # Determine if still should be a regex
+                            queryType = 'wildcard'
+                            value_cleaned = self.escapeSlashes( self.cleanValue( str( v ) ) )
+                    else:
+                        queryType = 'wildcard'
+                        value_cleaned = self.escapeSlashes(self.cleanValue(str(v)))
                 else:
                     queryType = 'match_phrase'
                     value_cleaned = self.cleanValue(str(v))
-
                 res['bool']['should'].append({queryType: {key_mapped: value_cleaned}})
             return res
         elif value is None:
@@ -229,9 +342,17 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
             return { "bool": { "must_not": { "exists": { "field": key_mapped } } } }
         elif type(value) in (str, int):
             key_mapped = self.fieldNameMapping(key, value)
-            if self.matchKeyword:   # searches against keyowrd fields are wildcard searches, phrases otherwise
-                queryType = 'wildcard'
-                value_cleaned = self.escapeSlashes(self.cleanValue(str(value)))
+            if self.matchKeyword:  # searches against keyword fields are wildcard searches, phrases otherwise
+                if self.CaseInSensitiveField:
+                    queryType = 'regexp'
+                    make_ci = self.makeCaseInSensitiveValue( self.reEscape.sub( "\\\\\g<1>", str( value ) ) )
+                    value_cleaned = make_ci.get( 'value' )
+                    if not make_ci.get( 'is_regex' ):  # Determine if still should be a regex
+                        queryType = 'wildcard'
+                        value_cleaned = self.escapeSlashes( self.cleanValue( str( value ) ) )
+                else:
+                    queryType = 'wildcard'
+                    value_cleaned = self.escapeSlashes(self.cleanValue(str(value)))
             else:
                 queryType = 'match_phrase'
                 value_cleaned = self.cleanValue(str(value))
