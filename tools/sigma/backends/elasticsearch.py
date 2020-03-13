@@ -56,11 +56,16 @@ class ElasticsearchWildcardHandlingMixin(object):
         else:
             return False
 
-    def fieldNameMapping(self, fieldname, value):
+    def fieldNameMapping(self, fieldname, value, *agg_option):
         """
         Determine if values contain wildcards. If yes, match on keyword field else on analyzed one.
         Decide if field value should be quoted based on the field name decision and store it in object property.
+        Agg_option used in case of query key is the only place you need {fieldname}.keyword
         """
+        if agg_option :
+            self.matchKeyword = True
+            return fieldname + "." + self.keyword_field
+
         if self.keyword_field == '':
             self.matchKeyword = True
             return fieldname
@@ -70,7 +75,7 @@ class ElasticsearchWildcardHandlingMixin(object):
                 or self.containsWildcard(value)
                 ):
             self.matchKeyword = True
-            return fieldname + "." + self.keyword_field
+            return fieldname
         else:
             self.matchKeyword = False
             return fieldname
@@ -848,7 +853,9 @@ class ElastalertBackend(MultiRuleOutputMixin):
             if parsed.parsedAgg:
                 if parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MIN or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MAX or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_AVG or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_SUM:
                     if parsed.parsedAgg.groupfield is not None:
-                        rule_object['query_key'] = self.fieldNameMapping(parsed.parsedAgg.groupfield, '*')
+                        ###use agg_option here in case of query key is the only place you need {fieldname}.keyword
+                        rule_object['query_key'] = self.fieldNameMapping(parsed.parsedAgg.groupfield, '*', True)
+
                     rule_object['type'] = "metric_aggregation"
                     rule_object['buffer_time'] = interval
                     rule_object['doc_type'] = "doc"
