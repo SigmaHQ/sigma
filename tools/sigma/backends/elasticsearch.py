@@ -86,7 +86,7 @@ class ElasticsearchWildcardHandlingMixin(object):
         else:
             return False
 
-    def fieldNameMapping(self, fieldname, value):
+    def fieldNameMapping(self, fieldname, value, *agg_option):
         """
         Decide whether to use a keyword field or analyzed field. Using options on fields to make into keywords OR not and the field naming of keyword.
         Further, determine if values contain wildcards. Additionally, determine if case insensitive regex should be used. Finally,
@@ -111,6 +111,10 @@ class ElasticsearchWildcardHandlingMixin(object):
             analyzed_subfield_name = '.%s'%analyzed_subfield_name
         else:
             analyzed_subfield_name = ''
+
+        # force keyword on agg_option used in Elasticsearch DSL query key
+        if agg_option:
+            force_keyword_type = True
 
         # Only some analyzed subfield, so if not in this list then has to be keyword
         if len(self.analyzed_sub_fields) != 0 and not any ([ fnmatch(fieldname, pattern) for pattern in self.analyzed_sub_fields ]):
@@ -403,12 +407,12 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
                         self.queries[-1]['aggs'] = {
                             count_agg_group_name: {
                                     "terms": {
-                                        "field": "{}.keyword".format(agg.groupfield)
+                                        "field": "{}".format(agg.groupfield)
                                     },
                                     "aggs": {
                                         count_distinct_agg_name: {
                                             "cardinality": {
-                                                "field": "{}.keyword".format(agg.aggfield)
+                                                "field": "{}".format(agg.aggfield)
                                             }
                                         },
                                         "limit": {
@@ -427,7 +431,7 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
                         self.queries[-1]['aggs'] = {
                             group_aggname: {
                                 'terms': {
-                                    'field': '%s' % (agg.groupfield + ".keyword")
+                                    'field': '%s' % (agg.groupfield)
                                 },
                                 'aggs': {
                                     'limit': {
@@ -686,7 +690,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                             "aggs": {
                                 "agg": {
                                     "terms": {
-                                        "field": condition.parsedAgg.aggfield + ".keyword",
+                                        "field": condition.parsedAgg.aggfield,
                                         "size": 10,
                                         "order": {
                                             "_count": order
@@ -704,7 +708,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                             "aggs": {
                                 "by": {
                                     "terms": {
-                                        "field": condition.parsedAgg.groupfield + ".keyword",
+                                        "field": condition.parsedAgg.groupfield,
                                         "size": 10,
                                         "order": {
                                             "_count": order
@@ -969,7 +973,7 @@ class ElastalertBackend(MultiRuleOutputMixin):
             if parsed.parsedAgg:
                 if parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MIN or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MAX or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_AVG or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_SUM:
                     if parsed.parsedAgg.groupfield is not None:
-                        rule_object['query_key'] = self.fieldNameMapping(parsed.parsedAgg.groupfield, '*')
+                        rule_object['query_key'] = self.fieldNameMapping(parsed.parsedAgg.groupfield, '*', True)
                     rule_object['type'] = "metric_aggregation"
                     rule_object['buffer_time'] = interval
                     rule_object['doc_type'] = "doc"
