@@ -108,7 +108,7 @@ def set_argparser():
     argparser.add_argument("--backend-config", "-C", help="Configuration file (YAML format) containing options to pass to the backend")
     argparser.add_argument("--defer-abort", "-d", action="store_true", help="Don't abort on parse or conversion errors, proceed with next rule. The exit code from the last error is returned")
     argparser.add_argument("--ignore-backend-errors", "-I", action="store_true", help="Only return error codes for parse errors and ignore errors for rules that cause backend errors. Useful, when you want to get as much queries as possible.")
-    argparser.add_argument("--shoot-yourshootself-in-the-foot", action="store_true", help=argparse.SUPPRESS)
+    argparser.add_argument("--shoot-yourself-in-the-foot", action="store_true", help=argparse.SUPPRESS)
     argparser.add_argument("--verbose", "-v", action="store_true", help="Be verbose")
     argparser.add_argument("--debug", "-D", action="store_true", help="Debugging output")
     argparser.add_argument("inputs", nargs="*", help="Sigma input files ('-' for stdin)")
@@ -227,15 +227,12 @@ error = 0
 for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
     logger.debug("* Processing Sigma input %s" % (sigmafile))
     try:
-        print (sigmafile)
         if cmdargs.inputs == ['-']:
             f = sigmafile
         else:
             f = sigmafile.open(encoding='utf-8')
         parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter)
-
         results = parser.generate(backend)
-        
         for result in results:
             print(result, file=out)
     except OSError as e:

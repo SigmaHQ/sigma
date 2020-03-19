@@ -15,14 +15,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-sys.path.append("....") 
 
 import sigma
 import yaml
 
 from .mixins import RulenameCommentMixin, QuoteCharMixin
 from sigma.parser.modifiers.base import SigmaTypeModifier
-from .. eventdict import event
 
 class BackendOptions(dict):
     """

@@ -2,7 +2,7 @@ import re
 import requests
 import json
 import os
-from .. eventdict import event
+from ..config.eventdict import event
 from fnmatch import fnmatch
 
 from sigma.backends.base import SingleTextQueryBackend
@@ -153,6 +153,7 @@ class CarbonBlackQueryBackend(CarbonBlackWildcardHandlingMixin, SingleTextQueryB
         if expression:
             return "(%s%s)" % (self.notToken, expression)
 
+# Function to upload watchlists through CB API
     def postAPI(self,result,title,desc):
         url = os.getenv("cbapi_watchlist")
         body = {
@@ -166,7 +167,6 @@ class CarbonBlackQueryBackend(CarbonBlackWildcardHandlingMixin, SingleTextQueryB
         }
         print(title)
         x = requests.post(url, data =json.dumps(body), headers = header, verify=False)
-
         print(x.text)
 
     def generateEventKey(self, value):
@@ -197,7 +197,7 @@ class CarbonBlackQueryBackend(CarbonBlackWildcardHandlingMixin, SingleTextQueryB
 
             if query is not None:
                 result += query
-                self.postAPI(result,title,desc)
+                # self.postAPI(result,title,desc)
             return result
         # if self.category == "process_creation":
         #     for parsed in sigmaparser.condparsed:

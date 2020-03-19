@@ -274,18 +274,6 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
         if agg:
             if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT:
                 if agg.groupfield is not None:
-<<<<<<< HEAD
-                    self.queries[-1]['aggs'] = {
-                        '%s_count'%(agg.groupfield or ""): {
-                            'terms': {
-                                'field': '%s'%(agg.groupfield + ".keyword" or "")
-                            },
-                            'aggs': {
-                                'limit': {
-                                    'bucket_selector': {
-                                        'buckets_path': {
-                                            'count': '%s_count'%(agg.groupfield or "")
-=======
                     # If the aggregation is 'count(MyDistinctFieldName) by MyGroupedField > XYZ'
                     if agg.aggfield is not None:
                         count_agg_group_name = "{}_count".format(agg.groupfield)
@@ -301,7 +289,6 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
                                             "cardinality": {
                                                 "field": "{}.keyword".format(agg.aggfield)
                                             }
->>>>>>> 9e86170d7937bf37694a5763e82ca6635735129c
                                         },
                                         "limit": {
                                             "bucket_selector": {

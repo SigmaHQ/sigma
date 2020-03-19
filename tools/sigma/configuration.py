@@ -133,7 +133,6 @@ class SigmaConfiguration:
                 if type(logsources) != dict:
                     raise SigmaConfigParseError("Logsources must be a map")
                 for name, logsource in logsources.items():
-                    print(name, logsource)
                     self.logsources.append(SigmaLogsourceConfiguration(logsource, self.defaultindex))
 
     def get_indexfield(self):
