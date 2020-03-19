@@ -152,12 +152,6 @@ class CarbonBlackQueryBackend(CarbonBlackWildcardHandlingMixin, SingleTextQueryB
         expression = super().generateNode(node.item)
         if expression:
             return "(%s%s)" % (self.notToken, expression)
-    # def generateNOTNode(self, node):
-    #     generated = self.generateNode(node.item)
-    #     if generated is not None:
-    #         return self.notToken + generated
-    #     else:
-    #         return None
 
     def postAPI(self,result,title,desc):
         url = os.getenv("cbapi_watchlist")
@@ -191,8 +185,6 @@ class CarbonBlackQueryBackend(CarbonBlackWildcardHandlingMixin, SingleTextQueryB
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
         title = sigmaparser.parsedyaml["title"]
         desc = sigmaparser.parsedyaml["description"]
-        # print(title)
-        # print("\n")
         try:
             self.category = sigmaparser.parsedyaml['logsource'].setdefault('category', None)
             self.counted = sigmaparser.parsedyaml.get('counted', None)
@@ -205,9 +197,6 @@ class CarbonBlackQueryBackend(CarbonBlackWildcardHandlingMixin, SingleTextQueryB
 
             if query is not None:
                 result += query
-                # val = "vsss admin shadow"
-                # escapeSubst = "\\\\\g<1>" 
-                # print(self.reEscape.sub(escapeSubst, val))
                 self.postAPI(result,title,desc)
             return result
         # if self.category == "process_creation":

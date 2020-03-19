@@ -180,7 +180,7 @@ class CarbonBlackBackend(SingleTextQueryBackend):
         return new_value
 
     def postAPI(self,result,title,desc):
-        url = 'https://10.14.132.35//api/v1/watchlist'
+        rl = os.getenv("cbapi_watchlist")
         body = {
                 "name":title,
                 "search_query":"q="+str(result),
@@ -188,7 +188,7 @@ class CarbonBlackBackend(SingleTextQueryBackend):
                 "index_type":"events"
                 }
         header = {
-            "X-Auth-Token": "099c366b1e56c0bca3ae61ce1fb7435af7a5926c"
+            "X-Auth-Token": os.getenv("APIToken")
         }
         print(title)
         x = requests.post(url, data =json.dumps(body), headers = header, verify=False)
