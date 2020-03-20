@@ -1,0 +1,64 @@
+title: Suspicious PowerShell parent process
+id: 754ed792-634f-40ae-b3bc-e0448d33f695
+description: Detects a suspicious parent of csc.exe, which could by a sign of payload delivery
+status: experimental
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=26
+author: Teymur Kheirkhabarov, Harish Segar (rule)
+date: 2020/03/20
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+
+    selection_image1:
+        ParentImage|endswith:
+            - '\mshta.exe'
+            - '\rundll32.exe'
+            - '\regsvr32.exe'
+            - '\services.exe'
+            - '\winword.exe'
+            - '\wmiprvse.exe'
+            - '\powerpnt.exe'
+            - '\excel.exe'
+            - '\msaccess.exe'
+            - '\mspub.exe'
+            - '\visio.exe'
+            - '\outlook.exe'
+            - '\amigo.exe'
+            - '\chrome.exe'
+            - '\firefox.exe'
+            - '\iexplore.exe'
+            - '\microsoftedgecp.exe'
+            - '\microsoftedge.exe'
+            - '\browser.exe'
+            - '\vivaldi.exe'
+            - '\safari.exe'
+            - '\sqlagent.exe'
+            - '\sqlserver.exe'
+            - '\sqlservr.exe'
+            - '\w3wp.exe'
+            - '\httpd.exe'
+            - '\nginx.exe'
+            - '\php-cgi.exe'
+            - '\jbosssvc.exe'
+            - 'MicrosoftEdgeSH.exe'
+    selection_image2:
+        ParentImage|contains: 'tomcat'
+
+    filters:
+        CommandLine|contains:
+            - 'powershell'
+            - 'pwsh'
+        Description: 'Windows PowerShell'
+        Product: 'PowerShell Core 6'
+
+    condition: selection and (1 of selection_image*) and (1 of filters)
+falsepositives:
+    - Unkown
+level: high
