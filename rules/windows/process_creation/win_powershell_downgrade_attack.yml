@@ -1,0 +1,40 @@
+action: global
+title: PowerShell Downgrade Attack
+id: b3512211-c67e-4707-bedc-66efc7848863
+related:
+  - id: 6331d09b-4785-4c13-980f-f96661356249
+    type: derived
+status: experimental
+description: Detects PowerShell downgrade attack by comparing the host versions with the actually used engine version 2.0
+references:
+    - http://www.leeholmes.com/blog/2017/03/17/detecting-and-preventing-powershell-downgrade-attacks/
+tags:
+    - attack.defense_evasion
+    - attack.execution
+    - attack.t1086
+author: Harish Segar (rule)
+date: 2020/03/20
+falsepositives:
+    - Penetration Test
+    - Unknown
+level: medium
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+        CommandLine|re: '.*-[Vv][Ee][Rr][Ss][Ii][Oo][Nn] 2'
+        Image|endswith: '\powershell.exe'
+    condition: selection
+---
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4688
+        CommandLine|re: '.*-[Vv][Ee][Rr][Ss][Ii][Oo][Nn] 2'
+        Image|endswith: '\powershell.exe'
+    condition: selection
