@@ -1,14 +1,14 @@
 title: Suspicious PowerShell parent process
 id: 754ed792-634f-40ae-b3bc-e0448d33f695
-description: Detects a suspicious parent of csc.exe, which could by a sign of payload delivery
+description: Detects a suspicious parents of powershell.exe
 status: experimental
 references:
     - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=26
 author: Teymur Kheirkhabarov, Harish Segar (rule)
 date: 2020/03/20
 tags:
-    - attack.defense_evasion
-    - attack.t1036
+    - attack.execution
+    - attack.t1086
 logsource:
     product: windows
     service: sysmon
@@ -47,18 +47,18 @@ detection:
             - '\nginx.exe'
             - '\php-cgi.exe'
             - '\jbosssvc.exe'
-            - 'MicrosoftEdgeSH.exe'
+            - "MicrosoftEdgeSH.exe"
     selection_image2:
-        ParentImage|contains: 'tomcat'
+        ParentImage|contains: "tomcat"
 
     filters:
-        CommandLine|contains:
-            - 'powershell'
-            - 'pwsh'
-        Description: 'Windows PowerShell'
-        Product: 'PowerShell Core 6'
+        - CommandLine|contains:
+              - "powershell"
+              - "pwsh"
+        - Description: "Windows PowerShell"
+        - Product: "PowerShell Core 6"
 
     condition: selection and (1 of selection_image*) and (1 of filters)
 falsepositives:
-    - Unkown
-level: high
+    - Other scripts
+level: medium
