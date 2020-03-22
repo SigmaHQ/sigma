@@ -345,4 +345,8 @@ This is a private project mainly developed by Florian Roth and Thomas Patzke wit
 
 # Info Graphic
 
+## Overview
 ![sigmac_info_graphic](./images/sigma_infographic_lq.png)
+
+## Coverage Illustration
+![sigmac_coverage](./images/Sigma_Coverage.png)
