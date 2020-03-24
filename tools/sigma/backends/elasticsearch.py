@@ -185,7 +185,7 @@ class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, Single
     identifier = "es-qs"
     active = True
 
-    reEscape = re.compile("([\s+\\-=!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|&&|\\|\\|)")
+    reEscape = re.compile("([\s+\\-=!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|\\\\u|&&|\\|\\|)")
     andToken = " AND "
     orToken = " OR "
     notToken = "NOT "
@@ -254,7 +254,7 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
     )
     interval = None
     title = None
-    reEscape = re.compile( "([\s+\\-=!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|&&|\\|\\|)" )
+    reEscape = re.compile( "([\s+\\-=!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|\\\\u|&&|\\|\\|)" )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
