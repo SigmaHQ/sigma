@@ -7,15 +7,20 @@ tags:
     - attack.t1086
 author: Florian Roth
 date: 2017/03/05
+modified: 2020/03/25
 logsource:
     product: windows
     service: powershell
 detection:
-    keywords:
-        Message:
-            - '*System.Net.WebClient).DownloadString(*'
-            - '*system.net.webclient).downloadfile(*'
-    condition: keywords
+    downloadfile:
+        Message|contains|all:
+            - 'System.Net.WebClient'
+            - '.DownloadFile('
+    downloadstring:
+        Message|contains|all:
+            - 'System.Net.WebClient'
+            - '.DownloadString('
+    condition: downloadfile or downloadstring
 falsepositives:
     - PowerShell scripts that download content from the Internet
 level: medium
