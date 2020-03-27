@@ -16,11 +16,10 @@ logsource:
 detection:
     selection:
       - EventID: 12 # key create
-        TargetObject|contains: '\SYSTEM\'
-        TargetObject|endswith: '\Control\MiniNt'
+        # Sysmon gives us HKLM\SYSTEM\CurrentControlSet\.. if ControlSetXX is the selected one
+        TargetObject: 'HKLM\SYSTEM\CurrentControlSet\Control\MiniNt'
       - EventID: 14  # key rename
-        NewName|contains: '\SYSTEM\'
-        NewName|endswith: '\Control\MiniNt'
+        NewName: 'HKLM\SYSTEM\CurrentControlSet\Control\MiniNt'
     condition: selection
 fields:
     - EventID
