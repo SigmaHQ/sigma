@@ -18,23 +18,11 @@ falsepositives:
     - Penetration Test
     - Unknown
 level: medium
----
 logsource:
+    category: process_creation
     product: windows
-    service: sysmon
 detection:
     selection:
-        EventID: 1
-        CommandLine|re: '.*-[Vv][Ee][Rr][Ss][Ii][Oo][Nn] 2'
+        CommandLine|contains: ' -version 2 '
         Image|endswith: '\powershell.exe'
-    condition: selection
----
-logsource:
-    product: windows
-    service: security
-detection:
-    selection:
-        EventID: 4688
-        CommandLine|re: '.*-[Vv][Ee][Rr][Ss][Ii][Oo][Nn] 2'
-        NewProcessName|endswith: '\powershell.exe'
     condition: selection
