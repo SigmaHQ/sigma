@@ -23,7 +23,14 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r tools/requirements.txt -r tools/requirements-devel.txt -r tools/requirements-misp.txt -r tests/requirements-test.txt
-    - name: Test with Makefile
+    - name: Test Sigma Tools and Rules
       run: |
         make test
+    - name: Test Generated Elasticsearch Query Strings
+      run: |
+        wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add -
+        apt install -y apt-transport-https
+        echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" >> /etc/apt/sources.list.d/elastic.list
+        apt update
+        apt install -y elasticsearch
         make test-backend-es-qs
