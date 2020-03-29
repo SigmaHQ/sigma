@@ -34,6 +34,6 @@ jobs:
         sudo apt update
         sudo apt install -y elasticsearch curl jq
         sudo systemctl start elasticsearch
-        until curl -s elasticsearch:9200; do sleep 1; done
-        until curl -s elasticsearch:9200/_cluster/health | jq -e '.status == "green"'; do sleep 1; done
+        until curl -s elasticsearch:9200; do echo "Waiting for Elasticsearch server..."; sleep 10; done
+        until curl -s elasticsearch:9200/_cluster/health | jq -e '.status != "red"'; do echo "Waiting for Elasticsearch cluster to become ready..."; sleep 10; done
         make test-backend-es-qs
