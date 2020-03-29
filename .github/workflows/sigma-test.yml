@@ -32,5 +32,8 @@ jobs:
         sudo apt install -y apt-transport-https
         echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic.list
         sudo apt update
-        sudo apt install -y elasticsearch
+        sudo apt install -y elasticsearch curl jq
+        sudo systemctl start elasticsearch
+        until curl -s elasticsearch:9200; do sleep 1; done
+        until curl -s elasticsearch:9200/_cluster/health | jq -e '.status == "green"'; do sleep 1; done
         make test-backend-es-qs
