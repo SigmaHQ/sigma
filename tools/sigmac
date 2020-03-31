@@ -115,19 +115,19 @@ def set_argparser():
     
     return argparser
 
-def list_backends():
+def list_backends(debug):
     for backend in sorted(backends.getBackendList(), key=lambda backend: backend.identifier):
-        if cmdargs.debug:
+        if debug:
             print("{:>15} : {} ({})".format(backend.identifier, backend.__doc__, backend.__name__))
         else:
             print("{:>15} : {}".format(backend.identifier, backend.__doc__))
 
-def list_configurations(backend=None):
+def list_configurations(backend=None, scm=scm):
     for conf_id, title, backends in sorted(scm.list(), key=lambda config: config[0]):
         if backend is not None and backend in backends or backend is None or len(backends) == 0:
             print("{:>30} : {}".format(conf_id, title))
 
-def list_modifiers():
+def list_modifiers(modifiers):
     for modifier_id, modifier in modifiers.items():
         print("{:>10} : {}".format(modifier_id, modifier.__doc__))
 
@@ -143,15 +143,15 @@ def main():
 
     if cmdargs.lists:
         print("Backends:")
-        list_backends()
+        list_backends(cmdargs.debug)
 
         print()
         print("Configurations:")
-        list_configurations(cmdargs.target)
+        list_configurations(backend=cmdargs.target, scm=scm)
 
         print()
         print("Modifiers:")
-        list_modifiers()
+        list_modifiers(modifiers=modifiers)
         sys.exit(0)
     elif len(cmdargs.inputs) == 0:
         print("Nothing to do!")
