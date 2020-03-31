@@ -77,11 +77,13 @@ setup(
             'config/generic/sysmon.yml',
             'config/generic/windows-audit.yml',
         ])],
-    scripts=[
-        'sigmac',
-        'merge_sigma',
-        'sigma2misp',
-        'sigma-similarity',
-        'sigma-uuid',
-        ]
+    entry_points={
+        'console_scripts': [
+        'sigmac = sigmac:main',
+        'merge_sigma = merge_sigma:main',
+        'sigma2misp = sigma2misp:main',
+        'sigma-similarity = sigma-similarity:main',
+        'sigma-uuid = sigma-uuid:main',
+        ],
+    },
 )
