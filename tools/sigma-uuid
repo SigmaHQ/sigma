@@ -8,8 +8,7 @@ import yaml
 from sigma.output import SigmaYAMLDumper
 
 def print_verbose(*arg, **kwarg):
-    if args.verbose:
-        print(*arg, **kwarg)
+    print(*arg, **kwarg)
 
 # Define order-preserving representer from dicts/maps
 def yaml_preserve_order(self, dict_data):
@@ -23,6 +22,9 @@ def main():
     argparser.add_argument("--error", "-e", action="store_true", help="Exit with error code 10 on verification failures.")
     argparser.add_argument("inputs", nargs="+", help="Sigma rule files or repository directories")
     args = argparser.parse_args()
+
+    if args.verbose:
+        print_verbose()
 
     if args.recursive:
         paths = [ p for pathname in args.inputs for p in Path(pathname).glob("**/*") if p.is_file() ]
