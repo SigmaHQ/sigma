@@ -83,7 +83,7 @@ setup(
             'merge_sigma = merge_sigma:main',
             'sigma2misp = sigma2misp:main',
             'sigma_similarity = sigma_similarity:main',
-            'sigma_uuid = sigma-uuid:main',
+            'sigma_uuid = sigma_uuid:main',
         ],
     },
 )

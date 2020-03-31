@@ -13,7 +13,7 @@ finish:
 test-rules:
 	yamllint rules
 	tests/test_rules.py
-	tools/sigma-uuid -Ver rules/
+	tools/sigma_uuid -Ver rules/
 
 test-sigmac:
 	coverage run -a --include=$(COVSCOPE) tools/sigmac
