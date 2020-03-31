@@ -13,7 +13,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='sigmatools',
-    version='0.16.0',
+    version='0.17.0',
     description='Tools for the Generic Signature Format for SIEM Systems',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -79,11 +79,11 @@ setup(
         ])],
     entry_points={
         'console_scripts': [
-            'sigmac = sigmac:main',
-            'merge_sigma = merge_sigma:main',
-            'sigma2misp = sigma2misp:main',
-            'sigma_similarity = sigma_similarity:main',
-            'sigma_uuid = sigma_uuid:main',
+            'sigmac = sigma.sigmac:main',
+            'merge_sigma = sigma.merge_sigma:main',
+            'sigma2misp = sigma.sigma2misp:main',
+            'sigma_similarity = sigma.sigma_similarity:main',
+            'sigma_uuid = sigma.sigma_uuid:main',
         ],
     },
 )
