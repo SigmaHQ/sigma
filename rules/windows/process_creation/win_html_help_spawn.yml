@@ -1,4 +1,4 @@
-title: Suspicious Compiled HTML File
+title: HTML Help Shell Spawn
 id: 52cad028-0ff0-4854-8f67-d25dfcbc78b4
 status: experimental
 description: Detects a suspicious child process of a Microsoft HTML Help system when executing compiled HTML files (.chm)
@@ -6,26 +6,25 @@ references:
     - https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/chm-badness-delivers-a-banking-trojan/
 author: Maxim Pavlunin
 date: 2020/04/01
-modified: 2020/04/01
+modified: 2020/04/03
 tags:
     - attack.execution
     - attack.defense_evasion
     - attack.t1223
 logsource:
+    category: process_creation
     product: windows
-    service: sysmon
 detection:
     selection:
-        EventID: 1
         ParentImage: 'C:\Windows\hh.exe'
-        Image:
-            - '*\cmd.exe'
-            - '*\powershell.exe'
-            - '*\wscript.exe'
-            - '*\cscript.exe'
-            - '*\regsvr32.exe'
-            - '*\wmic.exe'
-            - '*\rundll32.exe'
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\regsvr32.exe'
+            - '\wmic.exe'
+            - '\rundll32.exe'
     condition: selection
 fields:
     - CommandLine
