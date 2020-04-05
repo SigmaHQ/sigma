@@ -997,10 +997,6 @@ class ElastalertBackendQs(ElastalertBackend, ElasticsearchQuerystringBackend):
 class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
     identifier = "es-rule"
     active = True
-    options = ElasticsearchQuerystringBackend.options + (
-            ("index_patterns", "apm-*-transaction,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,winlogbeat-*", "Rule execution index patterns", "index_patterns"),
-            ("execution_interval", "5m", "Rule execution interval", "interval"),
-            )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1024,9 +1020,12 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
     def generate(self, sigmaparser):
         translation = super().generate(sigmaparser)
         if translation:
+            index = sigmaparser.get_logsource().index
+            if len(index) == 0:
+                index = ["apm-*-transaction", "auditbeat-*", "endgame-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"]
             configs = sigmaparser.parsedyaml
             configs.update({"translation": translation})
-            rule = self.create_rule(configs)
+            rule = self.create_rule(configs, index)
             return rule
 
     def create_threat_description(self, tactics_list, techniques_list):
@@ -1074,7 +1073,7 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
         elif level == "critical":
             return randrange(74,101)
 
-    def create_rule(self, configs):
+    def create_rule(self, configs, index):
         tags = configs.get("tags", [])
         tactics_list = list()
         technics_list = list()
@@ -1110,8 +1109,8 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
             "filters": [],
             "from": "now-360s",
             "immutable": False,
-            "index": self.index_patterns.split(','),
-            "interval": self.interval,
+            "index": index,
+            "interval": "5m",
             "rule_id": rule_id,
             "language": "lucene",
             "output_index": ".siem-signals-default",
