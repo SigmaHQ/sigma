@@ -120,7 +120,7 @@ class QRadarBackend(SingleTextQueryBackend):
                 regex = regex + '.*'
             return "%s imatches %s" % (self.cleanKey(fieldname), self.generateValueNode(regex, True))
         else:
-            raise NotImplementedError("Type modifier '{}' is not supported by backend".format(node.identifier))
+            raise NotImplementedError("Type modifier '{}' is not supported by backend".format(value.identifier))
 
     def generateValueNode(self, node, keypresent):
         if keypresent == False:
