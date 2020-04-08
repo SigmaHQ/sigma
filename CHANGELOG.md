@@ -8,6 +8,10 @@ from version 0.14.0.
 
 ## Unreleased
 
+### Added
+
+* LOGIQ Backend (logiq)
+
 ### Fixed
 
 * Splunx XML rule name is now set to rule title
