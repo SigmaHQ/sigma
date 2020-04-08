@@ -17,7 +17,7 @@ class LogiqBackend(SingleTextQueryBackend):
     listSeparator = ", "
     valueExpression = "message =~ \'%s\'"
     keyExpression = "%s"
-    nullExpression = "%s"
+    nullExpression = "!~ %s"
     notNullExpression = "!%s"
     mapExpression = "(%s=%s)"
     mapListsSpecialHandling = True
@@ -29,13 +29,10 @@ class LogiqBackend(SingleTextQueryBackend):
 
         eventRule = dict()
         eventRule["name"] = sigmaparser.parsedyaml["title"]
-        eventRule["groupName"] = sigmaparser.parsedyaml["logsource"]["product"]
+        eventRule["groupName"] = sigmaparser.parsedyaml["logsource"].get("product", "")
         eventRule["description"] = sigmaparser.parsedyaml["description"]
         eventRule["condition"] = sigmaparser.parsedyaml["detection"]
         eventRule["level"] = sigmaparser.parsedyaml["level"]
-
-        # for key,value in eventRule.items():
-        #     print(key, ":", value)
 
         for parsed in sigmaparser.condparsed:
             query = self.generateQuery(parsed)
@@ -53,22 +50,12 @@ class LogiqBackend(SingleTextQueryBackend):
             return json.dumps(eventRule)
 
     def cleanValue(self, val):
-        if val[0] == '*':
+        if val.startswith('*'):
             val = val.replace("*","/*")
       
-        # print("cleanValue: ", val)
         return val
 
     def generateListNode(self, node):
-        # print("generateListNode: ", node)
         if not set([type(value) for value in node]).issubset({str, int}):
             raise TypeError("List values must be strings or numbers")
         return self.generateORNode(node)
-
-    def generateMapItemNode(self, node):
-        # print("generateMapItemNode: ", node)
-        key, value = node
-        if value is None:
-            return self.generateNULLValueNode(node)
-        else:
-            return self.generateNode(value)
