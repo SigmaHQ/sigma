@@ -89,7 +89,7 @@ from version 0.14.0.
 ### Added
 
 * Index mappings for Sumologic
-* Malicious cmdlets in wdatp
+* Malicious cmdlets in mdatp
 * QRadar support for keyword searches
 * QRadar mapping improvements
 * QRadar field selection
