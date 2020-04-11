@@ -14,9 +14,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# How to use it in your CSharp program: 
+#  How to use it in your CSharp program: 
 #           public Dictionary<string, dynamic> sigmas = new Dictionary<string, dynamic>();
-#           sigmas["rules/windows/process_creation/win_cmdkey_recon.yml"] = from x in evnt where (x.Key == "1" ....
+#           Dictionary<string, string> evnt = new Dictionary<string, string>();
+#           this.evnt.Add(Key, Value);
+#           sigmas["rules/windows/process_creation/win_cmdkey_recon.yml"] = THE OUTPUT OF csharp BACKEND
 
 import re
 import sigma
