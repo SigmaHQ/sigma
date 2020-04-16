@@ -1,0 +1,28 @@
+title: Truncated CommandLine Data
+id: 26637e31-cd89-4296-b9a0-3f0b0ad09716
+description: truncated CommandLine data allows for possible hidden command injection. Detects very large Sysmon EID1 CommandLines, which should be investigated if they have not been created on purpose that large, to hide real bad commands at the end. If CommandLine is too large data gets truncated by "*...".
+             selection_2 = maximum characters in CommandLine = 8192 chars (WinEvent) - see reference(1)
+             selection_3 = fixed character padding via spaces in CommandLine = 8206 chars - see reference(2) (when executing http://hexacorn.com/examples/2018-06-30_sysmon-test.exe CommandLine will be padded with spaces to fixed length)
+status: experimental
+references:
+    - (1) http://www.hexacorn.com/blog/2020/03/29/hiding-process-creation-and-cmd-line-with-a-long-com/
+    - (2) http://www.hexacorn.com/blog/2018/06/29/sysmon-doing-lines-part-3/
+author: xknow @xknow_infosec
+date: 2020/04/16
+tags:
+    - attack.defense_evasion
+    - attack.t1073
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection_1:
+        EventID: 1
+    selection_2:
+        length(CommandLine): 8192
+    selection_3:
+        length(CommandLine): 8206
+    condition: selection_1 AND (selection_2 OR selection_3)
+falsepositives:
+    - Java is known to have very long CommandLines to load several libraries. Often these CommandLines are truncated with ellipses.
+level: low
