@@ -1,0 +1,42 @@
+title: OceanLotus Command and Control
+id: 3eb7366d-d385-4272-a05d-bc82a84a44ec
+status: experimental
+description: Detects network connection and executable file used in OceanLotus (also known as APT32) attacks
+references:
+    - https://www.fireeye.com/blog/threat-research/2020/04/apt32-targeting-chinese-government-in-covid-19-related-espionage.html
+tags:
+    - attack.t1094
+    - attack.t1117
+author: lep
+date: 2020/04/23
+
+detection:
+    selection: 1 of them
+fields:
+    - QueryName
+    - Hashes
+falsepositives:
+    - Unknown
+level: critical
+---
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Hashes:
+            - *d739f10933c11bd6bd9677f91893986c*
+            - *c5b98b77810c5619d20b71791b820529*
+            - *a4808a329b071a1a37b8d03b1305b0cb*
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection2:
+        EventID: 22
+        QueryName: 
+            - m.topiccore.com
+            - jcdn.jsoid.com
+            - libjs.inquirerjs.com
+            - vitlescaux.com
