@@ -18,6 +18,7 @@ import sys
 
 import sigma
 import yaml
+import re
 
 from .mixins import RulenameCommentMixin, QuoteCharMixin
 from sigma.parser.modifiers.base import SigmaTypeModifier
@@ -90,6 +91,7 @@ class BaseBackend:
     options = tuple()     # a list of tuples with following elements: option name, default value, help text, target attribute name (option name if None)
     config_required = True
     default_config = None
+    mapExpression = ""
 
     def __init__(self, sigmaconfig, backend_options=dict()):
         """
@@ -130,6 +132,12 @@ class BaseBackend:
         result = self.generateNode(parsed.parsedSearch)
         if parsed.parsedAgg:
             result += self.generateAggregation(parsed.parsedAgg)
+        if 'overrides' in self.sigmaconfig.config:
+            for expression in self.sigmaconfig.config['overrides']:
+                for x in expression['regexes']:
+                    sub = expression['field']
+                    value = expression['value']
+                    result = re.sub(x, self.mapExpression % (sub, value), result)
         return result
 
     def generateNode(self, node):
