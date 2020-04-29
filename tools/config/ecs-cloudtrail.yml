@@ -43,15 +43,14 @@ fieldmappings:
   userIdentity.userName: user.name
   vpcEndpointId: aws.cloudtrail.vpc_endpoint_id 
 overrides:
-  - field: event_outcome_errors
-    value: ''
-    regexes: 
-      - \b(aws.cloudtrail.error_message.keyword:.* OR aws.cloudtrail.error_code.keyword:.*|aws.cloudtrail.error_code.keyword:.* OR aws.cloudtrail.error_message.keyword:.*)\b
-  - field: event_outcome_login
-    value: ''
-    regexes:
-      - \b(event.action:"ConsoleLogin" AND aws.cloudtrail.response_elements.keyword:.*Failure|aws.cloudtrail.response_elements.keyword:.*Failure AND event.action:"ConsoleLogin")\b
-  - field: event.outcome
+  - field: event_outcome
     value: failure
-    regexes:
-      - '\b(event_outcome_errors: OR event_outcome_login:|event_outcome_login: OR event_outcome_errors:)'
+    regexes: 
+      - (\(aws.cloudtrail.error_message.keyword:.* event.action:\"ConsoleLogin\"\))
+      - (\(aws.cloudtrail.error_code.keyword:.* event.action:\"ConsoleLogin\"\))
+      - (\(aws.cloudtrail.error_message.keyword:.* aws.cloudtrail.response_elements.keyword:\*Failure\*\))
+      - (\(aws.cloudtrail.error_code.keyword:.* aws.cloudtrail.response_elements.keyword:\*Failure\*\))
+      - (\(event.action:\"ConsoleLogin\".* aws.cloudtrail.error_message.keyword:\*\))
+      - (\(event.action:\"ConsoleLogin\".* aws.cloudtrail.error_code.keyword:\*\))
+      - (\(aws.cloudtrail.response_elements.keyword:\*Failure\*.* aws.cloudtrail.error_message.keyword:\*\))
+      - (\(aws.cloudtrail.response_elements.keyword:\*Failure\*.* aws.cloudtrail.error_code.keyword:\*\))
