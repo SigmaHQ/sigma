@@ -54,6 +54,15 @@ overrides:
       - (\(\(event.action:\"ConsoleLogin\".* aws.cloudtrail.error_code.keyword:\*\)\))
       - (\(\(aws.cloudtrail.response_elements.keyword:\*Failure\*.* aws.cloudtrail.error_message.keyword:\*\)\))
       - (\(\(aws.cloudtrail.response_elements.keyword:\*Failure\*.* aws.cloudtrail.error_code.keyword:\*\)\))
+    literals:
+      - ((aws.cloudtrail.error_message.keyword:* OR aws.cloudtrail.error_code.keyword:*) OR (event.action:"ConsoleLogin" AND aws.cloudtrail.response_elements.keyword:*Failure*))
+      - ((aws.cloudtrail.error_code.keyword:* OR aws.cloudtrail.error_message.keyword:*) OR (event.action:"ConsoleLogin" AND aws.cloudtrail.response_elements.keyword:*Failure*))
+      - ((aws.cloudtrail.error_message.keyword:* OR aws.cloudtrail.error_code.keyword:*) OR (aws.cloudtrail.response_elements.keyword:*Failure* AND event.action:"ConsoleLogin"))
+      - ((aws.cloudtrail.error_code.keyword:* OR aws.cloudtrail.error_message.keyword:*) OR (aws.cloudtrail.response_elements.keyword:*Failure* AND event.action:"ConsoleLogin"))    
+      - ((event.action:"ConsoleLogin" AND aws.cloudtrail.response_elements.keyword:*Failure*) OR (aws.cloudtrail.error_message.keyword:* OR aws.cloudtrail.error_code.keyword:*))
+      - ((event.action:"ConsoleLogin" AND aws.cloudtrail.response_elements.keyword:*Failure*) OR (aws.cloudtrail.error_code.keyword:* OR aws.cloudtrail.error_message.keyword:*))   
+      - ((aws.cloudtrail.response_elements.keyword:*Failure* AND event.action:"ConsoleLogin") OR (aws.cloudtrail.error_message.keyword:* OR aws.cloudtrail.error_code.keyword:*))
+      - ((aws.cloudtrail.response_elements.keyword:*Failure* AND event.action:"ConsoleLogin") OR (aws.cloudtrail.error_code.keyword:* OR aws.cloudtrail.error_message.keyword:*))
   - field: event.outcome
     value: success
     literals:
