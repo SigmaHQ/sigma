@@ -1,7 +1,8 @@
 title: Suspicious Userinit Child Process
+id: b655a06a-31c0-477a-95c2-3726b83d649d
 status: experimental
-description: Detects the creation of a process from Windows task manager
-references: 
+description: Detects a suspicious child process of userinit
+references:
     - https://twitter.com/SBousseaden/status/1139811587760562176
 author: Florian Roth (rule), Samir Bousseaden (idea)
 date: 2019/06/17
@@ -11,14 +12,14 @@ logsource:
 detection:
     selection:
         ParentImage: '*\userinit.exe'
-    filter:
-        CommandLine:
-            - '*\explorer.exe*'
-            - '*\\netlogon\\*'
-    condition: selection and not filter
+    filter1:
+        CommandLine: '*\\netlogon\\*'
+    filter2:
+        Image: '*\explorer.exe'
+    condition: selection and not filter1 and not filter2
 fields:
     - CommandLine
     - ParentCommandLine
 falsepositives:
     - Administrative scripts
-level: high
+level: medium

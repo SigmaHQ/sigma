@@ -1,8 +1,8 @@
-.PHONY: test test-rules test-sigmac
+.PHONY: test test-rules test-sigmac test-sigma2attack
 TMPOUT = $(shell tempfile||mktemp)
-COVSCOPE = tools/sigma/*.py,tools/sigma/backends/*.py,tools/sigmac,tools/merge_sigma
+COVSCOPE = tools/sigma/*.py,tools/sigma/backends/*.py,tools/sigmac,tools/merge_sigma,tools/sigma2attack
 export COVERAGE = coverage
-test: clearcov test-rules test-sigmac test-merge build finish
+test: clearcov test-rules test-sigmac test-merge test-sigma2attack build finish
 
 clearcov:
 	rm -f .coverage
@@ -14,6 +14,7 @@ finish:
 test-rules:
 	yamllint rules
 	tests/test_rules.py
+	tools/sigma-uuid -Ver rules/
 
 test-sigmac:
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac
@@ -33,16 +34,23 @@ test-sigmac:
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -c tools/config/splunk-windows-index.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunkxml -c tools/config/splunk-windows.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t logpoint -c tools/config/logpoint-windows.yml rules/ > /dev/null
-	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t wdatp rules/ > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t mdatp rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t ala rules/ > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t ala-rule rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t ala --backend-config tests/backend_config.yml rules/windows/process_creation/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-dsl -c tools/config/winlogbeat.yml rules/ > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-rule -c tools/config/winlogbeat.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t powershell -c tools/config/powershell.yml -Ocsv rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t arcsight -c tools/config/arcsight.yml rules/ > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t arcsight-esm -c tools/config/arcsight.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t qradar -c tools/config/qradar.yml rules/ > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t limacharlie -c tools/config/limacharlie.yml rules/ > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t carbonblack -c tools/config/carbon-black.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t qualys -c tools/config/qualys.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t netwitness -c tools/config/netwitness.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t sumologic -O rulecomment -c tools/config/sumologic.yml rules/ > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t sql -c sysmon rules/ > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t logiq -c sysmon rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -c tools/config/splunk-windows-index.yml -f 'level>=high,level<=critical,status=stable,logsource=windows,tag=attack.execution' rules/ > /dev/null
 	! $(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -c tools/config/splunk-windows-index.yml -f 'level>=high,level<=critical,status=xstable,logsource=windows' rules/ > /dev/null
 	! $(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -c tools/config/splunk-windows-index.yml -f 'level>=high,level<=xcritical,status=stable,logsource=windows' rules/ > /dev/null
@@ -50,6 +58,7 @@ test-sigmac:
 	! $(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -c tools/config/splunk-windows-index.yml -f 'level=xcritical' rules/ > /dev/null
 	! $(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -c tools/config/splunk-windows-index.yml -f 'foo=bar' rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/logstash-windows.yml -t es-qs rules/ > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c ecs-proxy -t es-qs rules/proxy > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c sysmon -c logstash-windows -t es-qs rules/ > /dev/null
 	! $(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c sysmon -c logstash-windows -t splunk rules/ > /dev/null
 	! $(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -c tools/config/logstash-windows.yml -c tools/config/generic/sysmon.yml -t es-qs rules/ > /dev/null
@@ -90,8 +99,11 @@ test-merge:
 test-backend-es-qs:
 	tests/test-backend-es-qs.py
 
+test-sigma2attack:
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigma2attack
+
 build: tools/sigmac tools/merge_sigma tools/sigma/*.py tools/setup.py tools/setup.cfg
-	cd tools && python3 setup.py bdist_wheel
+	cd tools && python3 setup.py bdist_wheel sdist
 
 upload-test: build
 	twine upload --repository-url https://test.pypi.org/legacy/ tools/dist/*

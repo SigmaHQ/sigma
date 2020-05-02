@@ -1,0 +1,28 @@
+title: New Service Creation
+id: 7fe71fc9-de3b-432a-8d57-8c809efc10ab
+status: experimental
+description: Detects creation if a new service
+author: Timur Zinniatullin, Daniil Yugoslavskiy, oscd.community
+date: 2019/10/21
+modified: 2019/11/04
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1050
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1050/T1050.yaml
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+      - Image|endswith: '\sc.exe'
+        CommandLine|contains|all:
+            - 'create'
+            - 'binpath'
+      - Image|endswith: '\powershell.exe'
+        CommandLine|contains: 'new-service'
+    condition: selection
+falsepositives:
+    - Legitimate administrator or user creates a service for legitimate reason
+level: low

@@ -1,10 +1,12 @@
 title: Active Directory User Backdoors
+id: 300bac00-e041-4ee2-9c36-e262656a6ecc
 description: Detects scenarios where one can control another users or computers account without having to use their credentials.
 references:
     - https://msdn.microsoft.com/en-us/library/cc220234.aspx
     - https://adsecurity.org/?p=3466
     - https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/
 author: '@neu5ron'
+date: 2017/04/13
 tags:
     - attack.t1098
     - attack.credential_access
@@ -18,9 +20,9 @@ detection:
     selection1:
         EventID: 4738
     filter1:
-        AllowedToDelegateTo: null
-    filter2:
-        AllowedToDelegateTo: '-'
+        AllowedToDelegateTo: 
+            - null
+            - '-'
     selection2:
         EventID: 5136
         AttributeLDAPDisplayName: 'msDS-AllowedToDelegateTo'
@@ -30,8 +32,8 @@ detection:
         AttributeLDAPDisplayName: 'servicePrincipalName'
     selection4:
         EventID: 5136
-        AttributeLDAPDisplayName: 'msDS-AllowedToActOnBehalfOfOtherIdentity'        
+        AttributeLDAPDisplayName: 'msDS-AllowedToActOnBehalfOfOtherIdentity'
     condition: (selection1 and not 1 of filter*) or selection2 or selection3 or selection4
-falsepositives: 
+falsepositives:
     - Unknown
 level: high

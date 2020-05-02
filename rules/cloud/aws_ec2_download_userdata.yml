@@ -1,0 +1,24 @@
+title: AWS EC2 Download Userdata
+id: 26ff4080-194e-47e7-9889-ef7602efed0c
+status: experimental
+author: faloker
+date: 2020/02/11
+description: Detects bulk downloading of User Data associated with AWS EC2 instances. Instance User Data may include installation scripts and hard-coded secrets for deployment.
+references:
+    - https://github.com/RhinoSecurityLabs/pacu/blob/master/modules/ec2__download_userdata/main.py#L24
+logsource:
+    service: cloudtrail
+detection:
+    selection_source:
+        - eventSource: ec2.amazonaws.com
+    selection_requesttype:
+        - requestParameters.attribute: userData
+    selection_eventname:
+        - eventName: DescribeInstanceAttribute
+    timeframe: 30m
+    condition: all of them | count() > 10
+level: medium
+falsepositives:
+    - Assets management software like device42
+tags:
+    - attack.t1020

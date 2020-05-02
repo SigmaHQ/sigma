@@ -18,10 +18,13 @@ import json
 import re
 from fnmatch import fnmatch
 import sys
+import os
+from random import randrange
 
 import sigma
 import yaml
 from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
+from sigma.parser.condition import ConditionOR, ConditionAND, NodeSubexpression
 from .base import BaseBackend, SingleTextQueryBackend
 from .mixins import RulenameCommentMixin, MultiRuleOutputMixin
 from .exceptions import NotSupportedError
@@ -32,18 +35,48 @@ class ElasticsearchWildcardHandlingMixin(object):
     provide configurability with backend parameters.
     """
     options = SingleTextQueryBackend.options + (
-            ("keyword_field", "keyword", "Keyword sub-field name", None),
-            ("keyword_blacklist", None, "Fields that don't have a keyword subfield (wildcards * and ? allowed)", None)
+            ("keyword_field", "keyword", "Keyword sub-field name (default is: '.keyword'). Set blank value if all keyword fields are the base(top-level) field. Additionally see 'keyword_base_fields' for more granular control of the base & subfield situation.", None),
+            ("analyzed_sub_field_name", "", "Analyzed sub-field name. By default analyzed field is the base field. Therefore, use this option to make the analyzed field a subfield. An example value would be '.text' ", None),
+            ("analyzed_sub_fields", None, "Fields that have an analyzed sub-field.", None),
+            ("keyword_base_fields", None, "Fields that the keyword is base (top-level) field. By default analyzed field is the base field. So use this option to change that logic. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
+            ("keyword_whitelist", None, "Fields to always set as keyword. Bypasses case insensitive options. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
+            ("keyword_blacklist", None, "Fields to never set as keyword (ie: always set as analyzed field). Bypasses case insensitive options. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
+            ("case_insensitive_whitelist", None, "Fields to make the values case insensitive regex. Automatically sets the field as a keyword. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
+            ("case_insensitive_blacklist", None, "Fields to exclude from being made into case insensitive regex. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None)
             )
     reContainsWildcard = re.compile("(?:(?<!\\\\)|\\\\\\\\)[*?]").search
+    uuid_regex = re.compile( "[0-9a-fA-F]{8}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{12}", re.IGNORECASE )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.matchKeyword = True
+        self.CaseInSensitiveField = False
+        self.keyword_field = self.keyword_field.strip().strip('.') # Prevent mistake if user added a '.' or field has spaces
+        self.analyzed_sub_field_name = self.analyzed_sub_field_name.strip().strip('.') # Prevent mistake if user added a '.' or field has spaces
         try:
-            self.blacklist = self.keyword_blacklist.split(",")
+            self.keyword_base_fields = self.keyword_base_fields.replace(' ','').split(',')
         except AttributeError:
-            self.blacklist = list()
+            self.keyword_base_fields = list()
+        try:
+            self.analyzed_sub_fields = self.analyzed_sub_fields.replace(' ','').split(',')
+        except AttributeError:
+            self.analyzed_sub_fields = list()
+        try:
+            self.keyword_whitelist = self.keyword_whitelist.replace(' ','').split(',')
+        except AttributeError:
+            self.keyword_whitelist = list()
+        try:
+            self.keyword_blacklist = self.keyword_blacklist.replace(' ','').split(',')
+        except AttributeError:
+            self.keyword_blacklist = list()
+        try:
+            self.case_insensitive_whitelist = self.case_insensitive_whitelist.replace(' ','').split(',')
+        except AttributeError:
+            self.case_insensitive_whitelist = list()
+        try:
+            self.case_insensitive_blacklist = self.case_insensitive_blacklist.replace(' ','').split(',')
+        except AttributeError:
+            self.case_insensitive_blacklist = list()
 
     def containsWildcard(self, value):
         """Determine if value contains wildcard."""
@@ -53,24 +86,99 @@ class ElasticsearchWildcardHandlingMixin(object):
         else:
             return False
 
-    def fieldNameMapping(self, fieldname, value):
+    def fieldNameMapping(self, fieldname, value, *agg_option):
         """
-        Determine if values contain wildcards. If yes, match on keyword field else on analyzed one.
-        Decide if field value should be quoted based on the field name decision and store it in object property.
+        Decide whether to use a keyword field or analyzed field. Using options on fields to make into keywords OR not and the field naming of keyword.
+        Further, determine if values contain wildcards. Additionally, determine if case insensitive regex should be used. Finally,
+        if field value should be quoted based on the field name decision and store it in object property.
         """
-        if self.keyword_field == '':
-            self.matchKeyword = True
-            return fieldname
+        force_keyword_whitelist = False # override everything AND set keyword and turn off case insensitivity
+        force_keyword_blacklist = False # override everything AND set analyzed field and turn off case insensitivity
+        force_keyword_type = False # make keyword
+        keyword_subfield_name = self.keyword_field
+        analyzed_subfield_name = self.analyzed_sub_field_name
 
-        if not any([ fnmatch(fieldname, pattern) for pattern in self.blacklist ]) and (
-                type(value) == list and any(map(self.containsWildcard, value)) \
-                or self.containsWildcard(value)
-                ):
+        # Set naming for keyword fields
+        if keyword_subfield_name == '':
+            force_keyword_type = True
+        elif len(self.keyword_base_fields) != 0 and any ([ fnmatch(fieldname, pattern) for pattern in self.keyword_base_fields ]):
+            keyword_subfield_name = ''
+        else:
+            keyword_subfield_name = '.%s'%keyword_subfield_name
+
+        # Set naming for analyzed fields
+        if analyzed_subfield_name != '' and not keyword_subfield_name.startswith('.'):
+            analyzed_subfield_name = '.%s'%analyzed_subfield_name
+        else:
+            analyzed_subfield_name = ''
+
+        # force keyword on agg_option used in Elasticsearch DSL query key
+        if agg_option:
+            force_keyword_type = True
+
+        # Only some analyzed subfield, so if not in this list then has to be keyword
+        if len(self.analyzed_sub_fields) != 0 and not any ([ fnmatch(fieldname, pattern) for pattern in self.analyzed_sub_fields ]):
+            force_keyword_type = True
+
+        # Keyword (force) exclude
+        if len(self.keyword_blacklist) != 0 and any ([ fnmatch(fieldname, pattern.strip()) for pattern in self.keyword_blacklist ]):
+            force_keyword_blacklist = True
+        # Keyword (force) include
+        elif len(self.keyword_whitelist) != 0 and any ([ fnmatch(fieldname, pattern.strip()) for pattern in self.keyword_whitelist ]):
+            force_keyword_whitelist = True
+
+        # Set case insensitive regex
+        if not (len( self.case_insensitive_blacklist ) != 0 and any([ fnmatch( fieldname, pattern ) for pattern in self.case_insensitive_blacklist ])) and len( self.case_insensitive_whitelist ) != 0 and any([ fnmatch( fieldname, pattern ) for pattern in self.case_insensitive_whitelist ]):
+            self.CaseInSensitiveField = True
+        else:
+            self.CaseInSensitiveField = False
+
+        # Set type and value
+        if force_keyword_blacklist:
+            self.matchKeyword = False
+            self.CaseInSensitiveField = False
+        elif force_keyword_whitelist:
             self.matchKeyword = True
-            return fieldname + "." + self.keyword_field
+            self.CaseInSensitiveField = False
+        elif force_keyword_type:
+            self.matchKeyword = True
+        elif self.CaseInSensitiveField:
+            self.matchKeyword = True
+        elif (type(value) == list and any(map(self.containsWildcard, value))) or self.containsWildcard(value):
+            self.matchKeyword = True
         else:
             self.matchKeyword = False
-            return fieldname
+
+        # Return compiled field name
+        if self.matchKeyword:
+            return '%s%s'%(fieldname, keyword_subfield_name)
+        else:
+            return '%s%s'%(fieldname, analyzed_subfield_name)
+
+    def makeCaseInSensitiveValue(self, value):
+        """
+        Returns dictionary of if should be a regex (`is_regex`) and if regex the query value ('value')
+        Converts the query(value) into a case insensitive regular expression (regex). ie: 'http' would get converted to '[hH][tT][pP][pP]'
+        Adds the beginning and ending '/' to make regex query if still determined that it should be a regex
+        """
+        if value and not value == 'null' and not re.match(r'^/.*/$', value) and (re.search('[a-zA-Z]', value) and not re.match(self.uuid_regex, value) or self.containsWildcard(value)):  # re.search for alpha is fastest:
+            # Make upper/lower
+            value = re.sub( r"[A-Za-z]", lambda x: "[" + x.group( 0 ).upper() + x.group( 0 ).lower() + "]", value )
+            # Turn `*` into wildcard, only if odd number of '\'(because this would mean already escaped)
+            value = re.sub( r"(((?<!\\)(\\\\)+)|(?<!\\))\*", "\g<1>.*", value )
+            # Escape additional values that are treated as specific "operators" within Elastic. (ie: @, ?, &, <, >, and ~)
+            # reference: https://www.elastic.co/guide/en/elasticsearch/reference/current/regexp-syntax.html#regexp-optional-operators
+            value = re.sub( r"(((?<!\\)(\\\\)+)|(?<!\\))([@?&~<>])", "\g<1>\\\\\g<4>", value )
+            # Validate regex
+            try:
+                re.compile(value)
+                return {'is_regex': True, 'value': value}
+            # Regex failed
+            except re.error:
+                raise TypeError( "Regular expression validation error for: '%s')" %str(value) )
+        else:
+            return { 'is_regex': False, 'value': value }
+
 
 class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
     """Converts Sigma rule into Elasticsearch query string. Only searches, no aggregations."""
@@ -78,7 +186,6 @@ class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, Single
     active = True
 
     reEscape = re.compile("([\s+\\-=!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|\\\\u|&&|\\|\\|)")
-    reClear = re.compile("[<>]")
     andToken = " AND "
     orToken = " OR "
     notToken = "NOT "
@@ -100,6 +207,11 @@ class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, Single
             return '""'
         else:
             if self.matchKeyword:   # don't quote search value on keyword field
+                if self.CaseInSensitiveField:
+                    make_ci = self.makeCaseInSensitiveValue(result)
+                    result = make_ci.get('value')
+                    if make_ci.get('is_regex'): # Determine if still should be a regex
+                        result = "/%s/" % result # Regex place holders for regex
                 return result
             else:
                 return "\"%s\"" % result
@@ -108,6 +220,29 @@ class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, Single
         expression = super().generateNode(node.item)
         if expression:
             return "(%s%s)" % (self.notToken, expression)
+
+    def generateSubexpressionNode(self, node):
+        """Check for search not bound to a field and restrict search to keyword fields"""
+        nodetype = type(node.items)
+        if nodetype in { ConditionAND, ConditionOR } and type(node.items.items) == list and { type(item) for item in node.items.items }.issubset({str, int}):
+            newitems = list()
+            for item in node.items:
+                newitem = item
+                if type(item) == str:
+                    if not item.startswith("*"):
+                        newitem = "*" + newitem
+                    if not item.endswith("*"):
+                        newitem += "*"
+                    newitems.append(newitem)
+                else:
+                    newitems.append(item)
+            newnode = NodeSubexpression(nodetype(None, None, *newitems))
+            self.matchKeyword = True
+            result = "\\*.keyword:" + super().generateSubexpressionNode(newnode)
+            self.matchKeyword = False       # one of the reasons why the converter needs some major overhaul
+            return result
+        else:
+            return super().generateSubexpressionNode(node)
 
 class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlingMixin, BaseBackend):
     """ElasticSearch DSL backend"""
@@ -119,6 +254,7 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
     )
     interval = None
     title = None
+    reEscape = re.compile( "([\s+\\-=!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|\\\\u|&&|\\|\\|)" )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -149,9 +285,6 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
         self.queries[-1]['query']['constant_score']['filter'] = self.generateNode(parsed.parsedSearch)
         if parsed.parsedAgg:
             self.generateAggregation(parsed.parsedAgg)
-        # if parsed.parsedAgg:
-        #     fields += self.generateAggregation(parsed.parsedAgg)
-        # self.fields.update(fields)
 
     def generateANDNode(self, node):
         andNode = {'bool': {'must': []}}
@@ -188,33 +321,51 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
 
     def generateMapItemNode(self, node):
         key, value = node
-        if type(value) not in (str, int, list, type(None)):
-            raise TypeError("Map values must be strings, numbers, lists or null, not " + str(type(value)))
         if type(value) is list:
             res = {'bool': {'should': []}}
             for v in value:
                 key_mapped = self.fieldNameMapping(key, v)
-                if self.matchKeyword:   # searches against keyowrd fields are wildcard searches, phrases otherwise
-                    queryType = 'wildcard'
-                    value_cleaned = self.escapeSlashes(self.cleanValue(str(v)))
+                if self.matchKeyword:   # searches against keyword fields are wildcard searches, phrases otherwise
+                    if self.CaseInSensitiveField:
+                        queryType = 'regexp'
+                        make_ci = self.makeCaseInSensitiveValue(self.reEscape.sub("\\\\\g<1>", str(v)))
+                        value_cleaned = make_ci.get('value')
+                        if not make_ci.get( 'is_regex' ):  # Determine if still should be a regex
+                            queryType = 'wildcard'
+                            value_cleaned = self.escapeSlashes( self.cleanValue( str( v ) ) )
+                    else:
+                        queryType = 'wildcard'
+                        value_cleaned = self.escapeSlashes(self.cleanValue(str(v)))
                 else:
                     queryType = 'match_phrase'
                     value_cleaned = self.cleanValue(str(v))
-
                 res['bool']['should'].append({queryType: {key_mapped: value_cleaned}})
             return res
         elif value is None:
             key_mapped = self.fieldNameMapping(key, value)
             return { "bool": { "must_not": { "exists": { "field": key_mapped } } } }
-        else:
+        elif type(value) in (str, int):
             key_mapped = self.fieldNameMapping(key, value)
-            if self.matchKeyword:   # searches against keyowrd fields are wildcard searches, phrases otherwise
-                queryType = 'wildcard'
-                value_cleaned = self.escapeSlashes(self.cleanValue(str(value)))
+            if self.matchKeyword:  # searches against keyword fields are wildcard searches, phrases otherwise
+                if self.CaseInSensitiveField:
+                    queryType = 'regexp'
+                    make_ci = self.makeCaseInSensitiveValue( self.reEscape.sub( "\\\\\g<1>", str( value ) ) )
+                    value_cleaned = make_ci.get( 'value' )
+                    if not make_ci.get( 'is_regex' ):  # Determine if still should be a regex
+                        queryType = 'wildcard'
+                        value_cleaned = self.escapeSlashes( self.cleanValue( str( value ) ) )
+                else:
+                    queryType = 'wildcard'
+                    value_cleaned = self.escapeSlashes(self.cleanValue(str(value)))
             else:
                 queryType = 'match_phrase'
                 value_cleaned = self.cleanValue(str(value))
             return {queryType: {key_mapped: value_cleaned}}
+        elif isinstance(value, SigmaRegularExpressionModifier):
+            key_mapped = self.fieldNameMapping(key, value)
+            return { 'regexp': { key_mapped: str(value) } }
+        else:
+            raise TypeError("Map values must be strings, numbers, lists, null or regular expression, not " + str(type(value)))
 
     def generateValueNode(self, node):
         return {'multi_match': {'query': node, 'fields': [], 'type': 'phrase'}}
@@ -226,32 +377,81 @@ class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlin
         return {'exists': {'field': node.item}}
 
     def generateAggregation(self, agg):
+        """
+        Generates an Elasticsearch nested aggregation given a SigmaAggregationParser object
+
+        Two conditions are handled here:
+        a) "count() by MyGroupedField > X"
+        b) "count(MyDistinctFieldName) by MyGroupedField > X'
+
+        The case (b) is translated to a the following equivalent SQL query
+
+        ```
+        SELECT MyDistinctFieldName, COUNT(DISTINCT MyDistinctFieldName) FROM Table
+        GROUP BY MyGroupedField HAVING COUNT(DISTINCT MyDistinctFieldName) > 1
+        ```
+
+        The resulting aggregation is set on 'self.queries[-1]["aggs"]' as a Python dict
+
+        :param agg: Input SigmaAggregationParser object that defines a condition
+        :return: None
+        """
         if agg:
             if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT:
                 if agg.groupfield is not None:
-                    self.queries[-1]['aggs'] = {
-                        '%s_count'%(agg.groupfield or ""): {
-                            'terms': {
-                                'field': '%s'%(agg.groupfield + ".keyword" or "")
-                            },
-                            'aggs': {
-                                'limit': {
-                                    'bucket_selector': {
-                                        'buckets_path': {
-                                            'count': '%s_count'%(agg.groupfield or "")
+                    # If the aggregation is 'count(MyDistinctFieldName) by MyGroupedField > XYZ'
+                    if agg.aggfield is not None:
+                        count_agg_group_name = "{}_count".format(agg.groupfield)
+                        count_distinct_agg_name = "{}_distinct".format(agg.aggfield)
+                        script_limit = "params.count {} {}".format(agg.cond_op, agg.condition)
+                        self.queries[-1]['aggs'] = {
+                            count_agg_group_name: {
+                                    "terms": {
+                                        "field": "{}".format(agg.groupfield)
+                                    },
+                                    "aggs": {
+                                        count_distinct_agg_name: {
+                                            "cardinality": {
+                                                "field": "{}".format(agg.aggfield)
+                                            }
                                         },
-                                        'script': 'params.count %s %s'%(agg.cond_op, agg.condition)
+                                        "limit": {
+                                            "bucket_selector": {
+                                                "buckets_path": {
+                                                    "count": count_distinct_agg_name
+                                                },
+                                                "script": script_limit
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                    else:  # if the condition is count() by MyGroupedField > XYZ
+                        group_aggname = "{}_count".format(agg.groupfield)
+                        self.queries[-1]['aggs'] = {
+                            group_aggname: {
+                                'terms': {
+                                    'field': '%s' % (agg.groupfield)
+                                },
+                                'aggs': {
+                                    'limit': {
+                                        'bucket_selector': {
+                                            'buckets_path': {
+                                                'count': group_aggname
+                                            },
+                                            'script': 'params.count %s %s' % (agg.cond_op, agg.condition)
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
             else:
+                funcname = ""
                 for name, idx in agg.aggfuncmap.items():
                     if idx == agg.aggfunc:
                         funcname = name
                         break
-                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend"%(self.title, funcname))
+                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend" % (self.title, funcname))
 
     def generateBefore(self, parsed):
         self.queries.append({'query': {'constant_score': {'filter': {}}}})
@@ -490,7 +690,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                             "aggs": {
                                 "agg": {
                                     "terms": {
-                                        "field": condition.parsedAgg.aggfield + ".keyword",
+                                        "field": condition.parsedAgg.aggfield,
                                         "size": 10,
                                         "order": {
                                             "_count": order
@@ -508,7 +708,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                             "aggs": {
                                 "by": {
                                     "terms": {
-                                        "field": condition.parsedAgg.groupfield + ".keyword",
+                                        "field": condition.parsedAgg.groupfield,
                                         "size": 10,
                                         "order": {
                                             "_count": order
@@ -773,7 +973,7 @@ class ElastalertBackend(MultiRuleOutputMixin):
             if parsed.parsedAgg:
                 if parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MIN or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MAX or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_AVG or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_SUM:
                     if parsed.parsedAgg.groupfield is not None:
-                        rule_object['query_key'] = self.fieldNameMapping(parsed.parsedAgg.groupfield, '*')
+                        rule_object['query_key'] = self.fieldNameMapping(parsed.parsedAgg.groupfield, '*', True)
                     rule_object['type'] = "metric_aggregation"
                     rule_object['buffer_time'] = interval
                     rule_object['doc_type'] = "doc"
@@ -868,14 +1068,18 @@ class ElastalertBackend(MultiRuleOutputMixin):
 
     def generateAggregation(self, agg):
         if agg:
-            if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT or agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MIN or agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MAX or agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_AVG or agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_SUM:
+            if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT or \
+                    agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MIN or \
+                    agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MAX or \
+                    agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_AVG or \
+                    agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_SUM:
                 return ""
             else:
                 for name, idx in agg.aggfuncmap.items():
                     if idx == agg.aggfunc:
                         funcname = name
                         break
-                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend"%(self.title, funcname))
+                raise NotImplementedError("%s : The '%s' aggregation operator is not yet implemented for this backend" % ( self.title, funcname))
 
     def convertLevel(self, level):
         return {
@@ -888,7 +1092,7 @@ class ElastalertBackend(MultiRuleOutputMixin):
     def finalize(self):
         result = ""
         for rulename, rule in self.elastalert_alerts.items():
-            result += yaml.dump(rule, default_flow_style=False)
+            result += yaml.dump(rule, default_flow_style=False, width=10000)
             result += '\n'
         return result
 
@@ -915,3 +1119,139 @@ class ElastalertBackendQs(ElastalertBackend, ElasticsearchQuerystringBackend):
         #Generate ES QS Query
         return [{ 'query' : { 'query_string' : { 'query' : super().generateQuery(parsed) } } }]
 
+class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
+    identifier = "es-rule"
+    active = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.tactics = self._load_mitre_file("tactics")
+        self.techniques = self._load_mitre_file("techniques")
+
+    def _load_mitre_file(self, mitre_type):
+        try:
+            backend_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "config", "mitre"))
+            path = os.path.join(backend_dir,"{}.json".format(mitre_type))
+            with open(path, 'r') as config_file:
+                config = json.load(config_file)
+                return config
+        except (IOError, OSError) as e:
+            print("Failed to open {} configuration file '%s': %s".format(path, str(e)), file=sys.stderr)
+            return []
+        except json.JSONDecodeError as e:
+            print("Failed to parse {} configuration file '%s' as valid YAML: %s" % (path, str(e)), file=sys.stderr)
+            return []
+
+    def generate(self, sigmaparser):
+        translation = super().generate(sigmaparser)
+        if translation:
+            index = sigmaparser.get_logsource().index
+            if len(index) == 0:
+                index = ["apm-*-transaction", "auditbeat-*", "endgame-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"]
+            configs = sigmaparser.parsedyaml
+            configs.update({"translation": translation})
+            rule = self.create_rule(configs, index)
+            return rule
+
+    def create_threat_description(self, tactics_list, techniques_list):
+        threat_list = list()
+        for tactic in tactics_list:
+            temp_tactics = {
+                "tactic": {
+                    "id": tactic.get("external_id", ""),
+                    "reference": tactic.get("url", ""),
+                    "name": tactic.get("tactic", "")
+                },
+                "framework": "MITRE ATT&CK"
+            }
+            temp_techniques = list()
+            for tech in techniques_list:
+                if tactic.get("tactic", "") in tech.get("tactic", []):
+                    temp_techniques.append({
+                                "id": tech.get("technique_id", ""),
+                                "name": tech.get("technique", ""),
+                                "reference": tech.get("url", "")
+                            })
+            temp_tactics.update({"technique": temp_techniques})
+            threat_list.append(temp_tactics)
+        return threat_list
+
+    def find_tactics(self, key_name=None, key_id=None):
+        for tactic in self.tactics:
+            if key_name and key_name == tactic.get("tactic", ""):
+                return tactic
+            if key_id and key_id == tactic.get("external_id", ""):
+                return tactic
+
+    def find_technique(self, key_id=None):
+        for technique in self.techniques:
+            if key_id and key_id == technique.get("technique_id", ""):
+                return technique
+
+    def map_risk_score(self, level):
+        if level == "low":
+            return randrange(0,22)
+        elif level == "medium":
+            return randrange(22,48)
+        elif level == "high":
+            return randrange(48,74)
+        elif level == "critical":
+            return randrange(74,101)
+
+    def create_rule(self, configs, index):
+        tags = configs.get("tags", [])
+        tactics_list = list()
+        technics_list = list()
+
+        for tag in tags:
+            tag = tag.replace("attack.", "")
+            if re.match("[t][0-9]{4}", tag, re.IGNORECASE):
+                tech = self.find_technique(tag.title())
+                if tech:
+                    technics_list.append(tech)
+            else:
+                if "_" in tag:
+                    tag_list = tag.split("_")
+                    tag_list = [item.title() for item in tag_list]
+                    tact = self.find_tactics(key_name=" ".join(tag_list))
+                    if tact:
+                        tactics_list.append(tact)
+                elif re.match("[ta][0-9]{4}", tag, re.IGNORECASE):
+                    tact = self.find_tactics(key_id=tag.upper())
+                    if tact:
+                        tactics_list.append(tact)
+                else:
+                    tact = self.find_tactics(key_name=tag.title())
+                    if tact:
+                        tactics_list.append(tact)
+        threat = self.create_threat_description(tactics_list=tactics_list, techniques_list=technics_list)
+        rule_id = configs.get("title", "").lower().replace(" ", "_")
+        risk_score = self.map_risk_score(configs.get("level", "medium"))
+        rule = {
+            "description": configs.get("description", ""),
+            "enabled": True,
+            "false_positives": configs.get('falsepositives'),
+            "filters": [],
+            "from": "now-360s",
+            "immutable": False,
+            "index": index,
+            "interval": "5m",
+            "rule_id": rule_id,
+            "language": "lucene",
+            "output_index": ".siem-signals-default",
+            "max_signals": 100,
+            "risk_score": risk_score,
+            "name": configs.get("title", ""),
+            "query":configs.get("translation"),
+            "references": configs.get("references"),
+            "meta": {
+                "from": "1m"
+            },
+            "severity": configs.get("level", "medium"),
+            "tags": tags,
+            "to": "now",
+            "type": "query",
+            "threat": threat,
+            "version": 1
+        }
+        return json.dumps(rule)
