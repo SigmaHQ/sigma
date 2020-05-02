@@ -214,9 +214,9 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 elif self.service == "sysmon" and value == 11:              # File Creation
                     self.table = "DeviceFileEvents"
                     return "ActionType == \"FileCreated\""
-                # elif self.service == "sysmon" and value == 23:              # File Deletion
-                #     self.table = "DeviceFileEvents"
-                #     return "ActionType == \"FileDeleted\""
+                elif self.service == "sysmon" and value == 23:              # File Deletion
+                    self.table = "DeviceFileEvents"
+                    return "ActionType == \"FileDeleted\""
                 elif self.service == "sysmon" and value == 12:              # Create/Delete Registry Value
                     self.table = "DeviceRegistryEvents"
                     return None
