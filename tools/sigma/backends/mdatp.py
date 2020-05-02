@@ -161,7 +161,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
             domain, user = m.groups()
             return (("InitiatingProcessAccountDomain",  self.default_value_mapping(domain)), ("InititatingProcessAccountName",  self.default_value_mapping(user)))
         else:   # assume only user name is given if backslash is missing
-            return [("InititatingProcessAccountName", self.default_value_mapping(src_value))]
+            return (("InititatingProcessAccountName", self.default_value_mapping(src_value)))
 
     def generate(self, sigmaparser):
         self.table = None
