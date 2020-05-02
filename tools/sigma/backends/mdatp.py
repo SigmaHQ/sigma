@@ -64,14 +64,13 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "ParentImage": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "SourceImage": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "TargetImage": ("FolderPath", self.default_value_mapping),
-                "TargetObject": ("RegistryKey", self.default_value_mapping),
                 "User": (self.decompose_user, ),
             },
             "DeviceEvents": {
                 "TargetFilename": ("FolderPath", self.default_value_mapping),
+                "TargetImage": ("FolderPath", self.default_value_mapping),
 
-                "Image": ("InitiatingFolderPath", self.default_value_mapping),
-                "TargetImage": ("InitiatingProcessFolderPath", self.default_value_mapping),
+                "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "User":  (self.decompose_user, ),
             },
             "DeviceRegistryEvents": {
@@ -79,8 +78,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "ObjectValueName": ("RegistryValueName", self.default_value_mapping),
                 "Details": ("RegistryValueData", self.default_value_mapping),
 
-                "Image": ("InitiatingFolderPath", self.default_value_mapping),
-                "TargetImage": ("InitiatingProcessFolderPath", self.default_value_mapping),
+                "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "User":  (self.decompose_user, ),
             },
             "DeviceFileEvents": {
