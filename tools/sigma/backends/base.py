@@ -132,18 +132,6 @@ class BaseBackend:
         result = self.generateNode(parsed.parsedSearch)
         if parsed.parsedAgg:
             result += self.generateAggregation(parsed.parsedAgg)
-        # if 'overrides' in self.sigmaconfig.config:
-        #     for expression in self.sigmaconfig.config['overrides']:
-        #         if 'regexes' in expression:
-        #             for x in expression['regexes']:
-        #                 sub = expression['field']
-        #                 value = expression['value']
-        #                 result = re.sub(x, self.mapExpression % (sub, value), result)
-        #         if 'literals' in expression:
-        #             for x in expression['literals']:
-        #                 sub = expression['field']
-        #                 value = expression['value']
-        #                 result = result.replace(x, self.mapExpression % (sub, value))
         result = self.applyOverrides(result)
         return result
 

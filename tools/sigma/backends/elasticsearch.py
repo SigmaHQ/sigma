@@ -566,7 +566,7 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
                                         },
                                     "query": {
                                         "query_string": {
-                                            "query": result,
+                                            "query": self.applyOverrides(result),
                                             "analyze_wildcard": True
                                             }
                                         }
