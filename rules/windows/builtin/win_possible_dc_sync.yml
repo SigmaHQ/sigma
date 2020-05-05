@@ -2,7 +2,7 @@ title: Possible DC Sync
 id: 32e19d25-4aed-4860-a55a-be99cb0bf7ed
 description: Detects DC sync via create new SPN
 status: experimental
-author: Ilyas Ochkov, oscd.community
+author: Ilyas Ochkov, oscd.community, Chakib Gzenayi (@Chak092), Hosni Mribah
 date: 2019/10/25
 references:
     - https://github.com/Neo23x0/sigma/blob/ec5bb710499caae6667c7f7311ca9e92c03b9039/rules/windows/builtin/win_dcsync.yml
@@ -11,15 +11,19 @@ references:
     - https://jsecurity101.com/2019/Syncing-into-the-Shadows/
 tags:
     - attack.credential_access
-    - attack.t1003
+    - attack.t1207
 logsource:
     product: windows
     service: security
 detection:
-    selection:
+    selection1:
         EventID: 4742
         ServicePrincipalNames: '*GC/*'
-    condition: selection
+    selection2:
+        EventID: 5136
+        LDAP_Display_Name: servicePrincipalName
+        Value: 'GC/*'
+    condition: selection1 OR selection2
 falsepositives:
-    - Unkown
+    - Exclude known DCs
 level: high
