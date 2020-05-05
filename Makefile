@@ -1,13 +1,14 @@
 .PHONY: test test-rules test-sigmac test-sigma2attack
 TMPOUT = $(shell tempfile||mktemp)
 COVSCOPE = tools/sigma/*.py,tools/sigma/backends/*.py,tools/sigmac,tools/merge_sigma,tools/sigma2attack
+export COVERAGE = coverage
 test: clearcov test-rules test-sigmac test-merge test-sigma2attack build finish
 
 clearcov:
 	rm -f .coverage
 
 finish:
-	coverage report --fail-under=90
+	$(COVERAGE) report --fail-under=90
 	rm -f $(TMPOUT)
 
 test-rules:
@@ -91,15 +92,16 @@ test-sigmac:
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -t es-qs -c tests/invalid_yaml.yml rules/windows/sysmon/sysmon_mimikatz_detection_lsass.yml
 	! coverage run -a --include=$(COVSCOPE) tools/sigmac -t es-qs -c tests/invalid_config.yml rules/windows/sysmon/sysmon_mimikatz_detection_lsass.yml
 
+
 test-merge:
 	tests/test-merge.sh
-	! coverage run -a --include=$(COVSCOPE) tools/merge_sigma tests/not_existing.yml > /dev/null
+	! $(COVERAGE) run -a --include=$(COVSCOPE) tools/merge_sigma tests/not_existing.yml > /dev/null
 
 test-backend-es-qs:
 	tests/test-backend-es-qs.py
 
 test-sigma2attack:
-	coverage run -a --include=$(COVSCOPE) tools/sigma2attack
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigma2attack
 
 build: tools/sigmac tools/merge_sigma tools/sigma/*.py tools/setup.py tools/setup.cfg
 	cd tools && python3 setup.py bdist_wheel sdist
