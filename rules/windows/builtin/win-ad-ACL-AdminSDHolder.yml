@@ -1,0 +1,23 @@
+title: Windows-AdminSDHolder
+description: Windows server 2008 R2（AD）
+status: experimental
+references:
+    - https://github.com/infosecn1nja/AD-Attack-Defense/blob/master/README.md
+    - https://github.com/0Kee-Team/WatchAD/blob/master/modules/detect/event_log/persistence/AdminSDHolder.py
+author: 12306Bro
+date: 2020/05/05
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1098
+logsource:
+    product: windows
+    service: security
+detection:
+    selection1:
+        EventID: 5136  #Directory service objects have been modified. AdminSDHolder changes, generally used for permission maintenance, since changes are rare.
+    selection2:
+        EventID: 4780  #ACL is set on the account of an administrator group member
+    timeframe: last 1h #The default waiting time is 60 minutes, please refer to the following SDPROP instructions
+    condition: all of them
+level: medium
