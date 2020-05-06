@@ -1,5 +1,5 @@
-title: Windows-AdminSDHolder
-description: Windows server 2008 R2（AD）
+title: Windows-ACL-AdminSDHolder
+description: Detecting persistence behavior using AdminSDholder
 status: experimental
 references:
     - https://github.com/infosecn1nja/AD-Attack-Defense/blob/master/README.md
@@ -15,9 +15,11 @@ logsource:
     service: security
 detection:
     selection1:
-        EventID: 5136  #Directory service objects have been modified. AdminSDHolder changes, generally used for permission maintenance, since changes are rare.
+        EventID: 5136
     selection2:
-        EventID: 4780  #ACL is set on the account of an administrator group member
-    timeframe: last 1h #The default waiting time is 60 minutes, please refer to the following SDPROP instructions
+        EventID: 4780
+    timeframe: 60m
     condition: all of them
+falsepositives:
+    - Directory service objects have been modified. AdminSDHolder changes, generally used for permission maintenance, since changes are rare.
 level: medium
