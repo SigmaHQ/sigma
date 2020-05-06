@@ -1,0 +1,27 @@
+title: metasploit authentication
+description: Alerts on Metasploit host's authentications on the domain.
+author: Chakib Gzenayi (@Chak092), Hosni Mribah
+references: https://github.com/rapid7/metasploit-framework/blob/master/lib/rex/proto/smb/client.rb
+tags:
+    - attack.credential_access
+    - attack.t1110
+logsource:
+    product: windows
+    service: security
+detection:
+    selection1:
+        EventID:
+        - 4625
+        - 4624
+        LogonType: 3
+        AuthenticationPackage: 'NTLM'
+        WorkstationName: '^[A-Za-z0-9]{16}$'
+    selection2:
+        ProcessName:
+        EventID:
+        - 4776
+        SourceWorkstation: '^[A-Za-z0-9]{16}$'
+    condition: selection1 OR selection2
+falsepositives:
+    - Linux hostnames composed of 16 characters.
+level: high
