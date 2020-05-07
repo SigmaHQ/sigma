@@ -1,4 +1,4 @@
-title: Elastic Common Schema (ECS) implementation for Zeek using filebeat modules enabled based on version 7.6.1
+title: "Elastic Common Schema (ECS) implementation for Zeek using filebeat modules enabled based on https://github.com/elastic/beats/tree/master/x-pack/filebeat/module/zeek"
 order: 20
 backends:
   - es-qs
@@ -12,8 +12,6 @@ logsources:
   zeek:
     product: zeek
     index: 'filebeat*'
-      #'*ecs-corelight*'
-      #'*ecs-zeek-*
   zeek-category-accounting:
     category: accounting
     rewrite:
@@ -21,12 +19,14 @@ logsources:
       service: syslog
   zeek-category-firewall:
     category: firewall
-    conditions:
-      event.dataset: zeek.connection
+    rewrite:
+      product: zeek
+      service: conn
   zeek-category-dns:
     category: dns
-    conditions:
-      event.dataset: zeek.dns
+    rewrite:
+      product: zeek
+      service: dns
   zeek-category-proxy:
     category: proxy
     rewrite:
@@ -34,8 +34,6 @@ logsources:
         service: http
   zeek-category-webserver:
     category: webserver
-    conditions:
-      event.dataset: zeek.http
     rewrite:
         product: zeek
         service: http
@@ -323,6 +321,7 @@ logsources:
 defaultindex: 'filebeat*'
 fieldmappings:
   # All Logs Applied Mapping & Taxonomy
+  clientip: source.ip
   dst:
     - destination.address
     - destination.ip
@@ -480,6 +479,7 @@ fieldmappings:
     #service=smtp: zeek.smtp.user_agent
   version:
     - 'zeek.*.version'
+    #service=http: http.version
     #service=snmp: zeek.snmp.version
     #service=socks: zeek.socks.version
     #service=ssh: zeek.ssh.version
@@ -659,6 +659,7 @@ fieldmappings:
   uri_vars: zeek.http.uri_vars
   #user_agent: user_agent.original
   #username: source.user.name
+  #version: http.version
   # Intel
   file_mime_type: zeek.intel.mime_type
   file_desc: zeek.intel.file_desc
