@@ -321,7 +321,6 @@ logsources:
 defaultindex: 'filebeat*'
 fieldmappings:
   # All Logs Applied Mapping & Taxonomy
-  clientip: source.ip
   dst:
     - destination.address
     - destination.ip
@@ -358,12 +357,20 @@ fieldmappings:
     - 'zeek.smb_files.action'
     #service=tunnel: zeek.tunnel.action
     #service=smb_files: zeek.smb_files.action
+  mqtt_action: smb.action
+  smb_action: smb.action
+  tunnel_action: tunnel.action
   addl:
     - 'zeek.weird.additional_info'
     #service=dns: zeek.dns.addl
     #service=weird: zeek.weird.additional_info
+  dns_addl: zeek.dns.addl
+  weird_addl: zeek.weird.additional_info
   arg:
     - 'zeek.*.arg'
+  ftp_arg: zeek.ftp.arg
+  mysql_arg: zeek.mysql.arg
+  pop3_arg: zeek.pop3.arg
   auth:
     - 'zeek.*.auth*'
     #service=dns: zeek.dns.auth
@@ -372,6 +379,9 @@ fieldmappings:
     - 'zeek.*.cipher'
     #service=kerberos: zeek.kerberos.cipher
     #service=ssl: zeek.ssl.cipher
+  kerberos_cipher: zeek.kerberos.cipher
+  ssl_cipher: zeek.ssl.cipher
+  tls_cipher: zeek.ssl.cipher
   client:
     - 'zeek.*.client*'
     #service=kerberos: zeek.kerberos.cert.client.value
@@ -380,6 +390,9 @@ fieldmappings:
     - 'zeek.*.command'
     #service=ftp: zeek.ftp.command
     #service=irc: zeek.irc.command
+  ftp_command: zeek.irc.command
+  irc_command: zeek.ftp.command
+  pop3_command: zeek.pop3.command
   date:
     - 'zeek.*.date'
     #service=smtp: zeek.smtp.date
@@ -394,6 +407,8 @@ fieldmappings:
     - 'zeek.*.from'
     #service=smtp: zeek.smtp.from
     #service=kerberos: zeek.kerberos.valid.from
+  kerberos_from: zeek.smtp.from
+  smtp_from: zeek.kerberos.valid.from
   is_orig:
     - 'zeek.*.is_orig'
   local_orig:
@@ -402,15 +417,23 @@ fieldmappings:
     - http.request.method
     #service=http: http.request.method
     #service=sip: zeek.sip.sequence.method
+  http_method: http.request.method
+  sip_method: zeek.sip.sequence.method
   name:
     - 'zeek.smb_files.name'
       #service=weird: zeek.weird.name
       #service=smb_files: zeek.smb_files.name
+  smb_files_name: zeek.smb_files.name
+  software_name: zeek.software.name
+  weird_name: zeek.weird.name
   path:
     - 'zeek.*.path'
     #service=smb_mapping: zeek.smb_mapping.path
     #service=smb_files: zeek.smb_files.path
     #service=smtp: zeek.smtp.path
+  smb_mapping_path: zeek.smb_mapping.path
+  smb_files_path: zeek.smb_files.path
+  smtp_files_path: zeek.smtp.path
   password:
     - 'zeek.*.password'
     #service=ftp: zeek.ftp.password
@@ -420,6 +443,10 @@ fieldmappings:
     - 'zeek.*.reply*msg'
     #service=ftp: zeek.ftp.reply.msg
     #service=radius: zeek.radius.reply_msg
+  reply_to:
+    - 'zeek.*.reply_to'
+    #service=sip: zeek.sip.reply_to
+    #service=smtp: zeek.smtp.reply_to  
   response_body_len:
     - http.response.body.bytes
     #service=http: http.response.body.bytes
@@ -441,17 +468,22 @@ fieldmappings:
     - 'zeek.*status*msg'
     #service=http: zeek.http.status_msg
     #service=sip: zeek.sip.status.msg
-  subject:
-    - 'zeek.*.subject'
-    #service=sip: zeek.sip.subject
-    #service=ssl: zeek.ssl.subject
+  #_service:
   service:
     - 'zeek.*.service'
     #service=kerberos: zeek.kerberos.service
     #service=smb_mapping: zeek.smb_mapping.service
-    - 'zeek.*.reply_to'
-    #service=sip: zeek.sip.reply_to
-    #service=smtp: zeek.smtp.reply_to
+  kerberos_service: zeek.kerberos.service
+  smb_mapping_kerberos: zeek.smb_mapping.service
+  #_subject:
+  subject:
+    - 'zeek.*.subject'
+    #service=sip: zeek.sip.subject
+    #service=ssl: zeek.ssl.subject 
+  known_certs_subject: zeek.known_certs.subject
+  sip_subject: zeek.sip.subject
+  smtp_subject: zeek.smtp.subject
+  ssl_subject: zeek.ssl.subject  
   trans_depth:
     - 'zeek.*.trans*depth'
     #service=smtp: zeek.smtp.transaction_depth
@@ -471,19 +503,35 @@ fieldmappings:
     - 'zeek.*user*'
     #service=ftp: zeek.ftp.user.name
     #service=irc: zeek.irc.user.name
+  #_user_agent
   user_agent:
     - 'zeek.*user_agent*'
     #service=http: user_agent.original
-    #service=guic: user_agent
+    #service=guic: zeek.gquic.user_agent
     #service=sip: zeek.sip.user_agent
     #service=smtp: zeek.smtp.user_agent
+  http_user_agent: user_agent.original
+  gquic_user_agent: zeek.gquic.user_agent
+  sip_user_agent: zeek.sip.user_agent
+  smtp_user_agent: zeek.smtp.user_agent
+  #_version
   version:
     - 'zeek.*.version'
+    #service=gquic: http.version
     #service=http: http.version
     #service=snmp: zeek.snmp.version
+    #service=snmp: zeek.ntp.version
     #service=socks: zeek.socks.version
+    #service=snmp: zeek.snmp.version
     #service=ssh: zeek.ssh.version
     #service=ssl: zeek.ssl.version
+  gquic_version: zeek.gquic.version
+  http_version: http.version
+  ntp_version: zeek.ntp.version
+  socks_version: zeek.socks.version
+  snmp_version: zeek.snmp.version
+  ssh_version: zeek.ssh.version
+  tls_version: zeek.ssl.version   
   # DNS matching Taxonomy & DNS Category
   answer: dns.answers.name
   question_length: labels.dns.query_length
