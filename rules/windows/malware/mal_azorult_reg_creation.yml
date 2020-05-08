@@ -1,0 +1,28 @@
+title: Azorult Registry
+id: 
+description: Detects the presence of a registry key created during Azorult execution
+status: experimental
+references:
+tags:
+    - attack.execution
+    - attack.t1112
+author: Trent Liffick
+date: 2020/05/08
+logsource:
+    product: windows
+    service: sysmon
+detection:
+  selection:
+    EventID:
+      - 12
+      - 13
+    TargetObject:
+      - '*\SYSTEM\*\services\LocalNETService'
+  condition: selection
+fields:
+    - Image
+    - TargetObject
+    - TargetDetails
+falsepositives:
+  - unknown
+level: medium
