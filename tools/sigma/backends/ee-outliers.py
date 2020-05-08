@@ -18,11 +18,11 @@ from .elasticsearch import ElasticsearchDSLBackend
 import json
 import logging
 import configparser
+from .mixins import MultiRuleOutputMixin
 from io import StringIO
-from slugify import slugify
 
 
-class OutliersBackend(ElasticsearchDSLBackend):
+class OutliersBackend(ElasticsearchDSLBackend, MultiRuleOutputMixin):
     """ee-outliers backend"""
     identifier = 'ee-outliers'
     active = True
@@ -39,7 +39,7 @@ class OutliersBackend(ElasticsearchDSLBackend):
 
         self.queries = []
 
-        use_case_name = slugify(self.title)
+        use_case_name = self.getRuleName(sigmaparser)
 
         index = ''
         if self.indices is not None and len(self.indices) == 1:
@@ -59,7 +59,7 @@ class OutliersBackend(ElasticsearchDSLBackend):
         }
 
         config = configparser.ConfigParser(interpolation=None)
-        config["simplequery_" + use_case_name] = config_data
+        config["simplequery_sigma_" + use_case_name] = config_data
 
         output = StringIO()
         config.write(output)
@@ -67,3 +67,10 @@ class OutliersBackend(ElasticsearchDSLBackend):
         output.close()
 
         return result
+    
+    def finalize(self):
+        """
+        Is called after the last file was processed with generate(). The right place if this backend is not intended to
+        look isolated at each rule, but generates an output which incorporates multiple rules, e.g. dashboards.
+        """
+        pass
