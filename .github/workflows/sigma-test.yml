@@ -1,0 +1,37 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Sigma Tools and Rule Tests
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test-sigma:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r tools/requirements.txt -r tools/requirements-devel.txt
+        wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+        sudo apt install -y apt-transport-https
+        echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic.list
+        sudo apt update
+        sudo apt install -y elasticsearch
+        sudo systemctl start elasticsearch
+    - name: Test Sigma Tools and Rules
+      run: |
+        make test
+    - name: Test Generated Elasticsearch Query Strings
+      run: |
+        make test-backend-es-qs
