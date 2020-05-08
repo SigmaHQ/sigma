@@ -217,6 +217,11 @@ class LimaCharlieBackend(BaseBackend):
         # except KeyError:
         #     service = ""
 
+        # If there is a timeframe component, we do not currently
+        # support it for now.
+        if ruleConfig.get( 'detection', {} ).get( 'timeframe', None ) is not None:
+            raise NotImplementedError("Timeframes are not supported by backend.")
+
         # Don't use service for now, most Windows Event Logs
         # uses a different service with no category, since we
         # treat all Windows Event Logs together we can ignore

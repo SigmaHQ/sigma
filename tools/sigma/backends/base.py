@@ -19,6 +19,7 @@ import sys
 import sigma
 import yaml
 
+from sigma.backends.exceptions import NotSupportedError
 from .mixins import RulenameCommentMixin, QuoteCharMixin
 from sigma.parser.modifiers.base import SigmaTypeModifier
 
@@ -306,3 +307,34 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
         transformed from the original name given in the Sigma rule.
         """
         return fieldname
+
+class CorelightQueryBackend:
+
+    def generate(self, sigmaparser):
+        lgs = sigmaparser.parsedyaml.get("logsource")
+        allow_types = {
+            'category':
+                [
+                    'proxy', 'firewall', 'webserver', 'accounting', 'dns'
+                ],
+            'product':
+                [
+                    'zeek', 'apache', 'netflow', 'firewall'
+                ],
+            'service': [
+                'radius', 'kerberos', 'pe', 'ntlm', 'sip', 'syslog', 'ntp',
+                'mqtt_subscribe', 'smb_files', 'irc', 'http2', 'rfb',
+                'tunnel', 'socks', 'mqtt_publish', 'network', 'weird',
+                'known_certs', 'traceroute', 'modbus', 'smtp_links',
+                'ssl', 'known_hosts', 'software', 'smtp', 'tls', 'intel',
+                'ssh', 'dce_rpc', 'x509', 'known_services', 'http', 'files',
+                'gquic', 'ftp', 'dns', 'conn', 'dnp3', 'rdp', 'dpd',
+                'known_modbus', 'conn_long', 'modbus_register_change',
+                'mqtt_connect', 'pop3', 'mysql', 'notice', 'snmp', 'smb_mapping'
+            ]
+        }
+        for logsource_type, value in lgs.items():
+            if allow_types.get(logsource_type) and value.lower() in allow_types.get(logsource_type):
+                return super().generate(sigmaparser)
+        lgs_text = ", ".join(["%s: %s" % (key, lgs.get(key)) for key in lgs.keys()])
+        raise NotSupportedError("Corelight backend not supported logsources: %s." % lgs_text)
