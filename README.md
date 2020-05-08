@@ -100,7 +100,7 @@ merges multiple YAML documents of a Sigma rule collection into simple Sigma rule
 
 ```
 usage: sigmac [-h] [--recurse] [--filter FILTER]
-              [--target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,mdatp}]
+              [--target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,mdatp,ee-outliers}]
               [--target-list] [--config CONFIG] [--output OUTPUT]
               [--backend-option BACKEND_OPTION] [--defer-abort]
               [--ignore-backend-errors] [--verbose] [--debug]
@@ -201,6 +201,7 @@ tools/sigmac -t splunk -c ~/my-splunk-mapping.yml -c tools/config/generic/window
 * [PowerShell](https://docs.microsoft.com/en-us/powershell/scripting/getting-started/getting-started-with-windows-powershell?view=powershell-6)
 * [Grep](https://www.gnu.org/software/grep/manual/grep.html) with Perl-compatible regular expression support
 * [LimaCharlie](https://limacharlie.io)
+* [ee-outliers](https://github.com/NVISO-BE/ee-outliers)
 
 Current work-in-progress
 * [Splunk Data Models](https://docs.splunk.com/Documentation/Splunk/7.1.0/Knowledge/Aboutdatamodels)
