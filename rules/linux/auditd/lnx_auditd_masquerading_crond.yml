@@ -1,0 +1,24 @@
+title: Masquerading as Linux Crond Process
+id: 9d4548fa-bba0-4e88-bd66-5d5bf516cda0
+status: experimental
+description: Masquerading occurs when the name or location of an executable, legitimate or malicious, is manipulated or abused for the sake of evading defenses and
+    observation. Several different variations of this technique have been observed.
+author: Timur Zinniatullin, oscd.community
+date: 2019/10/21
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1036/T1036.yaml
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+        type: 'execve'
+        a0: 'cp'
+        a1: '-i'
+        a2: '/bin/sh'
+        a3: '*/crond'
+    condition: selection
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1036

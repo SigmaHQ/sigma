@@ -32,6 +32,8 @@ class SumoLogicBackend(SingleTextQueryBackend):
     """Converts Sigma rule into SumoLogic query"""
     identifier = "sumologic"
     active = True
+    config_required = False
+    default_config = ["sysmon", "sumologic"]
 
     index_field = "_index"
     reClear = None
@@ -78,23 +80,6 @@ class SumoLogicBackend(SingleTextQueryBackend):
         # not required but makes query faster, especially if no FER or _index/_sourceCategory
         if self.logname:
             return "%s " % self.logname
-        # FIXME! don't get backend config mapping through generate() => mapping inside script
-        if not self.indices and self.product == 'windows' and self.service:
-            return "_index=WINDOWS %s " % (self.service)
-        if not self.indices and self.product == 'windows':
-            return "_index=WINDOWS "
-        if not self.indices and self.product == 'linux' and self.service == 'auditd':
-            return "_index=AUDITD "
-        if not self.indices and self.product == 'linux' and self.service == 'osqueryd':
-            return "_index=OSQUERY "
-        if not self.indices and self.product == 'linux':
-            return "_index=LINUX "
-        if self.product == 'antivirus':
-            return "_index=ANTIVIRUS "
-        if self.category == 'firewall':
-            return "_index=FIREWALL "
-        if self.indices:
-            return "_index=%s " % self.indices
         return ""
 
     def generate(self, sigmaparser):
@@ -147,7 +132,7 @@ class SumoLogicBackend(SingleTextQueryBackend):
         super().__init__(*args, **kwargs)
         # TODO/FIXME! depending on deployment configuration, existing FER must be populate here (or backend config?)
         # aFL = ["EventID"]
-        aFL = ["EventID", "sourcename", "CommandLine", "NewProcessName", "Image", "ParentImage", "ParentCommandLine", "ParentProcessName"]
+        aFL = ["_index", "_sourceCategory", "_view", "EventID", "sourcename", "CommandLine", "NewProcessName", "Image", "ParentImage", "ParentCommandLine", "ParentProcessName"]
         for item in self.sigmaconfig.fieldmappings.values():
             if item.target_type is list:
                 aFL.extend(item.target)
@@ -248,7 +233,7 @@ class SumoLogicBackend(SingleTextQueryBackend):
                 val = re.sub(r'\\"\*$', '\\\\\\"*', val)
         # if not key and not (val.startswith('"') and val.endswith('"')) and not (val.startswith('(') and val.endswith(')')) and not ('|' in val) and val:
         # apt_babyshark.yml
-        if not (val.startswith('"') and val.endswith('"')) and not (val.startswith('(') and val.endswith(')')) and not ('|' in val) and not ('*' in val) and val:
+        if not (val.startswith('"') and val.endswith('"')) and not (val.startswith('(') and val.endswith(')')) and not ('|' in val) and not ('*' in val) and val and not '_index' in key and not '_sourceCategory' in key and not '_view' in key:
             val = '"%s"' % val
         return val
 

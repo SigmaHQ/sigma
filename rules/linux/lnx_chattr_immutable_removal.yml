@@ -1,0 +1,23 @@
+title: Remove Immutable File Attribute
+id: a5b977d6-8a81-4475-91b9-49dbfcd941f7
+description: Detects removing immutable file attribute
+status: experimental
+tags:
+    - attack.defense_evasion
+    - attack.t1222
+author: Jakob Weinzettl, oscd.community
+date: 2019/09/23
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+        type: 'EXECVE'
+        a0|contains: 'chattr'
+        a1|contains: '-i'
+    condition: selection
+falsepositives:
+    - Administrator interacting with immutable files (for instance backups)
+level: medium
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1222/T1222.yaml

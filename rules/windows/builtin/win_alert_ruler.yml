@@ -1,4 +1,5 @@
 title: Hacktool Ruler
+id: 24549159-ac1b-479c-8175-d42aea947cae
 description: This events that are generated when using the hacktool Ruler by Sensepost
 author: Florian Roth
 date: 2017/05/31
@@ -7,6 +8,8 @@ references:
     - https://github.com/sensepost/ruler
     - https://github.com/sensepost/ruler/issues/47
     - https://github.com/staaldraad/go-ntlm/blob/master/ntlm/ntlmv1.go#L427
+    - https://docs.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4776
+    - https://docs.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4624
 tags:
     - attack.discovery
     - attack.execution
@@ -21,10 +24,13 @@ detection:
     selection1:
         EventID: 
           - 4776
+        Workstation: 'RULER'
+    selection2:
+        EventID:
           - 4624
           - 4625
         WorkstationName: 'RULER'
-    condition: selection1
+    condition: (1 of selection*)
 falsepositives:
     - Go utilities that use staaldraad awesome NTLM library
 level: high

@@ -17,6 +17,8 @@
 
 import re
 import sigma
+from sigma.parser.modifiers.base import SigmaTypeModifier
+from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
 from .base import SingleTextQueryBackend
 from .mixins import MultiRuleOutputMixin
 
@@ -25,6 +27,8 @@ class QRadarBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Qradar saved search. Contributed by SOC Prime. https://socprime.com"""
     identifier = "qradar"
     active = True
+    config_required = False
+    default_config = ["sysmon", "qradar"]
     reEscape = re.compile('(")')
     reClear = None
     andToken = " and "
@@ -49,6 +53,10 @@ class QRadarBackend(SingleTextQueryBackend):
             return key
         else:
             return key
+
+    def cleanValue(self, value):
+        """Remove quotes in text"""
+        return value.replace("\'","\\\'")
 
     def generateNode(self, node):
         if type(node) == sigma.parser.condition.ConditionAND:
@@ -85,6 +93,8 @@ class QRadarBackend(SingleTextQueryBackend):
                 return self.mapExpression % (self.cleanKey(key), self.generateNode(value))
         elif type(value) == list:
             return self.generateMapItemListNode(key, value)
+        elif isinstance(value, SigmaTypeModifier):
+            return self.generateMapItemTypedNode(key, value)
         elif value is None:
             return self.nullExpression % (key, )
         else:
@@ -99,6 +109,18 @@ class QRadarBackend(SingleTextQueryBackend):
             else:
                 itemslist.append('%s = %s' % (self.cleanKey(key), self.generateValueNode(item, True)))
         return '('+" or ".join(itemslist)+')'
+
+    def generateMapItemTypedNode(self, fieldname, value):
+        if type(value) == SigmaRegularExpressionModifier:
+            regex = str(value)
+            # Regular Expressions have to match the full value in QRadar
+            if not (regex.startswith('^') or regex.startswith('.*')):
+                regex = '.*' + regex
+            if not (regex.endswith('$') or regex.endswith('.*')):
+                regex = regex + '.*'
+            return "%s imatches %s" % (self.cleanKey(fieldname), self.generateValueNode(regex, True))
+        else:
+            raise NotImplementedError("Type modifier '{}' is not supported by backend".format(value.identifier))
 
     def generateValueNode(self, node, keypresent):
         if keypresent == False:
@@ -175,7 +197,19 @@ class QRadarBackend(SingleTextQueryBackend):
             aql_database = "flows"
         else:
             aql_database = "events"
-        qradarPrefix = "SELECT UTF8(payload) as search_payload from %s where " % (aql_database)
+        
+        qradarPrefix="SELECT "
+        try:
+            mappedFields = []
+            for field in sigmaparser.parsedyaml["fields"]:
+                    mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
+                    mappedFields.append(mapped)
+            qradarPrefix += str(mappedFields).strip('[]')
+        except KeyError:    # no 'fields' attribute
+            mapped = None
+            qradarPrefix+="UTF8(payload) as search_payload"
+            pass
+        qradarPrefix += " from %s where " % (aql_database)
 
         try:
             timeframe = sigmaparser.parsedyaml['detection']['timeframe']

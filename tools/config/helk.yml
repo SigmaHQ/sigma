@@ -3,6 +3,7 @@ order: 20
 backends:
   - es-qs
   - es-dsl
+  - es-rule
   - kibana
   - xpack-watcher
   - elastalert
@@ -36,7 +37,6 @@ logsources:
     product: windows
     service: powershell-classic
     index: logs-endpoint-winevent-powershell-*
-
 defaultindex: logs-*
 fieldmappings:
     AccessMask: object_access_mask_requested
@@ -47,18 +47,22 @@ fieldmappings:
     AuthenticationPackageName: logon_authentication_package
     CallingProcessName: process_path
     CallTrace: process_call_trace
+    ClientAddress: src_ip_addr
+    ClientIPAddress: src_ip_addr
+    ClientIP: src_ip_addr
     CommandLine: process_command_line
     Company: file_company
     ComputerName: host_name
     Configuration:
         EventID=16: sysmon_configuration
+    ConnectedViaIPAddress: dst_nat_ip_addr
     CurrentDirectory: process_current_directory
     Description: file_description
+    DestAddress: dst_ip_addr
     Destination:
         EventID=20: wmi_consumer_destination
     DestinationHostname: dst_host_name
     DestinationIp: dst_ip_addr
-    DestinationIsIpv6: dst_is_ipv6
     DestinationPort: dst_port
     DestinationPortName: dst_port_name
     Details:
@@ -76,6 +80,7 @@ fieldmappings:
     FileVersion: file_version
     GrantedAccess: process_granted_access
     GroupName: group_name
+    GroupSid: group_sid
     HiveName: hive_name
     HostVersion: powershell.host.version
     Image: process_path
@@ -84,11 +89,16 @@ fieldmappings:
         EventID=7: module_loaded
     Imphash: hash_imphash
     Initiated:
-        EventID=3: network_initiated"
+        EventID=3: network_initiated
     IntegrityLevel:
         EventID=1: process_integrity_level
+    ipAddress: dst_ip_addr
+    IpAddress: src_ip_addr
+    IPString: src_ip_addr
+    LaunchedViaIPAddress: dst_ip_addr
     LogonProcessName: logon_process_name
     LogonType: logon_type
+    MachineIpAddress: dst_ip_addr
     MachineName: host_name
     Name:
         EventID=19: wmi_name
@@ -105,13 +115,15 @@ fieldmappings:
         EventID=20: wmi_operation
         EventID=21: wmi_operation
     OperationType: object_operation_type
+    OriginalFileName: file_name_original
     ParentImage: process_parent_path
+    ParentProcessName: process_parent_path
     PasswordLastSet: user_attribute_password_lastset
     Path: process_path
     ParentCommandLine: process_parent_command_line
     PipeName: pipe_name
     ProcessName: process_path
-    ProcesssCommandLine: process_command_line
+    ProcessCommandLine: process_command_line
     Product: file_product
     Properties: object_properties
     Protocol:
@@ -119,6 +131,7 @@ fieldmappings:
     Query:
         EventID=19: wmi_query
     RelativeTargetName: share_relative_target_name
+    SourceAddress: src_ip_addr
     SchemaVersion:
         EventID=4: sysmon_schema_version
     ServiceFileName: service_image_path
@@ -130,6 +143,7 @@ fieldmappings:
     Source: source_name
     SourceHostname: src_host_name
     SourceImage: process_path
+    SourceIp: src_ip_addr
     SourcePort: src_port
     SourcePortName: src_port_name
     StartAddress: thread_start_address
@@ -143,17 +157,20 @@ fieldmappings:
         EventID=4624: user_reporter_name
         EventId=4648: user_name
         EventID=5140: user_name
+    TargetServer: dst_ip_addr
+    TaskName: task_name
+    TicketEncryptionType: ticket_encryption_type
+    TicketOptions: ticket_options
     TargetFilename: file_name
     TargetImage: target_process_path
     TargetProcessAddress: thread_start_address
     TargetObject: registry_key_path
-    TaskName: task_name
-    TicketEncryptionType: ticket_encryption_type
-    TicketOptions: ticket_options
     Type:
         EventID=20: wmi_consumer_type
     User: user_account
     UserName: user_name
+    Value:
+      EventID=1102: dst_ip_addr
     Version:
         EventID=4: sysmon_version
     Workstation: src_host_name

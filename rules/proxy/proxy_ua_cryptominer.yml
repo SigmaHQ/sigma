@@ -1,0 +1,26 @@
+title: Crypto Miner User Agent
+id: fa935401-513b-467b-81f4-f9e77aa0dd78
+status: experimental
+description: Detects suspicious user agent strings used by crypto miners in proxy logs
+references:
+    - https://github.com/xmrig/xmrig/blob/da22b3e6c45825f3ac1f208255126cb8585cd4fc/src/base/kernel/Platform_win.cpp#L65
+    - https://github.com/xmrig/xmrig/blob/427b6516e0550200c17ca28675118f0fffcc323f/src/version.h
+author: Florian Roth
+date: 2019/10/21
+logsource:
+    category: proxy
+detection:
+    selection:
+      c-useragent:
+        # XMRig
+        - 'XMRig *'
+        # CCMiner
+        - 'ccminer*'
+    condition: selection
+fields:
+    - ClientIP
+    - c-uri
+    - c-useragent
+falsepositives:
+    - Unknown
+level: high
