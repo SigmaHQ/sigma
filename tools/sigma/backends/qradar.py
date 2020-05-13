@@ -27,6 +27,8 @@ class QRadarBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Qradar saved search. Contributed by SOC Prime. https://socprime.com"""
     identifier = "qradar"
     active = True
+    config_required = False
+    default_config = ["sysmon", "qradar"]
     reEscape = re.compile('(")')
     reClear = None
     andToken = " and "
@@ -118,7 +120,7 @@ class QRadarBackend(SingleTextQueryBackend):
                 regex = regex + '.*'
             return "%s imatches %s" % (self.cleanKey(fieldname), self.generateValueNode(regex, True))
         else:
-            raise NotImplementedError("Type modifier '{}' is not supported by backend".format(node.identifier))
+            raise NotImplementedError("Type modifier '{}' is not supported by backend".format(value.identifier))
 
     def generateValueNode(self, node, keypresent):
         if keypresent == False:

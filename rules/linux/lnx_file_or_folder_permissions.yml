@@ -1,0 +1,24 @@
+title: File or Folder Permissions Change
+description: Detects 
+id: 74c01ace-0152-4094-8ae2-6fd776dd43e5
+status: experimental
+tags:
+    - attack.defense_evasion
+    - attack.t1222
+author: Jakob Weinzettl, oscd.community
+date: 2019/09/23
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+        type: 'EXECVE'
+        a0|contains:
+            - 'chmod'
+            - 'chown'
+    condition: selection
+falsepositives:
+    - User interracting with files permissions (normal/daily behaviour)
+level: low
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1222/T1222.yaml

@@ -28,7 +28,33 @@ class SigmaContainsModifier(ListOrStringModifierMixin, SigmaTransformModifier):
         if not val.startswith("*"):
             val = "*" + val
         if not val.endswith("*"):
-            val += "*"
+            if val.endswith("\\"):
+                val += "\\*"
+            else:
+                val += "*"
+        return val
+
+class SigmaStartswithModifier(ListOrStringModifierMixin, SigmaTransformModifier):
+    """Add *-wildcard before and after all string(s)"""
+    identifier = "startswith"
+    active = True
+
+    def apply_str(self, val : str):
+        if not val.endswith("*"):
+            if val.endswith("\\"):
+                val += "\\*"
+            else:
+                val += "*"
+        return val
+
+class SigmaEndswithModifier(ListOrStringModifierMixin, SigmaTransformModifier):
+    """Add *-wildcard before and after all string(s)"""
+    identifier = "endswith"
+    active = True
+
+    def apply_str(self, val : str):
+        if not val.startswith("*"):
+           val = '*' + val
         return val
 
 class SigmaAllValuesModifier(SigmaTransformModifier):
