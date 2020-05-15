@@ -30,6 +30,7 @@ test-sigmac:
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t xpack-watcher -O email,index,webhook -c tools/config/winlogbeat.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t elastalert -c tools/config/winlogbeat.yml -O alert_methods=http_post,email -O emails=test@test.invalid -O http_post_url=http://test.invalid rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t elastalert-dsl -c tools/config/winlogbeat.yml -O alert_methods=http_post,email -O emails=test@test.invalid -O http_post_url=http://test.invalid rules/ > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t ee-outliers -c tools/config/winlogbeat.yml rules/ > /dev/null
 	! $(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -c tools/config/splunk-windows-index.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunkxml -c tools/config/splunk-windows.yml rules/ > /dev/null
