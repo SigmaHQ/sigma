@@ -206,7 +206,7 @@ tools/sigmac -t splunk -c ~/my-splunk-mapping.yml -c tools/config/generic/window
 Current work-in-progress
 * [Splunk Data Models](https://docs.splunk.com/Documentation/Splunk/7.1.0/Knowledge/Aboutdatamodels)
 
-New targets are continuously developed. You can get a list of supported targets with `sigmac --target-list` or `sigmac -l`.
+New targets are continuously developed. You can get a list of supported targets with `sigmac --lists` or `sigmac -l`.
 
 ### Requirements
 
