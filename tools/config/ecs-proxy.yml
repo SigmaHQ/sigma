@@ -1,16 +1,44 @@
-title: Elastic Common Schema mapping for proxy logs
+title: Elastic Common Schema mapping for proxy and webserver logs including NSM logs (zeek/suricata)
 order: 20
 backends:
   - es-qs
   - es-dsl
+  - elasticsearch-rule
   - kibana
   - xpack-watcher
   - elastalert
   - elastalert-dsl
-logsources:
-  proxy:
-    category: proxy
-    index: filebeat-*
+# logsources:
+  # proxy:
+    # category: proxy
+    # index:
+      # - "filebeat-*"
+      # - "*ecs-*"
+  #zeek-category-proxy:
+  #  category: proxy
+  #  rewrite:
+  #      product: zeek
+  #      service: http
+  #zeek-category-webserver:
+  #  category: webserver
+  #  conditions:
+  #    event.dataset: http
+  #  rewrite:
+  #      product: zeek
+  #      service: http
+  # zeek-http:
+  #   product: zeek
+  #   service: http
+  #   conditions:
+  #     event.dataset: http
+  # zeek-http2:
+  #   product: zeek
+  #   service: http2
+  #   conditions:
+  #     event.dataset: http2
+defaultindex:
+  - filebeat-*
+# logsourcemerging: or
 fieldmappings:
   # All Logs Applied Mapping & Taxonomy
   dst:
@@ -48,6 +76,14 @@ fieldmappings:
   sc-bytes: http.response.body.bytes
   sc-status: http.response.status_code
   # Temporary one off rule name fields
+  destination.domain:
+  # destination.ip:
+  # destination.port:
+  # http.response.status_code
+  # http.request.body.content
+  # source.domain:
+  # source.ip:
+  # source.port:
   agent.version: http.version
   c-ip:
     - source.address
@@ -65,6 +101,9 @@ fieldmappings:
     - destination.address
     - destination.ip
   dest_port: destination.port
+  #TODO:WhatShouldThisBe?==dest:
+  #TODO:WhatShouldThisBe?==destination:
+  #TODO:WhatShouldThisBe?==Destination:
   destination.hostname:
     - destination.domain
     - url.domain
