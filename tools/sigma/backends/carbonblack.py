@@ -2,7 +2,7 @@ import re
 import requests
 import json
 import os
-from ..config.eventdict import event
+from sigma.config.eventdict import event
 from fnmatch import fnmatch
 
 from sigma.backends.base import SingleTextQueryBackend
@@ -83,7 +83,7 @@ class CarbonBlackQueryBackend(CarbonBlackWildcardHandlingMixin, SingleTextQueryB
             if val.startswith("*"):
                 val = val.replace("*", "",1)
             if val.startswith("\\"):
-                val = val.replace("\\", "", 1)     
+                val = val.replace("\\", "", 1)
             if val.startswith("*\\"):
                 val = val.replace("*\\", "*")
             if val.startswith("*/"):
@@ -108,7 +108,7 @@ class CarbonBlackQueryBackend(CarbonBlackWildcardHandlingMixin, SingleTextQueryB
         elif type(new_value) is list:
             for index, vl in enumerate(new_value):
                 new_value[index] = self.cleanIPRange(vl)
-        
+
         return new_value
 
     def generateValueNode(self, node):
@@ -131,7 +131,6 @@ class CarbonBlackQueryBackend(CarbonBlackWildcardHandlingMixin, SingleTextQueryB
         else:
             transformed_fieldname = self.fieldNameMapping(fieldname, value)
             if(transformed_fieldname == "ipaddr"):
-                print("OK")
                 value = self.cleanIPRange(value)
             if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
                 #return self.mapExpression % (transformed_fieldname, self.generateNode(value))
