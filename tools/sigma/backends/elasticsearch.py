@@ -27,7 +27,7 @@ from sigma.parser.modifiers.type import SigmaRegularExpressionModifier, SigmaTyp
 from sigma.parser.condition import ConditionOR, ConditionAND, NodeSubexpression
 
 from sigma.config.mapping import ConditionalFieldMapping
-from .base import BaseBackend, SingleTextQueryBackend, CorelightQueryBackend
+from .base import BaseBackend, SingleTextQueryBackend
 from .mixins import RulenameCommentMixin, MultiRuleOutputMixin
 from .exceptions import NotSupportedError
 
@@ -297,11 +297,6 @@ class ElasticsearchQuerystringBackend(DeepFieldMappingMixin, ElasticsearchWildca
             return result
         else:
             return super().generateSubexpressionNode(node)
-
-
-class ElasticsearchCorelightBackend(CorelightQueryBackend, ElasticsearchQuerystringBackend):
-    identifier = "corelight_es-qs"
-
 
 class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, ElasticsearchWildcardHandlingMixin, BaseBackend):
     """ElasticSearch DSL backend"""
@@ -662,11 +657,6 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     def index_variable_name(self, index):
         return "index_" + index.replace("-", "__").replace("*", "X")
 
-
-class KibanaCorelightBackend(CorelightQueryBackend, KibanaBackend):
-    identifier = "corelight_kibana"
-
-
 class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     """Converts Sigma Rule into X-Pack Watcher JSON for alerting"""
     identifier = "xpack-watcher"
@@ -972,10 +962,6 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
             else:
                 raise NotImplementedError("Output type '%s' not supported" % self.output_type)
         return result
-
-class XPackWatcherCorelightBackend(CorelightQueryBackend, XPackWatcherBackend):
-    identifier = "corelight_xpack-watcher"
-
 
 class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
     """Elastalert backend"""
@@ -1334,6 +1320,3 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
         if references:
             rule.update({"references": references})
         return json.dumps(rule)
-
-class ElasticSearchRuleCorelightBackend(CorelightQueryBackend, ElasticSearchRuleBackend):
-    identifier = "corelight_elasticsearch-rule"

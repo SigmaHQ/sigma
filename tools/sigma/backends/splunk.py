@@ -16,7 +16,7 @@
 
 import re
 import sigma
-from .base import SingleTextQueryBackend, CorelightQueryBackend
+from .base import SingleTextQueryBackend
 from .mixins import MultiRuleOutputMixin
 
 class SplunkBackend(SingleTextQueryBackend):
@@ -171,12 +171,6 @@ class SplunkXMLBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
     def finalize(self):
         self.queries += self.dash_suf
         return self.queries
-
-
-class SplunkCorelightBackend(CorelightQueryBackend, SplunkBackend):
-    identifier = "corelight_splunk"
-
-
 
 class CrowdStrikeBackend(SplunkBackend):
     """Converts Sigma rule into CrowdStrike Search Processing Language (SPL)."""
