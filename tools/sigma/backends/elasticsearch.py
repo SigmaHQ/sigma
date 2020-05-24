@@ -23,7 +23,7 @@ from random import randrange
 
 import sigma
 import yaml
-from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
+from sigma.parser.modifiers.type import SigmaRegularExpressionModifier, SigmaTypeModifier
 from sigma.parser.condition import ConditionOR, ConditionAND, NodeSubexpression
 
 from sigma.config.mapping import ConditionalFieldMapping
@@ -119,7 +119,10 @@ class ElasticsearchWildcardHandlingMixin(object):
             if isinstance(value, list):
                 res = []
                 for item in value:
-                    res.extend([item.lower(), item.upper()])
+                    try:
+                        res.extend([item.lower(), item.upper()])
+                    except AttributeError:  # not a string (something that doesn't support upper/lower casing)
+                        res.append(item)
                 value = res
             elif isinstance(value, str):
                 value = [value.upper(), value.lower()]

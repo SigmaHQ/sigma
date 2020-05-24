@@ -330,7 +330,6 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
         return fieldname
 
 class CorelightQueryBackend:
-
     def generate(self, sigmaparser):
         lgs = sigmaparser.parsedyaml.get("logsource")
         allow_types = {

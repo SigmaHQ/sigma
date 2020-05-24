@@ -32,6 +32,7 @@ test-sigmac:
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t elastalert-dsl -c tools/config/winlogbeat.yml -O alert_methods=http_post,email -O emails=test@test.invalid -O http_post_url=http://test.invalid rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t ee-outliers -c tools/config/winlogbeat.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-qs  -c tools/config/ecs-cloudtrail.yml rules/ > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t corelight_es-qs  -c tools/config/ecs-zeek-corelight.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-rule  -c tools/config/ecs-cloudtrail.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t kibana  -c tools/config/ecs-cloudtrail.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t xpack-watcher  -c tools/config/ecs-cloudtrail.yml rules/ > /dev/null
@@ -55,6 +56,8 @@ test-sigmac:
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t qualys -c tools/config/qualys.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t netwitness -c tools/config/netwitness.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t sumologic -O rulecomment -c tools/config/sumologic.yml rules/ > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t humio -O rulecomment -c tools/config/humio.yml rules/ > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t crowdstrike -O rulecomment -c tools/config/crowdstrike.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t sql -c sysmon rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t logiq -c sysmon rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk -c tools/config/splunk-windows-index.yml -f 'level>=high,level<=critical,status=stable,logsource=windows,tag=attack.execution' rules/ > /dev/null
