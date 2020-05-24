@@ -4,12 +4,12 @@ status: experimental
 description: Detects suspicious new RUN key element pointing to an executable in a suspicious folder
 references:
     - https://www.fireeye.com/blog/threat-research/2018/08/fin7-pursuing-an-enigmatic-and-evasive-global-criminal-operation.html
-author: Florian Roth, Markus Neis
+author: Florian Roth, Markus Neis, Sander Wiebing
 tags:
     - attack.persistence
     - attack.t1060
 date: 2018/08/25
-modified: 2020/02/26
+modified: 2020/05/24
 logsource:
     product: windows
     service: sysmon
@@ -21,8 +21,6 @@ detection:
             - '*\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce\\*'
         Details:
             - '*C:\Windows\Temp\\*'
-            - '*\AppData\\*'
-            - '%AppData%\\*'
             - '*C:\$Recycle.bin\\*'
             - '*C:\Temp\\*'
             - '*C:\Users\Public\\*'
@@ -31,12 +29,9 @@ detection:
             - '*C:\Users\Desktop\\*'
             - 'wscript*'
             - 'cscript*'
-    filter:
-        Details|contains:
-          - '\AppData\Local\Microsoft\OneDrive\'  # OneDrive False Positives
-    condition: selection and not filter
+    condition: selection
 fields:
     - Image
 falsepositives:
-    - Software using the AppData folders for updates
+    - Software using weird folders for updates
 level: high
