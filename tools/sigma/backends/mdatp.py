@@ -15,8 +15,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
+from functools import wraps
 from .base import SingleTextQueryBackend
 from .exceptions import NotSupportedError
+
+
+def wrapper(method):
+    @wraps(method)
+    def _impl(self, method_args):
+        key, value, *_ = method_args
+        if '.keyword' in key:
+            key = key.split('.keyword')[0]
+        if key not in self.skip_fields:
+            method_output = method(self, method_args)
+            return method_output
+        else:
+            return
+    return _impl
+
 
 class WindowsDefenderATPBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Microsoft Defender ATP Hunting Queries."""
@@ -41,6 +57,16 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
     mapExpression = "%s == %s"
     mapListsSpecialHandling = True
     mapListValueExpression = "%s in %s"
+    
+    skip_fields = {
+        "Description",
+        "_exists_",
+        "FileVersion",
+        "Product",
+        "Company",
+        "ParentProcessName",
+        "ParentCommandLine"
+    }
 
     def __init__(self, *args, **kwargs):
         """Initialize field mappings"""
@@ -57,6 +83,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "DestinationIp"             : ("RemoteIP", self.default_value_mapping),
                 "DestinationIsIpv6"         : ("RemoteIP has \":\"", ),
                 "DestinationPort"           : ("RemotePort", self.default_value_mapping),
+                "Protocol"                  : ("RemoteProtocol", self.default_value_mapping),
                 "Details"                   : ("RegistryValueData", self.default_value_mapping),
                 "EventType"                 : ("ActionType", self.default_value_mapping),
                 "Image"                     : ("FolderPath", self.default_value_mapping),
@@ -151,6 +178,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
             return "%s | where tostring(extractjson('$.Command', AdditionalFields)) in~ " % self.table
         return "%s | where " % self.table
 
+    @wrapper
     def generateMapItemNode(self, node):
         """
         ATP queries refer to event tables instead of Windows logging event identifiers. This method catches conditions that refer to this field
