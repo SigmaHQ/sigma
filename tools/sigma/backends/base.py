@@ -20,6 +20,7 @@ import sigma
 import yaml
 import re
 
+from sigma.backends.exceptions import NotSupportedError
 from .mixins import RulenameCommentMixin, QuoteCharMixin
 from sigma.parser.modifiers.base import SigmaTypeModifier
 
