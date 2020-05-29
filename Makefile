@@ -109,7 +109,7 @@ test-backend-es-qs:
 	tests/test-backend-es-qs.py
 
 test-backend-sql:
-	pytest tests/test_backend_sql.py tests/test_backend_sqlite.py
+	pytest tools/tests/test_backend_sql.py tools/tests/test_backend_sqlite.py
 
 test-sigma2attack:
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigma2attack
