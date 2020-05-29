@@ -110,7 +110,7 @@ test-backend-es-qs:
 
 test-backend-sql:
 	cd tools && python3 setup.py install
-	cd tools && python3 -m pytest tests/test_backend_sql.py tests/test_backend_sqlite.py
+	cd tools && $(COVERAGE) run -m pytest tests/test_backend_sql.py tests/test_backend_sqlite.py
 
 test-sigma2attack:
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigma2attack

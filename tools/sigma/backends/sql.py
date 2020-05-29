@@ -178,7 +178,7 @@ class SQLBackend(SingleTextQueryBackend):
 
     def generateQuery(self, parsed):
         if self._recursiveFtsSearch(parsed.parsedSearch):
-            raise NotImplementedError("FullTextSearch not implemented for SQL Backend, use SQLite Backend.")
+            raise NotImplementedError("FullTextSearch not implemented for SQL Backend.")
         result = self.generateNode(parsed.parsedSearch)
 
         if parsed.parsedAgg:

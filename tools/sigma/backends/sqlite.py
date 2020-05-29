@@ -20,7 +20,7 @@ import re
 
 
 class SQLiteBackend(SQLBackend):
-    """SQLiteBackend provides FullTextSearch functionality"""
+    """Converts Sigma rule into SQL query for SQLite"""
     identifier = "sqlite"
     active = True
 
@@ -121,20 +121,3 @@ class SQLiteBackend(SQLBackend):
             return "SELECT * FROM {} WHERE {}".format(fro, whe)
 
         return "SELECT * FROM {} WHERE {}".format(self.table, result)
-
-    def generateFullTextQuery(self, search, parsed):
-
-        search = search.replace('"', '')
-        search = '" OR "'.join(search.split(" OR "))
-        search = '" AND "'.join(search.split(" AND "))
-        search = '"{}"'.format(search)
-        search = search.replace('%', '')
-        search = search.replace('_', '')
-        search = '{} MATCH (\'{}\')'.format(self.table, search)
-
-        if parsed.parsedAgg:
-            # Handle aggregation
-            fro, whe = self.generateAggregation(parsed.parsedAgg, search)
-            return "SELECT * FROM {} WHERE {}".format(fro, whe)
-
-        return 'SELECT * FROM {} WHERE {}'.format(self.table, search)
