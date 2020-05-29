@@ -2,7 +2,7 @@
 TMPOUT = $(shell tempfile||mktemp)
 COVSCOPE = tools/sigma/*.py,tools/sigma/backends/*.py,tools/sigmac,tools/merge_sigma,tools/sigma2attack
 export COVERAGE = coverage
-test: clearcov test-rules test-sigmac test-merge test-backend-sql test-sigma2attack build finish
+test: clearcov test-rules test-sigmac test-merge test-sigma2attack build finish
 
 clearcov:
 	rm -f .coverage
@@ -109,7 +109,8 @@ test-backend-es-qs:
 	tests/test-backend-es-qs.py
 
 test-backend-sql:
-	pytest tools/tests/test_backend_sql.py tools/tests/test_backend_sqlite.py
+	cd tools && python3 setup.py install
+	cd tools && python3 -m pytest tests/test_backend_sql.py tests/test_backend_sqlite.py
 
 test-sigma2attack:
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigma2attack
