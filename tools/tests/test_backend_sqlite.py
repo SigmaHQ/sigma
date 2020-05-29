@@ -1,3 +1,19 @@
+# Test output backends for sigmac
+# Copyright 2020 Jonas Hagg
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import unittest
 from unittest.mock import patch
 
@@ -15,39 +31,39 @@ class TestFullTextSearch(unittest.TestCase):
 
     def test_full_text_search(self):
         detection = {"selection": ["test1"], "condition": "selection"}
-        expected_result = 'select * from {0} where {0} match (\'"test1"\')'.format(
+        expected_result = 'SELECT * FROM {0} WHERE {0} MATCH (\'"test1"\')'.format(
             self.table)
         self.validate(detection, expected_result)
 
         detection = {"selection": [5], "condition": "selection"}
-        expected_result = 'select * from {0} where {0} match (\'"5"\')'.format(
+        expected_result = 'SELECT * FROM {0} WHERE {0} MATCH (\'"5"\')'.format(
             self.table)
         self.validate(detection, expected_result)
 
         detection = {"selection": ["test1", "test2"], "condition": "selection"}
-        expected_result = 'select * from {0} where ({0} match (\'"test1" OR "test2"\'))'.format(
+        expected_result = 'SELECT * FROM {0} WHERE ({0} MATCH (\'"test1" OR "test2"\'))'.format(
             self.table)
         self.validate(detection, expected_result)
 
         detection = {"selection": ["test1"], "filter":["test2"], "condition": "selection and filter"}
-        expected_result = 'select * from {0} where ({0} match (\'"test1" and "test2"\'))'.format(
+        expected_result = 'SELECT * FROM {0} WHERE ({0} MATCH (\'"test1" AND "test2"\'))'.format(
             self.table)
         self.validate(detection, expected_result)
 
         detection = {"selection": [5, 6], "condition": "selection"}
-        expected_result = 'select * from {0} where ({0} match (\'"5" OR "6"\'))'.format(
+        expected_result = 'SELECT * FROM {0} WHERE ({0} MATCH (\'"5" OR "6"\'))'.format(
             self.table)
         self.validate(detection, expected_result)
 
         detection = {"selection": ["test1"], "filter": [
             "test2"], "condition": "selection or filter"}
-        expected_result = 'select * from {0} where ({0} match (\'"test1" OR "test2"\'))'.format(
+        expected_result = 'SELECT * FROM {0} WHERE ({0} MATCH (\'"test1" OR "test2"\'))'.format(
             self.table)
         self.validate(detection, expected_result)
 
         detection = {"selection": ["test1"], "filter": [
             "test2"], "condition": "selection and filter"}
-        expected_result = 'select * from {0} where ({0} match (\'"test1" and "test2"\'))'.format(
+        expected_result = 'SELECT * FROM {0} WHERE ({0} MATCH (\'"test1" AND "test2"\'))'.format(
             self.table)
         self.validate(detection, expected_result)
 
@@ -55,26 +71,26 @@ class TestFullTextSearch(unittest.TestCase):
         # aggregation with fts
         detection = {"selection": ["test"],
                      "condition": "selection | count() > 5"}
-        inner_query = 'select count(*) as agg from {0} where {0} match (\'"test"\')'.format(
+        inner_query = 'SELECT count(*) AS agg FROM {0} WHERE {0} MATCH (\'"test"\')'.format(
             self.table)
-        expected_result = 'select * from ({}) where agg > 5'.format(inner_query)
+        expected_result = 'SELECT * FROM ({}) WHERE agg > 5'.format(inner_query)
         self.validate(detection, expected_result)
 
         detection = {"selection": ["test1", "test2"],
                      "condition": "selection | count() > 5"}
-        inner_query = 'select count(*) as agg from {0} where ({0} match (\'"test1" or "test2"\'))'.format(
+        inner_query = 'SELECT count(*) AS agg FROM {0} WHERE ({0} MATCH (\'"test1" OR "test2"\'))'.format(
             self.table)
-        expected_result = 'select * from ({}) where agg > 5'.format(inner_query)
+        expected_result = 'SELECT * FROM ({}) WHERE agg > 5'.format(inner_query)
         self.validate(detection, expected_result)
 
         # aggregation + group by + fts
         detection = {"selection": ["test1", "test2"],
                      "condition": "selection | count() by fieldname > 5"}
-        inner_query = 'select count(*) as agg from {0} where ({0} match (\'"test1" or "test2"\')) group by fieldname'.format(
+        inner_query = 'SELECT count(*) AS agg FROM {0} WHERE ({0} MATCH (\'"test1" OR "test2"\')) GROUP BY fieldname'.format(
             self.table)
-        expected_result = 'select * from ({}) where agg > 5'.format(inner_query)
+        expected_result = 'SELECT * FROM ({}) WHERE agg > 5'.format(inner_query)
         self.validate(detection, expected_result)
-    
+
     def test_not_implemented(self):
         # fts not implemented with wildcards
         detection = {"selection": ["test*"], "condition": "selection"}
@@ -124,8 +140,7 @@ class TestFullTextSearch(unittest.TestCase):
 
             for p in parser.parsers:
                 if isinstance(expectation, str):
-                    self.assertEqual(expectation.lower(),
-                                     backend.generate(p).lower())
+                    self.assertEqual(expectation, backend.generate(p))
                 elif isinstance(expectation, Exception):
                     self.assertRaises(type(expectation), backend.generate, p)
 

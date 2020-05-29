@@ -1,5 +1,6 @@
 # Output backends for sigmac
 # Copyright 2019 Jayden Zheng
+# Copyright 2020 Jonas Hagg
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -36,7 +37,7 @@ class SQLBackend(SingleTextQueryBackend):
     notNullExpression = "%s=*"              # Expression of queries for not null values. %s is field name
     mapExpression = "%s = %s"               # Syntax for field/value conditions. First %s is fieldname, second is value
     mapMulti = "%s IN %s"                   # Syntax for field/value conditions. First %s is fieldname, second is value
-    mapWildcard = "%s LIKE %s escape \'\\\'"# Syntax for swapping wildcard conditions: Adding \ as escape character          
+    mapWildcard = "%s LIKE %s ESCAPE \'\\\'"# Syntax for swapping wildcard conditions: Adding \ as escape character
     mapSource = "%s=%s"                     # Syntax for sourcetype
     mapListsSpecialHandling = False         # Same handling for map items with list values as for normal values (strings, integers) if True, generateMapItemListNode method is called with node
     mapListValueExpression = "%s OR %s"     # Syntax for field/value condititons where map value is a list
@@ -87,13 +88,13 @@ class SQLBackend(SingleTextQueryBackend):
 
         has_wildcard = re.search(r"((\\(\*|\?|\\))|\*|\?|_|%)", self.generateNode(value))
 
-        if "," in self.generateNode(value) and not has_wildcard:        
+        if "," in self.generateNode(value) and not has_wildcard:
             return self.mapMulti % (transformed_fieldname, self.generateNode(value))
         elif "LENGTH" in transformed_fieldname:
             return self.mapLength % (transformed_fieldname, value)
         elif type(value) == list:
             return self.generateMapItemListNode(transformed_fieldname, value)
-        elif self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):          
+        elif self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
             if has_wildcard:
                 return self.mapWildcard % (transformed_fieldname, self.generateNode(value))
             else:
@@ -107,7 +108,7 @@ class SQLBackend(SingleTextQueryBackend):
 
     def generateMapItemListNode(self, key, value):
         return "(" + (" OR ".join([self.mapWildcard % (key, self.generateValueNode(item)) for item in value])) + ")"
-    
+
     def generateValueNode(self, node):
             return self.valueExpression % (self.cleanValue(str(node)))
 
@@ -144,11 +145,11 @@ class SQLBackend(SingleTextQueryBackend):
         #Replace ? with _, if even number of backsashes (or zero) in front of ?
         val = re.sub(r"(?<!\\)(\\\\)*(?!\\)\?", r"\1_", val)
         return val
- 
+
     def generateAggregation(self, agg, where_clausel):
         if not agg:
             return self.table, where_clausel
-        
+
         if  (agg.aggfunc == SigmaAggregationParser.AGGFUNC_COUNT or
             agg.aggfunc == SigmaAggregationParser.AGGFUNC_MAX or
             agg.aggfunc == SigmaAggregationParser.AGGFUNC_MIN or
@@ -161,18 +162,18 @@ class SQLBackend(SingleTextQueryBackend):
                 group_by = ""
 
             if agg.aggfield:
-                select = "{}({}) AS AGG".format(agg.aggfunc_notrans, self.fieldNameMapping(agg.aggfield, None))
+                select = "{}({}) AS agg".format(agg.aggfunc_notrans, self.fieldNameMapping(agg.aggfield, None))
             else:
                 if agg.aggfunc == SigmaAggregationParser.AGGFUNC_COUNT:
-                    select = "{}(*) AS AGG".format(agg.aggfunc_notrans)
+                    select = "{}(*) AS agg".format(agg.aggfunc_notrans)
                 else:
                     raise SigmaParseError("For {} aggregation a fieldname needs to be specified".format(agg.aggfunc_notrans))
-            
+
             temp_table = "(SELECT {} FROM {} WHERE {}{})".format(select, self.table, where_clausel, group_by)
-            agg_condition =  "AGG {} {}".format(agg.cond_op, agg.condition)
+            agg_condition =  "agg {} {}".format(agg.cond_op, agg.condition)
 
             return temp_table, agg_condition
-        
+
         raise NotImplementedError("{} aggregation not implemented in SQL Backend".format(agg.aggfunc_notrans))
 
     def generateQuery(self, parsed):
