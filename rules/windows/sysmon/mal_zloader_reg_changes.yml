@@ -1,0 +1,29 @@
+title: zLoader Registry Changes
+id: 916ae9c5-a21a-4e34-b2ea-deccd16fba01
+description: Detects the registry changes made by zLoader malware
+status: experimental
+references:
+  - https://clickallthethings.wordpress.com/2020/05/13/zloader-and-xlm-4-0-making-evasion-great-again/
+author: Trent Liffick
+date: 2020/05/13
+tags:
+  - attack.execution
+  - attack.t1112
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID:
+      - 12
+      - 13
+    TargetObject:
+      - '*SOFTWARE\Microsoft\Office\\*\Word\Security'
+  condition: selection
+fields:
+  - Image
+  - TargetObject
+  - TargetDetails
+falsepositives:
+  - unknown
+level: low
