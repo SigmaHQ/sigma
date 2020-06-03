@@ -1,33 +1,34 @@
 title: Execution in Webserver Root Folder
 id: 35efb964-e6a5-47ad-bbcd-19661854018d
 status: experimental
-description: Detects a suspicious program execution in a web service root folder (filter out false positives)
+description: Detects a suspicious program execution in a web service root folder (filter
+  out false positives)
 author: Florian Roth
 date: 2019/01/16
 tags:
-    - attack.persistence
-    - attack.t1100
+  - attack.persistence
+  - attack.t1505.003
 logsource:
-    category: process_creation
-    product: windows
+  category: process_creation
+  product: windows
 detection:
-    selection:
-        Image:
-            - '*\wwwroot\\*'
-            - '*\wmpub\\*'
-            - '*\htdocs\\*'
-    filter:
-        Image:
-            - '*bin\\*'
-            - '*\Tools\\*'
-            - '*\SMSComponent\\*'
-        ParentImage:
-            - '*\services.exe'
-    condition: selection and not filter
+  selection:
+    Image:
+      - '*\wwwroot\\*'
+      - '*\wmpub\\*'
+      - '*\htdocs\\*'
+  filter:
+    Image:
+      - '*bin\\*'
+      - '*\Tools\\*'
+      - '*\SMSComponent\\*'
+    ParentImage:
+      - '*\services.exe'
+  condition: selection and not filter
 fields:
-    - CommandLine
-    - ParentCommandLine
+  - CommandLine
+  - ParentCommandLine
 falsepositives:
-    - Various applications
-    - Tools that include ping or nslookup command invocations
+  - Various applications
+  - Tools that include ping or nslookup command invocations
 level: medium
