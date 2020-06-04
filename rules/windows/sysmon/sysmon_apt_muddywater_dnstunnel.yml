@@ -1,0 +1,26 @@
+title: "Muddywater DNS tunnel method detection"
+description: "Detecting DNS tunnel activity from Muddywater"
+author: Furkan Caliskan
+status: "testing"
+references:
+- https://www.virustotal.com/gui/file/5ad401c3a568bd87dd13f8a9ddc4e450ece61cd9ce4d1b23f68ce0b1f3c190b7/
+- https://www.vmray.com/analyses/5ad401c3a568/report/overview.html
+tags:
+- attack.command_and_control
+- attack.t1071
+logsource:
+  product: "windows"
+  service: "sysmon"
+detection:
+  selection:
+    EventID: 1
+    Image|endswith:
+    - '\powershell.exe'
+    ParentImage|endswith:
+    - '\excel.exe'
+    CommandLine|contains:
+    - 'DataExchange.dll'
+  condition: selection
+falsepositives:
+- Unkown
+level: medium
