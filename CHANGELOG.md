@@ -19,6 +19,7 @@ from version 0.14.0.
 ### Fixed
 
 * Splunx XML rule name is now set to rule title
+* Backend list deduplicated
 
 ## 0.16.0 - 2020-02-25
 
