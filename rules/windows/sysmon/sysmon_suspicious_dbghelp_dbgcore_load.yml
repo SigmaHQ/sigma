@@ -1,12 +1,12 @@
-title: Dumping Lsass.exe Memory with MiniDumpWriteDump API
-id: dd5ab153-beaa-4315-9647-65abc5f71541
+title: Load of dbghelp/dbgcore DLL from Suspicious Process
+id: 0e277796-5f23-4e49-a490-483131d4f6e1
 status: experimental
-description: Detects the use of MiniDumpWriteDump API for dumping lsass.exe memory in a stealth way. Tools like ProcessHacker and some attacker tradecract use this
+description: Detects the load of dbghelp/dbgcore DLL (used to make memory dumps) by suspicious processes. Tools like ProcessHacker and some attacker tradecract use MiniDumpWriteDump
     API found in dbghelp.dll or dbgcore.dll. As an example, SilentTrynity C2 Framework has a module that leverages this API to dump the contents of Lsass.exe and
     transfer it over the network back to the attacker's machine.
 date: 2019/10/27
-modified: 2019/11/13
-author: Perez Diego (@darkquassar), oscd.community
+modified: 2020/05/23
+author: Perez Diego (@darkquassar), oscd.community, Ecco
 references:
     - https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/nf-minidumpapiset-minidumpwritedump
     - https://www.pinvoke.net/default.aspx/dbghelp/MiniDumpWriteDump.html
@@ -35,7 +35,7 @@ detection:
             - '\outlook.exe'
             - '\monitoringhost.exe'
             - '\wmic.exe'
-            - '\msiexec.exe'
+              # - '\msiexec.exe'  an installer installing a program using one of those DLL will raise an alert
             - '\bash.exe'
             - '\wscript.exe'
             - '\cscript.exe'
@@ -62,4 +62,4 @@ fields:
     - ImageLoaded
 falsepositives:
     - Penetration tests
-level: critical
+level: high

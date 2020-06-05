@@ -13,22 +13,49 @@
 
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-import re, json
+import os
+import sys
+import re
+import json
 import xml.etree.ElementTree as xml
 
 
-from ..config.mapping import (
+from sigma.config.mapping import (
     SimpleFieldMapping, MultiFieldMapping, ConditionalFieldMapping
 )
-from ..parser.condition import SigmaAggregationParser
-from ..parser.exceptions import SigmaParseError
-from ..parser.modifiers.type import SigmaRegularExpressionModifier
-from .base import SingleTextQueryBackend
+from sigma.parser.condition import SigmaAggregationParser
+
+from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
+from sigma.backends.base import SingleTextQueryBackend
+
+from sigma.parser.modifiers.base import SigmaTypeModifier
+from sigma.parser.modifiers.transform import SigmaContainsModifier, SigmaStartswithModifier, SigmaEndswithModifier
 from .data import sysmon_schema
 from .exceptions import NotSupportedError
 
-class AzureLogAnalyticsBackend(SingleTextQueryBackend):
+class DeepFieldMappingMixin(object):
+
+    def fieldNameMapping(self, fieldname, value):
+        if isinstance(fieldname, str):
+            get_config = self.sigmaconfig.fieldmappings.get(fieldname)
+            if not get_config and '|' in fieldname:
+                fieldname = fieldname.split('|', 1)[0]
+                get_config = self.sigmaconfig.fieldmappings.get(fieldname)
+            if isinstance(get_config, ConditionalFieldMapping):
+                condition = self.sigmaconfig.fieldmappings.get(fieldname).conditions
+                for key, item in self.logsource.items():
+                    if condition.get(key) and condition.get(key, {}).get(item):
+                        new_fieldname = condition.get(key, {}).get(item)
+                        if any(new_fieldname):
+                           return super().fieldNameMapping(new_fieldname[0], value)
+        return super().fieldNameMapping(fieldname, value)
+
+
+    def generate(self, sigmaparser):
+        self.logsource = sigmaparser.parsedyaml.get("logsource", {})
+        return super().generate(sigmaparser)
+
+class AzureLogAnalyticsBackend(DeepFieldMappingMixin, SingleTextQueryBackend):
     """Converts Sigma rule into Azure Log Analytics Queries."""
     identifier = "ala"
     active = True
@@ -43,8 +70,7 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
     )
     config_required = False
 
-    reEscape = re.compile('("|(?<!\\\\)\\\\(?![*?\\\\]))')
-    reClear = None
+    reEscape = re.compile('(\\\|"|(?<!)(?![*?]))')
     andToken = " and "
     orToken = " or "
     notToken = "not "
@@ -57,12 +83,16 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
     mapExpression = "%s == %s"
     mapListsSpecialHandling = True
     mapListValueExpression = "%s in %s"
-
-    _WIN_SECURITY_EVENT_MAP = {
-        "Image": "NewProcessName",
-        "ParentImage": "ParentProcessName",
-        "User": "SubjectUserName",
+    typedValueExpression = {
+        SigmaRegularExpressionModifier: "matches regex \"(?i)%s\"",
+        SigmaContainsModifier: "contains \"%s\""
     }
+
+    # _WIN_SECURITY_EVENT_MAP = {
+    #     "Image": "NewProcessName",
+    #     "ParentImage": "ParentProcessName",
+    #     "User": "SubjectUserName",
+    # }
 
     def __init__(self, *args, **kwargs):
         """Initialize field mappings."""
@@ -77,14 +107,9 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
         self._agg_var = None
         self._has_logsource_event_cond = False
         if not self.sysmon and not self.sigmaconfig.config:
-            self._field_map = self._WIN_SECURITY_EVENT_MAP
+            self._field_map = {}#self._WIN_SECURITY_EVENT_MAP
         else:
             self._field_map = {}
-        self.typedValueExpression[SigmaRegularExpressionModifier] = "matches regex \"%s\""
-
-    def id_mapping(self, src):
-        """Identity mapping, source == target field name"""
-        return src
 
     def map_sysmon_schema(self, eventid):
         schema_keys = []
@@ -105,48 +130,36 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
     def default_value_mapping(self, val):
         op = "=="
         if isinstance(val, str):
-            if "*" in val[1:-1]:     # value contains * inside string - use regex match
+            if "*" in val[1:-1]:  # value contains * inside string - use regex match
                 op = "matches regex"
-                val = re.sub('([".^$]|\\\\(?![*?]))', '\\\\\g<1>', val)
                 val = re.sub('\\*', '.*', val)
+                if "\\" in val:
+                    return "%s \"(?i)%s\"" % (op, val)
+                return "%s \"(?i)%s\"" % (op, val)
+            elif val.startswith("*") or val.endswith("*"):
+                op = "contains"
+                val = re.sub('([".^$]|(?![*?]))', '\g<1>', val)
+                val = re.sub('\\*', '', val)
                 val = re.sub('\\?', '.', val)
-                if "\\" in val:
-                    return "%s @\"%s\"" % (op, val)
-            else:                           # value possibly only starts and/or ends with *, use prefix/postfix match
-                if val.endswith("*") and val.startswith("*"):
-                    op = "contains"
-                    val = self.cleanValue(val[1:-1])
-                elif val.endswith("*"):
-                    op = "startswith"
-                    val = self.cleanValue(val[:-1])
-                elif val.startswith("*"):
-                    op = "endswith"
-                    val = self.cleanValue(val[1:])
-
-                if "\\" in val:
-                    return "%s @\"%s\"" % (op, val)
-
+                # if "\\" in val:
+                #     return "%s @\"%s\"" % (op, val)
+                return "%s \"%s\"" % (op, val)
+            # elif "\\" in val:
+            #     return "%s @\"%s\"" % (op, val)
         return "%s \"%s\"" % (op, val)
 
     def generate(self, sigmaparser):
         self.table = None
-        try:
-            self.category = sigmaparser.parsedyaml['logsource'].setdefault('category', None)
-            self.product = sigmaparser.parsedyaml['logsource'].setdefault('product', None)
-            self.service = sigmaparser.parsedyaml['logsource'].setdefault('service', None)
-        except KeyError:
-            self.category = None
-            self.product = None
-            self.service = None
+        self.category = sigmaparser.parsedyaml['logsource'].setdefault('category', None)
+        self.product = sigmaparser.parsedyaml['logsource'].setdefault('product', None)
+        self.service = sigmaparser.parsedyaml['logsource'].setdefault('service', None)
 
         detection = sigmaparser.parsedyaml.get("detection", {})
-        is_parent_cmd = False
         if "keywords" in detection.keys():
             return super().generate(sigmaparser)
 
-
         if self.category == "process_creation":
-            self.table = "SysmonEvent"
+            self.table = "SecurityEvent"
             self.eventid = "1"
         elif self.service == "security":
             self.table = "SecurityEvent"
@@ -154,6 +167,12 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
             self.table = "SysmonEvent"
         elif self.service == "powershell":
             self.table = "Event"
+        elif self.service == "office365":
+            self.table = "OfficeActivity"
+        elif self.service == "azuread":
+            self.table = "AuditLogs"
+        elif self.service == "azureactivity":
+            self.table = "AzureActivity"
         else:
             if self.service:
                 if "-" in self.service:
@@ -181,8 +200,8 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
         elif self.sysmon:
             parse_string = self.map_sysmon_schema(self.eventid)
             before = "%s | parse EventData with * %s | where " % (self.table, parse_string)
-        elif self.category == "process_creation" and not self._has_logsource_event_cond:
-            before = "%s | where EventID == \"%s\" | where " % (self.table, self.eventid)
+        # elif self.category == "process_creation" and not self._has_logsource_event_cond:
+        #     before = "%s | where EventID == \"%s\" | where " % (self.table, self.eventid)
         else:
             before = "%s | where " % self.table
         return before
@@ -193,6 +212,7 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
         and creates an appropriate table reference.
         """
         key, value = node
+        key = self.fieldNameMapping(key, value)
         if type(value) == list:         # handle map items with values list like multiple OR-chained conditions
             return "(" + self.generateORNode(
                     [(key, v) for v in value]
@@ -207,17 +227,26 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
                 self.table = "SecurityEvent"
             elif self.service == "system":
                 self.table = "Event"
-        elif type(value) in (str, int):     # default value processing
-            mapping = (key, self.default_value_mapping)
+            return self.mapExpression % (key, value)
+        elif type(value) in [SigmaTypeModifier, SigmaContainsModifier, SigmaRegularExpressionModifier, SigmaStartswithModifier, SigmaEndswithModifier]:
+            return self.generateMapItemTypedNode(key, value)
+        elif type(value) in (str, int):    # default value processing'
+            #default_filters = ["endswith", "contains", "startswith", "re"]
+            # if any([item for item in default_filters if item in key]):
+            #     key = re.sub(key, default_filters, "")
+            #     return self.regexExpression % (key, self.cleanValue(value))
+            # else:
+            #     value_mapping = self.default_value_mapping
+            value_mapping = self.default_value_mapping
+            mapping = (key, value_mapping)
             if len(mapping) == 1:
                 mapping = mapping[0]
                 if type(mapping) == str:
                     return mapping
                 elif callable(mapping):
-                    conds = mapping(key, value)
                     return self.generateSubexpressionNode(
                             self.generateANDNode(
-                                [cond for cond in mapping(key, value)]
+                                [cond for cond in mapping(key, self.cleanValue(value))]
                                 )
                             )
             elif len(mapping) == 2:
@@ -226,12 +255,29 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
                     if type(mapitem) == str:
                         result.append(mapitem)
                     elif callable(mapitem):
-                        result.append(mapitem(val))
+                        result.append(mapitem(self.cleanValue(val)))
                 return "{} {}".format(*result)
             else:
                 raise TypeError("Backend does not support map values of type " + str(type(value)))
+        elif type(value) == list:
+            return self.generateMapItemListNode(key, value)
 
-        return super().generateMapItemNode(node)
+        elif value is None:
+            return self.nullExpression % (key, )
+        else:
+            raise TypeError("Backend does not support map values of type " + str(type(value)))
+
+    def generateMapItemTypedNode(self, fieldname, value):
+        return "%s %s" % (fieldname, self.generateTypedValueNode(value))
+
+    def generateTypedValueNode(self, node):
+        try:
+            val = str(node)
+            if "*" in val:
+                val = re.sub('\\*', '.*', val)
+            return self.typedValueExpression[type(node)] % (val)
+        except KeyError:
+            raise NotImplementedError("Type modifier '{}' is not supported by backend".format(node.identifier))
 
     def generateAggregation(self, agg):
         if agg is None:
@@ -269,36 +315,6 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
             )
         )
 
-    def generateAfter(self, parsed):
-        del parsed
-        if self._fields:
-            all_fields = list(self._fields)
-            if self._agg_var:
-                all_fields = set(all_fields + [self._agg_var])
-            project_fields = self._map_fields(all_fields)
-            project_list = ", ".join(str(fld) for fld in set(project_fields))
-            return " | project " + project_list
-        return ""
-
-    def _map_fields(self, fields):
-        for field in fields:
-            mapped_field = self._map_field(field)
-            if isinstance(mapped_field, str):
-                yield mapped_field
-            elif isinstance(mapped_field, list):
-                for subfield in mapped_field:
-                    yield subfield
-
-    def _map_field(self, fieldname):
-        mapping = self.sigmaconfig.fieldmappings.get(fieldname)
-        if isinstance(mapping, ConditionalFieldMapping):
-            fieldname = self._map_conditional_field(fieldname)
-        elif isinstance(mapping, MultiFieldMapping):
-            fieldname = mapping.resolve_fieldname(fieldname, self._parser)
-        elif isinstance(mapping, SimpleFieldMapping):
-            fieldname = mapping.resolve_fieldname(fieldname, self._parser)
-        return fieldname
-
     def _map_conditional_field(self, fieldname):
         mapping = self.sigmaconfig.fieldmappings.get(fieldname)
         # if there is a conditional mapping for this fieldname
@@ -325,35 +341,89 @@ class AzureAPIBackend(AzureLogAnalyticsBackend):
     def __init__(self, *args, **kwargs):
         """Initialize field mappings"""
         super().__init__(*args, **kwargs)
+        self.techniques = self._load_mitre_file("techniques")
 
-    def create_rule(self, config):
-        tags = config.get("tags", [])
+    def find_technique(self, key_ids):
+        for key_id in set(key_ids):
+            if not key_id:
+                continue
+            for technique in self.techniques:
+                if key_id == technique.get("technique_id", ""):
+                    yield technique
+
+    def _load_mitre_file(self, mitre_type):
+        try:
+            backend_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "config", "mitre"))
+            path = os.path.join(backend_dir, "{}.json".format(mitre_type))
+            with open(path) as config_file:
+                config = json.load(config_file)
+                return config
+        except (IOError, OSError) as e:
+            print("Failed to open {} configuration file '%s': %s".format(path, str(e)), file=sys.stderr)
+            return []
+        except json.JSONDecodeError as e:
+            print("Failed to parse {} configuration file '%s' as valid YAML: %s" % (path, str(e)), file=sys.stderr)
+            return []
+
+    def skip_tactics_or_techniques(self, src_technics, src_tactics):
+        tactics = set()
+        technics = set()
+
+        local_storage_techniques = {item["technique_id"]: item for item in self.find_technique(src_technics)}
+
+        for key_id in src_technics:
+            src_tactic = local_storage_techniques.get(key_id, {}).get("tactic")
+            if not src_tactic:
+                continue
+            src_tactic = set(src_tactic)
+
+            for item in src_tactics:
+                if item in src_tactic:
+                    technics.add(key_id)
+                    tactics.add(item)
+
+        return sorted(tactics), sorted(technics)
+
+    def parse_severity(self, old_severity):
+        if old_severity.lower() == "critical":
+            return "high"
+        return old_severity
+
+    def get_tactics_and_techniques(self, tags):
         tactics = list()
         technics = list()
+
         for tag in tags:
             tag = tag.replace("attack.", "")
-            if re.match("[tT][0-9]{4}", tag):
+            if re.match("[t][0-9]{4}", tag, re.IGNORECASE):
                 technics.append(tag.title())
             else:
                 if "_" in tag:
-                    tag_list = tag.split("_")
-                    tag_list = [item.title() for item in tag_list]
-                    tactics.append("".join(tag_list))
-                else:
-                    tactics.append(tag.title())
+                    tag = tag.replace("_", " ")
+                tag = tag.title()
+                tactics.append(tag)
+
+        return tactics, technics
+
+    def create_rule(self, config):
+        tags = config.get("tags", [])
+
+        tactics, technics = self.get_tactics_and_techniques(tags)
+        tactics, technics = self.skip_tactics_or_techniques(technics, tactics)
+        tactics = list(map(lambda s: s.replace(" ", ""), tactics))
 
         rule = {
                 "displayName": "{} by {}".format(config.get("title"), config.get('author')),
                 "description": "{} {}".format(config.get("description"), "Technique: {}.".format(",".join(technics))),
-                "severity": config.get("level", "medium"),
+                "severity": self.parse_severity(config.get("level", "medium")),
                 "enabled": True,
                 "query": config.get("translation"),
                 "queryFrequency": "12H",
                 "queryPeriod": "12H",
                 "triggerOperator": "GreaterThan",
-                "triggerThreshold": 1,
+                "triggerThreshold": 0,
                 "suppressionDuration": "12H",
-                "suppressionEnabled": False,
+                "suppressionEnabled": True,
                 "tactics": tactics
             }
         return json.dumps(rule)
@@ -365,3 +435,5 @@ class AzureAPIBackend(AzureLogAnalyticsBackend):
             configs.update({"translation": translation})
             rule = self.create_rule(configs)
             return rule
+        else:
+            raise NotSupportedError("No table could be determined from Sigma rule")
