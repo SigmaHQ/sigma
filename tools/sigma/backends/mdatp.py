@@ -32,7 +32,6 @@ def wrapper(method):
             return
     return _impl
 
-
 class WindowsDefenderATPBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Microsoft Defender ATP Hunting Queries."""
     identifier = "mdatp"
@@ -188,14 +187,9 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
 
     def generate(self, sigmaparser):
         self.table = None
-        try:
-            self.category = sigmaparser.parsedyaml['logsource'].setdefault('category', None)
-            self.product = sigmaparser.parsedyaml['logsource'].setdefault('product', None)
-            self.service = sigmaparser.parsedyaml['logsource'].setdefault('service', None)
-        except KeyError:
-            self.category = None
-            self.product = None
-            self.service = None
+        self.category = sigmaparser.parsedyaml['logsource'].get('category')
+        self.product = sigmaparser.parsedyaml['logsource'].get('product')
+        self.service = sigmaparser.parsedyaml['logsource'].get('service')
 
         if (self.category, self.product, self.service) == ("process_creation", "windows", None):
             self.table = "DeviceProcessEvents"
