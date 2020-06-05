@@ -20,6 +20,7 @@ test-sigmac:
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -h
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -l
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac --backend-help es-qs
 	! $(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvd -t es-qs rules/ > /dev/null
 	! $(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-qs rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-qs --shoot-yourself-in-the-foot rules/ > /dev/null
