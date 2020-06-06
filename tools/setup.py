@@ -82,6 +82,7 @@ setup(
             'sigmac = sigma.sigmac:main',
             'merge_sigma = sigma.merge_sigma:main',
             'sigma2misp = sigma.sigma2misp:main',
+            'sigma2attack = sigma.sigma2attack:main',
             'sigma_similarity = sigma.sigma_similarity:main',
             'sigma_uuid = sigma.sigma_uuid:main',
         ],
