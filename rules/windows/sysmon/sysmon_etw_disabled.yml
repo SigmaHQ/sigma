@@ -1,0 +1,26 @@
+title: ETW Disabled
+id: 11985f9f-2590-4f59-beea-88cc0507f350
+status: experimental
+description: Detects methods that disable ETW (Event Tracing) to evade detection
+references: 
+    - https://twitter.com/_xpn_/status/1268712093928378368?s=20
+    - https://gist.github.com/Cyb3rWard0g/a4a115fd3ab518a0e593525a379adee3
+tags:
+    - attack.defense_evasion
+    - attack.t1089
+author: Florian Roth
+date: 2020/06/06
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 13  # value set
+        TargetObject|contains: 'SOFTWARE\Microsoft\.NETFramework\ETWEnabled'
+        Details|contains: '0x00000000'
+    condition: selection
+fields:
+    - Image
+falsepositives:
+    - Services or programs that disable the ETW temporarily
+level: high
