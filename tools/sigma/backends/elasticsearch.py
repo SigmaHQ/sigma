@@ -1175,6 +1175,7 @@ class ElastalertBackendQs(ElastalertBackend, ElasticsearchQuerystringBackend):
         return [{ 'query' : { 'query_string' : { 'query' : super().generateQuery(parsed) } } }]
 
 class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
+    """Elasticsearch detection rule backend"""
     identifier = "es-rule"
     active = True
 
