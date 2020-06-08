@@ -14,8 +14,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-tools/sigma/parser/exceptions.py
-
 import yaml
 from .exceptions import SigmaCollectionParseError
 from .rule import SigmaParser
