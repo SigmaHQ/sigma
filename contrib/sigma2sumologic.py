@@ -124,7 +124,7 @@ def get_rule_as_sumologic(file):
     return "".join(output)
 
 if args.help:
-    parser_print_help()
+    parser.print_help()
 
 if args.conf:
     with open(args.conf, 'r') as ymlfile:
