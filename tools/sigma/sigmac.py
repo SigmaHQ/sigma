@@ -115,179 +115,183 @@ def set_argparser():
     
     return argparser
 
-argparser = set_argparser()
-cmdargs = argparser.parse_args()
-
-scm = SigmaConfigurationManager()
-
-logger = logging.getLogger(__name__)
-if cmdargs.debug:   # pragma: no cover
-    logger.setLevel(logging.DEBUG)
-
-def list_backends():
+def list_backends(debug):
     for backend in sorted(backends.getBackendList(), key=lambda backend: backend.identifier):
-        if cmdargs.debug:
+        if debug:
             print("{:>15} : {} ({})".format(backend.identifier, backend.__doc__, backend.__name__))
         else:
             print("{:>15} : {}".format(backend.identifier, backend.__doc__))
 
-def list_configurations(backend=None):
+def list_configurations(backend=None, scm=None):
     for conf_id, title, backends in sorted(scm.list(), key=lambda config: config[0]):
         if backend is not None and backend in backends or backend is None or len(backends) == 0:
             print("{:>30} : {}".format(conf_id, title))
 
-def list_modifiers():
+def list_modifiers(modifiers):
     for modifier_id, modifier in modifiers.items():
         print("{:>10} : {}".format(modifier_id, modifier.__doc__))
 
-if cmdargs.lists:
-    print("Backends:")
-    list_backends()
+def main():
+    argparser = set_argparser()
+    cmdargs = argparser.parse_args()
 
-    print()
-    print("Configurations:")
-    list_configurations(cmdargs.target)
+    scm = SigmaConfigurationManager()
 
-    print()
-    print("Modifiers:")
-    list_modifiers()
-    sys.exit(0)
-elif len(cmdargs.inputs) == 0:
-    print("Nothing to do!")
-    argparser.print_usage()
-    sys.exit(0)
+    logger = logging.getLogger(__name__)
+    if cmdargs.debug:   # pragma: no cover
+        logger.setLevel(logging.DEBUG)
 
-if cmdargs.target is None:
-    print("No target selected, select one with -t/--target")
-    argparser.print_usage()
-    sys.exit(ERR_NO_TARGET)
+    if cmdargs.lists:
+        print("Backends:")
+        list_backends(cmdargs.debug)
 
-rulefilter = None
-if cmdargs.filter:
-    try:
-        rulefilter = SigmaRuleFilter(cmdargs.filter)
-    except SigmaRuleFilterParseException as e:
-        print("Parse error in Sigma rule filter expression: %s" % str(e), file=sys.stderr)
-        sys.exit(ERR_RULE_FILTER_PARSING)
+        print()
+        print("Configurations:")
+        list_configurations(backend=cmdargs.target, scm=scm)
 
-sigmaconfigs = SigmaConfigurationChain()
-backend_class = backends.getBackend(cmdargs.target)
-if cmdargs.config is None:
-    if backend_class.config_required and not cmdargs.shoot_yourself_in_the_foot:
-        print("The backend you want to use usually requires a configuration to generate valid results. Please provide one with --config/-c.", file=sys.stderr)
-        print("Available choices for this backend (get complete list with --lists/-l):")
-        list_configurations(cmdargs.target)
-        sys.exit(ERR_CONFIG_REQUIRED)
+        print()
+        print("Modifiers:")
+        list_modifiers(modifiers=modifiers)
+        sys.exit(0)
+    elif len(cmdargs.inputs) == 0:
+        print("Nothing to do!")
+        argparser.print_usage()
+        sys.exit(0)
+
+    if cmdargs.target is None:
+        print("No target selected, select one with -t/--target")
+        argparser.print_usage()
+        sys.exit(ERR_NO_TARGET)
+
+    rulefilter = None
+    if cmdargs.filter:
+        try:
+            rulefilter = SigmaRuleFilter(cmdargs.filter)
+        except SigmaRuleFilterParseException as e:
+            print("Parse error in Sigma rule filter expression: %s" % str(e), file=sys.stderr)
+            sys.exit(ERR_RULE_FILTER_PARSING)
+
+    sigmaconfigs = SigmaConfigurationChain()
+    backend_class = backends.getBackend(cmdargs.target)
+    if cmdargs.config is None:
+        if backend_class.config_required and not cmdargs.shoot_yourself_in_the_foot:
+            print("The backend you want to use usually requires a configuration to generate valid results. Please provide one with --config/-c.", file=sys.stderr)
+            print("Available choices for this backend (get complete list with --lists/-l):")
+            list_configurations(backend=cmdargs.target, scm=scm)
+            sys.exit(ERR_CONFIG_REQUIRED)
     if backend_class.default_config is not None:
         cmdargs.config = backend_class.default_config
 
-if cmdargs.config:
-    order = 0
-    for conf_name in cmdargs.config:
-        try:
-            sigmaconfig = scm.get(conf_name)
-            if sigmaconfig.order is not None:
-                if sigmaconfig.order <= order and not cmdargs.shoot_yourself_in_the_foot:
-                    print("The configurations were provided in the wrong order (order key check in config file)", file=sys.stderr)
-                    sys.exit(ERR_CONFIG_ORDER)
-                order = sigmaconfig.order
-
+    if cmdargs.config:
+        order = 0
+        for conf_name in cmdargs.config:
             try:
-                if cmdargs.target not in sigmaconfig.config["backends"]:
-                    print("The configuration '{}' is not valid for backend '{}'. Valid choices are: {}".format(conf_name, cmdargs.target, ", ".join(sigmaconfig.config["backends"])), file=sys.stderr)
-                    sys.exit(ERR_CONFIG_ORDER)
-            except KeyError:
+                sigmaconfig = scm.get(conf_name)
+                if sigmaconfig.order is not None:
+                    if sigmaconfig.order <= order and not cmdargs.shoot_yourself_in_the_foot:
+                        print("The configurations were provided in the wrong order (order key check in config file)", file=sys.stderr)
+                        sys.exit(ERR_CONFIG_ORDER)
+                    order = sigmaconfig.order
+
+                try:
+                    if cmdargs.target not in sigmaconfig.config["backends"]:
+                        print("The configuration '{}' is not valid for backend '{}'. Valid choices are: {}".format(conf_name, cmdargs.target, ", ".join(sigmaconfig.config["backends"])), file=sys.stderr)
+                        sys.exit(ERR_CONFIG_ORDER)
+                except KeyError:
+                    pass
+
+                sigmaconfigs.append(sigmaconfig)
+            except OSError as e:
+                print("Failed to open Sigma configuration file %s: %s" % (conf_name, str(e)), file=sys.stderr)
+                exit(ERR_OPEN_CONFIG_FILE)
+            except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
+                print("Sigma configuration file %s is no valid YAML: %s" % (conf_name, str(e)), file=sys.stderr)
+                exit(ERR_CONFIG_INVALID_YAML)
+            except SigmaConfigParseError as e:
+                print("Sigma configuration parse error in %s: %s" % (conf_name, str(e)), file=sys.stderr)
+                exit(ERR_CONFIG_PARSING)
+
+    backend_options = BackendOptions(cmdargs.backend_option, cmdargs.backend_config)
+    backend = backend_class(sigmaconfigs, backend_options)
+
+    filename = cmdargs.output
+    if filename:
+        try:
+            out = open(filename, "w", encoding='utf-8')
+        except (IOError, OSError) as e:
+            print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
+            exit(ERR_OUTPUT)
+    else:
+        out = sys.stdout
+
+    error = 0
+    for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
+        logger.debug("* Processing Sigma input %s" % (sigmafile))
+        try:
+            if cmdargs.inputs == ['-']:
+                f = sigmafile
+            else:
+                f = sigmafile.open(encoding='utf-8')
+            parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter)
+            results = parser.generate(backend)
+            for result in results:
+                print(result, file=out)
+        except OSError as e:
+            print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
+            error = ERR_OPEN_SIGMA_RULE
+        except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
+            print("Sigma file %s is no valid YAML: %s" % (sigmafile, str(e)), file=sys.stderr)
+            error = ERR_INVALID_YAML
+            if not cmdargs.defer_abort:
+                sys.exit(error)
+        except (SigmaParseError, SigmaCollectionParseError) as e:
+            print("Sigma parse error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
+            error = ERR_SIGMA_PARSING
+            if not cmdargs.defer_abort:
+                sys.exit(error)
+        except NotSupportedError as e:
+            print("The Sigma rule requires a feature that is not supported by the target system: " + str(e), file=sys.stderr)
+            if not cmdargs.ignore_backend_errors:
+                error = ERR_NOT_SUPPORTED
+                if not cmdargs.defer_abort:
+                    sys.exit(error)
+        except BackendError as e:
+            print("Backend error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
+            if not cmdargs.ignore_backend_errors:
+                error = ERR_BACKEND
+                if not cmdargs.defer_abort:
+                    sys.exit(error)
+        except (NotImplementedError, TypeError) as e:
+            print("An unsupported feature is required for this Sigma rule (%s): " % (sigmafile) + str(e), file=sys.stderr)
+            print("Feel free to contribute for fun and fame, this is open source :) -> https://github.com/Neo23x0/sigma", file=sys.stderr)
+            if not cmdargs.ignore_backend_errors:
+                error = ERR_NOT_IMPLEMENTED
+                if not cmdargs.defer_abort:
+                    sys.exit(error)
+        except PartialMatchError as e:
+            print("Partial field match error: %s" % str(e), file=sys.stderr)
+            if not cmdargs.ignore_backend_errors:
+                error = ERR_PARTIAL_FIELD_MATCH
+                if not cmdargs.defer_abort:
+                    sys.exit(error)
+        except FullMatchError as e:
+            print("Full field match error", file=sys.stderr)
+            if not cmdargs.ignore_backend_errors:
+                error = ERR_FULL_FIELD_MATCH
+                if not cmdargs.defer_abort:
+                    sys.exit(error)                
+        finally:
+            try:
+                f.close()
+            except:
                 pass
 
-            sigmaconfigs.append(sigmaconfig)
-        except OSError as e:
-            print("Failed to open Sigma configuration file %s: %s" % (conf_name, str(e)), file=sys.stderr)
-            exit(ERR_OPEN_CONFIG_FILE)
-        except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
-            print("Sigma configuration file %s is no valid YAML: %s" % (conf_name, str(e)), file=sys.stderr)
-            exit(ERR_CONFIG_INVALID_YAML)
-        except SigmaConfigParseError as e:
-            print("Sigma configuration parse error in %s: %s" % (conf_name, str(e)), file=sys.stderr)
-            exit(ERR_CONFIG_PARSING)
+    result = backend.finalize()
+    if result:
+        print(result, file=out)
+    out.close()
 
-backend_options = BackendOptions(cmdargs.backend_option, cmdargs.backend_config)
-backend = backend_class(sigmaconfigs, backend_options)
+    sys.exit(error)
 
-filename = cmdargs.output
-if filename:
-    try:
-        out = open(filename, "w", encoding='utf-8')
-    except (IOError, OSError) as e:
-        print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
-        exit(ERR_OUTPUT)
-else:
-    out = sys.stdout
-
-error = 0
-for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
-    logger.debug("* Processing Sigma input %s" % (sigmafile))
-    try:
-        if cmdargs.inputs == ['-']:
-            f = sigmafile
-        else:
-            f = sigmafile.open(encoding='utf-8')
-        parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter)
-        results = parser.generate(backend)
-        for result in results:
-            print(result, file=out)
-    except OSError as e:
-        print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
-        error = ERR_OPEN_SIGMA_RULE
-    except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
-        print("Sigma file %s is no valid YAML: %s" % (sigmafile, str(e)), file=sys.stderr)
-        error = ERR_INVALID_YAML
-        if not cmdargs.defer_abort:
-            sys.exit(error)
-    except (SigmaParseError, SigmaCollectionParseError) as e:
-        print("Sigma parse error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
-        error = ERR_SIGMA_PARSING
-        if not cmdargs.defer_abort:
-            sys.exit(error)
-    except NotSupportedError as e:
-        print("The Sigma rule requires a feature that is not supported by the target system: " + str(e), file=sys.stderr)
-        if not cmdargs.ignore_backend_errors:
-            error = ERR_NOT_SUPPORTED
-            if not cmdargs.defer_abort:
-                sys.exit(error)
-    except BackendError as e:
-        print("Backend error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
-        if not cmdargs.ignore_backend_errors:
-            error = ERR_BACKEND
-            if not cmdargs.defer_abort:
-                sys.exit(error)
-    except (NotImplementedError, TypeError) as e:
-        print("An unsupported feature is required for this Sigma rule (%s): " % (sigmafile) + str(e), file=sys.stderr)
-        print("Feel free to contribute for fun and fame, this is open source :) -> https://github.com/Neo23x0/sigma", file=sys.stderr)
-        if not cmdargs.ignore_backend_errors:
-            error = ERR_NOT_IMPLEMENTED
-            if not cmdargs.defer_abort:
-                sys.exit(error)
-    except PartialMatchError as e:
-        print("Partial field match error: %s" % str(e), file=sys.stderr)
-        if not cmdargs.ignore_backend_errors:
-            error = ERR_PARTIAL_FIELD_MATCH
-            if not cmdargs.defer_abort:
-                sys.exit(error)
-    except FullMatchError as e:
-        print("Full field match error", file=sys.stderr)
-        if not cmdargs.ignore_backend_errors:
-            error = ERR_FULL_FIELD_MATCH
-            if not cmdargs.defer_abort:
-                sys.exit(error)                
-    finally:
-        try:
-            f.close()
-        except:
-            pass
-
-result = backend.finalize()
-if result:
-    print(result, file=out)
-out.close()
-
-sys.exit(error)
+if __name__ == "__main__":
+    main()
