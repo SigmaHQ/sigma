@@ -88,9 +88,9 @@ Sysmon: Web Shell Detection
 Windows 'Security' Eventlog: Suspicious Number of Failed Logons from a Single Source Workstation
 ![sigma_rule example5](./images/Sigma_rule_example5.png)
 
-# Sigma Tools 
+# Sigma Tools
 
-## Sigmac 
+## Sigmac
 
 Sigmac converts sigma rules into queries or inputs of the supported targets listed below. It acts as a frontend to the
 Sigma library that may be used to integrate Sigma support in other projects. Further, there's `merge_sigma.py` which
@@ -98,7 +98,7 @@ merges multiple YAML documents of a Sigma rule collection into simple Sigma rule
 
 ### Usage
 
-```
+```bash
 usage: sigmac [-h] [--recurse] [--filter FILTER]
               [--target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,mdatp,ee-outliers}]
               [--target-list] [--config CONFIG] [--output OUTPUT]
