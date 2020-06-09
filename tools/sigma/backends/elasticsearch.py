@@ -667,10 +667,13 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
             ("es", "localhost:9200", "Host and port of Elasticsearch instance", None),
             ("watcher_url", "watcher", "Watcher URL: watcher (default)=_watcher/..., xpack=_xpack/wacher/... (deprecated)", None),
             ("filter_range","30m","Watcher time filter",None),
+            ("action_throttle_period","15m","Throttle time of the action",None),
 
             ("alert_methods", "email", "Alert method(s) to use when the rule triggers, comma separated. Supported: " + ', '.join(supported_alert_methods), None),
             # Options for Email Action            
             ("mail", "root@localhost", "Mail address for Watcher notification (only logging if not set)", None),
+            ("mail_from", "root@localhost", "Mail address for Watcher notification (only logging if not set)", None),
+            ("mail_profile", "standard", "Watcher provides three email profiles that control how MIME messages are structured: standard (default), gmail, and outlook.", None),
 
             # Options for WebHook Action
         ("http_host", "localhost", "Webhook host used for alert notification", None),
@@ -816,14 +819,20 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                 if 'email' in alert_methods:
                     # mail notification if mail address is given
                     email = self.mail
+                    mail_profile = self.mail_profile
+                    mail_from = self.mail_from
+                    action_throttle_period = self.action_throttle_period
                     eaction = {
                         "send_email": {
+                                "throttle_period": action_throttle_period,
                                 "email": {
-                                "to": email,
-                                "subject": action_subject,
+                                    "profile": mail_profile,
+                                    "from": mail_from,
+                                    "to": email,
+                                    "subject": action_subject,
                                     "body": action_body,
-                                "attachments": {
-                                    "data.json": {
+                                    "attachments": {
+                                        "data.json": {
                                             "data": {
                                             "format": "json"
                                                 }
