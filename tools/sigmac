@@ -74,22 +74,21 @@ def get_inputs(paths, recursive):
     else:
         return [pathlib.Path(p) for p in paths]
 
-class SigmacArgumentParser(argparse.ArgumentParser):
-    def format_help(self):
-        helptext = super().format_help() + "\nBackend options:\n"
+class ActionBackendHelp(argparse.Action):
+    def __call__(self, parser, ns, vals, opt):
+        backend = backends.getBackend(vals)
+        if len(backend.options) > 0:
+            helptext = "Backend options for " + backend.identifier + "\n"
+            for option, default, help, _ in backend.options:
+                helptext += "    {:10}: {} (default: {})".format(option, help, default) + "\n"
 
-        for backend in backends.getBackendList():
-            if len(backend.options) > 0:
-                helptext += "  " + backend.identifier + "\n"
-                for option, default, help, _ in backend.options:
-                    helptext += "    {:10}: {} (default: {})".format(option, help, default) + "\n"
-
-        return helptext
+        print(helptext)
+        exit(0)
 
 def set_argparser():
     """Sets up and parses the command line arguments for Sigmac.
     Returns the argparser"""
-    argparser = SigmacArgumentParser(description="Convert Sigma rules into SIEM signatures.")
+    argparser = argparse.ArgumentParser(description="Convert Sigma rules into SIEM signatures.")
     argparser.add_argument("--recurse", "-r", action="store_true", help="Use directory as input (recurse into subdirectories is not implemented yet)")
     argparser.add_argument("--filter", "-f", help="""
     Define comma-separated filters that must match (AND-linked) to rule to be processed.
@@ -106,6 +105,7 @@ def set_argparser():
     argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix if multiple files are generated")
     argparser.add_argument("--backend-option", "-O", action="append", help="Options and switches that are passed to the backend")
     argparser.add_argument("--backend-config", "-C", help="Configuration file (YAML format) containing options to pass to the backend")
+    argparser.add_argument("--backend-help", action=ActionBackendHelp, help="Print backend options")
     argparser.add_argument("--defer-abort", "-d", action="store_true", help="Don't abort on parse or conversion errors, proceed with next rule. The exit code from the last error is returned")
     argparser.add_argument("--ignore-backend-errors", "-I", action="store_true", help="Only return error codes for parse errors and ignore errors for rules that cause backend errors. Useful, when you want to get as much queries as possible.")
     argparser.add_argument("--shoot-yourself-in-the-foot", action="store_true", help=argparse.SUPPRESS)
