@@ -1,24 +1,10 @@
---- 
-Description: ".SettingContent-ms” file type was introduced in Windows 10 and allows a user to create “shortcuts” to various Windows 10 setting pages. These files are simply XML and contain paths to various Windows 10 settings binaries."
+title: Arbitrary Shell Command Execution via Settingcontent-Ms
+description: The .SettingContent-ms file type was introduced in Windows 10 and allows a user to create "shortcuts" to various Windows 10 setting pages. These files are simply XML and contain paths to various Windows 10 settings binaries.
 author: Sreeman
 condition: selection
 references:
     - https://posts.specterops.io/the-tale-of-settingcontent-ms-files-f1ea253e4d39
 date: 2020/03/13
-detection:
-    selection:
-        CommandLine: '*.SettingContent-ms*'
-    filter:
-        FilePath:
-            - '*immersivecontrolpanel*'
-    condition: selection and not filter
-falsepositives: 
-  - Unknown
-fields: 
-  - ParentProcess
-  - CommandLine
-  - ParentCommandLine
-level: medium
 logsource: 
   Service: Security
   product: Windows
@@ -27,4 +13,17 @@ tags:
   - attack.t1193
   - attack.execution
   - attack.initial_access
-title: "Abusing settingcontent-ms to launch arbitrary shell command execution"
+detection:
+    selection:
+        CommandLine|contains: '.SettingContent-ms'
+    filter:
+        FilePath|contains:
+            - 'immersivecontrolpanel'
+    condition: selection and not filter
+falsepositives: 
+  - Unknown
+fields: 
+  - ParentProcess
+  - CommandLine
+  - ParentCommandLine
+level: medium
