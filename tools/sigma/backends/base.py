@@ -18,9 +18,7 @@ import sys
 
 import sigma
 import yaml
-import re
 
-from sigma.backends.exceptions import NotSupportedError
 from .mixins import RulenameCommentMixin, QuoteCharMixin
 from sigma.parser.modifiers.base import SigmaTypeModifier
 
@@ -92,7 +90,6 @@ class BaseBackend:
     options = tuple()     # a list of tuples with following elements: option name, default value, help text, target attribute name (option name if None)
     config_required = True
     default_config = None
-    mapExpression = ""
 
     def __init__(self, sigmaconfig, backend_options=dict()):
         """
@@ -133,48 +130,29 @@ class BaseBackend:
         result = self.generateNode(parsed.parsedSearch)
         if parsed.parsedAgg:
             result += self.generateAggregation(parsed.parsedAgg)
-        #result = self.applyOverrides(result)
         return result
-
-    def applyOverrides(self, query):
-        try:
-            if 'overrides' in self.sigmaconfig.config and isinstance(query, str):
-                for expression in self.sigmaconfig.config['overrides']:
-                    if 'regexes' in expression:
-                        for x in expression['regexes']:
-                            sub = expression['field']
-                            value = expression['value']
-                            query = re.sub(x, self.mapExpression % (sub, value), query)
-                    if 'literals' in expression:
-                        for x in expression['literals']:
-                            sub = expression['field']
-                            value = expression['value']
-                            query = query.replace(x, self.mapExpression % (sub, value))
-        except Exception:
-            pass
-        return query
 
     def generateNode(self, node):
         if type(node) == sigma.parser.condition.ConditionAND:
-            return self.applyOverrides(self.generateANDNode(node))
+            return self.generateANDNode(node)
         elif type(node) == sigma.parser.condition.ConditionOR:
-            return self.applyOverrides(self.generateORNode(node))
+            return self.generateORNode(node)
         elif type(node) == sigma.parser.condition.ConditionNOT:
-            return self.applyOverrides(self.generateNOTNode(node))
+            return self.generateNOTNode(node)
         elif type(node) == sigma.parser.condition.ConditionNULLValue:
-            return self.applyOverrides(self.generateNULLValueNode(node))
+            return self.generateNULLValueNode(node)
         elif type(node) == sigma.parser.condition.ConditionNotNULLValue:
-            return self.applyOverrides(self.generateNotNULLValueNode(node))
+            return self.generateNotNULLValueNode(node)
         elif type(node) == sigma.parser.condition.NodeSubexpression:
-            return self.applyOverrides(self.generateSubexpressionNode(node))
+            return self.generateSubexpressionNode(node)
         elif type(node) == tuple:
-            return self.applyOverrides(self.generateMapItemNode(node))
+            return self.generateMapItemNode(node)
         elif type(node) in (str, int):
-            return self.applyOverrides(self.generateValueNode(node))
+            return self.generateValueNode(node)
         elif type(node) == list:
-            return self.applyOverrides(self.generateListNode(node))
+            return self.generateListNode(node)
         elif isinstance(node, SigmaTypeModifier):
-            return self.applyOverrides(self.generateTypedValueNode(node))
+            return self.generateTypedValueNode(node)
         else:
             raise TypeError("Node type %s was not expected in Sigma parse tree" % (str(type(node))))
 

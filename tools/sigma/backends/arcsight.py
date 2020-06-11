@@ -222,7 +222,7 @@ class ArcSightESMBackend(SingleTextQueryBackend):
                 elif isinstance(value, str) and value.endswith("*"):
                     return self.startsWithExpression % (key, self.generateValueNode(self.CleanNode(value)))
                 else:
-                    return self.mapExpression % (key, self.generateValueNode(value))
+                    return self.generateValueNode(value)
             elif isinstance(value, list):
                 new_value = list()
                 for item in value:
