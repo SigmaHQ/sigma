@@ -486,6 +486,25 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules with missing or malformed 'id' fields. Create an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).")
     
+    def test_sysmon_rule_without_eventid(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            logsource = self.get_rule_part(file_path=file, part_name="logsource")
+            service = logsource.get('service', '')
+            if service.lower() == 'sysmon':
+                with open(file) as f:
+                    found = False
+                    for line in f:
+                        if re.search(r'.*EventID:.*$', line):  # might be on a single line or in multiple lines
+                            found = True
+                            break
+                    if not found:
+                        faulty_rules.append(file)      
+
+        self.assertEqual(faulty_rules, [], Fore.RED + 
+                         "There are rules using sysmon events but with no EventID specified")
+
+
     def test_missing_date(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
@@ -538,7 +557,7 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
             wrong_casing = []
             for word in title.split(" "):
-                if word.islower() and not word.lower() in allowed_lowercase_words and not "." in word and not word[0].isdigit():
+                if word.islower() and not word.lower() in allowed_lowercase_words and not "." in word and not "/" in word and not word[0].isdigit():
                     wrong_casing.append(word)
             if len(wrong_casing) > 0:
                 print(Fore.RED + "Rule {} has a title that has not title capitalization. Words: '{}'".format(file, ", ".join(wrong_casing)))

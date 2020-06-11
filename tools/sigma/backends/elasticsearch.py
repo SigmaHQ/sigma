@@ -23,11 +23,38 @@ from random import randrange
 
 import sigma
 import yaml
-from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
+from sigma.parser.modifiers.type import SigmaRegularExpressionModifier, SigmaTypeModifier
 from sigma.parser.condition import ConditionOR, ConditionAND, NodeSubexpression
+
+from sigma.config.mapping import ConditionalFieldMapping
 from .base import BaseBackend, SingleTextQueryBackend
 from .mixins import RulenameCommentMixin, MultiRuleOutputMixin
 from .exceptions import NotSupportedError
+
+
+class DeepFieldMappingMixin(object):
+
+    def fieldNameMapping(self, fieldname, value):
+        if isinstance(fieldname, str):
+            get_config = self.sigmaconfig.fieldmappings.get(fieldname)
+            if not get_config and '|' in fieldname:
+                fieldname = fieldname.split('|', 1)[0]
+                get_config = self.sigmaconfig.fieldmappings.get(fieldname)
+            if isinstance(get_config, ConditionalFieldMapping):
+                condition = self.sigmaconfig.fieldmappings.get(fieldname).conditions
+                for key, item in self.logsource.items():
+                    if condition.get(key) and condition.get(key, {}).get(item):
+                        new_fieldname = condition.get(key, {}).get(item)
+                        if any(new_fieldname):
+                           return super().fieldNameMapping(new_fieldname[0], value)
+        return super().fieldNameMapping(fieldname, value)
+
+
+    def generate(self, sigmaparser):
+        self.logsource = sigmaparser.parsedyaml.get("logsource", {})
+        return super().generate(sigmaparser)
+
+
 
 class ElasticsearchWildcardHandlingMixin(object):
     """
@@ -85,6 +112,31 @@ class ElasticsearchWildcardHandlingMixin(object):
             return res
         else:
             return False
+
+    def generateMapItemNode(self, node):
+        fieldname, value = node
+        if fieldname.lower().find("hash") != -1:
+            if isinstance(value, list):
+                res = []
+                for item in value:
+                    try:
+                        res.extend([item.lower(), item.upper()])
+                    except AttributeError:  # not a string (something that doesn't support upper/lower casing)
+                        res.append(item)
+                value = res
+            elif isinstance(value, str):
+                value = [value.upper(), value.lower()]
+        transformed_fieldname = self.fieldNameMapping(fieldname, value)
+        if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
+            return self.mapExpression % (transformed_fieldname, self.generateNode(value))
+        elif type(value) == list:
+            return self.generateMapItemListNode(transformed_fieldname, value)
+        elif isinstance(value, SigmaTypeModifier):
+            return self.generateMapItemTypedNode(transformed_fieldname, value)
+        elif value is None:
+            return self.nullExpression % (transformed_fieldname, )
+        else:
+            raise TypeError("Backend does not support map values of type " + str(type(value)))
 
     def fieldNameMapping(self, fieldname, value, *agg_option):
         """
@@ -162,6 +214,8 @@ class ElasticsearchWildcardHandlingMixin(object):
         Adds the beginning and ending '/' to make regex query if still determined that it should be a regex
         """
         if value and not value == 'null' and not re.match(r'^/.*/$', value) and (re.search('[a-zA-Z]', value) and not re.match(self.uuid_regex, value) or self.containsWildcard(value)):  # re.search for alpha is fastest:
+            # Turn single ending '\\' into non escaped (ie: '\\*')
+            #value = re.sub( r"((?<!\\)(\\))\*$", "\g<1>\\*", value )
             # Make upper/lower
             value = re.sub( r"[A-Za-z]", lambda x: "[" + x.group( 0 ).upper() + x.group( 0 ).lower() + "]", value )
             # Turn `*` into wildcard, only if odd number of '\'(because this would mean already escaped)
@@ -180,7 +234,7 @@ class ElasticsearchWildcardHandlingMixin(object):
             return { 'is_regex': False, 'value': value }
 
 
-class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
+class ElasticsearchQuerystringBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
     """Converts Sigma rule into Elasticsearch query string. Only searches, no aggregations."""
     identifier = "es-qs"
     active = True
@@ -244,7 +298,7 @@ class ElasticsearchQuerystringBackend(ElasticsearchWildcardHandlingMixin, Single
         else:
             return super().generateSubexpressionNode(node)
 
-class ElasticsearchDSLBackend(RulenameCommentMixin, ElasticsearchWildcardHandlingMixin, BaseBackend):
+class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, ElasticsearchWildcardHandlingMixin, BaseBackend):
     """ElasticSearch DSL backend"""
     identifier = 'es-dsl'
     active = True
@@ -579,7 +633,8 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
         if self.output_type == "import":        # output format that can be imported via Kibana UI
             for item in self.kibanaconf:    # JSONize kibanaSavedObjectMeta.searchSourceJSON
                 item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'] = json.dumps(item['_source']['kibanaSavedObjectMeta']['searchSourceJSON'])
-            return json.dumps(self.kibanaconf, indent=2)
+            if self.kibanaconf:
+                return json.dumps(self.kibanaconf, indent=2)
         elif self.output_type == "curl":
             for item in self.indexsearch:
                 return item
@@ -908,7 +963,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                 raise NotImplementedError("Output type '%s' not supported" % self.output_type)
         return result
 
-class ElastalertBackend(MultiRuleOutputMixin):
+class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
     """Elastalert backend"""
     active = True
     supported_alert_methods = {'email', 'http_post'}
@@ -1120,6 +1175,7 @@ class ElastalertBackendQs(ElastalertBackend, ElasticsearchQuerystringBackend):
         return [{ 'query' : { 'query_string' : { 'query' : super().generateQuery(parsed) } } }]
 
 class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
+    """Elasticsearch detection rule backend"""
     identifier = "es-rule"
     active = True
 
@@ -1202,12 +1258,14 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
         tags = configs.get("tags", [])
         tactics_list = list()
         technics_list = list()
+        new_tags = list()
 
         for tag in tags:
             tag = tag.replace("attack.", "")
             if re.match("[t][0-9]{4}", tag, re.IGNORECASE):
                 tech = self.find_technique(tag.title())
                 if tech:
+                    new_tags.append(tag.title())
                     technics_list.append(tech)
             else:
                 if "_" in tag:
@@ -1215,22 +1273,29 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
                     tag_list = [item.title() for item in tag_list]
                     tact = self.find_tactics(key_name=" ".join(tag_list))
                     if tact:
+                        new_tags.append(" ".join(tag_list))
                         tactics_list.append(tact)
                 elif re.match("[ta][0-9]{4}", tag, re.IGNORECASE):
                     tact = self.find_tactics(key_id=tag.upper())
                     if tact:
+                        new_tags.append(tag.upper())
                         tactics_list.append(tact)
                 else:
                     tact = self.find_tactics(key_name=tag.title())
                     if tact:
+                        new_tags.append(tag.title())
                         tactics_list.append(tact)
         threat = self.create_threat_description(tactics_list=tactics_list, techniques_list=technics_list)
-        rule_id = configs.get("title", "").lower().replace(" ", "_")
+        rule_name = configs.get("title", "").lower()
+        rule_id = re.sub(re.compile('[()*+!,\[\].\s"]'), "_", rule_name)
         risk_score = self.map_risk_score(configs.get("level", "medium"))
+        references = configs.get("reference")
+        if references is None:
+            references = configs.get("references")
         rule = {
             "description": configs.get("description", ""),
             "enabled": True,
-            "false_positives": configs.get('falsepositives'),
+            "false_positives": configs.get('falsepositives', "Unkown"),
             "filters": [],
             "from": "now-360s",
             "immutable": False,
@@ -1243,15 +1308,16 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
             "risk_score": risk_score,
             "name": configs.get("title", ""),
             "query":configs.get("translation"),
-            "references": configs.get("references"),
             "meta": {
                 "from": "1m"
             },
             "severity": configs.get("level", "medium"),
-            "tags": tags,
+            "tags": new_tags,
             "to": "now",
             "type": "query",
             "threat": threat,
             "version": 1
         }
+        if references:
+            rule.update({"references": references})
         return json.dumps(rule)
