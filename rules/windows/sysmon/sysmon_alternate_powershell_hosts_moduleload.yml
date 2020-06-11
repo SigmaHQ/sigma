@@ -1,5 +1,5 @@
-title: Alternate PowerShell Hosts Pipe
-id: 58cb02d5-78ce-4692-b3e1-dce850aae41a
+title: Alternate PowerShell Hosts Module Load
+id: f67f6c57-257d-4919-a416-69cd31f9aac3
 description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
 status: experimental
 date: 2019/09/12
@@ -15,16 +15,12 @@ logsource:
     service: sysmon
 detection:
     selection: 
-        EventID: 17
-        PipeName|startswith: '\PSHost'
+        EventID: 7
+        Description: 'system.management.automation'
+        ImageLoaded|contains: 'system.management.automation'
     filter:
         Image|endswith: '\powershell.exe'
     condition: selection and not filter
-fields:
-    - ComputerName
-    - User
-    - Image
-    - PipeName
 falsepositives:
     - Programs using PowerShell directly without invocation of a dedicated interpreter.
-level: medium
+level: high
