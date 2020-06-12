@@ -6,20 +6,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 from version 0.14.0.
 
-## Unreleased
+## 0.17.0 - 2020-06-12
 
 ### Added
 
 * LOGIQ Backend (logiq)
+* CarbonBlack backend (carbonblack) and field mappings
+* Elasticsearch detection rule backend (es-rule)
+* ee-outliers backend
+* CrowdStrike backend (crowdstrike)
+* Humio backend (humio)
+* Aggregations in SQL backend
+* SQLite backend (sqlite)
+* AWS Cloudtrail ECS mappings
+* Overrides
+* Zeek configurations for various backends
+* Case-insensitive matching for Elasticsearch
+* ECS proxy mappings
+* RuleName field mapping for Winlogbeat
+* sigma2attack tool
 
 ### Changed
 
+* Improved usage of keyword fields for Elasticsearch-based backends
+* Splunk XML backend rule titles from sigma rule instead of file name
 * Moved backend option list to --help-backend
+* Microsoft Defender ATP schema improvements
 
 ### Fixed
 
 * Splunx XML rule name is now set to rule title
 * Backend list deduplicated
+* Wrong escaping of wildcard at end of value when startswith modifier is used.
+* Direct execution of tools on Windows systems by addition of script entry points
 
 ## 0.16.0 - 2020-02-25
 
