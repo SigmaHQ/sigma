@@ -288,7 +288,7 @@ Now lets determine which options and Sigmac to use.
 You can add the following depending on additional information from your answers/input above.
 
 1. If you are using ECS, your data is going to `winlogbeat-*` index, or your default field is a keyword type then add the following to your SIGMA command: `--backend-option keyword_field="" `
-    * If you want to prevent case sensitive bypasses you can add the following to your command: `--backend-option case_insensitive_whitelist""`
+    * If you want to prevent case sensitive bypasses you can add the following to your command: `--backend-option case_insensitive_whitelist="*"`
     * If you want to prevent case sensitive bypasses but only for certain fields, you can use an option like this: `-backend-option keyword_field="" --backend-option case_insensitive_whitelist="*CommandLine*, *ProcessName*, *Image*, process.*, *FileName*, *Path*, *ServiceName*, *ShareName*, file.*, *Directory*, *directory*, *hash*, *Hash*, *Object*, ComputerName, *Subject*, *Target*, *Service*"`
 
 2. If you are using analyzed (text) fields or your index template portion of `strings_as_keyword` contains `text` then you can add the following:
@@ -307,10 +307,10 @@ You can add the following depending on additional information from your answers/
 
 So putting it all together to help show everything from above, here are some "full" examples:
 
-* base field keyword & no analyzed field w/ case insensitivity (covers elastic 7 with beats/ecs (default)mappings) and using winlogbeat with modules enabled
+* base field keyword & no analyzed field w/ case insensitivity (covers elastic 7 with beats/ecs (default)mappings) and using winlogbeat with modules enabled. Also, keeps `winlog.channel` from making case insensitive as is not necessary (ie: the `keyword_whitelist` option)
 
 ```bash
-sigma -t es-qs -c tools/config/winlogbeat-modules-enabled.yml --backend-option keyword_field="" --backend-option case_insensitive_whitelist"" rules/windows/process_creation/win_office_shell.yml
+sigma -t es-qs -c tools/config/winlogbeat-modules-enabled.yml --backend-option keyword_field="" --backend-option case_insensitive_whitelist="*" keyword_whitelist="winlog.channel" rules/windows/process_creation/win_office_shell.yml
 ```
 
 * base field keyword & subfield is analyzed(.text) and winlogbeat with modules enabled
