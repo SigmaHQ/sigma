@@ -4,6 +4,7 @@ from setuptools import setup, find_packages
 # To use a consistent encoding
 from codecs import open
 from os import path
+from pathlib import Path
 
 here = path.abspath(path.dirname(__file__))
 
@@ -48,36 +49,8 @@ setup(
         'test': ['coverage', 'yamllint'],
     },
     data_files=[
-        ('etc/sigma', [
-            "config/arcsight.yml",
-            "config/carbon-black.yml",
-            "config/ecs-proxy.yml",
-            "config/filebeat-defaultindex.yml",
-            "config/helk.yml",
-            "config/limacharlie.yml",
-            "config/logpoint-windows.yml",
-            "config/logstash-defaultindex.yml",
-            "config/logstash-linux.yml",
-            "config/logstash-windows.yml",
-            "config/mitre/tactics.json",
-            "config/mitre/techniques.json",
-            "config/netwitness.yml",
-            "config/powershell.yml",
-            "config/qradar.yml",
-            "config/qualys.yml",
-            "config/splunk-windows-index.yml",
-            "config/splunk-windows.yml",
-            "config/splunk-zeek.yml",
-            "config/sumologic.yml",
-            "config/thor.yml",
-            "config/winlogbeat-modules-enabled.yml",
-            "config/winlogbeat-old.yml",
-            "config/winlogbeat.yml",
-            ]),
-        ('etc/sigma/generic', [
-            'config/generic/sysmon.yml',
-            'config/generic/windows-audit.yml',
-        ])],
+        ('etc/sigma', [ str(p) for p in Path('config/').glob('*.yml') ]),
+        ('etc/sigma/generic', [ str(p) for p in Path('config/generic/').glob('*.yml') ])],
     entry_points={
         'console_scripts': [
             'sigmac = sigma.sigmac:main',
