@@ -239,16 +239,16 @@ For this backend, there are two very important components. One is the field name
 You have a few different variations of what could be the correct Sigmac to use. Based on the version of Elasticsearch, using ECS or not, using certain Beat's settings enabled or not, and so on.
 
 In order to aide in the decision of the correct Sigmac there are a few quick questions to ask yourself and based on those answers will be which one to use.
-Please not the answer to each question. It is OK to not know the answer to each question and in fact is very common (that's OK).
+Please note the answer to each question. It is OK to not know the answer to each question and in fact is very common (that's OK).
 
-1. What version of filebeat are you using (you may not be using this at all).
-2. Are you using Elastic Common Schema (ECS)?
+1. What version of [Filebeat](https://www.elastic.co/beats/filebeat) are you using (you may not be using this at all).
+2. Are you using [Elastic Common Schema (ECS)](https://www.elastic.co/guide/en/ecs/current/index.html)?
 3. What index do your store the log source's data in? Some examples:
    * Window's logs are most likely in `winlogbeat-*`
    * Linux logs are most likely in `filebeat-*`
    * Zeek/Bro data is most likely in `filebeat-*`
    * If you are using logstash, data is most likely in `logstash-*`
-4. If you are using filebeat, are you using the module enabled? Here is link showing the description for Windows log [Security Channel](https://www.elastic.co/guide/en/beats/winlogbeat/current/winlogbeat-module-security.html)
+4. If you are using Filebeat, are you using the module enabled? Here is link showing the description for Windows log [Security Channel](https://www.elastic.co/guide/en/beats/winlogbeat/current/winlogbeat-module-security.html)
 
 Now choose your data source:
 * [Windows Event Logs](#elastic-windows-event-log--sysmon-data-configurations)
@@ -269,7 +269,7 @@ example of the full command running on all the proxy rules converting to a Kiban
 
 **index templates**
 
-If you are able, because this will be one of the best ways to dermine which options to use - run the following command. Take the output from question 3 and replace in the example command `winlogbeat` with index. You can run this from the CLI against your Elasticsearch instance or from Kibana Dev Tools.
+If you are able, because this will be one of the best ways to determine which options to use - run the following command. Take the output from question 3 and replace in the example command `winlogbeat` with index. You can run this from the CLI against your Elasticsearch instance or from Kibana Dev Tools.
 You will only need to use the first index template pattern. Look under the section `dynamic_templates` and then look for `strings_as_keyword`. Under that section, is there a `strings_as_keyword` ? If so take note.
 
 `curl -XGET "http://127.0.0.1:9200/winlogbeat-*/_mapping/?filter_path=*.mappings.dynamic_templates*,*.index_patterns"`
