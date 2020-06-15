@@ -14,7 +14,7 @@ finish:
 test-rules:
 	yamllint rules
 	tests/test_rules.py
-	tools/sigma-uuid -Ver rules/
+	tools/sigma_uuid -Ver rules/
 
 test-sigmac:
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac
@@ -32,9 +32,10 @@ test-sigmac:
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t elastalert -c tools/config/winlogbeat.yml -O alert_methods=http_post,email -O emails=test@test.invalid -O http_post_url=http://test.invalid rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t elastalert-dsl -c tools/config/winlogbeat.yml -O alert_methods=http_post,email -O emails=test@test.invalid -O http_post_url=http://test.invalid rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t ee-outliers -c tools/config/winlogbeat.yml rules/ > /dev/null
-	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-qs  -c tools/config/ecs-cloudtrail.yml rules/ > /dev/null
-	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-rule  -c tools/config/ecs-cloudtrail.yml rules/ > /dev/null
-	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t kibana  -c tools/config/ecs-cloudtrail.yml rules/ > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-qs -c sysmon -c winlogbeat -O case_insensitive_whitelist=* rules/windows/process_creation > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-qs -c tools/config/ecs-cloudtrail.yml rules/ > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t es-rule -c tools/config/ecs-cloudtrail.yml rules/ > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t kibana -c tools/config/ecs-cloudtrail.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t xpack-watcher  -c tools/config/ecs-cloudtrail.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t elastalert  -c tools/config/ecs-cloudtrail.yml rules/ > /dev/null
 	! $(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t splunk rules/ > /dev/null
@@ -116,7 +117,7 @@ test-backend-sql:
 test-sigma2attack:
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigma2attack
 
-build: tools/sigmac tools/merge_sigma tools/sigma/*.py tools/setup.py tools/setup.cfg
+build: tools/sigma/*.py tools/setup.py tools/setup.cfg
 	cd tools && python3 setup.py bdist_wheel sdist
 
 upload-test: build
