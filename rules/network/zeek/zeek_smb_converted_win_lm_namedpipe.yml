@@ -1,14 +1,14 @@
 title: First Time Seen Remote Named Pipe - Zeek
 id: 52d8b0c6-53d6-439a-9e41-52ad442ad9ad
-description: This detection excludes known namped pipes accessible remotely and notify on newly observed ones, may help to detect lateral movement and remote exec
-    using named pipes
+description: This detection excludes known namped pipes accessible remotely and notify on newly observed ones, may help to detect lateral movement and remote exec using named pipes
 author: 'Samir Bousseaden, @neu5ron'
 date: 2020/04/02
 references:
     - https://github.com/neo23x0/sigma/blob/d42e87edd741dd646db946f30964f331f92f50e6/rules/windows/builtin/win_lm_namedpipe.yml
-tags: 
+tags:
     - attack.lateral_movement
     - attack.t1077
+    - attack.t1021.002
 logsource:
     product: zeek
     service: smb_files
@@ -18,23 +18,23 @@ detection:
     selection2:
         path: \\*\IPC$
         name:
-         - 'atsvc'
-         - 'samr'
-         - 'lsarpc'
-         - 'winreg'
-         - 'netlogon'
-         - 'srvsvc'
-         - 'protected_storage'
-         - 'wkssvc'
-         - 'browser'
-         - 'netdfs'
-         - 'svcctl'
-         - 'spoolss'
-         - 'ntsvcs'
-         - 'LSM_API_service'
-         - 'HydraLsPipe'
-         - 'TermSrv_API_service'
-         - 'MsFteWds'
+            - 'atsvc'
+            - 'samr'
+            - 'lsarpc'
+            - 'winreg'
+            - 'netlogon'
+            - 'srvsvc'
+            - 'protected_storage'
+            - 'wkssvc'
+            - 'browser'
+            - 'netdfs'
+            - 'svcctl'
+            - 'spoolss'
+            - 'ntsvcs'
+            - 'LSM_API_service'
+            - 'HydraLsPipe'
+            - 'TermSrv_API_service'
+            - 'MsFteWds'
     condition: selection1 and not selection2
 falsepositives:
     - update the excluded named pipe to filter out any newly observed legit named pipe
