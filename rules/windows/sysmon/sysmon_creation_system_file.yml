@@ -1,0 +1,57 @@
+title: File Created with System Process Name
+id: d5866ddf-ce8f-4aea-b28e-d96485a20d3d 
+status: experimental
+description: Detects the creation of a executable with a sytem process name in a suspicious folder
+references:
+    - https://attack.mitre.org/techniques/T1036/
+author: Sander Wiebing
+date: 2020/05/26
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 11
+        TargetFilename|endswith:
+            - '*\svchost.exe'
+            - '*\rundll32.exe'
+            - '*\services.exe'
+            - '*\powershell.exe'
+            - '*\regsvr32.exe'
+            - '*\spoolsv.exe'
+            - '*\lsass.exe'
+            - '*\smss.exe'
+            - '*\csrss.exe'
+            - '*\conhost.exe'
+            - '*\wininit.exe'
+            - '*\lsm.exe'
+            - '*\winlogon.exe'
+            - '*\explorer.exe'
+            - '*\taskhost.exe'
+            - '*\Taskmgr.exe'
+            - '*\taskmgr.exe'
+            - '*\sihost.exe'
+            - '*\RuntimeBroker.exe'
+            - '*\runtimebroker.exe'
+            - '*\smartscreen.exe'
+            - '*\dllhost.exe'
+            - '*\audiodg.exe'
+            - '*\wlanext.exe'
+    filter:
+        TargetFilename:
+            - 'C:\Windows\System32\\*'
+            - 'C:\Windows\system32\\*'
+            - 'C:\Windows\SysWow64\\*'
+            - 'C:\Windows\SysWOW64\\*'
+            - 'C:\Windows\winsxs\\*'
+            - 'C:\Windows\WinSxS\\*'
+            - '\SystemRoot\System32\\*'
+    condition: selection and not filter
+fields:
+    - Image
+falsepositives:
+    - System processes copied outside the default folder
+level: high

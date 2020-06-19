@@ -7,6 +7,7 @@ references:
     - https://attack.mitre.org/techniques/T1037/
 tags:
     - attack.t1037
+    - attack.t1037.001
     - attack.persistence
     - attack.lateral_movement
 author: Tom Ueltschi (@c_APT_ure)
@@ -25,9 +26,9 @@ detection:
     exec_exclusion1:
         Image: '*\explorer.exe'
     exec_exclusion2:
-        CommandLine:
-            - '*\netlogon.bat'
-            - '*\UsrLogon.cmd'
+        CommandLine|contains:
+            - 'netlogon.bat'
+            - 'UsrLogon.cmd'
     condition: exec_selection and not exec_exclusion1 and not exec_exclusion2
 ---
 logsource:
@@ -44,7 +45,6 @@ logsource:
 detection:
     create_selection_reg:
         EventID:
-            - 11
             - 12
             - 13
             - 14

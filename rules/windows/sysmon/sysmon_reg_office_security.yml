@@ -1,0 +1,30 @@
+title: Office Security Settings Changed
+id: a166f74e-bf44-409d-b9ba-ea4b2dd8b3cd
+status: experimental
+description: Detects registry changes to Office macro settings
+author: Trent Liffick (@tliffick)
+date: 2020/05/22
+references:
+tags:
+    - attack.defense_evasion
+    - attack.t1112
+falsepositives:
+    - Valid Macros and/or internal documents
+level: high
+logsource:
+  service: sysmon
+  product: windows
+detection:
+    sec_settings:
+      EventID:
+            - 12
+            - 13
+      TargetObject|endswith:
+            - '*\Security\Trusted Documents\TrustRecords'
+            - '*\Security\AccessVBOM'
+            - '*\Security\VBAWarnings'
+      EventType:
+            - SetValue
+            - DeleteValue
+            - CreateValue
+    condition: sec_settings
