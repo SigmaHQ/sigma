@@ -13,8 +13,6 @@ author: Nik Seetharaman
 date: 2018/07/16
 references:
     - http://www.endurant.io/cmstp/detecting-cmstp-enabled-code-execution-and-uac-bypass-with-sysmon/
-detection:
-    condition: 1 of them
 fields:
     - CommandLine
     - ParentCommandLine
@@ -33,17 +31,17 @@ detection:
         EventType: 'CreateKey'
     # Registry Object Value Set
     selection3:
-        
         TargetObject: '*\cmmgr32.exe*'
     # Process Access Call Trace
     selection4:
         CallTrace: '*cmlua.dll*'
+    condition: 1 of them
 ---
 detection:
     # CMSTP Spawning Child Process
     selection1:
         ParentImage: '*\cmstp.exe'
-
+    condition: 1 of them
 logsource:
     category: process_creation
     product: windows
