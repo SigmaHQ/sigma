@@ -142,11 +142,11 @@ def main():
         logger.setLevel(logging.DEBUG)
 
     if cmdargs.lists:
-        print("Backends:")
+        print("Backends (Targets):")
         list_backends(cmdargs.debug)
 
         print()
-        print("Configurations:")
+        print("Configurations (Sources):")
         list_configurations(backend=cmdargs.target, scm=scm)
 
         print()
