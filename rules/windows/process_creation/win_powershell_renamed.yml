@@ -10,12 +10,10 @@ tags:
   - attack.execution
   - attack.t1086
 logsource:
+  category: process_creation
   product: windows
-  service: sysmon
 detection:
   selection1:
-    EventID: 1
-  selection2:
     - Description: "Windows PowerShell"
     - Product: "PowerShell Core 6"
   filter:
@@ -23,7 +21,7 @@ detection:
       - '\powershell.exe'
       - '\pwsh.exe'
 
-  condition: selection1 and 1 of selection2 and not filter
+  condition: 1 of selection2 and not filter
 falsepositives:
   - unknown
 level: low
