@@ -1,0 +1,25 @@
+title: Renamed Powershell
+id: 30a8cb77-8eb3-4cfb-8e79-ad457c5a4592
+description: Detects renamed powershell
+status: experimental
+references:
+  - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse
+author: Teymur Kheirkhabarov, Harish Segar (rule)
+date: 2020/06/29
+tags:
+  - attack.execution
+  - attack.t1086
+logsource:
+  product: windows
+  service: powershell-classic
+detection:
+  selection:
+    EventID: 400
+    HostName: "ConsoleHost"
+  filter:
+    CommandLine|contains:
+      - "powershell"
+  condition: selection and not filter
+falsepositives:
+  - unknown
+level: low
