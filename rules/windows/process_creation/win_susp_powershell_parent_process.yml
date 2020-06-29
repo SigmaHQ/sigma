@@ -14,7 +14,7 @@ logsource:
     product: windows
 detection:
     selection_image1:
-        ParentImage|endswith:
+        - ParentImage|endswith:
             - '\mshta.exe'
             - '\rundll32.exe'
             - '\regsvr32.exe'
@@ -45,17 +45,14 @@ detection:
             - '\php-cgi.exe'
             - '\jbosssvc.exe'
             - "MicrosoftEdgeSH.exe"
-    selection_image2:
-        ParentImage|contains: "tomcat"
-
-    filters:
+        - ParentImage|contains: "tomcat"
+    selection_powershell:
         - CommandLine|contains:
               - "powershell"
               - "pwsh"
         - Description: "Windows PowerShell"
         - Product: "PowerShell Core 6"
-
-    condition: (1 of selection_image*) and (1 of filters)
+    condition: all of them
 falsepositives:
     - Other scripts
 level: medium
