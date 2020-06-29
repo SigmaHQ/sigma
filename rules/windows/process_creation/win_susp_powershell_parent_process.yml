@@ -1,4 +1,4 @@
-title: Suspicious PowerShell parent process
+title: Suspicious PowerShell Parent Process
 id: 754ed792-634f-40ae-b3bc-e0448d33f695
 description: Detects a suspicious parents of powershell.exe
 status: experimental
@@ -10,12 +10,9 @@ tags:
     - attack.execution
     - attack.t1086
 logsource:
+    category: process_creation
     product: windows
-    service: sysmon
 detection:
-    selection:
-        EventID: 1
-
     selection_image1:
         ParentImage|endswith:
             - '\mshta.exe'
@@ -58,7 +55,7 @@ detection:
         - Description: "Windows PowerShell"
         - Product: "PowerShell Core 6"
 
-    condition: selection and (1 of selection_image*) and (1 of filters)
+    condition: (1 of selection_image*) and (1 of filters)
 falsepositives:
     - Other scripts
 level: medium
