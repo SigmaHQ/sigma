@@ -1,4 +1,3 @@
-action: global
 title: Logon Scripts (UserInitMprLogonScript)
 id: 0a98a10c-685d-4ab0-bddc-b6bdd1d48458
 status: experimental
@@ -12,11 +11,7 @@ tags:
     - attack.lateral_movement
 author: Tom Ueltschi (@c_APT_ure)
 date: 2019/01/12
-falsepositives:
-    - exclude legitimate logon scripts
-    - penetration tests, red teaming
-level: high
----
+modified: 2020/07/01
 logsource:
     category: process_creation
     product: windows
@@ -29,25 +24,10 @@ detection:
         CommandLine|contains:
             - 'netlogon.bat'
             - 'UsrLogon.cmd'
-    condition: exec_selection and not exec_exclusion1 and not exec_exclusion2
----
-logsource:
-    category: process_creation
-    product: windows
-detection:
     create_keywords_cli:
         CommandLine: '*UserInitMprLogonScript*'
-    condition: create_keywords_cli
----
-logsource:
-    product: windows
-    service: sysmon
-detection:
-    create_selection_reg:
-        EventID:
-            - 12
-            - 13
-            - 14
-    create_keywords_reg:
-        TargetObject: '*UserInitMprLogonScript*'
-    condition: create_selection_reg and create_keywords_reg
+    condition: ( exec_selection and not exec_exclusion1 and not exec_exclusion2 ) or create_keywords_cli
+falsepositives:
+    - exclude legitimate logon scripts
+    - penetration tests, red teaming
+level: high
