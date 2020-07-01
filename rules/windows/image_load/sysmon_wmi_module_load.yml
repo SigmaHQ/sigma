@@ -1,0 +1,46 @@
+title: WMI Modules Loaded
+id: 671bb7e3-a020-4824-a00e-2ee5b55f385e
+description: Detects non wmiprvse loading WMI modules
+status: experimental
+date: 2019/08/10
+modified: 2019/11/10
+author: Roberto Rodriguez @Cyb3rWard0g
+references:
+    - https://github.com/Cyb3rWard0g/ThreatHunter-Playbook/tree/master/playbooks/windows/02_execution/T1047_windows_management_instrumentation/wmi_wmi_module_load.md
+tags:
+    - attack.execution
+    - attack.t1047
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection: 
+        ImageLoaded|endswith:
+            - '\wmiclnt.dll'
+            - '\WmiApRpl.dll'
+            - '\wmiprov.dll'
+            - '\wmiutils.dll'
+            - '\wbemcomn.dll'
+            - '\wbemprox.dll'
+            - '\WMINet_Utils.dll'
+            - '\wbemsvc.dll'
+            - '\fastprox.dll'
+    filter:
+        Image|endswith:
+            - '\WmiPrvSe.exe'
+            - '\WmiAPsrv.exe'
+            - '\svchost.exe'
+            - '\DeviceCensus.exe'
+            - '\CompatTelRunner.exe'
+            - '\sdiagnhost.exe'
+            - '\SIHClient.exe'
+    condition: selection and not filter
+fields:
+    - ComputerName
+    - User
+    - Image
+    - ImageLoaded
+falsepositives:
+    - Unknown
+level: high
+

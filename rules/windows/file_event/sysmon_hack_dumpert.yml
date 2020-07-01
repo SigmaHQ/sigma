@@ -1,0 +1,34 @@
+action: global
+title: Dumpert Process Dumper
+id: 2704ab9e-afe2-4854-a3b1-0c0706d03578
+description: Detects the use of Dumpert process dumper, which dumps the lsass.exe process memory
+author: Florian Roth
+references:
+    - https://github.com/outflanknl/Dumpert
+    - https://unit42.paloaltonetworks.com/actors-still-exploiting-sharepoint-vulnerability/
+date: 2020/02/04
+tags:
+    - attack.credential_access
+    - attack.t1003
+logsource:
+    category: file_event
+    product: windows
+falsepositives:
+    - Very unlikely
+level: critical
+---
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Imphash: '09D278F9DE118EF09163C6140255C690'
+    condition: selection
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection: 
+        TargetFilename: C:\Windows\Temp\dumpert.dmp
+    condition: selection
