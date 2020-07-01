@@ -106,6 +106,7 @@ class TestRules(unittest.TestCase):
              "t1102",
              "t1103",
              "t1105",
+             "t1106",
              "t1107",
              "t1110",
              "t1112",
