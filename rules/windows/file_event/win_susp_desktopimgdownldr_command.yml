@@ -1,0 +1,30 @@
+title: Suspicious desktopimgdownldr Command
+id: e011a729-98a6-4139-b5c4-bf6f6dd8239a
+status: experimental
+description: Detects a suspicious Microsoft desktopimgdownldr execution where the systemroot is changed to writable directory
+author: Steven Goossens
+modified: 2020/07/02
+date: 2020/07/02
+references:
+        - https://labs.sentinelone.com/living-off-windows-land-a-new-native-file-downldr/
+logsource:
+    category: file_creation
+    product: windows
+detection:
+    selection:
+            Image:
+            - '*desktopimgdownldr.exe'
+    filter:
+            TargetFileName:
+            - 'C:\Windows\Personalization\LockScreenImage'
+    condition: selection and not filter
+fields:
+    - CommandLine
+    - ParentCommandLine
+tags:
+    - attack.defense_evasion
+    - attack.ta0005
+    - attack.t1140
+    - attack.t1105
+falsepositives:
+level: high
