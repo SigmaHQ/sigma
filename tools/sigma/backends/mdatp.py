@@ -92,7 +92,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
             "DeviceEvents": {
                 "TargetFilename": ("FolderPath", self.default_value_mapping),
                 "TargetImage": ("FolderPath", self.default_value_mapping),
-
+                
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "User":  (self.decompose_user, ),
             },
@@ -100,7 +100,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "TargetObject": ("RegistryKey", self.default_value_mapping),
                 "ObjectValueName": ("RegistryValueName", self.default_value_mapping),
                 "Details": ("RegistryValueData", self.default_value_mapping),
-
+                "EventType": ("ActionType", self.default_value_mapping),
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "User":  (self.decompose_user, ),
             },
@@ -120,13 +120,13 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "SourcePort": ("LocalPort", self.default_value_mapping),
                 "SourceIp": ("LocalIP", self.default_value_mapping),
                 "DestinationHostname":  ("RemoteUrl", self.default_value_mapping),
-
+                "EventType": ("ActionType", self.default_value_mapping),
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "User":  (self.decompose_user, ),
             },
             "DeviceImageLoadEvents": {
                 "ImageLoaded": ("FolderPath", self.default_value_mapping),
-
+                "EventType": ("ActionType", self.default_value_mapping),
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "User":  (self.decompose_user, ),
             }
