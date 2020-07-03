@@ -1,7 +1,7 @@
-title: Suspicious Desktopimgdownldr Command
+title: Suspicious Desktopimgdownldr Target File
 id: fc4f4817-0c53-4683-a4ee-b17a64bc1039
 status: experimental
-description: Detects a suspicious Microsoft desktopimgdownldr execution with parameters used to download files from the Internet
+description: Detects a suspicious Microsoft desktopimgdownldr file creation that stores a file to a suspicious location or contains a file with a suspicious extension
 author: Florian Roth
 date: 2020/07/03
 references:
@@ -13,9 +13,17 @@ tags:
     - attack.defense_evasion
     - attack.t1105
 detection:
-    selection1:
-
-    condition: selection1 and not selection1_filter or selection_reg
+    selection:
+        Image|endswith: svchost.exe
+        TargetFilename|contains: '\Personalization\LockScreenImage\'
+    filter1:
+        TargetFilename|contains: 'C:\Windows\'
+    filter2:
+        TargetFilename|contains:
+            - '.jpg'
+            - '.jpeg'
+            - '.png'
+    condition: selection and not filter1 and not filter2
 fields:
     - CommandLine
     - ParentCommandLine
