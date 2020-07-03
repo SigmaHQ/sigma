@@ -1,3 +1,4 @@
+action: global
 title: Regsvr32 Network Activity
 id: c7e91a02-d771-4a6d-a700-42587e0b1095
 description: Detects network connections and DNS queries initiated by Regsvr32.exe
@@ -14,13 +15,10 @@ author: Dmitriy Lifanov, oscd.community
 status: experimental
 date: 2019/10/25
 modified: 2020/07/01
-logsource:
-    category: network_connection
-    product: windows
 detection:
     selection:
         Image|endswith: '\regsvr32.exe'
-    condition: selection
+    condition: all of them
 fields:
     - ComputerName
     - User
@@ -30,3 +28,14 @@ fields:
 falsepositives:
     - unknown
 level: high
+---
+logsource:
+    category: network_connection
+    product: windows
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection1:
+        EventID: 22
