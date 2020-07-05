@@ -11,12 +11,13 @@ date: 2020/07/05
 logsource:
     category: webserver
 detection:
-    selection:
-        c-uri|contains|all: 
-            - '/tmui/login.jsp/'
-            - '/..'
-            - ';/tmui/'
-    condition: selection
+    selection_base:
+        c-uri|contains: '/tmui/login'
+    selection_traversal:
+        c-uri|contains:
+            - '..;/'
+            - '.jsp/..'
+    condition: selection_base and selection_traversal
 fields:
     - c-ip
     - c-dns
