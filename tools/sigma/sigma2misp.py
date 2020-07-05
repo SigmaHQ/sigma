@@ -7,7 +7,7 @@ import urllib3
 urllib3.disable_warnings()
 from pymisp import PyMISP
 
-def create_new_event():
+def create_new_event(args, misp):
     if hasattr(misp, "new_event"):
         return misp.new_event(info=args.info)["Event"]["id"]
     
@@ -55,7 +55,7 @@ def main():
 
     for sigma in paths:
         if not args.event and (first or not args.same_event):
-            eventid = create_new_event()
+            eventid = create_new_event(args, misp)
         print("Importing Sigma rule {} into MISP event {}...".format(sigma, eventid, end=""))
         f = sigma.open("rt")
 
