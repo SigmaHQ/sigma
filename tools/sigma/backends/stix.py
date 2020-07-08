@@ -15,6 +15,7 @@ class STIXBackend(SingleTextQueryBackend):
     valueExpression = "\'%s\'"
     mapExpression = "%s = %s"
     mapListsSpecialHandling = True
+    sigmaSTIXObjectName = "x-sigma"
 
     def cleanKey(self, key):
         if key is None:
@@ -50,7 +51,7 @@ class STIXBackend(SingleTextQueryBackend):
     def generateMapItemNode(self, node):
         key, value = node
         if ":" not in key:
-            raise TypeError("Backend does not support mapping for key " + str(key))
+            key = "%s:%s" % (self.sigmaSTIXObjectName, str(key).lower())
         if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
             if type(value) == str and "*" in value:
                 value = value.replace("*", "%")
