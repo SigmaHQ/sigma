@@ -478,7 +478,7 @@ class TestRules(unittest.TestCase):
             references = self.get_rule_part(file_path=file, part_name="references")
             if not references:
                 print(Fore.YELLOW + "Rule {} has no field 'references'.".format(file))
-                faulty_rules.append(file)
+                #faulty_rules.append(file)
             elif not isinstance(references, list):
                 print(Fore.YELLOW + "Rule {} has a refences field that isn't a list.".format(file))
                 faulty_rules.append(file)                
