@@ -475,7 +475,7 @@ class TestRules(unittest.TestCase):
     def test_references(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
-            references = self.get_rule_part(file_path=file, part_name="refrences")
+            references = self.get_rule_part(file_path=file, part_name="references")
             if not references:
                 print(Fore.YELLOW + "Rule {} has no field 'references'.".format(file))
                 faulty_rules.append(file)
