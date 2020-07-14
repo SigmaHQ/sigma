@@ -10,238 +10,13 @@ import os
 import unittest
 import yaml
 import re
+from attackcti import attack_client
 from colorama import init
 from colorama import Fore
 
 class TestRules(unittest.TestCase):
-    MITRE_TECHNIQUES = [
-             "t1002",
-             "t1003",
-             "t1003.001",
-             "t1003.002",
-             "t1003.003",
-             "t1003.004",
-             "t1003.005",
-             "t1003.006",
-             "t1004",
-             "t1005",
-             "t1006",
-             "t1007",
-             "t1009",
-             "t1011",
-             "t1012",
-             "t1015",
-             "t1016",
-             "t1018",
-             "t1020",
-             "t1021",
-             "t1021.001",
-             "t1021.002",
-             "t1021.003",
-             "t1021.006",
-             "t1023",
-             "t1027",
-             "t1028",
-             "t1031",
-             "t1033",
-             "t1035",
-             "t1036",
-             "t1036.005",
-             "t1037",
-             "t1037.001",
-             "t1038",
-             "t1040",
-             "t1041",
-             "t1042",
-             "t1043",
-             "t1046",
-             "t1047",
-             "t1048",
-             "t1049",
-             "t1050",
-             "t1053",
-             "t1053.002",
-             "t1053.005",
-             "t1054",
-             "t1055",
-             "t1056",
-             "t1057",
-             "t1058",
-             "t1059",
-             "t1059.001",
-             "t1059.003",
-             "t1059.004",
-             "t1059.005",
-             "t1059.006",
-             "t1060",
-             "t1064",
-             "t1066",
-             "t1067",
-             "t1068",
-             "t1069",
-             "t1070",
-             "t1070.001",
-             "t1070.002",
-             "t1070.003",
-             "t1070.004",
-             "t1070.005",
-             "t1070.006",
-             "t1071",
-             "t1071.004",
-             "t1073",
-             "t1074",
-             "t1075",
-             "t1076",
-             "t1077",
-             "t1078",
-             "t1081",
-             "t1082",
-             "t1083",
-             "t1084",
-             "t1085",
-             "t1086",
-             "t1087",
-             "t1088",
-             "t1089",
-             "t1090",
-             "t1091",
-             "t1096",
-             "t1098",
-             "t1099",
-             "t1100",
-             "t1102",
-             "t1103",
-             "t1105",
-             "t1106",
-             "t1107",
-             "t1110",
-             "t1112",
-             "t1114",
-             "t1117",
-             "t1118",
-             "t1121",
-             "t1122",
-             "t1123",
-             "t1124",
-             "t1125",
-             "t1127",
-             "t1128",
-             "t1130",
-             "t1133",
-             "t1134",
-             "t1134.005",
-             "t1135",
-             "t1136",
-             "t1137",
-             "t1138",
-             "t1139",
-             "t1140",
-             "t1145",
-             "t1146",
-             "t1156",
-             "t1158",
-             "t1168",
-             "t1169",
-             "t1170",
-             "t1171",
-             "t1175",
-             "t1177",
-             "t1178",
-             "t1182",
-             "t1183",
-             "t1190",
-             "t1191",
-             "t1193",
-             "t1195",
-             "t1195.001",
-             "t1196",
-             "t1197",
-             "t1200",
-             "t1201",
-             "t1202",
-             "t1203",
-             "t1204",
-             "t1207",
-             "t1208",
-             "t1210",
-             "t1211",
-             "t1212",
-             "t1218",
-             "t1218.001",
-             "t1218.005",
-             "t1218.010",
-             "t1218.011",
-             "t1219",
-             "t1220",
-             "t1222",
-             "t1223",
-             "t1482",
-             "t1485",
-             "t1487",
-             "t1488",
-             "t1489",
-             "t1490",
-             "t1492",
-             "t1493",
-             "t1495",
-             "t1499",
-             "t1500",
-             "t1501",
-             "t1505",
-             "t1505.003",
-             "t1537",
-             "t1542.003",
-             "t1543.002",
-             "t1543.003",
-             "t1546.001",
-             "t1546.003",
-             "t1546.004",
-             "t1546.007",
-             "t1546.008",
-             "t1546.009",
-             "t1546.010",
-             "t1546.011",
-             "t1546.012",
-             "t1546.015",
-             "t1547.001",
-             "t1547.004",
-             "t1547.008",
-             "t1547.009",
-             "t1548.002",
-             "t1550.002",
-             "t1551",
-             "t1551.003",
-             "t1551.004",
-             "t1551.006",
-             "t1552.001",
-             "t1552.003",
-             "t1552.004",
-             "t1553.004",
-             "t1557.001",
-             "t1558",
-             "t1558.003",
-             "t1559.001",
-             "t1560",
-             "t1561.001",
-             "t1561.002",
-             "t1562.001",
-             "t1562.006",
-             "t1564.001",
-             "t1564.004",
-             "t1565.001",
-             "t1565.002",
-             "t1566.001",
-             "t1569.002",
-             "t1571",
-             "t1574.001",
-             "t1574.002",
-             "t1574.011",
-]
     MITRE_TECHNIQUE_NAMES = ["process_injection", "signed_binary_proxy_execution", "process_injection"] # incomplete list
     MITRE_TACTICS = ["initial_access", "execution", "persistence", "privilege_escalation", "defense_evasion", "credential_access", "discovery", "lateral_movement", "collection", "exfiltration", "command_and_control", "impact", "launch"]
-    MITRE_GROUPS =  ["g0001", "g0002", "g0003", "g0004", "g0005", "g0006", "g0007", "g0008", "g0009", "g0010", "g0011", "g0012", "g0013", "g0014", "g0015", "g0016", "g0017", "g0018", "g0019", "g0020", "g0021", "g0022", "g0023", "g0024", "g0025", "g0026", "g0027", "g0028", "g0029", "g0030", "g0031", "g0032", "g0033", "g0034", "g0035", "g0036", "g0037", "g0038", "g0039", "g0040", "g0041", "g0042", "g0043", "g0044", "g0045", "g0046", "g0047", "g0048", "g0049", "g0050", "g0051", "g0052", "g0053", "g0054", "g0055", "g0056", "g0057", "g0058", "g0059", "g0060", "g0061", "g0062", "g0063", "g0064", "g0065", "g0066", "g0067", "g0068", "g0069", "g0070", "g0071", "g0072", "g0073", "g0074", "g0075", "g0076", "g0077", "g0078", "g0079", "g0080", "g0081", "g0082", "g0083", "g0084", "g0085", "g0086", "g0087", "g0088", "g0089", "g0090", "g0091", "g0092", "g0093", "g0094", "g0095", "g0096"]
-    MITRE_SOFTWARE = ["s0001", "s0002", "s0003", "s0004", "s0005", "s0006", "s0007", "s0008", "s0009", "s0010", "s0011", "s0012", "s0013", "s0014", "s0015", "s0016", "s0017", "s0018", "s0019", "s0020", "s0021", "s0022", "s0023", "s0024", "s0025", "s0026", "s0027", "s0028", "s0029", "s0030", "s0031", "s0032", "s0033", "s0034", "s0035", "s0036", "s0037", "s0038", "s0039", "s0040", "s0041", "s0042", "s0043", "s0044", "s0045", "s0046", "s0047", "s0048", "s0049", "s0050", "s0051", "s0052", "s0053", "s0054", "s0055", "s0056", "s0057", "s0058", "s0059", "s0060", "s0061", "s0062", "s0063", "s0064", "s0065", "s0066", "s0067", "s0068", "s0069", "s0070", "s0071", "s0072", "s0073", "s0074", "s0075", "s0076", "s0077", "s0078", "s0079", "s0080", "s0081", "s0082", "s0083", "s0084", "s0085", "s0086", "s0087", "s0088", "s0089", "s0090", "s0091", "s0092", "s0093", "s0094", "s0095", "s0096", "s0097", "s0098", "s0099", "s0100", "s0101", "s0102", "s0103", "s0104", "s0105", "s0106", "s0107", "s0108", "s0109", "s0110", "s0111", "s0112", "s0113", "s0114", "s0115", "s0116", "s0117", "s0118", "s0119", "s0120", "s0121", "s0122", "s0123", "s0124", "s0125", "s0126", "s0127", "s0128", "s0129", "s0130", "s0131", "s0132", "s0133", "s0134", "s0135", "s0136", "s0137", "s0138", "s0139", "s0140", "s0141", "s0142", "s0143", "s0144", "s0145", "s0146", "s0147", "s0148", "s0149", "s0150", "s0151", "s0152", "s0153", "s0154", "s0155", "s0156", "s0157", "s0158", "s0159", "s0160", "s0161", "s0162", "s0163", "s0164", "s0165", "s0166", "s0167", "s0168", "s0169", "s0170", "s0171", "s0172", "s0173", "s0174", "s0175", "s0176", "s0177", "s0178", "s0179", "s0180", "s0181", "s0182", "s0183", "s0184", "s0185", "s0186", "s0187", "s0188", "s0189", "s0190", "s0191", "s0192", "s0193", "s0194", "s0195", "s0196", "s0197", "s0198", "s0199", "s0200", "s0201", "s0202", "s0203", "s0204", "s0205", "s0206", "s0207", "s0208", "s0209", "s0210", "s0211", "s0212", "s0213", "s0214", "s0215", "s0216", "s0217", "s0218", "s0219", "s0220", "s0221", "s0222", "s0223", "s0224", "s0225", "s0226", "s0227", "s0228", "s0229", "s0230", "s0231", "s0232", "s0233", "s0234", "s0235", "s0236", "s0237", "s0238", "s0239", "s0240", "s0241", "s0242", "s0243", "s0244", "s0245", "s0246", "s0247", "s0248", "s0249", "s0250", "s0251", "s0252", "s0253", "s0254", "s0255", "s0256", "s0257", "s0258", "s0259", "s0260", "s0261", "s0262", "s0263", "s0264", "s0265", "s0266", "s0267", "s0268", "s0269", "s0270", "s0271", "s0272", "s0273", "s0274", "s0275", "s0276", "s0277", "s0278", "s0279", "s0280", "s0281", "s0282", "s0283", "s0284", "s0330", "s0331", "s0332", "s0333", "s0334", "s0335", "s0336", "s0337", "s0338", "s0339", "s0340", "s0341", "s0342", "s0343", "s0344", "s0345", "s0346", "s0347", "s0348", "s0349", "s0350", "s0351", "s0352", "s0353", "s0354", "s0355", "s0356", "s0357", "s0358", "s0359", "s0360", "s0361", "s0362", "s0363", "s0364", "s0365", "s0366", "s0367", "s0368", "s0369", "s0370", "s0371", "s0372", "s0373", "s0374", "s0375", "s0376", "s0377", "s0378", "s0379", "s0380", "s0381", "s0382", "s0383", "s0384", "s0385", "s0386", "s0387", "s0388", "s0389", "s0390", "s0391", "s0393", "s0394", "s0395", "s0396", "s0397", "s0398", "s0400", "s0401", "s0402", "s0404", "s0409", "s0410", "s0412", "s0413", "s0414", "s0415", "s0416", "s0417"]
-    MITRE_ALL = ["attack." + item for item in MITRE_TECHNIQUES + MITRE_TACTICS + MITRE_GROUPS + MITRE_SOFTWARE]
 
     path_to_rules = "rules"
 
@@ -290,7 +65,7 @@ class TestRules(unittest.TestCase):
             tags = self.get_rule_part(file_path=file, part_name="tags")
             if tags:
                 for tag in tags:
-                    if tag not in self.MITRE_ALL and tag.startswith("attack.") and len(split(".", tag)) < 3:
+                    if tag not in MITRE_ALL and tag.startswith("attack."):
                         print(Fore.RED + "Rule {} has the following incorrect tag {}".format(file, tag))
                         files_with_incorrect_mitre_tags.append(file)
 
@@ -548,6 +323,54 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules with non-conform 'title' fields. Please check: https://github.com/Neo23x0/sigma/wiki/Rule-Creation-Guide#title")
 
+def get_mitre_data():
+    """
+    Generate tags from live MITRE ATT&CK TAXI service to get up-to-date data
+    """
+    # Get MITRE ATT&CK information
+    lift = attack_client()
+    # Techniques
+    MITRE_TECHNIQUES = []
+    MITRE_TECHNIQUE_NAMES = []
+    MITRE_PHASE_NAMES = set()
+    MITRE_TOOLS = []
+    MITRE_GROUPS = []
+    # Techniques 
+    enterprise_techniques = lift.get_enterprise_techniques()
+    for t in enterprise_techniques:
+        MITRE_TECHNIQUE_NAMES.append(t['name'].lower().replace(' ', '_').replace('-', '_'))
+        for r in t.external_references:
+            if 'external_id' in r:
+                MITRE_TECHNIQUES.append(r['external_id'].lower())
+        if 'kill_chain_phases' in t:
+            for kc in t['kill_chain_phases']:
+                if 'phase_name' in kc:
+                    MITRE_PHASE_NAMES.add(kc['phase_name'].replace('-','_'))
+    # Tools / Malware
+    enterprise_tools = lift.get_enterprise_tools()
+    for t in enterprise_tools:
+        for r in t.external_references:
+            if 'external_id' in r:
+                MITRE_TOOLS.append(r['external_id'].lower())
+    enterprise_malware = lift.get_enterprise_malware()
+    for m in enterprise_malware:
+        for r in m.external_references:
+            if 'external_id' in r:
+                MITRE_TOOLS.append(r['external_id'].lower())
+    # Groups
+    enterprise_groups = lift.get_enterprise_groups()
+    for g in enterprise_groups:
+        for r in g.external_references:
+            if 'external_id' in r:
+                MITRE_GROUPS.append(r['external_id'].lower())
+    
+    # Combine all IDs to a big tag list
+    return ["attack." + item for item in MITRE_TECHNIQUES + MITRE_TECHNIQUE_NAMES + list(MITRE_PHASE_NAMES) + MITRE_GROUPS + MITRE_TOOLS]
+
+
 if __name__ == "__main__":
     init(autoreset=True)
+    # Get Current Data from MITRE on ATT&CK
+    MITRE_ALL = get_mitre_data()
+    # Run the tests
     unittest.main()
