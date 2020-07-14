@@ -290,12 +290,12 @@ class TestRules(unittest.TestCase):
             tags = self.get_rule_part(file_path=file, part_name="tags")
             if tags:
                 for tag in tags:
-                    if tag not in self.MITRE_ALL and tag.startswith("attack."):
+                    if tag not in self.MITRE_ALL and tag.startswith("attack.") and len(split(".", tag)) < 3:
                         print(Fore.RED + "Rule {} has the following incorrect tag {}".format(file, tag))
                         files_with_incorrect_mitre_tags.append(file)
 
         self.assertEqual(files_with_incorrect_mitre_tags, [], Fore.RED + 
-                         "There are rules with incorrect MITRE Tags. (please inform us about new tags that are not yet supported in our tests) Check the correct tags here: https://attack.mitre.org/ ")
+                         "There are rules with incorrect/unknown MITRE Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://attack.mitre.org/ ")
 
     def test_look_for_duplicate_filters(self):
         def check_list_or_recurse_on_dict(item, depth:int) -> None:
@@ -477,10 +477,10 @@ class TestRules(unittest.TestCase):
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             references = self.get_rule_part(file_path=file, part_name="references")
             # Reference field doesn't exist      
-            if not references:
-                print(Fore.YELLOW + "Rule {} has no field 'references'.".format(file))
+            #if not references:
+                #print(Fore.YELLOW + "Rule {} has no field 'references'.".format(file))
                 #faulty_rules.append(file)
-            else:
+            if references:
                 # it exists but isn't a list
                 if not isinstance(references, list):
                     print(Fore.YELLOW + "Rule {} has a references field that isn't a list.".format(file))
@@ -488,6 +488,18 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules with malformed 'references' fields. (has to be a list of values even if it contains only a single value)")
+
+    def test_file_names(self):
+        faulty_rules = []
+        filename_pattern = re.compile('[a-z0-9_]{10,70}\.yml')
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            filename = os.path.basename(file)
+            if not filename_pattern.match(filename) and not '_' in filename:
+                print(Fore.YELLOW + "Rule {} has a file name that doesn't match our standard.".format(file))
+                faulty_rules.append(file)     
+
+        self.assertEqual(faulty_rules, [], Fore.RED + 
+                         "There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is '[a-z0-9_]{10,70}\.yml' and it has to contain at least an underline character.")
 
     def test_title(self):
         faulty_rules = []
