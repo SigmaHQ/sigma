@@ -472,6 +472,23 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules with missing or malformed 'date' fields. (create one, e.g. date: 2019/01/14)")
 
+    def test_references(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            references = self.get_rule_part(file_path=file, part_name="references")
+            # Reference field doesn't exist      
+            if not references:
+                print(Fore.YELLOW + "Rule {} has no field 'references'.".format(file))
+                #faulty_rules.append(file)
+            else:
+                # it exists but isn't a list
+                if not isinstance(references, list):
+                    print(Fore.YELLOW + "Rule {} has a references field that isn't a list.".format(file))
+                    faulty_rules.append(file)     
+
+        self.assertEqual(faulty_rules, [], Fore.RED + 
+                         "There are rules with malformed 'references' fields. (has to be a list of values even if it contains only a single value)")
+
     def test_title(self):
         faulty_rules = []
         allowed_lowercase_words = [
