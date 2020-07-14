@@ -290,12 +290,12 @@ class TestRules(unittest.TestCase):
             tags = self.get_rule_part(file_path=file, part_name="tags")
             if tags:
                 for tag in tags:
-                    if tag not in self.MITRE_ALL and tag.startswith("attack."):
+                    if tag not in self.MITRE_ALL and tag.startswith("attack.") and len(split(".", tag)) < 3:
                         print(Fore.RED + "Rule {} has the following incorrect tag {}".format(file, tag))
                         files_with_incorrect_mitre_tags.append(file)
 
         self.assertEqual(files_with_incorrect_mitre_tags, [], Fore.RED + 
-                         "There are rules with incorrect MITRE Tags. (please inform us about new tags that are not yet supported in our tests) Check the correct tags here: https://attack.mitre.org/ ")
+                         "There are rules with incorrect/unknown MITRE Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://attack.mitre.org/ ")
 
     def test_look_for_duplicate_filters(self):
         def check_list_or_recurse_on_dict(item, depth:int) -> None:
