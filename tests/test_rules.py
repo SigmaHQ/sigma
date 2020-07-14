@@ -477,10 +477,10 @@ class TestRules(unittest.TestCase):
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             references = self.get_rule_part(file_path=file, part_name="references")
             # Reference field doesn't exist      
-            if not references:
-                print(Fore.YELLOW + "Rule {} has no field 'references'.".format(file))
+            #if not references:
+                #print(Fore.YELLOW + "Rule {} has no field 'references'.".format(file))
                 #faulty_rules.append(file)
-            else:
+            if references:
                 # it exists but isn't a list
                 if not isinstance(references, list):
                     print(Fore.YELLOW + "Rule {} has a references field that isn't a list.".format(file))
