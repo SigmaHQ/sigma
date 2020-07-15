@@ -33,29 +33,7 @@ from sigma.parser.modifiers.transform import SigmaContainsModifier, SigmaStartsw
 from .data import sysmon_schema
 from .exceptions import NotSupportedError
 
-class DeepFieldMappingMixin(object):
-
-    def fieldNameMapping(self, fieldname, value):
-        if isinstance(fieldname, str):
-            get_config = self.sigmaconfig.fieldmappings.get(fieldname)
-            if not get_config and '|' in fieldname:
-                fieldname = fieldname.split('|', 1)[0]
-                get_config = self.sigmaconfig.fieldmappings.get(fieldname)
-            if isinstance(get_config, ConditionalFieldMapping):
-                condition = self.sigmaconfig.fieldmappings.get(fieldname).conditions
-                for key, item in self.logsource.items():
-                    if condition.get(key) and condition.get(key, {}).get(item):
-                        new_fieldname = condition.get(key, {}).get(item)
-                        if any(new_fieldname):
-                           return super().fieldNameMapping(new_fieldname[0], value)
-        return super().fieldNameMapping(fieldname, value)
-
-
-    def generate(self, sigmaparser):
-        self.logsource = sigmaparser.parsedyaml.get("logsource", {})
-        return super().generate(sigmaparser)
-
-class AzureLogAnalyticsBackend(DeepFieldMappingMixin, SingleTextQueryBackend):
+class AzureLogAnalyticsBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Azure Log Analytics Queries."""
     identifier = "ala"
     active = True

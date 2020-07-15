@@ -54,7 +54,7 @@ class CarbonBlackQueryBackend(CarbonBlackWildcardHandlingMixin, SingleTextQueryB
     orToken = " OR "
     notToken = " -"
     subExpression = "(%s)"
-    listExpression = "%s"
+    listExpression = "(%s)"
     listSeparator = " OR "
     valueExpression = '%s'
     typedValueExpression = {

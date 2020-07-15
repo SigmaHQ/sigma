@@ -37,12 +37,31 @@ logsources:
     product: windows
     service: driver-framework
     conditions:
-      source: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
+      log_name: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
   windows-dhcp:
     product: windows
     service: dhcp
     conditions:
-      source: 'Microsoft-Windows-DHCP-Server/Operational'
+      log_name: 'Microsoft-Windows-DHCP-Server/Operational'
+  windows-ntlm:
+    product: windows
+    service: ntlm
+    conditions:
+      log_name: 'Microsoft-Windows-NTLM/Operational'
+  windows-defender:
+    product: windows
+    service: windefend
+    conditions:
+      log_name: 'Microsoft-Windows-Windows Defender/Operational'
+  windows-applocker:
+    product: windows
+    service: applocker
+    conditions:
+      log_name:
+        - 'Microsoft-Windows-AppLocker/MSI and Script'
+        - 'Microsoft-Windows-AppLocker/EXE and DLL'
+        - 'Microsoft-Windows-AppLocker/Packaged app-Deployment'
+        - 'Microsoft-Windows-AppLocker/Packaged app-Execution'
 defaultindex: winlogbeat-*
 # Extract all field names qith yq:
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: event_data.\1/g'
