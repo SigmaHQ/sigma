@@ -323,6 +323,13 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules with non-conform 'title' fields. Please check: https://github.com/Neo23x0/sigma/wiki/Rule-Creation-Guide#title")
 
+    def test_invalid_logsource_attributes(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            logsource = self.get_rule_part(file_path=file, part_name="logsource")
+            for key in logsource:
+                if key.lower() not in ['category', 'product', 'service', 'definition']:
+                    print(Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
 def get_mitre_data():
     """
     Generate tags from live MITRE ATT&CK TAXI service to get up-to-date data
