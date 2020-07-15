@@ -9,6 +9,7 @@ references:
     - https://github.com/EmpireProject/Empire/blob/e37fb2eef8ff8f5a0a689f1589f424906fe13055/data/module_source/privesc/Invoke-EventVwrBypass.ps1#L64
 author: Florian Roth
 date: 2019/04/20
+modified: 2020/07/13
 tags:
     - attack.execution
     - attack.t1086
@@ -18,9 +19,12 @@ logsource:
     product: windows
 detection:
     selection:
-        CommandLine:
-            - '* -NoP -sta -NonI -W Hidden -Enc *'
-            - '* -noP -sta -w 1 -enc *'
-            - '* -NoP -NonI -W Hidden -enc *'
+        CommandLine|contains:
+            - ' -NoP -sta -NonI -W Hidden -Enc '
+            - ' -noP -sta -w 1 -enc '
+            - ' -NoP -NonI -W Hidden -enc '
+            - ' -noP -sta -w 1 -enc'
+            - ' -enc  SQB'
+            - ' -nop -exec bypass -EncodedCommand SQB'
     condition: selection
 level: critical
