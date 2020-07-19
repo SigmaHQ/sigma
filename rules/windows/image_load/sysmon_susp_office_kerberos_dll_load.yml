@@ -1,0 +1,27 @@
+title: Active Directory Kerberos DLL Loaded Via Office Applications
+id: 7417e29e-c2e7-4cf6-a2e8-767228c64837
+status: experimental
+description: Detects Kerberos DLL being loaded by an Office Product
+references:
+    - https://medium.com/threatpunter/detecting-adversary-tradecraft-with-image-load-event-logging-and-eql-8de93338c16
+author: Antonlovesdnb
+date: 2020/02/19
+tags:
+    - attack.initial_access
+    - attack.t1193
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        Image:
+            - '*\winword.exe'
+            - '*\powerpnt.exe'
+            - '*\excel.exe'
+            - '*\outlook.exe'
+        ImageLoaded:
+            - '*\kerberos.dll'
+    condition: selection
+falsepositives:
+    - Alerts on legitimate macro usage as well, will need to filter as appropriate
+level: high

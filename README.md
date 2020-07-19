@@ -8,7 +8,7 @@ Generic Signature Format for SIEM Systems
 
 # What is Sigma
 
-Sigma is a generic and open signature format that allows you to describe relevant log events in a straight forward manner. The rule format is very flexible, easy to write and applicable to any type of log file. The main purpose of this project is to provide a structured form in which researchers or analysts can describe their once developed detection methods and make them shareable with others.
+Sigma is a generic and open signature format that allows you to describe relevant log events in a straightforward manner. The rule format is very flexible, easy to write and applicable to any type of log file. The main purpose of this project is to provide a structured form in which researchers or analysts can describe their once developed detection methods and make them shareable with others.
 
 Sigma is for log files what [Snort](https://www.snort.org/) is for network traffic and [YARA](https://github.com/VirusTotal/yara) is for files.
 
@@ -88,9 +88,9 @@ Sysmon: Web Shell Detection
 Windows 'Security' Eventlog: Suspicious Number of Failed Logons from a Single Source Workstation
 ![sigma_rule example5](./images/Sigma_rule_example5.png)
 
-# Sigma Tools 
+# Sigma Tools
 
-## Sigmac 
+## Sigmac
 
 Sigmac converts sigma rules into queries or inputs of the supported targets listed below. It acts as a frontend to the
 Sigma library that may be used to integrate Sigma support in other projects. Further, there's `merge_sigma.py` which
@@ -98,7 +98,7 @@ merges multiple YAML documents of a Sigma rule collection into simple Sigma rule
 
 ### Usage
 
-```
+```bash
 usage: sigmac [-h] [--recurse] [--filter FILTER]
               [--target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,mdatp,ee-outliers}]
               [--target-list] [--config CONFIG] [--output OUTPUT]

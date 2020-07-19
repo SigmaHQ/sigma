@@ -1,8 +1,8 @@
+title: ELK Ingested with Winlogbeat
 logsources:
   windows:
     product: windows
     index: <winlogbeat-{now/d}>
-    
   windows-application:
     product: windows
     service: application
@@ -27,7 +27,21 @@ logsources:
     product: windows
     service: driver-framework
     conditions:
-      source: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
+      log_name: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
+  windows-ntlm:
+    product: windows
+    service: ntlm
+    conditions:
+      log_name: 'Microsoft-Windows-NTLM/Operational'
+  windows-applocker:
+    product: windows
+    service: applocker
+    conditions:
+      log_name:
+        - 'Microsoft-Windows-AppLocker/MSI and Script'
+        - 'Microsoft-Windows-AppLocker/EXE and DLL'
+        - 'Microsoft-Windows-AppLocker/Packaged app-Deployment'
+        - 'Microsoft-Windows-AppLocker/Packaged app-Execution'
 defaultindex: <winlogbeat-{now/d}>
 # Extract all field names qith yq:
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: event_data.\1/g'
