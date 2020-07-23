@@ -36,7 +36,7 @@ class STIXBackend(SingleTextQueryBackend):
         else:
             return None
 
-    def generateORNode(self, node, currently_within_NOT_node):
+    def generateORNode(self, node, currently_within_NOT_node=False):
         generated = [self.generateNode(val, currently_within_NOT_node) for val in node]
         filtered = [g for g in generated if g is not None]
         if filtered:
@@ -46,7 +46,7 @@ class STIXBackend(SingleTextQueryBackend):
         else:
             return None
 
-    def generateNOTNode(self, node, currently_within_NOT_node):
+    def generateNOTNode(self, node, currently_within_NOT_node=False):
         currently_within_NOT_node = True
         generated = self.generateNode(node.item, currently_within_NOT_node)
         if generated is not None:
@@ -54,14 +54,14 @@ class STIXBackend(SingleTextQueryBackend):
         else:
             return None
 
-    def generateSubexpressionNode(self, node, currently_within_NOT_node):
+    def generateSubexpressionNode(self, node, currently_within_NOT_node=False):
         generated = self.generateNode(node.items, currently_within_NOT_node)
         if generated:
             return self.subExpression % generated
         else:
             return None
 
-    def generateMapItemNode(self, node, currently_within_NOT_node):
+    def generateMapItemNode(self, node, currently_within_NOT_node=False):
         fieldname, value = node
 
         transformed_fieldname = self.fieldNameMapping(fieldname, value)
@@ -76,7 +76,7 @@ class STIXBackend(SingleTextQueryBackend):
         else:
             raise TypeError("Backend does not support map values of type " + str(type(value)))
 
-    def generateMapItemListNode(self, key, value, currently_within_NOT_node):
+    def generateMapItemListNode(self, key, value, currently_within_NOT_node=False):
         items_list = list()
         for item in value:
             if type(item) == str and "*" in item:
@@ -107,7 +107,7 @@ class STIXBackend(SingleTextQueryBackend):
         else:
             raise NotImplementedError("Type modifier '{}' is not supported by backend".format(value.identifier))
 
-    def generateMapItemNode(self, node, currently_within_NOT_node):
+    def generateMapItemNode(self, node, currently_within_NOT_node=False):
         key, value = node
         if ":" not in key:
             key = "%s:%s" % (self.sigmaSTIXObjectName, str(key).lower())
