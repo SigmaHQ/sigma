@@ -26,7 +26,57 @@ class STIXBackend(SingleTextQueryBackend):
     def cleanValue(self, value):
         return value
 
-    def generateMapItemListNode(self, key, value, currently_within_NOT_node):
+    def generateANDNode(self, node, currently_within_NOT_node=False):
+        generated = [self.generateNode(val, currently_within_NOT_node) for val in node]
+        filtered = [g for g in generated if g is not None]
+        if filtered:
+            if self.sort_condition_lists:
+                filtered = sorted(filtered)
+            return self.andToken.join(filtered)
+        else:
+            return None
+
+    def generateORNode(self, node, currently_within_NOT_node=False):
+        generated = [self.generateNode(val, currently_within_NOT_node) for val in node]
+        filtered = [g for g in generated if g is not None]
+        if filtered:
+            if self.sort_condition_lists:
+                filtered = sorted(filtered)
+            return self.orToken.join(filtered)
+        else:
+            return None
+
+    def generateNOTNode(self, node, currently_within_NOT_node=False):
+        currently_within_NOT_node = True
+        generated = self.generateNode(node.item, currently_within_NOT_node)
+        if generated is not None:
+            return generated
+        else:
+            return None
+
+    def generateSubexpressionNode(self, node, currently_within_NOT_node=False):
+        generated = self.generateNode(node.items, currently_within_NOT_node)
+        if generated:
+            return self.subExpression % generated
+        else:
+            return None
+
+    def generateMapItemNode(self, node, currently_within_NOT_node=False):
+        fieldname, value = node
+
+        transformed_fieldname = self.fieldNameMapping(fieldname, value)
+        if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
+            return self.mapExpression % (transformed_fieldname, self.generateNode(value))
+        elif type(value) == list:
+            return self.generateMapItemListNode(transformed_fieldname, value, currently_within_NOT_node)
+        elif isinstance(value, SigmaTypeModifier):
+            return self.generateMapItemTypedNode(transformed_fieldname, value)
+        elif value is None:
+            return self.nullExpression % (transformed_fieldname, )
+        else:
+            raise TypeError("Backend does not support map values of type " + str(type(value)))
+
+    def generateMapItemListNode(self, key, value, currently_within_NOT_node=False):
         items_list = list()
         for item in value:
             if type(item) == str and "*" in item:
@@ -57,7 +107,7 @@ class STIXBackend(SingleTextQueryBackend):
         else:
             raise NotImplementedError("Type modifier '{}' is not supported by backend".format(value.identifier))
 
-    def generateMapItemNode(self, node, currently_within_NOT_node):
+    def generateMapItemNode(self, node, currently_within_NOT_node=False):
         key, value = node
         if ":" not in key:
             key = "%s:%s" % (self.sigmaSTIXObjectName, str(key).lower())

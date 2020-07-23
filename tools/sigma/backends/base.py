@@ -154,12 +154,10 @@ class BaseBackend:
             pass
         return query
 
-    def generateNode(self, node, currently_within_NOT_node=False):
+    def generateNode(self, node):
         if type(node) == sigma.parser.condition.ConditionAND:
             return self.applyOverrides(self.generateANDNode(node))
         elif type(node) == sigma.parser.condition.ConditionOR:
-            if currently_within_NOT_node:
-                return self.applyOverrides(self.generateANDNode(node))
             return self.applyOverrides(self.generateORNode(node))
         elif type(node) == sigma.parser.condition.ConditionNOT:
             return self.applyOverrides(self.generateNOTNode(node))
@@ -248,8 +246,8 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
     sort_condition_lists = False        # Sort condition items for AND and OR conditions
 
-    def generateANDNode(self, node, currently_within_NOT_node=False):
-        generated = [ self.generateNode(val, currently_within_NOT_node) for val in node ]
+    def generateANDNode(self, node):
+        generated = [ self.generateNode(val) for val in node ]
         filtered = [ g for g in generated if g is not None ]
         if filtered:
             if self.sort_condition_lists:
@@ -258,8 +256,8 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
         else:
             return None
 
-    def generateORNode(self, node, currently_within_NOT_node):
-        generated = [ self.generateNode(val, currently_within_NOT_node) for val in node ]
+    def generateORNode(self, node):
+        generated = [ self.generateNode(val) for val in node ]
         filtered = [ g for g in generated if g is not None ]
         if filtered:
             if self.sort_condition_lists:
@@ -268,34 +266,33 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
         else:
             return None
 
-    def generateNOTNode(self, node, currently_within_NOT_node):
-        currently_within_NOT_node = True
-        generated = self.generateNode(node.item, currently_within_NOT_node)
+    def generateNOTNode(self, node):
+        generated = self.generateNode(node.item)
         if generated is not None:
-            return generated
+            return self.notToken + generated
         else:
             return None
 
-    def generateSubexpressionNode(self, node, currently_within_NOT_node):
-        generated = self.generateNode(node.items, currently_within_NOT_node)
+    def generateSubexpressionNode(self, node):
+        generated = self.generateNode(node.items)
         if generated:
             return self.subExpression % generated
         else:
             return None
 
-    def generateListNode(self, node, currently_within_NOT_node):
+    def generateListNode(self, node):
         if not set([type(value) for value in node]).issubset({str, int}):
             raise TypeError("List values must be strings or numbers")
         return self.listExpression % (self.listSeparator.join([self.generateNode(value) for value in node]))
 
-    def generateMapItemNode(self, node, currently_within_NOT_node):
+    def generateMapItemNode(self, node):
         fieldname, value = node
 
         transformed_fieldname = self.fieldNameMapping(fieldname, value)
         if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
             return self.mapExpression % (transformed_fieldname, self.generateNode(value))
         elif type(value) == list:
-            return self.generateMapItemListNode(transformed_fieldname, value, currently_within_NOT_node)
+            return self.generateMapItemListNode(transformed_fieldname, value)
         elif isinstance(value, SigmaTypeModifier):
             return self.generateMapItemTypedNode(transformed_fieldname, value)
         elif value is None:
@@ -303,7 +300,7 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
         else:
             raise TypeError("Backend does not support map values of type " + str(type(value)))
 
-    def generateMapItemListNode(self, fieldname, value, currently_within_NOT_node):
+    def generateMapItemListNode(self, fieldname, value):
         return self.mapListValueExpression % (fieldname, self.generateNode(value))
 
     def generateMapItemTypedNode(self, fieldname, value):
