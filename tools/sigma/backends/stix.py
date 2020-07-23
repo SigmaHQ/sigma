@@ -14,6 +14,7 @@ class STIXBackend(SingleTextQueryBackend):
     subExpression = "(%s)"
     valueExpression = "\'%s\'"
     mapExpression = "%s = %s"
+    notMapExpression = "%s != %s"
     mapListsSpecialHandling = True
     sigmaSTIXObjectName = "x-sigma"
 
@@ -47,7 +48,7 @@ class STIXBackend(SingleTextQueryBackend):
             return None
 
     def generateNOTNode(self, node, currently_within_NOT_node=False):
-        currently_within_NOT_node = True
+        currently_within_NOT_node = not(currently_within_NOT_node)
         generated = self.generateNode(node.item, currently_within_NOT_node)
         if generated is not None:
             return generated
@@ -66,6 +67,8 @@ class STIXBackend(SingleTextQueryBackend):
 
         transformed_fieldname = self.fieldNameMapping(fieldname, value)
         if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
+            if currently_within_NOT_node:
+                return self.notMapExpression % (transformed_fieldname, self.generateNode(value))
             return self.mapExpression % (transformed_fieldname, self.generateNode(value))
         elif type(value) == list:
             return self.generateMapItemListNode(transformed_fieldname, value, currently_within_NOT_node)
@@ -118,6 +121,8 @@ class STIXBackend(SingleTextQueryBackend):
                     return "%s NOT LIKE %s" % (self.cleanKey(key), self.generateValueNode(value))
                 return "%s LIKE %s" % (self.cleanKey(key), self.generateValueNode(value))
             elif type(value) in (str, int):
+                if currently_within_NOT_node:
+                    return self.notMapExpression % (self.cleanKey(key), self.generateValueNode(value))
                 return self.mapExpression % (self.cleanKey(key), self.generateValueNode(value))
         elif type(value) == list:
             return self.generateMapItemListNode(key, value, currently_within_NOT_node)
