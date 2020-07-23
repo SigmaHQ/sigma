@@ -269,7 +269,7 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
     def generateNOTNode(self, node):
         generated = self.generateNode(node.item)
         if generated is not None:
-            return generated
+            return self.notToken + generated
         else:
             return None
 
