@@ -58,14 +58,10 @@ class QRadarBackend(SingleTextQueryBackend):
         """Remove quotes in text"""
         return value.replace("\'","\\\'")
 
-    def generateNode(self, node, currently_within_NOT_node=False):
+    def generateNode(self, node):
         if type(node) == sigma.parser.condition.ConditionAND:
-            if currently_within_NOT_node:
-                return self.generateORNode(node)
             return self.generateANDNode(node)
         elif type(node) == sigma.parser.condition.ConditionOR:
-            if currently_within_NOT_node:
-                return self.generateANDNode(node)
             return self.generateORNode(node)
         elif type(node) == sigma.parser.condition.ConditionNOT:
             return self.generateNOTNode(node)
