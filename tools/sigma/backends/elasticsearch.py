@@ -1037,7 +1037,7 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
             if parsed.parsedAgg:
                 if parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MIN or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MAX or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_AVG or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_SUM:
                     if parsed.parsedAgg.groupfield is not None:
-                        rule_object['query_key'] = self.fieldNameMapping(parsed.parsedAgg.groupfield, '*', True)
+                        rule_object['query_key'] = self.fieldNameMapping(parsed.parsedAgg.groupfield, '*')
                     rule_object['type'] = "metric_aggregation"
                     rule_object['buffer_time'] = interval
                     rule_object['doc_type'] = "doc"
