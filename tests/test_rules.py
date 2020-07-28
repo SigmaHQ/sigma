@@ -72,6 +72,23 @@ class TestRules(unittest.TestCase):
         self.assertEqual(files_with_incorrect_mitre_tags, [], Fore.RED + 
                          "There are rules with incorrect/unknown MITRE Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://attack.mitre.org/ ")
 
+    def test_duplicate_tags(self):
+        files_with_incorrect_mitre_tags = []
+
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            tags = self.get_rule_part(file_path=file, part_name="tags")
+            if tags:
+                known_tags = []
+                for tag in tags:
+                    if tag in known_tags:
+                        print(Fore.RED + "Rule {} has the duplicate tag {}".format(file, tag))
+                        files_with_incorrect_mitre_tags.append(file)
+                    else: 
+                        known_tags.append(tag)
+
+        self.assertEqual(files_with_incorrect_mitre_tags, [], Fore.RED + 
+                         "There are rules with duplicate tags")
+
     def test_look_for_duplicate_filters(self):
         def check_list_or_recurse_on_dict(item, depth:int) -> None:
             if type(item) == list:
