@@ -3,6 +3,8 @@ backends:
   - stix
 order: 20
 fieldmappings:
+  action:
+    - x-event:action
   User:
     - user-account:user_id
   c-ip:
@@ -21,6 +23,8 @@ fieldmappings:
     - mac-addr:value
     - network-traffic:dst_ref.value
   destinationport:
+    - network-traffic:dst_port
+  dst_port:
     - network-traffic:dst_port
   domainname:
     - domain-name:value
@@ -45,6 +49,8 @@ fieldmappings:
   event_data.DestinationPort:
     - network-traffic:dst_port
   DestinationPort:
+    - network-traffic:dst_port
+  destination.port:
     - network-traffic:dst_port
   event_data.SubjectUserName:
     - user-account:user_id
@@ -93,19 +99,53 @@ fieldmappings:
   utf8_payload:
     - artifact:payload_bin
 
-  # Web mapping
+  # Web + Proxy mapping
   c-uri:
+    - network-traffic:extensions.'http-request-ext'.request_value
+    - url:value
+  c-uri-query:
+    - network-traffic:extensions.'http-request-ext'.request_value
+    - url:value
+  c-uri-stem:
+    - network-traffic:extensions.'http-request-ext'.request_value
     - url:value
   keywords:
-    - x-sigma:keywords
+    - artifact:payload_bin
   cs-method:
-    - http-request-ext:request_method
+    - network-traffic:extensions.'http-request-ext'.request_method
   sc-status:
     - x-web:status_code
   clientip:
     - ipv4-addr:value
     - ipv6-addr:value
     - network-traffic:src_ref.value
+  c-useragent:
+    - network-traffic:extensions.'http-request-ext'.request_header.'User-Agent'
+  r-dns:
+    - domain-name:value
+    - url:value
+    - x-dns:query
+  cs-host:
+    - x-host:name
+    - domain-name:value
+  cs-cookie:
+    - network-traffic:extensions.'http-request-ext'.request_header.Cookie
+  query:
+    - domain-name:value
+    - url:value
+    - x-dns:query
+  record_type:
+    - x-dns:record_type
+  operation:
+    - x-event:action
+
+  # Compliance mapping
+  event.category:
+    - x-event:action
+  host.scan.vuln_name:
+    - vulnerability:name
+  host.scan.vuln:
+    - vulnerability:external_references[*].external_id
 
   # Cloud mapping
   eventSource:
