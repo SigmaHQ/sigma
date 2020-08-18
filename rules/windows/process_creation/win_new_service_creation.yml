@@ -9,6 +9,7 @@ tags:
     - attack.persistence
     - attack.privilege_escalation
     - attack.t1050
+    - attack.t1543.003
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1050/T1050.yaml
 logsource:
@@ -16,12 +17,12 @@ logsource:
     product: windows
 detection:
     selection:
-      - Image|endswith: '\sc.exe'
-        CommandLine|contains|all:
+        - Image|endswith: '\sc.exe'
+          CommandLine|contains|all:
             - 'create'
             - 'binpath'
-      - Image|endswith: '\powershell.exe'
-        CommandLine|contains: 'new-service'
+        - Image|endswith: '\powershell.exe'
+          CommandLine|contains: 'new-service'
     condition: selection
 falsepositives:
     - Legitimate administrator or user creates a service for legitimate reason

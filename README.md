@@ -8,7 +8,7 @@ Generic Signature Format for SIEM Systems
 
 # What is Sigma
 
-Sigma is a generic and open signature format that allows you to describe relevant log events in a straight forward manner. The rule format is very flexible, easy to write and applicable to any type of log file. The main purpose of this project is to provide a structured form in which researchers or analysts can describe their once developed detection methods and make them shareable with others.
+Sigma is a generic and open signature format that allows you to describe relevant log events in a straightforward manner. The rule format is very flexible, easy to write and applicable to any type of log file. The main purpose of this project is to provide a structured form in which researchers or analysts can describe their once developed detection methods and make them shareable with others.
 
 Sigma is for log files what [Snort](https://www.snort.org/) is for network traffic and [YARA](https://github.com/VirusTotal/yara) is for files.
 
@@ -88,9 +88,9 @@ Sysmon: Web Shell Detection
 Windows 'Security' Eventlog: Suspicious Number of Failed Logons from a Single Source Workstation
 ![sigma_rule example5](./images/Sigma_rule_example5.png)
 
-# Sigma Tools 
+# Sigma Tools
 
-## Sigmac 
+## Sigmac
 
 Sigmac converts sigma rules into queries or inputs of the supported targets listed below. It acts as a frontend to the
 Sigma library that may be used to integrate Sigma support in other projects. Further, there's `merge_sigma.py` which
@@ -98,9 +98,9 @@ merges multiple YAML documents of a Sigma rule collection into simple Sigma rule
 
 ### Usage
 
-```
+```bash
 usage: sigmac [-h] [--recurse] [--filter FILTER]
-              [--target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,wdatp}]
+              [--target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,mdatp,ee-outliers}]
               [--target-list] [--config CONFIG] [--output OUTPUT]
               [--backend-option BACKEND_OPTION] [--defer-abort]
               [--ignore-backend-errors] [--verbose] [--debug]
@@ -125,7 +125,7 @@ optional arguments:
                         tag that must appear in the rules tag list, case-
                         insensitive matching. Multiple log source
                         specifications are AND linked.
-  --target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,wdatp}, -t {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,wdatp}
+  --target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,mdatp}, -t {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,mdatp}
                         Output target format
   --target-list, -l     List available output target formats
   --config CONFIG, -c CONFIG
@@ -191,7 +191,7 @@ tools/sigmac -t splunk -c ~/my-splunk-mapping.yml -c tools/config/generic/window
 * [Kibana](https://www.elastic.co/de/products/kibana)
 * [Elastic X-Pack Watcher](https://www.elastic.co/guide/en/x-pack/current/xpack-alerting.html)
 * [Logpoint](https://www.logpoint.com)
-* [Windows Defender Advanced Threat Protection (WDATP)](https://www.microsoft.com/en-us/windowsforbusiness/windows-atp)
+* [Microsoft Defender Advanced Threat Protection (MDATP)](https://www.microsoft.com/en-us/microsoft-365/windows/microsoft-defender-atp)
 * [Azure Sentinel / Azure Log Analytics](https://azure.microsoft.com/en-us/services/azure-sentinel/)
 * [Sumologic](https://www.sumologic.com/)
 * [ArcSight](https://software.microfocus.com/en-us/products/siem-security-information-event-management/overview)
@@ -201,11 +201,13 @@ tools/sigmac -t splunk -c ~/my-splunk-mapping.yml -c tools/config/generic/window
 * [PowerShell](https://docs.microsoft.com/en-us/powershell/scripting/getting-started/getting-started-with-windows-powershell?view=powershell-6)
 * [Grep](https://www.gnu.org/software/grep/manual/grep.html) with Perl-compatible regular expression support
 * [LimaCharlie](https://limacharlie.io)
+* [ee-outliers](https://github.com/NVISO-BE/ee-outliers)
+* [Structured Threat Information Expression (STIX)](https://oasis-open.github.io/cti-documentation/stix/intro.html)
 
 Current work-in-progress
 * [Splunk Data Models](https://docs.splunk.com/Documentation/Splunk/7.1.0/Knowledge/Aboutdatamodels)
 
-New targets are continuously developed. You can get a list of supported targets with `sigmac --target-list` or `sigmac -l`.
+New targets are continuously developed. You can get a list of supported targets with `sigmac --lists` or `sigmac -l`.
 
 ### Requirements
 
@@ -337,7 +339,7 @@ The content of this repository is released under the following licenses:
 
 * The toolchain (everything under `tools/`) is licensed under the [GNU Lesser General Public License](https://www.gnu.org/licenses/lgpl-3.0.en.html).
 * The [Sigma specification](https://github.com/Neo23x0/sigma/wiki) is public domain.
-* Everything else, especially the rules contained in the `rules/` directory is released under the [GNU General Public License](https://www.gnu.org/licenses/gpl-3.0.en.html).
+* Everything else, especially the rules contained in the `rules/` directory is released under the [Detection Rule License (DRL) 1.0](https://github.com/Neo23x0/sigma/blob/master/LICENSE.Detection.Rules.md).
 
 # Credits
 
@@ -345,4 +347,8 @@ This is a private project mainly developed by Florian Roth and Thomas Patzke wit
 
 # Info Graphic
 
+## Overview
 ![sigmac_info_graphic](./images/sigma_infographic_lq.png)
+
+## Coverage Illustration
+![sigmac_coverage](./images/Sigma_Coverage.png)

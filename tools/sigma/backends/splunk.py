@@ -16,7 +16,7 @@
 
 import re
 import sigma
-from .base import SingleTextQueryBackend, CorelightQueryBackend
+from .base import SingleTextQueryBackend
 from .mixins import MultiRuleOutputMixin
 
 class SplunkBackend(SingleTextQueryBackend):
@@ -172,12 +172,6 @@ class SplunkXMLBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
         self.queries += self.dash_suf
         return self.queries
 
-
-class SplunkCorelightBackend(CorelightQueryBackend, SplunkBackend):
-    identifier = "corelight_splunk"
-
-
-
 class CrowdStrikeBackend(SplunkBackend):
     """Converts Sigma rule into CrowdStrike Search Processing Language (SPL)."""
     identifier = "crowdstrike"
@@ -189,18 +183,21 @@ class CrowdStrikeBackend(SplunkBackend):
             detections = sigmaparser.definitions
             all_fields = dict()
             for det in detections.values():
-                for field, value in det.items():
-                    if "|" in field:
-                        field = field.split("|")[0]
-                    if any([item for item in fieldmappings.keys() if field == item]):
-                        if field == "EventID" and str(value) == str(1) and lgs.get("service") == "sysmon":
-                            all_fields.update(det)
-                        elif field != "EventID":
-                            all_fields.update(det)
+                try:
+                    for field, value in det.items():
+                        if "|" in field:
+                            field = field.split("|")[0]
+                        if any([item for item in fieldmappings.keys() if field == item]):
+                            if field == "EventID" and str(value) == str(1) and lgs.get("service") == "sysmon":
+                                all_fields.update(det)
+                            elif field != "EventID":
+                                all_fields.update(det)
+                            else:
+                                raise NotImplementedError("Not supported fields!")
                         else:
                             raise NotImplementedError("Not supported fields!")
-                    else:
-                        raise NotImplementedError("Not supported fields!")
+                except AttributeError:  # ignore if detection is not a dict
+                    pass
 
             table_fields = sigmaparser.parsedyaml.get("fields", [])
             res_table_fields = []

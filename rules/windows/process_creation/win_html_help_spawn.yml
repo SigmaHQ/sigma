@@ -1,0 +1,35 @@
+title: HTML Help Shell Spawn
+id: 52cad028-0ff0-4854-8f67-d25dfcbc78b4
+status: experimental
+description: Detects a suspicious child process of a Microsoft HTML Help system when executing compiled HTML files (.chm)
+references:
+    - https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/chm-badness-delivers-a-banking-trojan/
+author: Maxim Pavlunin
+date: 2020/04/01
+modified: 2020/04/03
+tags:
+    - attack.execution
+    - attack.defense_evasion
+    - attack.t1223
+    - attack.t1218.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage: 'C:\Windows\hh.exe'
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\regsvr32.exe'
+            - '\wmic.exe'
+            - '\rundll32.exe'
+    condition: selection
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - unknown
+level: high

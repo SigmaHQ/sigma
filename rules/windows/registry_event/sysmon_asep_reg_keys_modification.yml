@@ -1,0 +1,32 @@
+title: Autorun Keys Modification
+id: 17f878b8-9968-4578-b814-c4217fc5768c
+description: Detects modification of autostart extensibility point (ASEP) in registry
+status: experimental
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1060/T1060.yaml
+tags:
+    - attack.persistence
+    - attack.t1060
+date: 2019/10/21
+modified: 2019/11/10
+author: Victor Sergeev, Daniil Yugoslavskiy, oscd.community
+logsource:
+    category: registry_event
+    product: windows
+detection:
+    selection:
+        TargetObject|contains:
+            - '\software\Microsoft\Windows\CurrentVersion\Run'
+            - '\software\Microsoft\Windows\CurrentVersion\RunOnce'
+            - '\software\Microsoft\Windows\CurrentVersion\RunOnceEx'
+            - '\software\Microsoft\Windows\CurrentVersion\RunServices'
+            - '\software\Microsoft\Windows\CurrentVersion\RunServicesOnce'
+            - '\software\Microsoft\Windows NT\CurrentVersion\Winlogon\Userinit'
+            - '\software\Microsoft\Windows NT\CurrentVersion\Winlogon\Shell'
+            - '\software\Microsoft\Windows NT\CurrentVersion\Windows'
+            - '\software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders'
+    condition: selection
+falsepositives:
+    - Legitimate software automatically (mostly, during installation) sets up autorun keys for legitimate reason
+    - Legitimate administrator sets up autorun keys for legitimate reason
+level: medium

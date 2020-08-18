@@ -18,6 +18,7 @@ import sys
 
 import sigma
 import yaml
+import re
 
 from sigma.backends.exceptions import NotSupportedError
 from .mixins import RulenameCommentMixin, QuoteCharMixin
@@ -91,6 +92,7 @@ class BaseBackend:
     options = tuple()     # a list of tuples with following elements: option name, default value, help text, target attribute name (option name if None)
     config_required = True
     default_config = None
+    mapExpression = ""
 
     def __init__(self, sigmaconfig, backend_options=dict()):
         """
@@ -131,29 +133,48 @@ class BaseBackend:
         result = self.generateNode(parsed.parsedSearch)
         if parsed.parsedAgg:
             result += self.generateAggregation(parsed.parsedAgg)
+        #result = self.applyOverrides(result)
         return result
+
+    def applyOverrides(self, query):
+        try:
+            if 'overrides' in self.sigmaconfig.config and isinstance(query, str):
+                for expression in self.sigmaconfig.config['overrides']:
+                    if 'regexes' in expression:
+                        for x in expression['regexes']:
+                            sub = expression['field']
+                            value = expression['value']
+                            query = re.sub(x, self.mapExpression % (sub, value), query)
+                    if 'literals' in expression:
+                        for x in expression['literals']:
+                            sub = expression['field']
+                            value = expression['value']
+                            query = query.replace(x, self.mapExpression % (sub, value))
+        except Exception:
+            pass
+        return query
 
     def generateNode(self, node):
         if type(node) == sigma.parser.condition.ConditionAND:
-            return self.generateANDNode(node)
+            return self.applyOverrides(self.generateANDNode(node))
         elif type(node) == sigma.parser.condition.ConditionOR:
-            return self.generateORNode(node)
+            return self.applyOverrides(self.generateORNode(node))
         elif type(node) == sigma.parser.condition.ConditionNOT:
-            return self.generateNOTNode(node)
+            return self.applyOverrides(self.generateNOTNode(node))
         elif type(node) == sigma.parser.condition.ConditionNULLValue:
-            return self.generateNULLValueNode(node)
+            return self.applyOverrides(self.generateNULLValueNode(node))
         elif type(node) == sigma.parser.condition.ConditionNotNULLValue:
-            return self.generateNotNULLValueNode(node)
+            return self.applyOverrides(self.generateNotNULLValueNode(node))
         elif type(node) == sigma.parser.condition.NodeSubexpression:
-            return self.generateSubexpressionNode(node)
+            return self.applyOverrides(self.generateSubexpressionNode(node))
         elif type(node) == tuple:
-            return self.generateMapItemNode(node)
+            return self.applyOverrides(self.generateMapItemNode(node))
         elif type(node) in (str, int):
-            return self.generateValueNode(node)
+            return self.applyOverrides(self.generateValueNode(node))
         elif type(node) == list:
-            return self.generateListNode(node)
+            return self.applyOverrides(self.generateListNode(node))
         elif isinstance(node, SigmaTypeModifier):
-            return self.generateTypedValueNode(node)
+            return self.applyOverrides(self.generateTypedValueNode(node))
         else:
             raise TypeError("Node type %s was not expected in Sigma parse tree" % (str(type(node))))
 
@@ -307,34 +328,3 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
         transformed from the original name given in the Sigma rule.
         """
         return fieldname
-
-class CorelightQueryBackend:
-
-    def generate(self, sigmaparser):
-        lgs = sigmaparser.parsedyaml.get("logsource")
-        allow_types = {
-            'category':
-                [
-                    'proxy', 'firewall', 'webserver', 'accounting', 'dns'
-                ],
-            'product':
-                [
-                    'zeek', 'apache', 'netflow', 'firewall'
-                ],
-            'service': [
-                'radius', 'kerberos', 'pe', 'ntlm', 'sip', 'syslog', 'ntp',
-                'mqtt_subscribe', 'smb_files', 'irc', 'http2', 'rfb',
-                'tunnel', 'socks', 'mqtt_publish', 'network', 'weird',
-                'known_certs', 'traceroute', 'modbus', 'smtp_links',
-                'ssl', 'known_hosts', 'software', 'smtp', 'tls', 'intel',
-                'ssh', 'dce_rpc', 'x509', 'known_services', 'http', 'files',
-                'gquic', 'ftp', 'dns', 'conn', 'dnp3', 'rdp', 'dpd',
-                'known_modbus', 'conn_long', 'modbus_register_change',
-                'mqtt_connect', 'pop3', 'mysql', 'notice', 'snmp', 'smb_mapping'
-            ]
-        }
-        for logsource_type, value in lgs.items():
-            if allow_types.get(logsource_type) and value.lower() in allow_types.get(logsource_type):
-                return super().generate(sigmaparser)
-        lgs_text = ", ".join(["%s: %s" % (key, lgs.get(key)) for key in lgs.keys()])
-        raise NotSupportedError("Corelight backend not supported logsources: %s." % lgs_text)

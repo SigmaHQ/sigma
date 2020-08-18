@@ -1,0 +1,25 @@
+title: Suspicious RUN Key from Download
+id: 9c5037d1-c568-49b3-88c7-9846a5bdc2be
+status: experimental
+description: Detects the suspicious RUN keys created by software located in Download or temporary Outlook/Internet Explorer directories
+references:
+    - https://app.any.run/tasks/c5bef5b7-f484-4c43-9cf3-d5c5c7839def/
+author: Florian Roth
+date: 2019/10/01
+tags:
+    - attack.persistence
+    - attack.t1060
+logsource:
+    category: registry_event
+    product: windows
+detection:
+    selection:
+        Image: 
+            - '*\Downloads\\*'
+            - '*\Temporary Internet Files\Content.Outlook\\*'
+            - '*\Local Settings\Temporary Internet Files\\*'
+        TargetObject: '*\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\\*'
+    condition: selection
+falsepositives:
+    - Software installers downloaded and used by users
+level: high

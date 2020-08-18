@@ -33,29 +33,7 @@ from sigma.parser.modifiers.transform import SigmaContainsModifier, SigmaStartsw
 from .data import sysmon_schema
 from .exceptions import NotSupportedError
 
-class DeepFieldMappingMixin(object):
-
-    def fieldNameMapping(self, fieldname, value):
-        if isinstance(fieldname, str):
-            get_config = self.sigmaconfig.fieldmappings.get(fieldname)
-            if not get_config and '|' in fieldname:
-                fieldname = fieldname.split('|', 1)[0]
-                get_config = self.sigmaconfig.fieldmappings.get(fieldname)
-            if isinstance(get_config, ConditionalFieldMapping):
-                condition = self.sigmaconfig.fieldmappings.get(fieldname).conditions
-                for key, item in self.logsource.items():
-                    if condition.get(key) and condition.get(key, {}).get(item):
-                        new_fieldname = condition.get(key, {}).get(item)
-                        if any(new_fieldname):
-                           return super().fieldNameMapping(new_fieldname[0], value)
-        return super().fieldNameMapping(fieldname, value)
-
-
-    def generate(self, sigmaparser):
-        self.logsource = sigmaparser.parsedyaml.get("logsource", {})
-        return super().generate(sigmaparser)
-
-class AzureLogAnalyticsBackend(DeepFieldMappingMixin, SingleTextQueryBackend):
+class AzureLogAnalyticsBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Azure Log Analytics Queries."""
     identifier = "ala"
     active = True
@@ -111,10 +89,6 @@ class AzureLogAnalyticsBackend(DeepFieldMappingMixin, SingleTextQueryBackend):
         else:
             self._field_map = {}
 
-    def id_mapping(self, src):
-        """Identity mapping, source == target field name"""
-        return src
-
     def map_sysmon_schema(self, eventid):
         schema_keys = []
         try:
@@ -154,14 +128,9 @@ class AzureLogAnalyticsBackend(DeepFieldMappingMixin, SingleTextQueryBackend):
 
     def generate(self, sigmaparser):
         self.table = None
-        try:
-            self.category = sigmaparser.parsedyaml['logsource'].setdefault('category', None)
-            self.product = sigmaparser.parsedyaml['logsource'].setdefault('product', None)
-            self.service = sigmaparser.parsedyaml['logsource'].setdefault('service', None)
-        except KeyError:
-            self.category = None
-            self.product = None
-            self.service = None
+        self.category = sigmaparser.parsedyaml['logsource'].setdefault('category', None)
+        self.product = sigmaparser.parsedyaml['logsource'].setdefault('product', None)
+        self.service = sigmaparser.parsedyaml['logsource'].setdefault('service', None)
 
         detection = sigmaparser.parsedyaml.get("detection", {})
         if "keywords" in detection.keys():
@@ -323,36 +292,6 @@ class AzureLogAnalyticsBackend(DeepFieldMappingMixin, SingleTextQueryBackend):
                 cond=agg.condition,
             )
         )
-
-    def generateAfter(self, parsed):
-        del parsed
-        if self._fields:
-            all_fields = list(self._fields)
-            if self._agg_var:
-                all_fields = set(all_fields + [self._agg_var])
-            project_fields = self._map_fields(all_fields)
-            project_list = ", ".join(str(fld) for fld in set(project_fields))
-            return " | project " + project_list
-        return ""
-
-    def _map_fields(self, fields):
-        for field in fields:
-            mapped_field = self._map_field(field)
-            if isinstance(mapped_field, str):
-                yield mapped_field
-            elif isinstance(mapped_field, list):
-                for subfield in mapped_field:
-                    yield subfield
-
-    def _map_field(self, fieldname):
-        mapping = self.sigmaconfig.fieldmappings.get(fieldname)
-        if isinstance(mapping, ConditionalFieldMapping):
-            fieldname = self._map_conditional_field(fieldname)
-        elif isinstance(mapping, MultiFieldMapping):
-            fieldname = mapping.resolve_fieldname(fieldname, self._parser)
-        elif isinstance(mapping, SimpleFieldMapping):
-            fieldname = mapping.resolve_fieldname(fieldname, self._parser)
-        return fieldname
 
     def _map_conditional_field(self, fieldname):
         mapping = self.sigmaconfig.fieldmappings.get(fieldname)

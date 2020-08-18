@@ -23,17 +23,15 @@ from random import randrange
 
 import sigma
 import yaml
-from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
+from sigma.parser.modifiers.type import SigmaRegularExpressionModifier, SigmaTypeModifier
 from sigma.parser.condition import ConditionOR, ConditionAND, NodeSubexpression
 
 from sigma.config.mapping import ConditionalFieldMapping
-from .base import BaseBackend, SingleTextQueryBackend, CorelightQueryBackend
+from .base import BaseBackend, SingleTextQueryBackend
 from .mixins import RulenameCommentMixin, MultiRuleOutputMixin
 from .exceptions import NotSupportedError
 
-
 class DeepFieldMappingMixin(object):
-
     def fieldNameMapping(self, fieldname, value):
         if isinstance(fieldname, str):
             get_config = self.sigmaconfig.fieldmappings.get(fieldname)
@@ -49,12 +47,9 @@ class DeepFieldMappingMixin(object):
                            return super().fieldNameMapping(new_fieldname[0], value)
         return super().fieldNameMapping(fieldname, value)
 
-
     def generate(self, sigmaparser):
         self.logsource = sigmaparser.parsedyaml.get("logsource", {})
         return super().generate(sigmaparser)
-
-
 
 class ElasticsearchWildcardHandlingMixin(object):
     """
@@ -119,7 +114,10 @@ class ElasticsearchWildcardHandlingMixin(object):
             if isinstance(value, list):
                 res = []
                 for item in value:
-                    res.extend([item.lower(), item.upper()])
+                    try:
+                        res.extend([item.lower(), item.upper()])
+                    except AttributeError:  # not a string (something that doesn't support upper/lower casing)
+                        res.append(item)
                 value = res
             elif isinstance(value, str):
                 value = [value.upper(), value.lower()]
@@ -230,14 +228,12 @@ class ElasticsearchWildcardHandlingMixin(object):
         else:
             return { 'is_regex': False, 'value': value }
 
-
 class ElasticsearchQuerystringBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
     """Converts Sigma rule into Elasticsearch query string. Only searches, no aggregations."""
     identifier = "es-qs"
     active = True
 
     reEscape = re.compile("([\s+\\-=!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|\\\\u|&&|\\|\\|)")
-    reClear = re.compile("[<>]")
     andToken = " AND "
     orToken = " OR "
     notToken = "NOT "
@@ -296,11 +292,6 @@ class ElasticsearchQuerystringBackend(DeepFieldMappingMixin, ElasticsearchWildca
         else:
             return super().generateSubexpressionNode(node)
 
-
-class ElasticsearchCorelightBackend(CorelightQueryBackend, ElasticsearchQuerystringBackend):
-    identifier = "corelight_es-qs"
-
-
 class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, ElasticsearchWildcardHandlingMixin, BaseBackend):
     """ElasticSearch DSL backend"""
     identifier = 'es-dsl'
@@ -311,6 +302,7 @@ class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, Elast
     )
     interval = None
     title = None
+    reEscape = re.compile( "([\s+\\-=!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|\\\\u|&&|\\|\\|)" )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -381,13 +373,20 @@ class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, Elast
             res = {'bool': {'should': []}}
             for v in value:
                 key_mapped = self.fieldNameMapping(key, v)
-                if self.matchKeyword:   # searches against keyowrd fields are wildcard searches, phrases otherwise
-                    queryType = 'wildcard'
-                    value_cleaned = self.escapeSlashes(self.cleanValue(str(v)))
+                if self.matchKeyword:   # searches against keyword fields are wildcard searches, phrases otherwise
+                    if self.CaseInSensitiveField:
+                        queryType = 'regexp'
+                        make_ci = self.makeCaseInSensitiveValue(self.reEscape.sub("\\\\\g<1>", str(v)))
+                        value_cleaned = make_ci.get('value')
+                        if not make_ci.get( 'is_regex' ):  # Determine if still should be a regex
+                            queryType = 'wildcard'
+                            value_cleaned = self.escapeSlashes( self.cleanValue( str( v ) ) )
+                    else:
+                        queryType = 'wildcard'
+                        value_cleaned = self.escapeSlashes(self.cleanValue(str(v)))
                 else:
                     queryType = 'match_phrase'
                     value_cleaned = self.cleanValue(str(v))
-
                 res['bool']['should'].append({queryType: {key_mapped: value_cleaned}})
             return res
         elif value is None:
@@ -395,9 +394,17 @@ class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, Elast
             return { "bool": { "must_not": { "exists": { "field": key_mapped } } } }
         elif type(value) in (str, int):
             key_mapped = self.fieldNameMapping(key, value)
-            if self.matchKeyword:   # searches against keyowrd fields are wildcard searches, phrases otherwise
-                queryType = 'wildcard'
-                value_cleaned = self.escapeSlashes(self.cleanValue(str(value)))
+            if self.matchKeyword:  # searches against keyword fields are wildcard searches, phrases otherwise
+                if self.CaseInSensitiveField:
+                    queryType = 'regexp'
+                    make_ci = self.makeCaseInSensitiveValue( self.reEscape.sub( "\\\\\g<1>", str( value ) ) )
+                    value_cleaned = make_ci.get( 'value' )
+                    if not make_ci.get( 'is_regex' ):  # Determine if still should be a regex
+                        queryType = 'wildcard'
+                        value_cleaned = self.escapeSlashes( self.cleanValue( str( value ) ) )
+                else:
+                    queryType = 'wildcard'
+                    value_cleaned = self.escapeSlashes(self.cleanValue(str(value)))
             else:
                 queryType = 'match_phrase'
                 value_cleaned = self.cleanValue(str(value))
@@ -644,11 +651,6 @@ class KibanaBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     def index_variable_name(self, index):
         return "index_" + index.replace("-", "__").replace("*", "X")
 
-
-class KibanaCorelightBackend(CorelightQueryBackend, KibanaBackend):
-    identifier = "corelight_kibana"
-
-
 class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     """Converts Sigma Rule into X-Pack Watcher JSON for alerting"""
     identifier = "xpack-watcher"
@@ -659,10 +661,13 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
             ("es", "localhost:9200", "Host and port of Elasticsearch instance", None),
             ("watcher_url", "watcher", "Watcher URL: watcher (default)=_watcher/..., xpack=_xpack/wacher/... (deprecated)", None),
             ("filter_range","30m","Watcher time filter",None),
+            ("action_throttle_period","15m","Throttle time of the action",None),
 
             ("alert_methods", "email", "Alert method(s) to use when the rule triggers, comma separated. Supported: " + ', '.join(supported_alert_methods), None),
             # Options for Email Action            
             ("mail", "root@localhost", "Mail address for Watcher notification (only logging if not set)", None),
+            ("mail_from", "root@localhost", "Mail address for Watcher notification (only logging if not set)", None),
+            ("mail_profile", "standard", "Watcher provides three email profiles that control how MIME messages are structured: standard (default), gmail, and outlook.", None),
 
             # Options for WebHook Action
         ("http_host", "localhost", "Webhook host used for alert notification", None),
@@ -808,14 +813,20 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                 if 'email' in alert_methods:
                     # mail notification if mail address is given
                     email = self.mail
+                    mail_profile = self.mail_profile
+                    mail_from = self.mail_from
+                    action_throttle_period = self.action_throttle_period
                     eaction = {
                         "send_email": {
+                                "throttle_period": action_throttle_period,
                                 "email": {
-                                "to": email,
-                                "subject": action_subject,
+                                    "profile": mail_profile,
+                                    "from": mail_from,
+                                    "to": email,
+                                    "subject": action_subject,
                                     "body": action_body,
-                                "attachments": {
-                                    "data.json": {
+                                    "attachments": {
+                                        "data.json": {
                                             "data": {
                                             "format": "json"
                                                 }
@@ -955,10 +966,6 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                 raise NotImplementedError("Output type '%s' not supported" % self.output_type)
         return result
 
-class XPackWatcherCorelightBackend(CorelightQueryBackend, XPackWatcherBackend):
-    identifier = "corelight_xpack-watcher"
-
-
 class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
     """Elastalert backend"""
     active = True
@@ -990,6 +997,7 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
         self.fields = []
 
     def generate(self, sigmaparser):
+        self.logsource = sigmaparser.parsedyaml.get("logsource", {})
         rulename = self.getRuleName(sigmaparser)
         title = sigmaparser.parsedyaml.setdefault("title", "")
         description = sigmaparser.parsedyaml.setdefault("description", "")
@@ -1170,17 +1178,15 @@ class ElastalertBackendQs(ElastalertBackend, ElasticsearchQuerystringBackend):
         #Generate ES QS Query
         return [{ 'query' : { 'query_string' : { 'query' : super().generateQuery(parsed) } } }]
 
-
-
 class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
-    identifier = "elasticsearch-rule"
+    """Elasticsearch detection rule backend"""
+    identifier = "es-rule"
     active = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tactics = self._load_mitre_file("tactics")
         self.techniques = self._load_mitre_file("techniques")
-
 
     def _load_mitre_file(self, mitre_type):
         try:
@@ -1206,7 +1212,6 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
             configs.update({"translation": translation})
             rule = self.create_rule(configs, index)
             return rule
-
 
     def create_threat_description(self, tactics_list, techniques_list):
         threat_list = list()
@@ -1320,6 +1325,3 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
         if references:
             rule.update({"references": references})
         return json.dumps(rule)
-
-class ElasticSearchRuleCorelightBackend(CorelightQueryBackend, ElasticSearchRuleBackend):
-    identifier = "corelight_elasticsearch-rule"

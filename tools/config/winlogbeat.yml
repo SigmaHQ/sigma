@@ -3,10 +3,12 @@ order: 20
 backends:
   - es-qs
   - es-dsl
+  - es-rule
   - kibana
   - xpack-watcher
   - elastalert
   - elastalert-dsl
+  - ee-outliers
 logsources:
   windows:
     product: windows
@@ -35,12 +37,31 @@ logsources:
     product: windows
     service: driver-framework
     conditions:
-      winlog.provider_name: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
+      winlog.channel: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
   windows-dhcp:
     product: windows
     service: dhcp
     conditions:
-      winlog.provider_name: 'Microsoft-Windows-DHCP-Server/Operational'
+      winlog.channel: 'Microsoft-Windows-DHCP-Server/Operational'
+  windows-ntlm:
+    product: windows
+    service: ntlm
+    conditions:
+      winlog.channel: 'Microsoft-Windows-NTLM/Operational'
+  windows-defender:
+    product: windows
+    service: windefend
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Windows Defender/Operational'
+  windows-applocker:
+    product: windows
+    service: applocker
+    conditions:
+      winlog.channel:
+        - 'Microsoft-Windows-AppLocker/MSI and Script'
+        - 'Microsoft-Windows-AppLocker/EXE and DLL'
+        - 'Microsoft-Windows-AppLocker/Packaged app-Deployment'
+        - 'Microsoft-Windows-AppLocker/Packaged app-Execution'
 defaultindex: winlogbeat-*
 # Extract all field names qith yq:
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: winlog.event_data.\1/g'
@@ -98,6 +119,7 @@ fieldmappings:
   ProcessCommandLine: winlog.event_data.ProcessCommandLine
   ProcessName: winlog.event_data.ProcessName
   Properties: winlog.event_data.Properties
+  RuleName: winlog.event_data.RuleName
   SecurityID: winlog.event_data.SecurityID
   ServiceFileName: winlog.event_data.ServiceFileName
   ServiceName: winlog.event_data.ServiceName
@@ -107,6 +129,8 @@ fieldmappings:
   SourceImage: winlog.event_data.SourceImage
   SourceIp: winlog.event_data.SourceIp
   src_ip: winlog.event_data.SourceIp
+  SourcePort: winlog.event_data.SourcePort
+  src_port: winlog.event_data.SourcePort
   StartModule: winlog.event_data.StartModule
   Status: winlog.event_data.Status
   SubjectUserName: winlog.event_data.SubjectUserName

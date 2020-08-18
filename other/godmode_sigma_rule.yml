@@ -1,0 +1,150 @@
+#    _____        __  __  ___        __      
+#   / ___/__  ___/ / /  |/  /__  ___/ /__    
+#  / (_ / _ \/ _  / / /|_/ / _ \/ _  / -_)   
+#  \___/\___/\_,_/ /_/  /_/\___/\_,_/\__/_   
+#    / __(_)__ ___ _  ___ _  / _ \__ __/ /__ 
+#   _\ \/ / _ `/  ' \/ _ `/ / , _/ // / / -_)
+#  /___/_/\_, /_/_/_/\_,_/ /_/|_|\_,_/_/\__/ 
+#        /___/ IDDQD                              
+#
+#  Florian Roth
+#  May 2020
+#  v0.3
+#
+#  A Proof-of-Concept with the most effective search queries
+
+title: Godmode Sigma Rule
+id: def6caac-a999-4fc9-8800-cfeff700ba98
+description: 'PoC rule to detect malicious activity - following the principle: if you had only one shot, what would you look for?'
+status: experimental
+author: Florian Roth
+date: 2019/12/22
+modified: 2020/05/18
+level: high
+action: global
+---
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    # Different suspicious or malicious command line parameters
+    selection_plain:
+        CommandLine|contains:
+            - ' -NoP '  # Often used in malicious PowerShell commands
+            - ' -W Hidden '  # Often used in malicious PowerShell commands
+            - ' -decode '  # Used with certutil
+            - ' /decode '  # Used with certutil 
+            - ' -e* JAB'  # PowerShell encoded commands
+            - ' -e* SUVYI'  # PowerShell encoded commands
+            - ' -e* SQBFAFgA'  # PowerShell encoded commands
+            - ' -e* aWV4I'  # PowerShell encoded commands
+            - ' -e* IAB'  # PowerShell encoded commands
+            - ' -e* PAA'  # PowerShell encoded commands
+            - ' -e* aQBlAHgA'  # PowerShell encoded commands
+            - 'vssadmin delete shadows'  # Ransomware
+            - 'reg SAVE HKLM\SAM'  # save registry SAM - syskey extraction
+            - ' -ma '  # ProcDump
+            - 'Microsoft\Windows\CurrentVersion\Run'  # Run key in command line - often in combination with REG ADD
+            - '.downloadstring('  # PowerShell download command
+            - '.downloadfile('  # PowerShell download command
+            - ' /ticket:'  # Rubeus
+            - ' sekurlsa'  # Mimikatz
+            - ' p::d '  # Mimikatz 
+            - ';iex('  # PowerShell IEX
+            - 'schtasks* /create *AppData'  # Scheduled task creation pointing to AppData
+            - ' comsvcs.dll,MiniDump'  # Process dumping method apart from procdump
+            - ' comsvcs.dll,#24'  # Process dumping method apart from procdump
+    selection_parent_child:
+        ParentImage|contains:
+            # Office Dropper Detection
+            - '\WINWORD.EXE'
+            - '\EXCEL.EXE'
+            - '\POWERPNT.exe'
+            - '\MSPUB.exe'
+            - '\VISIO.exe'
+            - '\OUTLOOK.EXE'
+        Image|contains:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\schtasks.exe'
+            - '*\scrcons.exe'
+            - '\regsvr32.exe'
+            - '\hh.exe'
+            - '\wmic.exe'
+            - '\mshta.exe'
+            - '\msiexec.exe'
+            - '\forfiles.exe'
+            - '\AppData\'
+    selection_webshells:
+        Image|contains:
+            - '\apache*'
+            - '\tomcat*'
+            - '\w3wp.exe'
+            - '\php-cgi.exe'
+            - '\nginx.exe'
+            - '\httpd.exe'
+        CommandLine|contains:
+            - 'whoami'
+            - 'net user '
+            - 'ping -n '
+            - 'systeminfo'
+            - '&cd&echo'
+            - 'cd /d '  # https://www.computerhope.com/cdhlp.htm
+    # Running whoami as LOCAL_SYSTEM (usually after privilege escalation)
+    selection_whoami:
+        Image|contains: '\whoami.exe'
+        User: 'NT AUTHORITY\SYSTEM' 
+    condition: 1 of them
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection_file_creation:
+        EventID: 11
+        TargetFilename|contains: 
+            - '.dmp'  # dump process memory
+            - 'Desktop\how'  # Ransomware
+            - 'Desktop\decrypt'  # Ransomware
+    selection_registry_modifications:
+        EventID:
+            - 12
+            - 13
+        TargetObject|contains: 
+            - 'UserInitMprLogonScript'  # persistence
+            - '\CurrentVersion\Image File Execution Options\'  # persistence
+    selection_registry_run:
+        EventID:
+            - 12
+            - 13
+        TargetObject|contains: 
+            - '\Microsoft\Windows\CurrentVersion\Run\'  # persistence
+            - '\Microsoft\Windows\CurrentVersion\RunOnce\'   # persistence
+        Details|contains:
+            - 'AppData'
+            - '\Users\Public\'
+            - '\Temp\'
+            - 'powershell'
+            - 'wscript'
+            - 'cscript'
+    condition: 1 of them
+---
+logsource:
+    product: windows
+    service: system
+detection:
+    # Malicious service installs
+    selection:
+        EventID: 7045
+        ServiceName|contains: 
+            - 'WCESERVICE'
+            - 'WCE SERVICE'
+            - 'winexesvc'
+            - 'DumpSvc'
+            - 'pwdump'
+            - 'gsecdump'
+            - 'cachedump'
+    condition:
+        1 of them
