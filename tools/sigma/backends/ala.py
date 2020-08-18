@@ -103,13 +103,26 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
         return parse_arg
 
     def default_value_mapping(self, val):
+        return self._default_value_mapping(val, False)
+
+    def default_value_mapping_ci(self, val):
+        return self._default_value_mapping(val, True)
+
+    def _default_value_mapping(self, val, is_case_insensitive=False):
         op = "=="
         if isinstance(val, str):
+            if is_case_insensitive is True:
+                op = "=~"
+
             if "*" in val[1:-1]:     # value contains * inside string - use regex match
                 op = "matches regex"
                 val = re.sub('([".^$]|\\\\(?![*?]))', '\\\\\g<1>', val)
                 val = re.sub('\\*', '.*', val)
                 val = re.sub('\\?', '.', val)
+
+                if is_case_insensitive is True:
+                    val = f"(?i){val}"
+
                 if "\\" in val:
                     return "%s @\"%s\"" % (op, val)
             else:                           # value possibly only starts and/or ends with *, use prefix/postfix match
@@ -208,7 +221,17 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
             elif self.service == "system":
                 self.table = "Event"
         elif type(value) in (str, int):     # default value processing
-            mapping = (key, self.default_value_mapping)
+            case_insensitive_cols = []
+            try:
+                case_insensitive_cols = self.sigmaconfig.config['config']['case_insensitive_cols']
+            except KeyError:
+                pass
+
+            if len(case_insensitive_cols) > 0 and key in case_insensitive_cols:
+                mapping = (key, self.default_value_mapping_ci)
+            else:
+                mapping = (key, self.default_value_mapping)
+
             if len(mapping) == 1:
                 mapping = mapping[0]
                 if type(mapping) == str:
