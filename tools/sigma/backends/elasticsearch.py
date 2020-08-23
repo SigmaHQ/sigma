@@ -31,9 +31,7 @@ from .base import BaseBackend, SingleTextQueryBackend
 from .mixins import RulenameCommentMixin, MultiRuleOutputMixin
 from .exceptions import NotSupportedError
 
-
 class DeepFieldMappingMixin(object):
-
     def fieldNameMapping(self, fieldname, value):
         if isinstance(fieldname, str):
             get_config = self.sigmaconfig.fieldmappings.get(fieldname)
@@ -49,12 +47,9 @@ class DeepFieldMappingMixin(object):
                            return super().fieldNameMapping(new_fieldname[0], value)
         return super().fieldNameMapping(fieldname, value)
 
-
     def generate(self, sigmaparser):
         self.logsource = sigmaparser.parsedyaml.get("logsource", {})
         return super().generate(sigmaparser)
-
-
 
 class ElasticsearchWildcardHandlingMixin(object):
     """
@@ -232,7 +227,6 @@ class ElasticsearchWildcardHandlingMixin(object):
                 raise TypeError( "Regular expression validation error for: '%s')" %str(value) )
         else:
             return { 'is_regex': False, 'value': value }
-
 
 class ElasticsearchQuerystringBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
     """Converts Sigma rule into Elasticsearch query string. Only searches, no aggregations."""
@@ -1003,6 +997,7 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
         self.fields = []
 
     def generate(self, sigmaparser):
+        self.logsource = sigmaparser.parsedyaml.get("logsource", {})
         rulename = self.getRuleName(sigmaparser)
         title = sigmaparser.parsedyaml.setdefault("title", "")
         description = sigmaparser.parsedyaml.setdefault("description", "")

@@ -71,6 +71,12 @@ Florian wrote a short [rule creation tutorial](https://www.nextron-systems.com/2
 5. Convert a whole rule directory with `python sigmac -t splunk -r ../rules/proxy/`
 6. Check the `./tools/config` folder and the [wiki](https://github.com/Neo23x0/sigma/wiki/Converter-Tool-Sigmac) if you need custom field or log source mappings in your environment
 
+## Troubles / Troubleshooting / Help
+
+If you need help for a specific supported backend you can use e.g. `sigmac --backend-help elastalert-dsl`. More details on the usage of `sigmac` can be found in the dedicated [README.md](https://github.com/Neo23x0/sigma/blob/master/tools/README.md).
+
+Be sure to checkout the [guidance on backend specific settings](https://github.com/Neo23x0/sigma/blob/master/tools/README.md#choosing-the-right-sigmac) for `sigmac`.
+
 # Examples
 
 Windows 'Security' Eventlog: Access to LSASS Process with Certain Access Mask / Object Type (experimental)
