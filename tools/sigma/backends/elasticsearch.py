@@ -217,6 +217,8 @@ class ElasticsearchWildcardHandlingMixin(object):
             #value = re.sub( r"((?<!\\)(\\))\*$", "\g<1>\\*", value )
             # Make upper/lower
             value = re.sub( r"[A-Za-z]", lambda x: "[" + x.group( 0 ).upper() + x.group( 0 ).lower() + "]", value )
+            # Turn `.` into wildcard, only if odd number of '\'(because this would mean already escaped)
+            value = re.sub( r"(((?<!\\)(\\\\)+)|(?<!\\))\.", "\g<1>\.", value )
             # Turn `*` into wildcard, only if odd number of '\'(because this would mean already escaped)
             value = re.sub( r"(((?<!\\)(\\\\)+)|(?<!\\))\*", "\g<1>.*", value )
             # Escape additional values that are treated as specific "operators" within Elastic. (ie: @, ?, &, <, >, and ~)
