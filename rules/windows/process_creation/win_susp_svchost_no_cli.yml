@@ -6,6 +6,7 @@ references:
     - https://securitybytes.io/blue-team-fundamentals-part-two-windows-processes-759fe15965e2
 author: David Burkett
 date: 2019/12/28
+modified: 2020/07/23
 tags:
     - attack.t1055
 logsource:
@@ -13,13 +14,13 @@ logsource:
     product: windows
 detection:
     selection1:
-        CommandLine: null
+        CommandLine|endswith: 'svchost.exe' 
     selection2:
-        Image: '*\svchost.exe'
+        Image|endswith: '\svchost.exe'
     filter:
-        ParentImage:
-            - '*\rpcnet.exe'
-            - '*\rpcnetp.exe'
+        ParentImage|endswith:
+            - '\rpcnet.exe'
+            - '\rpcnetp.exe'
     condition: (selection1 and selection2) and not filter
 fields:
     - CommandLine

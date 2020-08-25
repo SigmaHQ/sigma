@@ -72,6 +72,7 @@ class SplunkBackend(SingleTextQueryBackend):
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
         columns = list()
+        mapped =None
         try:
             for field in sigmaparser.parsedyaml["fields"]:
                 mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
@@ -170,3 +171,40 @@ class SplunkXMLBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
     def finalize(self):
         self.queries += self.dash_suf
         return self.queries
+
+class CrowdStrikeBackend(SplunkBackend):
+    """Converts Sigma rule into CrowdStrike Search Processing Language (SPL)."""
+    identifier = "crowdstrike"
+
+    def generate(self, sigmaparser):
+        lgs = sigmaparser.parsedyaml.get("logsource")
+        if lgs.get("product") == "windows" and (lgs.get("service") == "sysmon" or lgs.get("category") == "process_creation"):
+            fieldmappings = sigmaparser.config.fieldmappings
+            detections = sigmaparser.definitions
+            all_fields = dict()
+            for det in detections.values():
+                try:
+                    for field, value in det.items():
+                        if "|" in field:
+                            field = field.split("|")[0]
+                        if any([item for item in fieldmappings.keys() if field == item]):
+                            if field == "EventID" and str(value) == str(1) and lgs.get("service") == "sysmon":
+                                all_fields.update(det)
+                            elif field != "EventID":
+                                all_fields.update(det)
+                            else:
+                                raise NotImplementedError("Not supported fields!")
+                        else:
+                            raise NotImplementedError("Not supported fields!")
+                except AttributeError:  # ignore if detection is not a dict
+                    pass
+
+            table_fields = sigmaparser.parsedyaml.get("fields", [])
+            res_table_fields = []
+            for fl in table_fields:
+                if fl in fieldmappings.keys():
+                    res_table_fields.append(fl)
+            sigmaparser.parsedyaml["fields"] = res_table_fields
+            return super().generate(sigmaparser)
+        else:
+            raise NotImplementedError("Not supported logsources!")

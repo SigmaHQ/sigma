@@ -125,9 +125,9 @@ class ConditionalFieldMapping(SimpleFieldMapping):
 
         if len(targets) == 1:     # result set contains only one target, return mapped item (like SimpleFieldMapping)
             if value is None:
-                return ConditionNULLValue(val=targets.pop())
+                return ConditionNULLValue(val=list(targets)[0])
             else:
-                return (targets.pop(), value)
+                return (list(targets)[0], value)
         elif len(targets) > 1:        # result set contains multiple targets, return all linked as OR condition (like MultiFieldMapping)
             cond = ConditionOR()
             for target in targets:
