@@ -20,6 +20,7 @@ from fnmatch import fnmatch
 import sys
 import os
 from random import randrange
+from distutils.util import strtobool 
 
 import sigma
 import yaml
@@ -64,7 +65,8 @@ class ElasticsearchWildcardHandlingMixin(object):
             ("keyword_whitelist", None, "Fields to always set as keyword. Bypasses case insensitive options. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("keyword_blacklist", None, "Fields to never set as keyword (ie: always set as analyzed field). Bypasses case insensitive options. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("case_insensitive_whitelist", None, "Fields to make the values case insensitive regex. Automatically sets the field as a keyword. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
-            ("case_insensitive_blacklist", None, "Fields to exclude from being made into case insensitive regex. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None)
+            ("case_insensitive_blacklist", None, "Fields to exclude from being made into case insensitive regex. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
+            ("wildcard_use_keyword", "true", "Use analyzed field or wildcard field if the query uses a wildcard value (ie: '*mall_wear.exe'). Set this to 'False' to use analyzed field or wildcard field. Valid options are: true/false", None)
             )
     reContainsWildcard = re.compile("(?:(?<!\\\\)|\\\\\\\\)[*?]").search
     uuid_regex = re.compile( "[0-9a-fA-F]{8}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{12}", re.IGNORECASE )
@@ -99,6 +101,10 @@ class ElasticsearchWildcardHandlingMixin(object):
             self.case_insensitive_blacklist = self.case_insensitive_blacklist.replace(' ','').split(',')
         except AttributeError:
             self.case_insensitive_blacklist = list()
+        try:
+            self.wildcard_use_keyword = strtobool(self.wildcard_use_keyword.lower().strip())
+        except AttributeError:
+            self.wildcard_use_keyword = False
 
     def containsWildcard(self, value):
         """Determine if value contains wildcard."""
@@ -154,10 +160,8 @@ class ElasticsearchWildcardHandlingMixin(object):
             keyword_subfield_name = '.%s'%keyword_subfield_name
 
         # Set naming for analyzed fields
-        if analyzed_subfield_name != '' and not keyword_subfield_name.startswith('.'):
+        if analyzed_subfield_name != '':
             analyzed_subfield_name = '.%s'%analyzed_subfield_name
-        else:
-            analyzed_subfield_name = ''
 
         # force keyword on agg_option used in Elasticsearch DSL query key
         if agg_option:
@@ -191,7 +195,7 @@ class ElasticsearchWildcardHandlingMixin(object):
             self.matchKeyword = True
         elif self.CaseInSensitiveField:
             self.matchKeyword = True
-        elif (type(value) == list and any(map(self.containsWildcard, value))) or self.containsWildcard(value):
+        elif self.wildcard_use_keyword and ( (type(value) == list and any(map(self.containsWildcard, value))) or self.containsWildcard(value) ):
             self.matchKeyword = True
         else:
             self.matchKeyword = False
@@ -213,6 +217,8 @@ class ElasticsearchWildcardHandlingMixin(object):
             #value = re.sub( r"((?<!\\)(\\))\*$", "\g<1>\\*", value )
             # Make upper/lower
             value = re.sub( r"[A-Za-z]", lambda x: "[" + x.group( 0 ).upper() + x.group( 0 ).lower() + "]", value )
+            # Turn `.` into wildcard, only if odd number of '\'(because this would mean already escaped)
+            value = re.sub( r"(((?<!\\)(\\\\)+)|(?<!\\))\.", "\g<1>\.", value )
             # Turn `*` into wildcard, only if odd number of '\'(because this would mean already escaped)
             value = re.sub( r"(((?<!\\)(\\\\)+)|(?<!\\))\*", "\g<1>.*", value )
             # Escape additional values that are treated as specific "operators" within Elastic. (ie: @, ?, &, <, >, and ~)
