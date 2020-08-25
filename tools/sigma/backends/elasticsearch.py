@@ -160,10 +160,8 @@ class ElasticsearchWildcardHandlingMixin(object):
             keyword_subfield_name = '.%s'%keyword_subfield_name
 
         # Set naming for analyzed fields
-        if analyzed_subfield_name != '' and not keyword_subfield_name.startswith('.'):
+        if analyzed_subfield_name != '':
             analyzed_subfield_name = '.%s'%analyzed_subfield_name
-        else:
-            analyzed_subfield_name = ''
 
         # force keyword on agg_option used in Elasticsearch DSL query key
         if agg_option:
