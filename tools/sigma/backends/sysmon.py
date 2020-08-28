@@ -1,25 +1,10 @@
-# Output backends for sigmac
-# Copyright 2020 SOC Prime
-
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-
-# You should have received a copy of the GNU Lesser General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
 import re
 
 import sigma
 from sigma.backends.base import SingleTextQueryBackend
 from sigma.backends.mixins import MultiRuleOutputMixin
+
+from .exceptions import NotSupportedError
 
 
 class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
@@ -45,6 +30,7 @@ class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
         }
         self.eventidTagMapping = {
             1: "ProcessCreate",
+            4799: "ProcessCreate",
             2: "FileCreateTime",
             3: "NetworkConnect",
             5: "ProcessTerminate",
@@ -64,6 +50,7 @@ class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
             20: "WmiEvent",
             21: "WmiEvent",
             22: "DNSQuery",
+            257: "DNSQuery",
             23: "FileDelete"
         }
         self.allowedCondCombinations = {
@@ -126,7 +113,10 @@ class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
             if isinstance(value, list) and len(value) == 1:
                 value = value[0]
             if field == "EventID":
-                table = self.eventidTagMapping[value]
+                try:
+                    table = self.eventidTagMapping[value]
+                except KeyError:
+                    table = self.eventidTagMapping[1]
             else:
                 created_field_value = self.mapFiledValue(field, value)
                 fields_list.append(created_field_value)
@@ -170,7 +160,7 @@ class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
                     rules_result.append(category_comment)
             return "".join(rules_result)
         else:
-            raise
+            raise NotSupportedError("Couldn't create rule with current condition.")
 
     def createMultiRuleGroup(self, conditions):
         conditions_id = "".join([str(item.type) for item in conditions])
@@ -183,7 +173,7 @@ class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
                 result += "{}\n".format(rule)
             return result
         else:
-            raise NotImplementedError("not implemented condition")
+            raise NotSupportedError("Not implemented condition.")
 
     def createExcludeRuleGroup(self, conditions):
         conditions_id = "".join([str(item.type) for item in conditions])
@@ -202,9 +192,6 @@ class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
                 result += "{}\n".format(rule)
             return result
 
-    def createMultiExcludeRuleGroup(self, conditions):
-        return
-
     def checkRuleCondition(self, condtokens):
         if len(condtokens) == 1:
             conditions = [item for item in condtokens[0].tokens]
@@ -214,14 +201,14 @@ class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
                     if sorted(conditions_combination) == sorted(combination):
                         return rule_type, conditions
             else:
-                raise NotImplementedError("not implemented condition")
+                raise NotSupportedError("Not supported condition.")
         else:
-            raise NotImplementedError("not implemented condition")
+            raise NotSupportedError("Not supported condition.")
 
     def createTableFromLogsource(self):
         if self.logsource.get("product", "") != "windows":
-            raise TypeError(
-                "Not supported logsource. Should be product windows")
+            raise NotSupportedError(
+                "Not supported logsource. Should be product `windows`.")
         for item in self.logsource.values():
             if item.lower() in self.allowedSource.keys():
                 self.table = self.allowedSource.get(item.lower())
@@ -229,22 +216,29 @@ class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
         else:
             self.table = "ProcessCreate"
 
-    def finalize(self):
-        rulegroup_comment = '<!--RuleGroup groupRelation should be `or` <RuleGroup groupRelation="or"> -->'
-        return "{}\n{}".format(rulegroup_comment, self.sysmon_rule)
+    def checkDetection(self):
+        for selection_name, value in self.detection.items():
+            if isinstance(value, list):
+                raise NotSupportedError("Keywords are not supported in sysmon backend.")
 
 
     def generate(self, sigmaparser):
+        sysmon_rule = None
         title = sigmaparser.parsedyaml.get("title", "")
         author = sigmaparser.parsedyaml.get("author", {})
         self.rule_name = "{} by {}".format(title, author)
         self.detection = sigmaparser.parsedyaml.get("detection", {})
+        self.checkDetection()
         self.logsource = sigmaparser.parsedyaml["logsource"]
         self.createTableFromLogsource()
         rule_type, conditions = self.checkRuleCondition(sigmaparser.condtoken)
         if rule_type == "single":
-            self.sysmon_rule = self.createRuleGroup(conditions, self.detection.get("condition"))
+            sysmon_rule = self.createRuleGroup(conditions, self.detection.get("condition"))
         elif rule_type == "multi":
-            self.sysmon_rule = self.createMultiRuleGroup(conditions)
+            sysmon_rule = self.createMultiRuleGroup(conditions)
         elif rule_type == "exclude":
-            self.sysmon_rule = self.createExcludeRuleGroup(conditions)
+            sysmon_rule = self.createExcludeRuleGroup(conditions)
+
+        if sysmon_rule:
+            rulegroup_comment = '<!--RuleGroup groupRelation should be `or` <RuleGroup groupRelation="or"> -->'
+            return "{}\n{}".format(rulegroup_comment, sysmon_rule)
