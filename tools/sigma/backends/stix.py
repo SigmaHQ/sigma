@@ -131,8 +131,13 @@ class STIXBackend(SingleTextQueryBackend):
         else:
             raise TypeError("Backend does not support map values of type " + str(type(value)))
 
-    def generateValueNode(self, node):
-        return self.valueExpression % (self.cleanValue(str(node)))
+    def generateValueNode(self, node, keypresent=True):
+        if keypresent == False:
+            if type(node) == str and "*" in node:
+                node = node.replace("*", "%")
+            return "artifact:payload_bin LIKE \'{0}\'".format(self.cleanValue(str(node)))
+        else:
+            return self.valueExpression % (self.cleanValue(str(node)))
 
     def generateNode(self, node, currently_within_NOT_node=False):
         if type(node) == sigma.parser.condition.ConditionAND:
@@ -149,6 +154,8 @@ class STIXBackend(SingleTextQueryBackend):
             return self.generateSubexpressionNode(node, currently_within_NOT_node)
         elif type(node) == tuple:
             return self.generateMapItemNode(node, currently_within_NOT_node)
+        elif type(node) in (str, int):
+            return self.generateValueNode(node, keypresent=False)
         else:
             raise TypeError("Node type %s was not expected in Sigma parse tree" % (str(type(node))))
 
