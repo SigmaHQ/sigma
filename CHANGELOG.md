@@ -6,15 +6,70 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 from version 0.14.0.
 
-## Unreleased
+## 0.18.1 - 2020-08-25
+
+Release created for technical reasons (issues with extended README and PyPI), no real changes done.
+
+## 0.18.0 - 2020-08-25
+
+### Added
+
+* C# backend
+* STIX backend
+* Options to xpack-watcher backend (action_throttle_period, mail_from acaw, mail_profile and other)
+* More generic log sources
+* Windows Defender log sources
+* Generic DNS query log source
+* AppLocker log source
+
+### Changed
+
+* Improved backend and configuration descriptions
+* Microsoft Defender ATP mapping updated
+* Improved handling of wildcards in Elastic backends
+
+### Fixed
+
+* Powershell backend: key name was incorrectly added into regular expression
+* Grouping issue in Carbon Black backend
+* Handling of default field mapping in case field is referenced multiple from a rule
+* Code cleanup and various fixes
+* Log source mappings in configurations
+* Handling of conditional field mappings by Elastic backends
+
+## 0.17.0 - 2020-06-12
 
 ### Added
 
 * LOGIQ Backend (logiq)
+* CarbonBlack backend (carbonblack) and field mappings
+* Elasticsearch detection rule backend (es-rule)
+* ee-outliers backend
+* CrowdStrike backend (crowdstrike)
+* Humio backend (humio)
+* Aggregations in SQL backend
+* SQLite backend (sqlite)
+* AWS Cloudtrail ECS mappings
+* Overrides
+* Zeek configurations for various backends
+* Case-insensitive matching for Elasticsearch
+* ECS proxy mappings
+* RuleName field mapping for Winlogbeat
+* sigma2attack tool
+
+### Changed
+
+* Improved usage of keyword fields for Elasticsearch-based backends
+* Splunk XML backend rule titles from sigma rule instead of file name
+* Moved backend option list to --help-backend
+* Microsoft Defender ATP schema improvements
 
 ### Fixed
 
 * Splunx XML rule name is now set to rule title
+* Backend list deduplicated
+* Wrong escaping of wildcard at end of value when startswith modifier is used.
+* Direct execution of tools on Windows systems by addition of script entry points
 
 ## 0.16.0 - 2020-02-25
 

@@ -1,0 +1,35 @@
+title: OceanLotus Registry Activity
+id: 4ac5fc44-a601-4c06-955b-309df8c4e9d4
+status: experimental
+description: Detects registry keys created in OceanLotus (also known as APT32) attacks
+references:
+    - https://www.welivesecurity.com/2019/03/20/fake-or-fake-keeping-up-with-oceanlotus-decoys/
+tags:
+    - attack.t1112
+author: megan201296
+date: 2019/04/14
+logsource:
+    category: registry_event
+    product: windows
+detection:
+    selection:       
+        TargetObject: 
+            - 'HKCR\CLSID\{E08A0F4B-1F65-4D4D-9A09-BD4625B9C5A1}\Model'
+            - 'HKU\\*_Classes\CLSID\{E08A0F4B-1F65-4D4D-9A09-BD4625B9C5A1}\Model'
+              # covers HKU\* and HKLM..
+            - '*\SOFTWARE\App\AppXbf13d4ea2945444d8b13e2121cb6b663\Application'
+            - '*\SOFTWARE\App\AppXbf13d4ea2945444d8b13e2121cb6b663\DefaultIcon'
+            - '*\SOFTWARE\App\AppX70162486c7554f7f80f481985d67586d\Application'
+            - '*\SOFTWARE\App\AppX70162486c7554f7f80f481985d67586d\DefaultIcon'
+            - '*\SOFTWARE\App\AppX37cc7fdccd644b4f85f4b22d5a3f105a\Application'
+            - '*\SOFTWARE\App\AppX37cc7fdccd644b4f85f4b22d5a3f105a\DefaultIcon'
+            # HKCU\SOFTWARE\Classes\AppXc52346ec40fb4061ad96be0e6cb7d16a\
+            - 'HKU\\*_Classes\AppXc52346ec40fb4061ad96be0e6cb7d16a\\*'
+            # HKCU\SOFTWARE\Classes\AppX3bbba44c6cae4d9695755183472171e2\
+            - 'HKU\\*_Classes\AppX3bbba44c6cae4d9695755183472171e2\\*'
+            # HKCU\SOFTWARE\Classes\CLSID\{E3517E26-8E93-458D-A6DF-8030BC80528B}\
+            - 'HKU\\*_Classes\CLSID\{E3517E26-8E93-458D-A6DF-8030BC80528B}\\*'
+    condition: selection
+falsepositives:
+    - Unknown
+level: critical

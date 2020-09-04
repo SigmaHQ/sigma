@@ -1,0 +1,26 @@
+title: Covenant Launcher Indicators
+id: c260b6db-48ba-4b4a-a76f-2f67644e99d2
+description: Detects suspicious command lines used in Covenant luanchers
+status: experimental
+references:
+    - https://posts.specterops.io/covenant-v0-5-eee0507b85ba
+author: Florian Roth
+date: 2020/06/04
+tags:
+  - attack.execution
+  - attack.t1086
+  - attack.t1059.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:
+            - ' -Sta -Nop -Window Hidden -Command '
+            - ' -Sta -Nop -Window Hidden -EncodedCommand '
+            - 'sv o (New-Object IO.MemorySteam);sv d '
+            - 'mshta file.hta'
+            - 'GruntHTTP'
+            - '-EncodedCommand cwB2ACAAbwAgA'
+    condition: selection
+level: high
