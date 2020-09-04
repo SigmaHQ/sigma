@@ -1,0 +1,21 @@
+title: Traffic to Newly Registered Domains
+status: experimental
+id: 1ec26fad-9a11-4d12-96ec-adcc47f31966
+description: Detects traffic to domains registered recently
+references:
+    - https://unit42.paloaltonetworks.com/newly-registered-domains-malicious-abuse-by-bad-actors/
+tags:
+    - attack.t1189
+author: Mike Wade @savvyspoon
+date: 2020/09/01
+logsource:
+    category: dns
+detection:
+    selection:
+        record_type: '*'
+        answer:
+            - 'CreationDate'
+    condition: selection | CreationDate > -14d
+falsepositives:
+    - Unknown
+level: high
