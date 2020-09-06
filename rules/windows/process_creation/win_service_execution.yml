@@ -4,7 +4,7 @@ status: experimental
 description: Detects manual service execution (start) via system utilities
 author: Timur Zinniatullin, Daniil Yugoslavskiy, oscd.community
 date: 2019/10/21
-modified: 2019/11/04
+modified: 2020/09/06
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1035/T1035.yaml
 logsource:
@@ -15,6 +15,7 @@ detection:
         Image|endswith:
             - '\net.exe'
             - '\net1.exe'
+            - '\sc.exe'
         CommandLine|contains: ' start ' # space character after the 'start' keyword indicates that a service name follows, in contrast to `net start` discovery expression 
     condition: selection
 falsepositives:
@@ -22,5 +23,5 @@ falsepositives:
 level: low
 tags:
     - attack.execution
-    - attack.t1035
+    - attack.t1035 # an old one
     - attack.t1569.002
