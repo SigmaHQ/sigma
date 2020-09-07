@@ -1,0 +1,30 @@
+title: MpCmdRun.exe LOLBIN usage tracker
+id: a86523f6-d2a3-4530-9d3c-cc44ad44a095
+status: experimental
+description: Detects creation of process MpCmdRun.exe LOLBIN usage tracker
+tags:
+    - 'attack.t1105'
+    - 'attack.T1564.004'
+    - 'attack.command_and_control'
+    - 'attack.defense_evasion'
+date: 2020/09/07
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection1:
+        NewProcessName: 'MpCmdRun.exe'
+        CommandLine|contains: '-url'
+    selection2:
+        CommandLine|contains: '-path'
+    selection3:
+        CommandLine|contains: '-DownloadFile'
+    condition: selection1 and selection2 and selection3
+falsepositives:
+    - Unknown
+level: high
+references:
+    - 'https://twitter.com/mohammadaskar2/status/1301263551638761477?s=21'
+    - 'https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-antivirus/command-line-arguments-microsoft-defender-antivirus'
+    - 'https://twitter.com/Oddvarmoe/status/1301444858910052352'
+    - 'https://twitter.com/NotMedic/status/1301506813242867720'
