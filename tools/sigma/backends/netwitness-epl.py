@@ -26,7 +26,7 @@ import re
 import sigma
 from .base import SingleTextQueryBackend
 from .mixins import MultiRuleOutputMixin
-import sqlparse
+#import sqlparse
 
 template="""
 module_XXXXX;
@@ -139,7 +139,7 @@ class NetWitnessEplBackend(SingleTextQueryBackend):
                 raise NotImplementedError("Backend does not support keywords")
         for parsed in sigmaparser.condparsed:
             query = self.generateQuery(parsed, sigmaparser)
-            query = sqlparse.format(query, reindent=True, keyword_case='upper')
+            #query = sqlparse.format(query, reindent=True, keyword_case='upper')
             query=query.replace('INDEX','`index`')  # index is reserved keyword in Esper and must be escaped
             query=template.replace('EXPRESSION', query)
             try:
