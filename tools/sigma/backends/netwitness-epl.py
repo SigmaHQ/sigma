@@ -122,7 +122,7 @@ class NetWitnessEplBackend(SingleTextQueryBackend):
         if regexlist:
             fmtitems.append("%s REGEXP %s" % (key, "|".join(regexlist)))
         fmtquery = "("+" OR ".join(filter(None, fmtitems))
-        # delete the " ' " from the begin or the end of the each regex pattern ex : '.*('patern1'|'patern2').*' --> '.*(patern1|patern2).*'
+        # Delete the " ' " from the begin or the end of each regex pattern ex : '.*('patern1'|'patern2').*' --> '.*(patern1|patern2).*'
         fmtquery = re.sub('\'\.\*\(\'','\'.*(',fmtquery)
         fmtquery = re.sub('\'\)\.\*\'',').*\'',fmtquery)
         fmtquery = re.sub('\'\|\'','|',fmtquery)
