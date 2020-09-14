@@ -26,6 +26,8 @@ import re
 import sigma
 from .base import SingleTextQueryBackend
 from .mixins import MultiRuleOutputMixin
+from sigma.parser.modifiers.base import SigmaTypeModifier
+from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
 
 template="""
 module_XXXXX;
@@ -40,10 +42,10 @@ class NetWitnessEplBackend(SingleTextQueryBackend):
     """Converts Sigma rule into RSA NetWitness EPL . Contributed by @snake-jump"""
     identifier = "netwitness-epl"
     config_required = False
-    default_config = ["netwitness-epl"]
+    default_config = ["sysmon","netwitness-epl"]
     active = True
     reEscape = re.compile('(")')
-    ##reEscape = re.compile("([\\|()\[\]{}.^$+])")
+    #reEscape = re.compile("([\\|()\[\]{}.^$+])")
     reClear = None
     andToken = " AND "
     orToken = " OR "
@@ -82,6 +84,17 @@ class NetWitnessEplBackend(SingleTextQueryBackend):
         elif value is None:
             return self.nullExpression % (key, )
 			
+        elif type(value) == SigmaRegularExpressionModifier:  ## if value is regex
+            regex = str(value)
+			## in RSA netwitness EPL regex each backslash must be escaped by backslash
+			## ex :  c:\temp\  to regex ->  c:\\temp\\  to RSA EPL regex --> c:\\\\temp\\\\
+            regex = regex.replace("\\","\\\\") 
+            # Regular Expressions have to match the full value in RSA Netwitness EPL
+            if not (regex.startswith('^') or regex.startswith('.*')):
+                regex = '.*' + regex
+            if not (regex.endswith('$') or regex.endswith('.*')):
+                regex = regex + '.*'
+            return "(%s REGEXP %s)" %(key, self.generateValueNode(regex))
         else:
             raise TypeError("Backend does not support map values of type " + str(type(value)))
 
