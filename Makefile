@@ -57,6 +57,7 @@ test-sigmac:
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t carbonblack -c tools/config/carbon-black.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t qualys -c tools/config/qualys.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t netwitness -c tools/config/netwitness.yml rules/ > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t netwitness-epl -c netwitness-epl rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t sumologic -O rulecomment -c tools/config/sumologic.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t humio -O rulecomment -c tools/config/humio.yml rules/ > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t crowdstrike -O rulecomment -c tools/config/crowdstrike.yml rules/ > /dev/null
