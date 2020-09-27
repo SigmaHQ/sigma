@@ -1,0 +1,25 @@
+title: COM hijack & UAC bypass via Sdclt
+status: experimental
+description: Detects changes to 'HKCU\Software\Classes\Folder\shell\open\command\DelegateExecute'
+references:
+    - http://blog.sevagas.com/?Yet-another-sdclt-UAC-bypass
+    - https://www.exploit-db.com/exploits/47696
+author: Omkar Gudhate
+date: 2020/09/27
+logsource:
+    category: registry_event
+    product: windows
+detection:
+    selection:
+        TargetObject:
+            - 'HKCU\Software\Classes\Folder\shell\open\command\DelegateExecute'
+            - 'HKCU\Software\Classes\Folder\shell\open\command'
+    condition: selection
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.T1546.015
+    - attack.T1548.002
+falsepositives:
+    - unknown
+level: high
