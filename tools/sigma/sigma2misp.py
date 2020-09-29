@@ -5,13 +5,13 @@ import argparse
 import pathlib
 import urllib3
 urllib3.disable_warnings()
-from pymisp import PyMISP
+from pymisp import PyMISP, MISPEvent
 
 def create_new_event(args, misp):
     if hasattr(misp, "new_event"):
         return misp.new_event(info=args.info)["Event"]["id"]
     
-    event = misp.MISPEvent()
+    event = MISPEvent()
     event.info = args.info
     return misp.add_event(event)["Event"]["id"]
 
