@@ -20,6 +20,7 @@ from fnmatch import fnmatch
 import sys
 import os
 from random import randrange
+from distutils.util import strtobool 
 
 import sigma
 import yaml
@@ -31,9 +32,7 @@ from .base import BaseBackend, SingleTextQueryBackend
 from .mixins import RulenameCommentMixin, MultiRuleOutputMixin
 from .exceptions import NotSupportedError
 
-
 class DeepFieldMappingMixin(object):
-
     def fieldNameMapping(self, fieldname, value):
         if isinstance(fieldname, str):
             get_config = self.sigmaconfig.fieldmappings.get(fieldname)
@@ -49,12 +48,9 @@ class DeepFieldMappingMixin(object):
                            return super().fieldNameMapping(new_fieldname[0], value)
         return super().fieldNameMapping(fieldname, value)
 
-
     def generate(self, sigmaparser):
         self.logsource = sigmaparser.parsedyaml.get("logsource", {})
         return super().generate(sigmaparser)
-
-
 
 class ElasticsearchWildcardHandlingMixin(object):
     """
@@ -69,7 +65,8 @@ class ElasticsearchWildcardHandlingMixin(object):
             ("keyword_whitelist", None, "Fields to always set as keyword. Bypasses case insensitive options. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("keyword_blacklist", None, "Fields to never set as keyword (ie: always set as analyzed field). Bypasses case insensitive options. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("case_insensitive_whitelist", None, "Fields to make the values case insensitive regex. Automatically sets the field as a keyword. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
-            ("case_insensitive_blacklist", None, "Fields to exclude from being made into case insensitive regex. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None)
+            ("case_insensitive_blacklist", None, "Fields to exclude from being made into case insensitive regex. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
+            ("wildcard_use_keyword", "true", "Use analyzed field or wildcard field if the query uses a wildcard value (ie: '*mall_wear.exe'). Set this to 'False' to use analyzed field or wildcard field. Valid options are: true/false", None)
             )
     reContainsWildcard = re.compile("(?:(?<!\\\\)|\\\\\\\\)[*?]").search
     uuid_regex = re.compile( "[0-9a-fA-F]{8}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{12}", re.IGNORECASE )
@@ -104,6 +101,10 @@ class ElasticsearchWildcardHandlingMixin(object):
             self.case_insensitive_blacklist = self.case_insensitive_blacklist.replace(' ','').split(',')
         except AttributeError:
             self.case_insensitive_blacklist = list()
+        try:
+            self.wildcard_use_keyword = strtobool(self.wildcard_use_keyword.lower().strip())
+        except AttributeError:
+            self.wildcard_use_keyword = False
 
     def containsWildcard(self, value):
         """Determine if value contains wildcard."""
@@ -159,10 +160,8 @@ class ElasticsearchWildcardHandlingMixin(object):
             keyword_subfield_name = '.%s'%keyword_subfield_name
 
         # Set naming for analyzed fields
-        if analyzed_subfield_name != '' and not keyword_subfield_name.startswith('.'):
+        if analyzed_subfield_name != '':
             analyzed_subfield_name = '.%s'%analyzed_subfield_name
-        else:
-            analyzed_subfield_name = ''
 
         # force keyword on agg_option used in Elasticsearch DSL query key
         if agg_option:
@@ -196,7 +195,7 @@ class ElasticsearchWildcardHandlingMixin(object):
             self.matchKeyword = True
         elif self.CaseInSensitiveField:
             self.matchKeyword = True
-        elif (type(value) == list and any(map(self.containsWildcard, value))) or self.containsWildcard(value):
+        elif self.wildcard_use_keyword and ( (type(value) == list and any(map(self.containsWildcard, value))) or self.containsWildcard(value) ):
             self.matchKeyword = True
         else:
             self.matchKeyword = False
@@ -218,6 +217,8 @@ class ElasticsearchWildcardHandlingMixin(object):
             #value = re.sub( r"((?<!\\)(\\))\*$", "\g<1>\\*", value )
             # Make upper/lower
             value = re.sub( r"[A-Za-z]", lambda x: "[" + x.group( 0 ).upper() + x.group( 0 ).lower() + "]", value )
+            # Turn `.` into wildcard, only if odd number of '\'(because this would mean already escaped)
+            value = re.sub( r"(((?<!\\)(\\\\)+)|(?<!\\))\.", "\g<1>\.", value )
             # Turn `*` into wildcard, only if odd number of '\'(because this would mean already escaped)
             value = re.sub( r"(((?<!\\)(\\\\)+)|(?<!\\))\*", "\g<1>.*", value )
             # Escape additional values that are treated as specific "operators" within Elastic. (ie: @, ?, &, <, >, and ~)
@@ -232,7 +233,6 @@ class ElasticsearchWildcardHandlingMixin(object):
                 raise TypeError( "Regular expression validation error for: '%s')" %str(value) )
         else:
             return { 'is_regex': False, 'value': value }
-
 
 class ElasticsearchQuerystringBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
     """Converts Sigma rule into Elasticsearch query string. Only searches, no aggregations."""
@@ -667,10 +667,13 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
             ("es", "localhost:9200", "Host and port of Elasticsearch instance", None),
             ("watcher_url", "watcher", "Watcher URL: watcher (default)=_watcher/..., xpack=_xpack/wacher/... (deprecated)", None),
             ("filter_range","30m","Watcher time filter",None),
+            ("action_throttle_period","15m","Throttle time of the action",None),
 
             ("alert_methods", "email", "Alert method(s) to use when the rule triggers, comma separated. Supported: " + ', '.join(supported_alert_methods), None),
             # Options for Email Action            
             ("mail", "root@localhost", "Mail address for Watcher notification (only logging if not set)", None),
+            ("mail_from", "root@localhost", "Mail address for Watcher notification (only logging if not set)", None),
+            ("mail_profile", "standard", "Watcher provides three email profiles that control how MIME messages are structured: standard (default), gmail, and outlook.", None),
 
             # Options for WebHook Action
         ("http_host", "localhost", "Webhook host used for alert notification", None),
@@ -816,14 +819,20 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                 if 'email' in alert_methods:
                     # mail notification if mail address is given
                     email = self.mail
+                    mail_profile = self.mail_profile
+                    mail_from = self.mail_from
+                    action_throttle_period = self.action_throttle_period
                     eaction = {
                         "send_email": {
+                                "throttle_period": action_throttle_period,
                                 "email": {
-                                "to": email,
-                                "subject": action_subject,
+                                    "profile": mail_profile,
+                                    "from": mail_from,
+                                    "to": email,
+                                    "subject": action_subject,
                                     "body": action_body,
-                                "attachments": {
-                                    "data.json": {
+                                    "attachments": {
+                                        "data.json": {
                                             "data": {
                                             "format": "json"
                                                 }
@@ -994,6 +1003,7 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
         self.fields = []
 
     def generate(self, sigmaparser):
+        self.logsource = sigmaparser.parsedyaml.get("logsource", {})
         rulename = self.getRuleName(sigmaparser)
         title = sigmaparser.parsedyaml.setdefault("title", "")
         description = sigmaparser.parsedyaml.setdefault("description", "")
@@ -1028,7 +1038,7 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
             if parsed.parsedAgg:
                 if parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_COUNT or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MIN or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_MAX or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_AVG or parsed.parsedAgg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_SUM:
                     if parsed.parsedAgg.groupfield is not None:
-                        rule_object['query_key'] = self.fieldNameMapping(parsed.parsedAgg.groupfield, '*', True)
+                        rule_object['query_key'] = self.fieldNameMapping(parsed.parsedAgg.groupfield, '*')
                     rule_object['type'] = "metric_aggregation"
                     rule_object['buffer_time'] = interval
                     rule_object['doc_type'] = "doc"
@@ -1218,7 +1228,7 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
                     "reference": tactic.get("url", ""),
                     "name": tactic.get("tactic", "")
                 },
-                "framework": "MITRE ATT&CK"
+                "framework": "MITRE ATT&CK®"
             }
             temp_techniques = list()
             for tech in techniques_list:

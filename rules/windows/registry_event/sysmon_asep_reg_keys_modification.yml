@@ -6,9 +6,10 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1060/T1060.yaml
 tags:
     - attack.persistence
-    - attack.t1060
+    - attack.t1060 # an old one
+    - attack.t1547.001
 date: 2019/10/21
-modified: 2019/11/10
+modified: 2020/09/06
 author: Victor Sergeev, Daniil Yugoslavskiy, oscd.community
 logsource:
     category: registry_event
@@ -23,7 +24,12 @@ detection:
             - '\software\Microsoft\Windows\CurrentVersion\RunServicesOnce'
             - '\software\Microsoft\Windows NT\CurrentVersion\Winlogon\Userinit'
             - '\software\Microsoft\Windows NT\CurrentVersion\Winlogon\Shell'
-            - '\software\Microsoft\Windows NT\CurrentVersion\Windows'
+            - '\software\Microsoft\Windows NT\CurrentVersion\Windows\AppInit_DLLs'  # Appinit DLL
+            - '\software\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Windows\AppInit_DLLs'  # Appinit DLL
+            - '\software\Microsoft\Windows NT\CurrentVersion\Windows\Load'  # WindowsShellLoadAndRun in HKCU
+            - '\software\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Windows\Load'  # WindowsShellLoadAndRun in HKCU
+            - '\software\Microsoft\Windows NT\CurrentVersion\Windows\Run'  # WindowsShellLoadAndRun in HKCU
+            - '\software\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Windows\Run'  # WindowsShellLoadAndRun in HKCU
             - '\software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders'
     condition: selection
 falsepositives:

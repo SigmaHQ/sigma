@@ -8,7 +8,7 @@ Generic Signature Format for SIEM Systems
 
 # What is Sigma
 
-Sigma is a generic and open signature format that allows you to describe relevant log events in a straight forward manner. The rule format is very flexible, easy to write and applicable to any type of log file. The main purpose of this project is to provide a structured form in which researchers or analysts can describe their once developed detection methods and make them shareable with others.
+Sigma is a generic and open signature format that allows you to describe relevant log events in a straightforward manner. The rule format is very flexible, easy to write and applicable to any type of log file. The main purpose of this project is to provide a structured form in which researchers or analysts can describe their once developed detection methods and make them shareable with others.
 
 Sigma is for log files what [Snort](https://www.snort.org/) is for network traffic and [YARA](https://github.com/VirusTotal/yara) is for files.
 
@@ -24,11 +24,11 @@ This repository contains:
 
 [![Sigma - Generic Signatures for Log Events](https://preview.ibb.co/cMCigR/Screen_Shot_2017_10_18_at_15_47_15.png)](https://www.youtube.com/watch?v=OheVuE9Ifhs "Sigma - Generic Signatures for Log Events")
 
-## SANS Webcast on MITRE ATT&CK and Sigma
+## SANS Webcast on MITRE ATT&CK® and Sigma
 
 The SANS webcast on Sigma contains a very good 20 min introduction to the project by John Hubbart from minute 39 onward. (SANS account required; registration is free)
 
-[MITRE ATT&CK and Sigma Alerting Webcast Recording](https://www.sans.org/webcasts/mitre-att-ck-sigma-alerting-110010 "MITRE ATT&CK and Sigma Alerting")
+[MITRE ATT&CK® and Sigma Alerting Webcast Recording](https://www.sans.org/webcasts/mitre-att-ck-sigma-alerting-110010 "MITRE ATT&CK® and Sigma Alerting")
 
 # Use Cases
 
@@ -70,6 +70,12 @@ Florian wrote a short [rule creation tutorial](https://www.nextron-systems.com/2
 4. Convert a rule of your choice with `sigmac` like `./sigmac -t splunk -c tools/config/generic/sysmon.yml ./rules/windows/process_creation/win_susp_whoami.yml`
 5. Convert a whole rule directory with `python sigmac -t splunk -r ../rules/proxy/`
 6. Check the `./tools/config` folder and the [wiki](https://github.com/Neo23x0/sigma/wiki/Converter-Tool-Sigmac) if you need custom field or log source mappings in your environment
+
+## Troubles / Troubleshooting / Help
+
+If you need help for a specific supported backend you can use e.g. `sigmac --backend-help elastalert-dsl`. More details on the usage of `sigmac` can be found in the dedicated [README.md](https://github.com/Neo23x0/sigma/blob/master/tools/README.md).
+
+Be sure to checkout the [guidance on backend specific settings](https://github.com/Neo23x0/sigma/blob/master/tools/README.md#choosing-the-right-sigmac) for `sigmac`.
 
 # Examples
 
@@ -202,6 +208,7 @@ tools/sigmac -t splunk -c ~/my-splunk-mapping.yml -c tools/config/generic/window
 * [Grep](https://www.gnu.org/software/grep/manual/grep.html) with Perl-compatible regular expression support
 * [LimaCharlie](https://limacharlie.io)
 * [ee-outliers](https://github.com/NVISO-BE/ee-outliers)
+* [Structured Threat Information Expression (STIX)](https://oasis-open.github.io/cti-documentation/stix/intro.html)
 
 Current work-in-progress
 * [Splunk Data Models](https://docs.splunk.com/Documentation/Splunk/7.1.0/Knowledge/Aboutdatamodels)
@@ -262,7 +269,7 @@ sigma2misp @misp.conf --same-event --info "Test Event" -r sigma_rules/
 
 ## Sigma2attack
 
-Generates a [MITRE ATT&CK Navigator](https://github.com/mitre/attack-navigator/) heatmap from a directory containing sigma rules.
+Generates a [MITRE ATT&CK® Navigator](https://github.com/mitre/attack-navigator/) heatmap from a directory containing sigma rules.
 
 Requirements:
 - Sigma rules tagged with a `attack.tXXXX` tag (e.g.: `attack.t1086`)
@@ -277,7 +284,7 @@ Usage samples:
 ./tools/sigma2attack --rules-directory ~/hunting/rules
 ```
 
-Result once imported in the MITRE ATT&CK Navigator ([online version](https://mitre-attack.github.io/attack-navigator/enterprise/)):
+Result once imported in the MITRE ATT&CK® Navigator ([online version](https://mitre-attack.github.io/attack-navigator/enterprise/)):
 
 ![Sigma2attack result](./images/sigma2attack.png)
 
@@ -292,7 +299,7 @@ These tools are not part of the main toolchain and maintained separately by thei
 
 # Next Steps
 
-* Integration of MITRE ATT&CK framework identifier to the rule set
+* Integration of MITRE ATT&CK® framework identifier to the rule set
 * Integration into Threat Intel Exchanges
 * Attempts to convince others to use the rule format in their reports, threat feeds, blog posts, threat sharing platforms
 

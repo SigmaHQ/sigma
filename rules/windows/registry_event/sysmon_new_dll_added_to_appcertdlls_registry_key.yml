@@ -8,21 +8,19 @@ references:
     - https://eqllib.readthedocs.io/en/latest/analytics/14f90406-10a0-4d36-a672-31cabe149f2f.html
 tags:
     - attack.persistence
-    - attack.t1182
+    - attack.t1182 # an old one
+    - attack.t1546.009
 author: Ilyas Ochkov, oscd.community
 date: 2019/10/25
-modified: 2019/11/13
+modified: 2020/09/06
 logsource:
     category: registry_event
     product: windows
 detection:
     selection:
-      - EventID: 
-            - 12  # key create
-            - 13  # value set
-        # Sysmon gives us HKLM\SYSTEM\CurrentControlSet\.. if ControlSetXX is the selected one
+      - # Sysmon gives us HKLM\SYSTEM\CurrentControlSet\.. if ControlSetXX is the selected one
         TargetObject: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCertDlls'
-      -   # key rename
+      - # key rename
         NewName: 'HKLM\SYSTEM\CurentControlSet\Control\Session Manager\AppCertDlls'
     condition: selection
 fields:

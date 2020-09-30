@@ -1,0 +1,32 @@
+title: Microsoft Office Add-In Loading
+id: 8e1cb247-6cf6-42fa-b440-3f27d57e9936
+status: experimental
+description: Detects add-ins that load when Microsoft Word or Excel starts (.wll/.xll are simply .dll fit for Word or Excel).
+references:
+    - Internal Research
+tags:
+    - attack.persistence
+    - attack.t1137         # an old one
+    - attack.t1137.006
+author: NVISO
+date: 2020/05/11
+modified: 2020/08/23
+logsource:
+    category: file_event
+    product: windows
+detection:
+    wlldropped:
+        TargetFilename|contains: \Microsoft\Word\Startup\
+        TargetFilename|endswith: .wll
+    xlldropped:
+        TargetFilename|contains: \Microsoft\Excel\Startup\
+        TargetFilename|endswith: .xll
+    generic:
+        TargetFilename|contains: \Microsoft\Addins\
+        TargetFilename|endswith:
+            - .xlam
+            - .xla
+    condition: (wlldropped or xlldropped or generic)
+falsepositives:
+    - Legitimate add-ins
+level: high

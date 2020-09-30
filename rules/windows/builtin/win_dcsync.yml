@@ -3,30 +3,32 @@ id: 611eab06-a145-4dfa-a295-3ccc5c20f59a
 description: Detects Mimikatz DC sync security events
 status: experimental
 date: 2018/06/03
-modified: 2019/10/08
-author: Benjamin Delpy, Florian Roth
+modified: 2020/09/11
+author: Benjamin Delpy, Florian Roth, Scott Dermott
 references:
     - https://twitter.com/gentilkiwi/status/1003236624925413376
     - https://gist.github.com/gentilkiwi/dcc132457408cf11ad2061340dcb53c2
 tags:
     - attack.credential_access
     - attack.s0002
-    - attack.t1003
+    - attack.t1003          # an old one
+    - attack.t1003.006
 logsource:
     product: windows
     service: security
 detection:
     selection:
         EventID: 4662
-        Properties: 
+        Properties:
             - '*Replicating Directory Changes All*'
             - '*1131f6ad-9c07-11d1-f79f-00c04fc2dcd2*'
     filter1:
         SubjectDomainName: 'Window Manager'
-    filter2: 
+    filter2:
         SubjectUserName:
             - 'NT AUTHORITY*'
             - '*$'
+            - 'MSOL_*'
     condition: selection and not filter1 and not filter2
 falsepositives:
     - Valid DC Sync that is not covered by the filters; please report

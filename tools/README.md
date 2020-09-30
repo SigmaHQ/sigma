@@ -239,16 +239,16 @@ For this backend, there are two very important components. One is the field name
 You have a few different variations of what could be the correct Sigmac to use. Based on the version of Elasticsearch, using ECS or not, using certain Beat's settings enabled or not, and so on.
 
 In order to aide in the decision of the correct Sigmac there are a few quick questions to ask yourself and based on those answers will be which one to use.
-Please not the answer to each question. It is OK to not know the answer to each question and in fact is very common (that's OK).
+Please note the answer to each question. It is OK to not know the answer to each question and in fact is very common (that's OK).
 
-1. What version of filebeat are you using (you may not be using this at all).
-2. Are you using Elastic Common Schema (ECS)?
+1. What version of [Filebeat](https://www.elastic.co/beats/filebeat) are you using (you may not be using this at all).
+2. Are you using [Elastic Common Schema (ECS)](https://www.elastic.co/guide/en/ecs/current/index.html)?
 3. What index do your store the log source's data in? Some examples:
    * Window's logs are most likely in `winlogbeat-*`
    * Linux logs are most likely in `filebeat-*`
    * Zeek/Bro data is most likely in `filebeat-*`
    * If you are using logstash, data is most likely in `logstash-*`
-4. If you are using filebeat, are you using the module enabled? Here is link showing the description for Windows log [Security Channel](https://www.elastic.co/guide/en/beats/winlogbeat/current/winlogbeat-module-security.html)
+4. If you are using Filebeat, are you using the module enabled? Here is link showing the description for Windows log [Security Channel](https://www.elastic.co/guide/en/beats/winlogbeat/current/winlogbeat-module-security.html)
 
 Now choose your data source:
 * [Windows Event Logs](#elastic-windows-event-log--sysmon-data-configurations)
@@ -269,7 +269,7 @@ example of the full command running on all the proxy rules converting to a Kiban
 
 **index templates**
 
-If you are able, because this will be one of the best ways to dermine which options to use - run the following command. Take the output from question 3 and replace in the example command `winlogbeat` with index. You can run this from the CLI against your Elasticsearch instance or from Kibana Dev Tools.
+If you are able, because this will be one of the best ways to determine which options to use - run the following command. Take the output from question 3 and replace in the example command `winlogbeat` with index. You can run this from the CLI against your Elasticsearch instance or from Kibana Dev Tools.
 You will only need to use the first index template pattern. Look under the section `dynamic_templates` and then look for `strings_as_keyword`. Under that section, is there a `strings_as_keyword` ? If so take note.
 
 `curl -XGET "http://127.0.0.1:9200/winlogbeat-*/_mapping/?filter_path=*.mappings.dynamic_templates*,*.index_patterns"`
@@ -288,45 +288,62 @@ Now lets determine which options and Sigmac to use.
 You can add the following depending on additional information from your answers/input above.
 
 1. If you are using ECS, your data is going to `winlogbeat-*` index, or your default field is a keyword type then add the following to your SIGMA command: `--backend-option keyword_field="" `
-    * If you want to prevent case sensitive bypasses you can add the following to your command: `--backend-option case_insensitive_whitelist""`
+    * If you want to prevent case sensitive bypasses you can add the following to your command: `--backend-option case_insensitive_whitelist="*"`
     * If you want to prevent case sensitive bypasses but only for certain fields, you can use an option like this: `-backend-option keyword_field="" --backend-option case_insensitive_whitelist="*CommandLine*, *ProcessName*, *Image*, process.*, *FileName*, *Path*, *ServiceName*, *ShareName*, file.*, *Directory*, *directory*, *hash*, *Hash*, *Object*, ComputerName, *Subject*, *Target*, *Service*"`
 
-2. If you are using analyzed (text) fields or your index template portion of `strings_as_keyword` contains `text` then you can add the following:
+1. If you are using analyzed (text) fields or your index template portion of `strings_as_keyword` contains `text` then you can add the following:
 
-```bash
---backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text"
-```
+    ```bash
+    --backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text"
+    ```
 
-3. If you only have some analyzed fields then you would use an example like this:
+1. If you only have some analyzed fields then you would use an example like this:
 
-```bash
---backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text" --backend-option analyzed_sub_fields="TargetUserName, SourceUserName, TargetHostName, CommandLine, ProcessName, ParentProcessName, ParentImage, Image"
-```
+    ```bash
+    --backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text" --backend-option analyzed_sub_fields="TargetUserName, SourceUserName, TargetHostName, CommandLine, ProcessName, ParentProcessName, ParentImage, Image"
+    ```
+
+1. If you only have some analyzed fields then you would use an example like this:
+
+    ```bash
+    --backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text" --backend-option analyzed_sub_fields="TargetUserName, SourceUserName, TargetHostName, CommandLine, ProcessName, ParentProcessName, ParentImage, Image"
+    ```
+1. Use an analyzed field or different field for queries that contain wildcard(s)
+
+    ```bash
+    --backend-option wildcard_use_keyword="false"
+    ```
 
 ### Elastic - Some Final Examples
 
 So putting it all together to help show everything from above, here are some "full" examples:
 
-* base field keyword & no analyzed field w/ case insensitivity (covers elastic 7 with beats/ecs (default)mappings) and using winlogbeat with modules enabled
+* base field keyword & no analyzed field w/ case insensitivity (covers elastic 7 with beats/ecs (default)mappings) and using winlogbeat with modules enabled. Also, keeps `winlog.channel` from making case insensitive as is not necessary (ie: the `keyword_whitelist` option)
 
 ```bash
-sigma -t es-qs -c tools/config/winlogbeat-modules-enabled.yml --backend-option keyword_field="" --backend-option case_insensitive_whitelist"" rules/windows/process_creation/win_office_shell.yml
+tools/sigmac -t es-qs -c tools/config/winlogbeat-modules-enabled.yml --backend-option keyword_field="" --backend-option case_insensitive_whitelist="*" --backend-option keyword_whitelist="winlog.channel" rules/windows/process_creation/win_office_shell.yml
 ```
 
 * base field keyword & subfield is analyzed(.text) and winlogbeat with modules enabled
 
 ```bash
-sigma -t es-qs -c tools/config/winlogbeat-modules-enabled.yml --backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text" rules/windows/process_creation/win_office_shell.yml
+tools/sigmac -t es-qs -c tools/config/winlogbeat-modules-enabled.yml --backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text" rules/windows/process_creation/win_office_shell.yml
 ```
 
 * base field keyword & only some analyzed fields and winlogbeat without modules enabled
 
 ```bash
-tools/sigmac -t es-dsl -c tools/config/winlogbeat.yml  --backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text" --backend-option analyzed_sub_fields="TargetUserName, SourceUserName, TargetHostName, CommandLine, ProcessName, ParentProcessName, ParentImage, Image" rules/windows/process_creation/win_office_shell.yml
+tools/sigmac -t es-qs -c tools/config/winlogbeat.yml  --backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text" --backend-option analyzed_sub_fields="TargetUserName, SourceUserName, TargetHostName, CommandLine, ProcessName, ParentProcessName, ParentImage, Image" rules/windows/process_creation/win_office_shell.yml
 ```
 
 * using beats/ecs Elastic 7 with case insensitive and some .text fields and winlogbeat without modules enabled
 
 ```bash
-tools/sigmac -t es-dsl -c tools/config/winlogbeat.yml --backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text" --backend-option keyword_whitelist="winlog.channel,winlog.event_id" --backend-option case_insensitive_whitelist="*" --backend-option analyzed_sub_fields="TargetUserName, SourceUserName, TargetHostName, CommandLine, ProcessName, ParentProcessName, ParentImage, Image" rules/windows/process_creation/win_office_shell.yml
+tools/sigmac -t es-qs -c tools/config/winlogbeat.yml --backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text" --backend-option keyword_whitelist="winlog.channel,winlog.event_id" --backend-option case_insensitive_whitelist="*" --backend-option analyzed_sub_fields="TargetUserName, SourceUserName, TargetHostName, CommandLine, ProcessName, ParentProcessName, ParentImage, Image" rules/windows/process_creation/win_office_shell.yml
+```
+
+* using keyword as a subfield and custom analyzed field as a subfield with winlogbeat mappings
+
+```bash
+tools/sigmac -t es-qs -c tools/config/winlogbeat.yml --backend-option keyword_field=".keyword" --backend-option analyzed_sub_field_name=".security" rules/windows/sysmon/sysmon_wmi_susp_scripting.yml
 ```

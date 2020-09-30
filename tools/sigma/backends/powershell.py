@@ -118,7 +118,10 @@ class PowerShellBackend(SingleTextQueryBackend):
                 return self.mapExpression % (key, self.generateValueNode(value, True))
             elif type(value) == str and "*" in value:
                 value = value.replace("*", ".*")
-                return "$_.message -match %s" % (self.generateValueNode(key + ".*" + value, True))
+                if key == "Message":
+                    return "$_.message -match %s" % (self.generateValueNode(value, True))
+                else:
+                    return "$_.message -match %s" % (self.generateValueNode(key + ".*" + value, True))
             elif type(value) in (str, int):
                 return '$_.message -match %s' % (self.generateValueNode(key + ".*" +str(value), True))
             else:
@@ -139,7 +142,10 @@ class PowerShellBackend(SingleTextQueryBackend):
                 itemslist.append(self.mapExpression % (key, self.generateValueNode(item, True)))
             elif type(item) == str and "*" in item:
                 item = item.replace("*", ".*")
-                itemslist.append('$_.message -match %s' % (self.generateValueNode(key + ".*" +item, True)))
+                if key == "Message":
+                    itemslist.append('$_.message -match %s' % (self.generateValueNode(item, True)))
+                else:
+                    itemslist.append('$_.message -match %s' % (self.generateValueNode(key + ".*" +item, True)))
             else:
                 itemslist.append('$_.message -match %s' % (self.generateValueNode(item, True)))
         return '('+" -or ".join(itemslist)+')'
