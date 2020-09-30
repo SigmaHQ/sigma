@@ -28,20 +28,23 @@ level: high
 logsource:
     product: windows
     service: sysmon
+    category: registry_event
 detection:
     # Registry Object Add
     selection2:
-        EventID: 12
         TargetObject: '*\cmmgr32.exe*'
         EventType: 'CreateKey'
     # Registry Object Value Set
     selection3:
-        EventID: 13
         TargetObject: '*\cmmgr32.exe*'
-    # Process Access Call Trace
+---
+logsource:
+    product: windows
+    service: sysmon
+    category: process_access
+detection:
     selection4:
-        EventID: 10
-        CallTrace: '*cmlua.dll*'
+        Calltrace: '*cmlua.dll*'
 ---
 logsource:
     category: process_creation
