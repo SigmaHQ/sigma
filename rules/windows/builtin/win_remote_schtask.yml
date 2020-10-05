@@ -1,0 +1,36 @@
+title: Remote Schtasks Creation
+id: cf349c4b-99af-40fa-a051-823aa2307a84
+status: experimental
+description: Detects remote execution via scheduled task creation or update on the destination host
+author: Jai Minton
+date: 2020/10/05
+references:
+    - https://drive.google.com/file/d/1lKya3_mLnR3UQuCoiYruO3qgu052_iS_/view
+tags:
+    - attack.lateral_movement
+    - attack.persistence
+    - attack.execution
+    - attack.t1053.005
+logsource:
+    product: windows
+    service: security
+    definition: 'The Advanced Audit Policy setting Object Access > Audit Other Object Access Events has to be configured to allow this detection (not in the baseline recommendations by Microsoft).'
+detection:
+    selection1:
+        EventID: 4624
+        Logon_Type: 3
+    selection2:
+        EventID:
+            - 4698
+            - 4702
+    filter1: 
+        Source_Network_Address:
+            - '::1'
+            - '127.0.0.1'
+    filter2: 
+        Source_Network_Address: '-'
+    timeframe: 30d
+    condition: (selection1 and not filter1) or selection2 and not filter2
+falsepositives:
+    - Unknown
+level: medium
