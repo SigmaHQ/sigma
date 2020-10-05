@@ -1,0 +1,32 @@
+title: Execute code using Pester
+id: 59e938ff-0d6d-4dc3-b13f-36cc28734d4e
+description: Detects code execution via Pester.bat (Pester Powershell Modulte)
+status: experimental
+references:
+    - https://lolbas-project.github.io/lolbas/Scripts/pester/
+    - https://twitter.com/Oddvarmoe/status/993383596244258816
+author: Julia Fomina, oscd.community
+date: 2020/10/05
+tags:
+    - attack.defense_evasion
+    - attack.t1216
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_1:
+        Image|endswith: '\poweshell.exe'
+        CommandLine|contains|all:
+            - 'Pester'
+            - 'Get-Help*;'
+    selection_2:
+        Image|endswith: '\cmd.exe'
+        CommandLine: '*Pester.bat*;*'
+        CommandLine:|contains:
+            - '/help'
+            - '/?'
+            - '-?'
+    condition: selection_1 or selection_2
+level: medium
+falsepositives:
+    - Legitimate use of Pester for writing tests for Powershell scripts and modules
