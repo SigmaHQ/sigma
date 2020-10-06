@@ -1,0 +1,32 @@
+title: Failed Authentication with Fake Account
+id: 38bc437b-151a-4334-ae81-d4099fb3d627
+description: Search for unsuccesful authentication attempts with fake account (this is specified in fake file with stored credentials)
+status: experimental
+author: Teymur Kheirkhabarov (idea), Ryan Plas (rule), oscd.community
+date: 2020/10/05
+references: 
+    - https://image.slidesharecdn.com/kheirkhabarovoffzonefinal-181117201458/95/hunting-for-privilege-escalation-in-windows-environment-16-638.jpg
+tags:
+    - attack.credential_access
+    - attack.t1555
+logsource:
+    product: windows
+    service: security
+detection:
+    selection_1:
+        EventID: 
+            - 4625
+            - 4648
+    selection_2:
+        EventID: 4776
+        Status: '0x0'
+    selection_3:
+        TargetUserName: '%FakeAccountUserName%'
+    condition: (selection_1 or selection_2) and selection_3
+fields:
+    - EventID
+    - Status
+    - TargetUserName
+falsepositives:
+    - Unknown
+level: high 
