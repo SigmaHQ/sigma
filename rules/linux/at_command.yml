@@ -1,0 +1,27 @@
+title: Scheduled Task/Job: At
+id: d2d642d7-b393-43fe-bae4-e81ed5915c4b
+status: stable
+description: Detects the use of at/atd
+author: Ömer Günal
+date: 2020/10/06
+references:
+    - https://attack.mitre.org/techniques/T1053/001/
+logsource:
+    product: linux
+detection:
+    keywords:
+        - at|contains:
+          - '* at *'
+        - atd|contains:
+          - '* atd *'
+        - enumeration|contains:
+          - 'which atd'
+          - 'which at'
+          - 'systemctl status atd'
+          - 'service atd status '
+    condition: keywords
+falsepositives:
+    - Legitimate administration activities
+level: low
+tags:
+    - attack.persistence
