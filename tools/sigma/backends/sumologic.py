@@ -13,11 +13,14 @@
 
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+import json
+import os
 import re
-import sigma
-from sigma.parser.condition import ConditionOR
-from .base import SingleTextQueryBackend
+import sys
+
+from sigma.backends.base import SingleTextQueryBackend
+from sigma.backends.exceptions import NotSupportedError
+from sigma.parser.condition import ConditionOR, SigmaAggregationParser
 
 # Sumo specifics
 # https://help.sumologic.com/05Search/Search-Query-Language
@@ -29,13 +32,13 @@ from .base import SingleTextQueryBackend
 
 
 class SumoLogicBackend(SingleTextQueryBackend):
-    """Converts Sigma rule into SumoLogic query"""
+    """Converts Sigma rule into SumoLogic query. Contributed by SOC Prime. https://socprime.com"""
     identifier = "sumologic"
     active = True
     config_required = False
     default_config = ["sysmon", "sumologic"]
 
-    index_field = "_index"
+    index_field = "_sourceCategory"
     reClear = None
     andToken = " AND "
     orToken = " OR "
@@ -59,22 +62,46 @@ class SumoLogicBackend(SingleTextQueryBackend):
             agg.groupfield = 'hostname'
         if agg.aggfunc_notrans == 'count() by':
             agg.aggfunc_notrans = 'count by'
-        if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_NEAR:
+        if agg.aggfunc == SigmaAggregationParser.AGGFUNC_NEAR:
             raise NotImplementedError("The 'near' aggregation operator is not yet implemented for this backend")
-            # WIP
-            # ex:
-            # (QUERY) | timeslice 5m
-            # | count_distinct(process) _timeslice,hostname
-            # | where _count_distinct > 5
-            # return " | timeslice %s | count_distinct(%s) %s | where _count_distinct > 0" % (self.interval, agg.aggfunc_notrans or "", agg.aggfield or "", agg.groupfield or "")
-            # return " | timeslice %s | count_distinct(%s) %s | where _count_distinct %s %s" % (self.interval, agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)
-        if not agg.groupfield:
-            # return " | %s(%s) | when _count %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.cond_op, agg.condition)
-            return " | %s %s | where _count %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.cond_op, agg.condition)
-        elif agg.groupfield:
-            return " | %s by %s | where _count %s %s" % (agg.aggfunc_notrans, agg.groupfield or "", agg.cond_op, agg.condition)
+        if self.keypresent:
+            if not agg.groupfield:
+                if agg.aggfield:
+                    agg.aggfunc_notrans = "count_distinct"
+                    return " \n| %s(%s) \n| where _count_distinct %s %s" % (
+                        agg.aggfunc_notrans, agg.aggfield, agg.cond_op, agg.condition)
+                else:
+                    return "  \n| %s | where _count %s %s" % (
+                    agg.aggfunc_notrans, agg.cond_op, agg.condition)
+            elif agg.groupfield:
+                if agg.aggfield:
+                    agg.aggfunc_notrans = "count_distinct"
+                    return " \n| %s(%s) by %s \n| where _count_distinct %s %s" % (
+                        agg.aggfunc_notrans, agg.aggfield, agg.groupfield, agg.cond_op, agg.condition)
+                else:
+                    return " \n| %s by %s \n| where _count %s %s" % (
+                        agg.aggfunc_notrans, agg.groupfield, agg.cond_op, agg.condition)
+            else:
+                return " \n| %s | where _count %s %s" % (agg.aggfunc_notrans, agg.cond_op, agg.condition)
         else:
-            return " | %s(%s) by %s | where _count %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)
+            if not agg.groupfield:
+                if agg.aggfield:
+                    agg.aggfunc_notrans = "count_distinct"
+                    return " \n| parse \"[%s=*]\" as searched nodrop\n| %s(searched) \n| where _count_distinct %s %s" % (
+                        agg.aggfield, agg.aggfunc_notrans, agg.cond_op, agg.condition)
+                else:
+                    return " \n| %s | where _count %s %s" % (
+                    agg.aggfunc_notrans, agg.cond_op, agg.condition)
+            elif agg.groupfield:
+                if agg.aggfield:
+                    agg.aggfunc_notrans = "count_distinct"
+                    return " \n| parse \"[%s=*]\" as searched nodrop\n| parse \"[%s=*]\" as grpd nodrop\n| %s(searched) by grpd \n| where _count_distinct %s %s" % (
+                        agg.aggfield, agg.groupfield, agg.aggfunc_notrans, agg.cond_op, agg.condition)
+                else:
+                    return " \n| parse \"[%s=*]\" as grpd nodrop\n| %s by grpd \n| where _count %s %s" % (
+                        agg.groupfield, agg.aggfunc_notrans, agg.cond_op, agg.condition)
+            else:
+                return " \n| %s | where _count %s %s" % (agg.aggfunc_notrans, agg.cond_op, agg.condition)
 
     def generateBefore(self, parsed):
         # not required but makes query faster, especially if no FER or _index/_sourceCategory
@@ -126,13 +153,17 @@ class SumoLogicBackend(SingleTextQueryBackend):
             if '|' in result:
                 return result
             else:
-                return "(" + result + ")"
+                return result
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # TODO/FIXME! depending on deployment configuration, existing FER must be populate here (or backend config?)
-        # aFL = ["EventID"]
-        aFL = ["_index", "_sourceCategory", "_view", "EventID", "sourcename", "CommandLine", "NewProcessName", "Image", "ParentImage", "ParentCommandLine", "ParentProcessName"]
+        aFL = ["_sourceCategory", "_view", "_sourceName"]
+        if self.sigmaconfig.config.get("afl_fields"):
+            self.keypresent = True
+            aFL.extend(self.sigmaconfig.config.get("afl_fields"))
+        else:
+            self.keypresent = False
         for item in self.sigmaconfig.fieldmappings.values():
             if item.target_type is list:
                 aFL.extend(item.target)
@@ -146,25 +177,22 @@ class SumoLogicBackend(SingleTextQueryBackend):
 
     # Clearing values from special characters.
     # Sumologic: only removing '*' (in quotes, is litteral. without, is wildcard) and '"'
-    def CleanNode(self, node):
-        search_ptrn = re.compile(r"[*\"\\]")
-        replace_ptrn = re.compile(r"[*\"\\]")
-        match = search_ptrn.search(str(node))
-        new_node = list()
-        if match:
-            replaced_str = replace_ptrn.sub('*', node)
-            node = [x for x in replaced_str.split('*') if x]
-            new_node.extend(node)
-        else:
-            new_node.append(node)
-        node = new_node
+
+    def cleanNode(self, node, key=None):
+        if "*" in node and key and not re.search("[\s]", node):
+            return node
+        elif "*" in node and not key:
+            return [x for x in node.split("*") if x]
         return node
 
     # Clearing values from special characters.
     def generateMapItemNode(self, node):
         key, value = node
         if key in self.allowedFieldsList:
-            if not self.mapListsSpecialHandling and type(value) in (
+            if key in ["_sourceCategory", "_sourceName"]:
+                value = "*%s*" % value.lower()
+                return self.mapExpression % (key, value)
+            elif not self.mapListsSpecialHandling and type(value) in (
                     str, int, list) or self.mapListsSpecialHandling and type(value) in (str, int):
                 if key in ("LogName", "source"):
                     self.logname = value
@@ -181,29 +209,29 @@ class SumoLogicBackend(SingleTextQueryBackend):
                     str, int, list) or self.mapListsSpecialHandling and type(value) in (str, int):
                 if type(value) is str:
                     new_value = list()
-                    value = self.CleanNode(value)
+                    value = self.cleanNode(value)
                     if type(value) == list:
-                        new_value.append(self.andToken.join([self.valueExpression % val for val in value]))
+                        new_value.append(self.andToken.join([self.cleanValue(val) for val in value]))
                     else:
                         new_value.append(value)
                     if len(new_value) == 1:
                         if self.generateANDNode(new_value):
-                            return "(" + self.generateANDNode(new_value) + ")"
+                            return self.generateANDNode(new_value)
                         else:
                             # if after cleaning node, it is empty but there is AND statement... make it true.
                             return "true"
                     else:
-                        return "(" + self.generateORNode(new_value) + ")"
+                        return self.generateORNode(new_value)
                 else:
                     return self.generateValueNode(value)
             elif type(value) is list:
                 new_value = list()
                 for item in value:
-                    item = self.CleanNode(item)
+                    item = self.cleanNode(item)
                     if type(item) is list and len(item) == 1:
-                        new_value.append(self.valueExpression % item[0])
+                        new_value.append(item[0])
                     elif type(item) is list:
-                        new_value.append(self.andToken.join([self.valueExpression % val for val in item]))
+                        new_value.append(self.andToken.join([self.cleanValue(val) for val in item]))
                     else:
                         new_value.append(item)
                 return self.generateORNode(new_value)
@@ -217,35 +245,25 @@ class SumoLogicBackend(SingleTextQueryBackend):
     #   => OK only if field entry with list, not string
     #   => generateNode: call cleanValue
     def cleanValue(self, val, key=''):
-        # in sumologic, if key, can use wildcard outside of double quotes. if inside, it's litteral
-        if key:
-            val = re.sub(r'\"', '\\"', str(val))
-            val = re.sub(r'(.+)\*(.+)', '"\g<1>"*"\g<2>"', val, 0)
-            val = re.sub(r'^\*', '*"', val)
-            val = re.sub(r'\*$', '"*', val)
-            # if unbalanced wildcard?
-            if val.startswith('*"') and not (val.endswith('"*') or val.endswith('"')):
-                val = val + '"'
-            if val.endswith('"*') and not (val.startswith('*"') or val.startswith('"')):
-                val = '"' + val
-            # double escape if end quote
-            if val.endswith('\\"*') and not val.endswith('\\\\"*'):
-                val = re.sub(r'\\"\*$', '\\\\\\"*', val)
-        # if not key and not (val.startswith('"') and val.endswith('"')) and not (val.startswith('(') and val.endswith(')')) and not ('|' in val) and val:
-        # apt_babyshark.yml
-        if not (val.startswith('"') and val.endswith('"')) and not (val.startswith('(') and val.endswith(')')) and not ('|' in val) and not ('*' in val) and val and not '_index' in key and not '_sourceCategory' in key and not '_view' in key:
-            val = '"%s"' % val
+        if isinstance(val, str):
+            val = re.sub("[^\\\"](\")", "\\\"", val)
+            if re.search("[\W\s]", val):# and not val.startswith('"') and not val.endswith('"'):  # or "\\" in node in [] or "/" in node:
+                return self.valueExpression % val
         return val
 
     # for keywords values with space
     def generateValueNode(self, node, key=''):
-        cV = self.cleanValue(str(node), key)
+        cV = self.cleanNode(str(node), key)
         if type(node) is int:
             return cV
+        if type(cV) is list:
+            return "(%s)" % "AND".join([self.cleanValue(item) for item in cV])
         if 'AND' in node and cV:
             return "(" + cV + ")"
-        else:
+        elif isinstance(node, str) and node.startswith('"') and node.endswith('"'):
             return cV
+        else:
+            return self.cleanValue(cV)
 
     def generateMapItemListNode(self, key, value):
         itemslist = list()
@@ -256,15 +274,209 @@ class SumoLogicBackend(SingleTextQueryBackend):
                 itemslist.append('%s' % (self.generateValueNode(item)))
         return "(" + " OR ".join(itemslist) + ")"
 
-    # generateORNode algorithm for ArcSightBackend & SumoLogicBackend class.
+    # generateORNode algorithm for SumoLogicBackend class.
     def generateORNode(self, node):
         if type(node) == ConditionOR and all(isinstance(item, str) for item in node):
             new_value = list()
             for value in node:
-                value = self.CleanNode(value)
+                value = self.cleanNode(value)
                 if type(value) is list:
                     new_value.append(self.andToken.join([self.valueExpression % val for val in value]))
                 else:
                     new_value.append(value)
             return "(" + self.orToken.join([self.generateNode(val) for val in new_value]) + ")"
         return "(" + self.orToken.join([self.generateNode(val) for val in node]) + ")"
+
+
+class SumoLogicCSE(SumoLogicBackend):
+    """Converts Sigma rule into SumoLogic CSE query. Contributed by SOC Prime. https://socprime.com"""
+    identifier = "sumologic-cse"
+    active = True
+    config_required = False
+    default_config = ["sysmon"]
+
+    index_field = "metdata_product"
+    reClear = None
+    #reEscape = re.compile('[\\\\"]')
+    andToken = " and "
+    orToken = " or "
+    notToken = "!"
+    subExpression = "(%s)"
+    listExpression = "(%s)"
+    listSeparator = ", "
+    valueExpression = "\"%s\""
+    nullExpression = "isEmpty(%s)"
+    notNullExpression = "!isEmpty(%s)"
+    mapExpression = "%s=%s"
+    mapListsSpecialHandling = True
+    mapListValueExpression = "%s IN %s"
+    interval = None
+    logname = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.allowedFieldsList.extend(["metdata_product", "metdata_vendor"])
+
+    def cleanValue(self, val, key=''):
+        if key == 'metadata_deviceEventId' or val.isdigit():
+            return val
+        return self.valueExpression % val
+
+    def cleanNode(self, node, key=None):
+        return node
+
+    # Clearing values from special characters.
+    def generateMapItemNode(self, node):
+        key, value = node
+        if key:
+            if not self.mapListsSpecialHandling and type(value) in (
+                    str, int, list) or self.mapListsSpecialHandling and type(value) in (str, int):
+                if key in ("LogName", "source"):
+                    self.logname = value
+                # need cleanValue if sigma entry with single quote
+                return self.mapExpression % (key, self.cleanValue(value, key))
+            elif type(value) is list:
+                return self.generateMapItemListNode(key, value)
+            elif value is None:
+                return self.nullExpression % (key,)
+            else:
+                raise TypeError("Backend does not support map values of type " + str(type(value)))
+        raise TypeError("Backend does not support query without key.")
+
+    def generateMapItemListNode(self, key, value):
+        if len(value) == 1:
+            return self.mapExpression % (key, value[0])
+        return "%s IN (%s)" % (key, ", ".join([self.cleanValue(item, key) for item in value]))
+
+
+class SumoLogicCSERule(SumoLogicCSE):
+    """Converts Sigma rule into SumoLogic CSE query"""
+    identifier = "sumologic-cse-rule"
+    active = True
+
+    def __init__(self, *args, **kwargs):
+        """Initialize field mappings"""
+        super().__init__(*args, **kwargs)
+        self.techniques = self._load_mitre_file("techniques")
+        self.allowedCategories = ["Threat Intelligence", "Initial Access", "Execution", "Persistence", "Privilege Escalation",
+                                  "Defense Evasion", "Credential Access", "Discovery", "Lateral Movement", "Collection",
+                                  "Command and Control", "Exfiltration", "Impact"]
+        self.defaultCategory = "Unknown/Other"
+        self.results = []
+
+    def find_technique(self, key_ids):
+        for key_id in set(key_ids):
+            if not key_id:
+                continue
+            for technique in self.techniques:
+                if key_id == technique.get("technique_id", ""):
+                    yield technique
+
+    def _load_mitre_file(self, mitre_type):
+        try:
+            backend_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "config", "mitre"))
+            path = os.path.join(backend_dir, "{}.json".format(mitre_type))
+            with open(path) as config_file:
+                config = json.load(config_file)
+                return config
+        except (IOError, OSError) as e:
+            print("Failed to open {} configuration file '%s': %s".format(path, str(e)), file=sys.stderr)
+            return []
+        except json.JSONDecodeError as e:
+            print("Failed to parse {} configuration file '%s' as valid YAML: %s" % (path, str(e)), file=sys.stderr)
+            return []
+
+    def skip_tactics_or_techniques(self, src_technics, src_tactics):
+        tactics = set()
+        technics = set()
+
+        local_storage_techniques = {item["technique_id"]: item for item in self.find_technique(src_technics)}
+
+        for key_id in src_technics:
+            src_tactic = local_storage_techniques.get(key_id, {}).get("tactic")
+            if not src_tactic:
+                continue
+            src_tactic = set(src_tactic)
+
+            for item in src_tactics:
+                if item in src_tactic:
+                    technics.add(key_id)
+                    tactics.add(item)
+
+        return sorted(tactics), sorted(technics)
+
+    def parse_severity(self, old_severity):
+        if old_severity.lower() == "critical":
+            return "high"
+        return old_severity
+
+    def get_tactics_and_techniques(self, tags):
+        tactics = list()
+        technics = list()
+
+        for tag in tags:
+            tag = tag.replace("attack.", "")
+            if re.match("[t][0-9]{4}", tag, re.IGNORECASE):
+                technics.append(tag.title())
+            elif re.match("[s][0-9]{4}", tag, re.IGNORECASE):
+                continue
+            else:
+                if "_" in tag:
+                    tag = tag.replace("_", " ")
+                tag = tag.title()
+                tactics.append(tag)
+
+        return tactics, technics
+
+    def map_risk_score(self, level):
+        if level == "critical":
+            return 5
+        elif level == "high":
+            return 4
+        elif level == "medium":
+            return 3
+        elif level == "low":
+            return 2
+        return 1
+
+    def create_rule(self, config):
+        tags = config.get("tags", [])
+
+        tactics, technics = self.get_tactics_and_techniques(tags)
+        tactics, technics = self.skip_tactics_or_techniques(technics, tactics)
+        tactics = list(map(lambda s: s.replace(" ", ""), tactics))
+        score = self.map_risk_score(config.get("level", "medium"))
+        rule = {
+            "name": "{} by {}".format(config.get("title"), config.get('author')),
+            "description": "{} {}".format(config.get("description"), "Technique: {}.".format(",".join(technics))),
+            "enabled": True,
+            "expression": """{}""".format(config.get("translation", "")),
+            "assetField": "device_hostname",
+            "score": score,
+            "stream": "record"
+        }
+        if tactics and tactics[0] in self.allowedCategories:
+            rule.update({"category": tactics[0]})
+        else:
+            rule.update({"category": "Unknown/Other"})
+        self.results.append(rule)
+        #return json.dumps(rule, indent=4, sort_keys=False)
+
+    def generate(self, sigmaparser):
+        translation = super().generate(sigmaparser)
+        if translation:
+            configs = sigmaparser.parsedyaml
+            configs.update({"translation": translation})
+            rule = self.create_rule(configs)
+            return rule
+        else:
+            raise NotSupportedError("No table could be determined from Sigma rule")
+
+    def finalize(self):
+        if len(self.results) == 1:
+           return json.dumps(self.results[0], indent=4, sort_keys=False)
+        elif len(self.results) > 1:
+            return json.dumps(self.results, indent=4, sort_keys=False)
+
+
+

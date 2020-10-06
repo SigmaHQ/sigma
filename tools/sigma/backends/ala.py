@@ -110,62 +110,95 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
         if isinstance(val, str):
             if "*" in val[1:-1]:  # value contains * inside string - use regex match
                 op = "matches regex"
-                val = re.sub('\\*', '.*', val)
+                val = re.sub('(\\\\\*|\*)', '.*', val)
                 if "\\" in val:
-                    return "%s \"(?i)%s\"" % (op, val)
-                return "%s \"(?i)%s\"" % (op, val)
+                    val = "@'(?i)%s'" % (val)
+                else:
+                    val = "'(?i)%s'" % (val)
+                return "%s %s" % (op, self.cleanValue(val))
             elif val.startswith("*") or val.endswith("*"):
-                op = "contains"
+                if val.startswith("*") and val.endswith("*"):
+                    op = "contains"
+                elif val.startswith("*"):
+                    op = "endswith"
+                elif val.endswith("*"):
+                    op = "startswith"
                 val = re.sub('([".^$]|(?![*?]))', '\g<1>', val)
-                val = re.sub('\\*', '', val)
+                val = re.sub('(\\\\\*|\*)', '.*', val)
                 val = re.sub('\\?', '.', val)
-                # if "\\" in val:
-                #     return "%s @\"%s\"" % (op, val)
-                return "%s \"%s\"" % (op, val)
-            # elif "\\" in val:
-            #     return "%s @\"%s\"" % (op, val)
-        return "%s \"%s\"" % (op, val)
+                if "\\" in val:
+                    return "%s @'%s'" % (op, self.cleanValue(val))
+                return "%s '%s'" % (op, self.cleanValue(val))
+            elif "\\" in val:
+                return "%s @'%s'" % (op, self.cleanValue(val))
+        return "%s \"%s\"" % (op, self.cleanValue(val))
 
-    def generate(self, sigmaparser):
-        self.table = None
-        self.category = sigmaparser.parsedyaml['logsource'].setdefault('category', None)
-        self.product = sigmaparser.parsedyaml['logsource'].setdefault('product', None)
-        self.service = sigmaparser.parsedyaml['logsource'].setdefault('service', None)
-
-        detection = sigmaparser.parsedyaml.get("detection", {})
-        if "keywords" in detection.keys():
-            return super().generate(sigmaparser)
-
-        if self.category == "process_creation":
-            self.table = "SecurityEvent"
-            self.eventid = "1"
-        elif self.service == "security":
-            self.table = "SecurityEvent"
-        elif self.service == "sysmon":
+    def getTable(self, sigmaparser):
+        if self.category == "process_creation" and len(set(sigmaparser.values.keys()) - {"Image", "ParentImage",
+                                                                                         "CommandLine"}) == 0:
+            self.table = "SecurityEvent | where EventID == 4688 "
+            self.eventid = "4688"
+        elif self.category == "process_creation":
             self.table = "SysmonEvent"
-        elif self.service == "powershell":
+            self.eventid = "1"
+        elif self.service and self.service.lower() == "security":
+            self.table = "SecurityEvent"
+        elif self.service and self.service.lower() == "sysmon":
+            self.table = "SysmonEvent"
+        elif self.service and self.service.lower() == "powershell":
             self.table = "Event"
-        elif self.service == "office365":
+        elif self.service and self.service.lower() == "office365":
             self.table = "OfficeActivity"
-        elif self.service == "azuread":
+        elif self.service and self.service.lower() == "azuread":
             self.table = "AuditLogs"
-        elif self.service == "azureactivity":
+        elif self.service and self.service.lower() == "azureactivity":
             self.table = "AzureActivity"
         else:
             if self.service:
                 if "-" in self.service:
-                    self.table = "-".join([item.title() for item in self.service.split("-")])
+                    self.table = "-".join([item.capitalize() for item in self.service.split("-")])
                 elif "_" in self.service:
-                    self.table = "_".join([item.title() for item in self.service.split("_")])
+                    self.table = "_".join([item.capitalize() for item in self.service.split("_")])
                 else:
-                    self.table = self.service.title()
+                    if self.service.islower() or self.service.isupper():
+                        self.table = self.service.capitalize()
+                    else:
+                        self.table = self.service
             elif self.product:
                 if "-" in self.product:
-                    self.table = "-".join([item.title() for item in self.product.split("-")])
+                    self.table = "-".join([item.capitalize() for item in self.product.split("-")])
                 elif "_" in self.product:
-                    self.table = "_".join([item.title() for item in self.product.split("_")])
+                    self.table = "_".join([item.capitalize() for item in self.product.split("_")])
                 else:
-                    self.table = self.product.title()
+                    if self.product.islower() or self.product.isupper():
+                        self.table = self.product.capitalize()
+                    else:
+                        self.table = self.product
+            elif self.category:
+                if "-" in self.category:
+                    self.table = "-".join([item.capitalize() for item in self.category.split("-")])
+                elif "_" in self.category:
+                    self.table = "_".join([item.capitalize() for item in self.category.split("_")])
+                else:
+                    if self.category.islower() or self.category.isupper():
+                        self.table = self.category.capitalize()
+                    else:
+                        self.table = self.category
+
+    def generate(self, sigmaparser):
+        try:
+            self.category = sigmaparser.parsedyaml['logsource'].setdefault('category', None)
+            self.product = sigmaparser.parsedyaml['logsource'].setdefault('product', None)
+            self.service = sigmaparser.parsedyaml['logsource'].setdefault('service', None)
+        except KeyError:
+            self.category = None
+            self.product = None
+            self.service = None
+        detection = sigmaparser.parsedyaml.get("detection", {})
+        if "keywords" in detection.keys():
+            return super().generate(sigmaparser)
+        if self.table is None:
+            self.getTable(sigmaparser)
 
         return super().generate(sigmaparser)
 

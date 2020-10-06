@@ -175,6 +175,9 @@ class SplunkXMLBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
 class CrowdStrikeBackend(SplunkBackend):
     """Converts Sigma rule into CrowdStrike Search Processing Language (SPL)."""
     identifier = "crowdstrike"
+    typedValueExpression = {
+        SigmaRegularExpressionModifier: 'regex field=%s "%s"'
+    }
 
     def generate(self, sigmaparser):
         lgs = sigmaparser.parsedyaml.get("logsource")
@@ -208,3 +211,9 @@ class CrowdStrikeBackend(SplunkBackend):
             return super().generate(sigmaparser)
         else:
             raise NotImplementedError("Not supported logsources!")
+
+    def generateMapItemTypedNode(self, fieldname, value):
+        if isinstance(value, SigmaRegularExpressionModifier):
+            return self.typedValueExpression.get(type(value)) % (fieldname, value)
+        else:
+            return super().generateMapItemTypedNode(fieldname=fieldname, value=value)
