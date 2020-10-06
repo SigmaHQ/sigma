@@ -17,13 +17,18 @@ detection:
     selection1:
         Image|endswith:
             - \print.exe
-        CommandLine|contains|all:
-            - .exe
-            - \\
+        CommandLine|startswith:
+            - print
     selection2:
         CommandLine|contains:
             - /D
-    condition: selection1 and selection2
+    exeCondition:
+        CommandLine|contains:
+            - .exe
+    cmdExclude:
+        CommandLine|contains:
+            - print.exe
+    condition: selection1 and selection2 and exeCondition and not cmdExclude
 falsepositives:
-    - Legitimate printer actions from a fileshare for an exe file
+    - Unknown
 level: medium
