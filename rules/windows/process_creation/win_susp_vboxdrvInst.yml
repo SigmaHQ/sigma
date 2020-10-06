@@ -1,0 +1,28 @@
+title: Set registry key-value via INF file call through VBoxDrvInst.exe
+id: b7b19cb6-9b32-4fc4-a108-73f19acfe262
+description: Detect run VBoxDrvInst.exe whith parameters allowing registry modify via INF file
+status: experimental
+author: Konstantin Grishchenko, oscd.community
+date: 2020/10/06
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/LOLUtilz/OtherBinaries/VBoxDrvInst.yml
+tags:
+    - attack.defense_evasion
+    - attack.T1112
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\VBoxDrvInst.exe'
+        CommandLine:
+            - 'driver*executeinf'
+    condition: selection
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Legitimate use of VBoxDrvInst.exe utility by VirtualBox Guest Additions installation process
+level: medium
