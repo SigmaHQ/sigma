@@ -1,0 +1,46 @@
+title: Usage of reg or Powershell by Non-privileged Users
+id: 8f02c935-effe-45b3-8fc9-ef8696a9e41d
+description: Search for usage of reg or Powershell by non-priveleged users to modify service configuration in registry
+status: experimental
+author: Teymur Kheirkhabarov (idea), Ryan Plas (rule), oscd.community
+date: 2020/10/05
+references: 
+    - https://image.slidesharecdn.com/kheirkhabarovoffzonefinal-181117201458/95/hunting-for-privilege-escalation-in-windows-environment-20-638.jpg
+tags:
+    - attack.defense_evasion
+    - attack.t1112
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 1
+        IntegrityLevel: Medium
+    commandline_1:
+        CommandLine|contains|all:
+            - reg
+            - add
+    commandline_2:
+        CommandLine|contains|all:
+            - powershell
+        CommandLine|contains:
+            - set-itemproperty
+            - " sp "
+            - new-itemproperty
+    commandline_3:
+        CommandLine|contains|all: 
+            - ControlSet
+            - Services
+    commandline_4:
+        CommandLine|contains:
+            - ImagePath
+            - FailureCommand
+            - ServiceDLL
+    condition: selection and (commandline_1 or commandline_2) and commandline_3 and commandline_4
+fields:
+    - EventID
+    - IntegrityLevel
+    - CommandLine
+falsepositives:
+    - Unknown
+level: high 
