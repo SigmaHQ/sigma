@@ -1,0 +1,43 @@
+title: Base64-encoded PowerShell Commands
+id: 3f07b9d1-2082-4c56-9277-613a621983cc
+description: Detects Base64-encoded powershell commands
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001
+status: experimental
+author: oscd.community, Natalia Shornikova
+date: 2020/10/07
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    Powershell_selection:
+      - CommandLine|contains: 
+        - 'powershell'
+        - 'pwsh'
+      - Description: 'Windows Powershell'
+      - Product: 'PowerShell Core 6'
+    Keywords:
+      CommandLine|contains:
+        - '-e '
+        - '-en '
+        - '-ec '
+        - '-enc '
+        - '-enco '
+        - '-encod '
+        - '-encode '
+        - '-encoded '
+        - '-encodedc '
+        - '-encodedco '
+        - '-encodedcom '
+        - '-encodedcomm '
+        - '-encodedcomma '
+        - '-encodedcomman '
+        - '-encodedcommand '
+    condition: all of them
+falsepositives: Unknown
+level: high
