@@ -13,16 +13,16 @@ logsource:
     product: windows
     service: security
 detection:
-    selection_1:
+    failed_logon:
         EventID: 
             - 4625
             - 4648
-    selection_2:
+    attempted_to_validate_no_errors:
         EventID: 4776
         Status: '0x0'
-    selection_3:
+    target_fake_user_name:
         TargetUserName: '%FakeAccountUserName%'
-    condition: (selection_1 or selection_2) and selection_3
+    condition: (failed_logon or attempted_to_validate_no_errors) and target_fake_user_name
 fields:
     - EventID
     - Status
