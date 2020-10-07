@@ -3,18 +3,20 @@ id: 78a80655-a51e-4669-bc6b-e9d206a462ee
 description: Detects installed new certificate
 references:
     - https://attack.mitre.org/techniques/T1553/004/
-author: Ömer Günal
+author: Ömer Günal, oscd.community
 date: 2020/10/05
 tags:
     - attack.defense_evasion
+    - attack.t1553.004
 level: low
 logsource:
     product: linux
 detection:
-    keyword:
-        - 'mv * /usr/local/share/ca-certificates'
-    keyword2:
-        - '*update-ca-certificates*'
-    condition: keyword and keyword2
+    keywords:
+        - keys|contains|all:
+          - 'mv '
+          - '/usr/local/share/ca-certificates'
+          - 'update-ca-certificates'
+    condition: keywords
 falsepositives:
     - Legitimate administration activities
