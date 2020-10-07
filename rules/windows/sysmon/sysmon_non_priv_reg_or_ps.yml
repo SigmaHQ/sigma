@@ -13,30 +13,30 @@ logsource:
     product: windows
     service: security
 detection:
-    selection:
+    process_creation:
         EventID: 1
         IntegrityLevel: Medium
-    commandline_1:
+    reg:
         CommandLine|contains|all:
             - reg
             - add
-    commandline_2:
+    powershell:
         CommandLine|contains|all:
             - powershell
         CommandLine|contains:
             - set-itemproperty
             - " sp "
             - new-itemproperty
-    commandline_3:
+    registry_folder:
         CommandLine|contains|all: 
             - ControlSet
             - Services
-    commandline_4:
+    registry_key:
         CommandLine|contains:
             - ImagePath
             - FailureCommand
             - ServiceDLL
-    condition: selection and (commandline_1 or commandline_2) and commandline_3 and commandline_4
+    condition: process_creation and (reg or powershell) and registry_folder and registry_key
 fields:
     - EventID
     - IntegrityLevel
