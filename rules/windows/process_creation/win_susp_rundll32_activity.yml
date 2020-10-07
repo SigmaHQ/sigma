@@ -11,27 +11,33 @@ tags:
     - attack.execution  # an old one 
     - attack.t1218.011
     - attack.t1085      # an old one 
-author: juju4
+author: juju4, Jonhnathan Ribeiro, oscd.community
 date: 2019/01/16
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
-        CommandLine:
-            - '*\rundll32.exe* url.dll,*OpenURL *'
-            - '*\rundll32.exe* url.dll,*OpenURLA *'
-            - '*\rundll32.exe* url.dll,*FileProtocolHandler *'
-            - '*\rundll32.exe* zipfldr.dll,*RouteTheCall *'
-            - '*\rundll32.exe* Shell32.dll,*Control_RunDLL *'
-            - '*\rundll32.exe javascript:*'
-            - '* url.dll,*OpenURL *'
-            - '* url.dll,*OpenURLA *'
-            - '* url.dll,*FileProtocolHandler *'
-            - '* zipfldr.dll,*RouteTheCall *'
-            - '* Shell32.dll,*Control_RunDLL *'
-            - '* javascript:*'
-            - '*.RegisterXLL*'
+        CommandLine|contains:
+            - 'url.dll,*OpenURL'
+            - 'url.dll,*OpenURLA'
+            - 'url.dll,*FileProtocolHandler'
+            - 'zipfldr.dll,*RouteTheCall'
+            - 'shell32.dll,*Control_RunDLL'
+            - 'shell32.dll,*ShellExec_RunDLL'
+            - 'javascript:'
+            - '.RegisterXLL'
+            - 'mshtml.dll,*PrintHTML'
+            - 'advpack.dll,*LaunchINFSection'
+            - 'advpack.dll,*RegisterOCX'
+            - 'ieadvpack.dll,*LaunchINFSection'
+            - 'ieadvpack.dll,*RegisterOCX'
+            - 'ieframe.dll,*OpenURL'
+            - 'shdocvw.dll,*OpenURL'
+            - 'syssetup.dll,*SetupInfObjectInstallAction'
+            - 'setupapi.dll,*InstallHinfSection'
+            - 'pcwutl.dll,*LaunchApplication'
+            - 'dfshim.dll,*ShOpenVerbApplication'
     condition: selection
 falsepositives:
     - False positives depend on scripts and administrative tools used in the monitored environment
