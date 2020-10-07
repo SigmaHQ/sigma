@@ -1,4 +1,4 @@
-title: Usage of reg or Powershell by Non-privileged Users
+title: Non-privileged Usage of reg or Powershell
 id: 8f02c935-effe-45b3-8fc9-ef8696a9e41d
 description: Search for usage of reg or Powershell by non-priveleged users to modify service configuration in registry
 status: experimental
@@ -10,11 +10,10 @@ tags:
     - attack.defense_evasion
     - attack.t1112
 logsource:
+    category: process_creation
     product: windows
-    service: security
 detection:
-    process_creation:
-        EventID: 1
+    integrity_level:
         IntegrityLevel: Medium
     reg:
         CommandLine|contains|all:
@@ -36,7 +35,7 @@ detection:
             - ImagePath
             - FailureCommand
             - ServiceDLL
-    condition: process_creation and (reg or powershell) and registry_folder and registry_key
+    condition: integrity_level and (reg or powershell) and registry_folder and registry_key
 fields:
     - EventID
     - IntegrityLevel
