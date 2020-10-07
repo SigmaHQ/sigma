@@ -1,0 +1,28 @@
+title: Too Long PowerShell Commandlines
+id: 3f07b9d1-2082-4c56-9277-613a621983cc
+description: Detects Too long PowerShell command lines
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse
+tags:
+    - attack.execution
+    - attack.t1059.001
+status: experimental
+author: oscd.community, Natalia Shornikova
+date: 2020/10/06
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+      EventID: 1
+    Powershell_selection:
+      - CommandLine: 
+        - '*powershell*'
+        - '*pwsh*'
+      - Description: 'Windows Powershell'
+      - Product: 'PowerShell Core 6'
+    Length_selection|re:
+      CommandLine: '(.){1000,}'
+    condition: all of them
+falsepositives: Unknown
+level: medium
