@@ -1,0 +1,27 @@
+title: Scheduled Cron Task/Job
+id: 6b14bac8-3e3a-4324-8109-42f0546a347f
+status: experimental
+description: Detects abuse of the cron utility to perform task scheduling for initial or recurring execution of malicious code. Crontabs in OS X, has the minor difference that the per-user files are in /usr/lib/cron/tabs/
+author: Alejandro Ortuno, oscd.community
+date: 2020/10/06
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1053.003/T1053.003.md
+    - https://attack.mitre.org/techniques/T1053/003/
+logsource:
+    product: unix
+detection:
+    keywords:
+        - 'echo "*" > * && crontab *'
+        # Cover Linux /etc/cron.{hourly,daily,weekly,monthly}/
+        # and MacOS /usr/lib/cron/tabs/
+        - 'echo "*" > */cron*/*'
+    condition: keywords
+falsepositives:
+    - Legitimate administration activities
+    - Redirecting output of echo command to a path that contains the word "cron"
+level: low
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1059.003
