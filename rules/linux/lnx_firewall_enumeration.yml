@@ -1,0 +1,30 @@
+title: System Network Discovery - Firewall Enumeration
+status: experimental
+description: Detects enumeration of firewall configuration
+author: remotephone, oscd.community
+date: 2020/10/06
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1016/T1016.md
+    - https://attack.mitre.org/techniques/T1016
+logsource:
+    product: unix
+detection:
+    keywords:
+        # Linux Only
+        - 'arp -a'
+        - 'ip'
+        - 'ss'
+        # macOS and Linux
+        - 'netstat'
+        - 'ifconfig'
+        # macOS only
+        - 'defaults read /Library/Preferences/com.apple.alf'
+        - 'socketfilterfw'
+    condition: keywords
+falsepositives:
+    - Legitimate administration activities
+    - Redirecting output of echo command to a path that contains the word "cron"
+level: low
+tags:
+    - attack.discovery
+    - attack.t1016
