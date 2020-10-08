@@ -1,0 +1,23 @@
+title: Local System Accounts Discovery
+id: ddf36b67-e872-4507-ab2e-46bda21b842c
+status: experimental
+description: Detects enumeration of local systeam accounts on MacOS
+author: Alejandro Ortuno, oscd.community
+date: 2020/10/08
+references:
+  - https://attack.mitre.org/techniques/T1087/001/
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1087.001/T1087.001.md
+logsource:
+  product: macos
+detection:
+  selection:
+    CommandLine|contains:
+      - 'dscl . list /Users'
+      - 'dscacheutil -q user'
+  condition: selection
+falsepositives:
+  - Legitimate administration activities
+level: low
+tags:
+  - attack.discovery
+  - attack.t1087.001
