@@ -5,7 +5,7 @@ status: experimental
 references:
     - https://twitter.com/Oddvarmoe/status/993383596244258816
 author: Julia Fomina, oscd.community
-date: 2020/10/07
+date: 2020/10/08
 tags:
     - attack.defense_evasion
     - attack.t1216
@@ -13,20 +13,22 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_powershell:
+    powershell_module:
         Image|endswith: '\poweshell.exe'
         CommandLine|contains|all:
             - 'Pester'
-            - 'Get-Help*;'
-    selection_cmd:
+            - 'Get-Help'
+    cmd_execution:
         Image|endswith: '\cmd.exe'
-        CommandLine|contains: 'Pester.bat*;'
-    selection_cmd_help:
+        CommandLine|contains|all: 
+            - 'Pester.bat'
+            - ';'
+    get_help:
         CommandLine|contains:
             - '/help'
             - '/?'
             - '-?'
-    condition: selection_powershell or (selection_cmd and selection_cnd_help)
+    condition: powershell_module or (cmd_execution and get_help)
 level: medium
 falsepositives:
     - Legitimate use of Pester for writing tests for Powershell scripts and modules
