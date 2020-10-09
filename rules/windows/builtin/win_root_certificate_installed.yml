@@ -17,17 +17,6 @@ detection:
     condition: 1 of them
 ---
 logsource:
-    category: process_creation
-    product: windows
-detection:
-    selection1:
-        Image|endswith: '\certutil.exe'     # Example: certutil -addstore -f -user ROOT CertificateFileName.der
-        CommandLine|contains: '-addstore * root'
-    selection2:
-        Image|endswith: '\CertMgr.exe'      # Example: CertMgr.exe /add CertificateFileName.cer /s /r localMachine root /all
-        CommandLine|contains: '/add * root'
----
-logsource:
     product: windows
     service: powershell
 detection:
@@ -35,4 +24,30 @@ detection:
         EventID: 4104
         ScriptBlockText|contains:
           - 'Import-Certificate * Cert:\LocalMachine\Root'
-          - 'Move-Item * Cert:\LocalMachine\Root'
+          - 'Move-Item * Cert:\LocalMachine\Root'    
+---
+logsource:
+    category: process_creation
+    product: windows
+    service: sysmon
+detection:
+    selection1:
+        EventID: 1
+        Image|endswith: '\certutil.exe'     # Example: certutil -addstore -f -user ROOT CertificateFileName.der
+        CommandLine|contains: '-addstore * root'
+    selection2:
+        EventID: 1
+        Image|endswith: '\CertMgr.exe'      # Example: CertMgr.exe /add CertificateFileName.cer /s /r localMachine root /all
+        CommandLine|contains: '/add * root'
+---
+action: repeat
+logsource:
+    product: windows
+    service: security
+detection:
+    selection1:
+        EventID: 4688
+    selection2:
+        EventID: 4688
+---
+action: reset
