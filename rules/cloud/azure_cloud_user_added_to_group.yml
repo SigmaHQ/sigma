@@ -1,0 +1,25 @@
+title: Azure Cloud Only Account Added to Group
+id: 4db60cc0-36fb-42b7-9b58-a5b53020fb74
+status: experimental
+author: Ruperto Razon and Michael Wade
+date: 2020/09/16
+description: Detects cloud users being added to groups
+logsource:
+    service: amdl:diagnosticlogs 
+detection:
+    selection_source:
+        - eventSource: AUDITLOGS
+    selection_userdata: 
+        - properties.initiatedBy.user.userPrincipalName: '*.onmicrosoft.com'
+    events:
+        - eventName:
+            - 'Add owner to group'
+            - 'Remove owner from group'
+    condition: selection_source AND selection_userdata AND events
+level: medium
+falsepositives:
+    - Known user being added to group
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+    - attack.t1089  # an old one
