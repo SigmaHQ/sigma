@@ -14,12 +14,18 @@ tags:
     - car.2016-04-002
 logsource:
     product: windows
-    service: system
 detection:
-    selection:
+    selection1:
+        service: security
+        EventID:
+            - 517
+            - 1102
+    selection2:
+        service: system
         EventID: 104
         Source: Microsoft-Windows-Eventlog
-    condition: selection
+    condition: selection1 or selection2
 falsepositives:
-    - Unknown
-level: medium
+    - Rollout of log collection agents (the setup routine often includes a reset of the local Eventlog)
+    - System provisioning (system reset before the golden image creation)
+level: high
