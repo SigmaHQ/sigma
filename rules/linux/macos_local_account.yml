@@ -5,16 +5,39 @@ description: Detects enumeration of local systeam accounts on MacOS
 author: Alejandro Ortuno, oscd.community
 date: 2020/10/08
 references:
-  - https://attack.mitre.org/techniques/T1087/001/
   - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1087.001/T1087.001.md
 logsource:
+  category: process_creation
   product: macos
 detection:
-  selection:
+  selection_1:
+    ProcessName|contains:
+      - '*/dscl'
     CommandLine|contains:
-      - 'dscl . list /Users'
-      - 'dscacheutil -q user'
-  condition: selection
+      - '. list /users'
+  selection_2:
+    ProcessName|contains:
+      - '*/dscacheutil'
+    CommandLine|contains:
+      - '-q user'
+  selection_3:
+    CommandLine|contains:
+      - "'x:0:'"
+  selection_4:
+    ProcessName|contains:
+      - '*/cat'
+    CommandLine|contains:
+      - '/etc/passwd'
+      - '/etc/sudoers'
+  selection_5:
+    ProcessName|contains:
+      - '*/id'
+  selection_6:
+    ProcessName|contains:
+      - '*/lsof'
+    CommandLine|contains:
+      - '-u'
+  condition: 1 of them
 falsepositives:
   - Legitimate administration activities
 level: low

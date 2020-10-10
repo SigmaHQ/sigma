@@ -5,15 +5,32 @@ description: Detects enumeration of local systeam accounts
 author: Alejandro Ortuno, oscd.community
 date: 2020/10/08
 references:
-  - https://attack.mitre.org/techniques/T1087/001/
   - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1087.001/T1087.001.md
 logsource:
+  category: process_creation
   product: linux
 detection:
-  selection:
+  selection_1:
+    ProcessName|contains:
+      - '*/lastlog'
+  selection_2:
     CommandLine|contains:
-      - 'lastlog'
-  condition: selection
+      - "'x:0:'"
+  selection_3:
+    ProcessName|contains:
+      - '*/cat'
+    CommandLine|contains:
+      - '/etc/passwd'
+      - '/etc/sudoers'
+  selection_4:
+    ProcessName|contains:
+      - '*/id'
+  selection_5:
+    ProcessName|contains:
+      - '*/lsof'
+    CommandLine|contains:
+      - '-u'
+  condition: 1 of them
 falsepositives:
   - Legitimate administration activities
 level: low
