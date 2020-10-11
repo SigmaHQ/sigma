@@ -20,11 +20,16 @@ logsource:
     product: windows
     service: powershell
 detection:
-    selection:
+    selection1:
         EventID: 4104
-        ScriptBlockText|contains:
-          - 'Import-Certificate * Cert:\LocalMachine\Root'
-          - 'Move-Item * Cert:\LocalMachine\Root'
+        ScriptBlockText|contains|all:
+          - 'Move-Item'
+          - 'Cert:\LocalMachine\Root'
+    selection2:
+        EventID: 4104
+        ScriptBlockText|contains|all:
+          - 'Import-Certificate'
+          - 'Cert:\LocalMachine\Root'
 ---
 logsource:
     category: process_creation
@@ -32,7 +37,11 @@ logsource:
 detection:
     selection1:
         Image|endswith: '\certutil.exe'     # Example: certutil -addstore -f -user ROOT CertificateFileName.der
-        CommandLine|contains: '-addstore * root'
+        CommandLine|contains|all: 
+            - '-addstore'
+            - 'root'
     selection2:
         Image|endswith: '\CertMgr.exe'      # Example: CertMgr.exe /add CertificateFileName.cer /s /r localMachine root /all
-        CommandLine|contains: '/add * root'
+        CommandLine|contains|all:
+            - '/add'
+            - 'root'
