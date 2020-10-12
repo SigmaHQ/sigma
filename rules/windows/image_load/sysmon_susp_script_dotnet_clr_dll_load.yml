@@ -1,0 +1,30 @@
+title: CLR DLL Loaded Via Scripting Applications
+id: 4508a70e-97ef-4300-b62b-ff27992990ea
+status: experimental
+description: Detects CLR DLL being loaded by an scripting applications
+references:
+    - https://github.com/tyranid/DotNetToJScript
+    - https://thewover.github.io/Introducing-Donut/
+author: omkar72, oscd.community
+date: 2020/10/10
+tags:
+    - attack.execution
+    - attack.privilege_escalation
+    - attack.t1055
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        Image:
+            - '*\wscript.exe'
+            - '*\cscript.exe'
+            - '*\mshta.exe'
+        ImageLoaded:
+            - '*\clr.dll'
+            - '*\mscoree.dll'
+            - '*\mscorlib.dll'
+    condition: selection
+falsepositives:
+    - unknown
+level: high
