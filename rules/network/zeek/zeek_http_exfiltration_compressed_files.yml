@@ -1,0 +1,32 @@
+title: Potential exfiltration of compressed files
+id: 0d47e3f6-357f-4534-928c-202631d065fa
+date: 2020/04/05
+author: Greg Howell, OTR (Open Threat Research)
+tags:
+    - attack.data_exfiltration
+    - attack.t1560.001
+    - attack.t1005
+references:
+    - https://github.com/OTRF/detection-hackathon-apt29/issues/17
+logsource:
+    product: zeek
+    service: files
+    service: http
+detection:
+    selection1:
+        uri:
+         - '*.7z'
+         - '*.zip'
+         - '*.rar'
+    selection2:
+        mime_types: '*compressed'
+    selection3:
+        filetype: '*compressed'
+    selection4:
+        http.bodyMagic: '*compressed'
+    selection5:
+        http.method: PUT
+    condition: selection1 and selection2 and selection5 or selection3 and selection5 or selection4 and selection5
+falsepositives:
+    - nothing observed so far
+level: medium

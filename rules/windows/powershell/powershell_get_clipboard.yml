@@ -1,0 +1,26 @@
+title: PowerShell Get Clipboard
+id: 5486f63a-aa4c-488d-9a61-c9192853099f
+description: A General detection for the Get-Clipboard commands in PowerShell logs. This could be an adversary capturing clipboard contents.
+status: experimental
+date: 2020/05/02
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+tags:
+    - attack.collection
+    - attack.t1115
+references:
+    - https://github.com/OTRF/detection-hackathon-apt29/issues/16
+    - https://threathunterplaybook.com/evals/apt29/detections/7.A.2_F4609F7E-C4DB-4327-91D4-59A58C962A02.html
+logsource:
+    product: windows
+    service: powershell
+detection:
+    selection1:
+        EventID: 4104
+        ScriptBlockText|contains: 'Get-Clipboard'
+    selection2:
+        EventID: 4103
+        Payload|contains: 'Get-Clipboard'
+    condition: selection1 or selection2
+falsepositives:
+    - unknown
+level: medium
