@@ -1,7 +1,7 @@
-title: Modifies the Registry From a File
-id: 5f60740a-f57b-4e76-82a1-15b6ff2cb134
+title: Modifies the Registry From a ADS
+id: 77946e79-97f1-45a2-84b4-f37b5c0d8682
 status: experimental
-description: Detects the execution of regini.exe which can be used to modify registry keys, the changes are imported from one or more text files.
+description:  Detects the import of an alternate data stream with regini.exe, regini.exe can be used to modify registry keys.
 references:
     - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OSBinaries/Regini.yml
     - https://gist.github.com/api0cradle/cdd2d0d0ec9abb686f0e89306e277b8f
@@ -10,19 +10,18 @@ tags:
     - attack.t1112
     - attack.defense_evasion
 author: Eli Salem, Sander Wiebing, oscd.community
-date: 2020/10/08
+date: 2020/10/12
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
         Image|endswith: '\regini.exe'
-    filter:
-        CommandLine|re: ':[^ \\]' # to avoid intersection with ADS rule
-    condition: selection and not filter
+        CommandLine|re: ':[^ \\]'
+    condition: selection
 fieds:
     - ParentImage
     - CommandLine
 falsepositives:
-    - Legitimate modification of keys
-level: low
+    - Unknown
+level: high
