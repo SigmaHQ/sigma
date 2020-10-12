@@ -15,36 +15,40 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_1:
+    selection1:
         Image|endswith: '\powershell.exe'
-    selection_2:
         CommandLine|all:
             - '*char*'
             - '*join*'
-    selection_3:
+    selection2:
+        Image|endswith: '\powershell.exe'
         CommandLine|contains:
             - 'ToInt'
             - 'ToDecimal'
             - 'ToByte'
             - 'ToSingle'
             - 'ToSByte'
-    selection_4:
+    selection3:
+        Image|endswith: '\powershell.exe'
         CommandLine|contains:
             - 'ToChar'
             - 'ToString'
             - 'String'
-    selection_5:
+    selection4:
+        Image|endswith: '\powershell.exe'
         CommandLine|all:
             - '*split*'
             - '*join*'
-    selection_6:
+    selection5:
+        Image|endswith: '\powershell.exe'
         CommandLine|all:
             - '*ForEach*'
             - '*Xor*'
-    selection_7:
+    selection6:
+        Image|endswith: '\powershell.exe'
         CommandLine|contains:
             - 'cOnvErTTO-SECUreStRIng'
-    condition: selection_1 and (selection_2 or (selection_3 and selection_4) or selection_5 or selection_6 or selection_7)
+    condition: (selection2 and selection3) or selection1 or selection4 or selection5 or selection6
 falsepositives:
     - Unlikely
 level: high
