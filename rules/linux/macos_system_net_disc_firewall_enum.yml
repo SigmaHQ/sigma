@@ -7,18 +7,14 @@ date: 2020/10/06
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1016/T1016.md
 logsource:
-    category: process_creation
-    product: unix
+    product: macos
 detection:
     selection:
         CommandLine|contains:
-            # Linux Only
-            - 'arp -a'
-            - 'ip'
-            - 'ss'
-            # macOS and Linux
             - 'netstat'
             - 'ifconfig'
+            - 'defaults read /Library/Preferences/com.apple.alf'
+            - 'socketfilterfw'
     condition: selection
 falsepositives:
     - Legitimate administration activities
