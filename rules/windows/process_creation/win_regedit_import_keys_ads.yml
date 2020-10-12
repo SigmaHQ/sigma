@@ -1,7 +1,7 @@
-title: Imports Registry Key From a File
-id: 73bba97f-a82d-42ce-b315-9182e76c57b1
+title: Imports Registry Key From an ADS
+id: 0b80ade5-6997-4b1d-99a1-71701778ea61
 status: experimental
-description: Detects the import of the specified file to the registry with regedit.exe.
+description: Detects the import of a alternate datastream to the registry with regedit.exe.
 references:
     - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OSBinaries/Regedit.yml
     - https://gist.github.com/api0cradle/cdd2d0d0ec9abb686f0e89306e277b8f
@@ -9,7 +9,7 @@ tags:
     - attack.t1112
     - attack.defense_evasion
 author: Oddvar Moe, Sander Wiebing, oscd.community
-date: 2020/10/07
+date: 2020/10/12
 logsource:
     category: process_creation
     product: windows
@@ -19,17 +19,17 @@ detection:
         CommandLine|contains:
             - ' /i '
             - '.reg'
+    selection_2:
+        CommandLine|re: ':[^ \\]'
     filter:
         CommandLine|contains:
             - ' /e '
             - ' /a '
             - ' /c '
-    filter_2:
-        CommandLine|re: ':[^ \\]' # to avoid intersection with ADS rule
-    condition: selection and not filter and not filter_2
+    condition: selection and selection_2 and not filter
 fieds:
     - ParentImage
     - CommandLine
 falsepositives:
     - Legitimate import of keys
-level: medium
+level: high
