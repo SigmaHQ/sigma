@@ -1,21 +1,23 @@
-title: Silenttrinity Stager Communication To C2
-id: c4f2d4b1-ca0f-42e4-9b7b-a69790524fab
+title: Silenttrinity Stager Msbuild Activity
 description: Detects a possible remote connections to Silenttrinity c2
 references:
     - https://www.blackhillsinfosec.com/my-first-joyride-with-silenttrinity/
 tags:
     - T1127.001
+    - attack.defense_evasion
 status: experimental
-author: Kiran kumar s
-date: 11/10/2020
+author: Kiran kumar s, oscd.community
+date: 2020/10/11
 logsource:
+    category: sysmon
     product: windows
-    service: sysmon
 detection:
     selection:
         EventID: 3
-        ParentImage: '*\msbuild.exe'
+        ParentImage|endswith: '*\msbuild.exe'
     condition: selection
+fields: fields:
+    - ParentImage
 falsepositives:
     - unknown
 level: high
