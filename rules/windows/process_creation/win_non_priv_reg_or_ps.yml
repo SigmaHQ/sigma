@@ -14,27 +14,28 @@ logsource:
     product: windows
 detection:
     integrity_level:
-        IntegrityLevel: Medium
+        IntegrityLevel: 'Medium'
     reg:
         CommandLine|contains|all:
-            - reg
-            - add
-    powershell:
-        CommandLine|contains: powershell
+            - 'reg'
+            - 'add'
+    powershell_1:
+        CommandLine|contains: 'powershell'
+    powershell_2:
         CommandLine|contains:
-            - set-itemproperty
-            - " sp "
-            - new-itemproperty
+            - 'set-itemproperty'
+            - ' sp '
+            - 'new-itemproperty'
     registry_folder:
         CommandLine|contains|all: 
-            - ControlSet
-            - Services
+            - 'ControlSet'
+            - 'Services'
     registry_key:
         CommandLine|contains:
-            - ImagePath
-            - FailureCommand
-            - ServiceDLL
-    condition: integrity_level and (reg or powershell) and registry_folder and registry_key
+            - 'ImagePath'
+            - 'FailureCommand'
+            - 'ServiceDLL'
+    condition: integrity_level and (reg or powershell_1 and powershell_2) and registry_folder and registry_key
 fields:
     - EventID
     - IntegrityLevel
