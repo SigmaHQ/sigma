@@ -1,0 +1,25 @@
+title: Application Whitelisting Bypass via PresentationHost.exe
+id: d149a338-ae47-408e-a8ff-9064220c0b34
+description: Detects defence evasion attempt via PresentationHost.exe to run malicious .xbap file
+status: experimental
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OSBinaries/Presentationhost.yml
+    - https://medium.com/tsscyber/applocker-bypass-presentationhost-exe-8c87b2354cd4
+    - https://lolbas-project.github.io/lolbas/Binaries/Presentationhost/
+author: Kirill Kiryanov, oscd.community
+date: 2020/10/08
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+    - attack.execution      
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\presentationhost.exe'
+        CommandLine|contains: '.xbap'
+    condition: selection
+level: medium
+falsepositives:
+    - Unknown
