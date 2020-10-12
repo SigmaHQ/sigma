@@ -16,21 +16,36 @@ logsource:
     product: windows
 detection:
     selection1:
-        Image|endswith: '\powershell.exe'
+        Image|endswith:
+            - '\powershell.exe'
     selection2:
+        CommandLine|contains|all:
+            - 'char'
+            - 'joint'
+    selection3:
         CommandLine|contains:
             - 'ToInt'
             - 'ToDecimal'
             - 'ToByte'
-            - 'ToByte'
             - 'ToSingle'
             - 'ToSByte'
-    selection3:
+    selection4:
         CommandLine|contains:
             - 'ToChar'
             - 'ToString'
             - 'String'
-    condition: selection1 and (selection2 and selection3)
+    selection5:
+        CommandLine|contains|all:
+            - 'split'
+            - 'join'
+    selection6:
+        CommandLine|contains|all:
+            - 'ForEach'
+            - 'Xor'
+    selection7:
+        CommandLine|contains:
+            - 'cOnvErTTO-SECUreStRIng'
+    condition: selection1 and (selection2 or (selection3 and selection4) or selection5 or selection6 or selection7)
 falsepositives:
     - Unlikely
 level: high
