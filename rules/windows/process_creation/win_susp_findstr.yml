@@ -1,0 +1,32 @@
+title: Abusing Findstr for Defense Evasion 
+id: bf6c39fc-e203-45b9-9538-05397c1b4f3f
+description: Attackers can use findstr to hide their artifacts or search specific strings and evade defense mechanism
+author: 'Furkan CALISKAN, @caliskanfurkan_, @oscd_initiative'
+status: experimental
+date: 2020/10/05
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OSBinaries/Findstr.yml
+    - https://oddvar.moe/2018/04/11/putting-data-in-alternate-data-streams-and-how-to-execute-it-part-2/
+    - https://gist.github.com/api0cradle/cdd2d0d0ec9abb686f0e89306e277b8f
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selectionFindstr:
+        CommandLine|contains:
+            - findstr 
+    selection_V_L:
+        CommandLine|contains|all:
+            - /V
+            - /L
+    selection_S_I:
+        CommandLine|contains|all:
+            - /S
+            - /I
+    condition: selectionFindstr and (selection_V_L or selection_S_I) 
+falsepositives:
+    - Administrative findstr usage
+level: medium
