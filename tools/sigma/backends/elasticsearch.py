@@ -1228,7 +1228,7 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
                     "reference": tactic.get("url", ""),
                     "name": tactic.get("tactic", "")
                 },
-                "framework": "MITRE ATT&CK"
+                "framework": "MITRE ATT&CK®"
             }
             temp_techniques = list()
             for tech in techniques_list:

@@ -1,0 +1,34 @@
+title: Disabling Security Tools
+id: e3a8a052-111f-4606-9aee-f28ebeb76776
+status: experimental
+description: Detects disabling security tools
+author: Ömer Günal
+date: 2020/06/17
+references:
+    - https://attack.mitre.org/techniques/T1089/
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1089/T1089.md
+logsource:
+    product: linux
+detection:
+    keywords:
+        - Command|contains:
+          - 'service iptables stop'
+          - 'chkconfig off iptables'
+          - 'service ip6tables stop'
+          - 'chkconfig off ip6tables'
+        - CarbonBlack|contains:
+          - 'service cbdaemon stop'
+          - 'chkconfig off cbdaemon'
+          - 'systemctl stop cbdaemon'
+          - 'systemctl disable cbdaemon'
+        - SELinux:
+          - 'setenforce 0'
+        - Crowdstrike|contains:
+          - 'systemctl stop falcon-sensor.service'
+          - 'systemctl disable falcon-sensor.service'
+    condition: keywords
+falsepositives:
+    - Legitimate administration activities
+level: medium
+tags:
+    - attack.defense_evasion
