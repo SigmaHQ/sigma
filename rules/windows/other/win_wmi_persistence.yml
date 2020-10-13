@@ -24,7 +24,7 @@ logsource:
     service: wmi #native windows detection
     definition: 'WMI Namespaces Auditing and SACL should be configured, EventID 5861 and 5859 detection requires Windows 10, 2012 and higher'
 detection:
-    wmi_activity_5861:
+    wmi_filter_to_consumer_binding:
         EventID: 5861
     keywords:
         Message:
@@ -32,8 +32,14 @@ detection:
             - '*CommandLineEventConsumer*'
             - '*CommandLineTemplate*'
         # - 'Binding EventFilter'  # too many false positive with HP Health Driver
-    wmi_activity_5859:
+    wmi_filter_registration:
         EventID: 5859
+    condition: (wmi_filter_to_consumer_binding and 1 of keywords) OR (wmi_filter_registration)
+---
+logsource:
+    product: windows
+    service: security
+detection:
     network_logon:
         EventID: 4624
         LogonType: 3
@@ -43,20 +49,4 @@ detection:
         EventID: 4662
         ObjectType: 'WMI Namespace'
         ObjectName: '*subscription*'
-    condition: (wmi_activity_5861 and 1 of keywords) OR (wmi_activity_5859) OR (network_logon and privileges_assigned and wmi_subscription)
----
-logsource:
-    product: windows
-    service: sysmon #sysmon detection
-detection: 
-    filter_creation: 
-        # Sysmon WMI Filter Creation
-        EventID: 19
-    consumer_creation:
-        # Sysmon WMI Consumer Creation 
-        EventID: 20
-    consumer_binding:
-        # Sysmon WMI Consumer Binding
-        EventID: 21
-    timeframe: 5m
-    condition: all of them
+    condition: network_logon and privileges_assigned and wmi_subscription
