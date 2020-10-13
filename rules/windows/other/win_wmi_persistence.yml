@@ -26,15 +26,14 @@ logsource:
 detection:
     wmi_filter_to_consumer_binding:
         EventID: 5861
-    keywords:
-        Message:
-            - '*ActiveScriptEventConsumer*'
-            - '*CommandLineEventConsumer*'
-            - '*CommandLineTemplate*'
+        Message|contains:
+            - 'ActiveScriptEventConsumer'
+            - 'CommandLineEventConsumer'
+            - 'CommandLineTemplate'
         # - 'Binding EventFilter'  # too many false positive with HP Health Driver
     wmi_filter_registration:
         EventID: 5859
-    condition: (wmi_filter_to_consumer_binding and 1 of keywords) OR (wmi_filter_registration)
+    condition: (wmi_filter_to_consumer_binding) OR (wmi_filter_registration)
 ---
 logsource:
     product: windows
@@ -48,5 +47,5 @@ detection:
     wmi_subscription:
         EventID: 4662
         ObjectType: 'WMI Namespace'
-        ObjectName: '*subscription*'
+        ObjectName|contains: 'subscription'
     condition: network_logon and privileges_assigned and wmi_subscription
