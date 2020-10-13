@@ -1,4 +1,4 @@
-title: System Network Discovery - Firewall Enumeration
+title: System Network Discovery - Linux
 id: 71da9e5a-fb1e-46a8-abc1-28c80173af4c
 status: experimental
 description: Detects enumeration of firewall configuration
@@ -11,14 +11,14 @@ logsource:
     product: unix
 detection:
     selection:
-        CommandLine|contains:
-            # Linux Only
-            - 'arp -a'
-            - 'ip'
-            - 'ss'
-            # macOS and Linux
-            - 'netstat'
-            - 'ifconfig'
+        ProcessName:
+            - '/usr/bin/firewall-cmd'
+            - '/usr/sbin/ufw'
+            - '/usr/sbin/iptables'
+            - '/usr/bin/netstat'
+            - '/usr/bin/ss'
+            - '/usr/sbin/ip'
+            - '/usr/sbin/ifconfig'
     condition: selection
 falsepositives:
     - Legitimate administration activities
