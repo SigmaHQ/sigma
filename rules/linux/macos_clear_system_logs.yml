@@ -10,13 +10,15 @@ logsource:
     product: macos
     category: process_creation
 detection:
-    selection:
-      - ProcessName: 'rm' 
-        CommandLine|contains:
-            - '-rf /var/log'
-            - '-rf /private/var/log'
-            - '-rf /Users/*/Library/Logs/'
-    condition: selection
+    selection1:
+      - ProcessName|endswith: '/rm'
+    selection2:
+        CommandLine|contains: '/var/log'
+    selection3:
+        Commandline|contains|all:
+            - '/Users/'
+            - '/Library/Logs/'
+    condition: selection1 and (selection2 or selection3)
 falsepositives:
     - Legitimate administration activities
 level: low
