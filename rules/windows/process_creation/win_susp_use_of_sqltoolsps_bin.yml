@@ -1,8 +1,7 @@
 title: SQL Client Tools PowerShell Session Detection
 id: a746c9b8-a2fb-4ee5-a428-92bee9e99060 
 status: experimental
-description: PowerShell execution through builtin SQL Server Management Studio "SQLToolsPS.exe" binary. Microsoft PS logging like
-  ScriptBlock logging function of PowerShell is not an option here, PS session caused by the binary won't be recorded/logged.
+description: This rule detects execution of a PowerShell code through the sqltoolsps.exe utility, which is included in the standard set of utilities supplied with the Microsoft SQL Server Management studio. Script blocks are not logged in this case, so this utility helps to bypass protection mechanisms based on the analysis of these logs. 
 references:
   - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OtherMSBinaries/Sqltoolsps.yml 
   - https://twitter.com/pabraeken/status/993298228840992768 
@@ -11,7 +10,7 @@ tags:
     - attack.t1059.001
     - attack.defense_evasion 
     - attack.t1127
-author: Agro (@agro_sev)
+author: Agro (@agro_sev) oscd.community
 date: 2020/10/13
 logsource:
     category: process_creation
@@ -27,6 +26,6 @@ detection:
         ParentImage|endswith: '\smss.exe'
     condition: selection1 or selection2 or selection3 and not reduction
 falsepositives:
-    - Direct PS command execution through SQLToolsPS.exe is uncommon, childprocess sqltoolsps.exe spawned by  smss.exe is a legitimate action.
+    - Direct PS command execution through SQLToolsPS.exe is uncommon, childprocess sqltoolsps.exe spawned by smss.exe is a legitimate action.
 level: medium 
 
