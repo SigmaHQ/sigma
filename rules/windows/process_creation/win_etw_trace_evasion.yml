@@ -5,7 +5,8 @@ status: experimental
 references:
     - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/wevtutil
     - https://abuse.io/lockergoga.txt
-author: '@neu5ron, Florian Roth'
+    - https://medium.com/palantir/tampering-with-windows-event-tracing-background-offense-and-defense-4be7ac62ac63
+author: '@neu5ron, Florian Roth, Jonhnathan Ribeiro, oscd.community'
 date: 2019/03/22
 tags:
     - attack.defense_evasion
@@ -33,6 +34,24 @@ detection:
         CommandLine|contains|all: 
           - 'set-log'
           - '/e:false'
+    selection_disable_3: #Autologger provider removal
+        Commandline|contains|all:
+          - 'Remove-EtwTraceProvider'
+          - 'EventLog-Microsoft-Windows-WMI-Activity-Trace'
+          - '{1418ef04-b0b4-4623-bf7e-d74ab47bbdaa}'
+    selection_disable_4: #Provider “Enable” property modification
+        Commandline|contains|all:
+          - 'Set-EtwTraceProvider'
+          - '{1418ef04-b0b4-4623-bf7e-d74ab47bbdaa}'
+          - 'EventLog-Microsoft-Windows-WMI-Activity-Trace'
+          - '0x11'
+    selection_disable_4: #ETW provider removal from a trace session
+        Commandline|contains|all:
+          - "logman" 
+          - "update trace" 
+          - "Trace --p"
+          - "-ets"
+    selection_disale
     condition: selection_clear_1 or selection_clear_2 or selection_disable_1 or selection_disable_2
 falsepositives:
     - Unknown
