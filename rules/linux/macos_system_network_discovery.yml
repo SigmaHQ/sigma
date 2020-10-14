@@ -1,7 +1,7 @@
 title: System Network Discovery - macOS
-id: 71da9e5a-fb1e-46a8-abc1-28c80173af4c
+id: 58800443-f9fc-4d55-ae0c-98a3966dfb97
 status: experimental
-description: Detects enumeration of firewall configuration
+description: Detects enumeration of local network configuration
 author: remotephone, oscd.community
 date: 2020/10/06
 references:
@@ -20,7 +20,9 @@ detection:
             - '/usr/sbin/arp'
     selection2:
         ProcessName: '/usr/bin/defaults'
-        Commandline|contains: 'read /Library/Preferences/com.apple.alf'
+        Commandline|contains|all: 
+            - 'read'
+            - '/Library/Preferences/com.apple.alf'
     condition: selection1 or selection2
 falsepositives:
     - Legitimate administration activities
