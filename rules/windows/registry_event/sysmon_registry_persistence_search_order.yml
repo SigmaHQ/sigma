@@ -18,12 +18,12 @@ detection:
     selection: # Detect new COM servers in the user hive
         TargetObject: 'HKU\\*_Classes\CLSID\\*\InProcServer32\(Default)'
     filter:
-        Details: # Exclude privileged directories and observed FPs
-            - '%%systemroot%%\system32\\*'
-            - '%%systemroot%%\SysWow64\\*'
-            - '*\AppData\Local\Microsoft\OneDrive\\*\FileCoAuthLib64.dll'
-            - '*\AppData\Local\Microsoft\OneDrive\\*\FileSyncShell64.dll'
-            - '*\AppData\Local\Microsoft\TeamsMeetingAddin\\*\Microsoft.Teams.AddinLoader.dll'
+        Details|contains: # Exclude privileged directories and observed FPs
+            - '%%systemroot%%\system32\\'
+            - '%%systemroot%%\SysWow64\\'
+            - '\AppData\Local\Microsoft\OneDrive\\*\FileCoAuthLib64.dll'
+            - '\AppData\Local\Microsoft\OneDrive\\*\FileSyncShell64.dll'
+            - '\AppData\Local\Microsoft\TeamsMeetingAddin\\*\Microsoft.Teams.AddinLoader.dll'
     condition: selection and not filter
 falsepositives:
     - Some installed utilities (i.e. OneDrive) may serve new COM objects at user-level
