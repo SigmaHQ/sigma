@@ -52,13 +52,13 @@ logsource:
 detection:
     selection_reg1:
         EventID: 13 
-        TargetObject: 
-            - '*SOFTWARE\Microsoft\Windows\CurrentVersion\UMe'
-            - '*SOFTWARE\Microsoft\Windows\CurrentVersion\UT'
+        TargetObject|endswith: 
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\UMe'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\UT'
         EventType: 'SetValue'
     selection_reg2:
         EventID: 13 
-        TargetObject: '*\Control\SecurityProviders\WDigest\UseLogonCredential'
+        TargetObject|endswith: '\Control\SecurityProviders\WDigest\UseLogonCredential'
         EventType: 'SetValue'
         Details: 'DWORD (0x00000001)'
 ---
@@ -67,13 +67,14 @@ logsource:
     product: windows
 detection:
     selection_process1:
-        CommandLine: 
-            - '*\Service.exe i'
-            - '*\Service.exe u'
-            - '*\microsoft\Taskbar\autoit3.exe'
-            - 'C:\wsc.exe*'
+        CommandLine|endswith: 
+            - '\Service.exe i'
+            - '\Service.exe u'
+            - '\microsoft\Taskbar\autoit3.exe'
+        CommandLine|startswith:
+            - 'C:\wsc.exe'
     selection_process2:
-        Image: '*\Windows\Temp\DB\\*.exe'
+        Image|startswith: '\Windows\Temp\DB\\*.exe'
     selection_process3:
-        CommandLine: '*\nslookup.exe -q=TXT*'
-        ParentImage: '*\Autoit*'
+        CommandLine|contains: '\nslookup.exe -q=TXT'
+        ParentImage|contains: '\Autoit'
