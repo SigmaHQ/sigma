@@ -1,0 +1,29 @@
+title: Suspicious PowerShell Cmdline
+id: b6b49cd1-34d6-4ead-b1bf-196e4edba9a5
+description: Detects the PowerShell command lines with special characters "({, [, ‘, ` + …):"
+status: experimental
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=64
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001
+author: Teymur Kheirkhabarov (idea), Vasiliy Burov (rule), oscd.community
+date: 2020/10/15
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Image|endswith: '\powershell.exe'
+        CommandLine|re:
+            - '.*`.*`.*`.*`.*`.*'
+            - '.*^.*^.*^.*^.*^.*'
+            - '.*{.*{.*{.*{.*{.*'
+            - '.*\{.*\{.*\{.*\{.*\{.*\{.*\{.*\{.*\{.*\{.*'
+            - '.*\+.*\+.*\+.*\+.*\+.*\+.*\+.*\+.*\+.*\+.*\+.*\+.*\+.*\+.*'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
