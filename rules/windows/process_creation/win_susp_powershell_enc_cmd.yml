@@ -16,27 +16,27 @@ logsource:
     product: windows
 detection:
     selection:
-        CommandLine:
-            - '* -e JAB*'
-            - '* -e  JAB*'
-            - '* -e   JAB*'
-            - '* -e    JAB*'
-            - '* -e     JAB*'
-            - '* -e      JAB*'
-            - '* -en JAB*'
-            - '* -enc JAB*'
-            - '* -enc* JAB*'
-            - '* -w hidden -e* JAB*'
-            - '* BA^J e-'
-            - '* -e SUVYI*'
-            - '* -e aWV4I*'
-            - '* -e SQBFAFgA*'
-            - '* -e aQBlAHgA*'
-            - '* -enc SUVYI*'
-            - '* -enc aWV4I*'
-            - '* -enc SQBFAFgA*'
-            - '* -enc aQBlAHgA*'
+        CommandLine|contains:
+            - ' -e'
+            - ' -en'
+            - ' -enc'
+            - ' -w hidden -e'
+    selection2:
+            - 'JAB'
+    selection3:
+            - '-e'
+            - '-enc'
+    selection4:
+            - ' BA^J'
+            - 'SUVYI'
+            - ' aWV4I'
+            - ' SQBFAFgA'
+            - ' aQBlAHgA'
+            - ' SUVYI'
+            - ' aWV4I'
+            - ' SQBFAFgA'
+            - ' aQBlAHgA'
     falsepositive1:
-        CommandLine: '* -ExecutionPolicy remotesigned *'
-    condition: selection and not falsepositive1
+        CommandLine|contains: ' -ExecutionPolicy remotesigned '
+    condition: (selection and selection2) or (selection3 and selection4) and not falsepositive1
 level: high
