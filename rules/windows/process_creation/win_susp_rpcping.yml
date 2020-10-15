@@ -3,6 +3,7 @@ id: 93671f99-04eb-4ab4-a161-70d446a84003
 description: Detects using Rpcping.exe to send a RPC test connection to the target server (-s) and force the NTLM hash to be sent in the process.
 status: experimental
 references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Rpcping/
     - https://twitter.com/vysecurity/status/974806438316072960
     - https://twitter.com/vysecurity/status/873181705024266241
     - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/hh875578(v=ws.11)
@@ -22,11 +23,18 @@ detection:
             - '-s'
             - '/s'
     ntlm_auth:
-        CommandLine|contains: 
-            - '-u NTLM'
-            - '/u NTLM'
-            - '-t ncacn_np'
-            - '/t ncacn_np'
+        - CommandLine|contains|all: 
+            - '-u'
+            - 'NTLM'
+        - CommandLine|contains|all: 
+            - '/u'
+            - 'NTLM'
+        - CommandLine|contains|all: 
+            - '-t'
+            - 'ncacn_np'
+        - CommandLine|contains|all: 
+            - '/t'
+            - 'ncacn_np'
     condition: use_rpcping and remote_server and ntlm_auth
 level: medium
 falsepositives:
