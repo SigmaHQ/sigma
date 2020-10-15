@@ -32,17 +32,18 @@ detection:
         #   parent is services.exe
         #   example:
         #       C:\Windows\system32\cmd.exe /Q /c echo tasklist ^> \\127.0.0.1\C$\__output 2^>^&1 > C:\Windows\TEMP\execute.bat & C:\Windows\system32\cmd.exe /Q /c C:\Windows\TEMP\execute.bat & del C:\Windows\TEMP\execute.bat
-        ParentImage:
-            - '*\wmiprvse.exe'  # wmiexec
-            - '*\mmc.exe'  # dcomexec MMC
-            - '*\explorer.exe'  # dcomexec ShellBrowserWindow
-            - '*\services.exe'  # smbexec
-        CommandLine:
-            - '*cmd.exe* /Q /c * \\\\127.0.0.1\\*&1*'
+        ParentImage|endswith:
+            - '\wmiprvse.exe'  # wmiexec
+            - '\mmc.exe'  # dcomexec MMC
+            - '\explorer.exe'  # dcomexec ShellBrowserWindow
+            - '\services.exe'  # smbexec
+        CommandLine|contains:
+            - 'cmd.exe* /Q /c * \\\\127.0.0.1\\*&1'
     selection_atexec:
-        ParentCommandLine:
-            - '*svchost.exe -k netsvcs' # atexec on win10 (parent is "C:\Windows\system32\svchost.exe -k netsvcs")
-            - 'taskeng.exe*' # atexec on win7 (parent is "taskeng.exe {AFA79333-694C-4BEE-910E-E57D9A3518F6} S-1-5-18:NT AUTHORITY\System:Service:")
+        ParentCommandLine|endswith:
+            - 'svchost.exe -k netsvcs' # atexec on win10 (parent is "C:\Windows\system32\svchost.exe -k netsvcs")
+        ParentCommandLine|startswith:
+            - 'taskeng.exe' # atexec on win7 (parent is "taskeng.exe {AFA79333-694C-4BEE-910E-E57D9A3518F6} S-1-5-18:NT AUTHORITY\System:Service:")
         # cmd.exe /C tasklist /m > C:\Windows\Temp\bAJrYQtL.tmp 2>&1
         CommandLine:
             - 'cmd.exe /C *Windows\\Temp\\*&1'
