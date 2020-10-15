@@ -5,9 +5,9 @@ description: Detects using register-cimprovider.exe to execute arbitrary dll fil
 references:
     - https://twitter.com/PhilipTsukerman/status/992021361106268161
     - https://github.com/api0cradle/LOLBAS/blob/master/OSBinaries/Register-cimprovider.md
-#tags:
-  #  - attack.defense_evasion
-   # - attack.t1574     
+tags:
+    - attack.defense_evasion
+    - attack.t1574     
 author: Ivan Dyachkov, Yulia Fomina, oscd.community
 date: 2020/10/07  
 logsource:           
@@ -16,8 +16,9 @@ logsource:
     definition: 'Requirements: Sysmon ProcessCreation logging must be activated and Windows audit msut Include command line in process creation events'
 detection:
     selection:
-            Image|endswith:
-             - 'cimprovider.exe'
+            Image:
+              - 'c:\windows\system32\register-cimprovider.exe'
+              - 'c:\windows\syswow64\register-cimprovider.exe'
             CommandLine|contains|all:
                 - 'register-cimprovider'
                 - '-path'
