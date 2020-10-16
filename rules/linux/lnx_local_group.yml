@@ -5,20 +5,18 @@ description: Detects group enumeration
 author: Ömer Günal, oscd.community
 date: 2020/10/06
 references:
-    - https://attack.mitre.org/techniques/T1069/001/
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1069.001/T1069.001.md
 logsource:
     product: linux
 detection:
-    keywords:
-        - keys|contains:
+    selection:
+        - CommandLine|contains:
           - 'groups'
           - '/etc/passwd'
           - '/etc/group'
           - 'getent group'
-        - command:
           - 'id'
-          - 'id *'
-    condition: keywords
+    condition: selection
 falsepositives:
     - Legitimate administration activities
 level: low
