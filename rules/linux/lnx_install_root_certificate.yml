@@ -1,8 +1,6 @@
 title: Install Root Certificate
 id: 78a80655-a51e-4669-bc6b-e9d206a462ee
 description: Detects installed new certificate
-references:
-    - https://attack.mitre.org/techniques/T1553/004/
 author: Ömer Günal, oscd.community
 date: 2020/10/05
 tags:
@@ -12,11 +10,16 @@ level: low
 logsource:
     product: linux
 detection:
-    keywords:
-        - keys|contains|all:
+    selection:
+        - CommandLine|contains|all:
           - 'mv '
           - '/usr/local/share/ca-certificates'
           - 'update-ca-certificates'
-    condition: keywords
+    selection2:
+        - CommandLine|contains|all:
+          - 'cp '
+          - 'rootCA.crt'
+          - 'update-ca-trust'
+    condition: selection or selection2
 falsepositives:
     - Legitimate administration activities
