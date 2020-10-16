@@ -8,15 +8,12 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1053.001/T1053.001.md
 logsource:
     product: linux
+    category: process_creation
 detection:
     selection:
-        CommandLine|contains:
-          - ' at '
-          - ' atd '
-          - 'which atd'
-          - 'which at'
-          - 'systemctl status atd'
-          - 'service atd status '
+        ProcessName|endswith:
+          - '/at'
+          - '/atd'
     condition: selection
 falsepositives:
     - Legitimate administration activities
