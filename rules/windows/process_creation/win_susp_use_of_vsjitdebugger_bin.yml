@@ -8,7 +8,7 @@ references:
   - https://docs.microsoft.com/en-us/visualstudio/debugger/debug-using-the-just-in-time-debugger?view=vs-2019
 tags:
     - attack.t1218
-author: 'Agro (@agro_sev)' oscd.community
+author: 'Agro (@agro_sev) oscd.community'
 date: 2020/10/14
 logsource:
     category: process_creation
@@ -16,7 +16,11 @@ logsource:
 detection:
     selection:        
         ParentImage|endswith: '\vsjitdebugger.exe'
-    condition: selection
+    reduction1:
+        ChildImage|endswith: '\vsimmersiveactivatehelper*.exe'
+    reduction2:
+        ChildImage|endswith: '\devenv.exe'
+    condition: selection and not (reduction1 or reduction2)
 falsepositives:
     - the process spawned by vsjitdebugger.exe is uncommon. 
 level: medium 
