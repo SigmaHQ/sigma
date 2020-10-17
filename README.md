@@ -315,6 +315,10 @@ These tools are not part of the main toolchain and maintained separately by thei
 * [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 * [TimeSketch](https://github.com/google/timesketch/commit/0c6c4b65a6c0f2051d074e87bbb2da2424fa6c35)
 
+Sigma is available on some Linux distribution repositories:
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/sigma.svg)](https://repology.org/project/sigma/versions)
+
 # Contribution
 
 If you want to contribute, you are more then welcome. There are numerous ways to help this project.
