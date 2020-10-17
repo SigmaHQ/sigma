@@ -10,7 +10,7 @@ logsource:
     category: process_creation
     product: unix
 detection:
-    selection:
+    selection1:
         ProcessName|endswith:
             - '/firewall-cmd'
             - '/ufw'
@@ -19,7 +19,11 @@ detection:
             - '/ss'
             - '/ip'
             - '/ifconfig'
-    condition: selection
+            - '/systemd-resolve'
+            - '/route'
+    selection2:
+        CommandLine|contains: '/etc/resolv.conf'
+    condition: selection1 or selection2
 falsepositives:
     - Legitimate administration activities
 level: low
