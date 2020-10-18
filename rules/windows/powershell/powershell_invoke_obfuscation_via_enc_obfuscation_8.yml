@@ -1,0 +1,27 @@
+title: Invoke-Obfuscation ENCODING OBFUSCATION\8
+id: ab30162d-6215-4c80-a6d5-0c29281b08c7
+description: Detects Obfuscated Powershell via ENCODING OBFUSCATION\8
+status: experimental
+author: Timur Zinniatullin, oscd.community
+date: 2020/10/18
+references:
+    - https://github.com/Neo23x0/sigma/issues/1009 #(Task 18)
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    service: powershell
+detection:
+    selection_1:
+        EventID: 4104
+        ScriptBlockText|re: '(?i)\'\s+\'\s?\|(?:foreach|\s?%).*(?:\[string\]::join|remove\.tostring).*trim.*split.*(?:char|substring\.tostring).*\}'
+    selection_2:
+        EventID: 4103
+        Payload|re: '(?i)\'\s+\'\s?\|(?:foreach|\s?%).*(?:\[string\]::join|remove\.tostring).*trim.*split.*(?:char|substring\.tostring).*\}'
+    condition: selection_1 or selection_2
+falsepositives:
+    - Unknown
+level: medium
