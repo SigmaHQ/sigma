@@ -1,0 +1,27 @@
+title: Invoke-Obfuscation WMIC LAUNCHER
+id: 9e5d6fe6-e0c4-42a7-881d-11c6f2ee4957
+description: Detects Obfuscated Powershell via WMIC LAUNCHER
+status: experimental
+author: Timur Zinniatullin, oscd.community
+date: 2020/10/18
+references:
+    - https://github.com/Neo23x0/sigma/issues/1009 #(Task 22)
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    service: powershell
+detection:
+    selection_1:
+        EventID: 4104
+        ScriptBlockText|re: '(?i).*wmic(?:\.exe)?(?:\s+)?(?:"|')?process(?:"|')?.*call.*create.*powershell'
+    selection_2:
+        EventID: 4103
+        Payload|re: '(?i).*wmic(?:\.exe)?(?:\s+)?(?:"|')?process(?:"|')?.*call.*create.*powershell'
+    condition: selection_1 or selection_2
+falsepositives:
+    - Unknown
+level: medium
