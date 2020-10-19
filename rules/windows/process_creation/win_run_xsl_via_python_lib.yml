@@ -1,0 +1,30 @@
+title: XSL Script Processing via Pywin32
+id: cc264aa4-bc6e-4a80-89fe-ead41c2b8a93
+status: experimental
+description: Executes payload from Extensible Stylesheet Language (XSL) files using a test Jscript included in Python tool.
+author: Ilyas Ochkov, oscd.community
+date: 2020/10/18
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/LOLUtilz/OtherScripts/Testxlst.yml
+tags:
+    - attack.execution
+    - attack.t1059
+    - attack.defense_evasion
+    - attack.t1220
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: 
+            - '\cscript.exe'
+            - '\wscript.exe'
+        CommandLine|contains: 
+            - 'testxlst.js'
+        CommandLine|contains|all: 
+            - '.xml'
+            - '.xls'
+    condition: selection
+level: medium
+fields:
+    - CommandLine
