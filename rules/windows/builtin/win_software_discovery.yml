@@ -7,7 +7,6 @@ author: Nikita Nazarov, oscd.community
 date: 2020/10/16
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1518/T1518.md
-    - https://attack.mitre.org/techniques/T1518/
 tags:
     - attack.discovery
     - attack.t1518
@@ -25,7 +24,7 @@ detection:
         EventID: 4104
         ScriptBlockText|contains|all:    # Example: Get-ItemProperty HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | Format-Table -Autosize
           - 'get-itemProperty'
-          - '*\software\*'
+          - '\software\'
           - 'select-object'
           - 'format-table'
 ---
@@ -37,6 +36,6 @@ detection:
         Image|endswith: '\reg.exe'    # Example: reg query "HKEY_LOCAL_MACHINE\Software\Microsoft\Internet Explorer" /v svcVersion
         CommandLine|contains|all:
             - 'query'
-            - '*\software\*'
+            - '\software\'
             - '/v'
             - 'svcversion'
