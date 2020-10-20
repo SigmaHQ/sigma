@@ -18,6 +18,8 @@ import re
 import sigma
 from .base import SingleTextQueryBackend
 from .mixins import MultiRuleOutputMixin
+from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
+
 
 class SplunkBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Splunk Search Processing Language (SPL)."""
