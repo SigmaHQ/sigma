@@ -1,0 +1,34 @@
+title: Linux Network Service Scanning
+id: 3e102cd9-a70d-4a7a-9508-403963092f31
+status: experimental
+description: Detects enumeration of local or remote network services.
+author: Alejandro Ortuno, oscd.community
+date: 2020/10/21
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1046/T1046.md
+logsource:
+  category: process_creation
+  product: macos
+detection:
+  selection_1:
+    CommandLine|contains:
+      - '/dev/tcp/'
+  selection_2:
+    ProcessName|endswith:
+      - '/cat'
+  selection_3:
+    ProcessName|endswith:
+      - '/nmap'
+  selection_4:
+    ProcessName|endswith:
+      - '/telnet'
+  selection_5:
+    ProcessName|endswith:
+      - '/nc'
+  condition: 1 of them
+falsepositives:
+  - Legitimate administration activities
+level: medium
+tags:
+  - attack.discovery
+  - attack.t1046
