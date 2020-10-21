@@ -135,6 +135,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "User":  (self.decompose_user, ),
             }
         }
+        self.current_table = ""
 
     def generateANDNode(self, node):
         generated = [ self.generateNode(val) for val in node ]
