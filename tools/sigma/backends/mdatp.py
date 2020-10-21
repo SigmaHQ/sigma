@@ -66,8 +66,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
         "FileVersion",
         "Product",
         "Company",
-        "ParentProcessName",
-        "ParentCommandLine"
+        "IMPHASH",
     }
 
     def __init__(self, *args, **kwargs):
@@ -85,12 +84,17 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "DeviceName": (self.id_mapping, self.default_value_mapping),
                 "EventType": ("ActionType", self.default_value_mapping),
                 "Image": ("FolderPath", self.default_value_mapping),
+                "ImagePath": ("FolderPath", self.default_value_mapping),
                 "ImageLoaded": ("FolderPath", self.default_value_mapping),
                 "LogonType": (self.id_mapping, self.logontype_mapping),
                 "NewProcessName": ("FolderPath", self.default_value_mapping),
+                "ProcessName": ("FileName", self.default_value_mapping),
+                "ParentName": ("InitiatingProcessFileName", self.default_value_mapping),
+                "ParentProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
                 "ParentImage": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "SourceImage": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "TargetImage": ("FolderPath", self.default_value_mapping),
+                "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
                 "User": (self.decompose_user, ),
             },
             "DeviceEvents": {
@@ -106,6 +110,10 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "Details": ("RegistryValueData", self.default_value_mapping),
                 "EventType": ("ActionType", self.default_value_mapping),
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
+                "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
+                "CommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
+                "ParentName": ("InitiatingProcessParentFileName", self.default_value_mapping),
+                "ParentProcessName": ("InitiatingProcessParentFileName", self.default_value_mapping),
                 "User":  (self.decompose_user, ),
             },
             "DeviceFileEvents": {
@@ -113,6 +121,10 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "TargetFileName": ("FolderPath", self.default_value_mapping),
 
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
+                "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
+                "CommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
+                "ParentName": ("InitiatingProcessParentFileName", self.default_value_mapping),
+                "ParentProcessName": ("InitiatingProcessParentFileName", self.default_value_mapping),
                 "User":  (self.decompose_user, ),
             },
             "DeviceNetworkEvents": {
@@ -222,6 +234,15 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
         if (self.category, self.product, self.service) == ("process_creation", "windows", None):
             self.tables.append("DeviceProcessEvents")
             self.current_table = "DeviceProcessEvents"
+        elif (self.category, self.product, self.service) == ("registry_event", "windows", None):
+            self.tables.append("DeviceRegistryEvents")
+            self.current_table = "DeviceRegistryEvents"
+        elif (self.category, self.product, self.service) == ("file_event", "windows", None):
+            self.tables.append("DeviceFileEvents")
+            self.current_table = "DeviceFileEvents"
+        elif (self.category, self.product, self.service) == ("network_connection", "windows", None):
+            self.tables.append("DeviceNetworkEvents")
+            self.current_table = "DeviceNetworkEvents"
         elif (self.category, self.product, self.service) == (None, "windows", "powershell"):
             self.tables.append("DeviceEvents")
             self.current_table = "DeviceEvents"
