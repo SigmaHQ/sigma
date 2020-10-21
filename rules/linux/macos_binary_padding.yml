@@ -13,15 +13,17 @@ logsource:
     category: process_creation
 detection:
     selection1:
-        CommandLine|contains|all:
-             - 'truncate'
+        ProcessName|endswith:
+             - '/truncate'
+        CommandLine|contains:
              - '-s'
     selection2:
-        CommandLine|contains|all:
-             - 'dd'
+        ProcessName|endswith:
+             - '/dd'
+        CommandLine|contains:
              - 'if='
     filter:
-        keywords|contains: 'of='
+        CommandLine|contains: 'of='
     condition: selection1 or (selection2 and not filter)
 falsepositives:
     - 'Legitimate script work'
