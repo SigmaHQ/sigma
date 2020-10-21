@@ -10,7 +10,7 @@ from ..parser.modifiers.base import SigmaTypeModifier
 
 
 def convert_sigma_level_to_uberagent_risk_score(level):
-    """Converts the given sigma rule level to uberAgent ESA RiskScore property."""
+    """Converts the given Sigma rule level to uberAgent ESA RiskScore property."""
     levels = {
         "critical": 100,
         "high": 75,
@@ -25,7 +25,7 @@ def convert_sigma_level_to_uberagent_risk_score(level):
 
 
 def convert_sigma_name_to_uberagent_tag(name):
-    """Converts the given sigma rule name to uberAgent ESA Tag property."""
+    """Converts the given Sigma rule name to uberAgent ESA Tag property."""
     tag = name.lower().replace(" ", "-")
     tag = re.sub(r"-{2,}", "-", tag, 0, re.IGNORECASE)
     return tag
@@ -99,7 +99,7 @@ class ActivityMonitoringRule:
         self.risk_score = risk_score
 
     def set_sigma_level(self, level):
-        """Sets the sigma rule level."""
+        """Sets the Sigma rule level."""
         self.sigma_level = level
 
     def set_description(self, description):
@@ -215,36 +215,36 @@ class uberAgentBackend(SingleTextQueryBackend):
     # uberAgent field mapping
     #
     fieldMapping = {
-        'commandline': 'Process.CommandLine',
-        'image': 'Process.Path',
-        'originalfilename': 'Process.Name',
-        'imageloaded': 'Image.Name',
-        'imagepath': 'Image.Path',
-        'parentcommandline': 'Parent.CommandLine',
-        'parentprocessname': 'Parent.Name',
-        'parentimage': 'Parent.Path',
-        'path': 'Process.Path',
-        'processcommandline': 'Process.CommandLine',
-        'command': 'Process.CommandLine',
-        'processname': 'Process.Name',
-        'user': 'Process.User',
-        'username': 'Process.User'
+        "commandline": "Process.CommandLine",
+        "image": "Process.Path",
+        "originalfilename": "Process.Name",
+        "imageloaded": "Image.Name",
+        "imagepath": "Image.Path",
+        "parentcommandline": "Parent.CommandLine",
+        "parentprocessname": "Parent.Name",
+        "parentimage": "Parent.Path",
+        "path": "Process.Path",
+        "processcommandline": "Process.CommandLine",
+        "command": "Process.CommandLine",
+        "processname": "Process.Name",
+        "user": "Process.User",
+        "username": "Process.User"
     }
 
     # We ignore some fields that we don't support yet but we don't want them to
     # throw errors in the console since we are aware of this.
     ignoreFieldList = [
-        'description',
-        'product',
-        'logonid',
-        'integritylevel',
-        'currentdirectory',
-        'company',
-        'parentintegritylevel',
-        'sha1',
-        'eventid',
-        'parentuser',
-        'imphash'
+        "description",
+        "product",
+        "logonid",
+        "integritylevel",
+        "currentdirectory",
+        "company",
+        "parentintegritylevel",
+        "sha1",
+        "eventid",
+        "parentuser",
+        "imphash"
     ]
 
     rules = []
@@ -263,13 +263,13 @@ class uberAgentBackend(SingleTextQueryBackend):
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
         product, category, service, title, level, condition, description = get_parser_properties(sigmaparser)
-        if product not in ['windows']:
+        if product not in ["windows"]:
             return ""
 
         # Do not generate a rule if the given category is unsupported by now.
         if not is_sigma_category_supported(category):
             return ""
-        if category not in ['process_creation']:
+        if category not in ["process_creation"]:
             return ""
 
         try:
@@ -299,7 +299,7 @@ class uberAgentBackend(SingleTextQueryBackend):
                 try:
                     serialized_rule = str(rule)
                     if rule.sigma_level == level:
-                        file.write(serialized_rule + '\n')
+                        file.write(serialized_rule + "\n")
                         count = count + 1
                 except MalformedRuleException:
                     continue
