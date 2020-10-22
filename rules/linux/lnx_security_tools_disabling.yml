@@ -2,11 +2,11 @@ title: Disabling Security Tools
 id: e3a8a052-111f-4606-9aee-f28ebeb76776
 status: experimental
 description: Detects disabling security tools
-author: Ömer Günal
+author: Ömer Günal, Alejandro Ortuno
 date: 2020/06/17
 references:
-    - https://attack.mitre.org/techniques/T1089/
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1089/T1089.md
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1562.004/T1562.004.md
 logsource:
     product: linux
 detection:
@@ -16,6 +16,8 @@ detection:
           - 'chkconfig off iptables'
           - 'service ip6tables stop'
           - 'chkconfig off ip6tables'
+          - 'systemctl stop firewalld'
+          - 'systemctl disable firewalld'
         - CarbonBlack|contains:
           - 'service cbdaemon stop'
           - 'chkconfig off cbdaemon'
@@ -32,3 +34,5 @@ falsepositives:
 level: medium
 tags:
     - attack.defense_evasion
+    - attack.t1562.004
+    - attack.t1089
