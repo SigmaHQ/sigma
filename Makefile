@@ -8,7 +8,7 @@ clearcov:
 	rm -f .coverage
 
 finish:
-	$(COVERAGE) report --fail-under=90
+	$(COVERAGE) report --fail-under=80
 	rm -f $(TMPOUT)
 
 test-rules:
