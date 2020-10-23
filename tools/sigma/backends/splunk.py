@@ -18,8 +18,6 @@ import re
 import sigma
 from .base import SingleTextQueryBackend
 from .mixins import MultiRuleOutputMixin
-from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
-
 
 class SplunkBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Splunk Search Processing Language (SPL)."""
@@ -70,7 +68,7 @@ class SplunkBackend(SingleTextQueryBackend):
                     agg.aggfunc_notrans = 'dc'
             return " | eventstats %s(%s) as val by %s | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)
 
-        
+
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
         columns = list()
@@ -108,7 +106,7 @@ class SplunkBackend(SingleTextQueryBackend):
                 result += fields
 
             return result
-    
+
 class SplunkXMLBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
     """Converts Sigma rule into XML used for Splunk Dashboard Panels"""
     identifier = "splunkxml"
@@ -177,9 +175,6 @@ class SplunkXMLBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
 class CrowdStrikeBackend(SplunkBackend):
     """Converts Sigma rule into CrowdStrike Search Processing Language (SPL)."""
     identifier = "crowdstrike"
-    typedValueExpression = {
-        SigmaRegularExpressionModifier: 'regex field=%s "%s"'
-    }
 
     def generate(self, sigmaparser):
         lgs = sigmaparser.parsedyaml.get("logsource")
@@ -215,7 +210,4 @@ class CrowdStrikeBackend(SplunkBackend):
             raise NotImplementedError("Not supported logsources!")
 
     def generateMapItemTypedNode(self, fieldname, value):
-        if isinstance(value, SigmaRegularExpressionModifier):
-            return self.typedValueExpression.get(type(value)) % (fieldname, value)
-        else:
-            return super().generateMapItemTypedNode(fieldname=fieldname, value=value)
+        return super().generateMapItemTypedNode(fieldname=fieldname, value=value)
