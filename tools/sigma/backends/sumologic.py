@@ -318,7 +318,7 @@ class SumoLogicCSE(SumoLogicBackend):
         self.allowedFieldsList.extend(["metdata_product", "metdata_vendor"])
 
     def cleanValue(self, val, key=''):
-        if key == 'metadata_deviceEventId' or val.isdigit():
+        if key == 'metadata_deviceEventId' or isinstance(val, int) or val.isdigit():
             return val
         return self.valueExpression % val
 
