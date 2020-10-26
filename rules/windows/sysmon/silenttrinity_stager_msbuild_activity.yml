@@ -14,10 +14,14 @@ logsource:
     product: windows
 detection:
     selection:
-        ParentImage|endswith: '*\msbuild.exe'
-    condition: selection
-fields:
-    - ParentImage
+        DestinationPort:
+            - '80'
+            - '443'
+        Initiated: 'true'
+    filter:
+        Image|endswith:
+            - '*\msbuild.exe'
+    condition: selection and not filter 
 falsepositives:
     - unknown
 level: high
