@@ -1,0 +1,24 @@
+title: RDP Session Hijacking detected
+description: Adversaries may perform RDP session hijacking which involves stealing a legitimate user's remote session.
+references:
+    - http://blog.gentilkiwi.com/securite/vol-de-session-rdp
+    - http://www.korznikov.com/2017/03/0-day-or-feature-privilege-escalation.html
+date: 2019/02/27
+modified: 2019/02/27
+tags:
+    - attack.lateral_movement
+status: experimental
+author: vburov
+logsource:
+    product: windows
+    service: security
+definition: 'Requirements: Audit Policy : Detailed Tracking > Audit Process creation, Group Policy : Administrative Templates\System\Audit Process Creation'
+detection:
+    selection:
+        EventID: 4688
+        NewProcessName: "*\tscon.exe"
+        SecurityID: "System"
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
