@@ -15,10 +15,13 @@ logsource:
     service: powershell
 detection:
     selection:
+    selection2:
         EventID: 4104
-        ScriptBlockText|contains|all:
+        ScriptBlockText|contains:
           - 'CL_Mutexverifiers.ps1'
           - 'runAfterCancelProcess'
-    condition: selection
+    condition: selection2 | count(ScriptBlockText) by Computer > 2
+      # PS > Import-Module c:\Windows\diagnostics\system\Audio\CL_Mutexverifiers.ps1
+      # PS > runAfterCancelProcess c:\Evil.exe
 falsepositives: Unknown
 level: high
