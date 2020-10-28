@@ -14,11 +14,13 @@ logsource:
     product: windows
     service: powershell
 detection:
-    selection:
+    selection2:
         EventID: 4104
-        ScriptBlockText|contains|all:
+        ScriptBlockText|contains:
           - 'CL_Invocation.ps1'
           - 'SyncInvoke'
-    condition:  selection
+    condition: selection2 | count(ScriptBlockText) by Computer > 2
+      # PS > Import-Module c:\Windows\diagnostics\system\Audio\CL_Invocation.ps1
+      # PS > SyncInvoke c:\Evil.exe
 falsepositives: Unknown
 level: high
