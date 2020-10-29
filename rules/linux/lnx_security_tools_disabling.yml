@@ -11,25 +11,84 @@ logsource:
     category: process_creation
     product: linux
 detection:
-    keywords:
-        - Command|contains:
-          - 'service iptables stop'
-          - 'chkconfig off iptables'
-          - 'service ip6tables stop'
-          - 'chkconfig off ip6tables'
-          - 'systemctl stop firewalld'
-          - 'systemctl disable firewalld'
-        - CarbonBlack|contains:
-          - 'service cbdaemon stop'
-          - 'chkconfig off cbdaemon'
-          - 'systemctl stop cbdaemon'
-          - 'systemctl disable cbdaemon'
-        - SELinux:
-          - 'setenforce 0'
-        - Crowdstrike|contains:
-          - 'systemctl stop falcon-sensor.service'
-          - 'systemctl disable falcon-sensor.service'
-    condition: keywords
+    iptables_1:
+        ProcessName|endswith:
+          - 'service'
+        CommandLine|contains|all:
+          - 'iptables'
+          - 'stop'
+    iptables_2:
+        ProcessName|endswith:
+          - 'service'
+        CommandLine|contains|all:
+          - 'ip6tables'
+          - 'stop'
+    iptables_3:
+        ProcessName|endswith:
+          - 'chkconfig'
+        CommandLine|contains|all:
+          - 'iptables'
+          - 'stop'
+    iptables_4:
+        ProcessName|endswith:
+          - 'chkconfig'
+        CommandLine|contains|all:
+          - 'ip6tables'
+          - 'stop'
+    firewall_1:
+        ProcessName|endswith:
+          - 'systemctl'
+        CommandLine|contains|all:
+          - 'firewalld'
+          - 'stop'
+    firewall_2:
+        ProcessName|endswith:
+          - 'systemctl'
+        CommandLine|contains|all:
+          - 'firewalld'
+          - 'disable'
+    carbonblack_1:
+        ProcessName|endswith:
+          - 'service'
+        CommandLine|contains|all:
+          - 'cbdaemon'
+          - 'stop'
+    carbonblack_2:
+        ProcessName|endswith:
+          - 'chkconfig'
+        CommandLine|contains|all:
+          - 'cbdaemon'
+          - 'off'
+    carbonblack_3:
+        ProcessName|endswith:
+          - 'systemctl'
+        CommandLine|contains|all:
+          - 'cbdaemon'
+          - 'stop'
+    carbonblack_4:
+        ProcessName|endswith:
+          - 'systemctl'
+        CommandLine|contains|all:
+          - 'cbdaemon'
+          - 'disable'
+    selinux:
+        ProcessName|endswith:
+          - 'setenforce'
+        CommandLine|contains:
+          - '0'
+    crowdstrike_1:
+        ProcessName|endswith:
+          - 'systemctl'
+        CommandLine|contains|all:
+          - 'stop'
+          - 'falcon-sensor.service'
+    crowdstrike_2:
+        ProcessName|endswith:
+          - 'systemctl'
+        CommandLine|contains|all:
+          - 'disable'
+          - 'falcon-sensor.service'
+    condition: 1 of them
 falsepositives:
     - Legitimate administration activities
 level: medium
