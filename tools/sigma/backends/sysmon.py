@@ -14,7 +14,7 @@ class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
     orToken = " OR "
     notToken = "NOT "
     subExpression = "(%s)"
-    config_required = False
+    config_required = True
     INCLUDE = "include"
     EXCLUDE = "exclude"
     conditionDict = {
