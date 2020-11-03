@@ -44,7 +44,7 @@ setup(
         'sigma.parser.modifiers',
         ],
     python_requires='~=3.6',
-    install_requires=['PyYAML', 'pymisp', 'progressbar2'],
+    install_requires=['PyYAML', 'progressbar2'],
     extras_require={
         'test': ['coverage', 'yamllint'],
     },
