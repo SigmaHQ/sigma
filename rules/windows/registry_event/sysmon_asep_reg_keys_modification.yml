@@ -11,8 +11,8 @@ tags:
     - attack.t1547.001
     - attack.t1060      # an old one
 date: 2019/10/25
-modified: 2020/10/13
-author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin oscd.community
+modified: 2020/11/04
+author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community
 logsource:
     category: registry_event
     product: windows 
@@ -39,9 +39,8 @@ detection:
             - '\Software\Classes\Clsid\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\Inprocserver32'
             - '\Control Panel\Desktop\Scrnsave.exe'
     session_manager:
-        TargetObject|contains:
+        TargetObject|contains|all: 
             - '\System\CurrentControlSet\Control\Session Manager'
-    session_manager_details:
         TargetObject|contains:
             - '\SetupExecute'
             - '\S0InitialCommand'
@@ -50,9 +49,8 @@ detection:
             - '\BootExecute'
             - '\AppCertDlls'
     current_version:
-        TargetObject|contains:
+        TargetObject|contains|all: 
             - '\SOFTWARE\Microsoft\Windows\CurrentVersion'
-    current_version_details:
         TargetObject|contains:
             - '\ShellServiceObjectDelayLoad'
             - '\Run'
@@ -71,9 +69,8 @@ detection:
             - '\Authentication\Credential Providers'
             - '\Authentication\Credential Provider Filters'
     nt_current_version:
-        TargetObject|contains:
+        TargetObject|contains|all: 
             - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
-    nt_current_version_details:
         TargetObject|contains:
             - '\Winlogon\VmApplet'
             - '\Winlogon\Userinit'
@@ -90,9 +87,8 @@ detection:
             - '\Windows\Run'
             - '\Windows\Load'
     wow_current_version:
-        TargetObject|contains:
+        TargetObject|contains|all: 
             - '\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion'
-    wow_current_version_details:
         TargetObject|contains:
             - '\ShellServiceObjectDelayLoad'
             - '\Run'
@@ -102,19 +98,16 @@ detection:
             - '\Explorer\SharedTaskScheduler'
             - '\Explorer\Browser Helper Objects'
     wow_nt_current_version:
-        TargetObject|contains:
+        TargetObject|contains|all: 
             - '\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion'
-    wow_nt_current_version_details:
         TargetObject|contains:
             - '\Windows\Appinit_Dlls'
             - '\Image File Execution Options'
             - '\Drivers32'
     wow_office: 
-        TargetObject|contains:
-            - '\Software\Wow6432Node\Microsoft\Office'
+        TargetObject|contains: '\Software\Wow6432Node\Microsoft\Office'
     office: 
-        TargetObject|contains:
-            - '\Software\Microsoft\Office'
+        TargetObject|contains: '\Software\Microsoft\Office'
     wow_office_details:
         TargetObject|contains:
             - '\Word\Addins'
@@ -125,20 +118,17 @@ detection:
             - '\Access\Addins'
             - 'test\Special\Perf'
     wow_ie: 
-        TargetObject|contains:
-            - '\Software\Wow6432Node\Microsoft\Internet Explorer'
+        TargetObject|contains: '\Software\Wow6432Node\Microsoft\Internet Explorer'
     ie:
-        TargetObject|contains:
-            - '\Software\Microsoft\Internet Explorer'
+        TargetObject|contains: '\Software\Microsoft\Internet Explorer'
     wow_ie_details:
         TargetObject|contains:
             - '\Toolbar'
             - '\Extensions'
             - '\Explorer Bars'
     wow_classes:
-        TargetObject|contains:
+        TargetObject|contains|all: 
             - '\Software\Wow6432Node\Classes'
-    wow_classes_details:
         TargetObject|contains:
             - '\Folder\ShellEx\ExtShellFolderViews'
             - '\Folder\ShellEx\DragDropHandlers'
@@ -153,9 +143,8 @@ detection:
             - '\ShellEx\PropertySheetHandlers'
             - '\ShellEx\ContextMenuHandlers'
     classes:
-        TargetObject|contains:
+        TargetObject|contains|all: 
             - '\Software\Classes'
-    classes_details:
         TargetObject|contains:
             - '\Folder\ShellEx\ExtShellFolderViews'
             - '\Folder\ShellEx\DragDropHandlers'
@@ -174,25 +163,22 @@ detection:
             - '\ShellEx\PropertySheetHandlers'
             - '\ShellEx\ContextMenuHandlers'
     scripts:
-        TargetObject|contains:
+        TargetObject|contains|all: 
             - '\Software\Policies\Microsoft\Windows\System\Scripts'
-    scripts_details:
         TargetObject|contains:
             - '\Startup'
             - '\Shutdown'
             - '\Logon'
             - '\Logoff'
     winsock_parameters:
-        TargetObject|contains:
+        TargetObject|contains|all: 
             - '\System\CurrentControlSet\Services\WinSock2\Parameters'
-    winsock_parameters_details:
         TargetObject|contains:
             - '\Protocol_Catalog9\Catalog_Entries'
             - '\NameSpace_Catalog5\Catalog_Entries'
     system_control:
-        TargetObject|contains:
+        TargetObject|contains|all: 
             - '\SYSTEM\CurrentControlSet\Control'
-    system_control_details:
         TargetObject|contains:
             - '\Terminal Server\WinStations\RDP-Tcp\InitialProgram'
             - '\Terminal Server\Wds\rdpwd\StartupPrograms'
@@ -204,7 +190,19 @@ detection:
             - '\Lsa\Notification Packages'
             - '\Lsa\Authentication Packages'
             - '\BootVerificationProgram\ImagePath'
-    condition: main_selection OR (session_manager AND session_manager_details) OR (current_version AND current_version_details) OR (nt_current_version AND nt_current_version_details) OR (wow_current_version AND wow_current_version_details) OR (wow_nt_current_version AND wow_nt_current_version_details) OR ((wow_office OR office) AND wow_office_details) OR ((wow_ie OR ie) AND wow_ie_details) OR (wow_classes AND wow_classes_details) OR (classes AND classes_details) OR (scripts AND scripts_details) OR (winsock_parameters AND winsock_parameters_details) OR (system_control AND system_control_details)
+    condition: main_selection OR 
+               session_manager OR 
+               current_version OR 
+               nt_current_version OR 
+               wow_current_version OR 
+               wow_nt_current_version OR 
+               (wow_office OR office) AND wow_office_details OR 
+               (wow_ie OR ie) AND wow_ie_details OR 
+               wow_classes OR 
+               classes OR 
+               scripts OR 
+               winsock_parameters OR 
+               system_control
 fields:
     - SecurityID
     - ObjectName
