@@ -21,7 +21,7 @@ def main():
     num_rules_used = 0
     for rule_file in rule_files:
         try:
-            rule = yaml.safe_load(open(rule_file).read())
+            rule = yaml.safe_load(open(rule_file, encoding="utf-8").read())
         except yaml.YAMLError:
             sys.stderr.write("Ignoring rule " + rule_file + " (parsing failed)\n")
             continue
