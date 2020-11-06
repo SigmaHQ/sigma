@@ -1430,8 +1430,11 @@ class KibanaNdjsonBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
             for item in self.kibanaconf:    # JSONize kibanaSavedObjectMeta.searchSourceJSON
                 item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'] = json.dumps(item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'])
             if self.kibanaconf:
+                ndjson = ""
                 for item in self.kibanaconf:
-                    return json.dumps(item)
+                    ndjson += json.dumps(item)
+                    ndjson += "\n"
+                return ndjson
         elif self.output_type == "curl":
             for item in self.indexsearch:
                 return item
