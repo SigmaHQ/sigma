@@ -1,3 +1,4 @@
+action: global
 title: Linux Network Service Scanning
 id: 3e102cd9-a70d-4a7a-9508-403963092f31
 status: experimental
@@ -6,23 +7,36 @@ author: Alejandro Ortuno, oscd.community
 date: 2020/10/21
 references:
   - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1046/T1046.md
-logsource:
-  category: process_creation
-  product: linux
-detection:
-  selection_1:
-    ProcessName|endswith:
-      - '/nmap'
-  selection_2:
-    ProcessName|endswith:
-      - '/telnet'
-  selection_3:
-    ProcessName|endswith:
-      - '/nc'
-  condition: 1 of them
 falsepositives:
   - Legitimate administration activities
 level: medium
 tags:
   - attack.discovery
   - attack.t1046
+---
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection:
+    ProcessName|endswith:
+      - '/nmap'
+      - '/telnet'
+      - '/nc'
+      - '/netcat'
+  condition: selection
+---
+logsource:
+  product: linux
+  service: auditd
+  definition: 'Configure these rules https://github.com/Neo23x0/auditd/blob/master/audit.rules#L182-L183'
+detection:
+  selection:
+    type: 'SYSCALL'
+    exe|endswith:
+      - '/nc'
+      - '/netcat'
+      - '/telnet'
+      - '/nmap'
+    key: 'network_connect_4'
+    condition: selection
