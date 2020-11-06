@@ -1,3 +1,4 @@
+action: global
 title: Disabling Security Tools
 id: e3a8a052-111f-4606-9aee-f28ebeb76776
 status: experimental
@@ -7,6 +8,14 @@ date: 2020/06/17
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1089/T1089.md
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1562.004/T1562.004.md
+falsepositives:
+    - Legitimate administration activities
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1562.004
+    - attack.t1089
+---
 logsource:
     category: process_creation
     product: linux
@@ -89,10 +98,15 @@ detection:
           - 'disable'
           - 'falcon-sensor.service'
     condition: 1 of them
-falsepositives:
-    - Legitimate administration activities
-level: medium
-tags:
-    - attack.defense_evasion
-    - attack.t1562.004
-    - attack.t1089
+---
+logsource:
+    product: linux
+    service: syslog
+detection:
+    keywords:
+        - '*stopping iptables*'
+        - '*stopping ip6tables*'
+        - '*stopping firewalld*'
+        - '*stopping cbdaemon*'
+        - '*stopping falcon-sensor*'
+    condition: keywords
