@@ -24,11 +24,11 @@ This repository contains:
 
 [![Sigma - Generic Signatures for Log Events](https://preview.ibb.co/cMCigR/Screen_Shot_2017_10_18_at_15_47_15.png)](https://www.youtube.com/watch?v=OheVuE9Ifhs "Sigma - Generic Signatures for Log Events")
 
-## SANS Webcast on MITRE ATT&CK and Sigma
+## SANS Webcast on MITRE ATT&CK® and Sigma
 
 The SANS webcast on Sigma contains a very good 20 min introduction to the project by John Hubbart from minute 39 onward. (SANS account required; registration is free)
 
-[MITRE ATT&CK and Sigma Alerting Webcast Recording](https://www.sans.org/webcasts/mitre-att-ck-sigma-alerting-110010 "MITRE ATT&CK and Sigma Alerting")
+[MITRE ATT&CK® and Sigma Alerting Webcast Recording](https://www.sans.org/webcasts/mitre-att-ck-sigma-alerting-110010 "MITRE ATT&CK® and Sigma Alerting")
 
 # Use Cases
 
@@ -269,7 +269,7 @@ sigma2misp @misp.conf --same-event --info "Test Event" -r sigma_rules/
 
 ## Sigma2attack
 
-Generates a [MITRE ATT&CK Navigator](https://github.com/mitre/attack-navigator/) heatmap from a directory containing sigma rules.
+Generates a [MITRE ATT&CK® Navigator](https://github.com/mitre/attack-navigator/) heatmap from a directory containing sigma rules.
 
 Requirements:
 - Sigma rules tagged with a `attack.tXXXX` tag (e.g.: `attack.t1086`)
@@ -284,7 +284,7 @@ Usage samples:
 ./tools/sigma2attack --rules-directory ~/hunting/rules
 ```
 
-Result once imported in the MITRE ATT&CK Navigator ([online version](https://mitre-attack.github.io/attack-navigator/enterprise/)):
+Result once imported in the MITRE ATT&CK® Navigator ([online version](https://mitre-attack.github.io/attack-navigator/enterprise/)):
 
 ![Sigma2attack result](./images/sigma2attack.png)
 
@@ -299,7 +299,7 @@ These tools are not part of the main toolchain and maintained separately by thei
 
 # Next Steps
 
-* Integration of MITRE ATT&CK framework identifier to the rule set
+* Integration of MITRE ATT&CK® framework identifier to the rule set
 * Integration into Threat Intel Exchanges
 * Attempts to convince others to use the rule format in their reports, threat feeds, blog posts, threat sharing platforms
 

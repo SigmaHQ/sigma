@@ -20,6 +20,7 @@ from fnmatch import fnmatch
 import sys
 import os
 from random import randrange
+from distutils.util import strtobool 
 
 import sigma
 import yaml
@@ -64,7 +65,8 @@ class ElasticsearchWildcardHandlingMixin(object):
             ("keyword_whitelist", None, "Fields to always set as keyword. Bypasses case insensitive options. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("keyword_blacklist", None, "Fields to never set as keyword (ie: always set as analyzed field). Bypasses case insensitive options. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("case_insensitive_whitelist", None, "Fields to make the values case insensitive regex. Automatically sets the field as a keyword. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
-            ("case_insensitive_blacklist", None, "Fields to exclude from being made into case insensitive regex. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None)
+            ("case_insensitive_blacklist", None, "Fields to exclude from being made into case insensitive regex. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
+            ("wildcard_use_keyword", "true", "Use analyzed field or wildcard field if the query uses a wildcard value (ie: '*mall_wear.exe'). Set this to 'False' to use analyzed field or wildcard field. Valid options are: true/false", None)
             )
     reContainsWildcard = re.compile("(?:(?<!\\\\)|\\\\\\\\)[*?]").search
     uuid_regex = re.compile( "[0-9a-fA-F]{8}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{12}", re.IGNORECASE )
@@ -99,6 +101,10 @@ class ElasticsearchWildcardHandlingMixin(object):
             self.case_insensitive_blacklist = self.case_insensitive_blacklist.replace(' ','').split(',')
         except AttributeError:
             self.case_insensitive_blacklist = list()
+        try:
+            self.wildcard_use_keyword = strtobool(self.wildcard_use_keyword.lower().strip())
+        except AttributeError:
+            self.wildcard_use_keyword = False
 
     def containsWildcard(self, value):
         """Determine if value contains wildcard."""
@@ -154,10 +160,8 @@ class ElasticsearchWildcardHandlingMixin(object):
             keyword_subfield_name = '.%s'%keyword_subfield_name
 
         # Set naming for analyzed fields
-        if analyzed_subfield_name != '' and not keyword_subfield_name.startswith('.'):
+        if analyzed_subfield_name != '':
             analyzed_subfield_name = '.%s'%analyzed_subfield_name
-        else:
-            analyzed_subfield_name = ''
 
         # force keyword on agg_option used in Elasticsearch DSL query key
         if agg_option:
@@ -191,7 +195,7 @@ class ElasticsearchWildcardHandlingMixin(object):
             self.matchKeyword = True
         elif self.CaseInSensitiveField:
             self.matchKeyword = True
-        elif (type(value) == list and any(map(self.containsWildcard, value))) or self.containsWildcard(value):
+        elif self.wildcard_use_keyword and ( (type(value) == list and any(map(self.containsWildcard, value))) or self.containsWildcard(value) ):
             self.matchKeyword = True
         else:
             self.matchKeyword = False
@@ -213,6 +217,8 @@ class ElasticsearchWildcardHandlingMixin(object):
             #value = re.sub( r"((?<!\\)(\\))\*$", "\g<1>\\*", value )
             # Make upper/lower
             value = re.sub( r"[A-Za-z]", lambda x: "[" + x.group( 0 ).upper() + x.group( 0 ).lower() + "]", value )
+            # Turn `.` into wildcard, only if odd number of '\'(because this would mean already escaped)
+            value = re.sub( r"(((?<!\\)(\\\\)+)|(?<!\\))\.", "\g<1>\.", value )
             # Turn `*` into wildcard, only if odd number of '\'(because this would mean already escaped)
             value = re.sub( r"(((?<!\\)(\\\\)+)|(?<!\\))\*", "\g<1>.*", value )
             # Escape additional values that are treated as specific "operators" within Elastic. (ie: @, ?, &, <, >, and ~)
@@ -1222,7 +1228,7 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
                     "reference": tactic.get("url", ""),
                     "name": tactic.get("tactic", "")
                 },
-                "framework": "MITRE ATT&CK"
+                "framework": "MITRE ATT&CK®"
             }
             temp_techniques = list()
             for tech in techniques_list:
@@ -1325,3 +1331,128 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
         if references:
             rule.update({"references": references})
         return json.dumps(rule)
+
+class KibanaNdjsonBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
+    """Converts Sigma rule into Kibana JSON Configuration files (searches only)."""
+    identifier = "kibana-ndjson"
+    active = True
+    options = ElasticsearchQuerystringBackend.options + (
+            ("output", "import", "Output format: import = JSON file manually imported in Kibana, curl = Shell script that imports queries in Kibana via curl (jq is additionally required)", "output_type"),
+            ("es", "localhost:9200", "Host and port of Elasticsearch instance", None),
+            ("index", ".kibana", "Kibana index", None),
+            ("prefix", "Sigma: ", "Title prefix of Sigma queries", None),
+            )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.kibanaconf = list()
+        self.indexsearch = set()
+
+    def generate(self, sigmaparser):
+        description = sigmaparser.parsedyaml.setdefault("description", "")
+
+        columns = list()
+        try:
+            for field in sigmaparser.parsedyaml["fields"]:
+                mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
+                if type(mapped) == str:
+                    columns.append(mapped)
+                elif type(mapped) == list:
+                    columns.extend(mapped)
+                else:
+                    raise TypeError("Field mapping must return string or list")
+        except KeyError:    # no 'fields' attribute
+            pass
+
+        indices = sigmaparser.get_logsource().index
+        if len(indices) == 0:   # fallback if no index is given
+            indices = ["*"]
+
+        for parsed in sigmaparser.condparsed:
+            result = self.generateNode(parsed.parsedSearch)
+
+            for index in indices:
+                rulename = self.getRuleName(sigmaparser)
+                if len(indices) > 1:     # add index names if rule must be replicated because of ambigiuous index patterns
+                    raise NotSupportedError("Multiple target indices are not supported by Kibana")
+                else:
+                    title = self.prefix + sigmaparser.parsedyaml["title"]
+
+                self.indexsearch.add(
+                        "export {indexvar}=$(curl -s '{es}/{index}/_search?q=index-pattern.title:{indexpattern}' | jq -r '.hits.hits[0]._id | ltrimstr(\"index-pattern:\")')".format(
+                            es=self.es,
+                            index=self.index,
+                            indexpattern=index.replace("*", "\\*"),
+                            indexvar=self.index_variable_name(index)
+                            )
+                        )
+                self.kibanaconf.append({
+                        "id": rulename,
+                        "type": "search",
+                        "attributes": {
+                            "title": title,
+                            "description": description,
+                            "hits": 0,
+                            "columns": columns,
+                            "sort": ["@timestamp", "desc"],
+                            "version": 1,
+                            "kibanaSavedObjectMeta": {
+                                "searchSourceJSON": {
+                                    "index": index,
+                                    "filter":  [],
+                                    "highlight": {
+                                        "pre_tags": ["@kibana-highlighted-field@"],
+                                        "post_tags": ["@/kibana-highlighted-field@"],
+                                        "fields": { "*":{} },
+                                        "require_field_match": False,
+                                        "fragment_size": 2147483647
+                                        },
+                                    "query": {
+                                        "query_string": {
+                                            "query": result,
+                                            "analyze_wildcard": True
+                                            }
+                                        }
+                                    }
+                            }
+                        },
+                        "references": [
+                            {
+                                "id": index,
+                                "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+                                "type": "index-pattern"
+                            }
+                        ]
+                    })
+
+    def finalize(self):
+        if self.output_type == "import":        # output format that can be imported via Kibana UI
+            for item in self.kibanaconf:    # JSONize kibanaSavedObjectMeta.searchSourceJSON
+                item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'] = json.dumps(item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'])
+            if self.kibanaconf:
+                ndjson = ""
+                for item in self.kibanaconf:
+                    ndjson += json.dumps(item)
+                    ndjson += "\n"
+                return ndjson
+        elif self.output_type == "curl":
+            for item in self.indexsearch:
+                return item
+            for item in self.kibanaconf:
+                item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON']['index'] = "$" + self.index_variable_name(item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON']['index'])   # replace index pattern with reference to variable that will contain Kibana index UUID at script runtime
+                item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'] = json.dumps(item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'])     # Convert it to JSON string as expected by Kibana
+                item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'] = item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'].replace("\\", "\\\\")      # Add further escaping for escaped quotes for shell
+                return "curl -s -XPUT -H 'Content-Type: application/json' --data-binary @- '{es}/{index}/doc/{doc_id}' <<EOF\n{doc}\nEOF".format(
+                        es=self.es,
+                        index=self.index,
+                        doc_id="search:" + item['_id'],
+                        doc=json.dumps({
+                            "type": "search",
+                            "search": item['attributes']
+                            }, indent=2)
+                        )
+        else:
+            raise NotImplementedError("Output type '%s' not supported" % self.output_type)
+
+    def index_variable_name(self, index):
+        return "index_" + index.replace("-", "__").replace("*", "X")

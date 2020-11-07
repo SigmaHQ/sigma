@@ -291,17 +291,28 @@ You can add the following depending on additional information from your answers/
     * If you want to prevent case sensitive bypasses you can add the following to your command: `--backend-option case_insensitive_whitelist="*"`
     * If you want to prevent case sensitive bypasses but only for certain fields, you can use an option like this: `-backend-option keyword_field="" --backend-option case_insensitive_whitelist="*CommandLine*, *ProcessName*, *Image*, process.*, *FileName*, *Path*, *ServiceName*, *ShareName*, file.*, *Directory*, *directory*, *hash*, *Hash*, *Object*, ComputerName, *Subject*, *Target*, *Service*"`
 
-2. If you are using analyzed (text) fields or your index template portion of `strings_as_keyword` contains `text` then you can add the following:
+1. If you are using analyzed (text) fields or your index template portion of `strings_as_keyword` contains `text` then you can add the following:
 
-```bash
---backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text"
-```
+    ```bash
+    --backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text"
+    ```
 
-3. If you only have some analyzed fields then you would use an example like this:
+1. If you only have some analyzed fields then you would use an example like this:
 
-```bash
---backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text" --backend-option analyzed_sub_fields="TargetUserName, SourceUserName, TargetHostName, CommandLine, ProcessName, ParentProcessName, ParentImage, Image"
-```
+    ```bash
+    --backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text" --backend-option analyzed_sub_fields="TargetUserName, SourceUserName, TargetHostName, CommandLine, ProcessName, ParentProcessName, ParentImage, Image"
+    ```
+
+1. If you only have some analyzed fields then you would use an example like this:
+
+    ```bash
+    --backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text" --backend-option analyzed_sub_fields="TargetUserName, SourceUserName, TargetHostName, CommandLine, ProcessName, ParentProcessName, ParentImage, Image"
+    ```
+1. Use an analyzed field or different field for queries that contain wildcard(s)
+
+    ```bash
+    --backend-option wildcard_use_keyword="false"
+    ```
 
 ### Elastic - Some Final Examples
 
@@ -310,23 +321,29 @@ So putting it all together to help show everything from above, here are some "fu
 * base field keyword & no analyzed field w/ case insensitivity (covers elastic 7 with beats/ecs (default)mappings) and using winlogbeat with modules enabled. Also, keeps `winlog.channel` from making case insensitive as is not necessary (ie: the `keyword_whitelist` option)
 
 ```bash
-sigma -t es-qs -c tools/config/winlogbeat-modules-enabled.yml --backend-option keyword_field="" --backend-option case_insensitive_whitelist="*" --backend-option keyword_whitelist="winlog.channel" rules/windows/process_creation/win_office_shell.yml
+tools/sigmac -t es-qs -c tools/config/winlogbeat-modules-enabled.yml --backend-option keyword_field="" --backend-option case_insensitive_whitelist="*" --backend-option keyword_whitelist="winlog.channel" rules/windows/process_creation/win_office_shell.yml
 ```
 
 * base field keyword & subfield is analyzed(.text) and winlogbeat with modules enabled
 
 ```bash
-sigma -t es-qs -c tools/config/winlogbeat-modules-enabled.yml --backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text" rules/windows/process_creation/win_office_shell.yml
+tools/sigmac -t es-qs -c tools/config/winlogbeat-modules-enabled.yml --backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text" rules/windows/process_creation/win_office_shell.yml
 ```
 
 * base field keyword & only some analyzed fields and winlogbeat without modules enabled
 
 ```bash
-tools/sigmac -t es-dsl -c tools/config/winlogbeat.yml  --backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text" --backend-option analyzed_sub_fields="TargetUserName, SourceUserName, TargetHostName, CommandLine, ProcessName, ParentProcessName, ParentImage, Image" rules/windows/process_creation/win_office_shell.yml
+tools/sigmac -t es-qs -c tools/config/winlogbeat.yml  --backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text" --backend-option analyzed_sub_fields="TargetUserName, SourceUserName, TargetHostName, CommandLine, ProcessName, ParentProcessName, ParentImage, Image" rules/windows/process_creation/win_office_shell.yml
 ```
 
 * using beats/ecs Elastic 7 with case insensitive and some .text fields and winlogbeat without modules enabled
 
 ```bash
-tools/sigmac -t es-dsl -c tools/config/winlogbeat.yml --backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text" --backend-option keyword_whitelist="winlog.channel,winlog.event_id" --backend-option case_insensitive_whitelist="*" --backend-option analyzed_sub_fields="TargetUserName, SourceUserName, TargetHostName, CommandLine, ProcessName, ParentProcessName, ParentImage, Image" rules/windows/process_creation/win_office_shell.yml
+tools/sigmac -t es-qs -c tools/config/winlogbeat.yml --backend-option keyword_base_fields="*" --backend-option analyzed_sub_field_name=".text" --backend-option keyword_whitelist="winlog.channel,winlog.event_id" --backend-option case_insensitive_whitelist="*" --backend-option analyzed_sub_fields="TargetUserName, SourceUserName, TargetHostName, CommandLine, ProcessName, ParentProcessName, ParentImage, Image" rules/windows/process_creation/win_office_shell.yml
+```
+
+* using keyword as a subfield and custom analyzed field as a subfield with winlogbeat mappings
+
+```bash
+tools/sigmac -t es-qs -c tools/config/winlogbeat.yml --backend-option keyword_field=".keyword" --backend-option analyzed_sub_field_name=".security" rules/windows/sysmon/sysmon_wmi_susp_scripting.yml
 ```

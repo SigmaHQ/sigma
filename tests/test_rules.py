@@ -349,9 +349,9 @@ class TestRules(unittest.TestCase):
                     print(Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
 def get_mitre_data():
     """
-    Generate tags from live MITRE ATT&CK TAXI service to get up-to-date data
+    Generate tags from live MITRE ATT&CK® TAXI service to get up-to-date data
     """
-    # Get MITRE ATT&CK information
+    # Get ATT&CK information
     lift = attack_client()
     # Techniques
     MITRE_TECHNIQUES = []
@@ -394,7 +394,7 @@ def get_mitre_data():
 
 if __name__ == "__main__":
     init(autoreset=True)
-    # Get Current Data from MITRE on ATT&CK
+    # Get Current Data from MITRE ATT&CK®
     MITRE_ALL = get_mitre_data()
     # Run the tests
     unittest.main()
