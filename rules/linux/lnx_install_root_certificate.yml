@@ -13,17 +13,11 @@ logsource:
     product: linux
 detection:
     selection:
-        - CommandLine|contains|all:
-          - 'mv '
-          - '/usr/local/share/ca-certificates'
+        - ProcessName|endswith:
+          - '/update-ca-certificates'
     selection2:
-        - ProcessName|contains:
-          - 'update-ca-certificates'
-    selection3:
         - CommandLine|contains|all:
-          - 'cp '
-          - 'rootCA.crt'
           - 'update-ca-trust'
-    condition: (selection and selection2) or selection3
+    condition: selection or selection2
 falsepositives:
     - Legitimate administration activities
