@@ -61,7 +61,10 @@ def main():
             "maxValue": curr_max_technique_count,
             "minValue": 0
         },
-        "version": "2.2", 
+        "versions": {
+            "navigator": "4.0",
+            "layer": "4.0"
+        },
         "techniques": scores,
     }
 
