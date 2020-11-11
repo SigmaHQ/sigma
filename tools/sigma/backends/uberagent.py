@@ -33,7 +33,8 @@ def convert_sigma_name_to_uberagent_tag(name):
 
 def convert_sigma_category_to_uberagent_event_type(category):
     categories = {
-        "process_creation": "Process.Start"
+        "process_creation": "Process.Start",
+        "image_load": "Image.Load"
     }
 
     if category in categories:
@@ -218,7 +219,7 @@ class uberAgentBackend(SingleTextQueryBackend):
         "commandline": "Process.CommandLine",
         "image": "Process.Path",
         "originalfilename": "Process.Name",
-        "imageloaded": "Image.Name",
+        "imageloaded": "Image.Path",
         "imagepath": "Image.Path",
         "parentcommandline": "Parent.CommandLine",
         "parentprocessname": "Parent.Name",
@@ -269,7 +270,7 @@ class uberAgentBackend(SingleTextQueryBackend):
         # Do not generate a rule if the given category is unsupported by now.
         if not is_sigma_category_supported(category):
             return ""
-        if category not in ["process_creation"]:
+        if category not in ["process_creation", "image_load"]:
             return ""
 
         try:
