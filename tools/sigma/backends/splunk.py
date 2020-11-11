@@ -68,7 +68,7 @@ class SplunkBackend(SingleTextQueryBackend):
                     agg.aggfunc_notrans = 'dc'
             return " | eventstats %s(%s) as val by %s | search val %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)
 
-        
+
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
         columns = list()
@@ -106,7 +106,7 @@ class SplunkBackend(SingleTextQueryBackend):
                 result += fields
 
             return result
-    
+
 class SplunkXMLBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
     """Converts Sigma rule into XML used for Splunk Dashboard Panels"""
     identifier = "splunkxml"
@@ -208,3 +208,6 @@ class CrowdStrikeBackend(SplunkBackend):
             return super().generate(sigmaparser)
         else:
             raise NotImplementedError("Not supported logsources!")
+
+    def generateMapItemTypedNode(self, fieldname, value):
+        return super().generateMapItemTypedNode(fieldname=fieldname, value=value)
