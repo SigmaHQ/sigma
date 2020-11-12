@@ -172,7 +172,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
         return src
 
     def default_value_mapping(self, val):
-        op = "=="
+        op = "=~"
         if type(val) == str:
             if "*" in val[1:-1]:     # value contains * inside string - use regex match
                 op = "matches regex"
