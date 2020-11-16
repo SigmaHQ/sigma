@@ -19,13 +19,17 @@ logsource:
   product: linux
   definition: 'Detect netcat and filter our listening mode'
 detection:
-  selection:
+  netcat:
     ProcessName|endswith:
       - '/nc'
       - '/netcat'
-  filter:
+  network_scanning_tools:
+    ProcessName|endswith:
+      - '/telnet' # could be wget, curl, ssh, many things. basically everything that is able to do network connection. consider fine tuning
+      - '/nmap'
+  netcat_listen_flag:
     CommandLine|contains: 'l'
-  condition: selection and not filter
+  condition: (netcat and not netcat_listen_flag) or network_scanning_tools
 ---
 logsource:
   product: linux
@@ -37,5 +41,7 @@ detection:
     exe|endswith:
       - '/telnet'
       - '/nmap'
+      - '/netcat'
+      - '/nc'
     key: 'network_connect_4'
     condition: selection
