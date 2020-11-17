@@ -1331,3 +1331,128 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
         if references:
             rule.update({"references": references})
         return json.dumps(rule)
+
+class KibanaNdjsonBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
+    """Converts Sigma rule into Kibana JSON Configuration files (searches only)."""
+    identifier = "kibana-ndjson"
+    active = True
+    options = ElasticsearchQuerystringBackend.options + (
+            ("output", "import", "Output format: import = JSON file manually imported in Kibana, curl = Shell script that imports queries in Kibana via curl (jq is additionally required)", "output_type"),
+            ("es", "localhost:9200", "Host and port of Elasticsearch instance", None),
+            ("index", ".kibana", "Kibana index", None),
+            ("prefix", "Sigma: ", "Title prefix of Sigma queries", None),
+            )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.kibanaconf = list()
+        self.indexsearch = set()
+
+    def generate(self, sigmaparser):
+        description = sigmaparser.parsedyaml.setdefault("description", "")
+
+        columns = list()
+        try:
+            for field in sigmaparser.parsedyaml["fields"]:
+                mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
+                if type(mapped) == str:
+                    columns.append(mapped)
+                elif type(mapped) == list:
+                    columns.extend(mapped)
+                else:
+                    raise TypeError("Field mapping must return string or list")
+        except KeyError:    # no 'fields' attribute
+            pass
+
+        indices = sigmaparser.get_logsource().index
+        if len(indices) == 0:   # fallback if no index is given
+            indices = ["*"]
+
+        for parsed in sigmaparser.condparsed:
+            result = self.generateNode(parsed.parsedSearch)
+
+            for index in indices:
+                rulename = self.getRuleName(sigmaparser)
+                if len(indices) > 1:     # add index names if rule must be replicated because of ambigiuous index patterns
+                    raise NotSupportedError("Multiple target indices are not supported by Kibana")
+                else:
+                    title = self.prefix + sigmaparser.parsedyaml["title"]
+
+                self.indexsearch.add(
+                        "export {indexvar}=$(curl -s '{es}/{index}/_search?q=index-pattern.title:{indexpattern}' | jq -r '.hits.hits[0]._id | ltrimstr(\"index-pattern:\")')".format(
+                            es=self.es,
+                            index=self.index,
+                            indexpattern=index.replace("*", "\\*"),
+                            indexvar=self.index_variable_name(index)
+                            )
+                        )
+                self.kibanaconf.append({
+                        "id": rulename,
+                        "type": "search",
+                        "attributes": {
+                            "title": title,
+                            "description": description,
+                            "hits": 0,
+                            "columns": columns,
+                            "sort": ["@timestamp", "desc"],
+                            "version": 1,
+                            "kibanaSavedObjectMeta": {
+                                "searchSourceJSON": {
+                                    "index": index,
+                                    "filter":  [],
+                                    "highlight": {
+                                        "pre_tags": ["@kibana-highlighted-field@"],
+                                        "post_tags": ["@/kibana-highlighted-field@"],
+                                        "fields": { "*":{} },
+                                        "require_field_match": False,
+                                        "fragment_size": 2147483647
+                                        },
+                                    "query": {
+                                        "query_string": {
+                                            "query": result,
+                                            "analyze_wildcard": True
+                                            }
+                                        }
+                                    }
+                            }
+                        },
+                        "references": [
+                            {
+                                "id": index,
+                                "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+                                "type": "index-pattern"
+                            }
+                        ]
+                    })
+
+    def finalize(self):
+        if self.output_type == "import":        # output format that can be imported via Kibana UI
+            for item in self.kibanaconf:    # JSONize kibanaSavedObjectMeta.searchSourceJSON
+                item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'] = json.dumps(item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'])
+            if self.kibanaconf:
+                ndjson = ""
+                for item in self.kibanaconf:
+                    ndjson += json.dumps(item)
+                    ndjson += "\n"
+                return ndjson
+        elif self.output_type == "curl":
+            for item in self.indexsearch:
+                return item
+            for item in self.kibanaconf:
+                item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON']['index'] = "$" + self.index_variable_name(item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON']['index'])   # replace index pattern with reference to variable that will contain Kibana index UUID at script runtime
+                item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'] = json.dumps(item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'])     # Convert it to JSON string as expected by Kibana
+                item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'] = item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'].replace("\\", "\\\\")      # Add further escaping for escaped quotes for shell
+                return "curl -s -XPUT -H 'Content-Type: application/json' --data-binary @- '{es}/{index}/doc/{doc_id}' <<EOF\n{doc}\nEOF".format(
+                        es=self.es,
+                        index=self.index,
+                        doc_id="search:" + item['_id'],
+                        doc=json.dumps({
+                            "type": "search",
+                            "search": item['attributes']
+                            }, indent=2)
+                        )
+        else:
+            raise NotImplementedError("Output type '%s' not supported" % self.output_type)
+
+    def index_variable_name(self, index):
+        return "index_" + index.replace("-", "__").replace("*", "X")

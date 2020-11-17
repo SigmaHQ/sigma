@@ -23,7 +23,7 @@ from .base import SingleTextQueryBackend
 from .mixins import MultiRuleOutputMixin
 
 class HumioBackend(SingleTextQueryBackend):
-    """Converts Sigma rule into Humio query."""
+    """Converts Sigma rule into Humio query. Contributed by SOC Prime. https://socprime.com"""
     identifier = "humio"
     active = True
 
@@ -117,23 +117,23 @@ class HumioBackend(SingleTextQueryBackend):
         #     return (" | " + " | ".join([self.regexExpression % (key, self.cleanValue(item)) for item in value]) + " | ")
         if not set([type(val) for val in value]).issubset({str, int}):
             raise TypeError("List values must be strings or numbers")
-        return (" or ".join(['%s=%s' % (key, self.generateValueNode(item)) for item in value]))
+        return " or ".join(['%s=%s' % (key, self.generateValueNode(item)) for item in value])
 
     def generateAggregation(self, agg):
-        if agg == None:
+        if agg is None:
             return ""
         if agg.aggfunc == SigmaAggregationParser.AGGFUNC_NEAR:
             raise NotImplementedError("The 'near' aggregation operator is not yet implemented for this backend")
-        if agg.groupfield == None:
+        if agg.groupfield is None:
             if agg.aggfunc_notrans == 'count':
-                if agg.aggfield == None :
+                if agg.aggfield is None :
                     return " | val := count() | val %s %s" % (agg.cond_op, agg.condition)
                 else:
                     agg.aggfunc_notrans = 'dc'
             return " | count(field=%s, distinct=true, as=val) | val %s %s" % (agg.aggfield or "", agg.cond_op, agg.condition)
         else:
             if agg.aggfunc_notrans == 'count':
-                if agg.aggfield == None :
+                if agg.aggfield is None :
                     return " | val := count(field=%s) | val %s %s" % (agg.groupfield or "", agg.cond_op, agg.condition)
                 else:
                     agg.aggfunc_notrans = 'dc'
