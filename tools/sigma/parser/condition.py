@@ -506,12 +506,39 @@ class SigmaConditionParser:
         """
         Iterative parsing of search expression.
         """
+        def find_close_token_index_in_pairs(tokens, start_index, open_token, close_token):
+            """
+                the function try to find close_token index for open_token in pairs
+                e.g
+                    open_token was '(' and
+                    tokens were ['(', '...', '(', '...', ')', ')']
+                    the first '(' should pair with the last ')' instead of the first ')'
+                
+                Parameters:
+                    tokens: the list of tokens
+                    start_index: the start index (included) of the input tokens for finding the close_token
+                    open_token: the token that considered as opening token
+                    close_token: the token that considered as closing token
+                Returns:
+                    the index of the close_token in pair with the open_token
+                    raise ValueError when there is no close_token in pairs
+            """
+            open_token_count = 0
+            for i in range(start_index, len(tokens)):
+                if tokens[i] == open_token:
+                    open_token_count += 1
+                elif tokens[i] == close_token:
+                    if open_token_count == 0:
+                        return i
+                    else:
+                        open_token_count -= 1
+            raise ValueError(f"matched close_token {close_token} is not found in tokens")
         # 1. Identify subexpressions with parentheses around them and parse them like a separate search expression
         while SigmaConditionToken.TOKEN_LPAR in tokens:
             lPos = tokens.index(SigmaConditionToken.TOKEN_LPAR)
             lTok = tokens[lPos]
             try:
-                rPos = tokens.index(SigmaConditionToken.TOKEN_RPAR)
+                rPos = find_close_token_index_in_pairs(tokens, lPos+1, SigmaConditionToken.TOKEN_LPAR, SigmaConditionToken.TOKEN_RPAR)
                 rTok = tokens[rPos]
             except ValueError as e:
                 raise SigmaParseError("Missing matching closing parentheses") from e
