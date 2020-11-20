@@ -8,7 +8,7 @@ description: Detects the access to processes by other suspicious processes which
 status: experimental
 date: 2019/10/27
 modified: 2020/08/24
-author: Perez Diego (@darkquassar), oscd.community
+author: Perez Diego (@darkquassar), oscd.community, Jonhnathan Ribeiro
 references:
     - https://azure.microsoft.com/en-ca/blog/detecting-in-memory-attacks-with-sysmon-and-azure-security-center/
 tags:
@@ -22,9 +22,12 @@ logsource:
     product: windows
 detection:
     selection1: 
-        CallTrace: 
-            - "C:\\Windows\\SYSTEM32\\ntdll.dll+*|C:\\Windows\\System32\\KERNELBASE.dll+*|UNKNOWN(*)"
-            - "*UNKNOWN(*)|UNKNOWN(*)"
+        - CallTrace|contains|all: 
+              - 'C:\\Windows\\SYSTEM32\\ntdll.dll+'
+              - '|C:\\Windows\\System32\\KERNELBASE.dll+'
+              - '|UNKNOWN(*)'
+        - CallTrace|endswith:
+              - "UNKNOWN(*)|UNKNOWN(*)"
     selection2: 
         CallTrace: "*UNKNOWN*"
     granted_access:
