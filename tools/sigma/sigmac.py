@@ -179,8 +179,8 @@ def main():
             print("Available choices for this backend (get complete list with --lists/-l):")
             list_configurations(backend=cmdargs.target, scm=scm)
             sys.exit(ERR_CONFIG_REQUIRED)
-    if backend_class.default_config is not None:
-        cmdargs.config = backend_class.default_config
+        if backend_class.default_config is not None:
+            cmdargs.config = backend_class.default_config
 
     if cmdargs.config:
         order = 0

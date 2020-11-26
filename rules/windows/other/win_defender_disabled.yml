@@ -8,7 +8,7 @@ references:
 status: stable
 tags:
     - attack.defense_evasion
-    - attack.t1089
+    - attack.t1089           # an old one
     - attack.t1562.001
 logsource:
     product: windows
@@ -20,7 +20,13 @@ detection:
             - 5010
             - 5012
             - 5101
-    condition: selection
+    selection2:
+        TargetObject:
+            - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WinDefend
+            - HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender
+            - HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender
+        Details: 'DWORD (0x00000001)'
+    condition: 1 of them
 falsepositives:
     - Administrator actions
 level: high

@@ -5,6 +5,7 @@ backends:
   - es-dsl
   - es-rule
   - kibana
+  - kibana-ndjson
   - xpack-watcher
   - elastalert
   - elastalert-dsl
@@ -53,6 +54,15 @@ logsources:
     service: windefend
     conditions:
       winlog.channel: 'Microsoft-Windows-Windows Defender/Operational'
+  windows-applocker:
+    product: windows
+    service: applocker
+    conditions:
+      winlog.channel:
+        - 'Microsoft-Windows-AppLocker/MSI and Script'
+        - 'Microsoft-Windows-AppLocker/EXE and DLL'
+        - 'Microsoft-Windows-AppLocker/Packaged app-Deployment'
+        - 'Microsoft-Windows-AppLocker/Packaged app-Execution'
 defaultindex: winlogbeat-*
 # Extract all field names qith yq:
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: winlog.event_data.\1/g'
