@@ -14,17 +14,20 @@ logsource:
     product: windows
     service: powershell
 detection:
-    command:
-        - 'del'
-        - 'Set-PSReadlineOption'
-        - 'Remove-Item'
-        - 'rm'
-    selection_1:
-        - '(Get-PSReadlineOption).HistorySavePath'
-    selection_2:
+    selection1:
+        Message|contains:
+            - 'del'
+            - 'Set-PSReadlineOption'
+            - 'Remove-Item'
+            - 'rm'
+    selection2:
+        Message|contains:
+            - '(Get-PSReadlineOption).HistorySavePath'
+    selection3:
+        Message|contains:
         - '–HistorySaveStyle'
         - 'SaveNothing'
-    condition: command and (selection_1 or selection_2)
+    condition: selection1 and (selection2 or selection3)
 falsepositives:
     - some PS-scripts
 level: medium
