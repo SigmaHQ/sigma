@@ -37,15 +37,22 @@ detection:
             - '\mmc.exe'  # dcomexec MMC
             - '\explorer.exe'  # dcomexec ShellBrowserWindow
             - '\services.exe'  # smbexec
-        CommandLine|contains:
-            - 'cmd.exe* /Q /c * \\\\127.0.0.1\\*&1'
+        CommandLine|contains|all:
+            - 'cmd.exe'
+            - '/Q'
+            - '/c'
+            - '\\\\127.0.0.1\'
+            - '&1'
     selection_atexec:
         ParentCommandLine|contains:
             - 'svchost.exe -k netsvcs' # atexec on win10 (parent is "C:\Windows\system32\svchost.exe -k netsvcs")
             - 'taskeng.exe' # atexec on win7 (parent is "taskeng.exe {AFA79333-694C-4BEE-910E-E57D9A3518F6} S-1-5-18:NT AUTHORITY\System:Service:")
         # cmd.exe /C tasklist /m > C:\Windows\Temp\bAJrYQtL.tmp 2>&1
-        CommandLine:
-            - 'cmd.exe /C *Windows\\Temp\\*&1'
+        CommandLine|contains|all:
+            - 'cmd.exe'
+            - '/C'
+            - 'Windows\Temp\'
+            - '&1'
     condition: (1 of selection_*)
 fields:
     - CommandLine
