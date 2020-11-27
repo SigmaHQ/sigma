@@ -1,6 +1,6 @@
 title: Sofacy Trojan Loader Activity
 id: ba778144-5e3d-40cf-8af9-e28fb1df1e20
-author: Florian Roth
+author: Florian Roth, oscd.community
 status: experimental
 date: 2018/03/01
 modified: 2020/08/27
@@ -23,9 +23,11 @@ logsource:
     product: windows
 detection:
     selection:
-        CommandLine:
-            - 'rundll32.exe %APPDATA%\\*.dat",*'
-            - 'rundll32.exe %APPDATA%\\*.dll",#1'
+        CommandLine|contains|all:
+            - 'rundll32.exe'
+        CommandLine|contains:
+            - '%APPDATA%\\*.dat",'
+            - '%APPDATA%\\*.dll",#1'
     condition: selection
 falsepositives:
     - Unknown
