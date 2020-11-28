@@ -8,22 +8,30 @@ references:
     - https://blog.malwarebytes.com/threat-analysis/2016/04/rokku-ransomware/
 author: Michael Haag, Florian Roth, juju4, oscd.community
 date: 2019/01/16
+modified: 2020/11/28
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
-        Image|endswith:
-            - '\wmic.exe'
+        Image|endswith: '\wmic.exe'
     selection2:
-        - CommandLine|contains|all:
+        CommandLine|contains|all:
             - '/NODE:'
-            - 'process call create '
-        - CommandLine|contains:
-            - ' path AntiVirusProduct get '
-            - ' path FirewallProduct get '
-            - ' shadowcopy delete '
-    condition: selection and selection2
+            - 'process'
+            - 'call'
+            - 'create '
+    recon_part1:
+        CommandLine|contains: ' path '
+    recon_part2:
+        CommandLine|contains:
+            - 'AntiVirus'
+            - 'Firewall'
+        CommandLine|contains|all:
+            - 'Product'
+            - ' get '
+    condition: selection and selection2 or
+               selection and recon_part1 and recon_part2
 fields:
     - CommandLine
     - ParentCommandLine
