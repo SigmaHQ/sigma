@@ -21,15 +21,19 @@ logsource:
     category: process_access
     product: windows
 detection:
-    selection1: 
-        - CallTrace|contains|all: 
+    selection1:
+        CallTrace|contains|all:
               - 'C:\\Windows\\SYSTEM32\\ntdll.dll+'
               - '|C:\\Windows\\System32\\KERNELBASE.dll+'
-              - '|UNKNOWN(*)'
-        - CallTrace|endswith:
-              - 'UNKNOWN(*)|UNKNOWN(*)'
-    selection2: 
-        CallTrace|contains: 'UNKNOWN'
+              - '|UNKNOWN('
+              - ')'
+    selection2:
+        CallTrace|contains|all:
+              - "UNKNOWN("
+              - ")|UNKNOWN("
+        CallTrace|endswith: ")"
+    selection3: 
+        CallTrace|contains: "UNKNOWN"
     granted_access:
         GrantedAccess:
             - "0x1F0FFF"
@@ -40,7 +44,7 @@ detection:
             - "0x1F2FFF"
             - "0x1F3FFF"
             - "0x1FFFFF"
-    condition: selection1 OR (selection2 AND granted_access)
+    condition: (selection1 OR selection2) or (selection3 AND granted_access)
 fields:
     - ComputerName
     - User
