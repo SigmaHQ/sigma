@@ -2,7 +2,7 @@ title: Regsvr32 Anomaly
 id: 8e2b24c9-4add-46a0-b4bb-0057b4e6187d
 status: experimental
 description: Detects various anomalies in relation to regsvr32.exe
-author: Florian Roth
+author: Florian Roth, oscd.community
 date: 2019/01/16
 modified: 2020/08/28
 references:
@@ -21,7 +21,7 @@ logsource:
 detection:
     selection1:
         Image|endswith: '\regsvr32.exe'
-        CommandLine|contains: '\Temp\\'
+        CommandLine|contains: '\Temp\'
     selection2:
         Image|endswith: '\regsvr32.exe'
         ParentImage|endswith: '\powershell.exe'
@@ -30,9 +30,11 @@ detection:
         ParentImage|endswith: '\cmd.exe'
     selection4:
         Image|endswith: '\regsvr32.exe'
+        CommandLine|contains:
+            - '/i:http'
+            - '/i:ftp'
         CommandLine|endswith:
-            - '/i:http* scrobj.dll'
-            - '/i:ftp* scrobj.dll'
+            - 'scrobj.dll'
     selection5:
         Image|endswith: '\wscript.exe'
         ParentImage|endswith: '\regsvr32.exe'
