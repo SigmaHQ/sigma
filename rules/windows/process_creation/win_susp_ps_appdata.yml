@@ -9,16 +9,19 @@ tags:
     - attack.execution
     - attack.t1059.001
     - attack.t1086      # an old one     
-author: Florian Roth
+author: Florian Roth, oscd.community, Jonhnathan Ribeiro
 date: 2019/01/09
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
+        CommandLine|contains|all:
+            - '/c'
+            - 'powershell'
         CommandLine|contains:
-            - ' /c powershell*\AppData\Local\\'
-            - ' /c powershell*\AppData\Roaming\\'
+            - '\AppData\Local\'
+            - '\AppData\Roaming\'
     condition: selection
 falsepositives:
     - Administrative scripts
