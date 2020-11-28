@@ -14,14 +14,14 @@ logsource:
 detection:
     selection:
         Image|endswith: '\powershell.exe'
-    selection2:
-        - Message|contains|all:
-            - 'System.Net.WebClient'
-            - '.DownloadFile('
-        - Message|contains|all:
-            - 'System.Net.WebClient'
-            - '.DownloadString('
-    condition: selection and selection2
+        CommandLine|contains|all:
+            - 'new-object'
+            - 'net.webclient).'
+            - 'download'
+        CommandLine|contains:
+            - 'string('
+            - 'file('
+    condition: selection
 fields:
     - CommandLine
     - ParentCommandLine
