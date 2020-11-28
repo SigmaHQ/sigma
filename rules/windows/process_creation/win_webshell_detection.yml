@@ -5,7 +5,7 @@ author: Florian Roth, Jonhnathan Ribeiro, oscd.community
 reference:
     - https://www.fireeye.com/blog/threat-research/2013/08/breaking-down-the-china-chopper-web-shell-part-ii.html
 date: 2017/01/01
-modified: 2019/10/26
+modified: 2019/11/28
 tags:
     - attack.persistence
     - attack.t1505.003
@@ -25,20 +25,23 @@ detection:
             - '\apache'
             - '\tomcat'
     selection2:
-        - CommandLine|contains:
-            - 'whoami'
-            - 'systeminfo'
-            - '&cd&echo'
-        - CommandLine|contains|all:
-            - 'net'
-            - 'user'
+        Image|endswith:
+            - '\whoami.exe'
+            - '\systeminfo.exe'
+    selection3:
+        Image|endswith:
+            - '\net1.exe'
+            - '\net.exe'
+        CommandLine|contains: 'user'
+    selection4:
         - CommandLine|contains|all:
             - 'cd' # https://www.computerhope.com/cdhlp.htm
             - '/d'
-        - CommandLine|contains|all:
-            - 'ping'
-            - '-n'
-    condition: selection and selection2
+        - CommandLine|contains: '&cd&echo'
+    selection5:
+        Image|endswith: '\ping.exe'
+        CommandLine|contains: '-n'
+    condition: selection and ( selection2 or selection3 or selection4 or selection5 )
 fields:
     - CommandLine
     - ParentCommandLine
