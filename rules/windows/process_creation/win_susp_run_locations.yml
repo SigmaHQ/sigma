@@ -4,7 +4,7 @@ description: Detects suspicious process run from unusual locations
 status: experimental
 references:
     - https://car.mitre.org/wiki/CAR-2013-05-002
-author: juju4
+author: juju4, oscd.community, Jonhnathan Ribeiro
 date: 2019/01/16
 tags:
     - attack.defense_evasion
@@ -15,17 +15,18 @@ logsource:
     product: windows
 detection:
     selection:
-        Image:
-            - '*:\RECYCLER\\*'
-            - '*:\SystemVolumeInformation\\*'
-            - 'C:\\Windows\\Tasks\\*'
-            - 'C:\\Windows\\debug\\*'
-            - 'C:\\Windows\\fonts\\*'
-            - 'C:\\Windows\\help\\*'
-            - 'C:\\Windows\\drivers\\*'
-            - 'C:\\Windows\\addins\\*'
-            - 'C:\\Windows\\cursors\\*'
-            - 'C:\\Windows\\system32\tasks\\*'
+        - Image|contains:
+            - ':\RECYCLER\'
+            - ':\SystemVolumeInformation\'
+        - Image|startswith:
+            - 'C:\Windows\Tasks\'
+            - 'C:\Windows\debug\'
+            - 'C:\Windows\fonts\'
+            - 'C:\Windows\help\'
+            - 'C:\Windows\drivers\'
+            - 'C:\Windows\addins\'
+            - 'C:\Windows\cursors\'
+            - 'C:\Windows\system32\tasks\'
 
     condition: selection
 falsepositives:
