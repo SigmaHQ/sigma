@@ -4,9 +4,9 @@ status: experimental
 description: Detects potential COM object hijacking leveraging the COM Search Order
 references:
     - https://www.cyberbit.com/blog/endpoint-security/com-hijacking-windows-overlooked-security-vulnerability/
-author: Maxime Thiebaut (@0xThiebaut)
+author: Maxime Thiebaut (@0xThiebaut), oscd.community
 date: 2020/04/14
-modified: 2020/09/06
+modified: 2020/11/28
 tags:
     - attack.persistence
     - attack.t1038 # an old one
@@ -16,7 +16,10 @@ logsource:
     product: windows
 detection:
     selection: # Detect new COM servers in the user hive
-        TargetObject: 'HKU\\*_Classes\CLSID\\*\InProcServer32\(Default)'
+        TargetObject|contains|all: 
+            - 'HKU\'
+            - '_Classes\CLSID\'
+            - '\InProcServer32\(Default)'
     filter:
         - Details|contains: # Exclude privileged directories and observed FPs
             - '%%systemroot%%\system32\'
