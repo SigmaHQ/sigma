@@ -16,13 +16,15 @@ logsource:
     product: windows
 detection:
     selection:
-        ParentImage|contains:
+        - ParentImage|contains:
             - '\apache'
             - '\tomcat'
+        - ParentImage|endswith:
             - '\w3wp.exe'
             - '\php-cgi.exe'
             - '\nginx.exe'
             - '\httpd.exe'
+    selection2:
         Image|endswith:
             - '\cmd.exe'
         CommandLine|contains:
@@ -30,7 +32,7 @@ detection:
             - 'python --help'
             - 'wget --help'
             - 'perl -h'
-    condition: selection
+    condition: selection and selection2
 fields:
     - Image
     - CommandLine
