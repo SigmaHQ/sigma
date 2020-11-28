@@ -11,6 +11,7 @@ tags:
     - attack.t1202
 author: Markus Neis
 date: 2018/12/27
+modified: 2020/11/28
 logsource:
     category: process_creation
     product: windows
@@ -19,7 +20,10 @@ detection:
         CommandLine|contains: 'EnableUnsafeClientMailRules'
     outlookExec:
         ParentImage|endswith: '\outlook.exe'
-        CommandLine: \\\\*\\*.exe
+        CommandLine|contains|all: 
+            - '\\\\'
+            - '\\'
+            - '.exe'
     condition: clientMailRules or outlookExec
 falsepositives:
     - unknown
