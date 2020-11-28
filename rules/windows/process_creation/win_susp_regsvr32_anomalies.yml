@@ -4,7 +4,7 @@ status: experimental
 description: Detects various anomalies in relation to regsvr32.exe
 author: Florian Roth, oscd.community
 date: 2019/01/16
-modified: 2020/08/28
+modified: 2020/11/28
 references:
     - https://subt0x10.blogspot.de/2017/04/bypass-application-whitelisting-script.html
 tags:
@@ -14,7 +14,6 @@ tags:
     - attack.t1117      # an old one  
     - car.2019-04-002
     - car.2019-04-003
-
 logsource:
     category: process_creation
     product: windows
@@ -30,11 +29,12 @@ detection:
         ParentImage|endswith: '\cmd.exe'
     selection4:
         Image|endswith: '\regsvr32.exe'
+        CommandLine|contains|all: 
+            - '/i:'
         CommandLine|contains:
-            - '/i:http'
-            - '/i:ftp'
-        CommandLine|endswith:
-            - 'scrobj.dll'
+            - 'http'
+            - 'ftp'
+        CommandLine|endswith: 'scrobj.dll'
     selection5:
         Image|endswith: '\wscript.exe'
         ParentImage|endswith: '\regsvr32.exe'
