@@ -1,0 +1,27 @@
+title: Windows Defender Exclusion Set
+id: e9c8808f-4cfb-4ba9-97d4-e5f3beaa244d
+description: 'Detects scenarios where an windows defender exclusion was added in registry where an entity would want to bypass antivirus scanning from windows defender'
+references:
+    - https://www.bleepingcomputer.com/news/security/gootkit-malware-bypasses-windows-defender-by-setting-path-exclusions/
+tags:
+    - attack.defense_evasion
+    - attack.t1089           # an old one
+    - attack.t1562.001
+author: "@BarryShooshooga"
+date: 2019/10/26
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: Audit Policy : Security Settings/Local Policies/Audit Policy, Registry System Access Control (SACL): Auditing/User'
+detection:
+    selection:
+        EventID:
+            - 4657
+            - 4656
+            - 4660
+            - 4663
+        ObjectName|contains: '\Microsoft\Windows Defender\Exclusions\'
+    condition: selection
+falsepositives:
+    - Intended inclusions by administrator
+level: high

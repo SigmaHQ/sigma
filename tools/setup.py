@@ -4,16 +4,17 @@ from setuptools import setup, find_packages
 # To use a consistent encoding
 from codecs import open
 from os import path
+from pathlib import Path
 
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+with open(path.join(here, 'LONG_DESCRIPTION.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
     name='sigmatools',
-    version='0.11',
+    version='0.18.1',
     description='Tools for the Generic Signature Format for SIEM Systems',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -22,7 +23,7 @@ setup(
     author_email='thomas@patzke.org',
     license='LGPLv3',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Intended Audience :: Information Technology',
         'Intended Audience :: System Administrators',
@@ -31,41 +32,33 @@ setup(
         'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Environment :: Console',
     ],
     keywords='security monitoring siem logging signatures elasticsearch splunk ids sysmon',
-    packages=['sigma', 'sigma.backends', 'sigma.config', 'sigma.parser'],
+    packages=[
+        'sigma',
+        'sigma.backends',
+        'sigma.config',
+        'sigma.parser',
+        'sigma.parser.modifiers',
+        ],
     python_requires='~=3.6',
-    install_requires=['PyYAML', 'pymisp'],
+    install_requires=['PyYAML', 'pymisp', 'progressbar2'],
     extras_require={
         'test': ['coverage', 'yamllint'],
     },
     data_files=[
-        ('etc/sigma', [
-            'config/qualys.yml',
-            'config/elk-defaultindex.yml',
-            'config/arcsight.yml',
-            'config/sumologic.yml',
-            'config/netwitness.yml',
-            'config/elk-windows.yml',
-            'config/helk.yml',
-            'config/elk-defaultindex-logstash.yml',
-            'config/elk-linux.yml',
-            'config/logpoint-windows-all.yml',
-            'config/thor.yml',
-            'config/elk-winlogbeat.yml',
-            'config/elk-defaultindex-filebeat.yml',
-            'config/splunk-windows-all.yml',
-            'config/qradar.yml',
-            'config/powershell-windows-all.yml',
-            ]),
-        ('etc/sigma/generic', [
-            'config/generic/sysmon.yml',
-            'config/generic/windows-audit.yml',
-        ])],
-    scripts=[
-        'sigmac',
-        'merge_sigma',
-        'sigma2misp',
-        ]
+        ('etc/sigma', [ str(p) for p in Path('config/').glob('*.yml') ]),
+        ('etc/sigma/generic', [ str(p) for p in Path('config/generic/').glob('*.yml') ])],
+    entry_points={
+        'console_scripts': [
+            'sigmac = sigma.sigmac:main',
+            'merge_sigma = sigma.merge_sigma:main',
+            'sigma2misp = sigma.sigma2misp:main',
+            'sigma2attack = sigma.sigma2attack:main',
+            'sigma_similarity = sigma.sigma_similarity:main',
+            'sigma_uuid = sigma.sigma_uuid:main',
+        ],
+    },
 )

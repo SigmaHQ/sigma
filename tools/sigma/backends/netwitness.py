@@ -24,6 +24,8 @@ from .mixins import MultiRuleOutputMixin
 class NetWitnessBackend(SingleTextQueryBackend):
     """Converts Sigma rule into NetWitness saved search. Contributed by @tuckner"""
     identifier = "netwitness"
+    config_required = False
+    default_config = ["sysmon", "netwitness"]
     active = True
     reEscape = re.compile('(")')
     reClear = None

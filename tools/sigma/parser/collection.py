@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import yaml
+from .exceptions import SigmaCollectionParseError
 from .rule import SigmaParser
 
 class SigmaCollectionParser:

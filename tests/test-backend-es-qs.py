@@ -16,7 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import asyncio
-import functools
 import sys
 import pprint
 import elasticsearch
@@ -41,10 +40,11 @@ except elasticsearch.exceptions.RequestError as e:
 
 queries = asyncio.Queue()
 
+
 # sigmac runner coroutinne
 async def run_sigmac():
     sigmac = asyncio.create_subprocess_exec(
-            sigmac_cmd, "-t", "es-qs", "-c", "tools/config/elk-winlogbeat.yml", "-v", "-I", "-r", "rules/",
+            sigmac_cmd, "-t", "es-qs", "-c", "winlogbeat", "-v", "-I", "-r", "rules/",
             stdout=asyncio.subprocess.PIPE,
             )
     print("* Launching sigmac")
@@ -69,6 +69,7 @@ async def run_sigmac():
     exitcode = proc.returncode
     print("* sigmac returned with exit code {}".format(exitcode))
     return exitcode
+
 
 # Generated query checker loop
 async def check_queries():

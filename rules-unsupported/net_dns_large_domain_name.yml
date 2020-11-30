@@ -1,0 +1,37 @@
+title: Large domain name request
+id: 14aa0d9e-c70a-4a49-bdc1-e5cbc4fc6af7
+description: Detects large DNS domain names
+author: Daniil Yugoslavskiy, oscd.community
+date: 2019/10/21
+modified: 2019/11/04
+tags:
+    - attack.exfiltration
+    - attack.t1048
+logsource:
+    category: dns
+detection:
+    selection:
+        query_length: "> 70"              # IS MORE THAN 70 bytes
+    default_list_of_well_known_domains:
+        query_etld_plus_one:
+            - "akadns.net"
+            - "akamaiedge.net"
+            - "amazonaws.com"
+            - "apple.com"
+            - "apple-dns.net"
+            - "cloudfront.net"
+            - "icloud.com"
+            - "in-addr.arpa"
+            - "google.com"
+            - "yahoo.com"
+            - "dropbox.com"
+            - "windowsupdate.com"
+            - "microsoftonline.com"
+            - "s-microsoft.com"
+            - "office365.com"
+            - "linkedin.com"
+    condition: selection and not default_list_of_well_known_domains
+falsepositives:
+    - Legitimate domain name requested, which should be added to whitelist
+level: high
+status: experimental

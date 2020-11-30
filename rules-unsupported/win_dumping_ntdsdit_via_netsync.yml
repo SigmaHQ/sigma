@@ -1,0 +1,30 @@
+title: Dumping ntds.dit remotely via NetSync
+id: 757b2a11-73e7-411a-bd46-141d906e0167
+description: ntds.dit retrieving (only computer accounts) using synchronisation with legit domain controller using Netlogon Remote Protocol
+author: Teymur Kheirkhabarov, oscd.community
+date: 2019/11/01
+references:
+    - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
+tags:
+    - attack.credential_access
+    - attack.t1003
+logsource:
+    product: windows
+    service: security
+detection:
+    selection1:
+        EventID: 4624
+        ComputerName: '%DomainControllersNamesList%'
+    selection2:
+        IpAddress: '%DomainControllersIpsList%'
+    selection3:
+        EventID: 5145
+        ComputerName: '%DomainControllersNamesList%'
+        ShareName|contains: '\IPC$'
+        SubjectLogonId: '%SuspiciousTargetLogonIdList%'
+        RelativeTargetName: 'netlogon'
+    condition: write TargetLogonId from selection1 (if not selection2) to list %SuspiciousTargetLogonIdList%; then if selection3 -> alert
+falsepositives:
+    - Legitimate administrator adding new domain controller to already existing domain
+level: medium
+status: experimental

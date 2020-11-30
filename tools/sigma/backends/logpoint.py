@@ -22,6 +22,8 @@ class LogPointBackend(SingleTextQueryBackend):
     """Converts Sigma rule into LogPoint query"""
     identifier = "logpoint"
     active = True
+    config_required = False
+    default_config = ["sysmon", "logpoint-windows"]
 
     # \   -> \\
     # \*  -> \*

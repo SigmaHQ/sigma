@@ -1,0 +1,33 @@
+title: Renamed ZOHO Dctask64
+id: 340a090b-c4e9-412e-bb36-b4b16fe96f9b
+status: experimental
+description: Detects a renamed dctask64.exe used for process injection, command execution, process creation with a signed binary by ZOHO Corporation
+references:
+    - https://twitter.com/gN3mes1s/status/1222088214581825540
+    - https://twitter.com/gN3mes1s/status/1222095963789111296
+    - https://twitter.com/gN3mes1s/status/1222095371175911424
+author: Florian Roth
+date: 2020/01/28
+modified: 2020/08/28
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+    - attack.t1055.001
+    - attack.t1202
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Imphash: '6834B1B94E49701D77CCB3C0895E1AFD'
+    filter:
+        Image|endswith: '\dctask64.exe'
+    condition: selection and not filter
+fields:
+    - CommandLine
+    - ParentCommandLine
+    - ParentImage
+falsepositives:
+    - Unknown yet
+level: high

@@ -24,6 +24,7 @@ COND_OR   = 2
 COND_NOT  = 3
 COND_NULL = 4
 
+
 # Debugging code
 def dumpNode(node, indent=''):   # pragma: no cover
     """
@@ -41,6 +42,7 @@ def dumpNode(node, indent=''):   # pragma: no cover
         print("%s%s=%s" % (indent, type(node).__name__,
                                    repr(node)))
     return node
+
 
 # Condition Tokenizer
 class SigmaConditionToken:
@@ -99,6 +101,7 @@ class SigmaConditionToken:
 
     def __str__(self):  # pragma: no cover
         return "[ Token: %s: '%s' ]" % (self.tokenstr[self.type], self.matched)
+
 
 class SigmaConditionTokenizer:
     """Tokenize condition string into token sequence"""
@@ -172,6 +175,7 @@ class SigmaConditionTokenizer:
     def index(self, item):
         return self.tokens.index(item)
 
+
 ### Parse Tree Node Classes ###
 class ParseTreeNode:
     """Parse Tree Node Base Class"""
@@ -180,6 +184,7 @@ class ParseTreeNode:
 
     def __str__(self):  # pragma: no cover
         return "[ %s: %s ]" % (self.__doc__, str([str(item) for item in self.items]))
+
 
 class ConditionBase(ParseTreeNode):
     """Base class for conditional operations"""
@@ -198,19 +203,22 @@ class ConditionBase(ParseTreeNode):
     def __len__(self):
         return len(self.items)
 
+
 class ConditionAND(ConditionBase):
     """AND Condition"""
     op = COND_AND
 
-    def __init__(self, sigma=None, op=None, val1=None, val2=None):
-        if sigma == None and op == None and val1 == None and val2 == None:    # no parameters given - initialize empty
+    def __init__(self, sigma=None, op=None, *args):
+        if sigma == None and op == None and len(args) == 0:    # no parameters given - initialize empty
             self.items = list()
         else:       # called by parser, use given values
-            self.items = [ val1, val2 ]
+            self.items = args
+
 
 class ConditionOR(ConditionAND):
     """OR Condition"""
     op = COND_OR
+
 
 class ConditionNOT(ConditionBase):
     """NOT Condition"""
@@ -235,18 +243,22 @@ class ConditionNOT(ConditionBase):
         except IndexError:
             return None
 
+
 class ConditionNULLValue(ConditionNOT):
     """Condition: Field value is empty or doesn't exists"""
     pass
+
 
 class ConditionNotNULLValue(ConditionNULLValue):
     """Condition: Field value is not empty"""
     pass
 
+
 class NodeSubexpression(ParseTreeNode):
     """Subexpression"""
     def __init__(self, subexpr):
         self.items = subexpr
+
 
 # Parse tree generators: generate parse tree nodes from extended conditions
 def generateXOf(sigma, val, condclass):
@@ -259,30 +271,36 @@ def generateXOf(sigma, val, condclass):
     """
     if val.matched == "them":           # OR across all definitions
         cond = condclass()
-        for definition in sigma.definitions.values():
+        for name, definition in sigma.definitions.items():
+            if name == "timeframe":
+                continue
             cond.add(NodeSubexpression(sigma.parse_definition(definition)))
         return NodeSubexpression(cond)
     elif val.matched.find("*") > 0:     # OR across all matching definitions
         cond = condclass()
         reDefPat = re.compile("^" + val.matched.replace("*", ".*") + "$")
         for name, definition in sigma.definitions.items():
-            if reDefPat.match(name):
+            if name != "timeframe" and reDefPat.match(name):
                 cond.add(NodeSubexpression(sigma.parse_definition(definition)))
         return NodeSubexpression(cond)
     else:                               # OR across all items of definition
         return NodeSubexpression(sigma.parse_definition_byname(val.matched, condclass))
 
+
 def generateAllOf(sigma, op, val):
     """Convert 'all of x' expressions into ConditionAND"""
     return generateXOf(sigma, val, ConditionAND)
+
 
 def generateOneOf(sigma, op, val):
     """Convert '1 of x' expressions into ConditionOR"""
     return generateXOf(sigma, val, ConditionOR)
 
+
 def convertId(sigma, op):
     """Convert search identifiers (lists or maps) into condition nodes according to spec defaults"""
     return NodeSubexpression(sigma.parse_definition_byname(op.matched))
+
 
 # Optimizer
 class SigmaConditionOptimizer:
@@ -546,7 +564,8 @@ class SigmaConditionParser:
 
     def __len__(self):  # pragma: no cover
         return len(self.parsedSearch)
- 
+
+
 # Aggregation parser
 class SigmaAggregationParser(SimpleParser):
     """Parse Sigma aggregation expression and provide parsed data"""
@@ -597,7 +616,7 @@ class SigmaAggregationParser(SimpleParser):
                 SigmaConditionToken.TOKEN_ID: (None, "store_search_id", 9),
             },
             ]
-    finalstates = { -1, 9 }
+    finalstates = {-1, 9}
 
     # Aggregation functions
     AGGFUNC_COUNT = 1
@@ -631,7 +650,7 @@ class SigmaAggregationParser(SimpleParser):
 
     def trans_fieldname(self, fieldname):
         """Translate field name into configured mapped name"""
-        mapped = self.config.get_fieldmapping(fieldname).resolve_fieldname(fieldname)
+        mapped = self.config.get_fieldmapping(fieldname).resolve_fieldname(fieldname, self.parser)
         if type(mapped) == str:
             return mapped
         else:

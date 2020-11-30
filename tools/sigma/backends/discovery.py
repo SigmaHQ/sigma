@@ -1,5 +1,5 @@
-# Output backends for sigmac
-# Copyright 2016-2018 Thomas Patzke, Florian Roth
+# Output backend discovery
+# Copyright 2016-2019 Thomas Patzke, Florian Roth
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -17,30 +17,18 @@
 import sys
 import json
 import re
+import os
 import sigma.backends
 from .base import BaseBackend
-import pkgutil
-import importlib
-import os
-
-def getAllSubclasses(cls):
-    for subcls in cls.__subclasses__():
-        yield from getAllSubclasses(subcls)
-        yield cls
+from sigma.tools import getAllSubclasses, getClassDict
 
 def getBackendList():
     """Return list of backend classes"""
     path = os.path.dirname(__file__)
-    backend_classes = list()
-    for finder, name, ispkg in pkgutil.iter_modules([ path ]):
-        module = importlib.import_module("." + name, __package__)
-        for name, cls in vars(module).items():
-            if type(cls) == type and issubclass(cls, BaseBackend) and cls.active:
-                backend_classes.append(cls)
-    return backend_classes
+    return getAllSubclasses(path, "backends", BaseBackend)
 
 def getBackendDict():
-    return {cls.identifier: cls for cls in getBackendList() }
+    return getClassDict(getBackendList())
 
 def getBackend(name):
     try:

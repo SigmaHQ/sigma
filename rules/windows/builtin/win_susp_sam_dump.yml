@@ -1,10 +1,13 @@
 title: SAM Dump to AppData
+id: 839dd1e8-eda8-4834-8145-01beeee33acd
 status: experimental
 description: Detects suspicious SAM dump activity as cause by QuarksPwDump and other password dumpers
 tags:
     - attack.credential_access
-    - attack.t1003
+    - attack.t1003          # an old one
+    - attack.t1003.002
 author: Florian Roth
+date: 2018/01/27
 logsource:
     product: windows
     service: system
@@ -12,9 +15,9 @@ logsource:
 detection:
     selection:
         EventID: 16
-    keywords:
-        - '*\AppData\Local\Temp\SAM-*.dmp *'
-    condition: all of them
+        Message:
+            - '*\AppData\Local\Temp\SAM-*.dmp *'
+    condition: selection
 falsepositives:
     - Penetration testing
 level: high

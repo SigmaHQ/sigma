@@ -22,6 +22,8 @@ class QualysBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Qualys saved search. Contributed by SOC Prime. https://socprime.com"""
     identifier = "qualys"
     active = True
+    config_required = False
+    default_config = ["sysmon", "qualys"]
     andToken = " and "
     orToken = " or "
     notToken = "not "

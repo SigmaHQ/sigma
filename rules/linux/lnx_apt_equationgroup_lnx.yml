@@ -1,0 +1,81 @@
+title: Equation Group Indicators
+id: 41e5c73d-9983-4b69-bd03-e13b67e9623c
+status: experimental
+description: Detects suspicious shell commands used in various Equation Group scripts and tools
+author: Florian Roth
+date: 2017/04/09
+references:
+    - https://medium.com/@shadowbrokerss/dont-forget-your-base-867d304a94b1
+logsource:
+    product: linux
+detection:
+    keywords:
+        # evolvingstrategy, elgingamble, estesfox
+        - 'chown root*chmod 4777 '
+        - 'cp /bin/sh .;chown'
+        # tmpwatch
+        - 'chmod 4777 /tmp/.scsi/dev/bin/gsh'
+        - 'chown root:root /tmp/.scsi/dev/bin/'
+        # estesfox
+        - 'chown root:root x;'
+        # ratload
+        - '/bin/telnet locip locport < /dev/console | /bin/sh'
+        - '/tmp/ratload'
+        # ewok
+        - 'ewok -t '
+        # xspy
+        - 'xspy -display '
+        # elatedmonkey
+        - 'cat > /dev/tcp/127.0.0.1/80 <<END'
+        # ftshell
+        - 'rm -f /current/tmp/ftshell.latest'
+        # ghost
+        - 'ghost_* -v '
+        # morerats client
+        - ' --wipe > /dev/null'
+        # noclient
+        - 'ping -c 2 *; grep * /proc/net/arp >/tmp/gx'
+        - 'iptables * OUTPUT -p tcp -d 127.0.0.1 --tcp-flags RST RST -j DROP;'
+        # auditcleaner
+        - '> /var/log/audit/audit.log; rm -f .'
+        - 'cp /var/log/audit/audit.log .tmp'
+        # reverse shell
+        - 'sh >/dev/tcp/* <&1 2>&1'
+        # packrat
+        - 'ncat -vv -l -p * <'
+        - 'nc -vv -l -p * <'
+        # empty bowl
+        - '< /dev/console | uudecode && uncompress'
+        - 'sendmail -osendmail;chmod +x sendmail'
+        # echowrecker
+        - '/usr/bin/wget -O /tmp/a http* && chmod 755 /tmp/cron'
+        # dubmoat
+        - 'chmod 666 /var/run/utmp~'
+        # poptop
+        - 'chmod 700 nscd crond'
+        # abopscript
+        - 'cp /etc/shadow /tmp/.'
+        # ys
+        - '</dev/console |uudecode > /dev/null 2>&1 && uncompress'
+        # jacktelnet
+        - 'chmod 700 jp&&netstat -an|grep'
+        # others
+        - 'uudecode > /dev/null 2>&1 && uncompress -f * && chmod 755'
+        - 'chmod 700 crond'
+        - 'wget http*; chmod +x /tmp/sendmail'
+        - 'chmod 700 fp sendmail pt'
+        - 'chmod 755 /usr/vmsys/bin/pipe'
+        - 'chmod -R 755 /usr/vmsys'
+        - 'chmod 755 $opbin/*tunnel'
+        - 'chmod 700 sendmail'
+        - 'chmod 0700 sendmail'
+        - '/usr/bin/wget http*sendmail;chmod +x sendmail;'
+        - '&& telnet * 2>&1 </dev/console'
+    condition: keywords
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.execution
+    - attack.g0020
+    - attack.t1059.004

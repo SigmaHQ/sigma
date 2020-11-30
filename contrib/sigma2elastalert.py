@@ -162,12 +162,12 @@ for file in glob.glob(args.ruledir + "/*"):
             output_elast_config = re.sub(entry, str(convert_args[entry]), output_elast_config)
         for entry in translate_func:
             output_elast_config = re.sub(entry, translate_func[entry], output_elast_config)
-        print "Converting file " + file
+        print("Converting file " + file)
         with open(os.path.join(args.outdir, "sigma-" + file.split("/")[-1]), "w") as f:
                 f.write(output_elast_config)
     except Exception as e:
         if args.debug:
             traceback.print_exc()
-        print "error " + str(file) + "----" + str(e)
+        print("error " + str(file) + "----" + str(e))
         pass
 

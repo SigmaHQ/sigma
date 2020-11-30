@@ -1,0 +1,28 @@
+title: Stop Windows Service
+id: eb87818d-db5d-49cc-a987-d5da331fbd90
+description: Detects a windows service to be stopped
+status: experimental
+author: Jakob Weinzettl, oscd.community
+date: 2019/10/23
+modified: 2019/11/08
+tags:
+    - attack.impact
+    - attack.t1489
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+      - Image|endswith:
+            - '\sc.exe'
+            - '\net.exe'
+            - '\net1.exe'
+        CommandLine|contains: 'stop'
+    condition: selection
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+falsepositives:
+    - Administrator shutting down the service due to upgrade or removal purposes
+level: low

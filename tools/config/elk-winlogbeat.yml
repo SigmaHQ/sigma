@@ -1,12 +1,4 @@
-title: Elastic Winlogbeat index pattern and field mapping
-order: 20
-backends:
-  - es-qs
-  - es-dsl
-  - kibana
-  - xpack-watcher
-  - elastalert
-  - elastalert-dsl
+title: ELK Ingested with Winlogbeat
 logsources:
   windows:
     product: windows
@@ -35,12 +27,21 @@ logsources:
     product: windows
     service: driver-framework
     conditions:
-      source: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
-  windows-dhcp:
+      log_name: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
+  windows-ntlm:
     product: windows
-    service: dhcp
+    service: ntlm
     conditions:
-      source: 'Microsoft-Windows-DHCP-Server/Operational'
+      log_name: 'Microsoft-Windows-NTLM/Operational'
+  windows-applocker:
+    product: windows
+    service: applocker
+    conditions:
+      log_name:
+        - 'Microsoft-Windows-AppLocker/MSI and Script'
+        - 'Microsoft-Windows-AppLocker/EXE and DLL'
+        - 'Microsoft-Windows-AppLocker/Packaged app-Deployment'
+        - 'Microsoft-Windows-AppLocker/Packaged app-Execution'
 defaultindex: winlogbeat-*
 # Extract all field names qith yq:
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: event_data.\1/g'
@@ -77,7 +78,6 @@ fieldmappings:
     ImageLoaded: event_data.ImageLoaded
     ImagePath: event_data.ImagePath
     Imphash: event_data.Imphash
-    IpAddress: event_data.IpAddress
     LogonProcessName: event_data.LogonProcessName
     LogonType: event_data.LogonType
     NewProcessName: event_data.NewProcessName
@@ -86,11 +86,9 @@ fieldmappings:
     ObjectType: event_data.ObjectType
     ObjectValueName: event_data.ObjectValueName
     ParentCommandLine: event_data.ParentCommandLine
-    ParentProcessName: event_data.ParentProcessName
     ParentImage: event_data.ParentImage
     Path: event_data.Path
     PipeName: event_data.PipeName
-    ProcessCommandLine: event_data.ProcessCommandLine
     ProcessName: event_data.ProcessName
     Properties: event_data.Properties
     ServiceFileName: event_data.ServiceFileName

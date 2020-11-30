@@ -1,12 +1,4 @@
-title: Logstash Windows common log sources
-order: 20
-backends:
-  - es-qs
-  - es-dsl
-  - kibana
-  - xpack-watcher
-  - elastalert
-  - elastalert-dsl
+title: ELK Windows Indices and Mappings
 logsources:
   windows:
     product: windows
@@ -35,10 +27,19 @@ logsources:
     product: windows
     service: driver-framework
     conditions:
-      source: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
-  windows-dhcp:
+      EventLog: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
+  windows-ntlm:
     product: windows
-    service: dhcp
+    service: ntlm
     conditions:
-      source: 'Microsoft-Windows-DHCP-Server/Operational'
+      EventLog: 'Microsoft-Windows-NTLM/Operational'
+  windows-applocker:
+    product: windows
+    service: applocker
+    conditions:
+      EventLog:
+        - 'Microsoft-Windows-AppLocker/MSI and Script'
+        - 'Microsoft-Windows-AppLocker/EXE and DLL'
+        - 'Microsoft-Windows-AppLocker/Packaged app-Deployment'
+        - 'Microsoft-Windows-AppLocker/Packaged app-Execution'
 defaultindex: logstash-*

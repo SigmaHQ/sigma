@@ -1,0 +1,31 @@
+title: Empire UserAgent URI Combo
+id: b923f7d6-ac89-4a50-a71a-89fb846b4aa8
+status: experimental
+description: Detects user agent and URI paths used by empire agents
+author: Florian Roth
+date: 2020/07/13
+modified: 2020/09/03
+references:
+    - https://github.com/BC-SECURITY/Empire
+logsource:
+    category: proxy
+detection:
+    selection:
+        c-useragent: 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'
+        cs-uri-query:
+            - '/admin/get.php'
+            - '/news.php'
+            - '/login/process.php'
+        cs-method: 'POST'
+    condition: selection
+fields:
+    - c-uri
+    - c-ip
+falsepositives:
+    - Valid requests with this exact user agent to server scripts of the defined names
+level: high
+tags:
+  - attack.defense_evasion
+  - attack.command_and_control
+  - attack.t1071.001
+  - attack.t1043  # an old one
