@@ -10,16 +10,18 @@ logsource:
     product: linux
     category: process_creation
 detection:
-    keywords:
-        - Commands|contains:
-          - 'rm * /var/log*'
-          - 'shred -u /var/log*'
-          - 'echo * > /var/log*'
-          - 'rmdir * /var/log*'
-          - 'rm * /private/var/audit/*'
-          - 'rm * /private/var/log/system.log*'
-          - 'echo * /var/spool/mail/*'
-    condition: keywords
+    selection1:
+      - ProcessName|endswith: 
+        - '/rm'
+        - 'shred'
+        - 'echo'
+        - 'rmdir'
+    selection2:
+        CommandLine|contains: 
+          - '/var/log'
+          - '/private/var/audit'
+          - '/private/var/log/'
+    condition: selection1 and selection2
 falsepositives:
     - Legitimate administration activities
 level: medium
