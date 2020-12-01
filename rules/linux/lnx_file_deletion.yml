@@ -10,15 +10,13 @@ logsource:
     product: linux
     category: process_creation
 detection:
-    keywords:
-        - Commands|contains:
-          - 'rm '
-          - 'shred -u'
-          - 'rmdir'
-          - 'unlink'
-          - 'busybox rm -f *'
-          - 'find * -delete'
-    condition: keywords
+    selection:
+        - ProcessName|endswith:
+          - '/rm'
+          - '/shred'
+          - '/unlink'
+          - '/busybox'
+    condition: selection
 falsepositives:
     - Legitimate administration activities
 level: low
