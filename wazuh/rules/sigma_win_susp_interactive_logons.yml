@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects interactive console logons to Server Systems
+filter:
+- query:
+    query_string:
+      query: ((data.win.system.eventID:("528" OR "529" OR "4624" OR "4625") AND logon_type:"2" AND data.win.system.computer:("%ServerSystems%" OR "%DomainControllers%")) AND (NOT (logon_process_name:"Advapi" AND data.win.system.computer:"%Workstations%")))
+index: wazuh-alerts-3.x-*
+name: 3ff152b2-1388-4984-9cd9-a323323fdadf_0
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,29 @@
+alert:
+- debug
+description: Detects PsExec service installation and execution events (service and Sysmon)
+filter:
+- query:
+    query_string:
+      query: (service_name:"PSEXESVC" AND ((data.win.system.eventID:"7045" AND service_image_path.keyword:*\\PSEXESVC.exe) OR data.win.system.eventID:"7036"))
+index: wazuh-alerts-3.x-*
+name: 42c575ea-e41e-41f1-b248-8093c3e82a28_0
+priority: 4
+realert:
+  minutes: 0
+type: any
+
+alert:
+- debug
+description: Detects PsExec service installation and execution events (service and Sysmon)
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.image.keyword:*\\PSEXESVC.exe AND user_account:"NT\ AUTHORITY\\SYSTEM")
+index: wazuh-alerts-3.x-*
+name: 42c575ea-e41e-41f1-b248-8093c3e82a28-2_0
+priority: 4
+realert:
+  minutes: 0
+type: any
+
+
