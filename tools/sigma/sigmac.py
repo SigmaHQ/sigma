@@ -236,7 +236,7 @@ def main():
             parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter)
             results = parser.generate(backend)
 
-            newline_separator = '\0' if cmdargs.print0 else None
+            newline_separator = '\0' if cmdargs.print0 else '\n'
             for result in results:
                 print(result, file=out, end=newline_separator)
         except OSError as e:
