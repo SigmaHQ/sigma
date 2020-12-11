@@ -5,6 +5,8 @@ description: Detects a Windows command line executable started from Microsoft Wo
 references:
     - https://www.hybrid-analysis.com/sample/465aabe132ccb949e75b8ab9c5bda36d80cf2fd503d52b8bad54e295f28bbc21?environmentId=100
     - https://mgreen27.github.io/posts/2018/04/02/DownloadCradle.html
+    - https://blog.talosintelligence.com/2020/02/building-bypass-with-msbuild.html
+    - https://github.com/elastic/detection-rules/blob/main/rules/windows/defense_evasion_execution_msbuild_started_by_office_app.toml
 tags:
     - attack.execution
     - attack.defense_evasion
@@ -12,7 +14,7 @@ tags:
     - attack.t1202
     - car.2013-02-003
     - car.2014-04-003
-author: Michael Haag, Florian Roth, Markus Neis
+author: Michael Haag, Florian Roth, Markus Neis, Elastic, FPT.EagleEye Team
 date: 2018/04/06
 logsource:
     category: process_creation
@@ -26,6 +28,8 @@ detection:
             - '*\MSPUB.exe'
             - '*\VISIO.exe'
             - '*\OUTLOOK.EXE'
+            - '*\MSACCESS.EXE'
+            - '*\EQNEDT32.EXE'
         Image:
             - '*\cmd.exe'
             - '*\powershell.exe'
@@ -46,6 +50,7 @@ detection:
             - '*\mftrace.exe'
             - '*\AppVLP.exe'
             - '*\svchost.exe'  # https://www.vmray.com/analyses/2d2fa29185ad/report/overview.html
+            - '*\msbuild.exe' # https://github.com/elastic/detection-rules/blob/main/rules/windows/defense_evasion_execution_msbuild_started_by_office_app.toml
     condition: selection
 fields:
     - CommandLine
