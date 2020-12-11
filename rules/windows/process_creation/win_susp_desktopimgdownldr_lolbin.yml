@@ -1,0 +1,25 @@
+title: DesktopImgdownldr LOLBIN
+id: d596156f-28dc-4c6a-bc69-ad8331ca174c
+status: experimental
+description: Detects the execution of a DesktopImgdownldr for downloading arbitrary files from a web server
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Desktopimgdownldr/
+    - https://labs.sentinelone.com/living-off-windows-land-a-new-native-file-downldr/
+    - https://github.com/elastic/detection-rules/blob/main/rules/windows/command_and_control_remote_file_copy_desktopimgdownldr.toml
+author: Elastic, FPT.EagleEye Team
+date: 2020/09/28
+tags:
+    - attack.command_and_control
+    - attack.t1105
+logsource:
+    product: windows
+    service: process_creation
+detection:
+    selection:
+        ProcessCommandline|contains: '*/lockscreenurl:http*'
+        Image: 
+            - '*\desktopimgdownldr.exe'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

@@ -1,0 +1,75 @@
+# ################################################################################
+# IMPORTANT NOTE
+# The most recent version of this POC rule can now be found in the main repository 
+# https://github.com/Neo23x0/sigma/blob/master/other/godmode_sigma_rule.yml
+# ################################################################################
+#    _____        __  __  ___        __      
+#   / ___/__  ___/ / /  |/  /__  ___/ /__    
+#  / (_ / _ \/ _  / / /|_/ / _ \/ _  / -_)   
+#  \___/\___/\_,_/ /_/  /_/\___/\_,_/\__/_   
+#    / __(_)__ ___ _  ___ _  / _ \__ __/ /__ 
+#   _\ \/ / _ `/  ' \/ _ `/ / , _/ // / / -_)
+#  /___/_/\_, /_/_/_/\_,_/ /_/|_|\_,_/_/\__/ 
+#        /___/                               
+#
+#  Florian Roth
+#  December 2019
+#  v0.2
+#
+#  A Proof-of-Concept with the most effective search queries
+
+title: Godmode Sigma Rule
+id: def6caac-a999-4fc9-8800-cfeff700ba98
+description: 'PoC rule to detect malicious activity - following the principle: if you had only one shot, what would you look for?'
+status: experimental
+author: Florian Roth
+date: 2019/12/22
+level: high
+action: global
+---
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    # Different suspicious or malicious command line parameters
+    selection_plain:
+        CommandLine|contains:
+            - ' -NoP '  # Often used in malicious PowerShell commands
+            - ' -W Hidden '  # Often used in malicious PowerShell commands
+            - ' -decode '  # Used with certutil
+            - ' /decode '  # Used with certutil 
+            - ' -e* JAB'  # PowerShell encoded commands
+            - ' -e* SUVYI'  # PowerShell encoded commands
+            - ' -e* SQBFAFgA'  # PowerShell encoded commands
+            - ' -e* aWV4I'  # PowerShell encoded commands
+            - ' -e* aQBlAHgA'  # PowerShell encoded commands
+            - 'vssadmin delete shadows'  # Ransomware
+            - 'reg SAVE HKLM\SAM'  # save registry SAM - syskey extraction
+            - ' -ma '  # ProcDump
+            - 'Microsoft\Windows\CurrentVersion\Run'  # Run key in command line - often in combination with REG ADD
+            - '.downloadstring('  # PowerShell download command
+            - '.downloadfile('  # PowerShell download command
+            - ' /ticket:'  # Rubeus
+            - ' sekurlsa'  # Mimikatz
+            - ' p::d '  # Mimikatz 
+            - ';iex('  # PowerShell IEX
+            - 'schtasks* /create *AppData'  # Scheduled task creation pointing to AppData
+    condition: selection_plain
+---
+logsource:
+    product: windows
+    service: system
+detection:
+    # Malicious service installs
+    selection:
+        EventID: 7045
+        ServiceName|contains: 
+            - 'WCESERVICE'
+            - 'WCE SERVICE'
+            - 'winexesvc'
+            - 'DumpSvc'
+            - 'pwdump'
+            - 'gsecdump'
+            - 'cachedump'
+    condition:
+        1 of them
