@@ -65,7 +65,7 @@ for rule in rules/apt/* ; do
         echo "[+++] Processing apt rule: $rule .."
         ./sigmac -t elastalert -c config/generic/sysmon.yml -c config/wazuh.yml -o ${ESALERT_HOME}/sigma_apt_$(basename $rule) "$rule"
         # Give unique rule name for sysmon
-        sed -i 's/^name: /name: Sysmon_/' ${ESALERT_HOME}/sigma_sysmon_apt_$(basename $rule)
+        sed -i '' 's/^name: /name: Sysmon_/' ${ESALERT_HOME}/sigma_sysmon_apt_$(basename $rule)
         ./sigmac -t elastalert -c config/generic/windows-audit.yml -c config/wazuh.yml -o ${ESALERT_HOME}/sigma_sysmon_apt_$(basename $rule) "$rule"
         rule_counter=$[$rule_counter +1]
     fi
