@@ -124,6 +124,15 @@ class SigmaConfiguration:
         matching = [logsource for logsource in self.logsources if logsource.matches(category, product, service)]
         return SigmaLogsourceConfiguration(matching, self.defaultindex)
 
+    def get_logsourcemerging(self):
+        value = ''
+        if 'logsourcemerging' in self.config:
+            value = self.config['logsourcemerging'].lower()
+        if not value in ['and', 'or']:
+            value = 'and'
+
+        return value
+
     def set_backend(self, backend):
         """Set backend. This is used by other code to determine target properties for index addressing"""
         self.backend = backend
