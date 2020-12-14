@@ -18,25 +18,25 @@ echo "Translating SIGMA rules to Elastalert format.."
 echo "------------------------------------------------"
 echo " "
 rule_counter=0
-ESALERT_HOME="/Users/i.motrenko/Project/sigma/wazuh"
+ESALERT_HOME="../elastalert_rules"
 # Windows rules
-for  rule_category in /Users/i.motrenko/Project/sigma/rules/windows/* ; do
+for  rule_category in ../rules/windows/* ; do
     echo " "
     echo "Working on Folder: $rule_category:"
     echo "-------------------------------------------------------------"
-    if [ "$rule_category" == /Users/i.motrenko/Project/sigma/rules/windows/process_creation ]; then
+    if [ "$rule_category" == ../rules/windows/process_creation ]; then
         for rule in $rule_category/* ; do
-            if [ $rule != /Users/i.motrenko/Project/sigma/rules/windows/process_creation/win_mal_adwind.yml ];
+            if [ $rule != ../rules/windows/process_creation/win_mal_adwind.yml ];
             then
                 if SIGMAremoveNearRules "$rule"; then
                     continue
                 else
                     echo "[+++] Processing Windows process creation rule: $rule .."
-                    ./sigmac -t elastalert -c tools/config/generic/sysmon.yml -c /Users/i.motrenko/Project/sigma/tools/config/wazuh.yml -o /Users/i.motrenko/Project/sigma/wazuh/rules/sigma_$(basename $rule) "$rule"
+                    ./sigmac -t elastalert -c config/generic/sysmon.yml -c config/wazuh.yml -o ${ESALERT_HOME}/sigma_$(basename $rule) "$rule"
                     # Give unique rule name for sysmon
-                    sed -i 's/^name: /name: Sysmon_/' /Users/i.motrenko/Project/sigma/rules/sigma_sysmon_$(basename $rule)
-                    ./sigmac -t elastalert -c tools/config/generic/windows-audit.yml -c /Users/i.motrenko/Project/sigma/tools/config/wazuh.yml -o /Users/i.motrenko/Project/sigma/wazuh/rules/sigma_sysmon$(basename $rule) "$rule"
-                    ls -la "${ESALERT_HOME}"/rules/sigma_sysmon_"$(basename "${rule}")"
+                    sed -i '' 's/^name: /name: Sysmon_/' ${ESALERT_HOME}/sigma_sysmon_$(basename $rule)
+                    ./sigmac -t elastalert -c config/generic/windows-audit.yml -c config/wazuh.yml -o ${ESALERT_HOME}/sigma_sysmon_$(basename $rule) "$rule"
+                    #ls -la "${ESALERT_HOME}"/rules/sigma_sysmon_"$(basename "${rule}")"
                     rule_counter=$[$rule_counter +1]
                 fi
             fi
@@ -47,8 +47,8 @@ for  rule_category in /Users/i.motrenko/Project/sigma/rules/windows/* ; do
                 continue
             else
                 echo "[+++] Processing additional Windows rule: $rule .."
-                ./sigmac -t elastalert -c /Users/i.motrenko/Project/sigma/tools/config/wazuh.yml -o $ESALERT_HOME/rules/sigma_$(basename $rule) "$rule"rules/sigma_$(basename $rule) $rule
-                sed -i '' "s/^name: .*/name: sigma_$(basename -s .yml $rule)/" $ESALERT_HOME/rules/sigma_$(basename $rule)
+                ./sigmac -t elastalert -c config/wazuh.yml -o ${ESALERT_HOME}/sigma_$(basename $rule) "$rule"rules/sigma_$(basename $rule) $rule
+                sed -i '' "s/^name: .*/name: sigma_$(basename -s .yml $rule)/" ${ESALERT_HOME}/sigma_$(basename $rule)
                 rule_counter=$[$rule_counter +1]
             fi
         done
@@ -63,10 +63,10 @@ for rule in rules/apt/* ; do
         continue
     else
         echo "[+++] Processing apt rule: $rule .."
-        ./sigmac -t elastalert -c tools/config/generic/sysmon.yml -c /Users/i.motrenko/Project/sigma/tools/config/wazuh.yml -o $ESALERT_HOME/rules/sigma_apt_$(basename $rule) "$rule"
+        ./sigmac -t elastalert -c config/generic/sysmon.yml -c config/wazuh.yml -o ${ESALERT_HOME}/sigma_apt_$(basename $rule) "$rule"
         # Give unique rule name for sysmon
-        sed -i 's/^name: /name: Sysmon_/' /Users/i.motrenko/Project/sigma/rules/sigma_sysmon_apt_$(basename $rule)
-        ./sigmac -t elastalert -c tools/config/generic/windows-audit.yml -c /Users/i.motrenko/Project/sigma/tools/config/wazuh.yml -o $ESALERT_HOME/rules/sigma_sysmon_apt_$(basename $rule) "$rule"
+        sed -i 's/^name: /name: Sysmon_/' ${ESALERT_HOME}/sigma_sysmon_apt_$(basename $rule)
+        ./sigmac -t elastalert -c config/generic/windows-audit.yml -c config/wazuh.yml -o ${ESALERT_HOME}/sigma_sysmon_apt_$(basename $rule) "$rule"
         rule_counter=$[$rule_counter +1]
     fi
 done
@@ -90,7 +90,7 @@ echo " "
 echo "Removing empty files.."
 echo "-------------------------"
 rule_counter=0
-for ef in $ESALERT_HOME/rules/* ; do
+for ef in $ESALERT_HOME/* ; do
     if [[ -s $ef ]]; then
         continue
     else
@@ -107,7 +107,7 @@ echo " "
 rule_counter=0
 echo "Fixing Elastalert rule files with multiple SIGMA rules in them.."
 echo "------------------------------------------------------------------"
-for er in $ESALERT_HOME/rules/*; do
+for er in $ESALERT_HOME/*; do
     echo "[+++] Identifiying extra new lines in file $er .."
     counter=0
     while read line; do
@@ -125,7 +125,7 @@ for er in $ESALERT_HOME/rules/*; do
         # https://github.com/Neo23x0/sigma/issues/205
         echo "[++++++] Spliting file $er in two files .."
         name=$(basename $er .yml)
-        awk -v RS= -v filename="$name" '{print > ("/Users/i.motrenko/Project/sigma/wazuh/rules/"filename NR ".yml")}' $er
+        awk -v RS= -v filename="$name" '{print > ("../elastalert_rules/"filename NR ".yml")}' $er
         echo "[------] Removing original file $er .."
         rm $er
         rule_counter=$[$rule_counter +1]
