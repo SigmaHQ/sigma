@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects a JAVA process running with remote debugging allowing more than just localhost to connect
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND data.win.eventdata.commandLine.keyword:*transport\=dt_socket,address\=* AND (NOT (data.win.eventdata.commandLine.keyword:*address\=127.0.0.1* OR data.win.eventdata.commandLine.keyword:*address\=localhost*)))
+index: wazuh-alerts-3.x-*
+name: 8f88e3f6-2a49-48f5-a5c4-2f7eedf78710_0
+priority: 3
+realert:
+  minutes: 0
+type: any

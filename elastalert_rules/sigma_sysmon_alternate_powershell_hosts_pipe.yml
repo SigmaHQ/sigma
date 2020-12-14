@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
+filter:
+- query:
+    query_string:
+      query: ((data.win.system.eventID:"17" AND data.win.eventdata.pipeName.keyword:\\PSHost*) AND (NOT (data.win.eventdata.image.keyword:(*\\powershell.exe OR *\\powershell_ise.exe))))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_alternate_powershell_hosts_pipe
+priority: 3
+realert:
+  minutes: 0
+type: any

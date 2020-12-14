@@ -1,0 +1,20 @@
+alert:
+- debug
+buffer_time:
+  hours: 24
+description: Detects suspicious failed logins with different user accounts from a single source system
+doc_type: doc
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4776" AND user_name.keyword:* AND data.win.eventdata.sourceHostname.keyword:*)
+index: wazuh-alerts-3.x-*
+max_threshold: 3
+metric_agg_key: user_name.keyword
+metric_agg_type: cardinality
+name: sigma_win_susp_failed_logons_single_source
+priority: 3
+query_key: data.win.eventdata.sourceHostname.keyword
+realert:
+  minutes: 0
+type: metric_aggregation

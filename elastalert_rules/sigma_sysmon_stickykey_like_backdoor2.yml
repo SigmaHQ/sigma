@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects the usage and installation of a backdoor that uses an option to register a malicious debugger for built-in tools that are accessible in the login screen
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.parentImage.keyword:(*\\winlogon.exe) AND data.win.eventdata.commandLine.keyword:(*cmd.exe\ sethc.exe\ * OR *cmd.exe\ utilman.exe\ * OR *cmd.exe\ osk.exe\ * OR *cmd.exe\ Magnify.exe\ * OR *cmd.exe\ Narrator.exe\ * OR *cmd.exe\ DisplaySwitch.exe\ *))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_stickykey_like_backdoor
+priority: 1
+realert:
+  minutes: 0
+type: any

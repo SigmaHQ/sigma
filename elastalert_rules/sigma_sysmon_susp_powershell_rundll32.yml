@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects PowerShell remote thread creation in Rundll32.exe
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"8" AND process_path.keyword:*\\powershell.exe AND data.win.eventdata.targetImage.keyword:*\\rundll32.exe)
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_susp_powershell_rundll32
+priority: 2
+realert:
+  minutes: 0
+type: any

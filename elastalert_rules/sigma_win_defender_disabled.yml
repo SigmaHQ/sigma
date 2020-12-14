@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects disabling Windows Defender threat protection
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:("5001" OR "5010" OR "5012" OR "5101") OR (data.win.eventdata.targetObject:("HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\WinDefend" OR "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\ Defender" OR "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\ Defender") AND Details:"DWORD\ \(0x00000001\)"))
+index: wazuh-alerts-3.x-*
+name: sigma_win_defender_disabled
+priority: 2
+realert:
+  minutes: 0
+type: any

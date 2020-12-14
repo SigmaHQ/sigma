@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects potential malicious modification of the property value of fDenyTSConnections and UserAuthentication to enable remote desktop connections.
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.targetObject.keyword:(*\\CurrentControlSet\\Control\\Terminal\ Server\\WinStations\\RDP\-Tcp\\UserAuthentication OR *\\CurrentControlSet\\Control\\Terminal\ Server\\fDenyTSConnections) AND Details:"DWORD\ \(0x00000000\)")
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_rdp_registry_modification
+priority: 2
+realert:
+  minutes: 0
+type: any

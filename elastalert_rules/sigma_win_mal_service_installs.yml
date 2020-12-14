@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects known malicious service installs that only appear in cases of lateral movement, credential dumping and other suspicious activity
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"7045" AND (data.win.eventdata.imagePath.keyword:*\\PAExec* OR data.win.eventdata.serviceName:"mssecsvc2.0" OR data.win.eventdata.imagePath.keyword:*net\ user*))
+index: wazuh-alerts-3.x-*
+name: sigma_win_mal_service_installs
+priority: 1
+realert:
+  minutes: 0
+type: any

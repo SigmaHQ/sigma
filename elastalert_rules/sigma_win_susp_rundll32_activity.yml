@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects suspicious process related to rundll32 based on arguments
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine.keyword:(*\\rundll32.exe*\ url.dll,*OpenURL\ * OR *\\rundll32.exe*\ url.dll,*OpenURLA\ * OR *\\rundll32.exe*\ url.dll,*FileProtocolHandler\ * OR *\\rundll32.exe*\ zipfldr.dll,*RouteTheCall\ * OR *\\rundll32.exe*\ Shell32.dll,*Control_RunDLL\ * OR *\\rundll32.exe\ javascript\:* OR *\ url.dll,*OpenURL\ * OR *\ url.dll,*OpenURLA\ * OR *\ url.dll,*FileProtocolHandler\ * OR *\ zipfldr.dll,*RouteTheCall\ * OR *\ Shell32.dll,*Control_RunDLL\ * OR *\ javascript\:* OR *.RegisterXLL*))
+index: wazuh-alerts-3.x-*
+name: e593cf51-88db-4ee1-b920-37e89012a3c9_0
+priority: 3
+realert:
+  minutes: 0
+type: any

@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects Kerberos DLL being loaded by an Office Product
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.image.keyword:(*\\winword.exe OR *\\powerpnt.exe OR *\\excel.exe OR *\\outlook.exe) AND ImageLoaded.keyword:(*\\kerberos.dll))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_susp_office_kerberos_dll_load
+priority: 2
+realert:
+  minutes: 0
+type: any

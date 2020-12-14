@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects an executable in the Windows folder accessing github.com
+filter:
+- query:
+    query_string:
+      query: (Initiated:"true" AND data.win.eventdata.destinationHostname.keyword:(*.github.com OR *.githubusercontent.com) AND data.win.eventdata.image.keyword:C\:\\Windows\\*)
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_win_binary_github_com
+priority: 2
+realert:
+  minutes: 0
+type: any

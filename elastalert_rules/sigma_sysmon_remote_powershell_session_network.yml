@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects remote PowerShell connections by monitoring network outbount connections to ports 5985 or 5986 from not network service account
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.destinationPort:("5985" OR "5986") AND (NOT (user_account:"NT\ AUTHORITY\\NETWORK\ SERVICE")))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_remote_powershell_session_network
+priority: 2
+realert:
+  minutes: 0
+type: any

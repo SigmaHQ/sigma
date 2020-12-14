@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects the keyboard preload installation with a suspicious keyboard layout, e.g. Chinese, Iranian or Vietnamese layout load in user session on systems maintained by US staff only
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.targetObject.keyword:(*\\Keyboard\ Layout\\Preload\\* OR *\\Keyboard\ Layout\\Substitutes\\*) AND Details.keyword:(*00000429* OR *00050429* OR *0000042a*))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_suspicious_keyboard_layout_load
+priority: 3
+realert:
+  minutes: 0
+type: any

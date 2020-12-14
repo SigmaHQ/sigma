@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects DLL's Loaded Via Word Containing VBA Macros Executing WMI Commands
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.image.keyword:(*\\winword.exe OR *\\powerpnt.exe OR *\\excel.exe OR *\\outlook.exe) AND ImageLoaded.keyword:(*\\wmiutils.dll OR *\\wbemcomn.dll OR *\\wbemprox.dll OR *\\wbemdisp.dll OR *\\wbemsvc.dll))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_susp_winword_wmidll_load
+priority: 2
+realert:
+  minutes: 0
+type: any

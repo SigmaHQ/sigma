@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Offensive tradecraft is switching away from using APIs like "CreateRemoteThread", however, this is still largely observed in the wild. This rule aims to detect suspicious processes (those we would not expect to behave in this way like word.exe or outlook.exe) creating remote threads on other processes. It is a generalistic rule, but it should have a low FP ratio due to the selected range of processes.
+filter:
+- query:
+    query_string:
+      query: ((data.win.system.eventID:"8" AND process_path.keyword:(*\\bash.exe OR *\\cvtres.exe OR *\\defrag.exe OR *\\dnx.exe OR *\\esentutl.exe OR *\\excel.exe OR *\\expand.exe OR *\\explorer.exe OR *\\find.exe OR *\\findstr.exe OR *\\forfiles.exe OR *\\git.exe OR *\\gpupdate.exe OR *\\hh.exe OR *\\iexplore.exe OR *\\installutil.exe OR *\\lync.exe OR *\\makecab.exe OR *\\mDNSResponder.exe OR *\\monitoringhost.exe OR *\\msbuild.exe OR *\\mshta.exe OR *\\msiexec.exe OR *\\mspaint.exe OR *\\outlook.exe OR *\\ping.exe OR *\\powerpnt.exe OR *\\powershell.exe OR *\\provtool.exe OR *\\python.exe OR *\\regsvr32.exe OR *\\robocopy.exe OR *\\runonce.exe OR *\\sapcimc.exe OR *\\schtasks.exe OR *\\smartscreen.exe OR *\\spoolsv.exe OR *\\tstheme.exe OR *\\userinit.exe OR *\\vssadmin.exe OR *\\vssvc.exe OR *\\w3wp.exe* OR *\\winlogon.exe OR *\\winscp.exe OR *\\wmic.exe OR *\\word.exe OR *\\wscript.exe)) AND (NOT (process_path.keyword:*Visual\ Studio*)))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_suspicious_remote_thread
+priority: 2
+realert:
+  minutes: 0
+type: any

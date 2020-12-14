@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects a suspicious parents of powershell.exe
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND (data.win.eventdata.parentImage.keyword:(*\\mshta.exe OR *\\rundll32.exe OR *\\regsvr32.exe OR *\\services.exe OR *\\winword.exe OR *\\wmiprvse.exe OR *\\powerpnt.exe OR *\\excel.exe OR *\\msaccess.exe OR *\\mspub.exe OR *\\visio.exe OR *\\outlook.exe OR *\\amigo.exe OR *\\chrome.exe OR *\\firefox.exe OR *\\iexplore.exe OR *\\microsoftedgecp.exe OR *\\microsoftedge.exe OR *\\browser.exe OR *\\vivaldi.exe OR *\\safari.exe OR *\\sqlagent.exe OR *\\sqlserver.exe OR *\\sqlservr.exe OR *\\w3wp.exe OR *\\httpd.exe OR *\\nginx.exe OR *\\php\-cgi.exe OR *\\jbosssvc.exe OR *MicrosoftEdgeSH.exe) OR data.win.eventdata.parentImage.keyword:*tomcat*) AND (data.win.eventdata.commandLine.keyword:(*powershell* OR *pwsh*) OR data.win.eventdata.description:"Windows\ PowerShell" OR data.win.eventdata.product:"PowerShell\ Core\ 6"))
+index: wazuh-alerts-3.x-*
+name: 754ed792-634f-40ae-b3bc-e0448d33f695_0
+priority: 3
+realert:
+  minutes: 0
+type: any

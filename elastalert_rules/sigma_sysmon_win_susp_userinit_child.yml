@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects a suspicious child process of userinit
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND (data.win.eventdata.parentImage.keyword:*\\userinit.exe AND (NOT (data.win.eventdata.commandLine.keyword:*\\netlogon\\*))) AND (NOT (process_path.keyword:*\\explorer.exe)))
+index: wazuh-alerts-3.x-*
+name: b655a06a-31c0-477a-95c2-3726b83d649d_0
+priority: 3
+realert:
+  minutes: 0
+type: any

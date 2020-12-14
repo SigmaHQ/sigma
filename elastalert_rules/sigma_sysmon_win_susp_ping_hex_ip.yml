@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects a ping command that uses a hex encoded IP address
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND data.win.eventdata.commandLine.keyword:(*\\ping.exe\ 0x* OR *\\ping\ 0x*) AND process_path.keyword:(*ping.exe*))
+index: wazuh-alerts-3.x-*
+name: 1a0d4aba-7668-4365-9ce4-6d79ab088dfd_0
+priority: 2
+realert:
+  minutes: 0
+type: any

@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects tools extracting LSA secret DPAPI domain backup key from Domain Controllers
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4662" AND data.win.eventdata.objectType:"SecretObject" AND data.win.eventdata.accessMask:"0x2" AND data.win.eventdata.objectName:"BCKUPKEY")
+index: wazuh-alerts-3.x-*
+name: sigma_win_dpapi_domain_backupkey_extraction
+priority: 1
+realert:
+  minutes: 0
+type: any

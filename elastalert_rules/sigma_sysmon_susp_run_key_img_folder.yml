@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects suspicious new RUN key element pointing to an executable in a suspicious folder
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.targetObject.keyword:(*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\* OR *\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce\\*) AND Details.keyword:(*C\:\\Windows\\Temp\\* OR *C\:\\$Recycle.bin\\* OR *C\:\\Temp\\* OR *C\:\\Users\\Public\\* OR %Public%\\* OR *C\:\\Users\\Default\\* OR *C\:\\Users\\Desktop\\* OR wscript* OR cscript*))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_susp_run_key_img_folder
+priority: 2
+realert:
+  minutes: 0
+type: any

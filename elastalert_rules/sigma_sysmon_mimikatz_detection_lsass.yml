@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects process access to LSASS which is typical for Mimikatz (0x1000 PROCESS_QUERY_ LIMITED_INFORMATION, 0x0400 PROCESS_QUERY_ INFORMATION "only old versions", 0x0010 PROCESS_VM_READ)
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"10" AND data.win.eventdata.targetImage:"C\:\\windows\\system32\\lsass.exe" AND data.win.eventdata.grantedAccess:("0x1410" OR "0x1010"))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_mimikatz_detection_lsass
+priority: 2
+realert:
+  minutes: 0
+type: any

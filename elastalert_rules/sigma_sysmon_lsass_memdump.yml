@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects process LSASS memory dump using procdump or taskmgr based on the CallTrace pointing to dbghelp.dll or dbgcore.dll for win10
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.targetImage:"C\:\\windows\\system32\\lsass.exe" AND data.win.eventdata.grantedAccess:"0x1fffff" AND data.win.eventdata.callTrace.keyword:(*dbghelp.dll* OR *dbgcore.dll*))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_lsass_memdump
+priority: 2
+realert:
+  minutes: 0
+type: any

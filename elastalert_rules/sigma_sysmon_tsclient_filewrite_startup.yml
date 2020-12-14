@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects the usage of tsclient share to place a backdoor on the RDP source machine's startup folder
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.image.keyword:*\\mstsc.exe AND data.win.eventdata.targetFilename.keyword:*\\Microsoft\\Windows\\Start\ Menu\\Programs\\Startup\\*)
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_tsclient_filewrite_startup
+priority: 2
+realert:
+  minutes: 0
+type: any

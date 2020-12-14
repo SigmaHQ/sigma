@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detect lateral movement using GPO scheduled task, usually used to deploy ransomware at scale
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"5145" AND data.win.eventdata.shareName.keyword:\\*\\SYSVOL AND data.win.eventdata.relativeTargetName.keyword:*ScheduledTasks.xml AND Accesses.keyword:*WriteData*)
+index: wazuh-alerts-3.x-*
+name: sigma_win_GPO_scheduledtasks
+priority: 2
+realert:
+  minutes: 0
+type: any

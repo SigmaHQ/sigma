@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects scenario where weak encryption is enabled for a user profile which could be used for hash/password cracking.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4738" AND data.win.system.message.keyword:(*DES* OR *Preauth* OR *Encrypted*) AND data.win.system.message.keyword:(*Enabled*))
+index: wazuh-alerts-3.x-*
+name: sigma_win_alert_enable_weak_encryption
+priority: 2
+realert:
+  minutes: 0
+type: any

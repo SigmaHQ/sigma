@@ -1,0 +1,13 @@
+alert:
+- debug
+description: DLLs that are specified in the AppInit_DLLs value in the Registry key HKLM\Software\Microsoft\Windows NT\CurrentVersion\Windows are loaded by user32.dll into every process that loads user32.dll
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.targetObject.keyword:(*\\SOFTWARE\\Microsoft\\Windows\ NT\\CurrentVersion\\Windows\\AppInit_Dlls OR *\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\ NT\\CurrentVersion\\Windows\\AppInit_Dlls) OR NewName.keyword:(*\\SOFTWARE\\Microsoft\\Windows\ NT\\CurrentVersion\\Windows\\AppInit_Dlls OR *\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\ NT\\CurrentVersion\\Windows\\AppInit_Dlls))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_new_dll_added_to_appinit_dlls_registry_key
+priority: 3
+realert:
+  minutes: 0
+type: any

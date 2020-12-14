@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects programs with network connections running in suspicious files system locations
+filter:
+- query:
+    query_string:
+      query: data.win.eventdata.image.keyword:(*\\$Recycle.bin OR *\\Users\\All\ Users\\* OR *\\Users\\Default\\* OR *\\Users\\Public\\* OR *\\Users\\Contacts\\* OR *\\Users\\Searches\\* OR C\:\\Perflogs\\* OR *\\config\\systemprofile\\* OR *\\Windows\\Fonts\\* OR *\\Windows\\IME\\* OR *\\Windows\\addins\\*)
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_susp_prog_location_network_connection
+priority: 2
+realert:
+  minutes: 0
+type: any

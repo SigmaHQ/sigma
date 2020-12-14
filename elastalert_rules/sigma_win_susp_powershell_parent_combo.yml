@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects suspicious powershell invocations from interpreters or unusual programs
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.parentImage.keyword:(*\\wscript.exe OR *\\cscript.exe) AND data.win.eventdata.image.keyword:(*\\powershell.exe)) AND (NOT (data.win.eventdata.currentDirectory.keyword:*\\Health\ Service\ State\\*)))
+index: wazuh-alerts-3.x-*
+name: 95eadcb2-92e4-4ed1-9031-92547773a6db_0
+priority: 3
+realert:
+  minutes: 0
+type: any

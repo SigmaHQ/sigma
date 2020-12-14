@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects the addition of a SSP to the registry. Upon a reboot or API call, SSP DLLs gain access to encrypted and plaintext passwords stored in Windows.
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.targetObject:("HKLM\\System\\CurrentControlSet\\Control\\Lsa\\Security\ Packages" OR "HKLM\\System\\CurrentControlSet\\Control\\Lsa\\OSConfig\\Security\ Packages") AND (NOT (data.win.eventdata.image:"C\:\\Windows\\system32\\msiexec.exe" OR data.win.eventdata.image:"C\:\\Windows\\syswow64\\MsiExec.exe")))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_ssp_added_lsa_config
+priority: 1
+realert:
+  minutes: 0
+type: any

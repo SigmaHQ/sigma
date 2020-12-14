@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Identifies use of various commands to query a systems time. This technique may be used before executing a scheduled task or to discover the time zone of a target system.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND ((process_path.keyword:(*\\net.exe OR *\\net1.exe) AND data.win.eventdata.commandLine.keyword:*time*) OR (process_path.keyword:*\\w32tm.exe AND data.win.eventdata.commandLine.keyword:*tz*) OR (process_path.keyword:*\\powershell.exe AND data.win.eventdata.commandLine.keyword:*Get\-Date*)))
+index: wazuh-alerts-3.x-*
+name: b243b280-65fe-48df-ba07-6ddea7646427_0
+priority: 4
+realert:
+  minutes: 0
+type: any

@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects Processes accessing the camera and microphone from suspicious folder
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.targetObject.keyword:(*\\Software\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\*\\NonPackaged*) AND data.win.eventdata.targetObject.keyword:(*microphone* OR *webcam*) AND data.win.eventdata.targetObject.keyword:(*#C\:#Windows#Temp#* OR *#C\:#$Recycle.bin#* OR *#C\:#Temp#* OR *#C\:#Users#Public#* OR *#C\:#Users#Default#* OR *#C\:#Users#Desktop#*))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_susp_mic_cam_access
+priority: 2
+realert:
+  minutes: 0
+type: any

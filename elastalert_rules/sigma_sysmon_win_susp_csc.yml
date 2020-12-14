@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects a suspicious parent of csc.exe, which could by a sign of payload delivery
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND process_path.keyword:*\\csc.exe* AND data.win.eventdata.parentImage.keyword:(*\\wscript.exe OR *\\cscript.exe OR *\\mshta.exe))
+index: wazuh-alerts-3.x-*
+name: b730a276-6b63-41b8-bcf8-55930c8fc6ee_0
+priority: 2
+realert:
+  minutes: 0
+type: any

@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Identifies execution of nltest.exe and dsquery.exe for domain trust discovery. This technique is used by attackers to enumerate Active Directory trusts.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND ((data.win.eventdata.image.keyword:*\\nltest.exe AND data.win.eventdata.commandLine.keyword:(*domain_trusts* OR *all_trusts* OR *\/dclist*)) OR (data.win.eventdata.image.keyword:*\\dsquery.exe AND data.win.eventdata.commandLine.keyword:*trustedDomain*)))
+index: wazuh-alerts-3.x-*
+name: 3bad990e-4848-4a78-9530-b427d854aac0_0
+priority: 3
+realert:
+  minutes: 0
+type: any

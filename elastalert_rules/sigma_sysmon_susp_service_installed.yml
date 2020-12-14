@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects installation of NalDrv or PROCEXP152 services via registry-keys to non-system32 folders. Both services are used in the tool Ghost-In-The-Logs (https://github.com/bats3c/Ghost-In-The-Logs), which uses KDU (https://github.com/hfiref0x/KDU)
+filter:
+- query:
+    query_string:
+      query: ((data.win.eventdata.targetObject:("HKLM\\System\\CurrentControlSet\\Services\\NalDrv\\ImagePath" OR "HKLM\\System\\CurrentControlSet\\Services\\PROCEXP152\\ImagePath") AND (NOT (data.win.eventdata.image.keyword:(*\\procexp64.exe* OR *\\procexp.exe* OR *\\procmon64.exe* OR *\\procmon.exe*)))) AND (NOT (Details.keyword:(*\\WINDOWS\\system32\\Drivers\\PROCEXP152.SYS*))))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_susp_service_installed
+priority: 3
+realert:
+  minutes: 0
+type: any

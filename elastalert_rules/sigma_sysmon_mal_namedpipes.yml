@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects the creation of a named pipe used by known APT malware
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:("17" OR "18") AND data.win.eventdata.pipeName.keyword:(\\isapi_http OR \\isapi_dg OR \\isapi_dg2 OR \\sdlrpc OR \\ahexec OR \\winsession OR \\lsassw OR \\46a676ab7f179e511e30dd2dc41bd388 OR \\9f81f59bc58452127884ce513865ed20 OR \\e710f28d59aa529d6792ca6ff0ca1b34 OR \\rpchlp_3 OR \\NamePipe_MoreWindows OR \\pcheap_reuse OR \\msagent_* OR \\gruntsvc))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_mal_namedpipes
+priority: 1
+realert:
+  minutes: 0
+type: any

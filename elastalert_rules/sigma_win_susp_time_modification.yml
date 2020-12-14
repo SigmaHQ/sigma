@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detect scenarios where a potentially unauthorized application or user is modifying the system time.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4616" AND (NOT (((data.win.eventdata.processName:"C\:\\Program\ Files\\VMware\\VMware\ Tools\\vmtoolsd.exe" OR data.win.eventdata.processName:"C\:\\Windows\\System32\\VBoxService.exe") OR (data.win.eventdata.processName:"C\:\\Windows\\System32\\svchost.exe" AND SubjectUserSid:"S\-1\-5\-19")))))
+index: wazuh-alerts-3.x-*
+name: sigma_win_susp_time_modification
+priority: 3
+realert:
+  minutes: 0
+type: any

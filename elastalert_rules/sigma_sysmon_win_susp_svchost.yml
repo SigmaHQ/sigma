@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects a suspicious svchost process start
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND (process_path.keyword:*\\svchost.exe AND (NOT (data.win.eventdata.parentImage.keyword:(*\\services.exe OR *\\MsMpEng.exe OR *\\Mrt.exe OR *\\rpcnet.exe OR *\\svchost.exe)))) AND (NOT (NOT _exists_:data.win.eventdata.parentImage)))
+index: wazuh-alerts-3.x-*
+name: 01d2e2a1-5f09-44f7-9fc1-24faa7479b6d_0
+priority: 2
+realert:
+  minutes: 0
+type: any

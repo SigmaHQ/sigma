@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Possible webshell file creation on a static web site
+filter:
+- query:
+    query_string:
+      query: ((((data.win.eventdata.targetFilename.keyword:*\\inetpub\\wwwroot\\* AND data.win.eventdata.targetFilename.keyword:(*.asp* OR *.ashx* OR *.ph*)) AND (NOT (data.win.eventdata.targetFilename.keyword:(*\\AppData\\Local\\Temp\\* OR *\\Windows\\Temp\\*)))) OR ((data.win.eventdata.targetFilename.keyword:(*\\www\\* OR *\\htdocs\\* OR *\\html\\*) AND data.win.eventdata.targetFilename.keyword:*.ph*) AND (NOT (data.win.eventdata.targetFilename.keyword:(*\\AppData\\Local\\Temp\\* OR *\\Windows\\Temp\\*))))) OR ((data.win.eventdata.targetFilename.keyword:*.jsp OR (data.win.eventdata.targetFilename.keyword:*\\cgi\-bin\\* AND data.win.eventdata.targetFilename.keyword:*.pl*)) AND (NOT (data.win.eventdata.targetFilename.keyword:(*\\AppData\\Local\\Temp\\* OR *\\Windows\\Temp\\*)))))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_webshell_creation_detect
+priority: 1
+realert:
+  minutes: 0
+type: any

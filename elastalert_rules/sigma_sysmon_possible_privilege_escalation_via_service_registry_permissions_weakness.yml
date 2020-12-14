@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detect modification of services configuration (ImagePath, FailureCommand and ServiceDLL) in registry by processes with Medium integrity level
+filter:
+- query:
+    query_string:
+      query: (IntegrityLevel:"Medium" AND data.win.eventdata.targetObject.keyword:*\\services\\* AND data.win.eventdata.targetObject.keyword:(*\\ImagePath OR *\\FailureCommand OR *\\Parameters\\ServiceDll))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_possible_privilege_escalation_via_service_registry_permissions_weakness
+priority: 2
+realert:
+  minutes: 0
+type: any

@@ -1,0 +1,13 @@
+alert:
+- debug
+description: The Tasks folder in system32 and syswow64 are globally writable paths. Adversaries can take advantage of this and load or influence any script hosts or ANY .NET Application in Tasks to load and execute a custom assembly into cscript, wscript, regsvr32, mshta, eventvwr
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.commandLine.keyword:(*echo\ * OR *copy\ * OR *type\ * OR *file\ createnew*) AND data.win.eventdata.commandLine.keyword:(*\ C\:\\Windows\\System32\\Tasks\\* OR *\ C\:\\Windows\\SysWow64\\Tasks\\*))
+index: wazuh-alerts-3.x-*
+name: cc4e02ba-9c06-48e2-b09e-2500cace9ae0_0
+priority: 2
+realert:
+  minutes: 0
+type: any

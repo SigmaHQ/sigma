@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects the suspicious RUN keys created by software located in Download or temporary Outlook/Internet Explorer directories
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.image.keyword:(*\\Downloads\\* OR *\\Temporary\ Internet\ Files\\Content.Outlook\\* OR *\\Local\ Settings\\Temporary\ Internet\ Files\\*) AND data.win.eventdata.targetObject.keyword:*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\*)
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_susp_download_run_key
+priority: 2
+realert:
+  minutes: 0
+type: any

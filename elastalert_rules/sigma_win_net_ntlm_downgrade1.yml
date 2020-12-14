@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects NetNTLM downgrade attack
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"13" AND data.win.eventdata.targetObject.keyword:(*SYSTEM\\*ControlSet*\\Control\\Lsa\\lmcompatibilitylevel OR *SYSTEM\\*ControlSet*\\Control\\Lsa*\\NtlmMinClientSec OR *SYSTEM\\*ControlSet*\\Control\\Lsa*\\RestrictSendingNTLMTraffic))
+index: wazuh-alerts-3.x-*
+name: sigma_win_net_ntlm_downgrade
+priority: 1
+realert:
+  minutes: 0
+type: any

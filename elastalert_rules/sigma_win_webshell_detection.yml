@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects certain command line parameters often used during reconnaissance activity via web shells
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.parentImage.keyword:(*\\apache* OR *\\tomcat* OR *\\w3wp.exe OR *\\php\-cgi.exe OR *\\nginx.exe OR *\\httpd.exe) AND data.win.eventdata.commandLine.keyword:(*whoami* OR *net\ user\ * OR *ping\ \-n\ * OR *systeminfo OR *&cd&echo* OR *cd\ \/d*))
+index: wazuh-alerts-3.x-*
+name: bed2a484-9348-4143-8a8a-b801c979301c_0
+priority: 2
+realert:
+  minutes: 0
+type: any

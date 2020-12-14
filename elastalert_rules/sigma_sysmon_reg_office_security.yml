@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects registry changes to Office macro settings
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.targetObject.keyword:(*\\Security\\Trusted\ Documents\\TrustRecords OR *\\Security\\AccessVBOM OR *\\Security\\VBAWarnings) AND data.win.eventdata.eventType:("SetValue" OR "DeleteValue" OR "CreateValue"))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_reg_office_security
+priority: 2
+realert:
+  minutes: 0
+type: any

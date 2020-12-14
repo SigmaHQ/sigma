@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects process memory dump via comsvcs.dll and rundll32
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND (process_path.keyword:*\\rundll32.exe OR data.win.eventdata.originalFileName:"RUNDLL32.EXE") AND data.win.eventdata.commandLine.keyword:(*comsvcs*MiniDump*full* OR *comsvcs*MiniDumpW*full*))
+index: wazuh-alerts-3.x-*
+name: 09e6d5c0-05b8-4ff8-9eeb-043046ec774c_0
+priority: 3
+realert:
+  minutes: 0
+type: any

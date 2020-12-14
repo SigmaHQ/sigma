@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects usage of mimikatz through WinRM protocol by monitoring access to lsass process by wsmprovhost.exe.
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.targetImage:"C\:\\windows\\system32\\lsass.exe" AND process_path:"C\:\\Windows\\system32\\wsmprovhost.exe")
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_mimikatz_trough_winrm
+priority: 2
+realert:
+  minutes: 0
+type: any

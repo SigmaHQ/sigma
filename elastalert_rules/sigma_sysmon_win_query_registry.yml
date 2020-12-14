@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Adversaries may interact with the Windows Registry to gather information about the system, configuration, and installed software.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND process_path.keyword:*\\reg.exe AND data.win.eventdata.commandLine.keyword:(*query* OR *save* OR *export*) AND data.win.eventdata.commandLine.keyword:(*currentVersion\\windows* OR *currentVersion\\runServicesOnce* OR *currentVersion\\runServices* OR *winlogon\\* OR *currentVersion\\shellServiceObjectDelayLoad* OR *currentVersion\\runOnce* OR *currentVersion\\runOnceEx* OR *currentVersion\\run* OR *currentVersion\\policies\\explorer\\run* OR *currentcontrolset\\services*))
+index: wazuh-alerts-3.x-*
+name: 970007b7-ce32-49d0-a4a4-fbef016950bd_0
+priority: 4
+realert:
+  minutes: 0
+type: any

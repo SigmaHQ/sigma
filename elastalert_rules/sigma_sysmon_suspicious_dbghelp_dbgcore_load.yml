@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects the load of dbghelp/dbgcore DLL (used to make memory dumps) by suspicious processes. Tools like ProcessHacker and some attacker tradecract use MiniDumpWriteDump API found in dbghelp.dll or dbgcore.dll. As an example, SilentTrynity C2 Framework has a module that leverages this API to dump the contents of Lsass.exe and transfer it over the network back to the attacker's machine.
+filter:
+- query:
+    query_string:
+      query: (((ImageLoaded.keyword:(*\\dbghelp.dll OR *\\dbgcore.dll) AND data.win.eventdata.image.keyword:(*\\msbuild.exe OR *\\cmd.exe OR *\\svchost.exe OR *\\rundll32.exe OR *\\powershell.exe OR *\\word.exe OR *\\excel.exe OR *\\powerpnt.exe OR *\\outlook.exe OR *\\monitoringhost.exe OR *\\wmic.exe OR *\\bash.exe OR *\\wscript.exe OR *\\cscript.exe OR *\\mshta.exe OR *\\regsvr32.exe OR *\\schtasks.exe OR *\\dnx.exe OR *\\regsvcs.exe OR *\\sc.exe OR *\\scriptrunner.exe)) AND (NOT (data.win.eventdata.image.keyword:*Visual\ Studio*))) OR ((ImageLoaded.keyword:(*\\dbghelp.dll OR *\\dbgcore.dll) AND data.win.eventdata.signed:"FALSE") AND (NOT (data.win.eventdata.image.keyword:*Visual\ Studio*))))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_suspicious_dbghelp_dbgcore_load
+priority: 2
+realert:
+  minutes: 0
+type: any

@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects PowerShell called from an executable by the version mismatch method
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"400" AND data.win.eventdata.engine Version.keyword:(2.* OR 4.* OR 5.*) AND powershell.host.version.keyword:3.*)
+index: wazuh-alerts-3.x-*
+name: sigma_powershell_exe_calling_ps
+priority: 2
+realert:
+  minutes: 0
+type: any

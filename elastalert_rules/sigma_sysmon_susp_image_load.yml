@@ -1,0 +1,13 @@
+alert:
+- debug
+description: Detects Loading of samlib.dll, WinSCard.dll from untypical process e.g. through process hollowing by Mimikatz
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.image.keyword:(*\\notepad.exe) AND ImageLoaded.keyword:(*\\samlib.dll OR *\\WinSCard.dll))
+index: wazuh-alerts-3.x-*
+name: sigma_sysmon_susp_image_load
+priority: 2
+realert:
+  minutes: 0
+type: any
