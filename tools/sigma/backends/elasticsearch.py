@@ -66,7 +66,8 @@ class ElasticsearchWildcardHandlingMixin(object):
             ("keyword_blacklist", None, "Fields to never set as keyword (ie: always set as analyzed field). Bypasses case insensitive options. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("case_insensitive_whitelist", None, "Fields to make the values case insensitive regex. Automatically sets the field as a keyword. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("case_insensitive_blacklist", None, "Fields to exclude from being made into case insensitive regex. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
-            ("wildcard_use_keyword", "true", "Use analyzed field or wildcard field if the query uses a wildcard value (ie: '*mall_wear.exe'). Set this to 'False' to use analyzed field or wildcard field. Valid options are: true/false", None)
+            ("wildcard_use_keyword", "true", "Use analyzed field or wildcard field if the query uses a wildcard value (ie: '*mall_wear.exe'). Set this to 'False' to use analyzed field or wildcard field. Valid options are: true/false", None),
+            ("set_size", "0", "value for the size of returned datasets.", None)
             )
     reContainsWildcard = re.compile("(?:(?<!\\\\)|\\\\\\\\)[*?]").search
     uuid_regex = re.compile( "[0-9a-fA-F]{8}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{12}", re.IGNORECASE )
@@ -333,6 +334,30 @@ class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, Elast
         for parsed in sigmaparser.condparsed:
             self.generateBefore(parsed)
             self.generateQuery(parsed)
+
+            # size = X
+            if int(self.set_size) > 0:
+                self.queries[-1]['size'] = self.set_size
+
+            # set _source from YAML-fields
+            columns = list()
+            mapped =None
+            try:
+                for field in sigmaparser.parsedyaml["fields"]:
+                    mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
+                    if type(mapped) == str:
+                        columns.append(mapped)
+                    elif type(mapped) == list:
+                        columns.extend(mapped)
+                    else:
+                        raise TypeError("Field mapping must return string or list")
+
+                fields = ",".join(str(x) for x in columns)
+                self.queries[-1]['_source_'] = columns
+            except KeyError:    # no 'fields' attribute
+                 mapped = None
+                 pass
+
             self.generateAfter(parsed)
 
     def generateQuery(self, parsed):
