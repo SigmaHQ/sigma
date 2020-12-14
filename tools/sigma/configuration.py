@@ -74,6 +74,9 @@ class SigmaConfigurationChain(list):
             if value == '':
                 value =  config.get_logsourcemerging()
 
+        if not value in ['and', 'or']:
+            value = 'and'
+
         return value
 
     def set_backend(self, backend):
