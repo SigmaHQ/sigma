@@ -72,7 +72,7 @@ class SigmaConfigurationChain(list):
         value = ''
         for config in self:
             if value == '':
-                value =  config.get_logsourcemerging()
+                value =  config.get_logsourcemerging().lower()
 
         if not value in ['and', 'or']:
             value = 'and'
@@ -137,7 +137,7 @@ class SigmaConfiguration:
 
     def get_logsourcemerging(self):
         try:
-            return self.config['logsourcemerging'].lower()
+            return self.config['logsourcemerging']
         except KeyError:
             return ''
 
