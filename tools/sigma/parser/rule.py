@@ -134,26 +134,27 @@ class SigmaParser:
 
         return self.config.get_logsource(category, product, service)
 
+    def build_conditions(self, condition_func, items):
+        cond = condition_func()
+        for item in items:
+            if type(item) is list:
+                cond.add(self.build_conditions(ConditionAND, item))
+            else:
+                mapping = self.config.get_fieldmapping(item[0])
+                cond.add(mapping.resolve(item[0], item[1], self))
+
+        return cond
+
     def get_logsource_condition(self):
         logsource = self.get_logsource()
         if logsource is None:
             return None
         else:
-            if logsource.merged:    # Merged log source, flatten nested list of condition items
-                kvconds = [ item for sublscond in logsource.conditions for item in sublscond ]
-            else:                   # Simple log sources already contain flat list of conditions items
-                kvconds = logsource.conditions
-
-            # Apply field mappings
-            mapped_kvconds = list()
-            for field, value in kvconds:
-                mapping = self.config.get_fieldmapping(field)
-                mapped_kvconds.append(mapping.resolve(field, value, self))
-
-            # AND-link condition items
             cond = ConditionAND()
-            for kvcond in mapped_kvconds:
-                cond.add(kvcond)
+            if self.config.get_logsourcemerging() == 'or':
+                cond.add(self.build_conditions(ConditionOR,  logsource.conditions))
+            else:
+                cond.add(self.build_conditions(ConditionAND, logsource.conditions))
 
             # Add index condition if supported by backend and defined in log source
             index_field = self.config.get_indexfield()
