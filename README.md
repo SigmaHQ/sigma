@@ -293,7 +293,7 @@ Result once imported in the MITRE ATT&CK® Navigator ([online version](https://m
 
 Similar to **Sigma2attack**, [S2AN](https://github.com/3CORESec/S2AN) is a pre-compiled binary for both Windows and GNU/Linux that generates [MITRE ATT&CK® Navigator](https://github.com/mitre/attack-navigator/) layers from a directory of Sigma rules. 
 
-S2AN was developed to by used as a standalone tool or as part of a CI/CD pipeline where it can be quickly downloaded and executed without external dependencies.
+S2AN was developed to be used as a standalone tool or as part of a CI/CD pipeline where it can be quickly downloaded and executed without external dependencies.
 
 ## Contributed Scripts
 
