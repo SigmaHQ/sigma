@@ -289,6 +289,12 @@ Result once imported in the MITRE ATT&CK® Navigator ([online version](https://m
 
 ![Sigma2attack result](./images/sigma2attack.png)
 
+## S2AN
+
+Similar to **Sigma2attack**, [S2AN](https://github.com/3CORESec/S2AN) is a pre-compiled binary for both Windows and GNU/Linux that generates [MITRE ATT&CK® Navigator](https://github.com/mitre/attack-navigator/) layers from a directory of Sigma rules. 
+
+S2AN was developed to be used as a standalone tool or as part of a CI/CD pipeline where it can be quickly downloaded and executed without external dependencies.
+
 ## Contributed Scripts
 
 The directory `contrib` contains scripts that were contributed by the community:
@@ -315,6 +321,7 @@ These tools are not part of the main toolchain and maintained separately by thei
 * [RANK VASA](https://globenewswire.com/news-release/2019/03/04/1745907/0/en/RANK-Software-to-Help-MSSPs-Scale-Cybersecurity-Offerings.html)
 * [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 * [TimeSketch](https://github.com/google/timesketch/commit/0c6c4b65a6c0f2051d074e87bbb2da2424fa6c35)
+* [SIΣGMA](https://github.com/3CORESec/SIEGMA) - SIEM consumable generator that utilizes Sigma for query conversion 
 
 # Contribution
 
