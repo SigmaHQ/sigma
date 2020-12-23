@@ -1,16 +1,13 @@
-title: CMSTP Execution Process Access
-id: 3b4b232a-af90-427c-a22f-30b0c0837b95
+title: CMSTP Execution Process Creation
+id: 7d4cdc5a-0076-40ca-aac8-f7e714570e47
 status: stable
 description: Detects various indicators of Microsoft Connection Manager Profile Installer execution
 tags:
     - attack.defense_evasion
-    - attack.t1218.003
-    - attack.t1191  # an old one
     - attack.execution
-    - attack.t1559.001
-    - attack.t1175  # an old one
+    - attack.t1191          # an old one
+    - attack.t1218.003
     - attack.g0069
-    - attack.g0080
     - car.2019-04-001
 author: Nik Seetharaman
 date: 2018/07/16
@@ -25,10 +22,10 @@ falsepositives:
     - Legitimate CMSTP use (unlikely in modern enterprise environments)
 level: high
 logsource:
+    category: process_creation
     product: windows
-    category: process_access
 detection:
-    # Process Access Call Trace
+    # CMSTP Spawning Child Process
     selection:
-        CallTrace: '*cmlua.dll*'
+        ParentImage: '*\cmstp.exe'
     condition: selection
