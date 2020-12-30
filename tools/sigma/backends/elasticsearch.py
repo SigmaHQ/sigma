@@ -20,7 +20,7 @@ from fnmatch import fnmatch
 import sys
 import os
 from random import randrange
-from distutils.util import strtobool 
+from distutils.util import strtobool
 
 import sigma
 import yaml
@@ -67,7 +67,6 @@ class ElasticsearchWildcardHandlingMixin(object):
             ("case_insensitive_whitelist", None, "Fields to make the values case insensitive regex. Automatically sets the field as a keyword. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("case_insensitive_blacklist", None, "Fields to exclude from being made into case insensitive regex. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("wildcard_use_keyword", "true", "Use analyzed field or wildcard field if the query uses a wildcard value (ie: '*mall_wear.exe'). Set this to 'False' to use analyzed field or wildcard field. Valid options are: true/false", None),
-            ("set_size", "0", "value for the size of returned datasets.", None)
             )
     reContainsWildcard = re.compile("(?:(?<!\\\\)|\\\\\\\\)[*?]").search
     uuid_regex = re.compile( "[0-9a-fA-F]{8}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{12}", re.IGNORECASE )
@@ -306,6 +305,7 @@ class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, Elast
     options = RulenameCommentMixin.options + ElasticsearchWildcardHandlingMixin.options + (
         ("es", "http://localhost:9200", "Host and port of Elasticsearch instance", None),
         ("output", "import", "Output format: import = JSON search request, curl = Shell script that do the search queries via curl", "output_type"),
+        ("set_size", "0", "value for the size of returned datasets.", None)
     )
     interval = None
     title = None
@@ -695,7 +695,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
             ("action_throttle_period","15m","Throttle time of the action",None),
 
             ("alert_methods", "email", "Alert method(s) to use when the rule triggers, comma separated. Supported: " + ', '.join(supported_alert_methods), None),
-            # Options for Email Action            
+            # Options for Email Action
             ("mail", "root@localhost", "Mail address for Watcher notification (only logging if not set)", None),
             ("mail_from", "root@localhost", "Mail address for Watcher notification (only logging if not set)", None),
             ("mail_profile", "standard", "Watcher provides three email profiles that control how MIME messages are structured: standard (default), gmail, and outlook.", None),
@@ -714,7 +714,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
             # Options for Index Action
             ("index", "<log2alert-{now/d}>","Index name used to add the alerts", None), #by default it creates a new index every day
             ("type", "_doc","Index Type used to add the alerts", None)
-        
+
             )
     watcher_urls = {
             "watcher": "_watcher",
@@ -736,7 +736,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
         # Get time frame if exists
         interval = sigmaparser.parsedyaml["detection"].setdefault("timeframe", "30m")
         dateField = self.sigmaconfig.config.get("dateField", "timestamp")
-        
+
         # creating condition
         indices = sigmaparser.get_logsource().index
         # How many results to be returned. Usually 0 but for index action we need it.
@@ -839,7 +839,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                 eaction={} #email action
                 waction={} #webhook action
                 iaction={} #index action
-                action={} 
+                action={}
                 alert_methods = self.alert_methods.split(',')
                 if 'email' in alert_methods:
                     # mail notification if mail address is given
@@ -879,7 +879,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                     waction = {
             "httppost":{
                             "transform":{
-                                "script": "ctx.metadata.timestamp=ctx.trigger.scheduled_time;" 
+                                "script": "ctx.metadata.timestamp=ctx.trigger.scheduled_time;"
                                 },
                             "webhook":{
                             "scheme"  : http_scheme,
@@ -914,12 +914,12 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                     size=1000 #I presume it will not be more than 1000 events detected
                     iaction = {
                             "elastic":{
-                                "transform":{ #adding title, description, tags on the event 
+                                "transform":{ #adding title, description, tags on the event
                                     "script": "ctx.payload.transform = [];for (int j=0;j<ctx.payload.hits.total;j++){ctx.payload.hits.hits[j]._source.alerttimestamp=ctx.trigger.scheduled_time;ctx.payload.hits.hits[j]._source.alerttitle=ctx.metadata.title;ctx.payload.hits.hits[j]._source.alertquery=ctx.metadata.query;ctx.payload.hits.hits[j]._source.alertdescription=ctx.metadata.description;ctx.payload.hits.hits[j]._source.tags=ctx.metadata.tags;ctx.payload.transform.add(ctx.payload.hits.hits[j]._source)} return ['_doc': ctx.payload.transform];"
                                 },
                                 "index":{
                                     "index": index,
-                                    "doc_type":dtype 
+                                    "doc_type":dtype
                                 }
                             }
                     }
@@ -941,7 +941,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                                   "description": description,
                                   "tags": tags,
                                   "query":result #addede query to metadata. very useful in kibana to do drill down directly from discover
-                              },     
+                              },
                               "trigger": {
                                 "schedule": {
                                   "interval": interval  # how often the watcher should check
