@@ -197,6 +197,8 @@ class ElasticsearchWildcardHandlingMixin(object):
             self.matchKeyword = True
         elif self.wildcard_use_keyword and ( (type(value) == list and any(map(self.containsWildcard, value))) or self.containsWildcard(value) ):
             self.matchKeyword = True
+        elif isinstance(value, SigmaRegularExpressionModifier):
+            self.matchKeyword = True
         else:
             self.matchKeyword = False
 
