@@ -7,7 +7,7 @@ references:
     - https://drive.google.com/file/d/1lKya3_mLnR3UQuCoiYruO3qgu052_iS_/view
 author: 'Florian Roth, oscd.community, Teymur Kheirkhabarov @HeirhabarovT, Zach Stanford @svch0st'
 date: 2019/12/30
-modified: 2020/10/05
+modified: 2020/11/28
 tags:
     - attack.lateral_movement
     - attack.collection
@@ -25,21 +25,19 @@ detection:
             - '\robocopy.exe'
             - '\xcopy.exe'
     selection2:
-        Image|endswith:
-            - '\cmd.exe'
-        CommandLine|contains:
-            - 'copy'
+        Image|endswith: '\cmd.exe'
+        CommandLine|contains: 'copy'
     selection3:
-        Image|contains:
-            - '\powershell'
+        Image|contains: '\powershell'
         CommandLine|contains:
             - 'copy-item'
             - 'copy'
             - 'cpi '
             - ' cp '
     selection4:
-        CommandLine|contains:
-            - '\\\\*\*$*'               
+        CommandLine|contains|all:
+            - '\\\\'
+            - '$'
     condition: (selection1 or selection2 or selection3) and selection4
 fields:
     - CommandLine

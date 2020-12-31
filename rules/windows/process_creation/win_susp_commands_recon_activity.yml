@@ -8,7 +8,7 @@ references:
     - https://www.fireeye.com/blog/threat-research/2016/05/targeted_attacksaga.html
 author: Florian Roth, Markus Neis
 date: 2018/08/22
-modified: 2018/12/11
+modified: 2020/11/28
 tags:
     - attack.discovery
     - attack.t1087
@@ -19,24 +19,25 @@ logsource:
     product: windows
 detection:
     selection:
-        CommandLine:
+        - CommandLine:
             - tasklist
             - net time
             - systeminfo
             - whoami
             - nbtstat
             - net start
-            - '*\net1 start'
             - qprocess
             - nslookup
             - hostname.exe
-            - '*\net1 user /domain'
-            - '*\net1 group /domain'
-            - '*\net1 group "domain admins" /domain'
-            - '*\net1 group "Exchange Trusted Subsystem" /domain'
-            - '*\net1 accounts /domain'
-            - '*\net1 user net localgroup administrators'
-            - netstat -an
+            - 'netstat -an'
+        - CommandLine|endswith:
+            - '\net1 start'
+            - '\net1 user /domain'
+            - '\net1 group /domain'
+            - '\net1 group "domain admins" /domain'
+            - '\net1 group "Exchange Trusted Subsystem" /domain'
+            - '\net1 accounts /domain'
+            - '\net1 user net localgroup administrators'
     timeframe: 15s
     condition: selection | count() by CommandLine > 4
 falsepositives:

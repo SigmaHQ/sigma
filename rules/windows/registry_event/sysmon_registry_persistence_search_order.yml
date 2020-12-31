@@ -4,9 +4,9 @@ status: experimental
 description: Detects potential COM object hijacking leveraging the COM Search Order
 references:
     - https://www.cyberbit.com/blog/endpoint-security/com-hijacking-windows-overlooked-security-vulnerability/
-author: Maxime Thiebaut (@0xThiebaut)
+author: Maxime Thiebaut (@0xThiebaut), oscd.community
 date: 2020/04/14
-modified: 2020/09/06
+modified: 2020/11/28
 tags:
     - attack.persistence
     - attack.t1038 # an old one
@@ -16,14 +16,23 @@ logsource:
     product: windows
 detection:
     selection: # Detect new COM servers in the user hive
-        TargetObject: 'HKU\\*_Classes\CLSID\\*\InProcServer32\(Default)'
+        TargetObject|contains|all: 
+            - 'HKU\'
+            - '_Classes\CLSID\'
+            - '\InProcServer32\(Default)'
     filter:
-        Details: # Exclude privileged directories and observed FPs
-            - '%%systemroot%%\system32\\*'
-            - '%%systemroot%%\SysWow64\\*'
-            - '*\AppData\Local\Microsoft\OneDrive\\*\FileCoAuthLib64.dll'
-            - '*\AppData\Local\Microsoft\OneDrive\\*\FileSyncShell64.dll'
-            - '*\AppData\Local\Microsoft\TeamsMeetingAddin\\*\Microsoft.Teams.AddinLoader.dll'
+        - Details|contains: # Exclude privileged directories and observed FPs
+            - '%%systemroot%%\system32\'
+            - '%%systemroot%%\SysWow64\'
+        - Details|contains|all:
+            - '\AppData\Local\Microsoft\OneDrive\'
+            - '\FileCoAuthLib64.dll'
+        - Details|contains|all:
+            - '\AppData\Local\Microsoft\OneDrive\'
+            - '\FileSyncShell64.dll'
+        - Details|contains|all:
+            - '\AppData\Local\Microsoft\TeamsMeetingAddin\'
+            - '\Microsoft.Teams.AddinLoader.dll'
     condition: selection and not filter
 falsepositives:
     - Some installed utilities (i.e. OneDrive) may serve new COM objects at user-level

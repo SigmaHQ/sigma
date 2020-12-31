@@ -12,15 +12,24 @@ logsource:
     product: windows
     category: process_creation
 detection:
-    selection:
-        ParentImage:
-            - '*\powershell.exe'
-        CommandLine:
-            - '*schtasks*/Create*/SC *ONLOGON*/TN *Updater*/TR *powershell*'
-            - '*schtasks*/Create*/SC *DAILY*/TN *Updater*/TR *powershell*'
-            - '*schtasks*/Create*/SC *ONIDLE*/TN *Updater*/TR *powershell*'
-            - '*schtasks*/Create*/SC *Updater*/TN *Updater*/TR *powershell*'
-    condition: selection
+    selection1:
+        ParentImage|endswith: '\powershell.exe'
+        Image|endswith: '\schtasks.exe'
+        CommandLine|contains|all:
+            - '/Create'
+            - '/SC'
+    selection2:
+        CommandLine|contains:
+            - 'ONLOGON'
+            - 'DAILY'
+            - 'ONIDLE'
+            - 'Updater'
+        CommandLine|contains|all:
+            - '/TN'
+            - 'Updater'
+            - '/TR'
+            - 'powershell'
+    condition: selection1 and selection2
 tags:
     - attack.execution
     - attack.persistence

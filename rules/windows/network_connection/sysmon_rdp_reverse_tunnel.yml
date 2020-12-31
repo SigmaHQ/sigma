@@ -19,13 +19,15 @@ logsource:
     product: windows
 detection:
     selection:
-        Image: '*\svchost.exe'
+        Image|endswith: '\svchost.exe'
         Initiated: 'true'
         SourcePort: 3389
-        DestinationIp:
-            - '127.*'
+    selection2:
+        - DestinationIp|startswith:
+            - '127.'
+        - DestinationIP:
             - '::1'
-    condition: selection
+    condition: selection and selection2
 falsepositives:
     - unknown
 level: high

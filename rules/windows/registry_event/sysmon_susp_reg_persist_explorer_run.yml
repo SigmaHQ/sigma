@@ -2,7 +2,7 @@ title: Registry Persistence via Explorer Run Key
 id: b7916c2a-fa2f-4795-9477-32b731f70f11
 status: experimental
 description: Detects a possible persistence mechanism using RUN key for Windows Explorer and pointing to a suspicious folder
-author: Florian Roth
+author: Florian Roth, oscd.community
 date: 2018/07/18
 modified: 2020/09/06
 references:
@@ -12,16 +12,18 @@ logsource:
     product: windows
 detection:
     selection:
-        TargetObject: '*\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run'
-        Details: 
-            - 'C:\Windows\Temp\\*'
-            - 'C:\ProgramData\\*'
-            - '*\AppData\\*'
-            - 'C:\$Recycle.bin\\*'
-            - 'C:\Temp\\*'
-            - 'C:\Users\Public\\*'
-            - 'C:\Users\Default\\*'
-    condition: selection
+        TargetObject|endswith: '\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run'
+    selection2:
+        - Details|startswith: 
+            - 'C:\Windows\Temp\'
+            - 'C:\ProgramData\'
+            - 'C:\$Recycle.bin\'
+            - 'C:\Temp\'
+            - 'C:\Users\Public\'
+            - 'C:\Users\Default\'
+        - Details|contains: 
+            - '\AppData\'
+    condition: selection and selection2
 tags:
     - attack.persistence
     - attack.t1060 # an old one

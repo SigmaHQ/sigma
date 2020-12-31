@@ -15,13 +15,14 @@ logsource:
     category: file_event
 detection:
     selection_1:
-        TargetFilename: '*\AppData\Local\Temp\\*\PROCEXP152.sys'
+        TargetFilename|contains: '\AppData\Local\Temp\'
+        TargetFilename|endswith: 'PROCEXP152.sys'
     selection_2:
         Image|contains:
-            - '*\procexp64.exe'
-            - '*\procexp.exe'
-            - '*\procmon64.exe'
-            - '*\procmon.exe'
+            - '\procexp64.exe'
+            - '\procexp.exe'
+            - '\procmon64.exe'
+            - '\procmon.exe'
     condition: selection_1 and not selection_2
 falsepositives:
     - Other legimate tools using this driver and filename (like Sysinternals). Note - Clever attackers may easily bypass this detection by just renaming the driver filename. Therefore just Medium-level and don't rely on it.
