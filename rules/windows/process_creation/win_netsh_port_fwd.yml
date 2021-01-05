@@ -4,7 +4,7 @@ description: Detects netsh commands that configure a port forwarding
 references:
     - https://www.fireeye.com/blog/threat-research/2019/01/bypassing-network-restrictions-through-rdp-tunneling.html
 date: 2019/01/29
-modified: 2020/10/13
+modified: 2021/01/06
 tags:
     - attack.lateral_movement
     - attack.defense_evasion
@@ -17,21 +17,19 @@ logsource:
     product: windows
 detection:
     selection1:
-        Image|endswith: 
-            - '\netsh.exe'
+        Image|endswith: '\netsh.exe'
         CommandLine|contains|all:
             - 'interface'
             - 'portproxy'
             - 'add'
             - 'v4tov4'
     selection2:
-        Image|endswith: 
-            - '\netsh.exe'
+        Image|endswith: '\netsh.exe'
         CommandLine|contains|all:
             - 'connectp'
             - 'listena'
             - 'c='
-    condition: selection1 OR selection2
+    condition: selection1 or selection2
 falsepositives:
     - Legitimate administration
 level: medium

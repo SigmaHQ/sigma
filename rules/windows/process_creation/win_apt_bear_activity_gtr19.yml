@@ -17,11 +17,20 @@ logsource:
     product: windows
 detection:
     selection1:
-        Image: '*\xcopy.exe'
-        CommandLine: '* /S /E /C /Q /H \\*'
+        Image|endswith: '\xcopy.exe'
+        CommandLine|contains|all: 
+            - '/S'
+            - '/E' 
+            - '/C' 
+            - '/Q' 
+            - '/H' 
+            - '\\'
     selection2:
-        Image: '*\adexplorer.exe'
-        CommandLine: '* -snapshot "" c:\users\\*'
+        Image|endswith: '\adexplorer.exe'
+        CommandLine|contains|all: 
+            - '-snapshot' 
+            - '""' 
+            - 'c:\users\'
     condition: selection1 or selection2
 falsepositives:
     - unknown
