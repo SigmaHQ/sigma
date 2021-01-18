@@ -216,7 +216,7 @@ class ElasticsearchWildcardHandlingMixin(object):
         """
         if value and not value == 'null' and not re.match(r'^/.*/$', value) and (re.search('[a-zA-Z]', value) and not re.match(self.uuid_regex, value) or self.containsWildcard(value)):  # re.search for alpha is fastest:
             # Turn single ending '\\' into non escaped (ie: '\\*')
-            #value = re.sub( r"((?<!\\)(\\))\*$", "\g<1>\\*", value )
+            value = re.sub( r"((?<!\\)(\\))\*$", "\g<1>\\*", value )
             # Make upper/lower
             value = re.sub( r"[A-Za-z]", lambda x: "[" + x.group( 0 ).upper() + x.group( 0 ).lower() + "]", value )
             # Turn `.` into wildcard, only if odd number of '\'(because this would mean already escaped)
