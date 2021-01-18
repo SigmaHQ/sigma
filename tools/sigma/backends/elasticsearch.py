@@ -421,8 +421,12 @@ class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, Elast
                         queryType = 'wildcard'
                         value_cleaned = self.escapeSlashes(self.cleanValue(str(v)))
                 else:
-                    queryType = 'match_phrase'
-                    value_cleaned = self.cleanValue(str(v))
+                    if self.containsWildcard(str(v)):
+                        queryType = 'wildcard'
+                        value_cleaned = self.escapeSlashes(self.cleanValue(str(v)))
+                    else:
+                        queryType = 'match_phrase'
+                        value_cleaned = self.cleanValue(str(v))
                 res['bool']['should'].append({queryType: {key_mapped: value_cleaned}})
             return res
         elif value is None:
@@ -442,8 +446,12 @@ class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, Elast
                     queryType = 'wildcard'
                     value_cleaned = self.escapeSlashes(self.cleanValue(str(value)))
             else:
-                queryType = 'match_phrase'
-                value_cleaned = self.cleanValue(str(value))
+                if self.containsWildcard(str(value)):
+                    queryType = 'wildcard'
+                    value_cleaned = self.escapeSlashes(self.cleanValue(str(value)))
+                else:
+                    queryType = 'match_phrase'
+                    value_cleaned = self.cleanValue(str(value))
             return {queryType: {key_mapped: value_cleaned}}
         elif isinstance(value, SigmaRegularExpressionModifier):
             key_mapped = self.fieldNameMapping(key, value)
