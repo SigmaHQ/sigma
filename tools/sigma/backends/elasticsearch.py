@@ -269,8 +269,11 @@ class ElasticsearchQuerystringBackend(DeepFieldMappingMixin, ElasticsearchWildca
                     if make_ci.get('is_regex'): # Determine if still should be a regex
                         result = "/%s/" % result # Regex place holders for regex
                 return result
-            else:
-                return "\"%s\"" % result
+            else: # If analyzed field contains wildcard then do NOT quote otherwise things such as '*' get treated as an exact match
+                if self.containsWildcard(result):
+                    return result
+                else:
+                    return "\"%s\"" % result
 
     def generateNOTNode(self, node):
         expression = super().generateNode(node.item)
