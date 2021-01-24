@@ -2,12 +2,14 @@ title: Domain Trust Discovery
 id: 3bad990e-4848-4a78-9530-b427d854aac0
 description: Identifies execution of nltest.exe and dsquery.exe for domain trust discovery. This technique is used by attackers to enumerate Active Directory trusts.
 status: experimental
-author: E.M. Anhaus (orignally from Atomic Blue Detections, Tony Lambert), oscd.community
+author: E.M. Anhaus (orignally from Atomic Blue Detections, Tony Lambert), oscd.community, omkar72
 date: 2019/10/24
-modified: 2019/11/11
+modified: 2020/10/30
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1482/T1482.md
     - https://eqllib.readthedocs.io/en/latest/analytics/03e231a6-74bc-467a-acb1-e5676b0fb55e.html
+    - https://thedfirreport.com/2020/10/18/ryuk-in-5-hours/
+    - https://redcanary.com/blog/how-one-hospital-thwarted-a-ryuk-ransomware-outbreak/
 tags:
     - attack.discovery
     - attack.t1482
@@ -17,7 +19,10 @@ logsource:
 detection:
     selection:
       - Image|endswith: '\nltest.exe'
-        CommandLine|contains: 'domain_trusts'
+        CommandLine|contains: 
+            - 'domain_trusts'
+            - 'all_trusts'
+            - '/dclist'
       - Image|endswith: '\dsquery.exe'
         CommandLine|contains: 'trustedDomain'
     condition: selection

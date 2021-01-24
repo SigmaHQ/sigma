@@ -1,0 +1,28 @@
+title: Emotet RunDLL32 Process Creation
+id: 54e57ce3-0672-46eb-a402-2c0948d5e3e9
+description: Detecting Emotet DLL loading by looking for rundll32.exe processes with command lines ending in ,RunDLL or ,#1
+author: FPT.EagleEye 
+status: experimental
+date: 2020/12/25
+references:
+    - https://paste.cryptolaemus.com/emotet/2020/12/22/emotet-malware-IoCs_12-22-20.html
+tags:
+    - attack.defense_evasion
+    - attack.t1218.011
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\rundll32.exe'
+        CommandLine|endswith:
+            - ',RunDLL'
+            # - ',#1'  too generic - function load by ordinal is not Emotet specific
+    filter_ide:
+        ParentImage|endswith:
+            - '\tracker.exe' #When Visual Studio compile NodeJS program, it might use MSBuild to create tracker.exe and then, the tracker.exe fork rundll32.exe 
+    condition: selection and not filter_ide
+falsepositives:
+    - Unknown
+level: critical
