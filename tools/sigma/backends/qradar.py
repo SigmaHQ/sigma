@@ -215,7 +215,6 @@ class QRadarBackend(SingleTextQueryBackend):
 
         except KeyError:    # no 'fields' attribute
             mapped = None
-            qradarPrefix+="UTF8(payload) as search_payload"
             pass
         qradarPrefix += " from %s where " % (aql_database)
 
