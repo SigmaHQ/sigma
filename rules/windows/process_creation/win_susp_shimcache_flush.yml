@@ -13,17 +13,23 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection1:
+    selection1a:
         CommandLine|contains|all:
             - 'rundll32'
             - 'apphelp.dll'
+    selection1b:
+        CommandLine|contains:
             - 'ShimFlushCache'
-    selection2:
+            - '#250'
+    selection2a:
         CommandLine|contains|all:
             - 'rundll32'
             - 'kernel32.dll'
+    selection2b:
+        CommandLine|contains:
             - 'BaseFlushAppcompatCache'
-    condition: selection1 or selection2
+            - '#46'
+    condition: ( selection1 and selection1b ) or ( selection2a and selection2b )
 fields:
     - Image
     - CommandLine
