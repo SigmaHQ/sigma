@@ -1,11 +1,11 @@
 title: Webshell Detection With Command Line Keywords
 id: bed2a484-9348-4143-8a8a-b801c979301c
 description: Detects certain command line parameters often used during reconnaissance activity via web shells
-author: Florian Roth
+author: Florian Roth, Jonhnathan Ribeiro, oscd.community
 reference:
     - https://www.fireeye.com/blog/threat-research/2013/08/breaking-down-the-china-chopper-web-shell-part-ii.html
 date: 2017/01/01
-modified: 2019/10/26
+modified: 2019/11/28
 tags:
     - attack.persistence
     - attack.t1505.003
@@ -16,21 +16,32 @@ logsource:
     product: windows
 detection:
     selection:
-        ParentImage:
-            - '*\apache*'
-            - '*\tomcat*'
-            - '*\w3wp.exe'
-            - '*\php-cgi.exe'
-            - '*\nginx.exe'
-            - '*\httpd.exe'
-        CommandLine:
-            - '*whoami*'
-            - '*net user *'
-            - '*ping -n *'
-            - '*systeminfo'
-            - '*&cd&echo*'
-            - '*cd /d*'  # https://www.computerhope.com/cdhlp.htm
-    condition: selection
+        - ParentImage|endswith:
+            - '\w3wp.exe'
+            - '\php-cgi.exe'
+            - '\nginx.exe'
+            - '\httpd.exe'
+        - ParentImage|contains:
+            - '\apache'
+            - '\tomcat'
+    selection2:
+        Image|endswith:
+            - '\whoami.exe'
+            - '\systeminfo.exe'
+    selection3:
+        Image|endswith:
+            - '\net1.exe'
+            - '\net.exe'
+        CommandLine|contains: 'user'
+    selection4:
+        - CommandLine|contains|all:
+            - 'cd' # https://www.computerhope.com/cdhlp.htm
+            - '/d'
+        - CommandLine|contains: '&cd&echo'
+    selection5:
+        Image|endswith: '\ping.exe'
+        CommandLine|contains: '-n'
+    condition: selection and ( selection2 or selection3 or selection4 or selection5 )
 fields:
     - CommandLine
     - ParentCommandLine

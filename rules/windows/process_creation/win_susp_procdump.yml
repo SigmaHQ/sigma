@@ -6,7 +6,7 @@ references:
     - Internal Research
 author: Florian Roth
 date: 2018/10/30
-modified: 2019/10/14
+modified: 2020/11/28
 tags:
     - attack.defense_evasion
     - attack.t1036
@@ -19,14 +19,13 @@ logsource:
     product: windows
 detection:
     selection1:
-        CommandLine:
-            - '* -ma *'
+        CommandLine|contains: ' -ma '
     selection2:
-        CommandLine:
-            - '* lsass*'
+        CommandLine|contains: ' lsass'
     selection3:
-        CommandLine:
-            - '* -ma ls*'
+        CommandLine|contains|all:
+            - ' -ma '
+            - 'ls'
     condition: ( selection1 and selection2 ) or selection3
 falsepositives:
     - Unlikely, because no one should dump an lsass process memory
