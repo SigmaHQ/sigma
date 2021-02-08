@@ -355,7 +355,7 @@ class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, Elast
                         raise TypeError("Field mapping must return string or list")
 
                 fields = ",".join(str(x) for x in columns)
-                self.queries[-1]['_source_'] = columns
+                self.queries[-1]['_source'] = columns
             except KeyError:    # no 'fields' attribute
                  mapped = None
                  pass
