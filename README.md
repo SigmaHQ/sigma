@@ -323,6 +323,10 @@ These tools are not part of the main toolchain and maintained separately by thei
 * [TimeSketch](https://github.com/google/timesketch/commit/0c6c4b65a6c0f2051d074e87bbb2da2424fa6c35)
 * [SIΣGMA](https://github.com/3CORESec/SIEGMA) - SIEM consumable generator that utilizes Sigma for query conversion 
 
+Sigma is available in some Linux distribution repositories:
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/sigma.svg)](https://repology.org/project/sigma/versions)
+
 # Contribution
 
 If you want to contribute, you are more then welcome. There are numerous ways to help this project.
