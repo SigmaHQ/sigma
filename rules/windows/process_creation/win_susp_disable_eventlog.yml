@@ -1,0 +1,22 @@
+title: Disable Windows Eventlog
+id: cd1f961e-0b96-436b-b7c6-38da4583ec00
+status: experimental
+description: Detects command that is used to disable Windows eventlog 
+references:
+    - https://twitter.com/0gtweet/status/1359039665232306183?s=21
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+author: Florian Roth 
+date: 2021/02/11
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains: 'logman stop EventLog-System'
+    condition: 1 of them
+falsepositives:
+    - Legitimate deactivation by administrative staff
+    - Installer tools that disable services, e.g. before log collection agent installation
+level: high
