@@ -53,8 +53,6 @@ class FieldnameListBackend(BaseBackend):
 
     def generateMapItemNode(self, node):
         key, value = node
-        if type(value) not in (str, int, list, type(None)):
-            raise TypeError("Map values must be strings, numbers or lists, not " + str(type(value)))
         return [key]
 
     def generateValueNode(self, node):
