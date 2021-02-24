@@ -6,29 +6,12 @@ references:
     - https://www.optiv.com/blog/post-exploitation-using-netntlm-downgrade-attacks
 author: Florian Roth
 date: 2018/03/20
-modified: 2020/08/23
+modified: 2021/02/24
 tags:
     - attack.defense_evasion
     - attack.t1089          # an old one
     - attack.t1562.001
     - attack.t1112
-detection:
-    condition: 1 of them
-falsepositives:
-    - Unknown
-level: critical
----
-logsource:
-    product: windows
-    service: sysmon
-detection:
-    selection1:
-        EventID: 13
-        TargetObject: 
-            - '*SYSTEM\\*ControlSet*\Control\Lsa\lmcompatibilitylevel'
-            - '*SYSTEM\\*ControlSet*\Control\Lsa*\NtlmMinClientSec'
-            - '*SYSTEM\\*ControlSet*\Control\Lsa*\RestrictSendingNTLMTraffic'
----
 # Windows Security Eventlog: Process Creation with Full Command Line
 logsource:
     product: windows
@@ -42,3 +25,7 @@ detection:
             - 'LmCompatibilityLevel'
             - 'NtlmMinClientSec'
             - 'RestrictSendingNTLMTraffic'
+    condition: 1 of them
+falsepositives:
+    - Unknown
+level: critical
