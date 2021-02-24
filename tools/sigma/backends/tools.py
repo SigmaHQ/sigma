@@ -16,7 +16,7 @@
 
 from .base import BaseBackend
 
-### Backends for developement purposes
+### Backends for development purposes
 
 class FieldnameListBackend(BaseBackend):
     """List all fieldnames from given Sigma rules for creation of a field mapping configuration."""
