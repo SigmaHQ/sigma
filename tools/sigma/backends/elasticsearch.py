@@ -1283,13 +1283,13 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
 
     def map_risk_score(self, level):
         if level == "low":
-            return randrange(0,22)
+            return 5
         elif level == "medium":
-            return randrange(22,48)
+            return 35
         elif level == "high":
-            return randrange(48,74)
+            return 65
         elif level == "critical":
-            return randrange(74,101)
+            return 95
 
     def create_rule(self, configs, index):
         tags = configs.get("tags", [])
