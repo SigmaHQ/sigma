@@ -1,0 +1,34 @@
+title: Execute Files with Msdeploy.exe
+status: experimental
+id: d80d5c81-04ba-45b4-84e4-92eba40e0ad3
+author: Beyu Denis, oscd.community
+date: 2020/10/18
+description: Detects file execution using the msdeploy.exe lolbin
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OtherMSBinaries/Msdeploy.yml
+    - https://twitter.com/pabraeken/status/995837734379032576
+    - https://twitter.com/pabraeken/status/999090532839313408
+tags:
+    - attack.execution
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Commandline|contains|all:
+            - 'verb:sync'
+            - '-source:RunCommand'
+            - '-dest:runCommand'
+        Image|endswith:
+            - '\msdeploy.exe'
+    condition: selection
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+    - ParentCommandLine    
+falsepositives:
+    - System administrator Usage
+    - Penetration test 
+level: medium
