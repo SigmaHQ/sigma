@@ -101,8 +101,9 @@ def set_argparser():
             """)
     argparser.add_argument("--target", "-t", choices=backends.getBackendDict().keys(), help="Output target format")
     argparser.add_argument("--lists", "-l", action="store_true", help="List available output target formats and configurations")
-    argparser.add_argument("--config", "-c", action="append", help="Configurations with field name and index mapping for target environment. Multiple configurations are merged into one. Last config is authorative in case of conflicts.")
+    argparser.add_argument("--config", "-c", action="append", help="Configurations with field name and index mapping for target environment. Multiple configurations are merged into one. Last config is authoritative in case of conflicts.")
     argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix if multiple files are generated")
+    argparser.add_argument("--print0", action="store_true", help="Delimit results by NUL-character")
     argparser.add_argument("--backend-option", "-O", action="append", help="Options and switches that are passed to the backend")
     argparser.add_argument("--backend-config", "-C", help="Configuration file (YAML format) containing options to pass to the backend")
     argparser.add_argument("--backend-help", action=ActionBackendHelp, help="Print backend options")
@@ -234,8 +235,10 @@ def main():
                 f = sigmafile.open(encoding='utf-8')
             parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter)
             results = parser.generate(backend)
+
+            newline_separator = '\0' if cmdargs.print0 else '\n'
             for result in results:
-                print(result, file=out)
+                print(result, file=out, end=newline_separator)
         except OSError as e:
             print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
             error = ERR_OPEN_SIGMA_RULE

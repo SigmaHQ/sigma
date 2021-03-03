@@ -20,7 +20,7 @@ from fnmatch import fnmatch
 import sys
 import os
 from random import randrange
-from distutils.util import strtobool 
+from distutils.util import strtobool
 
 import sigma
 import yaml
@@ -66,7 +66,7 @@ class ElasticsearchWildcardHandlingMixin(object):
             ("keyword_blacklist", None, "Fields to never set as keyword (ie: always set as analyzed field). Bypasses case insensitive options. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("case_insensitive_whitelist", None, "Fields to make the values case insensitive regex. Automatically sets the field as a keyword. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("case_insensitive_blacklist", None, "Fields to exclude from being made into case insensitive regex. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
-            ("wildcard_use_keyword", "true", "Use analyzed field or wildcard field if the query uses a wildcard value (ie: '*mall_wear.exe'). Set this to 'False' to use analyzed field or wildcard field. Valid options are: true/false", None)
+            ("wildcard_use_keyword", "true", "Use analyzed field or wildcard field if the query uses a wildcard value (ie: '*mall_wear.exe'). Set this to 'False' to use analyzed field or wildcard field. Valid options are: true/false", None),
             )
     reContainsWildcard = re.compile("(?:(?<!\\\\)|\\\\\\\\)[*?]").search
     uuid_regex = re.compile( "[0-9a-fA-F]{8}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{12}", re.IGNORECASE )
@@ -197,6 +197,8 @@ class ElasticsearchWildcardHandlingMixin(object):
             self.matchKeyword = True
         elif self.wildcard_use_keyword and ( (type(value) == list and any(map(self.containsWildcard, value))) or self.containsWildcard(value) ):
             self.matchKeyword = True
+        elif isinstance(value, SigmaRegularExpressionModifier):
+            self.matchKeyword = True
         else:
             self.matchKeyword = False
 
@@ -305,6 +307,7 @@ class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, Elast
     options = RulenameCommentMixin.options + ElasticsearchWildcardHandlingMixin.options + (
         ("es", "http://localhost:9200", "Host and port of Elasticsearch instance", None),
         ("output", "import", "Output format: import = JSON search request, curl = Shell script that do the search queries via curl", "output_type"),
+        ("set_size", "0", "value for the size of returned datasets.", None)
     )
     interval = None
     title = None
@@ -333,6 +336,30 @@ class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, Elast
         for parsed in sigmaparser.condparsed:
             self.generateBefore(parsed)
             self.generateQuery(parsed)
+
+            # size = X
+            if int(self.set_size) > 0:
+                self.queries[-1]['size'] = self.set_size
+
+            # set _source from YAML-fields
+            columns = list()
+            mapped =None
+            try:
+                for field in sigmaparser.parsedyaml["fields"]:
+                    mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
+                    if type(mapped) == str:
+                        columns.append(mapped)
+                    elif type(mapped) == list:
+                        columns.extend(mapped)
+                    else:
+                        raise TypeError("Field mapping must return string or list")
+
+                fields = ",".join(str(x) for x in columns)
+                self.queries[-1]['_source'] = columns
+            except KeyError:    # no 'fields' attribute
+                 mapped = None
+                 pass
+
             self.generateAfter(parsed)
 
     def generateQuery(self, parsed):
@@ -670,7 +697,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
             ("action_throttle_period","15m","Throttle time of the action",None),
 
             ("alert_methods", "email", "Alert method(s) to use when the rule triggers, comma separated. Supported: " + ', '.join(supported_alert_methods), None),
-            # Options for Email Action            
+            # Options for Email Action
             ("mail", "root@localhost", "Mail address for Watcher notification (only logging if not set)", None),
             ("mail_from", "root@localhost", "Mail address for Watcher notification (only logging if not set)", None),
             ("mail_profile", "standard", "Watcher provides three email profiles that control how MIME messages are structured: standard (default), gmail, and outlook.", None),
@@ -689,7 +716,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
             # Options for Index Action
             ("index", "<log2alert-{now/d}>","Index name used to add the alerts", None), #by default it creates a new index every day
             ("type", "_doc","Index Type used to add the alerts", None)
-        
+
             )
     watcher_urls = {
             "watcher": "_watcher",
@@ -711,7 +738,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
         # Get time frame if exists
         interval = sigmaparser.parsedyaml["detection"].setdefault("timeframe", "30m")
         dateField = self.sigmaconfig.config.get("dateField", "timestamp")
-        
+
         # creating condition
         indices = sigmaparser.get_logsource().index
         # How many results to be returned. Usually 0 but for index action we need it.
@@ -814,7 +841,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                 eaction={} #email action
                 waction={} #webhook action
                 iaction={} #index action
-                action={} 
+                action={}
                 alert_methods = self.alert_methods.split(',')
                 if 'email' in alert_methods:
                     # mail notification if mail address is given
@@ -854,7 +881,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                     waction = {
             "httppost":{
                             "transform":{
-                                "script": "ctx.metadata.timestamp=ctx.trigger.scheduled_time;" 
+                                "script": "ctx.metadata.timestamp=ctx.trigger.scheduled_time;"
                                 },
                             "webhook":{
                             "scheme"  : http_scheme,
@@ -889,12 +916,12 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                     size=1000 #I presume it will not be more than 1000 events detected
                     iaction = {
                             "elastic":{
-                                "transform":{ #adding title, description, tags on the event 
+                                "transform":{ #adding title, description, tags on the event
                                     "script": "ctx.payload.transform = [];for (int j=0;j<ctx.payload.hits.total;j++){ctx.payload.hits.hits[j]._source.alerttimestamp=ctx.trigger.scheduled_time;ctx.payload.hits.hits[j]._source.alerttitle=ctx.metadata.title;ctx.payload.hits.hits[j]._source.alertquery=ctx.metadata.query;ctx.payload.hits.hits[j]._source.alertdescription=ctx.metadata.description;ctx.payload.hits.hits[j]._source.tags=ctx.metadata.tags;ctx.payload.transform.add(ctx.payload.hits.hits[j]._source)} return ['_doc': ctx.payload.transform];"
                                 },
                                 "index":{
                                     "index": index,
-                                    "doc_type":dtype 
+                                    "doc_type":dtype
                                 }
                             }
                     }
@@ -916,7 +943,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                                   "description": description,
                                   "tags": tags,
                                   "query":result #addede query to metadata. very useful in kibana to do drill down directly from discover
-                              },     
+                              },
                               "trigger": {
                                 "schedule": {
                                   "interval": interval  # how often the watcher should check
@@ -1018,7 +1045,7 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
             index = "logstash-*"
         elif len(index) > 0:
             index = index[0]
-        #Init a rule number cpt in case there are several elastalert rules generated fron one Sigma rule
+        #Init a rule number cpt in case there are several elastalert rules generated from one Sigma rule
         rule_number = 0
         for parsed in sigmaparser.condparsed:
             #Static data
@@ -1305,7 +1332,7 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
         rule = {
             "description": configs.get("description", ""),
             "enabled": True,
-            "false_positives": configs.get('falsepositives', "Unkown"),
+            "false_positives": configs.get('falsepositives', "Unknown"),
             "filters": [],
             "from": "now-360s",
             "immutable": False,
@@ -1331,3 +1358,128 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
         if references:
             rule.update({"references": references})
         return json.dumps(rule)
+
+class KibanaNdjsonBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
+    """Converts Sigma rule into Kibana JSON Configuration files (searches only)."""
+    identifier = "kibana-ndjson"
+    active = True
+    options = ElasticsearchQuerystringBackend.options + (
+            ("output", "import", "Output format: import = JSON file manually imported in Kibana, curl = Shell script that imports queries in Kibana via curl (jq is additionally required)", "output_type"),
+            ("es", "localhost:9200", "Host and port of Elasticsearch instance", None),
+            ("index", ".kibana", "Kibana index", None),
+            ("prefix", "Sigma: ", "Title prefix of Sigma queries", None),
+            )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.kibanaconf = list()
+        self.indexsearch = set()
+
+    def generate(self, sigmaparser):
+        description = sigmaparser.parsedyaml.setdefault("description", "")
+
+        columns = list()
+        try:
+            for field in sigmaparser.parsedyaml["fields"]:
+                mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
+                if type(mapped) == str:
+                    columns.append(mapped)
+                elif type(mapped) == list:
+                    columns.extend(mapped)
+                else:
+                    raise TypeError("Field mapping must return string or list")
+        except KeyError:    # no 'fields' attribute
+            pass
+
+        indices = sigmaparser.get_logsource().index
+        if len(indices) == 0:   # fallback if no index is given
+            indices = ["*"]
+
+        for parsed in sigmaparser.condparsed:
+            result = self.generateNode(parsed.parsedSearch)
+
+            for index in indices:
+                rulename = self.getRuleName(sigmaparser)
+                if len(indices) > 1:     # add index names if rule must be replicated because of ambigiuous index patterns
+                    raise NotSupportedError("Multiple target indices are not supported by Kibana")
+                else:
+                    title = self.prefix + sigmaparser.parsedyaml["title"]
+
+                self.indexsearch.add(
+                        "export {indexvar}=$(curl -s '{es}/{index}/_search?q=index-pattern.title:{indexpattern}' | jq -r '.hits.hits[0]._id | ltrimstr(\"index-pattern:\")')".format(
+                            es=self.es,
+                            index=self.index,
+                            indexpattern=index.replace("*", "\\*"),
+                            indexvar=self.index_variable_name(index)
+                            )
+                        )
+                self.kibanaconf.append({
+                        "id": rulename,
+                        "type": "search",
+                        "attributes": {
+                            "title": title,
+                            "description": description,
+                            "hits": 0,
+                            "columns": columns,
+                            "sort": ["@timestamp", "desc"],
+                            "version": 1,
+                            "kibanaSavedObjectMeta": {
+                                "searchSourceJSON": {
+                                    "index": index,
+                                    "filter":  [],
+                                    "highlight": {
+                                        "pre_tags": ["@kibana-highlighted-field@"],
+                                        "post_tags": ["@/kibana-highlighted-field@"],
+                                        "fields": { "*":{} },
+                                        "require_field_match": False,
+                                        "fragment_size": 2147483647
+                                        },
+                                    "query": {
+                                        "query_string": {
+                                            "query": result,
+                                            "analyze_wildcard": True
+                                            }
+                                        }
+                                    }
+                            }
+                        },
+                        "references": [
+                            {
+                                "id": index,
+                                "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+                                "type": "index-pattern"
+                            }
+                        ]
+                    })
+
+    def finalize(self):
+        if self.output_type == "import":        # output format that can be imported via Kibana UI
+            for item in self.kibanaconf:    # JSONize kibanaSavedObjectMeta.searchSourceJSON
+                item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'] = json.dumps(item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'])
+            if self.kibanaconf:
+                ndjson = ""
+                for item in self.kibanaconf:
+                    ndjson += json.dumps(item)
+                    ndjson += "\n"
+                return ndjson
+        elif self.output_type == "curl":
+            for item in self.indexsearch:
+                return item
+            for item in self.kibanaconf:
+                item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON']['index'] = "$" + self.index_variable_name(item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON']['index'])   # replace index pattern with reference to variable that will contain Kibana index UUID at script runtime
+                item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'] = json.dumps(item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'])     # Convert it to JSON string as expected by Kibana
+                item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'] = item['attributes']['kibanaSavedObjectMeta']['searchSourceJSON'].replace("\\", "\\\\")      # Add further escaping for escaped quotes for shell
+                return "curl -s -XPUT -H 'Content-Type: application/json' --data-binary @- '{es}/{index}/doc/{doc_id}' <<EOF\n{doc}\nEOF".format(
+                        es=self.es,
+                        index=self.index,
+                        doc_id="search:" + item['_id'],
+                        doc=json.dumps({
+                            "type": "search",
+                            "search": item['attributes']
+                            }, indent=2)
+                        )
+        else:
+            raise NotImplementedError("Output type '%s' not supported" % self.output_type)
+
+    def index_variable_name(self, index):
+        return "index_" + index.replace("-", "__").replace("*", "X")

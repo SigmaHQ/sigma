@@ -6,7 +6,7 @@ references:
     - https://www.optiv.com/blog/post-exploitation-using-netntlm-downgrade-attacks
 author: Florian Roth
 date: 2018/03/20
-modified: 2020/08/23
+modified: 2021/02/24
 tags:
     - attack.defense_evasion
     - attack.t1089          # an old one
@@ -40,10 +40,14 @@ logsource:
     service: security
     definition: 'Requirements: Audit Policy : Object Access > Audit Registry (Success)'
 detection:
-    selection2:
+    selection:
         EventID: 4657
         ObjectName|startswith: '\REGISTRY\MACHINE\SYSTEM\\*ControlSet*\Control\Lsa'
         ObjectValueName: 
             - 'LmCompatibilityLevel'
             - 'NtlmMinClientSec'
             - 'RestrictSendingNTLMTraffic'
+    condition: selection
+falsepositives:
+    - Unknown
+level: critical
