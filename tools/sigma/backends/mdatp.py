@@ -18,6 +18,10 @@ import re
 from functools import wraps
 from .base import SingleTextQueryBackend
 from .exceptions import NotSupportedError
+from ..parser.modifiers.base import SigmaTypeModifier
+from ..parser.modifiers.transform import SigmaContainsModifier, SigmaStartswithModifier, SigmaEndswithModifier
+from ..parser.modifiers.type import SigmaRegularExpressionModifier
+
 
 def wrapper(method):
     @wraps(method)
@@ -62,8 +66,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
         "FileVersion",
         "Product",
         "Company",
-        "ParentProcessName",
-        "ParentCommandLine"
+        "IMPHASH",
     }
 
     def __init__(self, *args, **kwargs):
@@ -77,67 +80,121 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
             "DeviceProcessEvents": {
                 "AccountName": (self.id_mapping, self.default_value_mapping),
                 "CommandLine": ("ProcessCommandLine", self.default_value_mapping),
-                "Command": ("ProcessCommandLine", self.default_value_mapping),
                 "DeviceName": (self.id_mapping, self.default_value_mapping),
                 "EventType": ("ActionType", self.default_value_mapping),
+                "FileName": (self.id_mapping, self.default_value_mapping),
                 "Image": ("FolderPath", self.default_value_mapping),
+                "ImagePath": ("FolderPath", self.default_value_mapping),
                 "ImageLoaded": ("FolderPath", self.default_value_mapping),
                 "LogonType": (self.id_mapping, self.logontype_mapping),
                 "NewProcessName": ("FolderPath", self.default_value_mapping),
-                "ParentImage": ("InitiatingProcessFolderPath", self.default_value_mapping),
+                "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
+                "ParentName": ("InitiatingProcessFileName", self.default_value_mapping),
+                "ParentProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
+                "ParentImage": ("InitiatingProcessFolderPath", self.default_value_mapping),                
                 "SourceImage": ("InitiatingProcessFolderPath", self.default_value_mapping),
-                "TargetImage": ("FolderPath", self.default_value_mapping),
+                "TargetImage": ("FolderPath", self.default_value_mapping),                
                 "User": (self.decompose_user, ),
             },
             "DeviceEvents": {
+                "AccountName": (self.id_mapping, self.default_value_mapping),
+                "CommandLine": ("ProcessCommandLine", self.default_value_mapping),
+                "DestinationHostname":  ("RemoteUrl", self.default_value_mapping),
+                "DestinationIp": ("RemoteIP", self.default_value_mapping),
+                "DestinationPort": ("RemotePort", self.default_value_mapping),
+                "EventType": ("ActionType", self.default_value_mapping),
+                "FileName": (self.id_mapping, self.default_value_mapping),
+                "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
+                "ParentProcessName": ("InitiatingProcessParentFileName", self.default_value_mapping),
+                "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),  
+                "SourceIp": ("LocalIP", self.default_value_mapping),
+                "SourcePort": ("LocalPort", self.default_value_mapping),
                 "TargetFilename": ("FolderPath", self.default_value_mapping),
-                "TargetImage": ("FolderPath", self.default_value_mapping),
-                
+                "TargetObject": ("RegistryKey", self.default_value_mapping),
+                "TargetImage": ("FolderPath", self.default_value_mapping),                
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "User":  (self.decompose_user, ),
             },
-            "DeviceRegistryEvents": {
-                "TargetObject": ("RegistryKey", self.default_value_mapping),
-                "ObjectValueName": ("RegistryValueName", self.default_value_mapping),
+            "DeviceRegistryEvents": {                
+                "DataType": ("RegistryValueType", self.default_value_mapping),
                 "Details": ("RegistryValueData", self.default_value_mapping),
                 "EventType": ("ActionType", self.default_value_mapping),
-                "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
+                "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),                
+                "ObjectValueName": ("RegistryValueName", self.default_value_mapping),
+                "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
+                "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),                
+                "ParentName": ("InitiatingProcessParentFileName", self.default_value_mapping),
+                "ParentProcessName": ("InitiatingProcessParentFileName", self.default_value_mapping),
+                "TargetObject": ("RegistryKey", self.default_value_mapping),
                 "User":  (self.decompose_user, ),
             },
             "DeviceFileEvents": {
-                "TargetFilename": ("FolderPath", self.default_value_mapping),
-                "TargetFileName": ("FolderPath", self.default_value_mapping),
-
+                "FileName": (self.id_mapping, self.default_value_mapping),
+                "OriginIp": ("FileOriginIp", self.default_value_mapping),
+                "OriginReferrer": ("FileOriginReferrerUrl", self.default_value_mapping),
+                "OriginUrl": ("FileOriginUrl", self.default_value_mapping),                
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
+                "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),                  
+                "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),                
+                "ParentName": ("InitiatingProcessParentFileName", self.default_value_mapping),
+                "ParentProcessName": ("InitiatingProcessParentFileName", self.default_value_mapping),
+                "TargetFilename": ("FolderPath", self.default_value_mapping),              
                 "User":  (self.decompose_user, ),
             },
-            "DeviceNetworkEvents": {
-                "Initiated": ("RemotePort", self.default_value_mapping),
-                "Protocol": ("RemoteProtocol", self.default_value_mapping),
-                "DestinationPort": ("RemotePort", self.default_value_mapping),
+            "DeviceNetworkEvents": {                
+                "DestinationHostname": ("RemoteUrl", self.default_value_mapping),
                 "DestinationIp": ("RemoteIP", self.default_value_mapping),
                 "DestinationIsIpv6": ("RemoteIP has \":\"", ),
-                "SourcePort": ("LocalPort", self.default_value_mapping),
-                "SourceIp": ("LocalIP", self.default_value_mapping),
-                "DestinationHostname":  ("RemoteUrl", self.default_value_mapping),
+                "DestinationPort": ("RemotePort", self.default_value_mapping),
+                "DeviceName": (self.id_mapping, self.default_value_mapping),
                 "EventType": ("ActionType", self.default_value_mapping),
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
+                "Initiated": ("RemotePort", self.default_value_mapping),
+                "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
+                "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),           
+                "Protocol": ("RemoteProtocol", self.default_value_mapping),
+                "SourceIp": ("LocalIP", self.default_value_mapping),
+                "SourcePort": ("LocalPort", self.default_value_mapping),                
                 "User":  (self.decompose_user, ),
             },
             "DeviceImageLoadEvents": {
-                "ImageLoaded": ("FolderPath", self.default_value_mapping),
-                "EventType": ("ActionType", self.default_value_mapping),
+                "DeviceName": (self.id_mapping, self.default_value_mapping),
+                "EventType": ("ActionType", self.default_value_mapping),               
+                "FileName": (self.id_mapping, self.default_value_mapping),
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
+                "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
+                "ParentProcessName": ("InitiatingProcessParentFileName", self.default_value_mapping),
+                "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
+                "TargetImage": ("FolderPath", self.default_value_mapping),
                 "User":  (self.decompose_user, ),
             }
         }
+        self.current_table = ""
+
+    def generateANDNode(self, node):
+        generated = [ self.generateNode(val) for val in node ]
+        filtered = []
+        for g in generated:
+            if g and g.startswith("ActionType"):
+                if not any([i for i in filtered if i.startswith("ActionType")]):
+                    filtered.append(g)
+                else:
+                    continue
+            elif g is not None:
+                filtered.append(g)
+        if filtered:
+            if self.sort_condition_lists:
+                filtered = sorted(filtered)
+            return self.andToken.join(filtered)
+        else:
+            return None
 
     def id_mapping(self, src):
         """Identity mapping, source == target field name"""
         return src
 
     def default_value_mapping(self, val):
-        op = "=="
+        op = "=~"
         if type(val) == str:
             if "*" in val[1:-1]:     # value contains * inside string - use regex match
                 op = "matches regex"
@@ -186,25 +243,104 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
             return (("InititatingProcessAccountName", self.default_value_mapping(src_value)))
 
     def generate(self, sigmaparser):
-        self.table = None
-        self.category = sigmaparser.parsedyaml['logsource'].get('category')
-        self.product = sigmaparser.parsedyaml['logsource'].get('product')
-        self.service = sigmaparser.parsedyaml['logsource'].get('service')
+        self.tables = []
+        try:
+            self.category = sigmaparser.parsedyaml['logsource'].setdefault('category', None)
+            self.product = sigmaparser.parsedyaml['logsource'].setdefault('product', None)
+            self.service = sigmaparser.parsedyaml['logsource'].setdefault('service', None)
+        except KeyError:
+            self.category = None
+            self.product = None
+            self.service = None
 
         if (self.category, self.product, self.service) == ("process_creation", "windows", None):
-            self.table = "DeviceProcessEvents"
+            self.tables.append("DeviceProcessEvents")
+            self.current_table = "DeviceProcessEvents"
+        elif (self.category, self.product, self.service) == ("registry_event", "windows", None):
+            self.tables.append("DeviceRegistryEvents")
+            self.current_table = "DeviceRegistryEvents"
+        elif (self.category, self.product, self.service) == ("file_event", "windows", None):
+            self.tables.append("DeviceFileEvents")
+            self.current_table = "DeviceFileEvents"
+        elif (self.category, self.product, self.service) == ("network_connection", "windows", None):
+            self.tables.append("DeviceNetworkEvents")
+            self.current_table = "DeviceNetworkEvents"
         elif (self.category, self.product, self.service) == (None, "windows", "powershell"):
-            self.table = "DeviceEvents"
+            self.tables.append("DeviceEvents")
+            self.current_table = "DeviceEvents"
             self.orToken = ", "
+        elif (self.category, self.product, self.service) == (None, "windows", "security"):
+            self.tables.append("DeviceAlertEvents")
+            self.current_table = "DeviceAlertEvents"
 
         return super().generate(sigmaparser)
 
     def generateBefore(self, parsed):
-        if self.table is None:
+        if not any(self.tables):
             raise NotSupportedError("No MDATP table could be determined from Sigma rule")
-        if self.table == "DeviceEvents" and self.service == "powershell":
-            return "%s | where tostring(extractjson('$.Command', AdditionalFields)) in~ " % self.table
-        return "%s | where " % self.table
+        # if self.tables in "DeviceEvents" and self.service == "powershell":
+        #     return "%s | where tostring(extractjson('$.Command', AdditionalFields)) in~ " % self.tables
+        if len(self.tables) == 1:
+            if self.tables[0] == "DeviceEvents" and self.service == "powershell":
+                return "%s | where tostring(extractjson('$.Command', AdditionalFields)) in~ " % self.tables
+            return "%s | where " % self.tables[0]
+        else:
+            if "DeviceEvents" in self.tables and self.service == "powershell":
+                return "union %s | where tostring(extractjson('$.Command', AdditionalFields)) in~ " % ", ".join(self.tables)
+            return "union %s | where " % ", ".join(self.tables)
+
+    def generateORNode(self, node):
+        generated = super().generateORNode(node)
+        if generated:
+            return "%s" % generated
+        return generated
+
+
+    def mapEventId(self, event_id):
+        if self.product == "windows":
+            if self.service == "sysmon" and event_id == 1 \
+                    or self.service == "security" and event_id == 4688:  # Process Execution
+                self.tables.append("DeviceProcessEvents")
+                self.current_table = "DeviceProcessEvents"
+                return None
+            elif self.service == "sysmon" and event_id == 3:  # Network Connection
+                self.tables.append("DeviceNetworkEvents")
+                self.current_table = "DeviceNetworkEvents"
+                return None
+            elif self.service == "sysmon" and event_id == 7:  # Image Load
+                self.tables.append("DeviceImageLoadEvents")
+                self.current_table = "DeviceImageLoadEvents"
+                return None
+            elif self.service == "sysmon" and event_id == 8:  # Create Remote Thread
+                self.tables.append("DeviceEvents")
+                self.current_table = "DeviceEvents"
+                return "ActionType == \"CreateRemoteThreadApiCall\""
+            elif self.service == "sysmon" and event_id == 11:  # File Creation
+                self.tables.append("DeviceFileEvents")
+                self.current_table = "DeviceFileEvents"
+                return "ActionType == \"FileCreated\""
+            elif self.service == "sysmon" and event_id == 23:  # File Deletion
+                self.tables.append("DeviceFileEvents")
+                self.current_table = "DeviceFileEvents"
+                return "ActionType == \"FileDeleted\""
+            elif self.service == "sysmon" and event_id == 12:  # Create/Delete Registry Value
+                self.tables.append("DeviceRegistryEvents")
+                self.current_table = "DeviceRegistryEvents"
+                return None
+            elif self.service == "sysmon" and event_id == 13 \
+                    or self.service == "security" and event_id == 4657:  # Set Registry Value
+                self.tables.append("DeviceRegistryEvents")
+                self.current_table = "DeviceRegistryEvents"
+                return "ActionType == \"RegistryValueSet\""
+            elif self.service == "security" and event_id == 4624:
+                self.tables.append("DeviceLogonEvents")
+                self.current_table = "DeviceLogonEvents"
+                return None
+            else:
+                if not self.tables:
+                    raise NotSupportedError("No sysmon Event ID provided")
+                else:
+                    raise NotSupportedError("No mapping for Event ID %s" % event_id)
 
     @wrapper
     def generateMapItemNode(self, node):
@@ -213,67 +349,56 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
         and creates an appropriate table reference.
         """
         key, value = node
-        # handle map items with values list like multiple OR-chained conditions
-        if type(value) == list:
-            return self.generateORNode([(key, v) for v in value])
-        elif key == "EventID":            # EventIDs are not reflected in condition but in table selection
-            if self.product == "windows":
-                if self.service == "sysmon" and value == 1 \
-                        or self.service == "security" and value == 4688:    # Process Execution
-                    self.table = "DeviceProcessEvents"
-                    return None
-                elif self.service == "sysmon" and value == 3:               # Network Connection
-                    self.table = "DeviceNetworkEvents"
-                    return None
-                elif self.service == "sysmon" and value == 7:               # Image Load
-                    self.table = "DeviceImageLoadEvents"
-                    return None
-                elif self.service == "sysmon" and value == 8:               # Create Remote Thread
-                    self.table = "DeviceEvents"
-                    return "ActionType == \"CreateRemoteThreadApiCall\""
-                elif self.service == "sysmon" and value == 11:              # File Creation
-                    self.table = "DeviceFileEvents"
-                    return "ActionType == \"FileCreated\""
-                elif self.service == "sysmon" and value == 23:              # File Deletion
-                    self.table = "DeviceFileEvents"
-                    return "ActionType == \"FileDeleted\""
-                elif self.service == "sysmon" and value == 12:              # Create/Delete Registry Value
-                    self.table = "DeviceRegistryEvents"
-                    return None
-                elif self.service == "sysmon" and value == 13 \
-                        or self.service == "security" and value == 4657:    # Set Registry Value
-                    self.table = "DeviceRegistryEvents"
-                    return "ActionType == \"RegistryValueSet\""
-                elif self.service == "security" and value == 4624:
-                    self.table = "DeviceLogonEvents"
+        if key == "EventID":
+            # EventIDs are not reflected in condition but in table selection
+            if isinstance(value, str) or isinstance(value, int):
+                value = int(value) if isinstance(value, str) else value
+                return self.mapEventId(value)
+            elif isinstance(value, list):
+                return_payload = []
+                for event_id in value:
+                    res = self.mapEventId(event_id)
+                    if res:
+                        return_payload.append(res)
+                if len(return_payload) == 1:
+                    return return_payload[0]
+                elif not any(return_payload):
                     return None
                 else:
-                    if not self.table:
-                        raise NotSupportedError("No sysmon Event ID provided")
-                    else:
-                        raise NotSupportedError("No mapping for Event ID %s" % value)
+                    return "(%s)" % self.generateORNode(
+                    [(key, v) for v in value]
+                    )
+        if type(value) == list:         # handle map items with values list like multiple OR-chained conditions
+            return "(%s)" % self.generateORNode(
+                    [(key, self.cleanValue(v)) for v in value]
+                    )
         elif type(value) in (str, int):     # default value processing
             try:
-                mapping = self.fieldMappings[self.table][key]
+                mapping = self.fieldMappings[self.current_table][key]
             except KeyError:
-                raise NotSupportedError("No mapping defined for field '%s' in '%s'" % (key, self.table))
+                raise NotSupportedError("No mapping defined for field '%s' in '%s'" % (key, self.tables))
             if len(mapping) == 1:
                 mapping = mapping[0]
                 if type(mapping) == str:
                     return mapping
                 elif callable(mapping):
-                    conds = mapping(key, value)
+                    conds = mapping(key, self.cleanValue(value))
                     return self.andToken.join(["{} {}".format(*cond) for cond in conds])
             elif len(mapping) == 2:
                 result = list()
-                # iterate mapping and mapping source value synchronously over key and value
-                for mapitem, val in zip(mapping, node):
+                for mapitem, val in zip(mapping, node):     # iterate mapping and mapping source value synchronously over key and value
                     if type(mapitem) == str:
                         result.append(mapitem)
                     elif callable(mapitem):
-                        result.append(mapitem(val))
+                        result.append(mapitem(self.cleanValue(val)))
                 return "{} {}".format(*result)
             else:
                 raise TypeError("Backend does not support map values of type " + str(type(value)))
+        elif isinstance(value, SigmaTypeModifier):
+            try:
+                mapping = self.fieldMappings[self.current_table][key]
+            except KeyError:
+                raise NotSupportedError("No mapping defined for field '%s' in '%s'" % (key, self.tables))
+            return self.generateMapItemTypedNode(mapping[0], value)
 
         return super().generateMapItemNode(node)

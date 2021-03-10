@@ -3,7 +3,7 @@ id: d21374ff-f574-44a7-9998-4a8c8bf33d7d
 description: Detects wmiprvse spawning processes
 status: experimental
 date: 2019/08/15
-modified: 2019/11/10
+modified: 2021/02/24
 author: Roberto Rodriguez @Cyb3rWard0g
 references:
     - https://github.com/Cyb3rWard0g/ThreatHunter-Playbook/tree/master/playbooks/windows/02_execution/T1047_windows_management_instrumentation/wmi_win32_process_create_remote.md
@@ -17,9 +17,16 @@ detection:
     selection:
         ParentImage|endswith: '\WmiPrvSe.exe'
     filter:
-        - LogonId: '0x3e7'  # LUID 999 for SYSTEM
+        - LogonId: 
+            - '0x3e7'  # LUID 999 for SYSTEM
+            - 'null'   # too many false positives
         - User: 'NT AUTHORITY\SYSTEM'  # if we don't have LogonId data, fallback on username detection
-    condition: selection and not filter
+        - Image|endswith: 
+            - '\WmiPrvSE.exe'
+            - '\WerFault.exe'
+    filter_null:  # some backends need the null value in a seperate expression
+        LogonId: null
+    condition: selection and not filter and not filter_null
 falsepositives:
     - Unknown
-level: critical
+level: high

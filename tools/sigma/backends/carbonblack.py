@@ -44,8 +44,7 @@ class CarbonBlackWildcardHandlingMixin:
 
 
 class CarbonBlackQueryBackend(CarbonBlackWildcardHandlingMixin, SingleTextQueryBackend):
-    """Converts Sigma rule into CarbonBlack query string. Only searches, no aggregations."""
-
+    """Converts Sigma rule into CarbonBlack query string. Only searches, no aggregations. Contributed by SOC Prime. https://socprime.com"""
     identifier = "carbonblack"
     active = True
 
@@ -110,8 +109,8 @@ class CarbonBlackQueryBackend(CarbonBlackWildcardHandlingMixin, SingleTextQueryB
     def cleanWhitespace(self, val):
         val = val.replace('*', ' AND ').replace('  ', ' ')
         if re.match('\S+ \S', val):
-            matchs = re.findall('(?:^|\(| )(.+?)(?:\)| OR| AND|$)', val)
-            for strMatch in matchs:
+            matches = re.findall('(?:^|\(| )(.+?)(?:\)| OR| AND|$)', val)
+            for strMatch in matches:
                 if re.match('\S+ \S', strMatch):
                     strUnescapeMatch = self.unescapeCharacter(strMatch)
                     val = val.replace(strMatch, '"{}"'.format(strUnescapeMatch))
@@ -133,13 +132,13 @@ class CarbonBlackQueryBackend(CarbonBlackWildcardHandlingMixin, SingleTextQueryB
 
     def cleanIPRange(self, value):
         new_value = value
-        if type(new_value) is str and value.find('*'):
+        if isinstance(new_value, str) and value.find('*'):
             sub = value.count('.')
             if value[-2:] == '.*':
                 value = value[:-2]
             min_ip = value + '.0' * (4 - sub)
             new_value = min_ip + '/' + str(8 * (4 - sub))
-        elif type(new_value) is list:
+        elif isinstance(new_value, list):
             for index, vl in enumerate(new_value):
                 new_value[index] = self.cleanIPRange(vl)
 

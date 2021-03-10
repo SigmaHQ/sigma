@@ -106,7 +106,7 @@ class TestFullTextSearch(unittest.TestCase):
         self.validate(detection, expected_result)
 
 
-        # fts is not implemented for nested condtions
+        # fts is not implemented for nested conditions
         detection = {"selection": ["test"], "filter": [
             "test2"], "condition": "selection and filter"}  # this is ok
         detection = {"selection": ["test"], "filter": [

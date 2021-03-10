@@ -5,13 +5,13 @@ import argparse
 import pathlib
 import urllib3
 urllib3.disable_warnings()
-from pymisp import PyMISP
+from pymisp import PyMISP, MISPEvent
 
 def create_new_event(args, misp):
     if hasattr(misp, "new_event"):
         return misp.new_event(info=args.info)["Event"]["id"]
     
-    event = misp.MISPEvent()
+    event = MISPEvent()
     event.info = args.info
     return misp.add_event(event)["Event"]["id"]
 
@@ -31,7 +31,7 @@ def main():
     argparser = MISPImportArgumentParser()
     argparser.add_argument("--url", "-u", default="https://localhost", help="URL of MISP instance")
     argparser.add_argument("--key", "-k", required=True, help="API key")
-    argparser.add_argument("--insecure", "-I", action="store_false", help="Disable TLS certifcate validation.")
+    argparser.add_argument("--insecure", "-I", action="store_false", help="Disable TLS certificate validation.")
     argparser.add_argument("--event", "-e", type=int, help="Add Sigma rule to event with this ID. If not set, create new event.")
     argparser.add_argument("--same-event", "-s", action="store_true", help="Import all Sigma rules to the same event, if no event is set.")
     argparser.add_argument("--info", "-i", default="Sigma import", help="Event Information field for newly created MISP event.")

@@ -1,0 +1,24 @@
+title: MacOS Scripting Interpreter AppleScript
+id: 1bc2e6c5-0885-472b-bed6-be5ea8eace55
+status: experimental
+description: Detects execution of AppleScript of the macOS scripting language AppleScript.
+author: Alejandro Ortuno, oscd.community
+date: 2020/10/21
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1059.002/T1059.002.md
+logsource:
+  category: process_creation
+  product: macos
+detection:
+  selection:
+    Image|endswith:
+      - '/osascript'
+    CommandLine|contains|all:
+      - '-e'
+  condition: selection
+falsepositives:
+  - Application installers might contain scripts as part of the installation process.
+level: medium
+tags:
+  - attack.execution
+  - attack.t1059.002

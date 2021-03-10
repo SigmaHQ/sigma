@@ -1,9 +1,10 @@
 title: Execution in Non-Executable Folder
 id: 3dfd06d2-eaf4-4532-9555-68aca59f57c4
 status: experimental
-description: Detects a suspicious exection from an uncommon folder
+description: Detects a suspicious execution from an uncommon folder
 author: Florian Roth
 date: 2019/01/16
+modified: 2020/11/28
 tags:
     - attack.defense_evasion
     - attack.t1036
@@ -12,16 +13,16 @@ logsource:
     product: windows
 detection:
     selection:
-        Image:
-            - '*\$Recycle.bin'
-            - '*\Users\All Users\\*'
-            - '*\Users\Default\\*'
-            - '*\Users\Public\\*'
-            - 'C:\Perflogs\\*'
-            - '*\config\systemprofile\\*'
-            - '*\Windows\Fonts\\*'
-            - '*\Windows\IME\\*'
-            - '*\Windows\addins\\*'
+        - Image|contains:
+            - '\Users\All Users\'
+            - '\Users\Default\'
+            - '\Users\Public\'
+            - '\config\systemprofile\'
+            - '\Windows\Fonts\'
+            - '\Windows\IME\'
+            - '\Windows\addins\'
+        - Image|endswith: '\$Recycle.bin'
+        - Image|startswith: 'C:\Perflogs\'
     condition: selection
 fields:
     - CommandLine
