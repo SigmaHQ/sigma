@@ -6,6 +6,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 from version 0.14.0.
 
+## 0.19.1 - 2021-02-28
+
+### Changed
+
+* Added LGPL license to distribution
+
+## 0.19 - 2021-02-23
+
+### Added
+
+* New parameters for Elastic backends
+* Various field mappings
+* FireEye Helix backend
+* Generic log source image_load
+* Kibana NDJSON backend
+* uberAgent ESA backend
+* SumoLogic CSE backend
+
+### Changed
+
+* Updated mdatp backend fields
+* QRadar query generation optimized
+* MDATP: case insensitive search
+
+### Fixed
+
+* Fixing Qradar implementation for create valid AQL queries
+* Nested conditions
+* Various minor bug fixes
+
 ## 0.18.1 - 2020-08-25
 
 Release created for technical reasons (issues with extended README and PyPI), no real changes done.

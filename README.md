@@ -32,7 +32,7 @@ The SANS webcast on Sigma contains a very good 20 min introduction to the projec
 
 # Use Cases
 
-* Describe your detection method in Sigma to make it sharable
+* Describe your detection method in Sigma to make it shareable
 * Write your SIEM searches in Sigma to avoid a vendor lock-in
 * Share the signature in the appendix of your analysis along with IOCs and YARA rules
 * Share the signature in threat intel communities - e.g. via MISP
@@ -64,7 +64,7 @@ Florian wrote a short [rule creation tutorial](https://www.nextron-systems.com/2
 
 ## Rule Usage 
 
-1. Download or clone the respository
+1. Download or clone the repository
 2. Check the `./rules` sub directory for an overview on the rule base
 3. Run `python sigmac --help` in folder `./tools` to get a help on the rule converter
 4. Convert a rule of your choice with `sigmac` like `./sigmac -t splunk -c tools/config/generic/sysmon.yml ./rules/windows/process_creation/win_susp_whoami.yml`
@@ -137,7 +137,7 @@ optional arguments:
   --config CONFIG, -c CONFIG
                         Configurations with field name and index mapping for
                         target environment. Multiple configurations are merged
-                        into one. Last config is authorative in case of
+                        into one. Last config is authoritative in case of
                         conflicts.
   --output OUTPUT, -o OUTPUT
                         Output file or filename prefix if multiple files are
@@ -289,6 +289,12 @@ Result once imported in the MITRE ATT&CK® Navigator ([online version](https://m
 
 ![Sigma2attack result](./images/sigma2attack.png)
 
+## S2AN
+
+Similar to **Sigma2attack**, [S2AN](https://github.com/3CORESec/S2AN) is a pre-compiled binary for both Windows and GNU/Linux that generates [MITRE ATT&CK® Navigator](https://github.com/mitre/attack-navigator/) layers from a directory of Sigma rules. 
+
+S2AN was developed to be used as a standalone tool or as part of a CI/CD pipeline where it can be quickly downloaded and executed without external dependencies.
+
 ## Contributed Scripts
 
 The directory `contrib` contains scripts that were contributed by the community:
@@ -315,6 +321,11 @@ These tools are not part of the main toolchain and maintained separately by thei
 * [RANK VASA](https://globenewswire.com/news-release/2019/03/04/1745907/0/en/RANK-Software-to-Help-MSSPs-Scale-Cybersecurity-Offerings.html)
 * [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 * [TimeSketch](https://github.com/google/timesketch/commit/0c6c4b65a6c0f2051d074e87bbb2da2424fa6c35)
+* [SIΣGMA](https://github.com/3CORESec/SIEGMA) - SIEM consumable generator that utilizes Sigma for query conversion 
+
+Sigma is available in some Linux distribution repositories:
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/sigma.svg)](https://repology.org/project/sigma/versions)
 
 # Contribution
 

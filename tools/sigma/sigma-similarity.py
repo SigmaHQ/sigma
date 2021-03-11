@@ -18,7 +18,7 @@ argparser.add_argument("--recursive", "-r", action="store_true", help="Recurse i
 argparser.add_argument("--verbose", "-v", action="count", help="Be verbose. Use once more for debug output.")
 argparser.add_argument("--top", "-t", type=int, help="Only output the n most similar rule pairs.")
 argparser.add_argument("--min-similarity", "-m", type=int, help="Only output pairs with a similarity above this threshold (percent)")
-argparser.add_argument("--primary", "-p", help="File with list of paths to primary rules. If given, only rule combinations with at leat one primary rule are compared. Primary rules must also be contained in input rule set.")
+argparser.add_argument("--primary", "-p", help="File with list of paths to primary rules. If given, only rule combinations with at least one primary rule are compared. Primary rules must also be contained in input rule set.")
 argparser.add_argument("inputs", nargs="+", help="Sigma input files")
 args = argparser.parse_args()
 
