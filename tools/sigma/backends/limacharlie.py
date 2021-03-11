@@ -593,7 +593,7 @@ class LimaCharlieBackend(BaseBackend):
                 raise NotImplementedError("Full-text keyboard searches not supported.")
 
             # This seems to be indicative only of "keywords" which are mostly
-            # representative of full-text searches. We don't suport that but
+            # representative of full-text searches. We don't support that but
             # in some data sources we can alias them to an actual field.
             op, newVal = self._valuePatternToLcOp(val)
             newOp = {

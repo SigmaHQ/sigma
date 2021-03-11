@@ -90,7 +90,7 @@ class SigmaParser:
                 if isinstance(value, (ConditionAND, ConditionOR)):    # value is condition node (by transformation modifier)
                     value.items = [ mapping.resolve(key, item, self) for item in value.items ]
                     cond.add(value)
-                else:           # plain value or something unexpected (catched by backends)
+                else:           # plain value or something unexpected (caught by backends)
                     mapped = mapping.resolve(key, value, self)
                     cond.add(mapped)
 
