@@ -176,7 +176,7 @@ class SumoLogicBackend(SingleTextQueryBackend):
     #    return self.valueExpression % (self.cleanValue(str(value)))
 
     # Clearing values from special characters.
-    # Sumologic: only removing '*' (in quotes, is litteral. without, is wildcard) and '"'
+    # Sumologic: only removing '*' (in quotes, is literal. without, is wildcard) and '"'
 
     def cleanNode(self, node, key=None):
         if "*" in node and key and not re.search("[\s]", node):

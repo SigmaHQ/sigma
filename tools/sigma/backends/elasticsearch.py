@@ -1045,7 +1045,7 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
             index = "logstash-*"
         elif len(index) > 0:
             index = index[0]
-        #Init a rule number cpt in case there are several elastalert rules generated fron one Sigma rule
+        #Init a rule number cpt in case there are several elastalert rules generated from one Sigma rule
         rule_number = 0
         for parsed in sigmaparser.condparsed:
             #Static data
@@ -1332,7 +1332,7 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
         rule = {
             "description": configs.get("description", ""),
             "enabled": True,
-            "false_positives": configs.get('falsepositives', "Unkown"),
+            "false_positives": configs.get('falsepositives', "Unknown"),
             "filters": [],
             "from": "now-360s",
             "immutable": False,
