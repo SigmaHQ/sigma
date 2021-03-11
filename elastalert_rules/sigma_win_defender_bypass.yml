@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects scenarios where an windows defender exclusion was added in registry where an entity would want to bypass antivirus scanning from windows defender
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:("4657" OR "4656" OR "4660" OR "4663") AND data.win.eventdata.objectName.keyword:*\\Microsoft\\Windows\ Defender\\Exclusions\\*)
+index: wazuh-alerts-3.x-*
+name: sigma_win_defender_bypass
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

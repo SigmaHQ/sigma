@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detect priv users or groups recon based on 4661 eventid and known privileged users or groups SIDs
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4661" AND data.win.eventdata.objectType:("SAM_USER" OR "SAM_GROUP") AND data.win.eventdata.objectName.keyword:(*\-512 OR *\-502 OR *\-500 OR *\-505 OR *\-519 OR *\-520 OR *\-544 OR *\-551 OR *\-555 OR *admin*))
+index: wazuh-alerts-3.x-*
+name: sigma_win_account_discovery
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

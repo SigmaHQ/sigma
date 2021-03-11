@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects DCShadow via create new SPN
+filter:
+- query:
+    query_string:
+      query: ((data.win.system.eventID:"4742" AND ServicePrincipalNames.keyword:*GC\/*) OR (data.win.system.eventID:"5136" AND LDAPDisplayName:"servicePrincipalName" AND Value.keyword:GC\/*))
+index: wazuh-alerts-3.x-*
+name: sigma_win_possible_dc_shadow
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects process access LSASS memory which is typical for credentials dumping tools
+filter:
+- query:
+    query_string:
+      query: ((data.win.eventdata.targetImage.keyword:*\\lsass.exe AND data.win.eventdata.grantedAccess.keyword:(*0x40* OR *0x1000* OR *0x1400* OR *0x100000* OR *0x1410* OR *0x1010* OR *0x1438* OR *0x143a* OR *0x1418* OR *0x1f0fff* OR *0x1f1fff* OR *0x1f2fff* OR *0x1f3fff*)) AND (NOT (process_path.keyword:(*\\wmiprvse.exe OR *\\taskmgr.exe OR *\\procexp64.exe OR *\\procexp.exe OR *\\lsm.exe OR *\\csrss.exe OR *\\wininit.exe OR *\\vmtoolsd.exe))))
+index: wazuh-alerts-3.x-*
+name: 32d0d3e2-e58d-4d41-926b-18b520b2b32d_0
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

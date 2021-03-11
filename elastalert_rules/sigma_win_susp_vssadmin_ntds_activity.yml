@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious commands that could be related to activity that uses volume shadow copy to steal and retrieve hashes from the NTDS.dit file remotely
+filter:
+- query:
+    query_string:
+      query: 'data.win.eventdata.commandLine.keyword:(vssadmin.exe\ Delete\ Shadows OR vssadmin\ create\ shadow\ \/for\=C\: OR copy\ \\?\\GLOBALROOT\\Device\\*\\windows\\ntds\\ntds.dit OR copy\ \\?\\GLOBALROOT\\Device\\*\\config\\SAM OR vssadmin\ delete\ shadows\ \/for\=C\: OR reg\ SAVE\ HKLM\\SYSTEM\  OR esentutl.exe\ \/y\ \/vss\ *\\ntds.dit* OR esentutl.exe\ \/y\ \/vss\ *\\SAM OR esentutl.exe\ \/y\ \/vss\ *\\SYSTEM)'
+index: wazuh-alerts-3.x-*
+name: sigma_win_susp_vssadmin_ntds_activity
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

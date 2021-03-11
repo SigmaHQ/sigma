@@ -1,0 +1,29 @@
+alert:
+- debug
+description: Detects UAC bypass method using Windows event viewer
+filter:
+- query:
+    query_string:
+      query: data.win.eventdata.targetObject.keyword:HKU\\*\\mscfile\\shell\\open\\command
+index: wazuh-alerts-3.x-*
+name: 7c81fec3-1c1d-43b0-996a-46753041b1b6_0
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+alert:
+- debug
+description: Detects UAC bypass method using Windows event viewer
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.parentImage.keyword:*\\eventvwr.exe AND (NOT (data.win.eventdata.image.keyword:*\\mmc.exe)))
+index: wazuh-alerts-3.x-*
+name: 7c81fec3-1c1d-43b0-996a-46753041b1b6-2_0
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

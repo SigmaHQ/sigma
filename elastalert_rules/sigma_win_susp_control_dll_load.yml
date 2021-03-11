@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious Rundll32 execution from control.exe as used by Equation Group and Exploit Kits
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.parentImage.keyword:*\\System32\\control.exe AND data.win.eventdata.commandLine.keyword:*\\rundll32.exe\ *) AND (NOT (data.win.eventdata.commandLine.keyword:*Shell32.dll*)))
+index: wazuh-alerts-3.x-*
+name: d7eb979b-c2b5-4a6f-a3a7-c87ce6763819_0
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

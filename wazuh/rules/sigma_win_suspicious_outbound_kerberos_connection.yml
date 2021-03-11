@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious outbound network activity via kerberos default port indicating possible lateral movement or first stage PrivEsc via delegation.
+filter:
+- query:
+    query_string:
+      query: ((data.win.system.eventID:"5156" AND data.win.eventdata.destinationPort:"88") AND (NOT (data.win.eventdata.image.keyword:(*\\lsass.exe OR *\\opera.exe OR *\\chrome.exe OR *\\firefox.exe))))
+index: wazuh-alerts-3.x-*
+name: eca91c7c-9214-47b9-b4c5-cb1d7e4f2350_0
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the attack technique pass the hash which is used to move laterally inside the network
+filter:
+- query:
+    query_string:
+      query: ((logon_type:"3" AND logon_process_name:"NtLmSsp" AND data.win.eventdata.sourceHostname:"%Workstations%" AND data.win.system.computer:"%Workstations%" AND (data.win.system.eventID:"4624" OR data.win.system.eventID:"4625")) AND (NOT (data.win.eventdata.accountName:"ANONYMOUS\ LOGON")))
+index: wazuh-alerts-3.x-*
+name: f8d98d6c-7a07-4d74-b064-dd4a3c244528_0
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

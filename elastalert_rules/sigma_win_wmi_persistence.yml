@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious WMI event filter and command line event consumer based on event id 5861 and 5859 (Windows 10, 2012 and higher)
+filter:
+- query:
+    query_string:
+      query: ((data.win.system.eventID:"5861" AND data.win.system.message.keyword:(*ActiveScriptEventConsumer* OR *CommandLineEventConsumer* OR *CommandLineTemplate*)) OR data.win.system.eventID:"5859")
+index: wazuh-alerts-3.x-*
+name: sigma_win_wmi_persistence
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

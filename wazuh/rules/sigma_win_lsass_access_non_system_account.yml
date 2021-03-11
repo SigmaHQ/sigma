@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects potential mimikatz-like tools accessing LSASS from non system account
+filter:
+- query:
+    query_string:
+      query: ((data.win.system.eventID:("4663" OR "4656") AND object_type:"Process" AND object_name.keyword:*\\lsass.exe) AND (NOT (SubjectUserName.keyword:*$)))
+index: wazuh-alerts-3.x-*
+name: 962fe167-e48d-4fd6-9974-11e5b9a5d6d1_0
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+
