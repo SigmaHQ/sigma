@@ -1,0 +1,48 @@
+title: HAFNIUM Exchange Exploitation Activity
+id: bbb2dedd-a0e3-46ab-ba6c-6c82ae7a9aa7
+description: Detects activity observed by different researchers to be HAFNIUM group acitivity (or related) on Exchange servers
+author: Florian Roth
+date: 2021/03/09
+status: experimental
+references:
+    - https://blog.truesec.com/2021/03/07/exchange-zero-day-proxylogon-and-hafnium/
+    - https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers/
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        CommandLine|contains|all:
+            - 'attrib'
+            - ' +h '
+            - ' +s '
+            - ' +r '
+            - '.aspx'
+    selection2:
+        CommandLine|contains|all:
+            - 'schtasks'
+            - 'VSPerfMon'
+    selection3:
+        CommandLine|contains|all:
+            - 'vssadmin list shadows'
+            - 'Temp\__output'
+    selection4: 
+        CommandLine|contains: '%TEMP%\execute.bat'
+    selection5:
+        Image|endswith: 'Users\Public\opera\Opera_browser.exe'
+    selection6:
+        Image|endswith: 'Opera_browser.exe'
+        ParentImage|endswith:
+            - '\services.exe'
+            - '\svchost.exe'
+    selection7:
+        Image|contains: '\ProgramData\VSPerfMon\'
+    selection8:
+        CommandLine|contains|all:
+            - ' -t7z '
+            - 'C:\Programdata\pst'
+            - '\it.zip'
+    condition: 1 of them
+falsepositives:
+    - Unknown
+level: high

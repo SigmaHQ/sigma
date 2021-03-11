@@ -103,7 +103,11 @@ class QRadarBackend(SingleTextQueryBackend):
     def generateMapItemListNode(self, key, value):
         itemslist = list()
         for item in value:
-            if type(item) == str and "*" in item:
+            if item is None:
+                itemslist.append(self.nullExpression % (key))
+            elif type(item) == str and "ip" in key and ("/16" in item or "/24" in item):
+                itemslist.append("INCIDR(%s, %s)" % (self.generateValueNode(item, True), self.cleanKey(key)))
+            elif type(item) == str and "*" in item:
                 item = item.replace("*", "%")
                 itemslist.append('%s ilike %s' % (self.cleanKey(key), self.generateValueNode(item, True)))
             else:
@@ -197,17 +201,20 @@ class QRadarBackend(SingleTextQueryBackend):
             aql_database = "flows"
         else:
             aql_database = "events"
-        
-        qradarPrefix="SELECT "
+
+        qradarPrefix="SELECT UTF8(payload) as search_payload"
         try:
             mappedFields = []
             for field in sigmaparser.parsedyaml["fields"]:
                     mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
                     mappedFields.append(mapped)
-            qradarPrefix += str(mappedFields).strip('[]')
+                    if " " in mapped and not "(" in mapped:
+                        qradarPrefix += ", \"" + mapped + "\""
+                    else:
+                        qradarPrefix +=  ", " + mapped
+
         except KeyError:    # no 'fields' attribute
             mapped = None
-            qradarPrefix+="UTF8(payload) as search_payload"
             pass
         qradarPrefix += " from %s where " % (aql_database)
 

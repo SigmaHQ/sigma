@@ -109,8 +109,8 @@ class CarbonBlackQueryBackend(CarbonBlackWildcardHandlingMixin, SingleTextQueryB
     def cleanWhitespace(self, val):
         val = val.replace('*', ' AND ').replace('  ', ' ')
         if re.match('\S+ \S', val):
-            matchs = re.findall('(?:^|\(| )(.+?)(?:\)| OR| AND|$)', val)
-            for strMatch in matchs:
+            matches = re.findall('(?:^|\(| )(.+?)(?:\)| OR| AND|$)', val)
+            for strMatch in matches:
                 if re.match('\S+ \S', strMatch):
                     strUnescapeMatch = self.unescapeCharacter(strMatch)
                     val = val.replace(strMatch, '"{}"'.format(strUnescapeMatch))
