@@ -1,0 +1,22 @@
+alert:
+- debug
+buffer_time:
+  seconds: 30
+description: Detects several different DNS-answers by one domain with IPs from internal and external networks. Normally, DNS-answer contain TTL >100. (DNS-record will saved in host cache for a while TTL).
+doc_type: doc
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"22" AND QueryName.keyword:* AND QueryStatus:"0" AND QueryResults.keyword:(\(\:\:ffff\:\)?10.* OR \(\:\:ffff\:\)?192.168.* OR \(\:\:ffff\:\)?172.16.* OR \(\:\:ffff\:\)?172.17.* OR \(\:\:ffff\:\)?172.18.* OR \(\:\:ffff\:\)?172.19.* OR \(\:\:ffff\:\)?172.20.* OR \(\:\:ffff\:\)?172.21.* OR \(\:\:ffff\:\)?172.22.* OR \(\:\:ffff\:\)?172.23.* OR \(\:\:ffff\:\)?172.24.* OR \(\:\:ffff\:\)?172.25.* OR \(\:\:ffff\:\)?172.26.* OR \(\:\:ffff\:\)?172.27.* OR \(\:\:ffff\:\)?172.28.* OR \(\:\:ffff\:\)?172.29.* OR \(\:\:ffff\:\)?172.30.* OR \(\:\:ffff\:\)?172.31.* OR \(\:\:ffff\:\)?127.*) AND (data.win.system.eventID:"22" AND QueryName.keyword:* AND QueryStatus:"0") AND (NOT (QueryResults.keyword:(\(\:\:ffff\:\)?10.* OR \(\:\:ffff\:\)?192.168.* OR \(\:\:ffff\:\)?172.16.* OR \(\:\:ffff\:\)?172.17.* OR \(\:\:ffff\:\)?172.18.* OR \(\:\:ffff\:\)?172.19.* OR \(\:\:ffff\:\)?172.20.* OR \(\:\:ffff\:\)?172.21.* OR \(\:\:ffff\:\)?172.22.* OR \(\:\:ffff\:\)?172.23.* OR \(\:\:ffff\:\)?172.24.* OR \(\:\:ffff\:\)?172.25.* OR \(\:\:ffff\:\)?172.26.* OR \(\:\:ffff\:\)?172.27.* OR \(\:\:ffff\:\)?172.28.* OR \(\:\:ffff\:\)?172.29.* OR \(\:\:ffff\:\)?172.30.* OR \(\:\:ffff\:\)?172.31.* OR \(\:\:ffff\:\)?127.*))))
+index: wazuh-alerts-3.x-*
+max_threshold: 3
+metric_agg_key: QueryName.keyword
+metric_agg_type: cardinality
+name: eb07e747-2552-44cd-af36-b659ae0958e4_0
+priority: 3
+query_key: data.win.system.computer.keyword
+realert:
+  minutes: 0
+type: metric_aggregation
+
+

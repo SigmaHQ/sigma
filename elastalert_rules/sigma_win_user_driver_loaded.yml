@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the loading of drivers via 'SeLoadDriverPrivilege' required to load or unload a device driver. With this privilege, the user can dynamically load and unload device drivers or other code in to kernel mode. This user right does not apply to Plug and Play device drivers. If you exclude privileged users/admins and processes, which are allowed to do so, you are maybe left with bad programs trying to load malicious kernel drivers. This will detect Ghost-In-The-Logs (https://github.com/bats3c/Ghost-In-The-Logs) and the usage of Sysinternals and various other tools. So you have to work with a whitelist to find the bad stuff.
+filter:
+- query:
+    query_string:
+      query: ((data.win.system.eventID:"4673" AND PrivilegeList:"SeLoadDriverPrivilege" AND Service:"\-") AND (NOT (data.win.eventdata.processName.keyword:(*\\Windows\\System32\\Dism.exe* OR *\\Windows\\System32\\rundll32.exe* OR *\\Windows\\System32\\fltMC.exe* OR *\\Windows\\HelpPane.exe* OR *\\Windows\\System32\\mmc.exe* OR *\\Windows\\System32\\svchost.exe* OR *\\Windows\\System32\\wimserv.exe* OR *\\procexp64.exe* OR *\\procexp.exe* OR *\\procmon64.exe* OR *\\procmon.exe* OR *\\Google\\Chrome\\Application\\chrome.exe*))))
+index: wazuh-alerts-3.x-*
+name: sigma_win_user_driver_loaded
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

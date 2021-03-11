@@ -1,0 +1,43 @@
+alert:
+- debug
+description: Detects javaw.exe in AppData folder as used by Adwind / JRAT
+filter:
+- query:
+    query_string:
+      query: data.win.eventdata.commandLine.keyword:(*\\AppData\\Roaming\\Oracle*\\java*.exe\ * OR *cscript.exe\ *Retrive*.vbs\ *)
+index: wazuh-alerts-3.x-*
+name: 1fac1481-2dbc-48b2-9096-753c49b4ec71_0
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+alert:
+- debug
+description: Detects javaw.exe in AppData folder as used by Adwind / JRAT
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"11" AND data.win.eventdata.targetFilename.keyword:(*\\AppData\\Roaming\\Oracle\\bin\\java*.exe OR *\\Retrive*.vbs))
+index: wazuh-alerts-3.x-*
+name: 1fac1481-2dbc-48b2-9096-753c49b4ec71-2_0
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+alert:
+- debug
+description: Detects javaw.exe in AppData folder as used by Adwind / JRAT
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"13" AND data.win.eventdata.targetObject.keyword:HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run* AND data.win.eventdata.details.keyword:%AppData%\\Roaming\\Oracle\\bin\\*)
+index: wazuh-alerts-3.x-*
+name: 1fac1481-2dbc-48b2-9096-753c49b4ec71-3_0
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

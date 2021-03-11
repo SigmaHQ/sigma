@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects clearing or configuration of eventlogs uwing wevtutil, powershell and wmic. Might be used by ransomwares during the attack (seen by NotPetya and others)
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (((data.win.eventdata.image.keyword:*\\powershell.exe AND data.win.eventdata.commandLine.keyword:(*Clear\-EventLog* OR *Remove\-EventLog* OR *Limit\-EventLog*)) OR (data.win.eventdata.image.keyword:*\\wmic.exe AND data.win.eventdata.commandLine.keyword:*\ ClearEventLog\ *)) OR (data.win.system.eventID:"1" AND data.win.eventdata.image.keyword:*\\wevtutil.exe AND data.win.eventdata.commandLine.keyword:(*clear\-log* OR *\ cl\ * OR *set\-log* OR *\ sl\ *))))
+index: wazuh-alerts-3.x-*
+name: cc36992a-4671-4f21-a91d-6c2b72a2edf5_0
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

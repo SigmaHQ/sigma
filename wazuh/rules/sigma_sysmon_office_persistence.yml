@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects add-ins that load when Microsoft Word or Excel starts (.wll/.xll are simply .dll fit for Word or Excel).
+filter:
+- query:
+    query_string:
+      query: (((data.win.eventdata.targetFilename.keyword:*\\Microsoft\\Word\\Startup\\* AND data.win.eventdata.targetFilename.keyword:*.wll) OR (data.win.eventdata.targetFilename.keyword:*\\Microsoft\\Excel\\Startup\\* AND data.win.eventdata.targetFilename.keyword:*.xll)) OR (data.win.eventdata.targetFilename.keyword:*\\Microsoft\\Addins\\* AND data.win.eventdata.targetFilename.keyword:(*.xlam OR *.xla)))
+index: wazuh-alerts-3.x-*
+name: 8e1cb247-6cf6-42fa-b440-3f27d57e9936_0
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects process handle on LSASS process with certain access mask and object type SAM_DOMAIN
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4656" AND data.win.eventdata.processName:"C\:\\Windows\\System32\\lsass.exe" AND data.win.eventdata.accessMask:"0x705" AND data.win.eventdata.objectType:"SAM_DOMAIN")
+index: wazuh-alerts-3.x-*
+name: sigma_win_susp_lsass_dump
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

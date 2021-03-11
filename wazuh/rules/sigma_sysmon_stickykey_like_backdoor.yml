@@ -1,0 +1,29 @@
+alert:
+- debug
+description: Detects the usage and installation of a backdoor that uses an option to register a malicious debugger for built-in tools that are accessible in the login screen
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.targetObject.keyword:(*\\SOFTWARE\\Microsoft\\Windows\ NT\\CurrentVersion\\Image\ File\ Execution\ Options\\sethc.exe\\Debugger OR *\\SOFTWARE\\Microsoft\\Windows\ NT\\CurrentVersion\\Image\ File\ Execution\ Options\\utilman.exe\\Debugger OR *\\SOFTWARE\\Microsoft\\Windows\ NT\\CurrentVersion\\Image\ File\ Execution\ Options\\osk.exe\\Debugger OR *\\SOFTWARE\\Microsoft\\Windows\ NT\\CurrentVersion\\Image\ File\ Execution\ Options\\Magnify.exe\\Debugger OR *\\SOFTWARE\\Microsoft\\Windows\ NT\\CurrentVersion\\Image\ File\ Execution\ Options\\Narrator.exe\\Debugger OR *\\SOFTWARE\\Microsoft\\Windows\ NT\\CurrentVersion\\Image\ File\ Execution\ Options\\DisplaySwitch.exe\\Debugger) AND data.win.eventdata.eventType:"SetValue")
+index: wazuh-alerts-3.x-*
+name: baca5663-583c-45f9-b5dc-ea96a22ce542_0
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+alert:
+- debug
+description: Detects the usage and installation of a backdoor that uses an option to register a malicious debugger for built-in tools that are accessible in the login screen
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.parentImage.keyword:(*\\winlogon.exe) AND data.win.eventdata.commandLine.keyword:(*cmd.exe\ sethc.exe\ * OR *cmd.exe\ utilman.exe\ * OR *cmd.exe\ osk.exe\ * OR *cmd.exe\ Magnify.exe\ * OR *cmd.exe\ Narrator.exe\ * OR *cmd.exe\ DisplaySwitch.exe\ *))
+index: wazuh-alerts-3.x-*
+name: baca5663-583c-45f9-b5dc-ea96a22ce542-2_0
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

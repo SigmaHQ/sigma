@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects activity as "net user administrator /domain" and "net group domain admins /domain"
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4661" AND data.win.eventdata.accessMask:"0x2d" AND ((data.win.eventdata.objectType:"SAM_USER" AND data.win.eventdata.objectName.keyword:S\-1\-5\-21\-*\-500) OR (data.win.eventdata.objectType:"SAM_GROUP" AND data.win.eventdata.objectName.keyword:S\-1\-5\-21\-*\-512)))
+index: wazuh-alerts-3.x-*
+name: sigma_win_susp_net_recon_activity
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects scenarios where one can control another users or computers account without having to use their credentials.
+filter:
+- query:
+    query_string:
+      query: (((((data.win.system.eventID:"4738" AND (NOT (user_attribute_allowed_todelegate:"\-"))) AND (NOT (NOT _exists_:user_attribute_allowed_todelegate))) OR (data.win.system.eventID:"5136" AND dsobject_attribute_name:"msDS\-AllowedToDelegateTo")) OR (data.win.system.eventID:"5136" AND dsobject_class:"user" AND dsobject_attribute_name:"servicePrincipalName")) OR (data.win.system.eventID:"5136" AND dsobject_attribute_name:"msDS\-AllowedToActOnBehalfOfOtherIdentity"))
+index: wazuh-alerts-3.x-*
+name: 300bac00-e041-4ee2-9c36-e262656a6ecc_0
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detection of sc.exe utility spawning by user with Medium integrity level to change service ImagePath or FailureCommand
+filter:
+- query:
+    query_string:
+      query: ((data.win.eventdata.image.keyword:*\\sc.exe AND IntegrityLevel:"Medium") AND ((data.win.eventdata.commandLine.keyword:*config* AND data.win.eventdata.commandLine.keyword:*binPath*) OR (data.win.eventdata.commandLine.keyword:*failure* AND data.win.eventdata.commandLine.keyword:*command*)))
+index: wazuh-alerts-3.x-*
+name: d937b75f-a665-4480-88a5-2f20e9f9b22a_0
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

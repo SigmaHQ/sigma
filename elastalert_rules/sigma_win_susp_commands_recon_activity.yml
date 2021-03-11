@@ -1,0 +1,22 @@
+alert:
+- debug
+buffer_time:
+  seconds: 15
+description: Detects a set of commands often used in recon stages by different attack groups
+doc_type: doc
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine.keyword:(tasklist OR net\ time OR systeminfo OR whoami OR nbtstat OR net\ start OR *\\net1\ start OR qprocess OR nslookup OR hostname.exe OR *\\net1\ user\ \/domain OR *\\net1\ group\ \/domain OR *\\net1\ group\ \"domain\ admins\"\ \/domain OR *\\net1\ group\ \"Exchange\ Trusted\ Subsystem\"\ \/domain OR *\\net1\ accounts\ \/domain OR *\\net1\ user\ net\ localgroup\ administrators OR netstat\ \-an))
+index: wazuh-alerts-3.x-*
+max_threshold: 4
+metric_agg_key: _id
+metric_agg_type: cardinality
+name: 2887e914-ce96-435f-8105-593937e90757_0
+priority: 3
+query_key: data.win.eventdata.commandLine.keyword
+realert:
+  minutes: 0
+type: metric_aggregation
+
+

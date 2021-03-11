@@ -1,0 +1,22 @@
+alert:
+- debug
+buffer_time:
+  hours: 1
+description: Detects enumeration of the global catalog (that can be performed using BloodHound or others AD reconnaissance tools). Adjust Treshhold according to domain width.
+doc_type: doc
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"5156" AND data.win.eventdata.destinationPort:("3268" OR "3269"))
+index: wazuh-alerts-3.x-*
+max_threshold: 2000
+metric_agg_key: _id
+metric_agg_type: cardinality
+name: sigma_win_global_catalog_enumeration
+priority: 3
+query_key: src_ip_addr.keyword
+realert:
+  minutes: 0
+type: metric_aggregation
+
+

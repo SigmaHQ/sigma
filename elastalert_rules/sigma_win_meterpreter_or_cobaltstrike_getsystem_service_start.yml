@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the use of getsystem Meterpreter/Cobalt Strike command by detecting a specific service starting
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.parentImage.keyword:*\\services.exe AND ((data.win.eventdata.commandLine.keyword:*cmd* AND data.win.eventdata.commandLine.keyword:*\/c* AND data.win.eventdata.commandLine.keyword:*echo* AND data.win.eventdata.commandLine.keyword:*\\pipe\\*) OR (data.win.eventdata.commandLine.keyword:*%COMSPEC%* AND data.win.eventdata.commandLine.keyword:*\/c* AND data.win.eventdata.commandLine.keyword:*echo* AND data.win.eventdata.commandLine.keyword:*\\pipe\\*) OR (data.win.eventdata.commandLine.keyword:*rundll32* AND data.win.eventdata.commandLine.keyword:*.dll,a* AND data.win.eventdata.commandLine.keyword:*\/p\:*))) AND (NOT (data.win.eventdata.commandLine.keyword:*MpCmdRun*)))
+index: wazuh-alerts-3.x-*
+name: 15619216-e993-4721-b590-4c520615a67d_0
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

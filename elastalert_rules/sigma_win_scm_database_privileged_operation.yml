@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects non-system users performing privileged operation os the SCM database
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4674" AND data.win.eventdata.objectType:"SC_MANAGER\ OBJECT" AND data.win.eventdata.objectName:"servicesactive" AND PrivilegeList:"SeTakeOwnershipPrivilege" AND SubjectLogonId:"0x3e4")
+index: wazuh-alerts-3.x-*
+name: sigma_win_scm_database_privileged_operation
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,22 @@
+alert:
+- debug
+buffer_time:
+  minutes: 30
+description: The PowerShell implementation of DNSCat2 calls nslookup to craft queries. Counting nslookup processes spawned by PowerShell will show hundreds or thousands of instances if PS DNSCat2 is active locally.
+doc_type: doc
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.parentImage.keyword:*\\powershell.exe AND data.win.eventdata.image.keyword:*\\nslookup.exe AND data.win.eventdata.commandLine.keyword:*\\nslookup.exe)
+index: wazuh-alerts-3.x-*
+max_threshold: 100
+metric_agg_key: data.win.eventdata.image.keyword
+metric_agg_type: cardinality
+name: b11d75d6-d7c1-11ea-87d0-0242ac130003_0
+priority: 2
+query_key: data.win.eventdata.parentImage.keyword
+realert:
+  minutes: 0
+type: metric_aggregation
+
+

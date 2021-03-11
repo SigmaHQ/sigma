@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects remote service activity via remote access to the svcctl named pipe
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"5145" AND data.win.eventdata.shareName.keyword:\\*\\IPC$ AND data.win.eventdata.relativeTargetName:"svcctl" AND Accesses.keyword:*WriteData*)
+index: wazuh-alerts-3.x-*
+name: sigma_win_svcctl_remote_service
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

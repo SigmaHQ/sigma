@@ -1,0 +1,29 @@
+alert:
+- debug
+description: Detects NetNTLM downgrade attack
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"13" AND data.win.eventdata.targetObject.keyword:(*SYSTEM\\*ControlSet*\\Control\\Lsa\\lmcompatibilitylevel OR *SYSTEM\\*ControlSet*\\Control\\Lsa*\\NtlmMinClientSec OR *SYSTEM\\*ControlSet*\\Control\\Lsa*\\RestrictSendingNTLMTraffic))
+index: wazuh-alerts-3.x-*
+name: d67572a0-e2ec-45d6-b8db-c100d14b8ef2_0
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+alert:
+- debug
+description: Detects NetNTLM downgrade attack
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4657" AND object_name.keyword:\\REGISTRY\\MACHINE\\SYSTEM\\*ControlSet*\\Control\\Lsa* AND object_value_name:("LmCompatibilityLevel" OR "NtlmMinClientSec" OR "RestrictSendingNTLMTraffic"))
+index: wazuh-alerts-3.x-*
+name: d67572a0-e2ec-45d6-b8db-c100d14b8ef2-2_0
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

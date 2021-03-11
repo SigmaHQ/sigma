@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the malicious use of a control panel item
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND ((data.win.eventdata.commandLine.keyword:*.cpl AND (NOT (data.win.eventdata.commandLine.keyword:(*\\System32\\* OR *%System%*)))) OR (data.win.eventdata.commandLine.keyword:(*reg\ add*) AND data.win.eventdata.commandLine.keyword:(*CurrentVersion\\Control\ Panel\\CPLs*))))
+index: wazuh-alerts-3.x-*
+name: 0ba863e6-def5-4e50-9cea-4dd8c7dc46a4_0
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

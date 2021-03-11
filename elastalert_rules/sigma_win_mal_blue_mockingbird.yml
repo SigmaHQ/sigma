@@ -1,0 +1,43 @@
+alert:
+- debug
+description: Attempts to detect system changes made by Blue Mockingbird
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.image.keyword:*\\cmd.exe AND data.win.eventdata.commandLine.keyword:*sc\ config* AND data.win.eventdata.commandLine.keyword:*wercplsupporte.dll*)
+index: wazuh-alerts-3.x-*
+name: sigma_win_mal_blue_mockingbird
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+alert:
+- debug
+description: Attempts to detect system changes made by Blue Mockingbird
+filter:
+- query:
+    query_string:
+      query: (data.win.eventdata.image.keyword:*\\wmic.exe AND data.win.eventdata.commandLine.keyword:*COR_PROFILER)
+index: wazuh-alerts-3.x-*
+name: sigma_win_mal_blue_mockingbird
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+alert:
+- debug
+description: Attempts to detect system changes made by Blue Mockingbird
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"13" AND data.win.eventdata.targetObject.keyword:(*\\CurrentControlSet\\Services\\wercplsupport\\Parameters\\ServiceDll))
+index: wazuh-alerts-3.x-*
+name: sigma_win_mal_blue_mockingbird
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+
