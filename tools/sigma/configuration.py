@@ -68,6 +68,17 @@ class SigmaConfigurationChain(list):
                         category, product, service = logsource.rewrite
         return SigmaLogsourceConfiguration(matching, self.defaultindex)
 
+    def get_logsourcemerging(self):
+        value = ''
+        for config in self:
+            if value == '':
+                value =  config.get_logsourcemerging().lower()
+
+        if not value in ['and', 'or']:
+            value = 'and'
+
+        return value
+
     def set_backend(self, backend):
         """Set backend for all sigma conversion configurations in chain."""
         self.backend = backend
@@ -123,6 +134,12 @@ class SigmaConfiguration:
         """Return merged log source definition of all logosurces that match criteria"""
         matching = [logsource for logsource in self.logsources if logsource.matches(category, product, service)]
         return SigmaLogsourceConfiguration(matching, self.defaultindex)
+
+    def get_logsourcemerging(self):
+        if self.config != None:
+            if 'logsourcemerging' in self.config:
+                return self.config['logsourcemerging']
+        return ''
 
     def set_backend(self, backend):
         """Set backend. This is used by other code to determine target properties for index addressing"""
