@@ -162,6 +162,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "EventType": ("ActionType", self.default_value_mapping),               
                 "FileName": (self.id_mapping, self.default_value_mapping),
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
+                "ImageLoaded": ("FolderPath", self.default_value_mapping),
                 "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
                 "ParentProcessName": ("InitiatingProcessParentFileName", self.default_value_mapping),
                 "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
@@ -262,6 +263,9 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
         elif (self.category, self.product, self.service) == ("file_event", "windows", None):
             self.tables.append("DeviceFileEvents")
             self.current_table = "DeviceFileEvents"
+        elif (self.category, self.product, self.service) == ("image_load", "windows", None):
+            self.tables.append("DeviceImageLoadEvents")
+            self.current_table = "DeviceImageLoadEvents"
         elif (self.category, self.product, self.service) == ("network_connection", "windows", None):
             self.tables.append("DeviceNetworkEvents")
             self.current_table = "DeviceNetworkEvents"
