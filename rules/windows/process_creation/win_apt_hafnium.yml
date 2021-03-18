@@ -1,4 +1,4 @@
-title: HAFNIUM Exchange Exploitation Activity
+title: Exchange Exploitation Activity
 id: bbb2dedd-a0e3-46ab-ba6c-6c82ae7a9aa7
 description: Detects activity observed by different researchers to be HAFNIUM group acitivity (or related) on Exchange servers
 author: Florian Roth
@@ -10,6 +10,7 @@ references:
     - https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers/
     - https://discuss.elastic.co/t/detection-and-response-for-hafnium-activity/266289/3
     - https://twitter.com/GadixCRK/status/1369313704869834753?s=20
+    - https://twitter.com/BleepinComputer/status/1372218235949617161
 logsource:
     category: process_creation
     product: windows
@@ -55,6 +56,16 @@ detection:
             - '\Temp\xx.bat'
             - 'Windows\WwanSvcdcs'
             - 'Windows\Temp\cw.exe'
+    selection11: 
+        CommandLine|contains|all:
+            - '\comsvcs.dll'
+            - 'Minidump'
+            - '\inetpub\wwwroot'
+    selection12:
+        CommandLine|contains|all:
+            - 'dsquery'
+            - ' -uco '
+            - '\inetpub\wwwroot'
     condition: 1 of them
 falsepositives:
     - Unknown
