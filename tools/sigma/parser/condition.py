@@ -403,7 +403,8 @@ class SigmaConditionOptimizer:
                 if len(promoted) > 0:
                     for child in node.items:
                         for cand in promoted:
-                            child.items.remove(cand)
+                            if cand in child.items:
+                                child.items.remove(cand)
                     newnode = othertype()
                     newnode.items = promoted
                     newnode.add(node)
