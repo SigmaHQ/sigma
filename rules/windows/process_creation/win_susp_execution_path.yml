@@ -1,9 +1,15 @@
-title: Execution in Non-Executable Folder
+title: Execution from Suspicious Folder
 id: 3dfd06d2-eaf4-4532-9555-68aca59f57c4
 status: experimental
 description: Detects a suspicious execution from an uncommon folder
 author: Florian Roth
 date: 2019/01/16
+modified: 2021/03/31
+references:
+    - https://github.com/mbevilacqua/appcompatprocessor/blob/master/AppCompatSearch.txt
+    - https://www.secureworks.com/research/bronze-butler-targets-japanese-businesses
+    - https://www.crowdstrike.com/resources/reports/2019-crowdstrike-global-threat-report/
+    - https://github.com/ThreatHuntingProject/ThreatHunting/blob/master/hunts/suspicious_process_creation_via_windows_event_logs.md
 tags:
     - attack.defense_evasion
     - attack.t1036
@@ -13,7 +19,7 @@ logsource:
 detection:
     selection:
         Image:
-            - '*\$Recycle.bin'
+            - '*\$Recycle.bin\\*'
             - '*\Users\All Users\\*'
             - '*\Users\Default\\*'
             - '*\Users\Public\\*'
@@ -22,6 +28,18 @@ detection:
             - '*\Windows\Fonts\\*'
             - '*\Windows\IME\\*'
             - '*\Windows\addins\\*'
+            - '*\Intel\Logs\\*'
+            - '*\Users\NetworkService\\*'
+            - '*\Windows\debug\\*'
+            - '*\Windows\Media\\*'
+            - '*\Windows\Help\\*'
+            - '*\Windows\repair\\*'
+            - '*\Windows\security\\*'
+            - '*\RSA\MachineKeys\\*'
+            - '*\Windows\system32\config\systemprofile\\*'
+            - '*\Windows\Tasks\\*'
+            - '*\Windows\System32\Tasks\\*'
+
     condition: selection
 fields:
     - CommandLine
