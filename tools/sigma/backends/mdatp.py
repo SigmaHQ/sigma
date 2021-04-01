@@ -19,8 +19,6 @@ from functools import wraps
 from .base import SingleTextQueryBackend
 from .exceptions import NotSupportedError
 from ..parser.modifiers.base import SigmaTypeModifier
-from ..parser.modifiers.transform import SigmaContainsModifier, SigmaStartswithModifier, SigmaEndswithModifier
-from ..parser.modifiers.type import SigmaRegularExpressionModifier
 
 
 def wrapper(method):
