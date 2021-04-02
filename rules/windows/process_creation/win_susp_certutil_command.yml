@@ -18,28 +18,19 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    suffixes_1:
-        CommandLine|contains:
-            - ' -'
-            - ' /'
-    selection:
+    parameters:
         CommandLine|contains:
             - 'decode '
             - 'decodehex '
             - 'urlcache '
             - 'verifyctl '
             - 'encode '
-    suffixes_2:
-        CommandLine|contains:
-            - '-'
-            - '/'
     certutil:
         Image|endswith: '\certutil.exe'
         CommandLine|contains:
             - 'URL'
             - 'ping'
-    condition: suffixes_1 and selection or 
-               suffixes_2 and certutil
+    condition: parameters or certutil
 fields:
     - CommandLine
     - ParentCommandLine
@@ -54,7 +45,7 @@ tags:
     - attack.g0045
     - attack.g0049
     - attack.g0075
-    - attack.g0096        
+    - attack.g0096
 falsepositives:
     - False positives depend on scripts and administrative tools used in the monitored environment
 level: high

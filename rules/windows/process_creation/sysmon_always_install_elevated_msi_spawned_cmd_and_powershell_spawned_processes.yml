@@ -4,7 +4,7 @@ description: This rule will looks for Windows Installer service (msiexec.exe) sp
 status: experimental
 author: Teymur Kheirkhabarov (idea), Mangatas Tondang (rule), oscd.community
 date: 2020/10/13
-references: 
+references:
     - https://image.slidesharecdn.com/kheirkhabarovoffzonefinal-181117201458/95/hunting-for-privilege-escalation-in-windows-environment-50-638.jpg
 tags:
     - attack.privilege_escalation
@@ -14,21 +14,21 @@ logsource:
     category: process_creation
 detection:
     parent_image:
-        ParentImage|contains: 
+        ParentImage|endswith:
             - '\cmd.exe'
             - '\powershell.exe'
     parent_of_parent_image:
-        ParentOfParentImage|contains|all: 
+        ParentOfParentImage|contains|all:
             - '\Windows\Installer\'
             - 'msi'
-        ParentOfParentImage|endswith: 
+        ParentOfParentImage|endswith:
             - 'tmp'
     condition: parent_image and parent_of_parent_image
 fields:
     - ParentImage
     - ParentOfParentImage
 falsepositives:
-    - Penetration test 
+    - Penetration test
 level: high
 enrichment:
     - EN_0001_cache_sysmon_event_id_1_info                # http://bit.ly/314zc6x

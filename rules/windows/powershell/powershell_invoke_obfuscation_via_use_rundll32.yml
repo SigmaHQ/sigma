@@ -4,7 +4,7 @@ description: Detects Obfuscated Powershell via use Rundll32 in Scripts
 status: experimental
 author: Nikita Nazarov, oscd.community
 date: 2019/10/08
-references: 
+references:
     - https://github.com/Neo23x0/sigma/issues/1009
 tags:
     - attack.defense_evasion
@@ -17,13 +17,11 @@ logsource:
 detection:
     selection_1:
         EventID: 4104
+        ScriptBlockText|re: '(?i).*&&.*rundll32.*shell32\.dll.*shellexec_rundll.*(value|invoke|comspec|iex).*"'
     selection_2:
-        - ScriptBlockText|re: '(?i).*&&.*rundll32.*shell32\.dll.*shellexec_rundll.*(value|invoke|comspec|iex).*"'
-    selection_3:
         EventID: 4103
-    selection_4:
-        - Payload|re: '(?i).*&&.*rundll32.*shell32\.dll.*shellexec_rundll.*(value|invoke|comspec|iex).*"'
-    condition: ( selection_1 and selection_2 ) or ( selection_3 and selection_4 )
+        Payload|re: '(?i).*&&.*rundll32.*shell32\.dll.*shellexec_rundll.*(value|invoke|comspec|iex).*"'
+    condition: 1 of them
 falsepositives:
     - Unknown
 level: high

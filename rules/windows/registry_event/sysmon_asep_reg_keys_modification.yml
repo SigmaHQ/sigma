@@ -3,7 +3,7 @@ id: 17f878b8-9968-4578-b814-c4217fc5768c
 description: Detects modification of autostart extensibility point (ASEP) in registry.
 status: experimental
 references:
-    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1060/T1060.yaml
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1547.001/T1547.001.md
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 tags:
@@ -15,10 +15,10 @@ modified: 2020/11/04
 author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community
 logsource:
     category: registry_event
-    product: windows 
+    product: windows
 level: medium
 detection:
-    main_selection: 
+    main_selection:
         TargetObject|contains:
             - '\SOFTWARE\Wow6432Node\Microsoft\Windows CE Services\AutoStart'
             - '\Software\Wow6432Node\Microsoft\Command Processor\Autorun'
@@ -38,9 +38,9 @@ detection:
             - '\SOFTWARE\Microsoft\Internet Explorer\Desktop\Components'
             - '\Software\Classes\Clsid\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\Inprocserver32'
             - '\Control Panel\Desktop\Scrnsave.exe'
+    session_manager_base:
+        TargetObject|contains: '\System\CurrentControlSet\Control\Session Manager'
     session_manager:
-        TargetObject|contains|all: 
-            - '\System\CurrentControlSet\Control\Session Manager'
         TargetObject|contains:
             - '\SetupExecute'
             - '\S0InitialCommand'
@@ -48,9 +48,9 @@ detection:
             - '\Execute'
             - '\BootExecute'
             - '\AppCertDlls'
+    current_version_base:
+        TargetObject|contains: '\SOFTWARE\Microsoft\Windows\CurrentVersion'
     current_version:
-        TargetObject|contains|all: 
-            - '\SOFTWARE\Microsoft\Windows\CurrentVersion'
         TargetObject|contains:
             - '\ShellServiceObjectDelayLoad'
             - '\Run'
@@ -68,9 +68,9 @@ detection:
             - '\Authentication\PLAP Providers'
             - '\Authentication\Credential Providers'
             - '\Authentication\Credential Provider Filters'
+    nt_current_version_base:
+        TargetObject|contains: '\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
     nt_current_version:
-        TargetObject|contains|all: 
-            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
         TargetObject|contains:
             - '\Winlogon\VmApplet'
             - '\Winlogon\Userinit'
@@ -86,9 +86,9 @@ detection:
             - '\Drivers32'
             - '\Windows\Run'
             - '\Windows\Load'
+    wow_current_version_base:
+        TargetObject|contains: '\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion'
     wow_current_version:
-        TargetObject|contains|all: 
-            - '\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion'
         TargetObject|contains:
             - '\ShellServiceObjectDelayLoad'
             - '\Run'
@@ -97,16 +97,16 @@ detection:
             - '\Explorer\ShellExecuteHooks'
             - '\Explorer\SharedTaskScheduler'
             - '\Explorer\Browser Helper Objects'
+    wow_nt_current_version_base:
+        TargetObject|contains: '\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion'
     wow_nt_current_version:
-        TargetObject|contains|all: 
-            - '\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion'
         TargetObject|contains:
             - '\Windows\Appinit_Dlls'
             - '\Image File Execution Options'
             - '\Drivers32'
-    wow_office: 
+    wow_office:
         TargetObject|contains: '\Software\Wow6432Node\Microsoft\Office'
-    office: 
+    office:
         TargetObject|contains: '\Software\Microsoft\Office'
     wow_office_details:
         TargetObject|contains:
@@ -117,7 +117,7 @@ detection:
             - '\Excel\Addins'
             - '\Access\Addins'
             - 'test\Special\Perf'
-    wow_ie: 
+    wow_ie:
         TargetObject|contains: '\Software\Wow6432Node\Microsoft\Internet Explorer'
     ie:
         TargetObject|contains: '\Software\Microsoft\Internet Explorer'
@@ -126,9 +126,9 @@ detection:
             - '\Toolbar'
             - '\Extensions'
             - '\Explorer Bars'
+    wow_classes_base:
+        TargetObject|contains: '\Software\Wow6432Node\Classes'
     wow_classes:
-        TargetObject|contains|all: 
-            - '\Software\Wow6432Node\Classes'
         TargetObject|contains:
             - '\Folder\ShellEx\ExtShellFolderViews'
             - '\Folder\ShellEx\DragDropHandlers'
@@ -142,9 +142,9 @@ detection:
             - '\AllFileSystemObjects\ShellEx\DragDropHandlers'
             - '\ShellEx\PropertySheetHandlers'
             - '\ShellEx\ContextMenuHandlers'
+    classes_base:
+        TargetObject|contains: '\Software\Classes'
     classes:
-        TargetObject|contains|all: 
-            - '\Software\Classes'
         TargetObject|contains:
             - '\Folder\ShellEx\ExtShellFolderViews'
             - '\Folder\ShellEx\DragDropHandlers'
@@ -162,23 +162,23 @@ detection:
             - '\.cmd'
             - '\ShellEx\PropertySheetHandlers'
             - '\ShellEx\ContextMenuHandlers'
+    scripts_base:
+        TargetObject|contains: '\Software\Policies\Microsoft\Windows\System\Scripts'
     scripts:
-        TargetObject|contains|all: 
-            - '\Software\Policies\Microsoft\Windows\System\Scripts'
         TargetObject|contains:
             - '\Startup'
             - '\Shutdown'
             - '\Logon'
             - '\Logoff'
+    winsock_parameters_base:
+        TargetObject|contains: '\System\CurrentControlSet\Services\WinSock2\Parameters'
     winsock_parameters:
-        TargetObject|contains|all: 
-            - '\System\CurrentControlSet\Services\WinSock2\Parameters'
         TargetObject|contains:
             - '\Protocol_Catalog9\Catalog_Entries'
             - '\NameSpace_Catalog5\Catalog_Entries'
+    system_control_base:
+        TargetObject|contains: '\SYSTEM\CurrentControlSet\Control'
     system_control:
-        TargetObject|contains|all: 
-            - '\SYSTEM\CurrentControlSet\Control'
         TargetObject|contains:
             - '\Terminal Server\WinStations\RDP-Tcp\InitialProgram'
             - '\Terminal Server\Wds\rdpwd\StartupPrograms'
@@ -190,19 +190,19 @@ detection:
             - '\Lsa\Notification Packages'
             - '\Lsa\Authentication Packages'
             - '\BootVerificationProgram\ImagePath'
-    condition: main_selection OR 
-               session_manager OR 
-               current_version OR 
-               nt_current_version OR 
-               wow_current_version OR 
-               wow_nt_current_version OR 
-               (wow_office OR office) AND wow_office_details OR 
-               (wow_ie OR ie) AND wow_ie_details OR 
-               wow_classes OR 
-               classes OR 
-               scripts OR 
-               winsock_parameters OR 
-               system_control
+    condition: main_selection OR
+               session_manager_base AND session_manager OR
+               current_version_base AND current_version OR
+               nt_current_version_base AND nt_current_version OR
+               wow_current_version_base AND wow_current_version OR
+               wow_nt_current_version_base AND wow_nt_current_version OR
+               (wow_office OR office) AND wow_office_details OR
+               (wow_ie OR ie) AND wow_ie_details OR
+               wow_classes_base AND wow_classes OR
+               classes_base AND classes OR
+               scripts_base AND scripts OR
+               winsock_parameters_base AND winsock_parameters OR
+               system_control_base AND system_control
 fields:
     - SecurityID
     - ObjectName
