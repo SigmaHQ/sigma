@@ -12,19 +12,21 @@ logsource:
     definition: 'Use the following config to generate the necessary Event ID 3 Network Connection events'
 detection:
     selection:
-        Image: 
-            # - '*\ProgramData\\*'  # too many false positives, e.g. with Webex for Windows
-            - '*\$Recycle.bin'
-            - '*\Users\All Users\\*'
-            - '*\Users\Default\\*'
-            - '*\Users\Public\\*'
-            - '*\Users\Contacts\\*'
-            - '*\Users\Searches\\*' 
-            - 'C:\Perflogs\\*'
-            - '*\config\systemprofile\\*'
-            - '*\Windows\Fonts\\*'
-            - '*\Windows\IME\\*'
-            - '*\Windows\addins\\*'
+        - Image|contains: 
+            # - '\ProgramData\\'  # too many false positives, e.g. with Webex for Windows
+            - '\Users\All Users\'
+            - '\Users\Default\'
+            - '\Users\Public\'
+            - '\Users\Contacts\'
+            - '\Users\Searches\'
+            - '\config\systemprofile\'
+            - '\Windows\Fonts\'
+            - '\Windows\IME\'
+            - '\Windows\addins\'
+        - Image|endswith:
+            - '\$Recycle.bin'
+        - Image|startswith:
+            - 'C:\Perflogs\'
     condition: selection
 falsepositives:
     - unknown

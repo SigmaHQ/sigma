@@ -1,0 +1,27 @@
+title: Local Groups Discovery
+id: 676381a6-15ca-4d73-a9c8-6a22e970b90d
+status: experimental
+description: Detects enumeration of local system groups
+author: Ömer Günal, Alejandro Ortuno, oscd.community
+date: 2020/10/11
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1069.001/T1069.001.md
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection_1:
+    Image|endswith:
+      - '/groups'
+  selection_2:
+    Image|endswith:
+      - '/cat'
+    CommandLine|contains:
+      - '/etc/group'
+  condition: 1 of them
+falsepositives:
+  - Legitimate administration activities
+level: low
+tags:
+  - attack.discovery
+  - attack.t1069.001

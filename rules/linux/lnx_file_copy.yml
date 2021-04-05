@@ -11,14 +11,16 @@ logsource:
 detection:
     keywords:
         - Scp|contains:
-          - 'scp * *@*:*'
-          - 'scp *@*:* *'
+          - 'scp'
         - Rsync|contains:
-          - 'rsync -r *@*:* *'
-          - 'rsync -r * *@*:*'
+          - 'rsync -r'
         - Sftp|contains:
-          - 'sftp *@*:* *'
-    condition: keywords
+          - 'sftp'
+    filter:
+        message|contains|all:
+          - '@'
+          - ':'
+    condition: keywords and filter
 falsepositives:
     - Legitimate administration activities
 level: low

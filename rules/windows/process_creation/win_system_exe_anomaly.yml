@@ -4,7 +4,7 @@ status: experimental
 description: Detects a Windows program executable started in a suspicious folder
 references:
     - https://twitter.com/GelosSnake/status/934900723426439170
-author: Florian Roth, Patrick Bareiss
+author: Florian Roth, Patrick Bareiss, Anton Kutepov, oscd.community
 date: 2017/11/27
 modified: 2021/03/02
 tags:
@@ -15,40 +15,40 @@ logsource:
     product: windows
 detection:
     selection:
-        Image:
-            - '*\svchost.exe'
-            - '*\rundll32.exe'
-            - '*\services.exe'
-            - '*\powershell.exe'
-            - '*\regsvr32.exe'
-            - '*\spoolsv.exe'
-            - '*\lsass.exe'
-            - '*\smss.exe'
-            - '*\csrss.exe'
-            - '*\conhost.exe'
-            - '*\wininit.exe'
-            - '*\lsm.exe'
-            - '*\winlogon.exe'
-            - '*\explorer.exe'
-            - '*\taskhost.exe'
-            - '*\Taskmgr.exe'
-            - '*\sihost.exe'
-            - '*\RuntimeBroker.exe'
-            - '*\smartscreen.exe'
-            - '*\dllhost.exe'
-            - '*\audiodg.exe'
-            - '*\wlanext.exe'
+        Image|endswith:
+            - '\svchost.exe'
+            - '\rundll32.exe'
+            - '\services.exe'
+            - '\powershell.exe'
+            - '\regsvr32.exe'
+            - '\spoolsv.exe'
+            - '\lsass.exe'
+            - '\smss.exe'
+            - '\csrss.exe'
+            - '\conhost.exe'
+            - '\wininit.exe'
+            - '\lsm.exe'
+            - '\winlogon.exe'
+            - '\explorer.exe'
+            - '\taskhost.exe'
+            - '\Taskmgr.exe'
+            - '\sihost.exe'
+            - '\RuntimeBroker.exe'
+            - '\smartscreen.exe'
+            - '\dllhost.exe'
+            - '\audiodg.exe'
+            - '\wlanext.exe'
     filter:
-        Image:
-            - 'C:\Windows\System32\\*'
-            - 'C:\Windows\system32\\*'
-            - 'C:\Windows\SysWow64\\*'
-            - 'C:\Windows\SysWOW64\\*'
-            - 'C:\Windows\explorer.exe'
-            - 'C:\Windows\winsxs\\*'
-            - 'C:\Windows\WinSxS\\*'
-            - '*\SystemRoot\System32\\*'
-            - 'C:\avast! sandbox*'
+        - Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\system32\'
+            - 'C:\Windows\SysWow64\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\winsxs\'
+            - 'C:\Windows\WinSxS\'
+            - 'C:\avast! sandbox'
+        - Image|contains: '\SystemRoot\System32\'
+        - Image: 'C:\Windows\explorer.exe'
     condition: selection and not filter
 fields:
     - ComputerName

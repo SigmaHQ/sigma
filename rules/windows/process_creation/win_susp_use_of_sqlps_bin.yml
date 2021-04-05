@@ -1,0 +1,31 @@
+title: Detection of PowerShell Execution via Sqlps.exe
+id: 0152550d-3a26-4efd-9f0e-54a0b28ae2f3
+status: experimental
+description: This rule detects execution of a PowerShell code through the sqlps.exe utility, which is included in the standard set of utilities supplied with the MSSQL Server. Script blocks are not logged in this case, so this utility helps to bypass protection mechanisms based on the analysis of these logs.
+references:
+  - https://docs.microsoft.com/en-us/sql/tools/sqlps-utility?view=sql-server-ver15
+  - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Sqlps/
+  - https://twitter.com/bryon_/status/975835709587075072
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.defense_evasion
+    - attack.t1127
+author: 'Agro (@agro_sev) oscd.community'
+date: 2020/10/10
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Image|endswith: '\sqlps.exe'
+    selection2:
+        ParentImage|endswith: '\sqlps.exe'
+    selection3:
+        OriginalFileName: '\sqlps.exe'
+    reduction:
+        ParentImage|endswith: '\sqlagent.exe'
+    condition: selection1 or selection2 or selection3 and not reduction
+falsepositives:
+    - Direct PS command execution through SQLPS.exe is uncommon, childprocess sqlps.exe spawned by sqlagent.exe is a legitimate action.
+level: medium

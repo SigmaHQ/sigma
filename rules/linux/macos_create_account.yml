@@ -1,0 +1,25 @@
+title: Creation Of A Local User Account
+id: 51719bf5-e4fd-4e44-8ba8-b830e7ac0731
+status: experimental
+description: Detects the creation of a new user account. Such accounts may be used for persistence that do not require persistent remote access tools to be deployed on the system.
+author: Alejandro Ortuno, oscd.community
+date: 2020/10/06
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1136.001/T1136.001.md
+logsource:
+  category: process_creation
+  product: macos
+detection:
+  selection:
+    Image|endswith:
+      - '/dscl'
+    CommandLine|contains:
+      - 'create'
+  condition: selection
+falsepositives:
+  - Legitimate administration activities
+level: low
+tags:
+    - attack.t1136    # an old one
+    - attack.t1136.001
+    - attack.persistence

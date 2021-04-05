@@ -1,0 +1,23 @@
+title: File Deletion
+id: 30aed7b6-d2c1-4eaf-9382-b6bc43e50c57
+status: stable
+description: Detects file deletion commands
+author: Ömer Günal, oscd.community
+date: 2020/10/07
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1070.004/T1070.004.md
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection:
+        Image|endswith:
+            - '/rm'     # covers /rmdir as well
+            - '/shred'
+    condition: selection
+falsepositives:
+    - Legitimate administration activities
+level: informational
+tags:
+    - attack.defense_evasion
+    - attack.t1070.004

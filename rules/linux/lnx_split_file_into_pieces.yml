@@ -1,0 +1,26 @@
+title: 'Split A File Into Pieces'
+id: 2dad0cba-c62a-4a4f-949f-5f6ecd619769
+status: experimental
+description: 'Detection use of the command "split" to split files into parts and possible transfer.'
+  # For this rule to work execve auditing / file system auditing with "execute access" to specific binaries must be configured
+  # Example config (place it at the bottom of audit.rules)
+  # -a always,exit -F arch=b32 -S execve -k execve
+  # -a always,exit -F arch=b64 -S execve -k execve
+author: 'Igor Fits, oscd.community'
+date: 2020/10/15
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1030/T1030.md
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+        type: 'SYSCALL'
+        comm: 'split'
+    condition: selection
+falsepositives:
+    - 'Legitimate administrative activity'
+level: low
+tags:
+    - attack.exfiltration
+    - attack.t1030

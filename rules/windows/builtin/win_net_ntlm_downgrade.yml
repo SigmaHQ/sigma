@@ -12,6 +12,28 @@ tags:
     - attack.t1089          # an old one
     - attack.t1562.001
     - attack.t1112
+detection:
+    condition: 1 of them
+falsepositives:
+    - Unknown
+level: critical
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection1:
+        EventID: 13
+        TargetObject|contains|all: 
+            - 'SYSTEM\'
+            - 'ControlSet'
+            - '\Control\Lsa'
+        TargetObject|endswith:
+            - '\lmcompatibilitylevel'
+            - '\NtlmMinClientSec'
+            - '\RestrictSendingNTLMTraffic'
+            
+---
 # Windows Security Eventlog: Process Creation with Full Command Line
 logsource:
     product: windows
@@ -20,7 +42,7 @@ logsource:
 detection:
     selection:
         EventID: 4657
-        ObjectName: '\REGISTRY\MACHINE\SYSTEM\\*ControlSet*\Control\Lsa*'
+        ObjectName|startswith: '\REGISTRY\MACHINE\SYSTEM\\*ControlSet*\Control\Lsa'
         ObjectValueName: 
             - 'LmCompatibilityLevel'
             - 'NtlmMinClientSec'

@@ -2,7 +2,7 @@ title: Suspicious Scripting in a WMI Consumer
 id: fe21810c-2a8c-478f-8dd3-5a287fb2a0e0
 status: experimental
 description: Detects suspicious scripting in WMI Event Consumers
-author: Florian Roth
+author: Florian Roth, Jonhnathan Ribeiro
 references:
     - https://in.security/an-intro-into-abusing-and-identifying-wmi-event-subscriptions-for-persistence/
     - https://github.com/Neo23x0/signature-base/blob/master/yara/gen_susp_lnk_files.yar#L19
@@ -17,18 +17,23 @@ logsource:
 detection:
     selection:
         EventID: 20
-        Destination:
-            - '*new-object system.net.webclient).downloadstring(*'
-            - '*new-object system.net.webclient).downloadfile(*'
-            - '*new-object net.webclient).downloadstring(*'
-            - '*new-object net.webclient).downloadfile(*'
-            - '* iex(*'
-            - '*WScript.shell*'
-            - '* -nop *'
-            - '* -noprofile *'
-            - '* -decode *'
-            - '* -enc *'
-    condition: selection
+    selection_destination:
+        - Destination|contains|all:
+              - 'new-object'
+              - 'net.webclient'
+              - '.downloadstring'
+        - Destination|contains|all:
+              - 'new-object'
+              - 'net.webclient'
+              - '.downloadfile'
+        - Destination|contains:
+              - ' iex('
+              - 'WScript.shell'
+              - ' -nop '
+              - ' -noprofile '
+              - ' -decode '
+              - ' -enc '
+    condition: selection and selection_destination
 fields:
     - CommandLine
     - ParentCommandLine
