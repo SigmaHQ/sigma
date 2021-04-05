@@ -2,8 +2,9 @@ title: Suspicious Code Page Switch
 id: c7942406-33dd-4377-a564-0f62db0593a3
 status: experimental
 description: Detects a code page switch in command line or batch scripts to a rare language
-author: Florian Roth
+author: Florian Roth, Jonhnathan Ribeiro, oscd.community
 date: 2019/10/14
+modified: 2020/11/28
 references:
     - https://docs.microsoft.com/en-us/windows/win32/intl/code-page-identifiers
     - https://twitter.com/cglyer/status/1183756892952248325
@@ -12,13 +13,14 @@ logsource:
     product: windows
 detection:
     selection:
-        CommandLine: 
-            - 'chcp* 936'  # Chinese
-            # - 'chcp* 1256' # Arabic
-            - 'chcp* 1258' # Vietnamese
-            # - 'chcp* 855'  # Russian
-            # - 'chcp* 866'  # Russian
-            # - 'chcp* 864'  # Arabic
+        Image|endswith: '\chcp.com'
+        CommandLine|endswith:
+            - ' 936'    # Chinese
+            # - ' 1256' # Arabic
+            - ' 1258'   # Vietnamese
+            # - ' 855'  # Russian
+            # - ' 866'  # Russian
+            # - ' 864'  # Arabic
     condition: selection
 fields:
     - ParentCommandLine

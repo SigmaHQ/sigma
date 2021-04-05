@@ -1,0 +1,26 @@
+title: Psexec Accepteula Condition
+id: 730fc21b-eaff-474b-ad23-90fd265d4988
+description: Detect ed user accept agreement execution in psexec commandline
+status: experimental
+author: omkar72
+    - https://www.fireeye.com/blog/threat-research/2020/10/kegtap-and-singlemalt-with-a-ransomware-chaser.html
+date: 2020/10/30
+tags:
+    - attack.execution
+    - attack.t1569
+    - attack.t1021
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\psexec.exe'
+        CommandLine|contains: 'accepteula'
+    condition: selection
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+falsepositives:
+    - Administrative scripts.
+level: medium

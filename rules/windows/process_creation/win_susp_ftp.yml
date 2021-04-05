@@ -1,0 +1,32 @@
+title: Suspicious ftp.exe 
+id: 06b401f4-107c-4ff9-947f-9ec1e7649f1e
+status: experimental
+description: Detects renamed ftp.exe, ftp.exe script execution and child processes ran by ftp.exe
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OSBinaries/Ftp.yml
+author: Victor Sergeev, oscd.community
+date: 2020/10/09
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    ftp_path:
+        Image|endswith: 'ftp.exe'
+    ftp_metadata:
+        OriginalFileName|contains: 'ftp.exe'
+    cmd_with_script_modifier:
+        CommandLine|contains: '-s:'
+    parent_path:
+        ParentImage|endswith: 'ftp.exe'
+    condition: (ftp_path and cmd_with_script_modifier) or (ftp_metadata and cmd_with_script_modifier) or (ftp_metadata and not ftp_path) or parent_path
+fields:
+    - CommandLine
+    - ParentImage
+tags:
+    - attack.execution
+    - attack.t1059
+    - attack.defense_evasion
+    - attack.t1202
+falsepositives:
+    - Unknown
+level: medium

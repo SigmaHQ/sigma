@@ -3,7 +3,7 @@ id: f64e5c19-879c-4bae-b471-6d84c8339677
 status: experimental
 description: Looking for processes spawned by web server components that indicate reconnaissance by popular public domain webshells for whether perl, python or wget are installed.
 author: Cian Heasley
-reference:
+references:
     - https://ragged-lab.blogspot.com/2020/07/webshells-automating-reconnaissance.html
 date: 2020/07/22
 tags:
@@ -16,21 +16,23 @@ logsource:
     product: windows
 detection:
     selection:
-        ParentImage|contains:
-            - '*\apache*'
-            - '*\tomcat*'
-            - '*\w3wp.exe'
-            - '*\php-cgi.exe'
-            - '*\nginx.exe'
-            - '*\httpd.exe'
+        - ParentImage|contains:
+            - '\apache'
+            - '\tomcat'
+        - ParentImage|endswith:
+            - '\w3wp.exe'
+            - '\php-cgi.exe'
+            - '\nginx.exe'
+            - '\httpd.exe'
+    selection2:
         Image|endswith:
-            - '*\cmd.exe'
+            - '\cmd.exe'
         CommandLine|contains:
-            - '*perl --help*'
-            - '*python --help*'
-            - '*wget --help*'
-            - '*perl -h*'
-    condition: selection
+            - 'perl --help'
+            - 'python --help'
+            - 'wget --help'
+            - 'perl -h'
+    condition: selection and selection2
 fields:
     - Image
     - CommandLine

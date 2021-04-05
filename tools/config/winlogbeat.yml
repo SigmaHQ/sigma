@@ -5,6 +5,7 @@ backends:
   - es-dsl
   - es-rule
   - kibana
+  - kibana-ndjson
   - xpack-watcher
   - elastalert
   - elastalert-dsl
@@ -63,12 +64,13 @@ logsources:
         - 'Microsoft-Windows-AppLocker/Packaged app-Deployment'
         - 'Microsoft-Windows-AppLocker/Packaged app-Execution'
 defaultindex: winlogbeat-*
-# Extract all field names qith yq:
+# Extract all field names with yq:
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: winlog.event_data.\1/g'
 # Keep EventID! Clean up the list afterwards!
 fieldmappings:
   EventID: winlog.event_id
   AccessMask: winlog.event_data.AccessMask
+  AccessList: winlog.event_data.AccessList
   AccountName: winlog.event_data.AccountName
   AllowedToDelegateTo: winlog.event_data.AllowedToDelegateTo
   AttributeLDAPDisplayName: winlog.event_data.AttributeLDAPDisplayName
@@ -111,6 +113,7 @@ fieldmappings:
   ObjectName: winlog.event_data.ObjectName
   ObjectType: winlog.event_data.ObjectType
   ObjectValueName: winlog.event_data.ObjectValueName
+  OriginalFileName: winlog.event_data.OriginalFileName
   ParentCommandLine: winlog.event_data.ParentCommandLine
   ParentProcessName: winlog.event_data.ParentProcessName
   ParentImage: winlog.event_data.ParentImage
@@ -118,8 +121,10 @@ fieldmappings:
   PipeName: winlog.event_data.PipeName
   ProcessCommandLine: winlog.event_data.ProcessCommandLine
   ProcessName: winlog.event_data.ProcessName
+  Product: winlog.event_data.Product
   Properties: winlog.event_data.Properties
   RuleName: winlog.event_data.RuleName
+  SAMAccountName: winlog.event_data.SamAccountName
   SecurityID: winlog.event_data.SecurityID
   ServiceFileName: winlog.event_data.ServiceFileName
   ServiceName: winlog.event_data.ServiceName

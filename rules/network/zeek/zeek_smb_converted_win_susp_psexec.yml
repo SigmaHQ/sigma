@@ -14,14 +14,18 @@ logsource:
     service: smb_files
 detection:
     selection1:
-        path: \\*\IPC$
-        name:
-            - '*-stdin'
-            - '*-stdout'
-            - '*-stderr'
+        path|contains|all: 
+            - '\\'
+            - '\IPC$'
+        name|endswith:
+            - '-stdin'
+            - '-stdout'
+            - '-stderr'
     selection2:
-        name: \\*\IPC$
-        path: 'PSEXESVC*'
+        name|contains|all: 
+            - '\\'
+            - '\IPC$'
+        path|startswith: 'PSEXESVC'
     condition: selection1 and not selection2
 falsepositives:
     - nothing observed so far

@@ -16,15 +16,15 @@ logsource:
     product: windows
 detection:
     exec_selection:
-        ParentImage: '*\userinit.exe'
+        ParentImage|endswith: '\userinit.exe'
     exec_exclusion1:
-        Image: '*\explorer.exe'
+        Image|endswith: '\explorer.exe'
     exec_exclusion2:
         CommandLine|contains:
             - 'netlogon.bat'
             - 'UsrLogon.cmd'
     create_keywords_cli:
-        CommandLine: '*UserInitMprLogonScript*'
+        CommandLine|contains: 'UserInitMprLogonScript'
     condition: ( exec_selection and not exec_exclusion1 and not exec_exclusion2 ) or create_keywords_cli
 falsepositives:
     - exclude legitimate logon scripts

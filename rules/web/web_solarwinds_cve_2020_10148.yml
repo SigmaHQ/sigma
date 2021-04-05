@@ -1,0 +1,30 @@
+title: CVE-2020-10148 SolarWinds Orion API Auth Bypass
+id: 5a35116f-43bc-4901-b62d-ef131f42a9af
+status: experimental
+description: Detects CVE-2020-10148 SolarWinds Orion API authentication bypass attempts
+references:
+    - https://kb.cert.org/vuls/id/843464
+author: Bhabesh Raj
+date: 2020/12/27
+tags:
+    - attack.initial_access
+    - attack.t1190
+logsource:
+    category: webserver
+detection:
+    selection:
+        c-uri|contains:
+            - "WebResource.axd"
+            - "ScriptResource.axd"
+            - "i18n.ashx"
+            - "Skipi18n"
+    valid_request_1:
+        c-uri|contains: "Orion/Skipi18n/Profiler/"
+    valid_request_2:
+        c-uri|contains:
+            - "css.i18n.ashx"
+            - "js.i18n.ashx"
+    condition: selection and not valid_request_1 and not valid_request_2
+falsepositives:
+    - Unknown
+level: critical

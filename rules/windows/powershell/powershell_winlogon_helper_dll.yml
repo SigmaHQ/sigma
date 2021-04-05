@@ -4,6 +4,7 @@ status: experimental
 description: Winlogon.exe is a Windows component responsible for actions at logon/logoff as well as the secure attention sequence (SAS) triggered by Ctrl-Alt-Delete. Registry entries in HKLM\Software[Wow6432Node]Microsoft\Windows NT\CurrentVersion\Winlogon\ and HKCU\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\ are used to manage additional helper programs and functionalities that support Winlogon. Malicious modifications to these Registry keys may cause Winlogon to load and execute malicious DLLs and/or executables.
 author: Timur Zinniatullin, oscd.community
 date: 2019/10/21
+modified: 2020/12/01
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1004/T1004.yaml
 logsource:
@@ -13,12 +14,12 @@ logsource:
 detection:
     selection:
         EventID: 4104
-    keyword1:
-        - '*Set-ItemProperty*'
-        - '*New-Item*'
-    keyword2:
-        - '*CurrentVersion\Winlogon*'
-    condition: selection and ( keyword1 and keyword2 )
+        ScriptBlockText|contains: 'CurrentVersion\Winlogon'
+    selection2:
+        ScriptBlockText|contains:
+            - 'Set-ItemProperty'
+            - 'New-Item'
+    condition: selection and selection2
 falsepositives:
     - Unknown
 level: medium
