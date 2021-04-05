@@ -14,16 +14,19 @@ tags:
     - attack.t1059.007
     - attack.t1064  # an old one
 date: 2020/01/12
-modified: 2020/09/01
-author: wagga
+modified: 2020/11/28
+author: wagga, Jonhnathan Ribeiro, oscd.community
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection1:
-        CommandLine:
-            - '*cmd.exe* /q /c chcp *'
-    condition: selection1
+    selection:
+        Image|endswith: '\cmd.exe'
+        CommandLine|contains|all:
+            - '/q'
+            - '/c'
+            - 'chcp'
+    condition: selection
 fields:
     - CommandLine
     - ParentCommandLine

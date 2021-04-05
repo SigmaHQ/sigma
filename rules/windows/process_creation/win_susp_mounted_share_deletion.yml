@@ -1,0 +1,25 @@
+title: Mounted Share Deleted
+id: cb7c4a03-2871-43c0-9bbb-18bbdb079896
+status: experimental
+description: Detects when when a mounted share is removed. Adversaries may remove share connections that are no longer useful in order to clean up traces of their operation
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1070.005/T1070.005.md
+author: 'oscd.community, @redcanary, Zach Stanford @svch0st'
+date: 2020/10/08
+tags:
+    - attack.defense_evasion
+    - attack.t1070.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\net.exe'
+        Image|endswith: '\net1.exe'
+        CommandLine|contains|all:
+            - 'share'
+            - '/delete'
+    condition: selection
+falsepositives:
+    - Administrators or Power users may remove their shares via cmd line
+level: low
