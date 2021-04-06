@@ -509,16 +509,22 @@ class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, Elast
                             }
                     else:  # if the condition is count() by MyGroupedField > XYZ
                         group_aggname = "{}_count".format(agg.groupfield)
+                        count_agg_name = "single_{}_count".format(agg.groupfield)
                         self.queries[-1]['aggs'] = {
                             group_aggname: {
                                 'terms': {
                                     'field': '%s' % (agg.groupfield)
                                 },
                                 'aggs': {
+                                    count_agg_name: {
+                                        'value_count': {
+                                            'field': '%s' % agg.groupfield
+                                        }
+                                    },
                                     'limit': {
                                         'bucket_selector': {
                                             'buckets_path': {
-                                                'count': group_aggname
+                                                'count': count_agg_name
                                             },
                                             'script': 'params.count %s %s' % (agg.cond_op, agg.condition)
                                         }
