@@ -14,24 +14,24 @@ tags:
     - attack.t1546
 author: Kyaw Min Thein, Furkan Caliskan (@caliskanfurkan_)
 date: 2020/06/22
-modified: 2020/08/29
+modified: 2020/11/28
 level: critical
 logsource:
     product: windows
     category: process_creation
 detection:
     selection1:
-        CommandLine: '*.cpl'
+        CommandLine|endswith: '.cpl'
     filter:
-        CommandLine:
-            - '*\System32\\*'
-            - '*%System%*'
+        CommandLine|contains:
+            - '\System32\'
+            - '%System%'
     selection2:
-        CommandLine:
-            - '*reg add*'
+        Image|endswith: '\reg.exe'
+        CommandLine|contains: 'add'
     selection3:
-        CommandLine:
-            - '*CurrentVersion\\Control Panel\\CPLs*'
+        CommandLine|contains:
+            - 'CurrentVersion\\Control Panel\\CPLs'
     condition: (selection1 and not filter) or (selection2 and selection3)
 falsepositives:
     - Unknown

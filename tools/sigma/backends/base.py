@@ -114,6 +114,8 @@ class BaseBackend:
 
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
+        if len(sigmaparser.condparsed) > 1:
+            raise NotImplementedError("Base backend doesn't support multiple conditions")
         for parsed in sigmaparser.condparsed:
             query = self.generateQuery(parsed)
             before = self.generateBefore(parsed)

@@ -1,0 +1,33 @@
+title: Suspicious Service DACL Modification
+id: 99cf1e02-00fb-4c0d-8375-563f978dfd37
+description: Detects suspicious DACL modifications that can  be used to hide services or make them unstopable
+author: Jonhnathan Ribeiro, oscd.community
+status: experimental
+date: 2020/10/16
+references:
+    - https://www.sans.org/blog/red-team-tactics-hiding-windows-services/
+    - https://docs.microsoft.com/pt-br/windows/win32/secauthz/sid-strings
+tags:
+    - attack.persistence
+    - attack.t1543.003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\sc.exe'
+        CommandLine|contains|all:
+            - 'sdset'
+            - 'D;;'
+    sids:
+        CommandLine|contains:
+            - ';;;IU'
+            - ';;;SU'
+            - ';;;BA'
+            - ';;;SY'
+            - ';;;WD'
+    condition: selection and sids
+falsepositives:
+    - Unknown
+level: high

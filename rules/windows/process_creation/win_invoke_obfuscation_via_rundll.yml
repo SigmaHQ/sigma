@@ -1,0 +1,23 @@
+title: Invoke-Obfuscation RUNDLL LAUNCHER
+id: 056a7ee1-4853-4e67-86a0-3fd9ceed7555
+description: Detects Obfuscated Powershell via RUNDLL LAUNCHER
+status: experimental
+author: Timur Zinniatullin, oscd.community
+date: 2020/10/18
+references:
+    - https://github.com/Neo23x0/sigma/issues/1009 #(Task 23)
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|re: '(?i).*rundll32(?:\.exe)?(?:\s+)?shell32\.dll.*shellexec_rundll.*powershell.*\"'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium

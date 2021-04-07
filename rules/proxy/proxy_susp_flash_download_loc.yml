@@ -4,17 +4,17 @@ status: experimental
 description: Detects a flashplayer update from an unofficial location
 author: Florian Roth
 date: 2017/10/25
+modified: 2020/11/28
 references:
     - https://gist.github.com/roycewilliams/a723aaf8a6ac3ba4f817847610935cfb
 logsource:
     category: proxy
 detection:
     selection:
-        c-uri-query:
-            - '*/install_flash_player.exe'
-            - '*/flash_install.php*'
+        - c-uri-query|contains: '/flash_install.php'
+        - c-uri-query|endswith: '/install_flash_player.exe'
     filter:
-        c-uri-stem: '*.adobe.com/*'
+        c-uri-stem|contains: '.adobe.com/'
     condition: selection and not filter
 falsepositives:
     - Unknown flash download locations

@@ -13,13 +13,14 @@ logsource:
     product: windows
 detection:
     rundll_image:
-        Image: '*\rundll32.exe'
+        Image|endswith: '\rundll32.exe'
     rundll_ofn:
         OriginalFileName: 'RUNDLL32.EXE'
     selection:
-        CommandLine:
-            - '*comsvcs*MiniDump*full*'
-            - '*comsvcs*MiniDumpW*full*'
+        CommandLine|contains|all:
+            - 'comsvcs'
+            - 'MiniDump' #Matches MiniDump and MinidumpW
+            - 'full'
     condition: (rundll_image or rundll_ofn) and selection
 fields:
     - CommandLine

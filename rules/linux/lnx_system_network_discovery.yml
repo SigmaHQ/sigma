@@ -1,0 +1,32 @@
+title: System Network Discovery - Linux
+id: e7bd1cfa-b446-4c88-8afb-403bcd79e3fa
+status: experimental
+description: Detects enumeration of local network configuration
+author: Ömer Günal and remotephone, oscd.community
+date: 2020/10/06
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1016/T1016.md
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection1:
+        Image|endswith:
+            - '/firewall-cmd'
+            - '/ufw'
+            - '/iptables'
+            - '/netstat'
+            - '/ss'
+            - '/ip'
+            - '/ifconfig'
+            - '/systemd-resolve'
+            - '/route'
+    selection2:
+        CommandLine|contains: '/etc/resolv.conf'
+    condition: selection1 or selection2
+falsepositives:
+    - Legitimate administration activities
+level: informational
+tags:
+    - attack.discovery
+    - attack.t1016
