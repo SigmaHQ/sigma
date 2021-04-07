@@ -1,4 +1,4 @@
-title: Suspicious WebDav Client Execution 
+title: Suspicious WebDav Client Execution
 id: 40f9af16-589d-4984-b78d-8c2aec023197
 description: A General detection for svchost.exe spawning rundll32.exe with command arguments like C:\windows\system32\davclnt.dll,DavSetCookie. This could be an indicator of exfiltration or use of WebDav to launch code (hosted on WebDav Server).
 status: experimental
@@ -15,7 +15,8 @@ logsource:
     product: windows
 detection:
     selection:
-        CommandLine|contains: 'rundll32.exe C:\windows\system32\davclnt.dll,DavSetCookie'
+        Image|endswith: '\rundll32.exe'
+        CommandLine|contains: 'C:\windows\system32\davclnt.dll,DavSetCookie'
     condition: selection
 falsepositives:
     - unknown

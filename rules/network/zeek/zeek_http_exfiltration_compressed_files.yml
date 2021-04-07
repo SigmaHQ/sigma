@@ -14,19 +14,17 @@ logsource:
     service: http
 detection:
     selection1:
-        uri:
-         - '*.7z'
-         - '*.zip'
-         - '*.rar'
-    selection2:
-        mime_types: '*compressed'
+        uri|endswith:
+         - '.7z'
+         - '.zip'
+         - '.rar'
+        mime_types|endswith: 'compressed'
     selection3:
-        filetype: '*compressed'
+        filetype|endswith: 'compressed'
     selection4:
-        http.bodyMagic: '*compressed'
-    selection5:
+        http.bodyMagic|endswith: 'compressed'
         http.method: PUT
-    condition: selection1 and selection2 and selection5 or selection3 and selection5 or selection4 and selection5
+    condition: selection1 or selection3 or selection4
 falsepositives:
-    - nothing observed so far
+    - Legitimate upload/download of archives
 level: medium
