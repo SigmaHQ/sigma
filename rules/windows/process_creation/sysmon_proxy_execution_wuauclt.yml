@@ -1,0 +1,24 @@
+title: Proxy Execution via Wuauclt
+id: c649a6c7-cd8c-4a78-9c04-000fc76df954
+description: Detects the use of the Windows Update Client binary (wuauclt.exe) to proxy execute code.
+status: experimental
+date: 2020/10/12
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+references:
+    - https://dtm.uk/wuauclt/
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_one:
+        - Image|contains: wuauclt
+        - OriginalFileName: wuauclt.exe
+    selection_two:
+        CommandLine|contains: '*wuauclt*UpdateDeploymentProvider*.dll*RunHandlerComServer'
+    condition: selection_one and selection_two
+falsepositives:
+    - Unknown
+level: critical
