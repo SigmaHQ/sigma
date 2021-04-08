@@ -25,7 +25,7 @@ from distutils.util import strtobool
 import sigma
 import yaml
 from sigma.parser.modifiers.type import SigmaRegularExpressionModifier, SigmaTypeModifier
-from sigma.parser.condition import ConditionOR, ConditionAND, NodeSubexpression
+from sigma.parser.condition import ConditionOR, ConditionAND, NodeSubexpression, SigmaAggregationParser
 
 from sigma.config.mapping import ConditionalFieldMapping
 from .base import BaseBackend, SingleTextQueryBackend
@@ -1220,6 +1220,8 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
         super().__init__(*args, **kwargs)
         self.tactics = self._load_mitre_file("tactics")
         self.techniques = self._load_mitre_file("techniques")
+        self.rule_type = "query"
+        self.rule_threshold = {}
 
     def _load_mitre_file(self, mitre_type):
         try:
@@ -1245,6 +1247,20 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
             configs.update({"translation": translation})
             rule = self.create_rule(configs, index)
             return rule
+
+    def generateAggregation(self, agg):
+        if agg.aggfunc == SigmaAggregationParser.AGGFUNC_COUNT:
+            if agg.cond_op not in [">", ">="]:
+                raise NotImplementedError("Threshold rules can only handle > and >= operators")
+            if agg.aggfield:
+                raise NotImplementedError("Threshold rules cannot COUNT(DISTINCT %s)" % agg.aggfield)
+            self.rule_type = "threshold"
+            self.rule_threshold = {
+                "field": agg.groupfield if agg.groupfield else [],
+                "value": int(agg.condition) if agg.cond_op == ">=" else int(agg.condition) + 1
+            }
+            return ""
+        raise NotImplementedError("Aggregation %s is not implemented for this backend" % agg.aggfunc_notrans)
 
     def create_threat_description(self, tactics_list, techniques_list):
         threat_list = list()
@@ -1351,10 +1367,12 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
             "severity": configs.get("level", "medium"),
             "tags": new_tags,
             "to": "now",
-            "type": "query",
+            "type": self.rule_type,
             "threat": threat,
             "version": 1
         }
+        if self.rule_type == "threshold":
+            rule.update({"threshold": self.rule_threshold})
         if references:
             rule.update({"references": references})
         return json.dumps(rule)
