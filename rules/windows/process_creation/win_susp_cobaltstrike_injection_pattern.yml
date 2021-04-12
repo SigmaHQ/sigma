@@ -1,0 +1,32 @@
+title: CobaltStrike Injection Pattern
+id: df4ab62b-fa8b-4d91-b7f4-ad71ff564854
+status: experimental
+description: Detects a specific command line combination used by CobaltStrike loaders generated with a random C2 profile generator published on Github
+references:
+    - https://github.com/threatexpress/random_c2_profile/
+    - https://twitter.com/YouDownWithTTPs/status/1380452012861624320
+author: 'Florian Roth, @YouDownWithTTPs'
+date: 2021/04/09
+tags:
+    - attack.defense_evasion
+    - attack.t1055.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|startswith: 'C:\Windows\System32\'
+        CommandLine|contains:
+            - '\sysnative\runonce.exe'
+            - '\sysnative\svchost.exe -k netsvc'
+            - '\sysnative\svchost.exe -k wksvc'
+            - '\sysnative\dmclient.exe'
+            - '\sysnative\locator.exe'
+            - '\sysnative\systray.exe' 
+            - '\sysnative\WUAUCLT.exe'
+            - '\sysnative\w32tm.exe'
+            - '\sysnative\dllhost.exe -o enable'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
