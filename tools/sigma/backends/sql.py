@@ -193,7 +193,7 @@ class SQLBackend(SingleTextQueryBackend):
         #False: no subexpression found, where a full text search is needed
 
         def _evaluateCondition(condition):
-            #Helper function to evaulate condtions
+            #Helper function to evaluate conditions
             if type(condition) not in  [ConditionAND, ConditionOR, ConditionNOT]:
                 raise NotImplementedError("Error in recursive Search logic")
 

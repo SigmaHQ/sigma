@@ -9,7 +9,7 @@ tags:
     - attack.t1574.002
     - attack.t1073  # an old one
     - attack.g0044
-author: Florian Roth
+author: Florian Roth, oscd.community
 date: 2020/07/30
 logsource:
     category: process_creation
@@ -19,10 +19,12 @@ detection:
         CommandLine|contains:
             - 'setup0.exe -p'
     selection2:
-        CommandLine|endswith:    
-            - 'setup.exe -x:0'
-            - 'setup.exe -x:1'
-            - 'setup.exe -x:2'
+        CommandLine|contains|all:    
+            - 'setup.exe'
+        CommandLine|endswith:
+            - '-x:0'
+            - '-x:1'
+            - '-x:2'
     condition: 1 of them
 falsepositives:
     - Legitimate setups that use similar flags

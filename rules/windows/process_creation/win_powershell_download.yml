@@ -2,7 +2,7 @@ title: PowerShell Download from URL
 id: 3b6ab547-8ec2-4991-b9d2-2b06702a48d7
 status: experimental
 description: Detects a Powershell process that contains download commands in its command line string
-author: Florian Roth
+author: Florian Roth, oscd.community, Jonhnathan Ribeiro
 date: 2019/01/16
 tags:
     - attack.t1086  # an old one
@@ -13,12 +13,14 @@ logsource:
     product: windows
 detection:
     selection:
-        Image: '*\powershell.exe'
-        CommandLine:
-            - '*new-object system.net.webclient).downloadstring(*'
-            - '*new-object system.net.webclient).downloadfile(*'
-            - '*new-object net.webclient).downloadstring(*'
-            - '*new-object net.webclient).downloadfile(*'
+        Image|endswith: '\powershell.exe'
+        CommandLine|contains|all:
+            - 'new-object'
+            - 'net.webclient).'
+            - 'download'
+        CommandLine|contains:
+            - 'string('
+            - 'file('
     condition: selection
 fields:
     - CommandLine

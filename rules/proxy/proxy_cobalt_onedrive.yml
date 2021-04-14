@@ -4,7 +4,7 @@ status: experimental
 description: Detects Malleable OneDrive Profile
 author: Markus Neis
 date: 2019/11/12
-modified: 2020/09/02
+modified: 2020/11/28
 references:
     - https://github.com/rsmudge/Malleable-C2-Profiles/blob/master/normal/onedrive_getonly.profile
 logsource:
@@ -12,10 +12,11 @@ logsource:
 detection:
     selection:
       cs-method: 'GET'
-      c-uri: '*?manifest=wac'
+      c-uri|endswith: '?manifest=wac'
       cs-host: 'onedrive.live.com'
     filter:
-      c-uri: 'http*://onedrive.live.com/*'
+      c-uri|startswith: 'http'
+      c-uri|contains: '://onedrive.live.com/'
     condition: selection and not filter
 falsepositives:
     - Unknown
