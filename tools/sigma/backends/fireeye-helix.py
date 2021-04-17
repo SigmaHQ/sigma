@@ -125,14 +125,14 @@ class FireEyeHelixBackend(SingleTextQueryBackend):
 
     def generateNULLValueNode(self, node):
         # Don't generate null value nodes for fields we don't map
-        if node.item is "rawmsg":
+        if node.item == "rawmsg":
             return None
         else:
             return self.notNullExpression % (node.item)
 
     def generateNotNULLValueNode(self, node):
         # Don't generate not null value nodes for fields we don't map
-        if node.item is "rawmsg":
+        if node.item == "rawmsg":
             return None
         else:
             return self.nullExpression % (node.item)
