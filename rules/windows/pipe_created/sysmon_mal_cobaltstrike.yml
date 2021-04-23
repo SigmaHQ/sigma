@@ -1,0 +1,29 @@
+title: CobaltStrike Named Pipe
+id: d5601f8c-b26f-4ab0-9035-69e11a8d4ad2
+status: experimental
+description: Detects the creation of a named pipe as used by CobaltStrike
+references:
+    - https://twitter.com/d4rksystem/status/1357010969264873472
+    - https://labs.f-secure.com/blog/detecting-cobalt-strike-default-modules-via-named-pipe-analysis/
+    - https://github.com/Neo23x0/sigma/issues/253
+date: 2021/04/23
+author: Florian Roth
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1055
+logsource:
+   product: windows
+   category: pipe_created
+   definition: 'Note that you have to configure logging for Named Pipe Events in Sysmon config (Event ID 17)'
+detection:
+   selection_start:
+      PipeName|startswith: '\MSSE-' 
+   selection_end:
+      PipeName|endswith: '-server'
+   selection_others:
+      PipeName|startswith: '\msagent_'
+   condition: selection_start and selection_end
+falsepositives:
+   - Unknown
+level: critical
