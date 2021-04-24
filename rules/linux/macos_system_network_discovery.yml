@@ -1,0 +1,32 @@
+title: System Network Discovery - macOS
+id: 58800443-f9fc-4d55-ae0c-98a3966dfb97
+status: experimental
+description: Detects enumeration of local network configuration
+author: remotephone, oscd.community
+date: 2020/10/06
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1016/T1016.md
+logsource:
+    product: macos
+    category: process_creation
+detection:
+    selection1:
+        Image:
+            - '/usr/sbin/netstat'
+            - '/sbin/ifconfig'
+            - '/usr/sbin/ipconfig'
+            - '/usr/libexec/ApplicationFirewall/socketfilterfw'
+            - '/usr/sbin/networksetup'
+            - '/usr/sbin/arp'
+    selection2:
+        Image: '/usr/bin/defaults'
+        Commandline|contains|all:
+            - 'read'
+            - '/Library/Preferences/com.apple.alf'
+    condition: selection1 or selection2
+falsepositives:
+    - Legitimate administration activities
+level: informational
+tags:
+    - attack.discovery
+    - attack.t1016

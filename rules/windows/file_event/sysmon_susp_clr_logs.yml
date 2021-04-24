@@ -1,0 +1,29 @@
+title: Suspcious CLR Logs Creation
+id: e4b63079-6198-405c-abd7-3fe8b0ce3263
+description: Detects suspicious .NET assembly executions 
+references:
+    - https://blog.menasec.net/2019/07/interesting-difr-traces-of-net-clr.html
+date: 2020/10/12
+tags:
+    - attack.execution
+    - attack.t1059.001
+status: experimental
+author: omkar72, oscd.community
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|contains|all:
+          - '\AppData\Local\Microsoft\CLR'
+          - '\UsageLogs\'
+        TargetFilename|contains:
+          - 'mshta'
+          - 'cscript'
+          - 'wscript'
+          - 'regsvr32'
+          - 'wmic'
+    condition: selection
+falsepositives:
+  - Unknown
+level: high

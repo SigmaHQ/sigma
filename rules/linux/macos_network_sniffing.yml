@@ -1,0 +1,24 @@
+title: Network Sniffing
+id: adc9bcc4-c39c-4f6b-a711-1884017bf043
+status: experimental
+description: Detects the usage of tooling to sniff network traffic. An adversary may place a network interface into promiscuous mode to passively access data in transit over the network, or use span ports to capture a larger amount of data.
+author: Alejandro Ortuno, oscd.community
+date: 2020/10/14
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1040/T1040.md
+logsource:
+  category: process_creation
+  product: macos
+detection:
+  selection:
+    Image|endswith:
+      - '/tcpdump'
+      - '/tshark'
+  condition: selection
+falsepositives:
+  - Legitimate administration activities
+level: informational
+tags:
+  - attack.discovery
+  - attack.credential_access
+  - attack.t1040

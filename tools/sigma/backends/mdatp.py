@@ -19,8 +19,6 @@ from functools import wraps
 from .base import SingleTextQueryBackend
 from .exceptions import NotSupportedError
 from ..parser.modifiers.base import SigmaTypeModifier
-from ..parser.modifiers.transform import SigmaContainsModifier, SigmaStartswithModifier, SigmaEndswithModifier
-from ..parser.modifiers.type import SigmaRegularExpressionModifier
 
 
 def wrapper(method):
@@ -42,10 +40,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
     active = True
     config_required = False
 
-    # \   -> \\
-    # \*  -> \*
-    # \\* -> \\*
-    reEscape = re.compile('("|(?<!\\\\)\\\\(?![*?\\\\]))')
+    reEscape = re.compile('(?:\\\\)?(")')
     reClear = None
     andToken = " and "
     orToken = " or "
@@ -59,7 +54,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
     mapExpression = "%s == %s"
     mapListsSpecialHandling = True
     mapListValueExpression = "%s in %s"
-    
+
     skip_fields = {
         "Description",
         "_exists_",
@@ -91,9 +86,9 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
                 "ParentName": ("InitiatingProcessFileName", self.default_value_mapping),
                 "ParentProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
-                "ParentImage": ("InitiatingProcessFolderPath", self.default_value_mapping),                
+                "ParentImage": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "SourceImage": ("InitiatingProcessFolderPath", self.default_value_mapping),
-                "TargetImage": ("FolderPath", self.default_value_mapping),                
+                "TargetImage": ("FolderPath", self.default_value_mapping),
                 "User": (self.decompose_user, ),
             },
             "DeviceEvents": {
@@ -101,28 +96,29 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "CommandLine": ("ProcessCommandLine", self.default_value_mapping),
                 "DestinationHostname":  ("RemoteUrl", self.default_value_mapping),
                 "DestinationIp": ("RemoteIP", self.default_value_mapping),
-                "DestinationPort": ("RemotePort", self.default_value_mapping),
+                "DestinationPort": ("RemotePort", self.porttype_mapping),
                 "EventType": ("ActionType", self.default_value_mapping),
                 "FileName": (self.id_mapping, self.default_value_mapping),
                 "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
                 "ParentProcessName": ("InitiatingProcessParentFileName", self.default_value_mapping),
-                "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),  
+                "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
                 "SourceIp": ("LocalIP", self.default_value_mapping),
-                "SourcePort": ("LocalPort", self.default_value_mapping),
+                "SourcePort": ("LocalPort", self.porttype_mapping),
                 "TargetFilename": ("FolderPath", self.default_value_mapping),
                 "TargetObject": ("RegistryKey", self.default_value_mapping),
-                "TargetImage": ("FolderPath", self.default_value_mapping),                
+                "TargetImage": ("FolderPath", self.default_value_mapping),
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "User":  (self.decompose_user, ),
             },
-            "DeviceRegistryEvents": {                
+            "DeviceRegistryEvents": {
                 "DataType": ("RegistryValueType", self.default_value_mapping),
                 "Details": ("RegistryValueData", self.default_value_mapping),
                 "EventType": ("ActionType", self.default_value_mapping),
-                "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),                
+                "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
+                "CommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
                 "ObjectValueName": ("RegistryValueName", self.default_value_mapping),
                 "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
-                "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),                
+                "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
                 "ParentName": ("InitiatingProcessParentFileName", self.default_value_mapping),
                 "ParentProcessName": ("InitiatingProcessParentFileName", self.default_value_mapping),
                 "TargetObject": ("RegistryKey", self.default_value_mapping),
@@ -132,34 +128,36 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "FileName": (self.id_mapping, self.default_value_mapping),
                 "OriginIp": ("FileOriginIp", self.default_value_mapping),
                 "OriginReferrer": ("FileOriginReferrerUrl", self.default_value_mapping),
-                "OriginUrl": ("FileOriginUrl", self.default_value_mapping),                
+                "OriginUrl": ("FileOriginUrl", self.default_value_mapping),
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
-                "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),                  
-                "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),                
+                "CommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
+                "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
+                "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
                 "ParentName": ("InitiatingProcessParentFileName", self.default_value_mapping),
                 "ParentProcessName": ("InitiatingProcessParentFileName", self.default_value_mapping),
-                "TargetFilename": ("FolderPath", self.default_value_mapping),              
+                "TargetFilename": ("FolderPath", self.default_value_mapping),
                 "User":  (self.decompose_user, ),
             },
-            "DeviceNetworkEvents": {                
+            "DeviceNetworkEvents": {
                 "DestinationHostname": ("RemoteUrl", self.default_value_mapping),
                 "DestinationIp": ("RemoteIP", self.default_value_mapping),
                 "DestinationIsIpv6": ("RemoteIP has \":\"", ),
-                "DestinationPort": ("RemotePort", self.default_value_mapping),
+                "DestinationPort": ("RemotePort", self.porttype_mapping),
                 "DeviceName": (self.id_mapping, self.default_value_mapping),
                 "EventType": ("ActionType", self.default_value_mapping),
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
+                "CommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
                 "Initiated": ("RemotePort", self.default_value_mapping),
                 "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
-                "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),           
+                "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
                 "Protocol": ("RemoteProtocol", self.default_value_mapping),
                 "SourceIp": ("LocalIP", self.default_value_mapping),
-                "SourcePort": ("LocalPort", self.default_value_mapping),                
+                "SourcePort": ("LocalPort", self.porttype_mapping),
                 "User":  (self.decompose_user, ),
             },
             "DeviceImageLoadEvents": {
                 "DeviceName": (self.id_mapping, self.default_value_mapping),
-                "EventType": ("ActionType", self.default_value_mapping),               
+                "EventType": ("ActionType", self.default_value_mapping),
                 "FileName": (self.id_mapping, self.default_value_mapping),
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "ImageLoaded": ("FolderPath", self.default_value_mapping),
@@ -197,12 +195,14 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
     def default_value_mapping(self, val):
         op = "=~"
         if type(val) == str:
-            if "*" in val[1:-1]:     # value contains * inside string - use regex match
+            if "*" in val[1:-1]:
+                # value contains * inside string - use regex match
                 op = "matches regex"
                 val = re.sub('([".^$]|\\\\(?![*?]))', '\\\\\g<1>', val)
                 val = re.sub('\\*', '.*', val)
                 val = re.sub('\\?', '.', val)
-            else:                           # value possibly only starts and/or ends with *, use prefix/postfix match
+            else:
+                # value possibly only starts and/or ends with *, use prefix/postfix match
                 if val.endswith("*") and val.startswith("*"):
                     op = "contains"
                     val = self.cleanValue(val[1:-1])
@@ -214,6 +214,9 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                     val = self.cleanValue(val[1:])
 
         return "%s \"%s\"" % (op, val)
+
+    def porttype_mapping(self, val):
+        return "%s \"%s\"" % ("==", val)
 
     def logontype_mapping(self, src):
         """Value mapping for logon events to reduced ATP LogonType set"""
@@ -299,6 +302,10 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
             return "%s" % generated
         return generated
 
+    def cleanValue(self, val):
+        if self.reEscape:
+            val = self.reEscape.sub(self.escapeSubst, val)
+        return val
 
     def mapEventId(self, event_id):
         if self.product == "windows":

@@ -1,0 +1,47 @@
+action: global
+title: Linux Network Service Scanning
+id: 3e102cd9-a70d-4a7a-9508-403963092f31
+status: experimental
+description: Detects enumeration of local or remote network services.
+author: Alejandro Ortuno, oscd.community
+date: 2020/10/21
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1046/T1046.md
+falsepositives:
+  - Legitimate administration activities
+level: low
+tags:
+  - attack.discovery
+  - attack.t1046
+---
+logsource:
+  category: process_creation
+  product: linux
+  definition: 'Detect netcat and filter our listening mode'
+detection:
+  netcat:
+    Image|endswith:
+      - '/nc'
+      - '/netcat'
+  network_scanning_tools:
+    Image|endswith:
+      - '/telnet' # could be wget, curl, ssh, many things. basically everything that is able to do network connection. consider fine tuning
+      - '/nmap'
+  netcat_listen_flag:
+    CommandLine|contains: 'l'
+  condition: (netcat and not netcat_listen_flag) or network_scanning_tools
+---
+logsource:
+  product: linux
+  service: auditd
+  definition: 'Configure these rules https://github.com/Neo23x0/auditd/blob/master/audit.rules#L182-L183'
+detection:
+  selection:
+    type: 'SYSCALL'
+    exe|endswith:
+      - '/telnet'
+      - '/nmap'
+      - '/netcat'
+      - '/nc'
+    key: 'network_connect_4'
+  condition: selection

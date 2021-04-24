@@ -9,7 +9,7 @@ references:
     - https://eqllib.readthedocs.io/en/latest/analytics/9b3dd402-891c-4c4d-a662-28947168ce61.html
 author: Michael Haag, Mark Woan (improvements), James Pemberton / @4A616D6573 / oscd.community (improvements)
 date: 2019/01/16
-modified: 2020/08/30
+modified: 2020/11/28
 tags:
     - attack.discovery
     - attack.t1049
@@ -29,19 +29,18 @@ logsource:
     product: windows
 detection:
     selection:
-        Image:
-            - '*\net.exe'
-            - '*\net1.exe'
+        Image|endswith:
+            - '\net.exe'
+            - '\net1.exe'
     cmdline:
-        CommandLine:
-            - '* group*'
-            - '* localgroup*'
-            - '* user*'
-            - '* view*'
-            - '* share'
-            - '* accounts*'
-            - '* use*'
-            - '* stop *'
+        CommandLine|contains:
+            - ' group'
+            - ' localgroup'
+            - ' user'
+            - ' view'
+            - ' share'
+            - ' accounts'
+            - ' stop '
     condition: selection and cmdline
 fields:
     - ComputerName

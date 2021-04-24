@@ -13,7 +13,7 @@ tags:
     - attack.t1086  #an old one
 author: David Ledbetter (shellcode), Florian Roth (rule)
 date: 2018/11/17
-modified: 2020/08/24
+modified: 2020/12/01
 logsource:
     product: windows
     service: powershell
@@ -21,12 +21,12 @@ logsource:
 detection:
     selection:
         EventID: 4104
-    keyword1:
-        - '*AAAAYInlM*'
-    keyword2:
-        - '*OiCAAAAYInlM*'
-        - '*OiJAAAAYInlM*'
-    condition: selection and keyword1 and keyword2
+        ScriptBlockText|contains: 'AAAAYInlM'
+    selection2:
+        ScriptBlockText|contains:
+            - 'OiCAAAAYInlM'
+            - 'OiJAAAAYInlM'
+    condition: selection and selection2
 falsepositives:
     - Unknown
 level: critical
