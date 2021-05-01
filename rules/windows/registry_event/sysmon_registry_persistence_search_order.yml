@@ -4,9 +4,9 @@ status: experimental
 description: Detects potential COM object hijacking leveraging the COM Search Order
 references:
     - https://www.cyberbit.com/blog/endpoint-security/com-hijacking-windows-overlooked-security-vulnerability/
-author: Maxime Thiebaut (@0xThiebaut), oscd.community
+author: Maxime Thiebaut (@0xThiebaut), oscd.community, Cédric Hien
 date: 2020/04/14
-modified: 2020/11/28
+modified: 2021/05/01
 tags:
     - attack.persistence
     - attack.t1038 # an old one
@@ -20,20 +20,31 @@ detection:
             - 'HKU\'
             - '_Classes\CLSID\'
             - '\InProcServer32\(Default)'
-    filter:
+    filter1:
         - Details|contains: # Exclude privileged directories and observed FPs
             - '%%systemroot%%\system32\'
             - '%%systemroot%%\SysWow64\'
+    filter2:
         - Details|contains|all:
             - '\AppData\Local\Microsoft\OneDrive\'
             - '\FileCoAuthLib64.dll'
+    filter3:
         - Details|contains|all:
             - '\AppData\Local\Microsoft\OneDrive\'
             - '\FileSyncShell64.dll'
+    filter4:
+        - Details|contains|all:
+            - '\AppData\Local\Microsoft\OneDrive\'
+            - '\FileSyncApi64.dll'
+    filter5:
         - Details|contains|all:
             - '\AppData\Local\Microsoft\TeamsMeetingAddin\'
             - '\Microsoft.Teams.AddinLoader.dll'
-    condition: selection and not filter
+    filter6:
+         - Details|contains|all:
+             - '\AppData\Roaming\Dropbox\'
+             - '\DropboxExt64.*.dll'
+    condition: selection and not ( filter1 or filter2 or filter3 or filter4 or filter5 or filter6 )
 falsepositives:
     - Some installed utilities (i.e. OneDrive) may serve new COM objects at user-level
 level: medium
