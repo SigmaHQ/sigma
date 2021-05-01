@@ -24,27 +24,22 @@ detection:
         - Details|contains: # Exclude privileged directories and observed FPs
             - '%%systemroot%%\system32\'
             - '%%systemroot%%\SysWow64\'
-    filter2:
-        - Details|contains|all:
-            - '\AppData\Local\Microsoft\OneDrive\'
+    filterOneDrive:
+        - Details|contains: '\AppData\Local\Microsoft\OneDrive\'
+    filterOneDrive2:
+        - Details|contains:
             - '\FileCoAuthLib64.dll'
-    filter3:
-        - Details|contains|all:
-            - '\AppData\Local\Microsoft\OneDrive\'
             - '\FileSyncShell64.dll'
-    filter4:
-        - Details|contains|all:
-            - '\AppData\Local\Microsoft\OneDrive\'
             - '\FileSyncApi64.dll'
-    filter5:
+    filter2:
         - Details|contains|all:
             - '\AppData\Local\Microsoft\TeamsMeetingAddin\'
             - '\Microsoft.Teams.AddinLoader.dll'
-    filter6:
+    filter3:
          - Details|contains|all:
              - '\AppData\Roaming\Dropbox\'
              - '\DropboxExt64.*.dll'
-    condition: selection and not ( filter1 or filter2 or filter3 or filter4 or filter5 or filter6 )
+    condition: selection and not ( filter1 or ( filterOneDrive and filterOneDrive2 ) or filter2 or filter3 )
 falsepositives:
     - Some installed utilities (i.e. OneDrive) may serve new COM objects at user-level
 level: medium
