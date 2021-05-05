@@ -29,7 +29,7 @@ class PowerShellBackend(SingleTextQueryBackend):
         ("csv", False, "Return the results in CSV format instead of Powershell objects", None),
     )
 
-    reEscape = re.compile('("|(?<!\\\\)\\\\(?![*?\\\\])|\+|\$)')
+    reEscape = re.compile('("|(?<!\\\\)\\\\(?![*?\\\\])|\+)')
     reClear = None
     andToken = " -and "
     orToken = " -or "
