@@ -5,8 +5,8 @@ description: Detects the load of dbghelp/dbgcore DLL (used to make memory dumps)
     API found in dbghelp.dll or dbgcore.dll. As an example, SilentTrynity C2 Framework has a module that leverages this API to dump the contents of Lsass.exe and
     transfer it over the network back to the attacker's machine.
 date: 2019/10/27
-modified: 2020/08/23
-author: Perez Diego (@darkquassar), oscd.community, Ecco
+modified: 2021/03/19
+author: Perez Diego (@darkquassar), oscd.community, Ecco, Anton Gura (@satandyh)
 references:
     - https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/nf-minidumpapiset-minidumpwritedump
     - https://www.pinvoke.net/default.aspx/dbghelp/MiniDumpWriteDump.html
@@ -20,9 +20,6 @@ logsource:
     product: windows
 detection:
     signedprocess:
-        ImageLoaded|endswith:
-            - '\dbghelp.dll'
-            - '\dbgcore.dll'
         Image|endswith: 
             - '\msbuild.exe'
             - '\cmd.exe'
@@ -47,13 +44,14 @@ detection:
             - '\sc.exe'
             - '\scriptrunner.exe'
     unsignedprocess:
-        ImageLoaded|endswith:
-            - '\dbghelp.dll'
-            - '\dbgcore.dll'
         Signed: "FALSE"
     filter:
         Image|contains: 'Visual Studio'
-    condition: (signedprocess AND NOT filter) OR (unsignedprocess AND NOT filter)
+    dbgdll:
+        ImageLoaded|endswith:
+            - '\dbghelp.dll'
+            - '\dbgcore.dll'
+    condition: NOT filter AND dbgdll AND (signedprocess OR unsignedprocess)
 fields:
     - ComputerName
     - User
