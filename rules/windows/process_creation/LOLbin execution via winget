@@ -1,0 +1,23 @@
+Reference: https://docs.microsoft.com/en-us/windows/package-manager/winget/install#local-install
+author: Sreeman
+description: Adversaries can abuse winget to download payloads remotely and execute them without touching disk. Winget will be included by default in Windows 10 and is already available in Windows 10 insider programs. The manifest option enables you to install an application by passing in a YAML file directly to the client. Winget can be used to download and install exe's, msi, msix files.
+  later.
+detection:
+  condition: selection
+  selection:
+    CommandLine|contains:
+    - '.*(?i)winget install (--m|-m).*'
+falsepositives:
+- Admin activity installing packages not in the official Microsoft repo. Winget probably wont be used by most users.
+fields:
+- CommandLine
+level: medium
+logsource:
+  category: process_creation
+  product: windows
+status: experimental
+title: Monitoring winget for LOLbin execution
+tags:
+- attack.defense evasion
+- attack.execution
+- attack.t1059

@@ -1,0 +1,26 @@
+Reference: https://dtm.uk/wuauclt/
+author: Sreeman
+description: Adversaries can abuse wuauclt.exe (Windows Update client) to run code execution by specifying an arbitrary DLL.
+detection:
+  condition: selection and not filter
+  selection:
+    CommandLine|re:
+    - '(?i)wuauclt\.exe.*\/UpdateDeploymentProvider.*\/Runhandlercomserver'
+  filter:
+    CommandLine|contains:
+    - 'wuaueng.dll'
+    - 'UpdateDeploymentProvider.dll /ClassId'
+falsepositives:
+- Wuaueng.dll which is a module belonging to Microsoft Wnidows Update.
+fields:
+- CommandLine
+level: medium
+logsource:
+  category: process_creation
+  product: windows
+status: experimental
+title: Monitoring wuauclt.exe for lolbas execution of DLL's
+tags:
+- attack.defense evasion
+- attack.execution
+- attack.t1085
