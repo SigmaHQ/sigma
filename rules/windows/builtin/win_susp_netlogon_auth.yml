@@ -1,0 +1,32 @@
+title: Insecure NetLogon Authentication
+id: aef9a8d3-ba73-4996-9656-902242e12600
+status: experimental
+description:
+    Detects legacy NetLogon authentication *on unpatched systems* where Secure RPC is disabled - possibly a Zerologon (CVE-2020-1472) attempt.
+    On patched systems (August 2020), use the new event IDs 5827-5831 in the System event log instead.
+references:
+    - https://www.secura.com/blog/zero-logon
+    - https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-nrpc/5805bc9f-e4c9-4c8a-b191-3c3a7de7eeed
+    - https://github.com/jdu2600/Windows10EtwEvents/blob/master/mof/Active_Directory-_NetLogon.tsv
+    - https://support.microsoft.com/en-au/help/4557222/how-to-manage-the-changes-in-netlogon-secure-channel-connections-assoc
+author: John U (@jdu2600)
+date: 2020/09/20
+tags:
+    - attack.lateral_movement
+    - attack.t1210
+logsource:
+    product: windows
+    service: netlogon
+    definition:
+        Requires ETW events from the legacy 'Active Directory: NetLogon' provider {f33959b4-dbec-11d2-895b-00c04f79ab69}
+detection:
+    selection:
+        Source: 'Active Directory: NetLogon'
+        Opcode:
+            - 1  # NlServerAuth_Start
+            - 2  # NlServerAuth_End - also contains Status field indicating success/failure
+        NegotiatedFlags&0x40000000: 0  # 0x40000000 - Secure RPC is enabled
+    condition: selection
+falsepositives:
+    - Legacy NetLogon clients that don't support Secure RPC
+level: critical
