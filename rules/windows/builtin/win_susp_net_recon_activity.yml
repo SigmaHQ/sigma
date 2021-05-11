@@ -13,15 +13,17 @@ logsource:
     definition: The volume of Event ID 4661 is high on Domain Controllers and therefore "Audit SAM" and "Audit Kernel Object" advanced audit policy settings are not configured in the recommendations for server systems
 detection:
     selection:
-        - EventID: 4661
-          ObjectType: 'SAM_USER'
-          ObjectName: 'S-1-5-21-*-500'
+          EventID: 4661
+          ObjectType:
+            - 'SAM_USER'
+            - 'SAM_GROUP'
+          ObjectName|startswith: 'S-1-5-21-'
           AccessMask: '0x2d'
-        - EventID: 4661
-          ObjectType: 'SAM_GROUP'
-          ObjectName: 'S-1-5-21-*-512'
-          AccessMask: '0x2d'
-    condition: selection
+    selection2:
+          ObjectName|endswith: 
+            - '-500'
+            - '-512'
+    condition: selection and selection2
 falsepositives:
     - Administrator activity
     - Penetration tests

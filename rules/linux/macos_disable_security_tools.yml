@@ -1,0 +1,42 @@
+title: Disable Security Tools
+id: ff39f1a6-84ac-476f-a1af-37fcdf53d7c0
+status: experimental
+description: Detects disabling security tools
+author: Daniil Yugoslavskiy, oscd.community
+date: 2020/10/19
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1562.001/T1562.001.md
+logsource:
+  category: process_creation
+  product: macos
+detection:
+  launchctl_unload:
+    Image: '/bin/launchctl'
+    CommandLine|contains: 'unload'
+  security_plists:
+    CommandLine|contains:
+      - 'com.objective-see.lulu.plist'                     # Objective-See firewall management utility
+      - 'com.objective-see.blockblock.plist'               # Objective-See persistence locations watcher/blocker
+      - 'com.google.santad.plist'                          # google santa
+      - 'com.carbonblack.defense.daemon.plist'             # carbon black
+      - 'com.carbonblack.daemon.plist'                     # carbon black
+      - 'at.obdev.littlesnitchd.plist'                     # Objective Development Software firewall management utility
+      - 'com.tenablesecurity.nessusagent.plist'            # Tenable Nessus
+      - 'com.opendns.osx.RoamingClientConfigUpdater.plist' # OpenDNS Umbrella
+      - 'com.crowdstrike.falcond.plist'                    # Crowdstrike Falcon
+      - 'com.crowdstrike.userdaemon.plist'                 # Crowdstrike Falcon
+      - 'osquery'                                          # facebook osquery
+      - 'filebeat'                                         # elastic log file shipper
+      - 'auditbeat'                                        # elastic auditing agent/log shipper
+      - 'packetbeat'                                       # elastic network logger/shipper
+      - 'td-agent'                                         # fluentd log shipper
+  disable_gatekeeper:
+    Image: '/usr/sbin/spctl'
+    CommandLine|contains: 'disable'
+  condition: (launchctl_unload and security_plists) or disable_gatekeeper
+falsepositives:
+  - Legitimate activities
+level: medium
+tags:
+  - attack.defense_evasion
+  - attack.t1562.001

@@ -1,4 +1,4 @@
-title: Conversion of generic process_creation rules into Security/4688
+title: Conversion for Windows Native Auditing Events
 order: 10
 logsources:
     process_creation:
@@ -9,6 +9,18 @@ logsources:
         rewrite:
             product: windows
             service: security
+    registry_event:
+        category: registry_event
+        product: windows
+        conditions:
+            EventID: 4657
+            OperationType:
+                - 'New registry value created'
+                - 'Existing registry value modified'
+        rewrite:
+            product: windows
+            service: security
 fieldmappings:
     Image: NewProcessName
     ParentImage: ParentProcessName
+    Details: NewValue

@@ -249,7 +249,6 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules using sysmon events but with no EventID specified")
 
-
     def test_missing_date(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
@@ -261,25 +260,36 @@ class TestRules(unittest.TestCase):
                 print(Fore.YELLOW + "Rule {} has a malformed 'date' (not 10 chars, should be YYYY/MM/DD).".format(file))
                 faulty_rules.append(file)                
 
-        self.assertEqual(faulty_rules, [], Fore.RED + 
+        self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with missing or malformed 'date' fields. (create one, e.g. date: 2019/01/14)")
 
     def test_references(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             references = self.get_rule_part(file_path=file, part_name="references")
-            # Reference field doesn't exist      
-            #if not references:
-                #print(Fore.YELLOW + "Rule {} has no field 'references'.".format(file))
-                #faulty_rules.append(file)
+            # Reference field doesn't exist
+            # if not references:
+                # print(Fore.YELLOW + "Rule {} has no field 'references'.".format(file))
+                # faulty_rules.append(file)
             if references:
                 # it exists but isn't a list
                 if not isinstance(references, list):
                     print(Fore.YELLOW + "Rule {} has a references field that isn't a list.".format(file))
-                    faulty_rules.append(file)     
+                    faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules with malformed 'references' fields. (has to be a list of values even if it contains only a single value)")
+
+    def test_references_plural(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            reference = self.get_rule_part(file_path=file, part_name="reference")
+            if reference:
+                # it exists but in singular form
+                faulty_rules.append(file)
+
+        self.assertEqual(faulty_rules, [], Fore.RED +
+                         "There are rules with malformed 'references' fields. (has to be 'references' in plural form, not singular)")
 
     def test_file_names(self):
         faulty_rules = []
@@ -349,9 +359,9 @@ class TestRules(unittest.TestCase):
                     print(Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
 def get_mitre_data():
     """
-    Generate tags from live MITRE ATT&CK TAXI service to get up-to-date data
+    Generate tags from live MITRE ATT&CK® TAXI service to get up-to-date data
     """
-    # Get MITRE ATT&CK information
+    # Get ATT&CK information
     lift = attack_client()
     # Techniques
     MITRE_TECHNIQUES = []
@@ -394,7 +404,7 @@ def get_mitre_data():
 
 if __name__ == "__main__":
     init(autoreset=True)
-    # Get Current Data from MITRE on ATT&CK
+    # Get Current Data from MITRE ATT&CK®
     MITRE_ALL = get_mitre_data()
     # Run the tests
     unittest.main()

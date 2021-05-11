@@ -1,0 +1,27 @@
+title: WebDav Put Request
+id: 705072a5-bb6f-4ced-95b6-ecfa6602090b
+status: experimental
+description: A General detection for WebDav user-agent being used to PUT files on a WebDav network share. This could be an indicator of exfiltration.
+date: 2020/05/02
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+tags:
+    - attack.exfiltration
+    - attack.t1048.003
+references:
+    - https://github.com/OTRF/detection-hackathon-apt29/issues/17
+logsource:
+    product: zeek
+    service: http
+detection:
+    selection:
+        user_agent|contains: 'WebDAV'
+        method: 'PUT'
+    filter:
+        id_resp_h:
+        - 192.168.0.0/16
+        - 172.16.0.0/12
+        - 10.0.0.0/8
+    condition: selection and not filter
+falsepositives:
+    - unknown
+level: low

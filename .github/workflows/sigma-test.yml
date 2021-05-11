@@ -8,7 +8,7 @@ on:
     branches:
       - "*"
   pull_request:
-    branches: [ master ]
+    branches: [ master, oscd ]
 
 jobs:
   test-sigma:
@@ -22,19 +22,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r tools/requirements.txt -r tools/requirements-devel.txt
-        wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
-        sudo apt install -y apt-transport-https
-        echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic.list
-        sudo apt update
-        sudo apt install -y elasticsearch
-        sudo systemctl start elasticsearch
+        pip install pipenv
+        pipenv lock
+        pipenv install --dev --deploy
     - name: Test Sigma Tools and Rules
       run: |
-        make test
-    - name: Test Generated Elasticsearch Query Strings
-      run: |
-        make test-backend-es-qs
+        pipenv run make test
     - name: Test SQL(ite) Backend
       run: |
-        make test-backend-sql
+        pipenv run make test-backend-sql

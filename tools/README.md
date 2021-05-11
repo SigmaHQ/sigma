@@ -74,7 +74,7 @@ A configuration should contain the following attributes:
 
 Field mappings in the *fieldmappings* section map between Sigma field names and field names used in target SIEM systems. There are three types of field mappings:
 
-* Simple: the source field name corresponds to exactly one target field name given as string. Exmaple: `EventID: EventCode` for translation of Windows event identifiers between Sigma and Splunk.
+* Simple: the source field name corresponds to exactly one target field name given as string. Example: `EventID: EventCode` for translation of Windows event identifiers between Sigma and Splunk.
 * Multiple: a source field corresponds to a list of target fields. Sigmac generates an OR condition that covers all field names. This can be useful in configuration change and migration scenarios, when field names change. A further use case is when the SIEM normalizes one source field name into different target field names and the exact rules are unknown.
 * Conditional: a source field is translated to one or multiple target field names depending on values from other fields in specific rules. This is useful in scenarios where the SIEM maps the same Sigma field to different target field names depending on the event or log type, like Logpoint.
 

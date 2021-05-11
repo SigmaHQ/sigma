@@ -6,11 +6,11 @@ status: experimental
 description: Detects well-known credential dumping tools execution via service execution events
 author: Florian Roth, Teymur Kheirkhabarov, Daniil Yugoslavskiy, oscd.community
 date: 2017/03/05
-modified: 2020/08/23
+modified: 2021/03/18
 references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
 detection:
-    selection_1:
+    selection:
         - ServiceName|contains:
             - 'fgexec'
             - 'wceservice'
@@ -28,8 +28,7 @@ detection:
             - 'gsecdump'
             - 'servpw'
             - 'pwdump'
-        - ImagePath|re: '((\\\\.*\\.*|.*\\)([{]?[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}[}])?\.(exe|scr|cpl|bat|js|cmd|vbs).*)'
-    condition: selection and selection_1
+    condition: selection
 falsepositives:
     - Legitimate Administrator using credential dumping tool for password recovery
 level: high
@@ -55,10 +54,7 @@ detection:
 ---
 logsource:
     product: windows
-    service: sysmon
-detection:
-    selection:
-        EventID: 6
+    category: driver_load
 ---
 logsource:
     product: windows

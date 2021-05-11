@@ -11,24 +11,26 @@ tags:
     - attack.t1204.002
     - FIN7
     - car.2013-05-002
-author: Jason Lynch 
+author: Jason Lynch
 date: 2019/04/02
-modified: 2020/09/01
+modified: 2021/04/01
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
-        ParentImage:
-            - '*\WINWORD.EXE'
-            - '*\EXCEL.EXE'
-            - '*\POWERPNT.exe'
-            - '*\MSPUB.exe'
-            - '*\VISIO.exe'
-            - '*\OUTLOOK.EXE'
-        Image:
-            - 'C:\users\\*.exe'
-    condition: selection
+        ParentImage|endswith:
+            - '\WINWORD.EXE'
+            - '\EXCEL.EXE'
+            - '\POWERPNT.exe'
+            - '\MSPUB.exe'
+            - '\VISIO.exe'
+            # - '\OUTLOOK.EXE' too many FPs
+        Image|startswith: 'C:\users\'
+        Image|endswith: '.exe'
+    filter:
+        Image|endswith: '\Teams.exe'
+    condition: selection and not filter
 fields:
     - CommandLine
     - ParentCommandLine

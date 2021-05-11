@@ -1,0 +1,35 @@
+title: MSI Spawned Cmd and Powershell Spawned Processes
+id: 38cf8340-461b-4857-bf99-23a41f772b18
+description: This rule will looks for Windows Installer service (msiexec.exe) spawned command line and/or powershell that spawned other processes
+status: experimental
+author: Teymur Kheirkhabarov (idea), Mangatas Tondang (rule), oscd.community
+date: 2020/10/13
+references:
+    - https://image.slidesharecdn.com/kheirkhabarovoffzonefinal-181117201458/95/hunting-for-privilege-escalation-in-windows-environment-50-638.jpg
+tags:
+    - attack.privilege_escalation
+    - attack.t1548.002
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    parent_image:
+        ParentImage|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+    parent_of_parent_image:
+        ParentOfParentImage|contains|all:
+            - '\Windows\Installer\'
+            - 'msi'
+        ParentOfParentImage|endswith:
+            - 'tmp'
+    condition: parent_image and parent_of_parent_image
+fields:
+    - ParentImage
+    - ParentOfParentImage
+falsepositives:
+    - Penetration test
+level: high
+enrichment:
+    - EN_0001_cache_sysmon_event_id_1_info                # http://bit.ly/314zc6x
+    - EN_0002_enrich_sysmon_event_id_1_with_parent_info   # http://bit.ly/2KmSC0l
