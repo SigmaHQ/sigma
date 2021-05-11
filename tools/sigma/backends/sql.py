@@ -43,9 +43,16 @@ class SQLBackend(SingleTextQueryBackend):
     mapListValueExpression = "%s OR %s"     # Syntax for field/value condititons where map value is a list
     mapLength = "(%s %s)"
 
-    def __init__(self, sigmaconfig, table):
+    options = SingleTextQueryBackend.options + (
+        ("table", False, "Use this option to specify table name, default is \"eventlog\"", None),
+    )
+
+    def __init__(self, sigmaconfig, options):
         super().__init__(sigmaconfig)
-        self.table = table
+        if "table" in options:
+            self.table = options["table"]
+        else:
+            self.table = "eventlog"
 
     def generateANDNode(self, node):
         generated = [ self.generateNode(val) for val in node ]
