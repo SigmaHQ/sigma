@@ -1,6 +1,7 @@
 # Output backends for sigmac
 # Copyright 2019 Jayden Zheng
 # Copyright 2020 Jonas Hagg
+# Copyright 2021 wagga (https://github.com/wagga40/)
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -169,10 +170,10 @@ class SQLBackend(SingleTextQueryBackend):
                 group_by = ""
 
             if agg.aggfield:
-                select = "{}({}) AS agg".format(agg.aggfunc_notrans, self.fieldNameMapping(agg.aggfield, None))
+                select = "*,{}({}) AS agg".format(agg.aggfunc_notrans, self.fieldNameMapping(agg.aggfield, None))
             else:
                 if agg.aggfunc == SigmaAggregationParser.AGGFUNC_COUNT:
-                    select = "{}(*) AS agg".format(agg.aggfunc_notrans)
+                    select = "*,{}(*) AS agg".format(agg.aggfunc_notrans)
                 else:
                     raise SigmaParseError("For {} aggregation a fieldname needs to be specified".format(agg.aggfunc_notrans))
 
