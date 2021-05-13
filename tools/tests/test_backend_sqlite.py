@@ -71,14 +71,14 @@ class TestFullTextSearch(unittest.TestCase):
         # aggregation with fts
         detection = {"selection": ["test"],
                      "condition": "selection | count() > 5"}
-        inner_query = 'SELECT count(*) AS agg FROM {0} WHERE {0} MATCH (\'"test"\')'.format(
+        inner_query = 'SELECT *,count(*) AS agg FROM {0} WHERE {0} MATCH (\'"test"\')'.format(
             self.table)
         expected_result = 'SELECT * FROM ({}) WHERE agg > 5'.format(inner_query)
         self.validate(detection, expected_result)
 
         detection = {"selection": ["test1", "test2"],
                      "condition": "selection | count() > 5"}
-        inner_query = 'SELECT count(*) AS agg FROM {0} WHERE ({0} MATCH (\'"test1" OR "test2"\'))'.format(
+        inner_query = 'SELECT *,count(*) AS agg FROM {0} WHERE ({0} MATCH (\'"test1" OR "test2"\'))'.format(
             self.table)
         expected_result = 'SELECT * FROM ({}) WHERE agg > 5'.format(inner_query)
         self.validate(detection, expected_result)
@@ -86,7 +86,7 @@ class TestFullTextSearch(unittest.TestCase):
         # aggregation + group by + fts
         detection = {"selection": ["test1", "test2"],
                      "condition": "selection | count() by fieldname > 5"}
-        inner_query = 'SELECT count(*) AS agg FROM {0} WHERE ({0} MATCH (\'"test1" OR "test2"\')) GROUP BY fieldname'.format(
+        inner_query = 'SELECT *,count(*) AS agg FROM {0} WHERE ({0} MATCH (\'"test1" OR "test2"\')) GROUP BY fieldname'.format(
             self.table)
         expected_result = 'SELECT * FROM ({}) WHERE agg > 5'.format(inner_query)
         self.validate(detection, expected_result)
