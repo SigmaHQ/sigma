@@ -1,11 +1,12 @@
-title: Ngrok RDP Exposure Pattern
+title: Ngrok Usage
 id: ee37eb7c-a4e7-4cd5-8fa4-efa27f1c3f31
-description: Detects the use of Ngrok, a utility used for port forwarding and tunneling, often used by threat actors to make local protected RDP service publicly available 
+description: Detects the use of Ngrok, a utility used for port forwarding and tunneling, often used by threat actors to make local protected services publicly available 
 status: experimental
 references:
     - https://ngrok.com/docs
     - https://www.fireeye.com/blog/threat-research/2021/05/shining-a-light-on-darkside-ransomware-operations.html
     - https://stackoverflow.com/questions/42442320/ssh-tunnel-to-ngrok-and-initiate-rdp
+    - https://www.virustotal.com/gui/file/58d21840d915aaf4040ceb89522396124c82f325282f805d1085527e1e2ccfa1/detection
 author: Florian Roth
 date: 2021/05/14
 tags:
@@ -15,10 +16,16 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection1:
         CommandLine|contains:
             - ' tcp 3389'
-    condition: selection
+    selection2:
+        CommandLine|contains|all:
+            - ' start '
+            - '--all'
+            - '--config'
+            - '.yml'
+    condition: 1 of them
 falsepositives:
     - Another tool that uses the command line switches of Ngrok
 level: high
