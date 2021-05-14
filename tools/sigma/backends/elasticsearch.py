@@ -1381,6 +1381,8 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
             rule.update({"threshold": self.rule_threshold})
         if references:
             rule.update({"references": references})
+        self.rule_type = "query"
+        self.rule_threshold = {}
         return json.dumps(rule)
 
 class KibanaNdjsonBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
