@@ -372,9 +372,10 @@ class TestRules(unittest.TestCase):
             for key in logsource:
                 if key.lower() not in ['category', 'product', 'service', 'definition']:
                     print(Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
+
 def get_mitre_data():
     """
-    Generate tags from live MITRE ATT&CK® TAXI service to get up-to-date data
+    Generate tags from live TAXI service to get up-to-date data
     """
     # Get ATT&CK information
     lift = attack_client()
