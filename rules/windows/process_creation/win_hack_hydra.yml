@@ -14,10 +14,15 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection1: 
-        Image|contains: 
-            - '\hydra.exe'
+    selection1:
+        CommandLine|contains:
+            - '-u '
+            - '-U '
     selection2:
+        CommandLine|contains:
+            - '-p '
+            - '-P '
+    selection3:
         CommandLine|contains:
             - ' http-head://'
             - ' http-get://'
@@ -90,7 +95,13 @@ detection:
             - ' vmauthd://'
             - ' vnc://'
             - ' xmpp://'
-    condition: selection1 or selection2
+    selection4:
+        CommandLine|contains:
+            - '^USER^'
+            - '^user^'
+            - '^PASS^'
+            - '^pass^'
+    condition: selection1 and selection2 and selection3 and selection4
 falsepositives:
-    - Other programs that use these command line option
+    - Unknown
 level: high
