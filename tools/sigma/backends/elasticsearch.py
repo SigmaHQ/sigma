@@ -21,6 +21,7 @@ import sys
 import os
 from random import randrange
 from distutils.util import strtobool
+from uuid import uuid4
 
 import sigma
 import yaml
@@ -1221,6 +1222,7 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
     """Elasticsearch detection rule backend"""
     identifier = "es-rule"
     active = True
+    uuid_black_list = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1348,9 +1350,11 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
         rule_name = configs.get("title", "").lower()
         rule_uuid = configs.get("id", "").lower()
         if rule_uuid == "":
-            rule_id = re.sub(re.compile('[()*+!,\[\].\s"]'), "_", rule_name)
-        else:
-            rule_id = re.sub(re.compile('[()*+!,\[\].\s"]'), "_", rule_uuid)
+            rule_uuid = str(uuid4())
+        if rule_uuid in self.uuid_black_list:
+            rule_uuid = str(uuid4())
+        self.uuid_black_list.append(rule_uuid)
+        rule_id = re.sub(re.compile('[()*+!,\[\].\s"]'), "_", rule_uuid)
         risk_score = self.map_risk_score(configs.get("level", "medium"))
         references = configs.get("reference")
         if references is None:
