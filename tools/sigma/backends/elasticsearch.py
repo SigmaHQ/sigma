@@ -1306,6 +1306,8 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
                 return technique
 
     def map_risk_score(self, level):
+        if level not in ["low","medium","high","critical"]:
+            level = "medium"
         if level == "low":
             return 5
         elif level == "medium":
