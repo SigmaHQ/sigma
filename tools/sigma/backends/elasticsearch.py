@@ -1317,6 +1317,16 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
         elif level == "critical":
             return 95
 
+    def map_severity(self, severity):
+        severity = severity.lower()
+        if severity  in ["low","medium","high","critical"]:
+            return severity
+        elif severity == "informational":
+            return "low"
+        else:
+            return "medium"
+
+
     def create_rule(self, configs, index):
         tags = configs.get("tags", [])
         tactics_list = list()
@@ -1386,7 +1396,7 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
             "meta": {
                 "from": "1m"
             },
-            "severity": configs.get("level", "medium"),
+            "severity": self.map_severity(configs.get("level", "medium")),
             "tags": new_tags,
             "to": "now",
             "type": self.rule_type,
