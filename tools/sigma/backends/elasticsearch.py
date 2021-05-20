@@ -1359,10 +1359,16 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
         references = configs.get("reference")
         if references is None:
             references = configs.get("references")
+        falsepositives = []
+        yml_falsepositives = configs.get('falsepositives',["Unknown"])
+        if isinstance(yml_falsepositives,str):
+            falsepositives.append(yml_falsepositives)
+        else:
+            falsepositives=yml_falsepositives
         rule = {
             "description": configs.get("description", ""),
             "enabled": True,
-            "false_positives": configs.get('falsepositives', "Unknown"),
+            "false_positives": falsepositives,
             "filters": [],
             "from": "now-360s",
             "immutable": False,
