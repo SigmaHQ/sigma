@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Rule Filtering
+import datetime
 class SigmaRuleFilter:
     """Filter for Sigma rules with conditions"""
     LEVELS = {
@@ -31,6 +32,7 @@ class SigmaRuleFilter:
         self.status     = None
         self.logsources = list()
         self.tags       = list()
+        self.lastday    = None
 
         for cond in [c.replace(" ", "") for c in expr.split(",")]:
             if cond.startswith("level<="):
@@ -60,6 +62,12 @@ class SigmaRuleFilter:
                 self.logsources.append(cond[cond.index("=") + 1:])
             elif cond.startswith("tag="):
                 self.tags.append(cond[cond.index("=") + 1:].lower())
+            elif cond.startswith("lastday="):
+                nbday = cond[cond.index("=") + 1:]
+                try:     
+                    self.lastday = int(nbday)
+                except ValueError as e:
+                    raise SigmaRuleFilterParseException("Unknown number '%s' in condition '%s'" % (nbday, cond)) from e
             else:
                 raise SigmaRuleFilterParseException("Unknown condition '%s'" % cond)
 
@@ -111,7 +119,27 @@ class SigmaRuleFilter:
             for tag in self.tags:
                 if tag not in tags:
                     return False
-
+        
+        # date in the last N days
+        if self.lastday:
+           try:
+               date_str = yamldoc['date']
+           except KeyError:    # missing date 
+               return False    # User wants date time restriction, but it's not possible here
+               
+           try:
+               modified_str = yamldoc['modified']
+           except KeyError:    # no update 
+               modified_str = None   
+           if modified_str:
+               date_str = modified_str
+           
+           date_object = datetime.datetime.strptime(date_str, '%Y/%m/%d')
+           today_objet = datetime.datetime.now()
+           delta       = today_objet - date_object
+           if delta.days > self.lastday:
+                return False
+            
         # all tests passed
         return True
 
