@@ -32,6 +32,7 @@ class SigmaRuleFilter:
         self.status     = None
         self.logsources = list()
         self.tags       = list()
+        self.nottags    = list()
         self.inlastday  = None
 
         for cond in [c.replace(" ", "") for c in expr.split(",")]:
@@ -62,6 +63,8 @@ class SigmaRuleFilter:
                 self.logsources.append(cond[cond.index("=") + 1:])
             elif cond.startswith("tag="):
                 self.tags.append(cond[cond.index("=") + 1:].lower())
+            elif cond.startswith("tag!="):
+                self.nottags.append(cond[cond.index("=") + 1:].lower())                
             elif cond.startswith("inlastday="):
                 nbday = cond[cond.index("=") + 1:]
                 try:     
@@ -118,6 +121,16 @@ class SigmaRuleFilter:
 
             for tag in self.tags:
                 if tag not in tags:
+                    return False
+        # Not Tags
+        if self.nottags:
+            try:
+                nottags = [ tag.lower() for tag in yamldoc['tags']]
+            except (KeyError, AttributeError):    # no tags set
+                return False
+
+            for tag in self.nottags:
+                if tag in nottags:
                     return False
         
         # date in the last N days
