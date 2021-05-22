@@ -32,7 +32,7 @@ class SigmaRuleFilter:
         self.status     = None
         self.logsources = list()
         self.tags       = list()
-        self.lastday    = None
+        self.inlastday  = None
 
         for cond in [c.replace(" ", "") for c in expr.split(",")]:
             if cond.startswith("level<="):
@@ -62,10 +62,10 @@ class SigmaRuleFilter:
                 self.logsources.append(cond[cond.index("=") + 1:])
             elif cond.startswith("tag="):
                 self.tags.append(cond[cond.index("=") + 1:].lower())
-            elif cond.startswith("lastday="):
+            elif cond.startswith("inlastday="):
                 nbday = cond[cond.index("=") + 1:]
                 try:     
-                    self.lastday = int(nbday)
+                    self.inlastday = int(nbday)
                 except ValueError as e:
                     raise SigmaRuleFilterParseException("Unknown number '%s' in condition '%s'" % (nbday, cond)) from e
             else:
@@ -121,7 +121,7 @@ class SigmaRuleFilter:
                     return False
         
         # date in the last N days
-        if self.lastday:
+        if self.inlastday:
            try:
                date_str = yamldoc['date']
            except KeyError:    # missing date 
@@ -137,7 +137,7 @@ class SigmaRuleFilter:
            date_object = datetime.datetime.strptime(date_str, '%Y/%m/%d')
            today_objet = datetime.datetime.now()
            delta       = today_objet - date_object
-           if delta.days > self.lastday:
+           if delta.days > self.inlastday:
                 return False
             
         # all tests passed
