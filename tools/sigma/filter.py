@@ -27,13 +27,14 @@ class SigmaRuleFilter:
     STATES = ["experimental", "testing", "stable"]
 
     def __init__(self, expr):
-        self.minlevel   = None 
-        self.maxlevel   = None 
-        self.status     = None
-        self.logsources = list()
-        self.tags       = list()
-        self.nottags    = list()
-        self.inlastday  = None
+        self.minlevel      = None 
+        self.maxlevel      = None 
+        self.status        = None
+        self.logsources    = list()
+        self.notlogsources = list()
+        self.tags          = list()
+        self.nottags       = list()
+        self.inlastday     = None
 
         for cond in [c.replace(" ", "") for c in expr.split(",")]:
             if cond.startswith("level<="):
@@ -61,6 +62,8 @@ class SigmaRuleFilter:
                     raise SigmaRuleFilterParseException("Unknown status '%s' in condition '%s'" % (self.status, cond))
             elif cond.startswith("logsource="):
                 self.logsources.append(cond[cond.index("=") + 1:])
+            elif cond.startswith("logsource!="):
+                self.notlogsources.append(cond[cond.index("=") + 1:])
             elif cond.startswith("tag="):
                 self.tags.append(cond[cond.index("=") + 1:].lower())
             elif cond.startswith("tag!="):
@@ -112,6 +115,17 @@ class SigmaRuleFilter:
                 if logsrc not in logsources:
                     return False
 
+        # NOT Log Sources
+        if self.notlogsources:
+            try:
+                notlogsources = { value for key, value in yamldoc['logsource'].items() }
+            except (KeyError, AttributeError):    # no log source set
+                return False    # User wants status restriction, but it's not possible here
+
+            for logsrc in self.notlogsources:
+                if logsrc  in notlogsources:
+                    return False
+
         # Tags
         if self.tags:
             try:
@@ -122,7 +136,7 @@ class SigmaRuleFilter:
             for tag in self.tags:
                 if tag not in tags:
                     return False
-        # Not Tags
+        # NOT Tags
         if self.nottags:
             try:
                 nottags = [ tag.lower() for tag in yamldoc['tags']]
