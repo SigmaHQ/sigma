@@ -1346,7 +1346,11 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
                         tactics_list.append(tact)
         threat = self.create_threat_description(tactics_list=tactics_list, techniques_list=technics_list)
         rule_name = configs.get("title", "").lower()
-        rule_id = re.sub(re.compile('[()*+!,\[\].\s"]'), "_", rule_name)
+        rule_uuid = configs.get("id", "").lower()
+        if rule_uuid == "":
+            rule_id = re.sub(re.compile('[()*+!,\[\].\s"]'), "_", rule_name)
+        else:
+            rule_id = re.sub(re.compile('[()*+!,\[\].\s"]'), "_", rule_uuid)
         risk_score = self.map_risk_score(configs.get("level", "medium"))
         references = configs.get("reference")
         if references is None:
@@ -1381,6 +1385,8 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
             rule.update({"threshold": self.rule_threshold})
         if references:
             rule.update({"references": references})
+        self.rule_type = "query"
+        self.rule_threshold = {}
         return json.dumps(rule)
 
 class KibanaNdjsonBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
