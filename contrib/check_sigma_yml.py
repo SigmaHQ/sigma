@@ -15,17 +15,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Project: check_sigma.py
-Date: 23/05/2021
+Project: check_sigma_yml.py
+Date: 24/05/2021
 Author: frack
-Version: 1.0
-Description: This script check commun field of Sigma SIEM rules.
+Version: 1.1
+Description: This script check common error of Sigma SIEM rules.
 Thanks: https://github.com/SigmaHQ/sigma/wiki/Specification
 TODO:
- [] manage action rule
- [] Add more test
- [] fix what is broken
- [] Cleanup
+ [x] manage action global rule
+ [ ] manage action other rule
+ [ ] Add more deep tests
+ [ ] fix what is broken
+ [ ] Cleanup
     
 """
 
@@ -79,8 +80,46 @@ class info:
         self.level,
         self.tags,
         self.unknow ]
+       
+    def clean(self):
+        self.filename    = ""
+        self.etat        = ""
+        self.title       = ""
+        self.uuid        = ""
+        self.related     = ""
+        self.status      = ""
+        self.description = ""
+        self.date        = ""
+        self.modified    = ""
+        self.author      = ""
+        self.references  = ""
+        self.logsource   = ""
+        self.detection   = ""
+        self.fields      = ""
+        self.falsepositives = ""
+        self.level       = ""
+        self.tags        = ""
+        self.unknow      = ""   
 
-# From sigmac 
+# list of category,product or service
+# Only for warning
+# all find in rule no logic check
+list_product  = ["antivirus","apache","cisco","django","firewall","linux","macos","netflow","python",
+                "qualys","ruby_on_rails","sql","stormshield","spring","unix","windef","windows",
+                "windows_defender","zeek"]
+
+list_category = ["auditd","accounting","application","authentication","create_remote_thread","create_stream_hash","dns",
+                "dns_query","driver_load","file_delete","file_event","firewall","image_load",
+                "network_connection","other","pipe_created","process_access","process_creation",
+                "proxy","raw_access_thread","registry_event","webserver","windows","wmi_event"]
+
+list_service  = ["aaa","alarm","application","applocker","auditd","auth","clamav","cloudtrail","connection","dce_rpc",
+                "dns","dns-server","driver-framework","guacamole","http","kerberos","modsecurity","Microsoft-ServiceBus-Client",
+                "msexchange-management","ntlm","powershell","powershell-classic","rdp","security",
+                "server","smb_files","sysmon","system","sshd","syslog","taskscheduler","vsftpd","windefend","wmi"]
+
+
+# Thanks to sigmac 
 def alliter(path):
     for sub in path.iterdir():
         if sub.name.startswith("."):
@@ -98,7 +137,7 @@ def check_title(content):
             return "valid","Pass"
         else:
             del content["title"]
-            return "error","lenght of title is too long"            
+            return "error","Lenght of title is too long"            
     else:
         return "error","MISSING"
 
@@ -133,14 +172,18 @@ def check_status  (content):
 
 def check_description (content):
     if "description" in content:
-        del content["description"]
-        return "valid","Pass"
+        if len(content["description"]) < 65536:
+            del content["description"]
+            return "valid","Pass"
+        else:
+            del content["description"]
+            return "warning","Lenght of title is too long"
     else:
         return "warning","Pass Optional"
     
 def check_date (content):
     if "date" in content:
-        if re.match('\d{4}/\d{2}/\d{2}',content["date"]):
+        if re.match('\d{4}/\d{1,2}/\d{1,2}',content["date"]):
             valid = True
         else:
             valid = False
@@ -154,7 +197,7 @@ def check_date (content):
 
 def check_modified (content):
     if "modified" in content:
-        if re.match('\d{4}/\d{2}/\d{2}',content["modified"]):
+        if re.match('\d{4}/\d{1,2}/\d{1,2}',content["modified"]):
             valid = True
         else:
             valid = False
@@ -198,9 +241,23 @@ def check_references (content):
         return "warning","Pass Optional"
 
 def check_logsource (content):
+    msg = ""
     if "logsource" in content:
-        del content["logsource"]
-        return "valid","Pass"
+        if "product" in content["logsource"]:
+            if not content["logsource"]["product"] in list_product:
+                msg = f'New product {content["logsource"]["product"]}'
+        if "category" in content["logsource"]:
+            if not content["logsource"]["category"] in list_category:
+                msg = f'{msg} New category {content["logsource"]["category"]}'
+        if "service" in content["logsource"]:
+            if not content["logsource"]["service"] in list_service:
+                msg = f'{msg} New service {content["logsource"]["service"]}'
+        if msg == "":
+            del content["logsource"]
+            return "valid","Pass"
+        else:
+            del content["logsource"]
+            return "valid",msg
     else:
         return "warning","Pass Optional"
 
@@ -274,43 +331,43 @@ def clean_custom_field(content):
         if field in content:
             del content[field]
 
-def run_all_check(content,l_info):
+def run_all_check(rule_dict,l_info):
     l_info.etat = "OK"
     
     #some field find in the rule as you can create your one
-    clean_custom_field(rule)
+    clean_custom_field(rule_dict)
     
-    r_level,l_info.title         = check_title(rule)
+    r_level,l_info.title         = check_title(rule_dict)
     if r_level == "error": l_info.etat = "NOK"
-    r_level,l_info.uuid          = check_id(rule)
+    r_level,l_info.uuid          = check_id(rule_dict)
     if r_level == "error": l_info.etat = "NOK"
-    r_level,l_info.related       = check_related(rule)
+    r_level,l_info.related       = check_related(rule_dict)
     if r_level == "error": l_info.etat = "NOK"
-    r_level,l_info.status        = check_status(rule)
+    r_level,l_info.status        = check_status(rule_dict)
     if r_level == "error": l_info.etat = "NOK"
-    r_level,l_info.description   = check_description(rule)
+    r_level,l_info.description   = check_description(rule_dict)
     if r_level == "error": l_info.etat = "NOK"
-    r_level,l_info.date          = check_date(rule)
+    r_level,l_info.date          = check_date(rule_dict)
     if r_level == "error": l_info.etat = "NOK"
-    r_level,l_info.modified      = check_modified(rule)
+    r_level,l_info.modified      = check_modified(rule_dict)
     if r_level == "error": l_info.etat = "NOK"
-    r_level,l_info.author        = check_author(rule)
+    r_level,l_info.author        = check_author(rule_dict)
     if r_level == "error": l_info.etat = "NOK"
-    r_level,l_info.references    = check_references(rule)
+    r_level,l_info.references    = check_references(rule_dict)
     if r_level == "error": l_info.etat = "NOK"
-    r_level,l_info.logsource     = check_logsource(rule)
+    r_level,l_info.logsource     = check_logsource(rule_dict)
     if r_level == "error": l_info.etat = "NOK"
-    r_level,l_info.detection     = check_detection(rule)
+    r_level,l_info.detection     = check_detection(rule_dict)
     if r_level == "error": l_info.etat = "NOK"
-    r_level,l_info.fields        = check_fields(rule)
+    r_level,l_info.fields        = check_fields(rule_dict)
     if r_level == "error": l_info.etat = "NOK"
-    r_level,l_info.falsepositives = check_falsepositives(rule)
+    r_level,l_info.falsepositives = check_falsepositives(rule_dict)
     if r_level == "error": l_info.etat = "NOK"
-    r_level,l_info.level         = check_level(rule)
+    r_level,l_info.level         = check_level(rule_dict)
     if r_level == "error": l_info.etat = "NOK"
-    r_level,l_info.tags          = check_tags(rule)
+    r_level,l_info.tags          = check_tags(rule_dict)
     if r_level == "error": l_info.etat = "NOK"
-    r_level,l_info.unknow        = check_unknow(rule)
+    r_level,l_info.unknow        = check_unknow(rule_dict)
     if r_level == "error": l_info.etat = "NOK"
 
         
@@ -362,15 +419,27 @@ csvwriter.writerow(header)
 
 rule_data = info()
 for yml_file in list_yml:
+    rule_data.clean()
+    merge = False
     rule_data.filename = yml_file.name
     with yml_file.open('rt',encoding='utf8') as f:
         data = yaml.safe_load_all(f)
         for rule in data:
             if "action" in rule:
-                print(f'{yml_file.name} warning action is not implemented')
-                break
-           
-            run_all_check(rule,rule_data)
-            csvwriter.writerow(rule_data.get_list())
+                if rule["action"] == "global":
+                    global_dict = rule
+                    del global_dict["action"]
+                    merge = True
+                else:
+                    print(f'{yml_file.name} warning this action is not implemented')
+                    break
+            else:
+                if merge:
+                    merge_rule = {**global_dict, **rule}  # Python 3.5
+                    run_all_check(merge_rule,rule_data)
+                    csvwriter.writerow(rule_data.get_list())
+                else:
+                    run_all_check(rule,rule_data)
+                    csvwriter.writerow(rule_data.get_list())
 
 csvfile.close()
