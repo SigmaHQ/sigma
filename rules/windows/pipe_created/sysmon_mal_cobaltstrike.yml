@@ -17,13 +17,15 @@ logsource:
    category: pipe_created
    definition: 'Note that you have to configure logging for Named Pipe Events in Sysmon config (Event ID 17)'
 detection:
-   selection_start:
+   selection_MSSE_start:
       PipeName|startswith: '\MSSE-' 
-   selection_end:
+   selection_MSSE_end:
       PipeName|endswith: '-server'
-   selection_others:
+   selection_postex:
+      PipeName|startswith: '\postex_'
+   selection_msagent:
       PipeName|startswith: '\msagent_'
-   condition: selection_start and selection_end
+   condition: selection_MSSE_start and selection_MSSE_end or selection_postex or selection_msagent 
 falsepositives:
    - Unknown
 level: critical
