@@ -18,10 +18,10 @@ logsource:
    category: pipe_created
    definition: 'Note that you have to configure logging for Named Pipe Events in Sysmon config (Event ID 17 and Event ID 18). In the current popular sysmon configuration (https://github.com/SwiftOnSecurity/sysmon-config) this is not there, you have to add it yourself.'
 detection:
-   selection_MSSE_start:
-      PipeName|startswith: '\MSSE-' 
-   selection_MSSE_end:
-      PipeName|endswith: '-server'
+   selection_MSSE:
+      PipeName|contains|all: 
+         - '\MSSE-'
+         - '-server'
    selection_postex:
       PipeName|startswith: '\postex_'
    selection_postex_ssh:
@@ -30,7 +30,7 @@ detection:
       PipeName|startswith: '\status_'
    selection_msagent:
       PipeName|startswith: '\msagent_'
-   condition: selection_MSSE_start and selection_MSSE_end or selection_postex or selection_postex_ssh or selection_status or selection_msagent 
+   condition: 1 of them
 falsepositives:
    - Unknown
 level: critical
