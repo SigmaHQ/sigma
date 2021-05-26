@@ -6,8 +6,9 @@ references:
     - https://twitter.com/d4rksystem/status/1357010969264873472
     - https://labs.f-secure.com/blog/detecting-cobalt-strike-default-modules-via-named-pipe-analysis/
     - https://github.com/Neo23x0/sigma/issues/253
-date: 2021/04/23
-author: Florian Roth
+    - https://blog.cobaltstrike.com/2021/02/09/learn-pipe-fitting-for-all-of-your-offense-projects/
+date: 2021/05/25
+author: Florian Roth, Wojciech Lesicki
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
@@ -15,15 +16,21 @@ tags:
 logsource:
    product: windows
    category: pipe_created
-   definition: 'Note that you have to configure logging for Named Pipe Events in Sysmon config (Event ID 17)'
+   definition: 'Note that you have to configure logging for Named Pipe Events in Sysmon config (Event ID 17 and Event ID 18). In the current popular sysmon configuration (https://github.com/SwiftOnSecurity/sysmon-config) this is not there, you have to add it yourself.'
 detection:
-   selection_start:
+   selection_MSSE_start:
       PipeName|startswith: '\MSSE-' 
-   selection_end:
+   selection_MSSE_end:
       PipeName|endswith: '-server'
-   selection_others:
+   selection_postex:
+      PipeName|startswith: '\postex_'
+   selection_postex_ssh:
+      PipeName|startswith: '\postex_ssh_'
+   selection_status:
+      PipeName|startswith: '\status_'
+   selection_msagent:
       PipeName|startswith: '\msagent_'
-   condition: selection_start and selection_end
+   condition: selection_MSSE_start and selection_MSSE_end or selection_postex or selection_postex_ssh or selection_status or selection_msagent 
 falsepositives:
    - Unknown
 level: critical
