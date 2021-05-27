@@ -18,22 +18,25 @@ level: high
 detection:
     selection:
         - ImagePath|re: '(?i).*&&set.*(\{\d\}){2,}\\\"\s+?\-f.*&&.*cmd.*\/c' # FPs with |\/r
-    condition: selection
+    condition: selection and selection_eventid
 ---
 logsource:
     product: windows
     service: system
 detection:
-    selection:
+    selection_eventid:
         EventID: 7045
 ---
 logsource:
     product: windows
     category: driver_load
+detection:
+    selection_eventid:
+        EventID: 6
 ---
- logsource:
-     product: windows
-     service: security
- detection:
-     selection:
-         EventID: 4697
+logsource:
+    product: windows
+    service: security
+detection:
+    selection_eventid:
+        EventID: 4697
