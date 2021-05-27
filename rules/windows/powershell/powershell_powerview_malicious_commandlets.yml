@@ -1,0 +1,98 @@
+title: Malicious PowerView PowerShell Commandlets
+id: dcd74b95-3f36-4ed9-9598-0490951643aa
+status: experimental
+description: Detects Commandlet names from PowerView of PowerSploit exploitation framework
+date: 2021/05/18
+references:
+    - https://powersploit.readthedocs.io/en/stable/Recon/README
+    - https://github.com/PowerShellMafia/PowerSploit/tree/master/Recon
+    - https://thedfirreport.com/2020/10/08/ryuks-return
+tags:
+    - attack.execution
+    - attack.t1059.001
+author: Bhabesh Raj
+logsource:
+    product: windows
+    service: powershell
+    definition: It is recommanded to use the new "Script Block Logging" of PowerShell v5 https://adsecurity.org/?p=2277
+detection:
+  selection:
+      EventID: 4104
+      ScriptBlockText:
+        - Export-PowerViewCSV
+        - Resolve-IPAddress
+        - ConvertTo-SID
+        - Convert-ADName
+        - ConvertFrom-UACValue
+        - Add-RemoteConnection
+        - Remove-RemoteConnection
+        - Invoke-UserImpersonation
+        - Invoke-RevertToSelf
+        - Get-DomainSPNTicket
+        - Invoke-Kerberoast
+        - Get-PathAcl
+        - Get-DomainDNSZone
+        - Get-DomainDNSRecord
+        - Get-Domain
+        - Get-DomainController
+        - Get-Forest
+        - Get-ForestDomain
+        - Get-ForestGlobalCatalog
+        - Find-DomainObjectPropertyOutlier-
+        - Get-DomainUser
+        - New-DomainUser
+        - Set-DomainUserPassword
+        - Get-DomainUserEvent
+        - Get-DomainComputer
+        - Get-DomainObject
+        - Set-DomainObject
+        - Get-DomainObjectAcl
+        - Add-DomainObjectAcl
+        - Find-InterestingDomainAcl
+        - Get-DomainOU
+        - Get-DomainSite
+        - Get-DomainSubnet
+        - Get-DomainSID
+        - Get-DomainGroup
+        - New-DomainGroup
+        - Get-DomainManagedSecurityGroup
+        - Get-DomainGroupMember
+        - Add-DomainGroupMember
+        - Get-DomainFileServer
+        - Get-DomainDFSShare
+        - Get-DomainGPO
+        - Get-DomainGPOLocalGroup
+        - Get-DomainGPOUserLocalGroupMapping
+        - Get-DomainGPOComputerLocalGroupMapping
+        - Get-DomainPolicy
+        - Get-NetLocalGroup
+        - Get-NetLocalGroupMember
+        - Get-NetShare
+        - Get-NetLoggedon
+        - Get-NetSession
+        - Get-RegLoggedOn
+        - Get-NetRDPSession
+        - Test-AdminAccess
+        - Get-NetComputerSiteName
+        - Get-WMIRegProxy
+        - Get-WMIRegLastLoggedOn
+        - Get-WMIRegCachedRDPConnection
+        - Get-WMIRegMountedDrive
+        - Get-WMIProcess
+        - Find-InterestingFile
+        - Find-DomainUserLocation
+        - Find-DomainProcess
+        - Find-DomainUserEvent
+        - Find-DomainShare
+        - Find-InterestingDomainShareFile
+        - Find-LocalAdminAccess
+        - Find-DomainLocalGroupMember
+        - Get-DomainTrust
+        - Get-ForestTrust
+        - Get-DomainForeignUser
+        - Get-DomainForeignGroupMember
+        - Get-DomainTrustMapping
+  condition: selection
+falsepositives:
+    - Should not be any as administrators do not use this tool
+level: high
