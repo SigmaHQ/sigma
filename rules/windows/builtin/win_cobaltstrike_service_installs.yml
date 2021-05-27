@@ -1,0 +1,25 @@
+title: CobaltStrike Service Installations
+id: 5a105d34-05fc-401e-8553-272b45c1522d
+description: Detects known malicious service installs that appear in cases in which a Cobalt Strike beacon elevates privileges
+author: Florian Roth
+references:
+    - https://www.sans.org/webcasts/119395
+date: 2021/05/26
+tags:
+    - attack.execution
+    - attack.privilege_escalation
+    - attack.t1543.003
+    - attack.t1569.002
+logsource:
+    product: windows
+    service: system
+detection:
+    selection:
+        EventID: 7045
+        ImagePath|contains|all: 
+            - '\\127.0.0.1\ADMIN$'
+            - '.exe'
+    condition: selection
+falsepositives:
+    - Unknown
+level: critical
