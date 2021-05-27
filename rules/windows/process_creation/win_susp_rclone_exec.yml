@@ -16,6 +16,11 @@ logsource:
     product: windows
     category: process_creation
 detection:
+    exec_selection:
+        Image|endswith: '\rclone.exe'
+        ParentImage|endswith:
+            - '\PowerShell.exe'
+            - '\cmd.exe'
     command_selection:
         CommandLine|contains:
             - ' pass '
@@ -29,4 +34,4 @@ detection:
             - ' ls '
     description_selection:
       Description: 'Rsync for cloud storage'
-    condition: 1 of command_selection and description_selection
+    condition: command_selection and ( description_selection or exec_selection )
