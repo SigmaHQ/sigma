@@ -37,8 +37,12 @@ class SigmaCollectionParser:
         self.parsers = list()
         prevrule = None
         if filename:
-            globalyaml['yml_filename']=str(filename.name)
-            globalyaml['yml_path']=str(filename.parent)
+            try:
+                globalyaml['yml_filename']=str(filename.name)
+                globalyaml['yml_path']=str(filename.parent)
+            except:
+                filename = None
+        
         for yamldoc in self.yamls:
             action = None
             try:
