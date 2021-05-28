@@ -233,7 +233,7 @@ def main():
                 f = sigmafile
             else:
                 f = sigmafile.open(encoding='utf-8')
-            parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter)
+            parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter, sigmafile)
             results = parser.generate(backend)
 
             newline_separator = '\0' if cmdargs.print0 else '\n'
