@@ -7,7 +7,7 @@ description: Detects the access to processes by other suspicious processes which
     routines are already present in memory, not requiring any calls to external libraries. The latter should also be considered suspicious.
 status: experimental
 date: 2019/10/27
-modified: 2020/08/24
+modified: 2021/05/16
 author: Perez Diego (@darkquassar), oscd.community, Jonhnathan Ribeiro
 references:
     - https://azure.microsoft.com/en-ca/blog/detecting-in-memory-attacks-with-sysmon-and-azure-security-center/
@@ -44,7 +44,10 @@ detection:
             - "0x1F2FFF"
             - "0x1F3FFF"
             - "0x1FFFFF"
-    condition: (selection1 or selection2) or (selection3 and granted_access)
+    filter:
+        SourceImage|endswith:
+            - '\Windows\System32\sdiagnhost.exe'
+    condition: (selection1 or selection2) or (selection3 and granted_access) and not filter
 fields:
     - ComputerName
     - User

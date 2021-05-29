@@ -21,6 +21,7 @@ import sys
 import os
 from random import randrange
 from distutils.util import strtobool
+from uuid import uuid4
 
 import sigma
 import yaml
@@ -1221,6 +1222,7 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
     """Elasticsearch detection rule backend"""
     identifier = "es-rule"
     active = True
+    uuid_black_list = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1304,6 +1306,8 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
                 return technique
 
     def map_risk_score(self, level):
+        if level not in ["low","medium","high","critical"]:
+            level = "medium"
         if level == "low":
             return 5
         elif level == "medium":
@@ -1312,6 +1316,16 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
             return 65
         elif level == "critical":
             return 95
+
+    def map_severity(self, severity):
+        severity = severity.lower()
+        if severity  in ["low","medium","high","critical"]:
+            return severity
+        elif severity == "informational":
+            return "low"
+        else:
+            return "medium"
+
 
     def create_rule(self, configs, index):
         tags = configs.get("tags", [])
@@ -1346,15 +1360,27 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
                         tactics_list.append(tact)
         threat = self.create_threat_description(tactics_list=tactics_list, techniques_list=technics_list)
         rule_name = configs.get("title", "").lower()
-        rule_id = re.sub(re.compile('[()*+!,\[\].\s"]'), "_", rule_name)
+        rule_uuid = configs.get("id", "").lower()
+        if rule_uuid == "":
+            rule_uuid = str(uuid4())
+        if rule_uuid in self.uuid_black_list:
+            rule_uuid = str(uuid4())
+        self.uuid_black_list.append(rule_uuid)
+        rule_id = re.sub(re.compile('[()*+!,\[\].\s"]'), "_", rule_uuid)
         risk_score = self.map_risk_score(configs.get("level", "medium"))
         references = configs.get("reference")
         if references is None:
             references = configs.get("references")
+        falsepositives = []
+        yml_falsepositives = configs.get('falsepositives',["Unknown"])
+        if isinstance(yml_falsepositives,str):
+            falsepositives.append(yml_falsepositives)
+        else:
+            falsepositives=yml_falsepositives
         rule = {
             "description": configs.get("description", ""),
             "enabled": True,
-            "false_positives": configs.get('falsepositives', "Unknown"),
+            "false_positives": falsepositives,
             "filters": [],
             "from": "now-360s",
             "immutable": False,
@@ -1370,7 +1396,7 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
             "meta": {
                 "from": "1m"
             },
-            "severity": configs.get("level", "medium"),
+            "severity": self.map_severity(configs.get("level", "medium")),
             "tags": new_tags,
             "to": "now",
             "type": self.rule_type,
@@ -1381,6 +1407,8 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
             rule.update({"threshold": self.rule_threshold})
         if references:
             rule.update({"references": references})
+        self.rule_type = "query"
+        self.rule_threshold = {}
         return json.dumps(rule)
 
 class KibanaNdjsonBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
