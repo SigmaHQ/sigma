@@ -1,6 +1,6 @@
-title: Multiple Accounts Failing to Authenticate from Single Process
-id: fe563ab6-ded4-4916-b49f-a3a8445fe280
-description: Detects failed logins with multiple accounts from a single process on the system.
+title: Multiple Users Remotely Failing To Authenticate From Single Source
+id: add2ef8d-dc91-4002-9e7e-f2702369f53a
+description: Detects a source system failing to authenticate against a remote host with multiple users.
 author: Mauricio Velazco
 date: 2021/06/01
 tags:
@@ -13,12 +13,12 @@ logsource:
 detection:
     selection1:
         EventID: '4625'
-        Logon_Type: '2'
+        Logon_Type: '3'
     filter:
-        Caller_Process_Name: '-'
+        Source_Network_Address: '-'
     timeframe: 24h
     condition:
-        - selection1 and not filter | count(Account_Name) by Caller_Process_Name > 10
+        - selection1 and not filter | count(Account_Name) by Source_Network_Address > 10
 falsepositives:
     - Terminal servers
     - Jump servers
