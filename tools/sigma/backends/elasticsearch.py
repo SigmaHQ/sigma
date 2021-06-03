@@ -1223,7 +1223,13 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
     identifier = "es-rule"
     active = True
     uuid_black_list = []
-
+    options = ElasticsearchQuerystringBackend.options + (
+                ("put_filename_in_ref", False, "Want to have yml name in reference ?", None),
+                ("convert_to_url", False, "Want to convert to a URL ?", None),
+                ("path_to_replace", "../", "The local path to replace with dest_base_url", None),
+                ("dest_base_url", "https://github.com/SigmaHQ/sigma/tree/master/", "The URL prefix", None),
+                ("custom_tag", None , "Add a custom tag", None),
+            )
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tactics = self._load_mitre_file("tactics")
@@ -1326,6 +1332,25 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
         else:
             return "medium"
 
+    def build_ymlfile_ref(self, configs):
+        if self.put_filename_in_ref == False:  # Dont want
+            return None
+
+        yml_filename = configs.get("yml_filename")
+        yml_path = configs.get("yml_path")
+        if yml_filename == None or yml_path == None:
+            return None
+            
+        if self.convert_to_url:
+            yml_path = yml_path.replace('\\','/')                              #windows path to url 
+            self.path_to_replace = self.path_to_replace.replace('\\','/')      #windows path to url            
+            if self.path_to_replace not in yml_path: #Error to change
+                return None
+
+            new_ref = yml_path.replace(self.path_to_replace,self.dest_base_url) + '/' + yml_filename
+        else:
+            new_ref = yml_filename
+        return new_ref
 
     def create_rule(self, configs, index):
         tags = configs.get("tags", [])
@@ -1358,6 +1383,10 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
                     if tact:
                         new_tags.append(tag.title())
                         tactics_list.append(tact)
+        
+        if self.custom_tag:
+            new_tags.append(self.custom_tag)
+            
         threat = self.create_threat_description(tactics_list=tactics_list, techniques_list=technics_list)
         rule_name = configs.get("title", "").lower()
         rule_uuid = configs.get("id", "").lower()
@@ -1377,6 +1406,16 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
             falsepositives.append(yml_falsepositives)
         else:
             falsepositives=yml_falsepositives
+        
+        add_ref_yml= self.build_ymlfile_ref(configs)
+        if add_ref_yml:
+            if references is None: # No ref
+                references=[]
+            if add_ref_yml in references:
+                pass # else put a duplicate ref for  multi rule file
+            else:
+                references.append(add_ref_yml)
+        
         rule = {
             "description": configs.get("description", ""),
             "enabled": True,
