@@ -1,0 +1,32 @@
+title: Alternate PowerShell Hosts Pipe
+id: 58cb02d5-78ce-4692-b3e1-dce850aae41a
+description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
+status: experimental
+date: 2019/09/12
+modified: 2019/11/10
+author: Roberto Rodriguez @Cyb3rWard0g
+references:
+    - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190815181010.html
+tags:
+    - attack.execution
+    - attack.t1086          # an old one
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: pipe_created
+detection:
+    selection:
+        PipeName|startswith: '\PSHost'
+    filter:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\powershell_ise.exe'
+    condition: selection and not filter
+fields:
+    - ComputerName
+    - User
+    - Image
+    - PipeName
+falsepositives:
+    - Programs using PowerShell directly without invocation of a dedicated interpreter.
+level: medium
