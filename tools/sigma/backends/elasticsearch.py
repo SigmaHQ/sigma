@@ -21,6 +21,7 @@ import sys
 import os
 from random import randrange
 from distutils.util import strtobool
+from uuid import uuid4
 
 import sigma
 import yaml
@@ -509,16 +510,22 @@ class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, Elast
                             }
                     else:  # if the condition is count() by MyGroupedField > XYZ
                         group_aggname = "{}_count".format(agg.groupfield)
+                        count_agg_name = "single_{}_count".format(agg.groupfield)
                         self.queries[-1]['aggs'] = {
                             group_aggname: {
                                 'terms': {
                                     'field': '%s' % (agg.groupfield)
                                 },
                                 'aggs': {
+                                    count_agg_name: {
+                                        'value_count': {
+                                            'field': '%s' % agg.groupfield
+                                        }
+                                    },
                                     'limit': {
                                         'bucket_selector': {
                                             'buckets_path': {
-                                                'count': group_aggname
+                                                'count': count_agg_name
                                             },
                                             'script': 'params.count %s %s' % (agg.cond_op, agg.condition)
                                         }
@@ -1215,7 +1222,14 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
     """Elasticsearch detection rule backend"""
     identifier = "es-rule"
     active = True
-
+    uuid_black_list = []
+    options = ElasticsearchQuerystringBackend.options + (
+                ("put_filename_in_ref", False, "Want to have yml name in reference ?", None),
+                ("convert_to_url", False, "Want to convert to a URL ?", None),
+                ("path_to_replace", "../", "The local path to replace with dest_base_url", None),
+                ("dest_base_url", "https://github.com/SigmaHQ/sigma/tree/master/", "The URL prefix", None),
+                ("custom_tag", None , "Add a custom tag", None),
+            )
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tactics = self._load_mitre_file("tactics")
@@ -1298,6 +1312,8 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
                 return technique
 
     def map_risk_score(self, level):
+        if level not in ["low","medium","high","critical"]:
+            level = "medium"
         if level == "low":
             return 5
         elif level == "medium":
@@ -1306,6 +1322,35 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
             return 65
         elif level == "critical":
             return 95
+
+    def map_severity(self, severity):
+        severity = severity.lower()
+        if severity  in ["low","medium","high","critical"]:
+            return severity
+        elif severity == "informational":
+            return "low"
+        else:
+            return "medium"
+
+    def build_ymlfile_ref(self, configs):
+        if self.put_filename_in_ref == False:  # Dont want
+            return None
+
+        yml_filename = configs.get("yml_filename")
+        yml_path = configs.get("yml_path")
+        if yml_filename == None or yml_path == None:
+            return None
+            
+        if self.convert_to_url:
+            yml_path = yml_path.replace('\\','/')                              #windows path to url 
+            self.path_to_replace = self.path_to_replace.replace('\\','/')      #windows path to url            
+            if self.path_to_replace not in yml_path: #Error to change
+                return None
+
+            new_ref = yml_path.replace(self.path_to_replace,self.dest_base_url) + '/' + yml_filename
+        else:
+            new_ref = yml_filename
+        return new_ref
 
     def create_rule(self, configs, index):
         tags = configs.get("tags", [])
@@ -1338,17 +1383,43 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
                     if tact:
                         new_tags.append(tag.title())
                         tactics_list.append(tact)
+        
+        if self.custom_tag:
+            new_tags.append(self.custom_tag)
+            
         threat = self.create_threat_description(tactics_list=tactics_list, techniques_list=technics_list)
         rule_name = configs.get("title", "").lower()
-        rule_id = re.sub(re.compile('[()*+!,\[\].\s"]'), "_", rule_name)
+        rule_uuid = configs.get("id", "").lower()
+        if rule_uuid == "":
+            rule_uuid = str(uuid4())
+        if rule_uuid in self.uuid_black_list:
+            rule_uuid = str(uuid4())
+        self.uuid_black_list.append(rule_uuid)
+        rule_id = re.sub(re.compile('[()*+!,\[\].\s"]'), "_", rule_uuid)
         risk_score = self.map_risk_score(configs.get("level", "medium"))
         references = configs.get("reference")
         if references is None:
             references = configs.get("references")
+        falsepositives = []
+        yml_falsepositives = configs.get('falsepositives',["Unknown"])
+        if isinstance(yml_falsepositives,str):
+            falsepositives.append(yml_falsepositives)
+        else:
+            falsepositives=yml_falsepositives
+        
+        add_ref_yml= self.build_ymlfile_ref(configs)
+        if add_ref_yml:
+            if references is None: # No ref
+                references=[]
+            if add_ref_yml in references:
+                pass # else put a duplicate ref for  multi rule file
+            else:
+                references.append(add_ref_yml)
+        
         rule = {
             "description": configs.get("description", ""),
             "enabled": True,
-            "false_positives": configs.get('falsepositives', "Unknown"),
+            "false_positives": falsepositives,
             "filters": [],
             "from": "now-360s",
             "immutable": False,
@@ -1364,7 +1435,7 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
             "meta": {
                 "from": "1m"
             },
-            "severity": configs.get("level", "medium"),
+            "severity": self.map_severity(configs.get("level", "medium")),
             "tags": new_tags,
             "to": "now",
             "type": self.rule_type,
@@ -1375,6 +1446,8 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
             rule.update({"threshold": self.rule_threshold})
         if references:
             rule.update({"references": references})
+        self.rule_type = "query"
+        self.rule_threshold = {}
         return json.dumps(rule)
 
 class KibanaNdjsonBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):

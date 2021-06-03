@@ -17,6 +17,8 @@ from colorama import Fore
 class TestRules(unittest.TestCase):
     MITRE_TECHNIQUE_NAMES = ["process_injection", "signed_binary_proxy_execution", "process_injection"] # incomplete list
     MITRE_TACTICS = ["initial_access", "execution", "persistence", "privilege_escalation", "defense_evasion", "credential_access", "discovery", "lateral_movement", "collection", "exfiltration", "command_and_control", "impact", "launch"]
+    # Don't use trademarks in rules - they require non-ASCII characters to be used on we don't want them in our rules
+    TRADE_MARKS = {"MITRE ATT&CK", "ATT&CK"}
 
     path_to_rules = "rules"
 
@@ -57,6 +59,19 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(files_with_incorrect_extensions, [], Fore.RED + 
                         "There are rule files with extensions other than .yml")
+
+    def test_legal_trademark_violations(self):
+        files_with_legal_issues = []
+
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            with open(file, 'r') as fh:
+                file_data = fh.read()
+                for tm in self.TRADE_MARKS:
+                    if tm in file_data:
+                        files_with_legal_issues.append(file)
+
+        self.assertEqual(files_with_legal_issues, [], Fore.RED + 
+                        "There are rule files which contains a trademark or reference that doesn't comply with the respective trademark requirements - please remove the trademark to avoid legal issues")
 
     def test_confirm_correct_mitre_tags(self):
         files_with_incorrect_mitre_tags = []
@@ -357,9 +372,10 @@ class TestRules(unittest.TestCase):
             for key in logsource:
                 if key.lower() not in ['category', 'product', 'service', 'definition']:
                     print(Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
+
 def get_mitre_data():
     """
-    Generate tags from live MITRE ATT&CK® TAXI service to get up-to-date data
+    Generate tags from live TAXI service to get up-to-date data
     """
     # Get ATT&CK information
     lift = attack_client()
