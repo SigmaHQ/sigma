@@ -102,6 +102,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
                 "ParentProcessName": ("InitiatingProcessParentFileName", self.default_value_mapping),
                 "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
+                "ServiceFileName": ("FileName", self.default_value_mapping),
                 "SourceIp": ("LocalIP", self.default_value_mapping),
                 "SourcePort": ("LocalPort", self.porttype_mapping),
                 "TargetFilename": ("FolderPath", self.default_value_mapping),
@@ -347,6 +348,10 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 self.tables.append("DeviceLogonEvents")
                 self.current_table = "DeviceLogonEvents"
                 return None
+            elif self.service == "system" and event_id == 7045: # New Service Install
+                self.tables.append("DeviceEvents")
+                self.current_table = "DeviceEvents"
+                return "ActionType == \"ServiceInstalled\""
             else:
                 if not self.tables:
                     raise NotSupportedError("No sysmon Event ID provided")
