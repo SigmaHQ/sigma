@@ -1,0 +1,27 @@
+title: Multiple Valid Accounts Failing to Authenticate from Single Source using NTLM
+id: f88bab7f-b1f4-41bb-bdb1-4b8af35b0470
+description: Detects multiple failed logins with multiple valid domain accounts from a single source system using the NTLM protocol.
+author: Mauricio Velazco
+date: 2021/05/05
+tags:
+    - attack.t1110.003
+    - attack.initial_access
+    - attack.privilege_escalation
+logsource:
+    product: windows
+    service: security
+detection:
+    selection1:
+        EventID: '4776'
+        action: 'failure'
+    filter:
+        Logon_Account: '*$'
+    timeframe: 24h
+    condition:
+        - selection1 and not filter | count(Logon_Account) by Source_Workstation > 10
+falsepositives:
+    - Terminal servers
+    - Jump servers
+    - Other multiuser systems like Citrix server farms
+    - Workstations with frequently changing users
+level: medium
