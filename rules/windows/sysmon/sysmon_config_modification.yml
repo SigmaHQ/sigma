@@ -1,0 +1,30 @@
+title: Sysmon Configuration Modification
+id: 1f2b5353-573f-4880-8e33-7d04dcf97744
+description: Someone try to hide from Sysmon
+status: experimental
+author: frack113
+date: 2021/06/04
+references:
+    - https://talesfrominfosec.blogspot.com/2017/12/killing-sysmon-silently.html
+tags:
+    - attack.defense_evasion
+    - attack.t1564
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection_stop:
+        EventID: 4
+        State: Stopped
+    selection_conf:
+        EventID: 16
+        message|startswith:
+            - 'Sysmon config state changed'
+    selection_error:
+        EventID: 255
+        Description|contains:
+            - 'Failed to open service configuration with error'
+    condition: 1 of them
+falsepositives:
+    - legitimate administrative action
+level: high
