@@ -5,7 +5,7 @@ description: Detects Obfuscated use of Environment Variables to execute PowerShe
 status: experimental
 author: Jonathan Cheong, oscd.community
 date: 2020/10/15
-modified: 2021/05/27
+modified: 2021/06/10
 references:
      - https://github.com/Neo23x0/sigma/issues/1009 #(Task 24)
 tags:
@@ -19,7 +19,7 @@ level: high
 detection:
     selection:
         - ImagePath|re: '.*cmd.{0,5}(?:\/c|\/r)(?:\s|)\"set\s[a-zA-Z]{3,6}.*(?:\{\d\}){1,}\\\"\s+?\-f(?:.*\)){1,}.*\"'
-    condition: selection and selection_eventid
+    condition: all of them
 ---
 logsource:
     product: windows
@@ -30,10 +30,7 @@ detection:
 ---
 logsource:
     product: windows
-    category: driver_load
-detection:
-    selection_eventid:
-        EventID: 6
+    category: process_creation
 ---
 logsource:
     product: windows
