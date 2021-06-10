@@ -4,16 +4,14 @@ date: 2021/04/30
 author: Florent Labouyrie
 logsource:
     product: windows
-    category: Sysmon
+    category: process_access
 detection:
     selection_process:
-        EventID: 10
-        destination_process_name: "svchost.exe"
+        TargetImage: "svchost.exe"
     selection_memory:
-        EventID: 10
-        ProcessAccess: "0x143a"
+        GrantedAccess: "0x143a"
     filter_trusted_process_access:
-        source_process_name: 
+        SourceImage: 
           - "services.exe"
           - "msiexec.exe"
     condition: selection_process and selection_memory and not filter_trusted_process_access
