@@ -1,3 +1,4 @@
+action: global
 title: MSExchange Transport Agent Installation
 id: 83809e84-4475-4b69-bc3e-4aad8568612f
 status: experimental
@@ -8,16 +9,25 @@ tags:
     - attack.persistence  
     - attack.t1505.002    
 author: Tobias Michalski  
-date: 2021/06/08  
-logsource:        
-    service: msexchange-management
-    product: windows
+date: 2021/06/08
 detection:
-    selection:
-        Message|contains: 'Install-TransportAgent'
     condition: selection
 fields:
     - AssemblyPath
 falsepositives:
     - legitimate installations of exchange TransportAgents. AssemblyPath is a good indicator for this.
 level: medium
+---
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        CommandLine|contains: 'Install-TransportAgent'
+---
+logsource:
+    product: windows
+    service: msexchange-management
+detection:
+    selection:
+        Message|contains: 'Install-TransportAgent'
