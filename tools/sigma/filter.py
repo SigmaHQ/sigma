@@ -27,14 +27,16 @@ class SigmaRuleFilter:
     STATES = ["experimental", "testing", "stable"]
 
     def __init__(self, expr):
-        self.minlevel      = None 
-        self.maxlevel      = None 
+        self.minlevel      = None
+        self.maxlevel      = None
         self.status        = None
         self.logsources    = list()
         self.notlogsources = list()
         self.tags          = list()
         self.nottags       = list()
         self.inlastday     = None
+        self.condition     = list()
+        self.notcondition  = list()
 
         for cond in [c.replace(" ", "") for c in expr.split(",")]:
             if cond.startswith("level<="):
@@ -67,10 +69,14 @@ class SigmaRuleFilter:
             elif cond.startswith("tag="):
                 self.tags.append(cond[cond.index("=") + 1:].lower())
             elif cond.startswith("tag!="):
-                self.nottags.append(cond[cond.index("=") + 1:].lower())                
+                self.nottags.append(cond[cond.index("=") + 1:].lower())
+            elif cond.startswith("condition="):
+                self.condition.append(cond[cond.index("=") + 1:].lower())
+            elif cond.startswith("condition!="):
+                self.notcondition.append(cond[cond.index("=") + 1:].lower())
             elif cond.startswith("inlastday="):
                 nbday = cond[cond.index("=") + 1:]
-                try:     
+                try:
                     self.inlastday = int(nbday)
                 except ValueError as e:
                     raise SigmaRuleFilterParseException("Unknown number '%s' in condition '%s'" % (nbday, cond)) from e
@@ -110,7 +116,7 @@ class SigmaRuleFilter:
                 logsources = { value for key, value in yamldoc['logsource'].items() }
             except (KeyError, AttributeError):    # no log source set
                 return False    # User wants status restriction, but it's not possible here
-
+            print(self.logsources)
             for logsrc in self.logsources:
                 if logsrc not in logsources:
                     return False
@@ -146,27 +152,53 @@ class SigmaRuleFilter:
             for tag in self.nottags:
                 if tag in nottags:
                     return False
-        
+
         # date in the last N days
         if self.inlastday:
            try:
                date_str = yamldoc['date']
-           except KeyError:    # missing date 
+           except KeyError:    # missing date
                return False    # User wants date time restriction, but it's not possible here
-               
+
            try:
                modified_str = yamldoc['modified']
-           except KeyError:    # no update 
-               modified_str = None   
+           except KeyError:    # no update
+               modified_str = None
            if modified_str:
                date_str = modified_str
-           
+
            date_object = datetime.datetime.strptime(date_str, '%Y/%m/%d')
            today_objet = datetime.datetime.now()
            delta       = today_objet - date_object
            if delta.days > self.inlastday:
                 return False
-            
+
+        if self.condition:
+            try:
+                conditions = yamldoc['detection']['condition']
+                if isinstance(conditions,list):                         # sone time conditions are list even with only 1 line
+                    s_condition = ' '.join(conditions)
+                else:
+                    s_condition = conditions
+            except KeyError:    # missing condition
+                return False    # User wants condition restriction, but it's not possible here
+            for val in self.condition:
+                if not val in s_condition:
+                    return False
+
+        if self.notcondition:
+            try:
+                conditions = yamldoc['detection']['condition']
+                if isinstance(conditions,list):                         # sone time conditions are list even with only 1 line
+                    s_condition = ' '.join(conditions)
+                else:
+                    s_condition = conditions
+            except KeyError:    # missing condition
+                return False    # User wants condition restriction, but it's not possible here
+            for val in self.notcondition:
+                if val in s_condition:
+                    return False
+
         # all tests passed
         return True
 
