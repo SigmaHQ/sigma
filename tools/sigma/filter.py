@@ -116,7 +116,7 @@ class SigmaRuleFilter:
                 logsources = { value for key, value in yamldoc['logsource'].items() }
             except (KeyError, AttributeError):    # no log source set
                 return False    # User wants status restriction, but it's not possible here
-            print(self.logsources)
+
             for logsrc in self.logsources:
                 if logsrc not in logsources:
                     return False
