@@ -24,6 +24,13 @@ logsources:
     service: sysmon
     conditions:
       source: 'WinEventLog:Microsoft-Windows-Sysmon/Operational'
+  windows-process-creation:
+    product: windows
+    service: sysmon
+    category: process_creation
+    # Optimized search for process creation, being dramatically faster than EventCode=1 search, as 'ParentProcessGuid' is more unique than '1' in the raw data.
+    # This also supports custom splunk macros.
+    search: '`example_splunk_macro_for_sysmon` ParentProcessGuid'
   windows-powershell:
     product: windows
     service: powershell

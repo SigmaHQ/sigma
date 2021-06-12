@@ -260,6 +260,12 @@ class NodeSubexpression(ParseTreeNode):
         self.items = subexpr
 
 
+class SigmaSearchValueAsIs:
+    """The contained value is used as-is in the output."""
+    def __init__(self, value):
+        self.value = value
+
+
 # Parse tree generators: generate parse tree nodes from extended conditions
 def generateXOf(sigma, val, condclass):
     """
