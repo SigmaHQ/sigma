@@ -9,6 +9,7 @@ tags:
     - attack.persistence
 author: Bhabesh Raj
 date: 2021/01/10
+modified: 2021/06/01
 logsource:
     category: registry_event
     product: windows
@@ -20,7 +21,9 @@ detection:
         - '\Software\Microsoft\Office\Excel\Addins\'
         - '\Software\Microsoft\Office\Powerpoint\Addins\'
         - '\Software\Microsoft\VSTO\Security\Inclusion\'
-    condition: selection
+    filter:
+        Image|endswith: '\msiexec.exe'
+    condition: selection and not filter
 falsepositives:
   - Unknown
 level: high
