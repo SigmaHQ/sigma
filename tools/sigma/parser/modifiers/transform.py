@@ -19,6 +19,7 @@ from .mixins import ListOrStringModifierMixin
 from sigma.parser.condition import ConditionAND
 from base64 import b64encode
 from ipaddress import ip_network
+import re
 
 class SigmaContainsModifier(ListOrStringModifierMixin, SigmaTransformModifier):
     """Add *-wildcard before and after all string(s)"""
@@ -143,7 +144,7 @@ class SigmaIpCIDRV4hModifier(ListOrStringModifierMixin, SigmaTransformModifier):
     identifier = "ipcidrv4"
     active = True
     
-    def convert_ipv4(self,ip_str : str):
+    def CidrV4_to_list(self,ip_str : str):
         """ the network CIDR brain """
 
         subnet = int (ip_str.split('/')[1])
@@ -170,6 +171,7 @@ class SigmaIpCIDRV4hModifier(ListOrStringModifierMixin, SigmaTransformModifier):
         return (list_ip)
         
     def apply_str(self, val : str):
-        if type(val) == str and '/' in val:
-            val = self.convert_ipv4(val)
+        if type(val) == str:
+            if re.match('\d+\.\d+\.\d+\.\d+/\d+',val):
+                val = self.CidrV4_to_list(val)
         return val
