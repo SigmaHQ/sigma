@@ -1,15 +1,22 @@
+action: global
 title: Windows Defender Threat Detection Disabled
 id: fe34868f-6e0e-4882-81f6-c43aa8f15b62
 description: Detects disabling Windows Defender threat protection
 date: 2020/07/28
-author: Ján Trenčanský
+modified: 2021/06/07
+author: Ján Trenčanský, frack113
 references:
     - https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-antivirus/troubleshoot-windows-defender-antivirus
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1562.001/T1562.001.md
 status: stable
 tags:
     - attack.defense_evasion
     - attack.t1089           # an old one
     - attack.t1562.001
+falsepositives:
+    - Administrator actions
+level: high
+---    
 logsource:
     product: windows
     service: windefend
@@ -27,6 +34,13 @@ detection:
             - HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender
         Details: 'DWORD (0x00000001)'
     condition: 1 of them
-falsepositives:
-    - Administrator actions
-level: high
+---
+logsource:
+    product: windows
+    category: registry_event
+detection:
+    tamper_registry:
+        EventType: 'SetValue'
+        TargetObject: 'HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\DisableAntiSpyware'
+        Details: 'DWORD (0x00000001)'
+    condition: tamper_registry
