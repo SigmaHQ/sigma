@@ -1,0 +1,144 @@
+title: Devo sourcetype mappings for windows sources
+order: 20
+backends:
+  - devo
+logsources:
+  windows:
+    product: windows
+    index: box.all.win
+  windows-category-process_creation:
+    product: windows
+    category: process_creation
+  windows-service-powershell:
+    product: windows
+    service: powershell
+  windows-service-powershell-classic:
+    product: windows
+    service: powershell-classic
+  windows-service-security:
+    product: windows
+    service: security
+  windows-service-sysmon:
+    product: windows
+    service: security
+  windows-category-registry_event:
+    product: windows
+    category: registry_event
+  windows-category-process_access:
+    product: windows
+    category: process_access
+  windows-service-windefend:
+    product: windows
+    service: windefend
+  windows-service-windef:
+    product: windows
+    service: windef
+  windows_defender:
+    product: windows_defender
+    index: box.all.win
+  windows-service-taskscheduler:
+    product: windows
+    service: taskscheduler
+  windows-service-wmi:
+    product: windows
+    service: wmi
+  windows-service-system:
+    product: windows
+    service: system
+  windows-category-network_connection:
+    product: windows
+    category: network_connection
+  windows-category-image_load:
+    product: windows
+    category: image_load
+  windows-category-file_event:
+    product: windows
+    category: file_event
+  windows-category-driver_load:
+    product: windows
+    category: driver_load
+  windows-service-applocker:
+    product: windows
+    service: applocker
+  windows-service-dns-server:
+    product: windows
+    service: dns-server
+  windows-service-ntlm:
+    product: windows
+    service: ntlm
+  windows-service-driver-framework:
+    product: windows
+    service: driver-framework
+  windows-category-create_remote_thread:
+    product: windows
+    category: create_remote_thread
+  windows-category-create_stream_hash:
+    product: windows
+    category: create_stream_hash
+  windows-category-dns_query:
+    product: windows
+    category: dns_query
+  windows-category-file_delete:
+    product: windows
+    category: file_delete
+  windows-category-pipe_created:
+    product: windows
+    category: pipe_created
+  windows-category-raw_access_thread:
+    product: windows
+    category: raw_access_thread
+  windows-category-wmi_event:
+    product: windows
+    category: wmi_event
+fieldmappings:
+  EventID: eventID
+  HostName: machine
+  HostApplication: ProcessName # ???
+  Message: message
+  CommandLine: procCmdLine
+  Commandline: procCmdLine
+  ProcessCommandline: procCmdLine
+  ProcessCommandLine: procCmdLine
+  Image: serviceFileName
+  User: username
+  TaskName: category
+  TargetFilename: serviceFileName # ???
+  ServiceName: service
+  ProcessName: callerProcName
+  OriginalFilename: serviceFileName
+  OriginalFileName: serviceFileName
+  MachineName: machine
+  LogonId: subjectLogonId
+  GroupName: groupName
+  EventType: eventType
+  Description: message
+  Details: extMessage
+  ObjectName: objName
+  CreatorProcessName: parentProcessName
+  ServiceFileName: serviceFileName
+  ObjectType: objType
+  Keywords: keywords
+  SubjectLogonId: subjectLogonId
+  UserName: username
+  Status: status
+  SourceNetworkAddress: srcIp
+  AccountName: account
+  ObjectValueName: objValueName
+  LogonProcessName: procName
+  TargetUserName: targetUsername
+  WorkstationName: workstation
+  SubjectUserName: subjectUsername
+  Source: sourceName
+  Destination: dstIp
+  TargetImage: serviceFileName
+  CallingProcessName: callerProcName
+  TargetName: targetUsername
+  FileName: serviceFileName
+  TargetObject: objName
+  DestinationHostname: machine
+  DestinationIp: dstIp
+  DestinationIsIpv6: dstIp
+  ImageLoaded: serviceFileName
+  ScriptBlockText: select str(jqeval(jqcompile(".columns.data.EventData.ScriptBlockText"), jsonparse(message))) as ScriptBlockText
+  DestinationPort: select int(trim(split(split(rawMessage, "Destination Port:", 1), "&", 0))) as destinationPort / where eventID > 5100  or eventID < 5199
+
