@@ -1,0 +1,39 @@
+title: Renamed MegaSync
+id: 643bdcac-8b82-49f4-9fd9-25a90b929f3b
+status: experimental
+description: Detects the execution of a renamed meg.exe (MegaSync) during incident response engagements associated with ransomware families like Nefilim, Sodinokibi, Pysa, and Conti.
+references:
+    - https://redcanary.com/blog/rclone-mega-extortion/
+author: Sittikorn S
+date: 2021/06/22
+tags:
+    - attack.Defense_Evasion
+    - attack.T1218.001
+logsource:
+    product: windows
+    service: sysmon # require sysmon version >= 10.0
+detection:
+    selection:
+        EventID: 
+            - '1'
+        OriginalFileName:
+            - 'meg.exe'
+     filter:
+        Image|endswith:
+            - '\meg.exe'
+     condition: selection and not filter
+---
+logsource:
+      product: windows
+      category: process_creation
+detection:
+      selection:
+          ParentImage|endswith:
+              - '\explorer.exe'
+          CommandLine|contains:
+              - 'C:\Windows\Temp\meg.exe'
+      condition: selection
+falsepositives:
+    - Software that illegaly integrates MegaSync in a renamed form
+    - Administrators that have renamed MegaSync
+level: high
