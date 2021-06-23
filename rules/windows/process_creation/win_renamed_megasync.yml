@@ -11,28 +11,16 @@ tags:
     - attack.t1218
 logsource:
     product: windows
-    service: sysmon # require sysmon version >= 10.0
-detection:
-    selection_sysmon:
-        EventID: 
-            - '1'
-        OriginalFileName:
-            - 'meg.exe'
-    filter:
-        Image|endswith:
-            - '\meg.exe'
-    condition: selection_sysmon and not filter
----
-logsource:
-    product: windows
     category: process_creation
 detection:
     selection_proc:
-        ParentImage|endswith:
-            - '\explorer.exe'
-        CommandLine|contains:
-            - 'C:\Windows\Temp\meg.exe'
-    condition: selection_proc
+        ParentImage|endswith: '\explorer.exe'
+        CommandLine|contains: 'C:\Windows\Temp\meg.exe'
+    selection_orig:
+        OriginalFileName: 'meg.exe'
+    filter:
+        Image|endswith: '\meg.exe'
+    condition: selection_proc or ( selection_orig and not filter )
 falsepositives:
     - Software that illegaly integrates MegaSync in a renamed form
     - Administrators that have renamed MegaSync
