@@ -88,12 +88,12 @@ def flatten(l):
 
 def generatelistforcidrv4 (fieldname : str,ip_str : str, Separator_str : str, explose : bool):
     """ the network CIDR brain """
-    
+
     if ',' in ip_str:
         list_ip_str = ip_str.split(',')
     else:
         list_ip_str = [ip_str]
-  
+
     list_field_ip = []    
     for cidr in list_ip_str:
         if explose :
@@ -118,9 +118,8 @@ def generatelistforcidrv4 (fieldname : str,ip_str : str, Separator_str : str, ex
             list_ip = [str(ip_sub).replace(remp_old,remp_new) for ip_sub in ip_range]
         else:
             list_ip = [cidr]
-            
+
         for term in list_ip:
             list_field_ip.append(str(fieldname+': '+ term))
     str_ip = Separator_str.join(list_field_ip)
-    return str_ip
-    
+    return str_ip 

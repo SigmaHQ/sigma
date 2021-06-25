@@ -23,7 +23,7 @@ class SigmaRegularExpressionModifier(SigmaTypeModifier):
     valid_input_types = (str,)
 
 class SigmaIpCIDRV4Modifier(SigmaTypeModifier):
-    """Convert ip CIDR to x.x.x.* """
+    """Treat value as CIDR expression"""
     identifier = "ipcidrv4"
     active = True
     valid_input_types = (str,)

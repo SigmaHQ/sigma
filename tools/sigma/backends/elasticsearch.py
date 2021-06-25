@@ -24,7 +24,7 @@ from distutils.util import strtobool
 
 import sigma
 import yaml
-from sigma.parser.modifiers.type import SigmaRegularExpressionModifier, SigmaTypeModifier, SigmaIpCIDRV4Modifier
+from sigma.parser.modifiers.type import SigmaRegularExpressionModifier, SigmaIpCIDRV4Modifier, SigmaTypeModifier
 from sigma.parser.condition import ConditionOR, ConditionAND, NodeSubexpression
 
 from sigma.config.mapping import ConditionalFieldMapping
@@ -70,7 +70,7 @@ class ElasticsearchWildcardHandlingMixin(object):
             ("case_insensitive_whitelist", None, "Fields to make the values case insensitive regex. Automatically sets the field as a keyword. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("case_insensitive_blacklist", None, "Fields to exclude from being made into case insensitive regex. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("wildcard_use_keyword", "true", "Use analyzed field or wildcard field if the query uses a wildcard value (ie: '*mall_wear.exe'). Set this to 'False' to use analyzed field or wildcard field. Valid options are: true/false", None),
-            ("convert_cidr","False","Convert cidr to list",None)
+            ("explose_cidr", "false", "convert cidr to a full list of ip.Valid options are: true/false", None),
             )
     reContainsWildcard = re.compile("(?:(?<!\\\\)|\\\\\\\\)[*?]").search
     uuid_regex = re.compile( "[0-9a-fA-F]{8}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{12}", re.IGNORECASE )
@@ -120,10 +120,12 @@ class ElasticsearchWildcardHandlingMixin(object):
 
     def generateMapItemTypedNode(self, fieldname, value):
         if type(value) == SigmaIpCIDRV4Modifier:
-            if self.convert_cidr == "True" :
+            if self.explose_cidr.lower() == "true" :
                 return generatelistforcidrv4(fieldname,str(value),str(self.listSeparator),True)
             else:
                 return generatelistforcidrv4(fieldname,str(value),str(self.listSeparator),False)
+        elif type(value) == SigmaRegularExpressionModifier:
+            return "%s: /%s/" % (fieldname,str(value))
         else:
             raise NotImplementedError("Type modifier '{}' is not supported by backend".format(value.identifier))
 
