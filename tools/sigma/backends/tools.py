@@ -121,7 +121,6 @@ def generatelistforcidrv4 (fieldname : str,ip_str : str, Separator_str : str, ex
             
         for term in list_ip:
             list_field_ip.append(str(fieldname+': '+ term))
-            print
     str_ip = Separator_str.join(list_field_ip)
     return str_ip
     
