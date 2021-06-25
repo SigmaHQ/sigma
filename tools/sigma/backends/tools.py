@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from .base import BaseBackend
+from ipaddress import ip_network
 
 ### Backends for developement purposes
 
@@ -84,3 +85,43 @@ def flatten(l):
           yield from flatten(i)
       else:
           yield i
+
+def generatelistforcidrv4 (fieldname : str,ip_str : str, Separator_str : str, explose : bool):
+    """ the network CIDR brain """
+    
+    if ',' in ip_str:
+        list_ip_str = ip_str.split(',')
+    else:
+        list_ip_str = [ip_str]
+  
+    list_field_ip = []    
+    for cidr in list_ip_str:
+        if explose :
+            subnet = int (str(cidr).split('/')[1])
+            if subnet <= 8 :
+                new_sub = 8
+                remp_old = '0/8'
+                remp_new = '*'
+            elif subnet <= 16:
+                new_sub = 16
+                remp_old = '0/16'
+                remp_new = '*'
+            elif subnet <= 24:
+                new_sub = 24
+                remp_old = '0/24'
+                remp_new = '*'
+            elif subnet <= 32:
+                new_sub = 32
+                remp_old = '/32'
+                remp_new = ''
+            ip_range = list(ip_network(str(cidr)).subnets(new_prefix=new_sub))
+            list_ip = [str(ip_sub).replace(remp_old,remp_new) for ip_sub in ip_range]
+        else:
+            list_ip = [cidr]
+            
+        for term in list_ip:
+            list_field_ip.append(str(fieldname+': '+ term))
+            print
+    str_ip = Separator_str.join(list_field_ip)
+    return str_ip
+    

@@ -24,13 +24,16 @@ from distutils.util import strtobool
 
 import sigma
 import yaml
-from sigma.parser.modifiers.type import SigmaRegularExpressionModifier, SigmaTypeModifier
+from sigma.parser.modifiers.type import SigmaRegularExpressionModifier, SigmaTypeModifier, SigmaIpCIDRV4Modifier
 from sigma.parser.condition import ConditionOR, ConditionAND, NodeSubexpression
 
 from sigma.config.mapping import ConditionalFieldMapping
 from .base import BaseBackend, SingleTextQueryBackend
 from .mixins import RulenameCommentMixin, MultiRuleOutputMixin
 from .exceptions import NotSupportedError
+
+
+from .tools  import generatelistforcidrv4
 
 class DeepFieldMappingMixin(object):
     def fieldNameMapping(self, fieldname, value):
@@ -66,7 +69,8 @@ class ElasticsearchWildcardHandlingMixin(object):
             ("keyword_blacklist", None, "Fields to never set as keyword (ie: always set as analyzed field). Bypasses case insensitive options. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("case_insensitive_whitelist", None, "Fields to make the values case insensitive regex. Automatically sets the field as a keyword. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("case_insensitive_blacklist", None, "Fields to exclude from being made into case insensitive regex. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
-            ("wildcard_use_keyword", "true", "Use analyzed field or wildcard field if the query uses a wildcard value (ie: '*mall_wear.exe'). Set this to 'False' to use analyzed field or wildcard field. Valid options are: true/false", None)
+            ("wildcard_use_keyword", "true", "Use analyzed field or wildcard field if the query uses a wildcard value (ie: '*mall_wear.exe'). Set this to 'False' to use analyzed field or wildcard field. Valid options are: true/false", None),
+            ("convert_cidr","False","Convert cidr to list",None)
             )
     reContainsWildcard = re.compile("(?:(?<!\\\\)|\\\\\\\\)[*?]").search
     uuid_regex = re.compile( "[0-9a-fA-F]{8}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{12}", re.IGNORECASE )
@@ -113,6 +117,15 @@ class ElasticsearchWildcardHandlingMixin(object):
             return res
         else:
             return False
+
+    def generateMapItemTypedNode(self, fieldname, value):
+        if type(value) == SigmaIpCIDRV4Modifier:
+            if self.convert_cidr == "True" :
+                return generatelistforcidrv4(fieldname,str(value),str(self.listSeparator),True)
+            else:
+                return generatelistforcidrv4(fieldname,str(value),str(self.listSeparator),False)
+        else:
+            raise NotImplementedError("Type modifier '{}' is not supported by backend".format(value.identifier))
 
     def generateMapItemNode(self, node):
         fieldname, value = node
