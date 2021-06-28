@@ -216,17 +216,30 @@ def main():
     backend = backend_class(sigmaconfigs, backend_options)
 
     filename = cmdargs.output
+    fileprefix = None
     if filename:
-        try:
-            out = open(filename, "w", encoding='utf-8')
-        except (IOError, OSError) as e:
-            print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
-            exit(ERR_OUTPUT)
+        if filename[-1:] == '_':
+            fileprefix = filename
+        else:
+            try:
+                out = open(filename, "w", encoding='utf-8')
+            except (IOError, OSError) as e:
+                print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
+                exit(ERR_OUTPUT)
     else:
         out = sys.stdout
 
     error = 0
     for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
+        if fileprefix :
+            try:
+                filename = fileprefix + str(sigmafile.name)
+                filename = filename.replace('.yml','.rule') # add a option to extension ?
+                out = open(filename, "w", encoding='utf-8')
+            except (IOError, OSError) as e:
+                print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
+                exit(ERR_OUTPUT)
+                
         logger.debug("* Processing Sigma input %s" % (sigmafile))
         try:
             if cmdargs.inputs == ['-']:
