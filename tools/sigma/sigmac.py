@@ -102,7 +102,8 @@ def set_argparser():
     argparser.add_argument("--target", "-t", choices=backends.getBackendDict().keys(), help="Output target format")
     argparser.add_argument("--lists", "-l", action="store_true", help="List available output target formats and configurations")
     argparser.add_argument("--config", "-c", action="append", help="Configurations with field name and index mapping for target environment. Multiple configurations are merged into one. Last config is authoritative in case of conflicts.")
-    argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix (if end with a '_','/' or '\\') if multiple files are generated")
+    argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix (if end with a '_','/' or '\\')")
+    argparser.add_argument("--output-extention", "-e", default=None, help="Extention of Output file for filename prefix use")
     argparser.add_argument("--print0", action="store_true", help="Delimit results by NUL-character")
     argparser.add_argument("--backend-option", "-O", action="append", help="Options and switches that are passed to the backend")
     argparser.add_argument("--backend-config", "-C", help="Configuration file (YAML format) containing options to pass to the backend")
@@ -135,7 +136,6 @@ def list_modifiers(modifiers):
 def main():
     argparser = set_argparser()
     cmdargs = argparser.parse_args()
-
     scm = SigmaConfigurationManager()
 
     logger = logging.getLogger(__name__)
@@ -214,10 +214,19 @@ def main():
 
     backend_options = BackendOptions(cmdargs.backend_option, cmdargs.backend_config)
     backend = backend_class(sigmaconfigs, backend_options)
-
+    
+    filename_ext = cmdargs.output_extention
     filename = cmdargs.output
     fileprefix = None
     if filename:
+        if filename_ext:
+            if filename_ext[0] == '.':
+                pass
+            else:
+                filename_ext = '.' + filename_ext
+        else:
+            filename_ext = '.rule'
+    
         if filename[-1:] in ['_','/','\\']:
             fileprefix = filename
         else:
@@ -234,7 +243,7 @@ def main():
         if fileprefix :
             try:
                 filename = fileprefix + str(sigmafile.name)
-                filename = filename.replace('.yml','.rule') # add a option to extension ?
+                filename = filename.replace('.yml',filename_ext) 
                 out = open(filename, "w", encoding='utf-8')
             except (IOError, OSError) as e:
                 print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
