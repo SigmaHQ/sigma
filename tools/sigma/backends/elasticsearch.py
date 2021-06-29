@@ -1341,7 +1341,7 @@ class ElasticSearchRuleBackend(object):
                 ("convert_to_url", False, "Want to convert to a URL ?", None),
                 ("path_to_replace", "../", "The local path to replace with dest_base_url", None),
                 ("dest_base_url", "https://github.com/SigmaHQ/sigma/tree/master/", "The URL prefix", None),
-                ("custom_tag", None , "Add a custom tag", None),
+                ("custom_tag", None , "Add custom tag. for multi split with a comma tag1,tag2 ", None),
             )
     default_rule_type = "query"
 
@@ -1499,7 +1499,12 @@ class ElasticSearchRuleBackend(object):
                         tactics_list.append(tact)
         
         if self.custom_tag:
-            new_tags.append(self.custom_tag)
+            if ',' in self.custom_tag:
+                tag_split = self.custom_tag.split(",")
+                for l_tag in tag_split:
+                    new_tags.append(l_tag)   
+            else:    
+                new_tags.append(self.custom_tag)
             
         threat = self.create_threat_description(tactics_list=tactics_list, techniques_list=technics_list)
         rule_name = configs.get("title", "").lower()
