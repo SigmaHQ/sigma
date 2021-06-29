@@ -240,15 +240,6 @@ def main():
 
     error = 0
     for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
-        if fileprefix :
-            try:
-                filename = fileprefix + str(sigmafile.name)
-                filename = filename.replace('.yml',filename_ext) 
-                out = open(filename, "w", encoding='utf-8')
-            except (IOError, OSError) as e:
-                print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
-                exit(ERR_OUTPUT)
-                
         logger.debug("* Processing Sigma input %s" % (sigmafile))
         try:
             if cmdargs.inputs == ['-']:
@@ -257,10 +248,34 @@ def main():
                 f = sigmafile.open(encoding='utf-8')
             parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter, sigmafile)
             results = parser.generate(backend)
-
+            
+            nb_result = len(list(parser.generate(backend)))
+            if nb_result > 1 :
+                inc_filenane = 0
+            else:
+                inc_filenane = None
+            
             newline_separator = '\0' if cmdargs.print0 else '\n'
             for result in results:
+                if not fileprefix == None and not inc_filenane == None: #yml action
+                    try:
+                        filename = fileprefix + str(sigmafile.name)
+                        filename = filename.replace('.yml','_' + str(inc_filenane) + filename_ext)
+                        inc_filenane += 1
+                        out = open(filename, "w", encoding='utf-8')
+                    except (IOError, OSError) as e:
+                        print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
+                        exit(ERR_OUTPUT)
+                elif  not fileprefix == None and inc_filenane == None: # a simple yml
+                    try:
+                        filename = fileprefix + str(sigmafile.name)
+                        filename = filename.replace('.yml',filename_ext) 
+                        out = open(filename, "w", encoding='utf-8')
+                    except (IOError, OSError) as e:
+                        print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
+                        exit(ERR_OUTPUT)
                 print(result, file=out, end=newline_separator)
+        
         except OSError as e:
             print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
             error = ERR_OPEN_SIGMA_RULE
