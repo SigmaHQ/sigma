@@ -1,6 +1,7 @@
 # Output backends for sigmac
 # Copyright 2019 Jayden Zheng
 # Copyright 2020 Jonas Hagg
+# Copyright 2021 wagga (https://github.com/wagga40/)
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -43,9 +44,16 @@ class SQLBackend(SingleTextQueryBackend):
     mapListValueExpression = "%s OR %s"     # Syntax for field/value condititons where map value is a list
     mapLength = "(%s %s)"
 
-    def __init__(self, sigmaconfig, table):
+    options = SingleTextQueryBackend.options + (
+        ("table", False, "Use this option to specify table name, default is \"eventlog\"", None),
+    )
+
+    def __init__(self, sigmaconfig, options):
         super().__init__(sigmaconfig)
-        self.table = table
+        if "table" in options:
+            self.table = options["table"]
+        else:
+            self.table = "eventlog"
 
     def generateANDNode(self, node):
         generated = [ self.generateNode(val) for val in node ]
@@ -162,10 +170,10 @@ class SQLBackend(SingleTextQueryBackend):
                 group_by = ""
 
             if agg.aggfield:
-                select = "{}({}) AS agg".format(agg.aggfunc_notrans, self.fieldNameMapping(agg.aggfield, None))
+                select = "*,{}({}) AS agg".format(agg.aggfunc_notrans, self.fieldNameMapping(agg.aggfield, None))
             else:
                 if agg.aggfunc == SigmaAggregationParser.AGGFUNC_COUNT:
-                    select = "{}(*) AS agg".format(agg.aggfunc_notrans)
+                    select = "*,{}(*) AS agg".format(agg.aggfunc_notrans)
                 else:
                     raise SigmaParseError("For {} aggregation a fieldname needs to be specified".format(agg.aggfunc_notrans))
 

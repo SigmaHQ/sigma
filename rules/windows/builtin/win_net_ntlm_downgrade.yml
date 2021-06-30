@@ -4,14 +4,35 @@ id: d67572a0-e2ec-45d6-b8db-c100d14b8ef2
 description: Detects NetNTLM downgrade attack
 references:
     - https://www.optiv.com/blog/post-exploitation-using-netntlm-downgrade-attacks
-author: Florian Roth
+author: Florian Roth, wagga
 date: 2018/03/20
-modified: 2021/02/24
+modified: 2021/06/27
 tags:
     - attack.defense_evasion
     - attack.t1089          # an old one
     - attack.t1562.001
     - attack.t1112
+detection:
+    condition: 1 of them
+falsepositives:
+    - Unknown
+level: critical
+---
+logsource:
+    product: windows
+    category: registry_event
+detection:
+    selection1:
+        TargetObject|contains|all: 
+            - 'SYSTEM\'
+            - 'ControlSet'
+            - '\Control\Lsa'
+        TargetObject|endswith:
+            - '\lmcompatibilitylevel'
+            - '\NtlmMinClientSec'
+            - '\RestrictSendingNTLMTraffic'
+            
+---
 # Windows Security Eventlog: Process Creation with Full Command Line
 logsource:
     product: windows
@@ -20,7 +41,10 @@ logsource:
 detection:
     selection:
         EventID: 4657
-        ObjectName: '\REGISTRY\MACHINE\SYSTEM\\*ControlSet*\Control\Lsa*'
+        ObjectName|contains|all: 
+            - '\REGISTRY\MACHINE\SYSTEM'
+            - 'ControlSet'
+            - '\Control\Lsa'
         ObjectValueName: 
             - 'LmCompatibilityLevel'
             - 'NtlmMinClientSec'

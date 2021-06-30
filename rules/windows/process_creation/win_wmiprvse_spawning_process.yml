@@ -6,7 +6,7 @@ date: 2019/08/15
 modified: 2021/02/24
 author: Roberto Rodriguez @Cyb3rWard0g
 references:
-    - https://github.com/Cyb3rWard0g/ThreatHunter-Playbook/tree/master/playbooks/windows/02_execution/T1047_windows_management_instrumentation/wmi_win32_process_create_remote.md
+    - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190810201010.html
 tags:
     - attack.execution
     - attack.t1047
@@ -20,13 +20,18 @@ detection:
         - LogonId: 
             - '0x3e7'  # LUID 999 for SYSTEM
             - 'null'   # too many false positives
+        - SubjectLogonId:
+            - '0x3e7'  # LUID 999 for SYSTEM
+            - 'null'   # too many false positives
         - User: 'NT AUTHORITY\SYSTEM'  # if we don't have LogonId data, fallback on username detection
         - Image|endswith: 
             - '\WmiPrvSE.exe'
             - '\WerFault.exe'
-    filter_null:  # some backends need the null value in a seperate expression
+    filter_null1:  # some backends need the null value in a seperate expression
         LogonId: null
-    condition: selection and not filter and not filter_null
+    filter_null2:  # some backends need the null value in a seperate expression
+        SubjectLogonId: null
+    condition: selection and not filter and not filter_null1 and not filter_null2
 falsepositives:
     - Unknown
 level: high

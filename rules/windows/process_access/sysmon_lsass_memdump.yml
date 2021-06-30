@@ -4,7 +4,7 @@ status: experimental
 description: Detects process LSASS memory dump using procdump or taskmgr based on the CallTrace pointing to dbghelp.dll or dbgcore.dll for win10
 author: Samir Bousseaden
 date: 2019/04/03
-modified: 2020/08/24
+modified: 2021/06/21
 references:
     - https://blog.menasec.net/2019/02/threat-hunting-21-procdump-or-taskmgr.html
 tags:
@@ -17,11 +17,11 @@ logsource:
     product: windows
 detection:
     selection:
-        TargetImage: 'C:\windows\system32\lsass.exe'
+        TargetImage|endswith: '\lsass.exe'
         GrantedAccess: '0x1fffff'
-        CallTrace:
-         - '*dbghelp.dll*'
-         - '*dbgcore.dll*'
+        CallTrace|contains:
+         - 'dbghelp.dll'
+         - 'dbgcore.dll'
     condition: selection
 falsepositives:
     - unknown

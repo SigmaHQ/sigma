@@ -7,6 +7,7 @@ references:
     - https://countuponsecurity.com/2017/06/07/threat-hunting-in-the-enterprise-with-appcompatprocessor/
 author: Florian Roth
 date: 2017/06/12
+modified: 2020/11/28
 tags:
     - attack.s0013
     - attack.defense_evasion
@@ -17,75 +18,88 @@ logsource:
     product: windows
 detection:
     selection_cammute:
-        Image: '*\CamMute.exe'
+        Image|endswith: '\CamMute.exe'
     filter_cammute:
-        Image: '*\Lenovo\Communication Utility\\*'
+        Image|contains:
+          - '\Lenovo\Communication Utility\'
+          - '\Lenovo\Communications Utility\'
     selection_chrome_frame:
-        Image: '*\chrome_frame_helper.exe'
+        Image|endswith: '\chrome_frame_helper.exe'
     filter_chrome_frame:
-        Image: '*\Google\Chrome\application\\*'
+        Image|contains: '\Google\Chrome\application\'
     selection_devemu:
-        Image: '*\dvcemumanager.exe'
+        Image|endswith: '\dvcemumanager.exe'
     filter_devemu:
-        Image: '*\Microsoft Device Emulator\\*'
+        Image|contains: '\Microsoft Device Emulator\'
     selection_gadget:
-        Image: '*\Gadget.exe'
+        Image|endswith: '\Gadget.exe'
     filter_gadget:
-        Image: '*\Windows Media Player\\*'
+        Image|contains: '\Windows Media Player\'
     selection_hcc:
-        Image: '*\hcc.exe'
+        Image|endswith: '\hcc.exe'
     filter_hcc:
-        Image: '*\HTML Help Workshop\\*'
+        Image|contains: '\HTML Help Workshop\'
     selection_hkcmd:
-        Image: '*\hkcmd.exe'
+        Image|endswith: '\hkcmd.exe'
     filter_hkcmd:
-        Image:
-            - '*\System32\\*'
-            - '*\SysNative\\*'
-            - '*\SysWowo64\\*'
+        Image|contains:
+            - '\System32\'
+            - '\SysNative\'
+            - '\SysWowo64\'
     selection_mc:
-        Image: '*\Mc.exe'
+        Image|endswith: '\Mc.exe'
     filter_mc:
-        Image:
-            - '*\Microsoft Visual Studio*'
-            - '*\Microsoft SDK*'
-            - '*\Windows Kit*'
+        Image|contains:
+            - '\Microsoft Visual Studio'
+            - '\Microsoft SDK'
+            - '\Windows Kit'
     selection_msmpeng:
-        Image: '*\MsMpEng.exe'
+        Image|endswith: '\MsMpEng.exe'
     filter_msmpeng:
-        Image:
-            - '*\Microsoft Security Client\\*'
-            - '*\Windows Defender\\*'
-            - '*\AntiMalware\\*'
+        Image|contains:
+            - '\Microsoft Security Client\'
+            - '\Windows Defender\'
+            - '\AntiMalware\'
     selection_msseces:
-        Image: '*\msseces.exe'
+        Image|endswith: '\msseces.exe'
     filter_msseces:
-        Image:
-            - '*\Microsoft Security Center\\*'
-            - '*\Microsoft Security Client\\*'
-            - '*\Microsoft Security Essentials\\*'
+        Image|contains:
+            - '\Microsoft Security Center\'
+            - '\Microsoft Security Client\'
+            - '\Microsoft Security Essentials\'
     selection_oinfo:
-        Image: '*\OInfoP11.exe'
+        Image|endswith: '\OInfoP11.exe'
     filter_oinfo:
-        Image: '*\Common Files\Microsoft Shared\\*'
+        Image|contains: '\Common Files\Microsoft Shared\'
     selection_oleview:
-        Image: '*\OleView.exe'
+        Image|endswith: '\OleView.exe'
     filter_oleview:
-        Image:
-            - '*\Microsoft Visual Studio*'
-            - '*\Microsoft SDK*'
-            - '*\Windows Kit*'
-            - '*\Windows Resource Kit\\*'
+        Image|contains:
+            - '\Microsoft Visual Studio'
+            - '\Microsoft SDK'
+            - '\Windows Kit'
+            - '\Windows Resource Kit\'
     selection_rc:
-        Image: '*\rc.exe'
+        Image|endswith: '\rc.exe'
     filter_rc:
-        Image:
-            - '*\Microsoft Visual Studio*'
-            - '*\Microsoft SDK*'
-            - '*\Windows Kit*'
-            - '*\Windows Resource Kit\\*'
-            - '*\Microsoft.NET\\*'
-    condition: ( selection_cammute and not filter_cammute ) or ( selection_chrome_frame and not filter_chrome_frame ) or ( selection_devemu and not filter_devemu ) or ( selection_gadget and not filter_gadget ) or ( selection_hcc and not filter_hcc ) or ( selection_hkcmd and not filter_hkcmd ) or ( selection_mc and not filter_mc ) or ( selection_msmpeng and not filter_msmpeng ) or ( selection_msseces and not filter_msseces ) or ( selection_oinfo and not filter_oinfo ) or ( selection_oleview and not filter_oleview ) or ( selection_rc and not filter_rc )
+        Image|contains:
+            - '\Microsoft Visual Studio'
+            - '\Microsoft SDK'
+            - '\Windows Kit'
+            - '\Windows Resource Kit\'
+            - '\Microsoft.NET\'
+    condition: ( selection_cammute and not filter_cammute ) or
+               ( selection_chrome_frame and not filter_chrome_frame ) or
+               ( selection_devemu and not filter_devemu ) or
+               ( selection_gadget and not filter_gadget ) or
+               ( selection_hcc and not filter_hcc ) or
+               ( selection_hkcmd and not filter_hkcmd ) or
+               ( selection_mc and not filter_mc ) or
+               ( selection_msmpeng and not filter_msmpeng ) or
+               ( selection_msseces and not filter_msseces ) or
+               ( selection_oinfo and not filter_oinfo ) or
+               ( selection_oleview and not filter_oleview ) or
+               ( selection_rc and not filter_rc )
 fields:
     - CommandLine
     - ParentCommandLine

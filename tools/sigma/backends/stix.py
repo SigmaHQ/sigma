@@ -16,7 +16,7 @@ class STIXBackend(SingleTextQueryBackend):
     mapExpression = "%s = %s"
     notMapExpression = "%s != %s"
     mapListsSpecialHandling = True
-    sigmaSTIXObjectName = "x-sigma"
+    sort_condition_lists = True
 
     def cleanKey(self, key):
         if key is None:
@@ -113,7 +113,8 @@ class STIXBackend(SingleTextQueryBackend):
     def generateMapItemNode(self, node, currently_within_NOT_node=False):
         key, value = node
         if ":" not in key:
-            key = "%s:%s" % (self.sigmaSTIXObjectName, str(key).lower())
+            # key wasn't mapped
+            return None
         if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
             if type(value) == str and "*" in value:
                 value = value.replace("*", "%")

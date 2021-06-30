@@ -15,11 +15,13 @@ logsource:
     product: windows
 detection:
     selection_image:
-        Image: '*\setspn.exe'
+        Image|endswith: '\setspn.exe'
     selection_desc:
-        Description: '*Query or reset the computer* SPN attribute*'
+        Description|contains|all: 
+            - 'Query or reset the computer'
+            - 'SPN attribute'
     cmd:
-        CommandLine: '*-q*'
+        CommandLine|contains: '-q'
     condition: (selection_image or selection_desc) and cmd
 falsepositives:
     - Administrator Activity
