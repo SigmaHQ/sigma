@@ -2,9 +2,9 @@ action: global
 title: Meterpreter or Cobalt Strike Getsystem Service Installation
 id: 843544a7-56e0-4dcc-a44f-5cc266dd97d6
 description: Detects the use of getsystem Meterpreter/Cobalt Strike command by detecting a specific service installation
-author: Teymur Kheirkhabarov, Ecco
+author: Teymur Kheirkhabarov, Ecco, Florian Roth
 date: 2019/10/26
-modified: 2020/08/23
+modified: 2021/05/20
 references:
     - https://speakerdeck.com/heirhabarov/hunting-for-privilege-escalation-in-windows-environment
     - https://blog.cobaltstrike.com/2014/04/02/what-happens-when-i-type-getsystem/
@@ -14,7 +14,7 @@ tags:
     - attack.t1134.001
     - attack.t1134.002
 detection:
-    selection_1:
+    selection:
         # meterpreter getsystem technique 1: cmd.exe /c echo 559891bb017 > \\.\pipe\5e120a
         - ServiceFileName|contains|all:
             - 'cmd'
@@ -27,12 +27,18 @@ detection:
             - '/c'
             - 'echo'
             - '\pipe\'
+        # cobaltstrike getsystem technique 1b (expanded %COMSPEC%): %COMSPEC% /c echo 559891bb017 > \\.\pipe\5e120a
+        - ServiceFileName|contains|all:
+            - 'cmd.exe'
+            - '/c'
+            - 'echo'
+            - '\pipe\'
         # meterpreter getsystem technique 2: rundll32.exe C:\Users\test\AppData\Local\Temp\tmexsn.dll,a /p:tmexsn
         - ServiceFileName|contains|all:
             - 'rundll32'
             - '.dll,a'
             - '/p:'
-    condition: selection and selection_1
+    condition: selection
 fields:
     - ComputerName
     - SubjectDomainName
@@ -51,14 +57,11 @@ detection:
 ---
 logsource:
     product: windows
-    service: sysmon
+    category: driver_load
+---
+logsource:
+    product: windows
+    service: security
 detection:
     selection:
-        EventID: 6
----
- logsource:
-     product: windows
-     service: security
- detection:
-     selection:
-         EventID: 4697
+        EventID: 4697

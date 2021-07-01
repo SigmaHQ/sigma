@@ -5,12 +5,14 @@ description: Detects execution of RClone utility for exfiltration as used by var
 tags:
     - attack.exfiltration
     - attack.t1567.002
-author: Bhabesh Raj
+author: Bhabesh Raj, Sittikorn S
 date: 2021/05/10
+modified: 2021/06/29
 references:
     - https://thedfirreport.com/2021/03/29/sodinokibi-aka-revil-ransomware
     - https://us-cert.cisa.gov/ncas/analysis-reports/ar21-126a
     - https://labs.sentinelone.com/egregor-raas-continues-the-chaos-with-cobalt-strike-and-rclone
+    - https://www.splunk.com/en_us/blog/security/darkside-ransomware-splunk-threat-update-and-detections.html
 fields:
     - CommandLine
     - ParentCommandLine
@@ -29,4 +31,16 @@ detection:
             - '--config '
             - '--no-check-certificate '
             - ' copy '
+    selection3:
+        Image|endswith:
+            - '\rclone.exe'
+        CommandLine|contains:
+            - 'mega'
+            - 'pcloud'
+            - 'ftp'
+            - '--progress'
+            - '--ignore-existing'
+            - '--auto-confirm'
+            - '--transfers'
+            - '--multi-thread-streams'
     condition: 1 of them

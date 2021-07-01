@@ -1,0 +1,76 @@
+title: LDAP Reconnaissance / Active Directory Enumeration
+id: 31d68132-4038-47c7-8f8e-635a39a7c174
+status: experimental
+description: Detects possible Active Directory enumeration via LDAP
+author: Adeem Mawani
+date: 2021/06/22
+references:
+    - https://techcommunity.microsoft.com/t5/microsoft-defender-for-endpoint/hunting-for-reconnaissance-activities-using-ldap-search-filters/ba-p/824726
+    - https://github.com/PowerShellMafia/PowerSploit/blob/master/Recon/PowerView.ps1
+    - https://github.com/BloodHoundAD/SharpHound3/blob/master/SharpHound3/LdapBuilder.cs
+logsource:
+    category: ldap_query
+    product: windows
+    definition: 'Requires Microsoft-Windows-LDAP-Client/Debug ETW logging'
+detection:
+    generic_search:
+        EventID: 30
+        SearchFilter|contains:
+            - '(groupType:1.2.840.113556.1.4.803:=2147483648)'
+            - '(groupType:1.2.840.113556.1.4.803:=2147483656)'
+            - '(groupType:1.2.840.113556.1.4.803:=2147483652)'
+            - '(groupType:1.2.840.113556.1.4.803:=2147483650)'
+            - '(sAMAccountType=805306369)'
+            - '(sAMAccountType=805306368)'
+            - '(sAMAccountType=536870913)'
+            - '(sAMAccountType=536870912)'
+            - '(sAMAccountType=268435457)'
+            - '(sAMAccountType=268435456)'
+            - '(objectCategory=groupPolicyContainer)'
+            - '(objectCategory=organizationalUnit)'
+            - '(objectCategory=Computer)'
+            - '(objectCategory=nTDSDSA)'
+            - '(objectCategory=server)'
+            - '(objectCategory=domain)'
+            - '(objectCategory=person)'
+            - '(objectCategory=group)'
+            - '(objectCategory=user)'
+            - '(objectClass=trustedDomain)'
+            - '(objectClass=computer)'
+            - '(objectClass=server)'
+            - '(objectClass=group)'
+            - '(objectClass=user)'
+            - '(primaryGroupID=521)'
+            - '(primaryGroupID=516)'
+            - '(primaryGroupID=515)'
+            - '(primaryGroupID=512)'
+            - 'Domain Admins'
+    suspicious_flag:
+        EventID: 30
+        SearchFilter|contains:
+            - '(userAccountControl:1.2.840.113556.1.4.803:=4194304)'
+            - '(userAccountControl:1.2.840.113556.1.4.803:=2097152)'
+            - '!(userAccountControl:1.2.840.113556.1.4.803:=1048574)'
+            - '(userAccountControl:1.2.840.113556.1.4.803:=524288)'
+            - '(userAccountControl:1.2.840.113556.1.4.803:=65536)'
+            - '(userAccountControl:1.2.840.113556.1.4.803:=8192)'
+            - '(userAccountControl:1.2.840.113556.1.4.803:=544)'
+            - '!(UserAccountControl:1.2.840.113556.1.4.803:=2)'
+            - 'msDS-AllowedToActOnBehalfOfOtherIdentity'
+            - 'msDS-AllowedToDelegateTo'
+            - '(accountExpires=9223372036854775807)'
+            - '(accountExpires=0)'
+            - '(adminCount=1)'
+            - 'ms-MCS-AdmPwd'
+    narrow_down_filter:
+        EventID: 30
+        SearchFilter|contains:
+            - '(domainSid=*)'
+            - '(objectSid=*)'
+    condition: (generic_search and not narrow_down_filter) or (suspicious_flag)
+level: medium
+tags:
+    - attack.discovery
+    - attack.t1069.002
+    - attack.t1087.002
+    - attack.t1482

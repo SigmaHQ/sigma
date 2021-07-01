@@ -101,7 +101,7 @@ def set_argparser():
             """)
     argparser.add_argument("--target", "-t", choices=backends.getBackendDict().keys(), help="Output target format")
     argparser.add_argument("--lists", "-l", action="store_true", help="List available output target formats and configurations")
-    argparser.add_argument("--config", "-c", action="append", help="Configurations with field name and index mapping for target environment. Multiple configurations are merged into one. Last config is authorative in case of conflicts.")
+    argparser.add_argument("--config", "-c", action="append", help="Configurations with field name and index mapping for target environment. Multiple configurations are merged into one. Last config is authoritative in case of conflicts.")
     argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix if multiple files are generated")
     argparser.add_argument("--print0", action="store_true", help="Delimit results by NUL-character")
     argparser.add_argument("--backend-option", "-O", action="append", help="Options and switches that are passed to the backend")
@@ -233,7 +233,7 @@ def main():
                 f = sigmafile
             else:
                 f = sigmafile.open(encoding='utf-8')
-            parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter)
+            parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter, sigmafile)
             results = parser.generate(backend)
 
             newline_separator = '\0' if cmdargs.print0 else '\n'
@@ -243,23 +243,23 @@ def main():
             print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
             error = ERR_OPEN_SIGMA_RULE
         except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
-            print("Sigma file %s is no valid YAML: %s" % (sigmafile, str(e)), file=sys.stderr)
+            print("Error: Sigma file %s is no valid YAML: %s" % (sigmafile, str(e)), file=sys.stderr)
             error = ERR_INVALID_YAML
             if not cmdargs.defer_abort:
                 sys.exit(error)
         except (SigmaParseError, SigmaCollectionParseError) as e:
-            print("Sigma parse error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
+            print("Error: Sigma parse error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
             error = ERR_SIGMA_PARSING
             if not cmdargs.defer_abort:
                 sys.exit(error)
         except NotSupportedError as e:
-            print("The Sigma rule requires a feature that is not supported by the target system: " + str(e), file=sys.stderr)
+            print("Error: The Sigma rule requires a feature that is not supported by the target system: " + str(e), file=sys.stderr)
             if not cmdargs.ignore_backend_errors:
                 error = ERR_NOT_SUPPORTED
                 if not cmdargs.defer_abort:
                     sys.exit(error)
         except BackendError as e:
-            print("Backend error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
+            print("Error: Backend error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
             if not cmdargs.ignore_backend_errors:
                 error = ERR_BACKEND
                 if not cmdargs.defer_abort:
@@ -272,13 +272,13 @@ def main():
                 if not cmdargs.defer_abort:
                     sys.exit(error)
         except PartialMatchError as e:
-            print("Partial field match error: %s" % str(e), file=sys.stderr)
+            print("Error: Partial field match error: %s" % str(e), file=sys.stderr)
             if not cmdargs.ignore_backend_errors:
                 error = ERR_PARTIAL_FIELD_MATCH
                 if not cmdargs.defer_abort:
                     sys.exit(error)
         except FullMatchError as e:
-            print("Full field match error", file=sys.stderr)
+            print("Error: Full field match error", file=sys.stderr)
             if not cmdargs.ignore_backend_errors:
                 error = ERR_FULL_FIELD_MATCH
                 if not cmdargs.defer_abort:

@@ -9,7 +9,7 @@ references:
     - https://twitter.com/gN3mes1s/status/1206874118282448897
 author: Florian Roth
 date: 2019/08/24
-modified: 2020/09/05
+modified: 2021/02/01
 tags:
     - attack.defense_evasion
     - attack.t1500 # an old one
@@ -19,15 +19,17 @@ logsource:
     product: windows
 detection:
     selection:
-        Image: '*\csc.exe'
-        CommandLine:
-            - '*\AppData\\*'
-            - '*\Windows\Temp\\*'
+        Image|endswith: '\csc.exe'
+        CommandLine|contains:
+            - '\AppData\'
+            - '\Windows\Temp\'
     filter:
-        ParentImage:
-            - 'C:\Program Files*'  # https://twitter.com/gN3mes1s/status/1206874118282448897
-            - '*\sdiagnhost.exe'  # https://twitter.com/gN3mes1s/status/1206874118282448897
-            - '*\w3wp.exe'  # https://twitter.com/gabriele_pippi/status/1206907900268072962
+        - ParentImage|startswith: 'C:\Program Files'  # https://twitter.com/gN3mes1s/status/1206874118282448897
+        - ParentImage|endswith:
+            - '\sdiagnhost.exe'  # https://twitter.com/gN3mes1s/status/1206874118282448897
+            - '\w3wp.exe'        # https://twitter.com/gabriele_pippi/status/1206907900268072962
+        - ParentCommandLine|contains:
+            - '\ProgramData\Microsoft\Windows Defender Advanced Threat Protection'
     condition: selection and not filter
 falsepositives:
     - https://twitter.com/gN3mes1s/status/1206874118282448897

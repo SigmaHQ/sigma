@@ -9,7 +9,7 @@ references:
     - https://www.13cubed.com/downloads/windows_process_genealogy_v2.pdf
     - https://attack.mitre.org/techniques/T1036/
 date: 2019/02/23
-modified: 2020/09/06
+modified: 2020/11/28
 tags:
     - attack.defense_evasion
     - attack.t1036 # an old one
@@ -20,25 +20,29 @@ logsource:
     product: windows
 detection:
     selection:
-        Image:
-            - '*\svchost.exe'
-            - '*\taskhost.exe'
-            - '*\lsm.exe'
-            - '*\lsass.exe'
-            - '*\services.exe'
-            - '*\lsaiso.exe'
-            - '*\csrss.exe'
-            - '*\wininit.exe'
-            - '*\winlogon.exe'
-    filter:
-        ParentImage:
-            - '*\System32\\*'
-            - '*\SysWOW64\\*'
-            - '*\SavService.exe'
-            - '*\Windows Defender\\*\MsMpEng.exe'
+        Image|endswith:
+            - '\svchost.exe'
+            - '\taskhost.exe'
+            - '\lsm.exe'
+            - '\lsass.exe'
+            - '\services.exe'
+            - '\lsaiso.exe'
+            - '\csrss.exe'
+            - '\wininit.exe'
+            - '\winlogon.exe'
+    filter1:
+        - ParentImage|endswith: '\SavService.exe'
+        - ParentImage|contains:
+            - '\System32\'
+            - '\SysWOW64\'
+    filter2:
+        ParentImage|contains:
+            - '\Windows Defender\'
+            - '\Microsoft Security Client\'
+        ParentImage|endswith: '\MsMpEng.exe'
     filter_null:
         ParentImage: null
-    condition: selection and not filter and not filter_null
+    condition: selection and not filter1 and not filter2 and not filter_null
 falsepositives:
     - Some security products seem to spawn these
 level: low

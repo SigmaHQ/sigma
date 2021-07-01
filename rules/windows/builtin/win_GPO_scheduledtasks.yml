@@ -19,8 +19,10 @@ detection:
     selection:
         EventID: 5145
         ShareName: \\*\SYSVOL
-        RelativeTargetName: '*ScheduledTasks.xml'
-        Accesses: '*WriteData*'
+        RelativeTargetName|endswith: 'ScheduledTasks.xml'
+        Accesses|contains: 
+            - 'WriteData'
+            - '%%4417'
     condition: selection
 falsepositives:
     - if the source IP is not localhost then it's super suspicious, better to monitor both local and remote changes to GPO scheduledtasks

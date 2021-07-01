@@ -1,0 +1,35 @@
+title: Wmic Uninstall Security Product
+id: 847d5ff3-8a31-4737-a970-aeae8fe21765
+description: Detects deinstallation of security products using WMIC utility
+references:
+    - https://twitter.com/cglyer/status/1355171195654709249
+date: 2021/01/30
+status: experimental
+author: Florian Roth
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains|all:
+            - 'wmic'
+            - 'product where name='
+            - 'call uninstall'
+            - '/nointeractive'
+    selection_product:
+        CommandLine|contains:
+            - 'Antivirus'
+            - 'Endpoint Security'
+            - 'Endpoint Detection'
+            - 'Crowdstrike Sensor'
+            - 'Windows Defender'
+            - 'VirusScan'
+            - 'Threat Protection'
+            - 'Endpoint Sensor'
+    condition: selection and selection_product
+falsepositives:
+    - Legitimate administration
+level: medium

@@ -58,7 +58,7 @@ class FireEyeHelixBackend(SingleTextQueryBackend):
     def __init__(self, *args, **kwargs):
         """Initialize field mappings"""
         super().__init__(*args, **kwargs)
-        # Retrieve a list of fields explicity mapped in the config so we can use "rawmsg" for unmapped fields
+        # Retrieve a list of fields explicitly mapped in the config so we can use "rawmsg" for unmapped fields
         fl = ["metaclass", "channel"]
         for item in self.sigmaconfig.fieldmappings.values():
             if item.target_type == list:
@@ -125,14 +125,14 @@ class FireEyeHelixBackend(SingleTextQueryBackend):
 
     def generateNULLValueNode(self, node):
         # Don't generate null value nodes for fields we don't map
-        if node.item is "rawmsg":
+        if node.item == "rawmsg":
             return None
         else:
             return self.notNullExpression % (node.item)
 
     def generateNotNULLValueNode(self, node):
         # Don't generate not null value nodes for fields we don't map
-        if node.item is "rawmsg":
+        if node.item == "rawmsg":
             return None
         else:
             return self.nullExpression % (node.item)

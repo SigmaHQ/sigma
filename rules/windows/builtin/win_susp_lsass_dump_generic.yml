@@ -4,7 +4,7 @@ description: Detects process handle on LSASS process with certain access mask
 status: experimental
 author: Roberto Rodriguez, Teymur Kheirkhabarov, Dimitrios Slamaris, Mark Russinovich, Aleksey Potapov, oscd.community (update)
 date: 2019/11/01
-modified: 2019/11/07
+modified: 2021/04/19
 references:
     - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
@@ -40,7 +40,7 @@ detection:
         AccessList|contains:
             - '4484'
             - '4416'
-    filter:
+    filter1:
         ProcessName|endswith:
             - '\wmiprvse.exe'
             - '\taskmgr.exe'
@@ -51,8 +51,18 @@ detection:
             - '\wininit.exe'
             - '\vmtoolsd.exe'
             - '\minionhost.exe'  # Cyberreason
-            - '\VsTskMgr.exe'  # McAfee Enterprise
-    condition: selection_1 or selection_2 and not filter
+            - '\VsTskMgr.exe'    # McAfee Enterprise
+            - '\thor64.exe'      # THOR
+        ProcessName|startswith:
+            - C:\Windows\System32\
+            - C:\Windows\SysWow64\
+            - C:\Windows\SysNative\
+            - C:\Program Files\
+            - C:\Windows\Temp\asgard2-agent\
+    filter2:
+        ProcessName|startswith:
+            - 'C:\Program Files'  # too many false positives with legitimate AV and EDR solutions
+    condition: selection_1 or selection_2 and not filter1 and not filter2
 fields:
     - ComputerName
     - SubjectDomainName

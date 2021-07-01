@@ -6,21 +6,57 @@ tags:
     - attack.execution
     - attack.t1059.001
     - attack.t1086  #an old one
-author: Florian Roth (rule)
+author: Florian Roth (rule), Jonhnathan Ribeiro
 date: 2017/03/05
 logsource:
     product: windows
     service: powershell
 detection:
-    keywords:
-        Message:
-            - '* -nop -w hidden -c * [Convert]::FromBase64String*'
-            - '* -w hidden -noni -nop -c "iex(New-Object*'
-            - '* -w hidden -ep bypass -Enc*'
-            - '*powershell.exe reg add HKCU\software\microsoft\windows\currentversion\run*'
-            - '*bypass -noprofile -windowstyle hidden (new-object system.net.webclient).download*'
-            - '*iex(New-Object Net.WebClient).Download*'
-    condition: keywords
+    convert_b64:
+        Message|contains|all:
+            - '-nop'
+            - ' -w ' 
+            - 'hidden' 
+            - ' -c '
+            - '[Convert]::FromBase64String'
+    iex_selection:
+        Message|contains|all:
+            - ' -w ' 
+            - 'hidden'
+            - '-noni'
+            - '-nop' 
+            - ' -c '
+            - 'iex'
+            - 'New-Object'
+    enc_selection:
+        Message|contains|all:
+            - ' -w ' 
+            - 'hidden'
+            - '-ep'
+            - 'bypass'
+            - '-Enc'
+    reg_selection:
+        Message|contains|all:
+            - 'powershell' 
+            - 'reg'
+            - 'add'
+            - 'HKCU\software\microsoft\windows\currentversion\run'
+    webclient_selection:
+        Message|contains|all:
+            - 'bypass' 
+            - '-noprofile'
+            - '-windowstyle'
+            - 'hidden'
+            - 'new-object'
+            - 'system.net.webclient'
+            - '.download'
+    iex_webclient:
+        Message|contains|all:
+            - 'iex'
+            - 'New-Object'
+            - 'Net.WebClient'
+            - '.Download'
+    condition: 1 of them
 falsepositives:
     - Penetration tests
 level: high

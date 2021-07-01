@@ -4,7 +4,7 @@ status: experimental
 description: Detects the creation of a executable with a system process name in a suspicious folder
 author: Sander Wiebing
 date: 2020/05/26
-modified: 2020/08/23
+modified: 2021/05/16
 tags:
     - attack.defense_evasion
     - attack.t1036          # an old one
@@ -14,40 +14,42 @@ logsource:
     product: windows
 detection:
     selection:
-        TargetFilename:
-            - '*\svchost.exe'
-            - '*\rundll32.exe'
-            - '*\services.exe'
-            - '*\powershell.exe'
-            - '*\regsvr32.exe'
-            - '*\spoolsv.exe'
-            - '*\lsass.exe'
-            - '*\smss.exe'
-            - '*\csrss.exe'
-            - '*\conhost.exe'
-            - '*\wininit.exe'
-            - '*\lsm.exe'
-            - '*\winlogon.exe'
-            - '*\explorer.exe'
-            - '*\taskhost.exe'
-            - '*\Taskmgr.exe'
-            - '*\taskmgr.exe'
-            - '*\sihost.exe'
-            - '*\RuntimeBroker.exe'
-            - '*\runtimebroker.exe'
-            - '*\smartscreen.exe'
-            - '*\dllhost.exe'
-            - '*\audiodg.exe'
-            - '*\wlanext.exe'
+        TargetFilename|endswith:
+            - '\svchost.exe'
+            - '\rundll32.exe'
+            - '\services.exe'
+            - '\powershell.exe'
+            - '\regsvr32.exe'
+            - '\spoolsv.exe'
+            - '\lsass.exe'
+            - '\smss.exe'
+            - '\csrss.exe'
+            - '\conhost.exe'
+            - '\wininit.exe'
+            - '\lsm.exe'
+            - '\winlogon.exe'
+            - '\explorer.exe'
+            - '\taskhost.exe'
+            - '\Taskmgr.exe'
+            - '\taskmgr.exe'
+            - '\sihost.exe'
+            - '\RuntimeBroker.exe'
+            - '\runtimebroker.exe'
+            - '\smartscreen.exe'
+            - '\dllhost.exe'
+            - '\audiodg.exe'
+            - '\wlanext.exe'
     filter:
-        TargetFilename:
-            - 'C:\Windows\System32\\*'
-            - 'C:\Windows\system32\\*'
-            - 'C:\Windows\SysWow64\\*'
-            - 'C:\Windows\SysWOW64\\*'
-            - 'C:\Windows\winsxs\\*'
-            - 'C:\Windows\WinSxS\\*'
-            - '\SystemRoot\System32\\*'
+        TargetFilename|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\system32\'
+            - 'C:\Windows\SysWow64\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\winsxs\'
+            - 'C:\Windows\WinSxS\'
+            - '\SystemRoot\System32\'
+        Image|endswith:
+            - '\Windows\System32\dism.exe'
     condition: selection and not filter
 fields:
     - Image

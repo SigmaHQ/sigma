@@ -30,7 +30,7 @@ logsource:
     category: registry_event
 detection:
     dnsregmod: 
-        TargetObject: '*\services\DNS\Parameters\ServerLevelPluginDll'
+        TargetObject|endswith: '\services\DNS\Parameters\ServerLevelPluginDll'
     condition: 1 of them
 ---
 logsource:
@@ -38,5 +38,8 @@ logsource:
     product: windows
 detection:
     dnsadmin:
-        CommandLine: 'dnscmd.exe /config /serverlevelplugindll *'
+        Image|endswith: '\dnscmd.exe'
+        CommandLine|contains|all: 
+            - '/config'
+            - '/serverlevelplugindll'
     condition: 1 of them

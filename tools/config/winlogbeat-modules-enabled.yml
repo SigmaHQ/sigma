@@ -4,6 +4,8 @@ backends:
   - es-qs
   - es-dsl
   - es-rule
+  - es-rule-eql
+  - es-eql
   - kibana
   - kibana-ndjson
   - xpack-watcher
@@ -25,11 +27,26 @@ logsources:
     service: security
     conditions:
       winlog.channel: Security
+  windows-system:
+    product: windows
+    service: system
+    conditions:
+      winlog.channel: System
   windows-sysmon:
     product: windows
     service: sysmon
     conditions:
       winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+  windows-powershell:
+    product: windows
+    service: powershell
+    conditions:
+      winlog.channel: 'Microsoft-Windows-PowerShell/Operational'
+  windows-classicpowershell:
+    product: windows
+    service: powershell-classic
+    conditions:
+      winlog.channel: 'Windows PowerShell'
   windows-dns-server:
     product: windows
     service: dns-server
@@ -55,6 +72,16 @@ logsources:
     service: windefend
     conditions:
       winlog.channel: 'Microsoft-Windows-Windows Defender/Operational'
+  windows-printservice-admin:
+    product: windows
+    service: printservice-admin
+    conditions:
+      winlog.channel: 'Microsoft-Windows-PrintService/Admin'
+  windows-smbclient-security:
+    product: windows
+    service: smbclient-security
+    conditions:
+      winlog.channel: 'Microsoft-Windows-SmbClient/Security'
   windows-applocker:
     product: windows
     service: applocker
@@ -64,8 +91,13 @@ logsources:
         - 'Microsoft-Windows-AppLocker/EXE and DLL'
         - 'Microsoft-Windows-AppLocker/Packaged app-Deployment'
         - 'Microsoft-Windows-AppLocker/Packaged app-Execution'
+  windows-msexchange-management:
+    product: windows
+    service: msexchange-management
+    conditions:
+      winlog.channel: 'MSExchange Management'
 defaultindex: winlogbeat-*
-# Extract all field names qith yq:
+# Extract all field names with yq:
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: winlog.event_data.\1/g'
 # Keep EventID! Clean up the list afterwards!
 fieldmappings:
@@ -79,7 +111,7 @@ fieldmappings:
   CallingProcessName: winlog.event_data.CallingProcessName
   CallTrace: winlog.event_data.CallTrace
   Channel: winlog.channel
-  CommandLine: process.args
+  CommandLine: process.command_line
   ComputerName: winlog.ComputerName
   CurrentDirectory: process.working_directory
   Description: winlog.event_data.Description
@@ -120,15 +152,17 @@ fieldmappings:
   ObjectName: winlog.event_data.ObjectName
   ObjectType: winlog.event_data.ObjectType
   ObjectValueName: winlog.event_data.ObjectValueName
-  ParentCommandLine: process.parent.args
+  ParentCommandLine: process.parent.command_line
   ParentProcessName: process.parent.name
   ParentImage: process.parent.executable
   Path: winlog.event_data.Path
   PipeName: file.name
   ProcessCommandLine: winlog.event_data.ProcessCommandLine
   ProcessName: process.executable
+  Product: winlog.event_data.Product
   Properties: winlog.event_data.Properties
   RuleName: winlog.event_data.RuleName
+  ScriptBlockText: powershell.file.script_block_text
   SecurityID: winlog.event_data.SecurityID
   ServiceFileName: winlog.event_data.ServiceFileName
   ServiceName: winlog.event_data.ServiceName
@@ -143,6 +177,7 @@ fieldmappings:
   src_port: source.port
   #SourceIsIpv6: winlog.event_data.SourceIsIpv6 #=gets deleted and not boolean...https://github.com/elastic/beats/blob/71eee76e7cfb8d5b18dfacad64864370ddb14ce7/x-pack/winlogbeat/module/sysmon/config/winlogbeat-sysmon.js#L278-L279
   StartModule: winlog.event_data.StartModule
+  State: winlog.event_data.State
   Status: winlog.event_data.Status
   SubjectDomainName: user.domain
   SubjectUserName: user.name
@@ -170,3 +205,12 @@ fieldmappings:
   PHYType: winlog.event_data.PHYType
   ProfileName: winlog.event_data.ProfileName
   SSID: winlog.event_data.SSID
+  # powershell
+  SequenceNumber: event.sequence
+  NewEngineState: powershell.engine.new_state
+  PreviousEngineState: powershell.engine.previous_state
+  NewProviderState: powershell.provider.new_state
+  ProviderName: powershell.provider.name
+  HostId: process.entity_id
+  HostApplication: process.command_line
+  HostName: process.title

@@ -3,7 +3,8 @@ id: dfba4ce1-e0ea-495f-986e-97140f31af2d
 status: experimental
 description: Detects keywords that could indicate clearing PowerShell history
 date: 2019/10/25
-author: Ilyas Ochkov, oscd.community
+modified: 2020/11/28
+author: Ilyas Ochkov, Jonhnathan Ribeiro, Daniil Yugoslavskiy, oscd.community
 references:
     - https://gist.github.com/hook-s3c/7363a856c3cdbadeb71085147f042c1a
 tags:
@@ -14,12 +15,36 @@ logsource:
     product: windows
     service: powershell
 detection:
-    keywords:
-        - 'del (Get-PSReadlineOption).HistorySavePath'
-        - 'Set-PSReadlineOption –HistorySaveStyle SaveNothing'
-        - 'Remove-Item (Get-PSReadlineOption).HistorySavePath'
-        - 'rm (Get-PSReadlineOption).HistorySavePath'
-    condition: keywords
+    selection_1:
+        EventID: 4104
+    selection_2:
+        ScriptBlockText|contains:
+            - 'del'
+            - 'Remove-Item'
+            - 'rm'
+        ScriptBlockText|contains|all:
+            - '(Get-PSReadlineOption).HistorySavePath'
+    selection_3:
+        ScriptBlockText|contains|all:
+            - 'Set-PSReadlineOption'
+            - '–HistorySaveStyle'
+            - 'SaveNothing'
+    selection_4:
+        EventID: 4103
+    selection_5:
+        Payload|contains:
+            - 'del'
+            - 'Remove-Item'
+            - 'rm'
+        Payload|contains|all:
+            - '(Get-PSReadlineOption).HistorySavePath'
+    selection_6:
+        Payload|contains|all:
+            - 'Set-PSReadlineOption'
+            - '–HistorySaveStyle'
+            - 'SaveNothing'
+    condition: selection_1 and ( selection_2 or selection_3 ) or 
+               selection_4 and ( selection_5 or selection_6 ) 
 falsepositives:
-    - some PS-scripts
+    - Legitimate PowerShell scripts
 level: medium

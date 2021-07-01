@@ -74,7 +74,7 @@ A configuration should contain the following attributes:
 
 Field mappings in the *fieldmappings* section map between Sigma field names and field names used in target SIEM systems. There are three types of field mappings:
 
-* Simple: the source field name corresponds to exactly one target field name given as string. Exmaple: `EventID: EventCode` for translation of Windows event identifiers between Sigma and Splunk.
+* Simple: the source field name corresponds to exactly one target field name given as string. Example: `EventID: EventCode` for translation of Windows event identifiers between Sigma and Splunk.
 * Multiple: a source field corresponds to a list of target fields. Sigmac generates an OR condition that covers all field names. This can be useful in configuration change and migration scenarios, when field names change. A further use case is when the SIEM normalizes one source field name into different target field names and the exact rules are unknown.
 * Conditional: a source field is translated to one or multiple target field names depending on values from other fields in specific rules. This is useful in scenarios where the SIEM maps the same Sigma field to different target field names depending on the event or log type, like Logpoint.
 
@@ -346,4 +346,20 @@ tools/sigmac -t es-qs -c tools/config/winlogbeat.yml --backend-option keyword_ba
 
 ```bash
 tools/sigmac -t es-qs -c tools/config/winlogbeat.yml --backend-option keyword_field=".keyword" --backend-option analyzed_sub_field_name=".security" rules/windows/sysmon/sysmon_wmi_susp_scripting.yml
+```
+
+### Devo
+Devo backend admits several configurations that, based on the data source type, will apply a specific mapping and
+will point to the proper Devo table. The current available configurations are:
+* `devo-windows`, for windows sources
+* `devo-web`, for generic web sources (webserver, apache, proxy...)
+* `devo-network`, for generic network sources (firewall, dns...)
+
+These backend configurations will specify the Devo table to build the query upon, and the output query will reference such
+table if the rule sources matches the configuration sources.
+
+For example, in order to translate a windows-related Sigma rule, one would use:
+
+```bash
+tools/sigmac -t devo -c tools/config/devo-windows.yml rules/windows/sysmon/sysmon_wmi_susp_scripting.yml
 ```

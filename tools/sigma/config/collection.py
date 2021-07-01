@@ -23,7 +23,7 @@ from sigma.config.exceptions import SigmaConfigParseError
 
 class SigmaConfigurationManager(object):
     """
-    Locate Sigma configuration files in a directory and provide them as well as informations
+    Locate Sigma configuration files in a directory and provide them as well as information
     about them.
     """
     re_identifier = re.compile("^[\\w-]+$")

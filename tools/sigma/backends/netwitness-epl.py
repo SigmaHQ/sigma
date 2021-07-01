@@ -55,8 +55,8 @@ class NetWitnessEplBackend(SingleTextQueryBackend):
     listSeparator = ", "
     valueExpression = "\'%s\'"
     keyExpression = "%s"
-    nullExpression = "%s exists"
-    notNullExpression = "%s exists"
+    nullExpression = "%s is null"
+    notNullExpression = "%s is not null"
     mapExpression = "(%s=%s)"
     mapListsSpecialHandling = True
 

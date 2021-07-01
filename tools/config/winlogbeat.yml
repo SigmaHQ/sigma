@@ -24,11 +24,26 @@ logsources:
     service: security
     conditions:
       winlog.channel: Security
+  windows-system:
+    product: windows
+    service: system
+    conditions:
+      winlog.channel: System
   windows-sysmon:
     product: windows
     service: sysmon
     conditions:
       winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+  windows-powershell:
+    product: windows
+    service: powershell
+    conditions:
+      winlog.channel: 'Microsoft-Windows-PowerShell/Operational'
+  windows-classicpowershell:
+    product: windows
+    service: powershell-classic
+    conditions:
+      winlog.channel: 'Windows PowerShell'
   windows-dns-server:
     product: windows
     service: dns-server
@@ -54,6 +69,16 @@ logsources:
     service: windefend
     conditions:
       winlog.channel: 'Microsoft-Windows-Windows Defender/Operational'
+  windows-printservice-admin:
+    product: windows
+    service: printservice-admin
+    conditions:
+      winlog.channel: 'Microsoft-Windows-PrintService/Admin'
+  windows-smbclient-security:
+    product: windows
+    service: smbclient-security
+    conditions:
+      winlog.channel: 'Microsoft-Windows-SmbClient/Security'
   windows-applocker:
     product: windows
     service: applocker
@@ -64,12 +89,13 @@ logsources:
         - 'Microsoft-Windows-AppLocker/Packaged app-Deployment'
         - 'Microsoft-Windows-AppLocker/Packaged app-Execution'
 defaultindex: winlogbeat-*
-# Extract all field names qith yq:
+# Extract all field names with yq:
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: winlog.event_data.\1/g'
 # Keep EventID! Clean up the list afterwards!
 fieldmappings:
   EventID: winlog.event_id
   AccessMask: winlog.event_data.AccessMask
+  AccessList: winlog.event_data.AccessList
   AccountName: winlog.event_data.AccountName
   AllowedToDelegateTo: winlog.event_data.AllowedToDelegateTo
   AttributeLDAPDisplayName: winlog.event_data.AttributeLDAPDisplayName
@@ -120,8 +146,11 @@ fieldmappings:
   PipeName: winlog.event_data.PipeName
   ProcessCommandLine: winlog.event_data.ProcessCommandLine
   ProcessName: winlog.event_data.ProcessName
+  Product: winlog.event_data.Product
   Properties: winlog.event_data.Properties
   RuleName: winlog.event_data.RuleName
+  SAMAccountName: winlog.event_data.SamAccountName
+  ScriptBlockText: winlog.event_data.ScriptBlockText
   SecurityID: winlog.event_data.SecurityID
   ServiceFileName: winlog.event_data.ServiceFileName
   ServiceName: winlog.event_data.ServiceName
