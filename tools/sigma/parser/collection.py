@@ -28,7 +28,7 @@ class SigmaCollectionParser:
     * reset: resets global attributes from previous set_global statements
     * repeat: takes attributes from this YAML document, merges into previous rule YAML and regenerates the rule
     """
-    def __init__(self, content, config=None, rulefilter=None):
+    def __init__(self, content, config=None, rulefilter=None, filename=None):
         if config is None:
             from sigma.configuration import SigmaConfiguration
             config = SigmaConfiguration()
@@ -36,6 +36,13 @@ class SigmaCollectionParser:
         globalyaml = dict()
         self.parsers = list()
         prevrule = None
+        if filename:
+            try:
+                globalyaml['yml_filename']=str(filename.name)
+                globalyaml['yml_path']=str(filename.parent)
+            except:
+                filename = None
+        
         for yamldoc in self.yamls:
             action = None
             try:
@@ -48,6 +55,9 @@ class SigmaCollectionParser:
                 deep_update_dict(globalyaml, yamldoc)
             elif action == "reset":
                 globalyaml = dict()
+                if filename:
+                    globalyaml['yml_filename']=str(filename.name)
+                    globalyaml['yml_path']=str(filename.parent) 
             elif action == "repeat":
                 if prevrule is None:
                     raise SigmaCollectionParseError("action 'repeat' is only applicable after first valid Sigma rule")

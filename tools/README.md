@@ -347,3 +347,19 @@ tools/sigmac -t es-qs -c tools/config/winlogbeat.yml --backend-option keyword_ba
 ```bash
 tools/sigmac -t es-qs -c tools/config/winlogbeat.yml --backend-option keyword_field=".keyword" --backend-option analyzed_sub_field_name=".security" rules/windows/sysmon/sysmon_wmi_susp_scripting.yml
 ```
+
+### Devo
+Devo backend admits several configurations that, based on the data source type, will apply a specific mapping and
+will point to the proper Devo table. The current available configurations are:
+* `devo-windows`, for windows sources
+* `devo-web`, for generic web sources (webserver, apache, proxy...)
+* `devo-network`, for generic network sources (firewall, dns...)
+
+These backend configurations will specify the Devo table to build the query upon, and the output query will reference such
+table if the rule sources matches the configuration sources.
+
+For example, in order to translate a windows-related Sigma rule, one would use:
+
+```bash
+tools/sigmac -t devo -c tools/config/devo-windows.yml rules/windows/sysmon/sysmon_wmi_susp_scripting.yml
+```
