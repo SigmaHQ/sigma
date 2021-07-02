@@ -23,5 +23,5 @@ class GraylogQuerystringBackend(ElasticsearchQuerystringBackend):
     active = True
     config_required = False
 
-    reEscape = re.compile("([+\\-!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|&&|\\|\\|)")
+    reEscape = re.compile("([\s+\\-!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|&&|\\|\\|)")
     listSeparator = " "
