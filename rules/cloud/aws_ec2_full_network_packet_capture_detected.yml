@@ -11,19 +11,14 @@ references:
 logsource:
     service: cloudtrail
 detection:
-    selection1:
+    selection_source:
         - eventSource: ec2.amazonaws.com
+    selection_eventname:
         - eventName: CreateTrafficMirrorFilter
-    selection2:
-        - eventSource: ec2.amazonaws.com
         - eventName: CreateTrafficMirrorFilterRule
-    selection3:
-        - eventSource: ec2.amazonaws.com
         - eventName: CreateTrafficMirrorSession
-    selection4:
-        - eventSource: ec2.amazonaws.com
         - eventName: CreateTrafficMirrorTarget
-    condition: 1 of selection
+    condition: selection_source AND selection_eventname
 falsepositives:
     - Traffic Mirroring may be done by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Traffic Mirroring from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule.
 level: medium
