@@ -4,6 +4,8 @@ status: experimental
 description: Detects static QMS 810 driver name used by Mimikatz 
 references:
   - https://github.com/gentilkiwi/mimikatz/commit/c21276072b3f2a47a21e215a46962a17d54b3760
+  - https://www.lexjansen.com/sesug/1993/SESUG93035.pdf
+  - https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rprn/4464eaf0-f34f-40d5-b970-736437a21913
 author: Markus Neis, @markus_neis
 tags:
   - attack.execution
@@ -15,12 +17,8 @@ logsource:
   category: registry_event
 detection:
   selection:
-    EventID:
-      - 12 # key create
-      - 13 # value set
-  selection_qms:
-      - TargetObject|startswith: 'HKLM\System\CurrentControlSet\Control\Print\Environments\Windows x64\Drivers\Version-3\QMS 810\'
-  condition: selection and selection_qms
+    TargetObject|startswith: 'HKLM\System\CurrentControlSet\Control\Print\Environments\Windows x64\Drivers\Version-3\QMS 810\'
+  condition: selection
 falsepositives:
-  - Unknown 
+  - Legitimate installation of printer driver QMS 810, Texas Instruments microLaser printer (unlikely)
 level: critical 
