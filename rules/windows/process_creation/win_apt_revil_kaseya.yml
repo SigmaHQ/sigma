@@ -7,8 +7,10 @@ references:
     - https://www.joesandbox.com/analysis/443736/0/html
     - https://doublepulsar.com/kaseya-supply-chain-attack-delivers-mass-ransomware-event-to-us-companies-76e4ec6ec64b
     - https://therecord.media/revil-ransomware-executes-supply-chain-attack-via-malicious-kaseya-update/
+    - https://blog.truesec.com/2021/07/04/kaseya-supply-chain-attack-targeting-msps-to-deliver-revil-ransomware/
 author: Florian Roth
 date: 2021/07/03
+modified: 2021/07/05
 tags:
     - attack.execution
     - attack.g0115
@@ -23,11 +25,20 @@ detection:
             - 'del /q /f c:\kworking\agent.crt'
             - 'Kaseya VSA Agent Hot-fix'
             - '\AppData\Local\Temp\MsMpEng.exe'
+            - 'rmdir /s /q %SystemDrive%\inetpub\logs'
+            - 'del /s /q /f %SystemDrive%\\*.log'
+            - 'c:\kworking1\agent.exe'
+            - 'c:\kworking1\agent.crt'
     selection2:
         Image: 
             - 'C:\Windows\MsMpEng.exe'
             - 'C:\Windows\cert.exe'
             - 'C:\kworking\agent.exe'
+            - 'C:\kworking1\agent.exe'
+    selection3:
+        CommandLine|contains|all:
+            - 'del /s /q /f'
+            - 'WebPages\Errors\webErrorLog.txt'
     condition: selection1 and selection2
 falsepositives:
     - Unknown
