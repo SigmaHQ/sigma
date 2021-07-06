@@ -1171,7 +1171,7 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
         for parsed in sigmaparser.condparsed:
             #Static data
             rule_object = {
-                "name": rulename + "_" + str(rule_number),
+                "name": rulename,
                 "description": description,
                 "index": index,
                 "priority": self.convertLevel(level),
