@@ -68,9 +68,16 @@ class MultiRuleOutputMixin:
 
         """
         try:
-            rulename = sigmaparser.parsedyaml["id"]
+            yaml_id = sigmaparser.parsedyaml["id"]
         except KeyError:
-            rulename = sigmaparser.parsedyaml["title"].replace(" ", "-").replace("(", "").replace(")", "")
+            yaml_id = "00000000-0000-0000-0000-000000000000"
+        try:
+            yaml_title = sigmaparser.parsedyaml["title"]
+        except KeyError:
+            yaml_title = "No Title"
+        yaml_title = yaml_title.replace(" ", "-").replace("(", "").replace(")", "")
+        
+        rulename = "%s-%s" % (yaml_id, yaml_title)
         if rulename in self.rulenames:   # add counter if name collides
             cnt = 2
             while "%s-%d" % (rulename, cnt) in self.rulenames:
