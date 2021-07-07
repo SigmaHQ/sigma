@@ -1,0 +1,30 @@
+title: Remove Windows Defender Definition Files
+id: 9719a8aa-401c-41af-8108-ced7ec9cd75c
+status: experimental
+author: frack113
+date: 2021/07/07
+description: Adversaries may disable security tools to avoid possible detection of their tools and activities by removing Windows Defender Definition Files
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1562.001/T1562.001.md
+    - https://unit42.paloaltonetworks.com/unit42-gorgon-group-slithering-nation-state-cybercrime/
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        OriginalFileName: MpCmdRun.exe
+        CommandLine|contains|all:
+            - ' -RemoveDefinitions'
+            - ' -All'
+    condition: selection 
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Unknown
+level: medium
