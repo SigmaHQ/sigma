@@ -1,7 +1,7 @@
-title: Printnightmare Mimimkatz Driver Name 
+title: PrinterNightmare Mimimkatz Driver Name 
 id: ba6b9e43-1d45-4d3c-a504-1043a64c8469
 status: experimental
-description: Detects static QMS 810 driver name used by Mimikatz 
+description: Detects static QMS 810 and mimikatz driver name used by Mimikatz as exploited in CVE-2021-1675 and CVE-2021-34527
 references:
   - https://github.com/gentilkiwi/mimikatz/commit/c21276072b3f2a47a21e215a46962a17d54b3760
   - https://www.lexjansen.com/sesug/1993/SESUG93035.pdf
@@ -12,15 +12,15 @@ tags:
   - cve.2021-1675
   - cve.2021-34527
 date: 2021/07/04
-modified: 2021/07/05
+modified: 2021/07/08
 logsource:
   product: windows
   category: registry_event
 detection:
   selection:
-    TargetObject|startswith:
-      -'HKLM\System\CurrentControlSet\Control\Print\Environments\Windows x64\Drivers\Version-3\QMS 810\'
-      - 'HKLM\System\CurrentControlSet\Control\Print\Environments\Windows x64\Drivers\Version-3\mimikatz'
+    TargetObject|contains:
+      - '\Control\Print\Environments\Windows x64\Drivers\Version-3\QMS 810\'
+      - '\Control\Print\Environments\Windows x64\Drivers\Version-3\mimikatz'
   selection_alt:
     TargetObject|contains|all:
       - 'legitprinter'
