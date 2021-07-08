@@ -3,6 +3,7 @@ id: f88bab7f-b1f4-41bb-bdb1-4b8af35b0470
 description: Detects failed logins with multiple valid domain accounts from a single source system using the NTLM protocol.
 author: Mauricio Velazco
 date: 2021/06/01
+modified: 2021/07/07
 references:
     - https://docs.splunk.com/Documentation/ESSOC/3.22.0/stories/UseCase#Active_directory_password_spraying
 tags:
@@ -14,14 +15,13 @@ logsource:
     service: security
 detection:
     selection1:
-        EventID: '4776'
-        action: 'failure'
-        Message: '*0xC000006A'
+        EventID: 4776
+        Status: '*0xC000006A' #Account logon with misspelled or bad password.
     filter:
-        Logon_Account: '*$'
+        TargetUserName: '*$'
     timeframe: 24h
     condition:
-        - selection1 and not filter | count(Logon_Account) by Source_Workstation > 10
+        - selection1 and not filter | count(TargetUserName) by Workstation > 10
 falsepositives:
     - Terminal servers
     - Jump servers
