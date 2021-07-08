@@ -160,7 +160,6 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "DeviceName": (self.id_mapping, self.default_value_mapping),
                 "EventType": ("ActionType", self.default_value_mapping),
                 "FileName": (self.id_mapping, self.default_value_mapping),
-                "OriginalFileName": ("OriginalFileName", self.default_value_mapping),
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "ImageLoaded": ("FolderPath", self.default_value_mapping),
                 "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
