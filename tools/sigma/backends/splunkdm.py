@@ -1,4 +1,4 @@
-# Splunk Datamodel backend for sigmac by mf1d3l (twitter: @mfidel19)
+# Splunk Datamodel backend for sigmac by mf1d3l (twitter: @mfidel19), greatly inspired by original Splunk Backend from Thomas Patzke, Florian Roth and Roey
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
