@@ -43,7 +43,7 @@ default_datamodels = {
                     "process_hash": ["Hashes"],
                     "process_id": ["ProcessId"],
                     "process_guid": ["ProcessGuid"],
-                    "process_integrity_level": [],
+                    "process_integrity_level": ["IntegrityLevel"],
                     "process_name": [],
                     "process_path": ["Image"],
                     "tag": [],
