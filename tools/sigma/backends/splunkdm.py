@@ -84,13 +84,10 @@ class SplunkDMBackend(SingleTextQueryBackend):
            self.datamodels = default_datamodels
 
     def normalizeField(self, field):
-
         normalized = False
-
         datamodel = self.datamodel
         dataset = self.dataset
         datamodels = self.datamodels
-
         try:
             for f in datamodels[datamodel]['datasets'][dataset]['fields']:
                 if field in datamodels[datamodel]['datasets'][dataset]['fields'][f]:
@@ -100,7 +97,6 @@ class SplunkDMBackend(SingleTextQueryBackend):
                 elif field == f:
                     normalized = True
                     return field
-
         except:
             pass
 
@@ -110,10 +106,8 @@ class SplunkDMBackend(SingleTextQueryBackend):
            raise Exception("[!] Failure to convert sigma rule: No normalization available for field "+ field + " in "+ datamodel + "." + dataset)
 
     def applyNormalization(self, sigmaparser):
-
         datamodel = self.datamodel
         dataset = self.dataset
-
         if 'fields' in sigmaparser.parsedyaml:
             newfields = []
             for field in sigmaparser.parsedyaml['fields']:
@@ -138,10 +132,8 @@ class SplunkDMBackend(SingleTextQueryBackend):
                     newdetection[subkey].update({newfield: values})
             else:
                     newdetection[subkey] = sigmaparser.parsedyaml['detection'][subkey]
-
         sigmaparser.parsedyaml.update({'detection': newdetection})
         sigmaparser.parse_sigma()
-
         return sigmaparser
 
     def generateMapItemListNode(self, key, value):
@@ -267,7 +259,6 @@ class SplunkDMBackend(SingleTextQueryBackend):
             return result
 
     def generate(self, sigmaparser):
-        self.generate_mode = ""
         try:
             normalization_mode = self.backend_options['normalization_mode']
         except:
