@@ -1,0 +1,29 @@
+title: SyncAppvPublishingServer Execute Arbitrary PowerShell Code
+id: fbd7c32d-db2a-4418-b92c-566eb8911133
+status: experimental
+author: frack113
+date: 2021/07/12
+description: Executes arbitrary PowerShell code using SyncAppvPublishingServer.exe. Requires Windows 10.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1218/T1218.md
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\SyncAppvPublishingServer.exe'
+        CommandLine|contains|all:
+            - '"n; '
+            - ' Start-Process '
+    condition: selection 
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Unknown
+level: medium
