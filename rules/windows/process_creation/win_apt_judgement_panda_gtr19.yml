@@ -20,15 +20,15 @@ logsource:
     product: windows
 detection:
     selection1:
-        CommandLine:
-            - '*\ldifde.exe -f -n *'
-            - '*\7za.exe a 1.7z *'
-            - '* eprod.ldf'
-            - '*\aaaa\procdump64.exe*'
-            - '*\aaaa\netsess.exe*'
-            - '*\aaaa\7za.exe*'
-            - '*copy .\1.7z \\*'
-            - '*copy \\client\c$\aaaa\\*'
+        - CommandLine|endswith: 'eprod.ldf'
+        - CommandLine|contains:
+            - '\ldifde.exe -f -n '
+            - '\7za.exe a 1.7z '
+            - '\aaaa\procdump64.exe'
+            - '\aaaa\netsess.exe'
+            - '\aaaa\7za.exe'
+            - 'copy .\1.7z \'
+            - 'copy \\client\c$\aaaa\'
     selection2:
         Image: C:\Users\Public\7za.exe
     condition: selection1 or selection2

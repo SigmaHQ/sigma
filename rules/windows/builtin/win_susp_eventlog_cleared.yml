@@ -1,3 +1,4 @@
+action: global
 title: Eventlog Cleared
 id: d99b79d2-0a6f-4f46-ad8b-260b6e17f982
 description: One of the Windows Eventlogs has been cleared. e.g. caused by "wevtutil cl" command execution
@@ -6,26 +7,34 @@ references:
     - https://www.hybrid-analysis.com/sample/027cc450ef5f8c5f653329641ec1fed91f694e0d229928963b30f6b0d7d3a745?environmentId=100
 author: Florian Roth
 date: 2017/01/10
-modified: 2020/08/23
+modified: 2021/07/09
 tags:
     - attack.defense_evasion
     - attack.t1070           # an old one
     - attack.t1070.001
     - car.2016-04-002
-logsource:
-    product: windows
-detection:
-    selection1:
-        service: security
-        EventID:
-            - 517
-            - 1102
-    selection2:
-        service: system
-        EventID: 104
-        Source: Microsoft-Windows-Eventlog
-    condition: selection1 or selection2
 falsepositives:
     - Rollout of log collection agents (the setup routine often includes a reset of the local Eventlog)
     - System provisioning (system reset before the golden image creation)
 level: high
+
+---
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID:
+            - 517
+            - 1102
+    condition: selection
+---
+logsource:
+    product: windows
+    service: system
+detection:
+    selection:
+        EventID: 104
+        Source: Microsoft-Windows-Eventlog
+    condition: selection
+

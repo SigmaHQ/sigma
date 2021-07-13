@@ -68,6 +68,7 @@ SigmaLCConfig = namedtuple('SigmaLCConfig', [
     'isAllStringValues',
     'keywordField',
     'postOpMapper',
+    'isCaseSensitive',
 ])
 _allFieldMappings = {
     'edr': {
@@ -81,7 +82,8 @@ _allFieldMappings = {
             fieldMappings = _windowsEventLogEDRFieldName,
             isAllStringValues = True,
             keywordField = None,
-            postOpMapper = None
+            postOpMapper = None,
+            isCaseSensitive = []
         ),
         "windows_defender//": SigmaLCConfig(
             topLevelParams = {
@@ -93,7 +95,8 @@ _allFieldMappings = {
             fieldMappings = _windowsEventLogEDRFieldName,
             isAllStringValues = True,
             keywordField = None,
-            postOpMapper = None
+            postOpMapper = None,
+            isCaseSensitive = []
         ),
         "windows/process_creation/": SigmaLCConfig(
             topLevelParams = {
@@ -120,7 +123,8 @@ _allFieldMappings = {
             },
             isAllStringValues = False,
             keywordField = "event/COMMAND_LINE",
-            postOpMapper = _mapProcessCreationOperations
+            postOpMapper = _mapProcessCreationOperations,
+            isCaseSensitive = []
         ),
         "dns//": SigmaLCConfig(
             topLevelParams = {
@@ -132,7 +136,8 @@ _allFieldMappings = {
             },
             isAllStringValues = False,
             keywordField = None,
-            postOpMapper = None
+            postOpMapper = None,
+            isCaseSensitive = []
         ),
         "linux//": SigmaLCConfig(
             topLevelParams = {
@@ -150,7 +155,8 @@ _allFieldMappings = {
             },
             isAllStringValues = False,
             keywordField = 'event/COMMAND_LINE',
-            postOpMapper = None
+            postOpMapper = None,
+            isCaseSensitive = ['event/FILE_PATH']
         ),
         "unix//": SigmaLCConfig(
             topLevelParams = {
@@ -168,7 +174,8 @@ _allFieldMappings = {
             },
             isAllStringValues = False,
             keywordField = 'event/COMMAND_LINE',
-            postOpMapper = None
+            postOpMapper = None,
+            isCaseSensitive = ['event/FILE_PATH']
         ),
         "netflow//": SigmaLCConfig(
             topLevelParams = {
@@ -181,7 +188,8 @@ _allFieldMappings = {
             },
             isAllStringValues = False,
             keywordField = None,
-            postOpMapper = None
+            postOpMapper = None,
+            isCaseSensitive = []
         ),
         "/proxy/": SigmaLCConfig(
             topLevelParams = {
@@ -197,7 +205,37 @@ _allFieldMappings = {
             },
             isAllStringValues = False,
             keywordField = None,
-            postOpMapper = None
+            postOpMapper = None,
+            isCaseSensitive = []
+        ),
+        "macos/process_creation/": SigmaLCConfig(
+            topLevelParams = {
+                "events": [
+                    "NEW_PROCESS",
+                    "EXISTING_PROCESS",
+                ]
+            },
+            preConditions = {
+                "op": "is mac",
+            },
+            fieldMappings = {
+                "CommandLine": "event/COMMAND_LINE",
+                "Commandline": "event/COMMAND_LINE",
+                "Image": "event/FILE_PATH",
+                "ParentImage": "event/PARENT/FILE_PATH",
+                "ParentCommandLine": "event/PARENT/COMMAND_LINE",
+                "User": "event/USER_NAME",
+                "OriginalFileName": "event/ORIGINAL_FILE_NAME",
+                # Custom field names coming from somewhere unknown.
+                "NewProcessName": "event/FILE_PATH",
+                "ProcessCommandLine": "event/COMMAND_LINE",
+                # Another one-off command line.
+                "Command": "event/COMMAND_LINE",
+            },
+            isAllStringValues = False,
+            keywordField = "event/COMMAND_LINE",
+            postOpMapper = _mapProcessCreationOperations,
+            isCaseSensitive = ['event/FILE_PATH']
         ),
     },
     "artifact": {
@@ -210,7 +248,8 @@ _allFieldMappings = {
             fieldMappings = _windowsEventLogArtifactFieldName,
             isAllStringValues = True,
             keywordField = None,
-            postOpMapper = None
+            postOpMapper = None,
+            isCaseSensitive = []
         ),
         "windows_defender//": SigmaLCConfig(
             topLevelParams = {
@@ -221,7 +260,8 @@ _allFieldMappings = {
             fieldMappings = _windowsEventLogArtifactFieldName,
             isAllStringValues = True,
             keywordField = None,
-            postOpMapper = None
+            postOpMapper = None,
+            isCaseSensitive = []
         ),
     }
 }
@@ -272,7 +312,7 @@ class LimaCharlieBackend(BaseBackend):
 
         # See if we have a definition for the source combination.
         mappingKey = "%s/%s/%s" % (product, category, service)
-        topFilter, preCond, mappings, isAllStringValues, keywordField, postOpMapper = _allFieldMappings.get(self.lc_target, {}).get(mappingKey, tuple([None, None, None, None, None, None]))
+        topFilter, preCond, mappings, isAllStringValues, keywordField, postOpMapper, isCaseSensitive = _allFieldMappings.get(self.lc_target, {}).get(mappingKey, tuple([None, None, None, None, None, None, None]))
         if mappings is None:
             raise NotImplementedError("Log source %s/%s/%s not supported by backend." % (product, category, service))
 
@@ -290,6 +330,9 @@ class LimaCharlieBackend(BaseBackend):
 
         # Call to fixup all operations after the fact.
         self._postOpMapper = postOpMapper
+
+        # Event paths that are case sensitive.
+        self._isCaseSensitiveFS = isCaseSensitive
 
         # Call the original generation code.
         detectComponent = super().generate(sigmaparser)
@@ -453,7 +496,7 @@ class LimaCharlieBackend(BaseBackend):
             newOp = {
                 "op": op,
                 "path": fieldname,
-                "case sensitive": False,
+                "case sensitive": fieldname in self._isCaseSensitiveFS,
             }
             if op == "matches":
                 newOp["re"] = newVal
@@ -471,7 +514,7 @@ class LimaCharlieBackend(BaseBackend):
                 newOp = {
                     "op": op,
                     "path": fieldname,
-                    "case sensitive": False,
+                    "case sensitive": fieldname in self._isCaseSensitiveFS,
                 }
                 if op == "matches":
                     newOp["re"] = newVal

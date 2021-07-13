@@ -40,9 +40,9 @@ The SANS webcast on Sigma contains a very good 20 min introduction to the projec
 
 # Why Sigma
 
-Today, everyone collects log data for analysis. People start working on their own, processing numerous white papers, blog posts and log analysis guidelines, extracting the necessary information and build their own searches and dashboard. Some of their searches and correlations are great and very useful but they lack a standardized format in which they can share their work with others. 
+Today, everyone collects log data for analysis. People start working on their own, processing numerous white papers, blog posts and log analysis guidelines, extracting the necessary information and build their own searches and dashboard. Some of their searches and correlations are great and very useful but they lack a standardized format in which they can share their work with others.
 
-Others provide excellent analyses, include IOCs and YARA rules to detect the malicious files and network connections, but have no way to describe a specific or generic detection method in log events. Sigma is meant to be an open standard in which such detection mechanisms can be defined, shared and collected in order to improve the detection capabilities for everyone. 
+Others provide excellent analyses, include IOCs and YARA rules to detect the malicious files and network connections, but have no way to describe a specific or generic detection method in log events. Sigma is meant to be an open standard in which such detection mechanisms can be defined, shared and collected in order to improve the detection capabilities for everyone.
 
 ## Slides
 
@@ -52,7 +52,7 @@ See the first slide deck that I prepared for a private conference in mid January
 
 # Specification
 
-The specifications can be found in the [Wiki](https://github.com/Neo23x0/sigma/wiki/Specification). 
+The specifications can be found in the [Wiki](https://github.com/Neo23x0/sigma/wiki/Specification).
 
 The current specification is a proposal. Feedback is requested.
 
@@ -62,7 +62,7 @@ The current specification is a proposal. Feedback is requested.
 
 Florian wrote a short [rule creation tutorial](https://www.nextron-systems.com/2018/02/10/write-sigma-rules/) that can help you getting started.
 
-## Rule Usage 
+## Rule Usage
 
 1. Download or clone the repository
 2. Check the `./rules` sub directory for an overview on the rule base
@@ -106,7 +106,7 @@ merges multiple YAML documents of a Sigma rule collection into simple Sigma rule
 
 ```bash
 usage: sigmac [-h] [--recurse] [--filter FILTER]
-              [--target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,mdatp,ee-outliers}]
+              [--target {sqlite,netwitness-epl,logpoint,graylog,netwitness,arcsight,carbonblack,es-rule,ala,elastalert-dsl,splunkxml,fieldlist,sysmon,arcsight-esm,kibana,csharp,qualys,powershell,es-qs,mdatp,humio,grep,qradar,logiq,sql,sumologic,ala-rule,limacharlie,elastalert,splunk,stix,xpack-watcher,crowdstrike,es-dsl,ee-outliers}]
               [--target-list] [--config CONFIG] [--output OUTPUT]
               [--backend-option BACKEND_OPTION] [--defer-abort]
               [--ignore-backend-errors] [--verbose] [--debug]
@@ -131,7 +131,7 @@ optional arguments:
                         tag that must appear in the rules tag list, case-
                         insensitive matching. Multiple log source
                         specifications are AND linked.
-  --target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,mdatp}, -t {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,mdatp}
+  --target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,mdatp,devo}, -t {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,mdatp,devo}
                         Output target format
   --target-list, -l     List available output target formats
   --config CONFIG, -c CONFIG
@@ -172,13 +172,13 @@ Translate a whole rule directory and ignore backend errors (`-I`) in rule conver
 ```
 tools/sigmac -I -t splunk -c splunk-windows -f 'level>=high' -r rules/windows/sysmon/
 ```
-#### Rule Set Translation with Custom Config 
+#### Rule Set Translation with Custom Config
 Apply your own config file (`-c ~/my-elk-winlogbeat.yml`) during conversion, which can contain you custom field and source mappings
 ```
 tools/sigmac -t es-qs -c ~/my-elk-winlogbeat.yml -r rules/windows/sysmon
 ```
 #### Generic Rule Set Translation
-Use a config file for `process_creation` rules (`-r rules/windows/process_creation`) that instructs sigmac to create queries for a Sysmon log source (`-c tools/config/generic/sysmon.yml`) and the ElasticSearch target backend (`-t es-qs`) 
+Use a config file for `process_creation` rules (`-r rules/windows/process_creation`) that instructs sigmac to create queries for a Sysmon log source (`-c tools/config/generic/sysmon.yml`) and the ElasticSearch target backend (`-t es-qs`)
 ```
 tools/sigmac -t es-qs -c tools/config/generic/sysmon.yml -r rules/windows/process_creation
 ```
@@ -209,7 +209,9 @@ tools/sigmac -t splunk -c ~/my-splunk-mapping.yml -c tools/config/generic/window
 * [LimaCharlie](https://limacharlie.io)
 * [ee-outliers](https://github.com/NVISO-BE/ee-outliers)
 * [Structured Threat Information Expression (STIX)](https://oasis-open.github.io/cti-documentation/stix/intro.html)
+* [LOGIQ](https://www.logiq.ai)
 * [uberAgent ESA](https://uberagent.com/)
+* [Devo](https://devo.com)
 
 Current work-in-progress
 * [Splunk Data Models](https://docs.splunk.com/Documentation/Splunk/7.1.0/Knowledge/Aboutdatamodels)
@@ -228,16 +230,18 @@ It's available on PyPI. Install with:
 pip3 install sigmatools
 ```
 
-Alternatively, if used from the Sigma Github repository, the Python dependencies can be installed with:
+Alternatively, if used from the Sigma Github repository, the Python dependencies can be installed with [Pipenv](https://pypi.org/project/pipenv/).
+Run the following command to get a shell with the installed requirements:
 
 ```bash
-pip3 install -r tools/requirements.txt
+pipenv shell
 ```
 
 For development (e.g. execution of integration tests with `make` and packaging), further dependencies are required and can be installed with:
 
 ```bash
-pip3 install -r tools/requirements-devel.txt
+pipenv install --dev
+pipenv shell
 ```
 
 ## Sigma2MISP
@@ -251,7 +255,7 @@ Example:
 *misp.conf*:
 ```
 url https://host
-key foobarfoobarfoobarfoobarfoobarfoobarfoo 
+key foobarfoobarfoobarfoobarfoobarfoobarfoo
 ```
 
 Load Sigma rule into MISP event 1234:
@@ -266,7 +270,7 @@ sigma2misp @misp.conf --same-event --info "Test Event" -r sigma_rules/
 
 ## Evt2Sigma
 
-[Evt2Sigma](https://github.com/Neo23x0/evt2sigma) helps you with the rule creation. It generates a Sigma rule from a log entry. 
+[Evt2Sigma](https://github.com/Neo23x0/evt2sigma) helps you with the rule creation. It generates a Sigma rule from a log entry.
 
 ## Sigma2attack
 
@@ -291,7 +295,7 @@ Result once imported in the MITRE ATT&CK® Navigator ([online version](https://m
 
 ## S2AN
 
-Similar to **Sigma2attack**, [S2AN](https://github.com/3CORESec/S2AN) is a pre-compiled binary for both Windows and GNU/Linux that generates [MITRE ATT&CK® Navigator](https://github.com/mitre/attack-navigator/) layers from a directory of Sigma rules. 
+Similar to **Sigma2attack**, [S2AN](https://github.com/3CORESec/S2AN) is a pre-compiled binary for both Windows and GNU/Linux that generates [MITRE ATT&CK® Navigator](https://github.com/mitre/attack-navigator/) layers from a directory of Sigma rules.
 
 S2AN was developed to be used as a standalone tool or as part of a CI/CD pipeline where it can be quickly downloaded and executed without external dependencies.
 
@@ -317,11 +321,11 @@ These tools are not part of the main toolchain and maintained separately by thei
 * [uncoder.io](https://uncoder.io/) - Online Translator for SIEM Searches
 * [THOR](https://www.nextron-systems.com/2018/06/28/spark-applies-sigma-rules-in-eventlog-scan/) - Scan with Sigma rules on endpoints
 * [Joe Sandbox](https://www.joesecurity.org/)
-* [ypsilon](https://github.com/P4T12ICK/ypsilon) - Automated Use Case Testing 
+* [ypsilon](https://github.com/P4T12ICK/ypsilon) - Automated Use Case Testing
 * [RANK VASA](https://globenewswire.com/news-release/2019/03/04/1745907/0/en/RANK-Software-to-Help-MSSPs-Scale-Cybersecurity-Offerings.html)
 * [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 * [TimeSketch](https://github.com/google/timesketch/commit/0c6c4b65a6c0f2051d074e87bbb2da2424fa6c35)
-* [SIΣGMA](https://github.com/3CORESec/SIEGMA) - SIEM consumable generator that utilizes Sigma for query conversion 
+* [SIΣGMA](https://github.com/3CORESec/SIEGMA) - SIEM consumable generator that utilizes Sigma for query conversion
 
 Sigma is available in some Linux distribution repositories:
 
@@ -333,10 +337,10 @@ If you want to contribute, you are more then welcome. There are numerous ways to
 
 ## Use it and provide feedback
 
-If you use it, let us know what works and what does not work. 
+If you use it, let us know what works and what does not work.
 
 E.g.
-- Tell us about false positives (issues section) 
+- Tell us about false positives (issues section)
 - Try to provide an improved rule (new filter) via [pull request](https://help.github.com/en/articles/editing-files-in-another-users-repository) on that rule
 
 ## Work on open issues
@@ -345,7 +349,7 @@ The github issue tracker is a good place to start tackling some issues others ra
 
 ## Provide Backends / Backend Features / Bugfixes
 
-Various requests for sigmac (sigma converter) backends exist. Some backends are very limited and need features. We are working on a documentation on how to write new backends but our time for this project is currently mostly spent for issue resolutions. 
+Various requests for sigmac (sigma converter) backends exist. Some backends are very limited and need features. We are working on a documentation on how to write new backends but our time for this project is currently mostly spent for issue resolutions.
 
 ## Spread the word
 

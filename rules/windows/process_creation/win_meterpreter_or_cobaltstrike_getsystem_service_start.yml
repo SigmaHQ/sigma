@@ -1,9 +1,9 @@
 title: Meterpreter or Cobalt Strike Getsystem Service Start
 id: 15619216-e993-4721-b590-4c520615a67d
 description: Detects the use of getsystem Meterpreter/Cobalt Strike command by detecting a specific service starting
-author: Teymur Kheirkhabarov, Ecco
+author: Teymur Kheirkhabarov, Ecco, Florian Roth
 date: 2019/10/26
-modified: 2020/09/01
+modified: 2021/05/20
 references:
     - https://speakerdeck.com/heirhabarov/hunting-for-privilege-escalation-in-windows-environment
     - https://blog.cobaltstrike.com/2014/04/02/what-happens-when-i-type-getsystem/
@@ -28,6 +28,12 @@ detection:
         # cobaltstrike getsystem technique 1: %COMSPEC% /c echo 559891bb017 > \\.\pipe\5e120a
         - CommandLine|contains|all:
             - '%COMSPEC%'
+            - '/c'
+            - 'echo'
+            - '\pipe\'
+        # cobaltstrike getsystem technique 1b (expanded env var): %COMSPEC% /c echo 559891bb017 > \\.\pipe\5e120a
+        - CommandLine|contains|all:
+            - 'cmd.exe'
             - '/c'
             - 'echo'
             - '\pipe\'

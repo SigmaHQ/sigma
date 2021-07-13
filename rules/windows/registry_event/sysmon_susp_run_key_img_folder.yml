@@ -16,20 +16,22 @@ logsource:
     product: windows
 detection:
     selection:
-        TargetObject: 
-            - '*\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\\*'
-            - '*\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce\\*'
-        Details:
-            - '*C:\Windows\Temp\\*'
-            - '*C:\$Recycle.bin\\*'
-            - '*C:\Temp\\*'
-            - '*C:\Users\Public\\*'
-            - '%Public%\\*'
-            - '*C:\Users\Default\\*'
-            - '*C:\Users\Desktop\\*'
-            - 'wscript*'
-            - 'cscript*'
-    condition: selection
+        TargetObject|contains: 
+            - '\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\'
+            - '\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce\'
+    selection2:
+        - Details|contains:
+            - 'C:\Windows\Temp\'
+            - 'C:\$Recycle.bin\'
+            - 'C:\Temp\'
+            - 'C:\Users\Public\'
+            - 'C:\Users\Default\'
+            - 'C:\Users\Desktop\'
+        - Details|startswith:
+            - '%Public%\'
+            - 'wscript'
+            - 'cscript'
+    condition: selection and selection2
 fields:
     - Image
 falsepositives:

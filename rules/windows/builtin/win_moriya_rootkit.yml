@@ -1,0 +1,34 @@
+action: global
+title: Moriya Rootkit
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+description: Detects the use of Moriya rootkit as described in the securelist's Operation TunnelSnake report
+status: experimental
+author: Bhabesh Raj
+date: 2021/05/06
+modified: 2021/05/12
+level: critical
+falsepositives:
+    - None
+references:
+    - https://securelist.com/operation-tunnelsnake-and-moriya-rootkit/101831
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1543.003
+---
+logsource:
+    product: windows
+    service: system
+detection:
+    selection:
+        EventID: 7045
+        ServiceName: ZzNetSvc
+    condition: selection
+---
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename: 'C:\Windows\System32\drivers\MoriyaStreamWatchmen.sys'
+    condition: selection

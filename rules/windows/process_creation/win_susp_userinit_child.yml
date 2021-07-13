@@ -6,16 +6,17 @@ references:
     - https://twitter.com/SBousseaden/status/1139811587760562176
 author: Florian Roth (rule), Samir Bousseaden (idea)
 date: 2019/06/17
+modified: 2021/06/27
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
-        ParentImage: '*\userinit.exe'
+        ParentImage|endswith: '\userinit.exe'
     filter1:
-        CommandLine: '*\\netlogon\\*'
+        CommandLine|contains: '\netlogon\'
     filter2:
-        Image: '*\explorer.exe'
+        Image|endswith: '\explorer.exe'
     condition: selection and not filter1 and not filter2
 fields:
     - CommandLine

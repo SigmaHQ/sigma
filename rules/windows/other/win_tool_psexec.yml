@@ -5,7 +5,7 @@ status: experimental
 description: Detects PsExec service installation and execution events (service and Sysmon)
 author: Thomas Patzke
 date: 2017/06/12
-modified: 2020/08/23
+modified: 2021/05/16
 references:
     - https://www.jpcert.or.jp/english/pub/sr/ir_research.html
     - https://jpcertcc.github.io/ToolAnalysisResultSheet
@@ -22,6 +22,8 @@ fields:
     - ParentCommandLine
     - ServiceName
     - ServiceFileName
+    - TargetFileName
+    - PipeName
 falsepositives:
     - unknown
 level: low
@@ -33,7 +35,7 @@ detection:
     service_installation:
         EventID: 7045
         ServiceName: 'PSEXESVC'
-        ServiceFileName: '*\PSEXESVC.exe'
+        ServiceFileName|endswith: '\PSEXESVC.exe'
     service_execution:
         EventID: 7036
         ServiceName: 'PSEXESVC'
@@ -43,5 +45,19 @@ logsource:
     product: windows
 detection:
     sysmon_processcreation:
-        Image: '*\PSEXESVC.exe'
+        Image|endswith: '\PSEXESVC.exe'
         User: 'NT AUTHORITY\SYSTEM'
+---
+logsource:
+     category: pipe_created
+     product: windows
+detection:
+     sysmon_pipecreated:
+         PipeName: '\PSEXESVC'
+---
+logsource:
+     category: file_event
+     product: windows
+detection:
+     sysmon_filecreation:
+        TargetFileName|endswith: '\PSEXESVC.exe'

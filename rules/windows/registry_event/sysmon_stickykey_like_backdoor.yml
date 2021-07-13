@@ -12,9 +12,9 @@ tags:
     - attack.t1546.008
     - car.2014-11-003
     - car.2014-11-008
-author: Florian Roth, @twjackomo
+author: Florian Roth, @twjackomo, Jonhnathan Ribeiro, oscd.community
 date: 2018/03/15
-modified: 2020/09/06    
+modified: 2020/11/28
 falsepositives:
     - Unlikely
 level: critical
@@ -23,15 +23,14 @@ logsource:
     category: registry_event
     product: windows
 detection:
-    selection_registry:     
-        TargetObject: 
-            - '*\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\sethc.exe\Debugger'
-            - '*\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\utilman.exe\Debugger'
-            - '*\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\osk.exe\Debugger'
-            - '*\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\Magnify.exe\Debugger'
-            - '*\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\Narrator.exe\Debugger'
-            - '*\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\DisplaySwitch.exe\Debugger'
-        EventType: 'SetValue'
+    selection_registry:
+        TargetObject|endswith:
+            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\sethc.exe\Debugger'
+            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\utilman.exe\Debugger'
+            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\osk.exe\Debugger'
+            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\Magnify.exe\Debugger'
+            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\Narrator.exe\Debugger'
+            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\DisplaySwitch.exe\Debugger'
     condition: 1 of them
 ---
 logsource:
@@ -39,13 +38,13 @@ logsource:
     product: windows
 detection:
     selection_process:
-        ParentImage:
-            - '*\winlogon.exe'
-        CommandLine:
-            - '*cmd.exe sethc.exe *'
-            - '*cmd.exe utilman.exe *'
-            - '*cmd.exe osk.exe *'
-            - '*cmd.exe Magnify.exe *'
-            - '*cmd.exe Narrator.exe *'
-            - '*cmd.exe DisplaySwitch.exe *'
+        ParentImage|endswith: '\winlogon.exe'
+        Image|endswith: '\cmd.exe'
+        CommandLine|contains:
+            - 'sethc.exe'
+            - 'utilman.exe'
+            - 'osk.exe'
+            - 'Magnify.exe'
+            - 'Narrator.exe'
+            - 'DisplaySwitch.exe'
     condition: 1 of them

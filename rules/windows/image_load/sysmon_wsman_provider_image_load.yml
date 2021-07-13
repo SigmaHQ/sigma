@@ -1,0 +1,38 @@
+title: Suspicious WSMAN Provider Image Loads
+id: ad1f4bb9-8dfb-4765-adb6-2a7cfb6c0f94
+description: Detects signs of potential use of the WSMAN provider from uncommon processes locally and remote execution.
+status: experimental
+date: 2020/06/24
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.lateral_movement
+    - attack.t1021.003
+references:
+    - https://twitter.com/chadtilbury/status/1275851297770610688
+    - https://bohops.com/2020/05/12/ws-management-com-another-approach-for-winrm-lateral-movement/
+    - https://docs.microsoft.com/en-us/windows/win32/winrm/windows-remote-management-architecture
+    - https://github.com/bohops/WSMan-WinRM
+logsource:
+    category: image_load
+    product: windows
+detection:
+    request_client:
+        - ImageLoaded|endswith:
+            - '\WsmSvc.dll'
+            - '\WsmAuto.dll'
+            - '\Microsoft.WSMan.Management.ni.dll'
+        - OriginalFileName:
+            - WsmSvc.dll
+            - WSMANAUTOMATION.DLL
+            - Microsoft.WSMan.Management.dll
+    filter_ps:
+        Image|endswith: '\powershell.exe'
+    respond_server:
+        Image|endswith: '\svchost.exe'
+        OriginalFileName: 'WsmWmiPl.dll'
+    condition: (request_client and not filter_ps) or respond_server
+falsepositives:
+    - Unknown
+level: medium

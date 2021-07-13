@@ -6,7 +6,7 @@ references:
     - https://twitter.com/SBousseaden/status/1096148422984384514
 author: Samir Bousseaden
 date: 2019/02/16
-modified: 2020/08/24
+modified: 2021/05/11
 tags:
     - attack.command_and_control
     - attack.t1572
@@ -19,13 +19,15 @@ logsource:
     product: windows
 detection:
     selection:
-        Image: '*\svchost.exe'
+        Image|endswith: '\svchost.exe'
         Initiated: 'true'
         SourcePort: 3389
-        DestinationIp:
-            - '127.*'
+    selection2:
+        - DestinationIp|startswith:
+            - '127.'
+        - DestinationIp:
             - '::1'
-    condition: selection
+    condition: selection and selection2
 falsepositives:
     - unknown
 level: high

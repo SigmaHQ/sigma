@@ -19,7 +19,7 @@ tags:
     - attack.t1071.004
 date: 2018/03/23
 modified: 2020/08/26
-author: Florian Roth, Markus Neis
+author: Florian Roth, Markus Neis, Jonhnathan Ribeiro, Daniil Yugoslavskiy, oscd.community
 detection:
     condition: 1 of them
 falsepositives:
@@ -47,33 +47,31 @@ detection:
             - 'UpdatMachine'
 ---
 logsource:
+   category: registry_event
    product: windows
-   service: sysmon
 detection:
     selection_reg1:
-        EventID: 13 
-        TargetObject: 
-            - '*SOFTWARE\Microsoft\Windows\CurrentVersion\UMe'
-            - '*SOFTWARE\Microsoft\Windows\CurrentVersion\UT'
-        EventType: 'SetValue'
-    selection_reg2:
-        EventID: 13 
-        TargetObject: '*\Control\SecurityProviders\WDigest\UseLogonCredential'
-        EventType: 'SetValue'
-        Details: 'DWORD (0x00000001)'
+        TargetObject|endswith: 
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\UMe'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\UT'
 ---
 logsource:
     category: process_creation
     product: windows
 detection:
+    selection_process0:
+        CommandLine|contains: '\Service.exe'
+        CommandLine|endswith: 
+            - 'i'
+            - 'u'
     selection_process1:
-        CommandLine: 
-            - '*\Service.exe i'
-            - '*\Service.exe u'
-            - '*\microsoft\Taskbar\autoit3.exe'
-            - 'C:\wsc.exe*'
+        - CommandLine|endswith: '\microsoft\Taskbar\autoit3.exe'
+        - CommandLine|startswith: 'C:\wsc.exe'
     selection_process2:
-        Image: '*\Windows\Temp\DB\\*.exe'
+        Image|contains: '\Windows\Temp\DB\'
+        Image|endswith: '.exe'
     selection_process3:
-        CommandLine: '*\nslookup.exe -q=TXT*'
-        ParentImage: '*\Autoit*'
+        CommandLine|contains|all: 
+            - '\nslookup.exe'
+            - '-q=TXT'
+        ParentImage|contains: '\Autoit'

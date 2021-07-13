@@ -9,9 +9,9 @@ tags:
     - attack.execution
     - attack.defense_evasion
     - attack.t1218
-author: Karneades / Markus Neis
+author: Karneades / Markus Neis, Jonhnathan Ribeiro, oscd.community
 date: 2019/11/12
-modified: 2020/08/28
+modified: 2020/11/28
 falsepositives:
     - 1Clipboard
     - Beaker Browser
@@ -51,10 +51,11 @@ logsource:
     product: windows
 detection:
     selection:
-        Image:
-            - '*\update.exe'                           # Check if folder Name matches executed binary  \\(?P<first>[^\\]*)\\Update.*Start.{2}(?P<second>\1)\.exe (example: https://regex101.com/r/SGSQGz/2)
-        CommandLine:
-            - '*--processStart*.exe*'
-            - '*--processStartAndWait*.exe*'
-            - '*--createShortcut*.exe*'
+        Image|endswith: '\update.exe' # Check if folder Name matches executed binary  \\(?P<first>[^\\]*)\\Update.*Start.{2}(?P<second>\1)\.exe (example: https://regex101.com/r/SGSQGz/2)
+        CommandLine|contains:
+            - '--processStart'
+            - '--processStartAndWait'
+            - '--createShortcut'
+        CommandLine|contains|all:
+            - '.exe'
     condition: selection
