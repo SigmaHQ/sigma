@@ -1,0 +1,42 @@
+title: Bad Opsec Powershell Code Artifacts
+id: 73e733cc-1ace-3212-a107-ff2523cc9fc3
+description: Focuses on trivial artifacts observed in variants of prevalent offensive ps1 payloads, including Cobalt Strike Beacon, PoshC2, Powerview, Letmein, Empire, Powersploit, and other attack payloads that often undergo minimal changes by attackers due to bad opsec.
+status: experimental
+references:
+    - https://newtonpaul.com/analysing-fileless-malware-cobalt-strike-beacon/
+    - https://labs.sentinelone.com/top-tier-russian-organized-cybercrime-group-unveils-fileless-stealthy-powertrick-backdoor-for-high-value-targets/
+    - https://www.mdeditor.tw/pl/pgRt
+author: 'ok @securonix invrep_de, oscd.community'
+date: 2020/10/09
+modified: 2020/10/09
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1086
+logsource:
+    product: windows
+    service: powershell
+    definition: 'Script block logging must be enabled'
+detection:
+    selection_4104:
+        EventID: 4104
+        ScriptBlockText|contains:
+            - '$DoIt'
+            - 'harmj0y'
+            - 'mattifestation'
+            - '_RastaMouse'
+            - 'tifkin_'
+            - '0xdeadbeef'
+    selection_4103:
+        EventID: 4103
+        Payload|contains:
+            - '$DoIt'
+            - 'harmj0y'
+            - 'mattifestation'
+            - '_RastaMouse'
+            - 'tifkin_'
+            - '0xdeadbeef'
+    condition: selection_4104 or selection_4103
+falsepositives:
+    - 'Moderate-to-low; Despite the shorter length/lower entropy for some of these, because of high specificity, fp appears to be fairly limited in many environments.'
+level: critical

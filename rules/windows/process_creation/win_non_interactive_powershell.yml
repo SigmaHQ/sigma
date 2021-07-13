@@ -3,10 +3,10 @@ id: f4bbd493-b796-416e-bbf2-121235348529
 description: Detects non-interactive PowerShell activity by looking at powershell.exe with not explorer.exe as a parent.
 status: experimental
 date: 2019/09/12
-modified: 2019/11/10
+modified: 2021/05/10
 author: Roberto Rodriguez @Cyb3rWard0g (rule), oscd.community (improvements)
 references:
-    - https://github.com/Cyb3rWard0g/ThreatHunter-Playbook/tree/master/playbooks/windows/02_execution/T1086_powershell/basic_powershell_execution.md
+    - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190410151110.html
 tags:
     - attack.execution
     - attack.t1086          # an old one
@@ -18,8 +18,10 @@ detection:
     selection:
         Image|endswith: '\powershell.exe'
     filter:
-        ParentImage|endswith: '\explorer.exe'
+        ParentImage|endswith: 
+            - '\explorer.exe'
+            - '\CompatTelRunner.exe'
     condition: selection and not filter
 falsepositives:
     - Legitimate programs executing PowerShell scripts
-level: medium
+level: low

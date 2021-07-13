@@ -1,0 +1,39 @@
+title: Security Software Discovery
+id: 0ed75b9c-c73b-424d-9e7d-496cd565fbe0
+status: experimental
+description: Detects usage of system utilities (only grep for now) to discover security software discovery
+author: Daniil Yugoslavskiy, oscd.community
+date: 2020/10/19
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1518.001/T1518.001.md
+logsource:
+  category: process_creation
+  product: macos
+detection:
+  grep_execution:
+    Image: '/usr/bin/grep'
+  security_services_and_processes:
+    CommandLine|contains:
+      - 'nessusd'        # nessus vulnerability scanner
+      - 'santad'         # google santa
+      - 'CbDefense'      # carbon black
+      - 'falcond'        # crowdstrike falcon
+      - 'td-agent'       # fluentd log shipper
+      - 'packetbeat'     # elastic network logger/shipper
+      - 'filebeat'       # elastic log file shipper
+      - 'auditbeat'      # elastic auditing agent/log shipper
+      - 'osqueryd'       # facebook osquery
+      - 'BlockBlock'     # Objective-See persistence locations watcher/blocker
+      - 'LuLu'           # Objective-See firewall management utility
+  little_snitch_process: # Objective Development Software firewall management utility
+    CommandLine|contains|all:
+      - 'Little'
+      - 'Snitch'
+  condition: grep_execution and security_services_and_processes or
+             grep_execution and little_snitch_process
+falsepositives:
+  - Legitimate activities
+level: medium
+tags:
+  - attack.discovery
+  - attack.t1518.001

@@ -20,6 +20,7 @@ class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
     conditionDict = {
         "startswith": "begin with",
         "endswith": "end with",
+        "all": "contains all"
     }
 
     def __init__(self, *args, **kwargs):
@@ -78,14 +79,19 @@ class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
 
     def mapFiledValue(self, field, value):
         condition = None
+        any_selector = "contains any"
         if "|" in field:
             field, *pipes = field.split("|")
             if len(pipes) == 1:
-                condition = pipes[0]
+                modifier = pipes[0]
+                if modifier in self.conditionDict:
+                    condition = self.conditionDict[modifier]
+                if modifier == "all":
+                    any_selector = "contains all"
             else:
                 raise NotImplementedError("not implemented condition")
         if isinstance(value, list) and len(value) > 1:
-            condition = "contains any"
+            condition = any_selector
             value = ";".join(value)
         elif "*" in value:
             if value.startswith("*") and value.endswith("*"):

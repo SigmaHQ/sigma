@@ -4,7 +4,7 @@ status: experimental
 description: Detects activity as "net user administrator /domain" and "net group domain admins /domain"
 references:
     - https://findingbad.blogspot.de/2017/01/hunting-what-does-it-look-like.html
-author: Florian Roth (rule), Jack Croock (method)
+author: Florian Roth (rule), Jack Croock (method), Jonhnathan Ribeiro (improvements), oscd.community
 date: 2017/03/07
 modified: 2020/08/23
 tags:
@@ -20,15 +20,17 @@ logsource:
     definition: The volume of Event ID 4661 is high on Domain Controllers and therefore "Audit SAM" and "Audit Kernel Object" advanced audit policy settings are not configured in the recommendations for server systems
 detection:
     selection:
-        - EventID: 4661
-          ObjectType: 'SAM_USER'
-          ObjectName: 'S-1-5-21-*-500'
+          EventID: 4661
+          ObjectType:
+            - 'SAM_USER'
+            - 'SAM_GROUP'
+          ObjectName|startswith: 'S-1-5-21-'
           AccessMask: '0x2d'
-        - EventID: 4661
-          ObjectType: 'SAM_GROUP'
-          ObjectName: 'S-1-5-21-*-512'
-          AccessMask: '0x2d'
-    condition: selection
+    selection2:
+          ObjectName|endswith: 
+            - '-500'
+            - '-512'
+    condition: selection and selection2
 falsepositives:
     - Administrator activity
     - Penetration tests

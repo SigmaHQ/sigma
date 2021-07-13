@@ -6,6 +6,7 @@ references:
     - https://researchcenter.paloaltonetworks.com/2018/01/unit42-oilrig-uses-rgdoor-iis-backdoor-targets-middle-east/
 author: Florian Roth
 date: 2012/12/11
+modified: 2020/11/28
 tags:
     - attack.persistence
     - attack.t1505.003
@@ -15,8 +16,11 @@ logsource:
     product: windows
 detection:
     selection:
-        CommandLine:
-            - '*\APPCMD.EXE install module /name:*'
+        Image|endswith: '\appcmd.exe'
+        CommandLine|contains|all:
+            - 'install'
+            - 'module'
+            - '/name:'
     condition: selection
 falsepositives:
     - Unknown as it may vary from organisation to arganisation how admins use to install IIS modules

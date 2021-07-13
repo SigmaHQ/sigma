@@ -4,6 +4,7 @@ status: experimental
 description: Detects suspicious powershell invocations from interpreters or unusual programs
 author: Florian Roth
 date: 2019/01/16
+modified: 2020/11/28
 references:
     - https://www.carbonblack.com/2017/03/15/attackers-leverage-excel-powershell-dns-latest-non-malware-attack/
 tags:
@@ -15,13 +16,12 @@ logsource:
     product: windows
 detection:
     selection:
-        ParentImage:
-            - '*\wscript.exe'
-            - '*\cscript.exe'
-        Image:
-            - '*\powershell.exe'
+        ParentImage|endswith:
+            - '\wscript.exe'
+            - '\cscript.exe'
+        Image|endswith: '\powershell.exe'
     falsepositive:
-        CurrentDirectory: '*\Health Service State\\*'
+        CurrentDirectory|contains: '\Health Service State\'
     condition: selection and not falsepositive
 fields:
     - CommandLine

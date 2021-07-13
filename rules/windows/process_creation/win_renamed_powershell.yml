@@ -4,9 +4,9 @@ status: experimental
 description: Detects the execution of a renamed PowerShell often used by attackers or malware
 references:
     - https://twitter.com/christophetd/status/1164506034720952320
-author: Florian Roth
+author: Florian Roth, frack113
 date: 2019/08/22
-modified: 2020/09/06
+modified: 2021/07/03
 tags:
     - car.2013-05-009
     - attack.defense_evasion
@@ -17,12 +17,15 @@ logsource:
     category: process_creation
 detection:
     selection:
-        Description: 'Windows PowerShell'
+        Description|startswith: 
+            - 'Windows PowerShell'
+            - 'pwsh'
         Company: 'Microsoft Corporation'
     filter:
-        Image: 
-            - '*\powershell.exe'
-            - '*\powershell_ise.exe'
+        Image|endswith: 
+            - '\powershell.exe'
+            - '\powershell_ise.exe'
+            - '\pwsh.exe'
     condition: selection and not filter
 falsepositives:
     - Unknown

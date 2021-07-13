@@ -8,7 +8,7 @@ on:
     branches:
       - "*"
   pull_request:
-    branches: [ master ]
+    branches: [ master, oscd ]
 
 jobs:
   test-sigma:
@@ -22,10 +22,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r tools/requirements.txt -r tools/requirements-devel.txt
+        pip install pipenv
+        pipenv lock
+        pipenv install --dev --deploy
     - name: Test Sigma Tools and Rules
       run: |
-        make test
+        pipenv run make test
     - name: Test SQL(ite) Backend
       run: |
-        make test-backend-sql
+        pipenv run make test-backend-sql

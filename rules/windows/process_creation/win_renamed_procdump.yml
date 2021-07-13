@@ -6,7 +6,7 @@ references:
     - https://docs.microsoft.com/en-us/sysinternals/downloads/procdump
 author: Florian Roth
 date: 2019/11/18
-modified: 2020/09/06
+modified: 2021/04/29
 tags:
     - attack.defense_evasion
     - attack.t1036 # an old one
@@ -15,13 +15,21 @@ logsource:
     product: windows
     category: process_creation
 detection:
-    selection:
+    selection1:
         OriginalFileName: 'procdump'
-    filter:
-        Image: 
-            - '*\procdump.exe'
-            - '*\procdump64.exe'
-    condition: selection and not filter
+    filter1:
+        Image|endswith: 
+            - '\procdump.exe'
+            - '\procdump64.exe'
+    selection2:
+        CommandLine|contains|all: 
+            - ' -ma '
+            - ' -accepteula '
+    filter2:
+        CommandLine|contains: 
+            - '\procdump.exe'
+            - '\procdump64.exe'
+    condition: ( selection1 and not filter1 ) or ( selection2 and not filter2 )
 falsepositives:
     - Procdump illegaly bundled with legitimate software
     - Weird admins who renamed binaries

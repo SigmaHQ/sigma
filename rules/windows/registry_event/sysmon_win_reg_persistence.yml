@@ -5,18 +5,25 @@ references:
     - https://oddvar.moe/2018/04/10/persistence-using-globalflags-in-image-file-execution-options-hidden-from-autoruns-exe/
 date: 2018/04/11
 modified: 2020/09/06
-author: Karneades
+author: Karneades, Jonhnathan Ribeiro
 logsource:
     category: registry_event
     product: windows
 detection:
     selection_reg1:
-        TargetObject:
-            - '*\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\\*\GlobalFlag'
-            - '*\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SilentProcessExit\\*\ReportingMode'
-            - '*\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SilentProcessExit\\*\MonitorProcess'
-        EventType: SetValue
-    condition: selection_reg1
+        TargetObject|contains:
+            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
+    selection_reg2:
+        - TargetObject|contains|all:
+            - '\Image File Execution Options\'
+            - '\GlobalFlag'
+        - TargetObject|contains|all:
+            - 'SilentProcessExit\'
+            - '\ReportingMode'
+        - TargetObject|contains|all:
+            - 'SilentProcessExit\'
+            - '\MonitorProcess'
+    condition: selection_reg1 and selection_reg2
 tags:
     - attack.privilege_escalation
     - attack.persistence

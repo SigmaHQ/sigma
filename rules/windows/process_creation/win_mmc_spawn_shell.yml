@@ -16,18 +16,20 @@ logsource:
     product: windows
 detection:
     selection:
-        ParentImage: '*\mmc.exe'
-        Image:
-            - '*\cmd.exe'
-            - '*\powershell.exe'
-            - '*\wscript.exe'
-            - '*\cscript.exe'
-            - '*\sh.exe'
-            - '*\bash.exe'
-            - '*\reg.exe'
-            - '*\regsvr32.exe'
-            - '*\BITSADMIN*'
-    condition: selection
+        ParentImage|endswith: '\mmc.exe'
+    selection2:
+        - Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\sh.exe'
+            - '\bash.exe'
+            - '\reg.exe'
+            - '\regsvr32.exe'
+        - Image|contains:
+            - '\BITSADMIN'
+    condition: selection and selection2
 fields:
     - CommandLine
     - Image
