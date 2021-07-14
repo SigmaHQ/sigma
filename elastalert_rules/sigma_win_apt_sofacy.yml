@@ -4,9 +4,9 @@ description: Detects Trojan loader acitivty as used by APT28
 filter:
 - query:
     query_string:
-      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine.keyword:(rundll32.exe\ %APPDATA%\\*.dat\",* OR rundll32.exe\ %APPDATA%\\*.dll\",#1))
+      query: (data.win.system.eventID:"4688" AND (data.win.eventdata.commandLine:*rundll32.exe* AND data.win.eventdata.commandLine:*%APPDATA%\\*) AND (data.win.eventdata.commandLine:*.dat\",* OR data.win.eventdata.commandLine:*.dll\",#1))
 index: wazuh-alerts-3.x-*
-name: ba778144-5e3d-40cf-8af9-e28fb1df1e20_0
+name: Sofacy-Trojan-Loader-Activity
 priority: 1
 realert:
   minutes: 0

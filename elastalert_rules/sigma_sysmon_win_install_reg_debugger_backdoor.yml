@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the registration of a debugger for a program that is available in the logon screen (sticky key backdoor).
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:*\\CurrentVersion\\Image\ File\ Execution\ Options\\* AND data.win.eventdata.commandLine:(*sethc.exe* OR *utilman.exe* OR *osk.exe* OR *magnify.exe* OR *narrator.exe* OR *displayswitch.exe* OR *atbroker.exe*))
+index: wazuh-alerts-3.x-*
+name: Suspicious-Debugger-Registration-Cmdline
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

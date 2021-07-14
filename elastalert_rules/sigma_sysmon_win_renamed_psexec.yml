@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the execution of a renamed PsExec often used by attackers or malware
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.description:"Execute\ processes\ remotely" AND data.win.eventdata.product:"Sysinternals\ PsExec") AND (NOT (data.win.eventdata.image:(*\\PsExec.exe OR *\\PsExec64.exe))))
+index: wazuh-alerts-3.x-*
+name: Renamed-PsExec
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

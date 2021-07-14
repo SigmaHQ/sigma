@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects different loaders as described in various threat reports on Lazarus group activity
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND ((data.win.eventdata.commandLine:*cmd.exe\ \/c\ * AND data.win.eventdata.commandLine:*\ \-p\ 0x* AND data.win.eventdata.commandLine:(*C\:\\ProgramData\\* OR *C\:\\RECYCLER\\*)) OR (data.win.eventdata.commandLine:*rundll32.exe\ * AND data.win.eventdata.commandLine:*C\:\\ProgramData\\* AND data.win.eventdata.commandLine:(*.bin,* OR *.tmp,* OR *.dat,* OR *.io,* OR *.ini,* OR *.db,*))))
+index: wazuh-alerts-3.x-*
+name: Lazarus-Loaders
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

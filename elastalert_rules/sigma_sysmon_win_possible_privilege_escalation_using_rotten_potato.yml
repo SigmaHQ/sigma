@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detection of child processes spawned with SYSTEM privileges by parents with LOCAL SERVICE or NETWORK SERVICE privileges
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (ParentUser:("NT\ AUTHORITY\\NETWORK\ SERVICE" OR "NT\ AUTHORITY\\LOCAL\ SERVICE") AND user_account:"NT\ AUTHORITY\\SYSTEM") AND (NOT (data.win.eventdata.image:*\\rundll32.exe AND data.win.eventdata.commandLine:*DavSetCookie*)))
+index: wazuh-alerts-3.x-*
+name: Detection-of-Possible-Rotten-Potato
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

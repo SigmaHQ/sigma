@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a suspicious child process of a Windows shell
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.parentImage:(*\\mshta.exe OR *\\powershell.exe OR *\\rundll32.exe OR *\\cscript.exe OR *\\wscript.exe OR *\\wmiprvse.exe) AND data.win.eventdata.image:(*\\schtasks.exe OR *\\nslookup.exe OR *\\certutil.exe OR *\\bitsadmin.exe OR *\\mshta.exe)) AND (NOT (data.win.eventdata.currentDirectory:*\\ccmcache\\*)))
+index: wazuh-alerts-3.x-*
+name: Windows-Shell-Spawning-Suspicious-Program
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

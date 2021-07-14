@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detection well-known mimikatz command line arguments
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.commandLine:(*DumpCreds* OR *invoke\-mimikatz*) OR (data.win.eventdata.commandLine:(*rpc* OR *token* OR *crypto* OR *dpapi* OR *sekurlsa* OR *kerberos* OR *lsadump* OR *privilege* OR *process*) AND data.win.eventdata.commandLine:(*\:\:*))))
+index: wazuh-alerts-3.x-*
+name: Mimikatz-Command-Line
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

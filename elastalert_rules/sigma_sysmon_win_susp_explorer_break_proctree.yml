@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a command line process that uses explorer.exe /root, which is similar to cmd.exe /c, only it breaks the process tree and makes its parent a new instance of explorer
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:*explorer.exe* AND data.win.eventdata.commandLine:*\ \/root,*)
+index: wazuh-alerts-3.x-*
+name: Explorer-Root-Flag-Process-Tree-Break
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

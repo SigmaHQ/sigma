@@ -1,0 +1,15 @@
+alert:
+- debug
+description: "Csi.exe is a signed binary from Micosoft that comes with Visual Studio and provides C# interactive capabilities. It can be used to run C# code from a file passed as a parameter in command line. Early version of this utility provided with Microsoft \u201CRoslyn\u201D Community Technology Preview was named 'rcsi.exe'"
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND (process_path:*\\csi.exe OR process_path:*\\rcsi.exe OR data.win.eventdata.originalFileName:"csi.exe" OR data.win.eventdata.originalFileName:"rcsi.exe") AND data.win.eventdata.company:"Microsoft\ Corporation")
+index: wazuh-alerts-3.x-*
+name: Suspicious-Csi.exe-Usage
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

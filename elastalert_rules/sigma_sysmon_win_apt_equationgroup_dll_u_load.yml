@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a specific tool and export used by EquationGroup
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND ((data.win.eventdata.image:*\\rundll32.exe AND data.win.eventdata.commandLine:*,dll_u) OR data.win.eventdata.commandLine:*\ \-export\ dll_u\ *))
+index: wazuh-alerts-3.x-*
+name: Equation-Group-DLL_U-Load
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

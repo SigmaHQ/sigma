@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious renamed PAExec execution as often used by attackers
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND (data.win.system.eventID:"4688" AND (data.win.eventdata.description:"PAExec\ Application" OR OriginalFilename:"PAExec.exe")) AND (NOT (process_path:(*\\PAexec.exe OR *\\paexec.exe))))
+index: wazuh-alerts-3.x-*
+name: Renamed-PAExec
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

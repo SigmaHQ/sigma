@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious flags used by PsExec and PAExec but no usual program name in command line
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND (data.win.system.eventID:"4688" AND ((data.win.eventdata.commandLine:*\\127.0.0.1* AND data.win.eventdata.commandLine:*\ \-s\ * AND data.win.eventdata.commandLine:*cmd.exe*) OR (data.win.eventdata.commandLine:*\ \/accepteula\ * AND data.win.eventdata.commandLine:*cmd\ \/c\ * AND data.win.eventdata.commandLine:*\ \-u\ * AND data.win.eventdata.commandLine:*\ \-p\ *))) AND (NOT (data.win.eventdata.commandLine:(*paexec* OR *PsExec*))))
+index: wazuh-alerts-3.x-*
+name: PsExec/PAExec-Flags
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

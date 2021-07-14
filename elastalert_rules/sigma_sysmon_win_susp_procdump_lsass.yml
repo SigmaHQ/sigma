@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious uses of the SysInternals Procdump utility by using a special command line parameter in combination with the lsass.exe process. This way we're also able to catch cases in which the attacker has renamed the procdump executable.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:*\ \-ma\ * AND ((data.win.system.eventID:"1" AND data.win.eventdata.commandLine:*\ lsass*) OR data.win.eventdata.commandLine:*\ ls*))
+index: wazuh-alerts-3.x-*
+name: Suspicious-Use-of-Procdump-on-LSASS
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

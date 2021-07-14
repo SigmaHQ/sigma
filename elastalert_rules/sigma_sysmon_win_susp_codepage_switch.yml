@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a code page switch in command line or batch scripts to a rare language
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.image:*\\chcp.com AND data.win.eventdata.commandLine:(*\ 936 OR *\ 1258))
+index: wazuh-alerts-3.x-*
+name: Suspicious-Code-Page-Switch
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

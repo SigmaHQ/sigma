@@ -1,0 +1,15 @@
+alert:
+- debug
+description: A General detection for svchost.exe spawning rundll32.exe with command arguments like C:\windows\system32\davclnt.dll,DavSetCookie. This could be an indicator of exfiltration or use of WebDav to launch code (hosted on WebDav Server).
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND process_path:*\\rundll32.exe AND data.win.eventdata.commandLine:*C\:\\windows\\system32\\davclnt.dll,DavSetCookie*)
+index: wazuh-alerts-3.x-*
+name: Suspicious-WebDav-Client-Execution
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

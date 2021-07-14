@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a suspicious copy command to or from an Admin share
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND ((data.win.eventdata.image:(*\\robocopy.exe OR *\\xcopy.exe) OR (data.win.eventdata.image:*\\cmd.exe AND data.win.eventdata.commandLine:*copy*)) OR (data.win.eventdata.image:*\\powershell* AND data.win.eventdata.commandLine:(*copy\-item* OR *copy* OR *cpi\ * OR *\ cp\ *))) AND (data.win.eventdata.commandLine:*\\\\\* AND data.win.eventdata.commandLine:*$*))
+index: wazuh-alerts-3.x-*
+name: Copy-from-Admin-Share
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

@@ -4,9 +4,9 @@ description: Looking for processes spawned by web server components that indicat
 filter:
 - query:
     query_string:
-      query: (data.win.system.eventID:"1" AND data.win.eventdata.parentImage.keyword:(*\\apache* OR *\\tomcat* OR *\\w3wp.exe* OR *\\php\-cgi.exe* OR *\\nginx.exe* OR *\\httpd.exe*) AND data.win.eventdata.image.keyword:(*\\cmd.exe) AND data.win.eventdata.commandLine.keyword:(*perl\ \-\-help* OR *python\ \-\-help* OR *wget\ \-\-help* OR *perl\ \-h*))
+      query: (data.win.system.eventID:"4688" AND (data.win.eventdata.parentImage:(*\\apache* OR *\\tomcat*) OR data.win.eventdata.parentImage:(*\\w3wp.exe OR *\\php\-cgi.exe OR *\\nginx.exe OR *\\httpd.exe)) AND (process_path:(*\\cmd.exe) AND data.win.eventdata.commandLine:(*perl\ \-\-help* OR *python\ \-\-help* OR *wget\ \-\-help* OR *perl\ \-h*)))
 index: wazuh-alerts-3.x-*
-name: f64e5c19-879c-4bae-b471-6d84c8339677_0
+name: Webshell-Recon-Detection-Via-CommandLine-&-Processes
 priority: 2
 realert:
   minutes: 0

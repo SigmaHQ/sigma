@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a regedit started with TrustedInstaller privileges or by ProcessHacker.exe
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND process_path:*\\regedit.exe AND data.win.eventdata.parentImage:(*\\TrustedInstaller.exe OR *\\ProcessHacker.exe))
+index: wazuh-alerts-3.x-*
+name: Regedit-as-Trusted-Installer
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

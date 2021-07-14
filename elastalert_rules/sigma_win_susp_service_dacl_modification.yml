@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious DACL modifications that can  be used to hide services or make them unstopable
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND process_path:(*\\sc.exe) AND data.win.eventdata.commandLine:*sdset* AND data.win.eventdata.commandLine:*D;;* AND data.win.eventdata.commandLine:(*;;;IU* OR *;;;SU* OR *;;;BA* OR *;;;SY* OR *;;;WD*))
+index: wazuh-alerts-3.x-*
+name: Suspicious-Service-DACL-Modification
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

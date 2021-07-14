@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious command line arguments of common data compression tools
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.originalFileName:(7z*.exe OR *rar.exe OR *Command*Line*RAR*) AND data.win.eventdata.commandLine:(*\ \-p* OR *\ \-ta* OR *\ \-tb* OR *\ \-sdel* OR *\ \-dw* OR *\ \-hp*)) AND (NOT (data.win.eventdata.parentImage:C\:\\Program*)))
+index: wazuh-alerts-3.x-*
+name: Suspicious-Compression-Tool-Parameters
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

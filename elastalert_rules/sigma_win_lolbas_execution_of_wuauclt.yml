@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Adversaries can abuse wuauclt.exe (Windows Update client) to run code execution by specifying an arbitrary DLL.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND data.win.eventdata.commandLine:/(?i)wuauclt\.exe.*\/UpdateDeploymentProvider.*\/Runhandlercomserver/ AND (NOT (data.win.eventdata.commandLine:(*wuaueng.dll* OR *UpdateDeploymentProvider.dll\ \/ClassId*))))
+index: wazuh-alerts-3.x-*
+name: Monitoring-Wuauclt.exe-For-Lolbas-Execution-Of-DLL
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

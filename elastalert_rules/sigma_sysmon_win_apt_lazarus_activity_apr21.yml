@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects different process creation events as described in Malwarebytes's threat report on Lazarus group activity
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND ((data.win.eventdata.commandLine:*mshta* AND data.win.eventdata.commandLine:*.zip*) OR (data.win.eventdata.parentImage:("C\:\\Windows\\System32\\wbem\\wmiprvse.exe") AND data.win.eventdata.image:("C\:\\Windows\\System32\\mshta.exe")) OR (data.win.eventdata.parentImage:(*\:\\Users\\Public\\*) AND data.win.eventdata.image:("C\:\\Windows\\System32\\rundll32.exe"))))
+index: wazuh-alerts-3.x-*
+name: Lazarus-Activity
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

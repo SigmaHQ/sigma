@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects file execution using the msdeploy.exe lolbin
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:*verb\:sync* AND data.win.eventdata.commandLine:*\-source\:RunCommand* AND data.win.eventdata.commandLine:*\-dest\:runCommand* AND data.win.eventdata.image:(*\\msdeploy.exe))
+index: wazuh-alerts-3.x-*
+name: Execute-Files-with-Msdeploy.exe
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

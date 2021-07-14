@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects Obfuscated use of stdin to execute PowerShell
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:/.*cmd.{0,5}(?:\/c|\/r).+powershell.+(?:\$\{?input\}?|noexit).+\"/)
+index: wazuh-alerts-3.x-*
+name: Invoke-Obfuscation-STDIN+-Launcher
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

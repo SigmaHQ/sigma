@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious command line activity on Windows systems
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:("net\ group\ \"domain\ admins\"\ \/domain" OR "net\ localgroup\ administrators" OR "net\ group\ \"enterprise\ admins\"\ \/domain"))
+index: wazuh-alerts-3.x-*
+name: Suspicious-Reconnaissance-Activity
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

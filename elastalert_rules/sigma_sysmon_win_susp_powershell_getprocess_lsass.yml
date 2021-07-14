@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a Get-Process command on lsass process, which is in almost all cases a sign of malicious activity
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:(*Get\-Process\ lsass*))
+index: wazuh-alerts-3.x-*
+name: PowerShell-Get-Process-LSASS
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

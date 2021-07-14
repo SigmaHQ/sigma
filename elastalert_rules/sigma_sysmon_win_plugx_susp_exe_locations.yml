@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the execution of an executable that is typically used by PlugX for DLL side loading started from an uncommon location
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND ((((((((((((data.win.eventdata.image:*\\CamMute.exe AND (NOT (data.win.eventdata.image:(*\\Lenovo\\Communication\ Utility\\* OR *\\Lenovo\\Communications\ Utility\\*)))) OR (data.win.eventdata.image:*\\chrome_frame_helper.exe AND (NOT (data.win.eventdata.image:*\\Google\\Chrome\\application\\*)))) OR (data.win.eventdata.image:*\\dvcemumanager.exe AND (NOT (data.win.eventdata.image:*\\Microsoft\ Device\ Emulator\\*)))) OR (data.win.eventdata.image:*\\Gadget.exe AND (NOT (data.win.eventdata.image:*\\Windows\ Media\ Player\\*)))) OR (data.win.eventdata.image:*\\hcc.exe AND (NOT (data.win.eventdata.image:*\\HTML\ Help\ Workshop\\*)))) OR (data.win.eventdata.image:*\\hkcmd.exe AND (NOT (data.win.eventdata.image:(*\\System32\\* OR *\\SysNative\\* OR *\\SysWowo64\\*))))) OR (data.win.eventdata.image:*\\Mc.exe AND (NOT (data.win.eventdata.image:(*\\Microsoft\ Visual\ Studio* OR *\\Microsoft\ SDK* OR *\\Windows\ Kit*))))) OR (data.win.eventdata.image:*\\MsMpEng.exe AND (NOT (data.win.eventdata.image:(*\\Microsoft\ Security\ Client\\* OR *\\Windows\ Defender\\* OR *\\AntiMalware\\*))))) OR (data.win.eventdata.image:*\\msseces.exe AND (NOT (data.win.eventdata.image:(*\\Microsoft\ Security\ Center\\* OR *\\Microsoft\ Security\ Client\\* OR *\\Microsoft\ Security\ Essentials\\*))))) OR (data.win.eventdata.image:*\\OInfoP11.exe AND (NOT (data.win.eventdata.image:*\\Common\ Files\\Microsoft\ Shared\\*)))) OR (data.win.eventdata.image:*\\OleView.exe AND (NOT (data.win.eventdata.image:(*\\Microsoft\ Visual\ Studio* OR *\\Microsoft\ SDK* OR *\\Windows\ Kit* OR *\\Windows\ Resource\ Kit\\*))))) OR (data.win.eventdata.image:*\\rc.exe AND (NOT (data.win.eventdata.image:(*\\Microsoft\ Visual\ Studio* OR *\\Microsoft\ SDK* OR *\\Windows\ Kit* OR *\\Windows\ Resource\ Kit\\* OR *\\Microsoft.NET\\*))))))
+index: wazuh-alerts-3.x-*
+name: Executable-Used-by-PlugX-in-Uncommon-Location
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

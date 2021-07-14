@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects an attempt to execude code or create service on remote host via winrm.vbs.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.image:*\\cscript.exe AND data.win.eventdata.commandLine:*winrm* AND data.win.eventdata.commandLine:*invoke\ Create\ wmicimv2\/Win32_* AND data.win.eventdata.commandLine:*\-r\:http*)
+index: wazuh-alerts-3.x-*
+name: Remote-Code-Execute-via-Winrm.vbs
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

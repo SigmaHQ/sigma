@@ -1,0 +1,29 @@
+alert:
+- debug
+description: Detects execution of attacker-controlled WsmPty.xsl or WsmTxt.xsl via winrm.vbs and copied cscript.exe (can be renamed)
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:*winrm* AND data.win.eventdata.commandLine:(*format\:pretty* OR *format\:\"pretty\"* OR *format\:\"text\"* OR *format\:text*) AND (NOT (data.win.eventdata.image:(C\:\\Windows\\System32\\* OR C\:\\Windows\\SysWOW64\\*))))
+index: wazuh-alerts-3.x-*
+name: AWL-Bypass-with-Winrm.vbs-and-Malicious-WsmPty.xsl/WsmTxt.xsl
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+alert:
+- debug
+description: Detects execution of attacker-controlled WsmPty.xsl or WsmTxt.xsl via winrm.vbs and copied cscript.exe (can be renamed)
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"11" AND data.win.eventdata.targetFilename:(*WsmPty.xsl OR *WsmTxt.xsl) AND (NOT (data.win.eventdata.targetFilename:(C\:\\Windows\\System32\\* OR C\:\\Windows\\SysWOW64\\*))))
+index: wazuh-alerts-3.x-*
+name: AWL-Bypass-with-Winrm.vbs-and-Malicious-WsmPty.xsl/WsmTxt.xsl-2
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

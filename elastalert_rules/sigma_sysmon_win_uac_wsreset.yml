@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Identifies use of WSReset.exe to bypass User Account Control. Adversaries use this technique to execute privileged processes.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.parentImage:*\\wsreset.exe AND (NOT (data.win.eventdata.image:*\\conhost.exe)))
+index: wazuh-alerts-3.x-*
+name: Bypass-UAC-via-WSReset.exe
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

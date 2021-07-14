@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects execution of Net.exe, whether suspicious or benign.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.image:(*\\net.exe OR *\\net1.exe) AND data.win.eventdata.commandLine:(*\ group* OR *\ localgroup* OR *\ user* OR *\ view* OR *\ share* OR *\ accounts* OR *\ stop\ *))
+index: wazuh-alerts-3.x-*
+name: Net.exe-Execution
+priority: 4
+realert:
+  minutes: 0
+type: any
+
+

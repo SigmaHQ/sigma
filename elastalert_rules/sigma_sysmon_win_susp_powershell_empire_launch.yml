@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious powershell command line parameters used in Empire
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:(*\ \-NoP\ \-sta\ \-NonI\ \-W\ Hidden\ \-Enc\ * OR *\ \-noP\ \-sta\ \-w\ 1\ \-enc\ * OR *\ \-NoP\ \-NonI\ \-W\ Hidden\ \-enc\ * OR *\ \-noP\ \-sta\ \-w\ 1\ \-enc* OR *\ \-enc\ \ SQB* OR *\ \-nop\ \-exec\ bypass\ \-EncodedCommand\ SQB*))
+index: wazuh-alerts-3.x-*
+name: Empire-PowerShell-Launch-Parameters
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

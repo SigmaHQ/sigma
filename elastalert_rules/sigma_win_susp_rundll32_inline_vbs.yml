@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious process related to rundll32 based on command line that invokes inline VBScript as seen being used by UNC2452
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND data.win.eventdata.commandLine:*rundll32.exe* AND data.win.eventdata.commandLine:*Execute* AND data.win.eventdata.commandLine:*RegRead* AND data.win.eventdata.commandLine:*window.close*)
+index: wazuh-alerts-3.x-*
+name: Suspicious-Rundll32-Invoking-Inline-VBScript
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

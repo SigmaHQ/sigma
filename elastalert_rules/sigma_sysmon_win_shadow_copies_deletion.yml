@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Shadow Copies deletion using operating systems utilities
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:*delete* AND ((data.win.eventdata.image:(*\\powershell.exe OR *\\wmic.exe OR *\\vssadmin.exe OR *\\diskshadow.exe) AND data.win.eventdata.commandLine:*shadow*) OR (data.win.eventdata.image:(*\\wbadmin.exe) AND data.win.eventdata.commandLine:*catalog* AND data.win.eventdata.commandLine:*quiet*)))
+index: wazuh-alerts-3.x-*
+name: Shadow-Copies-Deletion-Using-Operating-Systems-Utilities
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

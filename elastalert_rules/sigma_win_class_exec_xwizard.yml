@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the execution of Xwizard tool with specific arguments which utilized to run custom class properties.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND process_path:*\\xwizard.exe AND data.win.eventdata.commandLine:/{[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}}/)
+index: wazuh-alerts-3.x-*
+name: Custom-Class-Execution-via-Xwizard
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

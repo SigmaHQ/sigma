@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects command lines that indicate unwanted modifications to registry keys that disable important Internet Explorer security features
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND ((data.win.eventdata.commandLine:*\ \-name\ IEHarden\ * AND data.win.eventdata.commandLine:*\ \-value\ 0\ *) OR (data.win.eventdata.commandLine:*\ \-name\ DEPOff\ * AND data.win.eventdata.commandLine:*\ \-value\ 1\ *) OR (data.win.eventdata.commandLine:*\ \-name\ DisableFirstRunCustomize\ * AND data.win.eventdata.commandLine:*\ \-value\ 2\ *)))
+index: wazuh-alerts-3.x-*
+name: Disabled-IE-Security-Features
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

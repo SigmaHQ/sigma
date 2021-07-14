@@ -4,9 +4,9 @@ description: Detects suspicious IIS native-code module installations via command
 filter:
 - query:
     query_string:
-      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine.keyword:(*\\APPCMD.EXE\ install\ module\ \/name\:*))
+      query: (data.win.system.eventID:"4688" AND process_path:*\\appcmd.exe AND data.win.eventdata.commandLine:*install* AND data.win.eventdata.commandLine:*module* AND data.win.eventdata.commandLine:*\/name\:*)
 index: wazuh-alerts-3.x-*
-name: 9465ddf4-f9e4-4ebd-8d98-702df3a93239_0
+name: IIS-Native-Code-Module-Command-Line-Installation
 priority: 3
 realert:
   minutes: 0

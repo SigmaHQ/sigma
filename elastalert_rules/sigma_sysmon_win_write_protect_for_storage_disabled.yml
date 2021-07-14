@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Looks for changes to registry to disable any write-protect property for storage devices. This could be a precursor to a ransomware attack and has been an observed technique used by cypherpunk group.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:/(?i).*reg add.*hklm\\system\\currentcontrolset\\control.*(storage|storagedevicepolicies).*write protection.*0.*/)
+index: wazuh-alerts-3.x-*
+name: Write-Protect-For-Storage-Disabled
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

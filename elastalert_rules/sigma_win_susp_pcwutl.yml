@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects launch of executable by calling the LaunchApplication function from pcwutl.dll library.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND process_path:*\\rundll32.exe AND data.win.eventdata.commandLine:*pcwutl* AND data.win.eventdata.commandLine:*LaunchApplication*)
+index: wazuh-alerts-3.x-*
+name: Code-Execution-via-Pcwutl.dll
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

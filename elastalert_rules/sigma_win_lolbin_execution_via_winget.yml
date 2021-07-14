@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Adversaries can abuse winget to download payloads remotely and execute them without touching disk. Winget will be included by default in Windows 10 and is already available in Windows 10 insider programs. The manifest option enables you to install an application by passing in a YAML file directly to the client. Winget can be used to download and install exe's, msi, msix files later.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND data.win.eventdata.commandLine:(*.*\(?i\)winget\ install\ \(\-\-m|\-m\).*))
+index: wazuh-alerts-3.x-*
+name: Monitoring-Winget-For-LOLbin-Execution
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

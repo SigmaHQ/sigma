@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects renamed ftp.exe, ftp.exe script execution and child processes ran by ftp.exe
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND ((data.win.system.eventID:"4688" AND data.win.eventdata.commandLine:*\-s\:* AND (process_path:*ftp.exe OR data.win.eventdata.originalFileName:*ftp.exe*)) OR (data.win.system.eventID:"4688" AND data.win.eventdata.originalFileName:*ftp.exe* AND (NOT (process_path:*ftp.exe))) OR data.win.eventdata.parentImage:*ftp.exe))
+index: wazuh-alerts-3.x-*
+name: Suspicious-ftp.exe
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

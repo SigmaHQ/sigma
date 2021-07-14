@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects activity observed by different researchers to be HAFNIUM group acitivity (or related) on Exchange servers
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND ((data.win.eventdata.commandLine:*attrib* AND data.win.eventdata.commandLine:*\ \+h\ * AND data.win.eventdata.commandLine:*\ \+s\ * AND data.win.eventdata.commandLine:*\ \+r\ * AND data.win.eventdata.commandLine:*.aspx*) OR (data.win.eventdata.commandLine:*schtasks* AND data.win.eventdata.commandLine:*VSPerfMon*) OR (data.win.eventdata.commandLine:*vssadmin\ list\ shadows* AND data.win.eventdata.commandLine:*Temp\\__output*) OR data.win.eventdata.commandLine:*%TEMP%\\execute.bat* OR process_path:*Users\\Public\\opera\\Opera_browser.exe OR (process_path:*Opera_browser.exe AND data.win.eventdata.parentImage:(*\\services.exe OR *\\svchost.exe)) OR process_path:*\\ProgramData\\VSPerfMon\\* OR (data.win.eventdata.commandLine:*\ \-t7z\ * AND data.win.eventdata.commandLine:*C\:\\Programdata\\pst* AND data.win.eventdata.commandLine:*\\it.zip*) OR (process_path:*\\makecab.exe AND data.win.eventdata.commandLine:(*Microsoft\\Exchange\ Server\\* OR *inetpub\\wwwroot*)) OR data.win.eventdata.commandLine:(*\\Temp\\xx.bat* OR *Windows\\WwanSvcdcs* OR *Windows\\Temp\\cw.exe*) OR (data.win.eventdata.commandLine:*\\comsvcs.dll* AND data.win.eventdata.commandLine:*Minidump* AND data.win.eventdata.commandLine:*\\inetpub\\wwwroot*) OR (data.win.eventdata.commandLine:*dsquery* AND data.win.eventdata.commandLine:*\ \-uco\ * AND data.win.eventdata.commandLine:*\\inetpub\\wwwroot*)))
+index: wazuh-alerts-3.x-*
+name: Exchange-Exploitation-Activity
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

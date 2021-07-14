@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a suspicious execution from an uncommon folder
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.image:(*\\$Recycle.bin\\* OR *\\config\\systemprofile\\* OR *\\Intel\\Logs\\* OR *\\RSA\\MachineKeys\\* OR *\\Users\\All\ Users\\* OR *\\Users\\Default\\* OR *\\Users\\NetworkService\\* OR *\\Users\\Public\\* OR *\\Windows\\addins\\* OR *\\Windows\\debug\\* OR *\\Windows\\Fonts\\* OR *\\Windows\\Help\\* OR *\\Windows\\IME\\* OR *\\Windows\\Media\\* OR *\\Windows\\repair\\* OR *\\Windows\\security\\* OR *\\Windows\\system32\\config\\systemprofile\\* OR *\\Windows\\System32\\Tasks\\* OR *\\Windows\\Tasks\\*) OR data.win.eventdata.image:C\:\\Perflogs\\*))
+index: wazuh-alerts-3.x-*
+name: Execution-from-Suspicious-Folder
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

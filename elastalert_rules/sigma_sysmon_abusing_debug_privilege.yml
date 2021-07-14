@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detection of unusual child processes by different system processes
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND (data.win.eventdata.parentImage:(*\\winlogon.exe OR *\\services.exe OR *\\lsass.exe OR *\\csrss.exe OR *\\smss.exe OR *\\wininit.exe OR *\\spoolsv.exe OR *\\searchindexer.exe) AND process_path:(*\\powershell.exe OR *\\cmd.exe) AND user_account:"NT\ AUTHORITY\\SYSTEM") AND (NOT (data.win.eventdata.commandLine:*\ route\ * AND data.win.eventdata.commandLine:*\ ADD\ *)))
+index: wazuh-alerts-3.x-*
+name: Abused-Debug-Privilege-by-Arbitrary-Parent-Processes
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

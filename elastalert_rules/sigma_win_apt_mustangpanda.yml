@@ -4,9 +4,9 @@ description: Detects specific process parameters as used by Mustang Panda droppe
 filter:
 - query:
     query_string:
-      query: (data.win.system.eventID:"1" AND (data.win.eventdata.commandLine.keyword:(*Temp\\wtask.exe\ \/create* OR *%windir\:\~\-3,1%%PUBLIC\:\~\-9,1%* OR *\/E\:vbscript\ *\ C\:\\Users\\*.txt\"\ \/F OR *\/tn\ \"Security\ Script\ * OR *%windir\:\~\-1,1%*) OR data.win.eventdata.image.keyword:(*Temp\\winwsh.exe)))
+      query: (data.win.system.eventID:"4688" AND (data.win.eventdata.commandLine:(*Temp\\wtask.exe\ \/create* OR *%windir\:\~\-3,1%%PUBLIC\:\~\-9,1%* OR *\/tn\ \"Security\ Script\ * OR *%windir\:\~\-1,1%*) OR (data.win.eventdata.commandLine:*\/E\:vbscript* AND data.win.eventdata.commandLine:*C\:\\Users\\* AND data.win.eventdata.commandLine:*.txt* AND data.win.eventdata.commandLine:*\/F*) OR process_path:*Temp\\winwsh.exe))
 index: wazuh-alerts-3.x-*
-name: 2d87d610-d760-45ee-a7e6-7a6f2a65de00_0
+name: Mustang-Panda-Dropper
 priority: 2
 realert:
   minutes: 0

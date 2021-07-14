@@ -4,9 +4,9 @@ description: Detects the deactivation and disabling of the Scheduled defragmenta
 filter:
 - query:
     query_string:
-      query: (data.win.system.eventID:"1" AND data.win.eventdata.image.keyword:*\\schtasks.exe AND data.win.eventdata.commandLine.keyword:(*\/delete* OR *\/change*) AND data.win.eventdata.commandLine.keyword:*\/TN* AND data.win.eventdata.commandLine.keyword:*\\Microsoft\\Windows\\Defrag\\ScheduledDefrag*)
+      query: (data.win.system.eventID:"4688" AND process_path:*\\schtasks.exe AND data.win.eventdata.commandLine:(*\/delete* OR *\/change*) AND data.win.eventdata.commandLine:*\/TN* AND data.win.eventdata.commandLine:*\\Microsoft\\Windows\\Defrag\\ScheduledDefrag*)
 index: wazuh-alerts-3.x-*
-name: 958d81aa-8566-4cea-a565-59ccd4df27b0_0
+name: Defrag-Deactivation
 priority: 3
 realert:
   minutes: 0
@@ -20,7 +20,7 @@ filter:
     query_string:
       query: (data.win.system.eventID:"4701" AND task_name:"\\Microsoft\\Windows\\Defrag\\ScheduledDefrag")
 index: wazuh-alerts-3.x-*
-name: 958d81aa-8566-4cea-a565-59ccd4df27b0-2_0
+name: Defrag-Deactivation-2
 priority: 3
 realert:
   minutes: 0

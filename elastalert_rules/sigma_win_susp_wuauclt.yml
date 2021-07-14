@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects code execution via the Windows Update client (wuauclt)
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND process_command_line:*\/UpdateDeploymentProvider* AND process_command_line:*\/RunHandlerComServer* AND process_path:(*\\wuauclt.exe))
+index: wazuh-alerts-3.x-*
+name: Windows-Update-Client-LOLBIN
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects Rclone which is commonly used by ransomware groups for exfiltration
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND data.win.eventdata.commandLine:(*\ pass\ * OR *\ user\ * OR *\ copy\ * OR *\ mega\ * OR *\ sync\ * OR *\ config\ * OR *\ lsd\ * OR *\ remote\ * OR *\ ls\ *) AND (data.win.eventdata.description:"Rsync\ for\ cloud\ storage" OR (process_path:*\\rclone.exe AND data.win.eventdata.parentImage:(*\\PowerShell.exe OR *\\cmd.exe))))
+index: wazuh-alerts-3.x-*
+name: Rclone-Execution-via-Command-Line-or-PowerShell
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

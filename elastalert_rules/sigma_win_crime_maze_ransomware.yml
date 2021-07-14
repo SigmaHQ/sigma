@@ -4,9 +4,9 @@ description: Detects specific process characteristics of Maze ransomware word do
 filter:
 - query:
     query_string:
-      query: (data.win.system.eventID:"1" AND ((data.win.eventdata.parentImage.keyword:(*\\WINWORD.exe) AND data.win.eventdata.image.keyword:(*.tmp)) OR (data.win.eventdata.image.keyword:*\\wmic.exe AND data.win.eventdata.parentImage.keyword:*\\Temp\\* AND data.win.eventdata.commandLine.keyword:*shadowcopy\ delete) OR (data.win.eventdata.commandLine.keyword:*shadowcopy\ delete AND data.win.eventdata.commandLine.keyword:*\\..\\..\\system32*)))
+      query: (data.win.system.eventID:"4688" AND ((data.win.eventdata.parentImage:(*\\WINWORD.exe) AND process_path:(*.tmp)) OR (process_path:*\\wmic.exe AND data.win.eventdata.parentImage:*\\Temp\\* AND data.win.eventdata.commandLine:*shadowcopy\ delete) OR (data.win.eventdata.commandLine:*shadowcopy\ delete AND data.win.eventdata.commandLine:*\\..\\..\\system32*)))
 index: wazuh-alerts-3.x-*
-name: 29fd07fc-9cfd-4331-b7fd-cc18dfa21052_0
+name: Maze-Ransomware
 priority: 1
 realert:
   minutes: 0

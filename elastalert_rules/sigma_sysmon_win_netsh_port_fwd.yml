@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects netsh commands that configure a port forwarding (PortProxy)
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.image:*\\netsh.exe AND ((data.win.eventdata.commandLine:*interface* AND data.win.eventdata.commandLine:*portproxy* AND data.win.eventdata.commandLine:*add* AND data.win.eventdata.commandLine:*v4tov4*) OR (data.win.eventdata.commandLine:*connectp* AND data.win.eventdata.commandLine:*listena* AND data.win.eventdata.commandLine:*c\=*)))
+index: wazuh-alerts-3.x-*
+name: Netsh-Port-Forwarding
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

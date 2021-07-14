@@ -1,0 +1,15 @@
+alert:
+- debug
+description: There is an option for a MS VS Just-In-Time Debugger "vsjitdebugger.exe" to launch specified executable and attach a debugger. This option may be used adversaries to execute malicious code by signed verified binary. The debugger is installed alongside with Microsoft Visual Studio package.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.parentImage:*\\vsjitdebugger.exe AND (NOT ((data.win.system.eventID:"1" AND (ChildImage:*\\vsimmersiveactivatehelper*.exe OR ChildImage:*\\devenv.exe)))))
+index: wazuh-alerts-3.x-*
+name: Malicious-PE-Execution-by-Microsoft-Visual-Studio-Debugger
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

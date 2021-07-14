@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the creation of scheduled tasks that involves a temporary folder and runs only once
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND process_path:*\\schtasks.exe AND data.win.eventdata.commandLine:*\ \/create\ * AND data.win.eventdata.commandLine:*\ \/sc\ once\ * AND data.win.eventdata.commandLine:*\\Temp\\*)
+index: wazuh-alerts-3.x-*
+name: Suspicious-Scheduled-Task-Creation-Involving-Temp-Folder
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

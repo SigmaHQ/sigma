@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the import of the specified file to the registry with regedit.exe.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND ((process_path:*\\regedit.exe AND data.win.eventdata.commandLine:(*\ \/i\ * OR *.reg*)) AND (NOT (data.win.eventdata.commandLine:(*\ \/e\ * OR *\ \/a\ * OR *\ \/c\ *)))) AND (NOT (data.win.eventdata.commandLine:/:[^ \\]/)))
+index: wazuh-alerts-3.x-*
+name: Imports-Registry-Key-From-a-File
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

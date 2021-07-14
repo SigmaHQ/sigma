@@ -4,9 +4,9 @@ description: Local accounts, System Owner/User discovery using operating systems
 filter:
 - query:
     query_string:
-      query: (data.win.system.eventID:"1" AND (((data.win.eventdata.image.keyword:*\\whoami.exe OR (data.win.eventdata.image.keyword:*\\wmic.exe AND data.win.eventdata.commandLine.keyword:*useraccount* AND data.win.eventdata.commandLine.keyword:*get*) OR data.win.eventdata.image.keyword:(*\\quser.exe OR *\\qwinsta.exe) OR (data.win.eventdata.image.keyword:*\\cmdkey.exe AND data.win.eventdata.commandLine.keyword:*\/list*) OR (data.win.eventdata.image.keyword:*\\cmd.exe AND data.win.eventdata.commandLine.keyword:*\/c* AND data.win.eventdata.commandLine.keyword:*dir\ * AND data.win.eventdata.commandLine.keyword:*\\Users\\*)) AND (NOT (data.win.eventdata.commandLine.keyword:(*\ rmdir\ *)))) OR ((data.win.eventdata.image.keyword:(*\\net.exe OR *\\net1.exe) AND data.win.eventdata.commandLine.keyword:*user*) AND (NOT (data.win.eventdata.commandLine.keyword:(*\/domain* OR *\/add* OR *\/delete* OR *\/active* OR *\/expires* OR *\/passwordreq* OR *\/scriptpath* OR *\/times* OR *\/workstations*))))))
+      query: (data.win.system.eventID:"4688" AND (((process_path:*\\whoami.exe OR (process_path:*\\wmic.exe AND data.win.eventdata.commandLine:*useraccount* AND data.win.eventdata.commandLine:*get*) OR process_path:(*\\quser.exe OR *\\qwinsta.exe) OR (process_path:*\\cmdkey.exe AND data.win.eventdata.commandLine:*\/list*) OR (process_path:*\\cmd.exe AND data.win.eventdata.commandLine:*\/c* AND data.win.eventdata.commandLine:*dir\ * AND data.win.eventdata.commandLine:*\\Users\\*)) AND (NOT (data.win.eventdata.commandLine:(*\ rmdir\ *)))) OR ((process_path:(*\\net.exe OR *\\net1.exe) AND data.win.eventdata.commandLine:*user*) AND (NOT (data.win.eventdata.commandLine:(*\/domain* OR *\/add* OR *\/delete* OR *\/active* OR *\/expires* OR *\/passwordreq* OR *\/scriptpath* OR *\/times* OR *\/workstations*))))))
 index: wazuh-alerts-3.x-*
-name: 502b42de-4306-40b4-9596-6f590c81f073_0
+name: Local-Accounts-Discovery
 priority: 4
 realert:
   minutes: 0

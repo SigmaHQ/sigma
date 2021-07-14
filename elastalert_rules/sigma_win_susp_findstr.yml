@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Attackers can use findstr to hide their artifacts or search specific strings and evade defense mechanism
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND data.win.eventdata.commandLine:(*findstr*) AND ((data.win.eventdata.commandLine:*\/V* AND data.win.eventdata.commandLine:*\/L*) OR (data.win.eventdata.commandLine:*\/S* AND data.win.eventdata.commandLine:*\/I*)))
+index: wazuh-alerts-3.x-*
+name: Abusing-Findstr-for-Defense-Evasion
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

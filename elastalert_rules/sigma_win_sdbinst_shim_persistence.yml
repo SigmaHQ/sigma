@@ -4,9 +4,9 @@ description: Detects installation of a new shim using sdbinst.exe. A shim can be
 filter:
 - query:
     query_string:
-      query: (data.win.system.eventID:"1" AND data.win.eventdata.image.keyword:(*\\sdbinst.exe) AND data.win.eventdata.commandLine.keyword:(*.sdb*))
+      query: (data.win.system.eventID:"4688" AND (process_path:(*\\sdbinst.exe) AND data.win.eventdata.commandLine:(*.sdb*)) AND (NOT (data.win.eventdata.commandLine:(*iisexpressshim.sdb*))))
 index: wazuh-alerts-3.x-*
-name: 517490a7-115a-48c6-8862-1a481504d5a8_0
+name: Possible-Shim-Database-Persistence-via-sdbinst.exe
 priority: 2
 realert:
   minutes: 0

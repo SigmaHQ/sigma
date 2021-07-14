@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects requests to exclude files, folders or processes from Antivirus scanning using PowerShell cmdlets
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND ((data.win.system.eventID:"4688" AND data.win.eventdata.commandLine:"Add\-MpPreference" AND data.win.eventdata.commandLine:(*\ \-ExclusionPath\ * OR *\ \-ExclusionExtension\ * OR *\ \-ExclusionProcess\ *)) OR data.win.eventdata.commandLine:(*QWRkLU1wUHJlZmVyZW5jZ* OR *FkZC1NcFByZWZlcmVuY2* OR *BZGQtTXBQcmVmZXJlbmNl*)))
+index: wazuh-alerts-3.x-*
+name: Powershell-Defender-Exclusion
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

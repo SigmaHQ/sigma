@@ -1,0 +1,15 @@
+alert:
+- debug
+description: This rule detects execution of a PowerShell code through the sqltoolsps.exe utility, which is included in the standard set of utilities supplied with the Microsoft SQL Server Management studio. Script blocks are not logged in this case, so this utility helps to bypass protection mechanisms based on the analysis of these logs.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND ((data.win.eventdata.image:*\\sqltoolsps.exe OR data.win.eventdata.parentImage:*\\sqltoolsps.exe) OR (data.win.eventdata.originalFileName:"\\sqltoolsps.exe" AND (NOT (data.win.eventdata.parentImage:*\\smss.exe)))))
+index: wazuh-alerts-3.x-*
+name: SQL-Client-Tools-PowerShell-Session-Detection
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

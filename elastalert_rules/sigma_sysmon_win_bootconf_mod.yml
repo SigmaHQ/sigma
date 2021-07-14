@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Identifies use of the bcdedit command to delete boot configuration data. This tactic is sometimes used as by malware or an attacker as a destructive technique.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.image:*\\bcdedit.exe AND data.win.eventdata.commandLine:*set*) AND ((data.win.eventdata.commandLine:*bootstatuspolicy* AND data.win.eventdata.commandLine:*ignoreallfailures*) OR (data.win.eventdata.commandLine:*recoveryenabled* AND data.win.eventdata.commandLine:*no*)))
+index: wazuh-alerts-3.x-*
+name: Modification-of-Boot-Configuration
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

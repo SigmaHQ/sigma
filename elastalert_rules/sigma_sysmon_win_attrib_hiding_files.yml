@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects usage of attrib.exe to hide files from users.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.image:*\\attrib.exe AND data.win.eventdata.commandLine:*\ \+h\ *) AND (NOT ((data.win.system.eventID:"1" AND (data.win.eventdata.commandLine:*\\desktop.ini\ * OR (data.win.eventdata.parentImage:*\\cmd.exe AND data.win.eventdata.commandLine:\+R\ \+H\ \+S\ \+A\ \\*.cui AND data.win.eventdata.parentCommandLine:C\:\\WINDOWS\\system32\\*.bat))))))
+index: wazuh-alerts-3.x-*
+name: Hiding-Files-with-Attrib.exe
+priority: 4
+realert:
+  minutes: 0
+type: any
+
+

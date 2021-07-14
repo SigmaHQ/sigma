@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects process dump via legitimate sqldumper.exe binary
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND process_path:*\\sqldumper.exe AND data.win.eventdata.commandLine:(*0x0110* OR *0x01100\:40*))
+index: wazuh-alerts-3.x-*
+name: Dumping-Process-via-Sqldumper.exe
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

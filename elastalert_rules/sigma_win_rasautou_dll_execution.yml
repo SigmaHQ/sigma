@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects using Rasautou.exe for loading arbitrary .DLL specified in -d option and executes the export specified in -p.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND (process_path:*\\rasautou.exe OR data.win.eventdata.originalFileName:"rasdlui.exe") AND (data.win.eventdata.commandLine:*\-d* AND data.win.eventdata.commandLine:*\-p*))
+index: wazuh-alerts-3.x-*
+name: DLL-Execution-via-Rasautou.exe
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

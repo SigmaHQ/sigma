@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a suspicious Microsoft certutil execution with sub commands like 'decode' sub command, which is sometimes used to decode malicious code with the built-in certutil utility
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.commandLine:(*\ \-decode\ * OR *\ \-decodehex\ * OR *\ \-urlcache\ * OR *\ \-verifyctl\ * OR *\ \-encode\ * OR *\ \/decode\ * OR *\ \/decodehex\ * OR *\ \/urlcache\ * OR *\ \/verifyctl\ * OR *\ \/encode\ *) OR (data.win.eventdata.image:*\\certutil.exe AND data.win.eventdata.commandLine:(*URL* OR *ping*))))
+index: wazuh-alerts-3.x-*
+name: Suspicious-Certutil-Command
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

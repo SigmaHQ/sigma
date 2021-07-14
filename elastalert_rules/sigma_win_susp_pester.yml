@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects code execution via Pester.bat (Pester - Powershell Modulte for testing)
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND ((process_path:*\\powershell.exe AND data.win.eventdata.commandLine:*Pester* AND data.win.eventdata.commandLine:*Get\-Help*) OR (data.win.system.eventID:"4688" AND process_path:*\\cmd.exe AND data.win.eventdata.commandLine:*pester* AND data.win.eventdata.commandLine:*;* AND data.win.eventdata.commandLine:(*help* OR *?*))))
+index: wazuh-alerts-3.x-*
+name: Execute-Code-with-Pester.bat
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

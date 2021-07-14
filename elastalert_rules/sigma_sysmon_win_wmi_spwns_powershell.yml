@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects WMI spawning PowerShell
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND ((data.win.eventdata.parentImage:(*\\wmiprvse.exe) AND data.win.eventdata.image:(*\\powershell.exe)) AND (NOT (data.win.eventdata.commandLine:"null"))) AND (NOT (NOT _exists_:data.win.eventdata.commandLine)))
+index: wazuh-alerts-3.x-*
+name: WMI-Spawning-Windows-PowerShell
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

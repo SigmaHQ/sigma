@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious process related to rundll32 based on arguments
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.commandLine:(*javascript\:* OR *.RegisterXLL*) OR (data.win.eventdata.commandLine:*url.dll* AND data.win.eventdata.commandLine:*OpenURL*) OR (data.win.eventdata.commandLine:*url.dll* AND data.win.eventdata.commandLine:*OpenURLA*) OR (data.win.eventdata.commandLine:*url.dll* AND data.win.eventdata.commandLine:*FileProtocolHandler*) OR (data.win.eventdata.commandLine:*zipfldr.dll* AND data.win.eventdata.commandLine:*RouteTheCall*) OR (data.win.eventdata.commandLine:*shell32.dll* AND data.win.eventdata.commandLine:*Control_RunDLL*) OR (data.win.eventdata.commandLine:*shell32.dll* AND data.win.eventdata.commandLine:*ShellExec_RunDLL*) OR (data.win.eventdata.commandLine:*mshtml.dll* AND data.win.eventdata.commandLine:*PrintHTML*) OR (data.win.eventdata.commandLine:*advpack.dll* AND data.win.eventdata.commandLine:*LaunchINFSection*) OR (data.win.eventdata.commandLine:*advpack.dll* AND data.win.eventdata.commandLine:*RegisterOCX*) OR (data.win.eventdata.commandLine:*ieadvpack.dll* AND data.win.eventdata.commandLine:*LaunchINFSection*) OR (data.win.eventdata.commandLine:*ieadvpack.dll* AND data.win.eventdata.commandLine:*RegisterOCX*) OR (data.win.eventdata.commandLine:*ieframe.dll* AND data.win.eventdata.commandLine:*OpenURL*) OR (data.win.eventdata.commandLine:*shdocvw.dll* AND data.win.eventdata.commandLine:*OpenURL*) OR (data.win.eventdata.commandLine:*syssetup.dll* AND data.win.eventdata.commandLine:*SetupInfObjectInstallAction'*) OR (data.win.eventdata.commandLine:*setupapi.dll* AND data.win.eventdata.commandLine:*InstallHinfSection*) OR (data.win.eventdata.commandLine:*pcwutl.dll* AND data.win.eventdata.commandLine:*LaunchApplication*) OR (data.win.eventdata.commandLine:*dfshim.dll* AND data.win.eventdata.commandLine:*ShOpenVerbApplication*)))
+index: wazuh-alerts-3.x-*
+name: Suspicious-Rundll32-Activity
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

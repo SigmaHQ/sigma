@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects using SettingSyncHost.exe to run hijacked binary
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (NOT (data.win.eventdata.image:(C\:\\Windows\\System32\\* OR C\:\\Windows\\SysWOW64\\*))) AND (data.win.eventdata.parentCommandLine:*cmd.exe\ \/c* AND data.win.eventdata.parentCommandLine:*RoamDiag.cmd* AND data.win.eventdata.parentCommandLine:*\-outputpath*))
+index: wazuh-alerts-3.x-*
+name: Using-SettingSyncHost.exe-as-LOLBin
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

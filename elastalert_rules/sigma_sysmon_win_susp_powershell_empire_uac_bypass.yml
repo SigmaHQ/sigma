@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects some Empire PowerShell UAC bypass methods
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:(*\ \-NoP\ \-NonI\ \-w\ Hidden\ \-c\ $x\=$\(\(gp\ HKCU\:Software\\Microsoft\\Windows\ Update\).Update\)* OR *\ \-NoP\ \-NonI\ \-c\ $x\=$\(\(gp\ HKCU\:Software\\Microsoft\\Windows\ Update\).Update\);*))
+index: wazuh-alerts-3.x-*
+name: Empire-PowerShell-UAC-Bypass
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

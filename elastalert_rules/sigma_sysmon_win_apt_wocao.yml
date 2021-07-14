@@ -1,0 +1,29 @@
+alert:
+- debug
+description: Detects activity mentioned in Operation Wocao report
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4799" AND group_name:"Administrators" AND data.win.eventdata.processName:*\\checkadmin.exe)
+index: wazuh-alerts-3.x-*
+name: Operation-Wocao-Activity
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+alert:
+- debug
+description: Detects activity mentioned in Operation Wocao report
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:(*checkadmin.exe\ 127.0.0.1\ \-all* OR *netsh\ advfirewall\ firewall\ add\ rule\ name\=powershell\ dir\=in* OR *cmd\ \/c\ powershell.exe\ \-ep\ bypass\ \-file\ c\:\\s.ps1* OR *\/tn\ win32times\ \/f* OR *create\ win32times\ binPath\=* OR *\\c$\\windows\\system32\\devmgr.dll* OR *\ \-exec\ bypass\ \-enc\ JgAg* OR *type\ *keepass\\KeePass.config.xml* OR *iie.exe\ iie.txt* OR *reg\ query\ HKEY_CURRENT_USER\\Software\\*\\PuTTY\\Sessions\\*))
+index: wazuh-alerts-3.x-*
+name: Operation-Wocao-Activity-2
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

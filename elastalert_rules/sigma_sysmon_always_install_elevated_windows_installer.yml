@@ -1,0 +1,15 @@
+alert:
+- debug
+description: This rule will looks for Windows Installer service (msiexec.exe) when it tries to install MSI packages with SYSTEM privilege
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND user_account:"NT\ AUTHORITY\\SYSTEM" AND ((process_path:*\\Windows\\Installer\\* AND process_path:*msi* AND process_path:(*tmp)) OR (process_path:(*\\msiexec.exe) AND IntegrityLevel:"System")))
+index: wazuh-alerts-3.x-*
+name: Always-Install-Elevated-Windows-Installer
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects PowerShell downgrade attack by comparing the host versions with the actually used engine version 2.0
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:(*\ \-version\ 2\ * OR *\ \-versio\ 2\ * OR *\ \-versi\ 2\ * OR *\ \-vers\ 2\ * OR *\ \-ver\ 2\ * OR *\ \-ve\ 2\ *) AND data.win.eventdata.image:*\\powershell.exe)
+index: wazuh-alerts-3.x-*
+name: PowerShell-Downgrade-Attack
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

@@ -4,9 +4,9 @@ description: Detects various anomalies in relation to regsvr32.exe
 filter:
 - query:
     query_string:
-      query: (data.win.system.eventID:"1" AND ((data.win.eventdata.image.keyword:*\\regsvr32.exe AND data.win.eventdata.commandLine.keyword:*\\Temp\\*) OR (data.win.eventdata.image.keyword:*\\regsvr32.exe AND data.win.eventdata.parentImage.keyword:*\\powershell.exe) OR (data.win.eventdata.image.keyword:*\\regsvr32.exe AND data.win.eventdata.parentImage.keyword:*\\cmd.exe) OR (data.win.eventdata.image.keyword:*\\regsvr32.exe AND data.win.eventdata.commandLine.keyword:(*\/i\:http*\ scrobj.dll OR *\/i\:ftp*\ scrobj.dll)) OR (data.win.eventdata.image.keyword:*\\wscript.exe AND data.win.eventdata.parentImage.keyword:*\\regsvr32.exe) OR (data.win.eventdata.image.keyword:*\\EXCEL.EXE AND data.win.eventdata.commandLine.keyword:*..\\..\\..\\Windows\\System32\\regsvr32.exe\ *)))
+      query: (data.win.system.eventID:"4688" AND ((process_path:*\\regsvr32.exe AND data.win.eventdata.commandLine:*\\Temp\\*) OR (process_path:*\\regsvr32.exe AND data.win.eventdata.parentImage:*\\powershell.exe) OR (process_path:*\\regsvr32.exe AND data.win.eventdata.parentImage:*\\cmd.exe) OR (process_path:*\\regsvr32.exe AND data.win.eventdata.commandLine:*\/i\:* AND data.win.eventdata.commandLine:(*http* OR *ftp*) AND data.win.eventdata.commandLine:*scrobj.dll) OR (process_path:*\\wscript.exe AND data.win.eventdata.parentImage:*\\regsvr32.exe) OR (process_path:*\\EXCEL.EXE AND data.win.eventdata.commandLine:*..\\..\\..\\Windows\\System32\\regsvr32.exe\ *)))
 index: wazuh-alerts-3.x-*
-name: 8e2b24c9-4add-46a0-b4bb-0057b4e6187d_0
+name: Regsvr32-Anomaly
 priority: 2
 realert:
   minutes: 0

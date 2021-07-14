@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects using Diskshadow.exe to execute arbitrary code in text file
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND process_path:*\\diskshadow.exe AND data.win.eventdata.commandLine:(*\/s* OR *\-s*))
+index: wazuh-alerts-3.x-*
+name: Execution-via-Diskshadow.exe
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

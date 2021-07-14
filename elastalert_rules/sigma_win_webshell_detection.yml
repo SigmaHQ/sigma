@@ -4,9 +4,9 @@ description: Detects certain command line parameters often used during reconnais
 filter:
 - query:
     query_string:
-      query: (data.win.system.eventID:"1" AND data.win.eventdata.parentImage.keyword:(*\\apache* OR *\\tomcat* OR *\\w3wp.exe OR *\\php\-cgi.exe OR *\\nginx.exe OR *\\httpd.exe) AND data.win.eventdata.commandLine.keyword:(*whoami* OR *net\ user\ * OR *ping\ \-n\ * OR *systeminfo OR *&cd&echo* OR *cd\ \/d*))
+      query: (data.win.system.eventID:"4688" AND (data.win.eventdata.parentImage:(*\\w3wp.exe OR *\\php\-cgi.exe OR *\\nginx.exe OR *\\httpd.exe) OR data.win.eventdata.parentImage:(*\\apache* OR *\\tomcat*)) AND (data.win.system.eventID:"4688" AND (((process_path:(*\\net.exe OR *\\net1.exe) AND data.win.eventdata.commandLine:(*\ user\ * OR *\ use\ * OR *\ group\ *)) OR (process_path:*\\ping.exe AND data.win.eventdata.commandLine:*\ \-n\ *) OR data.win.eventdata.commandLine:(*&cd&echo* OR *cd\ \/d\ *)) OR (process_path:*\\wmic.exe AND data.win.eventdata.commandLine:*\ \/node\:*) OR process_path:(*\\whoami.exe OR *\\systeminfo.exe OR *\\quser.exe OR *\\ipconfig.exe OR *\\pathping.exe OR *\\tracert.exe OR *\\netstat.exe OR *\\schtasks.exe OR *\\vssadmin.exe OR *\\wevtutil.exe OR *\\tasklist.exe) OR data.win.eventdata.commandLine:(*\ Test\-NetConnection\ * OR *dir\ \\*))))
 index: wazuh-alerts-3.x-*
-name: bed2a484-9348-4143-8a8a-b801c979301c_0
+name: Webshell-Detection-With-Command-Line-Keywords
 priority: 2
 realert:
   minutes: 0

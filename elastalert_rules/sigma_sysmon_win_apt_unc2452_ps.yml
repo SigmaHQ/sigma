@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a specific PowerShell command line pattern used by the UNC2452 actors as mentioned in Microsoft and Symantec reports
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND ((data.win.eventdata.commandLine:*Invoke\-WMIMethod\ win32_process\ \-name\ create\ \-argumentlist* AND data.win.eventdata.commandLine:*rundll32\ c\:\\windows*) OR (data.win.eventdata.commandLine:*wmic\ \/node\:* AND data.win.eventdata.commandLine:*process\ call\ create\ \"rundll32\ c\:\\windows*)))
+index: wazuh-alerts-3.x-*
+name: UNC2452-PowerShell-Pattern
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

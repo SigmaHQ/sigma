@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects creation or execution of UserInitMprLogonScript persistence method
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND ((data.win.system.eventID:"4688" AND (data.win.eventdata.parentImage:*\\userinit.exe AND (NOT (process_path:*\\explorer.exe))) AND (NOT (data.win.eventdata.commandLine:(*netlogon.bat* OR *UsrLogon.cmd*)))) OR data.win.eventdata.commandLine:*UserInitMprLogonScript*))
+index: wazuh-alerts-3.x-*
+name: Logon-Scripts-UserInitMprLogonScript
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

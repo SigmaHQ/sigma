@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the execution of a AdFind for Active Directory enumeration
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:(*objectcategory* OR *trustdmp* OR *dcmodes* OR *dclist* OR *computers_pwdnotreqd*) AND data.win.eventdata.image:*\\adfind.exe)
+index: wazuh-alerts-3.x-*
+name: Suspicious-AdFind-Execution
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

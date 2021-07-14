@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Threat actors can use auditpol binary to change audit policy configuration to impair detection capability. This can be carried out by selectively disabling/removing certain audit policies as well as restoring a custom policy owned by the threat actor.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND process_path:*\\auditpol.exe AND data.win.eventdata.commandLine:(*disable* OR *clear* OR *remove* OR *restore*))
+index: wazuh-alerts-3.x-*
+name: Suspicious-Auditpol-Usage
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

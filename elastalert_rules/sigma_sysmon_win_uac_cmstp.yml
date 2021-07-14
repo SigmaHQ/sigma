@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detect child processes of automatically elevated instances of Microsoft Connection Manager Profile Installer (cmstp.exe).
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.image:*\\cmstp.exe AND data.win.eventdata.commandLine:(*\/s* OR *\/au*))
+index: wazuh-alerts-3.x-*
+name: Bypass-UAC-via-CMSTP
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

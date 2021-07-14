@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious process related to rundll32 based on command line that includes a *.sys file as seen being used by UNC2452
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:*rundll32.exe* AND data.win.eventdata.commandLine:(*.sys,* OR *.sys\ *))
+index: wazuh-alerts-3.x-*
+name: Suspicious-Rundll32-Activity-Invoking-Sys-File
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

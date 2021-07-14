@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects Obfuscated Powershell via use Rundll32 in Scripts
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND data.win.eventdata.commandLine:/(?i).*&&.*rundll32.*shell32\.dll.*shellexec_rundll.*(value|invoke|comspec|iex).*"/)
+index: wazuh-alerts-3.x-*
+name: Invoke-Obfuscation-Via-Use-Rundll32
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

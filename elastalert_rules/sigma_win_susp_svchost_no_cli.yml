@@ -4,9 +4,9 @@ description: It is extremely abnormal for svchost.exe to spawn without any CLI a
 filter:
 - query:
     query_string:
-      query: (data.win.system.eventID:"1" AND (data.win.system.eventID:"1" AND data.win.eventdata.commandLine.keyword:*svchost.exe AND data.win.eventdata.image.keyword:*\\svchost.exe) AND (NOT (data.win.eventdata.parentImage.keyword:(*\\rpcnet.exe OR *\\rpcnetp.exe))))
+      query: (data.win.system.eventID:"4688" AND (data.win.system.eventID:"4688" AND data.win.eventdata.commandLine:*svchost.exe AND process_path:*\\svchost.exe) AND (NOT (data.win.eventdata.parentImage:(*\\rpcnet.exe OR *\\rpcnetp.exe) OR NOT _exists_:data.win.eventdata.commandLine)))
 index: wazuh-alerts-3.x-*
-name: 16c37b52-b141-42a5-a3ea-bbe098444397_0
+name: Suspect-Svchost-Activity
 priority: 1
 realert:
   minutes: 0

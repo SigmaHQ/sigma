@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects command that is used to disable or delete Windows eventlog via logman Windows utility
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND data.win.eventdata.commandLine:(*logman\ *) AND data.win.eventdata.commandLine:(*stop\ * OR *delete\ *) AND data.win.eventdata.commandLine:(*EventLog\-System*))
+index: wazuh-alerts-3.x-*
+name: Disable-or-Delete-Windows-Eventlog
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

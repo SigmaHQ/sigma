@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects modification of an existing service on a compromised host in order to execute an arbitrary payload when the service is started or killed as a method of persistence.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND (data.win.eventdata.commandLine:/(?i)sc config.*binpath=.*/ OR data.win.eventdata.commandLine:/(?i)sc failure.*command=.*/ OR data.win.eventdata.commandLine:/(?i).*reg add.*(FailureCommand|ImagePath).*(\.sh|\.exe|\.dll|\.bin^|\.bat|\.cmd|\.js|\.msh^|\.reg^|\.scr|\.ps|\.vb|\.jar|\.pl).*/))
+index: wazuh-alerts-3.x-*
+name: Modification-Of-Existing-Services-For-Persistence
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

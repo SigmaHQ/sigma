@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects specific process parameters as used by Mustang Panda droppers
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.commandLine:(*Temp\\wtask.exe\ \/create* OR *%windir\:\~\-3,1%%PUBLIC\:\~\-9,1%* OR *\/tn\ \"Security\ Script\ * OR *%windir\:\~\-1,1%*) OR (data.win.eventdata.commandLine:*\/E\:vbscript* AND data.win.eventdata.commandLine:*C\:\\Users\\* AND data.win.eventdata.commandLine:*.txt* AND data.win.eventdata.commandLine:*\/F*) OR data.win.eventdata.image:*Temp\\winwsh.exe))
+index: wazuh-alerts-3.x-*
+name: Mustang-Panda-Dropper
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

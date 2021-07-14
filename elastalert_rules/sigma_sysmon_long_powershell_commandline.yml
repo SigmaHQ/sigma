@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects Too long PowerShell command lines
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND (data.win.eventdata.commandLine:(*powershell* OR *pwsh*) OR data.win.eventdata.description:"Windows\ Powershell" OR data.win.eventdata.product:"PowerShell\ Core\ 6") AND data.win.eventdata.commandLine:/.{1000,}/)
+index: wazuh-alerts-3.x-*
+name: Too-Long-PowerShell-Commandlines
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a Powershell process that contains download commands in its command line string
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.image:*\\powershell.exe AND data.win.eventdata.commandLine:*new\-object* AND data.win.eventdata.commandLine:*net.webclient\).* AND data.win.eventdata.commandLine:*download* AND data.win.eventdata.commandLine:(*string\(* OR *file\(*))
+index: wazuh-alerts-3.x-*
+name: PowerShell-Download-from-URL
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

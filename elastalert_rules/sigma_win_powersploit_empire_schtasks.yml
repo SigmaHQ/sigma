@@ -4,9 +4,9 @@ description: Detects the creation of a schtask via PowerSploit or Empire Default
 filter:
 - query:
     query_string:
-      query: (data.win.system.eventID:"1" AND data.win.eventdata.parentImage.keyword:(*\\powershell.exe) AND data.win.eventdata.commandLine.keyword:(*schtasks*\/Create*\/SC\ *ONLOGON*\/TN\ *Updater*\/TR\ *powershell* OR *schtasks*\/Create*\/SC\ *DAILY*\/TN\ *Updater*\/TR\ *powershell* OR *schtasks*\/Create*\/SC\ *ONIDLE*\/TN\ *Updater*\/TR\ *powershell* OR *schtasks*\/Create*\/SC\ *Updater*\/TN\ *Updater*\/TR\ *powershell*))
+      query: (data.win.system.eventID:"4688" AND data.win.eventdata.parentImage:*\\powershell.exe AND process_path:*\\schtasks.exe AND data.win.eventdata.commandLine:*\/Create* AND data.win.eventdata.commandLine:*\/SC* AND data.win.eventdata.commandLine:(*ONLOGON* OR *DAILY* OR *ONIDLE* OR *Updater*) AND data.win.eventdata.commandLine:*\/TN* AND data.win.eventdata.commandLine:*Updater* AND data.win.eventdata.commandLine:*\/TR* AND data.win.eventdata.commandLine:*powershell*)
 index: wazuh-alerts-3.x-*
-name: 56c217c3-2de2-479b-990f-5c109ba8458f_0
+name: Default-PowerSploit-and-Empire-Schtasks-Persistence
 priority: 2
 realert:
   minutes: 0

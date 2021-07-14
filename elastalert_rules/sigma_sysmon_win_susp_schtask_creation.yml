@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the creation of scheduled tasks in user session
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.image:*\\schtasks.exe AND data.win.eventdata.commandLine:*\ \/create\ *) AND (NOT (user_account:"NT\ AUTHORITY\\SYSTEM")))
+index: wazuh-alerts-3.x-*
+name: Scheduled-Task-Creation
+priority: 4
+realert:
+  minutes: 0
+type: any
+
+

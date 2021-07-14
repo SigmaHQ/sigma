@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a service binary running in a suspicious directory
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND process_path:(*\\Users\\Public\\* OR *\\$Recycle.bin* OR *\\Users\\All\ Users\\* OR *\\Users\\Default\\* OR *\\Users\\Contacts\\* OR *\\Users\\Searches\\* OR *C\:\\Perflogs\\* OR *\\config\\systemprofile\\* OR *\\Windows\\Fonts\\* OR *\\Windows\\IME\\* OR *\\Windows\\addins\\*) AND data.win.eventdata.parentImage:(*\\services.exe OR *\\svchost.exe))
+index: wazuh-alerts-3.x-*
+name: Suspicious-Service-Binary-Directory
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a suspicious child process of a mshta.exe process
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.parentImage:*\\mshta.exe AND data.win.eventdata.image:(*\\powershell.exe OR *\\cmd.exe OR *\\WScript.exe))
+index: wazuh-alerts-3.x-*
+name: Mshta-Spawning-Windows-Shell
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious powershell process starts with base64 encoded commands (e.g. Emotet)
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.system.eventID:"1" AND ((data.win.system.eventID:"1" AND data.win.eventdata.commandLine:*\ \-e* AND data.win.eventdata.commandLine:*\ JAB* AND data.win.eventdata.commandLine:*\ \-w* AND data.win.eventdata.commandLine:*\ hidden\ *) OR (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:*\ \-e* AND data.win.eventdata.commandLine:(*\ BA\^J* OR *\ SUVYI* OR *\ SQBFAFgA* OR *\ aQBlAHgA* OR *\ aWV4I* OR *\ IAA* OR *\ IAB* OR *\ UwB* OR *\ cwB*)) OR data.win.eventdata.commandLine:(*.exe\ \-ENCOD\ *))) AND (NOT (data.win.eventdata.commandLine:*\ \-ExecutionPolicy* AND data.win.eventdata.commandLine:*remotesigned\ *)))
+index: wazuh-alerts-3.x-*
+name: Suspicious-Encoded-PowerShell-Command-Line
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

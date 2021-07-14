@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects wmiexec/dcomexec/atexec/smbexec from Impacket framework
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:*cmd.exe* AND data.win.eventdata.commandLine:*&1* AND ((data.win.eventdata.parentImage:(*\\wmiprvse.exe OR *\\mmc.exe OR *\\explorer.exe OR *\\services.exe) AND data.win.eventdata.commandLine:*\/Q* AND data.win.eventdata.commandLine:*\/c* AND data.win.eventdata.commandLine:*\\\\127.0.0.1\\*) OR (data.win.eventdata.parentCommandLine:(*svchost.exe\ \-k\ netsvcs* OR *taskeng.exe*) AND data.win.eventdata.commandLine:*\/C* AND data.win.eventdata.commandLine:*Windows\\Temp\\*)))
+index: wazuh-alerts-3.x-*
+name: Impacket-Lateralization-Detection
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

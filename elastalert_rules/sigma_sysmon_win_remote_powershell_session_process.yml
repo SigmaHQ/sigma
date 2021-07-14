@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects remote PowerShell sections by monitoring for wsmprovhost (WinRM host process) as a parent or child process (sign of an active ps remote session)
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.image:*\\wsmprovhost.exe OR data.win.eventdata.parentImage:*\\wsmprovhost.exe))
+index: wazuh-alerts-3.x-*
+name: Remote-PowerShell-Session-Host-Process-WinRM
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

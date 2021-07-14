@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a suspicious program execution in a web service root folder (filter out false positives)
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.image:(*\\wwwroot\\* OR *\\wmpub\\* OR *\\htdocs\\*) AND (NOT (data.win.eventdata.image:(*bin\\* OR *\\Tools\\* OR *\\SMSComponent\\*) AND data.win.eventdata.parentImage:(*\\services.exe))))
+index: wazuh-alerts-3.x-*
+name: Execution-in-Webserver-Root-Folder
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

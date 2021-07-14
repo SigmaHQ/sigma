@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious use of calc.exe with command line parameters or in a suspicious directory, which is likely caused by some PoC or detection evasion
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.commandLine:*\\calc.exe\ * OR (data.win.system.eventID:"1" AND data.win.eventdata.image:*\\calc.exe AND (NOT (data.win.eventdata.image:*\\Windows\\Sys*)))))
+index: wazuh-alerts-3.x-*
+name: Suspicious-Calculator-Usage
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

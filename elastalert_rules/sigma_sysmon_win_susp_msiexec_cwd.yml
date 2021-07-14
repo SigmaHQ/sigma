@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious msiexec process starts in an uncommon directory
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.image:*\\msiexec.exe AND (NOT (data.win.eventdata.image:(C\:\\Windows\\System32\\* OR C\:\\Windows\\SysWOW64\\* OR C\:\\Windows\\WinSxS\\*))))
+index: wazuh-alerts-3.x-*
+name: Suspicious-MsiExec-Directory
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

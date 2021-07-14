@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the export of a crital Registry key to a file.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.image:*\\regedit.exe AND data.win.eventdata.commandLine:*\ \/E\ * AND data.win.eventdata.commandLine:(*hklm* OR *hkey_local_machine*) AND data.win.eventdata.commandLine:(*\\system OR *\\sam OR *\\security))
+index: wazuh-alerts-3.x-*
+name: Exports-Critical-Registry-Keys-To-a-File
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

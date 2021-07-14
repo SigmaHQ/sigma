@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a suspicious copy command that copies a system program from System32 to another directory on disk - sometimes used to use LOLBINs like certutil or desktopimgdownldr to a different location with a different name
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:(*\ \/c\ copy* OR *xcopy*) AND data.win.eventdata.commandLine:*\\System32\\*)
+index: wazuh-alerts-3.x-*
+name: Suspicious-Copy-From-or-To-System32
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects Service Principal Name Enumeration used for Kerberoasting
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.image:*\\setspn.exe OR (data.win.eventdata.description:*Query\ or\ reset\ the\ computer* AND data.win.eventdata.description:*SPN\ attribute*)) AND data.win.eventdata.commandLine:*\-q*)
+index: wazuh-alerts-3.x-*
+name: Possible-SPN-Enumeration
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

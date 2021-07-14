@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detect VBoxDrvInst.exe run whith parameters allowing processing INF file. This allows to create values in the registry and install drivers. For example one could use this technique to obtain persistence via modifying one of Run or RunOnce registry keys
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND process_path:*\\VBoxDrvInst.exe AND data.win.eventdata.commandLine:*driver* AND data.win.eventdata.commandLine:*executeinf*)
+index: wazuh-alerts-3.x-*
+name: Suspicious-VBoxDrvInst.exe-Parameters
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

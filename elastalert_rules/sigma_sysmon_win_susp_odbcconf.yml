@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects defence evasion attempt via odbcconf.exe execution to load DLL
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND ((data.win.eventdata.image:*\\odbcconf.exe AND data.win.eventdata.commandLine:(*\-f* OR *regsvr*)) OR (data.win.eventdata.parentImage:*\\odbcconf.exe AND data.win.eventdata.image:*\\rundll32.exe)))
+index: wazuh-alerts-3.x-*
+name: Application-Whitelisting-Bypass-via-DLL-Loaded-by-odbcconf.exe
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

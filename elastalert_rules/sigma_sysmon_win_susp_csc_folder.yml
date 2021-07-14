@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a suspicious execution of csc.exe, which uses a source in a suspicious folder (e.g. AppData)
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.image:*\\csc.exe AND data.win.eventdata.commandLine:(*\\AppData\\* OR *\\Windows\\Temp\\*)) AND (NOT (data.win.eventdata.parentImage:C\:\\Program\ Files* OR data.win.eventdata.parentImage:(*\\sdiagnhost.exe OR *\\w3wp.exe) OR data.win.eventdata.parentCommandLine:(*\\ProgramData\\Microsoft\\Windows\ Defender\ Advanced\ Threat\ Protection*))))
+index: wazuh-alerts-3.x-*
+name: Suspicious-Csc.exe-Source-File-Folder
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

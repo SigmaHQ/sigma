@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects tools and process executions as observed in a Greenbug campaign in May 2020
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND ((data.win.eventdata.commandLine:*bitsadmin* AND data.win.eventdata.commandLine:*\/transfer* AND data.win.eventdata.commandLine:*CSIDL_APPDATA*) OR data.win.eventdata.commandLine:(*CSIDL_SYSTEM_DRIVE*) OR data.win.eventdata.commandLine:(*\\msf.ps1* OR *8989\ \-e\ cmd.exe* OR *system.Data.SqlClient.SqlDataAdapter\($cmd\);\ \[void\]$da.fill* OR *\-nop\ \-w\ hidden\ \-c\ $k\=new\-object* OR *\[Net.CredentialCache\]\:\:DefaultCredentials;IEX\ * OR *\ \-nop\ \-w\ hidden\ \-c\ $m\=new\-object\ net.webclient;$m* OR *\-noninteractive\ \-executionpolicy\ bypass\ whoami* OR *\-noninteractive\ \-executionpolicy\ bypass\ netstat\ \-a* OR *L3NlcnZlc*) OR data.win.eventdata.image:(*\\adobe\\Adobe.exe OR *\\oracle\\local.exe OR *\\revshell.exe OR *infopagesbackup\\ncat.exe OR *CSIDL_SYSTEM\\cmd.exe OR *\\programdata\\oracle\\java.exe OR *CSIDL_COMMON_APPDATA\\comms\\comms.exe OR *\\Programdata\\VMware\\Vmware.exe)))
+index: wazuh-alerts-3.x-*
+name: Greenbug-Campaign-Indicators
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

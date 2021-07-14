@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects using Rpcping.exe to send a RPC test connection to the target server (-s) and force the NTLM hash to be sent in the process.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND (process_path:*\\rpcping.exe AND data.win.eventdata.commandLine:(*\-s* OR *\/s*)) AND ((data.win.eventdata.commandLine:*\-u* AND data.win.eventdata.commandLine:*NTLM*) OR (data.win.eventdata.commandLine:*\/u* AND data.win.eventdata.commandLine:*NTLM*) OR (data.win.eventdata.commandLine:*\-t* AND data.win.eventdata.commandLine:*ncacn_np*) OR (data.win.eventdata.commandLine:*\/t* AND data.win.eventdata.commandLine:*ncacn_np*)))
+index: wazuh-alerts-3.x-*
+name: Capture-Credentials-with-Rpcping.exe
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

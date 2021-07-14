@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects non-interactive PowerShell activity by looking at powershell.exe with not explorer.exe as a parent.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.image:*\\powershell.exe AND (NOT (data.win.eventdata.parentImage:(*\\explorer.exe OR *\\CompatTelRunner.exe))))
+index: wazuh-alerts-3.x-*
+name: Non-Interactive-PowerShell
+priority: 4
+realert:
+  minutes: 0
+type: any
+
+

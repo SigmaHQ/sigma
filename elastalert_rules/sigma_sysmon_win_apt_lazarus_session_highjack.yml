@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects executables launched outside their default directories as used by Lazarus Group (Bluenoroff)
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.image:(*\\msdtc.exe OR *\\gpvc.exe) AND (NOT (data.win.eventdata.image:(C\:\\Windows\\System32\\* OR C\:\\Windows\\SysWOW64\\*))))
+index: wazuh-alerts-3.x-*
+name: Lazarus-Session-Highjacker
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

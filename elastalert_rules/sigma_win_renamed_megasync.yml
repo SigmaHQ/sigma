@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the execution of a renamed meg.exe of MegaSync during incident response engagements associated with ransomware families like Nefilim, Sodinokibi, Pysa, and Conti.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND ((data.win.eventdata.parentImage:*\\explorer.exe AND data.win.eventdata.commandLine:*C\:\\Windows\\Temp\\meg.exe*) OR (data.win.system.eventID:"4688" AND data.win.eventdata.originalFileName:"meg.exe" AND (NOT (process_path:*\\meg.exe)))))
+index: wazuh-alerts-3.x-*
+name: Renamed-MegaSync
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

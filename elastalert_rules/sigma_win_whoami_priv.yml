@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a whoami.exe executed with the /priv command line flag instructing the tool to show all current user privieleges. This is often used after a privilege escalation attempt.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND process_path:*\\whoami.exe AND data.win.eventdata.commandLine:*\/priv*)
+index: wazuh-alerts-3.x-*
+name: Run-Whoami-Showing-Privileges
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,15 @@
+alert:
+- debug
+description: When a file is opened, the default program used to open the file (also called the file association or handler) is checked. File association selections are stored in the Windows Registry and can be edited by users, administrators, or programs that have Registry access or by administrators using the built-in assoc utility. Applications can modify the file association for a given file extension to call an arbitrary program when a file with the given extension is opened.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:*cmd* AND data.win.eventdata.commandLine:*\/c* AND data.win.eventdata.commandLine:*assoc*)
+index: wazuh-alerts-3.x-*
+name: Change-Default-File-Association
+priority: 4
+realert:
+  minutes: 0
+type: any
+
+

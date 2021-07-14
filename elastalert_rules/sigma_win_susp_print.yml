@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Attackers can use print.exe for remote file copy
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND (process_path:(*\\print.exe) AND data.win.eventdata.commandLine:(print*) AND data.win.eventdata.commandLine:(*\/D*) AND data.win.eventdata.commandLine:(*.exe*)) AND (NOT (data.win.eventdata.commandLine:(*print.exe*))))
+index: wazuh-alerts-3.x-*
+name: Abusing-Print-Executable
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

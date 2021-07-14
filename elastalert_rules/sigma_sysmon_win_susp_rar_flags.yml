@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the use of rar.exe, on the command line, to create an archive with password protection or with a specific compression level. This is pretty indicative of malicious actions.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:*\ \-hp* AND data.win.eventdata.commandLine:*\ \-m*)
+index: wazuh-alerts-3.x-*
+name: Rar-with-Password-or-Compression-Level
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

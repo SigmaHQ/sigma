@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects Request to amsiInitFailed that can be used to disable AMSI Scanning
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:(*System.Management.Automation.AmsiUtils*) AND data.win.eventdata.commandLine:(*amsiInitFailed*))
+index: wazuh-alerts-3.x-*
+name: Powershell-AMSI-Bypass-via-.NET-Reflection
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

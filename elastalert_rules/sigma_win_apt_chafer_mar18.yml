@@ -6,7 +6,7 @@ filter:
     query_string:
       query: (data.win.system.eventID:"7045" AND data.win.eventdata.serviceName:("SC\ Scheduled\ Scan" OR "UpdatMachine"))
 index: wazuh-alerts-3.x-*
-name: 53ba33fd-3a50-4468-a5ef-c583635cfa92_0
+name: Chafer-Activity
 priority: 1
 realert:
   minutes: 0
@@ -20,7 +20,7 @@ filter:
     query_string:
       query: (data.win.system.eventID:"4698" AND task_name:("SC\ Scheduled\ Scan" OR "UpdatMachine"))
 index: wazuh-alerts-3.x-*
-name: 53ba33fd-3a50-4468-a5ef-c583635cfa92-2_0
+name: Chafer-Activity-2
 priority: 1
 realert:
   minutes: 0
@@ -32,9 +32,9 @@ description: Detects Chafer activity attributed to OilRig as reported in Nyotron
 filter:
 - query:
     query_string:
-      query: (data.win.system.eventID:"13" AND data.win.eventdata.eventType:"SetValue" AND (data.win.eventdata.targetObject.keyword:(*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\UMe OR *SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\UT) OR (data.win.eventdata.targetObject.keyword:*\\Control\\SecurityProviders\\WDigest\\UseLogonCredential AND data.win.eventdata.details:"DWORD\ \(0x00000001\)")))
+      query: (data.win.system.eventID:"4657" AND data.win.eventdata.operationType:("New\ registry\ value\ created" OR "Existing\ registry\ value\ modified") AND data.win.eventdata.targetObject:(*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\UMe OR *SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\UT))
 index: wazuh-alerts-3.x-*
-name: 53ba33fd-3a50-4468-a5ef-c583635cfa92-3_0
+name: Chafer-Activity-3
 priority: 1
 realert:
   minutes: 0
@@ -46,9 +46,9 @@ description: Detects Chafer activity attributed to OilRig as reported in Nyotron
 filter:
 - query:
     query_string:
-      query: (data.win.system.eventID:"1" AND (data.win.eventdata.commandLine.keyword:(*\\Service.exe\ i OR *\\Service.exe\ u OR *\\microsoft\\Taskbar\\autoit3.exe OR C\:\\wsc.exe*) OR data.win.eventdata.image.keyword:*\\Windows\\Temp\\DB\\*.exe OR (data.win.eventdata.commandLine.keyword:*\\nslookup.exe\ \-q\=TXT* AND data.win.eventdata.parentImage.keyword:*\\Autoit*)))
+      query: (data.win.system.eventID:"4688" AND ((data.win.eventdata.commandLine:*\\Service.exe* AND data.win.eventdata.commandLine:(*i OR *u)) OR (data.win.eventdata.commandLine:*\\microsoft\\Taskbar\\autoit3.exe OR data.win.eventdata.commandLine:C\:\\wsc.exe*) OR (process_path:*\\Windows\\Temp\\DB\\* AND process_path:*.exe) OR (data.win.eventdata.commandLine:*\\nslookup.exe* AND data.win.eventdata.commandLine:*\-q\=TXT* AND data.win.eventdata.parentImage:*\\Autoit*)))
 index: wazuh-alerts-3.x-*
-name: 53ba33fd-3a50-4468-a5ef-c583635cfa92-4_0
+name: Chafer-Activity-4
 priority: 1
 realert:
   minutes: 0

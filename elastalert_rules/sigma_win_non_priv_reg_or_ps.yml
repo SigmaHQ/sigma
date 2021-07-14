@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Search for usage of reg or Powershell by non-priveleged users to modify service configuration in registry
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND IntegrityLevel:"Medium" AND ((data.win.eventdata.commandLine:*reg* AND data.win.eventdata.commandLine:*add*) OR (data.win.eventdata.commandLine:*powershell* AND data.win.eventdata.commandLine:(*set\-itemproperty* OR *\ sp\ * OR *new\-itemproperty*))) AND data.win.eventdata.commandLine:*ControlSet* AND data.win.eventdata.commandLine:*Services* AND data.win.eventdata.commandLine:(*ImagePath* OR *FailureCommand* OR *ServiceDLL*))
+index: wazuh-alerts-3.x-*
+name: Non-privileged-Usage-of-Reg-or-Powershell
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

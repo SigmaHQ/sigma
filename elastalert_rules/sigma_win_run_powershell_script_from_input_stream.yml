@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects PowerShell script execution via input stream redirect
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND process_path:*\\powershell.exe AND data.win.eventdata.commandLine:/\s-\s*</)
+index: wazuh-alerts-3.x-*
+name: Run-PowerShell-Script-from-Redirected-Input-Stream
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

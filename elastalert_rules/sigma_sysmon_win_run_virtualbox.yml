@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Adversaries can carry out malicious operations using a virtual instance to avoid detection. This rule is built to detect the registration of the Virtualbox driver or start of a Virtualbox VM.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.commandLine:(*VBoxRT.dll,RTR3Init* OR *VBoxC.dll* OR *VBoxDrv.sys*) OR data.win.eventdata.commandLine:(*startvm* OR *controlvm*)))
+index: wazuh-alerts-3.x-*
+name: Detect-Virtualbox-Driver-Installation-OR-Starting-Of-VMs
+priority: 4
+realert:
+  minutes: 0
+type: any
+
+

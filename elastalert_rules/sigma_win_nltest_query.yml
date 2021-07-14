@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects nltest query commands which may leak credential hashes
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND process_path:*\\nltest.exe AND data.win.eventdata.commandLine:*\\query*)
+index: wazuh-alerts-3.x-*
+name: Nltest-Credential-Hash-Theft
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

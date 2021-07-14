@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects command line parameters used by Bloodhound and Sharphound hack tools
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.image:(*\\Bloodhound.exe* OR *\\SharpHound.exe*) OR data.win.eventdata.commandLine:(*\ \-CollectionMethod\ All\ * OR *.exe\ \-c\ All\ \-d\ * OR *Invoke\-Bloodhound* OR *Get\-BloodHoundData*) OR (data.win.eventdata.commandLine:*\ \-JsonFolder\ * AND data.win.eventdata.commandLine:*\ \-ZipFileName\ *) OR (data.win.eventdata.commandLine:*\ DCOnly\ * AND data.win.eventdata.commandLine:*\ \-\-NoSaveCache\ *)))
+index: wazuh-alerts-3.x-*
+name: Bloodhound-and-Sharphound-Hack-Tool
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

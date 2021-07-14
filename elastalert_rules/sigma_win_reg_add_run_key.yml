@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious command line reg.exe tool adding key to RUN key in Registry
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND data.win.eventdata.commandLine:*reg* AND data.win.eventdata.commandLine:*\ ADD\ * AND data.win.eventdata.commandLine:*Software\\Microsoft\\Windows\\CurrentVersion\\Run*)
+index: wazuh-alerts-3.x-*
+name: Reg-Add-RUN-Key
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

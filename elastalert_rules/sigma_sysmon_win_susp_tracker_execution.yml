@@ -1,0 +1,15 @@
+alert:
+- debug
+description: This rule detects DLL injection and execution via LOLBAS - Tracker.exe
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.image:(*\\tracker.exe) OR data.win.eventdata.description:("Tracker")) AND data.win.eventdata.commandLine:(*\ \/d\ *) AND data.win.eventdata.commandLine:(*\ \/c\ *))
+index: wazuh-alerts-3.x-*
+name: DLL-Injection-with-Tracker.exe
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

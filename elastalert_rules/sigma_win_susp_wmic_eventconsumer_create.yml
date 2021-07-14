@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects WMIC executions in which a event consumer gets created in order to establish persistence
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND data.win.eventdata.commandLine:*ActiveScriptEventConsumer* AND data.win.eventdata.commandLine:*\ CREATE\ *)
+index: wazuh-alerts-3.x-*
+name: Suspicious-WMIC-ActiveScriptEventConsumer-Creation
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects commands that indicate a Raccine removal from an end system. Raccine is a free ransomware protection tool.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND ((data.win.eventdata.commandLine:*taskkill\ * AND data.win.eventdata.commandLine:*\/IM\ RaccineSettings.exe*) OR (data.win.eventdata.commandLine:*reg.exe* AND data.win.eventdata.commandLine:*delete* AND data.win.eventdata.commandLine:*Raccine\ Tray*) OR (data.win.eventdata.commandLine:*schtasks* AND data.win.eventdata.commandLine:*\/DELETE* AND data.win.eventdata.commandLine:*Raccine\ Rules\ Updater*)))
+index: wazuh-alerts-3.x-*
+name: Raccine-Uninstall
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

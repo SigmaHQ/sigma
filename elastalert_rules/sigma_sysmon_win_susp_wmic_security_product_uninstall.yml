@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects deinstallation of security products using WMIC utility
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:*wmic* AND data.win.eventdata.commandLine:*product\ where\ name\=* AND data.win.eventdata.commandLine:*call\ uninstall* AND data.win.eventdata.commandLine:*\/nointeractive* AND data.win.eventdata.commandLine:(*Antivirus* OR *Endpoint\ Security* OR *Endpoint\ Detection* OR *Crowdstrike\ Sensor* OR *Windows\ Defender* OR *VirusScan* OR *Threat\ Protection* OR *Endpoint\ Sensor*))
+index: wazuh-alerts-3.x-*
+name: Wmic-Uninstall-Security-Product
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

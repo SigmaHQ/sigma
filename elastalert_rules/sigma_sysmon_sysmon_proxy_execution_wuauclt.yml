@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the use of the Windows Update Client binary (wuauclt.exe) to proxy execute code.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND ((data.win.eventdata.image:*wuauclt* OR data.win.eventdata.originalFileName:"wuauclt.exe") AND (data.win.eventdata.commandLine:*UpdateDeploymentProvider* AND data.win.eventdata.commandLine:*.dll* AND data.win.eventdata.commandLine:*RunHandlerComServer*)) AND (NOT (data.win.eventdata.commandLine:(*\ \/UpdateDeploymentProvider\ UpdateDeploymentProvider.dll\ * OR *\ wuaueng.dll\ *))))
+index: wazuh-alerts-3.x-*
+name: Proxy-Execution-via-Wuauclt
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

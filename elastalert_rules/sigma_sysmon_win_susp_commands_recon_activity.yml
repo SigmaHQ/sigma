@@ -1,0 +1,22 @@
+alert:
+- debug
+buffer_time:
+  seconds: 15
+description: Detects a set of commands often used in recon stages by different attack groups
+doc_type: doc
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.commandLine:("tasklist" OR "net\ time" OR "systeminfo" OR "whoami" OR "nbtstat" OR "net\ start" OR "qprocess" OR "nslookup" OR "hostname.exe" OR "netstat\ \-an") OR data.win.eventdata.commandLine:(*\\net1\ start OR *\\net1\ user\ \/domain OR *\\net1\ group\ \/domain OR *\\net1\ group\ \"domain\ admins\"\ \/domain OR *\\net1\ group\ \"Exchange\ Trusted\ Subsystem\"\ \/domain OR *\\net1\ accounts\ \/domain OR *\\net1\ user\ net\ localgroup\ administrators)))
+index: wazuh-alerts-3.x-*
+max_threshold: 4
+metric_agg_key: _id
+metric_agg_type: cardinality
+name: Reconnaissance-Activity-with-Net-Command
+priority: 3
+query_key: data.win.eventdata.commandLine
+realert:
+  minutes: 0
+type: metric_aggregation
+
+

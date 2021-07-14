@@ -4,9 +4,9 @@ description: Detects WMI executing suspicious commands
 filter:
 - query:
     query_string:
-      query: (data.win.system.eventID:"1" AND data.win.eventdata.image.keyword:(*\\wmic.exe) AND data.win.eventdata.commandLine.keyword:(*\/NODE\:*process\ call\ create\ * OR *\ path\ AntiVirusProduct\ get\ * OR *\ path\ FirewallProduct\ get\ * OR *\ shadowcopy\ delete\ *))
+      query: (data.win.system.eventID:"4688" AND process_path:*\\wmic.exe AND ((data.win.eventdata.commandLine:*process* AND data.win.eventdata.commandLine:*call* AND data.win.eventdata.commandLine:*create\ *) OR (data.win.eventdata.commandLine:*\ path\ * AND data.win.eventdata.commandLine:(*AntiVirus* OR *Firewall*) AND data.win.eventdata.commandLine:*Product* AND data.win.eventdata.commandLine:*\ get\ *)))
 index: wazuh-alerts-3.x-*
-name: 526be59f-a573-4eea-b5f7-f0973207634d_0
+name: Suspicious-WMI-Execution
 priority: 3
 realert:
   minutes: 0

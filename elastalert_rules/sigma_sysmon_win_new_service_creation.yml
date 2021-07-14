@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects creation of a new service
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND ((data.win.eventdata.image:*\\sc.exe AND data.win.eventdata.commandLine:*create* AND data.win.eventdata.commandLine:*binpath*) OR (data.win.eventdata.image:*\\powershell.exe AND data.win.eventdata.commandLine:*new\-service*)))
+index: wazuh-alerts-3.x-*
+name: New-Service-Creation
+priority: 4
+realert:
+  minutes: 0
+type: any
+
+

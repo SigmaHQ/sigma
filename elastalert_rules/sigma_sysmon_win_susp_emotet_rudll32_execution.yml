@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detecting Emotet DLL loading by looking for rundll32.exe processes with command lines ending in ,RunDLL or ,#1
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.image:(*\\rundll32.exe) AND data.win.eventdata.commandLine:(*,RunDLL)) AND (NOT (data.win.eventdata.parentImage:(*\\tracker.exe))))
+index: wazuh-alerts-3.x-*
+name: Emotet-RunDLL32-Process-Creation
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

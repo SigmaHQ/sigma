@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects when when a mounted share is removed. Adversaries may remove share connections that are no longer useful in order to clean up traces of their operation
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND data.win.eventdata.parentImage:*\\net.exe AND process_path:*\\net1.exe AND data.win.eventdata.commandLine:*share* AND data.win.eventdata.commandLine:*\/delete*)
+index: wazuh-alerts-3.x-*
+name: Mounted-Share-Deleted
+priority: 4
+realert:
+  minutes: 0
+type: any
+
+

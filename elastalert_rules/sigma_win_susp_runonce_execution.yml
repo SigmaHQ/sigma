@@ -1,0 +1,15 @@
+alert:
+- debug
+description: This rule detects the execution of Run Once task as configured in the registry
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND (process_path:(*\\runonce.exe) OR data.win.eventdata.description:("Run\ Once\ Wrapper")) AND data.win.eventdata.commandLine:(*\ \/AlternateShellStartup*))
+index: wazuh-alerts-3.x-*
+name: Run-Once-Task-Execution-as-Configured-in-Registry
+priority: 4
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects actions that clear the local ShimCache and remove forensic evidence
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:*rundll32* AND ((data.win.eventdata.commandLine:*apphelp.dll* AND data.win.eventdata.commandLine:(*ShimFlushCache* OR *#250*)) OR (data.win.eventdata.commandLine:*kernel32.dll* AND data.win.eventdata.commandLine:(*BaseFlushAppcompatCache* OR *#46*))))
+index: wazuh-alerts-3.x-*
+name: ShimCache-Flush
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

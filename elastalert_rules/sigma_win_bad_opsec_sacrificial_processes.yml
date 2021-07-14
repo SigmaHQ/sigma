@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects attackers using tooling with bad opsec defaults e.g. spawning a sacrificial process to inject a capability into the process without taking into account how the process is normally run, one trivial example of this is using rundll32.exe without arguments as a sacrificial process (default in CS, now highlighted by c2lint), running WerFault without arguments (Kraken - credit am0nsec), and other examples.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND data.win.eventdata.commandLine:(*\\WerFault.exe OR *\\rundll32.exe))
+index: wazuh-alerts-3.x-*
+name: Bad-Opsec-Defaults-Sacrificial-Processes-With-Improper-Arguments
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects, possibly, malicious unauthorized usage of bcdedit.exe
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.image:*\\bcdedit.exe AND data.win.eventdata.commandLine:(*delete* OR *deletevalue* OR *import* OR *safeboot* OR *network*))
+index: wazuh-alerts-3.x-*
+name: Possible-Ransomware-or-Unauthorized-MBR-Modifications
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

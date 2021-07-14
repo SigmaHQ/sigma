@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects Obfuscated Powershell via Stdin in Scripts
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND data.win.eventdata.commandLine:/(?i).*(set).*&&\s?set.*(environment|invoke|\${?input).*&&.*"/)
+index: wazuh-alerts-3.x-*
+name: Invoke-Obfuscation-Via-Stdin
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

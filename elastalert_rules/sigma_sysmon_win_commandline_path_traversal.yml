@@ -1,0 +1,15 @@
+alert:
+- debug
+description: detects the usage of path traversal in cmd.exe indicating possible command/argument confusion/hijacking
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.parentCommandLine:*cmd* AND data.win.eventdata.parentCommandLine:*\/c* AND data.win.eventdata.commandLine:*\/..\/..\/*)
+index: wazuh-alerts-3.x-*
+name: Cmd.exe-CommandLine-Path-Traversal
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

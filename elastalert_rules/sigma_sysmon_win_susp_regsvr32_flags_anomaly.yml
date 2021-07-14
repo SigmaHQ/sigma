@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a flag anomaly in which regsvr32.exe uses a /i flag without using a /n flag at the same time
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.image:*\\regsvr32.exe AND data.win.eventdata.commandLine:*\ \/i\:*) AND (NOT (data.win.eventdata.commandLine:*\ \/n\ *)))
+index: wazuh-alerts-3.x-*
+name: Regsvr32-Flags-Anomaly
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

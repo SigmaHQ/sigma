@@ -4,9 +4,9 @@ description: Detects a process spawned by the terminal service server process (t
 filter:
 - query:
     query_string:
-      query: (data.win.system.eventID:"1" AND data.win.eventdata.parentCommandLine.keyword:*\\svchost.exe*termsvcs AND (NOT (data.win.eventdata.image.keyword:*\\rdpclip.exe)))
+      query: (data.win.system.eventID:"4688" AND (data.win.eventdata.parentCommandLine:*\\svchost.exe* AND data.win.eventdata.parentCommandLine:*termsvcs*) AND (NOT (process_path:*\\rdpclip.exe)))
 index: wazuh-alerts-3.x-*
-name: 1012f107-b8f1-4271-af30-5aed2de89b39_0
+name: Terminal-Service-Process-Spawn
 priority: 2
 realert:
   minutes: 0

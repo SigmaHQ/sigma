@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a specific process creation patterns as seen used by UNC2452 and provided by Microsoft as Microsoft Defender ATP queries
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND ((((data.win.eventdata.commandLine:(*7z.exe\ a\ \-v500m\ \-mx9\ \-r0\ \-p*) OR (data.win.eventdata.parentCommandLine:*wscript.exe* AND data.win.eventdata.parentCommandLine:*.vbs* AND data.win.eventdata.commandLine:*rundll32.exe* AND data.win.eventdata.commandLine:*C\:\\Windows* AND data.win.eventdata.commandLine:*.dll,Tk_*)) OR (data.win.eventdata.parentImage:*\\rundll32.exe AND data.win.eventdata.parentCommandLine:*C\:\\Windows* AND data.win.eventdata.commandLine:*cmd.exe\ \/C\ *)) OR (data.win.eventdata.commandLine:*rundll32\ c\:\\windows\\* AND data.win.eventdata.commandLine:*.dll\ *)) OR (data.win.system.eventID:"4688" AND (data.win.eventdata.parentImage:*\\rundll32.exe AND process_path:*\\dllhost.exe) AND (NOT (data.win.eventdata.commandLine:("\ " OR ""))))))
+index: wazuh-alerts-3.x-*
+name: UNC2452-Process-Creation-Patterns
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,15 @@
+alert:
+- debug
+description: By replacing the sticky keys executable with the local admins CMD executable, an attacker is able to access a privileged windows console session without authenticating to the system. When the sticky keys are "activated" the privilleged shell is launched.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:("copy\ \/y\ C\:\\windows\\system32\\cmd.exe\ C\:\\windows\\system32\\sethc.exe"))
+index: wazuh-alerts-3.x-*
+name: Using-Sticky-keys-To-Obtain-Unauthenticated,-Privileged-Console-Access
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

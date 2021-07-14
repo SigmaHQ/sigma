@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects ScreenConnect program starts that establish a remote access to that system (not meeting, not remote support)
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND data.win.eventdata.commandLine:*e\=Access&* AND data.win.eventdata.commandLine:*y\=Guest&* AND data.win.eventdata.commandLine:*&p\=* AND data.win.eventdata.commandLine:*&c\=* AND data.win.eventdata.commandLine:*&k\=*)
+index: wazuh-alerts-3.x-*
+name: ScreenConnect-Remote-Access
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

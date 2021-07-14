@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects PowerShell Strings applied to rundll as seen in PowerShdll.dll
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.image:(*\\rundll32.exe) OR data.win.eventdata.description:(*Windows\-Hostprozess\ \(Rundll32\)*)) AND data.win.eventdata.commandLine:(*Default.GetString* OR *FromBase64String*))
+index: wazuh-alerts-3.x-*
+name: Detection-of-PowerShell-Execution-via-DLL
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

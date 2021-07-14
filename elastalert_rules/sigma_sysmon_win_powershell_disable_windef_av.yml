@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects attackers attempting to disable Windows Defender using Powershell
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND ((data.win.eventdata.image:*\\powershell.exe AND data.win.eventdata.commandLine:(*\-DisableBehaviorMonitoring\ $true* OR *\-DisableRuntimeMonitoring\ $true*)) OR (data.win.eventdata.commandLine:*sc* AND data.win.eventdata.commandLine:*stop* AND data.win.eventdata.commandLine:*WinDefend*) OR (data.win.eventdata.commandLine:*sc* AND data.win.eventdata.commandLine:*config* AND data.win.eventdata.commandLine:*WinDefend* AND data.win.eventdata.commandLine:*start\=disabled*)))
+index: wazuh-alerts-3.x-*
+name: Powershell-Used-To-Disable-Windows-Defender-AV-Security-Monitoring
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

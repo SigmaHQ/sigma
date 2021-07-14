@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the execution of powershell, a WebClient object creation and the invocation of DownloadFile in a single command line
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:*powershell* AND data.win.eventdata.commandLine:*.DownloadFile* AND data.win.eventdata.commandLine:*System.Net.WebClient*)
+index: wazuh-alerts-3.x-*
+name: PowerShell-DownloadFile
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

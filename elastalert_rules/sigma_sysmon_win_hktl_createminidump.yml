@@ -1,0 +1,29 @@
+alert:
+- debug
+description: Detects the use of CreateMiniDump hack tool used to dump the LSASS process memory for credential extraction on the attacker's machine
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.image:*\\CreateMiniDump.exe* OR hash_imphash:("4A07F944A83E8A7C2525EFA35DD30E2F" OR "4a07f944a83e8a7c2525efa35dd30e2f")))
+index: wazuh-alerts-3.x-*
+name: CreateMiniDump-Hacktool
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+alert:
+- debug
+description: Detects the use of CreateMiniDump hack tool used to dump the LSASS process memory for credential extraction on the attacker's machine
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"11" AND data.win.eventdata.targetFilename:*\\lsass.dmp)
+index: wazuh-alerts-3.x-*
+name: CreateMiniDump-Hacktool-2
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

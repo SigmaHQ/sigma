@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Dump sam, system or security hives using REG.exe utility
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.image:*\\reg.exe AND data.win.eventdata.commandLine:(*save* OR *export*) AND data.win.eventdata.commandLine:(*hklm* OR *hkey_local_machine*) AND data.win.eventdata.commandLine:(*\\system OR *\\sam OR *\\security))
+index: wazuh-alerts-3.x-*
+name: Grabbing-Sensitive-Hives-via-Reg-Utility
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

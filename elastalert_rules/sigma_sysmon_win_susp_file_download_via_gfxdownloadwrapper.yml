@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects when GfxDownloadWrapper.exe downloads file from non standard URL
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.image:*\\GfxDownloadWrapper.exe AND (NOT (data.win.eventdata.commandLine:*gameplayapi.intel.com*))) AND (NOT (data.win.eventdata.parentImage:*\\GfxDownloadWrapper.exe)))
+index: wazuh-alerts-3.x-*
+name: GfxDownloadWrapper.exe-Downloads-File-from-Suspicious-URL
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

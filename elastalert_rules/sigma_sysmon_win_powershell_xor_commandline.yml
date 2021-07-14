@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects suspicious powershell process which includes bxor command, alternative obfuscation method to b64 encoded commands.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.description:"Windows\ PowerShell" OR data.win.eventdata.product:"PowerShell\ Core\ 6") AND data.win.eventdata.commandLine:(*bxor* OR *join* OR *char*))
+index: wazuh-alerts-3.x-*
+name: Suspicious-XOR-Encoded-PowerShell-Command-Line
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

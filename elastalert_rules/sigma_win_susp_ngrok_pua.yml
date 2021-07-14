@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the use of Ngrok, a utility used for port forwarding and tunneling, often used by threat actors to make local protected services publicly available. Involved domains are bin.equinox.io for download and *.ngrok.io for connections.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND (data.win.eventdata.commandLine:(*\ tcp\ 139* OR *\ tcp\ 445* OR *\ tcp\ 3389* OR *\ tcp\ 5985* OR *\ tcp\ 5986*) OR (data.win.eventdata.commandLine:*\ start\ * AND data.win.eventdata.commandLine:*\-\-all* AND data.win.eventdata.commandLine:*\-\-config* AND data.win.eventdata.commandLine:*.yml*) OR (process_path:(*ngrok.exe) AND data.win.eventdata.commandLine:(*\ tcp\ * OR *\ http\ * OR *\ authtoken\ *))))
+index: wazuh-alerts-3.x-*
+name: Ngrok-Usage
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

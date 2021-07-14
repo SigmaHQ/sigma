@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects Possible usage of Windows Subsystem for Linux (WSL) binary as a LOLBIN
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.image:(*\\wsl.exe) AND data.win.eventdata.commandLine:(*\ \-e\ * OR *\ \-\-exec\ *))
+index: wazuh-alerts-3.x-*
+name: WSL-Execution
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

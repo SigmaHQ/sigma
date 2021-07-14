@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects different process creation events as described in various threat reports on Lazarus group activity
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND (data.win.eventdata.commandLine:(*reg.exe\ save\ hklm\\sam\ %temp%\\\~reg_sam.save* OR *1q2w3e4r@#$@#$@#$* OR *\ \-hp1q2w3e4\ * OR *.dat\ data03\ 10000\ \-p\ *) OR (data.win.eventdata.commandLine:*process\ call\ create* AND data.win.eventdata.commandLine:*\ >\ %temp%\\\~*) OR (data.win.eventdata.commandLine:*netstat\ \-aon\ |\ find\ * AND data.win.eventdata.commandLine:*\ >\ %temp%\\\~*) OR data.win.eventdata.commandLine:(*.255\ 10\ C\:\\ProgramData\\*)))
+index: wazuh-alerts-3.x-*
+name: Lazarus-Activity
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects Registry modifications performed by Ke3chang malware in campaigns running in 2019 and 2020
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.commandLine:(*\-Property\ DWORD\ \-name\ DisableFirstRunCustomize\ \-value\ 2\ \-Force* OR *\-Property\ String\ \-name\ Check_Associations\ \-value* OR *\-Property\ DWORD\ \-name\ IEHarden\ \-value\ 0\ \-Force*))
+index: wazuh-alerts-3.x-*
+name: Ke3chang-Registry-Key-Modifications
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

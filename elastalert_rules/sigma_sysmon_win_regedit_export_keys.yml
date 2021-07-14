@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects the export of the target Registry key to a file.
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND (data.win.eventdata.image:*\\regedit.exe AND data.win.eventdata.commandLine:*\ \/E\ *) AND (NOT ((data.win.system.eventID:"1" AND data.win.eventdata.commandLine:(*hklm* OR *hkey_local_machine*) AND data.win.eventdata.commandLine:(*\\system OR *\\sam OR *\\security)))))
+index: wazuh-alerts-3.x-*
+name: Exports-Registry-Key-To-a-File
+priority: 4
+realert:
+  minutes: 0
+type: any
+
+

@@ -4,9 +4,9 @@ description: Detects an executable in the users directory started from Microsoft
 filter:
 - query:
     query_string:
-      query: (data.win.system.eventID:"1" AND data.win.eventdata.parentImage.keyword:(*\\WINWORD.EXE OR *\\EXCEL.EXE OR *\\POWERPNT.exe OR *\\MSPUB.exe OR *\\VISIO.exe OR *\\OUTLOOK.EXE) AND data.win.eventdata.image.keyword:(C\:\\users\\*.exe))
+      query: (data.win.system.eventID:"4688" AND (data.win.eventdata.parentImage:(*\\WINWORD.EXE OR *\\EXCEL.EXE OR *\\POWERPNT.exe OR *\\MSPUB.exe OR *\\VISIO.exe) AND process_path:C\:\\users\\* AND process_path:*.exe) AND (NOT (process_path:*\\Teams.exe)))
 index: wazuh-alerts-3.x-*
-name: aa3a6f94-890e-4e22-b634-ffdfd54792cc_0
+name: MS-Office-Product-Spawning-Exe-in-User-Dir
 priority: 2
 realert:
   minutes: 0

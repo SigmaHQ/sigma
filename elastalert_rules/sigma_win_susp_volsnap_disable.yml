@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects commands that temporarily turn off Volume Snapshots
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND data.win.eventdata.commandLine:*reg* AND data.win.eventdata.commandLine:*\ add\ * AND data.win.eventdata.commandLine:*\\Services\\VSS\\Diag* AND data.win.eventdata.commandLine:*\/d\ Disabled*)
+index: wazuh-alerts-3.x-*
+name: Disabled-Volume-Snapshots
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

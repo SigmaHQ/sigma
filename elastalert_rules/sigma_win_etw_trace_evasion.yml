@@ -4,9 +4,9 @@ description: Detects a command that clears or disables any ETW trace log which c
 filter:
 - query:
     query_string:
-      query: (data.win.system.eventID:"1" AND (data.win.eventdata.commandLine.keyword:*\ cl\ *\/Trace* OR data.win.eventdata.commandLine.keyword:*\ clear\-log\ *\/Trace* OR data.win.eventdata.commandLine.keyword:*\ sl*\ \/e\:false* OR data.win.eventdata.commandLine.keyword:*\ set\-log*\ \/e\:false*))
+      query: (data.win.system.eventID:"4688" AND ((data.win.eventdata.commandLine:*cl* AND data.win.eventdata.commandLine:*\/Trace*) OR (data.win.eventdata.commandLine:*clear\-log* AND data.win.eventdata.commandLine:*\/Trace*) OR (data.win.eventdata.commandLine:*sl* AND data.win.eventdata.commandLine:*\/e\:false*) OR (data.win.eventdata.commandLine:*set\-log* AND data.win.eventdata.commandLine:*\/e\:false*) OR (data.win.eventdata.commandLine:*Remove\-EtwTraceProvider* AND data.win.eventdata.commandLine:*EventLog\-Microsoft\-Windows\-WMI\-Activity\-Trace* AND data.win.eventdata.commandLine:*\{1418ef04\-b0b4\-4623\-bf7e\-d74ab47bbdaa\}*) OR (data.win.eventdata.commandLine:*Set\-EtwTraceProvider* AND data.win.eventdata.commandLine:*\{1418ef04\-b0b4\-4623\-bf7e\-d74ab47bbdaa\}* AND data.win.eventdata.commandLine:*EventLog\-Microsoft\-Windows\-WMI\-Activity\-Trace* AND data.win.eventdata.commandLine:*0x11*) OR (data.win.eventdata.commandLine:*logman* AND data.win.eventdata.commandLine:*update* AND data.win.eventdata.commandLine:*trace* AND data.win.eventdata.commandLine:*\-\-p* AND data.win.eventdata.commandLine:*\-ets*)))
 index: wazuh-alerts-3.x-*
-name: a238b5d0-ce2d-4414-a676-7a531b3d13d6_0
+name: Disable-of-ETW-Trace
 priority: 2
 realert:
   minutes: 0

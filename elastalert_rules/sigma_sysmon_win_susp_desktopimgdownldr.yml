@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a suspicious Microsoft desktopimgdownldr execution with parameters used to download files from the Internet
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND ((data.win.system.eventID:"1" AND data.win.eventdata.commandLine:*\ \/lockscreenurl\:* AND (NOT (data.win.eventdata.commandLine:(*.jpg* OR *.jpeg* OR *.png*)))) OR (data.win.eventdata.commandLine:*reg\ delete* AND data.win.eventdata.commandLine:*\\PersonalizationCSP*)))
+index: wazuh-alerts-3.x-*
+name: Suspicious-Desktopimgdownldr-Command
+priority: 2
+realert:
+  minutes: 0
+type: any
+
+

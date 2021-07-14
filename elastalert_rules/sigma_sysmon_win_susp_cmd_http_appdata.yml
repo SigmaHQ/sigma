@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects a suspicious command line execution that includes an URL and AppData string in the command line parameters as used by several droppers (js/vbs > powershell)
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND data.win.eventdata.image:*\\cmd.exe AND data.win.eventdata.commandLine:*http* AND data.win.eventdata.commandLine:*\:\/\/* AND data.win.eventdata.commandLine:*%AppData%*)
+index: wazuh-alerts-3.x-*
+name: Command-Line-Execution-with-Suspicious-URL-and-AppData-Strings
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

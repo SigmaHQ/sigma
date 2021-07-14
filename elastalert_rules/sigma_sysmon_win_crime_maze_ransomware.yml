@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects specific process characteristics of Maze ransomware word document droppers
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND ((data.win.eventdata.parentImage:(*\\WINWORD.exe) AND data.win.eventdata.image:(*.tmp)) OR (data.win.eventdata.image:*\\wmic.exe AND data.win.eventdata.parentImage:*\\Temp\\* AND data.win.eventdata.commandLine:*shadowcopy\ delete) OR (data.win.eventdata.commandLine:*shadowcopy\ delete AND data.win.eventdata.commandLine:*\\..\\..\\system32*)))
+index: wazuh-alerts-3.x-*
+name: Maze-Ransomware
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+

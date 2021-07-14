@@ -1,0 +1,15 @@
+alert:
+- debug
+description: This rule will looks for Windows Installer service (msiexec.exe) spawned command line and/or powershell
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"4688" AND process_path:(*\\cmd.exe OR *\\powershell.exe) AND data.win.eventdata.parentImage:*\\Windows\\Installer\\* AND data.win.eventdata.parentImage:*msi* AND data.win.eventdata.parentImage:(*tmp))
+index: wazuh-alerts-3.x-*
+name: Always-Install-Elevated-MSI-Spawned-Cmd-And-Powershell
+priority: 3
+realert:
+  minutes: 0
+type: any
+
+

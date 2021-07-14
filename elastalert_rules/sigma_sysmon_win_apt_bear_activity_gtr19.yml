@@ -1,0 +1,15 @@
+alert:
+- debug
+description: Detects Russian group activity as described in Global Threat Report 2019 by Crowdstrike
+filter:
+- query:
+    query_string:
+      query: (data.win.system.eventID:"1" AND ((data.win.eventdata.image:*\\xcopy.exe AND data.win.eventdata.commandLine:*\/S* AND data.win.eventdata.commandLine:*\/E* AND data.win.eventdata.commandLine:*\/C* AND data.win.eventdata.commandLine:*\/Q* AND data.win.eventdata.commandLine:*\/H* AND data.win.eventdata.commandLine:*\\\*) OR (data.win.eventdata.image:*\\adexplorer.exe AND data.win.eventdata.commandLine:*\-snapshot* AND data.win.eventdata.commandLine:*\"\"* AND data.win.eventdata.commandLine:*c\:\\users\\*)))
+index: wazuh-alerts-3.x-*
+name: Judgement-Panda-Credential-Access-Activity
+priority: 1
+realert:
+  minutes: 0
+type: any
+
+
