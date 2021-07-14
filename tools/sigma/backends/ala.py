@@ -124,7 +124,7 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
                 elif val.endswith("*"):
                     op = "startswith"
                 val = re.sub('([".^$]|(?![*?]))', '\g<1>', val)
-                val = re.sub('(\\\\\*|\*)', '.*', val)
+                val = re.sub('(\\\\\*|\*)', '', val)
                 val = re.sub('\\?', '.', val)
                 if "\\" in val:
                     return "%s @'%s'" % (op, self.cleanValue(val))
