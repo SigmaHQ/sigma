@@ -300,7 +300,73 @@ class ElasticsearchQuerystringBackend(DeepFieldMappingMixin, ElasticsearchWildca
             return result
         else:
             return super().generateSubexpressionNode(node)
+class ElasticsearchQuerystringBackendLogRhythm(DeepFieldMappingMixin, ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
+    """Converts Sigma rule into Lucene query string for LogRhythm. Only searches, no aggregations."""
+    identifier = "es-qs-lr"
+    active = True
 
+    reEscape = re.compile("([+\\=!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|\\\\u|&&|\\|\\|)")
+    andToken = " AND "
+    orToken = " "
+    notToken = "NOT "
+    subExpression = "(%s)"
+    listExpression = "(%s)"
+    listSeparator = " OR "
+    valueExpression = "%s"
+    typedValueExpression = {
+                SigmaRegularExpressionModifier: "/%s/"
+            }
+    nullExpression = "NOT _exists_:%s"
+    notNullExpression = "_exists_:%s"
+    mapExpression = "%s:%s"
+    mapListsSpecialHandling = False
+    wildcard_use_keyword = False
+
+    
+    def generateValueNode(self, node):
+        result = super().generateValueNode(node)
+        if result == "" or result.isspace():
+            return '""'
+        else:
+            if self.matchKeyword:   # don't quote search value on keyword field
+                if self.CaseInSensitiveField:
+                    make_ci = self.makeCaseInSensitiveValue(result)
+                    result = make_ci.get('value')
+                    if make_ci.get('is_regex'): # Determine if still should be a regex
+                        result = "/%s/" % result # Regex place holders for regex
+                return result
+            else:
+                return "\"%s\"" % result
+
+    def generateNOTNode(self, node):
+        expression = super().generateNode(node.item)
+        if expression:
+            return "(%s%s)" % (self.notToken, expression)
+
+    def generateSubexpressionNode(self, node):
+        """Check for search not bound to a field and restrict search to keyword fields"""
+        nodetype = type(node.items)
+        if nodetype in { ConditionAND, ConditionOR } and type(node.items.items) == list and { type(item) for item in node.items.items }.issubset({str, int}):
+            newitems = list()
+            for item in node.items:
+                newitem = item
+                if type(item) == str:
+                    if not item.startswith("*"):
+                        newitem = "*" + newitem
+                    if not item.endswith("*"):
+                        newitem += "*"
+                    newitems.append(newitem)
+                else:
+                    newitems.append(item)
+            newnode = NodeSubexpression(nodetype(None, None, *newitems))
+            self.matchKeyword = True
+            result = "logMessage:" + super().generateSubexpressionNode(newnode) #changed the word keyword to logMessage. I don't think this is necessarily the best way to do this.
+            self.matchKeyword = False       # one of the reasons why the converter needs some major overhaul
+            return result
+        else:
+            return super().generateSubexpressionNode(node)
+        
+        
 class ElasticsearchEQLBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
     """Converts Sigma rule into EQL."""
     identifier = "es-eql"
