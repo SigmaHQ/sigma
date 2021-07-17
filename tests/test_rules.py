@@ -234,6 +234,7 @@ class TestRules(unittest.TestCase):
 
     def test_missing_id(self):
         faulty_rules = []
+        list_id = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             id = self.get_rule_part(file_path=file, part_name="id")
             if not id:
@@ -242,6 +243,11 @@ class TestRules(unittest.TestCase):
             elif len(id) != 36:
                 print(Fore.YELLOW + "Rule {} has a malformed 'id' (not 36 chars).".format(file))
                 faulty_rules.append(file)                
+            elif id in list_id:
+                print(Fore.YELLOW + "Rule {} has a duplicate 'id'.".format(file))
+                faulty_rules.append(file)
+            else:
+                list_id.append(id)
 
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules with missing or malformed 'id' fields. Create an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).")
