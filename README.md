@@ -212,6 +212,7 @@ tools/sigmac -t splunk -c ~/my-splunk-mapping.yml -c tools/config/generic/window
 * [LOGIQ](https://www.logiq.ai)
 * [uberAgent ESA](https://uberagent.com/)
 * [Devo](https://devo.com)
+* [LogRhythm](https://logrhythm.com/)
 
 Current work-in-progress
 * [Splunk Data Models](https://docs.splunk.com/Documentation/Splunk/7.1.0/Knowledge/Aboutdatamodels)
