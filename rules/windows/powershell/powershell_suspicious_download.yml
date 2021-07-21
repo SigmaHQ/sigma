@@ -1,3 +1,4 @@
+action: global
 title: Suspicious PowerShell Download
 id: 65531a81-a694-4e31-ae04-f8ba5bc33759
 status: experimental
@@ -8,6 +9,11 @@ tags:
     - attack.t1086  #an old one
 author: Florian Roth
 date: 2017/03/05
+modified: 2021/07/20
+falsepositives:
+    - PowerShell scripts that download content from the Internet
+level: medium
+---
 logsource:
     product: windows
     service: powershell
@@ -21,6 +27,19 @@ detection:
             - 'System.Net.WebClient'
             - '.DownloadString('
     condition: downloadfile or downloadstring
-falsepositives:
-    - PowerShell scripts that download content from the Internet
-level: medium
+---
+logsource:
+    product: windows
+    service: powershell-classic
+detection:
+    downloadfile:
+        EventID: 400 #  get 400 ,403 and 600 for 1 execution
+        HostApplication|contains|all:
+            - 'System.Net.WebClient'
+            - '.DownloadFile('
+    downloadstring:
+        EventID: 400
+        HostApplication|contains|all:
+            - 'System.Net.WebClient'
+            - '.DownloadString('
+    condition: downloadfile or downloadstring
