@@ -18,7 +18,14 @@ detection:
         # can not use OriginalFileName as is empty
         Image|endswith:
             - '\ncat.exe'
-    condition: selection 
+    selection_cmdline:
+        # Typical command lines
+        CommandLine|contains:
+            - ' -lvp '
+            - ' -l --proxy-type http '
+            - ' --exec cmd.exe '
+            - ' -vnl --exec '
+    condition: selection or selection_cmdline
 falsepositives:
     - Legitimate ncat use
 level: medium
