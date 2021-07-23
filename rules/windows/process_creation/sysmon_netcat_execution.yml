@@ -1,0 +1,31 @@
+title: Ncat Execution
+id: e31033fc-33f0-4020-9a16-faf9b31cbf08
+status: experimental
+author: frack113
+date: 2021/07/21
+description: Adversaries may use a non-application layer protocol for communication between host and C2 server or among infected hosts within a network
+references:
+    - https://nmap.org/ncat/   
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1095/T1095.md
+tags:
+    - attack.command_and_control
+    - attack.t1095
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        # can not use OriginalFileName as is empty
+        Image|endswith:
+            - '\ncat.exe'
+    selection_cmdline:
+        # Typical command lines
+        CommandLine|contains:
+            - ' -lvp '
+            - ' -l --proxy-type http '
+            - ' --exec cmd.exe '
+            - ' -vnl --exec '
+    condition: selection or selection_cmdline
+falsepositives:
+    - Legitimate ncat use
+level: high
