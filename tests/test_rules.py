@@ -302,6 +302,34 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed 'modified' fields. (create one, e.g. date: 2019/01/14)")
 
+    def test_optional_status(self):
+        faulty_rules = []
+        valid_status = ["stable","test","experimental"]
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            status_str = self.get_rule_part(file_path=file, part_name="status")
+            if status_str:
+                if not status_str in valid_status:
+                    print(Fore.YELLOW + "Rule {} has a invalide 'status' (check wiki).".format(file))
+                    faulty_rules.append(file) 
+        
+        self.assertEqual(faulty_rules, [], Fore.RED +
+                         "There are rules with malformed 'status' fields. (check https://github.com/SigmaHQ/sigma/wiki/Specification)")
+
+    def test_level(self):
+        faulty_rules = []
+        valid_level = ["informational","low","medium","high","critical"]
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            level_str = self.get_rule_part(file_path=file, part_name="level")
+            if not level_str:
+                print(Fore.YELLOW + "Rule {} has no field 'level'.".format(file))
+                faulty_rules.append(file)            
+            elif not level_str in valid_level:
+                    print(Fore.YELLOW + "Rule {} has a invalide 'level' (check wiki).".format(file))
+                    faulty_rules.append(file) 
+        
+        self.assertEqual(faulty_rules, [], Fore.RED +
+                         "There are rules with missing or malformed 'level' fields. (check https://github.com/SigmaHQ/sigma/wiki/Specification)")
+
     def test_references(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
