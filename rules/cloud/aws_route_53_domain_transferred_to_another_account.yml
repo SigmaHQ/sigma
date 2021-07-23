@@ -1,0 +1,22 @@
+title: "AWS Route 53 Domain Transferred to Another Account"
+description: "Identifies when a request has been made to transfer a Route 53 domain to another AWS account."
+author: Elastic, Austin Songer
+status: experimental
+date: 2021/07/22
+reference:
+    - https://github.com/elastic/detection-rules/blob/main/rules/integrations/aws/persistence_route_53_domain_transferred_to_another_account.toml
+logsource:
+    service: cloudtrail
+detection:
+    selection_source:
+        - eventSource: route53.amazonaws.com
+    selection_eventname:
+        - eventName: TransferDomainToAnotherAwsAccount
+    condition: all of them
+tags:
+    - attack.persistence
+	- attack.credential_access
+	- attack.t1098
+falsepositives:
+- A domain may be transferred to another AWS account by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Domain transfers from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule.
+level: low
