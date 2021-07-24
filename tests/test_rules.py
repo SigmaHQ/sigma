@@ -252,6 +252,37 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules with missing or malformed 'id' fields. Create an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).")
     
+    def test_optional_related(self):
+        faulty_rules = []
+        valid_type = [
+            "derived",
+            "obsoletes",
+            "merged",
+            "renamed",
+            ]
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            related_lst = self.get_rule_part(file_path=file, part_name="related")
+            if related_lst:
+                # it exists but isn't a list
+                if not isinstance(related_lst, list):
+                    print(Fore.YELLOW + "Rule {} has a 'related' field that isn't a list.".format(file))
+                    faulty_rules.append(file)
+                else:
+                    # should probably test if we have only 'id' and 'type' ... 
+                    type_ok = True
+                    for ref in related_lst:
+                        id_str = ref['id']
+                        type_str = ref['type']
+                        if not type_str in valid_type:
+                           type_ok = False
+                    #Only add one time if many bad type in the same file
+                    if type_ok == False:
+                        print(Fore.YELLOW + "Rule {} has a 'related/type' invalid value.".format(file))
+                        faulty_rules.append(file)                       
+
+        self.assertEqual(faulty_rules, [], Fore.RED + 
+                         "There are rules with malformed optional 'related' fields. (check https://github.com/SigmaHQ/sigma/wiki/Specification)")            
+    
     def test_sysmon_rule_without_eventid(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
@@ -287,7 +318,7 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with missing or malformed 'date' fields. (create one, e.g. date: 2019/01/14)")
 
-    def test_date_modified(self):
+    def test_optional_date_modified(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             modifiedfield = self.get_rule_part(file_path=file, part_name="modified")
@@ -304,7 +335,11 @@ class TestRules(unittest.TestCase):
 
     def test_optional_status(self):
         faulty_rules = []
-        valid_status = ["stable","test","experimental"]
+        valid_status = [
+            "stable",
+            "test",
+            "experimental",
+            ]
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             status_str = self.get_rule_part(file_path=file, part_name="status")
             if status_str:
@@ -317,7 +352,13 @@ class TestRules(unittest.TestCase):
 
     def test_level(self):
         faulty_rules = []
-        valid_level = ["informational","low","medium","high","critical"]
+        valid_level = [
+            "informational",
+            "low",
+            "medium",
+            "high",
+            "critical",
+            ]
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             level_str = self.get_rule_part(file_path=file, part_name="level")
             if not level_str:
@@ -329,6 +370,32 @@ class TestRules(unittest.TestCase):
         
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with missing or malformed 'level' fields. (check https://github.com/SigmaHQ/sigma/wiki/Specification)")
+
+    def test_optional_fields(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            fields_str = self.get_rule_part(file_path=file, part_name="fields")
+            if fields_str:
+                # it exists but isn't a list
+                if not isinstance(fields_str, list):
+                    print(Fore.YELLOW + "Rule {} has a 'fields' field that isn't a list.".format(file))
+                    faulty_rules.append(file)
+
+        self.assertEqual(faulty_rules, [], Fore.RED + 
+                         "There are rules with malformed optional 'fields' fields. (has to be a list of values even if it contains only a single value)")
+
+    def test_optional_falsepositives(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            falsepositives_str = self.get_rule_part(file_path=file, part_name="falsepositives")
+            if falsepositives_str:
+                # it exists but isn't a list
+                if not isinstance(falsepositives_str, list):
+                    print(Fore.YELLOW + "Rule {} has a 'falsepositives' field that isn't a list.".format(file))
+                    faulty_rules.append(file)
+
+        self.assertEqual(faulty_rules, [], Fore.RED + 
+                         "There are rules with malformed optional 'falsepositives' fields. (has to be a list of values even if it contains only a single value)")
 
     def test_references(self):
         faulty_rules = []
