@@ -8,6 +8,7 @@ references:
     - https://github.com/GossiTheDog/HiveNightmare
     - https://github.com/FireFart/hivenightmare/
     - https://github.com/WiredPulse/Invoke-HiveNightmare
+    - https://twitter.com/cube0x0/status/1418920190759378944
 logsource:
     product: windows
     category: file_event
@@ -17,12 +18,14 @@ tags:
     - attack.t1552.001
 detection:
     selection:
-        TargetFilename|contains: 
+        - TargetFilename|contains: 
             - '\hive_sam_'  # Go version
             - '\SAM-2021-'  # C++ version
             - '\SAM-2022-'  # C++ version
             - '\SAM-haxx'   # Early C++ versions
             - '\Sam.save'   # PowerShell version
+        - TargetFilename: 
+            - 'C:\windows\temp\sam'
     condition: selection
 fields:
     - CommandLine
