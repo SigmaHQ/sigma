@@ -1,0 +1,36 @@
+title: AWS Possible Macie Evasion
+id: 91f6a16c-ef71-437a-99ac-0b070e3ad221
+status: experimental
+description: Detects evade to Macie detection.
+author: Sittikorn S
+date: 2021/07/06
+reference:
+    - https://docs.aws.amazon.com/cli/latest/reference/macie/
+tags:
+    - attack.defensive_evasion
+    - attack.t1562.001
+logsource:
+    service: cloudtrail
+detection:
+    selection:
+        eventName:
+            - 'ArchiveFindings'
+            - 'CreateFindingsFilter'
+            - 'DeleteMember'
+            - 'DisassociateFromMasterAccount'
+            - 'DisassociateMember'
+            - 'DisableMacie'
+            - 'UpdateFindingsFilter'
+            - 'UpdateMacieSession'
+            - 'UpdateMemberSession'
+            - 'DisableOrganizationAdminAccount'
+            - 'UpdateClassificationJob'
+            - 'UpdateFindingsFilter'
+    timeframe: 10m
+    condition: selection | count(eventName) by sourceIPAddress > 5
+fields:
+    - sourceIPAddress
+    - userIdentity.arn
+falsepositives:
+    - System or Network administrator behaviors
+level: medium
