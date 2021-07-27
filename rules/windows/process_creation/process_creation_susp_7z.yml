@@ -14,18 +14,17 @@ logsource:
     product: windows
 detection:
     selection_7z:
-        CommandLine|contains:
+        Image|endswith:
             - '7z.exe'
-    selection_password:
-        CommandLine|contains:
+            - '7za.exe'
+    selection_param:
+        CommandLine|contains|all:
             - ' -p'
-    selection_action:
-        CommandLine|contains:
             - ' a '
             - ' u '
-    condition: all of them 
+    condition: selection_7z and selection_param
 falsepositives:
-    - Unknown
+    - Command line parameter combinations that contain all included strings
 level: medium
 fields:
     - CommandLine
