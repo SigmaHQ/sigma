@@ -397,6 +397,19 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules with malformed optional 'falsepositives' fields. (has to be a list of values even if it contains only a single value)")
 
+    def test_optional_author(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            author_str = self.get_rule_part(file_path=file, part_name="author")
+            if author_str:
+                # it exists but isn't a string
+                if not isinstance(author_str, str):
+                    print(Fore.YELLOW + "Rule {} has a 'author' field that isn't a string.".format(file))
+                    faulty_rules.append(file)
+
+        self.assertEqual(faulty_rules, [], Fore.RED + 
+                         "There are rules with malformed optional 'author' fields. (has to be a string even if it contains many author)")
+
     def test_references(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
