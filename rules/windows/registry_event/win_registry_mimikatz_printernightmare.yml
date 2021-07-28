@@ -12,7 +12,7 @@ tags:
   - cve.2021-1675
   - cve.2021-34527
 date: 2021/07/04
-modified: 2021/07/08
+modified: 2021/07/28
 logsource:
   product: windows
   category: registry_event
@@ -25,7 +25,16 @@ detection:
     TargetObject|contains|all:
       - 'legitprinter'
       - '\Control\Print\Environments\Windows'
-  condition: selection or selection_alt
+  selection_print:
+    TargetObject|contains:
+      - '\Control\Print\Environments'
+      - '\CurrentVersion\Print\Printers'
+  selection_kiwi:
+    TargetObject|contains:
+      - 'Gentil Kiwi'
+      - 'mimikatz printer'
+      - 'Kiwi Legit Printer'
+  condition: selection or selection_alt or (selection_print and selection_kiwi)
 falsepositives:
   - Legitimate installation of printer driver QMS 810, Texas Instruments microLaser printer (unlikely)
 level: critical
