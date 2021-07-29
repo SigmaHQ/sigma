@@ -81,6 +81,7 @@ class CarbonBlackQueryBackend(CarbonBlackWildcardHandlingMixin, SingleTextQueryB
         '|',
         ';',
         ':',
+        '-'
     ]
 
     def __init__(self, *args, **kwargs):
