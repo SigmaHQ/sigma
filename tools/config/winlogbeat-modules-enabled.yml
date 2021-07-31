@@ -72,6 +72,21 @@ logsources:
     service: windefend
     conditions:
       winlog.channel: 'Microsoft-Windows-Windows Defender/Operational'
+  windows-printservice-admin:
+    product: windows
+    service: printservice-admin
+    conditions:
+      winlog.channel: 'Microsoft-Windows-PrintService/Admin'
+  windows-printservice-operational:
+    product: windows
+    service: printservice-operational
+    conditions:
+      winlog.channel: 'Microsoft-Windows-PrintService/Operational'
+  windows-smbclient-security:
+    product: windows
+    service: smbclient-security
+    conditions:
+      winlog.channel: 'Microsoft-Windows-SmbClient/Security'
   windows-applocker:
     product: windows
     service: applocker
@@ -91,116 +106,176 @@ defaultindex: winlogbeat-*
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: winlog.event_data.\1/g'
 # Keep EventID! Clean up the list afterwards!
 fieldmappings:
-  EventID: winlog.event_id
-  AccessMask: winlog.event_data.AccessMask
-  AccountName: winlog.event_data.AccountName
-  AllowedToDelegateTo: winlog.event_data.AllowedToDelegateTo
-  AttributeLDAPDisplayName: winlog.event_data.AttributeLDAPDisplayName
-  AuditPolicyChanges: winlog.event_data.AuditPolicyChanges
-  AuthenticationPackageName: winlog.event_data.AuthenticationPackageName
-  CallingProcessName: winlog.event_data.CallingProcessName
-  CallTrace: winlog.event_data.CallTrace
-  Channel: winlog.channel
-  CommandLine: process.command_line
-  ComputerName: winlog.ComputerName
-  CurrentDirectory: process.working_directory
-  Description: winlog.event_data.Description
-  DestinationHostname: destination.domain
-  DestinationIp: destination.ip
-  dst_ip: destination.ip
-  #DestinationIsIpv6: winlog.event_data.DestinationIsIpv6 #=gets deleted and not boolean...https://github.com/elastic/beats/blob/71eee76e7cfb8d5b18dfacad64864370ddb14ce7/x-pack/winlogbeat/module/sysmon/config/winlogbeat-sysmon.js#L278-L279
-  DestinationPort: destination.port
-  dst_port: destination.port
-  DestinationPortName: network.protocol
-  Details: winlog.event_data.Details
-  EngineVersion: winlog.event_data.EngineVersion
-  EventType: winlog.event_data.EventType
-  FailureCode: winlog.event_data.FailureCode
-  FileName: file.path
-  GrantedAccess: winlog.event_data.GrantedAccess
-  GroupName:
+    EventID: event.code
+    AccessMask: winlog.event_data.AccessMask
+    AccountName: winlog.event_data.AccountName
+    AllowedToDelegateTo: winlog.event_data.AllowedToDelegateTo
+    AttributeLDAPDisplayName: winlog.event_data.AttributeLDAPDisplayName
+    AuditPolicyChanges: winlog.event_data.AuditPolicyChanges
+    AuthenticationPackageName: winlog.event_data.AuthenticationPackageName
+    CallingProcessName: winlog.event_data.CallingProcessName
+    CallTrace: winlog.event_data.CallTrace
+    Channel: winlog.channel
+    CommandLine: process.command_line
+    ComputerName: winlog.ComputerName
+    CurrentDirectory: process.working_directory
+    Description: winlog.event_data.Description
+    DestinationHostname: destination.domain
+    DestinationIp: destination.ip
+    dst_ip: destination.ip
+    #DestinationIsIpv6: winlog.event_data.DestinationIsIpv6 #=gets deleted and not boolean...https://github.com/elastic/beats/blob/71eee76e7cfb8d5b18dfacad64864370ddb14ce7/x-pack/winlogbeat/module/sysmon/config/winlogbeat-sysmon.js#L278-L279
+    DestinationPort: destination.port
+    dst_port: destination.port
+    DestinationPortName: network.protocol
+    Details: winlog.event_data.Details
+    EngineVersion: winlog.event_data.EngineVersion
+    EventType: winlog.event_data.EventType
+    FailureCode: winlog.event_data.FailureCode
+    FileName: file.path
+    GrantedAccess: winlog.event_data.GrantedAccess
+    GroupName:
     - winlog.event_data.GroupName
     - group.name
-  GroupSid:
+    GroupSid:
     - group.id
     - winlog.event_data.GroupSid
-  Hashes: winlog.event_data.Hashes
-  file_hash: winlog.event_data.Hashes
-  HiveName: winlog.event_data.HiveName
-  HostVersion: winlog.event_data.HostVersion
-  Image: process.executable
-  ImageLoaded: file.path
-  ImagePath: winlog.event_data.ImagePath
-  Imphash: winlog.event_data.Imphash
-  IpAddress: source.ip
-  IpPort: source.port
-  KeyLength: winlog.event_data.KeyLength
-  LogonProcessName: winlog.event_data.LogonProcessName
-  LogonType: winlog.event_data.LogonType
-  NewProcessName: winlog.event_data.NewProcessName
-  ObjectClass: winlog.event_data.ObjectClass
-  ObjectName: winlog.event_data.ObjectName
-  ObjectType: winlog.event_data.ObjectType
-  ObjectValueName: winlog.event_data.ObjectValueName
-  ParentCommandLine: process.parent.command_line
-  ParentProcessName: process.parent.name
-  ParentImage: process.parent.executable
-  Path: winlog.event_data.Path
-  PipeName: file.name
-  ProcessCommandLine: winlog.event_data.ProcessCommandLine
-  ProcessName: process.executable
-  Product: winlog.event_data.Product
-  Properties: winlog.event_data.Properties
-  RuleName: winlog.event_data.RuleName
-  ScriptBlockText: powershell.file.script_block_text
-  SecurityID: winlog.event_data.SecurityID
-  ServiceFileName: winlog.event_data.ServiceFileName
-  ServiceName: winlog.event_data.ServiceName
-  ShareName: winlog.event_data.ShareName
-  Signature: winlog.event_data.Signature
-  Source: winlog.event_data.Source
-  SourceHostname: source.domain
-  SourceImage: process.executable
-  SourceIp: source.ip
-  src_ip: source.ip
-  SourcePort: source.port
-  src_port: source.port
-  #SourceIsIpv6: winlog.event_data.SourceIsIpv6 #=gets deleted and not boolean...https://github.com/elastic/beats/blob/71eee76e7cfb8d5b18dfacad64864370ddb14ce7/x-pack/winlogbeat/module/sysmon/config/winlogbeat-sysmon.js#L278-L279
-  StartModule: winlog.event_data.StartModule
-  State: winlog.event_data.State
-  Status: winlog.event_data.Status
-  SubjectDomainName: user.domain
-  SubjectUserName: user.name
-  SubjectUserSid: user.id
-  TargetFilename: file.path
-  TargetImage: winlog.event_data.TargetImage
-  TargetObject: winlog.event_data.TargetObject
-  TicketEncryptionType: winlog.event_data.TicketEncryptionType
-  TicketOptions: winlog.event_data.TicketOptions
-  TargetDomainName: user.domain
-  TargetUserName: user.name
-  TargetUserSid: user.id
-  User: user.name
-  WorkstationName: source.domain
-  # Channel: WLAN-Autoconfig AND EventID: 8001
-  AuthenticationAlgorithm: winlog.event_data.AuthenticationAlgorithm
-  BSSID: winlog.event_data.BSSID
-  BSSType: winlog.event_data.BSSType
-  CipherAlgorithm: winlog.event_data.CipherAlgorithm
-  ConnectionId: winlog.event_data.ConnectionId
-  ConnectionMode: winlog.event_data.ConnectionMode
-  InterfaceDescription: winlog.event_data.InterfaceDescription
-  InterfaceGuid: winlog.event_data.InterfaceGuid
-  OnexEnabled: winlog.event_data.OnexEnabled
-  PHYType: winlog.event_data.PHYType
-  ProfileName: winlog.event_data.ProfileName
-  SSID: winlog.event_data.SSID
-  # powershell
-  SequenceNumber: event.sequence
-  NewEngineState: powershell.engine.new_state
-  PreviousEngineState: powershell.engine.previous_state
-  NewProviderState: powershell.provider.new_state
-  ProviderName: powershell.provider.name
-  HostId: process.entity_id
-  HostApplication: process.command_line
-  HostName: process.title
+    Hashes: winlog.event_data.Hashes
+    file_hash: winlog.event_data.Hashes
+    HiveName: winlog.event_data.HiveName
+    HostVersion: winlog.event_data.HostVersion
+    Image: process.executable
+    ImageLoaded: file.path
+    ImagePath: winlog.event_data.ImagePath
+    Imphash: process.pe.imphash
+    IpAddress: source.ip
+    IpPort: source.port
+    KeyLength: winlog.event_data.KeyLength
+    LogonProcessName: winlog.event_data.LogonProcessName
+    LogonType: winlog.event_data.LogonType
+    NewProcessName: winlog.event_data.NewProcessName
+    ObjectClass: winlog.event_data.ObjectClass
+    ObjectName: winlog.event_data.ObjectName
+    ObjectType: winlog.event_data.ObjectType
+    ObjectValueName: winlog.event_data.ObjectValueName
+    ParentCommandLine: process.parent.command_line
+    ParentProcessName: process.parent.name
+    ParentImage: process.parent.executable
+    Path: winlog.event_data.Path
+    PipeName: file.name
+    ProcessCommandLine: winlog.event_data.ProcessCommandLine
+    ProcessName: process.executable
+    Product: winlog.event_data.Product
+    Properties: winlog.event_data.Properties
+    RuleName: winlog.event_data.RuleName
+    ScriptBlockText: powershell.file.script_block_text
+    SecurityID: winlog.event_data.SecurityID
+    ServiceFileName: winlog.event_data.ServiceFileName
+    ServiceName: winlog.event_data.ServiceName
+    ShareName: winlog.event_data.ShareName
+    Signature: winlog.event_data.Signature
+    Source: winlog.event_data.Source
+    SourceHostname: source.domain
+    SourceImage: process.executable
+    SourceIp: source.ip
+    src_ip: source.ip
+    SourcePort: source.port
+    src_port: source.port
+    #SourceIsIpv6: winlog.event_data.SourceIsIpv6 #=gets deleted and not boolean...https://github.com/elastic/beats/blob/71eee76e7cfb8d5b18dfacad64864370ddb14ce7/x-pack/winlogbeat/module/sysmon/config/winlogbeat-sysmon.js#L278-L279
+    StartModule: winlog.event_data.StartModule
+    State: winlog.event_data.State
+    Status: winlog.event_data.Status
+    SubjectDomainName: user.domain
+    SubjectUserName: user.name
+    SubjectUserSid: user.id
+    TargetFilename: file.path
+    TargetImage: winlog.event_data.TargetImage
+    TargetObject: registry.path
+    TicketEncryptionType: winlog.event_data.TicketEncryptionType
+    TicketOptions: winlog.event_data.TicketOptions
+    TargetDomainName: user.domain
+    TargetUserName: user.name
+    TargetUserSid: user.id
+    User: user.name
+    WorkstationName: source.domain
+    # Channel: WLAN-Autoconfig AND EventID: 8001
+    AuthenticationAlgorithm: winlog.event_data.AuthenticationAlgorithm
+    BSSID: winlog.event_data.BSSID
+    BSSType: winlog.event_data.BSSType
+    CipherAlgorithm: winlog.event_data.CipherAlgorithm
+    ConnectionId: winlog.event_data.ConnectionId
+    ConnectionMode: winlog.event_data.ConnectionMode
+    InterfaceDescription: winlog.event_data.InterfaceDescription
+    InterfaceGuid: winlog.event_data.InterfaceGuid
+    OnexEnabled: winlog.event_data.OnexEnabled
+    PHYType: winlog.event_data.PHYType
+    ProfileName: winlog.event_data.ProfileName
+    SSID: winlog.event_data.SSID
+    # powershell
+    SequenceNumber: event.sequence
+    NewEngineState: powershell.engine.new_state
+    PreviousEngineState: powershell.engine.previous_state
+    NewProviderState: powershell.provider.new_state
+    ProviderName: powershell.provider.name
+    HostId: process.entity_id
+    HostApplication: process.command_line
+    HostName: process.title
+    Payload: winlog.event_data.Payload
+    ContextInfo: winlog.event_data.ContextInfo
+    #  from here missing field at 20210706
+    Accesses: winlog.event_data.Accesses
+    AccessList: winlog.event_data.AccessList
+    AttributeValue: winlog.event_data.AttributeValue
+    AuditSourceName: winlog.event_data.AuditSourceName
+    AuthenticationPackage: winlog.event_data.AuthenticationPackageName
+    CallerProcessName: winlog.event_data.CallerProcessName
+    ClassName: winlog.event_data.ClassName
+    ClassId: winlog.event_data.ClassId
+    Company: winlog.event_data.Company
+    DestAddress: winlog.event_data.DestAddress
+    Destination: process.executable
+    DestinationIsIpv6: winlog.event_data.DestinationIsIpv6
+    DestPort: destination.port
+    Device: file.path
+    DeviceDescription: winlog.event_data.DeviceDescription
+    # DeviceName =>  Microsoft-Windows-Ntfs  EventID: 98
+    DeviceName: winlog.event_data.DeviceName
+    # ErrorCode =>  printservice-admin  EventID: 4909 or 808
+    ErrorCode: winlog.event_data.ErrorCode 
+    FilePath: winlog.event_data.FilePath
+    FileVersion: winlog.event_data.FileVersion
+    # Filename =>  product: antivirus
+    Filename: winlog.event_data.Filename    
+    Initiated: winlog.event_data.Initiated
+    IntegrityLevel: winlog.event_data.IntegrityLevel
+    LayerRTID: winlog.event_data.LayerRTID
+    LDAPDisplayName: winlog.event_data.LDAPDisplayName
+    # Level => Source: MSExchange Control Panel EventID: 4
+    Level: winlog.event_data.Level
+    LogonId: winlog.event_data.LogonId
+    NewName: winlog.event_data.NewName
+    NewValue: winlog.event_data.NewValue
+    ObjectServer: winlog.event_data.ObjectServer
+    OriginalFileName: process.pe.original_file_name
+    PasswordLastSet: winlog.event_data.PasswordLastSet
+    PrivilegeList: winlog.event_data.PrivilegeList
+    QueryName: dns.question.name
+    QueryResults: winlog.event_data.QueryResults
+    QueryStatus: sysmon.dns.status
+    RelativeTargetName: winlog.event_data.RelativeTargetName
+    SamAccountName: winlog.event_data.SamAccountName
+    Service: winlog.event_data.Service
+    ServicePrincipalNames: winlog.event_data.ServicePrincipalNames
+    sha1: hash.sha1
+    SidHistory: winlog.event_data.SidHistory
+    Signed: winlog.event_data.Signed
+    SourceAddress: source.ip
+    StartFunction: winlog.event_data.StartFunction
+    SubjectLogonId: winlog.event_data.SubjectLogonId
+    TargetFileName: file.path
+    TargetProcessAddress: winlog.event_data.TargetProcessAddress
+    TargetServerName: winglog.event_data.TargetServerName
+    TargetLogonId: winlog.event_data.TargetLogonId
+    TaskName: winlog.event_data.TaskName
+    # UserName => smbclient-security  eventid:31017
+    UserName: winlog.event_data.UserName
+    Workstation: winlog.event_data.Workstation
