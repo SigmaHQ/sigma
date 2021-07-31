@@ -3,7 +3,7 @@ title: Windows Defender Threat Detection Disabled
 id: fe34868f-6e0e-4882-81f6-c43aa8f15b62
 description: Detects disabling Windows Defender threat protection
 date: 2020/07/28
-modified: 2021/06/07
+modified: 2021/07/05
 author: Ján Trenčanský, frack113
 references:
     - https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-antivirus/troubleshoot-windows-defender-antivirus
@@ -44,3 +44,12 @@ detection:
         TargetObject: 'HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\DisableAntiSpyware'
         Details: 'DWORD (0x00000001)'
     condition: tamper_registry
+---
+logsource:
+    product: windows
+    category: system
+detection:
+    selection3:
+        EventID: 7036
+        Message: 'The Windows Defender Antivirus Service service entered the stopped state'
+    condition: selection3

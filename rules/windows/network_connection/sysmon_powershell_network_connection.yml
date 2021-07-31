@@ -5,6 +5,7 @@ description: Detects a Powershell process that opens network connections - check
     extend filters with company's ip range')
 author: Florian Roth
 date: 2017/03/13
+modified: 2021/06/14
 references:
     - https://www.youtube.com/watch?v=DLtJTxMWZ2o
 tags:
@@ -18,6 +19,7 @@ detection:
     selection:
         Image|endswith: '\powershell.exe'
         Initiated: 'true'
+        DestinationIsIpv6: 'false'
     filter:
         DestinationIp|startswith:
             - '10.'
@@ -41,6 +43,9 @@ detection:
             - '127.0.0.1'
         DestinationIsIpv6: 'false'
         User: 'NT AUTHORITY\SYSTEM'
+        User|contains|all:  # other languages
+            - 'AUT'
+            - ' NT'
     condition: selection and not filter
 falsepositives:
     - Administrative scripts
