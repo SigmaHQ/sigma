@@ -300,6 +300,7 @@ class ElasticsearchQuerystringBackend(DeepFieldMappingMixin, ElasticsearchWildca
             return result
         else:
             return super().generateSubexpressionNode(node)
+
 class ElasticsearchQuerystringBackendLogRhythm(DeepFieldMappingMixin, ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
     """Converts Sigma rule into Lucene query string for LogRhythm. Only searches, no aggregations."""
     identifier = "es-qs-lr"
@@ -365,8 +366,7 @@ class ElasticsearchQuerystringBackendLogRhythm(DeepFieldMappingMixin, Elasticsea
             return result
         else:
             return super().generateSubexpressionNode(node)
-        
-        
+
 class ElasticsearchEQLBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
     """Converts Sigma rule into EQL."""
     identifier = "es-eql"
@@ -1370,15 +1370,9 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
 
     def finalize(self):
         result = ""
-        rule_lst = []
         for rulename, rule in self.elastalert_alerts.items():
-            filter_data = rule['filter']
-            if filter_data in rule_lst:
-                pass
-            else:
-                result += yaml.dump(rule, default_flow_style=False, width=10000)
-                result += '\n'
-                rule_lst.append(filter_data)
+            result += yaml.dump(rule, default_flow_style=False, width=10000)
+            result += '\n'
         return result
 
 class ElastalertBackendDsl(ElastalertBackend, ElasticsearchDSLBackend):

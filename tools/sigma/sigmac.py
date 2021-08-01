@@ -33,6 +33,7 @@ from sigma.backends.base import BackendOptions
 from sigma.backends.exceptions import BackendError, NotSupportedError, PartialMatchError, FullMatchError
 from sigma.parser.modifiers import modifiers
 import codecs
+import copy
 
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
 
@@ -249,11 +250,9 @@ def main():
             parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter, sigmafile)
             results = parser.generate(backend)
             
-            nb_result = len(list(parser.generate(backend)))
-            if nb_result > 1 :
-                inc_filenane = 0
-            else:
-                inc_filenane = None
+            nb_result = len(list(copy.deepcopy(results)))
+            inc_filenane = None if nb_result < 2 else 0
+
             
             newline_separator = '\0' if cmdargs.print0 else '\n'
             for result in results:
@@ -275,6 +274,25 @@ def main():
                         print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
                         exit(ERR_OUTPUT)
                 print(result, file=out, end=newline_separator)
+            
+            if nb_result == 0: # elastalert return "results=[]" so get a error with out not def
+                if not fileprefix == None and not inc_filenane == None: #yml action
+                    try:
+                        filename = fileprefix + str(sigmafile.name)
+                        filename = filename.replace('.yml','_' + str(inc_filenane) + filename_ext)
+                        inc_filenane += 1
+                        out = open(filename, "w", encoding='utf-8')
+                    except (IOError, OSError) as e:
+                        print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
+                        exit(ERR_OUTPUT)
+                elif  not fileprefix == None and inc_filenane == None: # a simple yml
+                    try:
+                        filename = fileprefix + str(sigmafile.name)
+                        filename = filename.replace('.yml',filename_ext) 
+                        out = open(filename, "w", encoding='utf-8')
+                    except (IOError, OSError) as e:
+                        print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
+                        exit(ERR_OUTPUT) 
         
         except OSError as e:
             print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
