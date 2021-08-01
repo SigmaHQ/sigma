@@ -1370,9 +1370,15 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
 
     def finalize(self):
         result = ""
+        rule_lst = []
         for rulename, rule in self.elastalert_alerts.items():
-            result += yaml.dump(rule, default_flow_style=False, width=10000)
-            result += '\n'
+            filter_data = rule['filter']
+            if filter_data in rule_lst:
+                pass
+            else:
+                result += yaml.dump(rule, default_flow_style=False, width=10000)
+                result += '\n'
+                rule_lst.append(filter_data)
         return result
 
 class ElastalertBackendDsl(ElastalertBackend, ElasticsearchDSLBackend):
