@@ -146,7 +146,6 @@ fieldmappings:
     Image: process.executable
     ImageLoaded: file.path
     ImagePath: winlog.event_data.ImagePath
-    Imphash: process.pe.imphash
     IpAddress: source.ip
     IpPort: source.port
     KeyLength: winlog.event_data.KeyLength
@@ -265,7 +264,6 @@ fieldmappings:
     SamAccountName: winlog.event_data.SamAccountName
     Service: winlog.event_data.Service
     ServicePrincipalNames: winlog.event_data.ServicePrincipalNames
-    sha1: hash.sha1
     SidHistory: winlog.event_data.SidHistory
     Signed: winlog.event_data.Signed
     SourceAddress: source.ip
@@ -279,3 +277,22 @@ fieldmappings:
     # UserName => smbclient-security  eventid:31017
     UserName: winlog.event_data.UserName
     Workstation: winlog.event_data.Workstation
+    # SYSMON Hashes
+    Hashes: winlog.event_data.Hashes
+    # extraction from Hashes NOT a original field but find in some rule
+    md5:
+        category=driver_load: hash.md5
+        category=image_load: file.hash.md5
+        default: process.hash.md5
+    sha1:
+        category=driver_load: hash.sha1
+        category=image_load: file.hash.sha1
+        default: process.hash.sha1
+    sha256:
+        category=driver_load: hash.sha256
+        category=image_load: file.hash.sha256
+        default: process.hash.sha256
+    Imphash: 
+        category=driver_load: hash.imphash
+        category=image_load: file.hash.imphash
+        default: process.pe.imphash
