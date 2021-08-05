@@ -277,7 +277,7 @@ def main():
             if nb_result == 0: # backend get only 1 output
                 if not fileprefix == None: # want a prefix anyway
                     try:
-                        filename = "%s%s_nono_output%s" % (fileprefix,cmdargs.target,filename_ext)
+                        filename = "%s%s_mono_output%s" % (fileprefix,cmdargs.target,filename_ext)
                         out = open(filename, "w", encoding='utf-8')
                         fileprefix = None  # no need to open the same file many time
                     except (IOError, OSError) as e:
