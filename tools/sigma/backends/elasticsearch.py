@@ -1321,6 +1321,7 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
             self.elastalert_alerts[rule_object['name']] = rule_object
             #Clear fields
             self.fields = []
+            return str(yaml.dump(rule_object, default_flow_style=False, width=10000))
 
     def generateNode(self, node):
         #Save fields for adding them in query_key
@@ -1369,11 +1370,12 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
         }.get(level, 2)
 
     def finalize(self):
-        result = ""
-        for rulename, rule in self.elastalert_alerts.items():
-            result += yaml.dump(rule, default_flow_style=False, width=10000)
-            result += '\n'
-        return result
+        pass
+        # result = ""
+        # for rulename, rule in self.elastalert_alerts.items():
+            # result += yaml.dump(rule, default_flow_style=False, width=10000)
+            # result += '\n'
+        # return result
 
 class ElastalertBackendDsl(ElastalertBackend, ElasticsearchDSLBackend):
     """Elastalert backend"""
