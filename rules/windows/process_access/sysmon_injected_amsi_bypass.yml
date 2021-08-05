@@ -1,0 +1,24 @@
+title: CobaltStrike BOF Injecting AMSI Bypass
+id: 09706624-b7f6-455d-9d02-adee024cee1d 
+description: Detects the usage of a CobaltStrike BOF which injects an AMSI Bypass 
+references:
+    - https://github.com/boku7/injectAmsiBypass
+status: experimental
+author: Christian Burkard
+date: 2021/08/04
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        CallTrace|re: '^C:\\Windows\\SYSTEM32\\ntdll\.dll\+[a-z0-9]{4,6}\|C:\\Windows\\System32\\KERNELBASE\.dll\+[a-z0-9]{4,6}\|UNKNOWN\([A-Z0-9]{16}\)$'
+        GrantedAccess: '0x1028'
+    condition: selection
+falsepositives:
+    - unkown
+level: high
+tags:
+    - attack.execution
+    - attack.t1106
+    - attack.defense_evasion
+    - attack.t1562.001

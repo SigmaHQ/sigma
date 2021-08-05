@@ -3,7 +3,7 @@
 Checks for noncompliance or common errors on all rules
 
 Run using the command
-# python -m unittest test_rules.py
+# python test_rules.py
 """
 
 import os
