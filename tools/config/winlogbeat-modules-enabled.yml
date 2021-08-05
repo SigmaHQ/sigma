@@ -107,24 +107,18 @@ defaultindex: winlogbeat-*
 # Keep EventID! Clean up the list afterwards!
 fieldmappings:
     EventID: event.code
+    Channel: winlog.channel
     AccessMask: winlog.event_data.AccessMask
     AccountName: winlog.event_data.AccountName
     AllowedToDelegateTo: winlog.event_data.AllowedToDelegateTo
     AttributeLDAPDisplayName: winlog.event_data.AttributeLDAPDisplayName
     AuditPolicyChanges: winlog.event_data.AuditPolicyChanges
-    AuthenticationPackageName: winlog.event_data.AuthenticationPackageName
     CallingProcessName: winlog.event_data.CallingProcessName
-    Channel: winlog.channel
     ComputerName: winlog.ComputerName
     EventType: winlog.event_data.EventType
     FailureCode: winlog.event_data.FailureCode
     FileName: file.path
     HiveName: winlog.event_data.HiveName
-    IpAddress: source.ip
-    IpPort: source.port
-    KeyLength: winlog.event_data.KeyLength
-    LogonProcessName: winlog.event_data.LogonProcessName
-    LogonType: winlog.event_data.LogonType
     NewProcessName: winlog.event_data.NewProcessName
     ObjectClass: winlog.event_data.ObjectClass
     ObjectName: winlog.event_data.ObjectName
@@ -133,22 +127,17 @@ fieldmappings:
     ParentProcessName: process.parent.name
     Path: winlog.event_data.Path
     ProcessCommandLine: winlog.event_data.ProcessCommandLine
-    ProcessName: process.executable
     Properties: winlog.event_data.Properties
     SecurityID: winlog.event_data.SecurityID
     ServiceFileName: winlog.event_data.ServiceFileName
     ShareName: winlog.event_data.ShareName
     Source: winlog.event_data.Source
     Status: winlog.event_data.Status
-    SubjectDomainName: user.domain
-    SubjectUserName: user.name
-    SubjectUserSid: user.id
     TicketEncryptionType: winlog.event_data.TicketEncryptionType
     TicketOptions: winlog.event_data.TicketOptions
     TargetDomainName: user.domain
     TargetUserName: user.name
     TargetUserSid: user.id
-    WorkstationName: source.domain
     # Channel: WLAN-Autoconfig AND EventID: 8001
     AuthenticationAlgorithm: winlog.event_data.AuthenticationAlgorithm
     BSSID: winlog.event_data.BSSID
@@ -167,12 +156,10 @@ fieldmappings:
     AccessList: winlog.event_data.AccessList
     AttributeValue: winlog.event_data.AttributeValue
     AuditSourceName: winlog.event_data.AuditSourceName
-    AuthenticationPackage: winlog.event_data.AuthenticationPackageName
     CallerProcessName: winlog.event_data.CallerProcessName
     ClassName: winlog.event_data.ClassName
     ClassId: winlog.event_data.ClassId
     DestAddress: winlog.event_data.DestAddress
-    Destination: process.executable
     DestPort: destination.port
     DeviceDescription: winlog.event_data.DeviceDescription
     # DeviceName =>  Microsoft-Windows-Ntfs  EventID: 98
@@ -190,19 +177,14 @@ fieldmappings:
     ObjectServer: winlog.event_data.ObjectServer
     PasswordLastSet: winlog.event_data.PasswordLastSet
     PrivilegeList: winlog.event_data.PrivilegeList
-    QueryName: dns.question.name
-    QueryResults: winlog.event_data.QueryResults
-    QueryStatus: sysmon.dns.status
     RelativeTargetName: winlog.event_data.RelativeTargetName
     SamAccountName: winlog.event_data.SamAccountName
     Service: winlog.event_data.Service
     ServicePrincipalNames: winlog.event_data.ServicePrincipalNames
     SidHistory: winlog.event_data.SidHistory
     SourceAddress: source.ip
-    SubjectLogonId: winlog.event_data.SubjectLogonId
     TargetProcessAddress: winlog.event_data.TargetProcessAddress
     TargetServerName: winglog.event_data.TargetServerName
-    TargetLogonId: winlog.event_data.TargetLogonId
     TaskName: winlog.event_data.TaskName
     # UserName => smbclient-security  eventid:31017
     UserName: winlog.event_data.UserName
@@ -356,6 +338,38 @@ fieldmappings:
     #
     # Security
     #
+    SubjectUserSid: user.id
+    SubjectUserName: user.name
+    SubjectDomainName: user.domain
+    SubjectLogonId:
+        service=security: winlog.logon.id
+        default: winlog.event_data.SubjectLogonId
+    #EventID 4610
+    AuthenticationPackageName: winlog.event_data.AuthenticationPackageName
+    #EventID 4611
+    LogonProcessName: winlog.event_data.LogonProcessName
+    #EventID 4616
+    PreviousTime: winlog.event_data.PreviousTime
+    NewTime: winlog.event_data.NewTime
+    #EventID 4624
+    TargetLogonId: 
+        service=security: winlog.logon.id
+        default: winlog.event_data.TargetLogonId
+    LogonType: winlog.event_data.LogonType
+    WorkstationName: source.domain
+    TransmittedServices: winlog.event_data.TransmittedServices
+    LmPackageName: winlog.event_data.LmPackageName
+    KeyLength: winlog.event_data.KeyLength
+    ProcessName: process.executable
+    IpAddress: source.ip
+    IpPort: source.port
+    ImpersonationLevel: winlog.event_data.ImpersonationLevel
+    RestrictedAdminMode: winlog.event_data.RestrictedAdminMode
+    TargetOutboundUserName: winlog.event_data.TargetOutboundUserName
+    TargetOutboundDomainName: winlog.event_data.TargetOutboundDomainName
+    VirtualAccount: winlog.event_data.VirtualAccount
+    TargetLinkedLogonId: winlog.event_data.TargetLinkedLogonId
+    ElevatedToken: winlog.event_data.ElevatedToken
     #EventID 7045
     ServiceName:
         service=security: service.name
