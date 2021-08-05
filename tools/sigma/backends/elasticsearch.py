@@ -300,6 +300,7 @@ class ElasticsearchQuerystringBackend(DeepFieldMappingMixin, ElasticsearchWildca
             return result
         else:
             return super().generateSubexpressionNode(node)
+
 class ElasticsearchQuerystringBackendLogRhythm(DeepFieldMappingMixin, ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
     """Converts Sigma rule into Lucene query string for LogRhythm. Only searches, no aggregations."""
     identifier = "es-qs-lr"
@@ -365,8 +366,7 @@ class ElasticsearchQuerystringBackendLogRhythm(DeepFieldMappingMixin, Elasticsea
             return result
         else:
             return super().generateSubexpressionNode(node)
-        
-        
+
 class ElasticsearchEQLBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
     """Converts Sigma rule into EQL."""
     identifier = "es-eql"
