@@ -16,23 +16,14 @@ logsource:
   product: windows
   category: registry_event
 detection:
-  filterprocess:
-    Image|endswith: 
-      - '\spoolsv.exe'
-  filtereventtype:
-    EventType: 
-      - 'SetValue'
   selection:
-    TargetObject|contains:
-      - '\Control\Print\Environments\Windows x64\Drivers\Version-3\'
-  selection_end:
+    Image|endswith: '\spoolsv.exe'
+    TargetObject|contains: '\Control\Print\Environments\Windows x64\Drivers\Version-3\'
+    Details|endswith: '.dll'
     TargetObject|endswith:
       - '\Configuration File'
       - '\Data File'
-  selection_dll:
-    Details|endswith:
-      - '.dll'
-  condition: all of them 
+  condition: selection
 falsepositives:
   - unknown
 level: critical
