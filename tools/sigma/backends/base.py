@@ -117,6 +117,7 @@ class BaseBackend:
         if len(sigmaparser.condparsed) > 1:
             raise NotImplementedError("Base backend doesn't support multiple conditions")
         for parsed in sigmaparser.condparsed:
+            print(f'\nParsed: {parsed}\n')
             query = self.generateQuery(parsed)
             before = self.generateBefore(parsed)
             after = self.generateAfter(parsed)
@@ -133,6 +134,7 @@ class BaseBackend:
 
     def generateQuery(self, parsed):
         result = self.generateNode(parsed.parsedSearch)
+        print(f'\nResult: {result}\n')
         if parsed.parsedAgg:
             result += self.generateAggregation(parsed.parsedAgg)
         #result = self.applyOverrides(result)

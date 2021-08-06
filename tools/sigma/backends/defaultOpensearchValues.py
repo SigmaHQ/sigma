@@ -1,0 +1,11 @@
+RULE_TYPE = "monitor"
+IS_ENABLED = True
+INTERVAL = 5
+UNIT = "MINUTES"
+TRIGGER_NAME = "generated-trigger"
+SEVERITIES = {"informational": "5", "low": "4", "medium": "3", "high": "2", "critical": "1"}
+RESULTS_INDEX = 0
+TRIGGER_INEQUALITY = ">"
+TRIGGER_THRESHOLD = 0
+TRIGGER_LANGUAGE = "painless"
+MONITOR_INDICES = ["opensearch-security-logs"]

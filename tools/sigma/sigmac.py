@@ -214,7 +214,10 @@ def main():
                 exit(ERR_CONFIG_PARSING)
 
     backend_options = BackendOptions(cmdargs.backend_option, cmdargs.backend_config)
+    print(f'backend options: {cmdargs.backend_config}')
     backend = backend_class(sigmaconfigs, backend_options)
+    print(f'sigma configs: {backend_options}')
+    print(f'backend: {backend}')
     
     filename_ext = cmdargs.output_extention
     filename = cmdargs.output
@@ -248,6 +251,7 @@ def main():
             else:
                 f = sigmafile.open(encoding='utf-8')
             parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter, sigmafile)
+            print(f'\nparser: {parser.parsers[0].condtoken} \n {parser.parsers[0].condparsed[0]}\n')
             results = parser.generate(backend)
             
             nb_result = len(list(copy.deepcopy(results)))
