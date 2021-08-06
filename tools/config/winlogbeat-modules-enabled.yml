@@ -108,6 +108,8 @@ defaultindex: winlogbeat-*
 fieldmappings:
     EventID: event.code
     Channel: winlog.channel
+    #Keywords: from "<System><Keywords>Value</Keywords></System><EventData>" is lost with winlogbeat exist in nxlog
+    provider name: winlog.provider_name
     CallingProcessName: winlog.event_data.CallingProcessName
     ComputerName: winlog.ComputerName
     EventType: winlog.event_data.EventType
@@ -135,8 +137,6 @@ fieldmappings:
     ClassName: winlog.event_data.ClassName
     ClassId: winlog.event_data.ClassId
     DeviceDescription: winlog.event_data.DeviceDescription
-    # DeviceName =>  Microsoft-Windows-Ntfs  EventID: 98
-    DeviceName: winlog.event_data.DeviceName
     # ErrorCode =>  printservice-admin  EventID: 4909 or 808
     ErrorCode: winlog.event_data.ErrorCode 
     FilePath: winlog.event_data.FilePath
@@ -211,7 +211,10 @@ fieldmappings:
     SchemaVersion: winlog.event_data.SchemaVersion
     ImageLoaded: file.path
     Signed: file.code_signature.signed
-    Signature: file.code_signature.subject_name
+    Signature: 
+        category=driver_loaded: file.code_signature.subject_name
+        category=image_loaded: file.code_signature.subject_name
+        default: winlog.event_data.Signature
     SignatureStatus: file.code_signature.status
     SourceProcessGuid: process.entity_id
     SourceProcessId: process.pid
@@ -487,3 +490,19 @@ fieldmappings:
     VirtualAccount: winlog.event_data.VirtualAccount
     Workstation: winlog.event_data.Workstation
     WorkstationName: source.domain
+    #
+    # System
+    #
+    DriveName: winlog.event_data.DriveName
+    DeviceName: winlog.event_data.DeviceName
+    HeaderFlags: winlog.event_data.HeaderFlags
+    Severity: winlog.event_data.Severity
+    Origin: winlog.event_data.Origin
+    Verb: winlog.event_data.Verb
+    Outcome: winlog.event_data.Outcome
+    SampleLength: winlog.event_data.SampleLength
+    SampleData: winlog.event_data.SampleData
+    SourceFile: winlog.event_data.SourceFile
+    SourceLine: winlog.event_data.SourceLine
+    SourceTag: winlog.event_data.SourceTag
+    CallStack: winlog.event_data.CallStack
