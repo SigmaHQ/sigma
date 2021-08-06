@@ -1,4 +1,4 @@
-![sigma build sttaus](https://github.com/SigmaHQ/sigma/actions/workflows/sigma-test.yml/badge.svg?branch=master)
+[![sigma build sttaus](https://github.com/SigmaHQ/sigma/actions/workflows/sigma-test.yml/badge.svg?branch=master)](https://github.com/SigmaHQ/sigma/actions?query=branch%3Amaster)
 
 ![sigma_logo](./images/Sigma_0.3.png)
 
