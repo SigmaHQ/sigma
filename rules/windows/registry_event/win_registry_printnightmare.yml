@@ -1,0 +1,38 @@
+title: PrintNightmare Dll in configurationFile 
+id: 02890211-C193-4240-8B94-368186421F20
+status: experimental
+description: Detects the exploitation of the CVE-2021-1675 and CVE-2021-34527 vulnerabilities by analysing the ConfigurationFile/DataFile from registry events.
+references:
+  - https://no-sec.net/vulnerability-advisory-printnightmare-cve-2021-34527-zero-day-exploit-code-available-what-to-do-now/
+  - https://msrc.microsoft.com/update-guide/vulnerability/CVE-2021-1675
+  - https://msrc.microsoft.com/update-guide/vulnerability/CVE-2021-34527  
+author: Cedric Maurugeon, @kidrek
+tags:
+  - attack.privilege_escalation
+  - cve.2021-1675
+  - cve.2021-34527
+date: 2021/08/06
+logsource:
+  product: windows
+  category: registry_event
+detection:
+  filterprocess:
+    Image|endswith: 
+      - '\spoolsv.exe'
+  filtereventtype:
+    EventType: 
+      - 'SetValue'
+  selection:
+    TargetObject|contains:
+      - '\Control\Print\Environments\Windows x64\Drivers\Version-3\'
+  selection_end:
+    TargetObject|endswith:
+      - '\Configuration File'
+      - '\Data File'
+  selection_dll:
+    Details|endswith:
+      - '.dll'
+  condition: all of them 
+falsepositives:
+  - unknown
+level: critical
