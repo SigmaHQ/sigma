@@ -1,0 +1,31 @@
+title: AnyDesk silent installation
+id: 114e7f1c-f137-48c8-8f54-3088c24ce4b9
+status: experimental
+author: Ján Trenčanský
+date: 2021/08/06
+description: AnyDesk Remote Desktop silent installation can be used by attacker to gain remote access.
+references:
+    - https://twitter.com/TheDFIRReport/status/1423361119926816776?s=20
+    - https://support.anydesk.com/Automatic_Deployment
+tags:
+    - attack.t1219
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_anydesk:
+        CommandLine|contains: 'anydesk.exe'
+    selection_install:
+        CommandLine|contains: '--install'
+    selection_with_win:
+        CommandLine|contains: '--start-with-win'
+    selection_silent:
+        CommandLine|contains: '--silent'
+    condition: all of them
+falsepositives:
+    - Legitimate deployment of AnyDesk
+level: medium
+fields:
+    - CommandLine
+    - ParentCommandLine
+    - CurrentDirectory
