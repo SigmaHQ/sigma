@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Neo23x0/sigma.svg?branch=master)](https://travis-ci.org/Neo23x0/sigma)
+![sigma build sttaus](https://github.com/SigmaHQ/sigma/actions/workflows/sigma-test.yml/badge.svg?branch=master)
 
 ![sigma_logo](./images/Sigma_0.3.png)
 
