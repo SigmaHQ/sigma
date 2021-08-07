@@ -1,0 +1,32 @@
+title: Exchange ProxyShell Pattern
+id: 23eee45e-933b-49f9-ae1b-df706d2d52ef
+status: experimental
+description: Detects URP patterns that could be found in ProxyShell exloitation attempts against Exchange servers
+references:
+    - https://youtu.be/5mqid-7zp8k?t=2231
+    - https://blog.orange.tw/2021/08/proxylogon-a-new-attack-surface-on-ms-exchange-part-1.html
+author: Florian Roth
+date: 2020/08/07
+tags:
+    - attack.initial_access
+logsource:
+    category: webserver
+
+detection:
+    selection1:
+        c-uri|contains|all:
+            - '/autodiscover/autodiscover.json?'
+            - '%3f@'
+    selection2:
+        c-uri|contains: 
+            # since we don't know how it will appear in the log files, we'll just use all versions
+            - 'autodiscover.json?@'
+            - 'autodiscover.json%3f@'
+            - '%3f@foo.com'
+            - 'Email=autodiscover/autodiscover.json'
+            - 'json?@foo.com'
+            - 'autodiscover.json?@'
+    condition: 1 of them
+falsepositives:
+    - Unknown
+level: high
