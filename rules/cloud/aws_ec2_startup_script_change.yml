@@ -10,13 +10,11 @@ references:
 logsource:
     service: cloudtrail
 detection:
-    selection_source:
-        - eventSource: ec2.amazonaws.com
-    selection_userdata:
-        - requestParameters.userData: "*"
-    selection_eventname:
-        - eventName: ModifyInstanceAttribute
-    condition: all of them
+    selection_ioc:
+        eventSource: ec2.amazonaws.com
+        requestParameters.userData: "*"
+        eventName: ModifyInstanceAttribute
+    condition: selection_ioc
 falsepositives:
     - Valid changes to the startup script
 level: high

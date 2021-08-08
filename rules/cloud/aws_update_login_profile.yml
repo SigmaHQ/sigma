@@ -9,13 +9,12 @@ references:
 logsource:
     service: cloudtrail
 detection:
-    selection_source:
-        - eventSource: iam.amazonaws.com
-    selection_eventname:
-        - eventName: UpdateLoginProfile
+    selection_ioc:
+        eventSource: iam.amazonaws.com
+        eventName: UpdateLoginProfile
     filter:
         userIdentity.arn|contains: responseElements.accessKey.userName
-    condition: all of selection* and not filter
+    condition: selection_ioc and not filter
 fields:
     - userIdentity.arn
     - responseElements.accessKey.userName

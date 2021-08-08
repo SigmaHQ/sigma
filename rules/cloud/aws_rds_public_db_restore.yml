@@ -10,13 +10,11 @@ references:
 logsource:
     service: cloudtrail
 detection:
-    selection_source:
-        - eventSource: rds.amazonaws.com
-    selection_ispublic:
-        - responseElements.publiclyAccessible: "true"
-    selection_eventname:
-        - eventName: RestoreDBInstanceFromDBSnapshot
-    condition: all of them
+    selection_ioc:
+        eventSource: rds.amazonaws.com
+        responseElements.publiclyAccessible: "true"
+        eventName: RestoreDBInstanceFromDBSnapshot
+    condition: selection_ioc
 falsepositives:
     - unknown
 level: high

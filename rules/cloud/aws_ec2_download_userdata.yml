@@ -10,14 +10,12 @@ references:
 logsource:
     service: cloudtrail
 detection:
-    selection_source:
-        - eventSource: ec2.amazonaws.com
-    selection_requesttype:
-        - requestParameters.attribute: userData
-    selection_eventname:
-        - eventName: DescribeInstanceAttribute
+    selection_ioc:
+        eventSource: ec2.amazonaws.com
+        requestParameters.attribute: userData
+        eventName: DescribeInstanceAttribute
     timeframe: 30m
-    condition: all of them | count() > 10
+    condition: selection_ioc | count() > 10
 falsepositives:
     - Assets management software like device42
 level: medium
