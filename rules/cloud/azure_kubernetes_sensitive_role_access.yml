@@ -1,0 +1,28 @@
+title: Azure Kubernetes Sensitive Role Access
+id: 
+description: Identifies when ClusterRoles/Roles are being modified or deleted.
+author: Austin Songer
+status: experimental
+date: 2021/08/07
+references:
+    - https://docs.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations#microsoftkubernetes
+logsource:
+  service: azure.activitylogs
+detection:
+    selection:
+        properties.message: 
+            - MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/RBAC.AUTHORIZATION.K8S.IO/ROLES/WRITE
+            - MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/RBAC.AUTHORIZATION.K8S.IO/ROLES/DELETE
+            - MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/RBAC.AUTHORIZATION.K8S.IO/ROLES/BIND/ACTION
+            - MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/RBAC.AUTHORIZATION.K8S.IO/ROLES/ESCALATE/ACTION
+            - MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/RBAC.AUTHORIZATION.K8S.IO/CLUSTERROLES/WRITE
+            - MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/RBAC.AUTHORIZATION.K8S.IO/CLUSTERROLES/DELETE
+            - MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/RBAC.AUTHORIZATION.K8S.IO/CLUSTERROLES/BIND/ACTION
+            - MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/RBAC.AUTHORIZATION.K8S.IO/CLUSTERROLES/ESCALATE/ACTION
+    condition: selection
+level: medium
+tags:
+    - attack.impact
+    - attack.credential_access
+falsepositives:
+ - ClusterRoles/Roles being modified and deleted may be performed by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. ClusterRoles/Roles modification from unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule.
