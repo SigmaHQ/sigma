@@ -15,9 +15,10 @@ logsource:
     product: windows
 detection:
     selection_1:
-        TargetObject:
-            - 'HKLM\System\CurrentControlSet\Services\NalDrv\ImagePath'
-            - 'HKLM\System\CurrentControlSet\Services\PROCEXP152\ImagePath'
+        RegistryKey:
+            - 'HKLM\System\CurrentControlSet\Services\NalDrv'
+            - 'HKLM\System\CurrentControlSet\Services\PROCEXP152'
+        RegistryValue: 'ImagePath'
     selection_2:
         Image|endswith:
             - '\procexp64.exe'
@@ -25,7 +26,7 @@ detection:
             - '\procmon64.exe'
             - '\procmon.exe'
     selection_3:
-        Details|contains:
+        RegistryData|contains:
             - '\WINDOWS\system32\Drivers\PROCEXP152.SYS'
     condition: selection_1 and not selection_2 and not selection_3
 falsepositives:

@@ -16,29 +16,29 @@ logsource:
     product: windows
 detection:
     selection: # Detect new COM servers in the user hive
-        TargetObject|contains|all: 
+        RegistryKey|contains|all:
             - 'HKU\'
             - '_Classes\CLSID\'
             - '\InProcServer32\(Default)'
     filter1:
-        - Details|contains: # Exclude privileged directories and observed FPs
-            - '%%systemroot%%\system32\'
-            - '%%systemroot%%\SysWow64\'
+        - RegistryData|contains: # Exclude privileged directories and observed FPs
+              - '%%systemroot%%\system32\'
+              - '%%systemroot%%\SysWow64\'
     filterOneDrive:
-        - Details|contains: '\AppData\Local\Microsoft\OneDrive\'
+        - RegistryData|contains: '\AppData\Local\Microsoft\OneDrive\'
     filterOneDrive2:
-        - Details|contains:
-            - '\FileCoAuthLib64.dll'
-            - '\FileSyncShell64.dll'
-            - '\FileSyncApi64.dll'
+        - RegistryData|contains:
+              - '\FileCoAuthLib64.dll'
+              - '\FileSyncShell64.dll'
+              - '\FileSyncApi64.dll'
     filter2:
-        - Details|contains|all:
-            - '\AppData\Local\Microsoft\TeamsMeetingAddin\'
-            - '\Microsoft.Teams.AddinLoader.dll'
+        - RegistryData|contains|all:
+              - '\AppData\Local\Microsoft\TeamsMeetingAddin\'
+              - '\Microsoft.Teams.AddinLoader.dll'
     filter3:
-         - Details|contains|all:
-             - '\AppData\Roaming\Dropbox\'
-             - '\DropboxExt64.*.dll'
+        - RegistryData|contains|all:
+              - '\AppData\Roaming\Dropbox\'
+              - '\DropboxExt64.*.dll'
     condition: selection and not ( filter1 or ( filterOneDrive and filterOneDrive2 ) or filter2 or filter3 )
 falsepositives:
     - Some installed utilities (i.e. OneDrive) may serve new COM objects at user-level

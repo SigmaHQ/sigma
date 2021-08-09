@@ -11,19 +11,19 @@ logsource:
     product: windows
 detection:
     selection_reg1:
-        TargetObject|contains:
+        RegistryKey|contains:
             - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
     selection_reg2:
-        - TargetObject|contains|all:
+        RegistryKey|contains:
             - '\Image File Execution Options\'
-            - '\GlobalFlag'
-        - TargetObject|contains|all:
-            - 'SilentProcessExit\'
-            - '\ReportingMode'
-        - TargetObject|contains|all:
-            - 'SilentProcessExit\'
-            - '\MonitorProcess'
-    condition: selection_reg1 and selection_reg2
+        RegistryValue: 'GlobalFlag'
+    selection_reg3:
+        RegistryKey|contains:
+            - '\SilentProcessExit'
+        RegistryValue:
+            - 'ReportingMode'
+            - 'MonitorProcess'
+    condition: selection_reg1 and (selection_reg2 or selection_reg3)
 tags:
     - attack.privilege_escalation
     - attack.persistence

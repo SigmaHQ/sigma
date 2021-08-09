@@ -17,7 +17,6 @@ fields:
     - ParentCommandLine
     - Image
     - User
-    - TargetObject
 falsepositives:
     - unknown
 level: critical
@@ -26,9 +25,13 @@ logsource:
     category: registry_event
     product: windows
 detection:
-    selection1:        
-        TargetObject|contains: '\SYSTEM\CurrentControlSet\services\null\Instance'
-    condition: 1 of them
+    selection1:
+        RegistryKey|contains|all:
+            - '\SYSTEM\'
+            - 'ControlSet'
+            - '\services\null\'
+        RegistryValue: 'Instance'
+    condition: selection1
 ---
 logsource:
     category: process_creation

@@ -15,16 +15,16 @@ logsource:
     product: windows
 detection:
     selection:
-        TargetObject|endswith:
-            - '\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp\UserAuthentication'
-            - '\CurrentControlSet\Control\Terminal Server\fDenyTSConnections'
-        Details: 'DWORD (0x00000000)'
-    condition: selection
-fields:
-    - ComputerName
-    - Image
-    - EventType
-    - TargetObject
+        RegistryKey|contains|all:
+            - 'ControlSet'
+            - '\Control\Terminal Server\'
+        RegistryData: 0
+    selection2:
+        RegistryKey|endswith: '\WinStations\RDP-Tcp'
+        RegistryValue: 'UserAuthentication'
+    selection3:
+        RegistryValue: 'fDenyTSConnections'
+    condition: selection and (selection2 or selection3)
 falsepositives:
     - Unknown
 level: high

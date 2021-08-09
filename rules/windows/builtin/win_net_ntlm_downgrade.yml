@@ -23,15 +23,15 @@ logsource:
     category: registry_event
 detection:
     selection1:
-        TargetObject|contains|all: 
+        RegistryKey|contains|all:
             - 'SYSTEM\'
             - 'ControlSet'
             - '\Control\Lsa'
-        TargetObject|endswith:
-            - '\lmcompatibilitylevel'
-            - '\NtlmMinClientSec'
-            - '\RestrictSendingNTLMTraffic'
-            
+        RegistryValue:
+            - 'lmcompatibilitylevel'
+            - 'NtlmMinClientSec'
+            - 'RestrictSendingNTLMTraffic'
+
 ---
 # Windows Security Eventlog: Process Creation with Full Command Line
 logsource:
@@ -41,11 +41,11 @@ logsource:
 detection:
     selection:
         EventID: 4657
-        ObjectName|contains|all: 
+        ObjectName|contains|all:
             - '\REGISTRY\MACHINE\SYSTEM'
             - 'ControlSet'
             - '\Control\Lsa'
-        ObjectValueName: 
+        ObjectValueName:
             - 'LmCompatibilityLevel'
             - 'NtlmMinClientSec'
             - 'RestrictSendingNTLMTraffic'

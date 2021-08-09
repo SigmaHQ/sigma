@@ -19,9 +19,15 @@ logsource:
 detection:
     selection:
       - # Sysmon gives us HKLM\SYSTEM\CurrentControlSet\.. if ControlSetXX is the selected one
-        TargetObject: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCertDlls'
+        RegistryKey|contains|all:
+            - 'HKLM\System\'
+            - 'ConstrolSet'
+            - '\Control\Session Manager\AppCertDlls'
       - # key rename
-        NewName: 'HKLM\SYSTEM\CurentControlSet\Control\Session Manager\AppCertDlls'
+        NewName|contains|all:
+            - 'HKLM\System\'
+            - 'ControlSet'
+            - '\Control\Session Manager\AppCertDlls'
     condition: selection
 fields:
     - EventID

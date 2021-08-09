@@ -1,6 +1,6 @@
-title: Registry Persistence Mechanism via Windows Telemetry 
+title: Registry Persistence Mechanism via Windows Telemetry
 id: 73a883d0-0348-4be4-a8d8-51031c2564f8
-description: Detects persistence method using windows telemetry 
+description: Detects persistence method using windows telemetry
 status: experimental
 date: 2020/10/16
 references:
@@ -15,12 +15,11 @@ logsource:
     definition: 'Requirements: Sysmon config that monitors \SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\TelemetryController subkey of the HKLU hives'
 detection:
     selection:
-        TargetObject|contains|all: 
-            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\TelemetryController\'
-            - '\Command'
-        Details|contains: '.exe'
+        RegistryKey|contains: '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\TelemetryController\'
+        RegistryKey: "Command"
+        RegistryData|contains: ".exe"
     filter:
-        Details|contains: 
+        RegistryData|contains:
             - '\system32\CompatTelRunner.exe'
             - '\system32\DeviceCensus.exe'
     condition: selection and not filter

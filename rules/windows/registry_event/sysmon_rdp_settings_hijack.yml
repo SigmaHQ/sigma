@@ -11,11 +11,14 @@ logsource:
     product: windows
 detection:
     selection_reg:
-        TargetObject|contains:
-            - '\services\TermService\Parameters\ServiceDll'
-            - '\Control\Terminal Server\fSingleSessionPerUser'
-            - '\Control\Terminal Server\fDenyTSConnections'
-    condition: selection_reg
+        RegistryKey|contains: '\services\TermService\Parameters'
+        RegistryValue: 'ServiceDll'
+    selection_reg2:
+        RegistryKey|endswith: '\Control\Terminal Server'
+        RegistryValue:
+            - 'fSingleSessionPerUser'
+            - 'fDenyTSConnections'
+    condition: 1 of them
 tags:
     - attack.defense_evasion
     - attack.t1112

@@ -14,16 +14,14 @@ logsource:
   category: registry_event
 detection:
   selection1:
-    TargetObject|contains: 
+    RegistryKey|contains:
       - 'Software\Microsoft\Office\'
       - '\Outlook\Today\'
   selectionStamp:
-    TargetObject|endswith: 
-      - 'Stamp'
-    Details: DWORD (0x00000001)  
+    RegistryValue: 'Stamp'
+    RegistryData|contains: 1
   selectionUserDefined:
-    TargetObject|endswith: 
-      - 'UserDefinedUrl'
+    RegistryValue: 'UserDefinedUrl'
   condition: selection1 and (selectionStamp or selectionUserDefined)
 fields:
   - Details

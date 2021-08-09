@@ -51,9 +51,10 @@ logsource:
    product: windows
 detection:
     selection_reg1:
-        TargetObject|endswith: 
-            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\UMe'
-            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\UT'
+        RegistryKey|endswith: 'SOFTWARE\Microsoft\Windows\CurrentVersion'
+        RegistryValue:
+            - 'UMe'
+            - 'UT'
 ---
 logsource:
     category: process_creation
@@ -61,7 +62,7 @@ logsource:
 detection:
     selection_process0:
         CommandLine|contains: '\Service.exe'
-        CommandLine|endswith: 
+        CommandLine|endswith:
             - 'i'
             - 'u'
     selection_process1:
@@ -71,7 +72,7 @@ detection:
         Image|contains: '\Windows\Temp\DB\'
         Image|endswith: '.exe'
     selection_process3:
-        CommandLine|contains|all: 
+        CommandLine|contains|all:
             - '\nslookup.exe'
             - '-q=TXT'
         ParentImage|contains: '\Autoit'

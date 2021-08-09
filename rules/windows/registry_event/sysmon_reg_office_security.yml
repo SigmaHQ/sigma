@@ -16,11 +16,14 @@ logsource:
     product: windows
 detection:
     sec_settings:
-        TargetObject|endswith:
-            - '\Security\Trusted Documents\TrustRecords'
-            - '\Security\AccessVBOM'
-            - '\Security\VBAWarnings'
-    condition: sec_settings
+        RegistryKey|contains: '\Security\Trusted Documents'
+        RegistryValue: TrustRecords
+    sec_settings2:
+        RegistryKey|contains: '\Security'
+        RegistryValue:
+            - 'AccessVBOM'
+            - 'VBAWarnings'
+    condition: 1 of them
 falsepositives:
     - Valid Macros and/or internal documents
 level: high
