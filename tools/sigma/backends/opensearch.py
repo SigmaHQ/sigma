@@ -32,78 +32,14 @@ from sigma.config.mapping import ConditionalFieldMapping
 from .base import BaseBackend, SingleTextQueryBackend
 from .mixins import RulenameCommentMixin, MultiRuleOutputMixin
 from .exceptions import NotSupportedError
-from .elasticsearch import DeepFieldMappingMixin, ElasticsearchWildcardHandlingMixin
+from .elasticsearch import ElasticsearchQuerystringBackend
 from .defaultOpensearchValues import *
 
-class OpenSearchQuerystringBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
-    """Converts Sigma rule into OpenSearch query string. Only searches, no aggregations."""
-    identifier = "es-qs"
-    active = True
-
-    reEscape = re.compile("([\s+\\-=!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|\\\\u|&&|\\|\\|)")
-    andToken = " AND "
-    orToken = " OR "
-    notToken = "NOT "
-    subExpression = "(%s)"
-    listExpression = "(%s)"
-    listSeparator = " OR "
-    valueExpression = "%s"
-    typedValueExpression = {
-                SigmaRegularExpressionModifier: "/%s/"
-            }
-    nullExpression = "NOT _exists_:%s"
-    notNullExpression = "_exists_:%s"
-    mapExpression = "%s:%s"
-    mapListsSpecialHandling = False
-
-    def generateValueNode(self, node):
-        result = super().generateValueNode(node)
-        if result == "" or result.isspace():
-            return '""'
-        else:
-            if self.matchKeyword:   # don't quote search value on keyword field
-                if self.CaseInSensitiveField:
-                    make_ci = self.makeCaseInSensitiveValue(result)
-                    result = make_ci.get('value')
-                    if make_ci.get('is_regex'): # Determine if still should be a regex
-                        result = "/%s/" % result # Regex place holders for regex
-                return result
-            else:
-                return "\"%s\"" % result
-
-    def generateNOTNode(self, node):
-        expression = super().generateNode(node.item)
-        if expression:
-            return "(%s%s)" % (self.notToken, expression)
-
-    def generateSubexpressionNode(self, node):
-        """Check for search not bound to a field and restrict search to keyword fields"""
-        nodetype = type(node.items)
-        if nodetype in { ConditionAND, ConditionOR } and type(node.items.items) == list and { type(item) for item in node.items.items }.issubset({str, int}):
-            newitems = list()
-            for item in node.items:
-                newitem = item
-                if type(item) == str:
-                    if not item.startswith("*"):
-                        newitem = "*" + newitem
-                    if not item.endswith("*"):
-                        newitem += "*"
-                    newitems.append(newitem)
-                else:
-                    newitems.append(item)
-            newnode = NodeSubexpression(nodetype(None, None, *newitems))
-            self.matchKeyword = True
-            result = "\\*.keyword:" + super().generateSubexpressionNode(newnode)
-            self.matchKeyword = False       # one of the reasons why the converter needs some major overhaul
-            return result
-        else:
-            return super().generateSubexpressionNode(node)
-
 class OpenSearchBackend(object):
-    """OpenSearch detection rule backend"""
+    """OpenSearch detection rule backend."""
     active = True
     uuid_black_list = []
-    options = OpenSearchQuerystringBackend.options + (
+    options = ElasticsearchQuerystringBackend.options + (
                 ("put_filename_in_ref", False, "Want to have yml name in reference ?", None),
                 ("convert_to_url", False, "Want to convert to a URL ?", None),
                 ("path_to_replace", "../", "The local path to replace with dest_base_url", None),
@@ -117,6 +53,9 @@ class OpenSearchBackend(object):
         self.techniques = self._load_mitre_file("techniques")
         self.rule_threshold = {}
 
+    '''
+    Loads appropriate mitre file and returns mappings as dict.
+    '''
     def _load_mitre_file(self, mitre_type):
         try:
             backend_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "config", "mitre"))
@@ -245,10 +184,12 @@ class OpenSearchBackend(object):
                 }
             ]
 
+    '''
+    Adds Sigma yml file name in references if self.put_filename_in_ref option is True.
+    '''
     def build_ymlfile_ref(self, configs):
         if self.put_filename_in_ref == False:  # Dont want
             return None
-
         yml_filename = configs.get("yml_filename")
         yml_path = configs.get("yml_path")
         if yml_filename == None or yml_path == None:
@@ -265,6 +206,9 @@ class OpenSearchBackend(object):
             new_ref = yml_filename
         return new_ref
 
+    '''
+    Builds the list of searchable tags. Matches against list of known tags and adds any custom tags.
+    '''
     def build_tags_list(self, tags):
         tactics_list = list()
         new_tags = list()
@@ -318,24 +262,19 @@ class OpenSearchBackend(object):
 
         return rule_id
 
-    def create_rule(self, configs, index):
-        tactics_list, technics_list, new_tags = self.build_tags_list(configs.get("tags", []))   
-        
-        threat = self.create_threat_description(tactics_list, technics_list)
-        
-        rule_name = configs.get("title", "")
-        
-        rule_description = configs.get("description", "")
-        
-        rule_id = self.get_rule_id(configs.get("id", ""))
-        
-        inputs = self.build_inputs(configs.get("translation", ""))
-        
-        triggers = self.create_trigger(configs.get("level", "medium"))
-        
+    '''
+    Gets list of references.
+    '''
+    def get_references(self, configs):
         references = configs.get("reference") if configs.get("reference") is not None else configs.get("references")
+        references = self.build_ref_yaml(references, configs)
+        return references
 
-        add_ref_yml= self.build_ymlfile_ref(configs)
+    '''
+    Adds Sigma yml file to references.
+    '''
+    def build_ref_yaml(self, references, configs):
+        add_ref_yml = self.build_ymlfile_ref(configs)
         if add_ref_yml:
             if references is None: # No ref
                 references=[]
@@ -343,6 +282,27 @@ class OpenSearchBackend(object):
                 pass # else put a duplicate ref for  multi rule file
             else:
                 references.append(add_ref_yml)
+        
+        return references
+
+    '''
+    Main method that builds OpenSearch monitor and returns it in JSON format.
+    '''
+    def create_rule(self, configs, index):
+        rule_name = configs.get("title", "")
+        
+        rule_description = configs.get("description", "")
+        
+        inputs = self.build_inputs(configs.get("translation", ""))
+        
+        triggers = self.create_trigger(configs.get("level", "medium"))
+        
+        rule_id = self.get_rule_id(configs.get("id", ""))
+
+        tactics_list, technics_list, new_tags = self.build_tags_list(configs.get("tags", []))   
+        threat = self.create_threat_description(tactics_list, technics_list)
+        
+        references = self.get_references(configs)
         
         rule = {
             "type": RULE_TYPE,
@@ -358,17 +318,22 @@ class OpenSearchBackend(object):
             "inputs": inputs,
             "tags": new_tags,
             "triggers": triggers,
-            "sigma_data": {
+            "sigma_meta_data": {
                 "rule_id": rule_id,
                 "threat": threat
             }
         }
-        
+
         if references:
             rule.update({"references": references})
+
         return json.dumps(rule)
 
-class OpenSearchQsBackend(OpenSearchBackend, OpenSearchQuerystringBackend):
+class OpenSearchQsBackend(OpenSearchBackend, ElasticsearchQuerystringBackend):
+    '''
+    Backend class containing the identifier for the -t argument. Can inherit from ElasticsearchQuerystringBackend
+    since query string in both OpenSearch monitors and ElasticRule are in Elastic Common Schema.
+    '''
     identifier = "os-monitor"
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
