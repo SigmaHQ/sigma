@@ -1,7 +1,7 @@
 title: Exchange ProxyShell Pattern
 id: 23eee45e-933b-49f9-ae1b-df706d2d52ef
 status: experimental
-description: Detects URP patterns that could be found in ProxyShell exloitation attempts against Exchange servers
+description: Detects URP patterns that could be found in ProxyShell exploitation attempts against Exchange servers (failed and successful)
 references:
     - https://youtu.be/5mqid-7zp8k?t=2231
     - https://blog.orange.tw/2021/08/proxylogon-a-new-attack-surface-on-ms-exchange-part-1.html
@@ -22,6 +22,8 @@ detection:
             - '/mapi/nspi'
             - '/EWS'
             - 'X-Rps-CAT'
+    selection:
+        sc-status: 401
     selection_poc:
         c-uri|contains: 
             # since we don't know how it will appear in the log files, we'll just use all versions
@@ -32,5 +34,5 @@ detection:
             - 'json?@foo.com'
     condition: selection_auto and selection_uri or selection_poc 
 falsepositives:
-    - Could only be an attempt and not a successful attack
-level: high
+    - Unknown
+level: medium

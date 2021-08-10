@@ -1,0 +1,30 @@
+title: ProxyShell MSExchange MailBox Export Pattern
+id: 516376b4-05cd-4122-bae0-ad7641c38d48
+status: experimental
+description: Detects specific patterns found after a successful ProxyShell exploitation in relation to a Commandlet invokation of New-MailboxExportRequest 
+references:
+    - https://blog.orange.tw/2021/08/proxylogon-a-new-attack-surface-on-ms-exchange-part-1.html?m=1
+author: Florian Roth, Rich Warren 
+date: 2021/08/09
+logsource:
+    product: windows
+    service: msexchange-management
+detection:
+    selection_cmdlet:
+        Message|contains|all: 
+            - 'New-MailboxExportRequest'
+            - ' -Mailbox '
+    selection_params:
+        Message|contains:
+            - '-FilePath "\\localhost\C$'
+            - '-FilePath "\\127.0.0.1\C$'
+            - '.aspx'
+    selection_assignment:
+        Message|contains|all:
+            - 'New-ManagementRoleAssignment'
+            - ' -Role "Mailbox Import Export"'
+            - ' -User "exchange.admin"'
+    condition: selection_cmdlet and selection_params or selection_assignment
+falsepositives:
+    - Unlikely
+level: critical
