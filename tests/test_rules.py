@@ -281,7 +281,7 @@ class TestRules(unittest.TestCase):
                         faulty_rules.append(file)                       
 
         self.assertEqual(faulty_rules, [], Fore.RED + 
-                         "There are rules with malformed optional 'related' fields. (check https://github.com/SigmaHQ/sigma/wiki/Specification)")            
+                         "There are rules with malformed optional 'related' fields. (check https://github.com/SigmaHQ/sigma/wiki/Specification#rule-identification)")            
     
     def test_sysmon_rule_without_eventid(self):
         faulty_rules = []
@@ -348,7 +348,7 @@ class TestRules(unittest.TestCase):
                     faulty_rules.append(file) 
         
         self.assertEqual(faulty_rules, [], Fore.RED +
-                         "There are rules with malformed 'status' fields. (check https://github.com/SigmaHQ/sigma/wiki/Specification)")
+                         "There are rules with malformed 'status' fields. (check https://github.com/SigmaHQ/sigma/wiki/Specification#status-optional)")
 
     def test_level(self):
         faulty_rules = []
@@ -369,7 +369,7 @@ class TestRules(unittest.TestCase):
                     faulty_rules.append(file) 
         
         self.assertEqual(faulty_rules, [], Fore.RED +
-                         "There are rules with missing or malformed 'level' fields. (check https://github.com/SigmaHQ/sigma/wiki/Specification)")
+                         "There are rules with missing or malformed 'level' fields. (check https://github.com/SigmaHQ/sigma/wiki/Specification#level)")
 
     def test_optional_fields(self):
         faulty_rules = []
@@ -495,7 +495,7 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED + 
-                         "There are rules with non-conform 'title' fields. Please check: https://github.com/Neo23x0/sigma/wiki/Rule-Creation-Guide#title")
+                         "There are rules with non-conform 'title' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title")
 
     def test_invalid_logsource_attributes(self):
         faulty_rules = []
@@ -516,7 +516,7 @@ class TestRules(unittest.TestCase):
                faulty_rules.append(file)
         
         self.assertEqual(faulty_rules, [], Fore.RED + 
-                         "There are rules with non-conform 'logsource' fields. Please check: https://github.com/Neo23x0/sigma/wiki/Rule-Creation-Guide#logsource")
+                         "There are rules with non-conform 'logsource' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#log-source")
 
     def test_selection_list_one_value(self):
         faulty_rules = []
@@ -528,15 +528,15 @@ class TestRules(unittest.TestCase):
                     if isinstance(detection[key],list):
                         if len(detection[key]) == 1 and not isinstance(detection[key][0],str): #rule with only list of Keywords term
                            print(Fore.RED + "Rule {} has the selection ({}) with a list of only 1 value in detection".format(file, key))
-                           valid = False
+                           #valid = False
                     if isinstance(detection[key],dict):
                         for sub_key in detection[key]:
                             if isinstance(detection[key][sub_key],list): #split in 2 if as get a error "int has not len()"
                                 if len(detection[key][sub_key]) == 1:
                                     print (Fore.RED + "Rule {} has the selection ({}/{}) with a list of only 1 value in detection".format(file, key, sub_key))
-                                    valid = False
-                #if not valid:
-                #   faulty_rules.append(file)
+                                    #valid = False
+                if not valid:
+                  faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED + "There are rules using list with only 1 value")                  
 
