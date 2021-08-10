@@ -499,11 +499,47 @@ class TestRules(unittest.TestCase):
 
     def test_invalid_logsource_attributes(self):
         faulty_rules = []
+        valid_logsource = [
+           'category',
+           'product',
+           'service',
+           'definition',
+           ]
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             logsource = self.get_rule_part(file_path=file, part_name="logsource")
+            valid = True
             for key in logsource:
-                if key.lower() not in ['category', 'product', 'service', 'definition']:
+                if key.lower() not in valid_logsource:
                     print(Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
+                    valide = False
+            if not valid:
+               faulty_rules.append(file)
+        
+        self.assertEqual(faulty_rules, [], Fore.RED + 
+                         "There are rules with non-conform 'logsource' fields. Please check: https://github.com/Neo23x0/sigma/wiki/Rule-Creation-Guide#logsource")
+
+    def test_selection_list_one_value(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            detection = self.get_rule_part(file_path=file, part_name="detection")
+            if detection:
+                valid = True
+                for key in detection:
+                    if isinstance(detection[key],list):
+                        if len(detection[key]) == 1 and not isinstance(detection[key][0],str): #rule with only list of Keywords term
+                           print(Fore.RED + "Rule {} has the selection ({}) with a list of only 1 value in detection".format(file, key))
+                           valid = False
+                    if isinstance(detection[key],dict):
+                        for sub_key in detection[key]:
+                            if isinstance(detection[key][sub_key],list): #split in 2 if as get a error "int has not len()"
+                                if len(detection[key][sub_key]) == 1:
+                                    print (Fore.RED + "Rule {} has the selection ({}/{}) with a list of only 1 value in detection".format(file, key, sub_key))
+                                    valid = False
+                #if not valid:
+                #   faulty_rules.append(file)
+
+        self.assertEqual(faulty_rules, [], Fore.RED + "There are rules using list with only 1 value")                  
+
 
 def get_mitre_data():
     """
