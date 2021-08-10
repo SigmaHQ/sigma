@@ -1,0 +1,25 @@
+title: ProxyLogon Reset Virtual Directories Based On IIS log
+id: effee1f6-a932-4297-a81f-acb44064fa3a
+status: experimental
+description: When exploiting this vulnerability with CVE-2021–26858, an SSRF attack is used to manipulate virtual directories
+references:
+    - https://bi-zone.medium.com/hunting-down-ms-exchange-attacks-part-1-proxylogon-cve-2021-26855-26858-27065-26857-6e885c5f197c
+author: frack113
+date: 2021/08/10
+logsource:
+    product: windows
+    category: webserver
+    service: iis
+detection:
+    selection:
+        http_method: 'POST'
+        http_code: 200
+        url_path: '/ecp/DDI/DDIService.svc/SetObject'
+        Message|contains|all:
+            - 'schema=Reset'
+            - 'VirtualDirectory'
+        Username|endswith: '$'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: critical 
