@@ -9,16 +9,16 @@ date: 2021/08/10
 logsource:
     product: windows
     category: webserver
-    service: iis
+    definition: w3c-logging must be enable https://docs.microsoft.com/en-us/windows/win32/http/w3c-logging
 detection:
     selection:
-        http_method: 'POST'
-        http_code: 200
-        url_path: '/ecp/DDI/DDIService.svc/SetObject'
-        Message|contains|all:
+        cs-method: 'POST'
+        sc-status: 200
+        cs-uri-stem|startswith: '/ecp/DDI/DDIService.svc/SetObject'
+        cs-uri-stem|contains|all:
             - 'schema=Reset'
             - 'VirtualDirectory'
-        Username|endswith: '$'
+        cs-username|endswith: '$'
     condition: selection
 falsepositives:
     - Unlikely
