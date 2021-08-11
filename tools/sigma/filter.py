@@ -30,6 +30,8 @@ class SigmaRuleFilter:
         self.minlevel      = None
         self.maxlevel      = None
         self.status        = None
+        self.tlp           = None
+        self.target        = None
         self.logsources    = list()
         self.notlogsources = list()
         self.tags          = list()
@@ -62,6 +64,10 @@ class SigmaRuleFilter:
                 self.status = cond[cond.index("=") + 1:]
                 if self.status not in self.STATES:
                     raise SigmaRuleFilterParseException("Unknown status '%s' in condition '%s'" % (self.status, cond))
+            elif cond.startswith("tlp="):
+                self.tlp = cond[cond.index("=") + 1:].upper()  #tlp is allways uppercase
+            elif cond.startswith("target="):
+                self.target = cond[cond.index("=") + 1:].lower() # lower to make caseinsensitive
             elif cond.startswith("logsource="):
                 self.logsources.append(cond[cond.index("=") + 1:])
             elif cond.startswith("logsource!="):
@@ -108,6 +114,24 @@ class SigmaRuleFilter:
             except KeyError:    # missing status
                 return False    # User wants status restriction, but it's not possible here
             if status != self.status:
+                return False
+
+        # Tlp
+        if self.tlp is not None:
+            try:
+                tlp = yamldoc['tlp']
+            except KeyError:    # missing tlp
+                tlp = "WHITE"    # tlp is WHITE by default
+            if tlp != self.tlp:
+                return False
+
+        #Target
+        if self.target:
+            try:
+                targets = [ target.lower() for target in yamldoc['target']]
+            except (KeyError, AttributeError):    # no target set
+                return False
+            if self.target not in targets:
                 return False
 
         # Log Sources
