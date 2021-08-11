@@ -68,6 +68,7 @@ class ElasticsearchWildcardHandlingMixin(object):
             ("case_insensitive_whitelist", None, "Fields to make the values case insensitive regex. Automatically sets the field as a keyword. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("case_insensitive_blacklist", None, "Fields to exclude from being made into case insensitive regex. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("wildcard_use_keyword", "true", "Use analyzed field or wildcard field if the query uses a wildcard value (ie: '*mall_wear.exe'). Set this to 'False' to use analyzed field or wildcard field. Valid options are: true/false", None),
+            ("hash_normalize", None, "Normalize hash fields to lowercase, uppercase or both. If this option is not used the field value stays untouched. Valid options are: lower/upper/both (default: both)", None),
             )
     reContainsWildcard = re.compile("(?:(?<!\\\\)|\\\\\\\\)[*?]").search
     uuid_regex = re.compile( "[0-9a-fA-F]{8}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{12}", re.IGNORECASE )
@@ -115,19 +116,37 @@ class ElasticsearchWildcardHandlingMixin(object):
         else:
             return False
 
+    def convert_hash(self,value,action):
+        try:
+            value_lo=value.lower()
+        except AttributeError:
+            value_lo=value
+        try:
+            value_hi=value.upper()
+        except AttributeError:
+            value_hi=value
+        if action == "lower":
+            return value_lo
+        elif action == "upper":
+            return value_hi
+        else:
+            return [value_lo,value_hi]
+
     def generateMapItemNode(self, node):
         fieldname, value = node
-        if fieldname.lower().find("hash") != -1:
-            if isinstance(value, list):
-                res = []
-                for item in value:
-                    try:
-                        res.extend([item.lower(), item.upper()])
-                    except AttributeError:  # not a string (something that doesn't support upper/lower casing)
-                        res.append(item)
-                value = res
-            elif isinstance(value, str):
-                value = [value.upper(), value.lower()]
+        if not self.hash_normalize == None:
+            if fieldname.lower().find("hash") != -1:
+                if isinstance(value, list):
+                    res = []
+                    for item in value:
+                        hash_ret = self.convert_hash(item,self.hash_normalize)
+                        if isinstance(hash_ret,list):
+                            res.extend(hash_ret)
+                        else:
+                            res.append(hash_ret)
+                    value = res
+                elif isinstance(value, str):
+                    value = self.convert_hash(value,self.hash_normalize)
         transformed_fieldname = self.fieldNameMapping(fieldname, value)
         if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
             return self.mapExpression % (transformed_fieldname, self.generateNode(value))
