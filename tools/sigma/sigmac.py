@@ -113,7 +113,7 @@ def set_argparser():
     Select the fields you want by providing their list delimited with commas (no space). Only work with the '--output-format' option and with 'json' or 'yaml' value.
     available additional fields : title, id, status, description, author, references, fields, falsepositives, level, tags.
     This option do not have any effect for backends that already format output : elastalert, kibana, splukxml etc. """)
-    argparser.add_argument("--output-format", "-oF", default="raw", choices=["raw", "json", "yaml"], help="Use only if you want to have JSON or YAML output (default is raw text)")
+    argparser.add_argument("--output-format", "-oF", choices=["json", "yaml"], help="Use only if you want to have JSON or YAML output (default is raw text)")
     argparser.add_argument("--output-extention", "-e", default=None, help="Extention of Output file for filename prefix use")
     argparser.add_argument("--print0", action="store_true", help="Delimit results by NUL-character")
     argparser.add_argument("--backend-option", "-O", action="append", help="Options and switches that are passed to the backend")
@@ -224,7 +224,7 @@ def main():
                 exit(ERR_CONFIG_PARSING)
 
     if cmdargs.output_fields:
-        if cmdargs.output_format != "raw": 
+        if cmdargs.output_format: 
             output_fields_rejected = [field for field in cmdargs.output_fields.split(",") if field not in allowed_fields] # Not allowed fields
             if output_fields_rejected:
                     print("These fields are not allowed (check help for allow field list) : %s" % (", ".join(output_fields_rejected)), file=sys.stderr)
@@ -232,7 +232,7 @@ def main():
             else:
                 output_fields_filtered = [field for field in cmdargs.output_fields.split(",") if field in allowed_fields] # Keep only allowed fields
         else:
-            print("The '--output-fields' or '-of' arguments must be use with '--output-format' or '-oF' equal to 'json' or 'yaml'", file=sys.stderr)
+            print("The '--output-fields' or '-of' arguments must be used with '--output-format' or '-oF' equal to 'json' or 'yaml'", file=sys.stderr)
             exit(ERR_OUTPUT_FORMAT)
 
     backend_options = BackendOptions(cmdargs.backend_option, cmdargs.backend_config)
