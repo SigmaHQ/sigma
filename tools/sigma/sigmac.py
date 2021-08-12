@@ -389,9 +389,6 @@ def main():
         if cmdargs.output_format == 'json':
             print(json.dumps(output_array, indent=4, ensure_ascii=False), file=out)
         elif cmdargs.output_format == 'yaml':
-            yml = ruamel.yaml.YAML()
-            yml.explicit_start = True
-            yml.indent(mapping=2, sequence=4, offset=2)
             print(ruamel.yaml.round_trip_dump(output_array), file=out)
 
     out.close()
