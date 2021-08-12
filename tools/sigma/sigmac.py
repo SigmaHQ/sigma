@@ -313,21 +313,12 @@ def main():
                     output['filename'] = str(sigmafile.name)
                 output_array.append(output)
 
-            if nb_result == 0: # elastalert return "results=[]" so get a error with out not def
-                if not fileprefix == None and not inc_filenane == None: #yml action
+            if nb_result == 0: # backend get only 1 output
+                if not fileprefix == None: # want a prefix anyway
                     try:
-                        filename = fileprefix + str(sigmafile.name)
-                        filename = filename.replace('.yml','_' + str(inc_filenane) + filename_ext)
-                        inc_filenane += 1
+                        filename = "%s%s_mono_output%s" % (fileprefix,cmdargs.target,filename_ext)
                         out = open(filename, "w", encoding='utf-8')
-                    except (IOError, OSError) as e:
-                        print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
-                        exit(ERR_OUTPUT)
-                elif  not fileprefix == None and inc_filenane == None: # a simple yml
-                    try:
-                        filename = fileprefix + str(sigmafile.name)
-                        filename = filename.replace('.yml',filename_ext) 
-                        out = open(filename, "w", encoding='utf-8')
+                        fileprefix = None  # no need to open the same file many time
                     except (IOError, OSError) as e:
                         print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
                         exit(ERR_OUTPUT) 
