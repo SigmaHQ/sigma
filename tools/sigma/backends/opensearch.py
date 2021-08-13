@@ -156,16 +156,73 @@ class OpenSearchBackend(object):
 
     '''
     Builds OpenSearch monitor query from translated Elastic Common Schema query.
-    Only supports must and must_not clauses.
+    Only supports must and should clauses.
     '''
     def build_query(self, translation):
-        return {
+        translation = "(winlog.channel:\"System\" OR winlog.event_id:\"16\" AND winlog.event_data.HiveName.keyword:*\\\\AppData\\\\Local\\\\Temp\\\\SAM* OR winlog.event_data.HiveName.keyword:*.dmp)"
+        # translation = "(winlog.channel:\"System\""
+        parsedTranslation = translation.strip("()").split()
+        
+        if len(parsedTranslation) == 0:
+            return {}
+
+        boolMappings = {"and": "must", "or": "should"}
+        clauses = []
+        currMatches = []
+
+        if len(parsedTranslation) == 1 or (parsedTranslation[1].lower() == "or" and len(parsedTranslation) > 3 and parsedTranslation[3].lower() == "and"):
+            defaultClause = "must"
+        else:
+            defaultClause = boolMappings[parsedTranslation[1].lower()]
+
+        currQuery = {
+            "bool": {
+                defaultClause : currMatches
+            }
+        }
+        prevOp = "and" if defaultClause == "must" else "or"
+        
+        for index in range(0, len(parsedTranslation)-1, 2):
+            element = parsedTranslation[index]
+            nextElement = parsedTranslation[index+1].lower()
+
+            currMatches.append({
+                "match": {
+                    element.split(":")[0]: element.split(":")[1]
+                }
+            })
+
+            if nextElement != prevOp:
+                clauses.append(currQuery)
+                currMatches = []
+
+                if nextElement == "or" and index+3 < len(parsedTranslation) and parsedTranslation[index+3].lower() == "or":
+                    nextClause = "should"
+                else:
+                    nextClause = "must"
+
+                currQuery = {
                     "bool": {
-                        "must": {
-                            "match_all": translation
-                        }
+                        nextClause : currMatches
                     }
                 }
+                
+            prevOp = nextElement
+
+        currMatches.append({
+            "match": {
+                parsedTranslation[-1].split(":")[0]: parsedTranslation[-1].split(":")[1]
+            }
+        })
+        clauses.append(currQuery)
+
+        if len(clauses) > 1:
+            return {
+                        "bool": {
+                            "should": clauses
+                        }
+                    }
+        return clauses[0]
 
     '''
     Builds inputs field of OS monitor.
@@ -174,7 +231,7 @@ class OpenSearchBackend(object):
         return [
                 {
                     "search": {
-                        "index": MONITOR_INDICES,
+                        "indices": MONITOR_INDICES,
                         "query": {
                             "size": NUM_RESULTS,
                             "aggregations": {},
