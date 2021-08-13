@@ -18,6 +18,7 @@
 import sys
 import argparse
 import yaml
+import ruamel.yaml
 import json
 import pathlib
 import itertools
@@ -53,9 +54,13 @@ ERR_RULE_FILTER_PARSING = 11
 ERR_CONFIG_REQUIRED     = 20
 ERR_CONFIG_ORDER        = 21
 ERR_CONFIG_BACKEND      = 22
+ERR_OUTPUT_FORMAT       = 30
 ERR_NOT_IMPLEMENTED     = 42
 ERR_PARTIAL_FIELD_MATCH = 80
 ERR_FULL_FIELD_MATCH    = 90
+
+# Allowed fields in output
+allowed_fields = ["title", "id", "status", "description", "author", "references", "fields", "falsepositives", "level", "tags", "filename"]
 
 def alliter(path):
     for sub in path.iterdir():
@@ -104,6 +109,11 @@ def set_argparser():
     argparser.add_argument("--lists", "-l", action="store_true", help="List available output target formats and configurations")
     argparser.add_argument("--config", "-c", action="append", help="Configurations with field name and index mapping for target environment. Multiple configurations are merged into one. Last config is authoritative in case of conflicts.")
     argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix (if end with a '_','/' or '\\')")
+    argparser.add_argument("--output-fields", "-of", help="""Enhance your output with additional fields from the Sigma rule (not only the converted rule itself). 
+    Select the fields you want by providing their list delimited with commas (no space). Only work with the '--output-format' option and with 'json' or 'yaml' value.
+    available additional fields : title, id, status, description, author, references, fields, falsepositives, level, tags.
+    This option do not have any effect for backends that already format output : elastalert, kibana, splukxml etc. """)
+    argparser.add_argument("--output-format", "-oF", choices=["json", "yaml"], help="Use only if you want to have JSON or YAML output (default is raw text)")
     argparser.add_argument("--output-extention", "-e", default=None, help="Extention of Output file for filename prefix use")
     argparser.add_argument("--print0", action="store_true", help="Delimit results by NUL-character")
     argparser.add_argument("--backend-option", "-O", action="append", help="Options and switches that are passed to the backend")
@@ -213,6 +223,18 @@ def main():
                 print("Sigma configuration parse error in %s: %s" % (conf_name, str(e)), file=sys.stderr)
                 exit(ERR_CONFIG_PARSING)
 
+    if cmdargs.output_fields:
+        if cmdargs.output_format: 
+            output_fields_rejected = [field for field in cmdargs.output_fields.split(",") if field not in allowed_fields] # Not allowed fields
+            if output_fields_rejected:
+                    print("These fields are not allowed (check help for allow field list) : %s" % (", ".join(output_fields_rejected)), file=sys.stderr)
+                    exit(ERR_OUTPUT_FORMAT)
+            else:
+                output_fields_filtered = [field for field in cmdargs.output_fields.split(",") if field in allowed_fields] # Keep only allowed fields
+        else:
+            print("The '--output-fields' or '-of' arguments must be used with '--output-format' or '-oF' equal to 'json' or 'yaml'", file=sys.stderr)
+            exit(ERR_OUTPUT_FORMAT)
+
     backend_options = BackendOptions(cmdargs.backend_option, cmdargs.backend_config)
     backend = backend_class(sigmaconfigs, backend_options)
     
@@ -240,6 +262,7 @@ def main():
         out = sys.stdout
 
     error = 0
+    output_array = []
     for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
         logger.debug("* Processing Sigma input %s" % (sigmafile))
         try:
@@ -249,11 +272,13 @@ def main():
                 f = sigmafile.open(encoding='utf-8')
             parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter, sigmafile)
             results = parser.generate(backend)
-            
+
             nb_result = len(list(copy.deepcopy(results)))
             inc_filenane = None if nb_result < 2 else 0
             
             newline_separator = '\0' if cmdargs.print0 else '\n'
+
+            results = list(results) # Since results is an iterator and used twice we convert it a list
             for result in results:
                 if not fileprefix == None and not inc_filenane == None: #yml action
                     try:
@@ -272,8 +297,22 @@ def main():
                     except (IOError, OSError) as e:
                         print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
                         exit(ERR_OUTPUT)
-                print(result, file=out, end=newline_separator)
-            
+                if not cmdargs.output_fields:
+                    print(result, file=out, end=newline_separator)
+
+            if cmdargs.output_fields: # Handle output fields
+                output={}
+                f.seek(0)
+                docs = yaml.load_all(f, Loader=yaml.FullLoader)
+                for doc in docs:
+                    for k,v in doc.items():
+                        if k in output_fields_filtered:
+                            output[k] = v
+                output['rule'] = [result for result in results]
+                if "filename" in output_fields_filtered:
+                    output['filename'] = str(sigmafile.name)
+                output_array.append(output)
+
             if nb_result == 0: # backend get only 1 output
                 if not fileprefix == None: # want a prefix anyway
                     try:
@@ -283,7 +322,7 @@ def main():
                     except (IOError, OSError) as e:
                         print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
                         exit(ERR_OUTPUT) 
-        
+
         except OSError as e:
             print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
             error = ERR_OPEN_SIGMA_RULE
@@ -311,7 +350,6 @@ def main():
                     sys.exit(error)
         except (NotImplementedError, TypeError) as e:
             print("An unsupported feature is required for this Sigma rule (%s): " % (sigmafile) + str(e), file=sys.stderr)
-            print("Feel free to contribute for fun and fame, this is open source :) -> https://github.com/Neo23x0/sigma", file=sys.stderr)
             if not cmdargs.ignore_backend_errors:
                 error = ERR_NOT_IMPLEMENTED
                 if not cmdargs.defer_abort:
@@ -333,10 +371,17 @@ def main():
                 f.close()
             except:
                 pass
-
+    
     result = backend.finalize()
     if result:
         print(result, file=out)
+    
+    if cmdargs.output_fields:
+        if cmdargs.output_format == 'json':
+            print(json.dumps(output_array, indent=4, ensure_ascii=False), file=out)
+        elif cmdargs.output_format == 'yaml':
+            print(ruamel.yaml.round_trip_dump(output_array), file=out)
+
     out.close()
 
     sys.exit(error)
