@@ -159,63 +159,62 @@ class OpenSearchBackend(object):
     Only supports must and should clauses.
     '''
     def build_query(self, translation):
-        translation = "(winlog.channel:\"System\" OR winlog.event_id:\"16\" AND winlog.event_data.HiveName.keyword:*\\\\AppData\\\\Local\\\\Temp\\\\SAM* OR winlog.event_data.HiveName.keyword:*.dmp)"
+        translation = "(winlog.channel:\"System\" AND winlog.event_id:\"16\" OR winlog.event_data.HiveName.keyword:*\\\\AppData\\\\Local\\\\Temp\\\\SAM* OR winlog.event_data.HiveName.keyword:*.dmp)"
         # translation = "(winlog.channel:\"System\""
-        parsedTranslation = translation.strip("()").split()
+        parsedTranslation = translation.strip("()").split("OR")
         
         if len(parsedTranslation) == 0:
             return {}
-
-        boolMappings = {"and": "must", "or": "should"}
+            
         clauses = []
-        currMatches = []
-
-        if len(parsedTranslation) == 1 or (parsedTranslation[1].lower() == "or" and len(parsedTranslation) > 3 and parsedTranslation[3].lower() == "and"):
-            defaultClause = "must"
-        else:
-            defaultClause = boolMappings[parsedTranslation[1].lower()]
-
-        currQuery = {
-            "bool": {
-                defaultClause : currMatches
-            }
-        }
-        prevOp = "and" if defaultClause == "must" else "or"
         
-        for index in range(0, len(parsedTranslation)-1, 2):
-            element = parsedTranslation[index]
-            nextElement = parsedTranslation[index+1].lower()
+        translateIndex = 0
+        while translateIndex < len(parsedTranslation):
+            expression = parsedTranslation[translateIndex]
+            currMatches = []
+            clause = "must" # default clause is "must"; clause is "should" if multiple "or" statements
 
-            currMatches.append({
-                "match": {
-                    element.split(":")[0]: element.split(":")[1]
-                }
-            })
+            parsedExpression = expression.split()
 
-            if nextElement != prevOp:
-                clauses.append(currQuery)
-                currMatches = []
+            # Statement was joined by "or"
+            if len(parsedExpression) == 1:
+                counter = 1
+                tempIndex = translateIndex
+                while tempIndex+1 < len(parsedTranslation) and len(parsedTranslation[tempIndex+1].split()) == 1:
+                    tempIndex += 1
+                    counter += 1
 
-                if nextElement == "or" and index+3 < len(parsedTranslation) and parsedTranslation[index+3].lower() == "or":
-                    nextClause = "should"
-                else:
-                    nextClause = "must"
+                # If there's more than one, use "should" clase instead of "must"
+                if counter > 1:
+                    clause = "should"
+                    parsedExpression = []
 
-                currQuery = {
-                    "bool": {
-                        nextClause : currMatches
+                    # Rebuild parsed expression to join statements together and fast forward the translate index
+                    for i in range(counter):
+                        parsedExpression.append(parsedTranslation[translateIndex+i])
+                        parsedExpression.append(None)
+                    
+                    translateIndex = tempIndex
+            
+            # Iterate through each statement and join match statements into array
+            for expressionIndex in range(0, len(parsedExpression), 2):
+                element = parsedExpression[expressionIndex]
+                currMatches.append({
+                    "match": {
+                        element.split(":")[0]: element.split(":")[1]
                     }
+                })
+
+            currQuery = {
+                "bool": {
+                    clause: currMatches
                 }
-                
-            prevOp = nextElement
-
-        currMatches.append({
-            "match": {
-                parsedTranslation[-1].split(":")[0]: parsedTranslation[-1].split(":")[1]
             }
-        })
-        clauses.append(currQuery)
 
+            clauses.append(currQuery)
+            translateIndex += 1
+
+        # If only one type of clause, don't use nested bool object
         if len(clauses) > 1:
             return {
                         "bool": {
