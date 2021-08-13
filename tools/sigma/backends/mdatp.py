@@ -118,7 +118,6 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "CommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
                 "ObjectValueName": ("RegistryValueName", self.default_value_mapping),
-                "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
                 "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
                 "ParentName": ("InitiatingProcessParentFileName", self.default_value_mapping),
                 "ParentProcessName": ("InitiatingProcessParentFileName", self.default_value_mapping),
@@ -132,7 +131,6 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "OriginUrl": ("FileOriginUrl", self.default_value_mapping),
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "CommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
-                "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
                 "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
                 "ParentName": ("InitiatingProcessParentFileName", self.default_value_mapping),
                 "ParentProcessName": ("InitiatingProcessParentFileName", self.default_value_mapping),
@@ -149,7 +147,6 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "CommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
                 "Initiated": ("RemotePort", self.default_value_mapping),
-                "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
                 "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
                 "Protocol": ("RemoteProtocol", self.default_value_mapping),
                 "SourceIp": ("LocalIP", self.default_value_mapping),
@@ -162,7 +159,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "FileName": (self.id_mapping, self.default_value_mapping),
                 "Image": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "ImageLoaded": ("FolderPath", self.default_value_mapping),
-                "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
+                "CommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
                 "ParentProcessName": ("InitiatingProcessParentFileName", self.default_value_mapping),
                 "ProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
                 "TargetImage": ("FolderPath", self.default_value_mapping),
@@ -258,19 +255,19 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
             self.product = None
             self.service = None
 
-        if (self.category, self.product, self.service) == ("process_creation", "windows", None):
+        if (self.category, self.service) == ("process_creation", None) and self.product in ['windows', 'linux', 'macos']:
             self.tables.append("DeviceProcessEvents")
             self.current_table = "DeviceProcessEvents"
         elif (self.category, self.product, self.service) == ("registry_event", "windows", None):
             self.tables.append("DeviceRegistryEvents")
             self.current_table = "DeviceRegistryEvents"
-        elif (self.category, self.product, self.service) == ("file_event", "windows", None):
+        elif (self.category, self.service) == ("file_event", None) and self.product in ['windows', 'linux', 'macos']:
             self.tables.append("DeviceFileEvents")
             self.current_table = "DeviceFileEvents"
         elif (self.category, self.product, self.service) == ("image_load", "windows", None):
             self.tables.append("DeviceImageLoadEvents")
             self.current_table = "DeviceImageLoadEvents"
-        elif (self.category, self.product, self.service) == ("network_connection", "windows", None):
+        elif (self.category, self.service) == ("network_connection", None) and self.product in ['windows', 'linux', 'macos']:
             self.tables.append("DeviceNetworkEvents")
             self.current_table = "DeviceNetworkEvents"
         elif (self.category, self.product, self.service) == (None, "windows", "powershell"):
