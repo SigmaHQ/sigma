@@ -6,6 +6,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 from version 0.14.0.
 
+## 0.20 - 2021-08-14
+
+### Added
+
+* Devo backend
+* Fields selection added to SQL backend
+* Linux/MacOS support for MDATP backend
+* Output results as generic YAML/JSON
+* Hash normalization option (hash_normalize) for Elasticsearch wildcard handling
+* ALA AWS Cloudtrail and Azure mappings
+* Logrhytm backend
+* Splunk Data Models backend
+* Further log sources used in open source Sigma ruleset
+* CarbonBlack EDR backend
+* Elastic EQL backend
+* Additional conversion selection filters
+* Filter negation
+* Specifiy table in SQL backend
+* Generic registry event log source
+* Chronicle backend
+
+### Changed
+
+* Elastic Watcher backend populates name attribute instead of title.
+* One item list optimization.
+* Updated Winlogbeat mapping
+* Generic mapping for Powershell backend
+
+### Fixed
+
+* Elastalert multi output file
+* Fixed duplicate output in ElastAlert backend
+* Escaping in Graylog backend
+* es-rule ndjson output
+* Various fixes of known bugs
+
 ## 0.19.1 - 2021-02-28
 
 ### Changed
