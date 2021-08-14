@@ -1,0 +1,34 @@
+title: Cabinet File Expansion
+status: experimental
+id: 9f107a84-532c-41af-b005-8d12a607639f
+author: Bhabesh Raj
+date: 2021/07/30
+description: Adversaries can use the inbuilt expand utility to decompress cab files as seen in recent Iranian MeteorExpress attack
+references:
+    - https://labs.sentinelone.com/meteorexpress-mysterious-wiper-paralyzes-iranian-trains-with-epic-troll
+tags:
+    - attack.execution
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\expand.exe'
+        CommandLine|contains:
+            - '.cab'
+            - '/F:'
+            - 'C:\ProgramData\' #Suspicious paths to curb FPs if any
+            - 'C:\Public\'
+            - '\AppData\Local\Temp\'
+            - '\AppData\Roaming\Temp\'
+    condition: selection
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - System administrator Usage
+level: medium
