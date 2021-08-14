@@ -414,6 +414,18 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules with malformed 'author' fields. (has to be a string even if it contains many author)")
 
+    def test_optional_license(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            license_str = self.get_rule_part(file_path=file, part_name="license")
+            if license_str:
+                if not isinstance(license_str, str):
+                    print(Fore.YELLOW + "Rule {} has a malformed 'license' (has to be a string).".format(file))
+                    faulty_rules.append(file)
+
+        self.assertEqual(faulty_rules, [], Fore.RED +
+                         "There are rules with malformed 'license' fields. (has to be a string )")
+
     def test_optional_tlp(self):
         faulty_rules = []
         valid_tlp = [
