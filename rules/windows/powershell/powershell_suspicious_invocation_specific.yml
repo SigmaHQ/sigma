@@ -13,50 +13,44 @@ logsource:
     service: powershell
 detection:
     convert_b64:
-        Message|contains|all:
-            - '-nop'
-            - ' -w ' 
-            - 'hidden' 
-            - ' -c '
-            - '[Convert]::FromBase64String'
+        - '-nop'
+        - ' -w '
+        - 'hidden'
+        - ' -c '
+        - '[Convert]::FromBase64String'
     iex_selection:
-        Message|contains|all:
-            - ' -w ' 
-            - 'hidden'
-            - '-noni'
-            - '-nop' 
-            - ' -c '
-            - 'iex'
-            - 'New-Object'
+        - ' -w '
+        - 'hidden'
+        - '-noni'
+        - '-nop' 
+        - ' -c '
+        - 'iex'
+        - 'New-Object'
     enc_selection:
-        Message|contains|all:
-            - ' -w ' 
-            - 'hidden'
-            - '-ep'
-            - 'bypass'
-            - '-Enc'
+        - ' -w '
+        - 'hidden'
+        - '-ep'
+        - 'bypass'
+        - '-Enc'
     reg_selection:
-        Message|contains|all:
-            - 'powershell' 
-            - 'reg'
-            - 'add'
-            - 'HKCU\software\microsoft\windows\currentversion\run'
+        - 'powershell'
+        - 'reg'
+        - 'add'
+        - 'HKCU\software\microsoft\windows\currentversion\run'
     webclient_selection:
-        Message|contains|all:
-            - 'bypass' 
-            - '-noprofile'
-            - '-windowstyle'
-            - 'hidden'
-            - 'new-object'
-            - 'system.net.webclient'
-            - '.download'
+        - 'bypass'
+        - '-noprofile'
+        - '-windowstyle'
+        - 'hidden'
+        - 'new-object'
+        - 'system.net.webclient'
+        - '.download'
     iex_webclient:
-        Message|contains|all:
-            - 'iex'
-            - 'New-Object'
-            - 'Net.WebClient'
-            - '.Download'
-    condition: 1 of them
+        - 'iex'
+        - 'New-Object'
+        - 'Net.WebClient'
+        - '.Download'
+    condition: all of convert_b64 or all of iex_selection or all of enc_selection or all of reg_selection or all of webclient_selection or all of iex_webclient
 falsepositives:
     - Penetration tests
 level: high

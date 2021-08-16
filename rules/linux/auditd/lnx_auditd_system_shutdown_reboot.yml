@@ -14,24 +14,20 @@ logsource:
     product: linux
     service: auditd
 detection:
-    selection1:
+    execve:
        type: 'EXECVE'
-       keywords|contains:
-              - 'shutdown'
-              - 'reboot'
-              - 'halt'
-              - 'poweroff'
-    selection2:
-       type: 'EXECVE'
-       keywords|contains:
-              - 'init'
-              - 'telinit'
-    selection3:
-        type: 'EXECVE'
-        keywords|contains:
-              - '0'
-              - '6'
-    condition: selection1 or (selection2 and selection3)
+    shutdowncmd:
+        - 'shutdown'
+        - 'reboot'
+        - 'halt'
+        - 'poweroff'
+    init:
+        - 'init'
+        - 'telinit'
+    initselection:
+        - '0'
+        - '6'
+    condition: execve and (shutdowncmd or (init and initselection))
 falsepositives:
     - 'Legitimate administrative activity'
 level: informational
