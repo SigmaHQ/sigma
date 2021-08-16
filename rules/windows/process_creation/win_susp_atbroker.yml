@@ -7,6 +7,7 @@ references:
 status: experimental
 author: Mateusz Wydra, oscd.community
 date: 2020/10/12
+modified: 2021/08/14
 tags:
     - attack.defense_evasion
     - attack.t1218
@@ -14,12 +15,11 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection1:
-        - Image|endswith: 'AtBroker.exe'
-    selection2:
-        - CommandLine|contains: 'start'
+    selection:
+        Image|endswith: 'AtBroker.exe'
+        CommandLine|contains: 'start'
     filter:
-        - CommandLine|contains:
+        CommandLine|contains:
             - animations
             - audiodescription
             - caretbrowsing
@@ -47,7 +47,7 @@ detection:
             - windowtracking
             - windowtrackingtimeout
             - windowtrackingzorder
-    condition: selection1 and selection2 and not filter
+    condition: selection and not filter
 falsepositives:
     - Legitimate, non-default assistive technology applications execution
 level: high
