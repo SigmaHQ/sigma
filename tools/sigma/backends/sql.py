@@ -45,19 +45,21 @@ class SQLBackend(SingleTextQueryBackend):
     mapLength = "(%s %s)"
 
     options = SingleTextQueryBackend.options + (
-        ("table", False, "Use this option to specify table name, default is \"eventlog\"", None),
+        ("table", "eventlog", "Use this option to specify table name.", None),
+        ("select", "*", "Use this option to specify fields you want to select. Example: \"--backend-option select=xxx,yyy\"", None),
     )
 
     
 
     def __init__(self, sigmaconfig, options):
         super().__init__(sigmaconfig)
+        
         if "table" in options:
             self.table = options["table"]
         else:
             self.table = "eventlog"
 
-        if "select" in options:
+        if "select" in options and options["select"]:
             self.select_fields = options["select"].split(',')
         else:
             self.select_fields = list()
