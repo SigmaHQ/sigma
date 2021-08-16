@@ -21,7 +21,6 @@ import sigma
 from sigma.backends.base import SingleTextQueryBackend
 from sigma.parser.condition import SigmaAggregationParser, NodeSubexpression, ConditionAND, ConditionOR, ConditionNOT
 from sigma.parser.exceptions import SigmaParseError
-
 class SQLBackend(SingleTextQueryBackend):
     """Converts Sigma rule into SQL query"""
     identifier = "sql"
@@ -61,7 +60,7 @@ class SQLBackend(SingleTextQueryBackend):
         if "select" in options and options["select"]:
             self.select_fields = options["select"].split(',')
         else:
-            self.select_fields = list("*")
+            self.select_fields = list()
 
     def generateANDNode(self, node):
         generated = [ self.generateNode(val) for val in node ]
@@ -142,6 +141,47 @@ class SQLBackend(SingleTextQueryBackend):
         """
         return fieldname
 
+    def generate(self, sigmaparser):
+        """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
+        fields = list()
+
+        # First add fields specified in the rule
+        try:
+            for field in sigmaparser.parsedyaml["fields"]:
+                mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
+                if type(mapped) == str:
+                    fields.append(mapped)
+                elif type(mapped) == list:
+                    fields.extend(mapped)
+                else:
+                    raise TypeError("Field mapping must return string or list")
+
+        except KeyError:    # no 'fields' attribute
+            pass
+
+        # Then add fields specified in the backend configuration
+        fields.extend(self.select_fields)
+
+        # Finally, in case fields is empty, add the default value
+        if not fields:
+            fields = list("*")
+
+        for parsed in sigmaparser.condparsed:
+            #query = self.generateQuery(parsed)
+            query = self._generateQueryWithFields(parsed, fields)
+            before = self.generateBefore(parsed)
+            after = self.generateAfter(parsed)
+
+            result = ""
+            if before is not None:
+                result = before
+            if query is not None:
+                result += query
+            if after is not None:
+                result += after
+
+            return result
+
     def cleanValue(self, val):
         if not isinstance(val, str):
             return str(val)
@@ -191,12 +231,24 @@ class SQLBackend(SingleTextQueryBackend):
             return temp_table, agg_condition
 
         raise NotImplementedError("{} aggregation not implemented in SQL Backend".format(agg.aggfunc_notrans))
-
+    
     def generateQuery(self, parsed):
+        return self._generateQueryWithFields(parsed, list("*"))
+
+    def checkFTS(self, parsed, result):
         if self._recursiveFtsSearch(parsed.parsedSearch):
             raise NotImplementedError("FullTextSearch not implemented for SQL Backend.")
+
+    def _generateQueryWithFields(self, parsed, fields):
+        """
+        Return a SQL query with fields specified.
+        """
+
         result = self.generateNode(parsed.parsedSearch)
-        select = ", ".join(self.select_fields)
+
+        self.checkFTS(parsed, result)
+
+        select = ", ".join(fields)
 
         if parsed.parsedAgg:
             #Handle aggregation
