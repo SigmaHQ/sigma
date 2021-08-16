@@ -48,7 +48,6 @@ class SQLBackend(SingleTextQueryBackend):
         ("table", "eventlog", "Use this option to specify table name.", None),
         ("select", "*", "Use this option to specify fields you want to select. Example: \"--backend-option select=xxx,yyy\"", None),
     )
-
     
 
     def __init__(self, sigmaconfig, options):
@@ -62,7 +61,7 @@ class SQLBackend(SingleTextQueryBackend):
         if "select" in options and options["select"]:
             self.select_fields = options["select"].split(',')
         else:
-            self.select_fields = list()
+            self.select_fields = list("*")
 
     def generateANDNode(self, node):
         generated = [ self.generateNode(val) for val in node ]
@@ -197,10 +196,7 @@ class SQLBackend(SingleTextQueryBackend):
         if self._recursiveFtsSearch(parsed.parsedSearch):
             raise NotImplementedError("FullTextSearch not implemented for SQL Backend.")
         result = self.generateNode(parsed.parsedSearch)
-        select = "*"
-
-        if self.select_fields:
-            select = ", ".join(self.select_fields)
+        select = ", ".join(self.select_fields)
 
         if parsed.parsedAgg:
             #Handle aggregation
