@@ -14,13 +14,12 @@ logsource:
     product: linux
     service: auditd
 detection:
-    selection1:
+    execve:
         type: 'EXECVE'
-        keywords|contains: 'grep'
-    selection2:
-        type: 'EXECVE'
-        keywords|contains: 'password'
-    condition: selection1 and selection2
+    passwordgrep:
+        - 'grep'
+        - 'password'
+    condition: execve and all of passwordgrep
 falsepositives:
     - 'Unknown'
 level: high

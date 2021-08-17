@@ -1,0 +1,29 @@
+title: Azure Kubernetes Network Policy Change
+id: 08d6ac24-c927-4469-b3b7-2e422d6e3c43
+description: Identifies when a Azure Kubernetes network policy is modified or deleted.
+author: Austin Songer @austinsonger
+status: experimental
+date: 2021/08/07
+references:
+    - https://docs.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations#microsoftkubernetes
+    - https://www.microsoft.com/security/blog/2021/03/23/secure-containerized-environments-with-updated-threat-matrix-for-kubernetes/
+    - https://www.microsoft.com/security/blog/2020/04/02/attack-matrix-kubernetes/
+    - https://medium.com/mitre-engenuity/att-ck-for-containers-now-available-4c2359654bf1
+    - https://attack.mitre.org/matrices/enterprise/cloud/
+logsource:
+  service: azure.activitylogs
+detection:
+    selection:
+        properties.message: 
+            - MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/NETWORKING.K8S.IO/NETWORKPOLICIES/WRITE
+            - MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/NETWORKING.K8S.IO/NETWORKPOLICIES/DELETE 
+            - MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/EXTENSIONS/NETWORKPOLICIES/WRITE
+            - MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/EXTENSIONS/NETWORKPOLICIES/DELETE
+    condition: selection
+level: medium
+tags:
+    - attack.impact
+    - attack.credential_access
+falsepositives:
+ - Network Policy being modified and deleted may be performed by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment.
+ - Network Policy being modified and deleted from unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule.

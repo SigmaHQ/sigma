@@ -48,12 +48,19 @@ class SQLBackend(SingleTextQueryBackend):
         ("table", False, "Use this option to specify table name, default is \"eventlog\"", None),
     )
 
+    
+
     def __init__(self, sigmaconfig, options):
         super().__init__(sigmaconfig)
         if "table" in options:
             self.table = options["table"]
         else:
             self.table = "eventlog"
+
+        if "select" in options:
+            self.select_fields = options["select"].split(',')
+        else:
+            self.select_fields = list()
 
     def generateANDNode(self, node):
         generated = [ self.generateNode(val) for val in node ]
@@ -188,13 +195,17 @@ class SQLBackend(SingleTextQueryBackend):
         if self._recursiveFtsSearch(parsed.parsedSearch):
             raise NotImplementedError("FullTextSearch not implemented for SQL Backend.")
         result = self.generateNode(parsed.parsedSearch)
+        select = "*"
+
+        if self.select_fields:
+            select = ", ".join(self.select_fields)
 
         if parsed.parsedAgg:
             #Handle aggregation
             fro, whe = self.generateAggregation(parsed.parsedAgg, result)
-            return "SELECT * FROM {} WHERE {}".format(fro, whe)
+            return "SELECT {} FROM {} WHERE {}".format(select, fro, whe)
 
-        return "SELECT * FROM {} WHERE {}".format(self.table, result)
+        return "SELECT {} FROM {} WHERE {}".format(select, self.table, result)
 
     def _recursiveFtsSearch(self, subexpression):
         #True: found subexpression, where no fieldname is requested -> full text search

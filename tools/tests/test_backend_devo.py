@@ -214,6 +214,31 @@ class TestDevoBackend(unittest.TestCase):
         # Act & Assert
         self.validate(detection, expected_result)
 
+    def testMulticondition(self):
+        # Arrange
+        detection = {"selection1": {"fieldname1": "value1"},
+                     "selection2": {"fieldname2": "value2"},
+                     "condition": ["selection1", "selection2"]}
+        expected_result = 'from siem.logtrust.alert.info select "link" as subquery_link group every 24h by subquery_link' \
+                          ' where subquery_link in ( from ' + self.table + \
+                          ' where fieldname1 = "value1" select "link" as subquery_link) or subquery_link in ( from ' + self.table + \
+                          ' where fieldname2 = "value2" select "link" as subquery_link) select *'
+        # Act & Assert
+        self.validate(detection, expected_result)
+
+    def testMulticonditionAgg(self):
+        # Arrange
+        detection = {"selection1": {"fieldname1": "value1"},
+                     "selection2": {"fieldname2": "value2"},
+                     "condition": ["selection1 | count(fieldname1) by fieldname2 > 3", "selection2 | count(fieldname3) by fieldname4 > 3"]}
+        expected_result = 'from siem.logtrust.alert.info select "link" as subquery_link group every 24h by subquery_link' \
+                          ' where subquery_link in ( from ' + self.table + ' where fieldname1 = "value1" select "link" as' \
+                          ' subquery_link group every - by subquery_link,fieldname2 select count(fieldname1) as agg where agg > 3 select *)' \
+                          ' or subquery_link in ( from ' + self.table + ' where fieldname2 = "value2" select "link" as ' \
+                          'subquery_link group every - by subquery_link,fieldname4 select count(fieldname3) as agg where agg > 3 select *) select *'
+        # Act & Assert
+        self.validate(detection, expected_result)
+
 
     def validate(self, detection, expectation):
         config = SigmaConfiguration()

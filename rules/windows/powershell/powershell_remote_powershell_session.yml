@@ -1,3 +1,4 @@
+action: global
 title: Remote PowerShell Session
 id: 96b9f619-aa91-478f-bacb-c3e50f8df575
 description: Detects remote PowerShell sessions
@@ -14,17 +15,27 @@ tags:
     - attack.lateral_movement
     - attack.t1021.006
     - attack.t1028  #an old one
+falsepositives:
+    - Legitimate use remote PowerShell sessions
+level: high
+---
 logsource:
     product: windows
     service: powershell
 detection:
     selection:
-        EventID:
-            - 4103
-            - 400
+        EventID: 4103
         HostName: 'ServerRemoteHost'
         HostApplication|contains: 'wsmprovhost.exe'
     condition: selection
-falsepositives:
-    - Legitimate use remote PowerShell sessions
-level: high
+---
+logsource:
+    product: windows
+    service: powershell-classic
+    definition: fields have to be extract from event
+detection:
+    selection:
+        EventID: 400
+        HostName: 'ServerRemoteHost'
+        HostApplication|contains: 'wsmprovhost.exe'
+    condition: selection
