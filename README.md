@@ -304,7 +304,7 @@ S2AN was developed to be used as a standalone tool or as part of a CI/CD pipelin
 
 The directory `contrib` contains scripts that were contributed by the community:
 
-* `sigma2elastalert.py`i by David Routin: A script that converts Sigma rules to Elastalert configurations. This tool
+* `sigma2elastalert.py`i by David Routine: A script that converts Sigma rules to Elastalert configurations. This tool
   uses *sigmac* and expects it in its path.
 
 These tools are not part of the main toolchain and maintained separately by their authors.
