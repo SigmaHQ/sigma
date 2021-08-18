@@ -2,9 +2,9 @@ action: global
 title: Alternate PowerShell Hosts
 id: 64e8e417-c19a-475a-8d19-98ea705394cc
 description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
-status: experimental
+status: test
 date: 2019/08/11
-modified: 2021/08/16
+modified: 2021/08/18
 author: Roberto Rodriguez @Cyb3rWard0g
 references:
     - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190815181010.html
@@ -26,7 +26,7 @@ detection:
         EventID: 4103
         ContextInfo: '*'
     filter:
-        ContextInfo: 'powershell.exe'
+        ContextInfo|endswith: 'powershell.exe'
     condition: selection and not filter        
 ---
 logsource:
@@ -38,5 +38,5 @@ detection:
         EventID: 400
         HostApplication: '*'
     filter:
-        HostApplication: 'powershell.exe'
+        HostApplication|endswith: 'powershell.exe'
     condition: selection and not filter        
