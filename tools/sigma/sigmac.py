@@ -114,7 +114,7 @@ def set_argparser():
     available additional fields : title, id, status, description, author, references, fields, falsepositives, level, tags.
     This option do not have any effect for backends that already format output : elastalert, kibana, splukxml etc. """)
     argparser.add_argument("--output-format", "-oF", choices=["json", "yaml"], help="Use only if you want to have JSON or YAML output (default is raw text)")
-    argparser.add_argument("--output-extention", "-e", default=None, help="Extention of Output file for filename prefix use")
+    argparser.add_argument("--output-extention", "-e", default=None, help="Extension of Output file for filename prefix use")
     argparser.add_argument("--print0", action="store_true", help="Delimit results by NUL-character")
     argparser.add_argument("--backend-option", "-O", action="append", help="Options and switches that are passed to the backend")
     argparser.add_argument("--backend-config", "-C", help="Configuration file (YAML format) containing options to pass to the backend")

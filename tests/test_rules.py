@@ -344,7 +344,7 @@ class TestRules(unittest.TestCase):
             status_str = self.get_rule_part(file_path=file, part_name="status")
             if status_str:
                 if not status_str in valid_status:
-                    print(Fore.YELLOW + "Rule {} has a invalide 'status' (check wiki).".format(file))
+                    print(Fore.YELLOW + "Rule {} has a invalid 'status' (check wiki).".format(file))
                     faulty_rules.append(file) 
 
         self.assertEqual(faulty_rules, [], Fore.RED +
@@ -365,7 +365,7 @@ class TestRules(unittest.TestCase):
                 print(Fore.YELLOW + "Rule {} has no field 'level'.".format(file))
                 faulty_rules.append(file)
             elif not level_str in valid_level:
-                    print(Fore.YELLOW + "Rule {} has a invalide 'level' (check wiki).".format(file))
+                    print(Fore.YELLOW + "Rule {} has a invalid 'level' (check wiki).".format(file))
                     faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED +
@@ -562,7 +562,7 @@ class TestRules(unittest.TestCase):
             for key in logsource:
                 if key.lower() not in valid_logsource:
                     print(Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
-                    valide = False
+                    valid = False
             if not valid:
                faulty_rules.append(file)
 

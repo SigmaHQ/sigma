@@ -40,7 +40,7 @@ class DevoBackend(SingleTextQueryBackend):
     mapMulti = "has(%s, %s)"                      # Syntax for field/value conditions. First %s is fieldname, second is value
     mapWildcard = "matches(%s, nameglob(%s))"     # Syntax for globbing conditions
     mapRe = "matches(%s, %s)"                     # Syntax for regex conditions that already were transformed by SigmaRegularExpressionModifier
-    mapContains = "toktains(%s, %s, true, true)"  # Systax for token value searches
+    mapContains = "toktains(%s, %s, true, true)"  # Syntax for token value searches
     mapListValueExpression = "%s or %s"           # Syntax for field/value condititons where map value is a list
     mapFullTextSearch = "weaktoktains(raw, \"%s\", true, true)"  # Expression for full text searches
     typedValueExpression = {
