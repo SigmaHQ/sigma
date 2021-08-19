@@ -21,6 +21,7 @@ import sys
 import os
 from random import randrange
 from distutils.util import strtobool
+from typing import List, Tuple, Union
 from uuid import uuid4
 
 import sigma
@@ -35,6 +36,63 @@ from .exceptions import NotSupportedError
 from .elasticsearch import ElasticsearchQuerystringBackend
 from .defaultOpensearchValues import *
 
+class Atom:
+    def __init__(self, field: str, prop: str) -> None:
+        self.field = field
+        self.prop = prop
+
+class Group:
+	def __init__(self) -> None:
+		pass
+
+class Boolean:
+    def __init__(self, expression: Union[Atom, Group]) -> None:
+        self.expression = expression
+
+class Ary:
+    def __init__(self, bool1: Boolean, bool2: List[Tuple[str, Boolean]] = None) -> None:
+        self.bool1 = bool1
+        self.bool2 = bool2
+
+def group_init(self, ary:Ary):
+    self.ary = ary
+
+Group.__init__ = group_init
+
+def parseAtom(s: str) -> Atom:
+    return Atom(s.split(":")[0], s.split(":")[0])
+
+def parseGroup(s: str) -> Group:
+    return Group(parseAry(s[1:-1]))
+
+def expandGroup(s: str) -> str:
+    field = s.strip("()").split(":")[0]
+    props = s.strip("()").split(":")[1].strip("()").split()
+    print(props)
+    newGroup = []
+
+    for index in range(len(props)):
+        element = props[index]
+        if index%2 == 0:
+            newGroup.append(f'{field}: {element}')
+        else:
+            newGroup.append(element)
+
+    return "(" + "".join(newGroup) + ")"
+
+def parseBoolean(s: str) -> Boolean:
+    if not s.contains("("):
+        expression = parseAtom(s)
+    else:
+        if s[0] != '(':
+            s = expandGroup(s)
+        expression = parseGroup(s)
+
+    return Boolean(expression)
+
+def parseAry(s: str) -> Ary:
+    pass
+
 class OpenSearchBackend(object):
     """OpenSearch detection rule backend."""
     active = True
@@ -46,6 +104,7 @@ class OpenSearchBackend(object):
                 ("dest_base_url", "https://github.com/SigmaHQ/sigma/tree/master/", "The URL prefix", None),
                 ("custom_tag", None , "Add custom tag. for multi split with a comma tag1,tag2 ", None),
             )
+    isThreshold = False
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -154,14 +213,27 @@ class OpenSearchBackend(object):
                 }
             ]
 
+    def build_threshold(self, field, inequality, threshold):
+        INEQUALITIES = {"<": "lt", "<=": "lte", ">": "gt", ">=": "gte"}
+
+        return {
+            "range": {
+                field: {
+                    INEQUALITIES[inequality]: threshold
+                }
+            }
+        }
+
     '''
     Builds OpenSearch monitor query from translated Elastic Common Schema query.
-    Only supports must and should clauses.
     '''
     def build_query(self, translation):
-        translation = "(winlog.channel:\"System\" AND winlog.event_id:\"16\" OR winlog.event_data.HiveName.keyword:*\\\\AppData\\\\Local\\\\Temp\\\\SAM* OR winlog.event_data.HiveName.keyword:*.dmp)"
+        # print(f'\nparsed translation: {translation.strip("()").split("OR")}\n')
+        translation = "(winlog.channel:\"System\" AND winlog.event_id:\"16\" AND winlog.event_data.HiveName.keyword:*\\\\AppData\\\\Local\\\\Temp\\\\SAM* AND winlog.event_data.HiveName.keyword:*.dmp)"
         # translation = "(winlog.channel:\"System\""
         parsedTranslation = translation.strip("()").split("OR")
+
+        print(f'\nExpanded group: {expandGroup("winlog.event_data.DestAddress.keyword:(127.* OR 121)")}\n')
         
         if len(parsedTranslation) == 0:
             return {}
@@ -216,11 +288,20 @@ class OpenSearchBackend(object):
 
         # If only one type of clause, don't use nested bool object
         if len(clauses) > 1:
-            return {
-                        "bool": {
-                            "should": clauses
+            if self.isThreshold:
+                self.isThreshold = False
+                return {
+                            "bool": {
+                                "should": clauses,
+                                "filter": self.rule_threshold
+                            }
+                        } 
+            else:
+                return {
+                            "bool": {
+                                "should": clauses
+                            }
                         }
-                    }
         return clauses[0]
 
     '''
@@ -390,7 +471,7 @@ class OpenSearchQsBackend(OpenSearchBackend, ElasticsearchQuerystringBackend):
     Backend class containing the identifier for the -t argument. Can inherit from ElasticsearchQuerystringBackend
     since query string in both OpenSearch monitors and ElasticRule are in Elastic Common Schema.
     '''
-    identifier = "os-monitor"
+    identifier = "opensearch-monitor"
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -400,9 +481,7 @@ class OpenSearchQsBackend(OpenSearchBackend, ElasticsearchQuerystringBackend):
                 raise NotImplementedError("Threshold rules can only handle > and >= operators")
             if agg.aggfield:
                 raise NotImplementedError("Threshold rules cannot COUNT(DISTINCT %s)" % agg.aggfield)
-            self.rule_threshold = {
-                "field": agg.groupfield if agg.groupfield else [],
-                "value": int(agg.condition) if agg.cond_op == ">=" else int(agg.condition) + 1
-            }
+            self.isThreshold = True
+            self.rule_threshold = self.build_threshold(agg.groupfield, agg.cond_op, agg.condition)
             return ""
         raise NotImplementedError("Aggregation %s is not implemented for this backend" % agg.aggfunc_notrans)
