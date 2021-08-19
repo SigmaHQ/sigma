@@ -1,0 +1,47 @@
+title: SMB Relay Attack Tools
+status: experimental
+id: 5589ab4f-a767-433c-961d-c91f3f704db1
+description: Detects different hacktools used for relay attacks on Windows for privilege escalation
+author: Florian Roth
+date: 2021/07/24
+modified: 2021/07/26
+references:
+    - https://attack.mitre.org/techniques/T1557/001/
+    - https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/
+    - https://pentestlab.blog/2017/04/13/hot-potato/
+    - https://github.com/ohpe/juicy-potato
+    - https://hunter2.gitbook.io/darthsidious/other/war-stories/domain-admin-in-30-minutes
+    - https://hunter2.gitbook.io/darthsidious/execution/responder-with-ntlm-relay-and-empire
+tags:
+    - attack.execution
+    - attack.t1557.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_pe:
+        Image|contains: 
+            - 'PetitPotam'
+            - 'RottenPotato'
+            - 'HotPotato'
+            - 'JuicyPotato'
+            - '\just_dce_'
+            - 'Juicy Potato'
+            - '\temp\rot.exe'
+            - '\Potato.exe'
+            - '\SpoolSample.exe'
+            - '\Responder.exe'
+            - '\smbrelayx'
+            - '\ntlmrelayx'
+    selection_script:
+        CommandLine|contains:
+            - 'Invoke-Tater'
+            - ' smbrelay'
+            - ' ntlmrelay'
+            - 'cme smb '
+            - ' /ntlm:NTLMhash '
+            - 'Invoke-PetitPotam'
+    condition: selection_pe or selection_script
+falsepositives:
+    - Legitimate files with these rare hacktool names
+level: critical

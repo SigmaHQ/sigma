@@ -4,18 +4,17 @@ status: experimental
 description: Detects Bitsadmin connections to domains with uncommon TLDs - https://twitter.com/jhencinski/status/1102695118455349248 - https://isc.sans.edu/forums/diary/Investigating+Microsoft+BITS+Activity/23281/
 author: Florian Roth
 date: 2019/03/07
-modified: 2020/09/03
+modified: 2021/08/09
 logsource:
     category: proxy
 detection:
     selection:
-        c-useragent:
-            - 'Microsoft BITS/*'
+        c-useragent|startswith: 'Microsoft BITS/'
     falsepositives:
-        r-dns:
-            - '*.com' 
-            - '*.net' 
-            - '*.org' 
+        r-dns|endswith:
+            - '.com' 
+            - '.net' 
+            - '.org' 
     condition: selection and not falsepositives
 fields:
     - ClientIP

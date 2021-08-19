@@ -1,0 +1,42 @@
+title: SOURGUM Actor Behaviours
+id: 7ba08e95-1e0b-40cd-9db5-b980555e42fd
+description: Suspicious behaviours related to an actor tracked by Microsoft as SOURGUM
+author: MSTIC, FPT.EagleEye
+status: experimental
+level: high
+references:
+    - https://www.virustotal.com/gui/file/c299063e3eae8ddc15839767e83b9808fd43418dc5a1af7e4f44b97ba53fbd3d/detection
+    - https://github.com/Azure/Azure-Sentinel/blob/master/Detections/MultipleDataSources/SOURGUM_IOC.yaml
+    - https://www.microsoft.com/security/blog/2021/07/15/protecting-customers-from-a-private-sector-offensive-actor-using-0-day-exploits-and-devilstongue-malware/
+date: 2021/06/15
+modified: 2021/07/30
+tags:
+    - attack.t1546
+    - attack.t1546.015
+    - attack.persistence
+    - attack.privilege_escalation
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection1:
+        Image|contains: 'windows\system32\Physmem.sys'
+    selection2:
+        Image|contains: 
+            - 'Windows\system32\ime\SHARED\WimBootConfigurations.ini'
+            - 'Windows\system32\ime\IMEJP\WimBootConfigurations.ini'
+            - 'Windows\system32\ime\IMETC\WimBootConfigurations.ini'
+    selection3:
+        Image|contains:
+            - 'windows\system32\filepath2'
+            - 'windows\system32\ime'
+    registry_command:
+        CommandLine|contains:
+            - 'reg add'
+    registry_key:
+        CommandLine|contains: 
+            - 'HKEY_LOCAL_MACHINE\software\classes\clsid\{7c857801-7381-11cf-884d-00aa004b2e24}\inprocserver32'
+            - 'HKEY_LOCAL_MACHINE\software\classes\clsid\{cf4cc405-e2c5-4ddd-b3ce-5e7582d8c9fa}\inprocserver32'
+    condition: selection1 or selection2 or (selection3 and registry_command and registry_key)
+falsepositives:
+    - Unknown

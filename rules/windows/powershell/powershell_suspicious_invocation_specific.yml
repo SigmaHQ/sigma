@@ -6,21 +6,51 @@ tags:
     - attack.execution
     - attack.t1059.001
     - attack.t1086  #an old one
-author: Florian Roth (rule)
+author: Florian Roth (rule), Jonhnathan Ribeiro
 date: 2017/03/05
 logsource:
     product: windows
     service: powershell
 detection:
-    keywords:
-        Message:
-            - '* -nop -w hidden -c * [Convert]::FromBase64String*'
-            - '* -w hidden -noni -nop -c "iex(New-Object*'
-            - '* -w hidden -ep bypass -Enc*'
-            - '*powershell.exe reg add HKCU\software\microsoft\windows\currentversion\run*'
-            - '*bypass -noprofile -windowstyle hidden (new-object system.net.webclient).download*'
-            - '*iex(New-Object Net.WebClient).Download*'
-    condition: keywords
+    convert_b64:
+        - '-nop'
+        - ' -w '
+        - 'hidden'
+        - ' -c '
+        - '[Convert]::FromBase64String'
+    iex_selection:
+        - ' -w '
+        - 'hidden'
+        - '-noni'
+        - '-nop' 
+        - ' -c '
+        - 'iex'
+        - 'New-Object'
+    enc_selection:
+        - ' -w '
+        - 'hidden'
+        - '-ep'
+        - 'bypass'
+        - '-Enc'
+    reg_selection:
+        - 'powershell'
+        - 'reg'
+        - 'add'
+        - 'HKCU\software\microsoft\windows\currentversion\run'
+    webclient_selection:
+        - 'bypass'
+        - '-noprofile'
+        - '-windowstyle'
+        - 'hidden'
+        - 'new-object'
+        - 'system.net.webclient'
+        - '.download'
+    iex_webclient:
+        - 'iex'
+        - 'New-Object'
+        - 'Net.WebClient'
+        - '.Download'
+    condition: all of convert_b64 or all of iex_selection or all of enc_selection or all of reg_selection or all of webclient_selection or all of iex_webclient
 falsepositives:
     - Penetration tests
 level: high

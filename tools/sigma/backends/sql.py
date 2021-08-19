@@ -1,6 +1,7 @@
 # Output backends for sigmac
 # Copyright 2019 Jayden Zheng
 # Copyright 2020 Jonas Hagg
+# Copyright 2021 wagga (https://github.com/wagga40/)
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -43,9 +44,23 @@ class SQLBackend(SingleTextQueryBackend):
     mapListValueExpression = "%s OR %s"     # Syntax for field/value condititons where map value is a list
     mapLength = "(%s %s)"
 
-    def __init__(self, sigmaconfig, table):
+    options = SingleTextQueryBackend.options + (
+        ("table", False, "Use this option to specify table name, default is \"eventlog\"", None),
+    )
+
+    
+
+    def __init__(self, sigmaconfig, options):
         super().__init__(sigmaconfig)
-        self.table = table
+        if "table" in options:
+            self.table = options["table"]
+        else:
+            self.table = "eventlog"
+
+        if "select" in options:
+            self.select_fields = options["select"].split(',')
+        else:
+            self.select_fields = list()
 
     def generateANDNode(self, node):
         generated = [ self.generateNode(val) for val in node ]
@@ -162,10 +177,10 @@ class SQLBackend(SingleTextQueryBackend):
                 group_by = ""
 
             if agg.aggfield:
-                select = "{}({}) AS agg".format(agg.aggfunc_notrans, self.fieldNameMapping(agg.aggfield, None))
+                select = "*,{}({}) AS agg".format(agg.aggfunc_notrans, self.fieldNameMapping(agg.aggfield, None))
             else:
                 if agg.aggfunc == SigmaAggregationParser.AGGFUNC_COUNT:
-                    select = "{}(*) AS agg".format(agg.aggfunc_notrans)
+                    select = "*,{}(*) AS agg".format(agg.aggfunc_notrans)
                 else:
                     raise SigmaParseError("For {} aggregation a fieldname needs to be specified".format(agg.aggfunc_notrans))
 
@@ -180,13 +195,17 @@ class SQLBackend(SingleTextQueryBackend):
         if self._recursiveFtsSearch(parsed.parsedSearch):
             raise NotImplementedError("FullTextSearch not implemented for SQL Backend.")
         result = self.generateNode(parsed.parsedSearch)
+        select = "*"
+
+        if self.select_fields:
+            select = ", ".join(self.select_fields)
 
         if parsed.parsedAgg:
             #Handle aggregation
             fro, whe = self.generateAggregation(parsed.parsedAgg, result)
-            return "SELECT * FROM {} WHERE {}".format(fro, whe)
+            return "SELECT {} FROM {} WHERE {}".format(select, fro, whe)
 
-        return "SELECT * FROM {} WHERE {}".format(self.table, result)
+        return "SELECT {} FROM {} WHERE {}".format(select, self.table, result)
 
     def _recursiveFtsSearch(self, subexpression):
         #True: found subexpression, where no fieldname is requested -> full text search

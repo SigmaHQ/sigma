@@ -1,0 +1,25 @@
+title: Alternate PowerShell Hosts
+id: fe6e002f-f244-4278-9263-20e4b593827f
+description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
+status: experimental
+date: 2019/09/12
+modified: 2021/05/12
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+tags:
+    - attack.execution
+    - attack.t1059.001
+references:
+    - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190815181010.html
+logsource:
+    product: windows
+    category: image_load
+detection:
+    selection:
+        Description: 'System.Management.Automation'
+        ImageLoaded|contains: 'System.Management.Automation'
+    filter:
+        Image|endswith: '\powershell.exe'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: medium

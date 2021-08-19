@@ -4,7 +4,7 @@ description: Detects suspicious command lines used in Covenant luanchers
 status: experimental
 references:
     - https://posts.specterops.io/covenant-v0-5-eee0507b85ba
-author: Florian Roth
+author: Florian Roth, Jonhnathan Ribeiro, oscd.community
 date: 2020/06/04
 tags:
     - attack.execution
@@ -17,12 +17,19 @@ logsource:
     product: windows
 detection:
     selection:
+        CommandLine|contains|all:
+            - '-Sta' 
+            - '-Nop'
+            - '-Window'
+            - 'Hidden'
         CommandLine|contains:
-            - ' -Sta -Nop -Window Hidden -Command '
-            - ' -Sta -Nop -Window Hidden -EncodedCommand '
+            - '-Command'
+            - '-EncodedCommand'
+    selection2:
+        CommandLine|contains:
             - 'sv o (New-Object IO.MemorySteam);sv d '
             - 'mshta file.hta'
             - 'GruntHTTP'
             - '-EncodedCommand cwB2ACAAbwAgA'
-    condition: selection
+    condition: selection or selection2
 level: high

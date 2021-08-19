@@ -1,0 +1,28 @@
+title: Turla Group Named Pipes
+id: 739915e4-1e70-4778-8b8a-17db02f66db1
+status: experimental
+description: Detects a named pipe used by Turla group samples
+references:
+    - Internal Research
+date: 2017/11/06
+tags:
+    - attack.g0010
+author: Markus Neis
+logsource:
+    product: windows
+    category: pipe_created
+    definition: 'Note that you have to configure logging for PipeEvents in Symson config'
+detection:
+    selection:
+        PipeName: 
+            - '\atctl' # https://www.virustotal.com/#/file/a4ddb2664a6c87a1d3c5da5a5a32a5df9a0b0c8f2e951811bd1ec1d44d42ccf1/detection
+            - '\userpipe' # ruag apt case
+            - '\iehelper' # ruag apt case
+            - '\sdlrpc' # project cobra https://www.gdatasoftware.com/blog/2015/01/23926-analysis-of-project-cobra
+            - '\comnap' # https://www.gdatasoftware.com/blog/2015/01/23926-analysis-of-project-cobra
+            # - '\rpc'  # may cause too many false positives : http://kb.palisade.com/index.php?pg=kb.page&id=483
+    condition: selection
+falsepositives:
+    - Unknown
+level: critical
+

@@ -7,6 +7,7 @@ references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
     - https://eqllib.readthedocs.io/en/latest/analytics/aed95fc6-5e3f-49dc-8b35-06508613f979.html
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1003/T1003.md
+    - https://www.wietzebeukema.nl/blog/windows-command-line-obfuscation
 tags:
     - attack.credential_access
     - attack.t1003.002
@@ -19,19 +20,30 @@ logsource:
     product: windows
 detection:
     selection_1:
-        Image: '*\reg.exe'
+        Image|endswith: '\reg.exe'
         CommandLine|contains:
             - 'save'
             - 'export'
+            - 'ˢave'
+            - 'eˣport'
     selection_2:
         CommandLine|contains:
             - 'hklm'
+            - 'hk˪m'
             - 'hkey_local_machine'
+            - 'hkey_˪ocal_machine'
+            - 'hkey_loca˪_machine'
+            - 'hkey_˪oca˪_machine'
     selection_3:
         CommandLine|endswith:
             - '\system'
             - '\sam'
             - '\security'
+            - '\ˢystem'
+            - '\syˢtem'
+            - '\ˢyˢtem'
+            - '\ˢam'
+            - '\ˢecurity'
     condition: selection_1 and selection_2 and selection_3
 falsepositives:
     - Dumping hives for legitimate purpouse i.e. backup or forensic investigation

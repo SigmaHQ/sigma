@@ -21,11 +21,12 @@ import sys
 import os
 from random import randrange
 from distutils.util import strtobool
+from uuid import uuid4
 
 import sigma
 import yaml
 from sigma.parser.modifiers.type import SigmaRegularExpressionModifier, SigmaTypeModifier
-from sigma.parser.condition import ConditionOR, ConditionAND, NodeSubexpression
+from sigma.parser.condition import ConditionOR, ConditionAND, NodeSubexpression, SigmaAggregationParser, SigmaConditionParser, SigmaConditionTokenizer
 
 from sigma.config.mapping import ConditionalFieldMapping
 from .base import BaseBackend, SingleTextQueryBackend
@@ -67,6 +68,7 @@ class ElasticsearchWildcardHandlingMixin(object):
             ("case_insensitive_whitelist", None, "Fields to make the values case insensitive regex. Automatically sets the field as a keyword. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("case_insensitive_blacklist", None, "Fields to exclude from being made into case insensitive regex. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("wildcard_use_keyword", "true", "Use analyzed field or wildcard field if the query uses a wildcard value (ie: '*mall_wear.exe'). Set this to 'False' to use analyzed field or wildcard field. Valid options are: true/false", None),
+            ("hash_normalize", None, "Normalize hash fields to lowercase, uppercase or both. If this option is not used the field value stays untouched. Valid options are: lower/upper/both (default: both)", None),
             )
     reContainsWildcard = re.compile("(?:(?<!\\\\)|\\\\\\\\)[*?]").search
     uuid_regex = re.compile( "[0-9a-fA-F]{8}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{12}", re.IGNORECASE )
@@ -114,19 +116,37 @@ class ElasticsearchWildcardHandlingMixin(object):
         else:
             return False
 
+    def convert_hash(self,value,action):
+        try:
+            value_lo=value.lower()
+        except AttributeError:
+            value_lo=value
+        try:
+            value_hi=value.upper()
+        except AttributeError:
+            value_hi=value
+        if action == "lower":
+            return value_lo
+        elif action == "upper":
+            return value_hi
+        else:
+            return [value_lo,value_hi]
+
     def generateMapItemNode(self, node):
         fieldname, value = node
-        if fieldname.lower().find("hash") != -1:
-            if isinstance(value, list):
-                res = []
-                for item in value:
-                    try:
-                        res.extend([item.lower(), item.upper()])
-                    except AttributeError:  # not a string (something that doesn't support upper/lower casing)
-                        res.append(item)
-                value = res
-            elif isinstance(value, str):
-                value = [value.upper(), value.lower()]
+        if not self.hash_normalize == None:
+            if fieldname.lower().find("hash") != -1:
+                if isinstance(value, list):
+                    res = []
+                    for item in value:
+                        hash_ret = self.convert_hash(item,self.hash_normalize)
+                        if isinstance(hash_ret,list):
+                            res.extend(hash_ret)
+                        else:
+                            res.append(hash_ret)
+                    value = res
+                elif isinstance(value, str):
+                    value = self.convert_hash(value,self.hash_normalize)
         transformed_fieldname = self.fieldNameMapping(fieldname, value)
         if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
             return self.mapExpression % (transformed_fieldname, self.generateNode(value))
@@ -299,6 +319,186 @@ class ElasticsearchQuerystringBackend(DeepFieldMappingMixin, ElasticsearchWildca
             return result
         else:
             return super().generateSubexpressionNode(node)
+
+class ElasticsearchQuerystringBackendLogRhythm(DeepFieldMappingMixin, ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
+    """Converts Sigma rule into Lucene query string for LogRhythm. Only searches, no aggregations."""
+    identifier = "es-qs-lr"
+    active = True
+
+    reEscape = re.compile("([+\\=!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|\\\\u|&&|\\|\\|)")
+    andToken = " AND "
+    orToken = " "
+    notToken = "NOT "
+    subExpression = "(%s)"
+    listExpression = "(%s)"
+    listSeparator = " OR "
+    valueExpression = "%s"
+    typedValueExpression = {
+                SigmaRegularExpressionModifier: "/%s/"
+            }
+    nullExpression = "NOT _exists_:%s"
+    notNullExpression = "_exists_:%s"
+    mapExpression = "%s:%s"
+    mapListsSpecialHandling = False
+    wildcard_use_keyword = False
+
+    
+    def generateValueNode(self, node):
+        result = super().generateValueNode(node)
+        if result == "" or result.isspace():
+            return '""'
+        else:
+            if self.matchKeyword:   # don't quote search value on keyword field
+                if self.CaseInSensitiveField:
+                    make_ci = self.makeCaseInSensitiveValue(result)
+                    result = make_ci.get('value')
+                    if make_ci.get('is_regex'): # Determine if still should be a regex
+                        result = "/%s/" % result # Regex place holders for regex
+                return result
+            else:
+                return "\"%s\"" % result
+
+    def generateNOTNode(self, node):
+        expression = super().generateNode(node.item)
+        if expression:
+            return "(%s%s)" % (self.notToken, expression)
+
+    def generateSubexpressionNode(self, node):
+        """Check for search not bound to a field and restrict search to keyword fields"""
+        nodetype = type(node.items)
+        if nodetype in { ConditionAND, ConditionOR } and type(node.items.items) == list and { type(item) for item in node.items.items }.issubset({str, int}):
+            newitems = list()
+            for item in node.items:
+                newitem = item
+                if type(item) == str:
+                    if not item.startswith("*"):
+                        newitem = "*" + newitem
+                    if not item.endswith("*"):
+                        newitem += "*"
+                    newitems.append(newitem)
+                else:
+                    newitems.append(item)
+            newnode = NodeSubexpression(nodetype(None, None, *newitems))
+            self.matchKeyword = True
+            result = "logMessage:" + super().generateSubexpressionNode(newnode) #changed the word keyword to logMessage. I don't think this is necessarily the best way to do this.
+            self.matchKeyword = False       # one of the reasons why the converter needs some major overhaul
+            return result
+        else:
+            return super().generateSubexpressionNode(node)
+
+class ElasticsearchEQLBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
+    """Converts Sigma rule into EQL."""
+    identifier = "es-eql"
+    active = True
+
+    # XXX case sensitivity
+    # case insensitive (and regex!!!)
+    # - map/field: "%s == %s" becomes "%s : %s"
+    # - map/list: "%s in %s" becomes "%s : %s"
+
+    andToken = " and "
+    orToken = " or "
+    notToken = " not "
+    subExpression = "(%s)"
+    listExpression = "(%s)"
+    listSeparator = ","
+    valueExpression = "\"%s\""          # XXX numeric?
+    typedValueExpression = dict()       # XXX Expression of typed values generated by type modifiers. modifier identifier -> expression dict, %s represents value
+    nullExpression = "%s == null"
+    notNullExpression = "%s != null"
+    mapExpression = "%s : %s"
+    mapListsSpecialHandling = False
+    mapListValueExpression = "%s : %s"
+
+    sort_condition_lists = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.categories = set()
+        self.sequence = False
+        self.maxspan = None
+
+    def generate(self, sigmaparser):
+        # reset per-rule variables
+        self.categories = set()
+        self.sequence = False
+        self.maxspan = None
+        return super().generate(sigmaparser)
+
+    def escapeSlashes(self, value):
+        return value.replace("\\", "\\\\")
+
+    def generateMapItemNode(self, node):
+        fieldname, _ = node
+        try:
+            category, fieldname = fieldname.split('.', 1)
+            # check against https://www.elastic.co/guide/en/ecs/1.8/ecs-allowed-values-event-category.html
+            if category in ("authentication", "configuration", "database", "driver", "file", "host", "iam", "intrusion_detection", "malware", "network", "package", "process", "registry", "session", "web"):
+                self.categories.add(category)
+        except ValueError:
+            pass
+        return super().generateMapItemNode(node)
+
+    def generateMapItemTypedNode(self, fieldname, value):
+        return self.mapExpression % (fieldname, self.generateTypedValueNode(value))
+
+    def generateValueNode(self, node):
+        return self.valueExpression % (self.escapeSlashes(self.cleanValue(str(node))))
+
+    def generateAggregationQuery(self, agg, searchId):
+        condtoken = SigmaConditionTokenizer(searchId)
+        condparsed = SigmaConditionParser(agg.parser, condtoken)
+        backend = ElasticsearchEQLBackend(agg.config)
+        query = backend.generateQuery(condparsed)
+        before = backend.generateBefore(condparsed)
+        return before + query
+
+    def generateAggregation(self, agg):
+        if agg.aggfunc == SigmaAggregationParser.AGGFUNC_NEAR:
+            self.sequence = True
+            self.maxspan = agg.parser.parsedyaml['detection'].get('timeframe', None)
+
+            includeQueries = []
+            excludeQueries = []
+
+            for include in agg.include:
+                includeQueries.append(self.generateAggregationQuery(agg, include))
+
+            for exclude in agg.exclude:
+                excludeQueries.append(self.generateAggregationQuery(agg, exclude))
+
+            ret = " ] [ " + " ] [ ".join(includeQueries) + " ]"
+            if len(excludeQueries) > 0:
+                ret += " until [ " + " ] [ ".join(excludeQueries) + " ]"
+            return ret
+
+        raise NotImplementedError("Aggregation %s is not implemented for this backend" % agg.aggfunc_notrans)
+
+    def generateEventCategory(self):
+        if len(self.categories) == 0:
+            return "any where "
+        elif len(self.categories) == 1:
+            return "%s where " % self.categories.pop()
+        # XXX raise NotImplementedError? >1 category is probably due to unmapped fields
+        return "any where "
+
+    def generateBefore(self, parsed):
+        before = ""
+
+        if self.sequence:
+            before += "sequence "
+            if self.maxspan != None:
+                before += "with maxspan=%s " % self.maxspan
+            before += "[ "
+
+        before += self.generateEventCategory()
+
+        return before
+
+    def fieldNameMapping(self, fieldname, value):
+        if fieldname.count("-") > 0 or fieldname.count(" ") > 0 or fieldname[0].isdigit():
+            return "`%s`" % fieldname
+        return fieldname
 
 class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, ElasticsearchWildcardHandlingMixin, BaseBackend):
     """ElasticSearch DSL backend"""
@@ -509,16 +709,22 @@ class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, Elast
                             }
                     else:  # if the condition is count() by MyGroupedField > XYZ
                         group_aggname = "{}_count".format(agg.groupfield)
+                        count_agg_name = "single_{}_count".format(agg.groupfield)
                         self.queries[-1]['aggs'] = {
                             group_aggname: {
                                 'terms': {
                                     'field': '%s' % (agg.groupfield)
                                 },
                                 'aggs': {
+                                    count_agg_name: {
+                                        'value_count': {
+                                            'field': '%s' % agg.groupfield
+                                        }
+                                    },
                                     'limit': {
                                         'bucket_selector': {
                                             'buckets_path': {
-                                                'count': group_aggname
+                                                'count': count_agg_name
                                             },
                                             'script': 'params.count %s %s' % (agg.cond_op, agg.condition)
                                         }
@@ -917,7 +1123,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                     iaction = {
                             "elastic":{
                                 "transform":{ #adding title, description, tags on the event
-                                    "script": "ctx.payload.transform = [];for (int j=0;j<ctx.payload.hits.total;j++){ctx.payload.hits.hits[j]._source.alerttimestamp=ctx.trigger.scheduled_time;ctx.payload.hits.hits[j]._source.alerttitle=ctx.metadata.title;ctx.payload.hits.hits[j]._source.alertquery=ctx.metadata.query;ctx.payload.hits.hits[j]._source.alertdescription=ctx.metadata.description;ctx.payload.hits.hits[j]._source.tags=ctx.metadata.tags;ctx.payload.transform.add(ctx.payload.hits.hits[j]._source)} return ['_doc': ctx.payload.transform];"
+                                    "script": "ctx.payload.transform = [];for (int j=0;j<ctx.payload.hits.total;j++){ctx.payload.hits.hits[j]._source.alerttimestamp=ctx.trigger.scheduled_time;ctx.payload.hits.hits[j]._source.alerttitle=ctx.metadata.name;ctx.payload.hits.hits[j]._source.alertquery=ctx.metadata.query;ctx.payload.hits.hits[j]._source.alertdescription=ctx.metadata.description;ctx.payload.hits.hits[j]._source.tags=ctx.metadata.tags;ctx.payload.transform.add(ctx.payload.hits.hits[j]._source)} return ['_doc': ctx.payload.transform];"
                                 },
                                 "index":{
                                     "index": index,
@@ -939,7 +1145,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
 
             self.watcher_alert[rulename] = {
                               "metadata": {
-                                  "title": title,
+                                  "name": title,
                                   "description": description,
                                   "tags": tags,
                                   "query":result #addede query to metadata. very useful in kibana to do drill down directly from discover
@@ -1050,7 +1256,7 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
         for parsed in sigmaparser.condparsed:
             #Static data
             rule_object = {
-                "name": rulename + "_" + str(rule_number),
+                "name": rulename,
                 "description": description,
                 "index": index,
                 "priority": self.convertLevel(level),
@@ -1134,6 +1340,7 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
             self.elastalert_alerts[rule_object['name']] = rule_object
             #Clear fields
             self.fields = []
+            return str(yaml.dump(rule_object, default_flow_style=False, width=10000))
 
     def generateNode(self, node):
         #Save fields for adding them in query_key
@@ -1182,11 +1389,12 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
         }.get(level, 2)
 
     def finalize(self):
-        result = ""
-        for rulename, rule in self.elastalert_alerts.items():
-            result += yaml.dump(rule, default_flow_style=False, width=10000)
-            result += '\n'
-        return result
+        pass
+        # result = ""
+        # for rulename, rule in self.elastalert_alerts.items():
+            # result += yaml.dump(rule, default_flow_style=False, width=10000)
+            # result += '\n'
+        # return result
 
 class ElastalertBackendDsl(ElastalertBackend, ElasticsearchDSLBackend):
     """Elastalert backend"""
@@ -1211,15 +1419,34 @@ class ElastalertBackendQs(ElastalertBackend, ElasticsearchQuerystringBackend):
         #Generate ES QS Query
         return [{ 'query' : { 'query_string' : { 'query' : super().generateQuery(parsed) } } }]
 
-class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
+class ElasticSearchRuleBackend(object):
     """Elasticsearch detection rule backend"""
-    identifier = "es-rule"
     active = True
+    uuid_black_list = []
+    options = ElasticsearchQuerystringBackend.options + (
+                ("put_filename_in_ref", False, "Want to have yml name in reference ?", None),
+                ("convert_to_url", False, "Want to convert to a URL ?", None),
+                ("path_to_replace", "../", "The local path to replace with dest_base_url", None),
+                ("dest_base_url", "https://github.com/SigmaHQ/sigma/tree/master/", "The URL prefix", None),
+                ("custom_tag", None , "Add custom tag. for multi split with a comma tag1,tag2 ", None),
+            )
+    default_rule_type = "query"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tactics = self._load_mitre_file("tactics")
         self.techniques = self._load_mitre_file("techniques")
+        self.rule_type = self.default_rule_type
+        self.rule_threshold = {}
+
+    def _rule_lang_from_type(self):
+        rule_lang_map = {
+            "eql": "eql",
+            "query": "lucene",
+            "threat-match": "lucene",
+            "threshold": "lucene",
+        }
+        return rule_lang_map[self.rule_type]
 
     def _load_mitre_file(self, mitre_type):
         try:
@@ -1236,6 +1463,10 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
             return []
 
     def generate(self, sigmaparser):
+        # reset per-detection variables
+        self.rule_type = self.default_rule_type
+        self.rule_threshold = {}
+
         translation = super().generate(sigmaparser)
         if translation:
             index = sigmaparser.get_logsource().index
@@ -1282,14 +1513,45 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
                 return technique
 
     def map_risk_score(self, level):
+        if level not in ["low","medium","high","critical"]:
+            level = "medium"
         if level == "low":
-            return randrange(0,22)
+            return 5
         elif level == "medium":
-            return randrange(22,48)
+            return 35
         elif level == "high":
-            return randrange(48,74)
+            return 65
         elif level == "critical":
-            return randrange(74,101)
+            return 95
+
+    def map_severity(self, severity):
+        severity = severity.lower()
+        if severity  in ["low","medium","high","critical"]:
+            return severity
+        elif severity == "informational":
+            return "low"
+        else:
+            return "medium"
+
+    def build_ymlfile_ref(self, configs):
+        if self.put_filename_in_ref == False:  # Dont want
+            return None
+
+        yml_filename = configs.get("yml_filename")
+        yml_path = configs.get("yml_path")
+        if yml_filename == None or yml_path == None:
+            return None
+            
+        if self.convert_to_url:
+            yml_path = yml_path.replace('\\','/')                              #windows path to url 
+            self.path_to_replace = self.path_to_replace.replace('\\','/')      #windows path to url            
+            if self.path_to_replace not in yml_path: #Error to change
+                return None
+
+            new_ref = yml_path.replace(self.path_to_replace,self.dest_base_url) + '/' + yml_filename
+        else:
+            new_ref = yml_filename
+        return new_ref
 
     def create_rule(self, configs, index):
         tags = configs.get("tags", [])
@@ -1322,24 +1584,55 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
                     if tact:
                         new_tags.append(tag.title())
                         tactics_list.append(tact)
+        
+        if self.custom_tag:
+            if ',' in self.custom_tag:
+                tag_split = self.custom_tag.split(",")
+                for l_tag in tag_split:
+                    new_tags.append(l_tag)   
+            else:    
+                new_tags.append(self.custom_tag)
+            
         threat = self.create_threat_description(tactics_list=tactics_list, techniques_list=technics_list)
         rule_name = configs.get("title", "").lower()
-        rule_id = re.sub(re.compile('[()*+!,\[\].\s"]'), "_", rule_name)
+        rule_uuid = configs.get("id", "").lower()
+        if rule_uuid == "":
+            rule_uuid = str(uuid4())
+        if rule_uuid in self.uuid_black_list:
+            rule_uuid = str(uuid4())
+        self.uuid_black_list.append(rule_uuid)
+        rule_id = re.sub(re.compile('[()*+!,\[\].\s"]'), "_", rule_uuid)
         risk_score = self.map_risk_score(configs.get("level", "medium"))
         references = configs.get("reference")
         if references is None:
             references = configs.get("references")
+        falsepositives = []
+        yml_falsepositives = configs.get('falsepositives',["Unknown"])
+        if isinstance(yml_falsepositives,str):
+            falsepositives.append(yml_falsepositives)
+        else:
+            falsepositives=yml_falsepositives
+        
+        add_ref_yml= self.build_ymlfile_ref(configs)
+        if add_ref_yml:
+            if references is None: # No ref
+                references=[]
+            if add_ref_yml in references:
+                pass # else put a duplicate ref for  multi rule file
+            else:
+                references.append(add_ref_yml)
+        
         rule = {
             "description": configs.get("description", ""),
             "enabled": True,
-            "false_positives": configs.get('falsepositives', "Unknown"),
+            "false_positives": falsepositives,
             "filters": [],
             "from": "now-360s",
             "immutable": False,
             "index": index,
             "interval": "5m",
             "rule_id": rule_id,
-            "language": "lucene",
+            "language": self._rule_lang_from_type(),
             "output_index": ".siem-signals-default",
             "max_signals": 100,
             "risk_score": risk_score,
@@ -1348,16 +1641,44 @@ class ElasticSearchRuleBackend(ElasticsearchQuerystringBackend):
             "meta": {
                 "from": "1m"
             },
-            "severity": configs.get("level", "medium"),
+            "severity": self.map_severity(configs.get("level", "medium")),
             "tags": new_tags,
             "to": "now",
-            "type": "query",
+            "type": self.rule_type,
             "threat": threat,
             "version": 1
         }
+        if self.rule_type == "threshold":
+            rule.update({"threshold": self.rule_threshold})
         if references:
             rule.update({"references": references})
         return json.dumps(rule)
+
+
+class ElasticSearchRuleEqlBackend(ElasticSearchRuleBackend, ElasticsearchEQLBackend):
+    default_rule_type = "eql"
+    identifier = "es-rule-eql"
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+class ElasticSearchRuleQsBackend(ElasticSearchRuleBackend, ElasticsearchQuerystringBackend):
+    identifier = "es-rule"
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def generateAggregation(self, agg):
+        if agg.aggfunc == SigmaAggregationParser.AGGFUNC_COUNT:
+            if agg.cond_op not in [">", ">="]:
+                raise NotImplementedError("Threshold rules can only handle > and >= operators")
+            if agg.aggfield:
+                raise NotImplementedError("Threshold rules cannot COUNT(DISTINCT %s)" % agg.aggfield)
+            self.rule_type = "threshold"
+            self.rule_threshold = {
+                "field": agg.groupfield if agg.groupfield else [],
+                "value": int(agg.condition) if agg.cond_op == ">=" else int(agg.condition) + 1
+            }
+            return ""
+        raise NotImplementedError("Aggregation %s is not implemented for this backend" % agg.aggfunc_notrans)
 
 class KibanaNdjsonBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin):
     """Converts Sigma rule into Kibana JSON Configuration files (searches only)."""

@@ -4,9 +4,9 @@ description: Detects suspicious powershell process starts with base64 encoded co
 status: experimental
 references:
     - https://app.any.run/tasks/6217d77d-3189-4db2-a957-8ab239f3e01e
-author: Florian Roth, Markus Neis
+author: Florian Roth, Markus Neis, Jonhnathan Ribeiro, Daniil Yugoslavskiy, Anton Kutepov, oscd.community
 date: 2018/09/03
-modified: 2020/10/20
+modified: 2021/03/02
 tags:
     - attack.execution
     - attack.t1059.001
@@ -16,32 +16,30 @@ logsource:
     product: windows
 detection:
     selection:
-        CommandLine:
-            - '* -e JAB*'
-            - '* -e  JAB*'
-            - '* -e   JAB*'
-            - '* -e    JAB*'
-            - '* -e     JAB*'
-            - '* -e      JAB*'
-            - '* -en JAB*'
-            - '* -enc JAB*'
-            - '* -enc* JAB*'
-            - '* -w hidden -e* JAB*'
-            - '* BA^J e-'
-            - '* -e SUVYI*'
-            - '* -e aWV4I*'
-            - '* -e SQBFAFgA*'
-            - '* -e aQBlAHgA*'
-            - '* -enc SUVYI*'
-            - '* -enc aWV4I*'
-            - '* -enc SQBFAFgA*'
-            - '* -enc aQBlAHgA*'
-            - '* -e* IAA*'
-            - '* -e* IAB*'
-            - '* -e* UwB*'
-            - '* -e* cwB*'
-            - '*.exe -ENCOD *'
+        CommandLine|contains: ' -e' # covers -en and -enc
+    selection2:
+        CommandLine|contains: ' JAB'
+    selection3:
+        CommandLine|contains|all:
+            - ' -w'
+            - ' hidden '
+    selection4:
+        CommandLine|contains:
+            - ' BA^J'
+            - ' SUVYI'
+            - ' SQBFAFgA'
+            - ' aQBlAHgA'
+            - ' aWV4I'
+            - ' IAA'
+            - ' IAB'
+            - ' UwB'
+            - ' cwB'
+    selection5:
+        CommandLine|contains:
+            - '.exe -ENCOD '
     falsepositive1:
-        CommandLine: '* -ExecutionPolicy remotesigned *'
-    condition: selection and not falsepositive1
+        CommandLine|contains|all:
+            - ' -ExecutionPolicy'
+            - 'remotesigned '
+    condition: ((selection and selection2) or (selection and selection2 and selection3) or (selection and selection4) or selection5) and not falsepositive1
 level: high

@@ -5,6 +5,7 @@ description: Detects usage of bitsadmin downloading a file
 references:
     - https://blog.netspi.com/15-ways-to-download-a-file/#bitsadmin
     - https://isc.sans.edu/diary/22264
+    - https://lolbas-project.github.io/lolbas/Binaries/Bitsadmin/
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -12,21 +13,29 @@ tags:
     - attack.s0190
     - attack.t1036.003    
 date: 2017/03/09
-modified: 2020/09/06
-author: Michael Haag
+modified: 2021/07/16
+author: Michael Haag, FPT.EagleEye 
 logsource:
     category: process_creation
     product: windows
 detection:
     selection1:
-        Image:
-            - '*\bitsadmin.exe'
-        CommandLine:
-            - '* /transfer *'
+        Image|endswith:
+            - '\bitsadmin.exe'
+    susp_flag_1:
+        CommandLine|contains:
+            - ' /transfer '
+    susp_flag_2:
+        CommandLine|contains:
+            - ' /create '
+            - ' /addfile '
+    http_flag:
+        CommandLine|contains:
+            - 'http'
     selection2:
-        CommandLine:
-            - '*copy bitsadmin.exe*'
-    condition: selection1 or selection2
+        CommandLine|contains:
+            - 'copy bitsadmin.exe'
+    condition: (selection1 and susp_flag_2 and http_flag) or (selection1 and susp_flag_1) or selection2
 fields:
     - CommandLine
     - ParentCommandLine

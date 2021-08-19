@@ -24,11 +24,26 @@ logsources:
     service: security
     conditions:
       log_name: Security
+  windows-system:
+    product: windows
+    service: system
+    conditions:
+      winlog.channel: System
   windows-sysmon:
     product: windows
     service: sysmon
     conditions:
       log_name: 'Microsoft-Windows-Sysmon/Operational'
+  windows-powershell:
+    product: windows
+    service: powershell
+    conditions:
+      winlog.channel: 'Microsoft-Windows-PowerShell/Operational'
+  windows-classicpowershell:
+    product: windows
+    service: powershell-classic
+    conditions:
+      winlog.channel: 'Windows PowerShell'
   windows-dns-server:
     product: windows
     service: dns-server
@@ -117,7 +132,9 @@ fieldmappings:
   PipeName: event_data.PipeName
   ProcessCommandLine: event_data.ProcessCommandLine
   ProcessName: event_data.ProcessName
+  Product: event_data.Product
   Properties: event_data.Properties
+  ScriptBlockText: winlog.event_data.ScriptBlockText
   SecurityID: event_data.SecurityID
   ServiceFileName: event_data.ServiceFileName
   ServiceName: event_data.ServiceName

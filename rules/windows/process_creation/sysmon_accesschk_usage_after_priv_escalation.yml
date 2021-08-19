@@ -1,0 +1,30 @@
+title: Accesschk Usage After Privilege Escalation
+id: c625d754-6a3d-4f65-9c9a-536aea960d37
+description: Accesschk is an access and privilege audit tool developed by SysInternal and often being used by attacker to verify if a privilege escalation process successful or not 
+status: experimental
+author: Teymur Kheirkhabarov (idea), Mangatas Tondang (rule), oscd.community
+date: 2020/10/13
+references: 
+    - https://image.slidesharecdn.com/kheirkhabarovoffzonefinal-181117201458/95/hunting-for-privilege-escalation-in-windows-environment-43-638.jpg
+tags:
+    - attack.discovery
+    - attack.t1069.001
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    integrity_level:
+        IntegrityLevel: 'Medium'
+    product:
+        Product|endswith: 'AccessChk'
+    description:
+        Description|contains: 'Reports effective permissions'
+    condition: integrity_level and (product or description)
+fields:
+    - IntegrityLevel
+    - Product
+    - Description
+falsepositives:
+    - System administrator Usage
+    - Penetration test 
+level: high

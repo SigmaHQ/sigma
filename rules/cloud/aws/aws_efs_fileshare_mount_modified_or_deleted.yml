@@ -1,0 +1,20 @@
+title: AWS EFS Fileshare Mount Modified or Deleted
+id: 6a7ba45c-63d8-473e-9736-2eaabff79964
+status: experimental
+description: Detects when a EFS Fileshare Mount is modified or deleted. An adversary breaking any file system using the mount target that is being deleted, which might disrupt instances or applications using those mounts.
+author: Austin Songer @austinsonger
+date: 2021/08/15
+references:
+    - https://docs.aws.amazon.com/efs/latest/ug/API_DeleteMountTarget.html
+logsource:
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: elasticfilesystem.amazonaws.com
+        eventName: DeleteMountTarget
+    condition: selection
+falsepositives:
+    - unknown
+level: medium
+tags:
+    - attack.impact

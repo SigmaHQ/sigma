@@ -7,8 +7,8 @@ description: Detects the access to processes by other suspicious processes which
     routines are already present in memory, not requiring any calls to external libraries. The latter should also be considered suspicious.
 status: experimental
 date: 2019/10/27
-modified: 2020/08/24
-author: Perez Diego (@darkquassar), oscd.community
+modified: 2021/05/16
+author: Perez Diego (@darkquassar), oscd.community, Jonhnathan Ribeiro
 references:
     - https://azure.microsoft.com/en-ca/blog/detecting-in-memory-attacks-with-sysmon-and-azure-security-center/
 tags:
@@ -21,12 +21,19 @@ logsource:
     category: process_access
     product: windows
 detection:
-    selection1: 
-        CallTrace: 
-            - "C:\\Windows\\SYSTEM32\\ntdll.dll+*|C:\\Windows\\System32\\KERNELBASE.dll+*|UNKNOWN(*)"
-            - "*UNKNOWN(*)|UNKNOWN(*)"
-    selection2: 
-        CallTrace: "*UNKNOWN*"
+    selection1:
+        CallTrace|contains|all:
+              - 'C:\\Windows\\SYSTEM32\\ntdll.dll+'
+              - '|C:\\Windows\\System32\\KERNELBASE.dll+'
+              - '|UNKNOWN('
+              - ')'
+    selection2:
+        CallTrace|contains|all:
+              - "UNKNOWN("
+              - ")|UNKNOWN("
+        CallTrace|endswith: ")"
+    selection3:
+        CallTrace|contains: "UNKNOWN"
     granted_access:
         GrantedAccess:
             - "0x1F0FFF"
@@ -37,7 +44,10 @@ detection:
             - "0x1F2FFF"
             - "0x1F3FFF"
             - "0x1FFFFF"
-    condition: selection1 OR (selection2 AND granted_access)
+    filter:
+        SourceImage|endswith:
+            - '\Windows\System32\sdiagnhost.exe'
+    condition: (selection1 or selection2) or (selection3 and granted_access) and not filter
 fields:
     - ComputerName
     - User

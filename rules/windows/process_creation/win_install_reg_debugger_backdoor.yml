@@ -9,21 +9,23 @@ tags:
     - attack.privilege_escalation
     - attack.t1546.008
     - attack.t1015  # an old one
-author: Florian Roth
+author: Florian Roth, oscd.community, Jonhnathan Ribeiro
 date: 2019/09/06
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
-        CommandLine:
-            - '*\CurrentVersion\Image File Execution Options\sethc.exe*'
-            - '*\CurrentVersion\Image File Execution Options\utilman.exe*'
-            - '*\CurrentVersion\Image File Execution Options\osk.exe*'
-            - '*\CurrentVersion\Image File Execution Options\magnify.exe*'
-            - '*\CurrentVersion\Image File Execution Options\narrator.exe*'
-            - '*\CurrentVersion\Image File Execution Options\displayswitch.exe*'
-            - '*\CurrentVersion\Image File Execution Options\atbroker.exe*'
+        CommandLine|contains|all:
+            - '\CurrentVersion\Image File Execution Options\'
+        CommandLine|contains:
+            - 'sethc.exe'
+            - 'utilman.exe'
+            - 'osk.exe'
+            - 'magnify.exe'
+            - 'narrator.exe'
+            - 'displayswitch.exe'
+            - 'atbroker.exe'
     condition: selection
 falsepositives:
     - Penetration Tests

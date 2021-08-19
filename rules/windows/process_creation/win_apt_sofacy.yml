@@ -1,9 +1,9 @@
 title: Sofacy Trojan Loader Activity
 id: ba778144-5e3d-40cf-8af9-e28fb1df1e20
-author: Florian Roth
+author: Florian Roth, Jonhnathan Ribeiro, oscd.community
 status: experimental
 date: 2018/03/01
-modified: 2020/08/27
+modified: 2020/11/28
 description: Detects Trojan loader acitivty as used by APT28
 references:
     - https://researchcenter.paloaltonetworks.com/2018/02/unit42-sofacy-attacks-multiple-government-entities/
@@ -22,11 +22,14 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        CommandLine:
-            - 'rundll32.exe %APPDATA%\\*.dat",*'
-            - 'rundll32.exe %APPDATA%\\*.dll",#1'
-    condition: selection
+    selection1:
+        CommandLine|contains|all:
+            - 'rundll32.exe'
+            - '%APPDATA%\'
+    selection2:
+        - CommandLine|contains: '.dat",'
+        - CommandLine|endswith: '.dll",#1'
+    condition: selection1 and selection2
 falsepositives:
     - Unknown
 level: critical

@@ -1,0 +1,43 @@
+title: Raw Disk Access Using Illegitimate Tools
+id: db809f10-56ce-4420-8c86-d6a7d793c79c
+description: Raw disk access using illegitimate tools, possible defence evasion
+author: Teymur Kheirkhabarov, oscd.community
+date: 2019/10/22
+modified: 2021/08/14
+references:
+    - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
+tags:
+    - attack.defense_evasion
+    - attack.t1006
+logsource:
+    product: windows
+    category: raw_access_thread
+detection:
+    filter_1:
+        Device|contains: floppy
+    filter_2:
+        Image|endswith:             # easy to bypass. requires extra rule to support this one
+            - '\wmiprvse.exe'
+            - '\sdiagnhost.exe'
+            - '\searchindexer.exe'
+            - '\csrss.exe'
+            - '\defrag.exe'
+            - '\smss.exe'
+            - '\vssvc.exe'
+            - '\compattelrunner.exe'
+            - '\wininit.exe'
+            - '\autochk.exe'
+            - '\taskhost.exe'
+            - '\dfsrs.exe'
+            - '\vds.exe'
+            - '\lsass.exe'
+    condition: not filter_1 and not filter_2
+fields:
+    - ComputerName
+    - Image
+    - ProcessID
+    - Device
+falsepositives:
+    - Legitimate Administrator using tool for raw access or ongoing forensic investigation
+level: medium
+status: experimental
