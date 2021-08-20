@@ -234,7 +234,7 @@ class TestRules(unittest.TestCase):
 
     def test_missing_id(self):
         faulty_rules = []
-        list_id = []
+        dict_id = {}
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             id = self.get_rule_part(file_path=file, part_name="id")
             if not id:
@@ -243,11 +243,11 @@ class TestRules(unittest.TestCase):
             elif len(id) != 36:
                 print(Fore.YELLOW + "Rule {} has a malformed 'id' (not 36 chars).".format(file))
                 faulty_rules.append(file)                
-            elif id in list_id:
-                print(Fore.YELLOW + "Rule {} has a duplicate 'id'.".format(file))
+            elif id in dict_id.keys():
+                print(Fore.YELLOW + "Rule {} has the same 'id' than {} must be unique.".format(file,dict_id[id]))
                 faulty_rules.append(file)
             else:
-                list_id.append(id)
+                dict_id[id] = file
 
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules with missing or malformed 'id' fields. Create an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).")
@@ -344,7 +344,7 @@ class TestRules(unittest.TestCase):
             status_str = self.get_rule_part(file_path=file, part_name="status")
             if status_str:
                 if not status_str in valid_status:
-                    print(Fore.YELLOW + "Rule {} has a invalide 'status' (check wiki).".format(file))
+                    print(Fore.YELLOW + "Rule {} has a invalid 'status' (check wiki).".format(file))
                     faulty_rules.append(file) 
 
         self.assertEqual(faulty_rules, [], Fore.RED +
@@ -365,7 +365,7 @@ class TestRules(unittest.TestCase):
                 print(Fore.YELLOW + "Rule {} has no field 'level'.".format(file))
                 faulty_rules.append(file)
             elif not level_str in valid_level:
-                    print(Fore.YELLOW + "Rule {} has a invalide 'level' (check wiki).".format(file))
+                    print(Fore.YELLOW + "Rule {} has a invalid 'level' (check wiki).".format(file))
                     faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED +
@@ -562,7 +562,7 @@ class TestRules(unittest.TestCase):
             for key in logsource:
                 if key.lower() not in valid_logsource:
                     print(Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
-                    valide = False
+                    valid = False
             if not valid:
                faulty_rules.append(file)
 
