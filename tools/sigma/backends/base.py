@@ -277,9 +277,10 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
     def generateSubexpressionNode(self, node):
         generated = self.generateNode(node.items)
-        if len(node.items) == 1:
-            # A sub expression with length 1 is not a proper sub expression, no self.subExpression required
-            return generated
+        if 'len'in dir(node.items): # fix the "TypeError: object of type 'NodeSubexpression' has no len()"
+            if len(node.items) == 1:
+                # A sub expression with length 1 is not a proper sub expression, no self.subExpression required
+                return generated
         if generated:
             return self.subExpression % generated
         else:
