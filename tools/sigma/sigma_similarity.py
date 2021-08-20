@@ -68,9 +68,8 @@ def main():
     if args.primary:
         with open(args.primary, "r") as f:
             primary_paths = { pathname.strip() for pathname in f.readlines() }
-
     parsed = {
-                str(path): SigmaCollectionParser(path.open().read())
+                str(path): SigmaCollectionParser(path.open(encoding='utf-8').read())
                 for path in paths
             }
     converted = {
