@@ -13,12 +13,12 @@ modified: 2021/08/04
 logsource:
     product: windows
     service: powershell
-    definition: 'It is recommended to use the new "Script Block Logging" of PowerShell v5 https://adsecurity.org/?p=2277'
+    definition: Script Block Logging must be enable
 detection:
-    keywords:
+    select_LSASS:
         EventID: 4104
         ScriptBlockText|contains: 'Get-Process lsass'
-    condition: keywords
+    condition: select_LSASS
 falsepositives:
     - Legitimate certificate exports invoked by administrators or users (depends on processes in the environment - filter if unusable)
 level: high
