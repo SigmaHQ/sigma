@@ -20,10 +20,18 @@ logsource:
     service: dce_rpc
 detection:
     efs_operation:
-        endpoint|startswith:
+        operation|startswith:
             - 'Efs'
             - 'efs'
     condition: efs_operation
 falsepositives:
     - Uncommon but legitimate windows administrator or software tasks that make use of the Encrypting File System RPC Calls. Verify if this is common activity (see description).
 level: medium
+fields:
+    - id.orig_h
+    - id.resp_h
+    - id.resp_p
+    - operation
+    - endpoint
+    - named_pipe
+    - uid
