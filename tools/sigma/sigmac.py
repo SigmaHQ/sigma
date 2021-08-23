@@ -323,13 +323,13 @@ def main():
                 error = ERR_BACKEND
                 if not cmdargs.defer_abort:
                     sys.exit(error)
-        except (NotImplementedError, TypeError) as e:
-            print("An unsupported feature is required for this Sigma rule (%s): " % (sigmafile) + str(e), file=sys.stderr)
-            print("Feel free to contribute for fun and fame, this is open source :) -> https://github.com/Neo23x0/sigma", file=sys.stderr)
-            if not cmdargs.ignore_backend_errors:
-                error = ERR_NOT_IMPLEMENTED
-                if not cmdargs.defer_abort:
-                    sys.exit(error)
+        # except (NotImplementedError, TypeError) as e:
+        #     print("An unsupported feature is required for this Sigma rule (%s): " % (sigmafile) + str(e), file=sys.stderr)
+        #     print("Feel free to contribute for fun and fame, this is open source :) -> https://github.com/Neo23x0/sigma", file=sys.stderr)
+        #     if not cmdargs.ignore_backend_errors:
+        #         error = ERR_NOT_IMPLEMENTED
+        #         if not cmdargs.defer_abort:
+        #             sys.exit(error)
         except PartialMatchError as e:
             print("Error: Partial field match error: %s" % str(e), file=sys.stderr)
             if not cmdargs.ignore_backend_errors:
