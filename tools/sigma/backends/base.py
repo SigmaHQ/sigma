@@ -27,7 +27,6 @@ from sigma.parser.modifiers.base import SigmaTypeModifier
 class BackendOptions(dict):
     """
     Object containing all the options that should be passed to the backend.
-
     The options can come from command line and a YAML configuration file, and will be merged together.
     Options from the command line take precedence.
     """
@@ -44,7 +43,6 @@ class BackendOptions(dict):
     def _parse_options(self, options):
         """
         Populates options from the unparsed options of the CLI
-
         :param options: list unparsed options from the CLI.
             Each option can have one of the following formats:
             - "key=value": the option key:value will be passed to the backend
@@ -65,7 +63,6 @@ class BackendOptions(dict):
     def _load_config_file(self, path):
         """
         Populates options from a configuration file
-
         :param path: Path to the configuration file
         """
         if path is None:
@@ -117,7 +114,6 @@ class BaseBackend:
         if len(sigmaparser.condparsed) > 1:
             raise NotImplementedError("Base backend doesn't support multiple conditions")
         for parsed in sigmaparser.condparsed:
-            print(f'\nParsed: {parsed}\n')
             query = self.generateQuery(parsed)
             before = self.generateBefore(parsed)
             after = self.generateAfter(parsed)
@@ -134,7 +130,6 @@ class BaseBackend:
 
     def generateQuery(self, parsed):
         result = self.generateNode(parsed.parsedSearch)
-        print(f'\nResult: {result}\n')
         if parsed.parsedAgg:
             result += self.generateAggregation(parsed.parsedAgg)
         #result = self.applyOverrides(result)
@@ -279,6 +274,10 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
     def generateSubexpressionNode(self, node):
         generated = self.generateNode(node.items)
+        if 'len'in dir(node.items): # fix the "TypeError: object of type 'NodeSubexpression' has no len()"
+            if len(node.items) == 1:
+                # A sub expression with length 1 is not a proper sub expression, no self.subExpression required
+                return generated
         if generated:
             return self.subExpression % generated
         else:
@@ -287,7 +286,11 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
     def generateListNode(self, node):
         if not set([type(value) for value in node]).issubset({str, int}):
             raise TypeError("List values must be strings or numbers")
-        return self.listExpression % (self.listSeparator.join([self.generateNode(value) for value in node]))
+        result = [self.generateNode(value) for value in node]
+        if len(result) == 1:
+            # A list with length 1 is not a proper list, no self.listExpression required
+            return result[0]
+        return self.listExpression % (self.listSeparator.join(result))
 
     def generateMapItemNode(self, node):
         fieldname, value = node

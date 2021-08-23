@@ -16,23 +16,13 @@
 
 import json
 import re
-from fnmatch import fnmatch
 import sys
 import os
-from random import randrange
-from distutils.util import strtobool
 from typing import List, Tuple, Union
 from uuid import uuid4
 
-import sigma
-import yaml
-from sigma.parser.modifiers.type import SigmaRegularExpressionModifier, SigmaTypeModifier
-from sigma.parser.condition import ConditionOR, ConditionAND, NodeSubexpression, SigmaAggregationParser, SigmaConditionParser, SigmaConditionTokenizer
+from sigma.parser.condition import SigmaAggregationParser
 
-from sigma.config.mapping import ConditionalFieldMapping
-from .base import BaseBackend, SingleTextQueryBackend
-from .mixins import RulenameCommentMixin, MultiRuleOutputMixin
-from .exceptions import NotSupportedError
 from .elasticsearch import ElasticsearchQuerystringBackend
 from .defaultOpensearchValues import *
 
@@ -72,10 +62,15 @@ def parse_atom(s: str) -> Atom:
     reg = r"(?<!\\):" # (any character that's not '\') followed by ':'
     return Atom(*re.split(reg, s))
 
-# Since root of AST is always a Group, call parse_group to initiate parsing of overall expression
+'''
+Since root of AST is always a Group, call parse_group to initiate parsing of overall expression.
+'''
 def parse_group(s: str) -> Group:
     return Group(parse_ary(s[1:-1]))
 
+'''
+Expand special group in form of A:(B OR C) to (A:B OR A:C)
+'''
 def expand_group(s: str) -> str:
     reg = r"(?<!\\):" # (any character that's not '\') followed by ':'
 
@@ -154,7 +149,9 @@ def translate_boolean(boolean: Boolean) -> dict:
 
     return translate_group(boolean.expression)
 
-# Combining ary.bool1 and ary.bool2 into array of Boolean grouped by ANDs and split by ORs
+'''
+Combining ary.bool1 and ary.bool2 into array of Boolean grouped by ANDs and split by ORs.
+''' 
 def convert_bool_array(bool1: Boolean, boolArr: List[Tuple[str, Boolean]]) -> List[List[Boolean]]:
     result = [[bool1]]
     resultIndex = 0
@@ -171,6 +168,9 @@ def convert_bool_array(bool1: Boolean, boolArr: List[Tuple[str, Boolean]]) -> Li
 
     return result
 
+'''
+Wraps match statements inside bool-must statement.
+'''
 def adjust_matches(matches: List[dict]) -> List[dict]:
     for index in range(len(matches)):
         match = matches[index]
@@ -191,7 +191,6 @@ def contains_group(booleanArr: List[Boolean]) -> bool:
 
 def translate_ary(ary: Ary) -> dict:
     parsedTranslation = convert_bool_array(ary.bool1, ary.bool2)
-    # print(f'ParsedTranslation: {parsedTranslation}')
 
     clauses = []
     
@@ -222,11 +221,10 @@ def translate_ary(ary: Ary) -> dict:
         
         # Iterate through each statement and join match statements into array
         for boolean in parsedExpression:
-            # print(f'Boolean: {boolean}\nCurrMatches: {currMatches}\n')
             currMatches.append(translate_boolean(boolean))
-
+        
+        # If bool array contains a Group, match statements must also be wrapped in a bool.
         if contains_group(parsedExpression):
-            print(f"\nContains Group; currMatches: {currMatches}\n")
             currMatches = adjust_matches(currMatches)
 
         currQuery = {
@@ -234,8 +232,6 @@ def translate_ary(ary: Ary) -> dict:
                 clause: currMatches
             }
         }
-
-        # print(f'\nCurrQuery: {currQuery}')
 
         clauses.append(currQuery)
         translateIndex += 1
@@ -293,7 +289,6 @@ class OpenSearchBackend(object):
         # reset per-detection variables
         self.rule_threshold = {}
         translation = super().generate(sigmaparser)
-        print(f'translation: {translation}\n')
         if translation:
             index = sigmaparser.get_logsource().index
             if len(index) == 0:
@@ -381,16 +376,25 @@ class OpenSearchBackend(object):
         }
 
     '''
-    Builds OpenSearch monitor query from translated Elastic Common Schema query.
+    Builds OpenSearch monitor query from translated Elastic Rule query. Forms an abstract syntax tree (AST)
+    using the following repeated structures:
+    - Atom = A:B
+    - Rel = AND | OR
+    - Ary = Bool [Rel Bool]*
+    - Group = (Ary)
+    - SGroup = A:(B OR C)
+    - Bool = Atom | Group | SGroup
+
+    Then translates AST into OpenSearch boolean queries.
     '''
     def build_query(self, translation):
-        # print(f'\nparsed translation: {translation.strip("()").split("OR")}\n')
-        translation = "(winlog.channel:\"System\" AND winlog.event_id:\"16\" OR winlog.event_data.HiveName.keyword:*\\\\AppData\\\\Local\\\\Temp\\\\SAM* OR winlog.event_data.HiveName.keyword:*.dmp)"
-        # translation = '(winlog.event_id:"5156" AND (winlog.event_data.SourcePort:"3389" AND winlog.event_data.DestAddress.keyword:(127.* OR \:\:1)))'
-
         ast = parse_group(translation)
-        print("\nAST: " + str(ast) + "\n")
-        return translate_group(ast)
+        translatedQuery = translate_group(ast)
+
+        if self.isThreshold:
+            translatedQuery["bool"]["filter"] = self.rule_threshold
+        
+        return translatedQuery
 
     '''
     Builds inputs field of OS monitor.
@@ -565,8 +569,6 @@ class OpenSearchQsBackend(OpenSearchBackend, ElasticsearchQuerystringBackend):
 
     def generateAggregation(self, agg):
         if agg.aggfunc == SigmaAggregationParser.AGGFUNC_COUNT:
-            if agg.cond_op not in [">", ">="]:
-                raise NotImplementedError("Threshold rules can only handle > and >= operators")
             if agg.aggfield:
                 raise NotImplementedError("Threshold rules cannot COUNT(DISTINCT %s)" % agg.aggfield)
             self.isThreshold = True
