@@ -1,11 +1,11 @@
 title: DNS Events Related To Mining Pools
 id: bf74135c-18e8-4a72-a926-0e4f47888c19
-description: Identifies IPs that may be performing DNS lookups associated with common currency mining pools.
+description: Identifies clients that may be performing DNS lookups associated with common currency mining pools.
 references:
   - https://github.com/Azure/Azure-Sentinel/blob/master/Detections/ASimDNS/imDNS_Miners.yaml
 date: 2021/08/19
-author: Saw Winn Naung , Azure-Sentinel
-level: medium
+author: Saw Winn Naung, Azure-Sentinel, @neu5ron
+level: low
 logsource:                     
     service: dns  
     product: zeek 
@@ -15,7 +15,7 @@ tags:
   - attack.t1496
 detection:
     selection:
-        query:
+        query|endswith:
             - "monerohash.com"
             - "do-dear.com"
             - "xmrminerpro.com"
@@ -82,10 +82,23 @@ detection:
             - "crypto-pools.org"
             - "monero.net"
             - "backup-pool.com"
-            - "mooo.com"
+            - "mooo.com" # Dynamic DNS, may want to exclude
             - "freeyy.me"
             - "cryptonight.net"
             - "shscrypto.net"
-    condition: selection
+    exclude_answers:
+        answers:
+            - "127.0.0.1"
+            - "0.0.0.0"
+    exclude_rejected:
+        rejected: "true"
+    condition: selection and not (exclude_answers OR exclude_rejected)
+falsepositives: |
+    A DNS lookup does not necessarily  mean a successful attempt, verify a) if there was a response using the zeek answers field, if there was then verify the connections (conn.log) to those IPs. b) verify if HTTP, SSL, or TLS activity to the domain that was queried. http.log field is "host" and ssl/tls is "server_name".
 fields:
-    - clientip
+    - id.orig_h
+    - id.resp_h
+    - query
+    - answers
+    - qtype_name
+    - rcode_name
