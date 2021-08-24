@@ -106,6 +106,8 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
         return parse_arg
 
     def default_value_mapping(self, val):
+        if isinstance(val, int):
+            return "== %d" % (val)
         op = "=="
         if isinstance(val, str):
             if "*" in val[1:-1]:  # value contains * inside string - use regex match
