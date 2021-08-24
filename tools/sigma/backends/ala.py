@@ -361,6 +361,8 @@ class AzureAPIBackend(AzureLogAnalyticsBackend):
             for technique in self.techniques:
                 if key_id == technique.get("technique_id", ""):
                     yield technique
+                if "." in key_id and key_id.split(".")[0] == technique.get("technique_id", ""):
+                    yield technique
 
     def _load_mitre_file(self, mitre_type):
         try:
@@ -383,7 +385,10 @@ class AzureAPIBackend(AzureLogAnalyticsBackend):
         local_storage_techniques = {item["technique_id"]: item for item in self.find_technique(src_technics)}
 
         for key_id in src_technics:
-            src_tactic = local_storage_techniques.get(key_id, {}).get("tactic")
+            if "." in key_id:
+                src_tactic = local_storage_techniques.get(key_id.split(".")[0], {}).get("tactic")
+            else:
+                src_tactic = local_storage_techniques.get(key_id, {}).get("tactic")
             if not src_tactic:
                 continue
             src_tactic = set(src_tactic)
