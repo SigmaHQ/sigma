@@ -5,8 +5,9 @@ description: Detects a explorer.exe sub process of the RazerInstaller software w
 references:
     - https://twitter.com/j0nh4t/status/1429049506021138437
     - https://streamable.com/q2dsji
-author: Florian Roth
+author: Florian Roth, Maxime Thiebaut
 date: 2021/08/23
+modified: 2021/08/24
 tags:
     - attack.privilege_escalation
 logsource:
@@ -14,9 +15,11 @@ logsource:
     product: windows
 detection:
     selection:
-        Image|endswith: '\explorer.exe'
         ParentImage|endswith: '\RazerInstaller.exe'
-    condition: selection
+        IntegrityLevel: 'System'
+    filter:
+        Image|beginswith: 'C:\Windows\Installer\Razer\Installer\'
+    condition: selection and not filter
 falsepositives:
     - User selecting a different installation folder (check for other sub processes of this explorer.exe process)
 level: high
