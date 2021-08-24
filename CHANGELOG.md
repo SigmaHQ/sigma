@@ -23,7 +23,7 @@ from version 0.14.0.
 * Elastic EQL backend
 * Additional conversion selection filters
 * Filter negation
-* Specifiy table in SQL backend
+* Specify table in SQL backend
 * Generic registry event log source
 * Chronicle backend
 
