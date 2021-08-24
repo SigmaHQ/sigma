@@ -86,7 +86,7 @@ class TestRules(unittest.TestCase):
                        continue
                    elif tag.startswith("cve."):
                        print(Fore.RED + "Rule {} has the cve tag <{}> but is it a references (https://nvd.nist.gov/)".format(file, tag))
-                      # files_with_incorrect_tags.append(file)
+                       files_with_incorrect_tags.append(file)
                    else:
                        print(Fore.RED + "Rule {} has the unknown tag <{}>".format(file, tag))
                       # files_with_incorrect_tags.append(file)
