@@ -79,17 +79,17 @@ class TestRules(unittest.TestCase):
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             tags = self.get_rule_part(file_path=file, part_name="tags")
             if tags:
-            	for tag in tags:
-                   if tag.startswith("attack."):
-                       continue
-                   elif tag.startswith("car."):
-                       continue
-                   elif tag.startswith("cve."):
-                       print(Fore.RED + "Rule {} has the cve tag <{}> but is it a references (https://nvd.nist.gov/)".format(file, tag))
-                       files_with_incorrect_tags.append(file)
-                   else:
-                       print(Fore.RED + "Rule {} has the unknown tag <{}>".format(file, tag))
-                      # files_with_incorrect_tags.append(file)
+                for tag in tags:
+                    if tag.startswith("attack."):
+                        continue
+                    elif tag.startswith("car."):
+                        continue
+                    elif tag.startswith("cve."):
+                        print(Fore.RED + "Rule {} has the cve tag <{}> but is it a references (https://nvd.nist.gov/)".format(file, tag))
+                        files_with_incorrect_tags.append(file)
+                    else:
+                        print(Fore.RED + "Rule {} has the unknown tag <{}>".format(file, tag))
+                        files_with_incorrect_tags.append(file)
 
         self.assertEqual(files_with_incorrect_tags, [], Fore.RED + 
                          "There are rules with incorrect/unknown MITRE Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://attack.mitre.org/ ")
