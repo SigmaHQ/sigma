@@ -21,7 +21,6 @@ import sigma
 from sigma.backends.base import SingleTextQueryBackend
 from sigma.parser.condition import SigmaAggregationParser, NodeSubexpression, ConditionAND, ConditionOR, ConditionNOT
 from sigma.parser.exceptions import SigmaParseError
-
 class SQLBackend(SingleTextQueryBackend):
     """Converts Sigma rule into SQL query"""
     identifier = "sql"
@@ -45,22 +44,29 @@ class SQLBackend(SingleTextQueryBackend):
     mapLength = "(%s %s)"
 
     options = SingleTextQueryBackend.options + (
-        ("table", False, "Use this option to specify table name, default is \"eventlog\"", None),
+        ("table", "eventlog", "Use this option to specify table name.", None),
+        ("select", "*", "Use this option to specify fields you want to select. Example: \"--backend-option select=xxx,yyy\"", None),
+        ("selection", False, "Use this option to enable fields selection from Sigma rules.", None),
     )
 
+    selection_enabled = False
     
 
     def __init__(self, sigmaconfig, options):
         super().__init__(sigmaconfig)
+        
         if "table" in options:
             self.table = options["table"]
         else:
             self.table = "eventlog"
 
-        if "select" in options:
+        if "select" in options and options["select"]:
             self.select_fields = options["select"].split(',')
         else:
             self.select_fields = list()
+
+        if "selection" in options:
+            self.selection_enabled = True
 
     def generateANDNode(self, node):
         generated = [ self.generateNode(val) for val in node ]
@@ -141,6 +147,53 @@ class SQLBackend(SingleTextQueryBackend):
         """
         return fieldname
 
+    def generate(self, sigmaparser):
+        """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
+        fields = list()
+
+        # First add fields specified in the rule
+        try:
+            for field in sigmaparser.parsedyaml["fields"]:
+                mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
+                if type(mapped) == str:
+                    fields.append(mapped)
+                elif type(mapped) == list:
+                    fields.extend(mapped)
+                else:
+                    raise TypeError("Field mapping must return string or list")
+
+        except KeyError:    # no 'fields' attribute
+            pass
+
+        # Then add fields specified in the backend configuration
+        fields.extend(self.select_fields)
+
+        # In case select is specified in backend option, we want to enable selection
+        if len(self.select_fields) > 0:
+            self.selection_enabled = True
+
+        # Finally, in case fields is empty, add the default value
+        if not fields:
+            fields = list("*")
+
+        for parsed in sigmaparser.condparsed:
+            if self.selection_enabled:
+                query = self._generateQueryWithFields(parsed, fields)
+            else:
+                query = self.generateQuery(parsed)
+            before = self.generateBefore(parsed)
+            after = self.generateAfter(parsed)
+
+            result = ""
+            if before is not None:
+                result = before
+            if query is not None:
+                result += query
+            if after is not None:
+                result += after
+
+            return result
+
     def cleanValue(self, val):
         if not isinstance(val, str):
             return str(val)
@@ -190,15 +243,24 @@ class SQLBackend(SingleTextQueryBackend):
             return temp_table, agg_condition
 
         raise NotImplementedError("{} aggregation not implemented in SQL Backend".format(agg.aggfunc_notrans))
-
+    
     def generateQuery(self, parsed):
+        return self._generateQueryWithFields(parsed, list("*"))
+
+    def checkFTS(self, parsed, result):
         if self._recursiveFtsSearch(parsed.parsedSearch):
             raise NotImplementedError("FullTextSearch not implemented for SQL Backend.")
-        result = self.generateNode(parsed.parsedSearch)
-        select = "*"
 
-        if self.select_fields:
-            select = ", ".join(self.select_fields)
+    def _generateQueryWithFields(self, parsed, fields):
+        """
+        Return a SQL query with fields specified.
+        """
+
+        result = self.generateNode(parsed.parsedSearch)
+
+        self.checkFTS(parsed, result)
+
+        select = ", ".join(fields)
 
         if parsed.parsedAgg:
             #Handle aggregation

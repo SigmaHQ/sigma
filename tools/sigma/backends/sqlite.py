@@ -18,13 +18,14 @@ from sigma.backends.sql import SQLBackend
 from sigma.parser.condition import NodeSubexpression, ConditionAND, ConditionOR, ConditionNOT
 import re
 
-
 class SQLiteBackend(SQLBackend):
     """Converts Sigma rule into SQL query for SQLite"""
     identifier = "sqlite"
     active = True
 
     mapFullTextSearch = "%s MATCH ('\"%s\"')"
+
+    countFTS = 0
 
     def __init__(self, sigmaconfig, table):
         super().__init__(sigmaconfig, table)
@@ -108,16 +109,10 @@ class SQLiteBackend(SQLBackend):
             return self.generateFTS(self.cleanValue(str(node)))
 
     def generateQuery(self, parsed):
-        self.countFTS = 0
-        result = self.generateNode(parsed.parsedSearch)
+        return self._generateQueryWithFields(parsed, list("*"))
+
+    def checkFTS(self, parsed, result):
         if self.countFTS > 1:
             raise NotImplementedError(
                 "Match operator ({}) is allowed only once in SQLite, parse rule in a different way:\n{}".format(self.countFTS, result))
         self.countFTS = 0
-
-        if parsed.parsedAgg:
-            # Handle aggregation
-            fro, whe = self.generateAggregation(parsed.parsedAgg, result)
-            return "SELECT * FROM {} WHERE {}".format(fro, whe)
-
-        return "SELECT * FROM {} WHERE {}".format(self.table, result)

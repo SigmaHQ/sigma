@@ -72,6 +72,27 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(files_with_legal_issues, [], Fore.RED + 
                         "There are rule files which contains a trademark or reference that doesn't comply with the respective trademark requirements - please remove the trademark to avoid legal issues")
+                        
+    def test_optional_tags(self):
+        files_with_incorrect_tags = []
+
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            tags = self.get_rule_part(file_path=file, part_name="tags")
+            if tags:
+                for tag in tags:
+                    if tag.startswith("attack."):
+                        continue
+                    elif tag.startswith("car."):
+                        continue
+                    elif tag.startswith("cve."):
+                        print(Fore.RED + "Rule {} has the cve tag <{}> but is it a references (https://nvd.nist.gov/)".format(file, tag))
+                        files_with_incorrect_tags.append(file)
+                    else:
+                        print(Fore.RED + "Rule {} has the unknown tag <{}>".format(file, tag))
+                        files_with_incorrect_tags.append(file)
+
+        self.assertEqual(files_with_incorrect_tags, [], Fore.RED + 
+                         "There are rules with incorrect/unknown MITRE Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://attack.mitre.org/ ")
 
     def test_confirm_correct_mitre_tags(self):
         files_with_incorrect_mitre_tags = []

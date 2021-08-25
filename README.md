@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Neo23x0/sigma.svg?branch=master)](https://travis-ci.org/Neo23x0/sigma)
+[![sigma build status](https://github.com/SigmaHQ/sigma/actions/workflows/sigma-test.yml/badge.svg?branch=master)](https://github.com/SigmaHQ/sigma/actions?query=branch%3Amaster)
 
 ![sigma_logo](./images/Sigma_0.3.png)
 
@@ -318,6 +318,7 @@ These tools are not part of the main toolchain and maintained separately by thei
 # Projects or Products that use Sigma
 
 * [MISP](http://www.misp-project.org/2017/03/26/MISP.2.4.70.released.html) (since version 2.4.70, March 2017)
+* [Atomic Threat Coverage](https://github.com/atc-project/atomic-threat-coverage) (since December 2018)
 * [SOC Prime - Sigma Rule Editor](https://tdm.socprime.com/sigma/)
 * [uncoder.io](https://uncoder.io/) - Online Translator for SIEM Searches
 * [THOR](https://www.nextron-systems.com/2018/06/28/spark-applies-sigma-rules-in-eventlog-scan/) - Scan with Sigma rules on endpoints
