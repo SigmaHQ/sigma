@@ -5,7 +5,7 @@ status: experimental
 description: Detects PsExec service installation and execution events (service and Sysmon)
 author: Thomas Patzke
 date: 2017/06/12
-modified: 2021/08/06
+modified: 2021/08/26
 references:
     - https://www.jpcert.or.jp/english/pub/sr/ir_research.html
     - https://jpcertcc.github.io/ToolAnalysisResultSheet
@@ -46,7 +46,9 @@ logsource:
 detection:
     sysmon_processcreation:
         Image|endswith: '\PSEXESVC.exe'
-        User: 'NT AUTHORITY\SYSTEM'
+        User|startswith: 
+            - 'NT AUTHORITY\SYSTEM'
+            - 'AUTORITE NT\Sys' # French language settings
 ---
 logsource:
      category: pipe_created
