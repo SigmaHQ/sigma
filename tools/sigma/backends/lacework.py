@@ -1,6 +1,8 @@
 # Output backends for sigmac
 # Copyright 2021 Lacework, Inc.
-# Author: 
+# Authors:
+# David Hazekamp (david.hazekamp@lacework.net)
+# Rachel Rice (rachel.rice@lacework.net)
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -26,7 +28,6 @@ from sigma.parser.modifiers.base import SigmaTypeModifier
 
 
 LACEWORK_CONFIG = yaml.load(
-    # TODO: build this out to support all the default aws sigma rules
     textwrap.dedent('''
     ---
     version: 0.1
