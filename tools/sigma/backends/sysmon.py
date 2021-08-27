@@ -8,6 +8,7 @@ from .exceptions import NotSupportedError
 
 
 class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
+    """Converts Sigma rule into sysmon config"""
     identifier = "sysmon"
     active = True
     andToken = " AND "
