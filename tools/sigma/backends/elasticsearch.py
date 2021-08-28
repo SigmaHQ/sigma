@@ -387,7 +387,7 @@ class ElasticsearchQuerystringBackendLogRhythm(DeepFieldMappingMixin, Elasticsea
             return super().generateSubexpressionNode(node)
 
 class ElasticsearchEQLBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
-    """Converts Sigma rule into EQL."""
+    """Converts Sigma rule into Elasticsearch EQL query."""
     identifier = "es-eql"
     active = True
 
@@ -501,7 +501,7 @@ class ElasticsearchEQLBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandli
         return fieldname
 
 class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, ElasticsearchWildcardHandlingMixin, BaseBackend):
-    """ElasticSearch DSL backend"""
+    """Converts Sigma rule into Elasticsearch DSL query"""
     identifier = 'es-dsl'
     active = True
     options = RulenameCommentMixin.options + ElasticsearchWildcardHandlingMixin.options + (
@@ -1397,7 +1397,7 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
         # return result
 
 class ElastalertBackendDsl(ElastalertBackend, ElasticsearchDSLBackend):
-    """Elastalert backend"""
+    """Converts Sigma rule into ElastAlert DSL query"""
     identifier = 'elastalert-dsl'
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1410,7 +1410,7 @@ class ElastalertBackendDsl(ElastalertBackend, ElasticsearchDSLBackend):
         return self.queries
 
 class ElastalertBackendQs(ElastalertBackend, ElasticsearchQuerystringBackend):
-    """Elastalert backend"""
+    """Converts Sigma rule into ElastAlert QS query"""
     identifier = 'elastalert'
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1656,12 +1656,14 @@ class ElasticSearchRuleBackend(object):
 
 
 class ElasticSearchRuleEqlBackend(ElasticSearchRuleBackend, ElasticsearchEQLBackend):
+    """Converts Sigma rule into Elastic SIEM EQL query"""
     default_rule_type = "eql"
     identifier = "es-rule-eql"
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
 class ElasticSearchRuleQsBackend(ElasticSearchRuleBackend, ElasticsearchQuerystringBackend):
+    """Converts Sigma rule into Elastic SIEM lucene query"""
     identifier = "es-rule"
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

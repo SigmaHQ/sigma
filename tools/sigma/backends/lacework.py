@@ -102,9 +102,7 @@ yaml.add_representer(str, str_presenter)
 
 
 class LaceworkBackend(SingleTextQueryBackend):
-    """
-    Converts Sigma rule into Lacework Policy Platform
-    """
+    """Converts Sigma rule into Lacework Policy Platform"""
     identifier = "lacework"
     active = True
     # our approach to config will be such that we support both an
