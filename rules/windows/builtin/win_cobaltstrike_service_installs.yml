@@ -1,3 +1,4 @@
+action: global
 title: CobaltStrike Service Installations
 id: 5a105d34-05fc-401e-8553-272b45c1522d
 description: Detects known malicious service installs that appear in cases in which a Cobalt Strike beacon elevates privileges or lateral movement
@@ -7,7 +8,6 @@ references:
     - https://www.crowdstrike.com/blog/getting-the-bacon-from-cobalt-strike-beacon/
     - https://thedfirreport.com/2021/08/29/cobalt-strike-a-defenders-guide/
 date: 2021/05/26
-modified: 2021/08/30
 tags:
     - attack.execution
     - attack.privilege_escalation
@@ -15,14 +15,7 @@ tags:
     - attack.t1021.002
     - attack.t1543.003
     - attack.t1569.002
-logsource:
-    product: windows
-    service: system
 detection:
-    selection_id:
-        EventID: 
-            - 7045
-            - 4697
     selection1:
         ServiceFileName|contains|all: 
             - 'ADMIN$'
@@ -40,3 +33,17 @@ detection:
 falsepositives:
     - Unknown
 level: critical
+---
+logsource:
+    product: windows
+    service: system
+detection:
+    selection_id:
+        EventID: 7045
+---
+logsource:
+    product: windows
+    service: security
+detection:
+    selection_id:
+        EventID: 4697
