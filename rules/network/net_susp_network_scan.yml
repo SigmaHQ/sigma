@@ -1,3 +1,4 @@
+action: global
 title: Network Scans
 id: fab0ddf0-b8a9-4d70-91ce-a20547209afb
 status: experimental
@@ -7,13 +8,6 @@ date: 2017/02/19
 modified: 2020/08/27
 logsource:
     category: firewall
-detection:
-    selection:
-        action: denied
-    timeframe: 24h
-    condition:
-        - selection | count(dst_port) by src_ip > 10
-        - selection | count(dst_ip) by src_ip > 10
 fields:
     - src_ip
     - dst_ip
@@ -26,3 +20,15 @@ level: medium
 tags:
     - attack.discovery
     - attack.t1046
+---
+detection:
+    selection:
+        action: denied
+    timeframe: 24h
+    condition: selection | count(dst_port) by src_ip > 10
+---
+detection:
+    selection:
+        action: denied
+    timeframe: 24h
+    condition: selection | count(dst_ip) by src_ip > 10
