@@ -1622,7 +1622,17 @@ class ElasticSearchRuleBackend(object):
             else:
                 references.append(add_ref_yml)
         
+        # add author filed depending on data type in rule file
+        author = configs.get("author", "")
+        if isinstance(author, str):
+            author_list = author.split(', ')
+        elif isinstance(author, list):
+            author_list = author
+        else:
+            author_list = []
+        
         rule = {
+            "author": author_list,
             "description": configs.get("description", ""),
             "enabled": True,
             "false_positives": falsepositives,
