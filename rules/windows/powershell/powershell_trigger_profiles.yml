@@ -1,0 +1,29 @@
+title: Powershell Trigger Profiles by Add_Content
+id: 05b3e303-faf0-4f4a-9b30-46cc13e69152
+status: experimental
+author: frack113
+date: 2021/08/18
+description: Adversaries may gain persistence and elevate privileges by executing malicious content triggered by PowerShell profiles.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1546.013/T1546.013.md
+tags:
+    - attack.privilege_escalation
+    - attack.t1546.013
+logsource:
+    product: windows
+    service: powershell
+    definition: EnableScriptBlockLogging must be set to enable
+detection:
+    selection:
+        EventID: 4104
+        ScriptBlockText|contains|all:
+            - 'Add-Content'
+            - '$profile'
+            - '-Value' 
+        ScriptBlockText|contains: 
+            - 'Start-Process'
+            - '""'  #cleanup action
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium

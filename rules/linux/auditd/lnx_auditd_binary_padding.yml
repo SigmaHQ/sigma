@@ -1,0 +1,33 @@
+title: 'Binary Padding'
+id: c52a914f-3d8b-4b2a-bb75-b3991e75f8ba
+status: experimental
+description: 'Adversaries may use binary padding to add junk data and change the on-disk representation of malware. This rule detect using dd and truncate to add a junk data to file.'
+  # For this rule to work execve auditing / file system auditing with "execute access" to specific binaries must be configured
+  # Example config (place it at the bottom of audit.rules)
+  # -a always,exit -F arch=b32 -S execve -k execve
+  # -a always,exit -F arch=b64 -S execve -k execve
+author: 'Igor Fits, oscd.community'
+date: 2020/10/13
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1027.001/T1027.001.md
+logsource:
+    product: linux
+    service: auditd
+detection:
+    execve:
+        type: 'EXECVE'
+    truncate:
+        - 'truncate'
+        - '-s'
+    dd:
+        - 'dd'
+        - 'if='
+    filter:
+        - 'of='
+    condition: execve and (all of truncate or (all of dd and not filter))
+falsepositives:
+    - 'Legitimate script work'
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1027.001

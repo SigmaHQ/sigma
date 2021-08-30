@@ -1,0 +1,28 @@
+title: Vulnerable Dell BIOS Update Driver Load
+id: 21b23707-60d6-41bb-96e3-0f0481b0fed9
+description: Detects the load of the vulnerable Dell BIOS update driver as reported in CVE-2021-21551
+author: Florian Roth
+date: 2021/05/05
+references:
+    - https://labs.sentinelone.com/cve-2021-21551-hundreds-of-millions-of-dell-computers-at-risk-due-to-multiple-bios-driver-privilege-escalation-flaws/
+    - https://nvd.nist.gov/vuln/detail/cve-2021-21551
+logsource:
+    category: driver_load
+    product: windows
+tags:
+    - attack.privilege_escalation
+detection:
+    selection_image:
+        ImageLoaded|contains: '\DBUtil_2_3.Sys'
+    selection_hash:
+        Hashes|contains:
+            - '0296e2ce999e67c76352613a718e11516fe1b0efc3ffdb8918fc999dd76a73a5'
+            - 'c948ae14761095e4d76b55d9de86412258be7afd'
+            - 'c996d7971c49252c582171d9380360f2'
+            - 'ddbf5ecca5c8086afde1fb4f551e9e6400e94f4428fe7fb5559da5cffa654cc1'
+            - '10b30bdee43b3a2ec4aa63375577ade650269d25'
+            - 'd2fd132ab7bbc6bbb87a84f026fa0244'
+    condition: selection_image or selection_hash
+falsepositives:
+    - legitimate BIOS driver updates (should be rare)
+level: high

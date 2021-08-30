@@ -10,13 +10,15 @@ tags:
     - attack.t1086  #an old one
 author: Sean Metcalf (source), Florian Roth (rule)
 date: 2017/03/05
+modified: 2021/08/21
 logsource:
     product: windows
     service: powershell
     definition: 'It is recommended to use the new "Script Block Logging" of PowerShell v5 https://adsecurity.org/?p=2277'
 detection:
-    keywords:
-        Message|contains:
+    Malicious:
+        EventID: 4104
+        ScriptBlockText|contains:
             - "AdjustTokenPrivileges"
             - "IMAGE_NT_OPTIONAL_HDR64_MAGIC"
             - "Microsoft.Win32.UnsafeNativeMethods"
@@ -37,7 +39,7 @@ detection:
             - "TOKEN_QUERY"
             - "Metasploit"
             - "Mimikatz"
-    condition: keywords
+    condition: Malicious
 falsepositives:
     - Penetration tests
 level: high

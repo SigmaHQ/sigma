@@ -13,7 +13,7 @@ tags:
     - attack.t1085      # an old one
 author: Florian Roth
 date: 2019/10/22
-modified: 2020/11/28
+modified: 2021/04/29
 logsource:
     category: process_creation
     product: windows
@@ -22,7 +22,11 @@ detection:
         CommandLine|contains|all:
             - '\rundll32.exe'
             - ',#'
-    condition: selection
+    filter:
+        CommandLine|contains|all:
+            - 'EDGEHTML.dll'
+            - '#141'
+    condition: selection and not filter
 falsepositives:
     - False positives depend on scripts and administrative tools used in the monitored environment
     - Windows control panel elements have been identified as source (mmc)

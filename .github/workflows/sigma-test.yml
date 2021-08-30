@@ -8,7 +8,9 @@ on:
     branches:
       - "*"
   pull_request:
-    branches: [ master, oscd ]
+    branches:
+      - master
+      - oscd
 
 jobs:
   test-sigma:
@@ -23,6 +25,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pipenv
+        pipenv lock
         pipenv install --dev --deploy
     - name: Test Sigma Tools and Rules
       run: |
@@ -30,3 +33,9 @@ jobs:
     - name: Test SQL(ite) Backend
       run: |
         pipenv run make test-backend-sql
+  yamllint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: yaml-lint
+      uses: ibiqlik/action-yamllint@v3

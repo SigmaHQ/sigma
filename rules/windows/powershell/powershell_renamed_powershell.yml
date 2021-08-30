@@ -1,0 +1,29 @@
+title: Renamed Powershell Under Powershell Channel
+id: 30a8cb77-8eb3-4cfb-8e79-ad457c5a4592
+description: Detects renamed powershell
+status: test
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse
+author: Harish Segar, frack113
+date: 2020/06/29
+modified: 2021/08/18
+tags:
+    - attack.execution
+    - attack.t1086 # an old one
+    - attack.t1059.001
+logsource:
+    product: windows
+    service: powershell-classic
+    definition: fields have to be extract from event
+detection:
+    selection:
+        EventID: 400
+        HostName: ConsoleHost
+    filter:
+        HostApplication|startswith:
+            - powershell.exe
+            - C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+    condition: selection and not filter
+falsepositives:
+    - unknown
+level: low

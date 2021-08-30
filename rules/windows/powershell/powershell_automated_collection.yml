@@ -1,0 +1,38 @@
+title: Automated Collection Command PowerShell
+id: c1dda054-d638-4c16-afc8-53e007f3fbc5
+status: experimental
+author: frack113
+date: 2021/07/28
+description: Once established within a system or network, an adversary may use automated techniques for collecting internal data.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1119/T1119.md
+tags:
+    - attack.collection
+    - attack.t1119
+logsource:
+    product: windows
+    service: powershell
+    definition: Script block logging must be enabled
+detection:
+    selection_eventid:
+        EventID: 4104
+    selection_ext:
+        ScriptBlockText|contains:
+            - '.doc'
+            - '.docx'
+            - '.xls'
+            - '.xlsx'
+            - '.ppt'
+            - '.pptx'
+            - '.rtf'
+            - '.pdf'
+            - '.txt'
+    selection_cmd:
+        ScriptBlockText|contains|all:
+            - 'Get-ChildItem'
+            - ' -Recurse '
+            - ' -Include '
+    condition: all of them
+falsepositives:
+    - Unknown
+level: medium
