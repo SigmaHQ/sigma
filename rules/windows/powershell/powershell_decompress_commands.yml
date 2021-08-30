@@ -1,0 +1,26 @@
+title: PowerShell Decompress Commands
+id: 81fbdce6-ee49-485a-908d-1a728c5dcb09
+description: A General detection for specific decompress commands in PowerShell logs. This could be an adversary decompressing files.
+status: experimental
+date: 2020/05/02
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+tags:
+    - attack.defense_evasion
+    - attack.t1140
+references:
+    - https://github.com/OTRF/detection-hackathon-apt29/issues/8
+    - https://threathunterplaybook.com/evals/apt29/detections/4.A.3_09F29912-8E93-461E-9E89-3F06F6763383.html
+logsource:
+    product: windows
+    service: powershell
+detection:
+    selection1:
+        EventID: 4104
+        ScriptBlockText|contains: 'Expand-Archive'
+    selection2:
+        EventID: 4103
+        Payload|contains: 'Expand-Archive'
+    condition: selection1 or selection2
+falsepositives:
+    - unknown
+level: informational

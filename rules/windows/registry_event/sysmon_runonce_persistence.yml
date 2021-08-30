@@ -1,0 +1,23 @@
+title: Run Once Task Configuration in Registry
+id: c74d7efc-8826-45d9-b8bb-f04fac9e4eff
+description: Rule to detect the configuration of Run Once registry key. Configured payload can be run by runonce.exe /AlternateShellStartup
+author: 'Avneet Singh @v3t0_, oscd.community'
+status: experimental
+date: 2020/11/15
+references:
+    - https://twitter.com/pabraeken/status/990717080805789697
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OSBinaries/Runonce.yml
+tags:
+    - attack.defense_evasion
+    - attack.t1112
+logsource:
+    product: windows
+    category: registry_event
+detection:
+    selection:
+      TargetObject|startswith: 'HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components'
+      TargetObject|endswith: '\StubPath'
+    condition: selection
+falsepositives:
+    - Legitimate modification of the registry key by legitimate program
+level: medium

@@ -1,0 +1,24 @@
+title: Suspicious System.Drawing Load
+id: 666ecfc7-229d-42b8-821e-1a8f8cb7057c
+description: A General detection for processes loading System.Drawing.ni.dll. This could be an indicator of potential Screen Capture.
+status: experimental
+date: 2020/05/02
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+tags:
+    - attack.collection
+    - attack.t1113
+references:
+    - https://github.com/OTRF/detection-hackathon-apt29/issues/16
+    - https://threathunterplaybook.com/evals/apt29/detections/7.A.1_3B4E5808-3C71-406A-B181-17B0CE3178C9.html
+logsource:
+    product: windows
+    category: image_load
+detection:
+    selection:
+        ImageLoaded|endswith: '\System.Drawing.ni.dll'
+    filter:
+        Image|endswith: '\WmiPrvSE.exe'
+    condition: selection and not filter
+falsepositives:
+    - unknown
+level: medium

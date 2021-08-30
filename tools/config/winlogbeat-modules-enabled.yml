@@ -64,8 +64,13 @@ logsources:
         - 'Microsoft-Windows-AppLocker/EXE and DLL'
         - 'Microsoft-Windows-AppLocker/Packaged app-Deployment'
         - 'Microsoft-Windows-AppLocker/Packaged app-Execution'
+  windows-msexchange-management:
+    product: windows
+    service: msexchange-management
+    conditions:
+      winlog.channel: 'MSExchange Management'
 defaultindex: winlogbeat-*
-# Extract all field names qith yq:
+# Extract all field names with yq:
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: winlog.event_data.\1/g'
 # Keep EventID! Clean up the list afterwards!
 fieldmappings:
@@ -79,7 +84,7 @@ fieldmappings:
   CallingProcessName: winlog.event_data.CallingProcessName
   CallTrace: winlog.event_data.CallTrace
   Channel: winlog.channel
-  CommandLine: process.args
+  CommandLine: process.command_line
   ComputerName: winlog.ComputerName
   CurrentDirectory: process.working_directory
   Description: winlog.event_data.Description
@@ -120,13 +125,14 @@ fieldmappings:
   ObjectName: winlog.event_data.ObjectName
   ObjectType: winlog.event_data.ObjectType
   ObjectValueName: winlog.event_data.ObjectValueName
-  ParentCommandLine: process.parent.args
+  ParentCommandLine: process.parent.command_line
   ParentProcessName: process.parent.name
   ParentImage: process.parent.executable
   Path: winlog.event_data.Path
   PipeName: file.name
   ProcessCommandLine: winlog.event_data.ProcessCommandLine
   ProcessName: process.executable
+  Product: winlog.event_data.Product
   Properties: winlog.event_data.Properties
   RuleName: winlog.event_data.RuleName
   SecurityID: winlog.event_data.SecurityID

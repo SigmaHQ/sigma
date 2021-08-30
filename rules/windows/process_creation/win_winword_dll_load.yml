@@ -1,0 +1,25 @@
+title: Winword.exe Loads Suspicious DLL
+id: 2621b3a6-3840-4810-ac14-a02426086171
+status: experimental
+description: Detects Winword.exe loading of custmom dll via /l cmd switch
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/LOLUtilz/OtherMSBinaries/Winword.yml
+author: Victor Sergeev, oscd.community
+date: 2020/10/09
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    image_path:
+        Image|endswith: '\winword.exe'
+    cmd:
+        CommandLine|contains: '/l'
+    condition: image_path and cmd
+fields:
+    - CommandLine
+tags:
+    - attack.defense_evasion
+    - attack.t1202
+falsepositives:
+    - Unknown
+level: medium

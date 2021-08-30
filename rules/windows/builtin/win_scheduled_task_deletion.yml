@@ -1,0 +1,26 @@
+title: Scheduled Task Deletion
+id: 4f86b304-3e02-40e3-aa5d-e88a167c9617 
+description: Detects scheduled task deletion events. Scheduled tasks are likely to be deleted if not used for persistence. Malicious Software often creates tasks directly under the root node e.g. \TASKNAME
+status: experimental
+author: David Strassegger
+date: 2021/01/22
+tags:
+    - attack.execution
+    - attack.privilege_escalation
+    - attack.t1053           # an old one
+    - car.2013-08-001
+    - attack.t1053.005
+references:
+    - https://twitter.com/matthewdunwoody/status/1352356685982146562
+    - https://docs.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4699
+logsource:
+    product: windows
+    service: security
+    definition: 'The Advanced Audit Policy setting Object Access > Audit Other Object Access Events has to be configured to allow this detection. We also recommend extracting the Command field from the embedded XML in the event data.'
+detection:
+    selection:
+        EventID: 4699
+    condition: selection
+falsepositives:
+    - Software installation
+level: medium
