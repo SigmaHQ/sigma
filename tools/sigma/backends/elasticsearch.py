@@ -1490,6 +1490,10 @@ class ElasticSearchRuleBackend(object):
 
     def create_threat_description(self, tactics_list, techniques_list):
         threat_list = list()
+        # sort lists for correct handling with subtechniques
+        tactics_list.sort(key=lambda x: x['external_id'], reverse=False)
+        techniques_list.sort(key=lambda x: x['technique_id'], reverse=False)
+
         for tactic in tactics_list:
             temp_tactics = {
                 "tactic": {
@@ -1507,6 +1511,23 @@ class ElasticSearchRuleBackend(object):
                                 "name": tech.get("technique", ""),
                                 "reference": tech.get("url", "")
                             })
+                elif re.match('[T][0-9]{4}.[0-9]{3}', tech.get("technique_id", ""), re.IGNORECASE):
+                    # add subtechnique to main technique
+                    technique = tech.get("technique_id", "").split(".")[0]
+                    technique_entry = list(filter(lambda temp_techniques: temp_techniques['id'] == technique, temp_techniques))
+                    
+                    if technique_entry:
+                        index = temp_techniques.index(technique_entry[0])
+                        temp_subtechniques = temp_techniques[index].get("subtechnique", [])
+                        temp_subtechniques.append(
+                            {
+                                "id": tech.get("technique_id", ""),
+                                "name": tech.get("technique", ""),
+                                "reference": tech.get("url", "")
+                            }
+                        )
+                        temp_techniques[index].update({"subtechnique": temp_subtechniques})
+
             temp_tactics.update({"technique": temp_techniques})
             threat_list.append(temp_tactics)
         return threat_list
@@ -1570,8 +1591,20 @@ class ElasticSearchRuleBackend(object):
         technics_list = list()
         new_tags = list()
 
+        # sort tags so it looks nice :)
+        tags.sort()
+
         for tag in tags:
             tag = tag.replace("attack.", "")
+            # if there's a subtechnique, add main technique to the list if not already there
+            if re.match("[t][0-9]{4}.[0-9]{3}", tag, re.IGNORECASE):
+                technique = tag.split('.')[0]
+                if technique not in tags and technique.title() not in new_tags:
+                    tech = self.find_technique(technique.title())
+                    if tech:
+                        new_tags.append(technique.title())
+                        technics_list.append(tech)
+
             if re.match("[t][0-9]{4}", tag, re.IGNORECASE):
                 tech = self.find_technique(tag.title())
                 if tech:
@@ -1593,8 +1626,13 @@ class ElasticSearchRuleBackend(object):
                 else:
                     tact = self.find_tactics(key_name=tag.title())
                     if tact:
-                        new_tags.append(tag.title())
                         tactics_list.append(tact)
+                    
+                    # capitalize if not a MITRE CAR tag
+                    if re.match("car.\d{4}-\d{2}-\d{3}", tag, re.IGNORECASE):
+                        new_tags.append(tag)
+                    else:
+                        new_tags.append(tag.title())
         
         if self.custom_tag:
             if ',' in self.custom_tag:
@@ -1633,7 +1671,17 @@ class ElasticSearchRuleBackend(object):
             else:
                 references.append(add_ref_yml)
         
+        # add author filed depending on data type in rule file
+        author = configs.get("author", "")
+        if isinstance(author, str):
+            author_list = author.split(', ')
+        elif isinstance(author, list):
+            author_list = author
+        else:
+            author_list = []
+        
         rule = {
+            "author": author_list,
             "description": configs.get("description", ""),
             "enabled": True,
             "false_positives": falsepositives,
