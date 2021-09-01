@@ -236,7 +236,7 @@ class ElasticsearchWildcardHandlingMixin(object):
         """
         if value and not value == 'null' and not re.match(r'^/.*/$', value) and (re.search('[a-zA-Z]', value) and not re.match(self.uuid_regex, value) or self.containsWildcard(value)):  # re.search for alpha is fastest:
             # Turn single ending '\\' into non escaped (ie: '\\*')
-            #value = re.sub( r"((?<!\\)(\\))\*$", "\g<1>\\*", value )
+            value = re.sub( r"((?<!\\)(\\))\*$", "\g<1>\\*", value )
             # Make upper/lower
             value = re.sub( r"[A-Za-z]", lambda x: "[" + x.group( 0 ).upper() + x.group( 0 ).lower() + "]", value )
             # Turn `.` into wildcard, only if odd number of '\'(because this would mean already escaped)
@@ -289,8 +289,11 @@ class ElasticsearchQuerystringBackend(DeepFieldMappingMixin, ElasticsearchWildca
                     if make_ci.get('is_regex'): # Determine if still should be a regex
                         result = "/%s/" % result # Regex place holders for regex
                 return result
-            else:
-                return "\"%s\"" % result
+            else: # If analyzed field contains wildcard then do NOT quote otherwise things such as '*' get treated as an exact match
+                if self.containsWildcard(result):
+                    return result
+                else:
+                    return "\"%s\"" % result
 
     def generateNOTNode(self, node):
         expression = super().generateNode(node.item)
@@ -618,8 +621,12 @@ class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, Elast
                         queryType = 'wildcard'
                         value_cleaned = self.escapeSlashes(self.cleanValue(str(v)))
                 else:
-                    queryType = 'match_phrase'
-                    value_cleaned = self.cleanValue(str(v))
+                    if self.containsWildcard(str(v)):
+                        queryType = 'wildcard'
+                        value_cleaned = self.escapeSlashes(self.cleanValue(str(v)))
+                    else:
+                        queryType = 'match_phrase'
+                        value_cleaned = self.cleanValue(str(v))
                 res['bool']['should'].append({queryType: {key_mapped: value_cleaned}})
             return res
         elif value is None:
@@ -639,8 +646,12 @@ class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, Elast
                     queryType = 'wildcard'
                     value_cleaned = self.escapeSlashes(self.cleanValue(str(value)))
             else:
-                queryType = 'match_phrase'
-                value_cleaned = self.cleanValue(str(value))
+                if self.containsWildcard(str(value)):
+                    queryType = 'wildcard'
+                    value_cleaned = self.escapeSlashes(self.cleanValue(str(value)))
+                else:
+                    queryType = 'match_phrase'
+                    value_cleaned = self.cleanValue(str(value))
             return {queryType: {key_mapped: value_cleaned}}
         elif isinstance(value, SigmaRegularExpressionModifier):
             key_mapped = self.fieldNameMapping(key, value)
