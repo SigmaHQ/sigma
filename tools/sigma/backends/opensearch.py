@@ -169,18 +169,34 @@ def convert_bool_array(bool1: Boolean, boolArr: List[Tuple[str, Boolean]]) -> Li
     return result
 
 '''
-Wraps match statements inside bool-must statement.
+Group atomic match statements together into parent clause and wrap inside bool statement.
+Maintain group match statements, which are already wrapped in bool statement.
 '''
-def adjust_matches(matches: List[dict]) -> List[dict]:
+def adjust_matches(matches: List[dict], clause) -> List[dict]:
+    atomicMatches = []
+    combinedAtomicMatches = []
+    groupMatches = []
+
+    # Determine if current statement is an atomic match or bool group statement
     for index in range(len(matches)):
         match = matches[index]
         if "match" in match.keys():
-            matches[index] = {
+            atomicMatches.append(match)
+        else:
+            groupMatches.append(match)
+
+    # If any atomic matches, combine under parent clause wrapped in a single bool statement
+    if atomicMatches:
+        # If there's only one atomic match, it should be wrapped in a bool-must regardless of the parent clause
+        clause = "must" if len(atomicMatches) == 1 else clause
+
+        combinedAtomicMatches = [{
                 "bool": {
-                    "must": [match]
+                    clause: atomicMatches
                 }
-            }
-    return matches
+            }]
+    
+    return combinedAtomicMatches + groupMatches
 
 def contains_group(booleanArr: List[Boolean]) -> bool:
     for boolean in booleanArr:
@@ -198,7 +214,7 @@ def translate_ary(ary: Ary) -> dict:
     while translateIndex < len(parsedTranslation):
         parsedExpression = parsedTranslation[translateIndex]
         currMatches = []
-        clause = "must" # default clause is "must"; clause is "should" if multiple "or" statements
+        clause = "must" # default clause is "must"; clause is "should" if multiple consecutive "or" statements
 
         # Statement was joined by "or"
         if len(parsedExpression) == 1:
@@ -208,7 +224,7 @@ def translate_ary(ary: Ary) -> dict:
                 tempIndex += 1
                 counter += 1
 
-            # If there's more than one, use "should" clase instead of "must"
+            # If there's more than one, use "should" clause instead of "must"
             if counter > 1:
                 clause = "should"
                 parsedExpression = []
@@ -223,9 +239,9 @@ def translate_ary(ary: Ary) -> dict:
         for boolean in parsedExpression:
             currMatches.append(translate_boolean(boolean))
         
-        # If bool array contains a Group, match statements must also be wrapped in a bool.
+        # If bool array contains a Group which is wrapped in a bool, match statements must also be wrapped in a bool.
         if contains_group(parsedExpression):
-            currMatches = adjust_matches(currMatches)
+            currMatches = adjust_matches(currMatches, clause)
 
         currQuery = {
             "bool": {
