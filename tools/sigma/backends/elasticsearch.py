@@ -68,6 +68,7 @@ class ElasticsearchWildcardHandlingMixin(object):
             ("case_insensitive_whitelist", None, "Fields to make the values case insensitive regex. Automatically sets the field as a keyword. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("case_insensitive_blacklist", None, "Fields to exclude from being made into case insensitive regex. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("wildcard_use_keyword", "true", "Use analyzed field or wildcard field if the query uses a wildcard value (ie: '*mall_wear.exe'). Set this to 'False' to use analyzed field or wildcard field. Valid options are: true/false", None),
+            ("hash_normalize", None, "Normalize hash fields to lowercase, uppercase or both. If this option is not used the field value stays untouched. Valid options are: lower/upper/both (default: both)", None),
             )
     reContainsWildcard = re.compile("(?:(?<!\\\\)|\\\\\\\\)[*?]").search
     uuid_regex = re.compile( "[0-9a-fA-F]{8}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{12}", re.IGNORECASE )
@@ -115,19 +116,37 @@ class ElasticsearchWildcardHandlingMixin(object):
         else:
             return False
 
+    def convert_hash(self,value,action):
+        try:
+            value_lo=value.lower()
+        except AttributeError:
+            value_lo=value
+        try:
+            value_hi=value.upper()
+        except AttributeError:
+            value_hi=value
+        if action == "lower":
+            return value_lo
+        elif action == "upper":
+            return value_hi
+        else:
+            return [value_lo,value_hi]
+
     def generateMapItemNode(self, node):
         fieldname, value = node
-        if fieldname.lower().find("hash") != -1:
-            if isinstance(value, list):
-                res = []
-                for item in value:
-                    try:
-                        res.extend([item.lower(), item.upper()])
-                    except AttributeError:  # not a string (something that doesn't support upper/lower casing)
-                        res.append(item)
-                value = res
-            elif isinstance(value, str):
-                value = [value.upper(), value.lower()]
+        if not self.hash_normalize == None:
+            if fieldname.lower().find("hash") != -1:
+                if isinstance(value, list):
+                    res = []
+                    for item in value:
+                        hash_ret = self.convert_hash(item,self.hash_normalize)
+                        if isinstance(hash_ret,list):
+                            res.extend(hash_ret)
+                        else:
+                            res.append(hash_ret)
+                    value = res
+                elif isinstance(value, str):
+                    value = self.convert_hash(value,self.hash_normalize)
         transformed_fieldname = self.fieldNameMapping(fieldname, value)
         if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
             return self.mapExpression % (transformed_fieldname, self.generateNode(value))
@@ -301,8 +320,74 @@ class ElasticsearchQuerystringBackend(DeepFieldMappingMixin, ElasticsearchWildca
         else:
             return super().generateSubexpressionNode(node)
 
+class ElasticsearchQuerystringBackendLogRhythm(DeepFieldMappingMixin, ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
+    """Converts Sigma rule into Lucene query string for LogRhythm. Only searches, no aggregations."""
+    identifier = "es-qs-lr"
+    active = True
+
+    reEscape = re.compile("([+\\=!(){}\\[\\]^\"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|\\\\u|&&|\\|\\|)")
+    andToken = " AND "
+    orToken = " "
+    notToken = "NOT "
+    subExpression = "(%s)"
+    listExpression = "(%s)"
+    listSeparator = " OR "
+    valueExpression = "%s"
+    typedValueExpression = {
+                SigmaRegularExpressionModifier: "/%s/"
+            }
+    nullExpression = "NOT _exists_:%s"
+    notNullExpression = "_exists_:%s"
+    mapExpression = "%s:%s"
+    mapListsSpecialHandling = False
+    wildcard_use_keyword = False
+
+    
+    def generateValueNode(self, node):
+        result = super().generateValueNode(node)
+        if result == "" or result.isspace():
+            return '""'
+        else:
+            if self.matchKeyword:   # don't quote search value on keyword field
+                if self.CaseInSensitiveField:
+                    make_ci = self.makeCaseInSensitiveValue(result)
+                    result = make_ci.get('value')
+                    if make_ci.get('is_regex'): # Determine if still should be a regex
+                        result = "/%s/" % result # Regex place holders for regex
+                return result
+            else:
+                return "\"%s\"" % result
+
+    def generateNOTNode(self, node):
+        expression = super().generateNode(node.item)
+        if expression:
+            return "(%s%s)" % (self.notToken, expression)
+
+    def generateSubexpressionNode(self, node):
+        """Check for search not bound to a field and restrict search to keyword fields"""
+        nodetype = type(node.items)
+        if nodetype in { ConditionAND, ConditionOR } and type(node.items.items) == list and { type(item) for item in node.items.items }.issubset({str, int}):
+            newitems = list()
+            for item in node.items:
+                newitem = item
+                if type(item) == str:
+                    if not item.startswith("*"):
+                        newitem = "*" + newitem
+                    if not item.endswith("*"):
+                        newitem += "*"
+                    newitems.append(newitem)
+                else:
+                    newitems.append(item)
+            newnode = NodeSubexpression(nodetype(None, None, *newitems))
+            self.matchKeyword = True
+            result = "logMessage:" + super().generateSubexpressionNode(newnode) #changed the word keyword to logMessage. I don't think this is necessarily the best way to do this.
+            self.matchKeyword = False       # one of the reasons why the converter needs some major overhaul
+            return result
+        else:
+            return super().generateSubexpressionNode(node)
+
 class ElasticsearchEQLBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
-    """Converts Sigma rule into EQL."""
+    """Converts Sigma rule into Elasticsearch EQL query."""
     identifier = "es-eql"
     active = True
 
@@ -416,7 +501,7 @@ class ElasticsearchEQLBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandli
         return fieldname
 
 class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, ElasticsearchWildcardHandlingMixin, BaseBackend):
-    """ElasticSearch DSL backend"""
+    """Converts Sigma rule into Elasticsearch DSL query"""
     identifier = 'es-dsl'
     active = True
     options = RulenameCommentMixin.options + ElasticsearchWildcardHandlingMixin.options + (
@@ -1038,7 +1123,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
                     iaction = {
                             "elastic":{
                                 "transform":{ #adding title, description, tags on the event
-                                    "script": "ctx.payload.transform = [];for (int j=0;j<ctx.payload.hits.total;j++){ctx.payload.hits.hits[j]._source.alerttimestamp=ctx.trigger.scheduled_time;ctx.payload.hits.hits[j]._source.alerttitle=ctx.metadata.title;ctx.payload.hits.hits[j]._source.alertquery=ctx.metadata.query;ctx.payload.hits.hits[j]._source.alertdescription=ctx.metadata.description;ctx.payload.hits.hits[j]._source.tags=ctx.metadata.tags;ctx.payload.transform.add(ctx.payload.hits.hits[j]._source)} return ['_doc': ctx.payload.transform];"
+                                    "script": "ctx.payload.transform = [];for (int j=0;j<ctx.payload.hits.total;j++){ctx.payload.hits.hits[j]._source.alerttimestamp=ctx.trigger.scheduled_time;ctx.payload.hits.hits[j]._source.alerttitle=ctx.metadata.name;ctx.payload.hits.hits[j]._source.alertquery=ctx.metadata.query;ctx.payload.hits.hits[j]._source.alertdescription=ctx.metadata.description;ctx.payload.hits.hits[j]._source.tags=ctx.metadata.tags;ctx.payload.transform.add(ctx.payload.hits.hits[j]._source)} return ['_doc': ctx.payload.transform];"
                                 },
                                 "index":{
                                     "index": index,
@@ -1060,7 +1145,7 @@ class XPackWatcherBackend(ElasticsearchQuerystringBackend, MultiRuleOutputMixin)
 
             self.watcher_alert[rulename] = {
                               "metadata": {
-                                  "title": title,
+                                  "name": title,
                                   "description": description,
                                   "tags": tags,
                                   "query":result #addede query to metadata. very useful in kibana to do drill down directly from discover
@@ -1255,6 +1340,7 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
             self.elastalert_alerts[rule_object['name']] = rule_object
             #Clear fields
             self.fields = []
+            return str(yaml.dump(rule_object, default_flow_style=False, width=10000))
 
     def generateNode(self, node):
         #Save fields for adding them in query_key
@@ -1303,14 +1389,15 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
         }.get(level, 2)
 
     def finalize(self):
-        result = ""
-        for rulename, rule in self.elastalert_alerts.items():
-            result += yaml.dump(rule, default_flow_style=False, width=10000)
-            result += '\n'
-        return result
+        pass
+        # result = ""
+        # for rulename, rule in self.elastalert_alerts.items():
+            # result += yaml.dump(rule, default_flow_style=False, width=10000)
+            # result += '\n'
+        # return result
 
 class ElastalertBackendDsl(ElastalertBackend, ElasticsearchDSLBackend):
-    """Elastalert backend"""
+    """Converts Sigma rule into ElastAlert DSL query"""
     identifier = 'elastalert-dsl'
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1323,7 +1410,7 @@ class ElastalertBackendDsl(ElastalertBackend, ElasticsearchDSLBackend):
         return self.queries
 
 class ElastalertBackendQs(ElastalertBackend, ElasticsearchQuerystringBackend):
-    """Elastalert backend"""
+    """Converts Sigma rule into ElastAlert QS query"""
     identifier = 'elastalert'
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1569,12 +1656,14 @@ class ElasticSearchRuleBackend(object):
 
 
 class ElasticSearchRuleEqlBackend(ElasticSearchRuleBackend, ElasticsearchEQLBackend):
+    """Converts Sigma rule into Elastic SIEM EQL query"""
     default_rule_type = "eql"
     identifier = "es-rule-eql"
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
 class ElasticSearchRuleQsBackend(ElasticSearchRuleBackend, ElasticsearchQuerystringBackend):
+    """Converts Sigma rule into Elastic SIEM lucene query"""
     identifier = "es-rule"
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

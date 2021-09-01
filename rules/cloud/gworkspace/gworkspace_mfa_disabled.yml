@@ -1,0 +1,28 @@
+title: Google Workspace MFA Disabled
+id: 780601d1-6376-4f2a-884e-b8d45599f78c
+description: Detects when multi-factor authentication (MFA) is disabled.
+author: Austin Songer
+status: experimental
+date: 2021/08/26
+modified: 2021/08/29
+references:
+    - https://cloud.google.com/logging/docs/audit/gsuite-audit-logging#3
+    - https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-security-settings#ENFORCE_STRONG_AUTHENTICATION
+    - https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-security-settings?hl=en#ALLOW_STRONG_AUTHENTICATION
+logsource:
+  service: google_workspace.admin
+detection:
+    selection:
+        eventService: admin.googleapis.com
+        eventName: 
+            - ENFORCE_STRONG_AUTHENTICATION
+            - ALLOW_STRONG_AUTHENTICATION
+    eventValue:
+        new_value: 'false'
+    condition: all of them
+level: medium
+tags:
+    - attack.impact
+falsepositives:
+ - MFA may be disabled and performed by a system administrator.
+ 

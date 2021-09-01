@@ -277,6 +277,10 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
     def generateSubexpressionNode(self, node):
         generated = self.generateNode(node.items)
+        if 'len'in dir(node.items): # fix the "TypeError: object of type 'NodeSubexpression' has no len()"
+            if len(node.items) == 1:
+                # A sub expression with length 1 is not a proper sub expression, no self.subExpression required
+                return generated
         if generated:
             return self.subExpression % generated
         else:
@@ -285,7 +289,11 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
     def generateListNode(self, node):
         if not set([type(value) for value in node]).issubset({str, int}):
             raise TypeError("List values must be strings or numbers")
-        return self.listExpression % (self.listSeparator.join([self.generateNode(value) for value in node]))
+        result = [self.generateNode(value) for value in node]
+        if len(result) == 1:
+            # A list with length 1 is not a proper list, no self.listExpression required
+            return result[0]
+        return self.listExpression % (self.listSeparator.join(result))
 
     def generateMapItemNode(self, node):
         fieldname, value = node

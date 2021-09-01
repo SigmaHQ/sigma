@@ -14,19 +14,17 @@ logsource:
     product: linux
     service: auditd
 detection:
-    selection1:
+    execve:
         type: 'EXECVE'
-        keywords|contains|all:
-             - 'truncate'
-             - '-s'
-    selection2:
-        type: 'EXECVE'
-        keywords|contains|all:
-             - 'dd'
-             - 'if='
+    truncate:
+        - 'truncate'
+        - '-s'
+    dd:
+        - 'dd'
+        - 'if='
     filter:
-        keywords|contains: 'of='
-    condition: selection1 or (selection2 and not filter)
+        - 'of='
+    condition: execve and (all of truncate or (all of dd and not filter))
 falsepositives:
     - 'Legitimate script work'
 level: high

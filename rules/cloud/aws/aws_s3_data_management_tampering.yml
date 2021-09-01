@@ -1,0 +1,35 @@
+title: AWS S3 Data Management Tampering
+id: 78b3756a-7804-4ef7-8555-7b9024a02e2d
+description: Detects when a user tampers with S3 data management in Amazon Web Services.
+author: Austin Songer @austinsonger
+status: experimental
+date: 2021/07/24
+modified: 2021/08/19
+references:
+    - https://github.com/elastic/detection-rules/pull/1145/files
+    - https://docs.aws.amazon.com/AmazonS3/latest/API/API_Operations.html
+    - https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutBucketLogging.html
+    - https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutBucketWebsite.html
+    - https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutBucketEncryption.html
+    - https://docs.aws.amazon.com/AmazonS3/latest/userguide/setting-repl-config-perm-overview.html
+    - https://docs.aws.amazon.com/AmazonS3/latest/API/API_RestoreObject.html
+logsource:
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: s3.amazonaws.com
+        eventName:
+           - PutBucketLogging
+           - PutBucketWebsite
+           - PutEncryptionConfiguration
+           - PutLifecycleConfiguration
+           - PutReplicationConfiguration
+           - ReplicateObject
+           - RestoreObject
+    condition: selection
+level: low
+tags:
+    - attack.exfiltration
+    - attack.t1537
+falsepositives:
+- A S3 configuration change may be done by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. S3 configuration change from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule.

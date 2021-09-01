@@ -1,0 +1,23 @@
+title: Azure DNS Zone Modified or Deleted
+id: af6925b0-8826-47f1-9324-337507a0babd
+description: Identifies when DNS zone is modified or deleted.
+author: Austin Songer @austinsonger
+status: experimental
+date: 2021/08/08
+references:
+    - https://docs.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations#microsoftkubernetes
+logsource:
+  service: azure.activitylogs
+detection:
+    selection:
+        properties.message|startswith: MICROSOFT.NETWORK/DNSZONES
+        properties.message|endswith:
+            - /WRITE
+            - /DELETE
+    condition: selection
+level: medium
+tags:
+    - attack.impact
+falsepositives:
+ - DNS zone modified and deleted may be performed by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. 
+ - DNS zone modification from unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule.

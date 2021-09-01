@@ -1,0 +1,26 @@
+title: AWS CloudTrail Important Change
+id: 4db60cc0-36fb-42b7-9b58-a5b53019fb74
+status: experimental
+description: Detects disabling, deleting and updating of a Trail
+author: vitaliy0x1
+date: 2020/01/21
+modified: 2021/08/09
+references:
+    - https://docs.aws.amazon.com/awscloudtrail/latest/userguide/best-practices-security.html
+logsource:
+    service: cloudtrail
+detection:
+    selection_source:
+        eventSource: cloudtrail.amazonaws.com
+        eventName:
+            - StopLogging
+            - UpdateTrail
+            - DeleteTrail
+    condition: selection_source
+falsepositives:
+    - Valid change in a Trail
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+    - attack.t1089  # an old one

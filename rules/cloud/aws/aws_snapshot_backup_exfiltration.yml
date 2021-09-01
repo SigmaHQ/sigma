@@ -1,0 +1,23 @@
+title: AWS Snapshot Backup Exfiltration
+id: abae8fec-57bd-4f87-aff6-6e3db989843d
+status: test
+description: Detects the modification of an EC2 snapshot's permissions to enable access from another account
+author: Darin Smith
+date: 2021/05/17
+modified: 2021/08/19
+references:
+  - https://www.justice.gov/file/1080281/download
+  - https://attack.mitre.org/techniques/T1537/
+logsource:
+  service: cloudtrail
+detection:
+  selection_source:
+    eventSource: ec2.amazonaws.com
+    eventName: ModifySnapshotAttribute
+  condition: selection_source
+falsepositives:
+  - Valid change to a snapshot's permissions
+level: medium
+tags:
+  - attack.exfiltration
+  - attack.t1537

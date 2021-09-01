@@ -1,0 +1,25 @@
+title: AWS ElastiCache Security Group Created
+id: 4ae68615-866f-4304-b24b-ba048dfa5ca7 
+description: Detects when an ElastiCache security group has been created. 
+author: Austin Songer @austinsonger
+status: experimental
+date: 2021/07/24
+modified: 2021/08/19
+references:
+    - https://github.com/elastic/detection-rules/blob/598f3d7e0a63221c0703ad9a0ea7e22e7bc5961e/rules/integrations/aws/persistence_elasticache_security_group_creation.toml
+logsource:
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: elasticache.amazonaws.com
+        eventName: "CreateCacheSecurityGroup"
+    condition: selection
+level: low
+tags:
+    - attack.persistence
+    - attack.t1136
+    - attack.t1136.003
+falsepositives:
+- A ElastiCache security group may be created by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Security group creations from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule.
+
+

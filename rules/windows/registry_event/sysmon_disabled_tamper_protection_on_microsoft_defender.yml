@@ -1,0 +1,23 @@
+title: Disable Tamper Protection on Windows Defender
+id: 93d298a1-d28f-47f1-a468-d971e7796679
+description: Detects disabling Windows Defender Tamper Protection
+status: experimental
+date: 2021/08/04
+author: Austin Songer @austinsonger
+references:
+    - https://www.tenforums.com/tutorials/123792-turn-off-tamper-protection-microsoft-defender-antivirus.html
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    category: registry_event
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|contains: 'HKLM\SOFTWARE\Microsoft\Windows Defender\Features\TamperProtection'
+        Details: 'DWORD (0)'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium

@@ -5,7 +5,7 @@ author: Florian Roth
 references:
     - https://www.ampliasecurity.com/research/windows-credentials-editor/
 date: 2019/12/31
-modified: 2020/08/26
+modified: 2021/07/15
 tags:
     - attack.credential_access
     - attack.t1003 # an old one
@@ -22,7 +22,9 @@ detection:
     selection2:
         CommandLine|endswith: '.exe -S'
         ParentImage|endswith: '\services.exe'
-    condition: 1 of them
+    filter:
+        Image|endswith: '\clussvc.exe'
+    condition: ( selection1 or selection2 ) and not filter
 falsepositives:
     - 'Another service that uses a single -s command line switch'
 level: critical
