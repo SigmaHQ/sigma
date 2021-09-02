@@ -7,12 +7,24 @@ from uuid import uuid4, UUID
 import yaml
 from sigma.output import SigmaYAMLDumper
 
+
 def print_verbose(*arg, **kwarg):
     print(*arg, **kwarg)
 
 # Define order-preserving representer from dicts/maps
 def yaml_preserve_order(self, dict_data):
     return self.represent_mapping("tag:yaml.org,2002:map", dict_data.items())
+
+def valid_rule(rule,i,path):
+    try:
+        UUID(rule["id"])
+    except ValueError:  # id is not a valid UUID
+        print("Rule {} in file {} has a malformed UUID '{}'.".format(i, str(path), rule["id"]))
+        return False
+    except KeyError:    # rule has no id
+        print("Rule {} in file {} has no UUID.".format(i, str(path)))
+        return False
+    return True 
 
 def main():
     argparser = ArgumentParser(description="Assign and verify UUIDs of Sigma rules")
@@ -37,22 +49,32 @@ def main():
     passed = True
     for path in paths:
         print_verbose("Rule {}".format(str(path)))
-        with path.open("r") as f:
+        with path.open("r",encoding="UTF-8") as f:
             rules = list(yaml.safe_load_all(f))
-
+            
+        nb_rule = len(rules)
         if args.verify:
-            i = 1
+            if nb_rule == 1:
+                if not valid_rule(rules[0],1,path): passed = False
+            else:
+                if rules[0]["action"] == "global":
+                    for i in range(1,nb_rule):
+                        if not valid_rule(rules[i],i,path): passed = False
+            '''
             for rule in rules:
+                
                 if "title" in rule:     # Rule with a title should also have a UUID
                     try:
                         UUID(rule["id"])
                     except ValueError:  # id is not a valid UUID
                         print("Rule {} in file {} has a malformed UUID '{}'.".format(i, str(path), rule["id"]))
                         passed = False
+                        exit()
                     except KeyError:    # rule has no id
                         print("Rule {} in file {} has no UUID.".format(i, str(path)))
                         passed = False
-                i += 1
+                        exit()
+                '''
         else:
             newrules = list()
             changed = False
