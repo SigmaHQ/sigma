@@ -69,11 +69,9 @@ def main():
                     except ValueError:  # id is not a valid UUID
                         print("Rule {} in file {} has a malformed UUID '{}'.".format(i, str(path), rule["id"]))
                         passed = False
-                        exit()
                     except KeyError:    # rule has no id
                         print("Rule {} in file {} has no UUID.".format(i, str(path)))
                         passed = False
-                        exit()
                 '''
         else:
             newrules = list()
