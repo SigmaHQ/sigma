@@ -1,0 +1,23 @@
+title: Azure Device or Configuration Deleted
+id: 46530378-f9db-4af9-a9e5-889c177d3881
+description: Identifies when a device or device configuration in azure is deleted.
+author: Austin Songer
+status: experimental
+date: 2021/09/03
+references:
+    - https://docs.microsoft.com/en-us/azure/active-directory/reports-monitoring/reference-audit-activities#core-directory
+logsource:
+  service: azure.activitylogs
+detection:
+    selection:
+        properties.message: 
+            - Delete device
+            - Delete device configuration
+    condition: selection
+level: medium
+tags:
+    - attack.impact
+falsepositives:
+ - Device or device configuration being deleted may be performed by a system administrator. 
+ - Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. 
+ - Device or device configuration deleted from unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule.
