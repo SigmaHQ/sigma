@@ -1,10 +1,23 @@
 #!/usr/bin/env python3
 # Assign UUIDs to Sigma rules and verify UUID assignment for a Sigma rule repository
+# Copyright 2016-2021 SigmaHQ
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from argparse import ArgumentParser
 from pathlib import Path
 from uuid import uuid4, UUID
-import yaml
+import ruamel.yaml
 from sigma.output import SigmaYAMLDumper
 
 
@@ -15,7 +28,7 @@ def print_verbose(*arg, **kwarg):
 def yaml_preserve_order(self, dict_data):
     return self.represent_mapping("tag:yaml.org,2002:map", dict_data.items())
 
-def valid_rule(rule,i,path):
+def valid_id(rule,i,path):
     try:
         UUID(rule["id"])
     except ValueError:  # id is not a valid UUID
@@ -25,6 +38,22 @@ def valid_rule(rule,i,path):
         print("Rule {} in file {} has no UUID.".format(i, str(path)))
         return False
     return True 
+
+def is_global(rule):
+    if 'action' in rule:
+        if rule['action'] == 'global':
+            return True
+    return False
+
+def is_id_uuid(rule):
+    if 'id' in rule:
+        try:
+            UUID(rule["id"])
+        except ValueError:
+            return False
+        return True
+    return False
+
 
 def main():
     argparser = ArgumentParser(description="Assign and verify UUIDs of Sigma rules")
@@ -43,36 +72,24 @@ def main():
     else:
         paths = [ Path(pathname) for pathname in args.inputs ]
 
-    yaml.add_representer(dict, yaml_preserve_order)
-
     uuids = set()
     passed = True
     for path in paths:
         print_verbose("Rule {}".format(str(path)))
         with path.open("r",encoding="UTF-8") as f:
-            rules = list(yaml.safe_load_all(f))
-            
-        nb_rule = len(rules)
+            rules = list(ruamel.yaml.load_all(f,Loader=ruamel.yaml.RoundTripLoader))
+        
         if args.verify:
-            if nb_rule == 1:
-                if not valid_rule(rules[0],1,path): passed = False
-            else:
-                if rules[0]["action"] == "global":
-                    for i in range(1,nb_rule):
-                        if not valid_rule(rules[i],i,path): passed = False
-            '''
+            i = 0
             for rule in rules:
-                
-                if "title" in rule:     # Rule with a title should also have a UUID
-                    try:
-                        UUID(rule["id"])
-                    except ValueError:  # id is not a valid UUID
-                        print("Rule {} in file {} has a malformed UUID '{}'.".format(i, str(path), rule["id"]))
+                if is_global(rule): # No id in global section
+                    if 'id' in rule:
                         passed = False
-                    except KeyError:    # rule has no id
-                        print("Rule {} in file {} has no UUID.".format(i, str(path)))
+                        print("Rule {} in file {} has ID in global section.".format(i,str(path)))
+                else:
+                    if not valid_id(rule,i,path):
                         passed = False
-                '''
+                i += 1
         else:
             newrules = list()
             changed = False
