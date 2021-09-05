@@ -18,15 +18,10 @@ from argparse import ArgumentParser
 from pathlib import Path
 from uuid import uuid4, UUID
 import ruamel.yaml
-from sigma.output import SigmaYAMLDumper
-
 
 def print_verbose(*arg, **kwarg):
     print(*arg, **kwarg)
 
-# Define order-preserving representer from dicts/maps
-def yaml_preserve_order(self, dict_data):
-    return self.represent_mapping("tag:yaml.org,2002:map", dict_data.items())
 
 def valid_id(rule,i,path):
     try:
@@ -45,16 +40,6 @@ def is_global(rule):
             return True
     return False
 
-def is_id_uuid(rule):
-    if 'id' in rule:
-        try:
-            UUID(rule["id"])
-        except ValueError:
-            return False
-        return True
-    return False
-
-
 def main():
     argparser = ArgumentParser(description="Assign and verify UUIDs of Sigma rules")
     argparser.add_argument("--verify", "-V", action="store_true", help="Verify existence and uniqueness of UUID assignments. Exits with error code if verification fails.")
@@ -72,7 +57,6 @@ def main():
     else:
         paths = [ Path(pathname) for pathname in args.inputs ]
 
-    uuids = set()
     passed = True
     for path in paths:
         print_verbose("Rule {}".format(str(path)))
@@ -91,27 +75,36 @@ def main():
                         passed = False
                 i += 1
         else:
-            newrules = list()
             changed = False
             i = 1
             for rule in rules:
-                if "title" in rule and "id" not in rule:    # only assign id to rules that have a title and no id
-                    newrule = dict()
-                    changed = True
-                    for k, v in rule.items():
-                        newrule[k] = v
-                        if k == "title":    # insert id after title
-                            uuid = uuid4()
-                            newrule["id"] = str(uuid)
-                            print("Assigned UUID '{}' to rule {} in file {}.".format(uuid, i, str(path)))
-                    newrules.append(newrule)
+                if is_global(rule):
+                    if 'id' in rule:
+                        uuid = rule['id']
+                        del rule['id']
+                        print("Remove Global UUID '{}' to rule {} in file {}.".format(str(uuid), i, str(path)))
+                        changed = True
                 else:
-                    newrules.append(rule)
+                    if 'id' in rule:
+                        if not valid_id(rule,i,path):
+                            uuid = uuid4()
+                            rule['id'] = str(uuid)
+                            changed = True
+                            print("Change bad UUID '{}' to rule {} in file {}.".format(str(uuid), i, str(path)))
+                    else:
+                        pos= 1 if 'title' in rule else 0 #put id in after title is need 
+                        uuid = uuid4()
+                        rule.insert(pos,"id",str(uuid))
+                        changed = True
+                        print("Assigned UUID '{}' to rule {} in file {}.".format(str(uuid), i, str(path))) 
                 i += 1
 
             if changed:
                 with path.open("w") as f:
-                    yaml.dump_all(newrules, f, Dumper=SigmaYAMLDumper, indent=4, width=160, default_flow_style=False)
+                    for rule in rules:
+                        start= False if is_global(rule) else True
+                        if len(rules) == 1: start= False # avoid --- if only one rule 
+                        ruamel.yaml.round_trip_dump(rule,stream=f,indent=4,block_seq_indent=4,explicit_start=start)
 
     if not passed:
         print("The Sigma rules listed above don't have an ID. The ID must be:")
