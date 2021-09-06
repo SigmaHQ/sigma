@@ -1,4 +1,5 @@
 title: Created Executables and Files by Office Applications
+id: a9505d16-644f-4f24-9002-7c322675e40d
 description: This rule will monitor any office apps that spins up a new LOLBin process. This activity is pretty suspicious and should be investigated. 
 references:
     - https://thedfirreport.com/2021/03/29/sodinokibi-aka-revil-ransomware/
@@ -11,29 +12,25 @@ tags:
     - attack.execution
     - attack.defence_evasion
 status: experimental
-Date: 2021/23/8
+Date: 2021/08/23
 logsource:
   product: Windows
-  service: security
   category: process_creation
 detection:
   #useful_information: add more LOLBins to the rules logic of your choice.
   selection1:
-    EventLog: security
-    EventID: 4688
-  selection2:
-    NewProcessName|endswith:
+    Image|endswith:
       - 'regsvr32'
       - 'rundll32'
       - 'msiexec'
       - 'mshta'
       - 'verclsid'
-  selection3:
-    ParentProcessName|endswith:
-    - winword.exe
-    - excel.exe
-    - powerpnt.exe
-  condition: selection1 AND selection2 AND selection3
+  selection2:
+    ParentImage|endswith:
+      - winword.exe
+      - excel.exe
+      - powerpnt.exe
+  condition: selection1 AND selection2
 falsepositives:
-- Unknown
+  - Unknown
 level: high
