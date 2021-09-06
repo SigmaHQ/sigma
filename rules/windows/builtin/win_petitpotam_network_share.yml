@@ -1,0 +1,26 @@
+title: Possible PetitPotam Coerce Authentication Attempt
+id: 1ce8c8a3-2723-48ed-8246-906ac91061a6
+description: Detect PetitPotam coerced authentication activity.
+author: Mauricio Velazco, Michael Haag
+date: 2021/09/02
+references:
+    - https://github.com/topotam/PetitPotam
+    - https://github.com/splunk/security_content/blob/0dd6de32de2118b2818550df9e65255f4109a56d/detections/endpoint/petitpotam_network_share_access_request.yml
+tags:
+    - attack.credential_access
+    - attack.t1187
+logsource:
+    product: windows
+    service: security
+    definition: 'The advanced audit policy setting "Object Access > Detailed File Share" must be configured for Success/Failure'
+detection:
+    selection:
+        EventID: 5145
+        ShareName|startswith: '\\'
+        ShareName|endswith: '\IPC$'
+        RelativeTargetName: lsarpc
+        SubjectUserName: ANONYMOUS LOGON
+    condition: selection
+falsepositives:
+    - Unknown. Feedback welcomed.
+level: high
