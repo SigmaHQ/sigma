@@ -19,6 +19,8 @@ import re
 import json
 import xml.etree.ElementTree as xml
 
+from datetime import timedelta
+from uuid import uuid4
 
 from sigma.config.mapping import (
     SimpleFieldMapping, MultiFieldMapping, ConditionalFieldMapping
@@ -106,6 +108,8 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
         return parse_arg
 
     def default_value_mapping(self, val):
+        if isinstance(val, int):
+            return "== %d" % (val)
         op = "=="
         if isinstance(val, str):
             if "*" in val[1:-1]:  # value contains * inside string - use regex match
@@ -361,6 +365,8 @@ class AzureAPIBackend(AzureLogAnalyticsBackend):
             for technique in self.techniques:
                 if key_id == technique.get("technique_id", ""):
                     yield technique
+                if "." in key_id and key_id.split(".")[0] == technique.get("technique_id", ""):
+                    yield technique
 
     def _load_mitre_file(self, mitre_type):
         try:
@@ -383,7 +389,10 @@ class AzureAPIBackend(AzureLogAnalyticsBackend):
         local_storage_techniques = {item["technique_id"]: item for item in self.find_technique(src_technics)}
 
         for key_id in src_technics:
-            src_tactic = local_storage_techniques.get(key_id, {}).get("tactic")
+            if "." in key_id:
+                src_tactic = local_storage_techniques.get(key_id.split(".")[0], {}).get("tactic")
+            else:
+                src_tactic = local_storage_techniques.get(key_id, {}).get("tactic")
             if not src_tactic:
                 continue
             src_tactic = set(src_tactic)
@@ -416,6 +425,28 @@ class AzureAPIBackend(AzureLogAnalyticsBackend):
 
         return tactics, technics
 
+    def timeframeToDelta(self, timeframe):
+        time_unit = timeframe[-1:]
+        duration = int(timeframe[:-1])
+        return (
+            time_unit == "s" and timedelta(seconds=duration) or
+            time_unit == "m" and timedelta(minutes=duration) or
+            time_unit == "h" and timedelta(hours=duration) or
+            time_unit == "d" and timedelta(days=duration) or
+            None
+        )
+
+    def iso8601_duration(self, delta):
+        if not delta:
+            return "PT0S"
+        if not delta.seconds:
+            return "P%dD" % (delta.days)
+        days = delta.days and "%dD" % (delta.days) or ""
+        hours = delta.seconds // 3600 % 24 and "%dH" % (delta.seconds // 3600 % 24) or ""
+        minutes = delta.seconds // 60 % 60 and "%dM" % (delta.seconds // 60 % 60) or ""
+        seconds = delta.seconds % 60 and "%dS" % (delta.seconds % 60) or ""
+        return "P%sT%s%s%s" % (days, hours, minutes, seconds)
+
     def create_rule(self, config):
         tags = config.get("tags", [])
 
@@ -423,17 +454,21 @@ class AzureAPIBackend(AzureLogAnalyticsBackend):
         tactics, technics = self.skip_tactics_or_techniques(technics, tactics)
         tactics = list(map(lambda s: s.replace(" ", ""), tactics))
 
+        timeframe = self.timeframeToDelta(config["detection"].setdefault("timeframe", "30m"))
+        queryDuration = self.iso8601_duration(timeframe)
+        suppressionDuration = self.iso8601_duration(timeframe * 5)
+
         rule = {
                 "displayName": "{} by {}".format(config.get("title"), config.get('author')),
                 "description": "{} {}".format(config.get("description"), "Technique: {}.".format(",".join(technics))),
                 "severity": self.parse_severity(config.get("level", "medium")),
                 "enabled": True,
                 "query": config.get("translation"),
-                "queryFrequency": "12H",
-                "queryPeriod": "12H",
+                "queryFrequency": queryDuration,
+                "queryPeriod": queryDuration,
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0,
-                "suppressionDuration": "12H",
+                "suppressionDuration": suppressionDuration,
                 "suppressionEnabled": True,
                 "tactics": tactics
             }
@@ -448,3 +483,66 @@ class AzureAPIBackend(AzureLogAnalyticsBackend):
             return rule
         else:
             raise NotSupportedError("No table could be determined from Sigma rule")
+
+class SentinelBackend(AzureAPIBackend):
+    """Converts Sigma rule into Azure Sentinel scheduled alert rule ARM template."""
+    identifier = "sentinel-rule"
+    active = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def generate(self, sigmaparser):
+        translation = super().generate(sigmaparser)
+        if translation:
+            configs = sigmaparser.parsedyaml
+            configs.update({"translation": translation})
+            rule = self.create_sentinel_rule(configs)
+            return json.dumps(rule)
+
+    def create_sentinel_rule(self, config):
+        # https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/child-resource-name-type#outside-parent-resource
+        # https://docs.microsoft.com/en-us/azure/templates/microsoft.operationalinsights/workspaces?tabs=json
+        # https://docs.microsoft.com/en-us/rest/api/securityinsights/alert-rules/create-or-update#scheduledalertrule
+        properties = json.loads(config.get("translation"))
+        properties.update({
+            "incidentConfiguration": {
+                "createIncident": True,
+                "groupingConfiguration": {
+                    "enabled": False,
+                    "reopenClosedIncident": False,
+                    "lookbackDuration": properties['suppressionDuration'],
+                    "matchingMethod": "AllEntities",
+                    "groupByEntities": [],
+                    "groupByAlertDetails": [],
+                    "groupByCustomDetails": [],
+                },
+            },
+            "eventGroupingSettings": {
+                "aggregationKind": "SingleAlert",
+            },
+            "alertDetailsOverride": None,
+            "customDetails": None,
+            "templateVersion": "1.0.0",
+        })
+        rule_uuid = config.get("id", str(uuid4()))
+        return {
+            "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+                "workspace": {
+                    "type": "String",
+                },
+            },
+            "resources": [
+                {
+                    "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/" + rule_uuid + "')]",
+                    "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/" + rule_uuid + "')]",
+                    "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+                    "apiVersion": "2021-03-01-preview",
+
+                    "kind": "Scheduled",
+                    "properties": properties,
+                },
+            ],
+        }

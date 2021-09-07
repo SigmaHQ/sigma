@@ -72,6 +72,27 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(files_with_legal_issues, [], Fore.RED + 
                         "There are rule files which contains a trademark or reference that doesn't comply with the respective trademark requirements - please remove the trademark to avoid legal issues")
+                        
+    def test_optional_tags(self):
+        files_with_incorrect_tags = []
+
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            tags = self.get_rule_part(file_path=file, part_name="tags")
+            if tags:
+                for tag in tags:
+                    if tag.startswith("attack."):
+                        continue
+                    elif tag.startswith("car."):
+                        continue
+                    elif tag.startswith("cve."):
+                        print(Fore.RED + "Rule {} has the cve tag <{}> but is it a references (https://nvd.nist.gov/)".format(file, tag))
+                        files_with_incorrect_tags.append(file)
+                    else:
+                        print(Fore.RED + "Rule {} has the unknown tag <{}>".format(file, tag))
+                        files_with_incorrect_tags.append(file)
+
+        self.assertEqual(files_with_incorrect_tags, [], Fore.RED + 
+                         "There are rules with incorrect/unknown MITRE Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://attack.mitre.org/ ")
 
     def test_confirm_correct_mitre_tags(self):
         files_with_incorrect_mitre_tags = []
@@ -314,6 +335,9 @@ class TestRules(unittest.TestCase):
             elif len(datefield) != 10:
                 print(Fore.YELLOW + "Rule {} has a malformed 'date' (not 10 chars, should be YYYY/MM/DD).".format(file))
                 faulty_rules.append(file)
+            elif datefield[4] != '/' or datefield[7] != '/':
+                print(Fore.YELLOW + "Rule {} has a malformed 'date' (should be YYYY/MM/DD).".format(file))
+                faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with missing or malformed 'date' fields. (create one, e.g. date: 2019/01/14)")
@@ -329,6 +353,9 @@ class TestRules(unittest.TestCase):
                 elif len(modifiedfield) != 10:
                     print(Fore.YELLOW + "Rule {} has a malformed 'modified' (not 10 chars, should be YYYY/MM/DD).".format(file))
                     faulty_rules.append(file)
+                elif modifiedfield[4] != '/' or modifiedfield[7] != '/':
+                    print(Fore.YELLOW + "Rule {} has a malformed 'modified' (should be YYYY/MM/DD).".format(file))
+                    faulty_rules.append(file)    
 
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed 'modified' fields. (create one, e.g. date: 2019/01/14)")
@@ -344,7 +371,7 @@ class TestRules(unittest.TestCase):
             status_str = self.get_rule_part(file_path=file, part_name="status")
             if status_str:
                 if not status_str in valid_status:
-                    print(Fore.YELLOW + "Rule {} has a invalide 'status' (check wiki).".format(file))
+                    print(Fore.YELLOW + "Rule {} has a invalid 'status' (check wiki).".format(file))
                     faulty_rules.append(file) 
 
         self.assertEqual(faulty_rules, [], Fore.RED +
@@ -365,7 +392,7 @@ class TestRules(unittest.TestCase):
                 print(Fore.YELLOW + "Rule {} has no field 'level'.".format(file))
                 faulty_rules.append(file)
             elif not level_str in valid_level:
-                    print(Fore.YELLOW + "Rule {} has a invalide 'level' (check wiki).".format(file))
+                    print(Fore.YELLOW + "Rule {} has a invalid 'level' (check wiki).".format(file))
                     faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED +
@@ -546,7 +573,7 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED + 
-                         "There are rules with non-conform 'title' fields. Please check: https://github.com/SimaHQ/sigma/wiki/Rule-Creation-Guide#title")
+                         "There are rules with non-conform 'title' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title")
 
     def test_invalid_logsource_attributes(self):
         faulty_rules = []
@@ -562,7 +589,7 @@ class TestRules(unittest.TestCase):
             for key in logsource:
                 if key.lower() not in valid_logsource:
                     print(Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
-                    valide = False
+                    valid = False
             if not valid:
                faulty_rules.append(file)
 

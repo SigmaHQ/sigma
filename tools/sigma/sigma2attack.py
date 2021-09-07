@@ -8,6 +8,7 @@ import sys
 
 import yaml
 
+
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--rules-directory", "-d", dest="rules_dir", default="rules", help="Directory to read rules from")
@@ -20,24 +21,25 @@ def main():
     curr_max_technique_count = 0
     num_rules_used = 0
     for rule_file in rule_files:
-        try:
-            rule = yaml.safe_load(open(rule_file, encoding="utf-8").read())
-        except yaml.YAMLError:
-            sys.stderr.write("Ignoring rule " + rule_file + " (parsing failed)\n")
-            continue
-        if "tags" not in rule:
-            sys.stderr.write("Ignoring rule " + rule_file + " (no tags)\n")
-            continue
-        tags = rule["tags"]
-        for tag in tags:
-            if tag.lower().startswith("attack.t"):
-                technique_id = tag[len("attack."):].upper()
-                num_rules_used += 1
-                if technique_id not in techniques_to_rules:
-                    techniques_to_rules[technique_id] = []
-                techniques_to_rules[technique_id].append(os.path.basename(rule_file))
-                curr_max_technique_count = max(curr_max_technique_count, len(techniques_to_rules[technique_id]))
-
+        with open(rule_file,encoding='utf-8') as f:
+            docs = yaml.load_all(f, Loader=yaml.FullLoader)
+            double = False
+            for rule in docs:
+                if "tags" not in rule :
+                    if double == False : # Only 1 warning
+                        sys.stderr.write("Ignoring rule " + rule_file + " (no tags)\n")
+                    double = True # action globle no tag
+                    continue
+                tags = rule["tags"]
+                double = True
+                for tag in tags:
+                    if tag.lower().startswith("attack.t"):
+                        technique_id = tag[len("attack."):].upper()
+                        num_rules_used += 1
+                        if technique_id not in techniques_to_rules:
+                            techniques_to_rules[technique_id] = []
+                        techniques_to_rules[technique_id].append(os.path.basename(rule_file))
+                        curr_max_technique_count = max(curr_max_technique_count, len(techniques_to_rules[technique_id]))
 
     scores = []
     for technique in techniques_to_rules:

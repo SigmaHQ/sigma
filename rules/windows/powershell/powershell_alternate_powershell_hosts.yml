@@ -1,10 +1,9 @@
 action: global
 title: Alternate PowerShell Hosts
-id: 64e8e417-c19a-475a-8d19-98ea705394cc
 description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
-status: experimental
+status: test
 date: 2019/08/11
-modified: 2021/08/16
+modified: 2021/08/28
 author: Roberto Rodriguez @Cyb3rWard0g
 references:
     - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190815181010.html
@@ -18,17 +17,20 @@ falsepositives:
     - Citrix ConfigSync.ps1
 level: medium   
 ---
+id: 64e8e417-c19a-475a-8d19-98ea705394cc
 logsource:
     product: windows
     service: powershell
+    definition: ModuleLogging must be enable
 detection:
     selection:
         EventID: 4103
         ContextInfo: '*'
     filter:
-        ContextInfo: 'powershell.exe'
+        ContextInfo|contains: 'powershell.exe' # Host Application=...powershell.exe or Application hote=...powershell.exe in French Win10 event
     condition: selection and not filter        
 ---
+id: d7326048-328b-4d5e-98af-86e84b17c765
 logsource:
     product: windows
     service: powershell-classic
@@ -38,5 +40,5 @@ detection:
         EventID: 400
         HostApplication: '*'
     filter:
-        HostApplication: 'powershell.exe'
+        HostApplication|startswith: 'C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe'
     condition: selection and not filter        
