@@ -1,0 +1,19 @@
+title: WMI Event Consumer Created Named Pipe
+id: 493fb4ab-cdcc-4c4f-818c-0e363bd1e4bb
+status: experimental
+description: Detects the WMI Event Consumer service scrcons.exe creating a named pipe
+references:
+    - https://github.com/RiccardoAncarani/LiquidSnake
+date: 2021/09/01
+author: Florian Roth
+logsource:
+   product: windows
+   category: pipe_created
+   definition: 'Note that you have to configure logging for Named Pipe Events in Sysmon config (Event ID 17 and Event ID 18). In the current popular sysmon configuration (https://github.com/SwiftOnSecurity/sysmon-config) this is not there, you have to add it yourself or use this extended version that logs the Named Pipes used in this Sigma repo (https://github.com/Neo23x0/sysmon-config)'
+detection:
+   selection:
+      Image|endswith: '\scrcons.exe'
+   condition: selection
+falsepositives:
+   - Unknown
+level: high
