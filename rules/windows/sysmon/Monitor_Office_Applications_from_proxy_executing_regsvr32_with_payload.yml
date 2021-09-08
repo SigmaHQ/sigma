@@ -11,37 +11,35 @@ tags:
     - attack.execution
     - attack.defence_evasion
 status: experimental
-Date: 2021/23/8
+Date: 2021/08/23
 logsource:
   product: Windows
   category: process_creation
 detection:
   #useful_information: add more LOLBins to the rules logic of your choice.
   selection1:
-    EventID: 1
-  selection2:
     - Image: '*\wbem\WMIC.exe'
     - ProcessCommandLine: '*wmic *'
     - OriginalFileName: 'wmic.exe'
     - Description: 'WMI Commandline Utility'
-  selection3:
+  selection2:
     CommandLine|contains:
       - 'regsvr32'
       - 'rundll32'
       - 'msiexec'
       - 'mshta'
       - 'verclsid'
-  selection4:
+  selection3:
     ParentImage|endswith:
     - winword.exe
     - excel.exe
     - powerpnt.exe
-  selection5:
+  selection4:
     processCommandLine|contains|all: 
       - 'process'
       - 'create'
       - 'call'
-  condition: selection1 AND selection2 AND selection3 AND selection4 AND selection5
+  condition: selection1 AND selection2 AND selection3 AND selection4
 falsepositives:
 - Unknown
 level: high
