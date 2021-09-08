@@ -11,26 +11,21 @@ tags:
     - attack.execution
     - attack.defence_evasion
 status: experimental
-Date: 2021/23/8
+Date: 2021/08/23
 logsource:
   product: windows
-  service: security
   category: process_creation
 detection:
  #useful_information: Add more office applications to the rule logic of choice
   selection1:
-  - EventLog: security
-  selection2:
-  - EventID: 4688
-  selection3:
-  - ProcessName: '*\wbem\WMIC.exe'
+  - Image: '*\wbem\WMIC.exe'
   - ProcessCommandLine: '*wmic *'
-  selection4:
-  - ParentProcessName:
+  selection2:
+  - ParentImage:
     - winword.exe
     - excel.exe
     - powerpnt.exe
-  condition: selection1 AND selection2 AND selection3 AND selection4
+  condition: selection1 AND selection2
 falsepositives:
 - Unknown
 level: high
