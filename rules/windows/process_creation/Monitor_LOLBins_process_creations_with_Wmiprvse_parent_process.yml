@@ -11,27 +11,23 @@ tags:
     - attack.execution
     - attack.defence_evasion
 status: experimental
-Date: 2021/23/8
+Date: 2021/08/23
 logsource:
   product: Windows
-  service: security
   category: process_creation
 detection:
   #useful_information: add more LOLBins to the rules logic of your choice.
   selection1:
-    EventLog: security
-    EventID: 4688
-  selection2:
-    NewProcessName|endswith:
+    Image|endswith:
       - 'regsvr32'
       - 'rundll32'
       - 'msiexec'
       - 'mshta'
       - 'verclsid'
-  selection3:
-    ParentProcessName|endswith:
+  selection2:
+    ParentImage|endswith:
     - "\\wbem\\WmiPrvSE.exe"
-  condition: selection1 AND selection2 AND selection3
+  condition: selection1 AND selection2
 falsepositives:
 - Unknown
 level: high
