@@ -24,7 +24,6 @@ from uuid import uuid4
 from sigma.parser.condition import SigmaAggregationParser
 
 from .elasticsearch import ElasticsearchQuerystringBackend
-from .defaultOpensearchValues import *
 
 class Atom:
     def __init__(self, field: str, prop: str) -> None:
@@ -274,6 +273,18 @@ class OpenSearchBackend(object):
             )
     isThreshold = False
 
+    # Default values for fields exclusive to OpenSearch monitors
+    RULE_TYPE = "monitor"
+    IS_ENABLED = True
+    INTERVAL = 5
+    UNIT = "MINUTES"
+    TRIGGER_NAME = "generated-trigger"
+    SEVERITIES = {"informational": "5", "low": "4", "medium": "3", "high": "2", "critical": "1"}
+    TRIGGER_SCRIPT = "ctx.results[0].hits.total.value > 0"
+    TRIGGER_LANGUAGE = "painless"
+    MONITOR_INDICES = ["opensearch-security-logs"]
+    NUM_RESULTS = 1
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tactics = self._load_mitre_file("tactics")
@@ -363,17 +374,17 @@ class OpenSearchBackend(object):
     '''
     def map_severity(self, severity):
         severity = severity.lower()
-        return SEVERITIES[severity] if severity in SEVERITIES else SEVERITIES["medium"]
+        return self.SEVERITIES[severity] if severity in self.SEVERITIES else self.SEVERITIES["medium"]
 
     def create_trigger(self, severity):
         return [
                 {
-                "name": TRIGGER_NAME,
+                "name": self.TRIGGER_NAME,
                 "severity": self.map_severity(severity),
                 "condition": {
                     "script": {
-                        "source": f'{TRIGGER_SCRIPT}',
-                        "lang": TRIGGER_LANGUAGE
+                        "source": f'{self.TRIGGER_SCRIPT}',
+                        "lang": self.TRIGGER_LANGUAGE
                     }
                 },
                 "actions": []
@@ -419,9 +430,9 @@ class OpenSearchBackend(object):
         return [
                 {
                     "search": {
-                        "indices": MONITOR_INDICES,
+                        "indices": self.MONITOR_INDICES,
                         "query": {
-                            "size": NUM_RESULTS,
+                            "size": self.NUM_RESULTS,
                             "aggregations": {},
                             "query": self.build_query(translation)
                         }
@@ -550,14 +561,14 @@ class OpenSearchBackend(object):
         references = self.get_references(configs)
         
         rule = {
-            "type": RULE_TYPE,
+            "type": self.RULE_TYPE,
             "name": rule_name,
             "description": rule_description,
-            "enabled": IS_ENABLED,
+            "enabled": self.IS_ENABLED,
             "schedule": {
                 "period": {
-                    "interval": INTERVAL,
-                    "unit": UNIT
+                    "interval": self.INTERVAL,
+                    "unit": self.UNIT
                 }
             },
             "inputs": inputs,
