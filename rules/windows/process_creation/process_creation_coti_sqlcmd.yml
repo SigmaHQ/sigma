@@ -1,0 +1,31 @@
+title: Conti Backup Database
+id: 2f47f1fd-0901-466e-a770-3b7092834a1b
+status: experimental
+author: frack113
+date: 2021/08/16
+description: Detects a command used by conti to dump database 
+references:
+    - https://twitter.com/vxunderground/status/1423336151860002816?s=20 #the leak info not the files itself 
+    - https://www.virustotal.com/gui/file/03e9b8c2e86d6db450e5eceec057d7e369ee2389b9daecaf06331a95410aa5f8/detection
+    - https://docs.microsoft.com/en-us/sql/tools/sqlcmd-utility?view=sql-server-ver15
+tags:
+    - attack.collection
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_tools:
+        CommandLine|contains:
+            - 'sqlcmd '
+            - 'sqlcmd.exe'
+    selection_svr:
+        CommandLine|contains: ' -S localhost '
+    selection_query:
+        CommandLine|contains:
+            - 'sys.sysprocesses'
+            - 'master.dbo.sysdatabases'
+            - 'BACKUP DATABASE'
+    condition: all of them 
+falsepositives:
+    - Unknown
+level: high

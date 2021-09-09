@@ -1,0 +1,35 @@
+title: Azure AD Health Monitoring Agent Registry Keys Access
+id: ff151c33-45fa-475d-af4f-c2f93571f4fe
+description: |
+    This detection uses Windows security events to detect suspicious access attempts to the registry key of Azure AD Health monitoring agent.
+    This detection requires an access control entry (ACE) on the system access control list (SACL) of the following securable object HKLM\SOFTWARE\Microsoft\Microsoft Online\Reporting\MonitoringAgent.
+status: experimental
+date: 2021/08/26
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research), MSTIC
+tags:
+    - attack.discovery
+    - attack.t1012
+references:
+  - https://o365blog.com/post/hybridhealthagent/
+  - https://github.com/OTRF/Set-AuditRule/blob/master/rules/registry/aad_connect_health_monitoring_agent.yml
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID:
+            - 4656
+            - 4663
+        ObjectType: 'Key'
+        ObjectName: '\REGISTRY\MACHINE\SOFTWARE\Microsoft\Microsoft Online\Reporting\MonitoringAgent'
+    filter:
+        ProcessName|contains:
+            - 'Microsoft.Identity.Health.Adfs.DiagnosticsAgent.exe'
+            - 'Microsoft.Identity.Health.Adfs.InsightsService.exe'
+            - 'Microsoft.Identity.Health.Adfs.MonitoringAgent.Startup.exe'
+            - 'Microsoft.Identity.Health.Adfs.PshSurrogate.exe'
+            - 'Microsoft.Identity.Health.Common.Clients.ResourceMonitor.exe'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: medium

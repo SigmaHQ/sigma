@@ -1,0 +1,33 @@
+title: Hidden Files and Directoriese
+id: d08722cd-3d09-449a-80b4-83ea2d9d4616
+description: Detects adversary creating hidden file or directory, by detecting directories or files with . as the first character
+author: 'Pawel Mazur'
+status: experimental
+date: 2021/09/06
+references:
+   - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1564.001/T1564.001.md
+   - https://attack.mitre.org/techniques/T1564/001/
+logsource:
+   product: linux
+   service: auditd
+detection:
+   commands:
+       type: EXECVE
+       a0:
+           - mkdir
+           - touch
+           - vim
+           - nano
+           - vi
+   arguments:
+       - a1|contains: '/.'
+       - a1|startswith: '.'
+       - a2|contains: '/.'
+       - a2|startswith: '.'
+   condition: commands and arguments
+tags:
+   - attack.defense_evasion
+   - attack.t1564.001
+falsepositives:
+   - None
+level: low

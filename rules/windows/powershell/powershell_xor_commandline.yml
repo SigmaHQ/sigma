@@ -4,6 +4,7 @@ description: Detects suspicious powershell process which includes bxor command, 
 status: experimental
 author: Teymur Kheirkhabarov, Harish Segar (rule)
 date: 2020/06/29
+modified: 2021/08/28
 tags:
   - attack.execution
   - attack.t1059.001
@@ -11,12 +12,13 @@ tags:
 logsource:
   product: windows
   service: powershell-classic
+  definition: fields have to be extract from event
 detection:
   selection:
     EventID: 400
     HostName: "ConsoleHost"
   filter:
-    CommandLine|contains:
+    HostApplication|contains:
       - "bxor"
       - "join"
       - "char"

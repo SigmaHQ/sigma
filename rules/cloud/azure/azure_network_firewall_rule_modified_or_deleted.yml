@@ -1,0 +1,24 @@
+title: Azure Firewall Rule Configuration Modified or Deleted
+id: 2a7d64cf-81fa-4daf-ab1b-ab80b789c067
+description: Identifies when a Firewall Rule Configuration is Modified or Deleted.
+author: Austin Songer @austinsonger
+status: experimental
+date: 2021/08/08
+references:
+    - https://docs.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations
+logsource:
+  service: azure.activitylogs
+detection:
+    selection:
+        properties.message:
+            - MICROSOFT.NETWORK/FIREWALLPOLICIES/RULECOLLECTIONGROUPS/WRITE
+            - MICROSOFT.NETWORK/FIREWALLPOLICIES/RULECOLLECTIONGROUPS/DELETE
+            - MICROSOFT.NETWORK/FIREWALLPOLICIES/RULEGROUPS/WRITE
+            - MICROSOFT.NETWORK/FIREWALLPOLICIES/RULEGROUPS/DELETE
+    condition: selection
+level: medium
+tags:
+    - attack.impact
+falsepositives:
+ - Firewall Rule Configuration being modified or deleted may be performed by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. 
+ - Firewall Rule Configuration modified or deleted from unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule.

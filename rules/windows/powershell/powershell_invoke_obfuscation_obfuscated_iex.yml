@@ -14,7 +14,7 @@ tags:
 logsource:
     product: windows
     service: powershell
-    definition: 'Script block logging must be enabled'
+    definition: Script block logging must be enabled for 4104, Module Logging must be enabled for 4103
 detection:
     selection_1:
         EventID: 4104
@@ -23,7 +23,7 @@ detection:
         - ScriptBlockText|re: '\$ShellId\[\s*\d{1,3}\s*\]\s*\+\s*\$ShellId\['
         - ScriptBlockText|re: '\$env:Public\[\s*\d{1,3}\s*\]\s*\+\s*\$env:Public\['
         - ScriptBlockText|re: '\$env:ComSpec\[(\s*\d{1,3}\s*,){2}'
-        - ScriptBlockText|re: '\*mdr\*\W\s*\)\.Name'
+        - ScriptBlockText|re: '\\\\*mdr\\\\*\W\s*\)\.Name'
         - ScriptBlockText|re: '\$VerbosePreference\.ToString\('
         - ScriptBlockText|re: '\String\]\s*\$VerbosePreference'
     selection_3:
@@ -33,7 +33,7 @@ detection:
         - Payload|re: '\$ShellId\[\s*\d{1,3}\s*\]\s*\+\s*\$ShellId\['
         - Payload|re: '\$env:Public\[\s*\d{1,3}\s*\]\s*\+\s*\$env:Public\['
         - Payload|re: '\$env:ComSpec\[(\s*\d{1,3}\s*,){2}'
-        - Payload|re: '\*mdr\*\W\s*\)\.Name'
+        - Payload|re: '\\\\*mdr\\\\*\W\s*\)\.Name'
         - Payload|re: '\$VerbosePreference\.ToString\('
         - Payload|re: '\String\]\s*\$VerbosePreference'
     condition: ( selection_1 and selection_2 ) or ( selection_3 and selection_4 )

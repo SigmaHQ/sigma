@@ -1,0 +1,31 @@
+title: Azure Virtual Network Device Modified or Deleted
+id: 15ef3fac-f0f0-4dc4-ada0-660aa72980b3
+description: Identifies when a virtual network device is being modified or deleted. This can be a network interface, network virtual appliance, virtual hub, or virtual router.
+author: Austin Songer @austinsonger
+status: experimental
+date: 2021/08/08
+references:
+    - https://docs.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations
+logsource:
+  service: azure.activitylogs
+detection:
+    selection:
+        properties.message:
+            - MICROSOFT.NETWORK/NETWORKINTERFACES/TAPCONFIGURATIONS/WRITE
+            - MICROSOFT.NETWORK/NETWORKINTERFACES/TAPCONFIGURATIONS/DELETE
+            - MICROSOFT.NETWORK/NETWORKINTERFACES/WRITE
+            - MICROSOFT.NETWORK/NETWORKINTERFACES/JOIN/ACTION
+            - MICROSOFT.NETWORK/NETWORKINTERFACES/DELETE
+            - MICROSOFT.NETWORK/NETWORKVIRTUALAPPLIANCES/DELETE
+            - MICROSOFT.NETWORK/NETWORKVIRTUALAPPLIANCES/WRITE
+            - MICROSOFT.NETWORK/VIRTUALHUBS/DELETE
+            - MICROSOFT.NETWORK/VIRTUALHUBS/WRITE
+            - MICROSOFT.NETWORK/VIRTUALROUTERS/WRITE
+            - MICROSOFT.NETWORK/VIRTUALROUTERS/DELETE
+    condition: selection
+level: medium
+tags:
+    - attack.impact
+falsepositives:
+ - Virtual Network Device being modified or deleted may be performed by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. 
+ - Virtual Network Device modified or deleted from unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule.

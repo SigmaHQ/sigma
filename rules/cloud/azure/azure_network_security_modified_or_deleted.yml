@@ -1,0 +1,26 @@
+title: Azure Network Security Configuration Modified or Deleted
+id: d22b4df4-5a67-4859-a578-8c9a0b5af9df
+description: Identifies when a network security configuration is modified or deleted.
+author: Austin Songer @austinsonger
+status: experimental
+date: 2021/08/08
+references:
+    - https://docs.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations
+logsource:
+  service: azure.activitylogs
+detection:
+    selection:
+        properties.message:
+            - MICROSOFT.NETWORK/NETWORKSECURITYGROUPS/WRITE
+            - MICROSOFT.NETWORK/NETWORKSECURITYGROUPS/DELETE
+            - MICROSOFT.NETWORK/NETWORKSECURITYGROUPS/SECURITYRULES/WRITE
+            - MICROSOFT.NETWORK/NETWORKSECURITYGROUPS/SECURITYRULES/DELETE
+            - MICROSOFT.NETWORK/NETWORKSECURITYGROUPS/JOIN/ACTION
+            - MICROSOFT.NETWORK/NETWORKSECURITYGROUPS/PROVIDERS/MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/WRITE
+    condition: selection
+level: medium
+tags:
+    - attack.impact
+falsepositives:
+ - Network Security Configuration being modified or deleted may be performed by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. 
+ - Network Security Configuration modified or deleted from unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule.

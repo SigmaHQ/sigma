@@ -3,7 +3,7 @@ id: f772cee9-b7c2-4cb2-8f07-49870adc02e0
 status: experimental
 description: Detects Commandlet names and arguments from the Nishang exploitation framework
 date: 2019/05/16
-modified: 2021/07/21
+modified: 2021/08/21
 references:
     - https://github.com/samratashok/nishang
 tags:
@@ -14,10 +14,11 @@ author: Alec Costello
 logsource:
     product: windows
     service: powershell
-    definition: It is recommended to use the new "Script Block Logging" of PowerShell v5 https://adsecurity.org/?p=2277
+    definition: Script block logging must be enabled
 detection:
-    keywords:
-        Payload|contains:
+    Nishang:
+        EventID: 4104
+        ScriptBlockText|contains:
             - Add-ConstrainedDelegationBackdoor
             - Set-DCShadowPermissions
             - DNS_TXT_Pwnage
@@ -89,7 +90,7 @@ detection:
             - NotAllNameSpaces
             - exfill
             - FakeDC
-    condition: keywords
+    condition: Nishang
 falsepositives:
     - Penetration testing
 level: high
