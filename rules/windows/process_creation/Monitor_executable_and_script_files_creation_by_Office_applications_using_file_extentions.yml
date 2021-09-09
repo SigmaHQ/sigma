@@ -14,19 +14,15 @@ status: experimental
 Date: 2021/08/23
 logsource:
   product: Windows
-  category: process_creation
+  category: file_event
 detection:
   #useful_information: Please add more file extentions and magic bytes to the logic of your choice. 
   selection1:
-    EventType:
-      - FileCreate
-      - FileRename
-  selection2:
     Image|endswith:
       - 'winword.exe'
       - 'excel.exe'
       - 'powerpnt.exe'
-  selection3:
+  selection2:
     FileName|endswith:
     - ".exe"
     - ".dll"
@@ -38,10 +34,10 @@ detection:
     - ".bat"
     - ".scr"
     - ".proj"
-  selection4:
+  selection3:
     FileMagicBytes|startswith:
     - "4D5A"
-  condition: selection1 AND selection2 AND (selection3 OR selection4)
+  condition: selection1 AND (selection2 OR selection3)
 falsepositives:
 - Unknown
 level: high
