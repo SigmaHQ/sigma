@@ -1,0 +1,38 @@
+title: Exchange ProxyShell Pattern
+id: 23eee45e-933b-49f9-ae1b-df706d2d52ef
+status: experimental
+description: Detects URL patterns that could be found in ProxyShell exploitation attempts against Exchange servers (failed and successful)
+references:
+    - https://youtu.be/5mqid-7zp8k?t=2231
+    - https://blog.orange.tw/2021/08/proxylogon-a-new-attack-surface-on-ms-exchange-part-1.html
+    - https://peterjson.medium.com/reproducing-the-proxyshell-pwn2own-exploit-49743a4ea9a1
+author: Florian Roth, Rich Warren
+date: 2021/08/07
+modified: 2021/08/08
+tags:
+    - attack.initial_access
+logsource:
+    category: webserver
+detection:
+    selection_auto:
+        c-uri|contains: '/autodiscover.json'
+    selection_uri:
+        c-uri|contains:
+            - '/powershell'
+            - '/mapi/nspi'
+            - '/EWS'
+            - 'X-Rps-CAT'
+    selection:
+        sc-status: 401
+    selection_poc:
+        c-uri|contains: 
+            # since we don't know how it will appear in the log files, we'll just use all versions
+            - 'autodiscover.json?@'
+            - 'autodiscover.json%3f@'
+            - '%3f@foo.com'
+            - 'Email=autodiscover/autodiscover.json'
+            - 'json?@foo.com'
+    condition: selection_auto and selection_uri or selection_poc 
+falsepositives:
+    - Unknown
+level: medium

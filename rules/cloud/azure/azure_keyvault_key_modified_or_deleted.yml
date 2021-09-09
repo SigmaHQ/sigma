@@ -1,0 +1,33 @@
+title: Azure Keyvault Key Modified or Deleted
+id: 80eeab92-0979-4152-942d-96749e11df40
+description: Identifies when a Keyvault Key is modified or deleted in Azure.
+author: Austin Songer @austinsonger
+status: experimental
+date: 2021/08/16
+references:
+    - https://docs.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations
+logsource:
+  service: azure.activitylogs
+detection:
+    selection:
+        properties.message: 
+            - MICROSOFT.KEYVAULT/VAULTS/KEYS/UPDATE/ACTION
+            - MICROSOFT.KEYVAULT/VAULTS/KEYS/CREATE
+            - MICROSOFT.KEYVAULT/VAULTS/KEYS/CREATE/ACTION
+            - MICROSOFT.KEYVAULT/VAULTS/KEYS/IMPORT/ACTION
+            - MICROSOFT.KEYVAULT/VAULTS/KEYS/RECOVER/ACTION
+            - MICROSOFT.KEYVAULT/VAULTS/KEYS/RESTORE/ACTION
+            - MICROSOFT.KEYVAULT/VAULTS/KEYS/DELETE
+            - MICROSOFT.KEYVAULT/VAULTS/KEYS/BACKUP/ACTION
+            - MICROSOFT.KEYVAULT/VAULTS/KEYS/PURGE/ACTION
+    condition: selection
+level: medium
+tags:
+    - attack.impact
+    - attack.credential_access
+    - attack.t1552
+    - attack.t1552.001
+falsepositives:
+ - Key being modified or deleted may be performed by a system administrator. 
+ - Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. 
+ - Key modified or deleted from unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule.

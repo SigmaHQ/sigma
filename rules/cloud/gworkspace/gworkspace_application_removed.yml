@@ -1,0 +1,24 @@
+title: Google Workspace Application Removed
+id: ee2803f0-71c8-4831-b48b-a1fc57601ee4
+description: Detects when an an application is removed from Google Workspace.
+author: Austin Songer
+status: experimental
+date: 2021/08/26
+references:
+    - https://cloud.google.com/logging/docs/audit/gsuite-audit-logging#3
+    - https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-domain-settings?hl=en#REMOVE_APPLICATION
+    - https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-domain-settings?hl=en#REMOVE_APPLICATION_FROM_WHITELIST
+logsource:
+  service: google_workspace.admin
+detection:
+    selection:
+        eventService: admin.googleapis.com
+        eventName: 
+            - REMOVE_APPLICATION
+            - REMOVE_APPLICATION_FROM_WHITELIST
+    condition: selection
+level: medium
+tags:
+    - attack.impact
+falsepositives:
+ - Application being removed may be performed by a System Administrator.

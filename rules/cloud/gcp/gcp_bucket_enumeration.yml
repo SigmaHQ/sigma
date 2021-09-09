@@ -1,0 +1,22 @@
+title: Google Cloud Storage Buckets Enumeration
+id: e2feb918-4e77-4608-9697-990a1aaf74c3
+description: Detects when storage bucket is enumerated in Google Cloud.
+author: Austin Songer @austinsonger
+status: experimental
+date: 2021/08/14
+references:
+    - https://cloud.google.com/storage/docs/json_api/v1/buckets
+logsource:
+  service: gcp.audit
+detection:
+    selection:
+        gcp.audit.method_name: 
+            - storage.buckets.list
+            - storage.buckets.listChannels
+    condition: selection
+level: low
+tags:
+    - attack.discovery
+falsepositives:
+ - Storage Buckets being enumerated may be performed by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. 
+ - Storage Buckets enumerated from unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule.

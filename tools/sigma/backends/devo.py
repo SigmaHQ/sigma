@@ -40,7 +40,7 @@ class DevoBackend(SingleTextQueryBackend):
     mapMulti = "has(%s, %s)"                      # Syntax for field/value conditions. First %s is fieldname, second is value
     mapWildcard = "matches(%s, nameglob(%s))"     # Syntax for globbing conditions
     mapRe = "matches(%s, %s)"                     # Syntax for regex conditions that already were transformed by SigmaRegularExpressionModifier
-    mapContains = "toktains(%s, %s, true, true)"  # Systax for token value searches
+    mapContains = "toktains(%s, %s, true, true)"  # Syntax for token value searches
     mapListValueExpression = "%s or %s"           # Syntax for field/value condititons where map value is a list
     mapFullTextSearch = "weaktoktains(raw, \"%s\", true, true)"  # Expression for full text searches
     typedValueExpression = {
@@ -53,6 +53,7 @@ class DevoBackend(SingleTextQueryBackend):
     reEscape = re.compile('("|(?<!\\\\)\\\\(?![*?\\\\]))')
     derivedField = re.compile('^select .* as (.+)$')
     derivedFieldSet = set()
+    hasMulticondition = False
 
     def __init__(self, sigmaconfig, options):
         super().__init__(sigmaconfig)
@@ -189,7 +190,10 @@ class DevoBackend(SingleTextQueryBackend):
                 agg.aggfunc == SigmaAggregationParser.AGGFUNC_AVG):
 
             if agg.groupfield:
-                group_by = " group by {0}".format(self.fieldNameMapping(agg.groupfield, None))
+                if self.hasMulticondition:
+                    group_by = " group every - by subquery_link,{0}".format(self.fieldNameMapping(agg.groupfield, None))
+                else:
+                    group_by = " group by {0}".format(self.fieldNameMapping(agg.groupfield, None))
             else:
                 group_by = ""
 
@@ -206,7 +210,12 @@ class DevoBackend(SingleTextQueryBackend):
             else:
                 derivedFieldsStr = ""
 
-            temp_table = "from {}{} where {}{} select {}".format(self.table, derivedFieldsStr, where_clause, group_by, select)
+            if self.hasMulticondition:
+                link_select = ' select "link" as subquery_link'
+            else:
+                link_select = ""
+
+            temp_table = "from {}{} where {}{}{} select {}".format(self.table, derivedFieldsStr, where_clause, link_select, group_by, select)
             agg_condition = "agg {} {}".format(agg.cond_op, agg.condition)
 
             return temp_table, agg_condition
@@ -227,7 +236,12 @@ class DevoBackend(SingleTextQueryBackend):
         else:
             derivedFieldsStr = ""
 
-        return "from {}{} where {} select *".format(self.table, derivedFieldsStr, result)
+        if self.hasMulticondition:
+            select = 'select "link" as subquery_link'
+        else:
+            select = "select *"
+
+        return "from {}{} where {} {}".format(self.table, derivedFieldsStr, result, select)
 
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
@@ -237,6 +251,12 @@ class DevoBackend(SingleTextQueryBackend):
         else:
             self.table = "sourcetable"
 
+        if len(sigmaparser.condparsed) > 1:
+            self.hasMulticondition = True
+        else:
+            self.hasMulticondition = False
+
+        results = []
         for parsed in sigmaparser.condparsed:
             # Multi condition rules are not supported yet, only the first one will be processed
             query = self.generateQuery(parsed)
@@ -251,4 +271,17 @@ class DevoBackend(SingleTextQueryBackend):
             if after is not None:
                 result += after
 
-            return result
+            results.append(result)
+
+        if self.hasMulticondition:
+            prefix = 'from siem.logtrust.alert.info select "link" as subquery_link group every 24h by subquery_link where '
+            suffix = " select *"
+            for i in range(len(results)):
+                results[i] = "subquery_link in ( " + results[i]
+                results[i] += ")"
+
+            body = " or ".join(results)
+
+            return prefix + body + suffix
+
+        return results[0]

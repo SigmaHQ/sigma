@@ -11,25 +11,25 @@ tags:
 status: experimental
 author: frack113
 date: 2021/06/03
-modified: 2021/08/03
+modified: 2021/08/28
 logsource:
     product: windows
     service: powershell-classic
+    definition: fields have to be extract from event
 detection:
     selection_obj:
-        CommandLine|contains|all:
+        HostApplication|contains|all:
             - 'Get-WmiObject'
             - ' Win32_Shadowcopy'
     selection_del:
-        CommandLine|contains:
+        HostApplication|contains:
             - 'Delete()'
             - 'Remove-WmiObject'
     selection_eventid:
         EventID: 400
     condition: selection_obj and selection_del and selection_eventid
 fields:
-    - CommandLine
-    - ParentCommandLine
+    - HostApplication
 falsepositives:
     - Legitimate Administrator deletes Shadow Copies using operating systems utilities for legitimate reason
 level: critical

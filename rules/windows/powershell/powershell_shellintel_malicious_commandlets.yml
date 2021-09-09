@@ -1,0 +1,28 @@
+title: Malicious ShellIntel PowerShell Commandlets
+id: 402e1e1d-ad59-47b6-bf80-1ee44985b3a7
+status: experimental
+description: Detects Commandlet names from ShellIntel exploitation scripts.
+date: 2021/08/09
+modified: 2021/08/21
+references:
+    - https://github.com/Shellntel/scripts/
+tags:
+    - attack.execution
+    - attack.t1059.001
+author: Max Altgelt, Tobias Michalski
+logsource:
+    product: windows
+    service: powershell
+    definition: Script Block Logging must be enable
+detection:
+  selection:
+      EventID: 4104
+      ScriptBlockText|contains:
+        - Invoke-SMBAutoBrute
+        - Invoke-GPOLinks
+        - Out-Minidump
+        - Invoke-Potato
+  condition: selection
+falsepositives:
+    - Unknown
+level: high
