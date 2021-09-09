@@ -27,6 +27,7 @@ from sigma.parser.modifiers.base import SigmaTypeModifier
 class BackendOptions(dict):
     """
     Object containing all the options that should be passed to the backend.
+
     The options can come from command line and a YAML configuration file, and will be merged together.
     Options from the command line take precedence.
     """
@@ -43,6 +44,7 @@ class BackendOptions(dict):
     def _parse_options(self, options):
         """
         Populates options from the unparsed options of the CLI
+
         :param options: list unparsed options from the CLI.
             Each option can have one of the following formats:
             - "key=value": the option key:value will be passed to the backend
@@ -63,6 +65,7 @@ class BackendOptions(dict):
     def _load_config_file(self, path):
         """
         Populates options from a configuration file
+        
         :param path: Path to the configuration file
         """
         if path is None:
