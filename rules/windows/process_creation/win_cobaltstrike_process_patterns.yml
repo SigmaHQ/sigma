@@ -5,7 +5,9 @@ description: Detects process patterns found in Cobalt Strike beacon activity (se
 author: Florian Roth
 references:
     - https://hausec.com/2021/07/26/cobalt-strike-and-tradecraft/
+    - https://thedfirreport.com/2021/08/29/cobalt-strike-a-defenders-guide/
 date: 2021/07/27
+modified: 2021/08/30
 tags:
     - attack.execution
 logsource:
@@ -27,6 +29,10 @@ detection:
             - '> \\.\pipe'
             - '\whoami.exe'
         ParentImage|endswith: '\dllhost.exe'
+    selection4:
+        Image|endswith: '\cmd.exe'
+        ParentImage|endswith: '\runonce.exe'
+        ParentCommandLine|endswith: '\runonce.exe'
     condition: 1 of them
 falsepositives:
     - Other programs that cause these patterns (please report)

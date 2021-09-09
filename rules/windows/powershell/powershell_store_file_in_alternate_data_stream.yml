@@ -1,0 +1,28 @@
+title: Powershell Store File In Alternate Data Stream
+id: a699b30e-d010-46c8-bbd1-ee2e26765fe9
+status: experimental
+author: frack113
+date: 2021/09/02
+description: Storing files in Alternate Data Stream (ADS) similar to Astaroth malware.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1564.004/T1564.004.md
+tags:
+    - attack.defense_evasion
+    - attack.t1564.004
+logsource:
+    product: windows
+    service: powershell
+    definition: EnableScriptBlockLogging must be set to enable
+detection:
+    selection_id:
+        EventID: 4104
+    selection_compspec:
+        ScriptBlockText|contains|all: 
+            - 'Start-Process'
+            - '-FilePath "$env:comspec" '
+            - '-ArgumentList '
+            - '>'
+    condition: selection_id and selection_compspec
+falsepositives:
+    - Unknown
+level: medium

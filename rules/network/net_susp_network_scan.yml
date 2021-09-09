@@ -1,5 +1,5 @@
+action: global
 title: Network Scans
-id: fab0ddf0-b8a9-4d70-91ce-a20547209afb
 status: experimental
 description: Detects many failed connection attempts to different ports or hosts
 author: Thomas Patzke
@@ -7,13 +7,6 @@ date: 2017/02/19
 modified: 2020/08/27
 logsource:
     category: firewall
-detection:
-    selection:
-        action: denied
-    timeframe: 24h
-    condition:
-        - selection | count(dst_port) by src_ip > 10
-        - selection | count(dst_ip) by src_ip > 10
 fields:
     - src_ip
     - dst_ip
@@ -26,3 +19,17 @@ level: medium
 tags:
     - attack.discovery
     - attack.t1046
+---
+id: fab0ddf0-b8a9-4d70-91ce-a20547209afb
+detection:
+    selection:
+        action: denied
+    timeframe: 24h
+    condition: selection | count(dst_port) by src_ip > 10
+---
+id: 4601eaec-6b45-4052-ad32-2d96d26ce0d8
+detection:
+    selection:
+        action: denied
+    timeframe: 24h
+    condition: selection | count(dst_ip) by src_ip > 10

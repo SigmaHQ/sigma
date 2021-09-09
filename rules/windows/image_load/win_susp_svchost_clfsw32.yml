@@ -1,0 +1,19 @@
+title: APT PRIVATELOG Image Load Pattern
+id: 33a2d1dd-f3b0-40bd-8baf-7974468927cc
+status: experimental
+description: Detects an image load pattern as seen when a tool named PRIVATELOG is used and rarely observed under legitimate circumstances
+references:
+    - https://www.fireeye.com/blog/threat-research/2021/09/unknown-actor-using-clfs-log-files-for-stealth.html
+author: Florian Roth
+date: 2021/09/07
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\svchost.exe'
+        ImageLoaded|endswith: '\clfsw32.dll'
+    condition: selection
+falsepositives:
+    - Rarely observed
+level: high

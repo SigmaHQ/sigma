@@ -6,7 +6,9 @@ author: Florian Roth, Jonhnathan Ribeiro
 references:
     - https://in.security/an-intro-into-abusing-and-identifying-wmi-event-subscriptions-for-persistence/
     - https://github.com/Neo23x0/signature-base/blob/master/yara/gen_susp_lnk_files.yar#L19
+    - https://github.com/RiccardoAncarani/LiquidSnake
 date: 2019/04/15
+modified: 2021/09/01
 tags:
     - attack.t1086          # an old one
     - attack.execution
@@ -15,8 +17,6 @@ logsource:
     product: windows
     category: wmi_event
 detection:
-    selection:
-        EventID: 20
     selection_destination:
         - Destination|contains|all:
               - 'new-object'
@@ -33,10 +33,13 @@ detection:
               - ' -noprofile '
               - ' -decode '
               - ' -enc '
-    condition: selection and selection_destination
+        - Destination|contains:
+              - 'WScript.Shell'
+              - 'System.Security.Cryptography.FromBase64Transform'
+    condition: selection_destination
 fields:
-    - CommandLine
-    - ParentCommandLine
+    - User
+    - Operation
 falsepositives:
     - Administrative scripts
 level: high

@@ -7,6 +7,7 @@ references:
     - https://app.any.run/tasks/7eaba74e-c1ea-400f-9c17-5e30eee89906/
 author: Florian Roth
 date: 2021/08/12
+modified: 2021/08/26
 tags:
     - attack.discovery
     - attack.t1033
@@ -17,17 +18,23 @@ logsource:
 detection:
     selection:
         Image|endswith: '\whoami.exe'
-    filter:
+    filter1:
         ParentImage|endswith: 
             - '\cmd.exe'
             - '\powershell.exe'
+    filter2:
+        ParentImage:
+            - 'C:\Program Files\Microsoft Monitoring Agent\Agent\MonitoringHost.exe'
+            - ''
+    filter3:
+        ParentImage: null
     selection_special:
         CommandLine|contains:
             - 'whoami -all'
             - 'whoami /all'
             - 'whoami.exe -all'
             - 'whoami.exe /all'
-    condition: ( selection and not filter ) or selection_special
+    condition: ( selection and not filter1 and not filter2 and not filter3 ) or selection_special
 falsepositives:
     - Admin activity
     - Scripts and administrative tools used in the monitored environment

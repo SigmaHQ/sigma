@@ -335,6 +335,9 @@ class TestRules(unittest.TestCase):
             elif len(datefield) != 10:
                 print(Fore.YELLOW + "Rule {} has a malformed 'date' (not 10 chars, should be YYYY/MM/DD).".format(file))
                 faulty_rules.append(file)
+            elif datefield[4] != '/' or datefield[7] != '/':
+                print(Fore.YELLOW + "Rule {} has a malformed 'date' (should be YYYY/MM/DD).".format(file))
+                faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with missing or malformed 'date' fields. (create one, e.g. date: 2019/01/14)")
@@ -350,6 +353,9 @@ class TestRules(unittest.TestCase):
                 elif len(modifiedfield) != 10:
                     print(Fore.YELLOW + "Rule {} has a malformed 'modified' (not 10 chars, should be YYYY/MM/DD).".format(file))
                     faulty_rules.append(file)
+                elif modifiedfield[4] != '/' or modifiedfield[7] != '/':
+                    print(Fore.YELLOW + "Rule {} has a malformed 'modified' (should be YYYY/MM/DD).".format(file))
+                    faulty_rules.append(file)    
 
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed 'modified' fields. (create one, e.g. date: 2019/01/14)")
@@ -567,7 +573,7 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED + 
-                         "There are rules with non-conform 'title' fields. Please check: https://github.com/SimaHQ/sigma/wiki/Rule-Creation-Guide#title")
+                         "There are rules with non-conform 'title' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title")
 
     def test_invalid_logsource_attributes(self):
         faulty_rules = []

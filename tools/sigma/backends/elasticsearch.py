@@ -236,7 +236,7 @@ class ElasticsearchWildcardHandlingMixin(object):
         """
         if value and not value == 'null' and not re.match(r'^/.*/$', value) and (re.search('[a-zA-Z]', value) and not re.match(self.uuid_regex, value) or self.containsWildcard(value)):  # re.search for alpha is fastest:
             # Turn single ending '\\' into non escaped (ie: '\\*')
-            #value = re.sub( r"((?<!\\)(\\))\*$", "\g<1>\\*", value )
+            value = re.sub( r"((?<!\\)(\\))\*$", "\g<1>\\*", value )
             # Make upper/lower
             value = re.sub( r"[A-Za-z]", lambda x: "[" + x.group( 0 ).upper() + x.group( 0 ).lower() + "]", value )
             # Turn `.` into wildcard, only if odd number of '\'(because this would mean already escaped)
@@ -289,8 +289,11 @@ class ElasticsearchQuerystringBackend(DeepFieldMappingMixin, ElasticsearchWildca
                     if make_ci.get('is_regex'): # Determine if still should be a regex
                         result = "/%s/" % result # Regex place holders for regex
                 return result
-            else:
-                return "\"%s\"" % result
+            else: # If analyzed field contains wildcard then do NOT quote otherwise things such as '*' get treated as an exact match
+                if self.containsWildcard(result):
+                    return result
+                else:
+                    return "\"%s\"" % result
 
     def generateNOTNode(self, node):
         expression = super().generateNode(node.item)
@@ -387,7 +390,7 @@ class ElasticsearchQuerystringBackendLogRhythm(DeepFieldMappingMixin, Elasticsea
             return super().generateSubexpressionNode(node)
 
 class ElasticsearchEQLBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandlingMixin, SingleTextQueryBackend):
-    """Converts Sigma rule into EQL."""
+    """Converts Sigma rule into Elasticsearch EQL query."""
     identifier = "es-eql"
     active = True
 
@@ -501,7 +504,7 @@ class ElasticsearchEQLBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandli
         return fieldname
 
 class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, ElasticsearchWildcardHandlingMixin, BaseBackend):
-    """ElasticSearch DSL backend"""
+    """Converts Sigma rule into Elasticsearch DSL query"""
     identifier = 'es-dsl'
     active = True
     options = RulenameCommentMixin.options + ElasticsearchWildcardHandlingMixin.options + (
@@ -618,8 +621,12 @@ class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, Elast
                         queryType = 'wildcard'
                         value_cleaned = self.escapeSlashes(self.cleanValue(str(v)))
                 else:
-                    queryType = 'match_phrase'
-                    value_cleaned = self.cleanValue(str(v))
+                    if self.containsWildcard(str(v)):
+                        queryType = 'wildcard'
+                        value_cleaned = self.escapeSlashes(self.cleanValue(str(v)))
+                    else:
+                        queryType = 'match_phrase'
+                        value_cleaned = self.cleanValue(str(v))
                 res['bool']['should'].append({queryType: {key_mapped: value_cleaned}})
             return res
         elif value is None:
@@ -639,8 +646,12 @@ class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, Elast
                     queryType = 'wildcard'
                     value_cleaned = self.escapeSlashes(self.cleanValue(str(value)))
             else:
-                queryType = 'match_phrase'
-                value_cleaned = self.cleanValue(str(value))
+                if self.containsWildcard(str(value)):
+                    queryType = 'wildcard'
+                    value_cleaned = self.escapeSlashes(self.cleanValue(str(value)))
+                else:
+                    queryType = 'match_phrase'
+                    value_cleaned = self.cleanValue(str(value))
             return {queryType: {key_mapped: value_cleaned}}
         elif isinstance(value, SigmaRegularExpressionModifier):
             key_mapped = self.fieldNameMapping(key, value)
@@ -1397,7 +1408,7 @@ class ElastalertBackend(DeepFieldMappingMixin, MultiRuleOutputMixin):
         # return result
 
 class ElastalertBackendDsl(ElastalertBackend, ElasticsearchDSLBackend):
-    """Elastalert backend"""
+    """Converts Sigma rule into ElastAlert DSL query"""
     identifier = 'elastalert-dsl'
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1410,7 +1421,7 @@ class ElastalertBackendDsl(ElastalertBackend, ElasticsearchDSLBackend):
         return self.queries
 
 class ElastalertBackendQs(ElastalertBackend, ElasticsearchQuerystringBackend):
-    """Elastalert backend"""
+    """Converts Sigma rule into ElastAlert QS query"""
     identifier = 'elastalert'
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1479,6 +1490,10 @@ class ElasticSearchRuleBackend(object):
 
     def create_threat_description(self, tactics_list, techniques_list):
         threat_list = list()
+        # sort lists for correct handling with subtechniques
+        tactics_list.sort(key=lambda x: x['external_id'], reverse=False)
+        techniques_list.sort(key=lambda x: x['technique_id'], reverse=False)
+
         for tactic in tactics_list:
             temp_tactics = {
                 "tactic": {
@@ -1496,6 +1511,23 @@ class ElasticSearchRuleBackend(object):
                                 "name": tech.get("technique", ""),
                                 "reference": tech.get("url", "")
                             })
+                elif re.match('[T][0-9]{4}.[0-9]{3}', tech.get("technique_id", ""), re.IGNORECASE):
+                    # add subtechnique to main technique
+                    technique = tech.get("technique_id", "").split(".")[0]
+                    technique_entry = list(filter(lambda temp_techniques: temp_techniques['id'] == technique, temp_techniques))
+                    
+                    if technique_entry:
+                        index = temp_techniques.index(technique_entry[0])
+                        temp_subtechniques = temp_techniques[index].get("subtechnique", [])
+                        temp_subtechniques.append(
+                            {
+                                "id": tech.get("technique_id", ""),
+                                "name": tech.get("technique", ""),
+                                "reference": tech.get("url", "")
+                            }
+                        )
+                        temp_techniques[index].update({"subtechnique": temp_subtechniques})
+
             temp_tactics.update({"technique": temp_techniques})
             threat_list.append(temp_tactics)
         return threat_list
@@ -1559,8 +1591,20 @@ class ElasticSearchRuleBackend(object):
         technics_list = list()
         new_tags = list()
 
+        # sort tags so it looks nice :)
+        tags.sort()
+
         for tag in tags:
             tag = tag.replace("attack.", "")
+            # if there's a subtechnique, add main technique to the list if not already there
+            if re.match("[t][0-9]{4}.[0-9]{3}", tag, re.IGNORECASE):
+                technique = tag.split('.')[0]
+                if technique not in tags and technique.title() not in new_tags:
+                    tech = self.find_technique(technique.title())
+                    if tech:
+                        new_tags.append(technique.title())
+                        technics_list.append(tech)
+
             if re.match("[t][0-9]{4}", tag, re.IGNORECASE):
                 tech = self.find_technique(tag.title())
                 if tech:
@@ -1582,8 +1626,13 @@ class ElasticSearchRuleBackend(object):
                 else:
                     tact = self.find_tactics(key_name=tag.title())
                     if tact:
-                        new_tags.append(tag.title())
                         tactics_list.append(tact)
+                    
+                    # capitalize if not a MITRE CAR tag
+                    if re.match("car.\d{4}-\d{2}-\d{3}", tag, re.IGNORECASE):
+                        new_tags.append(tag)
+                    else:
+                        new_tags.append(tag.title())
         
         if self.custom_tag:
             if ',' in self.custom_tag:
@@ -1622,7 +1671,17 @@ class ElasticSearchRuleBackend(object):
             else:
                 references.append(add_ref_yml)
         
+        # add author filed depending on data type in rule file
+        author = configs.get("author", "")
+        if isinstance(author, str):
+            author_list = author.split(', ')
+        elif isinstance(author, list):
+            author_list = author
+        else:
+            author_list = []
+        
         rule = {
+            "author": author_list,
             "description": configs.get("description", ""),
             "enabled": True,
             "false_positives": falsepositives,
@@ -1656,12 +1715,14 @@ class ElasticSearchRuleBackend(object):
 
 
 class ElasticSearchRuleEqlBackend(ElasticSearchRuleBackend, ElasticsearchEQLBackend):
+    """Converts Sigma rule into Elastic SIEM EQL query"""
     default_rule_type = "eql"
     identifier = "es-rule-eql"
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
 class ElasticSearchRuleQsBackend(ElasticSearchRuleBackend, ElasticsearchQuerystringBackend):
+    """Converts Sigma rule into Elastic SIEM lucene query"""
     identifier = "es-rule"
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
