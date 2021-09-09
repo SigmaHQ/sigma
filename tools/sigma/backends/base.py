@@ -65,7 +65,7 @@ class BackendOptions(dict):
     def _load_config_file(self, path):
         """
         Populates options from a configuration file
-        
+
         :param path: Path to the configuration file
         """
         if path is None:
