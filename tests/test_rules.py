@@ -39,7 +39,7 @@ class TestRules(unittest.TestCase):
     def get_rule_yaml(self, file_path:str) -> dict:
         data = []
 
-        with open(file_path) as f:
+        with open(file_path,encoding='utf-8') as f:
             yaml_parts = yaml.safe_load_all(f)
             for part in yaml_parts:
                 data.append(part)
@@ -64,7 +64,7 @@ class TestRules(unittest.TestCase):
         files_with_legal_issues = []
 
         for file in self.yield_next_rule_file_path(self.path_to_rules):
-            with open(file, 'r') as fh:
+            with open(file, 'r',encoding='utf-8') as fh:
                 file_data = fh.read()
                 for tm in self.TRADE_MARKS:
                     if tm in file_data:
@@ -245,7 +245,7 @@ class TestRules(unittest.TestCase):
     def test_event_id_instead_of_process_creation(self):
         faulty_detections = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
-            with open(file) as f:
+            with open(file,encoding='utf-8') as f:
                 for line in f:
                     if re.search(r'.*EventID: (?:1|4688)\s*$', line) and file not in faulty_detections:
                         faulty_detections.append(file)
@@ -310,7 +310,7 @@ class TestRules(unittest.TestCase):
             logsource = self.get_rule_part(file_path=file, part_name="logsource")
             service = logsource.get('service', '')
             if service.lower() == 'sysmon':
-                with open(file) as f:
+                with open(file,encoding='utf-8') as f:
                     found = False
                     for line in f:
                         if re.search(r'.*EventID:.*$', line):  # might be on a single line or in multiple lines
@@ -619,6 +619,29 @@ class TestRules(unittest.TestCase):
                      faulty_rules.append(file)
    
         self.assertEqual(faulty_rules, [], Fore.RED + "There are rules using list with only 1 element")
+
+    def test_condition_operator_casesensitive(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+             detection = self.get_rule_part(file_path=file, part_name="detection")
+             if detection:
+                 valid = True
+                 if isinstance(detection["condition"],str):
+                     param = detection["condition"].split(' ')
+                     for item in param:
+                        if item.lower() == 'or' and not item == 'or':
+                            valid = False
+                        elif item.lower() == 'and' and not item == 'and':
+                            valid = False
+                        elif item.lower() == 'not' and not item == 'not':
+                            valid = False   
+                        elif item.lower() == 'of' and not item == 'of':
+                            valid = False                            
+                     if not valid:
+                         print(Fore.RED + "Rule {} has a invalid condition '{}' : 'or','and','not','of' are lowercase".format(file,detection["condition"]))
+                         faulty_rules.append(file)
+                         
+        self.assertEqual(faulty_rules, [], Fore.RED + "There are rules using condition whitout lowercase operator")
 
 def get_mitre_data():
     """
