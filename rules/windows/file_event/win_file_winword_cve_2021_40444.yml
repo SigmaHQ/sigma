@@ -1,0 +1,23 @@
+title: Suspicious Word Cab File Write CVE-2021-40444
+id: 60c0a111-787a-4e8a-9262-ee485f3ef9d5
+status: experimental
+description: Detects file creation patterns noticable during the exploitation of CVE-2021-40444
+references:
+    - https://twitter.com/RonnyTNL/status/1436334640617373699?s=20
+author: Florian Roth
+date: 2021/09/10
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        Image: '\winword.exe'
+        TargetFilename|endswith: '.cab'
+        TargetFilename|contains: '\Windows\INetCache'
+    condition: selection
+fields:
+    - TargetFilename
+falsepositives:
+    - unknown
+level: critical
+
