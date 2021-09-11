@@ -83,6 +83,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "ImageLoaded": ("FolderPath", self.default_value_mapping),
                 "LogonType": (self.id_mapping, self.logontype_mapping),
                 "NewProcessName": ("FolderPath", self.default_value_mapping),
+                "OriginalFileName": ("ProcessVersionInfoOriginalFileName", self.default_value_mapping),
                 "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
                 "ParentName": ("InitiatingProcessFileName", self.default_value_mapping),
                 "ParentProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
