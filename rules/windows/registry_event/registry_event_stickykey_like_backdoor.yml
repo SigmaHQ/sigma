@@ -1,5 +1,5 @@
-action: global
 title: Sticky Key Like Backdoor Usage
+id: baca5663-583c-45f9-b5dc-ea96a22ce542
 description: Detects the usage and installation of a backdoor that uses an option to register a malicious debugger for built-in tools that are accessible in the login
     screen
 references:
@@ -13,12 +13,7 @@ tags:
     - car.2014-11-008
 author: Florian Roth, @twjackomo, Jonhnathan Ribeiro, oscd.community
 date: 2018/03/15
-modified: 2020/11/28
-falsepositives:
-    - Unlikely
-level: critical
----
-id: baca5663-583c-45f9-b5dc-ea96a22ce542
+modified: 2021/09/12
 logsource:
     category: registry_event
     product: windows
@@ -31,21 +26,7 @@ detection:
             - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\Magnify.exe\Debugger'
             - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\Narrator.exe\Debugger'
             - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\DisplaySwitch.exe\Debugger'
-    condition: 1 of them
----
-id: 2fdefcb3-dbda-401e-ae23-f0db027628bc
-logsource:
-    category: process_creation
-    product: windows
-detection:
-    selection_process:
-        ParentImage|endswith: '\winlogon.exe'
-        Image|endswith: '\cmd.exe'
-        CommandLine|contains:
-            - 'sethc.exe'
-            - 'utilman.exe'
-            - 'osk.exe'
-            - 'Magnify.exe'
-            - 'Narrator.exe'
-            - 'DisplaySwitch.exe'
-    condition: 1 of them
+    condition: selection_registry
+falsepositives:
+    - Unlikely
+level: critical
