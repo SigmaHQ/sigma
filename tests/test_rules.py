@@ -585,6 +585,10 @@ class TestRules(unittest.TestCase):
            ]
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             logsource = self.get_rule_part(file_path=file, part_name="logsource")
+            if not logsource:
+                print(Fore.RED + "Rule {} has no 'logsource'.".format(file))
+                faulty_rules.append(file)
+                continue           
             valid = True
             for key in logsource:
                 if key.lower() not in valid_logsource:
