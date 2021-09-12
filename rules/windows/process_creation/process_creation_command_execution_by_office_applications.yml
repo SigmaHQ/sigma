@@ -1,0 +1,33 @@
+title: WMI Command Execution by Office Applications
+id: 3ee1bba8-b9e2-4e35-bec5-7fb66b6b3815
+description: Initial execution of malicious document calls wmic Win32_Process::Create to execute the file with regsvr32
+references:
+    - https://thedfirreport.com/2021/03/29/sodinokibi-aka-revil-ransomware/
+    - https://github.com/vadim-hunter/Detection-Ideas-Rules/blob/main/Threat%20Intelligence/The%20DFIR%20Report/20210329_Sodinokibi_(aka_REvil)_Ransomware.yaml
+author: "Vadim Khrykov (ThreatIntel), Cyb3rEng (Rule)"
+tags:
+    - attack.t1204.002
+    - attack.t1047
+    - attack.t1218.010
+    - attack.execution
+    - attack.defense_evasion
+status: experimental
+date: 2021/08/23
+logsource:
+  product: EndPoint Detection Logs
+  category: process_creation
+detection:
+  #useful_information: Add more office applications to the rule logic of choice
+  selection1:
+    EventLog: EDR
+    EventType: WMIExecution
+    WMIcommand|contains: 'Win32_Process\:\:Create'
+  selection2:
+    Image|endswith:
+      - '\winword.exe'
+      - '\excel.exe'
+      - '\powerpnt.exe'
+  condition: selection1 and selection2
+falsepositives:
+- Unknown
+level: high

@@ -1,0 +1,44 @@
+title: Excel Proxy Executing Regsvr32 With Payload
+id: c0e1c3d5-4381-4f18-8145-2583f06a1fe5
+description: Excel called wmic to finally proxy execute regsvr32 with the payload. An attacker wanted to break suspicious parent-child chain (Office app spawns LOLBin).But we have command-line in the event which allow us to "restore" this suspicious parent-child chain and detect it. Monitor process creation with "wmic process call create" and LOLBins in command-line with parent Office application processes.
+references:
+    - https://thedfirreport.com/2021/03/29/sodinokibi-aka-revil-ransomware/
+    - https://github.com/vadim-hunter/Detection-Ideas-Rules/blob/main/Threat%20Intelligence/The%20DFIR%20Report/20210329_Sodinokibi_(aka_REvil)_Ransomware.yaml
+author: "Vadim Khrykov (ThreatIntel), Cyb3rEng (Rule)"
+tags:
+    - attack.t1204.002
+    - attack.t1047
+    - attack.t1218.010
+    - attack.execution
+    - attack.defense_evasion
+status: experimental
+date: 2021/08/23
+logsource:
+  product: Windows
+  category: process_creation
+detection:
+  #useful_information: add more LOLBins to the rules logic of your choice.
+  selection1:
+    ProcessCommandLine:
+      - '*regsvr32*'
+      - '*rundll32*'
+      - '*msiexec*'
+      - '*mshta*'
+      - '*verclsid*'
+  selection2:
+    - Image|endswith: '\wbem\WMIC.exe'
+    - ProcessCommandLine|contains: 'wmic '
+  selection3:
+    ParentImage|endswith:
+    - winword.exe
+    - excel.exe
+    - powerpnt.exe
+  selection4:
+    processCommandLine|contains|all: 
+      - 'process'
+      - 'create'
+      - 'call' 
+  condition: selection1 and selection2 and selection3 and selection4
+falsepositives:
+- Unknown
+level: high

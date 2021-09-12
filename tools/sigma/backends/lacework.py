@@ -166,7 +166,7 @@ class LaceworkBackend(SingleTextQueryBackend):
 
         If value is a field name
         1.  Do not wrap in valueExpression
-        2.  Transfrom using fieldNameMapping()
+        2.  Transform using fieldNameMapping()
         """
         node = self.cleanValue(str(node))
 
@@ -405,7 +405,7 @@ class LaceworkQuery:
 
     @staticmethod
     def should_generate_query(backend_options):
-        # if we are explictly requesting a query
+        # if we are explicitly requesting a query
         if (
             'query' in backend_options
             and backend_options['query'] is True
@@ -588,7 +588,7 @@ class LaceworkPolicy:
 
     @staticmethod
     def should_generate_policy(backend_options):
-        # if we are explictly requesting a query
+        # if we are explicitly requesting a query
         if (
             'policy' in backend_options
             and backend_options['policy'] is True
