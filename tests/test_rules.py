@@ -308,16 +308,17 @@ class TestRules(unittest.TestCase):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             logsource = self.get_rule_part(file_path=file, part_name="logsource")
-            service = logsource.get('service', '')
-            if service.lower() == 'sysmon':
-                with open(file,encoding='utf-8') as f:
-                    found = False
-                    for line in f:
-                        if re.search(r'.*EventID:.*$', line):  # might be on a single line or in multiple lines
-                            found = True
-                            break
-                    if not found:
-                        faulty_rules.append(file)
+            if logsource:
+                service = logsource.get('service', '')
+                if service.lower() == 'sysmon':
+                    with open(file,encoding='utf-8') as f:
+                        found = False
+                        for line in f:
+                            if re.search(r'.*EventID:.*$', line):  # might be on a single line or in multiple lines
+                                found = True
+                                break
+                        if not found:
+                            faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules using sysmon events but with no EventID specified")
@@ -585,6 +586,10 @@ class TestRules(unittest.TestCase):
            ]
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             logsource = self.get_rule_part(file_path=file, part_name="logsource")
+            if not logsource:
+                print(Fore.RED + "Rule {} has no 'logsource'.".format(file))
+                faulty_rules.append(file)
+                continue           
             valid = True
             for key in logsource:
                 if key.lower() not in valid_logsource:
