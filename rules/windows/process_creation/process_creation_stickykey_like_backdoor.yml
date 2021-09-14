@@ -1,0 +1,37 @@
+title: Sticky Key Like Backdoor Usage
+id: 2fdefcb3-dbda-401e-ae23-f0db027628bc
+related:
+    - id: baca5663-583c-45f9-b5dc-ea96a22ce542
+      type: derived
+description: Detects the usage and installation of a backdoor that uses an option to register a malicious debugger for built-in tools that are accessible in the login
+    screen
+references:
+    - https://blogs.technet.microsoft.com/jonathantrull/2016/10/03/detecting-sticky-key-backdoors/
+tags:
+    - attack.privilege_escalation
+    - attack.persistence
+    - attack.t1015 # an old one
+    - attack.t1546.008
+    - car.2014-11-003
+    - car.2014-11-008
+author: Florian Roth, @twjackomo, Jonhnathan Ribeiro, oscd.community
+date: 2018/03/15
+modified: 2021/09/12
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_process:
+        ParentImage|endswith: '\winlogon.exe'
+        Image|endswith: '\cmd.exe'
+        CommandLine|contains:
+            - 'sethc.exe'
+            - 'utilman.exe'
+            - 'osk.exe'
+            - 'Magnify.exe'
+            - 'Narrator.exe'
+            - 'DisplaySwitch.exe'
+    condition: selection_process
+falsepositives:
+    - Unlikely
+level: critical
