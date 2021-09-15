@@ -14,16 +14,17 @@ date: 2019/10/26
 modified: 2020/09/06
 logsource:
     product: windows
-    category: registry_event
+    category: process_creation
 detection:
     selection:
-        
         IntegrityLevel: 'Medium'
-        TargetObject|contains: '\services\'
-        TargetObject|endswith:
-            - '\ImagePath'
-            - '\FailureCommand'
-            - '\Parameters\ServiceDll'
+        CommandLine|contains|all:
+            - ControlSet
+            - services
+        CommandLine|contains:
+            - \ImagePath
+            - \FailureCommand
+            - \ServiceDll
     condition: selection
 falsepositives:
     - Unknown
