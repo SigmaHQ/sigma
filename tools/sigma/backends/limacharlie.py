@@ -50,6 +50,17 @@ def _mapProcessCreationOperations(node):
 
     return node
 
+def _validateSubrules(elem):
+    # Make sure that all elements in the rules
+    # are actual operators. Otherwise this
+    # indicates the Sigma engine provided us
+    # with partial contextual information we
+    # cannot map to LimaCharlie data with
+    # any certainty.
+    for sub in elem.get( 'rules', [] ):
+        if not isinstance( sub, dict ):
+            raise NotImplementedError("Sub-rule does not contain an operator.")
+
 # We support many different log sources so we keep different mapping depending
 # on the log source and category.
 # The mapping key is product/category/service.
@@ -403,6 +414,7 @@ class LimaCharlieBackend(BaseBackend):
                     result,
                 ]
             }
+            _validateSubrules(result)
             if self._postOpMapper is not None:
                 result = self._postOpMapper(result)
         return yaml.safe_dump(result)
@@ -424,6 +436,7 @@ class LimaCharlieBackend(BaseBackend):
             "op": "and",
             "rules": filtered,
         }
+        _validateSubrules(result)
         if self._postOpMapper is not None:
             result = self._postOpMapper(result)
         return result
@@ -445,6 +458,7 @@ class LimaCharlieBackend(BaseBackend):
             "op": "or",
             "rules": filtered,
         }
+        _validateSubrules(result)
         if self._postOpMapper is not None:
             result = self._postOpMapper(result)
         return result
