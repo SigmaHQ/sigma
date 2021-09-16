@@ -1,5 +1,8 @@
-action: global
 title: CobaltStrike Service Installations
+id: d7a95147-145f-4678-b85d-d1ff4a3bb3f6
+related:
+    - id: 5a105d34-05fc-401e-8553-272b45c1522d
+      type: derived
 description: Detects known malicious service installs that appear in cases in which a Cobalt Strike beacon elevates privileges or lateral movement
 author: Florian Roth, Wojciech Lesicki
 references:
@@ -14,7 +17,12 @@ tags:
     - attack.t1021.002
     - attack.t1543.003
     - attack.t1569.002
+logsource:
+    product: windows
+    service: security
 detection:
+    selection_id:
+        EventID: 4697
     selection1:
         ServiceFileName|contains|all: 
             - 'ADMIN$'
@@ -32,19 +40,3 @@ detection:
 falsepositives:
     - Unknown
 level: critical
----
-id: 5a105d34-05fc-401e-8553-272b45c1522d
-logsource:
-    product: windows
-    service: system
-detection:
-    selection_id:
-        EventID: 7045
----
-id: d7a95147-145f-4678-b85d-d1ff4a3bb3f6
-logsource:
-    product: windows
-    service: security
-detection:
-    selection_id:
-        EventID: 4697
