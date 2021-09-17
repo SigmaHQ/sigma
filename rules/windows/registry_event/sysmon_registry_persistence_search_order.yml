@@ -6,7 +6,7 @@ references:
     - https://www.cyberbit.com/blog/endpoint-security/com-hijacking-windows-overlooked-security-vulnerability/
 author: Maxime Thiebaut (@0xThiebaut), oscd.community, Cédric Hien
 date: 2020/04/14
-modified: 2021/08/14
+modified: 2021/09/16
 tags:
     - attack.persistence
     - attack.t1038 # an old one
@@ -16,10 +16,10 @@ logsource:
     product: windows
 detection:
     selection: # Detect new COM servers in the user hive
-        TargetObject|contains|all: 
-            - 'HKU\'
-            - '_Classes\CLSID\'
-            - '\InProcServer32\(Default)'
+        TargetObject|startswith: 
+            - 'HKCR\CLSID\'
+            - 'HKCU\Software\Classes\CLSID\'
+        TargetObject|endswith: '\InprocServer32\(Default)'
     filter1:
         Details|contains: # Exclude privileged directories and observed FPs
             - '%%systemroot%%\system32\'
