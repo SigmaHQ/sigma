@@ -1,0 +1,33 @@
+title: OMIGOD SCX RunAsProvider ExecuteScript
+id: 865c10a6-9541-4d11-9f45-9a3484e23b0a 
+description: Rule to detect the use of the SCX RunAsProvider ExecuteScript to execute any UNIX/Linux script using the /bin/sh shell. Script being executed gets created as a temp file in /tmp folder with a scx* prefix. Then it is invoked from the following directory /etc/opt/microsoft/scx/conf/tmpdir/. The file in that directory has the same prefix scx*. SCXcore, started as the Microsoft Operations Manager UNIX/Linux Agent, is now used in a host of products including Microsoft Operations Manager. Microsoft Azure, and Microsoft Operations Management Suite.
+status: experimental
+date: 2021/09/18
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+tags:
+    - attack.privilege_escalation
+    - attack.initial_access
+    - attack.execution
+    - attack.t1068
+    - attack.t1190
+    - attack.t1203
+references:
+    - https://www.wiz.io/blog/omigod-critical-vulnerabilities-in-omi-azure
+    - https://censys.io/blog/understanding-the-impact-of-omigod-cve-2021-38647/
+    - https://github.com/Azure/Azure-Sentinel/pull/3071/files
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+        type: 'SYSCALL'
+        SYSCALL: 'execve'
+        uid: '0'
+        cwd: '/var/opt/microsoft/scx/tmp'
+        cmdline|contains: /etc/opt/microsoft/scx/conf/tmpdir/scx
+        comm: 'sh'
+    condition: selection
+falsepositives:
+    - Legitimate use of SCX RunAsProvider ExecuteScript.
+level: high
+
