@@ -1,0 +1,27 @@
+title: Defrag Deactivation
+id: 958d81aa-8566-4cea-a565-59ccd4df27b0
+description: Detects the deactivation and disabling of the Scheduled defragmentation task as seen by Slingshot APT group
+author: Florian Roth, Bartlomiej Czyz (@bczyz1)
+date: 2019/03/04
+modified: 2021/09/19
+references:
+    - https://securelist.com/apt-slingshot/84312/
+tags:
+    - attack.persistence
+    - attack.s0111
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\schtasks.exe'
+        CommandLine|contains:
+            - '/delete'
+            - '/change'
+        CommandLine|contains|all:
+            - '/TN'
+            - '\Microsoft\Windows\Defrag\ScheduledDefrag'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
