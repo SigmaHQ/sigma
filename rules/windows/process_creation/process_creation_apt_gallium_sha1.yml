@@ -1,20 +1,16 @@
-action: global
 title: GALLIUM Artefacts
+id: 440a56bf-7873-4439-940a-1c8a671073c2
 status: experimental
 description: Detects artefacts associated with activity group GALLIUM - Microsoft Threat Intelligence Center indicators released in December 2019.
 author: Tim Burrell
 date: 2020/02/07
+modified: 2021/09/19
 references:
     - https://www.microsoft.com/security/blog/2019/12/12/gallium-targeting-global-telecom/
     - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/dn800669(v=ws.11)
 tags:
     - attack.credential_access
     - attack.command_and_control
-falsepositives:
-    - unknown
-level: high
----
-id: 440a56bf-7873-4439-940a-1c8a671073c2
 logsource:
     product: windows
     category: process_creation
@@ -41,34 +37,6 @@ detection:
             - 'f201504bd96e81d0d350c3a8332593ee1c9e09de'
             - 'ddd2db1127632a2a52943a2fe516a2e7d05d70d2'
     condition: exec_selection
----
-id: 3db10f25-2527-4b79-8d4b-471eb900ee29
-logsource:
-    product: windows
-    service: dns-server
-detection:
-    c2_selection:
-        EventID: 257
-        QNAME: 
-            - 'asyspy256.ddns.net'
-            - 'hotkillmail9sddcc.ddns.net'
-            - 'rosaf112.ddns.net'
-            - 'cvdfhjh1231.myftp.biz'
-            - 'sz2016rose.ddns.net'
-            - 'dffwescwer4325.myftp.biz'
-            - 'cvdfhjh1231.ddns.net'
-    condition: c2_selection
----
-id: 18739897-21b1-41da-8ee4-5b786915a676
-logsource:
-    product: windows
-    category: process_creation
-detection:
-    legitimate_process_path:
-        Image|contains:
-            - ':\Program Files(x86)\'
-            - ':\Program Files\'
-    legitimate_executable:
-        sha1:
-            - 'e570585edc69f9074cb5e8a790708336bd45ca0f'
-    condition: legitimate_executable and not legitimate_process_path
+falsepositives:
+    - unknown
+level: high
