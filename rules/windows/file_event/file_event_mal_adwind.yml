@@ -1,5 +1,8 @@
 title: Adwind RAT / JRAT
-id: 1fac1481-2dbc-48b2-9096-753c49b4ec71
+id: 0bcfabcb-7929-47f4-93d6-b33fb67d34d1
+related:
+    - id: 1fac1481-2dbc-48b2-9096-753c49b4ec71
+      type: derived
 status: experimental
 description: Detects javaw.exe in AppData folder as used by Adwind / JRAT
 references:
@@ -14,17 +17,15 @@ tags:
     - attack.t1059.007
     - attack.t1064  # an old one
 logsource:
-    category: process_creation
+    category: file_event
     product: windows
 detection:
     selection:
-        - CommandLine|contains|all:
-            - '\AppData\Roaming\Oracle'
-            - '\java'
-            - '.exe '
-        - CommandLine|contains|all:
-            - 'cscript.exe'
-            - 'Retrive'
-            - '.vbs '
+        - TargetFilename|contains|all:
+            - '\AppData\Roaming\Oracle\bin\java'
+            - '.exe'
+        - TargetFilename|contains|all:
+            - '\Retrive'
+            - '.vbs'
     condition: selection
 level: high

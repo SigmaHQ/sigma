@@ -1,5 +1,8 @@
 title: CreateMiniDump Hacktool
-id: 36d88494-1d43-4dc0-b3fa-35c8fea0ca9d
+id: db2110f3-479d-42a6-94fb-d35bc1e46492
+related:
+    - id: 36d88494-1d43-4dc0-b3fa-35c8fea0ca9d
+      type: derived
 description: Detects the use of CreateMiniDump hack tool used to dump the LSASS process memory for credential extraction on the attacker's machine
 author: Florian Roth
 references:
@@ -11,14 +14,12 @@ tags:
     - attack.t1003.001
     - attack.t1003  # an old one
 logsource:
-    category: process_creation
     product: windows
+    category: file_event
 detection:
-    selection1:
-        Image|contains: '\CreateMiniDump.exe'
-    selection2:
-        Imphash: '4a07f944a83e8a7c2525efa35dd30e2f'
-    condition: 1 of them
+    selection:
+        TargetFilename|endswith: '\lsass.dmp'
+    condition: selection
 falsepositives:
     - Unknown
 level: high
