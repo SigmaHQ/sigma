@@ -1,5 +1,8 @@
 title: Alternate PowerShell Hosts
-id: 64e8e417-c19a-475a-8d19-98ea705394cc
+id: d7326048-328b-4d5e-98af-86e84b17c765
+related:
+     - id: 64e8e417-c19a-475a-8d19-98ea705394cc
+       type: derived
 description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
 status: test
 date: 2019/08/11
@@ -13,15 +16,15 @@ tags:
     - attack.t1086  # an old one
 logsource:
     product: windows
-    service: powershell
-    definition: ModuleLogging must be enable
+    service: powershell-classic
+    definition: fields have to be extract from event
 detection:
     selection:
-        EventID: 4103
-        ContextInfo: '*'
+        EventID: 400
+        HostApplication: '*'
     filter:
-        ContextInfo|contains: 'powershell.exe' # Host Application=...powershell.exe or Application hote=...powershell.exe in French Win10 event
-    condition: selection and not filter        
+        HostApplication|startswith: 'C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe'
+    condition: selection and not filter
 falsepositives:
     - Programs using PowerShell directly without invocation of a dedicated interpreter
     - MSP Detection Searcher
