@@ -1,0 +1,39 @@
+title: "suspicious use of findstr"
+description: "potentially malicious use of findstr from commandLine - LOLBAS windows"
+author: "pooch11"
+status: "experimental"
+references:
+ - https://lolbas-project.github.io/lolbas/Binaries/Findstr/
+ - https://gist.github.com/api0cradle/cdd2d0d0ec9abb686f0e89306e277b8f
+date: 2021/09/13
+tags:
+ - attack.lateral_movement
+logsource:
+ product: "windows"
+ category: "process_creation"
+detection:
+ fromcmdline:
+  parentImage|endswith:
+   cmd.exe
+ findcommand:
+  commandLine|contains|all:
+   - findstr
+   - /V
+   - /L
+ findcommand_passwords:
+  commandLine|contains|all:
+   - /S
+   - /I
+ findtarget:
+  commandLine|contains:
+   - *.dll
+   - *.exe
+   - *.xml 
+ condition: "findtarget and findcomdline and (findcommand or findcommand_passwords)"
+fields:
+ - "CommandLine"
+ - "ParentImage"
+ - "User"
+falsepositives:
+ - "rare uses from power users"
+level: "critical"
