@@ -1,0 +1,33 @@
+title: Suspicious PowerShell Download
+id: 3236fcd0-b7e3-4433-b4f8-86ad61a9af2d
+related:
+    - id: 65531a81-a694-4e31-ae04-f8ba5bc33759
+      type: derived
+status: experimental
+description: Detects suspicious PowerShell download command
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1086  #an old one
+author: Florian Roth
+date: 2017/03/05
+modified: 2021/09/21
+logsource:
+    product: windows
+    service: powershell-classic
+    definition: fields have to be extract from event
+detection:
+    downloadfile:
+        EventID: 400 #  get 400 ,403 and 600 for 1 execution
+        HostApplication|contains|all:
+            - 'System.Net.WebClient'
+            - '.DownloadFile('
+    downloadstring:
+        EventID: 400
+        HostApplication|contains|all:
+            - 'System.Net.WebClient'
+            - '.DownloadString('
+    condition: downloadfile or downloadstring
+falsepositives:
+    - PowerShell scripts that download content from the Internet
+level: medium
