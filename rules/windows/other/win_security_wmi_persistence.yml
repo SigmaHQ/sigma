@@ -1,5 +1,8 @@
 title: WMI Persistence
-id: 0b7889b4-5577-4521-a60a-3376ee7f9f7b
+id: f033f3f3-fd24-4995-97d8-a3bb17550a88
+related:
+    - id: 0b7889b4-5577-4521-a60a-3376ee7f9f7b
+      type: derived
 status: experimental
 description: Detects suspicious WMI event filter and command line event consumer based on WMI and Security Logs.
 author: Florian Roth, Gleb Sukhodolskiy, Timur Zinniatullin oscd.community
@@ -15,19 +18,13 @@ tags:
     - attack.t1546.003
 logsource:
     product: windows
-    service: wmi #native windows detection
-    definition: 'WMI Namespaces Auditing and SACL should be configured, EventID 5861 and 5859 detection requires Windows 10, 2012 and higher'
+    service: security
 detection:
-    wmi_filter_to_consumer_binding:
-        EventID: 5861
-    consumer_keywords:
-        - 'ActiveScriptEventConsumer'
-        - 'CommandLineEventConsumer'
-        - 'CommandLineTemplate'
-        # - 'Binding EventFilter'  # too many false positive with HP Health Driver
-    wmi_filter_registration:
-        EventID: 5859
-    condition: (wmi_filter_to_consumer_binding and consumer_keywords) or (wmi_filter_registration)
+    wmi_subscription:
+        EventID: 4662
+        ObjectType: 'WMI Namespace'
+        ObjectName|contains: 'subscription'
+    condition: wmi_subscription
 falsepositives:
     - Unknown (data set is too small; further testing needed)
 level: medium
