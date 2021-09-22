@@ -522,7 +522,7 @@ class TestRules(unittest.TestCase):
         filename_pattern = re.compile('[a-z0-9_]{10,70}\.yml')
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             filename = os.path.basename(file)
-            if not filename_pattern.match(filename) and not '_' in filename:
+            if filename_pattern.match(filename) == None or not '_' in filename:
                 print(Fore.YELLOW + "Rule {} has a file name that doesn't match our standard.".format(file))
                 faulty_rules.append(file)
 
