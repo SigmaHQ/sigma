@@ -47,18 +47,18 @@ class TestRules(unittest.TestCase):
         return data
 
     # Tests
-    def test_confirm_extension_is_yml(self):
-        files_with_incorrect_extensions = []
+    # def test_confirm_extension_is_yml(self):
+        # files_with_incorrect_extensions = []
 
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            file_name_and_extension = os.path.splitext(file)
-            if len(file_name_and_extension) == 2:
-                extension = file_name_and_extension[1]
-                if extension != ".yml":
-                    files_with_incorrect_extensions.append(file)
+        # for file in self.yield_next_rule_file_path(self.path_to_rules):
+            # file_name_and_extension = os.path.splitext(file)
+            # if len(file_name_and_extension) == 2:
+                # extension = file_name_and_extension[1]
+                # if extension != ".yml":
+                    # files_with_incorrect_extensions.append(file)
 
-        self.assertEqual(files_with_incorrect_extensions, [], Fore.RED + 
-                        "There are rule files with extensions other than .yml")
+        # self.assertEqual(files_with_incorrect_extensions, [], Fore.RED + 
+                        # "There are rule files with extensions other than .yml")
 
     def test_legal_trademark_violations(self):
         files_with_legal_issues = []
@@ -522,7 +522,16 @@ class TestRules(unittest.TestCase):
         filename_pattern = re.compile('[a-z0-9_]{10,70}\.yml')
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             filename = os.path.basename(file)
-            if filename_pattern.match(filename) == None or not '_' in filename:
+            if filename[-4:] != ".yml":
+                print(Fore.YELLOW + "Rule {} has a invalid extension (.yml).".format(file))
+                faulty_rules.append(file)
+            elif len(filename) > 74:
+                print(Fore.YELLOW + "Rule {} has a file name too long >70.".format(file))
+                faulty_rules.append(file)
+            elif len(filename) < 14:
+                print(Fore.YELLOW + "Rule {} has a file name too sort <10.".format(file))
+                faulty_rules.append(file)
+            elif filename_pattern.match(filename) == None or not '_' in filename:
                 print(Fore.YELLOW + "Rule {} has a file name that doesn't match our standard.".format(file))
                 faulty_rules.append(file)
 
