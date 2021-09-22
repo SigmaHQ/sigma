@@ -1,0 +1,24 @@
+title: Live Memory Dump Using Powershell
+id: cd185561-4760-45d6-a63e-a51325112cae
+status: experimental
+description: Detects usage of a PowerShell command to dump the live memory of a Windows machine
+date: 2021/09/21
+references:
+    - https://docs.microsoft.com/en-us/powershell/module/storage/get-storagediagnosticinfo
+tags:
+    - attack.t1003
+author: Max Altgelt
+logsource:
+    product: windows
+    service: powershell
+    definition: Script block logging must be enabled
+detection:
+    dump:
+        EventID: 4104
+        ScriptBlockText|contains|all:
+            - 'Get-StorageDiagnosticInfo'
+            - '-IncludeLiveDump'
+    condition: dump
+falsepositives:
+    - Diagnostics
+level: high
