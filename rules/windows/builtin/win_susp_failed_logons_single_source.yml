@@ -1,9 +1,9 @@
-action: global
 title: Failed Logins with Different Accounts from Single Source System
+id: e98374a6-e2d9-4076-9b5c-11bdb2569995
 description: Detects suspicious failed logins with different user accounts from a single source system
 author: Florian Roth
 date: 2017/01/10
-modified: 2021/08/29
+modified: 2021/09/21
 tags:
     - attack.persistence
     - attack.privilege_escalation
@@ -11,14 +11,6 @@ tags:
 logsource:
     product: windows
     service: security
-falsepositives:
-    - Terminal servers
-    - Jump servers
-    - Other multiuser systems like Citrix server farms
-    - Workstations with frequently changing users
-level: medium
----
-id: e98374a6-e2d9-4076-9b5c-11bdb2569995
 detection:
     selection1:
         EventID:
@@ -27,12 +19,9 @@ detection:
         TargetUserName: '*'
         WorkstationName: '*'
     condition: selection1 | count(TargetUserName) by WorkstationName > 3    
----
-id: 6309ffc4-8fa2-47cf-96b8-a2f72e58e538
-detection:
-    selection2:
-        EventID: 4776
-        TargetUserName: '*'
-        Workstation: '*'
-    timeframe: 24h
-    condition: selection2 | count(TargetUserName) by Workstation > 3
+falsepositives:
+    - Terminal servers
+    - Jump servers
+    - Other multiuser systems like Citrix server farms
+    - Workstations with frequently changing users
+level: medium

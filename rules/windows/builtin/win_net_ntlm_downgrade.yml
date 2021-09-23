@@ -1,5 +1,8 @@
-action: global
 title: NetNTLM Downgrade Attack
+id: d3abac66-f11c-4ed0-8acb-50cc29c97eed
+related:
+    - id: d67572a0-e2ec-45d6-b8db-c100d14b8ef2
+      type: derived
 description: Detects NetNTLM downgrade attack
 references:
     - https://www.optiv.com/blog/post-exploitation-using-netntlm-downgrade-attacks
@@ -11,30 +14,7 @@ tags:
     - attack.t1089          # an old one
     - attack.t1562.001
     - attack.t1112
-detection:
-    condition: 1 of them
-falsepositives:
-    - Unknown
-level: critical
----
-id: d67572a0-e2ec-45d6-b8db-c100d14b8ef2
-logsource:
-    product: windows
-    category: registry_event
-detection:
-    selection1:
-        TargetObject|contains|all: 
-            - 'SYSTEM\'
-            - 'ControlSet'
-            - '\Control\Lsa'
-        TargetObject|endswith:
-            - '\lmcompatibilitylevel'
-            - '\NtlmMinClientSec'
-            - '\RestrictSendingNTLMTraffic'
-            
----
 # Windows Security Eventlog: Process Creation with Full Command Line
-id: d3abac66-f11c-4ed0-8acb-50cc29c97eed
 logsource:
     product: windows
     service: security
