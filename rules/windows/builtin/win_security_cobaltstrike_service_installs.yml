@@ -1,5 +1,8 @@
 title: CobaltStrike Service Installations
-id: 5a105d34-05fc-401e-8553-272b45c1522d
+id: d7a95147-145f-4678-b85d-d1ff4a3bb3f6
+related:
+    - id: 5a105d34-05fc-401e-8553-272b45c1522d
+      type: derived
 description: Detects known malicious service installs that appear in cases in which a Cobalt Strike beacon elevates privileges or lateral movement
 author: Florian Roth, Wojciech Lesicki
 references:
@@ -17,23 +20,23 @@ tags:
     - attack.t1569.002
 logsource:
     product: windows
-    service: system
+    service: security
 detection:
     selection_id:
-        EventID: 7045
+        EventID: 4697
     selection1:
-        ImagePath|contains|all: 
+        ServiceFileName|contains|all: 
             - 'ADMIN$'
             - '.exe'
     selection2:
-        ImagePath|contains|all: 
+        ServiceFileName|contains|all: 
             - '%COMSPEC%'
             - 'start'
             - 'powershell'
     selection3:
-        ImagePath|contains: 'powershell -nop -w hidden -encodedcommand'
+        ServiceFileName|contains: 'powershell -nop -w hidden -encodedcommand'
     selection4:
-        ImagePath|base64offset|contains: "IEX (New-Object Net.Webclient).DownloadString('http://127.0.0.1:"
+        ServiceFileName|base64offset|contains: "IEX (New-Object Net.Webclient).DownloadString('http://127.0.0.1:"
     condition: selection_id and (selection1 or selection2 or selection3 or selection4)
 falsepositives:
     - Unknown

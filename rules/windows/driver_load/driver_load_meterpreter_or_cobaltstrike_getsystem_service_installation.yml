@@ -1,5 +1,8 @@
 title: Meterpreter or Cobalt Strike Getsystem Service Installation
-id: 843544a7-56e0-4dcc-a44f-5cc266dd97d6
+id: d585ab5a-6a69-49a8-96e8-4a726a54de46
+related:
+    - id: 843544a7-56e0-4dcc-a44f-5cc266dd97d6
+      type: derived
 description: Detects the use of getsystem Meterpreter/Cobalt Strike command by detecting a specific service installation
 author: Teymur Kheirkhabarov, Ecco, Florian Roth
 date: 2019/10/26
@@ -14,10 +17,8 @@ tags:
     - attack.t1134.002
 logsource:
     product: windows
-    service: system
+    category: driver_load
 detection:
-    selection_id:
-        EventID: 7045
     selection:
         # meterpreter getsystem technique 1: cmd.exe /c echo 559891bb017 > \\.\pipe\5e120a
         - ImagePath|contains|all:
@@ -42,7 +43,7 @@ detection:
             - 'rundll32'
             - '.dll,a'
             - '/p:'
-    condition: selection_id and selection
+    condition: selection
 fields:
     - ComputerName
     - SubjectDomainName

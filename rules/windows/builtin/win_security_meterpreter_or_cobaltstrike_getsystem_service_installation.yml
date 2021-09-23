@@ -1,5 +1,8 @@
 title: Meterpreter or Cobalt Strike Getsystem Service Installation
-id: 843544a7-56e0-4dcc-a44f-5cc266dd97d6
+id: ecbc5e16-58e0-4521-9c60-eb9a7ea4ad34
+related:
+    - id: 843544a7-56e0-4dcc-a44f-5cc266dd97d6
+      type: derived
 description: Detects the use of getsystem Meterpreter/Cobalt Strike command by detecting a specific service installation
 author: Teymur Kheirkhabarov, Ecco, Florian Roth
 date: 2019/10/26
@@ -14,31 +17,31 @@ tags:
     - attack.t1134.002
 logsource:
     product: windows
-    service: system
+    service: security
 detection:
     selection_id:
-        EventID: 7045
+        EventID: 4697
     selection:
         # meterpreter getsystem technique 1: cmd.exe /c echo 559891bb017 > \\.\pipe\5e120a
-        - ImagePath|contains|all:
+        - ServiceFileName|contains|all:
             - 'cmd'
             - '/c'
             - 'echo'
             - '\pipe\'
         # cobaltstrike getsystem technique 1: %COMSPEC% /c echo 559891bb017 > \\.\pipe\5e120a
-        - ImagePath|contains|all:
+        - ServiceFileName|contains|all:
             - '%COMSPEC%'
             - '/c'
             - 'echo'
             - '\pipe\'
         # cobaltstrike getsystem technique 1b (expanded %COMSPEC%): %COMSPEC% /c echo 559891bb017 > \\.\pipe\5e120a
-        - ImagePath|contains|all:
+        - ServiceFileName|contains|all:
             - 'cmd.exe'
             - '/c'
             - 'echo'
             - '\pipe\'
         # meterpreter getsystem technique 2: rundll32.exe C:\Users\test\AppData\Local\Temp\tmexsn.dll,a /p:tmexsn
-        - ImagePath|contains|all:
+        - ServiceFileName|contains|all:
             - 'rundll32'
             - '.dll,a'
             - '/p:'
@@ -47,7 +50,7 @@ fields:
     - ComputerName
     - SubjectDomainName
     - SubjectUserName
-    - ImagePath
+    - ServiceFileName
 falsepositives:
     - Highly unlikely
 level: critical

@@ -181,13 +181,17 @@ class TestRules(unittest.TestCase):
                 return False
 
             for named_condition in detection1:
+                #don't check timeframes
+                if named_condition == "timeframe":
+                    continue
+                
                 # condition clause must be the same too 
                 if named_condition == "condition":
                     if detection1["condition"] != detection2["condition"]:
                         return False
                     else:
                         continue
-
+                
                 # Named condition must exist in both rule files
                 if named_condition not in detection2:
                     return False

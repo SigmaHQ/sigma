@@ -1,0 +1,34 @@
+title: Malicious Service Installations
+id: cb062102-587e-4414-8efa-dbe3c7bf19c6
+related:
+    - id: 2cfe636e-317a-4bee-9f2c-1066d9f54d1a
+      type: derived
+description: Detects known malicious service installs that only appear in cases of lateral movement, credential dumping, and other suspicious activities.
+author: Florian Roth, Daniil Yugoslavskiy, oscd.community (update)
+date: 2017/03/27
+modified: 2021/09/21
+references:
+    - https://awakesecurity.com/blog/threat-hunting-for-paexec/
+    - https://www.fireeye.com/blog/threat-research/2017/05/wannacry-malware-profile.html
+    - https://blog.f-secure.com/wp-content/uploads/2019/10/CosmicDuke.pdf
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1003
+    - attack.t1035          # an old one
+    - attack.t1050          # an old one
+    - car.2013-09-005
+    - attack.t1543.003
+    - attack.t1569.002
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4697
+    malsvc_apt29:
+        ServiceName: 'javamtsup'
+    condition: selection and 1 of malsvc_*
+falsepositives:
+    - Penetration testing
+level: critical
