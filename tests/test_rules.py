@@ -519,10 +519,14 @@ class TestRules(unittest.TestCase):
 
     def test_file_names(self):
         faulty_rules = []
+        name_lst = []
         filename_pattern = re.compile('[a-z0-9_]{10,70}\.yml')
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             filename = os.path.basename(file)
-            if filename[-4:] != ".yml":
+            if filename in name_lst:
+                print(Fore.YELLOW + "Rule {} is a duplicate file name.".format(file))
+                faulty_rules.append(file)        
+            elif filename[-4:] != ".yml":
                 print(Fore.YELLOW + "Rule {} has a invalid extension (.yml).".format(file))
                 faulty_rules.append(file)
             elif len(filename) > 74:
@@ -534,6 +538,7 @@ class TestRules(unittest.TestCase):
             elif filename_pattern.match(filename) == None or not '_' in filename:
                 print(Fore.YELLOW + "Rule {} has a file name that doesn't match our standard.".format(file))
                 faulty_rules.append(file)
+            name_lst.append(filename)
 
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is '[a-z0-9_]{10,70}\.yml' and it has to contain at least an underline character.")
