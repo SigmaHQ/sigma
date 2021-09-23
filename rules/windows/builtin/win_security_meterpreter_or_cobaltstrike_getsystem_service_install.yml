@@ -1,0 +1,56 @@
+title: Meterpreter or Cobalt Strike Getsystem Service Installation
+id: ecbc5e16-58e0-4521-9c60-eb9a7ea4ad34
+related:
+    - id: 843544a7-56e0-4dcc-a44f-5cc266dd97d6
+      type: derived
+description: Detects the use of getsystem Meterpreter/Cobalt Strike command by detecting a specific service installation
+author: Teymur Kheirkhabarov, Ecco, Florian Roth
+date: 2019/10/26
+modified: 2021/09/21
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-privilege-escalation-in-windows-environment
+    - https://blog.cobaltstrike.com/2014/04/02/what-happens-when-i-type-getsystem/
+tags:
+    - attack.privilege_escalation
+    - attack.t1134          # an old one
+    - attack.t1134.001
+    - attack.t1134.002
+logsource:
+    product: windows
+    service: security
+detection:
+    selection_id:
+        EventID: 4697
+    selection:
+        # meterpreter getsystem technique 1: cmd.exe /c echo 559891bb017 > \\.\pipe\5e120a
+        - ServiceFileName|contains|all:
+            - 'cmd'
+            - '/c'
+            - 'echo'
+            - '\pipe\'
+        # cobaltstrike getsystem technique 1: %COMSPEC% /c echo 559891bb017 > \\.\pipe\5e120a
+        - ServiceFileName|contains|all:
+            - '%COMSPEC%'
+            - '/c'
+            - 'echo'
+            - '\pipe\'
+        # cobaltstrike getsystem technique 1b (expanded %COMSPEC%): %COMSPEC% /c echo 559891bb017 > \\.\pipe\5e120a
+        - ServiceFileName|contains|all:
+            - 'cmd.exe'
+            - '/c'
+            - 'echo'
+            - '\pipe\'
+        # meterpreter getsystem technique 2: rundll32.exe C:\Users\test\AppData\Local\Temp\tmexsn.dll,a /p:tmexsn
+        - ServiceFileName|contains|all:
+            - 'rundll32'
+            - '.dll,a'
+            - '/p:'
+    condition: selection_id and selection
+fields:
+    - ComputerName
+    - SubjectDomainName
+    - SubjectUserName
+    - ServiceFileName
+falsepositives:
+    - Highly unlikely
+level: critical
