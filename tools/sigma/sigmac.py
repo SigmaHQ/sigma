@@ -151,6 +151,7 @@ def main():
 
     logger = logging.getLogger(__name__)
     if cmdargs.debug:   # pragma: no cover
+        logging.basicConfig(filename='sigmac.log', filemode='w', level=logging.DEBUG)
         logger.setLevel(logging.DEBUG)
 
     if cmdargs.lists:
@@ -174,6 +175,8 @@ def main():
         print("No target selected, select one with -t/--target")
         argparser.print_usage()
         sys.exit(ERR_NO_TARGET)
+
+    logger.debug("* Target selected %s" % (cmdargs.target))
 
     rulefilter = None
     if cmdargs.filter:
@@ -265,6 +268,7 @@ def main():
     output_array = []
     for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
         logger.debug("* Processing Sigma input %s" % (sigmafile))
+        success = True
         try:
             if cmdargs.inputs == ['-']:
                 f = sigmafile
@@ -325,43 +329,59 @@ def main():
 
         except OSError as e:
             print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
+            logger.debug("* Convertion Sigma input %s FAILURE" % (sigmafile))
+            success = False
             error = ERR_OPEN_SIGMA_RULE
         except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
             print("Error: Sigma file %s is no valid YAML: %s" % (sigmafile, str(e)), file=sys.stderr)
+            logger.debug("* Convertion Sigma input %s FAILURE" % (sigmafile))
+            success = False
             error = ERR_INVALID_YAML
             if not cmdargs.defer_abort:
                 sys.exit(error)
         except (SigmaParseError, SigmaCollectionParseError) as e:
             print("Error: Sigma parse error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
+            logger.debug("* Convertion Sigma input %s FAILURE" % (sigmafile))
+            success = False
             error = ERR_SIGMA_PARSING
             if not cmdargs.defer_abort:
                 sys.exit(error)
         except NotSupportedError as e:
             print("Error: The Sigma rule requires a feature that is not supported by the target system: " + str(e), file=sys.stderr)
+            logger.debug("* Convertion Sigma input %s FAILURE" % (sigmafile))
+            success = False
             if not cmdargs.ignore_backend_errors:
                 error = ERR_NOT_SUPPORTED
                 if not cmdargs.defer_abort:
                     sys.exit(error)
         except BackendError as e:
             print("Error: Backend error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
+            logger.debug("* Convertion Sigma input %s FAILURE" % (sigmafile))
+            success = False
             if not cmdargs.ignore_backend_errors:
                 error = ERR_BACKEND
                 if not cmdargs.defer_abort:
                     sys.exit(error)
         except (NotImplementedError, TypeError) as e:
             print("An unsupported feature is required for this Sigma rule (%s): " % (sigmafile) + str(e), file=sys.stderr)
+            logger.debug("* Convertion Sigma input %s FAILURE" % (sigmafile))
+            success = False
             if not cmdargs.ignore_backend_errors:
                 error = ERR_NOT_IMPLEMENTED
                 if not cmdargs.defer_abort:
                     sys.exit(error)
         except PartialMatchError as e:
             print("Error: Partial field match error: %s" % str(e), file=sys.stderr)
+            logger.debug("* Convertion Sigma input %s FAILURE" % (sigmafile))
+            success = False
             if not cmdargs.ignore_backend_errors:
                 error = ERR_PARTIAL_FIELD_MATCH
                 if not cmdargs.defer_abort:
                     sys.exit(error)
         except FullMatchError as e:
             print("Error: Full field match error", file=sys.stderr)
+            logger.debug("* Convertion Sigma input %s FAILURE" % (sigmafile))
+            success = False
             if not cmdargs.ignore_backend_errors:
                 error = ERR_FULL_FIELD_MATCH
                 if not cmdargs.defer_abort:
@@ -371,11 +391,14 @@ def main():
                 f.close()
             except:
                 pass
-    
+        
+        if success :
+            logger.debug("* Convertion Sigma input %s SUCCESS" % (sigmafile)) 
+ 
     result = backend.finalize()
     if result:
         print(result, file=out)
-    
+
     if cmdargs.output_fields:
         if cmdargs.output_format == 'json':
             print(json.dumps(output_array, indent=4, ensure_ascii=False), file=out)
