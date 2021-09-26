@@ -9,12 +9,10 @@ Author: frack113
 Version: 1.1
 Description: 
     get cover of the rules vs backend
-    It is more a POC than a script for the moment
 Requirements:
     python 3.7 min
     $ pip install ruyaml
 Todo:
-    - add output options
     - clean code and bug
     - better use of subprocess.run
     - have idea
@@ -25,7 +23,10 @@ import re
 import subprocess
 import pathlib
 import ruyaml
+import json
 import copy
+import platform
+import argparse
 
 def get_sigmac(name,conf):
     infos = []
@@ -33,13 +34,21 @@ def get_sigmac(name,conf):
         options = ["python","../tools/sigmac","-t",name,"--debug","-rI","-o","dump.txt","../rules"]
     else:
         options = ["python","../tools/sigmac","-t",name,"-c",conf,"--debug","-rI","-o","dump.txt","../rules"]
-    si = subprocess.STARTUPINFO()
-    si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    ret = subprocess.run(options,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.STDOUT,
-                         startupinfo=si
-                         )
+    if platform.system() == "Windows":
+        si = subprocess.STARTUPINFO()
+        si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        ret = subprocess.run(options,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT,
+                             startupinfo=si
+                             )
+        my_regex = "Convertion Sigma input \S+\\\\(\w+\.yml) (\w+)"
+    else:
+        ret = subprocess.run(options,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT,
+                             )
+        my_regex = "Convertion Sigma input \S+/(\w+\.yml) (\w+)"   
     if not ret.returncode == 0:
         print (f"error {ret.returncode} in sigmac")
     log = pathlib.Path("sigmac.log")
@@ -47,7 +56,7 @@ def get_sigmac(name,conf):
         lines = f.readlines()
         for line in lines:
             if "Convertion Sigma input" in line:
-                info = re.findall("Convertion Sigma input \S+\\\\(\w+\.yml) (\w+)",line)[0]
+                info = re.findall(my_regex,line)[0]
                 infos.append(info)
     log.unlink()
     dump = pathlib.Path("dump.txt")
@@ -106,7 +115,7 @@ backend_dict = {
     "sumologic" : None,
     "sumologic-cse" : None,
     "sumologic-cse-rule" : None,
-    "sysmon": "../tools/config/sysmon.yml",
+    "sysmon": "../tools/config/elk-windows.yml",
     "uberagent" : None,
     "xpack-watcher": "../tools/config/winlogbeat-modules-enabled.yml",
     }
@@ -115,10 +124,17 @@ print("""
 ███ ███ ████ █▄┼▄█ ███ ┼┼ ███ ███ █▄█ ███ ███
 █▄▄ ┼█┼ █┼▄▄ █┼█┼█ █▄█ ┼┼ █┼┼ █┼█ ███ █▄┼ █▄┼
 ▄▄█ ▄█▄ █▄▄█ █┼┼┼█ █┼█ ┼┼ ███ █▄█ ┼█┼ █▄▄ █┼█
-                    v1.0
+                  v1.1 bugfix
 please wait during the tests
 """)
+argparser = argparse.ArgumentParser(description="Check Sigma rules with all backend.")
+argparser.add_argument("--target", "-t", choices=["yaml","json"], help="Output target format")
+cmdargs = argparser.parse_args()
 
+if cmdargs.target == None:
+    print("No outpout use -h to see help")
+    exit()
+  
 #init dict of all rules
 default_key_test = {key : "NO TEST" for key in backend_dict.keys()}
 the_dico ={}
@@ -133,7 +149,12 @@ for name,opt in backend_dict.items():
     update_dict(the_dico,result,name)
 
 #Save
-cover = pathlib.Path("sigmacover.yml")
-with cover.open("w") as f:
-    ruyaml.dump(the_dico, f, Dumper=ruyaml.RoundTripDumper)
-
+if cmdargs.target.lower() == "yaml":
+    cover = pathlib.Path("sigmacover.yml")
+    with cover.open("w") as file:
+        ruyaml.dump(the_dico, file, Dumper=ruyaml.RoundTripDumper)
+else:
+    cover = pathlib.Path("sigmacover.json")
+    with cover.open("w") as file:
+        json_dumps_str = json.dumps(the_dico, indent=4)
+        file.write(json_dumps_str)
