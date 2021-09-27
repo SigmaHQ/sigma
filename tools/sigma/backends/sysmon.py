@@ -217,7 +217,7 @@ class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
             raise NotSupportedError(
                 "Not supported logsource. Should be product `windows`.")
         for item in self.logsource.values():
-            if item.lower() in self.allowedSource.keys():
+             if str(item).lower() in self.allowedSource.keys():
                 self.table = self.allowedSource.get(item.lower())
                 break
         else:
