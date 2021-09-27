@@ -1,5 +1,5 @@
-action: global
 title: Regsvr32 Network Activity
+id: c7e91a02-d771-4a6d-a700-42587e0b1095
 description: Detects network connections and DNS queries initiated by Regsvr32.exe
 references:
     - https://pentestlab.blog/2017/05/11/applocker-bypass-regsvr32/
@@ -15,9 +15,13 @@ tags:
 author: Dmitriy Lifanov, oscd.community
 status: experimental
 date: 2019/10/25
-modified: 2020/08/24
+modified: 2021/09/21
+logsource:
+    category: network_connection
+    product: windows
 detection:
     selection:
+        EventID: 3 # need to pass the test "There are rule files with exactly the same detection logic"
         Image|endswith: '\regsvr32.exe'
     condition: selection
 fields:
@@ -29,13 +33,3 @@ fields:
 falsepositives:
     - unknown
 level: high
----
-id: c7e91a02-d771-4a6d-a700-42587e0b1095
-logsource:
-    category: network_connection
-    product: windows
----
-id: 36e037c4-c228-4866-b6a3-48eb292b9955
-logsource:
-    category: dns_query
-    product: windows

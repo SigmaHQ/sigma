@@ -1,0 +1,30 @@
+title: WMI Persistence
+id: f033f3f3-fd24-4995-97d8-a3bb17550a88
+related:
+    - id: 0b7889b4-5577-4521-a60a-3376ee7f9f7b
+      type: derived
+status: experimental
+description: Detects suspicious WMI event filter and command line event consumer based on WMI and Security Logs.
+author: Florian Roth, Gleb Sukhodolskiy, Timur Zinniatullin oscd.community
+date: 2017/08/22
+modified: 2021/09/21
+references:
+    - https://twitter.com/mattifestation/status/899646620148539397
+    - https://www.eideon.com/2018-03-02-THL03-WMIBackdoors/
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1084           # an old one
+    - attack.t1546.003
+logsource:
+    product: windows
+    service: security
+detection:
+    wmi_subscription:
+        EventID: 4662
+        ObjectType: 'WMI Namespace'
+        ObjectName|contains: 'subscription'
+    condition: wmi_subscription
+falsepositives:
+    - Unknown (data set is too small; further testing needed)
+level: medium

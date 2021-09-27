@@ -1,8 +1,8 @@
-action: global
 title: Windows Defender Threat Detection Disabled
+id: fe34868f-6e0e-4882-81f6-c43aa8f15b62
 description: Detects disabling Windows Defender threat protection
 date: 2020/07/28
-modified: 2021/07/05
+modified: 2021/09/21
 author: Ján Trenčanský, frack113
 references:
     - https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-antivirus/troubleshoot-windows-defender-antivirus
@@ -12,11 +12,6 @@ tags:
     - attack.defense_evasion
     - attack.t1089           # an old one
     - attack.t1562.001
-falsepositives:
-    - Administrator actions
-level: high
----
-id: fe34868f-6e0e-4882-81f6-c43aa8f15b62
 logsource:
     product: windows
     service: windefend
@@ -27,33 +22,7 @@ detection:
             - 5010
             - 5012
             - 5101
-    selection2:
-        TargetObject:
-            - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WinDefend
-            - HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender
-            - HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender
-        Details: 'DWORD (0x00000001)'
-    condition: 1 of them
----
-id: a64e4198-c1c8-46a5-bc9c-324c86455fd4
-logsource:
-    product: windows
-    category: registry_event
-detection:
-    tamper_registry:
-        EventType: 'SetValue'
-        TargetObject: 'HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\DisableAntiSpyware'
-        Details: 'DWORD (0x00000001)'
-    condition: tamper_registry
----
-id: 6c0a7755-6d31-44fa-80e1-133e57752680
-logsource:
-    product: windows
-    category: system
-detection:
-    selection3:
-        EventID: 7036
-    keywords:
-        - 'Windows Defender Antivirus Service'
-        - 'stopped'
-    condition: selection3 and all of keywords
+    condition: selection
+falsepositives:
+    - Administrator actions
+level: high

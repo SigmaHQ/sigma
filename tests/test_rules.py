@@ -39,7 +39,7 @@ class TestRules(unittest.TestCase):
     def get_rule_yaml(self, file_path:str) -> dict:
         data = []
 
-        with open(file_path) as f:
+        with open(file_path,encoding='utf-8') as f:
             yaml_parts = yaml.safe_load_all(f)
             for part in yaml_parts:
                 data.append(part)
@@ -47,24 +47,24 @@ class TestRules(unittest.TestCase):
         return data
 
     # Tests
-    def test_confirm_extension_is_yml(self):
-        files_with_incorrect_extensions = []
+    # def test_confirm_extension_is_yml(self):
+        # files_with_incorrect_extensions = []
 
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            file_name_and_extension = os.path.splitext(file)
-            if len(file_name_and_extension) == 2:
-                extension = file_name_and_extension[1]
-                if extension != ".yml":
-                    files_with_incorrect_extensions.append(file)
+        # for file in self.yield_next_rule_file_path(self.path_to_rules):
+            # file_name_and_extension = os.path.splitext(file)
+            # if len(file_name_and_extension) == 2:
+                # extension = file_name_and_extension[1]
+                # if extension != ".yml":
+                    # files_with_incorrect_extensions.append(file)
 
-        self.assertEqual(files_with_incorrect_extensions, [], Fore.RED + 
-                        "There are rule files with extensions other than .yml")
+        # self.assertEqual(files_with_incorrect_extensions, [], Fore.RED + 
+                        # "There are rule files with extensions other than .yml")
 
     def test_legal_trademark_violations(self):
         files_with_legal_issues = []
 
         for file in self.yield_next_rule_file_path(self.path_to_rules):
-            with open(file, 'r') as fh:
+            with open(file, 'r',encoding='utf-8') as fh:
                 file_data = fh.read()
                 for tm in self.TRADE_MARKS:
                     if tm in file_data:
@@ -181,13 +181,17 @@ class TestRules(unittest.TestCase):
                 return False
 
             for named_condition in detection1:
+                #don't check timeframes
+                if named_condition == "timeframe":
+                    continue
+                
                 # condition clause must be the same too 
                 if named_condition == "condition":
                     if detection1["condition"] != detection2["condition"]:
                         return False
                     else:
                         continue
-
+                
                 # Named condition must exist in both rule files
                 if named_condition not in detection2:
                     return False
@@ -245,7 +249,7 @@ class TestRules(unittest.TestCase):
     def test_event_id_instead_of_process_creation(self):
         faulty_detections = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
-            with open(file) as f:
+            with open(file,encoding='utf-8') as f:
                 for line in f:
                     if re.search(r'.*EventID: (?:1|4688)\s*$', line) and file not in faulty_detections:
                         faulty_detections.append(file)
@@ -308,16 +312,17 @@ class TestRules(unittest.TestCase):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             logsource = self.get_rule_part(file_path=file, part_name="logsource")
-            service = logsource.get('service', '')
-            if service.lower() == 'sysmon':
-                with open(file) as f:
-                    found = False
-                    for line in f:
-                        if re.search(r'.*EventID:.*$', line):  # might be on a single line or in multiple lines
-                            found = True
-                            break
-                    if not found:
-                        faulty_rules.append(file)
+            if logsource:
+                service = logsource.get('service', '')
+                if service.lower() == 'sysmon':
+                    with open(file,encoding='utf-8') as f:
+                        found = False
+                        for line in f:
+                            if re.search(r'.*EventID:.*$', line):  # might be on a single line or in multiple lines
+                                found = True
+                                break
+                        if not found:
+                            faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules using sysmon events but with no EventID specified")
@@ -518,12 +523,26 @@ class TestRules(unittest.TestCase):
 
     def test_file_names(self):
         faulty_rules = []
+        name_lst = []
         filename_pattern = re.compile('[a-z0-9_]{10,70}\.yml')
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             filename = os.path.basename(file)
-            if not filename_pattern.match(filename) and not '_' in filename:
+            if filename in name_lst:
+                print(Fore.YELLOW + "Rule {} is a duplicate file name.".format(file))
+                faulty_rules.append(file)        
+            elif filename[-4:] != ".yml":
+                print(Fore.YELLOW + "Rule {} has a invalid extension (.yml).".format(file))
+                faulty_rules.append(file)
+            elif len(filename) > 74:
+                print(Fore.YELLOW + "Rule {} has a file name too long >70.".format(file))
+                faulty_rules.append(file)
+            elif len(filename) < 14:
+                print(Fore.YELLOW + "Rule {} has a file name too sort <10.".format(file))
+                faulty_rules.append(file)
+            elif filename_pattern.match(filename) == None or not '_' in filename:
                 print(Fore.YELLOW + "Rule {} has a file name that doesn't match our standard.".format(file))
                 faulty_rules.append(file)
+            name_lst.append(filename)
 
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is '[a-z0-9_]{10,70}\.yml' and it has to contain at least an underline character.")
@@ -585,6 +604,10 @@ class TestRules(unittest.TestCase):
            ]
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             logsource = self.get_rule_part(file_path=file, part_name="logsource")
+            if not logsource:
+                print(Fore.RED + "Rule {} has no 'logsource'.".format(file))
+                faulty_rules.append(file)
+                continue           
             valid = True
             for key in logsource:
                 if key.lower() not in valid_logsource:
@@ -619,6 +642,29 @@ class TestRules(unittest.TestCase):
                      faulty_rules.append(file)
    
         self.assertEqual(faulty_rules, [], Fore.RED + "There are rules using list with only 1 element")
+
+    def test_condition_operator_casesensitive(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+             detection = self.get_rule_part(file_path=file, part_name="detection")
+             if detection:
+                 valid = True
+                 if isinstance(detection["condition"],str):
+                     param = detection["condition"].split(' ')
+                     for item in param:
+                        if item.lower() == 'or' and not item == 'or':
+                            valid = False
+                        elif item.lower() == 'and' and not item == 'and':
+                            valid = False
+                        elif item.lower() == 'not' and not item == 'not':
+                            valid = False   
+                        elif item.lower() == 'of' and not item == 'of':
+                            valid = False                            
+                     if not valid:
+                         print(Fore.RED + "Rule {} has a invalid condition '{}' : 'or','and','not','of' are lowercase".format(file,detection["condition"]))
+                         faulty_rules.append(file)
+                         
+        self.assertEqual(faulty_rules, [], Fore.RED + "There are rules using condition whitout lowercase operator")
 
 def get_mitre_data():
     """

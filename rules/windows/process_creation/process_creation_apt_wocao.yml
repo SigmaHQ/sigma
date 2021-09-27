@@ -1,0 +1,45 @@
+title: Operation Wocao Activity
+id: 1cfac73c-be78-4f9a-9b08-5bde0c3953ab
+related:
+    - id: 74ad4314-482e-4c3e-b237-3f7ed3b9ca8d
+      type: derived
+author: Florian Roth, frack113
+status: experimental
+description: Detects activity mentioned in Operation Wocao report
+references:
+    - https://www.fox-it.com/en/news/whitepapers/operation-wocao-shining-a-light-on-one-of-chinas-hidden-hacking-groups/
+    - https://twitter.com/SBousseaden/status/1207671369963646976
+tags:
+    - attack.discovery 
+    - attack.t1012
+    - attack.defense_evasion
+    - attack.t1036.004
+    - attack.t1036  # an old one
+    - attack.t1027
+    - attack.execution
+    - attack.t1053.005
+    - attack.t1053  # an old one
+    - attack.t1059.001
+    - attack.t1086  # an old one
+date: 2019/12/20
+modified: 2021/09/19
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains: 
+            - 'checkadmin.exe 127.0.0.1 -all'
+            - 'netsh advfirewall firewall add rule name=powershell dir=in'
+            - 'cmd /c powershell.exe -ep bypass -file c:\s.ps1'
+            - '/tn win32times /f'
+            - 'create win32times binPath='
+            - '\c$\windows\system32\devmgr.dll'
+            - ' -exec bypass -enc JgAg'
+            - 'type *keepass\KeePass.config.xml'
+            - 'iie.exe iie.txt'
+            - 'reg query HKEY_CURRENT_USER\Software\\*\PuTTY\Sessions\'
+    condition: selection
+falsepositives:
+    - Administrators that use checkadmin.exe tool to enumerate local administrators
+level: high

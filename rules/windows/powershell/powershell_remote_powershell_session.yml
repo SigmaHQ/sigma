@@ -1,9 +1,9 @@
-action: global
 title: Remote PowerShell Session
+id: 96b9f619-aa91-478f-bacb-c3e50f8df575
 description: Detects remote PowerShell sessions
 status: test
 date: 2019/08/10
-modified: 2020/08/24
+modified: 2021/09/21
 author: Roberto Rodriguez @Cyb3rWard0g
 references:
     - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190511223310.html
@@ -14,11 +14,6 @@ tags:
     - attack.lateral_movement
     - attack.t1021.006
     - attack.t1028  # an old one
-falsepositives:
-    - Legitimate use remote PowerShell sessions
-level: high
----
-id: 96b9f619-aa91-478f-bacb-c3e50f8df575
 logsource:
     product: windows
     service: powershell
@@ -30,15 +25,6 @@ detection:
             - ' = ServerRemoteHost ' #  HostName: 'ServerRemoteHost'  french : Nom d’hôte = 
             - 'wsmprovhost.exe'      #  HostApplication|contains: 'wsmprovhost.exe' french  Application hôte = 
     condition: selection
----
-id: 60167e5c-84b2-4c95-a7ac-86281f27c445
-logsource:
-    product: windows
-    service: powershell-classic
-    definition: fields have to be extract from event
-detection:
-    selection:
-        EventID: 400
-        HostName: 'ServerRemoteHost'
-        HostApplication|contains: 'wsmprovhost.exe'
-    condition: selection
+falsepositives:
+    - Legitimate use remote PowerShell sessions
+level: high

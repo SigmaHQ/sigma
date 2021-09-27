@@ -1,0 +1,54 @@
+title: OMIGOD HTTP No Authentication RCE
+id: ab6b1a39-a9ee-4ab4-b075-e83acf6e346b
+description: Detects the exploitation of OMIGOD (CVE-2021-38647) which allows remote execute (RCE) commands as root with just a single unauthenticated HTTP request. Verify, successful, exploitation by viewing the HTTP client (request) body to see what was passed to the server (using PCAP). Within the client body is where the code execution would occur. Additionally, check the endpoint logs to see if suspicious commands or activity occurred within the timeframe of this HTTP request.
+author: Nate Guagenti (neu5ron)
+date: 2021/09/20
+modified: 2019/09/20
+references:
+    - https://www.wiz.io/blog/omigod-critical-vulnerabilities-in-omi-azure
+    - https://twitter.com/neu5ron/status/1438987292971053057?s=20
+tags:
+    - attack.privilege_escalation
+    - attack.initial_access
+    - attack.execution
+    - attack.lateral_movement
+    - attack.t1068
+    - attack.t1190
+    - attack.t1203
+    - attack.t1021.006
+    - attack.t1210
+logsource:
+    product: zeek
+    service: http
+    definition: Enable the builtin Zeek script that logs all HTTP header names by adding "@load policy/protocols/http/header-names" to your local.zeek config file. The script can be seen here for reference https://github.com/zeek/zeek/blob/master/scripts/policy/protocols/http/header-names.zeek 
+detection:
+    selection:
+        status_code: 200
+        uri: /wsman
+        method: POST
+    auth_header:
+        client_header_names|contains: "AUTHORIZATION"
+    too_small_http_client_body:
+        request_body_len: 0
+    #winrm_ports:
+    #    id.resp_p:
+    #        -  5985
+    #        -  5986
+    #        -  1270
+    condition: selection and not auth_header and not too_small_http_client_body
+    #condition: selection and winrm_ports and not auth_header and not too_small_http_client_body # Enable this to only perform search on default WinRM ports, however those ports are sometimes changed and therefore this is disabled by default to give a broader coverage of this rule
+falsepositives:
+    - Exploits that were attempted but unsuccessful. 
+    - Scanning attempts with the abnormal use of the HTTP POST method with no indication of code execution within the HTTP Client (Request) body. An example would be vulnerability scanners trying to identify unpatched versions while not actually exploiting the vulnerability. See description for investigation tips.
+level: high
+fields:
+    - id.orig_h
+    - id.resp_h
+    - id.resp_p
+    - status_code
+    - method
+    - uri
+    - request_body_len
+    - response_body_len
+    - user_agent
+status: stable

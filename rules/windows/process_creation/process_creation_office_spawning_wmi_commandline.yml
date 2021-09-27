@@ -1,0 +1,32 @@
+title: Office Applications Spawning Wmi Cli
+id: 04f5363a-6bca-42ff-be70-0d28bf629ead
+description: Initial execution of malicious document calls wmic to execute the file with regsvr32
+references:
+    - https://thedfirreport.com/2021/03/29/sodinokibi-aka-revil-ransomware/
+    - https://github.com/vadim-hunter/Detection-Ideas-Rules/blob/main/Threat%20Intelligence/The%20DFIR%20Report/20210329_Sodinokibi_(aka_REvil)_Ransomware.yaml
+author: "Vadim Khrykov (ThreatIntel), Cyb3rEng (Rule)"
+tags:
+    - attack.t1204.002
+    - attack.t1047
+    - attack.t1218.010
+    - attack.execution
+    - attack.defense_evasion
+status: experimental
+date: 2021/08/23
+logsource:
+  product: windows
+  category: process_creation
+detection:
+ #useful_information: Add more office applications to the rule logic of choice
+  selection1:
+  - Image|endswith: '\wbem\WMIC.exe'
+  - ProcessCommandLine|contains: 'wmic '
+  selection2:
+   ParentImage:
+    - winword.exe
+    - excel.exe
+    - powerpnt.exe
+  condition: selection1 and selection2
+falsepositives:
+- Unknown
+level: high

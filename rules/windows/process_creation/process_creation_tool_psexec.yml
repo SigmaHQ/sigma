@@ -1,0 +1,38 @@
+title: PsExec Tool Execution
+id: fa91cc36-24c9-41ce-b3c8-3bbc3f2f67ba
+related:
+    - id: 42c575ea-e41e-41f1-b248-8093c3e82a28
+      type: derived
+status: experimental
+description: Detects PsExec service installation and execution events (service and Sysmon)
+author: Thomas Patzke
+date: 2017/06/12
+modified: 2021/09/21
+references:
+    - https://www.jpcert.or.jp/english/pub/sr/ir_research.html
+    - https://jpcertcc.github.io/ToolAnalysisResultSheet
+tags:
+    - attack.execution
+    - attack.t1035           # an old one
+    - attack.t1569.002
+    - attack.s0029
+
+fields:
+    - EventID
+    - CommandLine
+    - ParentCommandLine
+    - ServiceName
+    - ServiceFileName
+    - TargetFilename
+    - PipeName
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    sysmon_processcreation:
+        Image|endswith: '\PSEXESVC.exe'
+        User|startswith: 'NT AUTHORITY\SYSTEM'
+    condition: sysmon_processcreation
+falsepositives:
+    - unknown
+level: low

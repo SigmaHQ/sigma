@@ -1,0 +1,38 @@
+title: DNS ServerLevelPluginDll Install
+id: f63b56ee-3f79-4b8a-97fb-5c48007e8573
+related:
+    - id: e61e8a88-59a9-451c-874e-70fcc9740d67
+      type: derived
+status: experimental
+description: Detects the installation of a plugin DLL via ServerLevelPluginDll parameter in Registry, which can be used to execute code in context of the DNS server
+    (restart required)
+references:
+    - https://medium.com/@esnesenon/feature-not-bug-dnsadmin-to-dc-compromise-in-one-line-a0f779b8dc83
+date: 2017/05/08
+modified: 2021/09/12
+author: Florian Roth
+tags:
+    - attack.defense_evasion
+    - attack.t1073 # an old one
+    - attack.t1574.002
+    - attack.t1112
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    dnsadmin:
+        Image|endswith: '\dnscmd.exe'
+        CommandLine|contains|all: 
+            - '/config'
+            - '/serverlevelplugindll'
+    condition: dnsadmin
+falsepositives:
+    - unknown
+level: high
+fields:
+    - EventID
+    - CommandLine
+    - ParentCommandLine
+    - Image
+    - User
+    - TargetObject

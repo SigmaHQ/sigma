@@ -1,0 +1,26 @@
+title: Invoke-Obfuscation STDIN+ Launcher
+id: 72862bf2-0eb1-11eb-adc1-0242ac120002
+description: Detects Obfuscated use of stdin to execute PowerShell
+status: experimental
+author: Jonathan Cheong, oscd.community
+date: 2020/10/15
+modified: 2021/09/17
+references:
+     - https://github.com/Neo23x0/sigma/issues/1009 #(Task 25)
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    service: system
+detection:
+    selection_eventid:
+        EventID: 7045
+    selection:
+        ImagePath|re: '.*cmd.{0,5}(?:\/c|\/r).+powershell.+(?:\$\{?input\}?|noexit).+\"'
+    condition: selection and selection_eventid
+falsepositives:
+    - Unknown
+level: high

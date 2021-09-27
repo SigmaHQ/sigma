@@ -1,0 +1,29 @@
+title: Invoke-Obfuscation COMPRESS OBFUSCATION
+id: 7a922f1b-2635-4d6c-91ef-af228b198ad3
+related:
+    - id: 175997c5-803c-4b08-8bb0-70b099f47595
+      type: derived  
+description: Detects Obfuscated Powershell via COMPRESS OBFUSCATION
+status: experimental
+author: Timur Zinniatullin, oscd.community
+date: 2020/10/18
+modified: 2021/09/18
+references:
+    - https://github.com/Neo23x0/sigma/issues/1009 #(Task 19)
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    service: security
+detection:
+    selection_eventid:
+        EventID: 4697 
+    selection:
+        ServiceFileName|re: '(?i).*new-object.*(?:system\.io\.compression\.deflatestream|system\.io\.streamreader).*text\.encoding\]::ascii.*readtoend'
+    condition: selection and selection_eventid
+falsepositives:
+    - unknown
+level: medium
