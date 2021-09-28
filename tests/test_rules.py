@@ -613,6 +613,9 @@ class TestRules(unittest.TestCase):
                 if key.lower() not in valid_logsource:
                     print(Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
                     valid = False
+                elif not isinstance(logsource[key],str):
+                    print(Fore.RED + "Rule {} has a logsource with an invalid field type ({})".format(file, key))
+                    valid = False
             if not valid:
                faulty_rules.append(file)
 
