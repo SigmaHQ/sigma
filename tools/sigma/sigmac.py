@@ -98,12 +98,16 @@ def set_argparser():
     argparser.add_argument("--recurse", "-r", action="store_true", help="Use directory as input (recurse into subdirectories is not implemented yet)")
     argparser.add_argument("--filter", "-f", help="""
     Define comma-separated filters that must match (AND-linked) to rule to be processed.
-    Valid filters: level<=x, level>=x, level=x, status=y, logsource=z, tag=t.
+    Valid filters: level<=x, level>=x, level=x, status=y, logsource=z, tag=t, target=o.
     x is one of: low, medium, high, critical.
     y is one of: experimental, testing, stable.
     z is a word appearing in an arbitrary log source attribute.
     t is a tag that must appear in the rules tag list, case-insensitive matching.
+    o is a target that must appear in the rules target list, case-insensitive matching.
     Multiple log source specifications are AND linked.
+    Special filter:
+    inlastday=X rule create or modified in the last X days period
+    tlp=valid_tlp if rule have no tlp set to WHITE 
             """)
     argparser.add_argument("--target", "-t", choices=backends.getBackendDict().keys(), help="Output target format")
     argparser.add_argument("--lists", "-l", action="store_true", help="List available output target formats and configurations")
