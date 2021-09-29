@@ -1,0 +1,28 @@
+title: windows lolbas execution of nltest.exe
+id: eeb66bbb-3dde-4582-815a-584aee9fe6d1 # https://www.uuidgenerator.net/version4
+status: experimental
+author: Arun Chauhan
+date: 2021/08/24
+description: The attacker might use LOLBAS nltest.exe for discovery of domain controllers, domain trusts, parent domain and the current user permissions.
+references:
+  - https://jpcertcc.github.io/ToolAnalysisResultSheet/details/nltest.htm
+  - https://attack.mitre.org/software/S0359/
+tags: 
+  - attack.discovery
+  - attack.t1482 # enumerate trusted domains by using commands such as nltest /domain_trusts
+  - attack.t1018 # enumerate remote domain controllers using options such as /dclist and /dsgetdc
+  - attack.1016  # enumerate the parent domain of a local machine using /parentdomain
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4689
+    Image|contains: "nltest.exe" 
+    ExitStatus: "0x0"
+  condition: selection
+fields:
+  - "SubjectUserName"
+falsepositives:
+  - "Red team activity"
+level: high
