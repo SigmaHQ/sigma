@@ -3,7 +3,7 @@ id: b7a3c9a3-09ea-4934-8864-6a32cacd98d9
 status: experimental
 author: frack113
 date: 2021/07/20
-modified: 2021/09/07
+modified: 2021/09/30
 description: Use living off the land tools to zip a file and stage it in the Windows temporary folder for later exfiltration
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1074.001/T1074.001.md
@@ -13,16 +13,23 @@ tags:
 logsource:
     product: windows
     service: powershell
-    definition: Module Logging must be enabled
+    definition: 4103 Module Logging must be enabled , 4104 Script Block Logging must be enable
 detection:
-    selection:
+    selection_4103:
         EventID: 4103
         ContextInfo|contains|all:
             - 'Compress-Archive '
             - ' -Path '
             - ' -DestinationPath '
             - '$env:TEMP\'
-    condition: selection 
+    selection_4104:
+        EventID: 4104
+        ScriptBlockText|contains|all:
+            - 'Compress-Archive '
+            - ' -Path '
+            - ' -DestinationPath '
+            - '$env:TEMP\'
+    condition: selection_4103 or  selection_4104
 falsepositives:
     - Unknown
 level: medium
