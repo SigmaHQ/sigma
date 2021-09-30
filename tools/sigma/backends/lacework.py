@@ -554,7 +554,7 @@ class LaceworkPolicy:
         self.description = safe_get(rule, 'description', str)
 
         # 14. Get Remediation
-        self.remediation = ""
+        self.remediation = 'Remediation steps are not represented in Sigma rule specification'
 
     def __iter__(self):
         for key, attr in {
