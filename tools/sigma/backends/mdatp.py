@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
+import sigma
 from functools import wraps
 from .base import SingleTextQueryBackend
 from .exceptions import NotSupportedError
@@ -416,3 +417,23 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
             return self.generateMapItemTypedNode(mapping[0], value)
 
         return super().generateMapItemNode(node)
+
+    def generateAggregation(self, agg):
+        if agg == None:
+            return ""
+        if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_NEAR:
+            raise NotImplementedError("The 'near' aggregation operator is not yet implemented for this backend")
+        if agg.groupfield == None:
+            if agg.aggfunc_notrans == 'count':
+                if agg.aggfield == None :
+                    return " | summarize val=count() | where val %s %s" % (agg.cond_op, agg.condition)
+                else:
+                    agg.aggfunc_notrans = 'dcount'
+            return " | summarize val=%s(%s) as val | where val %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.cond_op, agg.condition)
+        else:
+            if agg.aggfunc_notrans == 'count':
+                if agg.aggfield == None :
+                    return " | summarize val=count() by %s | where val %s %s" % (agg.groupfield, agg.cond_op, agg.condition)
+                else:
+                    agg.aggfunc_notrans = 'dcount'
+            return " | summarize val=%s(%s) by %s | where val %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)
