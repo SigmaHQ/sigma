@@ -1,0 +1,28 @@
+title: CVE-2021-41773 Exploitation Attempt
+id: 3007fec6-e761-4319-91af-e32e20ac43f5
+status: experimental
+description: Detects exploitation of flaw in path normalization in Apache HTTP server 2.4.49. An attacker could use a path traversal attack to map URLs to files outside the expected document root. If files outside of the document root are not protected by "require all denied" these requests can succeed. Additionally this flaw could leak the source of interpreted files like CGI scripts. This issue is known to be exploited in the wild. This issue only affects Apache 2.4.49 and not earlier versions.
+author: daffainfo, Florian Roth
+date: 2021/10/05
+references:
+    - https://nvd.nist.gov/vuln/detail/CVE-2021-41773
+    - https://github.com/apache/httpd/commit/e150697086e70c552b2588f369f2d17815cb1782
+    - https://twitter.com/ptswarm/status/1445376079548624899
+    - https://twitter.com/h4x0r_dz/status/1445401960371429381
+    - https://github.com/projectdiscovery/nuclei-templates/blob/master/cves/2021/CVE-2021-41773.yaml
+logsource:
+  category: webserver
+detection:
+    selection:
+        c-uri|contains: '/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e'
+    selection_success:
+        sc-status: 
+            - 200
+            - 301    
+    condition: selection and selection_success
+false_positives:
+    - Unknown
+tags:
+    - attack.initial_access
+    - attack.t1190
+level: critical
