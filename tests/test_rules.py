@@ -219,6 +219,8 @@ class TestRules(unittest.TestCase):
 
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             detection = self.get_rule_part(file_path = file, part_name = "detection")
+            logsource = self.get_rule_part(file_path = file, part_name = "logsource")
+            detection.update(logsource)
             yaml = self.get_rule_yaml(file_path = file)
 
             is_multipart_yaml_file = len(yaml) != 1
