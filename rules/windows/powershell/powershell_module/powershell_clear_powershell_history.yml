@@ -1,5 +1,8 @@
 title: Clear PowerShell History
-id: dfba4ce1-e0ea-495f-986e-97140f31af2d
+id: f99276ad-d122-4989-a09a-d00904a5f9d2
+related:
+    - id: dfba4ce1-e0ea-495f-986e-97140f31af2d
+      type: derived
 status: experimental
 description: Detects keywords that could indicate clearing PowerShell history
 date: 2019/10/25
@@ -14,22 +17,8 @@ tags:
 logsource:
     product: windows
     service: powershell
-    definition: 4104 Script block logging must be enabled , 4103 Module Logging must be enabled
+    definition: Module Logging must be enable
 detection:
-    selection_1:
-        EventID: 4104
-    selection_2:
-        ScriptBlockText|contains:
-            - 'del'
-            - 'Remove-Item'
-            - 'rm'
-        ScriptBlockText|contains|all:
-            - '(Get-PSReadlineOption).HistorySavePath'
-    selection_3:
-        ScriptBlockText|contains|all:
-            - 'Set-PSReadlineOption'
-            - '–HistorySaveStyle'
-            - 'SaveNothing'
     selection_4:
         EventID: 4103
     selection_5:
@@ -44,8 +33,7 @@ detection:
             - 'Set-PSReadlineOption'
             - '–HistorySaveStyle'
             - 'SaveNothing'
-    condition: selection_1 and ( selection_2 or selection_3 ) or 
-               selection_4 and ( selection_5 or selection_6 ) 
+    condition: selection_4 and ( selection_5 or selection_6 ) 
 falsepositives:
     - Legitimate PowerShell scripts
 level: medium

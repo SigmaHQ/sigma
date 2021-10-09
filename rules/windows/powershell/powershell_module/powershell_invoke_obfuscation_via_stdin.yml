@@ -1,5 +1,8 @@
 title: Invoke-Obfuscation Via Stdin
-id: 86b896ba-ffa1-4fea-83e3-ee28a4c915c7
+id: c72aca44-8d52-45ad-8f81-f96c4d3c755e
+related:
+    - id: 86b896ba-ffa1-4fea-83e3-ee28a4c915c7
+      type: derived
 description: Detects Obfuscated Powershell via Stdin in Scripts
 status: experimental
 author: Nikita Nazarov, oscd.community
@@ -14,15 +17,12 @@ tags:
 logsource:
     product: windows
     service: powershell
-    definition: Script block logging must be enabled for 4104, Module Logging must be enable for 4103
+    definition: Module Logging must be enable
 detection:
-    selection_1:
-        EventID: 4104
-        ScriptBlockText|re: '(?i).*(set).*&&\s?set.*(environment|invoke|\${?input).*&&.*"'
-    selection_2:
+     selection_4103:
         EventID: 4103
         Payload|re: '(?i).*(set).*&&\s?set.*(environment|invoke|\${?input).*&&.*"'
-    condition: 1 of them
+    condition: selection_4103
 falsepositives:
     - Unknown
 level: high

@@ -1,9 +1,13 @@
 title: Invoke-Obfuscation CLIP+ Launcher
-id: 73e67340-0d25-11eb-adc1-0242ac120002
+id: a136cde0-61ad-4a61-9b82-8dc490e60dd2
+related :
+    - id: 73e67340-0d25-11eb-adc1-0242ac120002
+      type: derived
 description: Detects Obfuscated use of Clip.exe to execute PowerShell
 status: experimental
 author: Jonathan Cheong, oscd.community
 date: 2020/10/13
+modified: 2021/10/07
 references:
      - https://github.com/Neo23x0/sigma/issues/1009 #(Task 26)
 tags:
@@ -14,15 +18,12 @@ tags:
 logsource:
     product: windows
     service: powershell
-    definition: Script block logging must be enabled for 4104 , Module Logging must be enabled for 4103
+    definition: Module Logging must be enable
 detection:
-    selection_1:
-        EventID: 4104
-        ScriptBlockText|re: '.*cmd.{0,5}(?:\/c|\/r).+clip(?:\.exe)?.{0,4}&&.+clipboard]::\(\s\\\"\{\d\}.+\-f.+\"'
-    selection_2:
+    selection_4103:
         EventID: 4103
         Payload|re: '.*cmd.{0,5}(?:\/c|\/r).+clip(?:\.exe)?.{0,4}&&.+clipboard]::\(\s\\\"\{\d\}.+\-f.+\"'
-    condition: 1 of them
+    condition: selection_4103
 falsepositives:
     - Unknown
 level: high

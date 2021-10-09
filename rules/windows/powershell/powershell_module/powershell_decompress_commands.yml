@@ -1,8 +1,12 @@
 title: PowerShell Decompress Commands
-id: 81fbdce6-ee49-485a-908d-1a728c5dcb09
+id: 1ddc1472-8e52-4f7d-9f11-eab14fc171f5
+related:
+    - id: 81fbdce6-ee49-485a-908d-1a728c5dcb09
+      type: derived
 description: A General detection for specific decompress commands in PowerShell logs. This could be an adversary decompressing files.
 status: experimental
 date: 2020/05/02
+modified: 2021/10/07
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 tags:
     - attack.defense_evasion
@@ -13,15 +17,12 @@ references:
 logsource:
     product: windows
     service: powershell
-    definition: Script block logging must be enabled for 4104, Module Logging must be enabled for 4103
+    definition: Module Logging must be enable
 detection:
-    selection1:
-        EventID: 4104
-        ScriptBlockText|contains: 'Expand-Archive'
     selection2:
         EventID: 4103
         Payload|contains: 'Expand-Archive'
-    condition: selection1 or selection2
+    condition: selection2
 falsepositives:
     - unknown
 level: informational
