@@ -1,0 +1,28 @@
+title: AWS Passed Role to Lambda Function
+id: d914951b-52c8-485f-875e-86abab710c0b
+description: Detects when an user with these permissions could escalate privileges by passing an existing IAM role to a new Lmbda function that includes code to import the AWS library to their programming lanugage. This can give access to the privileges associated with any Lambda service role that exists in the account and escalate to full administrator access to the account.
+author: Austin Songer @austinsonger
+status: experimental
+date: 2021/10/03
+references:
+    - https://rhinosecuritylabs.com/aws/aws-privilege-escalation-methods-mitigation/
+logsource:
+    service: cloudtrail
+detection:
+    selection1:
+        eventSource: iam.amazonaws.com
+        eventName: PassRole
+    selection2:
+        eventSource: lambda.amazonaws.com
+        eventName: CreateFunction
+    selection3:
+        eventSource: lambda.amazonaws.com
+        eventName: InvokeFunction
+    condition: selection1 and selection2 and selection3
+level: low
+tags:
+    - attack.privilege_escalation
+    - attack.t1078
+falsepositives:
+ - Passed Role to New Lambda Function may be performed by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. 
+ - If known behavior is causing false positives, it can be exempted from the rule.
