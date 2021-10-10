@@ -19,21 +19,21 @@ logsource:
     service: powershell
     definition: PowerShell Module Logging must be enabled
 detection:
-    selection_4:
+    selection_id:
         EventID: 4103
-    selection_5:
+    selection_payload_1:
         Payload|contains:
             - 'del'
             - 'Remove-Item'
             - 'rm'
         Payload|contains|all:
             - '(Get-PSReadlineOption).HistorySavePath'
-    selection_6:
+    selection_payload_2:
         Payload|contains|all:
             - 'Set-PSReadlineOption'
             - '–HistorySaveStyle'
             - 'SaveNothing'
-    condition: selection_4 and ( selection_5 or selection_6 ) 
+    condition: selection_id and ( selection_payload_1 or selection_payload_2 ) 
 falsepositives:
     - Legitimate PowerShell scripts
 level: medium
