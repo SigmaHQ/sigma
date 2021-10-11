@@ -4,6 +4,7 @@ description: Detects Obfuscated Powershell via RUNDLL LAUNCHER
 status: experimental
 author: Timur Zinniatullin, oscd.community
 date: 2020/10/18
+modified: 2021/10/07
 references:
     - https://github.com/Neo23x0/sigma/issues/1009 #(Task 23)
 tags:
@@ -14,15 +15,12 @@ tags:
 logsource:
     product: windows
     service: powershell
-    definition: Script block logging must be enabled for 4104, Module Logging must be enabled for 4103
+    definition: Script block logging must be enabled
 detection:
-    selection_1:
+    selection_4104:
         EventID: 4104
         ScriptBlockText|re: '(?i).*rundll32(?:\.exe)?(?:\s+)?shell32\.dll.*shellexec_rundll.*powershell.*\"'
-    selection_2:
-        EventID: 4103
-        Payload|re: '(?i).*rundll32(?:\.exe)?(?:\s+)?shell32\.dll.*shellexec_rundll.*powershell.*\"'
-    condition: 1 of them
+    condition: selection_4104
 falsepositives:
     - Unknown
 level: medium

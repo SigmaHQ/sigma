@@ -4,6 +4,7 @@ description: Detects Obfuscated Powershell via Stdin in Scripts
 status: experimental
 author: Nikita Nazarov, oscd.community
 date: 2020/10/12
+modified: 2021/10/07
 references:
      - https://github.com/Neo23x0/sigma/issues/1009 #(Task28)
 tags:
@@ -14,15 +15,12 @@ tags:
 logsource:
     product: windows
     service: powershell
-    definition: Script block logging must be enabled for 4104, Module Logging must be enable for 4103
+    definition: Script block logging must be enabled
 detection:
-    selection_1:
+    selection_4104:
         EventID: 4104
         ScriptBlockText|re: '(?i).*(set).*&&\s?set.*(environment|invoke|\${?input).*&&.*"'
-    selection_2:
-        EventID: 4103
-        Payload|re: '(?i).*(set).*&&\s?set.*(environment|invoke|\${?input).*&&.*"'
-    condition: 1 of them
+    condition: selection_4104
 falsepositives:
     - Unknown
 level: high

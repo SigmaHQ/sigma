@@ -4,6 +4,7 @@ description: Detects Obfuscated use of Environment Variables to execute PowerShe
 status: experimental
 author: Jonathan Cheong, oscd.community
 date: 2020/10/15
+modified: 2021/10/07
 references:
      - https://github.com/Neo23x0/sigma/issues/1009 #(Task 24)
 tags:
@@ -14,15 +15,12 @@ tags:
 logsource:
     product: windows
     service: powershell
-    definition: Script block logging must be enabled for 4104,Module Logging must be enabled for 4103
+    definition: Script block logging must be enabled
 detection:
-    selection_1:
+    selection_4104:
         EventID: 4104
         ScriptBlockText|re: '.*cmd.{0,5}(?:\/c|\/r)(?:\s|)\"set\s[a-zA-Z]{3,6}.*(?:\{\d\}){1,}\\\"\s+?\-f(?:.*\)){1,}.*\"'
-    selection_2:
-        EventID: 4103
-        Payload|re: '.*cmd.{0,5}(?:\/c|\/r)(?:\s|)\"set\s[a-zA-Z]{3,6}.*(?:\{\d\}){1,}\\\"\s+?\-f(?:.*\)){1,}.*\"'
-    condition: 1 of them
+    condition: selection_4104
 falsepositives:
     - Unknown
 level: high
