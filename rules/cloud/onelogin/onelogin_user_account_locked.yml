@@ -1,0 +1,24 @@
+title: OneLogin User Account Locked
+id: a717c561-d117-437e-b2d9-0118a7035d01
+description: Detects when an user acount is locked or suspended.
+author: Austin Songer @austinsonger
+status: experimental
+date: 2021/10/12
+modified: 2021/10/12
+references:
+    - https://developers.onelogin.com/api-docs/1/events/event-resource/
+logsource:
+  service: onelogin.events
+detection:
+    selection1: # Locked via API
+        event_type_id: 532
+    selection2: # Locked via API
+        event_type_id: 553
+    selection3: # Suspended via API
+        event_type_id: 551
+    condition: 1 of them
+level: low
+tags:
+    - attack.impact
+falsepositives:
+ - System may lock or suspend user accounts.
