@@ -154,6 +154,24 @@ class TestRules(unittest.TestCase):
         self.assertEqual(files_with_duplicate_filters, [], Fore.RED + 
                          "There are rules with duplicate filters")
 
+    def test_field_name_with_space(self):
+        def key_iterator(fields, faulty):
+            for key, value in fields.items():
+                if " " in key:
+                    faulty.append(key)
+                    print(Fore.YELLOW + "Rule {} has a space in field name ({}).".format(file, key))
+                if type(value) == dict:
+                    key_iterator(value, faulty)
+
+        faulty_fieldnames = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            yaml = self.get_rule_yaml(file_path = file)
+            detection = self.get_rule_part(file_path = file, part_name = "detection")
+            key_iterator(detection, faulty_fieldnames)
+
+        self.assertEqual(faulty_fieldnames, [], Fore.RED +
+                "There are rules with an unsupported field name. Spaces are not allowed. (Replace space with an underscore character if the log source uses space)")
+
     def test_single_named_condition_with_x_of_them(self):
         faulty_detections = []
 
