@@ -1,9 +1,10 @@
-title: AWS Passed Role to Glue Development Endpoint
+title: AWS Glue Development Endpoint Activity
 id: 4990c2e3-f4b8-45e3-bc3c-30b14ff0ed26
-description: Detects when an user these permissions could create a new AWS Glue development endpoint and pass an existing service role to it. They then could SSH into the instance and use the AWS CLI to have access of the permissions the role has access to. The adversary could gain privileges associated with any Glue service role that exists in the account, which could range from no privilege escalation to full administrator access to the account.
+description: Detects possible suspicious glue development endpoint activity.
 author: Austin Songer @austinsonger
 status: experimental
 date: 2021/10/03
+update: 2021/10/13
 references:
     - https://rhinosecuritylabs.com/aws/aws-privilege-escalation-methods-mitigation/
     - https://docs.aws.amazon.com/glue/latest/webapi/API_CreateDevEndpoint.html
@@ -13,10 +14,16 @@ detection:
     selection1:
         eventSource: glue.amazonaws.com
         eventName: CreateDevEndpoint
-    condition: selection1
+    selection2:
+        eventSource: glue.amazonaws.com
+        eventName: DeleteDevEndpoint
+    selection3:
+        eventSource: glue.amazonaws.com
+        eventName: UpdateDevEndpoint
+condition: selection1 or selection2 or selection3
 level: low
 tags:
     - attack.privilege_escalation
 falsepositives:
- - Passed Role to Glue Development Endpoint may be performed by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. 
+ - Glue Development Endpoint Activity may be performed by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. 
  - If known behavior is causing false positives, it can be exempted from the rule.
