@@ -170,7 +170,7 @@ class TestRules(unittest.TestCase):
             key_iterator(detection, faulty_fieldnames)
 
         self.assertEqual(faulty_fieldnames, [], Fore.RED +
-                "There are rules with an unsupported field name. Spaces are not allowed. (Replace space with an underscore character if the log source uses space)")
+                "There are rules with an unsupported field name. Spaces are not allowed. (Replace space with an underscore character '_' )")
 
     def test_single_named_condition_with_x_of_them(self):
         faulty_detections = []
