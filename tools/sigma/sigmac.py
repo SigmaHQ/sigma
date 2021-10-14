@@ -22,7 +22,7 @@ import ruamel.yaml
 import json
 import pathlib
 import itertools
-import logging
+import logging, traceback
 from sigma.parser.collection import SigmaCollectionParser
 from sigma.parser.exceptions import SigmaCollectionParseError, SigmaParseError
 from sigma.configuration import SigmaConfiguration, SigmaConfigurationChain
@@ -368,6 +368,7 @@ def main():
                     sys.exit(error)
         except (NotImplementedError, TypeError) as e:
             print("An unsupported feature is required for this Sigma rule (%s): " % (sigmafile) + str(e), file=sys.stderr)
+            traceback.print_exc()
             logger.debug("* Convertion Sigma input %s FAILURE" % (sigmafile))
             success = False
             if not cmdargs.ignore_backend_errors:
