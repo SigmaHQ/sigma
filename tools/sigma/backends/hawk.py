@@ -376,7 +376,7 @@ class HAWKBackend(SingleTextQueryBackend):
         #print(result)
         result = prefix + json.dumps(result)
 
-        # print(sigmaparser.parsedyaml)
+        print(sigmaparser.parsedyaml)
 
         analytic_txt = ret + result + ret2 # json.dumps(ret)
         try:
