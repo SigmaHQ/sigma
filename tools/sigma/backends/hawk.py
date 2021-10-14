@@ -376,7 +376,7 @@ class HAWKBackend(SingleTextQueryBackend):
         #print(result)
         result = prefix + json.dumps(result)
 
-        print(sigmaparser.parsedyaml)
+        #print(sigmaparser.parsedyaml)
 
         analytic_txt = ret + result + ret2 # json.dumps(ret)
         try:
@@ -386,6 +386,23 @@ class HAWKBackend(SingleTextQueryBackend):
             raise Exception("Failed to parse json: %s" % analytic_txt)
         # "rules","filter_name","actions_category_name","correlation_action","date_added","scores/53c9a74abfc386415a8b463e","enabled","public","group_name","score_id"
 
+        cmt = "Sigma Rule: %s\n" % sigmaparser.parsedyaml['id'] 
+        cmt += "Author: %s\n" % sigmaparser.parsedyaml['author'] 
+        cmt += "Level: %s\n" % sigmaparser.parsedyaml['level'] 
+        if 'falsepositives' in sigmaparser.parsedyaml and type(sigmaparser.parsedyaml['falsepositives']) is list:
+            if len(sigmaparser.parsedyaml['falsepositives']) > 0:
+                cmt += "False Positives: "
+                for v in sigmaparser.parsedyaml['falsepositives']:
+                    if v:
+                        cmt += "%s, " % v
+                    else:
+                        cmt += "None, "
+                cmt = cmt[:-2] + "\n"
+        elif 'falsepositives' in sigmaparser.parsedyaml and sigmaparser.parsedyaml['falsepositives']:
+            raise Exception("Unknown type for false positives: ", type(sigmaparser.parsedyaml['falsepositives']))
+
+        if 'references' in sigmaparser.parsedyaml:
+            cmt += "References: \n%s" % "\n".join(sigmaparser.parsedyaml['references']) 
         record = {
             "rules" : analytic, # analytic_txt.replace('"','""'),
             "filter_name" : sigmaparser.parsedyaml['title'],
@@ -394,9 +411,13 @@ class HAWKBackend(SingleTextQueryBackend):
             "date_added" : sigmaparser.parsedyaml['date'],
             "enabled" : True,
             "public" : True,
+            "comments" : cmt,
             "group_name" : ".",
             "score_id" : sigmaparser.parsedyaml['id']
         }
+        if 'tags' in sigmaparser.parsedyaml:
+            record["tags"] = sigmaparser.parsedyaml['tags']
+
         if not 'status' in self.sigmaparser.parsedyaml or 'status' in self.sigmaparser.parsedyaml and self.sigmaparser.parsedyaml['status'] != 'experimental':
             record['correlation_action'] += 10.0;
         if 'falsepositives' in self.sigmaparser.parsedyaml and len(self.sigmaparser.parsedyaml['falsepositives']) > 1:
