@@ -4,7 +4,7 @@ description: "Detects all variations of obfuscated powershell IEX invocation cod
 status: experimental
 author: Daniel Bohannon (@Mandiant/@FireEye), oscd.community
 date: 2019/11/08
-modified: 2021/10/07
+modified: 2021/10/16
 tags:
     - attack.defense_evasion
     - attack.t1027
@@ -13,12 +13,10 @@ tags:
     - attack.t1086  #an old one
 logsource:
     product: windows
-    service: powershell
+    category: ps_script
     definition: Script block logging must be enabled
 detection:
-    selection_1:
-        EventID: 4104
-    selection_2:
+    selection_iex:
         - ScriptBlockText|re: '\$PSHome\[\s*\d{1,3}\s*\]\s*\+\s*\$PSHome\['
         - ScriptBlockText|re: '\$ShellId\[\s*\d{1,3}\s*\]\s*\+\s*\$ShellId\['
         - ScriptBlockText|re: '\$env:Public\[\s*\d{1,3}\s*\]\s*\+\s*\$env:Public\['
@@ -26,7 +24,7 @@ detection:
         - ScriptBlockText|re: '\\\\*mdr\\\\*\W\s*\)\.Name'
         - ScriptBlockText|re: '\$VerbosePreference\.ToString\('
         - ScriptBlockText|re: '\String\]\s*\$VerbosePreference'
-    condition: selection_1 and selection_2
+    condition: selection_iex
 falsepositives:
     - Unknown
 level: high
