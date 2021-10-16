@@ -125,10 +125,13 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
             elif val.startswith("*") or val.endswith("*"):
                 if val.startswith("*") and val.endswith("*"):
                     op = "contains"
+                    val = val[1:-1]
                 elif val.startswith("*"):
                     op = "endswith"
+                    val = val[1:]
                 elif val.endswith("*"):
                     op = "startswith"
+                    val = val[:-1]
                 val = re.sub('([".^$]|(?![*?]))', '\g<1>', val)
                 val = re.sub('(\\\\\*|\*)', '', val)
                 val = re.sub('\\?', '.', val)
