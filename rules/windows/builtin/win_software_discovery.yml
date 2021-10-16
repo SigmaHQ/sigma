@@ -1,0 +1,29 @@
+title: Detected Windows Software Discovery
+id: 2650dd1a-eb2a-412d-ac36-83f06c4f2282
+description: Adversaries may attempt to enumerate software for a variety of reasons, such as figuring out what security measures are present or if the compromised system has a version of software that is vulnerable.
+status: experimental
+author: Nikita Nazarov, oscd.community
+date: 2020/10/16
+modified: 2021/09/21
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1518/T1518.md
+    - https://github.com/harleyQu1nn/AggressorScripts #AVQuery.cna
+tags:
+    - attack.discovery
+    - attack.t1518
+logsource:
+    product: windows
+    service: powershell
+    definition: 'Script block logging must be enabled'
+detection:
+    selection:
+        EventID: 4104
+        ScriptBlockText|contains|all:    # Example: Get-ItemProperty HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | Format-Table -Autosize
+          - 'get-itemProperty'
+          - '\software\'
+          - 'select-object'
+          - 'format-table'
+    condition: selection
+level: medium
+falsepositives:
+    - Legitimate administration activities

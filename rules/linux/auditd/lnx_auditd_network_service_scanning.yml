@@ -1,0 +1,32 @@
+title: Linux Network Service Scanning
+id: 3761e026-f259-44e6-8826-719ed8079408
+related:
+    - id: 3e102cd9-a70d-4a7a-9508-403963092f31
+      type: derived
+status: experimental
+description: Detects enumeration of local or remote network services.
+author: Alejandro Ortuno, oscd.community
+date: 2020/10/21
+modified: 2021/09/14
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1046/T1046.md
+tags:
+  - attack.discovery
+  - attack.t1046
+logsource:
+  product: linux
+  service: auditd
+  definition: 'Configure these rules https://github.com/Neo23x0/auditd/blob/master/audit.rules#L182-L183'
+detection:
+  selection:
+    type: 'SYSCALL'
+    exe|endswith:
+      - '/telnet'
+      - '/nmap'
+      - '/netcat'
+      - '/nc'
+    key: 'network_connect_4'
+  condition: selection
+falsepositives:
+  - Legitimate administration activities
+level: low

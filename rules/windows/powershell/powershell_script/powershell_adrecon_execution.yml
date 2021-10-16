@@ -1,0 +1,27 @@
+title: PowerShell ADRecon Execution
+id: bf72941a-cba0-41ea-b18c-9aca3925690d
+status: experimental
+description: Detects execution of ADRecon.ps1 for AD reconnaissance which has been reported to be actively used by FIN7 
+references:
+    - https://github.com/sense-of-security/ADRecon
+    - https://bi-zone.medium.com/from-pentest-to-apt-attack-cybercriminal-group-fin7-disguises-its-malware-as-an-ethical-hackers-c23c9a75e319
+tags:
+    - attack.discovery
+    - attack.execution
+    - attack.t1059.001
+author: Bhabesh Raj
+date: 2021/07/16
+logsource:
+    product: windows
+    service: powershell
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        EventID: 4104
+        ScriptBlockText|contains:
+            - 'Function Get-ADRExcelComOb'
+            - 'ADRecon-Report.xlsx' #Default
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

@@ -1,0 +1,32 @@
+title: Ke3chang Registry Key Modifications
+id: 7b544661-69fc-419f-9a59-82ccc328f205
+status: experimental
+description: Detects Registry modifications performed by Ke3chang malware in campaigns running in 2019 and 2020
+references:
+    - https://www.verfassungsschutz.de/embed/broschuere-2020-06-bfv-cyber-brief-2020-01.pdf
+    - https://unit42.paloaltonetworks.com/operation-ke3chang-resurfaces-with-new-tidepool-malware/
+tags:
+    - attack.g0004
+    - attack.defense_evasion
+    - attack.t1089 # an old one
+    - attack.t1562.001
+author: Markus Neis, Swisscom 
+date: 2020/06/18
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        # Ke3chang and TidePool both modify the IEHarden registry key, as well as the following list of keys. 
+        # Setting these registry keys is unique to the Ke3chang and TidePool malware families.
+        # HKCU\Software\Microsoft\Internet Explorer\Main\Check_Associations
+        # HKCU\Software\Microsoft\Internet Explorer\Main\DisableFirstRunCustomize
+        # HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\IEharden
+        CommandLine|contains:
+            - '-Property DWORD -name DisableFirstRunCustomize -value 2 -Force'
+            - '-Property String -name Check_Associations -value'
+            - '-Property DWORD -name IEHarden -value 0 -Force'         
+    condition: selection1
+falsepositives:
+    - Will need to be looked for combinations of those processes
+level: critical

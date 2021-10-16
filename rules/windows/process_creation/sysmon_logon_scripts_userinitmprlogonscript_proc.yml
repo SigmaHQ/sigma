@@ -1,0 +1,32 @@
+title: Logon Scripts (UserInitMprLogonScript)
+id: 0a98a10c-685d-4ab0-bddc-b6bdd1d48458
+status: experimental
+description: Detects creation or execution of UserInitMprLogonScript persistence method
+references:
+    - https://attack.mitre.org/techniques/T1037/
+tags:
+    - attack.t1037 # an old one
+    - attack.t1037.001
+    - attack.persistence
+author: Tom Ueltschi (@c_APT_ure)
+date: 2019/01/12
+modified: 2020/08/26
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    exec_selection:
+        ParentImage|endswith: '\userinit.exe'
+    exec_exclusion1:
+        Image|endswith: '\explorer.exe'
+    exec_exclusion2:
+        CommandLine|contains:
+            - 'netlogon.bat'
+            - 'UsrLogon.cmd'
+    create_keywords_cli:
+        CommandLine|contains: 'UserInitMprLogonScript'
+    condition: ( exec_selection and not exec_exclusion1 and not exec_exclusion2 ) or create_keywords_cli
+falsepositives:
+    - exclude legitimate logon scripts
+    - penetration tests, red teaming
+level: high

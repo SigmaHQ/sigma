@@ -1,0 +1,27 @@
+title: Enumeration via the Global Catalog 
+description: Detects enumeration of the global catalog (that can be performed using BloodHound or others AD reconnaissance tools). Adjust Threshold according to domain width.
+author: Chakib Gzenayi (@Chak092), Hosni Mribah
+id: 619b020f-0fd7-4f23-87db-3f51ef837a34
+date: 2020/05/11
+modified: 2021/06/01
+references:
+    - https://docs.microsoft.com/en-us/windows/security/threat-protection/auditing/event-5156
+tags:
+    - attack.discovery
+    - attack.t1087          # an old one
+    - attack.t1087.002
+logsource:
+    product: windows
+    service: security
+    definition: 'The advanced audit policy setting "Windows Filtering Platform > Filtering Platform Connection" must be configured for Success'
+detection:
+    selection:
+        EventID: 5156
+        DestinationPort:
+        - 3268
+        - 3269
+    timeframe: 1h
+    condition: selection | count() by SourceAddress > 2000
+falsepositives:
+    - Exclude known DCs.
+level: medium

@@ -1,0 +1,27 @@
+title: CobaltStrike BOF Injection Pattern
+id: 09706624-b7f6-455d-9d02-adee024cee1d
+description: Detects a typical pattern of a CobaltStrike BOF which inject into other processes
+references:
+    - https://github.com/boku7/injectAmsiBypass
+    - https://github.com/boku7/spawn
+status: experimental
+author: Christian Burkard
+date: 2021/08/04
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        CallTrace|re: '^C:\\\\Windows\\\\SYSTEM32\\\\ntdll\\.dll\+[a-z0-9]{4,6}\|C:\\\\Windows\\\\System32\\\\KERNELBASE\\.dll\+[a-z0-9]{4,6}\|UNKNOWN\([A-Z0-9]{16}\)$'
+        GrantedAccess:
+          - '0x1028'
+          - '0x1fffff'
+    condition: selection
+falsepositives:
+    - unknown
+level: high
+tags:
+    - attack.execution
+    - attack.t1106
+    - attack.defense_evasion
+    - attack.t1562.001

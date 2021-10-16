@@ -1,0 +1,28 @@
+title: Windows Spooler Service Suspicious Binary Load
+id: 02fb90de-c321-4e63-a6b9-25f4b03dfd14
+status: experimental
+description: Detect DLL Load from Spooler Service backup folder
+references:
+    - https://github.com/hhlxf/PrintNightmare
+    - https://nvd.nist.gov/vuln/detail/cve-2021-1675
+    - https://nvd.nist.gov/vuln/detail/cve-2021-34527
+author: FPT.EagleEye, Thomas Patzke (improvements)
+date: 2021/06/29
+modified: 2021/08/24
+tags:
+    - attack.persistence
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1574
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        Image|endswith: 'spoolsv.exe'
+        ImageLoaded|contains: '\Windows\System32\spool\drivers\x64\3\'
+        ImageLoaded|endswith: '.dll'
+    condition: selection
+falsepositives:
+    - Loading of legitimate driver
+level: informational

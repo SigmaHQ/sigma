@@ -1,0 +1,27 @@
+title: Remote Code Execute via Winrm.vbs
+id: 9df0dd3a-1a5c-47e3-a2bc-30ed177646a0
+description: Detects an attempt to execute code or create service on remote host via winrm.vbs.
+status: experimental
+references:
+    - https://twitter.com/bohops/status/994405551751815170
+    - https://redcanary.com/blog/lateral-movement-winrm-wmi/
+author: Julia Fomina, oscd.community
+date: 2020/10/07
+tags:
+    - attack.defense_evasion
+    - attack.t1216
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\cscript.exe'
+        CommandLine|contains|all:
+            - 'winrm'
+            - 'invoke Create wmicimv2/Win32_'
+            - '-r:http'
+    condition: selection
+level: medium
+falsepositives:
+    - Legitimate use for administartive purposes. Unlikely
+    

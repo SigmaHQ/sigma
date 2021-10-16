@@ -1,0 +1,42 @@
+title: Webshell Recon Detection Via CommandLine & Processes
+id: f64e5c19-879c-4bae-b471-6d84c8339677
+status: experimental
+description: Looking for processes spawned by web server components that indicate reconnaissance by popular public domain webshells for whether perl, python or wget are installed.
+author: Cian Heasley
+references:
+    - https://ragged-lab.blogspot.com/2020/07/webshells-automating-reconnaissance.html
+date: 2020/07/22
+tags:
+    - attack.persistence
+    - attack.t1505.003
+    - attack.privilege_escalation       # an old one
+    - attack.t1100      # an old one
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - ParentImage|contains:
+            - '\apache'
+            - '\tomcat'
+        - ParentImage|endswith:
+            - '\w3wp.exe'
+            - '\php-cgi.exe'
+            - '\nginx.exe'
+            - '\httpd.exe'
+    selection2:
+        Image|endswith:
+            - '\cmd.exe'
+        CommandLine|contains:
+            - 'perl --help'
+            - 'python --help'
+            - 'wget --help'
+            - 'perl -h'
+    condition: selection and selection2
+fields:
+    - Image
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - unknown
+level: high

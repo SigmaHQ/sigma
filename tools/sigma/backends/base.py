@@ -18,7 +18,9 @@ import sys
 
 import sigma
 import yaml
+import re
 
+from sigma.backends.exceptions import NotSupportedError
 from .mixins import RulenameCommentMixin, QuoteCharMixin
 from sigma.parser.modifiers.base import SigmaTypeModifier
 
@@ -90,6 +92,7 @@ class BaseBackend:
     options = tuple()     # a list of tuples with following elements: option name, default value, help text, target attribute name (option name if None)
     config_required = True
     default_config = None
+    mapExpression = ""
 
     def __init__(self, sigmaconfig, backend_options=dict()):
         """
@@ -111,6 +114,8 @@ class BaseBackend:
 
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
+        if len(sigmaparser.condparsed) > 1:
+            raise NotImplementedError("Base backend doesn't support multiple conditions")
         for parsed in sigmaparser.condparsed:
             query = self.generateQuery(parsed)
             before = self.generateBefore(parsed)
@@ -130,31 +135,55 @@ class BaseBackend:
         result = self.generateNode(parsed.parsedSearch)
         if parsed.parsedAgg:
             result += self.generateAggregation(parsed.parsedAgg)
+        #result = self.applyOverrides(result)
         return result
+
+    def applyOverrides(self, query):
+        try:
+            if 'overrides' in self.sigmaconfig.config and isinstance(query, str):
+                for expression in self.sigmaconfig.config['overrides']:
+                    if 'regexes' in expression:
+                        for x in expression['regexes']:
+                            sub = expression['field']
+                            value = expression['value']
+                            query = re.sub(x, self.mapExpression % (sub, value), query)
+                    if 'literals' in expression:
+                        for x in expression['literals']:
+                            sub = expression['field']
+                            value = expression['value']
+                            query = query.replace(x, self.mapExpression % (sub, value))
+        except Exception:
+            pass
+        return query
 
     def generateNode(self, node):
         if type(node) == sigma.parser.condition.ConditionAND:
-            return self.generateANDNode(node)
+            return self.applyOverrides(self.generateANDNode(node))
         elif type(node) == sigma.parser.condition.ConditionOR:
-            return self.generateORNode(node)
+            return self.applyOverrides(self.generateORNode(node))
         elif type(node) == sigma.parser.condition.ConditionNOT:
-            return self.generateNOTNode(node)
+            return self.applyOverrides(self.generateNOTNode(node))
         elif type(node) == sigma.parser.condition.ConditionNULLValue:
-            return self.generateNULLValueNode(node)
+            return self.applyOverrides(self.generateNULLValueNode(node))
         elif type(node) == sigma.parser.condition.ConditionNotNULLValue:
-            return self.generateNotNULLValueNode(node)
+            return self.applyOverrides(self.generateNotNULLValueNode(node))
         elif type(node) == sigma.parser.condition.NodeSubexpression:
-            return self.generateSubexpressionNode(node)
+            return self.applyOverrides(self.generateSubexpressionNode(node))
+        elif type(node) == sigma.parser.condition.SigmaSearchValueAsIs:
+            return self.generateValueAsIsNode(node)
         elif type(node) == tuple:
-            return self.generateMapItemNode(node)
+            return self.applyOverrides(self.generateMapItemNode(node))
         elif type(node) in (str, int):
-            return self.generateValueNode(node)
+            return self.applyOverrides(self.generateValueNode(node))
         elif type(node) == list:
-            return self.generateListNode(node)
+            return self.applyOverrides(self.generateListNode(node))
         elif isinstance(node, SigmaTypeModifier):
-            return self.generateTypedValueNode(node)
+            return self.applyOverrides(self.generateTypedValueNode(node))
         else:
             raise TypeError("Node type %s was not expected in Sigma parse tree" % (str(type(node))))
+
+    def generateValueAsIsNode(self, node):
+        raise NotImplementedError("Node type not implemented for this backend")
 
     def generateANDNode(self, node):
         raise NotImplementedError("Node type not implemented for this backend")
@@ -224,6 +253,11 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
     sort_condition_lists = False        # Sort condition items for AND and OR conditions
 
+    def generateValueAsIsNode(self, node):
+        if type(node.value) is list:
+            return self.listExpression % (self.listSeparator.join(node.value))
+        return self.listExpression % node.value
+
     def generateANDNode(self, node):
         generated = [ self.generateNode(val) for val in node ]
         filtered = [ g for g in generated if g is not None ]
@@ -253,6 +287,10 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
     def generateSubexpressionNode(self, node):
         generated = self.generateNode(node.items)
+        if 'len'in dir(node.items): # fix the "TypeError: object of type 'NodeSubexpression' has no len()"
+            if len(node.items) == 1:
+                # A sub expression with length 1 is not a proper sub expression, no self.subExpression required
+                return generated
         if generated:
             return self.subExpression % generated
         else:
@@ -261,7 +299,11 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
     def generateListNode(self, node):
         if not set([type(value) for value in node]).issubset({str, int}):
             raise TypeError("List values must be strings or numbers")
-        return self.listExpression % (self.listSeparator.join([self.generateNode(value) for value in node]))
+        result = [self.generateNode(value) for value in node]
+        if len(result) == 1:
+            # A list with length 1 is not a proper list, no self.listExpression required
+            return result[0]
+        return self.listExpression % (self.listSeparator.join(result))
 
     def generateMapItemNode(self, node):
         fieldname, value = node

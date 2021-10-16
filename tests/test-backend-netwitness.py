@@ -67,7 +67,7 @@ done, pending = loop.run_until_complete(asyncio.wait(tasks))
 loop.close()
 print()
 
-# Check if sigmac runned successfully
+# Check if sigmac ran successfully
 try:
     if task_sigmac.result() != 0:       # sigmac failed
         print("!!! sigmac failed while test!")

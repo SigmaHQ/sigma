@@ -1,0 +1,28 @@
+title: PowerShell Downgrade Attack
+id: 6331d09b-4785-4c13-980f-f96661356249
+status: experimental
+description: Detects PowerShell downgrade attack by comparing the host versions with the actually used engine version 2.0
+references:
+    - http://www.leeholmes.com/blog/2017/03/17/detecting-and-preventing-powershell-downgrade-attacks/
+tags:
+    - attack.defense_evasion
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1086  # an old one
+author: Florian Roth (rule), Lee Holmes (idea), Harish Segar (improvements)
+date: 2017/03/22
+logsource:
+    product: windows
+    service: powershell-classic
+    definition: fields have to be extract from event
+detection:
+    selection:
+        EventID: 400
+        EngineVersion|startswith: '2.'
+    filter:
+        HostVersion|startswith: '2.'
+    condition: selection and not filter
+falsepositives:
+    - Penetration Test
+    - Unknown
+level: medium

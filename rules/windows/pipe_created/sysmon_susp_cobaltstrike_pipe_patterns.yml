@@ -1,0 +1,60 @@
+title: CobaltStrike Named Pipe Patterns
+id: 85adeb13-4fc9-4e68-8a4a-c7cb2c336eb7
+status: experimental
+description: Detects the creation of a named pipe with a pattern found in CobaltStrike malleable C2 profiles
+references:
+    - https://svch0st.medium.com/guide-to-named-pipes-and-hunting-for-cobalt-strike-pipes-dc46b2c5f575
+    - https://gist.github.com/MHaggis/6c600e524045a6d49c35291a21e10752
+date: 2021/07/30
+modified: 2021/08/26
+author: Florian Roth, Christian Burkard
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1055
+logsource:
+   product: windows
+   category: pipe_created
+   definition: 'Note that you have to configure logging for Named Pipe Events in Sysmon config (Event ID 17 and Event ID 18). In the current popular sysmon configuration (https://github.com/SwiftOnSecurity/sysmon-config) this is not there, you have to add it yourself or use this extended version that logs the Named Pipes used in this Sigma repo (https://github.com/Neo23x0/sysmon-config)'
+detection:
+   selection_malleable_profiles:
+      - PipeName|startswith:
+         - '\mojo.5688.8052.183894939787088877'
+         - '\mojo.5688.8052.35780273329370473'
+         - '\mypipe-f'
+         - '\mypipe-h'
+         - '\ntsvcs'
+         - '\scerpc'
+         - '\win_svc'
+         - '\spoolss'
+         - '\msrpc_'
+         - '\win\msrpc_'
+         - '\wkssvc'
+         - '\f53f'
+         - '\windows.update.manager'
+         - '\SearchTextHarvester'
+         - '\DserNamePipe'
+         - '\PGMessagePipe'
+         - '\MsFteWds'
+         - '\f4c3'
+         - '\fullduplex_'
+         - '\rpc_'
+      - PipeName:
+         - '\demoagent_11'
+         - '\demoagent_22'
+   selection_malleable_profile_CatalogChangeListener:
+      PipeName|startswith: '\Winsock2\CatalogChangeListener-'
+      PipeName|endswith: '-0,'
+   filter:
+      PipeName:
+         - '\wkssvc'
+         - '\spoolss'
+         - '\scerpc'
+         - '\ntsvcs'
+         - '\SearchTextHarvester'
+         - '\PGMessagePipe'
+         - '\MsFteWds'
+   condition: 1 of selection_malleable_profile* and not filter
+falsepositives:
+   - Chrome instances using the exactly same name pipe named mojo.something
+level: high

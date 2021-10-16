@@ -1,0 +1,29 @@
+title: Renamed PAExec
+id: c4e49831-1496-40cf-8ce1-b53f942b02f9
+status: experimental
+description: Detects suspicious renamed PAExec execution as often used by attackers
+references:
+    - https://www.poweradmin.com/paexec/
+author: Florian Roth
+date: 2021/05/22
+modified: 2021/07/06
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Description: 'PAExec Application'
+    selection2:
+        OriginalFileName: 'PAExec.exe'
+    filter:
+        Image|endswith: 
+            - '\PAexec.exe'
+            - '\paexec.exe'
+    condition: ( selection1 or selection2 ) and not filter
+falsepositives:
+    - Weird admins that rename their tools
+    - Software companies that bundle PAExec with their software and rename it, so that it is less embarrassing 
+level: high
+tags:
+    - attack.defense_evasion 
+    - attack.t1202 

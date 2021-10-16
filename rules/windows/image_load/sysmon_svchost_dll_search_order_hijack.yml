@@ -1,0 +1,36 @@
+title: Svchost DLL Search Order Hijack
+id: 602a1f13-c640-4d73-b053-be9a2fa58b77
+status: experimental
+description: IKEEXT and SessionEnv service, as they call LoadLibrary on files that do not exist within C:\Windows\System32\ by default. An attacker can place their
+    malicious logic within the PROCESS_ATTACH block of their library and restart the aforementioned services "svchost.exe -k netsvcs" to gain code execution on a
+    remote machine.
+references:
+    - https://posts.specterops.io/lateral-movement-scm-and-dll-hijacking-primer-d2f61e8ab992
+author: SBousseaden
+date: 2019/10/28
+modified: 2020/08/23
+tags:
+    - attack.persistence
+    - attack.defense_evasion
+    - attack.t1073          # an old one
+    - attack.t1574.002
+    - attack.t1038          # an old one
+    - attack.t1574.001
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\svchost.exe'
+        ImageLoaded|endswith:
+            - '\tsmsisrv.dll'
+            - '\tsvipsrv.dll'
+            - '\wlbsctrl.dll'
+    filter:
+        ImageLoaded|startswith:
+            - 'C:\Windows\WinSxS\'
+    condition: selection and not filter
+falsepositives:
+    - Pentest
+level: high

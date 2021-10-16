@@ -1,0 +1,84 @@
+title: Disabling Security Tools
+id: e3a8a052-111f-4606-9aee-f28ebeb76776
+status: experimental
+description: Detects disabling security tools
+author: Ömer Günal, Alejandro Ortuno, oscd.community
+date: 2020/06/17
+modified: 2021/09/14
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1562.004/T1562.004.md
+tags:
+    - attack.defense_evasion
+    - attack.t1562.004
+    - attack.t1089 # an old one
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    iptables_1:
+        Image|endswith: '/service'
+        CommandLine|contains|all:
+          - 'iptables'
+          - 'stop'
+    iptables_2:
+        Image|endswith: '/service'
+        CommandLine|contains|all:
+          - 'ip6tables'
+          - 'stop'
+    iptables_3:
+        Image|endswith: '/chkconfig'
+        CommandLine|contains|all:
+          - 'iptables'
+          - 'stop'
+    iptables_4:
+        Image|endswith: '/chkconfig'
+        CommandLine|contains|all:
+          - 'ip6tables'
+          - 'stop'
+    firewall_1:
+        Image|endswith: '/systemctl'
+        CommandLine|contains|all:
+          - 'firewalld'
+          - 'stop'
+    firewall_2:
+        Image|endswith: '/systemctl'
+        CommandLine|contains|all:
+          - 'firewalld'
+          - 'disable'
+    carbonblack_1:
+        Image|endswith: '/service'
+        CommandLine|contains|all:
+          - 'cbdaemon'
+          - 'stop'
+    carbonblack_2:
+        Image|endswith: '/chkconfig'
+        CommandLine|contains|all:
+          - 'cbdaemon'
+          - 'off'
+    carbonblack_3:
+        Image|endswith: '/systemctl'
+        CommandLine|contains|all:
+          - 'cbdaemon'
+          - 'stop'
+    carbonblack_4:
+        Image|endswith: '/systemctl'
+        CommandLine|contains|all:
+          - 'cbdaemon'
+          - 'disable'
+    selinux:
+        Image|endswith: '/setenforce'
+        CommandLine|contains: '0'
+    crowdstrike_1:
+        Image|endswith: '/systemctl'
+        CommandLine|contains|all:
+          - 'stop'
+          - 'falcon-sensor'
+    crowdstrike_2:
+        Image|endswith: '/systemctl'
+        CommandLine|contains|all:
+          - 'disable'
+          - 'falcon-sensor'
+    condition: 1 of them
+falsepositives:
+    - Legitimate administration activities
+level: medium

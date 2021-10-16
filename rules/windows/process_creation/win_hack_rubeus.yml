@@ -8,22 +8,29 @@ date: 2018/12/19
 tags:
     - attack.credential_access
     - attack.t1003
-    - attack.s0005
+    - attack.t1558.003
+    - attack.t1558  # an old one
+    - attack.lateral_movement 
+    - attack.t1550.003
+    - attack.t1097  # an old one
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
-        CommandLine:
-            - '* asreproast *'
-            - '* dump /service:krbtgt *'
-            - '* kerberoast *'
-            - '* createnetonly /program:*'
-            - '* ptt /ticket:*'
-            - '* /impersonateuser:*'
-            - '* renew /ticket:*'
-            - '* asktgt /user:*'
-            - '* harvest /interval:*'
+        CommandLine|contains:
+            - ' asreproast '
+            - ' dump /service:krbtgt '
+            - ' kerberoast '
+            - ' createnetonly /program:'
+            - ' ptt /ticket:'
+            - ' /impersonateuser:'
+            - ' renew /ticket:'
+            - ' asktgt /user:'
+            - ' harvest /interval:'
+            - ' s4u /user:'
+            - ' s4u /ticket:'
+            - ' hash /password:'
     condition: selection
 falsepositives:
     - unlikely

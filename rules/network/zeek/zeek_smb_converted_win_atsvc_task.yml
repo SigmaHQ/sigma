@@ -1,0 +1,26 @@
+title: Remote Task Creation via ATSVC Named Pipe - Zeek
+id: dde85b37-40cd-4a94-b00c-0b8794f956b5
+description: Detects remote task creation via at.exe or API interacting with ATSVC namedpipe
+author: 'Samir Bousseaden, @neu5rn'
+date: 2020/04/03
+references:
+    - https://github.com/neo23x0/sigma/blob/d42e87edd741dd646db946f30964f331f92f50e6/rules/windows/builtin/win_atsvc_task.yml
+tags:
+    - attack.lateral_movement
+    - attack.persistence
+    - attack.t1053 # an old one
+    - car.2013-05-004
+    - car.2015-04-001
+    - attack.t1053.002
+logsource:
+    product: zeek
+    service: smb_files
+detection:
+    selection:
+        path: \\*\IPC$
+        name: atsvc
+        #Accesses: '*WriteData*'
+    condition: selection
+falsepositives:
+    - unknown
+level: medium

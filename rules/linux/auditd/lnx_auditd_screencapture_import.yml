@@ -1,0 +1,37 @@
+title: Screen Capture with Import Tool
+id: dbe4b9c5-c254-4258-9688-d6af0b7967fd
+description: Detects adversary creating screen capture of a desktop with Import Tool. Highly recommended using rule on servers, due to high usage of screenshot utilities on user workstations. ImageMagick must be installed.
+author: 'Pawel Mazur'
+status: experimental
+date: 2021/09/21
+references:
+   - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1113/T1113.md
+   - https://attack.mitre.org/techniques/T1113/
+   - https://linux.die.net/man/1/import
+   - https://imagemagick.org/
+logsource:
+   product: linux
+   service: auditd
+detection:
+   import:
+       type: EXECVE
+       a0: import
+   import_window_root:
+       a1: '-window'
+       a2: 'root'
+       a3|endswith:
+         - '.png'
+         - '.jpg'
+         - '.jpeg'
+   import_no_window_root:
+       a1|endswith:
+         - '.png'
+         - '.jpg'
+         - '.jpeg'
+   condition: import and (import_window_root or import_no_window_root)
+tags:
+   - attack.collection
+   - attack.t1113
+falsepositives:
+   - Legitimate use of screenshot utility
+level: low

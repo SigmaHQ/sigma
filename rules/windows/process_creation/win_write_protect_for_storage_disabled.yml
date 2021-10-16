@@ -1,0 +1,20 @@
+title: Write Protect For Storage Disabled
+id: 75f7a0e2-7154-4c4d-9eae-5cdb4e0a5c13
+description: Looks for changes to registry to disable any write-protect property for storage devices. This could be a precursor to a ransomware attack and has been an observed technique used by cypherpunk group.
+status: experimental
+author: Sreeman
+date: 2021/06/11
+modified: 2021/06/11
+tags:
+    - attack.defense_evasion
+    - attack.t1562
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        CommandLine|re: '(?i).*reg add.*hklm\\\\system\\\\currentcontrolset\\\\control.*(storage|storagedevicepolicies).*write protection.*0.*'
+    condition: selection
+falsepositives:
+    - none observed
+level: medium

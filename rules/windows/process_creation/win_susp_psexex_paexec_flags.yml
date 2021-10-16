@@ -1,0 +1,37 @@
+title: PsExec/PAExec Flags 
+id: 207b0396-3689-42d9-8399-4222658efc99
+status: experimental
+description: Detects suspicious flags used by PsExec and PAExec but no usual program name in command line
+references:
+    - https://docs.microsoft.com/en-us/sysinternals/downloads/psexec
+    - https://www.poweradmin.com/paexec/
+    - https://www.fireeye.com/blog/threat-research/2020/10/kegtap-and-singlemalt-with-a-ransomware-chaser.html
+author: Florian Roth
+date: 2021/05/22
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_flags_1: # Escalation to LOCAL_SYSTEM
+        CommandLine|contains|all: 
+            - '\\127.0.0.1'
+            - ' -s '
+            - 'cmd.exe'
+    selection_flags_2:
+        CommandLine|contains|all: # Accepting EULA in commandline - often used in automated attacks
+            - ' /accepteula '
+            - 'cmd /c '
+            - ' -u '
+            - ' -p '
+    filter:
+        CommandLine|contains: 
+            - 'paexec'
+            - 'PsExec'
+    condition: ( selection_flags_1 or selection_flags_2 ) and not filter
+falsepositives:
+    - Weird admins that rename their tools
+    - Software companies that bundle PsExec/PAExec with their software and rename it, so that it is less embarrassing 
+level: high
+tags:
+    - attack.develop_capabilities
+    - attack.t1587.001

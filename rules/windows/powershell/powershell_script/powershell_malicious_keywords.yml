@@ -1,0 +1,45 @@
+title: Malicious PowerShell Keywords
+id: f62176f3-8128-4faa-bf6c-83261322e5eb
+status: experimental
+description: Detects keywords from well-known PowerShell exploitation frameworks
+references:
+    - https://adsecurity.org/?p=2921
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1086  #an old one
+author: Sean Metcalf (source), Florian Roth (rule)
+date: 2017/03/05
+modified: 2021/08/21
+logsource:
+    product: windows
+    service: powershell
+    definition: 'It is recommended to use the new "Script Block Logging" of PowerShell v5 https://adsecurity.org/?p=2277'
+detection:
+    Malicious:
+        EventID: 4104
+        ScriptBlockText|contains:
+            - "AdjustTokenPrivileges"
+            - "IMAGE_NT_OPTIONAL_HDR64_MAGIC"
+            - "Microsoft.Win32.UnsafeNativeMethods"
+            - "ReadProcessMemory.Invoke"
+            - "SE_PRIVILEGE_ENABLED"
+            - "LSA_UNICODE_STRING"
+            - "MiniDumpWriteDump"
+            - "PAGE_EXECUTE_READ"
+            - "SECURITY_DELEGATION"
+            - "TOKEN_ADJUST_PRIVILEGES"
+            - "TOKEN_ALL_ACCESS"
+            - "TOKEN_ASSIGN_PRIMARY"
+            - "TOKEN_DUPLICATE"
+            - "TOKEN_ELEVATION"
+            - "TOKEN_IMPERSONATE"
+            - "TOKEN_INFORMATION_CLASS"
+            - "TOKEN_PRIVILEGES"
+            - "TOKEN_QUERY"
+            - "Metasploit"
+            - "Mimikatz"
+    condition: Malicious
+falsepositives:
+    - Penetration tests
+level: high

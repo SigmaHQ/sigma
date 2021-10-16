@@ -1,0 +1,32 @@
+title: Alternate PowerShell Hosts
+id: d7326048-328b-4d5e-98af-86e84b17c765
+related:
+     - id: 64e8e417-c19a-475a-8d19-98ea705394cc
+       type: derived
+description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
+status: test
+date: 2019/08/11
+modified: 2021/09/21
+author: Roberto Rodriguez @Cyb3rWard0g
+references:
+    - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190815181010.html
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1086  # an old one
+logsource:
+    product: windows
+    service: powershell-classic
+    definition: fields have to be extract from event
+detection:
+    selection:
+        EventID: 400
+        HostApplication: '*'
+    filter:
+        HostApplication|startswith: 'C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe'
+    condition: selection and not filter
+falsepositives:
+    - Programs using PowerShell directly without invocation of a dedicated interpreter
+    - MSP Detection Searcher
+    - Citrix ConfigSync.ps1
+level: medium 

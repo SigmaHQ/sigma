@@ -1,0 +1,29 @@
+title: AWS ElastiCache Security Group Modified or Deleted
+id: 7c797da2-9cf2-4523-ba64-33b06339f0cc
+description: Identifies when an ElastiCache security group has been modified or deleted.
+author: Austin Songer @austinsonger
+status: experimental
+date: 2021/07/24
+modified: 2021/08/19
+references:
+    - https://github.com/elastic/detection-rules/blob/7d5efd68603f42be5e125b5a6a503b2ef3ac0f4e/rules/integrations/aws/impact_elasticache_security_group_modified_or_deleted.toml
+logsource:
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: elasticache.amazonaws.com
+        eventName: 
+            - "DeleteCacheSecurityGroup"
+            - "AuthorizeCacheSecurityGroupIngress"
+            - "RevokeCacheSecurityGroupIngress"
+            - "AuthorizeCacheSecurityGroupEgress"
+            - "RevokeCacheSecurityGroupEgress"
+    condition: selection
+level: low
+tags:
+    - attack.impact
+    - attack.t1531
+falsepositives:
+- A ElastiCache security group deletion may be done by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Security Group deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule.
+
+

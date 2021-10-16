@@ -1,0 +1,45 @@
+title: Suspicious Scripting in a WMI Consumer
+id: fe21810c-2a8c-478f-8dd3-5a287fb2a0e0
+status: experimental
+description: Detects suspicious scripting in WMI Event Consumers
+author: Florian Roth, Jonhnathan Ribeiro
+references:
+    - https://in.security/an-intro-into-abusing-and-identifying-wmi-event-subscriptions-for-persistence/
+    - https://github.com/Neo23x0/signature-base/blob/master/yara/gen_susp_lnk_files.yar#L19
+    - https://github.com/RiccardoAncarani/LiquidSnake
+date: 2019/04/15
+modified: 2021/09/01
+tags:
+    - attack.t1086          # an old one
+    - attack.execution
+    - attack.t1059.005
+logsource:
+    product: windows
+    category: wmi_event
+detection:
+    selection_destination:
+        - Destination|contains|all:
+              - 'new-object'
+              - 'net.webclient'
+              - '.downloadstring'
+        - Destination|contains|all:
+              - 'new-object'
+              - 'net.webclient'
+              - '.downloadfile'
+        - Destination|contains:
+              - ' iex('
+              - 'WScript.shell'
+              - ' -nop '
+              - ' -noprofile '
+              - ' -decode '
+              - ' -enc '
+        - Destination|contains:
+              - 'WScript.Shell'
+              - 'System.Security.Cryptography.FromBase64Transform'
+    condition: selection_destination
+fields:
+    - User
+    - Operation
+falsepositives:
+    - Administrative scripts
+level: high

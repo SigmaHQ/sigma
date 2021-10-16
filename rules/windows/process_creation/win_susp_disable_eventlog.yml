@@ -1,0 +1,33 @@
+title: Disable or Delete Windows Eventlog
+id: cd1f961e-0b96-436b-b7c6-38da4583ec00
+status: experimental
+description: Detects command that is used to disable or delete Windows eventlog via logman Windows utility
+references:
+    - https://twitter.com/0gtweet/status/1359039665232306183?s=21
+    - https://ss64.com/nt/logman.html
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+    - attack.t1070.001
+author: Florian Roth 
+date: 2021/02/11
+modified: 2021/06/21
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_tools:
+        CommandLine|contains:
+           - 'logman '
+    selection_action:
+        CommandLine|contains:
+            - 'stop '
+            - 'delete '
+    selection_service:
+        CommandLine|contains: 
+            - EventLog-System
+    condition: all of them
+falsepositives:
+    - Legitimate deactivation by administrative staff
+    - Installer tools that disable services, e.g. before log collection agent installation
+level: high

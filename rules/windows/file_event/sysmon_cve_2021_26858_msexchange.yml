@@ -1,0 +1,35 @@
+title: CVE-2021-26858 Exchange Exploitation
+id: b06335b3-55ac-4b41-937e-16b7f5d57dfd
+description: Detects possible successful exploitation for vulnerability described in CVE-2021-26858 by looking for |
+             creation of non-standard files on disk by Exchange Server’s Unified Messaging service |
+             which could indicate dropping web shells or other malicious content
+author: Bhabesh Raj
+status: experimental
+level: critical
+references:
+    - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-26858
+    - https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers/
+    - https://nvd.nist.gov/vuln/detail/cve-2021-26858
+date: 2021/03/03
+tags:
+    - attack.t1203
+    - attack.execution
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        Image|endswith: 'UMWorkerProcess.exe'
+    filter:
+        TargetFilename|endswith: 
+            - 'CacheCleanup.bin'
+            - '.txt'
+            - '.LOG'
+            - '.cfg'
+            - 'cleanup.bin'
+    condition: selection and not filter
+fields:
+    - ComputerName
+    - TargetFilename
+falsepositives:
+    - Unknown

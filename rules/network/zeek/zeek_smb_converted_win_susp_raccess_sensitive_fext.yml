@@ -1,0 +1,37 @@
+title: Suspicious Access to Sensitive File Extensions - Zeek
+id: 286b47ed-f6fe-40b3-b3a8-35129acd43bc
+description: Detects known sensitive file extensions via Zeek
+author: 'Samir Bousseaden, @neu5ron'
+date: 2020/04/02
+references: 
+  - https://github.com/neo23x0/sigma/blob/d42e87edd741dd646db946f30964f331f92f50e6/rules/windows/builtin/win_susp_raccess_sensitive_fext.yml
+tags:
+  - attack.collection
+logsource:
+  product: zeek
+  service: smb_files
+detection:
+  selection:
+    name|endswith:
+      - '.pst'
+      - '.ost'
+      - '.msg'
+      - '.nst'
+      - '.oab'
+      - '.edb'
+      - '.nsf'
+      - '.bak'
+      - '.dmp'
+      - '.kirbi'
+      - '\groups.xml'
+      - '.rdp'
+  condition: selection
+fields:
+    - ComputerName
+    - SubjectDomainName
+    - SubjectUserName
+    - RelativeTargetName
+falsepositives:
+    - Help Desk operator doing backup or re-imaging end user machine or pentest or backup software
+    - Users working with these data types or exchanging message files
+level: medium

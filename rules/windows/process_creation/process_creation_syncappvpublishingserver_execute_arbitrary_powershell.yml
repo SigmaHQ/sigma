@@ -1,0 +1,32 @@
+title: SyncAppvPublishingServer Execute Arbitrary PowerShell Code
+id: fbd7c32d-db2a-4418-b92c-566eb8911133
+related:
+    - id: fde7929d-8beb-4a4c-b922-be9974671667
+      type: obsoletes
+status: experimental
+author: frack113
+date: 2021/07/12
+modified: 2021/09/12
+description: Executes arbitrary PowerShell code using SyncAppvPublishingServer.exe.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1218/T1218.md
+    - https://lolbas-project.github.io/lolbas/Binaries/Syncappvpublishingserver/
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\SyncAppvPublishingServer.exe'
+        CommandLine|contains: '"n; '
+    condition: selection 
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - App-V clients
+level: medium

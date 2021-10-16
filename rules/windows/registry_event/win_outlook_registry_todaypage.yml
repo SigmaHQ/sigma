@@ -1,0 +1,30 @@
+title: Persistent Outlook Landing Pages
+id: 487bb375-12ef-41f6-baae-c6a1572b4dd1
+description: Detects the manipulation of persistent URLs which could execute malicious code
+status: experimental
+references:
+  - https://speakerdeck.com/heirhabarov/hunting-for-persistence-via-microsoft-exchange-server-or-outlook?slide=70
+author: Tobias Michalski
+date: 2021/06/10
+tags:
+  - attack.persistence
+  - attack.t1112
+logsource:
+  product: windows
+  category: registry_event
+detection:
+  selection1:
+    TargetObject|contains: 
+      - 'Software\Microsoft\Office\'
+      - '\Outlook\Today\'
+  selectionStamp:
+    TargetObject|endswith: Stamp
+    Details: DWORD (0x00000001) 
+  selectionUserDefined:
+    TargetObject|endswith: UserDefinedUrl
+  condition: selection1 and (selectionStamp or selectionUserDefined)
+fields:
+  - Details
+falsepositives:
+  - unknown
+level: high

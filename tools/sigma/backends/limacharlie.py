@@ -23,10 +23,15 @@ from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
 
 # A few helper functions for cases where field mapping cannot be done
 # as easily one by one, or can be done more efficiently.
-def _windowsEventLogFieldName(fieldName):
+def _windowsEventLogArtifactFieldName(fieldName):
     if 'EventID' == fieldName:
         return 'Event/System/EventID'
     return 'Event/EventData/%s' % (fieldName,)
+
+def _windowsEventLogEDRFieldName(fieldName):
+    if 'EventID' == fieldName:
+        return 'event/EVENT/System/EventID'
+    return 'event/EVENT/EventData/%s' % (fieldName,)
 
 def _mapProcessCreationOperations(node):
     # Here we fix some common pitfalls found in rules
@@ -44,6 +49,17 @@ def _mapProcessCreationOperations(node):
         del(node["value"])
 
     return node
+
+def _validateSubrules(elem):
+    # Make sure that all elements in the rules
+    # are actual operators. Otherwise this
+    # indicates the Sigma engine provided us
+    # with partial contextual information we
+    # cannot map to LimaCharlie data with
+    # any certainty.
+    for sub in elem.get( 'rules', [] ):
+        if not isinstance( sub, dict ):
+            raise NotImplementedError("Sub-rule does not contain an operator.")
 
 # We support many different log sources so we keep different mapping depending
 # on the log source and category.
@@ -63,134 +79,202 @@ SigmaLCConfig = namedtuple('SigmaLCConfig', [
     'isAllStringValues',
     'keywordField',
     'postOpMapper',
+    'isCaseSensitive',
 ])
 _allFieldMappings = {
-    "windows/process_creation/": SigmaLCConfig(
-        topLevelParams = {
-            "events": [
-                "NEW_PROCESS",
-                "EXISTING_PROCESS",
-            ]
-        },
-        preConditions = {
-            "op": "is windows",
-        },
-        fieldMappings = {
-            "CommandLine": "event/COMMAND_LINE",
-            "Image": "event/FILE_PATH",
-            "ParentImage": "event/PARENT/FILE_PATH",
-            "ParentCommandLine": "event/PARENT/COMMAND_LINE",
-            "User": "event/USER_NAME",
-            "OriginalFileName": "event/ORIGINAL_FILE_NAME",
-            # Custom field names coming from somewhere unknown.
-            "NewProcessName": "event/FILE_PATH",
-            "ProcessCommandLine": "event/COMMAND_LINE",
-            # Another one-off command line.
-            "Command": "event/COMMAND_LINE",
-        },
-        isAllStringValues = False,
-        keywordField = "event/COMMAND_LINE",
-        postOpMapper = _mapProcessCreationOperations
-    ),
-    "windows//": SigmaLCConfig(
-        topLevelParams = {
-            "target": "log",
-            "log type": "wel",
-        },
-        preConditions = None,
-        fieldMappings = _windowsEventLogFieldName,
-        isAllStringValues = True,
-        keywordField = None,
-        postOpMapper = None
-    ),
-    "windows_defender//": SigmaLCConfig(
-        topLevelParams = {
-            "target": "log",
-            "log type": "wel",
-        },
-        preConditions = None,
-        fieldMappings = _windowsEventLogFieldName,
-        isAllStringValues = True,
-        keywordField = None,
-        postOpMapper = None
-    ),
-    "dns//": SigmaLCConfig(
-        topLevelParams = {
-            "event": "DNS_REQUEST",
-        },
-        preConditions = None,
-        fieldMappings = {
-            "query": "event/DOMAIN_NAME",
-        },
-        isAllStringValues = False,
-        keywordField = None,
-        postOpMapper = None
-    ),
-    "linux//": SigmaLCConfig(
-        topLevelParams = {
-            "events": [
-                "NEW_PROCESS",
-                "EXISTING_PROCESS",
-            ]
-        },
-        preConditions = {
-            "op": "is linux",
-        },
-        fieldMappings = {
-            "exe": "event/FILE_PATH",
-            "type": None,
-        },
-        isAllStringValues = False,
-        keywordField = 'event/COMMAND_LINE',
-        postOpMapper = None
-    ),
-    "unix//": SigmaLCConfig(
-        topLevelParams = {
-            "events": [
-                "NEW_PROCESS",
-                "EXISTING_PROCESS",
-            ]
-        },
-        preConditions = {
-            "op": "is linux",
-        },
-        fieldMappings = {
-            "exe": "event/FILE_PATH",
-            "type": None,
-        },
-        isAllStringValues = False,
-        keywordField = 'event/COMMAND_LINE',
-        postOpMapper = None
-    ),
-    "netflow//": SigmaLCConfig(
-        topLevelParams = {
-            "event": "NETWORK_CONNECTIONS",
-        },
-        preConditions = None,
-        fieldMappings = {
-            "destination.port": "event/NETWORK_ACTIVITY/DESTINATION/PORT",
-            "source.port": "event/NETWORK_ACTIVITY/SOURCE/PORT",
-        },
-        isAllStringValues = False,
-        keywordField = None,
-        postOpMapper = None
-    ),
-    "/proxy/": SigmaLCConfig(
-        topLevelParams = {
-            "event": "HTTP_REQUEST",
-        },
-        preConditions = None,
-        fieldMappings = {
-            "c-uri|contains": "event/URL",
-            "c-uri": "event/URL",
-            "URL": "event/URL",
-            "cs-uri-query": "event/URL",
-            "cs-uri-stem": "event/URL",
-        },
-        isAllStringValues = False,
-        keywordField = None,
-        postOpMapper = None
-    ),
+    'edr': {
+        "windows//": SigmaLCConfig(
+            topLevelParams = {
+                "event": "WEL",
+            },
+            preConditions = {
+                "op": "is windows",
+            },
+            fieldMappings = _windowsEventLogEDRFieldName,
+            isAllStringValues = True,
+            keywordField = None,
+            postOpMapper = None,
+            isCaseSensitive = []
+        ),
+        "windows_defender//": SigmaLCConfig(
+            topLevelParams = {
+                "event": "WEL",
+            },
+            preConditions = {
+                "op": "is windows",
+            },
+            fieldMappings = _windowsEventLogEDRFieldName,
+            isAllStringValues = True,
+            keywordField = None,
+            postOpMapper = None,
+            isCaseSensitive = []
+        ),
+        "windows/process_creation/": SigmaLCConfig(
+            topLevelParams = {
+                "events": [
+                    "NEW_PROCESS",
+                    "EXISTING_PROCESS",
+                ]
+            },
+            preConditions = {
+                "op": "is windows",
+            },
+            fieldMappings = {
+                "CommandLine": "event/COMMAND_LINE",
+                "Image": "event/FILE_PATH",
+                "ParentImage": "event/PARENT/FILE_PATH",
+                "ParentCommandLine": "event/PARENT/COMMAND_LINE",
+                "User": "event/USER_NAME",
+                "OriginalFileName": "event/ORIGINAL_FILE_NAME",
+                # Custom field names coming from somewhere unknown.
+                "NewProcessName": "event/FILE_PATH",
+                "ProcessCommandLine": "event/COMMAND_LINE",
+                # Another one-off command line.
+                "Command": "event/COMMAND_LINE",
+            },
+            isAllStringValues = False,
+            keywordField = "event/COMMAND_LINE",
+            postOpMapper = _mapProcessCreationOperations,
+            isCaseSensitive = []
+        ),
+        "dns//": SigmaLCConfig(
+            topLevelParams = {
+                "event": "DNS_REQUEST",
+            },
+            preConditions = None,
+            fieldMappings = {
+                "query": "event/DOMAIN_NAME",
+            },
+            isAllStringValues = False,
+            keywordField = None,
+            postOpMapper = None,
+            isCaseSensitive = []
+        ),
+        "linux//": SigmaLCConfig(
+            topLevelParams = {
+                "events": [
+                    "NEW_PROCESS",
+                    "EXISTING_PROCESS",
+                ]
+            },
+            preConditions = {
+                "op": "is linux",
+            },
+            fieldMappings = {
+                "exe": "event/FILE_PATH",
+                "type": None,
+            },
+            isAllStringValues = False,
+            keywordField = 'event/COMMAND_LINE',
+            postOpMapper = None,
+            isCaseSensitive = ['event/FILE_PATH']
+        ),
+        "unix//": SigmaLCConfig(
+            topLevelParams = {
+                "events": [
+                    "NEW_PROCESS",
+                    "EXISTING_PROCESS",
+                ]
+            },
+            preConditions = {
+                "op": "is linux",
+            },
+            fieldMappings = {
+                "exe": "event/FILE_PATH",
+                "type": None,
+            },
+            isAllStringValues = False,
+            keywordField = 'event/COMMAND_LINE',
+            postOpMapper = None,
+            isCaseSensitive = ['event/FILE_PATH']
+        ),
+        "netflow//": SigmaLCConfig(
+            topLevelParams = {
+                "event": "NETWORK_CONNECTIONS",
+            },
+            preConditions = None,
+            fieldMappings = {
+                "destination.port": "event/NETWORK_ACTIVITY/DESTINATION/PORT",
+                "source.port": "event/NETWORK_ACTIVITY/SOURCE/PORT",
+            },
+            isAllStringValues = False,
+            keywordField = None,
+            postOpMapper = None,
+            isCaseSensitive = []
+        ),
+        "/proxy/": SigmaLCConfig(
+            topLevelParams = {
+                "event": "HTTP_REQUEST",
+            },
+            preConditions = None,
+            fieldMappings = {
+                "c-uri|contains": "event/URL",
+                "c-uri": "event/URL",
+                "URL": "event/URL",
+                "cs-uri-query": "event/URL",
+                "cs-uri-stem": "event/URL",
+            },
+            isAllStringValues = False,
+            keywordField = None,
+            postOpMapper = None,
+            isCaseSensitive = []
+        ),
+        "macos/process_creation/": SigmaLCConfig(
+            topLevelParams = {
+                "events": [
+                    "NEW_PROCESS",
+                    "EXISTING_PROCESS",
+                ]
+            },
+            preConditions = {
+                "op": "is mac",
+            },
+            fieldMappings = {
+                "CommandLine": "event/COMMAND_LINE",
+                "Commandline": "event/COMMAND_LINE",
+                "Image": "event/FILE_PATH",
+                "ParentImage": "event/PARENT/FILE_PATH",
+                "ParentCommandLine": "event/PARENT/COMMAND_LINE",
+                "User": "event/USER_NAME",
+                "OriginalFileName": "event/ORIGINAL_FILE_NAME",
+                # Custom field names coming from somewhere unknown.
+                "NewProcessName": "event/FILE_PATH",
+                "ProcessCommandLine": "event/COMMAND_LINE",
+                # Another one-off command line.
+                "Command": "event/COMMAND_LINE",
+            },
+            isAllStringValues = False,
+            keywordField = "event/COMMAND_LINE",
+            postOpMapper = _mapProcessCreationOperations,
+            isCaseSensitive = ['event/FILE_PATH']
+        ),
+    },
+    "artifact": {
+        "windows//": SigmaLCConfig(
+            topLevelParams = {
+                "target": "log",
+                "log type": "wel",
+            },
+            preConditions = None,
+            fieldMappings = _windowsEventLogArtifactFieldName,
+            isAllStringValues = True,
+            keywordField = None,
+            postOpMapper = None,
+            isCaseSensitive = []
+        ),
+        "windows_defender//": SigmaLCConfig(
+            topLevelParams = {
+                "target": "log",
+                "log type": "wel",
+            },
+            preConditions = None,
+            fieldMappings = _windowsEventLogArtifactFieldName,
+            isAllStringValues = True,
+            keywordField = None,
+            postOpMapper = None,
+            isCaseSensitive = []
+        ),
+    }
 }
 
 class LimaCharlieBackend(BaseBackend):
@@ -199,6 +283,15 @@ class LimaCharlieBackend(BaseBackend):
     active = True
     config_required = False
     default_config = ["limacharlie"]
+
+    options = (
+        (
+            "lc_target",
+            "edr",
+            "Generate LimaCharlie D&R rules for the following target, one of: edr, artifact.",
+            None,
+        ),
+    )
 
     def generate(self, sigmaparser):
         # Take the log source information and figure out which set of mappings to use.
@@ -217,6 +310,11 @@ class LimaCharlieBackend(BaseBackend):
         # except KeyError:
         #     service = ""
 
+        # If there is a timeframe component, we do not currently
+        # support it for now.
+        if ruleConfig.get( 'detection', {} ).get( 'timeframe', None ) is not None:
+            raise NotImplementedError("Timeframes are not supported by backend.")
+
         # Don't use service for now, most Windows Event Logs
         # uses a different service with no category, since we
         # treat all Windows Event Logs together we can ignore
@@ -225,7 +323,7 @@ class LimaCharlieBackend(BaseBackend):
 
         # See if we have a definition for the source combination.
         mappingKey = "%s/%s/%s" % (product, category, service)
-        topFilter, preCond, mappings, isAllStringValues, keywordField, postOpMapper = _allFieldMappings.get(mappingKey, tuple([None, None, None, None, None, None]))
+        topFilter, preCond, mappings, isAllStringValues, keywordField, postOpMapper, isCaseSensitive = _allFieldMappings.get(self.lc_target, {}).get(mappingKey, tuple([None, None, None, None, None, None, None]))
         if mappings is None:
             raise NotImplementedError("Log source %s/%s/%s not supported by backend." % (product, category, service))
 
@@ -243,6 +341,9 @@ class LimaCharlieBackend(BaseBackend):
 
         # Call to fixup all operations after the fact.
         self._postOpMapper = postOpMapper
+
+        # Event paths that are case sensitive.
+        self._isCaseSensitiveFS = isCaseSensitive
 
         # Call the original generation code.
         detectComponent = super().generate(sigmaparser)
@@ -313,6 +414,7 @@ class LimaCharlieBackend(BaseBackend):
                     result,
                 ]
             }
+            _validateSubrules(result)
             if self._postOpMapper is not None:
                 result = self._postOpMapper(result)
         return yaml.safe_dump(result)
@@ -334,6 +436,7 @@ class LimaCharlieBackend(BaseBackend):
             "op": "and",
             "rules": filtered,
         }
+        _validateSubrules(result)
         if self._postOpMapper is not None:
             result = self._postOpMapper(result)
         return result
@@ -355,6 +458,7 @@ class LimaCharlieBackend(BaseBackend):
             "op": "or",
             "rules": filtered,
         }
+        _validateSubrules(result)
         if self._postOpMapper is not None:
             result = self._postOpMapper(result)
         return result
@@ -406,7 +510,7 @@ class LimaCharlieBackend(BaseBackend):
             newOp = {
                 "op": op,
                 "path": fieldname,
-                "case sensitive": False,
+                "case sensitive": fieldname in self._isCaseSensitiveFS,
             }
             if op == "matches":
                 newOp["re"] = newVal
@@ -424,7 +528,7 @@ class LimaCharlieBackend(BaseBackend):
                 newOp = {
                     "op": op,
                     "path": fieldname,
-                    "case sensitive": False,
+                    "case sensitive": fieldname in self._isCaseSensitiveFS,
                 }
                 if op == "matches":
                     newOp["re"] = newVal
@@ -588,7 +692,7 @@ class LimaCharlieBackend(BaseBackend):
                 raise NotImplementedError("Full-text keyboard searches not supported.")
 
             # This seems to be indicative only of "keywords" which are mostly
-            # representative of full-text searches. We don't suport that but
+            # representative of full-text searches. We don't support that but
             # in some data sources we can alias them to an actual field.
             op, newVal = self._valuePatternToLcOp(val)
             newOp = {

@@ -1,0 +1,30 @@
+title: Zip A Folder With PowerShell For Staging In Temp
+id: 71ff406e-b633-4989-96ec-bc49d825a412
+related:
+    - id: b7a3c9a3-09ea-4934-8864-6a32cacd98d9
+      type: derived
+status: experimental
+author: frack113
+date: 2021/07/20
+modified: 2021/09/07
+description: Use living off the land tools to zip a file and stage it in the Windows temporary folder for later exfiltration
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1074.001/T1074.001.md
+tags:
+    - attack.collection
+    - attack.t1074.001
+logsource:
+    product: windows
+    service: powershell-classic
+    definition: fields have to be extract from event
+detection:
+    selection:
+        HostApplication|contains|all:
+            - 'Compress-Archive '
+            - ' -Path '
+            - ' -DestinationPath '
+            - '$env:TEMP\'
+    condition: selection 
+falsepositives:
+    - Unknown
+level: medium

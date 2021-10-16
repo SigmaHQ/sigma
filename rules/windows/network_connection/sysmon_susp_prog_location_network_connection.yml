@@ -1,0 +1,36 @@
+title: Suspicious Program Location with Network Connections
+id: 7b434893-c57d-4f41-908d-6a17bf1ae98f
+status: experimental
+description: Detects programs with network connections running in suspicious files system locations
+references:
+    - https://docs.google.com/spreadsheets/d/17pSTDNpa0sf6pHeRhusvWG6rThciE8CsXTSlDUAZDyo
+author: Florian Roth
+date: 2017/03/19
+logsource:
+    category: network_connection
+    product: windows
+    definition: 'Use the following config to generate the necessary Event ID 3 Network Connection events'
+detection:
+    selection:
+        - Image|contains: 
+            # - '\ProgramData\\'  # too many false positives, e.g. with Webex for Windows
+            - '\Users\All Users\'
+            - '\Users\Default\'
+            - '\Users\Public\'
+            - '\Users\Contacts\'
+            - '\Users\Searches\'
+            - '\config\systemprofile\'
+            - '\Windows\Fonts\'
+            - '\Windows\IME\'
+            - '\Windows\addins\'
+        - Image|endswith:
+            - '\$Recycle.bin'
+        - Image|startswith:
+            - 'C:\Perflogs\'
+    condition: selection
+falsepositives:
+    - unknown
+level: high
+tags:
+    - attack.command_and_control
+    - attack.t1105 

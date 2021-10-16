@@ -1,0 +1,35 @@
+title: Typical HiveNightmare SAM File Export
+id: 6ea858a8-ba71-4a12-b2cc-5d83312404c7
+status: experimental
+description: Detects files written by the different tools that exploit HiveNightmare
+author: Florian Roth
+date: 2021/07/23
+references:
+    - https://github.com/GossiTheDog/HiveNightmare
+    - https://github.com/FireFart/hivenightmare/
+    - https://github.com/WiredPulse/Invoke-HiveNightmare
+    - https://twitter.com/cube0x0/status/1418920190759378944
+    - https://nvd.nist.gov/vuln/detail/cve-2021-36934
+logsource:
+    product: windows
+    category: file_event
+tags:
+    - attack.credential_access
+    - attack.t1552.001
+detection:
+    selection:
+        - TargetFilename|contains: 
+            - '\hive_sam_'  # Go version
+            - '\SAM-2021-'  # C++ version
+            - '\SAM-2022-'  # C++ version
+            - '\SAM-haxx'   # Early C++ versions
+            - '\Sam.save'   # PowerShell version
+        - TargetFilename: 
+            - 'C:\windows\temp\sam'  # C# version of HiveNightmare
+    condition: selection
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Files that accidentally contain these strings 
+level: high

@@ -1,0 +1,31 @@
+title: Suspicious PowerShell Mailbox Export to Share
+id: 889719ef-dd62-43df-86c3-768fb08dc7c0
+status: experimental
+description: Detects a PowerShell New-MailboxExportRequest that exports a mailbox to a local share, as used in ProxyShell exploitations
+references:
+    - https://youtu.be/5mqid-7zp8k?t=2481
+    - https://blog.orange.tw/2021/08/proxylogon-a-new-attack-surface-on-ms-exchange-part-1.html
+    - https://peterjson.medium.com/reproducing-the-proxyshell-pwn2own-exploit-49743a4ea9a1
+author: Florian Roth
+date: 2021/08/07
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains|all:
+            - 'New-MailboxExport'
+            - ' -Mailbox '
+            - ' -FilePath \\127.0.0.1\C$'
+    condition: selection
+falsepositives:
+    - unknown
+level: critical
+fields:
+    - CommandLine
+    - ParentCommandLine
+tags:
+   - attack.persistence  
+   - attack.t1505.003
+   - attack.resource_development
+   - attack.t1584.006

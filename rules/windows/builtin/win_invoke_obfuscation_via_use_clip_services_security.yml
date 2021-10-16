@@ -1,0 +1,31 @@
+title: Invoke-Obfuscation Via Use Clip
+id: 1a0a2ff1-611b-4dac-8216-8a7b47c618a6
+related:
+    - id: 63e3365d-4824-42d8-8b82-e56810fefa0c
+      type: derived
+description: Detects Obfuscated Powershell via use Clip.exe in Scripts
+status: experimental
+author: Nikita Nazarov, oscd.community
+date: 2020/10/09
+modified: 2021/09/18
+references:
+    - https://github.com/Neo23x0/sigma/issues/1009 #(Task29)
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    service: security
+detection:
+    selection_eventid:
+        EventID: 4697
+    selection:
+        ServiceFileName|re: '(?i).*?echo.*clip.*&&.*(Clipboard|i`?n`?v`?o`?k`?e`?).*'
+    condition: selection and selection_eventid
+falsepositives:
+    - Unknown
+level: high
+
+

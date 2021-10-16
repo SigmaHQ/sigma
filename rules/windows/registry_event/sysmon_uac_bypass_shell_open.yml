@@ -1,0 +1,34 @@
+title: UAC Bypass Using Registry Shell Open Keys
+id: 152f3630-77c1-4284-bcc0-4cc68ab2f6e7
+description: Detects the pattern of UAC Bypass using fodhelper.exe, computerdefaults.exe, slui.exe via registry keys (e.g. UACMe 33 or 62)
+author: Christian Burkard
+date: 2021/08/30
+modified: 2021/09/17
+status: experimental
+references:
+    - https://github.com/hfiref0x/UACME
+    - https://winscripting.blog/2017/05/12/first-entry-welcome-and-uac-bypass/
+    - https://github.com/RhinoSecurityLabs/Aggressor-Scripts/tree/master/UACBypass
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1548.002
+logsource:
+    category: registry_event
+    product: windows
+detection:
+    selection1:
+        TargetObject|endswith: 'Classes\ms-settings\shell\open\command\SymbolicLinkValue'
+        Details|contains: '\Software\Classes\{'
+    selection2:
+        TargetObject|endswith: 'Classes\ms-settings\shell\open\command\DelegateExecute'
+    selection3:
+        TargetObject|endswith: 
+            - 'Classes\ms-settings\shell\open\command\(Default)'
+            - 'Classes\exefile\shell\open\command\(Default)'
+    filter_sel3:
+        Details: '(Empty)'
+    condition: selection1 or selection2 or (selection3 and not filter_sel3)
+falsepositives:
+    - Unknown
+level: high

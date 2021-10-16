@@ -1,4 +1,3 @@
-action: global
 title: Unidentified Attacker November 2018
 id: 7453575c-a747-40b9-839b-125a0aae324b
 status: stable
@@ -6,29 +5,19 @@ description: A sigma rule detecting an unidetefied attacker who used phishing em
     YYTRIUM/APT29 campaign in 2016.
 references:
     - https://twitter.com/DrunkBinary/status/1063075530180886529
-author: '@41thexplorer, Windows Defender ATP'
+author: '@41thexplorer, Microsoft Defender ATP'
 date: 2018/11/20
-modified: 2018/12/11
+modified: 2021/09/19
 tags:
     - attack.execution
-    - attack.t1085
-detection:
-    condition: 1 of them
-level: high
----
+    - attack.t1218.011
+    - attack.t1085  # an old one
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection1:
-        CommandLine: '*cyzfc.dat, PointFunctionCall'
----
-# Sysmon: File Creation (ID 11)
-logsource:
-    product: windows
-    service: sysmon
-detection:
-    selection2:
-        EventID: 11
-        TargetFilename: 
-            - '*ds7002.lnk*' 
+    selection:
+        CommandLine|contains: 'cyzfc.dat,'
+        CommandLine|endswith: 'PointFunctionCall'
+    condition: selection
+level: high

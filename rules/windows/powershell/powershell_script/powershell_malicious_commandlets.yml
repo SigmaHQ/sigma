@@ -1,0 +1,122 @@
+title: Malicious PowerShell Commandlets
+id: 89819aa4-bbd6-46bc-88ec-c7f7fe30efa6
+status: experimental
+description: Detects Commandlet names from well-known PowerShell exploitation frameworks
+references:
+    - https://adsecurity.org/?p=2921
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1086  #an old one
+author: Sean Metcalf (source), Florian Roth (rule), Bartlomiej Czyz @bczyz1 (update), oscd.community (update)
+date: 2017/03/05
+modified: 2021/08/21
+logsource:
+    product: windows
+    service: powershell
+    definition: Script Block Logging must be enable
+detection:
+    select_Malicious:
+        EventID: 4104
+        ScriptBlockText|contains:
+            - "Invoke-DllInjection"
+            - "Invoke-Shellcode"
+            - "Invoke-WmiCommand"
+            - "Get-GPPPassword"
+            - "Get-Keystrokes"
+            - "Get-TimedScreenshot"
+            - "Get-VaultCredential"
+            - "Invoke-CredentialInjection"
+            - "Invoke-Mimikatz"
+            - "Invoke-NinjaCopy"
+            - "Invoke-TokenManipulation"
+            - "Out-Minidump"
+            - "VolumeShadowCopyTools"
+            - "Invoke-ReflectivePEInjection"
+            - "Invoke-UserHunter"
+            - "Find-GPOLocation"
+            - "Invoke-ACLScanner"
+            - "Invoke-DowngradeAccount"
+            - "Get-ServiceUnquoted"
+            - "Get-ServiceFilePermission"
+            - "Get-ServicePermission"
+            - "Invoke-ServiceAbuse"
+            - "Install-ServiceBinary"
+            - "Get-RegAutoLogon"
+            - "Get-VulnAutoRun"
+            - "Get-VulnSchTask"
+            - "Get-UnattendedInstallFile"
+            - "Get-ApplicationHost"
+            - "Get-RegAlwaysInstallElevated"
+            - "Get-Unconstrained"
+            - "Add-RegBackdoor"
+            - "Add-ScrnSaveBackdoor"
+            - "Gupt-Backdoor"
+            - "Invoke-ADSBackdoor"
+            - "Enabled-DuplicateToken"
+            - "Invoke-PsUaCme"
+            - "Remove-Update"
+            - "Check-VM"
+            - "Get-LSASecret"
+            - "Get-PassHashes"
+            - "Show-TargetScreen"
+            - "Port-Scan"
+            - "Invoke-PoshRatHttp"
+            - "Invoke-PowerShellTCP"
+            - "Invoke-PowerShellWMI"
+            - "Add-Exfiltration"
+            - "Add-Persistence"
+            - "Do-Exfiltration"
+            - "Start-CaptureServer"
+            - "Get-ChromeDump"
+            - "Get-ClipboardContents"
+            - "Get-FoxDump"
+            - "Get-IndexedItem"
+            - "Get-Screenshot"
+            - "Invoke-Inveigh"
+            - "Invoke-NetRipper"
+            - "Invoke-EgressCheck"
+            - "Invoke-PostExfil"
+            - "Invoke-PSInject"
+            - "Invoke-RunAs"
+            - "MailRaider"
+            - "New-HoneyHash"
+            - "Set-MacAttribute"
+            - "Invoke-DCSync"
+            - "Invoke-PowerDump"
+            - "Exploit-Jboss"
+            - "Invoke-ThunderStruck"
+            - "Invoke-VoiceTroll"
+            - "Set-Wallpaper"
+            - "Invoke-InveighRelay"
+            - "Invoke-PsExec"
+            - "Invoke-SSHCommand"
+            - "Get-SecurityPackages"
+            - "Install-SSP"
+            - "Invoke-BackdoorLNK"
+            - "PowerBreach"
+            - "Get-SiteListPassword"
+            - "Get-System"
+            - "Invoke-BypassUAC"
+            - "Invoke-Tater"
+            - "Invoke-WScriptBypassUAC"
+            - "PowerUp"
+            - "PowerView"
+            - "Get-RickAstley"
+            - "Find-Fruit"
+            - "HTTP-Login"
+            - "Find-TrustedDocuments"
+            - "Invoke-Paranoia"
+            - "Invoke-WinEnum"
+            - "Invoke-ARPScan"
+            - "Invoke-PortScan"
+            - "Invoke-ReverseDNSLookup"
+            - "Invoke-SMBScanner"
+            - "Invoke-Mimikittenz"
+            - "Invoke-AllChecks"
+    false_positives:
+        ScriptBlockText|contains: Get-SystemDriveInfo  # http://bheltborg.dk/Windows/WinSxS/amd64_microsoft-windows-maintenancediagnostic_31bf3856ad364e35_10.0.10240.16384_none_91ef7543a4514b5e/CL_Utility.ps1
+    condition: select_Malicious and not false_positives
+falsepositives:
+    - Penetration testing
+level: high

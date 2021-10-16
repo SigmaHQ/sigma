@@ -44,6 +44,11 @@ class PowerShellBackend(SingleTextQueryBackend):
     mapListsSpecialHandling = True
 
     logname = None
+    fieldMappings = {
+        "EventID": "ID",
+        "ID": "ID",
+        "ServiceFileName": "Service File Name"
+    }
 
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
@@ -112,13 +117,15 @@ class PowerShellBackend(SingleTextQueryBackend):
         if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
             if key in ("LogName","source"):
                 self.logname = value
-            elif key in ("ID", "EventID"):
-                if key == "EventID":
-                    key = "ID"
+            elif key in self.fieldMappings.keys():
+                key = self.fieldMappings[key]
                 return self.mapExpression % (key, self.generateValueNode(value, True))
             elif type(value) == str and "*" in value:
                 value = value.replace("*", ".*")
-                return "$_.message -match %s" % (self.generateValueNode(key + ".*" + value, True))
+                if key == "Message":
+                    return "$_.message -match %s" % (self.generateValueNode(value, True))
+                else:
+                    return "$_.message -match %s" % (self.generateValueNode(key + ".*" + value, True))
             elif type(value) in (str, int):
                 return '$_.message -match %s' % (self.generateValueNode(key + ".*" +str(value), True))
             else:
@@ -133,13 +140,15 @@ class PowerShellBackend(SingleTextQueryBackend):
     def generateMapItemListNode(self, key, value):
         itemslist = list()
         for item in value:
-            if key in ("ID", "EventID"):
-                if key == "EventID":
-                    key = "ID"
+            if key in self.fieldMappings.keys():
+                key = self.fieldMappings[key]
                 itemslist.append(self.mapExpression % (key, self.generateValueNode(item, True)))
             elif type(item) == str and "*" in item:
                 item = item.replace("*", ".*")
-                itemslist.append('$_.message -match %s' % (self.generateValueNode(key + ".*" +item, True)))
+                if key == "Message":
+                    itemslist.append('$_.message -match %s' % (self.generateValueNode(item, True)))
+                else:
+                    itemslist.append('$_.message -match %s' % (self.generateValueNode(key + ".*" +item, True)))
             else:
                 itemslist.append('$_.message -match %s' % (self.generateValueNode(item, True)))
         return '('+" -or ".join(itemslist)+')'

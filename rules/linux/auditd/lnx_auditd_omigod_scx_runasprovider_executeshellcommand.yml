@@ -1,0 +1,31 @@
+title: OMIGOD SCX RunAsProvider ExecuteShellCommand
+id: 045b5f9c-49f7-4419-a236-9854fb3c827a
+description: Rule to detect the use of the SCX RunAsProvider Invoke_ExecuteShellCommand to execute any UNIX/Linux command using the /bin/sh shell. SCXcore, started as the Microsoft Operations Manager UNIX/Linux Agent, is now used in a host of products including Microsoft Operations Manager. Microsoft Azure, and Microsoft Operations Management Suite.
+status: experimental
+date: 2021/09/17
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+tags:
+    - attack.privilege_escalation
+    - attack.initial_access
+    - attack.execution
+    - attack.t1068
+    - attack.t1190
+    - attack.t1203
+references:
+    - https://www.wiz.io/blog/omigod-critical-vulnerabilities-in-omi-azure
+    - https://github.com/Azure/Azure-Sentinel/pull/3059
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+        type: 'SYSCALL'
+        SYSCALL: 'execve'
+        uid: '0'
+        cwd: '/var/opt/microsoft/scx/tmp'
+        comm: 'sh'
+    condition: selection
+falsepositives:
+    - Legitimate use of SCX RunAsProvider Invoke_ExecuteShellCommand.
+level: high
+

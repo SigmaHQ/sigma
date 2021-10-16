@@ -1,0 +1,24 @@
+title: PowerShell Get-Process LSASS in ScriptBlock
+id: 84c174ab-d3ef-481f-9c86-a50d0b8e3edb
+status: experimental
+description: Detects a Get-Process command on lsass process, which is in almost all cases a sign of malicious activity
+references:
+    - https://twitter.com/PythonResponder/status/1385064506049630211
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+author: Florian Roth
+date: 2021/04/23
+modified: 2021/08/04
+logsource:
+    product: windows
+    service: powershell
+    definition: Script Block Logging must be enable
+detection:
+    select_LSASS:
+        EventID: 4104
+        ScriptBlockText|contains: 'Get-Process lsass'
+    condition: select_LSASS
+falsepositives:
+    - Legitimate certificate exports invoked by administrators or users (depends on processes in the environment - filter if unusable)
+level: high

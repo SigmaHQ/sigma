@@ -1,0 +1,37 @@
+title: Suspicious File Characteristics Due to Missing Fields
+id: 9637e8a5-7131-4f7f-bdc7-2b05d8670c43
+description: Detects Executables in the Downloads folder without FileVersion,Description,Product,Company likely created with py2exe
+status: experimental
+references:
+    - https://securelist.com/muddywater/88059/
+    - https://www.virustotal.com/#/file/276a765a10f98cda1a38d3a31e7483585ca3722ecad19d784441293acf1b7beb/detection
+author: Markus Neis, Sander Wiebing
+date: 2018/11/22
+modified: 2021/06/27
+tags:
+    - attack.execution
+    - attack.t1059.006
+    - attack.defense_evasion        # an old one
+    - attack.t1064      # an old one
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection1:
+        Description: '\?'
+        FileVersion: '\?'
+    selection2:
+        Description: '\?'
+        Product: '\?'
+    selection3:
+        Description: '\?'
+        Company: '\?'
+    folder:
+        Image|contains: '\Downloads\'
+    condition: (selection1 or selection2 or selection3) and folder
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Unknown
+level: medium

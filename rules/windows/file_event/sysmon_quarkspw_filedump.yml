@@ -1,0 +1,26 @@
+title: QuarksPwDump Dump File
+id: 847def9e-924d-4e90-b7c4-5f581395a2b4
+status: experimental
+description: Detects a dump file written by QuarksPwDump password dumper
+references:
+    - https://jpcertcc.github.io/ToolAnalysisResultSheet/details/QuarksPWDump.htm
+author: Florian Roth
+date: 2018/02/10
+modified: 2020/08/23
+tags:
+  - attack.credential_access
+  - attack.t1003          # an old one
+  - attack.t1003.002
+level: critical
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        # Sysmon: File Creation (ID 11)
+        TargetFilename|contains|all: 
+            - '\AppData\Local\Temp\SAM-'
+            - '.dmp'
+    condition: selection
+falsepositives:
+    - Unknown

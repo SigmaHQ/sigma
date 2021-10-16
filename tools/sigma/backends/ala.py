@@ -13,18 +13,25 @@
 
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-import re, json
+import os
+import sys
+import re
+import json
 import xml.etree.ElementTree as xml
 
+from datetime import timedelta
+from uuid import uuid4
 
-from ..config.mapping import (
+from sigma.config.mapping import (
     SimpleFieldMapping, MultiFieldMapping, ConditionalFieldMapping
 )
-from ..parser.condition import SigmaAggregationParser
-from ..parser.exceptions import SigmaParseError
-from ..parser.modifiers.type import SigmaRegularExpressionModifier
-from .base import SingleTextQueryBackend
+from sigma.parser.condition import SigmaAggregationParser, SigmaConditionParser, SigmaConditionTokenizer
+
+from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
+from sigma.backends.base import SingleTextQueryBackend
+
+from sigma.parser.modifiers.base import SigmaTypeModifier
+from sigma.parser.modifiers.transform import SigmaContainsModifier, SigmaStartswithModifier, SigmaEndswithModifier
 from .data import sysmon_schema
 from .exceptions import NotSupportedError
 
@@ -43,8 +50,7 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
     )
     config_required = False
 
-    reEscape = re.compile('("|(?<!\\\\)\\\\(?![*?\\\\]))')
-    reClear = None
+    reEscape = re.compile('(\\\|"|(?<!)(?![*?]))')
     andToken = " and "
     orToken = " or "
     notToken = "not "
@@ -57,12 +63,16 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
     mapExpression = "%s == %s"
     mapListsSpecialHandling = True
     mapListValueExpression = "%s in %s"
-
-    _WIN_SECURITY_EVENT_MAP = {
-        "Image": "NewProcessName",
-        "ParentImage": "ParentProcessName",
-        "User": "SubjectUserName",
+    typedValueExpression = {
+        SigmaRegularExpressionModifier: "matches regex \"(?i)%s\"",
+        SigmaContainsModifier: "contains \"%s\""
     }
+
+    # _WIN_SECURITY_EVENT_MAP = {
+    #     "Image": "NewProcessName",
+    #     "ParentImage": "ParentProcessName",
+    #     "User": "SubjectUserName",
+    # }
 
     def __init__(self, *args, **kwargs):
         """Initialize field mappings."""
@@ -72,19 +82,16 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
         self.service = None
         self.table = None
         self.eventid = None
+        self.tableAggJoinFields = None
+        self.tableAggTimeField = None
         self._parser = None
         self._fields = None
         self._agg_var = None
         self._has_logsource_event_cond = False
         if not self.sysmon and not self.sigmaconfig.config:
-            self._field_map = self._WIN_SECURITY_EVENT_MAP
+            self._field_map = {}#self._WIN_SECURITY_EVENT_MAP
         else:
             self._field_map = {}
-        self.typedValueExpression[SigmaRegularExpressionModifier] = "matches regex \"%s\""
-
-    def id_mapping(self, src):
-        """Identity mapping, source == target field name"""
-        return src
 
     def map_sysmon_schema(self, eventid):
         schema_keys = []
@@ -110,7 +117,9 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
 
     def _default_value_mapping(self, val, is_case_insensitive=False):
         op = "=="
-        if isinstance(val, str):
+        if isinstance(val, int):
+            return "== %d" % (val)
+        elif isinstance(val, str):
             if is_case_insensitive is True:
                 op = "=~"
 
@@ -122,27 +131,86 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
 
                 if is_case_insensitive is True:
                     val = f"(?i){val}"
-
                 if "\\" in val:
-                    return "%s @\"%s\"" % (op, val)
-            else:                           # value possibly only starts and/or ends with *, use prefix/postfix match
-                if val.endswith("*") and val.startswith("*"):
+                    val = "@'(?i)%s'" % (val)
+                else:
+                    val = "'(?i)%s'" % (val)
+                return "%s %s" % (op, self.cleanValue(val))
+            elif val.startswith("*") or val.endswith("*"):
+                if val.startswith("*") and val.endswith("*"):
                     op = "contains"
-                    val = self.cleanValue(val[1:-1])
-                elif val.endswith("*"):
-                    op = "startswith"
-                    val = self.cleanValue(val[:-1])
+                    val = val[1:-1]
                 elif val.startswith("*"):
                     op = "endswith"
-                    val = self.cleanValue(val[1:])
-
+                    val = val[1:]
+                elif val.endswith("*"):
+                    op = "startswith"
+                    val = val[:-1]
+                val = re.sub('([".^$]|(?![*?]))', '\g<1>', val)
+                val = re.sub('(\\\\\*|\*)', '', val)
+                val = re.sub('\\?', '.', val)
                 if "\\" in val:
-                    return "%s @\"%s\"" % (op, val)
+                    return "%s @'%s'" % (op, self.cleanValue(val))
+                return "%s '%s'" % (op, self.cleanValue(val))
+            elif "\\" in val:
+                return "%s @'%s'" % (op, self.cleanValue(val))
+        return "%s \"%s\"" % (op, self.cleanValue(val))
 
-        return "%s \"%s\"" % (op, val)
+    def getTable(self, sigmaparser):
+        if self.category == "process_creation" and len(set(sigmaparser.values.keys()) - {"Image", "ParentImage",
+                                                                                         "CommandLine"}) == 0:
+            self.table = "SecurityEvent | where EventID == 4688 "
+            self.eventid = "4688"
+            self.tableAggJoinFields = "SubjectLogonId, Computer"
+            self.tableAggTimeField = "TimeGenerated"
+        elif self.category == "process_creation":
+            self.table = "SysmonEvent"
+            self.eventid = "1"
+        elif self.service and self.service.lower() == "security":
+            self.table = "SecurityEvent"
+        elif self.service and self.service.lower() == "sysmon":
+            self.table = "SysmonEvent"
+        elif self.service and self.service.lower() == "powershell":
+            self.table = "Event"
+        elif self.service and self.service.lower() == "office365":
+            self.table = "OfficeActivity"
+        elif self.service and self.service.lower() == "azuread":
+            self.table = "AuditLogs"
+        elif self.service and self.service.lower() == "azureactivity":
+            self.table = "AzureActivity"
+        else:
+            if self.service:
+                if "-" in self.service:
+                    self.table = "-".join([item.capitalize() for item in self.service.split("-")])
+                elif "_" in self.service:
+                    self.table = "_".join([item.capitalize() for item in self.service.split("_")])
+                else:
+                    if self.service.islower() or self.service.isupper():
+                        self.table = self.service.capitalize()
+                    else:
+                        self.table = self.service
+            elif self.product:
+                if "-" in self.product:
+                    self.table = "-".join([item.capitalize() for item in self.product.split("-")])
+                elif "_" in self.product:
+                    self.table = "_".join([item.capitalize() for item in self.product.split("_")])
+                else:
+                    if self.product.islower() or self.product.isupper():
+                        self.table = self.product.capitalize()
+                    else:
+                        self.table = self.product
+            elif self.category:
+                if "-" in self.category:
+                    self.table = "-".join([item.capitalize() for item in self.category.split("-")])
+                elif "_" in self.category:
+                    self.table = "_".join([item.capitalize() for item in self.category.split("_")])
+                else:
+                    if self.category.islower() or self.category.isupper():
+                        self.table = self.category.capitalize()
+                    else:
+                        self.table = self.category
 
     def generate(self, sigmaparser):
-        self.table = None
         try:
             self.category = sigmaparser.parsedyaml['logsource'].setdefault('category', None)
             self.product = sigmaparser.parsedyaml['logsource'].setdefault('product', None)
@@ -151,37 +219,11 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
             self.category = None
             self.product = None
             self.service = None
-
         detection = sigmaparser.parsedyaml.get("detection", {})
-        is_parent_cmd = False
         if "keywords" in detection.keys():
             return super().generate(sigmaparser)
-
-
-        if self.category == "process_creation":
-            self.table = "SysmonEvent"
-            self.eventid = "1"
-        elif self.service == "security":
-            self.table = "SecurityEvent"
-        elif self.service == "sysmon":
-            self.table = "SysmonEvent"
-        elif self.service == "powershell":
-            self.table = "Event"
-        else:
-            if self.service:
-                if "-" in self.service:
-                    self.table = "-".join([item.title() for item in self.service.split("-")])
-                elif "_" in self.service:
-                    self.table = "_".join([item.title() for item in self.service.split("_")])
-                else:
-                    self.table = self.service.title()
-            elif self.product:
-                if "-" in self.product:
-                    self.table = "-".join([item.title() for item in self.product.split("-")])
-                elif "_" in self.product:
-                    self.table = "_".join([item.title() for item in self.product.split("_")])
-                else:
-                    self.table = self.product.title()
+        if self.table is None:
+            self.getTable(sigmaparser)
 
         return super().generate(sigmaparser)
 
@@ -194,10 +236,16 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
         elif self.sysmon:
             parse_string = self.map_sysmon_schema(self.eventid)
             before = "%s | parse EventData with * %s | where " % (self.table, parse_string)
-        elif self.category == "process_creation" and not self._has_logsource_event_cond:
-            before = "%s | where EventID == \"%s\" | where " % (self.table, self.eventid)
+        # elif self.category == "process_creation" and not self._has_logsource_event_cond:
+        #     before = "%s | where EventID == \"%s\" | where " % (self.table, self.eventid)
         else:
             before = "%s | where " % self.table
+        if parsed.parsedAgg != None and parsed.parsedAgg.aggfunc == SigmaAggregationParser.AGGFUNC_NEAR:
+            window = parsed.parsedAgg.parser.parsedyaml["detection"].get("timeframe", "30m")
+            before = """
+            let lookupWindow = %s;
+            let lookupBin = lookupWindow / 2.0;
+            """ % (window) + before
         return before
 
     def generateMapItemNode(self, node):
@@ -206,6 +254,7 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
         and creates an appropriate table reference.
         """
         key, value = node
+        key = self.fieldNameMapping(key, value)
         if type(value) == list:         # handle map items with values list like multiple OR-chained conditions
             return "(" + self.generateORNode(
                     [(key, v) for v in value]
@@ -231,16 +280,17 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
                 mapping = (key, self.default_value_mapping_ci)
             else:
                 mapping = (key, self.default_value_mapping)
-
+            return self.mapExpression % (key, value)
+        elif type(value) in [SigmaTypeModifier, SigmaContainsModifier, SigmaRegularExpressionModifier, SigmaStartswithModifier, SigmaEndswithModifier]:
+            return self.generateMapItemTypedNode(key, value)
             if len(mapping) == 1:
                 mapping = mapping[0]
                 if type(mapping) == str:
                     return mapping
                 elif callable(mapping):
-                    conds = mapping(key, value)
                     return self.generateSubexpressionNode(
                             self.generateANDNode(
-                                [cond for cond in mapping(key, value)]
+                                [cond for cond in mapping(key, self.cleanValue(value))]
                                 )
                             )
             elif len(mapping) == 2:
@@ -249,21 +299,94 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
                     if type(mapitem) == str:
                         result.append(mapitem)
                     elif callable(mapitem):
-                        result.append(mapitem(val))
+                        result.append(mapitem(self.cleanValue(val)))
                 return "{} {}".format(*result)
             else:
                 raise TypeError("Backend does not support map values of type " + str(type(value)))
+        elif type(value) == list:
+            return self.generateMapItemListNode(key, value)
 
-        return super().generateMapItemNode(node)
+        elif value is None:
+            return self.nullExpression % (key, )
+        else:
+            raise TypeError("Backend does not support map values of type " + str(type(value)))
+
+    def generateMapItemTypedNode(self, fieldname, value):
+        return "%s %s" % (fieldname, self.generateTypedValueNode(value))
+
+    def generateTypedValueNode(self, node):
+        try:
+            val = str(node)
+            if "*" in val:
+                val = re.sub('\\*', '.*', val)
+            return self.typedValueExpression[type(node)] % (val)
+        except KeyError:
+            raise NotImplementedError("Type modifier '{}' is not supported by backend".format(node.identifier))
+
+    def generateAggregationQuery(self, agg, searchId):
+        condtoken = SigmaConditionTokenizer(searchId)
+        condparsed = SigmaConditionParser(agg.parser, condtoken)
+        backend = AzureLogAnalyticsBackend(agg.config)
+
+        # these bits from generate() should be moved to __init__
+        try:
+            backend.category = agg.parser.parsedyaml['logsource'].setdefault('category', None)
+            backend.product = agg.parser.parsedyaml['logsource'].setdefault('product', None)
+            backend.service = agg.parser.parsedyaml['logsource'].setdefault('service', None)
+        except KeyError:
+            backend.category = None
+            backend.product = None
+            backend.service = None
+        backend.getTable(agg.parser)
+
+        query = backend.generateQuery(condparsed)
+        before = backend.generateBefore(condparsed)
+        return before + query
+
+    # follow the join/time window pattern
+    # https://docs.microsoft.com/en-us/azure/data-explorer/kusto/query/join-timewindow
+    def generateNear(self, agg):
+        includeQueries = []
+
+        includeCount = 0
+        for includeCount, include in enumerate(agg.include, start=1):
+            iq = self.generateAggregationQuery(agg, include)
+            iq += """
+                | extend End{timeIndex}={timeField},
+                    TimeKey = range(
+                        bin({timeField} - lookupWindow, lookupBin),
+                        bin({timeField}, lookupBin),
+                        lookupBin)
+                | mv-expand TimeKey to typeof(datetime)""".format(
+                    timeField=self.tableAggTimeField,
+                    timeIndex=includeCount,
+                )
+            includeQueries.append(iq)
+
+        ret = " | extend Start={timeField}, TimeKey = bin({timeField}, lookupBin) | join kind=inner (\n  ".format(
+            timeField=self.tableAggTimeField,
+        )
+        ret += ") on {joinFields}, TimeKey | join kind=inner (\n  ".format(
+            joinFields=self.tableAggJoinFields,
+        ).join(includeQueries)
+        ret += ") on {joinFields}, TimeKey\n| where ".format(
+            joinFields=self.tableAggJoinFields,
+        )
+        ret += " and ".join([
+            "(End%d - Start) between (0min .. lookupWindow)" % (endIndex + 1) for endIndex in range(includeCount)
+        ])
+
+        return ret
 
     def generateAggregation(self, agg):
         if agg is None:
             return ""
         if agg.aggfunc == SigmaAggregationParser.AGGFUNC_NEAR:
-            raise NotImplementedError(
-                "The 'near' aggregation operator is not "
-                + f"implemented for the %s backend" % self.identifier
-            )
+            if agg.exclude:
+                raise NotSupportedError("This backend doesn't currently support 'near' with excludes")
+            if self.tableAggJoinFields == None or self.tableAggTimeField == None:
+                raise NotSupportedError("This backend doesn't currently support 'near' for this table")
+            return self.generateNear(agg)
         if agg.aggfunc_notrans != 'count' and agg.aggfield is None:
             raise NotSupportedError(
                 "The '%s' aggregation operator " % agg.aggfunc_notrans
@@ -292,36 +415,6 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
             )
         )
 
-    def generateAfter(self, parsed):
-        del parsed
-        if self._fields:
-            all_fields = list(self._fields)
-            if self._agg_var:
-                all_fields = set(all_fields + [self._agg_var])
-            project_fields = self._map_fields(all_fields)
-            project_list = ", ".join(str(fld) for fld in set(project_fields))
-            return " | project " + project_list
-        return ""
-
-    def _map_fields(self, fields):
-        for field in fields:
-            mapped_field = self._map_field(field)
-            if isinstance(mapped_field, str):
-                yield mapped_field
-            elif isinstance(mapped_field, list):
-                for subfield in mapped_field:
-                    yield subfield
-
-    def _map_field(self, fieldname):
-        mapping = self.sigmaconfig.fieldmappings.get(fieldname)
-        if isinstance(mapping, ConditionalFieldMapping):
-            fieldname = self._map_conditional_field(fieldname)
-        elif isinstance(mapping, MultiFieldMapping):
-            fieldname = mapping.resolve_fieldname(fieldname, self._parser)
-        elif isinstance(mapping, SimpleFieldMapping):
-            fieldname = mapping.resolve_fieldname(fieldname, self._parser)
-        return fieldname
-
     def _map_conditional_field(self, fieldname):
         mapping = self.sigmaconfig.fieldmappings.get(fieldname)
         # if there is a conditional mapping for this fieldname
@@ -348,35 +441,120 @@ class AzureAPIBackend(AzureLogAnalyticsBackend):
     def __init__(self, *args, **kwargs):
         """Initialize field mappings"""
         super().__init__(*args, **kwargs)
+        self.techniques = self._load_mitre_file("techniques")
 
-    def create_rule(self, config):
-        tags = config.get("tags", [])
+    def find_technique(self, key_ids):
+        for key_id in set(key_ids):
+            if not key_id:
+                continue
+            for technique in self.techniques:
+                if key_id == technique.get("technique_id", ""):
+                    yield technique
+                if "." in key_id and key_id.split(".")[0] == technique.get("technique_id", ""):
+                    yield technique
+
+    def _load_mitre_file(self, mitre_type):
+        try:
+            backend_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "config", "mitre"))
+            path = os.path.join(backend_dir, "{}.json".format(mitre_type))
+            with open(path) as config_file:
+                config = json.load(config_file)
+                return config
+        except (IOError, OSError) as e:
+            print("Failed to open {} configuration file '%s': %s".format(path, str(e)), file=sys.stderr)
+            return []
+        except json.JSONDecodeError as e:
+            print("Failed to parse {} configuration file '%s' as valid YAML: %s" % (path, str(e)), file=sys.stderr)
+            return []
+
+    def skip_tactics_or_techniques(self, src_technics, src_tactics):
+        tactics = set()
+        technics = set()
+
+        local_storage_techniques = {item["technique_id"]: item for item in self.find_technique(src_technics)}
+
+        for key_id in src_technics:
+            if "." in key_id:
+                src_tactic = local_storage_techniques.get(key_id.split(".")[0], {}).get("tactic")
+            else:
+                src_tactic = local_storage_techniques.get(key_id, {}).get("tactic")
+            if not src_tactic:
+                continue
+            src_tactic = set(src_tactic)
+
+            for item in src_tactics:
+                if item in src_tactic:
+                    technics.add(key_id)
+                    tactics.add(item)
+
+        return sorted(tactics), sorted(technics)
+
+    def parse_severity(self, old_severity):
+        if old_severity.lower() == "critical":
+            return "high"
+        return old_severity
+
+    def get_tactics_and_techniques(self, tags):
         tactics = list()
         technics = list()
+
         for tag in tags:
             tag = tag.replace("attack.", "")
-            if re.match("[tT][0-9]{4}", tag):
+            if re.match("[t][0-9]{4}", tag, re.IGNORECASE):
                 technics.append(tag.title())
             else:
                 if "_" in tag:
-                    tag_list = tag.split("_")
-                    tag_list = [item.title() for item in tag_list]
-                    tactics.append("".join(tag_list))
-                else:
-                    tactics.append(tag.title())
+                    tag = tag.replace("_", " ")
+                tag = tag.title()
+                tactics.append(tag)
+
+        return tactics, technics
+
+    def timeframeToDelta(self, timeframe):
+        time_unit = timeframe[-1:]
+        duration = int(timeframe[:-1])
+        return (
+            time_unit == "s" and timedelta(seconds=duration) or
+            time_unit == "m" and timedelta(minutes=duration) or
+            time_unit == "h" and timedelta(hours=duration) or
+            time_unit == "d" and timedelta(days=duration) or
+            None
+        )
+
+    def iso8601_duration(self, delta):
+        if not delta:
+            return "PT0S"
+        if not delta.seconds:
+            return "P%dD" % (delta.days)
+        days = delta.days and "%dD" % (delta.days) or ""
+        hours = delta.seconds // 3600 % 24 and "%dH" % (delta.seconds // 3600 % 24) or ""
+        minutes = delta.seconds // 60 % 60 and "%dM" % (delta.seconds // 60 % 60) or ""
+        seconds = delta.seconds % 60 and "%dS" % (delta.seconds % 60) or ""
+        return "P%sT%s%s%s" % (days, hours, minutes, seconds)
+
+    def create_rule(self, config):
+        tags = config.get("tags", [])
+
+        tactics, technics = self.get_tactics_and_techniques(tags)
+        tactics, technics = self.skip_tactics_or_techniques(technics, tactics)
+        tactics = list(map(lambda s: s.replace(" ", ""), tactics))
+
+        timeframe = self.timeframeToDelta(config["detection"].setdefault("timeframe", "30m"))
+        queryDuration = self.iso8601_duration(timeframe)
+        suppressionDuration = self.iso8601_duration(timeframe * 5)
 
         rule = {
                 "displayName": "{} by {}".format(config.get("title"), config.get('author')),
                 "description": "{} {}".format(config.get("description"), "Technique: {}.".format(",".join(technics))),
-                "severity": config.get("level", "medium"),
+                "severity": self.parse_severity(config.get("level", "medium")),
                 "enabled": True,
                 "query": config.get("translation"),
-                "queryFrequency": "12H",
-                "queryPeriod": "12H",
+                "queryFrequency": queryDuration,
+                "queryPeriod": queryDuration,
                 "triggerOperator": "GreaterThan",
-                "triggerThreshold": 1,
-                "suppressionDuration": "12H",
-                "suppressionEnabled": False,
+                "triggerThreshold": 0,
+                "suppressionDuration": suppressionDuration,
+                "suppressionEnabled": True,
                 "tactics": tactics
             }
         return json.dumps(rule)
@@ -388,3 +566,68 @@ class AzureAPIBackend(AzureLogAnalyticsBackend):
             configs.update({"translation": translation})
             rule = self.create_rule(configs)
             return rule
+        else:
+            raise NotSupportedError("No table could be determined from Sigma rule")
+
+class SentinelBackend(AzureAPIBackend):
+    """Converts Sigma rule into Azure Sentinel scheduled alert rule ARM template."""
+    identifier = "sentinel-rule"
+    active = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def generate(self, sigmaparser):
+        translation = super().generate(sigmaparser)
+        if translation:
+            configs = sigmaparser.parsedyaml
+            configs.update({"translation": translation})
+            rule = self.create_sentinel_rule(configs)
+            return json.dumps(rule)
+
+    def create_sentinel_rule(self, config):
+        # https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/child-resource-name-type#outside-parent-resource
+        # https://docs.microsoft.com/en-us/azure/templates/microsoft.operationalinsights/workspaces?tabs=json
+        # https://docs.microsoft.com/en-us/rest/api/securityinsights/alert-rules/create-or-update#scheduledalertrule
+        properties = json.loads(config.get("translation"))
+        properties.update({
+            "incidentConfiguration": {
+                "createIncident": True,
+                "groupingConfiguration": {
+                    "enabled": False,
+                    "reopenClosedIncident": False,
+                    "lookbackDuration": properties['suppressionDuration'],
+                    "matchingMethod": "AllEntities",
+                    "groupByEntities": [],
+                    "groupByAlertDetails": [],
+                    "groupByCustomDetails": [],
+                },
+            },
+            "eventGroupingSettings": {
+                "aggregationKind": "SingleAlert",
+            },
+            "alertDetailsOverride": None,
+            "customDetails": None,
+            "templateVersion": "1.0.0",
+        })
+        rule_uuid = config.get("id", str(uuid4()))
+        return {
+            "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+                "workspace": {
+                    "type": "String",
+                },
+            },
+            "resources": [
+                {
+                    "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/" + rule_uuid + "')]",
+                    "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/" + rule_uuid + "')]",
+                    "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+                    "apiVersion": "2021-03-01-preview",
+
+                    "kind": "Scheduled",
+                    "properties": properties,
+                },
+            ],
+        }

@@ -1,0 +1,25 @@
+title: Suspicious Export-PfxCertificate
+id: aa7a3fce-bef5-4311-9cc1-5f04bb8c308c
+status: experimental
+description: Detects Commandlet that is used to export certificates from the local certificate store and sometimes used by threat actors to steal private keys from compromised machines
+references:
+    - https://us-cert.cisa.gov/ncas/analysis-reports/ar21-112a
+    - https://docs.microsoft.com/en-us/powershell/module/pki/export-pfxcertificate
+tags:
+    - attack.credential_access
+    - attack.t1552.004
+author: Florian Roth
+date: 2021/04/23
+modified: 2021/08/04
+logsource:
+    product: windows
+    service: powershell
+    definition: Script Block Logging must be enable
+detection:
+    PfxCertificate:
+        EventID: 4104
+        ScriptBlockText|contains: "Export-PfxCertificate"
+    condition: PfxCertificate
+falsepositives:
+    - Legitimate certificate exports invoked by administrators or users (depends on processes in the environment - filter if unusable)
+level: high

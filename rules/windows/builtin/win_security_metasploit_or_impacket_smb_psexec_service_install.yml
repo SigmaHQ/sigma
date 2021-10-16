@@ -1,0 +1,40 @@
+title: Metasploit Or Impacket Service Installation Via SMB PsExec
+id: 6fb63b40-e02a-403e-9ffd-3bcc1d749442
+related:
+    - id: 1a17ce75-ff0d-4f02-9709-2b7bb5618cf0
+      type: derived
+description: Detects usage of Metasploit SMB PsExec (exploit/windows/smb/psexec) and Impacket psexec.py by triggering on specific service installation
+author: Bartlomiej Czyz, Relativity
+date: 2021/01/21
+modified: 2021/07/23
+references:
+    - https://bczyz1.github.io/2021/01/30/psexec.html
+tags:
+    - attack.lateral_movement
+    - attack.t1021.002
+    - attack.t1570
+    - attack.execution
+    - attack.t1569.002
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4697
+    selection_1:
+        ServiceFileName|re: '^%systemroot%\\[a-zA-Z]{8}\.exe$'
+        ServiceName|re: '(^[a-zA-Z]{4}$)|(^[a-zA-Z]{8}$)|(^[a-zA-Z]{16}$)'
+        ServiceStartType: '3'  # on-demand start, see https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=4697
+        ServiceType: '0x10'
+    filter:
+        ServiceName: 'PSEXESVC'
+    condition: selection and selection_1 and not filter
+fields:
+    - ComputerName
+    - SubjectDomainName
+    - SubjectUserName
+    - ServiceName
+    - ServiceFileName
+falsepositives:
+    - Possible, different agents with a 8 character binary and a 4, 8 or 16 character service name
+level: high

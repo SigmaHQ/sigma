@@ -1,0 +1,32 @@
+title: Sticky Key Like Backdoor Usage
+id: baca5663-583c-45f9-b5dc-ea96a22ce542
+description: Detects the usage and installation of a backdoor that uses an option to register a malicious debugger for built-in tools that are accessible in the login
+    screen
+references:
+    - https://blogs.technet.microsoft.com/jonathantrull/2016/10/03/detecting-sticky-key-backdoors/
+tags:
+    - attack.privilege_escalation
+    - attack.persistence
+    - attack.t1015 # an old one
+    - attack.t1546.008
+    - car.2014-11-003
+    - car.2014-11-008
+author: Florian Roth, @twjackomo, Jonhnathan Ribeiro, oscd.community
+date: 2018/03/15
+modified: 2021/09/12
+logsource:
+    category: registry_event
+    product: windows
+detection:
+    selection_registry:
+        TargetObject|endswith:
+            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\sethc.exe\Debugger'
+            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\utilman.exe\Debugger'
+            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\osk.exe\Debugger'
+            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\Magnify.exe\Debugger'
+            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\Narrator.exe\Debugger'
+            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\DisplaySwitch.exe\Debugger'
+    condition: selection_registry
+falsepositives:
+    - Unlikely
+level: critical

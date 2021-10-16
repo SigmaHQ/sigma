@@ -1,0 +1,45 @@
+title: Malicious Named Pipe
+id: fe3ac066-98bb-432a-b1e7-a5229cb39d4a
+status: experimental
+description: Detects the creation of a named pipe used by known APT malware
+references:
+    - Various sources
+date: 2017/11/06
+author: Florian Roth, blueteam0ps
+logsource:
+   product: windows
+   category: pipe_created
+   definition: 'Note that you have to configure logging for PipeEvents in Sysmon config'
+detection:
+   selection:
+      PipeName: 
+         - '\isapi_http'  # Uroburos Malware Named Pipe
+         - '\isapi_dg'  # Uroburos Malware Named Pipe
+         - '\isapi_dg2'  # Uroburos Malware Named Pipe
+         - '\sdlrpc'  # Cobra Trojan Named Pipe http://goo.gl/8rOZUX
+         - '\ahexec'  # Sofacy group malware
+         - '\winsession'  # Wild Neutron APT malware https://goo.gl/pivRZJ
+         - '\lsassw'  # Wild Neutron APT malware https://goo.gl/pivRZJ
+         - '\46a676ab7f179e511e30dd2dc41bd388'  # Project Sauron https://goo.gl/eFoP4A
+         - '\9f81f59bc58452127884ce513865ed20'  # Project Sauron https://goo.gl/eFoP4A
+         - '\e710f28d59aa529d6792ca6ff0ca1b34'  # Project Sauron https://goo.gl/eFoP4A
+         - '\rpchlp_3'  # Project Sauron https://goo.gl/eFoP4A - Technical Analysis Input
+         - '\NamePipe_MoreWindows'  # Cloud Hopper Annex B https://www.pwc.co.uk/cyber-security/pdf/cloud-hopper-annex-b-final.pdf, US-CERT Alert - RedLeaves https://www.us-cert.gov/ncas/alerts/TA17-117A
+         - '\pcheap_reuse'  # Pipe used by Equation Group malware 77486bb828dba77099785feda0ca1d4f33ad0d39b672190079c508b3feb21fb0
+         - '\gruntsvc' # Covenant default named pipe
+         # - '\status_*'  # CS default named pipes https://github.com/Neo23x0/sigma/issues/253
+         - '\583da945-62af-10e8-4902-a8f205c72b2e'  # SolarWinds SUNBURST malware report https://www.fireeye.com/blog/threat-research/2020/12/evasive-attacker-leverages-solarwinds-supply-chain-compromises-with-sunburst-backdoor.html
+         - '\bizkaz'  # Snatch Ransomware https://thedfirreport.com/2020/06/21/snatch-ransomware/
+         - '\svcctl' #Crackmapexec smbexec default named pipe
+         - '\Posh*' #PoshC2 default 
+         - '\jaccdpqnvbrrxlaf' #PoshC2 default 
+         - '\csexecsvc' #CSEXEC default
+         - '\6e7645c4-32c5-4fe3-aabf-e94c2f4370e7'  # LiquidSnake https://github.com/RiccardoAncarani/LiquidSnake
+   condition: selection
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1055
+falsepositives:
+   - Unknown
+level: critical

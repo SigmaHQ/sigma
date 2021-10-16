@@ -1,0 +1,47 @@
+title: Suspicious MSHTA Process Patterns
+id: e32f92d1-523e-49c3-9374-bdb13b46a3ba
+status: experimental
+description: Detects suspicious mshta process patterns
+references:
+    - https://en.wikipedia.org/wiki/HTML_Application
+    - https://www.echotrail.io/insights/search/mshta.exe
+    - https://app.any.run/tasks/34221348-072d-4b70-93f3-aa71f6ebecad/
+tags:
+    - attack.execution
+author: Florian Roth
+date: 2021/07/17
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    # Binary Selector
+    selection_base:
+        Image|endswith: '\mshta.exe'
+    # Suspicious parents
+    selection1:
+        ParentImage|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+    # Suspicious folders
+    selection2:
+        CommandLine|contains: 
+            - '\AppData\Local'
+            - 'C:\Windows\Temp'
+            - 'C:\Users\Public' 
+    # Suspicious Execution Locations
+    filter3:
+        Image|contains:
+            - 'C:\Windows\System32'
+            - 'C:\Windows\SysWOW64'
+    # Suspicious extensions
+    filter4:
+        CommandLine|contains: 
+            - '.htm'
+            - '.hta'
+        CommandLine|endswith: 
+            - 'mshta.exe'
+            - 'mshta'
+    condition: selection_base and ( selection1 or selection2 ) or ( selection_base and not filter3 ) or ( selection_base and not filter4 )
+falsepositives:
+    - Unknown
+level: high

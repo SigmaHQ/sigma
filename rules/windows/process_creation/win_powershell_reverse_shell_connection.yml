@@ -1,0 +1,29 @@
+title: Powershell Reverse Shell Connection
+id: edc2f8ae-2412-4dfd-b9d5-0c57727e70be
+status: experimental
+description: Detects the Nishang Invoke-PowerShellTcpOneLine reverse shell
+author: FPT.EagleEye, wagga
+references:
+    - https://www.volexity.com/blog/2021/03/02/active-exploitation-of-microsoft-exchange-zero-day-vulnerabilities/
+    - https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers/
+date: 2021/03/03
+modified: 2021/06/27
+tags:
+    - attack.execution
+    - attack.t1086 # an old one
+    - attack.t1059.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\powershell.exe'
+        CommandLine|contains:
+            - 'new-object system.net.sockets.tcpclient'
+    condition: selection
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Administrative might use this function for checking network connectivity
+level: high

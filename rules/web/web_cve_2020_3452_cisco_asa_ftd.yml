@@ -1,0 +1,37 @@
+title: Cisco ASA FTD Exploit CVE-2020-3452
+id: aba47adc-4847-4970-95c1-61dce62a8b29
+status: experimental
+description: Detects exploitation attempts on Cisco ASA FTD systems exploiting CVE-2020-3452 with a status code of 200 (sccessful exploitation)
+author: Florian Roth
+date: 2021/01/07
+references:
+    - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-3452
+    - https://twitter.com/aboul3la/status/1286012324722155525
+    - https://github.com/darklotuskdb/CISCO-CVE-2020-3452-Scanner-Exploiter
+    - https://nvd.nist.gov/vuln/detail/CVE-2020-3452
+logsource:
+    category: webserver
+detection:
+    selection_endpoint:
+        c-uri|contains:
+            - '+CSCOT+/translation-table'
+            - '+CSCOT+/oem-customization'
+    selection_path_select:
+        c-uri|contains:
+            - '&textdomain=/'
+            - '&textdomain=%'
+            - '&name=/'
+            - '&name=%'
+    select_status_code:
+        sc-status: 200
+    condition: selection_endpoint and selection_path_select and select_status_code
+fields:
+    - c-ip
+    - c-dns
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.t1100 # an old one
+    - attack.t1190
+    - attack.initial_access

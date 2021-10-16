@@ -1,0 +1,27 @@
+title: Possible Process Hollowing Image Loading
+id: e32ce4f5-46c6-4c47-ba69-5de3c9193cd7
+status: experimental
+description: Detects Loading of samlib.dll, WinSCard.dll from untypical process e.g. through process hollowing by Mimikatz
+references:
+    - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for.html
+author: Markus Neis
+date: 2018/01/07
+modified: 2020/08/23
+tags:
+    - attack.defense_evasion
+    - attack.t1073          # an old one
+    - attack.t1574.002
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\notepad.exe'
+        ImageLoaded|endswith:
+            - '\samlib.dll'
+            - '\WinSCard.dll'
+    condition: selection
+falsepositives:
+    - Very likely, needs more tuning
+level: high

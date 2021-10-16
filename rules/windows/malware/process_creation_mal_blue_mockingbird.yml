@@ -1,0 +1,32 @@
+title: Blue Mockingbird
+id: c3198a27-23a0-4c2c-af19-e5328d49680e
+related:
+    - id: ce239692-aa94-41b3-b32f-9cab259c96ea
+      type: merged
+date: 2020/05/14
+modified: 2021/09/11
+status: experimental
+description: Attempts to detect system changes made by Blue Mockingbird
+references:
+    - https://redcanary.com/blog/blue-mockingbird-cryptominer/
+tags:
+    - attack.execution
+    - attack.t1112
+    - attack.t1047
+author: Trent Liffick (@tliffick)
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    sc_cmd:
+        Image|endswith: '\cmd.exe'
+        CommandLine|contains|all:
+            - 'sc config'
+            - 'wercplsupporte.dll'
+    wmic_cmd:
+        Image|endswith: '\wmic.exe'
+        CommandLine|endswith: 'COR_PROFILER'
+    condition: sc_cmd or wmic_cmd
+falsepositives:
+    - unknown
+level: high

@@ -1,0 +1,34 @@
+title: CVE-2020-5902 F5 BIG-IP Exploitation Attempt
+id: 44b53b1c-e60f-4a7b-948e-3435a7918478
+status: experimental
+description: Detects the exploitation attempt of the vulnerability found in F5 BIG-IP and described in CVE-2020-5902
+references:
+    - https://support.f5.com/csp/article/K52145254
+    - https://www.ptsecurity.com/ww-en/about/news/f5-fixes-critical-vulnerability-discovered-by-positive-technologies-in-big-ip-application-delivery-controller/
+    - https://twitter.com/yorickkoster/status/1279709009151434754
+    - https://www.criticalstart.com/f5-big-ip-remote-code-execution-exploit/
+author: Florian Roth
+date: 2020/07/05
+modified: 2020/07/07
+logsource:
+    category: webserver
+detection:
+    selection_base:
+        c-uri|contains: 
+            - '/tmui/'
+            - '/hsqldb'
+    selection_traversal:
+        c-uri|contains:
+            - '..;/'
+            - '.jsp/..'
+    condition: selection_base and selection_traversal
+fields:
+    - c-ip
+    - c-dns
+falsepositives:
+    - Unknown
+tags:
+    - attack.initial_access
+    - attack.t1190
+level: critical
+

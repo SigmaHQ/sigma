@@ -1,0 +1,41 @@
+title: Mimikatz In-Memory
+id: c0478ead-5336-46c2-bd5e-b4c84bc3a36e
+status: experimental
+author: sigma
+description: Detects certain DLL loads when Mimikatz gets executed
+references:
+    - https://securityriskadvisors.com/blog/post/detecting-in-memory-mimikatz/
+tags:
+    - attack.s0002
+    - attack.t1003
+    - attack.lateral_movement
+    - attack.credential_access
+    - car.2019-04-004
+logsource:
+    category: image_load
+    product: windows
+date: 2017/03/13
+detection:
+    selector:
+        Image: 'C:\Windows\System32\rundll32.exe'
+    dllload1:
+        ImageLoaded|endswith: '\vaultcli.dll'
+    dllload2:
+        ImageLoaded|endswith: '\wlanapi.dll'
+    exclusion:
+        ImageLoaded:
+            - 'ntdsapi.dll'
+            - 'netapi32.dll'
+            - 'imm32.dll'
+            - 'samlib.dll'
+            - 'combase.dll'
+            - 'srvcli.dll'
+            - 'shcore.dll'
+            - 'ntasn1.dll'
+            - 'cryptdll.dll'
+            - 'logoncli.dll'
+    timeframe: 30s
+    condition: selector | near dllload1 and dllload2 and not exclusion
+falsepositives:
+    - unknown
+level: medium

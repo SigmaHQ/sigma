@@ -1,0 +1,33 @@
+title: Regsvr32 Command Line Without DLL
+id: 50919691-7302-437f-8e10-1fe088afa145
+status: experimental
+description: Detects a regsvr.exe execution that doesn't contain a DLL in the command line
+author: Florian Roth
+date: 2019/07/17
+modified: 2021/10/07
+references:
+    - https://app.any.run/tasks/34221348-072d-4b70-93f3-aa71f6ebecad/
+tags:
+    - attack.defense_evasion
+    - attack.execution
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\regsvr32.exe'
+    filter:
+        CommandLine|contains: 
+            - '.dll'
+            - '.ocx'
+            - '.cpl'
+            - '.ax'
+            - '.bav'
+            - '.ppl'
+    condition: selection and not filter
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Unknown
+level: high

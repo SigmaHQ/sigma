@@ -1,0 +1,28 @@
+title: Steganography Unzip Hidden Information From Picture File
+id: edd595d7-7895-4fa7-acb3-85a18a8772ca
+description: Detects extracting of zip file from image file
+author: 'Pawel Mazur'
+status: experimental
+date: 2021/09/09
+references:
+   - https://attack.mitre.org/techniques/T1027/003/
+   - https://zerotoroot.me/steganography-hiding-a-zip-in-a-jpeg-file/
+tags:
+   - attack.defense_evasion
+   - attack.t1027.003
+falsepositives:
+   - None
+level: low
+logsource:
+   product: linux
+   service: auditd
+detection:
+   commands:
+       type: EXECVE
+       a0:
+           - unzip
+   a1:
+       a1|endswith:
+           - '.jpg'
+           - '.png'
+   condition: commands and a1

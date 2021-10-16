@@ -1,0 +1,27 @@
+title: Malicious Windows Script Components File Execution by TAEF Detection
+id: 634b00d5-ccc3-4a06-ae3b-0ec8444dd51b
+status: experimental
+description: Windows Test Authoring and Execution Framework (TAEF) framework allows you to run automation by executing tests files written on different languages (C, C#, Microsoft COM Scripting interfaces). Adversaries may execute malicious code (such as WSC file with VBScript, dll and so on) directly by running te.exe
+references:
+  - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OtherMSBinaries/Te.yml
+  - https://twitter.com/pabraeken/status/993298228840992768
+  - https://docs.microsoft.com/en-us/windows-hardware/drivers/taef/
+tags:
+    - attack.t1218
+author: 'Agro (@agro_sev) oscd.community'
+date: 2020/10/13
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Image|endswith: '\te.exe'
+    selection2:
+        ParentImage|endswith: '\te.exe'
+    selection3:
+        OriginalFileName: '\te.exe'
+    condition: selection1 or selection2 or selection3
+falsepositives:
+    - It's not an uncommon to use te.exe directly to execute legal TAEF tests
+level: low
+

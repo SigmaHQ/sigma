@@ -28,7 +28,10 @@ class SigmaContainsModifier(ListOrStringModifierMixin, SigmaTransformModifier):
         if not val.startswith("*"):
             val = "*" + val
         if not val.endswith("*"):
-            val += "*"
+            if val.endswith("\\"):
+                val += "\\*"
+            else:
+                val += "*"
         return val
 
 class SigmaStartswithModifier(ListOrStringModifierMixin, SigmaTransformModifier):
@@ -38,7 +41,10 @@ class SigmaStartswithModifier(ListOrStringModifierMixin, SigmaTransformModifier)
 
     def apply_str(self, val : str):
         if not val.endswith("*"):
-            val += "*"
+            if val.endswith("\\"):
+                val += "\\*"
+            else:
+                val += "*"
         return val
 
 class SigmaEndswithModifier(ListOrStringModifierMixin, SigmaTransformModifier):
@@ -48,7 +54,7 @@ class SigmaEndswithModifier(ListOrStringModifierMixin, SigmaTransformModifier):
 
     def apply_str(self, val : str):
         if not val.startswith("*"):
-            val = "*" + val
+           val = '*' + val
         return val
 
 class SigmaAllValuesModifier(SigmaTransformModifier):

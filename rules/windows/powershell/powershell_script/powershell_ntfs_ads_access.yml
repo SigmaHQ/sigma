@@ -1,0 +1,35 @@
+title: NTFS Alternate Data Stream
+id: 8c521530-5169-495d-a199-0a3a881ad24e
+status: experimental
+description: Detects writing data into NTFS alternate data streams from powershell. Needs Script Block Logging.
+references:
+    - http://www.powertheshell.com/ntfsstreams/
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1564.004/T1564.004.md
+tags:
+    - attack.defense_evasion
+    - attack.t1564.004
+    - attack.t1096  # an old one
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1086  # an old one
+author: Sami Ruohonen
+date: 2018/07/24
+modified: 2021/08/21
+logsource:
+    product: windows
+    service: powershell
+    definition: Script block logging must be enabled
+detection:
+    event:
+        EventID: 4104
+    content:
+        ScriptBlockText|contains:
+            - "set-content"
+            - "add-content"
+    stream:
+        ScriptBlockText|contains:
+            - "-stream"
+    condition: all of them
+falsepositives:
+    - unknown
+level: high

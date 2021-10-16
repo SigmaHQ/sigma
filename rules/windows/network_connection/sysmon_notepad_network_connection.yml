@@ -1,0 +1,27 @@
+title: Notepad Making Network Connection
+id: e81528db-fc02-45e8-8e98-4e84aba1f10b
+status: experimental
+description: Detects suspicious network connection by Notepad
+references:
+    - https://www.sans.org/cyber-security-summit/archives/file/summit-archive-1492186586.pdf
+    - https://blog.cobaltstrike.com/2013/08/08/why-is-notepad-exe-connecting-to-the-internet/
+tags:
+    - attack.command_and_control
+    - attack.execution
+    - attack.defense_evasion
+    - attack.t1055
+author: EagleEye Team
+logsource:
+    category: network_connection
+    product: windows
+date: 2020/05/14
+modified: 2020/08/24
+detection:
+    selection:
+        Image|endswith: '\notepad.exe'
+    filter:
+        DestinationPort: '9100'
+    condition: selection and not filter
+falsepositives:
+    - None observed so far
+level: high

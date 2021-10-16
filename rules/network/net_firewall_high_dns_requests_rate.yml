@@ -1,0 +1,24 @@
+title: High DNS Requests Rate
+id: 51186749-7415-46be-90e5-6914865c825a
+status: experimental
+description: High DNS requests amount from host per short period of time
+author: Daniil Yugoslavskiy, oscd.community
+date: 2019/10/24
+modified: 2021/09/21
+tags:
+    - attack.exfiltration
+    - attack.t1048 # an old one
+    - attack.t1048.003
+    - attack.command_and_control
+    - attack.t1071 # an old one
+    - attack.t1071.004
+logsource:
+    category: firewall
+detection:
+    selection:    
+        dst_port: 53
+    timeframe: 1m
+    condition: selection | count() by src_ip > 1000
+falsepositives:
+    - Legitimate high DNS requests rate to domain name which should be added to whitelist
+level: medium

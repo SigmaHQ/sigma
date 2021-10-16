@@ -1,0 +1,213 @@
+title: Autorun Keys Modification
+id: 17f878b8-9968-4578-b814-c4217fc5768c
+description: Detects modification of autostart extensibility point (ASEP) in registry.
+status: experimental
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1547.001/T1547.001.md
+    - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
+    - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
+tags:
+    - attack.persistence
+    - attack.t1547.001
+    - attack.t1060      # an old one
+date: 2019/10/25
+modified: 2020/11/04
+author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community
+logsource:
+    category: registry_event
+    product: windows
+level: medium
+detection:
+    main_selection:
+        TargetObject|contains:
+            - '\SOFTWARE\Wow6432Node\Microsoft\Windows CE Services\AutoStart'
+            - '\Software\Wow6432Node\Microsoft\Command Processor\Autorun'
+            - '\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components'
+            - '\SOFTWARE\Microsoft\Windows CE Services\AutoStartOnDisconnect'
+            - '\SOFTWARE\Microsoft\Windows CE Services\AutoStartOnConnect'
+            - '\SYSTEM\Setup\CmdLine'
+            - '\Software\Microsoft\Ctf\LangBarAddin'
+            - '\Software\Microsoft\Command Processor\Autorun'
+            - '\SOFTWARE\Microsoft\Active Setup\Installed Components'
+            - '\SOFTWARE\Classes\Protocols\Handler'
+            - '\SOFTWARE\Classes\Protocols\Filter'
+            - '\SOFTWARE\Classes\Htmlfile\Shell\Open\Command\(Default)'
+            - '\Environment\UserInitMprLogonScript'
+            - '\SOFTWARE\Policies\Microsoft\Windows\Control Panel\Desktop\Scrnsave.exe'
+            - '\Software\Microsoft\Internet Explorer\UrlSearchHooks'
+            - '\SOFTWARE\Microsoft\Internet Explorer\Desktop\Components'
+            - '\Software\Classes\Clsid\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\Inprocserver32'
+            - '\Control Panel\Desktop\Scrnsave.exe'
+    session_manager_base:
+        TargetObject|contains: '\System\CurrentControlSet\Control\Session Manager'
+    session_manager:
+        TargetObject|contains:
+            - '\SetupExecute'
+            - '\S0InitialCommand'
+            - '\KnownDlls'
+            - '\Execute'
+            - '\BootExecute'
+            - '\AppCertDlls'
+    current_version_base:
+        TargetObject|contains: '\SOFTWARE\Microsoft\Windows\CurrentVersion'
+    current_version:
+        TargetObject|contains:
+            - '\ShellServiceObjectDelayLoad'
+            - '\Run'
+            - '\Policies\System\Shell'
+            - '\Policies\Explorer\Run'
+            - '\Group Policy\Scripts\Startup'
+            - '\Group Policy\Scripts\Shutdown'
+            - '\Group Policy\Scripts\Logon'
+            - '\Group Policy\Scripts\Logoff'
+            - '\Explorer\ShellServiceObjects'
+            - '\Explorer\ShellIconOverlayIdentifiers'
+            - '\Explorer\ShellExecuteHooks'
+            - '\Explorer\SharedTaskScheduler'
+            - '\Explorer\Browser Helper Objects'
+            - '\Authentication\PLAP Providers'
+            - '\Authentication\Credential Providers'
+            - '\Authentication\Credential Provider Filters'
+    nt_current_version_base:
+        TargetObject|contains: '\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
+    nt_current_version:
+        TargetObject|contains:
+            - '\Winlogon\VmApplet'
+            - '\Winlogon\Userinit'
+            - '\Winlogon\Taskman'
+            - '\Winlogon\Shell'
+            - '\Winlogon\GpExtensions'
+            - '\Winlogon\AppSetup'
+            - '\Winlogon\AlternateShells\AvailableShells'
+            - '\Windows\IconServiceLib'
+            - '\Windows\Appinit_Dlls'
+            - '\Image File Execution Options'
+            - '\Font Drivers'
+            - '\Drivers32'
+            - '\Windows\Run'
+            - '\Windows\Load'
+    wow_current_version_base:
+        TargetObject|contains: '\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion'
+    wow_current_version:
+        TargetObject|contains:
+            - '\ShellServiceObjectDelayLoad'
+            - '\Run'
+            - '\Explorer\ShellServiceObjects'
+            - '\Explorer\ShellIconOverlayIdentifiers'
+            - '\Explorer\ShellExecuteHooks'
+            - '\Explorer\SharedTaskScheduler'
+            - '\Explorer\Browser Helper Objects'
+    wow_nt_current_version_base:
+        TargetObject|contains: '\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion'
+    wow_nt_current_version:
+        TargetObject|contains:
+            - '\Windows\Appinit_Dlls'
+            - '\Image File Execution Options'
+            - '\Drivers32'
+    wow_office:
+        TargetObject|contains: '\Software\Wow6432Node\Microsoft\Office'
+    office:
+        TargetObject|contains: '\Software\Microsoft\Office'
+    wow_office_details:
+        TargetObject|contains:
+            - '\Word\Addins'
+            - '\PowerPoint\Addins'
+            - '\Outlook\Addins'
+            - '\Onenote\Addins'
+            - '\Excel\Addins'
+            - '\Access\Addins'
+            - 'test\Special\Perf'
+    wow_ie:
+        TargetObject|contains: '\Software\Wow6432Node\Microsoft\Internet Explorer'
+    ie:
+        TargetObject|contains: '\Software\Microsoft\Internet Explorer'
+    wow_ie_details:
+        TargetObject|contains:
+            - '\Toolbar'
+            - '\Extensions'
+            - '\Explorer Bars'
+    wow_classes_base:
+        TargetObject|contains: '\Software\Wow6432Node\Classes'
+    wow_classes:
+        TargetObject|contains:
+            - '\Folder\ShellEx\ExtShellFolderViews'
+            - '\Folder\ShellEx\DragDropHandlers'
+            - '\Folder\ShellEx\ColumnHandlers'
+            - '\Directory\Shellex\DragDropHandlers'
+            - '\Directory\Shellex\CopyHookHandlers'
+            - '\CLSID\{AC757296-3522-4E11-9862-C17BE5A1767E}\Instance'
+            - '\CLSID\{ABE3B9A4-257D-4B97-BD1A-294AF496222E}\Instance'
+            - '\CLSID\{7ED96837-96F0-4812-B211-F13C24117ED3}\Instance'
+            - '\CLSID\{083863F1-70DE-11d0-BD40-00A0C911CE86}\Instance'
+            - '\AllFileSystemObjects\ShellEx\DragDropHandlers'
+            - '\ShellEx\PropertySheetHandlers'
+            - '\ShellEx\ContextMenuHandlers'
+    classes_base:
+        TargetObject|contains: '\Software\Classes'
+    classes:
+        TargetObject|contains:
+            - '\Folder\ShellEx\ExtShellFolderViews'
+            - '\Folder\ShellEx\DragDropHandlers'
+            - '\Folder\Shellex\ColumnHandlers'
+            - '\Filter'
+            - '\Exefile\Shell\Open\Command\(Default)'
+            - '\Directory\Shellex\DragDropHandlers'
+            - '\Directory\Shellex\CopyHookHandlers'
+            - '\CLSID\{AC757296-3522-4E11-9862-C17BE5A1767E}\Instance'
+            - '\CLSID\{ABE3B9A4-257D-4B97-BD1A-294AF496222E}\Instance'
+            - '\CLSID\{7ED96837-96F0-4812-B211-F13C24117ED3}\Instance'
+            - '\CLSID\{083863F1-70DE-11d0-BD40-00A0C911CE86}\Instance'
+            - '\Classes\AllFileSystemObjects\ShellEx\DragDropHandlers'
+            - '\.exe'
+            - '\.cmd'
+            - '\ShellEx\PropertySheetHandlers'
+            - '\ShellEx\ContextMenuHandlers'
+    scripts_base:
+        TargetObject|contains: '\Software\Policies\Microsoft\Windows\System\Scripts'
+    scripts:
+        TargetObject|contains:
+            - '\Startup'
+            - '\Shutdown'
+            - '\Logon'
+            - '\Logoff'
+    winsock_parameters_base:
+        TargetObject|contains: '\System\CurrentControlSet\Services\WinSock2\Parameters'
+    winsock_parameters:
+        TargetObject|contains:
+            - '\Protocol_Catalog9\Catalog_Entries'
+            - '\NameSpace_Catalog5\Catalog_Entries'
+    system_control_base:
+        TargetObject|contains: '\SYSTEM\CurrentControlSet\Control'
+    system_control:
+        TargetObject|contains:
+            - '\Terminal Server\WinStations\RDP-Tcp\InitialProgram'
+            - '\Terminal Server\Wds\rdpwd\StartupPrograms'
+            - '\SecurityProviders\SecurityProviders'
+            - '\SafeBoot\AlternateShell'
+            - '\Print\Providers'
+            - '\Print\Monitors'
+            - '\NetworkProvider\Order'
+            - '\Lsa\Notification Packages'
+            - '\Lsa\Authentication Packages'
+            - '\BootVerificationProgram\ImagePath'
+    condition: main_selection or
+               session_manager_base and session_manager or
+               current_version_base and current_version or
+               nt_current_version_base and nt_current_version or
+               wow_current_version_base and wow_current_version or
+               wow_nt_current_version_base and wow_nt_current_version or
+               (wow_office or office) and wow_office_details or
+               (wow_ie or ie) and wow_ie_details or
+               wow_classes_base and wow_classes or
+               classes_base and classes or
+               scripts_base and scripts or
+               winsock_parameters_base and winsock_parameters or
+               system_control_base and system_control
+fields:
+    - SecurityID
+    - ObjectName
+    - OldValueType
+    - NewValueType
+falsepositives:
+    - Legitimate software automatically (mostly, during installation) sets up autorun keys for legitimate reason
+    - Legitimate administrator sets up autorun keys for legitimate reason

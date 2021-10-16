@@ -25,7 +25,7 @@ from sigma.tools import getAllSubclasses, getClassDict
 def getBackendList():
     """Return list of backend classes"""
     path = os.path.dirname(__file__)
-    return frozenset(getAllSubclasses(path, "backends", BaseBackend))
+    return getAllSubclasses(path, "backends", BaseBackend)
 
 def getBackendDict():
     return getClassDict(getBackendList())

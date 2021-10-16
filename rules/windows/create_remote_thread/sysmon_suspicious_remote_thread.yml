@@ -1,0 +1,83 @@
+title: Suspicious Remote Thread Created
+id: 66d31e5f-52d6-40a4-9615-002d3789a119
+description: Offensive tradecraft is switching away from using APIs like "CreateRemoteThread", however, this is still largely observed in the wild. This rule aims
+    to detect suspicious processes (those we would not expect to behave in this way like word.exe or outlook.exe) creating remote threads on other processes. It is
+    a generalistic rule, but it should have a low FP ratio due to the selected range of processes.
+notes:
+    - MonitoringHost.exe is a process that loads .NET CLR by default and thus a favorite for process injection for .NET in-memory offensive tools.
+status: experimental
+date: 2019/10/27
+modified: 2021/06/27
+author: Perez Diego (@darkquassar), oscd.community
+references:
+    - Personal research, statistical analysis
+    - https://lolbas-project.github.io
+logsource:
+    product: windows
+    category: create_remote_thread
+tags:
+    - attack.privilege_escalation
+    - attack.defense_evasion
+    - attack.t1055
+detection:
+    selection: 
+        SourceImage|endswith:
+            - '\bash.exe'
+            - '\cvtres.exe'
+            - '\defrag.exe'
+            - '\dnx.exe'
+            - '\esentutl.exe'
+            - '\excel.exe'
+            - '\expand.exe'
+            - '\explorer.exe'
+            - '\find.exe'
+            - '\findstr.exe'
+            - '\forfiles.exe'
+            - '\git.exe'
+            - '\gpupdate.exe'
+            - '\hh.exe'
+            - '\iexplore.exe'
+            - '\installutil.exe'
+            - '\lync.exe'
+            - '\makecab.exe'
+            - '\mDNSResponder.exe'
+            - '\monitoringhost.exe'
+            - '\msbuild.exe'
+            - '\mshta.exe'
+            - '\msiexec.exe'
+            - '\mspaint.exe'
+            - '\outlook.exe'
+            - '\ping.exe'
+            - '\powerpnt.exe'
+            - '\powershell.exe'
+            - '\provtool.exe'
+            - '\python.exe'
+            - '\regsvr32.exe'
+            - '\robocopy.exe'
+            - '\runonce.exe'
+            - '\sapcimc.exe'
+            - '\schtasks.exe'
+            - '\smartscreen.exe'
+            - '\spoolsv.exe'
+            # - '\taskhost.exe'  # disabled due to false positives
+            - '\tstheme.exe'
+            - '\userinit.exe'
+            - '\vssadmin.exe'
+            - '\vssvc.exe'
+            - '\w3wp.exe'       
+            - '\winlogon.exe'
+            - '\winscp.exe'
+            - '\wmic.exe'
+            - '\word.exe'
+            - '\wscript.exe'
+    filter:
+        SourceImage|contains: 'Visual Studio'
+    condition: selection and not filter
+fields:
+    - ComputerName
+    - User
+    - SourceImage
+    - TargetImage
+level: high
+falsepositives:
+    - Unknown

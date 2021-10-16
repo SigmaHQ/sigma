@@ -1,0 +1,35 @@
+title: System Information Discovery
+id: 1f358e2e-cb63-43c3-b575-dfb072a6814f
+related:
+    - id: 42df45e7-e6e9-43b5-8f26-bec5b39cc239
+      type: derived
+status: stable
+description: Detects system information discovery commands
+author: Ömer Günal, oscd.community
+date: 2020/10/08
+modified: 2021/09/14
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1082/T1082.md
+tags:
+    - attack.discovery
+    - attack.t1082
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+      type: 'PATH'
+      name:
+          - '/sys/class/dmi/id/bios_version'
+          - '/sys/class/dmi/id/product_name'
+          - '/sys/class/dmi/id/chassis_vendor'
+          - '/proc/scsi/scsi'
+          - '/proc/ide/hd0/model'
+          - '/proc/version'
+          - '/etc/*version'
+          - '/etc/*release'
+          - '/etc/issue'
+    condition: selection
+falsepositives:
+    - Legitimate administration activities
+level: informational

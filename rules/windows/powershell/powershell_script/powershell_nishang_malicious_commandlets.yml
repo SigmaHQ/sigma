@@ -1,0 +1,96 @@
+title: Malicious Nishang PowerShell Commandlets
+id: f772cee9-b7c2-4cb2-8f07-49870adc02e0
+status: experimental
+description: Detects Commandlet names and arguments from the Nishang exploitation framework
+date: 2019/05/16
+modified: 2021/08/21
+references:
+    - https://github.com/samratashok/nishang
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1086  #an old one
+author: Alec Costello
+logsource:
+    product: windows
+    service: powershell
+    definition: Script block logging must be enabled
+detection:
+    Nishang:
+        EventID: 4104
+        ScriptBlockText|contains:
+            - Add-ConstrainedDelegationBackdoor
+            - Set-DCShadowPermissions
+            - DNS_TXT_Pwnage
+            - Execute-OnTime
+            - HTTP-Backdoor
+            - Set-RemotePSRemoting
+            - Set-RemoteWMI
+            - Invoke-AmsiBypass
+            - Out-CHM
+            - Out-HTA
+            - Out-SCF
+            - Out-SCT
+            - Out-Shortcut
+            - Out-WebQuery
+            - Out-Word
+            - Enable-Duplication
+            - Remove-Update
+            - Download-Execute-PS
+            - Download_Execute
+            - Execute-Command-MSSQL
+            - Execute-DNSTXT-Code
+            - Out-RundllCommand
+            - Copy-VSS
+            - FireBuster
+            - FireListener
+            - Get-Information
+            - Get-PassHints
+            - Get-WLAN-Keys
+            - Get-Web-Credentials
+            - Invoke-CredentialsPhish
+            - Invoke-MimikatzWDigestDowngrade
+            - Invoke-SSIDExfil
+            - Invoke-SessionGopher
+            - Keylogger
+            - Invoke-Interceptor
+            - Create-MultipleSessions
+            - Invoke-NetworkRelay
+            - Run-EXEonRemote
+            - Invoke-Prasadhak
+            - Invoke-BruteForce
+            - Password-List
+            - Invoke-JSRatRegsvr
+            - Invoke-JSRatRundll
+            - Invoke-PoshRatHttps
+            - Invoke-PowerShellIcmp
+            - Invoke-PowerShellUdp
+            - Invoke-PSGcat
+            - Invoke-PsGcatAgent
+            - Remove-PoshRat
+            - Add-Persistance
+            - ExetoText
+            - Invoke-Decode
+            - Invoke-Encode
+            - Parse_Keys
+            - Remove-Persistence
+            - StringtoBase64
+            - TexttoExe
+            - Powerpreter
+            - Nishang
+            - DataToEncode
+            - LoggedKeys
+            - OUT-DNSTXT
+            # - Jitter  # Prone to FPs
+            - ExfilOption
+            - DumpCerts
+            - DumpCreds
+            - Shellcode32
+            - Shellcode64
+            - NotAllNameSpaces
+            - exfill
+            - FakeDC
+    condition: Nishang
+falsepositives:
+    - Penetration testing
+level: high

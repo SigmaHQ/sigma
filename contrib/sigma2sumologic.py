@@ -124,7 +124,7 @@ def get_rule_as_sumologic(file):
     return "".join(output)
 
 if args.help:
-    parser_print_help()
+    parser.print_help()
 
 if args.conf:
     with open(args.conf, 'r') as ymlfile:
@@ -218,7 +218,7 @@ for file in glob.iglob(globpath, recursive=True):
     except Exception as e:
         if args.debug:
             traceback.print_exc()
-        logger.exception("error seaching sumo  " + str(file) + "----" + str(e))
+        logger.exception("error searching sumo  " + str(file) + "----" + str(e))
         with open(os.path.join(args.outdir, "sigma-" + file_basename + '-error.txt'), "w") as f:
             # f.write(json.dumps(r, indent=4, sort_keys=True) + " ERROR: %s\n\nQUERY: %s" % (e, sumo_query))
             f.write(" ERROR: %s\n\nQUERY: %s" % (e, sumo_query))

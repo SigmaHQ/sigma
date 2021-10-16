@@ -1,0 +1,149 @@
+title: Malicious PowerView PowerShell Commandlets
+id: dcd74b95-3f36-4ed9-9598-0490951643aa
+status: experimental
+description: Detects Commandlet names from PowerView of PowerSploit exploitation framework.
+date: 2021/05/18
+modified: 2021/08/21
+references:
+    - https://powersploit.readthedocs.io/en/stable/Recon/README
+    - https://github.com/PowerShellMafia/PowerSploit/tree/master/Recon
+    - https://thedfirreport.com/2020/10/08/ryuks-return
+    - https://adsecurity.org/?p=2277
+tags:
+    - attack.execution
+    - attack.t1059.001
+author: Bhabesh Raj
+logsource:
+    product: windows
+    service: powershell
+    definition: Script Block Logging must be enable
+detection:
+  selection:
+      EventID: 4104
+      ScriptBlockText|contains:
+        - Export-PowerViewCSV
+        - Get-IPAddress
+        - Resolve-IPAddress
+        - Convert-NameToSid
+        - ConvertTo-SID
+        - Convert-ADName
+        - ConvertFrom-UACValue
+        - Add-RemoteConnection
+        - Remove-RemoteConnection
+        - Invoke-UserImpersonation
+        - Invoke-RevertToSelf
+        - Request-SPNTicket
+        - Get-DomainSPNTicket
+        - Invoke-Kerberoast
+        - Get-PathAcl
+        - Get-DNSZone
+        - Get-DomainDNSZone
+        - Get-DNSRecord
+        - Get-DomainDNSRecord
+        - Get-NetDomain
+        - Get-Domain
+        - Get-NetDomainController
+        - Get-DomainController
+        - Get-NetForest
+        - Get-Forest
+        - Get-NetForestDomain
+        - Get-ForestDomain
+        - Get-NetForestCatalog
+        - Get-ForestGlobalCatalog
+        - Find-DomainObjectPropertyOutlier
+        - Get-NetUser
+        - Get-DomainUser
+        - New-DomainUser
+        - Set-DomainUserPassword
+        - Get-UserEvent
+        - Get-DomainUserEvent
+        - Get-NetComputer
+        - Get-DomainComputer
+        - Get-ADObject
+        - Get-DomainObject
+        - Set-ADObject
+        - Set-DomainObject
+        - Get-ObjectAcl
+        - Get-DomainObjectAcl
+        - Add-ObjectAcl
+        - Add-DomainObjectAcl
+        - Invoke-ACLScanner
+        - Find-InterestingDomainAcl
+        - Get-NetOU
+        - Get-DomainOU
+        - Get-NetSite
+        - Get-DomainSite
+        - Get-NetSubnet
+        - Get-DomainSubnet
+        - Get-DomainSID
+        - Get-NetGroup
+        - Get-DomainGroup
+        - New-DomainGroup
+        - Find-ManagedSecurityGroups
+        - Get-DomainManagedSecurityGroup
+        - Get-NetGroupMember
+        - Get-DomainGroupMember
+        - Add-DomainGroupMember
+        - Get-NetFileServer
+        - Get-DomainFileServer
+        - Get-DFSshare
+        - Get-DomainDFSShare
+        - Get-NetGPO
+        - Get-DomainGPO
+        - Get-NetGPOGroup
+        - Get-DomainGPOLocalGroup
+        - Find-GPOLocation
+        - Get-DomainGPOUserLocalGroupMapping
+        - Find-GPOComputerAdmin
+        - Get-DomainGPOComputerLocalGroupMapping
+        - Get-DomainPolicy
+        - Get-NetLocalGroup
+        - Get-NetLocalGroupMember
+        - Get-NetShare
+        - Get-NetLoggedon
+        - Get-NetSession
+        - Get-LoggedOnLocal
+        - Get-RegLoggedOn
+        - Get-NetRDPSession
+        - Invoke-CheckLocalAdminAccess
+        - Test-AdminAccess
+        - Get-SiteName
+        - Get-NetComputerSiteName
+        - Get-Proxy
+        - Get-WMIRegProxy
+        - Get-LastLoggedOn
+        - Get-WMIRegLastLoggedOn
+        - Get-CachedRDPConnection
+        - Get-WMIRegCachedRDPConnection
+        - Get-RegistryMountedDrive
+        - Get-WMIRegMountedDrive
+        - Get-NetProcess
+        - Get-WMIProcess
+        - Find-InterestingFile
+        - Invoke-UserHunter
+        - Find-DomainUserLocation
+        - Invoke-ProcessHunter
+        - Find-DomainProcess
+        - Invoke-EventHunter
+        - Find-DomainUserEvent
+        - Invoke-ShareFinder
+        - Find-DomainShare
+        - Invoke-FileFinder
+        - Find-InterestingDomainShareFile
+        - Find-LocalAdminAccess
+        - Invoke-EnumerateLocalAdmin
+        - Find-DomainLocalGroupMember
+        - Get-NetDomainTrust
+        - Get-DomainTrust
+        - Get-NetForestTrust
+        - Get-ForestTrust
+        - Find-ForeignUser
+        - Get-DomainForeignUser
+        - Find-ForeignGroup
+        - Get-DomainForeignGroupMember
+        - Invoke-MapDomainTrust
+        - Get-DomainTrustMapping
+  condition: selection
+falsepositives:
+    - Should not be any as administrators do not use this tool
+level: high

@@ -1,0 +1,45 @@
+title: Windows Registry Persistence COM Search Order Hijacking
+id: a0ff33d8-79e4-4cef-b4f3-9dc4133ccd12
+status: experimental
+description: Detects potential COM object hijacking leveraging the COM Search Order
+references:
+    - https://www.cyberbit.com/blog/endpoint-security/com-hijacking-windows-overlooked-security-vulnerability/
+author: Maxime Thiebaut (@0xThiebaut), oscd.community, Cédric Hien
+date: 2020/04/14
+modified: 2021/09/16
+tags:
+    - attack.persistence
+    - attack.t1038 # an old one
+    - attack.t1574.001
+logsource:
+    category: registry_event
+    product: windows
+detection:
+    selection: # Detect new COM servers in the user hive
+        TargetObject|startswith: 
+            - 'HKCR\CLSID\'
+            - 'HKCU\Software\Classes\CLSID\'
+        TargetObject|endswith: '\InprocServer32\(Default)'
+    filter1:
+        Details|contains: # Exclude privileged directories and observed FPs
+            - '%%systemroot%%\system32\'
+            - '%%systemroot%%\SysWow64\'
+    filterOneDrive:
+        Details|contains: '\AppData\Local\Microsoft\OneDrive\'
+    filterOneDrive2:
+        Details|contains:
+            - '\FileCoAuthLib64.dll'
+            - '\FileSyncShell64.dll'
+            - '\FileSyncApi64.dll'
+    filter2:
+        Details|contains|all:
+            - '\AppData\Local\Microsoft\TeamsMeetingAddin\'
+            - '\Microsoft.Teams.AddinLoader.dll'
+    filter3:
+        Details|contains|all:
+            - '\AppData\Roaming\Dropbox\'
+            - '\DropboxExt64.*.dll'
+    condition: selection and not ( filter1 or ( filterOneDrive and filterOneDrive2 ) or filter2 or filter3 )
+falsepositives:
+    - Some installed utilities (i.e. OneDrive) may serve new COM objects at user-level
+level: medium

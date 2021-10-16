@@ -23,7 +23,7 @@ from sigma.config.exceptions import SigmaConfigParseError
 
 class SigmaConfigurationManager(object):
     """
-    Locate Sigma configuration files in a directory and provide them as well as informations
+    Locate Sigma configuration files in a directory and provide them as well as information
     about them.
     """
     re_identifier = re.compile("^[\\w-]+$")
@@ -51,7 +51,7 @@ class SigmaConfigurationManager(object):
                         if path.exists()
                     ]
         elif isinstance(paths, Iterable) and all([type(path) is str for path in paths]):
-            self.paths = paths
+            self.paths = [Path(path) for path in paths]
         else:
             raise TypeError("None or iterable of strings expected as paths")
 

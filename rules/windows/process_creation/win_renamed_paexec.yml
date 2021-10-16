@@ -7,10 +7,12 @@ references:
     - https://summit.fireeye.com/content/dam/fireeye-www/summit/cds-2018/presentations/cds18-technical-s05-att&cking-fin7.pdf
 tags:
     - attack.defense_evasion
-    - attack.t1036
-    - FIN7
+    - attack.t1036 # an old one
+    - attack.t1036.003
+    - attack.g0046
     - car.2013-05-009
 date: 2019/04/17
+modified: 2020/09/06
 author: Jason Lynch 
 falsepositives:
     - Unknown imphashes
@@ -20,8 +22,8 @@ logsource:
     product: windows
 detection:
     selection1:
-        Product:
-            - '*PAExec*'
+        Product|contains:
+            - 'PAExec'
     selection2:
         Imphash:
             - 11D40A7B7876288F919AB819CC2D9802
@@ -29,5 +31,5 @@ detection:
             - dfd6aa3f7b2b1035b76b718f1ddc689f
             - 1a6cca4d5460b1710a12dea39e4a592c
     filter1:
-        Image: '*paexec*'
+        Image|contains: 'paexec'
     condition: (selection1 and selection2) and not filter1

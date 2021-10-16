@@ -1,0 +1,25 @@
+title: PowerShell PSAttack
+id: b7ec41a4-042c-4f31-a5db-d0fcde9fa5c5
+status: experimental
+description: Detects the use of PSAttack PowerShell hack tool
+references:
+    - https://adsecurity.org/?p=2921
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1086  #an old one
+author: Sean Metcalf (source), Florian Roth (rule)
+date: 2017/03/05
+modified: 2021/08/21
+logsource:
+    product: windows
+    service: powershell
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        EventID: 4104
+        ScriptBlockText|contains: 'PS ATTACK!!!'
+    condition: selection
+falsepositives:
+    - Pentesters
+level: high

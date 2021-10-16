@@ -1,0 +1,31 @@
+title: Windows Defender Download Activity
+id: 46123129-1024-423e-9fae-43af4a0fa9a5
+status: experimental
+description: Detect the use of Windows Defender to download payloads 
+author: Matthew Matchen
+date: 2020/09/04
+references:
+    - https://twitter.com/djmtshepana/status/1301608169496612866
+    - https://lolbas-project.github.io/lolbas/Binaries/MpCmdRun/
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+    - attack.command_and_control
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        - CommandLine|contains: 'MpCmdRun.exe'
+        - Description: 'Microsoft Malware Protection Command Line Utility'
+    selection2:
+        CommandLine|contains|all: 
+            - 'DownloadFile'
+            - 'url'
+    condition: selection1 and selection2
+fields:
+    - CommandLine
+falsepositives:
+    - Unknown
+level: high

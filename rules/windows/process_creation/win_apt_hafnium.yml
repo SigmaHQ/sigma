@@ -1,0 +1,76 @@
+title: Exchange Exploitation Activity
+id: bbb2dedd-a0e3-46ab-ba6c-6c82ae7a9aa7
+description: Detects activity observed by different researchers to be HAFNIUM group activity (or related) on Exchange servers
+author: Florian Roth
+date: 2021/03/09
+modified: 2021/03/16
+status: experimental
+references:
+    - https://blog.truesec.com/2021/03/07/exchange-zero-day-proxylogon-and-hafnium/
+    - https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers/
+    - https://discuss.elastic.co/t/detection-and-response-for-hafnium-activity/266289/3
+    - https://twitter.com/GadixCRK/status/1369313704869834753?s=20
+    - https://twitter.com/BleepinComputer/status/1372218235949617161
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        CommandLine|contains|all:
+            - 'attrib'
+            - ' +h '
+            - ' +s '
+            - ' +r '
+            - '.aspx'
+    selection2:
+        CommandLine|contains|all:
+            - 'schtasks'
+            - 'VSPerfMon'
+    selection3:
+        CommandLine|contains|all:
+            - 'vssadmin list shadows'
+            - 'Temp\__output'
+    selection4: 
+        CommandLine|contains: '%TEMP%\execute.bat'
+    selection5:
+        Image|endswith: 'Users\Public\opera\Opera_browser.exe'
+    selection6:
+        Image|endswith: 'Opera_browser.exe'
+        ParentImage|endswith:
+            - '\services.exe'
+            - '\svchost.exe'
+    selection7:
+        Image|contains: '\ProgramData\VSPerfMon\'
+    selection8:
+        CommandLine|contains|all:
+            - ' -t7z '
+            - 'C:\Programdata\pst'
+            - '\it.zip'
+    selection9:
+        Image|endswith: '\makecab.exe'
+        CommandLine|contains:
+            - 'Microsoft\Exchange Server\'
+            - 'inetpub\wwwroot'
+    selection10:
+        CommandLine|contains: 
+            - '\Temp\xx.bat'
+            - 'Windows\WwanSvcdcs'
+            - 'Windows\Temp\cw.exe'
+    selection11: 
+        CommandLine|contains|all:
+            - '\comsvcs.dll'
+            - 'Minidump'
+            - '\inetpub\wwwroot'
+    selection12:
+        CommandLine|contains|all:
+            - 'dsquery'
+            - ' -uco '
+            - '\inetpub\wwwroot'
+    condition: 1 of them
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.persistence 
+    - attack.t1546
+    - attack.t1053 

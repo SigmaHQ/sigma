@@ -1,0 +1,28 @@
+title: AWS STS AssumeRole Misuse
+id: 905d389b-b853-46d0-9d3d-dea0d3a3cd49
+description: Identifies the suspicious use of AssumeRole. Attackers could move laterally and escalate privileges.
+author: Austin Songer @austinsonger
+status: experimental
+date: 2021/07/24
+modified: 2021/08/20
+references:
+    - https://github.com/elastic/detection-rules/pull/1214
+    - https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html
+logsource:
+    service: cloudtrail
+detection:
+    selection:
+        userIdentity.type: AssumedRole
+        userIdentity.sessionContext.sessionIssuer.type: Role
+    condition: selection
+level: low
+tags:
+    - attack.lateral_movement
+    - attack.privilege_escalation
+    - attack.t1548
+    - attack.t1550
+    - attack.t1550.001
+falsepositives:
+    - AssumeRole may be done by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment.
+    - AssumeRole from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule.
+    - Automated processes that uses Terraform may lead to false positives.

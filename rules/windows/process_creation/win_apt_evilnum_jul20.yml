@@ -1,0 +1,29 @@
+title: EvilNum Golden Chickens Deployment via OCX Files
+id: 8acf3cfa-1e8c-4099-83de-a0c4038e18f0
+status: experimental
+description: Detects Golden Chickens deployment method as used by Evilnum in report published in July 2020
+references:
+    - https://www.welivesecurity.com/2020/07/09/more-evil-deep-look-evilnum-toolset/
+    - https://app.any.run/tasks/33d37fdf-158d-4930-aa68-813e1d5eb8ba/
+author: Florian Roth
+date: 2020/07/10
+modified: 2020/08/27
+tags:
+    - attack.defense_evasion
+    - attack.t1085 # an old one
+    - attack.t1218.011
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains|all: 
+            - 'regsvr32'
+            - '/s'
+            - '/i'
+            - '\AppData\Roaming\'
+            - '.ocx'
+    condition: selection
+falsepositives:
+    - Unknown
+level: critical

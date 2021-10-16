@@ -16,7 +16,7 @@
 
 import re
 from .exceptions import SigmaParseError
-from .condition import SigmaConditionTokenizer, SigmaConditionParser, ConditionAND, ConditionOR, ConditionNULLValue
+from .condition import SigmaConditionTokenizer, SigmaConditionParser, ConditionAND, ConditionOR, ConditionNULLValue, SigmaSearchValueAsIs
 from .modifiers import apply_modifiers
 
 class SigmaParser:
@@ -90,7 +90,7 @@ class SigmaParser:
                 if isinstance(value, (ConditionAND, ConditionOR)):    # value is condition node (by transformation modifier)
                     value.items = [ mapping.resolve(key, item, self) for item in value.items ]
                     cond.add(value)
-                else:           # plain value or something unexpected (catched by backends)
+                else:           # plain value or something unexpected (caught by backends)
                     mapped = mapping.resolve(key, value, self)
                     cond.add(mapped)
 
@@ -134,26 +134,27 @@ class SigmaParser:
 
         return self.config.get_logsource(category, product, service)
 
+    def build_conditions(self, condition_func, items):
+        cond = condition_func()
+        for item in items:
+            if type(item) is list:
+                cond.add(self.build_conditions(ConditionAND, item))
+            else:
+                mapping = self.config.get_fieldmapping(item[0])
+                cond.add(mapping.resolve(item[0], item[1], self))
+
+        return cond
+
     def get_logsource_condition(self):
         logsource = self.get_logsource()
         if logsource is None:
             return None
         else:
-            if logsource.merged:    # Merged log source, flatten nested list of condition items
-                kvconds = [ item for sublscond in logsource.conditions for item in sublscond ]
-            else:                   # Simple log sources already contain flat list of conditions items
-                kvconds = logsource.conditions
-
-            # Apply field mappings
-            mapped_kvconds = list()
-            for field, value in kvconds:
-                mapping = self.config.get_fieldmapping(field)
-                mapped_kvconds.append(mapping.resolve(field, value, self))
-
-            # AND-link condition items
             cond = ConditionAND()
-            for kvcond in mapped_kvconds:
-                cond.add(kvcond)
+            if self.config.get_logsourcemerging() == 'or':
+                cond.add(self.build_conditions(ConditionOR,  logsource.conditions))
+            else:
+                cond.add(self.build_conditions(ConditionAND, logsource.conditions))
 
             # Add index condition if supported by backend and defined in log source
             index_field = self.config.get_indexfield()
@@ -166,5 +167,10 @@ class SigmaParser:
                     cond.add(index_cond)
                 else:           # only one index, add directly to AND from above
                     cond.add((index_field, indices[0]))
+
+            # Add free-text search condition, expressed in the configuration as 'search' field.
+            if len(logsource.search) > 0:
+                for item in logsource.search:
+                    cond.add(SigmaSearchValueAsIs(item))
 
             return cond

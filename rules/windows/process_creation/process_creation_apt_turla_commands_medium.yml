@@ -1,0 +1,34 @@
+title: Turla Group Lateral Movement
+id: 75925535-ca97-4e0a-a850-00b5c00779dc
+status: experimental
+description: Detects automated lateral movement by Turla group
+references:
+    - https://securelist.com/the-epic-turla-operation/65545/
+tags:
+    - attack.g0010
+    - attack.execution
+    - attack.t1059
+    - attack.lateral_movement
+    - attack.t1077 # an old one
+    - attack.t1021.002
+    - attack.discovery
+    - attack.t1083
+    - attack.t1135
+author: Markus Neis
+date: 2017/11/07
+modified: 2021/09/19
+logsource:
+    category: process_creation
+    product: windows
+detection:
+   netCommand1:
+      CommandLine: 'net view /DOMAIN'
+   netCommand2:
+      CommandLine: 'net session'
+   netCommand3:
+      CommandLine: 'net share'
+   timeframe: 1m
+   condition: netCommand1 | near netCommand2 and netCommand3
+level: medium
+falsepositives:
+   - Unknown

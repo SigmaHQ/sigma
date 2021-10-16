@@ -1,0 +1,28 @@
+title: 'Credentials In Files'
+id: df3fcaea-2715-4214-99c5-0056ea59eb35
+status: experimental
+description: 'Detecting attempts to extract passwords with grep'
+  # For this rule to work execve auditing must be configured
+  # Example config (place it at the bottom of audit.rules)
+  # -a always,exit -F arch=b32 -S execve -k execve
+  # -a always,exit -F arch=b64 -S execve -k execve
+author: 'Igor Fits, oscd.community'
+date: 2020/10/15
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1552.001/T1552.001.md
+logsource:
+    product: linux
+    service: auditd
+detection:
+    execve:
+        type: 'EXECVE'
+    passwordgrep:
+        - 'grep'
+        - 'password'
+    condition: execve and all of passwordgrep
+falsepositives:
+    - 'Unknown'
+level: high
+tags:
+    - attack.credential_access
+    - attack.t1552.001

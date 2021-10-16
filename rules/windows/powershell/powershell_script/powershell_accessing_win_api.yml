@@ -1,0 +1,72 @@
+title: Accessing WinAPI in PowerShell
+id: 03d83090-8cba-44a0-b02f-0b756a050306
+status: experimental
+description: Detecting use WinAPI Functions in PowerShell
+author: Nikita Nazarov, oscd.community
+date: 2020/10/06
+modified: 2021/08/04
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1106
+logsource:
+    product: windows
+    service: powershell
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        EventID: 4104
+        ScriptBlockText|contains:
+            - 'WaitForSingleObject'
+            - 'QueueUserApc'
+            - 'RtlCreateUserThread'
+            - 'OpenProcess'
+            - 'VirtualAlloc'
+            - 'VirtualFree'
+            - 'WriteProcessMemory'
+            - 'CreateUserThread'
+            - 'CloseHandle'
+            - 'GetDelegateForFunctionPointer'
+            - 'CreateThread'
+            - 'memcpy'
+            - 'LoadLibrary'
+            - 'GetModuleHandle'
+            - 'GetProcAddress'
+            - 'VirtualProtect'
+            - 'FreeLibrary'
+            - 'ReadProcessMemory'
+            - 'CreateRemoteThread'
+            - 'AdjustTokenPrivileges'
+            - 'WriteByte'
+            - 'WriteInt32'
+            - 'OpenThreadToken'
+            - 'PtrToString'
+            - 'FreeHGlobal'
+            - 'ZeroFreeGlobalAllocUnicode'
+            - 'OpenProcessToken'
+            - 'GetTokenInformation'
+            - 'SetThreadToken'
+            - 'ImpersonateLoggedOnUser'
+            - 'RevertToSelf'
+            - 'GetLogonSessionData'
+            - 'CreateProcessWithToken'
+            - 'DuplicateTokenEx'
+            - 'OpenWindowStation'
+            - 'OpenDesktop'
+            - 'MiniDumpWriteDump'
+            - 'AddSecurityPackage'
+            - 'EnumerateSecurityPackages'
+            - 'GetProcessHandle'
+            - 'DangerousGetHandle'
+            - 'kernel32'
+            - 'Advapi32'
+            - 'msvcrt'
+            - 'ntdll'
+            - 'user32'
+            - 'secur32'
+    condition: selection
+falsepositives:
+    - Carbon PowerShell Module (https://github.com/webmd-health-services/Carbon)
+level: high
