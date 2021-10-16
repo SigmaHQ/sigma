@@ -178,7 +178,7 @@ class CrowdStrikeBackend(SplunkBackend):
 
     def generate(self, sigmaparser):
         lgs = sigmaparser.parsedyaml.get("logsource")
-        if lgs.get("product") == "windows" and (lgs.get("service") == "sysmon" or lgs.get("category") == "process_creation"):
+        if lgs.get("product") == "windows" and (lgs.get("service") == "sysmon" or lgs.get("category") == "process_creation" or lgs.get("service") == "security"):
             fieldmappings = sigmaparser.config.fieldmappings
             detections = sigmaparser.definitions
             all_fields = dict()
