@@ -25,6 +25,18 @@ logsources:
     service: sysmon
     conditions:
       source: 'WinEventLog:Microsoft-Windows-Sysmon/Operational'
+  windows-process-creation:
+    product: windows
+    service: sysmon
+    category: process_creation
+    # Optimized search for process creation, being dramatically faster in Lispy than just EventCode=1 search, as 'ParentProcessGuid' is more unique than '1' in the raw data.
+    # This also supports custom splunk macros, just like they are written in splunk (i.e. as `macro`), minding that it has to be written inside the string quotes here.
+    search: 'ParentProcessGuid EventCode=1'
+  windows-process-creation:
+    product: windows
+    service: sysmon
+    category: file_creation
+    search: 'TargetFilename EventCode=11'
   windows-powershell:
     product: windows
     service: powershell
