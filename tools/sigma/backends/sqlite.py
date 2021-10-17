@@ -109,6 +109,7 @@ class SQLiteBackend(SQLBackend):
             return self.generateFTS(self.cleanValue(str(node)))
 
     def generateQuery(self, parsed):
+        self.countFTS = 0
         return self._generateQueryWithFields(parsed, list("*"))
 
     def checkFTS(self, parsed, result):
