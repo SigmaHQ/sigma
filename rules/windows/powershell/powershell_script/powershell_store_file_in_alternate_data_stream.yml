@@ -3,6 +3,7 @@ id: a699b30e-d010-46c8-bbd1-ee2e26765fe9
 status: experimental
 author: frack113
 date: 2021/09/02
+modified: 2021/10/16
 description: Storing files in Alternate Data Stream (ADS) similar to Astaroth malware.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1564.004/T1564.004.md
@@ -11,18 +12,16 @@ tags:
     - attack.t1564.004
 logsource:
     product: windows
-    service: powershell
+    category: ps_script
     definition: EnableScriptBlockLogging must be set to enable
 detection:
-    selection_id:
-        EventID: 4104
     selection_compspec:
         ScriptBlockText|contains|all: 
             - 'Start-Process'
             - '-FilePath "$env:comspec" '
             - '-ArgumentList '
             - '>'
-    condition: selection_id and selection_compspec
+    condition: selection_compspec
 falsepositives:
     - Unknown
 level: medium

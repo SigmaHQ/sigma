@@ -9,17 +9,15 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1562.001/T1562.001.md
 author: frack113
 date: 2021/06/07
-modified: 2021/08/16
+modified: 2021/10/16
 falsepositives:
     - Unknown
 level: high
 logsource:
     product: windows
-    service: powershell-classic
+    category: ps_classic_provider_start
     definition: fields have to be extract from event
 detection:
-    select_EventID:
-        EventID: 600
     tamper_ps_action:
         HostApplication|contains: 'Set-MpPreference'
     tamper_ps_option:
@@ -28,4 +26,4 @@ detection:
             - '-DisableBehaviorMonitoring 1'
             - '-DisableScriptScanning 1'
             - '-DisableBlockAtFirstSeen 1'
-    condition: select_EventID and tamper_ps_action and  tamper_ps_option
+    condition: tamper_ps_action and  tamper_ps_option
