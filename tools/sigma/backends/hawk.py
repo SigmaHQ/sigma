@@ -402,7 +402,9 @@ class HAWKBackend(SingleTextQueryBackend):
             raise Exception("Unknown type for false positives: ", type(sigmaparser.parsedyaml['falsepositives']))
 
         if 'references' in sigmaparser.parsedyaml:
-            cmt += "References: \n%s" % "\n".join(sigmaparser.parsedyaml['references']) 
+            ref = "%s\n" % "\n".join(sigmaparser.parsedyaml['references']) 
+        else:
+            ref = ''
         record = {
             "rules" : analytic, # analytic_txt.replace('"','""'),
             "filter_name" : sigmaparser.parsedyaml['title'],
@@ -412,8 +414,9 @@ class HAWKBackend(SingleTextQueryBackend):
             "enabled" : True,
             "public" : True,
             "comments" : cmt,
+            "references" : ref,
             "group_name" : ".",
-            "score_id" : sigmaparser.parsedyaml['id']
+            "hawk_id" : sigmaparser.parsedyaml['id']
         }
         if 'tags' in sigmaparser.parsedyaml:
             record["tags"] = sigmaparser.parsedyaml['tags']
