@@ -333,7 +333,6 @@ class HAWKBackend(SingleTextQueryBackend):
             timeframe_object['months'] = int(duration)
         return timeframe_object
 
-
     def generateBefore(self, parsed):
         if self.logname:
             return self.logname
