@@ -5,12 +5,13 @@ related:
       type: derived
 description: Detects disabling Windows Defender threat protection
 date: 2020/07/28
-modified: 2021/09/21
-author: Ján Trenčanský, frack113
+modified: 2021/10/18
+author: Ján Trenčanský, frack113, AlertIQ
 references:
     - https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-antivirus/troubleshoot-windows-defender-antivirus
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1562.001/T1562.001.md
-status: test
+    - https://thedfirreport.com/2021/10/18/icedid-to-xinglocker-ransomware-in-24-hours/
+status: experimental
 tags:
     - attack.defense_evasion
     - attack.t1089           # an old one
@@ -21,7 +22,9 @@ logsource:
 detection:
     tamper_registry:
         EventType: SetValue
-        TargetObject: 'HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\DisableAntiSpyware'
+        TargetObject: 
+            - 'HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\DisableAntiSpyware'
+            - 'HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\DisableAntiVirus'
         Details: 'DWORD (0x00000001)'
     selection2:
         TargetObject:
