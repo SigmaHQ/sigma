@@ -1,4 +1,19 @@
-# Output backends for sigmac - HAWK.io
+# Output backends for sigmac 
+# Copyright 2021 HAWK.io
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 
 
 import re
@@ -18,6 +33,7 @@ class HAWKBackend(SingleTextQueryBackend):
     config_required = False
     default_config = ["sysmon", "hawk"]
     reEscape = re.compile('(")')
+    logname = None
     reClear = None
     andToken = " , "
     orToken = " , "
@@ -63,6 +79,7 @@ class HAWKBackend(SingleTextQueryBackend):
             #print(node)
             return self.generateSubexpressionNode(node)
         elif type(node) == tuple:
+            #print("TUPLE: ", node)
             return self.generateMapItemNode(node, notNode)
         elif type(node) in (str, int):
             nodeRet = {"key": "",  "description": "", "class": "column", "return": "str", "args": { "comparison": { "value": "regex" }, "str": { "value": "5" } } }
@@ -156,7 +173,9 @@ class HAWKBackend(SingleTextQueryBackend):
         if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
             nodeRet['key'] = self.cleanKey(key).lower()
             nodeRet['description'] = key
-            if type(value) == str and "*" in value:
+            if key.lower() in ("logname","source"):
+                self.logname = value
+            elif type(value) == str and "*" in value:
                 # value = value.replace("*", ".*")
                 value = value.replace("*", "")
                 if notNode:
@@ -314,14 +333,52 @@ class HAWKBackend(SingleTextQueryBackend):
             timeframe_object['months'] = int(duration)
         return timeframe_object
 
+
+    def generateBefore(self, parsed):
+        if self.logname:
+            return self.logname
+        return self.logname
+
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
+        columns = list()
+        mapped =None
+        #print(sigmaparser.parsedyaml)
+        self.logsource = sigmaparser.parsedyaml.get("logsource") if sigmaparser.parsedyaml.get("logsource") else sigmaparser.parsedyaml.get("logsources", {})
+        fields = ""
+        try:
+            #print(sigmaparser.parsedyaml["fields"])
+            for field in sigmaparser.parsedyaml["fields"]:
+                mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
+                if type(mapped) == str:
+                    columns.append(mapped)
+                elif type(mapped) == list:
+                    columns.extend(mapped)
+                else:
+                    raise TypeError("Field mapping must return string or list")
+
+            fields = ",".join(str(x) for x in columns)
+            fields = " | table " + fields
+
+        except KeyError:    # no 'fields' attribute
+            mapped = None
+            pass
+
+        #print("Mapped: ", mapped)
         #print(sigmaparser.parsedyaml)
         #print(sigmaparser.condparsed)
+        #print("Columns: ", columns)
+        #print("Fields: ", fields)
+        #print("Logsource: " , self.logsource)
+
         for parsed in sigmaparser.condparsed:
             query = self.generateQuery(parsed, sigmaparser)
             before = self.generateBefore(parsed)
             after = self.generateAfter(parsed)
+
+            #print("Before: ", before)
+
+            #print("Query: ", query)
 
             result = ""
             if before is not None:
@@ -336,7 +393,6 @@ class HAWKBackend(SingleTextQueryBackend):
     def generateQuery(self, parsed, sigmaparser):
         self.sigmaparser = sigmaparser
         result = self.generateNode(parsed.parsedSearch)
-        self.parsedlogsource = sigmaparser.get_logsource().index
         """
         if any("flow" in i for i in self.parsedlogsource):
             aql_database = "flows"
@@ -345,12 +401,12 @@ class HAWKBackend(SingleTextQueryBackend):
         """
         prefix = ""
         ret = '[ { "id" : "and", "key": "And", "children" : ['
-        ret2 =" ] } ]"
-        """
+        ret2 = ' ] } ]'
         try:
             mappedFields = []
             for field in sigmaparser.parsedyaml["fields"]:
                     mapped = sigmaparser.config.get_fieldmapping(field).resolve_fieldname(field, sigmaparser)
+                    #print(mapped)
                     mappedFields.append(mapped)
                     if " " in mapped and not "(" in mapped:
                         prefix += ", \"" + mapped + "\""
@@ -360,7 +416,6 @@ class HAWKBackend(SingleTextQueryBackend):
         except KeyError:    # no 'fields' attribute
             mapped = None
             pass
-        """
 
         #if parsed.parsedAgg: #and timeframe == None:
         #    (prefix, suffixAgg) = self.generateAggregation(parsed.parsedAgg)
@@ -374,9 +429,9 @@ class HAWKBackend(SingleTextQueryBackend):
         #    result = prefix + result
 
         #print(result)
-        result = prefix + json.dumps(result)
-
-        #print(sigmaparser.parsedyaml)
+        #print("Prefix: ", prefix)
+        # result = prefix + json.dumps(result)
+        result = json.dumps(result)
 
         analytic_txt = ret + result + ret2 # json.dumps(ret)
         try:
