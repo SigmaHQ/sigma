@@ -1,0 +1,24 @@
+title: WorkFolders Proxy Execution
+status: experimental
+id: 9988b489-6556-4c7b-b066-b91516b9030b
+author: Christian Burkard
+date: 2021/10/21
+description: WorkFolders.exe starting a non-default control.exe to potentially bypass other detections
+references:
+    - https://twitter.com/elliotkillick/status/1449812843772227588
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage: 'C:\Windows\System32\WorkFolders.exe'
+        Image|endswith: '\control.exe'
+    filter:
+        Image: 'C:\Windows\System32\control.exe'
+    condition: selection and not filter
+falsepositives:
+    - Very Unlikely
+level: high
