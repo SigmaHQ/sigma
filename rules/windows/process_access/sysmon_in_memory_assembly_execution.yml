@@ -7,7 +7,7 @@ description: Detects the access to processes by other suspicious processes which
     routines are already present in memory, not requiring any calls to external libraries. The latter should also be considered suspicious.
 status: experimental
 date: 2019/10/27
-modified: 2021/05/16
+modified: 2021/10/21
 author: Perez Diego (@darkquassar), oscd.community, Jonhnathan Ribeiro
 references:
     - https://azure.microsoft.com/en-ca/blog/detecting-in-memory-attacks-with-sysmon-and-azure-security-center/
@@ -23,8 +23,8 @@ logsource:
 detection:
     selection1:
         CallTrace|contains|all:
-              - 'C:\\Windows\\SYSTEM32\\ntdll.dll+'
-              - '|C:\\Windows\\System32\\KERNELBASE.dll+'
+              - 'C:\Windows\SYSTEM32\ntdll.dll+'
+              - '|C:\Windows\System32\KERNELBASE.dll+'
               - '|UNKNOWN('
               - ')'
     selection2:
@@ -34,7 +34,6 @@ detection:
         CallTrace|endswith: ")"
     selection3:
         CallTrace|contains: "UNKNOWN"
-    granted_access:
         GrantedAccess:
             - "0x1F0FFF"
             - "0x1F1FFF"
@@ -47,7 +46,7 @@ detection:
     filter:
         SourceImage|endswith:
             - '\Windows\System32\sdiagnhost.exe'
-    condition: (selection1 or selection2) or (selection3 and granted_access) and not filter
+    condition: selection1 or selection2 or selection3 and not filter
 fields:
     - ComputerName
     - User
