@@ -14,16 +14,17 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection1:
-        Image|endswith: '\schtasks.exe'
+   selection:
         ParentImage|endswith: '\stordiag.exe'
-    selection2:
-        Image|endswith: '\systeminfo.exe'
-        ParentImage|endswith: '\stordiag.exe'
-    selection3:
-        Image|endswith: '\fltmc.exe'
-        ParentImage|endswith: '\stordiag.exe'
-    condition: selection1 or selection2 or selection3
+        Image|endswith:
+           - '\schtasks.exe'
+           - '\systeminfo.exe'
+           - '\fltmc.exe'
+    filter:
+        ParentImage|startwith: # as first is "Copy c:\windows\system32\stordiag.exe to a folder"
+           - c:\windows\system32\
+           - c:\windows\syswow64\
+  condition: selection and not filter
 falsepositives:
     - Legitimate usage of stordiag.exe.
 level: high
