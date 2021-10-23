@@ -361,9 +361,9 @@ Last but not least, the more people use Sigma, the better, so help promote it by
 
 The content of this repository is released under the following licenses:
 
-* The toolchain (everything under `tools/`) is licensed under the [GNU Lesser General Public License](https://www.gnu.org/licenses/lgpl-3.0.en.html).
-* The [Sigma specification](https://github.com/Neo23x0/sigma/wiki) is public domain.
-* Everything else, especially the rules contained in the `rules/` directory is released under the [Detection Rule License (DRL) 1.0](https://github.com/Neo23x0/sigma/blob/master/LICENSE.Detection.Rules.md).
+* The toolchain (everything under `tools/`) is licensed under the [GNU Lesser General Public License](https://www.gnu.org/licenses/lgpl-3.0.en.html)
+* The [Sigma specification](https://github.com/Neo23x0/sigma/wiki) is public domain
+* The rules contained in the `rules/` directory are released under the [Detection Rule License (DRL) 1.1](https://github.com/Neo23x0/sigma/blob/master/LICENSE.Detection.Rules.md)
 
 # Credits
 
