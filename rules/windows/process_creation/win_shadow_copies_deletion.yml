@@ -4,7 +4,7 @@ status: stable
 description: Shadow Copies deletion using operating systems utilities
 author: Florian Roth, Michael Haag, Teymur Kheirkhabarov, Daniil Yugoslavskiy, oscd.community, Andreas Hunkeler (@Karneades)
 date: 2019/10/22
-modified: 2021/06/02
+modified: 2021/10/24
 references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
     - https://blog.talosintelligence.com/2017/05/wannacry.html
@@ -13,6 +13,7 @@ references:
     - https://www.hybrid-analysis.com/sample/ed01ebfbc9eb5bbea545af4d01bf5f1071661840480439c6e5babe8e080e41aa?environmentId=100
     - https://github.com/Neo23x0/Raccine#the-process
     - https://github.com/Neo23x0/Raccine/blob/main/yara/gen_ransomware_command_lines.yar
+    - https://redcanary.com/blog/intelligence-insights-october-2021/
 tags:
     - attack.defense_evasion
     - attack.impact
@@ -38,6 +39,12 @@ detection:
             - delete
             - catalog
             - quiet # will match -quiet or /quiet
+    selection3:
+        Image|endswith: '\vssadmin.exe'
+        CommandLine|contains|all:
+            - resize
+            - shadowstorage
+            - unbounded
     condition: 1 of selection*
 fields:
     - CommandLine
