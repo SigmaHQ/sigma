@@ -20,6 +20,11 @@ logsource:
     product: windows
     category: process_creation
 detection:
+    detect_by_option:
+        CommandLine|contains|all:
+            - '--config '
+            - '--no-check-certificate '
+            - ' copy '
     exec_selection:
         Image|endswith: '\rclone.exe'
         ParentImage|endswith:
@@ -45,7 +50,7 @@ detection:
             - 'no-check-certificate '
     description_selection:
         Description: 'Rsync for cloud storage'
-    condition: command_selection and ( description_selection or exec_selection )
+    condition: detect_by_option or command_selection and ( description_selection or exec_selection )
 fields:
     - CommandLine
     - ParentCommandLine
