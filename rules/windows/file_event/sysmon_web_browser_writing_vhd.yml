@@ -1,0 +1,32 @@
+title: Web Browser Writing VHD File
+id: 914f153e-f715-4c33-97be-0f1506e84103
+description: This rule attempts to detect web browsers writing malicious VHD files to Disk. Zloader has been reported to leverage this procedure. 
+status: experimental
+references: 
+    - https://redcanary.com/blog/intelligence-insights-october-2021/
+    - https://attack.mitre.org/techniques/T1553/005/
+tags:
+    - attack.subert_trust_controls_mark-of-the-web_bypass
+    - attack.t1553.005
+date: 2021/10/25
+author: Christopher Peacock '@securepeacock', SCYTHE '@scythe_io'
+level: high
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        Image|endswith: 
+        - 'chrome.exe'
+        - 'firefox.exe'
+        - 'microsoftedge.exe'
+        - 'microsoftedgecp.exe'
+        - 'msedge.exe'
+        - 'iexplorer.exe'
+        - 'brave.exe'
+        - 'opera.exe'
+        TargetFilename|endswith: 
+        - '.vhd'
+    condition: selection
+falsepositives:
+    - System Administrators may download disk image files, but it is not typical for the everyday user.
