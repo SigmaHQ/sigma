@@ -184,31 +184,33 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_detections, [], Fore.RED +
                          "There are rules using '1/all of them' style conditions but only have one condition")
 
-    def test_duplicate_titles(self):
+    def test_duplicate_detections(self):
         def compare_detections(detection1:dict, detection2:dict) -> bool:
 
-            # detections not the same length can't be the same
+            # detections not the same count can't be the same
             if len(detection1) != len(detection2):
-                return False
-
+                return False    
+                 
             for named_condition in detection1:
                 #don't check timeframes
                 if named_condition == "timeframe":
                     continue
-                
+               
                 # condition clause must be the same too 
                 if named_condition == "condition":
                     if detection1["condition"] != detection2["condition"]:
                         return False
                     else:
                         continue
-                
+                               
                 # Named condition must exist in both rule files
                 if named_condition not in detection2:
                     return False
-
+                
+                #can not be the same  if len is not equal
                 if len(detection1[named_condition]) != len(detection2[named_condition]):
                     return False
+                
 
                 for condition in detection1[named_condition]:
                     if type(condition) != str:
@@ -216,10 +218,9 @@ class TestRules(unittest.TestCase):
 
                     if condition not in detection2[named_condition]:
                         return False
-
+                    
                     condition_value1 = detection1[named_condition][condition]
                     condition_value2 = detection2[named_condition][condition]
-
                     if condition_value1 != condition_value2:
                         return False
 
@@ -229,9 +230,11 @@ class TestRules(unittest.TestCase):
         files_and_their_detections = {}
 
         for file in self.yield_next_rule_file_path(self.path_to_rules):
+            print(file)
             detection = self.get_rule_part(file_path = file, part_name = "detection")
             logsource = self.get_rule_part(file_path = file, part_name = "logsource")
-            detection.update(logsource)
+            detection["logsource"] = {}
+            detection["logsource"].update(logsource)
             yaml = self.get_rule_yaml(file_path = file)
 
             is_multipart_yaml_file = len(yaml) != 1
