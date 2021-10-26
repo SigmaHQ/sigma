@@ -1,0 +1,28 @@
+title: Invoke-Obfuscation Via Stdin
+id: c72aca44-8d52-45ad-8f81-f96c4d3c755e
+related:
+    - id: 86b896ba-ffa1-4fea-83e3-ee28a4c915c7
+      type: derived
+description: Detects Obfuscated Powershell via Stdin in Scripts
+status: experimental
+author: Nikita Nazarov, oscd.community
+date: 2020/10/12
+modified: 2021/10/16
+references:
+     - https://github.com/Neo23x0/sigma/issues/1009 #(Task28)
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: ps_module
+    definition: PowerShell Module Logging must be enabled
+detection:
+    selection_4103:
+        Payload|re: '(?i).*(set).*&&\s?set.*(environment|invoke|\${?input).*&&.*"'
+    condition: selection_4103
+falsepositives:
+    - Unknown
+level: high

@@ -25,7 +25,7 @@ from uuid import uuid4
 from sigma.config.mapping import (
     SimpleFieldMapping, MultiFieldMapping, ConditionalFieldMapping
 )
-from sigma.parser.condition import SigmaAggregationParser
+from sigma.parser.condition import SigmaAggregationParser, SigmaConditionParser, SigmaConditionTokenizer
 
 from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
 from sigma.backends.base import SingleTextQueryBackend
@@ -82,6 +82,8 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
         self.service = None
         self.table = None
         self.eventid = None
+        self.tableAggJoinFields = None
+        self.tableAggTimeField = None
         self._parser = None
         self._fields = None
         self._agg_var = None
@@ -123,10 +125,13 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
             elif val.startswith("*") or val.endswith("*"):
                 if val.startswith("*") and val.endswith("*"):
                     op = "contains"
+                    val = val[1:-1]
                 elif val.startswith("*"):
                     op = "endswith"
+                    val = val[1:]
                 elif val.endswith("*"):
                     op = "startswith"
+                    val = val[:-1]
                 val = re.sub('([".^$]|(?![*?]))', '\g<1>', val)
                 val = re.sub('(\\\\\*|\*)', '', val)
                 val = re.sub('\\?', '.', val)
@@ -142,6 +147,8 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
                                                                                          "CommandLine"}) == 0:
             self.table = "SecurityEvent | where EventID == 4688 "
             self.eventid = "4688"
+            self.tableAggJoinFields = "SubjectLogonId, Computer"
+            self.tableAggTimeField = "TimeGenerated"
         elif self.category == "process_creation":
             self.table = "SysmonEvent"
             self.eventid = "1"
@@ -219,6 +226,12 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
         #     before = "%s | where EventID == \"%s\" | where " % (self.table, self.eventid)
         else:
             before = "%s | where " % self.table
+        if parsed.parsedAgg != None and parsed.parsedAgg.aggfunc == SigmaAggregationParser.AGGFUNC_NEAR:
+            window = parsed.parsedAgg.parser.parsedyaml["detection"].get("timeframe", "30m")
+            before = """
+            let lookupWindow = %s;
+            let lookupBin = lookupWindow / 2.0;
+            """ % (window) + before
         return before
 
     def generateMapItemNode(self, node):
@@ -294,14 +307,70 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
         except KeyError:
             raise NotImplementedError("Type modifier '{}' is not supported by backend".format(node.identifier))
 
+    def generateAggregationQuery(self, agg, searchId):
+        condtoken = SigmaConditionTokenizer(searchId)
+        condparsed = SigmaConditionParser(agg.parser, condtoken)
+        backend = AzureLogAnalyticsBackend(agg.config)
+
+        # these bits from generate() should be moved to __init__
+        try:
+            backend.category = agg.parser.parsedyaml['logsource'].setdefault('category', None)
+            backend.product = agg.parser.parsedyaml['logsource'].setdefault('product', None)
+            backend.service = agg.parser.parsedyaml['logsource'].setdefault('service', None)
+        except KeyError:
+            backend.category = None
+            backend.product = None
+            backend.service = None
+        backend.getTable(agg.parser)
+
+        query = backend.generateQuery(condparsed)
+        before = backend.generateBefore(condparsed)
+        return before + query
+
+    # follow the join/time window pattern
+    # https://docs.microsoft.com/en-us/azure/data-explorer/kusto/query/join-timewindow
+    def generateNear(self, agg):
+        includeQueries = []
+
+        includeCount = 0
+        for includeCount, include in enumerate(agg.include, start=1):
+            iq = self.generateAggregationQuery(agg, include)
+            iq += """
+                | extend End{timeIndex}={timeField},
+                    TimeKey = range(
+                        bin({timeField} - lookupWindow, lookupBin),
+                        bin({timeField}, lookupBin),
+                        lookupBin)
+                | mv-expand TimeKey to typeof(datetime)""".format(
+                    timeField=self.tableAggTimeField,
+                    timeIndex=includeCount,
+                )
+            includeQueries.append(iq)
+
+        ret = " | extend Start={timeField}, TimeKey = bin({timeField}, lookupBin) | join kind=inner (\n  ".format(
+            timeField=self.tableAggTimeField,
+        )
+        ret += ") on {joinFields}, TimeKey | join kind=inner (\n  ".format(
+            joinFields=self.tableAggJoinFields,
+        ).join(includeQueries)
+        ret += ") on {joinFields}, TimeKey\n| where ".format(
+            joinFields=self.tableAggJoinFields,
+        )
+        ret += " and ".join([
+            "(End%d - Start) between (0min .. lookupWindow)" % (endIndex + 1) for endIndex in range(includeCount)
+        ])
+
+        return ret
+
     def generateAggregation(self, agg):
         if agg is None:
             return ""
         if agg.aggfunc == SigmaAggregationParser.AGGFUNC_NEAR:
-            raise NotImplementedError(
-                "The 'near' aggregation operator is not "
-                + f"implemented for the %s backend" % self.identifier
-            )
+            if agg.exclude:
+                raise NotSupportedError("This backend doesn't currently support 'near' with excludes")
+            if self.tableAggJoinFields == None or self.tableAggTimeField == None:
+                raise NotSupportedError("This backend doesn't currently support 'near' for this table")
+            return self.generateNear(agg)
         if agg.aggfunc_notrans != 'count' and agg.aggfield is None:
             raise NotSupportedError(
                 "The '%s' aggregation operator " % agg.aggfunc_notrans

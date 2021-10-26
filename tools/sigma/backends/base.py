@@ -169,6 +169,8 @@ class BaseBackend:
             return self.applyOverrides(self.generateNotNULLValueNode(node))
         elif type(node) == sigma.parser.condition.NodeSubexpression:
             return self.applyOverrides(self.generateSubexpressionNode(node))
+        elif type(node) == sigma.parser.condition.SigmaSearchValueAsIs:
+            return self.generateValueAsIsNode(node)
         elif type(node) == tuple:
             return self.applyOverrides(self.generateMapItemNode(node))
         elif type(node) in (str, int):
@@ -179,6 +181,9 @@ class BaseBackend:
             return self.applyOverrides(self.generateTypedValueNode(node))
         else:
             raise TypeError("Node type %s was not expected in Sigma parse tree" % (str(type(node))))
+
+    def generateValueAsIsNode(self, node):
+        raise NotImplementedError("Node type not implemented for this backend")
 
     def generateANDNode(self, node):
         raise NotImplementedError("Node type not implemented for this backend")
@@ -247,6 +252,11 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
     mapListValueExpression = None       # Syntax for field/value condititons where map value is a list
 
     sort_condition_lists = False        # Sort condition items for AND and OR conditions
+
+    def generateValueAsIsNode(self, node):
+        if type(node.value) is list:
+            return self.listExpression % (self.listSeparator.join(node.value))
+        return self.listExpression % node.value
 
     def generateANDNode(self, node):
         generated = [ self.generateNode(val) for val in node ]

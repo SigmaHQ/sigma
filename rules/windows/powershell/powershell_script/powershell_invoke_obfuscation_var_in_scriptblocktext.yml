@@ -1,0 +1,25 @@
+title: Invoke-Obfuscation VAR+ Launcher
+id: 0adfbc14-0ed1-11eb-adc1-0242ac120002
+description: Detects Obfuscated use of Environment Variables to execute PowerShell
+status: experimental
+author: Jonathan Cheong, oscd.community
+date: 2020/10/15
+modified: 2021/10/16
+references:
+     - https://github.com/Neo23x0/sigma/issues/1009 #(Task 24)
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection_4104:
+        ScriptBlockText|re: '.*cmd.{0,5}(?:\/c|\/r)(?:\s|)\"set\s[a-zA-Z]{3,6}.*(?:\{\d\}){1,}\\\"\s+?\-f(?:.*\)){1,}.*\"'
+    condition: selection_4104
+falsepositives:
+    - Unknown
+level: high

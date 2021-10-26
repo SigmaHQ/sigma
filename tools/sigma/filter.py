@@ -24,7 +24,9 @@ class SigmaRuleFilter:
             "high"     : 2,
             "critical" : 3
             }
-    STATES = ["experimental", "testing", "stable"]
+    STATES = ["experimental",
+              "test",
+              "stable"]
 
     def __init__(self, expr):
         self.minlevel      = None
