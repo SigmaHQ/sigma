@@ -94,7 +94,7 @@ class HAWKBackend(SingleTextQueryBackend):
             # they imply the entire payload
             nodeRet['description'] = key
             nodeRet['rule_id'] = str(uuid.uuid4())
-            nodeRet['args']['str']['value'] = self.generateValueNode(node, False)
+            nodeRet['args']['str']['value'] = self.generateValueNode(node, False).replace("\\","\\\\")
             # return json.dumps(nodeRet)
             return nodeRet
         elif type(node) == list:
