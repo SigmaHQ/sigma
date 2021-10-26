@@ -232,7 +232,7 @@ class HAWKBackend(SingleTextQueryBackend):
                 ret['children'].append( nodeRet )
             elif type(item) == str and "*" in item:
                 item = item.replace("*", "")
-                item = value.replace("\\", "\\\\")
+                item = item.replace("\\", "\\\\")
                 # item = item.replace("*", ".*")
                 #print("item")
                 #print(item)
