@@ -126,6 +126,8 @@ class HAWKBackend(SingleTextQueryBackend):
             return None
 
     def generateORNode(self, node):
+        #retAnd = { "id" : "and", "key": "And", "children" : [ ] }
+
         ret = { "id" : "or", "key": "Or", "children" : [ ] }
         generated = [ self.generateNode(val) for val in node ]
         filtered = [ g for g in generated if g is not None ]
@@ -133,7 +135,9 @@ class HAWKBackend(SingleTextQueryBackend):
             if self.sort_condition_lists:
                 filtered = sorted(filtered)
             ret['children'] = filtered
-            # return json.dumps(ret)# self.orToken.join(filtered)
+
+            # retAnd['children'].append( ret )
+            #return retAnd
             return ret
         else:
             return None
@@ -241,8 +245,9 @@ class HAWKBackend(SingleTextQueryBackend):
                 #print(item)
                 nodeRet['args']['str']['value'] = self.generateValueNode(item, True)
                 ret['children'].append( nodeRet )
+        retAnd = { "id" : "and", "key": "And", "children" : [ ret ] }
+        return retAnd # '('+" or ".join(itemslist)+')'
         # return json.dumps(ret) # '('+" or ".join(itemslist)+')'
-        return ret # '('+" or ".join(itemslist)+')'
 
     def generateMapItemTypedNode(self, fieldname, value, notNode=False):
         nodeRet = {"key": "",  "description": "", "class": "column", "return": "str", "args": { "comparison": { "value": "=" }, "str": { "value": "5" } } }
@@ -292,28 +297,72 @@ class HAWKBackend(SingleTextQueryBackend):
 
     def generateAggregation(self, agg, timeframe='00'):
         if agg == None:
-            return ""
+            return None
+        #print(agg.aggfunc)
+        #print(type(agg.aggfunc))
+        #print(agg.aggfunc_notrans)
+        if not agg.aggfunc_notrans.lower() in ("count", "sum"):
+            raise NotImplementedError("This aggregation operator '%s' has not been implemented" % agg.aggfunc_notrans)
+
         if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_NEAR:
-            raise NotImplementedError("The 'near' aggregation operator is not yet implemented for this backend")
+            return None
+
         if agg.groupfield == None:
-            s = "SELECT %s(%s) as agg_val from %s where" % (agg.aggfunc_notrans, self.cleanKey(agg.aggfield), self.aql_database)
-            s2 = " group by %s having agg_val %s %s" % (self.cleanKey(agg.aggfield), agg.cond_op, agg.condition)
-            raise NotImplementedError("The 'agg val' aggregation operator is not yet implemented for this backend: %s %s" % (s, s2))
-        """
-        elif agg.groupfield != None and timeframe == '00':
-                self.prefixAgg = " SELECT %s(%s) as agg_val from %s where " % (agg.aggfunc_notrans, self.cleanKey(agg.aggfield), self.aql_database)
-                self.suffixAgg = " group by %s having agg_val %s %s" % (self.cleanKey(agg.groupfield), agg.cond_op, agg.condition)
-                return self.prefixAgg, self.suffixAgg
+            agg.groupfield = "priority"
+
+        if agg.groupfield != None and timeframe == '00':
+            self.prefixAgg = " SELECT %s(%s) as agg_val from %s where " % (agg.aggfunc_notrans, self.cleanKey(agg.aggfield), self.aql_database)
+            self.suffixAgg = " group by %s having agg_val %s %s" % (self.cleanKey(agg.groupfield), agg.cond_op, agg.condition)
+            #print("Group field and timeframe is 00")
+            min_count = 60
+            nodeRet = {"key": "atomic_counter",  "description": self.cleanKey(agg.groupfield) + " %s aggregation stream counter" % agg.aggfunc_notrans, "class": "function", "return": "int",
+                 "inputs": {
+                     "columns" : { "order" : "0", "source" : "columns", "type" : "array", "objectKey" : "columns" },
+                     "comparison" : { "order" : "1", "source" : "comparison", "type" : "comparison", "objectKey" : "comparison" },
+                     "threshold" : { "order" : "2", "source" : "", "type" : "int", "objectKey" : "threshold" },
+                     "limit" : { "order" : "3", "source" : "time_offset", "type" : "int", "objectKey" : "limit" },
+                 },
+                 "args": { 
+                     "columns" : [ self.cleanKey(agg.groupfield) ],
+                     "comparison": { "value": "%s" % agg.cond_op }, 
+                     "threshold": { "value": int(agg.condition) }, 
+                     "limit": { "value": min_count } 
+                 } 
+            }
+            nodeRet['rule_id'] = str(uuid.uuid4())
+            #print("No time range set")
+            return nodeRet
         elif agg.groupfield != None and timeframe != None:
             for key, duration in self.generateTimeframe(timeframe).items():
-                self.prefixAgg = " SELECT %s(%s) as agg_val from %s where " % (agg.aggfunc_notrans, self.cleanKey(agg.aggfield), self.aql_database)
-                self.suffixAgg = " group by %s having agg_val %s %s LAST %s %s" % (self.cleanKey(agg.groupfield), agg.cond_op, agg.condition, duration, key)
-                return self.prefixAgg, self.suffixAgg
+                min_count = 60
+                if key.lower() == 'hours':
+                    min_count = 24 * int(duration)
+                nodeRet = {"key": "atomic_counter",  "description": self.cleanKey(agg.groupfield) + " %s aggregation stream counter" % agg.aggfunc_notrans, "class": "function", "return": "int",
+                         "inputs": {
+                             "columns" : { "order" : "0", "source" : "columns", "type" : "array", "objectKey" : "columns" },
+                             "comparison" : { "order" : "1", "source" : "comparison", "type" : "comparison", "objectKey" : "comparison" },
+                             "threshold" : { "order" : "2", "source" : "", "type" : "int", "objectKey" : "threshold" },
+                             "limit" : { "order" : "3", "source" : "time_offset", "type" : "int", "objectKey" : "limit" },
+                         },
+                         "args": { 
+                             "columns" : [ self.cleanKey(agg.groupfield) ],
+                             "comparison": { "value": "%s" % agg.cond_op }, 
+                             "threshold": { "value": int(agg.condition) }, 
+                             "limit": { "value": min_count } 
+                         } 
+                    }
+                nodeRet['rule_id'] = str(uuid.uuid4())
+                #self.prefixAgg = " SELECT %s(%s) as agg_val from %s where " % (agg.aggfunc_notrans, self.cleanKey(agg.aggfield), self.aql_database)
+                #self.suffixAgg = " group by %s having agg_val %s %s LAST %s %s" % (self.cleanKey(agg.groupfield), agg.cond_op, agg.condition, duration, key)
+                #print("Group field and timeframe")
+                #return self.prefixAgg, self.suffixAgg
+                return nodeRet
         else:
             self.prefixAgg = " SELECT %s(%s) as agg_val from %s where " % (agg.aggfunc_notrans, self.cleanKey(agg.aggfield), self.aql_database)
             self.suffixAgg = " group by %s having agg_val %s %s" % (self.cleanKey(agg.groupfield), agg.cond_op, agg.condition)
+            #print("Last option")
+            raise NotImplementedError("The 'agg' aggregation operator is not yet implemented for this backend") 
             return self.prefixAgg, self.suffixAgg
-        """
         #print(agg)
         raise NotImplementedError("The 'agg' aggregation operator is not yet implemented for this backend") 
 
@@ -416,20 +465,42 @@ class HAWKBackend(SingleTextQueryBackend):
             mapped = None
             pass
 
-        #if parsed.parsedAgg: #and timeframe == None:
-        #    (prefix, suffixAgg) = self.generateAggregation(parsed.parsedAgg)
-        #    result = prefix + result
-        #    result += suffixAgg
-        #elif parsed.parsedAgg != None and timeframe != None:
-        #    (prefix, suffixAgg) = self.generateAggregation(parsed.parsedAgg, timeframe)
-        #    result = prefix + result
-        #    result += suffixAgg
-        #else:
-        #    result = prefix + result
+        try:
+            timeframe = sigmaparser.parsedyaml['detection']['timeframe']
+        except:
+            timeframe = None
 
-        #print(result)
-        #print("Prefix: ", prefix)
-        # result = prefix + json.dumps(result)
+        if parsed.parsedAgg and timeframe == None:
+            addition = self.generateAggregation(parsed.parsedAgg)
+            #print(addition)
+            #print(result)
+            if addition:
+                if not 'children' in result:
+                    rec = self.subExpression % json.dumps(result)
+                    result = json.loads(rec)
+                    #print(result)
+                result['children'].append(addition)
+            elif parsed.parsedAgg:
+                #print(result)
+                raise Exception("No agg returned, something is off")
+        elif parsed.parsedAgg != None and timeframe != None:
+            addition = self.generateAggregation(parsed.parsedAgg, timeframe)
+            #print(addition)
+            #print(result)
+            if addition:
+                #print(result)
+                if not 'children' in result:
+                    rec = self.subExpression % json.dumps(result)
+                    result = json.loads(rec)
+                    #print(result)
+                result['children'].append(addition)
+            elif parsed.parsedAgg:
+                #print(result)
+                raise Exception("No agg returned, something is off")
+        else:
+            # result = prefix + result
+            pass
+
         result = json.dumps(result)
 
         analytic_txt = ret + result + ret2 # json.dumps(ret)
@@ -473,7 +544,7 @@ class HAWKBackend(SingleTextQueryBackend):
             "hawk_id" : sigmaparser.parsedyaml['id']
         }
         if 'tags' in sigmaparser.parsedyaml:
-            record["tags"] = sigmaparser.parsedyaml['tags']
+            record["tags"] = [ item.replace("attack.", "") for item in sigmaparser.parsedyaml['tags']]
 
         if not 'status' in self.sigmaparser.parsedyaml or 'status' in self.sigmaparser.parsedyaml and self.sigmaparser.parsedyaml['status'] != 'experimental':
             record['correlation_action'] += 10.0;
