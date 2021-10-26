@@ -75,20 +75,13 @@ class TestRules(unittest.TestCase):
                         
     def test_optional_tags(self):
         files_with_incorrect_tags = []
-
+        tags_pattern = re.compile(r"cve\.\d+\.\d+|attack\.t\d+\.*\d*|attack\.[a-z_]+|car\.\d{4}-\d{2}-\d{3}")
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             tags = self.get_rule_part(file_path=file, part_name="tags")
             if tags:
                 for tag in tags:
-                    if tag.startswith("attack."):
-                        continue
-                    elif tag.startswith("car."):
-                        continue
-                    elif tag.startswith("cve."):
-                        print(Fore.RED + "Rule {} has the cve tag <{}> but is it a references (https://nvd.nist.gov/)".format(file, tag))
-                        files_with_incorrect_tags.append(file)
-                    else:
-                        print(Fore.RED + "Rule {} has the unknown tag <{}>".format(file, tag))
+                    if tags_pattern.match(tag) == None:
+                        print(Fore.RED + "Rule {} has the invalid tag <{}>".format(file, tag))
                         files_with_incorrect_tags.append(file)
 
         self.assertEqual(files_with_incorrect_tags, [], Fore.RED + 
@@ -450,7 +443,7 @@ class TestRules(unittest.TestCase):
                          "There are rules with malformed optional 'falsepositives' fields. (has to be a list of values even if it contains only a single value)")
 
     # Upgrade Detection Rule License  1.1
-    def test_author(self):
+    def test_optional_author(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             author_str = self.get_rule_part(file_path=file, part_name="author")
@@ -459,9 +452,6 @@ class TestRules(unittest.TestCase):
                 if not isinstance(author_str, str):
                     print(Fore.YELLOW + "Rule {} has a 'author' field that isn't a string.".format(file))
                     faulty_rules.append(file)
-            else:
-                print(Fore.YELLOW + "Rule {} has no 'author' field".format(file))
-                faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules with malformed 'author' fields. (has to be a string even if it contains many author)")
