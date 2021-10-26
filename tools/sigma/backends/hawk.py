@@ -182,6 +182,7 @@ class HAWKBackend(SingleTextQueryBackend):
             elif type(value) == str and "*" in value:
                 # value = value.replace("*", ".*")
                 value = value.replace("*", "")
+                value = value.replace("\\", "\\\\")
                 if notNode:
                     nodeRet["args"]["comparison"]["value"] = "!regex"
                 else:
@@ -231,6 +232,7 @@ class HAWKBackend(SingleTextQueryBackend):
                 ret['children'].append( nodeRet )
             elif type(item) == str and "*" in item:
                 item = item.replace("*", "")
+                item = value.replace("\\", "\\\\")
                 # item = item.replace("*", ".*")
                 #print("item")
                 #print(item)
@@ -265,7 +267,7 @@ class HAWKBackend(SingleTextQueryBackend):
             return "%s imatches %s" % (self.cleanKey(fieldname), self.generateValueNode(regex, True))
             """
             #print("ENDS WITH!!!")
-            nodeRet['args']['str']['value'] = self.generateValueNode(regex, True)
+            nodeRet['args']['str']['value'] = self.generateValueNode(regex, True).replace("\\", "\\\\")
             if notNode:
                 nodeRet["args"]["comparison"]["value"] = "!regex"
             else:
