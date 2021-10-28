@@ -35,7 +35,7 @@ class SigmaRuleFilter:
         self.minlevel      = None
         self.maxlevel      = None
         self.status        = None
-        self.notstatus        = None
+        self.notstatus     = None
         self.tlp           = None
         self.target        = None
         self.logsources    = list()
@@ -125,7 +125,7 @@ class SigmaRuleFilter:
                 return False    # User wants status restriction, but it's not possible here
             if status != self.status:
                 return False
-        
+
         if self.notstatus is not None:
             try:
                 status = yamldoc['status']
