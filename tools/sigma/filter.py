@@ -24,7 +24,10 @@ class SigmaRuleFilter:
             "high"     : 2,
             "critical" : 3
             }
-    STATES = ["experimental",
+    STATES = [
+              "unsupported",
+              "deprecated",
+              "experimental",
               "test",
               "stable"]
 
