@@ -1,1 +1,33 @@
-
+title: AADInternals PowerShell Activew Directory
+id: ba68ba41-34e0-4048-9a9e-2733de7d57da
+status: experimental
+description: Detects ADDInternals tool is being used for administering or hacking Azure AD and Office 365.
+references:
+    - https://o365blog.com/aadinternals/
+    - https://github.com/Gerenios/AADInternals
+author: Austin Songer (@austinsonger)
+date: 2021/10/30
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script Block Logging must be enable
+detection:
+    selection:
+        ScriptBlockText|contains:
+            - "Get-AADIntDPAPIKeys"
+            - "Get-AADIntLSASecrets"
+            - "Get-AADIntLSABackupKeys"
+            - "Get-AADIntSystemMasterKeys"
+            - "Get-AADIntUserMasterKeys"
+            - "Get-AADIntLocalUserCredentials"
+    condition: selection
+tags:
+    - attack.execution
+    - attack.reconnaissance
+    - attack.discovery
+    - attack.credential_access
+    - attack.impact
+falsepositives:
+    - Penetration testing
+level: high        
+        
