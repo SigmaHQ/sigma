@@ -535,12 +535,12 @@ class HAWKBackend(SingleTextQueryBackend):
         record = {
             "rules" : analytic, # analytic_txt.replace('"','""'),
             "filter_name" : sigmaparser.parsedyaml['title'],
+            "filter_details" : cmt,
             "actions_category_name" : "Add (+)",
             "correlation_action" : 5.00,
             "date_added" : sigmaparser.parsedyaml['date'],
             "enabled" : True,
             "public" : True,
-            "comments" : cmt,
             "references" : ref,
             "group_name" : ".",
             "hawk_id" : sigmaparser.parsedyaml['id']
