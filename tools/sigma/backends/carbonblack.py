@@ -166,7 +166,6 @@ class CarbonBlackQueryBackend(CarbonBlackWildcardHandlingMixin, SingleTextQueryB
 
     def generateMapItemNode(self, node):
         fieldname, value = node
-        value = str(value)
         if fieldname == "EventID" and (type(value) is str or type(value) is int):
             fieldname = self.generateEventKey(value)
             value = self.generateEventValue(value)
