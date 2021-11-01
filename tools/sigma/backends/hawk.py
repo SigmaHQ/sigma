@@ -20,6 +20,7 @@ import re
 import sigma
 import json
 import uuid
+import re
 from sigma.parser.modifiers.base import SigmaTypeModifier
 from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
 from .base import SingleTextQueryBackend
@@ -94,7 +95,7 @@ class HAWKBackend(SingleTextQueryBackend):
             # they imply the entire payload
             nodeRet['description'] = key
             nodeRet['rule_id'] = str(uuid.uuid4())
-            nodeRet['args']['str']['value'] = self.generateValueNode(node, False).replace("\\","\\\\")
+            nodeRet['args']['str']['value'] = re.escape(self.generateValueNode(node, False))  # .replace("\\","\\\\").replace(".","\\.")
             # return json.dumps(nodeRet)
             return nodeRet
         elif type(node) == list:
@@ -182,7 +183,7 @@ class HAWKBackend(SingleTextQueryBackend):
             elif type(value) == str and "*" in value:
                 # value = value.replace("*", ".*")
                 value = value.replace("*", "")
-                value = value.replace("\\", "\\\\")
+                value = re.escape(value)  # .replace("\\", "\\\\").replace(".","\\.")
                 if notNode:
                     nodeRet["args"]["comparison"]["value"] = "!regex"
                 else:
@@ -232,8 +233,7 @@ class HAWKBackend(SingleTextQueryBackend):
                 ret['children'].append( nodeRet )
             elif type(item) == str and "*" in item:
                 item = item.replace("*", "")
-                item = item.replace("\\", "\\\\")
-                # item = item.replace("*", ".*")
+                item = re.escape(item) # .replace("\\", "\\\\").replace(".","\\.")
                 #print("item")
                 #print(item)
                 nodeRet['args']['str']['value'] = item # self.generateValueNode(item, True)
@@ -267,7 +267,7 @@ class HAWKBackend(SingleTextQueryBackend):
             return "%s imatches %s" % (self.cleanKey(fieldname), self.generateValueNode(regex, True))
             """
             #print("ENDS WITH!!!")
-            nodeRet['args']['str']['value'] = self.generateValueNode(regex, True).replace("\\", "\\\\")
+            nodeRet['args']['str']['value'] = re.escape(self.generateValueNode(regex, True))  # .replace("\\", "\\\\").replace(".","\\.")
             if notNode:
                 nodeRet["args"]["comparison"]["value"] = "!regex"
             else:
