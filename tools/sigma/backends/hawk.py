@@ -63,22 +63,22 @@ class HAWKBackend(SingleTextQueryBackend):
         #print(type(node))
         #print(node)
         if type(node) == sigma.parser.condition.ConditionAND:
-            return self.generateANDNode(node)
+            return self.generateANDNode(node, notNode)
         elif type(node) == sigma.parser.condition.ConditionOR:
             #print("OR NODE")
             #print(node)
-            return self.generateORNode(node)
+            return self.generateORNode(node, notNode)
         elif type(node) == sigma.parser.condition.ConditionNOT:
             #print("NOT NODE")
             #print(node)
             return self.generateNOTNode(node)
         elif type(node) == sigma.parser.condition.ConditionNULLValue:
-            return self.generateNULLValueNode(node)
+            return self.generateNULLValueNode(node, notNode)
         elif type(node) == sigma.parser.condition.ConditionNotNULLValue:
             return self.generateNotNULLValueNode(node)
         elif type(node) == sigma.parser.condition.NodeSubexpression:
             #print(node)
-            return self.generateSubexpressionNode(node)
+            return self.generateSubexpressionNode(node, notNode)
         elif type(node) == tuple:
             #print("TUPLE: ", node)
             return self.generateMapItemNode(node, notNode)
@@ -103,7 +103,7 @@ class HAWKBackend(SingleTextQueryBackend):
         else:
             raise TypeError("Node type %s was not expected in Sigma parse tree" % (str(type(node))))
 
-    def generateANDNode(self, node):
+    def generateANDNode(self, node, notNode=False):
         """
         generated = [ self.generateNode(val) for val in node ]
         filtered = [ g for g in generated if g is not None ]
@@ -115,7 +115,7 @@ class HAWKBackend(SingleTextQueryBackend):
             return None
         """
         ret = { "id" : "and", "key": "And", "children" : [ ] }
-        generated = [ self.generateNode(val) for val in node ]
+        generated = [ self.generateNode(val, notNode) for val in node ]
         filtered = [ g for g in generated if g is not None ]
         if filtered:
             if self.sort_condition_lists:
@@ -126,11 +126,11 @@ class HAWKBackend(SingleTextQueryBackend):
         else:
             return None
 
-    def generateORNode(self, node):
+    def generateORNode(self, node, notNode=False):
         #retAnd = { "id" : "and", "key": "And", "children" : [ ] }
 
         ret = { "id" : "or", "key": "Or", "children" : [ ] }
-        generated = [ self.generateNode(val) for val in node ]
+        generated = [ self.generateNode(val, notNode) for val in node ]
         filtered = [ g for g in generated if g is not None ]
         if filtered:
             if self.sort_condition_lists:
@@ -143,8 +143,8 @@ class HAWKBackend(SingleTextQueryBackend):
         else:
             return None
 
-    def generateSubexpressionNode(self, node):
-        generated = self.generateNode(node.items)
+    def generateSubexpressionNode(self, node, notNode=False):
+        generated = self.generateNode(node.items, notNode)
         if 'len'in dir(node.items): # fix the "TypeError: object of type 'NodeSubexpression' has no len()"
             if len(node.items) == 1:
                 # A sub expression with length 1 is not a proper sub expression, no self.subExpression required
@@ -215,8 +215,18 @@ class HAWKBackend(SingleTextQueryBackend):
             return self.generateMapItemTypedNode(key, value)
         elif value is None:
             #return self.nullExpression % (key, )
-            nodeRet['args']['str']['value'] = None
+            #print("Performing null")
+            #print(notNode)
+            #print(key)
+            nodeRet = { "key" : "empty", "description" : "Value Does Not Exist (IS NULL)", "class" : "function", "inputs" : { "comparison" : { "order" : 0, "source" : "comparison", "type" : "comparison" }, "column" : { "order" : 1, "source" : "columns", "type" : "str" } }, "args" : { "comparison" : { "value" : "!=" }, "column" : { "value" : "" } }, "return" : "boolean" }
+            nodeRet['args']['column']['value'] = self.cleanKey(key).lower()
+            nodeRet['description'] += " %s" % key
+            if notNode:
+                nodeRet['args']['comparison']['value'] = "!="
+            else:
+                nodeRet['args']['comparison']['value'] = "="
             #return json.dumps(nodeRet)
+            #print(json.dumps(nodeRet))
             return nodeRet
         else:
             raise TypeError("Backend does not support map values of type " + str(type(value)))
@@ -286,7 +296,7 @@ class HAWKBackend(SingleTextQueryBackend):
         """
         return self.valueExpression % (self.cleanValue(str(node)))
 
-    def generateNULLValueNode(self, node):
+    def generateNULLValueNode(self, node, notNode):
         # node.item
         nodeRet = {"key": node.item,  "description": node.item, "class": "column", "return": "str", "args": { "comparison": { "value": "=" }, "str": { "value": "null" } } }
         nodeRet['rule_id'] = str(uuid.uuid4())
