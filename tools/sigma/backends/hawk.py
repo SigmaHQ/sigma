@@ -127,9 +127,10 @@ class HAWKBackend(SingleTextQueryBackend):
             return None
 
     def generateORNode(self, node, notNode=False):
-        #retAnd = { "id" : "and", "key": "And", "children" : [ ] }
-
-        ret = { "id" : "or", "key": "Or", "children" : [ ] }
+        if notNode:
+            ret = { "id" : "and", "key": "And", "children" : [ ] }
+        else:
+            ret = { "id" : "or", "key": "Or", "children" : [ ] }
         generated = [ self.generateNode(val, notNode) for val in node ]
         filtered = [ g for g in generated if g is not None ]
         if filtered:
@@ -232,7 +233,10 @@ class HAWKBackend(SingleTextQueryBackend):
             raise TypeError("Backend does not support map values of type " + str(type(value)))
 
     def generateMapItemListNode(self, key, value, notNode=False):
-        ret = { "id" : "or", "key": "Or", "children" : [ ] }
+        if notNode:
+            ret = { "id" : "and", "key": "And", "children" : [ ] }
+        else:
+            ret = { "id" : "or", "key": "Or", "children" : [ ] }
         for item in value:
             nodeRet = {"key": "",  "description": "", "class": "column", "return": "str", "args": { "comparison": { "value": "=" }, "str": { "value": "5" } } }
             nodeRet['key'] = self.cleanKey(key).lower()
