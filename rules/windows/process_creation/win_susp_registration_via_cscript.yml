@@ -1,0 +1,30 @@
+title: Suspicious Registration via cscript.exe
+id: 28c8f68b-098d-45af-8d43-8089f3e35403
+description: Detects when 
+status: experimental
+author: Austin Songer @austinsonger
+date: 2021/11/05
+references:
+- https://twitter.com/sblmsrsn/status/1456613494783160325?s=20
+- https://ss64.com/vb/cscript.html
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\cscript.exe'
+        CommandLine|contains|all:
+            - '-register'
+            - '\Windows Kits\10\bin\10.0.22000.0\x64\register_app.vbs'
+            - '\Windows Kits\10\bin\10.0.19041.0\x64\register_app.vbs'
+            - '\Windows Kits\10\bin\10.0.17763.0\x64\register_app.vbs'
+    condition: selection
+fields:
+    - CommandLine
+    - ParentCommandLine
+tags:
+- attack.defense_evasion
+- attack.t1218
+level: medium
+falsepositives:
+- None
