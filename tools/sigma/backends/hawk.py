@@ -454,6 +454,30 @@ class HAWKBackend(SingleTextQueryBackend):
 
             return result
 
+    def dedupeAnds(self, arr):
+        if len(arr) == 1 and 'id' in arr[0] and arr[0]['id'].lower() == "and":
+            # print("Returning less!")
+            for i in range(0, len(arr) ):
+                if 'id' in arr[i] and arr[i]['id'].lower() == "and":
+                    arr[i]['children'] = self.dedupeAnds(arr[i]['children'])
+            return arr[0]['children']
+
+        allAndCheck = True
+        for i in range(0, len(arr) ):
+            # print(arr[i])
+            if 'id' in arr[i] and arr[i]['id'].lower() == "and":
+                arr[i]['children'] = self.dedupeAnds(arr[i]['children'])
+            else:
+                allAndCheck = False
+
+
+        x = [ ]
+        if allAndCheck:
+            for i in range(0, len(arr)):
+                x = x + arr[i]['children']
+            return x
+        return arr
+
     def generateQuery(self, parsed, sigmaparser):
         self.sigmaparser = sigmaparser
         result = self.generateNode(parsed.parsedSearch)
@@ -522,6 +546,9 @@ class HAWKBackend(SingleTextQueryBackend):
         analytic_txt = ret + result + ret2 # json.dumps(ret)
         try:
             analytic = json.loads(analytic_txt) # json.dumps(ret)
+            # analytic = self.dedupeAnds(analytic)
+            analytic[0]['children'] = self.dedupeAnds(analytic[0]['children'])
+
         except Exception as e:
             print("Failed to parse json: %s" % analytic_txt)
             raise Exception("Failed to parse json: %s" % analytic_txt)
@@ -553,7 +580,8 @@ class HAWKBackend(SingleTextQueryBackend):
             "actions_category_name" : "Add (+)",
             "correlation_action" : 5.00,
             "date_added" : sigmaparser.parsedyaml['date'],
-            "enabled" : True,
+            "enabled" : False,
+            # "enabled" : True,
             "public" : True,
             "references" : ref,
             "group_name" : ".",
