@@ -153,6 +153,15 @@ class ElasticsearchWildcardHandlingMixin(object):
         elif type(value) == list:
             return self.generateMapItemListNode(transformed_fieldname, value)
         elif isinstance(value, SigmaTypeModifier):
+            #On elastic can not use ^ or $ re is full match 
+            if isinstance(value,sigma.parser.modifiers.type.SigmaRegularExpressionModifier):
+                the_regex = value.value
+                if the_regex[0]=="^" and the_regex[-1]=="$":
+                    value.value = the_regex[1:-1]
+                elif the_regex[0]=="^":
+                    value.value = the_regex[1:] if the_regex[-2:] == ".*" else the_regex[1:] + ".*"
+                elif the_regex[-1]=="$":
+                    value.value = the_regex[:-1] if the_regex[:2] == ".*" else  ".*" +the_regex[:-1] 
             return self.generateMapItemTypedNode(transformed_fieldname, value)
         elif value is None:
             return self.nullExpression % (transformed_fieldname, )
