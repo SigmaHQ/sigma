@@ -83,7 +83,7 @@ class HAWKBackend(SingleTextQueryBackend):
             #print("TUPLE: ", node)
             return self.generateMapItemNode(node, notNode)
         elif type(node) in (str, int):
-            nodeRet = {"key": "",  "description": "", "class": "column", "return": "str", "args": { "comparison": { "value": "regex" }, "str": { "value": "5" } } }
+            nodeRet = {"key": "",  "description": "", "class": "column", "return": "str", "args": { "comparison": { "value": "=" }, "str": { "value": "5", "regex": "true" } } }
             #key = next(iter(self.sigmaparser.parsedyaml['detection'])) 
             key = "payload"
 
@@ -186,10 +186,11 @@ class HAWKBackend(SingleTextQueryBackend):
                 value = value.replace("*", "")
                 value = re.escape(value)  # .replace("\\", "\\\\").replace(".","\\.")
                 if notNode:
-                    nodeRet["args"]["comparison"]["value"] = "!regex"
+                    nodeRet["args"]["comparison"]["value"] = "!="
                 else:
-                    nodeRet['args']['comparison']['value'] = "regex"
+                    nodeRet['args']['comparison']['value'] = "="
                 nodeRet['args']['str']['value'] = value
+                nodeRet['args']['str']['regex'] = "true"
                 # return "%s regex %s" % (self.cleanKey(key), self.generateValueNode(value, True))
                 #return json.dumps(nodeRet)
                 return nodeRet
@@ -251,10 +252,11 @@ class HAWKBackend(SingleTextQueryBackend):
                 #print("item")
                 #print(item)
                 nodeRet['args']['str']['value'] = item # self.generateValueNode(item, True)
+                nodeRet['args']['str']['regex'] = "true"
                 if notNode:
-                    nodeRet["args"]["comparison"]["value"] = "!regex"
+                    nodeRet["args"]["comparison"]["value"] = "!="
                 else:
-                    nodeRet['args']['comparison']['value'] = "regex"
+                    nodeRet['args']['comparison']['value'] = "="
                 ret['children'].append( nodeRet )
             else:
                 #print("item2")
@@ -272,32 +274,18 @@ class HAWKBackend(SingleTextQueryBackend):
         nodeRet['rule_id'] = str(uuid.uuid4())
         if type(value) == SigmaRegularExpressionModifier:
             regex = str(value)
-            """
-            # Regular Expressions have to match the full value in QRadar
-            if not (regex.startswith('^') or regex.startswith('.*')):
-                regex = '.*' + regex
-            if not (regex.endswith('$') or regex.endswith('.*')):
-                regex = regex + '.*'
-            return "%s imatches %s" % (self.cleanKey(fieldname), self.generateValueNode(regex, True))
-            """
-            #print("ENDS WITH!!!")
             nodeRet['args']['str']['value'] = re.escape(self.generateValueNode(regex, True))  # .replace("\\", "\\\\").replace(".","\\.")
+            nodeRet['args']['str']['regex'] = "true"
             if notNode:
-                nodeRet["args"]["comparison"]["value"] = "!regex"
+                nodeRet["args"]["comparison"]["value"] = "!="
             else:
-                nodeRet['args']['comparison']['value'] = "regex"
+                nodeRet['args']['comparison']['value'] = "="
             # return json.dumps(nodeRet)
             return nodeRet
         else:
             raise NotImplementedError("Type modifier '{}' is not supported by backend".format(value.identifier))
 
     def generateValueNode(self, node, keypresent):
-        """
-        if keypresent == False:
-            return "payload regex \'{0}{1}{2}\'".format("%", self.cleanValue(str(node)), "%")
-        else:
-            return self.valueExpression % (self.cleanValue(str(node)))
-        """
         return self.valueExpression % (self.cleanValue(str(node)))
 
     def generateNULLValueNode(self, node, notNode):
