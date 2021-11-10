@@ -1,0 +1,45 @@
+title: Excel Network Connections
+id: 1f21ec3f-810d-4b0e-8045-31102e22b4b
+status: experimental
+description: Detects a Excel process that opens suspicious network connections to non-private IP addresses, and attempts to cover CVE-2021-42292.
+author: Christopher Peacock '@securepeacock', SCYTHE '@scythe_io'
+date: 2021/11/10
+references:
+    - https://corelight.com/blog/detecting-cve-2021-42292
+tags:
+    - attack.execution
+    - attack.t1203
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\excel.exe'
+        Initiated: 'true'
+        DestinationIsIpv6: 'false'
+    filter:
+        DestinationIp|startswith:
+            - '10.'
+            - '192.168.'
+            - '172.16.'
+            - '172.17.'
+            - '172.18.'
+            - '172.19.'
+            - '172.20.'
+            - '172.21.'
+            - '172.22.'
+            - '172.23.'
+            - '172.24.'
+            - '172.25.'
+            - '172.26.'
+            - '172.27.'
+            - '172.28.'
+            - '172.29.'
+            - '172.30.'
+            - '172.31.'
+            - '127.0.0.1'
+        DestinationIsIpv6: 'false'
+    condition: selection and not filter
+falsepositives:
+    - You may have to tune certain domains out that Excel may call out to, such as microsoft or other business use case domains.
+level: low
