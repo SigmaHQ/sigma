@@ -454,7 +454,48 @@ class HAWKBackend(SingleTextQueryBackend):
 
             return result
 
-    def dedupeAnds(self, arr):
+    def dedupeAnds(self, arr, parentAnd=False):
+        # simple dedupe
+        for i in range(0, len(arr)):
+            if 'id' in arr[i] and arr[i]['id'].lower() == "and":
+                arr[i]['children'] = self.dedupeAnds(arr[i]['children'])
+
+                if len(arr[i]['children']) == 1 and 'id' in arr[i]['children'][0] and arr[i]['children'][0]['id'].lower() == "and":
+                    arr[i] = arr[i]['children'][0]
+
+
+        return arr
+
+        """
+        for i in range(0, len(arr)):
+            if parentAnd and 'id' in arr[i] and arr[i]['id'].lower() == "and":
+                isAnd = True
+            else:
+                isAnd = False
+            
+            if 'children' in arr[i]:
+                arr[i]['children'] = self.dedupeAnds(arr['i']['children'], isAnd)
+
+            if parentAnd and 'id' in arr[i] and arr[i]['id'].lower() == "and":
+                pass
+
+        if len(arr) == 1 and 'id' in arr[0] and arr[0]['id'].lower() == "and":
+            # print("Returning less!")
+            for i in range(0, len(arr) ):
+                if 'id' in arr[i] and arr[i]['id'].lower() == "and":
+                    arr[i]['children'] = self.dedupeAnds(arr[i]['children'])
+            return arr[0]['children']
+
+        """
+        return arr
+
+    """
+    def dedupeAnds(self, arr, parentAnd=False):
+        #if not parentAnd:
+        #    for i in range(0, len(arr) ):
+        #        if 'id' in arr[i] and arr[i]['id'].lower() == "and":
+        #            arr[i]['children'] = self.dedupeAnds(arr[i]['children'], False)
+
         if len(arr) == 1 and 'id' in arr[0] and arr[0]['id'].lower() == "and":
             # print("Returning less!")
             for i in range(0, len(arr) ):
@@ -477,6 +518,7 @@ class HAWKBackend(SingleTextQueryBackend):
                 x = x + arr[i]['children']
             return x
         return arr
+    """
 
     def generateQuery(self, parsed, sigmaparser):
         self.sigmaparser = sigmaparser
@@ -547,7 +589,7 @@ class HAWKBackend(SingleTextQueryBackend):
         try:
             analytic = json.loads(analytic_txt) # json.dumps(ret)
             # analytic = self.dedupeAnds(analytic)
-            analytic[0]['children'] = self.dedupeAnds(analytic[0]['children'])
+            analytic[0]['children'] = self.dedupeAnds(analytic[0]['children'], True)
 
         except Exception as e:
             print("Failed to parse json: %s" % analytic_txt)
