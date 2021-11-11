@@ -13,14 +13,15 @@ tags:
     - attack.defense_evasion
 status: experimental
 date: 2021/08/23
+modified: 2021/11/09
 logsource:
-  product: Windows
+  product: windows
   category: process_creation
 detection:
   #useful_information: add more LOLBins to the rules logic of your choice.
   selection1:
     - Image|endswith: '\wbem\WMIC.exe'
-    - ProcessCommandLine|contains: 'wmic '
+    - ParentCommandLine|contains: 'wmic '
     - OriginalFileName: 'wmic.exe'
     - Description: 'WMI Commandline Utility'
   selection2:
@@ -32,11 +33,11 @@ detection:
       - 'verclsid'
   selection3:
     ParentImage|endswith:
-    - winword.exe
-    - excel.exe
-    - powerpnt.exe
+      - winword.exe
+      - excel.exe
+      - powerpnt.exe
   selection4:
-    processCommandLine|contains|all: 
+    ParentCommandLine|contains|all: 
       - 'process'
       - 'create'
       - 'call'
