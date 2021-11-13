@@ -386,6 +386,8 @@ class TestRules(unittest.TestCase):
             "stable",
             "test",
             "experimental",
+            "deprecated",
+            "unsupported"
             ]
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             status_str = self.get_rule_part(file_path=file, part_name="status")
@@ -393,7 +395,10 @@ class TestRules(unittest.TestCase):
                 if not status_str in valid_status:
                     print(Fore.YELLOW + "Rule {} has a invalid 'status' (check wiki).".format(file))
                     faulty_rules.append(file) 
-
+                elif status_str == "unsupported":
+                    print(Fore.YELLOW + "Rule {} has the unsupported 'status', can not be in rules directory".format(file))
+                    faulty_rules.append(file)
+                    
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed 'status' fields. (check https://github.com/SigmaHQ/sigma/wiki/Specification)")
 

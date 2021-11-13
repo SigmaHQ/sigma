@@ -13,19 +13,20 @@ tags:
     - attack.defense_evasion
 status: experimental
 date: 2021/08/23
+modified: 2021/11/09
 logsource:
   product: windows
   category: process_creation
 detection:
  #useful_information: Add more office applications to the rule logic of choice
   selection1:
-  - Image|endswith: '\wbem\WMIC.exe'
-  - ProcessCommandLine|contains: 'wmic '
+    - Image|endswith: '\wbem\WMIC.exe'
+    - ParentCommandLine|contains: 'wmic '
   selection2:
-   ParentImage:
-    - winword.exe
-    - excel.exe
-    - powerpnt.exe
+    ParentImage:
+      - winword.exe
+      - excel.exe
+      - powerpnt.exe
   condition: selection1 and selection2
 falsepositives:
 - Unknown
