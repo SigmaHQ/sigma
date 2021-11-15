@@ -121,7 +121,7 @@ class SigmaConditionTokenizer:
             (SigmaConditionToken.TOKEN_AND,    re.compile("and", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_OR,     re.compile("or", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_NOT,    re.compile("not", re.IGNORECASE)),
-            (SigmaConditionToken.TOKEN_ID,     re.compile("[\\w*]+")),
+            (SigmaConditionToken.TOKEN_ID,     re.compile("[\\w*-.]+")),
             (SigmaConditionToken.TOKEN_LPAR,   re.compile("\\(")),
             (SigmaConditionToken.TOKEN_RPAR,   re.compile("\\)")),
             ]
@@ -270,7 +270,7 @@ class SigmaSearchValueAsIs:
 def generateXOf(sigma, val, condclass):
     """
     Generic implementation of (1|all) of x expressions.
-        
+
     * condclass across all list items if x is name of definition
     * condclass across all definitions if x is keyword 'them'
     * condclass across all matching definition if x is wildcard expression, e.g. 'selection*'
@@ -520,7 +520,7 @@ class SigmaConditionParser:
                     open_token was '(' and
                     tokens were ['(', '...', '(', '...', ')', ')']
                     the first '(' should pair with the last ')' instead of the first ')'
-                
+
                 Parameters:
                     tokens: the list of tokens
                     start_index: the start index (included) of the input tokens for finding the close_token
