@@ -191,8 +191,14 @@ class ConditionBase(ParseTreeNode):
     op = COND_NONE
     items = None
 
-    def __init__(self):
-        raise NotImplementedError("ConditionBase is no usable class")
+    def __init__(self, sigma=None, op=None, *args):
+        if type(self) == ConditionBase:
+            raise NotImplementedError("ConditionBase is no usable class")
+
+        if sigma == None and op == None and len(args) == 0:    # no parameters given - initialize empty
+            self.items = list()
+        else:       # called by parser, use given values
+            self.items = args
 
     def add(self, item):
         self.items.append(item)
@@ -204,27 +210,11 @@ class ConditionBase(ParseTreeNode):
         return len(self.items)
 
 
-class ConditionAND(ConditionBase):
-    """AND Condition"""
-    op = COND_AND
-
-    def __init__(self, sigma=None, op=None, *args):
-        if sigma == None and op == None and len(args) == 0:    # no parameters given - initialize empty
-            self.items = list()
-        else:       # called by parser, use given values
-            self.items = args
-
-
-class ConditionOR(ConditionAND):
-    """OR Condition"""
-    op = COND_OR
-
-
-class ConditionNOT(ConditionBase):
-    """NOT Condition"""
-    op = COND_NOT
-
+class ConditionBaseOneItem(ConditionBase):
     def __init__(self, sigma=None, op=None, val=None):
+        if type(self) == ConditionBaseOneItem:
+            raise NotImplementedError("ConditionBaseOneItem is no usable class")
+
         if sigma == None and op == None and val == None:    # no parameters given - initialize empty
             self.items = list()
         else:       # called by parser, use given values
@@ -244,13 +234,30 @@ class ConditionNOT(ConditionBase):
             return None
 
 
-class ConditionNULLValue(ConditionNOT):
+class ConditionAND(ConditionBase):
+    """AND Condition"""
+    op = COND_AND
+
+
+class ConditionOR(ConditionBase):
+    """OR Condition"""
+    op = COND_OR
+
+
+class ConditionNOT(ConditionBaseOneItem):
+    """NOT Condition"""
+    op = COND_NOT
+
+
+class ConditionNULLValue(ConditionBaseOneItem):
     """Condition: Field value is empty or doesn't exists"""
+    op = COND_NULL
     pass
 
 
 class ConditionNotNULLValue(ConditionNULLValue):
     """Condition: Field value is not empty"""
+    op = COND_NULL
     pass
 
 
