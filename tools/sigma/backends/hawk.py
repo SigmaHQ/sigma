@@ -307,7 +307,13 @@ class HAWKBackend(SingleTextQueryBackend):
 
     def generateNULLValueNode(self, node, notNode):
         # node.item
-        nodeRet = {"key": node.item,  "description": node.item, "class": "column", "return": "str", "args": { "comparison": { "value": "=" }, "str": { "value": "null" } } }
+        nodeRet = { "key" : "empty", "description" : "Value Does Not Exist (IS NULL)", "class" : "function", "inputs" : { "comparison" : { "order" : 0, "source" : "comparison", "type" : "comparison" }, "column" : { "order" : 1, "source" : "columns", "type" : "str" } }, "args" : { "comparison" : { "value" : "!=" }, "column" : { "value" : node.item } }, "return" : "boolean" }
+        nodeRet['args']['column']['value'] = self.cleanKey(node.item).lower()
+        nodeRet['description'] += " %s" % key
+        if notNode:
+            nodeRet['args']['comparison']['value'] = "!="
+        else:
+            nodeRet['args']['comparison']['value'] = "="
         nodeRet['rule_id'] = str(uuid.uuid4())
         # return json.dumps(nodeRet)
         return nodeRet
