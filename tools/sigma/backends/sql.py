@@ -106,24 +106,25 @@ class SQLBackend(SingleTextQueryBackend):
     def generateMapItemNode(self, node):
         fieldname, value = node
         transformed_fieldname = self.fieldNameMapping(fieldname, value)
+        generated_value = self.generateNode(value)
 
-        has_wildcard = re.search(r"((\\(\*|\?|\\))|\*|\?|_|%)", self.generateNode(value))
+        has_wildcard = re.search(r"((\\(\*|\?|\\))|\*|\?|_|%)", generated_value)
 
-        if "," in self.generateNode(value) and not has_wildcard:
-            return self.mapMulti % (transformed_fieldname, self.generateNode(value))
+        if "," in generated_value  and generated_value[0]=="(" and generated_value[-1]==")" and not has_wildcard:
+            return self.mapMulti % (transformed_fieldname, generated_value)
         elif "LENGTH" in transformed_fieldname:
             return self.mapLength % (transformed_fieldname, value)
         elif type(value) == list:
             return self.generateMapItemListNode(transformed_fieldname, value)
         elif self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
             if has_wildcard:
-                return self.mapWildcard % (transformed_fieldname, self.generateNode(value))
+                return self.mapWildcard % (transformed_fieldname, generated_value)
             else:
-                return self.mapExpression % (transformed_fieldname, self.generateNode(value))
+                return self.mapExpression % (transformed_fieldname, generated_value)
         elif "sourcetype" in transformed_fieldname:
-            return self.mapSource % (transformed_fieldname, self.generateNode(value))
+            return self.mapSource % (transformed_fieldname, generated_value)
         elif has_wildcard:
-            return self.mapWildcard % (transformed_fieldname, self.generateNode(value))
+            return self.mapWildcard % (transformed_fieldname, generated_value)
         else:
             raise TypeError("Backend does not support map values of type " + str(type(value)))
 
