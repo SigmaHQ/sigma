@@ -6,7 +6,7 @@ references:
     - https://dtm.uk/wuauclt/
 author: FPT.EagleEye Team
 date: 2020/10/17
-modified: 2021/11/09
+modified: 2021/11/16
 tags:
     - attack.command_and_control
     - attack.execution
@@ -22,7 +22,10 @@ detection:
             - '/RunHandlerComServer'
         Image|endswith: 
             - '\wuauclt.exe'
-    condition: selection
+    filter:
+        CommandLine|contains:
+            - ' /ClassId '
+    condition: selection and not filter
 falsepositives:
     - Unknown
 level: high
