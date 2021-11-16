@@ -1,9 +1,7 @@
 title: Load of dbghelp/dbgcore DLL from Suspicious Process
 id: 0e277796-5f23-4e49-a490-483131d4f6e1
 status: experimental
-description: Detects the load of dbghelp/dbgcore DLL (used to make memory dumps) by suspicious processes. Tools like ProcessHacker and some attacker tradecract use MiniDumpWriteDump
-    API found in dbghelp.dll or dbgcore.dll. As an example, SilentTrynity C2 Framework has a module that leverages this API to dump the contents of Lsass.exe and
-    transfer it over the network back to the attacker's machine.
+description: Detects the load of dbghelp/dbgcore DLL (used to make memory dumps) by suspicious processes. Tools like ProcessHacker and some attacker tradecract use MiniDumpWriteDump API found in dbghelp.dll or dbgcore.dll. As an example, SilentTrynity C2 Framework has a module that leverages this API to dump the contents of Lsass.exe and transfer it over the network back to the attacker's machine.
 date: 2019/10/27
 modified: 2020/08/23
 author: Perez Diego (@darkquassar), oscd.community, Ecco
@@ -26,7 +24,7 @@ detection:
         Image|endswith:
             - '\msbuild.exe'
             - '\cmd.exe'
-            - '\svchost.exe'
+            # - '\svchost.exe'
             - '\rundll32.exe'
             - '\powershell.exe'
             - '\word.exe'
@@ -35,7 +33,7 @@ detection:
             - '\outlook.exe'
             - '\monitoringhost.exe'
             - '\wmic.exe'
-              # - '\msiexec.exe'  an installer installing a program using one of those DLL will raise an alert
+            # - '\msiexec.exe'  an installer installing a program using one of those DLL will raise an alert
             - '\bash.exe'
             - '\wscript.exe'
             - '\cscript.exe'
@@ -50,10 +48,10 @@ detection:
         ImageLoaded|endswith:
             - '\dbghelp.dll'
             - '\dbgcore.dll'
-        Signed: "FALSE"
-    filter:
+        Signed: 'FALSE'
+    filter1:
         Image|contains: 'Visual Studio'
-    condition: (signedprocess and not filter) or (unsignedprocess and not filter)
+    condition: (signedprocess and not filter1) or (unsignedprocess and not filter1)
 fields:
     - ComputerName
     - User
