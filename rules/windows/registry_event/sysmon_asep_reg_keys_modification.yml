@@ -11,8 +11,8 @@ tags:
     - attack.t1547.001
     - attack.t1060      # an old one
 date: 2019/10/25
-modified: 2020/11/04
-author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community
+modified: 2021/11/11
+author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton
 logsource:
     category: registry_event
     product: windows
@@ -190,6 +190,8 @@ detection:
             - '\Lsa\Notification Packages'
             - '\Lsa\Authentication Packages'
             - '\BootVerificationProgram\ImagePath'
+    filter:
+        Details: '(Empty)'
     condition: main_selection or
                session_manager_base and session_manager or
                current_version_base and current_version or
@@ -202,7 +204,7 @@ detection:
                classes_base and classes or
                scripts_base and scripts or
                winsock_parameters_base and winsock_parameters or
-               system_control_base and system_control
+               system_control_base and system_control and not filter
 fields:
     - SecurityID
     - ObjectName
