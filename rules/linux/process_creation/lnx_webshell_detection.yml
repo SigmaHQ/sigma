@@ -14,12 +14,6 @@ logsource:
    product: linux
    category: process_creation
 detection:
-   selection_sub_processes:
-      Image|endswith: 
-         - '/whoami'
-         - '/ifconfig'
-         - '/usr/bin/ip'
-         - '/bin/uname'
    selection_general:
       ParentImage|endswith:
          - '/httpd'
@@ -35,6 +29,12 @@ detection:
       ParentCommandLine|contains|all:
          - '/bin/java'
          - 'websphere'
+   selection_sub_processes:
+      Image|endswith: 
+         - '/whoami'
+         - '/ifconfig'
+         - '/usr/bin/ip'
+         - '/bin/uname'
    condition: selection_sub_processes and ( selection_general or selection_tomcat )
 falsepositives:
    - Web applications that invoke Linux command line tools 
