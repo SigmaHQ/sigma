@@ -5,7 +5,7 @@ description: Detects process access LSASS memory which is typical for credential
 author: Florian Roth, Roberto Rodriguez, Dimitrios Slamaris, Mark Russinovich, Thomas Patzke, Teymur Kheirkhabarov, Sherif Eldeeb, James Dickenson, Aleksey Potapov,
     oscd.community (update)
 date: 2017/02/16
-modified: 2021/10/20
+modified: 2021/11/16
 references:
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
     - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
@@ -23,7 +23,7 @@ logsource:
 detection:
     selection:
         TargetImage|endswith: '\lsass.exe'
-        GrantedAccess|contains:
+        GrantedAccess|startswith:
             - '0x40'
             - '0x1000'
             - '0x1400'
@@ -37,7 +37,7 @@ detection:
             - '0x1f1fff'
             - '0x1f2fff'
             - '0x1f3fff'
-    filter:
+    filter1:
         SourceImage|endswith: # easy to bypass. need to implement supportive rule to detect bypass attempts
             - '\wmiprvse.exe'
             - '\taskmgr.exe'
@@ -48,7 +48,15 @@ detection:
             - '\csrss.exe'
             - '\wininit.exe'
             - '\vmtoolsd.exe'
-    condition: selection and not filter
+    filter2:
+        GrantedAccess: 
+            - '0x1000'
+            - '0x1410'
+        SourceImage|endswith:
+            - '\MicrosoftEdgeUpdate.exe'
+            - '\GamingServices.exe'
+            - 'C:\Windows\System32\svchost.exe'
+    condition: selection and not filter1 and not filter2
 fields:
     - ComputerName
     - User
