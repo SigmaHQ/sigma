@@ -56,7 +56,6 @@ class HAWKBackend(SingleTextQueryBackend):
 
     def cleanValue(self, value):
         """Remove quotes in text"""
-        # return value.replace("\'","\\\'")
         return value
 
     def generateNode(self, node, notNode=False):
@@ -95,7 +94,14 @@ class HAWKBackend(SingleTextQueryBackend):
             # they imply the entire payload
             nodeRet['description'] = key
             nodeRet['rule_id'] = str(uuid.uuid4())
-            nodeRet['args']['str']['value'] = re.escape(self.generateValueNode(node, False))  # .replace("\\","\\\\").replace(".","\\.")
+            value = self.generateValueNode(node, False).replace("*", "EEEESTAREEE")
+            value = re.escape(value)
+            value = value.replace("EEEESTAREEE", ".*")
+            if value[0:2] == ".*":  
+                value = value[2:]
+            if value[-2:] == ".*":
+                value = value[:-2]
+            nodeRet['args']['str']['value'] = value 
             # return json.dumps(nodeRet)
             return nodeRet
         elif type(node) == list:
@@ -182,9 +188,13 @@ class HAWKBackend(SingleTextQueryBackend):
             if key.lower() in ("logname","source"):
                 self.logname = value
             elif type(value) == str and "*" in value:
-                # value = value.replace("*", ".*")
-                value = value.replace("*", "")
-                value = re.escape(value)  # .replace("\\", "\\\\").replace(".","\\.")
+                value = value.replace("*", "EEEESTAREEE")
+                value = re.escape(value)
+                value = value.replace("EEEESTAREEE", ".*")
+                if value[0:2] == ".*":  
+                    value = value[2:]
+                if value[-2:] == ".*":
+                    value = value[:-2]
                 if notNode:
                     nodeRet["args"]["comparison"]["value"] = "!="
                 else:
@@ -247,10 +257,13 @@ class HAWKBackend(SingleTextQueryBackend):
                 nodeRet['args']['str']['value'] = 'null'
                 ret['children'].append( nodeRet )
             elif type(item) == str and "*" in item:
-                item = item.replace("*", "")
-                item = re.escape(item) # .replace("\\", "\\\\").replace(".","\\.")
-                #print("item")
-                #print(item)
+                item = item.replace("*", "EEEESTAREEE")
+                item = re.escape(item)
+                item = item.replace("EEEESTAREEE", ".*")
+                if item[:2] == ".*":  
+                    item = item[2:]
+                if item[-2:] == ".*":
+                    item = item[:-2]
                 nodeRet['args']['str']['value'] = item # self.generateValueNode(item, True)
                 nodeRet['args']['str']['regex'] = "true"
                 if notNode:
@@ -259,8 +272,6 @@ class HAWKBackend(SingleTextQueryBackend):
                     nodeRet['args']['comparison']['value'] = "="
                 ret['children'].append( nodeRet )
             else:
-                #print("item2")
-                #print(item)
                 nodeRet['args']['str']['value'] = self.generateValueNode(item, True)
                 ret['children'].append( nodeRet )
         retAnd = { "id" : "and", "key": "And", "children" : [ ret ] }
@@ -273,14 +284,20 @@ class HAWKBackend(SingleTextQueryBackend):
         nodeRet['description'] = fieldname
         nodeRet['rule_id'] = str(uuid.uuid4())
         if type(value) == SigmaRegularExpressionModifier:
-            regex = str(value)
-            nodeRet['args']['str']['value'] = re.escape(self.generateValueNode(regex, True))  # .replace("\\", "\\\\").replace(".","\\.")
+            value = str(value)
+            value = value.replace("*", "EEEESTAREEE")
+            value = re.escape(self.generateValueNode(value, True))
+            value = value.replace("EEEESTAREEE", ".*")
+            if value[:2] == ".*":  
+                value = value[2:]
+            if value[-2:] == ".*":
+                value = value[:-2]
+            nodeRet['args']['str']['value'] = value
             nodeRet['args']['str']['regex'] = "true"
             if notNode:
                 nodeRet["args"]["comparison"]["value"] = "!="
             else:
                 nodeRet['args']['comparison']['value'] = "="
-            # return json.dumps(nodeRet)
             return nodeRet
         else:
             raise NotImplementedError("Type modifier '{}' is not supported by backend".format(value.identifier))
@@ -290,7 +307,13 @@ class HAWKBackend(SingleTextQueryBackend):
 
     def generateNULLValueNode(self, node, notNode):
         # node.item
-        nodeRet = {"key": node.item,  "description": node.item, "class": "column", "return": "str", "args": { "comparison": { "value": "=" }, "str": { "value": "null" } } }
+        nodeRet = { "key" : "empty", "description" : "Value Does Not Exist (IS NULL)", "class" : "function", "inputs" : { "comparison" : { "order" : 0, "source" : "comparison", "type" : "comparison" }, "column" : { "order" : 1, "source" : "columns", "type" : "str" } }, "args" : { "comparison" : { "value" : "!=" }, "column" : { "value" : node.item } }, "return" : "boolean" }
+        nodeRet['args']['column']['value'] = self.cleanKey(node.item).lower()
+        nodeRet['description'] += " %s" % key
+        if notNode:
+            nodeRet['args']['comparison']['value'] = "!="
+        else:
+            nodeRet['args']['comparison']['value'] = "="
         nodeRet['rule_id'] = str(uuid.uuid4())
         # return json.dumps(nodeRet)
         return nodeRet
