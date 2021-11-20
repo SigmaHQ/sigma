@@ -3,6 +3,7 @@ id: 0248a7bc-8a9a-4cd8-a57e-3ae8e073a073
 description: Detects the mount of ISO images on an endpoint
 status: experimental
 date: 2021/05/29
+modified: 2021/11/20
 author: Syed Hasan (@syedhasan009)
 references: 
     - https://www.trendmicro.com/vinfo/hk-en/security/news/cybercrime-and-digital-threats/malicious-spam-campaign-uses-iso-image-files-to-deliver-lokibot-and-nanocore
@@ -21,7 +22,9 @@ detection:
         ObjectServer: 'Security'
         ObjectType: 'File'
         ObjectName: '\Device\CdRom*'
-    condition: selection
+    filter:
+        ObjectName: '\Device\CdRom0\setup.exe'
+    condition: selection and not filter
 falsepositives:
     - Software installation ISO files
 level: medium
