@@ -44,6 +44,8 @@ def main():
     score_to_rules = {}
     curr_max_technique_count = 0
     num_rules_used = 0
+    num_rules_no_tags = 0
+    num_rules_no_techniques = 0
     for rule_file in rule_files:
         with open(rule_file,encoding='utf-8') as f:
             docs = yaml.load_all(f, Loader=yaml.FullLoader)
@@ -52,6 +54,7 @@ def main():
                 if "tags" not in rule :
                     if double == False : # Only 1 warning
                         sys.stderr.write(f"Ignoring rule {rule_file} (no tags)\n")
+                        num_rules_no_tags += 1
                     double = True # action globle no tag
                     continue
                 if not "status" in rule:
@@ -82,6 +85,7 @@ def main():
                             curr_max_technique_count = max(curr_max_technique_count, len(techniques_to_rules[technique_id]))
                 if t_tags == False:
                     sys.stderr.write(f"Ignoring rule {rule_file} no Techniques in {tags} \n")
+                    num_rules_no_techniques += 1
 
     scores = []
     for technique in techniques_to_rules:
@@ -119,6 +123,14 @@ def main():
     with open(args.out_file, "w",encoding="UTF-8") as f:
         f.write(json.dumps(output, indent=4, ensure_ascii=False))
         print(f"[*] Layer file written in {args.out_file} ({str(num_rules_used)} rules)")
+        if num_rules_no_tags>0 :
+            print(f"[-] Ignored  {num_rules_no_tags} rules without tags")
+        else:
+            print(f"[*] No rule without tags")
+        if num_rules_no_techniques>0:
+            print(f"[-] Ignored {num_rules_no_techniques} rules whitout Mittre Technique")
+        else:
+            print(f"[*] No rule whitout Mittre Technique")
 
 if __name__ == "__main__":
     main()
