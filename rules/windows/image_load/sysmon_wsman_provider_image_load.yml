@@ -3,6 +3,7 @@ id: ad1f4bb9-8dfb-4765-adb6-2a7cfb6c0f94
 description: Detects signs of potential use of the WSMAN provider from uncommon processes locally and remote execution.
 status: experimental
 date: 2020/06/24
+modified: 2021/11/17
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 tags:
     - attack.execution
@@ -32,6 +33,8 @@ detection:
     respond_server:
         Image|endswith: '\svchost.exe'
         OriginalFileName: 'WsmWmiPl.dll'
+    filter:
+        CommandLine|endswith: '\svchost.exe -k netsvcs -p -s BITS'
     condition: (request_client and not filter_ps) or respond_server
 falsepositives:
     - Unknown

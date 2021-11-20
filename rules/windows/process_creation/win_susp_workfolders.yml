@@ -1,0 +1,25 @@
+title: Execution via WorkFolders.exe
+id: 0bbc6369-43e3-453d-9944-cae58821c173
+status: experimental
+description: Detects using WorkFolders.exe to execute an arbitrary control.exe
+references:
+    - https://twitter.com/elliotkillick/status/1449812843772227588
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+author: Maxime Thiebaut (@0xThiebaut)
+date: 2021/10/21
+logsource:
+    category: process_creation
+    product: windows
+    definition: 'Requirements: Sysmon ProcessCreation logging must be activated'
+detection:
+    selection:
+        Image|endswith: '\control.exe'
+        ParentImage|endswith: '\WorkFolders.exe'
+    filter:
+        Image: 'C:\Windows\System32\control.exe'
+    condition: selection and not filter
+falsepositives:
+    - Legitimate usage of the uncommon Windows Work Folders feature.
+level: high

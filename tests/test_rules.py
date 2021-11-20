@@ -75,20 +75,13 @@ class TestRules(unittest.TestCase):
                         
     def test_optional_tags(self):
         files_with_incorrect_tags = []
-
+        tags_pattern = re.compile(r"cve\.\d+\.\d+|attack\.t\d+\.*\d*|attack\.[a-z_]+|car\.\d{4}-\d{2}-\d{3}")
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             tags = self.get_rule_part(file_path=file, part_name="tags")
             if tags:
                 for tag in tags:
-                    if tag.startswith("attack."):
-                        continue
-                    elif tag.startswith("car."):
-                        continue
-                    elif tag.startswith("cve."):
-                        print(Fore.RED + "Rule {} has the cve tag <{}> but is it a references (https://nvd.nist.gov/)".format(file, tag))
-                        files_with_incorrect_tags.append(file)
-                    else:
-                        print(Fore.RED + "Rule {} has the unknown tag <{}>".format(file, tag))
+                    if tags_pattern.match(tag) == None:
+                        print(Fore.RED + "Rule {} has the invalid tag <{}>".format(file, tag))
                         files_with_incorrect_tags.append(file)
 
         self.assertEqual(files_with_incorrect_tags, [], Fore.RED + 
@@ -191,31 +184,33 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_detections, [], Fore.RED +
                          "There are rules using '1/all of them' style conditions but only have one condition")
 
-    def test_duplicate_titles(self):
+    def test_duplicate_detections(self):
         def compare_detections(detection1:dict, detection2:dict) -> bool:
 
-            # detections not the same length can't be the same
+            # detections not the same count can't be the same
             if len(detection1) != len(detection2):
-                return False
-
+                return False    
+                 
             for named_condition in detection1:
                 #don't check timeframes
                 if named_condition == "timeframe":
                     continue
-                
+               
                 # condition clause must be the same too 
                 if named_condition == "condition":
                     if detection1["condition"] != detection2["condition"]:
                         return False
                     else:
                         continue
-                
+                               
                 # Named condition must exist in both rule files
                 if named_condition not in detection2:
                     return False
-
+                
+                #can not be the same  if len is not equal
                 if len(detection1[named_condition]) != len(detection2[named_condition]):
                     return False
+                
 
                 for condition in detection1[named_condition]:
                     if type(condition) != str:
@@ -223,10 +218,9 @@ class TestRules(unittest.TestCase):
 
                     if condition not in detection2[named_condition]:
                         return False
-
+                    
                     condition_value1 = detection1[named_condition][condition]
                     condition_value2 = detection2[named_condition][condition]
-
                     if condition_value1 != condition_value2:
                         return False
 
@@ -238,7 +232,8 @@ class TestRules(unittest.TestCase):
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             detection = self.get_rule_part(file_path = file, part_name = "detection")
             logsource = self.get_rule_part(file_path = file, part_name = "logsource")
-            detection.update(logsource)
+            detection["logsource"] = {}
+            detection["logsource"].update(logsource)
             yaml = self.get_rule_yaml(file_path = file)
 
             is_multipart_yaml_file = len(yaml) != 1
@@ -391,6 +386,8 @@ class TestRules(unittest.TestCase):
             "stable",
             "test",
             "experimental",
+            "deprecated",
+            "unsupported"
             ]
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             status_str = self.get_rule_part(file_path=file, part_name="status")
@@ -398,7 +395,10 @@ class TestRules(unittest.TestCase):
                 if not status_str in valid_status:
                     print(Fore.YELLOW + "Rule {} has a invalid 'status' (check wiki).".format(file))
                     faulty_rules.append(file) 
-
+                elif status_str == "unsupported":
+                    print(Fore.YELLOW + "Rule {} has the unsupported 'status', can not be in rules directory".format(file))
+                    faulty_rules.append(file)
+                    
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed 'status' fields. (check https://github.com/SigmaHQ/sigma/wiki/Specification)")
 
@@ -450,7 +450,7 @@ class TestRules(unittest.TestCase):
                          "There are rules with malformed optional 'falsepositives' fields. (has to be a list of values even if it contains only a single value)")
 
     # Upgrade Detection Rule License  1.1
-    def test_author(self):
+    def test_optional_author(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             author_str = self.get_rule_part(file_path=file, part_name="author")
@@ -459,9 +459,6 @@ class TestRules(unittest.TestCase):
                 if not isinstance(author_str, str):
                     print(Fore.YELLOW + "Rule {} has a 'author' field that isn't a string.".format(file))
                     faulty_rules.append(file)
-            else:
-                print(Fore.YELLOW + "Rule {} has no 'author' field".format(file))
-                faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED + 
                          "There are rules with malformed 'author' fields. (has to be a string even if it contains many author)")

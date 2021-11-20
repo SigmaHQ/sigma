@@ -100,6 +100,11 @@ logsources:
     service: msexchange-management
     conditions:
       winlog.channel: 'MSExchange Management'
+  microsoft-servicebus-client:
+    product: windows
+    service: microsoft-servicebus-client
+    conditions:
+      winlog.channel: 'Microsoft-ServiceBus-Client'
 defaultindex: winlogbeat-*
 # Extract all field names with yq:
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: winlog.event_data.\1/g'
@@ -155,22 +160,25 @@ fieldmappings:
     Image: process.executable
     FileVersion: 
         category=process_creation: process.pe.file_version
-        category=image_load: process.pe.file_version
+        category=image_load: file.pe.file_version
         default: winlog.event_data.FileVersion
     Description:
         category=process_creation: process.pe.description
-        category=image_load: process.pe.description
+        category=image_load: file.pe.description
         category=sysmon_error: winlog.event_data.Description
         default: winlog.event_data.Description
     Product:
         category=process_creation: process.pe.product
-        category=image_load: process.pe.product
+        category=image_load: file.pe.product
         default: winlog.event_data.Product
     Company: 
         category=process_creation: process.pe.company
-        category=image_load: process.pe.company
+        category=image_load: file.pe.company
         default: winlog.event_data.Company
-    OriginalFileName: process.pe.original_file_name
+    OriginalFileName: 
+        category=process_creation: process.pe.original_file_name
+        category=image_load: file.pe.original_file_name
+        default: winlog.event_data.OriginalFileName
     CommandLine: 
         category=process_creation: process.command_line
         service=security: process.command_line
@@ -185,6 +193,9 @@ fieldmappings:
     ParentProcessId: process.parent.pid
     ParentImage: process.parent.executable
     ParentCommandLine: process.parent.command_line
+    ParentUser: winlog.event_data.ParentUser  #Sysmon 13.30
+    SourceUser: winlog.event_data.SourceUser  #Sysmon 13.30
+    TargetUser: winlog.event_data.TargetUser  #Sysmon 13.30
     TargetFilename: file.path
     CreationUtcTime: winlog.event_data.CreationUtcTime
     PreviousCreationUtcTime: winlog.event_data.PreviousCreationUtcTime
