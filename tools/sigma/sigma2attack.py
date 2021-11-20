@@ -35,7 +35,7 @@ def main():
 
 
     args = parser.parse_args()
-
+    print(args.level_score)
     status_start = status_eq[args.status_start]
     status_end = status_eq[args.status_end]
 
@@ -79,7 +79,7 @@ def main():
                             score_to_rules[technique_id] = []
                         techniques_to_rules[technique_id].append(os.path.basename(rule_file))
                         score_to_rules[technique_id].append(level_eq[level])
-                        if args.level_score:
+                        if args.level_score == True:
                             curr_max_technique_count = max(curr_max_technique_count, sum(score_to_rules[technique_id]))
                         else:
                             curr_max_technique_count = max(curr_max_technique_count, len(techniques_to_rules[technique_id]))
@@ -89,9 +89,13 @@ def main():
 
     scores = []
     for technique in techniques_to_rules:
+        if args.level_score == True:
+            technique_score = sum(score_to_rules[technique])
+        else:
+            technique_score = len(techniques_to_rules[technique])
         entry = {
             "techniqueID": technique, 
-            "score": sum(score_to_rules[technique]), 
+            "score": technique_score, 
         }
         if not args.no_comment:
             entry["comment"] = "\n".join(techniques_to_rules[technique])
