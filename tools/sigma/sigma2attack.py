@@ -30,7 +30,7 @@ def main():
     parser.add_argument("--out-file", "-o", dest="out_file", default="heatmap.json", help="File to write the JSON layer to")
     parser.add_argument("--no-comment", dest="no_comment", action="store_true", help="Don't store rule names in comments")
     parser.add_argument("--status-start", "-s",dest="status_start", default="unsupported", help="Check rule with minimun status")
-    parser.add_argument("--status-end", "-se",dest="status_end", default="stable", help="Check rule with minimun status")
+    parser.add_argument("--status-end", "-se",dest="status_end", default="stable", help="Check rule with maximun status")
     parser.add_argument("--level-score", "-l",dest="level_score", action="store_true", help="Score depand form rule level")
 
 
@@ -132,9 +132,9 @@ def main():
         else:
             print(f"[*] No rule without tags")
         if num_rules_no_techniques>0:
-            print(f"[-] Ignored {num_rules_no_techniques} rules whitout Mittre Technique")
+            print(f"[-] Ignored {num_rules_no_techniques} rules whitout Mitre Technique")
         else:
-            print(f"[*] No rule whitout Mittre Technique")
+            print(f"[*] No rule whitout Mitre Technique")
 
 if __name__ == "__main__":
     main()
