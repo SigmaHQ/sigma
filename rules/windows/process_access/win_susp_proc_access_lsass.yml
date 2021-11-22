@@ -49,25 +49,39 @@ detection:
             - 'BA'
             - 'DA'
             - 'FA'
+    # Absolute paths to programs that cause false positives
     filter1:
         SourceImage:
             - 'C:\WINDOWS\system32\taskmgr.exe'
+            - 'C:\Program Files\Malwarebytes\Anti-Malware\MBAMService.exe'
+            - 'C:\PROGRAMDATA\MALWAREBYTES\MBAMSERVICE\ctlrupdate\mbupdatr.exe'
+    # Windows Defender
     filter2:
         SourceImage|startswith: 'C:\ProgramData\Microsoft\Windows Defender\'
         SourceImage|endswith: '\MsMpEng.exe'
+    # Microsoft Gaming Services
     filter3:
         SourceImage|startswith: 'C:\Program Files\WindowsApps\'
         SourceImage|endswith: '\GamingServices.exe'
         GrantedAccess: '0x1410'
+    # Process Explorer
     filter4:
         SourceImage|endswith: 
             - '\PROCEXP64.EXE'
             - '\PROCEXP.EXE'
         GrantedAccess: '0x1410'
+    # VMware Tools
     filter5:
         SourceImage|startswith: 'C:\ProgramData\VMware\VMware Tools\'
         SourceImage|endswith: '\vmtoolsd.exe'
-    condition: selection and not filter1 and not filter2 and not filter3 and not filter4 and not filter5
+    # Antivirus and EDR agents
+    filter6:
+        SourceImage|startswith: 
+            - 'C:\Progra Files\'
+            - 'C:\Progra Files (x86)\'
+        SourceImage|contains: 
+            - 'Antivirus'
+    condition: selection and not filter1 and not filter2 and not filter3 and not filter4 and not filter5 and not filter6
 fields:
     - User
     - SourceImage
