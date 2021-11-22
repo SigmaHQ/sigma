@@ -29,7 +29,7 @@ detection:
             - '0x1400'
             - '0x100000'
             - '0x1410'    # car.2019-04-004
-            - '0x1010'    # car.2019-04-004
+            # - '0x1010'    # car.2019-04-004
             - '0x1438'    # car.2019-04-004
             - '0x143a'    # car.2019-04-004
             - '0x1418'    # car.2019-04-004
@@ -38,21 +38,39 @@ detection:
             - '0x1f2fff'
             - '0x1f3fff'
     filter1:
-        SourceImage|endswith: # easy to bypass. need to implement supportive rule to detect bypass attempts
-            - '\wmiprvse.exe'
-            - '\taskmgr.exe'
-            - '\procexp64.exe'
-            - '\procexp.exe'
-            - '\lsm.exe'
-            - '\MsMpEng.exe'
-            - '\csrss.exe'
-            - '\wininit.exe'
-            - '\vmtoolsd.exe'
-    condition: selection and not filter1
+        SourceImage:
+            - 'C:\WINDOWS\system32\taskmgr.exe'
+    filter2:
+        SourceImage|startswith: 'C:\ProgramData\Microsoft\Windows Defender\'
+        SourceImage|endswith: '\MsMpEng.exe'
+    filter3:
+        SourceImage|startswith: 'C:\Program Files\WindowsApps\'
+        SourceImage|endswith: '\GamingServices.exe'
+        GrantedAccess: '0x1410'
+    filter4:
+        SourceImage|endswith: 
+            - '\PROCEXP64.EXE'
+            - '\PROCEXP.EXE'
+        GrantedAccess: '0x1410'
+    filter5:
+        SourceImage|startswith: 'C:\ProgramData\VMware\VMware Tools\'
+        SourceImage|endswith: '\vmtoolsd.exe'
+    # Old - too broad filter  
+        # SourceImage|endswith: # easy to bypass. need to implement supportive rule to detect bypass attempts
+        #     - '\wmiprvse.exe'
+        #     - '\taskmgr.exe'
+        #     - '\procexp64.exe'
+        #     - '\procexp.exe'
+        #     - '\lsm.exe'
+        #     - '\MsMpEng.exe'
+        #     - '\csrss.exe'
+        #     - '\wininit.exe'
+        #     - '\vmtoolsd.exe'
+    condition: selection and not filter1 and not filter2 and not filter3 and not filter4 and not filter5
 fields:
     - ComputerName
     - User
     - SourceImage
 falsepositives:
-    - Legitimate software accessing LSASS process for legitimate reason; update the whitelist with it
+    - Legitimate software accessing LSASS process for legitimate reason; please add more filters
 level: high
