@@ -5,7 +5,7 @@ description: Detects process access LSASS memory which is typical for credential
 author: Florian Roth, Roberto Rodriguez, Dimitrios Slamaris, Mark Russinovich, Thomas Patzke, Teymur Kheirkhabarov, Sherif Eldeeb, James Dickenson, Aleksey Potapov,
     oscd.community (update)
 date: 2017/02/16
-modified: 2021/11/20
+modified: 2021/11/22
 references:
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
     - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
@@ -25,7 +25,7 @@ detection:
         TargetImage|endswith: '\lsass.exe'
         GrantedAccess|startswith:
             - '0x40'
-            - '0x1000'
+            # - '0x1000'  # minimum access requirements to query basic info from service
             - '0x1400'
             - '0x100000'
             - '0x1410'    # car.2019-04-004
@@ -48,18 +48,7 @@ detection:
             - '\csrss.exe'
             - '\wininit.exe'
             - '\vmtoolsd.exe'
-    filter2:
-        GrantedAccess: 
-            - '0x1000'
-            - '0x1410'
-        SourceImage|endswith:
-            - '\MicrosoftEdgeUpdate.exe'
-            - '\GamingServices.exe'
-            - 'C:\Windows\System32\svchost.exe'
-            - '\aurora-agent.exe'
-            - '\aurora-agent-64.exe'
-            - 'C:\WINDOWS\system32\taskhostw.exe'
-    condition: selection and not filter1 and not filter2
+    condition: selection and not filter1
 fields:
     - ComputerName
     - User
