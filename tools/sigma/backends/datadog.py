@@ -13,18 +13,29 @@ class DatadogBackend(SingleTextQueryBackend):
     subExpression = "(%s)"
     listExpression = "(%s)"
     listSeparator = " OR "
-    valueExpression = "%s"
+    valueExpression = "%s" # TODO: escape string containing special chars
     mapExpression = "%s:%s"
     nullExpression = ""
 
     service = None
 
+    def __init__(self, sigmaconfig, backend_options):
+        if "index" in backend_options:
+            self.dd_index = backend_options["index"]
+
+        super().__init__(sigmaconfig)
+
     def generate(self, sigmaparser):
-        self.service = sigmaparser.parsedyaml['logsource'].get('service', "")
+        self.service = sigmaparser.parsedyaml["logsource"].get("service", "")
         return super().generate(sigmaparser)
 
     def generateQuery(self, parsed):
-        return self.generateANDNode([
+        nodes = [
             self.generateMapItemNode(["service", self.service]),
             self.generateNode(parsed.parsedSearch),
-        ])
+        ]
+
+        if self.dd_index:
+            nodes = [self.generateMapItemNode(["index", self.dd_index])] + nodes
+
+        return self.generateANDNode(nodes)
