@@ -55,6 +55,11 @@ detection:
     filter5:
         SourceImage|startswith: 'C:\ProgramData\VMware\VMware Tools\'
         SourceImage|endswith: '\vmtoolsd.exe'
+    filter_generic:
+        SourceImage|startswith: 
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+        GrantedAccess: '0x1410'
     # Old - too broad filter  
         # SourceImage|endswith: # easy to bypass. need to implement supportive rule to detect bypass attempts
         #     - '\wmiprvse.exe'
@@ -66,7 +71,7 @@ detection:
         #     - '\csrss.exe'
         #     - '\wininit.exe'
         #     - '\vmtoolsd.exe'
-    condition: selection and not filter1 and not filter2 and not filter3 and not filter4 and not filter5
+    condition: selection and not filter1 and not filter2 and not filter3 and not filter4 and not filter5 and not filter_generic
 fields:
     - ComputerName
     - User
