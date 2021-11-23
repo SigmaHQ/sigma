@@ -638,13 +638,16 @@ class HAWKBackend(SingleTextQueryBackend):
             "public" : True,
             "references" : ref,
             "group_name" : ".",
+            "tags" : [ "sigma" ],
             "hawk_id" : sigmaparser.parsedyaml['id']
         }
         if 'tags' in sigmaparser.parsedyaml:
-            record["tags"] = [ item.replace("attack.", "") for item in sigmaparser.parsedyaml['tags']]
+            record["tags"] = record['tags'] + [ item.replace("attack.", "") for item in sigmaparser.parsedyaml['tags']]
 
         if not 'status' in self.sigmaparser.parsedyaml or 'status' in self.sigmaparser.parsedyaml and self.sigmaparser.parsedyaml['status'] != 'experimental':
             record['correlation_action'] += 10.0;
+        elif 'status' in self.sigmaparser.parsedyaml and self.sigmaparser.parsedyaml['status'] == 'experimental':
+            record["tags"].append("qa")
         if 'falsepositives' in self.sigmaparser.parsedyaml and len(self.sigmaparser.parsedyaml['falsepositives']) > 1:
             record['correlation_action'] -= (2.0 * len(self.sigmaparser.parsedyaml['falsepositives']) )
 
