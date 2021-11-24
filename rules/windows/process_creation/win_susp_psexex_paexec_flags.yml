@@ -8,21 +8,21 @@ references:
     - https://www.fireeye.com/blog/threat-research/2020/10/kegtap-and-singlemalt-with-a-ransomware-chaser.html
 author: Florian Roth
 date: 2021/05/22
+modified: 2021/11/23
 logsource:
     category: process_creation
     product: windows
 detection:
     selection_flags_1: # Escalation to LOCAL_SYSTEM
-        CommandLine|contains|all: 
-            - '\\127.0.0.1'
-            - ' -s '
-            - 'cmd.exe'
+        CommandLine|endswith: 
+            - ' -s cmd.exe'
+            - ' -s -i cmd.exe'
     selection_flags_2:
         CommandLine|contains|all: # Accepting EULA in commandline - often used in automated attacks
-            - ' /accepteula '
-            - 'cmd /c '
+            - 'accepteula'
             - ' -u '
             - ' -p '
+            - ' \\'
     filter:
         CommandLine|contains: 
             - 'paexec'
