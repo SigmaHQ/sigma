@@ -5,7 +5,7 @@ related:
       type: derived
 description: Detects disabling Windows Defender threat protection
 date: 2020/07/28
-modified: 2021/11/09
+modified: 2021/11/22
 author: Ján Trenčanský, frack113
 references:
     - https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-antivirus/troubleshoot-windows-defender-antivirus
@@ -19,12 +19,14 @@ logsource:
     product: windows
     service: system
 detection:
-    selection3:
+    Selection:
         EventID: 7036
-    keywords:
-        - 'Windows Defender Antivirus Service'
-        - 'stopped'
-    condition: selection3 and all of keywords
+        Provider_Name: 'Service Control Manager'
+        param1: 
+            - 'Windows Defender Antivirus Service'
+            - 'Service antivirus Microsoft Defender' #French OS
+        param2: 'stopped'
+    condition: Selection
 falsepositives:
     - Administrator actions
 level: high
