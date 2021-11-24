@@ -10,10 +10,14 @@ logsource:
     product: windows
     service: msexchange-management
 detection:
-    EventID: 6
+    selection:
+        EventID: 
+            - 6
+            - 8
     keywords:
         - 'Cmdlet failed. Cmdlet Get-App, '
-    condition: keywords
+        - 'Task Get-App throwing unhandled exception: System.InvalidCastException:'
+    condition: selection and keywords
 falsepositives:
     - Unknown, please report false positives via https://github.com/SigmaHQ/sigma/issues
 level: critical
