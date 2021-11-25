@@ -11,13 +11,15 @@ logsource:
   service: gcp.audit
 detection:
     selection:
-        gcp.audit.method_name: 
-            - admissionregistration.k8s.io.v*.mutatingwebhookconfigurations.create
-            - admissionregistration.k8s.io.v*.mutatingwebhookconfigurations.patch
-            - admissionregistration.k8s.io.v*.mutatingwebhookconfigurations.replace 
-            - admissionregistration.k8s.io.v*.validatingwebhookconfigurations.create
-            - admissionregistration.k8s.io.v*.validatingwebhookconfigurations.patch
-            - admissionregistration.k8s.io.v*.validatingwebhookconfigurations.replace
+        gcp.audit.method_name|startswith: 
+            - admissionregistration.k8s.io.v*
+        gcp.audit.method_name|endswith: 
+            - .mutatingwebhookconfigurations.create
+            - .mutatingwebhookconfigurations.patch
+            - .mutatingwebhookconfigurations.replace
+            - .validatingwebhookconfigurations.create
+            - .validatingwebhookconfigurations.patch
+            - .validatingwebhookconfigurations.replace
     condition: selection
 level: medium
 tags:
