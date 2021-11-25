@@ -35,7 +35,7 @@ class DatadogBackend(SingleTextQueryBackend):
             self.generateNode(parsed.parsedSearch),
         ]
 
-        if self.dd_index:
+        if hasattr(self, "dd_index"):
             nodes = [self.generateMapItemNode(["index", self.dd_index])] + nodes
 
         return self.generateANDNode(nodes)
