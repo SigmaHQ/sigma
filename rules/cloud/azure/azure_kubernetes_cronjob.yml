@@ -14,14 +14,18 @@ logsource:
   service: azure.activitylogs
 detection:
     selection1:
-          properties.message: MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/BATCH/CRONJOBS/WRITE
-    selection2: 
-          properties.message: MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/BATCH/JOBS/WRITE
-    selection3:
-          properties.message: MICROSOFT.CONTAINERSERVICE/MANAGEDCLUSTERS/BATCH/CRONJOBS/WRITE
-    selection4:
-          properties.message: ICROSOFT.CONTAINERSERVICE/MANAGEDCLUSTERS/BATCH/JOBS/WRITE
-    condition: selection1 or selection2 or selection3 or selection4
+          properties.message|startswith:
+            - MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/BATCH
+          properties.message|endswith:
+            - /CRONJOBS/WRITE
+            - /JOBS/WRITE
+    selection2:
+          properties.message|startswith:
+            - MICROSOFT.CONTAINERSERVICE/MANAGEDCLUSTERS/BATCH
+          properties.message|endswith:
+            - /CRONJOBS/WRITE
+            - /JOBS/WRITE
+condition: selection1 or selection2
 level: medium
 tags:
     - attack.persistence
