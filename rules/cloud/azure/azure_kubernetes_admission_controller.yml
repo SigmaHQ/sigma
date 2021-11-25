@@ -10,16 +10,19 @@ logsource:
   product: azure
   service: azure.activitylogs
 detection:
-    selection:
+    selection1:
           properties.message|startswith:
-            - MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/ADMISSIONREGISTRATION.K8S.IO/
-            - MICROSOFT.CONTAINERSERVICE/MANAGEDCLUSTERS/ADMISSIONREGISTRATION.K8S.IO/
+            - MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/ADMISSIONREGISTRATION.K8S.IO
           properties.message|endswith:
             - /MUTATINGWEBHOOKCONFIGURATIONS/WRITE
             - /VALIDATINGWEBHOOKCONFIGURATIONS/WRITE
+    selection2:
+          properties.message|startswith:
+            - MICROSOFT.CONTAINERSERVICE/MANAGEDCLUSTERS/ADMISSIONREGISTRATION.K8S.IO
+          properties.message|endswith:
             - /MUTATINGWEBHOOKCONFIGURATIONS/WRITE
             - /VALIDATINGWEBHOOKCONFIGURATIONS/WRITE
-    condition: selection
+    condition: selection1 or selection2
 level: medium
 tags:
     - attack.persistence
