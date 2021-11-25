@@ -1,0 +1,29 @@
+title: Google Cloud Kubernetes Admission Controller
+id: 6ad91e31-53df-4826-bd27-0166171c8040
+description: Identifies when an admission controller is executed in GCP Kubernetes. Admission controller intercepts, and possibly modifies, requests to the Kubernetes API server. The behavior of this admission controller is determined by an admission webhook that the user deploys in the cluster. Attackers can use such webhooks for gaining persistence in the cluster. For example, attackers can intercept and modify the pod creation operations in the cluster and add their malicious container to every created pod.
+author: Austin Songer @austinsonger
+status: experimental
+date: 2021/11/25
+references:
+    - https://cloud.google.com/kubernetes-engine/docs
+logsource:
+  product: gcp
+  service: gcp.audit
+detection:
+    selection:
+        gcp.audit.method_name: 
+            - admissionregistration.k8s.io.v*.mutatingwebhookconfigurations.create
+            - admissionregistration.k8s.io.v*.mutatingwebhookconfigurations.patch
+            - admissionregistration.k8s.io.v*.mutatingwebhookconfigurations.replace 
+            - admissionregistration.k8s.io.v*.validatingwebhookconfigurations.create
+            - admissionregistration.k8s.io.v*.validatingwebhookconfigurations.patch
+            - admissionregistration.k8s.io.v*.validatingwebhookconfigurations.replace
+    condition: selection
+level: medium
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.execution
+falsepositives:
+- Google Cloud Kubernetes Admission Controller may be done by a system administrator. 
+- If known behavior is causing false positives, it can be exempted from the rule.
