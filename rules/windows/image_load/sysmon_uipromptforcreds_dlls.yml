@@ -3,7 +3,7 @@ id: 9ae01559-cf7e-4f8e-8e14-4c290a1b4784
 description: Detects potential use of UIPromptForCredentials functions by looking for some of the DLLs needed for it.
 status: experimental
 date: 2020/10/20
-modified: 2021/11/23
+modified: 2021/11/25
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 tags:
     - attack.credential_access
@@ -25,10 +25,13 @@ detection:
             - 'credui.dll'
             - 'wincredui.dll'
     filter:
-        Image|startswith: 
+        - Image|startswith:
             - 'C:\Windows\System32\'
             - 'C:\Windows\explorer.exe'
             - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Windows\ImmersiveControlPanel\SystemSettings.exe'
+        - Image|endswith: '\opera_autoupdate.exe'
     condition: selection and not filter
 falsepositives:
     - other legitimate processes loading those DLLs in your environment.
