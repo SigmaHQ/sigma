@@ -32,14 +32,14 @@ detection:
         Image|endswith: 
             - '\powershell.exe'
             - 'C:\Windows\System32\sdiagnhost.exe'
-    filter_bits: # not available in Sysmon data, but Aurora logs
-        CommandLine|contains:
-            - 'svchost.exe -k netsvcs -p -s BITS'
+    filter_svchost: # not available in Sysmon data, but Aurora logs
+        CommandLine|contains: 
+            - 'svchost.exe -k netsvcs -p'
             - 'svchost.exe -k GraphicsPerfSvcGroup -s GraphicsPerfSvc'
     respond_server:
         Image|endswith: '\svchost.exe'
         OriginalFileName: 'WsmWmiPl.dll'
-    condition: (request_client and not filter and not filter_bits) or respond_server
+    condition: (request_client and not filter and not filter_svchost) or respond_server
 falsepositives:
     - Unknown
 level: medium
