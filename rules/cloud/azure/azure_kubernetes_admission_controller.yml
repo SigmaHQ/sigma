@@ -1,0 +1,33 @@
+title: Azure Kubernetes Admission Controller
+id: a61a3c56-4ce2-4351-a079-88ae4cbd2b58
+description: Identifies when an admission controller is executed in Azure Kubernetes. Admission controller intercepts, and possibly modifies, requests to the Kubernetes API server. The behavior of this admission controller is determined by an admission webhook that the user deploys in the cluster. Attackers can use such webhooks for gaining persistence in the cluster. For example, attackers can intercept and modify the pod creation operations in the cluster and add their malicious container to every created pod.
+author: Austin Songer @austinsonger
+status: experimental
+date: 2021/11/25
+references:
+    - https://docs.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations#microsoftkubernetes
+logsource:
+  product: azure
+  service: azure.activitylogs
+detection:
+    selection1:
+          properties.message|startswith:
+            - MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/ADMISSIONREGISTRATION.K8S.IO
+          properties.message|endswith:
+            - /MUTATINGWEBHOOKCONFIGURATIONS/WRITE
+            - /VALIDATINGWEBHOOKCONFIGURATIONS/WRITE
+    selection2:
+          properties.message|startswith:
+            - MICROSOFT.CONTAINERSERVICE/MANAGEDCLUSTERS/ADMISSIONREGISTRATION.K8S.IO
+          properties.message|endswith:
+            - /MUTATINGWEBHOOKCONFIGURATIONS/WRITE
+            - /VALIDATINGWEBHOOKCONFIGURATIONS/WRITE
+    condition: selection1 or selection2
+level: medium
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.execution
+falsepositives:
+- Azure Kubernetes Admissions Controller may be done by a system administrator. 
+- If known behavior is causing false positives, it can be exempted from the rule.
