@@ -5,10 +5,41 @@ description: Ensure that all account usernames and authentication credentials ar
     is used for all sensitive information in transit. Ensure that an encrypted channels is used  for all administrative account access.
 author: Alexandr Yampolskyi, SOC Prime
 date: 2019/03/26
+modified: 2021/11/23
 references:
     - https://www.cisecurity.org/controls/cis-controls-list/
     - https://www.pcisecuritystandards.org/documents/PCI_DSS_v3-2-1.pdf
     - https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.04162018.pdf
+logsource:
+    category: firewall
+detection:
+    selection1:
+        dst_port:
+            - 8080
+            - 21
+            - 80
+            - 23
+            - 50000
+            - 1521
+            - 27017
+            - 3306
+            - 1433
+            - 11211
+            - 15672
+            - 5900
+            - 5901
+            - 5902
+            - 5903
+            - 5904
+    selection2:
+        action:
+            - forward
+            - accept
+            - 2
+    condition: selection1 and selection2
+falsepositives:
+    - unknown
+level: low
 # tags:
     # - CSC4
     # - CSC4.5
@@ -52,33 +83,3 @@ references:
     # - PCI DSS 3.2 7.1
     # - PCI DSS 3.2 7.2
     # - PCI DSS 3.2 7.3
-logsource:
-    category: firewall
-detection:
-    selection1:
-        destination.port:
-            - 8080
-            - 21
-            - 80
-            - 23
-            - 50000
-            - 1521
-            - 27017
-            - 3306
-            - 1433
-            - 11211
-            - 15672
-            - 5900
-            - 5901
-            - 5902
-            - 5903
-            - 5904
-    selection2:
-        action:
-            - forward
-            - accept
-            - 2
-    condition: selection1 and selection2
-falsepositives:
-    - unknown
-level: low
