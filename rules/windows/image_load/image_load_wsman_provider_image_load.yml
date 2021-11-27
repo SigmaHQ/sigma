@@ -3,7 +3,7 @@ id: ad1f4bb9-8dfb-4765-adb6-2a7cfb6c0f94
 description: Detects signs of potential use of the WSMAN provider from uncommon processes locally and remote execution.
 status: experimental
 date: 2020/06/24
-modified: 2021/11/25
+modified: 2021/11/27
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 tags:
     - attack.execution
@@ -34,12 +34,12 @@ detection:
             - 'C:\Windows\System32\sdiagnhost.exe'
     filter_svchost: # not available in Sysmon data, but Aurora logs
         CommandLine|contains: 
-            - 'svchost.exe -k netsvcs -p'
+            - 'svchost.exe -k netsvcs -p -s BITS'
             - 'svchost.exe -k GraphicsPerfSvcGroup -s GraphicsPerfSvc'
     respond_server:
         Image|endswith: '\svchost.exe'
         OriginalFileName: 'WsmWmiPl.dll'
-    condition: (request_client and not filter and not filter_svchost) or respond_server
+    condition: ( request_client or respond_server ) and not filter and not filter_svchost
 falsepositives:
     - Unknown
 level: medium
