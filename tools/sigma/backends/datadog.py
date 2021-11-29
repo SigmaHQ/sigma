@@ -1,6 +1,7 @@
 import re
 
 from sigma.backends.base import SingleTextQueryBackend
+from sigma.parser.condition import NodeSubexpression
 
 
 class DatadogBackend(SingleTextQueryBackend):
@@ -18,7 +19,8 @@ class DatadogBackend(SingleTextQueryBackend):
     listSeparator = " OR "
     valueExpression = "%s"
     mapExpression = "%s:%s"
-    nullExpression = ""
+    nullExpression = "-%s:*"
+    notNullExpression = "%s:*"
 
     # The escaped characters list comes from https://docs.datadoghq.com/logs/explorer/search_syntax/#escaping-of-special-characters.
     specialCharactersRegexp = re.compile(
@@ -47,7 +49,10 @@ class DatadogBackend(SingleTextQueryBackend):
         if hasattr(self, "dd_service"):
             nodes.append(("service", self.dd_service))
 
-        nodes.append(parsed.parsedSearch)
+        if type(parsed.parsedSearch) == NodeSubexpression:
+            nodes.append(parsed.parsedSearch.items)
+        else:
+            nodes.append(parsed.parsedSearch)
 
         return self.generateANDNode(nodes)
 
