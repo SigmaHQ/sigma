@@ -6,7 +6,7 @@ author: Timur Zinniatullin, oscd.community
 references:
   - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1220/T1220.md
 date: 2019/10/21
-modified: 2021/11/27
+modified: 2021/11/29
 logsource:
   category: process_creation
   product: windows
@@ -17,10 +17,19 @@ detection:
     - Image|endswith: '\msxsl.exe'
   false_positives:
     - CommandLine|contains: '/Format:List'
+    - CommandLine|contains: '/Format:htable'
+    - CommandLine|contains: '/Format:hform'
+    - CommandLine|contains: '/Format:table'
+    - CommandLine|contains: '/Format:mof'
+    - CommandLine|contains: '/Format:value'
+    - CommandLine|contains: '/Format:rawxml'
+    - CommandLine|contains: '/Format:xml'
+    - CommandLine|contains: '/Format:csv'
   condition: selection and not false_positives
 falsepositives:
   - WMIC.exe FP depend on scripts and administrative methods used in the monitored environment.
   - msxsl.exe is not installed by default, so unlikely.
+  - Static format arguments - https://petri.com/command-line-wmi-part-3
 level: medium
 tags:
   - attack.defense_evasion
