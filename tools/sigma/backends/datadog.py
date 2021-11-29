@@ -28,9 +28,13 @@ class DatadogBackend(SingleTextQueryBackend):
     )
     whitespacesRegexp = re.compile(r"\s+")
 
+    facets = ["index", "service"]
+
     def __init__(self, sigmaconfig, backend_options):
         if "index" in backend_options:
             self.dd_index = backend_options["index"]
+
+        self.facets += sigmaconfig.config.get("facets", [])
 
         super().__init__(sigmaconfig)
 
@@ -63,3 +67,19 @@ class DatadogBackend(SingleTextQueryBackend):
             return self.whitespacesRegexp.sub(
                 "?", self.specialCharactersRegexp.sub("\\\\\g<1>", val)
             )
+
+    def generateMapItemNode(self, node):
+        key, value = node
+        return super().generateMapItemNode(((self.wrap_key(key)), value))
+
+    def generateNULLValueNode(self, node):
+        return super().generateNULLValueNode((self.wrap_key(node)))
+
+    def generateNotNULLValueNode(self, node):
+        return super().generateNotNULLValueNode(self.wrap_key(node))
+
+    def wrap_key(self, key):
+        if key not in self.facets:
+            return "@%s" % key
+        else:
+            return key
