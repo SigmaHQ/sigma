@@ -3,6 +3,7 @@ from sigma.backends.base import SingleTextQueryBackend
 
 class DatadogBackend(SingleTextQueryBackend):
     """Converts Sigma rule into Datadog log search queries."""
+
     identifier = "datadog"  # TODO: more specific?
     active = True
     config_required = False
@@ -13,11 +14,9 @@ class DatadogBackend(SingleTextQueryBackend):
     subExpression = "(%s)"
     listExpression = "(%s)"
     listSeparator = " OR "
-    valueExpression = "%s" # TODO: escape string containing special chars
+    valueExpression = "%s"  # TODO: escape string containing special chars
     mapExpression = "%s:%s"
     nullExpression = ""
-
-    service = None
 
     def __init__(self, sigmaconfig, backend_options):
         if "index" in backend_options:
@@ -26,16 +25,20 @@ class DatadogBackend(SingleTextQueryBackend):
         super().__init__(sigmaconfig)
 
     def generate(self, sigmaparser):
-        self.service = sigmaparser.parsedyaml["logsource"].get("service", "")
+        if "service" in sigmaparser.parsedyaml.get("logsource", {}):
+            self.dd_service = sigmaparser.parsedyaml["logsource"]["service"]
+
         return super().generate(sigmaparser)
 
     def generateQuery(self, parsed):
-        nodes = [
-            self.generateMapItemNode(["service", self.service]),
-            self.generateNode(parsed.parsedSearch),
-        ]
+        nodes = []
 
         if hasattr(self, "dd_index"):
-            nodes = [self.generateMapItemNode(["index", self.dd_index])] + nodes
+            nodes.append(self.generateMapItemNode(["index", self.dd_index]))
+
+        if hasattr(self, "dd_service"):
+            nodes.append(self.generateMapItemNode(["service", self.dd_service]))
+
+        nodes.append(self.generateNode(parsed.parsedSearch))
 
         return self.generateANDNode(nodes)
