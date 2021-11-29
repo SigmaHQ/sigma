@@ -30,11 +30,12 @@ class DatadogBackend(SingleTextQueryBackend):
 
     facets = ["index", "service"]
 
-    def __init__(self, sigmaconfig, backend_options):
+    def __init__(self, sigmaconfig, backend_options=dict()):
         if "index" in backend_options:
             self.dd_index = backend_options["index"]
 
-        self.facets += sigmaconfig.config.get("facets", [])
+        if sigmaconfig.config:
+            self.facets += sigmaconfig.config.get("facets", [])
 
         super().__init__(sigmaconfig)
 
