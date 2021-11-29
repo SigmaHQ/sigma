@@ -95,6 +95,8 @@ class HAWKBackend(SingleTextQueryBackend):
             nodeRet['description'] = key
             nodeRet['rule_id'] = str(uuid.uuid4())
             value = self.generateValueNode(node, False).replace("*", "EEEESTAREEE")
+            if value[-2:] == "\\\\":
+                value = value[:-2]
             value = re.escape(value)
             value = value.replace("EEEESTAREEE", ".*")
             if value[0:2] == ".*":  
@@ -199,6 +201,8 @@ class HAWKBackend(SingleTextQueryBackend):
                     nodeRet["args"]["comparison"]["value"] = "!="
                 else:
                     nodeRet['args']['comparison']['value'] = "="
+                if value[-2:] == "\\\\":
+                    value = value[:-2]
                 nodeRet['args']['str']['value'] = value
                 nodeRet['args']['str']['regex'] = "true"
                 # return "%s regex %s" % (self.cleanKey(key), self.generateValueNode(value, True))
@@ -217,7 +221,6 @@ class HAWKBackend(SingleTextQueryBackend):
                 #return json.dumps(nodeRet)
                 return nodeRet
             else:
-                #return self.mapExpression % (self.cleanKey(key), self.generateNode(value))
                 nodeRet['args']['str']['value'] = value
                 #return json.dumps(nodeRet)
                 return nodeRet
@@ -264,12 +267,15 @@ class HAWKBackend(SingleTextQueryBackend):
                     item = item[2:]
                 if item[-2:] == ".*":
                     item = item[:-2]
-                nodeRet['args']['str']['value'] = item # self.generateValueNode(item, True)
+                if item[-2:] == "\\\\":
+                    item = item[:-2]
+                nodeRet['args']['str']['value'] = item 
                 nodeRet['args']['str']['regex'] = "true"
                 if notNode:
                     nodeRet["args"]["comparison"]["value"] = "!="
                 else:
                     nodeRet['args']['comparison']['value'] = "="
+                #print(item)
                 ret['children'].append( nodeRet )
             else:
                 nodeRet['args']['str']['value'] = self.generateValueNode(item, True)
@@ -291,6 +297,9 @@ class HAWKBackend(SingleTextQueryBackend):
             if value[:2] == ".*":  
                 value = value[2:]
             if value[-2:] == ".*":
+                value = value[:-2]
+            # print(value)
+            if value[-2:] == "\\\\":
                 value = value[:-2]
             nodeRet['args']['str']['value'] = value
             nodeRet['args']['str']['regex'] = "true"
@@ -534,12 +543,6 @@ class HAWKBackend(SingleTextQueryBackend):
     def generateQuery(self, parsed, sigmaparser):
         self.sigmaparser = sigmaparser
         result = self.generateNode(parsed.parsedSearch)
-        """
-        if any("flow" in i for i in self.parsedlogsource):
-            aql_database = "flows"
-        else:
-            aql_database = "events"
-        """
         prefix = ""
         ret = '[ { "id" : "and", "key": "And", "children" : ['
         ret2 = ' ] } ]'
