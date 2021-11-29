@@ -22,9 +22,9 @@ class DatadogBackend(SingleTextQueryBackend):
 
     # The escaped characters list comes from https://docs.datadoghq.com/logs/explorer/search_syntax/#escaping-of-special-characters.
     specialCharactersRegexp = re.compile(
-        '([\+\-\=\&\|\>\<\!\(\)\{\}\[\]\^"\~\?\:\\\/]+)'
+        r'([\+\-\=\&\|\>\<\!\(\)\{\}\[\]\^"\~\?\:\\\/]+)'
     )
-    whitespacesRegexp = re.compile(r"(\s+)")
+    whitespacesRegexp = re.compile(r"\s+")
 
     def __init__(self, sigmaconfig, backend_options):
         if "index" in backend_options:
