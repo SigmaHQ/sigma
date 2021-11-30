@@ -7,7 +7,7 @@ status: experimental
 description: Detects process access to LSASS memory with suspicious access flags
 author: Florian Roth
 date: 2021/11/22
-modified: 2021/11/27
+modified: 2021/11/30
 references:
     - https://docs.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
@@ -66,7 +66,9 @@ detection:
     filter3:
         SourceImage|startswith: 'C:\Program Files\WindowsApps\'
         SourceImage|endswith: '\GamingServices.exe'
-        GrantedAccess: '0x1410'
+        GrantedAccess: 
+            - '0x1410'
+            - '0x410'
     # Process Explorer
     filter4:
         SourceImage|endswith: 
@@ -89,7 +91,9 @@ detection:
         SourceImage|startswith: 
             - 'C:\Program Files\'
             - 'C:\Program Files (x86)\'
-        GrantedAccess: '0x1410'
+        GrantedAccess: 
+            - '0x1410'
+            - '0x410'
     condition: selection and not filter1 and not filter2 and not filter3 and not filter4 and not filter5 and not filter6 and not filter_generic
 fields:
     - User
