@@ -5,9 +5,12 @@ from sigma.parser.condition import NodeSubexpression
 
 
 class DatadogBackend(SingleTextQueryBackend):
-    """Converts Sigma rule into Datadog log search queries."""
+    """
+    Converts Sigma rule into Datadog log search queries.
+    Syntax Reference: https://docs.datadoghq.com/logs/explorer/search_syntax/
+    """
 
-    identifier = "datadog"  # TODO: more specific?
+    identifier = "datadog-logs"
     active = True
     config_required = False
 
