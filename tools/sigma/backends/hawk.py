@@ -613,7 +613,6 @@ class HAWKBackend(SingleTextQueryBackend):
         except Exception as e:
             print("Failed to parse json: %s" % analytic_txt)
             raise Exception("Failed to parse json: %s" % analytic_txt)
-        # "rules","filter_name","actions_category_name","correlation_action","date_added","scores/53c9a74abfc386415a8b463e","enabled","public","group_name","score_id"
 
         cmt = "Sigma Rule: %s\n" % sigmaparser.parsedyaml['id'] 
         cmt += "Author: %s\n" % sigmaparser.parsedyaml['author'] 
@@ -667,6 +666,6 @@ class HAWKBackend(SingleTextQueryBackend):
             elif self.sigmaparser.parsedyaml['level'].lower() == 'medium':
                 record['correlation_action'] += 5.0;
             elif self.sigmaparser.parsedyaml['level'].lower() == 'low':
-                record['correlation_action'] += 2.0;
+                record['correlation_action'] -= 5.0;
        
         return json.dumps(record)
