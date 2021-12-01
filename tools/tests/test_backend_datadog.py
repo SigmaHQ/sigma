@@ -72,12 +72,12 @@ class TestDatadogBackend(unittest.TestCase):
         self.assertEqual(query, expected_query)
 
     def test_facets_config(self):
-        # TODO: currently failing because it adds an @ to the facet
         self.config.config = {"facets": ["test-facet"]}
         self.basic_rule["detection"]["selection"]["test-facet"] = "myfacet"
+        test_backend = DatadogBackend(self.config)
         parser = SigmaParser(self.basic_rule, self.config)
-        query = self.backend.generate(parser)
-        expected_query = "test-facet:myfacet AND @attribute:test"
+        query = test_backend.generate(parser)
+        expected_query = "@attribute:test AND test-facet:myfacet"
         self.assertEqual(query, expected_query)
 
     def test_regex_escape(self):
