@@ -5,7 +5,7 @@ import unittest
 
 from sigma.configuration import SigmaConfiguration
 from sigma.parser.rule import SigmaParser
-from sigma.backends.datadog import DatadogBackend
+from sigma.backends.datadog import DatadogLogsBackend
 
 
 class TestDatadogBackend(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestDatadogBackend(unittest.TestCase):
     def generate_query(self, rule, backend_options=dict(), config=dict()):
         cfg = SigmaConfiguration()
         cfg.config = config
-        backend = DatadogBackend(cfg, backend_options)
+        backend = DatadogLogsBackend(cfg, backend_options)
         parser = SigmaParser(rule, cfg)
 
         return backend.generate(parser)
@@ -33,7 +33,7 @@ class TestDatadogBackend(unittest.TestCase):
         total = 0
 
         config = SigmaConfiguration()
-        backend = DatadogBackend(config)
+        backend = DatadogLogsBackend(config)
 
         for (dirpath, _, filenames) in os.walk("../rules"):
             for filename in filenames:
