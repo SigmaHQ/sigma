@@ -363,3 +363,20 @@ For example, in order to translate a windows-related Sigma rule, one would use:
 ```bash
 tools/sigmac -t devo -c tools/config/devo-windows.yml rules/windows/sysmon/sysmon_wmi_susp_scripting.yml
 ```
+
+### Datadog
+The Datadog backend currently supports converting Sigma files to the [Log Search Syntax](https://docs.datadoghq.com/logs/explorer/search_syntax/) 
+with the identifier `datadog-logs`.
+
+#### Config file
+This backend does not require a config file though it is possible to add a config file for fieldmapping and defining facets as a list. 
+While attributes will be queried with `@my-attribute:my-attribute` facets will be queried with `my-facet:my-facet`.
+For an example, see `tools/config/datadog.yml`.
+
+#### Backend options
+The backend options support `index` and `service` fields, as they are built-in facets and widely used.
+
+Example
+```
+tools/sigmac -t datadog-logs /rules/cloud/aws/aws_attached_malicious_lambda_layer.yml --backend-option index=my_index
+```
