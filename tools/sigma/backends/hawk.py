@@ -100,12 +100,21 @@ class HAWKBackend(SingleTextQueryBackend):
                 value = value[:-2]
             value = re.escape(value)
             value = value.replace("EEEESTAREEE", ".*")
+            endsWith = False
+            startsWith = False
             if value[0:2] == ".*":  
                 value = value[2:]
+                endsWith = True
             if value[-2:] == ".*":
                 value = value[:-2]
-            nodeRet['args']['str']['value'] = value 
-            # return json.dumps(nodeRet)
+                startsWith = True
+
+            if endsWith:
+                nodeRet['args']['str']['value'] = value + "$"
+            elif startsWith:
+                nodeRet['args']['str']['value'] = "^" + value
+            else:
+                nodeRet['args']['str']['value'] = value
             return nodeRet
         elif type(node) == list:
             return self.generateListNode(node, notNode)
@@ -183,17 +192,28 @@ class HAWKBackend(SingleTextQueryBackend):
                 value = value.replace("*", "EEEESTAREEE")
                 value = re.escape(value)
                 value = value.replace("EEEESTAREEE", ".*")
+                endsWith = False
+                startsWith = False
                 if value[0:2] == ".*":  
                     value = value[2:]
+                    endsWith = True
                 if value[-2:] == ".*":
                     value = value[:-2]
+                    startsWith = True
                 if notNode:
                     nodeRet["args"]["comparison"]["value"] = "!="
                 else:
                     nodeRet['args']['comparison']['value'] = "="
                 if value[-2:] == "\\\\":
                     value = value[:-2]
-                nodeRet['args']['str']['value'] = value
+
+                if endsWith:
+                    nodeRet['args']['str']['value'] = value + "$"
+                elif startsWith:
+                    nodeRet['args']['str']['value'] = "^" + value
+                else:
+                    nodeRet['args']['str']['value'] = value
+
                 nodeRet['args']['str']['regex'] = "true"
                 # return "%s regex %s" % (self.cleanKey(key), self.generateValueNode(value, True))
                 #return json.dumps(nodeRet)
@@ -268,14 +288,25 @@ class HAWKBackend(SingleTextQueryBackend):
                 item = item.replace("*", "EEEESTAREEE")
                 item = re.escape(item)
                 item = item.replace("EEEESTAREEE", ".*")
+                endsWith = False
+                startsWith = False
                 if item[:2] == ".*":  
                     item = item[2:]
+                    endsWith = True
                 if item[-2:] == ".*":
                     item = item[:-2]
+                    startsWith = True
                 if item[-2:] == "\\\\":
                     item = item[:-2]
-                nodeRet['args']['str']['value'] = item 
+
+                if endsWith:
+                    nodeRet['args']['str']['value'] = item + "$"
+                elif startsWith:
+                    nodeRet['args']['str']['value'] = "^" + item
+                else:
+                    nodeRet['args']['str']['value'] = item
                 nodeRet['args']['str']['regex'] = "true"
+
                 if notNode:
                     nodeRet["args"]["comparison"]["value"] = "!="
                 else:
@@ -299,13 +330,25 @@ class HAWKBackend(SingleTextQueryBackend):
             value = value.replace("*", "EEEESTAREEE")
             value = re.escape(self.generateValueNode(value, True))
             value = value.replace("EEEESTAREEE", ".*")
+            endsWith = False
+            startsWith = False
             if value[:2] == ".*":  
                 value = value[2:]
+                endsWith = True
             if value[-2:] == ".*":
                 value = value[:-2]
+                startsWith = True
             # print(value)
             if value[-2:] == "\\\\":
                 value = value[:-2]
+
+            if endsWith:
+                nodeRet['args']['str']['value'] = value + "$"
+            elif startsWith:
+                nodeRet['args']['str']['value'] = "^" + value
+            else:
+                nodeRet['args']['str']['value'] = value
+
             nodeRet['args']['str']['value'] = value
             nodeRet['args']['str']['regex'] = "true"
             if notNode:
