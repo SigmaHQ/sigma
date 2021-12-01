@@ -4,7 +4,7 @@ description: This method detects mimikatz keywords in different Eventlogs (some 
 status: experimental
 author: Florian Roth
 date: 2017/01/10
-modified: 2021/08/26
+modified: 2021/12/01
 tags:
     - attack.s0002
     - attack.t1003          # an old one
@@ -33,7 +33,9 @@ detection:
         - ' s::l '
         - 'gentilkiwi.com'
         - 'Kiwi Legit Printer'
-    condition: keywords
+    filter:
+        EventID: 15  # Sysmon's FileStream Events (could cause false positives when Sigma rules get copied on/to a system)
+    condition: keywords and not filter
 falsepositives:
     - Naughty administrators
     - Penetration test
