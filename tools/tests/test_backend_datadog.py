@@ -80,7 +80,7 @@ class TestDatadogBackend(unittest.TestCase):
         expected_query = "@attribute:test AND test-facet:myfacet"
         self.assertEqual(query, expected_query)
 
-    def test_regex_escape(self):
+    def test_special_characters_escape(self):
         self.basic_rule["detection"]["selection"][
             "regex-attribute"
         ] = "anything?inbetween"
@@ -89,7 +89,7 @@ class TestDatadogBackend(unittest.TestCase):
         expected_query = "@attribute:test AND @regex-attribute:anything\\?inbetween"
         self.assertEqual(query, expected_query)
 
-    def test_space(self):
+    def test_space_escape(self):
         self.basic_rule["detection"]["selection"]["space-attribute"] = "with space"
         self.parser = SigmaParser(self.basic_rule, self.config)
         query = self.backend.generate(self.parser)
