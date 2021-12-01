@@ -14,6 +14,8 @@ class TestDatadogBackend(unittest.TestCase):
     def setUp(self):
         self.config = SigmaConfiguration()
         self.backend = DatadogBackend(self.config)
+        self.basic_rule = {"detection": {"selection": {"attribute": "test"}, "condition": "selection"}}
+        self.parser = SigmaParser(self.basic_rule, self.config)
 
     def test_all_sigma_rules(self):
         """Test the Datadog backend over all the Sigma rules in the repository."""
@@ -55,3 +57,37 @@ class TestDatadogBackend(unittest.TestCase):
         print("SKIPPED: {}/{} ({:.2f}%)".format(skipped, total, skipped / total * 100))
         print("ERRORS: {}/{} ({:.2f}%)".format(errors, total, errors / total * 100))
         print("\n==============================\n")
+
+    def test_attribute(self):
+        query = self.backend.generate(self.parser)
+        expected_query = "@attribute:test"
+        assert query == expected_query
+
+    def test_facets_backend_option(self):
+        test_backend = DatadogBackend(self.config, {"index": "test_index"})
+        query = test_backend.generate(self.parser)
+        expected_query = "index:test_index AND @attribute:test"
+        assert query == expected_query
+
+    def test_facets_config(self):
+        # TODO: currently failing because it adds an @ to the facet
+        self.config.config = {"facets": ["test-facet"]}
+        self.basic_rule["detection"]["selection"]["test-facet"] = "myfacet"
+        parser = SigmaParser(self.basic_rule, self.config)
+        query = self.backend.generate(parser)
+        expected_query = "test-facet:myfacet AND @attribute:test"
+        assert expected_query == query
+
+    def test_regex_escape(self):
+        self.basic_rule["detection"]["selection"]["regex-attribute"] = "anything?inbetween"
+        self.parser = SigmaParser(self.basic_rule, self.config)
+        query = self.backend.generate(self.parser)
+        expected_query = "@attribute:test AND @regex-attribute:anything\\?inbetween"
+        assert expected_query == query
+
+    def test_space(self):
+        self.basic_rule["detection"]["selection"]["space-attribute"] = "with space"
+        self.parser = SigmaParser(self.basic_rule, self.config)
+        query = self.backend.generate(self.parser)
+        expected_query = "@attribute:test AND @space-attribute:with?space"
+        assert expected_query == query
