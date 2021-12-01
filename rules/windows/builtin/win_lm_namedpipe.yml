@@ -6,7 +6,7 @@ author: Samir Bousseaden
 references:
   - https://twitter.com/menasec1/status/1104489274387451904
 date: 2019/04/03
-modified: 2021/11/27
+modified: 2021/12/01
 logsource:
   product: windows
   service: security
@@ -15,9 +15,7 @@ detection:
   selection1:
     EventID: 5145
     ShareName: \\\*\IPC$
-  selection2:
-    EventID: 5145
-    ShareName: \\\*\IPC$
+  false_positives:
     RelativeTargetName:
       - 'atsvc'
       - 'samr'
@@ -36,7 +34,7 @@ detection:
       - 'HydraLsPipe'
       - 'TermSrv_API_service'
       - 'MsFteWds'
-  condition: selection1 and not selection2
+  condition: selection1 and not false_positives
 falsepositives:
   - update the excluded named pipe to filter out any newly observed legit named pipe
 level: high
