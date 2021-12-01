@@ -52,7 +52,7 @@ class HAWKBackend(SingleTextQueryBackend):
     def cleanKey(self, key):
         if key == None:
             return ""
-        return self.sigmaparser.config.get_fieldmapping(key).resolve_fieldname(key, self.sigmaparser)
+        return self.snake_case( self.sigmaparser.config.get_fieldmapping(key).resolve_fieldname(key, self.sigmaparser) )
 
     def cleanValue(self, value):
         """Remove quotes in text"""
@@ -669,3 +669,14 @@ class HAWKBackend(SingleTextQueryBackend):
                 record['correlation_action'] -= 5.0;
        
         return json.dumps(record)
+
+    def snake_case(self, str):
+        res = [str[0].lower()]
+        for c in str[1:]:
+            if c in ('ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
+                res.append('_')
+                res.append(c.lower())
+            else:
+                res.append(c)
+         
+        return ''.join(res)
