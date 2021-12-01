@@ -4,11 +4,8 @@ from sigma.backends.base import SingleTextQueryBackend
 from sigma.parser.condition import NodeSubexpression
 
 
-class DatadogBackend(SingleTextQueryBackend):
-    """
-    Converts Sigma rule into Datadog log search queries.
-    Syntax Reference: https://docs.datadoghq.com/logs/explorer/search_syntax/
-    """
+class DatadogLogsBackend(SingleTextQueryBackend):
+    """Converts Sigma rule into Datadog log search queries."""
 
     identifier = "datadog-logs"
     active = True
