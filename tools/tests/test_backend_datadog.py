@@ -12,12 +12,17 @@ class TestDatadogBackend(unittest.TestCase):
     """Test cases for the Datadog backend."""
 
     def setUp(self):
-        self.config = SigmaConfiguration()
-        self.backend = DatadogBackend(self.config)
         self.basic_rule = {
             "detection": {"selection": {"attribute": "test"}, "condition": "selection"}
         }
-        self.parser = SigmaParser(self.basic_rule, self.config)
+
+    def generate_query(self, rule, backend_options=dict(), config=dict()):
+        cfg = SigmaConfiguration()
+        cfg.config = config
+        backend = DatadogBackend(cfg, backend_options)
+        parser = SigmaParser(rule, cfg)
+
+        return backend.generate(parser)
 
     def test_all_sigma_rules(self):
         """Test the Datadog backend over all the Sigma rules in the repository."""
@@ -27,6 +32,9 @@ class TestDatadogBackend(unittest.TestCase):
         successes = 0
         total = 0
 
+        config = SigmaConfiguration()
+        backend = DatadogBackend(config)
+
         for (dirpath, _, filenames) in os.walk("../rules"):
             for filename in filenames:
                 if filename.endswith(".yaml") or filename.endswith(".yml"):
@@ -35,11 +43,10 @@ class TestDatadogBackend(unittest.TestCase):
 
                         with open(rule_path, "r") as rule_file:
                             total += 1
+                            parser = SigmaParser(yaml.safe_load(rule_file), config)
 
                             try:
-                                query = self.backend.generate(
-                                    SigmaParser(yaml.safe_load(rule_file), self.config)
-                                )
+                                query = backend.generate(parser)
                             except NotImplementedError as err:
                                 print("[SKIPPED] {}: {}".format(rule_path, err))
                                 skipped += 1
@@ -61,22 +68,20 @@ class TestDatadogBackend(unittest.TestCase):
         print("\n==============================\n")
 
     def test_attribute(self):
-        query = self.backend.generate(self.parser)
+        query = self.generate_query(self.basic_rule)
         expected_query = "@attribute:test"
         self.assertEqual(query, expected_query)
 
     def test_facets_backend_option(self):
-        test_backend = DatadogBackend(self.config, {"index": "test_index"})
-        query = test_backend.generate(self.parser)
+        query = self.generate_query(
+            self.basic_rule, backend_options={"index": "test_index"}
+        )
         expected_query = "index:test_index AND @attribute:test"
         self.assertEqual(query, expected_query)
 
     def test_facets_config(self):
-        self.config.config = {"facets": ["test-facet"]}
         self.basic_rule["detection"]["selection"]["test-facet"] = "myfacet"
-        test_backend = DatadogBackend(self.config)
-        parser = SigmaParser(self.basic_rule, self.config)
-        query = test_backend.generate(parser)
+        query = self.generate_query(self.basic_rule, config={"facets": ["test-facet"]})
         expected_query = "@attribute:test AND test-facet:myfacet"
         self.assertEqual(query, expected_query)
 
@@ -84,14 +89,12 @@ class TestDatadogBackend(unittest.TestCase):
         self.basic_rule["detection"]["selection"][
             "regex-attribute"
         ] = "anything?inbetween"
-        self.parser = SigmaParser(self.basic_rule, self.config)
-        query = self.backend.generate(self.parser)
+        query = self.generate_query(self.basic_rule)
         expected_query = "@attribute:test AND @regex-attribute:anything\\?inbetween"
         self.assertEqual(query, expected_query)
 
     def test_space_escape(self):
         self.basic_rule["detection"]["selection"]["space-attribute"] = "with space"
-        self.parser = SigmaParser(self.basic_rule, self.config)
-        query = self.backend.generate(self.parser)
+        query = self.generate_query(self.basic_rule)
         expected_query = "@attribute:test AND @space-attribute:with?space"
         self.assertEqual(query, expected_query)
