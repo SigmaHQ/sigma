@@ -109,9 +109,9 @@ class HAWKBackend(SingleTextQueryBackend):
                 value = value[:-2]
                 startsWith = True
 
-            if endsWith:
+            if endsWith and not startsWith:
                 nodeRet['args']['str']['value'] = value + "$"
-            elif startsWith:
+            elif startsWith and not endsWith:
                 nodeRet['args']['str']['value'] = "^" + value
             else:
                 nodeRet['args']['str']['value'] = value
@@ -207,9 +207,9 @@ class HAWKBackend(SingleTextQueryBackend):
                 if value[-2:] == "\\\\":
                     value = value[:-2]
 
-                if endsWith:
+                if endsWith and not startsWith:
                     nodeRet['args']['str']['value'] = value + "$"
-                elif startsWith:
+                elif startsWith and not endsWith:
                     nodeRet['args']['str']['value'] = "^" + value
                 else:
                     nodeRet['args']['str']['value'] = value
@@ -299,9 +299,9 @@ class HAWKBackend(SingleTextQueryBackend):
                 if item[-2:] == "\\\\":
                     item = item[:-2]
 
-                if endsWith:
+                if endsWith and not startsWith:
                     nodeRet['args']['str']['value'] = item + "$"
-                elif startsWith:
+                elif startsWith and not endsWith:
                     nodeRet['args']['str']['value'] = "^" + item
                 else:
                     nodeRet['args']['str']['value'] = item
@@ -342,9 +342,9 @@ class HAWKBackend(SingleTextQueryBackend):
             if value[-2:] == "\\\\":
                 value = value[:-2]
 
-            if endsWith:
+            if endsWith and not startsWith:
                 nodeRet['args']['str']['value'] = value + "$"
-            elif startsWith:
+            elif startsWith and not endsWith:
                 nodeRet['args']['str']['value'] = "^" + value
             else:
                 nodeRet['args']['str']['value'] = value
