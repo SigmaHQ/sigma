@@ -6,18 +6,18 @@ author: '@neu5ron'
 references:
   - https://www.harmj0y.net/blog/activedirectory/the-most-dangerous-user-right-you-probably-have-never-heard-of/
 date: 2017/07/30
-modified: 2021/11/27
+modified: 2021/12/02
 logsource:
   product: windows
   service: security
   definition: 'Requirements: Audit Policy : Policy Change > Audit Authorization Policy Change, Group Policy : Computer Configuration\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies\Policy Change\Audit Authorization Policy Change'
 detection:
-  selection:
+  selection_base:
     EventID: 4704
-  keywords:
+  selection_keywords:
     PrivilegeList|contains:
       - 'SeEnableDelegationPrivilege'
-  condition: all of them
+  condition: all of selection*
 falsepositives:
   - Unknown
 level: high
