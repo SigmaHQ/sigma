@@ -34,16 +34,13 @@ class DatadogLogsBackend(SingleTextQueryBackend):
         if "index" in backend_options:
             self.dd_index = backend_options["index"]
 
+        if "service" in backend_options:
+            self.dd_service = backend_options["service"]
+
         if sigmaconfig.config:
             self.facets += sigmaconfig.config.get("facets", [])
 
         super().__init__(sigmaconfig)
-
-    def generate(self, sigmaparser):
-        if "service" in sigmaparser.parsedyaml.get("logsource", {}):
-            self.dd_service = sigmaparser.parsedyaml["logsource"]["service"]
-
-        return super().generate(sigmaparser)
 
     def generateQuery(self, parsed):
         nodes = []
