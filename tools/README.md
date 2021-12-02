@@ -173,7 +173,7 @@ Sample usages:
 
 ```yaml
 # Backend configuration file (here for Elastalert)
-$ cat backend_config.yml 
+$ cat backend_config.yml
 alert_methods: email
 emails: alerts@mydomain.tld
 smtp_host: smtp.google.com
@@ -366,15 +366,15 @@ tools/sigmac -t devo -c tools/config/devo-windows.yml rules/windows/sysmon/sysmo
 
 ### Datadog
 The Datadog backend currently supports converting Sigma files to the [Log Search Syntax](https://docs.datadoghq.com/logs/explorer/search_syntax/)
-with the identifier `datadog-logs`. This query can be used in the Security Monitoring product. 
+with the identifier `datadog-logs`. This query can be used in the Security Monitoring product.
 
 #### Config file
-This backend does not require a config file though it is possible to add a config file for fieldmapping and defining facets as a list. 
+This backend does not require a config file though it is possible to add a config file for fieldmapping and defining facets as a list.
 While attributes will be queried with `@my-attribute:my-attribute` facets will be queried with `my-facet:my-facet`.
 For an example, see `tools/config/datadog.yml`.
 
 #### Backend options
-The backend options support `index` and `service` facets.
+The backend options support `index`, `service` and `source` facets.
 
 Example
 ```

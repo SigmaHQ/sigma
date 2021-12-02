@@ -39,12 +39,10 @@ class DatadogLogsBackend(SingleTextQueryBackend):
     notNullExpression = "%s:*"
 
     # The escaped characters list comes from https://docs.datadoghq.com/logs/explorer/search_syntax/#escaping-of-special-characters.
-    specialCharactersRegexp = re.compile(
-        r'([+\-=&|><!(){}\[\]^"~?:\\/]+)'
-    )
+    specialCharactersRegexp = re.compile(r'([+\-=&|><!(){}\[\]^"~?:\\/]+)')
     whitespacesRegexp = re.compile(r"\s+")
 
-    facets = ["index", "service"]
+    facets = ["index", "service", "source"]
 
     def __init__(self, sigmaconfig, backend_options=dict()):
         if "index" in backend_options:
@@ -52,6 +50,9 @@ class DatadogLogsBackend(SingleTextQueryBackend):
 
         if "service" in backend_options:
             self.dd_service = backend_options["service"]
+
+        if "source" in backend_options:
+            self.dd_source = backend_options["source"]
 
         if sigmaconfig.config:
             self.facets += sigmaconfig.config.get("facets", [])
@@ -66,6 +67,9 @@ class DatadogLogsBackend(SingleTextQueryBackend):
 
         if hasattr(self, "dd_service"):
             nodes.append(("service", self.dd_service))
+
+        if hasattr(self, "dd_source"):
+            nodes.append(("source", self.dd_source))
 
         if type(parsed.parsedSearch) == NodeSubexpression:
             nodes.append(parsed.parsedSearch.items)
