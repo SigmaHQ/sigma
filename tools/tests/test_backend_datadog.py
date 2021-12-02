@@ -5,6 +5,7 @@ import unittest
 
 from sigma.configuration import SigmaConfiguration
 from sigma.parser.rule import SigmaParser
+from sigma.config.mapping import FieldMapping
 from sigma.backends.datadog import DatadogLogsBackend
 
 
@@ -16,9 +17,12 @@ class TestDatadogBackend(unittest.TestCase):
             "detection": {"selection": {"attribute": "test"}, "condition": "selection"}
         }
 
-    def generate_query(self, rule, backend_options=dict(), config=dict()):
+    def generate_query(
+        self, rule, backend_options=dict(), config=dict(), fieldmappings=dict()
+    ):
         cfg = SigmaConfiguration()
         cfg.config = config
+        cfg.fieldmappings = fieldmappings
         backend = DatadogLogsBackend(cfg, backend_options)
         parser = SigmaParser(rule, cfg)
 
@@ -97,4 +101,12 @@ class TestDatadogBackend(unittest.TestCase):
         self.basic_rule["detection"]["selection"]["space-attribute"] = "with space"
         query = self.generate_query(self.basic_rule)
         expected_query = "@attribute:test AND @space-attribute:with?space"
+        self.assertEqual(query, expected_query)
+
+    def test_space_escape(self):
+        query = self.generate_query(
+            self.basic_rule,
+            fieldmappings={"attribute": FieldMapping("attribute", "another_attribute")},
+        )
+        expected_query = "@another_attribute:test"
         self.assertEqual(query, expected_query)
