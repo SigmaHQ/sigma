@@ -365,8 +365,8 @@ tools/sigmac -t devo -c tools/config/devo-windows.yml rules/windows/sysmon/sysmo
 ```
 
 ### Datadog
-The Datadog backend currently supports converting Sigma files to the [Log Search Syntax](https://docs.datadoghq.com/logs/explorer/search_syntax/) 
-with the identifier `datadog-logs`.
+The Datadog backend currently supports converting Sigma files to the [Log Search Syntax](https://docs.datadoghq.com/logs/explorer/search_syntax/)
+with the identifier `datadog-logs`. This query can be used in the Security Monitoring product. 
 
 #### Config file
 This backend does not require a config file though it is possible to add a config file for fieldmapping and defining facets as a list. 
@@ -374,9 +374,9 @@ While attributes will be queried with `@my-attribute:my-attribute` facets will b
 For an example, see `tools/config/datadog.yml`.
 
 #### Backend options
-The backend options support `index` and `service` fields, as they are built-in facets and widely used.
+The backend options support `index` and `service` facets.
 
 Example
 ```
-tools/sigmac -t datadog-logs /rules/cloud/aws/aws_attached_malicious_lambda_layer.yml --backend-option index=my_index
+tools/sigmac -t datadog-logs /rules/cloud/aws/aws_attached_malicious_lambda_layer.yml --backend-option index=my_index --backend-option service=my_service
 ```
