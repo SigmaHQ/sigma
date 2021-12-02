@@ -4,7 +4,7 @@ description: Detects process handle on LSASS process with certain access mask
 status: experimental
 author: Roberto Rodriguez, Teymur Kheirkhabarov, Dimitrios Slamaris, Mark Russinovich, Aleksey Potapov, oscd.community (update)
 date: 2019/11/01
-modified: 2021/11/22
+modified: 2021/12/02
 references:
     - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
@@ -18,6 +18,7 @@ logsource:
     service: security
 detection:
     selection_1:
+        Provider_Name: Microsoft-Windows-Security-Auditing
         EventID: 4656
         ObjectName|endswith: '\lsass.exe'
         AccessMask|contains:
@@ -35,6 +36,7 @@ detection:
             - '0x1f2fff'
             - '0x1f3fff'
     selection_2:
+        Provider_Name: Microsoft-Windows-Security-Auditing
         EventID: 4663
         ObjectName|endswith: '\lsass.exe'
         AccessList|contains:

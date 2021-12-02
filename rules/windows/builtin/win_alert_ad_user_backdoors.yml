@@ -8,7 +8,7 @@ references:
   - https://adsecurity.org/?p=3466
   - https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/
 date: 2017/04/13
-modified: 2021/11/27
+modified: 2021/12/02
 logsource:
   product: windows
   service: security
@@ -16,19 +16,23 @@ logsource:
 detection:
   selection1:
     EventID: 4738
+    Provider_Name: Microsoft-Windows-Security-Auditing
   filter_null:
     AllowedToDelegateTo:
   filter1:
     AllowedToDelegateTo: '-'
   selection2:
     EventID: 5136
+    Provider_Name: Microsoft-Windows-Security-Auditing
     AttributeLDAPDisplayName: 'msDS-AllowedToDelegateTo'
   selection3:
     EventID: 5136
+    Provider_Name: Microsoft-Windows-Security-Auditing
     ObjectClass: 'user'
     AttributeLDAPDisplayName: 'servicePrincipalName'
   selection4:
     EventID: 5136
+    Provider_Name: Microsoft-Windows-Security-Auditing
     AttributeLDAPDisplayName: 'msDS-AllowedToActOnBehalfOfOtherIdentity'
   condition: (selection1 and not filter1 and not filter_null) or selection2 or selection3 or selection4
 falsepositives:
