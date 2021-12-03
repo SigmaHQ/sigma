@@ -20,7 +20,7 @@ detection:
     Image|endswith:
       - '\msbuild.exe'
       - '\cmd.exe'
-            # - '\svchost.exe'
+      - '\svchost.exe'
       - '\rundll32.exe'
       - '\powershell.exe'
       - '\word.exe'
@@ -29,7 +29,7 @@ detection:
       - '\outlook.exe'
       - '\monitoringhost.exe'
       - '\wmic.exe'
-            # - '\msiexec.exe'  an installer installing a program using one of those DLL will raise an alert
+      # - '\msiexec.exe'  an installer installing a program using one of those DLL will raise an alert
       - '\bash.exe'
       - '\wscript.exe'
       - '\cscript.exe'
@@ -46,7 +46,8 @@ detection:
       - '\dbgcore.dll'
     Signed: 'FALSE'
   filter1:
-    Image|contains: 'Visual Studio'
+    - Image|contains: 'Visual Studio'
+    - CommandLine|contains: '-k LocalSystemNetworkRestricted'
   filter2:   # Not available in Sysmon, but in Aurora
     CommandLine: 'C:\WINDOWS\winsxs\*\TiWorker.exe -Embedding'
   condition: (signedprocess or unsignedprocess) and not filter1 and not filter2

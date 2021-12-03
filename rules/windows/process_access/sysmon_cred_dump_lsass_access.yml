@@ -5,7 +5,7 @@ description: Detects process access LSASS memory which is typical for credential
 author: Florian Roth, Roberto Rodriguez, Dimitrios Slamaris, Mark Russinovich, Thomas Patzke, Teymur Kheirkhabarov, Sherif Eldeeb, James Dickenson, Aleksey Potapov,
     oscd.community (update)
 date: 2017/02/16
-modified: 2021/11/27
+modified: 2021/12/02
 references:
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
     - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
@@ -26,7 +26,7 @@ detection:
         GrantedAccess|startswith:
             - '0x40'
             # - '0x1000'  # minimum access requirements to query basic info from service
-            - '0x1400'
+            # - '0x1400'
             - '0x100000'
             - '0x1410'    # car.2019-04-004
             # - '0x1010'    # car.2019-04-004
@@ -46,21 +46,42 @@ detection:
     filter3:
         SourceImage|startswith: 'C:\Program Files\WindowsApps\'
         SourceImage|endswith: '\GamingServices.exe'
-        GrantedAccess: '0x1410'
+        GrantedAccess: 
+            - '0x1410'
+            - '0x410'
     filter4:
         SourceImage|endswith: 
             - '\PROCEXP64.EXE'
             - '\PROCEXP.EXE'
             - 'C:\WINDOWS\system32\taskhostw.exe'
-        GrantedAccess: '0x1410'
+        GrantedAccess: 
+            - '0x1410'
+            - '0x410'
     filter5:
         SourceImage|startswith: 'C:\ProgramData\VMware\VMware Tools\'
         SourceImage|endswith: '\vmtoolsd.exe'
+    filter6:
+        SourceImage: 'C:\WINDOWS\system32\svchost.exe'
+        GrantedAccess: '0x100000'
+    filter7:
+        SourceImage: 'C:\WINDOWS\system32\wbem\wmiprvse.exe'
+        GrantedAccess: 
+            - '0x1410'
+            - '0x410'
+    filter8:
+        SourceImage|endswith:
+            - '\thor.exe'
+            - '\thor64.exe'
+        GrantedAccess: 
+            - '0x40'
+            - '0x1010'
     filter_generic:
         SourceImage|startswith: 
             - 'C:\Program Files\'
             - 'C:\Program Files (x86)\'
-        GrantedAccess: '0x1410'
+        GrantedAccess: 
+            - '0x1410'
+            - '0x410'
     # Old - too broad filter  
         # SourceImage|endswith: # easy to bypass. need to implement supportive rule to detect bypass attempts
         #     - '\wmiprvse.exe'
@@ -72,7 +93,7 @@ detection:
         #     - '\csrss.exe'
         #     - '\wininit.exe'
         #     - '\vmtoolsd.exe'
-    condition: selection and not filter1 and not filter2 and not filter3 and not filter4 and not filter5 and not filter_generic
+    condition: selection and not 1 of filter*
 fields:
     - ComputerName
     - User
