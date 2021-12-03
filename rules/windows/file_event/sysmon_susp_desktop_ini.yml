@@ -6,24 +6,18 @@ author: Maxime Thiebaut (@0xThiebaut), Tim Shelton (HAWK.IO)
 references:
   - https://isc.sans.edu/forums/diary/Desktopini+as+a+postexploitation+tool/25912/
 date: 2020/03/19
-modified: 2021/11/29
+modified: 2021/12/03
 logsource:
   product: windows
   category: file_event
 detection:
   selection:
     TargetFilename|endswith: '\desktop.ini'
-    AccessList|contains:
-      - 'WriteData'
-      - 'DELETE'
-      - 'WriteDAC'
-      - 'AppendData'
-      - 'AddSubdirectory'
   filter:
-    Image:
-      - 'C:\Windows\explorer.exe'
-      - 'C:\Windows\System32\msiexec.exe'
-      - 'C:\Windows\System32\mmc.exe'   
+    Image|startswith:
+      - 'C:\Windows\'
+      - 'C:\Program Files\'
+      - 'C:\Program Files (x86)\'
   condition: selection and not filter
 falsepositives:
   - Operations performed through Windows SCCM or equivalent
