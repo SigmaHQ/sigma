@@ -4,15 +4,16 @@ status: test
 description: Detects rare service installs that only appear a few times per time frame and could reveal password dumpers, backdoor installs or other types of malicious services
 author: Florian Roth
 date: 2017/03/08
-modified: 2021/11/27
+modified: 2021/11/30
 logsource:
   product: windows
   service: system
 detection:
   selection:
+    Provider_Name: 'Service Control Manager'
     EventID: 7045
   timeframe: 7d
-  condition: selection | count() by ServiceFileName < 5
+  condition: selection | count() by ServiceName < 5
 falsepositives:
   - Software installation
   - Software updates

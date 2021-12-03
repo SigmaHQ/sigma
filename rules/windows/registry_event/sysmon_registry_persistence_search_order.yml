@@ -7,7 +7,7 @@ references:
     - https://attack.mitre.org/techniques/T1546/015/
 author: Maxime Thiebaut (@0xThiebaut), oscd.community, Cédric Hien
 date: 2020/04/14
-modified: 2021/09/16
+modified: 2021/11/30
 tags:
     - attack.persistence
     - attack.t1546.015
@@ -39,7 +39,9 @@ detection:
         Details|contains|all:
             - '\AppData\Roaming\Dropbox\'
             - '\DropboxExt64.*.dll'
-    condition: selection and not ( filter1 or ( filterOneDrive and filterOneDrive2 ) or filter2 or filter3 )
+    filter4:
+        Details|endswith: TmopIEPlg.dll #TrendMicro osce
+    condition: selection and not ( filter1 or ( filterOneDrive and filterOneDrive2 ) or filter2 or filter3 or filter4 )
 falsepositives:
     - Some installed utilities (i.e. OneDrive) may serve new COM objects at user-level
 level: medium
