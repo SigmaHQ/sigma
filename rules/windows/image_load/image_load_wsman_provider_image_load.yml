@@ -28,7 +28,10 @@ detection:
             - WsmSvc.dll
             - WSMANAUTOMATION.DLL
             - Microsoft.WSMan.Management.dll
-    filter:
+    respond_server:
+        Image|endswith: '\svchost.exe'
+        OriginalFileName: 'WsmWmiPl.dll'
+    filter_general:
         Image|endswith: 
             - '\powershell.exe'
             - 'C:\Windows\System32\sdiagnhost.exe'
@@ -36,10 +39,10 @@ detection:
         CommandLine|contains: 
             - 'svchost.exe -k netsvcs -p -s BITS'
             - 'svchost.exe -k GraphicsPerfSvcGroup -s GraphicsPerfSvc'
-    respond_server:
-        Image|endswith: '\svchost.exe'
-        OriginalFileName: 'WsmWmiPl.dll'
-    condition: ( request_client or respond_server ) and not filter and not filter_svchost
+    filter_mscorsvw: #Image: C:\Windows\Microsoft.NET\Framework64\v4.0.30319\mscorsvw.exe
+        Image|startswith: C:\Windows\Microsoft.NET\Framework64\
+        Image|endswith: \mscorsvw.exe
+    condition: ( request_client or respond_server ) and not all of filter_*
 falsepositives:
     - Unknown
 level: medium
