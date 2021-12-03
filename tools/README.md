@@ -369,14 +369,15 @@ The Datadog backend currently supports converting Sigma files to the [Log Search
 with the identifier `datadog-logs`. This query can be used in the Security Monitoring product.
 
 #### Config file
-This backend does not require a config file though it is possible to add a config file for fieldmapping and defining facets as a list.
-While attributes will be queried with `@my-attribute:my-attribute` facets will be queried with `my-facet:my-facet`.
+The Datadog backend does not require a config file.
+If you choose to add one, you can specify facets in addition to the existing features.
+While attributes will be queried with `@my-attribute:attribute_value` specified facets will be queried with `my-facet:service_value`.
 For an example, see `tools/config/datadog.yml`.
 
 #### Backend options
-The backend options support `index`, `service` and `source` facets.
+The backend options support `index`, `service` and `source` facets. Note that the `index` facet is not available in the Security Monitoring product.
 
 Example
 ```
-tools/sigmac -t datadog-logs /rules/cloud/aws/aws_attached_malicious_lambda_layer.yml --backend-option index=my_index --backend-option service=my_service
+tools/sigmac -t datadog-logs ./rules/cloud/aws/aws_attached_malicious_lambda_layer.yml --backend-option index=index_value --backend-option service=service_value
 ```

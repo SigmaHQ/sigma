@@ -25,8 +25,8 @@ from sigma.config.mapping import FieldMapping
 from sigma.backends.datadog import DatadogLogsBackend
 
 
-class TestDatadogBackend(unittest.TestCase):
-    """Test cases for the Datadog backend."""
+class TestDatadogLogsBackend(unittest.TestCase):
+    """Test cases for the Datadog Logs backend."""
 
     def setUp(self):
         self.basic_rule = {

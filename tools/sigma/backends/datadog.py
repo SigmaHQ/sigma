@@ -21,7 +21,7 @@ from sigma.parser.condition import NodeSubexpression
 
 
 class DatadogLogsBackend(SingleTextQueryBackend):
-    """Converts Sigma rule into Datadog log search queries."""
+    """Converts Sigma rule into Datadog log search query."""
 
     identifier = "datadog-logs"
     active = True
