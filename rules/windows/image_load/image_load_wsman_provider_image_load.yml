@@ -3,7 +3,7 @@ id: ad1f4bb9-8dfb-4765-adb6-2a7cfb6c0f94
 description: Detects signs of potential use of the WSMAN provider from uncommon processes locally and remote execution.
 status: experimental
 date: 2020/06/24
-modified: 2021/11/27
+modified: 2021/12/03
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 tags:
     - attack.execution
@@ -28,7 +28,10 @@ detection:
             - WsmSvc.dll
             - WSMANAUTOMATION.DLL
             - Microsoft.WSMan.Management.dll
-    filter:
+    respond_server:
+        Image|endswith: '\svchost.exe'
+        OriginalFileName: 'WsmWmiPl.dll'
+    filter_general:
         Image|endswith: 
             - '\powershell.exe'
             - 'C:\Windows\System32\sdiagnhost.exe'
@@ -36,10 +39,10 @@ detection:
         CommandLine|contains: 
             - 'svchost.exe -k netsvcs -p -s BITS'
             - 'svchost.exe -k GraphicsPerfSvcGroup -s GraphicsPerfSvc'
-    respond_server:
-        Image|endswith: '\svchost.exe'
-        OriginalFileName: 'WsmWmiPl.dll'
-    condition: ( request_client or respond_server ) and not filter and not filter_svchost
+    filter_mscorsvw: #Image: C:\Windows\Microsoft.NET\Framework64\v4.0.30319\mscorsvw.exe
+        Image|startswith: C:\Windows\Microsoft.NET\Framework64\
+        Image|endswith: \mscorsvw.exe
+    condition: ( request_client or respond_server ) and not 1 of filter*
 falsepositives:
     - Unknown
 level: medium
