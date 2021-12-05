@@ -184,6 +184,19 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_detections, [], Fore.RED +
                          "There are rules using '1/all of them' style conditions but only have one condition")
 
+    def test_all_of_them_condition(self):
+        faulty_detections = []
+
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            yaml = self.get_rule_yaml(file_path = file)
+            detection = self.get_rule_part(file_path = file, part_name = "detection")
+
+            if "all of them" in detection["condition"]:
+                faulty_detections.append(file)
+
+        self.assertEqual(faulty_detections, [], Fore.RED +
+                         "There are rules using 'all of them'. Better use e.g. 'all of selection*' instead (and use the 'selection_' prefix as search-identifier).")
+
     def test_duplicate_detections(self):
         def compare_detections(detection1:dict, detection2:dict) -> bool:
 
