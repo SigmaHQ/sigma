@@ -20,13 +20,16 @@ logsource:
     product: windows
 detection:
     selection_comsvcs:
-        CommandLine|contains:
+        CommandLine|contains: 
             - 'comsvcs.dll'
-    slection_function:
+            - 'rundll32'
+    selection_function:
         Commandline|contains:
             - '#24'
             - 'MiniDump'
-    condition: selection_comsvcs and selection_function
+    selection_full:
+        CommandLine|contains: ' full'
+    condition: all of selection*
 falsepositives:
     - Unlikely, because no one should dump the process memory in that way
 level: high
