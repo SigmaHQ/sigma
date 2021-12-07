@@ -1,29 +1,30 @@
 title: WMIExec VBS Script
 id: 966e4016-627f-44f7-8341-f394905c361f
+status: test
 description: Detects suspicious file execution by wscript and cscript
-status: experimental
 author: Florian Roth
-date: 2017/04/07
 references:
-    - https://www.pwc.co.uk/cyber-security/pdf/cloud-hopper-annex-b-final.pdf
-tags:
-    - attack.execution
-    - attack.g0045
-    - attack.t1064 # an old one
-    - attack.t1059.005
+  - https://www.pwc.co.uk/cyber-security/pdf/cloud-hopper-annex-b-final.pdf
+date: 2017/04/07
+modified: 2021/11/27
 logsource:
-    category: process_creation
-    product: windows
+  category: process_creation
+  product: windows
 detection:
-    selection:
-        Image|endswith: '\cscript.exe'
-        CommandLine|contains|all:
-            - '.vbs'
-            - '/shell'
-    condition: selection
+  selection:
+    Image|endswith: '\cscript.exe'
+    CommandLine|contains|all:
+      - '.vbs'
+      - '/shell'
+  condition: selection
 fields:
-    - CommandLine
-    - ParentCommandLine
+  - CommandLine
+  - ParentCommandLine
 falsepositives:
-    - Unlikely
+  - Unlikely
 level: critical
+tags:
+  - attack.execution
+  - attack.g0045
+  - attack.t1064   # an old one
+  - attack.t1059.005

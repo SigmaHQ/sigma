@@ -7,7 +7,7 @@ references:
     - https://twitter.com/pythonresponder/status/1385064506049630211?s=21
 author: Florian Roth
 date: 2020/02/18
-modified: 2021/04/23
+modified: 2021/12/07
 tags:
     - attack.defense_evasion
     - attack.t1036
@@ -19,12 +19,17 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        CommandLine|contains:
-            - 'comsvcs.dll,#24'
-            - 'comsvcs.dll,MiniDump'
-            - 'comsvcs.dll MiniDump'
-    condition: selection
+    selection_comsvcs:
+        CommandLine|contains: 
+            - 'comsvcs.dll'
+            - 'rundll32'
+    selection_function:
+        Commandline|contains:
+            - '#24'
+            - 'MiniDump'
+    selection_full:
+        CommandLine|contains: ' full'
+    condition: all of selection*
 falsepositives:
     - Unlikely, because no one should dump the process memory in that way
 level: high

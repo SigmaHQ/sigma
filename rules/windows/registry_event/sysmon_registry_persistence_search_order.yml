@@ -7,7 +7,7 @@ references:
     - https://attack.mitre.org/techniques/T1546/015/
 author: Maxime Thiebaut (@0xThiebaut), oscd.community, Cédric Hien
 date: 2020/04/14
-modified: 2021/09/16
+modified: 2021/12/03
 tags:
     - attack.persistence
     - attack.t1546.015
@@ -25,9 +25,8 @@ detection:
             - '%%systemroot%%\system32\'
             - '%%systemroot%%\SysWow64\'
     filterOneDrive:
-        Details|contains: '\AppData\Local\Microsoft\OneDrive\'
-    filterOneDrive2:
-        Details|contains:
+        Details|contains: 
+            - '\AppData\Local\Microsoft\OneDrive\'
             - '\FileCoAuthLib64.dll'
             - '\FileSyncShell64.dll'
             - '\FileSyncApi64.dll'
@@ -39,7 +38,13 @@ detection:
         Details|contains|all:
             - '\AppData\Roaming\Dropbox\'
             - '\DropboxExt64.*.dll'
-    condition: selection and not ( filter1 or ( filterOneDrive and filterOneDrive2 ) or filter2 or filter3 )
+    filter4:
+        Details|endswith: TmopIEPlg.dll #TrendMicro osce
+    filter5:
+        Image:
+            - C:\WINDOWS\system32\wuauclt.exe
+            - C:\WINDOWS\system32\svchost.exe
+    condition: selection and not 1 of filter*
 falsepositives:
     - Some installed utilities (i.e. OneDrive) may serve new COM objects at user-level
 level: medium
