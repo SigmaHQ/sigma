@@ -328,7 +328,8 @@ class HAWKBackend(SingleTextQueryBackend):
         if type(value) == SigmaRegularExpressionModifier:
             value = str(value)
             value = value.replace("*", "EEEESTAREEE")
-            value = re.escape(self.generateValueNode(value, True))
+            # IS REGEX, NEVER NEED TO ESCAPE!
+            value = self.generateValueNode(value, True)
             value = value.replace("EEEESTAREEE", ".*")
             endsWith = False
             startsWith = False
