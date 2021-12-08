@@ -6,17 +6,17 @@ author: Florian Roth, @0xrawsec
 references:
   - https://twitter.com/0xrawsec/status/1002478725605273600?s=21
 date: 2018/06/03
-modified: 2021/11/27
+modified: 2021/12/08
 logsource:
   product: windows
   category: create_stream_hash
   definition: 'Requirements: Sysmon config with Imphash logging activated'
 detection:
-  filter1:
-    Imphash: '00000000000000000000000000000000'
-  filter2:
-    Imphash:
-  condition: not 1 of filter*
+  selection:
+    Hashes|contains: 'IMPHASH='
+  filter:
+    Hashes|contains: 'IMPHASH=00000000000000000000000000000000'
+  condition: selection and not filter
 fields:
   - TargetFilename
   - Image
