@@ -3,7 +3,7 @@ id: ba778144-5e3d-40cf-8af9-e28fb1df1e20
 author: Florian Roth, Jonhnathan Ribeiro, oscd.community
 status: experimental
 date: 2018/03/01
-modified: 2020/11/28
+modified: 2021/12/08
 description: Detects Trojan loader acitivty as used by APT28
 references:
     - https://researchcenter.paloaltonetworks.com/2018/02/unit42-sofacy-attacks-multiple-government-entities/
@@ -28,7 +28,10 @@ detection:
             - '%APPDATA%\'
     selection2:
         - CommandLine|contains: '.dat",'
-        - CommandLine|endswith: '.dll",#1'
+        - CommandLine|endswith: 
+            - '.dll",#1'
+            - '.dll #1'
+            - '.dll" #1'
     condition: selection1 and selection2
 falsepositives:
     - Unknown
