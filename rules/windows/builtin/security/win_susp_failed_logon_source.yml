@@ -11,9 +11,9 @@ logsource:
 detection:
   selection:
     EventID: 4625
-  unknown:
+  ip_unknown:
     IpAddress|contains: '-'
-  privatev4:
+  ip_privatev4:
     IpAddress|startswith:
       - '10.'       #10.0.0.0/8
       - '192.168.'       #192.168.0.0/16
@@ -35,12 +35,12 @@ detection:
       - '172.31.'
       - '127.'       #127.0.0.0/8
       - '169.254.'       #169.254.0.0/16
-  privatev6:
+  ip_privatev6:
     - IpAddress: '::1'     #loopback 
     - IpAddress|startswith:
       - 'fe80::'       #link-local
       - 'fc00::'       #unique local
-  condition: selection and not (unknown or privatev4 or privatev6)
+  condition: selection and not 1 of ip_*
 falsepositives:
   - Legitimate logon attempts over the internet
   - IPv4-to-IPv6 mapped IPs

@@ -326,30 +326,7 @@ class HAWKBackend(SingleTextQueryBackend):
         nodeRet['description'] = fieldname
         nodeRet['rule_id'] = str(uuid.uuid4())
         if type(value) == SigmaRegularExpressionModifier:
-            value = str(value)
-            value = value.replace("*", "EEEESTAREEE")
-            # IS REGEX, NEVER NEED TO ESCAPE!
             value = self.generateValueNode(value, True)
-            value = value.replace("EEEESTAREEE", ".*")
-            endsWith = False
-            startsWith = False
-            if value[:2] == ".*":  
-                value = value[2:]
-                endsWith = True
-            if value[-2:] == ".*":
-                value = value[:-2]
-                startsWith = True
-            # print(value)
-            if value[-2:] == "\\\\":
-                value = value[:-2]
-
-            if endsWith and not startsWith:
-                nodeRet['args']['str']['value'] = value + "$"
-            elif startsWith and not endsWith:
-                nodeRet['args']['str']['value'] = "^" + value
-            else:
-                nodeRet['args']['str']['value'] = value
-
             nodeRet['args']['str']['value'] = value
             nodeRet['args']['str']['regex'] = "true"
             if notNode:
