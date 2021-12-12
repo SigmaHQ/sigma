@@ -1,10 +1,10 @@
 title: Log4j RCE CVE-2021-44228 in Fields
 id: 9be472ed-893c-4ec0-94da-312d2765f654
 status: experimental
-description: Detects exploitation attempt against log4j RCE vulnerability reported as CVE-2021-44228 in different header fields found in web server logs
+description: Detects exploitation attempt against log4j RCE vulnerability reported as CVE-2021-44228 in different header fields found in web server logs (Log4Shell)
 author: Florian Roth
 date: 2021/12/10
-modified: 2021/12/11
+modified: 2021/12/12
 references:
    - https://www.lunasec.io/docs/blog/log4j-zero-day/
    - https://news.ycombinator.com/item?id=29504755
@@ -26,6 +26,11 @@ detection:
          - '${jndi:dns:/'
          - '/$%7bjndi:'
          - '%24%7bjndi:'
+         - '$%7Bjndi:'
+         - '%2524%257Bjndi'
+         - '%2F%252524%25257Bjndi%3A'
+         - '${jndi:${lower:'
+         - '${::-j}${'
       user-agent|contains:
          - '${jndi:ldap:/'
          - '${jndi:rmi:/'
@@ -33,6 +38,11 @@ detection:
          - '${jndi:dns:/'
          - '/$%7bjndi:'
          - '%24%7bjndi:'
+         - '$%7Bjndi:'
+         - '%2524%257Bjndi'
+         - '%2F%252524%25257Bjndi%3A'
+         - '${jndi:${lower:'
+         - '${::-j}${'
       cs-uri|contains:
          - '${jndi:ldap:/'
          - '${jndi:rmi:/'
@@ -40,6 +50,11 @@ detection:
          - '${jndi:dns:/'
          - '/$%7bjndi:'
          - '%24%7bjndi:'
+         - '$%7Bjndi:'
+         - '%2524%257Bjndi'
+         - '%2F%252524%25257Bjndi%3A'
+         - '${jndi:${lower:'
+         - '${::-j}${'
       cs-referrer|contains:
          - '${jndi:ldap:/'
          - '${jndi:rmi:/'
@@ -47,6 +62,11 @@ detection:
          - '${jndi:dns:/'
          - '/$%7bjndi:'
          - '%24%7bjndi:'
+         - '$%7Bjndi:'
+         - '%2524%257Bjndi'
+         - '%2F%252524%25257Bjndi%3A'
+         - '${jndi:${lower:'
+         - '${::-j}${'
    condition: selection
 falsepositives:
     - Vulnerability scanning
