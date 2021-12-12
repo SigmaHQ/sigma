@@ -13,10 +13,10 @@ logsource:
   product: windows
   category: file_event
 detection:
-  selection_1:
+  selection:
     TargetFilename|contains: '\Local\Microsoft\Windows\SchCache\'
     TargetFilename|endswith: '.sch'
-  selection_2:
+  filter:
     Image:
       - 'C:\windows\system32\svchost.exe'
       - 'C:\windows\system32\dllhost.exe'
@@ -24,7 +24,7 @@ detection:
       - 'C:\windows\system32\WindowsPowerShell\v1.0\powershell.exe'
       - 'C:\Windows\CCM\CcmExec.exe'
       - 'C:\Program Files\Cylance\Desktop\CylanceSvc.exe'
-  condition: selection_1 and not selection_2
+  condition: selection and not filter
 falsepositives:
   - Other legimate tools, which do ADSI (LDAP) operations, e.g. any remoting activity by MMC, Powershell, Windows etc.
 level: high
