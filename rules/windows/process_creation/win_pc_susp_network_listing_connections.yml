@@ -6,6 +6,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1049/T1049.md#atomic-test-1---system-network-connections-discovery
 author: frack113
 date: 2021/12/10
+modified: 2021/12/13
 logsource:
     category: process_creation
     product: windows
@@ -15,9 +16,12 @@ detection:
     net_cmd:
         CommandLine|contains: 'net '
     net_opt:
-        CommandLine|contains:
-            - use
-            - sessions
+        - CommandLine|endswith:
+            - ' use'
+            - ' sessions'
+        - CommandLine|contains:
+            - ' use '
+            - ' sessions '
     condition: netstat or (net_cmd and net_opt)
 falsepositives:
     - unknown
