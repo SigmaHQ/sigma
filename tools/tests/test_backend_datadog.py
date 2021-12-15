@@ -96,13 +96,14 @@ class TestDatadogLogsBackend(unittest.TestCase):
         expected_query = "@attribute:test AND @space-attribute:with?space"
         self.assertEqual(query, expected_query)
 
-    def test_space_escape(self):
+    def test_field_mappings(self):
         query = self.generate_query(
             self.generate_basic_rule(),
             fieldmappings={"attribute": FieldMapping("attribute", "another_attribute")},
         )
         expected_query = "@another_attribute:test"
         self.assertEqual(query, expected_query)
+
 
 if __name__ == "__main__":
     """
