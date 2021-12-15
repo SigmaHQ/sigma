@@ -73,13 +73,13 @@ class TestDatadogLogsBackend(unittest.TestCase):
             "detection": {
                 "selection": {
                     "attribute": "test",
-                    "regex-attribute": "anything?inbetween",
+                    "regex-attribute": "anything!inbetween",
                 },
                 "condition": "selection",
             }
         }
         query = self.generate_query(rule)
-        expected_query = "@attribute:test AND @regex-attribute:anything\\?inbetween"
+        expected_query = """@attribute:test AND @regex-attribute:anything\\!inbetween"""
         self.assertEqual(query, expected_query)
 
     def test_space_escape(self):
