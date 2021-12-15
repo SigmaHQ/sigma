@@ -104,6 +104,23 @@ class TestDatadogLogsBackend(unittest.TestCase):
         expected_query = "@another_attribute:test"
         self.assertEqual(query, expected_query)
 
+    def test_list_selection(self):
+        rule = {
+            "detection": {
+                "selection": {
+                    "attribute": "test",
+                    "list-attribute": [
+                        "a",
+                        "b",
+                    ],
+                },
+                "condition": "selection",
+            }
+        }
+        query = self.generate_query(rule)
+        expected_query = "@attribute:test AND @list-attribute:(a OR b)"
+        self.assertEqual(query, expected_query)
+
 
 if __name__ == "__main__":
     """
