@@ -50,22 +50,22 @@ class TestDatadogLogsBackend(unittest.TestCase):
         expected_query = "@attribute:test"
         self.assertEqual(query, expected_query)
 
-    def test_facets_backend_option(self):
+    def test_tags_backend_option(self):
         query = self.generate_query(
             self.generate_basic_rule(), backend_options={"index": "test_index"}
         )
         expected_query = "index:test_index AND @attribute:test"
         self.assertEqual(query, expected_query)
 
-    def test_facets_config(self):
+    def test_tags_config(self):
         rule = {
             "detection": {
-                "selection": {"attribute": "test", "test-facet": "myfacet"},
+                "selection": {"attribute": "test", "test-tag": "mytag"},
                 "condition": "selection",
             }
         }
-        query = self.generate_query(rule, config={"facets": ["test-facet"]})
-        expected_query = "@attribute:test AND test-facet:myfacet"
+        query = self.generate_query(rule, config={"tags": ["test-tag"]})
+        expected_query = "@attribute:test AND test-tag:mytag"
         self.assertEqual(query, expected_query)
 
     def test_special_characters_escape(self):

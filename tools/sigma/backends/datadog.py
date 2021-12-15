@@ -42,7 +42,8 @@ class DatadogLogsBackend(SingleTextQueryBackend):
     specialCharactersRegexp = re.compile(r'([+\-=&|><!(){}\[\]^"~?:\\/]+)')
     whitespacesRegexp = re.compile(r"\s")
 
-    facets = ["index", "service", "source"]
+    # Default tags taken from https://docs.datadoghq.com/getting_started/tagging/#introduction.
+    tags = ["index", "service", "source", "host", "device", "env", "version"]
 
     def __init__(self, sigmaconfig, backend_options=dict()):
         if "index" in backend_options:
@@ -54,8 +55,11 @@ class DatadogLogsBackend(SingleTextQueryBackend):
         if "source" in backend_options:
             self.dd_source = backend_options["source"]
 
+        if "env" in backend_options:
+            self.dd_env = backend_options["env"]
+
         if sigmaconfig.config:
-            self.facets += sigmaconfig.config.get("facets", [])
+            self.tags += sigmaconfig.config.get("tags", [])
 
         super().__init__(sigmaconfig)
 
@@ -70,6 +74,9 @@ class DatadogLogsBackend(SingleTextQueryBackend):
 
         if hasattr(self, "dd_source"):
             nodes.append(("source", self.dd_source))
+
+        if hasattr(self, "dd_env"):
+            nodes.append(("env", self.dd_env))
 
         if type(parsed.parsedSearch) == NodeSubexpression:
             nodes.append(parsed.parsedSearch.items)
@@ -97,7 +104,7 @@ class DatadogLogsBackend(SingleTextQueryBackend):
         return super().generateNotNULLValueNode(self.wrap_key(node))
 
     def wrap_key(self, key):
-        if key not in self.facets:
+        if key not in self.tags:
             return "@%s" % key
         else:
             return key

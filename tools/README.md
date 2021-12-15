@@ -370,12 +370,12 @@ with the identifier `datadog-logs`. This query can be used in the Security Monit
 
 #### Config file
 The Datadog backend does not require a config file.
-If you choose to add one, you can specify facets in addition to the existing features.
-While attributes will be queried with `@my-attribute:attribute_value` specified facets will be queried with `my-facet:service_value`.
+If you choose to add one, you can specify tags in addition to the existing features.
+While attributes will be queried with `@my-attribute:attribute_value` specified tags will be queried with `my-tag:service_value`.
 For an example, see `tools/config/datadog.yml`.
 
 #### Backend options
-The backend options support `index`, `service` and `source` facets. Note that the `index` facet is not available in the Security Monitoring product.
+The backend options allow you to override the `index`, `service` and `source` tags. Note that the `index` tag is not available in the Security Monitoring product.
 
 Example
 ```
