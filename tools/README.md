@@ -381,3 +381,19 @@ Example
 ```
 tools/sigmac -t datadog-logs ./rules/cloud/aws/aws_attached_malicious_lambda_layer.yml --backend-option index=index_value --backend-option service=service_value
 ```
+
+#### Tests
+You can run the backend unit tests with:
+```shell
+cd tools/
+python3 -m pytest ./tests/test_backend_datadog.py
+```
+
+You can have a glance at the backend rules coverage by running:
+```shell
+cd tools/
+python3 -m tests.test_backend_datadog
+```
+
+It will run the Datadog backend over all the rules in the repository and print out the number of supported rules.
+Use the `--verbose` flag to get individual results for each rule.
