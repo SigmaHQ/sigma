@@ -6,7 +6,7 @@ author: Florian Roth
 references:
   - https://www.hybrid-analysis.com/sample/759fb4c0091a78c5ee035715afe3084686a8493f39014aea72dae36869de9ff6?environmentId=100
 date: 2017/11/04
-modified: 2021/11/27
+modified: 2021/12/16
 logsource:
   category: network_connection
   product: windows
@@ -15,7 +15,7 @@ detection:
     Image|endswith: '\rundll32.exe'
     Initiated: 'true'
   filter:
-    DestinationIp|startswith:
+    - DestinationIp|startswith:
       - '10.'
       - '192.168.'
       - '172.16.'
@@ -35,6 +35,8 @@ detection:
       - '172.30.'
       - '172.31.'
       - '127.'
+    - CommandLine|contains:
+      - 'PcaSvc.dll,PcaPatchSdbTask'
   condition: selection and not filter
 falsepositives:
   - Communication to other corporate systems that use IP addresses from public address spaces
