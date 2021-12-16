@@ -7,7 +7,7 @@ references:
     - https://attack.mitre.org/techniques/T1546/015/
 author: Maxime Thiebaut (@0xThiebaut), oscd.community, Cédric Hien
 date: 2020/04/14
-modified: 2021/12/03
+modified: 2021/12/16
 tags:
     - attack.persistence
     - attack.t1546.015
@@ -44,6 +44,10 @@ detection:
         Image:
             - C:\WINDOWS\system32\wuauclt.exe
             - C:\WINDOWS\system32\svchost.exe
+    filter_defender:
+        Image|contains|all:
+            - 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+            - '\MsMpEng.exe'
     condition: selection and not 1 of filter*
 falsepositives:
     - Some installed utilities (i.e. OneDrive) may serve new COM objects at user-level
