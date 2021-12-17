@@ -15,11 +15,16 @@ logsource:
 detection:
     image_exe:
         Image|endswith: '.exe'
-    filter:
-        - Image: null
-        - Image|startswith: 'C:\Windows\Installer\MSI'
-        - ParentImage|startswith: 'C:\ProgramData\Avira\'
-    condition: not image_exe and not filter
+    filter_null:
+        Image: null
+    filter_starts:
+        Image|startswith: 'C:\Windows\Installer\MSI'
+    filter_pstarts:
+        ParentImage|startswith: 'C:\ProgramData\Avira\'
+    filter_avira:
+        Image|startswith: 'C:\Windows\Temp\'
+        Image|endswith: '\avira_speedup_setup_update.tmp'
+    condition: not image_exe and not 1 of filter*
 falsepositives:
     - unknown
 level: high
