@@ -4,7 +4,7 @@ status: experimental
 description: Checks whether the image specified in a process creation event doesn't refer to an .exe file (caused by process ghosting or other unorthodox methods to start a process)
 author: Max Altgelt
 date: 2021/12/09
-modified: 2021/12/14
+modified: 2021/12/17
 references:
     - https://pentestlaboratories.com/2021/12/08/process-ghosting/
 tags:
@@ -15,10 +15,13 @@ logsource:
 detection:
     image_exe:
         Image|endswith: '.exe'
-    filter:
+    filter_msi:
         Image: null
         Image|startswith: 'C:\Windows\Installer\MSI'
-    condition: not image_exe and not 1 of filter
+    filter_avira:
+        Image|startswith: 'C:\Windows\Temp\'
+        Image|endswith: '\avira_speedup_setup_update.tmp'
+    condition: not image_exe and not 1 of filter*
 falsepositives:
     - unknown
 level: high
