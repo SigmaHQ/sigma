@@ -6,7 +6,7 @@ author: bartblaze
 references:
   - https://github.com/Neo23x0/sigma/blob/master/rules/windows/network_connection/sysmon_rundll32_net_connections.yml
 date: 2020/07/13
-modified: 2021/11/27
+modified: 2021/12/07
 logsource:
   category: network_connection
   product: windows
@@ -34,8 +34,10 @@ detection:
       - '172.29.'
       - '172.30.'
       - '172.31.'
-      - '127.'
-  condition: selection and not filter
+  filter2:
+    DestinationIp:
+      - '0:0:0:0:0:0:0:1'
+  condition: selection and not 1 of filter*
 falsepositives:
   - Communication to other corporate systems that use IP addresses from public address spaces
 level: medium
