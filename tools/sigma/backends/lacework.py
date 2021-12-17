@@ -261,7 +261,9 @@ class LaceworkBackend(SingleTextQueryBackend):
 
         # is not null
         if value == '*':
-            return f'value_exists({transformed_fieldname})'
+            if ':' in transformed_fieldname:
+                return f'value_exists({transformed_fieldname})'
+            return f'{transformed_fieldname} is not null'
         # contains
         if (
             isinstance(value, str)
