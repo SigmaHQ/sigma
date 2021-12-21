@@ -32,6 +32,8 @@ class DatadogLogsBackend(SingleTextQueryBackend):
     notToken = "-"
     subExpression = "(%s)"
     listExpression = "(%s)"
+    # List selection items are linked with a logical 'OR' per the Sigma specification:
+    # https://github.com/SigmaHQ/sigma/wiki/Specification#lists.
     listSeparator = " OR "
     valueExpression = "%s"
     mapExpression = "%s:%s"
@@ -92,7 +94,15 @@ class DatadogLogsBackend(SingleTextQueryBackend):
         if type(val) == int:
             return val
         else:
+            # Whitespaces characters are replaced with a `?`.
+            # Datadog also supports escaping whitespaces by double quoting
+            # expression, but at the cost of losing the `*` pattern matching
+            # syntax that we wanted to preserve.
+            # Note that technically, `?` matches  **any** single character.
             return self.whitespacesRegexp.sub(
+                # Special characters are escaped with a `\` which requires to be escaped
+                # in Python as well (see https://docs.python.org/3/library/re.html).
+                # This explains the unusual number of `\` in the following regex definition.
                 "?", self.specialCharactersRegexp.sub("\\\\\g<1>", val)
             )
 
