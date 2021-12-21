@@ -4,7 +4,7 @@ status: experimental
 description: Checks whether the image specified in a process creation event doesn't refer to an .exe file (caused by process ghosting or other unorthodox methods to start a process)
 author: Max Altgelt
 date: 2021/12/09
-modified: 2021/12/18
+modified: 2021/12/21
 references:
     - https://pentestlaboratories.com/2021/12/08/process-ghosting/
 tags:
@@ -26,6 +26,9 @@ detection:
         Image|endswith: '\avira_speedup_setup_update.tmp'
     filter_screensaver:
         Image|endswith: '.scr'
+    filter_nvidia:
+        Image|contains: 'NVIDIA\NvBackend\'
+        Image|endswith: '.dat'
     condition: not image_exe and not 1 of filter*
 falsepositives:
     - unknown
