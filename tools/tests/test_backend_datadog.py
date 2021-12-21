@@ -29,9 +29,16 @@ from sigma.backends.datadog import DatadogLogsBackend
 class TestDatadogLogsBackend(unittest.TestCase):
     """Test cases for the Datadog Logs backend."""
 
-    def generate_query(
-        self, rule, backend_options=dict(), config=dict(), fieldmappings=dict()
-    ):
+    def generate_query(self, rule, backend_options=None, config=None, fieldmappings=None):
+        if backend_options is None:
+            backend_options = {}
+
+        if config is None:
+            config = {}
+
+        if fieldmappings is None:
+            fieldmappings = {}
+
         cfg = SigmaConfiguration()
         cfg.config = config
         cfg.fieldmappings = fieldmappings

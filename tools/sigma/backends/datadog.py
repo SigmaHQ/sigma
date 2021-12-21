@@ -45,7 +45,10 @@ class DatadogLogsBackend(SingleTextQueryBackend):
     # Default tags taken from https://docs.datadoghq.com/getting_started/tagging/#introduction.
     tags = ["index", "service", "source", "host", "device", "env", "version"]
 
-    def __init__(self, sigmaconfig, backend_options=dict()):
+    def __init__(self, sigmaconfig, backend_options=None):
+        if backend_options is None:
+            backend_options = {}
+
         if "index" in backend_options:
             self.dd_index = backend_options["index"]
 
