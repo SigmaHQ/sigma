@@ -11,7 +11,7 @@ references:
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 date: 2019/10/25
-modified: 2021/12/07
+modified: 2021/12/19
 logsource:
     category: registry_event
     product: windows
@@ -36,11 +36,17 @@ detection:
             - '\Authentication\PLAP Providers'
             - '\Authentication\Credential Providers'
             - '\Authentication\Credential Provider Filters'
-    filter:
+    filter_all:
         - Details: '(Empty)'
         - TargetObject|endswith: '\NgcFirst\ConsecutiveSwitchCount'
         - Image|endswith: '\AppData\Local\Microsoft\OneDrive\Update\OneDriveSetup.exe' # C:\Users\*\AppData\Local\Microsoft\OneDrive\Update\OneDriveSetup.exe
-    condition: current_version_base and current_version and not filter
+        - Image:
+            - 'C:\WINDOWS\system32\devicecensus.exe'
+    filter_edge:
+        Image|contains|all:
+            - 'C:\Program Files (x86)\Microsoft\EdgeUpdate\Install\{'
+            - '\setup.exe'
+    condition: current_version_base and current_version and not 1 of filter_*
 fields:
     - SecurityID
     - ObjectName

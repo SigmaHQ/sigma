@@ -7,7 +7,7 @@ tags:
   - attack.t1053
   - attack.t1053.005
 date: 2021/06/18
-modified: 2021/12/06
+modified: 2021/12/18
 references:
   - https://thedfirreport.com/2021/03/29/sodinokibi-aka-revil-ransomware/
 author: Syed Hasan (@syedhasan009)
@@ -23,7 +23,11 @@ detection:
       - 'Microsoft\Windows\UpdateOrchestrator'
       - 'Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTask\Index'
       - 'Microsoft\Windows\Flighting\OneSettings\RefreshCache\Index'
-  condition: selection and not filter
+  filter_svchost:
+    Image: 'C:\WINDOWS\system32\svchost.exe'
+    TargetObject|contains:
+      - 'Microsoft\Windows\WindowsUpdate\Scheduled Start\Index'
+  condition: selection and not 1 of filter*
 falsepositives:
   - Unknown
 level: medium
