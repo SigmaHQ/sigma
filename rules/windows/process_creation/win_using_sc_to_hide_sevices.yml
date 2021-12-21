@@ -1,0 +1,28 @@
+title: Abuse of Service Permissions to Hide Services in Tools
+id: a537cfc3-4297-4789-92b5-345bfd845ad0
+status: experimental
+description: Detection of sc.exe utility adding a new service with special permission which hides that service.
+author: Andreas Hunkeler (@Karneades)
+references:
+  - https://blog.talosintelligence.com/2021/10/threat-hunting-in-large-datasets-by.html
+  - https://www.sans.org/blog/red-team-tactics-hiding-windows-services/
+date: 2021/12/20
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  sc:
+    Image|endswith: '\sc.exe'
+  cli:
+    CommandLine|contains|all:
+      - 'sdset'
+      - 'DCLCWPDTSD'
+  condition: sc and cli
+falsepositives:
+  - Intended use of hidden services
+level: high
+tags:
+  - attack.persistence
+  - attack.defense_evasion
+  - attack.privilege_escalation
+  - attack.t1574.011
