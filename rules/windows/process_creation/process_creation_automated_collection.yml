@@ -6,9 +6,7 @@ date: 2021/07/28
 description: Once established within a system or network, an adversary may use automated techniques for collecting internal data.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1119/T1119.md
-tags:
-    - attack.collection
-    - attack.t1119
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1552.001/T1552.001.md
 logsource:
     category: process_creation
     product: windows
@@ -31,8 +29,15 @@ detection:
             - ' /s '
     selection_findstr:
         OriginalFileName: FINDSTR.EXE
-        CommandLine|contains: ' /e '
+        CommandLine|contains: 
+            - ' /e '
+            - ' /si '
     condition: selection_ext and (selection_dir or selection_findstr)
 falsepositives:
     - Unknown
 level: medium
+tags:
+    - attack.collection
+    - attack.t1119
+    - attack.credential_access
+    - attack.t1552.001
