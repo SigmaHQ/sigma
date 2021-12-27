@@ -1,0 +1,24 @@
+title: Powershell Install a DLL in System32
+id: 63bf8794-9917-45bc-88dd-e1b5abc0ecfd
+status: experimental
+description: Uses PowerShell to install a DLL in System32
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1556.002/T1556.002.md#atomic-test-1---install-and-register-password-filter-dll
+author: frack113
+date: 2021/12/27
+logsource:
+    product: windows
+    category: ps_script
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+           - 'Copy-Item '
+           - '-Destination '
+           - '\Windows\System32'
+    condition: selection
+falsepositives:
+    - unknown
+level: high
+tags:
+    - attack.credential_access
+    - attack.t1556.002
