@@ -15,8 +15,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import yaml
+import os
 from .exceptions import SigmaCollectionParseError
 from .rule import SigmaParser
+
+
+MACRO_PATH = os.getcwd() + '\\macros\\'
 
 class SigmaCollectionParser:
     """
@@ -33,6 +37,7 @@ class SigmaCollectionParser:
             from sigma.configuration import SigmaConfiguration
             config = SigmaConfiguration()
         self.yamls = yaml.safe_load_all(content)
+        self.yamls = self.expand_marcos(self.yamls)
         globalyaml = dict()
         self.parsers = list()
         prevrule = None
@@ -73,6 +78,63 @@ class SigmaCollectionParser:
                     prevrule = yamldoc
         self.config = config
 
+    
+    def expand_marcos(self, yamls):
+        """Expands Macros as defined in the Macro folder
+        
+        That is, instead of redefining how to detect Powershell everytime, 
+        the macro can define it instead.
+        This allows the author to focus on what Powershell does rather than 
+        worry about renamed executables.
+        """
+        def expand_condition(condition, condition_substitutions):
+            if condition_substitutions:
+                for key in condition_substitutions:
+                    if ' or ' in condition_substitutions[key].lower():
+                        condition = condition.replace(key, '('+ condition_substitutions[key] + ')')
+                    else:
+                        condition = condition.replace(key, condition_substitutions[key])
+            return condition
+
+        def load_macro(macro_name, data_source=None):
+            # Expansion should be data source dependent
+            todo = data_source
+
+            with open(MACRO_PATH + macro_name + '.yml') as f:
+                macro_yaml = yaml.safe_load(f)
+            
+                # Detection parts are renamed to avoid conflicts with other macros or rules
+                detection_dict = {f"MACRO_{macro_name}_{k}":v for k,v in macro_yaml['detection'].items() if k != "condition"}
+                
+                condition_substitutions = {k:f"MACRO_{macro_name}_{k}" for k in macro_yaml['detection'] if k != "condition"}
+                condition_string = expand_condition(macro_yaml['detection']['condition'], condition_substitutions)
+            
+            return detection_dict, condition_string
+
+        result_yaml = []
+        for part in yamls:
+            if 'detection' in part:
+                condition_substitutions = {}
+                keys_to_delete = []
+                new_detections = {}
+
+                for key in part['detection']:
+                    if part['detection'][key] == 'macro':
+                        detection_dict, condition_string = load_macro(key)
+                        keys_to_delete.append(key)
+                        new_detections.update(detection_dict)
+                        condition_substitutions[key] = condition_string
+                
+                part['detection'].update(new_detections)
+                for key in keys_to_delete:
+                    del part['detection'][key]
+                # Update condition with macro components
+                part['detection']["condition"] = expand_condition(
+                    part['detection']["condition"], condition_substitutions)
+            result_yaml.append(part)
+
+        return result_yaml
+    
     def generate(self, backend):
         """Calls backend for all parsed rules"""
         return filter(

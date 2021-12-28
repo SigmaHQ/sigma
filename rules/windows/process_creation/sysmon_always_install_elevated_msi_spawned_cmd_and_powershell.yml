@@ -11,17 +11,15 @@ logsource:
   product: windows
   category: process_creation
 detection:
-  image:
-    Image|endswith:
-      - '\cmd.exe'
-      - '\powershell.exe'
+  cmd: macro
+  powershell: macro
   parent_image:
     ParentImage|contains|all:
       - '\Windows\Installer\'
       - 'msi'
     ParentImage|endswith:
       - 'tmp'
-  condition: image and parent_image
+  condition: (cmd or powershell) and parent_image
 fields:
   - Image
   - ParentImage
