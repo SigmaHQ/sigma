@@ -4,6 +4,7 @@ status: experimental
 description: Execute Hashcat.exe with provided SAM file from registry of Windows and Password list to crack against
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1110.002/T1110.002.md#atomic-test-1---password-cracking-with-hashcat
+    - https://hashcat.net/wiki/doku.php?id=hashcat
 author: frack113
 date: 2021/12/27
 logsource:
@@ -15,12 +16,12 @@ detection:
     hashcat_option:
         CommandLine|contains|all:
             - '-a '
-            - '-m '
+            - '-m 1000 '
             - '-r '
     condition: 1 of hashcat_*
 falsepositives:
-    - unknown
-level: high
+    - Tools that accidentally use the same command line flags and values
+level: critical
 tags:
     - attack.credential_access
     - attack.t1110.002
