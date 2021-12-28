@@ -4,15 +4,18 @@ status: test
 description: This rule detects rare scheduled task creations. Typically software gets installed on multiple systems and not only on a few. The aggregation and count function selects tasks with rare names.
 author: Florian Roth
 date: 2017/03/17
-modified: 2021/11/27
+modified: 2021/12/28
 logsource:
   product: windows
   service: taskscheduler
 detection:
   selection:
     EventID: 106
+  filter1:
+    TaskName: 
+      - \Microsoft\Windows\Windows Defender\Windows Defender Scheduled Scan
   timeframe: 7d
-  condition: selection | count() by TaskName < 5
+  condition: selection and not 1 of filter* | count() by TaskName < 5
 falsepositives:
   - Software installation
 level: low
