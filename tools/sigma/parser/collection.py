@@ -96,19 +96,28 @@ class SigmaCollectionParser:
                         condition = condition.replace(key, condition_substitutions[key])
             return condition
 
-        def load_macro(macro_name, data_source=None):
-            # Expansion should be data source dependent
-            todo = data_source
-
+        def load_macro(macro_name, data_source):
             with open(MACRO_PATH + macro_name + '.yml') as f:
-                macro_yaml = yaml.safe_load(f)
+                macro_yaml_all = yaml.safe_load_all(f)
             
-                # Detection parts are renamed to avoid conflicts with other macros or rules
-                detection_dict = {f"MACRO_{macro_name}_{k}":v for k,v in macro_yaml['detection'].items() if k != "condition"}
-                
-                condition_substitutions = {k:f"MACRO_{macro_name}_{k}" for k in macro_yaml['detection'] if k != "condition"}
-                condition_string = expand_condition(macro_yaml['detection']['condition'], condition_substitutions)
-            
+                for macro_yaml in macro_yaml_all:
+                    if macro_yaml['logsource']['category'] == data_source['category'] and \
+                        macro_yaml['logsource']['product'] == data_source['product']:
+                        # Detection parts are renamed to avoid conflicts with other macros or rules
+                        detection_dict = {f"MACRO_{macro_name}_{k}":v for k,v in macro_yaml['detection'].items() if k != "condition"}
+                        
+                        condition_substitutions = {k:f"MACRO_{macro_name}_{k}" for k in macro_yaml['detection'] if k != "condition"}
+                        condition_string = expand_condition(macro_yaml['detection']['condition'], condition_substitutions)
+                    
+                    elif macro_yaml['logsource']['category'] == "generic" and \
+                        macro_yaml['logsource']['product'] == "generic":
+                        detection_dict_generic = {f"MACRO_{macro_name}_{k}":v for k,v in macro_yaml['detection'].items() if k != "condition"}
+                        
+                        condition_substitutions = {k:f"MACRO_{macro_name}_{k}" for k in macro_yaml['detection'] if k != "condition"}
+                        condition_string_generic = expand_condition(macro_yaml['detection']['condition'], condition_substitutions)
+
+            detection_dict = detection_dict if detection_dict else detection_dict_generic
+            condition_string = condition_string if condition_string else condition_string_generic
             return detection_dict, condition_string
 
         result_yaml = []
@@ -118,9 +127,13 @@ class SigmaCollectionParser:
                 keys_to_delete = []
                 new_detections = {}
 
+                logsource = {'category': 'generic', 'product': 'generic'}
+                if 'logsource' in part:
+                    logsource = part['logsource']
+
                 for key in part['detection']:
                     if part['detection'][key] == 'macro':
-                        detection_dict, condition_string = load_macro(key)
+                        detection_dict, condition_string = load_macro(key, logsource)
                         keys_to_delete.append(key)
                         new_detections.update(detection_dict)
                         condition_substitutions[key] = condition_string
