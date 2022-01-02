@@ -5,6 +5,8 @@ description: Commandline to lauch powershell with a base64 payload
 author: frack113
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1059.001/T1059.001.md#atomic-test-20---powershell-invoke-known-malicious-cmdlets
+    - https://unit42.paloaltonetworks.com/unit42-pulling-back-the-curtains-on-encodedcommand-powershell-attacks/
+    - https://mikefrobbins.com/2017/06/15/simple-obfuscation-with-powershell-using-base64-encoding/
 date: 2022/01/02
 logsource:
     category: process_creation
@@ -12,9 +14,11 @@ logsource:
 detection:
     selection:
         Image|endswith: \powershell.exe
-        CommandLine|contains|all:
-            - '-e '
-            - '==' # not all base64 have the ==
+        CommandLine|contains:
+            - ' -e '
+            - ' -en '
+            - ' -enc '
+            - ' -enco'
     condition: selection
 falsepositives:
     - Unknown
