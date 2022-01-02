@@ -1,0 +1,24 @@
+title: Suspicious Execution of Powershell with base64 
+id: fb843269-508c-4b76-8b8d-88679db22ce7
+status: experimental
+description: Commandline to lauch powershell with a base64 payload 
+author: frack113
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1059.001/T1059.001.md#atomic-test-20---powershell-invoke-known-malicious-cmdlets
+date: 2022/01/02
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: \powershell.exe
+        CommandLine|contains:
+            - '-e '
+            - '==' # not all base64 have the ==
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.execution
+    - attack.T1059.001
