@@ -52,7 +52,7 @@ class HAWKBackend(SingleTextQueryBackend):
     def cleanKey(self, key):
         if key == None:
             return ""
-        return self.sigmaparser.config.get_fieldmapping(key).resolve_fieldname(key, self.sigmaparser)
+        return self.snake_case( self.sigmaparser.config.get_fieldmapping(key).resolve_fieldname(key, self.sigmaparser) )
 
     def cleanValue(self, value):
         """Remove quotes in text"""
@@ -100,12 +100,21 @@ class HAWKBackend(SingleTextQueryBackend):
                 value = value[:-2]
             value = re.escape(value)
             value = value.replace("EEEESTAREEE", ".*")
+            endsWith = False
+            startsWith = False
             if value[0:2] == ".*":  
                 value = value[2:]
+                endsWith = True
             if value[-2:] == ".*":
                 value = value[:-2]
-            nodeRet['args']['str']['value'] = value 
-            # return json.dumps(nodeRet)
+                startsWith = True
+
+            if endsWith and not startsWith:
+                nodeRet['args']['str']['value'] = value + "$"
+            elif startsWith and not endsWith:
+                nodeRet['args']['str']['value'] = "^" + value
+            else:
+                nodeRet['args']['str']['value'] = value
             return nodeRet
         elif type(node) == list:
             return self.generateListNode(node, notNode)
@@ -183,17 +192,28 @@ class HAWKBackend(SingleTextQueryBackend):
                 value = value.replace("*", "EEEESTAREEE")
                 value = re.escape(value)
                 value = value.replace("EEEESTAREEE", ".*")
+                endsWith = False
+                startsWith = False
                 if value[0:2] == ".*":  
                     value = value[2:]
+                    endsWith = True
                 if value[-2:] == ".*":
                     value = value[:-2]
+                    startsWith = True
                 if notNode:
                     nodeRet["args"]["comparison"]["value"] = "!="
                 else:
                     nodeRet['args']['comparison']['value'] = "="
                 if value[-2:] == "\\\\":
                     value = value[:-2]
-                nodeRet['args']['str']['value'] = value
+
+                if endsWith and not startsWith:
+                    nodeRet['args']['str']['value'] = value + "$"
+                elif startsWith and not endsWith:
+                    nodeRet['args']['str']['value'] = "^" + value
+                else:
+                    nodeRet['args']['str']['value'] = value
+
                 nodeRet['args']['str']['regex'] = "true"
                 # return "%s regex %s" % (self.cleanKey(key), self.generateValueNode(value, True))
                 #return json.dumps(nodeRet)
@@ -268,14 +288,25 @@ class HAWKBackend(SingleTextQueryBackend):
                 item = item.replace("*", "EEEESTAREEE")
                 item = re.escape(item)
                 item = item.replace("EEEESTAREEE", ".*")
+                endsWith = False
+                startsWith = False
                 if item[:2] == ".*":  
                     item = item[2:]
+                    endsWith = True
                 if item[-2:] == ".*":
                     item = item[:-2]
+                    startsWith = True
                 if item[-2:] == "\\\\":
                     item = item[:-2]
-                nodeRet['args']['str']['value'] = item 
+
+                if endsWith and not startsWith:
+                    nodeRet['args']['str']['value'] = item + "$"
+                elif startsWith and not endsWith:
+                    nodeRet['args']['str']['value'] = "^" + item
+                else:
+                    nodeRet['args']['str']['value'] = item
                 nodeRet['args']['str']['regex'] = "true"
+
                 if notNode:
                     nodeRet["args"]["comparison"]["value"] = "!="
                 else:
@@ -295,17 +326,7 @@ class HAWKBackend(SingleTextQueryBackend):
         nodeRet['description'] = fieldname
         nodeRet['rule_id'] = str(uuid.uuid4())
         if type(value) == SigmaRegularExpressionModifier:
-            value = str(value)
-            value = value.replace("*", "EEEESTAREEE")
-            value = re.escape(self.generateValueNode(value, True))
-            value = value.replace("EEEESTAREEE", ".*")
-            if value[:2] == ".*":  
-                value = value[2:]
-            if value[-2:] == ".*":
-                value = value[:-2]
-            # print(value)
-            if value[-2:] == "\\\\":
-                value = value[:-2]
+            value = self.generateValueNode(value, True)
             nodeRet['args']['str']['value'] = value
             nodeRet['args']['str']['regex'] = "true"
             if notNode:
@@ -613,7 +634,6 @@ class HAWKBackend(SingleTextQueryBackend):
         except Exception as e:
             print("Failed to parse json: %s" % analytic_txt)
             raise Exception("Failed to parse json: %s" % analytic_txt)
-        # "rules","filter_name","actions_category_name","correlation_action","date_added","scores/53c9a74abfc386415a8b463e","enabled","public","group_name","score_id"
 
         cmt = "Sigma Rule: %s\n" % sigmaparser.parsedyaml['id'] 
         cmt += "Author: %s\n" % sigmaparser.parsedyaml['author'] 
@@ -667,6 +687,19 @@ class HAWKBackend(SingleTextQueryBackend):
             elif self.sigmaparser.parsedyaml['level'].lower() == 'medium':
                 record['correlation_action'] += 5.0;
             elif self.sigmaparser.parsedyaml['level'].lower() == 'low':
-                record['correlation_action'] += 2.0;
+                record['correlation_action'] -= 5.0;
+            elif self.sigmaparser.parsedyaml['level'].lower() == 'informational':
+                record['correlation_action'] -= 15.0;
        
         return json.dumps(record)
+
+    def snake_case(self, str):
+        res = [str[0].lower()]
+        for c in str[1:]:
+            if c in ('ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
+                res.append('_')
+                res.append(c.lower())
+            else:
+                res.append(c)
+         
+        return ''.join(res)

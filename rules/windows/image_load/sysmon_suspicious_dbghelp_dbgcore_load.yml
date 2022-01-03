@@ -8,7 +8,7 @@ references:
   - https://www.pinvoke.net/default.aspx/dbghelp/MiniDumpWriteDump.html
   - https://medium.com/@fsx30/bypass-edrs-memory-protection-introduction-to-hooking-2efb21acffd6
 date: 2019/10/27
-modified: 2021/11/27
+modified: 2021/12/16
 logsource:
   category: image_load
   product: windows
@@ -47,9 +47,13 @@ detection:
     Signed: 'FALSE'
   filter1:
     - Image|contains: 'Visual Studio'
-    - CommandLine|contains: '-k LocalSystemNetworkRestricted'
+    - CommandLine|contains: 
+      - '-k LocalSystemNetworkRestricted'
+      - '-k UnistackSvcGroup -s WpnUserService'
   filter2:   # Not available in Sysmon, but in Aurora
-    CommandLine: 'C:\WINDOWS\winsxs\*\TiWorker.exe -Embedding'
+    CommandLine: 
+      - 'C:\WINDOWS\winsxs\*\TiWorker.exe -Embedding'
+      - 'C:\Windows\system32\svchost.exe -k netsvcs -p -s wuauserv'
   condition: (signedprocess or unsignedprocess) and not filter1 and not filter2
 fields:
   - ComputerName

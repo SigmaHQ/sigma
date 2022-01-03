@@ -1,7 +1,7 @@
 title: Autorun Keys Modification
 id: 17f878b8-9968-4578-b814-c4217fc5768c
 description: Detects modification of autostart extensibility point (ASEP) in registry.
-status: experimental
+status: deprecated
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1547.001/T1547.001.md
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
@@ -11,7 +11,7 @@ tags:
     - attack.t1547.001
     - attack.t1060      # an old one
 date: 2019/10/25
-modified: 2021/11/26
+modified: 2021/12/05
 author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton
 logsource:
     category: registry_event
@@ -193,6 +193,7 @@ detection:
     filter:
         - Details: '(Empty)'
         - TargetObject|endswith: '\NgcFirst\ConsecutiveSwitchCount'
+        - Image: 'C:\WINDOWS\System32\svchost.exe'
     condition: ( main_selection or
                session_manager_base and session_manager or
                current_version_base and current_version or

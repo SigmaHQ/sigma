@@ -5,7 +5,7 @@ description: Detects process access LSASS memory which is typical for credential
 author: Florian Roth, Roberto Rodriguez, Dimitrios Slamaris, Mark Russinovich, Thomas Patzke, Teymur Kheirkhabarov, Sherif Eldeeb, James Dickenson, Aleksey Potapov,
     oscd.community (update)
 date: 2017/02/16
-modified: 2021/12/02
+modified: 2021/12/10
 references:
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
     - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
@@ -40,6 +40,7 @@ detection:
     filter1:
         SourceImage:
             - 'C:\WINDOWS\system32\taskmgr.exe'
+            - 'C:\Windows\System32\perfmon.exe'
     filter2:
         SourceImage|startswith: 'C:\ProgramData\Microsoft\Windows Defender\'
         SourceImage|endswith: '\MsMpEng.exe'
@@ -64,7 +65,10 @@ detection:
         SourceImage: 'C:\WINDOWS\system32\svchost.exe'
         GrantedAccess: '0x100000'
     filter7:
-        SourceImage: 'C:\WINDOWS\system32\wbem\wmiprvse.exe'
+        SourceImage: 
+            - 'C:\WINDOWS\system32\wbem\wmiprvse.exe'
+            - 'C:\Windows\syswow64\MsiExec.exe'
+            - 'C:\Windows\System32\msiexec.exe'
         GrantedAccess: 
             - '0x1410'
             - '0x410'
@@ -75,6 +79,9 @@ detection:
         GrantedAccess: 
             - '0x40'
             - '0x1010'
+    filter9:
+        SourceImage|endswith: '\explorer.exe'
+        GrantedAccess: '0x401'
     filter_generic:
         SourceImage|startswith: 
             - 'C:\Program Files\'
@@ -82,6 +89,9 @@ detection:
         GrantedAccess: 
             - '0x1410'
             - '0x410'
+    filter_edge: # version in path 96.0.1054.43
+        SourceImage|startswith: C:\Program Files (x86)\Microsoft\Edge\Application\
+        SourceImage|endswith: \Installer\setup.exe
     # Old - too broad filter  
         # SourceImage|endswith: # easy to bypass. need to implement supportive rule to detect bypass attempts
         #     - '\wmiprvse.exe'

@@ -4,7 +4,7 @@ status: experimental
 description: Detects process access to LSASS memory with suspicious access flags and from a suspicious folder
 author: Florian Roth
 date: 2021/11/27
-modified: 2021/11/30
+modified: 2021/12/05
 references:
     - https://docs.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
@@ -56,7 +56,12 @@ detection:
             - '\AppData\'
             - '\Temporary'
     filter1:
-        SourceImage: 'C:\Users\\*\AppData\Local\Programs\Microsoft VS Code\Code.exe'
+        SourceImage|contains|all: 
+            - 'C:\Users\'
+            - '\AppData\Local\'
+        SourceImage|endswith:
+            - '\Microsoft VS Code\Code.exe'
+            - '\software_reporter_tool.exe'
         GrantedAccess: '0x410'
     condition: selection and not 1 of filter*
 fields:

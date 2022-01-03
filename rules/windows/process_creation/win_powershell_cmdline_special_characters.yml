@@ -2,11 +2,11 @@ title: Suspicious PowerShell Command Line
 id: d7bcd677-645d-4691-a8d4-7a5602b780d1
 status: test
 description: Detects the PowerShell command lines with special characters
-author: Teymur Kheirkhabarov (idea), Vasiliy Burov (rule), oscd.community
+author: Teymur Kheirkhabarov (idea), Vasiliy Burov (rule), oscd.community, Tim Shelton (fp)
 references:
   - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=64
 date: 2020/10/15
-modified: 2021/11/27
+modified: 2021/12/06
 logsource:
   category: process_creation
   product: windows
@@ -26,9 +26,13 @@ detection:
   selection5:
     Image|endswith: '\powershell.exe'
     CommandLine|re: '.*`.*`.*`.*`.*`.*'
-  condition: selection1 or selection2 or selection3 or selection4 or selection5
+  filter:
+    ParentImage:
+        - C:\Program Files\Amazon\SSM\ssm-document-worker.exe
+  condition: (selection1 or selection2 or selection3 or selection4 or selection5) and not filter
 falsepositives:
   - Unlikely
+  - Amazon SSM Document Worker # fp example: powershell " [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 $keyExists = Test-Path "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Setup\OC Manager\Subcomponents" $jsonObj = @() if ($keyExists) { $key = Get-Item "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Setup\OC Manager\Subcomponents" $valueNames = $key.GetValueNames(); foreach ($valueName in $valueNames) { $value = $key.GetValue($valueName); if ($value -gt 0) { $installed = "True" } else { $installed = "False" } $jsonObj += @" {"Name": "$valueName", "Installed": "$installed"} "@ } } $result = $jsonObj -join "," $result = "[" + $result + "]" [Console]::WriteLine($result)
 level: high
 tags:
   - attack.defense_evasion

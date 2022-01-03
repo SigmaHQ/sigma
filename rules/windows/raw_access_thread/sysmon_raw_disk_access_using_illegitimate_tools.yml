@@ -2,8 +2,9 @@ title: Raw Disk Access Using Illegitimate Tools
 id: db809f10-56ce-4420-8c86-d6a7d793c79c
 description: Raw disk access using illegitimate tools, possible defence evasion
 author: Teymur Kheirkhabarov, oscd.community
+status: test
 date: 2019/10/22
-modified: 2021/11/20
+modified: 2022/02/02
 references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
 tags:
@@ -16,6 +17,9 @@ detection:
     filter_1:
         Device|contains: floppy
     filter_2:
+        Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SystemApps\'
         Image|endswith:             # easy to bypass. requires extra rule to support this one
             - '\wmiprvse.exe'
             - '\sdiagnhost.exe'
@@ -32,11 +36,28 @@ detection:
             - '\vds.exe'
             - '\lsass.exe'
             - '\svchost.exe'
-            - 'C:\Windows\System32\taskhostw.exe'
-            - 'C:\Windows\System32\SrTasks.exe'
+            - '\MsMpEng.exe'
+            - '\SearchApp.exe'
     filter_3:
         ProcessId: 4
-    condition: not filter_1 and not filter_2 and not filter_3
+    filter_fullpath:
+        Image:
+            - 'C:\Program Files\Bitdefender Antivirus Free\updatesrv.exe'
+            - 'C:\Program Files\Bitdefender Antivirus Free\downloader.exe'
+            - 'C:\Program Files\Bitdefender Antivirus Free\vsserv.exe'
+            - 'C:\Windows\System32\backgroundTaskHost.exe'
+            - 'C:\Windows\System32\RuntimeBroker.exe'
+            - 'C:\Windows\System32\MoUsoCoreWorker.exe'
+            - 'C:\Windows\System32\taskhostw.exe'
+            - 'C:\Windows\System32\SrTasks.exe'
+            - 'C:\Windows\System32\dllhost.exe'
+            - 'C:\Windows\System32\DeviceCensus.exe'
+    filter_Keybase:
+        Image|endswith: '\Keybase\upd.exe'
+    filter_windefender:
+        Image|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+        Image|endswith: '\MsMpEng.exe'
+    condition: not 1 of filter_*
 fields:
     - ComputerName
     - Image
@@ -45,4 +66,4 @@ fields:
 falsepositives:
     - Legitimate Administrator using tool for raw access or ongoing forensic investigation
 level: medium
-status: experimental
+

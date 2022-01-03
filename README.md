@@ -312,9 +312,8 @@ These tools are not part of the main toolchain and maintained separately by thei
 
 # Next Steps
 
-* Integration of MITRE ATT&CK® framework identifier to the rule set
-* Integration into Threat Intel Exchanges
-* Attempts to convince others to use the rule format in their reports, threat feeds, blog posts, threat sharing platforms
+* Finalizing and promoting the new [pySigma](https://github.com/SigmaHQ/pySigma) codebase
+* Description of the new "Sigma Correlation Rules" (available with pySigma)
 
 # Projects or Products that use Sigma
 
@@ -352,7 +351,7 @@ The github issue tracker is a good place to start tackling some issues others ra
 
 ## Provide Backends / Backend Features / Bugfixes
 
-Various requests for sigmac (sigma converter) backends exist. Some backends are very limited and need features. We are working on a documentation on how to write new backends but our time for this project is currently mostly spent for issue resolutions.
+Please don't provide backends for the old code base anymore. We recommand using the new [pySigma](https://github.com/SigmaHQ/pySigma). We are working on a documentation on how to write new backends for that new code base.
 
 ## Spread the word
 
