@@ -1,0 +1,31 @@
+title: Gather information about a system using gatherNetworkInfo.vbs script
+id: 575dce0c-8139-4e30-9295-1ee75969f7fe
+description: Adversaries can abuse the presence of C:\Windows\System32\gatherNetworkInfo.vbs script along with cscript.exe to gather information about the target
+status: experimental
+references:
+    - https://posts.slayerlabs.com/living-off-the-land/#gathernetworkinfovbs 
+author: blueteamer8699
+date: 2022/01/03
+modified: 2021/03/01
+tags:
+    - attack.discovery
+    - attack.group_policy_discovery
+    - attack.execution
+    - attack.command_and_scripting_interpreter
+    - attack.visual_basic
+    - attack.t1059_005
+logsource:
+    category: process_creation
+    product: windows
+    service: sysmon
+detection:
+    selection1:
+        CommandLine|contains: 'cscript.exe'
+    selection2:
+        CommandLine|contains: 'gatherNetworkInfo.vbs'
+    condition: selection1 AND selection2
+falsepositives:
+    - Unknown
+fields:
+    - CommandLine
+level: medium
