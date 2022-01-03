@@ -20,7 +20,7 @@ from .exceptions import SigmaCollectionParseError
 from .rule import SigmaParser
 
 
-MACRO_PATH = os.getcwd() + '\\macros\\'
+MACRO_PATH = os.getcwd() + '/macros/'
 
 class SigmaCollectionParser:
     """
@@ -47,7 +47,7 @@ class SigmaCollectionParser:
                 globalyaml['yml_path']=str(filename.parent)
             except:
                 filename = None
-        
+
         for yamldoc in self.yamls:
             action = None
             try:
@@ -62,7 +62,7 @@ class SigmaCollectionParser:
                 globalyaml = dict()
                 if filename:
                     globalyaml['yml_filename']=str(filename.name)
-                    globalyaml['yml_path']=str(filename.parent) 
+                    globalyaml['yml_path']=str(filename.parent)
             elif action == "repeat":
                 if prevrule is None:
                     raise SigmaCollectionParseError("action 'repeat' is only applicable after first valid Sigma rule")
@@ -78,13 +78,13 @@ class SigmaCollectionParser:
                     prevrule = yamldoc
         self.config = config
 
-    
+
     def expand_marcos(self, yamls):
         """Expands Macros as defined in the Macro folder
-        
-        That is, instead of redefining how to detect Powershell everytime, 
+
+        That is, instead of redefining how to detect Powershell everytime,
         the macro can define it instead.
-        This allows the author to focus on what Powershell does rather than 
+        This allows the author to focus on what Powershell does rather than
         worry about renamed executables.
         """
         def expand_condition(condition, condition_substitutions):
@@ -99,20 +99,20 @@ class SigmaCollectionParser:
         def load_macro(macro_name, data_source):
             with open(MACRO_PATH + macro_name + '.yml') as f:
                 macro_yaml_all = yaml.safe_load_all(f)
-            
+
                 for macro_yaml in macro_yaml_all:
                     if macro_yaml['logsource']['category'] == data_source['category'] and \
                         macro_yaml['logsource']['product'] == data_source['product']:
                         # Detection parts are renamed to avoid conflicts with other macros or rules
                         detection_dict = {f"MACRO_{macro_name}_{k}":v for k,v in macro_yaml['detection'].items() if k != "condition"}
-                        
+
                         condition_substitutions = {k:f"MACRO_{macro_name}_{k}" for k in macro_yaml['detection'] if k != "condition"}
                         condition_string = expand_condition(macro_yaml['detection']['condition'], condition_substitutions)
-                    
+
                     elif macro_yaml['logsource']['category'] == "generic" and \
                         macro_yaml['logsource']['product'] == "generic":
                         detection_dict_generic = {f"MACRO_{macro_name}_{k}":v for k,v in macro_yaml['detection'].items() if k != "condition"}
-                        
+
                         condition_substitutions = {k:f"MACRO_{macro_name}_{k}" for k in macro_yaml['detection'] if k != "condition"}
                         condition_string_generic = expand_condition(macro_yaml['detection']['condition'], condition_substitutions)
 
@@ -137,7 +137,7 @@ class SigmaCollectionParser:
                         keys_to_delete.append(key)
                         new_detections.update(detection_dict)
                         condition_substitutions[key] = condition_string
-                
+
                 part['detection'].update(new_detections)
                 for key in keys_to_delete:
                     del part['detection'][key]
@@ -147,7 +147,7 @@ class SigmaCollectionParser:
             result_yaml.append(part)
 
         return result_yaml
-    
+
     def generate(self, backend):
         """Calls backend for all parsed rules"""
         return filter(
