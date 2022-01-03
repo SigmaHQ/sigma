@@ -1,0 +1,31 @@
+title: Lolbin Format Load DLL
+id: 1fd56961-33aa-4cad-9210-5a87e8d8491e
+status: experimental
+description: use format.com /FS option to load dll
+author: frack113
+references:
+    - https://twitter.com/0gtweet/status/1477925112561209344?s=20
+    - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/format
+date: 2022/01/03
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\format.com'
+        CommandLine|contains: '/FS:'
+    filter:
+        CommandLine|contains: 
+            - '/FS:FAT'
+            - '/FS:FAT32'
+            - '/FS:NTFS'
+            - '/FS:exFAT'
+            - '/FS:ReFS'
+            - '/FS:UDF'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.defense_evasion 
+    - attack.t1574 
