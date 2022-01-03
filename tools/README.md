@@ -375,7 +375,7 @@ While attributes will be queried with `@my-attribute:attribute_value` specified 
 For an example, see `tools/config/datadog.yml`.
 
 #### Backend options
-The backend options allow you to override the `index`, `service` and `source` tags. Note that the `index` tag is not available in the Security Monitoring product.
+The backend options allow you to override tags such as `index`, `service` and `source`. Note that `index` is not available in the Security Monitoring product.
 
 Example
 ```
