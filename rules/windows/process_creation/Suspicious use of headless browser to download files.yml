@@ -1,0 +1,21 @@
+title: Suspicious use of headless browser to download files
+description: This is an unusual method to download files. It starts a browser headless and downloads a file from a location. This can be used by threat actors to download files.
+author: Sreeman
+date: 2022/01/04
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    CommandLine|re:
+      - '(?i)(msedge.exe|chrome.exe) --headless.*dump-dom.*(http|https):\/\/.*'
+  condition: selection
+fields:
+  - CommandLine
+  - ParentCommandLine
+falsepositives:
+  - unknown
+level: medium
+tags:
+  - attack.command.and.control
+  - attack.t1105
