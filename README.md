@@ -213,6 +213,7 @@ tools/sigmac -t splunk -c ~/my-splunk-mapping.yml -c tools/config/generic/window
 * [uberAgent ESA](https://uberagent.com/)
 * [Devo](https://devo.com)
 * [LogRhythm](https://logrhythm.com/)
+* [Datadog Logs](https://docs.datadoghq.com/logs/explorer/search_syntax/)
 
 Current work-in-progress
 * [Splunk Data Models](https://docs.splunk.com/Documentation/Splunk/7.1.0/Knowledge/Aboutdatamodels)
