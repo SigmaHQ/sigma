@@ -5,7 +5,7 @@ author: Den Iuzvyk
 references:
     - https://posts.specterops.io/requesting-azure-ad-request-tokens-on-azure-ad-joined-machines-for-browser-sso-2b0409caad30
 date: 2020/07/15
-modified: 2021/12/08
+modified: 2022/01/06
 logsource:
     category: image_load
     product: windows
@@ -19,13 +19,16 @@ detection:
     selection_dll:
         ImageLoaded|endswith: MicrosoftAccountTokenProvider.dll
     filter_legit:
-        Image|endswith:
+        - Image|endswith:
             - '\BackgroundTaskHost.exe'
             - '\devenv.exe'
             - '\iexplore.exe'
             - '\MicrosoftEdge.exe'
             - '\Microsoft\Edge\Application\msedge.exe'
             - '\AppData\Local\Microsoft\OneDrive\OneDrive.exe'
+            - '\msedgewebview2.exe'
+        - Image|startswith:
+            - 'C:\Program Files (x86)\Microsoft\EdgeWebView\Application\'
     condition: selection_dll and not filter_legit
 falsepositives:
     - unknown
