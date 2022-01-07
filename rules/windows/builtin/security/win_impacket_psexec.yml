@@ -1,27 +1,28 @@
 title: Impacket PsExec Execution
 id: 32d56ea1-417f-44ff-822b-882873f5f43b
+status: test
 description: Detects execution of Impacket's psexec.py.
-status: experimental
 author: Bhabesh Raj
-date: 2020/12/14
 references:
-    - https://blog.menasec.net/2019/02/threat-hunting-3-detecting-psexec.html
-tags:
-    - attack.lateral_movement
-    - attack.t1021.002
+  - https://blog.menasec.net/2019/02/threat-hunting-3-detecting-psexec.html
+date: 2020/12/14
+modified: 2022/01/07
 logsource:
-    product: windows
-    service: security
-    definition: 'The advanced audit policy setting "Object Access > Audit Detailed File Share" must be configured for Success/Failure'
+  product: windows
+  service: security
+  definition: 'The advanced audit policy setting "Object Access > Audit Detailed File Share" must be configured for Success/Failure'
 detection:
-    selection1:
-        EventID: 5145
-        ShareName: \\\*\IPC$
-        RelativeTargetName|contains:
-            - 'RemCom_stdint'
-            - 'RemCom_stdoutt'
-            - 'RemCom_stderrt'
-    condition: selection1
+  selection1:
+    EventID: 5145
+    ShareName: \\\*\IPC$
+    RelativeTargetName|contains:
+      - 'RemCom_stdint'
+      - 'RemCom_stdoutt'
+      - 'RemCom_stderrt'
+  condition: selection1
 falsepositives:
-    - nothing observed so far
+  - nothing observed so far
 level: high
+tags:
+  - attack.lateral_movement
+  - attack.t1021.002
