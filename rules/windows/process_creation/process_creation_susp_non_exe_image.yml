@@ -4,7 +4,7 @@ status: experimental
 description: Checks whether the image specified in a process creation event doesn't refer to an .exe file (caused by process ghosting or other unorthodox methods to start a process)
 author: Max Altgelt
 date: 2021/12/09
-modified: 2021/12/24
+modified: 2022/01/13
 references:
     - https://pentestlaboratories.com/2021/12/08/process-ghosting/
 tags:
@@ -17,6 +17,8 @@ detection:
         Image|endswith: '.exe'
     filter_null:
         Image: null
+    filter_registry:
+        Image: 'Registry'
     filter_starts:
         Image|startswith: 'C:\Windows\Installer\MSI'
     filter_pstarts:
@@ -29,6 +31,9 @@ detection:
     filter_nvidia:
         Image|contains: 'NVIDIA\NvBackend\'
         Image|endswith: '.dat'
+    filter_com:
+        Image|startswith: 'C:\Windows\System32\'
+        Image|endswith: '.com'
     condition: not image_exe and not 1 of filter*
 falsepositives:
     - unknown
