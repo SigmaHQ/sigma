@@ -1,0 +1,30 @@
+title: Application Executed Non-Executable Extension
+id: c3a99af4-35a9-4668-879e-c09aeb4f2bdf
+status: experimental
+description: Detects execution of files using an invalid file extension
+author: Tim Shelton
+date: 2022/01/12
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Image|endswith:
+        - '.exe'
+        - '.ex_'
+        - '.com'
+        - '.cmd'
+        - '.bat'
+        - '.bin'
+        - '.pif'
+    selection2:
+        Image|endswith: 'rundll32.exe'
+    selection2b:
+        CommandLine|contains: ".dll"
+    condition: not selection1 or (selection2 and not selection2b)
+fields:
+    - Image
+    - CommandLine
+falsepositives:
+    - Unknown
+level: high
