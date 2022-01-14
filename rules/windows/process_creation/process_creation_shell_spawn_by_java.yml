@@ -4,7 +4,7 @@ description: Detects shell spawn from Java host process, which could a maintenan
 status: experimental
 author: Andreas Hunkeler (@Karneades)
 date: 2021/12/17
-modified: 2021/12/18
+modified: 2022/01/12
 tags:
     - attack.initial_access
     - attack.persistence
@@ -17,7 +17,10 @@ detection:
         ParentImage|endswith: '\java.exe'
         Image|endswith:
             - '\cmd.exe'
-    condition: selection
+    filter:
+        ParentImage|contains: 'build'  # excluding CI build agents
+        CommandLine|contains: 'build'  # excluding CI build agents
+    condition: selection and not filter
 falsepositives:
     - Legitimate calls to system binaries
     - Company specific internal usage
