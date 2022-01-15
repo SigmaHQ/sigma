@@ -1,0 +1,23 @@
+title: Delete Prefetch File
+id: 4f14dd15-1625-451c-afa6-af6505a18e26
+status: experimental
+description: Deletion of prefetch files is a known anti-forensic technique
+author: frack113
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1070.004/T1070.004.md#atomic-test-9---delete-prefetch-file
+date: 2022/01/15
+logsource:
+  product: windows
+  category: file_delete
+detection:
+  selection_file:
+    TargetFilename|endswith: .pf
+  selection_valid: 
+    Image: C:\Windows\system32\svchost.exe
+  condition: selection_file and not selection_valid
+falsepositives:
+  - unknown
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1070.004
