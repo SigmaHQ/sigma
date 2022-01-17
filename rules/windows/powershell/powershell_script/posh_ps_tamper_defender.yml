@@ -1,0 +1,33 @@
+title: Suspicious Start-Process PassThru
+id: 14c71865-6cd3-44ae-adaa-1db923fae5f2
+related:
+    - id: ec19ebab-72dc-40e1-9728-4c0b805d722c
+      type: derived
+status: experimental
+description: Attempting to disable scheduled scanning and other parts of windows defender atp.
+author: frack113
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1562.001/T1562.001.md
+    - https://docs.microsoft.com/en-us/powershell/module/defender/set-mppreference?view=windowsserver2022-ps
+date: 2022/01/16
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - 'Set-MpPreference'
+            - ' 1'
+        ScriptBlockText|contains:
+            - DisableRealtimeMonitoring
+            - DisableBehaviorMonitoring
+            - DisableScriptScanning
+            - DisableBlockAtFirstSeen
+    condition: selection
+falsepositives:
+    - Legitimate PowerShell scripts
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
