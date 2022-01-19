@@ -758,7 +758,7 @@ def get_mitre_data():
                 MITRE_GROUPS.append(r['external_id'].lower())
 
     # Debugging 
-    print("MITRE ATT&CK LIST LENGTHS: %d " % (len(MITRE_TECHNIQUES), len(MITRE_TECHNIQUE_NAMES), len(list(MITRE_PHASE_NAMES)), len(MITRE_GROUPS), len(MITRE_TOOLS)))
+    print("MITRE ATT&CK LIST LENGTHS: %d %d %d %d %d" % (len(MITRE_TECHNIQUES), len(MITRE_TECHNIQUE_NAMES), len(list(MITRE_PHASE_NAMES)), len(MITRE_GROUPS), len(MITRE_TOOLS)))
 
     # Combine all IDs to a big tag list
     return ["attack." + item for item in MITRE_TECHNIQUES + MITRE_TECHNIQUE_NAMES + list(MITRE_PHASE_NAMES) + MITRE_GROUPS + MITRE_TOOLS]
