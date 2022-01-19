@@ -6,7 +6,7 @@ author: Roberto Rodriguez @Cyb3rWard0g, Tim Shelton
 references:
   - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190815181010.html
 date: 2019/09/12
-modified: 2022/01/18
+modified: 2022/01/19
 logsource:
   product: windows
   category: pipe_created
@@ -21,9 +21,13 @@ detection:
       - '\WINDOWS\System32\wsmprovhost.exe'
       - '\Windows\system32\dsac.exe'
       - '\Windows\system32\wbem\wmiprvse.exe'
-      - '\Tools\Binn\SQLPS.exe' # Microsoft SQL Server\130\Tools\
   filter2:
     Image: null
+  filter3: # Microsoft SQL Server\130\Tools\
+    Image|contains|all:
+      - ':\Program Files'
+      - '\Microsoft SQL Server\'
+    Image|endswith: '\Tools\Binn\SQLPS.exe'
   condition: selection and not 1 of filter*
 fields:
   - ComputerName
