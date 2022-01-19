@@ -17,14 +17,14 @@ logsource:
     category: ps_script
     definition: Script block logging must be enabled
 detection:
-    convert_b64:
+    select_convert_b64:
         ScriptBlockText|contains|all:
             - '-nop'
             - ' -w '
             - 'hidden'
             - ' -c '
             - '[Convert]::FromBase64String'
-    iex_selection:
+    select_iex_selection:
         ScriptBlockText|contains|all:
             - ' -w '
             - 'hidden'
@@ -33,20 +33,20 @@ detection:
             - ' -c '
             - 'iex'
             - 'New-Object'
-    enc_selection:
+    select_enc_selection:
         ScriptBlockText|contains|all:
             - ' -w '
             - 'hidden'
             - '-ep'
             - 'bypass'
             - '-Enc'
-    reg_selection:
+    select_reg_selection:
         ScriptBlockText|contains|all:
             - 'powershell'
             - 'reg'
             - 'add'
             - 'HKCU\software\microsoft\windows\currentversion\run'
-    webclient_selection:
+    select_webclient_selection:
         ScriptBlockText|contains|all:
             - 'bypass'
             - '-noprofile'
@@ -55,13 +55,13 @@ detection:
             - 'new-object'
             - 'system.net.webclient'
             - '.download'
-    iex_webclient:
+    select_iex_webclient:
         ScriptBlockText|contains|all:
             - 'iex'
             - 'New-Object'
             - 'Net.WebClient'
             - '.Download'
-    condition: 1 of them
+    condition: 1 of select*
 falsepositives:
     - Penetration tests
 level: high

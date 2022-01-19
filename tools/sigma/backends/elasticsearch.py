@@ -69,6 +69,7 @@ class ElasticsearchWildcardHandlingMixin(object):
             ("case_insensitive_blacklist", None, "Fields to exclude from being made into case insensitive regex. Valid options are: list of fields, single field. Also, wildcards * and ? allowed.", None),
             ("wildcard_use_keyword", "true", "Use analyzed field or wildcard field if the query uses a wildcard value (ie: '*mall_wear.exe'). Set this to 'False' to use analyzed field or wildcard field. Valid options are: true/false", None),
             ("hash_normalize", None, "Normalize hash fields to lowercase, uppercase or both. If this option is not used the field value stays untouched. Valid options are: lower/upper/both (default: both)", None),
+            ("not_bound_keyword", "\\*.keyword", "field name to use for keyword list search (default is: '\\*.keyword')", None),
             )
     reContainsWildcard = re.compile("(?:(?<!\\\\)|\\\\\\\\)[*?]").search
     uuid_regex = re.compile( "[0-9a-fA-F]{8}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{4}(\\\)?-[0-9a-fA-F]{12}", re.IGNORECASE )
@@ -326,7 +327,7 @@ class ElasticsearchQuerystringBackend(DeepFieldMappingMixin, ElasticsearchWildca
                     newitems.append(item)
             newnode = NodeSubexpression(nodetype(None, None, *newitems))
             self.matchKeyword = True
-            result = "\\*.keyword:" + super().generateSubexpressionNode(newnode)
+            result = self.not_bound_keyword + ":" + super().generateSubexpressionNode(newnode)
             self.matchKeyword = False       # one of the reasons why the converter needs some major overhaul
             return result
         else:
