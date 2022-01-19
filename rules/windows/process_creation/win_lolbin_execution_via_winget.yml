@@ -4,9 +4,9 @@ description: Adversaries can abuse winget to download payloads remotely and exec
 status: experimental
 references: 
     - https://docs.microsoft.com/en-us/windows/package-manager/winget/install#local-install
-author: Sreeman
-date: 2020/21/04
-modified: 2021/09/12
+author: Sreeman, Florian Roth, Frack113
+date: 2020/04/21
+modified: 2022/01/11
 tags:
     - attack.defense_evasion
     - attack.execution
@@ -16,7 +16,12 @@ logsource:
     product: windows
 detection:
     selection:
-        CommandLine|re: '.*(?i)winget install (--m|-m).*'
+        CommandLine|contains|all: 
+            - 'winget'
+            - 'install'
+        CommandLine|contains:
+            - '-m '
+            - '--manifest'
     condition: selection
 falsepositives:
     - Admin activity installing packages not in the official Microsoft repo. Winget probably won't be used by most users.
