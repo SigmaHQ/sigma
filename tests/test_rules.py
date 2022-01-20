@@ -625,6 +625,7 @@ class TestRules(unittest.TestCase):
                          "There are rules with non-conform 'title' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title")
 
     def test_invalid_logsource_attributes(self):
+        print("Testing invalid log sources...\n")
         faulty_rules = []
         valid_logsource = [
            'category',
