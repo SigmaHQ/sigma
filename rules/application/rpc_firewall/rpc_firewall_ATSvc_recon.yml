@@ -1,15 +1,13 @@
-title: Remote Schedule Task Lateral Movement via ATSvc
-id: 1ff70682-0a51-30e8-076d-740be8cee98b
-description: Detects remote RPC calls to create or execute a scheduled task via ATSvc
+title: Remote Schedule Task Recon via AtScv
+id: f177f2bc-5f3e-4453-b599-57eefce9a59c
+description: Detects remote RPC calls to read information about scheduled tasks via AtScv
 references:
-    - https://attack.mitre.org/techniques/T1053/
-    - https://attack.mitre.org/tactics/TA0008/
+    - https://attack.mitre.org/tactics/TA0007/
     - https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-tsch/d1058a28-7e02-4948-8b8d-4a347fa64931
+    - https://github.com/zeronetworks/rpcfirewall
+    - https://github.com/jsecurity101/MSRPC-to-ATTACK/blob/main/documents/MS-TSCH.md
 tags:
-    - attack.lateral_movement
-    - attack.ta0008
-    - attack.t1053
-    - attack.t1053.002
+    - attack.ta0007
 status: experimental
 author: Sagie Dulce, Dekel Paz
 date: 2022/01/01
@@ -26,10 +24,11 @@ detection:
       - EventLog: RPCFW
         EventID: 3
         InterfaceUuid: 1ff70682-0a51-30e8-076d-740be8cee98b
-        OpNum:
-          - 0
-          - 1
-    condition: selection
+    filter:
+      OpNum:
+        - 0
+        - 1
+    condition: selection and not filter
 falsepositives:
     - unknown
 level: high

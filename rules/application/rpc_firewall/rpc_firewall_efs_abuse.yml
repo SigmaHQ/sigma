@@ -1,9 +1,10 @@
-title: Remote Server Service Abuse
-id: 4b324fc8-1670-01d3-1278-5a47bf6ee188
+title: Remote Encrypting File System Abuse
+id: 5f92fff9-82e2-48eb-8fc1-8b133556a551
 description: Detects remote RPC calls to possibly abuse remote encryption service via MS-EFSR
 references:
     - https://attack.mitre.org/tactics/TA0008/
-    - https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-srvs/accf23b0-0f57-441c-9185-43041f1b0ee9
+    - https://msrc.microsoft.com/update-guide/vulnerability/CVE-2021-36942
+    - https://github.com/jsecurity101/MSRPC-to-ATTACK/blob/main/documents/MS-EFSR.md
 tags:
     - attack.lateral_movement
     - attack.ta0008
@@ -14,7 +15,7 @@ modified: 2022/01/01
 logsource:
     product: windows
     service: rpc_firewall
-    definition: 'Requirements: install and apply the RPC Firewall to all processes with "audit:true action:block uuid:4b324fc8-1670-01d3-1278-5a47bf6ee188'
+    definition: 'Requirements: install and apply the RPC Firewall to all processes with "audit:true action:block uuid:df1941c5-fe89-4e79-bf10-463657acf44d or c681d488-d850-11d0-8c52-00c04fd90f7e'
     references:
       - https://github.com/zeronetworks/rpcfirewall
       - https://zeronetworks.com/blog/stopping_lateral_movement_via_the_rpc_firewall/
@@ -23,8 +24,9 @@ detection:
       - EventLog: RPCFW
         EventID: 3
         InterfaceUuid:
-          - 4b324fc8-1670-01d3-1278-5a47bf6ee188
+          - df1941c5-fe89-4e79-bf10-463657acf44d
+          - c681d488-d850-11d0-8c52-00c04fd90f7e
     condition: selection
 falsepositives:
-    - Legitimate remote share creation
+    - Legitimate usage of remote file encryption
 level: high

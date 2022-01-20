@@ -1,10 +1,11 @@
-title: Remote Schedule Task Lateral Movement via SASec
-id: 378e52b0-c0a9-11cf-822d-00aa0051e40f
-description: Detects remote RPC calls to create or execute a scheduled task via SASec
+title: Remote Schedule Task Lateral Movement via ITaskSchedulerService
+id: ace3ff54-e7fd-46bd-8ea0-74b49a0aca1d
+description: Detects remote RPC calls to create or execute a scheduled task
 references:
     - https://attack.mitre.org/techniques/T1053/
     - https://attack.mitre.org/tactics/TA0008/
     - https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-tsch/d1058a28-7e02-4948-8b8d-4a347fa64931
+    - https://github.com/jsecurity101/MSRPC-to-ATTACK/blob/main/documents/MS-TSCH.md
 tags:
     - attack.lateral_movement
     - attack.ta0008
@@ -17,7 +18,7 @@ modified: 2022/01/01
 logsource:
     product: windows
     service: rpc_firewall
-    definition: 'Requirements: install and apply the RPC Firewall to all processes with "audit:true action:block uuid:378e52b0-c0a9-11cf-822d-00aa0051e40f"'
+    definition: 'Requirements: install and apply the RPC Firewall to all processes with "audit:true action:block uuid:86d35949-83c9-4044-b424-db363231fd0c"'
     references:
       - https://github.com/zeronetworks/rpcfirewall
       - https://zeronetworks.com/blog/stopping_lateral_movement_via_the_rpc_firewall/
@@ -25,10 +26,17 @@ detection:
     selection:
       - EventLog: RPCFW
         EventID: 3
-        InterfaceUuid: 378e52b0-c0a9-11cf-822d-00aa0051e40f
+        InterfaceUuid: 86d35949-83c9-4044-b424-db363231fd0c
         OpNum:
-          - 0
           - 1
+          - 3
+          - 4
+          - 10
+          - 11
+          - 12
+          - 13
+          - 14
+          - 15
     condition: selection
 falsepositives:
     - unknown
