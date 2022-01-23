@@ -6,15 +6,22 @@ author: Florian Roth
 references:
   - https://twitter.com/d1r4c/status/1279042657508081664
   - https://medium.com/@petehouston/upload-files-with-curl-93064dcccc76
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1105/T1105.md#atomic-test-19---curl-upload-file
+  - https://curl.se/docs/manpage.html
 date: 2020/07/03
-modified: 2021/11/27
+modified: 2022/01/22
 logsource:
   category: process_creation
   product: windows
 detection:
   selection:
     Image|endswith: '\curl.exe'
-    CommandLine|contains: ' -F '
+    CommandLine|contains:
+        - ' -F '
+        - ' -T '
+        - ' --upload-file '
+        - ' -d '
+        - ' --data '
   condition: selection
 fields:
   - CommandLine
@@ -25,3 +32,4 @@ level: medium
 tags:
   - attack.exfiltration
   - attack.t1567
+  - attack.t1105
