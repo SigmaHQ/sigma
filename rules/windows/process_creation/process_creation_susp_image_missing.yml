@@ -4,7 +4,7 @@ status: experimental
 description: Checks whether the image specified in a process creation event is not a full, absolute path (caused by process ghosting or other unorthodox methods to start a process)
 author: Max Altgelt
 date: 2021/12/09
-modified: 2021/12/27
+modified: 2022/01/25
 references:
     - https://pentestlaboratories.com/2021/12/08/process-ghosting/
 tags:
@@ -15,8 +15,12 @@ logsource:
 detection:
     image_absolute_path:
         Image|contains: '\'
-    filter:
+    filter_null:
         Image: null
+    filter_empty:
+        Image:
+            - '-'
+            - ''
     filter_4688:
         - Image: 'Registry'
         - CommandLine: 'Registry'
