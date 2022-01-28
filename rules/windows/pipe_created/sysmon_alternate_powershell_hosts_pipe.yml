@@ -2,11 +2,11 @@ title: Alternate PowerShell Hosts Pipe
 id: 58cb02d5-78ce-4692-b3e1-dce850aae41a
 status: test
 description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
-author: Roberto Rodriguez @Cyb3rWard0g
+author: Roberto Rodriguez @Cyb3rWard0g, Tim Shelton
 references:
   - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190815181010.html
 date: 2019/09/12
-modified: 2021/12/17
+modified: 2022/01/19
 logsource:
   product: windows
   category: pipe_created
@@ -19,8 +19,15 @@ detection:
       - '\powershell_ise.exe'
       - '\WINDOWS\System32\sdiagnhost.exe'
       - '\WINDOWS\System32\wsmprovhost.exe'
+      - '\Windows\system32\dsac.exe'
+      - '\Windows\system32\wbem\wmiprvse.exe'
   filter2:
     Image: null
+  filter3: # Microsoft SQL Server\130\Tools\
+    Image|contains|all:
+      - ':\Program Files'
+      - '\Microsoft SQL Server\'
+    Image|endswith: '\Tools\Binn\SQLPS.exe'
   condition: selection and not 1 of filter*
 fields:
   - ComputerName
@@ -32,5 +39,4 @@ falsepositives:
 level: medium
 tags:
   - attack.execution
-  - attack.t1086            # an old one
   - attack.t1059.001
