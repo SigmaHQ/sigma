@@ -4,9 +4,9 @@ status: experimental
 description: Detects a whoami.exe executed by LOCAL SYSTEM. This may be a sign of a successful local privilege escalation.
 references:
     - https://speakerdeck.com/heirhabarov/hunting-for-privilege-escalation-in-windows-environment
-author: Teymur Kheirkhabarov
+author: Teymur Kheirkhabarov, Florian Roth
 date: 2019/10/23
-modified: 2021/08/26
+modified: 2022/01/28
 tags:
     - attack.privilege_escalation
     - attack.discovery    
@@ -16,11 +16,11 @@ logsource:
     product: windows
 detection:
     selection:
-        User|startswith: 
-            - 'NT AUTHORITY\SYSTEM'
-            - 'AUTORITE NT\Sys' # French language settings
+        User|contains: 
+            - 'AUTHORI'
+            - 'AUTORI'
         Image|endswith: '\whoami.exe'
     condition: selection
 falsepositives:
-    - Unknown
+    - Possible name overlap with NT AUHTORITY substring to cover all languages
 level: high
