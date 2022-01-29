@@ -1,0 +1,27 @@
+title: XORDump Use
+id: 66e563f9-1cbd-4a22-a957-d8b7c0f44372
+description: Detects suspicious use of XORDump process memory dumping utility
+status: experimental
+references:
+    - https://github.com/audibleblink/xordump
+author: Florian Roth
+date: 2022/01/28
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+    - attack.t1003.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|endswith: '\xordump.exe'
+        - CommandLine|contains:
+            - ' -process lsass.exe '
+            - ' -m comsvcs '
+            - ' -m dbghelp '
+            - ' -m dbgcore '
+    condition: selection
+falsepositives:
+    - Another tool that uses the command line switches of XORdump
+level: high
