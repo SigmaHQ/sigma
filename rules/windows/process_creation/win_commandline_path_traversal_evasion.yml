@@ -3,6 +3,7 @@ status: experimental
 id: 1327381e-6ab0-4f38-b583-4c1b8346a56b
 author: Christian Burkard
 date: 2021/10/26
+modified: 2022/02/02
 description: Detects the attempt to evade or obfuscate the executed command on the CommandLine using bogus path traversal
 references:
     - https://twitter.com/hexacorn/status/1448037865435320323
@@ -22,7 +23,9 @@ detection:
             - '\..\..\'
     selection2:
         CommandLine|contains: '.exe\..\'
-    condition: 1 of selection*
+    filter:
+        CommandLine|contains: '\Google\Drive\googledrivesync.exe\..\'
+    condition: 1 of selection* and not filter
 falsepositives:
-    - Unknown
+    - Google Drive
 level: high
