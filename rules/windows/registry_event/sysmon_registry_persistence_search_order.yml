@@ -7,7 +7,7 @@ references:
     - https://attack.mitre.org/techniques/T1546/015/
 author: Maxime Thiebaut (@0xThiebaut), oscd.community, Cédric Hien
 date: 2020/04/14
-modified: 2022/01/13
+modified: 2022/02/01
 tags:
     - attack.persistence
     - attack.t1546.015
@@ -53,11 +53,16 @@ detection:
         Details|contains:
             - '\FileRepository\nvmdi.inf'
     filter_edge:
-        Image|contains|all:
+        - Image|contains|all:
             - 'C:\Program Files (x86)\Microsoft\EdgeUpdate\Install\{'
             - '\setup.exe'
+        - Image|endswith: '\MicrosoftEdgeUpdateComRegisterShell64.exe'
     filter_dx:
         Image: 'C:\WINDOWS\SYSTEM32\dxdiag.exe'
+    filter_other:
+        Details: 
+            - 'C:\Program Files\Mozilla Firefox\AccessibleHandler.dll'  # Firefox update
+            - 'C:\Program Files\Mozilla Firefox\AccessibleMarshal.dll'  # Firefox update
     condition: selection and not 1 of filter*
 falsepositives:
     - Some installed utilities (i.e. OneDrive) may serve new COM objects at user-level

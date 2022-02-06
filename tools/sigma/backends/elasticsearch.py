@@ -422,6 +422,7 @@ class ElasticsearchEQLBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandli
     mapExpression = "%s : %s"
     mapListsSpecialHandling = False
     mapListValueExpression = "%s : %s"
+    reEscape = re.compile('(["\\\\])')
 
     sort_condition_lists = True
 
@@ -438,9 +439,6 @@ class ElasticsearchEQLBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandli
         self.maxspan = None
         return super().generate(sigmaparser)
 
-    def escapeSlashes(self, value):
-        return value.replace("\\", "\\\\")
-
     def generateMapItemNode(self, node):
         fieldname, _ = node
         try:
@@ -456,7 +454,7 @@ class ElasticsearchEQLBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandli
         return self.mapExpression % (fieldname, self.generateTypedValueNode(value))
 
     def generateValueNode(self, node):
-        return self.valueExpression % (self.escapeSlashes(self.cleanValue(str(node))))
+        return self.valueExpression % (self.cleanValue(str(node)))
 
     def generateAggregationQuery(self, agg, searchId):
         condtoken = SigmaConditionTokenizer(searchId)
