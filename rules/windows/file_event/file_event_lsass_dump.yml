@@ -10,6 +10,7 @@ references:
     - https://www.google.com/search?q=procdump+lsass
     - https://medium.com/@markmotig/some-ways-to-dump-lsass-exe-c4a75fdc49bf
 date: 2021/11/15
+modified: 2022/02/06
 tags:
     - attack.credential_access
     - attack.t1003.001
@@ -28,7 +29,11 @@ detection:
             - '\lsass_2'  # default format of procdump v9.0 is lsass_YYMMDD_HHmmss.dmp
             - '\lsassdump'
             - '\lsassdmp'
-    condition: selection1 or selection2
+    selection3:
+        TargetFilename|contains|all:
+            - '\lsass'
+            - '.dmp'
+    condition: 1 of selection*
 falsepositives:
     - Unknown
 level: high
