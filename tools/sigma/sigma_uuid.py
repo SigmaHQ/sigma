@@ -15,7 +15,7 @@ def yaml_preserve_order(self, dict_data):
     return self.represent_mapping("tag:yaml.org,2002:map", dict_data.items())
 
 def main():
-    argparser = ArgumentParser(description="Assign and verfify UUIDs of Sigma rules")
+    argparser = ArgumentParser(description="Assign and verify UUIDs of Sigma rules")
     argparser.add_argument("--verify", "-V", action="store_true", help="Verify existence and uniqueness of UUID assignments. Exits with error code if verification fails.")
     argparser.add_argument("--verbose", "-v", action="store_true", help="Be verbose.")
     argparser.add_argument("--recursive", "-r", action="store_true", help="Recurse into directories.")

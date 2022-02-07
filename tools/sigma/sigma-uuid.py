@@ -7,7 +7,7 @@ from uuid import uuid4, UUID
 import yaml
 from sigma.output import SigmaYAMLDumper
 
-argparser = ArgumentParser(description="Assign and verfify UUIDs of Sigma rules")
+argparser = ArgumentParser(description="Assign and verify UUIDs of Sigma rules")
 argparser.add_argument("--verify", "-V", action="store_true", help="Verify existence and uniqueness of UUID assignments. Exits with error code if verification fails.")
 argparser.add_argument("--verbose", "-v", action="store_true", help="Be verbose.")
 argparser.add_argument("--recursive", "-r", action="store_true", help="Recurse into directories.")
