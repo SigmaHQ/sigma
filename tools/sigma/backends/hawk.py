@@ -691,6 +691,9 @@ class HAWKBackend(SingleTextQueryBackend):
                 record['correlation_action'] -= 10.0;
             elif self.sigmaparser.parsedyaml['level'].lower() == 'informational':
                 record['correlation_action'] -= 15.0;
+
+        if record['correlation_action'] < 0.0:
+            record['correlation_action'] = 0.0
        
         return json.dumps(record)
 
