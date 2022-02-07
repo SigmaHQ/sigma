@@ -4,7 +4,7 @@ description: Detects Obfuscated use of Clip.exe to execute PowerShell
 status: experimental
 author: Jonathan Cheong, oscd.community
 date: 2020/10/13
-modified: 2021/11/30
+modified: 2022/02/03
 references:
      - https://github.com/Neo23x0/sigma/issues/1009 #(Task 26)
 tags:
@@ -19,7 +19,10 @@ detection:
     selection:
         Provider_Name: 'Service Control Manager'
         EventID: 7045
-        ImagePath|re: '.*cmd.{0,5}(?:\/c|\/r).+clip(?:\.exe)?.{0,4}&&.+clipboard]::\(\s\\\"\{\d\}.+\-f.+\"'
+        ImagePath|contains|all: 
+            - 'cmd'
+            - 'clip'
+            - 'clipboard]::'
     condition: selection
 falsepositives:
     - Unknown
