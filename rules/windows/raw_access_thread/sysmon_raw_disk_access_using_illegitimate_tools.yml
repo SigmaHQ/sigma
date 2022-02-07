@@ -4,7 +4,7 @@ description: Raw disk access using illegitimate tools, possible defence evasion
 author: Teymur Kheirkhabarov, oscd.community
 status: test
 date: 2019/10/22
-modified: 2022/02/06
+modified: 2022/02/07
 references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
 tags:
@@ -42,11 +42,8 @@ detection:
             - '\GamingServices.exe'
     filter_3:
         ProcessId: 4
-    filter_fullpath:
+    filter_specific:
         Image:
-            - 'C:\Program Files\Bitdefender Antivirus Free\updatesrv.exe'
-            - 'C:\Program Files\Bitdefender Antivirus Free\downloader.exe'
-            - 'C:\Program Files\Bitdefender Antivirus Free\vsserv.exe'
             - 'C:\Windows\System32\backgroundTaskHost.exe'
             - 'C:\Windows\System32\RuntimeBroker.exe'
             - 'C:\Windows\System32\MoUsoCoreWorker.exe'
@@ -54,12 +51,22 @@ detection:
             - 'C:\Windows\System32\SrTasks.exe'
             - 'C:\Windows\System32\dllhost.exe'
             - 'C:\Windows\System32\DeviceCensus.exe'
-            - 'System'
+    filter_system:
+        Image: 'System'
     filter_Keybase:
         Image|endswith: '\Keybase\upd.exe'
     filter_windefender:
         Image|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
         Image|endswith: '\MsMpEng.exe'
+    filter_appdata:
+        Image|contains|all: 
+            - 'C:\Users\'
+            - '\Microsoft\OneDrive\'
+            - '\FileCoAuth.exe'
+    filter_programfiles:  # this rule causes so many FPs that we have to do this
+        Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
     condition: not 1 of filter_*
 fields:
     - ComputerName
