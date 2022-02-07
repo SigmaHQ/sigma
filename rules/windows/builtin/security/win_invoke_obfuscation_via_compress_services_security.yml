@@ -7,7 +7,7 @@ description: Detects Obfuscated Powershell via COMPRESS OBFUSCATION
 status: experimental
 author: Timur Zinniatullin, oscd.community
 date: 2020/10/18
-modified: 2021/09/18
+modified: 2022/02/03
 references:
     - https://github.com/Neo23x0/sigma/issues/1009 #(Task 19)
 tags:
@@ -21,8 +21,15 @@ logsource:
 detection:
     selection:
         EventID: 4697 
-        ServiceFileName|re: '(?i).*new-object.*(?:system\.io\.compression\.deflatestream|system\.io\.streamreader).*text\.encoding\]::ascii.*readtoend'
-    condition: selection
+        ServiceFileName|contains|all: 
+            - 'new-object'
+            - 'text.encoding]::ascii'
+            - 'readtoend'
+    selection2:
+        ServiceFileName|contains:
+            - 'system.io.compression.deflatestream'
+            - 'system.io.streamreader'
+    condition: all of selection*
 falsepositives:
     - unknown
 level: medium
