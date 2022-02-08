@@ -4,7 +4,7 @@ description: Raw disk access using illegitimate tools, possible defence evasion
 author: Teymur Kheirkhabarov, oscd.community
 status: test
 date: 2019/10/22
-modified: 2022/02/07
+modified: 2022/02/08
 references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
 tags:
@@ -51,6 +51,7 @@ detection:
             - 'C:\Windows\System32\SrTasks.exe'
             - 'C:\Windows\System32\dllhost.exe'
             - 'C:\Windows\System32\DeviceCensus.exe'
+            - 'C:\Windows\System32\MpSigStub.exe'
     filter_system:
         Image: 'System'
     filter_Keybase:
@@ -67,6 +68,11 @@ detection:
         Image|startswith:
             - 'C:\Program Files\'
             - 'C:\Program Files (x86)\'
+    filter_onedrive:
+        Image|contains|all:
+            - 'C:\Users\'
+            - '\AppData\'
+            - '\Microsoft\OneDrive\'
     condition: not 1 of filter_*
 fields:
     - ComputerName
