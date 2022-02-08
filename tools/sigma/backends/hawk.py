@@ -673,7 +673,7 @@ class HAWKBackend(SingleTextQueryBackend):
             record["tags"] = record['tags'] + [ item.replace("attack.", "") for item in sigmaparser.parsedyaml['tags']]
 
         if not 'status' in self.sigmaparser.parsedyaml or 'status' in self.sigmaparser.parsedyaml and self.sigmaparser.parsedyaml['status'] != 'experimental':
-            record['correlation_action'] += 10.0;
+            record['correlation_action'] += 5.0;
         elif 'status' in self.sigmaparser.parsedyaml and self.sigmaparser.parsedyaml['status'] == 'experimental':
             record["tags"].append("qa")
         if 'falsepositives' in self.sigmaparser.parsedyaml and len(self.sigmaparser.parsedyaml['falsepositives']) > 1:
@@ -685,11 +685,15 @@ class HAWKBackend(SingleTextQueryBackend):
             elif self.sigmaparser.parsedyaml['level'].lower() == 'high':
                 record['correlation_action'] += 10.0;
             elif self.sigmaparser.parsedyaml['level'].lower() == 'medium':
-                record['correlation_action'] += 5.0;
+                # record['correlation_action'] += 0.0;
+                pass
             elif self.sigmaparser.parsedyaml['level'].lower() == 'low':
-                record['correlation_action'] -= 5.0;
+                record['correlation_action'] -= 10.0;
             elif self.sigmaparser.parsedyaml['level'].lower() == 'informational':
                 record['correlation_action'] -= 15.0;
+
+        if record['correlation_action'] < 0.0:
+            record['correlation_action'] = 0.0
        
         return json.dumps(record)
 
