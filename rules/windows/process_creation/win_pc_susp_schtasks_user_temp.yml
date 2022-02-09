@@ -9,6 +9,7 @@ tags:
     - attack.t1053.005 
 author: frack113
 date: 2021/11/03
+modified: 2022/02/09
 logsource:
     product: windows
     category: process_creation
@@ -19,7 +20,11 @@ detection:
         CommandLine|contains|all:
             - '/Create '
             - '\AppData\Local\Temp'
-    condition: schtasks and option
+    filter_klite_codec:
+        CommandLine|contains|all:
+            - '/Create /TN "klcp_update" /XML '
+            - '\klcp_update_task.xml'
+    condition: schtasks and option and not 1 of filter_*
 falsepositives:
     - unknown
 level: high

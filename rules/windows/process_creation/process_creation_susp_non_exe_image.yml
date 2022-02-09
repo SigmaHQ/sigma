@@ -4,7 +4,7 @@ status: experimental
 description: Checks whether the image specified in a process creation event doesn't refer to an .exe file (caused by process ghosting or other unorthodox methods to start a process)
 author: Max Altgelt
 date: 2021/12/09
-modified: 2022/02/02
+modified: 2022/02/09
 references:
     - https://pentestlaboratories.com/2021/12/08/process-ghosting/
 tags:
@@ -42,6 +42,15 @@ detection:
         Image|endswith: '.com'
     filter_winscp:
         Image|endswith: '\WinSCP.com'
+    filter_libreoffice:
+        Image|endswith: '\program\soffice.bin'
+    filter_ninite_installer:
+        Image|contains:
+            - 'C:\Windows\Temp\is-'
+            - '\AppData\Local\Temp\is-'
+        Image|endswith:
+            - '.tmp\target.tmp'
+            - '.tmp\_isetup\_setup64.tmp'
     condition: not image_exe and not 1 of filter*
 falsepositives:
     - unknown
