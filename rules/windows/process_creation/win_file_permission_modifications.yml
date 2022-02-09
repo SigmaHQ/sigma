@@ -19,13 +19,14 @@ detection:
       CommandLine|contains: '/grant'
     - Image|endswith: '\attrib.exe'
       CommandLine|contains: '-r'
-  filter:
+  filter_1:
     - CommandLine: 
-        - 'C:\Windows\system32\cmd.exe /C ICACLS C:\ProgramData\dynatrace\gateway\config\config.properties /grant :r *S-1-5-19:F'
         - 'C:\Windows\system32\cmd.exe /C ICACLS C:\ProgramData\dynatrace\gateway\config\connectivity.history /reset'
-        - 'ICACLS C:\ProgramData\dynatrace\gateway\config\config.properties /grant :r *S-1-5-19:F'
         - 'ICACLS C:\ProgramData\dynatrace\gateway\config\connectivity.history /reset'
-  condition: selection and not filter
+  filter_2:
+    - CommandLine|contains|all:
+        - 'ICACLS C:\ProgramData\dynatrace\gateway\config\config.properties /grant :r' 
+  condition: selection and not 1 of filter*
 fields:
   - ComputerName
   - User
