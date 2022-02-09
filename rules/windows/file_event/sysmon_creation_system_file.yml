@@ -2,9 +2,9 @@ title: File Created with System Process Name
 id: d5866ddf-ce8f-4aea-b28e-d96485a20d3d
 status: test
 description: Detects the creation of an executable with a system process name in a suspicious folder
-author: Sander Wiebing
+author: Sander Wiebing, Tim Shelton
 date: 2020/05/26
-modified: 2021/10/28
+modified: 2022/02/07
 tags:
     - attack.defense_evasion
     - attack.t1036.005
@@ -51,7 +51,10 @@ detection:
     filter2:
         TargetFilename|startswith: 'C:\$WINDOWS.~BT\'
         Image: 'C:\$WINDOWS.~BT\Sources\SetupHost.exe'
-    condition: selection and not filter1 and not filter2
+    filter3:
+        TargetFilename|endswith: '\RuntimeBroker.exe'
+        Image: 'C:\Windows\system32\wbengine.exe'
+    condition: selection and not 1 of filter*
 fields:
     - Image
 falsepositives:
