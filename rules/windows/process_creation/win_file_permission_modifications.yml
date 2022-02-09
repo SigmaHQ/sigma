@@ -6,7 +6,7 @@ author: Jakob Weinzettl, oscd.community
 references:
   - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1222.001/T1222.001.md
 date: 2019/10/23
-modified: 2021/11/27
+modified: 2022/02/09
 logsource:
   category: process_creation
   product: windows
@@ -20,12 +20,15 @@ detection:
     - Image|endswith: '\attrib.exe'
       CommandLine|contains: '-r'
   filter:
-    - CommandLine: 
-        - 'C:\Windows\system32\cmd.exe /C ICACLS C:\ProgramData\dynatrace\gateway\config\config.properties /grant :r *S-1-5-19:F'
-        - 'C:\Windows\system32\cmd.exe /C ICACLS C:\ProgramData\dynatrace\gateway\config\connectivity.history /reset'
-        - 'ICACLS C:\ProgramData\dynatrace\gateway\config\config.properties /grant :r *S-1-5-19:F'
-        - 'ICACLS C:\ProgramData\dynatrace\gateway\config\connectivity.history /reset'
-  condition: selection and not filter
+    CommandLine: 
+      - 'C:\Windows\system32\cmd.exe /C ICACLS C:\ProgramData\dynatrace\gateway\config\connectivity.history /reset'
+      - 'ICACLS C:\ProgramData\dynatrace\gateway\config\connectivity.history /reset'
+  filter_grant:
+    CommandLine|contains:
+      - 'C:\Windows\system32\cmd.exe /C ICACLS C:\ProgramData\dynatrace\gateway\config\config.properties /grant :r '
+      - 'ICACLS C:\ProgramData\dynatrace\gateway\config\config.properties /grant :r '
+    CommandLine|contains|all: 'S-1-5-19:F'
+  condition: selection and not 1 of filter*
 fields:
   - ComputerName
   - User
