@@ -516,7 +516,7 @@ class LimaCharlieBackend(BaseBackend):
                 newOp["re"] = newVal
             elif op == "exists":
                 # Exists has no value.
-                pass
+                newOp.pop( "case sensitive", None )
             else:
                 newOp["value"] = newVal
             if self._postOpMapper is not None:
@@ -537,7 +537,7 @@ class LimaCharlieBackend(BaseBackend):
                     newOp["re"] = newVal
                 elif op == "exists":
                     # Exists has no value.
-                    pass
+                    newOp.pop( "case sensitive", None )
                 else:
                     newOp["value"] = newVal
                 if self._postOpMapper is not None:
