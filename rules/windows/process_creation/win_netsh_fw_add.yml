@@ -7,7 +7,7 @@ references:
   - https://attack.mitre.org/software/S0246/ (Lazarus HARDRAIN)
   - https://www.operationblockbuster.com/wp-content/uploads/2016/02/Operation-Blockbuster-RAT-and-Staging-Report.pdf
 date: 2019/01/29
-modified: 2021/11/27
+modified: 2022/02/10
 logsource:
   category: process_creation
   product: windows
@@ -18,7 +18,11 @@ detection:
     CommandLine|contains|all:
       - 'firewall'
       - 'add'
-  condition: selection1 and selection2
+  filter_dropbox:
+    CommandLine|contains:
+      - '\netsh.exe advfirewall firewall add rule name=Dropbox dir=in action=allow "program=C:\Program Files (x86)\Dropbox\Client\Dropbox.exe" enable=yes profile=Any'
+      - '\netsh.exe advfirewall firewall add rule name=Dropbox dir=in action=allow "program=C:\Program Files\Dropbox\Client\Dropbox.exe" enable=yes profile=Any'
+  condition: selection1 and selection2 and not 1 of filter_*
 falsepositives:
   - Legitimate administration
 level: medium
