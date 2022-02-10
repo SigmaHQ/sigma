@@ -1,0 +1,24 @@
+title: LSASS Memory Access by Tool Named Dump
+id: 9bd012ee-0dff-44d7-84a0-aa698cfd87a3
+status: experimental
+description: Detects a possible process memory dump based on the file name of the accessing process
+author: Florian Roth
+references:
+  - https://twitter.com/_xpn_/status/1491557187168178176
+  - https://www.ired.team/offensive-security/credential-access-and-credential-dumping/dump-credentials-from-lsass-process-without-mimikatz
+date: 2022/02/10
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+    - attack.s0002
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        TargetImage|endswith: '\lsass.exe'
+        SourceImage|contains: 'dump'
+    condition: selection
+falsepositives:
+    - Rare programs that contain the word dump in their name and access lsass
+level: high
