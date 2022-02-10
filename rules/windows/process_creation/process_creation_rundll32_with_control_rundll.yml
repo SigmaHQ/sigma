@@ -1,0 +1,25 @@
+title: Rundll32 with Control RunDLL function
+id: 5137afcb-c744-4901-9da0-42e37e7c7499
+status: stable
+author: Sittikorn S
+date: 2022/02/10
+description: Detects rundll32.exe with 'Control_Rundll' within the command-line, loading a .cpl or another file type related to CVE-2021-40444.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1218.011/T1218.011.md
+    - https://attack.mitre.org/techniques/T1218/011/
+tags:
+    - attack.defense_evasion
+    - attack.t1218.011
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\rundll32.exe'
+        CommandLine|contains|all:
+            - 'Control_RunDLL '
+    condition: selection 
+falsepositives:
+    - Unknown
+level: high
