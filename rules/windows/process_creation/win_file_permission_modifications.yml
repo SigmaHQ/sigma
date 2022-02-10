@@ -16,10 +16,10 @@ detection:
       - '\takeown.exe'
       - '\cacls.exe'
       - '\icacls.exe'
-      - '\attrib.exe'
-    CommandLine|contains: 
-      - '/grant'
-      - '-r'
+    CommandLine|contains: '/grant'
+  selection2:
+    Image|endswith: '\attrib.exe'
+    CommandLine|contains: '-r'
   filter:
     CommandLine: 
       - 'C:\Windows\system32\cmd.exe /C ICACLS C:\ProgramData\dynatrace\gateway\config\connectivity.history /reset'
@@ -28,7 +28,7 @@ detection:
     CommandLine|contains:
       - 'ICACLS C:\ProgramData\dynatrace\gateway\config\config.properties /grant :r '
     CommandLine|contains|all: 'S-1-5-19:F'
-  condition: selection and not 1 of filter*
+  condition: selection or selection2 and not 1 of filter*
 fields:
   - ComputerName
   - User
