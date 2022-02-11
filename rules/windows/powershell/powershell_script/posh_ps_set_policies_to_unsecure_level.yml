@@ -11,7 +11,7 @@ tags:
     - attack.t1059.001
 author: frack113
 date: 2021/10/20
-modified: 2021/11/26
+modified: 2022/02/11
 logsource:
     product: windows
     category: ps_script
@@ -24,8 +24,9 @@ detection:
             - 'bypass'
             - 'RemoteSigned'
     filter:
-        ParentImage: 
+        - ParentImage:
             - 'C:\ProgramData\chocolatey\choco.exe'
+        - ScriptBlockText|contains: '(New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')'
     condition: cmdlet and option and not filter
 falsepositives:
     - Administrator script
