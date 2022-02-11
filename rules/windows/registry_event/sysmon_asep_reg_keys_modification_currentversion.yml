@@ -11,7 +11,7 @@ references:
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 date: 2019/10/25
-modified: 2022/01/19
+modified: 2022/02/10
 logsource:
     category: registry_event
     product: windows
@@ -22,7 +22,8 @@ detection:
     current_version:
         TargetObject|contains:
             - '\ShellServiceObjectDelayLoad'
-            - '\Run'
+            - '\Run\'
+            - '\RunOnce\'
             - '\Policies\System\Shell'
             - '\Policies\Explorer\Run'
             - '\Group Policy\Scripts\Startup'
@@ -40,14 +41,55 @@ detection:
     filter_all:
         - Details: '(Empty)'
         - TargetObject|endswith: '\NgcFirst\ConsecutiveSwitchCount'
-        - Image|endswith: '\AppData\Local\Microsoft\OneDrive\Update\OneDriveSetup.exe' # C:\Users\*\AppData\Local\Microsoft\OneDrive\Update\OneDriveSetup.exe
+        - Image|endswith:
+            - '\AppData\Local\Microsoft\OneDrive\Update\OneDriveSetup.exe' # C:\Users\*\AppData\Local\Microsoft\OneDrive\Update\OneDriveSetup.exe
+            - '\AppData\Roaming\Spotify\Spotify.exe'
         - Image:
             - 'C:\WINDOWS\system32\devicecensus.exe'
             - 'C:\Program Files\Microsoft OneDrive\StandaloneUpdater\OneDriveSetup.exe'
+            - 'C:\Program Files\KeePass Password Safe 2\ShInstUtil.exe'
+            - 'C:\Program Files\Everything\Everything.exe'
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\OfficeClickToRun.exe'
+            - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
     filter_edge:
         Image|startswith:
             - 'C:\Program Files (x86)\Microsoft\EdgeUpdate\Install\'
             - 'C:\Program Files (x86)\Microsoft\EdgeWebView\'
+            - 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+    filter_dropbox:
+        Image: 'C:\Windows\system32\regsvr32.exe'
+        TargetObject|contains: 'DropboxExt'
+        Details|endswith: 'A251-47B7-93E1-CDD82E34AF8B}'
+    filter_opera:
+        TargetObject|endswith: '\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\Opera Browser Assistant'
+        Details: 'C:\Program Files\Opera\assistant\browser_assistant.exe'
+    filter_itunes:
+        TargetObject|endswith: '\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\iTunesHelper'
+        Details: '"C:\Program Files\iTunes\iTunesHelper.exe"'
+    filter_zoom:
+        TargetObject|endswith: '\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce\zoommsirepair'
+        Details: '"C:\Program Files\Zoom\bin\installer.exe" /repair'
+    filter_greenshot:
+        TargetObject|endswith: '\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\Greenshot'
+        Details: 'C:\Program Files\Greenshot\Greenshot.exe'
+    filter_googledrive1:
+        TargetObject|endswith: '\Software\Microsoft\Windows\CurrentVersion\Run\GoogleDriveFS'
+        Details|startswith: 'C:\Program Files\Google\Drive File Stream\'
+        Details|endswith: '\GoogleDriveFS.exe --startup_mode'
+    filter_googledrive2:
+        TargetObject|contains: 'GoogleDrive'
+        Details:
+            - '{CFE8B367-77A7-41D7-9C90-75D16D7DC6B6}'
+            - '{A8E52322-8734-481D-A7E2-27B309EF8D56}'
+            - '{C973DA94-CBDF-4E77-81D1-E5B794FBD146}'
+            - '{51EF1569-67EE-4AD6-9646-E726C3FFC8A2}'
+    filter_onedrive:
+        Details|startswith: 'C:\Windows\system32\cmd.exe /q /c rmdir /s /q "C:\Users\'
+        Details|contains: '\AppData\Local\Microsoft\OneDrive\'
+    filter_python:
+        TargetObject|endswith: '\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce\{c60fd5ac-367d-4e3a-a975-f157502ac30a}'
+        Details|contains: '\AppData\Local\Package Cache\{c60fd5ac-367d-4e3a-a975-f157502ac30a}\python'
+        Details|endswith: '.exe\" /burn.runonce'
     condition: current_version_base and current_version and not 1 of filter_*
 fields:
     - SecurityID

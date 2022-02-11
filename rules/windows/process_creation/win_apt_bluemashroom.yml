@@ -2,11 +2,11 @@ title: BlueMashroom DLL Load
 id: bd70d3f8-e60e-4d25-89f0-0b5a9cff20e0
 status: test
 description: Detects a suspicious DLL loading from AppData Local path as described in BlueMashroom report
-author: Florian Roth
+author: Florian Roth, Tim Shelton
 references:
   - https://www.virusbulletin.com/conference/vb2019/abstracts/apt-cases-exploiting-vulnerabilities-region-specific-software
 date: 2019/10/02
-modified: 2021/11/27
+modified: 2022/02/09
 logsource:
   category: process_creation
   product: windows
@@ -18,7 +18,10 @@ detection:
     - CommandLine|contains|all:
       - '\AppData\Local\'
       - ',DllEntry'
-  condition: selection
+  filter_1:
+    - CommandLine|contains: 'AppData\Local\Microsoft\TeamsMeetingAddin\'
+    - CommandLine|endswith: '\x86\Microsoft.Teams.AddinLoader.dll'
+  condition: selection and not 1 of filter*
 falsepositives:
   - Unlikely
 level: critical

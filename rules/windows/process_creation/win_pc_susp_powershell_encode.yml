@@ -8,6 +8,7 @@ references:
     - https://unit42.paloaltonetworks.com/unit42-pulling-back-the-curtains-on-encodedcommand-powershell-attacks/
     - https://mikefrobbins.com/2017/06/15/simple-obfuscation-with-powershell-using-base64-encoding/
 date: 2022/01/02
+modified: 2022/02/10
 logsource:
     category: process_creation
     product: windows
@@ -19,7 +20,11 @@ detection:
             - ' -en '
             - ' -enc '
             - ' -enco'
-    condition: selection
+            - ' -ec '
+    filter:
+        CommandLine|contains:
+            - ' -Encoding '
+    condition: selection and not filter
 falsepositives:
     - Unknown
 level: medium

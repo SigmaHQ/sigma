@@ -4,7 +4,7 @@ description: Raw disk access using illegitimate tools, possible defence evasion
 author: Teymur Kheirkhabarov, oscd.community
 status: test
 date: 2019/10/22
-modified: 2022/02/09
+modified: 2022/02/10
 references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
 tags:
@@ -25,7 +25,9 @@ detection:
     filter_specific:
         Image: 'C:\Windows\UUS\amd64\MoUsoCoreWorker.exe'
     filter_system:
-        Image: 'System'
+        Image:
+            - 'System'
+            - 'Registry'
     filter_Keybase:
         Image|endswith: '\Keybase\upd.exe'
     filter_windefender:
@@ -39,8 +41,10 @@ detection:
         Image|contains|all:
             - 'C:\Users\'
             - '\AppData\'
-        Image|contains:
             - '\Microsoft\'
+    filter_startmenu_xphost:
+        Image|startswith: 'C:\Windows\SystemApps\Microsoft.Windows.StartMenuExperienceHost'
+        Image|endswith: '\StartMenuExperienceHost.exe'
     condition: not 1 of filter_*
 fields:
     - ComputerName
