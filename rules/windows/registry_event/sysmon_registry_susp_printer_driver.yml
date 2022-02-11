@@ -6,7 +6,7 @@ author: Florian Roth
 references:
   - https://twitter.com/SBousseaden/status/1410545674773467140
 date: 2020/07/01
-modified: 2022/01/13
+modified: 2022/02/09
 logsource:
   category: registry_event
   product: windows
@@ -17,7 +17,9 @@ detection:
       - '\Control\Print\Environments\Windows x64\Drivers'
       - '\Manufacturer'
     Details: '(Empty)'
-  condition: selection
+  filter_cutepdf:
+    TargetObject|contains: '\CutePDF Writer v4.0\'
+  condition: selection and not 1 of filter_*
 falsepositives:
   - Alerts on legitimate printer drivers that do not set any more details in the Manufacturer value
 level: high

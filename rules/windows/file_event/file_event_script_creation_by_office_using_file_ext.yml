@@ -13,7 +13,7 @@ tags:
     - attack.defense_evasion
 status: experimental
 date: 2021/08/23
-modified: 2021/11/10
+modified: 2022/02/09
 logsource:
     product: windows
     category: file_event
@@ -36,7 +36,13 @@ detection:
             - '.bat'
             - '.scr'
             - '.proj'
-    condition: selection1 and selection2
+    filter_webservicecache: # matches e.g. directory with name *.microsoft.com
+        TargetFilename|contains|all:
+            - 'C:\Users\'
+            - '\AppData\Local\Microsoft\Office\'
+            - '\WebServiceCache\AllUsers'
+        TargetFilename|endswith: '.com'
+    condition: selection1 and selection2 and not 1 of filter_*
 falsepositives:
     - Unknown
 level: high

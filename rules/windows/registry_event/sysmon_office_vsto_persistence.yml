@@ -10,7 +10,7 @@ tags:
     - attack.persistence
 author: Bhabesh Raj
 date: 2021/01/10
-modified: 2021/07/27
+modified: 2022/02/09
 logsource:
     category: registry_event
     product: windows
@@ -23,9 +23,17 @@ detection:
         - '\Software\Microsoft\Office\Excel\Addins\'
         - '\Software\Microsoft\Office\Powerpoint\Addins\'
         - '\Software\Microsoft\VSTO\Security\Inclusion\'
-    filter:
-        Image|endswith: '\msiexec.exe'
-    condition: selection and not filter
+    filter_image:
+        Image|endswith:
+            - '\msiexec.exe'
+            - '\regsvr32.exe' # e.g. default Evernote installation
+    # triggered by a default Office 2019 installation
+    filter_office:
+        Image|endswith:
+            - '\winword.exe'
+            - '\integrator.exe'
+            - '\OfficeClickToRun.exe'
+    condition: selection and not 1 of filter_*
 falsepositives:
-  - Unknown
-level: high
+  - Legitimate Addin Installation
+level: medium
