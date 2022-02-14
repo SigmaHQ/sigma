@@ -788,7 +788,6 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
         self.service = None
         self.category = None
         self.isValTooLong = False
-
         logsource = sigmaparser.parsedyaml.get("logsource", None)
         if logsource is not None:
             self.product = logsource.get("product", None)
