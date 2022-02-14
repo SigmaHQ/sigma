@@ -62,7 +62,6 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
     service = None
     category = None
     curAttrs= set()
-    curEvtType = set()
     sourceValueForWinAppEvtTy= None
 
     #if Attribute value is too long, this rule will be skip.
@@ -322,8 +321,6 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
             listExp = self.mapListValueExpressionNot
 
         if not value:
-            if interName == "eventType":
-                self.curEvtType.add("NULL")
             return nullExp % (interName, )
         elif self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
             val = self.convertFieldValToInterVal(interName, value)
@@ -331,7 +328,6 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
                 self.isValTooLong = True
 
             if interName== "eventType":
-                self.curEvtType.add(val)
                 if val.find(".*") == -1 and val.find(",") == -1:
                     return mapExp % (interName, val)
                 elif val.find(".*") == -1 and val.find(",") != -1:
@@ -374,9 +370,6 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
                 for val in vals:
                     res = res + ("|%s" % val)
                 res = res[1:]
-                if key == "eventType":
-                    self.curEvtType.add(res)
-
                 res = "\"%s\"" % res
                
             if result != "" and isnot:
@@ -427,13 +420,9 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
         if len(tmp) == 1:
             tmpstr = (mapExp %  (key, tmp[0]))
-            if key == "eventType":
-                self.curEvtType.add(val)
         elif len(tmp) > 1:
             tmp = sorted(tmp)
             tmpstr = (",".join(['%s' % (item) for item in tmp]))
-            if key == "eventType":
-                self.curEvtType.add(tmpstr)
             tmpstr = mapListExp % (key, tmpstr)
         
         tmpregstr=''
@@ -441,9 +430,6 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
             tmpReg = sorted(tmpReg)
             tmpregstr = ('|'.join(tmpReg))
             tmpregstr = tmpregstr.replace('"|"', '|')
-            if key == "eventType":
-                self.curEvtType.add(tmpregstr)
-
             if len(tmpregstr) > self.MAX_LEN:
                 self.isValTooLong = True
 
@@ -746,15 +732,10 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
             val = "\"%s\"" % val
         return val
 
-    #def generateRuleForOneYml(self, sigmaparsers):
     def generate(self, sigmaparser):
 
-        #"file name,rule name,rule id,rule event type, product,service,category,event type,groupby,attrs in filter condition,techniques"
-        self.curAttrs = set()
-        self.curEvtType = set()
         result = set()
 
-        #They are shared attribute for every logsource  in one YML.
         date = sigmaparser.parsedyaml["date"]
         name = sigmaparser.parsedyaml["title"]    
         des = sigmaparser.parsedyaml["description"]
@@ -782,10 +763,6 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
         ruleTailer = self.generateRuleTailer()
         rulePatternClause,groupByStr = self.generateRulePatternClause(result, groupByAttr)
 
-        self.curEvtType = sorted(self.curEvtType)
-        eventStr = ",".join(self.curEvtType)
-        eventStr = eventStr.replace('"', "")
-
         result = ruleHeader + ruleCommonPart + ruleIncidentDef + rulePatternClause + ruleTriggerEventDisplay + ruleTailer
         self.ruleIndex += 1
         return result
@@ -807,6 +784,10 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
     def generateEvtConstrForOneLogsource(self, sigmaparser):
         errMsg = None
         result = None
+        self.curAttrs = set()
+        self.product = None
+        self.service = None
+        self.category = None
         self.isValTooLong = False
 
         logsource = sigmaparser.parsedyaml.get("logsource", None)
