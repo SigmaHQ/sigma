@@ -743,8 +743,7 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
         res,errMsg = self.generateEvtConstrForOneLogsource(sigmaparser);
         if errMsg is not None:
-            print(self.ymlFileName)
-            print(errMsg)
+            print("%s, %s" % (self.ymlFileName, errMsg))
             return None
 
         result.add(res)

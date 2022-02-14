@@ -35,6 +35,8 @@ from sigma.backends.exceptions import BackendError, NotSupportedError, PartialMa
 from sigma.parser.modifiers import modifiers
 import codecs
 import copy
+import time
+import datetime
 
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
 
@@ -111,6 +113,7 @@ def set_argparser():
             """)
     argparser.add_argument("--target", "-t", choices=backends.getBackendDict().keys(), help="Output target format")
     argparser.add_argument("--lists", "-l", action="store_true", help="List available output target formats and configurations")
+    argparser.add_argument("--lists-files-after-date", "-L",help="List yml files  which is modified/created after the date (Example of the date: 2022/02/01).")
     argparser.add_argument("--config", "-c", action="append", help="Configurations with field name and index mapping for target environment. Multiple configurations are merged into one. Last config is authoritative in case of conflicts.")
     argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix (if end with a '_','/' or '\\')")
     argparser.add_argument("--output-fields", "-of", help="""Enhance your output with additional fields from the Sigma rule (not only the converted rule itself). 
@@ -148,6 +151,32 @@ def list_modifiers(modifiers):
     for modifier_id, modifier in modifiers.items():
         print("{:>10} : {}".format(modifier_id, modifier.__doc__))
 
+def get_fileName_after_date(inputs, recurse, date):
+    #date: 2021/05/06
+    #modified: 2021/11/30
+    dateTime = time.mktime(datetime.datetime.strptime(date, "%Y/%m/%d").timetuple())
+    for sigmafile in get_inputs(inputs, recurse):
+        f = sigmafile.open(encoding='utf-8')
+        yamls = yaml.safe_load_all(f)
+        datestr = None
+        modifiedstr = None
+        for data in yamls:
+            modifiedstr = data.get("modified", None)
+            datestr = data.get("date", None)
+            if not modifiedstr and not datestr:
+                continue;
+
+        if not modifiedstr and not datestr:
+            print("%s, No date" % sigmafile)
+            continue
+
+        if not modifiedstr:
+            modifiedstr = datestr
+
+        modified = time.mktime(datetime.datetime.strptime(modifiedstr, "%Y/%m/%d").timetuple())
+        if modified > dateTime:
+            print("%s, Updated" % sigmafile)
+
 def main():
     argparser = set_argparser()
     cmdargs = argparser.parse_args()
@@ -173,6 +202,10 @@ def main():
     elif len(cmdargs.inputs) == 0:
         print("Nothing to do!")
         argparser.print_usage()
+        sys.exit(0)
+
+    if cmdargs.lists_files_after_date is not None:
+        get_fileName_after_date(cmdargs.inputs, cmdargs.recurse, cmdargs.lists_files_after_date)
         sys.exit(0)
 
     if cmdargs.target is None:
