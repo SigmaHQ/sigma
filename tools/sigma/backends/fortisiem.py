@@ -53,8 +53,8 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
     sort_condition_lists = False        # Sort condition items for AND and OR conditions
 
-    attrDicts = {}
     ymlAttr2FortiSIEMAttr = {}
+    fortiSIEMAttrType = {}
     fileFilterDicts= {}
     WindowsSysmonCode2FortiSIEMEvtTy = {}
 
@@ -143,18 +143,18 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
     def loadCSVfiles(self):
         #It's used to map field name to internal attributes in FSIM
-        if len(self.attrDicts) == 0:
+        if len(self.ymlAttr2FortiSIEMAttr) == 0:
             with open("./tools/config/fortisiem/ymlAttr2FortiSIEMAttr.csv", newline='') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 for row in spamreader:
                     if len(row) < 2:
                         continue;
                     elif len(row) == 2:
-                        self.ymlAttr2FortiSIEMAttr[row[1]] = "string"
+                        self.fortiSIEMAttrType[row[1]] = "string"
                     else:
-                        self.ymlAttr2FortiSIEMAttr[row[1]] = row[2]
+                        self.fortiSIEMAttrType[row[1]] = row[2]
 
-                    self.attrDicts[row[0]] = row[1]
+                    self.ymlAttr2FortiSIEMAttr[row[0]] = row[1]
         #It's used to map event id to event type.
         if len(self.WindowsSysmonCode2FortiSIEMEvtTy) == 0:
             with open("./tools/config/fortisiem/WindowsSysmonCode2FortiSIEMEvtTy.csv", newline='') as csvfile:
@@ -207,7 +207,7 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
     def formatRuleName(self, name):
         #ruleName has invalid characters. It only accepts: a-zA-Z0-9 \/:.$-
-        ruleName = re.sub('\s*[^a-zA-Z0-9 \/:.$_\'\"-]\s*', ' ', name)
+        ruleName = re.sub('\s*[^a-zA-Z0-9 \/:.$_\'\"-]+\s*', ' ', name)
         ruleName = re.sub('_', '-', ruleName)
         ruleName = re.sub('[\'"\(\)+,]*', '', ruleName)
         return ruleName
@@ -226,7 +226,7 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
             self.ruleIndex = int(ruleStartIndex)
 
     def convertFieldNameToInterAttrName(self, fieldname):
-        val = self.attrDicts.get(fieldname, None)
+        val = self.ymlAttr2FortiSIEMAttr.get(fieldname, None)
         if val is None:
             interfieldname = fieldname
         else:
@@ -240,7 +240,7 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
         interfieldname = self.convertFieldNameToInterAttrName(fieldname)
 
-        attrType = self.ymlAttr2FortiSIEMAttr.get(interfieldname, None)
+        attrType = self.fortiSIEMAttrType.get(interfieldname, None)
         if val.find('.*') != -1:
              attrType = "string";
 
@@ -252,13 +252,15 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
         return val
 
     def formatEvtTypeVal(self, code):
-        val = code
+        val = "\".*%s.*\"" % code
+        if self.product == "windows":
+            val = "\"Win-.*%s.*\"" % code
+
         if self.product == "windows" and ( self.service == "sysmon" or (self.service is None and  self.category == "sysmon")) :
             val = self.WindowsSysmonCode2FortiSIEMEvtTy.get(code, None)
             if val is None:
                 val = "\"Win-Sysmon-%s-.*\"" % code
             else:
-                #print(val)
                 evt = val.split(",")
                 val = ",".join(["\"%s\"" % item for item in evt])
         elif self.product == "windows" and (self.service == "system" or (self.service is None and  self.category == "system")):
