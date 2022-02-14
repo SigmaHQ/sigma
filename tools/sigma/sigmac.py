@@ -18,7 +18,7 @@
 import sys
 import argparse
 import yaml
-import ruamel.yaml
+#import ruamel.yaml
 import json
 import pathlib
 import itertools
@@ -279,6 +279,7 @@ def main():
             else:
                 f = sigmafile.open(encoding='utf-8')
             parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter, sigmafile)
+            backend.setYmlFileName(str(sigmafile))
             results = parser.generate(backend)
 
             nb_result = len(list(copy.deepcopy(results)))
@@ -407,8 +408,8 @@ def main():
     if cmdargs.output_fields:
         if cmdargs.output_format == 'json':
             print(json.dumps(output_array, indent=4, ensure_ascii=False), file=out)
-        elif cmdargs.output_format == 'yaml':
-            print(ruamel.yaml.round_trip_dump(output_array), file=out)
+        #elif cmdargs.output_format == 'yaml':
+        #    print(ruamel.yaml.round_trip_dump(output_array), file=out)
 
     out.close()
 
