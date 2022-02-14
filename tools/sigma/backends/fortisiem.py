@@ -760,6 +760,8 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
         res,errMsg = self.generateEvtConstrForOneLogsource(sigmaparser);
         if errMsg is not None:
+            print(self.ymlFileName)
+            print(errMsg)
             return None
 
         result.add(res)
@@ -832,7 +834,7 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
                     errMsg = "SKIP RULE (Regular expression is too long)"
                 else:
                     if self.product == "windows":
-                        if result.find('eventType') == 0:
+                        if result.find('eventType') == -1:
                             errMsg = "SKIP RULE (There is no event type in constraint)"
                             return None, errMsg
 
