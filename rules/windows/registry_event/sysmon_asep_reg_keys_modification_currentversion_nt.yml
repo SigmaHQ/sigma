@@ -11,7 +11,7 @@ references:
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 date: 2019/10/25
-modified: 2022/01/19
+modified: 2022/02/16
 logsource:
     category: registry_event
     product: windows
@@ -35,12 +35,25 @@ detection:
             - '\Drivers32'
             - '\Windows\Run'
             - '\Windows\Load'
-    filter:
+    filter_empty:
         Details: '(Empty)'
     filter_edge:
         Image|startswith: 'C:\Program Files (x86)\Microsoft\Temp\'
         Image|endswith: '\MicrosoftEdgeUpdate.exe'
-    condition: nt_current_version_base and nt_current_version and not filter
+    filter_msoffice:
+        - TargetObject|contains:
+            - '\ClickToRunStore\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\'
+            - '\ClickToRun\REGISTRY\MACHINE\Software\Microsoft\Windows NT\CurrentVersion\'
+        - Image:
+            - 'C:\Program Files\Microsoft Office\root\integration\integrator.exe'
+            - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
+        - TargetObject|endswith:
+            - '\Image File Execution Options\OSPPREARM.EXE\DisableExceptionChainValidation'
+            - '\Image File Execution Options\LICLUA.EXE\DisableExceptionChainValidation'
+    filter_dropbox:
+        Image|endswith: '\DropboxUpdate.exe'
+        TargetObject|endswith: '\Image File Execution Options\DropboxUpdate.exe\DisableExceptionChainValidation'
+    condition: nt_current_version_base and nt_current_version and not 1 of filter_*
 fields:
     - SecurityID
     - ObjectName
