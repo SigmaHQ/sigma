@@ -11,7 +11,7 @@ references:
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 date: 2019/10/25
-modified: 2022/01/13
+modified: 2022/02/16
 logsource:
     category: registry_event
     product: windows
@@ -22,7 +22,8 @@ detection:
     wow_current_version:
         TargetObject|contains:
             - '\ShellServiceObjectDelayLoad'
-            - '\Run'
+            - '\Run\'
+            - '\RunOnce\'
             - '\Explorer\ShellServiceObjects'
             - '\Explorer\ShellIconOverlayIdentifiers'
             - '\Explorer\ShellExecuteHooks'
@@ -33,7 +34,33 @@ detection:
     filter_edge:
         Image|contains|all:
             - 'C:\Program Files (x86)\Microsoft\EdgeUpdate\Install\{'
-            - '\setup.exe' 
+            - '\setup.exe'
+    filter_msoffice1:
+        Image: 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\OfficeClickToRun.exe'
+        TargetObject|contains: '\Office\ClickToRun\REGISTRY\MACHINE\Software\Wow6432Node\'
+    filter_msoffice2:
+        Image:
+            - 'C:\Program Files\Microsoft Office\root\integration\integrator.exe'
+            - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
+        TargetObject|contains: '\Explorer\Browser Helper Objects\{31D09BA0-12F5-4CCE-BE8A-2923E76605DA}\'
+    filter_dropbox:
+        - Details|endswith: '-A251-47B7-93E1-CDD82E34AF8B}'
+        - Details: 'grpconv -o'
+        - Details|contains|all:
+            - 'C:\Program Files'
+            - '\Dropbox\Client\Dropbox.exe'
+            - ' /systemstartup'
+    filter_evernote:
+        TargetObject|endswith: '\Explorer\Browser Helper Objects\{92EF2EAD-A7CE-4424-B0DB-499CF856608E}\NoExplorer'
+    filter_dotnet:
+        Image|contains: '\windowsdesktop-runtime-'
+        TargetObject|endswith:
+            - '\WOW6432Node\Microsoft\Windows\CurrentVersion\RunOnce\{e2d1ae32-dd1d-4ad7-a298-10e42e7840fc}'
+            - '\WOW6432Node\Microsoft\Windows\CurrentVersion\RunOnce\{7037b699-7382-448c-89a7-4765961d2537}'
+        Details|startswith:
+            - '"C:\ProgramData\Package Cache\{7037b699-7382-448c-89a7-4765961d2537}\windowsdesktop-runtime-'
+            - '"C:\ProgramData\Package Cache\{e2d1ae32-dd1d-4ad7-a298-10e42e7840fc}\windowsdesktop-runtime-'
+        Details|endswith: '.exe" /burn.runonce'
     condition: wow_current_version_base and wow_current_version and not 1 of filter_*
 fields:
     - SecurityID

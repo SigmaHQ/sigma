@@ -11,7 +11,7 @@ references:
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 date: 2019/10/25
-modified: 2022/01/13
+modified: 2022/02/16
 logsource:
     category: registry_event
     product: windows
@@ -31,9 +31,15 @@ detection:
             - '\Lsa\Notification Packages'
             - '\Lsa\Authentication Packages'
             - '\BootVerificationProgram\ImagePath'
-    filter:
+    filter_empty:
         Details: '(Empty)'
-    condition: system_control_base and system_control and not filter
+    filter_cutepdf:
+        Image: 'C:\Windows\System32\spoolsv.exe'
+        TargetObject|contains: '\Print\Monitors\CutePDF Writer Monitor'
+        Details:
+            - 'cpwmon64_v40.dll'
+            - 'CutePDF Writer'
+    condition: system_control_base and system_control and not 1 of filter_*
 fields:
     - SecurityID
     - ObjectName
