@@ -11,7 +11,7 @@ references:
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 date: 2019/10/25
-modified: 2022/01/13
+modified: 2022/02/16
 logsource:
     category: registry_event
     product: windows
@@ -30,9 +30,29 @@ detection:
             - '\Excel\Addins'
             - '\Access\Addins'
             - 'test\Special\Perf'
-    filter:
+    filter_empty:
         Details: '(Empty)'
-    condition: office and office_details and not filter
+    filter_excel:  # known addins for excel
+        TargetObject|contains:
+            - '\Excel\Addins\AdHocReportingExcelClientLib.AdHocReportingExcelClientAddIn.1\'
+            - '\Excel\Addins\ExcelPlugInShell.PowerMapConnect\'
+            - '\Excel\Addins\NativeShim\'
+            - '\Excel\Addins\NativeShim.InquireConnector.1\'
+            - '\Excel\Addins\PowerPivotExcelClientAddIn.NativeEntry.1\'
+    filter_outlook:  # known addins for outlook
+        TargetObject|contains:
+            - '\Outlook\AddIns\AccessAddin.DC\'
+            - '\Outlook\AddIns\ColleagueImport.ColleagueImportAddin\'
+            - '\Outlook\AddIns\EvernoteCC.EvernoteContactConnector\'
+            - '\Outlook\AddIns\EvernoteOLRD.Connect\'
+            - '\Outlook\Addins\Microsoft.VbaAddinForOutlook.1\'
+            - '\Outlook\Addins\OcOffice.OcForms\'
+            - '\Outlook\Addins\OscAddin.Connect\'
+            - '\Outlook\Addins\OutlookChangeNotifier.Connect\'
+            - '\Outlook\Addins\UCAddin.LyncAddin.1'
+            - '\Outlook\Addins\UCAddin.UCAddin.1'
+            - '\Outlook\Addins\UmOutlookAddin.FormRegionAddin\'
+    condition: office and office_details and not 1 of filter_*
 fields:
     - SecurityID
     - ObjectName
