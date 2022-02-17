@@ -11,7 +11,7 @@ references:
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 date: 2019/10/25
-modified: 2022/01/13
+modified: 2022/02/16
 logsource:
     category: registry_event
     product: windows
@@ -26,10 +26,20 @@ detection:
             - '\Toolbar'
             - '\Extensions'
             - '\Explorer Bars'
-
-    filter:
+    filter_empty:
         Details: '(Empty)'
-    condition: ie and ie_details and not filter
+    filter_extensions:
+        TargetObject|contains:
+            - '\Extensions\{2670000A-7350-4f3c-8081-5663EE0C6C49}'
+            - '\Extensions\{31D09BA0-12F5-4CCE-BE8A-2923E76605DA}'
+            - '\Extensions\{789FE86F-6FC4-46A1-9849-EDE0DB0C95CA}'
+            - '\Extensions\{A95fe080-8f5d-11d2-a20b-00aa003c157a}'
+    filter_toolbar:
+        TargetObject|endswith:
+            - '\Toolbar\ShellBrowser\ITBar7Layout'
+            - '\Toolbar\ShowDiscussionButton'
+            - '\Toolbar\Locked'
+    condition: ie and ie_details and not 1 of filter_*
 fields:
     - SecurityID
     - ObjectName

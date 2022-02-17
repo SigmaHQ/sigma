@@ -23,6 +23,9 @@ class SQLiteBackend(SQLBackend):
     identifier = "sqlite"
     active = True
 
+    # Single quoted string literals are preferred in SQlite 
+    # https://www.sqlite.org/quirks.html#double_quoted_string_literals_are_accepted 
+    valueExpression = "\'%s\'" # Expression of values, %s represents value
     mapFullTextSearch = "%s MATCH ('\"%s\"')"
 
     countFTS = 0
@@ -74,22 +77,22 @@ class SQLiteBackend(SQLBackend):
         if not isinstance(val, str):
             return str(val)
 
-        #Escape double quotes in SQLite
-        val = val.replace('"','""')
+        # Escape single quotes in SQLite
+        val = val.replace('\'','\'\'')
 
-        #Single backlashes which are not in front of * or ? are doulbed
+        # Single backlashes which are not in front of * or ? are doulbed
         val = re.sub(r"(?<!\\)\\(?!(\\|\*|\?))", r"\\\\", val)
 
-        #Replace _ with \_ because _ is a sql wildcard
+        # Replace _ with \_ because _ is a sql wildcard
         val = re.sub(r'_', r'\_', val)
 
-        #Replace % with \% because % is a sql wildcard
+        # Replace % with \% because % is a sql wildcard
         val = re.sub(r'%', r'\%', val)
 
-        #Replace * with %, if even number of backslashes (or zero) in front of *
+        # Replace * with %, if even number of backslashes (or zero) in front of *
         val = re.sub(r"(?<!\\)(\\\\)*(?!\\)\*", r"\1%", val)
 
-        #Replace ? with _, if even number of backsashes (or zero) in front of ?
+        # Replace ? with _, if even number of backsashes (or zero) in front of ?
         val = re.sub(r"(?<!\\)(\\\\)*(?!\\)\?", r"\1_", val)
 
         return val
