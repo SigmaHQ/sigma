@@ -4,7 +4,7 @@ description: This rule looks for Windows Installer service (msiexec.exe) trying 
 status: experimental
 author: Teymur Kheirkhabarov (idea), Mangatas Tondang (rule), oscd.community
 date: 2020/10/13
-modified: 2022/02/15
+modified: 2022/02/18
 references:
     - https://image.slidesharecdn.com/kheirkhabarovoffzonefinal-181117201458/95/hunting-for-privilege-escalation-in-windows-environment-48-638.jpg
 tags:
@@ -24,15 +24,15 @@ detection:
         Image|contains|all:
             - '\Windows\Installer\'
             - 'msi'
-        Image|endswith:
-            - 'tmp'
+        Image|endswith: 'tmp'
     image_2:
-        Image|endswith:
-            - '\msiexec.exe'
+        Image|endswith: '\msiexec.exe'
+    filter_installer:
+        ParentImage: 'C:\Windows\System32\services.exe'
     filter_repair:
         - CommandLine|endswith: '\system32\msiexec.exe /V' # ignore "repair option"
         - ParentCommandLine|endswith: '\system32\msiexec.exe /V' # ignore "repair option"
-    condition: ( (image_1 and user) or (image_2 and user and integrity_level) ) and not filter_repair
+    condition: ( (image_1 and user) or (image_2 and user and integrity_level) ) and not 1 of filter*
 fields:
     - IntegrityLevel
     - User
