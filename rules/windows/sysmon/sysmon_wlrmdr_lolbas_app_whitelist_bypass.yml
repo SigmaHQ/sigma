@@ -1,0 +1,33 @@
+title: T1021 Sysmon WLRMDR LolBas App whitelist bypass
+id: c97d1cd3-7788-4c1d-b166-74f69fe421ab
+description: Detects a threat actor running wlrmdr to run executable for app whitelisting bypass
+status: experimental
+date: 2022/02/20
+modified: 
+author: manasmbellani
+tags:
+    - attack.defence_evasion
+    - attack.t1218
+references:
+    - https://twitter.com/0gtweet/status/1493963591745220608?s=20&t=JDbL3SxZNXZWI0I46mYLAw
+    - Windows Logon Reminder Command Line Reference - https://www.renevdlinden.nl/2018/03/09/user-notifications-with-resone-workspace/
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection_one: 
+        EventID: 1
+        ParentImage|endswith: '\wlrmdr.exe'
+        Image|endswith: 
+          - '.exe'
+    selection_two: 
+        EventID: 1
+        Image|endswith: '\wlrmdr.exe'
+        CommandLine|contains|all: 
+          - '-u'
+          - '-t'
+          - '-f'
+    condition: selection_one OR selection_two
+falsepositives:
+    - Other custom apps using Windows Logon Reminder executable to display messages / icons
+level: medium
