@@ -32,4 +32,6 @@ if [[ -z ${findings} ]]; then
 else
     >&2 echo "Found matches:"
     >&2 echo "${findings}"
+    >&2 echo "You either need to tune your rule(s) for false positives or add a false positive filter to .github/workflows/known-FPs.csv"
+    exit 3
 fi
