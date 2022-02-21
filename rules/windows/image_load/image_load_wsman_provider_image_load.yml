@@ -3,7 +3,7 @@ id: ad1f4bb9-8dfb-4765-adb6-2a7cfb6c0f94
 description: Detects signs of potential use of the WSMAN provider from uncommon processes locally and remote execution.
 status: experimental
 date: 2020/06/24
-modified: 2021/12/16
+modified: 2022/02/21
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 tags:
     - attack.execution
@@ -35,11 +35,13 @@ detection:
         Image|endswith: 
             - '\powershell.exe'
             - 'C:\Windows\System32\sdiagnhost.exe'
+            - 'C:\Windows\System32\services.exe'
     filter_svchost: # not available in Sysmon data, but Aurora logs
         CommandLine|contains: 
             - 'svchost.exe -k netsvcs -p -s BITS'
             - 'svchost.exe -k GraphicsPerfSvcGroup -s GraphicsPerfSvc'
             - 'svchost.exe -k NetworkService -p -s Wecsvc'
+            - 'svchost.exe -k netsvcs'
     filter_mscorsvw: #Image: C:\Windows\Microsoft.NET\Framework64\v4.0.30319\mscorsvw.exe
         Image|startswith: 
             - C:\Windows\Microsoft.NET\Framework64\v
@@ -49,6 +51,10 @@ detection:
         Image: 
             - 'C:\Windows\System32\Configure-SMRemoting.exe'
             - 'C:\Windows\System32\ServerManager.exe'
+    filter_nextron:
+        Image|startswith: 'C:\Windows\Temp\asgard2-agent\'
+    filter_citrix:
+        Image|startswith: 'C:\Program Files\Citrix\'
     condition: ( request_client or respond_server ) and not 1 of filter*
 falsepositives:
     - Unknown
