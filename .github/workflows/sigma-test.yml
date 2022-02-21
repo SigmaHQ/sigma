@@ -51,9 +51,9 @@ jobs:
         tar xzf win10-client.tgz
     - name: Remove deprecated rules
       run: 'grep -ERl "^status: deprecated" rules | xargs -r rm -v'
-    - name: Run evtx-sigma-checker
+    - name: Check for Sigma matches in baseline (run evtx-sigma-checker)
       run: |
         chmod +x evtx-sigma-checker
         ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path Logs_Client/ --rule-path rules/windows/ > findings.json
-    - name: Check for Sigma matches in baseline
+    - name: Show findings (exclude known FPs)
       run: ./github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
