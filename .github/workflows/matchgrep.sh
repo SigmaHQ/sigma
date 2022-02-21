@@ -1,3 +1,5 @@
+#!/bin/bash
+
 infile=$1
 fps=$2
 
