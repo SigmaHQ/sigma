@@ -54,5 +54,6 @@ jobs:
     - name: Run evtx-sigma-checker
       run: |
         chmod +x evtx-sigma-checker
-        ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path Logs_Client/ --rule-path rules/windows/ > findings-client.json
-        cat findings-client.json
+        ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path Logs_Client/ --rule-path rules/windows/ > findings.json
+    - name: Check for Sigma matches in baseline
+      run: ./github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
