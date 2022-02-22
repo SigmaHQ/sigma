@@ -10,6 +10,7 @@ tags:
     - attack.t1053.005 
 author: Florian Roth
 date: 2022/02/21
+modified: 2022/02/22
 logsource:
     product: windows
     category: process_creation
@@ -27,7 +28,10 @@ detection:
             - '\Users\Public'
             - 'C:\Windows\Temp'
             - 'C:\Perflogs'
-    condition: selection and selection_flag and selection_folder
+    filter_mixed:
+        - CommandLine|contains: 'update_task.xml'
+        - ParentCommandLine|contains: 'unattended.ini'
+    condition: selection and selection_flag and selection_folder and not 1 of filter*
 falsepositives:
     - Benign scheduled tasks creations that happen often during software installations
 level: high
