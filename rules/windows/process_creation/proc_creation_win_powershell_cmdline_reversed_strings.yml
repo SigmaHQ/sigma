@@ -2,12 +2,12 @@ title: Suspicious PowerShell Cmdline
 id: b6b49cd1-34d6-4ead-b1bf-176e9edba9a4
 status: test
 description: Detects the PowerShell command lines with reversed strings
-author: Teymur Kheirkhabarov (idea), Vasiliy Burov (rule), oscd.community
+author: Teymur Kheirkhabarov (idea), Vasiliy Burov (rule), oscd.community, Tim Shelton
 references:
   - https://2019.offzone.moscow/ru/report/hunting-for-powershell-abuses/
   - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=66
 date: 2020/10/11
-modified: 2021/11/27
+modified: 2022/02/21
 logsource:
   category: process_creation
   product: windows
@@ -41,7 +41,9 @@ detection:
       - 'hcaerof'
       - 'ekovni'
       - 'retupmoc'
-  condition: selection
+  filter_1:
+    CommandLine|contains: '-EncodedCommand'
+  condition: selection and not 1 of filter*
 falsepositives:
   - Unlikely
 level: high
