@@ -23,7 +23,7 @@ findings=$(grep -v '"RuleLevel":"low"' ${infile})
 {
     read # Skip CSV header
     while IFS=\; read -r id name fpstring; do
-        findings=$(echo "${findings}" | grep -Ev "\"RuleId\":\"${id}\".*${fpstring}")
+        findings=$(echo "${findings}" | grep -iEv "\"RuleId\":\"${id}\".*${fpstring}")
     done
 } < ${fps}
 
