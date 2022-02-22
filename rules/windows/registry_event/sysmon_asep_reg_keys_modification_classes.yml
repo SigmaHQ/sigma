@@ -11,7 +11,7 @@ references:
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 date: 2019/10/25
-modified: 2022/01/13
+modified: 2022/02/16
 logsource:
     category: registry_event
     product: windows
@@ -37,9 +37,11 @@ detection:
             - '\.cmd'
             - '\ShellEx\PropertySheetHandlers'
             - '\ShellEx\ContextMenuHandlers'
-    filter:
+    filter_empty:
         Details: '(Empty)'
-    condition: classes_base and classes and not filter
+    filter_msoffice:
+        Details: '{807583E5-5146-11D5-A672-00B0D022E945}'
+    condition: classes_base and classes and not 1 of filter_*
 fields:
     - SecurityID
     - ObjectName

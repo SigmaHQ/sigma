@@ -8,7 +8,7 @@ references:
   - https://www.pinvoke.net/default.aspx/dbghelp/MiniDumpWriteDump.html
   - https://medium.com/@fsx30/bypass-edrs-memory-protection-introduction-to-hooking-2efb21acffd6
 date: 2019/10/27
-modified: 2022/01/31
+modified: 2022/02/21
 logsource:
   category: image_load
   product: windows
@@ -20,9 +20,9 @@ detection:
     Image|endswith:
       - '\msbuild.exe'
       - '\cmd.exe'
-      - '\svchost.exe'
+      # - '\svchost.exe'  triggered by installing common software
       - '\rundll32.exe'
-      - '\powershell.exe'
+      # - '\powershell.exe'  triggered by installing common software
       - '\word.exe'
       - '\excel.exe'
       - '\powerpnt.exe'
@@ -34,7 +34,7 @@ detection:
       - '\wscript.exe'
       - '\cscript.exe'
       - '\mshta.exe'
-      - '\regsvr32.exe'
+      # - '\regsvr32.exe'  triggered by installing common software
       - '\schtasks.exe'
       - '\dnx.exe'
       - '\regsvcs.exe'
@@ -54,7 +54,7 @@ detection:
     CommandLine: 
       - 'C:\WINDOWS\winsxs\*\TiWorker.exe -Embedding'
       - 'C:\Windows\system32\svchost.exe -k netsvcs -p -s wuauserv'
-      - 'C:\WINDOWS\System32\svchost.exe -k WerSvcGroup'
+      - 'C:\Windows\System32\svchost.exe -k WerSvcGroup'
   condition: (signedprocess or unsignedprocess) and not filter1 and not filter2
 fields:
   - ComputerName

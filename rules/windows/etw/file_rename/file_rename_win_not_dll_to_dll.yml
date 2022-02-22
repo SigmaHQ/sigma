@@ -1,0 +1,21 @@
+title: Rename a Commun File to DLL File
+id: bbfd974c-248e-4435-8de6-1e938c79c5c1
+status: experimental
+description: To bypass detection download a dll hide with commun extension and rename it to dll
+references:
+    - https://twitter.com/ffforward/status/1481672378639912960
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1036/T1036.md#atomic-test-1---system-file-copied-to-unusual-location
+author: frack113
+date: 2022/02/19
+logsource:
+    product: windows
+    category: file_rename
+detection:
+    to_dll:
+        TargetFilename|endswith: '.dll'
+    from_dll:
+        OriginalFilename|endswith: '.dll'
+    condition: to_dll and not from_dll
+falsepositives:
+    - Application installation
+level: medium

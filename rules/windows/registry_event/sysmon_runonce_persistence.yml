@@ -7,7 +7,7 @@ references:
   - https://twitter.com/pabraeken/status/990717080805789697
   - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OSBinaries/Runonce.yml
 date: 2020/11/15
-modified: 2021/11/27
+modified: 2022/02/15
 logsource:
   product: windows
   category: registry_event
@@ -15,7 +15,10 @@ detection:
   selection:
     TargetObject|startswith: 'HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components'
     TargetObject|endswith: '\StubPath'
-  condition: selection
+  filter_chrome:
+    Details|startswith: '"C:\Program Files\Google\Chrome\Application\'
+    Details|endswith: '\Installer\chrmstp.exe" --configure-user-settings --verbose-logging --system-level'
+  condition: selection and not 1 of filter_*
 falsepositives:
   - Legitimate modification of the registry key by legitimate program
 level: medium

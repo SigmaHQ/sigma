@@ -4,7 +4,7 @@ status: experimental
 description: Detects process access to LSASS memory with suspicious access flags and from a suspicious folder
 author: Florian Roth
 date: 2021/11/27
-modified: 2021/12/05
+modified: 2022/02/21
 references:
     - https://docs.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
@@ -48,20 +48,29 @@ detection:
             - 'FA'
             - '0x14C2'  # https://github.com/b4rtik/ATPMiniDump/blob/master/ATPMiniDump/ATPMiniDump.c
             - 'FF'
-        SourceImage|contains: 
+        SourceImage|contains:
             - '\Temp\'
             - '\Users\Public\'
             - '\PerfLogs\'
             - '\AppData\'
             - '\Temporary'
     filter1:
-        SourceImage|contains|all: 
+        SourceImage|contains|all:
             - 'C:\Users\'
             - '\AppData\Local\'
         SourceImage|endswith:
             - '\Microsoft VS Code\Code.exe'
             - '\software_reporter_tool.exe'
+            - '\DropboxUpdate.exe'
         GrantedAccess: '0x410'
+    filter_nextron:
+        SourceImage|startswith: 'C:\Windows\Temp\asgard2-agent\'
+        SourceImage|endswith: 
+            - '\thor64.exe'
+            - '\thor.exe'
+        GrantedAccess:
+            - '0x1fffff'
+            - '0x1010'
     condition: selection and not 1 of filter*
 fields:
     - User
