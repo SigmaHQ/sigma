@@ -10,7 +10,7 @@ tags:
     - attack.t1059.001
 author: Florian Roth (rule), Jonhnathan Ribeiro
 date: 2017/03/05
-modified: 2022/02/11
+modified: 2022/02/21
 logsource:
     product: windows
     category: ps_module
@@ -61,7 +61,9 @@ detection:
             - 'Net.WebClient'
             - '.Download'
     filter_chocolatey:
-        ContextInfo|contains: "(New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1"
+        ContextInfo|contains: 
+            - "(New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1"
+            - 'Write-ChocolateyWarning'
     condition: 1 of selection* and not 1 of filter*
 falsepositives:
     - Penetration tests
