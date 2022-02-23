@@ -1,4 +1,4 @@
-title: Change PowerShell Policies to a Unsecure Level
+title: Change PowerShell Policies to an Unsecure Level
 id: 87e3c4e8-a6a8-4ad9-bb4f-46e7ff99a180
 description: Detects use of executionpolicy option to set a unsecure policies
 status: experimental
@@ -12,12 +12,16 @@ tags:
     - attack.t1059.001
 author: frack113
 date: 2021/11/01
+modified: 2022/02/23
 logsource:
     product: windows
     category: process_creation
 detection:
     option:
-        CommandLine|contains: '-executionpolicy '
+        CommandLine|contains:
+            - ' -executionpolicy '
+            - ' -ep '
+            - ' -exec '
     level:
         CommandLine|contains:
             - 'Unrestricted'
@@ -26,4 +30,4 @@ detection:
     condition: option and level
 falsepositives:
     - Administrator script
-level: high
+level: medium
