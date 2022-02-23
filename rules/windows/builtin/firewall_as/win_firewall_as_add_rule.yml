@@ -4,6 +4,7 @@ status: experimental
 description: A rule has been modified in the Windows Firewall exception list
 author: frack113
 date: 2022/02/19
+modified: 2022/02/22
 references:
     - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd364427(v=ws.10)
 logsource:
@@ -15,7 +16,14 @@ detection:
         EventID: 2004
     filter_block:
         Action: 2
-    filter_app:
-        ModifyingApplication: 'C:\Program Files\Windows Defender\MsMpEng.exe'
+    filter_installations:
+        - ApplicationPath|startswith: 
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+        - ModifyingApplication|startswith: 'C:\Windows\WinSxS\'  # TiWorker.exe
+        - ModifyingApplication:
+            - 'C:\Windows\SysWOW64\msiexec.exe'
+            - 'C:\Windows\System32\svchost.exe'
+            - 'C:\Program Files\Windows Defender\MsMpEng.exe'
     condition: selection and not 1 of filter_*
-level: low
+level: medium
