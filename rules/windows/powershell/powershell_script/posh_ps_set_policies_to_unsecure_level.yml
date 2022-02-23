@@ -1,4 +1,4 @@
-title: Change PowerShell Policies to a Unsecure Level
+title: Change PowerShell Policies to an Unsecure Level
 id: 61d0475c-173f-4844-86f7-f3eebae1c66b
 description: Detects use of Set-ExecutionPolicy to set a unsecure policies
 status: experimental
@@ -11,7 +11,7 @@ tags:
     - attack.t1059.001
 author: frack113
 date: 2021/10/20
-modified: 2022/02/11
+modified: 2022/02/23
 logsource:
     product: windows
     category: ps_script
@@ -26,8 +26,10 @@ detection:
     filter:
         - ParentImage:
             - 'C:\ProgramData\chocolatey\choco.exe'
-        - ScriptBlockText|contains: "(New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')"
+        - ScriptBlockText|contains:
+            - "(New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')"
+            - "(New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')"
     condition: cmdlet and option and not filter
 falsepositives:
     - Administrator script
-level: high
+level: medium
