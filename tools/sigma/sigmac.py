@@ -317,9 +317,10 @@ def main():
                         if k in output_fields_filtered:
                             output[k] = v
                 output['rule'] = [result for result in results]
-                if "filename" in output_fields_filtered:
-                    output['filename'] = str(sigmafile.name)
-                output_array.append(output)
+                if len(output['rule']) > 0: # avoid printing empty rules
+                    if "filename" in output_fields_filtered:
+                        output['filename'] = str(sigmafile.name)
+                    output_array.append(output)
 
             if nb_result == 0: # backend get only 1 output
                 if not fileprefix == None: # want a prefix anyway
