@@ -1,0 +1,29 @@
+title: BlackByte Ransomware Patterns
+id: 999e8307-a775-4d5f-addc-4855632335be
+status: experimental
+description: This command line patterns found in BlackByte Ransomware operations
+author: Florian Roth
+references:
+  - https://redcanary.com/blog/blackbyte-ransomware/
+date: 2022/02/25
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection1:
+    Image|startswith: 'C:\Users\Public\'
+    CommandLine|contains: ' -single '
+  selection2:
+    CommandLine|contains:
+      - 'del C:\Windows\System32\Taskmgr.exe'
+      - ';Set-Service -StartupType Disabled $'
+      - 'powershell -command "$x =[System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String('
+      - ' do start wordpad.exe /p '
+  condition: 1 of selection*
+fields:
+  - ComputerName
+  - User
+  - CommandLine
+falsepositives:
+  - Unknown
+level: high
