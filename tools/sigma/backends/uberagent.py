@@ -1,3 +1,4 @@
+import json
 import re
 import sigma
 from sigma.backends.base import SingleTextQueryBackend
@@ -106,6 +107,7 @@ class ActivityMonitoringRule:
         self.risk_score = 0
         self.description = ""
         self.sigma_level = ""
+        self.annotation = ""
 
         # Specifies the properties that are being evaluated and send to the backend
         # if an Activity Monitoring rule is matched.
@@ -178,6 +180,10 @@ class ActivityMonitoringRule:
         """Set the Description property."""
         self.description = description
 
+    def set_annotation(self, annotation):
+        """Set the Annotation property."""
+        self.annotation = annotation
+
     def _prefixed_tag(self):
         prefixes = {
             "Process.Start": "proc-start"
@@ -219,6 +225,9 @@ class ActivityMonitoringRule:
         if self.risk_score > 0:
             result += "RiskScore = {}\n".format(self.risk_score)
 
+        if len(self.annotation) > 0:
+            result += "Annotation = {}\n".format(self.annotation)
+
         result += "Query = {}\n".format(self.query)
 
         if self.event_type == "Reg.Any":
@@ -238,12 +247,33 @@ class ActivityMonitoringRule:
         return result
 
 
+def get_mitre_annotation_from_tag(tag):
+    tag = tag.lower()
+    if tag.startswith('attack.t'):
+        return tag[7:].upper()
+    return None
+
+
+def get_annotation(tags):
+    mitre_annotation_objects = []
+    for tag in tags:
+        mitre_annotation = get_mitre_annotation_from_tag(tag)
+        if mitre_annotation is not None:
+            mitre_annotation_objects.append(mitre_annotation)
+
+    if len(mitre_annotation_objects) > 0:
+        return json.dumps({ 'mitre_attack': mitre_annotation_objects })
+
+    return ""
+
+
 def get_parser_properties(sigmaparser):
     title = sigmaparser.parsedyaml['title']
     level = sigmaparser.parsedyaml['level']
     description = sigmaparser.parsedyaml['description']
     condition = sigmaparser.parsedyaml['detection']['condition']
     logsource = sigmaparser.parsedyaml['logsource']
+
     category = ''
     if 'category' in logsource:
         category = logsource['category'].lower()
@@ -256,7 +286,11 @@ def get_parser_properties(sigmaparser):
     if 'service' in logsource:
         service = logsource['service'].lower()
 
-    return product, category, service, title, level, condition, description
+    annotation = ''
+    if 'tags' in sigmaparser.parsedyaml:
+        annotation = get_annotation(sigmaparser.parsedyaml['tags'])
+
+    return product, category, service, title, level, condition, description, annotation
 
 
 def write_file_header(f, level):
@@ -417,7 +451,7 @@ class uberAgentBackend(SingleTextQueryBackend):
 
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
-        product, category, service, title, level, condition, description = get_parser_properties(sigmaparser)
+        product, category, service, title, level, condition, description, annotation = get_parser_properties(sigmaparser)
 
         # Do not generate a rule if the given category is unsupported by now.
         if not is_sigma_category_supported(category):
@@ -441,6 +475,7 @@ class uberAgentBackend(SingleTextQueryBackend):
                 rule.set_risk_score(convert_sigma_level_to_uberagent_risk_score(level))
                 rule.set_sigma_level(level)
                 rule.set_description(description)
+                rule.set_annotation(annotation)
                 self.rules.append(rule)
                 print("Generated rule <{}>.. [level: {}]".format(rule.name, level))
         except IgnoreTypedModifierException:
