@@ -30,18 +30,21 @@ detection:
     CurrentDirectory|contains: '\ccmcache\'
 
     # FP - Amazon Workspaces
-    ParentCommand|contains: '\Program Files\Amazon\WorkSpacesConfig\Scripts\setup-scheduledtask.ps1'
-    ParentCommand|contains: '\Program Files\Amazon\WorkSpacesConfig\Scripts\set-selfhealing.ps1'
-    ParentCommand|contains: '\Program Files\Amazon\WorkSpacesConfig\Scripts\check-workspacehealth.ps1'
+    ParentCommandLine|contains: '\Program Files\Amazon\WorkSpacesConfig\Scripts\setup-scheduledtask.ps1'
+    ParentCommandLine|contains: '\Program Files\Amazon\WorkSpacesConfig\Scripts\set-selfhealing.ps1'
+    ParentCommandLine|contains: '\Program Files\Amazon\WorkSpacesConfig\Scripts\check-workspacehealth.ps1'
 
     # Tenable/Nessus VA Scanner
-    ParentCommand|contains: '\nessus_'
-    Command|contains: '\nessus_'
+    ParentCommandLine|contains: '\nessus_'
+    CommandLine|contains: '\nessus_'
 
   condition: selection and not falsepositives
 fields:
   - CommandLine
   - ParentCommandLine
+  - CurrentDirectory
+  - Image
+  - ParentImage
 falsepositives:
   - Administrative scripts
   - Microsoft SCCM
