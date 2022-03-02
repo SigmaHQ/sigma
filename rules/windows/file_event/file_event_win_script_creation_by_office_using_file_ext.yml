@@ -13,7 +13,7 @@ tags:
     - attack.defense_evasion
 status: experimental
 date: 2021/08/23
-modified: 2022/02/09
+modified: 2022/03/02
 logsource:
     product: windows
     category: file_event
@@ -42,6 +42,15 @@ detection:
             - '\AppData\Local\Microsoft\Office\'
             - '\WebServiceCache\AllUsers'
         TargetFilename|endswith: '.com'
+    filter_webex:
+        Image|endswith: 'winword.exe'
+        TargetFilename|contains: '\AppData\Local\Temp\webexdelta\'
+        TargetFilename|endswith:
+            - '.dll'
+            - '.exe'
+    filter_localassembly:
+        TargetFilename|contains: '\AppData\Local\assembly\tmp\'
+        TargetFilename|endswith: '.dll'
     condition: selection1 and selection2 and not 1 of filter_*
 falsepositives:
     - Unknown
