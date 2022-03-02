@@ -2,11 +2,11 @@ title: Windows Shell Spawning Suspicious Program
 id: 3a6586ad-127a-4d3b-a677-1e6eacdf8fde
 status: test
 description: Detects a suspicious child process of a Windows shell
-author: Florian Roth
+author: Florian Roth, Tim Shelton
 references:
   - https://mgreen27.github.io/posts/2018/04/02/DownloadCradle.html
 date: 2018/04/06
-modified: 2021/11/27
+modified: 2022/03/02
 logsource:
   category: process_creation
   product: windows
@@ -28,6 +28,16 @@ detection:
       - '\mshta.exe'
   falsepositives:
     CurrentDirectory|contains: '\ccmcache\'
+
+    # FP - Amazon Workspaces
+    ParentCommand|contains: '\Program Files\Amazon\WorkSpacesConfig\Scripts\setup-scheduledtask.ps1'
+    ParentCommand|contains: '\Program Files\Amazon\WorkSpacesConfig\Scripts\set-selfhealing.ps1'
+    ParentCommand|contains: '\Program Files\Amazon\WorkSpacesConfig\Scripts\check-workspacehealth.ps1'
+
+    # Tenable/Nessus VA Scanner
+    ParentCommand|contains: '\nessus_'
+    Command|contains: '\nessus_'
+
   condition: selection and not falsepositives
 fields:
   - CommandLine
