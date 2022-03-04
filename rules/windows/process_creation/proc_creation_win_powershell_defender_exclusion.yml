@@ -11,7 +11,7 @@ tags:
     - attack.t1562.001
 author: Florian Roth
 date: 2021/04/29
-modified: 2022/03/03
+modified: 2022/03/04
 logsource:
     category: process_creation
     product: windows
@@ -25,14 +25,8 @@ detection:
             - ' -ExclusionPath '
             - ' -ExclusionExtension '
             - ' -ExclusionProcess '
-    selection_encoded:
-        CommandLine|base64offset|contains:
-            - 'Add-MpPreference '
-            - 'Set-MpPreference '
-            - 'add-mppreference '
-            - 'set-mppreference '
-    condition: ( selection1 and selection2 ) or selection_encoded
+    condition: all of selection*
 falsepositives:
     - Possible Admin Activity
     - Other Cmdlets that may use the same parameters
-level: high
+level: medium
