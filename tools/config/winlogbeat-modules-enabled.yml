@@ -115,6 +115,11 @@ logsources:
     service: firewall-as
     conditions:
       winlog.channel: 'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall'      
+  windows-bits-client:
+    product: windows
+    service: bits-client
+    conditions:
+      winlog.channel: 'WinEventlog:Microsoft-Windows-Bits-Client/Operational'
 defaultindex: winlogbeat-*
 # Extract all field names with yq:
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: winlog.event_data.\1/g'
@@ -561,3 +566,10 @@ fieldmappings:
     Threat_Name: winlog.event_data.Threat\ Name
     Type_ID: winlog.event_data.Type\ ID
     Type_Name: winlog.event_data.Type\ Name
+    #
+    # Microsoft-Windows-Windows Firewall With Advanced Security/Firewall
+    #
+    ApplicationPath: winlog.event_data.ApplicationPath
+    ModifyingApplication: winlog.event_data.ModifyingApplication
+    Action: winlog.event_data.Action
+    
