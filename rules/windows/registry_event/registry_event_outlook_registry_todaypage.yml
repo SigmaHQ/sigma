@@ -6,7 +6,7 @@ references:
   - https://speakerdeck.com/heirhabarov/hunting-for-persistence-via-microsoft-exchange-server-or-outlook?slide=70
 author: Tobias Michalski
 date: 2021/06/10
-modified: 2022/01/13
+modified: 2022/03/05
 tags:
   - attack.persistence
   - attack.t1112
@@ -24,7 +24,12 @@ detection:
     Details: DWORD (0x00000001) 
   selectionUserDefined:
     TargetObject|endswith: UserDefinedUrl
-  condition: selection1 and (selectionStamp or selectionUserDefined)
+  filter_office:
+    Image|startswith: 
+      - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
+      - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
+    Image|endswith: '\OfficeClickToRun.exe'
+  condition: selection1 and (selectionStamp or selectionUserDefined) and not 1 of filter_*
 fields:
   - Details
 falsepositives:
