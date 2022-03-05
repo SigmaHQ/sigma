@@ -6,7 +6,7 @@ author: Teymur Kheirkhabarov (idea), Vasiliy Burov (rule), oscd.community, Tim S
 references:
   - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=64
 date: 2020/10/15
-modified: 2021/12/06
+modified: 2022/03/04
 logsource:
   category: process_creation
   product: windows
@@ -26,13 +26,15 @@ detection:
   selection5:
     Image|endswith: '\powershell.exe'
     CommandLine|re: '.*`.*`.*`.*`.*`.*'
-  filter:
-    ParentImage:
-        - C:\Program Files\Amazon\SSM\ssm-document-worker.exe
-  condition: (selection1 or selection2 or selection3 or selection4 or selection5) and not filter
+  filter_amazonSSM:
+    ParentImage: C:\Program Files\Amazon\SSM\ssm-document-worker.exe
+  filter_windef_atp:
+    CommandLine|contains: 'new EventSource("Microsoft.Windows.Sense.Client.Management"'
+  condition: (selection1 or selection2 or selection3 or selection4 or selection5) and not filter_amazonSSM and not (selection3 and filter_windef_atp)
 falsepositives:
   - Unlikely
   - Amazon SSM Document Worker # fp example: powershell " [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 $keyExists = Test-Path "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Setup\OC Manager\Subcomponents" $jsonObj = @() if ($keyExists) { $key = Get-Item "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Setup\OC Manager\Subcomponents" $valueNames = $key.GetValueNames(); foreach ($valueName in $valueNames) { $value = $key.GetValue($valueName); if ($value -gt 0) { $installed = "True" } else { $installed = "False" } $jsonObj += @" {"Name": "$valueName", "Installed": "$installed"} "@ } } $result = $jsonObj -join "," $result = "[" + $result + "]" [Console]::WriteLine($result)
+  - Windows Defender ATP
 level: high
 tags:
   - attack.defense_evasion
