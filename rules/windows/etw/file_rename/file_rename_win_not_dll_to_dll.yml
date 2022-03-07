@@ -7,7 +7,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1036/T1036.md#atomic-test-1---system-file-copied-to-unusual-location
 author: frack113
 date: 2022/02/19
-modified: 2022/02/25
+modified: 2022/03/07
 logsource:
     product: windows
     category: file_rename
@@ -15,7 +15,9 @@ detection:
     to_dll:
         TargetFilename|endswith: '.dll'
     from_dll:
-        - OriginalFilename|endswith: '.dll'
+        - OriginalFilename|endswith: 
+            - '.dll'
+            - '.tmp'  # VSCode FP
         - OriginalFilename|contains: '.dll.'
     condition: to_dll and not from_dll
 falsepositives:
