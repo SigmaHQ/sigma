@@ -4,7 +4,7 @@ description: Detects Obfuscated Powershell via use MSHTA in Scripts
 status: experimental
 author: Nikita Nazarov, oscd.community
 date: 2020/10/09
-modified: 2021/11/30
+modified: 2022/03/06
 references:
     - https://github.com/Neo23x0/sigma/issues/1009 #(Task31)
 tags:
@@ -19,7 +19,13 @@ detection:
     selection:
         Provider_Name: 'Service Control Manager'
         EventID: 7045
-        ImagePath|re: '(?i).*(set).*(&&).*(mshta).*(vbscript:createobject).*(\.run).*\(window\.close\).*"'
+        ImagePath|contains|all:
+            - 'set'
+            - '&&'
+            - 'mshta'
+            - 'vbscript:createobject'
+            - '.run'
+            - '(window.close)'
     condition: selection
 falsepositives:
     - Unknown
