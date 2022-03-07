@@ -11,7 +11,7 @@ references:
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 date: 2019/10/25
-modified: 2022/02/16
+modified: 2022/03/03
 logsource:
     category: registry_event
     product: windows
@@ -49,7 +49,6 @@ detection:
             - 'C:\Program Files\Microsoft OneDrive\StandaloneUpdater\OneDriveSetup.exe'
             - 'C:\Program Files\KeePass Password Safe 2\ShInstUtil.exe'
             - 'C:\Program Files\Everything\Everything.exe'
-            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\OfficeClickToRun.exe'
             - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
     filter_edge:
         Image|startswith:
@@ -90,6 +89,13 @@ detection:
         TargetObject|endswith: '\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce\{c60fd5ac-367d-4e3a-a975-f157502ac30a}'
         Details|contains: '\AppData\Local\Package Cache\{c60fd5ac-367d-4e3a-a975-f157502ac30a}\python'
         Details|endswith: '.exe" /burn.runonce'
+    filter_officeclicktorun:
+        Image|startswith: 
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
+        Image|endswith: '\OfficeClickToRun.exe'
+    filter_defender:
+        Image: 'C:\Program Files\Windows Defender\MsMpEng.exe'
     condition: current_version_base and current_version and not 1 of filter_*
 fields:
     - SecurityID

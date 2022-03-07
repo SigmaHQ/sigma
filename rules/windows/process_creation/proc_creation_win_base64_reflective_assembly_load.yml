@@ -1,0 +1,26 @@
+title: Base64 Encoded Reflective Assembly Load
+id: 62b7ccc9-23b4-471e-aa15-6da3663c4d59
+status: test
+description: Detects base64 encoded .NET reflective loading of Assembly
+author: Christian Burkard
+date: 2022/03/01
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.defense_evasion
+    - attack.t1027
+references:
+    - https://github.com/Neo23x0/Raccine/blob/main/yara/mal_revil.yar
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    CommandLine|utf16le|base64offset|contains: '[Reflection.Assembly]::Load('
+  condition: selection
+fields:
+  - CommandLine
+  - ParentCommandLine
+falsepositives:
+  - Unlikely
+level: high

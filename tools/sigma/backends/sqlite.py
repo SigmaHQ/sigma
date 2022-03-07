@@ -16,6 +16,7 @@
 
 from sigma.backends.sql import SQLBackend
 from sigma.parser.condition import NodeSubexpression, ConditionAND, ConditionOR, ConditionNOT
+from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
 import re
 
 class SQLiteBackend(SQLBackend):
@@ -27,6 +28,10 @@ class SQLiteBackend(SQLBackend):
     # https://www.sqlite.org/quirks.html#double_quoted_string_literals_are_accepted 
     valueExpression = "\'%s\'" # Expression of values, %s represents value
     mapFullTextSearch = "%s MATCH ('\"%s\"')"
+    mapRegex = "%s REGEXP %s"
+    typedValueExpression = { 
+        SigmaRegularExpressionModifier: "\'%s\'" # Syntax for regular expressions
+    }
 
     countFTS = 0
 
@@ -109,6 +114,8 @@ class SQLiteBackend(SQLBackend):
 
             if "," in generated_value and generated_value[0]=="(" and generated_value[-1]==")" and not has_wildcard:
                 return self.mapMulti % (transformed_fieldname, generated_value)
+            elif type(value) == SigmaRegularExpressionModifier:
+                return self.mapRegex % (transformed_fieldname, generated_value) # regex are mapped "as is"
             elif "LENGTH" in transformed_fieldname:
                 return self.mapLength % (transformed_fieldname, value)
             elif type(value) == list:
@@ -133,6 +140,9 @@ class SQLiteBackend(SQLBackend):
             return self.valueExpression % (self.cleanValue(str(node)))
         else:
             return self.generateFTS(self.cleanValue(str(node)))
+
+    def generateTypedValueNode(self, node):
+        return self.typedValueExpression[type(node)] % (str(node))
 
     def generateQuery(self, parsed):
         self.countFTS = 0

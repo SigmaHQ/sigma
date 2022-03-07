@@ -27,6 +27,16 @@ if [[ "${OS}" != "Linux" && "${OS}" != "Darwin" ]]; then
     exit 1
 fi
 
+SCRIPT="$(realpath $0)"
+TOOLS="${SCRIPT%/*}"
+SIGMA="${TOOLS%/*}"
+
+if [[ -n "$1" && -d "$1" && -r "$1" ]]; then
+    RULES="$1"
+else
+    RULES="${SIGMA}"/rules
+fi
+
 TMP=$(mktemp -d)
 if [[ -z "${TMP}" || ! -d "${TMP}" || ! -w "${TMP}" ]]; then
     >2& echo "Error: Created temporary directory ${TMP} is not writable."
@@ -34,15 +44,12 @@ if [[ -z "${TMP}" || ! -d "${TMP}" || ! -w "${TMP}" ]]; then
     exit 1
 fi
 
-SCRIPT="$(realpath $0)"
-TOOLS="${SCRIPT%/*}"
-SIGMA="${TOOLS%/*}"
 
 cd "${TMP}"
 
 echo
 echo "Copy rules from ${SIGMA} to ${TMP}"
-cp -r "${SIGMA}"/rules/windows .
+cp -r "${RULES}"/windows .
 echo
 echo "Download evtx-sigma-checker"
 if [[ "${OS}" == "Linux" ]]; then

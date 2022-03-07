@@ -6,7 +6,7 @@ author: Florian Roth, Tim Shelton
 references:
   - https://www.virusbulletin.com/conference/vb2019/abstracts/apt-cases-exploiting-vulnerabilities-region-specific-software
 date: 2019/10/02
-modified: 2022/02/09
+modified: 2022/03/02
 logsource:
   category: process_creation
   product: windows
@@ -20,7 +20,11 @@ detection:
       - ',DllEntry'
   filter_1:
     - CommandLine|contains: 'AppData\Local\Microsoft\TeamsMeetingAddin\'
-    - CommandLine|endswith: '\x86\Microsoft.Teams.AddinLoader.dll'
+    - CommandLine|endswith:
+      - '\x86\Microsoft.Teams.AddinLoader.dll'
+      - '\x86\Microsoft.Teams.AddinLoader.dll"'
+      - '\x64\Microsoft.Teams.AddinLoader.dll'
+      - '\x64\Microsoft.Teams.AddinLoader.dll"'
   condition: selection and not 1 of filter*
 falsepositives:
   - Unlikely
