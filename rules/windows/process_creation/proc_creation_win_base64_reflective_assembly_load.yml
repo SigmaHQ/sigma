@@ -4,6 +4,7 @@ status: test
 description: Detects base64 encoded .NET reflective loading of Assembly
 author: Christian Burkard
 date: 2022/03/01
+modified: 2022/03/07
 tags:
     - attack.execution
     - attack.t1059.001
@@ -16,7 +17,11 @@ logsource:
   product: windows
 detection:
   selection:
-    CommandLine|utf16le|base64offset|contains: '[Reflection.Assembly]::Load('
+    # [Reflection.Assembly]::Load(
+    CommandLine|contains: 
+      - 'WwBSAGUAZgBsAGUAYwB0AGkAbwBuAC4AQQBzAHMAZQBtAGIAbAB5AF0AOgA6AEwAbwBhAGQAKA'
+      - 'sAUgBlAGYAbABlAGMAdABpAG8AbgAuAEEAcwBzAGUAbQBiAGwAeQBdADoAOgBMAG8AYQBkACgA'
+      - 'bAFIAZQBmAGwAZQBjAHQAaQBvAG4ALgBBAHMAcwBlAG0AYgBsAHkAXQA6ADoATABvAGEAZAAoA'
   condition: selection
 fields:
   - CommandLine
