@@ -81,6 +81,12 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
         self.setRuleType(backend_options)
         self.loadCSVfiles()
         self.loadMitreAttackMatrixFile(backend_options);
+
+    def initialize(self):
+        return "<Rules>"
+
+    def finalize(self):
+        return "</Rules>"
      
     # It's used to check whether the format of yml file is right. 
     def ymlValidator(self, node,regdicts={}):
@@ -634,9 +640,9 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
         result = None
         if technique_str is not None:
-            result = ("<Rule group=\"%s\" id=\"%s\"  phIncidentCategory=\"Server\" function=\"Security\" subFunction=\"%s\" technique=\"%s\">") % (rulename, ruleId, sub_function_str, technique_str)
+            result = ("<Rule group=\"%s\" natural_id=\"%s\"  phIncidentCategory=\"Server\" function=\"Security\" subFunction=\"%s\" technique=\"%s\">") % (rulename, ruleId, sub_function_str, technique_str)
         else:
-            result = ("<Rule group=\"%s\" id=\"%s\"  phIncidentCategory=\"Server\" function=\"Security\" subFunction=\"%s\">") % (rulename, ruleId, sub_function_str)
+            result = ("<Rule group=\"%s\" natural_id=\"%s\"  phIncidentCategory=\"Server\" function=\"Security\" subFunction=\"%s\">") % (rulename, ruleId, sub_function_str)
 
         return result,ruleId,technique_str
 

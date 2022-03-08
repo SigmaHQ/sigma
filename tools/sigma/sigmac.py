@@ -303,6 +303,10 @@ def main():
 
     error = 0
     output_array = []
+    result = backend.initialize()
+    if result:
+        print(result, file=out)
+
     for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
         logger.debug("* Processing Sigma input %s" % (sigmafile))
         success = True

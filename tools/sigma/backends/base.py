@@ -228,6 +228,13 @@ class BaseBackend:
     def generateAfter(self, parsed):
         return ""
 
+    def initialize(self):
+        """
+        Is called before the first file was processed with generate(). The right place if this backend is not intended to
+        look isolated at each rule, but generates an output which incorporates multiple rules, e.g. dashboards.
+        """
+        pass
+
     def finalize(self):
         """
         Is called after the last file was processed with generate(). The right place if this backend is not intended to
