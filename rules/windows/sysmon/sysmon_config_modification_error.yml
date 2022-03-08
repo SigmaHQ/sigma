@@ -4,7 +4,7 @@ description: Someone try to hide from Sysmon
 status: experimental
 author: frack113
 date: 2021/06/04
-modified: 2021/12/02
+modified: 2022/02/09
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1562.001/T1562.001.md
     - https://talesfrominfosec.blogspot.com/2017/12/killing-sysmon-silently.html
@@ -20,7 +20,9 @@ detection:
             - 'Failed to open service configuration with error'
             - 'Failed to connect to the driver to update configuration'
     selection_filter:
-        Description: 'Failed to open service configuration with error 19 - Last error: The media is write protected.'
+        Description|contains|all:
+            - 'Failed to open service configuration with error'
+            - 'Last error: The media is write protected.'
     condition: selection_error and not selection_filter
 falsepositives:
     - legitimate administrative action

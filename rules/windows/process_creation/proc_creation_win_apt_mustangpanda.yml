@@ -1,0 +1,38 @@
+title: Mustang Panda Dropper
+id: 2d87d610-d760-45ee-a7e6-7a6f2a65de00
+status: test
+description: Detects specific process parameters as used by Mustang Panda droppers
+author: Florian Roth, oscd.community
+references:
+  - https://app.any.run/tasks/7ca5661d-a67b-43ec-98c1-dd7a8103c256/
+  - https://app.any.run/tasks/b12cccf3-1c22-4e28-9d3e-c7a6062f3914/
+  - https://www.anomali.com/blog/china-based-apt-mustang-panda-targets-minority-groups-public-and-private-sector-organizations
+date: 2019/10/30
+modified: 2021/11/27
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection1:
+    - CommandLine|contains:
+      - 'Temp\wtask.exe /create'
+      - '%windir:~-3,1%%PUBLIC:~-9,1%'
+      - '/tn "Security Script '
+      - '%windir:~-1,1%'
+    - CommandLine|contains|all:
+      - '/E:vbscript'
+      - 'C:\Users\'
+      - '.txt'
+      - '/F'
+  selection2:
+    Image|endswith: 'Temp\winwsh.exe'
+  condition: 1 of selection*
+fields:
+  - CommandLine
+  - ParentCommandLine
+falsepositives:
+  - Unlikely
+level: high
+tags:
+  - attack.t1587.001
+  - attack.resource_development

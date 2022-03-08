@@ -1,0 +1,29 @@
+title: Powershell DNSExfiltration
+id: d59d7842-9a21-4bc6-ba98-64bfe0091355
+status: experimental
+description: DNSExfiltrator allows for transfering (exfiltrate) a file over a DNS request covert channel
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1048/T1048.md#atomic-test-3---dnsexfiltration-doh
+    - https://github.com/Arno0x/DNSExfiltrator
+author: frack113
+date: 2022/01/07
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Script block logging must be enabled'
+detection:
+    selection_cmdlet:
+        - ScriptBlockText|contains: Invoke-DNSExfiltrator
+        - ScriptBlockText|contains|all:
+            - ' -i '
+            - ' -d '
+            - ' -p '
+            - ' -doh '
+            - ' -t '
+    condition: selection_cmdlet
+falsepositives:
+    - legitim script
+level: high
+tags:
+    - attack.exfiltration
+    - attack.t1048

@@ -1,0 +1,41 @@
+title: UIPromptForCredentials DLLs
+id: 9ae01559-cf7e-4f8e-8e14-4c290a1b4784
+description: Detects potential use of UIPromptForCredentials functions by looking for some of the DLLs needed for it.
+status: experimental
+date: 2020/10/20
+modified: 2022/02/10
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+tags:
+    - attack.credential_access
+    - attack.collection
+    - attack.t1056.002
+references:
+    - https://securitydatasets.com/notebooks/small/windows/06_credential_access/SDWIN-201020013208.html
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1056.002/T1056.002.md#atomic-test-2---powershell---prompt-user-for-password
+    - https://docs.microsoft.com/en-us/windows/win32/api/wincred/nf-wincred-creduipromptforcredentialsa
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        - ImageLoaded|endswith:
+            - '\credui.dll'
+            - '\wincredui.dll'
+        - OriginalFileName:
+            - 'credui.dll'
+            - 'wincredui.dll'
+    filter:
+        - Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\explorer.exe'
+            - 'C:\Program Files\'
+            - 'C:\Users\\*\AppData\Local\Microsoft\OneDrive\\*\Microsoft.SharePoint.exe'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Windows\ImmersiveControlPanel\SystemSettings.exe'
+            - 'C:\Users\\*\AppData\Local\Microsoft\OneDrive\OneDrive.exe'
+            - 'C:\Users\\*\AppData\Roaming\Spotify\Spotify.exe'
+        - Image|endswith: '\opera_autoupdate.exe'      
+    condition: selection and not filter
+falsepositives:
+    - other legitimate processes loading those DLLs in your environment.
+level: medium

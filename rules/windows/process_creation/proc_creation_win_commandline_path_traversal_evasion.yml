@@ -1,0 +1,31 @@
+title: Command Line Path Traversal Evasion
+status: experimental
+id: 1327381e-6ab0-4f38-b583-4c1b8346a56b
+author: Christian Burkard
+date: 2021/10/26
+modified: 2022/02/02
+description: Detects the attempt to evade or obfuscate the executed command on the CommandLine using bogus path traversal
+references:
+    - https://twitter.com/hexacorn/status/1448037865435320323
+    - https://twitter.com/Gal_B1t/status/1062971006078345217
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Image|contains: '\Windows\'
+        CommandLine|contains:
+            - '\..\Windows\'
+            - '\..\System32\'
+            - '\..\..\'
+    selection2:
+        CommandLine|contains: '.exe\..\'
+    filter:
+        CommandLine|contains: '\Google\Drive\googledrivesync.exe\..\'
+    condition: 1 of selection* and not filter
+falsepositives:
+    - Google Drive
+level: high
