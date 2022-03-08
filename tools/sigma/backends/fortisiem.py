@@ -149,7 +149,7 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
     def loadCSVfiles(self):
         #It's used to map field name to internal attributes in FSIM
         if len(self.ymlAttr2FortiSIEMAttr) == 0:
-            with open("./tools/config/fortisiem/ymlAttr2FortiSIEMAttr.csv", newline='') as csvfile:
+            with open("./tools/config/fortisiem/FortiSIEM_EventAttributeMapping.csv", newline='') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 for row in spamreader:
                     if len(row) < 2:
@@ -162,7 +162,7 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
                     self.ymlAttr2FortiSIEMAttr[row[0]] = row[1]
         #It's used to map event id to event type.
         if len(self.WindowsSysmonCode2FortiSIEMEvtTy) == 0:
-            with open("./tools/config/fortisiem/WindowsSysmonCode2FortiSIEMEvtTy.csv", newline='') as csvfile:
+            with open("./tools/config/fortisiem/FortiSIEM_SysMonEventTypeMapping.csv", newline='') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 for row in spamreader:
                     if len(row) > 1:
@@ -170,7 +170,7 @@ class FortisemBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
         #It's used to skip some files. When yml file match the constraints in it, we don't need generate rule from that yml file.
         if len(self.fileFilterDicts) == 0:
-             with open("./tools/config/fortisiem/SkipRuleOflogsource.csv", newline='') as csvfile:
+             with open("./tools/config/fortisiem/FortiSIEM_SkipUnsupportedLogSources.csv", newline='') as csvfile:
                  spamreader = csv.reader(csvfile, delimiter=',')
                  for row in spamreader:
                      if len(row) > 1:
