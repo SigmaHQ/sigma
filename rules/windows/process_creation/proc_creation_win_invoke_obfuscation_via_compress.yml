@@ -6,13 +6,19 @@ author: Timur Zinniatullin, oscd.community
 references:
   - https://github.com/Neo23x0/sigma/issues/1009   #(Task 19)
 date: 2020/10/18
-modified: 2021/11/27
+modified: 2022/03/07
 logsource:
   category: process_creation
   product: windows
 detection:
   selection:
-    CommandLine|re: '(?i).*new-object.*(?:system\.io\.compression\.deflatestream|system\.io\.streamreader).*text\.encoding\]::ascii.*readtoend'
+    CommandLine|contains|all:
+      - 'new-object'
+      - 'text.encoding]::ascii'
+    CommandLine|contains:
+      - 'system.io.compression.deflatestream'
+      - 'system.io.streamreader'
+    CommandLine|endswith: 'readtoend'
   condition: selection
 falsepositives:
   - unknown

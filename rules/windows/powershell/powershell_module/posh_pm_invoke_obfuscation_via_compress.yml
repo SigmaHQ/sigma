@@ -21,7 +21,13 @@ logsource:
     definition: PowerShell Module Logging must be enabled
 detection:
     selection_4103:
-        Payload|re: '(?i).*new-object.*(?:system\.io\.compression\.deflatestream|system\.io\.streamreader).*text\.encoding\]::ascii.*readtoend'
+        Payload|contains|all:
+            - 'new-object'
+            - 'text.encoding]::ascii'
+        Payload|contains:
+            - 'system.io.compression.deflatestream'
+            - 'system.io.streamreader'
+        Payload|endswith: 'readtoend'
     condition: selection_4103
 falsepositives:
     - unknown

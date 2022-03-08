@@ -4,17 +4,24 @@ description: Looks for changes to registry to disable any write-protect property
 status: experimental
 author: Sreeman
 date: 2021/06/11
-modified: 2021/06/11
-tags:
-    - attack.defense_evasion
-    - attack.t1562
+modified: 2022/03/07
 logsource:
     product: windows
     category: process_creation
 detection:
     selection:
-        CommandLine|re: '(?i).*reg add.*hklm\\\\system\\\\currentcontrolset\\\\control.*(storage|storagedevicepolicies).*write protection.*0.*'
+        CommandLine|contains|all:
+            - 'reg add'
+            - 'hklm\system\currentcontrolset\control'
+            - 'write protection'
+            - '0'
+        CommandLine|contains:   
+            - 'storage'
+            - 'storagedevicepolicies'
     condition: selection
 falsepositives:
     - none observed
 level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1562
