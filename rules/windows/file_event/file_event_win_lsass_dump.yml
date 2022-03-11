@@ -9,8 +9,9 @@ author: Florian Roth
 references:
     - https://www.google.com/search?q=procdump+lsass
     - https://medium.com/@markmotig/some-ways-to-dump-lsass-exe-c4a75fdc49bf
+    - https://github.com/elastic/detection-rules/blob/main/rules/windows/credential_access_lsass_memdump_file_created.toml
 date: 2021/11/15
-modified: 2022/02/06
+modified: 2022/02/10
 tags:
     - attack.credential_access
     - attack.t1003.001
@@ -24,6 +25,8 @@ detection:
             - '\lsass.zip'
             - '\lsass.rar'
             - '\Temp\dumpert.dmp'
+            - '\Andrew.dmp'
+            - '\Coredump.dmp'
     selection2:
         TargetFilename|contains:
             - '\lsass_2'  # default format of procdump v9.0 is lsass_YYMMDD_HHmmss.dmp
@@ -33,6 +36,9 @@ detection:
         TargetFilename|contains|all:
             - '\lsass'
             - '.dmp'
+    selection4:
+        TargetFilename|contains: 'SQLDmpr'
+        TargetFilename|endswith: '.mdmp'
     condition: 1 of selection*
 falsepositives:
     - Unknown
