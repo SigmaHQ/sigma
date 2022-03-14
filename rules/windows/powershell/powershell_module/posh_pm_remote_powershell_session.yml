@@ -3,8 +3,8 @@ id: 96b9f619-aa91-478f-bacb-c3e50f8df575
 description: Detects remote PowerShell sessions
 status: test
 date: 2019/08/10
-modified: 2021/10/16
-author: Roberto Rodriguez @Cyb3rWard0g
+modified: 2022/03/14
+author: Roberto Rodriguez @Cyb3rWard0g, Tim Shelton
 references:
     - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190511223310.html
 tags:
@@ -21,7 +21,11 @@ detection:
         ContextInfo|contains|all:
             - ' = ServerRemoteHost ' #  HostName: 'ServerRemoteHost'  french : Nom d’hôte = 
             - 'wsmprovhost.exe'      #  HostApplication|contains: 'wsmprovhost.exe' french  Application hôte = 
-    condition: selection
+    false_positive_1:
+        ContextInfo|contains:
+            - '\Windows\system32\WindowsPowerShell\v1.0\Modules\Microsoft.PowerShell.Archive\Microsoft.PowerShell.Archive.psm1'
+    condition: selection and not 1 of false_positive*
+
 falsepositives:
     - Legitimate use remote PowerShell sessions
 level: high
