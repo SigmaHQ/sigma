@@ -6,7 +6,7 @@ author: Teymur Kheirkhabarov (idea), Vasiliy Burov (rule), oscd.community, Tim S
 references:
   - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=64
 date: 2020/10/15
-modified: 2022/03/04
+modified: 2022/03/08
 logsource:
   category: process_creation
   product: windows
@@ -29,7 +29,9 @@ detection:
   filter_amazonSSM:
     ParentImage: C:\Program Files\Amazon\SSM\ssm-document-worker.exe
   filter_windef_atp:
-    CommandLine|contains: 'new EventSource("Microsoft.Windows.Sense.Client.Management"'
+    CommandLine|contains:
+      - 'new EventSource("Microsoft.Windows.Sense.Client.Management"'
+      - 'public static extern bool InstallELAMCertificateInfo(SafeFileHandle handle);'
   condition: (selection1 or selection2 or selection3 or selection4 or selection5) and not filter_amazonSSM and not (selection3 and filter_windef_atp)
 falsepositives:
   - Unlikely
