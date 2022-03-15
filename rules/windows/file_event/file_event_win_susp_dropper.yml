@@ -6,6 +6,7 @@ author: frack113
 references:
   - Malware Sandbox
 date: 2022/03/09
+modified: 2022/03/13
 logsource:
   product: windows
   category: file_event
@@ -13,7 +14,16 @@ detection:
   selection:
     Image|endswith: '.exe'
     TargetFilename|endswith: '.exe'
-  condition: selection 
+  filter_update:
+    Image: 'C:\WINDOWS\system32\svchost.exe'
+    TargetFilename|startswith: 'C:\Windows\SoftwareDistribution\Download\Install\'
+    # Security_UserID: S-1-5-18
+  filter_tiworker:
+    Image|startswith: 'C:\Windows\WinSxS\'
+    Image|endswith: '\TiWorker.exe'
+  filter_msiexec:
+    Image: 'C:\Windows\System32\msiexec.exe'
+  condition: selection and not 1 of filter_*
 falsepositives:
   - Unknown
 #Please contribute to FP to go up the level
