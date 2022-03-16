@@ -403,26 +403,6 @@ class SigmaConditionOptimizer:
                 node.items = newitems
                 return self._optimizeNode(node, changes=True)
 
-            # OR(AND(X, ...), AND(X, ...))  =>  AND(X, OR(AND(...), AND(...)))
-            if type(node) == ConditionOR:
-                othertype = ConditionAND
-            else:
-                othertype = ConditionOR
-            if all(type(child) == othertype for child in node.items):
-                promoted = []
-                for cand in node.items[0]:
-                    if all(cand in child for child in node.items[1:]):
-                        promoted.append(cand)
-                if len(promoted) > 0:
-                    for child in node.items:
-                        for cand in promoted:
-                            if cand in child.items:
-                                child.items.remove(cand)
-                    newnode = othertype()
-                    newnode.items = promoted
-                    newnode.add(node)
-                    return self._optimizeNode(newnode, changes=True)
-
             # fallthrough
 
         elif type(node) == ConditionNOT:
