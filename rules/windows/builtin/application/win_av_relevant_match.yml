@@ -4,7 +4,7 @@ description: This detection method points out highly relevant Antivirus events
 status: experimental
 author: Florian Roth, Arnim Rupp
 date: 2017/02/19
-modified: 2022/02/05
+modified: 2022/03/08
 logsource:
     product: windows
     service: application
@@ -40,12 +40,14 @@ detection:
     filter:
         - 'Keygen'
         - 'Crack'
-    filter_aurora:
-        Provider_Name: 'Aurora Agent'
+        - 'anti_ransomware_service.exe'
+        - 'cyber-protect-service.exe'
+    filter_information:
+        Level: 4  # Information level
     condition: keywords and not 1 of filter*
 falsepositives:
     - Some software piracy tools (key generators, cracks) are classified as hack tools
 level: high
 tags:
-    - attack.resource_development 
-    - attack.t1588 
+    - attack.resource_development
+    - attack.t1588

@@ -3,7 +3,7 @@ id: 64e8e417-c19a-475a-8d19-98ea705394cc
 description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
 status: test
 date: 2019/08/11
-modified: 2021/10/16
+modified: 2022/02/16
 author: Roberto Rodriguez @Cyb3rWard0g
 references:
     - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190815181010.html
@@ -19,7 +19,9 @@ detection:
         ContextInfo: '*'
     filter:
         ContextInfo|contains: 'powershell.exe' # Host Application=...powershell.exe or Application hote=...powershell.exe in French Win10 event
-    condition: selection and not filter        
+    filter_citrix:
+        ContextInfo|contains: 'ConfigSyncRun.exe'
+    condition: selection and not 1 of filter*
 falsepositives:
     - Programs using PowerShell directly without invocation of a dedicated interpreter
     - MSP Detection Searcher
