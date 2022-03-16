@@ -6,9 +6,9 @@ references:
     - https://twitter.com/mvelazco/status/1410291741241102338
     - https://msrc.microsoft.com/update-guide/vulnerability/CVE-2021-1675
     - https://msrc.microsoft.com/update-guide/vulnerability/CVE-2021-34527
-author: Sittikorn S, Nuttakorn T
+author: Sittikorn S, Nuttakorn T, Tim Shelton
 date: 2021/07/01
-modified: 2021/11/23
+modified: 2022/03/15
 tags:
     - attack.privilege_escalation
     - attack.t1055
@@ -17,11 +17,13 @@ logsource:
 detection:
     selection:
         Filename|contains: 'C:\Windows\System32\spool\drivers\x64\'
-    condition: selection
+    keywords:
+        - 'File submitted to Symantec for analysis' # symantec fp, pending analysis
+    condition: selection and not keywords
 fields:
     - Signature
     - Filename
     - ComputerName
 falsepositives:
-    - Unlikely
+    - Unlikely, or pending PSP analysis
 level: critical
