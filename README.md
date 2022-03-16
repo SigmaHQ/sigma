@@ -215,6 +215,7 @@ tools/sigmac -t splunk -c ~/my-splunk-mapping.yml -c tools/config/generic/window
 * [LogRhythm](https://logrhythm.com/)
 * [Datadog Logs](https://docs.datadoghq.com/logs/explorer/search_syntax/)
 * [FortiSIEM](https://docs.fortinet.com)
+* [HAWK.io MDR](https://hawk.io/)
 
 Current work-in-progress
 * [Splunk Data Models](https://docs.splunk.com/Documentation/Splunk/7.1.0/Knowledge/Aboutdatamodels)
