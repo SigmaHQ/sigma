@@ -7,6 +7,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1070.004/T1070.004.md
     - https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/Remove-Item?view=powershell-5.1&viewFallbackFrom=powershell-7
 date: 2022/01/15
+modified: 2022/03/17
 logsource:
     product: windows
     category: ps_script
@@ -16,7 +17,11 @@ detection:
         ScriptBlockText|contains|all:
             - Remove-Item
             - '-Path '
-    condition: selection
+    filter_reg:
+        ScriptBlockText|contains:
+            - 'HKCU:\'
+            - 'HKLM:\'
+    condition: selection and not filter_reg
 falsepositives:
     - Legitimate PowerShell scripts
 level: low
