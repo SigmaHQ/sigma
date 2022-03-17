@@ -14,15 +14,17 @@ logsource:
 detection:
     to_dll:
         TargetFilename|endswith: '.dll'
-    from_dll:
+    filter_from_dll:
         - OriginalFilename|endswith: 
             - '.dll'
             - '.tmp'  # VSCode FP
-        - OriginalFilename|contains: '.dll.'
+        - OriginalFilename|contains: 
+            - '.dll.'
+            - '\SquirrelTemp\temp'
     filter_tiworker:
         Image|startswith: 'C:\Windows\WinSxS\'
         Image|endswith: '\TiWorker.exe'
-    condition: to_dll and not from_dll and not filter_tiworker
+    condition: to_dll and not 1 of filter*
 falsepositives:
     - Application installation
 level: medium
