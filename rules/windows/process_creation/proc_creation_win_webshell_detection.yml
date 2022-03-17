@@ -7,7 +7,7 @@ references:
     - https://www.fireeye.com/blog/threat-research/2013/08/breaking-down-the-china-chopper-web-shell-part-ii.html
     - https://unit42.paloaltonetworks.com/bumblebee-webshell-xhunt-campaign/
 date: 2017/01/01
-modified: 2021/03/02
+modified: 2021/03/17
 tags:
     - attack.persistence
     - attack.t1505.003
@@ -18,16 +18,29 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    parent_is_web_server_process:
+    selection_webserver_image:
         - ParentImage|endswith:
             - '\w3wp.exe'
             - '\php-cgi.exe'
             - '\nginx.exe'
             - '\httpd.exe'
-        - ParentImage|contains:
-            - '\apache'
+            - '\caddy.exe'
+            - '\ws_tomcatservice.exe'
+    selection_webserver_characteristics_tomcat1:
+        ParentImage|endswith: 
+            - '\java.exe'
+            - '\javaw.exe'
+        ParentImage|contains: 
+            - '-tomcat-'
             - '\tomcat'
-    net_utility:
+    selection_webserver_characteristics_tomcat2:
+        ParentImage|endswith: 
+            - '\java.exe'
+            - '\javaw.exe'
+        CommandLine|contains: 
+            - 'catalina.jar'
+            - 'CATALINA_HOME'
+    susp_net_utility:
         Image|endswith:
             - '\net.exe'
             - '\net1.exe'
@@ -35,17 +48,17 @@ detection:
             - ' user '
             - ' use '
             - ' group '
-    ping_utility:
+    susp_ping_utility:
         Image|endswith: '\ping.exe'
         CommandLine|contains: ' -n '
-    change_dir:
+    susp_change_dir:
         CommandLine|contains:
             - '&cd&echo'  # china chopper web shell
             - 'cd /d '  # https://www.computerhope.com/cdhlp.htm
-    wmic_utility:
+    susp_wmic_utility:
         Image|endswith: '\wmic.exe'
         CommandLine|contains: ' /node:' 
-    misc_discovery_binaries:
+    susp_misc_discovery_binaries:
         Image|endswith:
             - '\whoami.exe'
             - '\systeminfo.exe'
@@ -58,11 +71,11 @@ detection:
             - '\vssadmin.exe' 
             - '\wevtutil.exe' 
             - '\tasklist.exe' 
-    misc_discovery_commands:
+    susp_misc_discovery_commands:
         CommandLine|contains:
             - ' Test-NetConnection '
             - 'dir \'  # remote dir: dir \<redacted IP #3>\C$:\windows\temp\*.exe
-    condition: parent_is_web_server_process and (net_utility or ping_utility or change_dir or wmic_utility or misc_discovery_binaries or misc_discovery_commands)
+    condition: 1 of selection* and 1 of susp*
 fields:
     - CommandLine
     - ParentCommandLine
