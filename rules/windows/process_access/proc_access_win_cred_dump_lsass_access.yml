@@ -5,7 +5,7 @@ description: Detects process access LSASS memory which is typical for credential
 author: Florian Roth, Roberto Rodriguez, Dimitrios Slamaris, Mark Russinovich, Thomas Patzke, Teymur Kheirkhabarov, Sherif Eldeeb, James Dickenson, Aleksey Potapov,
     oscd.community (update)
 date: 2017/02/16
-modified: 2022/02/27
+modified: 2022/03/18
 references:
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
     - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
@@ -90,6 +90,11 @@ detection:
         GrantedAccess: 
             - '0x1410'
             - '0x1418'
+    filter_handle:
+        GrantedAccess: '0x40'
+        SourceImage|endswith:
+            - '\handle.exe'
+            - '\handle64.exe'
     filter_generic:
         SourceImage|startswith: 
             - 'C:\Program Files\'
