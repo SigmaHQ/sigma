@@ -1,0 +1,92 @@
+title: Query to Remote Access Software Domain
+id: a5b2fbfd-474c-4e95-ba55-030de1cac129
+status: experimental
+description: |
+An adversary may use legitimate desktop support and remote access software to establish an interactive command and control channel to target systems within networks. These services are commonly used as legitimate technical support software, and may be allowed by application control within a target environment. Remote access tools include
+ 01. AnyDesk 
+ 02. Splashtop 
+ 03. Atera
+ 04. LogMeIn
+ 05. TeamViewer
+ 06. RemotePC
+ 07. Solarwinds Dameware 
+ 08. GoToMyPC
+ 09. Remote Utilities
+ 10. ScreenConnect ConnectWise
+ 11. GoToAssist
+ 12. AmmyyAdmin
+ 13. RealVNC
+ 14. tmate.io
+ 15. parsec.app
+ 16. google remotedesktop
+ 17. logmeinrescue.com
+ 18. zoho assist
+ 19. jumpcloud
+ 20. Kaseya
+ 21. Bomgar
+ The following still need entries
+22. Pulseway
+23. ninjaOne
+24. NetSupport
+
+references:
+    - https://redcanary.com/blog/misbehaving-rats/
+author: Connor Martin
+date: 2022/03/13
+logsource:
+    product: windows
+    category: dns_query
+detection:
+    selection:
+        QueryName|endswith: 
+        - '.net.anydesk.com'
+        - 'api.playanext.com'
+        - '.relay.splashtop.com'
+        - '.api.splashtop.com'
+        - 'app.atera.com'
+        - '.agentreporting.atera.com'
+        - '.pubsub.atera.com'
+        - 'logmeincdn.http.internapcdn.net'
+        - 'logmein-gateway.com'
+        - 'secure.logmein.com'
+        - 'client.teamviewer.com'
+        - 'integratedchat.teamviewer.com'
+        - 'static.remotepc.com'
+        - '.n-able.com'
+        - 'comserver.corporate.beanywhere.com'
+        - '.swi-rc.com'
+        - '.swi-tc.com'
+        - 'telemetry.servers.qetqo.com'
+        - 'launch.getgo.com'
+        - 'server.remoteutilities.com'
+        - 'relay.screenconnect.com'
+        - 'control.connectwise.com'
+        - 'express.gotoassist.com'
+        - '.cdn.getgo.com'
+        - 'authentication.logmeininc.com'
+        - '.ammyy.com'
+        - '.services.vnc.com'
+        - '.tmate.io'
+        - 'api.parsec.app'
+        - 'parsecusercontent.com'
+        - 'remotedesktop-pa.googleapis.com'
+        - '.logmein-gateway.com'
+        - 'secure.logmeinrescue.com'
+        = 'join.zoho.com'
+        - 'assist.zoho.com'
+        - '.zohoassist.com'
+        - 'downloads.zohocdn.com'
+        - 'agent.jumpcloud.com'
+        - 'kickstart.jumpcloud.com'
+        - 'cdn.kaseya.net'
+        - 'relay.kaseya.net'
+        - 'license.bomgar.com'
+        - '.beyondtrustcloud.com'
+        
+    condition: selection
+falsepositives:
+    - Legit installs of remote desktop software. 
+level: medium
+tags:
+    - attack.command_and_control
+    - attack.t1219

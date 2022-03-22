@@ -1,0 +1,76 @@
+title: Remote Access Software Service Installed
+id: 614f9b22-d85e-4638-9ead-501d8c1c2e51
+status: experimental
+description: |
+An adversary may use legitimate desktop support and remote access software to establish an interactive command and control channel to target systems within networks. These services are commonly used as legitimate technical support software, and may be allowed by application control within a target environment. Remote access tools include
+ 01. AnyDesk 
+ 02. Splashtop 
+ 03. Atera
+ 04. LogMeIn
+ 05. TeamViewer
+ 06. RemotePC
+ 07. Solarwinds Dameware 
+ 08. GoToMyPC
+ 09. Remote Utilities
+ 10. ScreenConnect ConnectWise
+ 11. GoToAssist
+ 12. AmmyyAdmin
+ 13. RealVNC
+ 14. tmate.io
+ 15. parsec.app
+ 16. google remotedesktop
+ 17. logmeinrescue.com
+ 18. zoho assist
+ 19. jumpcloud
+ 20. Kaseya
+ 21. Bomgar
+ 
+ The following still need entries
+22. Pulseway
+23. ninjaOne
+24. NetSupport
+
+This requires Security System Extension in Advanced Audit Policy GPO
+references:
+    - https://redcanary.com/blog/misbehaving-rats/
+author: Connor Martin
+date: 2022/03/13
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 
+            - 4697
+            - 7045
+    selection_1:
+        - ServiceFileName|contains: 'AnyDesk'
+        - ServiceFileName|contains: 'SSUService'
+        - ServiceFileName|contains: 'SplashtopRemoteService'
+        - ServiceFileName|contains: 'Atera'
+        - ServiceFileName|contains: 'LogMeIn'
+        - ServiceFileName|contains: 'LMIGuardianSvc'
+        - ServiceFileName|contains: 'TeamViewer'
+        - ServiceFileName|contains: 'RPCService'
+        - ServiceFileName|contains: 'RPCPerformanceService'
+        - ServiceFileName|contains: 'BASupportExpressStandaloneService'
+        - ServiceFileName|contains: 'BASupportExpressSrvcUpdater'
+        - ServiceFileName|contains: 'GoToMyPC'
+        - ServiceFileName|contains: 'monblanking'
+        - ServiceFileName|contains: 'RManService'
+        - ServiceFileName|contains: 'GoToAssist'
+        - ServiceFileName|contains: 'AmmyyAdmin'
+        - ServiceFileName|contains: 'vncserver'
+        - ServiceFileName|contains: 'Parsec'
+        - ServiceFileName|contains: 'chromoting'
+        - ServiceFileName|contains: 'Zoho'
+        - ServiceFileName|contains: 'jumpcloud'
+        - ServiceFileName|contains: 'kaseya'
+        
+    condition: selection and selection_1
+falsepositives:
+    - Legit installs of remote desktop software. 
+level: medium
+tags:
+    - attack.command_and_control
+    - attack.t1219
