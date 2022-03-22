@@ -1,0 +1,31 @@
+title: Registry Defender Tampering
+id: 452bce90-6fb0-43cc-97a5-affc283139b3
+status: experimental
+description: Detects reg command lines that disable certain important features of Microsoft Defender
+references:
+    - https://thedfirreport.com/2022/03/21/apt35-automates-initial-access-using-proxyshell/
+author: Florian Roth
+date: 2022/03/22
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: \reg.exe
+        CommandLine|contains:
+            - 'SOFTWARE\Microsoft\Windows Defender\'
+            - 'SOFTWARE\Policies\Microsoft\Windows Defender\'
+        CommandLine|contains|all:
+            - ' add '
+            - ' /d 0'
+    selection_target:
+        CommandLine|contains:
+            - 'Real-Time Protection'
+            - 'TamperProtection'
+    condition: selection
+falsepositives:
+    - Legitimate use
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
