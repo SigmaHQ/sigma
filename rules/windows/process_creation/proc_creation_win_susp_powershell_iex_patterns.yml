@@ -10,7 +10,7 @@ logsource:
    product: windows
    category: process_creation
 detection:
-   selection_combined:
+   selection_combined_1:
       Image|endwith: '\powershell.exe'
       CommandLine|contains:
          -' | iex;'
@@ -22,6 +22,10 @@ detection:
          -' | IEX (new'
          -' | IEX (New'
          -');IEX '
+   selection_combined_2:
+      CommandLine|contains:
+         - '::FromBase64String'
+         - '.GetString([System.Convert]::'
    selection_standalone:
       CommandLine|contains:
          -')|iex;$'
@@ -29,7 +33,7 @@ detection:
          -');iex($'
          -');iex $'
          -' | IEX | '
-   condition: 1 of selection*
+   condition: all of selection_combined* or selection_standalone
 falsepositives:
    - Legitimate scripts that use IEX
 level: high
