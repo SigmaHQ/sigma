@@ -1,0 +1,39 @@
+title: Process Dump via Rundll32 and Comsvcs.dll
+id: 646ea171-dded-4578-8a4d-65e9822892e3
+description: Detects a process memory dump performed via ordinal function 24 in comsvcs.dll
+status: experimental
+references:
+    - https://twitter.com/shantanukhande/status/1229348874298388484
+    - https://twitter.com/pythonresponder/status/1385064506049630211?s=21
+    - https://twitter.com/Hexacorn/status/1224848930795552769
+author: Florian Roth
+date: 2020/02/18
+modified: 2021/12/08
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+    - attack.credential_access
+    - car.2013-05-009
+    - attack.t1003.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_comsvcs:
+        CommandLine|contains: 
+            - 'comsvcs.dll'
+            - 'rundll32'
+            - '.dmp'
+    selection_function:
+        Commandline|contains:
+            - '#24'
+            - '#+24'
+            - 'MiniDump'
+    selection_full:
+        CommandLine|contains: ' full'
+    unique_selection:
+        CommandLine|contains: '#-4294967272'  # https://twitter.com/Hexacorn/status/1224848930795552769
+    condition: all of selection* or unique_selection
+falsepositives:
+    - Unlikely, because no one should dump the process memory in that way
+level: high

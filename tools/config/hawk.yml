@@ -79,6 +79,11 @@ logsources:
    service: syslog
    conditions:
     process_name: "syslog*"
+ spring:
+   category: application
+   product: spring
+   conditions:
+    vendor_name: "Spring"
  modsecurity:
    service: modsecurity
    conditions:
@@ -308,12 +313,35 @@ logsources:
    conditions:
      product_name:
        - 'AppLocker'
+ windows-firewall-advanced-security:
+   product: windows
+   service: firewall-as
+   conditions:
+     product_name: 'Windows Firewall With Advanced Security'
  windows-ps-module:
    product: windows
    category: ps_module
    conditions:
      product_name: 'PowerShell'
      vendor_id: 4103
+ windows-ps-script:
+   product: windows
+   category: ps_script
+   conditions:
+     product_name: 'PowerShell'
+     vendor_id: 4104
+ windows-ps-classic-provider:
+   product: windows
+   category: ps_classic_provider_start
+   conditions:
+     vendor_id: 600
+     product_name: 'Windows PowerShell'
+ windows-ps-classic-script:
+   product: windows
+   category: ps_classic_script
+   conditions:
+     vendor_id: 800
+     product_name: 'Windows PowerShell'
  windows-service-bus:
    service: Microsoft-ServiceBus-Client
    conditions:
@@ -333,6 +361,11 @@ logsources:
    service: printservice-operational
    conditions:
      product_name: 'PrintService'
+ windows-codeintegrity-operational:
+   product: windows
+   service: codeintegrity-operational
+   conditions:
+     product_name: 'CodeIntegrity'
  windows-smbclient-security:
    product: windows
    service: smbclient-security
@@ -395,6 +428,7 @@ fieldmappings:
   ProcessCommandLine: command
   ParentCommandLine: parent_command
   IMPHASH: file_hash_imphash
+  Imphash: file_hash_imphash
   SHA256: file_hash_sha256
   MD5: file_hash_md5
   SHA1: file_hash_sha1
@@ -436,7 +470,6 @@ fieldmappings:
   ObjectValueName: object_name
   ObjectName: object_name
   DeviceClassName: object_name
-  Details: object_target
   CallTrace: calltrace
   IpAddress: ip_src
   WorkstationName: hostname_src
@@ -457,3 +490,25 @@ fieldmappings:
   user: correlation_username
   User: correlation_username
   Provider_Name: channel
+  c-referer: http_referer
+  cs-referer: http_referer
+  c-uri: http_uri
+  cs-uri: http_uri
+  c-agent: http_user_agent
+  cs-agent: http_user_agent
+  c-useragent: http_user_agent
+  cs-useragent: http_user_agent
+  c-ip: ip_src
+  cs-ip: ip_src
+  s-ip: ip_dst
+  sc-ip: ip_dst
+  c-username: correlation_username
+  cs-username: correlation_username
+  s-computername: ip_dst_host
+  cs-uri-query: http_query
+  c-uri-query: http_query
+  sc-status: http_status_code
+  sc-bytes: http_content_length
+  user-agent: http_user_agent
+  cs-User-Agent: http_user_agent
+  r-dns: ip_dst_host

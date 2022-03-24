@@ -27,9 +27,12 @@ from .base import SingleTextQueryBackend
 from .mixins import MultiRuleOutputMixin
 
 
+
+
 class HAWKBackend(SingleTextQueryBackend):
     """Converts Sigma rule into HAWK search"""
     identifier = "hawk"
+    mitre_json_url = "https://portal.hawk.io:8080/API/1.1/analytics/attack"
     active = True
     config_required = False
     default_config = ["sysmon", "hawk"]
@@ -115,6 +118,10 @@ class HAWKBackend(SingleTextQueryBackend):
                 nodeRet['args']['str']['value'] = "^" + value
             else:
                 nodeRet['args']['str']['value'] = value
+
+            if notNode:
+                nodeRet["args"]["comparison"]["value"] = "!="
+
             return nodeRet
         elif type(node) == list:
             return self.generateListNode(node, notNode)
@@ -670,10 +677,21 @@ class HAWKBackend(SingleTextQueryBackend):
             "hawk_id" : sigmaparser.parsedyaml['id']
         }
         if 'tags' in sigmaparser.parsedyaml:
-            record["tags"] = record['tags'] + [ item.replace("attack.", "") for item in sigmaparser.parsedyaml['tags']]
+            mitre_tactics = [ item.replace("attack.", "") for item in sigmaparser.parsedyaml['tags'] ]
+            if len(mitre_tactics) > 0:
+                record["tags"] = record['tags'] + mitre_tactics
+                # set 1st tactic and technique found
+
+                mitre_tactics_filtered = [ ]
+                for item in mitre_tactics:
+                    if re.match("^t[0-9]+", item): mitre_tactics_filtered.append(item.upper())
+                if len(mitre_tactics_filtered) > 0:
+                    record["technique"] = mitre_tactics_filtered[0]
+            
+            
 
         if not 'status' in self.sigmaparser.parsedyaml or 'status' in self.sigmaparser.parsedyaml and self.sigmaparser.parsedyaml['status'] != 'experimental':
-            record['correlation_action'] += 10.0;
+            record['correlation_action'] += 5.0;
         elif 'status' in self.sigmaparser.parsedyaml and self.sigmaparser.parsedyaml['status'] == 'experimental':
             record["tags"].append("qa")
         if 'falsepositives' in self.sigmaparser.parsedyaml and len(self.sigmaparser.parsedyaml['falsepositives']) > 1:
@@ -685,11 +703,15 @@ class HAWKBackend(SingleTextQueryBackend):
             elif self.sigmaparser.parsedyaml['level'].lower() == 'high':
                 record['correlation_action'] += 10.0;
             elif self.sigmaparser.parsedyaml['level'].lower() == 'medium':
-                record['correlation_action'] += 5.0;
+                # record['correlation_action'] += 0.0;
+                pass
             elif self.sigmaparser.parsedyaml['level'].lower() == 'low':
-                record['correlation_action'] -= 5.0;
+                record['correlation_action'] -= 10.0;
             elif self.sigmaparser.parsedyaml['level'].lower() == 'informational':
                 record['correlation_action'] -= 15.0;
+
+        if record['correlation_action'] < 0.0:
+            record['correlation_action'] = 0.0
        
         return json.dumps(record)
 

@@ -4,16 +4,11 @@ description: Detects Obfuscated Powershell via COMPRESS OBFUSCATION
 status: experimental
 author: Timur Zinniatullin, oscd.community
 date: 2020/10/18
-modified: 2021/11/30
+modified: 2022/03/06
 references:
     - https://github.com/Neo23x0/sigma/issues/1009 #(Task 19)
-tags:
-    - attack.defense_evasion
-    - attack.t1027
-    - attack.execution
-    - attack.t1059.001
 falsepositives:
-    - unknown
+    - Unknown
 level: medium
 logsource:
     product: windows
@@ -22,5 +17,16 @@ detection:
     selection:
         Provider_Name: 'Service Control Manager'
         EventID: 7045
-        ImagePath|re: '(?i).*new-object.*(?:system\.io\.compression\.deflatestream|system\.io\.streamreader).*text\.encoding\]::ascii.*readtoend'
+        ImagePath|contains|all:
+            - 'new-object'
+            - 'text.encoding]::ascii'
+            - 'readtoend'
+        ImagePath|contains:    
+            - ':system.io.compression.deflatestream'
+            - 'system.io.streamreader'
     condition: selection
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001

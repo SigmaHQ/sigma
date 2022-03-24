@@ -45,7 +45,7 @@ setup(
     python_requires='~=3.8',
     install_requires=['PyYAML', 'pymisp', 'progressbar2', 'ruamel.yaml'],
     extras_require={
-        'test': ['coverage', 'yamllint'],
+        'test': ['coverage', 'yamllint', 'attackcti'],
     },
     data_files=[
         ('etc/sigma', [ str(p) for p in Path('config/').glob('*.yml') ]),

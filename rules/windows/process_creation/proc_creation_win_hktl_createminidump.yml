@@ -1,0 +1,25 @@
+title: CreateMiniDump Hacktool
+id: 36d88494-1d43-4dc0-b3fa-35c8fea0ca9d
+description: Detects the use of CreateMiniDump hack tool used to dump the LSASS process memory for credential extraction on the attacker's machine
+status: experimental
+author: Florian Roth
+references:
+    - https://ired.team/offensive-security/credential-access-and-credential-dumping/dumping-lsass-passwords-without-mimikatz-minidumpwritedump-av-signature-bypass
+date: 2019/12/22
+modified: 2022/03/04
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Image|contains: '\CreateMiniDump.exe'
+    selection2:
+        - Imphash: '4a07f944a83e8a7c2525efa35dd30e2f'
+        - Hashes|contains: 'IMPHASH=4a07f944a83e8a7c2525efa35dd30e2f'
+    condition: 1 of selection*
+falsepositives:
+    - Unknown
+level: high

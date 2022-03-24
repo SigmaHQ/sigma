@@ -1,0 +1,77 @@
+title: Suspicious Rundll32 Activity
+id: e593cf51-88db-4ee1-b920-37e89012a3c9
+status: test
+description: Detects suspicious process related to rundll32 based on arguments
+author: juju4, Jonhnathan Ribeiro, oscd.community
+references:
+  - http://www.hexacorn.com/blog/2017/05/01/running-programs-via-proxy-jumping-on-a-edr-bypass-trampoline/
+  - https://twitter.com/Hexacorn/status/885258886428725250
+  - https://gist.github.com/ryhanson/227229866af52e2d963cf941af135a52
+date: 2019/01/16
+modified: 2021/12/04
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    - CommandLine|contains|all:
+      - 'javascript:'
+      - '.RegisterXLL'
+    - CommandLine|contains|all:
+      - 'url.dll'
+      - 'OpenURL'
+    - CommandLine|contains|all:
+      - 'url.dll'
+      - 'OpenURLA'
+    - CommandLine|contains|all:
+      - 'url.dll'
+      - 'FileProtocolHandler'
+    - CommandLine|contains|all:
+      - 'zipfldr.dll'
+      - 'RouteTheCall'
+    - CommandLine|contains|all:
+      - 'shell32.dll'
+      - 'Control_RunDLL'
+    - CommandLine|contains|all:
+      - 'shell32.dll'
+      - 'ShellExec_RunDLL'
+    - CommandLine|contains|all:
+      - 'mshtml.dll'
+      - 'PrintHTML'
+    - CommandLine|contains|all:
+      - 'advpack.dll'
+      - 'LaunchINFSection'
+    - CommandLine|contains|all:
+      - 'advpack.dll'
+      - 'RegisterOCX'
+    - CommandLine|contains|all:
+      - 'ieadvpack.dll'
+      - 'LaunchINFSection'
+    - CommandLine|contains|all:
+      - 'ieadvpack.dll'
+      - 'RegisterOCX'
+    - CommandLine|contains|all:
+      - 'ieframe.dll'
+      - 'OpenURL'
+    - CommandLine|contains|all:
+      - 'shdocvw.dll'
+      - 'OpenURL'
+    - CommandLine|contains|all:
+      - 'syssetup.dll'
+      - 'SetupInfObjectInstallAction'
+    - CommandLine|contains|all:
+      - 'setupapi.dll'
+      - 'InstallHinfSection'
+    - CommandLine|contains|all:
+      - 'pcwutl.dll'
+      - 'LaunchApplication'
+    - CommandLine|contains|all:
+      - 'dfshim.dll'
+      - 'ShOpenVerbApplication'
+  condition: selection
+falsepositives:
+  - False positives depend on scripts and administrative tools used in the monitored environment
+level: medium
+tags:
+  - attack.defense_evasion
+  - attack.t1218.011

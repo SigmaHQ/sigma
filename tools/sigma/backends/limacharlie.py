@@ -514,6 +514,9 @@ class LimaCharlieBackend(BaseBackend):
             }
             if op == "matches":
                 newOp["re"] = newVal
+            elif op == "exists":
+                # Exists has no value.
+                newOp.pop( "case sensitive", None )
             else:
                 newOp["value"] = newVal
             if self._postOpMapper is not None:
@@ -532,6 +535,9 @@ class LimaCharlieBackend(BaseBackend):
                 }
                 if op == "matches":
                     newOp["re"] = newVal
+                elif op == "exists":
+                    # Exists has no value.
+                    newOp.pop( "case sensitive", None )
                 else:
                     newOp["value"] = newVal
                 if self._postOpMapper is not None:
@@ -587,6 +593,9 @@ class LimaCharlieBackend(BaseBackend):
         # Is there any wildcard in this string? If not, we can short circuit.
         if "*" not in val and "?" not in val:
             return ("is", val)
+
+        if val == "*":
+            return ("exists", None)
 
         # Now we do a small optimization for the shortcut operators
         # available in LC. We try to see if the wildcards are around
@@ -701,6 +710,9 @@ class LimaCharlieBackend(BaseBackend):
             }
             if op == "matches":
                 newOp["re"] = newVal
+            elif op == "exists":
+                # Exists has no value.
+                pass
             else:
                 newOp["value"] = newVal
             mapped.append(newOp)

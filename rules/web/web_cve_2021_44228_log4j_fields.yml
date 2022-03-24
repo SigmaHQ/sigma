@@ -4,7 +4,7 @@ status: experimental
 description: Detects exploitation attempt against log4j RCE vulnerability reported as CVE-2021-44228 in different header fields found in web server logs (Log4Shell)
 author: Florian Roth
 date: 2021/12/10
-modified: 2021/12/12
+modified: 2022/02/06
 references:
    - https://www.lunasec.io/docs/blog/log4j-zero-day/
    - https://news.ycombinator.com/item?id=29504755
@@ -18,7 +18,7 @@ tags:
 logsource:
    category: webserver
 detection:
-   selection:
+   selection1:
       cs-User-Agent|contains:
          - '${jndi:ldap:/'
          - '${jndi:rmi:/'
@@ -35,9 +35,15 @@ detection:
          - '${jndi:nds'
          - '${jndi:corba'
          - '${jndi:iiop'
+         - 'Reference Class Name: foo'
          - '${${env:BARFOO:-j}'
          - '${::-l}${::-d}${::-a}${::-p}'
          - '${base64:JHtqbmRp'
+         - '${${env:ENV_NAME:-j}ndi${env:ENV_NAME:-:}$'
+         - '${${lower:j}ndi:'
+         - '${${upper:j}ndi:'
+         - '${${::-j}${::-n}${::-d}${::-i}:'
+   selection2:         
       user-agent|contains:
          - '${jndi:ldap:/'
          - '${jndi:rmi:/'
@@ -54,9 +60,15 @@ detection:
          - '${jndi:nds'
          - '${jndi:corba'
          - '${jndi:iiop'
+         - 'Reference Class Name: foo'
          - '${${env:BARFOO:-j}'
          - '${::-l}${::-d}${::-a}${::-p}'
          - '${base64:JHtqbmRp'
+         - '${${env:ENV_NAME:-j}ndi${env:ENV_NAME:-:}$'
+         - '${${lower:j}ndi:'
+         - '${${upper:j}ndi:'
+         - '${${::-j}${::-n}${::-d}${::-i}:'
+   selection3:
       cs-uri|contains:
          - '${jndi:ldap:/'
          - '${jndi:rmi:/'
@@ -73,10 +85,16 @@ detection:
          - '${jndi:nds'
          - '${jndi:corba'
          - '${jndi:iiop'
+         - 'Reference Class Name: foo'
          - '${${env:BARFOO:-j}'
          - '${::-l}${::-d}${::-a}${::-p}'
          - '${base64:JHtqbmRp'
-      cs-referrer|contains:
+         - '${${env:ENV_NAME:-j}ndi${env:ENV_NAME:-:}$'
+         - '${${lower:j}ndi:'
+         - '${${upper:j}ndi:'
+         - '${${::-j}${::-n}${::-d}${::-i}:'
+   selection4:
+      cs-referer|contains:
          - '${jndi:ldap:/'
          - '${jndi:rmi:/'
          - '${jndi:ldaps:/'
@@ -92,10 +110,15 @@ detection:
          - '${jndi:nds'
          - '${jndi:corba'
          - '${jndi:iiop'
+         - 'Reference Class Name: foo'
          - '${${env:BARFOO:-j}'
          - '${::-l}${::-d}${::-a}${::-p}'
          - '${base64:JHtqbmRp'
-   condition: selection
+         - '${${env:ENV_NAME:-j}ndi${env:ENV_NAME:-:}$'
+         - '${${lower:j}ndi:'
+         - '${${upper:j}ndi:'
+         - '${${::-j}${::-n}${::-d}${::-i}:'
+   condition: 1 of selection*
 falsepositives:
     - Vulnerability scanning
 level: high
