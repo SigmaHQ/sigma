@@ -42,7 +42,11 @@ def convert_sigma_category_to_uberagent_event_type(category):
         "network_connection": "Net.Any",
         "firewall": "Net.Any",
         "create_remote_thread": "Process.CreateRemoteThread",
-        "registry_event": "Reg.Any"
+        "registry_event": "Reg.Any",
+        "registry_add": "Reg.Any",
+        "registry_delete": "Reg.Any",
+        "registry_set": "Reg.Any",
+        "registry_rename": "Reg.Any"
     }
 
     if category in categories:
