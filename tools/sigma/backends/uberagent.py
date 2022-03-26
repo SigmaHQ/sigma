@@ -367,7 +367,23 @@ class uberAgentBackend(SingleTextQueryBackend):
         "registry_event": {
             "targetobject": "Reg.Key.Target",
             "newname": "Reg.Key.Path.New"
-        }
+        },
+        "registry_add": {
+            "targetobject": "Reg.Key.Target",
+            "newname": "Reg.Key.Path.New"
+        },
+        "registry_delete": {
+            "targetobject": "Reg.Key.Target",
+            "newname": "Reg.Key.Path.New"
+        },
+        "registry_set": {
+            "targetobject": "Reg.Key.Target",
+            "newname": "Reg.Key.Path.New"
+        },
+        "registry_rename": {
+            "targetobject": "Reg.Key.Target",
+            "newname": "Reg.Key.Path.New"
+        } 
     }
 
     # We ignore some fields that we don't support yet but we don't want them to
