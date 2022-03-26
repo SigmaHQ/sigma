@@ -8,7 +8,7 @@ references:
   - https://blog.fox-it.com/2020/03/19/ldapfragger-command-and-control-over-ldap-attributes/
   - https://github.com/fox-it/LDAPFragger
 date: 2019/03/24
-modified: 2022/02/21
+modified: 2022/03/26
 logsource:
   product: windows
   category: file_event
@@ -16,7 +16,7 @@ detection:
   selection:
     TargetFilename|contains: '\Local\Microsoft\Windows\SchCache\'
     TargetFilename|endswith: '.sch'
-  filter:
+  filter_eq:
     Image:
       - 'C:\windows\system32\svchost.exe'
       - 'C:\windows\system32\dllhost.exe'
@@ -25,7 +25,9 @@ detection:
       - 'C:\Windows\CCM\CcmExec.exe'
       - 'C:\Program Files\Cylance\Desktop\CylanceSvc.exe'
       - 'C:\Windows\System32\wbem\WmiPrvSE.exe'
-  condition: selection and not filter
+  filter_begins|startswith:
+      - 'C:\Windows\ccmsetup\autoupgrade\ccmsetup' # C:\Windows\ccmsetup\autoupgrade\ccmsetup.TMC00002.40.exe
+  condition: selection and not 1 of filter*
 falsepositives:
   - Other legimate tools, which do ADSI (LDAP) operations, e.g. any remoting activity by MMC, Powershell, Windows etc.
 level: high
