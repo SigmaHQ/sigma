@@ -1,0 +1,81 @@
+title: Wow6432Node CurrentVersion Autorun Keys Modification
+id: b29aed60-ebd1-442b-9cb5-16a1d0324adb
+related:
+    - id: 17f878b8-9968-4578-b814-c4217fc5768c
+      type: derived
+status: experimental
+description: Detects modification of autostart extensibility point (ASEP) in registry.
+author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split)
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1547.001/T1547.001.md
+    - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
+    - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
+date: 2019/10/25
+modified: 2022/03/26
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    wow_current_version_base:
+        EventType: SetValue
+        TargetObject|contains: '\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion'
+    wow_current_version:
+        TargetObject|contains:
+            - '\ShellServiceObjectDelayLoad'
+            - '\Run\'
+            - '\RunOnce\'
+            - '\Explorer\ShellServiceObjects'
+            - '\Explorer\ShellIconOverlayIdentifiers'
+            - '\Explorer\ShellExecuteHooks'
+            - '\Explorer\SharedTaskScheduler'
+            - '\Explorer\Browser Helper Objects'
+    filter_empty:
+        Details: '(Empty)'
+    filter_edge:
+        Image|contains|all:
+            - 'C:\Program Files (x86)\Microsoft\EdgeUpdate\Install\{'
+            - '\setup.exe'
+    filter_msoffice1:
+        Image: 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\OfficeClickToRun.exe'
+        TargetObject|contains: '\Office\ClickToRun\REGISTRY\MACHINE\Software\Wow6432Node\'
+    filter_msoffice2:
+        Image:
+            - 'C:\Program Files\Microsoft Office\root\integration\integrator.exe'
+            - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
+        TargetObject|contains: '\Explorer\Browser Helper Objects\{31D09BA0-12F5-4CCE-BE8A-2923E76605DA}\'
+    filter_dropbox:
+        - Details|endswith: '-A251-47B7-93E1-CDD82E34AF8B}'
+        - Details: 'grpconv -o'
+        - Details|contains|all:
+            - 'C:\Program Files'
+            - '\Dropbox\Client\Dropbox.exe'
+            - ' /systemstartup'
+    filter_evernote:
+        TargetObject|endswith: '\Explorer\Browser Helper Objects\{92EF2EAD-A7CE-4424-B0DB-499CF856608E}\NoExplorer'
+    filter_dotnet:
+        Image|contains: '\windowsdesktop-runtime-'
+        TargetObject|endswith:
+            - '\WOW6432Node\Microsoft\Windows\CurrentVersion\RunOnce\{e2d1ae32-dd1d-4ad7-a298-10e42e7840fc}'
+            - '\WOW6432Node\Microsoft\Windows\CurrentVersion\RunOnce\{7037b699-7382-448c-89a7-4765961d2537}'
+        Details|startswith:
+            - '"C:\ProgramData\Package Cache\{7037b699-7382-448c-89a7-4765961d2537}\windowsdesktop-runtime-'
+            - '"C:\ProgramData\Package Cache\{e2d1ae32-dd1d-4ad7-a298-10e42e7840fc}\windowsdesktop-runtime-'
+        Details|endswith: '.exe" /burn.runonce'
+    filter_office:
+        Image|startswith: 
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
+        Image|endswith: '\OfficeClickToRun.exe'    
+    condition: wow_current_version_base and wow_current_version and not 1 of filter_*
+fields:
+    - SecurityID
+    - ObjectName
+    - OldValueType
+    - NewValueType
+falsepositives:
+    - Legitimate software automatically (mostly, during installation) sets up autorun keys for legitimate reason
+    - Legitimate administrator sets up autorun keys for legitimate reason
+level: medium
+tags:
+    - attack.persistence
+    - attack.t1547.001
