@@ -1,0 +1,26 @@
+title: ServiceDll Modification
+id: 612e47e9-8a59-43a6-b404-f48683f45bd6
+description: Detects the modification of a ServiceDLL value in the service settings
+author: frack113
+date: 2022/02/04
+modified: 2022/03/26
+status: experimental
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1543.003/T1543.003.md#atomic-test-4---tinyturla-backdoor-service-w64time
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|startswith: 'HKLM\System\CurrentControlSet\Services\'
+        TargetObject|endswith: '\Parameters\ServiceDll'
+    condition: selection
+falsepositives:
+    - Administrative scripts
+    - Installation of a service
+level: medium
+tags:
+  - attack.persistence
+  - attack.privilege_escalation
+  - attack.t1543.003

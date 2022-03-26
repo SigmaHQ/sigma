@@ -1,0 +1,75 @@
+title: Common Autorun Keys Modification
+id: f59c3faf-50f3-464b-9f4c-1b67ab512d99
+related:
+    - id: 17f878b8-9968-4578-b814-c4217fc5768c
+      type: derived
+status: experimental
+description: Detects modification of autostart extensibility point (ASEP) in registry.
+author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split), wagga (name)
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1547.001/T1547.001.md
+    - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
+    - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
+date: 2019/10/25
+modified: 2022/03/26
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    main_selection:
+        EventType: SetValue
+        TargetObject|contains:
+            - '\SOFTWARE\Wow6432Node\Microsoft\Windows CE Services\AutoStart'
+            - '\Software\Wow6432Node\Microsoft\Command Processor\Autorun'
+            - '\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components'
+            - '\SOFTWARE\Microsoft\Windows CE Services\AutoStartOnDisconnect'
+            - '\SOFTWARE\Microsoft\Windows CE Services\AutoStartOnConnect'
+            - '\SYSTEM\Setup\CmdLine'
+            - '\Software\Microsoft\Ctf\LangBarAddin'
+            - '\Software\Microsoft\Command Processor\Autorun'
+            - '\SOFTWARE\Microsoft\Active Setup\Installed Components'
+            - '\SOFTWARE\Classes\Protocols\Handler'
+            - '\SOFTWARE\Classes\Protocols\Filter'
+            - '\SOFTWARE\Classes\Htmlfile\Shell\Open\Command\(Default)'
+            - '\Environment\UserInitMprLogonScript'
+            - '\SOFTWARE\Policies\Microsoft\Windows\Control Panel\Desktop\Scrnsave.exe'
+            - '\Software\Microsoft\Internet Explorer\UrlSearchHooks'
+            - '\SOFTWARE\Microsoft\Internet Explorer\Desktop\Components'
+            - '\Software\Classes\Clsid\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\Inprocserver32'
+            - '\Control Panel\Desktop\Scrnsave.exe'
+    filter_empty:
+        Details: '(Empty)'
+    filter_msoffice:
+        - TargetObject|contains:
+            - '\Office\ClickToRun\REGISTRY\MACHINE\Software\Classes\PROTOCOLS\Handler\'
+            - '\ClickToRunStore\HKMU\SOFTWARE\Classes\PROTOCOLS\Handler\'
+        - Details:
+            - '{314111c7-a502-11d2-bbca-00c04f8ec294}'
+            - '{3459B272-CC19-4448-86C9-DDC3B4B2FAD3}'
+            - '{42089D2D-912D-4018-9087-2B87803E93FB}'
+            - '{5504BE45-A83B-4808-900A-3A5C36E7F77A}'
+            - '{807583E5-5146-11D5-A672-00B0D022E945}'
+    filter_chrome:
+        TargetObject|contains: '\SOFTWARE\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}\'
+    filter_image:
+        Image: 
+            - 'C:\Windows\System32\poqexec.exe'
+            - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
+    filter_office:
+        Image|startswith: 
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
+        Image|endswith: '\OfficeClickToRun.exe'        
+    condition: main_selection and not 1 of filter_*
+fields:
+    - SecurityID
+    - ObjectName
+    - OldValueType
+    - NewValueType
+falsepositives:
+    - Legitimate software automatically (mostly, during installation) sets up autorun keys for legitimate reason
+    - Legitimate administrator sets up autorun keys for legitimate reason
+level: medium
+tags:
+    - attack.persistence
+    - attack.t1547.001
