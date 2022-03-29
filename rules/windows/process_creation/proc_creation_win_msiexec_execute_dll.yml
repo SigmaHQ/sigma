@@ -6,7 +6,7 @@ description: |
   Msiexec.exe is the command-line utility for the Windows Installer and is thus commonly associated with executing installation packages (.msi)
 author: frack113
 date: 2022/01/16
-modified: 2022/03/26
+modified: 2022/03/28
 references:
     - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/msiexec
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1218.007/T1218.007.md
@@ -26,6 +26,7 @@ detection:
             - '\MsiExec.exe" /Y "C:\Program Files (x86)\Apple Software Update\ScriptingObjectModel.dll'
             - '\MsiExec.exe" /Y "C:\Program Files (x86)\Apple Software Update\SoftwareUpdateAdmin.dll'
             - '\MsiExec.exe" /Y "C:\Windows\CCM\'
+            - '\MsiExec.exe" /Y C:\Windows\CCM\' #also need non-quoted execution
     condition: selection and not 1 of filter_*
 falsepositives:
     - Legitimate script
