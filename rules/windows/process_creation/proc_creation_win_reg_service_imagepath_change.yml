@@ -9,19 +9,22 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1574.011/T1574.011.md#atomic-test-2---service-imagepath-change-with-regexe
 author: frack113
 date: 2021/12/30
+modified: 2022/03/29
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
-        Image|endswith: \reg.exe 
+        Image|endswith: \reg.exe
         CommandLine|contains|all:
             - 'add '
-            - 'HKLM\SYSTEM\CurrentControlSet\Services\'
-            - '/v '
-            - 'ImagePath '
-            - '/d '
-    condition: selection
+            - 'SYSTEM\CurrentControlSet\Services\'
+            - ' ImagePath '
+    selection_value:
+        CommandLine|contains:
+            - ' /d '
+            - ' -d '
+    condition: all of selection*
 falsepositives:
     - Unknown
 level: medium
