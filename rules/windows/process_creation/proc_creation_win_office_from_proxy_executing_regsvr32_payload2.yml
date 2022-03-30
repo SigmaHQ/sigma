@@ -13,32 +13,32 @@ tags:
     - attack.defense_evasion
 status: experimental
 date: 2021/08/23
-modified: 2021/11/09
+modified: 2022/03/30
 logsource:
   product: windows
   category: process_creation
 detection:
   #useful_information: add more LOLBins to the rules logic of your choice.
   selection1:
-    ParentCommandLine:
-      - '*regsvr32*'
-      - '*rundll32*'
-      - '*msiexec*'
-      - '*mshta*'
-      - '*verclsid*'
+    CommandLine|contains:
+      - 'regsvr32'
+      - 'rundll32'
+      - 'msiexec'
+      - 'mshta'
+      - 'verclsid'
   selection2:
     - Image|endswith: '\wbem\WMIC.exe'
-    - ParentCommandLine|contains: 'wmic '
+    - CommandLine|contains: 'wmic '
   selection3:
     ParentImage|endswith:
       - winword.exe
       - excel.exe
       - powerpnt.exe
   selection4:
-    ParentCommandLine|contains|all: 
+    CommandLine|contains|all:
       - 'process'
       - 'create'
-      - 'call' 
+      - 'call'
   condition: selection1 and selection2 and selection3 and selection4
 falsepositives:
 - Unknown
