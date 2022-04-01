@@ -217,9 +217,6 @@ tools/sigmac -t splunk -c ~/my-splunk-mapping.yml -c tools/config/generic/window
 * [FortiSIEM](https://docs.fortinet.com)
 * [HAWK.io MDR](https://hawk.io/)
 
-Current work-in-progress
-* [Splunk Data Models](https://docs.splunk.com/Documentation/Splunk/7.1.0/Knowledge/Aboutdatamodels)
-
 New targets are continuously developed. You can get a list of supported targets with `sigmac --lists` or `sigmac -l`.
 
 ### Requirements
@@ -315,7 +312,7 @@ These tools are not part of the main toolchain and maintained separately by thei
 # Next Steps
 
 * Finalizing and promoting the new [pySigma](https://github.com/SigmaHQ/pySigma) codebase
-* Description of the new "Sigma Correlation Rules" (available with pySigma)
+* Development of backends for the new converter (in separate github repositories)
 
 # Projects or Products that use Sigma
 
@@ -330,6 +327,7 @@ These tools are not part of the main toolchain and maintained separately by thei
 * [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 * [TimeSketch](https://github.com/google/timesketch/commit/0c6c4b65a6c0f2051d074e87bbb2da2424fa6c35)
 * [SIΣGMA](https://github.com/3CORESec/SIEGMA) - SIEM consumable generator that utilizes Sigma for query conversion
+* [Aurora Agent](https://www.nextron-systems.com/2021/11/13/aurora-sigma-based-edr-agent-preview/)
 
 Sigma is available in some Linux distribution repositories:
 
