@@ -11,7 +11,7 @@ references:
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 date: 2019/10/25
-modified: 2022/03/26
+modified: 2022/04/04
 logsource:
     category: registry_set
     product: windows
@@ -51,15 +51,19 @@ detection:
             - '{807583E5-5146-11D5-A672-00B0D022E945}'
     filter_chrome:
         TargetObject|contains: '\SOFTWARE\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}\'
+    filter_edge:
+        TargetObject|contains: '\SOFTWARE\Microsoft\Active Setup\Installed Components\{9459C573-B17A-45AE-9F64-1857B5D58CEE}\'
+    filter_IE:
+        TargetObject|contains: '\Software\Microsoft\Active Setup\Installed Components\{89820200-ECBD-11cf-8B85-00AA005B4383}\'
     filter_image:
-        Image: 
+        Image:
             - 'C:\Windows\System32\poqexec.exe'
             - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
     filter_office:
-        Image|startswith: 
+        Image|startswith:
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
-        Image|endswith: '\OfficeClickToRun.exe'        
+        Image|endswith: '\OfficeClickToRun.exe'
     condition: main_selection and not 1 of filter_*
 fields:
     - SecurityID
