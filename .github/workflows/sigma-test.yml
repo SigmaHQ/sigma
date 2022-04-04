@@ -55,3 +55,21 @@ jobs:
         ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path Logs_Client/ --rule-path rules/windows/ > findings.json
     - name: Show findings excluding known FPs
       run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
+  check-baseline-win11:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Download evtx-sigma-checker
+      run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/latest/download/evtx-sigma-checker
+    - name: Download and extract Windows 11 baseline
+      run: |
+        wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win11-client.tgz
+        tar xzf win11-client.tgz
+    - name: Remove deprecated rules
+      run: 'grep -ERl "^status: deprecated" rules | xargs -r rm -v'
+    - name: Check for Sigma matches in baseline
+      run: |
+        chmod +x evtx-sigma-checker
+        ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path Logs_Win11/ --rule-path rules/windows/ > findings.json
+    - name: Show findings excluding known FPs
+      run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv

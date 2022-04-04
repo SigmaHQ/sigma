@@ -51,27 +51,46 @@ echo
 echo "Copy rules from ${SIGMA} to ${TMP}"
 cp -r "${RULES}"/windows .
 echo
+echo "Remove deprecated rules"
+grep -ERl "^status: deprecated" windows | xargs -r rm -v
+echo
 echo "Download evtx-sigma-checker"
 if [[ "${OS}" == "Linux" ]]; then
     wget --no-verbose --progress=bar --show-progress https://github.com/NextronSystems/evtx-baseline/releases/latest/download/evtx-sigma-checker
 elif [[ "${OS}" == "Darwin" ]]; then
     wget --no-verbose --progress=bar --show-progress https://github.com/NextronSystems/evtx-baseline/releases/latest/download/evtx-sigma-checker-darwin -O evtx-sigma-checker
 fi
+chmod +x evtx-sigma-checker
+
+# Windows 10
 echo
-echo "Download and extract Windows 10 baseline events"
+echo "Download Windows 10 baseline events"
 wget --no-verbose --progress=bar --show-progress https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win10-client.tgz
+echo "Extract Windows 10 baseline events"
 tar xzf win10-client.tgz
 echo
-echo "Remove deprecated rules"
-grep -ERl "^status: deprecated" windows | xargs -r rm -v
+echo "Check for Sigma matches in Windows 10 baseline (this takes at least 2 minutes)"
+./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path Logs_Client/ --rule-path windows/ > findings-win10.json
+
+# Windows 11
 echo
-echo "Check for Sigma matches in baseline (this takes at least 2 minutes)"
-chmod +x evtx-sigma-checker
-./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path Logs_Client/ --rule-path windows/ > findings.json
+echo "Download Windows 11 baseline events"
+wget --no-verbose --progress=bar --show-progress https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win11-client.tgz
+echo "Extract Windows 11 baseline events"
+tar xzf win11-client.tgz
+echo
+echo "Check for Sigma matches in Windows 11 baseline (this takes at least 6 minutes)"
+./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path Logs_Win11/ --rule-path windows/ > findings-win11.json
+
 
 echo
-echo "Checking for matches:"
-"${SIGMA}"/.github/workflows/matchgrep.sh findings.json "${SIGMA}"/.github/workflows/known-FPs.csv
+echo "## MATCHES ##"
+echo
+echo "Windows 10:"
+"${SIGMA}"/.github/workflows/matchgrep.sh findings-win10.json "${SIGMA}"/.github/workflows/known-FPs.csv
+echo
+echo "Windows 11:"
+"${SIGMA}"/.github/workflows/matchgrep.sh findings-win11.json "${SIGMA}"/.github/workflows/known-FPs.csv
 
 echo
 read -p  "Removing temporary directory ${TMP}. Press Enter to continue." -s
