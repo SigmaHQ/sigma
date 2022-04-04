@@ -7,7 +7,7 @@ references:
    - https://svch0st.medium.com/stats-from-hunting-cobalt-strike-beacons-c17e56255f9b
 author: Florian Roth
 date: 2022/03/21
-modified: 2022/03/23
+modified: 2022/03/28
 logsource:
    category: process_creation
    product: windows
@@ -32,7 +32,9 @@ detection:
          - '\conhost.exe'    # csrss.exe, certutil.exe
          - '\mmc.exe'        # eventvwr.exe
          - '\win32calc.exe'  # calc.exe
-   condition: selection or ( selection_special and not filter_special )
+   filter_null:
+      Image: null
+   condition: selection or ( selection_special and not 1 of filter_* )
 falsepositives:
    - Unknown
 level: high
