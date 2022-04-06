@@ -37,6 +37,24 @@ jobs:
     - uses: actions/checkout@v2
     - name: yaml-lint
       uses: ibiqlik/action-yamllint@v3
+  check-baseline-win7:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Download evtx-sigma-checker
+      run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/latest/download/evtx-sigma-checker
+    - name: Download and extract Windows 7 32-bit baseline
+      run: |
+        wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win7-x86.tgz
+        tar xzf win7-x86.tgz
+    - name: Remove deprecated rules
+      run: 'grep -ERl "^status: deprecated" rules | xargs -r rm -v'
+    - name: Check for Sigma matches in baseline
+      run: |
+        chmod +x evtx-sigma-checker
+        ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path win7_x86/ --rule-path rules/windows/ > findings.json
+    - name: Show findings excluding known FPs
+      run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
   check-baseline-win10:
     runs-on: ubuntu-latest
     steps:

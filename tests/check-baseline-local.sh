@@ -62,6 +62,16 @@ elif [[ "${OS}" == "Darwin" ]]; then
 fi
 chmod +x evtx-sigma-checker
 
+# Windows 7 32-bit
+echo
+echo "Download Windows 7 32-bit baseline events"
+wget --no-verbose --progress=bar --show-progress https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win7-x86.tgz
+echo "Extract Windows 7 32-bit baseline events"
+tar xzf win7-x86.tgz
+echo
+echo "Check for Sigma matches in Windows 7 32-bit baseline (this takes at least 2 minutes)"
+./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path win7_x86/ --rule-path windows/ > findings-win7.json
+
 # Windows 10
 echo
 echo "Download Windows 10 baseline events"
@@ -85,6 +95,9 @@ echo "Check for Sigma matches in Windows 11 baseline (this takes at least 6 minu
 
 echo
 echo "## MATCHES ##"
+echo
+echo "Windows 7 32-bit:"
+"${SIGMA}"/.github/workflows/matchgrep.sh findings-win7.json "${SIGMA}"/.github/workflows/known-FPs.csv
 echo
 echo "Windows 10:"
 "${SIGMA}"/.github/workflows/matchgrep.sh findings-win10.json "${SIGMA}"/.github/workflows/known-FPs.csv
