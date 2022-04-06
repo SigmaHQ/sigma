@@ -11,7 +11,7 @@ references:
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 date: 2019/10/25
-modified: 2022/03/26
+modified: 2022/04/04
 logsource:
     category: registry_set
     product: windows
@@ -62,10 +62,12 @@ detection:
             - '"C:\ProgramData\Package Cache\{e2d1ae32-dd1d-4ad7-a298-10e42e7840fc}\windowsdesktop-runtime-'
         Details|endswith: '.exe" /burn.runonce'
     filter_office:
-        Image|startswith: 
+        Image|startswith:
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
-        Image|endswith: '\OfficeClickToRun.exe'    
+        Image|endswith: '\OfficeClickToRun.exe'
+    filter_ms_win_desktop_runtime:
+        Details|startswith: '"C:\ProgramData\Package Cache\{d21a4f20-968a-4b0c-bf04-a38da5f06e41}\windowsdesktop-runtime-'
     condition: wow_current_version_base and wow_current_version and not 1 of filter_*
 fields:
     - SecurityID

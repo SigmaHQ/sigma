@@ -7,14 +7,14 @@ references:
     - https://attack.mitre.org/techniques/T1546/015/
 author: Maxime Thiebaut (@0xThiebaut), oscd.community, Cédric Hien
 date: 2020/04/14
-modified: 2022/03/26
+modified: 2022/04/04
 logsource:
     category: registry_set
     product: windows
 detection:
     selection: # Detect new COM servers in the user hive
         EventType: SetValue
-        TargetObject|startswith: 
+        TargetObject|startswith:
             - 'HKCR\CLSID\'
             - 'HKCU\Software\Classes\CLSID\'
         TargetObject|endswith: '\InprocServer32\(Default)'
@@ -23,7 +23,7 @@ detection:
             - '%%systemroot%%\system32\'
             - '%%systemroot%%\SysWow64\'
     filterOneDrive:
-        Details|contains: 
+        Details|contains:
             - '\AppData\Local\Microsoft\OneDrive\'
             - '\FileCoAuthLib64.dll'
             - '\FileSyncShell64.dll'
@@ -62,6 +62,8 @@ detection:
         Details:
             - 'C:\Windows\system32\dnssdX.dll'
             - 'C:\Windows\SysWOW64\dnssdX.dll'
+    filter_printextensionmanager:
+        Details: 'C:\Windows\system32\spool\drivers\x64\3\PrintConfig.dll'
     filter_programfiles:
         Details|startswith:
             - 'C:\Program Files\'

@@ -7,7 +7,7 @@ references:
   - https://twitter.com/pabraeken/status/990717080805789697
   - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OSBinaries/Runonce.yml
 date: 2020/11/15
-modified: 2022/02/15
+modified: 2022/04/04
 logsource:
   product: windows
   category: registry_event
@@ -18,6 +18,11 @@ detection:
   filter_chrome:
     Details|startswith: '"C:\Program Files\Google\Chrome\Application\'
     Details|endswith: '\Installer\chrmstp.exe" --configure-user-settings --verbose-logging --system-level'
+  filter_edge:
+    Details|startswith:
+    - '"C:\Program Files (x86)\Microsoft\Edge\Application\'
+    - '"C:\Program Files\Microsoft\Edge\Application\'
+    Details|endswith: '\Installer\setup.exe" --configure-user-settings --verbose-logging --system-level --msedge --channel=stable'
   condition: selection and not 1 of filter_*
 falsepositives:
   - Legitimate modification of the registry key by legitimate program

@@ -11,7 +11,7 @@ references:
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 date: 2019/10/25
-modified: 2022/03/26
+modified: 2022/04/04
 logsource:
     category: registry_set
     product: windows
@@ -50,6 +50,13 @@ detection:
             - 'C:\Program Files\KeePass Password Safe 2\ShInstUtil.exe'
             - 'C:\Program Files\Everything\Everything.exe'
             - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
+    filter_logonui:
+        Image: 'C:\Windows\system32\LogonUI.exe'
+        TargetObject|contains:
+            - '\Authentication\Credential Providers\{D6886603-9D2F-4EB2-B667-1971041FA96B}\'  # PIN
+            - '\Authentication\Credential Providers\{BEC09223-B018-416D-A0AC-523971B639F5}\'  # fingerprint
+            - '\Authentication\Credential Providers\{8AF662BF-65A0-4D0A-A540-A338A999D36F}\'  # facial recognizion
+            - '\Authentication\Credential Providers\{27FBDB57-B613-4AF2-9D7E-4FA7A66C21AD}\'  # Trusted Signal (Phone proximity, Network location)
     filter_edge:
         Image|startswith:
             - 'C:\Program Files (x86)\Microsoft\EdgeUpdate\Install\'
@@ -90,7 +97,7 @@ detection:
         Details|contains: '\AppData\Local\Package Cache\{c60fd5ac-367d-4e3a-a975-f157502ac30a}\python'
         Details|endswith: '.exe" /burn.runonce'
     filter_officeclicktorun:
-        Image|startswith: 
+        Image|startswith:
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
         Image|endswith: '\OfficeClickToRun.exe'
