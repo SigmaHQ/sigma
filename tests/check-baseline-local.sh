@@ -69,7 +69,7 @@ wget --no-verbose --progress=bar --show-progress https://github.com/NextronSyste
 echo "Extract Windows 7 32-bit baseline events"
 tar xzf win7-x86.tgz
 echo
-echo "Check for Sigma matches in Windows 7 32-bit baseline (this takes at least 2 minutes)"
+echo "Check for Sigma matches in Windows 7 32-bit baseline"
 ./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path win7_x86/ --rule-path windows/ > findings-win7.json
 
 # Windows 10
@@ -91,6 +91,15 @@ tar xzf win11-client.tgz
 echo
 echo "Check for Sigma matches in Windows 11 baseline (this takes at least 6 minutes)"
 ./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path Logs_Win11/ --rule-path windows/ > findings-win11.json
+ Windows 2022
+echo
+echo "Download Windows 2022 baseline events"
+wget --no-verbose --progress=bar --show-progress https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win2022-evtx.tgz
+echo "Extract Windows 2022 baseline events"
+tar xzf win2022-evtx.tgz
+echo
+echo "Check for Sigma matches in Windows 2022 baseline (this takes around 1 minute)"
+./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path win2022-evtx/ --rule-path windows/ > findings-win2022.json
 
 
 echo
@@ -104,6 +113,9 @@ echo "Windows 10:"
 echo
 echo "Windows 11:"
 "${SIGMA}"/.github/workflows/matchgrep.sh findings-win11.json "${SIGMA}"/.github/workflows/known-FPs.csv
+echo
+echo "Windows 2022:"
+"${SIGMA}"/.github/workflows/matchgrep.sh findings-win2022.json "${SIGMA}"/.github/workflows/known-FPs.csv
 
 echo
 read -p  "Removing temporary directory ${TMP}. Press Enter to continue." -s
