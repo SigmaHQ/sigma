@@ -31,6 +31,8 @@ SCRIPT="$(realpath $0)"
 TOOLS="${SCRIPT%/*}"
 SIGMA="${TOOLS%/*}"
 
+declare -A PID2OS
+
 if [[ -n "$1" && -d "$1" && -r "$1" ]]; then
     RULES="$1"
 else
@@ -61,49 +63,66 @@ elif [[ "${OS}" == "Darwin" ]]; then
     wget --no-verbose --progress=bar --show-progress https://github.com/NextronSystems/evtx-baseline/releases/latest/download/evtx-sigma-checker-darwin -O evtx-sigma-checker
 fi
 chmod +x evtx-sigma-checker
+echo
 
 # Windows 7 32-bit
-echo
-echo "Download Windows 7 32-bit baseline events"
-wget --no-verbose --progress=bar --show-progress https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win7-x86.tgz
-echo "Extract Windows 7 32-bit baseline events"
-tar xzf win7-x86.tgz
-echo
-echo "Check for Sigma matches in Windows 7 32-bit baseline"
-./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path win7_x86/ --rule-path windows/ > findings-win7.json
+OS="Windows 7 32-bit"
+{
+    wget --quiet https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win7-x86.tgz
+    tar xzf win7-x86.tgz
+    echo "  Checking for Sigma matches in $OS baseline"
+    ./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path win7_x86/ --rule-path windows/ > findings-win7.json
+    echo "  Finished Checking for Sigma matches in $OS baseline"
+}&
+pids+=($!)
+PID2OS[$!]=$OS
+
+# Windows 2022
+OS="Windows 2022"
+{
+    wget --quiet https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win2022-evtx.tgz
+    tar xzf win2022-evtx.tgz
+    echo "  Checking for Sigma matches in $OS baseline (this takes around 1 minute)"
+    ./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path win2022-evtx/ --rule-path windows/ > findings-win2022.json
+    echo "  Finished Checking for Sigma matches in $OS baseline"
+}&
+pids+=($!)
+PID2OS[$!]=$OS
 
 # Windows 10
-echo
-echo "Download Windows 10 baseline events"
-wget --no-verbose --progress=bar --show-progress https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win10-client.tgz
-echo "Extract Windows 10 baseline events"
-tar xzf win10-client.tgz
-echo
-echo "Check for Sigma matches in Windows 10 baseline (this takes at least 2 minutes)"
-./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path Logs_Client/ --rule-path windows/ > findings-win10.json
+OS="Windows 10"
+{
+    wget --quiet https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win10-client.tgz
+    tar xzf win10-client.tgz
+    echo "  Checking for Sigma matches in $OS baseline (this takes at least 2 minutes)"
+    ./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path Logs_Client/ --rule-path windows/ > findings-win10.json
+    echo "  Finished Checking for Sigma matches in $OS baseline"
+}&
+pids+=($!)
+PID2OS[$!]=$OS
 
 # Windows 11
-echo
-echo "Download Windows 11 baseline events"
-wget --no-verbose --progress=bar --show-progress https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win11-client.tgz
-echo "Extract Windows 11 baseline events"
-tar xzf win11-client.tgz
-echo
-echo "Check for Sigma matches in Windows 11 baseline (this takes at least 6 minutes)"
-./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path Logs_Win11/ --rule-path windows/ > findings-win11.json
- Windows 2022
-echo
-echo "Download Windows 2022 baseline events"
-wget --no-verbose --progress=bar --show-progress https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win2022-evtx.tgz
-echo "Extract Windows 2022 baseline events"
-tar xzf win2022-evtx.tgz
-echo
-echo "Check for Sigma matches in Windows 2022 baseline (this takes around 1 minute)"
-./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path win2022-evtx/ --rule-path windows/ > findings-win2022.json
+OS="Windows 11"
+{
+    wget --quiet https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win11-client.tgz
+    tar xzf win11-client.tgz
+    echo "  Checking for Sigma matches in $OS baseline (this takes at least 6 minutes)"
+    ./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path Logs_Win11/ --rule-path windows/ > findings-win11.json
+    echo "  Finished Checking for Sigma matches in $OS baseline"
+}&
+pids+=($!)
+PID2OS[$!]=$OS
 
+# Sync with all background jobs
+for pid in ${pids[*]}; do
+    echo "===>  Waiting for PID $pid / ${PID2OS[$pid]}"
+    wait $pid
+done
 
 echo
-echo "## MATCHES ##"
+echo "###############"
+echo "##  MATCHES  ##"
+echo "###############"
 echo
 echo "Windows 7 32-bit:"
 "${SIGMA}"/.github/workflows/matchgrep.sh findings-win7.json "${SIGMA}"/.github/workflows/known-FPs.csv
