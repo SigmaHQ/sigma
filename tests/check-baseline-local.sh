@@ -65,6 +65,9 @@ fi
 chmod +x evtx-sigma-checker
 echo
 
+echo
+echo "Starting EVTX checking in parallel..."
+
 # Windows 7 32-bit
 OS="Windows 7 32-bit"
 {
