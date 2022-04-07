@@ -1,0 +1,29 @@
+title: DumpMinitool Usage
+id: dee0a7a3-f200-4112-a99b-952196d81e42
+description: Detects the use of a Visual Studio bundled tool named DumpMinitool.exe
+status: experimental
+references:
+    - https://twitter.com/mrd0x/status/1511415432888131586?s=20&t=DvVrzeZ1OcGiWowbhPV8Lg
+    - https://twitter.com/mrd0x/status/1511489821247684615
+author: Florian Roth
+date: 2022/04/06
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+    - attack.t1003.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\DumpMinitool.exe'
+    selection_original_name:
+        OriginalName: 'DumpMinitool.exe'
+    selection_flags:
+        CommandLine|contains|all:
+            - ' --processId '
+            - ' --dumpType Full'
+    condition: 1 of selection*
+falsepositives:
+    - Unknown
+level: medium
