@@ -3,7 +3,7 @@ id: 93d298a1-d28f-47f1-a468-d971e7796679
 description: Detects disabling Windows Defender Tamper Protection
 status: experimental
 date: 2021/08/04
-modified: 2022/03/26
+modified: 2022/04/07
 author: Austin Songer @austinsonger
 references:
     - https://www.tenforums.com/tutorials/123792-turn-off-tamper-protection-microsoft-defender-antivirus.html
@@ -13,9 +13,12 @@ logsource:
 detection:
     selection:
         EventType: SetValue
-        TargetObject|contains: 'HKLM\SOFTWARE\Microsoft\Windows Defender\Features\TamperProtection'
+        TargetObject|contains: '\Microsoft\Windows Defender\Features\TamperProtection'
         Details: DWORD (0x00000000)
-    condition: selection
+    filter_msmpeng: # only disabled temporarily during updates
+        Image|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+        Image|endswith: '\MsMpEng.exe'
+    condition: selection and not filter_msmpeng
 falsepositives:
     - Unknown
 level: medium
