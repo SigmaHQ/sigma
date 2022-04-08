@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 from version 0.14.0.
 
+## 0.21 - 2022-04-08
+
+### Added
+
+* Azure Sentinel backend
+* OpenSearch Monitor backend
+* Hawk backend
+* Datadog backend
+* FortiSIEM backend
+* Lacework agent data support
+* Athena SQL backend
+* Regex support in SQLite backend
+* Additional field mappings
+
+### Changed
+
+* Log source refactoring
+
+### Fixed
+
+* Mapping fixes
+* Various bugfixes
+* Disabled problematic optimization
+
 ## 0.20 - 2021-08-14
 
 ### Added
