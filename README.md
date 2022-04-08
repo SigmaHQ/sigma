@@ -328,7 +328,7 @@ These tools are not part of the main toolchain and maintained separately by thei
 * [TimeSketch](https://github.com/google/timesketch/commit/0c6c4b65a6c0f2051d074e87bbb2da2424fa6c35)
 * [SIΣGMA](https://github.com/3CORESec/SIEGMA) - SIEM consumable generator that utilizes Sigma for query conversion
 * [Aurora Agent](https://www.nextron-systems.com/2021/11/13/aurora-sigma-based-edr-agent-preview/)
-* https://github.com/confluentinc/cyber/tree/master/confluent-sigma
+* [Confluent Sigma](https://github.com/confluentinc/cyber/tree/master/confluent-sigma)
 
 Sigma is available in some Linux distribution repositories:
 
