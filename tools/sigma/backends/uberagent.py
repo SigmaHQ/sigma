@@ -273,6 +273,7 @@ def get_parser_properties(sigmaparser):
     description = sigmaparser.parsedyaml['description']
     condition = sigmaparser.parsedyaml['detection']['condition']
     logsource = sigmaparser.parsedyaml['logsource']
+    id = sigmaparser.parsedyaml['id']
 
     category = ''
     if 'category' in logsource:
@@ -290,7 +291,7 @@ def get_parser_properties(sigmaparser):
     if 'tags' in sigmaparser.parsedyaml:
         annotation = get_annotation(sigmaparser.parsedyaml['tags'])
 
-    return product, category, service, title, level, condition, description, annotation
+    return product, category, service, title, level, condition, description, annotation, id
 
 
 def write_file_header(f, level):
@@ -424,6 +425,10 @@ class uberAgentBackend(SingleTextQueryBackend):
         "details"
     ]
 
+    options = SingleTextQueryBackend.options + (
+        ("exclusion", "", "List of separated GUIDs to execlude rule generation for.", None),
+    )
+
     rules = []
 
     def fieldNameMapping(self, fieldname, value):
@@ -451,10 +456,14 @@ class uberAgentBackend(SingleTextQueryBackend):
 
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
-        product, category, service, title, level, condition, description, annotation = get_parser_properties(sigmaparser)
+        product, category, service, title, level, condition, description, annotation, id = get_parser_properties(sigmaparser)
 
         # Do not generate a rule if the given category is unsupported by now.
         if not is_sigma_category_supported(category):
+            return ""
+
+        # Exclude all entries contained in backend configuration exclusion list.
+        if id in self.backend_options["exclusion"]:
             return ""
 
         # We support windows rules and generic rules that don't have a specific product specifier - such as DNS.
