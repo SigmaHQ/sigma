@@ -263,6 +263,18 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
         elif (self.category, self.product, self.service) == ("registry_event", "windows", None):
             self.tables.append("DeviceRegistryEvents")
             self.current_table = "DeviceRegistryEvents"
+        elif (self.category, self.product, self.service) == ("registry_add", "windows", None):
+            self.tables.append("DeviceRegistryEvents")
+            self.current_table = "DeviceRegistryEvents"
+        elif (self.category, self.product, self.service) == ("registry_delete", "windows", None):
+            self.tables.append("DeviceRegistryEvents")
+            self.current_table = "DeviceRegistryEvents"
+        elif (self.category, self.product, self.service) == ("registry_set", "windows", None):
+            self.tables.append("DeviceRegistryEvents")
+            self.current_table = "DeviceRegistryEvents"
+        elif (self.category, self.product, self.service) == ("registry_rename", "windows", None):
+            self.tables.append("DeviceRegistryEvents")
+            self.current_table = "DeviceRegistryEvents"    
         elif (self.category, self.service) == ("file_event", None) and self.product in ['windows', 'linux', 'macos']:
             self.tables.append("DeviceFileEvents")
             self.current_table = "DeviceFileEvents"

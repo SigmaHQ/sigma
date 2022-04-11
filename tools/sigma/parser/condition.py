@@ -403,26 +403,6 @@ class SigmaConditionOptimizer:
                 node.items = newitems
                 return self._optimizeNode(node, changes=True)
 
-            # OR(AND(X, ...), AND(X, ...))  =>  AND(X, OR(AND(...), AND(...)))
-            if type(node) == ConditionOR:
-                othertype = ConditionAND
-            else:
-                othertype = ConditionOR
-            if all(type(child) == othertype for child in node.items):
-                promoted = []
-                for cand in node.items[0]:
-                    if all(cand in child for child in node.items[1:]):
-                        promoted.append(cand)
-                if len(promoted) > 0:
-                    for child in node.items:
-                        for cand in promoted:
-                            if cand in child.items:
-                                child.items.remove(cand)
-                    newnode = othertype()
-                    newnode.items = promoted
-                    newnode.add(node)
-                    return self._optimizeNode(newnode, changes=True)
-
             # fallthrough
 
         elif type(node) == ConditionNOT:
@@ -516,7 +496,7 @@ class SigmaConditionParser:
             self.parsedSearch = self.parseSearch(tokens)
             self.parsedAgg = None
 
-    def parseSearch(self, tokens):
+    def parseSearch(self, tokens, depth=0):
         """
         Iterative parsing of search expression.
         """
@@ -561,7 +541,7 @@ class SigmaConditionParser:
             if lPos > rPos:
                 raise SigmaParseError("Closing parentheses at position " + str(rTok.pos) + " precedes opening at position " + str(lTok.pos))
 
-            subparsed = self.parseSearch(tokens[lPos + 1:rPos])
+            subparsed = self.parseSearch(tokens[lPos + 1:rPos], depth=depth+1)
             tokens = tokens[:lPos] + NodeSubexpression(subparsed) + tokens[rPos + 1:]   # replace parentheses + expression with group node that contains parsed subexpression
 
         # 2. Iterate over all known operators in given precedence
@@ -590,13 +570,14 @@ class SigmaConditionParser:
             raise ValueError("Parse tree must have exactly one start node!")
         query_cond = tokens[0]
 
-        # 4. Integrate conditions from logsources in configurations
-        ls_cond = self.sigmaParser.get_logsource_condition()
-        if ls_cond is not None:
-            cond = ConditionAND()
-            cond.add(ls_cond)
-            cond.add(query_cond)
-            query_cond = cond
+        # 4. Integrate conditions from logsources in configurations to outermost expression
+        if depth == 0:
+            ls_cond = self.sigmaParser.get_logsource_condition()
+            if ls_cond is not None:
+                cond = ConditionAND()
+                cond.add(ls_cond)
+                cond.add(query_cond)
+                query_cond = cond
 
         return self._optimizer.optimizeTree(query_cond)
 

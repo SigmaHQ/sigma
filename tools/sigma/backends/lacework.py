@@ -24,13 +24,12 @@ import yaml
 
 from sigma.backends.base import SingleTextQueryBackend
 from sigma.backends.exceptions import BackendError
-from sigma.parser.modifiers.base import SigmaTypeModifier
-
+from sigma.parser.condition import ConditionOR
 
 LACEWORK_CONFIG = yaml.load(
     textwrap.dedent('''
     ---
-    version: 0.1
+    version: 0.2
     services:
       cloudtrail:
         evaluatorId: Cloudtrail
@@ -62,6 +61,73 @@ LACEWORK_CONFIG = yaml.load(
           - EVENT_TIME
           - EVENT
         alertProfile: LW_CloudTrail_Alerts
+        evalFrequency: Hourly
+    product.categories:
+      linux.file_create:
+        evaluatorId:
+        source: LW_HE_FILES
+        conditions:
+          # evaluated hourly and file create time within the last hour
+          - and diff_minutes(FILE_CREATED_TIME, current_timestamp_sec()::timestamp) <= 60
+        fieldMap:
+          - sigmaField: TargetFilename
+            laceworkField: PATH
+            matchType: exact
+        returns:
+          - RECORD_CREATED_TIME
+          - MID
+          - PATH
+          - FILE_TYPE
+          - SIZE
+          - FILEDATA_HASH
+          - OWNER_UID
+          - OWNER_USERNAME
+          - FILE_CREATED_TIME
+        alertProfile: LW_HE_FILES_DEFAULT_PROFILE.HE_File_NewViolation
+        evalFrequency: Hourly
+      linux.process_creation:
+        evaluatorId:
+        source: LW_HE_PROCESSES
+        conditions:
+          # evaluated hourly and file create time within the last hour
+          - and diff_minutes(PROCESS_START_TIME, current_timestamp_sec()::timestamp) <= 60
+        fieldMap:
+          - sigmaField: ParentImage
+            laceworkField:
+            matchType: exact
+            action: raise
+          - sigmaField: Image
+            laceworkField: EXE_PATH
+            matchType: exact
+          - sigmaField: ParentCommandLine
+            laceworkField:
+            matchType: exact
+            action: raise
+          - sigmaField: CommandLine
+            laceworkField: CMDLINE
+            matchType: exact
+          - sigmaField: CurrentDirectory
+            laceworkField: CWD
+            matchType: exact
+          - sigmaField: LogonId
+            laceworkField:
+            matchType: exact
+            action: ignore
+          - sigmaField: User
+            laceworkField: USERNAME
+            matchType: exact
+        returns:
+          - RECORD_CREATED_TIME
+          - MID
+          - PID
+          - EXE_PATH
+          - CMDLINE
+          - CWD
+          - ROOT
+          - USERNAME
+          - PROCESS_START_TIME
+        alertProfile: LW_HE_PROCESSES_DEFAULT_PROFILE.HE_Process_NewViolation
+        evalFrequency: Hourly
     '''),
     Loader=yaml.SafeLoader
 )
@@ -98,7 +164,12 @@ def str_presenter(dumper, data):
     return dumper.represent_scalar('tag:yaml.org,2002:str', data)
 
 
+def none_representer(dumper, _):
+    return dumper.represent_scalar(u'tag:yaml.org,2002:null', '')
+
+
 yaml.add_representer(str, str_presenter)
+yaml.add_representer(type(None), none_representer)
 
 
 class LaceworkBackend(SingleTextQueryBackend):
@@ -119,8 +190,8 @@ class LaceworkBackend(SingleTextQueryBackend):
     nullExpression = '%s is null'
     notNullExpression = '%s is not null'
     mapExpression = '%s = %s'
-    mapListsSpecialHandling = True
     mapListValueExpression = '%s %s'
+    reEscape = re.compile("(')")
 
     def generate(self, sigmaparser):
         """
@@ -168,9 +239,11 @@ class LaceworkBackend(SingleTextQueryBackend):
         1.  Do not wrap in valueExpression
         2.  Transform using fieldNameMapping()
         """
-        node = self.cleanValue(str(node))
+        node = self.cleanValue(str(node).strip())
 
         if node in self.laceworkSigmaFields:
+            if self._should_ignore_field(node):
+                return None
             return self.fieldNameMapping(node, None)
         return self.valueExpression % node
 
@@ -182,10 +255,14 @@ class LaceworkBackend(SingleTextQueryBackend):
         """
         fieldname, value = node
 
+        if self._should_ignore_field(fieldname):
+            return None
         transformed_fieldname = self.fieldNameMapping(fieldname, value)
 
         # is not null
         if value == '*':
+            if ':' in transformed_fieldname:
+                return f'value_exists({transformed_fieldname})'
             return f'{transformed_fieldname} is not null'
         # contains
         if (
@@ -207,23 +284,57 @@ class LaceworkBackend(SingleTextQueryBackend):
             isinstance(value, str)
             and value.startswith('*')  # a wildcard at the start signifies endswith
         ):
-            new_value = self.generateValueNode(value[1:])
-            if new_value != (self.valueExpression % value[1:]):
+            value = f'%{value[1:]}'
+            new_value = self.generateValueNode(value)
+            if new_value != (self.valueExpression % value):
                 raise BackendError(
                     'Lacework backend only supports endswith for literal string values')
-            return f"{transformed_fieldname} <> {new_value}"
-        if (
-            self.mapListsSpecialHandling is False and isinstance(value, (str, int, list))
-            or self.mapListsSpecialHandling is True and isinstance(value, (str, int))
-        ):
+            return f"{transformed_fieldname} LIKE {new_value}"
+        if isinstance(value, (str, int)):
             return self.mapExpression % (transformed_fieldname, self.generateNode(value))
+        # mapListsHandling
         elif type(value) == list:
+            # if a list contains values with wildcards we can't use standard handling ("in")
+            if any([x for x in value if x.startswith('*') or x.endswith('*')]):
+                node = ConditionOR(None, None, *[(transformed_fieldname, x) for x in value])
+                return self.generateNode(node)
             return self.generateMapItemListNode(transformed_fieldname, value)
         elif value is None:
             return self.nullExpression % (transformed_fieldname, )
         else:
             raise TypeError(
                 f'Lacework backend does not support map values of type {type(value)}')
+
+    def _should_ignore_field(self, fieldname):
+        """
+        Whether to ignore field for Lacework Query Language (LQL)
+        """
+        if not (isinstance(fieldname, str) and fieldname):
+            return False
+
+        for map in self.laceworkFieldMap:
+            if not isinstance(map, dict):
+                continue
+
+            sigma_field = safe_get(map, 'sigmaField', str)
+            if not sigma_field:
+                continue
+
+            # ignore
+            if (
+                map.get('matchType') == 'exact'
+                and sigma_field == fieldname
+                and map.get('action') == 'ignore'
+            ):
+                return True
+
+        return False
+
+    @staticmethod
+    def _check_unsupported_field(action, fieldname):
+        if action == 'raise':
+            raise BackendError(
+                f'Lacework backend does not support the {fieldname} field')
 
     def fieldNameMapping(self, fieldname, value):
         """
@@ -244,7 +355,7 @@ class LaceworkBackend(SingleTextQueryBackend):
                 continue
 
             lacework_field = safe_get(map, 'laceworkField', str)
-            if not lacework_field:
+            if (not lacework_field) and map.get('action') != 'raise':
                 continue
 
             continyu = safe_get(map, 'continue', bool)
@@ -254,6 +365,7 @@ class LaceworkBackend(SingleTextQueryBackend):
                 map.get('matchType') == 'exact'
                 and sigma_field == fieldname
             ):
+                self._check_unsupported_field(map.get('action'), fieldname)
                 fieldname = lacework_field
                 if not continyu:
                     return fieldname
@@ -263,6 +375,7 @@ class LaceworkBackend(SingleTextQueryBackend):
                 map.get('matchType') == 'startswith'
                 and fieldname.startswith(sigma_field)
             ):
+                self._check_unsupported_field(map.get('action'), fieldname)
                 fieldname = f'{lacework_field}{fieldname[len(sigma_field):]}'
                 if not continyu:
                     return fieldname
@@ -274,6 +387,8 @@ class LaceworkBackend(SingleTextQueryBackend):
 
                 if not fieldname_match:
                     continue
+
+                self._check_unsupported_field(map.get('action'), fieldname)
 
                 for i, group in enumerate(fieldname_match.groups(), start=1):
                     if group is None:
@@ -287,6 +402,8 @@ class LaceworkBackend(SingleTextQueryBackend):
 
 
 class LaceworkQuery:
+    DEFAULT_EVAL_FREQUENCY = 'Hourly'
+
     def __init__(
         self,
         config,
@@ -300,32 +417,32 @@ class LaceworkQuery:
         # 0. Get Output Format
         self.output_format = str(output_format).lower()
 
-        # 1. Get Service
-        self.service_name = self.get_service(rule)
+        # 1. Get Logsource
+        self.logsource_type, self.logsource_name = self.get_logsource(rule)
 
-        # 2. Get Service Config
-        self.service_config = self.get_service_config(
-            config, self.service_name)
+        # 2. Get Logsource Config
+        self.logsource_config = self.get_logsource_config(
+            config, self.logsource_type, self.logsource_name)
 
         # 3. Get Evaluator ID
         self.evaluator_id = self.get_evaluator_id(
-            self.service_name, self.service_config)
+            self.logsource_name, self.logsource_config)
 
         # 4. Get Query ID
         self.title, self.query_id = self.get_query_id(rule)
 
         # 5. Get Query Source
         self.query_source = self.get_query_source(
-            self.service_name, self.service_config)
+            self.logsource_name, self.logsource_config)
 
         # 6. Get Query Returns
         self.returns = self.get_query_returns(
-            self.service_name, self.service_config)
+            self.logsource_name, self.logsource_config)
 
         # 7. Get Query Text
         self.query_text = self.get_query_text(backend, conditions)
 
-    def get_query_text(self, backend, conditions):
+    def get_query_text(self, backend, rule_conditions):
         query_template = (
             '{id} {{\n'
             '    {source_block}\n'
@@ -338,7 +455,8 @@ class LaceworkQuery:
         source_block = self.get_query_source_block()
 
         # 2. get_query_filters
-        filter_block = self.get_query_filter_block(backend, conditions)
+        config_conditions = safe_get(self.logsource_config, 'conditions', list)
+        filter_block = self.get_query_filter_block(backend, rule_conditions, config_conditions)
 
         # 3. get_query_returns
         return_block = self.get_query_return_block()
@@ -397,11 +515,10 @@ class LaceworkQuery:
 
     @staticmethod
     def get_field_map(config, sigmaparser):
-        config = safe_get(config, 'services', dict)
-        service = LaceworkQuery.get_service(sigmaparser.parsedyaml)
-        service_config = safe_get(config, service, dict)
+        logsource_type, logsource_name = LaceworkQuery.get_logsource(sigmaparser.parsedyaml)
+        logsource_config = LaceworkQuery.get_logsource_config(config, logsource_type, logsource_name)
 
-        return safe_get(service_config, 'fieldMap', list)
+        return safe_get(logsource_config, 'fieldMap', list)
 
     @staticmethod
     def should_generate_query(backend_options):
@@ -421,71 +538,75 @@ class LaceworkQuery:
         return True
 
     @staticmethod
-    def get_service(rule):
+    def get_logsource(rule):
         logsource = safe_get(rule, 'logsource', dict)
-        return logsource.get('service') or 'unknown'
+        if 'service' in logsource:
+            return 'services', logsource['service']
+        if {'product', 'category'}.issubset(set(logsource)):
+            return 'product.categories', f"{logsource['product']}.{logsource['category']}"
+        return 'unknown', 'unknown'
 
     @staticmethod
-    def get_service_config(config, service):
-        config = safe_get(config, 'services', dict)
-        service_config = safe_get(config, service, dict)
+    def get_logsource_config(config, logsource_type, logsource_name):
+        config = safe_get(config, logsource_type, dict)
+        logsource_config = safe_get(config, logsource_name, dict)
 
         # 1. validate logsource service
-        if not service_config:
+        if not logsource_config:
             raise BackendError(
-                f'Service {service} is not supported by the Lacework backend')
+                f'Log source {logsource_name} is not supported by the Lacework backend')
 
-        return service_config
+        return logsource_config
 
     @staticmethod
-    def get_evaluator_id(service_name, service_config):
+    def get_evaluator_id(logsource_name, logsource_config):
         # 3. validate service has an evaluatorId mapping
-        evaluator_id = safe_get(service_config, 'evaluatorId', str)
+        evaluator_id = safe_get(logsource_config, 'evaluatorId', str)
+        return evaluator_id if evaluator_id else None
 
-        if not evaluator_id:
-            raise BackendError(
-                f'Lacework backend could not determine evaluatorId for service {service_name}')
-
-        return evaluator_id
+    @staticmethod
+    def get_eval_frequency(logsource_name, logsource_config):
+        eval_frequency = safe_get(logsource_config, 'evalFrequency', str)
+        return eval_frequency if eval_frequency else LaceworkQuery.DEFAULT_EVAL_FREQUENCY
 
     @staticmethod
     def get_query_id(rule):
         title = safe_get(rule, 'title', str) or 'Unknown'
         # TODO: might need to replace additional non-word characters
-        query_id = f'Sigma_{title}'.replace(" ", "_").replace("/", "_Or_")
+        query_id = f'Sigma_{title}'.replace(" ", "_").replace("/", "_Or_").replace("-", "_")
 
         return title, query_id
 
     @staticmethod
-    def get_query_source(service_name, service_config):
+    def get_query_source(logsource_name, logsource_config):
         # 4. validate service has a source mapping
-        source = safe_get(service_config, 'source', str)
+        source = safe_get(logsource_config, 'source', str)
 
         if not source:
             raise BackendError(
-                f'Lacework backend could not determine source for service {service_name}')
+                f'Lacework backend could not determine source for logsource {logsource_name}')
 
         return source
 
     @staticmethod
-    def get_query_returns(service_name, service_config):
-        returns = safe_get(service_config, 'returns', list)
+    def get_query_returns(logsource_name, logsource_config):
+        returns = safe_get(logsource_config, 'returns', list)
 
         if not returns:
             raise BackendError(
-                f'Lacework backend could not determine returns for service {service_name}')
+                f'Lacework backend could not determine returns for logsource {logsource_name}')
 
         return returns
 
     @staticmethod
-    def get_query_filter_block(backend, conditions):
+    def get_query_filter_block(backend, rule_conditions, config_conditions):
         filter_block_template = (
             'filter {{\n'
             '        {filter}\n'
             '    }}'
         )
 
-        for parsed in conditions:
+        for parsed in rule_conditions:
             query = backend.generateQuery(parsed)
             before = backend.generateBefore(parsed)
             after = backend.generateAfter(parsed)
@@ -498,6 +619,8 @@ class LaceworkQuery:
             if after is not None:
                 filter += after
 
+            if config_conditions:
+                filter += f" {' '.join(config_conditions)}"
             return filter_block_template.format(filter=filter)
 
 
@@ -514,15 +637,15 @@ class LaceworkPolicy:
         self.output_format = str(output_format).lower()
 
         # 1. Get Service Name
-        self.service_name = LaceworkQuery.get_service(rule)
+        self.logsource_type, self.logsource_name = LaceworkQuery.get_logsource(rule)
 
         # 2. Get Service Config
-        self.service_config = LaceworkQuery.get_service_config(
-            config, self.service_name)
+        self.logsource_config = LaceworkQuery.get_logsource_config(
+            config, self.logsource_type, self.logsource_name)
 
         # 3. Get Evaluator Id
         self.evaluator_id = LaceworkQuery.get_evaluator_id(
-            self.service_name, self.service_config)
+            self.logsource_name, self.logsource_config)
 
         # 4. Get Title
         # 5. Get Query ID
@@ -539,10 +662,10 @@ class LaceworkPolicy:
 
         # 9. Get Alert Profile
         self.alert_profile = self.get_alert_profile(
-            self.service_name, self.service_config)
+            self.logsource_name, self.logsource_config)
 
         # 10. Get Eval Frequency
-        self.eval_frequency = 'Hourly'
+        self.eval_frequency = LaceworkQuery.get_eval_frequency(self.logsource_name, self.logsource_config)
 
         # 11. Get Limit
         self.limit = 1000
@@ -604,11 +727,11 @@ class LaceworkPolicy:
         return True
 
     @staticmethod
-    def get_alert_profile(service_name, service_config):
-        alert_profile = safe_get(service_config, 'alertProfile', str)
+    def get_alert_profile(logsource_name, logsource_config):
+        alert_profile = safe_get(logsource_config, 'alertProfile', str)
 
         if not alert_profile:
             raise BackendError(
-                f'Lacework backend could not determine alert profile for service {service_name}')
+                f'Lacework backend could not determine alert profile for logsource {logsource_name}')
 
         return alert_profile

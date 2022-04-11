@@ -14,7 +14,7 @@ with open(path.join(here, 'LONG_DESCRIPTION.md'), encoding='utf-8') as f:
 
 setup(
     name='sigmatools',
-    version='0.20',
+    version='0.21.0',
     description='Tools for the Generic Signature Format for SIEM Systems',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -45,7 +45,7 @@ setup(
     python_requires='~=3.8',
     install_requires=['PyYAML', 'pymisp', 'progressbar2', 'ruamel.yaml'],
     extras_require={
-        'test': ['coverage', 'yamllint'],
+        'test': ['coverage', 'yamllint', 'attackcti'],
     },
     data_files=[
         ('etc/sigma', [ str(p) for p in Path('config/').glob('*.yml') ]),

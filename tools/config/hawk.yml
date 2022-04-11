@@ -4,13 +4,19 @@ backends:
   - hawk
 logsources:
  antivirus:
-   product: antivirus
+   category: antivirus
+   conditions:
+     vendor_type: 'Antivirus'
  apache:
-   product: apache
+   service: apache
    conditions:
      product_name: 
        - 'apache*'
        - 'httpd*'
+ webserver:
+   category: webserver
+   conditions:
+     vendor_type: 'Webserver'
  cisco:
    product: cisco
    conditions:
@@ -35,14 +41,14 @@ logsources:
     vendor_name: "Microsoft"
     product_name: "Onelogin" 
  microsoft365:
-   category: ThreatManagement
-   service: Microsoft365
+   product: m365
+   service: threat_management
    conditions:
     vendor_name: "Microsoft"
     product_name: "365"
  m365:
-   category: ThreatManagement
-   service: m365
+   product: m365
+   service: threat_management
    conditions:
     vendor_name: "Microsoft"
     product_name: "365"
@@ -73,6 +79,11 @@ logsources:
    service: syslog
    conditions:
     process_name: "syslog*"
+ spring:
+   category: application
+   product: spring
+   conditions:
+    vendor_name: "Spring"
  modsecurity:
    service: modsecurity
    conditions:
@@ -144,7 +155,7 @@ logsources:
      vendor_id: "11"
  windows-file-event:
    product: windows
-   category: file_create
+   category: file_event
    conditions:
      product_name: "Sysmon"
      vendor_id: "11"
@@ -207,22 +218,26 @@ logsources:
   conditions:
     vendor_name: "Zeek IDS"
  azure-signin:
-  service: azure.signinlogs
+  product: azure
+  service: signinlogs
   conditions:
     vendor_name: "Microsoft"
     product_name: "Azure"
  azure-auditlogs:
-   service: azure.auditlogs
+   product: azure
+   service: auditlogs
    conditions:
     vendor_name: "Microsoft"
     product_name: "Azure"
  azure-activitylogs:
-   service: azure.activitylogs
+   product: azure
+   service: activitylogs
    conditions:
     vendor_name: "Microsoft"
     product_name: "Azure"
  azure-activity:
-   service: AzureActivity
+   product: azure
+   service: azureactivity
    conditions:
     vendor_name: "Microsoft"
     product_name: "Azure"
@@ -302,6 +317,35 @@ logsources:
    conditions:
      product_name:
        - 'AppLocker'
+ windows-firewall-advanced-security:
+   product: windows
+   service: firewall-as
+   conditions:
+     product_name: 'Windows Firewall With Advanced Security'
+ windows-ps-module:
+   product: windows
+   category: ps_module
+   conditions:
+     product_name: 'PowerShell'
+     vendor_id: 4103
+ windows-ps-script:
+   product: windows
+   category: ps_script
+   conditions:
+     product_name: 'PowerShell'
+     vendor_id: 4104
+ windows-ps-classic-provider:
+   product: windows
+   category: ps_classic_provider_start
+   conditions:
+     vendor_id: 600
+     product_name: 'Windows PowerShell'
+ windows-ps-classic-script:
+   product: windows
+   category: ps_classic_script
+   conditions:
+     vendor_id: 800
+     product_name: 'Windows PowerShell'
  windows-service-bus:
    service: Microsoft-ServiceBus-Client
    conditions:
@@ -321,6 +365,11 @@ logsources:
    service: printservice-operational
    conditions:
      product_name: 'PrintService'
+ windows-codeintegrity-operational:
+   product: windows
+   service: codeintegrity-operational
+   conditions:
+     product_name: 'CodeIntegrity'
  windows-smbclient-security:
    product: windows
    service: smbclient-security
@@ -334,10 +383,30 @@ logsources:
       - 12
       - 13
       - 14
+ windows-registry-add:
+   product: windows
+   category: registry_add
+   conditions:
+     vendor_id: 12
+ windows-registry-delete:
+   product: windows
+   category: registry_delete
+   conditions:
+     vendor_id: 12
+ windows-registry-set:
+   product: windows
+   category: registry_set
+   conditions:
+     vendor_id: 13
+ windows-registry-rename:
+   product: windows
+   category: registry_rename
+   conditions:
+     vendor_id: 14
  qflow:
    product: qflow
  netflow:
-   product: netflow
+   service: netflow
  ipfix:
    product: ipfix
  flow:
@@ -383,6 +452,7 @@ fieldmappings:
   ProcessCommandLine: command
   ParentCommandLine: parent_command
   IMPHASH: file_hash_imphash
+  Imphash: file_hash_imphash
   SHA256: file_hash_sha256
   MD5: file_hash_md5
   SHA1: file_hash_sha1
@@ -424,7 +494,6 @@ fieldmappings:
   ObjectValueName: object_name
   ObjectName: object_name
   DeviceClassName: object_name
-  Details: object_target
   CallTrace: calltrace
   IpAddress: ip_src
   WorkstationName: hostname_src
@@ -442,3 +511,28 @@ fieldmappings:
   event_type_id: vendor_id
   eventtype: vendor_type
   destination.port: ip_dport
+  user: correlation_username
+  User: correlation_username
+  Provider_Name: channel
+  c-referer: http_referer
+  cs-referer: http_referer
+  c-uri: http_uri
+  cs-uri: http_uri
+  c-agent: http_user_agent
+  cs-agent: http_user_agent
+  c-useragent: http_user_agent
+  cs-useragent: http_user_agent
+  c-ip: ip_src
+  cs-ip: ip_src
+  s-ip: ip_dst
+  sc-ip: ip_dst
+  c-username: correlation_username
+  cs-username: correlation_username
+  s-computername: ip_dst_host
+  cs-uri-query: http_query
+  c-uri-query: http_query
+  sc-status: http_status_code
+  sc-bytes: http_content_length
+  user-agent: http_user_agent
+  cs-User-Agent: http_user_agent
+  r-dns: ip_dst_host

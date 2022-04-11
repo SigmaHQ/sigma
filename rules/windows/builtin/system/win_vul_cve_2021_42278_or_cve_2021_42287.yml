@@ -1,0 +1,36 @@
+title: Exploit SamAccountName Spoofing with Kerberos
+id: 44bbff3e-4ca3-452d-a49a-6efa4cafa06f
+status: experimental
+description: |
+  The attacker creates a computer object using those permissions with a password known to her.
+  After that she clears the attribute ServicePrincipalName on the computer object.
+  Because she created the object (CREATOR OWNER), she gets granted additional permissions and can do many changes to the object.
+references:
+    - https://cloudbrothers.info/en/exploit-kerberos-samaccountname-spoofing/
+author: frack113
+date: 2021/12/15
+logsource:
+    product: windows
+    service: system
+detection:
+    selection_1:
+        Provider_Name: Microsoft-Windows-Kerberos-Key-Distribution-Center  # Active Directory
+        EventID:
+            - 35
+            - 36
+            - 37
+            - 38
+    selection_2:
+        Provider_Name: Microsoft-Windows-Directory-Services-SAM  # Active Directory
+        EventID:
+            - 16990
+            - 16991
+    condition: selection_1 or selection_2
+fields:
+    - samAccountName
+falsepositives:
+    - Unknown 
+level: medium
+tags:
+    - attack.credential_access
+    - attack.t1558.003 

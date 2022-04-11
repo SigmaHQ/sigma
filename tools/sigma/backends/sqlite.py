@@ -16,6 +16,7 @@
 
 from sigma.backends.sql import SQLBackend
 from sigma.parser.condition import NodeSubexpression, ConditionAND, ConditionOR, ConditionNOT
+from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
 import re
 
 class SQLiteBackend(SQLBackend):
@@ -23,7 +24,14 @@ class SQLiteBackend(SQLBackend):
     identifier = "sqlite"
     active = True
 
+    # Single quoted string literals are preferred in SQlite 
+    # https://www.sqlite.org/quirks.html#double_quoted_string_literals_are_accepted 
+    valueExpression = "\'%s\'" # Expression of values, %s represents value
     mapFullTextSearch = "%s MATCH ('\"%s\"')"
+    mapRegex = "%s REGEXP %s"
+    typedValueExpression = { 
+        SigmaRegularExpressionModifier: "\'%s\'" # Syntax for regular expressions
+    }
 
     countFTS = 0
 
@@ -74,22 +82,22 @@ class SQLiteBackend(SQLBackend):
         if not isinstance(val, str):
             return str(val)
 
-        #Escape double quotes in SQLite
-        val = val.replace('"','""')
+        # Escape single quotes in SQLite
+        val = val.replace('\'','\'\'')
 
-        #Single backlashes which are not in front of * or ? are doulbed
+        # Single backlashes which are not in front of * or ? are doulbed
         val = re.sub(r"(?<!\\)\\(?!(\\|\*|\?))", r"\\\\", val)
 
-        #Replace _ with \_ because _ is a sql wildcard
+        # Replace _ with \_ because _ is a sql wildcard
         val = re.sub(r'_', r'\_', val)
 
-        #Replace % with \% because % is a sql wildcard
+        # Replace % with \% because % is a sql wildcard
         val = re.sub(r'%', r'\%', val)
 
-        #Replace * with %, if even number of backslashes (or zero) in front of *
+        # Replace * with %, if even number of backslashes (or zero) in front of *
         val = re.sub(r"(?<!\\)(\\\\)*(?!\\)\*", r"\1%", val)
 
-        #Replace ? with _, if even number of backsashes (or zero) in front of ?
+        # Replace ? with _, if even number of backsashes (or zero) in front of ?
         val = re.sub(r"(?<!\\)(\\\\)*(?!\\)\?", r"\1_", val)
 
         return val
@@ -106,6 +114,8 @@ class SQLiteBackend(SQLBackend):
 
             if "," in generated_value and generated_value[0]=="(" and generated_value[-1]==")" and not has_wildcard:
                 return self.mapMulti % (transformed_fieldname, generated_value)
+            elif type(value) == SigmaRegularExpressionModifier:
+                return self.mapRegex % (transformed_fieldname, generated_value) # regex are mapped "as is"
             elif "LENGTH" in transformed_fieldname:
                 return self.mapLength % (transformed_fieldname, value)
             elif type(value) == list:
@@ -130,6 +140,9 @@ class SQLiteBackend(SQLBackend):
             return self.valueExpression % (self.cleanValue(str(node)))
         else:
             return self.generateFTS(self.cleanValue(str(node)))
+
+    def generateTypedValueNode(self, node):
+        return self.typedValueExpression[type(node)] % (str(node))
 
     def generateQuery(self, parsed):
         self.countFTS = 0

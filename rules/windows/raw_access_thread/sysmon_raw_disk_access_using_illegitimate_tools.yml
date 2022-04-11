@@ -2,8 +2,9 @@ title: Raw Disk Access Using Illegitimate Tools
 id: db809f10-56ce-4420-8c86-d6a7d793c79c
 description: Raw disk access using illegitimate tools, possible defence evasion
 author: Teymur Kheirkhabarov, oscd.community
+status: test
 date: 2019/10/22
-modified: 2021/11/16
+modified: 2022/03/15
 references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
 tags:
@@ -16,25 +17,45 @@ detection:
     filter_1:
         Device|contains: floppy
     filter_2:
-        Image|endswith:             # easy to bypass. requires extra rule to support this one
-            - '\wmiprvse.exe'
-            - '\sdiagnhost.exe'
-            - '\searchindexer.exe'
-            - '\csrss.exe'
-            - '\defrag.exe'
-            - '\smss.exe'
-            - '\vssvc.exe'
-            - '\compattelrunner.exe'
-            - '\wininit.exe'
-            - '\autochk.exe'
-            - '\taskhost.exe'
-            - '\dfsrs.exe'
-            - '\vds.exe'
-            - '\lsass.exe'
-            - '\svchost.exe'
+        Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SystemApps\'
+            - 'C:\Windows\WinSxS\'
+            - 'C:\Windows\servicing\'
+            - 'C:\Windows\CCM\'
+            - 'C:\Windows\uus\'
+            - 'C:\Windows\WinSxs\'
     filter_3:
         ProcessId: 4
-    condition: not filter_1 and not filter_2 and not filter_3
+    filter_specific:
+        Image:
+            - 'C:\Windows\UUS\amd64\MoUsoCoreWorker.exe'
+            - 'C:\Windows\explorer.exe'
+    filter_system:
+        Image:
+            - 'System'
+            - 'Registry'
+    filter_Keybase:
+        Image|endswith: '\Keybase\upd.exe'
+    filter_windefender:
+        Image|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+        Image|endswith: '\MsMpEng.exe'
+    filter_programfiles:  # this rule causes so many FPs that we have to do this
+        Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    filter_appdata:
+        Image|contains|all:
+            - 'C:\Users\'
+            - '\AppData\'
+            - '\Microsoft\'
+    filter_nextron:
+        Image|startswith: 'C:\Windows\Temp\asgard2-agent\'
+        Image|endswith: '\thor.exe'
+    filter_startmenu_xphost:
+        Image|startswith: 'C:\Windows\SystemApps\Microsoft.Windows.StartMenuExperienceHost'
+        Image|endswith: '\StartMenuExperienceHost.exe'
+    condition: not 1 of filter_*
 fields:
     - ComputerName
     - Image
@@ -42,5 +63,5 @@ fields:
     - Device
 falsepositives:
     - Legitimate Administrator using tool for raw access or ongoing forensic investigation
-level: medium
-status: experimental
+level: low  # far too many false positives
+

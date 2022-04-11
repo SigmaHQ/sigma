@@ -20,9 +20,29 @@ logsources:
         rewrite:
             product: windows
             service: security
+    registry_event_set:
+        category: registry_set
+        product: windows
+        conditions:
+            EventID: 4657
+            OperationType:
+                - 'Existing registry value modified'
+        rewrite:
+            product: windows
+            service: security
+    registry_event_add:
+        category: registry_add
+        product: windows
+        conditions:
+            EventID: 4657
+            OperationType:
+                - 'New registry value created'
+        rewrite:
+            product: windows
+            service: security
 fieldmappings:
     Image: NewProcessName
     ParentImage: ParentProcessName
     Details: NewValue
-    ParentCommandLine: ProcessCommandLine
+    #CommandLine: ProcessCommandLine  # No need to map, as real name of ProcessCommandLine is already CommandLine
     LogonId: SubjectLogonId

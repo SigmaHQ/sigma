@@ -93,6 +93,7 @@ class BaseBackend:
     config_required = True
     default_config = None
     mapExpression = ""
+    ymlFileName = None
 
     def __init__(self, sigmaconfig, backend_options=dict()):
         """
@@ -111,6 +112,9 @@ class BaseBackend:
             if target is None:
                 target = option
             setattr(self, target, self.backend_options.setdefault(option, default_value))
+
+    def setYmlFileName(self, filename):
+        self.ymlFileName = filename
 
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
@@ -223,6 +227,13 @@ class BaseBackend:
 
     def generateAfter(self, parsed):
         return ""
+
+    def initialize(self):
+        """
+        Is called before the first file was processed with generate(). The right place if this backend is not intended to
+        look isolated at each rule, but generates an output which incorporates multiple rules, e.g. dashboards.
+        """
+        pass
 
     def finalize(self):
         """

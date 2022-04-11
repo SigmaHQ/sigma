@@ -1,0 +1,60 @@
+title: Suspicious PowerShell Parent Process
+id: 754ed792-634f-40ae-b3bc-e0448d33f695
+status: test
+description: Detects a suspicious parents of powershell.exe
+author: Teymur Kheirkhabarov, Harish Segar (rule)
+references:
+  - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=26
+date: 2020/03/20
+modified: 2022/03/21
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_image1:
+    - ParentImage|endswith:
+      - '\mshta.exe'
+      - '\rundll32.exe'
+      - '\regsvr32.exe'
+      - '\services.exe'
+      - '\winword.exe'
+      - '\wmiprvse.exe'
+      - '\powerpnt.exe'
+      - '\excel.exe'
+      - '\msaccess.exe'
+      - '\mspub.exe'
+      - '\visio.exe'
+      - '\outlook.exe'
+      - '\amigo.exe'
+      - '\chrome.exe'
+      - '\firefox.exe'
+      - '\iexplore.exe'
+      - '\microsoftedgecp.exe'
+      - '\microsoftedge.exe'
+      - '\browser.exe'
+      - '\vivaldi.exe'
+      - '\safari.exe'
+      - '\sqlagent.exe'
+      - '\sqlserver.exe'
+      - '\sqlservr.exe'
+      - '\w3wp.exe'
+      - '\httpd.exe'
+      - '\nginx.exe'
+      - '\php-cgi.exe'
+      - '\jbosssvc.exe'
+      - 'MicrosoftEdgeSH.exe'
+    - ParentImage|contains: 'tomcat'
+  selection_powershell:
+    - Image|endswith: '\powershell.exe'
+    - CommandLine|contains:
+      - 'powershell'
+      - 'pwsh'
+    - Description: 'Windows PowerShell'
+    - Product: 'PowerShell Core 6'
+  condition: all of selection*
+falsepositives:
+  - Other scripts
+level: high
+tags:
+  - attack.execution
+  - attack.t1059.001

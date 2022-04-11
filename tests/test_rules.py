@@ -184,6 +184,19 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_detections, [], Fore.RED +
                          "There are rules using '1/all of them' style conditions but only have one condition")
 
+    def test_all_of_them_condition(self):
+        faulty_detections = []
+
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            yaml = self.get_rule_yaml(file_path = file)
+            detection = self.get_rule_part(file_path = file, part_name = "detection")
+
+            if "all of them" in detection["condition"]:
+                faulty_detections.append(file)
+
+        self.assertEqual(faulty_detections, [], Fore.RED +
+                         "There are rules using 'all of them'. Better use e.g. 'all of selection*' instead (and use the 'selection_' prefix as search-identifier).")
+
     def test_duplicate_detections(self):
         def compare_detections(detection1:dict, detection2:dict) -> bool:
 
@@ -361,6 +374,23 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with missing or malformed 'date' fields. (create one, e.g. date: 2019/01/14)")
+
+    def test_missing_description(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            descriptionfield = self.get_rule_part(file_path=file, part_name="description")
+            if not descriptionfield:
+                print(Fore.YELLOW + "Rule {} has no field 'description'.".format(file))
+                faulty_rules.append(file)
+            elif not isinstance(descriptionfield, str):
+                print(Fore.YELLOW + "Rule {} has a 'description' field that isn't a string.".format(file))
+                faulty_rules.append(file)
+            elif len(descriptionfield) < 16:
+                print(Fore.YELLOW + "Rule {} has a really short description. Please elaborate.".format(file))
+                faulty_rules.append(file)
+
+        self.assertEqual(faulty_rules, [], Fore.RED +
+                         "There are rules with missing or malformed 'description' field. (create one, e.g. description: Detects the suspicious behaviour of process XY doing YZ)")
 
     def test_optional_date_modified(self):
         faulty_rules = []
@@ -726,7 +756,10 @@ def get_mitre_data():
         for r in g.external_references:
             if 'external_id' in r:
                 MITRE_GROUPS.append(r['external_id'].lower())
-    
+
+    # Debugging 
+    print("MITRE ATT&CK LIST LENGTHS: %d %d %d %d %d" % (len(MITRE_TECHNIQUES), len(MITRE_TECHNIQUE_NAMES), len(list(MITRE_PHASE_NAMES)), len(MITRE_GROUPS), len(MITRE_TOOLS)))
+
     # Combine all IDs to a big tag list
     return ["attack." + item for item in MITRE_TECHNIQUES + MITRE_TECHNIQUE_NAMES + list(MITRE_PHASE_NAMES) + MITRE_GROUPS + MITRE_TOOLS]
 

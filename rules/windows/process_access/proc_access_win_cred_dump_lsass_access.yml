@@ -1,0 +1,126 @@
+title: Credentials Dumping Tools Accessing LSASS Memory
+id: 32d0d3e2-e58d-4d41-926b-18b520b2b32d
+status: experimental
+description: Detects process access LSASS memory which is typical for credentials dumping tools
+author: Florian Roth, Roberto Rodriguez, Dimitrios Slamaris, Mark Russinovich, Thomas Patzke, Teymur Kheirkhabarov, Sherif Eldeeb, James Dickenson, Aleksey Potapov,
+    oscd.community (update)
+date: 2017/02/16
+modified: 2022/03/18
+references:
+    - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
+    - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
+    - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
+    - http://security-research.dyndns.org/pub/slides/FIRST2017/FIRST-2017_Tom-Ueltschi_Sysmon_FINAL_notes.pdf
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+    - attack.s0002
+    - car.2019-04-004
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        TargetImage|endswith: '\lsass.exe'
+        GrantedAccess|startswith:
+            - '0x40'
+            # - '0x1000'  # minimum access requirements to query basic info from service
+            # - '0x1400'
+            - '0x100000'
+            - '0x1410'    # car.2019-04-004
+            # - '0x1010'    # car.2019-04-004
+            - '0x1438'    # car.2019-04-004
+            - '0x143a'    # car.2019-04-004
+            - '0x1418'    # car.2019-04-004
+            - '0x1f0fff'
+            - '0x1f1fff'
+            - '0x1f2fff'
+            - '0x1f3fff'
+    filter1:
+        SourceImage:
+            - 'C:\WINDOWS\system32\taskmgr.exe'
+            - 'C:\Windows\System32\perfmon.exe'
+    filter2:
+        SourceImage|startswith: 'C:\ProgramData\Microsoft\Windows Defender\'
+        SourceImage|endswith: '\MsMpEng.exe'
+    filter3:
+        SourceImage|startswith: 'C:\Program Files\WindowsApps\'
+        SourceImage|endswith: '\GamingServices.exe'
+        GrantedAccess: 
+            - '0x1410'
+            - '0x410'
+    filter4:
+        SourceImage|endswith: 
+            - '\PROCEXP64.EXE'
+            - '\PROCEXP.EXE'
+            - 'C:\WINDOWS\system32\taskhostw.exe'
+            - '\MBAMInstallerService.exe'
+        GrantedAccess: 
+            - '0x1410'
+            - '0x410'
+    filter5:
+        SourceImage|startswith: 'C:\ProgramData\VMware\VMware Tools\'
+        SourceImage|endswith: '\vmtoolsd.exe'
+    filter6:
+        SourceImage: 'C:\WINDOWS\system32\svchost.exe'
+        GrantedAccess: '0x100000'
+    filter7:
+        SourceImage: 
+            - 'C:\WINDOWS\system32\wbem\wmiprvse.exe'
+            - 'C:\Windows\syswow64\MsiExec.exe'
+            - 'C:\Windows\System32\msiexec.exe'
+        GrantedAccess: 
+            - '0x1410'
+            - '0x410'
+    filter8:
+        SourceImage|endswith:
+            - '\thor.exe'
+            - '\thor64.exe'
+        GrantedAccess: 
+            - '0x40'
+            - '0x1010'
+    filter9:
+        SourceImage|endswith: '\explorer.exe'
+        GrantedAccess: '0x401'
+    filter10:
+        SourceImage: 'C:\Windows\system32\wininit.exe'
+        GrantedAccess: '0x1000000'
+    filter11:
+        SourceImage: 'C:\Windows\system32\MRT.exe' # Windows Malicious Software Removal Tool
+        GrantedAccess: 
+            - '0x1410'
+            - '0x1418'
+    filter_handle:
+        GrantedAccess: '0x40'
+        SourceImage|endswith:
+            - '\handle.exe'
+            - '\handle64.exe'
+    filter_generic:
+        SourceImage|startswith: 
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+        GrantedAccess: 
+            - '0x1410'
+            - '0x410'
+    filter_edge: # version in path 96.0.1054.43
+        SourceImage|startswith: C:\Program Files (x86)\Microsoft\Edge\Application\
+        SourceImage|endswith: \Installer\setup.exe
+    # Old - too broad filter  
+        # SourceImage|endswith: # easy to bypass. need to implement supportive rule to detect bypass attempts
+        #     - '\wmiprvse.exe'
+        #     - '\taskmgr.exe'
+        #     - '\procexp64.exe'
+        #     - '\procexp.exe'
+        #     - '\lsm.exe'
+        #     - '\MsMpEng.exe'
+        #     - '\csrss.exe'
+        #     - '\wininit.exe'
+        #     - '\vmtoolsd.exe'
+    condition: selection and not 1 of filter*
+fields:
+    - ComputerName
+    - User
+    - SourceImage
+falsepositives:
+    - Legitimate software accessing LSASS process for legitimate reason; please add more filters
+level: high

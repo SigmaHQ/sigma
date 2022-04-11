@@ -213,9 +213,9 @@ tools/sigmac -t splunk -c ~/my-splunk-mapping.yml -c tools/config/generic/window
 * [uberAgent ESA](https://uberagent.com/)
 * [Devo](https://devo.com)
 * [LogRhythm](https://logrhythm.com/)
-
-Current work-in-progress
-* [Splunk Data Models](https://docs.splunk.com/Documentation/Splunk/7.1.0/Knowledge/Aboutdatamodels)
+* [Datadog Logs](https://docs.datadoghq.com/logs/explorer/search_syntax/)
+* [FortiSIEM](https://docs.fortinet.com)
+* [HAWK.io MDR](https://hawk.io/)
 
 New targets are continuously developed. You can get a list of supported targets with `sigmac --lists` or `sigmac -l`.
 
@@ -311,9 +311,8 @@ These tools are not part of the main toolchain and maintained separately by thei
 
 # Next Steps
 
-* Integration of MITRE ATT&CK® framework identifier to the rule set
-* Integration into Threat Intel Exchanges
-* Attempts to convince others to use the rule format in their reports, threat feeds, blog posts, threat sharing platforms
+* Finalizing and promoting the new [pySigma](https://github.com/SigmaHQ/pySigma) codebase
+* Development of backends for the new converter (in separate github repositories)
 
 # Projects or Products that use Sigma
 
@@ -328,6 +327,8 @@ These tools are not part of the main toolchain and maintained separately by thei
 * [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 * [TimeSketch](https://github.com/google/timesketch/commit/0c6c4b65a6c0f2051d074e87bbb2da2424fa6c35)
 * [SIΣGMA](https://github.com/3CORESec/SIEGMA) - SIEM consumable generator that utilizes Sigma for query conversion
+* [Aurora Agent](https://www.nextron-systems.com/2021/11/13/aurora-sigma-based-edr-agent-preview/)
+* [Confluent Sigma](https://github.com/confluentinc/cyber/tree/master/confluent-sigma)
 
 Sigma is available in some Linux distribution repositories:
 
@@ -351,7 +352,7 @@ The github issue tracker is a good place to start tackling some issues others ra
 
 ## Provide Backends / Backend Features / Bugfixes
 
-Various requests for sigmac (sigma converter) backends exist. Some backends are very limited and need features. We are working on a documentation on how to write new backends but our time for this project is currently mostly spent for issue resolutions.
+Please don't provide backends for the old code base anymore. We recommand using the new [pySigma](https://github.com/SigmaHQ/pySigma). We are working on a documentation on how to write new backends for that new code base.
 
 ## Spread the word
 

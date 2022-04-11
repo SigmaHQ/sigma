@@ -1,0 +1,89 @@
+title: Weak Encryption Enabled and Kerberoast
+id: f6de9536-0441-4b3f-a646-f4e00f300ffd
+status: test
+description: Detects scenario where weak encryption is enabled for a user profile which could be used for hash/password cracking.
+author: '@neu5ron'
+references:
+  - https://adsecurity.org/?p=2053
+  - https://www.harmj0y.net/blog/activedirectory/roasting-as-reps/
+date: 2017/07/30
+modified: 2021/11/27
+logsource:
+  product: windows
+  service: security
+  definition: 'Requirements: Audit Policy : Account Management > Audit User Account Management, Group Policy : Computer Configuration\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies\Account Management\Audit User Account Management'
+detection:
+  selection:
+    EventID: 4738
+    # According to Microsoft, the bit values are listed here: https://docs.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4720
+    # However, that seems to be a simple copy from https://docs.microsoft.com/en-US/troubleshoot/windows-server/identity/useraccountcontrol-manipulate-account-properties
+    # and the actual flags that are used are quite different and, unfortunately, not documented.
+    # https://github.com/mdecrevoisier/EVTX-to-MITRE-Attack/ contains a number of EVTX files with relevant events, which can be used to extract
+    # the following values.
+  olduac_des:   # 0x8000
+    OldUacValue|endswith:
+      - 8???
+      - 9???
+      - A???
+      - B???
+      - C???
+      - D???
+      - E???
+      - F???
+  newuac_des:
+    NewUacValue|endswith:
+      - 8???
+      - 9???
+      - A???
+      - B???
+      - C???
+      - D???
+      - E???
+      - F???
+  olduac_preauth:   # 0x10000
+    OldUacValue|endswith:
+      - 1????
+      - 3????
+      - 5????
+      - 7????
+      - 9????
+      - B????
+      - D????
+      - F????
+  newuac_preauth:
+    NewUacValue|endswith:
+      - 1????
+      - 3????
+      - 5????
+      - 7????
+      - 9????
+      - B????
+      - D????
+      - F????
+  olduac_encrypted:   # 0x800
+    OldUacValue|endswith:
+      - 8??
+      - 9??
+      - A??
+      - B??
+      - C??
+      - D??
+      - E??
+      - F??
+  newuac_encrypted:
+    NewUacValue|endswith:
+      - 8??
+      - 9??
+      - A??
+      - B??
+      - C??
+      - D??
+      - E??
+      - F??
+  condition: selection and ((newuac_des and not olduac_des) or (newuac_preauth and not olduac_preauth) or (newuac_encrypted and not olduac_encrypted))
+falsepositives:
+  - Unknown
+level: high
+tags:
+  - attack.defense_evasion
+  - attack.t1562.001

@@ -1,0 +1,35 @@
+title: Clear PowerShell History
+id: 26b692dc-1722-49b2-b496-a8258aa6371d
+related:
+    - id: dfba4ce1-e0ea-495f-986e-97140f31af2d
+      type: derived
+status: experimental
+description: Detects keywords that could indicate clearing PowerShell history
+author: Ilyas Ochkov, Jonhnathan Ribeiro, Daniil Yugoslavskiy, oscd.community
+references:
+    - https://gist.github.com/hook-s3c/7363a856c3cdbadeb71085147f042c1a
+date: 2022/01/25
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection_1:
+        ScriptBlockText|contains:
+            - 'del'
+            - 'Remove-Item'
+            - 'rm'
+        ScriptBlockText|contains|all: 
+            - '(Get-PSReadlineOption).HistorySavePath'
+    selection_2:
+        ScriptBlockText|contains|all:
+            - 'Set-PSReadlineOption'
+            - '–HistorySaveStyle'
+            - 'SaveNothing'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate PowerShell scripts
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1070.003

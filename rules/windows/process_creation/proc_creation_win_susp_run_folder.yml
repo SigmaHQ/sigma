@@ -1,0 +1,29 @@
+title: Process Start From Suspicious Folder
+id: dca91cfd-d7ab-4c66-8da7-ee57d487b35b
+status: experimental
+description: Detects process start from rare or uncommon folders like temporary folder or folders that usually don't contain executable files
+references:
+    - Malware sandbox results
+author: frack113
+date: 2022/02/11
+modified: 2022/02/18
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    image:
+        Image|contains:
+            - '\Desktop\'
+            - '\Temp\'
+            - '\Temporary Internet'
+    filter_parent:
+        ParentImage: 
+            - 'C:\Windows\System32\cleanmgr.exe'
+            - 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\resources\app\ServiceHub\Services\Microsoft.VisualStudio.Setup.Service\BackgroundDownload.exe'
+    condition: image and not filter_parent
+falsepositives:
+    - Unknown
+level: low
+tags:
+    - attack.execution
+    - attack.t1204

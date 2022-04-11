@@ -1,0 +1,34 @@
+title: Bad Opsec Powershell Code Artifacts
+id: 8d31a8ce-46b5-4dd6-bdc3-680931f1db86
+related:
+    - id: 73e733cc-1ace-3212-a107-ff2523cc9fc3
+      type: derived
+description: Focuses on trivial artifacts observed in variants of prevalent offensive ps1 payloads, including Cobalt Strike Beacon, PoshC2, Powerview, Letmein, Empire, Powersploit, and other attack payloads that often undergo minimal changes by attackers due to bad opsec.
+status: experimental
+references:
+    - https://newtonpaul.com/analysing-fileless-malware-cobalt-strike-beacon/
+    - https://labs.sentinelone.com/top-tier-russian-organized-cybercrime-group-unveils-fileless-stealthy-powertrick-backdoor-for-high-value-targets/
+    - https://www.mdeditor.tw/pl/pgRt
+author: 'ok @securonix invrep_de, oscd.community'
+date: 2020/10/09
+modified: 2021/10/16
+tags:
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: ps_module
+    definition: PowerShell Module Logging must be enabled
+detection:
+    selection_4103:
+        Payload|contains:
+            - '$DoIt'
+            - 'harmj0y'
+            - 'mattifestation'
+            - '_RastaMouse'
+            - 'tifkin_'
+            - '0xdeadbeef'
+    condition: selection_4103
+falsepositives:
+    - 'Moderate-to-low; Despite the shorter length/lower entropy for some of these, because of high specificity, fp appears to be fairly limited in many environments.'
+level: critical

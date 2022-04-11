@@ -1,0 +1,27 @@
+title: Remote Event Log Recon
+id: 2053961f-44c7-4a64-b62d-f6e72800af0d
+description: Detects remote RPC calls to get event log information via EVEN or EVEN6
+references:
+    - https://attack.mitre.org/tactics/TA0007/
+    - https://github.com/zeronetworks/rpcfirewall
+    - https://github.com/zeronetworks/rpcfirewall
+    - https://zeronetworks.com/blog/stopping_lateral_movement_via_the_rpc_firewall/
+status: experimental
+author: Sagie Dulce, Dekel Paz
+date: 2022/01/01
+modified: 2022/01/01
+logsource:
+    product: rpc_firewall
+    category: application
+    definition: 'Requirements: install and apply the RPC Firewall to all processes with "audit:true action:block uuid:82273fdc-e32a-18c3-3f78-827929dc23ea and uuid:f6beaff7-1e19-4fbb-9f8f-b89e2018337c"'
+detection:
+    selection:
+        EventLog: RPCFW
+        EventID: 3
+        InterfaceUuid:
+          - 82273fdc-e32a-18c3-3f78-827929dc23ea
+          - f6beaff7-1e19-4fbb-9f8f-b89e2018337c
+    condition: selection
+falsepositives:
+    - Remote administrative tasks on Windows Events
+level: high
