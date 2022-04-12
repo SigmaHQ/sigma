@@ -6,7 +6,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1016/T1016.md#atomic-test-2---list-windows-firewall-rules
 author: frack113, Christopher Peacock '@securepeacock', SCYTHE '@scythe_io'
 date: 2021/12/07
-modified: 2022/05/11
+modified: 2022/04/11
 logsource:
     category: process_creation
     product: windows
@@ -15,19 +15,16 @@ detection:
         CommandLine|contains|all:
             - 'netsh '
             - 'show '
-    network_cmd2:
-        CommandLine|contains:
-            - 'advfirewall '
             - 'firewall '
-    network_cmd3:
+    network_cmd2:
           CommandLine|contains:
             - 'config '
             - 'state '
             - 'rule '
             - 'name=all'
-    condition: network_cmd1 and network_cmd2 and network_cmd3
+    condition: all of network_cmd*
 falsepositives:
-    - Administrator, hotline ask to user
+    - Administrative activity
 level: low
 tags:
     - attack.discovery
