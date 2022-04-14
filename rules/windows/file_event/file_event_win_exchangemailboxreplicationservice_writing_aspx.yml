@@ -1,0 +1,22 @@
+title: Exchange Writing Active Server Pages
+id: c40e9841-d1bd-4826-8fae-7bb42d2519fe
+description: This logic looks for ASPX web shells dropped to disk by msechangemailboxreplication.exe, and may be indicative of ProxyLogon exploitation.
+status: experimental
+references: 
+    - https://redcanary.com/threat-detection-report/ Page 18
+tags:
+    - attack.t1190
+    - attack.t1505.003
+date: 2022/04/14
+author: Christopher Peacock '@securepeacock', SCYTHE 'scythe_io', RedCanary
+level: medium
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        Image|endswith: '\msexchangemailboxreplication.exe'
+        TargetFilename|endswith: '.aspx'
+    condition: selection
+falsepositives:
+    - Unknown
