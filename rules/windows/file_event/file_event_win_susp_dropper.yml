@@ -6,7 +6,7 @@ author: frack113
 references:
   - Malware Sandbox
 date: 2022/03/09
-modified: 2022/03/29
+modified: 2022/04/17
 logsource:
   product: windows
   category: file_event
@@ -25,12 +25,18 @@ detection:
     Image: 'C:\Windows\System32\msiexec.exe'
   filter_cleanmgr:
     Image: 'C:\WINDOWS\system32\cleanmgr.exe'
+  filter_programfiles:
+    Image|startswith:
+      - 'C:\Program Files\'
+      - 'C:\Program Files (x86)\'
+  filter_defender:
+    Image|startswith: 'C:\ProgramData\Microsoft\Windows Defender\'
   condition: selection and not 1 of filter_*
 falsepositives:
   - Software installers
   - Update utilities
 #Please contribute to FP to go up the level
-level: low
+level: medium
 tags:
   - attack.resource_development
-  - attack.t1587.001 
+  - attack.t1587.001
