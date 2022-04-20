@@ -97,7 +97,7 @@ OS="Windows 10"
 {
     wget --quiet https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win10-client.tgz
     tar xzf win10-client.tgz
-    echo "  Checking for Sigma matches in $OS baseline (this takes at least 2 minutes)"
+    echo "  Checking for Sigma matches in $OS baseline (this takes around 2 minutes)"
     ./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path Logs_Client/ --rule-path windows/ > findings-win10.json
     echo "  Finished Checking for Sigma matches in $OS baseline"
 }&
@@ -109,7 +109,7 @@ OS="Windows 11"
 {
     wget --quiet https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win11-client.tgz
     tar xzf win11-client.tgz
-    echo "  Checking for Sigma matches in $OS baseline (this takes at least 6 minutes)"
+    echo "  Checking for Sigma matches in $OS baseline (this takes around 3 minutes)"
     ./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path Logs_Win11/ --rule-path windows/ > findings-win11.json
     echo "  Finished Checking for Sigma matches in $OS baseline"
 }&
