@@ -104,6 +104,18 @@ OS="Windows 10"
 pids+=($!)
 PID2OS[$!]=$OS
 
+# Windows 2022 AD
+OS="Windows 2022 AD"
+{
+    wget --quiet https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win2022-ad.tgz
+    tar xzf win2022-ad.tgz
+    echo "  Checking for Sigma matches in $OS baseline (this takes around 2 minutes)"
+    ./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path Win2022-AD/ --rule-path windows/ > findings-win2022-ad.json
+    echo "  Finished Checking for Sigma matches in $OS baseline"
+}&
+pids+=($!)
+PID2OS[$!]=$OS
+
 # Windows 11
 OS="Windows 11"
 {
@@ -138,6 +150,9 @@ echo "Windows 11:"
 echo
 echo "Windows 2022:"
 "${SIGMA}"/.github/workflows/matchgrep.sh findings-win2022.json "${SIGMA}"/.github/workflows/known-FPs.csv
+echo
+echo "Windows 2022 AD:"
+"${SIGMA}"/.github/workflows/matchgrep.sh findings-win2022-ad.json "${SIGMA}"/.github/workflows/known-FPs.csv
 
 echo
 read -p  "Removing temporary directory ${TMP}. Press Enter to continue." -s
