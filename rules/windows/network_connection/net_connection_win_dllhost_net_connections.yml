@@ -6,7 +6,7 @@ author: bartblaze
 references:
   - https://github.com/Neo23x0/sigma/blob/master/rules/windows/network_connection/sysmon_rundll32_net_connections.yml
 date: 2020/07/13
-modified: 2021/12/07
+modified: 2022/04/21
 logsource:
   category: network_connection
   product: windows
@@ -14,7 +14,7 @@ detection:
   selection:
     Image|endswith: '\dllhost.exe'
     Initiated: 'true'
-  filter:
+  filter_ipv4:
     DestinationIp|startswith:
       - '10.'
       - '192.168.'
@@ -34,9 +34,15 @@ detection:
       - '172.29.'
       - '172.30.'
       - '172.31.'
-  filter2:
-    DestinationIp:
-      - '0:0:0:0:0:0:0:1'
+      - '169.254.'  # link-local address
+      - '127.'  # loopback address
+  filter_ipv6:
+    DestinationIp|startswith:
+      - '::1'  # IPv6 loopback variant
+      - '0:0:0:0:0:0:0:1'  # IPv6 loopback variant
+      - 'fe80:'  # link-local address
+      - 'fc'  # private address range fc00::/7
+      - 'fd'  # private address range fc00::/7
   condition: selection and not 1 of filter*
 falsepositives:
   - Communication to other corporate systems that use IP addresses from public address spaces

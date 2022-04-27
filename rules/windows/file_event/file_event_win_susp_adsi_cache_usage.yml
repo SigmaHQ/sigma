@@ -8,7 +8,7 @@ references:
   - https://blog.fox-it.com/2020/03/19/ldapfragger-command-and-control-over-ldap-attributes/
   - https://github.com/fox-it/LDAPFragger
 date: 2019/03/24
-modified: 2022/03/26
+modified: 2022/04/21
 logsource:
   product: windows
   category: file_event
@@ -27,6 +27,10 @@ detection:
       - 'C:\Windows\System32\wbem\WmiPrvSE.exe'
   filter_begins:
     Image|startswith: 'C:\Windows\ccmsetup\autoupgrade\ccmsetup' # C:\Windows\ccmsetup\autoupgrade\ccmsetup.TMC00002.40.exe
+  filter_domain_controller:
+    Image:
+      - 'C:\Windows\system32\efsui.exe'
+      - 'C:\Windows\system32\dsac.exe'
   condition: selection and not 1 of filter*
 falsepositives:
   - Other legimate tools, which do ADSI (LDAP) operations, e.g. any remoting activity by MMC, Powershell, Windows etc.
