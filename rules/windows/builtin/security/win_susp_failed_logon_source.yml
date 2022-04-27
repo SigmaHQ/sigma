@@ -4,7 +4,7 @@ status: test
 description: A login from a public IP can indicate a misconfigured firewall or network boundary.
 author: NVISO
 date: 2020/05/06
-modified: 2022/04/27
+modified: 2021/11/27
 logsource:
   product: windows
   service: security
@@ -12,9 +12,9 @@ detection:
   selection:
     EventID: 4625
   ip_unknown:
-    SourceNetworkAddress|contains: '-'
+    IpAddress|contains: '-'
   ip_privatev4:
-    SourceNetworkAddress|startswith:
+    IpAddress|startswith:
       - '10.'       #10.0.0.0/8
       - '192.168.'       #192.168.0.0/16
       - '172.16.'       #172.16.0.0/12
@@ -36,8 +36,8 @@ detection:
       - '127.'       #127.0.0.0/8
       - '169.254.'       #169.254.0.0/16
   ip_privatev6:
-    - SourceNetworkAddress: '::1'     #loopback 
-    - SourceNetworkAddress|startswith:
+    - IpAddress: '::1'     #loopback 
+    - IpAddress|startswith:
       - 'fe80::'       #link-local
       - 'fc00::'       #unique local
   condition: selection and not 1 of ip_*
