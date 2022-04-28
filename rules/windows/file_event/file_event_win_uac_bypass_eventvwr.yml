@@ -3,6 +3,7 @@ id: 63e4f530-65dc-49cc-8f80-ccfa95c69d43
 description: Detects the pattern of a UAC bypass using Windows Event Viewer
 author: Antonio Cocomazzi (idea), Florian Roth (rule)
 date: 2022/04/27
+modified: 2022/04/27
 status: experimental
 references:
     - https://twitter.com/orange_8361/status/1518970259868626944?s=20&t=RFXqZjtA7tWM3HxqEH78Aw
@@ -17,7 +18,9 @@ detection:
     selection:
         TargetFilename|contains: '\AppData\Local\Microsoft\Event Viewer\RecentViews'
     filter:
-        Level: 4
+        Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
     condition: selection and not filter
 falsepositives:
     - Unknown
