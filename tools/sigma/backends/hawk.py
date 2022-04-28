@@ -643,7 +643,10 @@ class HAWKBackend(SingleTextQueryBackend):
             raise Exception("Failed to parse json: %s" % analytic_txt)
 
         cmt = "Sigma Rule: %s\n" % sigmaparser.parsedyaml['id'] 
-        cmt += "Author: %s\n" % sigmaparser.parsedyaml['author'] 
+        if 'author' in sigmaparser.parsedyaml:
+            cmt += "Author: %s\n" % sigmaparser.parsedyaml['author'] 
+        else:
+            cmt += "Author: Unknown\n"
         cmt += "Level: %s\n" % sigmaparser.parsedyaml['level'] 
         if 'falsepositives' in sigmaparser.parsedyaml and type(sigmaparser.parsedyaml['falsepositives']) is list:
             if len(sigmaparser.parsedyaml['falsepositives']) > 0:
