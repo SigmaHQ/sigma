@@ -60,7 +60,6 @@ class DevoBackend(SingleTextQueryBackend):
         # Default table name. It is replaced based on the config file
         self.table = "sourcetable"
 
-
     def generateANDNode(self, node):
         generated = []
         for val in node:
