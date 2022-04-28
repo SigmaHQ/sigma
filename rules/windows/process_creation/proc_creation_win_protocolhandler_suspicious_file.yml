@@ -1,0 +1,29 @@
+title: ProtocolHandler.exe Downloaded Suspicious File
+id: 104cdb48-a7a8-4ca7-a453-32942c6e5dcb
+status: experimental
+author: frack113
+date: 2021/07/13
+description: Emulates attack via documents through protocol handler in Microsoft Office. On successful execution you should see Microsoft Word launch a blank file.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1218/T1218.md
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\protocolhandler.exe'
+        CommandLine|contains|all:
+            - '"ms-word'
+            - '.docx"'
+    condition: selection 
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Unknown
+level: medium

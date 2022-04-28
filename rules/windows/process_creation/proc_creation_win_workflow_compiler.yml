@@ -1,0 +1,31 @@
+title: Microsoft Workflow Compiler
+id: 419dbf2b-8a9b-4bea-bf99-7544b050ec8d
+status: experimental
+description: Detects invocation of Microsoft Workflow Compiler, which may permit the execution of arbitrary unsigned code.
+tags:
+    - attack.defense_evasion
+    - attack.execution
+    - attack.t1127
+    - attack.t1218
+author: Nik Seetharaman, frack113
+date: 2019/01/16
+modified: 2021/07/13
+references:
+    - https://posts.specterops.io/arbitrary-unsigned-code-execution-vector-in-microsoft-workflow-compiler-exe-3d9294bc5efb
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1218/T1218.md
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\Microsoft.Workflow.Compiler.exe'
+    selection_t1218:
+        OriginalFileName: 'Microsoft.Workflow.Compiler.exe'
+        CommandLine|contains: '.xml'
+    condition: selection or selection_t1218
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Legitimate MWC use (unlikely in modern enterprise environments)
+level: high

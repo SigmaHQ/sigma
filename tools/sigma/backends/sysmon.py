@@ -8,6 +8,7 @@ from .exceptions import NotSupportedError
 
 
 class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
+    """Converts Sigma rule into sysmon XML configuration"""
     identifier = "sysmon"
     active = True
     andToken = " AND "
@@ -20,6 +21,7 @@ class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
     conditionDict = {
         "startswith": "begin with",
         "endswith": "end with",
+        "all": "contains all"
     }
 
     def __init__(self, *args, **kwargs):
@@ -78,14 +80,19 @@ class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
 
     def mapFiledValue(self, field, value):
         condition = None
+        any_selector = "contains any"
         if "|" in field:
             field, *pipes = field.split("|")
             if len(pipes) == 1:
-                condition = pipes[0]
+                modifier = pipes[0]
+                if modifier in self.conditionDict:
+                    condition = self.conditionDict[modifier]
+                if modifier == "all":
+                    any_selector = "contains all"
             else:
                 raise NotImplementedError("not implemented condition")
         if isinstance(value, list) and len(value) > 1:
-            condition = "contains any"
+            condition = any_selector
             value = ";".join(value)
         elif "*" in value:
             if value.startswith("*") and value.endswith("*"):
@@ -206,11 +213,11 @@ class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
             raise NotSupportedError("Not supported condition.")
 
     def createTableFromLogsource(self):
-        if self.logsource.get("product", "") != "windows":
+        if self.logsource.get("product", "") not in ("linux","windows"):
             raise NotSupportedError(
-                "Not supported logsource. Should be product `windows`.")
+                "Not supported logsource. Should be product `linux` or `windows`.")
         for item in self.logsource.values():
-            if item.lower() in self.allowedSource.keys():
+            if str(item).lower() in self.allowedSource.keys():
                 self.table = self.allowedSource.get(item.lower())
                 break
         else:

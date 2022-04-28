@@ -23,7 +23,7 @@ from io import StringIO
 
 
 class OutliersBackend(ElasticsearchDSLBackend, MultiRuleOutputMixin):
-    """ee-outliers backend"""
+    """Converts Sigma rule into ee-outliers"""
     identifier = 'ee-outliers'
     active = True
 

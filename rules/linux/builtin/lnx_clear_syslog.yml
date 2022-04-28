@@ -1,0 +1,28 @@
+title: Commands to Clear or Remove the Syslog
+id: e09eb557-96d2-4de9-ba2d-30f712a5afd3
+status: experimental
+description: Detects specific commands commonly used to remove or empty the syslog
+author: Max Altgelt
+date: 2021/09/10
+references:
+    - https://www.virustotal.com/gui/file/fc614fb4bda24ae8ca2c44e812d12c0fab6dd7a097472a35dd12ded053ab8474
+tags:
+    - attack.impact
+    - attack.t1565.001
+logsource:
+    product: linux
+detection:
+    selection:
+        - 'rm /var/log/syslog'
+        - 'rm -r /var/log/syslog'
+        - 'rm -f /var/log/syslog'
+        - 'rm -rf /var/log/syslog'
+        - 'mv /var/log/syslog'
+        - ' >/var/log/syslog'
+        - ' > /var/log/syslog'
+    falsepositives:
+        - '/syslog.'
+    condition: selection and not falsepositives
+falsepositives:
+    - Log rotation
+level: high

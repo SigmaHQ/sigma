@@ -1,0 +1,33 @@
+title: 'System Shutdown/Reboot'
+id: 4cb57c2f-1f29-41f8-893d-8bed8e1c1d2f
+status: test
+description: 'Adversaries may shutdown/reboot systems to interrupt access to, or aid in the destruction of, those systems.'
+author: 'Igor Fits, oscd.community'
+references:
+  - hhttps://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1529/T1529.md
+date: 2020/10/15
+modified: 2021/11/27
+logsource:
+  product: linux
+  service: auditd
+detection:
+  execve:
+    type: 'EXECVE'
+  shutdowncmd:
+    - 'shutdown'
+    - 'reboot'
+    - 'halt'
+    - 'poweroff'
+  init:
+    - 'init'
+    - 'telinit'
+  initselection:
+    - '0'
+    - '6'
+  condition: execve and (shutdowncmd or (init and initselection))
+falsepositives:
+  - Legitimate administrative activity
+level: informational
+tags:
+  - attack.impact
+  - attack.t1529

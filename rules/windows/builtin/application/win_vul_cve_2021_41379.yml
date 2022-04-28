@@ -1,0 +1,24 @@
+title: LPE InstallerFileTakeOver PoC CVE-2021-41379
+id: 7dbb86de-a0cc-494c-8aa8-b2996c9ef3c8
+status: experimental
+description: Detects PoC tool used to exploit LPE vulnerability CVE-2021-41379
+references:
+    - https://github.com/klinix5/InstallerFileTakeOver
+author: Florian Roth
+date: 2021/11/22
+tags:
+    - attack.initial_access
+    - attack.t1190
+logsource:
+    product: windows
+    service: application
+detection:
+    selection:
+        EventID: 1033
+        Provider_Name: 'MsiInstaller'
+    keywords:
+        - 'test pkg'
+    condition: selection and keywords
+falsepositives:
+    - Other MSI packages for which your admins have used that name
+level: high

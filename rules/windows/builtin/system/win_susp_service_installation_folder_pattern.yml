@@ -1,0 +1,26 @@
+title: Service Installation with Suspicious Folder Pattern
+id: 1b2ae822-6fe1-43ba-aa7c-d1a3b3d1d5f2
+status: experimental
+description: Detects service installation with suspicious folder patterns
+author: pH-T
+date: 2022/03/18
+modified: 2022/03/24
+logsource:
+  product: windows
+  service: system
+detection:
+  selection:
+    Provider_Name: 'Service Control Manager'
+    EventID: 7045
+  suspicious1:
+    - ImagePath|re: '^[Cc]:\\[Pp]rogram[Dd]ata\\.{1,9}\.exe'
+    - ImagePath|re: '^[Cc]:\\.{1,9}\.exe'
+  condition: selection and 1 of suspicious*
+falsepositives:
+  - Unknown
+level: high
+tags:
+  - attack.persistence
+  - attack.privilege_escalation
+  - car.2013-09-005
+  - attack.t1543.003

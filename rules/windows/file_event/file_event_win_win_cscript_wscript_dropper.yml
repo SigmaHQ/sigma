@@ -1,0 +1,36 @@
+title: WScript or CScript Dropper
+id: 002bdb95-0cf1-46a6-9e08-d38c128a6127
+status: experimental
+description: Detects a file ending in jse, vbe, js, vba, vbs written by cscript.exe or wscript.exe
+related: 
+    - id: cea72823-df4d-4567-950c-0b579eaf0846
+      type: derived
+references:
+    - WScript or CScript Dropper (cea72823-df4d-4567-950c-0b579eaf0846)
+author: Tim Shelton
+date: 2022/01/10
+modified: 2022/01/11
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\wscript.exe'
+            - '\cscript.exe'
+        TargetFilename|startswith: 
+            - 'C:\Users\'
+            - 'C:\ProgramData'
+        TargetFilename|endswith: 
+            - '.jse'
+            - '.vbe'
+            - '.js'
+            - '.vba'
+            - '.vbs'
+    condition: selection
+fields:
+    - Image
+    - TargetFilename
+falsepositives:
+    - Unknown
+level: high

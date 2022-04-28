@@ -1,0 +1,38 @@
+title: Netsh Port Forwarding
+id: 322ed9ec-fcab-4f67-9a34-e7c6aef43614
+description: Detects netsh commands that configure a port forwarding (PortProxy)
+references:
+    - https://www.fireeye.com/blog/threat-research/2019/01/bypassing-network-restrictions-through-rdp-tunneling.html
+    - https://adepts.of0x.cc/netsh-portproxy-code/
+    - https://www.dfirnotes.net/portproxy_detection/
+date: 2019/01/29
+modified: 2021/06/22
+tags:
+    - attack.lateral_movement
+    - attack.defense_evasion
+    - attack.command_and_control
+    - attack.t1090
+status: experimental
+author: Florian Roth, omkar72, oscd.community
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Image|endswith: '\netsh.exe'
+        CommandLine|contains|all:
+            - 'interface'
+            - 'portproxy'
+            - 'add'
+            - 'v4tov4'
+    selection2:
+        Image|endswith: '\netsh.exe'
+        CommandLine|contains|all:
+            - 'connectp'
+            - 'listena'
+            - 'c='
+    condition: selection1 or selection2
+falsepositives:
+    - Legitimate administration
+    - WSL2 network bridge PowerShell script used for WSL/Kubernetes/Docker (e.g. https://github.com/microsoft/WSL/issues/4150#issuecomment-504209723)
+level: medium

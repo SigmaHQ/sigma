@@ -1,0 +1,27 @@
+title: Fsutil Drive Enumeration
+id: 63de06b9-a385-40b5-8b32-73f2b9ef84b6
+status: experimental
+description: Attackers may leverage fsutil to enumerated connected drives.
+author: Christopher Peacock '@securepeacock', SCYTHE '@scythe_io'
+date: 2022/03/29
+references:
+  - Turla has used fsutil fsinfo drives to list connected drives. https://attack.mitre.org/techniques/T1120/
+  - https://github.com/elastic/detection-rules/blob/414d32027632a49fb239abb8fbbb55d3fa8dd861/rules/windows/discovery_peripheral_device.toml
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  binary_1:
+    Image|endswith: '\fsutil.exe'
+  binary_2:
+    OriginalFileName: 'fsutil.exe'
+  selection:
+    CommandLine|contains:
+      - 'drives'
+  condition: (1 of binary_*) and selection
+falsepositives:
+  - Certain software or administrative tasks may trigger false positivies.
+level: low
+tags:
+  - attack.peripheral_device_discovery
+  - attack.t1120

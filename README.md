@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Neo23x0/sigma.svg?branch=master)](https://travis-ci.org/Neo23x0/sigma)
+[![sigma build status](https://github.com/SigmaHQ/sigma/actions/workflows/sigma-test.yml/badge.svg?branch=master)](https://github.com/SigmaHQ/sigma/actions?query=branch%3Amaster)
 
 ![sigma_logo](./images/Sigma_0.3.png)
 
@@ -67,7 +67,7 @@ Florian wrote a short [rule creation tutorial](https://www.nextron-systems.com/2
 1. Download or clone the repository
 2. Check the `./rules` sub directory for an overview on the rule base
 3. Run `python sigmac --help` in folder `./tools` to get a help on the rule converter
-4. Convert a rule of your choice with `sigmac` like `./sigmac -t splunk -c tools/config/generic/sysmon.yml ./rules/windows/process_creation/win_susp_whoami.yml`
+4. Convert a rule of your choice with `sigmac` like `./sigmac -t splunk -c tools/config/generic/sysmon.yml ./rules/windows/process_creation/proc_creation_win_susp_whoami.yml`
 5. Convert a whole rule directory with `python sigmac -t splunk -r ../rules/proxy/`
 6. Check the `./tools/config` folder and the [wiki](https://github.com/Neo23x0/sigma/wiki/Converter-Tool-Sigmac) if you need custom field or log source mappings in your environment
 
@@ -131,7 +131,7 @@ optional arguments:
                         tag that must appear in the rules tag list, case-
                         insensitive matching. Multiple log source
                         specifications are AND linked.
-  --target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,mdatp}, -t {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,mdatp}
+  --target {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,mdatp,devo}, -t {arcsight,es-qs,es-dsl,kibana,xpack-watcher,elastalert,graylog,limacharlie,logpoint,grep,netwitness,powershell,qradar,qualys,splunk,splunkxml,sumologic,fieldlist,mdatp,devo}
                         Output target format
   --target-list, -l     List available output target formats
   --config CONFIG, -c CONFIG
@@ -211,9 +211,11 @@ tools/sigmac -t splunk -c ~/my-splunk-mapping.yml -c tools/config/generic/window
 * [Structured Threat Information Expression (STIX)](https://oasis-open.github.io/cti-documentation/stix/intro.html)
 * [LOGIQ](https://www.logiq.ai)
 * [uberAgent ESA](https://uberagent.com/)
-
-Current work-in-progress
-* [Splunk Data Models](https://docs.splunk.com/Documentation/Splunk/7.1.0/Knowledge/Aboutdatamodels)
+* [Devo](https://devo.com)
+* [LogRhythm](https://logrhythm.com/)
+* [Datadog Logs](https://docs.datadoghq.com/logs/explorer/search_syntax/)
+* [FortiSIEM](https://docs.fortinet.com)
+* [HAWK.io MDR](https://hawk.io/)
 
 New targets are continuously developed. You can get a list of supported targets with `sigmac --lists` or `sigmac -l`.
 
@@ -309,13 +311,13 @@ These tools are not part of the main toolchain and maintained separately by thei
 
 # Next Steps
 
-* Integration of MITRE ATT&CK® framework identifier to the rule set
-* Integration into Threat Intel Exchanges
-* Attempts to convince others to use the rule format in their reports, threat feeds, blog posts, threat sharing platforms
+* Finalizing and promoting the new [pySigma](https://github.com/SigmaHQ/pySigma) codebase
+* Development of backends for the new converter (in separate github repositories)
 
 # Projects or Products that use Sigma
 
 * [MISP](http://www.misp-project.org/2017/03/26/MISP.2.4.70.released.html) (since version 2.4.70, March 2017)
+* [Atomic Threat Coverage](https://github.com/atc-project/atomic-threat-coverage) (since December 2018)
 * [SOC Prime - Sigma Rule Editor](https://tdm.socprime.com/sigma/)
 * [uncoder.io](https://uncoder.io/) - Online Translator for SIEM Searches
 * [THOR](https://www.nextron-systems.com/2018/06/28/spark-applies-sigma-rules-in-eventlog-scan/) - Scan with Sigma rules on endpoints
@@ -325,6 +327,8 @@ These tools are not part of the main toolchain and maintained separately by thei
 * [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 * [TimeSketch](https://github.com/google/timesketch/commit/0c6c4b65a6c0f2051d074e87bbb2da2424fa6c35)
 * [SIΣGMA](https://github.com/3CORESec/SIEGMA) - SIEM consumable generator that utilizes Sigma for query conversion
+* [Aurora Agent](https://www.nextron-systems.com/2021/11/13/aurora-sigma-based-edr-agent-preview/)
+* [Confluent Sigma](https://github.com/confluentinc/cyber/tree/master/confluent-sigma)
 
 Sigma is available in some Linux distribution repositories:
 
@@ -348,7 +352,7 @@ The github issue tracker is a good place to start tackling some issues others ra
 
 ## Provide Backends / Backend Features / Bugfixes
 
-Various requests for sigmac (sigma converter) backends exist. Some backends are very limited and need features. We are working on a documentation on how to write new backends but our time for this project is currently mostly spent for issue resolutions.
+Please don't provide backends for the old code base anymore. We recommand using the new [pySigma](https://github.com/SigmaHQ/pySigma). We are working on a documentation on how to write new backends for that new code base.
 
 ## Spread the word
 
@@ -358,9 +362,9 @@ Last but not least, the more people use Sigma, the better, so help promote it by
 
 The content of this repository is released under the following licenses:
 
-* The toolchain (everything under `tools/`) is licensed under the [GNU Lesser General Public License](https://www.gnu.org/licenses/lgpl-3.0.en.html).
-* The [Sigma specification](https://github.com/Neo23x0/sigma/wiki) is public domain.
-* Everything else, especially the rules contained in the `rules/` directory is released under the [Detection Rule License (DRL) 1.0](https://github.com/Neo23x0/sigma/blob/master/LICENSE.Detection.Rules.md).
+* The toolchain (everything under `tools/`) is licensed under the [GNU Lesser General Public License](https://www.gnu.org/licenses/lgpl-3.0.en.html)
+* The [Sigma specification](https://github.com/Neo23x0/sigma/wiki) is public domain
+* The rules contained in the `rules/` directory are released under the [Detection Rule License (DRL) 1.1](https://github.com/Neo23x0/sigma/blob/master/LICENSE.Detection.Rules.md)
 
 # Credits
 

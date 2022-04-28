@@ -1,0 +1,28 @@
+title: Suspicious Runscripthelper.exe
+id: eca49c87-8a75-4f13-9c73-a5a29e845f03
+status: test
+description: Detects execution of powershell scripts via Runscripthelper.exe
+author: Victor Sergeev, oscd.community
+references:
+  - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OSBinaries/Runscripthelper.yml
+date: 2020/10/09
+modified: 2021/11/27
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  image_path:
+    Image|endswith: '\Runscripthelper.exe'
+  cmd:
+    CommandLine|contains: 'surfacecheck'
+  condition: image_path and cmd
+fields:
+  - CommandLine
+falsepositives:
+  - Unknown
+level: medium
+tags:
+  - attack.execution
+  - attack.t1059
+  - attack.defense_evasion
+  - attack.t1202

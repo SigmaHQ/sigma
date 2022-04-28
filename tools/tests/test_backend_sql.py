@@ -125,7 +125,7 @@ class TestGenerateQuery(unittest.TestCase):
         # count
         detection = {"selection": {"fieldname": "test"},
                      "condition": "selection | count() > 5"}
-        inner_query = 'SELECT count(*) AS agg FROM {} WHERE fieldname = "test"'.format(
+        inner_query = 'SELECT *,count(*) AS agg FROM {} WHERE fieldname = "test"'.format(
             self.table)
         expected_result = 'SELECT * FROM ({}) WHERE agg > 5'.format(inner_query)
         self.validate(detection, expected_result)
@@ -133,7 +133,7 @@ class TestGenerateQuery(unittest.TestCase):
         # min
         detection = {"selection": {"fieldname1": "test"},
                      "condition": "selection | min(fieldname2) > 5"}
-        inner_query = 'SELECT min(fieldname2) AS agg FROM {} WHERE fieldname1 = "test"'.format(
+        inner_query = 'SELECT *,min(fieldname2) AS agg FROM {} WHERE fieldname1 = "test"'.format(
             self.table)
         expected_result = 'SELECT * FROM ({}) WHERE agg > 5'.format(inner_query)
         self.validate(detection, expected_result)
@@ -141,7 +141,7 @@ class TestGenerateQuery(unittest.TestCase):
         # max
         detection = {"selection": {"fieldname1": "test"},
                      "condition": "selection | max(fieldname2) > 5"}
-        inner_query = 'SELECT max(fieldname2) AS agg FROM {} WHERE fieldname1 = "test"'.format(
+        inner_query = 'SELECT *,max(fieldname2) AS agg FROM {} WHERE fieldname1 = "test"'.format(
             self.table)
         expected_result = 'SELECT * FROM ({}) WHERE agg > 5'.format(inner_query)
         self.validate(detection, expected_result)
@@ -149,7 +149,7 @@ class TestGenerateQuery(unittest.TestCase):
         # avg
         detection = {"selection": {"fieldname1": "test"},
                      "condition": "selection | avg(fieldname2) > 5"}
-        inner_query = 'SELECT avg(fieldname2) AS agg FROM {} WHERE fieldname1 = "test"'.format(
+        inner_query = 'SELECT *,avg(fieldname2) AS agg FROM {} WHERE fieldname1 = "test"'.format(
             self.table)
         expected_result = 'SELECT * FROM ({}) WHERE agg > 5'.format(inner_query)
         self.validate(detection, expected_result)
@@ -157,7 +157,7 @@ class TestGenerateQuery(unittest.TestCase):
         # sum
         detection = {"selection": {"fieldname1": "test"},
                      "condition": "selection | sum(fieldname2) > 5"}
-        inner_query = 'SELECT sum(fieldname2) AS agg FROM {} WHERE fieldname1 = "test"'.format(
+        inner_query = 'SELECT *,sum(fieldname2) AS agg FROM {} WHERE fieldname1 = "test"'.format(
             self.table)
         expected_result = 'SELECT * FROM ({}) WHERE agg > 5'.format(inner_query)
         self.validate(detection, expected_result)
@@ -165,7 +165,7 @@ class TestGenerateQuery(unittest.TestCase):
         # <
         detection = {"selection": {"fieldname1": "test"},
                      "condition": "selection | sum(fieldname2) < 5"}
-        inner_query = 'SELECT sum(fieldname2) AS agg FROM {} WHERE fieldname1 = "test"'.format(
+        inner_query = 'SELECT *,sum(fieldname2) AS agg FROM {} WHERE fieldname1 = "test"'.format(
             self.table)
         expected_result = 'SELECT * FROM ({}) WHERE agg < 5'.format(inner_query)
         self.validate(detection, expected_result)
@@ -173,7 +173,7 @@ class TestGenerateQuery(unittest.TestCase):
         # ==
         detection = {"selection": {"fieldname1": "test"},
                      "condition": "selection | sum(fieldname2) == 5"}
-        inner_query = 'SELECT sum(fieldname2) AS agg FROM {} WHERE fieldname1 = "test"'.format(
+        inner_query = 'SELECT *,sum(fieldname2) AS agg FROM {} WHERE fieldname1 = "test"'.format(
             self.table)
         expected_result = 'SELECT * FROM ({}) WHERE agg == 5'.format(inner_query)
         self.validate(detection, expected_result)
@@ -181,7 +181,7 @@ class TestGenerateQuery(unittest.TestCase):
         # group by
         detection = {"selection": {"fieldname1": "test"},
                      "condition": "selection | sum(fieldname2) by fieldname3 == 5"}
-        inner_query = 'SELECT sum(fieldname2) AS agg FROM {} WHERE fieldname1 = "test" GROUP BY fieldname3'.format(
+        inner_query = 'SELECT *,sum(fieldname2) AS agg FROM {} WHERE fieldname1 = "test" GROUP BY fieldname3'.format(
             self.table)
         expected_result = 'SELECT * FROM ({}) WHERE agg == 5'.format(inner_query)
         self.validate(detection, expected_result)
@@ -189,7 +189,7 @@ class TestGenerateQuery(unittest.TestCase):
         # multiple conditions
         detection = {"selection": {"fieldname1": "test"}, "filter": {
             "fieldname2": "tessst"}, "condition": "selection OR filter | sum(fieldname2) == 5"}
-        inner_query = 'SELECT sum(fieldname2) AS agg FROM {} WHERE (fieldname1 = "test" OR fieldname2 = "tessst")'.format(
+        inner_query = 'SELECT *,sum(fieldname2) AS agg FROM {} WHERE (fieldname1 = "test" OR fieldname2 = "tessst")'.format(
             self.table)
         expected_result = 'SELECT * FROM ({}) WHERE agg == 5'.format(inner_query)
         self.validate(detection, expected_result)

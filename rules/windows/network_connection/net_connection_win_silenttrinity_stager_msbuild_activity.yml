@@ -1,0 +1,27 @@
+title: Silenttrinity Stager Msbuild Activity
+id: 50e54b8d-ad73-43f8-96a1-5191685b17a4
+status: test
+description: Detects a possible remote connections to Silenttrinity c2
+author: Kiran kumar s, oscd.community
+references:
+  - https://www.blackhillsinfosec.com/my-first-joyride-with-silenttrinity/
+date: 2020/10/11
+modified: 2021/11/27
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\msbuild.exe'
+  filter:
+    DestinationPort:
+      - '80'
+      - '443'
+    Initiated: 'true'
+  condition: selection and filter
+falsepositives:
+  - Unknown
+level: high
+tags:
+  - attack.execution
+  - attack.t1127.001

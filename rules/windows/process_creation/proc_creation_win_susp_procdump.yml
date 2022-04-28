@@ -1,0 +1,26 @@
+title: Suspicious Use of Procdump
+id: 03795938-1387-481b-9f4c-3f6241e604fe
+description: Detects suspicious uses of the SysInternals Procdump utility by using a special command line parameter ' -ma ' and ' -accepteula' in a single step. This way we're also able to catch cases in which the attacker has renamed the procdump executable.
+status: experimental
+references:
+    - Internal Research
+author: Florian Roth
+date: 2021/02/02
+modified: 2021/08/16
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+    - attack.t1003.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains|all:
+            - ' -ma '
+            - ' -accepteula '
+    condition: selection
+falsepositives:
+    - Another tool that uses the command line switches of Procdump
+    - Legitimate use of procdump by a developer or administrator
+level: high

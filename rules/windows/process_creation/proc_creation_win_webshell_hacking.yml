@@ -1,0 +1,98 @@
+title: Webshell Hacking Activity Patterns
+id: 4ebc877f-4612-45cb-b3a5-8e3834db36c9
+description: Detects certain parent child patterns found in cases in which a webshell is used to perform certain credential dumping or exfiltration activities on a compromised system
+author: Florian Roth
+status: experimental
+references:
+   - https://youtu.be/7aemGhaE9ds?t=641
+date: 2022/03/17
+tags:
+   - attack.persistence
+   - attack.t1505.003
+   - attack.t1018
+   - attack.t1033
+   - attack.t1087
+logsource:
+   category: process_creation
+   product: windows
+detection:
+   # Webserver
+   selection_webserver_image:
+      ParentImage|endswith:
+         - '\w3wp.exe'
+         - '\php-cgi.exe'
+         - '\nginx.exe'
+         - '\httpd.exe'
+         - '\caddy.exe'
+         - '\ws_tomcatservice.exe'
+   selection_webserver_characteristics_tomcat1:
+      ParentImage|endswith: 
+         - '\java.exe'
+         - '\javaw.exe'
+      ParentImage|contains: 
+         - '-tomcat-'
+         - '\tomcat'
+   selection_webserver_characteristics_tomcat2:
+      ParentImage|endswith: 
+         - '\java.exe'
+         - '\javaw.exe'
+      CommandLine|contains: 
+         - 'catalina.jar'
+         - 'CATALINA_HOME'
+   # Suspicious child processes
+   selection_child_1:
+      # Process dumping
+      CommandLine|contains|all:
+         - 'rundll32'
+         - 'comsvcs.dll'
+   selection_child_2:
+      # Winrar exfil
+      CommandLine|contains|all:
+         - ' -hp'
+         - ' a '
+         - ' -m'
+   selection_child_3:
+      # User add
+      CommandLine|contains|all:
+         - 'net'
+         - ' user '
+         - ' /add'
+   selection_child_4:
+      CommandLine|contains|all:
+         - 'net'
+         - ' localgroup '
+         - ' administrators '
+         - '/add'
+   selection_child_5:
+      Image|endswith:
+         # Credential stealing
+         - '\ntdsutil.exe'
+         # AD recon 
+         - '\ldifde.exe'
+         - '\adfind.exe'
+         # Process dumping
+         - '\procdump.exe'
+         - '\Nanodump.exe'
+         # Destruction / ransom groups
+         - '\vssadmin.exe'
+         - '\fsutil.exe'
+   selection_child_6:
+      # SUspicious patterns
+      CommandLine|contains:
+         - ' -NoP '  # Often used in malicious PowerShell commands
+         - ' -W Hidden '  # Often used in malicious PowerShell commands
+         - ' -decode '  # Used with certutil
+         - ' /decode '  # Used with certutil 
+         - 'reg save '  # save registry SAM - syskey extraction
+         - '.downloadstring('  # PowerShell download command
+         - '.downloadfile('  # PowerShell download command
+         - 'FromBase64String' # PowerShell encoded payload 
+         - ' /ticket:'  # Rubeus
+         - ' sekurlsa'  # Mimikatz
+         - '.dmp full'  # Process dumping method apart from procdump
+         - 'process call create' # WMIC process creation
+         - 'whoami /priv'
+   condition: 1 of selection_webserver* and 1 of selection_child*
+falsepositives:
+   - Unlikely
+level: high

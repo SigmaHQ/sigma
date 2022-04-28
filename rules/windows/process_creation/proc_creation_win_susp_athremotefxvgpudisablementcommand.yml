@@ -1,0 +1,37 @@
+title: Abusable Invoke-ATHRemoteFXvGPUDisablementCommand
+id: a6fc3c46-23b8-4996-9ea2-573f4c4d88c5
+related:
+    - id: 38a7625e-b2cb-485d-b83d-aff137d859f4
+      type: derived
+status: experimental
+author: frack113
+date: 2021/07/13
+modified: 2021/09/07
+description: RemoteFXvGPUDisablement.exe is an abusable, signed PowerShell host executable that was introduced in Windows 10 and Server 2019 (OS Build 17763.1339).
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1218/T1218.md
+    - https://github.com/redcanaryco/AtomicTestHarnesses/blob/master/TestHarnesses/T1218_SignedBinaryProxyExecution/InvokeRemoteFXvGPUDisablementCommand.ps1
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_cmd:
+        CommandLine|contains: 'Invoke-ATHRemoteFXvGPUDisablementCommand '
+    selection_opt:
+        CommandLine|contains:
+            - '-ModuleName '
+            - '-ModulePath '
+            - '-ScriptBlock '
+            - '-RemoteFXvGPUDisablementFilePath'
+    condition: selection_cmd and selection_opt
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Unknown
+level: medium

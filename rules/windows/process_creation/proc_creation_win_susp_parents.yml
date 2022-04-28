@@ -1,0 +1,40 @@
+title: Suspicious Process Parents
+id: cbec226f-63d9-4eca-9f52-dfb6652f24df
+status: experimental
+description: Detects suspicious parent processes that should not have any children or should only have a single possible child program
+references:
+   - https://twitter.com/x86matthew/status/1505476263464607744?s=12
+   - https://svch0st.medium.com/stats-from-hunting-cobalt-strike-beacons-c17e56255f9b
+author: Florian Roth
+date: 2022/03/21
+modified: 2022/03/28
+logsource:
+   category: process_creation
+   product: windows
+detection:
+   selection:
+      ParentImage|endswith:
+         - '\notepad.exe'
+         - '\minesweeper.exe'
+         - '\winver.exe'
+         - '\bitsadmin.exe'
+   selection_special:
+      ParentImage|endswith:
+         - '\csrss.exe'
+         - '\certutil.exe'
+         - '\schtasks.exe'
+         - '\eventvwr.exe'
+         - '\calc.exe'
+   filter_special:
+      Image|endswith:
+         - '\WerFault.exe'
+         - '\wermgr.exe'
+         - '\conhost.exe'    # csrss.exe, certutil.exe
+         - '\mmc.exe'        # eventvwr.exe
+         - '\win32calc.exe'  # calc.exe
+   filter_null:
+      Image: null
+   condition: selection or ( selection_special and not 1 of filter_* )
+falsepositives:
+   - Unknown
+level: high

@@ -93,6 +93,7 @@ class BaseBackend:
     config_required = True
     default_config = None
     mapExpression = ""
+    ymlFileName = None
 
     def __init__(self, sigmaconfig, backend_options=dict()):
         """
@@ -111,6 +112,9 @@ class BaseBackend:
             if target is None:
                 target = option
             setattr(self, target, self.backend_options.setdefault(option, default_value))
+
+    def setYmlFileName(self, filename):
+        self.ymlFileName = filename
 
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
@@ -169,6 +173,8 @@ class BaseBackend:
             return self.applyOverrides(self.generateNotNULLValueNode(node))
         elif type(node) == sigma.parser.condition.NodeSubexpression:
             return self.applyOverrides(self.generateSubexpressionNode(node))
+        elif type(node) == sigma.parser.condition.SigmaSearchValueAsIs:
+            return self.generateValueAsIsNode(node)
         elif type(node) == tuple:
             return self.applyOverrides(self.generateMapItemNode(node))
         elif type(node) in (str, int):
@@ -179,6 +185,9 @@ class BaseBackend:
             return self.applyOverrides(self.generateTypedValueNode(node))
         else:
             raise TypeError("Node type %s was not expected in Sigma parse tree" % (str(type(node))))
+
+    def generateValueAsIsNode(self, node):
+        raise NotImplementedError("Node type not implemented for this backend")
 
     def generateANDNode(self, node):
         raise NotImplementedError("Node type not implemented for this backend")
@@ -219,6 +228,13 @@ class BaseBackend:
     def generateAfter(self, parsed):
         return ""
 
+    def initialize(self):
+        """
+        Is called before the first file was processed with generate(). The right place if this backend is not intended to
+        look isolated at each rule, but generates an output which incorporates multiple rules, e.g. dashboards.
+        """
+        pass
+
     def finalize(self):
         """
         Is called after the last file was processed with generate(). The right place if this backend is not intended to
@@ -247,6 +263,11 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
     mapListValueExpression = None       # Syntax for field/value condititons where map value is a list
 
     sort_condition_lists = False        # Sort condition items for AND and OR conditions
+
+    def generateValueAsIsNode(self, node):
+        if type(node.value) is list:
+            return self.listExpression % (self.listSeparator.join(node.value))
+        return self.listExpression % node.value
 
     def generateANDNode(self, node):
         generated = [ self.generateNode(val) for val in node ]
@@ -277,6 +298,10 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
 
     def generateSubexpressionNode(self, node):
         generated = self.generateNode(node.items)
+        if 'len'in dir(node.items): # fix the "TypeError: object of type 'NodeSubexpression' has no len()"
+            if len(node.items) == 1:
+                # A sub expression with length 1 is not a proper sub expression, no self.subExpression required
+                return generated
         if generated:
             return self.subExpression % generated
         else:
@@ -285,7 +310,11 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
     def generateListNode(self, node):
         if not set([type(value) for value in node]).issubset({str, int}):
             raise TypeError("List values must be strings or numbers")
-        return self.listExpression % (self.listSeparator.join([self.generateNode(value) for value in node]))
+        result = [self.generateNode(value) for value in node]
+        if len(result) == 1:
+            # A list with length 1 is not a proper list, no self.listExpression required
+            return result[0]
+        return self.listExpression % (self.listSeparator.join(result))
 
     def generateMapItemNode(self, node):
         fieldname, value = node

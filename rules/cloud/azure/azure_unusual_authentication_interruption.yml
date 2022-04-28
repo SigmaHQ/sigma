@@ -1,0 +1,28 @@
+title: Azure Unusual Authentication Interruption
+id: 8366030e-7216-476b-9927-271d79f13cf3
+status: experimental
+author: Austin Songer @austinsonger
+date: 2021/11/26  
+description: Detects when there is a interruption in the authentication process.
+references:
+  - https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/security-operations-privileged-accounts
+logsource:
+  product: azure
+  service: signinlogs
+detection:
+    selection1:
+          ResultType: 50097
+          ResultDescription: 'Device authentication is required'
+    selection2:
+          ResultType: 50155
+          ResultDescription: 'DeviceAuthenticationFailed'
+    selection3:
+          ResultType: 50158
+          ResultDescription: 'ExternalSecurityChallenge - External security challenge was not satisfied'
+    condition: selection1 or selection2 or selection3 
+level: medium
+falsepositives:
+  - Unknown
+tags:
+  - attack.initial_access
+  - attack.t1078
