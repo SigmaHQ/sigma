@@ -4,7 +4,7 @@ status: experimental
 description: Checks whether the image specified in a process creation event doesn't refer to an .exe file (caused by process ghosting or other unorthodox methods to start a process)
 author: Max Altgelt
 date: 2021/12/09
-modified: 2022/02/16
+modified: 2022/04/29
 references:
     - https://pentestlaboratories.com/2021/12/08/process-ghosting/
 tags:
@@ -76,6 +76,10 @@ detection:
         Image|endswith:
             - '.rbf'
             - '.rbs'
+    filter_wsl:
+        Image|contains|all:
+            - '\AppData\Local\Packages\'
+            - '\LocalState\rootfs\'
     condition: not known_image_extension and not 1 of filter*
 falsepositives:
     - Unknown

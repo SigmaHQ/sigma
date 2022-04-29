@@ -4,7 +4,7 @@ description: Detects process handle on LSASS process with certain access mask
 status: experimental
 author: Roberto Rodriguez, Teymur Kheirkhabarov, Dimitrios Slamaris, Mark Russinovich, Aleksey Potapov, oscd.community (update)
 date: 2019/11/01
-modified: 2021/11/22
+modified: 2022/04/29
 references:
     - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
@@ -51,11 +51,14 @@ detection:
             - '\vmtoolsd.exe'
             - '\minionhost.exe'  # Cyberreason
             - '\VsTskMgr.exe'    # McAfee Enterprise
+            - '\thor.exe'        # THOR
             - '\thor64.exe'      # THOR
             - '\MicrosoftEdgeUpdate.exe'
             - '\GamingServices.exe'
             - '\svchost.exe'
             - '\MsMpEng.exe'     # Defender
+            - '\MRT.exe'         # MS Malware Removal Tool
+            - 'RtkAudUService64' # https://medium.com/falconforce/the-curious-case-of-realtek-and-lsass-33fc0c8482ff
         ProcessName|startswith:
             - C:\Windows\System32\
             - C:\Windows\SysWow64\
@@ -66,6 +69,8 @@ detection:
     filter2:
         ProcessName|startswith:
             - 'C:\Program Files'  # too many false positives with legitimate AV and EDR solutions
+    filter3:
+        ProcessName: 'C:\Windows\CCM\CcmExec.exe'
     condition: 1 of selection_* and not 1 of filter*
 fields:
     - ComputerName
