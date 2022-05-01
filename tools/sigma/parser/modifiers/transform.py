@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import re
 from .base import SigmaTransformModifier
 from .mixins import ListOrStringModifierMixin
 from sigma.parser.condition import ConditionAND, ConditionBase, ConditionOR, NodeSubexpression
@@ -105,6 +106,43 @@ class SigmaBase64OffsetModifier(ListOrStringModifierMixin, SigmaTransformModifie
                         ].decode()
                 for i in range(3)
                 ]
+        cond = ConditionOR()
+        cond.items = items
+        return NodeSubexpression(cond)
+
+class SigmaWindashModifier(ListOrStringModifierMixin, SigmaTransformModifier):
+    """
+    Expand parameter characters / and - that are often interchangeable in Windows into the other
+    form if it appears between word boundaries. E.g. in -param-name the first dash will be expanded
+    into /param-name while the second dash is left untouched.
+    """
+    identifier = "windash"
+    active = True
+    valid_input_types = ListOrStringModifierMixin.valid_input_types
+
+    def expand_dashes(self, val, locations, offset=0):
+        i = locations[0]
+        if len(locations) == 1:
+            subexpansions = [ val[i + 1:]]
+        else:
+            subexpansions = self.expand_dashes(val, locations[1:], i + 1)
+
+        return [
+            val[offset:i] + expanded + subexpansion
+            for expanded in ("-", "/")
+            for subexpansion in subexpansions
+        ]
+
+    def apply_str(self, val):
+        dash_locations = [
+            m.start()
+            for m in re.finditer(re.compile("\\B[-/]\\b"), val)
+        ]
+        if dash_locations == []:
+            return val
+        else:
+            items = self.expand_dashes(val, dash_locations)
+
         cond = ConditionOR()
         cond.items = items
         return NodeSubexpression(cond)
