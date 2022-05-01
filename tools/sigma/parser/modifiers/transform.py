@@ -16,7 +16,7 @@
 
 from .base import SigmaTransformModifier
 from .mixins import ListOrStringModifierMixin
-from sigma.parser.condition import ConditionAND
+from sigma.parser.condition import ConditionAND, ConditionBase, ConditionOR
 from base64 import b64encode
 
 class SigmaContainsModifier(ListOrStringModifierMixin, SigmaTransformModifier):
@@ -24,14 +24,17 @@ class SigmaContainsModifier(ListOrStringModifierMixin, SigmaTransformModifier):
     identifier = "contains"
     active = True
 
-    def apply_str(self, val : str):
-        if not val.startswith("*"):
-            val = "*" + val
-        if not val.endswith("*"):
-            if val.endswith("\\"):
-                val += "\\*"
-            else:
-                val += "*"
+    def apply_str(self, val):
+        try:
+            if not val.startswith("*"):
+                val = "*" + val
+            if not val.endswith("*"):
+                if val.endswith("\\"):
+                    val += "\\*"
+                else:
+                    val += "*"
+        except AttributeError:
+            pass
         return val
 
 class SigmaStartswithModifier(ListOrStringModifierMixin, SigmaTransformModifier):
@@ -61,7 +64,7 @@ class SigmaAllValuesModifier(SigmaTransformModifier):
     """Override default OR-linking behavior for list with AND-linking of all list values"""
     identifier = "all"
     active = True
-    valid_input_types = (list, tuple, )
+    valid_input_types = (list, tuple, ConditionBase)
 
     def apply(self):
         vals = super().apply()
@@ -93,7 +96,7 @@ class SigmaBase64OffsetModifier(ListOrStringModifierMixin, SigmaTransformModifie
     def apply_str(self, val):
         if type(val) == str:
             val = val.encode()
-        return [
+        items = [
                 b64encode(
                     i * b' ' + val
                     )[
@@ -102,6 +105,9 @@ class SigmaBase64OffsetModifier(ListOrStringModifierMixin, SigmaTransformModifie
                         ].decode()
                 for i in range(3)
                 ]
+        cond = ConditionOR()
+        cond.items = items
+        return cond
 
 class SigmaEncodingBaseModifier(ListOrStringModifierMixin, SigmaTransformModifier):
     """
