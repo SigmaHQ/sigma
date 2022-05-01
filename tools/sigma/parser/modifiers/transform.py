@@ -16,7 +16,7 @@
 
 from .base import SigmaTransformModifier
 from .mixins import ListOrStringModifierMixin
-from sigma.parser.condition import ConditionAND, ConditionBase, ConditionOR
+from sigma.parser.condition import ConditionAND, ConditionBase, ConditionOR, NodeSubexpression
 from base64 import b64encode
 
 class SigmaContainsModifier(ListOrStringModifierMixin, SigmaTransformModifier):
@@ -107,7 +107,7 @@ class SigmaBase64OffsetModifier(ListOrStringModifierMixin, SigmaTransformModifie
                 ]
         cond = ConditionOR()
         cond.items = items
-        return cond
+        return NodeSubexpression(cond)
 
 class SigmaEncodingBaseModifier(ListOrStringModifierMixin, SigmaTransformModifier):
     """
