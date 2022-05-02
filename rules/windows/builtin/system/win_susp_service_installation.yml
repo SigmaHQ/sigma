@@ -4,7 +4,7 @@ status: experimental
 description: Detects suspicious service installation commands
 author: pH-T
 date: 2022/03/18
-modified: 2022/03/24
+modified: 2022/05/02
 logsource:
   product: windows
   service: system
@@ -35,7 +35,9 @@ detection:
         - ' IAB'  # PowerShell encoded commands
         - ' PAA'  # PowerShell encoded commands
         - ' aQBlAHgA'  # PowerShell encoded commands
-  condition: selection and ( suspicious1 or all of suspicious2* )
+  filter_thor_remote:
+      ImagePath|startswith: 'C:\WINDOWS\TEMP\thor10-remote\thor64.exe'
+  condition: selection and ( suspicious1 or all of suspicious2* ) and not 1 of filter_*
 falsepositives:
   - Unknown
 level: high
