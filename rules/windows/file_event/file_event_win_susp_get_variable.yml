@@ -1,0 +1,28 @@
+title: Suspicious Get-Variable.exe Creation 
+id: 0c3fac91-5627-46e8-a6a8-a0d7b9b8ae1b
+status: experimental
+description: |
+  Get-Variable is a valid PowerShell cmdlet
+  WindowsApps is by default in the path where PowerShell is executed.
+  So when the Get-Variable command is issued on PowerShell execution, the system first looks for the Get-Variable executable in the path and executes the malicious binary instead of looking for the PowerShell cmdlet.
+author: frack113
+references:
+  - https://blog.malwarebytes.com/threat-intelligence/2022/04/colibri-loader-combines-task-scheduler-and-powershell-in-clever-persistence-technique/
+  - https://www.joesandbox.com/analysis/465533/0/html
+date: 2022/04/23
+logsource:
+  product: windows
+  category: file_event
+detection:
+  selection:
+    TargetFilename|endswith: 'Local\Microsoft\WindowsApps\Get-Variable.exe'
+  condition: selection 
+falsepositives:
+  - Unknown
+level: high
+tags:
+  - attack.persistence
+  - attack.t1546
+  - attack.defense_evasion
+  - attack.t1027
+  

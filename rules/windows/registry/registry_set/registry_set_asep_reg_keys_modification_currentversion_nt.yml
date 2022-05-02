@@ -11,7 +11,7 @@ references:
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 date: 2019/10/25
-modified: 2022/03/26
+modified: 2022/04/27
 logsource:
     category: registry_set
     product: windows
@@ -54,10 +54,21 @@ detection:
         Image|endswith: '\DropboxUpdate.exe'
         TargetObject|endswith: '\Image File Execution Options\DropboxUpdate.exe\DisableExceptionChainValidation'
     filter_officeclicktorun:
-        Image|startswith: 
+        Image|startswith:
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
         Image|endswith: '\OfficeClickToRun.exe'
+    filter_security_extension_dc:
+        Image: 'C:\Windows\system32\svchost.exe'
+        TargetObject|contains:
+            - '\Winlogon\GPExtensions\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\PreviousPolicyAreas'
+            - '\Winlogon\GPExtensions\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\MaxNoGPOListChangesInterval'
+        Details:
+            - 'DWORD (0x00000009)'
+            - 'DWORD (0x000003c0)'
+    filter_ngen:
+        Image|startswith: 'C:\Windows\Microsoft.NET\Framework'
+        Image|endswith: '\ngen.exe'
     condition: nt_current_version_base and nt_current_version and not 1 of filter_*
 fields:
     - SecurityID

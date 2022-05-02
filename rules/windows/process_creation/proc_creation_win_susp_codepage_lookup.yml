@@ -1,0 +1,32 @@
+title: CHCP CodePage Locale Lookup
+id: 7090adee-82e2-4269-bd59-80691e7c6338
+status: experimental
+description: Detects use of chcp to look up the system locale value as part of host discovery
+author: '_pete_0, TheDFIRReport'
+references:
+  - https://thedfirreport.com/2022/04/04/stolen-images-campaign-ends-in-conti-ransomware/
+  - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/chcp
+date: 2022/02/21
+modified: 2022/04/21
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    ParentImage|endswith: '\cmd.exe'
+    ParentCommandLine|contains: ' /c '
+    Image|endswith: '\chcp.com'
+    CommandLine|endswith: 
+      - 'chcp'
+      - 'chcp '
+      - 'chcp  '
+  condition: selection
+fields:
+  - CommandLine
+  - ParentCommandLine
+falsepositives:
+  - Unknown
+level: high
+tags:
+  - attack.discovery
+  - attack.t1614.001
