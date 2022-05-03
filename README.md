@@ -102,6 +102,8 @@ Sigmac converts sigma rules into queries or inputs of the supported targets list
 Sigma library that may be used to integrate Sigma support in other projects. Further, there's `merge_sigma.py` which
 merges multiple YAML documents of a Sigma rule collection into simple Sigma rules.
 
+**WARNING: Do not provide conversion backends for this tool anymore. We'll soon set a date for its deprecation. Since October 2020, we're working on a much more flexible and stable module named [pySigma](https://github.com/SigmaHQ/pySigma) and a command line interface named [sigma-cli](https://github.com/SigmaHQ/sigma-cli) that makes use of pySigma.**
+
 ### Usage
 
 ```bash
