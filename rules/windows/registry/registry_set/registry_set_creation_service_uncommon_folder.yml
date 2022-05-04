@@ -3,6 +3,7 @@ id: 277dc340-0540-42e7-8efb-5ff460045e07
 description: Detect the creation of a service with a service binary located in a uncommon directory 
 status: experimental
 date: 2022/05/02
+modified: 2022/05/04
 author: Florian Roth
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1562.001/T1562.001.md
@@ -29,7 +30,14 @@ detection:
         Details|contains:
             - '\AppData\Local\'
             - '\AppData\Roaming\'
-    condition: 1 of selection_*
+    filter:
+        - Image|contains: 
+            - '\AppData\Roaming\Zoom\'
+            - '\AppData\Local\Zoom\'
+        - Details|contains: 
+            - '\AppData\Roaming\Zoom\'
+            - '\AppData\Local\Zoom\'
+    condition: 1 of selection_* and not filter
 falsepositives:
     - Unknown
 level: medium
