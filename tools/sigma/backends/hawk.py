@@ -152,8 +152,6 @@ class HAWKBackend(SingleTextQueryBackend):
                 filtered = sorted(filtered)
             ret['children'] = filtered
 
-            # retAnd['children'].append( ret )
-            #return retAnd
             return ret
         else:
             return None
@@ -176,8 +174,6 @@ class HAWKBackend(SingleTextQueryBackend):
         if len(result) == 1:
             # A list with length 1 is not a proper list, no self.listExpression required
             return result[0]
-        #print("LIST EXPRESSION")
-        #print(result)
         return self.listExpression % (self.listSeparator.join(result))
 
     def generateNOTNode(self, node):
@@ -230,6 +226,13 @@ class HAWKBackend(SingleTextQueryBackend):
                     nodeRet["args"]["comparison"]["value"] = "!="
                 else:
                     nodeRet['args']['comparison']['value'] = "="
+
+                # custom, since we trim up  string size in log to save bytes
+                if key == 'Provider_Name':
+                    nodeRet['key'] = "product_name"
+                    if value[0:17] == 'Microsoft-Windows':
+                        value = value[18:]
+
                 nodeRet['args']['str']['value'] = value
                 # return json.dumps(nodeRet)
                 return nodeRet
@@ -322,6 +325,16 @@ class HAWKBackend(SingleTextQueryBackend):
                 ret['children'].append( nodeRet )
             else:
                 nodeRet['args']['str']['value'] = self.generateValueNode(item, True)
+
+                # custom, since we trim up  string size in log to save bytes
+                key = nodeRet['key']
+                value = nodeRet['args']['str']['value']
+                if key == 'provider__name':
+                    nodeRet['key'] = "product_name"
+                    if value[0:17] == 'Microsoft-Windows':
+                        value = value[18:]
+                        nodeRet['args']['str']['value'] = value
+
                 ret['children'].append( nodeRet )
         retAnd = { "id" : "and", "key": "And", "children" : [ ret ] }
         return retAnd # '('+" or ".join(itemslist)+')'
