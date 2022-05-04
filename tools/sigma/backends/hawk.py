@@ -117,6 +117,13 @@ class HAWKBackend(SingleTextQueryBackend):
             elif startsWith and not endsWith:
                 nodeRet['args']['str']['value'] = "^" + value
             else:
+
+                # custom, since we trim up  string size in log to save bytes
+                if key == 'Provider_Name':
+                    nodeRet['key'] = "product_name"
+                    if type(value) is str and value[0:17] == 'Microsoft-Windows':
+                        value = value[18:]
+
                 nodeRet['args']['str']['value'] = value
 
             if notNode:
