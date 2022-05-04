@@ -397,3 +397,22 @@ python3 -m tests.test_backend_datadog
 
 It will run the Datadog backend over all the rules in the repository and print out the number of supported rules.
 Use the `--verbose` flag to get individual results for each rule.
+
+
+### StreamAlert
+The StreamAlert backend currently supports converting Sigma files to the [Rule code syntax](https://streamalert.io/rules.html/).
+
+The backend configurations will specify the outputs, publishers, and all the field mappings for the rules. Please change it in `tools/config/streamalert.yml` before running. Example running:
+```shell
+tools/sigmac -t streamalert -c tools/config/streamalert.yml rules/windows/process_creation/proc_creation_win_hack_krbrelayup.yml
+```
+
+You can see the backend rules coverage by running:
+```shell
+cd tools/
+python3 -m tests.test_backend_streamalert
+```
+
+It will run the StreamAlert backend against all of the rules in the repository and display the number of supported rules.
+
+To receive individual results for each rule, use the `—verbose` parameter.
