@@ -4,6 +4,7 @@ status: experimental
 description: Detects the use of NirCmd tool for command execution, which could be the result of legitimate administrative activity
 author: 'Florian Roth, Nasreddine Bencherchali @nas_bench'
 date: 2022/01/24
+modified: 2022/05/05
 references:
     - https://www.nirsoft.net/utils/nircmd.html
     - https://www.winhelponline.com/blog/run-program-as-system-localsystem-account-windows/
@@ -16,19 +17,25 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith:
-            - '\nircmd.exe'
-            - '\nircmdc.exe'
-    selection_params:
+    selection_org:
+        OriginalFileName|contains: 'NirCmd.exe'
+    selection_execmd:
+        CommandLine|contains: ' execmd '
+    selection_exec:
         CommandLine|contains:
-            - ' execmd '
+            - ' exec '
             - ' exec2 '
-    selection_commands:
+    selection_exec_params:
         CommandLine|contains:
-            - ' copy '
-            - ' del '
-    condition: selection or ( selection_params and selection_commands )
+            - ' show '
+            - ' hide '
+    selection_script:
+        CommandLine|contains: '.exe script '
+    selection_shexec:
+        CommandLine|contains: '.exe shexec '
+    selection_runinteractive:
+        CommandLine|contains: ' runinteractive '
+    condition: 1 of selection*
 fields:
     - CommandLine
     - ParentCommandLine
