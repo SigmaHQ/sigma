@@ -1,9 +1,10 @@
-title: Service Binary in Temp Folder
-id: c0abc838-36b0-47c9-b3b3-a90c39455382
-description: Detect the creation of a service with a service binary located in a temporary directory 
+title: Service Binary in Uncommon Folder
+id: 277dc340-0540-42e7-8efb-5ff460045e07
+description: Detect the creation of a service with a service binary located in a uncommon directory 
 status: experimental
-date: 2022/05/01
-author: frack113
+date: 2022/05/02
+modified: 2022/05/04
+author: Florian Roth
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1562.001/T1562.001.md
 logsource:
@@ -14,7 +15,9 @@ detection:
         EventType: SetValue
         TargetObject|startswith: 'HKLM\System\CurrentControlSet\Services\'
         TargetObject|endswith: '\Start'
-        Image|contains: '\Temp\'
+        Image|contains: 
+            - '\AppData\Local\'
+            - '\AppData\Roaming\'
         Details: 
             - 'DWORD (0x00000000)'  # boot
             - 'DWORD (0x00000001)'  # System
@@ -24,11 +27,20 @@ detection:
         EventType: SetValue
         TargetObject|startswith: 'HKLM\System\CurrentControlSet\Services\'
         TargetObject|endswith: '\ImagePath'
-        Details|contains: '\Temp\'
-    condition: 1 of selection_*
+        Details|contains:
+            - '\AppData\Local\'
+            - '\AppData\Roaming\'
+    filter:
+        - Image|contains: 
+            - '\AppData\Roaming\Zoom'
+            - '\AppData\Local\Zoom'
+        - Details|contains: 
+            - '\AppData\Roaming\Zoom'
+            - '\AppData\Local\Zoom'
+    condition: 1 of selection_* and not filter
 falsepositives:
     - Unknown
-level: high
+level: medium
 tags:
     - attack.defense_evasion
     - attack.t1112 
