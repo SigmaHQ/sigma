@@ -4,8 +4,12 @@ description: Detects a suspicious reg.exe invocation that looks as if it would d
 status: experimental
 references:
     - https://twitter.com/JohnLaTwC/status/1415295021041979392
-author: Florian Roth, John Lambert (idea)
+    - https://github.com/gordonbay/Windows-On-Reins/blob/master/wor.ps1
+    - https://vms.drweb.fr/virus/?i=24144899
+    - https://bidouillesecurity.com/disable-windows-defender-in-powershell/
+author: Florian Roth, John Lambert (idea), elhoim
 date: 2021/07/14
+modified: 2022/05/05
 tags:
     - attack.defense_evasion
     - attack.t1562.001
@@ -13,26 +17,55 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_reg:
+    selection_reg_add:
         CommandLine|contains|all:
             - 'reg'
             - 'add'
+    selection_reg_start:
+        CommandLine|contains|all:
             - ' /d 4'
             - ' /v Start'
-    selection_services:
+    selection_start_services:
         CommandLine|contains:
-            - '\Sense '
+            - '\Sense'
             - '\WinDefend'
             - '\MsMpSvc'
             - '\NisSrv'
-            - '\WdBoot '
+            - '\WdBoot'
             - '\WdNisDrv'
             - '\WdNisSvc'
-            - '\wscsvc '
+            - '\wscsvc'
             - '\SecurityHealthService'
             - '\wuauserv'
-            - '\UsoSvc '
-    condition: selection_reg and selection_services
+            - '\UsoSvc'
+            - '\WdFilter'
+            - '\AppIDSvc'
+    selection_reg_disable_defender:
+        CommandLine|contains|all:
+            - ' /d 1'
+            - 'Windows Defender'
+    selection_reg_disable_defender_values:
+        CommandLine|contains:
+            - 'DisableIOAVProtection'
+            - 'DisableOnAccessProtection'
+            - 'DisableRoutinelyTakingAction'
+            - 'DisableScanOnRealtimeEnable'
+            - 'DisableBlockAtFirstSeen'
+            - 'DisableBehaviorMonitoring'
+            - 'DisableEnhancedNotifications'
+            - 'DisableAntiSpyware'
+            - 'DisableAntiSpywareRealtimeProtection'
+            - 'DisableConfig'
+            - 'DisablePrivacyMode'
+            - 'SignatureDisableUpdateOnStartupWithoutEngine'
+            - 'DisableArchiveScanning'
+            - 'DisableIntrusionPreventionSystem'
+            - 'DisableScriptScanning'
+    condition: selection_reg_add and (
+            (selection_reg_start and selection_start_services)
+            or
+            (selection_reg_disable_defender and selection_reg_disable_defender_values)
+            )
 falsepositives:
     - Unknown
     - Other security solution installers
