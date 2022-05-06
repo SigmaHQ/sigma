@@ -16,18 +16,18 @@ detection:
     selection:
         EventType: SetValue
         Image|endswith: '\rundll32.exe'
-    registry_1:
-        TargetObject|contains: '\Control Panel\Desktop\ScreenSaveActive'
-        Details: '1'
-    registry_2:
-        TargetObject|contains: '\Control Panel\Desktop\ScreenSaveTimeOut'
-        Details: 900 
-    registry_3:
+    registry:
         TargetObject|contains: '\Control Panel\Desktop\SCRNSAVE.EXE'
         Details|endswith: '.scr'
-    condition: selection and 1 of registry_*
+    filter:
+        Details|contains: 
+        - 'C:\Windows\System32\'
+        - 'C:\Windows\SysWOW64\'
+        - 'C:\Windows\system32\'
+        - 'C:\Windows\SysWow64\'
+    condition: selection and registry and not filter
 falsepositives:
-    - Unknown
+    - legitimate use of screen saver
 level: medium
 tags:
     - attack.defense_evasion
