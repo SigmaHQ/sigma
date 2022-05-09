@@ -466,7 +466,7 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed optional 'fields' fields. (has to be a list of values even if it contains only a single value)")
 
-    def test_optional_falsepositives(self):
+    def test_optional_falsepositives_listtype(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             falsepositives_str = self.get_rule_part(file_path=file, part_name="falsepositives")
@@ -478,6 +478,25 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed optional 'falsepositives' fields. (has to be a list of values even if it contains only a single value)")
+
+    def test_optional_falsepositives_capital(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            fps = self.get_rule_part(file_path=file, part_name="falsepositives")
+            if fps:
+                for fp in fps:
+                    # first letter should be capital
+                    try:
+                        if fp[0].upper() != fp[0]:
+                            print(Fore.YELLOW + "Rule {} defines a falsepositive that does not start with a capital letter: '{}'.".format(file, fp))
+                            faulty_rules.append(file)
+                    except TypeError as err:
+                        print("TypeError Exception for rule {}".format(file))
+                        print("Error: {}".format(err))
+                        print("Maybe you created an empty falsepositive item?")
+
+        self.assertEqual(faulty_rules, [], Fore.RED +
+                         "There are rules with false positives that don't start with a capital letter (e.g. 'unknown' should be 'Unknown')")
 
     # Upgrade Detection Rule License  1.1
     def test_optional_author(self):
