@@ -498,6 +498,26 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with false positives that don't start with a capital letter (e.g. 'unknown' should be 'Unknown')")
 
+    def test_optional_falsepositives_blocked_content(self):
+        faulty_rules = []
+        banned_words = ["none", "pentest", "penetration test"]
+        common_typos = ["unkown", "ligitimate", "legitim ", "legitimeate"]
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            fps = self.get_rule_part(file_path=file, part_name="falsepositives")
+            if fps:
+                for fp in fps:
+                    for typo in common_typos:
+                        if fp == "Unknow" or typo in fp.lower():
+                            print(Fore.YELLOW + "Rule {} defines a falsepositive with a common typo: '{}'.".format(file, typo))
+                            faulty_rules.append(file)
+                    for banned_word in banned_words:
+                        if banned_word in fp.lower():
+                            print(Fore.YELLOW + "Rule {} defines a falsepositive with an invalid reason: '{}'.".format(file, banned_word))
+                            faulty_rules.append(file)
+
+        self.assertEqual(faulty_rules, [], Fore.RED +
+                         "There are rules with invalid false positive definitions (e.g. Pentest, None or common typos)")
+
     # Upgrade Detection Rule License  1.1
     def test_optional_author(self):
         faulty_rules = []
