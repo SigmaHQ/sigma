@@ -608,7 +608,7 @@ class TestRules(unittest.TestCase):
     def test_file_names(self):
         faulty_rules = []
         name_lst = []
-        filename_pattern = re.compile('[a-z0-9_]{10,70}\.yml')
+        filename_pattern = re.compile(r'[a-z0-9_]{10,70}\.yml')
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             filename = os.path.basename(file)
             if filename in name_lst:
@@ -629,7 +629,7 @@ class TestRules(unittest.TestCase):
             name_lst.append(filename)
 
         self.assertEqual(faulty_rules, [], Fore.RED +
-                         "There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is '[a-z0-9_]{10,70}\.yml' and it has to contain at least an underline character.")
+                         r'There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is \'[a-z0-9_]{10,70}\.yml\' and it has to contain at least an underline character.')
 
     def test_title(self):
         faulty_rules = []
