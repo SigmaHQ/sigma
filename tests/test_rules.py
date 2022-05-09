@@ -621,7 +621,7 @@ class TestRules(unittest.TestCase):
                 print(Fore.YELLOW + "Rule {} has a file name too long >70.".format(file))
                 faulty_rules.append(file)
             elif len(filename) < 14:
-                print(Fore.YELLOW + "Rule {} has a file name too sort <10.".format(file))
+                print(Fore.YELLOW + "Rule {} has a file name too short <10.".format(file))
                 faulty_rules.append(file)
             elif filename_pattern.match(filename) == None or not '_' in filename:
                 print(Fore.YELLOW + "Rule {} has a file name that doesn't match our standard.".format(file))
