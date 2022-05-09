@@ -678,6 +678,25 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with non-conform 'title' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title")
 
+    def test_title_in_first_line(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            yaml = self.get_rule_yaml(file)
+
+            # skip multi-part yaml
+            if len(yaml) > 1:
+                continue
+
+            # this propably is not the best way to check whether
+            # title is the attribute given in the 1st line
+            # (also assumes dict keeps the order from the input file)
+            if list(yaml[0].keys())[0] != "title":
+                print(Fore.RED + "Rule {} does not have its 'title' attribute in the first line".format(file))
+                faulty_rules.append(file)
+
+        self.assertEqual(faulty_rules, [], Fore.RED +
+                        "There are rules without the 'title' attribute in their first line.")
+
     def test_invalid_logsource_attributes(self):
         faulty_rules = []
         valid_logsource = [
