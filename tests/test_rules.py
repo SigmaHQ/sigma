@@ -57,7 +57,7 @@ class TestRules(unittest.TestCase):
                 # if extension != ".yml":
                     # files_with_incorrect_extensions.append(file)
 
-        # self.assertEqual(files_with_incorrect_extensions, [], Fore.RED + 
+        # self.assertEqual(files_with_incorrect_extensions, [], Fore.RED +
                         # "There are rule files with extensions other than .yml")
 
     def test_legal_trademark_violations(self):
@@ -70,9 +70,9 @@ class TestRules(unittest.TestCase):
                     if tm in file_data:
                         files_with_legal_issues.append(file)
 
-        self.assertEqual(files_with_legal_issues, [], Fore.RED + 
+        self.assertEqual(files_with_legal_issues, [], Fore.RED +
                         "There are rule files which contains a trademark or reference that doesn't comply with the respective trademark requirements - please remove the trademark to avoid legal issues")
-                        
+
     def test_optional_tags(self):
         files_with_incorrect_tags = []
         tags_pattern = re.compile(r"cve\.\d+\.\d+|attack\.t\d+\.*\d*|attack\.[a-z_]+|car\.\d{4}-\d{2}-\d{3}")
@@ -84,7 +84,7 @@ class TestRules(unittest.TestCase):
                         print(Fore.RED + "Rule {} has the invalid tag <{}>".format(file, tag))
                         files_with_incorrect_tags.append(file)
 
-        self.assertEqual(files_with_incorrect_tags, [], Fore.RED + 
+        self.assertEqual(files_with_incorrect_tags, [], Fore.RED +
                          "There are rules with incorrect/unknown MITRE Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://attack.mitre.org/ ")
 
     def test_confirm_correct_mitre_tags(self):
@@ -98,7 +98,7 @@ class TestRules(unittest.TestCase):
                         print(Fore.RED + "Rule {} has the following incorrect tag {}".format(file, tag))
                         files_with_incorrect_mitre_tags.append(file)
 
-        self.assertEqual(files_with_incorrect_mitre_tags, [], Fore.RED + 
+        self.assertEqual(files_with_incorrect_mitre_tags, [], Fore.RED +
                          "There are rules with incorrect/unknown MITRE Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://attack.mitre.org/ ")
 
     def test_duplicate_tags(self):
@@ -112,10 +112,10 @@ class TestRules(unittest.TestCase):
                     if tag in known_tags:
                         print(Fore.RED + "Rule {} has the duplicate tag {}".format(file, tag))
                         files_with_incorrect_mitre_tags.append(file)
-                    else: 
+                    else:
                         known_tags.append(tag)
 
-        self.assertEqual(files_with_incorrect_mitre_tags, [], Fore.RED + 
+        self.assertEqual(files_with_incorrect_mitre_tags, [], Fore.RED +
                          "There are rules with duplicate tags")
 
     def test_look_for_duplicate_filters(self):
@@ -144,7 +144,7 @@ class TestRules(unittest.TestCase):
             detection = self.get_rule_part(file_path=file, part_name="detection")
             check_list_or_recurse_on_dict(detection, 1)
 
-        self.assertEqual(files_with_duplicate_filters, [], Fore.RED + 
+        self.assertEqual(files_with_duplicate_filters, [], Fore.RED +
                          "There are rules with duplicate filters")
 
     def test_field_name_with_space(self):
@@ -202,28 +202,28 @@ class TestRules(unittest.TestCase):
 
             # detections not the same count can't be the same
             if len(detection1) != len(detection2):
-                return False    
-                 
+                return False
+
             for named_condition in detection1:
                 #don't check timeframes
                 if named_condition == "timeframe":
                     continue
-               
-                # condition clause must be the same too 
+
+                # condition clause must be the same too
                 if named_condition == "condition":
                     if detection1["condition"] != detection2["condition"]:
                         return False
                     else:
                         continue
-                               
+
                 # Named condition must exist in both rule files
                 if named_condition not in detection2:
                     return False
-                
+
                 #can not be the same  if len is not equal
                 if len(detection1[named_condition]) != len(detection2[named_condition]):
                     return False
-                
+
 
                 for condition in detection1[named_condition]:
                     if type(condition) != str:
@@ -231,7 +231,7 @@ class TestRules(unittest.TestCase):
 
                     if condition not in detection2[named_condition]:
                         return False
-                    
+
                     condition_value1 = detection1[named_condition][condition]
                     condition_value2 = detection2[named_condition][condition]
                     if condition_value1 != condition_value2:
@@ -259,7 +259,7 @@ class TestRules(unittest.TestCase):
 
             files_and_their_detections[file] = detection
 
-        self.assertEqual(faulty_detections, [], Fore.YELLOW + 
+        self.assertEqual(faulty_detections, [], Fore.YELLOW +
                          "There are rule files with exactly the same detection logic.")
 
     def test_source_eventlog(self):
@@ -271,7 +271,7 @@ class TestRules(unittest.TestCase):
             if "'source': 'eventlog'" in detection_str:
                 faulty_detections.append(file)
 
-        self.assertEqual(faulty_detections, [], Fore.YELLOW + 
+        self.assertEqual(faulty_detections, [], Fore.YELLOW +
                          "There are detections with 'Source: Eventlog'. This does not add value to the detection.")
 
     def test_event_id_instead_of_process_creation(self):
@@ -282,7 +282,7 @@ class TestRules(unittest.TestCase):
                     if re.search(r'.*EventID: (?:1|4688)\s*$', line) and file not in faulty_detections:
                         faulty_detections.append(file)
 
-        self.assertEqual(faulty_detections, [], Fore.YELLOW + 
+        self.assertEqual(faulty_detections, [], Fore.YELLOW +
                          "There are rules still using Sysmon 1 or Event ID 4688. Please migrate to the process_creation category.")
 
     def test_missing_id(self):
@@ -295,14 +295,14 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
             elif len(id) != 36:
                 print(Fore.YELLOW + "Rule {} has a malformed 'id' (not 36 chars).".format(file))
-                faulty_rules.append(file)                
+                faulty_rules.append(file)
             elif id in dict_id.keys():
                 print(Fore.YELLOW + "Rule {} has the same 'id' than {} must be unique.".format(file,dict_id[id]))
                 faulty_rules.append(file)
             else:
                 dict_id[id] = file
 
-        self.assertEqual(faulty_rules, [], Fore.RED + 
+        self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with missing or malformed 'id' fields. Create an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).")
 
     def test_optional_related(self):
@@ -321,7 +321,7 @@ class TestRules(unittest.TestCase):
                     print(Fore.YELLOW + "Rule {} has a 'related' field that isn't a list.".format(file))
                     faulty_rules.append(file)
                 else:
-                    # should probably test if we have only 'id' and 'type' ... 
+                    # should probably test if we have only 'id' and 'type' ...
                     type_ok = True
                     for ref in related_lst:
                         id_str = ref['id']
@@ -333,7 +333,7 @@ class TestRules(unittest.TestCase):
                         print(Fore.YELLOW + "Rule {} has a 'related/type' invalid value.".format(file))
                         faulty_rules.append(file)
 
-        self.assertEqual(faulty_rules, [], Fore.RED + 
+        self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed optional 'related' fields. (check https://github.com/SigmaHQ/sigma/wiki/Specification)")
 
     def test_sysmon_rule_without_eventid(self):
@@ -352,7 +352,7 @@ class TestRules(unittest.TestCase):
                         if not found:
                             faulty_rules.append(file)
 
-        self.assertEqual(faulty_rules, [], Fore.RED + 
+        self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules using sysmon events but with no EventID specified")
 
     def test_missing_date(self):
@@ -405,7 +405,7 @@ class TestRules(unittest.TestCase):
                     faulty_rules.append(file)
                 elif modifiedfield[4] != '/' or modifiedfield[7] != '/':
                     print(Fore.YELLOW + "Rule {} has a malformed 'modified' (should be YYYY/MM/DD).".format(file))
-                    faulty_rules.append(file)    
+                    faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed 'modified' fields. (create one, e.g. date: 2019/01/14)")
@@ -424,11 +424,11 @@ class TestRules(unittest.TestCase):
             if status_str:
                 if not status_str in valid_status:
                     print(Fore.YELLOW + "Rule {} has a invalid 'status' (check wiki).".format(file))
-                    faulty_rules.append(file) 
+                    faulty_rules.append(file)
                 elif status_str == "unsupported":
                     print(Fore.YELLOW + "Rule {} has the unsupported 'status', can not be in rules directory".format(file))
                     faulty_rules.append(file)
-                    
+
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed 'status' fields. (check https://github.com/SigmaHQ/sigma/wiki/Specification)")
 
@@ -463,7 +463,7 @@ class TestRules(unittest.TestCase):
                     print(Fore.YELLOW + "Rule {} has a 'fields' field that isn't a list.".format(file))
                     faulty_rules.append(file)
 
-        self.assertEqual(faulty_rules, [], Fore.RED + 
+        self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed optional 'fields' fields. (has to be a list of values even if it contains only a single value)")
 
     def test_optional_falsepositives(self):
@@ -476,7 +476,7 @@ class TestRules(unittest.TestCase):
                     print(Fore.YELLOW + "Rule {} has a 'falsepositives' field that isn't a list.".format(file))
                     faulty_rules.append(file)
 
-        self.assertEqual(faulty_rules, [], Fore.RED + 
+        self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed optional 'falsepositives' fields. (has to be a list of values even if it contains only a single value)")
 
     # Upgrade Detection Rule License  1.1
@@ -490,7 +490,7 @@ class TestRules(unittest.TestCase):
                     print(Fore.YELLOW + "Rule {} has a 'author' field that isn't a string.".format(file))
                     faulty_rules.append(file)
 
-        self.assertEqual(faulty_rules, [], Fore.RED + 
+        self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed 'author' fields. (has to be a string even if it contains many author)")
 
     def test_optional_license(self):
@@ -524,7 +524,7 @@ class TestRules(unittest.TestCase):
                     print(Fore.YELLOW + "Rule {} has a 'tlp' field with not valid value.".format(file))
                     faulty_rules.append(file)
 
-        self.assertEqual(faulty_rules, [], Fore.RED + 
+        self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed optional 'tlp' fields. (https://www.cisa.gov/tlp)")
 
     def test_optional_target(self):
@@ -537,7 +537,7 @@ class TestRules(unittest.TestCase):
                     print(Fore.YELLOW + "Rule {} has a 'target' field that isn't a list.".format(file))
                     faulty_rules.append(file)
 
-        self.assertEqual(faulty_rules, [], Fore.RED + 
+        self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed 'target' fields. (has to be a list of values even if it contains only a single value)")
 
     def test_references(self):
@@ -554,7 +554,7 @@ class TestRules(unittest.TestCase):
                     print(Fore.YELLOW + "Rule {} has a references field that isn't a list.".format(file))
                     faulty_rules.append(file)
 
-        self.assertEqual(faulty_rules, [], Fore.RED + 
+        self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed 'references' fields. (has to be a list of values even if it contains only a single value)")
 
     def test_references_plural(self):
@@ -576,7 +576,7 @@ class TestRules(unittest.TestCase):
             filename = os.path.basename(file)
             if filename in name_lst:
                 print(Fore.YELLOW + "Rule {} is a duplicate file name.".format(file))
-                faulty_rules.append(file)        
+                faulty_rules.append(file)
             elif filename[-4:] != ".yml":
                 print(Fore.YELLOW + "Rule {} has a invalid extension (.yml).".format(file))
                 faulty_rules.append(file)
@@ -591,7 +591,7 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
             name_lst.append(filename)
 
-        self.assertEqual(faulty_rules, [], Fore.RED + 
+        self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is '[a-z0-9_]{10,70}\.yml' and it has to contain at least an underline character.")
 
     def test_title(self):
@@ -638,7 +638,7 @@ class TestRules(unittest.TestCase):
                 print(Fore.RED + "Rule {} has a title that has not title capitalization. Words: '{}'".format(file, ", ".join(wrong_casing)))
                 faulty_rules.append(file)
 
-        self.assertEqual(faulty_rules, [], Fore.RED + 
+        self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with non-conform 'title' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title")
 
     def test_invalid_logsource_attributes(self):
@@ -654,7 +654,7 @@ class TestRules(unittest.TestCase):
             if not logsource:
                 print(Fore.RED + "Rule {} has no 'logsource'.".format(file))
                 faulty_rules.append(file)
-                continue           
+                continue
             valid = True
             for key in logsource:
                 if key.lower() not in valid_logsource:
@@ -666,9 +666,9 @@ class TestRules(unittest.TestCase):
             if not valid:
                faulty_rules.append(file)
 
-        self.assertEqual(faulty_rules, [], Fore.RED + 
+        self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with non-conform 'logsource' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#log-source")
-  
+
 
     def test_selection_list_one_value(self):
         faulty_rules = []
@@ -690,7 +690,7 @@ class TestRules(unittest.TestCase):
   #                                  #valid = False
                  if not valid:
                      faulty_rules.append(file)
-   
+
         self.assertEqual(faulty_rules, [], Fore.RED + "There are rules using list with only 1 element")
 
     def test_condition_operator_casesensitive(self):
@@ -707,13 +707,13 @@ class TestRules(unittest.TestCase):
                         elif item.lower() == 'and' and not item == 'and':
                             valid = False
                         elif item.lower() == 'not' and not item == 'not':
-                            valid = False   
+                            valid = False
                         elif item.lower() == 'of' and not item == 'of':
-                            valid = False                            
+                            valid = False
                      if not valid:
                          print(Fore.RED + "Rule {} has a invalid condition '{}' : 'or','and','not','of' are lowercase".format(file,detection["condition"]))
                          faulty_rules.append(file)
-                         
+
         self.assertEqual(faulty_rules, [], Fore.RED + "There are rules using condition whitout lowercase operator")
 
 def get_mitre_data():
@@ -728,7 +728,7 @@ def get_mitre_data():
     MITRE_PHASE_NAMES = set()
     MITRE_TOOLS = []
     MITRE_GROUPS = []
-    # Techniques 
+    # Techniques
     enterprise_techniques = lift.get_enterprise_techniques()
     for t in enterprise_techniques:
         MITRE_TECHNIQUE_NAMES.append(t['name'].lower().replace(' ', '_').replace('-', '_'))
@@ -757,7 +757,7 @@ def get_mitre_data():
             if 'external_id' in r:
                 MITRE_GROUPS.append(r['external_id'].lower())
 
-    # Debugging 
+    # Debugging
     print("MITRE ATT&CK LIST LENGTHS: %d %d %d %d %d" % (len(MITRE_TECHNIQUES), len(MITRE_TECHNIQUE_NAMES), len(list(MITRE_PHASE_NAMES)), len(MITRE_GROUPS), len(MITRE_TOOLS)))
 
     # Combine all IDs to a big tag list
