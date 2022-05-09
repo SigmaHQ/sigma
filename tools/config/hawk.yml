@@ -233,7 +233,8 @@ logsources:
  zeek:
   product: zeek
   conditions:
-    vendor_name: "Zeek IDS"
+    vendor_name: "Zeek"
+    vendor_type: "IDS"
  azure-signin:
   product: azure
   service: signinlogs
@@ -258,6 +259,11 @@ logsources:
    conditions:
     vendor_name: "Microsoft"
     product_name: "Azure"
+ microsoft-servicebus-client:
+   product: windows
+   service: microsoft-servicebus-client
+   conditions:
+    channel: 'Microsoft-ServiceBus-Client'
  windows-application:
    product: windows
    service: application
@@ -351,6 +357,14 @@ logsources:
    conditions:
      product_name: 'PowerShell'
      vendor_id: 4104
+ windows-ps-classic-start:
+   category: ps_classic_start
+   product: windows
+   conditions:
+     EventID: 400
+   rewrite:
+     product: windows
+     service: powershell-classic
  windows-ps-classic-provider:
    product: windows
    category: ps_classic_provider_start
@@ -430,6 +444,9 @@ logsources:
    conditions:
      product_name: "Sysmon"
      vendor_id: 14
+ #dns:
+ #  category: dns
+ #  conditions:
  qflow:
    product: qflow
  netflow:
@@ -537,7 +554,6 @@ fieldmappings:
   DetectionSource: value
   Priority: event_priority
   event_type_id: vendor_id
-  eventtype: vendor_type
   destination.port: ip_dport
   user: correlation_username
   User: correlation_username
@@ -568,3 +584,14 @@ fieldmappings:
   user-agent: http_user_agent
   cs-User-Agent: http_user_agent
   r-dns: http_host
+  id_orig_h: ip_src
+  id_orig_p: ip_src_port
+  id_resp_h: ip_dst
+  id_resp_p: ip_dst_port
+  host: ip_src
+  hostname: ip_src_host
+  port_num: ip_dst_port
+  query: dns_query
+  orig_ip_bytes: net_if_out_bytes
+  resp_ip_bytes: net_if_in_bytes
+  QNAME: qname
