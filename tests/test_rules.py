@@ -158,7 +158,6 @@ class TestRules(unittest.TestCase):
 
         faulty_fieldnames = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
-            yaml = self.get_rule_yaml(file_path = file)
             detection = self.get_rule_part(file_path = file, part_name = "detection")
             key_iterator(detection, faulty_fieldnames)
 
@@ -188,7 +187,6 @@ class TestRules(unittest.TestCase):
         faulty_detections = []
 
         for file in self.yield_next_rule_file_path(self.path_to_rules):
-            yaml = self.get_rule_yaml(file_path = file)
             detection = self.get_rule_part(file_path = file, part_name = "detection")
 
             if "all of them" in detection["condition"]:
