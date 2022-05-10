@@ -456,7 +456,7 @@ class HAWKBackend(SingleTextQueryBackend):
                              "limit" : { "order" : "3", "source" : "time_offset", "type" : "int", "objectKey" : "limit" },
                          },
                          "args": { 
-                             "columns" : [ self.cleanKey(agg.groupfield) ],
+                             "columns" : [ "ip_src", self.cleanKey(agg.groupfield) ],
                              "comparison": { "value": "%s" % agg.cond_op }, 
                              "threshold": { "value": int(agg.condition) }, 
                              "limit": { "value": min_count } 
