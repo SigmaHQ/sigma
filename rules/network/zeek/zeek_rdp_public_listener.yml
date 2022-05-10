@@ -13,7 +13,7 @@ logsource:
     product: zeek
     service: rdp
 detection:
-    selection:
+    selection1:
       id.orig_h|startswith:
         - '192.168.'
         - '10.'
@@ -33,10 +33,14 @@ detection:
         - '172.29.'
         - '172.30.'
         - '172.31.'
+    selection2:
+      id.orig_h|re:
+        - '^fe[c-f][0-9a-f]\:' # deprecated (RFC 3879)
+        - '^f[c-d][0-9a-f]\:' # current (RFC 1918)
     #approved_rdp:
       #dst_ip:
         #- x.x.x.x
-    condition: not selection #and not approved_rdp
+    condition: not selection* #and not approved_rdp
 fields:
     - id.orig_h
     - id.resp_h
