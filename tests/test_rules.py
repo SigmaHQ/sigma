@@ -749,6 +749,38 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(faulty_rules, [], Fore.RED + "There are rules using list with only 1 element")
 
+    def test_unused_selection(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            detection = self.get_rule_part(file_path=file, part_name="detection")
+            condition = detection["condition"]
+            wildcard_selections = re.compile(r"\sof\s([\w\*]+)(?:$|\s|\))")
+
+            # skip rules containing aggregations
+            if type(condition) == list:
+                continue
+
+            for selection in detection:
+                if selection == "condition":
+                    continue
+                if selection == "timeframe":
+                    continue
+                if selection in condition:
+                    continue
+                # find all wildcards in condition
+                found = False
+                for wildcard_selection in wildcard_selections.findall(condition):
+                    # wildcard matches selection
+                    if re.search(wildcard_selection.replace(r"*", r".*"), selection) is not None:
+                        found = True
+                        break
+                # selection was not found in condition
+                if not found:
+                    print(Fore.RED + "Rule {} has an unused selection '{}'".format(file, selection))
+                    faulty_rules.append(file)
+
+        self.assertEqual(faulty_rules, [], Fore.RED + "There are rules with unused selections")
+
     def test_condition_operator_casesensitive(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
