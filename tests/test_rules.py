@@ -667,6 +667,9 @@ class TestRules(unittest.TestCase):
             if title.startswith("Detects "):
                 print(Fore.RED + "Rule {} has a title that starts with 'Detects'".format(file))
                 faulty_rules.append(file)
+            if title.endswith("."):
+                print(Fore.RED + "Rule {} has a title that ends with '.'".format(file))
+                faulty_rules.append(file)
             wrong_casing = []
             for word in title.split(" "):
                 if word.islower() and not word.lower() in allowed_lowercase_words and not "." in word and not "/" in word and not word[0].isdigit():
