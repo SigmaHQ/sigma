@@ -199,6 +199,10 @@ class HAWKBackend(SingleTextQueryBackend):
             if key.lower() in ("logname","source"):
                 self.logname = value
             if type(value) == str and "*" in value:
+
+                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username') and 'NT AUTHORITY\\SYS' in value.upper():
+                    value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+
                 value = value.replace("*", "EEEESTAREEE")
                 value = re.escape(value)
                 value = value.replace("EEEESTAREEE", ".*")
@@ -216,9 +220,6 @@ class HAWKBackend(SingleTextQueryBackend):
                     nodeRet['args']['comparison']['value'] = "="
                 if value[-2:] == "\\\\":
                     value = value[:-2]
-
-                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username') and 'NT AUTHORITY\\SYS' in value.upper():
-                    value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
 
                 if endsWith and not startsWith:
                     nodeRet['args']['str']['value'] = value + "$"
