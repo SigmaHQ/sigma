@@ -199,6 +199,10 @@ class HAWKBackend(SingleTextQueryBackend):
             if key.lower() in ("logname","source"):
                 self.logname = value
             if type(value) == str and "*" in value:
+
+                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username') and 'NT AUTHORITY\\SYS' in value.upper():
+                    value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+
                 value = value.replace("*", "EEEESTAREEE")
                 value = re.escape(value)
                 value = value.replace("EEEESTAREEE", ".*")
@@ -240,6 +244,9 @@ class HAWKBackend(SingleTextQueryBackend):
                     if value[0:17] == 'Microsoft-Windows':
                         value = value[18:]
 
+                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username') and 'NT AUTHORITY\\SYS' in value.upper():
+                    value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+
                 nodeRet['args']['str']['value'] = value
                 # return json.dumps(nodeRet)
                 return nodeRet
@@ -255,6 +262,10 @@ class HAWKBackend(SingleTextQueryBackend):
                 #return json.dumps(nodeRet)
                 return nodeRet
             else:
+
+                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username') and 'NT AUTHORITY\\SYS' in value.upper():
+                    value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+
                 nodeRet['args']['str']['value'] = value
                 if notNode:
                     nodeRet["args"]["comparison"]["value"] = "!="
@@ -302,6 +313,8 @@ class HAWKBackend(SingleTextQueryBackend):
                 nodeRet['args']['str']['value'] = 'null'
                 ret['children'].append( nodeRet )
             elif type(item) == str and "*" in item:
+                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username') and 'NT AUTHORITY\\SYS' in item.upper():
+                    item = item.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
                 item = item.replace("*", "EEEESTAREEE")
                 item = re.escape(item)
                 item = item.replace("EEEESTAREEE", ".*")
@@ -315,6 +328,7 @@ class HAWKBackend(SingleTextQueryBackend):
                     startsWith = True
                 if item[-2:] == "\\\\":
                     item = item[:-2]
+
 
                 if endsWith and not startsWith:
                     nodeRet['args']['str']['value'] = item + "$"
@@ -336,11 +350,16 @@ class HAWKBackend(SingleTextQueryBackend):
                 # custom, since we trim up  string size in log to save bytes
                 key = nodeRet['key']
                 value = nodeRet['args']['str']['value']
+
+                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username') and 'NT AUTHORITY\\SYS' in value.upper():
+                    value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+
                 if key == 'provider__name':
                     nodeRet['key'] = "product_name"
                     if value[0:17] == 'Microsoft-Windows':
                         value = value[18:]
-                        nodeRet['args']['str']['value'] = value
+
+                nodeRet['args']['str']['value'] = value
 
                 ret['children'].append( nodeRet )
         retAnd = { "id" : "and", "key": "And", "children" : [ ret ] }
@@ -354,6 +373,10 @@ class HAWKBackend(SingleTextQueryBackend):
         nodeRet['rule_id'] = str(uuid.uuid4())
         if type(value) == SigmaRegularExpressionModifier:
             value = self.generateValueNode(value, True)
+
+            if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username') and 'NT AUTHORITY\\SYS' in value.upper():
+                value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+
             nodeRet['args']['str']['value'] = value
             nodeRet['args']['str']['regex'] = "true"
             if notNode:
@@ -412,7 +435,7 @@ class HAWKBackend(SingleTextQueryBackend):
                      "limit" : { "order" : "3", "source" : "time_offset", "type" : "int", "objectKey" : "limit" },
                  },
                  "args": { 
-                     "columns" : [ self.cleanKey(agg.groupfield) ],
+                     "columns" : [ "ip_src", self.cleanKey(agg.groupfield) ],
                      "comparison": { "value": "%s" % agg.cond_op }, 
                      "threshold": { "value": int(agg.condition) }, 
                      "limit": { "value": min_count } 
@@ -434,7 +457,7 @@ class HAWKBackend(SingleTextQueryBackend):
                              "limit" : { "order" : "3", "source" : "time_offset", "type" : "int", "objectKey" : "limit" },
                          },
                          "args": { 
-                             "columns" : [ self.cleanKey(agg.groupfield) ],
+                             "columns" : [ "ip_src", self.cleanKey(agg.groupfield) ],
                              "comparison": { "value": "%s" % agg.cond_op }, 
                              "threshold": { "value": int(agg.condition) }, 
                              "limit": { "value": min_count } 
