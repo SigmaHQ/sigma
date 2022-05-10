@@ -6,7 +6,7 @@ related:
 status: experimental
 description: Detects keywords that could indicate clearing PowerShell history
 date: 2019/10/25
-modified: 2021/10/16
+modified: 2022/05/10
 author: Ilyas Ochkov, Jonhnathan Ribeiro, Daniil Yugoslavskiy, oscd.community
 references:
     - https://gist.github.com/hook-s3c/7363a856c3cdbadeb71085147f042c1a
@@ -23,14 +23,18 @@ detection:
             - 'del'
             - 'Remove-Item'
             - 'rm'
-        Payload|contains|all:
-            - '(Get-PSReadlineOption).HistorySavePath'
+        Payload|contains|all: '(Get-PSReadlineOption).HistorySavePath'
     selection_payload_2:
         Payload|contains|all:
             - 'Set-PSReadlineOption'
-            - '–HistorySaveStyle'
+            - '–HistorySaveStyle'  # not sure if the homoglyph –/- is intended, just checking for both
             - 'SaveNothing'
-    condition: selection_payload_1 or selection_payload_2
+    selection_payload_3:
+        Payload|contains|all:
+            - 'Set-PSReadlineOption'
+            - '-HistorySaveStyle'
+            - 'SaveNothing'
+    condition: 1 of selection_*
 falsepositives:
     - Legitimate PowerShell scripts
 level: medium
