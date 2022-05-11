@@ -5,7 +5,7 @@ description: Detects suspicious sub processes of web server processes
 references:
    - https://www.acunetix.com/blog/articles/web-shells-101-using-php-introduction-web-shells-part-2/
 date: 2021/10/15
-modified: 2022/03/14
+modified: 2022/05/09
 author: Florian Roth
 tags:
     - attack.persistence
@@ -26,18 +26,18 @@ detection:
       ParentCommandLine|contains|all:
          - '/bin/java'
          - 'tomcat'
-   selection_websphere:  # ? just guessing 
+   selection_websphere:  # ? just guessing
       ParentCommandLine|contains|all:
          - '/bin/java'
          - 'websphere'
    selection_sub_processes:
-      Image|endswith: 
+      Image|endswith:
          - '/whoami'
          - '/ifconfig'
          - '/usr/bin/ip'
          - '/bin/uname'
-   condition: selection_sub_processes and ( selection_general or selection_tomcat )
+   condition: selection_sub_processes and ( selection_general or selection_tomcat or selection_websphere)
 falsepositives:
-   - Web applications that invoke Linux command line tools 
+   - Web applications that invoke Linux command line tools
 level: critical
 

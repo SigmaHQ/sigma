@@ -16,20 +16,20 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection1:
         Image|endswith: '\update.exe' # Check if folder Name matches executed binary  \\(?P<first>[^\\]*)\\Update.*Start.{2}(?P<second>\1)\.exe (example: https://regex101.com/r/SGSQGz/2)
+        CommandLine|contains: '.exe'
+    selection2:
         CommandLine|contains:
             - '--processStart'
             - '--processStartAndWait'
             - '--createShortcut'
-        CommandLine|contains|all:
-            - '.exe'
     filter1:
         CommandLine|contains|all:
             - 'C:\Users\'
             - '\AppData\Local\Discord\Update.exe'
             - ' --processStart Discord.exe'
-    condition: selection and not 1 of filter*
+    condition: all of selection* and not 1 of filter*
 falsepositives:
     - 1Clipboard
     - Beaker Browser
@@ -59,8 +59,8 @@ falsepositives:
     - WebTorrent
     - WhatsApp
     - WordPress.com
-    - atom
-    - gitkraken
-    - slack
-    - teams
+    - Atom
+    - Gitkraken
+    - Slack
+    - Teams
 level: medium

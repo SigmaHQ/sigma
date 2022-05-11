@@ -12,16 +12,15 @@ logsource:
   product: windows
 detection:
   selection1:
-    CommandLine|contains:
-      - 'setup0.exe -p'
-  selection2:
-    CommandLine|contains|all:
-      - 'setup.exe'
+    CommandLine|contains: 'setup0.exe -p'
+  selection2a:
+    CommandLine|contains: 'setup.exe'
+  selection2b:
     CommandLine|endswith:
       - '-x:0'
       - '-x:1'
       - '-x:2'
-  condition: 1 of selection*
+  condition: selection1 or all of selection2*
 falsepositives:
   - Legitimate setups that use similar flags
 level: critical
