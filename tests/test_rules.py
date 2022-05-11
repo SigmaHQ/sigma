@@ -783,6 +783,22 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(faulty_rules, [], Fore.RED + "There are rules with unused selections")
 
+    def test_all_value_modifier_single_item(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            detection = self.get_rule_part(file_path=file, part_name="detection")
+            if detection:
+                for search_identifier in detection:
+                    if isinstance(detection[search_identifier],dict):
+                        for field in detection[search_identifier]:
+                            if "|all" in field and not isinstance(detection[search_identifier][field],list):
+                                print (Fore.RED + "Rule {} uses the 'all' modifier on a single item in selection ({}/{})".format(file, search_identifier, field))
+                                faulty_rules.append(file)
+
+        self.assertEqual(faulty_rules, [], Fore.RED + "There are rules with |all modifier only having one item. " +
+        "Single item values are not allowed to have an all modifier as some back-ends cannot support it. " +
+        "If you use it as a workaround to duplicate a field in a selection, use a new selection instead.")
+
     def test_condition_operator_casesensitive(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
