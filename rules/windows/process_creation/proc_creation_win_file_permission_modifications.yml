@@ -6,7 +6,7 @@ author: Jakob Weinzettl, oscd.community
 references:
   - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1222.001/T1222.001.md
 date: 2019/10/23
-modified: 2022/02/11
+modified: 2022/05/12
 logsource:
   category: process_creation
   product: windows
@@ -26,6 +26,8 @@ detection:
     CommandLine|contains|all:
       - 'ICACLS C:\ProgramData\dynatrace\gateway\config\config.properties /grant :r '
       - 'S-1-5-19:F'
+  filter_programs:
+    CommandLine|contains: '\AppData\Local\Programs\Microsoft VS Code'
   condition: selection or selection2 and not 1 of filter*
 fields:
   - ComputerName
