@@ -1,4 +1,4 @@
-title: CVE-2022-1388 F5 BIG-IP iControl REST Attempt
+title: CVE-2022-1388 F5 BIG-IP iControl REST Expliot Attempt
 id: e72ddd18-62ed-4742-8e54-d37315746d7e
 status: experimental
 description: Detects the exploitation attempt of the iControl REST vulnerability found in F5 BIG-IP and described in CVE-2022-1388.
@@ -6,18 +6,22 @@ author: Sittikorn S
 references:
   - https://support.f5.com/csp/article/K23605346
   - https://github.com/alt3kx/CVE-2022-1388_PoC
+  - https://github.com/blind-intruder/CVE-2022-1388-RCE-checker/blob/main/CVE-2022-1388.sh
+  - https://twitter.com/1ZRR4H/status/1522165718975922178
 date: 2022/09/05
 logsource:
   category: webserver
 detection:
   selection:
     cs-method: 'POST'
-    c-uri|contains: '/mgmt/tm/util/bash'
+    c-uri|contains: 
+    - '/mgmt/shared/authn/login'
+    - '/mgmt/tm/util/bash'
   condition: selection
 fields:
   - c-ip
 falsepositives:
-  - Unknown
+  - Legitimate BIG-IP iControl REST Access by Administrator
 level: critical
 tags:
   - attack.initial_access
