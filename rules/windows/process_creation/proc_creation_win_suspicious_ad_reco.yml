@@ -9,14 +9,17 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1069.001/T1069.001.md
 author: frack113
 date: 2021/12/12
+modified: 2022/05/13
 logsource:
     product: windows
     category: process_creation
 detection:
-    test_5:
-        Image|endswith: '\wmic.exe'
+    selection_img:
+        - Image|endswith: '\wmic.exe'
+        - OriginalFileName: 'wmic.exe'
+    selection_cli:
         CommandLine|contains: ' group'
-    condition: test_5
+    condition: all of selection*
 falsepositives:
     - Unknown
 level: low

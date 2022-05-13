@@ -6,14 +6,17 @@ author: frac113
 references:
   - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1047/T1047.md#atomic-test-10---application-uninstall-using-wmic
 date: 2022/01/28
+modified: 2022/05/13
 logsource:
   category: process_creation
   product: windows
 detection:
-  selection:
-    Image|endswith: \WMIC.exe
+  selection_img:
+    - Image|endswith: \WMIC.exe
+    - OriginalFileName: 'wmic.exe'
+  selection_cli:
     CommandLine|contains: call uninstall
-  condition: selection
+  condition: all of selection*
 falsepositives:
   - Unknown
 level: medium

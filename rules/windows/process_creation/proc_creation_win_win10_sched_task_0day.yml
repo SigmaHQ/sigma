@@ -6,19 +6,21 @@ author: Olaf Hartong
 references:
   - https://github.com/SandboxEscaper/polarbearrepo/tree/master/bearlpe
 date: 2019/05/22
-modified: 2021/11/27
+modified: 2022/05/13
 logsource:
   category: process_creation
   product: windows
 detection:
-  selection:
+  selection_img:
     Image|endswith: '\schtasks.exe'
+    OriginalFileName: 'schtasks.exe'
+  selection_cli:
     CommandLine|contains|all:
       - '/change'
       - '/TN'
       - '/RU'
       - '/RP'
-  condition: selection
+  condition: all of selection*
 falsepositives:
   - Unknown
 level: high

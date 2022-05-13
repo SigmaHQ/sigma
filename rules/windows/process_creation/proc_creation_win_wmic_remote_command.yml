@@ -7,21 +7,24 @@ references:
     - https://securelist.com/moonbounce-the-dark-side-of-uefi-firmware/105468/
     - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/wmic
 date: 2022/03/13
+modified: 2022/05/13
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: \WMIC.exe
+    selection_img:
+        - Image|endswith: \WMIC.exe
+        - OriginalFileName: 'wmic.exe'
+    selection_cli:
         CommandLine|contains|all:
             - '/node:'
             - process
             - call
-            - create 
-    condition: selection
+            - create
+    condition: all of selection*
 falsepositives:
     - Unknown
-level: medium 
+level: medium
 tags:
     - attack.execution
     - attack.t1047
