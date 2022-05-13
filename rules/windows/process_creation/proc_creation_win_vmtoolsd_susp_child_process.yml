@@ -8,7 +8,7 @@ tags:
     - attack.t1059
 author: behops, Bhabesh Raj
 date: 2021/10/08
-modified: 2022/05/12
+modified: 2022/05/13
 references:
     - https://bohops.com/2021/10/08/analyzing-and-detecting-a-vmtools-persistence-technique/
 fields:
@@ -22,9 +22,17 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection_parent:
         ParentImage|endswith: '\vmtoolsd.exe'
-        OriginalFileName|contains:
+    selection_img:
+        - Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\rundll32.exe'
+            - '\regsvr32.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+        - OriginalFileName:
             - 'Cmd.Exe'
             - 'PowerShell.EXE'
             - 'RUNDLL32.EXE'
@@ -37,4 +45,4 @@ detection:
             - '\VMware\VMware Tools\poweroff-vm-default.bat'
             - '\VMware\VMware Tools\resume-vm-default.bat'
             - '\VMware\VMware Tools\suspend-vm-default.bat'
-    condition: selection and not filter
+    condition: all of selection* and not filter
