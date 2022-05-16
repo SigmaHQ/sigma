@@ -4,15 +4,28 @@ description: Detects the usage of the direct syscall of NtOpenProcess which migh
 references:
     - https://medium.com/falconforce/falconfriday-direct-system-calls-and-cobalt-strike-bofs-0xff14-741fa8e1bdd6
 status: experimental
-author: Christian Burkard
+author: Christian Burkard, Tim Shelton
 date: 2021/07/28
+modified: 2022/05/15
 logsource:
     category: process_access
     product: windows
 detection:
     selection:
         CallTrace|startswith: 'UNKNOWN'
-    condition: selection
+    falsepositive1:
+        TargetImage: 'C:\Program Files\Cylance\Desktop\CylanceUI.exe'
+        SourceImage: 'C:\Windows\Explorer.EXE'
+    falsepositive2:
+        TargetImage: 'C:\Program Files (x86)\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe'
+        SourceImage: 'C:\Program Files (x86)\Microsoft\Temp\*\MicrosoftEdgeUpdate.exe'
+    falsepositive3:
+        TargetImage|endswith: 'vcredist_x64.exe'
+        SourceImage|endswith: 'vcredist_x64.exe'
+    falsepositive4:
+        TargetImage: 'C:\Windows\system32\systeminfo.exe'
+        SourceImage|endswith: 'setup64.exe' #vmware
+    condition: selection and not 1 of falsepositive*
 falsepositives:
     - Unknown
 level: critical

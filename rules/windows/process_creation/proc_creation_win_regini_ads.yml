@@ -11,15 +11,17 @@ tags:
     - attack.defense_evasion
 author: Eli Salem, Sander Wiebing, oscd.community
 date: 2020/10/12
-modified: 2021/05/24
+modified: 2022/05/09
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
-        Image|endswith: '\regini.exe'
+        - Image|endswith: '\regini.exe'
+        - OriginalFileName: 'REGINI.EXE'
+    selection_re:
         CommandLine|re: ':[^ \\\\]'
-    condition: selection
+    condition: selection and selection_re
 fields:
     - ParentImage
     - CommandLine

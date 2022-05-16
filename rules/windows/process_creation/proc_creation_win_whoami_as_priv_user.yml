@@ -7,6 +7,7 @@ references:
     - https://nsudo.m2team.org/en-us/
 author: Florian Roth
 date: 2022/01/28
+modified: 2022/05/13
 tags:
     - attack.privilege_escalation
     - attack.discovery
@@ -15,10 +16,12 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection_user:
         User|contains: 'TrustedInstaller'
-        Image|endswith: '\whoami.exe'
-    condition: selection
+    selection_img:
+        - OriginalFileName: 'whoami.exe'
+        - Image|endswith: '\whoami.exe'
+    condition: all of selection*
 falsepositives:
     - Unknown
 level: high

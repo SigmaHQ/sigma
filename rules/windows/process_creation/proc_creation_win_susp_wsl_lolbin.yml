@@ -6,18 +6,19 @@ author: 'oscd.community, Zach Stanford @svch0st'
 references:
   - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Wsl/
 date: 2020/10/05
-modified: 2021/11/27
+modified: 2022/05/13
 logsource:
   category: process_creation
   product: windows
 detection:
-  selection:
-    Image|endswith:
-      - '\wsl.exe'
+  selection_img:
+    - Image|endswith: '\wsl.exe'
+    - OriginalFileName: 'wsl.exe'
+  selection_cli:
     CommandLine|contains:
       - ' -e '
       - ' --exec '
-  condition: selection
+  condition: all of selection*
 falsepositives:
   - Automation and orchestration scripts may use this method execute scripts etc
 level: medium

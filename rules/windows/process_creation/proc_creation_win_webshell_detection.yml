@@ -7,7 +7,7 @@ references:
     - https://www.fireeye.com/blog/threat-research/2013/08/breaking-down-the-china-chopper-web-shell-part-ii.html
     - https://unit42.paloaltonetworks.com/bumblebee-webshell-xhunt-campaign/
 date: 2017/01/01
-modified: 2021/03/17
+modified: 2022/05/13
 tags:
     - attack.persistence
     - attack.t1505.003
@@ -27,50 +27,62 @@ detection:
             - '\caddy.exe'
             - '\ws_tomcatservice.exe'
     selection_webserver_characteristics_tomcat1:
-        ParentImage|endswith: 
+        ParentImage|endswith:
             - '\java.exe'
             - '\javaw.exe'
-        ParentImage|contains: 
+        ParentImage|contains:
             - '-tomcat-'
             - '\tomcat'
     selection_webserver_characteristics_tomcat2:
-        ParentImage|endswith: 
+        ParentImage|endswith:
             - '\java.exe'
             - '\javaw.exe'
-        CommandLine|contains: 
+        CommandLine|contains:
             - 'catalina.jar'
             - 'CATALINA_HOME'
     susp_net_utility:
-        Image|endswith:
-            - '\net.exe'
-            - '\net1.exe'
+        OriginalFileName:
+            - 'net.exe'
+            - 'net1.exe'
         CommandLine|contains:
             - ' user '
             - ' use '
             - ' group '
     susp_ping_utility:
-        Image|endswith: '\ping.exe'
+        OriginalFileName: 'ping.exe'
         CommandLine|contains: ' -n '
     susp_change_dir:
         CommandLine|contains:
             - '&cd&echo'  # china chopper web shell
             - 'cd /d '  # https://www.computerhope.com/cdhlp.htm
     susp_wmic_utility:
-        Image|endswith: '\wmic.exe'
-        CommandLine|contains: ' /node:' 
+        OriginalFileName: 'wmic.exe'
+        CommandLine|contains: ' /node:'
     susp_misc_discovery_binaries:
-        Image|endswith:
+        - Image|endswith:
             - '\whoami.exe'
             - '\systeminfo.exe'
             - '\quser.exe'
-            - '\ipconfig.exe' 
-            - '\pathping.exe' 
-            - '\tracert.exe' 
-            - '\netstat.exe' 
-            - '\schtasks.exe' 
-            - '\vssadmin.exe' 
-            - '\wevtutil.exe' 
-            - '\tasklist.exe' 
+            - '\ipconfig.exe'
+            - '\pathping.exe'
+            - '\tracert.exe'
+            - '\netstat.exe'
+            - '\schtasks.exe'
+            - '\vssadmin.exe'
+            - '\wevtutil.exe'
+            - '\tasklist.exe'
+        - OriginalFileName:
+            - 'whoami.exe'
+            - 'sysinfo.exe'
+            - 'quser.exe'
+            - 'ipconfig.exe'
+            - 'pathping.exe'
+            - 'tracert.exe'
+            - 'netstat.exe'
+            - 'schtasks.exe'
+            - 'VSSADMIN.EXE'
+            - 'wevtutil.exe'
+            - 'tasklist.exe'
     susp_misc_discovery_commands:
         CommandLine|contains:
             - ' Test-NetConnection '

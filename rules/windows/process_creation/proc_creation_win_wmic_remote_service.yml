@@ -11,16 +11,19 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1047/T1047.md
     - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/wmic
 date: 2022/01/01
+modified: 2022/05/13
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: \WMIC.exe
+    selection_img:
+        - Image|endswith: \WMIC.exe
+        - OriginalFileName: 'wmic.exe'
+    selection_cli:
         CommandLine|contains|all:
             - '/node:'
-            - service 
-    condition: selection
+            - service
+    condition: all of selection*
 falsepositives:
     - Unknown
 level: medium

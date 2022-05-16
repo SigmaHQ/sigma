@@ -7,21 +7,21 @@ references:
     - https://any.run/report/68bc255f9b0db6a0d30a8f2dadfbee3256acfe12497bf93943bc1eab0735e45e/a2385d6f-34f7-403c-90d3-b1f9d2a90a5e
 author: Markus Neis / @Karneades
 date: 2019/04/03
-modified: 2021/02/24
+modified: 2022/05/13
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        ParentImage|endswith:
-            - '\wmiprvse.exe'
-        Image|endswith:
-            - '\powershell.exe'
+    selection_parent:
+        ParentImage|endswith: '\wmiprvse.exe'
+    selection_img:
+        - Image|endswith: '\powershell.exe'
+        - OriginalFileName: 'PowerShell.EXE'
     filter_null1:
         CommandLine: 'null'
     filter_null2:  # some backends need the null value in a separate expression
         CommandLine: null
-    condition: selection and not filter_null1 and not filter_null2
+    condition: all of selection* and not filter_null1 and not filter_null2
 falsepositives:
     - AppvClient
     - CCM

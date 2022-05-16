@@ -10,7 +10,7 @@ references:
     - https://app.any.run/tasks/34221348-072d-4b70-93f3-aa71f6ebecad/
 tags:
     - attack.defense_evasion
-    - attack.t1218.010      
+    - attack.t1218.010
     - car.2019-04-002
     - car.2019-04-003
 logsource:
@@ -26,12 +26,16 @@ detection:
     selection3:
         Image|endswith: '\regsvr32.exe'
         ParentImage|endswith: '\cmd.exe'
-    selection4:
+    selection4a:
         Image|endswith: '\regsvr32.exe'
-        CommandLine|contains|all: 
+        CommandLine|contains|all:
             - '/i:'
-        CommandLine|contains:
             - 'http'
+        CommandLine|endswith: 'scrobj.dll'
+    selection4b:
+        Image|endswith: '\regsvr32.exe'
+        CommandLine|contains|all:
+            - '/i:'
             - 'ftp'
         CommandLine|endswith: 'scrobj.dll'
     selection5:
@@ -45,7 +49,7 @@ detection:
         Image|endswith: '\regsvr32.exe'
     selection8:
         Image|endswith: '\regsvr32.exe'
-        CommandLine|contains: 
+        CommandLine|contains:
             - '\AppData\Local'
             - 'C:\Users\Public'
     condition: 1 of selection*
