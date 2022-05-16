@@ -7,16 +7,19 @@ references:
     - https://redcanary.com/threat-detection-report/threats/qbot/
 author: frack113
 date: 2022/02/13
+modified: 2022/05/12
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: \esentutl.exe
+    selection_img:
+        - Image|endswith: '\esentutl.exe'
+        - OriginalFileName: 'esentutl.exe'
+    selection_cli:
         CommandLine|contains|all:
             - '/r '
             - '\Windows\WebCache'
-    condition: selection
+    condition: all of selection*
 falsepositives:
     - Legitimate use
 level: medium

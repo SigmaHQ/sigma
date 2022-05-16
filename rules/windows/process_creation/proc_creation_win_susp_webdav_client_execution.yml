@@ -7,15 +7,17 @@ references:
   - https://github.com/OTRF/detection-hackathon-apt29/issues/17
   - https://threathunterplaybook.com/evals/apt29/detections/7.B.4_C10730EA-6345-4934-AA0F-B0EFCA0C4BA6.html
 date: 2020/05/02
-modified: 2021/11/27
+modified: 2022/05/13
 logsource:
   category: process_creation
   product: windows
 detection:
-  selection:
-    Image|endswith: '\rundll32.exe'
+  selection_img:
+    - Image|endswith: '\rundll32.exe'
+    - OriginalFileName: 'RUNDLL32.EXE'
+  selection_cli:
     CommandLine|contains: 'C:\windows\system32\davclnt.dll,DavSetCookie'
-  condition: selection
+  condition: all of selection*
 falsepositives:
   - Unknown
 level: medium
