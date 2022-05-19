@@ -60,7 +60,7 @@ The current specification is a proposal. Feedback is requested.
 
 ## Rule Creation
 
-Florian wrote a short [rule creation tutorial](https://www.nextron-systems.com/2018/02/10/write-sigma-rules/) that can help you getting started.
+Florian wrote a short [rule creation tutorial](https://www.nextron-systems.com/2018/02/10/write-sigma-rules/) that can help you getting started. Use the [Rule Creatuon Guide](https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide) in our Wiki for a clear guidance on how to populate the various field in Sigma rules.
 
 ## Rule Usage
 
