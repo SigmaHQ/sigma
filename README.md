@@ -354,11 +354,11 @@ The github issue tracker is a good place to start tackling some issues others ra
 
 ## Provide Backends / Backend Features / Bugfixes
 
-Please don't provide backends for the old code base anymore. We recommand using the new [pySigma](https://github.com/SigmaHQ/pySigma). We are working on a documentation on how to write new backends for that new code base.
+Please don't provide backends for the old code base (sigmac) anymore. Please use the new [pySigma](https://github.com/SigmaHQ/pySigma). We are working on a documentation on how to write new backends for that new code base. An example backend for Splunk can be found [here](https://github.com/SigmaHQ/pySigma-backend-splunk).
 
 ## Spread the word
 
-Last but not least, the more people use Sigma, the better, so help promote it by sharing it via social media. If you are using it, consider giving a talk about your journey and tell us about it.
+Last but not least, the more people use Sigma, the better, so help promote it by sharing it via social media. If you are using it, consider giving a talk about your journey and tell us about it. 
 
 # Licenses
 
