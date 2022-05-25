@@ -200,8 +200,11 @@ class HAWKBackend(SingleTextQueryBackend):
                 self.logname = value
             if type(value) == str and "*" in value:
 
-                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username') and 'NT AUTHORITY\\SYS' in value.upper():
-                    value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username'):
+                    if 'NT AUTHORITY\\SYS' in value.upper():
+                        value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+                    elif 'AUTHORI' in value.upper():
+                        value = 'SYSTEM'
 
                 value = value.replace("*", "EEEESTAREEE")
                 value = re.escape(value)
@@ -244,8 +247,11 @@ class HAWKBackend(SingleTextQueryBackend):
                     if value[0:17] == 'Microsoft-Windows':
                         value = value[18:]
 
-                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username') and 'NT AUTHORITY\\SYS' in value.upper():
-                    value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username'): 
+                    if 'NT AUTHORITY\\SYS' in value.upper():
+                        value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+                    elif 'AUTHORI' in value.upper():
+                        value = 'SYSTEM'
 
                 nodeRet['args']['str']['value'] = value
                 # return json.dumps(nodeRet)
@@ -263,8 +269,11 @@ class HAWKBackend(SingleTextQueryBackend):
                 return nodeRet
             else:
 
-                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username') and 'NT AUTHORITY\\SYS' in value.upper():
-                    value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+                if nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username':
+                    if 'NT AUTHORITY\\SYS' in value.upper():
+                        value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+                    elif 'AUTHORI' in value.upper():
+                        value = 'SYSTEM'
 
                 nodeRet['args']['str']['value'] = value
                 if notNode:
@@ -313,8 +322,11 @@ class HAWKBackend(SingleTextQueryBackend):
                 nodeRet['args']['str']['value'] = 'null'
                 ret['children'].append( nodeRet )
             elif type(item) == str and "*" in item:
-                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username') and 'NT AUTHORITY\\SYS' in item.upper():
-                    item = item.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username'):
+                    if 'NT AUTHORITY\\SYS' in item.upper():
+                        item = item.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+                    elif 'AUTHORI' in item.upper():
+                        item = 'SYSTEM'
                 item = item.replace("*", "EEEESTAREEE")
                 item = re.escape(item)
                 item = item.replace("EEEESTAREEE", ".*")
@@ -351,8 +363,11 @@ class HAWKBackend(SingleTextQueryBackend):
                 key = nodeRet['key']
                 value = nodeRet['args']['str']['value']
 
-                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username') and 'NT AUTHORITY\\SYS' in value.upper():
-                    value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username'):
+                    if 'NT AUTHORITY\\SYS' in value.upper():
+                        value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+                    elif 'AUTHORI' in value.upper():
+                        value = 'SYSTEM'
 
                 if key == 'provider__name':
                     nodeRet['key'] = "product_name"
@@ -374,8 +389,11 @@ class HAWKBackend(SingleTextQueryBackend):
         if type(value) == SigmaRegularExpressionModifier:
             value = self.generateValueNode(value, True)
 
-            if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username') and 'NT AUTHORITY\\SYS' in value.upper():
-                value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+            if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username'):
+                if 'NT AUTHORITY\\SYS' in value.upper():
+                    value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+                elif 'AUTHORI' in value.upper():
+                    value = 'SYSTEM'
 
             nodeRet['args']['str']['value'] = value
             nodeRet['args']['str']['regex'] = "true"
