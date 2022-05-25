@@ -310,6 +310,7 @@ class TestRules(unittest.TestCase):
             "obsoletes",
             "merged",
             "renamed",
+            "similar"
             ]
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             related_lst = self.get_rule_part(file_path=file, part_name="related")

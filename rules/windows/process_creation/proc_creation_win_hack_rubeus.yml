@@ -1,18 +1,20 @@
 title: Rubeus Hack Tool
 id: 7ec2c172-dceb-4c10-92c9-87c1881b7e18
 status: stable
-description: Detects command line parameters used by Rubeus hack tool
+description: Detects the execution of the hacktool Rubeus via PE information of command line parameters
 author: Florian Roth
 references:
   - https://www.harmj0y.net/blog/redteaming/from-kekeo-to-rubeus/
 date: 2018/12/19
-modified: 2021/11/27
+modified: 2022/05/23
 logsource:
   category: process_creation
   product: windows
 detection:
   selection:
-    CommandLine|contains:
+    - Image|endswith: ˚\Rubeus.exe'
+    - OriginalFilename: 'Rubeus.exe'
+    - CommandLine|contains:
       - ' asreproast '
       - ' dump /service:krbtgt '
       - ' kerberoast '
