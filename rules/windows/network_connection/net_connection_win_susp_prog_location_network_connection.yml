@@ -2,11 +2,11 @@ title: Suspicious Program Location with Network Connections
 id: 7b434893-c57d-4f41-908d-6a17bf1ae98f
 status: test
 description: Detects programs with network connections running in suspicious files system locations
-author: Florian Roth
+author: Florian Roth, Tim Shelton
 references:
   - https://docs.google.com/spreadsheets/d/17pSTDNpa0sf6pHeRhusvWG6rThciE8CsXTSlDUAZDyo
 date: 2017/03/19
-modified: 2021/11/27
+modified: 2022/05/26
 logsource:
   category: network_connection
   product: windows
@@ -28,7 +28,9 @@ detection:
       - '\$Recycle.bin'
     - Image|startswith:
       - 'C:\Perflogs\'
-  condition: selection
+  false_positive1:
+    Image|startswith: 'C:\Users\Public\IBM\ClientSolutions\Start_Programs\' # IBM Client Solutions Default Location
+  condition: selection and not 1 of false_positive*
 falsepositives:
   - Unknown
 level: high
