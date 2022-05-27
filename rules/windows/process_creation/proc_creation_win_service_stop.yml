@@ -4,7 +4,7 @@ description: Detects a windows service to be stopped
 status: experimental
 author: Jakob Weinzettl, oscd.community
 date: 2019/10/23
-modified: 2021/11/30
+modified: 2022/05/27
 tags:
     - attack.impact
     - attack.t1489
@@ -20,9 +20,9 @@ detection:
         CommandLine|contains: 'stop'
     filter:
         CommandLine: 'sc  stop KSCWebConsoleMessageQueue' # kaspersky Security Center Web Console double space between sc and stop
-        User|startswith: 
-            - 'NT AUTHORITY\SYSTEM'
-            - 'AUTORITE NT\Sys' # French language settings
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
     condition: selection and not filter
 fields:
     - ComputerName
