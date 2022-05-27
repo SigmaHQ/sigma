@@ -2,11 +2,11 @@ title: Windows Webshell Creation
 id: 39f1f9f2-9636-45de-98f6-a4046aa8e4b9
 status: test
 description: Possible webshell file creation on a static web site
-author: Beyu Denis, oscd.community
+author: Beyu Denis, oscd.community, Tim Shelton
 references:
   - PT ESC rule and personal experience
 date: 2019/10/22
-modified: 2021/11/27
+modified: 2022/05/24
 logsource:
   product: windows
   category: file_event
@@ -30,13 +30,13 @@ detection:
     - TargetFilename|contains|all:
       - '\cgi-bin\'
       - '.pl'
-  false_positives:    # false positives when unpacking some executables in $TEMP
+  false_positive1:    # false positives when unpacking some executables in $TEMP
     TargetFilename|contains:
       - '\AppData\Local\Temp\'
       - '\Windows\Temp\'
-    # kind of ugly but sigmac seems not to handle double parenthesis "(("
-    # we should prefer something like : selection_1 and not false_positives and ((selection_2 and selection_3) or (selection_4 and selection_5) or selection_6)
-  condition: (selection_2 and selection_3 and not false_positives) or (selection_4 and selection_5 and not false_positives) or (selection_6 and not false_positives)
+  false_positive2:
+    Image: 'System' # fp : backup/restore from drivers
+  condition: (selection_2 and selection_3 and not false_positive1) or (selection_4 and selection_5 and not false_positive1) or (selection_6 and not false_positive1) and not false_positive2
 falsepositives:
   - Legitimate administrator or developer creating legitimate executable files in a web application folder
 level: critical
