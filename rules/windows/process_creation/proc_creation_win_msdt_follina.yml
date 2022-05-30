@@ -1,0 +1,26 @@
+title: MSDT Suspicious Command Execution
+id: 1b90e772-0e84-45be-a1f4-8bcb7857c876
+description: Detects execution of executables that can be used to bypass Applocker whitelisting
+status: experimental
+references:
+    - https://twitter.com/nao_sec/status/1530196847679401984?s=20&t=NCOt7Yv2gAr41X0FheqvyA
+    - https://twitter.com/MalwareJake/status/1531019245726867457?s=20&t=UV3L0ijkG-yDYl24yXpJIA
+    - https://www.scythe.io/library/breaking-follina-msdt-vulnerability
+author: 'Christopher Peacock @SecurePeacock, SCYTHE @scythe_io, Jake Williams @MalwareJake'
+date: 2022/05/30
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\msdt.exe'
+        CommandLine|contains:
+            - 'IT_RebrowseForFile'
+            - 'IT_BrowseForFile'
+    condition: selection
+falsepositives:
+    - False positives depend on scripts used in the monitored environment
+level: medium
