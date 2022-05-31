@@ -6,6 +6,7 @@ author: Florian Roth
 references:
     - https://mpgn.gitbook.io/crackmapexec/smb-protocol/obtaining-credentials/dump-lsass
 date: 2022/03/12
+modified: 2022/05/27
 tags:
     - attack.credential_access
     - attack.t1003.001
@@ -16,9 +17,9 @@ detection:
     selection_lsass_dump1:
         TargetFilename|startswith: 'C:\Windows\Temp\'
         Image: 'C:\WINDOWS\system32\rundll32.exe'
-        User|contains: 
-            - 'NT AUTHORI'
-            - 'NT AUTORI'
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
         TargetFilename|endswith:
             - '.rtf'
             - '.otf'
@@ -48,9 +49,9 @@ detection:
             # list is incomplete
     selection_procdump:
         TargetFilename: 'C:\Windows\Temp\procdump.exe'
-        User|contains: 
-            - 'NT AUTHO'
-            - 'NT AUTO'
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
     condition: 1 of selection*
 falsepositives:
     - Unknown
