@@ -7,6 +7,7 @@ references:
   - https://twitter.com/nao_sec/status/1530196847679401984
   - https://app.any.run/tasks/713f05d2-fe78-4b9d-a744-f7c133e3fafb/
 date: 2022/05/29
+modified: 2022/05/31
 logsource:
   category: process_creation
   product: windows
@@ -14,13 +15,12 @@ detection:
   selection_parent:
     ParentImage|endswith: '\WINWORD.exe'
     Image|endswith: '\msdt.exe'
-  selection_cmd:
-    Image|endswith: '\msdt.exe'
-    CommandLine|contains|all:
-      - 'ms-msdt:/id'
-      - 'IT_BrowseForFile='
-      - 'IT_RebrowseForFile='
-  condition: 1 of selection*
+  selection_specific_img:
+    - Image|endswith: '\msdt.exe'
+    - OriginalFileName: 'msdt.exe'
+  selection_specific_cmd:
+    CommandLine|contains: 'IT_BrowseForFile='
+  condition: selection_parent or all of selection_specific_*
 falsepositives:
   - Unknown
 level: high
