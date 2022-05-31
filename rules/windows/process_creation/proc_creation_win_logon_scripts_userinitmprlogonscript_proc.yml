@@ -2,11 +2,11 @@ title: Logon Scripts (UserInitMprLogonScript)
 id: 0a98a10c-685d-4ab0-bddc-b6bdd1d48458
 status: test
 description: Detects creation or execution of UserInitMprLogonScript persistence method
-author: Tom Ueltschi (@c_APT_ure)
+author: Tom Ueltschi (@c_APT_ure), Tim Shelton
 references:
   - https://attack.mitre.org/techniques/T1037/
 date: 2019/01/12
-modified: 2022/02/21
+modified: 2022/05/31
 logsource:
   category: process_creation
   product: windows
@@ -22,6 +22,8 @@ detection:
       - 'netlogon*.bat'
       - 'UsrLogon.cmd'
       - 'C:\WINDOWS\Explorer.EXE'
+  exec_exclusion3:
+    Image|endswith: '\Citrix\System32\icast.exe'
   create_keywords_cli:
     CommandLine|contains: 'UserInitMprLogonScript'
   condition: ( exec_selection and not 1 of exec_exclusion* ) or create_keywords_cli
