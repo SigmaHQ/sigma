@@ -6,21 +6,21 @@ author: Nasreddine Bencherchali (rule)
 references:
   - https://twitter.com/nao_sec/status/1530196847679401984
   - https://app.any.run/tasks/713f05d2-fe78-4b9d-a744-f7c133e3fafb/
+  - https://twitter.com/_JohnHammond/status/1531672601067675648
 date: 2022/05/29
 modified: 2022/05/31
 logsource:
   category: process_creation
   product: windows
 detection:
-  selection_parent:
-    ParentImage|endswith: '\WINWORD.exe'
-    Image|endswith: '\msdt.exe'
   selection_specific_img:
     - Image|endswith: '\msdt.exe'
     - OriginalFileName: 'msdt.exe'
   selection_specific_cmd:
-    CommandLine|contains: 'IT_BrowseForFile='
-  condition: selection_parent or all of selection_specific_*
+    CommandLine|contains:
+      - 'IT_BrowseForFile='
+      - ' /af ' # For answer files
+  condition: all of selection_specific_*
 falsepositives:
   - Unknown
 level: high
