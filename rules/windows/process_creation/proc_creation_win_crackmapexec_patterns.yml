@@ -6,6 +6,7 @@ author: Florian Roth
 references:
     - https://mpgn.gitbook.io/crackmapexec/smb-protocol/obtaining-credentials/dump-lsass
 date: 2022/03/12
+modified: 2022/05/27
 tags:
     - attack.credential_access
     - attack.t1003.001
@@ -18,9 +19,9 @@ detection:
             - 'cmd.exe /c '
             - 'tasklist /fi '
             - 'Imagename eq lsass.exe'
-        User|contains: 
-            - 'NT AUTHO'
-            - 'NT AUTO'
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
     selection_lsass_dump2:
         CommandLine|contains|all:
             - 'do rundll32.exe C:\windows\System32\comsvcs.dll, MiniDump'
@@ -29,7 +30,7 @@ detection:
             - '%%B'
     selection_procdump:
         CommandLine|contains|all:
-            - 'tasklist /v /fo csv' 
+            - 'tasklist /v /fo csv'
             - 'findstr /i "lsass"'
     condition: 1 of selection*
 falsepositives:
