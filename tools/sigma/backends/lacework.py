@@ -24,7 +24,7 @@ import yaml
 
 from sigma.backends.base import SingleTextQueryBackend
 from sigma.backends.exceptions import BackendError
-from sigma.parser.condition import ConditionOR
+from sigma.parser.condition import NodeSubexpression, ConditionOR
 
 LACEWORK_CONFIG = yaml.load(
     textwrap.dedent('''
@@ -296,7 +296,9 @@ class LaceworkBackend(SingleTextQueryBackend):
         elif type(value) == list:
             # if a list contains values with wildcards we can't use standard handling ("in")
             if any([x for x in value if x.startswith('*') or x.endswith('*')]):
-                node = ConditionOR(None, None, *[(transformed_fieldname, x) for x in value])
+                node = NodeSubexpression(
+                    ConditionOR(None, None, *[(transformed_fieldname, x) for x in value])
+                )
                 return self.generateNode(node)
             return self.generateMapItemListNode(transformed_fieldname, value)
         elif value is None:
