@@ -1,0 +1,27 @@
+title: Java Payload String
+id: 583aa0a2-30b1-4d62-8bf3-ab73689efe6c
+status: experimental
+description: Detects possible Java payload in web access logs
+author: frack113
+date: 2022/06/04
+references:
+    - https://www.rapid7.com/blog/post/2022/06/02/active-exploitation-of-confluence-cve-2022-26134/
+    - https://www.rapid7.com/blog/post/2021/09/02/active-exploitation-of-confluence-server-cve-2021-26084/
+    - https://github.com/httpvoid/writeups/blob/main/Confluence-RCE.md
+logsource:
+    category: webserver
+detection:
+    keywords:
+      - '%24%7B%28%23a%3D%40'
+      - '${(#a=@'
+      - '%24%7B%40java'
+      - '${@java'
+      - '\u0022java'
+      - '"java'
+    condition: keywords
+falsepositives:
+    - Legitimate apps
+level: medium
+tags:
+    - cve.2022.26134
+    - cve.2021.26084
