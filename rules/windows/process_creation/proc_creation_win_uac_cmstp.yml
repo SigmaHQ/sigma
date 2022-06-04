@@ -1,13 +1,14 @@
 title: Bypass UAC via CMSTP
 id: e66779cc-383e-4224-a3a4-267eeb585c40
 status: test
-description: Detect child processes of automatically elevated instances of Microsoft Connection Manager Profile Installer (cmstp.exe).
+description: Detect commandline usage of Microsoft Connection Manager Profile Installer (cmstp.exe) to install specially formatted local .INF files
 author: E.M. Anhaus (originally from Atomic Blue Detections, Endgame), oscd.community
 references:
   - https://eqllib.readthedocs.io/en/latest/analytics/e584f1a1-c303-4885-8a66-21360c90995b.html
   - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1191/T1191.md
+  - https://lolbas-project.github.io/lolbas/Binaries/Cmstp/
 date: 2019/10/24
-modified: 2022/05/13
+modified: 2022/05/16
 logsource:
   category: process_creation
   product: windows
@@ -19,6 +20,7 @@ detection:
     CommandLine|contains:
       - '/s'
       - '/au'
+      - '/ni'
   condition: all of selection*
 fields:
   - ComputerName

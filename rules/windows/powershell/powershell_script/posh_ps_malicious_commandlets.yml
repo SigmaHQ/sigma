@@ -2,18 +2,16 @@ title: Malicious PowerShell Commandlets
 id: 89819aa4-bbd6-46bc-88ec-c7f7fe30efa6
 status: experimental
 description: Detects Commandlet names from well-known PowerShell exploitation frameworks
+author: Sean Metcalf (source), Florian Roth (rule), Bartlomiej Czyz @bczyz1 (update), oscd.community (update), Nasreddine Bencherchali (update), Tim Shelton (fp)
 references:
     - https://adsecurity.org/?p=2921
-tags:
-    - attack.execution
-    - attack.t1059.001
-author: Sean Metcalf (source), Florian Roth (rule), Bartlomiej Czyz @bczyz1 (update), oscd.community (update)
+    - https://github.com/S3cur3Th1sSh1t/PowerSharpPack/tree/master/PowerSharpBinaries
 date: 2017/03/05
-modified: 2021/11/29
+modified: 2022/05/26
 logsource:
     product: windows
     category: ps_script
-    definition: Script Block Logging must be enable
+    definition: Script Block Logging must be enabled
 detection:
     select_Malicious:
         ScriptBlockText|contains:
@@ -112,11 +110,90 @@ detection:
             - 'Invoke-SMBScanner'
             - 'Invoke-Mimikittenz'
             - 'Invoke-AllChecks'
-    false_positives:
+            - 'Invoke-BadPotato'
+            - 'Invoke-BetterSafetyKatz'
+            - 'Invoke-Carbuncle'
+            - 'Invoke-Certify'
+            - 'Invoke-DAFT'
+            - 'Invoke-DinvokeKatz'
+            - 'Invoke-Eyewitness'
+            - 'Invoke-FakeLogonScreen'
+            - 'Invoke-Farmer'
+            - 'Invoke-Get-RBCD-Threaded'
+            - 'Invoke-Gopher'
+            - 'Invoke-Grouper2'
+            - 'Invoke-HandleKatz'
+            - 'Invoke-Internalmonologue'
+            - 'Invoke-KrbRelayUp'
+            - 'Invoke-LdapSignCheck'
+            - 'Invoke-Lockless'
+            - 'Invoke-MITM6'
+            - 'Invoke-NanoDump'
+            - 'Invoke-OxidResolver'
+            - 'Invoke-P0wnedshell'
+            - 'Invoke-PPLDump'
+            - 'Invoke-Rubeus'
+            - 'Invoke-SCShell'
+            - 'Invoke-SafetyKatz'
+            - 'Invoke-SauronEye'
+            - 'Invoke-Seatbelt'
+            - 'Invoke-SharPersist'
+            - 'Invoke-SharpAllowedToAct'
+            - 'Invoke-SharpBlock'
+            - 'Invoke-SharpBypassUAC'
+            - 'Invoke-SharpChromium'
+            - 'Invoke-SharpClipboard'
+            - 'Invoke-SharpCloud'
+            - 'Invoke-SharpDPAPI'
+            - 'Invoke-SharpDump'
+            - 'Invoke-SharpGPO-RemoteAccessPolicies'
+            - 'Invoke-SharpGPOAbuse'
+            - 'Invoke-SharpHandler'
+            - 'Invoke-SharpHide'
+            - 'Invoke-SharpHound4'
+            - 'Invoke-SharpImpersonation'
+            - 'Invoke-SharpImpersonationNoSpace'
+            - 'Invoke-SharpKatz'
+            - 'Invoke-SharpLdapRelayScan'
+            - 'Invoke-SharpLoginPrompt'
+            - 'Invoke-SharpMove'
+            - 'Invoke-SharpPrintNightmare'
+            - 'Invoke-SharpPrinter'
+            - 'Invoke-SharpRDP'
+            - 'Invoke-SharpSSDP'
+            - 'Invoke-SharpSecDump'
+            - 'Invoke-SharpSniper'
+            - 'Invoke-SharpSploit'
+            - 'Invoke-SharpSpray'
+            - 'Invoke-SharpStay'
+            - 'Invoke-SharpUp'
+            - 'Invoke-SharpWatson'
+            - 'Invoke-Sharphound2'
+            - 'Invoke-Sharphound3'
+            - 'Invoke-Sharplocker'
+            - 'Invoke-Sharpshares'
+            - 'Invoke-Sharpview'
+            - 'Invoke-Sharpweb'
+            - 'Invoke-Snaffler'
+            - 'Invoke-Spoolsample'
+            - 'Invoke-StandIn'
+            - 'Invoke-StickyNotesExtract'
+            - 'Invoke-Thunderfox'
+            - 'Invoke-Tokenvator'
+            - 'Invoke-UrbanBishop'
+            - 'Invoke-Whisker'
+            - 'Invoke-WireTap'
+            - 'Invoke-winPEAS'
+    false_positive1:
         ScriptBlockText|contains:
             - Get-SystemDriveInfo  # http://bheltborg.dk/Windows/WinSxS/amd64_microsoft-windows-maintenancediagnostic_31bf3856ad364e35_10.0.10240.16384_none_91ef7543a4514b5e/CL_Utility.ps1
             - C:\ProgramData\Amazon\EC2-Windows\Launch\Module\Scripts\Set-Wallpaper.ps1  # false positive form Amazon EC2
-    condition: select_Malicious and not false_positives
+    false_positive2:
+        ScriptBlockText|startswith: '# Copyright 2016 Amazon.com, Inc. or its affiliates. All Rights Reserved'
+    condition: select_Malicious and not 1 of false_positive*
 falsepositives:
     - Unknown
 level: high
+tags:
+    - attack.execution
+    - attack.t1059.001

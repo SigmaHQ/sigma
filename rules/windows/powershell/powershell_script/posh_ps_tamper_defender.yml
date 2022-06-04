@@ -17,21 +17,30 @@ logsource:
     category: ps_script
     definition: Script block logging must be enabled
 detection:
-    selection_options_disabling:
-        ScriptBlockText|contains|all:
-            - 'Set-MpPreference'
-            - ' 1'
+    selection_options_disabling_preference:
+        ScriptBlockText|contains: 'Set-MpPreference'
+    selection_options_disabling_function:
         ScriptBlockText|contains:
-            - DisableRealtimeMonitoring
-            - DisableBehaviorMonitoring
-            - DisableScriptScanning
-            - DisableArchiveScanning
-            - DisableBlockAtFirstSeen
-            - DisableIOAVProtection
-            - DisableIntrusionPreventionSystem
-            - DisableRemovableDriveScanning
-            - DisableScanningMappedNetworkDrivesForFullScan
-            - DisableScanningNetworkFiles
+            - 'DisableRealtimeMonitoring 1'
+            - 'DisableBehaviorMonitoring 1'
+            - 'DisableScriptScanning 1'
+            - 'DisableArchiveScanning 1'
+            - 'DisableBlockAtFirstSeen 1'
+            - 'DisableIOAVProtection 1'
+            - 'DisableIntrusionPreventionSystem 1'
+            - 'DisableRemovableDriveScanning 1'
+            - 'DisableScanningMappedNetworkDrivesForFullScan 1'
+            - 'DisableScanningNetworkFiles 1'
+            - 'DisableRealtimeMonitoring $true'
+            - 'DisableBehaviorMonitoring $true'
+            - 'DisableScriptScanning $true'
+            - 'DisableArchiveScanning $true'
+            - 'DisableBlockAtFirstSeen $true'
+            - 'DisableIOAVProtection $true'
+            - 'DisableIntrusionPreventionSystem $true'
+            - 'DisableRemovableDriveScanning $true'
+            - 'DisableScanningMappedNetworkDrivesForFullScan $true'
+            - 'DisableScanningNetworkFiles $true'
     selection_default_actions_allow:
         ScriptBlockText|contains|all:
             - 'Set-MpPreference'
@@ -40,7 +49,7 @@ detection:
             - LowThreatDefaultAction
             - ModerateThreatDefaultAction
             - HighThreatDefaultAction
-    condition: selection_options_disabling or selection_default_actions_allow
+    condition: all of selection_options_disabling* or selection_default_actions_allow
 falsepositives:
     - Legitimate PowerShell scripts
 level: high

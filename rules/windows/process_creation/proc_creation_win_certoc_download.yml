@@ -1,0 +1,24 @@
+title: Suspicious File Download via CertOC.exe
+id: 70ad0861-d1fe-491c-a45f-fa48148a300d
+description: Detects when a user downloads file by using CertOC.exe
+status: experimental
+author: Nasreddine Bencherchali
+date: 2022/05/16
+references:
+- https://lolbas-project.github.io/lolbas/Binaries/Certoc/
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\certoc.exe'
+        - OriginalFileName: 'CertOC.exe'
+    selection_cli:
+        CommandLine|contains: '-GetCACAPS'
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.command_and_control
+    - attack.t1105

@@ -6,16 +6,19 @@ author: frack113
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1489/T1489.md#atomic-test-3---windows---stop-service-by-killing-process
 date: 2021/12/26
+modified: 2022/05/17
 logsource:
     category: process_creation
     product: windows
 detection:
-    taskkill:
-        Image|endswith: \taskkill.exe
-        CommandLine|contains|all: 
-            - /f 
-            - /im
-    condition: taskkill
+    selection_img:
+        - Image|endswith: '\taskkill.exe'
+        - OriginalFileName: 'taskkill.exe'
+    selection_cli:
+        CommandLine|contains|all:
+            - ' /f'
+            - ' /im '
+    condition: all of selection*
 falsepositives:
     - Unknown
 level: low

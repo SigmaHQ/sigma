@@ -1,0 +1,35 @@
+title: Linux Keylogging with Pam.d
+id: 49aae26c-450e-448b-911d-b3c13d178dfc
+description: Detect attempt to enable auditing of TTY input
+    # -w /etc/pam.d/ -p wa -k pam - this rule will help you detect changes to the pam.d files-  https://github.com/Neo23x0/auditd/blob/master/audit.rules 
+    # - the TTY events detection asumes that you do not expect them in your environment or add filtering on those users that you configured it for
+author: 'Pawel Mazur'
+status: experimental
+date: 2021/05/24
+references:
+   - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1056.001/T1056.001.md
+   - https://attack.mitre.org/techniques/T1003/
+   - https://linux.die.net/man/8/pam_tty_audit
+   - https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/security_guide/sec-configuring_pam_for_auditing
+   - https://access.redhat.com/articles/4409591#audit-record-types-2
+logsource:
+   product: linux
+   service: auditd
+detection:
+   path_events:
+       type: PATH
+       name: 
+       - '/etc/pam.d/system-auth'
+       - '/etc/pam.d/password-auth'
+   tty_events:
+        type:
+        - 'TTY'
+        - 'USER_TTY'
+   condition: path_events or tty_events
+tags:
+   - attack.credential_access
+   - attack.t1003
+   - attack.t1056.001
+falsepositives:
+   - Administrative work
+level: high
