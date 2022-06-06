@@ -12,7 +12,17 @@ logsource:
 detection:
   selection:
     TargetFilename|contains: '\AppData\Roaming\Microsoft\Word\STARTUP\'
-  condition: selection
+  filter_ext:
+    TargetFilename|endswith:
+      - '.docx' # Word document
+      - '.docm' # Word macro-enabled document; same as docx, but may contain macros and scripts
+      - '.dotx' # Word template
+      - '.dotm' # Word macro-enabled template; same as dotx, but may contain macros and scripts
+      - '.docb' # Word binary document introduced in Microsoft Office 2007
+      - '.pdf'  # PDF documents
+      - '.wll'  # Word add-in
+      - '.wwl'  # Word add-in
+  condition: selection and not filter_ext
 falsepositives:
   - Addition of legitimate plugins
 level: medium
