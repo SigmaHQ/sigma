@@ -1,0 +1,24 @@
+title: Hidden Binary Execution
+id: 9e1bef8d-0fff-46f6-8465-9aa54e128c1e
+status: experimental
+description: Hidden files and folders in NIX systems start with ".", it is uncommon for a binary to execute out of a folder that is hidden or for the binary itself to be hidden as this is a common way threat actors attempt to hide.
+author: David Burkett, @signalblur
+references:
+  - https://linux.die.net/man/1/tree
+  - https://regex101.com/r/6nMTEl/1
+date: 2022/06/07
+modified: 2022/06/07
+logsource:
+  product: linux
+  service: auditd
+detection:
+  selection:
+    type: 'PATH'
+    name|re: '.*\/\..*'
+  condition: selection
+falsepositives:
+  - Unknown
+level: high
+tags:
+  - attack.defense_evasion
+  - attack.t1574.001
