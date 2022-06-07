@@ -1,0 +1,32 @@
+title: DNS Query to External Service Interaction Domains
+id: d0a689db-52a2-47c9-beef-09a09a62c314
+status: stable
+description: Detects suspicious DNS queries to external service interaction domains often used for out-of-band interactions after successful RCE
+author: Florian Roth
+date: 2022/06/07
+references:
+    - https://twitter.com/breakersall/status/1533493587828260866
+    - http://interact.sh/
+logsource:
+    category: dns
+detection:
+    selection:
+        query|contains:
+            - '.interact.sh'
+            - '.oast.pro'
+            - '.oast.live'
+            - '.oast.online'
+            - '.oast.site'
+            - '.oast.fun'
+            - '.oast.me'
+            - '.burpcollaborator.net'
+            - '.oastify.com'
+    condition: selection
+falsepositives:
+    - Unknown
+tags:
+    - attack.initial_access
+    - attack.t1190
+    - attack.reconnaissance
+    - attack.t1595.002
+level: high
