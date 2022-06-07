@@ -1,0 +1,30 @@
+title: Sdiagnhost Calling Suspicious Child Process
+id: f3d39c45-de1a-4486-a687-ab126124f744
+status: experimental
+description: Detects sdiagnhost.exe calling a suspicious child process
+author: Nextron Systems
+references:
+  - https://twitter.com/nao_sec/status/1530196847679401984
+  - https://app.any.run/tasks/713f05d2-fe78-4b9d-a744-f7c133e3fafb/
+date: 2022/06/01
+tags:
+  - attack.defense_evasion
+  - attack.t1036
+  - attack.t1218
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    ParentImage|endswith: '\sdiagnhost.exe'
+    Image|endswith:
+      - '\powershell.exe'
+      - '\cmd.exe'
+      - '\mshta.exe'
+      - '\cscript.exe'
+      - '\wscript.exe'
+      - '\taskkill.exe'
+  condition: selection
+falsepositives:
+  - Unknown
+level: high

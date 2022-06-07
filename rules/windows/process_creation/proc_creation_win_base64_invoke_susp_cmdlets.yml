@@ -1,0 +1,40 @@
+title: Malicious Base64 Encoded Powershell Invoke Cmdlets
+id: fd6e2919-3936-40c9-99db-0aa922c356f7
+status: test
+description: Detects base64 encoded powershell cmdlet invocation of known suspicious cmdlets
+author: pH-T
+related:
+  - id: 6385697e-9f1b-40bd-8817-f4a91f40508e
+    type: similar
+date: 2022/05/31
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.defense_evasion
+    - attack.t1027
+references:
+    - https://thedfirreport.com/2022/05/09/seo-poisoning-a-gootloader-story/
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    CommandLine|contains:
+      # Invoke-BloodHound
+      - 'SQBuAHYAbwBrAGUALQBCAGwAbwBvAGQASABvAHUAbgBkA'
+      - 'kAbgB2AG8AawBlAC0AQgBsAG8AbwBkAEgAbwB1AG4AZA'
+      - 'JAG4AdgBvAGsAZQAtAEIAbABvAG8AZABIAG8AdQBuAGQA'
+      # Invoke-Mimikatz
+      - 'SQBuAHYAbwBrAGUALQBNAGkAbQBpAGsAYQB0AHoA'
+      - 'kAbgB2AG8AawBlAC0ATQBpAG0AaQBrAGEAdAB6A'
+      - 'JAG4AdgBvAGsAZQAtAE0AaQBtAGkAawBhAHQAeg'
+      # Invoke-WMIExec
+      - 'SQBuAHYAbwBrAGUALQBXAE0ASQBFAHgAZQBjA'
+      - 'kAbgB2AG8AawBlAC0AVwBNAEkARQB4AGUAYw'
+      - 'JAG4AdgBvAGsAZQAtAFcATQBJAEUAeABlAGMA'
+  condition: selection
+fields:
+  - CommandLine
+falsepositives:
+  - Unlikely
+level: high

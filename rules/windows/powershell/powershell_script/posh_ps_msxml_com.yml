@@ -5,20 +5,23 @@ description: |
   Adversaries may abuse PowerShell commands and scripts for execution.
   PowerShell is a powerful interactive command-line interface and scripting environment included in the Windows operating system. (Citation: TechNet PowerShell)
   Adversaries can use PowerShell to perform a number of actions, including discovery of information and execution of code
-author: frack113
+author: frack113, MatilJ
 date: 2022/01/19
+modified: 2022/05/19
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1059.001/T1059.001.md#atomic-test-7---powershell-msxml-com-object---with-prompt
     - https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ms766431(v=vs.85)
+    - https://www.trendmicro.com/en_id/research/22/e/uncovering-a-kingminer-botnet-attack-using-trend-micro-managed-x.html
 logsource:
     product: windows
     category: ps_script
 detection:
     selection:
         ScriptBlockText|contains|all:
-            - New-Object
+            - 'New-Object'
             - '-ComObject'
-            - MsXml2.ServerXmlHttp
+            - 'MsXml2.'
+            - 'XmlHttp'
     condition: selection
 falsepositives:
   - Legitimate administrative script

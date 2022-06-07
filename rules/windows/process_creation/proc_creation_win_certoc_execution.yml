@@ -4,25 +4,27 @@ description: Detects when a user installs certificates by using CertOC.exe to lo
 status: experimental
 author: Austin Songer @austinsonger
 date: 2021/10/23
+modified: 2022/05/16
 references:
 - https://twitter.com/sblmsrsn/status/1445758411803480072?s=20
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\certoc.exe'
+    selection_img:
+        - Image|endswith: '\certoc.exe'
+        - OriginalFileName: 'CertOC.exe'
+    selection_cli:
         CommandLine|contains|all:
             - '-LoadDLL'
             - '.dll'
-    condition: selection
+    condition: all of selection*
 fields:
     - CommandLine
     - ParentCommandLine
 tags:
 - attack.defense_evasion
 - attack.t1218
-level: medium
 falsepositives:
-- Unknown
-
+    - Unknown
+level: medium

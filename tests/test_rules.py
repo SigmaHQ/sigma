@@ -310,6 +310,7 @@ class TestRules(unittest.TestCase):
             "obsoletes",
             "merged",
             "renamed",
+            "similar"
             ]
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             related_lst = self.get_rule_part(file_path=file, part_name="related")
@@ -799,6 +800,39 @@ class TestRules(unittest.TestCase):
         "Single item values are not allowed to have an all modifier as some back-ends cannot support it. " +
         "If you use it as a workaround to duplicate a field in a selection, use a new selection instead.")
 
+    def test_field_user_localization(self):
+        def checkUser(faulty_rules, dict):
+            for key, value in dict.items():
+                if "User" in key:
+                    if type(value) == str:
+                        if "AUTORI" in value or "AUTHORI" in value:
+                            print("Localized user name '{}'.".format(value))
+                            faulty_rules.append(file)
+
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            detection = self.get_rule_part(file_path=file, part_name="detection")
+            for sel_key, sel_value in detection.items():
+                if sel_key == "condition" or sel_key == "timeframe":
+                    continue
+                # single item selection
+                if type(sel_value) == dict:
+                    checkUser(faulty_rules, sel_value)
+                if type(sel_value) == list:
+                    # skip keyword selection
+                    if type(sel_value[0]) != dict:
+                        continue
+                    # multiple item selection
+                    for item in sel_value:
+                        checkUser(faulty_rules, item)
+
+        self.assertEqual(faulty_rules, [], Fore.RED + "There are rules that match using localized user accounts. Better employ a generic version such as:\n" +
+            "User|contains: # covers many language settings\n" +
+            "    - 'AUTHORI'\n" +
+            "    - 'AUTORI'")
+
+
+
     def test_condition_operator_casesensitive(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
@@ -820,7 +854,7 @@ class TestRules(unittest.TestCase):
                          print(Fore.RED + "Rule {} has a invalid condition '{}' : 'or','and','not','of' are lowercase".format(file,detection["condition"]))
                          faulty_rules.append(file)
 
-        self.assertEqual(faulty_rules, [], Fore.RED + "There are rules using condition whitout lowercase operator")
+        self.assertEqual(faulty_rules, [], Fore.RED + "There are rules using condition without lowercase operator")
 
 def get_mitre_data():
     """
