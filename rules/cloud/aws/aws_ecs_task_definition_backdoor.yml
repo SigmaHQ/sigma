@@ -12,13 +12,15 @@ logsource:
     product: aws
     service: cloudtrail
 detection:
-    selection:
+    selection_source:
         eventSource: ecs.amazonaws.com
         eventName:
             - DescribeTaskDefinition
             - RegisterTaskDefinition
             - RunTask
-    condition: selection
+        filter:
+          requestParameters.containerDefinitions.command|contains: '169.254.170.2$AWS_CONTAINER_CREDENTIALS'
+    condition: selection_source
 level: medium
 tags:
     - attack.persistence
