@@ -18,12 +18,14 @@ detection:
             - DescribeTaskDefinition
             - RegisterTaskDefinition
             - RunTask
-        filter:
-          requestParameters.containerDefinitions.command|contains: '169.254.170.2$AWS_CONTAINER_CREDENTIALS'
-    condition: selection_source
+    filter:
+      - requestParameters.containerDefinitions.command|contains|all:
+          - '169.254'
+          - '$AWS_CONTAINER_CREDENTIALS'
+    condition: selection_source and filter
 level: medium
 tags:
     - attack.persistence
     - attack.t1525
 falsepositives:
- - Task Definition being modified for valid reasons
+ - Task Definition being modified to request credentials from the Task Metadata Service for valid reasons
