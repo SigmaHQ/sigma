@@ -33,7 +33,7 @@ from sigma.parser.modifiers.base import SigmaTypeModifier
 LACEWORK_CONFIG = yaml.load(
     textwrap.dedent('''
     ---
-    version: 0.2
+    version: 0.3
     services:
       cloudtrail:
         evaluatorId: Cloudtrail
