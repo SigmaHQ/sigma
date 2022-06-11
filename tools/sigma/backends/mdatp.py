@@ -212,10 +212,13 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 elif val.startswith("*"):
                     op = "endswith"
                     val = self.cleanValue(val[1:])
-        # if "\\" in val:
-        #     val = f"@{val}"
 
-        return "%s @\"%s\"" % (op, val)
+        # Add an @ character to escape slashes in the string
+        if "\\" in val:
+            val = val.replace("\\\\","\\")
+            return "%s @\"%s\"" % (op, val)
+
+        return "%s \"%s\"" % (op, val)
 
     def porttype_mapping(self, val):
         return "%s \"%s\"" % ("==", val)
