@@ -22,14 +22,18 @@ import re
 import textwrap
 import yaml
 
+import sigma
+
 from sigma.backends.base import SingleTextQueryBackend
 from sigma.backends.exceptions import BackendError
-from sigma.parser.condition import ConditionOR
+from sigma.parser.condition import NodeSubexpression, ConditionOR
+from sigma.parser.modifiers.base import SigmaTypeModifier
+
 
 LACEWORK_CONFIG = yaml.load(
     textwrap.dedent('''
     ---
-    version: 0.2
+    version: 0.3
     services:
       cloudtrail:
         evaluatorId: Cloudtrail
@@ -93,16 +97,18 @@ LACEWORK_CONFIG = yaml.load(
           - and diff_minutes(PROCESS_START_TIME, current_timestamp_sec()::timestamp) <= 60
         fieldMap:
           - sigmaField: ParentImage
-            laceworkField:
+            laceworkField: EXE_PATH
             matchType: exact
-            action: raise
+            action: selfjoin
+            selfJoinFilter: (MID, PPID_HASH) IN { source { LW_HE_PROCESSES } filter { $query$ } return { MID, PID_HASH } }
           - sigmaField: Image
             laceworkField: EXE_PATH
             matchType: exact
           - sigmaField: ParentCommandLine
-            laceworkField:
+            laceworkField: CMDLINE
             matchType: exact
-            action: raise
+            action: selfjoin
+            selfJoinFilter: (MID, PPID_HASH) IN { source { LW_HE_PROCESSES } filter { $query$ } return { MID, PID_HASH } }
           - sigmaField: CommandLine
             laceworkField: CMDLINE
             matchType: exact
@@ -231,6 +237,40 @@ class LaceworkBackend(SingleTextQueryBackend):
 
         return result
 
+    def generateNode(self, node):
+        if type(node) == sigma.parser.condition.ConditionAND:
+            return self.applyOverrides(self.generateANDNode(node))
+        elif type(node) == sigma.parser.condition.ConditionOR:
+            return self.applyOverrides(self.generateORNode(node))
+        elif type(node) == sigma.parser.condition.ConditionNOT:
+            return self.applyOverrides(self.generateNOTNode(node))
+        elif type(node) == sigma.parser.condition.ConditionNULLValue:
+            return self.applyOverrides(self.generateNULLValueNode(node))
+        elif type(node) == sigma.parser.condition.ConditionNotNULLValue:
+            return self.applyOverrides(self.generateNotNULLValueNode(node))
+        elif type(node) == sigma.parser.condition.NodeSubexpression:
+            return self.applyOverrides(self.generateSubexpressionNode(node))
+        elif type(node) == tuple:
+            return self.applySelfJoinFilter(node, self.applyOverrides(self.generateMapItemNode(node)))
+        elif type(node) in (str, int):
+            return self.applyOverrides(self.generateValueNode(node))
+        elif type(node) == list:
+            return self.applyOverrides(self.generateListNode(node))
+        elif isinstance(node, SigmaTypeModifier):
+            return self.applyOverrides(self.generateTypedValueNode(node))
+        else:
+            raise TypeError("Node type %s was not expected in Sigma parse tree" % (str(type(node))))
+
+    def applySelfJoinFilter(self, node, query):
+        if type(node) != tuple:
+            raise NotImplementedError('selfJoinFilter is not wired up for node type %s' % (str(type(node))))
+        fieldname, value = node
+
+        sjf = self._get_self_join_filter(fieldname)
+        if not sjf:
+            return query
+        return sjf.replace('$query$', query)
+
     def generateValueNode(self, node):
         """
         Value Expression for Lacework Query Language (LQL)
@@ -296,7 +336,9 @@ class LaceworkBackend(SingleTextQueryBackend):
         elif type(value) == list:
             # if a list contains values with wildcards we can't use standard handling ("in")
             if any([x for x in value if x.startswith('*') or x.endswith('*')]):
-                node = ConditionOR(None, None, *[(transformed_fieldname, x) for x in value])
+                node = NodeSubexpression(
+                    ConditionOR(None, None, *[(transformed_fieldname, x) for x in value])
+                )
                 return self.generateNode(node)
             return self.generateMapItemListNode(transformed_fieldname, value)
         elif value is None:
@@ -329,6 +371,33 @@ class LaceworkBackend(SingleTextQueryBackend):
                 return True
 
         return False
+
+    def _get_self_join_filter(self, fieldname):
+        """
+        Whether we're implementing a self-join filter within Lacework Query Language (LQL)
+        """
+        if not (isinstance(fieldname, str) and fieldname):
+            return None
+
+        for map in self.laceworkFieldMap:
+            if not isinstance(map, dict):
+                continue
+
+            sigma_field = safe_get(map, 'sigmaField', str)
+            if not sigma_field:
+                continue
+
+            sjf = map.get('selfJoinFilter')
+
+            # self join filter
+            if (
+                map.get('action') == 'selfjoin'
+                and sigma_field == fieldname
+                and sjf and isinstance(sjf, str)
+            ):
+                return sjf
+
+        return None
 
     @staticmethod
     def _check_unsupported_field(action, fieldname):
