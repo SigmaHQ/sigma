@@ -1,0 +1,29 @@
+title: Python Spawning Pretty TTY
+id: c4042d54-110d-45dd-a0e1-05c47822c937
+status: experimental
+description: Detects python spawning a pretty tty
+author: Nextron Systems
+date: 2022/06/03
+references:
+    - https://www.volexity.com/blog/2022/06/02/zero-day-exploitation-of-atlassian-confluence/
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_image:
+        Image|contains:
+            - '/python2.'  # python image is always of the form ../python3.10; ../python is just a symlink
+            - '/python3.'
+    selection_cli1:
+        CommandLine|contains|all:
+            - 'import pty'
+            - '.spawn('
+    selection_cli2:
+        CommandLine|contains: 'from pty import spawn'
+    condition: selection_image and 1 of selection_cli*
+falsepositives:
+    - Unknown
+level: high

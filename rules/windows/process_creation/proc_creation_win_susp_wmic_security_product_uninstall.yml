@@ -4,10 +4,11 @@ description: Detects deinstallation of security products using WMIC utility
 references:
     - https://twitter.com/cglyer/status/1355171195654709249
     - https://thedfirreport.com/2021/10/18/icedid-to-xinglocker-ransomware-in-24-hours/
+    - https://www.mandiant.com/resources/unc2165-shifts-to-evade-sanctions
 date: 2021/01/30
-modified: 2021/10/18
+modified: 2022/06/03
 status: experimental
-author: Florian Roth
+author: Florian Roth, Nasreddine Bencherchali
 tags:
     - attack.defense_evasion
     - attack.t1562.001
@@ -15,12 +16,15 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection_cli:
         CommandLine|contains|all:
             - 'wmic'
-            - 'product where name='
+            - 'product where '
             - 'call uninstall'
             - '/nointeractive'
+        CommandLine|contains:
+            - ' name='
+            - 'caption like '
     selection_product:
         CommandLine|contains:
             - 'Antivirus'
@@ -39,7 +43,13 @@ detection:
             - 'VirusScan'
             - 'Webroot SecureAnywhere'
             - 'Windows Defender'
-    condition: selection and selection_product
+            - 'CarbonBlack'
+            - 'Carbon Black'
+            - 'Cb Defense Sensor 64-bit'
+            - 'Dell Threat Defense'
+            - 'Cylance '
+            - 'LogRhythm System Monitor Service'
+    condition: all of selection*
 falsepositives:
     - Legitimate administration
 level: medium

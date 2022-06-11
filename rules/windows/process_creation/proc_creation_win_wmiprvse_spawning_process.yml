@@ -3,7 +3,7 @@ id: d21374ff-f574-44a7-9998-4a8c8bf33d7d
 description: Detects wmiprvse spawning processes
 status: experimental
 date: 2019/08/15
-modified: 2021/11/10
+modified: 2022/05/27
 author: Roberto Rodriguez @Cyb3rWard0g
 references:
     - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190810201010.html
@@ -17,13 +17,13 @@ detection:
     selection:
         ParentImage|endswith: '\WmiPrvSe.exe'
     filter:
-        - LogonId: 
+        - LogonId:
             - '0x3e7'  # LUID 999 for SYSTEM
             - 'null'   # too many false positives
-        - User|startswith: 
-            - 'NT AUTHORITY\SYSTEM'  # if we don't have LogonId data, fallback on username detection
-            - 'AUTORITE NT\Sys' # French language settings
-        - Image|endswith: 
+        - User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
+        - Image|endswith:
             - '\WmiPrvSE.exe'
             - '\WerFault.exe'
     filter_null:  # some backends need the null value in a separate expression
