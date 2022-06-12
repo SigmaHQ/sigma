@@ -722,7 +722,7 @@ class HAWKBackend(SingleTextQueryBackend):
             raise Exception("Unknown type for false positives: ", type(sigmaparser.parsedyaml['falsepositives']))
 
         if 'references' in sigmaparser.parsedyaml:
-            ref = "%s\n" % "\n".join(sigmaparser.parsedyaml['references']) 
+            ref = "%s" % "\n".join(sigmaparser.parsedyaml['references']) 
         else:
             ref = ''
         record = {
@@ -752,27 +752,36 @@ class HAWKBackend(SingleTextQueryBackend):
                 if len(mitre_tactics_filtered) > 0:
                     record["technique"] = mitre_tactics_filtered[0]
             
-            
-
+        score_reason_txt = "Scoring:\n"
         if not 'status' in self.sigmaparser.parsedyaml or 'status' in self.sigmaparser.parsedyaml and self.sigmaparser.parsedyaml['status'] != 'experimental':
             record['correlation_action'] += 5.0;
+            score_reason_txt += "Status is not experimental (+5)\n"
         elif 'status' in self.sigmaparser.parsedyaml and self.sigmaparser.parsedyaml['status'] == 'experimental':
             record["tags"].append("qa")
+            score_reason_txt += "Status is experimental (+0)\n"
         if 'falsepositives' in self.sigmaparser.parsedyaml and len(self.sigmaparser.parsedyaml['falsepositives']) > 1:
             record['correlation_action'] -= (2.0 * len(self.sigmaparser.parsedyaml['falsepositives']) )
+            score_reason_txt += "False positives  (-2 * %r)\n" % len(self.sigmaparser.parsedyaml['falsepositives'])
 
         if 'level' in self.sigmaparser.parsedyaml:
             if self.sigmaparser.parsedyaml['level'].lower() == 'critical':
                 record['correlation_action'] += 15.0;
+                score_reason_txt += "Critical (+15)\n"
             elif self.sigmaparser.parsedyaml['level'].lower() == 'high':
                 record['correlation_action'] += 10.0;
-            elif self.sigmaparser.parsedyaml['level'].lower() == 'medium':
+                score_reason_txt += "High (+10)\n"
+            elif self.sigmaparser.parsedyaml['level'].lower() == 'medium' or self.sigmaparser.parsedyaml['level'].lower() == 'moderate':
                 # record['correlation_action'] += 0.0;
+                score_reason_txt += "Medium (+0)\n"
                 pass
             elif self.sigmaparser.parsedyaml['level'].lower() == 'low':
                 record['correlation_action'] -= 10.0;
+                score_reason_txt += "Low (-10)\n"
             elif self.sigmaparser.parsedyaml['level'].lower() == 'informational':
                 record['correlation_action'] -= 15.0;
+                score_reason_txt += "Informational (-15)\n"
+
+        record["filter_details"] += "\n\n" + score_reason_txt
 
         if record['correlation_action'] < 0.0:
             record['correlation_action'] = 0.0
