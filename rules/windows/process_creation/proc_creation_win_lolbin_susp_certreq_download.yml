@@ -10,14 +10,16 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\certreq.exe'
+    selection_img:
+        - Image|endswith: '\certreq.exe'
+        - OriginalFileName: 'CertReq.exe'
+    selection_cli:
         CommandLine|contains|all:
             - ' -Post '
             - ' -config '
             - ' http'
             - ' C:\windows\win.ini '
-    condition: selection
+    condition: all of selection*
 fields:
     - CommandLine
     - ParentCommandLine
