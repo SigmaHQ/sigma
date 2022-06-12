@@ -8,19 +8,23 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1197/T1197.md
 author: frack113
 date: 2022/03/01
-modified: 2022/06/10
+modified: 2022/06/12
 logsource:
     product: windows
     service: bits-client
 detection:
     selection:
         EventID: 16403
-        LocalName|endswith: 
+        LocalName|endswith:
             - '.ps1'
             - '.exe'
             - '.vbs'
             - '.bat'
-    condition: selection
+    filter:
+        # Typical updates: Chrome, Dropbox etc.
+        LocalName|contains: '\AppData\'
+        RemoteName|contains: '.com'
+    condition: selection and not filter
 falsepositives:
     - Administrator PowerShell scripts 
 level: medium
