@@ -1,27 +1,25 @@
-title: UAC Bypass WSReset
-id: 89a9a0e0-f61a-42e5-8957-b1479565a658
-description: Detects the pattern of UAC Bypass via WSReset usable by default sysmon-config
-author: Christian Burkard
-date: 2021/08/23
-status: experimental
+title: Bypass UAC via WSReset.exe
+id: d797268e-28a9-49a7-b9a8-2f5039011c5c
+status: test
+description: Identifies use of WSReset.exe to bypass User Account Control. Adversaries use this technique to execute privileged processes.
+author: E.M. Anhaus (originally from Atomic Blue Detections, Tony Lambert), oscd.community
 references:
-    - https://lolbas-project.github.io/lolbas/Binaries/Wsreset/
-    - https://github.com/hfiref0x/UACME
-    - https://medium.com/falconforce/falconfriday-detecting-uac-bypasses-0xff16-86c2a9107abf
-tags:
-    - attack.defense_evasion
-    - attack.privilege_escalation
-    - attack.t1548.002
+  - https://eqllib.readthedocs.io/en/latest/analytics/532b5ed4-7930-11e9-8f5c-d46d6d62a49e.html
+date: 2019/10/24
+modified: 2022/05/13
 logsource:
-    category: process_creation
-    product: windows
+  category: process_creation
+  product: windows
 detection:
-    selection:
-        Image|endswith: '\wsreset.exe'
-        IntegrityLevel:
-          - 'High'
-          - 'System'
-    condition: selection
+  selection:
+    ParentImage|endswith: '\wsreset.exe'
+  filter:
+    - Image|endswith: '\conhost.exe'
+    - OriginalFileName: 'CONHOST.EXE'
+  condition: selection and not filter
 falsepositives:
-    - Unknown
+  - Unknown
 level: high
+tags:
+  - attack.privilege_escalation
+  - attack.t1548.002
