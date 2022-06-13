@@ -1,12 +1,12 @@
-title: Sdiagnhost.exe loading Powershell Module
+title: MSDT.exe loading Diagnostic Library
 id: ec8c4047-fad9-416a-8c81-0f479353d7f6
 status: experimental
-description: Detects windows document or pdf reader leveraging "msdt.exe" binary and "sdiagnohost.exe"; "sdiagnhost.exe" process loads "PowerShell.Command.Utility.dll" to execute arbitary executable command (CVE-2022-30190)
+description: Detects windows document or pdf reader leveraging "msdt.exe" and "sdiageng.dll" libraries (CVE-2022-30190)
 author: Greg (rule)
 references:
   - https://twitter.com/j00sean/status/1534115332830507008
   - https://twitter.com/nas_bench/status/1531944240271568896?t=z0hjfsgRgNb9c4NCLk-bHg&s=19  # rule is also by proc_creation_win_msdt_sdiagnhost.yml
-  - https://conscia.com/blog/vulnerability-spotlight-how-to-detect-follina-the-windows-msdt-0-day/
+  - https://www.securonix.com/blog/detecting-microsoft-msdt-dogwalk/
 date: 2022/06/09
 modified: 2022/06/09
 logsource:
@@ -21,9 +21,7 @@ detection:
       - 'PCWDiagnostic'
       - '/af ' # For answer files
   selection_load:
-    Image|endswith: '\sdiagnhost.exe'
-    ImageLoaded|contains: 'PowerShell.Command'
-    ImageLoaded|endswith: '.dll'
+    ImageLoaded|endswith: 'sdiageng.dll'
 
   condition: all of selection*
 falsepositives:
