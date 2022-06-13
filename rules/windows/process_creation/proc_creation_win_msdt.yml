@@ -4,11 +4,12 @@ status: experimental
 description: Detects word documents leveraging the "ms-msdt" handler or the "msdt.exe" binary to execute arbitrary commands as seen in CVE-2022-30190
 author: Nasreddine Bencherchali (rule)
 references:
+  - https://twitter.com/nas_bench/status/1531944240271568896?t=z0hjfsgRgNb9c4NCLk-bHg&s=19 # IT_RebrowseForFile is not necessary referenced from @nas_bench
   - https://twitter.com/nao_sec/status/1530196847679401984
   - https://app.any.run/tasks/713f05d2-fe78-4b9d-a744-f7c133e3fafb/
   - https://twitter.com/_JohnHammond/status/1531672601067675648
 date: 2022/05/29
-modified: 2022/06/01
+modified: 2022/06/13
 logsource:
   category: process_creation
   product: windows
@@ -18,7 +19,7 @@ detection:
     - OriginalFileName: 'msdt.exe'
   selection_specific_cmd:
     CommandLine|contains:
-      - 'IT_BrowseForFile='
+      - 'PCWDiagnostic'
       - '/af ' # For answer files
   condition: all of selection_specific_*
 falsepositives:
