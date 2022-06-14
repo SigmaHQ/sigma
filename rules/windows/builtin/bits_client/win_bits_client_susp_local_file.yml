@@ -1,4 +1,4 @@
-title: Suspicious Download File Extension with Bits
+title: Suspicious Download File Extension with BITS
 id: b85e5894-9b19-4d86-8c87-a2f3b81f0521
 status: experimental
 description: |
@@ -8,19 +8,26 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1197/T1197.md
 author: frack113
 date: 2022/03/01
+modified: 2022/06/12
 logsource:
     product: windows
     service: bits-client
 detection:
     selection:
         EventID: 16403
-        LocalName|endswith: 
+        LocalName|endswith:
             - '.ps1'
             - '.exe'
-    condition: selection
+            - '.vbs'
+            - '.bat'
+    filter:
+        # Typical updates: Chrome, Dropbox etc.
+        LocalName|contains: '\AppData\'
+        RemoteName|contains: '.com'
+    condition: selection and not filter
 falsepositives:
     - Administrator PowerShell scripts 
-level: low
+level: medium
 tags:
     - attack.defense_evasion
     - attack.persistence

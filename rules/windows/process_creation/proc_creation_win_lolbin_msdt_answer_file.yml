@@ -1,0 +1,29 @@
+title: Execute MSDT Via Answer File
+id: 9c8c7000-3065-44a8-a555-79bcba5d9955
+status: experimental
+description: Detects execution of "msdt.exe" using an answer file which is simulating the legitimate way of calling msdt via "pcwrun.exe" (For example from the compatibility tab)
+author: Nasreddine Bencherchali
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Msdt/
+date: 2022/06/13
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_cli:
+        Image|endswith: '\msdt.exe'
+        CommandLine|contains: '\WINDOWS\diagnostics\index\PCWDiagnostic.xml'
+    selection_answer:
+        CommandLine|contains:
+            - ' -af '
+            - ' /af '
+    filter:
+        ParentImage|endswith: '\pcwrun.exe'
+    condition: all of selection* and not filter
+falsepositives:
+    - Possible undocumented parents of "msdt" other than "pcwrun"
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+    - attack.execution

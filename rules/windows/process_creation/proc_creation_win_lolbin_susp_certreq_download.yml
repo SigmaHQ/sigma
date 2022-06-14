@@ -4,20 +4,23 @@ status: experimental
 description: Detects a suspicious certreq execution taken from the LOLBAS examples, which can be abused to download (small) files
 author: Christian Burkard
 date: 2021/11/24
+modified: 2022/06/13
 references:
     - https://lolbas-project.github.io/lolbas/Binaries/Certreq/
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\certreq.exe'
+    selection_img:
+        - Image|endswith: '\certreq.exe'
+        - OriginalFileName: 'CertReq.exe'
+    selection_cli:
         CommandLine|contains|all:
             - ' -Post '
             - ' -config '
             - ' http'
             - ' C:\windows\win.ini '
-    condition: selection
+    condition: all of selection*
 fields:
     - CommandLine
     - ParentCommandLine

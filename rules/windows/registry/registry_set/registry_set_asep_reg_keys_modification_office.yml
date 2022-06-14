@@ -11,7 +11,7 @@ references:
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 date: 2019/10/25
-modified: 2022/03/26
+modified: 2022/06/10
 logsource:
     category: registry_set
     product: windows
@@ -53,10 +53,13 @@ detection:
             - '\Outlook\Addins\UCAddin.UCAddin.1'
             - '\Outlook\Addins\UmOutlookAddin.FormRegionAddin\'
     filter_officeclicktorun:
-        Image|startswith: 
+        Image|startswith:
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
         Image|endswith: '\OfficeClickToRun.exe'
+    filter_avg:
+            Image: 'C:\Program Files\AVG\Antivirus\RegSvr.exe'
+            TargetObject|contains: '\Microsoft\Office\Outlook\Addins\Antivirus.AsOutExt\'
     condition: office and office_details and not 1 of filter_*
 fields:
     - SecurityID
