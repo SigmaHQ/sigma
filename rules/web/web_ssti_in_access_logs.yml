@@ -23,7 +23,10 @@ detection:
         - 'freemarker.template.utility.Execute'
         - .getClass().forName('javax.script.ScriptEngineManager')
         - 'T(org.apache.commons.io.IOUtils)'
-    condition: select_method and keywords
+    filter:
+        sc-status: 404
+    condition: select_method and keywords and not filter
 falsepositives:
     - User searches in search boxes of the respective website
+    - Internal vulnerability scanners can cause some serious FPs when used, if you experience a lot of FPs due to this think of adding more filters such as "User Agent" strings and more response codes
 level: high

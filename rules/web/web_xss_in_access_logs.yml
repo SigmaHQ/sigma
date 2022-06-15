@@ -30,7 +30,9 @@ detection:
         - '${alert'
         - 'javascript:alert'
         - 'javascript%3Aalert'
-    condition: select_method and keywords
+    filter:
+        sc-status: 404
+    condition: select_method and keywords and not filter
 fields:
     - client_ip
     - vhost
@@ -39,4 +41,5 @@ fields:
 falsepositives:
     - JavaScripts,CSS Files and PNG files
     - User searches in search boxes of the respective website
+    - Internal vulnerability scanners can cause some serious FPs when used, if you experience a lot of FPs due to this think of adding more filters such as "User Agent" strings and more response codes
 level: high

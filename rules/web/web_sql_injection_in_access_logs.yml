@@ -36,7 +36,9 @@ detection:
         - 'select%20*%20'
         - 'or 1=1#'
         - 'or%201=1#'
-    condition: select_method and keywords
+    filter:
+        sc-status: 404
+    condition: select_method and keywords and not filter
 fields:
     - client_ip
     - vhost
@@ -45,4 +47,5 @@ fields:
 falsepositives:
     - Java scripts and CSS Files
     - User searches in search boxes of the respective website
+    - Internal vulnerability scanners can cause some serious FPs when used, if you experience a lot of FPs due to this think of adding more filters such as "User Agent" strings and more response codes
 level: high
