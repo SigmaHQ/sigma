@@ -1,0 +1,27 @@
+title: MSDT.EXE With SMB Answers File
+id: c577e607-8f6f-4e33-8767-a8f263b326a1
+status: experimental
+description: Detects when "msdt.exe" is executed with an answers file from an SMB share
+references:
+  - https://twitter.com/nao_sec/status/1530196847679401984
+  - https://app.any.run/tasks/713f05d2-fe78-4b9d-a744-f7c133e3fafb/
+  - https://twitter.com/ImpetuousDanny/status/1531650953082023936
+date: 2022/06/09
+author: Matt Ehrnschwender
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  image:
+    - Image|endswith: '\msdt.exe'
+    - OriginalFileName: 'msdt.exe'
+  af_with_smb:
+    CommandLine|contains:
+      - '/af \\\\'
+      - '-af \\\\'
+  condition: image and af_with_smb
+falsepositives:
+  - Unknown
+level: high
+tags:
+  - attack.defense_evasion
