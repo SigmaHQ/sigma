@@ -7,12 +7,12 @@ references:
     - https://twitter.com/vanitasnk/status/1437329511142420483?s=21
 author: Florian Roth, Sittikorn S
 date: 2021/09/10
-modified: 2022/06/16
+modified: 2022/06/17
 logsource:
     product: windows
     category: file_event
 detection:
-    selection:
+    selection_cab:
         Image|endswith: '\winword.exe'
         TargetFilename|endswith: '.cab'
         TargetFilename|contains: '\Windows\INetCache'
@@ -21,7 +21,11 @@ detection:
         TargetFilename|contains|all:
         - '\AppData\Local\Temp\'
         - '.inf'
-    condition: selection or selection_inf
+    filter_legit:
+        TargetFilename|startwith: 'C:\Users\'
+        TargetFilename|contains: 'AppData\Local\Temp'
+        TargetFilename|endwith : '\Content.inf'
+    condition: (selection_cab or selection_inf) and not filter_legit
 fields:
     - TargetFilename
 falsepositives:
