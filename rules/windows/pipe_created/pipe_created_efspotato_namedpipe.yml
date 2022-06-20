@@ -6,6 +6,7 @@ references:
    - https://twitter.com/SBousseaden/status/1429530155291193354?s=20
    - https://github.com/zcgonvh/EfsPotato
 date: 2021/08/23
+modified: 2022/06/20
 author: Florian Roth
 logsource:
    product: windows
@@ -16,7 +17,9 @@ detection:
       PipeName|contains: 
          - '\pipe\'
          - '\pipe\srvsvc'  # more specific version (use only this one of the other causes too many false positives)
-   condition: selection
+   filter:
+      PipeName|contains: '\CtxShare'
+   condition: selection and not filter
 tags:
    - attack.defense_evasion
    - attack.privilege_escalation
