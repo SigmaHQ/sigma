@@ -7,7 +7,7 @@ status: experimental
 description: Detects process access to LSASS memory with suspicious access flags
 author: Florian Roth
 date: 2021/11/22
-modified: 2022/06/03
+modified: 2022/06/20
 references:
     - https://docs.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
@@ -91,6 +91,11 @@ detection:
             - '\thor64.exe'
             - '\thor.exe'
         GrantedAccess: '0x1fffff'
+    filter_windefend2:
+        CallTrace|contains|all:
+            - '|C:\ProgramData\Microsoft\Windows Defender\Definition Updates\{'
+            - '}\mpengine.dll+'
+        GrantedAccess: '0x1418'
     condition: selection and not 1 of filter*
 fields:
     - User
