@@ -20,21 +20,27 @@ logsource:
 detection:
     selection:
         TargetImage|endswith: '\lsass.exe'
-        GrantedAccess|contains: 
+        GrantedAccess|contains:
             #- '0x1fffff' # Too many false positives
             #- '0x01000'  # Too many false positives
             #- '0x1010'   # Too many false positives
             - '0x1038'
             # - '0x40'   # Too many false positives
             #- '0x1400'  # Too many false positives
-            # - '0x1410' # Too many false positives 
+            # - '0x1410' # Too many false positives
             - '0x1438'
             - '0x143a'
         CallTrace|contains:
             - 'dbghelp.dll'
             - 'dbgcore.dll'
             - 'ntdll.dll'
-    condition: selection
+    filter_thor:
+        CallTrace|contains|all:
+            - '|C:\Windows\Temp\asgard2-agent\'
+            - '\thor\thor64.exe+'
+            - '|UNKNOWN('
+        GrantedAccess: '0x103800'
+    condition: selection and not 1 of filter*
 falsepositives:
     - False positives are present when looking for 0x1410. Exclusions may be required.
 level: high

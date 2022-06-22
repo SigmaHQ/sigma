@@ -4,7 +4,7 @@ status: experimental
 description: Detects various anomalies in relation to regsvr32.exe
 author: Florian Roth, oscd.community
 date: 2019/01/16
-modified: 2021/07/18
+modified: 2022/06/20
 references:
     - https://subt0x10.blogspot.de/2017/04/bypass-application-whitelisting-script.html
     - https://app.any.run/tasks/34221348-072d-4b70-93f3-aa71f6ebecad/
@@ -52,7 +52,9 @@ detection:
         CommandLine|contains:
             - '\AppData\Local'
             - 'C:\Users\Public'
-    condition: 1 of selection*
+    filter:
+        CommandLine|contains: '\AppData\Local\Microsoft\Teams'
+    condition: 1 of selection* and not filter
 fields:
     - CommandLine
     - ParentCommandLine

@@ -1,0 +1,26 @@
+title: MSDT.EXE Execution With Suspicious Cab Option
+id: dc4576d4-7467-424f-9eee-fd2b02855fe0
+status: experimental
+description: Detects execution of msdt.exe using the "cab" flag which could indicates suspicious diagcab files with embedded answer files leveraging CVE-2022-30190
+author: Nasreddine Bencherchali
+references:
+    - https://twitter.com/nas_bench/status/1537896324837781506
+date: 2022/06/21
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\msdt.exe'
+        - OriginalFileName: 'msdt.exe'
+    selection_cmd:
+        CommandLine|contains:
+            - ' /cab '
+            - ' -cab '
+    condition: all of selection_*
+falsepositives:
+    - Legitimate usage of ".diagcab" files
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1202
