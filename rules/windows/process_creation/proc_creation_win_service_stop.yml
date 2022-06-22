@@ -4,7 +4,7 @@ description: Detects a windows service to be stopped
 status: experimental
 author: Jakob Weinzettl, oscd.community
 date: 2019/10/23
-modified: 2022/05/27
+modified: 2022/06/20
 tags:
     - attack.impact
     - attack.t1489
@@ -12,18 +12,23 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith:
+    selection_img:
+        - OriginalFileName:
+            - 'sc.exe'
+            - 'net.exe'
+            - 'net1.exe'
+        - Image|endswith:
             - '\sc.exe'
             - '\net.exe'
             - '\net1.exe'
+    selection_cli:
         CommandLine|contains: 'stop'
     filter:
         CommandLine: 'sc  stop KSCWebConsoleMessageQueue' # kaspersky Security Center Web Console double space between sc and stop
         User|contains: # covers many language settings
             - 'AUTHORI'
             - 'AUTORI'
-    condition: selection and not filter
+    condition: all of selection_* and not filter
 fields:
     - ComputerName
     - User
