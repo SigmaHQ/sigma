@@ -1,0 +1,26 @@
+title: Powershell ChromeLoader Browser Hijacker
+id: 27ba3207-dd30-4812-abbf-5d20c57d474e
+status: experimental
+description: Detects PowerShell spawning chrome.exe containing load-extension and AppData\Local in the process command line
+author: Aedan Russell, frack113 (sigma)
+references:
+  - https://redcanary.com/blog/chromeloader/
+  - https://emkc.org/s/RJjuLa
+date: 2022/06/19
+logsource:
+  category: process_creation
+  product: windows
+detection:
+    selection:
+        Image|endswith: '\chrome.exe'
+        ParentImage|endswith: '\powershell.exe'
+        CommandLine|contains|all:
+            - '--load-extension='
+            - '\AppData\Local\'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.persistence
+    - attack.t1176
