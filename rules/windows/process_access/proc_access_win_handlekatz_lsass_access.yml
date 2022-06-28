@@ -13,13 +13,12 @@ detection:
     selection:
         TargetImage|endswith: '\lsass.exe' # Theoretically, can be any benign process holding handle to LSASS
         GrantedAccess: '0x1440' # Only PROCESS_DUP_HANDLE, PROCESS_QUERY_LIMITED_INFORMATION, PROCESS_QUERY_INFORMATION
+    
+    call_trace:  # C:\Windows\SYSTEM32\ntdll.dll+9d234\|UNKNOWN(00000000001C119B)
+        CallTrace|startswith: 'C:\Windows\System32\ntdll.dll+' 
         CallTrace|contains: '|UNKNOWN('
-    filter:
-        CallTrace|contains:
-          - '\KERNEL32.DLL+'
-          - '\KERNELBASE.DLL+'
-          - '\WOW64.DLL+'
-    condition: selection and not filter
+        CallTrace|endswith: ')'
+    condition: selection and call_trace
 falsepositives:
     - Unknown
 level: high
