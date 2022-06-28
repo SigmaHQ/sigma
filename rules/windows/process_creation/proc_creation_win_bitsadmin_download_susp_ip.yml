@@ -1,0 +1,53 @@
+title: Bitsadmin Download File from IP
+id: 99c840f2-2012-46fd-9141-c761987550ef
+status: experimental
+description: Detects usage of bitsadmin downloading a file using an URL that contains an IP
+references:
+    - https://blog.netspi.com/15-ways-to-download-a-file/#bitsadmin
+    - https://isc.sans.edu/diary/22264
+    - https://lolbas-project.github.io/lolbas/Binaries/Bitsadmin/
+tags:
+    - attack.defense_evasion
+    - attack.persistence
+    - attack.t1197
+    - attack.s0190
+    - attack.t1036.003
+date: 2022/06/28
+author: Florian Roth
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\bitsadmin.exe'
+        CommandLine|contains:
+            - ' /transfer '
+            - ' /create '
+            - ' /addfile '
+    selection_extension:
+        CommandLine|contains:
+            - 'http://1'
+            - 'http://2'
+            - 'http://3'
+            - 'http://4'
+            - 'http://5'
+            - 'http://6'
+            - 'http://7'
+            - 'http://8'
+            - 'http://9'
+            - 'https://1'
+            - 'https://2'
+            - 'https://3'
+            - 'https://4'
+            - 'https://5'
+            - 'https://6'
+            - 'https://7'
+            - 'https://8'
+            - 'https://9'
+    condition: all of selection*
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Unknown
+level: high
