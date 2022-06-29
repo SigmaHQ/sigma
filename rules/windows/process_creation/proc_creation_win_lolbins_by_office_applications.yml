@@ -1,6 +1,6 @@
 title: New Lolbin Process by Office Applications
 id: 23daeb52-e6eb-493c-8607-c4f0246cb7d8
-description: This rule will monitor any office apps that spins up a new LOLBin process. This activity is pretty suspicious and should be investigated. 
+description: This rule will monitor any office apps that spins up a new LOLBin process. This activity is pretty suspicious and should be investigated.
 references:
     - https://thedfirreport.com/2021/03/29/sodinokibi-aka-revil-ransomware/
     - https://doublepulsar.com/follina-a-microsoft-office-code-execution-vulnerability-1a47fce5629e
@@ -14,29 +14,28 @@ tags:
     - attack.defense_evasion
 status: experimental
 date: 2021/08/23
-modified: 2022/06/02
+modified: 2022/06/27
 logsource:
-  product: windows
-  category: process_creation
+    product: windows
+    category: process_creation
 detection:
   #useful_information: add more LOLBins to the rules logic of your choice.
-  selection1:
-    Image|endswith:
-      - '\regsvr32.exe'
-      - '\rundll32.exe'
-      - '\msiexec.exe'
-      - '\mshta.exe'
-      - '\verclsid.exe'
-      - '\msdt.exe'
-  selection2:
-    ParentImage|endswith:
-      - '\winword.exe'
-      - '\excel.exe'
-      - '\powerpnt.exe'
-      - '\msaccess.exe'
-      - '\mspub.exe'
-      - '\eqnedt32.exe'
-  condition: selection1 and selection2
+    selection:
+        Image|endswith:
+            - '\regsvr32.exe'
+            - '\rundll32.exe'
+            - '\msiexec.exe'
+            - '\mshta.exe'
+            - '\verclsid.exe'
+            - '\msdt.exe'
+        ParentImage|endswith:
+            - '\winword.exe'
+            - '\excel.exe'
+            - '\powerpnt.exe'
+            - '\msaccess.exe'
+            - '\mspub.exe'
+            - '\eqnedt32.exe'
+    condition: selection
 falsepositives:
-  - Unknown
+    - Unknown
 level: high

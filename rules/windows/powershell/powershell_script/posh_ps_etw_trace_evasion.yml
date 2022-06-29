@@ -1,0 +1,31 @@
+title: Disable of ETW Trace
+id: 115fdba9-f017-42e6-84cf-d5573bf2ddf8
+related:
+    - id: a238b5d0-ce2d-4414-a676-7a531b3d13d6
+      type: derived
+status: experimental
+description: Detects usage of powershell cmdlets to disable or remove ETW trace sessions
+author: Nasreddine Bencherchali
+references:
+    - https://medium.com/palantir/tampering-with-windows-event-tracing-background-offense-and-defense-4be7ac62ac63
+date: 2022/06/28
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection_pwsh_remove:   #Autologger provider removal
+        ScriptBlockText|contains: 'Remove-EtwTraceProvider '
+    selection_pwsh_set:   #Provider “Enable” property modification
+        ScriptBlockText|contains|all:
+            - 'Set-EtwTraceProvider '
+            - '0x11'
+    condition: 1 of selection*
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1070
+    - attack.t1562.006
+    - car.2016-04-002
