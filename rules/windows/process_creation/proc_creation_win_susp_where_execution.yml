@@ -7,9 +7,9 @@ description: |
     internal network resources such as servers, tools/dashboards, or other related infrastructure.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1217/T1217.md
-author: frack113
+author: frack113, Nasreddine Bencherchali
 date: 2021/12/13
-modified: 2022/05/13
+modified: 2022/06/29
 logsource:
     category: process_creation
     product: windows
@@ -19,8 +19,19 @@ detection:
         - OriginalFileName: 'where.exe'
     where_opt:
         CommandLine|contains:
-            - 'Bookmarks'
+            # Firefox Data
             - 'places.sqlite'
+            - 'cookies.sqlite'
+            - 'formhistory.sqlite'
+            - 'logins.json'
+            - 'key4.db'
+            - 'key3.db'
+            - 'sessionstore.jsonlz4'
+            # Chrome Data
+            - 'History'
+            - 'Bookmarks'
+            - 'Cookies'
+            - 'Login Data'
     condition: all of where_*
 falsepositives:
     - Unknown
