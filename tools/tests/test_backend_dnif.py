@@ -19,17 +19,17 @@ if __name__ == "__main__":
                         help="Print only success results about each processed rule.")
     parser.add_argument("--skipped", "-s", default=False, action="store_true",
                         help="Print only skipped results about each processed rule.")
-    parser.add_argument("--error", "-e", default=False, action="store_true",
-                        help="Print only error results about each processed rule.")
+    parser.add_argument("--failed", "-f", default=False, action="store_true",
+                        help="Print only failed results about each processed rule.")
 
     args = parser.parse_args()
 
     success_report = args.success
     skipped_report = args.skipped
-    error_report = args.error
+    failed_report = args.failed
     display_results = False
 
-    if success_report or skipped_report or error_report:
+    if success_report or skipped_report or failed_report:
         display_results = True
 
     skipped = 0
@@ -66,7 +66,6 @@ if __name__ == "__main__":
                         errors += 1
                     else:
                         queries += '\n# {}\n{}\n'.format(rule_path, query)
-                        # print(f'queries: {queries}')
                         results['success'] += "[OK] {}\n".format(rule_path)
                         successes += 1
 
@@ -75,23 +74,23 @@ if __name__ == "__main__":
         "SUCCESSES: {}/{} ({:.2f}%)".format(successes, total, successes / total * 100)
     )
     print("SKIPPED: {}/{} ({:.2f}%)".format(skipped, total, skipped / total * 100))
-    print("ERRORS: {}/{} ({:.2f}%)".format(errors, total, errors / total * 100))
+    print("FAILED: {}/{} ({:.2f}%)".format(errors, total, errors / total * 100))
     print("\n==============================\n")
 
     if display_results:
         print("\n==========Results==========\n")
         if success_report:
             if results['success']:
-                print(f"SUCCESS RESULTS:\n{results['success']}")
+                print(f"SUCCESS RULES:\n{results['success']}")
             else:
-                print(f"SKIPPED RESULTS: No Results to Display")
+                print(f"SUCCESS RULES: No Results to Display")
         elif skipped_report:
             if results['skipped']:
-                print(f"SKIPPED RESULTS:\n{results['skipped']}")
+                print(f"SKIPPED RULES:\n{results['skipped']}")
             else:
-                print(f"SKIPPED RESULTS: No Results to Display")
-        elif error_report:
+                print(f"SKIPPED RULES: No Results to Display")
+        elif failed_report:
             if results['failed']:
-                print(f"ERROR RESULTS:\n{results['failed']}")
+                print(f"FAILED RULES:\n{results['failed']}")
             else:
-                print(f"SKIPPED RESULTS: No Results to Display")
+                print(f"FAILED RULES: No Results to Display")
