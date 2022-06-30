@@ -1,4 +1,4 @@
-title: Suspicious MsiExec Embedding Parent 
+title: Suspicious MsiExec Embedding Parent
 id: 4a2a2c3e-209f-4d01-b513-4155a540b469
 status: experimental
 description: Adversaries may abuse msiexec.exe to proxy the execution of malicious payloads
@@ -6,18 +6,22 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1218.007/T1218.007.md
 author: frack113
 date: 2022/04/16
+modified: 2022/06/30
 logsource:
     product: windows
     category: process_creation
 detection:
-    selection: 
-        Image|endswith: 
+    selection:
+        Image|endswith:
             - '\powershell.exe'
             - '\cmd.exe'
         ParentCommandLine|contains|all:
             - 'MsiExec.exe'
             - '-Embedding '
-    condition: selection
+    filter_splunk_ufw:
+        Image|endswith: ':\Windows\System32\cmd.exe'
+        CommandLine|contains: 'C:\Program Files\SplunkUniversalForwarder\bin\'
+    condition: selection and not 1 of filter*
 falsepositives:
     - Unknown
 level: medium
