@@ -2,11 +2,11 @@ title: Encoded PowerShell Command Line
 id: cdf05894-89e7-4ead-b2b0-0a5f97a90f2f
 status: test
 description: Detects specific combinations of encoding methods in the PowerShell command lines
-author: Teymur Kheirkhabarov (idea), Vasiliy Burov (rule), oscd.community
+author: Teymur Kheirkhabarov (idea), Vasiliy Burov (rule), oscd.community, Tim Shelton
 references:
   - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=65
 date: 2020/10/11
-modified: 2021/11/27
+modified: 2022/06/30
 logsource:
   category: process_creation
   product: windows
@@ -41,13 +41,10 @@ detection:
     CommandLine|contains|all:
       - 'ForEach'
       - 'Xor'
-  selection6:
-    Image|endswith: '\powershell.exe'
-    CommandLine|contains: 'cOnvErTTO-SECUreStRIng'
-  condition: (selection2 and selection3) or selection1 or selection4 or selection5 or selection6
+  condition: (selection2 and selection3) or selection1 or selection4 or selection5
 falsepositives:
   - Unlikely
-level: medium
+level: low
 tags:
   - attack.defense_evasion
   - attack.t1027
