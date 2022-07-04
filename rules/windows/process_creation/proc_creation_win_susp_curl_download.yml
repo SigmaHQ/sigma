@@ -1,12 +1,11 @@
 title: Suspicious Curl Usage on Windows
-id: e218595b-bbe7-4ee5-8a96-f32a24ad3468
-status: test
+id: 9740755c-4e83-43bf-b6ec-bb3422bee84c
+status: experimental
 description: Detects a suspicious curl process start on Windows and outputs the requested document to a local file
 author: Florian Roth
 references:
-    - https://web.archive.org/web/20200128160046/https://twitter.com/reegun21/status/1222093798009790464
-date: 2020/07/03
-modified: 2022/06/11
+    - https://twitter.com/max_mal_/status/1542461200797163522
+date: 2022/07/05
 logsource:
     category: process_creation
     product: windows
@@ -15,17 +14,25 @@ detection:
         - Image|endswith: '\curl.exe'
         - Product: 'The curl executable'
     selection_cli:
-        CommandLine|contains:
-            - ' -O'
-            - '--remote-name'
+        - CommandLine|contains:
+            - '\AppData\'
+            - '\Users\Public\'
+            - '\Temp'
+        - CommandLine|endswith:
+            - '.jpg'
+            - '.jpeg'
+            - '.png'
+            - '.gif'
+            - '.tmp'
+            - '.temp'
+            - '.txt'
     condition: all of selection*
 fields:
     - CommandLine
     - ParentCommandLine
 falsepositives:
-    - Scripts created by developers and admins
-    - Administrative activity
-level: medium
+    - Unknown
+level: high
 tags:
     - attack.command_and_control
     - attack.t1105
