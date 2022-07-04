@@ -5,7 +5,7 @@ description: Detects process access LSASS memory which is typical for credential
 author: Florian Roth, Roberto Rodriguez, Dimitrios Slamaris, Mark Russinovich, Thomas Patzke, Teymur Kheirkhabarov, Sherif Eldeeb, James Dickenson, Aleksey Potapov,
     oscd.community (update)
 date: 2017/02/16
-modified: 2022/06/22
+modified: 2022/06/24
 references:
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
     - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
@@ -43,6 +43,12 @@ detection:
     filter2:
         SourceImage|startswith: 'C:\ProgramData\Microsoft\Windows Defender\'
         SourceImage|endswith: '\MsMpEng.exe'
+    filter2b:
+        SourceImage: 'C:\Windows\System32\svchost.exe'
+        CallTrace|contains|all:
+            - '|C:\ProgramData\Microsoft\Windows Defender\Definition Updates\{'
+            - '}\mpengine.dll+'
+        GrantedAccess: '0x1418'
     filter3:
         SourceImage|startswith: 'C:\Program Files\WindowsApps\'
         SourceImage|endswith: '\GamingServices.exe'

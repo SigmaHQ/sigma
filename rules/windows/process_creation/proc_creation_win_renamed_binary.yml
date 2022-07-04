@@ -8,30 +8,30 @@ references:
   - https://mgreen27.github.io/posts/2019/05/12/BinaryRename.html
   - https://mgreen27.github.io/posts/2019/05/29/BinaryRename2.html
 date: 2019/06/15
-modified: 2021/12/01
+modified: 2022/06/28
 logsource:
   category: process_creation
   product: windows
 detection:
   selection:
     OriginalFileName:
-      - 'cmd.exe'
+      - 'Cmd.Exe'
       - 'CONHOST.EXE'
-      - 'powershell.exe'
-      - 'powershell_ise.exe'
+      - 'PowerShell.EXE'
+      - 'powershell_ise.EXE'
       - 'psexec.exe'
       - 'psexec.c'        # old versions of psexec (2016 seen)
       - 'cscript.exe'
       - 'wscript.exe'
-      - 'mshta.exe'
-      - 'regsvr32.exe'
+      - 'MSHTA.EXE'
+      - 'REGSVR32.EXE'
       - 'wmic.exe'
-      - 'certutil.exe'
-      - 'rundll32.exe'
-      - 'cmstp.exe'
+      - 'CertUtil.exe'
+      - 'RUNDLL32.EXE'
+      - 'CMSTP.EXE'
       - 'msiexec.exe'
       - '7z.exe'
-      - 'winrar.exe'
+      - 'WinRAR.exe'
       - 'wevtutil.exe'
       - 'net.exe'
       - 'net1.exe'
@@ -48,13 +48,13 @@ detection:
       - '\wscript.exe'
       - '\mshta.exe'
       - '\regsvr32.exe'
-      - '\wmic.exe'
+      - '\WMIC.exe'
       - '\certutil.exe'
       - '\rundll32.exe'
       - '\cmstp.exe'
       - '\msiexec.exe'
       - '\7z.exe'
-      - '\winrar.exe'
+      - '\WinRAR.exe'
       - '\wevtutil.exe'
       - '\net.exe'
       - '\net1.exe'
@@ -62,6 +62,7 @@ detection:
   condition: selection and not filter
 falsepositives:
   - Custom applications use renamed binaries adding slight change to binary name. Typically this is easy to spot and add to whitelist
+  - PsExec installed via Windows Store doesn't contain original filename field (False negative)
 level: medium
 tags:
   - attack.defense_evasion
