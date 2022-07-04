@@ -1,0 +1,23 @@
+title: Disabled Windows Defender Eventlog
+id: fcddca7c-b9c0-4ddf-98da-e1e2d18b0157
+description: Detects the disabling of the Windows Defender eventlog as seen in relation to Lockbit 3.0 infections
+status: experimental
+date: 2022/07/04
+author: Florian Roth
+references:
+    - https://twitter.com/WhichbufferArda/status/1543900539280293889/photo/2
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|contains: '\Microsoft\Windows\CurrentVersion\WINEVT\Channels\Microsoft-Windows-Windows Defender/Operational\Enabled'
+        Details: 'DWORD (0x00000000)'
+    condition: selection
+falsepositives:
+    - Other Antivirus software installations could cause Windows to disable that eventlog (unknown)
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
