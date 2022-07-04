@@ -15,10 +15,17 @@ detection:
         TargetObject|startswith: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\
         TargetObject|endswith: \Enabled 
         Details: DWORD (0x00000000)
-    condition: selection
+    filter:
+        TargetObject|contains:
+            - \WordChannel\
+            - \General Logging\
+            - \OfficeChannel\
+            - \OfficeDebugChannel\
+            - \AirSpaceChannel\
+    condition: selection and not filter
 falsepositives:
     - Unknown
-level: high
+level: medium
 tags:
   - attack.persistence
   - attack.t1547.010
