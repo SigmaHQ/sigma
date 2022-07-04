@@ -1,0 +1,24 @@
+title: Disable Winevt Event Logging
+id: 2f78da12-f7c7-430b-8b19-a28f269b77a3
+description: Disable Winevt Event logging by registry
+author: frack113
+date: 2022/07/04
+status: experimental
+references:
+    - https://twitter.com/WhichbufferArda/status/1543900539280293889
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|startswith: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\
+        TargetObject|endswith: \Enabled 
+        Details: DWORD (0x00000000)
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
+tags:
+  - attack.persistence
+  - attack.t1547.010
