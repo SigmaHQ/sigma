@@ -1,0 +1,27 @@
+title: Disable Winevt Event Logging Via Registry
+id: 2f78da12-f7c7-430b-8b19-a28f269b77a3
+description: Detects tempering with the "Enabled" registry key in order to disable windows logging of a windows event channel
+author: frack113, Nasreddine Bencherchali
+date: 2022/07/04
+status: experimental
+references:
+    - https://twitter.com/WhichbufferArda/status/1543900539280293889
+    - https://github.com/DebugPrivilege/CPP/blob/main/Windows%20Defender/RestoreDefenderConfig.cpp
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|startswith: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\
+        TargetObject|endswith: \Enabled
+        Details: DWORD (0x00000000)
+    filter:
+        Image|endswith: '\Windows\system32\wevtutil.exe' #FP generated during installation of manifests via wevtutil
+    condition: selection and not filter
+falsepositives:
+    - Legitimate administrators disabling specific event log for troubleshooting
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1562.002
