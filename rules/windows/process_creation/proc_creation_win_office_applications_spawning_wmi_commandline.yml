@@ -15,21 +15,19 @@ status: experimental
 date: 2021/08/23
 modified: 2022/06/02
 logsource:
-  product: windows
-  category: process_creation
+    product: windows
+    category: process_creation
 detection:
-  #useful_information: Add more office applications to the rule logic of choice
-  selection1:
-    - Image: '\wbem\WMIC.exe'
-    - CommandLine|contains: 'wmic '
-    - OriginalFileName: 'wmic.exe'
-    - Description: 'WMI Commandline Utility'
-  selection2:
-    ParentImage|endswith:
-      - '\winword.exe'
-      - '\excel.exe'
-      - '\powerpnt.exe'
-  condition: selection1 and selection2
+    #useful_information: Add more office applications to the rule logic of choice
+    selection_img:
+        - Image|endswith: '\wbem\WMIC.exe'
+        - OriginalFileName: 'wmic.exe'
+    selection_parent:
+        ParentImage|endswith:
+            - '\winword.exe'
+            - '\excel.exe'
+            - '\powerpnt.exe'
+    condition: all of selection_*
 falsepositives:
-  - Unknown
+    - Unknown
 level: high
