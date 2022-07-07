@@ -4,7 +4,7 @@ status: test
 description: Detects the creation of an executable with a system process name in a suspicious folder
 author: Sander Wiebing, Tim Shelton
 date: 2020/05/26
-modified: 2022/02/22
+modified: 2022/07/06
 tags:
     - attack.defense_evasion
     - attack.t1036.005
@@ -56,6 +56,10 @@ detection:
     filter3:
         TargetFilename|endswith: '\RuntimeBroker.exe'
         Image: 'C:\Windows\system32\wbengine.exe'
+    filter4:
+        TargetFilename|endswith: '\spoolsv.exe'
+        TargetFilename|startswith: 'C:\Windows\SoftwareDistribution\Download\'
+        Image|endswith: ':\Windows\system32\svchost.exe'
     condition: selection and not 1 of filter*
 fields:
     - Image
