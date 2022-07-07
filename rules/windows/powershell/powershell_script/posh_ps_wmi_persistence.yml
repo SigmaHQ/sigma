@@ -4,7 +4,7 @@ status: experimental
 author: frack113
 date: 2021/08/19
 modified: 2021/10/16
-description: Adversaries may establish persistence and elevate privileges by executing malicious content triggered by a Windows Management Instrumentation (WMI) event subscription. 
+description: Adversaries may establish persistence and elevate privileges by executing malicious content triggered by a Windows Management Instrumentation (WMI) event subscription.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1546.003/T1546.003.md
     - https://github.com/EmpireProject/Empire/blob/master/data/module_source/persistence/Persistence.psm1#L545
@@ -14,19 +14,19 @@ tags:
 logsource:
     product: windows
     category: ps_script
-    definition: EnableScriptBlockLogging must be set to enable
+    definition: Script block logging must be enabled
 detection:
     selection_ioc:
-        - ScriptBlockText|contains|all: 
+        - ScriptBlockText|contains|all:
             - 'New-CimInstance '
             - '-Namespace root/subscription '
             - '-ClassName __EventFilter '
-            - '-Property ' #is a variable name 
+            - '-Property ' #is a variable name
         - ScriptBlockText|contains|all:
             - 'New-CimInstance '
             - '-Namespace root/subscription '
             - '-ClassName CommandLineEventConsumer '
-            - '-Property ' #is a variable name 
+            - '-Property ' #is a variable name
     condition: selection_ioc
 falsepositives:
     - Unknown
