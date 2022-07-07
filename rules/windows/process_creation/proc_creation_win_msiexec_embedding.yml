@@ -6,7 +6,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1218.007/T1218.007.md
 author: frack113
 date: 2022/04/16
-modified: 2022/06/30
+modified: 2022/07/07
 logsource:
     product: windows
     category: process_creation
@@ -21,6 +21,11 @@ detection:
     filter_splunk_ufw:
         Image|endswith: ':\Windows\System32\cmd.exe'
         CommandLine|contains: 'C:\Program Files\SplunkUniversalForwarder\bin\'
+    filter_vs:
+        - CommandLine|contains: '\DismFoDInstall.cmd'
+        - ParentCommandLine|contains|all:
+            - '\MsiExec.exe -Embedding '
+            - 'Global\MSI0000'
     condition: selection and not 1 of filter*
 falsepositives:
     - Unknown
