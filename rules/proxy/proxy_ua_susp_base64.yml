@@ -1,0 +1,26 @@
+title: Suspicious User Agent
+id: 894a8613-cf12-48b3-8e57-9085f54aa0c3
+status: experimental
+description: Detects suspicious User Agent strings that end with an equal sign, which can be a sign of base64 encoded values used as User Agent string
+author: Florian Roth
+date: 2022/07/08
+references:
+    - https://blogs.jpcert.or.jp/en/2022/07/yamabot.html
+logsource:
+    category: proxy
+detection:
+    selection:
+        c-useragent|endswith: 
+            - '='
+            - 'TW96aWxsY'  # base64 encoded Mozilla/ as used by YamaBot
+    condition: selection
+fields:
+    - ClientIP
+    - c-uri
+    - c-useragent
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.command_and_control
+    - attack.t1071.001
