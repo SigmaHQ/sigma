@@ -6,14 +6,13 @@ author: Daniil Yugoslavskiy, oscd.community
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1518.001/T1518.001.md
 date: 2020/10/19
-modified: 2021/11/27
+modified: 2022/07/11
 logsource:
     category: process_creation
     product: linux
 detection:
-    grep_execution:
+    selection:
         Image|endswith: '/grep'
-    security_services_and_processes:
         CommandLine|contains:
             - 'nessusd'        # nessus vulnerability scanner
             - 'td-agent'       # fluentd log shipper
@@ -23,7 +22,7 @@ detection:
             - 'osqueryd'       # facebook osquery
             - 'cbagentd'       # carbon black
             - 'falcond'        # crowdstrike falcon
-    condition: grep_execution and security_services_and_processes
+    condition: selection
 falsepositives:
     - Legitimate activities
 level: low
