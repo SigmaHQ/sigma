@@ -5,7 +5,7 @@ author: frack113
 date: 2021/07/30
 description: Once established within a system or network, an adversary may use automated techniques for collecting internal data.
 references:
-    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1119/T1119.md
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1119/T1119.md
 tags:
     - attack.collection
     - attack.t1119
@@ -14,14 +14,18 @@ logsource:
     category: process_creation
 detection:
     selection_image:
-        Image|endswith:
+        - Image|endswith:
             - '\tree.com'
             - '\WMIC.exe'
             - '\doskey.exe'
             - '\sc.exe'
+        - OriginalFileName:
+            - 'wmic.exe'
+            - 'DOSKEY.EXE'
+            - 'sc.exe'
     selection_redirect:
         ParentCommandLine|contains: ' > %TEMP%\'
-    condition: selection_image and selection_redirect
+    condition: all of selection*
 falsepositives:
     - Unknown
 level: medium

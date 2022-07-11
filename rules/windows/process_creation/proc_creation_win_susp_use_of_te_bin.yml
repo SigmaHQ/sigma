@@ -4,24 +4,22 @@ status: test
 description: Windows Test Authoring and Execution Framework (TAEF) framework allows you to run automation by executing tests files written on different languages (C, C#, Microsoft COM Scripting interfaces). Adversaries may execute malicious code (such as WSC file with VBScript, dll and so on) directly by running te.exe
 author: 'Agro (@agro_sev) oscd.community'
 references:
-  - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OtherMSBinaries/Te.yml
-  - https://twitter.com/pabraeken/status/993298228840992768
-  - https://docs.microsoft.com/en-us/windows-hardware/drivers/taef/
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Te/
+    - https://twitter.com/pabraeken/status/993298228840992768
+    - https://docs.microsoft.com/en-us/windows-hardware/drivers/taef/
 date: 2020/10/13
 modified: 2021/11/27
 logsource:
-  category: process_creation
-  product: windows
+    category: process_creation
+    product: windows
 detection:
-  selection1:
-    Image|endswith: '\te.exe'
-  selection2:
-    ParentImage|endswith: '\te.exe'
-  selection3:
-    OriginalFileName: '\te.exe'
-  condition: selection1 or selection2 or selection3
+    selection:
+        - Image|endswith: '\te.exe'
+        - ParentImage|endswith: '\te.exe'
+        - OriginalFileName: '\te.exe'
+    condition: selection
 falsepositives:
-  - It's not an uncommon to use te.exe directly to execute legal TAEF tests
+    - It's not an uncommon to use te.exe directly to execute legal TAEF tests
 level: low
 tags:
-  - attack.t1218
+    - attack.t1218
