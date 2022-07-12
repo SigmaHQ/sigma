@@ -1,0 +1,21 @@
+title: MSSQL XPCmdshell Option Change
+id: d08dd86f-681e-4a00-a92c-1db218754417
+status: experimental
+description: Detects when the MSSQL "xp_cmdshell" stored procedure setting is changed
+author: Nasreddine Bencherchali
+date: 2022/07/12
+logsource:
+    product: windows
+    service: application
+detection:
+    selection:
+        Provider_Name: 'MSSQLSERVER'
+        EventID: 15457
+        Data|contains: 'xp_cmdshell'
+    condition: selection
+falsepositives:
+    - Legitimate enable/disable of the setting
+    - Note that since the event contain the change for both values. This means that this will trigger on both enable and disable
+level: high
+tags:
+    - attack.execution
