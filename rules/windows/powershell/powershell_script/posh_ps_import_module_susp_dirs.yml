@@ -1,0 +1,37 @@
+title: Import PowerShell Modules From Suspicious Directories
+id: 21f9162c-5f5d-4b01-89a8-b705bd7d10ab
+status: experimental
+description: Detects powershell scripts that import modules from suspicious directories
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1003.002/T1003.002.md
+author: Nasreddine Bencherchali
+date: 2022/07/07
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection_import:
+        ScriptBlockText|contains:
+            - 'Import-Module "$Env:Temp\'
+            - Import-Module '$Env:Temp\
+            - 'Import-Module $Env:Temp\'
+            - 'Import-Module "$Env:Appdata\'
+            - Import-Module '$Env:Appdata\
+            - 'Import-Module $Env:Appdata\'
+            - 'Import-Module C:\Users\Public\'
+            # Import-Module alias is "ipmo"
+            - 'ipmo "$Env:Temp\'
+            - ipmo '$Env:Temp\
+            - 'ipmo $Env:Temp\'
+            - 'ipmo "$Env:Appdata\'
+            - ipmo '$Env:Appdata\
+            - 'ipmo $Env:Appdata\'
+            - 'ipmo C:\Users\Public\'
+    condition: selection_import
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.execution
+    - attack.t1059.001
