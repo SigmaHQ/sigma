@@ -6,18 +6,20 @@ references:
     - https://msrc.microsoft.com/update-guide/vulnerability/CVE-2021-42321
 author: 'Florian Roth, @testanull'
 date: 2021/11/18
+modified: 2022/07/12
 logsource:
     product: windows
     service: msexchange-management
+    # warning: The 'data' field used in the detection section is the container for the event data as a whole. You may have to adapt the rule for your backend accordingly
 detection:
     selection:
         EventID: 
             - 6
             - 8
-    keywords:
-        - 'Cmdlet failed. Cmdlet Get-App, '
-        - 'Task Get-App throwing unhandled exception: System.InvalidCastException:'
-    condition: selection and keywords
+        Data|contains:
+            - 'Cmdlet failed. Cmdlet Get-App, '
+            - 'Task Get-App throwing unhandled exception: System.InvalidCastException:'
+    condition: selection
 falsepositives:
     - Unknown, please report false positives via https://github.com/SigmaHQ/sigma/issues
 level: high

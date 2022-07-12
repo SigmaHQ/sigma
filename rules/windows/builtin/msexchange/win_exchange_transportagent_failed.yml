@@ -8,16 +8,18 @@ tags:
     - attack.persistence  
     - attack.t1505.002    
 author: Tobias Michalski  
-date: 2021/06/08  
+date: 2021/06/08
+modified: 2022/07/12
 logsource:        
     service: msexchange-management
     product: windows
+    # warning: The 'data' field used in the detection section is the container for the event data as a whole. You may have to adapt the rule for your backend accordingly
 detection:
     selection:
         EventID: 6 
-    keywords:
-        - 'Install-TransportAgent'
-    condition: selection and keywords
+        Data|contains:
+            - 'Install-TransportAgent'
+    condition: selection
 fields:
     - AssemblyPath
 falsepositives:
