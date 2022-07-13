@@ -1,0 +1,30 @@
+title: Hiding Local User Accounts
+id: 59e3a079-4245-4203-9d5c-f11290c5ba24
+description: Detects the use reg.exe to hide users from listed in the logon screen. This is possible by changing the registry key value to 0 for a specific user.
+status: experimental
+references:
+    - https://thedfirreport.com/2022/07/11/select-xmrig-from-sqlserver/
+author: '@Kostastsale, @TheDFIRReport'
+date: 2022/07/11
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        ParentImage|endswith:
+          - '\cmd.exe'
+          - '\powershell.exe'
+        Image|endswith: '\reg.exe'
+        CommandLine|contains|all:
+          - 'HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\SpecialAccounts\Userlist' # remove HKLM - enough?
+          - ' add '
+          - ' /t '
+          - 'REG_DWORD'
+          - ' /v '
+          - ' /d 0'
+    condition: selection1
+falsepositives:
+    - System administrator activities
+level: medium
+tags:
+    - attack.t1564.002
