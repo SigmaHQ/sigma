@@ -1,5 +1,6 @@
 title: OMIGOD HTTP No Authentication RCE
 id: ab6b1a39-a9ee-4ab4-b075-e83acf6e346b
+status: stable
 description: Detects the exploitation of OMIGOD (CVE-2021-38647) which allows remote execute (RCE) commands as root with just a single unauthenticated HTTP request. Verify, successful, exploitation by viewing the HTTP client (request) body to see what was passed to the server (using PCAP). Within the client body is where the code execution would occur. Additionally, check the endpoint logs to see if suspicious commands or activity occurred within the timeframe of this HTTP request.
 author: Nate Guagenti (neu5ron)
 date: 2021/09/20
@@ -20,7 +21,7 @@ tags:
 logsource:
     product: zeek
     service: http
-    definition: Enable the builtin Zeek script that logs all HTTP header names by adding "@load policy/protocols/http/header-names" to your local.zeek config file. The script can be seen here for reference https://github.com/zeek/zeek/blob/master/scripts/policy/protocols/http/header-names.zeek 
+    definition: Enable the builtin Zeek script that logs all HTTP header names by adding "@load policy/protocols/http/header-names" to your local.zeek config file. The script can be seen here for reference https://github.com/zeek/zeek/blob/d957f883df242ef159cfd846884e673addeea7a5/scripts/policy/protocols/http/header-names.zeek
 detection:
     selection:
         status_code: 200
@@ -37,10 +38,6 @@ detection:
     #        -  1270
     condition: selection and not auth_header and not too_small_http_client_body
     #condition: selection and winrm_ports and not auth_header and not too_small_http_client_body # Enable this to only perform search on default WinRM ports, however those ports are sometimes changed and therefore this is disabled by default to give a broader coverage of this rule
-falsepositives:
-    - Exploits that were attempted but unsuccessful. 
-    - Scanning attempts with the abnormal use of the HTTP POST method with no indication of code execution within the HTTP Client (Request) body. An example would be vulnerability scanners trying to identify unpatched versions while not actually exploiting the vulnerability. See description for investigation tips.
-level: high
 fields:
     - id.orig_h
     - id.resp_h
@@ -51,4 +48,7 @@ fields:
     - request_body_len
     - response_body_len
     - user_agent
-status: stable
+falsepositives:
+    - Exploits that were attempted but unsuccessful.
+    - Scanning attempts with the abnormal use of the HTTP POST method with no indication of code execution within the HTTP Client (Request) body. An example would be vulnerability scanners trying to identify unpatched versions while not actually exploiting the vulnerability. See description for investigation tips.
+level: high

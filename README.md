@@ -73,9 +73,9 @@ Florian wrote a short [rule creation tutorial](https://www.nextron-systems.com/2
 
 ## Troubles / Troubleshooting / Help
 
-If you need help for a specific supported backend you can use e.g. `sigmac --backend-help elastalert-dsl`. More details on the usage of `sigmac` can be found in the dedicated [README.md](https://github.com/Neo23x0/sigma/blob/master/tools/README.md).
+If you need help for a specific supported backend you can use e.g. `sigmac --backend-help elastalert-dsl`. More details on the usage of `sigmac` can be found in the dedicated [README.md](https://github.com/SigmaHQ/sigma/blob/master/tools/README.md).
 
-Be sure to checkout the [guidance on backend specific settings](https://github.com/Neo23x0/sigma/blob/master/tools/README.md#choosing-the-right-sigmac) for `sigmac`.
+Be sure to checkout the [guidance on backend specific settings](https://github.com/SigmaHQ/sigma/blob/master/tools/README.md#choosing-the-right-sigmac) for `sigmac`.
 
 # Examples
 
@@ -366,7 +366,7 @@ The content of this repository is released under the following licenses:
 
 * The toolchain (everything under `tools/`) is licensed under the [GNU Lesser General Public License](https://www.gnu.org/licenses/lgpl-3.0.en.html)
 * The [Sigma specification](https://github.com/Neo23x0/sigma/wiki) is public domain
-* The rules contained in the `rules/` directory are released under the [Detection Rule License (DRL) 1.1](https://github.com/Neo23x0/sigma/blob/master/LICENSE.Detection.Rules.md)
+* The rules contained in the `rules/` directory are released under the [Detection Rule License (DRL) 1.1](https://github.com/SigmaHQ/sigma/blob/master/LICENSE.Detection.Rules.md)
 
 # Credits
 

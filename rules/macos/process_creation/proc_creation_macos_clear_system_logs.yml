@@ -4,22 +4,22 @@ status: experimental
 description: Detects deletion of local audit logs
 author: remotephone, oscd.community
 date: 2020/10/11
-modified: 2021/11/11
+modified: 2022/07/07
 references:
-    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1070.002/T1070.002.md
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.002/T1070.002.md
 logsource:
     product: macos
     category: process_creation
 detection:
     selection1:
         Image|endswith: '/rm'
-    selection2:
+    selection_cli_1:
         CommandLine|contains: '/var/log'
-    selection3:
+    selection_cli_2:
         CommandLine|contains|all:
             - '/Users/'
             - '/Library/Logs/'
-    condition: selection1 and (selection2 or selection3)
+    condition: selection1 and 1 of selection_cli*
 falsepositives:
     - Legitimate administration activities
 level: medium

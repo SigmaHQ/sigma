@@ -1,12 +1,12 @@
 title: Service Binary in Uncommon Folder
 id: 277dc340-0540-42e7-8efb-5ff460045e07
-description: Detect the creation of a service with a service binary located in a uncommon directory 
+description: Detect the creation of a service with a service binary located in a uncommon directory
 status: experimental
 date: 2022/05/02
 modified: 2022/05/04
 author: Florian Roth
 references:
-    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1562.001/T1562.001.md
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
 logsource:
     category: registry_set
     product: windows
@@ -15,10 +15,10 @@ detection:
         EventType: SetValue
         TargetObject|startswith: 'HKLM\System\CurrentControlSet\Services\'
         TargetObject|endswith: '\Start'
-        Image|contains: 
+        Image|contains:
             - '\AppData\Local\'
             - '\AppData\Roaming\'
-        Details: 
+        Details:
             - 'DWORD (0x00000000)'  # boot
             - 'DWORD (0x00000001)'  # System
             - 'DWORD (0x00000002)'  # Automatic
@@ -31,10 +31,10 @@ detection:
             - '\AppData\Local\'
             - '\AppData\Roaming\'
     filter:
-        - Image|contains: 
+        - Image|contains:
             - '\AppData\Roaming\Zoom'
             - '\AppData\Local\Zoom'
-        - Details|contains: 
+        - Details|contains:
             - '\AppData\Roaming\Zoom'
             - '\AppData\Local\Zoom'
     condition: 1 of selection_* and not filter
@@ -43,4 +43,4 @@ falsepositives:
 level: medium
 tags:
     - attack.defense_evasion
-    - attack.t1112 
+    - attack.t1112

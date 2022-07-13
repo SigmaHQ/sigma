@@ -5,7 +5,7 @@ status: experimental
 references:
     - https://symantec-enterprise-blogs.security.com/blogs/threat-intelligence/solarwinds-raindrop-malware
     - https://www.microsoft.com/security/blog/2020/12/18/analyzing-solorigate-the-compromised-dll-file-that-started-a-sophisticated-cyberattack-and-how-microsoft-defender-helps-protect/
-    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1047/T1047.md#atomic-test-7---create-a-process-using-wmi-query-and-an-encoded-command
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1047/T1047.md#atomic-test-7---create-a-process-using-wmi-query-and-an-encoded-command
 tags:
     - attack.execution
     - attack.t1059.001
@@ -19,14 +19,14 @@ logsource:
     product: windows
 detection:
     selection1:
-        CommandLine|contains|all: 
+        CommandLine|contains|all:
             - 'Invoke-WMIMethod win32_process -name create -argumentlist'
             - 'rundll32 c:\windows'
     selection2:
-         CommandLine|contains|all: 
+         CommandLine|contains|all:
             - 'wmic /node:'
-            - 'process call create "rundll32 c:\windows'   
-    condition: selection1 or selection2
+            - 'process call create "rundll32 c:\windows'
+    condition: 1 of selection*
 falsepositives:
-    - Unknown, unlikely, but possible
+    - Unlikely
 level: critical
