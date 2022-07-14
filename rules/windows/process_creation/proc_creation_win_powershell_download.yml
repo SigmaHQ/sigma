@@ -4,27 +4,29 @@ status: test
 description: Detects a Powershell process that contains download commands in its command line string
 author: Florian Roth, oscd.community, Jonhnathan Ribeiro
 date: 2019/01/16
-modified: 2021/11/27
+modified: 2022/07/14
 logsource:
-  category: process_creation
-  product: windows
+    category: process_creation
+    product: windows
 detection:
-  selection:
-    Image|endswith: '\powershell.exe'
-    CommandLine|contains|all:
-      - 'new-object'
-      - 'net.webclient).'
-      - 'download'
-    CommandLine|contains:
-      - 'string('
-      - 'file('
-  condition: selection
+    selection:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        CommandLine|contains|all:
+            - 'new-object'
+            - 'net.webclient).'
+            - 'download'
+        CommandLine|contains:
+            - 'string('
+            - 'file('
+    condition: selection
 fields:
-  - CommandLine
-  - ParentCommandLine
+    - CommandLine
+    - ParentCommandLine
 falsepositives:
-  - Unknown
+    - Unknown
 level: medium
 tags:
-  - attack.execution
-  - attack.t1059.001
+    - attack.execution
+    - attack.t1059.001

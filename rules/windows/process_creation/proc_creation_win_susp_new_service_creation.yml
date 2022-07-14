@@ -1,28 +1,35 @@
-title: Suspicious Service Path Modification
-id: 138d3531-8793-4f50-a2cd-f291b2863d78
-status: test
-description: Detects service path modification via the "sc" binary to a suspicious command or path
-author: Victor Sergeev, oscd.community, Nasreddine Bencherchali (update)
+title: Suspicious New Service Creation
+id: 17a1be64-8d88-40bf-b5ff-a4f7a50ebcc8
+related:
+    - id: 7fe71fc9-de3b-432a-8d57-8c809efc10ab
+      type: derived
+status: experimental
+description: Detects creation of a new service via "sc" command or the powershell "new-service" cmdlet with suspicious binary paths
+author: Nasreddine Bencherchali
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1543.003/T1543.003.md
-date: 2019/10/21
-modified: 2022/07/14
+date: 2022/07/14
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection_sc:
         Image|endswith: '\sc.exe'
         CommandLine|contains|all:
-            - 'config'
-            - 'binPath'
+            - 'create'
+            - 'binPath='
+    selection_posh:
+        CommandLine|contains|all:
+            - 'New-Service'
+            - '-BinaryPathName'
+    susp_binpath:
         CommandLine|contains:
             # Add more suspicious commands or binaries
             - 'powershell'
-            - 'cmd'
             - 'mshta'
             - 'wscript'
             - 'cscript'
+            - 'cmd.exe /c'
             - 'rundll32'
             # Add more suspicious paths
             - 'C:\Users\Public'
@@ -31,10 +38,7 @@ detection:
             - '\Microsoft\Windows\Start Menu\Programs\Startup\'
             - 'C:\Windows\TEMP\'
             - '\AppData\Local\Temp'
-    condition: selection
-fields:
-    - CommandLine
-    - ParentCommandLine
+    condition: 1 of selection* and susp_binpath
 falsepositives:
     - Unlikely
 level: high
