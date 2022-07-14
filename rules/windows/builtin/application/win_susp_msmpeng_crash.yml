@@ -7,7 +7,7 @@ tags:
     - attack.t1562.001
 status: experimental
 date: 2017/05/09
-modified: 2021/10/13
+modified: 2022/07/12
 references:
     - https://bugs.chromium.org/p/project-zero/issues/detail?id=1252&desc=5
     - https://technet.microsoft.com/en-us/library/security/4022344
@@ -15,6 +15,7 @@ author: Florian Roth
 logsource:
     product: windows
     service: application
+    # warning: The 'data' field used in the detection section is the container for the event data as a whole. You may have to adapt the rule for your backend accordingly
 detection:
     selection1:
         Provider_Name: 'Application Error'
@@ -22,10 +23,11 @@ detection:
     selection2:
         Provider_Name: 'Windows Error Reporting'
         EventID: 1001
-    keywords:
-        - 'MsMpEng.exe'
-        - 'mpengine.dll'
-    condition: 1 of selection* and all of keywords
+    malware_engine:
+        Data|contains|all:
+            - 'MsMpEng.exe'
+            - 'mpengine.dll'
+    condition: 1 of selection* and malware_engine
 falsepositives:
     - MsMpEng.exe can crash when C:\ is full
 level: high
