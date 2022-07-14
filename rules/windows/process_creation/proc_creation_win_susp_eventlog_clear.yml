@@ -7,7 +7,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.001/T1070.001.md
     - https://eqllib.readthedocs.io/en/latest/analytics/5b223758-07d6-4100-9e11-238cfdd0fe97.html
 date: 2019/09/26
-modified: 2022/07/11
+modified: 2022/07/14
 logsource:
     category: process_creation
     product: windows
@@ -20,7 +20,9 @@ detection:
             - 'set-log'         # modifies config of specified log. could be uset to set it to a tiny size
             - ' sl '              # short version of 'set-log'
     selection_other_ps:
-        Image|endswith: '\powershell.exe'
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
         CommandLine|contains:
             - 'Clear-EventLog'
             - 'Remove-EventLog'

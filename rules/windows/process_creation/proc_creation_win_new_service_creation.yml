@@ -6,7 +6,7 @@ author: Timur Zinniatullin, Daniil Yugoslavskiy, oscd.community
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1543.003/T1543.003.md
 date: 2019/10/21
-modified: 2021/11/27
+modified: 2022/07/14
 logsource:
     category: process_creation
     product: windows
@@ -15,10 +15,11 @@ detection:
         Image|endswith: '\sc.exe'
         CommandLine|contains|all:
             - 'create'
-            - 'binpath'
+            - 'binPath'
     selection_posh:
-        Image|endswith: '\powershell.exe'
-        CommandLine|contains: 'new-service'
+        CommandLine|contains|all:
+            - 'New-Service'
+            - '-BinaryPathName'
     condition: 1 of selection*
 falsepositives:
     - Legitimate administrator or user creates a service for legitimate reasons.
