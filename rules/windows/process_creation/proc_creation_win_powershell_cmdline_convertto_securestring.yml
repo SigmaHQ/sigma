@@ -1,0 +1,27 @@
+title: Encoded PowerShell Command Line Usage of ConvertTo-SecureString
+id: 74403157-20f5-415d-89a7-c505779585cf
+status: test
+description: Detects specific encoding method of cOnvErTTO-SECUreStRIng in the PowerShell command lines
+author: Teymur Kheirkhabarov (idea), Vasiliy Burov (rule), oscd.community, Tim Shelton
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=65
+date: 2020/10/11
+modified: 2022/07/14
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        CommandLine|contains: 'ConvertTo-SecureString'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001

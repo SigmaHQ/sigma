@@ -7,14 +7,18 @@ references:
   - https://github.com/OTRF/detection-hackathon-apt29/issues/14
   - https://threathunterplaybook.com/evals/apt29/detections/6.B.1_6392C9F1-D975-4F75-8A70-433DEDD7F622.html
 date: 2020/05/02
-modified: 2021/11/27
+modified: 2022/07/07
 logsource:
   product: windows
   category: file_event
 detection:
   selection:
     TargetFilename|endswith: '.pfx'
-  condition: selection
+  filter:
+    TargetFilename|contains|all:
+      - '\Templates\Windows\Windows_TemporaryKey.pfx'
+      - '\CMake\'
+  condition: selection and not 1 of filter*
 falsepositives:
   - System administrators managing certififcates.
 level: medium

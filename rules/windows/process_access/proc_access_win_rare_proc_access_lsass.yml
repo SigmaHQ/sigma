@@ -7,6 +7,7 @@ status: experimental
 description: Detects process access to LSASS memory with suspicious access flags 0x410 and 0x01410 (spin-off of similar rule)
 author: Florian Roth
 date: 2022/03/13
+modified: 2022/07/07
 references:
     - https://docs.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
@@ -67,10 +68,15 @@ detection:
     filter_mcafee:
         SourceImage: 'C:\Program Files\Common Files\McAfee\MMSSHost\MMSSHOST.exe'
     filter_nextron:
-        SourceImage|startswith: 'C:\Windows\Temp\asgard2-agent\'
+        # SourceImage|startswith: 'C:\Windows\Temp\asgard2-agent\'  # Can be a manual THOR installation
         SourceImage|endswith:
             - '\thor64.exe'
             - '\thor.exe'
+    filter_ms_products:
+        SourceImage|contains|all:
+            - '\AppData\Local\Temp\'
+            - '\vs_bootstrapper_'
+        GrantedAccess: '0x1410'
     # Generic Filter for 0x1410 filter (caused by so many programs like DropBox updates etc.)
     filter_generic:
         SourceImage|startswith:
@@ -86,6 +92,7 @@ detection:
             - '\software_reporter_tool.exe'
             - '\DropboxUpdate.exe'
             - '\MBAMInstallerService.exe'
+            - '\WebEx\WebexHost.exe '
     condition: selection and not 1 of filter*
 fields:
     - User

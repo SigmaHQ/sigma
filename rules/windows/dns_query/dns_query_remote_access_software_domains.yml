@@ -1,0 +1,36 @@
+title: Query To Remote Access Software Domain
+id: 4d07b1f4-cb00-4470-b9f8-b0191d48ff52
+related:
+    - id: 71ba22cb-8a01-42e2-a6dd-5bf9b547498f
+      type: obsoletes
+    - id: 7c4cf8e0-1362-48b2-a512-b606d2065d7d
+      type: obsoletes
+    - id: ed785237-70fa-46f3-83b6-d264d1dc6eb4
+      type: obsoletes
+status: experimental
+description: |
+  An adversary may use legitimate desktop support and remote access software, such as Team Viewer, Go2Assist, LogMein, AmmyyAdmin, etc, to establish an interactive command and control channel to target systems within networks.
+  These services are commonly used as legitimate technical support software, and may be allowed by application control within a target environment.
+  Remote access tools like VNC, Ammyy, and Teamviewer are used frequently when compared with other legitimate software commonly used by adversaries. (Citation: Symantec Living off the Land)
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1219/T1219.md#atomic-test-4---gotoassist-files-detected-test-on-windows
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1219/T1219.md#atomic-test-3---logmein-files-detected-test-on-windows
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1219/T1219.md#atomic-test-6---ammyy-admin-software-execution
+author: frack113
+date: 2022/07/11
+logsource:
+    product: windows
+    category: dns_query
+detection:
+    selection:
+        QueryName|endswith:
+            - '.getgo.com'
+            - '.logmein.com'
+            - '.ammyy.com'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.command_and_control
+    - attack.t1219
