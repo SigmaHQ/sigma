@@ -1,0 +1,24 @@
+title: New conditional access policy created by non-approved actors
+id: 0922467f-db53-4348-b7bf-dee8d0d348c6
+description: Monitor and alert on Conditional Access changes. Is Initiated by (actor) approved to make changes to Conditional Access?
+author: Corissa Koopmans, '@corissalea'
+date: 2022/07/18
+references:
+  - https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/security-operations-infrastructure
+logsource:
+  product: azure
+  service: auditlogs
+detection:
+  selection:
+    properties.message: Add conditional access policy
+  condition: selection
+falsepositives:
+  - Misconfigured role permissions
+  - Service principal being created may be performed by a system administrator.
+  - Verify whether the user identity, user agent, and/or hostname should be making changes in your environment.
+  - Service principal created from unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule.
+level: medium
+status: experimental
+tags:
+  - attack.defense_evasion
+  - attack.t1548
