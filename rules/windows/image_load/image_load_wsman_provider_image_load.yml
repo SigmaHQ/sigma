@@ -3,7 +3,7 @@ id: ad1f4bb9-8dfb-4765-adb6-2a7cfb6c0f94
 description: Detects signs of potential use of the WSMAN provider from uncommon processes locally and remote execution.
 status: experimental
 date: 2020/06/24
-modified: 2022/02/21
+modified: 2022/07/18
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 tags:
     - attack.execution
@@ -55,7 +55,11 @@ detection:
         Image|startswith: 'C:\Windows\Temp\asgard2-agent\'
     filter_citrix:
         Image|startswith: 'C:\Program Files\Citrix\'
-    condition: ( request_client or respond_server ) and not 1 of filter*
+    svchost:
+        Image|endswith: '\svchost.exe'
+    commandline_null:
+        CommandLine: null
+    condition: ( request_client or respond_server ) and not 1 of filter* and not ( svchost and commandline_null )
 falsepositives:
     - Unknown
 level: medium
