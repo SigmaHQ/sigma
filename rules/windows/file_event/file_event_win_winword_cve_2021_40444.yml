@@ -7,26 +7,30 @@ references:
     - https://twitter.com/vanitasnk/status/1437329511142420483?s=21
 author: Florian Roth, Sittikorn S
 date: 2021/09/10
-modified: 2021/09/13
+modified: 2022/06/17
 logsource:
     product: windows
     category: file_event
 detection:
-    selection:
-        Image: '\winword.exe'
+    selection_cab:
+        Image|endswith: '\winword.exe'
         TargetFilename|endswith: '.cab'
         TargetFilename|contains: '\Windows\INetCache'
     selection_inf:
-        Image: '\winword.exe'
+        Image|endswith: '\winword.exe'
         TargetFilename|contains|all:
-        - '\AppData\Local\Temp\'
-        - '.inf'
-    condition: selection or selection_inf
+            - '\AppData\Local\Temp\'
+            - '.inf'
+    filter_legit:
+        TargetFilename|startswith: 'C:\Users\'
+        TargetFilename|contains: 'AppData\Local\Temp'
+        TargetFilename|endswith: '\Content.inf'
+    condition: (selection_cab or selection_inf) and not filter_legit
 fields:
     - TargetFilename
 falsepositives:
     - Unknown
-level: critical
+level: high
 tags:
     - attack.resource_development
     - attack.t1587

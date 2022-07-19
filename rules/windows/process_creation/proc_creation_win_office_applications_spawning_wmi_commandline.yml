@@ -3,7 +3,7 @@ id: 518643ba-7d9c-4fa5-9f37-baed36059f6a
 description: Initial execution of malicious document calls wmic to execute the file with regsvr32
 references:
     - https://thedfirreport.com/2021/03/29/sodinokibi-aka-revil-ransomware/
-    - https://github.com/vadim-hunter/Detection-Ideas-Rules/blob/main/Threat%20Intelligence/The%20DFIR%20Report/20210329_Sodinokibi_(aka_REvil)_Ransomware.yaml
+    - https://github.com/vadim-hunter/Detection-Ideas-Rules/blob/02bcbfc2bfb8b4da601bb30de0344ae453aa1afe/Threat%20Intelligence/The%20DFIR%20Report/20210329_Sodinokibi_(aka_REvil)_Ransomware.yaml
 author: 'Vadim Khrykov (ThreatIntel), Cyb3rEng (Rule)'
 tags:
     - attack.t1204.002
@@ -15,21 +15,19 @@ status: experimental
 date: 2021/08/23
 modified: 2022/06/02
 logsource:
-  product: windows
-  category: process_creation
+    product: windows
+    category: process_creation
 detection:
-  #useful_information: Add more office applications to the rule logic of choice
-  selection1:
-    - Image: '\wbem\WMIC.exe'
-    - CommandLine|contains: 'wmic '
-    - OriginalFileName: 'wmic.exe'
-    - Description: 'WMI Commandline Utility'
-  selection2:
-    ParentImage|endswith:
-      - '\winword.exe'
-      - '\excel.exe'
-      - '\powerpnt.exe'
-  condition: selection1 and selection2
+    #useful_information: Add more office applications to the rule logic of choice
+    selection_img:
+        - Image|endswith: '\wbem\WMIC.exe'
+        - OriginalFileName: 'wmic.exe'
+    selection_parent:
+        ParentImage|endswith:
+            - '\winword.exe'
+            - '\excel.exe'
+            - '\powerpnt.exe'
+    condition: all of selection_*
 falsepositives:
-  - Unknown
+    - Unknown
 level: high

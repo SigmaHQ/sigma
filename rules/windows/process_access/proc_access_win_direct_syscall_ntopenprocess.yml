@@ -1,12 +1,12 @@
 title: Direct Syscall of NtOpenProcess
-id: 3f3f3506-1895-401b-9cc3-e86b16e630d0 
+id: 3f3f3506-1895-401b-9cc3-e86b16e630d0
 description: Detects the usage of the direct syscall of NtOpenProcess which might be done from a CobaltStrike BOF.
 references:
     - https://medium.com/falconforce/falconfriday-direct-system-calls-and-cobalt-strike-bofs-0xff14-741fa8e1bdd6
 status: experimental
 author: Christian Burkard, Tim Shelton
 date: 2021/07/28
-modified: 2022/05/15
+modified: 2022/06/20
 logsource:
     category: process_access
     product: windows
@@ -25,10 +25,16 @@ detection:
     falsepositive4:
         TargetImage: 'C:\Windows\system32\systeminfo.exe'
         SourceImage|endswith: 'setup64.exe' #vmware
+    falsepositive5:
+        TargetImage|endswith: 'AmazonSSMAgentSetup.exe'
+        SourceImage|endswith: 'AmazonSSMAgentSetup.exe'
+    falsepositive6:
+        TargetImage|endswith: 'C:\Program Files\Mozilla Firefox\firefox.exe'
+        SourceImage|endswith: 'C:\Program Files\Mozilla Firefox\firefox.exe'
     condition: selection and not 1 of falsepositive*
 falsepositives:
     - Unknown
-level: critical
+level: high
 tags:
     - attack.execution
-    - attack.t1106 
+    - attack.t1106

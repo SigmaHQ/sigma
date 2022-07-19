@@ -1,0 +1,32 @@
+title: WSL Execution
+id: dec44ca7-61ad-493c-bfd7-8819c5faa09b
+status: test
+description: Detects Possible usage of Windows Subsystem for Linux (WSL) binary as a LOLBIN
+author: 'oscd.community, Zach Stanford @svch0st, Nasreddine Bencherchali'
+references:
+  - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Wsl/
+  - https://twitter.com/nas_bench/status/1535431474429808642
+date: 2020/10/05
+modified: 2022/06/11
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_img:
+    - Image|endswith: '\wsl.exe'
+    - OriginalFileName: 'wsl.exe'
+  selection_cli:
+    CommandLine|contains:
+      - ' -e '
+      - ' --exec '
+      - ' --system '
+      - ' /mnt/c' # Path to mounted "C:\" partition (Indication of running Windows binaries via WSL)
+  condition: all of selection*
+falsepositives:
+  - Automation and orchestration scripts may use this method execute scripts etc
+level: medium
+tags:
+  - attack.execution
+  - attack.defense_evasion
+  - attack.t1218
+  - attack.t1202

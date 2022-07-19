@@ -1,0 +1,47 @@
+title: Bitsadmin Download from Suspicious Domain
+id: 8518ed3d-f7c9-4601-a26c-f361a4256a0c
+status: experimental
+description: Detects usage of bitsadmin downloading a file from a suspicious domain
+references:
+    - https://blog.netspi.com/15-ways-to-download-a-file/#bitsadmin
+    - https://isc.sans.edu/diary/22264
+    - https://lolbas-project.github.io/lolbas/Binaries/Bitsadmin/
+tags:
+    - attack.defense_evasion
+    - attack.persistence
+    - attack.t1197
+    - attack.s0190
+    - attack.t1036.003
+date: 2022/06/28
+author: Florian Roth
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\bitsadmin.exe'
+        CommandLine|contains: 
+            - ' /transfer '
+            - ' /create '
+            - ' /addfile '
+    selection_domain:
+        CommandLine|contains: 
+            - 'raw.githubusercontent.com'
+            - 'gist.githubusercontent.com'
+            - 'pastebin.com'
+            - 'cdn.discordapp.com/attachments/'
+            - 'mediafire.com'
+            - 'mega.nz'
+            - 'ddns.net'
+            - '.paste.ee'
+            - '.hastebin.com'
+            - '.ghostbin.co/'
+            - 'ufile.io'
+            - 'storage.googleapis.com'
+    condition: all of selection*
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Some legitimate apps use this, but limited.
+level: medium

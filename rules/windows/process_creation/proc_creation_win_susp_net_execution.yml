@@ -7,10 +7,10 @@ references:
     - https://eqllib.readthedocs.io/en/latest/analytics/4d2e7fc1-af0b-4915-89aa-03d25ba7805e.html
     - https://eqllib.readthedocs.io/en/latest/analytics/e61f557c-a9d0-4c25-ab5b-bbc46bb24deb.html
     - https://eqllib.readthedocs.io/en/latest/analytics/9b3dd402-891c-4c4d-a662-28947168ce61.html
-    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1007/T1007.md#atomic-test-2---system-service-discovery---netexe
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1007/T1007.md#atomic-test-2---system-service-discovery---netexe
 author: Michael Haag, Mark Woan (improvements), James Pemberton / @4A616D6573 / oscd.community (improvements)
 date: 2019/01/16
-modified: 2021/12/06
+modified: 2022/07/11
 tags:
     - attack.discovery
     - attack.t1007
@@ -29,11 +29,14 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith:
+    selection_img:
+        - Image|endswith:
             - '\net.exe'
             - '\net1.exe'
-    cmdline:
+        - OriginalFileName:
+            - 'net.exe'
+            - 'net1.exe'
+    selection_cli:
         CommandLine|contains:
             - ' group'
             - ' localgroup'
@@ -43,7 +46,7 @@ detection:
             - ' accounts'
             - ' stop '
             - ' start'
-    condition: selection and cmdline
+    condition: all of selection_*
 fields:
     - ComputerName
     - User

@@ -1,0 +1,41 @@
+title: Suspicious Mofcomp Execution
+id: 1dd05363-104e-4b4a-b963-196a534b03a1
+status: experimental
+description: |
+    Detects execution of the "mofcomp" utility as a child of a suspicious shell or script running utility or by having a supsicious path in the commandline.
+    The "mofcomp" utility parses a file containing MOF statements and adds the classes and class instances defined in the file to the WMI repository.
+    Attackers abuse this utility to install malicious MOF scripts
+author: Nasreddine Bencherchali
+references:
+    - https://thedfirreport.com/2022/07/11/select-xmrig-from-sqlserver/
+    - https://github.com/The-DFIR-Report/Sigma-Rules/blob/75260568a7ffe61b2458ca05f6f25914efb44337/win_mofcomp_execution.yml
+    - https://docs.microsoft.com/en-us/windows/win32/wmisdk/mofcomp
+date: 2022/07/12
+modified: 2022/07/14
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: '\mofcomp.exe'
+    selection_case:
+        - ParentImage|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\wsl.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+        - CommandLine|contains:
+            - '\AppData\Local\Temp'
+            - '\Users\Public\'
+            - '\WINDOWS\Temp\'
+            - '%temp%'
+            - '%appdata%'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.execution
+    - attack.t1218

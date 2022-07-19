@@ -107,6 +107,7 @@ test-sigmac:
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -t kibana -c tests/config-multiple_mapping.yml -c tests/config-multiple_mapping-2.yml tests/mapping-conditional-multi.yml > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -t xpack-watcher -c tools/config/winlogbeat.yml -O output=json -O es=es -O foobar rules/windows/builtin/security/win_susp_failed_logons_single_source.yml > /dev/null
 	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -t es-qs -c tools/config/winlogbeat.yml -o $(TMPOUT) - < tests/collection_repeat.yml > /dev/null
+	$(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -rvdI -t dnif -c tools/config/dnif.yml rules/ > /dev/null
 	! $(COVERAGE) run -a --include=$(COVSCOPE)  tools/sigmac -t xpack-watcher -c tools/config/winlogbeat.yml -O output=foobar -O es=es -O foobar rules/windows/builtin/security/win_susp_failed_logons_single_source.yml > /dev/null
 	! $(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -t es-qs -c tools/config/winlogbeat.yml tests/not_existing.yml > /dev/null
 	! $(COVERAGE) run -a --include=$(COVSCOPE) tools/sigmac -t es-qs -c tools/config/winlogbeat.yml tests/invalid_yaml.badyml > /dev/null

@@ -1,4 +1,4 @@
-title: Application Executed Non-Executable Extension
+title: Rundll32 Execution Without DLL File
 id: c3a99af4-35a9-4668-879e-c09aeb4f2bdf
 status: experimental
 description: Detects the execution of rundll32 with a command line that doesn't contain a .dll file
@@ -6,7 +6,7 @@ references:
     - https://twitter.com/mrd0x/status/1481630810495139841?s=12
 author: Tim Shelton, Florian Roth
 date: 2022/01/13
-modified: 2022/03/20
+modified: 2022/06/30
 logsource:
     category: process_creation
     product: windows
@@ -27,6 +27,9 @@ detection:
     filter_msiexec_system32:
         ParentImage|endswith: ':\Windows\System32\msiexec.exe'
         CommandLine|startswith: 'C:\Windows\system32\MsiExec.exe -Embedding'
+    filter_splunk_ufw:
+        ParentImage|endswith: ':\Windows\System32\cmd.exe'
+        ParentCommandLine|contains: ' C:\Program Files\SplunkUniversalForwarder\'
     condition: selection and not 1 of filter*
 fields:
     - Image

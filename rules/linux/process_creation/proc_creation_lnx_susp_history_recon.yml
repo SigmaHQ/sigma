@@ -1,0 +1,26 @@
+title: Print History File Contents
+id: d7821ff1-4527-4e33-9f84-d0d57fa2fb66
+status: experimental
+description: Detects events in which someone prints the contents of history files to the commandline or redirects it to a file for reconnaissance
+author: Florian Roth
+references:
+  - https://github.com/sleventyeleven/linuxprivchecker/
+date: 2022/06/20
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection:
+    Image|endswith: '/cat'
+  selection_history:
+    - CommandLine|contains: 
+      - '/.bash_history'
+      - '/.zsh_history'
+    - CommandLine|endswith: '_history'
+  condition: all of selection*
+falsepositives:
+  - Legitimate administration activities
+level: medium
+tags:
+  - attack.reconnaissance
+  - attack.t1592.004
