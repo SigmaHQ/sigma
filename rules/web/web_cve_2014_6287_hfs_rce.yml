@@ -1,0 +1,25 @@
+title: Rejetto HTTP File Server RCE
+id: a133193c-2daa-4a29-8022-018695fcf0ae
+status: experimental
+description: Detects attempts to exploit a Rejetto HTTP File Server (HFS) via CVE-2014-6287
+author: Nasreddine Bencherchali
+date: 2022/07/19
+references:
+    - https://vk9-sec.com/hfs-code-execution-cve-2014-6287/
+    - https://www.exploit-db.com/exploits/39161
+logsource:
+    category: webserver
+detection:
+    selection:
+        c-uri|contains:
+            - '?search=%00{.exec|'
+            - '?search=%00{.save|'
+    condition: selection
+falsepositives:
+    - Unknown
+level: critical
+tags:
+    - attack.initial_access
+    - attack.t1190
+    - attack.t1505.003
+    - cve.2014.6287
