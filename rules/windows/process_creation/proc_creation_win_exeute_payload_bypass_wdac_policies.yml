@@ -2,13 +2,13 @@ title: Detect_execute_proxied_payload_with_Microsoft_signed_binary_to_bypass_WDA
 id: e733959b-e761-4eda-bcf2-588e321c0515
 status: experimental
 description: Detect AWL bypass Execute arbitrary C# code embedded in a XOML file
-references: https://lolbas-project.github.io/lolbas/OtherMSBinaries/Wfc/
+references: 
+  - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Wfc/
 tags:
-- attack.t1127
-- attack.ds0017
-- attack.ds0009
+  - attack.t1127
+  - attack.ds0017
+  - attack.ds0009
 author: Meshal Aljohani
-status: experimental
 logsource:
  category: process_creation
  product: windows
@@ -18,7 +18,6 @@ detection:
    - 'wfc.exe'
    - 'fsi.exe'
    - 'fsianycpu.exe'
- condition: wfc_path AND cmd_cont
  cmd_cont:
    CommandLine|contains:
    - 'xomal'
@@ -30,9 +29,10 @@ detection:
    - 'fsscript'
    - 'Get-Process'
    - 'ProcessName'
+ condition: wfc_path AND cmd_cont   
 fields:
-- CommandLine
-- ParentImage
+  - CommandLine
+  - ParentImage
 falsepositives:
-- unknown
+ - Unknown
 level: high
