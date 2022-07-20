@@ -1,0 +1,27 @@
+title: DLL Load By System Process From Suspicious Locations
+id: 9e9a9002-56c4-40fd-9eff-e4b09bfa5f6c
+status: experimental
+description: Detects when a system process (ie located in system32, syswow64...etc) loads a DLL from a suspicious location such as %temp%
+author: Nasreddine Bencherchali
+references:
+    - https://github.com/hackerhouse-opensource/iscsicpl_bypassUAC (Idea)
+date: 2022/07/17
+logsource:
+    product: windows
+    category: image_load
+detection:
+    selection:
+        Image|startswith: 'C:\Windows\'
+        ImageLoaded|contains:
+            # Add more suspicious paths as you see fit in your env
+            - '\Users\Public\'
+            - '\Desktop\'
+            - '\Downloads\'
+            - '\AppData\Local\Temp\'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1070
