@@ -11,7 +11,7 @@ tags:
     - attack.t1218
 author: Karneades / Markus Neis, Jonhnathan Ribeiro, oscd.community
 date: 2019/11/12
-modified: 2022/01/12
+modified: 2022/07/20
 logsource:
     category: process_creation
     product: windows
@@ -25,10 +25,13 @@ detection:
             - '--processStartAndWait'
             - '--createShortcut'
     filter1:
-        CommandLine|contains|all:
+        - CommandLine|contains|all:
             - 'C:\Users\'
             - '\AppData\Local\Discord\Update.exe'
             - ' --processStart Discord.exe'
+        - CommandLine|contains|all:
+            - 'C:\Users\'
+            - '\AppData\Local\GitHubDesktop\Update.exe --createShortcut GitHubDesktop.exe'
     condition: all of selection* and not 1 of filter*
 falsepositives:
     - 1Clipboard

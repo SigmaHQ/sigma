@@ -5,7 +5,8 @@ references:
     - https://thedfirreport.com/2021/03/29/sodinokibi-aka-revil-ransomware/
     - https://doublepulsar.com/follina-a-microsoft-office-code-execution-vulnerability-1a47fce5629e
     - https://github.com/vadim-hunter/Detection-Ideas-Rules/blob/02bcbfc2bfb8b4da601bb30de0344ae453aa1afe/Threat%20Intelligence/The%20DFIR%20Report/20210329_Sodinokibi_(aka_REvil)_Ransomware.yaml
-author: 'Vadim Khrykov (ThreatIntel), Cyb3rEng (Rule)'
+    - https://github.com/splunk/security_content/blob/develop/detections/endpoint/office_spawning_control.yml
+author: 'Vadim Khrykov (ThreatIntel), Cyb3rEng (Rule), Michael Haag'
 tags:
     - attack.t1204.002
     - attack.t1047
@@ -14,7 +15,7 @@ tags:
     - attack.defense_evasion
 status: experimental
 date: 2021/08/23
-modified: 2022/06/27
+modified: 2022/07/20
 logsource:
     product: windows
     category: process_creation
@@ -28,6 +29,7 @@ detection:
             - '\mshta.exe'
             - '\verclsid.exe'
             - '\msdt.exe'
+            - '\control.exe'
         ParentImage|endswith:
             - '\winword.exe'
             - '\excel.exe'
@@ -35,6 +37,9 @@ detection:
             - '\msaccess.exe'
             - '\mspub.exe'
             - '\eqnedt32.exe'
+            - '\visio.exe'
+            - '\wordpad.exe'
+            - '\wordview.exe'
     condition: selection
 falsepositives:
     - Unknown
