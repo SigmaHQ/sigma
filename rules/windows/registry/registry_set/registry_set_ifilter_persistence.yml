@@ -14,19 +14,18 @@ logsource:
     product: windows
 detection:
     selection_ext:
-        # This selection focuses on the extension assoc
         EventType: SetValue
         TargetObject|startswith:
             - 'HKLM\SOFTWARE\Classes\.'
             - 'HKEY_LOCAL_MACHINE\SOFTWARE\Classes\.'
         TargetObject|contains: '\PersistentHandler'
-    selection_ext:
+    selection_clsid:
         EventType: SetValue
         TargetObject|startswith:
             - 'HKLM\SOFTWARE\Classes\CLSID'
             - 'HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID'
         TargetObject|contains: '\PersistentAddinsRegistered\{89BCB740-6119-101A-BCB7-00DD010655AF}'
-    condition: all of selection_*
+    condition: 1 of selection_*
 falsepositives:
     - Legitimate registration of IFilters by the OS or software
 level: medium
