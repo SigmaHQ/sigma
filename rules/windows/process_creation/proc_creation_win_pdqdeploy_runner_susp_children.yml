@@ -1,0 +1,52 @@
+title: Suspicious Execution Of PDQDeployRunner
+id: 12b8e9f5-96b2-41e1-9a42-8c6779a5c184
+status: experimental
+description: Detects suspicious execution of "PDQDeployRunner" which is part of the PDQDeploy service stack that is responsible for executing commands and packages on a remote machines
+references:
+    - https://twitter.com/malmoeb/status/1550483085472432128
+tags:
+    - attack.execution
+author: Nasreddine Bencherchali
+date: 2022/07/22
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|contains: 'PDQDeployRunner-'
+    selection_susp:
+        # Improve this section by adding other suspicious processes, commandlines or paths
+        - Image|endswith:
+            # If you use any of the following processes legitimately comment them out
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\rundll32.exe'
+            - '\regsvr32.exe'
+            - '\wmic.exe'
+            - '\msiexec.exe'
+            - '\mshta.exe'
+            - '\csc.exe'
+            - '\dllhost.exe'
+            - '\certutil.exe'
+            - '\scriptrunner.exe'
+            - '\bash.exe'
+            - '\wsl.exe'
+        - Image|contains:
+            - 'C:\Users\Public\'
+            - 'C:\ProgramData\'
+            - 'C:\Windows\TEMP\'
+            - '\AppData\Local\Temp'
+        - CommandLine|contains:
+            - 'iex '
+            - 'Invoke-'
+            - 'DownloadString'
+            - 'http'
+            - ' -enc '
+            - ' -encodedcommand '
+            - 'FromBase64String'
+            - ' -decode '
+            - ' -w hidden'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use of the PDQDeploy tool to execute these commands
+level: medium
