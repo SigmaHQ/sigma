@@ -6,6 +6,7 @@ references:
     - https://twitter.com/jonasLyk/status/1549338335243534336?t=CrmPocBGLbDyE4p6zTX1cg&s=19
 author: Greg (rule)
 date: 2022/07/21
+modified: 2022/07/25
 tags:
     - attack.t1547
     - attack.persistence
@@ -13,11 +14,10 @@ logsource:
     category: file_event
     product: windows
 detection:
-    selection1: # %APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\target.lnk.{0AFACED1-E828-11D1-9187-B532F1E9575D}\target.lnk
+    selection: # %APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\target.lnk.{0AFACED1-E828-11D1-9187-B532F1E9575D}\target.lnk
         TargetFileName|contains|all:
             - '\Microsoft\Windows\Start Menu\Programs\Startup'
             - '.lnk.{0AFACED1-E828-11D1-9187-B532F1E9575D}'
-    selection2:
         Image|endswith: '\explorer.exe'
-    condition: all of selection*
+    condition: selection
 level: high
