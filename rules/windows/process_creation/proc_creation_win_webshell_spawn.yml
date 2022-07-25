@@ -2,9 +2,9 @@ title: Shells Spawned by Web Servers
 id: 8202070f-edeb-4d31-a010-a26c72ac5600
 status: test
 description: Web servers that spawn shell processes could be the result of a successfully placed web shell or an other attack
-author: Thomas Patzke, Florian Roth, Zach Stanford @svch0st
+author: Thomas Patzke, Florian Roth, Zach Stanford @svch0st, Tim Shelton
 date: 2019/01/16
-modified: 2022/07/14
+modified: 2022/07/25
 tags:
     - attack.persistence
     - attack.t1505.003
@@ -46,7 +46,9 @@ detection:
             - '\powershell.exe'
             - '\pwsh.exe'
             - '\bitsadmin.exe'
-    condition: 1 of selection* and anomaly_children
+    false_positive1:
+        CommandLine|endswith: 'Windows\system32\cmd.exe /c C:\ManageEngine\ADManager "Plus\ES\bin\elasticsearch.bat -Enode.name=RMP-NODE1 -pelasticsearch-pid.txt'
+    condition: 1 of selection* and anomaly_children and not 1 of false_positive*
 fields:
     - CommandLine
     - ParentCommandLine
