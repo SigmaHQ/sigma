@@ -4,7 +4,7 @@ status: test
 description: Detects SQL Injection attempts via GET requests in access logs
 author: Saw Win Naung, Nasreddine Bencherchali
 date: 2020/02/22
-modified: 2022/06/27
+modified: 2022/07/25
 references:
     - https://www.acunetix.com/blog/articles/exploiting-sql-injection-example/
     - https://www.acunetix.com/blog/articles/using-logs-to-investigate-a-web-application-attack/
@@ -16,7 +16,9 @@ detection:
     select_method:
         cs-method: 'GET'
     keywords:
-        - '=select'
+        - '=select '
+        - '=select%20'
+        - '=select('
         - 'UNION SELECT'
         - 'UNION%20SELECT'
         - 'UNION ALL SELECT'
@@ -38,8 +40,6 @@ detection:
         - 'or%201=1#'
     filter:
         sc-status: 404
-    filter_fps:
-        - '=select2'
     condition: select_method and keywords and not 1 of filter*
 fields:
     - client_ip
