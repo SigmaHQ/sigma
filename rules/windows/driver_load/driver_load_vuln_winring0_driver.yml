@@ -1,0 +1,29 @@
+title: Vulnerable WinRing0 Driver Load
+id: 1a42dfa6-6cb2-4df9-9b48-295be477e835
+status: experimental
+description: Detects the load of a signed WinRing0 driver often used by threat actors, crypto miners (XMRIG) or malware for privilege escalation
+author: Florian Roth
+references:
+    - https://github.com/xmrig/xmrig/tree/master/bin/WinRing0
+date: 2022/07/26
+logsource:
+    product: windows
+    category: driver_load
+detection:
+    selection_name:
+        ImageLoaded|endswith:
+            - '\WinRing0x64.sys'
+            - '\WinRing0.sys'
+            - '\WinRing0.dll'
+            - '\WinRing0x64.dll'
+    selection_sysmon:
+        Hashes|contains: 'IMPHASH=D41FA95D4642DC981F10DE36F4DC8CD7'
+    selection_other:
+        IMPHASH: 'd41fa95d4642dc981f10de36f4dc8cd7'
+    condition: 1 of selection*
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.privilege_escalation
+    - attack.t1543.003

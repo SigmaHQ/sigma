@@ -11,7 +11,7 @@ references:
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 date: 2019/10/25
-modified: 2022/03/26
+modified: 2022/07/27
 logsource:
     category: registry_set
     product: windows
@@ -39,6 +39,12 @@ detection:
         Details:
             - 'cpwmon64_v40.dll'
             - 'CutePDF Writer'
+    filter_onenote:
+        Image: C:\Windows\System32\spoolsv.exe
+        TargetObject|contains: 'Print\Monitors\Appmon\Ports\Microsoft.Office.OneNote_'
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
     condition: system_control_base and system_control and not 1 of filter_*
 fields:
     - SecurityID
