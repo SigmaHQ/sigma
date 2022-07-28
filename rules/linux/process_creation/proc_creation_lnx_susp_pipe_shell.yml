@@ -5,6 +5,7 @@ description: Detects suspicious process command line that starts with a shell th
 references:
    - Internal Research
 date: 2022/03/14
+modified: 2022/07/26
 author: Florian Roth
 tags:
     - attack.defense_evasion
@@ -17,12 +18,18 @@ detection:
       CommandLine|startswith:
          - 'sh -c '
          - 'bash -c '
-      CommandLine|endswith:
-         - '| bash'
-         - '|bash'
-         - '| sh'
-         - '|sh'
-   condition: selection
+   selection_exec:
+      - CommandLine|contains:
+            - '| bash '
+            - '| sh '
+            - '|bash '
+            - '|sh '
+      - CommandLine|endswith:
+            - '| bash'
+            - '| sh'
+            - '|bash'
+            - ' |sh'
+   condition: all of selection*
 falsepositives:
    - Legitimate software that uses these patterns
 level: medium

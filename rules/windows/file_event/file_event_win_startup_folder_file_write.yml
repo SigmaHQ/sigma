@@ -7,14 +7,16 @@ references:
   - https://github.com/OTRF/detection-hackathon-apt29/issues/12
   - https://threathunterplaybook.com/evals/apt29/detections/5.B.1_611FCA99-97D0-4873-9E51-1C1BA2DBB40D.html
 date: 2020/05/02
-modified: 2021/11/27
+modified: 2022/07/27
 logsource:
   product: windows
   category: file_event
 detection:
   selection:
     TargetFilename|contains: 'ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp'
-  condition: selection
+  filter_update:
+    Image: 'C:\Windows\System32\wuauclt.exe'
+  condition: selection and not filter_update
 falsepositives:
   - Unknown
 level: low
