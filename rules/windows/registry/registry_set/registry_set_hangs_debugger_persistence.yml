@@ -1,0 +1,22 @@
+title: Add Debugger Entry To Hangs Key For Persistence
+id: 833ef470-fa01-4631-a79b-6f291c9ac498
+description: Detects when an attacker adds a new "Debugger" value to the "Hangs" key in order to achieve persistence which will get invoked when an application crashes
+author: Nasreddine Bencherchali
+date: 2022/07/21
+status: experimental
+references:
+    - https://persistence-info.github.io/Data/wer_debugger.html
+    - https://www.hexacorn.com/blog/2019/09/20/beyond-good-ol-run-key-part-116/
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|contains: '\SOFTWARE\Microsoft\Windows\Windows Error Reporting\Hangs\Debugger'
+    condition: selection
+falsepositives:
+    - This value is not set by default but could be rarly used by administrators
+level: high
+tags:
+  - attack.persistence

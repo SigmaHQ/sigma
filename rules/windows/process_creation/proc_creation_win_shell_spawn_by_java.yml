@@ -1,10 +1,10 @@
-title: Shells Spawn by Java
+title: Shells Spawned by Java
 id: dff1e1cc-d3fd-47c8-bfc2-aeb878a754c0
-description: Detects shell spawn from Java host process, which could a maintenance task or some kind of exploitation (e.g. log4j exploitation)
+description: Detects shell spawned from Java host process, which could be a sign of exploitation (e.g. log4j exploitation)
 status: experimental
-author: Andreas Hunkeler (@Karneades)
+author: Andreas Hunkeler (@Karneades), Nasreddine Bencherchali
 date: 2021/12/17
-modified: 2022/01/12
+modified: 2022/07/27
 tags:
     - attack.initial_access
     - attack.persistence
@@ -15,7 +15,10 @@ logsource:
 detection:
     selection:
         ParentImage|endswith: '\java.exe'
-        Image|endswith: '\cmd.exe'
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
     filter:
         ParentImage|contains: 'build'  # excluding CI build agents
         CommandLine|contains: 'build'  # excluding CI build agents

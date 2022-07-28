@@ -1,12 +1,18 @@
 title: Winword LOLBIN Usage
 id: 4ae3e30b-b03f-43aa-87e3-b622f4048eed
+related:
+    - id: 2621b3a6-3840-4810-ac14-a02426086171
+      type: obsoletes
 status: experimental
-description: Winword can be abused as a LOLBIN to download arbitary file or load arbitary DLLs
-author: Nasreddine Bencherchali
+description: |
+    Detects Winword process loading custmom dlls via the '/l' switch.
+    Winword can be abused as a LOLBIN to download arbitary file or load arbitary DLLs.
+author: Nasreddine Bencherchali, Victor Sergeev, oscd.community
 references:
     - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Winword/
     - https://github.com/D4Vinci/One-Lin3r/blob/9fdfa5f0b9c698dfbd4cdfe7d2473192777ae1c6/one_lin3r/core/liners/windows/cmd/dll_loader_word.py
 date: 2022/05/17
+modified: 2022/07/25
 logsource:
     category: process_creation
     product: windows
@@ -14,15 +20,16 @@ detection:
     selection_img:
         - Image|endswith: '\WINWORD.exe'
         - OriginalFileName: 'WinWord.exe'
-    selection_cli_http:
-        CommandLine|contains:
-            - 'http://'
-            - 'https://'
-    selection_cli_dll:
+    selection_susp:
         CommandLine|contains:
             - '/l '
             - '.dll'
-    condition: selection_img and 1 of selection_cli*
+            - 'http://'
+            - 'https://'
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1202
