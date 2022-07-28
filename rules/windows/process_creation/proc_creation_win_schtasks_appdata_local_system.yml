@@ -2,10 +2,11 @@ title: Suspicious Schtasks Execution AppData Folder
 id: c5c00f49-b3f9-45a6-997e-cfdecc6e1967
 status: experimental
 description: 'Detects the creation of a schtask that executes a file from C:\Users\<USER>\AppData\Local'
-author: 'pH-T'
+author: 'pH-T, Nasreddine Bencherchali'
 references:
     - https://thedfirreport.com/2022/02/21/qbot-and-zerologon-lead-to-full-domain-compromise/
 date: 2022/03/15
+modified: 2022/07/28
 logsource:
     product: windows
     category: process_creation
@@ -14,10 +15,13 @@ detection:
         Image|endswith: '\schtasks.exe'
         CommandLine|contains|all:
             - '/Create'
-            - '/RU "NT AUT'
+            - '/RU'
             - '/TR'
             - 'C:\Users\'
             - '\AppData\Local\'
+        CommandLine|contains:
+            - 'NT AUT'
+            - ' SYSTEM '
     condition: selection
 falsepositives:
     - Unknown
