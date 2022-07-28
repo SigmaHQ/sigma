@@ -16,13 +16,20 @@ detection:
             - ' /change '
             - ' /create '
     selection_run:
-        CommandLine|contains:
-            - '/ru '
+        CommandLine|contains: '/ru '
     selection_user:
         CommandLine|contains:
             - 'NT AUT'
             - ' SYSTEM '
-    condition: all of selection_*
+    filter:
+        # FP from test set in SIGMA
+        ParentImage|contains|all:
+            - '\AppData\\Local\Temp\'
+            - 'TeamViewer_.exe'
+        Image|endswith: '\schtasks.exe'
+        CommandLine|contains:
+            - '/TN TVInstallRestore'
+    condition: all of selection_* and not filter
 falsepositives:
     - Unknown
 level: high
