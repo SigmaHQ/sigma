@@ -6,7 +6,7 @@ author: Teymur Kheirkhabarov, Harish Segar (rule)
 references:
     - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=26
 date: 2020/03/20
-modified: 2022/07/14
+modified: 2022/07/27
 logsource:
     category: process_creation
     product: windows
@@ -49,8 +49,8 @@ detection:
             - '\powershell.exe'
             - '\pwsh.exe'
         - CommandLine|contains:
-            - 'powershell'
-            - 'pwsh'
+            - '/c powershell'  # FPs with sub processes that contained "powershell" soemwhere in the command line
+            - '/c pwsh'
         - Description: 'Windows PowerShell'
         - Product: 'PowerShell Core 6'
     condition: all of selection*
