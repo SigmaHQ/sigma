@@ -1,0 +1,28 @@
+title: Windows Registry Persistence DebugPath
+id: df4dc653-1029-47ba-8231-3c44238cc0ae
+status: experimental
+description: Detects potential persistence using Appx DebugPath
+references:
+    - https://oddvar.moe/2018/09/06/persistence-using-universal-windows-platform-apps-appx/
+    - https://github.com/rootm0s/WinPwnage
+author: frack113
+date: 2022/07/27
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_debug: 
+        EventType: SetValue
+        TargetObject|contains: 'Classes\ActivatableClasses\Package\Microsoft.'
+        TargetObject|endswith: '\DebugPath'
+    selection_default: 
+        EventType: SetValue
+        TargetObject|contains: '\Software\Microsoft\Windows\CurrentVersion\PackagedAppXDebug\Microsoft.'
+        TargetObject|endswith: '\(Default)'
+    condition: 1 of selection_*
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.persistence
+    - attack.t1546.015
