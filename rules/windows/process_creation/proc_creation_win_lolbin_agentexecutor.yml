@@ -1,0 +1,30 @@
+
+title: Suspicious AgentExecutor PowerShell Execution
+id: 7efd2c8d-8b18-45b7-947d-adfe9ed04f61
+status: experimental
+description: Detects AgentExecutor.exe execution of binary named powershell when the default ps path is absent from the command line. AgentExecutor will execute any binary named powershell.exe located in the $PSFolder path argument. AgentExecutor is included as part of Intune Managed Devices for Windows 10. 
+references:
+	- https://twitter.com/lefterispan/status/1286259016436514816
+	- https://lolbas-project.github.io/lolbas/OtherMSBinaries/Agentexecutor/
+	- https://docs.microsoft.com/en-us/mem/intune/apps/intune-management-extension
+tags:
+	- attack.defense_evasion
+	- attack.t1218
+date: 2022/07/31
+author: memory-shards
+logsource: 
+	category: process_creation
+	product: windows
+detection:
+	selection1:
+		Image: 'AgentExecutor.exe'
+	selection2: 
+		CommandLine|contains: '-powershell'
+	filter:
+		CommandLine|contains:
+			- ' C:\Windows\SysWOW64\WindowsPowerShell\'
+			- ' C:\Windows\System32\WindowsPowerShell\'
+	condition: selection1 and selection2 and not filter
+falsepositives:
+	- unknown
+level: medium
