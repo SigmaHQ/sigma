@@ -1,0 +1,27 @@
+title: CVE-2020-0688 Exploitation via Eventlog
+id: d6266bf5-935e-4661-b477-78772735a7cb
+status: experimental
+description: Detects the exploitation of Microsoft Exchange vulnerability as described in CVE-2020-0688 
+references:
+    - https://www.trustedsec.com/blog/detecting-cve-20200688-remote-code-execution-vulnerability-on-microsoft-exchange-server/
+    - https://cyberpolygon.com/materials/okhota-na-ataki-ms-exchange-chast-2-cve-2020-0688-cve-2020-16875-cve-2021-24085/
+author: Florian Roth, wagga
+date: 2020/02/29
+modified: 2021/10/13
+tags:
+    - attack.initial_access
+    - attack.t1190
+logsource:
+    product: windows
+    service: application
+detection:
+    selection1:
+        EventID: 4
+        Provider_Name: 'MSExchange Control Panel'
+        Level: Error
+    selection2:
+        - '&__VIEWSTATE='
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: high

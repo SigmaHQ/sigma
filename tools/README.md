@@ -173,7 +173,7 @@ Sample usages:
 
 ```yaml
 # Backend configuration file (here for Elastalert)
-$ cat backend_config.yml 
+$ cat backend_config.yml
 alert_methods: email
 emails: alerts@mydomain.tld
 smtp_host: smtp.google.com
@@ -363,3 +363,82 @@ For example, in order to translate a windows-related Sigma rule, one would use:
 ```bash
 tools/sigmac -t devo -c tools/config/devo-windows.yml rules/windows/sysmon/sysmon_wmi_susp_scripting.yml
 ```
+
+### Datadog
+The Datadog backend currently supports converting Sigma files to the [Log Search Syntax](https://docs.datadoghq.com/logs/explorer/search_syntax/)
+with the identifier `datadog-logs`. This query can be used in the Security Monitoring product.
+
+#### Config file
+The Datadog backend does not require a config file.
+If you choose to add one, you can specify tags in addition to the existing features.
+While attributes will be queried with `@my-attribute:attribute_value` specified tags will be queried with `my-tag:service_value`.
+For an example, see `tools/config/datadog.yml`.
+
+#### Backend options
+The backend options allow you to override tags such as `index`, `service` and `source`. Note that `index` is not available in the Security Monitoring product.
+
+Example
+```
+tools/sigmac -t datadog-logs ./rules/cloud/aws/aws_attached_malicious_lambda_layer.yml --backend-option index=index_value --backend-option service=service_value
+```
+
+#### Tests
+You can run the backend unit tests with:
+```shell
+cd tools/
+python3 -m pytest ./tests/test_backend_datadog.py
+```
+
+You can have a glance at the backend rules coverage by running:
+```shell
+cd tools/
+python3 -m tests.test_backend_datadog
+```
+
+It will run the Datadog backend over all the rules in the repository and print out the number of supported rules.
+Use the `--verbose` flag to get individual results for each rule.
+
+
+### StreamAlert
+The StreamAlert backend currently supports converting Sigma files to the [Rule code syntax](https://streamalert.io/rules.html/).
+
+The backend configurations will specify the outputs, publishers, and all the field mappings for the rules. Please change it in `tools/config/streamalert.yml` before running. Example running:
+```shell
+tools/sigmac -t streamalert -c tools/config/streamalert.yml rules/windows/process_creation/proc_creation_win_hack_krbrelayup.yml
+```
+
+You can see the backend rules coverage by running:
+```shell
+cd tools/
+python3 -m tests.test_backend_streamalert
+```
+
+It will run the StreamAlert backend against all of the rules in the repository and display the number of supported rules.
+
+To receive individual results for each rule, use the `—verbose` parameter.
+
+### DNIF
+The DNIF backend converts Sigma rules to the DNIF queries, with the identifier as `dnif`
+
+The configuration will define the field mappings, value mappings and source mappings. see `tools/config/dnif.yml`
+Example:
+```shell
+tools/sigmac -t dnif -c tools/config/dnif.yml rules/windows/file_event/file_event_win_susp_desktop_ini.yml
+```
+
+ You can preview the rules coverage by running:
+ ```shell
+cd tools/
+python3 -m tests.test_backend_dnif
+```
+
+The test will be executed for all the rules in the repository and display the outcome of the backend rules coverage (i.e. successful, skipped and failed rules).
+
+To see the results, 
+
+use `--success` or `-S` for successful rules, 
+
+use `--skipped` or `-s` for skipped rules,
+
+use `--failed` or `-f` for failed rules.
+

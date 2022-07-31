@@ -1,0 +1,65 @@
+title: UAC Bypass Tool UACMe Akagi
+id: d38d2fa4-98e6-4a24-aff1-410b0c9ad177
+description: Detects execution of UACMe (a tool used for UAC bypass) via default PE metadata
+author: Christian Burkard, Florian Roth
+date: 2021/08/30
+modified: 2022/07/27
+status: experimental
+references:
+    - https://github.com/hfiref0x/UACME
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1548.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_pe:
+        - Product: 'UACMe'
+        - Company: 
+            - 'REvol Corp'
+            - 'APT 92'
+            - 'UG North'
+            - 'Hazardous Environments'
+            - 'CD Project Rekt'
+        - Description: 
+            - 'UACMe main module'
+            - 'Pentesting utility'
+        - OriginalFileName:
+            - 'Akagi.exe'
+            - 'Akagi64.exe'
+    selection_exec:
+        Image|endswith:
+            - '\Akagi64.exe'
+            - '\Akagi.exe'
+    selection_sysmon:
+        Hashes|contains:
+            - 'IMPHASH=767637C23BB42CD5D7397CF58B0BE688'
+            - 'IMPHASH=14C4E4C72BA075E9069EE67F39188AD8'
+            - 'IMPHASH=3C782813D4AFCE07BBFC5A9772ACDBDC'
+            - 'IMPHASH=7D010C6BB6A3726F327F7E239166D127'
+            - 'IMPHASH=89159BA4DD04E4CE5559F132A9964EB3'
+            - 'IMPHASH=6F33F4A5FC42B8CEC7314947BD13F30F'
+            - 'IMPHASH=5834ED4291BDEB928270428EBBAF7604'
+            - 'IMPHASH=5A8A8A43F25485E7EE1B201EDCBC7A38'
+            - 'IMPHASH=DC7D30B90B2D8ABF664FBED2B1B59894'
+            - 'IMPHASH=41923EA1F824FE63EA5BEB84DB7A3E74'
+            - 'IMPHASH=3DE09703C8E79ED2CA3F01074719906B'
+    selection_hash:
+        IMPHASH:
+            - '767637c23bb42cd5d7397cf58b0be688'
+            - '14c4e4c72ba075e9069ee67f39188ad8'
+            - '3c782813d4afce07bbfc5a9772acdbdc'
+            - '7d010c6bb6a3726f327f7e239166d127'
+            - '89159ba4dd04e4ce5559f132a9964eb3'
+            - '6f33f4a5fc42b8cec7314947bd13f30f'
+            - '5834ed4291bdeb928270428ebbaf7604'
+            - '5a8a8a43f25485e7ee1b201edcbc7a38'
+            - 'dc7d30b90b2d8abf664fbed2b1b59894'
+            - '41923ea1f824fe63ea5beb84db7a3e74'
+            - '3de09703c8e79ed2ca3f01074719906b'
+    condition: 1 of selection*
+falsepositives:
+    - Unknown
+level: high

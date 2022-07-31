@@ -1,0 +1,25 @@
+title: Registry Persistence Mechanisms in Recycle Bin
+id: 277efb8f-60be-4f10-b4d3-037802f37167
+status: experimental
+description: Detects persistence registry keys for Recycle Bin
+references:
+    - https://github.com/vxunderground/VXUG-Papers/blob/751edb8d50f95bd7baa730adf2c6c3bb1b034276/The%20Persistence%20Series/Persistence%20via%20Recycle%20Bin/Persistence_via_Recycle_Bin.pdf
+date: 2021/11/18
+author: frack113
+logsource:
+    category: registry_event
+    product: windows
+detection:
+    selection_create:
+        EventType: RenameKey
+        NewName: HKCR\CLSID\{645FF040-5081-101B-9F08-00AA002F954E}\shell\open
+    selection_set:
+        EventType: SetValue
+        TargetObject: HKCR\CLSID\{645FF040-5081-101B-9F08-00AA002F954E}\shell\open\command\(Default)
+    condition: 1 of selection_*
+tags:
+    - attack.persistence
+    - attack.t1547
+falsepositives:
+    - Unknown
+level: high

@@ -1,0 +1,27 @@
+title: Blue Mockingbird
+id: 92b0b372-a939-44ed-a11b-5136cf680e27
+related:
+    - id: c3198a27-23a0-4c2c-af19-e5328d49680e
+      type: derived
+date: 2020/05/14
+modified: 2022/06/26
+status: experimental
+description: Attempts to detect system changes made by Blue Mockingbird
+references:
+    - https://redcanary.com/blog/blue-mockingbird-cryptominer/
+author: Trent Liffick (@tliffick)
+logsource:
+  product: windows
+  category: registry_set
+detection:
+  selection:
+    EventType: Setvalue
+    TargetObject|endswith: '\CurrentControlSet\Services\wercplsupport\Parameters\ServiceDll'
+  condition: selection
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.execution
+    - attack.t1112
+    - attack.t1047

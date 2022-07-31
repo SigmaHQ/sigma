@@ -1,0 +1,30 @@
+title: Encoded FromBase64String
+id: fdb62a13-9a81-4e5c-a38f-ea93a16f6d7c
+status: test
+description: Detects a base64 encoded FromBase64String keyword in a process command line
+author: Florian Roth
+date: 2019/08/24
+modified: 2022/03/07
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    - CommandLine|base64offset|contains: '::FromBase64String'
+    # UTF-16 LE
+    - CommandLine|contains:
+      - 'OgA6AEYAcgBvAG0AQgBhAHMAZQA2ADQAUwB0AHIAaQBuAGcA'
+      - 'oAOgBGAHIAbwBtAEIAYQBzAGUANgA0AFMAdAByAGkAbgBnA'
+      - '6ADoARgByAG8AbQBCAGEAcwBlADYANABTAHQAcgBpAG4AZw'
+  condition: selection
+fields:
+  - CommandLine
+  - ParentCommandLine
+falsepositives:
+  - Unknown
+level: high
+tags:
+  - attack.defense_evasion
+  - attack.t1140
+  - attack.execution
+  - attack.t1059.001

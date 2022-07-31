@@ -1,0 +1,34 @@
+title: Local System Accounts Discovery
+id: b45e3d6f-42c6-47d8-a478-df6bd6cf534c
+status: test
+description: Detects enumeration of local systeam accounts. This information can help adversaries determine which local accounts exist on a system to aid in follow-on behavior.
+author: Alejandro Ortuno, oscd.community
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1087.001/T1087.001.md
+date: 2020/10/08
+modified: 2022/07/07
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_1:
+        Image|endswith: '/lastlog'
+    selection_2:
+        CommandLine|contains: '''x:0:'''
+    selection_3:
+        Image|endswith: '/cat'
+        CommandLine|contains:
+            - '/etc/passwd'
+            - '/etc/sudoers'
+    selection_4:
+        Image|endswith: '/id'
+    selection_5:
+        Image|endswith: '/lsof'
+        CommandLine|contains: '-u'
+    condition: 1 of selection*
+falsepositives:
+    - Legitimate administration activities
+level: low
+tags:
+    - attack.discovery
+    - attack.t1087.001

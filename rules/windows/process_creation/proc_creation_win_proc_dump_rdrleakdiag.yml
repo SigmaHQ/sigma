@@ -1,0 +1,29 @@
+title: RdrLeakDiag Process Dump
+id: 6355a919-2e97-4285-a673-74645566340d
+description: Detects uses of the rdrleakdiag.exe LOLOBIN utility to dump process memory 
+status: experimental
+references:
+    - https://www.crowdstrike.com/blog/overwatch-exposes-aquatic-panda-in-possession-of-log-4-shell-exploit-tools/
+author: Florian Roth
+date: 2022/01/04
+modified: 2022/05/10
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+    - attack.t1003.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Image|endswith: '\rdrleakdiag.exe'
+        CommandLine|contains: '/fullmemdmp'
+    selection2:
+        CommandLine|contains|all:
+            - '/fullmemdmp'
+            - ' /o '
+            - ' /p '
+    condition: selection1 or selection2
+falsepositives:
+    - Unknown
+level: high

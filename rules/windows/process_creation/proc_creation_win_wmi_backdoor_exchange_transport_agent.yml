@@ -1,0 +1,25 @@
+title: WMI Backdoor Exchange Transport Agent
+id: 797011dc-44f4-4e6f-9f10-a8ceefbe566b
+status: test
+description: Detects a WMI backdoor in Exchange Transport Agents via WMI event filters
+author: Florian Roth
+references:
+  - https://twitter.com/cglyer/status/1182389676876980224
+  - https://twitter.com/cglyer/status/1182391019633029120
+date: 2019/10/11
+modified: 2022/03/18
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    ParentImage|endswith: '\EdgeTransport.exe'
+  filter:
+    Image: 'C:\Windows\System32\conhost.exe'
+  condition: selection and not filter
+falsepositives:
+  - Unknown
+level: critical
+tags:
+  - attack.persistence
+  - attack.t1546.003

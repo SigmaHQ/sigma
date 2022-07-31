@@ -1,0 +1,30 @@
+title: Possible DC Shadow
+id: 32e19d25-4aed-4860-a55a-be99cb0bf7ed
+description: Detects DCShadow via create new SPN
+status: experimental
+author: Ilyas Ochkov, oscd.community, Chakib Gzenayi (@Chak092), Hosni Mribah
+date: 2019/10/25
+modified: 2021/07/06
+references:
+    - https://github.com/Neo23x0/sigma/blob/ec5bb710499caae6667c7f7311ca9e92c03b9039/rules/windows/builtin/win_dcsync.yml
+    - https://twitter.com/gentilkiwi/status/1003236624925413376
+    - https://gist.github.com/gentilkiwi/dcc132457408cf11ad2061340dcb53c2
+    - https://blog.alsid.eu/dcshadow-explained-4510f52fc19d
+tags:
+    - attack.credential_access
+    - attack.t1207
+logsource:
+    product: windows
+    service: security
+detection:
+    selection1:
+        EventID: 4742
+        ServicePrincipalNames|contains: 'GC/'
+    selection2:
+        EventID: 5136
+        AttributeLDAPDisplayName: servicePrincipalName
+        AttributeValue|startswith: 'GC/'
+    condition: selection1 or selection2
+falsepositives:
+    - Exclude known DCs
+level: high

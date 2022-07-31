@@ -1,0 +1,66 @@
+title: Reg Disable Security Service
+id: 5e95028c-5229-4214-afae-d653d573d0ec
+description: Detects a suspicious reg.exe invocation that looks as if it would disable an important security service
+status: experimental
+references:
+    - https://twitter.com/JohnLaTwC/status/1415295021041979392
+    - https://github.com/gordonbay/Windows-On-Reins/blob/e587ac7a0407847865926d575e3c46f68cf7c68d/wor.ps1
+    - https://vms.drweb.fr/virus/?i=24144899
+    - https://bidouillesecurity.com/disable-windows-defender-in-powershell/
+author: Florian Roth, John Lambert (idea), elhoim
+date: 2021/07/14
+modified: 2022/05/05
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_reg_add:
+        CommandLine|contains|all:
+            - 'reg'
+            - 'add'
+    selection_cli_reg_start:
+        CommandLine|contains|all:
+            - ' /d 4'
+            - ' /v Start'
+        CommandLine|contains:
+            - '\Sense'
+            - '\WinDefend'
+            - '\MsMpSvc'
+            - '\NisSrv'
+            - '\WdBoot'
+            - '\WdNisDrv'
+            - '\WdNisSvc'
+            - '\wscsvc'
+            - '\SecurityHealthService'
+            - '\wuauserv'
+            - '\UsoSvc'
+            - '\WdFilter'
+            - '\AppIDSvc'
+    selection_cli_reg_disable_defender:
+        CommandLine|contains|all:
+            - ' /d 1'
+            - 'Windows Defender'
+        CommandLine|contains:
+            - 'DisableIOAVProtection'
+            - 'DisableOnAccessProtection'
+            - 'DisableRoutinelyTakingAction'
+            - 'DisableScanOnRealtimeEnable'
+            - 'DisableBlockAtFirstSeen'
+            - 'DisableBehaviorMonitoring'
+            - 'DisableEnhancedNotifications'
+            - 'DisableAntiSpyware'
+            - 'DisableAntiSpywareRealtimeProtection'
+            - 'DisableConfig'
+            - 'DisablePrivacyMode'
+            - 'SignatureDisableUpdateOnStartupWithoutEngine'
+            - 'DisableArchiveScanning'
+            - 'DisableIntrusionPreventionSystem'
+            - 'DisableScriptScanning'
+    condition: selection_reg_add and 1 of selection_cli_*
+falsepositives:
+    - Unknown
+    - Other security solution installers
+level: high

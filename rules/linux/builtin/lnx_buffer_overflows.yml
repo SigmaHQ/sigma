@@ -1,0 +1,23 @@
+title: Buffer Overflow Attempts
+id: 18b042f0-2ecd-4b6e-9f8d-aa7a7e7de781
+status: stable
+description: Detects buffer overflow attempts in Unix system log files
+author: Florian Roth
+date: 2017/03/01
+references:
+    - https://github.com/ossec/ossec-hids/blob/1ecffb1b884607cb12e619f9ab3c04f530801083/etc/rules/attack_rules.xml
+logsource:
+    product: linux
+detection:
+    keywords:
+        - 'attempt to execute code on stack by'
+        - 'FTP LOGIN FROM .* 0bin0sh'
+        - 'rpc.statd[\d+]: gethostbyname error for'
+        - 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+    condition: keywords
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.t1068
+    - attack.privilege_escalation

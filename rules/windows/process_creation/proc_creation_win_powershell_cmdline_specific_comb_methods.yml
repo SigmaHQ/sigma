@@ -1,0 +1,50 @@
+title: Encoded PowerShell Command Line
+id: cdf05894-89e7-4ead-b2b0-0a5f97a90f2f
+status: test
+related:
+    - id: 5b572dcf-254b-425c-a8c5-d9af6bea35a6
+      type: similar
+description: Detects specific combinations of encoding methods in the PowerShell command lines
+author: Teymur Kheirkhabarov (idea), Vasiliy Burov (rule), oscd.community, Tim Shelton
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=65
+date: 2020/10/11
+modified: 2022/07/14
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+    selection_to_1:
+        CommandLine|contains:
+            - 'ToInt'
+            - 'ToDecimal'
+            - 'ToByte'
+            - 'ToUint'
+            - 'ToSingle'
+            - 'ToSByte'
+    selection_to_2:
+        CommandLine|contains:
+            - 'ToChar'
+            - 'ToString'
+            - 'String'
+    selection_gen_1:
+        CommandLine|contains|all:
+            - 'char'
+            - 'join'
+    selection_gen_2:
+        CommandLine|contains|all:
+            - 'split'
+            - 'join'
+    condition: selection_img and (all of selection_to_* or 1 of selection_gen_*)
+falsepositives:
+    - Unlikely
+level: low
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001

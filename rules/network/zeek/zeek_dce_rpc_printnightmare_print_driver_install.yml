@@ -1,0 +1,49 @@
+title: Possible PrintNightmare Print Driver Install
+id: 7b33baef-2a75-4ca3-9da4-34f9a15382d8
+related:
+    - id: 53389db6-ba46-48e3-a94c-e0f2cefe1583
+      type: derived
+status: stable
+description: |
+    Detects the remote installation of a print driver which is possible indication of the exploitation of PrintNightmare (CVE-2021-1675).
+    The occurrence of print drivers being installed remotely via RPC functions should be rare, as print drivers are normally installed locally and or through group policy.
+author: '@neu5ron (Nate Guagenti)'
+date: 2021/08/23
+modified: 2022/07/07
+references:
+    - https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-par/93d1915d-4d9f-4ceb-90a7-e8f2a59adc29
+    - https://github.com/zeek/zeek/blob/691b099de13649d6576c7b9d637f8213ff818832/scripts/base/protocols/dce-rpc/consts.zeek
+    - https://msrc.microsoft.com/update-guide/vulnerability/CVE-2021-34527
+    - https://github.com/corelight/CVE-2021-1675
+    - https://old.zeek.org/zeekweek2019/slides/bzar.pdf
+    - https://www.crowdstrike.com/blog/cve-2021-1678-printer-spooler-relay-security-advisory/
+
+tags:
+    - attack.execution
+    - cve.2021.1678
+    - cve.2021.1675
+    - cve.2021.34527
+logsource:
+    product: zeek
+    service: dce_rpc
+detection:
+    selection:
+        operation:
+            - 'RpcAsyncInstallPrinterDriverFromPackage' # "76f03f96-cdfd-44fc-a22c-64950a001209",0x3e
+            - 'RpcAsyncAddPrintProcessor' # "76f03f96-cdfd-44fc-a22c-64950a001209",0x2c
+            - 'RpcAddPrintProcessor' # "12345678-1234-abcd-ef00-0123456789ab",0x0e
+            - 'RpcAddPrinterDriverEx' # "12345678-1234-abcd-ef00-0123456789ab",0x59
+            - 'RpcAddPrinterDriver' # "12345678-1234-abcd-ef00-0123456789ab",0x09
+            - 'RpcAsyncAddPrinterDriver' # "76f03f96-cdfd-44fc-a22c-64950a001209",0x27
+    condition: selection
+fields:
+    - id.orig_h
+    - id.resp_h
+    - id.resp_p
+    - operation
+    - endpoint
+    - named_pipe
+    - uid
+falsepositives:
+    - Legitimate remote alteration of a printer driver.
+level: medium

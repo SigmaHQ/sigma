@@ -1,0 +1,47 @@
+title: Suspicious DNS Query for IP Lookup Service APIs
+id: ec82e2a5-81ea-4211-a1f8-37a0286df2c2
+description: Detects DNS queries for ip lookup services such as api.ipify.org not originating from a browser process.
+status: experimental
+date: 2021/07/08
+modified: 2021/09/10
+author: Brandon George (blog post), Thomas Patzke (rule)
+references:
+    - https://www.binarydefense.com/analysis-of-hancitor-when-boring-begets-beacon
+    - https://twitter.com/neonprimetime/status/1436376497980428318
+tags:
+    - attack.reconnaissance
+    - attack.t1590
+falsepositives:
+    - Legitimate usage of ip lookup services such as ipify API
+level: medium
+logsource:
+    product: windows
+    category: dns_query
+detection:
+    dns_request:
+        QueryName: 
+            - canireachthe.net
+            - ipv4.icanhazip.com
+            - ip.anysrc.net
+            - edns.ip-api.com
+            - wtfismyip.com
+            - checkip.dyndns.org
+            - api.2ip.ua
+            - icanhazip.com
+            - api.ipify.org
+            - ip-api.com
+            - checkip.amazonaws.com
+            - ipecho.net
+            - ipinfo.io
+            - ipv4bot.whatismyipaddress.com
+            - freegeoip.app
+    browser_process:
+        Image|endswith:
+            - \chrome.exe
+            - \iexplore.exe
+            - \firefox.exe
+            - \brave.exe
+            - \opera.exe
+            - \msedge.exe
+            - \vivaldi.exe
+    condition: dns_request and not browser_process

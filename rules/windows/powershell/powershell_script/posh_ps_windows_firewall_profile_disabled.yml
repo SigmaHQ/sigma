@@ -1,0 +1,30 @@
+title: Windows Firewall Profile Disabled
+id: 488b44e7-3781-4a71-888d-c95abfacf44d
+description: Detects when a user disables the Windows Firewall via a Profile to help evade defense.
+status: experimental
+author: Austin Songer @austinsonger
+date: 2021/10/12
+modified: 2021/10/16
+references:
+    - https://docs.microsoft.com/en-us/powershell/module/netsecurity/set-netfirewallprofile?view=windowsserver2019-ps
+    - https://www.tutorialspoint.com/how-to-get-windows-firewall-profile-settings-using-powershell
+    - http://powershellhelp.space/commands/set-netfirewallrule-psv5.php
+    - http://woshub.com/manage-windows-firewall-powershell/
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - Set-NetFirewallProfile
+            - -Profile
+            - -Enabled
+            - 'False'
+    condition: selection
+tags:
+    - attack.defense_evasion
+    - attack.t1562.004
+level: high
+falsepositives:
+    - Unknown

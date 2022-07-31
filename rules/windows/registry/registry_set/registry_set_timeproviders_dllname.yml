@@ -1,0 +1,27 @@
+title: Set TimeProviders DllName
+id: e88a6ddc-74f7-463b-9b26-f69fc0d2ce85
+status: experimental
+description: |
+    Detects processes setting a new DLL in DllName in under HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\W32Time\TimeProvider. Adversaries may abuse time providers to execute DLLs when the system boots. The Windows Time service (W32Time) enables time synchronization across and within domains.
+author: frack113
+date: 2022/06/19
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1547.003/T1547.003.md
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|startswith: 'HKLM\System\CurrentControlSet\Services\W32Time\TimeProviders'
+        TargetObject|endswith: 'DllName'
+    filter:
+        Details: 'C:\Windows\SYSTEM32\w32time.DLL'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1547.003

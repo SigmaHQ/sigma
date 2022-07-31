@@ -1,0 +1,30 @@
+title: Registry-Free Process Scope COR_PROFILER
+id: 23590215-4702-4a70-8805-8dc9e58314a2
+status: experimental
+description: |
+    Adversaries may leverage the COR_PROFILER environment variable to hijack the execution flow of programs that load the .NET CLR.
+    The COR_PROFILER is a .NET Framework feature which allows developers to specify an unmanaged (or external of .NET) profiling DLL to be loaded into each .NET process that loads the Common Language Runtime (CLR).
+    These profiliers are designed to monitor, troubleshoot, and debug managed code executed by the .NET CLR.
+    (Citation: Microsoft Profiling Mar 2017)
+    (Citation: Microsoft COR_PROFILER Feb 2013)
+author: frack113
+date: 2021/12/30
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1574.012/T1574.012.md#atomic-test-3---registry-free-process-scope-cor_profiler
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - '$env:COR_ENABLE_PROFILING'
+            - '$env:COR_PROFILER'
+            - '$env:COR_PROFILER_PATH'
+    condition: selection
+falsepositives:
+  - Legitimate administrative script
+level: medium
+tags:
+  - attack.persistence
+  - attack.t1574.012

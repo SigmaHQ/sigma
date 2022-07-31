@@ -1,0 +1,31 @@
+title: Deletes Backup Files
+id: 06125661-3814-4e03-bfa2-1e4411c60ac3
+status: experimental
+description: Adversaries may delete or remove built-in operating system data and turn off services designed to aid in the recovery of a corrupted system to prevent recovery.
+author: frack113
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1490/T1490.md#atomic-test-6---windows---delete-backup-files
+date: 2022/01/02
+modified: 2022/06/02
+logsource:
+    product: windows
+    category: file_delete
+detection:
+    selection:
+        Image|endswith: '\cmd.exe'
+        TargetFilename|endswith:
+            - '.VHD'
+            - '.bac'
+            - '.bak'
+            - '.wbcat'
+            - '.bkf'
+            - '.set'
+            - '.win'
+            - '.dsk'
+    condition: selection
+falsepositives:
+    - Legitime usage
+level: medium
+tags:
+    - attack.impact
+    - attack.t1490

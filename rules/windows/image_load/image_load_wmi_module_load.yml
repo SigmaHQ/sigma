@@ -1,0 +1,66 @@
+title: WMI Modules Loaded
+id: 671bb7e3-a020-4824-a00e-2ee5b55f385e
+description: Detects non wmiprvse loading WMI modules
+status: experimental
+date: 2019/08/10
+modified: 2022/01/12
+author: Roberto Rodriguez @Cyb3rWard0g
+references:
+    - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190811201010.html
+tags:
+    - attack.execution
+    - attack.t1047
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection: 
+        ImageLoaded|endswith:
+            - '\wmiclnt.dll'
+            - '\WmiApRpl.dll'
+            - '\wmiprov.dll'
+            - '\wmiutils.dll'
+            - '\wbemcomn.dll'
+            - '\wbemprox.dll'
+            - '\WMINet_Utils.dll'
+            - '\wbemsvc.dll'
+            - '\fastprox.dll'
+    filter:
+        Image|endswith:
+            - '\WmiPrvSE.exe'
+            - '\WmiApSrv.exe'
+            - '\svchost.exe'
+            - '\DeviceCensus.exe'
+            - '\CompatTelRunner.exe'
+            - '\sdiagnhost.exe'
+            - '\SIHClient.exe'
+            - '\ngentask.exe'  # c:\Windows\Microsoft.NET\Framework(64)\ngentask.exe
+            - '\windows\system32\taskhostw.exe'  # c:\windows\system32\taskhostw.exe
+            - '\windows\system32\MoUsoCoreWorker.exe'  # c:\windows\System32\MoUsoCoreWorker.exe on win10 20H04 at least
+            - '\windows\system32\wbem\WMIADAP.exe'  # https://github.com/SigmaHQ/sigma/issues/1871
+            - 'C:\Windows\Sysmon64.exe'
+            - 'C:\Windows\Sysmon.exe'
+            - 'C:\Windows\System32\wbem\unsecapp.exe'
+            - '\logman.exe'
+            - '\systeminfo.exe'
+            - '\nvcontainer.exe'
+            - 'C:\Windows\System32\wbem\WMIC.exe'
+            - '\explorer.exe'
+            - '\opera_autoupdate.exe'
+            - '\MsMpEng.exe'
+            - '\thor64.exe'
+            - '\thor.exe'
+    filter_generic:             # rule caused many false positives in different productive environments - using this filter to exclude all programs that run from folders that only the administrative groups should have access to
+        Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    condition: selection and not filter and not filter_generic
+fields:
+    - ComputerName
+    - User
+    - Image
+    - ImageLoaded
+falsepositives:
+    - Unknown
+level: informational  # too many false positives
+

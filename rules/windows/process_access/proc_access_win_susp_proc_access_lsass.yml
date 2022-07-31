@@ -1,0 +1,106 @@
+title: Suspicious GrantedAccess Flags on LSASS Access
+id: a18dd26b-6450-46de-8c91-9659150cf088
+related:
+  - id: 32d0d3e2-e58d-4d41-926b-18b520b2b32d
+    type: obsoletes
+status: experimental
+description: Detects process access to LSASS memory with suspicious access flags
+author: Florian Roth
+date: 2021/11/22
+modified: 2022/06/20
+references:
+    - https://docs.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights
+    - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
+    - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
+    - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
+    - http://security-research.dyndns.org/pub/slides/FIRST2017/FIRST-2017_Tom-Ueltschi_Sysmon_FINAL_notes.pdf
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+    - attack.s0002
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        TargetImage|endswith: '\lsass.exe'
+        GrantedAccess|endswith:
+            # - '10'  # covered in rule 678dfc63-fefb-47a5-a04c-26bcf8cc9f65
+            - '30'
+            - '50'
+            - '70'
+            - '90'
+            - 'B0'
+            - 'D0'
+            - 'F0'
+            - '18'
+            - '38'
+            - '58'
+            - '78'
+            - '98'
+            - 'B8'
+            - 'D8'
+            - 'F8'
+            - '1A'
+            - '3A'
+            - '5A'
+            - '7A'
+            - '9A'
+            - 'BA'
+            - 'DA'
+            - 'FA'
+            - '0x14C2'  # https://github.com/b4rtik/ATPMiniDump/blob/76304f93b390af3bb66e4f451ca16562a479bdc9/ATPMiniDump/ATPMiniDump.c
+    # Absolute paths to programs that cause false positives
+    filter_absolute:
+        SourceImage:
+            - 'C:\WINDOWS\system32\taskmgr.exe'
+            - 'C:\Program Files\Malwarebytes\Anti-Malware\MBAMService.exe'
+            - 'C:\PROGRAMDATA\MALWAREBYTES\MBAMSERVICE\ctlrupdate\mbupdatr.exe'
+            - 'C:\WINDOWS\system32\taskhostw.exe'
+            - 'C:\Users\\*\AppData\Local\Programs\Microsoft VS Code\Code.exe'
+            - 'C:\Program Files\Windows Defender\MsMpEng.exe'
+            - 'C:\Windows\SysWOW64\msiexec.exe'
+            - 'C:\Windows\System32\msiexec.exe'
+            - 'C:\Windows\System32\lsass.exe'
+            - 'C:\WINDOWS\System32\perfmon.exe'
+            - 'C:\Windows\System32\MRT.exe'
+            - 'C:\Program Files\Cisco\Cisco AnyConnect Secure Mobility Client\vpnagent.exe'
+            - 'C:\Program Files (x86)\Cisco\Cisco AnyConnect Secure Mobility Client\vpnagent.exe'
+    # Windows Defender
+    filter1:
+        SourceImage|startswith: 'C:\ProgramData\Microsoft\Windows Defender\'
+        SourceImage|endswith: '\MsMpEng.exe'
+    # VMware Tools
+    filter2:
+        SourceImage|startswith: 'C:\ProgramData\VMware\VMware Tools\'
+        SourceImage|endswith: '\vmtoolsd.exe'
+    # Antivirus and EDR agents
+    filter3:
+        SourceImage|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+        SourceImage|contains: 'Antivirus'
+    filter_mrt:
+        SourceImage: 'C:\WINDOWS\system32\MRT.exe'
+        GrantedAccess: '0x1418'
+    filter_mcafee:
+        SourceImage: 'C:\Program Files\Common Files\McAfee\MMSSHost\MMSSHOST.exe'
+    filter_nextron:
+        SourceImage|startswith: 'C:\Windows\Temp\asgard2-agent\'
+        SourceImage|endswith:
+            - '\thor64.exe'
+            - '\thor.exe'
+        GrantedAccess: '0x1fffff'
+    filter_windefend2:
+        CallTrace|contains|all:
+            - '|C:\ProgramData\Microsoft\Windows Defender\Definition Updates\{'
+            - '}\mpengine.dll+'
+        GrantedAccess: '0x1418'
+    condition: selection and not 1 of filter*
+fields:
+    - User
+    - SourceImage
+    - GrantedAccess
+falsepositives:
+    - Legitimate software accessing LSASS process for legitimate reason
+level: high

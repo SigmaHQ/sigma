@@ -1,0 +1,24 @@
+title: New Shim Database Created in the Default Directory
+id: ee63c85c-6d51-4d12-ad09-04e25877a947
+status: experimental
+description: |
+  Adversaries may establish persistence and/or elevate privileges by executing malicious content triggered by application shims.
+  The Microsoft Windows Application Compatibility Infrastructure/Framework (Application Shim) was created to allow for backward compatibility of software as the operating system codebase changes over time.
+author: frack113
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1546.011/T1546.011.md#atomic-test-2---new-shim-database-files-created-in-the-default-shim-database-directory
+date: 2021/12/29
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename|endswith: '.sdb'
+        TargetFilename|contains: '\Windows\apppatch\Custom\'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.persistence
+    - attack.t1547.009

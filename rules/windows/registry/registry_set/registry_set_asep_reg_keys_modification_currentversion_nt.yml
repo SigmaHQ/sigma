@@ -1,0 +1,88 @@
+title: CurrentVersion NT Autorun Keys Modification
+id: cbf93e5d-ca6c-4722-8bea-e9119007c248
+related:
+    - id: 17f878b8-9968-4578-b814-c4217fc5768c
+      type: derived
+status: experimental
+description: Detects modification of autostart extensibility point (ASEP) in registry.
+author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split)
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1547.001/T1547.001.md
+    - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
+    - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
+date: 2019/10/25
+modified: 2022/07/05
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    nt_current_version_base:
+        EventType: SetValue
+        TargetObject|contains: '\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
+    nt_current_version:
+        TargetObject|contains:
+            - '\Winlogon\VmApplet'
+            - '\Winlogon\Userinit'
+            - '\Winlogon\Taskman'
+            - '\Winlogon\Shell'
+            - '\Winlogon\GpExtensions'
+            - '\Winlogon\AppSetup'
+            - '\Winlogon\AlternateShells\AvailableShells'
+            - '\Windows\IconServiceLib'
+            - '\Windows\Appinit_Dlls'
+            - '\Image File Execution Options'
+            - '\Font Drivers'
+            - '\Drivers32'
+            - '\Windows\Run'
+            - '\Windows\Load'
+    filter_empty:
+        Details: '(Empty)'
+    filter_legitimate_subkey:  # Legitimately used subkeys of \Image File Execution Options, which are not used for persistence (see https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)
+        TargetObject|contains: '\Image File Execution Options\'
+        TargetObject|endswith:
+            - '\DisableExceptionChainValidation'
+            - '\MitigationOptions'
+    filter_edge:
+        Image|startswith: 'C:\Program Files (x86)\Microsoft\Temp\'
+        Image|endswith: '\MicrosoftEdgeUpdate.exe'
+    filter_msoffice:
+        - TargetObject|contains:
+            - '\ClickToRunStore\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\'
+            - '\ClickToRun\REGISTRY\MACHINE\Software\Microsoft\Windows NT\CurrentVersion\'
+        - Image:
+            - 'C:\Program Files\Microsoft Office\root\integration\integrator.exe'
+            - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
+    filter_officeclicktorun:
+        Image|startswith:
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
+        Image|endswith: '\OfficeClickToRun.exe'
+    filter_security_extension_dc:
+        Image: 'C:\Windows\system32\svchost.exe'
+        TargetObject|contains:
+            - '\Winlogon\GPExtensions\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\PreviousPolicyAreas'
+            - '\Winlogon\GPExtensions\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\MaxNoGPOListChangesInterval'
+        Details:
+            - 'DWORD (0x00000009)'
+            - 'DWORD (0x000003c0)'
+    filter_ngen:
+        Image|startswith: 'C:\Windows\Microsoft.NET\Framework'
+        Image|endswith: '\ngen.exe'
+    filter_onedrive:
+        Image|endswith: '\AppData\Local\Microsoft\OneDrive\StandaloneUpdater\OneDriveSetup.exe'
+        TargetObject|endswith: '\Microsoft\Windows\CurrentVersion\RunOnce\Delete Cached Update Binary'
+        Details|startswith: 'C:\Windows\system32\cmd.exe /q /c del /q "C:\Users\'
+        Details|endswith: '\AppData\Local\Microsoft\OneDrive\Update\OneDriveSetup.exe"'
+    condition: nt_current_version_base and nt_current_version and not 1 of filter_*
+fields:
+    - SecurityID
+    - ObjectName
+    - OldValueType
+    - NewValueType
+falsepositives:
+    - Legitimate software automatically (mostly, during installation) sets up autorun keys for legitimate reason
+    - Legitimate administrator sets up autorun keys for legitimate reason
+level: medium
+tags:
+    - attack.persistence
+    - attack.t1547.001

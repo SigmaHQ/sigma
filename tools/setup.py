@@ -1,5 +1,5 @@
 # Setup module for Sigma toolchain
-# derived from example at https://github.com/pypa/sampleproject/blob/master/setup.py
+# derived from example at https://github.com/pypa/sampleproject/blob/918bd331501de42be32666bd5140d04d00b39386/setup.py
 from setuptools import setup, find_packages
 # To use a consistent encoding
 from codecs import open
@@ -14,7 +14,7 @@ with open(path.join(here, 'LONG_DESCRIPTION.md'), encoding='utf-8') as f:
 
 setup(
     name='sigmatools',
-    version='0.19.1',
+    version='0.21.0',
     description='Tools for the Generic Signature Format for SIEM Systems',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -30,9 +30,8 @@ setup(
         'Topic :: Security',
         'Topic :: Internet :: Log Analysis',
         'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Environment :: Console',
     ],
     keywords='security monitoring siem logging signatures elasticsearch splunk ids sysmon',
@@ -43,10 +42,10 @@ setup(
         'sigma.parser',
         'sigma.parser.modifiers',
         ],
-    python_requires='~=3.6',
-    install_requires=['PyYAML', 'pymisp', 'progressbar2'],
+    python_requires='~=3.8',
+    install_requires=['PyYAML', 'pymisp', 'progressbar2', 'ruamel.yaml'],
     extras_require={
-        'test': ['coverage', 'yamllint'],
+        'test': ['coverage', 'yamllint', 'attackcti'],
     },
     data_files=[
         ('etc/sigma', [ str(p) for p in Path('config/').glob('*.yml') ]),

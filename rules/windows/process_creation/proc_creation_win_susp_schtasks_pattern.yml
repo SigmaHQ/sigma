@@ -1,0 +1,50 @@
+title: Suspicious Add Scheduled Command Pattern
+id: f2c64357-b1d2-41b7-849f-34d2682c0fad
+description: Detects suspicious scheduled task creations with commands that are uncommon
+status: experimental
+references:
+   - https://app.any.run/tasks/512c1352-6380-4436-b27d-bb62f0c020d6/
+tags:
+   - attack.execution
+   - attack.t1053.005
+author: Florian Roth
+date: 2022/02/23
+modified: 2022/06/02
+logsource:
+   product: windows
+   category: process_creation
+detection:
+   selection_schtasks:
+      Image|endswith: '\schtasks.exe'
+      CommandLine|contains: '/Create '
+   selection_pattern1:
+      CommandLine|contains:
+         - '/sc minute '
+         - '/ru system '
+   selection_pattern2:
+      CommandLine|contains:
+         - 'cmd.exe /c '
+         - 'cmd /c'
+   selection_rare:
+      CommandLine|contains:
+         - ' bypass '
+         - '.DownloadString'
+         - '.DownloadFile'
+         - 'FromBase64String'
+         - ' -w hidden '
+         - ' IEX'
+         - ' -enc '
+         - ' -decode '
+         - '/c start /min '   # https://twitter.com/RedDrip7/status/1506480588827467785
+         - ' curl '           # https://twitter.com/RedDrip7/status/1506480588827467785
+   selection_anomaly:
+      - CommandLine|contains|all:
+         - '/xml C:\Users\'
+         - '\AppData\Local\'
+      - CommandLine|contains|all:
+         - 'wscript.exe'
+         - '\AppData\'
+   condition: selection_schtasks and ( all of selection_pattern* or selection_rare or selection_anomaly )
+falsepositives:
+   - Software installers that run from temporary folders and also install scheduled tasks
+level: high

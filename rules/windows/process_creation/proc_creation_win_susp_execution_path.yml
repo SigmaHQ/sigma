@@ -1,0 +1,49 @@
+title: Execution from Suspicious Folder
+id: 3dfd06d2-eaf4-4532-9555-68aca59f57c4
+status: experimental
+description: Detects a suspicious execution from an uncommon folder
+author: Florian Roth, Tim Shelton
+date: 2019/01/16
+modified: 2022/05/26
+references:
+    - https://github.com/mbevilacqua/appcompatprocessor/blob/6c847937c5a836e2ce2fe2b915f213c345a3c389/AppCompatSearch.txt
+    - https://www.secureworks.com/research/bronze-butler-targets-japanese-businesses
+    - https://www.crowdstrike.com/resources/reports/2019-crowdstrike-global-threat-report/
+    - https://github.com/ThreatHuntingProject/ThreatHunting/blob/cb22598bb70651f88e0285abc8d835757d2cb596/hunts/suspicious_process_creation_via_windows_event_logs.md
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|contains:
+            - '\$Recycle.bin\'
+            - '\config\systemprofile\'
+            - '\Intel\Logs\'
+            - '\RSA\MachineKeys\'
+            - '\Users\All Users\'
+            - '\Users\Default\'
+            - '\Users\NetworkService\'
+            - '\Users\Public\'
+            - '\Windows\addins\'
+            - '\Windows\debug\'
+            - '\Windows\Fonts\'
+            - '\Windows\Help\'
+            - '\Windows\IME\'
+            - '\Windows\Media\'
+            - '\Windows\repair\'
+            - '\Windows\security\'
+            - '\Windows\System32\Tasks\'
+            - '\Windows\Tasks\'
+        - Image|startswith: 'C:\Perflogs\'
+    false_positive:
+        Image|startswith: 'C:\Users\Public\IBM\ClientSolutions\Start_Programs\'
+    condition: selection and not false_positive
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Unknown
+level: high

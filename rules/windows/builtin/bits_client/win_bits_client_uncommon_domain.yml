@@ -1,0 +1,30 @@
+title: Suspicious Download with BITS from Suspicious TLD
+id: 6d44fb93-e7d2-475c-9d3d-54c9c1e33427
+status: experimental
+description: Detects a suspicious download using the BITS client from a FQDN that is unusual. Adversaries may abuse BITS jobs to persistently execute or clean up after malicious payloads.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1197/T1197.md
+    - https://twitter.com/malmoeb/status/1535142803075960832
+author: Florian Roth
+date: 2022/06/10
+modified: 2022/06/28
+logsource:
+    product: windows
+    service: bits-client
+detection:
+    selection:
+        EventID: 16403
+    filter:
+        RemoteName|contains:
+            - '.com'
+            - '.azureedge.net'
+            - '.sfx.ms'
+            - 'download.mozilla.org' # https://download.mozilla.org/?product=firefox-101.0.1-partial-101.0&amp;os=win64&amp;lang=en-US
+    condition: selection and not filter
+falsepositives:
+    - Other legitimate domains used by software updaters
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.persistence
+    - attack.t1197

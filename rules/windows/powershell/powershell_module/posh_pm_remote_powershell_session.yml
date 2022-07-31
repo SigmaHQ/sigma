@@ -1,0 +1,30 @@
+title: Remote PowerShell Session (PS Module)
+id: 96b9f619-aa91-478f-bacb-c3e50f8df575
+description: Detects remote PowerShell sessions
+status: test
+date: 2019/08/10
+modified: 2022/06/20
+author: Roberto Rodriguez @Cyb3rWard0g, Tim Shelton
+references:
+    - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190511223310.html
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.lateral_movement
+    - attack.t1021.006
+logsource:
+    product: windows
+    category: ps_module
+    definition: PowerShell Module Logging must be enabled
+detection:
+    selection:
+        ContextInfo|contains|all:
+            - ' = ServerRemoteHost ' #  HostName: 'ServerRemoteHost'  french : Nom d’hôte = 
+            - 'wsmprovhost.exe'      #  HostApplication|contains: 'wsmprovhost.exe' french  Application hôte = 
+    false_positive_1:
+        ContextInfo|contains: '\Windows\system32\WindowsPowerShell\v1.0\Modules\Microsoft.PowerShell.Archive\Microsoft.PowerShell.Archive.psm1'
+    condition: selection and not 1 of false_positive*
+
+falsepositives:
+    - Legitimate use remote PowerShell sessions
+level: high

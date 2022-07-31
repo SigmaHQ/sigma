@@ -1,0 +1,37 @@
+title: Process Start From Suspicious Folder
+id: dca91cfd-d7ab-4c66-8da7-ee57d487b35b
+status: experimental
+description: Detects process start from rare or uncommon folders like temporary folder or folders that usually don't contain executable files
+references:
+    - Malware sandbox results
+author: frack113
+date: 2022/02/11
+modified: 2022/07/27
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|contains:
+            - '\Desktop\'
+            - '\Temp\'
+            - '\Temporary Internet'
+    filter_parent:
+        - ParentImage: 
+            - 'C:\Windows\System32\cleanmgr.exe'
+            - 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\resources\app\ServiceHub\Services\Microsoft.VisualStudio.Setup.Service\BackgroundDownload.exe'
+            - 'C:\Windows\System32\dxgiadaptercache.exe'
+        - ParentImage|startswith: 'C:\Program Files (x86)\NVIDIA Corporation\'
+    filter_other:
+        Image|endswith: 'setup.exe'  # the missing \ at the beginning is intended - to cover e.g. MySoftwareSetup.exe as well
+    filter_edge:
+        Image|startswith: 'C:\Program Files (x86)\Microsoft\Temp\'
+        Image|endswith: '.tmp\MicrosoftEdgeUpdate.exe'
+        #OriginalFileName: msedgeupdate.dll
+    condition: selection and not 1 of filter*
+falsepositives:
+    - Unknown
+level: low
+tags:
+    - attack.execution
+    - attack.t1204

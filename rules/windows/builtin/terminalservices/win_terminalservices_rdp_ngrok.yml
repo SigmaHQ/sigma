@@ -1,0 +1,23 @@
+title: Ngrok Usage with Remote Desktop Service
+id: 64d51a51-32a6-49f0-9f3d-17e34d640272
+description: Detects cases in which ngrok, a reverse proxy tool, forwards events to the local RDP port, which could be a sign of malicious behaviour
+author: Florian Roth
+status: experimental
+references:
+    - https://twitter.com/tekdefense/status/1519711183162556416?s=12&t=OTsHCBkQOTNs1k3USz65Zg
+    - https://ngrok.com/
+date: 2022/04/29
+tags:
+    - attack.command_and_control
+    - attack.t1090
+logsource:
+    product: windows
+    service: terminalservices-localsessionmanager
+detection:
+    selection:
+        EventID: 21
+        Address|contains: '16777216'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

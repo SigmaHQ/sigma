@@ -1,0 +1,48 @@
+title: Suspicious Service Installation
+id: 1d61f71d-59d2-479e-9562-4ff5f4ead16b
+status: experimental
+description: Detects suspicious service installation commands
+author: pH-T
+date: 2022/03/18
+modified: 2022/05/02
+logsource:
+  product: windows
+  service: system
+detection:
+  selection:
+    Provider_Name: 'Service Control Manager'
+    EventID: 7045
+  suspicious1:
+    ImagePath|contains:
+      - ' -w hidden '
+      - ' -nop '
+      - ' -sta '
+      - '\Users\Public\'
+      - '\Windows\Temp\'
+      - '\Perflogs\'
+      - '\\\\.\\pipe'
+      - '\ADMIN$\'
+      - '.downloadstring('  # PowerShell download command
+      - '.downloadfile('  # PowerShell download command
+  suspicious2a:
+    ImagePath|contains: ' -e'
+  suspicious2b:
+    ImagePath|contains:
+        - ' JAB'  # PowerShell encoded commands
+        - ' SUVYI'  # PowerShell encoded commands
+        - ' SQBFAFgA'  # PowerShell encoded commands
+        - ' aWV4I'  # PowerShell encoded commands
+        - ' IAB'  # PowerShell encoded commands
+        - ' PAA'  # PowerShell encoded commands
+        - ' aQBlAHgA'  # PowerShell encoded commands
+  filter_thor_remote:
+      ImagePath|startswith: 'C:\WINDOWS\TEMP\thor10-remote\thor64.exe'
+  condition: selection and ( suspicious1 or all of suspicious2* ) and not 1 of filter_*
+falsepositives:
+  - Unknown
+level: high
+tags:
+  - attack.persistence
+  - attack.privilege_escalation
+  - car.2013-09-005
+  - attack.t1543.003

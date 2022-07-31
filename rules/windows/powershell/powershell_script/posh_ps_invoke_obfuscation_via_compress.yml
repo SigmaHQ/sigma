@@ -1,0 +1,31 @@
+title: Invoke-Obfuscation COMPRESS OBFUSCATION
+id: 20e5497e-331c-4cd5-8d36-935f6e2a9a07
+description: Detects Obfuscated Powershell via COMPRESS OBFUSCATION
+status: experimental
+author: Timur Zinniatullin, oscd.community
+date: 2020/10/18
+modified: 2022/03/08
+references:
+    - https://github.com/Neo23x0/sigma/issues/1009 #(Task 19)
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection_4104:
+        ScriptBlockText|contains|all: 
+            - 'new-object'
+            - 'text.encoding]::ascii'
+        ScriptBlockText|contains: 
+            - 'system.io.compression.deflatestream'
+            - 'system.io.streamreader'
+        ScriptBlockText|endswith: 'readtoend'
+    condition: selection_4104
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001

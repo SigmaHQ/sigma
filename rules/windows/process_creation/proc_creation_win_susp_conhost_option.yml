@@ -1,0 +1,25 @@
+title: Suspicious Conhost Legacy Option
+id: 3037d961-21e9-4732-b27a-637bcc7bf539
+status: experimental
+description: ForceV1 asks for information directly from the kernel space. Conhost connects to the console application
+references:
+    - https://cybercryptosec.medium.com/covid-19-cyber-infection-c615ead7c29
+    - https://thedfirreport.com/2022/04/04/stolen-images-campaign-ends-in-conti-ransomware/
+author: frack113
+date: 2022/04/04
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        CommandLine|contains|all:
+            - 'conhost.exe'
+            - '0xffffffff'
+            - '-ForceV1'
+    condition: selection
+falsepositives:
+    - Unknown
+level: informational
+tags:
+    - attack.defense_evasion
+    - attack.t1202

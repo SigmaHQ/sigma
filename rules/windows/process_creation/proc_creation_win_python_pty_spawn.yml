@@ -1,0 +1,30 @@
+title: Python Spawning Pretty TTY on Windows
+id: 480e7e51-e797-47e3-8d72-ebfce65b6d8d
+status: experimental
+description: Detects python spawning a pretty tty
+author: Nextron Systems
+date: 2022/06/03
+references:
+    - https://www.volexity.com/blog/2022/06/02/zero-day-exploitation-of-atlassian-confluence/
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_image:
+        Image|endswith:
+            - 'python.exe' # no \ bc of e.g. ipython.exe
+            - 'python3.exe'
+            - 'python2.exe'
+    selection_cli1:
+        CommandLine|contains|all:
+            - 'import pty'
+            - '.spawn('
+    selection_cli2:
+        CommandLine|contains: 'from pty import spawn'
+    condition: selection_image and 1 of selection_cli*
+falsepositives:
+    - Unknown
+level: high

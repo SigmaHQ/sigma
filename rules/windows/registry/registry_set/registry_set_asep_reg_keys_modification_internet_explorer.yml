@@ -1,0 +1,54 @@
+title: Internet Explorer Autorun Keys Modification
+id: a80f662f-022f-4429-9b8c-b1a41aaa6688
+related:
+    - id: 17f878b8-9968-4578-b814-c4217fc5768c
+      type: derived
+status: experimental
+description: Detects modification of autostart extensibility point (ASEP) in registry.
+author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split)
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1547.001/T1547.001.md
+    - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
+    - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
+date: 2019/10/25
+modified: 2022/03/26
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    ie:
+        EventType: SetValue
+        TargetObject|contains:
+            - '\Software\Wow6432Node\Microsoft\Internet Explorer'
+            - '\Software\Microsoft\Internet Explorer'
+    ie_details:
+        TargetObject|contains:
+            - '\Toolbar'
+            - '\Extensions'
+            - '\Explorer Bars'
+    filter_empty:
+        Details: '(Empty)'
+    filter_extensions:
+        TargetObject|contains:
+            - '\Extensions\{2670000A-7350-4f3c-8081-5663EE0C6C49}'
+            - '\Extensions\{31D09BA0-12F5-4CCE-BE8A-2923E76605DA}'
+            - '\Extensions\{789FE86F-6FC4-46A1-9849-EDE0DB0C95CA}'
+            - '\Extensions\{A95fe080-8f5d-11d2-a20b-00aa003c157a}'
+    filter_toolbar:
+        TargetObject|endswith:
+            - '\Toolbar\ShellBrowser\ITBar7Layout'
+            - '\Toolbar\ShowDiscussionButton'
+            - '\Toolbar\Locked'
+    condition: ie and ie_details and not 1 of filter_*
+fields:
+    - SecurityID
+    - ObjectName
+    - OldValueType
+    - NewValueType
+falsepositives:
+    - Legitimate software automatically (mostly, during installation) sets up autorun keys for legitimate reason
+    - Legitimate administrator sets up autorun keys for legitimate reason
+level: medium
+tags:
+    - attack.persistence
+    - attack.t1547.001

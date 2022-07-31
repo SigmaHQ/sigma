@@ -1,0 +1,34 @@
+title: Suspicious Download File Extension with BITS
+id: b85e5894-9b19-4d86-8c87-a2f3b81f0521
+status: experimental
+description: |
+  Adversaries may abuse BITS jobs to persistently execute or clean up after malicious payloads.
+  Windows Background Intelligent Transfer Service (BITS) is a low-bandwidth, asynchronous file transfer mechanism exposed through [Component Object Model](https://attack.mitre.org/techniques/T1559/001)
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1197/T1197.md
+author: frack113
+date: 2022/03/01
+modified: 2022/06/12
+logsource:
+    product: windows
+    service: bits-client
+detection:
+    selection:
+        EventID: 16403
+        LocalName|endswith:
+            - '.ps1'
+            - '.exe'
+            - '.vbs'
+            - '.bat'
+    filter:
+        # Typical updates: Chrome, Dropbox etc.
+        LocalName|contains: '\AppData\'
+        RemoteName|contains: '.com'
+    condition: selection and not filter
+falsepositives:
+    - Administrator PowerShell scripts
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.persistence
+    - attack.t1197

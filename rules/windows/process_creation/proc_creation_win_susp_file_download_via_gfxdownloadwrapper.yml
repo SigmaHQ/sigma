@@ -1,0 +1,27 @@
+title: GfxDownloadWrapper.exe Downloads File from Suspicious URL
+id: eee00933-a761-4cd0-be70-c42fe91731e7
+status: test
+description: Detects when GfxDownloadWrapper.exe downloads file from non standard URL
+author: Victor Sergeev, oscd.community
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/GfxDownloadWrapper/
+date: 2020/10/09
+modified: 2021/11/27
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    image_path:
+        Image|endswith: '\GfxDownloadWrapper.exe'
+    filter:
+        CommandLine|contains: 'gameplayapi.intel.com'
+        ParentImage|endswith: '\GfxDownloadWrapper.exe'
+    condition: image_path and not filter
+fields:
+    - CommandLine
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.command_and_control
+    - attack.t1105

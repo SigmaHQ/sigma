@@ -25,6 +25,18 @@ logsources:
     service: sysmon
     conditions:
       source: 'WinEventLog:Microsoft-Windows-Sysmon/Operational'
+  windows-process-creation:
+    product: windows
+    service: sysmon
+    category: process_creation
+    # Optimized search for process creation, being dramatically faster in Lispy than just EventCode=1 search, as 'ParentProcessGuid' is more unique than '1' in the raw data.
+    # This also supports custom splunk macros, just like they are written in splunk (i.e. as `macro`), minding that it has to be written inside the string quotes here.
+    search: 'ParentProcessGuid EventCode=1'
+  windows-file-creation:
+    product: windows
+    service: sysmon
+    category: file_creation
+    search: 'TargetFilename EventCode=11'
   windows-powershell:
     product: windows
     service: powershell
@@ -95,10 +107,40 @@ logsources:
     service: printservice-operational
     conditions:
       source: 'WinEventLog:Microsoft-Windows-PrintService/Operational'
+  windows-terminalservices-localsessionmanager-operational:
+    product: windows
+    service: terminalservices-localsessionmanager
+    conditions:
+      source: 'WinEventLog:Microsoft-Windows-TerminalServices-LocalSessionManager/Operational'
+  windows-codeintegrity-operational:
+    product: windows
+    service: codeintegrity-operational
+    conditions:
+      source: 'WinEventLog:Microsoft-Windows-CodeIntegrity/Operational'
   windows-smbclient-security:
     product: windows
     service: smbclient-security
     conditions:
       source: 'WinEventLog:Microsoft-Windows-SmbClient/Security'
+  windows-rpc-firewall:
+    product: rpc_firewall
+    category: application
+    conditions:
+      source: 'WinEventLog:RPCFW'
+  windows-firewall-advanced-security:
+    product: windows
+    service: firewall-as
+    conditions:
+      source: 'WinEventLog:Microsoft-Windows-Windows Firewall With Advanced Security/Firewall'
+  windows-bits-client:
+    product: windows
+    service: bits-client
+    conditions:
+      source: 'WinEventLog:Microsoft-Windows-Bits-Client/Operational'
+  windows-defender:
+    product: windows
+    service: windefend
+    conditions:
+      source: 'WinEventLog:Microsoft-Windows-Windows Defender/Operational'
 fieldmappings:
   EventID: EventCode

@@ -1,0 +1,25 @@
+title: Suspicious NTDS Exfil Filename Patterns
+id: 3a8da4e0-36c1-40d2-8b29-b3e890d5172a
+description: Detects suspicious creations of files with names used in various tools that export the NTDS.DIT for exfiltration
+status: experimental
+author: Florian Roth
+references:
+    - https://github.com/rapid7/metasploit-framework/blob/eb6535009f5fdafa954525687f09294918b5398d/modules/post/windows/gather/ntds_grabber.rb
+    - https://github.com/rapid7/metasploit-framework/blob/eb6535009f5fdafa954525687f09294918b5398d/data/post/powershell/NTDSgrab.ps1
+    - https://github.com/SecureAuthCorp/impacket/blob/7d2991d78836b376452ca58b3d14daa61b67cb40/impacket/examples/secretsdump.py#L2405
+date: 2022/03/11
+tags:
+    - attack.credential_access
+    - attack.t1003.003
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection_file:
+        TargetFilename|endswith:
+            - '\All.cab' # https://github.com/rapid7/metasploit-framework/blob/eb6535009f5fdafa954525687f09294918b5398d/data/post/powershell/NTDSgrab.ps1
+            - '.ntds.cleartext' # https://github.com/SecureAuthCorp/impacket/blob/7d2991d78836b376452ca58b3d14daa61b67cb40/impacket/examples/secretsdump.py#L2405
+    condition: selection_file
+falsepositives:
+    - Unknown
+level: high

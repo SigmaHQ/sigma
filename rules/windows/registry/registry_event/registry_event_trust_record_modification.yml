@@ -1,0 +1,23 @@
+title: Windows Registry Trust Record Modification
+id: 295a59c1-7b79-4b47-a930-df12c15fc9c2
+status: test
+description: Alerts on trust record modification within the registry, indicating usage of macros
+author: Antonlovesdnb
+references:
+  - https://outflank.nl/blog/2018/01/16/hunting-for-evil-detect-macros-being-executed/
+  - http://az4n6.blogspot.com/2016/02/more-on-trust-records-macros-and.html
+date: 2020/02/19
+modified: 2021/11/27
+logsource:
+  category: registry_event
+  product: windows
+detection:
+  selection:
+    TargetObject|contains: 'TrustRecords'
+  condition: selection
+falsepositives:
+  - Alerts on legitimate macro usage as well, will need to filter as appropriate
+level: medium
+tags:
+  - attack.initial_access
+  - attack.t1566.001

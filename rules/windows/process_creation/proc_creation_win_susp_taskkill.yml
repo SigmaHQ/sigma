@@ -1,0 +1,27 @@
+title: Suspicious Execution of Taskkill
+id: 86085955-ea48-42a2-9dd3-85d4c36b167d
+status: experimental
+description: Adversaries may stop services or processes in order to conduct Data Destruction or Data Encrypted for Impact on the data stores of services like Exchange and SQL Server.
+author: frack113
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1489/T1489.md#atomic-test-3---windows---stop-service-by-killing-process
+date: 2021/12/26
+modified: 2022/05/17
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\taskkill.exe'
+        - OriginalFileName: 'taskkill.exe'
+    selection_cli:
+        CommandLine|contains|all:
+            - ' /f'
+            - ' /im '
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: low
+tags:
+    - attack.impact
+    - attack.t1489

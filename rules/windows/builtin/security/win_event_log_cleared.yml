@@ -1,0 +1,27 @@
+title: Security Event Log Cleared
+id: a122ac13-daf8-4175-83a2-72c387be339d
+status: experimental
+description: Checks for event id 1102 which indicates the security event log was cleared.
+references:
+    - https://github.com/Azure/Azure-Sentinel/blob/f99542b94afe0ad2f19a82cc08262e7ac8e1428e/Detections/SecurityEvent/SecurityEventLogCleared.yaml
+date: 2021/08/15
+modified: 2021/10/13
+author: Saw Winn Naung
+level: medium
+logsource:
+    service: security
+    product: windows
+tags:
+    - attack.t1070.001
+detection:
+    selection:
+        EventID: 1102
+        Provider_Name: Microsoft-Windows-Eventlog
+    condition: selection
+fields:
+    - SubjectLogonId
+    - SubjectUserName
+    - SubjectUserSid
+    - SubjectDomainName
+falsepositives:
+    - Legitimate administrative activity

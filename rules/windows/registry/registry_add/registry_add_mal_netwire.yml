@@ -1,0 +1,31 @@
+title: NetWire RAT Registry Key
+id: 1d218616-71b0-4c40-855b-9dbe75510f7f
+description: Attempts to detect registry events for common NetWire key HKCU\Software\NetWire
+Note: You likely will have to change the sysmon configuration file. 
+    Per SwiftOnSecurity "Because Sysmon runs as a service, it has no filtering ability for, 
+    or concept of, HKCU or HKEY_CURRENT_USER. Use "contains" or "end with" to get around this limitation"
+    Therefore I set <TargetObject condition="contains">netwire</TargetObjecct> in my configuration.
+status: experimental
+references:
+    - https://www.fortinet.com/blog/threat-research/new-netwire-rat-variant-spread-by-phishing
+    - https://resources.infosecinstitute.com/topic/netwire-malware-what-it-is-how-it-works-and-how-to-prevent-it-malware-spotlight/
+    - https://unit42.paloaltonetworks.com/guloader-installing-netwire-rat/
+    - https://blogs.blackberry.com/en/2021/09/threat-thursday-netwire-rat-is-coming-down-the-line
+    - https://app.any.run/tasks/41ecdbde-4997-4301-a350-0270448b4c8f/
+date: 2021/10/07
+modified: 2022/06/26
+author: Christopher Peacock
+level: high
+logsource:
+    product: windows
+    category: registry_add
+detection:
+    selection:
+        EventType: CreateKey
+        TargetObject|contains: '\software\NetWire'
+    condition: selection
+falsepositives:
+    - Unknown
+tags:
+    - attack.defense_evasion
+    - attack.t1112 #The configuration information is usually stored under HKCU:\Software\Netwire - RedCanary

@@ -1,0 +1,30 @@
+title: Powershell Timestomp
+id: c6438007-e081-42ce-9483-b067fbef33c3
+status: experimental
+author: frack113
+date: 2021/08/03
+modified: 2021/10/16
+description: Adversaries may modify file time attributes to hide new or changes to existing files. Timestomping is a technique that modifies the timestamps of a file (the modify, access, create, and change times), often to mimic files that are in the same folder.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.006/T1070.006.md
+    - https://www.offensive-security.com/metasploit-unleashed/timestomp/
+tags:
+    - attack.defense_evasion
+    - attack.t1070.006
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection_ioc:
+        ScriptBlockText|contains:
+            - '.CreationTime ='
+            - '.LastWriteTime ='
+            - '.LastAccessTime ='
+            - '[IO.File]::SetCreationTime'
+            - '[IO.File]::SetLastAccessTime'
+            - '[IO.File]::SetLastWriteTime'
+    condition: selection_ioc
+falsepositives:
+    - Legitimate admin script
+level: medium

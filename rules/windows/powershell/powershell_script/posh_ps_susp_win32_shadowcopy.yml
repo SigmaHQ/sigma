@@ -1,0 +1,25 @@
+title: Delete Volume Shadow Copies via WMI with PowerShell
+id: e17121b4-ef2a-4418-8a59-12fb1631fa9e
+status: test
+author: frack113
+date: 2021/12/26
+description: Deletes Windows Volume Shadow Copies with PowerShell code and Get-WMIObject. This technique is used by numerous ransomware families such as Sodinokibi/REvil
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1490/T1490.md#atomic-test-5---windows---delete-volume-shadow-copies-via-wmi-with-powershell
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - 'Get-WmiObject'
+            - 'Win32_Shadowcopy'
+            - '.Delete()'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.impact
+    - attack.t1490

@@ -1,0 +1,38 @@
+title: Stop Windows Service
+id: eb87818d-db5d-49cc-a987-d5da331fbd90
+description: Detects a windows service to be stopped
+status: experimental
+author: Jakob Weinzettl, oscd.community
+date: 2019/10/23
+modified: 2022/06/20
+tags:
+    - attack.impact
+    - attack.t1489
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - OriginalFileName:
+            - 'sc.exe'
+            - 'net.exe'
+            - 'net1.exe'
+        - Image|endswith:
+            - '\sc.exe'
+            - '\net.exe'
+            - '\net1.exe'
+    selection_cli:
+        CommandLine|contains: 'stop'
+    filter:
+        CommandLine: 'sc  stop KSCWebConsoleMessageQueue' # kaspersky Security Center Web Console double space between sc and stop
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
+    condition: all of selection_* and not filter
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+falsepositives:
+    - Administrator shutting down the service due to upgrade or removal purposes
+level: low

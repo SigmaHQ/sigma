@@ -1,0 +1,30 @@
+title: Remote Encrypting File System Abuse
+id: 5f92fff9-82e2-48eb-8fc1-8b133556a551
+description: Detects remote RPC calls to possibly abuse remote encryption service via MS-EFSR
+references:
+    - https://attack.mitre.org/tactics/TA0008/
+    - https://msrc.microsoft.com/update-guide/vulnerability/CVE-2021-36942
+    - https://github.com/jsecurity101/MSRPC-to-ATTACK/blob/ddd4608fe8684fcf2fcf9b48c5f0b3c28097f8a3/documents/MS-EFSR.md
+    - https://github.com/zeronetworks/rpcfirewall
+    - https://zeronetworks.com/blog/stopping_lateral_movement_via_the_rpc_firewall/
+tags:
+    - attack.lateral_movement
+status: experimental
+author: Sagie Dulce, Dekel Paz
+date: 2022/01/01
+modified: 2022/01/01
+logsource:
+    product: rpc_firewall
+    category: application
+    definition: 'Requirements: install and apply the RPC Firewall to all processes with "audit:true action:block uuid:df1941c5-fe89-4e79-bf10-463657acf44d or c681d488-d850-11d0-8c52-00c04fd90f7e'
+detection:
+    selection:
+        EventLog: RPCFW
+        EventID: 3
+        InterfaceUuid:
+            - df1941c5-fe89-4e79-bf10-463657acf44d
+            - c681d488-d850-11d0-8c52-00c04fd90f7e
+    condition: selection
+falsepositives:
+    - Legitimate usage of remote file encryption
+level: high

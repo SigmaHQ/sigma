@@ -1,0 +1,29 @@
+title: DInject PowerShell Cradle CommandLine Flags
+id: d78b5d61-187d-44b6-bf02-93486a80de5a
+status: test
+description: Detects the use of the Dinject PowerShell cradle based on the specific flags
+author: Florian Roth
+references:
+    - https://github.com/snovvcrash/DInjector
+date: 2021/12/07
+modified: 2022/03/07
+tags:
+    - attack.defense_evasion
+    - attack.t1055
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:
+            - ' /am51'
+            - ' /password'
+    filter_fps:
+        - CommandLine|contains: ' /PASSWORDCHG'  # net user
+        - ParentImage:
+            - 'C:\Program Files\CEETIS\CEETIS_IDE.exe'  # CEETIS from WEETECH
+            - 'C:\Program Files (x86)\CEETIS\CEETIS_IDE.exe'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Unlikely
+level: critical

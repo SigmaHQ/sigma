@@ -1,0 +1,31 @@
+title: WMI Script Host Process Image Loaded
+id: b439f47d-ef52-4b29-9a2f-57d8a96cb6b8
+status: test
+description: Detects signs of the WMI script host process %SystemRoot%\system32\wbem\scrcons.exe functionality being used via images being loaded by a process.
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+references:
+  - https://twitter.com/HunterPlaybook/status/1301207718355759107
+  - https://www.mdsec.co.uk/2020/09/i-like-to-move-it-windows-lateral-movement-part-1-wmi-event-subscription/
+  - https://threathunterplaybook.com/notebooks/windows/08_lateral_movement/WIN-200902020333.html
+date: 2020/09/02
+modified: 2021/11/27
+logsource:
+  category: image_load
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\scrcons.exe'
+    ImageLoaded|endswith:
+      - '\vbscript.dll'
+      - '\wbemdisp.dll'
+      - '\wshom.ocx'
+      - '\scrrun.dll'
+  condition: selection
+falsepositives:
+  - Unknown
+level: high
+tags:
+  - attack.lateral_movement
+  - attack.privilege_escalation
+  - attack.persistence
+  - attack.t1546.003

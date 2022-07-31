@@ -1,0 +1,25 @@
+title: Suspicious Msiexec Load DLL
+id: 84f52741-8834-4a8c-a413-2eb2269aa6c8
+status: experimental
+description: Detects MsiExec loading a DLL and calling its DllUnregisterServer function
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1218.007/T1218.007.md
+    - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/msiexec
+author: frack113
+date: 2022/04/24
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '\msiexec.exe'
+        CommandLine|contains|all:
+            - ' /z '
+            - '.dll'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1218.007

@@ -1,0 +1,38 @@
+title: Suspicious PowerShell Encoded Command Patterns
+id: b9d9cc83-380b-4ba3-8d8f-60c0e7e2930c
+status: experimental
+description: Detects PowerShell command line patterns in combincation with encoded commands that often appear in malware infection chains
+author: Florian Roth
+references:
+    - https://app.any.run/tasks/b9040c63-c140-479b-ad59-f1bb56ce7a97/
+date: 2022/05/24
+modified: 2022/07/14
+tags:
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    encoded:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        CommandLine|contains:
+            - ' -e '
+            - ' -en '
+            - ' -enc '
+            - ' -enco'
+    selection:
+        CommandLine|contains:
+            - ' JAB'
+            - ' SUVYI'
+            - ' SQBFAFgA'
+            - ' aWV4I'
+            - ' IAB'
+            - ' PAA'
+            - ' aQBlAHgA'
+    condition: encoded and selection
+falsepositives:
+    - Other tools that work with encoded scripts in the command line instead of script files
+level: high

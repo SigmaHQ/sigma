@@ -1,0 +1,28 @@
+title: Service Registry Permissions Weakness Check
+id: 95afc12e-3cbb-40c3-9340-84a032e596a3
+status: experimental
+description: |
+    Adversaries may execute their own malicious payloads by hijacking the Registry entries used by services.
+    Adversaries may use flaws in the permissions for registry to redirect from the originally specified executable to one that they control, in order to launch their own code at Service start.
+    Windows stores local service configuration information in the Registry under HKLM\SYSTEM\CurrentControlSet\Services
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1574.011/T1574.011.md#atomic-test-1---service-registry-permissions-weakness
+    - https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.security/get-acl?view=powershell-7.2
+author: frack113
+date: 2021/12/30
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - 'get-acl'
+            - 'REGISTRY::HKLM\SYSTEM\CurrentControlSet\Services\'
+    condition: selection
+falsepositives:
+    - Legitimate administrative script
+level: medium
+tags:
+    - attack.persistence
+    - attack.t1574.011

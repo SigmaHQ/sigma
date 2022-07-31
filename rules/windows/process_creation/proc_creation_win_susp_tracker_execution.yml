@@ -1,0 +1,27 @@
+title: DLL Injection with Tracker.exe
+id: 148431ce-4b70-403d-8525-fcc2993f29ea
+status: test
+description: This rule detects DLL injection and execution via LOLBAS - Tracker.exe
+author: 'Avneet Singh @v3t0_, oscd.community'
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Tracker/
+date: 2020/10/18
+modified: 2021/11/27
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\tracker.exe'
+        - Description: 'Tracker'
+    selection_cli:
+        CommandLine|contains:
+            - ' /d '
+            - ' /c '
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1055.001

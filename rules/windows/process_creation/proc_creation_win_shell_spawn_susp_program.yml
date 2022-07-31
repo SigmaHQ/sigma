@@ -1,0 +1,58 @@
+title: Windows Shell Spawning Suspicious Program
+id: 3a6586ad-127a-4d3b-a677-1e6eacdf8fde
+status: test
+description: Detects a suspicious child process of a Windows shell
+author: Florian Roth, Tim Shelton
+references:
+    - https://mgreen27.github.io/posts/2018/04/02/DownloadCradle.html
+date: 2018/04/06
+modified: 2022/07/27
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith:
+            - '\mshta.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            #- '*\cmd.exe'  # too many false positives
+            - '\rundll32.exe'
+            - '\cscript.exe'
+            - '\wscript.exe'
+            - '\wmiprvse.exe'
+            - '\regsvr32.exe'
+        Image|endswith:
+            - '\schtasks.exe'
+            - '\nslookup.exe'
+            - '\certutil.exe'
+            - '\bitsadmin.exe'
+            - '\mshta.exe'
+    falsepositives_1:
+        CurrentDirectory|contains: '\ccmcache\'
+    falsepositives_2:
+        ParentCommandLine|contains:
+            # FP - Amazon Workspaces
+            - '\Program Files\Amazon\WorkSpacesConfig\Scripts\setup-scheduledtask.ps1'
+            - '\Program Files\Amazon\WorkSpacesConfig\Scripts\set-selfhealing.ps1'
+            - '\Program Files\Amazon\WorkSpacesConfig\Scripts\check-workspacehealth.ps1'
+            - '\nessus_' # Tenable/Nessus VA Scanner
+    falsepositives_3:
+        CommandLine|contains: '\nessus_' # Tenable/Nessus VA Scanner
+    condition: selection and not 1 of falsepositives*
+fields:
+    - CommandLine
+    - ParentCommandLine
+    - CurrentDirectory
+    - Image
+    - ParentImage
+falsepositives:
+    - Administrative scripts
+    - Microsoft SCCM
+level: high
+tags:
+    - attack.execution
+    - attack.defense_evasion
+    - attack.t1059.005
+    - attack.t1059.001
+    - attack.t1218

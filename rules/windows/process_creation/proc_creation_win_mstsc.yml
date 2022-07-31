@@ -1,0 +1,34 @@
+title: Remote Desktop Protocol Use Mstsc
+id: 954f0af7-62dd-418f-b3df-a84bc2c7a774
+status: experimental
+description: Adversaries may use Valid Accounts to log into a computer using the Remote Desktop Protocol (RDP). The adversary may then perform actions as the logged-on user.
+author: frack113
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1021.001/T1021.001.md#t1021001---remote-desktop-protocol
+    - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/mstsc
+date: 2022/01/07
+modified: 2022/06/12
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_mstsc_img:
+        - Image|endswith: \mstsc.exe
+        - OriginalFileName: 'mstsc.exe'
+    selection_mstsc_cli:
+        CommandLine|contains: ' /v:'
+    selection_cmdkey_img:
+        - Image|endswith: \cmdkey.exe
+        - OriginalFileName: 'cmdkey.exe'
+    selection_cmdkey_cli:
+        CommandLine|contains|all:
+            - ' /g'
+            - ' /u'
+            - ' /p'
+    condition: all of selection_mstsc* or all of selection_cmdkey*
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.lateral_movement
+    - attack.t1021.001

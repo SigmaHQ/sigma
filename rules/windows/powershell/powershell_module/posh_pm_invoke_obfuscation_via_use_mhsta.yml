@@ -1,0 +1,34 @@
+title: Invoke-Obfuscation Via Use MSHTA
+id: 07ad2ea8-6a55-4ac6-bf3e-91b8e59676eb
+related:
+    - id: e55a5195-4724-480e-a77e-3ebe64bd3759
+      type: derived
+description: Detects Obfuscated Powershell via use MSHTA in Scripts
+status: experimental
+author: Nikita Nazarov, oscd.community
+date: 2020/10/08
+modified: 2022/03/07
+references:
+    - https://github.com/Neo23x0/sigma/issues/1009 #(Task31)
+logsource:
+    product: windows
+    category: ps_module
+    definition: PowerShell Module Logging must be enabledd
+detection:
+    selection_4103:
+        Payload|contains|all:
+            - 'set'
+            - '&&'
+            - 'mshta'
+            - 'vbscript:createobject'
+            - '.run'
+            - '(window.close)'
+    condition: selection_4103
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001

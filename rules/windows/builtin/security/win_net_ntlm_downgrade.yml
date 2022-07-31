@@ -1,0 +1,36 @@
+title: NetNTLM Downgrade Attack
+id: d3abac66-f11c-4ed0-8acb-50cc29c97eed
+related:
+    - id: d67572a0-e2ec-45d6-b8db-c100d14b8ef2
+      type: derived
+description: Detects NetNTLM downgrade attack
+status: experimental
+references:
+    - https://www.optiv.com/blog/post-exploitation-using-netntlm-downgrade-attacks
+author: Florian Roth, wagga
+date: 2018/03/20
+modified: 2021/06/27
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+    - attack.t1112
+# Windows Security Eventlog: Process Creation with Full Command Line
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: Audit Policy : Object Access > Audit Registry (Success)'
+detection:
+    selection:
+        EventID: 4657
+        ObjectName|contains|all: 
+            - '\REGISTRY\MACHINE\SYSTEM'
+            - 'ControlSet'
+            - '\Control\Lsa'
+        ObjectValueName: 
+            - 'LmCompatibilityLevel'
+            - 'NtlmMinClientSec'
+            - 'RestrictSendingNTLMTraffic'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

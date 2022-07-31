@@ -1,0 +1,28 @@
+title: SCM Database Privileged Operation
+id: dae8171c-5ec6-4396-b210-8466585b53e9
+status: test
+description: Detects non-system users performing privileged operation os the SCM database
+author: Roberto Rodriguez @Cyb3rWard0g, Tim Shelton
+references:
+  - https://threathunterplaybook.com/notebooks/windows/07_discovery/WIN-190826010110.html
+date: 2019/08/15
+modified: 2022/06/30
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4674
+    ObjectType: 'SC_MANAGER OBJECT'
+    ObjectName: 'servicesactive'
+    PrivilegeList: 'SeTakeOwnershipPrivilege'
+  filter:
+    SubjectLogonId: '0x3e4'
+    ProcessName|endswith: ':\Windows\System32\services.exe'
+  condition: selection and not filter
+falsepositives:
+  - Unknown
+level: high
+tags:
+  - attack.privilege_escalation
+  - attack.t1548

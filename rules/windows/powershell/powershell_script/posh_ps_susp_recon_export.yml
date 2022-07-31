@@ -1,0 +1,28 @@
+title: Recon Information for Export with PowerShell
+id: a9723fcc-881c-424c-8709-fd61442ab3c3
+status: experimental
+author: frack113
+date: 2021/07/30
+modified: 2021/12/02
+description: Once established within a system or network, an adversary may use automated techniques for collecting internal data
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1119/T1119.md
+tags:
+    - attack.collection
+    - attack.t1119
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection_action:
+        ScriptBlockText|contains:
+            - 'Get-Service '
+            - 'Get-ChildItem '
+            - 'Get-Process '
+    selection_redirect:
+        ScriptBlockText|contains: '> $env:TEMP\'
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: medium

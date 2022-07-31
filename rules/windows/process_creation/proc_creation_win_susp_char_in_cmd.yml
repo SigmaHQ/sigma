@@ -1,0 +1,30 @@
+title: Obfuscated Command Line Using Special Unicode Characters
+id: e0552b19-5a83-4222-b141-b36184bb8d79
+status: experimental
+description: Adversaries may attempt to make an executable or file difficult to discover or analyze by encrypting, encoding, or otherwise obfuscating its contents on the system or in transit.
+author: frack113
+references:
+    - https://www.wietzebeukema.nl/blog/windows-command-line-obfuscation
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1027/T1027.md#atomic-test-6---dlp-evasion-via-sensitive-data-in-vba-macro-over-http
+date: 2022/01/15
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        #find the sysmon event
+        CommandLine|contains:
+            - 'â'
+            - '€'
+            - '£'
+            - '¯'
+            - '®'
+            - 'µ'
+            - '¶'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1027

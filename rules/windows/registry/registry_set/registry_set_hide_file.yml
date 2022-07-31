@@ -1,0 +1,26 @@
+title: Modification of Explorer Hidden Keys
+id: 5a5152f1-463f-436b-b2f5-8eceb3964b42
+description: Detects modifications to the hidden files keys in registry. This technique is abused by several malware families to hide their files from normal users.
+author: frack113
+date: 2022/04/02
+modified: 2022/06/26
+status: experimental
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1564.001/T1564.001.md#atomic-test-8---hide-files-through-registry
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: Setvalue
+        TargetObject:
+            - HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\ShowSuperHidden
+            - HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Hidden
+        Details: 'DWORD (0x00000000)'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1564.001

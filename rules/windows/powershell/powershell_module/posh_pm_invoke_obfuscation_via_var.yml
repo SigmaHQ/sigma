@@ -1,0 +1,28 @@
+title: Invoke-Obfuscation VAR++ LAUNCHER OBFUSCATION
+id: f3c89218-8c3d-4ba9-9974-f1d8e6a1b4a6
+related:
+    - id: e54f5149-6ba3-49cf-b153-070d24679126
+      type: derived
+description: Detects Obfuscated Powershell via VAR++ LAUNCHER
+status: experimental
+author: Timur Zinniatullin, oscd.community
+date: 2020/10/13
+modified: 2021/10/16
+references:
+    - https://github.com/Neo23x0/sigma/issues/1009 #(Task27)
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: ps_module
+    definition: PowerShell Module Logging must be enabled
+detection:
+    selection_4103:
+        Payload|re: '(?i).*&&set.*(\{\d\}){2,}\\\"\s+?\-f.*&&.*cmd.*\/c' # FPs with |\/r
+    condition: selection_4103
+falsepositives:
+    - Unknown
+level: high

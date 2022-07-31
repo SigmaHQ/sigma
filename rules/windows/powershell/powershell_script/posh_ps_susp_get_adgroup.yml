@@ -1,0 +1,24 @@
+title: Suspicious Enumerate Active Directory Groups with Get-AdComputer
+id: 8c3a6607-b7dc-4f0d-a646-ef38c00b76ee
+status: experimental
+author: frack113
+date: 2022/03/17
+description: Detects the use of Get-AdGroup to enumerate Groups within Active Directory
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1018/T1018.md
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - 'Get-AdGroup '
+            - '-Filter'
+    condition: selection
+falsepositives:
+    - Unknown
+level: low
+tags:
+    - attack.discovery
+    - attack.t1069.002

@@ -1,0 +1,24 @@
+title: SQLite Firefox Cookie DB Access
+id: 4833155a-4053-4c9c-a997-777fcea0baa7
+status: experimental
+description: Detect use of sqlite binary to query the Firefox cookies.sqlite database and steal the cookie data contained within it
+author: frack113
+date: 2022/04/08
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1539/T1539.md#atomic-test-1---steal-firefox-cookies-windows
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_sql:
+        - Product: SQLite
+        - Image|endswith: '\sqlite.exe'
+    selection_firefox:
+        CommandLine|contains: 'cookies.sqlite'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.credential_access
+    - attack.t1539

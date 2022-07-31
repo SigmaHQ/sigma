@@ -1,0 +1,34 @@
+title: Suspicious Msiexec Execute Arbitrary DLL
+id: 6f4191bb-912b-48a8-9ce7-682769541e6d
+status: experimental
+description: |
+    Adversaries may abuse msiexec.exe to proxy execution of malicious payloads.
+    Msiexec.exe is the command-line utility for the Windows Installer and is thus commonly associated with executing installation packages (.msi)
+author: frack113
+date: 2022/01/16
+modified: 2022/03/28
+references:
+    - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/msiexec
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1218.007/T1218.007.md
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\msiexec.exe'
+        CommandLine|contains: ' /y'
+    filter_apple:
+        CommandLine|contains:
+            - '\MsiExec.exe" /Y "C:\Program Files\Bonjour\mdnsNSP.dll'
+            - '\MsiExec.exe" /Y "C:\Program Files (x86)\Bonjour\mdnsNSP.dll'
+            - '\MsiExec.exe" /Y "C:\Program Files (x86)\Apple Software Update\ScriptingObjectModel.dll'
+            - '\MsiExec.exe" /Y "C:\Program Files (x86)\Apple Software Update\SoftwareUpdateAdmin.dll'
+            - '\MsiExec.exe" /Y "C:\Windows\CCM\'
+            - '\MsiExec.exe" /Y C:\Windows\CCM\' #also need non-quoted execution
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Legitimate script
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1218.007

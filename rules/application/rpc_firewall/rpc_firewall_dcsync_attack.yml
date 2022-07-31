@@ -1,0 +1,33 @@
+title: Possible DCSync Attack
+id: 56fda488-113e-4ce9-8076-afc2457922c3
+description: Detects remote RPC calls to MS-DRSR from non DC hosts, which could indicate DCSync / DCShadow attacks.
+references:
+    - https://attack.mitre.org/techniques/T1033/
+    - https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-drsr/f977faaa-673e-4f66-b9bf-48c640241d47?redirectedfrom=MSDN
+    - https://github.com/jsecurity101/MSRPC-to-ATTACK/blob/ddd4608fe8684fcf2fcf9b48c5f0b3c28097f8a3/documents/MS-DRSR.md
+    - https://github.com/zeronetworks/rpcfirewall
+    - https://zeronetworks.com/blog/stopping_lateral_movement_via_the_rpc_firewall/
+tags:
+    - attack.t1033
+status: experimental
+author: Sagie Dulce, Dekel Paz
+date: 2022/01/01
+modified: 2022/01/01
+logsource:
+    product: rpc_firewall
+    category: application
+    definition: 'Requirements: install and apply the RPC Firewall to all processes, enable DRSR UUID (e3514235-4b06-11d1-ab04-00c04fc2dcd2) for "dangerous" opcodes (not 0,1 or 12) only from trusted IPs (DCs)'
+detection:
+    selection:
+        EventLog: RPCFW
+        EventID: 3
+        InterfaceUuid: e3514235-4b06-11d1-ab04-00c04fc2dcd2
+    filter:
+        OpNum:
+            - 0
+            - 1
+            - 12
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high

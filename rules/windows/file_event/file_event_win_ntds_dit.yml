@@ -1,0 +1,47 @@
+title: Suspicious NTDS.DIT Creation
+id: 4e7050dd-e548-483f-b7d6-527ab4fa784d
+description: Detects suspicious creations of a file named ntds.dit, e.g. by a PowerShell parent or in a suspicious directory or a suspicious one liner
+status: experimental
+author: Florian Roth
+references:
+    - https://www.ired.team/offensive-security/credential-access-and-credential-dumping/ntds.dit-enumeration
+    - https://www.n00py.io/2022/03/manipulating-user-passwords-without-mimikatz/
+    - https://pentestlab.blog/tag/ntds-dit/
+    - https://github.com/samratashok/nishang/blob/414ee1104526d7057f9adaeee196d91ae447283e/Gather/Copy-VSS.ps1
+date: 2022/03/11
+modified: 2022/07/14
+tags:
+    - attack.credential_access
+    - attack.t1003.003
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection_file:
+        TargetFilename|endswith: '\ntds.dit'
+    selection_process:
+        - ParentImage|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\w3wp.exe'
+            - '\php-cgi.exe'
+            - '\nginx.exe'
+            - '\httpd.exe'
+        - ParentImage|contains:
+            - '\apache'
+            - '\tomcat'
+            - '\AppData\'
+            - '\Temp\'
+            - '\Public\'
+            - '\PerfLogs\'
+        - Image|contains:
+            - '\AppData\'
+            - '\Temp\'
+            - '\Public\'
+            - '\PerfLogs\'
+    condition: selection_file and 1 of selection_process*
+falsepositives:
+    - Unknown
+level: high

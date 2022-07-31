@@ -1,0 +1,36 @@
+title: Suspicious MsiExec Embedding Parent
+id: 4a2a2c3e-209f-4d01-b513-4155a540b469
+status: experimental
+description: Adversaries may abuse msiexec.exe to proxy the execution of malicious payloads
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1218.007/T1218.007.md
+author: frack113
+date: 2022/04/16
+modified: 2022/07/14
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\cmd.exe'
+        ParentCommandLine|contains|all:
+            - 'MsiExec.exe'
+            - '-Embedding '
+    filter_splunk_ufw:
+        Image|endswith: ':\Windows\System32\cmd.exe'
+        CommandLine|contains: 'C:\Program Files\SplunkUniversalForwarder\bin\'
+    filter_vs:
+        - CommandLine|contains: '\DismFoDInstall.cmd'
+        - ParentCommandLine|contains|all:
+            - '\MsiExec.exe -Embedding '
+            - 'Global\MSI0000'
+    condition: selection and not 1 of filter*
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.t1218.007
+    - attack.defense_evasion

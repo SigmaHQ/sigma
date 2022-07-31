@@ -1,0 +1,28 @@
+title: Suspicious XOR Encoded PowerShell Command Line
+id: 812837bb-b17f-45e9-8bd0-0ec35d2e3bd6
+description: Detects suspicious powershell process which includes bxor command, alternative obfuscation method to b64 encoded commands.
+status: experimental
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=46
+author: Teymur Kheirkhabarov, Harish Segar (rule)
+date: 2020/06/29
+modified: 2022/07/07
+tags:
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: ps_classic_start
+    definition: fields have to be extract from event
+detection:
+    selection:
+        HostName: 'ConsoleHost'
+    filter:
+        HostApplication|contains:
+            - 'bxor'
+            - 'join'
+            - 'char'
+    condition: selection and filter
+falsepositives:
+    - Unknown
+level: medium

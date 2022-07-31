@@ -1,0 +1,78 @@
+title: Antivirus Relevant File Paths Alerts
+id: c9a88268-0047-4824-ba6e-4d81ce0b907c
+description: Detects an Antivirus alert in a highly relevant file path or with a relevant file name
+status: experimental
+date: 2018/09/09
+modified: 2021/11/23
+author: Florian Roth, Arnim Rupp
+references:
+    - https://www.nextron-systems.com/2021/03/25/antivirus-event-analysis-cheat-sheet-v1-8/
+logsource:
+    category: antivirus
+detection:
+    selection:
+        - Filename|startswith:
+            - 'C:\Windows\'
+            - 'C:\Temp\'
+            - 'C:\PerfLogs\'
+            - 'C:\Users\Public\'
+            - 'C:\Users\Default\'
+        - Filename|contains:
+            - '\Client\'
+            - '\tsclient\'
+            - '\inetpub\'
+            - '/www/'
+            - 'apache'
+            - 'tomcat'
+            - 'nginx'
+            - 'weblogic'
+    selection2:
+        Filename|endswith:
+            - '.asax'
+            - '.ashx'
+            - '.asmx'
+            - '.asp'
+            - '.aspx'
+            - '.bat'
+            - '.cfm'
+            - '.cgi'
+            - '.chm'
+            - '.cmd'
+            - '.dat'
+            - '.ear'
+            - '.gif'
+            - '.hta'
+            - '.jpeg'
+            - '.jpg'
+            - '.jsp'
+            - '.jspx'
+            - '.lnk'
+            - '.php'
+            - '.pl'
+            - '.png'
+            - '.ps1'
+            - '.psm1'
+            - '.py'
+            - '.pyc'
+            - '.rb'
+            - '.scf'
+            - '.sct'
+            - '.sh'
+            - '.svg'
+            - '.txt'
+            - '.vbe'
+            - '.vbs'
+            - '.war'
+            - '.wsf'
+            - '.wsh'
+            - '.xml'
+    condition: selection or selection2
+fields:
+    - Signature
+    - User
+falsepositives:
+    - Unlikely
+level: high
+tags:
+    - attack.resource_development
+    - attack.t1588

@@ -1,0 +1,34 @@
+title: Suspicious DumpMinitool Usage
+id: eb1c4225-1c23-4241-8dd4-051389fde4ce
+description: Detects suspicious ways to use of a Visual Studio bundled tool named DumpMinitool.exe
+status: experimental
+references:
+    - https://twitter.com/mrd0x/status/1511415432888131586
+    - https://twitter.com/mrd0x/status/1511489821247684615
+author: Florian Roth
+date: 2022/04/06
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+    - attack.t1003.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|endswith: '\DumpMinitool.exe'
+        - OriginalName: 'DumpMinitool.exe'
+    filter_folder:
+        Image|contains:
+            - '\Microsoft Visual Studio\'
+            - '\Extensions\'  # https://github.com/microsoft/vstest/blob/b2e2126f1aa7e5753cafe9515563c99ade6a59ce/src/package/nuspec/Microsoft.TestPlatform.Portable.nuspec#L159
+    susp_flags:
+        CommandLine|contains: '.txt'
+    cmd_has_flags:
+        CommandLine|contains: ' Full'
+    filter_cmd_misses_flags:
+        CommandLine|contains: '--dumpType'
+    condition: selection and ( ( not filter_folder ) or susp_flags or ( cmd_has_flags and not filter_cmd_misses_flags ) )
+falsepositives:
+    - Unknown
+level: high

@@ -1,0 +1,36 @@
+title: Execution of Powershell Script in Public Folder
+id: fb9d3ff7-7348-46ab-af8c-b55f5fbf39b4
+status: experimental
+description: This rule detects execution of PowerShell scripts located in the "C:\Users\Public" folder
+author: Max Altgelt
+references:
+    - https://www.mandiant.com/resources/evolution-of-fin7
+date: 2022/04/06
+modified: 2022/07/14
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        CommandLine|contains:
+            - '-f C:\Users\Public'
+            - '-f "C:\Users\Public'
+            - '-f %Public%'
+            - '-fi C:\Users\Public'
+            - '-fi "C:\Users\Public'
+            - '-fi %Public%'
+            - '-fil C:\Users\Public'
+            - '-fil "C:\Users\Public'
+            - '-fil %Public%'
+            - '-file C:\Users\Public'
+            - '-file "C:\Users\Public'
+            - '-file %Public%'
+    condition: selection
+fields:
+    - CommandLine
+falsepositives:
+    - Unlikely
+level: high

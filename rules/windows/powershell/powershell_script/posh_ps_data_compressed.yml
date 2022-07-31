@@ -1,0 +1,26 @@
+title: Data Compressed - PowerShell
+id: 6dc5d284-69ea-42cf-9311-fb1c3932a69a
+status: experimental
+description: An adversary may compress data (e.g., sensitive documents) that is collected prior to exfiltration in order to make it portable and minimize the amount of data sent over the network.
+author: Timur Zinniatullin, oscd.community
+date: 2019/10/21
+modified: 2021/10/16
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1560/T1560.md
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - '-Recurse'
+            - '|'
+            - 'Compress-Archive'
+    condition: selection
+falsepositives:
+    - Highly likely if archive operations are done via PowerShell.
+level: low
+tags:
+    - attack.exfiltration
+    - attack.t1560

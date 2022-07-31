@@ -1,0 +1,29 @@
+title: Get-ADUser Enumeration Using UserAccountControl Flags
+id: 96c982fe-3d08-4df4-bed2-eb14e02f21c8
+status: experimental
+description: Detects AS-REP roasting is an attack that is often-overlooked. It is not very common as you have to explicitly set accounts that do not require pre-authentication.
+date: 2022/03/17
+author: frack113
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1069.002/T1069.002.md#atomic-test-11---get-aduser-enumeration-using-useraccountcontrol-flags-as-rep-roasting
+    - https://shellgeek.com/useraccountcontrol-flags-to-manipulate-properties/
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        #4194304 DONT_REQ_PREAUTH
+        ScriptBlockText|contains|all:
+            - 'Get-ADUser'
+            - '-Filter'
+            - 'useraccountcontrol'
+            - '-band'
+            - '4194304'
+    condition: selection
+falsepositives:
+    - Legitimate PowerShell scripts
+level: medium
+tags:
+    - attack.discovery
+    - attack.t1057

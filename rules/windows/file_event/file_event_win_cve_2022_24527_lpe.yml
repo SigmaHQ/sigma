@@ -1,0 +1,27 @@
+title: CVE-2022-24527 Microsoft Connected Cache LPE
+id: e0a41412-c69a-446f-8e6e-0e6d7483dad7
+description: Detects files created during the local privilege exploitation of CVE-2022-24527 Microsoft Connected Cache
+author: Florian Roth
+status: experimental
+references:
+   - https://www.rapid7.com/blog/post/2022/04/12/cve-2022-24527-microsoft-connected-cache-local-privilege-escalation-fixed/
+date: 2022/04/13
+tags:
+   - attack.privilege_escalation
+   - attack.t1059.001
+   - cve.2022.24527
+logsource:
+   category: file_event
+   product: windows
+detection:
+   selection:
+      TargetFilename|endswith: 'WindowsPowerShell\Modules\webAdministration\webAdministration.psm1'
+   filter:
+      User|contains: # covers many language settings
+         - 'AUTHORI'
+         - 'AUTORI'
+   condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high
+

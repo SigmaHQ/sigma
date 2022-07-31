@@ -1,0 +1,42 @@
+title: Suspicious PowerShell IEX Execution Patterns
+id: 09576804-7a05-458e-a817-eb718ca91f54
+status: experimental
+description: Detects suspicious ways to run Invoke-Execution using IEX acronym
+author: Florian Roth
+date: 2022/03/24
+modified: 2022/03/28
+references:
+    - https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-expression?view=powershell-7.2
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_combined_1:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        CommandLine|contains:
+            -' | iex;'
+            -' | iex '
+            -' | iex}'
+            -' | IEX;'
+            -' | IEX ;'
+            -' | IEX -Error'
+            -' | IEX (new'
+            -' | IEX (New'
+            -');IEX '
+    selection_combined_2:
+        CommandLine|contains:
+            - '::FromBase64String'
+            - '.GetString([System.Convert]::'
+    selection_standalone:
+        CommandLine|contains:
+            -')|iex;$'
+            -')|IEX;$'
+            -');iex($'
+            -');iex $'
+            -' | IEX | '
+    condition: all of selection_combined* or selection_standalone
+falsepositives:
+    - Legitimate scripts that use IEX
+level: high

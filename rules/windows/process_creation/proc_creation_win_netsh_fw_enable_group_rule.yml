@@ -1,0 +1,30 @@
+title: Netsh Allow Group Policy on Microsoft Defender Firewall
+id: 347906f3-e207-4d18-ae5b-a9403d6bcdef
+status: experimental
+description: Adversaries may  modify system firewalls in order to bypass controls limiting network usage
+author: frack113
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.004/T1562.004.md#atomic-test-3---allow-smb-and-rdp-on-microsoft-defender-firewall
+    - https://docs.microsoft.com/en-us/troubleshoot/windows-server/networking/netsh-advfirewall-firewall-control-firewall-behavior
+date: 2022/01/09
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\netsh.exe'
+        CommandLine|contains|all:
+            - advfirewall
+            - firewall
+            - set
+            - rule
+            - 'group='
+            - new
+            - 'enable=Yes'
+    condition: selection
+falsepositives:
+    - Legitimate administration
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1562.004

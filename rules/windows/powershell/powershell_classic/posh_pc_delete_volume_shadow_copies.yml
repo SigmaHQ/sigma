@@ -1,0 +1,31 @@
+title: Delete Volume Shadow Copies Via WMI With PowerShell
+id: 87df9ee1-5416-453a-8a08-e8d4a51e9ce1
+status: stable
+description: Shadow Copies deletion using operating systems utilities via PowerShell
+author: frack113
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1490/T1490.md
+    - https://www.fortinet.com/blog/threat-research/stomping-shadow-copies-a-second-look-into-deletion-methods
+tags:
+    - attack.impact
+    - attack.t1490
+date: 2021/06/03
+modified: 2021/10/16
+logsource:
+    product: windows
+    category: ps_classic_start
+    definition: fields have to be extract from event
+detection:
+    selection:
+        HostApplication|contains|all:
+            - 'Get-WmiObject'
+            - ' Win32_Shadowcopy'
+        HostApplication|contains:
+            - 'Delete()'
+            - 'Remove-WmiObject'
+    condition: selection
+fields:
+    - HostApplication
+falsepositives:
+    - Legitimate Administrator deletes Shadow Copies using operating systems utilities for legitimate reason
+level: high

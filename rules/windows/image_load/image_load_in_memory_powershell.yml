@@ -1,0 +1,61 @@
+title: In-memory PowerShell
+id: 092bc4b9-3d1d-43b4-a6b4-8c8acd83522f
+related:
+    - id: 867613fb-fa60-4497-a017-a82df74a172c
+      type: obsoletes
+status: experimental
+description: Detects loading of essential DLL used by PowerShell, but not by the process powershell.exe. Detects meterpreter's "load powershell" extension.
+author: Tom Kern, oscd.community, Natalia Shornikova, Tim Shelton
+date: 2019/11/14
+modified: 2022/04/21
+references:
+    - https://adsecurity.org/?p=2921
+    - https://github.com/p3nt4/PowerShdll
+tags:
+    - attack.t1059.001
+    - attack.execution
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith:
+            - '\System.Management.Automation.Dll'
+            - '\System.Management.Automation.ni.Dll'
+    filter:
+        - Image: 'C:\Windows\System32\dsac.exe'
+        - Image|endswith:
+            - '\powershell.exe'
+            - '\powershell_ise.exe'
+            - '\WINDOWS\System32\sdiagnhost.exe'
+            - '\mscorsvw.exe'  # c:\Windows\Microsoft.NET\Framework64\v4.0.30319\mscorsw.exe for instance
+            - '\WINDOWS\System32\RemoteFXvGPUDisablement.exe'  # on win10
+            - '\sqlps.exe'
+            - '\wsmprovhost.exe'
+            - '\winrshost.exe'
+            - '\syncappvpublishingserver.exe'
+            - '\runscripthelper.exe'
+            - '\ServerManager.exe'
+            - '\Microsoft SQL Server Management Studio *\Common*\IDE\Ssms.exe'
+            - '\IDE\devenv.exe'
+            - '\ServiceHub.VSDetouredHost.exe'
+            - '\ServiceHub.SettingsHost.exe'
+            - '\ServiceHub.Host.CLR.x86.exe'
+            - '\Citrix\ConfigSync\ConfigSyncRun.exe'
+        - Image|startswith:
+            - 'C:\Program Files (x86)\Microsoft Visual Studio\'
+            - 'C:\Program Files\Microsoft Visual Studio\'
+    filter_nextron:
+        Image|startswith: 'C:\Windows\Temp\asgard2-agent\'
+        Image|endswith:
+            - '\thor64.exe'
+            - '\thor.exe'
+       # User: 'NT AUTHORITY\SYSTEM'   # if set, matches all powershell processes not launched by SYSTEM
+    condition: selection and not 1 of filter*
+falsepositives:
+    - Used by some .NET binaries, minimal on user workstation.
+    - Used by Microsoft SQL Server Management Studio
+level: medium
+enrichment:
+    - EN_0001_cache_sysmon_event_id_1_info                      # http://bit.ly/314zc6x
+    - EN_0003_enrich_other_sysmon_events_with_event_id_1_data   # http://bit.ly/2ojW7fw

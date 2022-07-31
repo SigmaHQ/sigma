@@ -1,0 +1,41 @@
+title: Clear PowerShell History
+id: f99276ad-d122-4989-a09a-d00904a5f9d2
+related:
+    - id: dfba4ce1-e0ea-495f-986e-97140f31af2d
+      type: derived
+status: experimental
+description: Detects keywords that could indicate clearing PowerShell history
+date: 2019/10/25
+modified: 2022/05/10
+author: Ilyas Ochkov, Jonhnathan Ribeiro, Daniil Yugoslavskiy, oscd.community
+references:
+    - https://gist.github.com/hook-s3c/7363a856c3cdbadeb71085147f042c1a
+tags:
+    - attack.defense_evasion
+    - attack.t1070.003
+logsource:
+    product: windows
+    category: ps_module
+    definition: PowerShell Module Logging must be enabled
+detection:
+    selection_1a_payload:
+        Payload|contains:
+            - 'del'
+            - 'Remove-Item'
+            - 'rm'
+    selection_1b_payload:
+        Payload|contains: '(Get-PSReadlineOption).HistorySavePath'
+    selection_payload_2:
+        Payload|contains|all:
+            - 'Set-PSReadlineOption'
+            - '–HistorySaveStyle'  # not sure if the homoglyph –/- is intended, just checking for both
+            - 'SaveNothing'
+    selection_payload_3:
+        Payload|contains|all:
+            - 'Set-PSReadlineOption'
+            - '-HistorySaveStyle'
+            - 'SaveNothing'
+    condition: 1 of selection_payload_* or all of selection_1*
+falsepositives:
+    - Legitimate PowerShell scripts
+level: medium

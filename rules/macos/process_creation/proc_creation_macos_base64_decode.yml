@@ -1,0 +1,23 @@
+title: Decode Base64 Encoded Text
+id: 719c22d7-c11a-4f2c-93a6-2cfdd5412f68
+status: test
+description: Detects usage of base64 utility to decode arbitrary base64-encoded text
+author: Daniil Yugoslavskiy, oscd.community
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1027/T1027.md
+date: 2020/10/19
+modified: 2021/11/27
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection:
+        Image: '/usr/bin/base64'
+        CommandLine|contains: '-d'
+    condition: selection
+falsepositives:
+    - Legitimate activities
+level: low
+tags:
+    - attack.defense_evasion
+    - attack.t1027

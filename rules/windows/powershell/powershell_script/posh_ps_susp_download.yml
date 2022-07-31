@@ -1,0 +1,28 @@
+title: Suspicious PowerShell Download
+id: 403c2cc0-7f6b-4925-9423-bfa573bed7eb
+related:
+    - id: 65531a81-a694-4e31-ae04-f8ba5bc33759
+      type: derived
+status: experimental
+description: Detects suspicious PowerShell download command
+tags:
+    - attack.execution
+    - attack.t1059.001
+author: Florian Roth
+date: 2017/03/05
+modified: 2021/10/18
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    webclient:
+        ScriptBlockText|contains: 'System.Net.WebClient'
+    download:
+        ScriptBlockText|contains:
+            - '.DownloadFile('
+            - '.DownloadString('
+    condition: webclient and download
+falsepositives:
+    - PowerShell scripts that download content from the Internet
+level: medium

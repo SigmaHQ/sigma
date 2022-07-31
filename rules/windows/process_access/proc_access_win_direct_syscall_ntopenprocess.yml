@@ -1,0 +1,40 @@
+title: Direct Syscall of NtOpenProcess
+id: 3f3f3506-1895-401b-9cc3-e86b16e630d0
+description: Detects the usage of the direct syscall of NtOpenProcess which might be done from a CobaltStrike BOF.
+references:
+    - https://medium.com/falconforce/falconfriday-direct-system-calls-and-cobalt-strike-bofs-0xff14-741fa8e1bdd6
+status: experimental
+author: Christian Burkard, Tim Shelton
+date: 2021/07/28
+modified: 2022/06/20
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        CallTrace|startswith: 'UNKNOWN'
+    falsepositive1:
+        TargetImage: 'C:\Program Files\Cylance\Desktop\CylanceUI.exe'
+        SourceImage: 'C:\Windows\Explorer.EXE'
+    falsepositive2:
+        TargetImage: 'C:\Program Files (x86)\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe'
+        SourceImage: 'C:\Program Files (x86)\Microsoft\Temp\*\MicrosoftEdgeUpdate.exe'
+    falsepositive3:
+        TargetImage|endswith: 'vcredist_x64.exe'
+        SourceImage|endswith: 'vcredist_x64.exe'
+    falsepositive4:
+        TargetImage: 'C:\Windows\system32\systeminfo.exe'
+        SourceImage|endswith: 'setup64.exe' #vmware
+    falsepositive5:
+        TargetImage|endswith: 'AmazonSSMAgentSetup.exe'
+        SourceImage|endswith: 'AmazonSSMAgentSetup.exe'
+    falsepositive6:
+        TargetImage|endswith: 'C:\Program Files\Mozilla Firefox\firefox.exe'
+        SourceImage|endswith: 'C:\Program Files\Mozilla Firefox\firefox.exe'
+    condition: selection and not 1 of falsepositive*
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.execution
+    - attack.t1106

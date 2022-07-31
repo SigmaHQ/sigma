@@ -1,0 +1,79 @@
+title: Suspicious SYSTEM User Process Creation
+id: 2617e7ed-adb7-40ba-b0f3-8f9945fe6c09
+status: test
+description: Detects a suspicious process creation as SYSTEM user (suspicious program or command line parameter)
+references:
+    - Internal Research
+    - https://tools.thehacker.recipes/mimikatz/modules
+author: Florian Roth (rule), David ANDRE (additional keywords)
+date: 2021/12/20
+modified: 2022/04/27
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        IntegrityLevel: System
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
+    selection_special:
+        - Image|endswith:
+            - '\calc.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\hh.exe'
+            - '\mshta.exe'
+            - '\forfiles.exe'
+            - '\ping.exe'
+        - CommandLine|contains:
+            # - 'sc stop ' # stops a system service # causes FPs
+            - ' -NoP '  # Often used in malicious PowerShell commands
+            - ' -W Hidden '  # Often used in malicious PowerShell commands
+            - ' -decode '  # Used with certutil
+            - ' /decode '  # Used with certutil
+            - ' /urlcache '  # Used with certutil
+            - ' -urlcache '  # Used with certutil
+            - ' -e* JAB'  # PowerShell encoded commands
+            - ' -e* SUVYI'  # PowerShell encoded commands
+            - ' -e* SQBFAFgA'  # PowerShell encoded commands
+            - ' -e* aWV4I'  # PowerShell encoded commands
+            - ' -e* IAB'  # PowerShell encoded commands
+            - ' -e* PAA'  # PowerShell encoded commands
+            - ' -e* aQBlAHgA'  # PowerShell encoded commands
+            - 'vssadmin delete shadows'  # Ransomware
+            - 'reg SAVE HKLM'  # save registry SAM - syskey extraction
+            - ' -ma '  # ProcDump
+            - 'Microsoft\Windows\CurrentVersion\Run'  # Run key in command line - often in combination with REG ADD
+            - '.downloadstring('  # PowerShell download command
+            - '.downloadfile('  # PowerShell download command
+            - ' /ticket:'  # Rubeus
+            - 'dpapi::'     #Mimikatz
+            - 'event::clear'        #Mimikatz
+            - 'event::drop'     #Mimikatz
+            - 'id::modify'      #Mimikatz
+            - 'kerberos::'       #Mimikatz
+            - 'lsadump::'      #Mimikatz
+            - 'misc::'     #Mimikatz
+            - 'privilege::'       #Mimikatz
+            - 'rpc::'      #Mimikatz
+            - 'sekurlsa::'       #Mimikatz
+            - 'sid::'        #Mimikatz
+            - 'token::'      #Mimikatz
+            - 'vault::cred'     #Mimikatz
+            - 'vault::list'     #Mimikatz
+            - ' p::d '  # Mimikatz 
+            - ';iex('  # PowerShell IEX
+            - 'MiniDump'  # Process dumping method apart from procdump
+            - 'net user '
+    filter:
+        CommandLine: 'ping 127.0.0.1 -n 5'
+    filter_vs:
+        Image|endswith: '\PING.EXE'
+        ParentCommandLine|contains: '\DismFoDInstall.cmd'
+    condition: all of selection* and not 1 of filter*
+falsepositives:
+    - Administrative activity
+    - Scripts and administrative tools used in the monitored environment
+    - Monitoring activity
+level: high

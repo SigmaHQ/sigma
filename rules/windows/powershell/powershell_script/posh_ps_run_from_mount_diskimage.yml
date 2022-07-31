@@ -1,0 +1,29 @@
+title: Suspicious Invoke-Item From Mount-DiskImage
+id: 902cedee-0398-4e3a-8183-6f3a89773a96
+status: experimental
+description: Adversaries may abuse container files such as disk image (.iso, .vhd) file formats to deliver malicious payloads that may not be tagged with MOTW.
+date: 2022/02/01
+author: frack113
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1553.005/T1553.005.md#atomic-test-2---mount-an-iso-image-and-run-executable-from-the-iso
+    - https://docs.microsoft.com/en-us/powershell/module/storage/mount-diskimage?view=windowsserver2022-ps
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - 'Mount-DiskImage '
+            - '-ImagePath '
+            - Get-Volume
+            - '.DriveLetter'
+            - 'invoke-item '
+            - '):\'
+    condition: selection
+falsepositives:
+    - Legitimate PowerShell scripts
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1553.005

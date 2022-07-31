@@ -1,0 +1,24 @@
+title: Suspicious Enumerate Active Directory Computers with Get-AdComputer
+id: 36bed6b2-e9a0-4fff-beeb-413a92b86138
+status: experimental
+author: frack113
+date: 2022/03/17
+description: utilize Get-AdComputer to enumerate Computers within Active Directory.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1018/T1018.md
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - 'Get-AdComputer '
+            - '-Filter'
+    condition: selection
+falsepositives:
+    - Unknown
+level: low
+tags:
+    - attack.discovery
+    - attack.t1018

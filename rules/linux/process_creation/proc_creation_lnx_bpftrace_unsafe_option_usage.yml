@@ -1,0 +1,23 @@
+title: BPFtrace Unsafe Option Usage
+id: f8341cb2-ee25-43fa-a975-d8a5a9714b39
+status: experimental
+description: Detects the usage of the unsafe bpftrace option
+author: Andreas Hunkeler (@Karneades)
+tags:
+  - attack.execution
+  - attack.t1059.004
+references:
+  - https://embracethered.com/blog/posts/2021/offensive-bpf-bpftrace/
+  - https://bpftrace.org/
+date: 2022/02/11
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection1:
+    Image|endswith: 'bpftrace'
+    CommandLine|contains: '--unsafe'
+  condition: selection1
+falsepositives:
+  - Legitimate usage of the unsafe option
+level: medium

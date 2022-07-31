@@ -1,0 +1,29 @@
+title: SharpHound Recon Sessions
+id: 6d580420-ff3f-4e0e-b6b0-41b90c787e28
+description: Detects remote RPC calls useb by SharpHound to map remote connections and local group membership.
+references:
+    - https://attack.mitre.org/techniques/T1033/
+    - https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-srvs/02b1f559-fda2-4ba3-94c2-806eb2777183
+    - https://github.com/jsecurity101/MSRPC-to-ATTACK/blob/ddd4608fe8684fcf2fcf9b48c5f0b3c28097f8a3/documents/MS-SRVS.md
+    - https://github.com/zeronetworks/rpcfirewall
+    - https://zeronetworks.com/blog/stopping_lateral_movement_via_the_rpc_firewall/
+tags:
+    - attack.t1033
+status: experimental
+author: Sagie Dulce, Dekel Paz
+date: 2022/01/01
+modified: 2022/01/01
+logsource:
+    product: rpc_firewall
+    category: application
+    definition: 'Requirements: install and apply the RPC Firewall to all processes with "audit:true action:block uuid:4b324fc8-1670-01d3-1278-5a47bf6ee188 opnum:12'
+detection:
+    selection:
+        EventLog: RPCFW
+        EventID: 3
+        InterfaceUuid: 4b324fc8-1670-01d3-1278-5a47bf6ee188
+        OpNum: 12
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

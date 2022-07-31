@@ -1,0 +1,24 @@
+title: Process Discovery
+id: 4e2f5868-08d4-413d-899f-dc2f1508627b
+status: stable
+description: Detects process discovery commands. Adversaries may attempt to get information about running processes on a system. Information obtained could be used to gain an understanding of common software/applications running on systems within the network
+author: Ömer Günal, oscd.community
+date: 2020/10/06
+modified: 2022/07/07
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1057/T1057.md
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection:
+        Image|endswith:
+            - '/ps'
+            - '/top'
+    condition: selection
+falsepositives:
+    - Legitimate administration activities
+level: informational
+tags:
+    - attack.discovery
+    - attack.t1057

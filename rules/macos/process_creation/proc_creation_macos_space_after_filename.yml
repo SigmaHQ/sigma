@@ -1,0 +1,23 @@
+title: Space After Filename - macOS
+id: b6e2a2e3-2d30-43b1-a4ea-071e36595690
+status: experimental
+description: Detects attempts to masquerade as legitimate files by adding a space to the end of the filename.
+author: remotephone
+date: 2021/11/20
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1036.006/T1036.006.md
+logsource:
+    product: macos
+    category: process_creation
+detection:
+    selection1:
+        CommandLine|endswith: ' '
+    selection2:
+        ImageName|endswith: ' '
+    condition: 1 of selection*
+falsepositives:
+    - Mistyped commands or legitimate binaries named to match the pattern
+level: low
+tags:
+    - attack.defense_evasion
+    - attack.t1036.006

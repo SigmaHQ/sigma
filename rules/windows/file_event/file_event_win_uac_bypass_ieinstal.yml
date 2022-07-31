@@ -1,0 +1,25 @@
+title: UAC Bypass Using IEInstal - File
+id: bdd8157d-8e85-4397-bb82-f06cc9c71dbb
+description: Detects the pattern of UAC Bypass using IEInstal.exe (UACMe 64)
+author: Christian Burkard
+date: 2021/08/30
+status: experimental
+references:
+    - https://github.com/hfiref0x/UACME
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1548.002
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        Image: 'C:\Program Files\Internet Explorer\IEInstal.exe'
+        TargetFilename|startswith: 'C:\Users\'
+        TargetFilename|contains: '\AppData\Local\Temp\'
+        TargetFilename|endswith: 'consent.exe'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

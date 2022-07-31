@@ -1,0 +1,26 @@
+title: Suspicious Get-ADDBAccount Usage
+id: b140afd9-474b-4072-958e-2ebb435abd68
+description: Detects suspicious invocation of the Get-ADDBAccount script that reads from a ntds.dit file and may be used to get access to credentials without using any credential dumpers
+status: experimental
+author: Florian Roth
+date: 2022/03/16
+references:
+    - https://www.n00py.io/2022/03/manipulating-user-passwords-without-mimikatz/
+    - https://github.com/MichaelGrafnetter/DSInternals/blob/7ba59c12ee9a1cb430d7dc186a3366842dd612c8/Documentation/PowerShell/Get-ADDBAccount.md
+tags:
+    - attack.credential_access
+    - attack.t1003.003
+logsource:
+    product: windows
+    category: ps_module
+    definition: PowerShell Module Logging must be enabled
+detection:
+    selection:
+        Payload|contains|all:
+            - 'Get-ADDBAccount'
+            - 'BootKey '
+            - 'DatabasePath '
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

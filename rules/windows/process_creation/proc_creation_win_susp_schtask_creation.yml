@@ -1,0 +1,33 @@
+title: Scheduled Task Creation
+id: 92626ddd-662c-49e3-ac59-f6535f12d189
+status: experimental
+description: Detects the creation of scheduled tasks in user session
+author: Florian Roth
+date: 2019/01/16
+modified: 2021/08/26
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\schtasks.exe'
+        CommandLine|contains: ' /create '
+    filter:
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
+    condition: selection and not filter
+fields:
+    - CommandLine
+    - ParentCommandLine
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1053.005
+    - attack.s0111
+    - car.2013-08-001
+falsepositives:
+    - Administrative activity
+    - Software installation
+level: low

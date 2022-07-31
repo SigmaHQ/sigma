@@ -1,0 +1,24 @@
+title: Uninstall Sysinternals Sysmon
+id: 6a5f68d1-c4b5-46b9-94ee-5324892ea939
+status: experimental
+description: Detects the uninstallation of Sysinternals Sysmon, which could be the result of legitimate administration or a manipulation for defense evasion
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md#atomic-test-11---uninstall-sysmon
+author: frack113
+date: 2022/01/12
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - \Sysmon64.exe
+            - \Sysmon.exe
+        CommandLine|contains: '-u'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001

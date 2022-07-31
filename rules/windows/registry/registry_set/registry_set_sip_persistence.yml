@@ -1,0 +1,38 @@
+title: Persistence Via New SIP Provider
+id: 5a2b21ee-6aaa-4234-ac9d-59a59edf90a1
+description: Detects when an attacker register a new SIP provider for persistence and defense evasion
+author: Nasreddine Bencherchali
+date: 2022/07/21
+status: experimental
+references:
+    - https://persistence-info.github.io/Data/codesigning.html
+    - https://github.com/gtworek/PSBits/tree/master/SIP
+    - https://specterops.io/assets/resources/SpecterOps_Subverting_Trust_in_Windows.pdf
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_root:
+        EventType: SetValue
+        TargetObject|contains:
+            - '\SOFTWARE\Microsoft\Cryptography\Providers\'
+            - '\SOFTWARE\Microsoft\Cryptography\OID\EncodingType'
+            - '\SOFTWARE\WOW6432Node\Microsoft\Cryptography\Providers\'
+            - '\SOFTWARE\WOW6432Node\Microsoft\Cryptography\OID\EncodingType'
+    selection_dll:
+        TargetObject|contains:
+            - '\Dll'
+            - '\$DLL'
+    filter:
+        Details:
+            # Add more legitimate SIP providers according to your env
+            - WINTRUST.DLL
+            - mso.dll
+    condition: all of selection_* and not filter
+falsepositives:
+    - Legitimate SIP being registered by the OS or different software.
+level: medium
+tags:
+  - attack.persistence
+  - attack.defense_evasion
+  - attack.t1553.003

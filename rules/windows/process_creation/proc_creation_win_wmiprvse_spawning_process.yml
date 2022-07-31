@@ -1,0 +1,34 @@
+title: Wmiprvse Spawning Process
+id: d21374ff-f574-44a7-9998-4a8c8bf33d7d
+description: Detects wmiprvse spawning processes
+status: experimental
+date: 2019/08/15
+modified: 2022/05/27
+author: Roberto Rodriguez @Cyb3rWard0g
+references:
+    - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190810201010.html
+tags:
+    - attack.execution
+    - attack.t1047
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\WmiPrvSe.exe'
+    filter:
+        - LogonId:
+            - '0x3e7'  # LUID 999 for SYSTEM
+            - 'null'   # too many false positives
+        - User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
+        - Image|endswith:
+            - '\WmiPrvSE.exe'
+            - '\WerFault.exe'
+    filter_null:  # some backends need the null value in a separate expression
+        LogonId: null
+    condition: selection and not filter and not filter_null
+falsepositives:
+    - Unknown
+level: high

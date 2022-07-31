@@ -1,0 +1,82 @@
+title: Regsvr32 Anomaly
+id: 8e2b24c9-4add-46a0-b4bb-0057b4e6187d
+status: experimental
+description: Detects various anomalies in relation to regsvr32.exe
+author: Florian Roth, oscd.community, Tim Shelton
+date: 2019/01/16
+modified: 2022/07/20
+references:
+    - https://subt0x10.blogspot.de/2017/04/bypass-application-whitelisting-script.html
+    - https://app.any.run/tasks/34221348-072d-4b70-93f3-aa71f6ebecad/
+tags:
+    - attack.defense_evasion
+    - attack.t1218.010
+    - car.2019-04-002
+    - car.2019-04-003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Image|endswith: '\regsvr32.exe'
+        CommandLine|contains: '\Temp\'
+    selection2:
+        Image|endswith: '\regsvr32.exe'
+        ParentImage|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\powershell_ise.exe'
+    selection3:
+        Image|endswith: '\regsvr32.exe'
+        ParentImage|endswith: '\cmd.exe'
+    selection4a:
+        Image|endswith: '\regsvr32.exe'
+        CommandLine|contains|all:
+            - '/i:'
+            - 'http'
+        CommandLine|endswith: 'scrobj.dll'
+    selection4b:
+        Image|endswith: '\regsvr32.exe'
+        CommandLine|contains|all:
+            - '/i:'
+            - 'ftp'
+        CommandLine|endswith: 'scrobj.dll'
+    selection5:
+        Image|endswith: '\wscript.exe'
+        ParentImage|endswith: '\regsvr32.exe'
+    selection6:
+        Image|endswith: '\EXCEL.EXE'
+        CommandLine|contains: '..\..\..\Windows\System32\regsvr32.exe '
+    selection7:
+        ParentImage|endswith: '\mshta.exe'
+        Image|endswith: '\regsvr32.exe'
+    selection8:
+        Image|endswith: '\regsvr32.exe'
+        CommandLine|contains:
+            - '\AppData\Local'
+            - 'C:\Users\Public'
+    selection9: # suspicious extensions https://twitter.com/Max_Mal_/status/1542461200797163522/photo/3
+        Image|endswith: '\regsvr32.exe'
+        CommandLine|endswith:
+            - '.jpg'
+            - '.jpeg'
+            - '.png'
+            - '.gif'
+            - '.bin'
+            - '.tmp'
+            - '.temp'
+            - '.txt'
+    filter1:
+        CommandLine|contains:
+            - '\AppData\Local\Microsoft\Teams'
+            - '\AppData\Local\WebEx\WebEx64\Meetings\atucfobj.dll'
+    filter2:
+        ParentImage: 'C:\Program Files\Box\Box\FS\streem.exe'
+        CommandLine|contains: '\Program Files\Box\Box\Temp\'
+    condition: 1 of selection* and not 1 of filter*
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Unknown
+level: high

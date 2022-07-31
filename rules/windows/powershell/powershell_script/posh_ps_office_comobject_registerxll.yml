@@ -1,0 +1,28 @@
+title: Code Executed Via Office Add-in XLL File
+id: 36fbec91-fa1b-4d5d-8df1-8d8edcb632ad
+status: experimental
+description: |
+    Adversaries may abuse Microsoft Office add-ins to obtain persistence on a compromised system.
+    Office add-ins can be used to add functionality to Office programs
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1137.006/T1137.006.md
+author: frack113
+date: 2021/12/28
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - 'new-object '
+            - '-ComObject '
+            - '.application'
+            - '.RegisterXLL'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.persistence
+    - attack.t1137.006

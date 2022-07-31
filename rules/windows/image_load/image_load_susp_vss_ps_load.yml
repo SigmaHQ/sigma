@@ -1,0 +1,45 @@
+title: Image Load of VSS_PS.dll by Uncommon Executable
+id: 333cdbe8-27bb-4246-bf82-b41a0dca4b70
+status: experimental
+description: Detects the image load of vss_ps.dll by uncommon executables using OriginalFileName datapoint
+author: Markus Neis, @markus_neis
+date: 2021/07/07
+modified: 2022/07/27
+references:
+    - 1bd85e1caa1415ebdc8852c91e37bbb7
+    - https://twitter.com/am0nsec/status/1412232114980982787
+tags:
+    - attack.defense_evasion
+    - attack.impact
+    - attack.t1490
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith: '\vss_ps.dll'
+    filter_legit:
+        Image|endswith:
+            - '\svchost.exe'
+            - '\msiexec.exe'
+            - '\vssvc.exe'
+            - '\srtasks.exe'
+            - '\tiworker.exe'
+            - '\dllhost.exe'
+            - '\searchindexer.exe'
+            - '\dismhost.exe'
+            - '\taskhostw.exe'
+            - '\clussvc.exe'
+            - '\thor64.exe'
+            - '\thor.exe'
+            - '\rundll32.exe'
+            - '\inetsrv\iissetup.exe'
+            - '\inetsrv\appcmd.exe'
+        Image|contains: 'c:\windows\'
+    filter_update:
+        CommandLine|startswith: 'C:\$WinREAgent\Scratch\'
+        CommandLine|contains: '\dismhost.exe {'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: high

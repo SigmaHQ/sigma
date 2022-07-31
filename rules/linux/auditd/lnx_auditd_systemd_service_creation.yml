@@ -1,0 +1,30 @@
+title: Systemd Service Creation
+id: 1bac86ba-41aa-4f62-9d6b-405eac99b485
+status: experimental
+description: Detects a creation of systemd services which could be used by adversaries to execute malicious code.
+author: 'Pawel Mazur'
+references:
+  - https://attack.mitre.org/techniques/T1543/002/
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1543.002/T1543.002.md
+date: 2022/02/03
+modified: 2022/02/06
+logsource:
+  product: linux
+  service: auditd
+detection:
+  path:
+    type: 'PATH'
+    nametype: 'CREATE'
+  name_1:
+    name|startswith:
+         - '/usr/lib/systemd/system/'
+         - '/etc/systemd/system/'
+  name_2:
+    name|contains: '/.config/systemd/user/'
+  condition: path and 1 of name_*
+falsepositives:
+  - Admin work like legit service installs.
+level: medium
+tags:
+  - attack.persistence
+  - attack.t1543.002

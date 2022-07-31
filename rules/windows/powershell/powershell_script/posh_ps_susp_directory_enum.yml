@@ -1,0 +1,30 @@
+title: Powershell Directory Enumeration
+id: 162e69a7-7981-4344-84a9-0f1c9a217a52
+status: experimental
+description: Detects technique used by MAZE ransomware to enumerate directories using Powershell
+date: 2022/03/17
+author: frack113
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1083/T1083.md
+    - https://www.mandiant.com/resources/tactics-techniques-procedures-associated-with-maze-ransomware-incidents
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - foreach
+            - Get-ChildItem
+            - '-Path '
+            - '-ErrorAction '
+            - SilentlyContinue
+            - 'Out-File '
+            - '-append'
+    condition: selection
+falsepositives:
+    - Legitimate PowerShell scripts
+level: medium
+tags:
+    - attack.discovery
+    - attack.t1083

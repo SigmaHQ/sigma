@@ -1,0 +1,28 @@
+title: Remote Server Service Abuse
+id: b6ea3cc7-542f-43ef-bbe4-980fbed444c7
+description: Detects remote RPC calls to possibly abuse remote encryption service via MS-SRVS
+references:
+    - https://attack.mitre.org/tactics/TA0008/
+    - https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-srvs/accf23b0-0f57-441c-9185-43041f1b0ee9
+    - https://github.com/jsecurity101/MSRPC-to-ATTACK/blob/ddd4608fe8684fcf2fcf9b48c5f0b3c28097f8a3/documents/MS-SRVS.md
+    - https://github.com/zeronetworks/rpcfirewall
+    - https://zeronetworks.com/blog/stopping_lateral_movement_via_the_rpc_firewall/
+tags:
+    - attack.lateral_movement
+status: experimental
+author: Sagie Dulce, Dekel Paz
+date: 2022/01/01
+modified: 2022/01/01
+logsource:
+    product: rpc_firewall
+    category: application
+    definition: 'Requirements: install and apply the RPC Firewall to all processes with "audit:true action:block uuid:4b324fc8-1670-01d3-1278-5a47bf6ee188'
+detection:
+    selection:
+        EventLog: RPCFW
+        EventID: 3
+        InterfaceUuid: 4b324fc8-1670-01d3-1278-5a47bf6ee188
+    condition: selection
+falsepositives:
+    - Legitimate remote share creation
+level: high

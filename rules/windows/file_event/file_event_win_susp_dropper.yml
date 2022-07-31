@@ -1,0 +1,51 @@
+title: Creation of an Executable by an Executable
+id: 297afac9-5d02-4138-8c58-b977bac60556
+status: experimental
+description: Detects the creation of an executable by another executable
+author: frack113
+references:
+  - Malware Sandbox
+date: 2022/03/09
+modified: 2022/07/27
+logsource:
+  product: windows
+  category: file_event
+detection:
+  selection:
+    Image|endswith: '.exe'
+    TargetFilename|endswith: '.exe'
+  filter_whitelist:
+    Image: 
+      - 'C:\Windows\System32\msiexec.exe'
+      - 'C:\Windows\system32\cleanmgr.exe'
+      - 'C:\Windows\explorer.exe'
+      - 'C:\WINDOWS\system32\dxgiadaptercache.exe'
+      - 'C:\WINDOWS\system32\Dism.exe'
+      - 'C:\Windows\System32\wuauclt.exe'
+  filter_update:
+    Image: 'C:\WINDOWS\system32\svchost.exe'
+    TargetFilename|startswith: 'C:\Windows\SoftwareDistribution\Download\Install\'
+    # Security_UserID: S-1-5-18
+  filter_tiworker:
+    Image|startswith: 'C:\Windows\WinSxS\'
+    Image|endswith: '\TiWorker.exe'
+  filter_programfiles:
+    - Image|startswith:
+      - 'C:\Program Files\'
+      - 'C:\Program Files (x86)\'
+    - TargetFilename|startswith:
+      - 'C:\Program Files\'
+      - 'C:\Program Files (x86)\'
+  filter_defender:
+    Image|startswith: 'C:\ProgramData\Microsoft\Windows Defender\'
+  filter_windows_apps:
+    TargetFilename|contains: '\Microsoft\WindowsApps\'
+  condition: selection and not 1 of filter_*
+falsepositives:
+  - Software installers
+  - Update utilities
+#Please contribute to FP to go up the level
+level: low
+tags:
+  - attack.resource_development
+  - attack.t1587.001

@@ -1,0 +1,30 @@
+title: Remote Server Service Abuse for Lateral Movement
+id: 10018e73-06ec-46ec-8107-9172f1e04ff2
+description: Detects remote RPC calls to possibly abuse remote encryption service via MS-EFSR
+references:
+    - https://attack.mitre.org/tactics/TA0008/
+    - https://attack.mitre.org/techniques/T1569/002/
+    - https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-srvs/accf23b0-0f57-441c-9185-43041f1b0ee9
+    - https://github.com/jsecurity101/MSRPC-to-ATTACK/blob/ddd4608fe8684fcf2fcf9b48c5f0b3c28097f8a3/documents/MS-SCMR.md
+    - https://github.com/zeronetworks/rpcfirewall
+    - https://zeronetworks.com/blog/stopping_lateral_movement_via_the_rpc_firewall/
+tags:
+    - attack.lateral_movement
+    - attack.t1569.002
+status: experimental
+author: Sagie Dulce, Dekel Paz
+date: 2022/01/01
+modified: 2022/01/01
+logsource:
+    product: rpc_firewall
+    category: application
+    definition: 'Requirements: install and apply the RPC Firewall to all processes with "audit:true action:block uuid:367abb81-9844-35f1-ad32-98f038001003'
+detection:
+    selection:
+        EventLog: RPCFW
+        EventID: 3
+        InterfaceUuid: 367abb81-9844-35f1-ad32-98f038001003
+    condition: selection
+falsepositives:
+    - Administrative tasks on remote services
+level: high

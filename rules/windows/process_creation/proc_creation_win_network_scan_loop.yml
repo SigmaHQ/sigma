@@ -1,0 +1,31 @@
+title: Suspicious Scan Loop Network
+id: f8ad2e2c-40b6-4117-84d7-20b89896ab23
+status: experimental
+description: Adversaries may attempt to get a listing of other systems by IP address, hostname, or other logical identifier on a network that may be used for Lateral Movement from the current system
+author: frack113
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1018/T1018.md
+    - https://ss64.com/nt/for.html
+    - https://ss64.com/ps/foreach-object.htmll
+date: 2022/03/12
+logsource:
+  category: process_creation
+  product: windows
+detection:
+    selection_loop:
+        CommandLine|contains:
+            - 'for '
+            - 'foreach '
+    selection_tools:
+        CommandLine|contains:
+            - 'nslookup'
+            - 'ping'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate script
+level: medium
+tags:
+    - attack.execution
+    - attack.t1059
+    - attack.discovery
+    - attack.t1018
