@@ -14,11 +14,15 @@ logsource:
     category: file_event
     product: windows
 detection:
-    selection:
-        TargetFilename|endswith:
-            - '\AppData\Local\Temp\*.zip\*.iso'
-            - '\AppData\Local\Microsoft\Windows\INetCache\Content.Outlook\*.iso'
-    condition: selection
+    selection_1:
+        TargetFilename|contains|all:
+            - '\AppData\Local\Temp\
+            - '.zip\'
+        TargetFilename|endswith: '.iso'
+    selection_2:
+        TargetFilename|contains: '\AppData\Local\Microsoft\Windows\INetCache\Content.Outlook\'
+        TargetFilename|endswith: '.iso'
+    condition: 1 of selection*
 fields:
     - Image
     - ComputerName
