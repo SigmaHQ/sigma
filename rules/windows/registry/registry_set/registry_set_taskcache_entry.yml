@@ -3,7 +3,7 @@ id: 4720b7df-40c3-48fd-bbdf-fd4b3c464f0d
 description: Monitor the creation of a new key under 'TaskCache' when a new scheduled task is registered by a process that is not svchost.exe, which is suspicious
 status: experimental
 date: 2021/06/18
-modified: 2022/07/27
+modified: 2022/07/29
 references:
   - https://thedfirreport.com/2021/03/29/sodinokibi-aka-revil-ransomware/
   - https://labs.f-secure.com/blog/scheduled-task-tampering/
@@ -23,7 +23,11 @@ detection:
   filter_tiworker:
     Image|startswith: 'C:\Windows\'
     Image|endswith: '\TiWorker.exe'
-    TargetObject|contains: '\MICROSOFT\WINDOWS NT\CURRENTVERSION\SCHEDULE\TASKCACHE\PLAIN\{1A552422-F571-4376-A7F1-5941E63D7B40}'
+    TargetObject|contains:
+      - '\MICROSOFT\WINDOWS NT\CURRENTVERSION\SCHEDULE\TASKCACHE\PLAIN\{1A552422-F571-4376-A7F1-5941E63D7B40}'
+      - '\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\Microsoft\Windows\DeviceDirectoryClient\'
+      - '\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tasks\{04622042-F26B-4CCA-815F-E7A8375D87E6}'
+      - '\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tasks\{C130EB11-1FDE-4953-B222-F44EEC6E1E8B}'
   filter_svchost:
     Image: 'C:\WINDOWS\system32\svchost.exe'
   filter_ngen:

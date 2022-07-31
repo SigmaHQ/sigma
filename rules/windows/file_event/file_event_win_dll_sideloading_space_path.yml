@@ -1,0 +1,30 @@
+title: DLL Search Order Hijackig Via Additional Space in Path
+id: b6f91281-20aa-446a-b986-38a92813a18f
+status: experimental
+description: |
+  Detects when an attacker create a similar folder structure to windows system folders such as (Windows, Program Files...)
+  but with a space in order to trick DLL load search order and perform a "DLL Search Order Hijacking" attack
+references:
+    - https://twitter.com/cyb3rops/status/1552932770464292864
+    - https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows
+author: frack113, Nasreddine Bencherchali
+date: 2022/07/30
+logsource:
+     category: file_event
+     product: windows
+detection:
+    selection:
+        TargetFilename|startswith:
+            - 'C:\Windows \'
+            - 'C:\Program Files \'
+            - 'C:\Program Files (x86) \'
+        TargetFilename|endswith: '.dll'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.defense_evasion
+    - attack.t1574.002 

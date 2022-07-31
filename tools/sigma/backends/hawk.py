@@ -193,7 +193,7 @@ class HAWKBackend(SingleTextQueryBackend):
             nodeRet["args"]["comparison"]["value"] = "!="
         nodeRet['rule_id'] = str(uuid.uuid4())
         key, value = node
-        if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
+        if self.mapListsSpecialHandling == False and type(value) in (str, int, list, bool) or self.mapListsSpecialHandling == True and type(value) in (str, int, bool):
             nodeRet['key'] = self.cleanKey(key).lower()
             nodeRet['description'] = key
             if key.lower() in ("logname","source"):
@@ -266,6 +266,16 @@ class HAWKBackend(SingleTextQueryBackend):
                 del nodeRet['args']['str'] 
                 #return self.mapExpression % (self.cleanKey(key), self.generateValueNode(value, True))
                 #return json.dumps(nodeRet)
+                return nodeRet
+            elif type(value) is bool:
+                nodeRet['return'] = "bool"
+                nodeRet['args']['bool'] = { "value" : value }
+
+                if notNode:
+                    nodeRet["args"]["comparison"]["value"] = "!="
+                else:
+                    nodeRet['args']['comparison']['value'] = "="
+                del nodeRet['args']['str'] 
                 return nodeRet
             else:
 

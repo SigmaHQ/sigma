@@ -1,0 +1,22 @@
+title: App Granted Microsoft Permissions
+id: c1d147ae-a951-48e5-8b41-dcd0170c7213
+description: Detects when an application is granted delegated or app role permissions for Microsoft Graph, Exchange, Sharepoint, or Azure AD
+author: Bailey Bercik '@baileybercik', Mark Morowczynski '@markmorow'
+date: 2022/07/10
+references:
+    - https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/security-operations-applications#application-granted-highly-privileged-permissions
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection:
+        properties.message:
+            - Add delegated permission grant
+            - Add app role assignment to service principal
+    condition: selection
+falsepositives:
+    - When the permission is legitimately needed for the app
+level: high
+status: experimental
+tags:
+    - attack.privilege_escalation

@@ -6,7 +6,7 @@ author: Roberto Rodriguez @Cyb3rWard0g
 references:
   - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190511223310.html
 date: 2019/09/12
-modified: 2022/06/20
+modified: 2022/07/29
 logsource:
   category: network_connection
   product: windows
@@ -15,14 +15,21 @@ detection:
     DestinationPort:
       - 5985
       - 5986
+    Initiated: true  # only matches of the initiating system can be evaluated
   filter:
-    - User|contains: # covers many language settings
-      - 'AUTHORI'
-      - 'AUTORI'
+    - User|contains: # covers many language settings for Network Service, please expand
+      - 'NETWORK SERVICE'
+      - 'NETZWERKDIENST'
+      - 'SERVIZIO DI RETE'
+      - 'SERVICIO DE RED'
+    - User|contains|all:
+        - 'SERVICE R'
+        - 'SEAU'
     - SourceIp|startswith: '0:0:'
   condition: selection and not filter
 falsepositives:
   - Legitimate usage of remote PowerShell, e.g. remote administration and monitoring.
+  - Network Service user name of a not-covered localization
 level: high
 tags:
   - attack.execution
