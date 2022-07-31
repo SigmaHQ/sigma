@@ -1,0 +1,32 @@
+title: Linux Base64 Encoded Pipe to Shell
+id: ba592c6d-6888-43c3-b8c6-689b8fe47337
+status: experimental
+description: Detects suspicious process command line that uses base64 encoded input for execution with a shell
+author: pH-T
+date: 2022/07/26
+references:
+    - https://github.com/arget13/DDexec
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_base64:
+        CommandLine|contains: 'base64 -w0 '
+    selection_exec:
+        - CommandLine|contains:
+            - '| bash '
+            - '| sh '
+            - '|bash '
+            - '|sh '
+        - CommandLine|endswith:
+            - '| bash'
+            - '| sh'
+            - '|bash'
+            - ' |sh'
+    condition: selection_base64 and selection_exec
+falsepositives:
+    - Legitimate administration activities
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1140

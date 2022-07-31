@@ -4,7 +4,7 @@ status: experimental
 description: Detects the image load of vss_ps.dll by uncommon executables using OriginalFileName datapoint
 author: Markus Neis, @markus_neis
 date: 2021/07/07
-modified: 2022/06/02
+modified: 2022/07/27
 references:
     - 1bd85e1caa1415ebdc8852c91e37bbb7
     - https://twitter.com/am0nsec/status/1412232114980982787
@@ -18,7 +18,7 @@ logsource:
 detection:
     selection:
         ImageLoaded|endswith: '\vss_ps.dll'
-    filter:
+    filter_legit:
         Image|endswith:
             - '\svchost.exe'
             - '\msiexec.exe'
@@ -36,7 +36,10 @@ detection:
             - '\inetsrv\iissetup.exe'
             - '\inetsrv\appcmd.exe'
         Image|contains: 'c:\windows\'
-    condition: selection and not filter
+    filter_update:
+        CommandLine|startswith: 'C:\$WinREAgent\Scratch\'
+        CommandLine|contains: '\dismhost.exe {'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown
 level: high
