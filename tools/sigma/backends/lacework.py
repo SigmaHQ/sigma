@@ -468,7 +468,6 @@ class LaceworkBackend(SingleTextQueryBackend):
 
 
 class LaceworkQuery:
-    DEFAULT_EVAL_FREQUENCY = 'Hourly'
 
     def __init__(
         self,
