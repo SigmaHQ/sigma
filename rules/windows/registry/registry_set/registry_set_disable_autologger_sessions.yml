@@ -12,8 +12,9 @@ logsource:
     product: windows
 detection:
     selection:
-        EventType: SetValue
         TargetObject|contains: '\System\CurrentControlSet\Control\WMI\Autologger\'
+    selection_values:
+        EventType: SetValue
         TargetObject|contains: # We only care about some autologger to avoid FP. Add more if you need
             - '\EventLog-'
             - '\Defender'
@@ -21,7 +22,7 @@ detection:
             - '\Enabled'
             - '\Start'
         Details: DWORD (0x00000000)
-    condition: selection
+    condition: all of selection*
 falsepositives:
     - Unknown
 level: high
