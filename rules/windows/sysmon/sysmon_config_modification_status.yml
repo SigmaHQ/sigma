@@ -1,10 +1,10 @@
 title: Sysmon Configuration Modification
 id: 1f2b5353-573f-4880-8e33-7d04dcf97744
 description: Detects when an attacker tries to hide from Sysmon by disabling or stopping it
-status: experimental
+status: test
 author: frack113
 date: 2021/06/04
-modified: 2021/09/07
+modified: 2022/08/02
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
     - https://talesfrominfosec.blogspot.com/2017/12/killing-sysmon-silently.html
@@ -19,7 +19,9 @@ detection:
         State: Stopped
     selection_conf:
         - 'Sysmon config state changed'
-    condition: 1 of selection_*
+    filter:
+        State: Started
+    condition: 1 of selection_* and not filter
 falsepositives:
     - Legitimate administrative action
 level: high
