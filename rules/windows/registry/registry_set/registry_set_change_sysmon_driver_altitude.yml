@@ -1,0 +1,24 @@
+title: Disable Sysmon Event Logging Via Registry
+id: 4916a35e-bfc4-47d0-8e25-a003d7067061
+status: experimental
+description: Detects changes in Sysmon driver altitude. If the Sysmon driver is configured to load at an altitude of another registered service, it will fail to load at boot.
+references:
+    - https://posts.specterops.io/shhmon-silencing-sysmon-via-driver-unload-682b5be57650
+    - https://youtu.be/zSihR3lTf7g
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+author: B.Talebi
+date: 2022/07/28
+logsource:
+    category: registry_set
+    product: windows
+detection:
+  selection:
+    EventType: SetValue
+    TargetObject|startswith: 'HKLM\SYSTEM\CurrentControlSet\'
+    TargetObject|endswith: '\Instances\Sysmon Instance\Altitude'
+  condition: selection
+falsepositives:
+    - Legitimate driver altitude change to hide sysmon
+level: high

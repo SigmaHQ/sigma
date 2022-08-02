@@ -1,0 +1,26 @@
+title: Curl Usage on Windows
+id: bbeaed61-1990-4773-bf57-b81dbad7db2d
+status: test
+description: Detects a curl process start on Windows, which indicates a file download from a remote location or a simple web request to a remote server
+author: Florian Roth
+references:
+    - https://web.archive.org/web/20200128160046/https://twitter.com/reegun21/status/1222093798009790464
+date: 2022/07/05
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|endswith: '\curl.exe'
+        - Product: 'The curl executable'
+    condition: selection
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Scripts created by developers and admins
+    - Administrative activity
+level: low
+tags:
+    - attack.command_and_control
+    - attack.t1105

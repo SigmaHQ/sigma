@@ -6,7 +6,7 @@ author: Florian Roth
 references:
   - https://securingtomorrow.mcafee.com/other-blogs/mcafee-labs/rdp-stands-for-really-do-patch-understanding-the-wormable-rdp-vulnerability-cve-2019-0708/
 date: 2019/05/22
-modified: 2021/11/27
+modified: 2022/06/24
 logsource:
   product: windows
   category: process_creation
@@ -16,7 +16,10 @@ detection:
       - '\svchost.exe'
       - 'termsvcs'
   filter:
-    Image|endswith: '\rdpclip.exe'
+    Image|endswith:
+      - '\rdpclip.exe'
+      - ':\Windows\System32\csrss.exe'
+      - ':\Windows\System32\wininit.exe'
   condition: selection and not filter
 falsepositives:
   - Unknown

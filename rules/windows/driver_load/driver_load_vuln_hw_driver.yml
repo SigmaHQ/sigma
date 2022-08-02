@@ -1,0 +1,46 @@
+title: Vulnerable HW Driver Load
+id: 9bacc538-d1b9-4d42-862e-469eafc05a41
+status: experimental
+description: Detects the load of a legitimate signed driver named HW.sys by often used by threat actors or malware for privilege escalation
+author: Florian Roth
+references:
+    - https://decoded.avast.io/janvojtesek/the-return-of-candiru-zero-days-in-the-middle-east/
+    - https://www.virustotal.com/gui/file/6a4875ae86131a594019dec4abd46ac6ba47e57a88287b814d07d929858fe3e5/details
+date: 2022/07/26
+logsource:
+    product: windows
+    category: driver_load
+detection:
+    selection_name:
+        ImageLoaded|endswith: '\HW.sys'
+    selection_sysmon:
+        Hashes|contains: 
+            - 'SHA256=4880F40F2E557CFF38100620B9AA1A3A753CB693AF16CD3D95841583EDCB57A8'
+            - 'SHA256=55963284BBD5A3297F39F12F0D8A01ED99FE59D008561E3537BCD4DB4B4268FA'
+            - 'SHA256=6A4875AE86131A594019DEC4ABD46AC6BA47E57A88287B814D07D929858FE3E5'
+            - 'SHA1=74E4E3006B644392F5FCEA4A9BAE1D9D84714B57'
+            - 'SHA1=18F34A0005E82A9A1556BA40B997B0EAE554D5FD'
+            - 'SHA1=4E56E0B1D12664C05615C69697A2F5C5D893058A'
+            - 'MD5=3247014BA35D406475311A2EAB0C4657'
+            - 'MD5=376B1E8957227A3639EC1482900D9B97'
+            - 'MD5=45C2D133D41D2732F3653ED615A745C8'
+    selection_other:
+        - SHA256: 
+            - '4880f40f2e557cff38100620b9aa1a3a753cb693af16cd3d95841583edcb57a8'
+            - '55963284bbd5a3297f39f12f0d8a01ed99fe59d008561e3537bcd4db4b4268fa'
+            - '6a4875ae86131a594019dec4abd46ac6ba47e57a88287b814d07d929858fe3e5'
+        - SHA1: 
+            - '74e4e3006b644392f5fcea4a9bae1d9d84714b57'
+            - '18f34a0005e82a9a1556ba40b997b0eae554d5fd'
+            - '4e56e0b1d12664c05615c69697a2f5c5d893058a'
+        - MD5:
+            - '3247014ba35d406475311a2eab0c4657'
+            - '376b1e8957227a3639ec1482900d9b97'
+            - '45c2d133d41d2732f3653ed615a745c8'
+    condition: 1 of selection*
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.privilege_escalation
+    - attack.t1543.003

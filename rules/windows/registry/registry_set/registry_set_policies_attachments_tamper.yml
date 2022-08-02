@@ -1,0 +1,31 @@
+title: Modify Attachment Manager Settings - Attachments
+id: ee77a5db-b0f3-4be2-bfd4-b58be1c6b15a
+status: experimental
+description: Detects tampering with attachment manager settings policies attachments (See reference for more information)
+author: Nasreddine Bencherchali
+references:
+    - https://support.microsoft.com/en-us/topic/information-about-the-attachment-manager-in-microsoft-windows-c48a4dcd-8de5-2af5-ee9b-cd795ae42738
+    - https://www.virustotal.com/gui/file/2bcd5702a7565952c44075ac6fb946c7780526640d1264f692c7664c02c68465
+date: 2022/08/01
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    root:
+        EventType: SetValue
+        TargetObject|contains: '\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments\'
+    selection_hide_zone_info:
+        TargetObject|endswith: '\HideZoneInfoOnProperties'
+        Details: 'DWORD (0x00000001)' # On
+    selection_save_zone_info:
+        TargetObject|endswith: '\SaveZoneInformation'
+        Details: 'DWORD (0x00000002)' # Off
+    selection_scan_with_av:
+        TargetObject|endswith: '\ScanWithAntiVirus'
+        Details: 'DWORD (0x00000001)' # Disabled
+    condition: root and 1 of selection_*
+falsepositives:
+    - Unlikely
+level: high
+tags:
+    - attack.defense_evasion
