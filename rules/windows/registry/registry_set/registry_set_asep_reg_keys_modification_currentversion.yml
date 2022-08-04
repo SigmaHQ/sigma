@@ -10,8 +10,9 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1547.001/T1547.001.md
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
+    - https://oddvar.moe/2018/03/21/persistence-using-runonceex-hidden-from-autoruns-exe/
 date: 2019/10/25
-modified: 2022/07/25
+modified: 2022/08/04
 logsource:
     category: registry_set
     product: windows
@@ -19,11 +20,12 @@ detection:
     current_version_base:
         EventType: SetValue
         TargetObject|contains: '\SOFTWARE\Microsoft\Windows\CurrentVersion'
-    current_version:
+    current_version_keys:
         TargetObject|contains:
             - '\ShellServiceObjectDelayLoad'
             - '\Run\'
             - '\RunOnce\'
+            - '\RunOnceEx\'
             - '\Policies\System\Shell'
             - '\Policies\Explorer\Run'
             - '\Group Policy\Scripts\Startup'
@@ -107,7 +109,7 @@ detection:
         Image|endswith: '\OfficeClickToRun.exe'
     filter_defender:
         Image: 'C:\Program Files\Windows Defender\MsMpEng.exe'
-    condition: current_version_base and current_version and not 1 of filter_*
+    condition: all of current_version_* and not 1 of filter_*
 fields:
     - SecurityID
     - ObjectName
