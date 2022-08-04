@@ -4,31 +4,31 @@ status: test
 description: Detection of sc.exe utility spawning by user with Medium integrity level to change service ImagePath or FailureCommand
 author: Teymur Kheirkhabarov
 references:
-  - https://speakerdeck.com/heirhabarov/hunting-for-privilege-escalation-in-windows-environment
-  - https://pentestlab.blog/2017/03/30/weak-service-permissions/
+    - https://speakerdeck.com/heirhabarov/hunting-for-privilege-escalation-in-windows-environment
+    - https://pentestlab.blog/2017/03/30/weak-service-permissions/
 date: 2019/10/26
-modified: 2021/11/27
+modified: 2022/07/14
 logsource:
-  category: process_creation
-  product: windows
+    category: process_creation
+    product: windows
 detection:
-  scbynonadmin:
-    Image|endswith: '\sc.exe'
-    IntegrityLevel: 'Medium'
-  binpath:
-    CommandLine|contains|all:
-      - 'config'
-      - 'binPath'
-  failurecommand:
-    CommandLine|contains|all:
-      - 'failure'
-      - 'command'
-  condition: scbynonadmin and (binpath or failurecommand)
+    scbynonadmin:
+        Image|endswith: '\sc.exe'
+        IntegrityLevel: 'Medium'
+    selection_binpath:
+        CommandLine|contains|all:
+            - 'config'
+            - 'binPath'
+    selection_failure:
+        CommandLine|contains|all:
+            - 'failure'
+            - 'command'
+    condition: scbynonadmin and 1 of selection_*
 falsepositives:
-  - Unknown
+    - Unknown
 level: high
 tags:
-  - attack.persistence
-  - attack.defense_evasion
-  - attack.privilege_escalation
-  - attack.t1574.011
+    - attack.persistence
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1574.011

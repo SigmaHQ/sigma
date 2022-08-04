@@ -1,0 +1,45 @@
+title: Service Binary in Suspicious Folder
+id: a07f0359-4c90-4dc4-a681-8ffea40b4f47
+related:
+    - id: c0abc838-36b0-47c9-b3b3-a90c39455382
+      type: obsoletes
+description: Detect the creation of a service with a service binary located in a suspicious directory
+status: experimental
+date: 2022/05/02
+author: Florian Roth, frack113
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_1:
+        EventType: SetValue
+        TargetObject|startswith: 'HKLM\System\CurrentControlSet\Services\'
+        TargetObject|endswith: '\Start'
+        Image|contains:
+            - '\Users\Public\'
+            - '\Perflogs\'
+            - '\ADMIN$\'
+            - '\Temp\'
+        Details:
+            - 'DWORD (0x00000000)'  # boot
+            - 'DWORD (0x00000001)'  # System
+            - 'DWORD (0x00000002)'  # Automatic
+            # 3 - Manual , 4 - Disabled
+    selection_2:
+        EventType: SetValue
+        TargetObject|startswith: 'HKLM\System\CurrentControlSet\Services\'
+        TargetObject|endswith: '\ImagePath'
+        Details|contains:
+            - '\Users\Public\'
+            - '\Perflogs\'
+            - '\ADMIN$\'
+            - '\Temp\'
+    condition: 1 of selection_*
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1112

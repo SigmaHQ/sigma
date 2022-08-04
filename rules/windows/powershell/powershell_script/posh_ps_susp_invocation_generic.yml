@@ -1,0 +1,35 @@
+title: Suspicious PowerShell Invocations - Generic
+id: ed965133-513f-41d9-a441-e38076a0798f
+related:
+    - id: 3d304fda-78aa-43ed-975c-d740798a49c1
+      type: derived
+status: experimental
+description: Detects suspicious PowerShell invocation command parameters
+tags:
+    - attack.execution
+    - attack.t1059.001
+author: Florian Roth (rule)
+date: 2017/03/12
+modified: 2021/12/02
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection_encoded:
+        ScriptBlockText|contains:
+            - ' -enc '
+            - ' -EncodedCommand '
+    selection_hidden:
+        ScriptBlockText|contains:
+            - ' -w hidden '
+            - ' -window hidden '
+            - ' -windowstyle hidden '
+    selection_noninteractive:
+        ScriptBlockText|contains:
+            - ' -noni '
+            - ' -noninteractive '
+    condition: all of selection*
+falsepositives:
+    - Very special / sneaky PowerShell scripts
+level: high

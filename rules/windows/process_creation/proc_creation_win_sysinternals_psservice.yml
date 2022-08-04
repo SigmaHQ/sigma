@@ -1,0 +1,25 @@
+title: Use of Sysinternals PsService
+id: 3371f518-5fe3-4cf6-a14b-2a0ae3fd8a4f
+description: Detects usage of Sysinternals PsService for service reconnaissance or tamper
+status: experimental
+references:
+    - https://docs.microsoft.com/en-us/sysinternals/downloads/psservice
+author: Nasreddine Bencherchali
+date: 2022/06/16
+tags:
+    - attack.discovery
+    - attack.persistence
+    - attack.t1543.003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - OriginalFileName: 'psservice.exe'
+        - Image|endswith:
+          - '\PsService.exe'
+          - '\PsService64.exe'
+    condition: selection
+falsepositives:
+    - Legitimate use of PsService by an administrator
+level: medium

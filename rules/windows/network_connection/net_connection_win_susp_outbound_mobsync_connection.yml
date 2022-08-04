@@ -1,0 +1,45 @@
+title: Microsoft Sync Center Suspicious Network Connections
+id: 9f2cc74d-78af-4eb2-bb64-9cd1d292b87b
+status: experimental
+level: medium
+description: Detects suspicious connections from Microsoft Sync Center to non-private IPs.
+references:
+    - https://redcanary.com/blog/intelligence-insights-november-2021/
+author: elhoim
+date: 2022/04/28
+modified: 2022/06/02
+logsource:
+    product: windows
+    category: network_connection
+detection:
+    selection_mobsync:
+        Image|endswith: '\mobsync.exe'
+    filter:
+        DestinationIp|startswith:
+            - '10.'
+            - '192.168.'
+            - '172.16.'
+            - '172.17.'
+            - '172.18.'
+            - '172.19.'
+            - '172.20.'
+            - '172.21.'
+            - '172.22.'
+            - '172.23.'
+            - '172.24.'
+            - '172.25.'
+            - '172.26.'
+            - '172.27.'
+            - '172.28.'
+            - '172.29.'
+            - '172.30.'
+            - '172.31.'
+        DestinationIsIpv6: 'false'
+    condition: selection_mobsync and not filter
+falsepositives:
+    - Unknown
+tags:
+    - attack.t1055
+    - attack.t1218
+    - attack.execution
+    - attack.defense_evasion

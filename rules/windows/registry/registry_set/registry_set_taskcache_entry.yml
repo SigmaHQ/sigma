@@ -1,11 +1,12 @@
-title: New TaskCache Entry
+title: Scheduled TaskCache Change by Uncommon Program
 id: 4720b7df-40c3-48fd-bbdf-fd4b3c464f0d
-description: Monitor the creation of a new key under 'TaskCache' when a new scheduled task is registered
+description: Monitor the creation of a new key under 'TaskCache' when a new scheduled task is registered by a process that is not svchost.exe, which is suspicious
 status: experimental
 date: 2021/06/18
-modified: 2022/04/21
+modified: 2022/07/29
 references:
   - https://thedfirreport.com/2021/03/29/sodinokibi-aka-revil-ransomware/
+  - https://labs.f-secure.com/blog/scheduled-task-tampering/
 author: Syed Hasan (@syedhasan009)
 logsource:
   category: registry_set
@@ -13,58 +14,30 @@ logsource:
 detection:
   selection:
     EventType: SetValue
-    TargetObject|contains: 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\'
+    TargetObject|contains: 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\'
   filter:
     TargetObject|contains:
       - 'Microsoft\Windows\UpdateOrchestrator'
       - 'Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTask\Index'
       - 'Microsoft\Windows\Flighting\OneSettings\RefreshCache\Index'
+  filter_tiworker:
+    Image|startswith: 'C:\Windows\'
+    Image|endswith: '\TiWorker.exe'
+    TargetObject|contains:
+      - '\MICROSOFT\WINDOWS NT\CURRENTVERSION\SCHEDULE\TASKCACHE\PLAIN\{1A552422-F571-4376-A7F1-5941E63D7B40}'
+      - '\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\Microsoft\Windows\DeviceDirectoryClient\'
+      - '\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tasks\{04622042-F26B-4CCA-815F-E7A8375D87E6}'
+      - '\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tasks\{C130EB11-1FDE-4953-B222-F44EEC6E1E8B}'
   filter_svchost:
     Image: 'C:\WINDOWS\system32\svchost.exe'
-    TargetObject|contains:
-      - 'Microsoft\Windows\WindowsUpdate\Scheduled Start\Index'
-      - 'Microsoft\Windows\PushToInstall\Registration\Index'
-      - 'Microsoft\Windows\GroupPolicy\{*}\Index'
-      - '\TaskCache\Tree\Opera scheduled Autoupdate'
-      - '\TaskCache\Tree\Opera scheduled assistant Autoupdate'
-      - '\TaskCache\Tree\OneDrive Reporting'
-      - '\TaskCache\Tree\OneDrive Standalone Update Task'
-      - '\TaskCache\Tree\OneDrive Per-Machine Standalone Update Task\'
-      - '\TaskCache\Tree\Mozilla\SD'
-      - '\TaskCache\Tree\Microsoft\Windows\.NET Framework\.NET Framework '
-      - '\TaskCache\Tree\Microsoft\Office\OfficeOsfInstaller\'
-      - '\TaskCache\Tree\Microsoft\Office\OfficeBackgroundTaskHandler' # *Logon and *Registration
-      - '\TaskCache\Tree\GoogleUpdateTaskMachine' # *Core and *UA
-      - '\TaskCache\Tree\DropboxUpdateTaskMachine' # *Core and *UA
-      - '\TaskCache\Tree\Mozilla\Firefox Default Browser Agent '
-      - '\TaskCache\Tree\Mozilla\Firefox Background Update '
-      - '\TaskCache\Tree\Microsoft\Windows\WOF\WIM-Hash-Validation\Index'
-      - '\TaskCache\Tree\Microsoft\Office\SD'
-      - '\TaskCache\Tree\Microsoft\Office\OfficeTelemetry' # *AgentLogOn and *AgentFallBack
-      - '\TaskCache\Tree\Microsoft\Office\Office ClickToRun Service Monitor\'
-      - '\TaskCache\Tree\Microsoft\Office\Office Automatic Updates 2.0\'
-      - '\TaskCache\Tree\Microsoft\Office\Office Feature Updates'
-      - '\TaskCache\Tree\klcp_update\'
-      - '\TaskCache\Tree\Apple\SD'
-      - '\TaskCache\Tree\Apple\AppleSoftwareUpdate\'
-      - '\TaskCache\Tree\Microsoft\Windows\Windows Defender\Windows Defender Verification\'
-      - '\TaskCache\Tree\Microsoft\Windows\Windows Defender\Windows Defender Cache Maintenance\'
-      - '\TaskCache\Tree\Microsoft\Windows\Windows Defender\Windows Defender Cleanup\'
-      - '\TaskCache\Tree\Microsoft\Windows\Windows Defender\Windows Defender Scheduled Scan\'
-      - '\TaskCache\Tree\Microsoft\Windows Defender\MP Scheduled Scan\' # Win7
-      - '\TaskCache\Tree\TVInstallRestore\'
-      - '\TaskCache\Tree\Microsoft\Windows\InstallService\SmartRetry\'
-      - '\TaskCache\Tree\Microsoft\Windows\DeviceDirectoryClient\RegisterDevicePeriodic24\'
-      - '\TaskCache\Tree\Microsoft\Windows\DeviceDirectoryClient\RegisterDeviceLocationRightsChange\'
-      - '\TaskCache\Tree\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser\'
-      - '\TaskCache\Tree\MicrosoftEdgeUpdateTaskMachine' # *Core and *UA
-      - '\TaskCache\Tree\CreateExplorerShellUnelevatedTask\'
-      - '\TaskCache\Tree\Microsoft\Windows\Workplace Join\Automatic-Device-Join\'
-      - '\TaskCache\Tree\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTask' # *Network and *Logon
+  filter_ngen:
+    Image|startswith: 'C:\Windows\Microsoft.NET\Framework\'
+    Image|endswith: '\ngen.exe'
+    TargetObject|contains: '\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tasks\{B66B135D-DA06-4FC4-95F8-7458E1D10129}'
   condition: selection and not 1 of filter*
 falsepositives:
   - Unknown
-level: medium
+level: high
 tags:
   - attack.persistence
   - attack.t1053

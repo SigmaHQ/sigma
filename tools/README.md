@@ -397,3 +397,48 @@ python3 -m tests.test_backend_datadog
 
 It will run the Datadog backend over all the rules in the repository and print out the number of supported rules.
 Use the `--verbose` flag to get individual results for each rule.
+
+
+### StreamAlert
+The StreamAlert backend currently supports converting Sigma files to the [Rule code syntax](https://streamalert.io/rules.html/).
+
+The backend configurations will specify the outputs, publishers, and all the field mappings for the rules. Please change it in `tools/config/streamalert.yml` before running. Example running:
+```shell
+tools/sigmac -t streamalert -c tools/config/streamalert.yml rules/windows/process_creation/proc_creation_win_hack_krbrelayup.yml
+```
+
+You can see the backend rules coverage by running:
+```shell
+cd tools/
+python3 -m tests.test_backend_streamalert
+```
+
+It will run the StreamAlert backend against all of the rules in the repository and display the number of supported rules.
+
+To receive individual results for each rule, use the `—verbose` parameter.
+
+### DNIF
+The DNIF backend converts Sigma rules to the DNIF queries, with the identifier as `dnif`
+
+The configuration will define the field mappings, value mappings and source mappings. see `tools/config/dnif.yml`
+Example:
+```shell
+tools/sigmac -t dnif -c tools/config/dnif.yml rules/windows/file_event/file_event_win_susp_desktop_ini.yml
+```
+
+ You can preview the rules coverage by running:
+ ```shell
+cd tools/
+python3 -m tests.test_backend_dnif
+```
+
+The test will be executed for all the rules in the repository and display the outcome of the backend rules coverage (i.e. successful, skipped and failed rules).
+
+To see the results, 
+
+use `--success` or `-S` for successful rules, 
+
+use `--skipped` or `-s` for skipped rules,
+
+use `--failed` or `-f` for failed rules.
+

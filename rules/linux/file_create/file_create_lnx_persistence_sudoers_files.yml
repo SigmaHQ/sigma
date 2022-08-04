@@ -1,0 +1,21 @@
+title: Persistence Via Sudoers Files
+id: ddb26b76-4447-4807-871f-1b035b2bfa5d
+status: experimental
+description: Detects creation of sudoers file or files in "sudoers.d" directory which can be used a potential method to persiste privileges for a specific user.
+date: 2022/07/05
+author: Nasreddine Bencherchali
+references:
+    - https://github.com/h3xduck/TripleCross/blob/1f1c3e0958af8ad9f6ebe10ab442e75de33e91de/apps/deployer.sh
+logsource:
+    product: linux
+    category: file_create
+detection:
+    selection:
+        TargetFilename|startswith: '/etc/sudoers.d/'
+    condition: selection
+falsepositives:
+    - Creation of legitimate files in sudoers.d folder part of administrator work
+level: medium
+tags:
+    - attack.persistence
+    - attack.t1053.003

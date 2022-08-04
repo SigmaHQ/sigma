@@ -1,0 +1,33 @@
+title: Execute Arbitrary Commands Using MSDT.EXE
+id: 258fc8ce-8352-443a-9120-8a11e4857fa5
+status: experimental
+description: Detects processes leveraging the "ms-msdt" handler or the "msdt.exe" binary to execute arbitrary commands as seen in the follina (CVE-2022-30190) vulnerability
+author: Nasreddine Bencherchali (rule)
+references:
+    - https://twitter.com/nao_sec/status/1530196847679401984
+    - https://app.any.run/tasks/713f05d2-fe78-4b9d-a744-f7c133e3fafb/
+    - https://twitter.com/_JohnHammond/status/1531672601067675648
+date: 2022/05/29
+modified: 2022/06/13
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\msdt.exe'
+        - OriginalFileName: 'msdt.exe'
+    selection_cmd_inline:
+        CommandLine|contains: 'IT_BrowseForFile='
+    selection_cmd_answerfile:
+        CommandLine|contains: ' PCWDiagnostic'
+    selection_cmd_answerfile_param:
+        CommandLine|contains:
+            - ' /af '
+            - ' -af '
+    condition: selection_img and (selection_cmd_inline or all of selection_cmd_answerfile*)
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1202

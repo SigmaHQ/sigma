@@ -1,0 +1,25 @@
+title: Suspicious Unblock-File
+id: 5947497f-1aa4-41dd-9693-c9848d58727d
+status: experimental
+description: Remove the Zone.Identifier alternate data stream which identifies the file as downloaded from the internet.
+date: 2022/02/01
+author: frack113
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1553.005/T1553.005.md#atomic-test-3---remove-the-zoneidentifier-alternate-data-stream
+    - https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/unblock-file?view=powershell-7.2
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - 'Unblock-File '
+            - '-Path '
+    condition: selection
+falsepositives:
+    - Legitimate PowerShell scripts
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1553.005

@@ -3,7 +3,7 @@ id: 5a93eb65-dffa-4543-b761-94aa60098fb6
 status: experimental
 description: Detects registry modifications that hide internal tools or functions from the user (malware like Agent Tesla, Hermetic Wiper uses this technique)
 references:
-    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1112/T1112.md
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1564.001/T1564.001.md
 author: frack113
 date: 2022/03/18
 modified: 2022/03/26
@@ -11,24 +11,24 @@ logsource:
     category: registry_set
     product: windows
 detection:
-    selection_set_1: 
+    selection_set_1:
         EventType: SetValue
-        TargetObject|endswith: 
+        TargetObject|endswith:
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\HideClock'
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\HideSCAHealth'
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\HideSCANetwork'
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\HideSCAPower'
             - 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\HideSCAVolume'
         Details: 'DWORD (0x00000001)'
-    selection_set_0: 
+    selection_set_0:
         EventType: SetValue
-        TargetObject|endswith: 
+        TargetObject|endswith:
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\ShowInfoTip'
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\ShowCompColor'
-        Details: 'DWORD (0x00000000)'    
+        Details: 'DWORD (0x00000000)'
     condition: 1 of selection_set_*
 falsepositives:
-    - Legitim admin script
+    - Legitimate admin script
 level: medium
 tags:
     - attack.defense_evasion

@@ -1,0 +1,23 @@
+title: Use of Pcalua For Execution
+id: 0955e4e1-c281-4fb9-9ee1-5ee7b4b754d2
+status: experimental
+description: Execute commands and binaries from the context of The program compatibility assistant (Pcalua.exe). This is used as a LOLBIN for example to bypass application whitelisting.
+author: Nasreddine Bencherchali
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Pcalua/
+    - https://pentestlab.blog/2020/07/06/indirect-command-execution/
+date: 2022/06/14
+logsource:
+  category: process_creation
+  product: windows
+detection:
+    selection:
+        Image|endswith: \pcalua.exe
+        CommandLine|contains: ' -a' # No space after the flag because it accepts anything as long as there a "-a"
+    condition: selection
+falsepositives:
+    - Legitimate use by a via a batch script or by an administrator.
+level: medium
+tags:
+    - attack.execution
+    - attack.t1059

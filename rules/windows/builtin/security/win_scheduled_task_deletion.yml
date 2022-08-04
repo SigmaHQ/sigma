@@ -2,8 +2,9 @@ title: Scheduled Task Deletion
 id: 4f86b304-3e02-40e3-aa5d-e88a167c9617 
 description: Detects scheduled task deletion events. Scheduled tasks are likely to be deleted if not used for persistence. Malicious Software often creates tasks directly under the root node e.g. \TASKNAME
 status: experimental
-author: David Strassegger
+author: David Strassegger, Tim Shelton
 date: 2021/01/22
+modified: 2022/05/16
 tags:
     - attack.execution
     - attack.privilege_escalation
@@ -19,7 +20,9 @@ logsource:
 detection:
     selection:
         EventID: 4699
-    condition: selection
+    falsepositive1:
+        TaskName: '\Microsoft\Windows\RemovalTools\MRT_ERROR_HB' # triggered by ParentCommandLine=C:\WINDOWS\system32\MRT.exe /EHB /HeartbeatFailure ErrorStack,Previous=ErrorStack,Previous=ErrorStack,Previous=ErrorStack,Previous=ErrorStack,Previous=SubmitHeartbeatReportData,Hr=0x80072f8f,Hr=0x80072f8f,Hr=0x80072f8f,Hr=0x80072f8f,Hr=0x80072f8f /HeartbeatError 0x80072f8f
+    condition: selection and not 1 of falsepositive*
 falsepositives:
     - Software installation
-level: medium
+level: low

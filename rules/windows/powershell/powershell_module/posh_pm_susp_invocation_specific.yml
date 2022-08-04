@@ -1,0 +1,70 @@
+title: Suspicious PowerShell Invocations - Specific
+id: 8ff28fdd-e2fa-4dfa-aeda-ef3d61c62090
+related:
+    - id: fce5f582-cc00-41e1-941a-c6fabf0fdb8c
+      type: derived
+status: experimental
+description: Detects suspicious PowerShell invocation command parameters
+tags:
+    - attack.execution
+    - attack.t1059.001
+author: Florian Roth (rule), Jonhnathan Ribeiro
+date: 2017/03/05
+modified: 2022/02/21
+logsource:
+    product: windows
+    category: ps_module
+    definition: PowerShell Module Logging must be enabled
+detection:
+    selection_convert_b64:
+        ContextInfo|contains|all:
+            - '-nop'
+            - ' -w '
+            - 'hidden'
+            - ' -c '
+            - '[Convert]::FromBase64String'
+    selection_iex:
+        ContextInfo|contains|all:
+            - ' -w '
+            - 'hidden'
+            - '-noni'
+            - '-nop'
+            - ' -c '
+            - 'iex'
+            - 'New-Object'
+    selection_enc:
+        ContextInfo|contains|all:
+            - ' -w '
+            - 'hidden'
+            - '-ep'
+            - 'bypass'
+            - '-Enc'
+    selection_reg:
+        ContextInfo|contains|all:
+            - 'powershell'
+            - 'reg'
+            - 'add'
+            - 'HKCU\software\microsoft\windows\currentversion\run'
+    selection_webclient:
+        ContextInfo|contains|all:
+            - 'bypass'
+            - '-noprofile'
+            - '-windowstyle'
+            - 'hidden'
+            - 'new-object'
+            - 'system.net.webclient'
+            - '.download'
+    selection_iex_webclient:
+        ContextInfo|contains|all:
+            - 'iex'
+            - 'New-Object'
+            - 'Net.WebClient'
+            - '.Download'
+    filter_chocolatey:
+        ContextInfo|contains:
+            - "(New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1"
+            - 'Write-ChocolateyWarning'
+    condition: 1 of selection* and not 1 of filter*
+falsepositives:
+    - Unknown
+level: high

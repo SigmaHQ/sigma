@@ -3,7 +3,7 @@ id: dcdbc940-0bff-46b2-95f3-2d73f848e33b
 status: stable
 description: Detects suspicious print spool service (spoolsv.exe) child processes.
 references:
-    - https://github.com/microsoft/Microsoft-365-Defender-Hunting-Queries/blob/master/Exploits/Print%20Spooler%20RCE/Suspicious%20Spoolsv%20Child%20Process.md
+    - https://github.com/microsoft/Microsoft-365-Defender-Hunting-Queries/blob/efa17a600b43c897b4b7463cc8541daa1987eeb4/Exploits/Print%20Spooler%20RCE/Suspicious%20Spoolsv%20Child%20Process.md
 tags:
     - attack.execution
     - attack.t1203
@@ -11,12 +11,13 @@ tags:
     - attack.t1068
 author: Justin C. (@endisphotic), @dreadphones (detection), Thomas Patzke (Sigma rule)
 date: 2021/07/11
+modified: 2022/07/14
 logsource:
     category: process_creation
     product: windows
 detection:
     spoolsv:
-        ParentImage|endswith: \\spoolsv.exe
+        ParentImage|endswith: \spoolsv.exe
         IntegrityLevel: System
     suspicious_unrestricted:
         Image|endswith:
@@ -58,7 +59,9 @@ detection:
             - 'add portopening'
             - 'rule name'
     suspicious_powershell:
-        Image|endswith: \powershell.exe
+        Image|endswith:
+            - \powershell.exe
+            - \pwsh.exe
     suspicious_powershell_filter:
         CommandLine|contains: .spl
     suspicious_rundll32:

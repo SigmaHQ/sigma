@@ -6,14 +6,17 @@ author: Florian Roth
 references:
     - https://redcanary.com/blog/blackbyte-ransomware/
 date: 2022/02/26
+modified: 2022/05/13
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\Wuauclt.exe'
-        CommandLine|endswith: '\Wuauclt.exe' 
-    condition: selection
+    selection_img:
+        - Image|endswith: '\Wuauclt.exe'
+        - OriginalFileName: 'Wuauclt.exe'
+    selection_cli:
+        CommandLine|endswith: '\Wuauclt.exe'
+    condition: all of selection*
 falsepositives:
     - Unknown
 level: high

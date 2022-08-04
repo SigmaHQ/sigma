@@ -1,0 +1,26 @@
+title: Persistence Via New AMSI Providers
+id: 33efc23c-6ea2-4503-8cfe-bdf82ce8f705
+status: experimental
+description: Detects when an attacker registers a new AMSI provider in order to achieve persistence
+author: Nasreddine Bencherchali
+references:
+    - https://persistence-info.github.io/Data/amsi.html
+    - https://github.com/gtworek/PSBits/blob/8d767892f3b17eefa4d0668f5d2df78e844f01d8/FakeAMSI/FakeAMSI.c
+date: 2022/07/21
+logsource:
+    category: registry_add
+    product: windows
+detection:
+    selection:
+        EventType: CreateKey
+        TargetObject|contains:
+            - '\SOFTWARE\Microsoft\AMSI\Providers\'
+            - '\SOFTWARE\WOW6432Node\Microsoft\AMSI\Providers\'
+    filter:
+        Image|startswith: 'C:\Program Files'
+    condition: selection and not filter
+falsepositives:
+    - Legitimate security products adding their own AMSI providers
+level: high
+tags:
+    - attack.persistence

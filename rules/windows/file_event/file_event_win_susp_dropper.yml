@@ -6,7 +6,7 @@ author: frack113
 references:
   - Malware Sandbox
 date: 2022/03/09
-modified: 2022/04/28
+modified: 2022/07/27
 logsource:
   product: windows
   category: file_event
@@ -14,6 +14,14 @@ detection:
   selection:
     Image|endswith: '.exe'
     TargetFilename|endswith: '.exe'
+  filter_whitelist:
+    Image: 
+      - 'C:\Windows\System32\msiexec.exe'
+      - 'C:\Windows\system32\cleanmgr.exe'
+      - 'C:\Windows\explorer.exe'
+      - 'C:\WINDOWS\system32\dxgiadaptercache.exe'
+      - 'C:\WINDOWS\system32\Dism.exe'
+      - 'C:\Windows\System32\wuauclt.exe'
   filter_update:
     Image: 'C:\WINDOWS\system32\svchost.exe'
     TargetFilename|startswith: 'C:\Windows\SoftwareDistribution\Download\Install\'
@@ -21,10 +29,6 @@ detection:
   filter_tiworker:
     Image|startswith: 'C:\Windows\WinSxS\'
     Image|endswith: '\TiWorker.exe'
-  filter_msiexec:
-    Image: 'C:\Windows\System32\msiexec.exe'
-  filter_cleanmgr:
-    Image: 'C:\WINDOWS\system32\cleanmgr.exe'
   filter_programfiles:
     - Image|startswith:
       - 'C:\Program Files\'

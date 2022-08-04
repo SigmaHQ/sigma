@@ -1,0 +1,26 @@
+title: Rundll32 With Suspicious Parent Process
+id: 1723e720-616d-4ddc-ab02-f7e3685a4713
+description: Detects suspicious start of rundll32.exe with a parent process of Explorer.exe. Variant of Raspberry Robin, as first reported by Red Canary.
+status: experimental
+references:
+    - https://redcanary.com/blog/raspberry-robin/
+author: CD_ROM_
+date: 2022/05/21
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\rundll32.exe'
+        ParentImage|endswith: '\explorer.exe'
+    filter:
+         CommandLine|contains: '\shell32.dll,OpenAs_RunDLL'
+    condition: selection and not filter
+fields:
+    - Image
+    - ParentImage
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.defense_evasion 

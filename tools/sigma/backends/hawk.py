@@ -117,6 +117,13 @@ class HAWKBackend(SingleTextQueryBackend):
             elif startsWith and not endsWith:
                 nodeRet['args']['str']['value'] = "^" + value
             else:
+
+                # custom, since we trim up  string size in log to save bytes
+                if key == 'Provider_Name':
+                    nodeRet['key'] = "product_name"
+                    if type(value) is str and value[0:17] == 'Microsoft-Windows':
+                        value = value[18:]
+
                 nodeRet['args']['str']['value'] = value
 
             if notNode:
@@ -152,8 +159,6 @@ class HAWKBackend(SingleTextQueryBackend):
                 filtered = sorted(filtered)
             ret['children'] = filtered
 
-            # retAnd['children'].append( ret )
-            #return retAnd
             return ret
         else:
             return None
@@ -176,8 +181,6 @@ class HAWKBackend(SingleTextQueryBackend):
         if len(result) == 1:
             # A list with length 1 is not a proper list, no self.listExpression required
             return result[0]
-        #print("LIST EXPRESSION")
-        #print(result)
         return self.listExpression % (self.listSeparator.join(result))
 
     def generateNOTNode(self, node):
@@ -190,12 +193,19 @@ class HAWKBackend(SingleTextQueryBackend):
             nodeRet["args"]["comparison"]["value"] = "!="
         nodeRet['rule_id'] = str(uuid.uuid4())
         key, value = node
-        if self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
+        if self.mapListsSpecialHandling == False and type(value) in (str, int, list, bool) or self.mapListsSpecialHandling == True and type(value) in (str, int, bool):
             nodeRet['key'] = self.cleanKey(key).lower()
             nodeRet['description'] = key
             if key.lower() in ("logname","source"):
                 self.logname = value
             if type(value) == str and "*" in value:
+
+                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username'):
+                    if 'NT AUTHORITY\\SYS' in value.upper():
+                        value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+                    elif 'AUTHORI' in value.upper():
+                        value = 'SYSTEM'
+
                 value = value.replace("*", "EEEESTAREEE")
                 value = re.escape(value)
                 value = value.replace("EEEESTAREEE", ".*")
@@ -230,6 +240,19 @@ class HAWKBackend(SingleTextQueryBackend):
                     nodeRet["args"]["comparison"]["value"] = "!="
                 else:
                     nodeRet['args']['comparison']['value'] = "="
+
+                # custom, since we trim up  string size in log to save bytes
+                if key == 'Provider_Name':
+                    nodeRet['key'] = "product_name"
+                    if value[0:17] == 'Microsoft-Windows':
+                        value = value[18:]
+
+                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username'): 
+                    if 'NT AUTHORITY\\SYS' in value.upper():
+                        value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+                    elif 'AUTHORI' in value.upper():
+                        value = 'SYSTEM'
+
                 nodeRet['args']['str']['value'] = value
                 # return json.dumps(nodeRet)
                 return nodeRet
@@ -244,7 +267,24 @@ class HAWKBackend(SingleTextQueryBackend):
                 #return self.mapExpression % (self.cleanKey(key), self.generateValueNode(value, True))
                 #return json.dumps(nodeRet)
                 return nodeRet
+            elif type(value) is bool:
+                nodeRet['return'] = "bool"
+                nodeRet['args']['bool'] = { "value" : value }
+
+                if notNode:
+                    nodeRet["args"]["comparison"]["value"] = "!="
+                else:
+                    nodeRet['args']['comparison']['value'] = "="
+                del nodeRet['args']['str'] 
+                return nodeRet
             else:
+
+                if nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username':
+                    if 'NT AUTHORITY\\SYS' in value.upper():
+                        value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+                    elif 'AUTHORI' in value.upper():
+                        value = 'SYSTEM'
+
                 nodeRet['args']['str']['value'] = value
                 if notNode:
                     nodeRet["args"]["comparison"]["value"] = "!="
@@ -292,6 +332,11 @@ class HAWKBackend(SingleTextQueryBackend):
                 nodeRet['args']['str']['value'] = 'null'
                 ret['children'].append( nodeRet )
             elif type(item) == str and "*" in item:
+                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username'):
+                    if 'NT AUTHORITY\\SYS' in item.upper():
+                        item = item.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+                    elif 'AUTHORI' in item.upper():
+                        item = 'SYSTEM'
                 item = item.replace("*", "EEEESTAREEE")
                 item = re.escape(item)
                 item = item.replace("EEEESTAREEE", ".*")
@@ -305,6 +350,7 @@ class HAWKBackend(SingleTextQueryBackend):
                     startsWith = True
                 if item[-2:] == "\\\\":
                     item = item[:-2]
+
 
                 if endsWith and not startsWith:
                     nodeRet['args']['str']['value'] = item + "$"
@@ -322,6 +368,24 @@ class HAWKBackend(SingleTextQueryBackend):
                 ret['children'].append( nodeRet )
             else:
                 nodeRet['args']['str']['value'] = self.generateValueNode(item, True)
+
+                # custom, since we trim up  string size in log to save bytes
+                key = nodeRet['key']
+                value = nodeRet['args']['str']['value']
+
+                if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username'):
+                    if 'NT AUTHORITY\\SYS' in value.upper():
+                        value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+                    elif 'AUTHORI' in value.upper():
+                        value = 'SYSTEM'
+
+                if key == 'provider__name':
+                    nodeRet['key'] = "product_name"
+                    if value[0:17] == 'Microsoft-Windows':
+                        value = value[18:]
+
+                nodeRet['args']['str']['value'] = value
+
                 ret['children'].append( nodeRet )
         retAnd = { "id" : "and", "key": "And", "children" : [ ret ] }
         return retAnd # '('+" or ".join(itemslist)+')'
@@ -334,6 +398,13 @@ class HAWKBackend(SingleTextQueryBackend):
         nodeRet['rule_id'] = str(uuid.uuid4())
         if type(value) == SigmaRegularExpressionModifier:
             value = self.generateValueNode(value, True)
+
+            if (nodeRet['key'] == 'correlation_username' or nodeRet['key'] == 'target_username'):
+                if 'NT AUTHORITY\\SYS' in value.upper():
+                    value = value.replace('NT AUTHORITY\\SYSTEM', 'SYSTEM')
+                elif 'AUTHORI' in value.upper():
+                    value = 'SYSTEM'
+
             nodeRet['args']['str']['value'] = value
             nodeRet['args']['str']['regex'] = "true"
             if notNode:
@@ -392,7 +463,7 @@ class HAWKBackend(SingleTextQueryBackend):
                      "limit" : { "order" : "3", "source" : "time_offset", "type" : "int", "objectKey" : "limit" },
                  },
                  "args": { 
-                     "columns" : [ self.cleanKey(agg.groupfield) ],
+                     "columns" : [ "ip_src", self.cleanKey(agg.groupfield) ],
                      "comparison": { "value": "%s" % agg.cond_op }, 
                      "threshold": { "value": int(agg.condition) }, 
                      "limit": { "value": min_count } 
@@ -414,7 +485,7 @@ class HAWKBackend(SingleTextQueryBackend):
                              "limit" : { "order" : "3", "source" : "time_offset", "type" : "int", "objectKey" : "limit" },
                          },
                          "args": { 
-                             "columns" : [ self.cleanKey(agg.groupfield) ],
+                             "columns" : [ "ip_src", self.cleanKey(agg.groupfield) ],
                              "comparison": { "value": "%s" % agg.cond_op }, 
                              "threshold": { "value": int(agg.condition) }, 
                              "limit": { "value": min_count } 
@@ -661,7 +732,7 @@ class HAWKBackend(SingleTextQueryBackend):
             raise Exception("Unknown type for false positives: ", type(sigmaparser.parsedyaml['falsepositives']))
 
         if 'references' in sigmaparser.parsedyaml:
-            ref = "%s\n" % "\n".join(sigmaparser.parsedyaml['references']) 
+            ref = "%s" % "\n".join(sigmaparser.parsedyaml['references']) 
         else:
             ref = ''
         record = {
@@ -691,27 +762,36 @@ class HAWKBackend(SingleTextQueryBackend):
                 if len(mitre_tactics_filtered) > 0:
                     record["technique"] = mitre_tactics_filtered[0]
             
-            
-
+        score_reason_txt = "Scoring:\n"
         if not 'status' in self.sigmaparser.parsedyaml or 'status' in self.sigmaparser.parsedyaml and self.sigmaparser.parsedyaml['status'] != 'experimental':
             record['correlation_action'] += 5.0;
+            score_reason_txt += "Status is not experimental (+5)\n"
         elif 'status' in self.sigmaparser.parsedyaml and self.sigmaparser.parsedyaml['status'] == 'experimental':
             record["tags"].append("qa")
+            score_reason_txt += "Status is experimental (+0)\n"
         if 'falsepositives' in self.sigmaparser.parsedyaml and len(self.sigmaparser.parsedyaml['falsepositives']) > 1:
             record['correlation_action'] -= (2.0 * len(self.sigmaparser.parsedyaml['falsepositives']) )
+            score_reason_txt += "False positives  (-2 * %r)\n" % len(self.sigmaparser.parsedyaml['falsepositives'])
 
         if 'level' in self.sigmaparser.parsedyaml:
             if self.sigmaparser.parsedyaml['level'].lower() == 'critical':
                 record['correlation_action'] += 15.0;
+                score_reason_txt += "Critical (+15)\n"
             elif self.sigmaparser.parsedyaml['level'].lower() == 'high':
                 record['correlation_action'] += 10.0;
-            elif self.sigmaparser.parsedyaml['level'].lower() == 'medium':
+                score_reason_txt += "High (+10)\n"
+            elif self.sigmaparser.parsedyaml['level'].lower() == 'medium' or self.sigmaparser.parsedyaml['level'].lower() == 'moderate':
                 # record['correlation_action'] += 0.0;
+                score_reason_txt += "Medium (+0)\n"
                 pass
             elif self.sigmaparser.parsedyaml['level'].lower() == 'low':
                 record['correlation_action'] -= 10.0;
+                score_reason_txt += "Low (-10)\n"
             elif self.sigmaparser.parsedyaml['level'].lower() == 'informational':
                 record['correlation_action'] -= 15.0;
+                score_reason_txt += "Informational (-15)\n"
+
+        record["filter_details"] += "\n\n" + score_reason_txt
 
         if record['correlation_action'] < 0.0:
             record['correlation_action'] = 0.0

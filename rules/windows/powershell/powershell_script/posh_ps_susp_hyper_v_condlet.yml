@@ -1,0 +1,26 @@
+title: Suspicious Hyper-V Cmdlets
+id: 42d36aa1-3240-4db0-8257-e0118dcdd9cd
+status: experimental
+description: Adversaries may carry out malicious operations using a virtual instance to avoid detection
+date: 2022/04/09
+author: frack113
+references:
+    - https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1564.006/T1564.006.md#atomic-test-3---create-and-start-hyper-v-virtual-machine
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        ScriptBlockText|contains:
+            - New-VM
+            - Set-VMFirmware
+            - Start-VM
+    condition: selection
+falsepositives:
+    - Legitimate PowerShell scripts
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1564.006

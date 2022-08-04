@@ -1,0 +1,31 @@
+title: Suspicious Get Local Groups Information
+id: fa6a5a45-3ee2-4529-aa14-ee5edc9e29cb
+status: experimental
+description: |
+    Adversaries may attempt to find local system groups and permission settings.
+    The knowledge of local system permission groups can help adversaries determine which groups exist and which users belong to a particular group.
+    Adversaries may use this information to determine which users have elevated permissions, such as the users found within the local administrators group.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1069.001/T1069.001.md
+author: frack113
+date: 2021/12/12
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    test_3:
+        ScriptBlockText|contains:
+            - 'get-localgroup'
+            - 'Get-LocalGroupMember'
+    test_6:
+        ScriptBlockText|contains|all:
+            - 'Get-WMIObject'
+            - 'Win32_Group'
+    condition: 1 of test_*
+falsepositives:
+    - Unknown
+level: low
+tags:
+    - attack.discovery
+    - attack.t1069.001
