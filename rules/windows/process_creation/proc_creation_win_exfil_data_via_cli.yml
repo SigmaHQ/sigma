@@ -30,15 +30,16 @@ detection:
             - ' POST '
     selection_curl:
         Image|endswith: '\curl.exe'
-        CommandLine|contains|all:
-            - '--ur' # Shortest possible version of the --uri flag
-            - '-d' # Shortest possible version of the --data flag
+        CommandLine|contains: '--ur' # Shortest possible version of the --uri flag
+    selection_curl_data:
+        CommandLine|contains:
+            - ' -d ' # Shortest possible version of the --data flag
+            - ' --data '
     payloads:
         CommandLine|contains:
             - 'ToBase64String'
             - 'whoami'
             - 'nltest'
-            - 'type'
             - 'ifconfig'
             - 'hostname'
             - 'net view'
@@ -47,7 +48,11 @@ detection:
             - 'systeminfo'
             - 'tasklist'
             - 'sc query'
-    condition: 1 of selection_* and payloads
+        CommandLine|contains|all:
+            - 'type '
+            - ' > '
+            - ' C:\'
+    condition: (selection_iwr or all of selection_curl*) and payloads
 falsepositives:
     - Unlikely
 level: high
