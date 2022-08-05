@@ -1,0 +1,41 @@
+title: PsExec Tool Execution From Suspicious Locations - PipeName
+id: 41504465-5e3a-4a5b-a5b4-2a0baadd4463
+related:
+    - id: f3f3a972-f982-40ad-b63c-bca6afdfad7c
+      type: derived
+status: experimental
+description: Detects PsExec default pipe creation where the image executed is located in a suspicious location. Which could indicate that the tool is being used in an attack
+author: Nasreddine Bencherchali
+date: 2022/08/04
+references:
+    - https://www.jpcert.or.jp/english/pub/sr/ir_research.html
+    - https://jpcertcc.github.io/ToolAnalysisResultSheet
+tags:
+    - attack.execution
+    - attack.t1569.002
+    - attack.s0029
+logsource:
+    category: pipe_created
+    product: windows
+    definition: 'Note that you have to configure logging for Named Pipe Events in Sysmon config (Event ID 17 and Event ID 18). The basic configuration is in popular sysmon configuration (https://github.com/SwiftOnSecurity/sysmon-config), but it is worth verifying. You can also use other repo, e.g. https://github.com/Neo23x0/sysmon-config, https://github.com/olafhartong/sysmon-modular. How to test detection? You can check powershell script from this site https://svch0st.medium.com/guide-to-named-pipes-and-hunting-for-cobalt-strike-pipes-dc46b2c5f575'
+detection:
+    selection:
+        PipeName: '\PSEXESVC'
+        Image|contains: # Add or remove locations depending on how and if you execute Psexec in your env
+            - 'C:\Users\Public\'
+            - '\Desktop\'
+            - '\Downloads\'
+            - '\AppData\Local\Temp\'
+            - 'C:\Windows\Temp\'
+    condition: selection
+fields:
+    - EventID
+    - CommandLine
+    - ParentCommandLine
+    - ServiceName
+    - ServiceFileName
+    - TargetFilename
+    - PipeName
+falsepositives:
+    - Rare legitimate use of psexec from the locations mentioned above
+level: high

@@ -125,11 +125,13 @@ logsources:
     service: bits-client
     conditions:
       winlog.channel: 'Microsoft-Windows-Bits-Client/Operational'
-  windows-security-mitigations-kernel:
+  windows-security-mitigations:
     product: windows
-    service: security-mitigations-kernel
+    service: security-mitigations
     conditions:
-      winlog.channel: 'Microsoft-Windows-Security-Mitigations/Kernel Mode'
+      winlog.channel:
+        - 'Microsoft-Windows-Security-Mitigations/Kernel Mode'
+        - 'Microsoft-Windows-Security-Mitigations/User Mode'
 defaultindex: winlogbeat-*
 # Extract all field names with yq:
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: winlog.event_data.\1/g'
