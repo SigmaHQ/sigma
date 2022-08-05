@@ -6,7 +6,7 @@ author: Nikita Nazarov, oscd.community
 references:
     - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse
 date: 2020/10/06
-modified: 2022/07/14
+modified: 2022/07/28
 logsource:
     product: windows
     category: create_remote_thread
@@ -16,7 +16,9 @@ detection:
         SourceImage|endswith:
             - '\powershell.exe'
             - '\pwsh.exe'
-    condition: selection
+    filter_powershell:
+        SourceParentImage: 'C:\Windows\System32\CompatTelRunner.exe'
+    condition: selection and not 1 of filter*
 falsepositives:
     - Unknown
 level: high

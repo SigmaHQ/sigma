@@ -65,7 +65,6 @@ LACEWORK_CONFIG = yaml.load(
           - EVENT_TIME
           - EVENT
         alertProfile: LW_CloudTrail_Alerts
-        evalFrequency: Hourly
     product.categories:
       linux.file_create:
         evaluatorId:
@@ -88,7 +87,6 @@ LACEWORK_CONFIG = yaml.load(
           - OWNER_USERNAME
           - FILE_CREATED_TIME
         alertProfile: LW_HE_FILES_DEFAULT_PROFILE.HE_File_NewViolation
-        evalFrequency: Hourly
       linux.process_creation:
         evaluatorId:
         source: LW_HE_PROCESSES
@@ -133,7 +131,6 @@ LACEWORK_CONFIG = yaml.load(
           - USERNAME
           - PROCESS_START_TIME
         alertProfile: LW_HE_PROCESSES_DEFAULT_PROFILE.HE_Process_NewViolation
-        evalFrequency: Hourly
     '''),
     Loader=yaml.SafeLoader
 )
@@ -471,7 +468,6 @@ class LaceworkBackend(SingleTextQueryBackend):
 
 
 class LaceworkQuery:
-    DEFAULT_EVAL_FREQUENCY = 'Hourly'
 
     def __init__(
         self,
@@ -634,11 +630,6 @@ class LaceworkQuery:
         return evaluator_id if evaluator_id else None
 
     @staticmethod
-    def get_eval_frequency(logsource_name, logsource_config):
-        eval_frequency = safe_get(logsource_config, 'evalFrequency', str)
-        return eval_frequency if eval_frequency else LaceworkQuery.DEFAULT_EVAL_FREQUENCY
-
-    @staticmethod
     def get_query_id(rule):
         title = safe_get(rule, 'title', str) or 'Unknown'
         # TODO: might need to replace additional non-word characters
@@ -733,19 +724,16 @@ class LaceworkPolicy:
         self.alert_profile = self.get_alert_profile(
             self.logsource_name, self.logsource_config)
 
-        # 10. Get Eval Frequency
-        self.eval_frequency = LaceworkQuery.get_eval_frequency(self.logsource_name, self.logsource_config)
-
-        # 11. Get Limit
+        # 10. Get Limit
         self.limit = 1000
 
-        # 12. Get Severity
+        # 11. Get Severity
         self.severity = safe_get(rule, 'level', str) or 'medium'
 
-        # 13. Get Description
+        # 12. Get Description
         self.description = safe_get(rule, 'description', str)
 
-        # 14. Get Remediation
+        # 13. Get Remediation
         self.remediation = 'Remediation steps are not represented in Sigma rule specification'
 
     def __iter__(self):
@@ -756,7 +744,6 @@ class LaceworkPolicy:
             'policyType': 'policy_type',
             'alertEnabled': 'alert_enabled',
             'alertProfile': 'alert_profile',
-            'evalFrequency': 'eval_frequency',
             'queryId': 'query_id',
             'limit': 'limit',
             'severity': 'severity',

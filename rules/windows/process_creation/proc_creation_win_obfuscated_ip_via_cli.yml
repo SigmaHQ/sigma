@@ -1,0 +1,26 @@
+title: Obfuscated IP Via CLI
+id: 56d19cb4-6414-4769-9644-1ed35ffbb148
+status: experimental
+description: Detects usage of an encoded/obfuscated version of an IP address (hex, octal...) via commandline
+author: Nasreddine Bencherchali
+references:
+    - https://h.43z.one/ipconverter/
+    - https://twitter.com/Yasser_Elsnbary/status/1553804135354564608
+date: 2022/08/03
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith:
+            - '\ping.exe'
+            - '\arp.exe'
+    selection_ip:
+        - CommandLine|contains: ' 0x' # For hex format
+        - CommandLine|re: ' [0-9]{7,13}' # For octal format
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.discovery

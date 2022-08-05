@@ -2,11 +2,12 @@ title: File or Folder Permissions Modifications
 id: 37ae075c-271b-459b-8d7b-55ad5f993dd8
 status: test
 description: Detects a file or folder's permissions being modified.
-author: Jakob Weinzettl, oscd.community
+author: Jakob Weinzettl, oscd.community, Nasreddine Bencherchali
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1222.001/T1222.001.md
+    - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/hh750728(v=ws.11)
 date: 2019/10/23
-modified: 2022/05/12
+modified: 2022/08/01
 logsource:
     category: process_creation
     product: windows
@@ -16,6 +17,8 @@ detection:
             - '\takeown.exe'
             - '\cacls.exe'
             - '\icacls.exe'
+            - '\net.exe' # Option available when used with "net share"
+            - '\net1.exe'
         CommandLine|contains: '/grant'
     selection2:
         Image|endswith: '\attrib.exe'

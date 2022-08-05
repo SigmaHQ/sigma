@@ -6,7 +6,7 @@ references:
     - Malware sandbox results
 author: frack113
 date: 2022/02/11
-modified: 2022/06/04
+modified: 2022/07/27
 logsource:
     category: process_creation
     product: windows
@@ -24,6 +24,10 @@ detection:
         - ParentImage|startswith: 'C:\Program Files (x86)\NVIDIA Corporation\'
     filter_other:
         Image|endswith: 'setup.exe'  # the missing \ at the beginning is intended - to cover e.g. MySoftwareSetup.exe as well
+    filter_edge:
+        Image|startswith: 'C:\Program Files (x86)\Microsoft\Temp\'
+        Image|endswith: '.tmp\MicrosoftEdgeUpdate.exe'
+        #OriginalFileName: msedgeupdate.dll
     condition: selection and not 1 of filter*
 falsepositives:
     - Unknown

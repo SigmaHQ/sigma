@@ -7,8 +7,9 @@ references:
     - https://twitter.com/max_mal_/status/1542461200797163522
     - https://web.archive.org/web/20200128160046/https://twitter.com/reegun21/status/1222093798009790464
     - https://github.com/pr0xylife/Qakbot/blob/4f0795d79dabee5bc9dd69f17a626b48852e7869/Qakbot_AA_23.06.2022.txt
+    - https://www.volexity.com/blog/2022/07/28/sharptongue-deploys-clever-mail-stealing-browser-extension-sharpext/
 date: 2020/07/03
-modified: 2022/07/05
+modified: 2022/07/28
 logsource:
     category: process_creation
     product: windows
@@ -20,11 +21,11 @@ detection:
         CommandLine|contains:
             - '\AppData\'
             - '\Users\Public\'
-            - '\Temp'
+            - '\Temp\'
             - '%AppData%'
             - '%Temp%'
             - '%Public%'
-            - '\Desktop'
+            - '\Desktop\'
     selection_susp_extensions:
         CommandLine|endswith:
             - '.jpg'
@@ -34,10 +35,11 @@ detection:
             - '.tmp'
             - '.temp'
             - '.txt'
-    selection_susp_remote_name:
+    selection_susp_remote_name_or_output:
         CommandLine|contains:
-            - ' -O'  # alias for --remote-name
+            - ' -O'  # covers the alias for --remote-name and --output
             - '--remote-name'
+            - '--output'
     condition: selection_curl and 1 of selection_susp*
 fields:
     - CommandLine
