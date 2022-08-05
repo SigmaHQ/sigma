@@ -5,9 +5,10 @@ description: Detects the execution of whoami with suspicious parents or paramete
 references:
     - https://brica.de/alerts/alert/public/1247926/agent-tesla-keylogger-delivered-inside-a-power-iso-daa-archive/
     - https://app.any.run/tasks/7eaba74e-c1ea-400f-9c17-5e30eee89906/
+    - https://www.youtube.com/watch?v=DsJ9ByX84o4&t=6s
 author: Florian Roth
 date: 2021/08/12
-modified: 2022/05/13
+modified: 2022/07/19
 tags:
     - attack.discovery
     - attack.t1033
@@ -23,6 +24,8 @@ detection:
         ParentImage|endswith:
             - '\cmd.exe'
             - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\powershell_ise.exe'
     filter2:
         ParentImage:
             - 'C:\Program Files\Microsoft Monitoring Agent\Agent\MonitoringHost.exe'
@@ -35,6 +38,8 @@ detection:
             - 'whoami /all'
             - 'whoami.exe -all'
             - 'whoami.exe /all'
+            - 'whoami.exe >'
+            - 'whoami >'
     condition: ( selection and not filter1 and not filter2 and not filter3 ) or selection_special
 falsepositives:
     - Admin activity

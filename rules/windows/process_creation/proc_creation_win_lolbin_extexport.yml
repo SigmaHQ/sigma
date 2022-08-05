@@ -1,0 +1,24 @@
+title: Suspicious Extexport Execution
+id: fb0b815b-f5f6-4f50-970f-ffe21f253f7a
+status: experimental
+description: Extexport.exe loads dll and is execute from other folder the original path
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Extexport/
+author: frack113
+date: 2021/11/26
+modified: 2022/05/16
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - CommandLine|contains: Extexport.exe
+        - Image|endswith: '\Extexport.exe'
+        - OriginalFileName: 'extexport.exe'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1218

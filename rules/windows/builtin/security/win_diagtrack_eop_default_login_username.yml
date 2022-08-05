@@ -1,0 +1,22 @@
+title: DiagTrackEoP Default Login Username
+id: 2111118f-7e46-4fc8-974a-59fd8ec95196
+status: experimental
+description: Detects the default "UserName" used by the DiagTrackEoP POC
+author: Nasreddine Bencherchali
+references:
+    - https://github.com/Wh04m1001/DiagTrackEoP/blob/3a2fc99c9700623eb7dc7d4b5f314fd9ce5ef51f/main.cpp#L46
+date: 2022/08/03
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4624
+        LogonType: 9
+        TargetOutboundUserName: 'thisisnotvaliduser'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: critical
+tags:
+    - attack.privilege_escalation

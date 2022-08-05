@@ -1,0 +1,29 @@
+title: Suspicious Plink Usage RDP Tunneling
+id: f38ce0b9-5e97-4b47-a211-7dc8d8b871da
+status: test
+description: Execution of well known tools for data exfiltration and tunneling
+author: Florian Roth
+date: 2022/08/04
+references:
+   - 'https://www.microsoft.com/security/blog/2022/07/26/malicious-iis-extensions-quietly-open-persistent-backdoors-into-servers/'
+logsource:
+   category: process_creation
+   product: windows
+detection:
+   selection_a:
+      Image|endswith: '\plink.exe'
+      CommandLine|contains: ':127.0.0.1:3389'
+   selection_b1:
+      Image|endswith: '\plink.exe'
+      CommandLine|contains: ':3389'
+   selection_b2:
+      CommandLine|contains:
+         - ' -P 443'
+         - ' -P 22'
+   condition: selection_a or all of selection_b*
+falsepositives:
+   - Administrative activity
+level: high
+tags:
+   - attack.command_and_control
+   - attack.t1572

@@ -1,0 +1,23 @@
+title: App Role Added
+id: b04934b2-0a68-4845-8a19-bdfed3a68a7a
+description: Detects when an app is assigned Azure AD roles, such as global adminsitrator, or Azure RBAC roles, such as subscription owner.
+author: Bailey Bercik '@baileybercik', Mark Morowczynski '@markmorow'
+date: 2022/07/19
+references: 
+    - https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/security-operations-applications#service-principal-assigned-to-a-role
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection:
+        properties.message:
+          - Add member to role
+          - Add eligible member to role
+          - Add scoped member to role
+    condition: selection
+falsepositives:
+    - When the permission is legitimately needed for the app
+level: medium
+status: experimental
+tags:
+    - attack.persistence

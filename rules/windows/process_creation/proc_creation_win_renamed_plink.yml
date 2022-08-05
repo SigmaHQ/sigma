@@ -1,0 +1,29 @@
+title: Execution Of Renamed Plink Binary
+id: 1c12727d-02bf-45ff-a9f3-d49806a3cf43
+status: experimental
+description: Execution of a renamed version of the Plink binary
+author: Nasreddine Bencherchali
+references:
+    - https://thedfirreport.com/2022/06/06/will-the-real-msiexec-please-stand-up-exploit-leads-to-data-exfiltration/
+    - https://the.earth.li/~sgtatham/putty/0.58/htmldoc/Chapter7.html
+date: 2022/06/06
+modified: 2022/08/04
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - OriginalFileName: 'Plink'
+        - CommandLine|contains|all:
+            - ' -l forward'
+            - ' -P '
+            - ' -R '
+    filter:
+        Image|endswith: '\plink.exe'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1036

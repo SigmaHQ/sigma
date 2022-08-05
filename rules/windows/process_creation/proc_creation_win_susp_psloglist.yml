@@ -8,7 +8,7 @@ references:
     - https://github.com/3CORESec/MAL-CL/tree/master/Descriptors/Sysinternals/PsLogList
 author: Nasreddine Bencherchali @nas_bench
 date: 2021/12/18
-modified: 2022/05/13
+modified: 2022/06/16
 tags:
     - attack.discovery
     - attack.t1087
@@ -18,25 +18,23 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection1:
-        OriginalFileName: 'psloglist'
-    selection2:
-        Image|endswith:
+    selection_img:
+        - OriginalFileName: 'psloglist.exe'
+        - Image|endswith:
           - '\psloglist.exe'
           - '\psloglist64.exe'
-    flags:
-        CommandLine|contains:
-          - '-d'
-          - '/d'
-          - '-x'
-          - '/x'
-          - '-s'
-          - '/s'
-    other:
+    selection_flgs:
         CommandLine|contains|all:
             - 'security'
             - 'accepteula'
-    condition: (1 of selection*) or (flags and other)
+        CommandLine|contains:
+          - ' -d'
+          - ' /d'
+          - ' -x'
+          - ' /x'
+          - ' -s'
+          - ' /s'
+    condition: 1 of selection*
 falsepositives:
     - Another tool that uses the command line switches of PsLogList
     - Legitimate use of PsLogList by an administrator

@@ -1,0 +1,32 @@
+title: Suspicious Encoded PowerShell Command Line
+id: 5b572dcf-254b-425c-a8c5-d9af6bea35a6
+status: test
+related:
+    - id: cdf05894-89e7-4ead-b2b0-0a5f97a90f2f
+      type: similar
+description: Detects specific combinations of encoding methods in the PowerShell command lines
+author: Teymur Kheirkhabarov (idea), Vasiliy Burov (rule), oscd.community, Tim Shelton
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=65
+date: 2022/07/06
+modified: 2022/07/14
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        CommandLine|contains|all:
+            - 'ForEach'
+            - 'Xor'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001

@@ -1,0 +1,22 @@
+title: Conhost.exe CommandLine Path Traversal
+id: ee5e119b-1f75-4b34-add8-3be976961e39
+status: experimental
+description: detects the usage of path traversal in conhost.exe indicating possible command/argument confusion/hijacking
+author: Nasreddine Bencherchali
+references:
+  - https://pentestlab.blog/2020/07/06/indirect-command-execution/
+date: 2022/06/14
+logsource:
+  category: process_creation
+  product: windows
+detection:
+    selection:
+        ParentCommandLine|contains: 'conhost'
+        CommandLine|contains: '/../../'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
+tags:
+    - attack.execution
+    - attack.t1059.003

@@ -1,0 +1,36 @@
+title: Discovery/Execution via dnscmd.exe
+id: b6457d63-d2a2-4e29-859d-4e7affc153d1
+description: | 
+    Detects an attempt to add a potentially crafted DLL as a plug in of the DNS Service.
+    Detects an attempt to leverage dnscmd.exe to enumerate the DNS zones of a domain.
+    DNS zones used to host the DNS records for a particular domain
+references:
+  - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/dnscmd
+  - https://docs.microsoft.com/en-us/azure/dns/dns-zones-records
+  - https://lolbas-project.github.io/lolbas/Binaries/Dnscmd/
+status: experimental
+author: '@gott_cyber'
+date: 2022/07/31
+tags:
+  - attack.discovery
+  - attack.execution
+  - attack.t1543.003
+logsource:
+  category: process_creation
+  product: windows
+detection:
+    dnscmd:
+        Image|endswith: '\dnscmd.exe'
+    selection_1:
+        CommandLine|contains:
+            - '/enumrecords'
+            - '/enumzones'
+            - '/info'
+    selection_2:
+        CommandLine|contains|all:
+            - '/config'
+            - '/serverlevelplugindll'
+    condition: dnscmd and 1 of selection_*
+falsepositives:
+    - Legitimate administration use
+level: medium

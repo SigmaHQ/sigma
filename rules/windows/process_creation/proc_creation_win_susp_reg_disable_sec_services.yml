@@ -4,7 +4,7 @@ description: Detects a suspicious reg.exe invocation that looks as if it would d
 status: experimental
 references:
     - https://twitter.com/JohnLaTwC/status/1415295021041979392
-    - https://github.com/gordonbay/Windows-On-Reins/blob/master/wor.ps1
+    - https://github.com/gordonbay/Windows-On-Reins/blob/e587ac7a0407847865926d575e3c46f68cf7c68d/wor.ps1
     - https://vms.drweb.fr/virus/?i=24144899
     - https://bidouillesecurity.com/disable-windows-defender-in-powershell/
 author: Florian Roth, John Lambert (idea), elhoim
@@ -21,11 +21,10 @@ detection:
         CommandLine|contains|all:
             - 'reg'
             - 'add'
-    selection_reg_start:
+    selection_cli_reg_start:
         CommandLine|contains|all:
             - ' /d 4'
             - ' /v Start'
-    selection_start_services:
         CommandLine|contains:
             - '\Sense'
             - '\WinDefend'
@@ -40,11 +39,10 @@ detection:
             - '\UsoSvc'
             - '\WdFilter'
             - '\AppIDSvc'
-    selection_reg_disable_defender:
+    selection_cli_reg_disable_defender:
         CommandLine|contains|all:
             - ' /d 1'
             - 'Windows Defender'
-    selection_reg_disable_defender_values:
         CommandLine|contains:
             - 'DisableIOAVProtection'
             - 'DisableOnAccessProtection'
@@ -61,11 +59,7 @@ detection:
             - 'DisableArchiveScanning'
             - 'DisableIntrusionPreventionSystem'
             - 'DisableScriptScanning'
-    condition: selection_reg_add and (
-            (selection_reg_start and selection_start_services)
-            or
-            (selection_reg_disable_defender and selection_reg_disable_defender_values)
-            )
+    condition: selection_reg_add and 1 of selection_cli_*
 falsepositives:
     - Unknown
     - Other security solution installers

@@ -1,0 +1,32 @@
+title: ISO File Created Within Temp Folders
+id: 2f9356ae-bf43-41b8-b858-4496d83b2acb
+status: experimental
+description: Detects the creation of a ISO file in the Outlook temp folder or in the Appdata temp folder. Typical of Qakbot TTP from end-July 2022.
+references: 
+    - https://twitter.com/Sam0x90/status/1552011547974696960
+    - https://securityaffairs.co/wordpress/133680/malware/dll-sideloading-spread-qakbot.html
+author: '@sam0x90'
+date: 2022/07/30
+tags:
+    - attack.initial_access
+    - attack.t1566.001
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_1:
+        TargetFilename|contains|all:
+            - '\AppData\Local\Temp\'
+            - '.zip\'
+        TargetFilename|endswith: '.iso'
+    selection_2:
+        TargetFilename|contains: '\AppData\Local\Microsoft\Windows\INetCache\Content.Outlook\'
+        TargetFilename|endswith: '.iso'
+    condition: 1 of selection*
+fields:
+    - Image
+    - ComputerName
+    - TargetFileName
+falsepositives:
+    - Potential FP by sysadmin opening a zip file containing a legitimate ISO file
+level: high

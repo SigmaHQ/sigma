@@ -1,0 +1,29 @@
+title: UAC Bypass Using Iscsicpl - ImageLoad
+id: 9ed5959a-c43c-4c59-84e3-d28628429456
+status: experimental
+description: Detects the "iscsicpl.exe" UAC bypass technique that leverages a DLL Search Order hijacking technique to load a custom DLL's from temp or a any user controlled location in the users %PATH%
+author: Nasreddine Bencherchali
+references:
+    - https://github.com/hackerhouse-opensource/iscsicpl_bypassUAC
+    - https://twitter.com/wdormann/status/1547583317410607110
+date: 2022/07/17
+modified: 2022/07/25
+logsource:
+    product: windows
+    category: image_load
+detection:
+    selection:
+        Image: C:\Windows\SysWOW64\iscsicpl.exe
+        ImageLoaded|endswith: '\iscsiexe.dll'
+    filter:
+        ImageLoaded|contains|all:
+            - 'C:\Windows\'
+            - 'iscsiexe.dll'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1548.002

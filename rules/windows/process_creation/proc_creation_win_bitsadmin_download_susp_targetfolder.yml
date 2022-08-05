@@ -1,0 +1,38 @@
+title: Bitsadmin Download to Suspicious Target Folder
+id: 2ddef153-167b-4e89-86b6-757a9e65dcac
+status: experimental
+description: Detects usage of bitsadmin downloading a file to a suspicious target folder
+references:
+    - https://blog.netspi.com/15-ways-to-download-a-file/#bitsadmin
+    - https://isc.sans.edu/diary/22264
+    - https://lolbas-project.github.io/lolbas/Binaries/Bitsadmin/
+tags:
+    - attack.defense_evasion
+    - attack.persistence
+    - attack.t1197
+    - attack.s0190
+    - attack.t1036.003
+date: 2022/06/28
+author: Florian Roth
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\bitsadmin.exe'
+        CommandLine|contains:
+            - ' /transfer '
+            - ' /create '
+            - ' /addfile '
+    selection_folder:
+        CommandLine|contains: 
+            - 'C:\Users\Public\'
+            - '%public%'
+            - '\Desktop\'
+    condition: all of selection*
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Unknown
+level: high

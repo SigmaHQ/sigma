@@ -1,0 +1,20 @@
+title: Renamed Rundll32.exe Execution
+id: d4d2574f-ac17-4d9e-b986-aeeae0dc8fe2
+status: experimental
+description: Detects the execution of rundll32.exe that has been renamed to a different name to avoid detection
+references:
+    - https://threatresearch.ext.hp.com/svcready-a-new-loader-reveals-itself/
+author: Florian Roth
+date: 2022/06/08
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        OriginalFileName: 'RUNDLL32.EXE'
+    filter:
+        Image|endswith: '\rundll32.exe'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high

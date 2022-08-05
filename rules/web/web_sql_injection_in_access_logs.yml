@@ -1,0 +1,53 @@
+title: SQL Injection Strings
+id: 5513deaf-f49a-46c2-a6c8-3f111b5cb453
+status: test
+description: Detects SQL Injection attempts via GET requests in access logs
+author: Saw Win Naung, Nasreddine Bencherchali
+date: 2020/02/22
+modified: 2022/07/25
+references:
+    - https://www.acunetix.com/blog/articles/exploiting-sql-injection-example/
+    - https://www.acunetix.com/blog/articles/using-logs-to-investigate-a-web-application-attack/
+    - https://brightsec.com/blog/sql-injection-payloads/
+    - https://github.com/payloadbox/sql-injection-payload-list
+logsource:
+    category: webserver
+detection:
+    select_method:
+        cs-method: 'GET'
+    keywords:
+        - '=select '
+        - '=select%20'
+        - '=select('
+        - 'UNION SELECT'
+        - 'UNION%20SELECT'
+        - 'UNION ALL SELECT'
+        - 'UNION%20ALL%20SELECT'
+        - 'CONCAT(0x'
+        - 'order by '
+        - 'order%20by%20'
+        - 'information_schema.tables'
+        - 'group_concat('
+        - 'table_schema'
+        - 'select%28sleep%2810%29'
+        - '@@version'
+        - "'1'='1"
+        - '%271%27%3D%271'
+        - 'SELECTCHAR('
+        - 'select * '
+        - 'select%20*%20'
+        - 'or 1=1#'
+        - 'or%201=1#'
+    filter:
+        sc-status: 404
+    condition: select_method and keywords and not 1 of filter*
+fields:
+    - client_ip
+    - vhost
+    - url
+    - response
+falsepositives:
+    - Java scripts and CSS Files
+    - User searches in search boxes of the respective website
+    - Internal vulnerability scanners can cause some serious FPs when used, if you experience a lot of FPs due to this think of adding more filters such as "User Agent" strings and more response codes
+level: high

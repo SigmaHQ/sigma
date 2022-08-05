@@ -1,0 +1,23 @@
+title: Renamed Msdt.exe
+id: bd1c6866-65fc-44b2-be51-5588fcff82b9
+status: experimental
+description: Detects process creation with a renamed Msdt.exe
+author: pH-T
+date: 2022/06/03
+references:
+   - https://lolbas-project.github.io/lolbas/Binaries/Msdt/
+tags:
+   - attack.defense_evasion
+   - attack.t1036.003
+logsource:
+   category: process_creation
+   product: windows
+detection:
+   selection:
+      OriginalFileName: 'msdt.exe'
+   filter_realmsdt:
+      Image|endswith: '\msdt.exe'
+   condition: selection and not 1 of filter*
+falsepositives:
+    - Unlikely
+level: high

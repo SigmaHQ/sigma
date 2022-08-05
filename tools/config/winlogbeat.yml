@@ -113,7 +113,12 @@ logsources:
     product: windows
     service: bits-client
     conditions:
-      winlog.channel: 'WinEventlog:Microsoft-Windows-Bits-Client/Operational'
+      winlog.channel: 'Microsoft-Windows-Bits-Client/Operational'
+  windows-security-mitigations-kernel:
+    product: windows
+    service: security-mitigations-kernel
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Security-Mitigations/Kernel Mode'
 defaultindex: winlogbeat-*
 # Extract all field names with yq:
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: winlog.event_data.\1/g'
@@ -217,6 +222,7 @@ fieldmappings:
     PreviousEngineState: winlog.event_data.PreviousEngineState
     NewProviderState: winlog.event_data.NewProviderState
     ProviderName: winlog.event_data.ProviderName
+    Provider_Name: winlog.provider_name
     HostId: winlog.event_data.HostId
     HostApplication: winlog.event_data.HostApplication
     HostName: winlog.event_data.HostName
@@ -271,7 +277,7 @@ fieldmappings:
     SubjectLogonId: winlog.event_data.SubjectLogonId
     TargetFileName: winlog.event_data.TargetFilename
     TargetProcessAddress: winlog.event_data.TargetProcessAddress
-    TargetServerName: winglog.event_data.TargetServerName
+    TargetServerName: winlog.event_data.TargetServerName
     TargetLogonId: winlog.event_data.TargetLogonId
     TaskName: winlog.event_data.TaskName
     # UserName => smbclient-security  eventid:31017

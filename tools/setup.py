@@ -1,5 +1,5 @@
 # Setup module for Sigma toolchain
-# derived from example at https://github.com/pypa/sampleproject/blob/master/setup.py
+# derived from example at https://github.com/pypa/sampleproject/blob/918bd331501de42be32666bd5140d04d00b39386/setup.py
 from setuptools import setup, find_packages
 # To use a consistent encoding
 from codecs import open

@@ -1,0 +1,24 @@
+title: Sign-ins by Unknown Devices
+id: 4d136857-6a1a-432a-82fc-5dd497ee5e7c
+description: Monitor and alert for Sign-ins by unknown devices from non-Trusted locations.
+author: Michael Epping, '@mepples21'
+date: 2022/06/28
+references:
+  - https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/security-operations-devices#non-compliant-device-sign-in
+logsource:
+  product: azure
+  service: signinlogs
+detection:
+  selection:
+    AuthenticationRequirement: singleFactorAuthentication
+    ResultType: '0'
+    NetworkLocationDetails: '[]'
+    DeviceDetail.deviceId: ''
+  condition: selection
+falsepositives:
+  - Unknown
+level: low
+status: experimental
+tags:
+  - attack.valid_accounts
+  - attack.t1078

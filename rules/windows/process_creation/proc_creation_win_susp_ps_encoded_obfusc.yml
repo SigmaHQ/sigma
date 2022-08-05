@@ -1,0 +1,52 @@
+title: Suspicious PowerShell Obfuscated PowerShell Code
+id: 8d01b53f-456f-48ee-90f6-bc28e67d4e35
+status: experimental
+description: Detects suspicious UTF16 and base64 encoded and often obfuscated PowerShell code often used in command lines
+author: Florian Roth
+references:
+  - https://app.any.run/tasks/fcadca91-3580-4ede-aff4-4d2bf809bf99/
+date: 2022/07/11
+tags:
+  - attack.defense_evasion
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    CommandLine|contains:
+      #  -bxor 0x
+      - 'IAAtAGIAeABvAHIAIAAwAHgA'
+      - 'AALQBiAHgAbwByACAAMAB4A'
+      - 'gAC0AYgB4AG8AcgAgADAAeA'
+      # .Invoke() | 
+      - 'AC4ASQBuAHYAbwBrAGUAKAApACAAfAAg'
+      - 'AuAEkAbgB2AG8AawBlACgAKQAgAHwAI'
+      - 'ALgBJAG4AdgBvAGsAZQAoACkAIAB8AC'
+      # {1}{0}" -f 
+      # {0}{3}" -f 
+      # {2}{0}" -f 
+      - 'AHsAMQB9AHsAMAB9ACIAIAAtAGYAI'
+      - 'B7ADEAfQB7ADAAfQAiACAALQBmAC'
+      - 'AewAxAH0AewAwAH0AIgAgAC0AZgAg'
+      - 'AHsAMAB9AHsAMwB9ACIAIAAtAGYAI'
+      - 'B7ADAAfQB7ADMAfQAiACAALQBmAC'
+      - 'AewAwAH0AewAzAH0AIgAgAC0AZgAg'
+      - 'AHsAMgB9AHsAMAB9ACIAIAAtAGYAI'
+      - 'B7ADIAfQB7ADAAfQAiACAALQBmAC'
+      - 'AewAyAH0AewAwAH0AIgAgAC0AZgAg'
+      # {1}{0}' -f 
+      # {0}{3}' -f 
+      # {2}{0}' -f 
+      - 'AHsAMQB9AHsAMAB9ACcAIAAtAGYAI'
+      - 'B7ADEAfQB7ADAAfQAnACAALQBmAC'
+      - 'AewAxAH0AewAwAH0AJwAgAC0AZgAg'
+      - 'AHsAMAB9AHsAMwB9ACcAIAAtAGYAI'
+      - 'B7ADAAfQB7ADMAfQAnACAALQBmAC'
+      - 'AewAwAH0AewAzAH0AJwAgAC0AZgAg'
+      - 'AHsAMgB9AHsAMAB9ACcAIAAtAGYAI'
+      - 'B7ADIAfQB7ADAAfQAnACAALQBmAC'
+      - 'AewAyAH0AewAwAH0AJwAgAC0AZgAg'
+  condition: selection
+falsepositives:
+  - Unknown
+level: high
