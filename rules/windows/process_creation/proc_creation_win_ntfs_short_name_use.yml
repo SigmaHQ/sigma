@@ -1,0 +1,24 @@
+title: Use NTFS Short Name in Command Line
+id: dd6b39d9-d9be-4a3b-8fe0-fe3c6a5c1795
+status: experimental
+description: Detect use of the Windows 8.3 short name. Which could be used as a method to avoid command-line detection
+author: frack113, Nasreddine Bencherchali
+references:
+    - https://www.acunetix.com/blog/articles/windows-short-8-3-filenames-web-security-problem/
+    - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-2000-server/cc959352(v=technet.10)?redirectedfrom=MSDN
+date: 2022/08/05
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains: 
+            - '~1.'
+            - '~2.'
+    condition: selection
+falsepositives:
+    - Applications could use this notation occasionally which might generate some false positives. In that case Investigate the parent and child process.
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1564.004 
