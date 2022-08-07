@@ -1,0 +1,25 @@
+title: Add Debugger Entry To DbgManagedDebugger For Persistence
+id: 9827ae57-3802-418f-994b-d5ecf5cd974b
+description: Detects when an attacker adds a new "Debugger" value to the "DbgManagedDebugger" key in order to achieve persistence which will get invoked when an application crashes
+author: frack113
+date: 2022/08/07
+status: experimental
+references:
+    - https://www.hexacorn.com/blog/2013/09/19/beyond-good-ol-run-key-part-4/
+    - https://github.com/last-byte/PersistenceSniper
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|endswith: '\Microsoft\.NETFramework\DbgManagedDebugger'
+    filter:
+        Details: '"C:\Windows\system32\vsjitdebugger.exe" PID %d APPDOM %d EXTEXT "%s" EVTHDL %d'
+    condition: selection and not filter
+falsepositives:
+    - Legitimate use of the key to setup a debugger. Which is often the case on developers machines
+level: medium
+tags:
+  - attack.persistence
+  - attack.t1574
