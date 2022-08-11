@@ -1,0 +1,29 @@
+title: PowerShell X509Certificate Namespace in ScriptBlock
+id: 34949d3a-0684-4300-9ab1-2a50daf920fb
+status: experimental
+description: Detecting Hoaxshell reverse-shell (HTTPS Payload) which is using System.Security.Cryptography.X509Certificates namespace in the payload.
+references:
+    - https://github.com/t3l3machus/hoaxshell
+author: Isa AlMannaei
+date: 2022/08/11
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script Block Logging must be enable
+detection:
+    certificates:
+        ScriptBlockText|contains|all:
+            - 'System.Security.Cryptography.X509Certificates'
+            - 'TrustAllCertsPolicy'
+            - '-Headers'
+            - 'System.Text.Encoding'
+            - 'Invoke-WebRequest'
+            - 'iwr'
+            - 'POST'
+    headers:
+        ScriptBlockText|re|all: 
+            - 'X-[a-z0-9]{4}-[a-z0-9]{4}'
+    condition: certificates or headers
+falsepositives:
+    - unknown
+level: high
