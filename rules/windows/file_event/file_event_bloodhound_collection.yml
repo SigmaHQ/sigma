@@ -1,0 +1,40 @@
+title: BloodHound Collection Files
+id: 02773bed-83bf-469f-b7ff-e676e7d78bab
+description: Detects default file names outputted by the BloodHound collection tool SharpHound
+status: experimental
+author: C.J. May
+references:
+    - https://academy.hackthebox.com/course/preview/active-directory-bloodhound/bloodhound--data-collection
+date: 2022/08/09
+modified: 2022/08/09
+tags:
+  - attack.discovery
+  - attack.t1087.001
+  - attack.t1087.002
+  - attack.t1482
+  - attack.t1069.001
+  - attack.t1069.002
+  - attack.execution
+  - attack.t1059.001
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection1:
+        TargetFilename|endswith: 
+            - '_BloodHound.zip'
+            - '_computers.json'
+            - '_containers.json'
+            - '_domains.json'
+            - '_gpos.json'
+            - '_groups.json'
+            - '_ous.json'
+            - '_users.json'
+    selection2:
+        TargetFilename|contains|all:
+            - 'BloodHound'
+            - '.zip'
+    condition: 1 of selection*
+falsepositives:
+    - Unknown
+level: high
