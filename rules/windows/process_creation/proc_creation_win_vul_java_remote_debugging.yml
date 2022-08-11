@@ -3,18 +3,38 @@ id: 8f88e3f6-2a49-48f5-a5c4-2f7eedf78710
 status: test
 description: Detects a JAVA process running with remote debugging allowing more than just localhost to connect
 author: Florian Roth
+references:
+  - https://dzone.com/articles/remote-debugging-java-applications-with-jdwp
 date: 2019/01/16
 modified: 2021/11/27
 logsource:
   category: process_creation
   product: windows
 detection:
-  selection:
+  selection_jdwp_transport:
     CommandLine|contains: 'transport=dt_socket,address='
+  selection_old_jvm_version:
+    CommandLine|contains: 
+      - jre1.8
+      - jre1.7
+      - jre1.6
+      - jre1.5
+      - jre1.4
+      - jre1.3
+      - jre1.2
+      - jre1.1
+      - jdk1.8 
+      - jdk1.7
+      - jdk1.6 
+      - jdk1.5 
+      - jdk1.4 
+      - jdk1.3 
+      - jdk1.2 
+      - jdk1.1
   exclusion:
     - CommandLine|contains: 'address=127.0.0.1'
     - CommandLine|contains: 'address=localhost'
-  condition: selection and not exclusion
+  condition: all of selection* and not exclusion
 fields:
   - CommandLine
   - ParentCommandLine
