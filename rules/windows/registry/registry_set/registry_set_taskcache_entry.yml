@@ -3,7 +3,7 @@ id: 4720b7df-40c3-48fd-bbdf-fd4b3c464f0d
 description: Monitor the creation of a new key under 'TaskCache' when a new scheduled task is registered by a process that is not svchost.exe, which is suspicious
 status: experimental
 date: 2021/06/18
-modified: 2022/08/08
+modified: 2022/08/11
 references:
   - https://thedfirreport.com/2021/03/29/sodinokibi-aka-revil-ransomware/
   - https://labs.f-secure.com/blog/scheduled-task-tampering/
@@ -29,6 +29,10 @@ detection:
     Image|startswith: 'C:\Windows\Microsoft.NET\Framework\'
     Image|endswith: '\ngen.exe'
     TargetObject|contains: '\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tasks\{B66B135D-DA06-4FC4-95F8-7458E1D10129}'
+  filter_office_click_to_run:
+    Image:
+      - 'C:\Program Files\Microsoft Office\root\Integration\Integrator.exe'
+      - 'C:\Program Files (x86)\Microsoft Office\root\Integration\Integrator.exe'
   condition: selection and not 1 of filter*
 falsepositives:
   - Unknown
