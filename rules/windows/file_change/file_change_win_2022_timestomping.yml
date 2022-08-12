@@ -1,0 +1,25 @@
+title: File Creation Date Is Change to Another Years
+id: 558eebe5-f2ba-4104-b339-36f7902bcc1a
+status: experimental
+description: |
+  Attackers may change the file creation time of a backdoor to make it look like it was installed with the operating system.
+  Note that many processes legitimately change the creation time of a file; it does not necessarily indicate malicious activity.
+references:
+    - https://www.inversecos.com/2022/04/defence-evasion-technique-timestomping.html
+author: frack113
+date: 2022/08/12
+logsource:
+    category: file_change
+    product: windows
+detection:
+    selection:
+        PreviousCreationUtcTime|startwith: 2022
+    filter:
+        CreationUtcTime|startwith: 2022
+    condition: selection and not filter
+falsepositives:
+    - NTP change
+level: high
+tags:
+    - attack.t1070.006
+    - attack.defense_evasion
