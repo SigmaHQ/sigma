@@ -10,13 +10,15 @@ logsource:
     product: azure
     service: auditlogs
 detection:
+    # You have to tune the rule for your environnement before use it
     selection:
-        properties.message:
-            - Initiatied By: 'non approved user UPN'
+       properties.message: 
             - Add user
             - Delete user
         Status: Sucess
-    condition: selection
+    valid_admin:
+           Initiatied.By: 'approved user UPN' 
+    condition: selection and not valid_admin
 falsepositives:
      - Legit administrative action
 tags:
