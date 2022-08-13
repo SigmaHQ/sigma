@@ -8,12 +8,14 @@ status: experimental
 references:
     - https://twitter.com/vxunderground/status/1423336151860002816?s=20
     - https://www.virustotal.com/gui/file/03e9b8c2e86d6db450e5eceec057d7e369ee2389b9daecaf06331a95410aa5f8/detection
+    - https://pentestlab.blog/2018/07/04/dumping-domain-password-hashes/
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
-        CommandLine|contains: 'copy \\\\?\\GLOBALROOT\\Device\\HarddiskVolumeShadowCopy'
+        #cmd /c copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\Windows\System32\config\SYSTEM\
+        CommandLine|contains: 'copy \\\\\?\\GLOBALROOT\\Device\\HarddiskVolumeShadowCopy'
     condition: selection
 falsepositives:
     - Some rare backup scenarios
