@@ -1,0 +1,40 @@
+title: Windows Binaries Write Suspicious Extensions
+id: b8fd0e93-ff58-4cbd-8f48-1c114e342e62
+related:
+    - id: 1277f594-a7d1-4f28-a2d3-73af5cbeab43
+      type: derived
+status: experimental
+description: Detects windows executables that writes files with suspicious extensions
+references:
+    - Internal Research
+author: Nasreddine Bencherchali
+date: 2022/08/12
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\rundll32.exe'
+            #- '\svchost.exe' # Might generate some FP
+            - '\dllhost.exe'
+            - '\smss.exe'
+            - '\RuntimeBroker.exe'
+            - '\sihost.exe'
+            - '\lsass.exe'
+            - '\csrss.exe'
+            - '\winlogon.exe'
+            - '\wininit.exe'
+        TargetFilename|endswith:
+            - '.bat'
+            - '.vbe'
+            - '.txt'
+            - '.vbs'
+            - '.exe'
+            - '.ps1'
+            - '.hta'
+            - '.iso'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
