@@ -353,14 +353,18 @@ detection:
             - '\wmpdui.dll'
             - '\wwancfg.dll'
             - '\dpx.dll'
-    filter:
+    filter_generic:
         ImageLoaded|startswith:
             - 'C:\Windows\System32\'
             - 'C:\Windows\SysWOW64\'
             - 'C:\Windows\WinSxS\'
             - 'C:\Windows\SoftwareDistribution\'
-            - 'C:\Windows\SystemTemp\'
-    condition: selection and not filter
+    filter_systemp:
+        ImageLoaded|startswith: 'C:\Windows\SystemTemp\'
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Legitimate applications loading their own versions of the DLLs mentioned in this rule
 level: medium
