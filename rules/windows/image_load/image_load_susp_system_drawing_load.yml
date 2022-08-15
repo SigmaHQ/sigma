@@ -3,7 +3,7 @@ id: 666ecfc7-229d-42b8-821e-1a8f8cb7057c
 description: A General detection for processes loading System.Drawing.ni.dll. This could be an indicator of potential Screen Capture.
 status: experimental
 date: 2020/05/02
-modified: 2021/12/05
+modified: 2022/08/13
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 tags:
     - attack.collection
@@ -27,10 +27,12 @@ detection:
             - 'C:\Windows\Microsoft.NET\'
             - 'C:\Windows\ImmersiveControlPanel\'
     filter2:
-        Image:
-            - 'C:\Users\\*\AppData\Local\NhNotifSys\nahimic\nahimicNotifSys.exe'
-            - 'C:\Users\\*\GitHubDesktop\Update.exe'
-            - 'C:\Windows\System32\NhNotifSys.exe'
+        Image: 'C:\Windows\System32\NhNotifSys.exe'
+    filter3:
+        Image|startswith: 'C:\Users\'
+        Image|endswith:
+            - '\AppData\Local\NhNotifSys\nahimic\nahimicNotifSys.exe'
+            - '\GitHubDesktop\Update.exe'
     condition: selection and not 1 of filter*
 falsepositives:
     - Unknown
