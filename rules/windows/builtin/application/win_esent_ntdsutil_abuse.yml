@@ -12,21 +12,15 @@ logsource:
     service: application
     # warning: The 'data' field used in the detection section is the container for the event data as a whole. You may have to adapt the rule for your backend accordingly
 detection:
-    selection_root:
+    selection:
         Provider_Name: 'ESENT'
-        EventID: 325 # New Database Created
+        EventID:
+            - 216
+            - 325
+            - 326
+            - 327
         Data|contains: 'ntds.dit'
-    selection_paths:
-        Data|contains:
-            # Add more locations that you don't use in your env or that are just suspicious
-            - '\Users\Public\'
-            - '\Perflogs\'
-            - '\Temp\'
-            - '\Appdata\'
-            - '\Desktop\'
-            - '\Downloads\'
-            - 'C:\ntds.dit'
-    condition: all of selection_*
+    condition: selection
 falsepositives:
     - Legitimate backup operation/creating shadow copies
 level: medium
