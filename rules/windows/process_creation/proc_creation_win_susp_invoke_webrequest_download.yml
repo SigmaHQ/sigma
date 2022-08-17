@@ -1,0 +1,46 @@
+title: Suspicious Invoke-WebRequest Usage
+id: 5e3cc4d8-3e68-43db-8656-eaaeefdec9cc
+related:
+    - id: e218595b-bbe7-4ee5-8a96-f32a24ad3468
+      type: derived
+status: experimental
+description: Detects a suspicious call to Invoke-WebRequest cmdlet where the and output is located in a suspicious location
+author: Nasreddine Bencherchali
+references:
+    - https://www.sentinelone.com/blog/living-off-windows-defender-lockbit-ransomware-sideloads-cobalt-strike-through-microsoft-security-tool/
+date: 2022/08/02
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_iwr:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\cmd.exe'
+        CommandLine|contains:
+            - 'Invoke-WebRequest'
+            - 'iwr '
+            - 'wget '
+            - 'curl '
+    selection_flags:
+        CommandLine|contains:
+            - ' -ur'
+            - ' -o'
+    selection_susp_locations:
+        CommandLine|contains:
+            - '\AppData\'
+            - '\Users\Public\'
+            - '\Temp\'
+            - '%AppData%'
+            - '%Temp%'
+            - '%Public%'
+            - '\Desktop\'
+            - 'C:\Windows\'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.command_and_control
+    - attack.t1105

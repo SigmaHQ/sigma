@@ -1,0 +1,27 @@
+title: Netsh Firewall Rule Deletion
+id: 1a5fefe6-734f-452e-a07d-fc1c35bce4b2
+status: experimental
+description: Detects the removal of a port or application rule in the Windows Firewall configuration using netsh
+author: frack113
+references:
+    - https://app.any.run/tasks/8bbd5b4c-b82d-4e6d-a3ea-d454594a37cc/
+date: 2022/08/14
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\netsh.exe'
+        CommandLine|contains|all:
+            - 'firewall'
+            - 'delete'
+    filter_dropbox:
+        ParentImage|endswith: '\Dropbox.exe'
+        CommandLine|contains: 'name=Dropbox'
+    condition: selection and not filter_dropbox
+falsepositives:
+    - Legitimate administration
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1562.004

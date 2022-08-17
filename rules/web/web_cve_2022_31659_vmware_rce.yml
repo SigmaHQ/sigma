@@ -1,0 +1,22 @@
+title: CVE-2022-31659 VMware Workspace ONE Access RCE
+id: efdb2003-a922-48aa-8f37-8b80021a9706
+status: experimental
+description: Detects possible exploitation of VMware Workspace ONE Access Admin Remote Code Execution vulnerability as described in CVE-2022-31659
+author: Nasreddine Bencherchali
+date: 2022/08/12
+references:
+    - https://petrusviet.medium.com/dancing-on-the-architecture-of-vmware-workspace-one-access-eng-ad592ae1b6dd
+logsource:
+    category: webserver
+detection:
+    selection:
+        cs-method: 'POST'
+        c-uri|contains: '/SAAS/jersey/manager/api/migrate/tenant' # Investigate the host header to spot the difference between benign and malicious requests to this URL
+    condition: selection
+falsepositives:
+    - Vulnerability scanners
+    - Legitimate access to the URI
+level: medium
+tags:
+    - attack.initial_access
+    - attack.t1190

@@ -13,48 +13,48 @@ tags:
     - attack.privilege_escalation
     - attack.t1055
 logsource:
-   product: windows
-   category: pipe_created
-   definition: 'Note that you have to configure logging for Named Pipe Events in Sysmon config (Event ID 17 and Event ID 18). The basic configuration is in popular sysmon configuration (https://github.com/SwiftOnSecurity/sysmon-config), but it is worth verifying. You can also use other repo, e.g. https://github.com/Neo23x0/sysmon-config, https://github.com/olafhartong/sysmon-modular You can also use other repo, e.g. https://github.com/Neo23x0/sysmon-config, https://github.com/olafhartong/sysmon-modular. How to test detection? You can always use Cobalt Strike, but also you can check powershell script from this site https://svch0st.medium.com/guide-to-named-pipes-and-hunting-for-cobalt-strike-pipes-dc46b2c5f575'
+    product: windows
+    category: pipe_created
+    definition: 'Note that you have to configure logging for Named Pipe Events in Sysmon config (Event ID 17 and Event ID 18). The basic configuration is in popular sysmon configuration (https://github.com/SwiftOnSecurity/sysmon-config), but it is worth verifying. You can also use other repo, e.g. https://github.com/Neo23x0/sysmon-config, https://github.com/olafhartong/sysmon-modular You can also use other repo, e.g. https://github.com/Neo23x0/sysmon-config, https://github.com/olafhartong/sysmon-modular. How to test detection? You can always use Cobalt Strike, but also you can check powershell script from this site https://svch0st.medium.com/guide-to-named-pipes-and-hunting-for-cobalt-strike-pipes-dc46b2c5f575'
 detection:
-   selection_malleable_profiles:
-      - PipeName|startswith:
-         - '\mojo.5688.8052.183894939787088877'
-         - '\mojo.5688.8052.35780273329370473'
-         - '\mypipe-f'
-         - '\mypipe-h'
-         - '\ntsvcs'
-         - '\scerpc'
-         - '\win_svc'
-         - '\spoolss'
-         - '\msrpc_'
-         - '\win\msrpc_'
-         - '\wkssvc'
-         - '\f53f'
-         - '\windows.update.manager'
-         - '\SearchTextHarvester'
-         - '\DserNamePipe'
-         - '\PGMessagePipe'
-         - '\MsFteWds'
-         - '\f4c3'
-         - '\fullduplex_'
-         - '\rpc_'
-      - PipeName:
-         - '\demoagent_11'
-         - '\demoagent_22'
-   selection_malleable_profile_CatalogChangeListener:
-      PipeName|startswith: '\Winsock2\CatalogChangeListener-'
-      PipeName|endswith: '-0,'
-   filter:
-      PipeName:
-         - '\wkssvc'
-         - '\spoolss'
-         - '\scerpc'
-         - '\ntsvcs'
-         - '\SearchTextHarvester'
-         - '\PGMessagePipe'
-         - '\MsFteWds'
-   condition: 1 of selection_malleable_profile* and not filter
+    selection_malleable_profiles:
+        - PipeName|startswith:
+            - '\mojo.5688.8052.183894939787088877'
+            - '\mojo.5688.8052.35780273329370473'
+            - '\mypipe-f'
+            - '\mypipe-h'
+            - '\ntsvcs'
+            - '\scerpc'
+            - '\win_svc'
+            - '\spoolss'
+            - '\msrpc_'
+            - '\win\msrpc_'
+            - '\wkssvc'
+            - '\f53f'
+            - '\windows.update.manager'
+            - '\SearchTextHarvester'
+            - '\DserNamePipe'
+            - '\PGMessagePipe'
+            - '\MsFteWds'
+            - '\f4c3'
+            - '\fullduplex_'
+            - '\rpc_'
+        - PipeName:
+            - '\demoagent_11'
+            - '\demoagent_22'
+    selection_malleable_profile_CatalogChangeListener:
+        PipeName|startswith: '\Winsock2\CatalogChangeListener-'
+        PipeName|endswith: '-0,'
+    filter:
+        PipeName:
+            - '\wkssvc'
+            - '\spoolss'
+            - '\scerpc'
+            - '\ntsvcs'
+            - '\SearchTextHarvester'
+            - '\PGMessagePipe'
+            - '\MsFteWds'
+    condition: 1 of selection_malleable_profile* and not filter
 falsepositives:
-   - Chrome instances using the exactly same name pipe named mojo.something
+    - Chrome instances using the exactly same name pipe named mojo.something
 level: high

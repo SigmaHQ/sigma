@@ -1,0 +1,35 @@
+title: Obfuscated IP Download
+id: cb5a2333-56cf-4562-8fcb-22ba1bca728d
+status: experimental
+description: Detects use of an encoded/obfuscated version of an IP address (hex, octal...) in an URL combined with a download command
+author: Florian Roth
+references:
+    - https://h.43z.one/ipconverter/
+    - https://twitter.com/Yasser_Elsnbary/status/1553804135354564608
+date: 2022/08/03
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        CommandLine|contains:
+            - 'Invoke-WebRequest'
+            - 'iwr '
+            - 'wget '
+            - 'curl '
+            - 'DownloadFile'
+            - 'DownloadString'
+    selection_ip:
+        - CommandLine|contains:
+            - '//0x'
+            - '.0x'
+            - '.00x'
+        - CommandLine|contains|all:
+            - 'http://%'
+            - '%2e'
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.discovery

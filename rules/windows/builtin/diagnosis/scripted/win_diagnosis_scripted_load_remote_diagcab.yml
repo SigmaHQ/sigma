@@ -1,0 +1,22 @@
+title: Loading Diagcab Package From Remote Path
+id: 50cb47b8-2c33-4b23-a2e9-4600657d9746
+status: experimental
+description: Detects loading of diagcab packages from a remote path, as seen in DogWalk vulnerability
+author: Nasreddine Bencherchali
+date: 2022/08/14
+references:
+    - https://twitter.com/nas_bench/status/1539679555908141061
+    - https://twitter.com/j00sean/status/1537750439701225472
+tags:
+    - attack.execution
+logsource:
+    product: windows
+    service: diagnosis-scripted
+detection:
+    selection:
+        EventID: 101
+        PackagePath|contains: '\\\\' # Example would be: \\webdav-test.herokuapp.com@ssl\DavWWWRoot\package
+    condition: selection
+falsepositives:
+    - Legitimate package hosted on a known and authorized remote location
+level: high
