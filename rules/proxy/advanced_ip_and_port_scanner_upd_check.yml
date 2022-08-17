@@ -1,0 +1,32 @@
+title: Advanced IP/Port Scanner Update Check
+id: 1a9bb21a-1bb5-42d7-aa05-3219c7c8f47d
+status: experimental
+description: Detect update check performed by Advanced IP Scanner and Advanced Port Scanner
+author: Axel Olsson
+references:
+  - https://www.virustotal.com/gui/file/ffbc47543eebe9d314dd9774a9c1af2d9d982fdc9d58bd9e569a31413f6931cf/relations
+  - https://www.virustotal.com/gui/file/012bd037dad835d2f68f3fa6571420401747aaae111089d7e1e18546fa3da524/relations
+tags:
+  - attack.discovery
+  - attack.T1046 #  Network Service Discovery 
+date: 2022-08-17
+logsource:
+    category: proxy
+detection:
+    selection:
+      # Example request: http://www.advanced-port-scanner.com/checkupdate.php?lng=en&ver=2-5-3680&beta=n&type=upd&rmode=p&product=aps 
+      # Example request2: http://www.advanced-ip-scanner.com/checkupdate.php?lng=en&ver=2-5-3499&beta=n&type=upd&rmode=p&product=aips 
+      c-uri|contains: '/checkupdate.php?'
+      c-uri-query|contains|all:
+        - 'lng='
+        - 'ver='
+        - 'beta='
+        - 'type='
+        - 'rmode='
+        - 'product='
+    condition: selection
+fields:
+  - c-uri
+falsepositives:
+    - Unknown
+level: medium
