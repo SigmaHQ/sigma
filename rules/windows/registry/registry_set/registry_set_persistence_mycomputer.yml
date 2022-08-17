@@ -1,0 +1,22 @@
+title: Persistence Via MyComputer Key and SubKeys
+id: 8fbe98a8-8f9d-44f8-aa71-8c572e29ef06
+description: Detects modification to the "Default" value of the "MyComputer" key and subkeys to point to a custom binary that will be launched whenever the associated action is executed (see reference section for example)
+status: experimental
+author: Nasreddine Bencherchali
+date: 2022/08/09
+references:
+    - https://www.hexacorn.com/blog/2017/01/18/beyond-good-ol-run-key-part-55/
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|contains: '\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer'
+        TargetObject|endswith: '(Default)'
+    condition: selection
+falsepositives:
+    - Unlikely but if you experience FPs add specific processes and locations you would like to monitor for
+level: high
+tags:
+    - attack.persistence
