@@ -6,20 +6,23 @@ references:
    - https://blog.redbluepurple.io/offensive-research/bypassing-injection-detection
 author: Florian Roth
 date: 2022/03/16
-modified: 2022/07/07
+modified: 2022/08/17
 logsource:
    product: windows
    category: create_remote_thread
 detection:
-   selection:
-      TargetImage|endswith:
-         - '\mspaint.exe'
-         - '\calc.exe'
-         - '\notepad.exe'
-         - '\sethc.exe'
-         - '\write.exe'
-         - '\wordpad.exe'
-   condition: selection
+    selection:
+        TargetImage|endswith:
+            - '\mspaint.exe'
+            - '\calc.exe'
+            - '\notepad.exe'
+            - '\sethc.exe'
+            - '\write.exe'
+            - '\wordpad.exe'
+            - '\explorer.exe'
+    filter:
+        StartFunction: 'EtwpNotificationThread'
+    condition: selection and not filter
 falsepositives:
    - Unknown
 level: high
