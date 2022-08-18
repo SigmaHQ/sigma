@@ -6,7 +6,7 @@ references:
    - https://blog.redbluepurple.io/offensive-research/bypassing-injection-detection
 author: Florian Roth
 date: 2022/03/16
-modified: 2022/08/12
+modified: 2022/08/17
 logsource:
     product: windows
     category: create_remote_thread
@@ -20,7 +20,9 @@ detection:
             - '\write.exe'
             - '\wordpad.exe'
             - '\explorer.exe'
-    condition: selection
+    filter:
+        StartFunction: 'EtwpNotificationThread'
+    condition: selection and not filter
 falsepositives:
     - Unknown
 level: high
