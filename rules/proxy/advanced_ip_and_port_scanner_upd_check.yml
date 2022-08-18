@@ -4,10 +4,11 @@ status: experimental
 description: Detect update check performed by Advanced IP Scanner and Advanced Port Scanner
 author: Axel Olsson
 references:
-  - https://www.virustotal.com/gui/file/ffbc47543eebe9d314dd9774a9c1af2d9d982fdc9d58bd9e569a31413f6931cf/relations
-  - https://www.virustotal.com/gui/file/012bd037dad835d2f68f3fa6571420401747aaae111089d7e1e18546fa3da524/relations
+  - https://www.advanced-ip-scanner.com/
+  - https://www.advanced-port-scanner.com/
 tags:
   - attack.discovery
+  - attack.t1590 # Gather Victim Network Information 
 date: 2022/08/14
 logsource:
     category: proxy
@@ -15,7 +16,7 @@ detection:
     selection:
       # Example request: http://www.advanced-port-scanner.com/checkupdate.php?lng=en&ver=2-5-3680&beta=n&type=upd&rmode=p&product=aps 
       # Example request2: http://www.advanced-ip-scanner.com/checkupdate.php?lng=en&ver=2-5-3499&beta=n&type=upd&rmode=p&product=aips 
-      c-uri|contains: '/checkupdate.php?'
+      c-uri|contains: '/checkupdate.php\?'
       c-uri-query|contains|all:
         - 'lng='
         - 'ver='
@@ -25,7 +26,7 @@ detection:
         - 'product='
     condition: selection
 fields:
-  - c-uri
+  - c-ip
 falsepositives:
-    - Unknown
+    - Legitimate use by administrators
 level: medium
