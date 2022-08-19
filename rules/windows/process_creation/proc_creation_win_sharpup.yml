@@ -1,0 +1,33 @@
+title: SharpUp PrivEsc Tool
+id: c484e533-ee16-4a93-b6ac-f0ea4868b2f1
+status: experimental
+description: Detects the use of SharpUp, a tool for local privilege escalation
+references:
+    - https://github.com/GhostPack/SharpUp
+tags:
+    - attack.privilege_escalation
+    - attack.t1615
+    - attack.t1569.002
+    - attack.t1574.005
+author: Florian Roth
+date: 2022/08/20
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\SharpUp.exe'
+    selection_pe:
+        Description: 'SharpUp'
+    selection_commandline:
+        CommandLine|contains: 
+            - 'HijackablePaths'
+            - 'UnquotedServicePath'
+            - 'ProcessDLLHijack'
+            - 'ModifiableServiceBinaries'
+            - 'ModifiableScheduledTask'
+            - 'DomainGPPPassword'
+    condition: 1 of selection*
+falsepositives:
+    - Unknown
+level: critical
