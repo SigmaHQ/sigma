@@ -6,6 +6,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/40b77d63808dd4f4eafb83949805636735a1fd15/atomics/T1112/T1112.md
 author: frack113
 date: 2022/08/19
+modified: 2022/08/20
 logsource:
     category: process_creation
     product: windows
@@ -14,7 +15,10 @@ detection:
         - Image|endswith: \reg.exe
         - OriginalFileName: reg.exe
     selection_path:
-        CommandLine|contains: \Software\AppDataLow\Software\Microsoft\
+        CommandLine|contains:
+            - '\Software\AppDataLow\Software\Microsoft\'
+            - '\Software\Policies\Microsoft\Windows\OOBE'
+            - '\Software\Policies\Microsoft\Windows NT\CurrentVersion\Winlogon'
     condition: all of selection_*
 falsepositives:
     - Legitimate use
