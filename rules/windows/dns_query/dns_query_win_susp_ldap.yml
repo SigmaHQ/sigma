@@ -5,16 +5,19 @@ status: experimental
 date: 2022/08/20
 author: frack113
 references:
-    -  https://github.com/redcanaryco/atomic-red-team/blob/40b77d63808dd4f4eafb83949805636735a1fd15/atomics/T1482/T1482.md
+    - https://github.com/redcanaryco/atomic-red-team/blob/40b77d63808dd4f4eafb83949805636735a1fd15/atomics/T1482/T1482.md
 logsource:
     product: windows
     category: dns_query
 detection:
     dns_request:
         QueryName|startswith: '_ldap.'
-    filter:
-        image|startswith: 'C:\Windows\'
-    condition: dns_request and not filter
+    filter_windows:
+        Image|startswith: 'C:\Windows\'
+    filter_defender:
+        Image|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+        Image|endswith: '\MsMpEng.exe'
+    condition: dns_request and not 1 of filter_*
 falsepositives:
     - Programs that also lookup the observed domain
 level: medium
