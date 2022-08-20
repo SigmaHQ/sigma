@@ -6,6 +6,7 @@ author: Nasreddine Bencherchali
 references:
     - https://www.trendmicro.com/en_us/research/22/e/avoslocker-ransomware-variant-abuses-driver-file-to-disable-anti-Virus-scans-log4shell.html
 date: 2022/08/08
+modified: 2022/08/19
 logsource:
     category: process_creation
     product: windows
@@ -14,7 +15,10 @@ detection:
         - Image|endswith: '\mshta.exe'
         - OriginalFileName: 'MSHTA.EXE'
     selection_cli:
-        CommandLine|contains: 'http'
+        CommandLine|contains:
+            - 'http://'
+            - 'https://'
+            - 'ftp://'
     condition: all of selection_*
 falsepositives:
     - Unknown
