@@ -194,7 +194,7 @@ tools/sigmac -t splunk -c ~/my-splunk-mapping.yml -c tools/config/generic/window
 ### Supported Targets
 
 * [Splunk](https://www.splunk.com/) (plainqueries and dashboards)
-* [ElasticSearch Query Strings](https://www.elastic.co/)
+* [ElasticSearch Query Strings](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html)
 * [ElasticSearch Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html)
 * [Kibana](https://www.elastic.co/de/products/kibana)
 * [Elastic X-Pack Watcher](https://www.elastic.co/guide/en/x-pack/current/xpack-alerting.html)
@@ -306,7 +306,7 @@ S2AN was developed to be used as a standalone tool or as part of a CI/CD pipelin
 
 The directory `contrib` contains scripts that were contributed by the community:
 
-* `sigma2elastalert.py`i by David Routin: A script that converts Sigma rules to Elastalert configurations. This tool
+* `sigma2elastalert.py` is by David Routin: A script that converts Sigma rules to Elastalert configurations. This tool
   uses *sigmac* and expects it in its path.
 
 These tools are not part of the main toolchain and maintained separately by their authors.
@@ -346,7 +346,7 @@ If you use it, let us know what works and what does not work.
 
 E.g.
 - Tell us about false positives (issues section)
-- Try to provide an improved rule (new filter) via [pull request](https://help.github.com/en/articles/editing-files-in-another-users-repository) on that rule
+- Try to provide an improved rule (new filter) via [pull request](https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files#editing-files-in-another-users-repository) on that rule
 
 ## Work on open issues
 
