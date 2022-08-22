@@ -20,18 +20,17 @@ detection:
         Image|contains:
             - '~1\'
             - '~2\'
-    filter_other:
+    filter:
         - ParentImage:
             - C:\Windows\System32\Dism.exe
             - C:\Windows\System32\cleanmgr.exe # Spawns DismHost.exe with a shortened username (if too long)
         - ParentImage|endswith:
             - '\WebEx\WebexHost.exe' # Spawns a shortened version of the CLI and Image processes
             - '\thor\thor64.exe'
-    filter_installshield:
         - Product: 'InstallShield (R)'
         - Description: 'InstallShield (R) Setup Engine'
         - Company: 'InstallShield Software Corporation'
-    condition: selection and not 1 of filter_*
+    condition: selection and not filter
 falsepositives:
     - Applications could use this notation occasionally which might generate some false positives. In that case Investigate the parent and child process.
 level: high
