@@ -1,0 +1,28 @@
+title: Download Arbitrary Files Via MSPUB.EXE
+id: 3b3c7f55-f771-4dd6-8a6e-08d057a17caf
+description: Detects usage of "MSPUB" (Microsoft Publisher) to download arbitrary files
+status: experimental
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/pull/238/files
+author: Nasreddine Bencherchali
+date: 2022/08/19
+tags:
+    - attack.defense_evasion
+    - attack.execution
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\MSPUB.exe'
+        - OriginalFileName: 'MSPUB.exe'
+    selection_cli:
+        CommandLine|contains:
+            - 'http://'
+            - 'https://'
+            - 'ftp://'
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: medium
