@@ -12,7 +12,7 @@ references:
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
     - https://oddvar.moe/2018/03/21/persistence-using-runonceex-hidden-from-autoruns-exe/
 date: 2019/10/25
-modified: 2022/08/05
+modified: 2022/08/23
 logsource:
     category: registry_set
     product: windows
@@ -111,6 +111,18 @@ detection:
         Image|endswith: '\OfficeClickToRun.exe'
     filter_defender:
         Image: 'C:\Program Files\Windows Defender\MsMpEng.exe'
+    filter_teams:
+        Image|endswith: '\Microsoft\Teams\current\Teams.exe'
+        Details|contains: '\Microsoft\Teams\Update.exe --processStart '
+    filter_ctfmon:
+        Image: 'C:\Windows\system32\userinit.exe'
+        Details: 'ctfmon.exe /n'
+    filter_AVG:
+        Image|startswith: 'C:\Program Files\AVG\Antivirus\Setup\'
+        Details:
+            - '"C:\Program Files\AVG\Antivirus\AvLaunch.exe" /gui'
+            - '"C:\Program Files (x86)\AVG\Antivirus\AvLaunch.exe" /gui'
+            - '{472083B0-C522-11CF-8763-00608CC02F24}'
     condition: all of current_version_* and not 1 of filter_*
 fields:
     - SecurityID
