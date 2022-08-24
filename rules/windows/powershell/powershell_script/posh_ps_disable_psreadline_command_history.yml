@@ -1,4 +1,4 @@
-title: Disable Powershell Command History 
+title: Disable Powershell Command History
 id: 602f5669-6927-4688-84db-0d4b7afb2150
 status: experimental
 description: Powershell command history can be disabled by removing psreadline module 
@@ -12,11 +12,13 @@ logsource:
     definition: Script block logging must be enabled
 detection:
     selection:
-        ScriptBlockText|contains: 'Remove-Module psreadline'
+        ScriptBlockText|contains|all:
+            - Remove-Module 
+            - psreadline
     condition: selection
 falsepositives:
     - Legitimate script
 level: medium
 tags:
-    - attack.lateral_movement
-    - attack.t1021.006
+    - attack.defense_evasion
+    - attack.t1070.003
