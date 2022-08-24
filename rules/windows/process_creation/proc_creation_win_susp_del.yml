@@ -4,6 +4,7 @@ status: experimental
 description: Detects suspicious command line to remove and 'exe' or 'dll'
 author: frack113
 date: 2021/12/02
+modified: 2022/08/24
 references:
     - https://www.joesandbox.com/analysis/509330/0/html#1044F3BDBE3BB6F734E357235F4D5898582D
 tags:
@@ -15,15 +16,17 @@ logsource:
 detection:
     susp_del_exe:
         CommandLine|contains|all:
-            - 'del *.exe'
+            - 'del '
+            - '\*.exe'
             - '/f '
             - '/q '
     susp_del_dll:
         CommandLine|contains|all:
-            - 'del *.dll'
+            # Example: cmd.exe (PID: 1044 cmdline: 'C:\Windows\System32\cmd.exe' /c taskkill /im A8D4.exe /f & timeout /t 6 & del /f /q 'C:\Users\user~1\AppData\Local\Temp\A8D4.exe' & del C:\ProgramData\*.dll & exit
+            - 'del '
+            - '\*.dll'
             - 'C:\ProgramData\'
     condition: susp_del_exe or susp_del_dll
-#cmd.exe (PID: 1044 cmdline: 'C:\Windows\System32\cmd.exe' /c taskkill /im A8D4.exe /f & timeout /t 6 & del /f /q 'C:\Users\user~1\AppData\Local\Temp\A8D4.exe' & del C:\ProgramData\*.dll & exit
 falsepositives:
     - Unknown
 level: medium
