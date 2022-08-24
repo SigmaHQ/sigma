@@ -1,0 +1,32 @@
+title: Advanced IP/Port Scanner Update Check
+id: 1a9bb21a-1bb5-42d7-aa05-3219c7c8f47d
+status: experimental
+description: Detect update check performed by Advanced IP Scanner and Advanced Port Scanner
+author: Axel Olsson
+references:
+  - https://www.advanced-ip-scanner.com/
+  - https://www.advanced-port-scanner.com/
+tags:
+  - attack.discovery
+  - attack.t1590 # Gather Victim Network Information 
+date: 2022/08/14
+logsource:
+    category: proxy
+detection:
+    selection:
+      # Example request: http://www.advanced-port-scanner.com/checkupdate.php?lng=en&ver=2-5-3680&beta=n&type=upd&rmode=p&product=aps 
+      # Example request2: http://www.advanced-ip-scanner.com/checkupdate.php?lng=en&ver=2-5-3499&beta=n&type=upd&rmode=p&product=aips 
+      c-uri|contains: '/checkupdate.php'
+      c-uri-query|contains|all:
+        - 'lng='
+        - 'ver='
+        - 'beta='
+        - 'type='
+        - 'rmode='
+        - 'product='
+    condition: selection
+fields:
+  - c-ip
+falsepositives:
+    - Legitimate use by administrators
+level: medium

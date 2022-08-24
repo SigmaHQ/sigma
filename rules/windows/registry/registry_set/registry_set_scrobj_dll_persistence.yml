@@ -1,0 +1,23 @@
+title: Scrobj.dll COM Hijacking
+id: fe20dda1-6f37-4379-bbe0-a98d400cae90
+description: Detect use of scrobj.dll as this DLL looks for the ScriptletURL key to get the location of the script to execute
+author: frack113
+date: 2022/08/20 
+status: experimental
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/40b77d63808dd4f4eafb83949805636735a1fd15/atomics/T1546.015/T1546.015.md
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|endswith: 'InprocServer32\(Default)'
+        Details: 'C:\WINDOWS\system32\scrobj.dll'
+    condition: selection
+falsepositives:
+    - Legitimate use of the dll.
+level: medium
+tags:
+  - attack.persistence
+  - attack.t1546.015

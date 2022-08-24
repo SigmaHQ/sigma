@@ -1,0 +1,25 @@
+title: Network Reconnaissance Activity
+id: e6313acd-208c-44fc-a0ff-db85d572e90e
+status: experimental
+description: Detects a set of suspicious network related commands often used in recon stages
+author: Florian Roth
+references:
+    - https://thedfirreport.com/2022/02/07/qbot-likes-to-move-it-move-it/
+date: 2022/02/07
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_nslookup:
+        CommandLine|contains|all:
+            - 'nslookup'
+            - '_ldap._tcp.dc._msdcs.'
+    condition: 1 of selection*
+falsepositives:
+    - False positives depend on scripts and administrative tools used in the monitored environment
+level: high
+tags:
+    - attack.discovery
+    - attack.t1087
+    - attack.t1082
+    - car.2016-03-001
