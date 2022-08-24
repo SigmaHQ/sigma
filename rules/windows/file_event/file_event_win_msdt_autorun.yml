@@ -1,0 +1,22 @@
+title: Msdt.exe create executable file in autorun directory 
+id: 
+status: experimental
+description: Detection msdt.exe create executable file in autorun directory. CVE-2022-30190
+author: Vadim Varganov
+references:
+    - https://irsl.medium.com/the-trouble-with-microsofts-troubleshooters-6e32fc80b8bd 
+date: 2022/08/24
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        - Image|endswith: '\msdt.exe'
+        - TargetFilename|contains: '\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\' 
+    condition: selection
+falsepositives:
+    - Undefined
+level: high
+tags:
+    - attack.persistance
+    - attack.t1547.001
