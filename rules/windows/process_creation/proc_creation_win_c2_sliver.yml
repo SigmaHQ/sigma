@@ -1,0 +1,23 @@
+title: Sliver Implant Activity Pattern
+id: 42333b2c-b425-441c-b70e-99404a17170f
+status: experimental
+description: Detects process activity patterns as seen being used by Sliver C2 framework implants
+author: Florian Roth (rule), Stephan Berger (ideas)
+references:
+   - https://twitter.com/malmoeb/status/1562761080921034753
+date: 2022/08/25
+logsource:
+   category: process_creation
+   product: windows
+detection:
+   selection_cmdline:
+      CommandLine|contains: 'powershell.exe -NoExit -Command [Console]::OutputEncoding=[Text.UTF8Encoding]::UTF8'
+   condition: 1 of selection*
+falsepositives:
+   - Unlikely
+level: critical
+tags:
+   - attack.credential_access
+   - attack.t1558.003
+   - attack.lateral_movement
+   - attack.t1550.003
