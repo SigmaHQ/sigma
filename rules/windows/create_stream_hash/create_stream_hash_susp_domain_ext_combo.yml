@@ -1,0 +1,46 @@
+title: Suspicious File Download from File Sharing Domain
+id: 52182dfb-afb7-41db-b4bc-5336cb29b464
+status: experimental
+description: Detects the download of suspicious file type from a well-known file and paste sharing domain
+author: Florian Roth
+references:
+  - https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventid=90015
+date: 2022/08/24
+logsource:
+  product: windows
+  category: create_stream_hash
+  definition: 'Requirements: Sysmon config with Imphash logging activated'
+detection:
+    selection_domain:
+        Contents|contains:
+            - 'https://transfer.sh/'
+            - 'raw.githubusercontent.com'
+            - 'gist.githubusercontent.com'
+            - 'pastebin.com'
+            - 'cdn.discordapp.com/attachments/'
+            - 'mediafire.com'
+            - 'mega.nz'
+            - 'ddns.net'
+            - '.paste.ee'
+            - '.hastebin.com'
+            - '.ghostbin.co/'
+            - 'ufile.io'
+            - 'storage.googleapis.com'
+            - 'anonfiles.com'
+            - 'send.exploit.in'
+    selection_extension:
+        TargetFilename|contains:
+            - '.exe:Zone'
+            - '.vbs:Zone'
+            - '.dll:Zone'
+    condition: all of selection*
+fields:
+  - TargetFilename
+  - Image
+falsepositives:
+  - Unknown
+level: high
+tags:
+  - attack.defense_evasion
+  - attack.s0139
+  - attack.t1564.004
