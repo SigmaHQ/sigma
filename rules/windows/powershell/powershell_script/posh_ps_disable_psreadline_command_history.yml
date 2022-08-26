@@ -1,0 +1,24 @@
+title: Disable Powershell Command History
+id: 602f5669-6927-4688-84db-0d4b7afb2150
+status: experimental
+description: Detects scripts or commands that disabled the Powershell command history by removing psreadline module
+references:
+    - https://twitter.com/DissectMalware/status/1062879286749773824
+author: Ali Alwashali
+date: 2022/08/21
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - Remove-Module
+            - psreadline
+    condition: selection
+falsepositives:
+    - Legitimate script that disables the command history
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1070.003

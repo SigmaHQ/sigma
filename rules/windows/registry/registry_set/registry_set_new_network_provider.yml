@@ -1,0 +1,34 @@
+title: New Network Provider - Registry
+id: 0442defa-b4a2-41c9-ae2c-ea7042fc4701
+related:
+    - id: baef1ec6-2ca9-47a3-97cc-4cf2bda10b77
+      type: similar
+description: Detects when an attacker tries to add a new network provider in order to dump clear text credentials, similar to how the NPPSpy tool does it
+author: Nasreddine Bencherchali
+date: 2022/08/23
+status: experimental
+references:
+    - https://docs.microsoft.com/en-us/troubleshoot/windows-client/deployment/network-provider-settings-removed-in-place-upgrade
+    - https://github.com/gtworek/PSBits/tree/master/PasswordStealing/NPPSpy
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|contains|all:
+            - '\System\CurrentControlSet\Services\'
+            - '\NetworkProvider'
+    filter:
+        TargetObject|contains:
+            - '\System\CurrentControlSet\Services\WebClient\NetworkProvider'
+            - '\System\CurrentControlSet\Services\LanmanWorkstation\NetworkProvider'
+            - '\System\CurrentControlSet\Services\RDPNP\NetworkProvider'
+            #- '\System\CurrentControlSet\Services\P9NP\NetworkProvider' # Related to WSL remove the comment if you use WSL in your ENV
+    condition: selection and not filter
+falsepositives:
+    - Other legitimate network providers used and not filtred in this rule
+level: high
+tags:
+    - attack.credential_access
+    - attack.t1003
