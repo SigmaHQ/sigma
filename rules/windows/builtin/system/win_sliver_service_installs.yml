@@ -1,0 +1,32 @@
+title: Sliver Service Installations
+id: 6c681df-3188-406b-8932-0b7e52cc4379
+description: Detects known malicious service installs that appear in cases in which a Sliver implants execute the PsExec commands
+status: experimental
+author: Florian Roth
+references:
+    - https://www.microsoft.com/security/blog/2022/08/24/looking-for-the-sliver-lining-hunting-for-emerging-command-and-control-frameworks/
+date: 2022/08/25
+tags:
+    - attack.execution
+    - attack.privilege_escalation
+    - attack.lateral_movement 
+    - attack.t1021.002
+    - attack.t1543.003
+    - attack.t1569.002
+logsource:
+    product: windows
+    service: system
+detection:
+    selection_id:
+        Provider_Name: 'Service Control Manager'
+        EventID: 7045
+    selection1:
+        ImagePath|re: '^[a-zA-Z]:\\windows\\temp\\[a-zA-Z0-9]{10}\.exe'
+    selection2:
+        ServiceName: 
+            - 'Sliver'
+            - 'Sliver implant'
+    condition: 1 of selection*
+falsepositives:
+    - Unknown
+level: critical
