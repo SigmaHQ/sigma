@@ -4,7 +4,7 @@ description: This rule looks for Windows Installer service (msiexec.exe) trying 
 status: experimental
 author: Teymur Kheirkhabarov (idea), Mangatas Tondang (rule), oscd.community
 date: 2020/10/13
-modified: 2022/02/18
+modified: 2022/08/25
 references:
     - https://image.slidesharecdn.com/kheirkhabarovoffzonefinal-181117201458/95/hunting-for-privilege-escalation-in-windows-environment-48-638.jpg
 tags:
@@ -32,11 +32,20 @@ detection:
     filter_repair:
         - CommandLine|endswith: '\system32\msiexec.exe /V' # ignore "repair option"
         - ParentCommandLine|endswith: '\system32\msiexec.exe /V' # ignore "repair option"
+    filter_autoupdater:
+        ParentImage|startswith:
+            - 'C:\ProgramData\Sophos\'
+            - 'C:\ProgramData\Avira\'
+            - 'C:\Program Files\Avast Software\'
+            - 'C:\Program Files (x86)\Avast Software\'
+            - 'C:\Program Files\Google\Update\'
+            - 'C:\Program Files (x86)\Google\Update\'
     condition: ( (image_1 and user) or (image_2 and user and integrity_level) ) and not 1 of filter*
 fields:
     - IntegrityLevel
     - User
     - Image
 falsepositives:
-    - System administrator Usage
+    - System administrator usage
+    - Anti virus products
 level: medium
