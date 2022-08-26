@@ -1,9 +1,10 @@
-title: Sliver Service Installations
+title: Sliver C2 Default Service Installation
 id: 31c51af6-e7aa-4da7-84d4-8f32cc580af2
-description: Detects known malicious service installs that appear in cases in which a Sliver implants execute the PsExec commands
+description: Detects known malicious service installation that appear in cases in which a Sliver implants execute the PsExec commands
 status: experimental
-author: Florian Roth
+author: Florian Roth, Nasreddine Bencherchali
 references:
+    - https://github.com/BishopFox/sliver/blob/79f2d48fcdfc2bee4713b78d431ea4b27f733f30/client/command/commands.go#L1231
     - https://www.microsoft.com/security/blog/2022/08/24/looking-for-the-sliver-lining-hunting-for-emerging-command-and-control-frameworks/
 date: 2022/08/25
 tags:
@@ -20,13 +21,13 @@ detection:
     selection_id:
         Provider_Name: 'Service Control Manager'
         EventID: 7045
-    selection1:
+    selection_service1:
         ImagePath|re: '^[a-zA-Z]:\\windows\\temp\\[a-zA-Z0-9]{10}\.exe'
-    selection2:
+    selection_service2:
         ServiceName:
             - 'Sliver'
             - 'Sliver implant'
-    condition: 1 of selection*
+    condition: selection_id and 1 of selection_service*
 falsepositives:
     - Unknown
-level: critical
+level: high
