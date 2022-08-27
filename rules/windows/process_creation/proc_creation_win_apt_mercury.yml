@@ -1,0 +1,23 @@
+title: MERCURY Command Line Patterns
+id: a62298a3-1fe0-422f-9a68-ffbcbc5a123d
+status: experimental
+description: Detects suspicious command line patterns as seen being used by MERCURY threat actor
+references:
+    - https://www.microsoft.com/security/blog/2022/08/25/mercury-leveraging-log4j-2-vulnerabilities-in-unpatched-systems-to-target-israeli-organizations/
+author: Florian Roth
+date: 2022/08/26
+logsource:
+    category: process_creation
+    product: windows
+tags:
+    - attack.t1059.001
+    - attack.g0069
+detection:
+    selection_base:
+        CommandLine|contains|all: 
+            - '-exec bypass -w 1 -enc'
+            - 'UwB0AGEAcgB0AC0ASgBvAGIAIAAtAFMAYwByAGkAcAB0AEIAbABvAGMAaw'  # Start-Job -ScriptBlock
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: high
