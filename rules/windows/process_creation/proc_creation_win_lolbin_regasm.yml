@@ -1,0 +1,40 @@
+title: Regasm/Regsvcs Suspicious Execution
+id: cc368ed0-2411-45dc-a222-510ace303cb2
+description: Detects suspicious execution of Regasm/Regsvcs utilities
+status: experimental
+references:
+    - https://www.fortiguard.com/threat-signal-report/4718?s=09
+    - https://lolbas-project.github.io/lolbas/Binaries/Regasm/
+    - https://lolbas-project.github.io/lolbas/Binaries/Regsvcs/
+author: Nasreddine Bencherchali
+date: 2022/08/25
+tags:
+    - attack.defense_evasion
+    - attack.t1218.009
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+            - '\Regsvcs.exe'
+            - '\Regasm.exe'
+        - OriginalFileName:
+            - 'RegSvcs.exe'
+            - 'RegAsm.exe'
+    selection_dir:
+        CommandLine|contains:
+            # Add more suspicious directories
+            - '\Users\Public\'
+            - '\AppData\Local\Temp\'
+            - '\Desktop\'
+            - '\Downloads\'
+            - '\PerfLogs\'
+            - '\Windows\Temp\'
+            - '\Microsoft\Windows\Start Menu\Programs\Startup\'
+    filter_dll:
+        CommandLine|contains: '.dll'
+    condition: all of selection_* or (selection_img and not filter_dll)
+falsepositives:
+    - Unknown
+level: high
