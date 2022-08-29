@@ -1,0 +1,26 @@
+title: DLL Sideloading via DeviceEnroller.exe
+id: e173ad47-4388-4012-ae62-bd13f71c18a8
+description: Recent research discovered that DeviceEnroller.exe will load the DLL ShellChromeAPI.dll which does not exist
+references:
+  - https://mobile.twitter.com/0gtweet/status/1564131230941122561
+  - https://strontic.github.io/xcyclopedia/library/DeviceEnroller.exe-24BEF0D6B0ECED36BB41831759FDE18D.html
+status: experimental
+author: '@gott_cyber'
+date: 2022/08/29
+tags:
+  - attack.defense.evasion
+  - attack.t1574.002
+logsource:
+  category: process_creation
+  product: windows
+detection:
+    selection:
+        ParentImage|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+        Image|endswith: '\deviceenroller.exe'
+        CommandLine|re: '(/PhoneDeepLink|/phonedeeplink)'
+    condition: selection 
+falsepositives:
+    - unknown
+level: medium
