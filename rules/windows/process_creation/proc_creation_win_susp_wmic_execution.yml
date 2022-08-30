@@ -8,7 +8,7 @@ references:
     - https://www.hybrid-analysis.com/sample/4be06ecd234e2110bd615649fe4a6fa95403979acf889d7e45a78985eb50acf9?environmentId=1
     - https://blog.malwarebytes.com/threat-analysis/2016/04/rokku-ransomware/
 date: 2019/01/16
-modified: 2022/05/13
+modified: 2022/08/29
 logsource:
     category: process_creation
     product: windows
@@ -30,6 +30,8 @@ detection:
         CommandLine|contains|all:
             - 'Product'
             - ' get '
+    recon_part3:  # evaluate hardware ID
+        CommandLine|contains: 'wmic csproduct get name'
     condition: all of selection_* or (selection_img and all of recon_*)
 fields:
     - CommandLine
