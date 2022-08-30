@@ -1,0 +1,30 @@
+title: Hide Schedule Task Via Index Value Tamper
+id: 5b16df71-8615-4f7f-ac9b-6c43c0509e61
+related:
+    - id: acd74772-5f88-45c7-956b-6a7b36c294d2
+      type: similar
+    - id: 526cc8bc-1cdc-48ad-8b26-f19bff969cec
+      type: similar
+description: Detects when the "index" value of a scheduled task is modified from the registry. Which effectively hides it from any tooling such as "schtasks /query" (Read the referenced link for more information about the effects of this technique)
+status: experimental
+date: 2022/08/26
+author: Nasreddine Bencherchali
+references:
+    - https://blog.qualys.com/vulnerabilities-threat-research/2022/06/20/defending-against-scheduled-task-attacks-in-windows-environments
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|contains|all:
+            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\'
+            - 'Index'
+        Details: DWORD (0x00000000)
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1562

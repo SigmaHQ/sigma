@@ -4,8 +4,10 @@ status: experimental
 description: Deployment Image Servicing and Management tool. DISM is used to enumerate, install, uninstall, configure, and update features and packages in Windows images
 author: frack113
 date: 2022/01/16
+modified: 2022/08/26
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md#atomic-test-26---disable-windows-defender-with-dism
+    - https://www.trendmicro.com/en_us/research/22/h/ransomware-actor-abuses-genshin-impact-anti-cheat-driver-to-kill-antivirus.html
 logsource:
     category: process_creation
     product: windows
@@ -13,19 +15,19 @@ detection:
     selection_dismhost:
         Image|endswith: '\DismHost.exe'
         ParentCommandLine|contains|all:
-            - '/online'
+            - '/Online'
             - '/Disable-Feature'
-            - '/FeatureName:'
-            - '/Remove'
+            #- '/FeatureName:'
+            #- '/Remove'
             #/NoRestart
             #/quiet
     selection_dism:
         Image|endswith: '\Dism.exe'
         CommandLine|contains|all:
-            - '/online'
+            - '/Online'
             - '/Disable-Feature'
-            - '/FeatureName:'
-            - '/Remove'
+            #- '/FeatureName:'
+            #- '/Remove'
             #/NoRestart
             #/quiet
     condition: 1 of selection_*
