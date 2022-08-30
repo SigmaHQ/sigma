@@ -1,0 +1,34 @@
+title: SharpLdapWhoami
+id: d9367cbb-c2e0-47ce-bdc0-128cb6da898d
+status: experimental
+description: Detects SharpLdapWhoami, a whoami alternative by asking the LDAP service on a domain controller
+author: Florian Roth
+references:
+   - https://github.com/bugch3ck/SharpLdapWhoami
+date: 2022/08/29
+tags:
+   - attack.discovery
+   - attack.t1033
+   - car.2016-03-001
+logsource:
+   category: process_creation
+   product: windows
+detection:
+   selection_name:
+      Image|endswith: '\SharpLdapWhoami.exe'
+   selection_pe:  # in case the file has been renamed after compilation
+      - OriginalFileName|contains: 'SharpLdapWhoami'
+      - Product: 'SharpLdapWhoami'
+   selection_flags1:
+      CommandLine|endswith:
+         - ' /method:ntlm'
+         - ' /method:kerb'
+         - ' /method:nego'
+         - ' /m:nego'
+         - ' /m:ntlm'
+         - ' /m:kerb'
+   condition: 1 of selection*
+falsepositives:
+   - Programs that use the same command line flags
+level: high
+
