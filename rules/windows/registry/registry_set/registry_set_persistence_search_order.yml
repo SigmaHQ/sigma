@@ -7,7 +7,7 @@ references:
     - https://attack.mitre.org/techniques/T1546/015/
 author: Maxime Thiebaut (@0xThiebaut), oscd.community, Cédric Hien
 date: 2020/04/14
-modified: 2022/08/10
+modified: 2022/09/01
 logsource:
     category: registry_set
     product: windows
@@ -74,6 +74,9 @@ detection:
     filter_poqexec:
         Image: 'C:\Windows\System32\poqexec.exe'
         Details|contains: 'C:\Windows\System32\Autopilot.dll'
+    filter_sec_health_svc:
+        Image: 'C:\Windows\system32\SecurityHealthService.exe'
+        Details|contains: '\C:\Windows\System32\SecurityHealth'
     condition: selection and not 1 of filter*
 falsepositives:
     - Some installed utilities (i.e. OneDrive) may serve new COM objects at user-level
