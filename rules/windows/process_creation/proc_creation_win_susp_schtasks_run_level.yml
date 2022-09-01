@@ -1,0 +1,34 @@
+title: Scheduled Task Creation With Highest Run Level
+id: 4035f650-fe4c-48b7-ac2f-c1b83f1dae2f
+status: experimental
+description: Detects the creation of suspicious tasks with Highest Run Level
+author: elhoim
+date: 2022/04/27
+references:
+    - https://docs.microsoft.com/en-us/windows/win32/taskschd/schtasks
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\schtasks.exe'
+        CommandLine|contains: 
+            - ' /create '
+            - ' /RL '
+            - 'Highest'
+    condition: 
+        selection 
+fields:
+    - CommandLine
+    - ParentCommandLine
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1053.005
+    - attack.s0111
+    - car.2013-08-001
+falsepositives:
+    - Administrative activity
+    - Software installation
+level: low
