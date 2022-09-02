@@ -1,0 +1,34 @@
+title: Suspicious Net Use Command Combo
+id: f0507c0f-a3a2-40f5-acc6-7f543c334993
+status: experimental
+description: Detects net use command combo which executes files from WebDAV server; seen in malicious LNK files
+author: pH-T
+references:
+  - https://twitter.com/ShadowChasing1/status/1552595370961944576
+  - https://www.virustotal.com/gui/file/a63376ee1dba76361df73338928e528ca5b20171ea74c24581605366dcaa0104/behavior
+date: 2022/09/01
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  image:
+      Image|contains: '\cmd.exe'
+  selection_base:
+      CommandLine|contains|all:
+          - ' net use http'
+          - '& start /b '
+          - '\DavWWWRoot\'
+  selection_ext:
+      CommandLine|contains:
+          - '.exe '
+          - '.dll '
+          - '.bat '
+          - '.vbs '
+          - '.ps1 '
+  condition: image and all of selection*
+falsepositives:
+  - Unknown
+level: high
+tags:
+  - attack.execution
+  - attack.t1059.001
