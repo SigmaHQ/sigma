@@ -5,6 +5,7 @@ description: Detects suspicious manipulations of default accounts such as 'admin
 author: Nasreddine Bencherchali
 references:
     - https://www.trellix.com/en-sg/about/newsroom/stories/threat-labs/lockergoga-ransomware-family-used-in-targeted-attacks.html
+    - https://redacted.com/blog/bianlian-ransomware-gang-gives-it-a-go/
 date: 2022/09/01
 logsource:
     category: process_creation
@@ -18,14 +19,34 @@ detection:
         CommandLine|contains: ' user '
     selection_username:
         CommandLine|contains:
-            # Need to write the full account name for cases starting with 'admin' to avoid lookups only with the user flag
+            # Note: We need to write the full account name for cases starting with 'admin' to avoid lookups only with the user flag
             - ' Järjestelmänvalvoja ' # Finish
             - ' Rendszergazda ' # Hungarian
             - ' Администратор ' # Russian
             - ' Administrateur ' # French
             - ' Administrador ' # Portuguese (Brazil + Portugal) + Spanish
             - ' Administratör ' # Swedish
+            - ' Administrator ' # English
             - ' guest '
+            # The cases below are for when an attacker requests the net command via 'cmd /c....'
+            # First in double quotes
+            - ' "Järjestelmänvalvoja" ' # Finish
+            - ' "Rendszergazda" ' # Hungarian
+            - ' "Администратор" ' # Russian
+            - ' "Administrateur" ' # French
+            - ' "Administrador" ' # Portuguese (Brazil + Portugal) + Spanish
+            - ' "Administratör" ' # Swedish
+            - ' "Administrator" ' # English
+            - ' "guest" '
+            # Second in single quotes
+            - " 'Järjestelmänvalvoja' " # Finish
+            - " 'Rendszergazda' " # Hungarian
+            - " 'Администратор' " # Russian
+            - " 'Administrateur' " # French
+            - " 'Administrador' " # Portuguese (Brazil + Portugal) + Spanish
+            - " 'Administratör' " # Swedish
+            - " 'Administrator' " # English
+            - " 'guest' "
     condition: all of selection_*
 falsepositives:
     - Some fasle positives could occure with the admin or guest account. It depends on the scripts being used by the admins in your env. If you experience a lot of FP you could reduce the level to medium
