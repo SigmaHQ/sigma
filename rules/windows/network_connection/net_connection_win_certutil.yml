@@ -1,0 +1,27 @@
+title: Certuil Initiated Connection
+id: 0dba975d-a193-4ed1-a067-424df57570d1
+status: experimental
+description: Attackers can abuse `certutil.exe` to download malware, offensive security tools
+author: frack113
+references:
+    - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/certutil
+date: 2022/09/02
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\certuil.exe'
+        Initiated: 'true'
+        DestinationPort:
+            - 80
+            - 443
+            - 135
+            - 445
+    condition: selection
+falsepositives:
+    - Legitimate certuil network connection
+level: medium
+tags:
+    - attack.command_and_Control
+    - attack.t1105 
