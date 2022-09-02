@@ -1,0 +1,33 @@
+title: MSI Installation From Suspicious Locations
+id: c7c8aa1c-5aff-408e-828b-998e3620b341
+status: experimental
+description: Detects MSI package installation from suspicious locations
+author: Nasreddine Bencherchali
+references:
+    - https://www.trendmicro.com/en_us/research/22/h/ransomware-actor-abuses-genshin-impact-anti-cheat-driver-to-kill-antivirus.html
+date: 2022/08/31
+logsource:
+    product: windows
+    service: application
+    # warning: The 'data' field used in the detection section is the container for the event data as a whole. You may have to adapt the rule for your backend accordingly
+detection:
+    selection:
+        Provider_Name: 'MsiInstaller'
+        EventID:
+            - 1040
+            - 1042
+        Data|contains:
+            # Add more suspicious paths
+            - '\Users\Public\'
+            - '\PerfLogs\'
+            - '\Desktop\'
+            - '\Downloads\'
+            - '\AppData\Local\Temp\'
+            - 'C:\Windows\TEMP\'
+            - '\\\\'
+    condition: selection
+falsepositives:
+    - Some false positives may occure depending on the environnement
+level: high
+tags:
+    - attack.execution
