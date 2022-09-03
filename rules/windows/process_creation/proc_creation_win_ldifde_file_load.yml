@@ -19,12 +19,14 @@ logsource:
   category: process_creation
   product: windows
 detection:
-    selection:
-        Image|endswith: '\ldifde.exe'
-        CommandLine|contains|all:
-          - '-i'
-          - '-f'
-    condition: selection 
+    selection_ldif:
+        - Image|endswith: '\ldifde.exe'
+        - OriginalFileName: ldifde.exe.mui
+    selection_cmd: 
+        CommandLine|contains|all: 
+            - '-i' 
+            - '-f'     
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: medium
