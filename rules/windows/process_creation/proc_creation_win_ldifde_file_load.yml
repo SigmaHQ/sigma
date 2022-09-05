@@ -1,0 +1,32 @@
+title: Suspicious Ldifde Command Usage
+id: 6f535e01-ca1f-40be-ab8d-45b19c0c8b7f
+description: |
+  Detects the use of Ldifde.exe with specific command line arguments to potentially load an LDIF file containing HTTP-based arguments.
+  Ldifde.exe is present, by default, on domain controllers and only requires user-level authentication to execute.
+references:
+  - https://twitter.com/0gtweet/status/1564968845726580736
+  - https://strontic.github.io/xcyclopedia/library/ldifde.exe-979DE101F5059CEC1D2C56967CA2BAC0.html
+  - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc731033(v=ws.11)
+status: experimental
+author: '@gott_cyber'
+date: 2022/09/02
+tags:
+  - attack.command_and_control
+  - attack.t1105
+  - attack.defense_evasion
+  - attack.t1218
+logsource:
+  category: process_creation
+  product: windows
+detection:
+    selection_ldif:
+        - Image|endswith: '\ldifde.exe'
+        - OriginalFileName: ldifde.exe.mui
+    selection_cmd: 
+        CommandLine|contains|all: 
+            - '-i' 
+            - '-f'     
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium
