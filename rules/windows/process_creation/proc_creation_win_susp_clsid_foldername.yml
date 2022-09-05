@@ -1,0 +1,36 @@
+title: Suspicious CLSID Folder Name In Suspicious Locations
+id: 90b63c33-2b97-4631-a011-ceb0f47b77c3
+status: experimental
+description: Detects usage of a CLSID folder name located in a suspicious location from the commandline as seen being used in IcedID
+author: Nasreddine Bencherchali
+references:
+    - https://twitter.com/Kostastsale/status/1565257924204986369
+date: 2022/09/01
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    # Uncomment this section and remove the filter if you want the rule to be more specific to processes
+    #selection_img:
+    #    Image|endswith:
+    #        - '\rundll32.exe'
+    selection_folder:
+        CommandLine|contains:
+            # Add more suspicious or unexpected paths
+            - '\AppData\Roaming\'
+            - '\AppData\Local\Temp\' # This could generate some FP with some installers creating folders with CLSID
+    selection_clsid:
+        CommandLine|contains|all:
+            - '\{'
+            - '}\'
+    filter:
+        Image|contains|all:
+            - '\{'
+            - '}\'
+    condition: all of selection_* and not filter
+falsepositives:
+    - Some FP is expected with some installers
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1027
