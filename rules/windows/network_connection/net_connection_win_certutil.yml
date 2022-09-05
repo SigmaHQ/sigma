@@ -1,0 +1,29 @@
+title: Certutil Initiated Connection
+id: 0dba975d-a193-4ed1-a067-424df57570d1
+status: experimental
+description: Detects a network connection intitiated by the certutil.exe tool. Attackers can abuse `certutil.exe` to download malware or offensive security tools.
+author: frack113, Florian Roth
+references:
+    - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/certutil
+date: 2022/09/02
+tags:
+    - attack.command_and_control
+    - attack.t1105
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection_certutil:
+        - Image|endswith: '\certutil.exe'
+        - OriginalFilename: 'CertUtil.exe'
+    selection_network:
+        Initiated: 'true'
+        DestinationPort:
+            - 80
+            - 443
+            - 135
+            - 445
+    condition: all of selection*
+falsepositives:
+    - Legitimate certutil network connection
+level: high
