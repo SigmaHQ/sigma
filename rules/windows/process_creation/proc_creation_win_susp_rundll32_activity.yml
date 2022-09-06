@@ -11,7 +11,7 @@ references:
     - https://twitter.com/eral4m/status/1479106975967240209 # scrobj.dll,GenerateTypeLib
     - https://twitter.com/eral4m/status/1479080793003671557 # shimgvw.dll,ImageView_Fullscreen
 date: 2019/01/16
-modified: 2022/08/19
+modified: 2022/08/30
 logsource:
     category: process_creation
     product: windows
@@ -84,7 +84,10 @@ detection:
             - 'http'
     filter:
         CommandLine|contains: 'shell32.dll,Control_RunDLL desk.cpl,screensaver,@screensaver'
-    condition: selection and not filter
+    filter_parent:  # Settings
+        ParentImage: 'C:\Windows\System32\control.exe'
+        ParentCommandLine|contains: '.cpl'
+    condition: selection and not 1 of filter*
 falsepositives:
     - False positives depend on scripts and administrative tools used in the monitored environment
 level: medium

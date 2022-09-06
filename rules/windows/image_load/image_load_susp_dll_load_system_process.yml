@@ -6,7 +6,10 @@ author: Nasreddine Bencherchali
 references:
     - https://github.com/hackerhouse-opensource/iscsicpl_bypassUAC (Idea)
 date: 2022/07/17
-modified: 2022/08/10
+modified: 2022/09/03
+tags:
+    - attack.defense_evasion
+    - attack.t1070
 logsource:
     product: windows
     category: image_load
@@ -21,11 +24,11 @@ detection:
             - '\AppData\Local\Temp\'
             - 'C:\PerfLogs\'
     filter:
-        ImageLoaded|contains: '\Program Files'
+        - Image|endswith: '\msiexec.exe'
+        - ImageLoaded|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
     condition: selection and not filter
 falsepositives:
     - Unknown
 level: high
-tags:
-    - attack.defense_evasion
-    - attack.t1070
