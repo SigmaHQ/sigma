@@ -64,7 +64,10 @@ detection:
             - 'ntdll'
             - 'user32'  # FP with chocolatey
             - 'secur32'
-    condition: selection
+    filter_defender:
+        Image|endswith: '\MpCmdRun.exe'
+        CommandLine|contains: ' -GetLoadLibraryWAddress32'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown
 level: high
