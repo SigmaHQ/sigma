@@ -1,0 +1,30 @@
+title: SysmonEnte Usage
+id: d29ada0f-af45-4f27-8f32-f7b77c3dbc4e
+status: experimental
+description: Detects the use of SysmonEnte, a tool to attack the integrity of Sysmon
+author: Florian Roth
+references:
+   - https://codewhitesec.blogspot.com/2022/09/attacks-on-sysmon-revisited-sysmonente.html
+   - https://github.com/codewhitesec/SysmonEnte/
+   - https://github.com/codewhitesec/SysmonEnte/blob/main/screens/1.png
+date: 2022/09/07
+tags:
+   - attack.defense_evasion
+   - attack.t1562.002
+logsource:
+   category: process_access
+   product: windows
+detection:
+   selection_1:
+      TargetImage: 'C:\Windows\Sysmon64.exe'
+      GrantedAccess: '0x1400'
+   filter_1:
+      SourceImage|startswith:
+         - 'C:\Program Files'
+         - 'C:\Windows\System32\'
+   selection_calltrace:
+      CallTrace: 'Ente'
+   condition: ( selection_1 and not filter_1 ) or selection_calltrace
+falsepositives:
+   - Unknown
+level: high
