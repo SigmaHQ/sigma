@@ -1,0 +1,39 @@
+title: BITS Suspicious DLL Load
+id: f9b975fc-6323-4903-a225-e3311ad3ee5a
+status: experimental
+description: Detects BITS DLLs loaded by unusual host processes
+author: Borna Talebi
+references:
+    - https://blog.menasec.net/2021/05/hunting-for-suspicious-usage-of.html
+    - https://github.com/vadim-hunter/Detection-Ideas-Rules/blob/main/TTPs/Defense%20Evasion/T1197%20-%20BITS%20Jobs/Procedures.yaml#L174
+    - https://twitter.com/Mahdi_htm/status/1562830232263921665
+date: 2022/09/08
+logsource:
+  category: image_load
+  product: windows
+detection:
+    selection:
+        ImageLoaded|endswith:
+          - '\Bitsproxy.dll'
+          - '\qmgrprxy.dll'
+    filter:
+        - Image:
+            - 'C:\Windows\System32\svchost.exe'
+            - 'C:\Windows\System32\ofdeploy.exe'
+        - Image|endswith:
+            - '\MsMpEng.exe'
+            - '\Google\Chrome\Application\chrome.exe'
+            - '\Mozilla Firefox\firefox.exe'
+            - '\Microsoft\Edge\Application\msedge.exe'
+            - '\microsoft shared\ClickToRun\OfficeClickToRun.exe'
+            - '\Google\Update\GoogleUpdate.exe'
+            - '\Microsoft OneDrive\OneDrive.exe'
+            - '\Microsoft.SharePoint.exe'
+
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1197
