@@ -48,6 +48,9 @@ class SplunkBackend(SingleTextQueryBackend):
             raise TypeError("List values must be strings or numbers")
         return "(" + (" OR ".join(['%s=%s' % (key, self.generateValueNode(item)) for item in value])) + ")"
 
+    def generateANDNode(self, node):
+        return "(" + super().generateANDNode(node) + ")"
+
     def generateAggregation(self, agg):
         if agg == None:
             return ""
