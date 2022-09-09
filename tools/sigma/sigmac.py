@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # A Sigma to SIEM converter
 # Copyright 2016-2017 Thomas Patzke, Florian Roth
-
+import os
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -37,6 +37,7 @@ import codecs
 import copy
 import time
 import datetime
+from termcolor import colored
 
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
 
@@ -181,6 +182,9 @@ def main():
     argparser = set_argparser()
     cmdargs = argparser.parse_args()
     scm = SigmaConfigurationManager()
+
+    print(colored("!!! WARNING", "red"), "sigmac is deprecated in favor of", colored("sigma-cli", "green"), "using", colored("pySigma", "green"), ". Please stop contributing backends to this tool, it will be removed in 2023.")
+    print()
 
     logger = logging.getLogger(__name__)
     if cmdargs.debug:   # pragma: no cover
