@@ -72,7 +72,7 @@ class SigmaAllValuesModifier(SigmaTransformModifier):
         cond = ConditionAND()
         for val in self.value:
             cond.add(val)
-        return NodeSubexpression(cond)
+        return cond
 
 class SigmaBase64Modifier(ListOrStringModifierMixin, SigmaTransformModifier):
     """Encode strings with Base64"""
