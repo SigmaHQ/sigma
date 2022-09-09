@@ -1,0 +1,26 @@
+title: Suspicious Redirect To Local Admin Share
+id: 77d570aa-4e72-4949-98ff-24cdeec16787
+status: experimental
+description: Detects output redirection to the local admin share (ADMIN$) via the commandline
+author: Nasreddine Bencherchali
+references:
+    - http://blog.talosintelligence.com/2022/09/lazarus-three-rats.html
+date: 2022/09/09
+tags:
+    - attack.execution
+    - attack.lateral_movement
+    - attack.t1021.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:
+            - ' 1 > \\\\127.0.0.1\ADMIN$\'
+            - ' 1> \\\\127.0.0.1\ADMIN$\'
+            - ' 1 >\\\\127.0.0.1\ADMIN$\'
+            - ' 1>\\\\127.0.0.1\ADMIN$\'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
