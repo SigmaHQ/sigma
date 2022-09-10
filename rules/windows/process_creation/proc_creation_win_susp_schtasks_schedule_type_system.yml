@@ -1,19 +1,18 @@
-title: Suspicious Schtasks Schedule Types
-id: 24c8392b-aa3c-46b7-a545-43f71657fe98
+title: Suspicious Schtasks Schedule Type With High Privileges
+id: 7a02e22e-b885-4404-b38b-1ddc7e65258a
 related:
-    - id: 7a02e22e-b885-4404-b38b-1ddc7e65258a
+    - id: 24c8392b-aa3c-46b7-a545-43f71657fe98
       type: similar
-description: Detects scheduled task creations or modification on a suspicious schedule type
+description: Detects scheduled task creations or modification to be run with high privileges on a suspicious schedule type
 status: experimental
 references:
     - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/schtasks-change
     - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/schtasks-create
-    - http://blog.talosintelligence.com/2022/09/lazarus-three-rats.html
 tags:
     - attack.execution
     - attack.t1053.005
 author: Nasreddine Bencherchali
-date: 2022/09/09
+date: 2022/08/31
 logsource:
     product: windows
     category: process_creation
@@ -27,12 +26,12 @@ detection:
             - ' ONSTART '
             - ' ONCE '
             - ' ONIDLE '
-    filter_privs:
+    selection_privs:
         CommandLine|contains:
             - 'NT AUT' # This covers the usual NT AUTHORITY\SYSTEM
             - ' SYSTEM' # SYSTEM is a valid value for schtasks hence it gets it's own value with space
             - 'HIGHEST'
-    condition: all of selection_* and not 1 of filter_*
+    condition: all of selection_*
 falsepositives:
-    - Legitmate processes that run at logon. Filter according to your environment
-level: high
+    - Some installers were seen using this method of creation unfortunately. Filter them in your environment
+level: medium
