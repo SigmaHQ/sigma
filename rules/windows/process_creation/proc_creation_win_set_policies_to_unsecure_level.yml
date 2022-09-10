@@ -12,22 +12,27 @@ tags:
     - attack.t1059.001
 author: frack113
 date: 2021/11/01
-modified: 2022/02/23
+modified: 2022/09/10
 logsource:
     product: windows
     category: process_creation
 detection:
-    option:
+    selection_option:
         CommandLine|contains:
             - ' -executionpolicy '
             - ' -ep '
             - ' -exec '
-    level:
+    selection_level:
         CommandLine|contains:
             - 'Unrestricted'
             - 'bypass'
             - 'RemoteSigned'
-    condition: option and level
+    filter:
+        CommandLine|contains:
+            - 'C:\Program Files'
+            - 'C:\ProgramData'
+            - '\AppData\Roaming\Code\'
+    condition: all of selection* and not filter
 falsepositives:
     - Administrator script
 level: medium
