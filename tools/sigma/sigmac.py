@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # A Sigma to SIEM converter
 # Copyright 2016-2017 Thomas Patzke, Florian Roth
-
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -37,6 +36,7 @@ import codecs
 import copy
 import time
 import datetime
+from termcolor import colored
 
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
 
@@ -63,6 +63,12 @@ ERR_FULL_FIELD_MATCH    = 90
 
 # Allowed fields in output
 allowed_fields = ["title", "id", "status", "description", "author", "references", "fields", "falsepositives", "level", "tags", "filename"]
+
+deprecation_warning_message = colored("Sigmac will be deprecated by the end of 2022",
+                                      "red") + " in favour of sigma-cli and pySigma. Please " +  colored("stop contributing backends", "red") + \
+                                               " to this tool. Limited support is offered until the end of 2023, " \
+                                               "especially for backends that haven't been migrated yet.\n "
+
 
 def alliter(path):
     for sub in path.iterdir():
@@ -96,7 +102,7 @@ class ActionBackendHelp(argparse.Action):
 def set_argparser():
     """Sets up and parses the command line arguments for Sigmac.
     Returns the argparser"""
-    argparser = argparse.ArgumentParser(description="Convert Sigma rules into SIEM signatures.")
+    argparser = argparse.ArgumentParser(description="Convert Sigma rules into SIEM signatures.\n" + deprecation_warning_message, formatter_class=argparse.RawTextHelpFormatter)
     argparser.add_argument("--recurse", "-r", action="store_true", help="Use directory as input (recurse into subdirectories is not implemented yet)")
     argparser.add_argument("--filter", "-f", help="""
     Define comma-separated filters that must match (AND-linked) to rule to be processed.
@@ -201,6 +207,7 @@ def main():
         sys.exit(0)
     elif len(cmdargs.inputs) == 0:
         print("Nothing to do!")
+        print(deprecation_warning_message)
         argparser.print_usage()
         sys.exit(0)
 
