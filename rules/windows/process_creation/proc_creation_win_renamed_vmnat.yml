@@ -1,7 +1,7 @@
-title: Proc Creation Win Renamed Vmnat.exe
+title: Renamed or Portable Vmnat.exe
 id: 7b4f794b-590a-4ad4-ba18-7964a2832205
 status: experimental
-description: Detects renamed vmnat.exe (Legitimate file from VMware workstation) for DLL side-loading
+description: Detects renamed vmnat.exe or portable version that can be used for DLL side-loading
 author: elhoim
 date: 2022/09/09
 references:
@@ -15,9 +15,12 @@ logsource:
 detection:
     selection:
         OriginalFileName: 'vmnat.exe'
-    filter:
+    filter_rename:
         Image|endswith: 'vmnat.exe'
-    condition: selection and not filter
-falsepositives:
+    filter_portable:
+        Image: 
+            - 'C:\Program Files (x86)\VMware\VMware Workstation\vmnat.exe'
+            - 'C:\Windows\SysWOW64\vmnat.exe'
+    condition: selection and not 1 of filter_*
      - Unknown
 level: high
