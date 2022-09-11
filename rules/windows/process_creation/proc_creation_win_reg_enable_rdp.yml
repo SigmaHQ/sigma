@@ -6,7 +6,7 @@ author: '@Kostastsale, @TheDFIRReport, slightly modified by pH-T'
 references:
     - https://thedfirreport.com/2022/02/21/qbot-and-zerologon-lead-to-full-domain-compromise/
 date: 2022/02/12
-modified: 2022/08/06
+modified: 2022/09/09
 logsource:
     product: windows
     category: process_creation
@@ -15,7 +15,7 @@ detection:
         Image|endswith: '\reg.exe'
         CommandLine|contains|all:
             - ' add '
-            - '\SYSTEM\CurrentControlSet\Control\Terminal Server'
+            - '\CurrentControlSet\Control\Terminal Server'
             - 'REG_DWORD'
             - ' /f'
     selection_values_1:
@@ -34,6 +34,7 @@ detection:
             - 'TSAdvertise'
             - 'AllowTSConnections'
             - 'fSingleSessionPerUser'
+            - 'fDenyTSConnections'
     condition: selection_cli and 1 of selection_values_*
 falsepositives:
     - Unknown

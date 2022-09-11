@@ -8,6 +8,8 @@ This folder contains libraries and the following command line tools:
 
 # Sigmac
 
+<span style="color:red">Sigmac will be deprecated by the end of 2022</span> in favour of [sigma-cli](https://github.com/SigmaHQ/sigma-cli) and [pySigma](https://github.com/SigmaHQ/pySigma). <span style="color:red">Please stop contributing backends</span> to this tool. Limited support is offered until the end of 2023, especially for backends that haven't been migrated yet.
+
 The Sigmac is one of the most important files, as this is what sets the correct fields that your backend/database will use after being translated from the (original) log source's field names.
 Please read below to understand how a SIGMAC is constructed. Additionally, see [Choosing the Right Sigmac](#choosing-the-right-sigmac) for an idea of which file and command line options (if applicable) that will best suite your environment.
 
