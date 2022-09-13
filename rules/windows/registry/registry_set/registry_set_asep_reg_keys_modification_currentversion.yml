@@ -12,7 +12,7 @@ references:
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
     - https://oddvar.moe/2018/03/21/persistence-using-runonceex-hidden-from-autoruns-exe/
 date: 2019/10/25
-modified: 2022/08/23
+modified: 2022/09/06
 logsource:
     category: registry_set
     product: windows
@@ -98,7 +98,9 @@ detection:
             - '{C973DA94-CBDF-4E77-81D1-E5B794FBD146}'
             - '{51EF1569-67EE-4AD6-9646-E726C3FFC8A2}'
     filter_onedrive:
-        Details|startswith: 'C:\Windows\system32\cmd.exe /q /c rmdir /s /q "C:\Users\'
+        Details|startswith:
+            - 'C:\Windows\system32\cmd.exe /q /c rmdir /s /q "C:\Users\'
+            - 'C:\Windows\system32\cmd.exe /q /c del /q "C:\Users\'
         Details|contains: '\AppData\Local\Microsoft\OneDrive\'
     filter_python:
         TargetObject|endswith: '\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce\{c60fd5ac-367d-4e3a-a975-f157502ac30a}'

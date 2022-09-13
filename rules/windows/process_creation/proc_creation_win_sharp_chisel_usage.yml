@@ -1,0 +1,32 @@
+title: SharpChisel Usage
+id: cf93e05e-d798-4d9e-b522-b0248dc61eaf
+status: experimental
+description: Detects usage of the Sharp Chisel via the commandline arguments
+author: Nasreddine Bencherchali
+references:
+    - https://github.com/shantanu561993/SharpChisel
+    - https://www.sentinelone.com/labs/wading-through-muddy-waters-recent-activity-of-an-iranian-state-sponsored-threat-actor/
+date: 2022/09/05
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: '\SharpChisel.exe'
+    selection_client_server:
+        CommandLine|contains:
+            - 'exe client '
+            - 'exe server '
+    selection_flags:
+        CommandLine|contains:
+            - ' --socks5'
+            - ' --reverse'
+            - ' r:'
+            - ':127.0.0.1:'
+    condition: 1 of selection_*
+falsepositives:
+    - Some flalse positives may occure with other tools with similar commandlines
+level: medium
+tags:
+    - attack.command_and_control
+    - attack.t1090.001

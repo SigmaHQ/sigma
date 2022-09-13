@@ -1,7 +1,7 @@
 title: Disable Important Scheduled Task
 id: 9ac94dc8-9042-493c-ba45-3b5e7c86b980
 status: experimental
-description: Adversaries may stop services or processes in order to conduct Data Destruction or Data Encrypted for Impact on the data stores of services like Exchange, SQL Server...etc.
+description: Detects when adversaries stop services or processes by disabling their respective schdueled tasks in order to conduct data destructive activities
 author: frack113, Nasreddine Bencherchali
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1490/T1490.md#atomic-test-8---windows---disable-the-sr-scheduled-task
@@ -19,15 +19,15 @@ detection:
             - '/Change'
             - '/TN'
             - '/disable'
-        #split to add other
         CommandLine|contains:
-            - 'Microsoft\Windows\SystemRestore\SR'
-            - 'Microsoft\Windows\Windows Defender\'
-            - 'Microsoft\Windows\BitLocker'
-            - 'Microsoft\Windows\WindowsBackup\'
-            - 'Microsoft\Windows\WindowsUpdate\'
-            - 'Microsoft\Windows\UpdateOrchestrator\'
-            - 'Windows\ExploitGuard'
+            # Add more important tasks
+            - '\Windows\SystemRestore\SR'
+            - '\Windows\Windows Defender\'
+            - '\Windows\BitLocker'
+            - '\Windows\WindowsBackup\'
+            - '\Windows\WindowsUpdate\'
+            - '\Windows\UpdateOrchestrator\'
+            - '\Windows\ExploitGuard'
     condition: all of schtasks_*
 falsepositives:
     - Unknown

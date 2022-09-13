@@ -4,7 +4,7 @@ status: test
 description: Detects the creation of an executable with a system process name in a suspicious folder
 author: Sander Wiebing, Tim Shelton
 date: 2020/05/26
-modified: 2022/07/27
+modified: 2022/09/07
 tags:
     - attack.defense_evasion
     - attack.t1036.005
@@ -31,10 +31,8 @@ detection:
             - '\explorer.exe'
             - '\taskhost.exe'
             - '\Taskmgr.exe'
-            - '\taskmgr.exe'
             - '\sihost.exe'
             - '\RuntimeBroker.exe'
-            - '\runtimebroker.exe'
             - '\smartscreen.exe'
             - '\dllhost.exe'
             - '\audiodg.exe'
@@ -42,13 +40,10 @@ detection:
     filter1:
         TargetFilename|startswith:
             - 'C:\Windows\System32\'
-            - 'C:\Windows\system32\'
-            - 'C:\Windows\SysWow64\'
             - 'C:\Windows\SysWOW64\'
-            - 'C:\Windows\winsxs\'
             - 'C:\Windows\WinSxS\'
             - '\SystemRoot\System32\'
-        Image|endswith: 
+        Image|endswith:
             - '\Windows\System32\dism.exe'
             - '\TiWorker.exe'
     filter2:
@@ -67,5 +62,6 @@ detection:
 fields:
     - Image
 falsepositives:
-    - System processes copied outside the default folder
+    - System processes copied outside their default folders for testing purposes
+    - Third party software naming their software with the same names as the processes mentioned here
 level: high
