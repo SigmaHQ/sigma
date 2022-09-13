@@ -8,6 +8,7 @@ references:
    - https://github.com/codewhitesec/SysmonEnte/
    - https://github.com/codewhitesec/SysmonEnte/blob/main/screens/1.png
 date: 2022/09/07
+modified: 2022/09/09
 tags:
    - attack.defense_evasion
    - attack.t1562.002
@@ -22,9 +23,12 @@ detection:
       SourceImage|startswith:
          - 'C:\Program Files'
          - 'C:\Windows\System32\'
+   filter_msdefender:
+      SourceImage|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+      SourceImage|endswith: '\MsMpEng.exe'
    selection_calltrace:
       CallTrace: 'Ente'
-   condition: ( selection_1 and not filter_1 ) or selection_calltrace
+   condition: ( selection_1 and not 1 of filter_* ) or selection_calltrace
 falsepositives:
    - Unknown
 level: high
