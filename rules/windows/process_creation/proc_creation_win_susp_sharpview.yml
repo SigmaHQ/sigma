@@ -1,4 +1,4 @@
-title: Suspicious Execution of SharpView Aka PowerView 
+title: Suspicious Execution of SharpView Aka PowerView
 id: b2317cfa-4a47-4ead-b3ff-297438c0bc2d
 status: experimental
 description: Adversaries may look for details about the network configuration and settings of systems they access or through information discovery of remote systems
@@ -8,14 +8,15 @@ references:
     - https://github.com/PowerShellMafia/PowerSploit/blob/dev/Recon/PowerView.ps1
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1049/T1049.md#atomic-test-4---system-discovery-using-sharpview
 date: 2021/12/10
+modified: 2022/09/13
 logsource:
     category: process_creation
     product: windows
 detection:
-    sharpview:
-        OriginalFileName: SharpView.exe
-    sharpview_methods:
-        Commandline|contains:
+    selection:
+        - OriginalFileName: SharpView.exe
+        - Image|endswith: '\SharpView.exe'
+        - Commandline|contains:
             - Get-DomainGPOUserLocalGroupMapping
             - Find-GPOLocation
             - Get-DomainGPOComputerLocalGroupMapping
@@ -142,7 +143,8 @@ detection:
             - Get-DomainPolicy
             - Get-DomainGPOLocalGroup
             - Get-NetGPOGroup
-    condition: sharpview or sharpview_methods
+            - Invoke-Sharefinder
+    condition: selection
 falsepositives:
     - Unknown
 level: high
