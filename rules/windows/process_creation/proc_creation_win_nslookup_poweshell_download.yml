@@ -1,0 +1,29 @@
+title: Nslookup PowerShell Download
+id: 1b3b01c7-84e9-4072-86e5-fc285a41ff23
+status: experimental
+description: Detects usage of powershell in conjunction with nslookup as a mean of download.
+author: Nasreddine Bencherchali
+references:
+    - https://twitter.com/Alh4zr3d/status/1566489367232651264
+date: 2022/09/05
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_cli:
+        CommandLine|contains|all:
+            - 'powershell .'
+            - 'nslookup'
+            - ' -q=txt '
+    selection_img:
+        ParentImage|endswith: '\powershell.exe'
+        Image|contains: '\nslookup.exe'
+        CommandLine|contains:
+            - ' -q=txt '
+            - ' -querytype=txt '
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely
+level: high
+tags:
+    - attack.defense_evasion

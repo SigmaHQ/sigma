@@ -1,13 +1,13 @@
-title: Reg Add Suspicious Path To AppDataLow
+title: Reg Add Suspicious Paths
 id: b7e2a8d4-74bb-4b78-adc9-3f92af2d4829
 status: experimental
-description: Detects when an adversary uses the 'AppDataLow' subkeys as a place to store data as seen in the URSNIF phishing campaign
+description: Detects when an adversary uses the reg.exe utility to add or modify new keys or subkeys
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/40b77d63808dd4f4eafb83949805636735a1fd15/atomics/T1112/T1112.md
     - https://github.com/redcanaryco/atomic-red-team/blob/40b77d63808dd4f4eafb83949805636735a1fd15/atomics/T1562.001/T1562.001.md
-author: frack113
+author: frack113, Nasreddine Bencherchali
 date: 2022/08/19
-modified: 2022/08/20
+modified: 2022/09/09
 logsource:
     category: process_creation
     product: windows
@@ -17,13 +17,16 @@ detection:
         - OriginalFileName: 'reg.exe'
     selection_path:
         CommandLine|contains:
-            - '\Software\AppDataLow\Software\Microsoft\'
-            - '\Software\Policies\Microsoft\Windows\OOBE'
-            - '\Software\Policies\Microsoft\Windows NT\CurrentVersion\Winlogon'
+            # Add more suspicious registry locations below
+            - '\AppDataLow\Software\Microsoft\'
+            - '\Policies\Microsoft\Windows\OOBE'
+            - '\Policies\Microsoft\Windows NT\CurrentVersion\Winlogon'
+            - '\CurrentControlSet\Control\SecurityProviders\WDigest'
+            - '\Microsoft\Windows Defender\'
     condition: all of selection_*
 falsepositives:
-    - Legitimate use
-level: medium
+    - Rare legitimate add to registry via cli (to these locations)
+level: high
 tags:
   - attack.defense_evasion
   - attack.t1112
