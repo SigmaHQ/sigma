@@ -1,0 +1,25 @@
+title: Disabling SEP
+id: 4a6713f6-3331-11ed-a261-0242ac120002
+status: experimental
+description: detects one of the possible scenarios for disabling symantec endpoint protection. Symantec Endpoint Protection antivirus software services incorrectly implement the protected service mechanism. As a result, the NT AUTHORITY/SYSTEM user can execute the taskkill /im command several times ccSvcHst.exe /f, thereby killing the process belonging to the service, and thus shutting down the service.
+references:
+    - internal investigation
+author: Ilya Krestinichev
+date: 2022/09/13
+tags:
+    - attack.Impair_Defenses
+    - attack.t1562
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+      ParentCommandLine|contains|all:
+         - 'taskkill'
+         - 'ccSvcHst.exe'
+    condition: selection
+fields:
+    - CommandLine
+falsepositives:
+    - Unknown
+level: critical
