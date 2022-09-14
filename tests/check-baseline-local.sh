@@ -12,6 +12,24 @@ if [[ -z $(command -v wget) ]]; then
     exit 1
 fi
 
+if [[ -z $(command -v xargs) ]]; then
+    >2& echo "xargs not found. Please install findutils."
+    >2& echo "Exiting"
+    exit 1
+fi
+
+if [[ -z $(command -v tar) ]]; then
+    >2& echo "tar not found. Please install."
+    >2& echo "Exiting"
+    exit 1
+fi
+
+if [[ -z $(command -v mktemp) ]]; then
+    >2& echo "mktemp not found. Please install coreutils."
+    >2& echo "Exiting"
+    exit 1
+fi
+
 if [[ -z $(command -v realpath) ]]; then
     >2& echo "realpath not found. Please install coreutils."
     >2& echo "Exiting"
