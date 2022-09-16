@@ -1,23 +1,24 @@
-title: Suspicious Curl File Upload
-id: 00bca14a-df4e-4649-9054-3f2aa676bc04
-status: test
+title: Suspicious Curl File Upload - Linux
+id: 00b90cc1-17ec-402c-96ad-3a8117d7a582
+related:
+    - id: 00bca14a-df4e-4649-9054-3f2aa676bc04
+      type: derived
+status: experimental
 description: Detects a suspicious curl process start the adds a file to a web request
-author: Florian Roth
+author: Nasreddine Bencherchali
 references:
     - https://twitter.com/d1r4c/status/1279042657508081664
     - https://medium.com/@petehouston/upload-files-with-curl-93064dcccc76
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1105/T1105.md#atomic-test-19---curl-upload-file
     - https://curl.se/docs/manpage.html
-date: 2020/07/03
-modified: 2022/09/15
+    - https://www.trendmicro.com/en_us/research/22/i/how-malicious-actors-abuse-native-linux-tools-in-their-attacks.html
+date: 2022/09/15
 logsource:
     category: process_creation
-    product: windows
+    product: linux
 detection:
-    selection_img:
-        - Image|endswith: '\curl.exe'
-        - Product: 'The curl executable'
-    selection_cli:
+    selection:
+        Image|endswith: '/curl'
         CommandLine|contains:
             - ' -F '
             - ' --form' # Also covers the "--form-string"
@@ -26,10 +27,7 @@ detection:
             - ' -d '
             - ' --data '
             - ' --data-' # For flags like: "--data-ascii", "--data-binary", "--data-raw", "--data-urlencode"
-    condition: all of selection*
-fields:
-    - CommandLine
-    - ParentCommandLine
+    condition: selection
 falsepositives:
     - Scripts created by developers and admins
 level: medium
