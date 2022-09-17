@@ -1,0 +1,28 @@
+title: Change Winevt Event Access Permission Via Registry
+id: 7d9263bd-dc47-4a58-bc92-5474abab390c
+description: Detects tempering with the "ChannelAccess" registry key in order to change access to windows event channel
+author: frack113
+date: 2022/09/17
+status: experimental
+references:
+    - https://app.any.run/tasks/77b2e328-8f36-46b2-b2e2-8a80398217ab/
+    - https://learn.microsoft.com/en-us/windows/win32/api/winevt/
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|startswith: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\'
+        TargetObject|endswith: '\ChannelAccess'
+        Details|contains: 
+            - '(A;;0x1;;;SY)'
+            - '(A;;0x5;;;BA)'
+            - '(A;;0x1;;;LA)'
+    condition: selection 
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1562.002
