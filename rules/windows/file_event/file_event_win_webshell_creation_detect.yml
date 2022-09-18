@@ -6,37 +6,34 @@ author: Beyu Denis, oscd.community, Tim Shelton
 references:
   - PT ESC rule and personal experience
 date: 2019/10/22
-modified: 2022/05/24
+modified: 2022/09/18
 logsource:
   product: windows
   category: file_event
 detection:
-  selection_2:
+  selection_wwwroot:
     TargetFilename|contains: '\inetpub\wwwroot\'
-  selection_3:
+  selection_ext1:
     TargetFilename|contains:
       - '.asp'
       - '.ashx'
       - '.ph'
-  selection_4:
+  selection_static:
     TargetFilename|contains:
       - '\www\'
       - '\htdocs\'
       - '\html\'
-  selection_5:
+  selection_ext2:
     TargetFilename|contains: '.ph'
-  selection_6:
-    - TargetFilename|endswith: '.jsp'
-    - TargetFilename|contains|all:
-      - '\cgi-bin\'
-      - '.pl'
   false_positive1:    # false positives when unpacking some executables in $TEMP
     TargetFilename|contains:
       - '\AppData\Local\Temp\'
       - '\Windows\Temp\'
-  false_positive2:
+  false_positive_system:
     Image: 'System' # fp : backup/restore from drivers
-  condition: not false_positive2 and ( (selection_2 and selection_3 and not false_positive1) or (selection_4 and selection_5 and not false_positive1) or (selection_6 and not false_positive1) )
+  false_positive_legitimate:
+    TargetFilename|comntains: '\xampp'
+  condition: ((selection_wwwroot and selection_ext1) or (selection_static and selection_ext2)) and not 1 of false_positive*
 falsepositives:
   - Legitimate administrator or developer creating legitimate executable files in a web application folder
 level: high

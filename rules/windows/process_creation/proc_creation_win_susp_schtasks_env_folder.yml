@@ -10,7 +10,7 @@ tags:
     - attack.t1053.005
 author: Florian Roth
 date: 2022/02/21
-modified: 2022/07/28
+modified: 2022/09/18
 logsource:
     product: windows
     category: process_creation
@@ -36,7 +36,9 @@ detection:
             - 'C:\Windows\Temp'
             - 'C:\Perflogs'
     filter_mixed:
-        - CommandLine|contains: 'update_task.xml'
+        - CommandLine|contains: 
+            - 'update_task.xml'
+            - '/Create /TN TVInstallRestore /TR'
         - ParentCommandLine|contains: 'unattended.ini'
     condition: ( all of selection1* or all of selection2* ) and not 1 of filter*
 falsepositives:
