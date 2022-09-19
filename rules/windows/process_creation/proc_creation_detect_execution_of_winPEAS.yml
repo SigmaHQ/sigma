@@ -1,0 +1,57 @@
+title: Detect Execution of winPEAS 
+id: 98b53e78-ebaf-46f8-be06-421aafd176d9
+status: experimental
+description: WinPEAS is a script that search for possible paths to escalate privileges on Windows hosts. The checks are explained on book.hacktricks.xyz
+author: Georg Lauenstein
+date: 2022/09/19
+references:
+     - https://github.com/carlospolop/PEASS-ng
+     - https://book.hacktricks.xyz/windows-hardening/windows-local-privilege-escalation
+tags:
+    - attack.privilege_escalation
+    - attack.t1082
+    - attack.t1087
+    - attack.t1046
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+            - '\winPEASany.exe'
+            - '\winPEASany_ofs.exe'
+            - '\winPEASx64.exe'
+            - '\winPEASx64_ofs.exe'
+            - '\winPEASx86.exe'
+            - '\winPEASx86_ofs.exe'
+        - OriginalFileName:
+            - 'winPEAS.exe' # always the same
+    selection_cmd_args:
+        - CommandLine|contains:
+            - 'domain'         # Enumerate domain information
+            - 'systeminfo'     # Search system information
+            - 'userinfo'       # Search user information
+            - 'processinfo'    # Search processes information
+            - 'serviceinfo'    # Search services information
+            - 'applicationsinfo' # Search installed applications information
+            - 'networkinfo'   # Search network information
+            - 'windowscreds'  # Search windows credentials
+            - 'browserinfo '  # Search browser information
+            - 'filesinfo '    # Search generic files that can contains credentials
+            - 'fileanalysis'  # Search specific files that can contains credentials and for regexes inside files
+            - 'eventsinfo'    # Display interesting events information
+    filter_sysinfo:
+        - Image|endswith:
+            - '\systeminfo.exe' # due to option "systeminfo" via winPEAS
+        - OriginalFileName:
+            - 'sysinfo.exe'
+    condition: (selection_img or selection_cmd_args) and not filter_sysinfo
+fields:
+    - Image
+    - User
+    - CommandLine
+    - ParentCommandLine
+    - CurrentDirectory
+falsepositives:
+    - Pentesting
+level: high
