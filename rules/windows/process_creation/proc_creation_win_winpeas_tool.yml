@@ -16,7 +16,7 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_img:
+    winpeas_basic:
         - Image|endswith:
             - '\winPEASany.exe'
             - '\winPEASany_ofs.exe'
@@ -25,7 +25,7 @@ detection:
             - '\winPEASx86.exe'
             - '\winPEASx86_ofs.exe'
         - OriginalFileName: 'winPEAS.exe' # always the same
-    selection_cmd_args:
+    winpeas_option:
         - CommandLine|contains:
             - 'systeminfo'     # Search system information
             - 'userinfo'       # Search user information
@@ -41,7 +41,7 @@ detection:
     filter_sysinfo:
         - Image|endswith: '\systeminfo.exe' # due to option "systeminfo" via winPEAS
         - OriginalFileName: 'sysinfo.exe'
-    condition: (selection_img or selection_cmd_args) and not filter_sysinfo
+    condition: 1 of winpeas_* and not filter_sysinfo
 fields:
     - Image
     - User
