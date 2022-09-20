@@ -146,6 +146,18 @@ OS="Windows 11"
 pids+=($!)
 PID2OS[$!]=$OS
 
+# Windows 2022.0.20348 Azure
+OS="Windows 2022.0.20348 Azure"
+{
+    wget --quiet https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win2022-0-20348-azure.tgz
+    tar xzf win2022-0-20348-azure.tgz
+    echo "  Checking for Sigma matches in $OS baseline (this takes around 3 minutes)"
+    ./evtx-sigma-checker --log-source "${SIGMA}"/tools/config/thor.yml --evtx-path win2022-0-20348-azure/ --rule-path windows/ > findings-win2022-0-20348-azure.json
+    echo "  Finished Checking for Sigma matches in $OS baseline"
+}&
+pids+=($!)
+PID2OS[$!]=$OS
+
 # Sync with all background jobs
 for pid in ${pids[*]}; do
     echo "===>  Waiting for PID $pid / ${PID2OS[$pid]}"
@@ -171,6 +183,9 @@ echo "Windows 2022:"
 echo
 echo "Windows 2022 AD:"
 "${SIGMA}"/.github/workflows/matchgrep.sh findings-win2022-ad.json "${SIGMA}"/.github/workflows/known-FPs.csv
+echo
+echo "Windows 2022.0.20348 Azure:"
+"${SIGMA}"/.github/workflows/matchgrep.sh findings-win2022-0-20348-azure.json "${SIGMA}"/.github/workflows/known-FPs.csv
 
 echo
 read -p  "Removing temporary directory ${TMP}. Press Enter to continue." -s
