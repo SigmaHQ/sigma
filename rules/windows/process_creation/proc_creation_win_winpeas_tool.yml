@@ -5,8 +5,8 @@ description: WinPEAS is a script that search for possible paths to escalate priv
 author: Georg Lauenstein
 date: 2022/09/19
 references:
-     - https://github.com/carlospolop/PEASS-ng
-     - https://book.hacktricks.xyz/windows-hardening/windows-local-privilege-escalation
+    - https://github.com/carlospolop/PEASS-ng
+    - https://book.hacktricks.xyz/windows-hardening/windows-local-privilege-escalation
 tags:
     - attack.privilege_escalation
     - attack.t1082
@@ -17,16 +17,15 @@ logsource:
     product: windows
 detection:
     winpeas_basic:
-          Image|endswith:
+        Image|endswith:
             - '\winPEASany.exe'
             - '\winPEASany_ofs.exe'
             - '\winPEASx64.exe'
             - '\winPEASx64_ofs.exe'
             - '\winPEASx86.exe'
             - '\winPEASx86_ofs.exe'
-          OriginalFileName: 'winPEAS.exe' # always the same
     winpeas_option:
-          CommandLine|contains:
+        CommandLine|contains:
             - 'systeminfo'     # Search system information
             - 'userinfo'       # Search user information
             - 'processinfo'    # Search processes information
@@ -39,8 +38,7 @@ detection:
             - 'fileanalysis'  # Search specific files that can contains credentials and for regexes inside files
             - 'eventsinfo'    # Display interesting events information
     filter_sysinfo:
-          Image|endswith: '\systeminfo.exe' # due to option "systeminfo" via winPEAS
-          OriginalFileName: 'sysinfo.exe'
+        Image|endswith: '\systeminfo.exe' # due to option "systeminfo" via winPEAS
     condition: 1 of winpeas_* and not filter_sysinfo
 fields:
     - Image
@@ -49,5 +47,5 @@ fields:
     - ParentCommandLine
     - CurrentDirectory
 falsepositives:
-    - Should not be any as administrators do not use this tool
+    - Unlikely
 level: high
