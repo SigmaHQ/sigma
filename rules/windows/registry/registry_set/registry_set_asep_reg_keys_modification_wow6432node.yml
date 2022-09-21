@@ -12,7 +12,7 @@ references:
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
     - https://oddvar.moe/2018/03/21/persistence-using-runonceex-hidden-from-autoruns-exe/
 date: 2019/10/25
-modified: 2022/08/05
+modified: 2022/09/21
 logsource:
     category: registry_set
     product: windows
@@ -72,6 +72,9 @@ detection:
         Image|endswith: '\OfficeClickToRun.exe'
     filter_ms_win_desktop_runtime:
         Details|startswith: '"C:\ProgramData\Package Cache\{d21a4f20-968a-4b0c-bf04-a38da5f06e41}\windowsdesktop-runtime-'
+    filter_vcredist:
+        Image|endswith: '\VC_redist.x64.exe'
+        Details|endswith: '}\VC_redist.x64.exe" /burn.runonce'
     condition: all of wow_current_version_* and not 1 of filter_*
 fields:
     - SecurityID
