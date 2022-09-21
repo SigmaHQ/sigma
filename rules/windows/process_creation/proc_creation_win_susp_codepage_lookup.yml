@@ -7,7 +7,7 @@ references:
     - https://thedfirreport.com/2022/04/04/stolen-images-campaign-ends-in-conti-ransomware/
     - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/chcp
 date: 2022/02/21
-modified: 2022/04/21
+modified: 2022/09/21
 logsource:
     category: process_creation
     product: windows
@@ -22,12 +22,15 @@ detection:
             - 'chcp'
             - 'chcp '
             - 'chcp  '
-    condition: selection
+    filter_anaconda:
+        # This filter will only work with aurora agent enriched data as Sysmon EID 1 and EID 4688 from event log both do not contain GrandparentCommandLine field
+        GrandparentCommandLine|contains: '/c C:\ProgramData\Anaconda3'
+    condition: selection and not 1 of filter_*
 fields:
     - CommandLine
     - ParentCommandLine
 falsepositives:
-    - Unknown
+    - During Anaconda update the 'conda.exe' process will eventually launch the command described in the detection section
 level: high
 tags:
     - attack.discovery
