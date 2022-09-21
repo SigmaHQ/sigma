@@ -6,26 +6,27 @@ date: 2020/05/03
 modified: 2021/12/05
 author: Patrick St. John, OTR (Open Threat Research)
 tags:
-  - attack.defense_evasion
-  - attack.t1027.002
+    - attack.defense_evasion
+    - attack.t1027.002
 references:
-  - https://www.py2exe.org/
-  - https://unit42.paloaltonetworks.com/unit-42-technical-analysis-seaduke/
+    - https://www.py2exe.org/
+    - https://unit42.paloaltonetworks.com/unit-42-technical-analysis-seaduke/
 logsource:
-  product: windows
-  category: image_load
+    product: windows
+    category: image_load
 detection:
-  selection:
-    Description: 'Python Core'
-  filter:
-    - Image|contains: 
-      - 'Python'  # FPs with python38.dll, python.exe etc.
-    - Image|startswith:
-      - 'C:\Program Files\'
-      - 'C:\Program Files (x86)\'
-  condition: selection and not filter
+    selection:
+        Description: 'Python Core'
+    filter:
+        - Image|contains:
+            - 'Python'  # FPs with python38.dll, python.exe etc.
+        - Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    condition: selection and not filter
 fields:
-  - Description
+    - Description
 falsepositives:
-  - Legit Py2Exe Binaries
+    - Legit Py2Exe Binaries
+    - Known false positive caused with anaconda installation/update
 level: medium

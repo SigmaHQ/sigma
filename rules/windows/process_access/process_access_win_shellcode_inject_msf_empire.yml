@@ -4,6 +4,7 @@ status: experimental
 description: Detects shellcode injection by Metasploit's migrate and Empire's psinject
 author: Bhabesh Raj
 date: 2022/03/11
+modified: 2022/09/21
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
@@ -13,11 +14,38 @@ logsource:
     product: windows
 detection:
     selection:
-        GrantedAccess: 
+        GrantedAccess:
             - '0x147a'
             - '0x1f3fff'
         CallTrace|contains: 'UNKNOWN'
-    condition: selection
+    filter_dell_folders:
+        # If dell software is installed we get matches like these
+        # Example 1:
+        #   SourceImage: C:\Program Files\Dell\SupportAssistAgent\bin\SupportAssistAgent.exe
+        #   TargetImage: C:\Program Files\Dell\TechHub\Dell.TechHub.exe
+        #   GrantedAccess: 0x1F3FFF
+        # Example 2:
+        #   SourceImage: C:\Program Files (x86)\Dell\UpdateService\DCF\Dell.DCF.UA.Bradbury.API.SubAgent.exe
+        #   TargetImage: C:\Program Files\Dell\TechHub\Dell.TechHub.exe
+        #   GrantedAccess: 0x1F3FFF
+        # Example 3:
+        #   SourceImage: C:\Program Files\Dell\TechHub\Dell.TechHub.exe
+        #   TargetImage: C:\Program Files (x86)\Dell\UpdateService\DCF\Dell.DCF.UA.Bradbury.API.SubAgent.exe
+        #   GrantedAccess: 0x1F3FFF
+        SourceImage|startswith:
+            - 'C:\Program Files\Dell\'
+            - 'C:\Program Files (x86)\Dell\'
+        TargetImage|startswith:
+            - 'C:\Program Files\Dell\'
+            - 'C:\Program Files (x86)\Dell\'
+        GrantedAccess: 0x1F3FFF
+        CallTrace|startswith: 'C:\Windows\System32\ntdll.dll'
+    filter_dell_specifc:
+        SourceImage: C:\Program Files (x86)\Dell\UpdateService\ServiceShell.exe
+        TargetImage: C:\Windows\Explorer.EXE
+        GrantedAccess: 0x1F3FFF
+        CallTrace|startswith: 'C:\Windows\System32\ntdll.dll'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Empire's csharp_exe payload uses 0x1f3fff for process enumeration as well
 level: high
