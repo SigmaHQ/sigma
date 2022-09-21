@@ -6,6 +6,7 @@ references:
     - https://hijacklibs.net/ # For list of DLLs that could be sideloaded (search for dlls mentioned here in there)
 author: Nasreddine Bencherchali, Wietze Beukema (project and research)
 date: 2022/08/17
+modified: 2022/09/21
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -19,10 +20,13 @@ detection:
     # Bitdefender
     selection_bitdefender:
         ImageLoaded|endswith: '\log.dll'
-    filter_bitdefender:
+    filter_log_dll_bitdefender:
         ImageLoaded|startswith:
             - 'C:\Program Files\Bitdefender Antivirus Free\'
             - 'C:\Program Files (x86)\Bitdefender Antivirus Free\'
+    filter_log_dll_other:
+        - ImageLoaded: 'C:\Program Files\Dell\SARemediation\plugin\log.dll'
+        - ImageLoaded|startswith: 'C:\Program Files\Canon\MyPrinter\'
     # F-Secure
     selection_fsecure:
         ImageLoaded|endswith: '\qrt.dll'
@@ -40,9 +44,9 @@ detection:
         ImageLoaded|startswith:
             - 'C:\Program Files\McAfee\'
             - 'C:\Program Files (x86)\McAfee\'
-    condition: (selection_bitdefender and not filter_bitdefender) or (selection_fsecure and not filter_fsecure) or (selection_mcafee and not filter_mcafee)
+    condition: (selection_bitdefender and not 1 of filter_log_dll_*) or (selection_fsecure and not filter_fsecure) or (selection_mcafee and not filter_mcafee)
 falsepositives:
     - Applications that load the same dlls mentioned in the detection section. Investigate them and filter them out if a lot FPs are caused.
-    - Dell SARemediation pulgin folder (C:\Program Files\Dell\SARemediation\plugin\log.dll) is known to contain the 'log.dll' file.
+    - Dell SARemediation plugin folder (C:\Program Files\Dell\SARemediation\plugin\log.dll) is known to contain the 'log.dll' file.
     - The Canon MyPrinter folder 'C:\Program Files\Canon\MyPrinter\' is known to contain the 'log.dll' file
 level: medium
