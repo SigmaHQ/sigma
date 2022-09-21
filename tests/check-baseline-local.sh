@@ -113,6 +113,7 @@ PID2OS[$!]=$OS
 # Windows 10
 OS="Windows 10"
 {
+    sleep 10
     wget --quiet https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win10-client.tgz
     tar xzf win10-client.tgz
     echo "  Checking for Sigma matches in $OS baseline (this takes around 2 minutes)"
@@ -125,6 +126,7 @@ PID2OS[$!]=$OS
 # Windows 2022 AD
 OS="Windows 2022 AD"
 {
+    sleep 20
     wget --quiet https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win2022-ad.tgz
     tar xzf win2022-ad.tgz
     echo "  Checking for Sigma matches in $OS baseline (this takes around 2 minutes)"
@@ -137,6 +139,7 @@ PID2OS[$!]=$OS
 # Windows 11
 OS="Windows 11"
 {
+    sleep 30
     wget --quiet https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win11-client.tgz
     tar xzf win11-client.tgz
     echo "  Checking for Sigma matches in $OS baseline (this takes around 3 minutes)"
@@ -149,6 +152,7 @@ PID2OS[$!]=$OS
 # Windows 2022.0.20348 Azure
 OS="Windows 2022.0.20348 Azure"
 {
+    sleep 40
     wget --quiet https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win2022-0-20348-azure.tgz
     tar xzf win2022-0-20348-azure.tgz
     echo "  Checking for Sigma matches in $OS baseline (this takes around 3 minutes)"
