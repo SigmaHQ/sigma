@@ -6,7 +6,7 @@ author: Alejandro Ortuno, oscd.community
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1087.001/T1087.001.md
 date: 2020/10/08
-modified: 2022/07/07
+modified: 2022/09/15
 logsource:
     category: process_creation
     product: linux
@@ -16,9 +16,14 @@ detection:
     selection_2:
         CommandLine|contains: '''x:0:'''
     selection_3:
-        Image|endswith: '/cat'
+        Image|endswith:
+            - '/cat'
+            - '/head'
+            - '/tail'
+            - '/more'
         CommandLine|contains:
             - '/etc/passwd'
+            - '/etc/shadow'
             - '/etc/sudoers'
     selection_4:
         Image|endswith: '/id'

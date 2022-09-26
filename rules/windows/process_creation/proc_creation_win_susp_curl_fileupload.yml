@@ -9,7 +9,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1105/T1105.md#atomic-test-19---curl-upload-file
     - https://curl.se/docs/manpage.html
 date: 2020/07/03
-modified: 2022/01/22
+modified: 2022/09/15
 logsource:
     category: process_creation
     product: windows
@@ -20,11 +20,12 @@ detection:
     selection_cli:
         CommandLine|contains:
             - ' -F '
-            - ' --form '
+            - ' --form' # Also covers the "--form-string"
             - ' -T '
             - ' --upload-file '
             - ' -d '
             - ' --data '
+            - ' --data-' # For flags like: "--data-ascii", "--data-binary", "--data-raw", "--data-urlencode"
     condition: all of selection*
 fields:
     - CommandLine

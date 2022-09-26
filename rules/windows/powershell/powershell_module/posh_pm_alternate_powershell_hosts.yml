@@ -3,10 +3,10 @@ id: 64e8e417-c19a-475a-8d19-98ea705394cc
 description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
 status: test
 date: 2019/08/11
-modified: 2022/09/18
+modified: 2022/09/20
 author: Roberto Rodriguez @Cyb3rWard0g
 references:
-    - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190815181010.html
+    - https://threathunterplaybook.com/hunts/windows/190610-PwshAlternateHosts/notebook.html
 tags:
     - attack.execution
     - attack.t1059.001
@@ -26,7 +26,9 @@ detection:
     filter_winrm:
         ContextInfo|contains: 'C:\Windows\system32\wsmprovhost.exe -Embedding'
     filter_help_update:
-        Payload|contains: 'Update-Help'
+        Payload|contains:
+            - 'Update-Help'
+            - 'Failed to update Help for the module'
     condition: selection and not 1 of filter*
 falsepositives:
     - Programs using PowerShell directly without invocation of a dedicated interpreter
