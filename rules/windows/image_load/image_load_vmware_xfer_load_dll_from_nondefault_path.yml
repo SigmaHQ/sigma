@@ -1,0 +1,24 @@
+title: VMware Xfer Loading DLL from Nondefault Path
+id: 9313dc13-d04c-46d8-af4a-a930cc55d93b
+status: experimental
+description: Detects loading of a DLL by the VMware Xfer utility from the non-default directory which may be an attempt to sideload arbitrary DLL
+author: Nasreddine Bencherchali
+date: 2022/08/02
+references:
+    - https://www.sentinelone.com/labs/lockbit-ransomware-side-loads-cobalt-strike-beacon-with-legitimate-vmware-utility/
+tags:
+    - attack.defense_evasion
+    - attack.t1574.002
+logsource:
+    product: windows
+    category: image_load
+detection:
+    selection:
+        Image|endswith: '\VMwareXferlogs.exe'
+        ImageLoaded|endswith: '\glib-2.0.dll'
+    filter: # VMware might be installed in another path so update the rule accordingly
+        ImageLoaded|startswith: 'C:\Program Files\VMware\'
+    condition: selection and not filter
+falsepositives:
+    - Unlikely
+level: high

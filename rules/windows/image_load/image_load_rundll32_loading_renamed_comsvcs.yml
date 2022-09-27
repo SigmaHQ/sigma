@@ -1,0 +1,31 @@
+title: Rundll32 Loading Renamed Comsvcs DLL
+id: 8cde342c-ba48-4b74-b615-172c330f2e93
+status: experimental
+description: Detects rundll32 loading a renamed comsvcs.dll to dump process memory
+author: Nasreddine Bencherchali
+date: 2022/08/14
+references:
+    - https://twitter.com/sbousseaden/status/1555200155351228419
+tags:
+    - attack.credential_access
+    - attack.defense_evasion
+    - attack.t1003.001
+logsource:
+    product: windows
+    category: image_load
+detection:
+    selection:
+        Image|endswith: '\rundll32.exe'
+        Hashes|contains:
+            # Add more hashes for other windows verions
+            - IMPHASH=eed93054cb555f3de70eaa9787f32ebb # Windows 11 21H2 x64
+            - IMPHASH=5e0dbdec1fce52daae251a110b4f309d # Windows 10 1607
+            - IMPHASH=eadbccbb324829acb5f2bbe87e5549a8 # Windows 10 1809
+            - IMPHASH=407ca0f7b523319d758a40d7c0193699 # Windows 10 2004 x64
+            - IMPHASH=281d618f4e6271e527e6386ea6f748de # Windows 10 2004 x86
+    filter:
+        ImageLoaded|endswith: '\comsvcs.dll'
+    condition: selection and not filter
+falsepositives:
+    - Unlikely
+level: high

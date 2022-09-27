@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # A Sigma to SIEM converter
 # Copyright 2016-2017 Thomas Patzke, Florian Roth
-
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -18,7 +17,7 @@
 import sys
 import argparse
 import yaml
-#import ruamel.yaml
+import ruamel.yaml
 import json
 import pathlib
 import itertools
@@ -37,6 +36,7 @@ import codecs
 import copy
 import time
 import datetime
+from termcolor import colored
 
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
 
@@ -63,6 +63,12 @@ ERR_FULL_FIELD_MATCH    = 90
 
 # Allowed fields in output
 allowed_fields = ["title", "id", "status", "description", "author", "references", "fields", "falsepositives", "level", "tags", "filename"]
+
+deprecation_warning_message = colored("Sigmac will be deprecated by the end of 2022",
+                                      "red") + " in favour of sigma-cli and pySigma. Please " +  colored("stop contributing backends", "red") + \
+                                               " to this tool. Limited support is offered until the end of 2023, " \
+                                               "especially for backends that haven't been migrated yet.\n "
+
 
 def alliter(path):
     for sub in path.iterdir():
@@ -96,7 +102,7 @@ class ActionBackendHelp(argparse.Action):
 def set_argparser():
     """Sets up and parses the command line arguments for Sigmac.
     Returns the argparser"""
-    argparser = argparse.ArgumentParser(description="Convert Sigma rules into SIEM signatures.")
+    argparser = argparse.ArgumentParser(description="Convert Sigma rules into SIEM signatures.\n" + deprecation_warning_message, formatter_class=argparse.RawTextHelpFormatter)
     argparser.add_argument("--recurse", "-r", action="store_true", help="Use directory as input (recurse into subdirectories is not implemented yet)")
     argparser.add_argument("--filter", "-f", help="""
     Define comma-separated filters that must match (AND-linked) to rule to be processed.
@@ -109,14 +115,14 @@ def set_argparser():
     Multiple log source specifications are AND linked.
     Special filter:
     inlastday=X rule create or modified in the last X days period
-    tlp=valid_tlp if rule have no tlp set to WHITE 
+    tlp=valid_tlp if rule have no tlp set to WHITE
             """)
     argparser.add_argument("--target", "-t", choices=backends.getBackendDict().keys(), help="Output target format")
     argparser.add_argument("--lists", "-l", action="store_true", help="List available output target formats and configurations")
     argparser.add_argument("--lists-files-after-date", "-L",help="List yml files  which is modified/created after the date (Example of the date: 2022/02/01).")
     argparser.add_argument("--config", "-c", action="append", help="Configurations with field name and index mapping for target environment. Multiple configurations are merged into one. Last config is authoritative in case of conflicts.")
     argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix (if end with a '_','/' or '\\')")
-    argparser.add_argument("--output-fields", "-of", help="""Enhance your output with additional fields from the Sigma rule (not only the converted rule itself). 
+    argparser.add_argument("--output-fields", "-of", help="""Enhance your output with additional fields from the Sigma rule (not only the converted rule itself).
     Select the fields you want by providing their list delimited with commas (no space). Only work with the '--output-format' option and with 'json' or 'yaml' value.
     available additional fields : title, id, status, description, author, references, fields, falsepositives, level, tags.
     This option do not have any effect for backends that already format output : elastalert, kibana, splukxml etc. """)
@@ -132,7 +138,7 @@ def set_argparser():
     argparser.add_argument("--verbose", "-v", action="store_true", help="Be verbose")
     argparser.add_argument("--debug", "-D", action="store_true", help="Debugging output")
     argparser.add_argument("inputs", nargs="*", help="Sigma input files ('-' for stdin)")
-    
+
     return argparser
 
 def list_backends(debug):
@@ -201,6 +207,7 @@ def main():
         sys.exit(0)
     elif len(cmdargs.inputs) == 0:
         print("Nothing to do!")
+        print(deprecation_warning_message)
         argparser.print_usage()
         sys.exit(0)
 
@@ -264,7 +271,7 @@ def main():
                 exit(ERR_CONFIG_PARSING)
 
     if cmdargs.output_fields:
-        if cmdargs.output_format: 
+        if cmdargs.output_format:
             output_fields_rejected = [field for field in cmdargs.output_fields.split(",") if field not in allowed_fields] # Not allowed fields
             if output_fields_rejected:
                     print("These fields are not allowed (check help for allow field list) : %s" % (", ".join(output_fields_rejected)), file=sys.stderr)
@@ -277,7 +284,7 @@ def main():
 
     backend_options = BackendOptions(cmdargs.backend_option, cmdargs.backend_config)
     backend = backend_class(sigmaconfigs, backend_options)
-    
+
     filename_ext = cmdargs.output_extention
     filename = cmdargs.output
     fileprefix = None
@@ -289,7 +296,7 @@ def main():
                 filename_ext = '.' + filename_ext
         else:
             filename_ext = '.rule'
-    
+
         if filename[-1:] in ['_','/','\\']:
             fileprefix = filename
         else:
@@ -321,7 +328,7 @@ def main():
 
             nb_result = len(list(copy.deepcopy(results)))
             inc_filenane = None if nb_result < 2 else 0
-            
+
             newline_separator = '\0' if cmdargs.print0 else '\n'
 
             results = list(results) # Since results is an iterator and used twice we convert it a list
@@ -338,7 +345,7 @@ def main():
                 elif  not fileprefix == None and inc_filenane == None: # a simple yml
                     try:
                         filename = fileprefix + str(sigmafile.name)
-                        filename = filename.replace('.yml',filename_ext) 
+                        filename = filename.replace('.yml',filename_ext)
                         out = open(filename, "w", encoding='utf-8')
                     except (IOError, OSError) as e:
                         print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
@@ -368,7 +375,7 @@ def main():
                         fileprefix = None  # no need to open the same file many time
                     except (IOError, OSError) as e:
                         print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
-                        exit(ERR_OUTPUT) 
+                        exit(ERR_OUTPUT)
 
         except OSError as e:
             print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
@@ -429,16 +436,16 @@ def main():
             if not cmdargs.ignore_backend_errors:
                 error = ERR_FULL_FIELD_MATCH
                 if not cmdargs.defer_abort:
-                    sys.exit(error)                
+                    sys.exit(error)
         finally:
             try:
                 f.close()
             except:
                 pass
-        
+
         if success :
-            logger.debug("* Convertion Sigma input %s SUCCESS" % (sigmafile)) 
- 
+            logger.debug("* Convertion Sigma input %s SUCCESS" % (sigmafile))
+
     result = backend.finalize()
     if result:
         print(result, file=out)
@@ -446,8 +453,8 @@ def main():
     if cmdargs.output_fields:
         if cmdargs.output_format == 'json':
             print(json.dumps(output_array, indent=4, ensure_ascii=False), file=out)
-        #elif cmdargs.output_format == 'yaml':
-        #    print(ruamel.yaml.round_trip_dump(output_array), file=out)
+        elif cmdargs.output_format == 'yaml':
+            print(ruamel.yaml.round_trip_dump(output_array), file=out)
 
     out.close()
 

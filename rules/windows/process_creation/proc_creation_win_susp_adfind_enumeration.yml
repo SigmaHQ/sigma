@@ -1,0 +1,36 @@
+title: Suspicious AdFind Enumeration
+id: 455b9d50-15a1-4b99-853f-8d37655a4c1b
+status: experimental
+description: Detects the execution of a AdFind for enumeration based on it's commadline flags
+references:
+    - https://www.joeware.net/freetools/tools/adfind/
+    - https://social.technet.microsoft.com/wiki/contents/articles/7535.adfind-command-examples.aspx
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1087.002/T1087.002.md
+author: frack113
+date: 2021/12/13
+modified: 2022/08/12
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_password: #Listing password policy
+        CommandLine|contains:
+            - lockoutduration
+            - lockoutthreshold
+            - lockoutobservationwindow
+            - maxpwdage
+            - minpwdage
+            - minpwdlength
+            - pwdhistorylength
+            - pwdproperties
+    selection_enum_ad: #Enumerate Active Directory Admins
+        CommandLine|contains: '-sc admincountdmp'
+    selection_enum_exchange: #Enumerate Active Directory Exchange AD Objects
+        CommandLine|contains: '-sc exchaddresses'
+    condition: 1 of selection_*
+falsepositives:
+    - Administrative activity
+level: high
+tags:
+    - attack.discovery
+    - attack.t1087.002

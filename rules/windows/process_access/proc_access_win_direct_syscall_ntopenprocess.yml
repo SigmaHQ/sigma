@@ -6,7 +6,7 @@ references:
 status: experimental
 author: Christian Burkard, Tim Shelton
 date: 2021/07/28
-modified: 2022/06/20
+modified: 2022/09/20
 logsource:
     category: process_access
     product: windows
@@ -18,7 +18,8 @@ detection:
         SourceImage: 'C:\Windows\Explorer.EXE'
     falsepositive2:
         TargetImage: 'C:\Program Files (x86)\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe'
-        SourceImage: 'C:\Program Files (x86)\Microsoft\Temp\*\MicrosoftEdgeUpdate.exe'
+        SourceImage|startswith: 'C:\Program Files (x86)\Microsoft\Temp\'
+        SourceImage|endswith: '\MicrosoftEdgeUpdate.exe'
     falsepositive3:
         TargetImage|endswith: 'vcredist_x64.exe'
         SourceImage|endswith: 'vcredist_x64.exe'
@@ -31,6 +32,26 @@ detection:
     falsepositive6:
         TargetImage|endswith: 'C:\Program Files\Mozilla Firefox\firefox.exe'
         SourceImage|endswith: 'C:\Program Files\Mozilla Firefox\firefox.exe'
+    falsepositive7: # VsCode
+        TargetImage|endswith: '\AppData\Local\Programs\Microsoft VS Code\Code.exe'
+        SourceImage|endswith: '\AppData\Local\Programs\Microsoft VS Code\Code.exe'
+    falsepositive8: # Google Chrome
+        TargetImage|endswith: 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+        SourceImage|endswith: 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+    falsepositive9: # Google Chrome Update
+        TargetImage|endswith: 'C:\Program Files (x86)\Google\Update\GoogleUpdate.exe'
+        SourceImage|endswith: 'C:\Program Files (x86)\Google\Update\GoogleUpdate.exe'
+    falsepositive10: # MS Teams
+        TargetImage|endswith: '\AppData\Local\Microsoft\Teams\current\Teams.exe'
+        SourceImage|endswith: '\AppData\Local\Microsoft\Teams\current\Teams.exe'
+    falsepositives11:
+        TargetImage: 'C:\Windows\System32\backgroundTaskHost.exe'
+        SourceImage: 'C:\Windows\System32\backgroundTaskHost.exe'
+    falsepositives12:
+        TargetImage: 'C:\Program Files (x86)\CCleaner Browser\Application\CCleanerBrowser.exe'
+        SourceImage: 'C:\Program Files (x86)\CCleaner Browser\Application\CCleanerBrowser.exe'
+    falsepositive_kerneltrace_edge:  # Cases in which the CallTrace is just e.g. 'UNKNOWN(19290435374)' from Microsoft-Windows-Kernel-Audit-API-Calls provider
+        Provider_Name: 'Microsoft-Windows-Kernel-Audit-API-Calls'
     condition: selection and not 1 of falsepositive*
 falsepositives:
     - Unknown

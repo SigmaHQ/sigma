@@ -8,7 +8,7 @@ references:
   - https://www.pinvoke.net/default.aspx/dbghelp/MiniDumpWriteDump.html
   - https://medium.com/@fsx30/bypass-edrs-memory-protection-introduction-to-hooking-2efb21acffd6
 date: 2019/10/27
-modified: 2022/02/21
+modified: 2022/09/15
 logsource:
   category: image_load
   product: windows
@@ -35,7 +35,7 @@ detection:
       - '\cscript.exe'
       - '\mshta.exe'
       # - '\regsvr32.exe'  triggered by installing common software
-      - '\schtasks.exe'
+      # - '\schtasks.exe'  triggered by installing software
       - '\dnx.exe'
       - '\regsvcs.exe'
       - '\sc.exe'
@@ -52,10 +52,12 @@ detection:
       - '-k UnistackSvcGroup -s WpnUserService'
   filter2:   # Not available in Sysmon, but in Aurora
     CommandLine:
-      - 'C:\WINDOWS\winsxs\*\TiWorker.exe -Embedding'
       - 'C:\Windows\system32\svchost.exe -k netsvcs -p -s wuauserv'
       - 'C:\Windows\System32\svchost.exe -k WerSvcGroup'
-  condition: (signedprocess or unsignedprocess) and not filter1 and not filter2
+  filter3:
+    CommandLine|startswith: 'C:\WINDOWS\winsxs\'
+    CommandLine|endswith: '\TiWorker.exe -Embedding'
+  condition: (signedprocess or unsignedprocess) and not 1 of filter*
 fields:
   - ComputerName
   - User

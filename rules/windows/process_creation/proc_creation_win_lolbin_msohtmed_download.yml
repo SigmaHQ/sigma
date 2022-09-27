@@ -1,0 +1,28 @@
+title: Download Arbitrary Files Via MSOHTMED.EXE
+id: 459f2f98-397b-4a4a-9f47-6a5ec2f1c69d
+description: Detects usage of "MSOHTMED" to download arbitrary files
+status: experimental
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/pull/238/files
+author: Nasreddine Bencherchali
+date: 2022/08/19
+tags:
+    - attack.defense_evasion
+    - attack.execution
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\MSOHTMED.exe'
+        - OriginalFileName: 'MsoHtmEd.exe'
+    selection_cli:
+        CommandLine|contains:
+            - 'http://'
+            - 'https://'
+            - 'ftp://'
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: medium

@@ -1,0 +1,26 @@
+title: Privileged Account Creation
+id: f7b5b004-dece-46e4-a4a5-f6fd0e1c6947
+status: experimental
+description: Detects when a new admin is created.
+author: Mark Morowczynski '@markmorow', Yochana Henderson, '@Yochana-H', Tim Shelton
+date: 2022/08/11
+modified: 2022/08/16
+references:
+    - https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/security-operations-privileged-accounts#changes-to-privileged-accounts
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection:
+        properties.message|contains|all:
+            - Add user
+            - Add member to role
+        Status: Success
+    condition: selection
+falsepositives:
+     - A legitimate new admin account being created
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1078
+level: medium

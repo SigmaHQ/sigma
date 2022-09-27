@@ -1,0 +1,21 @@
+title: DiagTrackEoP Default Named Pipe
+id: 1f7025a6-e747-4130-aac4-961eb47015f1
+status: experimental
+description: Detects creation of default named pipe used by the DiagTrackEoP POC
+author: Nasreddine Bencherchali
+references:
+    - https://github.com/Wh04m1001/DiagTrackEoP/blob/3a2fc99c9700623eb7dc7d4b5f314fd9ce5ef51f/main.cpp#L22
+date: 2022/08/03
+logsource:
+    product: windows
+    category: pipe_created
+    definition: 'Note that you have to configure logging for Named Pipe Events in Sysmon config (Event ID 17 and Event ID 18). The basic configuration is in popular sysmon configuration (https://github.com/SwiftOnSecurity/sysmon-config), but it is worth verifying. You can also use other repo, e.g. https://github.com/Neo23x0/sysmon-config, https://github.com/olafhartong/sysmon-modular. How to test detection? You can check powershell script from this site https://svch0st.medium.com/guide-to-named-pipes-and-hunting-for-cobalt-strike-pipes-dc46b2c5f575'
+detection:
+    selection:
+        PipeName|contains: 'thisispipe' # Based on source code
+    condition: selection
+falsepositives:
+    - Unlikely
+level: critical
+tags:
+    - attack.privilege_escalation

@@ -11,7 +11,7 @@ references:
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 date: 2019/10/25
-modified: 2022/07/27
+modified: 2022/09/20
 logsource:
     category: registry_set
     product: windows
@@ -19,7 +19,7 @@ detection:
     system_control_base:
         EventType: SetValue
         TargetObject|contains: '\SYSTEM\CurrentControlSet\Control'
-    system_control:
+    system_control_keys:
         TargetObject|contains:
             - '\Terminal Server\WinStations\RDP-Tcp\InitialProgram'
             - '\Terminal Server\Wds\rdpwd\StartupPrograms'
@@ -45,7 +45,14 @@ detection:
         User|contains: # covers many language settings
             - 'AUTHORI'
             - 'AUTORI'
-    condition: system_control_base and system_control and not 1 of filter_*
+    filter_poqexec:
+        Image: 'C:\Windows\System32\poqexec.exe'
+        TargetObject|endswith: '\NetworkProvider\Order\ProviderOrder'
+    filter_realvnc:
+        Image: 'C:\Windows\System32\spoolsv.exe'
+        TargetObject|endswith: '\Print\Monitors\MONVNC\Driver'
+        Details: 'VNCpm.dll'
+    condition: all of system_control_* and not 1 of filter_*
 fields:
     - SecurityID
     - ObjectName

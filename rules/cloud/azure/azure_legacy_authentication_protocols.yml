@@ -1,0 +1,30 @@
+title: Use of Legacy Authentication Protocols
+id: 60f6535a-760f-42a9-be3f-c9a0a025906e
+description: Alert on when legecy authentication has been used on an account
+author: Yochana Henderson, '@Yochana-H'
+date: 2022/06/17
+references:
+    - https://docs.microsoft.com/en-gb/azure/active-directory/fundamentals/security-operations-privileged-accounts
+logsource:
+    product: azure
+    service: signinlogs
+detection:
+    selection:
+        ActivityDetails: Sign-ins
+        ClientApp:
+            - Other client
+            - IMAP
+            - POP3
+            - MAPI
+            - SMTP
+            - Exchange ActiveSync
+            - Exchange Web Services
+        Username: 'UPN'
+    condition: selection
+falsepositives:
+    - User has been put in acception group so they can use legacy authentication
+status: experimental
+level: high
+tags:
+    - attack.credential_access
+    - attack.t1212

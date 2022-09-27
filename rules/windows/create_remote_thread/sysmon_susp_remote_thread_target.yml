@@ -1,0 +1,30 @@
+title: Suspicious Remote Thread Target
+id: f016c716-754a-467f-a39e-63c06f773987
+description: Offensive tradecraft is switching away from using APIs like "CreateRemoteThread", however, this is still largely observed in the wild. This rule aims to detect suspicious processes (those we would not expect to behave in this way like word.exe or outlook.exe) creating remote threads on other processes. It is a generalistic rule, but it should have a low FP ratio due to the selected range of processes.
+status: experimental
+date: 2022/08/25
+modified: 2022/08/29
+author: Florian Roth
+references:
+    - https://www.microsoft.com/security/blog/2022/08/24/looking-for-the-sliver-lining-hunting-for-emerging-command-and-control-frameworks/
+logsource:
+    product: windows
+    category: create_remote_thread
+detection:
+    selection:
+        TargetImage|endswith:
+            - '\spoolsv.exe'
+            - '\notepad.exe'
+    filter:
+        - SourceImage|endswith: '\csrss.exe'
+        - SourceImage|contains: 'unknown process'
+        - StartFunction: 'EtwpNotificationThread'
+    condition: selection and not filter
+fields:
+    - ComputerName
+    - User
+    - SourceImage
+    - TargetImage
+falsepositives:
+    - Unknown
+level: medium

@@ -1,0 +1,38 @@
+title: Unusual File Download from Direct IP Address
+id: 025bd229-fd1f-4fdb-97ab-20006e1a5368
+status: experimental
+description: Detects the download of suspicious file type from URLs with IP
+author: Nasreddine Bencherchali
+references:
+    - https://github.com/trustedsec/SysmonCommunityGuide/blob/adcdfee20999f422b974c8d4149bf4c361237db7/chapters/file-stream-creation-hash.md
+date: 2022/09/07
+logsource:
+    product: windows
+    category: create_stream_hash
+detection:
+    selection_domain:
+        Contents|contains:
+            - '://1'
+            - '://2'
+            - '://3'
+            - '://4'
+            - '://5'
+            - '://6'
+            - '://7'
+            - '://8'
+            - '://9'
+    selection_extension:
+        TargetFilename|contains:
+            - '.ps1:Zone'
+            - '.bat:Zone'
+            - '.exe:Zone'
+            - '.vbe:Zone'
+            - '.vbs:Zone'
+            - '.dll:Zone'
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1564.004

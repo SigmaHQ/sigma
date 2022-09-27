@@ -1,0 +1,28 @@
+title: COM Hijacking via TreatAs
+id: dc5c24af-6995-49b2-86eb-a9ff62199e82
+description: Detect modification of TreatAs key to enable "rundll32.exe -sta" command
+author: frack113
+date: 2022/08/28
+status: experimental
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/40b77d63808dd4f4eafb83949805636735a1fd15/atomics/T1546.015/T1546.015.md
+    - https://www.youtube.com/watch?v=3gz1QmiMhss&t=1251s
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|endswith: 'TreatAs\(Default)'
+    filter_office:
+        Image|startswith: 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
+        Image|endswith: '\OfficeClickToRun.exe'
+    filter_office2:
+        Image: 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Legitimate use
+level: medium
+tags:
+  - attack.persistence
+  - attack.t1546.015

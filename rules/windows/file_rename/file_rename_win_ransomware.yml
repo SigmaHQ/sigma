@@ -4,8 +4,10 @@ status: experimental
 description: Detects possible ransomware adding a custom extension to the encrypted files, such as ".jpg.crypted", ".docx.locky" etc.
 references:
     - https://app.any.run/tasks/d66ead5a-faf4-4437-93aa-65785afaf9e5/
+    - https://blog.cyble.com/2022/08/10/onyx-ransomware-renames-its-leak-site-to-vsop/
 author: frack113
 date: 2022/07/16
+modified: 2022/09/20
 tags:
     - attack.impact
     - attack.t1486
@@ -19,21 +21,33 @@ detection:
             - '.rtf'
             - '.pst'
             - '.docx'
+            - '.xlsx'
             - '.jpg'
+            - '.jpeg'
+            - '.png'
             - '.pdf'
-        TargetFilename|contains: 
+        TargetFilename|contains:
             - '.lnk.'
             - '.rtf.'
             - '.pst.'
             - '.docx.'
+            - '.xlsx.'
             - '.jpg.'
+            - '.jpeg.'
+            - '.png.'
             - '.pdf.'
-    filter:
+    filter_generic:
         TargetFilename|endswith:
             - '.tmp'
             - '.bak'
             - '.old'
-    condition: selection and not filter
+            - '.orig'
+            - '.backup'
+            - '.temp'
+    filter_anaconda:
+        TargetFilename|startswith: 'C:\ProgramData\Anaconda3\'
+        TargetFilename|endswith: '.c~'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Backup software
 level: medium

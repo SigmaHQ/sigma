@@ -1,0 +1,54 @@
+title: Usage of Renamed Sysinternals Tools - RegistrySet
+id: 8023f872-3f1d-4301-a384-801889917ab4
+related:
+    - id: 25ffa65d-76d8-4da5-a832-3f2b0136e133
+      type: derived
+    - id: f50f3c09-557d-492d-81db-9064a8d4e211
+      type: similar
+status: experimental
+description: Detects the of the "accepteula" key related to sysinternals tools being set from non sysinternals tools
+references:
+    - Internal Research
+date: 2022/08/24
+author: Nasreddine Bencherchali
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|contains:
+            - '\PsExec'
+            - '\ProcDump'
+            - '\Handle'
+            - '\LiveKd'
+            - '\Process Explorer'
+            - '\PsLoglist'
+            - '\PsPasswd'
+            - '\Active Directory Explorer'
+        TargetObject|endswith: '\EulaAccepted'
+    filter:
+        Image|endswith:
+            - '\PsExec.exe'
+            - '\PsExec64.exe'
+            - '\procdump.exe'
+            - '\procdump64.exe'
+            - '\handle.exe'
+            - '\handle64.exe'
+            - '\livekd.exe'
+            - '\livekd64.exe'
+            - '\procexp.exe'
+            - '\procexp64.exe'
+            - '\psloglist.exe'
+            - '\psloglist64.exe'
+            - '\pspasswd.exe'
+            - '\pspasswd64.exe'
+            - '\ADExplorer.exe'
+            - '\ADExplorer64.exe'
+    condition: selection and not filter
+falsepositives:
+    - Unlikely
+level: high
+tags:
+    - attack.resource_development
+    - attack.t1588.002

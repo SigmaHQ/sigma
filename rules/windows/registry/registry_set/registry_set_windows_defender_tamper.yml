@@ -12,6 +12,7 @@ references:
     - https://thedfirreport.com/2021/10/18/icedid-to-xinglocker-ransomware-in-24-hours/
     - https://gist.github.com/anadr/7465a9fde63d41341136949f14c21105
     - https://admx.help/?Category=Windows_7_2008R2&Policy=Microsoft.Policies.WindowsDefender::SpyNetReporting
+    - https://symantec-enterprise-blogs.security.com/blogs/threat-intelligence/ransomware-hive-conti-avoslocker
 status: experimental
 logsource:
     product: windows
@@ -27,15 +28,16 @@ detection:
             - '\Real-Time Protection\DisableOnAccessProtection'
             - '\Real-Time Protection\DisableRealtimeMonitoring'
             - '\Real-Time Protection\DisableScanOnRealtimeEnable'
+            - '\Reporting\DisableEnhancedNotifications'
             - '\SpyNet\DisableBlockAtFirstSeen'
             - '\DisableAntiSpyware'
             - '\DisableAntiVirus'
         Details: 'DWORD (0x00000001)'
     selection_dword_0:
         TargetObject|endswith:
-          - '\SpyNet\SpynetReporting'
-          - '\SpyNet\SubmitSamplesConsent'
-          - '\MpEngine\MpEnablePus'
+            - '\SpyNet\SpynetReporting'
+            - '\SpyNet\SubmitSamplesConsent'
+            - '\MpEngine\MpEnablePus'
         Details: 'DWORD (0x00000000)'
     condition: root and 1 of selection_*
 falsepositives:

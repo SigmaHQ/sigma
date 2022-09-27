@@ -1,0 +1,25 @@
+title: Disable Windows Firewall by Registry
+id: e78c408a-e2ea-43cd-b5ea-51975cf358c0
+description: Detect set EnableFirewall to 0 to disable the windows firewall
+author: frack113
+date: 2022/08/19
+status: experimental
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/40b77d63808dd4f4eafb83949805636735a1fd15/atomics/T1562.004/T1562.004.md
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|endswith:
+            - \SOFTWARE\Policies\Microsoft\WindowsFirewall\StandardProfile\EnableFirewall
+            - \SOFTWARE\Policies\Microsoft\WindowsFirewall\DomainProfile\EnableFirewall
+        Details: DWORD (0x00000000)
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
+tags:
+  - attack.defense_evasion
+  - attack.t1562.004

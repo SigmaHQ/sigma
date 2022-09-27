@@ -1,0 +1,59 @@
+title: Dead Drop Resolvers
+id: 297ae038-edc2-4b2e-bb3e-7c5fc94dd5c7
+status: test
+description: Detects an executable, which is not an internet browser, making DNS request to legit popular websites, which were seen to be used as dead drop resolvers in previous attacks.
+author: Sorina Ionescu
+references:
+  - https://content.fireeye.com/apt-41/rpt-apt41
+  - https://securelist.com/the-tetrade-brazilian-banking-malware/97779/
+  - https://blog.bushidotoken.net/2021/04/dead-drop-resolvers-espionage-inspired.html
+date: 2022/08/17
+modified: 2022/08/29
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection:
+    Initiated: 'true'
+    DestinationHostname|endswith:
+      - 'cdn.discordapp.com'
+      - 'pastebin.com'
+      - 'youtube.com'
+      - 'technet.microsoft.com'
+      - 'facebook.com'
+      - '.cloudflare.com'
+      - 'docs.google.com'
+      - 'steamcommunity.com'
+      - 'reddit.com'
+      - 'fotolog.com'
+      - 'twitter.com'
+      - 'imgur.com'
+      - 'feeds.rapidfeeds.com'
+      - 'livejournal.com'
+      - '.githubusercontent.com'
+  filter_browsers:
+    Image|endswith: 
+      - '\iexplore.exe'
+      - '\msedge.exe'
+      - '\edge.exe'
+      - '\opera.exe'
+      - '\brave.exe'
+      - '\vivaldi.exe'
+      - '\whale.exe'
+      - '\chrome.exe'
+      - '\firefox.exe'
+  filter_others:
+      Image|endswith: 
+      - '\MsMpEng.exe' #Microsoft Defender executable
+      - '\MsSense.exe' #Windows Defender Advanced Threat Protection Service Executable
+      - '\PRTG Probe.exe' #Paessler's PRTG Network Monitor
+      - '\Engine.exe' #Process from qlik.com app
+      - '\msedgewebview2.exe' # related to Edge browser
+  condition: selection and not 1 of filter*
+falsepositives:
+  - One might need to exclude other internet browsers found in it's network or other applications like ones mentioned above from Microsoft Defender.
+level: high
+tags:
+  - attack.command_and_control
+  - attack.t1102
+  - attack.t1102.001

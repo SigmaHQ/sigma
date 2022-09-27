@@ -4,7 +4,7 @@ status: experimental
 description: Detects process access to LSASS memory with suspicious access flags and from a suspicious folder
 author: Florian Roth
 date: 2021/11/27
-modified: 2022/07/07
+modified: 2022/09/20
 references:
     - https://docs.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
@@ -65,6 +65,7 @@ detection:
             - '\MBAMInstallerService.exe'
             - '\WebexMTA.exe'
             - '\WebEx\WebexHost.exe'
+            - '\JetBrains\Toolbox\bin\jetbrains-toolbox.exe'
         GrantedAccess: '0x410'
     filter2:
         SourceImage|startswith: 'C:\Windows\Temp\'
@@ -83,6 +84,10 @@ detection:
             - '\AppData\Local\Temp\'
             - '\vs_bootstrapper_'
         GrantedAccess: '0x1410'
+    filter_chrome:
+        SourceImage|startswith: 'C:\Program Files (x86)\Google\Temp\'
+        SourceImage|endswith: '.tmp\GoogleUpdate.exe'
+        GrantedAccess: '0x410'
     condition: selection and not 1 of filter*
 fields:
     - User

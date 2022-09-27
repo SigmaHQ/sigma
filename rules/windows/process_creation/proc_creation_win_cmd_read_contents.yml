@@ -1,0 +1,31 @@
+title: Read and Execute a File Via Cmd.exe 
+id: 00a4bacd-6db4-46d5-9258-a7d5ebff4003
+status: experimental
+description: Detect use of "/R <" to read and execute a file via cmd.exe
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/40b77d63808dd4f4eafb83949805636735a1fd15/atomics/T1059.003/T1059.003.md
+author: frack113
+date: 2022/08/20
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_cmd:
+        - OriginalFileName: 'Cmd.Exe'
+        - Image|endswith: '\cmd.exe'
+    selection_read:
+        - ParentCommandLine|contains|all:
+            - 'cmd '
+            - '/r '
+            - '<'
+        - CommandLine|contains|all:
+            - 'cmd '
+            - '/r '
+            - '<'   
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use
+level: medium
+tags:
+    - attack.execution
+    - attack.t1059.003

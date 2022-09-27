@@ -1,0 +1,52 @@
+title: AdFind Usage Detection
+id: 9a132afa-654e-11eb-ae93-0242ac130002
+related:
+    - id: 75df3b17-8bcc-4565-b89b-c9898acef911
+      type: obsoletes
+status: test
+description: AdFind continues to be seen across majority of breaches. It is used to domain trust discovery to plan out subsequent steps in the attack chain.
+author: Janantha Marasinghe (https://github.com/blueteam0ps), FPT.EagleEye Team, omkar72, oscd.community
+references:
+    - https://www.joeware.net/freetools/tools/adfind/
+    - https://thedfirreport.com/2020/05/08/adfind-recon/
+    - https://thedfirreport.com/2021/01/11/trickbot-still-alive-and-well/
+    - https://www.microsoft.com/security/blog/2021/01/20/deep-dive-into-the-solorigate-second-stage-activation-from-sunburst-to-teardrop-and-raindrop/
+    - https://social.technet.microsoft.com/wiki/contents/articles/7535.adfind-command-examples.aspx
+    - https://github.com/center-for-threat-informed-defense/adversary_emulation_library/blob/bf62ece1c679b07b5fb49c4bae947fe24c81811f/fin6/Emulation_Plan/Phase1.md
+date: 2021/02/02
+modified: 2022/08/12
+tags:
+    - attack.discovery
+    - attack.t1018
+    - attack.t1087.002
+    - attack.t1482
+    - attack.t1069.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:
+            - 'domainlist'
+            - 'trustdmp'
+            - 'dcmodes'
+            - 'adinfo'
+            - ' dclist '
+            - 'computer_pwdnotreqd'
+            - 'objectcategory='
+            - '-subnets -f'
+            - 'name="Domain Admins"'
+            - '-sc u:'
+            - 'domainncs'
+            - 'dompol'
+            - ' oudmp '
+            - 'subnetdmp'
+            - 'gpodmp'
+            - 'fspdmp'
+            - 'users_noexpire'
+            - 'computers_active'
+            - 'computers_pwdnotreqd'
+    condition: selection
+falsepositives:
+    - Legitimate admin activity
+level: high

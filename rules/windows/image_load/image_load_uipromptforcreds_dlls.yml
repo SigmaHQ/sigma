@@ -3,7 +3,7 @@ id: 9ae01559-cf7e-4f8e-8e14-4c290a1b4784
 description: Detects potential use of UIPromptForCredentials functions by looking for some of the DLLs needed for it.
 status: experimental
 date: 2020/10/20
-modified: 2022/04/29
+modified: 2022/09/21
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 tags:
     - attack.credential_access
@@ -24,19 +24,30 @@ detection:
         - OriginalFileName:
             - 'credui.dll'
             - 'wincredui.dll'
-    filter:
-        - Image|startswith:
+    filter_start:
+        Image|startswith:
             - 'C:\Windows\System32\'
-            - 'C:\Windows\explorer.exe'
+            - 'C:\Windows\SysWOW64\'
             - 'C:\Program Files\'
-            - 'C:\Users\\*\AppData\Local\Microsoft\OneDrive\\*\Microsoft.SharePoint.exe'
             - 'C:\Program Files (x86)\'
+    filter_end:
+        Image|endswith:
+            - '\opera_autoupdate.exe'
+            - '\procexp64.exe'
+            - '\procexp.exe'
+    filter_full:
+        Image:
             - 'C:\Windows\ImmersiveControlPanel\SystemSettings.exe'
-            - 'C:\Users\\*\AppData\Local\Microsoft\OneDrive\OneDrive.exe'
-            - 'C:\Users\\*\AppData\Roaming\Spotify\Spotify.exe'
-        - Image|endswith: '\opera_autoupdate.exe'
-        - Image|contains: '\Local\Microsoft\OneDrive\'
-    condition: selection and not filter
+            - 'C:\Windows\explorer.exe'
+    filter_user:
+        Image|startswith: 'C:\Users\'
+        Image|endswith:
+            - '\AppData\Roaming\Spotify\Spotify.exe'
+            - '\AppData\Local\Microsoft\Teams\current\Teams.exe'
+    filter_contains:
+        Image|startswith: 'C:\Users\'
+        Image|contains: '\AppData\Local\Microsoft\OneDrive\'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Other legitimate processes loading those DLLs in your environment.
 level: medium

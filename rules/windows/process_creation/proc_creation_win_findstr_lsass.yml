@@ -1,0 +1,30 @@
+title: Findstr LSASS
+id: fe63010f-8823-4864-a96b-a7b4a0f7b929
+status: experimental
+description: Detects findstring commands that include the keyword lsass, which indicates recon actviity for the LSASS process PID
+author: Florian Roth
+references:
+    - https://blog.talosintelligence.com/2022/08/recent-cyber-attack.html?m=1
+date: 2022/08/12
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Image|endswith: '\findstr.exe'
+        CommandLine|contains: 'lsass'
+    selection2:
+        CommandLine|contains: 
+            - ' /i lsass.exe'
+            - ' /i "lsass'
+            - 'findstr lsass'
+            - 'findstr.exe lsass'
+            - 'findstr "lsass'
+            - 'findstr.exe "lsass'
+    condition: 1 of selection*
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.credential_access
+    - attack.t1552.006

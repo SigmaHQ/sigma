@@ -1,0 +1,23 @@
+title: Allow RDP Remote Assistance Feature
+id: 37b437cf-3fc5-4c8e-9c94-1d7c9aff842b
+description: Detect enable rdp feature to allow specific user to rdp connect on the targeted machine
+author: frack113
+date: 2022/08/19
+status: experimental
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/40b77d63808dd4f4eafb83949805636735a1fd15/atomics/T1112/T1112.md
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|endswith: 'System\CurrentControlSet\Control\Terminal Server\fAllowToGetHelp'
+        Details: DWORD (0x00000001)
+    condition: selection
+falsepositives:
+    - Legitmate use of the feature (alerts should be investigated either way)
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1112

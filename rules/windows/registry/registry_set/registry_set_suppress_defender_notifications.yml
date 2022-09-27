@@ -1,0 +1,23 @@
+title: Disable Windows Security Center Notifications
+id: 0c93308a-3f1b-40a9-b649-57ea1a1c1d63
+description: Detect set UseActionCenterExperience to 0 to disable the windows security center notification
+author: frack113
+date: 2022/08/19
+status: experimental
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/40b77d63808dd4f4eafb83949805636735a1fd15/atomics/T1112/T1112.md
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|endswith: 'SOFTWARE\Policies\Microsoft\Windows Defender\UX Configuration\Notification_Suppress'
+        Details: DWORD (0x00000001)
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
+tags:
+  - attack.defense_evasion
+  - attack.t1112 
