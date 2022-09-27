@@ -6,7 +6,7 @@ author: Florian Roth
 references:
     - https://app.any.run/tasks/b9040c63-c140-479b-ad59-f1bb56ce7a97/
 date: 2022/05/24
-modified: 2022/07/14
+modified: 2022/09/26
 tags:
     - attack.execution
     - attack.t1059.001
@@ -32,7 +32,11 @@ detection:
             - ' IAB'
             - ' PAA'
             - ' aQBlAHgA'
-    condition: encoded and selection
+    filter:
+        ParentImage|contains:
+            - 'C:\Packages\Plugins\Microsoft.GuestConfiguration.ConfigurationforWindows\'
+            - '\gc_worker.exe'
+    condition: encoded and selection and not filter
 falsepositives:
     - Other tools that work with encoded scripts in the command line instead of script files
 level: high
