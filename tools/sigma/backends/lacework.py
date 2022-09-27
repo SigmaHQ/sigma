@@ -33,10 +33,9 @@ from sigma.parser.modifiers.base import SigmaTypeModifier
 LACEWORK_CONFIG = yaml.load(
     textwrap.dedent('''
     ---
-    version: 0.3
+    version: 0.4
     services:
       cloudtrail:
-        evaluatorId: Cloudtrail
         source: CloudTrailRawEvents
         fieldMap:
           - sigmaField: eventName
@@ -67,8 +66,8 @@ LACEWORK_CONFIG = yaml.load(
         alertProfile: LW_CloudTrail_Alerts
     product.categories:
       linux.file_create:
-        evaluatorId:
-        source: LW_HE_FILES
+        sources:
+          - LW_HE_FILES
         conditions:
           # evaluated hourly and file create time within the last hour
           - and diff_minutes(FILE_CREATED_TIME, current_timestamp_sec()::timestamp) <= 60
@@ -87,9 +86,40 @@ LACEWORK_CONFIG = yaml.load(
           - OWNER_USERNAME
           - FILE_CREATED_TIME
         alertProfile: LW_HE_FILES_DEFAULT_PROFILE.HE_File_NewViolation
+      linux.network_connection:
+        sources:
+          - LW_HA_CONNECTION_SUMMARY as HACM
+          - array_to_rows(ENDPOINT_DETAILS) as (EP_PA)
+        fieldMap:
+          - sigmaField: Image
+            laceworkField: EXE_PATH
+            matchType: exact
+            action: selfjoin
+            selfJoinFilter: HACM.SRC_ENTITY_TYPE = 'Process' AND (HACM.SRC_ENTITY_ID:mid::NUMBER, HACM.SRC_ENTITY_ID:pid_hash::NUMBER) IN { source { LW_HE_PROCESSES AS HEP } filter { EXE_PATH like '%/bin/bash' } return { HEP.MID, HEP.PID_HASH }}
+          - sigmaField: DestinationIp
+            laceworkField: EP_PA:dst_ip_addr
+            matchType: exact
+          - sigmaField: DestinationHostname
+            laceworkField:
+            matchType: exact
+            action: raise
+        returns:
+          - HACM.BATCH_END_TIME
+          - HACM.BATCH_START_TIME
+          - HACM.DST_ENTITY_ID
+          - HACM.DST_ENTITY_TYPE
+          - HACM.DST_IN_BYTES
+          - HACM.DST_OUT_BYTES
+          - HACM.ENDPOINT_DETAILS
+          - HACM.NUM_CONNS
+          - HACM.SRC_ENTITY_ID
+          - HACM.SRC_ENTITY_TYPE
+          - HACM.SRC_IN_BYTES
+          - HACM.SRC_OUT_BYTES
+        alertProfile: LW_HA_CONNECTION_SUMMARY_DEFAULT_PROFILE.HA_Connection_Violation
       linux.process_creation:
-        evaluatorId:
-        source: LW_HE_PROCESSES
+        sources:
+          - LW_HE_PROCESSES
         conditions:
           # evaluated hourly and file create time within the last hour
           - and diff_minutes(PROCESS_START_TIME, current_timestamp_sec()::timestamp) <= 60
@@ -489,22 +519,18 @@ class LaceworkQuery:
         self.logsource_config = self.get_logsource_config(
             config, self.logsource_type, self.logsource_name)
 
-        # 3. Get Evaluator ID
-        self.evaluator_id = self.get_evaluator_id(
-            self.logsource_name, self.logsource_config)
-
-        # 4. Get Query ID
+        # 3. Get Query ID
         self.title, self.query_id = self.get_query_id(rule)
 
-        # 5. Get Query Source
-        self.query_source = self.get_query_source(
+        # 4. Get Query Source
+        self.query_sources = self.get_query_sources(
             self.logsource_name, self.logsource_config)
 
-        # 6. Get Query Returns
+        # 5. Get Query Returns
         self.returns = self.get_query_returns(
             self.logsource_name, self.logsource_config)
 
-        # 7. Get Query Text
+        # 6. Get Query Text
         self.query_text = self.get_query_text(backend, conditions)
 
     def get_query_text(self, backend, rule_conditions):
@@ -539,8 +565,9 @@ class LaceworkQuery:
             '        {source}\n'
             '    }}'
         )
+
         return source_block_template.format(
-            source=self.query_source
+            source=',\n        '.join(self.query_sources)
         )
 
     def get_query_return_block(self):
@@ -555,7 +582,6 @@ class LaceworkQuery:
 
     def __iter__(self):
         for key, attr in {
-            'evaluatorId': 'evaluator_id',
             'queryId': 'query_id',
             'queryText': 'query_text'
         }.items():
@@ -624,12 +650,6 @@ class LaceworkQuery:
         return logsource_config
 
     @staticmethod
-    def get_evaluator_id(logsource_name, logsource_config):
-        # 3. validate service has an evaluatorId mapping
-        evaluator_id = safe_get(logsource_config, 'evaluatorId', str)
-        return evaluator_id if evaluator_id else None
-
-    @staticmethod
     def get_query_id(rule):
         title = safe_get(rule, 'title', str) or 'Unknown'
         # TODO: might need to replace additional non-word characters
@@ -638,15 +658,18 @@ class LaceworkQuery:
         return title, query_id
 
     @staticmethod
-    def get_query_source(logsource_name, logsource_config):
+    def get_query_sources(logsource_name, logsource_config) -> list[str]:
         # 4. validate service has a source mapping
         source = safe_get(logsource_config, 'source', str)
+        sources = safe_get(logsource_config, 'sources', list)
 
-        if not source:
-            raise BackendError(
-                f'Lacework backend could not determine source for logsource {logsource_name}')
+        if sources:
+            return sources
+        elif source:
+            return [source]
 
-        return source
+        raise BackendError(
+            f'Lacework backend could not determine source for logsource {logsource_name}')
 
     @staticmethod
     def get_query_returns(logsource_name, logsource_config):
@@ -703,42 +726,37 @@ class LaceworkPolicy:
         self.logsource_config = LaceworkQuery.get_logsource_config(
             config, self.logsource_type, self.logsource_name)
 
-        # 3. Get Evaluator Id
-        self.evaluator_id = LaceworkQuery.get_evaluator_id(
-            self.logsource_name, self.logsource_config)
-
-        # 4. Get Title
-        # 5. Get Query ID
+        # 3. Get Title
+        # 4. Get Query ID
         self.title, self.query_id = LaceworkQuery.get_query_id(rule)
 
-        # 6. Get Enabled
+        # 5. Get Enabled
         self.enabled = False
 
-        # 7. Get Policy Type
+        # 6. Get Policy Type
         self.policy_type = 'Violation'
 
-        # 8. Get Alert Enabled
+        # 7. Get Alert Enabled
         self.alert_enabled = False
 
-        # 9. Get Alert Profile
+        # 8. Get Alert Profile
         self.alert_profile = self.get_alert_profile(
             self.logsource_name, self.logsource_config)
 
-        # 10. Get Limit
+        # 9. Get Limit
         self.limit = 1000
 
-        # 11. Get Severity
+        # 10. Get Severity
         self.severity = safe_get(rule, 'level', str) or 'medium'
 
-        # 12. Get Description
+        # 11. Get Description
         self.description = safe_get(rule, 'description', str)
 
-        # 13. Get Remediation
+        # 12. Get Remediation
         self.remediation = 'Remediation steps are not represented in Sigma rule specification'
 
     def __iter__(self):
         for key, attr in {
-            'evaluatorId': 'evaluator_id',
             'title': 'title',
             'enabled': 'enabled',
             'policyType': 'policy_type',
