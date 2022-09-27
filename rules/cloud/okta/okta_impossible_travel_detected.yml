@@ -1,0 +1,28 @@
+title: Okta Impossible Travel Detected
+id: 7e302f6b-533d-4f57-8041-0480773744ff
+description: Detects when impossible travel is detected by Okta
+author: Aidan Bracher @brachera
+status: experimental
+date: 2022/09/26
+references:
+    - https://help.okta.com/en-us/Content/Topics/Security/behavior-detection/about-behavior-detection.htm
+    - https://help.okta.com/en-us/Content/Topics/Security/behavior-detection/logs-behavior-detection.htm
+logsource:
+  product: okta
+  service: okta
+detection:
+    selection:
+        okta.event_type: 
+            - user.session.start
+            - policy.evaluate.sign_on
+        okta.debugContext.debugData.behaviors|contains: Velocity=POSITIVE
+    condition: selection
+level: high
+tags:
+    - attack.initial_access
+    - attack.t1078
+    - attack.t1078.004
+falsepositives:
+ - Legitimate VPN Usage
+ - Login events through legitimate use of Virtual Hosting Providers i.e. AWS, GCP, Azure
+ 
