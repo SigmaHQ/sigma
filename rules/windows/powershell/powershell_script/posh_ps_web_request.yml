@@ -10,7 +10,7 @@ references:
     - https://blog.jourdant.me/post/3-ways-to-download-files-with-powershell
 author: James Pemberton / @4A616D6573
 date: 2019/10/24
-modified: 2021/10/16
+modified: 2022/09/26
 tags:
     - attack.execution
     - attack.t1059.001
@@ -27,7 +27,9 @@ detection:
             - 'curl '
             - 'Net.WebClient'
             - 'Start-BitsTransfer'
-    condition: selection
+    filter:
+        Path|startswith: 'C:\Packages\Plugins\Microsoft.GuestConfiguration.ConfigurationforWindows\'
+    condition: selection and not filter
 falsepositives:
     - Use of Get-Command and Get-Help modules to reference Invoke-WebRequest and Start-BitsTransfer.
 level: medium

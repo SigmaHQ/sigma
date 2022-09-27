@@ -7,7 +7,7 @@ references:
     - https://blog.cyble.com/2022/08/10/onyx-ransomware-renames-its-leak-site-to-vsop/
 author: frack113
 date: 2022/07/16
-modified: 2022/08/31
+modified: 2022/09/20
 tags:
     - attack.impact
     - attack.t1486
@@ -26,7 +26,7 @@ detection:
             - '.jpeg'
             - '.png'
             - '.pdf'
-        TargetFilename|contains: 
+        TargetFilename|contains:
             - '.lnk.'
             - '.rtf.'
             - '.pst.'
@@ -36,7 +36,7 @@ detection:
             - '.jpeg.'
             - '.png.'
             - '.pdf.'
-    filter:
+    filter_generic:
         TargetFilename|endswith:
             - '.tmp'
             - '.bak'
@@ -44,7 +44,10 @@ detection:
             - '.orig'
             - '.backup'
             - '.temp'
-    condition: selection and not filter
+    filter_anaconda:
+        TargetFilename|startswith: 'C:\ProgramData\Anaconda3\'
+        TargetFilename|endswith: '.c~'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Backup software
 level: medium

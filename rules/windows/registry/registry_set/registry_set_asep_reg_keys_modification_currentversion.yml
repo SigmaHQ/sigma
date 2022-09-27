@@ -12,7 +12,7 @@ references:
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
     - https://oddvar.moe/2018/03/21/persistence-using-runonceex-hidden-from-autoruns-exe/
 date: 2019/10/25
-modified: 2022/09/06
+modified: 2022/09/21
 logsource:
     category: registry_set
     product: windows
@@ -103,8 +103,10 @@ detection:
             - 'C:\Windows\system32\cmd.exe /q /c del /q "C:\Users\'
         Details|contains: '\AppData\Local\Microsoft\OneDrive\'
     filter_python:
-        TargetObject|endswith: '\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce\{c60fd5ac-367d-4e3a-a975-f157502ac30a}'
-        Details|contains: '\AppData\Local\Package Cache\{c60fd5ac-367d-4e3a-a975-f157502ac30a}\python'
+        TargetObject|contains: '\Microsoft\Windows\CurrentVersion\RunOnce\{'
+        Details|contains|all:
+            - '\AppData\Local\Package Cache\{'
+            - '}\python-'
         Details|endswith: '.exe" /burn.runonce'
     filter_officeclicktorun:
         Image|startswith:
@@ -125,6 +127,12 @@ detection:
             - '"C:\Program Files\AVG\Antivirus\AvLaunch.exe" /gui'
             - '"C:\Program Files (x86)\AVG\Antivirus\AvLaunch.exe" /gui'
             - '{472083B0-C522-11CF-8763-00608CC02F24}'
+    filter_aurora_dashbaord:
+        Image|endswith:
+            - '\aurora-agent-64.exe'
+            - '\aurora-agent.exe'
+        TargetObject|endswith: '\Microsoft\Windows\CurrentVersion\Run\aurora-dashboard'
+        Details: 'C:\Program Files\Aurora-Agent\tools\aurora-dashboard.exe'
     condition: all of current_version_* and not 1 of filter_*
 fields:
     - SecurityID

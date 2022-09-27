@@ -9,7 +9,7 @@ references:
     - https://www.ietf.org/rfc/rfc2821.txt
 author: frack113
 date: 2022/01/07
-modified: 2022/02/16
+modified: 2022/09/21
 logsource:
     category: network_connection
     product: windows
@@ -27,7 +27,10 @@ detection:
             - \outlook.exe
     filter_mailserver:
         Image|startswith: 'C:\Program Files\Microsoft\Exchange Server\'
-    condition: selection and not 1 of filter*
+    filter_outlook:
+        Image|startswith: 'C:\Program Files\WindowsApps\microsoft.windowscommunicationsapps_'
+        Image|endswith: '\HxTsr.exe'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Other SMTP tools
 level: medium
