@@ -7,6 +7,7 @@ status: experimental
 references:
     - https://app.any.run/tasks/77b2e328-8f36-46b2-b2e2-8a80398217ab/
     - https://learn.microsoft.com/en-us/windows/win32/api/winevt/
+    - https://itconnect.uw.edu/tools-services-support/it-systems-infrastructure/msinf/other-help/understanding-sddl-syntax/
 logsource:
     category: registry_set
     product: windows
@@ -15,10 +16,11 @@ detection:
         EventType: SetValue
         TargetObject|startswith: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\'
         TargetObject|endswith: '\ChannelAccess'
+        # Add more interesting combinations if you found them
         Details|contains: 
-            - '(A;;0x1;;;SY)'
-            - '(A;;0x5;;;BA)'
-            - '(A;;0x1;;;LA)'
+            - '(A;;0x1;;;SY)' # Local System having GENERIC ALL
+            - '(A;;0x5;;;BA)' # Built-in administrators having GENERIC ALL and  GENERIC WRITE
+            - '(A;;0x1;;;LA)' # Local administrator having GENERIC ALL
     condition: selection 
 falsepositives:
     - Unknown
