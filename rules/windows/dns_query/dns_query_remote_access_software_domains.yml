@@ -9,15 +9,17 @@ related:
       type: obsoletes
 status: experimental
 description: |
-  An adversary may use legitimate desktop support and remote access software, such as Team Viewer, Go2Assist, LogMein, AmmyyAdmin, etc, to establish an interactive command and control channel to target systems within networks.
-  These services are commonly used as legitimate technical support software, and may be allowed by application control within a target environment.
-  Remote access tools like VNC, Ammyy, and Teamviewer are used frequently when compared with other legitimate software commonly used by adversaries. (Citation: Symantec Living off the Land)
+    An adversary may use legitimate desktop support and remote access software, such as Team Viewer, Go2Assist, LogMein, AmmyyAdmin, etc, to establish an interactive command and control channel to target systems within networks.
+    These services are commonly used as legitimate technical support software, and may be allowed by application control within a target environment.
+    Remote access tools like VNC, Ammyy, and Teamviewer are used frequently when compared with other legitimate software commonly used by adversaries. (Citation: Symantec Living off the Land)
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1219/T1219.md#atomic-test-4---gotoassist-files-detected-test-on-windows
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1219/T1219.md#atomic-test-3---logmein-files-detected-test-on-windows
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1219/T1219.md#atomic-test-6---ammyy-admin-software-execution
+    - https://redcanary.com/blog/misbehaving-rats/
 author: frack113
 date: 2022/07/11
+modified: 2022/09/19
 logsource:
     product: windows
     category: dns_query
@@ -27,9 +29,11 @@ detection:
             - '.getgo.com'
             - '.logmein.com'
             - '.ammyy.com'
+            - '.netsupportsoftware.com' # For NetSupport Manager RAT
+            - 'remoteutilities.com' # Usage of Remote Utilities RAT
     condition: selection
 falsepositives:
-    - Unknown
+    - FP may be caused in legitimate usage of the softwares mentioned above
 level: medium
 tags:
     - attack.command_and_control
