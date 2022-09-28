@@ -4,7 +4,7 @@ status: experimental
 description: Detects a suspicious Microsoft certutil execution with sub commands like 'decode' sub command, which is sometimes used to decode malicious code
 author: Florian Roth, juju4, keepwatch
 date: 2019/01/16
-modified: 2022/09/12
+modified: 2022/09/27
 references:
     - https://twitter.com/JohnLaTwC/status/835149808817991680
     - https://blogs.technet.microsoft.com/pki/2006/11/30/basic-crl-checking-with-certutil/
@@ -22,16 +22,18 @@ detection:
             - ' -urlcache '
             - ' -verifyctl '
             - ' -encode '
+            - ' -exportPFX '
             - ' /decode '
             - ' /decodehex '
             - ' /urlcache '
             - ' /verifyctl '
             - ' /encode '
+            - ' /exportPFX '
     selection_certutil:
         Image|endswith: '\certutil.exe'
         CommandLine|contains: 'ping'
             # - 'URL'  # questionable string; could cause false positive
-    condition: 1 of selection_*
+    condition: all of selection_*
 fields:
     - CommandLine
     - ParentCommandLine

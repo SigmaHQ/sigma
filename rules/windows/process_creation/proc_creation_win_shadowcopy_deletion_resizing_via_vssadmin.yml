@@ -1,0 +1,29 @@
+title: Deletion or Resizing of Volume Shadow Copies via VssAdmin
+id: e800d533-0a66-4604-b13d-77db13b28a12
+status: experimental
+author: Tim Rauch
+date: 2022/09/20
+description: Detects deletion or resizing of Windows Volume Shadow Copies via vssAdmin. This commonly occurs in tandem with ransomware or other destructive attacks.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1490/T1490.md#atomic-test-5---windows---delete-volume-shadow-copies-via-wmi-with-powershell
+    - https://www.elastic.co/guide/en/security/current/volume-shadow-copy-deletion-via-powershell.html
+logsource:
+    category: process_creation
+    product: windows
+tags:
+    - attack.impact
+    - attack.t1490
+detection:
+    selection_name:
+        - Image|endswith: '\vssadmin.exe'
+        - OriginalFilename: 'VSSADMIN.EXE'
+    selection_args:
+        commandLine|contains:
+            - 'delete'
+            - 'resize'
+    selection_shadow:
+        CommandLine|contains: 'shadows'
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: high

@@ -1,0 +1,28 @@
+title: Potential Remote Desktop Tunneling
+id: 8a3038e8-9c9d-46f8-b184-66234a160f6f
+status: experimental
+description: Detects potential use of an SSH utility to establish RDP over a reverse SSH Tunnel. This can be used by attackers to enable routing of network packets that would otherwise not reach their intended destination.
+author: Tim Rauch
+references:
+    - https://www.elastic.co/guide/en/security/current/potential-remote-desktop-tunneling-detected.html
+date: 2022/09/27
+logsource:
+    category: process_creation
+    product: windows
+tags:
+    - attack.lateral_movement
+    - attack.t1021
+detection:
+    selection:
+        CommandLine|contains: ':3899' # RDP port and usual SSH tunneling related switches in command line
+    selection_opt:
+        CommandLine|contains:
+            - '-L'
+            - '-P'
+            - '-R'
+            - '-pw'
+            - '-ssh'
+    condition: selection and selection_opt
+falsepositives:
+    - Unknown
+level: high

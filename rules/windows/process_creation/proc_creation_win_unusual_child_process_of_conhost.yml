@@ -1,0 +1,26 @@
+title: Suspicious Child Process of conhost
+id: 23f6015f-4b63-4bb7-a9e5-7857ef5b538f
+status: experimental
+description: Detects a suspicious Conhost child process which may be an indication of code injection activity
+references:
+    - 'https://www.elastic.co/guide/en/security/current/suspicious-process-from-conhost.html'
+author: Tim Rauch
+date: 2022/09/27
+logsource:
+    category: process_creation
+    product: windows
+tags:
+    - attack.defense_evasion
+    - attack.t1055
+detection:
+    selection:
+        ParentImage|endswith: '\conhost.exe'
+    selection_not:
+        Image|endswith:
+            - ':\Windows\splwow64.exe'
+            - ':\Windows\System32\WerFault.exe'
+            - ':\Windows\System32\conhost.exe'
+    condition: selection and not selection_not
+falsepositives:
+    - Unknown
+level: high

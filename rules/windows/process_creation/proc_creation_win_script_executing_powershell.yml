@@ -1,0 +1,24 @@
+title: VBS Script Executing Powershell
+id: c0464058-4954-4536-896d-7b16315be56f
+status: experimental
+description: Detects wscript.exe or script.exe executing powershell.exe
+references:
+    - 'https://www.elastic.co/guide/en/security/current/windows-script-executing-powershell.html'
+author: Tim Rauch
+date: 2022/09/15
+logsource:
+    category: process_creation
+    product: windows
+tags:
+    - attack.initial_access
+    - attack.t1566
+detection:
+    selection:
+        ParentImage|endswith:
+            - '\cscript.exe'
+            - '\wscript.exe'
+        Image|endswith: '\powershell.exe'
+    condition: selection
+falsepositives:
+     - Legitimate administrative scripts
+level: medium

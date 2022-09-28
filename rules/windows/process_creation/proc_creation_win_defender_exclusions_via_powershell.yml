@@ -1,0 +1,39 @@
+title: Windows Defender Exclusions added via Powershell
+id: 801f7258-40a8-4c10-bf4b-d76248556aac
+related:
+    - id: c1344fa2-323b-4d2e-9176-84b4d4821c88
+      type: similar
+status: experimental
+description: Detects modifications to the Windows Defender configuration settings using PowerShell to add exclusions
+references:
+    - 'https://www.elastic.co/guide/en/security/current/windows-defender-exclusions-added-via-powershell.html'
+author: Tim Rauch
+date: 2022/09/16
+logsource:
+    category: process_creation
+    product: windows
+tags:
+    - attack.defense_evasion
+    - attack.t1562
+    - attack.execution
+    - attack.t1059
+detection:
+    selection_name:
+        - Image|endswith:
+            - '\\powershell.exe'
+            - '\\pwsh.exe'
+            - '\\powershell_ise.exe'
+        - OriginalFilename:
+            - 'powershell.exe'
+            - 'pwsh.exe'
+            - 'powershell_ise.exe'
+    selection_args_exc:
+        CommandLine|contains: '-Exclusion'
+    selection_args_pref:
+        CommandLine|contains:
+            - 'Add-MpPreference'
+            - 'Set-MpPreference'
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: medium

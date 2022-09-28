@@ -10,7 +10,7 @@ references:
     - https://www.hybrid-analysis.com/sample/e122bc8bf291f15cab182a5d2d27b8db1e7019e4e96bb5cdbd1dfe7446f3f51f?environmentId=100
 author: Florian Roth
 date: 2017/03/19
-modified: 2021/09/12
+modified: 2021/09/28
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
@@ -23,7 +23,10 @@ detection:
     methprocess:
         ParentImage|endswith: '\eventvwr.exe'
     filterprocess:
-        Image|endswith: '\mmc.exe'
+        Image|endswith:
+            - '\mmc.exe'
+            - ':\Windows\SysWOW64\WerFault.exe'
+            - ':\Windows\System32\WerFault.exe'
     condition: methprocess and not filterprocess
 fields:
     - CommandLine
