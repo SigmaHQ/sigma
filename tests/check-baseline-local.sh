@@ -1,47 +1,47 @@
 #!/bin/bash
 
 if [[ -z $(command -v jq) ]]; then
-    >2& echo "jq not found. Please install."
-    >2& echo "Exiting"
+    >&2 echo "jq not found. Please install."
+    >&2 echo "Exiting"
     exit 1
 fi
 
 if [[ -z $(command -v wget) ]]; then
-    >2& echo "wget not found. Please install."
-    >2& echo "Exiting"
+    >&2 echo "wget not found. Please install."
+    >&2 echo "Exiting"
     exit 1
 fi
 
 if [[ -z $(command -v xargs) ]]; then
-    >2& echo "xargs not found. Please install findutils."
-    >2& echo "Exiting"
+    >&2 echo "xargs not found. Please install findutils."
+    >&2 echo "Exiting"
     exit 1
 fi
 
 if [[ -z $(command -v tar) ]]; then
-    >2& echo "tar not found. Please install."
-    >2& echo "Exiting"
+    >&2 echo "tar not found. Please install."
+    >&2 echo "Exiting"
     exit 1
 fi
 
 if [[ -z $(command -v mktemp) ]]; then
-    >2& echo "mktemp not found. Please install coreutils."
-    >2& echo "Exiting"
+    >&2 echo "mktemp not found. Please install coreutils."
+    >&2 echo "Exiting"
     exit 1
 fi
 
 if [[ -z $(command -v realpath) ]]; then
-    >2& echo "realpath not found. Please install coreutils."
-    >2& echo "Exiting"
+    >&2 echo "realpath not found. Please install coreutils."
+    >&2 echo "Exiting"
     exit 1
 fi
 
 OS=$(uname -s)
 
 if [[ "${OS}" != "Linux" && "${OS}" != "Darwin" ]]; then
-    >2& echo "This script only supports Linux and MacOS"
-    >2& echo "$(uname -s) is not a supported OS"
-    >2& echo "Exiting"
+    >&2 echo "This script only supports Linux and MacOS"
+    >&2 echo "$(uname -s) is not a supported OS"
+    >&2 echo "Exiting"
     exit 1
 fi
 
@@ -59,8 +59,8 @@ fi
 
 TMP=$(mktemp -d)
 if [[ -z "${TMP}" || ! -d "${TMP}" || ! -w "${TMP}" ]]; then
-    >2& echo "Error: Created temporary directory ${TMP} is not writable."
-    >2& echo "Exiting"
+    >&2 echo "Error: Created temporary directory ${TMP} is not writable."
+    >&2 echo "Exiting"
     exit 1
 fi
 
