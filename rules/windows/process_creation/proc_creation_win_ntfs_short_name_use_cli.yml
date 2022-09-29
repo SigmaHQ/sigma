@@ -11,7 +11,7 @@ references:
     - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-2000-server/cc959352(v=technet.10)?redirectedfrom=MSDN
     - https://twitter.com/jonasLyk/status/1555914501802921984
 date: 2022/08/05
-modified: 2022/08/12
+modified: 2022/09/21
 logsource:
     category: process_creation
     product: windows
@@ -37,9 +37,10 @@ detection:
             - '~2.js'
             - '~2.hta'
     filter:
-        ParentImage|endswith:
+        - ParentImage|endswith:
             - '\WebEx\WebexHost.exe'
             - '\thor\thor64.exe'
+        - CommandLine|contains: 'C:\xampp\vcredist\VCREDI~1.EXE'
     condition: selection and not filter
 falsepositives:
     - Applications could use this notation occasionally which might generate some false positives. In that case Investigate the parent and child process.
