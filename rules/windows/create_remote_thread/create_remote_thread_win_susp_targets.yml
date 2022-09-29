@@ -6,7 +6,7 @@ references:
    - https://blog.redbluepurple.io/offensive-research/bypassing-injection-detection
 author: Florian Roth
 date: 2022/03/16
-modified: 2022/08/17
+modified: 2022/09/29
 logsource:
     product: windows
     category: create_remote_thread
@@ -22,7 +22,11 @@ detection:
             - '\explorer.exe'
     filter:
         StartFunction: 'EtwpNotificationThread'
-    condition: selection and not filter
+    filter_programfiles:
+        SourceImage|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    condition: selection and not 1 of filter*
 falsepositives:
     - Unknown
 level: high
