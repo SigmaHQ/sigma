@@ -8,7 +8,7 @@ references:
     - https://unit42.paloaltonetworks.com/unit42-pulling-back-the-curtains-on-encodedcommand-powershell-attacks/
     - https://mikefrobbins.com/2017/06/15/simple-obfuscation-with-powershell-using-base64-encoding/
 date: 2022/01/02
-modified: 2022/07/14
+modified: 2022/09/26
 logsource:
     category: process_creation
     product: windows
@@ -25,7 +25,11 @@ detection:
             - ' -ec '
     filter:
         CommandLine|contains: ' -Encoding '
-    condition: selection and not filter
+    filter_azure:
+        ParentImage|contains:
+            - 'C:\Packages\Plugins\Microsoft.GuestConfiguration.ConfigurationforWindows\'
+            - '\gc_worker.exe'
+    condition: selection and not 1 of filter*
 falsepositives:
     - Unknown
 level: medium

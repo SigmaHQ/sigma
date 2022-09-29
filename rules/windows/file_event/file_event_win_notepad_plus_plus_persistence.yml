@@ -6,7 +6,7 @@ author: Nasreddine Bencherchali
 references:
     - https://pentestlab.blog/2022/02/14/persistence-notepad-plugins/
 date: 2022/06/10
-modified: 2022/06/21
+modified: 2022/09/20
 logsource:
     product: windows
     category: file_event
@@ -20,7 +20,9 @@ detection:
         # This filter is for Sigma dataset you could remove it or change when using the rule in your own env
         Image|startswith: 'C:\Users\'
         Image|contains: '\AppData\Local\Temp\'
-        Image|endswith: '\target.exe'
+        Image|endswith:
+            - '\target.exe'
+            - 'Installer.x64.exe'
     condition: selection and not 1 of filter*
 falsepositives:
     - Possible FPs during first installation of Notepad++

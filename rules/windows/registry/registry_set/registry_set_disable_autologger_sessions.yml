@@ -7,6 +7,7 @@ references:
     - https://twitter.com/MichalKoczwara/status/1553634816016498688
     - https://thedfirreport.com/2021/10/18/icedid-to-xinglocker-ransomware-in-24-hours/
 date: 2022/08/01
+modified: 2022/09/18
 logsource:
     category: registry_set
     product: windows
@@ -22,7 +23,9 @@ detection:
             - '\Enabled'
             - '\Start'
         Details: DWORD (0x00000000)
-    condition: all of selection*
+    filter_legitimate:
+        Image: 'C:\Windows\system32\wevtutil.exe'
+    condition: all of selection* and not 1 of filter*
 falsepositives:
     - Unknown
 level: high
