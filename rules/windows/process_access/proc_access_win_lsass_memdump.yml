@@ -4,7 +4,7 @@ status: experimental
 description: Detects process LSASS memory dump using Mimikatz, NanoDump, Invoke-Mimikatz, Procdump or Taskmgr based on the CallTrace pointing to ntdll.dll, dbghelp.dll or dbgcore.dll for win10, server2016 and up.
 author: Samir Bousseaden, Michael Haag
 date: 2019/04/03
-modified: 2022/03/20
+modified: 2022/09/29
 references:
     - https://blog.menasec.net/2019/02/threat-hunting-21-procdump-or-taskmgr.html
     - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
@@ -40,6 +40,8 @@ detection:
             - '\thor\thor64.exe+'
             - '|UNKNOWN('
         GrantedAccess: '0x103800'
+    filter_sysmon:
+        SourceImage: 'C:\Windows\Sysmon64.exe'
     condition: selection and not 1 of filter*
 falsepositives:
     - False positives are present when looking for 0x1410. Exclusions may be required.
