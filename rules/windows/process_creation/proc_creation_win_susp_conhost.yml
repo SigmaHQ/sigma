@@ -6,7 +6,7 @@ references:
     - http://www.hexacorn.com/blog/2020/05/25/how-to-con-your-host/
 author: omkar72
 date: 2020/10/25
-modified: 2021/12/17
+modified: 2022/09/29
 tags:
     - attack.defense_evasion
     - attack.t1202
@@ -16,9 +16,14 @@ logsource:
 detection:
     selection:
         ParentImage|endswith: '\conhost.exe'
-    filter:
+    filter_provider:
         Provider_Name: 'SystemTraceProvider-Process'  # FPs with Aurora
-    condition: selection and not filter
+    filter_git:
+        # Example FP:
+        #   ParentCommandLine: "C:\Program Files\Git\cmd\git.exe" show --textconv :path/to/file
+        Image|endswith: '\git.exe'
+        ParentCommandLine|contains: ' show '
+    condition: selection and not 1 of filter_*
 fields:
     - Image
     - CommandLine

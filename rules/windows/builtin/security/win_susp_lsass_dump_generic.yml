@@ -4,7 +4,7 @@ description: Detects process handle on LSASS process with certain access mask
 status: experimental
 author: Roberto Rodriguez, Teymur Kheirkhabarov, Dimitrios Slamaris, Mark Russinovich, Aleksey Potapov, oscd.community (update)
 date: 2019/11/01
-modified: 2022/09/18
+modified: 2022/09/28
 references:
     - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
@@ -64,6 +64,7 @@ detection:
             - C:\Windows\SysWow64\
             - C:\Windows\SysNative\
             - C:\Program Files\
+            - C:\Program Files (x86)\
             - C:\Windows\Temp\asgard2-agent\
             - C:\ProgramData\Microsoft\Windows Defender\Platform\
     filter2:
@@ -71,8 +72,9 @@ detection:
     filter3:
         ProcessName: 'C:\Windows\CCM\CcmExec.exe'
     filter4:
-        ProcessName: 'C:\Windows\System32\taskhostw.exe'
-        AccessMask: '0x10'
+        ProcessName: 
+            - 'C:\Windows\System32\taskhostw.exe'
+            - 'C:\Windows\System32\msiexec.exe'
     condition: 1 of selection_* and not 1 of filter*
 fields:
     - ComputerName

@@ -4,7 +4,7 @@ status: experimental
 description: Detects process access to LSASS memory with suspicious access flags and from a suspicious folder
 author: Florian Roth
 date: 2021/11/27
-modified: 2022/09/20
+modified: 2022/09/30
 references:
     - https://docs.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
@@ -88,6 +88,10 @@ detection:
         SourceImage|startswith: 'C:\Program Files (x86)\Google\Temp\'
         SourceImage|endswith: '.tmp\GoogleUpdate.exe'
         GrantedAccess: '0x410'
+    filter_adobe_temp:
+        SourceImage|startswith:
+            - 'C:\Program Files (x86)\Common Files\Adobe\ARM\'
+            - 'C:\Program Files\Common Files\Adobe\ARM\'
     condition: selection and not 1 of filter*
 fields:
     - User

@@ -8,7 +8,7 @@ references:
     - https://blog.cyble.com/2022/07/27/targeted-attacks-being-carried-out-via-dll-sideloading/ # iphlpapi.dll
 author: Nasreddine Bencherchali, Wietze Beukema (project and research), Chris Spehn (research WFH Dridex)
 date: 2022/08/14
-modified: 2022/09/11
+modified: 2022/09/29
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -418,11 +418,18 @@ detection:
             - 'C:\Windows\SoftwareDistribution\'
             - 'C:\Windows\SystemTemp\'
     filter_appvpolicy:
-        ImageLoaded: C:\Program Files\Common Files\microsoft shared\ClickToRun\AppVPolicy.dll
-        Image: C:\Program Files\Common Files\microsoft shared\ClickToRun\OfficeClickToRun.exe
+        ImageLoaded: 'C:\Program Files\Common Files\microsoft shared\ClickToRun\AppVPolicy.dll'
+        Image: 'C:\Program Files\Common Files\microsoft shared\ClickToRun\OfficeClickToRun.exe'
+    filter_azure:
+        ImageLoaded|startswith: 'C:\Packages\Plugins\Microsoft.GuestConfiguration.ConfigurationforWindows\'
     filter_dell:
-        Image: 'C:\Windows\System32\backgroundTaskHost.exe'
+        Image|startswith:
+            - 'C:\Program Files\WindowsApps\DellInc.DellSupportAssistforPCs'
+            - 'C:\Windows\System32\backgroundTaskHost.exe'
         ImageLoaded|startswith: 'C:\Program Files\WindowsApps\DellInc.DellSupportAssistforPCs'
+    filter_cleanmgr:
+        Image: 'C:\Windows\System32\cleanmgr.exe'
+        ImageLoaded|endswith: '\ssshim.dll'
     condition: selection and not 1 of filter_*
 falsepositives:
     - Legitimate applications loading their own versions of the DLLs mentioned in this rule
