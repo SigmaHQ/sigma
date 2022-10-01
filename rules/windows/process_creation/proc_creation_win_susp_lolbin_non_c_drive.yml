@@ -6,6 +6,7 @@ author: Aaron Herman
 date: 2022/10/01
 references:
     - https://github.com/pr0xylife/Qakbot/blob/main/Qakbot_BB_30.09.2022.txt
+    - https://app.any.run/tasks/4985c746-601e-401a-9ccf-ae350ac2e887/
 tags:
     - attack.execution
     - attack.t1059
@@ -15,14 +16,16 @@ logsource:
 detection:
     selection_lolbin:
         CommandLine|contains:
-            - 'wscript.exe'
-            - 'cscript.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
     selection_exetensions:
         CommandLine|contains: '.js'
     selection_drive_path:
         CommandLine|contains: ':\'
     filter_drive_path:
         CommandLine|contains: 'C:\'
+    filter_env_vars:
+        CommandLine|contains: '%'
     condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Rare legitimate execution from a mounted drive by an administrator
