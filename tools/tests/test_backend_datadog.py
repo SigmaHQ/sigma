@@ -71,8 +71,8 @@ class TestDatadogLogsBackend(unittest.TestCase):
                 "condition": "selection",
             }
         }
-        query = self.generate_query(rule, config={"tags": ["test-tag"]})
-        expected_query = "@attribute:test AND test-tag:mytag"
+        query = self.generate_query(rule, config={"tags": {"test-tag":"test-tag2"}})
+        expected_query = "@attribute:test AND test-tag2:mytag"
         self.assertEqual(query, expected_query)
 
     def test_special_characters_escape(self):
