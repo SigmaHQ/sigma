@@ -1,7 +1,7 @@
 title: Windows Defender Exclusions Added via Powershell
 id: c1344fa2-323b-4d2e-9176-84b4d4821c88
 related:
-    - id: 801f7258-40a8-4c10-bf4b-d76248556aac
+    - id: 17769c90-230e-488b-a463-e05c08e9d48f
       type: similar
 status: experimental
 description: Detects modifications to the Windows Defender configuration settings using PowerShell to add exclusions
@@ -19,11 +19,15 @@ tags:
     - attack.t1059
 detection:
     selection_args_exc:
-        ScriptBlockText|contains: '-Exclusion'
+        ScriptBlockText|contains: 
+            - ' -ExclusionPath '
+            - ' -ExclusionExtension '
+            - ' -ExclusionProcess '
+            - ' -ExclusionIpAddress '
     selection_args_pref:
         ScriptBlockText|contains:
-            - 'Add-MpPreference'
-            - 'Set-MpPreference'
+            - 'Add-MpPreference '
+            - 'Set-MpPreference '
     condition: all of selection*
 falsepositives:
     - Unknown
