@@ -6,7 +6,7 @@ author: Nasreddine Bencherchali
 references:
     - https://github.com/hackerhouse-opensource/iscsicpl_bypassUAC (Idea)
 date: 2022/07/17
-modified: 2022/09/10
+modified: 2022/09/29
 tags:
     - attack.defense_evasion
     - attack.t1070
@@ -23,12 +23,17 @@ detection:
             - '\Downloads\'
             - '\AppData\Local\Temp\'
             - 'C:\PerfLogs\'
-    filter:
+    filter_generic:
         - Image|endswith: '\msiexec.exe'
         - ImageLoaded|startswith:
             - 'C:\Program Files\'
             - 'C:\Program Files (x86)\'
-    condition: selection and not filter
+    filter_cleanmgr:
+        # Example CLI that generates this event: C:\WINDOWS\system32\cleanmgr.exe /autocleanstoragesense /d C:
+        # Sometimes the DLL gets loaded from %temp%
+        Image: 'C:\Windows\System32\cleanmgr.exe'
+        ImageLoaded|endswith: '\ssshim.dll'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown
 level: high
