@@ -1,0 +1,29 @@
+title: GMER - Rootkit Detector and Remover Execution
+id: 9082ff1f-88ab-4678-a3cc-5bcff99fc74d
+status: experimental
+description: Detects the execution GMER tool based on image and hash fields.
+references:
+    - http://www.gmer.net/
+author: Nasreddine Bencherchali
+date: 2022/10/05
+tags:
+    - attack.defense_evasion
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: '\gmer.exe'
+    selection_sysmon_hash:
+        Hashes|contains:
+            - 'MD5=e9dc058440d321aa17d0600b3ca0ab04'
+            - 'SHA1=539c228b6b332f5aa523e5ce358c16647d8bbe57'
+            - 'SHA256=e8a3e804a96c716a3e9b69195db6ffb0d33e2433af871e4d4e1eab3097237173'
+    selection_other:
+        - MD5: 'e9dc058440d321aa17d0600b3ca0ab04'
+        - SHA1: '539c228b6b332f5aa523e5ce358c16647d8bbe57'
+        - SHA256: 'e8a3e804a96c716a3e9b69195db6ffb0d33e2433af871e4d4e1eab3097237173'
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely
+level: high
