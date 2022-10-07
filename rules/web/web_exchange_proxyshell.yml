@@ -15,17 +15,18 @@ tags:
 logsource:
     category: webserver
 detection:
-    selection:
+    selection_1:
         sc-status: 401
-    selection_auto:
+    selection_1_auto:
         c-uri|contains: '/autodiscover.json'
-    selection_uri:
+    selection_1_uri:
         c-uri|contains:
             - '/powershell'
             - '/mapi/nspi'
             - '/EWS'
             - 'X-Rps-CAT'
     selection_poc:
+        sc-status: 401
         c-uri|contains: 
             # since we don't know how it will appear in the log files, we'll just use all versions
             - 'autodiscover.json?@'
@@ -33,7 +34,7 @@ detection:
             - '%3f@foo.com'
             - 'Email=autodiscover/autodiscover.json'
             - 'json?@foo.com'
-    condition: selection and ( selection_auto and selection_uri or and selection_poc )
+    condition: all of selection_1* or selection_poc
 falsepositives:
     - Unknown
 level: high
