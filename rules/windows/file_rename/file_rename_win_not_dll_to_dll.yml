@@ -7,7 +7,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1036/T1036.md#atomic-test-1---system-file-copied-to-unusual-location
 author: frack113
 date: 2022/02/19
-modified: 2022/03/13
+modified: 2022/10/07
 logsource:
     product: windows
     category: file_rename
@@ -24,6 +24,8 @@ detection:
     filter_tiworker:
         Image|startswith: 'C:\Windows\WinSxS\'
         Image|endswith: '\TiWorker.exe'
+    filter_upgrade:
+        Image: 'C:\Windows\System32\wuauclt.exe'
     condition: to_dll and not 1 of filter*
 falsepositives:
     - Application installation
