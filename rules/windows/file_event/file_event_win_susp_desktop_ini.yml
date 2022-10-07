@@ -6,7 +6,7 @@ author: Maxime Thiebaut (@0xThiebaut), Tim Shelton (HAWK.IO)
 references:
     - https://isc.sans.edu/forums/diary/Desktopini+as+a+postexploitation+tool/25912/
 date: 2020/03/19
-modified: 2022/09/20
+modified: 2022/10/07
 logsource:
     product: windows
     category: file_event
@@ -21,6 +21,8 @@ detection:
     filter_jetbrains:
         Image|endswith: '\AppData\Local\JetBrains\Toolbox\bin\7z.exe'
         TargetFilename|contains: '\JetBrains\apps\'
+    filter_upgrade:
+        TargetFilename|startswith: 'C:\$WINDOWS.~BT\NewOS\'
     condition: selection and not 1 of filter_*
 falsepositives:
     - Operations performed through Windows SCCM or equivalent
