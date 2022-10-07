@@ -7,7 +7,7 @@ references:
     - https://github.com/OTRF/detection-hackathon-apt29/issues/12
     - https://threathunterplaybook.com/evals/apt29/detections/5.B.1_611FCA99-97D0-4873-9E51-1C1BA2DBB40D.html
 date: 2020/05/02
-modified: 2022/08/22
+modified: 2022/10/07
 logsource:
     product: windows
     category: file_event
@@ -15,7 +15,8 @@ detection:
     selection:
         TargetFilename|contains: '\Microsoft\Windows\Start Menu\Programs\StartUp'
     filter_update:
-        Image: 'C:\Windows\System32\wuauclt.exe'
+        - Image: 'C:\Windows\System32\wuauclt.exe'
+        - TargetFilename|startswith: 'C:\$WINDOWS.~BT\NewOS\'
     condition: selection and not filter_update
 falsepositives:
     - An FP could be caused by legitimate application writing shortcuts for example. This folder should always be inspected to make sure that all the files in there are legitimate
