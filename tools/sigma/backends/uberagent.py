@@ -1,3 +1,4 @@
+import json
 import re
 import sigma
 from sigma.backends.base import SingleTextQueryBackend
@@ -103,6 +104,7 @@ class ActivityMonitoringRule:
     """
 
     def __init__(self):
+        self.id = ""
         self.name = ""
         self.event_type = None
         self.tag = ""
@@ -110,52 +112,15 @@ class ActivityMonitoringRule:
         self.risk_score = 0
         self.description = ""
         self.sigma_level = ""
+        self.annotation = ""
+        self.generic_properties = []
 
-        # Specifies the properties that are being evaluated and send to the backend
-        # if an Activity Monitoring rule is matched.
-        self.generic_properties = {
-            "Process.": [
-                "Process.Hash.MD5",
-                "Process.Hash.SHA1",
-                "Process.Hash.SHA256",
-                "Process.Hash.IMP"
-            ],
-            "Image.": [
-                "Image.Name",
-                "Image.Path",
-                "Image.Hash.MD5",
-                "Image.Hash.SHA1",
-                "Image.Hash.SHA256",
-                "Image.Hash.IMP"
-            ],
-            "Net.": [
-                "Net.Target.Ip",
-                "Net.Target.Name",
-                "Net.Target.Port",
-                "Net.Target.Protocol",
-                "Net.Source.Ip",
-                "Net.Source.Port",
-            ],
-            "Reg.": [
-                "Reg.Key.Path",
-                "Reg.Key.Path.New",
-                "Reg.Key.Path.Old",
-                "Reg.Key.Name",
-                "Reg.Parent.Key.Path",
-                "Reg.Value.Name",
-                "Reg.File.Name",
-                "Reg.Key.Sddl",
-                "Reg.Key.Hive",
-                "Reg.Key.Target"
-            ],
-            "Dns.": [
-                "Dns.QueryRequest",
-                "Dns.QueryResponse"
-            ]
-        }
+    def set_id(self, id):
+        """Sets the RuleId property."""
+        self.id = id
 
     def set_query(self, query):
-        """Sets the generated query."""
+        """Sets the generated query property."""
         self.query = query
 
     def set_name(self, name):
@@ -181,6 +146,14 @@ class ActivityMonitoringRule:
     def set_description(self, description):
         """Set the Description property."""
         self.description = description
+
+    def set_annotation(self, annotation):
+        """Set the Annotation property."""
+        self.annotation = annotation
+
+    def set_generic_properties(self, fields):
+        """Set the generic properties. """
+        self.generic_properties = fields
 
     def _prefixed_tag(self):
         prefixes = {
@@ -214,6 +187,7 @@ class ActivityMonitoringRule:
         if len(self.query) == 0:
             raise MalformedRuleException()
 
+        result += "RuleId = {}\n".format(self.id)
         result += "RuleName = {}\n".format(self.name)
         result += "EventType = {}\n".format(self.event_type)
         result += "Tag = {}\n".format(self._prefixed_tag())
@@ -223,23 +197,49 @@ class ActivityMonitoringRule:
         if self.risk_score > 0:
             result += "RiskScore = {}\n".format(self.risk_score)
 
+        if len(self.annotation) > 0:
+            result += "Annotation = {}\n".format(self.annotation)
+
         result += "Query = {}\n".format(self.query)
 
         if self.event_type == "Reg.Any":
             result += "Hive = HKLM,HKU\n"
 
         counter = 1
-        for event_type_prefix in self.generic_properties:
-            if self.event_type.startswith(event_type_prefix):
-                for prop in self.generic_properties[event_type_prefix]:
-                    # Generic properties are limited to 10.
-                    if counter > 10:
-                        break
+        for prop in self.generic_properties:
 
-                    result += "GenericProperty{} = {}\n".format(counter, prop)
-                    counter += 1
+            # The following properties are included in all tagging events anyways.
+            # There is no need to send them twice to the backend so we are ignoring them here.
+            if prop in ["Process.Path", "Process.CommandLine", "Process.Name"]:
+                continue
+            # Generic properties are limited to 10.
+            if counter > 10:
+                break
+
+            result += "GenericProperty{} = {}\n".format(counter, prop)
+            counter += 1
 
         return result
+
+
+def get_mitre_annotation_from_tag(tag):
+    tag = tag.lower()
+    if tag.startswith('attack.t'):
+        return tag[7:].upper()
+    return None
+
+
+def get_annotation(tags):
+    mitre_annotation_objects = []
+    for tag in tags:
+        mitre_annotation = get_mitre_annotation_from_tag(tag)
+        if mitre_annotation is not None:
+            mitre_annotation_objects.append(mitre_annotation)
+
+    if len(mitre_annotation_objects) > 0:
+        return json.dumps({ 'mitre_attack': mitre_annotation_objects })
+
+    return ""
 
 
 def get_parser_properties(sigmaparser):
@@ -248,6 +248,8 @@ def get_parser_properties(sigmaparser):
     description = sigmaparser.parsedyaml['description']
     condition = sigmaparser.parsedyaml['detection']['condition']
     logsource = sigmaparser.parsedyaml['logsource']
+    id = sigmaparser.parsedyaml['id']
+
     category = ''
     if 'category' in logsource:
         category = logsource['category'].lower()
@@ -260,7 +262,11 @@ def get_parser_properties(sigmaparser):
     if 'service' in logsource:
         service = logsource['service'].lower()
 
-    return product, category, service, title, level, condition, description
+    annotation = ''
+    if 'tags' in sigmaparser.parsedyaml:
+        annotation = get_annotation(sigmaparser.parsedyaml['tags'])
+
+    return product, category, service, title, level, condition, description, annotation, id
 
 
 def write_file_header(f, level):
@@ -282,6 +288,7 @@ class uberAgentBackend(SingleTextQueryBackend):
     config_required = False
     rule = None
     current_category = None
+    recent_fields = []
 
     #
     # SingleTextQueryBackend
@@ -410,7 +417,16 @@ class uberAgentBackend(SingleTextQueryBackend):
         "details"
     ]
 
+    options = SingleTextQueryBackend.options + (
+        ("exclusion", "", "List of separated GUIDs to execlude rule generation for.", None),
+    )
+
     rules = []
+
+    def trackRecentMappedField(self, field):
+        if field not in self.recent_fields:
+            self.recent_fields.append(field)
+
 
     def fieldNameMapping(self, fieldname, value):
         key = fieldname.lower()
@@ -418,7 +434,9 @@ class uberAgentBackend(SingleTextQueryBackend):
         if self.current_category is not None:
             if self.current_category in self.fieldMappingPerCategory:
                 if key in self.fieldMappingPerCategory[self.current_category]:
-                    return self.fieldMappingPerCategory[self.current_category][key]
+                    result = self.fieldMappingPerCategory[self.current_category][key]
+                    self.trackRecentMappedField(result)
+                    return result
 
         if key not in self.fieldMapping:
             if key in self.ignoreFieldList:
@@ -427,7 +445,9 @@ class uberAgentBackend(SingleTextQueryBackend):
                 raise NotImplementedError(
                     'The field name %s in category %s is not implemented.' % (fieldname, self.current_category))
 
-        return self.fieldMapping[key]
+        result = self.fieldMapping[key]
+        self.trackRecentMappedField(result)
+        return result
 
     def generateQuery(self, parsed):
         if parsed.parsedAgg:
@@ -437,10 +457,14 @@ class uberAgentBackend(SingleTextQueryBackend):
 
     def generate(self, sigmaparser):
         """Method is called for each sigma rule and receives the parsed rule (SigmaParser)"""
-        product, category, service, title, level, condition, description = get_parser_properties(sigmaparser)
+        product, category, service, title, level, condition, description, annotation, id = get_parser_properties(sigmaparser)
 
         # Do not generate a rule if the given category is unsupported by now.
         if not is_sigma_category_supported(category):
+            return ""
+
+        # Exclude all entries contained in backend configuration exclusion list.
+        if id in self.backend_options["exclusion"]:
             return ""
 
         # We support windows rules and generic rules that don't have a specific product specifier - such as DNS.
@@ -451,9 +475,11 @@ class uberAgentBackend(SingleTextQueryBackend):
 
         try:
             rule = ActivityMonitoringRule()
+            self.recent_fields = []
 
             query = super().generate(sigmaparser)
             if len(query) > 0:
+                rule.set_id(id)
                 rule.set_name(title)
                 rule.set_tag(convert_sigma_name_to_uberagent_tag(title))
                 rule.set_event_type(convert_sigma_category_to_uberagent_event_type(category))
@@ -461,6 +487,8 @@ class uberAgentBackend(SingleTextQueryBackend):
                 rule.set_risk_score(convert_sigma_level_to_uberagent_risk_score(level))
                 rule.set_sigma_level(level)
                 rule.set_description(description)
+                rule.set_annotation(annotation)
+                rule.set_generic_properties(self.recent_fields)
                 self.rules.append(rule)
                 print("Generated rule <{}>.. [level: {}]".format(rule.name, level))
         except IgnoreTypedModifierException:
