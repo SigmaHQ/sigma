@@ -7,7 +7,7 @@ status: experimental
 description: Detects process access to LSASS memory with suspicious access flags 0x410 and 0x01410 (spin-off of similar rule)
 author: Florian Roth
 date: 2022/03/13
-modified: 2022/09/20
+modified: 2022/10/07
 references:
     - https://docs.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
@@ -95,6 +95,9 @@ detection:
             - '\JetBrains\Toolbox\bin\jetbrains-toolbox.exe'
     filter_xampp:
         SourceImage|endswith: '\xampp-control.exe'
+        GrantedAccess: '0x410'
+    filter_games:
+        SourceImage|contains: '\SteamLibrary\steamapps\'
         GrantedAccess: '0x410'
     condition: selection and not 1 of filter*
 fields:
