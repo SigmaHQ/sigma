@@ -15,7 +15,8 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_parameters:
+    selection:
+        Image|endswith: '\certutil.exe'
         CommandLine|contains:
             - ' -decode '
             - ' -decodehex '
@@ -29,11 +30,7 @@ detection:
             - ' /verifyctl '
             - ' /encode '
             - ' /exportPFX '
-    selection_certutil:
-        Image|endswith: '\certutil.exe'
-        CommandLine|contains: 'ping'
-            # - 'URL'  # questionable string; could cause false positive
-    condition: all of selection_*
+    condition: selection
 fields:
     - CommandLine
     - ParentCommandLine
