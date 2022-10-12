@@ -6,7 +6,7 @@ author: Nasreddine Bencherchali
 references:
     - https://www.trendmicro.com/en_us/research/22/h/ransomware-actor-abuses-genshin-impact-anti-cheat-driver-to-kill-antivirus.html
 date: 2022/08/31
-modified: 2022/10/11
+modified: 2022/10/12
 logsource:
     product: windows
     service: application
@@ -23,11 +23,13 @@ detection:
             - '\PerfLogs\'
             - '\Desktop\'
             - '\Downloads\'
-            - '\AppData\Local\Temp\'
+            # - '\AppData\Local\Temp\'  # too many FPs
             - 'C:\Windows\TEMP\'
             - '\\\\'
     filter_winget:
         Data|contains: '\AppData\Local\Temp\WinGet\'
+    filter_updhealthtools:
+        Data|contains: 'C:\Windows\TEMP\UpdHealthTools.msi'
     condition: selection and not 1 of filter_*
 falsepositives:
     - Some false positives may occur depending on the environnement
