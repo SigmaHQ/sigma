@@ -1,0 +1,41 @@
+title: Conhost Spawned By Suspicious Parent Process
+id: cbb9e3d1-2386-4e59-912e-62f1484f7a89
+status: experimental
+description: Detects when the Console Window Host (conhost.exe) process is spawned by a suspicious parent process, which could be indicative of code injection.
+author: Tim Rauch
+references:
+    - https://www.elastic.co/guide/en/security/current/conhost-spawned-by-suspicious-parent-process.html
+date: 2022/09/28
+logsource:
+    category: process_creation
+    product: windows
+tags:
+    - attack.execution
+    - attack.t1059
+detection:
+    selection:
+        Image|endswith: '\conhost.exe'
+        ParentImage|endswith:
+            - '\svchost.exe'
+            - '\lsass.exe'
+            - '\services.exe'
+            - '\smss.exe'
+            - '\winlogon.exe'
+            - '\explorer.exe'
+            - '\dllhost.exe'
+            - '\rundll32.exe'
+            - '\regsvr32.exe'
+            - '\userinit.exe'
+            - '\wininit.exe'
+            - '\spoolsv.exe'
+            - '\wermgr.exe'
+            - '\csrss.exe'
+            - '\ctfmon.exe'
+    filter:
+        ParentCommandLine|contains:
+            - '-k apphost -s AppHostSvc'
+            - '-k imgsvc'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high
