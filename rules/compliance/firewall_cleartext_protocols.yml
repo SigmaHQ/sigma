@@ -3,9 +3,9 @@ id: d7fb8f0e-bd5f-45c2-b467-19571c490d7e
 status: stable
 description: Ensure that all account usernames and authentication credentials are transmitted across networks using encrypted channels. Ensure that an encryption
     is used for all sensitive information in transit. Ensure that an encrypted channels is used  for all administrative account access.
-author: Alexandr Yampolskyi, SOC Prime
+author: Alexandr Yampolskyi, SOC Prime, Tim Shelton
 date: 2019/03/26
-modified: 2021/11/23
+modified: 2022/10/10
 references:
     - https://www.cisecurity.org/controls/cis-controls-list/
     - https://www.pcisecuritystandards.org/documents/PCI_DSS_v3-2-1.pdf
@@ -13,7 +13,7 @@ references:
 logsource:
     category: firewall
 detection:
-    selection1:
+    selection:
         dst_port:
             - 8080
             - 21
@@ -31,12 +31,14 @@ detection:
             - 5902
             - 5903
             - 5904
-    selection2:
+    selection_allow1:
         action:
             - forward
             - accept
             - 2
-    condition: all of selection*
+    selection_allow2:
+        blocked: "false" # not all fws set action value, but are set to mark as blocked or allowed or not
+    condition: selection and 1 of selection_allow*
 falsepositives:
     - Unknown
 level: low
