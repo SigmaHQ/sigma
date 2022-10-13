@@ -6,7 +6,7 @@ author: Nasreddine Bencherchali
 references:
     - https://github.com/hackerhouse-opensource/iscsicpl_bypassUAC (Idea)
 date: 2022/07/17
-modified: 2022/09/29
+modified: 2022/10/12
 tags:
     - attack.defense_evasion
     - attack.t1070
@@ -33,6 +33,10 @@ detection:
         # Sometimes the DLL gets loaded from %temp%
         Image: 'C:\Windows\System32\cleanmgr.exe'
         ImageLoaded|endswith: '\ssshim.dll'
+    filter_mscorsvw:
+        Image|startswith: 'C:\Windows\Microsoft.NET\Framework\v'
+        Image|endswith: '\mscorsvw.exe'
+        ImageLoaded|contains: '\AppData\Local\Temp\'
     condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown

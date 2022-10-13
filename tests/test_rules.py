@@ -854,6 +854,27 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with unused selections")
 
+    def test_unknown_value_modifier(self):
+        known_modifiers = ["contains", "startswith", "endswith", "all", "base64offset", "base64", "utf16le", "utf16be", "wide", "utf16", "windash", "re"]
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            detection = self.get_rule_part(file_path=file, part_name="detection")
+            if detection:
+                for search_identifier in detection:
+                    if isinstance(detection[search_identifier], dict):
+                        for field in detection[search_identifier]:
+                            if "|" in field:
+                                for current_modifier in field.split('|')[1:]:
+                                    found = False
+                                    for target_modifier in known_modifiers:
+                                        if current_modifier == target_modifier:
+                                            found = True
+                                    if not found:
+                                        print(Fore.RED + "Rule {} uses an unknown field modifier ({}/{})".format(file, search_identifier, field))
+                                        faulty_rules.append(file)
+
+        self.assertEqual(faulty_rules, [], Fore.RED + "There are rules with unknown value modifiers. Most often it is just a typo.")
+
     def test_all_value_modifier_single_item(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
