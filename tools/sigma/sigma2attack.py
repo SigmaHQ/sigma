@@ -11,18 +11,18 @@ import yaml
 level_eq = {
     "informational" : 1,
     "low"           : 2,
-    "medium"        : 3,
-    "high"          : 4,
-    "critical"      : 5
+    "medium"        : 4,
+    "high"          : 5
+    #"critical"      : 5
     }
 
-status_eq = {
-    "unsupported"   : 1,
-    "deprecated"    : 2,
-    "experimental"  : 3,
-    "test"          : 4,
-    "stable"        : 5
-        }
+#status_eq = {
+#    "unsupported"   : 1,
+#    "deprecated"    : 2,
+#    "experimental"  : 3,
+#    "test"          : 4,
+#    "stable"        : 5
+#        }
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -51,16 +51,23 @@ def main():
             docs = yaml.load_all(f, Loader=yaml.FullLoader)
             double = False
             for rule in docs:
-                if "tags" not in rule :
+                if "properties" not in rule or "techniques" not in rule["properties"] :
                     if double == False : # Only 1 warning
-                        sys.stderr.write(f"Ignoring rule {rule_file} (no tags)\n")
+                        sys.stderr.write(f"Ignoring rule {rule_file} (no techniques)\n")
                         num_rules_no_tags += 1
                     double = True # action globle no tag
                     continue
-                if not "status" in rule:
-                    status_name = "experimental"
-                else:
-                    status_name = rule["status"]
+		if not rule["properties"]["enabled"] :
+                    sys.stderr.write(f"Ignoring rule {rule_file} (disabled)\n")
+                    num_rules_no_tags += 1
+                    continue
+		
+		if rule["properties"]["displayName"]
+                #if not "status" in rule:
+                #    status_name = "experimental"
+                #else:
+                #    status_name = rule["status"]
+		
                 status_nb = status_eq[status_name]
                 if status_nb <status_start or status_nb>status_end:
                     sys.stderr.write(f"Ignoring rule {rule_file} filter status : {status_name}\n")
