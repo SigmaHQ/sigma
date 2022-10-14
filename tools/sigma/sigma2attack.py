@@ -5,28 +5,29 @@ import glob
 import json
 import os
 import sys
+from xml.etree.ElementTree import iselement
 
 import yaml
 
 level_eq = {
-    "informational" : 1,
-    "low"           : 2,
-    "medium"        : 4,
-    "high"          : 5
+    "Informational" : 1,
+    "Low"           : 2,
+    "Medium"        : 4,
+    "High"          : 5
     #"critical"      : 5
     }
 
-#status_eq = {
-#    "unsupported"   : 1,
-#    "deprecated"    : 2,
-#    "experimental"  : 3,
-#    "test"          : 4,
-#    "stable"        : 5
-#        }
+status_eq = {
+    "unsupported"   : 1,
+    "deprecated"    : 2,
+    "experimental"  : 3,
+    "test"          : 4,
+    "stable"        : 5
+    }
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--rules-directory", "-d", dest="rules_dir", default="rules", help="Directory to read rules from")
+    parser.add_argument("--rules-directory", "-d", dest="rules_dir", default="../../../AzureSentinel/AlertRules/", help="Directory to read rules from")
     parser.add_argument("--out-file", "-o", dest="out_file", default="heatmap.json", help="File to write the JSON layer to")
     parser.add_argument("--no-comment", dest="no_comment", action="store_true", help="Don't store rule names in comments")
     parser.add_argument("--status-start", "-s",dest="status_start", default="unsupported", help="Check rule with minimun status")
@@ -39,7 +40,7 @@ def main():
     status_start = status_eq[args.status_start]
     status_end = status_eq[args.status_end]
 
-    rule_files = glob.glob(os.path.join(args.rules_dir, "**/*.yml"), recursive=True)
+    rule_files = glob.glob(os.path.join(args.rules_dir, "**/*.yaml"), recursive=True)
     techniques_to_rules = {}
     score_to_rules = {}
     curr_max_technique_count = 0
@@ -51,18 +52,25 @@ def main():
             docs = yaml.load_all(f, Loader=yaml.FullLoader)
             double = False
             for rule in docs:
-                if "properties" not in rule or "techniques" not in rule["properties"] :
+                if ("properties" not in rule or "techniques" not in rule["properties"]):
                     if double == False : # Only 1 warning
                         sys.stderr.write(f"Ignoring rule {rule_file} (no techniques)\n")
                         num_rules_no_tags += 1
                     double = True # action globle no tag
                     continue
-		if not rule["properties"]["enabled"] :
-                    sys.stderr.write(f"Ignoring rule {rule_file} (disabled)\n")
-                    num_rules_no_tags += 1
-                    continue
-		
-		if rule["properties"]["displayName"]
+                
+                isenabled = rule["properties"]["enabled"]
+                rulestatus = rule["properties"]["displayName"][0:3]
+                if not isenabled:
+                    status_name = "deprecated"
+                elif rulestatus == "P -":
+                    status_name = "stable"
+                elif rulestatus == "I -":
+                    status_name = "test"
+                else:
+                    status_name = "experimental"
+
+
                 #if not "status" in rule:
                 #    status_name = "experimental"
                 #else:
@@ -72,24 +80,28 @@ def main():
                 if status_nb <status_start or status_nb>status_end:
                     sys.stderr.write(f"Ignoring rule {rule_file} filter status : {status_name}\n")
                     continue
-                tags = rule["tags"]
-                level = rule["level"]
+                tags = rule["properties"]["techniques"]
+                try:
+                    level = rule["properties"]["severity"]
+                except:
+                    print(f'No Severity found {rule_file}')
+                    continue
+
                 double = True
                 t_tags = False
                 for tag in tags:
-                    if tag.lower().startswith("attack.t"):
-                        t_tags = True
-                        technique_id = tag[len("attack."):].upper()
-                        num_rules_used += 1
-                        if technique_id not in techniques_to_rules:
-                            techniques_to_rules[technique_id] = []
-                            score_to_rules[technique_id] = []
-                        techniques_to_rules[technique_id].append(os.path.basename(rule_file))
-                        score_to_rules[technique_id].append(level_eq[level])
-                        if args.level_score == True:
-                            curr_max_technique_count = max(curr_max_technique_count, sum(score_to_rules[technique_id]))
-                        else:
-                            curr_max_technique_count = max(curr_max_technique_count, len(techniques_to_rules[technique_id]))
+                    t_tags = True
+                    technique_id = tag
+                    num_rules_used += 1
+                    if technique_id not in techniques_to_rules:
+                        techniques_to_rules[technique_id] = []
+                        score_to_rules[technique_id] = []
+                    techniques_to_rules[technique_id].append(os.path.basename(rule_file))
+                    score_to_rules[technique_id].append(level_eq[level])
+                    if args.level_score == True:
+                        curr_max_technique_count = max(curr_max_technique_count, sum(score_to_rules[technique_id]))
+                    else:
+                        curr_max_technique_count = max(curr_max_technique_count, len(techniques_to_rules[technique_id]))
                 if t_tags == False:
                     sys.stderr.write(f"Ignoring rule {rule_file} no Techniques in {tags} \n")
                     num_rules_no_techniques += 1
