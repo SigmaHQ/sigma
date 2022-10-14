@@ -6,7 +6,7 @@ references:
     - https://hijacklibs.net/ # For list of DLLs that could be sideloaded (search for dlls mentioned here in there)
 author: Nasreddine Bencherchali, Wietze Beukema (project and research)
 date: 2022/08/17
-modified: 2022/09/21
+modified: 2022/10/13
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -24,9 +24,13 @@ detection:
         ImageLoaded|startswith:
             - 'C:\Program Files\Bitdefender Antivirus Free\'
             - 'C:\Program Files (x86)\Bitdefender Antivirus Free\'
-    filter_log_dll_other:
-        - ImageLoaded: 'C:\Program Files\Dell\SARemediation\plugin\log.dll'
-        - ImageLoaded|startswith: 'C:\Program Files\Canon\MyPrinter\'
+    filter_log_dll_dell_sar:
+        Image: 'C:\Program Files\Dell\SARemediation\audit\TelemetryUtility.exe'
+        ImageLoaded:
+            - 'C:\Program Files\Dell\SARemediation\plugin\log.dll'
+            - 'C:\Program Files\Dell\SARemediation\audit\log.dll'
+    filter_log_dll_canon:
+        ImageLoaded|startswith: 'C:\Program Files\Canon\MyPrinter\'
     # F-Secure
     selection_fsecure:
         ImageLoaded|endswith: '\qrt.dll'
