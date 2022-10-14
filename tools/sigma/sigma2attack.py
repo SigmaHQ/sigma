@@ -5,7 +5,6 @@ import glob
 import json
 import os
 import sys
-from xml.etree.ElementTree import iselement
 
 import yaml
 
@@ -27,7 +26,7 @@ status_eq = {
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--rules-directory", "-d", dest="rules_dir", default="../../../AzureSentinel/AlertRules/", help="Directory to read rules from")
+    parser.add_argument("--rules-directory", "-d", dest="rules_dir", default="rules", help="Directory to read rules from")
     parser.add_argument("--out-file", "-o", dest="out_file", default="heatmap.json", help="File to write the JSON layer to")
     parser.add_argument("--no-comment", dest="no_comment", action="store_true", help="Don't store rule names in comments")
     parser.add_argument("--status-start", "-s",dest="status_start", default="unsupported", help="Check rule with minimun status")
