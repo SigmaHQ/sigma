@@ -4,7 +4,7 @@ id: 5589ab4f-a767-433c-961d-c91f3f704db1
 description: Detects different hacktools used for relay attacks on Windows for privilege escalation
 author: Florian Roth
 date: 2021/07/24
-modified: 2022/03/03
+modified: 2022/10/06
 references:
     - https://attack.mitre.org/techniques/T1557/001/
     - https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/
@@ -41,6 +41,10 @@ detection:
             - 'cme smb '
             - ' /ntlm:NTLMhash '
             - 'Invoke-PetitPotam'
+            - '.exe -t * -p '  # JuicyPotatoNG pattern https://github.com/antonioCoco/JuicyPotatoNG
+    selection_juicypotato_enum:  # appears when JuicyPotatoNG is used with -b
+        CommandLine|contains: '.exe -c "{'
+        CommandLine|endswith: '}" -z'
     filter_hotpotatoes:  # known goodware https://hotpot.uvic.ca/
         Image|contains:
             - 'HotPotatoes6'
