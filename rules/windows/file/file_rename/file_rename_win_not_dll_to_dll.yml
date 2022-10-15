@@ -7,7 +7,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1036/T1036.md#atomic-test-1---system-file-copied-to-unusual-location
 author: frack113
 date: 2022/02/19
-modified: 2022/10/07
+modified: 2022/10/15
 logsource:
     product: windows
     category: file_rename
@@ -22,12 +22,20 @@ detection:
         - OriginalFilename|contains:
             - '.dll.'
             - '\SquirrelTemp\temp'
+    filter_empty_source:
+        OriginalFilename: ''
+    filter_non_existing_source:
+        OriginalFilename: null
     filter_tiworker:
         Image|startswith: 'C:\Windows\WinSxS\'
         Image|endswith: '\TiWorker.exe'
     filter_upgrade:
         - Image: 'C:\Windows\System32\wuauclt.exe'
         - TargetFilename|startswith: 'C:\$WINDOWS.~BT\Sources\'
+    filter_program_files:
+        Image|startswith:
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
     condition: to_dll and not 1 of filter*
 falsepositives:
     - Application installation
