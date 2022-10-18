@@ -1,9 +1,7 @@
-title: Abuse of Service Permissions to Hide Services Via Set-Service
-id: 514e4c3a-c77d-4cde-a00f-046425e2301e
+title: Windows PowerShell Web Request
+id: 953945c5-22fe-4a92-9f8a-a9edc1e522da
 related:
-    - id: a537cfc3-4297-4789-92b5-345bfd845ad0
-      type: derived
-    - id: 953945c5-22fe-4a92-9f8a-a9edc1e522da
+    - id: 514e4c3a-c77d-4cde-a00f-046425e2301e
       type: similar
 status: experimental
 description: Detects usage of the "Set-Service" powershell cmdlet to configure a new SecurityDescriptor that allows a service to be hidden from other utilities such as "sc.exe", "Get-Service"...etc. (Works only in powershell 7)
@@ -18,22 +16,19 @@ tags:
     - attack.privilege_escalation
     - attack.t1574.011
 logsource:
-    category: process_creation
     product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
 detection:
-    selection_img:
-        - Image|endswith: '\pwsh.exe'
-        - OriginalFileName: 'pwsh.dll'
-    selection_sddl:
-        # Example would be: "D:(D;;DCLCWPDTSD;;;IU)(D;;DCLCWPDTSD;;;SU)(D;;DCLCWPDTSD;;;BA)(A;;CCLCSWLOCRRC;;;IU)(A;;CCLCSWLOCRRC;;;SU)(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)S:(AU;FA;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)"
-        CommandLine|contains|all:
+    selection:
+        ScriptBlockText|contains|all:
             - 'Set-Service '
             - 'DCLCWPDTSD'
-    selection_cmdlet:
-        CommandLine|contains:
+        ScriptBlockText|contains:
             - '-SecurityDescriptorSddl '
             - '-sd '
-    condition: all of selection_*
+    condition: selection
 falsepositives:
     - Rare intended use of hidden services
+    - Rare FP could occure due to the non linearity of the ScriptBlockText log
 level: high
