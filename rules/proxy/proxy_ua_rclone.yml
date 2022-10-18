@@ -1,29 +1,23 @@
-title: Detect Rclone activity via Proxy
+title: Rclone Activity via Proxy
 id: 2c03648b-e081-41a5-b9fb-7d854a915091
-status: Experimental 
-description: Detects rclone via its default user-agent string when HTTP protocol is used for transmission of data.
+status: experimental 
+description: Detects the use of rclone, a command-line program to manage files on cloud storage, via its default user-agent string
 author: Janantha Marasinghe
 references:
-  - https://www.kroll.com/en/insights/publications/cyber/new-m365-business-email-compromise-attacks-with-rclone
+   - https://rclone.org/
+   - https://www.kroll.com/en/insights/publications/cyber/new-m365-business-email-compromise-attacks-with-rclone
 date: 2022/10/18
-modified: 2022/10/18
-logsource:
-  category: proxy
-detection:
-  selection:
-    c-useragent: 'rclone\*'
-    cs-method:
-      -'POST'
-      -'GET'
-      -'PUT'
-  condition: selection
-fields:
-  - c-uri
-  - c-ip
-  - c-useragent
-falsepositives:
-  - Valid requests with this exact user agent to that is used by legitimate scripts or sysadmin operations.
-level: high
 tags:
-  - attack.exfiltration
-  - attack.t1567.002
+   - attack.exfiltration
+   - attack.t1567.002
+logsource:
+   category: proxy
+detection:
+   selection:
+      c-useragent|startswith: 'rclone/v'
+   condition: selection
+fields:
+   - c-ip
+falsepositives:
+   - Valid requests with this exact user agent to that is used by legitimate scripts or sysadmin operations
+level: high
