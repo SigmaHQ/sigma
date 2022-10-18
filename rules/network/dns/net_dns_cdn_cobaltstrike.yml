@@ -1,0 +1,22 @@
+title: Cobalt Strike abusing fastly.net CDN
+id: 8ce3f9d5-e4d4-4b8f-8d08-26a1f53837d3
+status: test
+description: Detects suspicious DNS queries known from Cobalt Strike abusing fastly CDN
+references:
+    - https://thedfirreport.com/2022/01/24/cobalt-strike-a-defenders-guide-part-2/
+author: Sorina Ionescu
+date: 2022/10/18
+tags:
+    - attack.command_and_control
+    - attack.t1071.004
+logsource:
+    category: dns
+detection:
+    selection:
+        query|endswith:
+            - 'fastly.net'
+        query|re: (.*\.){6}
+    condition: selection
+falsepositives:
+    - Unknown
+level: critical
