@@ -6,7 +6,7 @@ related:
 status: experimental
 author: frack113
 date: 2021/07/12
-modified: 2021/09/12
+modified: 2022/10/04
 description: Executes arbitrary PowerShell code using SyncAppvPublishingServer.exe.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1218/T1218.md
@@ -18,10 +18,12 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\SyncAppvPublishingServer.exe'
+    selection_img:
+        - Image|endswith: '\SyncAppvPublishingServer.exe'
+        - OriginalFileName: 'syncappvpublishingserver.exe'
+    selection_cli:
         CommandLine|contains: '"n; '
-    condition: selection
+    condition: all of selection_*
 fields:
     - ComputerName
     - User

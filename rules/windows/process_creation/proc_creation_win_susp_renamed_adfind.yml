@@ -11,6 +11,7 @@ references:
     - https://social.technet.microsoft.com/wiki/contents/articles/7535.adfind-command-examples.aspx
     - https://github.com/center-for-threat-informed-defense/adversary_emulation_library/blob/bf62ece1c679b07b5fb49c4bae947fe24c81811f/fin6/Emulation_Plan/Phase1.md
 date: 2022/08/21
+modified: 2022/10/13
 tags:
     - attack.discovery
     - attack.t1018
@@ -21,7 +22,28 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection_1:
+        CommandLine|contains:
+            - 'domainlist'
+            - 'trustdmp'
+            - 'dcmodes'
+            - 'adinfo'
+            - ' dclist '
+            - 'computer_pwdnotreqd'
+            - 'objectcategory='
+            - '-subnets -f'
+            - 'name="Domain Admins"'
+            - '-sc u:'
+            - 'domainncs'
+            - 'dompol'
+            - ' oudmp '
+            - 'subnetdmp'
+            - 'gpodmp'
+            - 'fspdmp'
+            - 'users_noexpire'
+            - 'computers_active'
+            - 'computers_pwdnotreqd'
+    selection_2:
         - Imphash: 
             - bca5675746d13a1f246e2da3c2217492
             - 53e117a96057eaf19c41380d0e87f1c2
@@ -31,7 +53,7 @@ detection:
     filter:
         Image|endswith: '\AdFind.exe'
         OriginalFileName: 'AdFind.exe'
-    condition: selection and not filter
+    condition: 1 of selection* and not filter
 falsepositives:
     - Unknown
 level: high

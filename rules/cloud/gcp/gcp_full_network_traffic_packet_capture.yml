@@ -1,18 +1,22 @@
 title: Google Full Network Traffic Packet Capture
 id: 980a7598-1e7f-4962-9372-2d754c930d0e
+status: test
 description: Identifies potential full network packet capture in gcp. This feature can potentially be abused to read sensitive data from unencrypted internal traffic.
-author: Austin Songer @austinsonger
-status: experimental
-date: 2021/08/13
 references:
     - https://cloud.google.com/kubernetes-engine/docs/how-to/audit-logging
     - https://developers.google.com/resources/api-libraries/documentation/compute/v1/java/latest/com/google/api/services/compute/Compute.PacketMirrorings.html
+author: Austin Songer @austinsonger
+date: 2021/08/13
+modified: 2022/10/09
+tags:
+    - attack.collection
+    - attack.t1074
 logsource:
-  product: gcp
-  service: gcp.audit
+    product: gcp
+    service: gcp.audit
 detection:
     selection:
-        gcp.audit.method_name: 
+        gcp.audit.method_name:
             - v*.Compute.PacketMirrorings.Get
             - v*.Compute.PacketMirrorings.Delete
             - v*.Compute.PacketMirrorings.Insert
@@ -20,10 +24,7 @@ detection:
             - v*.Compute.PacketMirrorings.List
             - v*.Compute.PacketMirrorings.aggregatedList
     condition: selection
-level: medium
-tags:
-    - attack.collection
-    - attack.t1074
 falsepositives:
-  - Full Network Packet Capture may be done by a system or network administrator. 
-  - If known behavior is causing false positives, it can be exempted from the rule.
+    - Full Network Packet Capture may be done by a system or network administrator.
+    - If known behavior is causing false positives, it can be exempted from the rule.
+level: medium

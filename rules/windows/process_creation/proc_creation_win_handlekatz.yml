@@ -6,11 +6,12 @@ references:
 status: experimental
 author: Florian Roth
 date: 2022/08/18
+modified: 2022/10/05
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection_loader:
+    selection_loader_img:
         Image|endswith: '\loader.exe'
         CommandLine|contains: '--pid:'
     selection_loader_imphash:
@@ -20,17 +21,16 @@ detection:
         - Hashes:
             - 'IMPHASH=38D9E015591BBFD4929E0D0F47FA0055'
             - 'IMPHASH=0E2216679CA6E1094D63322E3412D650'
-    selection_flags_1:
+    selection_flags:
         CommandLine|contains|all:
             - '--pid:'
             - '--outfile:'
-    selection_flags_2:
         CommandLine|contains:
             - '.dmp'
             - 'lsass'
             - '.obf'
             - 'dump'
-    condition: 1 of selection_loader_* or all of selection_flags*
+    condition: 1 of selection_*
 falsepositives:
     - Unknown
 tags:

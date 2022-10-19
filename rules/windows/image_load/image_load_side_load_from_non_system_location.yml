@@ -8,7 +8,7 @@ references:
     - https://blog.cyble.com/2022/07/27/targeted-attacks-being-carried-out-via-dll-sideloading/ # iphlpapi.dll
 author: Nasreddine Bencherchali, Wietze Beukema (project and research), Chris Spehn (research WFH Dridex)
 date: 2022/08/14
-modified: 2022/09/27
+modified: 2022/10/07
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -423,8 +423,15 @@ detection:
     filter_azure:
         ImageLoaded|startswith: 'C:\Packages\Plugins\Microsoft.GuestConfiguration.ConfigurationforWindows\'
     filter_dell:
-        Image: 'C:\Windows\System32\backgroundTaskHost.exe'
+        Image|startswith:
+            - 'C:\Program Files\WindowsApps\DellInc.DellSupportAssistforPCs'
+            - 'C:\Windows\System32\backgroundTaskHost.exe'
         ImageLoaded|startswith: 'C:\Program Files\WindowsApps\DellInc.DellSupportAssistforPCs'
+    filter_cleanmgr:
+        Image: 'C:\Windows\System32\cleanmgr.exe'
+        ImageLoaded|endswith: '\ssshim.dll'
+    filter_upgrade:
+        Image|startswith: 'C:\$WINDOWS.~BT\'
     condition: selection and not 1 of filter_*
 falsepositives:
     - Legitimate applications loading their own versions of the DLLs mentioned in this rule
