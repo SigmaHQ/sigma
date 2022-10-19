@@ -1,4 +1,4 @@
-title: Rundll32 From Abnormal Drive
+title: LOLBAS From Abnormal Drive
 id: d4ca7c59-e9e4-42d8-bf57-91a776efcb87
 status: experimental
 description: Detects rundll32.exe executing from an abnormal drive such as a mounted ISO.
@@ -7,6 +7,7 @@ date: 2022/01/25
 modified: 2022/02/14
 references: 
     - https://thedfirreport.com/2021/12/13/diavol-ransomware/
+    - https://www.scythe.io/library/threat-emulation-qakbot
 tags:
     - attack.t1218.001
 logsource:
@@ -14,7 +15,10 @@ logsource:
     product: windows
 detection:
     selection:
-        Image|endswith: '\rundll32.exe'
+        Image|endswith: 
+        - '\rundll32.exe'
+        - '\calc.exe'
+        - '\regsvr32.exe'
     filter: 
         - CurrentDirectory|contains: 'C:\'
         - CurrentDirectory: ''
