@@ -4,7 +4,7 @@ status: experimental
 description: Detects process access to LSASS memory with suspicious access flags and from a suspicious folder
 author: Florian Roth
 date: 2021/11/27
-modified: 2022/10/05
+modified: 2022/10/20
 references:
     - https://docs.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
@@ -67,10 +67,16 @@ detection:
             - '\WebEx\WebexHost.exe'
             - '\JetBrains\Toolbox\bin\jetbrains-toolbox.exe'
         GrantedAccess: '0x410'
-    filter2:
+    filter_dropbox1:
         SourceImage|startswith: 'C:\Windows\Temp\'
         SourceImage|endswith: '.tmp\DropboxUpdate.exe'
-        GrantedAccess: '0x410'
+        GrantedAccess:
+            - '0x410'
+            - '0x1410'
+    filter_dropbox2:
+        SourceImage|contains: '\AppData\Local\Temp\'
+        SourceImage|endswith: '.tmp\DropboxUpdate.exe'
+        GrantedAccess: '0x1410'
     filter_nextron:
         SourceImage|startswith: 'C:\Windows\Temp\asgard2-agent\'
         SourceImage|endswith:
