@@ -3,7 +3,7 @@ id: 4720b7df-40c3-48fd-bbdf-fd4b3c464f0d
 description: Monitor the creation of a new key under 'TaskCache' when a new scheduled task is registered by a process that is not svchost.exe, which is suspicious
 status: experimental
 date: 2021/06/18
-modified: 2022/10/14
+modified: 2022/10/20
 references:
   - https://thedfirreport.com/2021/03/29/sodinokibi-aka-revil-ransomware/
   - https://labs.f-secure.com/blog/scheduled-task-tampering/
@@ -41,6 +41,9 @@ detection:
     Image:
       - 'C:\Program Files (x86)\Dropbox\Update\DropboxUpdate.exe'
       - 'C:\Program Files\Dropbox\Update\DropboxUpdate.exe'
+  filter_explorer:
+    Image: 'C:\Windows\explorer.exe'
+    TargetObject|contains: '\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\Microsoft\Windows\PLA\Server Manager Performance Monitor\'
   condition: selection and not 1 of filter*
 falsepositives:
   - Unknown
