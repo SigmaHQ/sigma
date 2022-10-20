@@ -12,7 +12,7 @@ references:
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
     - https://oddvar.moe/2018/03/21/persistence-using-runonceex-hidden-from-autoruns-exe/
 date: 2019/10/25
-modified: 2022/10/18
+modified: 2022/10/20
 logsource:
     category: registry_set
     product: windows
@@ -135,7 +135,7 @@ detection:
         Details: 'C:\Program Files\Aurora-Agent\tools\aurora-dashboard.exe'
     filter_everything:
         TargetObject|endswith: '\Microsoft\Windows\CurrentVersion\Run\Everything'
-        Details: '"C:\Program Files\Everything\Everything.exe" -startup'
+        Details|endswith: '\Everything\Everything.exe" -startup' # We remove the starting part as it could be installed in different locations
     condition: all of current_version_* and not 1 of filter_*
 fields:
     - SecurityID
