@@ -4,7 +4,7 @@ status: experimental
 description: Detects shellcode injection by Metasploit's migrate and Empire's psinject
 author: Bhabesh Raj
 date: 2022/03/11
-modified: 2022/09/21
+modified: 2022/10/20
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
@@ -41,9 +41,17 @@ detection:
         GrantedAccess: 0x1F3FFF
         CallTrace|startswith: 'C:\Windows\System32\ntdll.dll'
     filter_dell_specifc:
-        SourceImage: C:\Program Files (x86)\Dell\UpdateService\ServiceShell.exe
-        TargetImage: C:\Windows\Explorer.EXE
+        SourceImage: 'C:\Program Files (x86)\Dell\UpdateService\ServiceShell.exe'
+        TargetImage: 'C:\Windows\Explorer.EXE'
         GrantedAccess: 0x1F3FFF
+        CallTrace|startswith: 'C:\Windows\System32\ntdll.dll'
+    filter_visual_studio:
+        SourceImage:
+            - 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\PerfWatson2.exe'
+            - 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\PerfWatson2.exe'
+        TargetImage:
+            - 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\devenv.exe'
+            - 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\devenv.exe'
         CallTrace|startswith: 'C:\Windows\System32\ntdll.dll'
     condition: selection and not 1 of filter_*
 falsepositives:

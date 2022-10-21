@@ -10,7 +10,10 @@ references:
     - https://docs.microsoft.com/en-us/windows/win32/api/shobjidl_core/nn-shobjidl_core-iexecutecommand
     - https://docs.microsoft.com/en-us/windows/win32/shell/shell-and-managed-code
 date: 2020/05/02
-modified: 2022/09/21
+modified: 2022/10/20
+tags:
+    - attack.defense_evasion
+    - attack.t1112
 logsource:
     product: windows
     category: registry_delete
@@ -44,10 +47,12 @@ detection:
         Image|contains: 'peazip'
         # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
         TargetObject|contains: '\PeaZip.'
+    filter_everything:
+        Image|endswith: '\Everything.exe'
+        # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
+        TargetObject|contains: '\Everything.'
     condition: selection and not 1 of filter_*
 falsepositives:
-    - Unknown
+    - Legitimate software (un)installations are known to cause some false positives. Please add them as a filter when encountered
 level: medium
-tags:
-    - attack.defense_evasion
-    - attack.t1112
+
