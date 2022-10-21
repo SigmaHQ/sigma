@@ -6,22 +6,26 @@ author: Teymur Kheirkhabarov (idea), Mangatas Tondang (rule), oscd.community
 references:
     - https://image.slidesharecdn.com/kheirkhabarovoffzonefinal-181117201458/95/hunting-for-privilege-escalation-in-windows-environment-50-638.jpg
 date: 2020/10/13
-modified: 2022/07/14
+modified: 2022/10/20
 logsource:
     product: windows
     category: process_creation
 detection:
-    image:
-        Image|endswith:
+    selection_img:
+        - Image|endswith:
             - '\cmd.exe'
             - '\powershell.exe'
             - '\pwsh.exe'
-    parent_image:
+        - OriginalFileName:
+            - 'Cmd.Exe'
+            - 'PowerShell.EXE'
+            - 'pwsh.dll'
+    selection_parent:
         ParentImage|contains|all:
             - '\Windows\Installer\'
             - 'msi'
         ParentImage|endswith: 'tmp'
-    condition: image and parent_image
+    condition: all of selection_*
 fields:
     - Image
     - ParentImage

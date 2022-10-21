@@ -11,23 +11,23 @@ tags:
     - attack.t1574.005
 author: Florian Roth
 date: 2022/08/20
+modified: 2022/10/18
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
-        Image|endswith: '\SharpUp.exe'
-    selection_pe:
-        Description: 'SharpUp'
-    selection_commandline:
-        CommandLine|contains: 
+        - Image|endswith: '\SharpUp.exe'
+        - Description: 'SharpUp'
+        - CommandLine|contains:
             - 'HijackablePaths'
             - 'UnquotedServicePath'
             - 'ProcessDLLHijack'
             - 'ModifiableServiceBinaries'
             - 'ModifiableScheduledTask'
             - 'DomainGPPPassword'
-    condition: 1 of selection*
+            - 'CachedGPPPassword'
+    condition: selection
 falsepositives:
     - Unknown
 level: critical
