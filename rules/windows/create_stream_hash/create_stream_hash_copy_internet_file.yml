@@ -1,0 +1,49 @@
+title: Copy a File Downloaded From Internet
+id: 573df571-a223-43bc-846e-3f98da481eca
+status: experimental
+description: Detects the copy of an ADS data stream from internet for sensitives files 
+author: frack113
+references:
+    - https://www.bleepingcomputer.com/news/security/exploited-windows-zero-day-lets-javascript-files-bypass-security-warnings/
+date: 2022/10/22
+tags:
+    - attack.defense_evasion
+logsource:
+    product: windows
+    category: create_stream_hash
+detection:
+    selection:
+        Contents|startswith: '[ZoneTransfer]  ZoneId=3'
+        TargetFilename|endswith: ':Zone.Identifier'
+        TargetFilename|contains:
+            - '.exe'
+            - '.scr'
+            - '.bat'
+            - '.cmd'
+            - '.docx'
+            - '.hta'
+            - '.jse'
+            - '.lnk'
+            - '.pptx'
+            - '.ps1'
+            - '.ps2'
+            - '.reg'
+            - '.sct'
+            - '.vb'
+            - '.vbe'
+            - '.vbs'
+            - '.wsc'
+            - '.wsf'
+            - '.xlsx'
+    filter:
+        Image|endswith:
+            - '\chrome.exe'
+            - '\firefox.exe'
+            - '\msedge.exe'
+    condition: selection and not filter
+fields:
+    - TargetFilename
+    - Image
+falsepositives:
+    - Unknown
+level: medium
