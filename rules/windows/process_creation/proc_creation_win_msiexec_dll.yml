@@ -5,6 +5,7 @@ description: Detects MsiExec loading a DLL and calling its DllUnregisterServer f
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1218.007/T1218.007.md
     - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/msiexec
+    - 
 author: frack113
 date: 2022/04/24
 logsource:
@@ -15,6 +16,8 @@ detection:
         Image|endswith: '\msiexec.exe'
         CommandLine|contains|all:
             - ' /z '
+            - ' -z '
+        CommandLine|contains|all:
             - '.dll'
     condition: selection
 falsepositives:
