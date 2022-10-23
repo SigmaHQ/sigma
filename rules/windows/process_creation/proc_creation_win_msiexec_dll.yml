@@ -13,14 +13,14 @@ logsource:
     product: windows
     category: process_creation
 detection:
-    selection:
+    selection_msi:
         Image|endswith: '\msiexec.exe'
         CommandLine|contains:
             - ' /z '
             - ' -z '
-        CommandLine|contains|all:
-            - '.dll'
-    condition: selection
+    selection_dll:
+        CommandLine|contains: '.dll'
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: medium
