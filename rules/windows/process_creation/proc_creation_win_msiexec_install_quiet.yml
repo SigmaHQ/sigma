@@ -6,6 +6,7 @@ description: |
     Msiexec.exe is the command-line utility for the Windows Installer and is thus commonly associated with executing installation packages (.msi)
 author: frack113
 date: 2022/01/16
+modified: 2022/10/23
 references:
     - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/msiexec
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1218.007/T1218.007.md
@@ -14,7 +15,7 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection_msi:
         Image|endswith: '\msiexec.exe'
         CommandLine|contains:
             - ' /i'
@@ -25,10 +26,11 @@ detection:
             - ' -a'
             - ' /j'
             - ' -j'
+     selection_quiet:
         CommandLine|contains:
             - ' /q'
             - ' -q'
-    condition: selection
+    condition: all of selection_*
 falsepositives:
     - Legitimate script
 level: low
