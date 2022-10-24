@@ -3,7 +3,7 @@ id: 9ae01559-cf7e-4f8e-8e14-4c290a1b4784
 description: Detects potential use of UIPromptForCredentials functions by looking for some of the DLLs needed for it.
 status: experimental
 date: 2020/10/20
-modified: 2022/10/07
+modified: 2022/10/24
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 tags:
     - attack.credential_access
@@ -50,6 +50,9 @@ detection:
     filter_regedit:
         # This FP is triggered for example when choosing the "Connect Network Registry" from the menu
         Image: 'C:\Windows\regedit.exe'
+    filter_spotify_aurora:
+        Provider_Name: 'Microsoft-Windows-Kernel-Process'
+        CommandLine|contains: 'C:\Program Files\WindowsApps\SpotifyAB.SpotifyMusic_'
     condition: selection and not 1 of filter_*
 falsepositives:
     - Other legitimate processes loading those DLLs in your environment.
