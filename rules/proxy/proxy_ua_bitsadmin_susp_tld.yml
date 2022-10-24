@@ -5,26 +5,6 @@ description: Detects Bitsadmin connections to domains with uncommon TLDs - https
 author: Florian Roth, Tim Shelton
 date: 2019/03/07
 modified: 2022/08/16
-logsource:
-    category: proxy
-detection:
-    selection:
-        c-useragent|startswith: 'Microsoft BITS/'
-    falsepositives:
-        r-dns|endswith:
-            - '.com' 
-            - '.net' 
-            - '.org' 
-            - '.scdn.co' # spotify streaming
-            - '.sfx.ms' # Microsoft domain, example request: https://oneclient.sfx.ms/PreSignInSettings/Prod/2022-08-15-21-xx-xx/PreSignInSettingsConfig.json
-    condition: selection and not falsepositives
-fields:
-    - ClientIP
-    - c-uri
-    - c-useragent
-falsepositives:
-    - Rare programs that use Bitsadmin and update from regional TLDs e.g. .uk or .ca
-level: high
 tags:
     - attack.command_and_control
     - attack.t1071.001
@@ -32,3 +12,23 @@ tags:
     - attack.persistence
     - attack.t1197
     - attack.s0190
+logsource:
+    category: proxy
+detection:
+    selection:
+        c-useragent|startswith: 'Microsoft BITS/'
+    falsepositives:
+        r-dns|endswith:
+            - '.com'
+            - '.net'
+            - '.org'
+            - '.scdn.co' # spotify streaming
+            - '.sfx.ms' # Microsoft domain, example request: https://oneclient.sfx.ms/PreSignInSettings/Prod/2022-08-15-21-xx-xx/PreSignInSettingsConfig.json
+    condition: selection and not falsepositives
+falsepositives:
+    - Rare programs that use Bitsadmin and update from regional TLDs e.g. .uk or .ca
+level: high
+fields:
+    - ClientIP
+    - c-uri
+    - c-useragent

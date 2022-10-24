@@ -1,13 +1,13 @@
 title: Generic Password Dumper Activity on LSASS
 id: 4a1b6da0-d94f-4fc3-98fc-2d9cb9e5ee76
-description: Detects process handle on LSASS process with certain access mask
 status: experimental
-author: Roberto Rodriguez, Teymur Kheirkhabarov, Dimitrios Slamaris, Mark Russinovich, Aleksey Potapov, oscd.community (update)
-date: 2019/11/01
-modified: 2022/09/28
+description: Detects process handle on LSASS process with certain access mask
 references:
     - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
+author: Roberto Rodriguez, Teymur Kheirkhabarov, Dimitrios Slamaris, Mark Russinovich, Aleksey Potapov, oscd.community (update)
+date: 2019/11/01
+modified: 2022/09/28
 tags:
     - attack.credential_access
     - car.2019-04-004
@@ -72,16 +72,16 @@ detection:
     filter3:
         ProcessName: 'C:\Windows\CCM\CcmExec.exe'
     filter4:
-        ProcessName: 
+        ProcessName:
             - 'C:\Windows\System32\taskhostw.exe'
             - 'C:\Windows\System32\msiexec.exe'
     condition: 1 of selection_* and not 1 of filter*
+falsepositives:
+    - Legitimate software accessing LSASS process for legitimate reason; update the whitelist with it
+level: high
 fields:
     - ComputerName
     - SubjectDomainName
     - SubjectUserName
     - ProcessName
     - ProcessID
-falsepositives:
-    - Legitimate software accessing LSASS process for legitimate reason; update the whitelist with it
-level: high

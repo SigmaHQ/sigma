@@ -2,13 +2,20 @@ title: Copy from Admin Share
 id: 855bc8b5-2ae8-402e-a9ed-b889e6df1900
 status: test
 description: Detects a suspicious copy command to or from an Admin share
-author: 'Florian Roth, oscd.community, Teymur Kheirkhabarov @HeirhabarovT, Zach Stanford @svch0st'
 references:
     - https://twitter.com/SBousseaden/status/1211636381086339073
     - https://drive.google.com/file/d/1lKya3_mLnR3UQuCoiYruO3qgu052_iS_/view
     - https://www.elastic.co/guide/en/security/current/remote-file-copy-to-a-hidden-share.html
+author: 'Florian Roth, oscd.community, Teymur Kheirkhabarov @HeirhabarovT, Zach Stanford @svch0st'
 date: 2019/12/30
 modified: 2022/10/11
+tags:
+    - attack.lateral_movement
+    - attack.collection
+    - attack.exfiltration
+    - attack.t1039
+    - attack.t1048
+    - attack.t1021.002
 logsource:
     category: process_creation
     product: windows
@@ -34,16 +41,9 @@ detection:
             - '\\\\'
             - '$'
     condition: 1 of selection* and target
-fields:
-    - CommandLine
-    - ParentCommandLine
 falsepositives:
     - Administrative scripts
 level: high
-tags:
-    - attack.lateral_movement
-    - attack.collection
-    - attack.exfiltration
-    - attack.t1039
-    - attack.t1048
-    - attack.t1021.002
+fields:
+    - CommandLine
+    - ParentCommandLine
