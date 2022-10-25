@@ -6,7 +6,7 @@ status: experimental
 references:
     - https://twitter.com/SBousseaden/status/1483810148602814466
 date: 2022/01/20
-modified: 2022/10/24
+modified: 2022/10/25
 tags:
     - attack.execution
 logsource:
@@ -43,6 +43,13 @@ detection:
         RequestedPolicy:
             - 8
             - 12
+        ValidatedPolicy: 1
+    filter_msoffice:
+        FileNameBuffer|contains: '\Microsoft Office\root\vfs\ProgramFilesCommonX64\Microsoft Shared\OFFICE'
+        FileNameBuffer|endswith: '\MSOXMLMF.DLL'
+        ProcessNameBuffer|contains: '\ProgramData\Microsoft\Windows Defender\Platform\'
+        ProcessNameBuffer|endswith: '\MsMpEng.exe'
+        RequestedPolicy: 7
         ValidatedPolicy: 1
     condition: selection and not 1 of filter_*
 falsepositives:
