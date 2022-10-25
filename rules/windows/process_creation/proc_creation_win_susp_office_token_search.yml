@@ -1,7 +1,7 @@
 title: Suspicious Office Token Search Via CLI
 id: 6d3a3952-6530-44a3-8554-cf17c116c615
 status: experimental
-description: Detects possible search for office tokens via CLI by looking for the string "eyJ0eX"
+description: Detects possible search for office tokens via CLI by looking for the string "eyJ0eX". This string is used as an anchor to look for the start of the JWT token used by office and similar apps.
 author: Nasreddine Bencherchali
 references:
     - https://mrd0x.com/stealing-tokens-from-office-applications/
@@ -14,8 +14,10 @@ logsource:
     product: windows
 detection:
     selection:
+        # Comment out the line below and use it instead of the shorter CommandLine if you experience a lot of FP
+        #CommandLine|contains: 'eyJ0eXAiOi' # {"typ":
         CommandLine|contains: 'eyJ0eX'
     condition: selection
 falsepositives:
-    - Rare legitimate command-lines containing the string mentioned in the command-line
+    - Legitimate command-lines containing the string mentioned in the command-line
 level: medium
