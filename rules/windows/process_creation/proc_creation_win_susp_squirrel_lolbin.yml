@@ -11,7 +11,7 @@ tags:
     - attack.t1218
 author: Karneades / Markus Neis, Jonhnathan Ribeiro, oscd.community
 date: 2019/11/12
-modified: 2022/09/20
+modified: 2022/10/25
 logsource:
     category: process_creation
     product: windows
@@ -24,21 +24,30 @@ detection:
             - '--processStart'
             - '--processStartAndWait'
             - '--createShortcut'
-    filter1:
-        - CommandLine|contains|all:
+    filter_discord:
+        CommandLine|contains|all:
             - 'C:\Users\'
             - '\AppData\Local\Discord\Update.exe'
             - ' --processStart Discord.exe'
+    filter_github_desktop:
         - CommandLine|contains|all:
             - 'C:\Users\'
             - '\AppData\Local\GitHubDesktop\Update.exe --createShortcut GitHubDesktop.exe'
         - CommandLine|contains|all:
             - 'C:\Users\'
             - '\AppData\Local\GitHubDesktop\Update.exe --processStartAndWait GitHubDesktop.exe'
+    filter_teams:
         - CommandLine|contains|all:
             - 'C:\Users\'
-            - '\AppData\Local\Microsoft\Teams\Update.exe" --processStart "Teams.exe"'
-    condition: all of selection* and not 1 of filter*
+            - '\AppData\Local\Microsoft\Teams\Update.exe'
+            - '--processStart'
+            - 'Teams.exe'
+        - CommandLine|contains|all:
+            - 'C:\Users\'
+            - '\AppData\Local\Microsoft\Teams\Update.exe'
+            - '--createShortcut'
+            - 'Teams.exe'
+    condition: all of selection* and not 1 of filter_*
 falsepositives:
     - 1Clipboard
     - Beaker Browser
