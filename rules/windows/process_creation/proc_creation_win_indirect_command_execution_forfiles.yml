@@ -14,19 +14,25 @@ logsource:
     product: windows
     category: process_creation
 detection:
-    selection:
+    selection_parent:
         ParentImage|endswith: '\forfiles.exe'
-        ParentCommandLine|contains|all:
+    selection_c:
+        ParentCommandLine|contains:
             - ' /c '
+            - ' -c '
+    selection_p:
+        ParentCommandLine|contains:
             - ' /p '
+            - ' -p '
+    selection_m:
+        ParentCommandLine|contains:
             - ' /m '
+            - ' -m '
     filter:
         Image|endswith: '\cmd.exe'
         CommandLine|contains|all:
             - 'xcopy'
-            - 'cmd /c del @PATH'
-            - 'move'
-    condition: selection and not filter
+            - 'cmd /c del 
 falsepositives:
     - Unknown
 level: medium
