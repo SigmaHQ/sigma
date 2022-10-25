@@ -4,27 +4,27 @@ status: experimental
 description: Detects suspicious interactive bash as a parent to rather uncommon child processes
 references:
     - Internal Research
-date: 2022/03/14
 author: Florian Roth
+date: 2022/03/14
 logsource:
     product: linux
     category: process_creation
 detection:
-   selection:
+    selection:
         ParentCommandLine: 'bash -i'
-   anomaly1:
+    anomaly1:
         CommandLine|contains:
             - '-c import '
             - 'base64'
             - 'pty.spawn'
-   anomaly2:
+    anomaly2:
         Image|endswith:
             - 'whoami'
             - 'iptables'
             - '/ncat'
             - '/nc'
             - '/netcat'
-   condition: selection and 1 of anomaly*
+    condition: selection and 1 of anomaly*
 falsepositives:
     - Legitimate software that uses these patterns
 level: medium
