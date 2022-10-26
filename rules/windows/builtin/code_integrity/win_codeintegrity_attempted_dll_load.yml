@@ -1,0 +1,57 @@
+title: Code Integrity Attempted DLL Load
+id: f8931561-97f5-4c46-907f-0a4a592e47a7
+description: Detects attempted DLL load events that didn't meet signing level requirements
+author: Florian Roth, Nasreddine Bencherchali (update)
+status: experimental
+references:
+    - https://twitter.com/SBousseaden/status/1483810148602814466
+date: 2022/01/20
+modified: 2022/10/25
+tags:
+    - attack.execution
+logsource:
+    product: windows
+    service: codeintegrity-operational
+detection:
+    selection:
+        EventID: 3033
+    filter_dtrace:
+        # Example: Code Integrity determined that a process (\Device\HarddiskVolume5\Windows\System32\svchost.exe) attempted to load \Device\HarddiskVolume5\Program Files\DTrace\dtrace.dll that did not meet the Windows signing level requirements.
+        FileNameBuffer|endswith: '\Program Files\DTrace\dtrace.dll'
+        ProcessNameBuffer|endswith: '\Windows\System32\svchost.exe'
+        RequestedPolicy: 12
+        ValidatedPolicy: 1
+    filter_msmpeng:
+        # Example: Code Integrity determined that a process (\Device\HarddiskVolume5\ProgramData\Microsoft\Windows Defender\Platform\4.18.2207.7-0\MsMpEng.exe) attempted to load \Device\HarddiskVolume5\Windows\System32\DriverStore\FileRepository\iigd_dch.inf_amd64_36fb67bd6dbd887d\igd10iumd64.dll that did not meet the Custom 3 / Antimalware signing level requirements.
+        FileNameBuffer|contains: '\Windows\System32\DriverStore\FileRepository\'
+        FileNameBuffer|endswith: '\igd10iumd64.dll'
+        ProcessNameBuffer|contains: '\ProgramData\Microsoft\Windows Defender\Platform\'
+        ProcessNameBuffer|endswith: '\MsMpEng.exe'
+        RequestedPolicy: 7
+        ValidatedPolicy: 1
+    filter_keybase:
+        # Example: Code Integrity determined that a process (\Device\HarddiskVolume5\Users\user\AppData\Local\Keybase\Gui\Keybase.exe) attempted to load \Device\HarddiskVolume5\Windows\System32\nvspcap64.dll that did not meet the Microsoft signing level requirements.
+        FileNameBuffer|endswith: '\Windows\System32\nvspcap64.dll'
+        ProcessNameBuffer|endswith: '\AppData\Local\Keybase\Gui\Keybase.exe'
+        RequestedPolicy: 8
+        ValidatedPolicy: 1
+    filter_bonjour:
+        FileNameBuffer|endswith: '\Program Files\Bonjour\mdnsNSP.dll'
+        ProcessNameBuffer|endswith:
+            - '\Windows\System32\svchost.exe'
+            - '\Windows\System32\SIHClient.exe'
+        RequestedPolicy:
+            - 8
+            - 12
+        ValidatedPolicy: 1
+    filter_msoffice:
+        FileNameBuffer|contains: '\Microsoft Office\root\vfs\ProgramFilesCommonX64\Microsoft Shared\OFFICE'
+        FileNameBuffer|endswith: '\MSOXMLMF.DLL'
+        ProcessNameBuffer|contains: '\ProgramData\Microsoft\Windows Defender\Platform\'
+        ProcessNameBuffer|endswith: '\MsMpEng.exe'
+        RequestedPolicy: 7
+        ValidatedPolicy: 1
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: high
