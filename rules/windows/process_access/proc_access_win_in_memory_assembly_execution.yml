@@ -1,12 +1,18 @@
 title: Suspicious In-Memory Module Execution
 id: 5f113a8f-8b61-41ca-b90f-d374fa7e4a39
-description: Detects the access to processes by other suspicious processes which have reflectively loaded libraries in their memory space. An example is SilentTrinity C2 behaviour. Generally speaking, when Sysmon EventID 10 cannot reference a stack call to a dll loaded from disk (the standard way), it will display "UNKNOWN" as the module name. Usually this means the stack call points to a module that was reflectively loaded in memory. Adding to this, it is not common to see such few calls in the stack (ntdll.dll --> kernelbase.dll --> unknown) which essentially means that most of the functions required by the process to execute certain routines are already present in memory, not requiring any calls to external libraries. The latter should also be considered suspicious.
 status: experimental
-date: 2019/10/27
-modified: 2022/03/16
-author: Perez Diego (@darkquassar), oscd.community, Jonhnathan Ribeiro
+description: |
+  Detects the access to processes by other suspicious processes which have reflectively loaded libraries in their memory space.
+  An example is SilentTrinity C2 behaviour. Generally speaking, when Sysmon EventID 10 cannot reference a stack call to a dll loaded from disk (the standard way),
+  it will display "UNKNOWN" as the module name. Usually this means the stack call points to a module that was reflectively loaded in memory.
+  Adding to this, it is not common to see such few calls in the stack (ntdll.dll --> kernelbase.dll --> unknown) which essentially means that
+  most of the functions required by the process to execute certain routines are already present in memory, not requiring any calls to external libraries.
+  The latter should also be considered suspicious.
 references:
     - https://azure.microsoft.com/en-ca/blog/detecting-in-memory-attacks-with-sysmon-and-azure-security-center/
+author: Perez Diego (@darkquassar), oscd.community, Jonhnathan Ribeiro
+date: 2019/10/27
+modified: 2022/03/16
 tags:
     - attack.privilege_escalation
     - attack.defense_evasion
@@ -18,14 +24,14 @@ logsource:
 detection:
     selection1:
         CallTrace|contains|all:
-              - 'C:\WINDOWS\SYSTEM32\ntdll.dll+'
-              - '|C:\WINDOWS\System32\KERNELBASE.dll+'
-              - '|UNKNOWN('
-              - ')'
+            - 'C:\WINDOWS\SYSTEM32\ntdll.dll+'
+            - '|C:\WINDOWS\System32\KERNELBASE.dll+'
+            - '|UNKNOWN('
+            - ')'
     selection2:
         CallTrace|contains|all:
-              - 'UNKNOWN('
-              - ')|UNKNOWN('
+            - 'UNKNOWN('
+            - ')|UNKNOWN('
         CallTrace|endswith: ')'
     selection3:
         CallTrace|contains: 'UNKNOWN'
@@ -95,6 +101,6 @@ fields:
     - SourceImage
     - TargetImage
     - CallTrace
-level: low # too many false positives, really sad, but the amount of false positives with all kinds of software is just too high
 falsepositives:
     - SysInternals Process Explorer
+level: low
