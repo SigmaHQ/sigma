@@ -6,7 +6,7 @@ status: experimental
 references:
     - https://twitter.com/SBousseaden/status/1483810148602814466
 date: 2022/01/20
-modified: 2022/10/26
+modified: 2022/10/27
 tags:
     - attack.execution
 logsource:
@@ -68,6 +68,12 @@ detection:
             - '\Mozilla Firefox\mozavutil.dll'
         ProcessNameBuffer|endswith: '\Mozilla Firefox\firefox.exe'
         RequestedPolicy: 8
+    filter_avast:
+        FileNameBuffer|endswith:
+            - '\Program Files\Avast Software\Avast\aswAMSI.dll'
+            - '\Program Files (x86)\Avast Software\Avast\aswAMSI.dll'
+        ProcessNameBuffer|endswith: '\Windows\System32\SIHClient.exe'
+        RequestedPolicy: 12
         ValidatedPolicy: 1
     condition: selection and not 1 of filter_*
 falsepositives:
