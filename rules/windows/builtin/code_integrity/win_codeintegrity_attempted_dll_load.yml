@@ -1,7 +1,7 @@
 title: Code Integrity Attempted DLL Load
 id: f8931561-97f5-4c46-907f-0a4a592e47a7
 description: Detects attempted DLL load events that didn't meet signing level requirements
-author: Florian Roth, Nasreddine Bencherchali (update)
+author: Florian Roth, Nasreddine Bencherchali
 status: experimental
 references:
     - https://twitter.com/SBousseaden/status/1483810148602814466
@@ -29,10 +29,12 @@ detection:
         ProcessNameBuffer|endswith: '\MsMpEng.exe'
         RequestedPolicy: 7
         ValidatedPolicy: 1
-    filter_keybase:
+    filter_electron_based_app:
         # Example: Code Integrity determined that a process (\Device\HarddiskVolume5\Users\user\AppData\Local\Keybase\Gui\Keybase.exe) attempted to load \Device\HarddiskVolume5\Windows\System32\nvspcap64.dll that did not meet the Microsoft signing level requirements.
         FileNameBuffer|endswith: '\Windows\System32\nvspcap64.dll'
-        ProcessNameBuffer|endswith: '\AppData\Local\Keybase\Gui\Keybase.exe'
+        ProcessNameBuffer|endswith:
+            - '\AppData\Local\Keybase\Gui\Keybase.exe'
+            - '\Microsoft\Teams\stage\Teams.exe'
         RequestedPolicy: 8
         ValidatedPolicy: 1
     filter_bonjour:
@@ -51,6 +53,21 @@ detection:
         ProcessNameBuffer|endswith: '\MsMpEng.exe'
         RequestedPolicy: 7
         ValidatedPolicy: 1
+    filter_slack:
+        # Example: https://user-images.githubusercontent.com/112784902/197407680-96d4b662-8a59-4289-a483-b24d630ac2a9.png
+        # Even though it's the same DLL as the one used in the electron based app filter. We need to do a separate selection due to slack's folder naming convention with the version number :)
+        FileNameBuffer|endswith: '\Windows\System32\nvspcap64.dll'
+        ProcessNameBuffer|contains: '\AppData\Local\slack\app-'
+        ProcessNameBuffer|endswith: '\slack.exe'
+        RequestedPolicy: 8
+        ValidatedPolicy: 1
+    filter_firefox:
+        # Example: https://user-images.githubusercontent.com/62423083/197451483-70e89010-ed96-4357-8079-b5a061a239d6.png
+        FileNameBuffer|endswith:
+            - '\Mozilla Firefox\mozavcodec.dll'
+            - '\Mozilla Firefox\mozavutil.dll'
+        ProcessNameBuffer|endswith: '\Mozilla Firefox\firefox.exe'
+        RequestedPolicy: 8
     filter_avast:
         FileNameBuffer|endswith:
             - '\Program Files\Avast Software\Avast\aswAMSI.dll'
