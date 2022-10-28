@@ -18,7 +18,7 @@ WORKDIR /opt/sigma/tools
 
 # Install Python Modules
 RUN set -eux; \
-  python setup.py install;
+  python -m pip install sigmatools;
 
 # Use sigma as entrypoint
 ENTRYPOINT ["sigmac"]
