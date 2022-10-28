@@ -10,7 +10,7 @@ RUN set -eux; \
   echo "**** create $USER user and $USER group with home directory /opt/sigma ****" && \
   addgroup -S $USER && \
   adduser -u $PUID -s /bin/false -h /opt/sigma -S -G $USER $USER && \
-  adduser $USER users && \
+  adduser $USER users
   # Add Sigma Tools via Pip
   #python -m pip install sigmatools && \
   #chown -R abc. /opt/sigma
