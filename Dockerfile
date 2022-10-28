@@ -10,19 +10,21 @@ RUN set -eux; \
   echo "**** create $USER user and $USER group with home directory /opt/sigma ****" && \
   addgroup -S $USER && \
   adduser -u $PUID -s /bin/false -h /opt/sigma -S -G $USER $USER && \
-  adduser $USER users
+  adduser $USER users && \
+  # Add Sigma Tools via Pip
+  python -m pip install sigmatools
 
-# Add Files
-COPY . /opt/sigma/
-WORKDIR /opt/sigma/
-
-# Install Python Modules
-RUN set -eux; \
-  apk update && apk add --no-cache make && \
-  make build && \
-  cd tools && \
-  python -m pip install dist/*.whl && \
-  make clean
+## Add Files
+#COPY . /opt/sigma/
+#WORKDIR /opt/sigma/
+#
+## Install Python Modules
+#RUN set -eux; \
+#  apk update && apk add --no-cache make && \
+#  make build && \
+#  cd tools && \
+#  python -m pip install dist/*.whl && \
+#  make clean
 
 # Use sigma as entrypoint
 ENTRYPOINT ["sigmac"]
