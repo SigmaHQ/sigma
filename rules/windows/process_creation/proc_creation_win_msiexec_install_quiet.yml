@@ -37,7 +37,13 @@ detection:
         CommandLine|contains:
             - '/q'
             - '-q'
-    condition: all of selection_*
+    filter_user_temp:
+        # The %temp% is a very common location for installers
+        ParentImage|startswith: 'C:\Users\'
+        ParentImage|contains: '\AppData\Local\Temp\'
+    filter_system_temp:
+        ParentImage|startswith: 'C:\Windows\Temp\'
+    condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Legitimate script
 level: medium
