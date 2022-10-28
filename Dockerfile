@@ -28,7 +28,7 @@ WORKDIR /opt/sigma/
   #make clean && \
 #  chown -R abc. /opt/sigma
 
-USER ["abc"]
+USER abc
 
 # Use sigma as entrypoint
 ENTRYPOINT ["sigmac"]
