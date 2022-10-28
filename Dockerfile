@@ -14,6 +14,8 @@ RUN set -eux; \
   # Add Sigma Tools via Pip
   python -m pip install sigmatools
 
+WORKDIR /opt/sigma/
+
 ## Add Files
 #COPY . /opt/sigma/
 #WORKDIR /opt/sigma/
