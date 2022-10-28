@@ -1,4 +1,4 @@
-FROM python3/3-alpine
+FROM python:3-alpine
 
 # Set Environment Variables
 ENV PUID=1000
