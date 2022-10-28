@@ -14,7 +14,7 @@ RUN set -eux; \
 
 # Add Files
 COPY . /opt/sigma/
-WORKDIR /opt/sigma/tools
+WORKDIR /opt/sigma/
 
 # Install Python Modules
 RUN set -eux; \
