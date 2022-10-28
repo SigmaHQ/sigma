@@ -23,8 +23,7 @@ COPY . /opt/sigma/
 RUN set -eux; \
   apk update && apk add --no-cache make && \
   make build && \
-  cd tools && \
-  python -m pip install dist/*.whl && \
+  python -m pip install tools/dist/*.whl && \
   make clean && \
   chown -R abc. /opt/sigma
 
