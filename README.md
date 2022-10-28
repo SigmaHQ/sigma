@@ -78,7 +78,9 @@ or via Docker container:
     `echo "alias sigmac='docker run -ti -v $PWD/sigma:/opt/sigma ghcr.io/sigmahq/sigma/sigmac:latest'" >> ~/.bashrc"``
    Then:
     `sigmac --help` to get a help on the rule converter
-4. Convert a rule of your choice with `sigmac` like `./sigmac -t splunk -c config/generic/sysmon.yml ../rules/windows/process_creation/proc_creation_win_susp_whoami.yml`
+4. Convert a rule of your choice with `sigmac` like `./sigmac -t splunk -c tools/config/generic/sysmon.yml /rules/windows/process_creation/proc_creation_win_susp_whoami.yml`
+  or
+  `./sigmac -I -t mdatp -f 'level>=high' -r /rules/windows/`
 5. Convert a whole rule directory with `python sigmac -t splunk -r ../rules/proxy/`
 6. Check the `./tools/config` folder and the [wiki](https://github.com/Neo23x0/sigma/wiki/Converter-Tool-Sigmac) if you need custom field or log source mappings in your environment
 
