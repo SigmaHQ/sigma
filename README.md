@@ -71,6 +71,18 @@ Florian wrote a short [rule creation tutorial](https://www.nextron-systems.com/2
 5. Convert a whole rule directory with `python sigmac -t splunk -r ../rules/proxy/`
 6. Check the `./tools/config` folder and the [wiki](https://github.com/Neo23x0/sigma/wiki/Converter-Tool-Sigmac) if you need custom field or log source mappings in your environment
 
+or via Docker container:
+1. Download or clone the repository
+2. Check the `./rules` sub directory for an overview on the rule base
+3. Run first:
+    `echo "alias sigmac='docker run -ti -v $PWD/sigma:/opt/sigma ghcr.io/sigmahq/sigma/sigmac:latest'" >> ~/.bashrc"``
+   Then:
+    `sigmac --help` to get a help on the rule converter
+4. Convert a rule of your choice with `sigmac` like `./sigmac -t splunk -c config/generic/sysmon.yml ../rules/windows/process_creation/proc_creation_win_susp_whoami.yml`
+5. Convert a whole rule directory with `python sigmac -t splunk -r ../rules/proxy/`
+6. Check the `./tools/config` folder and the [wiki](https://github.com/Neo23x0/sigma/wiki/Converter-Tool-Sigmac) if you need custom field or log source mappings in your environment
+
+
 ## Troubles / Troubleshooting / Help
 
 If you need help for a specific supported backend you can use e.g. `sigmac --backend-help elastalert-dsl`. More details on the usage of `sigmac` can be found in the dedicated [README.md](https://github.com/SigmaHQ/sigma/blob/master/tools/README.md).
