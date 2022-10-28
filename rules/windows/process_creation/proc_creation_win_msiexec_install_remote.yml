@@ -1,16 +1,14 @@
-title: Suspicious Msiexec Quiet Install
-id: 79a87aa6-e4bd-42fc-a5bb-5e6fbdcd62f5
+title: Suspicious Msiexec Quiet Install From Remote Location
+id: 8150732a-0c9d-4a99-82b9-9efb9b90c40c
+related:
+    - id: f7b5f842-a6af-4da5-9e95-e32478f3cd2f
+      type: similar
 status: experimental
-description: |
-    Adversaries may abuse msiexec.exe to proxy execution of malicious payloads.
-    Msiexec.exe is the command-line utility for the Windows Installer and is thus commonly associated with executing installation packages (.msi)
-author: frack113
-date: 2022/01/16
-modified: 2022/10/28
+description: Detects usage of Msiexec.exe to install packages hosted remotely quietly
+author: Nasreddine Bencherchali
+date: 2022/10/28
 references:
-    - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/msiexec
-    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1218.007/T1218.007.md
-    - https://twitter.com/_st0pp3r_/status/1583914244344799235
+    - https://www.microsoft.com/en-us/security/blog/2022/10/27/raspberry-robin-worm-part-of-larger-ecosystem-facilitating-pre-ransomware-activity/
 logsource:
     category: process_creation
     product: windows
@@ -34,10 +32,13 @@ detection:
         CommandLine|contains:
             - '/q'
             - '-q'
+    selection_remote:
+        - 'http'
+        - '\\\\'
     condition: all of selection_*
 falsepositives:
-    - Legitimate script
-level: low
+    - Unknown
+level: medium
 tags:
     - attack.defense_evasion
     - attack.t1218.007
