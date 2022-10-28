@@ -1,4 +1,4 @@
-FROM python:3-alpine
+FROM python:3.8-alpine
 
 # Set Environment Variables
 ENV PUID=1000
@@ -21,7 +21,8 @@ RUN set -eux; \
   apk update && apk add --no-cache make && \
   make build && \
   cd tools && \
-  python -m pip install dist/*.whl
+  python -m pip install dist/*.whl && \
+  make clean
 
 # Use sigma as entrypoint
 ENTRYPOINT ["sigmac"]
