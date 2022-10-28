@@ -18,6 +18,7 @@ WORKDIR /opt/sigma/
 
 # Install Python Modules
 RUN set -eux; \
+  apk update && apk add --no-cache make; \
   make build;
 
 # Use sigma as entrypoint
