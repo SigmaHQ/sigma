@@ -28,11 +28,16 @@ detection:
         CommandLine|contains|all:
             - 'EDGEHTML.dll'
             - '#141'
-    filter2:  # VS Build
+    filter_edge:
         CommandLine|contains|all:
-            - '\FileTracker32.dll'
-            - ',#1'
-    condition: selection and not 1 of filter*
+            - 'EDGEHTML.dll'
+            - '#141'
+    filter_vsbuild_dll:
+        ParentImage|endswith: '\Msbuild\Current\Bin\Tracker.exe'
+        CommandLine|contains:
+            - '\FileTracker32.dll,#1'
+            - '\FileTracker64.dll,#1'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - False positives depend on scripts and administrative tools used in the monitored environment
     - Windows control panel elements have been identified as source (mmc)
