@@ -6,7 +6,7 @@ status: experimental
 references:
     - https://twitter.com/SBousseaden/status/1483810148602814466
 date: 2022/01/20
-modified: 2022/10/28
+modified: 2022/10/31
 tags:
     - attack.execution
 logsource:
@@ -25,8 +25,7 @@ detection:
         # Example: Code Integrity determined that a process (\Device\HarddiskVolume5\ProgramData\Microsoft\Windows Defender\Platform\4.18.2207.7-0\MsMpEng.exe) attempted to load \Device\HarddiskVolume5\Windows\System32\DriverStore\FileRepository\iigd_dch.inf_amd64_36fb67bd6dbd887d\igd10iumd64.dll that did not meet the Custom 3 / Antimalware signing level requirements.
         FileNameBuffer|contains: '\Windows\System32\DriverStore\FileRepository\'
         FileNameBuffer|endswith: '\igd10iumd64.dll'
-        ProcessNameBuffer|contains: '\ProgramData\Microsoft\Windows Defender\Platform\'
-        ProcessNameBuffer|endswith: '\MsMpEng.exe'
+        # ProcessNameBuffer is AV products
         RequestedPolicy: 7
         ValidatedPolicy: 1
     filter_electron_based_app:
@@ -49,8 +48,7 @@ detection:
     filter_msoffice:
         FileNameBuffer|contains: '\Microsoft Office\root\vfs\ProgramFilesCommonX64\Microsoft Shared\OFFICE'
         FileNameBuffer|endswith: '\MSOXMLMF.DLL'
-        ProcessNameBuffer|contains: '\ProgramData\Microsoft\Windows Defender\Platform\'
-        ProcessNameBuffer|endswith: '\MsMpEng.exe'
+        # ProcessNameBuffer is AV products
         RequestedPolicy: 7
         ValidatedPolicy: 1
     filter_slack:
@@ -75,7 +73,10 @@ detection:
         ProcessNameBuffer|endswith:
             - '\Windows\System32\SIHClient.exe'
             - '\Windows\System32\svchost.exe'
-        RequestedPolicy: 12
+            - '\Windows Defender\MpCmdRun.exe'
+        RequestedPolicy:
+            - 8
+            - 12
         ValidatedPolicy: 1
     filter_gac:
         FileNameBuffer|endswith: '\stdole.dll'
