@@ -6,7 +6,7 @@ references:
     - https://www.elastic.co/guide/en/security/current/conhost-spawned-by-suspicious-parent-process.html
 author: Tim Rauch
 date: 2022/09/28
-modified: 2022/10/28
+modified: 2022/10/31
 tags:
     - attack.execution
     - attack.t1059
@@ -29,7 +29,7 @@ detection:
             - '\userinit.exe'
             - '\wininit.exe'
             - '\spoolsv.exe'
-            - '\wermgr.exe'
+            # - '\wermgr.exe'  # Legitimate parent as seen in EchoTrail
             # - '\csrss.exe'  # Legitimate parent as seen in EchoTrail
             - '\ctfmon.exe'
     filter:
@@ -39,6 +39,7 @@ detection:
             - '-k netsvcs -p -s NetSetupSvc'
             - '-k LocalSystemNetworkRestricted -p -s NgcSvc'
             - '-k wsappx -p -s ClipSVC'
+            - '-k netsvcs -p -s wlidsvc'
     condition: selection and not filter
 falsepositives:
     - Unknown
