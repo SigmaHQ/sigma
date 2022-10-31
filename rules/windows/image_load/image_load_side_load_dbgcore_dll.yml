@@ -6,6 +6,7 @@ references:
     - https://hijacklibs.net/ # For list of DLLs that could be sideloaded (search for dlls mentioned here in there)
 author: Nasreddine Bencherchali, Wietze Beukema (project and research)
 date: 2022/10/25
+modified: 2022/10/28
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -25,24 +26,10 @@ detection:
             - 'C:\Windows\WinSxS\'
             - 'C:\Windows\SoftwareDistribution\'
             - 'C:\Windows\SystemTemp\'
-    filter_visual_studio:
-        ImageLoaded|startswith:
-            - 'C:\Program Files (x86)\Microsoft Visual Studio\'
-            - 'C:\Program Files\Microsoft Visual Studio\'
-    filter_windows_kits:
-        ImageLoaded|startswith: 'C:\Program Files (x86)\Windows Kits\10\Debuggers\'
-    filter_windbg:
-        ImageLoaded|startswith: 'C:\Program Files\WindowsApps\Microsoft.WinDbg_'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
     filter_steam:
         ImageLoaded|endswith: '\Steam\bin\cef\cef.win7x64\dbgcore.dll'
-    filter_dell:
-        ImageLoaded: 'C:\Program Files\Dell\DTP\InstrumentationSubAgent\dbgcore.dll'
-    filter_office:
-        ImageLoaded|startswith:
-            - 'C:\Program Files\Microsoft Office\Office'
-            - 'C:\Program Files\Microsoft Office\Root\Office'
-            - 'C:\Program Files (x86)\Microsoft Office\Office'
-            - 'C:\Program Files (x86)\Microsoft Office\Root\Office'
     condition: selection and not 1 of filter_*
 falsepositives:
     - Legitimate applications loading their own versions of the DLL mentioned in this rule
