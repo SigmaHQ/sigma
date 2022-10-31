@@ -10,7 +10,7 @@ references:
     - https://twitter.com/_st0pp3r_/status/1583914244344799235
 author: frack113
 date: 2022/01/16
-modified: 2022/10/23
+modified: 2022/10/28
 tags:
     - attack.defense_evasion
     - attack.t1218.007
@@ -18,22 +18,32 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_msi:
-        Image|endswith: '\msiexec.exe'
+    selection_img:
+        - Image|endswith: '\msiexec.exe'
+        - OriginalFileName: 'msiexec.exe'
+    selection_cli:
+        # Note that there is no space before and after the arguments because it's possible to write a commandline as such
+        # Example: msiexec -q/i [MSI Package]
         CommandLine|contains:
-            - ' /i'
-            - ' -i'
-            - ' /package'
-            - ' -package'
-            - ' /a'
-            - ' -a'
-            - ' /j'
-            - ' -j'
+            - '/i'
+            - '-i'
+            - '/package'
+            - '-package'
+            - '/a'
+            - '-a'
+            - '/j'
+            - '-j'
     selection_quiet:
         CommandLine|contains:
-            - ' /q'
-            - ' -q'
-    condition: all of selection_*
+            - '/q'
+            - '-q'
+    filter_user_temp:
+        # The %temp% is a very common location for installers
+        ParentImage|startswith: 'C:\Users\'
+        ParentImage|contains: '\AppData\Local\Temp\'
+    filter_system_temp:
+        ParentImage|startswith: 'C:\Windows\Temp\'
+    condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Legitimate script
-level: low
+level: medium
