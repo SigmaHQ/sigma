@@ -6,24 +6,22 @@ author: bohops
 date: 2022/10/30
 references:
     - https://twitter.com/bohops/status/1583916360404729857
+tags:
+    - attack.defense_evasion
+    - attack.t1218
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
         Image|endswith: '\vsls-agent.exe'
-        CommandLine|contains:
-            - '--agentExtensionPath' 
+        CommandLine|contains: '--agentExtensionPath' 
     filter:
-        CommandLine|contains:
-            - 'Microsoft.VisualStudio.LiveShare.Agent.'
+        CommandLine|contains: 'Microsoft.VisualStudio.LiveShare.Agent.'
     condition: selection and not filter
 fields:
     - CommandLine
     - ParentCommandLine
-tags:
-    - attack.defense_evasion
-    - attack.t1218
 falsepositives:
     - False positives depend on custom use of vsls-agent.exe 
 level: medium
