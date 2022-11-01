@@ -17,14 +17,17 @@ logsource:
 detection:
     selection:
         Description: 'Python Core'
-    filter:
+    filter_generic:
         - Image|contains:
             - 'Python'  # FPs with python38.dll, python.exe etc.
         - Image|startswith:
             - 'C:\Program Files\'
             - 'C:\Program Files (x86)\'
             - 'C:\ProgramData\Anaconda3\' # Comment out if you don't use Anaconda in your environment
-    condition: selection and not filter
+    filter_aurora:
+        Provider_Name: Microsoft-Windows-Kernel-Process
+        Image: null
+    condition: selection and not 1 of filter_*
 fields:
     - Description
 falsepositives:
