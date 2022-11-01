@@ -5,9 +5,10 @@ description: One way Qbot steals sensitive information is by extracting browser 
 references:
     - https://thedfirreport.com/2022/02/07/qbot-likes-to-move-it-move-it/
     - https://redcanary.com/threat-detection-report/threats/qbot/
+    - https://thedfirreport.com/2022/10/31/follina-exploit-leads-to-domain-compromise/
 author: frack113
 date: 2022/02/13
-modified: 2022/05/12
+modified: 2022/10/31
 tags:
     - attack.collection
     - attack.t1005
@@ -18,10 +19,12 @@ detection:
     selection_img:
         - Image|endswith: '\esentutl.exe'
         - OriginalFileName: 'esentutl.exe'
-    selection_cli:
-        CommandLine|contains|all:
-            - '/r '
-            - '\Windows\WebCache'
+    selection_flag:
+        CommandLine|contains:
+            - '/r'
+            - '-r'
+    selection_webcache:
+        CommandLine|contains: '\Windows\WebCache'
     condition: all of selection*
 falsepositives:
     - Legitimate use
