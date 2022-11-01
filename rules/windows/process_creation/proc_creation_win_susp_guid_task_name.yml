@@ -16,14 +16,19 @@ logsource:
 detection:
     selection_img:
         Image|endswith: '\schtasks.exe'
-        CommandLine|contains|all:
-            - '/Create '
-            - '}"' # Ending of the name to avoid possible FP in the rest of the commandline
+        CommandLine|contains: '/Create '
     selection_tn:
         CommandLine|contains:
             # Can start with single or double quote
             - '/TN "{'
             - "/TN '{"
+            - "/TN {"
+    selection_end:
+        CommandLine|contains:
+            # Ending of the name to avoid possible FP in the rest of the commandline
+            - '}"'
+            - "}'"
+            - '} '
     condition: all of selection_*
 falsepositives:
     - Legitimate software naming their tasks as GUIDs
