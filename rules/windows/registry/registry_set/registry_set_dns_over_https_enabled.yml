@@ -1,18 +1,25 @@
 title: DNS-over-HTTPS Enabled by Registry
 id: 04b45a8a-d11d-49e4-9acc-4a1b524407a5
 status: experimental
-description: Detects when a user enables DNS-over-HTTPS. This can be used to hide internet activity or be used to hide the process of exfiltrating data. With this enabled organization will lose visibility into data such as query type, response and originating IP that are used to determine bad actors.
-author: Austin Songer
+description: |
+  Detects when a user enables DNS-over-HTTPS.
+  This can be used to hide internet activity or be used to hide the process of exfiltrating data.
+  With this enabled organization will lose visibility into data such as query type, response and originating IP that are used to determine bad actors.
 references:
     - https://www.tenforums.com/tutorials/151318-how-enable-disable-dns-over-https-doh-microsoft-edge.html
     - https://github.com/elastic/detection-rules/issues/1371
     - https://chromeenterprise.google/policies/?policy=DnsOverHttpsMode
     - https://admx.help/HKLM/Software/Policies/Mozilla/Firefox/DNSOverHTTPS
+author: Austin Songer
 date: 2021/07/22
 modified: 2022/03/26
+tags:
+    - attack.defense_evasion
+    - attack.t1140
+    - attack.t1112
 logsource:
-  product: windows
-  category: registry_set
+    product: windows
+    category: registry_set
 detection:
     selection_edge:
         EventType: SetValue
@@ -28,9 +35,5 @@ detection:
         Details: DWORD (0x00000001)
     condition: 1 of selection_*
 falsepositives:
-- Unlikely
+    - Unlikely
 level: medium
-tags:
-    - attack.defense_evasion
-    - attack.t1140
-    - attack.t1112

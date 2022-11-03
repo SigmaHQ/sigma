@@ -1,0 +1,29 @@
+title: Image Load of VSS Dll by Uncommon Executable
+id: 37774c23-25a1-4adb-bb6d-8bb9fd59c0f8
+status: experimental
+description: Detects the image load of VSS DLL by uncommon executables
+references:
+    - https://github.com/ORCx41/DeleteShadowCopies
+author: frack113
+date: 2022/10/31
+tags:
+    - attack.defense_evasion
+    - attack.impact
+    - attack.t1490
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith: 
+            - '\vsstrace.dll'
+            - '\vssapi.dll'
+    filter_legit:
+        Image|startswith:
+            - 'C:\Windows\'
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: high

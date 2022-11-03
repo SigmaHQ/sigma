@@ -1,10 +1,10 @@
 title: File Created with System Process Name
 id: d5866ddf-ce8f-4aea-b28e-d96485a20d3d
 status: test
-description: Detects the creation of an executable with a system process name in a suspicious folder
-author: Sander Wiebing, Tim Shelton
+description: Detects the creation of an executable with a system process name in folders other than the system ones (System32, SysWOW64...etc).
+author: Sander Wiebing, Tim Shelton, Nasreddine Bencherchali
 date: 2020/05/26
-modified: 2022/09/07
+modified: 2022/10/28
 tags:
     - attack.defense_evasion
     - attack.t1036.005
@@ -37,6 +37,55 @@ detection:
             - '\dllhost.exe'
             - '\audiodg.exe'
             - '\wlanext.exe'
+            - '\AtBroker.exe'
+            - '\bcdedit.exe'
+            - '\bitsadmin.exe'
+            - '\ipconfig.exe'
+            - '\LsaIso.exe'
+            - '\LogonUI.exe'
+            - '\logman.exe'
+            - '\msinfo32.exe'
+            - '\mstsc.exe'
+            - '\msiexec.exe'
+            - '\nbtstat.exe'
+            - '\regini.exe'
+            - '\TiWorker.exe'
+            - '\WmiPrvSE.exe'
+            - '\WUDFHost.exe'
+            - '\taskhostw.exe'
+            - '\dasHost.exe'
+            - '\wslhost.exe'
+            - '\fontdrvhost.exe'
+            - '\dwm.exe'
+            - '\backgroundTaskHost.exe'
+            - '\SystemSettingsBroker.exe'
+            - '\odbcconf.exe'
+            - '\schtasks.exe'
+            - '\SearchProtocolHost.exe'
+            - '\SearchIndexer.exe'
+            - '\SearchFilterHost.exe'
+            - '\SecurityHealthSystray.exe'
+            - '\SecurityHealthService.exe'
+            - '\ShellAppRuntime.exe'
+            - '\vssadmin.exe'
+            - '\w32tm.exe'
+            - '\WerFault.exe'
+            - '\WerFaultSecure.exe'
+            - '\wermgr.exe'
+            - '\wevtutil.exe'
+            - '\winrshost.exe'
+            - '\wlrmdr.exe'
+            - '\WinRTNetMUAHostServer.exe'
+            - '\WSReset.exe'
+            - '\WWAHost.exe'
+            - '\iscsicpl.exe'
+            - '\iscsicli.exe'
+            - '\extrac32.exe'
+            - '\eventvwr.exe'
+            - '\eventcreate.exe'
+            - '\dfrgui.exe'
+            - '\cmdl32.exe'
+            - '\cmstp.exe'
     filter1:
         TargetFilename|startswith:
             - 'C:\Windows\System32\'
@@ -58,6 +107,8 @@ detection:
         Image|endswith: ':\Windows\system32\svchost.exe'
     filter6:
         Image: C:\Windows\System32\wuauclt.exe
+    filter7:
+        TargetFilename: 'C:\Windows\explorer.exe'
     condition: selection and not 1 of filter*
 fields:
     - Image
