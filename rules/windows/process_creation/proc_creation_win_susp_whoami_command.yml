@@ -1,0 +1,29 @@
+title: Suspicious used Whoami command 
+id: 4d1ecf54-5b8a-11ed-9b6a-0242ac120002
+status: experimental
+description: most common flags / parameters that are used in malware or by threat actors
+references:
+    - https://infosecwriteups.com/common-tools-techniques-used-by-threat-actors-and-malware-part-i-deb05b664879
+    - https://habr.com/ru/company/varonis/blog/598457/
+    - https://riccardoancarani.github.io/2019-10-04-lateral-movement-megaprimer/
+author: Ilya Krestinichev
+date: 2022/11/03
+tags:
+    - attack.discovery
+    - attack.t1033
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:
+            - 'whoami'
+            - 'whoami /all'
+            - 'whoami /groups'
+            - 'whoami /priv'
+            - 'whoami /user'
+            - 'whoami /upn'
+    condition: selection
+falsepositives:
+    - legitimate use by administrators
+level: medium
