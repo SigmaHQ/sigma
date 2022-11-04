@@ -2,17 +2,17 @@ title: Suspicious In-Memory Module Execution
 id: 5f113a8f-8b61-41ca-b90f-d374fa7e4a39
 status: experimental
 description: |
-  Detects the access to processes by other suspicious processes which have reflectively loaded libraries in their memory space.
-  An example is SilentTrinity C2 behaviour. Generally speaking, when Sysmon EventID 10 cannot reference a stack call to a dll loaded from disk (the standard way),
-  it will display "UNKNOWN" as the module name. Usually this means the stack call points to a module that was reflectively loaded in memory.
-  Adding to this, it is not common to see such few calls in the stack (ntdll.dll --> kernelbase.dll --> unknown) which essentially means that
-  most of the functions required by the process to execute certain routines are already present in memory, not requiring any calls to external libraries.
-  The latter should also be considered suspicious.
+    Detects the access to processes by other suspicious processes which have reflectively loaded libraries in their memory space.
+    An example is SilentTrinity C2 behaviour. Generally speaking, when Sysmon EventID 10 cannot reference a stack call to a dll loaded from disk (the standard way),
+    it will display "UNKNOWN" as the module name. Usually this means the stack call points to a module that was reflectively loaded in memory.
+    Adding to this, it is not common to see such few calls in the stack (ntdll.dll --> kernelbase.dll --> unknown) which essentially means that
+    most of the functions required by the process to execute certain routines are already present in memory, not requiring any calls to external libraries.
+    The latter should also be considered suspicious.
 references:
     - https://azure.microsoft.com/en-ca/blog/detecting-in-memory-attacks-with-sysmon-and-azure-security-center/
 author: Perez Diego (@darkquassar), oscd.community, Jonhnathan Ribeiro
 date: 2019/10/27
-modified: 2022/03/16
+modified: 2022/11/02
 tags:
     - attack.privilege_escalation
     - attack.defense_evasion
@@ -68,7 +68,6 @@ detection:
             - 'C:\WINDOWS\System32\DriverStore\'
             - 'C:\Windows\System32\WindowsPowerShell\'
         - SourceImage:
-            - 'C:\Users\\*\AppData\Local\Programs\Microsoft VS Code\Code.exe'
             - 'C:\WINDOWS\system32\taskhostw.exe'
             - 'C:\WINDOWS\system32\ctfmon.exe'
             - 'C:\WINDOWS\system32\NhNotifSys.exe'
@@ -94,7 +93,21 @@ detection:
     filter_openwith:
         SourceImage: 'C:\Windows\system32\OpenWith.exe'
         TargetImage: 'C:\Windows\Explorer.EXE'
-    condition: ( selection1 or selection2 or selection3 ) and not 1 of filter*
+    filter_teams:
+        SourceImage|startswith: 'C:\Users\'
+        SourceImage|endswith: '\AppData\Local\Microsoft\Teams\current\Teams.exe'
+        TargetImage|endswith:
+            - ':\Windows\Explorer.EXE'
+            - '\AppData\Local\Microsoft\Teams\Update.exe'
+            - '\AppData\Local\Microsoft\Teams\current\Teams.exe'
+            - '\MsMpEng.exe'
+    filter_wwahost:
+        SourceImage: 'C:\Windows\System32\WWAHost.exe'
+        TargetImage: 'C:\Windows\System32\svchost.exe'
+    filter_sppsvc:
+        SourceImage: C:\WINDOWS\system32\sppsvc.exe
+        TargetImage: C:\WINDOWS\system32\SppExtComObj.exe
+    condition: 1 of selection* and not 1 of filter*
 fields:
     - ComputerName
     - User
