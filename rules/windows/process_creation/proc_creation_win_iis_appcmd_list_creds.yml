@@ -1,0 +1,31 @@
+title: Retrieve Microsoft IIS Service Account Credentials using Appcmd
+id: d65a2d9d-31c8-414b-8492-bcfde9b18ed0
+status: experimental
+description: The list and the config command within appcmd.exe leveraged by an adversary to obtain the username and password of the service account that is configured to run the application.
+references:
+    - https://twitter.com/0gtweet/status/1588815661085917186?cxt=HHwWhIDUyaDbzYwsAAAA
+author: Janantha Marasinghe
+date: 2022/11/06
+tags:
+    - attack.credential_access
+    - attack.t1552
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_name:
+        - Image|endswith: '\appcmd.exe'
+    selection_list:
+        CommandLine|contains:
+            - ' /@t:* '
+            - ' /@text:* '
+            - ' /text:* '
+            - ' /config '
+    selection_all:
+        CommandLine|contains|all:
+            - ' list '
+            - ' apppool '
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: medium
