@@ -6,7 +6,7 @@ references:
     - Malware Sandbox
 author: frack113
 date: 2022/03/09
-modified: 2022/07/27
+modified: 2022/11/02
 tags:
     - attack.resource_development
     - attack.t1587.001
@@ -43,9 +43,16 @@ detection:
         Image|startswith: 'C:\ProgramData\Microsoft\Windows Defender\'
     filter_windows_apps:
         TargetFilename|contains: '\Microsoft\WindowsApps\'
+    filter_teams:
+        Image|startswith: 'C:\Users\'
+        Image|endswith: '\AppData\Local\Microsoft\Teams\Update.exe'
+        TargetFilename|startswith: 'C:\Users\'
+        TargetFilename|endswith:
+            - '\AppData\Local\Microsoft\Teams\stage\Teams.exe'
+            - '\AppData\Local\Microsoft\Teams\stage\Squirrel.exe'
     condition: selection and not 1 of filter_*
 falsepositives:
     - Software installers
     - Update utilities
-#Please contribute to FP to go up the level
+#Please contribute to FP to increase the level
 level: low
