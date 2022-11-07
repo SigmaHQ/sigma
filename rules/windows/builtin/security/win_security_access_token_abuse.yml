@@ -4,6 +4,8 @@ status: experimental
 description: 'This rule tries to detect token impersonation and theft. (Example: DuplicateToken(Ex) and ImpersonateLoggedOnUser with the LOGON32_LOGON_NEW_CREDENTIALS flag.)'
 references:
     - https://attack.mitre.org/techniques/T1134/001/
+    - https://www.elastic.co/fr/blog/how-attackers-abuse-access-token-manipulation
+    - https://www.manageengine.com/log-management/cyber-security/access-token-manipulation.html
 author: Michaela Adams, Zach Mathis
 date: 2022/11/06
 modified: 2022/11/06
@@ -18,12 +20,10 @@ detection:
     selection:
         EventID: 4624
         LogonType: 9
-        LogonProcessName: 
-            - 'Advapi'  # This is used when the attacker is abusing PowerShell.
-            - 'seclogo' # This is used when the process is C:\Windows\System32\svchost.exe
+        LogonProcessName: 'Advapi'
         AuthenticationPackageName: 'Negotiate'
         ImpersonationLevel: '%%1833' # Impersonation
     condition: selection
 falsepositives:
-    - Unknown
-level: high
+    - Anti-Virus
+level: medium
