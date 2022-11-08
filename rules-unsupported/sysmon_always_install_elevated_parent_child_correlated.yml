@@ -1,0 +1,41 @@
+title: Always Install Elevated Parent Child Correlated
+id: 078235c5-6ec5-48e7-94b2-f8b5474379ea
+description: This rule will looks any process with low privilege launching Windows Installer service (msiexec.exe) that tries to install MSI packages with SYSTEM privilege
+#look for MSI start by low privilege user, write the process guid to the suspicious_guid variable
+#look for child process from the suspicious_guid, alert if it's Windows Installer trying to install package with SYSTEM privilege
+status: unsupported
+author: Teymur Kheirkhabarov (idea), Mangatas Tondang (rule), oscd.community
+date: 2020/10/13
+references:
+    - https://image.slidesharecdn.com/kheirkhabarovoffzonefinal-181117201458/95/hunting-for-privilege-escalation-in-windows-environment-48-638.jpg
+tags:
+    - attack.privilege_escalation
+    - attack.t1548.002
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    system_integrity:
+        IntegrityLevel: 'System'
+    system_user:
+        User: 'NT AUTHORITY\SYSTEM'
+    image_1:
+        Image|contains|all:
+            - '\Windows\Installer\'
+            - 'msi'
+        Image|endswith:
+            - 'tmp'
+    image_2:
+        Image|endswith: '\msiexec.exe'
+    child_of_suspicious_guid:
+        ParentProcessGuid: '%suspicious_guid%'
+    condition: write ProcessGuid from (event_id and image_2 and not system_user) to %suspicious_guid%; then if (child_of_suspicious_guid and event_id and image_1 and system_user) or (suspicious_guid and event_id and image_2 and system_user and integrity_level) -> alert
+fields:
+    - EventID
+    - IntegrityLevel
+    - User
+    - Image
+    - ParentProcessGuid
+falsepositives:
+    - System administrator usage
+level: high

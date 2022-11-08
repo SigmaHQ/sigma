@@ -111,7 +111,7 @@ loop.close()
 esa.transport.close()
 print()
 
-# Check if sigmac runned successfully
+# Check if sigmac ran successfully
 try:
     if task_sigmac.result() != 0:       # sigmac failed
         print("!!! sigmac failed while test!")

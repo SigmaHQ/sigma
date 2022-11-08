@@ -19,12 +19,12 @@ import importlib
 
 def getAllSubclasses(path, import_base, base_class):
     """Return list of all classes derived from a superclass contained in a module."""
-    classes = list()
+    classes = set()
     for finder, name, ispkg in pkgutil.iter_modules([ path ]):
         module = importlib.import_module(".{}.{}".format(import_base, name), __package__)
         for name, cls in vars(module).items():
             if type(cls) == type and issubclass(cls, base_class) and cls.active:
-                classes.append(cls)
+                classes.add(cls)
     return classes
 
 def getClassDict(clss):

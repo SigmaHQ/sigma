@@ -124,7 +124,7 @@ def get_rule_as_sumologic(file):
     return "".join(output)
 
 if args.help:
-    parser_print_help()
+    parser.print_help()
 
 if args.conf:
     with open(args.conf, 'r') as ymlfile:
@@ -198,7 +198,7 @@ for file in glob.iglob(globpath, recursive=True):
 
     try:
         # Run query
-        # https://github.com/SumoLogic/sumologic-python-sdk/blob/master/scripts/search-job.py
+        # https://github.com/SumoLogic/sumologic-python-sdk/blob/3ad8033deb028ac45ac4099f11c04785fa426f51/scripts/search-job.py
         sumo = SumoLogic(args.accessid, args.accesskey, args.endpoint)
         toTime = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
         fromTime = datetime.datetime.strptime(toTime, "%Y-%m-%dT%H:%M:%S") - datetime.timedelta(hours=24)
@@ -218,7 +218,7 @@ for file in glob.iglob(globpath, recursive=True):
     except Exception as e:
         if args.debug:
             traceback.print_exc()
-        logger.exception("error seaching sumo  " + str(file) + "----" + str(e))
+        logger.exception("error searching sumo  " + str(file) + "----" + str(e))
         with open(os.path.join(args.outdir, "sigma-" + file_basename + '-error.txt'), "w") as f:
             # f.write(json.dumps(r, indent=4, sort_keys=True) + " ERROR: %s\n\nQUERY: %s" % (e, sumo_query))
             f.write(" ERROR: %s\n\nQUERY: %s" % (e, sumo_query))

@@ -1,0 +1,26 @@
+title: Disable Or Stop Services
+id: de25eeb8-3655-4643-ac3a-b662d3f26b6b
+status: experimental
+description: Detects the usage of utilities such as 'systemctl', 'service'...etc to stop or disable tools and services
+references:
+    - https://www.trendmicro.com/pl_pl/research/20/i/the-evolution-of-malicious-shell-scripts.html
+author: Nasreddine Bencherchali
+date: 2022/09/15
+tags:
+    - attack.defense_evasion
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith:
+            - '/service'
+            - '/systemctl'
+            - '/chkconfig'
+        CommandLine|contains:
+            - 'stop'
+            - 'disable'
+    condition: selection
+falsepositives:
+    - Legitimate administration activities
+level: medium

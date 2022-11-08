@@ -1,0 +1,284 @@
+title: Official STIX 2.0
+backends:
+  - stix
+order: 100
+fieldmappings:
+  User:
+    - user-account:user_id
+  USER:
+    - user-account:user_id
+  user:
+    - user-account:user_id
+  event_data.SubjectUserName:
+    - user-account:user_id
+    - user-account:account_login
+  c-ip:
+    - ipv4-addr:value
+    - ipv6-addr:value
+    - network-traffic:src_ref.value
+  cs-ip:
+    - ipv4-addr:value
+    - ipv6-addr:value
+    - network-traffic:src_ref.value
+  destinationip:
+    - ipv4-addr:value
+    - ipv6-addr:value
+    - network-traffic:dst_ref.value
+  destinationmac:
+    - mac-addr:value
+    - network-traffic:dst_ref.value
+  destinationport:
+    - network-traffic:dst_port
+  dst_port:
+    - network-traffic:dst_port
+  domainname:
+    - domain-name:value
+  dst:
+    - ipv4-addr:value
+    - ipv6-addr:value
+    - network-traffic:dst_ref.value
+  dst_ip:
+    - ipv4-addr:value
+    - ipv6-addr:value
+    - network-traffic:dst_ref.value
+  endtime:
+    - network-traffic:end
+  event_data.DestinationIp:
+    - ipv4-addr:value
+    - ipv6-addr:value
+    - network-traffic:dst_ref.value
+  DestinationIp:
+    - ipv4-addr:value
+    - ipv6-addr:value
+    - network-traffic:dst_ref.value
+  event_data.DestinationPort:
+    - network-traffic:dst_port
+  DestinationPort:
+    - network-traffic:dst_port
+  destination.port:
+    - network-traffic:dst_port
+  filehash:
+    - file:hashes.SHA-256
+    - file:hashes.MD5
+    - file:hashes.SHA-1
+  filename:
+    - file:name
+  filepath:
+    - file:parent_directory_ref
+    - directory:path
+  identityip:
+    - ipv4-addr:value
+  protocolid:
+    - network-traffic:protocols[*]
+  sourceip:
+    - ipv4-addr:value
+    - ipv6-addr:value
+    - network-traffic:src_ref.value
+  sourcemac:
+    - mac-addr:value
+    - network-traffic:src_ref.value
+  sourceport:
+    - network-traffic:src_port
+  SourcePort:
+    - network-traffic:src_port
+  src:
+    - ipv4-addr:value
+    - ipv6-addr:value
+    - network-traffic:src_ref.value
+  src_ip:
+    - ipv4-addr:value
+    - ipv6-addr:value
+    - network-traffic:src_ref.value
+  starttime:
+    - network-traffic:start
+  url:
+    - url:value
+  username:
+    - user-account:user_id
+  utf8_payload:
+    - artifact:payload_bin
+
+  # Web + Proxy mapping
+  c-uri:
+    - network-traffic:extensions.'http-request-ext'.request_value
+    - url:value
+  c-uri-query:
+    - network-traffic:extensions.'http-request-ext'.request_value
+    - url:value
+  c-uri-stem:
+    - network-traffic:extensions.'http-request-ext'.request_value
+    - url:value
+  keywords:
+    - artifact:payload_bin
+  cs-method:
+    - network-traffic:extensions.'http-request-ext'.request_method
+  clientip:
+    - ipv4-addr:value
+    - ipv6-addr:value
+    - network-traffic:src_ref.value
+  c-useragent:
+    - network-traffic:extensions.'http-request-ext'.request_header.'User-Agent'
+  r-dns:
+    - domain-name:value
+    - url:value
+  cs-host:
+    - domain-name:value
+  cs-cookie:
+    - network-traffic:extensions.'http-request-ext'.request_header.Cookie
+  query:
+    - domain-name:value
+    - url:value
+
+  # Compliance mapping
+  host.scan.vuln_name:
+    - vulnerability:name
+  host.scan.vuln:
+    - vulnerability:external_references[*].external_id
+
+  # Cloud mapping
+  userIdentity.type:
+    - user-account:account_login
+  userIdentity.arn:
+    - user-account:account_login
+    - user-account:display_name
+  responseElements.pendingModifiedValues.masterUserPassword:
+    - user-account:credential
+  AccountDomain:
+    - user-account:x_domain
+  AccountID:
+    - user-account:user_id
+  AccountName:
+    - user-account:account_login
+    - user-account:display_name
+  AccountSecurityID:
+    - user-account:x_security_id
+  ClientIP:
+    - ipv4-addr:value
+    - ipv6-addr:value
+    - network-traffic:src_ref.value
+  DestinationHostname:
+    - network-traffic:dst_ref.value
+  Device:
+    - file:name
+  FileDirectory:
+    - directory:path
+  FileExtension:
+    - file:x_extension
+  FileHash:
+    - file:hashes.SHA-256
+    - file:hashes.MD5
+    - file:hashes.SHA-1
+  FilePath:
+    - file:name
+  Filename:
+    - file:name
+  HomeDirectory:
+    - directory:path
+  Image:
+    - process:binary_ref.name
+  ImageLoadedTempPath:
+    - process:extensions.'windows-service-ext'.service_dll_refs[*].x_temp_path
+  ImageName:
+    - process:binary_ref.name
+  ImagePath:
+    - process:binary_ref.parent_directory_ref.path.name
+  SourceImage:
+    - process:binary_ref.name
+  InitiatorUserName:
+    - user-account:user_id
+    - user-account:account_login
+  LoadedImage:
+    - process:extensions.'windows-service-ext'.service_dll_refs[*].name
+  LoadedImageName:
+    - process:extensions.'windows-service-ext'.service_dll_refs[*].name
+  MD5Hash:
+    - file:hashes.MD5
+  NewName:
+    - windows-registry-key:key
+  ParentCommandLine:
+    - process:parent_ref.command_line
+  ParentImage:
+    - process:parent_ref.binary_ref.name
+  ParentImageName:
+    - process:parent_ref.binary_ref.name
+  ParentProcessGuid:
+    - process:parent_ref.x_guid
+  ParentProcessName:
+    - process:parent_ref.binary_ref.name
+  ParentProcessPath:
+    - process:parent_ref.binary_ref.name
+  ProcessCommandLine:
+    - process:command_line
+  Command:
+    - process:command_line
+  CommandLine:
+    - process:command_line
+  ProcessGuid:
+    - process:x_guid
+  ProcessId:
+    - process:pid
+  ProcessName:
+    - process:binary_ref.name
+  ProcessPath:
+    - process:binary_ref.parent_directory_ref.path
+  RegistryKey:
+    - windows-registry-key:key
+  RegistryValueData:
+    - windows-registry-key:values[*].data
+  RegistryValueName:
+    - windows-registry-key:values[*].name
+  SAMAccountName:
+    - user-account:account_login
+    - user-account:display_name
+  SHA1Hash:
+    - file:hashes.SHA-1
+  SHA256Hash:
+    - file:hashes.SHA-256
+  ServiceFileName:
+    - process:extensions.'windows-service-ext'.service_dll_refs[*].name
+  ServiceName:
+    - process:extensions.'windows-service-ext'.service_name
+  Details:
+    - windows-registry-key:values[*].data
+  TargetFilename:
+    - file:name
+  TargetImage:
+    - process:binary_ref.name
+  TargetObject:
+    - windows-registry-key:key
+  UserDomain:
+    - user-account:x_domain
+  event_data.FileName:
+    - file:name
+  event_data.Image:
+    - process:binary_ref.name
+  event_data.ImageLoaded:
+    - process:extensions.'windows-service-ext'.service_dll_refs[*].name
+  ImageLoaded:
+    - process:extensions.'windows-service-ext'.service_dll_refs[*].name
+  event_data.ImagePath:
+    - process:binary_ref.parent_directory_ref.path
+  event_data.ParentCommandLine:
+    - process:parent_ref.command_line
+  event_data.ParentImage:
+    - process:parent_ref.binary_ref.name
+  event_data.ParentProcessName:
+    - process:parent_ref.binary_ref.name
+  event_data.TargetFilename:
+    - file:name
+  event_data.User:
+    - user-account:user_id
+  a0:
+    - process:command_line
+  a1:
+    - process:command_line
+  name:
+    - file:name
+  a3:
+    - process:command_line
+  exe:
+    - file:name
+  a2:
+    - process:command_line
+  pam_user:
+    - user-account:user_id

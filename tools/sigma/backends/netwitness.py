@@ -37,7 +37,7 @@ class NetWitnessBackend(SingleTextQueryBackend):
     listSeparator = ", "
     valueExpression = "\'%s\'"
     keyExpression = "%s"
-    nullExpression = "%s exists"
+    nullExpression = "%s !exists"
     notNullExpression = "%s exists"
     mapExpression = "(%s=%s)"
     mapListsSpecialHandling = True

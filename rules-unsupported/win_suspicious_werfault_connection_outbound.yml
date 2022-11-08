@@ -1,0 +1,44 @@
+title: Suspicious Werfault.exe Network Connection Outbound
+id: e12c75f2-d09e-43f6-90e4-6a23842907af
+status: experimental
+description: Adversaries can migrate cobalt strike/metasploit/C2 beacons on compromised systems to legitimate werfault.exe process to avoid detection.
+references:
+    - https://thedfirreport.com/2021/03/08/bazar-drops-the-anchor/
+author: Sreeman
+date: 2021/03/09
+modified: 2021/06/11
+tags:
+    - attack.command_and_control
+    - attack.t1571
+logsource:
+  product: windows
+  category: network_connection
+detection:
+  selection:
+    Image: 'werfault.exe'
+  filter1:
+    ParentImage: 'svchost.exe'
+  filter2:
+    DestinationIp:
+        - '104.42.151.234'
+        - '104.43.193.48'
+        - '52.255.188.83'
+        - '13.64.90.137'
+        - '168.61.161.212'
+        - '13.88.21.125'
+        - '40.88.32.150'
+        - '52.147.198.201'
+        - '52.239.207.100'
+        - '52.176.224.96'
+        - '2607:7700:0:24:0:1:287e:1894'
+        - '10.*'
+        - '192.168.*'
+        - '127.*'
+  filter3:
+    DestinationHostname|contains:
+        - '*.windowsupdate.com'
+        - '*.microsoft.com'
+  condition: selection and not ( filter1 and filter2 and filter3 )
+falsepositives:
+    - Communication to other corporate systems that use IP addresses from public address spaces and Microsoft IP spaces
+level: medium

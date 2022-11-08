@@ -1,0 +1,31 @@
+title: AD User Enumeration
+id: ab6bffca-beff-4baa-af11-6733f296d57a
+status: test
+description: Detects access to a domain user from a non-machine account
+references:
+    - https://www.specterops.io/assets/resources/an_ace_up_the_sleeve.pdf
+    - http://www.stuffithoughtiknew.com/2019/02/detecting-bloodhound.html
+    - https://docs.microsoft.com/en-us/windows/win32/adschema/attributes-all # For further investigation of the accessed properties
+author: Maxime Thiebaut (@0xThiebaut)
+date: 2020/03/30
+modified: 2022/10/09
+tags:
+    - attack.discovery
+    - attack.t1087.002
+logsource:
+    product: windows
+    service: security
+    definition: Requires the "Read all properties" permission on the user object to be audited for the "Everyone" principal
+detection:
+    selection:
+        EventID: 4662
+        ObjectType|contains: 'bf967aba-0de6-11d0-a285-00aa003049e2'
+        # Using contains as the data commonly is structured as "%{bf967aba-0de6-11d0-a285-00aa003049e2}"
+        # The user class (https://docs.microsoft.com/en-us/windows/win32/adschema/c-user)
+    filter:
+        - SubjectUserName|endswith: '$' # Exclude machine accounts
+        - SubjectUserName|startswith: 'MSOL_' # https://docs.microsoft.com/en-us/azure/active-directory/hybrid/reference-connect-accounts-permissions#ad-ds-connector-account
+    condition: selection and not filter
+falsepositives:
+    - Administrators configuring new users.
+level: medium

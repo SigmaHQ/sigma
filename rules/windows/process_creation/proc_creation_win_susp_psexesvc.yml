@@ -1,0 +1,25 @@
+title: PsExec Service Execution
+id: fdfcbd78-48f1-4a4b-90ac-d82241e368c5
+related:
+    - id: fa91cc36-24c9-41ce-b3c8-3bbc3f2f67ba
+      type: similar
+status: experimental
+description: Detects launch of the PSEXESVC service, which means that this system was the target of a psexec remote execution
+references:
+    - https://docs.microsoft.com/en-us/sysinternals/downloads/psexec
+    - https://www.youtube.com/watch?v=ro2QuZTIMBM
+author: Romaissa Adjailia, FLorian Roth
+date: 2022/07/21
+tags:
+    - attack.execution
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image: 'C:\Windows\PSEXESVC.exe'
+        - OriginalFileName: 'psexesvc.exe'
+    condition: selection
+falsepositives:
+    - Legitimate administrative tasks
+level: medium

@@ -1,0 +1,27 @@
+title: Delete Services Via Reg Utility
+id: 05b2aa93-1210-42c8-8d9a-2fcc13b284f5
+status: experimental
+description: Detects execution of "reg.exe" commands with the "delete" flag on services registry key. Often used by attacker to remove AV software services
+references:
+    - https://www.virustotal.com/gui/file/2bcd5702a7565952c44075ac6fb946c7780526640d1264f692c7664c02c68465
+author: Nasreddine Bencherchali
+date: 2022/08/01
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: 'reg.exe'
+        - OriginalFileName: 'reg.exe'
+    selection_delete:
+        CommandLine|contains: ' delete '
+    selection_key:
+        # Add specific services if you would like the rule to be more specific
+        CommandLine|contains: '\SYSTEM\CurrentControlSet\services\'
+    condition: all of selection*
+falsepositives:
+    - Unlikely
+level: high

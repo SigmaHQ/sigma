@@ -1,0 +1,50 @@
+action: global
+title: Remote Service Creation
+id: 4a3a2b96-d7fc-4cb9-80e4-4a545fe95f46
+status: unsupported
+description: Detects remote execution via service creation on the destination host
+author: Jai Minton, oscd.community
+date: 2020/10/05
+references:
+    - https://drive.google.com/file/d/1lKya3_mLnR3UQuCoiYruO3qgu052_iS_/view
+tags:
+    - attack.lateral_movement
+    - attack.persistence
+    - attack.execution
+    - attack.t1543.003 
+detection:
+    selection1:
+        EventID: 4624
+        Logon_Type: 3
+    filter1: 
+        Source_Network_Address:
+            - '::1'
+            - '127.0.0.1'
+    timeframe: 30s
+    condition: (selection1 and not filter1) or selection2
+    #   where:
+    #       selection1: TargetLogonID = selection2: SubjectLogonID, grouped by host over 30seconds | eventcount > 1
+    #   Rule should trigger where the SubjectLogonID from event 7045 is the same as the TargetLogonID from event 4624 with a Logon_Type of 3, in a 30second period, provided its from the same host.
+    #   This logic would be similar to the Splunk 'Transaction' operator which groups related events over a timeframe. 
+    #       This takes both field values (e.g. host), and an expression provided (e.g. startswith=(EventCode=4624) maxspan=30s) which occurs over the raw event log to find events, at which point a Union based on the criteria provided occurs to merge these events into a single transaction.
+    #   This is similar to stats as an aggregation function, but allows you to see the raw text of events rather than to calculate stats on then, and it retains the raw event to allow an eval expression to occur for grouping. This is beneficial as fields such as LogonIDs are reused over time. 
+    #   By having this you can group logon events to their remote service creation event (as it is searching for a logon followed by a service creation) even by using a search timeframe over a long period of time e.g. 30days without running the risk of incorrectly grouping a logonID at one time, to a task creation at another.
+    #   Rule logic is currently not supported by SIGMA.
+    
+falsepositives:
+    - Unknown
+level: medium
+---
+ logsource:
+     product: windows
+     service: security
+ detection:
+     selection2:
+         EventID: 4697
+---
+logsource:
+    product: windows
+    service: system
+detection:
+    selection2:
+        EventID: 7045

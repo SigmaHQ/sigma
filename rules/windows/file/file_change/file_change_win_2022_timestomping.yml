@@ -1,0 +1,43 @@
+title: File Creation Date Changed to Another Year
+id: 558eebe5-f2ba-4104-b339-36f7902bcc1a
+status: experimental
+description: |
+    Attackers may change the file creation time of a backdoor to make it look like it was installed with the operating system.
+    Note that many processes legitimately change the creation time of a file; it does not necessarily indicate malicious activity.
+references:
+    - https://www.inversecos.com/2022/04/defence-evasion-technique-timestomping.html
+author: frack113, Florian Roth
+date: 2022/08/12
+modified: 2022/10/25
+tags:
+    - attack.t1070.006
+    - attack.defense_evasion
+logsource:
+    category: file_change
+    product: windows
+detection:
+    selection1:
+        PreviousCreationUtcTime|startswith: '2022'
+    filter1:
+        CreationUtcTime|startswith: '2022'
+    selection2:
+        PreviousCreationUtcTime|startswith: '202'
+    filter2:
+        CreationUtcTime|startswith: '202'
+    gen_filter_updates:
+        - Image:
+            - 'C:\Windows\system32\ProvTool.exe'
+            - 'C:\Windows\System32\usocoreworker.exe'
+            - 'C:\Windows\ImmersiveControlPanel\SystemSettings.exe'
+        - TargetFilename|startswith: 'C:\ProgramData\USOPrivate\UpdateStore\'
+        - TargetFilename|endswith:
+            - '.tmp'
+            - '.temp'
+    gen_filter_tiworker:
+        Image|startswith: 'C:\WINDOWS\'
+        Image|endswith: '\TiWorker.exe'
+        TargetFilename|endswith: '.cab'
+    condition: (( selection1 and not filter1 ) or ( selection2 and not filter2 )) and not 1 of gen_filter*
+falsepositives:
+    - Changes made to or by the local NTP service
+level: high

@@ -1,0 +1,37 @@
+title: Suspicious Curl File Upload - Linux
+id: 00b90cc1-17ec-402c-96ad-3a8117d7a582
+related:
+    - id: 00bca14a-df4e-4649-9054-3f2aa676bc04
+      type: derived
+status: experimental
+description: Detects a suspicious curl process start the adds a file to a web request
+references:
+    - https://twitter.com/d1r4c/status/1279042657508081664
+    - https://medium.com/@petehouston/upload-files-with-curl-93064dcccc76
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1105/T1105.md#atomic-test-19---curl-upload-file
+    - https://curl.se/docs/manpage.html
+    - https://www.trendmicro.com/en_us/research/22/i/how-malicious-actors-abuse-native-linux-tools-in-their-attacks.html
+author: Nasreddine Bencherchali
+date: 2022/09/15
+tags:
+    - attack.exfiltration
+    - attack.t1567
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith: '/curl'
+        CommandLine|contains:
+            - ' -F '
+            - ' --form' # Also covers the "--form-string"
+            - ' -T '
+            - ' --upload-file '
+            - ' -d '
+            - ' --data '
+            - ' --data-' # For flags like: "--data-ascii", "--data-binary", "--data-raw", "--data-urlencode"
+    condition: selection
+falsepositives:
+    - Scripts created by developers and admins
+level: medium

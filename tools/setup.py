@@ -1,19 +1,20 @@
 # Setup module for Sigma toolchain
-# derived from example at https://github.com/pypa/sampleproject/blob/master/setup.py
+# derived from example at https://github.com/pypa/sampleproject/blob/918bd331501de42be32666bd5140d04d00b39386/setup.py
 from setuptools import setup, find_packages
 # To use a consistent encoding
 from codecs import open
 from os import path
+from pathlib import Path
 
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+with open(path.join(here, 'LONG_DESCRIPTION.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
     name='sigmatools',
-    version='0.15.0',
+    version='0.22.1',
     description='Tools for the Generic Signature Format for SIEM Systems',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -22,15 +23,15 @@ setup(
     author_email='thomas@patzke.org',
     license='LGPLv3',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Intended Audience :: Information Technology',
         'Intended Audience :: System Administrators',
         'Topic :: Security',
         'Topic :: Internet :: Log Analysis',
         'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Environment :: Console',
     ],
     keywords='security monitoring siem logging signatures elasticsearch splunk ids sysmon',
@@ -41,43 +42,22 @@ setup(
         'sigma.parser',
         'sigma.parser.modifiers',
         ],
-    python_requires='~=3.6',
-    install_requires=['PyYAML', 'pymisp', 'progressbar2'],
+    python_requires='~=3.8',
+    install_requires=['PyYAML', 'pymisp', 'progressbar2', 'ruamel.yaml'],
     extras_require={
-        'test': ['coverage', 'yamllint'],
+        'test': ['coverage', 'yamllint', 'attackcti'],
     },
     data_files=[
-        ('etc/sigma', [
-            'config/sumologic.yml',
-            'config/logstash-defaultindex.yml',
-            'config/powershell.yml',
-            'config/logstash-windows.yml',
-            'config/splunk-windows.yml',
-            'config/splunk-windows-index.yml',
-            'config/netwitness.yml',
-            'config/arcsight.yml',
-            'config/qualys.yml',
-            'config/logstash-linux.yml',
-            'config/thor.yml',
-            'config/filebeat-defaultindex.yml',
-            'config/logpoint-windows.yml',
-            'config/helk.yml',
-            'config/qradar.yml',
-            'config/winlogbeat-modules-enabled.yml',
-            'config/winlogbeat.yml',
-            'config/winlogbeat-old.yml',
-            'config/ecs-proxy.yml',
-            'config/limacharlie.yml',
-            ]),
-        ('etc/sigma/generic', [
-            'config/generic/sysmon.yml',
-            'config/generic/windows-audit.yml',
-        ])],
-    scripts=[
-        'sigmac',
-        'merge_sigma',
-        'sigma2misp',
-        'sigma-similarity',
-        'sigma-uuid',
-        ]
+        ('etc/sigma', [ str(p) for p in Path('config/').glob('*.yml') ]),
+        ('etc/sigma/generic', [ str(p) for p in Path('config/generic/').glob('*.yml') ])],
+    entry_points={
+        'console_scripts': [
+            'sigmac = sigma.sigmac:main',
+            'merge_sigma = sigma.merge_sigma:main',
+            'sigma2misp = sigma.sigma2misp:main',
+            'sigma2attack = sigma.sigma2attack:main',
+            'sigma_similarity = sigma.sigma_similarity:main',
+            'sigma_uuid = sigma.sigma_uuid:main',
+        ],
+    },
 )

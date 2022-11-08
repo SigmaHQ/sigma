@@ -1,0 +1,23 @@
+title: Unusual File Deletion by dns.exe
+id: 8f0b1fb1-9bd4-4e74-8cdf-a8de4d2adfd0
+status: experimental
+description: Detects an unexpected file being deleted by dns.exe which my indicate activity related to remote code execution or other forms of exploitation as seen in CVE-2020-1350 (SigRed)
+references:
+    - https://www.elastic.co/guide/en/security/current/unusual-file-modification-by-dns.exe.html
+author: Tim Rauch
+date: 2022/09/27
+tags:
+    - attack.initial_access
+    - attack.t1133
+logsource:
+    category: file_delete
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\dns.exe'
+    filter:
+        TargetFilename|endswith: '\dns.log'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high

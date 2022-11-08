@@ -1,0 +1,42 @@
+title: Windows Webshell Creation
+id: 39f1f9f2-9636-45de-98f6-a4046aa8e4b9
+status: test
+description: Possible webshell file creation on a static web site
+references:
+    - PT ESC rule and personal experience
+author: Beyu Denis, oscd.community, Tim Shelton
+date: 2019/10/22
+modified: 2022/09/18
+tags:
+    - attack.persistence
+    - attack.t1505.003
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection_wwwroot:
+        TargetFilename|contains: '\inetpub\wwwroot\'
+    selection_ext1:
+        TargetFilename|contains:
+            - '.asp'
+            - '.ashx'
+            - '.ph'
+    selection_static:
+        TargetFilename|contains:
+            - '\www\'
+            - '\htdocs\'
+            - '\html\'
+    selection_ext2:
+        TargetFilename|contains: '.ph'
+    false_positive1:  # false positives when unpacking some executables in $TEMP
+        TargetFilename|contains:
+            - '\AppData\Local\Temp\'
+            - '\Windows\Temp\'
+    false_positive_system:
+        Image: 'System' # fp : backup/restore from drivers
+    false_positive_legitimate:
+        TargetFilename|contains: '\xampp'
+    condition: ((selection_wwwroot and selection_ext1) or (selection_static and selection_ext2)) and not 1 of false_positive*
+falsepositives:
+    - Legitimate administrator or developer creating legitimate executable files in a web application folder
+level: high

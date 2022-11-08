@@ -68,6 +68,17 @@ class SigmaConfigurationChain(list):
                         category, product, service = logsource.rewrite
         return SigmaLogsourceConfiguration(matching, self.defaultindex)
 
+    def get_logsourcemerging(self):
+        value = ''
+        for config in self:
+            if value == '':
+                value =  config.get_logsourcemerging().lower()
+
+        if not value in ['and', 'or']:
+            value = 'and'
+
+        return value
+
     def set_backend(self, backend):
         """Set backend for all sigma conversion configurations in chain."""
         self.backend = backend
@@ -124,6 +135,12 @@ class SigmaConfiguration:
         matching = [logsource for logsource in self.logsources if logsource.matches(category, product, service)]
         return SigmaLogsourceConfiguration(matching, self.defaultindex)
 
+    def get_logsourcemerging(self):
+        if self.config != None:
+            if 'logsourcemerging' in self.config:
+                return self.config['logsourcemerging']
+        return ''
+
     def set_backend(self, backend):
         """Set backend. This is used by other code to determine target properties for index addressing"""
         self.backend = backend
@@ -143,6 +160,7 @@ class SigmaConfiguration:
 class SigmaLogsourceConfiguration:
     """Contains the definition of a log source"""
     def __init__(self, logsource=None, defaultindex=None):
+        self.search = []
         if logsource == None:               # create empty object
             self.merged = False
             self.category = None
@@ -193,6 +211,8 @@ class SigmaLogsourceConfiguration:
                 else:
                     raise TypeError("Default index must be string or list of strings")
 
+            self.search = [ ls.search for ls in logsource if ls.search ]
+
             self.conditions = [ ls.conditions for ls in logsource if ls.conditions ]        # build list of list of (field, value) tuples as base for merged query condition.
         elif type(logsource) == dict:       # create logsource configuration from parsed yaml
             self.merged = False
@@ -242,6 +262,13 @@ class SigmaLogsourceConfiguration:
                 # config and these must not necessarily contain an index definition. A valid index may later be result
                 # from a merge, where default index handling applies.
                 self.index = []
+
+            # free-form text search as-is. Instead of key=value, the value of 'search' is directly the value itself. Appended to conditions.
+            search = logsource.get('search', None)
+            if search not in [None, '']:
+                if type(search) != str:
+                    raise SigmaConfigParseError("search field must be a string: " + repr(search))
+                self.search.append(logsource.get('search', ''))
 
             try:
                 if type(logsource['conditions']) != dict:

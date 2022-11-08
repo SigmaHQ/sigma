@@ -1,0 +1,30 @@
+title: Potential Exfiltration of Compressed Files
+id: 0d47e3f6-357f-4534-928c-202631d065fa
+description: This rule detects potential exfiltration by looking for a few compression extensions in the uri and signs of compression in the mime type, file type, and http body
+date: 2020/04/05
+author: Greg Howell, OTR (Open Threat Research)
+tags:
+    - attack.exfiltration
+    - attack.t1560.001
+    - attack.t1005
+references:
+    - https://github.com/OTRF/detection-hackathon-apt29/issues/17
+logsource:
+    product: zeek
+    service: http
+detection:
+    selection1:
+        uri|endswith:
+         - '.7z'
+         - '.zip'
+         - '.rar'
+        mime_types|endswith: 'compressed'
+    selection3:
+        filetype|endswith: 'compressed'
+    selection4:
+        http.bodyMagic|endswith: 'compressed'
+        http.method: PUT
+    condition: selection1 or selection3 or selection4
+falsepositives:
+    - Legitimate upload/download of archives
+level: medium
