@@ -6,7 +6,7 @@ status: experimental
 references:
     - https://twitter.com/SBousseaden/status/1483810148602814466
 date: 2022/01/20
-modified: 2022/10/31
+modified: 2022/11/07
 tags:
     - attack.execution
 logsource:
@@ -79,7 +79,10 @@ detection:
             - 12
         ValidatedPolicy: 1
     filter_gac:
-        FileNameBuffer|endswith: '\stdole.dll'
+        # If other DLLs show up from this process. Filter the path containing this string `\Windows\assembly\GAC\`
+        FileNameBuffer|endswith:
+            - '\stdole.dll'
+            - '\msdatasrc.dll'
         ProcessNameBuffer|endswith: '\mscorsvw.exe'
         ProcessNameBuffer|contains: '\Windows\Microsoft.NET\'
         RequestedPolicy: 8
