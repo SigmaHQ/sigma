@@ -1,0 +1,29 @@
+title: Access Token Abuse
+id: 02f7c9c1-1ae8-4c6a-8add-04693807f92f
+status: experimental
+description: 'This rule tries to detect token impersonation and theft. (Example: DuplicateToken(Ex) and ImpersonateLoggedOnUser with the LOGON32_LOGON_NEW_CREDENTIALS flag.)'
+references:
+    - https://attack.mitre.org/techniques/T1134/001/
+    - https://www.elastic.co/fr/blog/how-attackers-abuse-access-token-manipulation
+    - https://www.manageengine.com/log-management/cyber-security/access-token-manipulation.html
+author: Michaela Adams, Zach Mathis
+date: 2022/11/06
+modified: 2022/11/06
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1134.001
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4624
+        LogonType: 9
+        LogonProcessName: 'Advapi'
+        AuthenticationPackageName: 'Negotiate'
+        ImpersonationLevel: '%%1833' # Impersonation
+    condition: selection
+falsepositives:
+    - Anti-Virus
+level: medium
