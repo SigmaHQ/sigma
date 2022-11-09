@@ -4,7 +4,7 @@ status: test
 description: Detects the creation of an executable with a system process name in folders other than the system ones (System32, SysWOW64...etc).
 author: Sander Wiebing, Tim Shelton, Nasreddine Bencherchali
 date: 2020/05/26
-modified: 2022/11/07
+modified: 2022/11/08
 tags:
     - attack.defense_evasion
     - attack.t1036.005
@@ -110,6 +110,11 @@ detection:
         Image: C:\Windows\System32\wuauclt.exe
     filter7:
         TargetFilename: 'C:\Windows\explorer.exe'
+    filter8:
+        # This filter handles system processes who are updated/installed using misexec.
+        Image: C:\WINDOWS\system32\msiexec.exe
+        # Add more processes if you find them or simply filter msiexec on its own. If the list grows big
+        TargetFilename: C:\Program Files\PowerShell\7\pwsh.exe
     condition: selection and not 1 of filter*
 fields:
     - Image
