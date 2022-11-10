@@ -1,13 +1,13 @@
 title: Image Load of VSS_PS.dll by Uncommon Executable
 id: 333cdbe8-27bb-4246-bf82-b41a0dca4b70
 status: experimental
-description: Detects the image load of vss_ps.dll by uncommon executables using OriginalFileName datapoint
+description: Detects the image load of vss_ps.dll by uncommon executables
+references:
+    - https://www.virustotal.com/gui/file/ba88ca45589fae0139a40ca27738a8fc2dfbe1be5a64a9558f4e0f52b35c5add
+    - https://twitter.com/am0nsec/status/1412232114980982787
 author: Markus Neis, @markus_neis
 date: 2021/07/07
-modified: 2022/07/27
-references:
-    - 1bd85e1caa1415ebdc8852c91e37bbb7
-    - https://twitter.com/am0nsec/status/1412232114980982787
+modified: 2022/10/31
 tags:
     - attack.defense_evasion
     - attack.impact
@@ -35,7 +35,12 @@ detection:
             - '\rundll32.exe'
             - '\inetsrv\iissetup.exe'
             - '\inetsrv\appcmd.exe'
-        Image|contains: 'c:\windows\'
+            - '\WmiPrvSE.exe'
+        Image|startswith: 'C:\Windows\'
+    filter_programfiles:
+        Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
     filter_update:
         CommandLine|startswith: 'C:\$WinREAgent\Scratch\'
         CommandLine|contains: '\dismhost.exe {'

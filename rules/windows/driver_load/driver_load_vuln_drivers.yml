@@ -2,7 +2,6 @@ title: Vulnerable Driver Load
 id: 7aaaf4b8-e47c-4295-92ee-6ed40a6f60c8
 status: experimental
 description: Detects the load of known vulnerable drivers by hash value
-author: Nasreddine Bencherchali
 references:
     - https://github.com/eclypsium/Screwed-Drivers/blob/master/DRIVERS.md
     - https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/microsoft-recommended-driver-block-rules
@@ -19,8 +18,13 @@ references:
     - https://www.unknowncheats.me/forum/downloads.php?do=file&id=21780
     - https://www.rapid7.com/db/modules/exploit/windows/local/razer_zwopenprocess/
     - https://www.unknowncheats.me/forum/downloads.php?do=file&id=25444
+    - https://www.zscaler.com/blogs/security-research/technical-analysis-windows-clfs-zero-day-vulnerability-cve-2022-37969-part
+author: Nasreddine Bencherchali
 date: 2022/08/18
-modified: 2022/10/10
+modified: 2022/10/19
+tags:
+    - attack.privilege_escalation
+    - attack.t1543.003
 logsource:
     product: windows
     category: driver_load
@@ -280,6 +284,9 @@ detection:
             - 'SHA1=d0a228ed8af190dec0c1a812e212f5e68ee3b43e'
             - 'SHA1=7d2fc1a6729521e5c76f659e4c398e2061f7ed5e'
             - 'SHA1=f999709e5b00a68a0f4fa912619fe6548ad0c42d'
+            # Vuln driver version obtained from: https://www.zscaler.com/blogs/security-research/technical-analysis-windows-clfs-zero-day-vulnerability-cve-2022-37969-part
+            # Version hash obtained from: https://winbindex.m417z.com/?arch=&file=clfs.sys
+            - 'SHA1=06232f7ea7ea24102d452427aedbbc8b8e188a0c'
             # The list below is from https://github.com/namazso/physmem_drivers
             - 'SHA256=05F052C64D192CF69A462A5EC16DDA0D43CA5D0245900C9FCB9201685A2E7748'
             - 'SHA256=4045AE77859B1DBF13972451972EAAF6F3C97BEA423E9E78F1C2F14330CD47CA'
@@ -530,6 +537,9 @@ detection:
             - 'SHA256=1d053020079124ac526d84affb17bf4a1563ecd872c83b4b6299c9aa6a732557'
             - 'SHA256=c059f1b2b73ecab48d62f469d48dbde74a80c4ada07f0bd3b417ec4e044fb522'
             - 'SHA256=a66d2fb7ef7350ea74d4290c57fb62bc59c6ea93f759d4ca93c3febca7aeb512'
+            # Vuln driver version obtained from: https://www.zscaler.com/blogs/security-research/technical-analysis-windows-clfs-zero-day-vulnerability-cve-2022-37969-part
+            # Version hash obtained from: https://winbindex.m417z.com/?arch=&file=clfs.sys
+            - 'SHA256=5d712d3fad791bdc67502ed7c6586ca39d12ae26c7b245c36effec92e3cda08e'
     selection_other:
         - SHA1:
             # The list below is from https://github.com/namazso/physmem_drivers and the SHA1 are from VT
@@ -785,6 +795,9 @@ detection:
             - 'd0a228ed8af190dec0c1a812e212f5e68ee3b43e'
             - '7d2fc1a6729521e5c76f659e4c398e2061f7ed5e'
             - 'f999709e5b00a68a0f4fa912619fe6548ad0c42d'
+            # Vuln driver version obtained from: https://www.zscaler.com/blogs/security-research/technical-analysis-windows-clfs-zero-day-vulnerability-cve-2022-37969-part
+            # Version hash obtained from: https://winbindex.m417z.com/?arch=&file=clfs.sys
+            - '06232f7ea7ea24102d452427aedbbc8b8e188a0c'
         - SHA256:
             # The list below is from https://github.com/namazso/physmem_drivers
             - '04A85E359525D662338CAE86C1E59B1D7AA9BD12B920E8067503723DC1E03162'
@@ -1045,10 +1058,10 @@ detection:
             - '1d053020079124ac526d84affb17bf4a1563ecd872c83b4b6299c9aa6a732557'
             - 'c059f1b2b73ecab48d62f469d48dbde74a80c4ada07f0bd3b417ec4e044fb522'
             - 'a66d2fb7ef7350ea74d4290c57fb62bc59c6ea93f759d4ca93c3febca7aeb512'
+            # Vuln driver version obtained from: https://www.zscaler.com/blogs/security-research/technical-analysis-windows-clfs-zero-day-vulnerability-cve-2022-37969-part
+            # Version hash obtained from: https://winbindex.m417z.com/?arch=&file=clfs.sys
+            - '5d712d3fad791bdc67502ed7c6586ca39d12ae26c7b245c36effec92e3cda08e'
     condition: 1 of selection*
 falsepositives:
     - Unknown
 level: high
-tags:
-    - attack.privilege_escalation
-    - attack.t1543.003

@@ -2,14 +2,19 @@ title: Malicious PowerShell Commandlets
 id: 89819aa4-bbd6-46bc-88ec-c7f7fe30efa6
 status: experimental
 description: Detects Commandlet names from well-known PowerShell exploitation frameworks
-author: Sean Metcalf (source), Florian Roth (rule), Bartlomiej Czyz @bczyz1 (update), oscd.community (update), Nasreddine Bencherchali (update), Tim Shelton (fp)
 references:
     - https://adsecurity.org/?p=2921
     - https://github.com/S3cur3Th1sSh1t/PowerSharpPack/tree/master/PowerSharpBinaries
     - https://github.com/BC-SECURITY/Invoke-ZeroLogon/blob/111d17c7fec486d9bb23387e2e828b09a26075e4/Invoke-ZeroLogon.ps1
     - https://github.com/xorrior/RandomPS-Scripts/blob/848c919bfce4e2d67b626cbcf4404341cfe3d3b6/Get-DXWebcamVideo.ps1
+    - https://github.com/rvrsh3ll/Misc-Powershell-Scripts/blob/6f23bb41f9675d7e2d32bacccff75e931ae00554/OfficeMemScraper.ps1
+    - https://github.com/dafthack/DomainPasswordSpray/blob/b13d64a5834694aa73fd2aea9911a83027c465a7/DomainPasswordSpray.ps1
+author: Sean Metcalf (source), Florian Roth (rule), Bartlomiej Czyz @bczyz1 (update), oscd.community (update), Nasreddine Bencherchali (update), Tim Shelton (fp), Mustafa Kaan Demir (update)
 date: 2017/03/05
-modified: 2022/06/22
+modified: 2022/10/28
+tags:
+    - attack.execution
+    - attack.t1059.001
 logsource:
     product: windows
     category: ps_script
@@ -189,6 +194,9 @@ detection:
             - 'Invoke-Zerologon'
             - 'Get-USBKeystrokes'
             - 'Start-WebcamRecorder'
+            - 'Invoke-OfficeScrape'
+            - 'Invoke-DomainPasswordSpray'
+            - 'Invoke-SpraySinglePassword'
     false_positive1:
         ScriptBlockText|contains:
             - Get-SystemDriveInfo  # http://bheltborg.dk/Windows/WinSxS/amd64_microsoft-windows-maintenancediagnostic_31bf3856ad364e35_10.0.10240.16384_none_91ef7543a4514b5e/CL_Utility.ps1
@@ -199,6 +207,3 @@ detection:
 falsepositives:
     - Unknown
 level: high
-tags:
-    - attack.execution
-    - attack.t1059.001
