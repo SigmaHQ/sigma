@@ -4,7 +4,7 @@ status: test
 description: Detects the creation of an executable with a system process name in folders other than the system ones (System32, SysWOW64...etc).
 author: Sander Wiebing, Tim Shelton, Nasreddine Bencherchali
 date: 2020/05/26
-modified: 2022/11/09
+modified: 2022/11/10
 tags:
     - attack.defense_evasion
     - attack.t1036.005
@@ -96,7 +96,6 @@ detection:
         Image|endswith:
             - '\Windows\System32\dism.exe'
             - '\TiWorker.exe'
-            - '\bcdedit.exe'
     filter2:
         TargetFilename|startswith: 'C:\$WINDOWS.~BT\'
         Image: 'C:\$WINDOWS.~BT\Sources\SetupHost.exe'
@@ -104,9 +103,11 @@ detection:
         TargetFilename|endswith: '\RuntimeBroker.exe'
         Image: 'C:\Windows\system32\wbengine.exe'
     filter4:
-        TargetFilename|endswith: '\spoolsv.exe'
-        TargetFilename|startswith: 'C:\Windows\SoftwareDistribution\Download\'
         Image|endswith: ':\Windows\system32\svchost.exe'
+        TargetFilename|startswith: 'C:\Windows\SoftwareDistribution\Download\'
+        TargetFilename|endswith:
+            - '\spoolsv.exe'
+            - '\bcdedit.exe'
     filter6:
         Image: C:\Windows\System32\wuauclt.exe
     filter7:
