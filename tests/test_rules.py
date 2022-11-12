@@ -79,7 +79,7 @@ class TestRules(unittest.TestCase):
     def test_optional_tags(self):
         files_with_incorrect_tags = []
         tags_pattern = re.compile(
-            r"cve\.\d+\.\d+|attack\.t\d+\.*\d*|attack\.[a-z_]+|car\.\d{4}-\d{2}-\d{3}")
+            r"cve\.\d+\.\d+|attack\.(t\d{4}\.\d{3}|[gts]\d{4})$|attack\.[a-z_]+|car\.\d{4}-\d{2}-\d{3}")
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             tags = self.get_rule_part(file_path=file, part_name="tags")
             if tags:

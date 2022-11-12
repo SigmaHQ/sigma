@@ -6,7 +6,7 @@ references:
     - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd364427(v=ws.10)
 author: frack113
 date: 2022/02/19
-modified: 2022/04/07
+modified: 2022/11/01
 logsource:
     product: windows
     service: firewall-as
@@ -27,5 +27,8 @@ detection:
             - 'C:\Windows\System32\svchost.exe'
             - 'C:\Windows\System32\dllhost.exe'
             - 'C:\Program Files\Windows Defender\MsMpEng.exe'
+    filter_msmpeng:
+        ModifyingApplication|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+        ModifyingApplication|endswith: '\MsMpEng.exe'
     condition: selection and not 1 of filter_*
 level: medium
