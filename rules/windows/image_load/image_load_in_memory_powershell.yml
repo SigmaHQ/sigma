@@ -22,7 +22,7 @@ detection:
         ImageLoaded|endswith:
             - '\System.Management.Automation.Dll'
             - '\System.Management.Automation.ni.Dll'
-    filter:
+    filter_generic:
         - Image:
             - 'C:\Windows\System32\dsac.exe'
             - 'C:\Program Files\PowerShell\7\pwsh.exe' #PowerShell 7
@@ -53,7 +53,10 @@ detection:
             - '\thor64.exe'
             - '\thor.exe'
        # User: 'NT AUTHORITY\SYSTEM'   # if set, matches all powershell processes not launched by SYSTEM
-    condition: selection and not 1 of filter*
+    filter_aurora:
+        # This filter is to avoid a race condition FP with this specific ETW provider in aurora
+        Image: null
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Used by some .NET binaries, minimal on user workstation.
     - Used by Microsoft SQL Server Management Studio

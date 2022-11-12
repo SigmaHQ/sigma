@@ -21,9 +21,18 @@ detection:
         CommandLine|contains:
             - ' /d '
             - ' /c '
-    filter:
+    filter_msbuild1:
         CommandLine: ' /ERRORREPORT:PROMPT '
-    condition: all of selection_* and not 1 of filter*
+    filter_msbuild2:
+        # Example:
+        #   GrandparentImage: C:\Program Files\Microsoft Visual Studio\2022\Community\Msbuild\Current\Bin\MSBuild.exe
+        #   ParentCommandLine: "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" /nologo /nodemode:1 /nodeReuse:true /low:false
+        #   CommandLine: "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\Tracker.exe" @"C:\Users\user\AppData\Local\Temp\tmp05c7789bc5534838bf96d7a0fed1ffff.tmp" /c "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.29.30133\bin\HostX86\x64\Lib.exe"
+        ParentImage|endswith: '\Msbuild\Current\Bin\MSBuild.exe'
+        CommandLine|contains|all:
+            - '\VC\Tools\MSVC\'
+            - '\bin\HostX86\x64\'
+    condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Unknown
 level: medium

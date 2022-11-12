@@ -1,0 +1,37 @@
+title: Computer Discovery And Export Via Get-ADComputer Cmdlet
+id: 435e10e4-992a-4281-96f3-38b11106adde
+status: experimental
+description: Detects usage of the Get-ADComputer cmdlet to collect computer information and output it to a file
+references:
+    - http://blog.talosintelligence.com/2022/09/lazarus-three-rats.html
+    - https://www.microsoft.com/en-us/security/blog/2022/10/18/defenders-beware-a-case-for-post-ransomware-investigations/
+author: Nasreddine Bencherchali
+date: 2022/11/10
+tags:
+    - attack.discovery
+    - attack.t1033
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        - OriginalFileName:
+            - 'PowerShell.EXE'
+            - 'pwsh.dll'
+    selection_cli:
+        CommandLine|contains|all:
+            - 'Get-ADComputer '
+            - ' -Filter \*'
+    selection_output:
+        CommandLine|contains:
+            - ' > '
+            - 'Out-File'
+            - 'Set-Content'
+            - 'Add-Content'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate admin scripts may use the same technique, it's better to exclude specific computers or users who execute these commands or scripts often
+level: medium
