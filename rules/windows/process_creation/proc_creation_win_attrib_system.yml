@@ -7,6 +7,7 @@ references:
     - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/attrib
 author: frack113
 date: 2022/02/04
+modified: 2022/11/11
 tags:
     - attack.defense_evasion
     - attack.t1564.001
@@ -14,10 +15,12 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\attrib.exe'
+    selection_img:
+        - Image|endswith: '\attrib.exe'
+        - OriginalFileName: 'ATTRIB.EXE'
+    selection_cli:
         CommandLine|contains: ' +s '
-    condition: selection
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: low

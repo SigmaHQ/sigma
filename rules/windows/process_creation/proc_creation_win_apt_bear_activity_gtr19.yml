@@ -6,7 +6,7 @@ references:
     - https://www.crowdstrike.com/resources/reports/2019-crowdstrike-global-threat-report/
 author: Florian Roth
 date: 2019/02/21
-modified: 2022/08/13
+modified: 2022/11/11
 tags:
     - attack.credential_access
     - attack.t1552.001
@@ -15,8 +15,10 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection1:
-        Image|endswith: '\xcopy.exe'
+    selection_xcopy_img:
+        - Image|endswith: '\xcopy.exe'
+        - OriginalFileName: 'XCOPY.EXE'
+    selection_xcopy_cli:
         CommandLine|contains|all:
             - '/S'
             - '/E'
@@ -24,13 +26,15 @@ detection:
             - '/Q'
             - '/H'
             - '\\\\'
-    selection2:
-        Image|endswith: '\adexplorer.exe'
+    selection_adexplorer_img:
+        - Image|endswith: '\adexplorer.exe'
+        - OriginalFileName: 'AdExp'
+    selection_adexplorer_cli:
         CommandLine|contains|all:
             - '-snapshot'
             - '""'
             - 'c:\users\'
-    condition: 1 of selection*
+    condition: all of selection_xcopy_* or all of selection_adexplorer_*
 falsepositives:
     - Unknown
 level: critical
