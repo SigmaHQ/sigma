@@ -10,7 +10,7 @@ references:
     - http://security-research.dyndns.org/pub/slides/FIRST2017/FIRST-2017_Tom-Ueltschi_Sysmon_FINAL_notes.pdf
 author: Florian Roth
 date: 2021/11/27
-modified: 2022/10/26
+modified: 2022/11/01
 tags:
     - attack.credential_access
     - attack.t1003.001
@@ -55,9 +55,8 @@ detection:
             - '\AppData\'
             - '\Temporary'
     filter1:
-        SourceImage|contains|all:
-            - 'C:\Users\'
-            - '\AppData\Local\'
+        SourceImage|startswith: 'C:\Users\'
+        SourceImage|contains: '\AppData\Local\'
         SourceImage|endswith:
             - '\Microsoft VS Code\Code.exe'
             - '\software_reporter_tool.exe'
@@ -74,6 +73,7 @@ detection:
             - '0x410'
             - '0x1410'
     filter_dropbox2:
+        SourceImage|startswith: 'C:\Users\'
         SourceImage|contains: '\AppData\Local\Temp\'
         SourceImage|endswith: '.tmp\DropboxUpdate.exe'
         GrantedAccess: '0x1410'
@@ -91,6 +91,7 @@ detection:
             - '0x1010'
             - '0x101010'
     filter_ms_products:
+        SourceImage|startswith: 'C:\Users\'
         SourceImage|contains|all:
             - '\AppData\Local\Temp\'
             - '\vs_bootstrapper_'
@@ -103,6 +104,10 @@ detection:
         SourceImage|startswith:
             - 'C:\Program Files (x86)\'
             - 'C:\Program Files\'
+    filter_keybase:
+        SourceImage|startswith: 'C:\Users\'
+        SourceImage|endswith: \AppData\Local\Keybase\keybase.exe
+        GrantedAccess: '0x1fffff'
     condition: selection and not 1 of filter*
 fields:
     - User

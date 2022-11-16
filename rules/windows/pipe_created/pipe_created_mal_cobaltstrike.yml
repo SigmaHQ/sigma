@@ -7,9 +7,10 @@ references:
     - https://labs.f-secure.com/blog/detecting-cobalt-strike-default-modules-via-named-pipe-analysis/
     - https://github.com/Neo23x0/sigma/issues/253
     - https://blog.cobaltstrike.com/2021/02/09/learn-pipe-fitting-for-all-of-your-offense-projects/
+    - https://redcanary.com/threat-detection-report/threats/cobalt-strike/
 author: Florian Roth, Wojciech Lesicki
 date: 2021/05/25
-modified: 2022/10/09
+modified: 2022/10/31
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
@@ -24,13 +25,25 @@ detection:
             - '\MSSE-'
             - '-server'
     selection_postex:
-        PipeName|startswith: '\postex_'
-    selection_postex_ssh:
-        PipeName|startswith: '\postex_ssh_'
+        PipeName|startswith: '\postex_' # Also include the pipe "\postex_ssh_"
     selection_status:
         PipeName|startswith: '\status_'
     selection_msagent:
         PipeName|startswith: '\msagent_'
+    selection_mojo:
+        PipeName|startswith: '\mojo_'
+    selection_interprocess:
+        PipeName|startswith: '\interprocess_'
+    selection_samr:
+        PipeName|startswith: '\samr_'
+    selection_netlogon:
+        PipeName|startswith: '\netlogon_'
+    selection_srvsvc:
+        PipeName|startswith: '\srvsvc_'
+    selection_lsarpc:
+        PipeName|startswith: '\lsarpc_'
+    selection_wkssvc:
+        PipeName|startswith: '\wkssvc_'
     condition: 1 of selection*
 falsepositives:
     - Unknown

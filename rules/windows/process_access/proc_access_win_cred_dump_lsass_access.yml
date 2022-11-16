@@ -1,7 +1,7 @@
-title: Credentials Dumping Tools Accessing LSASS Memory
+title: Credential Dumping Tools Accessing LSASS Memory
 id: 32d0d3e2-e58d-4d41-926b-18b520b2b32d
 status: experimental
-description: Detects process access LSASS memory which is typical for credentials dumping tools
+description: Detects processes requesting access to LSASS memory via suspicious access masks. This is typical for credentials dumping tools
 references:
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
     - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
@@ -9,7 +9,7 @@ references:
     - http://security-research.dyndns.org/pub/slides/FIRST2017/FIRST-2017_Tom-Ueltschi_Sysmon_FINAL_notes.pdf
 author: Florian Roth, Roberto Rodriguez, Dimitrios Slamaris, Mark Russinovich, Thomas Patzke, Teymur Kheirkhabarov, Sherif Eldeeb, James Dickenson, Aleksey Potapov, oscd.community (update)
 date: 2017/02/16
-modified: 2022/10/20
+modified: 2022/11/13
 tags:
     - attack.credential_access
     - attack.t1003.001
@@ -135,6 +135,12 @@ detection:
         SourceImage|contains: '\AppData\Local\Temp\'
         SourceImage|endswith: '.tmp\DropboxUpdate.exe'
         GrantedAccess: '0x1410'
+    filter_msbuild:
+        # This FP was generated while building CPython from source and could be related to other similar examples.
+        # But if you don't do that kind of stuff consider removing it from the rule ;)
+        SourceImage|startswith: 'C:\Program Files\Microsoft Visual Studio\'
+        SourceImage|endswith: '\MSBuild\Current\Bin\MSBuild.exe'
+        GrantedAccess: '0x1F3FFF'
     # Old - too broad filter
         # SourceImage|endswith: # easy to bypass. need to implement supportive rule to detect bypass attempts
         #     - '\wmiprvse.exe'
@@ -146,6 +152,8 @@ detection:
         #     - '\csrss.exe'
         #     - '\wininit.exe'
         #     - '\vmtoolsd.exe'
+    filter_games:
+        SourceImage|contains: '\SteamLibrary\steamapps\'
     condition: selection and not 1 of filter*
 fields:
     - ComputerName

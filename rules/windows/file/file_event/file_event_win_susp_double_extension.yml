@@ -3,8 +3,10 @@ id: b4926b47-a9d7-434c-b3a0-adc3fa0bd13e
 related:
     - id: 1cdd9a09-06c9-4769-99ff-626e2b3991b8
       type: derived
+    - id: 3215aa19-f060-4332-86d5-5602511f3ca8
+      type: similar
 status: experimental
-description: Detects dropped files with double extensions which is often used by malware as a method to abuse the fact that windows hide default extensions by default.
+description: Detects dropped files with double extensions, which is often used by malware as a method to abuse the fact that windows hide default extensions by default.
 references:
     - https://www.crowdstrike.com/blog/meet-crowdstrikes-adversary-of-the-month-for-june-mustang-panda/
     - https://www.anomali.com/blog/china-based-apt-mustang-panda-targets-minority-groups-public-and-private-sector-organizations
@@ -13,7 +15,7 @@ references:
     - https://twitter.com/luc4m/status/1073181154126254080
 author: Nasreddine Bencherchali, frack113
 date: 2022/06/19
-modified: 2022/07/28
+modified: 2022/11/07
 tags:
     - attack.defense_evasion
     - attack.t1036.007
@@ -25,7 +27,7 @@ detection:
         TargetFilename|endswith:
             - '.zip'
             - '.rar'
-            - '.lnk'
+            #- '.lnk'  # legitimate links can happen just anywhere
             - '.iso'
             - '.exe'
         TargetFilename|contains:
@@ -36,15 +38,16 @@ detection:
             - '.ppt.'
             - '.pptx.'
             - '.jpg.'
+            - '.pdf.'
     selection_exe:
         TargetFilename|endswith:
             - '.zip.exe'
             - '.rar.exe'
-    filter:
-        TargetFilename|contains:
-            - '\AppData\Roaming\Microsoft\Office\Recent\'
-            - '\AppData\Roaming\Microsoft\Windows\Recent\'
-    condition: 1 of selection_* and not filter
+    #filter:
+    #    TargetFilename|contains:
+    #        - '\AppData\Roaming\Microsoft\Office\Recent\'
+    #        - '\AppData\Roaming\Microsoft\Windows\Recent\'
+    condition: 1 of selection_*
 falsepositives:
     - Unlikely
 level: high

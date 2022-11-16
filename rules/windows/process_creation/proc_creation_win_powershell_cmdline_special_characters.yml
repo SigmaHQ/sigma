@@ -2,11 +2,16 @@ title: Suspicious PowerShell Command Line
 id: d7bcd677-645d-4691-a8d4-7a5602b780d1
 status: test
 description: Detects the PowerShell command lines with special characters
-author: Teymur Kheirkhabarov (idea), Vasiliy Burov (rule), oscd.community, Tim Shelton (fp)
 references:
     - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=64
+author: Teymur Kheirkhabarov (idea), Vasiliy Burov (rule), oscd.community, Tim Shelton (fp)
 date: 2020/10/15
 modified: 2022/07/14
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001
 logsource:
     category: process_creation
     product: windows
@@ -48,8 +53,3 @@ falsepositives:
     - Amazon SSM Document Worker # fp example: powershell " [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 $keyExists = Test-Path "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Setup\OC Manager\Subcomponents" $jsonObj = @() if ($keyExists) { $key = Get-Item "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Setup\OC Manager\Subcomponents" $valueNames = $key.GetValueNames(); foreach ($valueName in $valueNames) { $value = $key.GetValue($valueName); if ($value -gt 0) { $installed = "True" } else { $installed = "False" } $jsonObj += @" {"Name": "$valueName", "Installed": "$installed"} "@ } } $result = $jsonObj -join "," $result = "[" + $result + "]" [Console]::WriteLine($result)
     - Windows Defender ATP
 level: high
-tags:
-    - attack.defense_evasion
-    - attack.t1027
-    - attack.execution
-    - attack.t1059.001

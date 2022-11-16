@@ -8,7 +8,7 @@ references:
     - https://lolbas-project.github.io/lolbas/Binaries/Bitsadmin/
 author: Michael Haag, FPT.EagleEye
 date: 2017/03/09
-modified: 2022/10/09
+modified: 2022/11/11
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -20,7 +20,8 @@ logsource:
     product: windows
 detection:
     selection1:
-        Image|endswith: '\bitsadmin.exe'
+        - Image|endswith: '\bitsadmin.exe'
+        - OriginalFileName: 'bitsadmin.exe'
     susp_flag_1:
         CommandLine|contains: ' /transfer '
     susp_flag_2:
@@ -32,9 +33,9 @@ detection:
     selection2:
         CommandLine|contains: 'copy bitsadmin.exe'
     condition: (selection1 and susp_flag_2 and http_flag) or (selection1 and susp_flag_1) or selection2
-falsepositives:
-    - Some legitimate apps use this, but limited.
-level: medium
 fields:
     - CommandLine
     - ParentCommandLine
+falsepositives:
+    - Some legitimate apps use this, but limited.
+level: medium

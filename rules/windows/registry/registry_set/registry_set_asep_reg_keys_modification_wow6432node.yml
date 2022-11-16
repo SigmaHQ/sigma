@@ -12,7 +12,7 @@ references:
     - https://oddvar.moe/2018/03/21/persistence-using-runonceex-hidden-from-autoruns-exe/
 author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split)
 date: 2019/10/25
-modified: 2022/09/21
+modified: 2022/11/01
 tags:
     - attack.persistence
     - attack.t1547.001
@@ -78,6 +78,12 @@ detection:
     filter_vcredist:
         Image|endswith: '\VC_redist.x64.exe'
         Details|endswith: '}\VC_redist.x64.exe" /burn.runonce'
+    filter_winsdk:
+        Image|startswith:
+            - 'C:\ProgramData\Package Cache'
+            - 'C:\Windows\Temp\'
+        Image|endswith: '\winsdksetup.exe'
+        Details|endswith: '\winsdksetup.exe" /burn.runonce'
     condition: all of wow_current_version_* and not 1 of filter_*
 fields:
     - SecurityID

@@ -7,7 +7,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1552.001/T1552.001.md
 author: frack113
 date: 2021/07/28
-modified: 2022/10/09
+modified: 2022/11/11
 tags:
     - attack.collection
     - attack.t1119
@@ -28,17 +28,17 @@ detection:
             - '.rtf'
             - '.pdf'
             - '.txt'
-    selection_dir:
+    selection_other_dir:
         CommandLine|contains|all:
             - 'dir '
             - ' /b '
             - ' /s '
-    selection_findstr:
-        OriginalFileName: FINDSTR.EXE
+    selection_other_findstr:
+        OriginalFileName: 'FINDSTR.EXE'
         CommandLine|contains:
             - ' /e '
             - ' /si '
-    condition: selection_ext and (selection_dir or selection_findstr)
+    condition: selection_ext and 1 of selection_other_*
 falsepositives:
     - Unknown
 level: medium
