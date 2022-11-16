@@ -1,0 +1,60 @@
+title: Rundll32 Dll Suspicious Path Execution (via process_creation)
+status: stable
+description: Adversaries may execute malicious dlls from common folders with write permission.
+author: SOC Prime Team
+references:
+  - https://cert.gov.ua/article/2394117
+  - https://cert.gov.ua/article/39708
+  - https://cert.gov.ua/article/39609
+  - https://cert.gov.ua/article/37829
+  - https://cert.gov.ua/article/2394117
+tags:
+  - attack.defense_evasion
+  - attack.T1218.011
+logsource:
+    category: process_creation
+    product: windows
+detection:
+  selection1:
+    CommandLine|contains:
+      - 'rundll32'
+  selection2:
+    CommandLine|contains:
+      - 'AppData' #%APPDATA%\%rand%\%rand%.dll",DllMain --iydu="SustainDream\license.dat"
+      - 'ProgramData'
+      - 'TEMP%' # rundll32.exe "%TEMP%\EdgeNotification.dll", GetApplicationNotificationFact
+      - '\TEMP'
+      - '\Tasks' #rundll32 C:\Windows\Tasks\pe.dll,DllRegisterServer
+      - 'PUBLIC%' #rundll32.exe %PUBLIC%\Libraries\WinApp.dll,fwdTst
+      - 'Public\' #rundll32.exe %PUBLIC%\Libraries\WinApp.dll,fwdTst
+  filters:
+    - CommandLine|contains|all:
+      - 'Program'
+      - 'Files'
+    - CommandLine|contains:
+      - 'DriverStore'
+      - 'OpenAs_RunDLL'
+      - 'DavSetCookie'
+      - 'RunServer'
+      - 'InvokeManagedCustomActionOutOfProc'
+      - 'ShOpenVerbShortcut'
+      - 'NdfRunDllDiagnoseWithAnswerFile'
+      - 'ShowNotificationDialog'
+      - 'NetworkDiagnosticsSharing'
+      - 'UnloadBatteryGaugeFromExplorer'
+      - 'ImController'
+      - 'PrintUIEntry'
+      - 'CryptExtOpenCER'
+      - 'CryptExtAddPFX'
+      - 'no-sandbox'
+      - 'FileProtocolHandler'
+      - 'queuereporting'
+    - CommandLine|contains|all:
+      - 'Windows.Storage.ApplicationData.dll'
+      - 'CleanupTemporaryState'
+    - ParentImage|endswith:
+      - '_1st.exe' #PICUS BAS
+  condition: (selection1 and selection2) and not filters
+falsepositives: 
+  - Legit dll execution outside of default directories.
+level: high
