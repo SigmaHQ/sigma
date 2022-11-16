@@ -7,7 +7,7 @@ references:
     - https://eqllib.readthedocs.io/en/latest/analytics/c4732632-9c1d-4980-9fa8-1d98c93f918e.html
 author: E.M. Anhaus (originally from Atomic Blue Detections, Endgame), oscd.community
 date: 2019/10/24
-modified: 2022/07/07
+modified: 2022/11/11
 tags:
     - attack.impact
     - attack.t1490
@@ -16,9 +16,11 @@ logsource:
     product: windows
 detection:
     selection1:
-        Image|endswith: '\bcdedit.exe'
-        CommandLine|contains: 'set'
+        - Image|endswith: '\bcdedit.exe'
+        - OriginalFileName: 'bcdedit.exe'
     selection2:
+        CommandLine|contains: 'set'
+    selection3:
         - CommandLine|contains|all:
             - 'bootstatuspolicy'
             - 'ignoreallfailures'

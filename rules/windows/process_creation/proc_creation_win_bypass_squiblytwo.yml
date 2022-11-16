@@ -7,7 +7,7 @@ references:
     - https://twitter.com/mattifestation/status/986280382042595328
 author: Markus Neis, Florian Roth
 date: 2019/01/16
-modified: 2022/03/21
+modified: 2022/11/11
 tags:
     - attack.defense_evasion
     - attack.t1047
@@ -19,8 +19,10 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_org:
-        Image|endswith: '\wmic.exe'
+    selection_org_img:
+        - Image|endswith: '\wmic.exe'
+        - OriginalFileName: 'wmic.exe'
+    selection_org_cli:
         CommandLine|contains|all:
             - wmic
             - format
@@ -38,7 +40,7 @@ detection:
         CommandLine|contains|all:
             - 'format:'
             - 'http'
-    condition: selection_org or all of selection_renamed_*
+    condition: all of selection_org_* or all of selection_renamed_*
 falsepositives:
     - Unknown
 level: medium
