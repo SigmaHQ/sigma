@@ -1,23 +1,27 @@
 title: Process Hacker Usage
 id: 811e0002-b13b-4a15-9d00-a613fce66e42
 status: experimental
-description: Detects suspicious use of Process Hacker, a tool to view and manipulate processes, kernel options and other low level stuff
+description: Detects suspicious use of Process Hacker and its newer version named System Informer, a tool to view and manipulate processes, kernel options and other low level stuff
 references:
     - https://processhacker.sourceforge.io/
     - https://www.crowdstrike.com/blog/falcon-overwatch-report-finds-increase-in-ecrime/
 author: Florian Roth
 date: 2022/10/10
+modified: 2022/11/16
 logsource:
     category: process_creation
     product: windows
 detection:
     selection_image:
-        Image|contains: '\ProcessHacker_'
+        - Image|contains: '\ProcessHacker_'
+        - Image: 'SystemInformer.exe'
     selection_pe:
         - OriginalFileName:
             - 'ProcessHacker.exe'
             - 'Process Hacker'
-        - Description: 'Process Hacker'
+        - Description: 
+            - 'Process Hacker'
+            - 'System Informer'
         - Product: 'Process Hacker'
     selection_hashes:
         Hashes|contains:
