@@ -7,6 +7,7 @@ references:
     - https://twitter.com/mrd0x/status/1511489821247684615
 author: Florian Roth
 date: 2022/04/06
+modified: 2022/11/18
 tags:
     - attack.defense_evasion
     - attack.t1036
@@ -16,14 +17,12 @@ logsource:
     product: windows
 detection:
     selection:
-        Image|endswith: '\DumpMinitool.exe'
-    selection_original_name:
-        OriginalName: 'DumpMinitool.exe'
-    selection_flags:
-        CommandLine|contains|all:
+        - Image|endswith: '\DumpMinitool.exe'
+        - OriginalFileName: 'DumpMinitool.exe'
+        - CommandLine|contains|all:
             - ' --processId '
             - ' --dumpType Full'
-    condition: 1 of selection*
+    condition: selection
 falsepositives:
     - Unknown
 level: medium
