@@ -7,7 +7,7 @@ references:
     - https://twitter.com/Oddvarmoe/status/1270633613449723905
 author: xknow @xknow_infosec, Tim Shelton
 date: 2020/06/11
-modified: 2022/03/17
+modified: 2022/11/18
 tags:
     - attack.execution
     - attack.t1059.003
@@ -15,14 +15,18 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        ParentCommandLine|contains|all:
-            - 'cmd'
+    selection_1:
+        - ParentCommandLine|contains: 'cmd'
+        - ParentImage|endswith: '\cmd.exe'
+    selection_2:
+        ParentCommandLine|contains:
             - '/c'
+            - '/k'
+            - '/r'
         CommandLine|contains: '/../../'
     falsepositive_1:
         CommandLine|contains: '\Tasktop\keycloak\bin\/../../jre\bin\java'
-    condition: selection and not 1 of falsepositive*
+    condition: all of selection_* and not 1 of falsepositive*
 falsepositives:
     - (not much) some benign Java tools may product false-positive commandlines for loading libraries
 level: high
