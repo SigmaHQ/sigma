@@ -871,7 +871,6 @@ class TestRules(unittest.TestCase):
     def test_field_name_typo(self):
         # add "OriginalFilename" after Aurora switched to SourceFilename
         # add "ProviderName" after special case powershell classic is resolved
-        
         # typos is a list of tuples where each tuple contains ("The typo", "The correct version")
         typos = [("ServiceFilename", "ServiceFileName"), ("TargetFileName", "TargetFilename"), ("SourceFileName", "OriginalFileName"), ("Commandline", "CommandLine"), ("Targetobject", "TargetObject"), ("OriginalName", "OriginalFileName")]
         faulty_rules = []
