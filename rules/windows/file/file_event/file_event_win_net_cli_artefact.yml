@@ -1,0 +1,29 @@
+title: NET CLR Binary Execution Log Artefact
+id: e0b06658-7d1d-4cd3-bf15-03467507ff7c
+status: experimental
+description: The CLR (crl.dll) create a Usage Log file named after the executing process once the assembly is finished executing for the first time in the (user) session context
+references:
+    - https://bohops.com/2021/03/16/investigating-net-clr-usage-log-tampering-techniques-for-edr-evasion/
+    - https://github.com/olafhartong/sysmon-modular/blob/master/11_file_create/include_dotnet.xml
+author: frack113
+date: 2022/11/18
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|endswith:
+            - '\UsageLogs\cscript.exe.log'
+            - '\UsageLogs\wscript.exe.log'
+            - '\UsageLogs\wmic.exe.log'
+            - '\UsageLogs\mshta.exe.log'
+            - '\UsageLogs\svchost.exe.log'
+            - '\UsageLogs\regsvr32.exe.log'
+            - '\UsageLogs\rundll32.exe.log'
+    condition: selection
+falsepositives:
+    - Legitimate use
+level: medium
