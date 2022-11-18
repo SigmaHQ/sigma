@@ -1,7 +1,7 @@
-title: Computer Discovery And Export Via Get-ADComputer Cmdlet
-id: 435e10e4-992a-4281-96f3-38b11106adde
+title: Computer Discovery And Export Via Get-ADComputer Cmdlet - PowerShell
+id: db885529-903f-4c5d-9864-28fe199e6370
 related:
-    - id: db885529-903f-4c5d-9864-28fe199e6370
+    - id: 435e10e4-992a-4281-96f3-38b11106adde
       type: similar
 status: experimental
 description: Detects usage of the Get-ADComputer cmdlet to collect computer information and output it to a file
@@ -10,33 +10,25 @@ references:
     - https://www.microsoft.com/en-us/security/blog/2022/10/18/defenders-beware-a-case-for-post-ransomware-investigations/
     - https://www.cisa.gov/uscert/sites/default/files/publications/aa22-320a_joint_csa_iranian_government-sponsored_apt_actors_compromise_federal%20network_deploy_crypto%20miner_credential_harvester.pdf
 author: Nasreddine Bencherchali
-date: 2022/11/10
-modified: 2022/11/17
+date: 2022/11/17
 tags:
     - attack.discovery
     - attack.t1033
 logsource:
-    category: process_creation
     product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
 detection:
-    selection_img:
-        - Image|endswith:
-            - '\powershell.exe'
-            - '\pwsh.exe'
-        - OriginalFileName:
-            - 'PowerShell.EXE'
-            - 'pwsh.dll'
-    selection_cli:
-        CommandLine|contains|all:
+    selection:
+        ScriptBlockText|contains|all:
             - 'Get-ADComputer '
             - ' -Filter \*'
-        CommandLine|contains:
-            - ' > '
+        ScriptBlockText|contains:
             - ' | Select '
             - 'Out-File'
             - 'Set-Content'
             - 'Add-Content'
-    condition: all of selection_*
+    condition: selection
 falsepositives:
     - Legitimate admin scripts may use the same technique, it's better to exclude specific computers or users who execute these commands or scripts often
 level: medium
