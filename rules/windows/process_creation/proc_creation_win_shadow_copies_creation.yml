@@ -7,7 +7,7 @@ references:
     - https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/tutorial-for-ntds-goodness-vssadmin-wmis-ntdsdit-system/
 author: Teymur Kheirkhabarov, Daniil Yugoslavskiy, oscd.community
 date: 2019/10/22
-modified: 2022/07/14
+modified: 2022/11/10
 tags:
     - attack.credential_access
     - attack.t1003
@@ -17,16 +17,22 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith:
+    selection_img:
+        - Image|endswith:
             - '\powershell.exe'
             - '\pwsh.exe'
             - '\wmic.exe'
             - '\vssadmin.exe'
+        - OriginalFileName:
+            - 'PowerShell.EXE'
+            - 'pwsh.dll'
+            - 'wmic.exe'
+            - 'VSSADMIN.EXE'
+    selection_cli:
         CommandLine|contains|all:
-            - shadow
-            - create
-    condition: selection
+            - 'shadow'
+            - 'create'
+    condition: all of selection_*
 falsepositives:
     - Legitimate administrator working with shadow copies, access for backup purposes
 level: medium

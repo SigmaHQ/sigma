@@ -6,7 +6,7 @@ references:
     - https://github.com/Neo23x0/sigma/issues/1009  #(Task 25)
 author: Jonathan Cheong, oscd.community
 date: 2020/10/15
-modified: 2021/11/30
+modified: 2022/11/17
 tags:
     - attack.defense_evasion
     - attack.t1027
@@ -16,11 +16,24 @@ logsource:
     product: windows
     service: system
 detection:
-    selection:
+    selection_main:
         Provider_Name: 'Service Control Manager'
         EventID: 7045
-        ImagePath|re: '.*cmd.{0,5}(?:\/c|\/r).+powershell.+(?:\$\{?input\}?|noexit).+\"'
-    condition: selection
+        # ImagePath|re: '.*cmd.{0,5}(?:\/c|\/r).+powershell.+(?:\$\{?input\}?|noexit).+\"'
+        # Example 1: c:\windows\sYstEm32\CmD.eXE /C"echO\Invoke-Expression (New-Object Net.WebClient).DownloadString | POwersHELl -NoEXiT -"
+        # Example 2: c:\WiNDOws\sysTEm32\cmd.EXe /C " ECHo Invoke-Expression (New-Object Net.WebClient).DownloadString | POwersHELl -nol ${EXEcUtIONCONTeXT}.INvOkEComMANd.InvOKEScRIPt( $InpUt )"
+        ImagePath|contains|all:
+            - 'cmd'
+            - 'powershell'
+        ImagePath|contains:
+            - '/c'
+            - '/r'
+    selection_other:
+        - ImagePath|contains: 'noexit'
+        - ImagePath|contains|all:
+            - 'input'
+            - '$'
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: high

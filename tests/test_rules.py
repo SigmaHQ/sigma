@@ -79,7 +79,7 @@ class TestRules(unittest.TestCase):
     def test_optional_tags(self):
         files_with_incorrect_tags = []
         tags_pattern = re.compile(
-            r"cve\.\d+\.\d+|attack\.t\d+\.*\d*|attack\.[a-z_]+|car\.\d{4}-\d{2}-\d{3}")
+            r"cve\.\d+\.\d+|attack\.(t\d{4}\.\d{3}|[gts]\d{4})$|attack\.[a-z_]+|car\.\d{4}-\d{2}-\d{3}")
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             tags = self.get_rule_part(file_path=file, part_name="tags")
             if tags:
@@ -871,7 +871,8 @@ class TestRules(unittest.TestCase):
     def test_field_name_typo(self):
         # add "OriginalFilename" after Aurora switched to SourceFilename
         # add "ProviderName" after special case powershell classic is resolved
-        typos = ["ServiceFilename", "TargetFileName", "SourceFileName", "Commandline", "Targetobject"]
+        # typos is a list of tuples where each tuple contains ("The typo", "The correct version")
+        typos = [("ServiceFilename", "ServiceFileName"), ("TargetFileName", "TargetFilename"), ("SourceFileName", "OriginalFileName"), ("Commandline", "CommandLine"), ("Targetobject", "TargetObject"), ("OriginalName", "OriginalFileName")]
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             detection = self.get_rule_part(file_path=file, part_name="detection")
@@ -880,8 +881,8 @@ class TestRules(unittest.TestCase):
                     if isinstance(detection[search_identifier], dict):
                         for field in detection[search_identifier]:
                             for typo in typos:
-                                if typo in field:
-                                    print(Fore.RED + "Rule {} has a common typo ({}) in selection ({}/{})".format(file, typo, search_identifier, field))
+                                if typo[0] in field:
+                                    print(Fore.RED + "Rule {} has a common typo ({}) which should be ({}) in selection ({}/{})".format(file, typo[0], typo[1], search_identifier, field))
                                     faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED + "There are rules with common typos in field names.")

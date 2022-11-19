@@ -9,7 +9,7 @@ references:
     - https://www.welivesecurity.com/2022/03/01/isaacwiper-hermeticwizard-wiper-worm-targeting-ukraine/
 author: Florian Roth
 date: 2019/10/22
-modified: 2022/10/31
+modified: 2022/11/13
 tags:
     - attack.defense_evasion
     - attack.t1218.011
@@ -24,16 +24,14 @@ detection:
             - ', #'
             - '.dll #'  # Sysmon removes , in its log
             - '.ocx #'  # HermeticWizard
-    filter1:
-        CommandLine|contains|all:
-            - 'EDGEHTML.dll'
-            - '#141'
     filter_edge:
         CommandLine|contains|all:
             - 'EDGEHTML.dll'
             - '#141'
     filter_vsbuild_dll:
-        ParentImage|endswith: '\Msbuild\Current\Bin\Tracker.exe'
+        ParentImage|contains:
+            - '\Msbuild\Current\Bin\'
+            - '\Tracker.exe'
         CommandLine|contains:
             - '\FileTracker32.dll,#1'
             - '\FileTracker32.dll",#1'

@@ -7,7 +7,7 @@ references:
     - https://ired.team/offensive-security/code-execution/code-execution-through-control-panel-add-ins
 author: Kyaw Min Thein, Furkan Caliskan (@caliskanfurkan_)
 date: 2020/06/22
-modified: 2022/08/11
+modified: 2022/11/11
 tags:
     - attack.execution
     - attack.defense_evasion
@@ -18,8 +18,10 @@ logsource:
     product: windows
     category: process_creation
 detection:
-    selection_reg:
-        Image|endswith: '\reg.exe'
+    selection_reg_img:
+        - Image|endswith: '\reg.exe'
+        - OriginalFileName: 'reg.exe'
+    selection_reg_cli:
         CommandLine|contains|all:
             - 'add'
             - 'CurrentVersion\Control Panel\CPLs'
@@ -34,7 +36,7 @@ detection:
             - 'regsvr32 '
             - ' /s '
             - 'igfxCPL.cpl'
-    condition: selection_reg or (selection_cpl and not 1 of filter_cpl_*)
+    condition: all of selection_reg_* or (selection_cpl and not 1 of filter_cpl_*)
 falsepositives:
     - Unknown
 level: high

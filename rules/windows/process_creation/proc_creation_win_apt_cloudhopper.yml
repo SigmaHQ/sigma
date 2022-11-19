@@ -6,7 +6,7 @@ references:
     - https://web.archive.org/web/20180725233601/https://www.pwc.co.uk/cyber-security/pdf/cloud-hopper-annex-b-final.pdf
 author: Florian Roth
 date: 2017/04/07
-modified: 2022/09/08
+modified: 2022/11/11
 tags:
     - attack.execution
     - attack.g0045
@@ -15,14 +15,18 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith:
+    selection_img:
+        - Image|endswith:
             - '\cscript.exe'
             - '\wscript.exe'
+        - OriginalFileName:
+            - 'cscript.exe'
+            - 'wscript.exe'
+    selection_cli:
         CommandLine|contains|all:
             - '.vbs'
             - '/shell'
-    condition: selection
+    condition: all of selection_*
 fields:
     - CommandLine
     - ParentCommandLine
