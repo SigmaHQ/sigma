@@ -9,7 +9,7 @@ references:
     - https://ss64.com/nt/cmd.html
 author: Florian Roth
 date: 2022/08/23
-modified: 2022/08/31
+modified: 2022/11/18
 tags:
     - attack.execution
     - attack.t1059.001
@@ -20,11 +20,14 @@ detection:
     selection1:  # missing space before the /c
         CommandLine|contains:
             - 'cmd.exe/c'
-            - '\cmd/c'  # just cmd/c would be prone to false positives 
+            - '\cmd/c'  # just cmd/c would be prone to false positives
             - '"cmd/c'
             - 'cmd.exe/k'
-            - '\cmd/k'  # just cmd/c would be prone to false positives 
+            - '\cmd/k'  # just cmd/k would be prone to false positives
             - '"cmd/k'
+            - 'cmd.exe/r'
+            - '\cmd/r'  # just cmd/r would be prone to false positives
+            - '"cmd/r'
     selection2: # special cases verified via Virustotal Enterprise search
         CommandLine|contains:
             - '/cwhoami'
@@ -43,12 +46,16 @@ detection:
             - 'cmd /c'
             - 'cmd.exe /k'
             - 'cmd /k'
+            - 'cmd.exe /r'
+            - 'cmd /r'
     filter1:
         CommandLine|contains:
             - 'cmd.exe /c '
             - 'cmd /c '
             - 'cmd.exe /k '
             - 'cmd /k '
+            - 'cmd.exe /r '
+            - 'cmd /r '
     filter_falsepositives:
         - CommandLine|contains: 'AppData\Local\Programs\Microsoft VS Code\resources\app\node_modules'
         - CommandLine|endswith: 'cmd.exe/c .'
