@@ -1,0 +1,49 @@
+title: Potential suspicious activity using secedit.exe
+id: c2c76b77-32be-4d1f-82c9-7e544bdfe0eb
+status: experimental
+description: Detects potential suspicious behaviour using secedit.exe
+references:
+    - https://blueteamops.medium.com/secedit-and-i-know-it-595056dee53d
+author: Janantha Marasinghe
+date: 2022/11/18
+tags:
+    - attack.discovery
+    - attack.persistence
+    - attack.defense_evasion
+    - attack.credential_access
+    - attack.privilege_escalation
+    - attack.T1562.002
+    - attack.T1547.001
+    - attack.T1546.007
+    - attack.T1505.005
+    - attack.T1556.002
+    - attack.T1562
+    - attack.T1574.007
+    - attack.T1564.002
+    - attack.T1546.008
+    - attack.T1546.007
+    - attack.T1547.014
+    - attack.T1547.010
+    - attack.T1547.002
+    - attack.T1557
+    - attack.T1082
+logsource:
+    category: process_creation
+    product: windows
+detection:   
+    process_name:
+        ProcessName|endswith: 'secedit.exe'
+    selection_discovery:
+        CommandLine|contains|all:
+            - '/export'
+            - '/cfg'
+    selection_configure:
+        CommandLine|contains|all:
+            - '/configure'
+            - '/db'
+    filter:
+        - SubjectUserName|endswith: '$'
+    condition: process_name and (1 of selection*) and not filter
+falsepositives:
+    - Legitimate administrative use
+level: medium
