@@ -11,7 +11,7 @@ references:
     - https://twitter.com/eral4m/status/1479080793003671557 # shimgvw.dll,ImageView_Fullscreen
 author: juju4, Jonhnathan Ribeiro, oscd.community, Nasreddine Bencherchali
 date: 2019/01/16
-modified: 2022/08/30
+modified: 2022/11/22
 tags:
     - attack.defense_evasion
     - attack.t1218.011
@@ -90,6 +90,10 @@ detection:
     filter_parent:  # Settings
         ParentImage: 'C:\Windows\System32\control.exe'
         ParentCommandLine|contains: '.cpl'
+    filter_startmenu:
+        ParentImage: 'C:\Windows\System32\control.exe'
+        CommandLine|startswith: '"C:\Windows\system32\rundll32.exe" Shell32.dll,Control_RunDLL "C:\Windows\System32\'
+        CommandLine|endswith: '.cpl",'
     condition: selection and not 1 of filter*
 falsepositives:
     - False positives depend on scripts and administrative tools used in the monitored environment

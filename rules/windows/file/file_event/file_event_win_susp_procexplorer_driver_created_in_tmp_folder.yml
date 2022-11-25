@@ -8,7 +8,7 @@ references:
     - https://blog.dylan.codes/evading-sysmon-and-windows-event-logging/
 author: xknow (@xknow_infosec), xorxes (@xor_xes)
 date: 2019/04/08
-modified: 2021/11/27
+modified: 2022/11/22
 tags:
     - attack.t1562.001
     - attack.defense_evasion
@@ -16,16 +16,16 @@ logsource:
     product: windows
     category: file_event
 detection:
-    selection_1:
+    selection:
         TargetFilename|contains: '\AppData\Local\Temp\'
         TargetFilename|endswith: 'PROCEXP152.sys'
-    selection_2:
+    filter:
         Image|contains:
             - '\procexp64.exe'
             - '\procexp.exe'
             - '\procmon64.exe'
             - '\procmon.exe'
-    condition: selection_1 and not selection_2
+    condition: selection and not filter
 falsepositives:
     - Other legimate tools using this driver and filename (like Sysinternals). Note - Clever attackers may easily bypass this detection by just renaming the driver filename. Therefore just Medium-level and don't rely on it.
 level: medium
