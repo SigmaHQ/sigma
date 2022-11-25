@@ -31,19 +31,20 @@ logsource:
     category: process_creation
     product: windows
 detection:   
-    process_name:
-        ProcessName|endswith: 'secedit.exe'
-    selection_discovery:
+    selection_img:
+        - Image|endswith: '\secedit.exe'
+        - OriginalFileName: 'SeCEdit'
+    selection_flags_discovery:
         CommandLine|contains|all:
             - '/export'
             - '/cfg'
-    selection_configure:
+    selection_flags_configure:
         CommandLine|contains|all:
             - '/configure'
             - '/db'
     filter:
-        - SubjectUserName|endswith: '$'
-    condition: process_name and (1 of selection*) and not filter
+        SubjectUserName|endswith: '$'
+    condition: selection_img and (1 of selection_flags_*) and not filter
 falsepositives:
     - Legitimate administrative use
 level: medium
