@@ -1,0 +1,28 @@
+title: Remote Credential Dump
+id: 02773bed-83bf-469f-b7ff-e676e7d78bab
+status: experimental
+description: Detects default filenames outputted by execution of CrackMapExec and Impacket-secretsdump against an endpoint.
+references:
+    - https://github.com/Porchetta-Industries/CrackMapExec
+    - https://github.com/SecureAuthCorp/impacket/blob/master/examples/secretsdump.py
+author: SecurityAura
+date: 2022/11/16
+modified: 2022/11/16
+tags:
+    - attack.credential
+    - attack.t1003
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        Image|endswith:
+            - 'svchost.exe'
+        CommandLine|contains:
+            - 'RemoteRegistry'
+        TargetFilename|endswith:
+            - '\Windows\System32\????????.tmp'
+    condition: selection
+falsepositives:
+    - Unknown
+level: experimental
