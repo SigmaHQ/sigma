@@ -127,17 +127,17 @@ class TestRules(unittest.TestCase):
                          "There are rules with duplicate tags")
 
     def test_look_for_duplicate_filters(self):
-        def check_list_or_recurse_on_dict(item, depth: int, special: int) -> None:
+        def check_list_or_recurse_on_dict(item, depth: int, special: bool) -> None:
             if type(item) == list:
                 check_if_list_contain_duplicates(item, depth, special)
             elif type(item) == dict and depth <= MAX_DEPTH:
                 for keys, sub_item in item.items():
                     if "|base64" in keys: # Covers both "base64" and "base64offset" modifiers
-                        check_list_or_recurse_on_dict(sub_item, depth + 1, 1)
+                        check_list_or_recurse_on_dict(sub_item, depth + 1, True)
                     else:
                         check_list_or_recurse_on_dict(sub_item, depth + 1, special)
 
-        def check_if_list_contain_duplicates(item: list, depth: int, special: int) -> None:
+        def check_if_list_contain_duplicates(item: list, depth: int, special: bool) -> None:
             try:
                 # We use a list comprehension to convert all the element to lowercase. Since we don't care about casing in SIGMA except for the following modifiers
                 #   - "base64offset"
@@ -163,7 +163,7 @@ class TestRules(unittest.TestCase):
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             detection = self.get_rule_part(
                 file_path=file, part_name="detection")
-            check_list_or_recurse_on_dict(detection, 1, 0)
+            check_list_or_recurse_on_dict(detection, 1, False)
 
         self.assertEqual(files_with_duplicate_filters, [], Fore.RED +
                          "There are rules with duplicate filters")
