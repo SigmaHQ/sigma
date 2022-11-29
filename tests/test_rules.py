@@ -146,7 +146,7 @@ class TestRules(unittest.TestCase):
                 else:
                     item_= [i.lower() for i in item]
                 if len(item_) != len(set(item_)):
-                    # We find the duplicates the print them to the user
+                    # We find the duplicates and then print them to the user
                     duplicates = [i for i, count in collections.Counter(item_).items() if count > 1]
                     print(Fore.RED + "Rule {} has duplicate filters {}".format(file, duplicates))
                     files_with_duplicate_filters.append(file)
