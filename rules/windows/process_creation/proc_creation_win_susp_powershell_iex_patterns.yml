@@ -6,7 +6,7 @@ references:
     - https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-expression?view=powershell-7.2
 author: Florian Roth
 date: 2022/03/24
-modified: 2022/10/28
+modified: 2022/11/28
 logsource:
     product: windows
     category: process_creation
@@ -16,25 +16,22 @@ detection:
             - '\powershell.exe'
             - '\pwsh.exe'
         CommandLine|contains:
-            - ' | iex;' 
-            - ' | iex ' 
-            - ' | iex}' 
-            - ' | IEX;' 
-            - ' | IEX ;' 
-            - ' | IEX -Error' 
-            - ' | IEX (new' 
-            - ' | IEX (New' 
+            - ' | iex;'
+            - ' | iex '
+            - ' | iex}'
+            - ' | IEX ;'
+            - ' | IEX -Error'
+            - ' | IEX (new'
             - ');IEX '
     selection_combined_2:
         CommandLine|contains:
             - '::FromBase64String'
             - '.GetString([System.Convert]::'
     selection_standalone:
-        CommandLine|contains: 
-            - ')|iex;$' 
-            - ')|IEX;$' 
-            - ');iex($' 
-            - ');iex $' 
+        CommandLine|contains:
+            - ')|iex;$'
+            - ');iex($'
+            - ');iex $'
             - ' | IEX | '
     condition: all of selection_combined* or selection_standalone
 falsepositives:
