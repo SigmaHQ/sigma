@@ -683,8 +683,8 @@ class TestRules(unittest.TestCase):
                 descriptionfield = self.get_rule_part(
                     file_path=file, part_name="description")
                 if descriptionfield:
-                    for i in ["http://", "https://", "Internal Research"]: # Extends the list with other common references starters
-                        if i in descriptionfield:
+                    for i in ["http://", "https://", "internal research"]: # Extends the list with other common references starters
+                        if i in descriptionfield.lower():
                             print(Fore.RED + "Rule {} has malformed description field that contain references to external links.".format(file))
                             faulty_rules.append(file)
 
