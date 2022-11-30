@@ -685,7 +685,7 @@ class TestRules(unittest.TestCase):
                 if descriptionfield:
                     for i in ["http://", "https://", "internal research"]: # Extends the list with other common references starters
                         if i in descriptionfield.lower():
-                            print(Fore.RED + "Rule {} has malformed description field that contain references to external links.".format(file))
+                            print(Fore.RED + "Rule {} has a field that contains references to external links but no references set. Add a 'references' key and add URLs as list items.".format(file))
                             faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED +
