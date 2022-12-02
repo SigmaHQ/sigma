@@ -1,0 +1,30 @@
+title: Creation Of Non-Existent DLLs In System Folders
+id: df6ecb8b-7822-4f4b-b412-08f524b4576c
+status: experimental
+description: Detects the creation of system dlls that are not present on the system. Usualy to achieve dll hijacking
+references:
+    - https://decoded.avast.io/martinchlumecky/png-steganography/
+    - https://posts.specterops.io/lateral-movement-scm-and-dll-hijacking-primer-d2f61e8ab992
+author: Nasreddine Bencherchali
+date: 2022/12/01
+tags:
+    - attack.defense_evasion
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1574.001
+    - attack.t1574.002
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename:
+            - 'C:\Windows\System32\WLBSCTRL.dll'
+            - 'C:\Windows\System32\TSMSISrv.dll'
+            - 'C:\Windows\System32\TSVIPSrv.dll'
+    filter:
+        Image|startswith: 'C:\Windows\System32\'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: medium
