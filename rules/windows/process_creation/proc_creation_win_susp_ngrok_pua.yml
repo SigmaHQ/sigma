@@ -9,10 +9,11 @@ references:
     - https://www.fireeye.com/blog/threat-research/2021/05/shining-a-light-on-darkside-ransomware-operations.html
     - https://stackoverflow.com/questions/42442320/ssh-tunnel-to-ngrok-and-initiate-rdp
     - https://www.virustotal.com/gui/file/58d21840d915aaf4040ceb89522396124c82f325282f805d1085527e1e2ccfa1/detection
-    - https://cybleinc.com/2021/02/15/ngrok-platform-abused-by-hackers-to-deliver-a-new-wave-of-phishing-attacks/.
+    - https://cybleinc.com/2021/02/15/ngrok-platform-abused-by-hackers-to-deliver-a-new-wave-of-phishing-attacks/
+    - https://twitter.com/xorJosh/status/1598646907802451969
 author: Florian Roth
 date: 2021/05/14
-modified: 2022/10/09
+modified: 2022/12/02
 tags:
     - attack.command_and_control
     - attack.t1572
@@ -39,6 +40,12 @@ detection:
             - ' tcp '
             - ' http '
             - ' authtoken '
+    selection4:
+        CommandLine|contains: '.exe authtoken '
+    selection5:
+        CommandLine|contains|all:
+            - '.exe wget '
+            - ' -outfile '
     condition: 1 of selection*
 falsepositives:
     - Another tool that uses the command line switches of Ngrok
