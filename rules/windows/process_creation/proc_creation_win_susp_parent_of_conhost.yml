@@ -6,7 +6,7 @@ references:
     - https://www.elastic.co/guide/en/security/current/conhost-spawned-by-suspicious-parent-process.html
 author: Tim Rauch
 date: 2022/09/28
-modified: 2022/10/31
+modified: 2022/11/29
 tags:
     - attack.execution
     - attack.t1059
@@ -31,15 +31,19 @@ detection:
             - '\spoolsv.exe'
             # - '\wermgr.exe'  # Legitimate parent as seen in EchoTrail https://www.echotrail.io/insights/search/wermgr.exe
             # - '\csrss.exe'  # Legitimate parent as seen in EchoTrail https://www.echotrail.io/insights/search/csrss.exe
-            - '\ctfmon.exe'
+            # - '\ctfmon.exe'  # Seen several times in a testing environment
     filter:
         ParentCommandLine|contains:
             - '-k apphost -s AppHostSvc'
             - '-k imgsvc'
-            - '-k netsvcs -p -s NetSetupSvc'
             - '-k LocalSystemNetworkRestricted -p -s NgcSvc'
-            - '-k wsappx -p -s ClipSVC'
+            - '-k netsvcs -p -s NetSetupSvc'
             - '-k netsvcs -p -s wlidsvc'
+            - '-k NetworkService -p -s DoSvc'
+            - '-k wsappx -p -s AppXSvc'
+            - '-k wsappx -p -s ClipSVC'
+            - 'C:\Program Files (x86)\Dropbox\Client\'
+            - 'C:\Program Files\Dropbox\Client\'
     condition: selection and not filter
 falsepositives:
     - Unknown

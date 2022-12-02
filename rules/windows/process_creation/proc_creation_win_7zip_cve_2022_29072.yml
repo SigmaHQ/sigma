@@ -7,21 +7,26 @@ references:
     - https://twitter.com/kagancapar/status/1515219358234161153
 author: frack113
 date: 2022/04/17
-modified: 2022/04/19
+modified: 2022/11/18
 tags:
     - cve.2022.29072
 logsource:
     product: windows
     category: process_creation
 detection:
-    selection:
-        Image|endswith: '\cmd.exe'
+    selection_img:
+        - Image|endswith: '\cmd.exe'
+        - OriginalFileName: 'Cmd.Exe'
+    selection_parent:
         ParentImage|endswith: '\7zFM.exe'
     filter_bat:
-        CommandLine|contains: ' /c '
+        CommandLine|contains:
+            - ' /c '
+            - ' /k '
+            - ' /r '
     filter_null:
         CommandLine: null
-    condition: selection and not 1 of filter_*
+    condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Unknown
 level: high

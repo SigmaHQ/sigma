@@ -4,7 +4,7 @@ status: experimental
 description: Detects suspicious service installation scripts
 author: pH-T
 date: 2022/03/18
-modified: 2022/03/24
+modified: 2022/11/18
 tags:
     - attack.persistence
     - attack.privilege_escalation
@@ -18,14 +18,19 @@ detection:
         Provider_Name: 'Service Control Manager'
         EventID: 7045
     suspicious1:
-        ImagePath|contains: ' /C '
+        ImagePath|contains:
+            - ' /c '
+            - ' /r '
+            - ' /k '
     suspicious2:
         ImagePath|contains:
             - 'powershell'
+            - 'pwsh'
             - 'wscript'
             - 'cscript'
             - 'mshta'
             - 'rundll32'
+            - 'regsvr32'
     condition: selection and all of suspicious*
 falsepositives:
     - Unknown

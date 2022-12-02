@@ -13,6 +13,7 @@ import re
 from attackcti import attack_client
 from colorama import init
 from colorama import Fore
+import collections
 
 
 class TestRules(unittest.TestCase):
@@ -126,23 +127,35 @@ class TestRules(unittest.TestCase):
                          "There are rules with duplicate tags")
 
     def test_look_for_duplicate_filters(self):
-        def check_list_or_recurse_on_dict(item, depth: int) -> None:
+        def check_list_or_recurse_on_dict(item, depth: int, special: bool) -> None:
             if type(item) == list:
-                check_if_list_contain_duplicates(item, depth)
+                check_if_list_contain_duplicates(item, depth, special)
             elif type(item) == dict and depth <= MAX_DEPTH:
-                for sub_item in item.values():
-                    check_list_or_recurse_on_dict(sub_item, depth + 1)
+                for keys, sub_item in item.items():
+                    if "|base64" in keys: # Covers both "base64" and "base64offset" modifiers
+                        check_list_or_recurse_on_dict(sub_item, depth + 1, True)
+                    else:
+                        check_list_or_recurse_on_dict(sub_item, depth + 1, special)
 
-        def check_if_list_contain_duplicates(item: list, depth: int) -> None:
+        def check_if_list_contain_duplicates(item: list, depth: int, special: bool) -> None:
             try:
-                if len(item) != len(set(item)):
-                    print(Fore.RED + "Rule {} has duplicate filters".format(file))
+                # We use a list comprehension to convert all the element to lowercase. Since we don't care about casing in SIGMA except for the following modifiers
+                #   - "base64offset"
+                #   - "base64"
+                if special:
+                    item_ = item
+                else:
+                    item_= [i.lower() for i in item]
+                if len(item_) != len(set(item_)):
+                    # We find the duplicates and then print them to the user
+                    duplicates = [i for i, count in collections.Counter(item_).items() if count > 1]
+                    print(Fore.RED + "Rule {} has duplicate filters {}".format(file, duplicates))
                     files_with_duplicate_filters.append(file)
             except:
                 # unhashable types like dictionaries
                 for sub_item in item:
                     if type(sub_item) == dict and depth <= MAX_DEPTH:
-                        check_list_or_recurse_on_dict(sub_item, depth + 1)
+                        check_list_or_recurse_on_dict(sub_item, depth + 1, special)
 
         MAX_DEPTH = 3
         files_with_duplicate_filters = []
@@ -150,7 +163,7 @@ class TestRules(unittest.TestCase):
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             detection = self.get_rule_part(
                 file_path=file, part_name="detection")
-            check_list_or_recurse_on_dict(detection, 1)
+            check_list_or_recurse_on_dict(detection, 1, False)
 
         self.assertEqual(files_with_duplicate_filters, [], Fore.RED +
                          "There are rules with duplicate filters")
@@ -871,7 +884,8 @@ class TestRules(unittest.TestCase):
     def test_field_name_typo(self):
         # add "OriginalFilename" after Aurora switched to SourceFilename
         # add "ProviderName" after special case powershell classic is resolved
-        typos = ["ServiceFilename", "TargetFileName", "SourceFileName", "Commandline", "Targetobject"]
+        # typos is a list of tuples where each tuple contains ("The typo", "The correct version")
+        typos = [("ServiceFilename", "ServiceFileName"), ("TargetFileName", "TargetFilename"), ("SourceFileName", "OriginalFileName"), ("Commandline", "CommandLine"), ("Targetobject", "TargetObject"), ("OriginalName", "OriginalFileName")]
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             detection = self.get_rule_part(file_path=file, part_name="detection")
@@ -880,8 +894,8 @@ class TestRules(unittest.TestCase):
                     if isinstance(detection[search_identifier], dict):
                         for field in detection[search_identifier]:
                             for typo in typos:
-                                if typo in field:
-                                    print(Fore.RED + "Rule {} has a common typo ({}) in selection ({}/{})".format(file, typo, search_identifier, field))
+                                if typo[0] in field:
+                                    print(Fore.RED + "Rule {} has a common typo ({}) which should be ({}) in selection ({}/{})".format(file, typo[0], typo[1], search_identifier, field))
                                     faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED + "There are rules with common typos in field names.")

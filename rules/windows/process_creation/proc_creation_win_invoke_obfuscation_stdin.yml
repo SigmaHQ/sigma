@@ -6,7 +6,7 @@ references:
     - https://github.com/Neo23x0/sigma/issues/1009  #(Task 25)
 author: Jonathan Cheong, oscd.community
 date: 2020/10/15
-modified: 2021/11/27
+modified: 2022/11/17
 tags:
     - attack.defense_evasion
     - attack.t1027
@@ -16,9 +16,22 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        CommandLine|re: '.*cmd.{0,5}(?:\/c|\/r).+powershell.+(?:\$\{?input\}?|noexit).+\"'
-    condition: selection
+    selection_main:
+        # CommandLine|re: '.*cmd.{0,5}(?:\/c|\/r).+powershell.+(?:\$\{?input\}?|noexit).+\"'
+        # Example 1: c:\windows\sYstEm32\CmD.eXE /C"echO\Invoke-Expression (New-Object Net.WebClient).DownloadString | POwersHELl -NoEXiT -"
+        # Example 2: c:\WiNDOws\sysTEm32\cmd.EXe /C " ECHo Invoke-Expression (New-Object Net.WebClient).DownloadString | POwersHELl -nol ${EXEcUtIONCONTeXT}.INvOkEComMANd.InvOKEScRIPt( $InpUt )"
+        CommandLine|contains|all:
+            - 'cmd'
+            - 'powershell'
+        CommandLine|contains:
+            - '/c'
+            - '/r'
+    selection_other:
+        - CommandLine|contains: 'noexit'
+        - CommandLine|contains|all:
+            - 'input'
+            - '$'
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: high
