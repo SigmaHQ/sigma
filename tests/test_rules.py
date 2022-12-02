@@ -672,6 +672,25 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed 'references' fields. (has to be a list of values even if it contains only a single value)")
 
+    def test_references_in_description(self):
+        # This test checks for the presence of a links and special keywords in the "description" field while there is no "references" field.
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            references = self.get_rule_part(
+                file_path=file, part_name="references")
+            # Reference field doesn't exist
+            if not references:
+                descriptionfield = self.get_rule_part(
+                    file_path=file, part_name="description")
+                if descriptionfield:
+                    for i in ["http://", "https://", "internal research"]: # Extends the list with other common references starters
+                        if i in descriptionfield.lower():
+                            print(Fore.RED + "Rule {} has a field that contains references to external links but no references set. Add a 'references' key and add URLs as list items.".format(file))
+                            faulty_rules.append(file)
+
+        self.assertEqual(faulty_rules, [], Fore.RED +
+                         "There are rules with malformed 'description' fields. (links and external references have to be in a seperate field named 'references'. see specification https://github.com/SigmaHQ/sigma-specification)")
+
     def test_references_plural(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
