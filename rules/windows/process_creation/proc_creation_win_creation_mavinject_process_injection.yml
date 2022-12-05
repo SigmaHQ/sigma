@@ -12,9 +12,11 @@ references:
     - https://twitter.com/gN3mes1s/status/941315826107510784
     - https://reaqta.com/2017/12/mavinject-microsoft-injector/
     - https://twitter.com/Hexacorn/status/776122138063409152  # Deleted tweet
+    - https://github.com/SigmaHQ/sigma/issues/3742
+    - https://github.com/keyboardcrunch/SentinelOne-ATTACK-Queries/blob/6a228d23eefe963ca81f2d52f94b815f61ef5ee0/Tactics/DefenseEvasion.md#t1055-process-injection
 author: frack113, Florian Roth
 date: 2021/07/12
-modified: 2022/09/07
+modified: 2022/12/05
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
@@ -26,6 +28,8 @@ logsource:
 detection:
     selection_flag:
         CommandLine|contains: ' /INJECTRUNNING '
+    filter_parent:
+        ParentImage: 'C:\Windows\System32\AppVClient.exe' # This parent is the expected process to launch "mavinject"
     selection_renamed:
         OriginalFileName:
             - 'mavinject32.exe'
@@ -34,7 +38,7 @@ detection:
         Image|endswith:
             - '\mavinject32.exe'
             - '\mavinject64.exe'
-    condition: selection_flag or (selection_renamed and not filter_renamed)
+    condition: (selection_flag and not filter_parent) or (selection_renamed and not filter_renamed)
 fields:
     - ComputerName
     - User
