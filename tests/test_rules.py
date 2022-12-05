@@ -336,12 +336,12 @@ class TestRules(unittest.TestCase):
                 print(
                     Fore.YELLOW + "Rule {} has a malformed 'id' (not 36 chars).".format(file))
                 faulty_rules.append(file)
-            elif id in dict_id.keys():
+            elif id.lower() in dict_id.keys():
                 print(
                     Fore.YELLOW + "Rule {} has the same 'id' than {} must be unique.".format(file, dict_id[id]))
                 faulty_rules.append(file)
             else:
-                dict_id[id] = file
+                dict_id[id.lower()] = file
 
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with missing or malformed 'id' fields. Create an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).")
