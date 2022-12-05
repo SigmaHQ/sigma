@@ -1,0 +1,26 @@
+title: Suspicious Elevate Shell
+id: 178e615d-e666-498b-9630-9ed363038101
+status: experimental
+description: Detect when a shell is launched by a System Account
+references:
+    - https://github.com/Wh04m1001/SysmonEoP
+author: frack113
+date: 2022/12/05
+tags:
+    - attack.privilege_escalation 
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        - Image|endswith: '\cmd.exe'
+        - OriginalFileName: 'Cmd.Exe'
+    selection_user:
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
+        #LogonId: '0x3e7'
+    condition: all of selection_* 
+falsepositives:
+    - Unknown
+level: high
