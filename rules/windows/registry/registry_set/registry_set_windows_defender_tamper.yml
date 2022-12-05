@@ -14,6 +14,7 @@ references:
     - https://symantec-enterprise-blogs.security.com/blogs/threat-intelligence/ransomware-hive-conti-avoslocker
 author: AlertIQ, Ján Trenčanský, frack113, Nasreddine Bencherchali
 date: 2022/08/01
+modified: 2022/12/05
 tags:
     - attack.defense_evasion
     - attack.t1562.001
@@ -42,7 +43,11 @@ detection:
             - '\SpyNet\SubmitSamplesConsent'
             - '\MpEngine\MpEnablePus'
         Details: 'DWORD (0x00000000)'
-    condition: root and 1 of selection_*
+    filter_msmpeng:
+        Image|contains|all:
+            - 'C:\ProgramData\Microsoft\Windows Defender\platform\'
+            - '\MsMpEng.exe'
+    condition: ( root and 1 of selection_* ) and not 1 of filter*
 falsepositives:
     - Administrator actions
 level: high
