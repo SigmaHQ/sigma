@@ -6,15 +6,18 @@ references:
     - https://twitter.com/0gtweet/status/1493963591745220608?s=20&t=xUg9DsZhJy1q9bPTUWgeIQ
 author: frack113
 date: 2022/02/16
-modified: 2022/11/09
+modified: 2022/12/06
 tags:
     - attack.defense_evasion
+    - attack.t1218
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\wlrmdr.exe'
+    selection_img:
+        - Image|endswith: '\wlrmdr.exe'
+        - OriginalFileName: 'WLRMNDR.EXE'
+    selection_cli:
         CommandLine|contains|all:
             - '-s '
             - '-f '
@@ -26,7 +29,7 @@ detection:
         ParentImage: 'C:\Windows\System32\winlogon.exe'
     filter_null:
         ParentImage: '-'
-    condition: selection and not 1 of filter*
+    condition: all of selection_* and not 1 of filter*
 falsepositives:
     - Unknown
 level: medium
