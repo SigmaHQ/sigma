@@ -909,11 +909,14 @@ class TestRules(unittest.TestCase):
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             # Some fields exists in certain log sources in different forms than other log sources. We need to handle these as special cases
             # We check first the logsource to handle special cases
-            logsource = self.get_rule_part(file_path=file, part_name="logsource")
-            # The current special cases are:
-            #   - 'windefend'
-            if "windefend" in logsource.values():
-                typos_ = typos + [("NewValue", "New_Value"), ("OldValue", "Old_Value")]
+            logsource = self.get_rule_part(file_path=file, part_name="logsource").values()
+            # add more typos in specific logsources below
+            if "windefend" in logsource:
+                typos_ = typos + [("New_Value", "NewValue"), ("Old_Value", "OldValue"), ('Source_Name', 'SourceName'), ("Newvalue", "NewValue"), ("Oldvalue", "OldValue"), ('Sourcename', 'SourceName')]
+            elif "registry_set" in logsource or "registry_add" in logsource or "registry_event" in logsource:
+                typos_ = typos + [("Targetobject", "TargetObject"), ("Eventtype", "EventType"), ("Newname", "NewName")]
+            elif "process_creation" in logsource:
+                typos_ = typos + [("Parentimage", "ParentImage"), ("Integritylevel", "IntegrityLevel"), ("IntegritiLevel", "IntegrityLevel")]
             else:
                 typos_ = typos
             detection = self.get_rule_part(file_path=file, part_name="detection")
