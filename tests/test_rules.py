@@ -907,12 +907,21 @@ class TestRules(unittest.TestCase):
         typos = [("ServiceFilename", "ServiceFileName"), ("TargetFileName", "TargetFilename"), ("SourceFileName", "OriginalFileName"), ("Commandline", "CommandLine"), ("Targetobject", "TargetObject"), ("OriginalName", "OriginalFileName")]
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
+            # Some fields exists in certain log sources in different forms than other log sources. We need to handle these as special cases
+            # We check first the logsource to handle special cases
+            logsource = self.get_rule_part(file_path=file, part_name="logsource")
+            # The current special cases are:
+            #   - 'windefend'
+            if "windefend" in logsource.values():
+                typos_ = typos + [("NewValue", "New_Value"), ("OldValue", "Old_Value")]
+            else:
+                typos_ = typos
             detection = self.get_rule_part(file_path=file, part_name="detection")
             if detection:
                 for search_identifier in detection:
                     if isinstance(detection[search_identifier], dict):
                         for field in detection[search_identifier]:
-                            for typo in typos:
+                            for typo in typos_:
                                 if typo[0] in field:
                                     print(Fore.RED + "Rule {} has a common typo ({}) which should be ({}) in selection ({}/{})".format(file, typo[0], typo[1], search_identifier, field))
                                     faulty_rules.append(file)
