@@ -1,0 +1,32 @@
+title: Suspicious LSASS Dumping using Windows Error Reporting
+id: 9a4ccd1a-3526-4d99-b980-9f9c5d3a6ff3
+status: experimental
+description: LSASS Shtinkering is a technique where using Windows Error Reporting, LSASS can be dumped.
+references:
+    - https://github.com/deepinstinct/Lsass-Shtinkering
+author: '@pbssubhash'
+date: 2022/12/08
+modified: 2022/12/08
+tags:
+    - attack.credential_access
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        - Image|endswith: '\Werfault.exe'
+        - OriginalFileName: 'WerFault.Exe'
+        - CommandLine|contains:
+          - '-u '
+          - '-p'
+          - '-ip '
+          - '-s '
+          # C:\Windows\system32\Werfault.exe -u -p 744 -ip 1112 -s 244
+    selection_parent:
+        ParentImage|endswith: '\7zFM.exe'
+    filter_lsass:
+        ParentImage|endswith: 'C:\Windows\System32\lsass.exe'
+    condition: selection and not filter_lsass
+falsepositives:
+    - Windows Error Reporting might have similar behavior and in that case, check the process associated with "-ip" parameter in CommandLine.
+level: high

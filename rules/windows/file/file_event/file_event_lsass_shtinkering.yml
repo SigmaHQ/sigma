@@ -1,0 +1,23 @@
+title: Suspicious LSASS Dump using LSASS Shtinkering
+id: 6902955a-01b7-432c-b32a-6f5f81d8f625
+status: experimental
+description: LSASS Shtinkering is a technique where using Windows Error Reporting, LSASS can be dumped.
+references:
+    - https://github.com/deepinstinct/Lsass-Shtinkering
+author: '@pbssubhash'
+modified: 2022/12/08
+tags:
+    - attack.credential_access
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename|contains|all: 
+          - 'lsass.exe'
+          - 'C:\Windows\System32\config\systemprofile\AppData\Local\CrashDumps'
+        TargetFilename|endswith: '.dmp'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
