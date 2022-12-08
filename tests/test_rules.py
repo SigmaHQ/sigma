@@ -838,32 +838,59 @@ class TestRules(unittest.TestCase):
                          "There are rules with non-conform 'logsource' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#log-source")
 
     def test_selection_list_one_value(self):
+    
+        def treat_list(file, values, valid_, selection_name):
+            # rule with only list of Keywords term
+            if len(values) == 1 and not isinstance(values[0], str):
+                print(
+                    Fore.RED + "Rule {} has the selection ({}) with a list of only 1 element in detection".format(file, key)
+                )
+                valid_ = False
+            elif isinstance(values[0], dict):
+                valid_ = treat_dict(file, values, valid_, selection_name)
+            return valid_
+
+        def treat_dict(file, values, valid_, selection_name):
+            if isinstance(values, list):
+                for dict_ in values:
+                    for key_ in dict_.keys():
+                        if isinstance(dict_[key_], list):
+                            if len(dict_[key_]) == 1:
+                                print(
+                                    Fore.RED + "Rule {} has the selection ({}/{}) with a list of only 1 value in detection".format(file, selection_name, key_)
+                                    )
+                                valid_ = False
+            else:
+                dict_ = values
+                for key_ in dict_.keys():
+                    if isinstance(dict_[key_], list):
+                        if len(dict_[key_]) == 1:
+                            print(
+                                Fore.RED + "Rule {} has the selection ({}/{}) with a list of only 1 value in detection".format(file, selection_name, key_)
+                                )
+                            valid_ = False
+            return valid_
+
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             detection = self.get_rule_part(
                 file_path=file, part_name="detection")
             if detection:
+                
                 valid = True
                 for key in detection:
+                    values = detection[key]
                     if isinstance(detection[key], list):
-                        # rule with only list of Keywords term
-                        if len(detection[key]) == 1 and not isinstance(detection[key][0], str):
-                            print(
-                                Fore.RED + "Rule {} has the selection ({}) with a list of only 1 element in detection".format(file, key))
-                            valid = False
+                        valid = treat_list(file, values, valid, key)
+                    
                     if isinstance(detection[key], dict):
-                        for sub_key in detection[key]:
-                            # split in 2 if as get a error "int has not len()"
-                            if isinstance(detection[key][sub_key], list):
-                                if len(detection[key][sub_key]) == 1:
-                                    print(
-                                        Fore.RED + "Rule {} has the selection ({}/{}) with a list of only 1 value in detection".format(file, key, sub_key))
-                                    valid = False
+                        valid = treat_dict(file, values, valid, key)
+
                     if not valid:
                         faulty_rules.append(file)
-
+                        
         self.assertEqual(faulty_rules, [], Fore.RED +
-                         "There are rules using list with only 1 element")
+                            "There are rules using list with only 1 element")
 
     def test_unused_selection(self):
         faulty_rules = []
@@ -882,8 +909,12 @@ class TestRules(unittest.TestCase):
                     continue
                 if selection == "timeframe":
                     continue
-                if selection in condition:
+
+                # remove special keywords
+                condition_list = condition.replace("not ", '').replace("1 of ", '').replace("all of ", '').replace(' or ', ' ').replace(' and ', ' ').replace('(', '').replace(')', '').split(" ")
+                if selection in condition_list:
                     continue
+
                 # find all wildcards in condition
                 found = False
                 for wildcard_selection in wildcard_selections.findall(condition):
