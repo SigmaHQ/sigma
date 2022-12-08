@@ -882,8 +882,12 @@ class TestRules(unittest.TestCase):
                     continue
                 if selection == "timeframe":
                     continue
-                if selection in condition:
+
+                # remove special keywords
+                condition_list = condition.replace("not ", '').replace("1 of ", '').replace("all of ", '').replace(' or ', ' ').replace(' and ', ' ').replace('(', '').replace(')', '').split(" ")
+                if selection in condition_list:
                     continue
+
                 # find all wildcards in condition
                 found = False
                 for wildcard_selection in wildcard_selections.findall(condition):
