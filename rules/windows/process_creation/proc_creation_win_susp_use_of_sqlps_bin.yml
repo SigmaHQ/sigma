@@ -20,14 +20,14 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_1:
+    selection_parent:
+        ParentImage|endswith: '\sqlps.exe'
+    selection_image:
         - Image|endswith: '\sqlps.exe'
         - OriginalFileName: 'sqlps.exe'
-    selection_2:
-        ParentImage|endswith: '\sqlps.exe'
-    filter:
+    filter_image:
         ParentImage|endswith: '\sqlagent.exe'
-    condition: (selection_1 and not filter) or selection_2
+    condition: selection_parent or (selection_image and not filter_image)
 falsepositives:
     - Direct PS command execution through SQLPS.exe is uncommon, childprocess sqlps.exe spawned by sqlagent.exe is a legitimate action.
 level: medium
