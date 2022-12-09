@@ -12,7 +12,7 @@ references:
     - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4701
 author: Nasreddine Bencherchali
 date: 2022/12/05
-modified: 2022/12/08
+modified: 2022/12/09
 tags:
     - attack.execution
     - attack.privilege_escalation
@@ -36,8 +36,10 @@ detection:
             - '\Windows\WindowsUpdate\'
             - '\Windows\UpdateOrchestrator\'
             - '\Windows\ExploitGuard'
-        filter_ac_power_download:
-            Task|contains: '\Windows\UpdateOrchestrator\AC Power Download'
+    filter_ac_power_download:
+        Task|contains: '\Windows\UpdateOrchestrator\AC Power Download'
+    filter_sys_username:
+        SubjectUserName|endswith: '$'  # False positives during upgrades of Defender, where its tasks get removed and added
     condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown
