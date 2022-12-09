@@ -12,6 +12,7 @@ references:
     - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4701
 author: Nasreddine Bencherchali
 date: 2022/12/05
+modified: 2022/12/08
 tags:
     - attack.execution
     - attack.privilege_escalation
@@ -27,7 +28,7 @@ detection:
             - 4699 # Task Deleted Event
             - 4701 # Task Disabled Event
         TaskName|contains:
-            # Add more important tasks>
+            # Add more important tasks
             - '\Windows\SystemRestore\SR'
             - '\Windows\Windows Defender\'
             - '\Windows\BitLocker'
@@ -35,7 +36,9 @@ detection:
             - '\Windows\WindowsUpdate\'
             - '\Windows\UpdateOrchestrator\'
             - '\Windows\ExploitGuard'
-    condition: selection
+        filter_ac_power_download:
+            Task|contains: '\Windows\UpdateOrchestrator\AC Power Download'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown
 level: high
