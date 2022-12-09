@@ -1,0 +1,27 @@
+title: ETW Logging Disabled For rpcrt4.dll
+id: 4f281b83-0200-4b34-bf35-d24687ea57c2
+status: experimental
+description: Detects changes to the "ExtErrorInformation" key in order to disable ETW logging for rpcrt4.dll
+references:
+    - http://redplait.blogspot.com/2020/07/whats-wrong-with-etw.html
+author: Nasreddine Bencherchali
+date: 2022/12/09
+tags:
+    - attack.defense_evasion
+    - attack.t1112
+    - attack.t1562
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection_etw_enabled:
+        EventType: SetValue
+        TargetObject|endswith: '\Microsoft\Windows NT\Rpc\ExtErrorInformation'
+        Details:
+            # This is disabled by default for some reason
+            - 'DWORD (0x00000000)' # Off
+            - 'DWORD (0x00000002)' # Off with exceptions
+    condition: selection
+falsepositives:
+    - Unknown
+level: low
