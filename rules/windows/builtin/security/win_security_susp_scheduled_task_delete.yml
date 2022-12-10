@@ -28,7 +28,7 @@ detection:
             - 4699 # Task Deleted Event
             - 4701 # Task Disabled Event
         TaskName|contains:
-            # Add more important tasks>
+            # Add more important tasks
             - '\Windows\SystemRestore\SR'
             - '\Windows\Windows Defender\'
             - '\Windows\BitLocker'
@@ -36,9 +36,11 @@ detection:
             - '\Windows\WindowsUpdate\'
             - '\Windows\UpdateOrchestrator\'
             - '\Windows\ExploitGuard'
-    filter:
+    filter_ac_power_download:
+        Task|contains: '\Windows\UpdateOrchestrator\AC Power Download'
+    filter_sys_username:
         SubjectUserName|endswith: '$'  # False positives during upgrades of Defender, where its tasks get removed and added
-    condition: selection and not filter
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown
 level: high

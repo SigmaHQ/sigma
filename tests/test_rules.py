@@ -935,7 +935,7 @@ class TestRules(unittest.TestCase):
         # add "OriginalFilename" after Aurora switched to SourceFilename
         # add "ProviderName" after special case powershell classic is resolved
         # typos is a list of tuples where each tuple contains ("The typo", "The correct version")
-        typos = [("ServiceFilename", "ServiceFileName"), ("TargetFileName", "TargetFilename"), ("SourceFileName", "OriginalFileName"), ("Commandline", "CommandLine"), ("Targetobject", "TargetObject"), ("OriginalName", "OriginalFileName")]
+        typos = [("ServiceFilename", "ServiceFileName"), ("TargetFileName", "TargetFilename"), ("SourceFileName", "OriginalFileName"), ("Commandline", "CommandLine"), ("Targetobject", "TargetObject"), ("OriginalName", "OriginalFileName"), ("ImageFileName", "OriginalFileName")]
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             # Some fields exists in certain log sources in different forms than other log sources. We need to handle these as special cases
