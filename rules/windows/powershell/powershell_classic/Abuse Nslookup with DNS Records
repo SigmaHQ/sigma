@@ -1,0 +1,29 @@
+title: Abuse Nslookup with DNS Records
+id: 999bff6d-dc15-44c9-9f5c-e1051bfc86e1
+status: stable
+description: "Red teamer's avoid IEX and Invoke-WebRequest in your PowerShell commands. Instead, host a text record with a payload to compromise hosts."
+references:
+- https://twitter.com/Alh4zr3d/status/1566489367232651264
+author: Sai Prashanth Pulisetti @pulisettis
+date: 2022/12/10
+modified: 2022/12/10
+tags:
+- attack.execution
+- attack.t1059.001
+- T1204
+- T1204.002
+logsource:
+  product: windows
+  category: ps_classic_start
+  definition: fields have to be extract from event
+detection:
+  selection:
+    HostApplication|contains: powershell.exe
+  filter:
+    HostApplication|startswith:
+    - nslookup.exe
+    - -q=txt
+  condition: selection and  filter
+level: high
+falsepositives:
+- Unknown
