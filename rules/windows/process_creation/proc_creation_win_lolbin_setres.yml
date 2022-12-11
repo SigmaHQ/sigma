@@ -17,14 +17,11 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_ldif:
-        - Image|endswith: '\setres.exe'
-        - OriginalFileName: 'setres.exe'
-    selection_cmd:
-        CommandLine|contains|all:
-            - '-w'
-            - '-h'
-    condition: all of selection_*
+    selection:
+      ParentImage|endswith: '\setres.exe'
+      Image|endswith:
+        - '\choice'
+    condition: all of selection*
 falsepositives:
     - Legitimate usage of Setres
 level: medium
