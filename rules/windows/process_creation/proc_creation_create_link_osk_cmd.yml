@@ -1,9 +1,10 @@
-title: Create Symbolic Link From osk.exe to cmd.exe
+title: Potential Privilege Escalation Using Symlink Between Osk and Cmd
 id: e9b61244-893f-427c-b287-3e708f321c6b
 status: experimental
-description: Detects creation of a link from accessiblity executable with cmd.exe to provide elevated command prompt from login screen without logging in.
+description: Detects the creation of a symbolic link between "cmd.exe" and the accessibility on-screen keyboard binary (osk.exe) using "mklink". This technique provides an elevated command prompt to the user from the login screen without the need to log in.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/5c1e6f1b4fafd01c8d1ece85f510160fc1275fbf/atomics/T1546.008/T1546.008.md
+    - https://ss64.com/nt/mklink.html
 author: frack113
 date: 2022/12/11
 tags:
@@ -19,8 +20,8 @@ detection:
     selection_cli:
         CommandLine|contains|all:
             - 'mklink'
-            - '\System32\osk.exe'
-            - '\System32\cmd.exe'
+            - '\osk.exe'
+            - '\cmd.exe'
     condition: all of selection_* 
 falsepositives:
     - Unknown
