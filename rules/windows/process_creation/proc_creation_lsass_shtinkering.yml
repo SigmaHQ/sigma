@@ -1,0 +1,41 @@
+title: Potential Credential Dumping Via WER
+id: 9a4ccd1a-3526-4d99-b980-9f9c5d3a6ff3
+status: experimental
+description: Detects potential credential dumping via Windows Error Reporting LSASS Shtinkering technique which uses the Windows Error Reporting to dump lsass
+references:
+    - https://github.com/deepinstinct/Lsass-Shtinkering
+    - https://media.defcon.org/DEF%20CON%2030/DEF%20CON%2030%20presentations/Asaf%20Gilboa%20-%20LSASS%20Shtinkering%20Abusing%20Windows%20Error%20Reporting%20to%20Dump%20LSASS.pdf
+author: '@pbssubhash , Nasreddine Bencherchali'
+date: 2022/12/08
+modified: 2022/12/09
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        - Image|endswith: '\Werfault.exe'
+        - OriginalFileName: 'WerFault.exe'
+    selection_cli:
+        ParentUser|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
+        User|contains:
+            - 'AUTHORI'
+            - 'AUTORI'
+        CommandLine|contains|all:
+            # Doc: WerFault.exe -u -p <target process> -ip <source process> -s <file mapping handle>
+            # Example: C:\Windows\system32\Werfault.exe -u -p 744 -ip 1112 -s 244
+            # If the source process is not equal to the target process and the target process is LSASS then this is an indication of this technique
+            # Example: If the "-p" points the PID of "lsass.exe" and "-ip" points to a different process than "lsass.exe" then this is a sign of malicious activity
+            - ' -u -p '
+            - ' -ip '
+            - ' -s '
+    filter_lsass:
+        ParentImage: 'C:\Windows\System32\lsass.exe'
+    condition: all of selection_* and not 1 of filter_*
+falsepositives:
+    - Windows Error Reporting might produce similar behavior. In that case, check the PID associated with the "-p" parameter in the CommandLine.
+level: high
