@@ -9,7 +9,7 @@ references:
     - https://attack.mitre.org/techniques/T1036/
 author: vburov
 date: 2019/02/23
-modified: 2022/02/14
+modified: 2022/12/12
 tags:
     - attack.defense_evasion
     - attack.t1036.003
@@ -29,14 +29,14 @@ detection:
             - '\csrss.exe'
             - '\wininit.exe'
             - '\winlogon.exe'
-    filter_sys:
+    filter_falsepositives_sys:
         - ParentImage|endswith:
             - '\SavService.exe'
             - '\ngen.exe'
         - ParentImage|contains:
             - '\System32\'
             - '\SysWOW64\'
-    filter_msmpeng:
+    filter_falsepositives_msmpeng:
         ParentImage|contains:
             - '\Windows Defender\'
             - '\Microsoft Security Client\'
@@ -44,7 +44,7 @@ detection:
     filter_null:
         - ParentImage: null
         - ParentImage: '-'
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_falsepositives* and not filter_null
 falsepositives:
     - Some security products seem to spawn these
 level: low
