@@ -6,11 +6,12 @@ related:
     - id: 8023f872-3f1d-4301-a384-801889917ab4
       type: similar
 status: experimental
-description: Detects the of the "accepteula" key related to sysinternals tools being created from non sysinternals tools
+description: Detects the "accepteula" key related to sysinternals tools being created from non sysinternals tools
 references:
     - Internal Research
 author: Nasreddine Bencherchali
 date: 2022/08/24
+modified: 2022/12/07
 tags:
     - attack.resource_development
     - attack.t1588.002
@@ -21,33 +22,44 @@ detection:
     selection:
         EventType: CreateKey
         TargetObject|contains:
-            - '\PsExec'
-            - '\ProcDump'
+            # Please add new values while respecting the alphabetical order
+            - '\Active Directory Explorer'
             - '\Handle'
             - '\LiveKd'
+            - '\ProcDump'
             - '\Process Explorer'
+            - '\PsExec'
+            - '\PsLoggedon'
             - '\PsLoglist'
             - '\PsPasswd'
-            - '\Active Directory Explorer'
+            - '\PsPing'
+            - '\PsService'
         TargetObject|endswith: '\EulaAccepted'
     filter:
         Image|endswith:
-            - '\PsExec.exe'
-            - '\PsExec64.exe'
-            - '\procdump.exe'
-            - '\procdump64.exe'
+            # Please add new values while respecting the alphabetical order
+            - '\ADExplorer.exe'
+            - '\ADExplorer64.exe'
             - '\handle.exe'
             - '\handle64.exe'
             - '\livekd.exe'
             - '\livekd64.exe'
+            - '\procdump.exe'
+            - '\procdump64.exe'
             - '\procexp.exe'
             - '\procexp64.exe'
+            - '\PsExec.exe'
+            - '\PsExec64.exe'
+            - '\PsLoggedon.exe'
+            - '\PsLoggedon64.exe'
             - '\psloglist.exe'
             - '\psloglist64.exe'
             - '\pspasswd.exe'
             - '\pspasswd64.exe'
-            - '\ADExplorer.exe'
-            - '\ADExplorer64.exe'
+            - '\PsPing.exe'
+            - '\PsPing64.exe'
+            - '\PsService.exe'
+            - '\PsService64.exe'
     condition: selection and not filter
 falsepositives:
     - Unlikely

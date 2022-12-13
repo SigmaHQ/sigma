@@ -5,10 +5,10 @@ description: |
   Detects installation of NalDrv or PROCEXP152 services via registry-keys to non-system32 folders.
   Both services are used in the tool Ghost-In-The-Logs (https://github.com/bats3c/Ghost-In-The-Logs), which uses KDU (https://github.com/hfiref0x/KDU)
 references:
-    - https://blog.dylan.codes/evading-sysmon-and-windows-event-logging/
+    - https://web.archive.org/web/20200419024230/https://blog.dylan.codes/evading-sysmon-and-windows-event-logging/
 author: xknow (@xknow_infosec), xorxes (@xor_xes)
 date: 2019/04/08
-modified: 2022/11/22
+modified: 2022/12/07
 tags:
     - attack.t1562.001
     - attack.defense_evasion
@@ -23,10 +23,13 @@ detection:
             - 'HKLM\System\CurrentControlSet\Services\PROCEXP152\ImagePath'
     filter:
         Image|endswith:
+            # Please add the full paths that you use in your environment to tighten the rule
             - '\procexp64.exe'
             - '\procexp.exe'
             - '\procmon64.exe'
             - '\procmon.exe'
+            - '\handle.exe'
+            - '\handle64.exe'
         Details|contains: '\WINDOWS\system32\Drivers\PROCEXP152.SYS'
     condition: selection and not filter
 falsepositives:
