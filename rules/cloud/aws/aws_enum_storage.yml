@@ -1,0 +1,29 @@
+title: Storage Enumeration on AWS
+id: 4723218f-2048-41f6-bcb0-417f2d784f61
+status: experimental
+description: Identifies enumeration activity targeting AWS storage
+references:
+    - https://unit42.paloaltonetworks.com/compromised-cloud-compute-credentials/
+author: Janantha Marasinghe
+date: 2022/12/13
+tags:
+    - attack.discovery
+    - attack.t1619
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: cloudtrail
+        eventName: s3.amazonaws.com
+            - ListBuckets
+            - GetBucketCors
+            - GetBucketInventoryConfiguration
+            - GetBucketPublicAccessBlock
+            - GetBucketMetricsConfiguration
+            - GetBucketPolicy
+            - GetBucketTagging
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
