@@ -1,0 +1,28 @@
+title: Network Enumeration on AWS
+id: c3d53999-4b14-4ddd-9d9b-e618c366b54d
+status: experimental
+description: Identifies when network enumeration is performed on AWS.
+references:
+    - https://unit42.paloaltonetworks.com/compromised-cloud-compute-credentials/
+author: Janantha Marasinghe
+date: 2022/12/13
+tags:
+    - attack.discovery
+    - attack.t1016
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: cloudtrail
+        eventName: ec2.amazonaws.com
+            - DescribeCarrierGateways
+            - DescribeVpcEndpointConnectionNotifications
+            - DescribeTransitGatewayMulticastDomains
+            - DescribeClientVpnRoutes
+            - DescribeDhcpOptions
+            - GetTransitGatewayRouteTableAssociations
+    condition: selection
+falsepositives:
+    - Unknown
+level: low
