@@ -12,7 +12,7 @@ references:
     - https://oddvar.moe/2018/03/21/persistence-using-runonceex-hidden-from-autoruns-exe/
 author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split)
 date: 2019/10/25
-modified: 2022/11/01
+modified: 2022/12/14
 tags:
     - attack.persistence
     - attack.t1547.001
@@ -65,8 +65,7 @@ detection:
             - '\WOW6432Node\Microsoft\Windows\CurrentVersion\RunOnce\{e2d1ae32-dd1d-4ad7-a298-10e42e7840fc}'
             - '\WOW6432Node\Microsoft\Windows\CurrentVersion\RunOnce\{7037b699-7382-448c-89a7-4765961d2537}'
         Details|startswith:
-            - '"C:\ProgramData\Package Cache\{7037b699-7382-448c-89a7-4765961d2537}\windowsdesktop-runtime-'
-            - '"C:\ProgramData\Package Cache\{e2d1ae32-dd1d-4ad7-a298-10e42e7840fc}\windowsdesktop-runtime-'
+            - '"C:\ProgramData\Package Cache\'
         Details|endswith: '.exe" /burn.runonce'
     filter_office:
         Image|startswith:
@@ -78,12 +77,15 @@ detection:
     filter_vcredist:
         Image|endswith: '\VC_redist.x64.exe'
         Details|endswith: '}\VC_redist.x64.exe" /burn.runonce'
-    filter_winsdk:
+    filter_upgrades:
         Image|startswith:
             - 'C:\ProgramData\Package Cache'
             - 'C:\Windows\Temp\'
-        Image|endswith: '\winsdksetup.exe'
-        Details|endswith: '\winsdksetup.exe" /burn.runonce'
+        Image|contains:
+            - '\winsdksetup.exe'
+            - '\windowsdesktop-runtime-'  # C:\WINDOWS\Temp\{751E2E78-46DC-4376-9205-99219CDC34AE}\.be\windowsdesktop-runtime-6.0.12-win-x86.exe
+            - '\AspNetCoreSharedFrameworkBundle-'  # "C:\ProgramData\Package Cache\{b52191c1-a9c0-4b34-9a4e-930c2dd8a540}\AspNetCoreSharedFrameworkBundle-x86.exe" /burn.runonce
+        Details|endswith: ' /burn.runonce'
     condition: all of wow_current_version_* and not 1 of filter_*
 fields:
     - SecurityID
