@@ -4,7 +4,7 @@ related:
     - id: 17eb8e57-9983-420d-ad8a-2c4976c22eb8
       type: obsoletes
 status: experimental
-description: Detects process injection using the signed Windows tool "Mavinject" via the "INJECTRUNNING" flag or a renamed execution of the tool
+description: Detects process injection using the signed Windows tool "Mavinject" via the "INJECTRUNNING" flag
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1218/T1218.md
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1056.004/T1056.004.md
@@ -12,9 +12,11 @@ references:
     - https://twitter.com/gN3mes1s/status/941315826107510784
     - https://reaqta.com/2017/12/mavinject-microsoft-injector/
     - https://twitter.com/Hexacorn/status/776122138063409152  # Deleted tweet
+    - https://github.com/SigmaHQ/sigma/issues/3742
+    - https://github.com/keyboardcrunch/SentinelOne-ATTACK-Queries/blob/6a228d23eefe963ca81f2d52f94b815f61ef5ee0/Tactics/DefenseEvasion.md#t1055-process-injection
 author: frack113, Florian Roth
 date: 2021/07/12
-modified: 2022/09/07
+modified: 2022/12/05
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
@@ -24,22 +26,11 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_flag:
+    selection:
         CommandLine|contains: ' /INJECTRUNNING '
-    selection_renamed:
-        OriginalFileName:
-            - 'mavinject32.exe'
-            - 'mavinject64.exe'
-    filter_renamed:
-        Image|endswith:
-            - '\mavinject32.exe'
-            - '\mavinject64.exe'
-    condition: selection_flag or (selection_renamed and not filter_renamed)
-fields:
-    - ComputerName
-    - User
-    - CommandLine
-    - ParentCommandLine
+    filter:
+        ParentImage: 'C:\Windows\System32\AppVClient.exe' # This parent is the expected process to launch "mavinject"
+    condition: selection and not filter
 falsepositives:
-    - Unlikely
+    - Unknown
 level: high

@@ -4,8 +4,11 @@ status: experimental
 description: Detects persistence registry keys for Recycle Bin
 references:
     - https://github.com/vxunderground/VXUG-Papers/blob/751edb8d50f95bd7baa730adf2c6c3bb1b034276/The%20Persistence%20Series/Persistence%20via%20Recycle%20Bin/Persistence_via_Recycle_Bin.pdf
+    - https://persistence-info.github.io/Data/recyclebin.html
+    - https://www.hexacorn.com/blog/2018/05/28/beyond-good-ol-run-key-part-78-2/
 author: frack113
 date: 2021/11/18
+modified: 2022/12/06
 tags:
     - attack.persistence
     - attack.t1547
@@ -15,10 +18,10 @@ logsource:
 detection:
     selection_create:
         EventType: RenameKey
-        NewName: HKCR\CLSID\{645FF040-5081-101B-9F08-00AA002F954E}\shell\open
+        NewName|contains: '\CLSID\{645FF040-5081-101B-9F08-00AA002F954E}\shell\open'
     selection_set:
         EventType: SetValue
-        TargetObject: HKCR\CLSID\{645FF040-5081-101B-9F08-00AA002F954E}\shell\open\command\(Default)
+        TargetObject|contains: '\CLSID\{645FF040-5081-101B-9F08-00AA002F954E}\shell\open\command\(Default)'
     condition: 1 of selection_*
 falsepositives:
     - Unknown

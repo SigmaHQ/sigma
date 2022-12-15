@@ -6,7 +6,7 @@ references:
     - http://www.hexacorn.com/blog/2020/05/25/how-to-con-your-host/
 author: omkar72
 date: 2020/10/25
-modified: 2022/11/08
+modified: 2022/12/07
 tags:
     - attack.defense_evasion
     - attack.t1202
@@ -42,17 +42,21 @@ detection:
         # Example FP:
         #   ParentCommandLine: "C:\Program Files\Git\cmd\git.exe" cat-file -s 4ca60c8a054f7eaa05f0438a8292762f2015d228
         Provider_Name: 'Microsoft-Windows-Kernel-Process'
-        ParentCommandLine|contains: ' cat-file -s '
+        ParentCommandLine|contains:
+            - ' cat-file -s '
+            - 'show --textconv'
         Image: 'C:\Windows\System32\conhost.exe'
     filter_image_conhost2:
         ParentCommandLine:
-            - '\??\C:\WINDOWS\system32\conhost.exe 0x4'
-            - '\??\C:\WINDOWS\system32\conhost.exe 0xffffffff -ForceV1'
+            # The "?" needs to be escaped as they considered special characters in SIGMA (https://github.com/SigmaHQ/sigma-specification)
+            - '\\\?\?\\C:\\WINDOWS\\system32\\conhost.exe 0x4'
+            - '\\\?\?\\C:\\WINDOWS\\system32\\conhost.exe 0xffffffff -ForceV1'
         Image: 'C:\Windows\System32\conhost.exe'
     filter_image_git:
-        ParentCommandLine: '\??\C:\WINDOWS\system32\conhost.exe 0xffffffff -ForceV1'
+        ParentCommandLine:
+            - \\\?\?\\C:\\WINDOWS\\system32\\conhost.exe 0xffffffff -ForceV1'
+            - \\\?\?\\C:\\WINDOWS\\system32\\conhost.exe 0x4'
         Image: 'C:\Program Files\Git\mingw64\bin\git.exe'
-        CommandLine|contains: 'show --textconv :'
     condition: selection and not 1 of filter_*
 fields:
     - Image
