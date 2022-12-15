@@ -9,7 +9,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.004/T1070.004.md
 author: frack113
 date: 2022/01/15
-modified: 2022/08/20
+modified: 2022/12/15
 tags:
     - attack.defense_evasion
     - attack.t1070.004
@@ -25,7 +25,11 @@ detection:
             - rmdir
             - /s
             - /q
-    condition: selection
+    filter_onedrive:
+        Image|endswith: '\cmd.exe'
+        ParentImage|endswith: '\explorer.exe'
+        CommandLine|contains: '\AppData\Local\Microsoft\OneDrive\'
+    condition: selection and not filter_onedrive
 falsepositives:
     - Legitimate scripts
 level: low
