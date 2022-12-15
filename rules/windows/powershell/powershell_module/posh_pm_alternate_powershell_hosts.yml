@@ -6,7 +6,7 @@ references:
     - https://threathunterplaybook.com/hunts/windows/190610-PwshAlternateHosts/notebook.html
 author: Roberto Rodriguez @Cyb3rWard0g
 date: 2019/08/11
-modified: 2022/12/02
+modified: 2022/12/13
 tags:
     - attack.execution
     - attack.t1059.001
@@ -17,7 +17,7 @@ logsource:
 detection:
     selection:
         ContextInfo|contains: '*'
-    filter:
+    filter_powershell:
         # This filter covers the following use cases
         #   - When powershell is called directly from commandline via keyword powershell or powershell.exe
         #   - Or called via path but not with full "".exe". Example: C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell
@@ -28,8 +28,8 @@ detection:
             # In some cases powershell was invoked with inverted slashes
             - '= C:/Windows/System32/WindowsPowerShell/v1.0/powershell'
             - '= C:/Windows/SysWOW64/WindowsPowerShell/v1.0/powershell'
-            # When MSDT is launched
-            - '= C:\WINDOWS\System32\sdiagnhost.exe -Embedding '
+    filter_sdiagnhost:
+        ContextInfo|contains: '= C:\WINDOWS\System32\sdiagnhost.exe -Embedding' # When MSDT is launched for example
     filter_citrix:
         ContextInfo|contains: 'ConfigSyncRun.exe'
     filter_adace:  # Active Directory Administrative Center Enhancements
@@ -40,7 +40,7 @@ detection:
         Payload|contains:
             - 'Update-Help'
             - 'Failed to update Help for the module'
-    condition: selection and not 1 of filter*
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Programs using PowerShell directly without invocation of a dedicated interpreter
     - MSP Detection Searcher

@@ -5,9 +5,10 @@ description: This rule detects the execution of Run Once task as configured in t
 references:
     - https://twitter.com/pabraeken/status/990717080805789697
     - https://lolbas-project.github.io/lolbas/Binaries/Runonce/
-author: 'Avneet Singh @v3t0_, oscd.community'
+    - https://twitter.com/0gtweet/status/1602644163824156672?s=20&t=kuxbUnZPltpvFPZdCrqPXA
+author: 'Avneet Singh @v3t0_, oscd.community, Christopher Peacock @SecurePeacock (updated)'
 date: 2020/10/18
-modified: 2022/07/11
+modified: 2022/12/13
 tags:
     - attack.defense_evasion
     - attack.t1112
@@ -19,8 +20,9 @@ detection:
         - Image|endswith: '\runonce.exe'
         - Description: 'Run Once Wrapper'
     selection_cli:
-        CommandLine|contains: ' /AlternateShellStartup'
-    condition: all of selection*
+        - CommandLine|contains: '/AlternateShellStartup'
+        - CommandLine|endswith: '/r'
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: low

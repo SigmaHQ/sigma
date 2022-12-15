@@ -7,7 +7,7 @@ references:
     - https://twitter.com/SBousseaden/status/1483810148602814466
     - https://github.com/MicrosoftDocs/windows-itpro-docs/blob/40fe118976734578f83e5e839b9c63ae7a4af82d/windows/security/threat-protection/windows-defender-application-control/event-id-explanations.md#windows-codeintegrity-operational-log
 date: 2022/01/20
-modified: 2022/12/05
+modified: 2022/12/12
 tags:
     - attack.execution
 logsource:
@@ -84,6 +84,13 @@ detection:
         ProcessNameBuffer|contains: '\Windows\Microsoft.NET\'
         RequestedPolicy: 8
         ValidatedPolicy: 2
+    filter_google_drive:
+        # Example: \Program Files\Google\Drive File Stream\67.0.2.0\crashpad_handler.exe
+        FileNameBuffer|contains: '\Program Files\Google\Drive File Stream\'
+        FileNameBuffer|endswith: '\crashpad_handler.exe'
+        ProcessNameBuffer|endswith: '\Windows\ImmersiveControlPanel\SystemSettings.exe'
+        RequestedPolicy: 8
+        ValidatedPolicy: 1
     condition: selection and not 1 of filter_*
 falsepositives:
     - Antivirus products
