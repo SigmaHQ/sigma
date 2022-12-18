@@ -13,7 +13,7 @@ references:
     - https://docs.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations#microsoftkubernetes
 author: Austin Songer @austinsonger
 date: 2021/11/25
-modified: 2022/08/23
+modified: 2022/12/18
 tags:
     - attack.persistence
     - attack.t1078
@@ -24,17 +24,14 @@ logsource:
     product: azure
     service: activitylogs
 detection:
-    selection1:
-        operationName|startswith: 'MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/ADMISSIONREGISTRATION.K8S.IO'
+    selection:
+        operationName|startswith:
+            - 'MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/ADMISSIONREGISTRATION.K8S.IO'
+            - 'MICROSOFT.CONTAINERSERVICE/MANAGEDCLUSTERS/ADMISSIONREGISTRATION.K8S.IO'
         operationName|endswith:
             - '/MUTATINGWEBHOOKCONFIGURATIONS/WRITE'
             - '/VALIDATINGWEBHOOKCONFIGURATIONS/WRITE'
-    selection2:
-        operationName|startswith: 'MICROSOFT.CONTAINERSERVICE/MANAGEDCLUSTERS/ADMISSIONREGISTRATION.K8S.IO'
-        operationName|endswith:
-            - '/MUTATINGWEBHOOKCONFIGURATIONS/WRITE'
-            - '/VALIDATINGWEBHOOKCONFIGURATIONS/WRITE'
-    condition: selection1 or selection2
+    condition: selection
 falsepositives:
     - Azure Kubernetes Admissions Controller may be done by a system administrator.
     - If known behavior is causing false positives, it can be exempted from the rule.
