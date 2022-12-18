@@ -764,12 +764,10 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
                 continue
             elif len(title) > 70:
-                print(
-                    Fore.YELLOW + "Rule {} has a title field with too many characters (>70)".format(file))
+                print(Fore.YELLOW + "Rule {} has a title field with too many characters (>70)".format(file))
                 faulty_rules.append(file)
             if title.startswith("Detects "):
-                print(
-                    Fore.RED + "Rule {} has a title that starts with 'Detects'".format(file))
+                print(Fore.RED + "Rule {} has a title that starts with 'Detects'".format(file))
                 faulty_rules.append(file)
             if title.endswith("."):
                 print(Fore.RED + "Rule {} has a title that ends with '.'".format(file))
@@ -805,6 +803,25 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules without the 'title' attribute in their first line.")
+
+    def test_duplicate_titles(self):
+        # This test ensure that every rule has a unique title
+        faulty_rules = []
+        titles_dict = {}
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            title = self.get_rule_part(file_path=file, part_name="title").lower().rstrip()
+            duplicate = False
+            for rule, title_ in titles_dict.items():
+                if title == title_:
+                    print(Fore.RED + "Rule {} has an already used title in {}.".format(file, rule))
+                    duplicate = True
+                    faulty_rules.append(file)
+                    continue
+            if not duplicate:
+                titles_dict[file] = title
+
+        self.assertEqual(faulty_rules, [], Fore.RED +
+                         "There are rules with already used 'title'. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title")
 
     def test_invalid_logsource_attributes(self):
         faulty_rules = []
