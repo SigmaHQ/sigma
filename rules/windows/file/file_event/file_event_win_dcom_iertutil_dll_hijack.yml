@@ -1,5 +1,10 @@
-title: DCOM InternetExplorer.Application Iertutil DLL Hijack - Sysmon
-id: e554f142-5cf3-4e55-ace9-a1b59e0def65
+title: DCOM InternetExplorer.Application Iertutil DLL Hijack - File Event
+id: 2f7979ae-f82b-45af-ac1d-2b10e93b0baa
+related:
+    - id: e554f142-5cf3-4e55-ace9-a1b59e0def65
+      type: obsoletes
+    - id: f354eba5-623b-450f-b073-0b5b2773b6aa
+      type: similar
 status: test
 description: Detects a threat actor creating a file named `iertutil.dll` in the `C:\Program Files\Internet Explorer\` directory over the network and loading it for a DCOM InternetExplorer DLL Hijack scenario.
 references:
@@ -13,17 +18,12 @@ tags:
     - attack.t1021.003
 logsource:
     product: windows
-    service: sysmon
+    category: file_event
 detection:
-    selection_one:
-        EventID: 11
+    selection:
         Image: System
         TargetFilename|endswith: '\Internet Explorer\iertutil.dll'
-    selection_two:
-        EventID: 7
-        Image|endswith: '\Internet Explorer\iexplore.exe'
-        ImageLoaded|endswith: '\Internet Explorer\iertutil.dll'
-    condition: 1 of selection_*
+    condition: selection
 falsepositives:
     - Unknown
 level: critical
