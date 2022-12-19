@@ -11,7 +11,7 @@ references:
     - https://twitter.com/Alh4zr3d/status/1566489367232651264
 author: Nasreddine Bencherchali
 date: 2022/09/05
-modified: 2022/12/12
+modified: 2022/12/19
 tags:
     - attack.defense_evasion
 logsource:
@@ -22,14 +22,14 @@ detection:
         CommandLine|contains|all:
             - 'powershell .'
             - 'nslookup'
-            - ' -q=txt '
     selection_img:
         ParentImage|endswith: '\powershell.exe'
         Image|contains: '\nslookup.exe'
+    selection_cmd:
         CommandLine|contains:
             - ' -q=txt '
             - ' -querytype=txt '
-    condition: 1 of selection_*
+    condition: (selection_cli or selection_img) and selection_cmd
 falsepositives:
     - Unlikely
 level: high
