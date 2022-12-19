@@ -821,7 +821,7 @@ class TestRules(unittest.TestCase):
                 titles_dict[file] = title
 
         self.assertEqual(faulty_rules, [], Fore.RED +
-                         "There are rules with already used 'title'. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title")
+                         "There are rules that share the same 'title'. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title")
 
     def test_invalid_logsource_attributes(self):
         faulty_rules = []
