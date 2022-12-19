@@ -18,18 +18,17 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_cli:
-        CommandLine|contains|all:
-            - 'powershell .'
-            - 'nslookup'
     selection_img:
-        ParentImage|endswith: '\powershell.exe'
-        Image|contains: '\nslookup.exe'
+        - Image|contains: '\nslookup.exe'
+        - OriginalFileName: '\nslookup.exe'
     selection_cmd:
+        ParentImage|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
         CommandLine|contains:
             - ' -q=txt '
             - ' -querytype=txt '
-    condition: (selection_cli or selection_img) and selection_cmd
+    condition: all of selection_*
 falsepositives:
-    - Unlikely
-level: high
+    - Unknown
+level: medium
