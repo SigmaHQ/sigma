@@ -1,0 +1,25 @@
+title: SQLite Chrome Cookie DB Access
+status: experimental
+description: Detect use of sqlite binary to query the Chrome Cookies database and steal the cookie data contained within it
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1539/T1539.md#atomic-test-2---steal-chrome-cookies-windows
+author: TropChaud
+date: 2022/12/19
+tags:
+    - attack.credential_access
+    - attack.t1539
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_sql:
+        - Product: SQLite
+        - Image|endswith:
+            - '\sqlite.exe'
+            - '\sqlite3.exe'
+    selection_firefox:
+        CommandLine|contains: '\Google\Chrome\User Data\Default\Network\Cookies'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
