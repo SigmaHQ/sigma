@@ -1,0 +1,30 @@
+title: Potential Privilege Escalation Attempt Via .Exe.Local Technique
+id: 07a99744-56ac-40d2-97b7-2095967b0e03
+status: experimental
+description: Detects potential privilege escalation attempt via the creation of the "*.Exe.Local" folder inside the "System32" directory in order to sideload "comctl32.dll"
+references:
+    - https://github.com/binderlabs/DirCreate2System
+    - https://github.com/sailay1996/awesome_windows_logical_bugs/blob/60cbb23a801f4c3195deac1cc46df27c225c3d07/dir_create2system.txt
+author: Nasreddine Bencherchali, Subhash P (@pbssubhash)
+date: 2022/12/16
+modified: 2022/12/19
+tags:
+    - attack.defense_evasion
+    - attack.persistence
+    - attack.privilege_escalation
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|startswith:
+            - 'C:\Windows\System32\logonUI.exe.local'
+            - 'C:\Windows\System32\werFault.exe.local'
+            - 'C:\Windows\System32\consent.exe.local'
+            - 'C:\Windows\System32\narrator.exe.local'
+            - 'C:\Windows\System32\wermgr.exe.local'
+        TargetFilename|endswith: '\comctl32.dll'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
