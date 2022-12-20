@@ -2,9 +2,9 @@ title: Creation Of An User Account
 id: 759d0d51-bc99-4b5e-9add-8f5b2c8e7512
 status: test
 description: Detects the creation of a new user account. Such accounts may be used for persistence that do not require persistent remote access tools to be deployed on the system.
- 'add_user_record_type' detection is based on ADD_USER record type which is going to generate whether you have created an auditd rule or not.
 references:
     - https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-understanding_audit_log_files
+    - https://access.redhat.com/articles/4409591#audit-record-types-2
 author: Marie Euler, Pawel Mazur
 date: 2020/05/18
 modified: 2022/12/20
@@ -15,12 +15,12 @@ logsource:
     product: linux
     service: auditd
 detection:
-    syscall_record_type:
+    selection_syscall_record_type:
         type: 'SYSCALL'
         exe|endswith: '/useradd'
-    add_user_record_type:
-        type: 'ADD_USER' # it appears that it doesn't require an auditd rule
-    condition: syscall_record_type or add_user_record_type
+    selection_add_user_record_type:
+        type: 'ADD_USER' # This is logged with having to configure audit rules on both Ubuntu and Centos
+    condition: 1 of selection_*
 falsepositives:
     - Admin activity
 level: medium
