@@ -1,0 +1,39 @@
+title: Renamed Office Binary Execution
+id: 0b0cd537-fc77-4e6e-a973-e53495c1083d
+status: experimental
+description: Detects the execution of a renamed office binaries
+references:
+    - https://infosec.exchange/@sbousseaden/109542254124022664
+author: Nasreddine Bencherchali
+date: 2022/12/20
+tags:
+    - attack.defense_evasion
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - OriginalFileName:
+            - 'Excel.exe'
+            - 'MSACCESS.EXE'
+            - 'OneNote.exe'
+            - 'POWERPNT.EXE'
+            - 'WinWord.exe'
+        - Description:
+            - 'Microsoft Access'
+            - 'Microsoft Excel'
+            - 'Microsoft OneNote'
+            - 'Microsoft PowerPoint'
+            - 'Microsoft Word'
+        # - Product|contains: 'Microsoft Office'  # prone to many FPs
+    filter:
+        Image|endswith:
+            - '\EXCEL.exe'
+            - '\MSACCESS.exe'
+            - '\ONENOTE.EXE'
+            - '\POWERPNT.EXE'
+            - '\WINWORD.exe'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high

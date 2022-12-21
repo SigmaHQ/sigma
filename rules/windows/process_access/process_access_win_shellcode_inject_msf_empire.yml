@@ -4,7 +4,7 @@ status: experimental
 description: Detects potential shellcode injection used by tools such as Metasploit's migrate and Empire's psinject
 author: Bhabesh Raj
 date: 2022/03/11
-modified: 2022/12/15
+modified: 2022/12/20
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
@@ -57,6 +57,11 @@ detection:
         SourceImage|startswith: 'C:\Program Files\Microsoft Visual Studio\'
         SourceImage|endswith: '\MSBuild\Current\Bin\MSBuild.exe'
         TargetImage: C:\Program Files\Dell\DellDataVault\DDVDataCollector.exe
+    filter_wmiprvese:
+        SourceImage: 'C:\Windows\System32\Wbem\Wmiprvse.exe'
+        TargetImage: 'C:\Windows\system32\lsass.exe'
+        CallTrace|startswith: 'C:\Windows\SYSTEM32\ntdll.dll'
+        CallTrace|contains: '\System.ni.dll+'
     condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown
