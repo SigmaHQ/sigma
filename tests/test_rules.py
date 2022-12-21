@@ -892,6 +892,25 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED +
                             "There are rules using list with only 1 element")
 
+    def test_selection_start_or_and(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            detection = self.get_rule_part(
+                file_path=file, part_name="detection")
+            if detection:
+                
+                for key in detection:
+                    if key[:2].lower() == "or":
+                        print( Fore.RED + "Rule {} the selection '{}' start with 'or'".format(file, key))
+                        faulty_rules.append(file)
+                    if key[:3].lower() == "and":
+                        print( Fore.RED + "Rule {} the selection '{}' start with 'and'".format(file, key))
+                        faulty_rules.append(file)
+                        
+        self.assertEqual(faulty_rules, [], Fore.RED +
+                            "There are rules using bad selection name (or*, and*)")
+
+
     def test_unused_selection(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
