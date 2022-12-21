@@ -1,0 +1,29 @@
+title: Possible Manipulation Of Tokens on a Windows computers remotely Detected via Impersonate
+id: cf0c254b-22f1-4b2b-8221-e137b3c0af94
+status: experimental
+description: Threat actors leverage a standalone binary (Impersonate/) that you can use to manipulate tokens on a Windows computers remotely (PsExec/WmiExec) or interactively
+references:
+    - https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/
+author: Sai Prashanth Pulisetti @pulisettis
+date: 2022/12/21
+modified: 2022/12/21
+tags:
+    - attack.command_and_control
+    - attack.lateral_movement
+logsource:
+    product: windows
+    category: process_creation
+    definition: fields have to be extract from event
+detection:
+    selection:
+        HostApplication|contains|all:
+            - 'impersonate.exe'
+        HostApplication|contains:
+            - 'list'
+            - 'exec'
+            - 'token'
+            - 'imp_exe'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
