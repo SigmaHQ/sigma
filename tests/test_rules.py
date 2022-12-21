@@ -65,7 +65,7 @@ class TestRules(unittest.TestCase):
         # "There are rule files with extensions other than .yml")
 
     def test_legal_trademark_violations(self):
-        # See Issue # https://github.com/SigmaHQ/sigma/issues/1014
+        # See Issue # https://github.com/SigmaHQ/sigma/issues/1028
         files_with_legal_issues = []
 
         for file in self.yield_next_rule_file_path(self.path_to_rules):
