@@ -899,16 +899,44 @@ class TestRules(unittest.TestCase):
                 file_path=file, part_name="detection")
             if detection:
                 
+                # This test is a best effort to avoid breaking SIGMAC parser. You could do more testing and try to fix this once and for all by modifiying the token regular expressions https://github.com/SigmaHQ/sigma/blob/b9ae5303f12cda8eb6b5b90a32fd7f11ad65645d/tools/sigma/parser/condition.py#L107-L127 
                 for key in detection:
                     if key[:2].lower() == "or":
-                        print( Fore.RED + "Rule {} the selection '{}' start with 'or'".format(file, key))
+                        print( Fore.RED + "Rule {} has a selection '{}' that starts with the string 'or'".format(file, key))
                         faulty_rules.append(file)
-                    if key[:3].lower() == "and":
-                        print( Fore.RED + "Rule {} the selection '{}' start with 'and'".format(file, key))
+                    elif key[:2].lower() == "by":
+                        print( Fore.RED + "Rule {} has a selection '{}' that starts with the string 'by'".format(file, key))
+                        faulty_rules.append(file)
+                    elif key[:3].lower() == "and":
+                        print( Fore.RED + "Rule {} has a selection '{}' that starts with the string 'and'".format(file, key))
+                        faulty_rules.append(file)
+                    elif key[:3].lower() == "not":
+                        print( Fore.RED + "Rule {} has a selection '{}' that starts with the string 'not'".format(file, key))
+                        faulty_rules.append(file)
+                    elif key[:3].lower() == "all":
+                        print( Fore.RED + "Rule {} has a selection '{}' that starts with the string 'all'".format(file, key))
+                        faulty_rules.append(file)
+                    elif key[:3].lower() == "min":
+                        print( Fore.RED + "Rule {} has a selection '{}' that starts with the string 'min'".format(file, key))
+                        faulty_rules.append(file)
+                    elif key[:3].lower() == "max":
+                        print( Fore.RED + "Rule {} has a selection '{}' that starts with the string 'max'".format(file, key))
+                        faulty_rules.append(file)
+                    elif key[:3].lower() == "avg":
+                        print( Fore.RED + "Rule {} has a selection '{}' that starts with the strings 'avg'".format(file, key))
+                        faulty_rules.append(file)
+                    elif key[:3].lower() == "sum":
+                        print( Fore.RED + "Rule {} has a selection '{}' that starts with the string 'sum'".format(file, key))
+                        faulty_rules.append(file)
+                    elif key[:4].lower() == "near":
+                        print( Fore.RED + "Rule {} has a selection '{}' that starts with the string 'near'".format(file, key))
+                        faulty_rules.append(file)
+                    elif key[:5].lower() == "count":
+                        print( Fore.RED + "Rule {} has a selection '{}' that starts with the string 'count'".format(file, key))
                         faulty_rules.append(file)
                         
         self.assertEqual(faulty_rules, [], Fore.RED +
-                            "There are rules using bad selection name (or*, and*)")
+                            "There are rules with bad selection names. Can't start a selection name with an 'or*' or an 'and*' ")
 
 
     def test_unused_selection(self):
