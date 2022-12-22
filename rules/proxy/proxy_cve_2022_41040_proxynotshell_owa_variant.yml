@@ -1,0 +1,26 @@
+title: Potential CVE-2022-41040 OWA Variant Exploitation Attempt - Proxy
+id: 181f49fa-0b21-4665-a98c-a57025ebb8c7
+status: experimental
+description: Detects exploitation attempt of CVE-2022-41040 using the OWA endpoint variant to access the powershell backend endpoint
+references:
+    - https://www.crowdstrike.com/blog/owassrf-exploit-analysis-and-recommendations/
+    - https://www.rapid7.com/blog/post/2022/12/21/cve-2022-41080-cve-2022-41082-rapid7-observed-exploitation-of-owassrf-in-exchange-for-rce/
+author: Nasreddine Bencherchali
+date: 2022/12/22
+tags:
+    - attack.initial_access
+    - attack.t1190
+    - cve.2022.41040
+logsource:
+    category: proxy
+detection:
+    selection:
+        # Look for the header: X-OWA-ExplicitLogonUser: owa/mastermailbox@outlook.com
+        cs-method: 'POST'
+        c-uri|contains|all:
+            - '/owa/mastermailbox'
+            - '/powershell'
+    condition: selection
+falsepositives:
+    - Web vulnerability scanners
+level: high
