@@ -8,7 +8,7 @@ references:
     - https://access.redhat.com/security/cve/CVE-2021-4034
 author: Pawel Mazur
 date: 2022/01/27
-modified: 2022/12/21
+modified: 2022/12/22
 tags:
     - attack.privilege_escalation
     - attack.t1068
@@ -16,14 +16,14 @@ logsource:
     product: linux
     service: auditd
 detection:
-    proctitle:
+    selection_proctitle:
         type: PROCTITLE
         proctitle: '(null)'
-    syscall:
+    selection_syscall:
         type: SYSCALL
         comm: pkexec
         exe: '/usr/bin/pkexec'
-    condition: proctitle near syscall
+    condition: selection_proctitle |near selection_syscall
 falsepositives:
     - Unknown
 level: high
