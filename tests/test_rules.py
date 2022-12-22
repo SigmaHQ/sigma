@@ -729,10 +729,145 @@ class TestRules(unittest.TestCase):
                 print(
                     Fore.YELLOW + "Rule {} has a file name that doesn't match our standard.".format(file))
                 faulty_rules.append(file)
+            else:
+                # This test make sure that every rules has a filename that corresponds to
+                # It's specific logsource.
+                # Fix Issue #1381 (https://github.com/SigmaHQ/sigma/issues/1381)
+                logsource = self.get_rule_part(file_path=file, part_name="logsource")
+                if logsource:
+                    pattern_prefix = ""
+                    os_infix = ""
+                    os_bool = False
+                    for key,value in logsource.items():
+                        if key == "definition":
+                            pass
+                        else:
+                            if key == "product":
+                                # This is to get the OS for certain categories
+                                if value == "windows":
+                                    os_infix = "win_"
+                                elif value == "macos":
+                                    os_infix = "macos_"
+                                elif value == "linux":
+                                    os_infix = "lnx_"
+                                # For other stuff
+                                elif value == "aws":
+                                    pattern_prefix = "aws_"
+                                elif value == "azure":
+                                    pattern_prefix = "azure_"
+                                elif value == "gcp":
+                                    pattern_prefix = "gcp_"
+                                elif value == "gworkspace":
+                                    pattern_prefix = "gworkspace_"
+                                elif value == "m365":
+                                    pattern_prefix = "microsoft365_"
+                                elif value == "okta":
+                                    pattern_prefix = "okta_"
+                                elif value == "onelogin":
+                                    pattern_prefix = "onelogin_"
+                            elif key == "category":
+                                if value == "process_creation":
+                                    pattern_prefix = "proc_creation_"
+                                    os_bool = True
+                                elif value == "image_load":
+                                    pattern_prefix = "image_load_"
+                                elif value == "file_event":
+                                    pattern_prefix = "file_event_"
+                                    os_bool = True
+                                elif value == "registry_set":
+                                    pattern_prefix = "registry_set_"
+                                elif value == "registry_add":
+                                    pattern_prefix = "registry_add_"
+                                elif value == "registry_event":
+                                    pattern_prefix = "registry_event_"
+                                elif value == "registry_delete":
+                                    pattern_prefix = "registry_delete_"
+                                elif value == "registry_rename":
+                                    pattern_prefix = "registry_rename_"
+                                elif value == "process_access":
+                                    pattern_prefix = "proc_access_"
+                                    os_bool = True
+                                elif value == "driver_load":
+                                    pattern_prefix = "driver_load_"
+                                    os_bool = True
+                                elif value == "dns_query":
+                                    pattern_prefix = "dns_query_"
+                                    os_bool = True
+                                elif value == "ps_script":
+                                    pattern_prefix = "posh_ps_"
+                                elif value == "ps_module":
+                                    pattern_prefix = "posh_pm_"
+                                elif value == "ps_classic_start":
+                                    pattern_prefix = "posh_pc_"
+                                elif value == "pipe_created":
+                                    pattern_prefix = "pipe_created_"
+                                elif value == "network_connection":
+                                    pattern_prefix = "net_connection_"
+                                    os_bool = True
+                                elif value == "file_rename":
+                                    pattern_prefix = "file_rename_"
+                                    os_bool = True
+                                elif value == "file_delete":
+                                    pattern_prefix = "file_delete_"
+                                    os_bool = True
+                                elif value == "file_change":
+                                    pattern_prefix = "file_change_"
+                                    os_bool = True
+                                elif value == "file_access":
+                                    pattern_prefix = "file_access_"
+                                    os_bool = True
+                                elif value == "create_stream_hash":
+                                    pattern_prefix = "create_stream_hash_"
+                                elif value == "create_remote_thread":
+                                    pattern_prefix = "create_remote_thread_win_"
+                                elif value == "dns":
+                                    pattern_prefix = "net_dns_"
+                                elif value == "firewall":
+                                    pattern_prefix = "net_firewall_"
+                                elif value == "webserver":
+                                    pattern_prefix = "web_"
+                            elif key == "service":
+                                if value == "auditd":
+                                    pattern_prefix = "lnx_auditd_"
+                                elif value == "modsecurity":
+                                    pattern_prefix = "modsec_"
+                                elif value == "diagnosis-scripted":
+                                    pattern_prefix = "win_diagnosis_scripted_"
+                                elif value == "firewall-as":
+                                    pattern_prefix = "win_firewall_as_"
+                                elif value == "msexchange-management":
+                                    pattern_prefix = "win_exchange_"
+                                elif value == "security":
+                                    pattern_prefix = "win_security_"
+                                elif value == "system":
+                                    pattern_prefix = "win_system_"
+                                elif value == "taskscheduler":
+                                    pattern_prefix = "win_taskscheduler_"
+                                elif value == "terminalservices-localsessionmanager":
+                                    pattern_prefix = "win_terminalservices_"
+                                elif value == "windefend":
+                                    pattern_prefix = "win_defender_"
+                                elif value == "wmi":
+                                    pattern_prefix = "win_wmi_"
+                                elif value == "codeintegrity-operational":
+                                    pattern_prefix = "win_codeintegrity_"
+                                elif value == "bits-client":
+                                    pattern_prefix = "win_bits_client_"
+                                elif value == "applocker":
+                                    pattern_prefix = "win_applocker_"
+                        
+                    # This value is used to test if we should add the OS infix for certain categories
+                    if os_bool:
+                        pattern_prefix += os_infix
+                    if pattern_prefix != "":
+                        if not filename.startswith(pattern_prefix):
+                            print(
+                                Fore.YELLOW + "Rule {} has a file name that doesn't match our standard naming convention.".format(file))
+                            faulty_rules.append(file)
             name_lst.append(filename)
 
         self.assertEqual(faulty_rules, [], Fore.RED +
-                         r'There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is \'[a-z0-9_]{10,70}\.yml\' and it has to contain at least an underline character.')
+                         r'There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is \'[a-z0-9_]{10,70}\.yml\' and it has to contain at least an underline character. It also has to follow the following naming convention https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/Sigmahq_filename_rule.md')
 
     def test_title(self):
         faulty_rules = []
