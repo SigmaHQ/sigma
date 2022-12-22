@@ -910,6 +910,30 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED +
                             "There are rules using list with only 1 element")
 
+    def test_selection_start_or_and(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            detection = self.get_rule_part(
+                file_path=file, part_name="detection")
+            if detection:
+                
+                # This test is a best effort to avoid breaking SIGMAC parser. You could do more testing and try to fix this once and for all by modifiying the token regular expressions https://github.com/SigmaHQ/sigma/blob/b9ae5303f12cda8eb6b5b90a32fd7f11ad65645d/tools/sigma/parser/condition.py#L107-L127 
+                for key in detection:
+                    if key[:3].lower() == "sel":
+                       continue
+                    elif key[:2].lower() == "or":
+                        print( Fore.RED + "Rule {} has a selection '{}' that starts with the string 'or'".format(file, key))
+                        faulty_rules.append(file)
+                    elif key[:3].lower() == "and":
+                        print( Fore.RED + "Rule {} has a selection '{}' that starts with the string 'and'".format(file, key))
+                        faulty_rules.append(file)
+                    elif key[:3].lower() == "not":
+                        print( Fore.RED + "Rule {} has a selection '{}' that starts with the string 'not'".format(file, key))
+                        faulty_rules.append(file)
+                        
+        self.assertEqual(faulty_rules, [], Fore.RED +
+                            "There are rules with bad selection names. Can't start a selection name with an 'or*' or an 'and*' or a 'not*' ")
+
     def test_unused_selection(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
