@@ -1,0 +1,97 @@
+title: Code Integrity Attempted DLL Load
+id: f8931561-97f5-4c46-907f-0a4a592e47a7
+description: Detects attempted DLL load events that didn't meet anti-malware or Windows signing level requirements. It often means the file's signature is revoked or expired
+author: Florian Roth, Nasreddine Bencherchali
+status: experimental
+references:
+    - https://twitter.com/SBousseaden/status/1483810148602814466
+    - https://github.com/MicrosoftDocs/windows-itpro-docs/blob/40fe118976734578f83e5e839b9c63ae7a4af82d/windows/security/threat-protection/windows-defender-application-control/event-id-explanations.md#windows-codeintegrity-operational-log
+date: 2022/01/20
+modified: 2022/12/12
+tags:
+    - attack.execution
+logsource:
+    product: windows
+    service: codeintegrity-operational
+detection:
+    selection:
+        EventID: 3033
+    filter_dtrace:
+        # Example: Code Integrity determined that a process (\Device\HarddiskVolume5\Windows\System32\svchost.exe) attempted to load \Device\HarddiskVolume5\Program Files\DTrace\dtrace.dll that did not meet the Windows signing level requirements.
+        FileNameBuffer|endswith: '\Program Files\DTrace\dtrace.dll'
+        ProcessNameBuffer|endswith: '\Windows\System32\svchost.exe'
+        RequestedPolicy: 12
+        ValidatedPolicy: 1
+    filter_msmpeng:
+        # Example: Code Integrity determined that a process (\Device\HarddiskVolume5\ProgramData\Microsoft\Windows Defender\Platform\4.18.2207.7-0\MsMpEng.exe) attempted to load \Device\HarddiskVolume5\Windows\System32\DriverStore\FileRepository\iigd_dch.inf_amd64_36fb67bd6dbd887d\igd10iumd64.dll that did not meet the Custom 3 / Antimalware signing level requirements.
+        FileNameBuffer|contains: '\Windows\System32\DriverStore\FileRepository\'
+        FileNameBuffer|endswith: '\igd10iumd64.dll'
+        # ProcessNameBuffer is AV products
+        RequestedPolicy: 7
+        ValidatedPolicy: 1
+    filter_electron_based_app:
+        # Example: Code Integrity determined that a process (\Device\HarddiskVolume5\Users\user\AppData\Local\Keybase\Gui\Keybase.exe) attempted to load \Device\HarddiskVolume5\Windows\System32\nvspcap64.dll that did not meet the Microsoft signing level requirements.
+        FileNameBuffer|endswith: '\Windows\System32\nvspcap64.dll'
+        ProcessNameBuffer|endswith:
+            - '\AppData\Local\Keybase\Gui\Keybase.exe'
+            - '\Microsoft\Teams\stage\Teams.exe'
+        RequestedPolicy: 8
+        ValidatedPolicy: 1
+    filter_bonjour:
+        FileNameBuffer|endswith: '\Program Files\Bonjour\mdnsNSP.dll'
+        ProcessNameBuffer|endswith:
+            - '\Windows\System32\svchost.exe'
+            - '\Windows\System32\SIHClient.exe'
+        RequestedPolicy:
+            - 8
+            - 12
+        ValidatedPolicy: 1
+    filter_msoffice:
+        FileNameBuffer|contains: '\Microsoft Office\root\vfs\ProgramFilesCommonX64\Microsoft Shared\OFFICE'
+        FileNameBuffer|endswith: '\MSOXMLMF.DLL'
+        # ProcessNameBuffer is AV products
+        RequestedPolicy: 7
+        ValidatedPolicy: 1
+    filter_slack:
+        # Example: https://user-images.githubusercontent.com/112784902/197407680-96d4b662-8a59-4289-a483-b24d630ac2a9.png
+        # Even though it's the same DLL as the one used in the electron based app filter. We need to do a separate selection due to slack's folder naming convention with the version number :)
+        FileNameBuffer|endswith: '\Windows\System32\nvspcap64.dll'
+        ProcessNameBuffer|contains: '\AppData\Local\slack\app-'
+        ProcessNameBuffer|endswith: '\slack.exe'
+        RequestedPolicy: 8
+        ValidatedPolicy: 1
+    filter_firefox:
+        # Example: https://user-images.githubusercontent.com/62423083/197451483-70e89010-ed96-4357-8079-b5a061a239d6.png
+        FileNameBuffer|endswith:
+            - '\Mozilla Firefox\mozavcodec.dll'
+            - '\Mozilla Firefox\mozavutil.dll'
+        ProcessNameBuffer|endswith: '\Mozilla Firefox\firefox.exe'
+        RequestedPolicy: 8
+    filter_avast:
+        FileNameBuffer|endswith:
+            - '\Program Files\Avast Software\Avast\aswAMSI.dll'
+            - '\Program Files (x86)\Avast Software\Avast\aswAMSI.dll'
+        RequestedPolicy:
+            - 8
+            - 12
+        ValidatedPolicy: 1
+    filter_gac:
+        # If other DLLs show up from this process. Filter the path containing this string `\Windows\assembly\GAC\`
+        FileNameBuffer|endswith:
+            - '\stdole.dll'
+            - '\msdatasrc.dll'
+        ProcessNameBuffer|endswith: '\mscorsvw.exe'
+        ProcessNameBuffer|contains: '\Windows\Microsoft.NET\'
+        RequestedPolicy: 8
+        ValidatedPolicy: 2
+    filter_google_drive:
+        # Example: \Program Files\Google\Drive File Stream\67.0.2.0\crashpad_handler.exe
+        FileNameBuffer|contains: '\Program Files\Google\Drive File Stream\'
+        FileNameBuffer|endswith: '\crashpad_handler.exe'
+        ProcessNameBuffer|endswith: '\Windows\ImmersiveControlPanel\SystemSettings.exe'
+        RequestedPolicy: 8
+        ValidatedPolicy: 1
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Antivirus products
+level: high

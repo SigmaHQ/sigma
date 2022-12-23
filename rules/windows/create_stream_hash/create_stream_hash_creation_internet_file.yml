@@ -1,0 +1,56 @@
+title: Creation Of a Suspicious ADS File Outside a Browser Download
+id: 573df571-a223-43bc-846e-3f98da481eca
+status: experimental
+description: Detects the creation of a suspicious ADS (Alternate Data Stream) file by software other than browsers
+references:
+    - https://www.bleepingcomputer.com/news/security/exploited-windows-zero-day-lets-javascript-files-bypass-security-warnings/
+author: frack113
+date: 2022/10/22
+modified: 2022/10/31
+tags:
+    - attack.defense_evasion
+logsource:
+    product: windows
+    category: create_stream_hash
+detection:
+    selection:
+        Contents|startswith: '[ZoneTransfer]  ZoneId=3'
+        TargetFilename|endswith: ':Zone.Identifier'
+        TargetFilename|contains:
+            - '.exe'
+            - '.scr'
+            - '.bat'
+            - '.cmd'
+            - '.docx'
+            - '.hta'
+            - '.jse'
+            - '.lnk'
+            - '.pptx'
+            - '.ps'
+            - '.reg'
+            - '.sct'
+            - '.vb'
+            - '.wsc'
+            - '.wsf'
+            - '.xlsx'
+    filter:
+        # Add missing browsers you use and exclude the ones you don't
+        Image|endswith:
+            - '\brave.exe'
+            - '\Google\Chrome\Application\chrome.exe'
+            - '\chromium.exe'
+            - '\firefox.exe'
+            - '\msedge.exe'
+            - '\opera.exe'
+            - '\microsoftedge.exe'
+            - '\iexplorer.exe'
+            - '\vivaldi.exe'
+            - '\CCleaner Browser\Application\CCleanerBrowser.exe'
+    condition: selection and not filter
+fields:
+    - TargetFilename
+    - Image
+falsepositives:
+    - Other legitimate browsers not currently included in the filter (please add them)
+    - Legitimate downloads via scripting or command-line tools (Investigate to determine if it's legitimate)
+level: medium

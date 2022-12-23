@@ -1,15 +1,15 @@
 title: Alternate PowerShell Hosts
 id: d7326048-328b-4d5e-98af-86e84b17c765
 related:
-     - id: 64e8e417-c19a-475a-8d19-98ea705394cc
-       type: derived
-description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
+    - id: 64e8e417-c19a-475a-8d19-98ea705394cc
+      type: derived
 status: test
-date: 2019/08/11
-modified: 2022/02/21
-author: Roberto Rodriguez @Cyb3rWard0g
+description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
 references:
     - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190815181010.html
+author: Roberto Rodriguez @Cyb3rWard0g
+date: 2019/08/11
+modified: 2022/10/05
 tags:
     - attack.execution
     - attack.t1059.001
@@ -19,8 +19,9 @@ logsource:
     definition: fields have to be extract from event
 detection:
     selection:
-        HostApplication: '*'
+        HostApplication|contains: '*'
     filter:
+        # If you extracted the fields from this event. Use the filter list described in 64e8e417-c19a-475a-8d19-98ea705394cc to filter FPs
         - HostApplication|startswith: 'C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe'
         - ContextInfo|contains: 'Citrix\ConfigSync\ConfigSync.ps1'
     condition: selection and not filter
@@ -28,4 +29,4 @@ falsepositives:
     - Programs using PowerShell directly without invocation of a dedicated interpreter
     - MSP Detection Searcher
     - Citrix ConfigSync.ps1
-level: medium 
+level: medium

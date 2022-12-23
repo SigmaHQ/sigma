@@ -2,12 +2,16 @@ title: Suspicious Service Path Modification
 id: 138d3531-8793-4f50-a2cd-f291b2863d78
 status: test
 description: Detects service path modification via the "sc" binary to a suspicious command or path
-author: Victor Sergeev, oscd.community, Nasreddine Bencherchali (update)
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1543.003/T1543.003.md
     - https://web.archive.org/web/20180331144337/https://www.fireeye.com/blog/threat-research/2018/03/sanny-malware-delivery-method-updated-in-recently-observed-attacks.html
+author: Victor Sergeev, oscd.community, Nasreddine Bencherchali (update)
 date: 2019/10/21
-modified: 2022/08/04
+modified: 2022/11/18
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1543.003
 logsource:
     category: process_creation
     product: windows
@@ -28,6 +32,11 @@ detection:
             - 'svchost'
             - 'dllhost'
             - 'cmd.exe /c'
+            - 'cmd.exe /k'
+            - 'cmd.exe /r'
+            - 'cmd /c'
+            - 'cmd /k'
+            - 'cmd /r'
             # Add more suspicious paths
             - 'C:\Users\Public'
             - '\Downloads\'
@@ -42,7 +51,3 @@ fields:
 falsepositives:
     - Unlikely
 level: high
-tags:
-    - attack.persistence
-    - attack.privilege_escalation
-    - attack.t1543.003

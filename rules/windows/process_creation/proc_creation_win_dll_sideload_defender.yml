@@ -1,7 +1,7 @@
 title: DLL Sideloading by Microsoft Defender
 id: 7002aa10-b8d4-47ae-b5ba-51ab07e228b9
 status: experimental
-description: Detects execution of Microsoft Defender's CLI process (MpCmdRun.exe) from the non-default directory which may be an attempt to sideload arbitary DLL
+description: Detects execution of Microsoft Defender's CLI process (MpCmdRun.exe) from the non-default directory which may be an attempt to sideload arbitrary DLL
 references:
     - https://www.sentinelone.com/blog/living-off-windows-defender-lockbit-ransomware-sideloads-cobalt-strike-through-microsoft-security-tool
 author: Bhabesh Raj
@@ -18,10 +18,10 @@ detection:
         Image|endswith: '\MpCmdRun.exe'
     legit_path:
         Image|startswith: # MpCmdRun resides in two locations
-          - 'C:\Program Files\Windows Defender\'
-          - 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
-          - 'C:\Windows\winsxs\x86_security-malware-windows-defender_'  # found on Win7 i386
-          - 'C:\Program Files\Microsoft Security Client\MpCmdRun.exe'  # found on Win7 i386
+            - 'C:\Program Files\Windows Defender\'
+            - 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+            - 'C:\Windows\winsxs\'
+            - 'C:\Program Files\Microsoft Security Client\MpCmdRun.exe' # found on Win7 i386
     condition: selection and not legit_path
 falsepositives:
     - Unknown

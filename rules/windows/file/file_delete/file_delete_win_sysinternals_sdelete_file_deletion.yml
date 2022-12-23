@@ -1,0 +1,27 @@
+title: Sysinternals SDelete File Deletion
+id: 6ddab845-b1b8-49c2-bbf7-1a11967f64bc
+status: test
+description: A General detection to trigger for the deletion of files by Sysinternals SDelete. It looks for the common name pattern used to rename files.
+references:
+    - https://github.com/OTRF/detection-hackathon-apt29/issues/9
+    - https://threathunterplaybook.com/evals/apt29/detections/4.B.4_83D62033-105A-4A02-8B75-DAB52D8D51EC.html
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+date: 2020/05/02
+modified: 2022/09/21
+tags:
+    - attack.defense_evasion
+    - attack.t1070.004
+logsource:
+    product: windows
+    category: file_delete
+detection:
+    selection:
+        TargetFilename|endswith:
+            - '.AAA'
+            - '.ZZZ'
+    filter_wireshark:
+        TargetFilename|endswith: '\Wireshark\radius\dictionary.alcatel-lucent.aaa'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Legitime usage of SDelete
+level: medium

@@ -107,6 +107,9 @@ class SQLiteBackend(SQLBackend):
             self.mappingItem = True
             fieldname, value = node
             transformed_fieldname = self.fieldNameMapping(fieldname, value)
+
+            if value is None: value = '' # Handle null values
+
             generated_value = self.generateNode(value)
 
             has_wildcard = re.search(

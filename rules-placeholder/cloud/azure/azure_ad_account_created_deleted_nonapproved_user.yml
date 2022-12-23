@@ -1,0 +1,26 @@
+title: Account Created And Deleted By Non Approved Users
+id: c98184ba-4a27-4e10-b7b7-da48e71f4d25
+status: experimental
+description: Detects accounts that are created or deleted by non-approved users.
+references:
+    - https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/security-operations-user-accounts#short-lived-accounts
+author: Mark Morowczynski '@markmorow', MikeDuddington, '@dudders1'
+date: 2022/08/11
+tags:
+    - attack.defense_evasion
+    - attack.t1078
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection:
+        properties.message:
+            - Add user
+            - Delete user
+        Status: Sucess
+    valid_admin:
+        Initiatied.By: '%ApprovedUserUpn%'
+    condition: selection and not valid_admin
+falsepositives:
+    - Legit administrative action
+level: medium

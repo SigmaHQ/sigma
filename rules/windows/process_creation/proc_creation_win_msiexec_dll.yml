@@ -5,21 +5,25 @@ description: Detects MsiExec loading a DLL and calling its DllUnregisterServer f
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1218.007/T1218.007.md
     - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/msiexec
+    - https://twitter.com/_st0pp3r_/status/1583914515996897281
 author: frack113
 date: 2022/04/24
+modified: 2022/10/23
+tags:
+    - attack.defense_evasion
+    - attack.t1218.007
 logsource:
     product: windows
     category: process_creation
 detection:
-    selection:
+    selection_msi:
         Image|endswith: '\msiexec.exe'
-        CommandLine|contains|all:
+        CommandLine|contains:
             - ' /z '
-            - '.dll'
-    condition: selection
+            - ' -z '
+    selection_dll:
+        CommandLine|contains: '.dll'
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: medium
-tags:
-    - attack.defense_evasion
-    - attack.t1218.007

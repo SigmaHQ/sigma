@@ -5,15 +5,19 @@ related:
       type: obsoletes
     - id: fd115e64-97c7-491f-951c-fc8da7e042fa
       type: obsoletes
+status: experimental
 description: Detects when attackers or tools disable Windows Defender functionalities via the windows registry
-date: 2022/08/01
-author: AlertIQ, Ján Trenčanský, frack113, Nasreddine Bencherchali
 references:
     - https://thedfirreport.com/2021/10/18/icedid-to-xinglocker-ransomware-in-24-hours/
     - https://gist.github.com/anadr/7465a9fde63d41341136949f14c21105
     - https://admx.help/?Category=Windows_7_2008R2&Policy=Microsoft.Policies.WindowsDefender::SpyNetReporting
     - https://symantec-enterprise-blogs.security.com/blogs/threat-intelligence/ransomware-hive-conti-avoslocker
-status: experimental
+author: AlertIQ, Ján Trenčanský, frack113, Nasreddine Bencherchali
+date: 2022/08/01
+modified: 2022/12/05
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
 logsource:
     product: windows
     category: registry_set
@@ -39,10 +43,11 @@ detection:
             - '\SpyNet\SubmitSamplesConsent'
             - '\MpEngine\MpEnablePus'
         Details: 'DWORD (0x00000000)'
-    condition: root and 1 of selection_*
+    filter_msmpeng:
+        Image|contains|all:
+            - 'C:\ProgramData\Microsoft\Windows Defender\platform\'
+            - '\MsMpEng.exe'
+    condition: ( root and 1 of selection_* ) and not 1 of filter*
 falsepositives:
     - Administrator actions
 level: high
-tags:
-    - attack.defense_evasion
-    - attack.t1562.001

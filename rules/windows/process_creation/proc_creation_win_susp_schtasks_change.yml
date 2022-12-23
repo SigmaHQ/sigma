@@ -1,18 +1,19 @@
 title: Suspicious Modification Of Scheduled Tasks
 id: 1c0e41cd-21bb-4433-9acc-4a2cd6367b9b
+status: experimental
 description: |
     Detects when an attacker tries to modify an already existing scheduled tasks to run from a suspicious location
     Attackers can create a simple looking task in order to avoid detection on creation as it's often the most focused on
     Instead they modify the task after creation to include their malicious payload
-status: experimental
 references:
     - Internal Research
     - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/schtasks
+author: Nasreddine Bencherchali
+date: 2022/07/28
+modified: 2022/11/18
 tags:
     - attack.execution
     - attack.t1053.005
-author: Nasreddine Bencherchali
-date: 2022/07/28
 logsource:
     product: windows
     category: process_creation
@@ -42,7 +43,11 @@ detection:
             - 'regsvr32'
             - 'rundll32'
             - 'cmd /c '
+            - 'cmd /k '
+            - 'cmd /r '
             - 'cmd.exe /c '
+            - 'cmd.exe /k '
+            - 'cmd.exe /r '
             - 'powershell'
             - 'mshta'
             - 'wscript'

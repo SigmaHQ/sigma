@@ -2,38 +2,56 @@ title: Removal of Potential COM Hijacking Registry Keys
 id: 96f697b0-b499-4e5d-9908-a67bec11cdb6
 status: test
 description: A General detection to trigger for processes removing .*\shell\open\command registry keys. Registry keys that might have been used for COM hijacking activities.
-author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 references:
-  - https://github.com/OTRF/detection-hackathon-apt29/issues/7
-  - https://threathunterplaybook.com/evals/apt29/detections/3.C.1_22A46621-7A92-48C1-81BF-B3937EB4FDC3.html
-  - https://docs.microsoft.com/en-us/windows/win32/shell/launch
-  - https://docs.microsoft.com/en-us/windows/win32/api/shobjidl_core/nn-shobjidl_core-iexecutecommand
-  - https://docs.microsoft.com/en-us/windows/win32/shell/shell-and-managed-code
+    - https://github.com/OTRF/detection-hackathon-apt29/issues/7
+    - https://threathunterplaybook.com/evals/apt29/detections/3.C.1_22A46621-7A92-48C1-81BF-B3937EB4FDC3.html
+    - https://docs.microsoft.com/en-us/windows/win32/shell/launch
+    - https://docs.microsoft.com/en-us/windows/win32/api/shobjidl_core/nn-shobjidl_core-iexecutecommand
+    - https://docs.microsoft.com/en-us/windows/win32/shell/shell-and-managed-code
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 date: 2020/05/02
-modified: 2022/03/26
-logsource:
-  product: windows
-  category: registry_delete
-detection:
-  selection:
-    EventType: 'DeleteKey'
-    TargetObject|endswith: '\shell\open\command'
-  filter_svchost:
-    Image: 'C:\Windows\system32\svchost.exe'
-  filter_office:
-    Image|startswith: 
-      - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
-      - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
-    Image|endswith: '\OfficeClickToRun.exe'
-  filter_integrator:
-    Image: 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
-  filter_dropbox:
-    Image|endswith: '\Dropbox.exe'
-    TargetObject|startswith: 'HKCR\Dropbox.'
-  condition: selection and not 1 of filter_*
-falsepositives:
-  - Unknown
-level: medium
+modified: 2022/10/20
 tags:
-  - attack.defense_evasion
-  - attack.t1112
+    - attack.defense_evasion
+    - attack.t1112
+logsource:
+    product: windows
+    category: registry_delete
+detection:
+    selection:
+        EventType: 'DeleteKey'
+        TargetObject|endswith: '\shell\open\command'
+    filter_svchost:
+        Image: 'C:\Windows\system32\svchost.exe'
+    filter_office:
+        Image|startswith:
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
+        Image|endswith: '\OfficeClickToRun.exe'
+    filter_integrator:
+        Image: 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
+    filter_dropbox:
+        Image|endswith: '\Dropbox.exe'
+        # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
+        TargetObject|contains: '\Dropbox.'
+    filter_wireshark:
+        Image|endswith: '\AppData\Local\Temp\Wireshark_uninstaller.exe'
+        # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
+        TargetObject|contains: '\wireshark-capture-file\'
+    filter_opera:
+        Image|startswith:
+            - 'C:\Program Files\Opera\'
+            - 'C:\Program Files (x86)\Opera\'
+        Image|endswith: '\installer.exe'
+    filter_peazip:
+        Image|contains: 'peazip'
+        # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
+        TargetObject|contains: '\PeaZip.'
+    filter_everything:
+        Image|endswith: '\Everything.exe'
+        # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
+        TargetObject|contains: '\Everything.'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Legitimate software (un)installations are known to cause some false positives. Please add them as a filter when encountered
+level: medium

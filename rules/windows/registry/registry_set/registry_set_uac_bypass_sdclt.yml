@@ -7,24 +7,24 @@ references:
     - https://github.com/hfiref0x/UACME
 author: Omer Yampel, Christian Burkard
 date: 2017/03/17
-modified: 2022/06/26
-logsource:
-    category: registry_set
-    product: windows
-detection:
-    selection1:
-        EventType: SetValue 
-        TargetObject|endswith: Software\Classes\exefile\shell\runas\command\isolatedCommand
-    selection2:
-        EventType: SetValue 
-        TargetObject|endswith: Software\Classes\Folder\shell\open\command\SymbolicLinkValue
-        Details|contains: '-1???\Software\Classes\'
-    condition: 1 of selection*
-falsepositives:
-    - Unknown
-level: high
+modified: 2022/12/01
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
     - attack.t1548.002
     - car.2019-04-001
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection1:
+        EventType: SetValue
+        TargetObject|endswith: 'Software\Classes\exefile\shell\runas\command\isolatedCommand'
+    selection2:
+        EventType: SetValue
+        TargetObject|endswith: 'Software\Classes\Folder\shell\open\command\SymbolicLinkValue'
+        Details|re: '-1[0-9]{3}\\Software\\Classes\\'
+    condition: 1 of selection*
+falsepositives:
+    - Unknown
+level: high

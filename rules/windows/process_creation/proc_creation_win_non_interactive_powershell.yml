@@ -1,12 +1,12 @@
 title: Non Interactive PowerShell
 id: f4bbd493-b796-416e-bbf2-121235348529
+status: test
 description: Detects non-interactive PowerShell activity by looking at powershell.exe with not explorer.exe as a parent.
-status: experimental
-date: 2019/09/12
-modified: 2021/05/10
-author: Roberto Rodriguez @Cyb3rWard0g (rule), oscd.community (improvements)
 references:
     - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190410151110.html
+author: Roberto Rodriguez @Cyb3rWard0g (rule), oscd.community (improvements)
+date: 2019/09/12
+modified: 2022/11/08
 tags:
     - attack.execution
     - attack.t1059.001
@@ -16,11 +16,13 @@ logsource:
 detection:
     selection:
         Image|endswith: '\powershell.exe'
-    filter:
-        ParentImage|endswith: 
+    filter_generic:
+        - ParentImage|endswith:
             - '\explorer.exe'
             - '\CompatTelRunner.exe'
-    condition: selection and not filter
+        - ParentImage: 'C:\$WINDOWS.~BT\Sources\SetupHost.exe' # During Windows updates/upgrades
+        # CommandLine: powershell.exe -ExecutionPolicy Restricted -Command Write-Host 'Final result: 1';
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Legitimate programs executing PowerShell scripts
 level: low

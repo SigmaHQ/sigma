@@ -1,0 +1,41 @@
+title: Suspicious Elevated System Shell
+id: 178e615d-e666-498b-9630-9ed363038101
+status: experimental
+description: Detects when a shell program such as the windows Command Prompt or PowerShell is launched with system privileges.
+references:
+    - https://github.com/Wh04m1001/SysmonEoP
+author: frack113
+date: 2022/12/05
+modified: 2022/12/07
+tags:
+    - attack.privilege_escalation
+    - attack.defense_evasion
+    - attack.execution
+    - attack.t1059
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_shell:
+        - Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\cmd.exe'
+        - OriginalFileName:
+            - 'PowerShell.EXE'
+            - 'pwsh.dll'
+            - 'Cmd.Exe'
+    selection_user:
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
+        LogonId: '0x3e7'
+    filter_compattelrunner:
+        ParentImage: 'C:\Windows\System32\CompatTelRunner.exe'
+        ParentCommandLine|contains: '-m:appraiser.dll -f:DoScheduledTelemetryRun'
+        OriginalFileName: 'PowerShell.EXE'
+        CommandLine|contains: '-ExecutionPolicy Restricted -Command Write-Host'
+    condition: all of selection_* and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: high

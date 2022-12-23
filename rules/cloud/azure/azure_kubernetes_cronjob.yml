@@ -1,34 +1,35 @@
 title: Azure Kubernetes CronJob
 id: 1c71e254-6655-42c1-b2d6-5e4718d7fc0a
-description: Identifies when a Azure Kubernetes CronJob runs in Azure Cloud. Kubernetes Job is a controller that creates one or more pods and ensures that a specified number of them successfully terminate. Kubernetes Job can be used to run containers that perform finite tasks for batch jobs. Kubernetes CronJob is used to schedule Jobs. An Adversary may use Kubernetes CronJob for scheduling execution of malicious code that would run as a container in the cluster.
-author: Austin Songer @austinsonger
 status: experimental
-date: 2021/11/22
+description: |
+  Identifies when a Azure Kubernetes CronJob runs in Azure Cloud. Kubernetes Job is a controller that creates one or more pods and ensures that a specified number of them successfully terminate.
+  Kubernetes Job can be used to run containers that perform finite tasks for batch jobs. Kubernetes CronJob is used to schedule Jobs.
+  An Adversary may use Kubernetes CronJob for scheduling execution of malicious code that would run as a container in the cluster.
 references:
     - https://docs.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations#microsoftkubernetes
     - https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/
     - https://kubernetes.io/docs/concepts/workloads/controllers/job/
     - https://www.microsoft.com/security/blog/2020/04/02/attack-matrix-kubernetes/
-logsource:
-    product: azure
-    service: activitylogs
-detection:
-    selection1:
-          properties.message|startswith: MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/BATCH
-          properties.message|endswith:
-            - /CRONJOBS/WRITE
-            - /JOBS/WRITE
-    selection2:
-          properties.message|startswith: MICROSOFT.CONTAINERSERVICE/MANAGEDCLUSTERS/BATCH
-          properties.message|endswith:
-            - /CRONJOBS/WRITE
-            - /JOBS/WRITE
-    condition: selection1 or selection2
-level: medium
+author: Austin Songer @austinsonger
+date: 2021/11/22
+modified: 2022/12/18
 tags:
     - attack.persistence
     - attack.privilege_escalation
     - attack.execution
+logsource:
+    product: azure
+    service: activitylogs
+detection:
+    selection:
+        operationName|startswith: 
+            - 'MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/BATCH'
+            - 'MICROSOFT.CONTAINERSERVICE/MANAGEDCLUSTERS/BATCH'
+        operationName|endswith:
+            - '/CRONJOBS/WRITE'
+            - '/JOBS/WRITE'
+    condition: selection
 falsepositives:
     - Azure Kubernetes CronJob/Job may be done by a system administrator.
     - If known behavior is causing false positives, it can be exempted from the rule.
+level: medium

@@ -1,0 +1,36 @@
+title: Delete Important Scheduled Task
+id: dbc1f800-0fe0-4bc0-9c66-292c2abe3f78
+related:
+    - id: 9ac94dc8-9042-493c-ba45-3b5e7c86b980
+      type: derived
+status: experimental
+description: Detects when adversaries stop services or processes by deleting their respective schdueled tasks in order to conduct data destructive activities
+references:
+    - Internal Research
+author: Nasreddine Bencherchali
+date: 2022/09/09
+tags:
+    - attack.impact
+    - attack.t1489
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    schtasks_exe:
+        Image|endswith: '\schtasks.exe'
+        CommandLine|contains|all:
+            - '/delete'
+            - '/tn'
+        CommandLine|contains:
+            # Add more important tasks
+            - '\Windows\SystemRestore\SR'
+            - '\Windows\Windows Defender\'
+            - '\Windows\BitLocker'
+            - '\Windows\WindowsBackup\'
+            - '\Windows\WindowsUpdate\'
+            - '\Windows\UpdateOrchestrator\'
+            - '\Windows\ExploitGuard'
+    condition: all of schtasks_*
+falsepositives:
+    - Unlikely
+level: high

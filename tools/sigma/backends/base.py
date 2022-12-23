@@ -21,6 +21,7 @@ import yaml
 import re
 
 from sigma.backends.exceptions import NotSupportedError
+from sigma.parser.condition import ConditionOR, NodeSubexpression
 from .mixins import RulenameCommentMixin, QuoteCharMixin
 from sigma.parser.modifiers.base import SigmaTypeModifier
 
@@ -328,6 +329,8 @@ class SingleTextQueryBackend(RulenameCommentMixin, BaseBackend, QuoteCharMixin):
             return self.generateMapItemTypedNode(transformed_fieldname, value)
         elif value is None:
             return self.nullExpression % (transformed_fieldname, )
+        elif isinstance(value, NodeSubexpression):
+            return self.generateSubexpressionNode(value)
         else:
             raise TypeError("Backend does not support map values of type " + str(type(value)))
 

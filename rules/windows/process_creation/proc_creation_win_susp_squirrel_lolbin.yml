@@ -5,13 +5,13 @@ description: Detects Possible Squirrel Packages Manager as Lolbin
 references:
     - http://www.hexacorn.com/blog/2019/03/30/sqirrel-packages-manager-as-a-lolbin-a-k-a-many-electron-apps-are-lolbins-by-default/
     - http://www.hexacorn.com/blog/2018/08/16/squirrel-as-a-lolbin/
+author: Karneades / Markus Neis, Jonhnathan Ribeiro, oscd.community
+date: 2019/11/12
+modified: 2022/10/25
 tags:
     - attack.execution
     - attack.defense_evasion
     - attack.t1218
-author: Karneades / Markus Neis, Jonhnathan Ribeiro, oscd.community
-date: 2019/11/12
-modified: 2022/07/20
 logsource:
     category: process_creation
     product: windows
@@ -24,15 +24,29 @@ detection:
             - '--processStart'
             - '--processStartAndWait'
             - '--createShortcut'
-    filter1:
-        - CommandLine|contains|all:
+    filter_discord:
+        CommandLine|contains|all:
             - 'C:\Users\'
             - '\AppData\Local\Discord\Update.exe'
-            - ' --processStart Discord.exe'
-        - CommandLine|contains|all:
+            - ' --processStart'
+            - 'Discord.exe'
+    filter_github_desktop:
+        CommandLine|contains|all:
             - 'C:\Users\'
-            - '\AppData\Local\GitHubDesktop\Update.exe --createShortcut GitHubDesktop.exe'
-    condition: all of selection* and not 1 of filter*
+            - '\AppData\Local\GitHubDesktop\Update.exe'
+            - 'GitHubDesktop.exe'
+        CommandLine|contains:
+            - '--createShortcut'
+            - '--processStartAndWait'
+    filter_teams:
+        CommandLine|contains|all:
+            - 'C:\Users\'
+            - '\AppData\Local\Microsoft\Teams\Update.exe'
+            - 'Teams.exe'
+        CommandLine|contains:
+            - '--processStart'
+            - '--createShortcut'
+    condition: all of selection* and not 1 of filter_*
 falsepositives:
     - 1Clipboard
     - Beaker Browser

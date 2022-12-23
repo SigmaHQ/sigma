@@ -1,12 +1,12 @@
 title: Suspicious Script Execution From Temp Folder
 id: a6a39bdb-935c-4f0a-ab77-35f4bbf44d33
-description: Detects a suspicious script executions from temporary folder
 status: experimental
+description: Detects a suspicious script executions from temporary folder
 references:
     - https://www.microsoft.com/security/blog/2021/07/13/microsoft-discovers-threat-actor-targeting-solarwinds-serv-u-software-with-0-day-exploit/
-author: Florian Roth, Max Altgelt
+author: Florian Roth, Max Altgelt, Tim Shelton
 date: 2021/07/14
-modified: 2022/07/14
+modified: 2022/10/05
 tags:
     - attack.execution
     - attack.t1059
@@ -35,6 +35,7 @@ detection:
             - 'Out-File'
             - 'ConvertTo-Json'
             - '-WindowStyle hidden -Verb runAs'  # VSCode behaviour if file cannot be written as current user
+            - '\Windows\system32\config\systemprofile\AppData\Local\Temp\Amazon\EC2-Windows\' # EC2 AWS
     condition: selection and not filter
 falsepositives:
     - Administrative scripts

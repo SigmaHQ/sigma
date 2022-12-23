@@ -1,0 +1,38 @@
+title: Windows Defender Suspicious Configuration Changes
+id: 801bd44f-ceed-4eb6-887c-11544633c0aa
+related:
+    - id: 1321dc4e-a1fe-481d-a016-52c45f0c8b4f
+      type: similar
+    - id: a3ab73f1-bd46-4319-8f06-4b20d0617886
+      type: similar
+status: stable
+description: Detects suspicious changes to the windows defender configuration
+references:
+    - https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/troubleshoot-microsoft-defender-antivirus?view=o365-worldwide
+    - https://bidouillesecurity.com/disable-windows-defender-in-powershell/#DisableAntiSpyware
+author: Nasreddine Bencherchali
+date: 2022/12/06
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    product: windows
+    service: windefend
+detection:
+    selection:
+        EventID: 5007 # The antimalware platform configuration changed.
+        NewValue|contains:
+            # TODO: Add more suspicious values
+            - '\Windows Defender\DisableAntiSpyware '
+            #- '\Windows Defender\Features\TamperProtection ' # Might produce FP
+            - '\Windows Defender\Scan\DisableRemovableDriveScanning '
+            - '\Windows Defender\Scan\DisableScanningMappedNetworkDrivesForFullScan '
+            - '\Windows Defender\SpyNet\DisableBlockAtFirstSeen '
+            - '\Real-Time Protection\SpyNetReporting '
+            - '\Real-Time Protection\SubmitSamplesConsent '
+            # Exclusions changes are covered in 1321dc4e-a1fe-481d-a016-52c45f0c8b4f
+            # Exploit guard changes are covered in a3ab73f1-bd46-4319-8f06-4b20d0617886
+    condition: selection
+falsepositives:
+    - Administrator activity (must be investigated)
+level: high

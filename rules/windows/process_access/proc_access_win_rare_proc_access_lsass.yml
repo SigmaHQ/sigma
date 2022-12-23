@@ -1,19 +1,19 @@
 title: Rare GrantedAccess Flags on LSASS Access
 id: 678dfc63-fefb-47a5-a04c-26bcf8cc9f65
 related:
-  - id: 32d0d3e2-e58d-4d41-926b-18b520b2b32d
-    type: obsoletes
+    - id: 32d0d3e2-e58d-4d41-926b-18b520b2b32d
+      type: obsoletes
 status: experimental
 description: Detects process access to LSASS memory with suspicious access flags 0x410 and 0x01410 (spin-off of similar rule)
-author: Florian Roth
-date: 2022/03/13
-modified: 2022/07/21
 references:
     - https://docs.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
     - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
     - http://security-research.dyndns.org/pub/slides/FIRST2017/FIRST-2017_Tom-Ueltschi_Sysmon_FINAL_notes.pdf
+author: Florian Roth
+date: 2022/03/13
+modified: 2022/11/13
 tags:
     - attack.credential_access
     - attack.t1003.001
@@ -32,12 +32,14 @@ detection:
             - 'C:\Program Files\Malwarebytes\Anti-Malware\MBAMService.exe'
             - 'C:\PROGRAMDATA\MALWAREBYTES\MBAMSERVICE\ctlrupdate\mbupdatr.exe'
             - 'C:\WINDOWS\system32\taskhostw.exe'
-            - 'C:\Users\\*\AppData\Local\Programs\Microsoft VS Code\Code.exe'
             - 'C:\Program Files\Windows Defender\MsMpEng.exe'
             - 'C:\Windows\SysWOW64\msiexec.exe'
             - 'C:\Windows\System32\msiexec.exe'
             - 'C:\Windows\System32\lsass.exe'
             - 'C:\WINDOWS\System32\perfmon.exe'
+            - 'C:\WINDOWS\system32\wbem\wmiprvse.exe'
+            - 'C:\Windows\sysWOW64\wbem\wmiprvse.exe'
+            - 'C:\Program Files\Common Files\McAfee\MMSSHost\MMSSHOST.exe'
     # Windows Defender
     filter2:
         SourceImage|startswith: 'C:\ProgramData\Microsoft\Windows Defender\'
@@ -61,17 +63,13 @@ detection:
             - 'C:\Program Files\'
             - 'C:\Program Files (x86)\'
         SourceImage|contains: 'Antivirus'
-    filter7:
-        SourceImage: 'C:\WINDOWS\system32\wbem\wmiprvse.exe'
-    filter8:
-        SourceImage: 'C:\Windows\sysWOW64\wbem\wmiprvse.exe'
-    filter_mcafee:
-        SourceImage: 'C:\Program Files\Common Files\McAfee\MMSSHost\MMSSHOST.exe'
     filter_nextron:
         # SourceImage|startswith: 'C:\Windows\Temp\asgard2-agent\'  # Can be a manual THOR installation
         SourceImage|endswith:
             - '\thor64.exe'
             - '\thor.exe'
+            - '\aurora-agent-64.exe'
+            - '\aurora-agent.exe'
     filter_ms_products:
         SourceImage|contains|all:
             - '\AppData\Local\Temp\'
@@ -94,7 +92,17 @@ detection:
             - '\software_reporter_tool.exe'
             - '\DropboxUpdate.exe'
             - '\MBAMInstallerService.exe'
-            - '\WebEx\WebexHost.exe '
+            - '\WebEx\WebexHost.exe'
+            - '\Programs\Microsoft VS Code\Code.exe'
+            - '\JetBrains\Toolbox\bin\jetbrains-toolbox.exe'
+    filter_xampp:
+        SourceImage|endswith: '\xampp-control.exe'
+        GrantedAccess: '0x410'
+    filter_games:
+        SourceImage|contains: '\SteamLibrary\steamapps\'
+        GrantedAccess: 
+            - '0x410'
+            - '0x10'
     condition: selection and not 1 of filter*
 fields:
     - User

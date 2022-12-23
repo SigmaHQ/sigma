@@ -14,8 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
-
+from re import compile
 from sigma.backends.base import SingleTextQueryBackend
 from sigma.parser.condition import NodeSubexpression
 
@@ -41,13 +40,22 @@ class DatadogLogsBackend(SingleTextQueryBackend):
     notNullExpression = "%s:*"
 
     # The escaped characters list comes from https://docs.datadoghq.com/logs/explorer/search_syntax/#escaping-of-special-characters.
-    specialCharactersRegexp = re.compile(r'([+\-=&|><!(){}\[\]^"~?:\\/]+)')
-    whitespacesRegexp = re.compile(r"\s")
+    specialCharactersRegexp = compile(r'([+\-=&|><!(){}\[\]^"~?:\\/]+)')
+    whitespacesRegexp = compile(r"\s")
 
     # Default tags taken from https://docs.datadoghq.com/getting_started/tagging/#introduction.
-    tags = ["index", "service", "source", "host", "device", "env", "version"]
+    tags = {}
 
     def __init__(self, sigmaconfig, backend_options=None):
+
+        if sigmaconfig.config:
+            self.dd_index = sigmaconfig.config.get("index")
+            self.dd_service = sigmaconfig.config.get("service")
+            self.dd_source = sigmaconfig.config.get("source")
+            self.dd_env = sigmaconfig.config.get("env")
+            self.tags = sigmaconfig.config.get("tags")
+
+        # if backend_options defined, overwrite default config file (for retro-compatibility)
         if backend_options is None:
             backend_options = {}
 
@@ -63,24 +71,21 @@ class DatadogLogsBackend(SingleTextQueryBackend):
         if "env" in backend_options:
             self.dd_env = backend_options["env"]
 
-        if sigmaconfig.config:
-            self.tags += sigmaconfig.config.get("tags", [])
-
         super().__init__(sigmaconfig)
 
     def generateQuery(self, parsed):
         nodes = []
 
-        if hasattr(self, "dd_index"):
+        if hasattr(self, "dd_index") and self.dd_index != None:
             nodes.append(("index", self.dd_index))
 
-        if hasattr(self, "dd_service"):
+        if hasattr(self, "dd_service") and self.dd_service != None:
             nodes.append(("service", self.dd_service))
 
-        if hasattr(self, "dd_source"):
+        if hasattr(self, "dd_source") and self.dd_source != None:
             nodes.append(("source", self.dd_source))
 
-        if hasattr(self, "dd_env"):
+        if hasattr(self, "dd_env") and self.dd_env != None:
             nodes.append(("env", self.dd_env))
 
         if type(parsed.parsedSearch) == NodeSubexpression:
@@ -117,7 +122,10 @@ class DatadogLogsBackend(SingleTextQueryBackend):
         return super().generateNotNULLValueNode(self.wrap_key(node))
 
     def wrap_key(self, key):
-        if key not in self.tags:
+        if key not in self.tags and key not in ['index', 'service', 'source', 'env']:
+            # print("WARNING tag %s not converted" % format(key))
             return "@%s" % key
+        elif key not in ['index', 'service', 'source', 'env']:
+            return self.tags[key]
         else:
             return key

@@ -1,0 +1,49 @@
+title: Suspicious Driver Loaded By User
+id: f63508a0-c809-4435-b3be-ed819394d612
+status: test
+description: |
+  Detects the loading of drivers via 'SeLoadDriverPrivilege' required to load or unload a device driver.
+  With this privilege, the user can dynamically load and unload device drivers or other code in to kernel mode.
+  This user right does not apply to Plug and Play device drivers.
+  If you exclude privileged users/admins and processes, which are allowed to do so, you are maybe left with bad programs trying to load malicious kernel drivers.
+  This will detect Ghost-In-The-Logs (https://github.com/bats3c/Ghost-In-The-Logs) and the usage of Sysinternals and various other tools.
+  So you have to work with a whitelist to find the bad stuff.
+references:
+    - https://blog.dylan.codes/evading-sysmon-and-windows-event-logging/
+    - https://docs.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4673
+author: xknow (@xknow_infosec), xorxes (@xor_xes)
+date: 2019/04/08
+modified: 2022/12/12
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    product: windows
+    service: security
+detection:
+    selection_1:
+        Provider_Name: Microsoft-Windows-Security-Auditing
+        EventID: 4673
+        PrivilegeList: 'SeLoadDriverPrivilege'
+        Service: '-'
+    filter:
+        - ProcessName:
+            - 'C:\Windows\System32\Dism.exe'
+            - 'C:\Windows\System32\rundll32.exe'
+            - 'C:\Windows\System32\fltMC.exe'
+            - 'C:\Windows\HelpPane.exe'
+            - 'C:\Windows\System32\mmc.exe'
+            - 'C:\Windows\System32\svchost.exe'
+            - 'C:\Windows\System32\wimserv.exe'
+            - 'C:\Windows\System32\RuntimeBroker.exe'
+            - 'C:\Windows\System32\SystemSettingsBroker.exe'
+        - ProcessName|endswith:
+            - '\procexp64.exe'
+            - '\procexp.exe'
+            - '\procmon64.exe'
+            - '\procmon.exe'
+            - '\Google\Chrome\Application\chrome.exe'
+    condition: selection_1 and not filter
+falsepositives:
+    - 'Other legimate tools loading drivers. There are some: Sysinternals, CPU-Z, AVs etc. - but not much. You have to baseline this according to your used products and allowed tools. Also try to exclude users, which are allowed to load drivers.'
+level: medium

@@ -1,0 +1,90 @@
+title: Creation of an Executable by an Executable
+id: 297afac9-5d02-4138-8c58-b977bac60556
+status: experimental
+description: Detects the creation of an executable by another executable
+references:
+    - Malware Sandbox
+author: frack113
+date: 2022/03/09
+modified: 2022/12/07
+tags:
+    - attack.resource_development
+    - attack.t1587.001
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        Image|endswith: '.exe'
+        TargetFilename|endswith: '.exe'
+    filter_whitelist:
+        Image:
+            - 'C:\Windows\System32\msiexec.exe'
+            - 'C:\Windows\system32\cleanmgr.exe'
+            - 'C:\Windows\explorer.exe'
+            - 'C:\WINDOWS\system32\dxgiadaptercache.exe'
+            - 'C:\WINDOWS\system32\Dism.exe'
+            - 'C:\Windows\System32\wuauclt.exe'
+    filter_update:
+        # Security_UserID: S-1-5-18
+        # Example:
+        #   TargetFilename: C:\Windows\SoftwareDistribution\Download\803d1df4c931df4f3e50a022cda56e88\WindowsUpdateBox.exe
+        Image: 'C:\WINDOWS\system32\svchost.exe'
+        TargetFilename|startswith: 'C:\Windows\SoftwareDistribution\Download\'
+    filter_upgrade:
+        Image: 'C:\Windows\system32\svchost.exe'
+        TargetFilename|contains|all:
+            # Example:
+            #   This example was seen during windows upgrade
+            #   TargetFilename: :\WUDownloadCache\803d1df4c931df4f3e50a022cda56e29\WindowsUpdateBox.exe
+            - ':\WUDownloadCache\'
+            - '\WindowsUpdateBox.exe'
+    filter_windows_update_box:
+        # This FP was seen during Windows Upgrade
+        # ParentCommandLine: C:\WINDOWS\system32\svchost.exe -k netsvcs -p -s wuauserv
+        Image|startswith: 'C:\WINDOWS\SoftwareDistribution\Download\'
+        Image|endswith: '\WindowsUpdateBox.Exe'
+        TargetFilename|startswith: 'C:\$WINDOWS.~BT\Sources\'
+    filter_tiworker:
+        Image|startswith: 'C:\Windows\WinSxS\'
+        Image|endswith: '\TiWorker.exe'
+    filter_programfiles:
+        - Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+        - TargetFilename|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    filter_defender:
+        Image|startswith: 'C:\ProgramData\Microsoft\Windows Defender\'
+    filter_windows_apps:
+        TargetFilename|contains: '\Microsoft\WindowsApps\'
+    filter_teams:
+        Image|startswith: 'C:\Users\'
+        Image|endswith: '\AppData\Local\Microsoft\Teams\Update.exe'
+        TargetFilename|startswith: 'C:\Users\'
+        TargetFilename|endswith:
+            - '\AppData\Local\Microsoft\Teams\stage\Teams.exe'
+            - '\AppData\Local\Microsoft\Teams\stage\Squirrel.exe'
+    filter_mscorsvw:
+        # Example:
+        #   ParentCommandLine: "C:\Windows\Microsoft.NET\Framework\v4.0.30319\ngen.exe" ExecuteQueuedItems /LegacyServiceBehavior
+        #   Image: C:\Windows\Microsoft.NET\Framework64\v4.0.30319\mscorsvw.exe
+        #       TargetFilename: C:\Windows\assembly\NativeImages_v4.0.30319_32\Temp\4f8c-0\MSBuild.exe
+        #       TargetFilename: C:\Windows\assembly\NativeImages_v4.0.30319_32\Temp\49bc-0\testhost.net47.x86.exe
+        #       TargetFilename: C:\Windows\assembly\NativeImages_v4.0.30319_32\Temp\39d8-0\fsc.exe
+        Image|startswith: 'C:\Windows\Microsoft.NET\Framework\'
+        Image|endswith: '\mscorsvw.exe'
+        TargetFilename|startswith: 'C:\Windows\assembly\NativeImages_'
+    filter_vscode:
+        Image|startswith: 'C:\Users\'
+        Image|contains: '\AppData\Local\'
+        Image|endswith: '\Microsoft VS Code\Code.exe'
+        TargetFilename|contains: '\.vscode\extensions\'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Software installers
+    - Update utilities
+    - 32bit applications launching their 64bit versions
+#Please contribute to FP to increase the level
+level: low

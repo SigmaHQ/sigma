@@ -2,12 +2,12 @@ title: Regsvr32 Anomaly
 id: 8e2b24c9-4add-46a0-b4bb-0057b4e6187d
 status: experimental
 description: Detects various anomalies in relation to regsvr32.exe
-author: Florian Roth, oscd.community, Tim Shelton
-date: 2019/01/16
-modified: 2022/07/20
 references:
     - https://subt0x10.blogspot.de/2017/04/bypass-application-whitelisting-script.html
     - https://app.any.run/tasks/34221348-072d-4b70-93f3-aa71f6ebecad/
+author: Florian Roth, oscd.community, Tim Shelton
+date: 2019/01/16
+modified: 2022/09/21
 tags:
     - attack.defense_evasion
     - attack.t1218.010
@@ -73,6 +73,8 @@ detection:
     filter2:
         ParentImage: 'C:\Program Files\Box\Box\FS\streem.exe'
         CommandLine|contains: '\Program Files\Box\Box\Temp\'
+    filter_legitimate:
+        CommandLine|endswith: '/s C:\Windows\System32\RpcProxy\RpcProxy.dll'
     condition: 1 of selection* and not 1 of filter*
 fields:
     - CommandLine

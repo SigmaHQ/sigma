@@ -152,7 +152,7 @@ logsources:
       EventID: 13
     rewrite:
       product: windows
-      service: sysmon     
+      service: sysmon
   registry_rename:
     category: registry_rename
     product: windows
@@ -225,6 +225,14 @@ logsources:
     rewrite:
       product: windows
       service: sysmon
+  file_block:
+    category: file_block
+    product: windows
+    conditions:
+      EventID: 27
+    rewrite:
+      product: windows
+      service: sysmon
   sysmon_error:
     category: sysmon_error
     product: windows
@@ -281,22 +289,16 @@ logsources:
     service: application
     sources:
       - "WinEventLog:Application"
-    fieldmappings:
-      Provider_Name: Provider.Name
   windows-security:
     product: windows
     service: security
     sources:
       - "WinEventLog:Security"
-    fieldmappings:
-      Provider_Name: Provider.Name
   windows-system:
     product: windows
     service: system
     sources:
       - "WinEventLog:System"
-    fieldmappings:
-      Provider_Name: Provider.Name
   windows-ntlm:
     product: windows
     service: ntlm
@@ -312,6 +314,7 @@ logsources:
     service: powershell
     sources:
       - "WinEventLog:Microsoft-Windows-PowerShell/Operational"
+      - "WinEventLog:PowerShellCore/Operational"
   windows-classicpowershell:
     product: windows
     service: powershell-classic
@@ -391,6 +394,26 @@ logsources:
     sources:
       - 'WinEventLog:Microsoft-Windows-Security-Mitigations/Kernel Mode'
       - 'WinEventLog:Microsoft-Windows-Security-Mitigations/User Mode'
+  windows-diagnosis:
+    product: windows
+    service: diagnosis-scripted
+    sources:
+      - 'WinEventLog:Microsoft-Windows-Diagnosis-Scripted/Operational'
+  windows-shell-core:
+    product: windows
+    service: shell-core
+    sources:
+      - 'WinEventLog:Microsoft-Windows-Shell-Core/Operational'
+  windows-openssh:
+    product: windows
+    service: openssh
+    sources:
+      - 'WinEventLog:OpenSSH/Operational'
+  windows-ldap-debug:
+    product: windows
+    service: ldap_debug
+    sources:
+      - 'WinEventLog:Microsoft-Windows-LDAP-Client/Debug'
   apache:
     category: webserver
     sources:

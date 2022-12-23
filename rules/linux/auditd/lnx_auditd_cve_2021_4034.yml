@@ -1,28 +1,29 @@
-title: CVE-2021-4034 Exploitation Attempt
+title: Potential CVE-2021-4034 Exploitation Attempt
 id: 40a016ab-4f48-4eee-adde-bbf612695c53
-description: Detects exploitation attempt of vulnerability described in CVE-2021-4034.
-author: 'Pawel Mazur'
 status: experimental
-date: 2022/01/27
+description: Detects exploitation attempt of the vulnerability described in CVE-2021-4034.
 references:
-   - https://github.com/berdav/CVE-2021-4034
-   - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-4034
-   - https://access.redhat.com/security/cve/CVE-2021-4034
+    - https://github.com/berdav/CVE-2021-4034
+    - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-4034
+    - https://access.redhat.com/security/cve/CVE-2021-4034
+author: Pawel Mazur
+date: 2022/01/27
+modified: 2022/12/22
+tags:
+    - attack.privilege_escalation
+    - attack.t1068
 logsource:
-   product: linux
-   service: auditd
+    product: linux
+    service: auditd
 detection:
-    proctitle:
+    selection_proctitle:
         type: PROCTITLE
         proctitle: '(null)'
-    syscall:
-       type: SYSCALL
-       comm: pkexec 
-       exe: '/usr/bin/pkexec'
-    condition: proctitle and syscall
-tags:
-   - attack.privilege_escalation
-   - attack.t1068
+    selection_syscall:
+        type: SYSCALL
+        comm: pkexec
+        exe: '/usr/bin/pkexec'
+    condition: selection_proctitle |near selection_syscall
 falsepositives:
-   - Unknown
+    - Unknown
 level: high

@@ -1,0 +1,24 @@
+title: Suspicious PowerShell Mailbox SMTP Forward Rule
+id: 15b7abbb-8b40-4d01-9ee2-b51994b1d474
+status: experimental
+description: Detects usage of the powerShell Set-Mailbox Cmdlet to set-up an SMTP forwarding rule.
+references:
+    - https://m365internals.com/2022/10/07/hunting-in-on-premises-exchange-server-logs/
+author: Nasreddine Bencherchali
+date: 2022/10/26
+tags:
+    - attack.exfiltration
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - 'Set-Mailbox '
+            - ' -DeliverToMailboxAndForward '
+            - ' -ForwardingSmtpAddress '
+    condition: selection
+falsepositives:
+    - Legitimate usage of the cmdlet to forward emails
+level: medium

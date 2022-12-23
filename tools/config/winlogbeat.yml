@@ -39,7 +39,9 @@ logsources:
     product: windows
     service: powershell
     conditions:
-      winlog.channel: 'Microsoft-Windows-PowerShell/Operational'
+      winlog.channel:
+        - 'Microsoft-Windows-PowerShell/Operational'
+        - 'PowerShellCore/Operational'
   windows-classicpowershell:
     product: windows
     service: powershell-classic
@@ -121,6 +123,26 @@ logsources:
       winlog.channel:
         - 'Microsoft-Windows-Security-Mitigations/Kernel Mode'
         - 'Microsoft-Windows-Security-Mitigations/User Mode'
+  windows-diagnosis:
+    product: windows
+    service: diagnosis-scripted
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Diagnosis-Scripted/Operational'
+  windows-shell-core:
+    product: windows
+    service: shell-core
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Shell-Core/Operational'
+  windows-openssh:
+    product: windows
+    service: openssh
+    conditions:
+      winlog.channel: 'OpenSSH/Operational'
+  windows-ldap-debug:
+    product: windows
+    service: ldap_debug
+    conditions:
+      winlog.channel: 'Microsoft-Windows-LDAP-Client/Debug'
 defaultindex: winlogbeat-*
 # Extract all field names with yq:
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: winlog.event_data.\1/g'

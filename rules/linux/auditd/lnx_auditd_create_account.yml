@@ -2,22 +2,26 @@ title: Creation Of An User Account
 id: 759d0d51-bc99-4b5e-9add-8f5b2c8e7512
 status: test
 description: Detects the creation of a new user account. Such accounts may be used for persistence that do not require persistent remote access tools to be deployed on the system.
-author: Marie Euler
 references:
-  - 'MITRE Attack technique T1136; Create Account '
+    - https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-understanding_audit_log_files
+    - https://access.redhat.com/articles/4409591#audit-record-types-2
+    - https://www.youtube.com/watch?v=VmvY5SQm5-Y&ab_channel=M45C07
+author: Marie Euler, Pawel Mazur
 date: 2020/05/18
-modified: 2021/11/27
-logsource:
-  product: linux
-  service: auditd
-detection:
-  selection:
-    type: 'SYSCALL'
-    exe|endswith: '/useradd'
-  condition: selection
-falsepositives:
-  - Admin activity
-level: medium
+modified: 2022/12/20
 tags:
-  - attack.t1136.001
-  - attack.persistence
+    - attack.t1136.001
+    - attack.persistence
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection_syscall_record_type:
+        type: 'SYSCALL'
+        exe|endswith: '/useradd'
+    selection_add_user_record_type:
+        type: 'ADD_USER' # This is logged without having to configure audit rules on both Ubuntu and Centos
+    condition: 1 of selection_*
+falsepositives:
+    - Admin activity
+level: medium

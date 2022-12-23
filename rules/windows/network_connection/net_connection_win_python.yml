@@ -2,11 +2,15 @@ title: Python Initiated Connection
 id: bef0bc5a-b9ae-425d-85c6-7b2d705980c6
 status: experimental
 description: Adversaries may attempt to get a listing of services running on remote hosts, including those that may be vulnerable to remote software exploitation
-author: frack113
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1046/T1046.md#atomic-test-4---port-scan-using-python
     - https://pypi.org/project/scapy/
+author: frack113
 date: 2021/12/10
+modified: 2022/09/20
+tags:
+    - attack.discovery
+    - attack.t1046
 logsource:
     category: network_connection
     product: windows
@@ -14,10 +18,23 @@ detection:
     selection:
         Initiated: 'true'
         Image|contains: python
-    condition: selection
+    filter_conda:
+        # Related to anaconda updates. Command example: "conda update conda"
+        # This filter will only work with aurora agent enriched data as Sysmon EID 3 doesn't contain CommandLine nor ParentImage
+        ParentImage: C:\ProgramData\Anaconda3\Scripts\conda.exe
+        CommandLine|contains|all:
+            - 'C:\ProgramData\Anaconda3\Scripts\conda-script.py'
+            - 'update'
+    filter_conda_jupyter_notebook:
+        # Related to anaconda opening an instance of Jupyter Notebook
+        # This filter will only work with aurora agent enriched data as Sysmon EID 3 doesn't contain CommandLine nor ParentImage
+        ParentImage: C:\ProgramData\Anaconda3\python.exe
+        CommandLine|contains: 'C:\ProgramData\Anaconda3\Scripts\jupyter-notebook-script.py'
+    filter_local_communication:
+        # This could be caused when launching an instance of Jupyter Notebook locally for example but can also be caused by other instances of python openning sockets locally etc. So comment this out if you want to monitor for those instances
+        DestinationIp: 127.0.0.1
+        SourceIp: 127.0.0.1
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Legitimate python script
-level: high
-tags:
-    - attack.discovery
-    - attack.t1046
+level: medium

@@ -1,0 +1,27 @@
+title: Raspberry Robin Dot Ending File
+id: a35c97c8-d9c4-4c89-a3e7-533dc0bcb73a
+status: experimental
+description: Detects commandline containing reference to files ending with a "." This scheme has been seen used by raspberry-robin
+author: Nasreddine Bencherchali
+references:
+    - https://www.microsoft.com/en-us/security/blog/2022/10/27/raspberry-robin-worm-part-of-larger-ecosystem-facilitating-pre-ransomware-activity/
+date: 2022/10/28
+modified: 2022/11/28
+tags:
+    - attack.execution
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        # Example 1: https://www.microsoft.com/en-us/security/blog/wp-content/uploads/2022/10/fig-3f-raspberryrobin-runonce.png
+        # Example 2: https://www.microsoft.com/en-us/security/blog/wp-content/uploads/2022/10/fig-5f-odbcconf.png
+        # Example 3: https://www.microsoft.com/en-us/security/blog/wp-content/uploads/2022/10/fig-6f-fauppod-command-line.png
+        CommandLine|re: "\\.[a-zA-Z0-9]{1,6}\\.[ |\"|']{1}"
+    filter:
+        # This filter is used to exclude double extension files
+        CommandLine|re: "\\.[a-zA-Z0-9]{1,6}\\.[a-zA-Z0-9]{1}"
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high

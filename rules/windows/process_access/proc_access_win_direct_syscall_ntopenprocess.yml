@@ -1,12 +1,15 @@
 title: Direct Syscall of NtOpenProcess
 id: 3f3f3506-1895-401b-9cc3-e86b16e630d0
+status: experimental
 description: Detects the usage of the direct syscall of NtOpenProcess which might be done from a CobaltStrike BOF.
 references:
     - https://medium.com/falconforce/falconfriday-direct-system-calls-and-cobalt-strike-bofs-0xff14-741fa8e1bdd6
-status: experimental
 author: Christian Burkard, Tim Shelton
 date: 2021/07/28
-modified: 2022/08/09
+modified: 2022/10/05
+tags:
+    - attack.execution
+    - attack.t1106
 logsource:
     category: process_access
     product: windows
@@ -32,10 +35,29 @@ detection:
     falsepositive6:
         TargetImage|endswith: 'C:\Program Files\Mozilla Firefox\firefox.exe'
         SourceImage|endswith: 'C:\Program Files\Mozilla Firefox\firefox.exe'
+    falsepositive7: # VsCode
+        TargetImage|endswith: '\AppData\Local\Programs\Microsoft VS Code\Code.exe'
+        SourceImage|endswith: '\AppData\Local\Programs\Microsoft VS Code\Code.exe'
+    falsepositive8: # Google Chrome
+        TargetImage|endswith: 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+        SourceImage|endswith: 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+    falsepositive9: # Google Chrome Update
+        TargetImage|endswith: 'C:\Program Files (x86)\Google\Update\GoogleUpdate.exe'
+        SourceImage|endswith: 'C:\Program Files (x86)\Google\Update\GoogleUpdate.exe'
+    falsepositive10: # MS Teams
+        TargetImage|endswith: '\AppData\Local\Microsoft\Teams\current\Teams.exe'
+        SourceImage|endswith: '\AppData\Local\Microsoft\Teams\current\Teams.exe'
+    falsepositives11:
+        TargetImage: 'C:\Windows\System32\backgroundTaskHost.exe'
+        SourceImage: 'C:\Windows\System32\backgroundTaskHost.exe'
+    falsepositives12:
+        TargetImage: 'C:\Program Files (x86)\CCleaner Browser\Application\CCleanerBrowser.exe'
+        SourceImage: 'C:\Program Files (x86)\CCleaner Browser\Application\CCleanerBrowser.exe'
+    falsepositive_kerneltrace_edge:  # Cases in which the CallTrace is just e.g. 'UNKNOWN(19290435374)' from Microsoft-Windows-Kernel-Audit-API-Calls provider
+        Provider_Name: 'Microsoft-Windows-Kernel-Audit-API-Calls'
+    falsepositives_mixed:
+        TargetImage|endswith: '\Evernote\Evernote.exe'
     condition: selection and not 1 of falsepositive*
 falsepositives:
     - Unknown
 level: high
-tags:
-    - attack.execution
-    - attack.t1106

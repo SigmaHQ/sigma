@@ -4,29 +4,37 @@ status: experimental
 description: Detects reg command lines that disable certain important features of Microsoft Defender
 references:
     - https://thedfirreport.com/2022/03/21/apt35-automates-initial-access-using-proxyshell/
+    - https://github.com/swagkarna/Defeat-Defender-V1.2.0
 author: Florian Roth
 date: 2022/03/22
-modified: 2022/08/05
+modified: 2022/11/18
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection_reg:
-        Image|endswith: \reg.exe
+    selection_root_img:
+        - Image|endswith: '\reg.exe'
+        - OriginalFileName: 'reg.exe'
+    selection_root_path:
         CommandLine|contains:
             - 'SOFTWARE\Microsoft\Windows Defender\'
             - 'SOFTWARE\Policies\Microsoft\Windows Defender\'
+    selection_dword_0:
         CommandLine|contains|all:
             - ' add '
             - ' /d 0'
-    selection_target:
         CommandLine|contains:
             - 'Real-Time Protection'
             - 'TamperProtection'
-    condition: all of selection_*
+    selection_dword_1:
+        CommandLine|contains|all:
+            - ' add '
+            - ' /d 1'
+        CommandLine|contains: 'Notification_Suppress'
+    condition: all of selection_root_* and 1 of selection_dword_*
 falsepositives:
-    - Legitimate use
+    - Rare legitimate use by administrators to test software (should always be investigated)
 level: high
-tags:
-    - attack.defense_evasion
-    - attack.t1562.001

@@ -139,7 +139,7 @@ logsources:
    category: sysmon_status
    conditions:
      product_name: "Sysmon"
-     vendor_id: 
+     vendor_id:
        - 4
        - 5
  windows-sysmon-error:
@@ -171,7 +171,7 @@ logsources:
    category: pipe_created
    conditions:
      product_name: "Sysmon"
-     vendor_id: 
+     vendor_id:
        - 17
        - 18
  windows-dns-query:
@@ -204,17 +204,12 @@ logsources:
      vendor_id:
        - 19
        - 20
-       - 21 
- windows-ldap-query:
-   product: windows
-   category: ldap_query
-   conditions:
-     event_channel: "Microsoft-Windows-LDAP-Client/Debug ETW"
+       - 21
  windows-ldap-debug:
    product: windows
    category: ldap_debug
    conditions:
-     event_channel: "Microsoft-Windows-LDAP-Client/Debug ETW"
+     event_channel: "Microsoft-Windows-LDAP-Client/Debug"
  windows-driver-load:
    product: windows
    category: driver_load
@@ -720,7 +715,7 @@ logsources:
    category: registry_event
    conditions:
      product_name: "Sysmon"
-     vendor_id: 
+     vendor_id:
       - 12
       - 13
       - 14
@@ -748,6 +743,12 @@ logsources:
    conditions:
      product_name: "Sysmon"
      vendor_id: 14
+ windows-file-block-executable:
+   product: windows
+   category: file_block
+   conditions:
+     product_name: "Sysmon"
+     vendor_id: 27
  #dns:
  #  category: dns
  #  conditions:
@@ -787,7 +788,7 @@ fieldmappings:
   AccountName: target_username
   TargetDomainName: target_domain
   DnsServerIpAddress: dns_address
-  QueryName: hostname_dst
+  QueryName: dns_query
   AuthenticationPackageName: package_name
   HostProcess: image
   Application: image
@@ -846,10 +847,10 @@ fieldmappings:
   DeviceClassName: object_name
   CallTrace: calltrace
   IpAddress: ip_src
-  WorkstationName: hostname_src
-  Workstation: hostname_src
+  WorkstationName: ip_src_host
+  Workstation: ip_src_host
   DestinationIp: ip_dst
-  DestinationHostname: hostname_dst
+  DestinationHostname: ip_dst_host
   DestinationPort: ip_dport
   GrantedAccess: access_mask
   StartModule: target_process_name
@@ -890,12 +891,13 @@ fieldmappings:
   cs-User-Agent: http_user_agent
   r-dns: http_host
   id.orig_h: ip_src
-  id.orig_p: ip_src_port
+  id.orig_p: ip_sport
   id.resp_h: ip_dst
-  id.resp_p: ip_dst_port
+  id.resp_p: ip_dport
   host: ip_src
   hostname: ip_src_host
-  port_num: ip_dst_port
+  port_num: ip_dport
+  dst_port: ip_dport
   query: dns_query
   orig_ip_bytes: net_if_out_bytes
   resp_ip_bytes: net_if_in_bytes

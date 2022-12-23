@@ -5,26 +5,26 @@ related:
       type: derived
 status: experimental
 description: Detects suspicious PowerShell download command
+references:
+    - https://www.trendmicro.com/en_us/research/22/j/lv-ransomware-exploits-proxyshell-in-attack.html
+author: Florian Roth
+date: 2017/03/05
+modified: 2022/11/09
 tags:
     - attack.execution
     - attack.t1059.001
-author: Florian Roth
-date: 2017/03/05
-modified: 2021/10/16
 logsource:
     product: windows
     category: ps_classic_start
     definition: fields have to be extract from event
 detection:
-    downloadfile:
-        HostApplication|contains|all:
-            - 'System.Net.WebClient'
+    selection_webclient:
+        HostApplication|contains: 'Net.WebClient'
+    selection_download:
+        HostApplication|contains:
             - '.DownloadFile('
-    downloadstring:
-        HostApplication|contains|all:
-            - 'System.Net.WebClient'
             - '.DownloadString('
-    condition: downloadfile or downloadstring
+    condition: all of selection_*
 falsepositives:
     - PowerShell scripts that download content from the Internet
 level: medium

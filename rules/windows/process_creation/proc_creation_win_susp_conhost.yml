@@ -6,7 +6,7 @@ references:
     - http://www.hexacorn.com/blog/2020/05/25/how-to-con-your-host/
 author: omkar72
 date: 2020/10/25
-modified: 2021/12/17
+modified: 2022/12/07
 tags:
     - attack.defense_evasion
     - attack.t1202
@@ -16,13 +16,52 @@ logsource:
 detection:
     selection:
         ParentImage|endswith: '\conhost.exe'
-    filter:
+    filter_provider:
         Provider_Name: 'SystemTraceProvider-Process'  # FPs with Aurora
-    condition: selection and not filter
+    # Note that some of these git events occure because of a spoofed parent image
+    filter_git:
+        # Example FP:
+        #   ParentCommandLine: "C:\Program Files\Git\cmd\git.exe" show --textconv :path/to/file
+        #   ParentCommandLine: "C:\Program Files\Git\cmd\git.exe" cat-file -s 4ca60c8a054f7eaa05f0438a8292762f2015d228
+        Provider_Name: 'Microsoft-Windows-Kernel-Process'
+        Image|endswith: '\git.exe'
+        ParentCommandLine|contains:
+            - ' show --textconv '
+            - ' cat-file -s '
+    filter_git_show:
+        # Example FP:
+        #   GrandparentCommandLine: git.exe cat-file -s 4ca60c8a054f7eaa05f0438a8292762f2015d258
+        #   ParentCommandLine: \??\C:\WINDOWS\system32\conhost.exe 0x4
+        #   ParentImage: C:\Windows\System32\conhost.exe
+        #   CommandLine: git.exe show --textconv :path/to/file
+        ParentCommandLine|contains: 'C:\WINDOWS\system32\conhost.exe 0x4'
+        CommandLine|contains:
+            - ' show --textconv '
+            - ' cat-file -s '
+    filter_image_conhost:
+        # Example FP:
+        #   ParentCommandLine: "C:\Program Files\Git\cmd\git.exe" cat-file -s 4ca60c8a054f7eaa05f0438a8292762f2015d228
+        Provider_Name: 'Microsoft-Windows-Kernel-Process'
+        ParentCommandLine|contains:
+            - ' cat-file -s '
+            - 'show --textconv'
+        Image: 'C:\Windows\System32\conhost.exe'
+    filter_image_conhost2:
+        ParentCommandLine:
+            # The "?" needs to be escaped as they considered special characters in SIGMA (https://github.com/SigmaHQ/sigma-specification)
+            - '\\\?\?\\C:\\WINDOWS\\system32\\conhost.exe 0x4'
+            - '\\\?\?\\C:\\WINDOWS\\system32\\conhost.exe 0xffffffff -ForceV1'
+        Image: 'C:\Windows\System32\conhost.exe'
+    filter_image_git:
+        ParentCommandLine:
+            - \\\?\?\\C:\\WINDOWS\\system32\\conhost.exe 0xffffffff -ForceV1'
+            - \\\?\?\\C:\\WINDOWS\\system32\\conhost.exe 0x4'
+        Image: 'C:\Program Files\Git\mingw64\bin\git.exe'
+    condition: selection and not 1 of filter_*
 fields:
     - Image
     - CommandLine
     - ParentCommandLine
 falsepositives:
-    - Unlikely, conhost is a child less process
+    - Unknown
 level: medium

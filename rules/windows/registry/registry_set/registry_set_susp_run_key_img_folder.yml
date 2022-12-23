@@ -6,17 +6,20 @@ references:
     - https://www.fireeye.com/blog/threat-research/2018/08/fin7-pursuing-an-enigmatic-and-evasive-global-criminal-operation.html
 author: Florian Roth, Markus Neis, Sander Wiebing
 date: 2018/08/25
-modified: 2022/03/26
+modified: 2022/09/13
+tags:
+    - attack.persistence
+    - attack.t1547.001
 logsource:
     category: registry_set
     product: windows
 detection:
-    selection:
-        EventType: SetValue 
-        TargetObject|contains: 
+    selection_target:
+        EventType: SetValue
+        TargetObject|contains:
             - '\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\'
             - '\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce\'
-    selection2:
+    selection_details:
         - Details|contains:
             - 'C:\Windows\Temp\'
             - 'C:\$Recycle.bin\'
@@ -25,16 +28,15 @@ detection:
             - 'C:\Users\Default\'
             - 'C:\Users\Desktop\'
             - '\AppData\Local\Temp\'
+            - '%temp%\'
+            - '%tmp%\'
         - Details|startswith:
             - '%Public%\'
             - 'wscript'
             - 'cscript'
-    condition: selection and selection2
+    condition: all of selection_*
 fields:
     - Image
 falsepositives:
     - Software using weird folders for updates
 level: high
-tags:
-    - attack.persistence
-    - attack.t1547.001

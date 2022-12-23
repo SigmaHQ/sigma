@@ -2,31 +2,37 @@ title: CHCP CodePage Locale Lookup
 id: 7090adee-82e2-4269-bd59-80691e7c6338
 status: experimental
 description: Detects use of chcp to look up the system locale value as part of host discovery
-author: '_pete_0, TheDFIRReport'
 references:
-  - https://thedfirreport.com/2022/04/04/stolen-images-campaign-ends-in-conti-ransomware/
-  - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/chcp
+    - https://thedfirreport.com/2022/04/04/stolen-images-campaign-ends-in-conti-ransomware/
+    - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/chcp
+author: '_pete_0, TheDFIRReport'
 date: 2022/02/21
-modified: 2022/04/21
-logsource:
-  category: process_creation
-  product: windows
-detection:
-  selection:
-    ParentImage|endswith: '\cmd.exe'
-    ParentCommandLine|contains: ' /c '
-    Image|endswith: '\chcp.com'
-    CommandLine|endswith: 
-      - 'chcp'
-      - 'chcp '
-      - 'chcp  '
-  condition: selection
-fields:
-  - CommandLine
-  - ParentCommandLine
-falsepositives:
-  - Unknown
-level: high
+modified: 2022/11/18
 tags:
-  - attack.discovery
-  - attack.t1614.001
+    - attack.discovery
+    - attack.t1614.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\cmd.exe'
+        ParentCommandLine|contains:
+            - ' /c '
+            - ' /r '
+            - ' /k '
+        Image|endswith: '\chcp.com'
+        CommandLine|endswith:
+            - 'chcp'
+            - 'chcp '
+            - 'chcp  '
+    filter_anaconda:
+        # This filter will only work with aurora agent enriched data as Sysmon EID 1 and EID 4688 from event log both do not contain GrandparentCommandLine field
+        GrandparentCommandLine|contains: '/c C:\ProgramData\Anaconda3'
+    condition: selection and not 1 of filter_*
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - During Anaconda update the 'conda.exe' process will eventually launch the command described in the detection section
+level: high

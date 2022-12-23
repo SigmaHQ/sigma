@@ -1,22 +1,25 @@
 title: Abusing Azure Browser SSO
 id: 50f852e6-af22-4c78-9ede-42ef36aa3453
-description: Detects abusing Azure Browser SSO by requesting OAuth 2.0 refresh tokens for an Azure-AD-authenticated Windows user (i.e. the machine is joined to Azure AD and a user logs in with their Azure AD account) wanting to perform SSO authentication in the browser. An attacker can use this to authenticate to Azure AD in a browser as that user.
-author: Den Iuzvyk
+status: test
+description: |
+  Detects abusing Azure Browser SSO by requesting OAuth 2.0 refresh tokens for an Azure-AD-authenticated Windows user (i.e. the machine is joined to Azure AD and a user logs in with their Azure AD account)
+  wanting to perform SSO authentication in the browser.
+  An attacker can use this to authenticate to Azure AD in a browser as that user.
 references:
     - https://posts.specterops.io/requesting-azure-ad-request-tokens-on-azure-ad-joined-machines-for-browser-sso-2b0409caad30
+author: Den Iuzvyk
 date: 2020/07/15
-modified: 2022/02/21
-logsource:
-    category: image_load
-    product: windows
-status: test
+modified: 2022/10/21
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
     - attack.t1574.002
+logsource:
+    category: image_load
+    product: windows
 detection:
     selection_dll:
-        ImageLoaded|endswith: MicrosoftAccountTokenProvider.dll
+        ImageLoaded|endswith: 'MicrosoftAccountTokenProvider.dll'
     filter_legit:
         - Image|endswith:
             - '\BackgroundTaskHost.exe'
@@ -27,8 +30,8 @@ detection:
             - '\AppData\Local\Microsoft\OneDrive\OneDrive.exe'
             - '\msedgewebview2.exe'
             - '\OneDrive.exe'
-        - Image|startswith:
-            - 'C:\Program Files (x86)\Microsoft\EdgeWebView\Application\'
+        - Image|startswith: 'C:\Program Files (x86)\Microsoft\EdgeWebView\Application\'
+        - Image: null
     condition: selection_dll and not filter_legit
 falsepositives:
     - Unknown

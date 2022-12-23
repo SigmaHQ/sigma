@@ -2,17 +2,20 @@ title: Wow6432Node CurrentVersion Autorun Keys Modification
 id: b29aed60-ebd1-442b-9cb5-16a1d0324adb
 related:
     - id: 17f878b8-9968-4578-b814-c4217fc5768c
-      type: derived
+      type: obsoletes
 status: experimental
 description: Detects modification of autostart extensibility point (ASEP) in registry.
-author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split)
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1547.001/T1547.001.md
     - https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
     - https://oddvar.moe/2018/03/21/persistence-using-runonceex-hidden-from-autoruns-exe/
+author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split)
 date: 2019/10/25
-modified: 2022/08/05
+modified: 2022/12/14
+tags:
+    - attack.persistence
+    - attack.t1547.001
 logsource:
     category: registry_set
     product: windows
@@ -61,9 +64,7 @@ detection:
         TargetObject|endswith:
             - '\WOW6432Node\Microsoft\Windows\CurrentVersion\RunOnce\{e2d1ae32-dd1d-4ad7-a298-10e42e7840fc}'
             - '\WOW6432Node\Microsoft\Windows\CurrentVersion\RunOnce\{7037b699-7382-448c-89a7-4765961d2537}'
-        Details|startswith:
-            - '"C:\ProgramData\Package Cache\{7037b699-7382-448c-89a7-4765961d2537}\windowsdesktop-runtime-'
-            - '"C:\ProgramData\Package Cache\{e2d1ae32-dd1d-4ad7-a298-10e42e7840fc}\windowsdesktop-runtime-'
+        Details|startswith: '"C:\ProgramData\Package Cache\'
         Details|endswith: '.exe" /burn.runonce'
     filter_office:
         Image|startswith:
@@ -72,6 +73,18 @@ detection:
         Image|endswith: '\OfficeClickToRun.exe'
     filter_ms_win_desktop_runtime:
         Details|startswith: '"C:\ProgramData\Package Cache\{d21a4f20-968a-4b0c-bf04-a38da5f06e41}\windowsdesktop-runtime-'
+    filter_vcredist:
+        Image|endswith: '\VC_redist.x64.exe'
+        Details|endswith: '}\VC_redist.x64.exe" /burn.runonce'
+    filter_upgrades:
+        Image|startswith:
+            - 'C:\ProgramData\Package Cache'
+            - 'C:\Windows\Temp\'
+        Image|contains:
+            - '\winsdksetup.exe'
+            - '\windowsdesktop-runtime-'  # C:\WINDOWS\Temp\{751E2E78-46DC-4376-9205-99219CDC34AE}\.be\windowsdesktop-runtime-6.0.12-win-x86.exe
+            - '\AspNetCoreSharedFrameworkBundle-'  # "C:\ProgramData\Package Cache\{b52191c1-a9c0-4b34-9a4e-930c2dd8a540}\AspNetCoreSharedFrameworkBundle-x86.exe" /burn.runonce
+        Details|endswith: ' /burn.runonce'
     condition: all of wow_current_version_* and not 1 of filter_*
 fields:
     - SecurityID
@@ -82,6 +95,3 @@ falsepositives:
     - Legitimate software automatically (mostly, during installation) sets up autorun keys for legitimate reason
     - Legitimate administrator sets up autorun keys for legitimate reason
 level: medium
-tags:
-    - attack.persistence
-    - attack.t1547.001

@@ -1,12 +1,12 @@
 title: Suspicious Use of Procdump on LSASS
 id: 5afee48e-67dd-4e03-a783-f74259dcf998
-description: Detects suspicious uses of the SysInternals Procdump utility by using a special command line parameter in combination with the lsass.exe process. This way we're also able to catch cases in which the attacker has renamed the procdump executable.
 status: stable
+description: Detects suspicious uses of the SysInternals Procdump utility by using a special command line parameter in combination with the lsass.exe process. This way we're also able to catch cases in which the attacker has renamed the procdump executable.
 references:
     - Internal Research
 author: Florian Roth
 date: 2018/10/30
-modified: 2021/02/02
+modified: 2022/08/12
 tags:
     - attack.defense_evasion
     - attack.t1036
@@ -18,14 +18,12 @@ logsource:
     product: windows
 detection:
     selection1:
-        CommandLine|contains: ' -ma '
-    selection2:
-        CommandLine|contains: ' lsass'
-    selection3:
-        CommandLine|contains|all:
+        CommandLine|contains:
             - ' -ma '
-            - ' ls'
-    condition: ( selection1 and selection2 ) or selection3
+            - ' /ma '
+    selection2:
+        CommandLine|contains: ' ls' # Short for lsass
+    condition: all of selection*
 falsepositives:
     - Unlikely, because no one should dump an lsass process memory
     - Another tool that uses the command line switches of Procdump

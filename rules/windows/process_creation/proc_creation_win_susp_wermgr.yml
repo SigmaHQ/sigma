@@ -1,0 +1,37 @@
+title: Suspicious WERMGR Process Patterns
+id: 396f6630-f3ac-44e3-bfc8-1b161bc00c4e
+status: experimental
+description: Detects suspicious Windows Error Reporting manager (wermgr.exe) process patterns - suspicious parents / children, execution folders, command lines etc.
+references:
+    - https://www.trendmicro.com/en_us/research/22/j/black-basta-infiltrates-networks-via-qakbot-brute-ratel-and-coba.html
+    - https://www.echotrail.io/insights/search/wermgr.exe
+    - https://github.com/binderlabs/DirCreate2System
+author: Florian Roth
+date: 2022/10/14
+modified: 2022/12/04
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_susp_parent:
+        ParentImage|endswith: '\wermgr.exe'
+        Image|endswith:
+            - '\nslookup.exe'
+            - '\ipconfig.exe'
+            - '\net.exe'
+            - '\net1.exe'
+            - '\whoami.exe'
+            - '\netstat.exe'
+            - '\systeminfo.exe'
+            - '\cmd.exe'
+            - '\powershell.exe'
+    selection_img:
+        Image|endswith: '\wermgr.exe'
+    filter_img_location:
+        Image|contains:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+    condition: 1 of selection_susp* or (selection_img and not filter_img_location)
+falsepositives:
+    - Unknown
+level: high

@@ -8,31 +8,33 @@ references:
     - https://peterjson.medium.com/reproducing-the-proxyshell-pwn2own-exploit-49743a4ea9a1
 author: Florian Roth, Rich Warren
 date: 2021/08/07
-modified: 2021/08/08
+modified: 2022/10/06
 tags:
     - attack.initial_access
+    - attack.t1190
 logsource:
     category: webserver
 detection:
-    selection_auto:
+    selection_1:
+        sc-status: 401
+    selection_1_auto:
         c-uri|contains: '/autodiscover.json'
-    selection_uri:
+    selection_1_uri:
         c-uri|contains:
             - '/powershell'
             - '/mapi/nspi'
             - '/EWS'
             - 'X-Rps-CAT'
-    selection:
-        sc-status: 401
     selection_poc:
-        c-uri|contains: 
+        sc-status: 401
+        c-uri|contains:
             # since we don't know how it will appear in the log files, we'll just use all versions
             - 'autodiscover.json?@'
             - 'autodiscover.json%3f@'
             - '%3f@foo.com'
             - 'Email=autodiscover/autodiscover.json'
             - 'json?@foo.com'
-    condition: selection_auto and selection_uri or selection_poc 
+    condition: all of selection_1* or selection_poc
 falsepositives:
     - Unknown
-level: medium
+level: high

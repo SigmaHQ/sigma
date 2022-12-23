@@ -2,11 +2,14 @@ title: Alternate PowerShell Hosts Pipe
 id: 58cb02d5-78ce-4692-b3e1-dce850aae41a
 status: test
 description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
-author: Roberto Rodriguez @Cyb3rWard0g, Tim Shelton
 references:
     - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190815181010.html
+author: Roberto Rodriguez @Cyb3rWard0g, Tim Shelton
 date: 2019/09/12
-modified: 2022/04/21
+modified: 2022/10/10
+tags:
+    - attack.execution
+    - attack.t1059.001
 logsource:
     product: windows
     category: pipe_created
@@ -36,7 +39,9 @@ detection:
             - 'C:\Program Files\Citrix\'
             - 'C:\Program Files\Microsoft\Exchange Server\'
     filter5:
-        Image: 'C:\Windows\system32\ServerManager.exe'
+        Image:
+            - 'C:\Windows\system32\ServerManager.exe'
+            - 'C:\Program Files\PowerShell\7\pwsh.exe' # Powershell 7
     condition: selection and not 1 of filter*
 fields:
     - ComputerName
@@ -46,6 +51,3 @@ fields:
 falsepositives:
     - Programs using PowerShell directly without invocation of a dedicated interpreter.
 level: medium
-tags:
-    - attack.execution
-    - attack.t1059.001

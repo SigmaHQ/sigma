@@ -1,44 +1,46 @@
-title: SquiblyTwo
+title: SquiblyTwo Execution
 id: 8d63dadf-b91b-4187-87b6-34a1114577ea
 status: test
 description: Detects WMI SquiblyTwo Attack with possible renamed WMI by looking for imphash
-author: Markus Neis / Florian Roth
 references:
-  - https://subt0x11.blogspot.ch/2018/04/wmicexe-whitelisting-bypass-hacking.html
-  - https://twitter.com/mattifestation/status/986280382042595328
+    - https://subt0x11.blogspot.ch/2018/04/wmicexe-whitelisting-bypass-hacking.html
+    - https://twitter.com/mattifestation/status/986280382042595328
+author: Markus Neis, Florian Roth
 date: 2019/01/16
-modified: 2022/03/21
-logsource:
-  category: process_creation
-  product: windows
-detection:
-  selection_one:
-    Image|endswith: '\wmic.exe'
-    CommandLine|contains|all:
-      - wmic
-      - format
-      - http
-  selection_wmic_imphash:
-    - Imphash:
-      - 1B1A3F43BF37B5BFE60751F2EE2F326E
-      - 37777A96245A3C74EB217308F3546F4C
-      - 9D87C9D67CE724033C0B40CC4CA1B206
-    - Hashes|contains:  # Sysmon field hashes contains all types
-      - IMPHASH=1B1A3F43BF37B5BFE60751F2EE2F326E
-      - IMPHASH=37777A96245A3C74EB217308F3546F4C
-      - IMPHASH=9D87C9D67CE724033C0B40CC4CA1B206
-  selection_flags:
-    CommandLine|contains|all:
-      - 'format:'
-      - 'http'
-  condition: selection_one or (selection_wmic_imphash and selection_flags)
-falsepositives:
-  - Unknown
-level: medium
+modified: 2022/11/11
 tags:
-  - attack.defense_evasion
-  - attack.t1047
-  - attack.t1220
-  - attack.execution
-  - attack.t1059.005
-  - attack.t1059.007
+    - attack.defense_evasion
+    - attack.t1047
+    - attack.t1220
+    - attack.execution
+    - attack.t1059.005
+    - attack.t1059.007
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_org_img:
+        - Image|endswith: '\wmic.exe'
+        - OriginalFileName: 'wmic.exe'
+    selection_org_cli:
+        CommandLine|contains|all:
+            - wmic
+            - format
+            - http
+    selection_renamed_wmic_imphash:
+        - Imphash:
+            - 1B1A3F43BF37B5BFE60751F2EE2F326E
+            - 37777A96245A3C74EB217308F3546F4C
+            - 9D87C9D67CE724033C0B40CC4CA1B206
+        - Hashes|contains:  # Sysmon field hashes contains all types
+            - IMPHASH=1B1A3F43BF37B5BFE60751F2EE2F326E
+            - IMPHASH=37777A96245A3C74EB217308F3546F4C
+            - IMPHASH=9D87C9D67CE724033C0B40CC4CA1B206
+    selection_renamed_flags:
+        CommandLine|contains|all:
+            - 'format:'
+            - 'http'
+    condition: all of selection_org_* or all of selection_renamed_*
+falsepositives:
+    - Unknown
+level: medium

@@ -1,35 +1,39 @@
-title: GlobalFlags Registry Persistence Mechanisms
+title: Potential GlobalFlags Registry Persistence Attempt
 id: 36803969-5421-41ec-b92f-8500f79c23b0
+related:
+    - id: c81fe886-cac0-4913-a511-2822d72ff505
+      type: obsoletes
 status: test
-description: Detects persistence using GlobalFlags in image file executiobn options
-author: Karneades, Jonhnathan Ribeiro
+description: Detects registry persistence technique using the GlobalFlags and SilentProcessExit keys
 references:
-  - https://oddvar.moe/2018/04/10/persistence-using-globalflags-in-image-file-execution-options-hidden-from-autoruns-exe/
+    - https://oddvar.moe/2018/04/10/persistence-using-globalflags-in-image-file-execution-options-hidden-from-autoruns-exe/
+    - https://www.deepinstinct.com/2021/02/16/lsass-memory-dumps-are-stealthier-than-ever-before-part-2/
+author: Karneades, Jonhnathan Ribeiro, Florian Roth
 date: 2018/04/11
-modified: 2022/03/26
-logsource:
-  category: registry_set
-  product: windows
-detection:
-  selection_reg1:
-    TargetObject|contains: '\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
-  selection_reg2:
-    - TargetObject|contains|all:
-      - '\Image File Execution Options\'
-      - '\GlobalFlag'
-    - TargetObject|contains|all:
-      - 'SilentProcessExit\'
-      - '\ReportingMode'
-    - TargetObject|contains|all:
-      - 'SilentProcessExit\'
-      - '\MonitorProcess'
-  condition: selection_reg1 and selection_reg2
-falsepositives:
-  - Unknown
-level: high
+modified: 2022/12/19
 tags:
-  - attack.privilege_escalation
-  - attack.persistence
-  - attack.defense_evasion
-  - attack.t1546.012
-  - car.2013-01-002
+    - attack.privilege_escalation
+    - attack.persistence
+    - attack.defense_evasion
+    - attack.t1546.012
+    - car.2013-01-002
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_global_flag:
+        TargetObject|contains|all:
+            - '\Microsoft\Windows NT\CurrentVersion\'
+            - '\Image File Execution Options\'
+            - '\GlobalFlag'
+    selection_silent_process:
+        TargetObject|contains|all:
+            - '\Microsoft\Windows NT\CurrentVersion\'
+            - '\SilentProcessExit\'
+        TargetObject|contains:
+            - '\ReportingMode'
+            - '\MonitorProcess'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high

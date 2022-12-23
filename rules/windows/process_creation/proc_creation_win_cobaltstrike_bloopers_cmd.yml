@@ -1,39 +1,47 @@
 title: Operator Bloopers Cobalt Strike Commands
-status: experimental
 id: 647c7b9e-d784-4fda-b9a0-45c565a7b729
+status: experimental
 description: Detects use of Cobalt Strike commands accidentally entered in the CMD shell
-author: _pete_0, TheDFIRReport
 references:
-  - https://hstechdocs.helpsystems.com/manuals/cobaltstrike/current/userguide/content/cobalt-4-5-user-guide.pdf
-  - https://thedfirreport.com/2021/10/04/bazarloader-and-the-conti-leaks/
-  - https://thedfirreport.com/2022/06/16/sans-ransomware-summit-2022-can-you-detect-this/
+    - https://hstechdocs.helpsystems.com/manuals/cobaltstrike/current/userguide/content/cobalt-4-5-user-guide.pdf
+    - https://thedfirreport.com/2021/10/04/bazarloader-and-the-conti-leaks/
+    - https://thedfirreport.com/2022/06/16/sans-ransomware-summit-2022-can-you-detect-this/
+author: _pete_0, TheDFIRReport
 date: 2022/05/06
-modified: 2022/05/06
-logsource:
-  category: process_creation
-  product: windows
-detection:
-  selection:
-    CommandLine|startswith:
-      - 'cmd.exe'
-      - 'c:\windows\system32\cmd.exe'
-    CommandLine|contains:
-      - psinject
-      - spawnas
-      - make_token
-      - remote-exec
-      - rev2self
-      - dcsync
-      - logonpasswords
-      - execute-assembly
-      - getsystem
-    Image|endswith: '\cmd.exe'
-  condition: selection
-fields:
-  - CommandLine
-falsepositives:
-  - Unknown
-level: high
+modified: 2022/11/11
 tags:
-  - attack.execution
-  - attack.t1059.003
+    - attack.execution
+    - attack.t1059.003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - OriginalFileName: 'Cmd.Exe'
+        - Image|endswith: '\cmd.exe'
+    selection_cli:
+        CommandLine|startswith:
+            - 'cmd.exe'
+            - 'c:\windows\system32\cmd.exe'
+        CommandLine|contains:
+            - psinject
+            - spawnas
+            - make_token
+            - remote-exec
+            - rev2self
+            - dcsync
+            - logonpasswords
+            - execute-assembly
+            - getsystem
+    filter_vscode:
+        # This FP could occure when VSCode is installed and a search/or string selection is made to look for one of these detections mentioned above
+        ParentImage|endswith: \AppData\Local\Programs\Microsoft VS Code\Code.exe # This is the default install location please add your custom one to avoid FP
+        CommandLine|contains|all:
+            - '/d /s /c '
+            - 'checkfilenameiocs --ioc-path '
+    condition: all of selection_* and not 1 of filter_*
+fields:
+    - CommandLine
+falsepositives:
+    - Unknown
+level: high

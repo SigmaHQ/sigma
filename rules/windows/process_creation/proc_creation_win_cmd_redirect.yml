@@ -2,21 +2,24 @@ title: Redirect Output in CommandLine
 id: 4f4eaa9f-5ad4-410c-a4be-bc6132b0175a
 status: experimental
 description: Use ">" to redicrect information in commandline
-author: frack113
 references:
     - https://ss64.com/nt/syntax-redirection.html
+author: frack113
 date: 2022/01/22
+modified: 2022/11/11
+tags:
+    - attack.discovery
+    - attack.t1082
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\cmd.exe'
+    selection_cmd:
+        - OriginalFileName: 'Cmd.Exe'
+        - Image|endswith: '\cmd.exe'
+    selection_cli:
         CommandLine|contains: '>'
-    condition: selection
+    condition: all of selection_*
 falsepositives:
-    - Unknown
+    - Internet Download Manager extensions use named pipes and redirection via CLI. Filter it out if you use it in your environment
 level: low
-tags:
-    - attack.discovery
-    - attack.t1082

@@ -7,12 +7,15 @@ status: test
 description: |
     Detects a suspicious copy operation that tries to copy a program from a system (System32 or SysWOW64) directory to another on disk.
     Often used to move LOLBINs such as 'certutil' or 'desktopimgdownldr' to a different location with a different name in order to bypass detections based on locations
-author: Florian Roth, Markus Neis, Tim Shelton (HAWK.IO), Nasreddine Bencherchali (update)
 references:
     - https://www.hybrid-analysis.com/sample/8da5b75b6380a41eee3a399c43dfe0d99eeefaa1fd21027a07b1ecaa4cd96fdd?environmentId=120
     - https://web.archive.org/web/20180331144337/https://www.fireeye.com/blog/threat-research/2018/03/sanny-malware-delivery-method-updated-in-recently-observed-attacks.html
+author: Florian Roth, Markus Neis, Tim Shelton (HAWK.IO), Nasreddine Bencherchali (update)
 date: 2020/07/03
-modified: 2022/08/04
+modified: 2022/09/10
+tags:
+    - attack.defense_evasion
+    - attack.t1036.003
 logsource:
     category: process_creation
     product: windows
@@ -26,7 +29,7 @@ detection:
             - '\pwsh.exe'
         CommandLine|contains:
             - 'copy-item'
-            - 'copy'
+            - ' copy '
             - 'cpi '
             - ' cp '
     selection_other:
@@ -46,6 +49,3 @@ falsepositives:
     - When cmd.exe and xcopy.exe are called directly #  C:\Windows\System32\cmd.exe /c copy file1 file2
     - When the command contains the keywords but not in the correct order
 level: medium
-tags:
-    - attack.defense_evasion
-    - attack.t1036.003

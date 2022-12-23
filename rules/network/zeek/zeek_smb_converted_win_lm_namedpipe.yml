@@ -2,41 +2,38 @@ title: First Time Seen Remote Named Pipe - Zeek
 id: 021310d9-30a6-480a-84b7-eaa69aeb92bb
 status: test
 description: This detection excludes known namped pipes accessible remotely and notify on newly observed ones, may help to detect lateral movement and remote exec using named pipes
-author: 'Samir Bousseaden, @neu5ron'
 references:
-  - https://github.com/neo23x0/sigma/blob/d42e87edd741dd646db946f30964f331f92f50e6/rules/windows/builtin/win_lm_namedpipe.yml
+    - https://github.com/neo23x0/sigma/blob/d42e87edd741dd646db946f30964f331f92f50e6/rules/windows/builtin/win_lm_namedpipe.yml
+author: Samir Bousseaden, @neu5ron, Tim Shelton
 date: 2020/04/02
-modified: 2021/11/27
-logsource:
-  product: zeek
-  service: smb_files
-detection:
-  selection1:
-    path: \\\*\IPC$
-  selection2:
-    path: \\\*\IPC$
-    name:
-      - 'atsvc'
-      - 'samr'
-      - 'lsarpc'
-      - 'winreg'
-      - 'netlogon'
-      - 'srvsvc'
-      - 'protected_storage'
-      - 'wkssvc'
-      - 'browser'
-      - 'netdfs'
-      - 'svcctl'
-      - 'spoolss'
-      - 'ntsvcs'
-      - 'LSM_API_service'
-      - 'HydraLsPipe'
-      - 'TermSrv_API_service'
-      - 'MsFteWds'
-  condition: selection1 and not selection2
-falsepositives:
-  - Update the excluded named pipe to filter out any newly observed legit named pipe
-level: high
+modified: 2022/10/10
 tags:
-  - attack.lateral_movement
-  - attack.t1021.002
+    - attack.lateral_movement
+    - attack.t1021.002
+logsource:
+    product: zeek
+    service: smb_files
+detection:
+    selection1:
+        path: \\\*\IPC$
+    selection2:
+        - 'samr'
+        - 'lsarpc'
+        - 'winreg'
+        - 'netlogon'
+        - 'srvsvc'
+        - 'protected_storage'
+        - 'wkssvc'
+        - 'browser'
+        - 'netdfs'
+        - 'svcctl'
+        - 'spoolss'
+        - 'ntsvcs'
+        - 'LSM_API_service'
+        - 'HydraLsPipe'
+        - 'TermSrv_API_service'
+        - 'MsFteWds'
+    condition: selection1 and not selection2
+falsepositives:
+    - Update the excluded named pipe to filter out any newly observed legit named pipe
+level: high

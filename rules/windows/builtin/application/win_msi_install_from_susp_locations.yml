@@ -1,0 +1,38 @@
+title: MSI Installation From Suspicious Locations
+id: c7c8aa1c-5aff-408e-828b-998e3620b341
+status: experimental
+description: Detects MSI package installation from suspicious locations
+references:
+    - https://www.trendmicro.com/en_us/research/22/h/ransomware-actor-abuses-genshin-impact-anti-cheat-driver-to-kill-antivirus.html
+author: Nasreddine Bencherchali
+date: 2022/08/31
+modified: 2022/10/18
+tags:
+    - attack.execution
+logsource:
+    product: windows
+    service: application
+    # warning: The 'data' field used in the detection section is the container for the event data as a whole. You may have to adapt the rule for your backend accordingly
+detection:
+    selection:
+        Provider_Name: 'MsiInstaller'
+        EventID:
+            - 1040
+            - 1042
+        Data|contains:
+            # Add more suspicious paths
+            - '\Users\Public\'
+            - '\PerfLogs\'
+            - '\Desktop\'
+            # - '\Downloads\'  # too many FPs, typical legitimate staging directory
+            # - '\AppData\Local\Temp\'  # too many FPs
+            - 'C:\Windows\TEMP\'
+            - '\\\\'
+    filter_winget:
+        Data|contains: '\AppData\Local\Temp\WinGet\'
+    filter_updhealthtools:
+        Data|contains: 'C:\Windows\TEMP\UpdHealthTools.msi'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - False positives may occur if you allow installation from folders such as the desktop, the public folder or remote shares
+level: medium

@@ -2,12 +2,15 @@ title: Suspicious WMIC Execution - ProcessCallCreate
 id: 3c89a1e8-0fba-449e-8f1b-8409d6267ec8
 status: test
 description: Detects WMIC executing "process call create" with suspicious calls to processes such as "rundll32", "regsrv32"...etc
-author: Florian Roth, Nasreddine Bencherchali
 references:
     - https://thedfirreport.com/2020/10/08/ryuks-return/
     - https://symantec-enterprise-blogs.security.com/blogs/threat-intelligence/ransomware-hive-conti-avoslocker
+author: Florian Roth, Nasreddine Bencherchali
 date: 2020/10/12
-modified: 2022/08/09
+modified: 2022/11/18
+tags:
+    - attack.execution
+    - attack.t1047
 logsource:
     category: process_creation
     product: windows
@@ -23,6 +26,11 @@ detection:
             - 'bitsadmin'
             - 'regsvr32'
             - 'cmd.exe /c '
+            - 'cmd.exe /k '
+            - 'cmd.exe /r '
+            - 'cmd /c '
+            - 'cmd /k '
+            - 'cmd /r '
             - 'powershell'
             - 'pwsh'
             - 'certutil'
@@ -33,6 +41,7 @@ detection:
             - '\Windows\Temp\'
             - '\AppData\Local\'
             - '%temp%'
+            - '%tmp%'
             - '%ProgramData%'
             - '%appdata%'
             - '%comspec%'
@@ -44,6 +53,3 @@ fields:
 falsepositives:
     - Unknown
 level: high
-tags:
-    - attack.execution
-    - attack.t1047

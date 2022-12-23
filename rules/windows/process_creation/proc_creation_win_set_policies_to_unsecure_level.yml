@@ -1,33 +1,38 @@
-title: Change PowerShell Policies to an Unsecure Level
+title: Change PowerShell Policies to an Insecure Level
 id: 87e3c4e8-a6a8-4ad9-bb4f-46e7ff99a180
-description: Detects use of executionpolicy option to set a unsecure policies
 status: experimental
+description: Detects use of executionpolicy option to set insecure policies
 references:
     - https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy?view=powershell-7.1
     - https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.1
     - https://adsecurity.org/?p=2604
     - https://thedfirreport.com/2021/11/01/from-zero-to-domain-admin/
+author: frack113
+date: 2021/11/01
+modified: 2022/09/10
 tags:
     - attack.execution
     - attack.t1059.001
-author: frack113
-date: 2021/11/01
-modified: 2022/02/23
 logsource:
     product: windows
     category: process_creation
 detection:
-    option:
+    selection_option:
         CommandLine|contains:
             - ' -executionpolicy '
             - ' -ep '
             - ' -exec '
-    level:
+    selection_level:
         CommandLine|contains:
             - 'Unrestricted'
             - 'bypass'
             - 'RemoteSigned'
-    condition: option and level
+    filter:
+        CommandLine|contains:
+            - 'C:\Program Files'
+            - 'C:\ProgramData'
+            - '\AppData\Roaming\Code\'
+    condition: all of selection* and not filter
 falsepositives:
     - Administrator script
 level: medium

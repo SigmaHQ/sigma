@@ -1,17 +1,21 @@
 title: Windows Crypto Mining Indicators
 id: 66c3b204-9f88-4d0a-a7f7-8a57d521ca55
-description: Detects command line parameters or strings often used by crypto miners
 status: stable
+description: Detects command line parameters or strings often used by crypto miners
 references:
     - https://www.poolwatch.io/coin/monero
 author: Florian Roth
 date: 2021/10/26
+modified: 2022/09/05
+tags:
+    - attack.impact
+    - attack.t1496
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
-         CommandLine|contains:
+        CommandLine|contains:
             - ' --cpu-priority='
             - '--donate-level=0'
             - ' -o pool.'
@@ -30,10 +34,13 @@ detection:
             - 'c3RyYXR1bSt1ZHA6Ly'
             - 'N0cmF0dW0rdWRwOi8v'
             - 'zdHJhdHVtK3VkcDovL'
-    condition: selection
+    filter:
+        CommandLine|contains:
+            - ' pool.c '
+            - ' pool.o '
+            - 'gcc -'
+    condition: selection and not filter
 falsepositives:
     - Legitimate use of crypto miners
+    - Some build frameworks
 level: high
-tags:
-    - attack.impact
-    - attack.t1496

@@ -6,20 +6,24 @@ references:
     - https://blog.netspi.com/15-ways-to-download-a-file/#bitsadmin
     - https://isc.sans.edu/diary/22264
     - https://lolbas-project.github.io/lolbas/Binaries/Bitsadmin/
+    - https://blog.talosintelligence.com/breaking-the-silence-recent-truebot-activity/
+author: Florian Roth
+date: 2022/06/28
+modified: 2022/11/11
 tags:
     - attack.defense_evasion
     - attack.persistence
     - attack.t1197
     - attack.s0190
     - attack.t1036.003
-date: 2022/06/28
-author: Florian Roth
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\bitsadmin.exe'
+    selection_img:
+        - Image|endswith: '\bitsadmin.exe'
+        - OriginalFileName: 'bitsadmin.exe'
+    selection_flags:
         CommandLine|contains:
             - ' /transfer '
             - ' /create '
@@ -28,11 +32,12 @@ detection:
         CommandLine|contains:
             - 'C:\Windows\Temp\'
             - '%temp%'
+            - '%tmp%'
             - 'C:\ProgramData\'
             - '%ProgramData%'
             - '\AppData\Local\'
             - '%AppData%'
-    condition: all of selection*
+    condition: all of selection_*
 fields:
     - CommandLine
     - ParentCommandLine

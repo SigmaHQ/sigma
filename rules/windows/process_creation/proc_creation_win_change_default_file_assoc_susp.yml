@@ -5,10 +5,14 @@ related:
       type: derived
 status: experimental
 description: Detects when a program changes the default file association of any extension to an executable
-author: Nasreddine Bencherchali
 references:
-  - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/assoc
+    - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/assoc
+author: Nasreddine Bencherchali
 date: 2022/06/28
+modified: 2022/11/18
+tags:
+    - attack.persistence
+    - attack.t1546.001
 logsource:
     category: process_creation
     product: windows
@@ -16,15 +20,15 @@ detection:
     selection:
         CommandLine|contains|all:
             - 'cmd'
-            - ' /c '
             - 'assoc '
             - 'exefile'
+        CommandLine|contains:
+            - ' /c '
+            - ' /r '
+            - ' /k '
     filter:
         CommandLine|contains: '.exe=exefile'
     condition: selection and not filter
 falsepositives:
     - Unknown
 level: high
-tags:
-    - attack.persistence
-    - attack.t1546.001

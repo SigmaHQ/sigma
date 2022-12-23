@@ -1,0 +1,66 @@
+title: Usage of Renamed Sysinternals Tools
+id: f50f3c09-557d-492d-81db-9064a8d4e211
+related:
+    - id: 25ffa65d-76d8-4da5-a832-3f2b0136e133
+      type: derived
+    - id: 8023f872-3f1d-4301-a384-801889917ab4
+      type: similar
+status: experimental
+description: Detects the "accepteula" key related to sysinternals tools being created from non sysinternals tools
+references:
+    - Internal Research
+author: Nasreddine Bencherchali
+date: 2022/08/24
+modified: 2022/12/07
+tags:
+    - attack.resource_development
+    - attack.t1588.002
+logsource:
+    product: windows
+    category: registry_add
+detection:
+    selection:
+        EventType: CreateKey
+        TargetObject|contains:
+            # Please add new values while respecting the alphabetical order
+            - '\Active Directory Explorer'
+            - '\Handle'
+            - '\LiveKd'
+            - '\ProcDump'
+            - '\Process Explorer'
+            - '\PsExec'
+            - '\PsLoggedon'
+            - '\PsLoglist'
+            - '\PsPasswd'
+            - '\PsPing'
+            - '\PsService'
+        TargetObject|endswith: '\EulaAccepted'
+    filter:
+        Image|endswith:
+            # Please add new values while respecting the alphabetical order
+            - '\ADExplorer.exe'
+            - '\ADExplorer64.exe'
+            - '\handle.exe'
+            - '\handle64.exe'
+            - '\livekd.exe'
+            - '\livekd64.exe'
+            - '\procdump.exe'
+            - '\procdump64.exe'
+            - '\procexp.exe'
+            - '\procexp64.exe'
+            - '\PsExec.exe'
+            - '\PsExec64.exe'
+            - '\PsLoggedon.exe'
+            - '\PsLoggedon64.exe'
+            - '\psloglist.exe'
+            - '\psloglist64.exe'
+            - '\pspasswd.exe'
+            - '\pspasswd64.exe'
+            - '\PsPing.exe'
+            - '\PsPing64.exe'
+            - '\PsService.exe'
+            - '\PsService64.exe'
+    condition: selection and not filter
+falsepositives:
+    - Unlikely
+level: high

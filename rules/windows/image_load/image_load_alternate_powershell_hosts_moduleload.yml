@@ -1,15 +1,15 @@
-title: Alternate PowerShell Hosts
+title: Alternate PowerShell Hosts - Image
 id: fe6e002f-f244-4278-9263-20e4b593827f
-description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
 status: experimental
-date: 2019/09/12
-modified: 2022/02/21
+description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
+references:
+    - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190610201010.html
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+date: 2019/09/12
+modified: 2022/12/02
 tags:
     - attack.execution
     - attack.t1059.001
-references:
-    - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190610201010.html
 logsource:
     product: windows
     category: image_load
@@ -17,7 +17,7 @@ detection:
     selection:
         Description: 'System.Management.Automation'
         ImageLoaded|contains: 'System.Management.Automation'
-    filter:
+    filter_generic:
         - Image|endswith:
             - '\powershell.exe'
             - '\mscorsvw.exe'
@@ -26,7 +26,11 @@ detection:
             - 'C:\Program Files\Microsoft Visual Studio\'
             - 'C:\Windows\System32\'
             - 'C:\Program Files\Citrix\ConfigSync\'
-    condition: selection and not filter
+        - Image: 'C:\Program Files\PowerShell\7\pwsh.exe'
+    filter_aurora:
+        # This filter is to avoid a race condition FP with this specific ETW provider in aurora
+        Image: null
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown
-level: low 
+level: low

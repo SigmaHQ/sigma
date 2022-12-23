@@ -2,11 +2,11 @@ title: Execution of Suspicious File Type Extension
 id: c09dad97-1c78-4f71-b127-7edb2b8e491a
 status: experimental
 description: Checks whether the image specified in a process creation event doesn't refer to an .exe file (caused by process ghosting or other unorthodox methods to start a process)
-author: Max Altgelt
-date: 2021/12/09
-modified: 2022/06/20
 references:
     - https://pentestlaboratories.com/2021/12/08/process-ghosting/
+author: Max Altgelt
+date: 2021/12/09
+modified: 2022/12/14
 tags:
     - attack.defense_evasion
 logsource:
@@ -21,8 +21,10 @@ detection:
         Image: null
     filter_image: # Windows utilities without extension
         Image:
+            - 'System'
             - 'Registry'
             - 'MemCompression'
+            - 'vmmem'
     filter_empty:
         Image:
             - '-'
@@ -82,8 +84,13 @@ detection:
             - '\LocalState\rootfs\'
     filter_lzma_exe:
         Image|endswith: '\LZMA_EXE'
+    filter_windows_helper:
+        ParentImage|startswith: C:\Windows\Temp\
+        Image|startswith: 'C:\Windows\Temp\Helper\'
+    filter_dell_dock:
+        ParentImage|startswith: 'C:\Windows\Temp\'
+        ParentImage|endswith: '\TBT_Dock_Firmware\GetDockVer32W.exe'
     condition: not known_image_extension and not 1 of filter*
 falsepositives:
     - Unknown
 level: high
-

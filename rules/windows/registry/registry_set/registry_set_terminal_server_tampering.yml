@@ -5,9 +5,12 @@ related:
       type: obsoletes
     - id: 41904ebe-d56c-4904-b9ad-7a77bdf154b3
       type: obsoletes
+    - id: a2863fbc-d5cb-48d5-83fb-d976d4b1743b
+      type: similar
 status: test
-description: Detects tampering to RDP Terminal Service/Server sensitive settings. Such as allowing unauthorized users access to a system via the 'fAllowUnsolicited' or enabling RDP via 'fDenyTSConnections'...etc
-author: Samir Bousseaden, David ANDRE, Roberto Rodriguez @Cyb3rWard0g, Nasreddine Bencherchali
+description: |
+  Detects tampering to RDP Terminal Service/Server sensitive settings.
+  Such as allowing unauthorized users access to a system via the 'fAllowUnsolicited' or enabling RDP via 'fDenyTSConnections'...etc
 references:
     - https://blog.menasec.net/2019/02/threat-hunting-rdp-hijacking-via.html # Related to RDP hijacking via the "ServiceDll" key
     - http://woshub.com/rds-shadow-how-to-connect-to-a-user-session-in-windows-server-2012-r2/ # Related to the Shadow RPD technique
@@ -16,7 +19,13 @@ references:
     - https://bazaar.abuse.ch/sample/6f3aa9362d72e806490a8abce245331030d1ab5ac77e400dd475748236a6cc81/
     - http://etutorials.org/Microsoft+Products/microsoft+windows+server+2003+terminal+services/Chapter+6+Registry/Registry+Keys+for+Terminal+Services/ # Contain description for most of the keys mentioned here (check it out if you want more information
     - https://admx.help/HKLM/SOFTWARE/Policies/Microsoft/Windows%20NT/Terminal%20Services # Contain description for most of the keys mentioned here (check it out if you want more information)
+author: Samir Bousseaden, David ANDRE, Roberto Rodriguez @Cyb3rWard0g, Nasreddine Bencherchali
 date: 2022/08/06
+modified: 2022/09/29
+tags:
+    - attack.defense_evasion
+    - attack.persistence
+    - attack.t1112
 logsource:
     category: registry_set
     product: windows
@@ -37,13 +46,7 @@ detection:
         TargetObject|contains:
             - '\Control\Terminal Server\'
             - 'SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\'
-    selection_terminal_services_values_0:
-        TargetObject|endswith:
-            - '\fDenyTSConnections' # Specifies whether Remote Desktop connections are enabled - When set to zero RDP is enabled
-            - '\fSingleSessionPerUser' # When changed to 0 it allows multiple RDP sessions
-            - '\UserAuthentication' # Specifies that Network-Level user authentication is not required before the remote desktop connection is established
-        Details: 'DWORD (0x00000000)'
-    selection_terminal_services_values_1:
+    selection_terminal_services_values:
         TargetObject|endswith:
             - '\fAllowUnsolicited' # Allow unsolicited remote assistance offers
             - '\fAllowUnsolicitedFullControl'
@@ -56,11 +59,7 @@ detection:
             - '\Control\Terminal Server\WinStations\RDP-Tcp\InitialProgram' # This value can be set to pecify a program to run automatically when a user logs on to a remote computer.
             - '\Control\Terminal Server\InitialProgram' # This value can be set to pecify a program to run automatically when a user logs on to a remote computer.
             - 'SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\InitialProgram' # This value can be set to pecify a program to run automatically when a user logs on to a remote computer.
-    condition: selection_shadow or (selection_terminal_services_key and 1 of selection_terminal_services_values_*) or selection_tamper_only
+    condition: selection_shadow or (selection_terminal_services_key and selection_terminal_services_values) or selection_tamper_only
 falsepositives:
     - Some of the keys mentioned here could be modified by an administrator while setting group policy (it should be investigated either way)
 level: high
-tags:
-    - attack.defense_evasion
-    - attack.persistence
-    - attack.t1112

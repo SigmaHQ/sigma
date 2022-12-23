@@ -1,30 +1,32 @@
-title: 'Binary Padding'
+title: Binary Padding - Linux
 id: c52a914f-3d8b-4b2a-bb75-b3991e75f8ba
 status: test
-description: 'Adversaries may use binary padding to add junk data and change the on-disk representation of malware. This rule detect using dd and truncate to add a junk data to file.'
-author: 'Igor Fits, oscd.community'
+description: |
+  Adversaries may use binary padding to add junk data and change the on-disk representation of malware.
+  This rule detect using dd and truncate to add a junk data to file.
 references:
-  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1027.001/T1027.001.md
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1027.001/T1027.001.md
+author: 'Igor Fits, oscd.community'
 date: 2020/10/13
-modified: 2021/11/27
-logsource:
-  product: linux
-  service: auditd
-detection:
-  execve:
-    type: 'EXECVE'
-  truncate:
-    - 'truncate'
-    - '-s'
-  dd:
-    - 'dd'
-    - 'if='
-  filter:
-    - 'of='
-  condition: execve and (all of truncate or (all of dd and not filter))
-falsepositives:
-  - Legitimate script work
-level: high
+modified: 2022/11/26
 tags:
-  - attack.defense_evasion
-  - attack.t1027.001
+    - attack.defense_evasion
+    - attack.t1027.001
+logsource:
+    product: linux
+    service: auditd
+detection:
+    execve:
+        type: 'EXECVE'
+    truncate:
+        - 'truncate'
+        - '-s'
+    dd:
+        - 'dd'
+        - 'if='
+    filter:
+        - 'of='
+    condition: execve and (all of truncate or (all of dd and not filter))
+falsepositives:
+    - Legitimate script work
+level: high

@@ -1,0 +1,27 @@
+title: Suspicious Command With Teams Objects Pathes
+id: d2eb17db-1d39-41dc-b57f-301f6512fa75
+status: experimental
+description: Detects an access to authentication tokens and accounts of Microsoft Teams desktop application.
+references:
+    - https://www.bleepingcomputer.com/news/security/microsoft-teams-stores-auth-tokens-as-cleartext-in-windows-linux-macs/
+    - https://www.vectra.ai/blogpost/undermining-microsoft-teams-security-by-mining-tokens
+author: '@SerkinValery'
+date: 2022/09/16
+modified: 2022/09/27
+tags:
+    - attack.credential_access
+    - attack.t1528
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        CommandLine|contains:
+            - '\Microsoft\Teams\Cookies'
+            - '\Microsoft\Teams\Local Storage\leveldb'
+    filter:
+        Image|endswith: '\Microsoft\Teams\current\Teams.exe'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high

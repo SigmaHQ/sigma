@@ -2,14 +2,17 @@ title: Suspicious Curl Usage on Windows
 id: e218595b-bbe7-4ee5-8a96-f32a24ad3468
 status: experimental
 description: Detects a suspicious curl process start on Windows and outputs the requested document to a local file
-author: Florian Roth, Nasreddine Bencherchali (updated)
 references:
     - https://twitter.com/max_mal_/status/1542461200797163522
     - https://web.archive.org/web/20200128160046/https://twitter.com/reegun21/status/1222093798009790464
     - https://github.com/pr0xylife/Qakbot/blob/4f0795d79dabee5bc9dd69f17a626b48852e7869/Qakbot_AA_23.06.2022.txt
     - https://www.volexity.com/blog/2022/07/28/sharptongue-deploys-clever-mail-stealing-browser-extension-sharpext/
+author: Florian Roth, Nasreddine Bencherchali (updated)
 date: 2020/07/03
-modified: 2022/07/28
+modified: 2022/09/29
+tags:
+    - attack.command_and_control
+    - attack.t1105
 logsource:
     category: process_creation
     product: windows
@@ -24,6 +27,7 @@ detection:
             - '\Temp\'
             - '%AppData%'
             - '%Temp%'
+            - '%tmp%'
             - '%Public%'
             - '\Desktop\'
     selection_susp_extensions:
@@ -40,13 +44,18 @@ detection:
             - ' -O'  # covers the alias for --remote-name and --output
             - '--remote-name'
             - '--output'
-    condition: selection_curl and 1 of selection_susp*
+    filter_git_windows:
+        # Example FP
+        # CommandLine: "C:\Program Files\Git\mingw64\bin\curl.exe" --silent --show-error --output C:/Users/test/AppData/Local/Temp/gfw-httpget-jVOEoxbS.txt --write-out %{http_code} https://gitforwindows.org/latest-tag.txt
+        ParentImage: 'C:\Program Files\Git\usr\bin\sh.exe'
+        Image: 'C:\Program Files\Git\mingw64\bin\curl.exe'
+        CommandLine|contains|all:
+            - '--silent --show-error --output '
+            - 'gfw-httpget-'
+    condition: selection_curl and 1 of selection_susp* and not 1 of filter_*
 fields:
     - CommandLine
     - ParentCommandLine
 falsepositives:
     - Unknown
 level: high
-tags:
-    - attack.command_and_control
-    - attack.t1105

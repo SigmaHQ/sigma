@@ -1,30 +1,38 @@
-title: Wlrmdr Lolbin Use as Laucher
+title: Wlrmdr Lolbin Use as Launcher
 id: 9cfc00b6-bfb7-49ce-9781-ef78503154bb
 status: experimental
 description: Detects use of Wlrmdr.exe in which the -u parameter is passed to ShellExecute
 references:
     - https://twitter.com/0gtweet/status/1493963591745220608?s=20&t=xUg9DsZhJy1q9bPTUWgeIQ
-author: frack113
+author: frack113, manasmbellani
 date: 2022/02/16
-modified: 2022/06/02
+modified: 2022/12/06
+tags:
+    - attack.defense_evasion
+    - attack.t1218
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\wlrmdr.exe'
+    selection_child_img:
+        - Image|endswith: '\wlrmdr.exe'
+        - OriginalFileName: 'WLRMNDR.EXE'
+    selection_child_cli:
         CommandLine|contains|all:
+            # Note that the dash "-" can be replaced with a slash "/" (TODO: Use the "windash" modifier when it's introduced)
             - '-s '
             - '-f '
             - '-t '
             - '-m '
             - '-a '
             - '-u '
+    selection_parent: # This selection is looking for processes spawned from wlrmdr using the "-u" flag
+        ParentImage|endswith: '\wlrmdr.exe'
     filter:
         ParentImage: 'C:\Windows\System32\winlogon.exe'
-    condition: selection and not filter
+    filter_null:
+        ParentImage: '-'
+    condition: selection_parent or (all of selection_child_* and not 1 of filter*)
 falsepositives:
     - Unknown
 level: medium
-tags:
-    - attack.defense_evasion

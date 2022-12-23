@@ -1,0 +1,48 @@
+title: Office Processes Proxy Execution Through WMIC
+id: e1693bc8-7168-4eab-8718-cdcaa68a1738
+related:
+    - id: 9d1c72f5-43f0-4da5-9320-648cf2099dd0
+      type: obsoletes
+    - id: c0e1c3d5-4381-4f18-8145-2583f06a1fe5
+      type: obsoletes
+status: experimental
+description: Office application called wmic to proxye execution through a LOLBIN process. This is often used to break suspicious parent-child chain (Office app spawns LOLBin).
+references:
+    - https://thedfirreport.com/2021/03/29/sodinokibi-aka-revil-ransomware/
+    - https://github.com/vadim-hunter/Detection-Ideas-Rules/blob/02bcbfc2bfb8b4da601bb30de0344ae453aa1afe/Threat%20Intelligence/The%20DFIR%20Report/20210329_Sodinokibi_(aka_REvil)_Ransomware.yaml
+author: 'Vadim Khrykov (ThreatIntel), Cyb3rEng (Rule)'
+date: 2021/08/23
+modified: 2022/12/02
+tags:
+    - attack.t1204.002
+    - attack.t1047
+    - attack.t1218.010
+    - attack.execution
+    - attack.defense_evasion
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_wmic:
+        - Image|endswith: '\wbem\WMIC.exe'
+        - OriginalFileName: 'wmic.exe'
+    selection_parent:
+        ParentImage|endswith:
+            - '\winword.exe'
+            - '\excel.exe'
+            - '\powerpnt.exe'
+        CommandLine|contains|all:
+            - 'process'
+            - 'create'
+            - 'call'
+        CommandLine|contains:
+            # Add more suspicious LOLBINs as you see fit
+            - 'regsvr32'
+            - 'rundll32'
+            - 'msiexec'
+            - 'mshta'
+            - 'verclsid'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high

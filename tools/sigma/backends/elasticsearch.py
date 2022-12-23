@@ -1743,7 +1743,7 @@ class ElasticSearchRuleQsBackend(ElasticSearchRuleBackend, ElasticsearchQuerystr
                 raise NotImplementedError("Threshold rules cannot COUNT(DISTINCT %s)" % agg.aggfield)
             self.rule_type = "threshold"
             self.rule_threshold = {
-                "field": agg.groupfield if agg.groupfield else [],
+                "field": [agg.groupfield] if agg.groupfield else [],
                 "value": int(agg.condition) if agg.cond_op == ">=" else int(agg.condition) + 1
             }
             return ""

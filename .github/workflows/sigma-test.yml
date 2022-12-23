@@ -13,20 +13,22 @@ on: # yamllint disable-line rule:truthy
       - oscd
 
 env:
-  EVTX_BASELINE_VERSION: v0.6
+  EVTX_BASELINE_VERSION: v0.7
 
 jobs:
   test-sigma:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.8
+      with:
+        submodules: true
+    - name: Set up Python 3.11
       uses: actions/setup-python@v1
       with:
-        python-version: 3.8
+        python-version: 3.11
     - name: Install dependencies
       run: |
-        pip install sigma-cli~=0.3.2
+        pip install sigma-cli~=0.5.3
     - name: Test Sigma Rule Syntax
       run: |
         sigma check rules
@@ -128,5 +130,23 @@ jobs:
       run: |
         chmod +x evtx-sigma-checker
         ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path Win2022-AD/ --rule-path rules/windows/ > findings.json
+    - name: Show findings excluding known FPs
+      run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
+  check-baseline-win2022-0-20348-azure:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Download evtx-sigma-checker
+      run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
+    - name: Download and extract Windows 2022.0.20348 Azure baseline
+      run: |
+        wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win2022-0-20348-azure.tgz
+        tar xzf win2022-0-20348-azure.tgz
+    - name: Remove deprecated rules
+      run: 'grep -ERl "^status: deprecated" rules | xargs -r rm -v'
+    - name: Check for Sigma matches in baseline
+      run: |
+        chmod +x evtx-sigma-checker
+        ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path win2022-0-20348-azure/ --rule-path rules/windows/ > findings.json
     - name: Show findings excluding known FPs
       run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv

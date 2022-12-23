@@ -1,0 +1,31 @@
+title: Suspicious Eventlog Clear
+id: 0f017df3-8f5a-414f-ad6b-24aff1128278
+related:
+    - id: cc36992a-4671-4f21-a91d-6c2b72a2edf5
+      type: derived
+status: experimental
+description: Detects usage of known powershell cmdlets such as "Clear-EventLog" to clear the windows event logs
+references:
+    - https://twitter.com/oroneequalsone/status/1568432028361830402
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.001/T1070.001.md
+    - https://eqllib.readthedocs.io/en/latest/analytics/5b223758-07d6-4100-9e11-238cfdd0fe97.html
+author: Nasreddine Bencherchali
+date: 2022/09/12
+tags:
+    - attack.defense_evasion
+    - attack.t1070.001
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script block logging must be enabled
+detection:
+    selection:
+        ScriptBlockText|contains:
+            - 'Clear-EventLog '
+            - 'Remove-EventLog '
+            - 'Limit-EventLog '
+            - 'Clear-WinEvent '
+    condition: selection
+falsepositives:
+    - Rare need to clear logs before doing something. Sometimes used by installers or cleaner scripts. The script should be investigated to determine if it's legitimate
+level: medium

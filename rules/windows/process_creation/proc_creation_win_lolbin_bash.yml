@@ -4,12 +4,12 @@ status: experimental
 description: Performs execution of specified file, can be used for defensive evasion.
 references:
     - https://lolbas-project.github.io/lolbas/Binaries/Bash/
+author: frack113
+date: 2021/11/24
+modified: 2022/10/26
 tags:
     - attack.defense_evasion
     - attack.t1202
-author: frack113
-date: 2021/11/24
-modified: 2022/07/05
 logsource:
     category: process_creation
     product: windows
@@ -19,9 +19,11 @@ detection:
             - bash.exe
             - '-c '
     filter_git:
-        ParentCommandLine|contains:
+        - ParentCommandLine|contains:
             - 'C:\Program Files\Git\post-install.bat'
             - 'C:\Program Files (x86)\Git\post-install.bat'
+            - 'echo /etc/post-install/*.post'  # needed for occurrences where the *.bat is the grandparent
+        - CommandLine|contains: 'echo /etc/post-install/*.post'  # needed for WinEvtLog 4688 events
     condition: selection and not 1 of filter*
 falsepositives:
     - Unknown

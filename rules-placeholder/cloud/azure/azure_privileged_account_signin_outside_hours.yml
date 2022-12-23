@@ -1,0 +1,27 @@
+title: Privilege Role Sign-In Outside Of Normal Hours
+id: e927a2f5-e7af-424f-ace7-70ebb49e8976
+status: experimental
+description: Detects account sign ins outside of normal hours or uncommon locations. Administrator accounts should be investigated
+references:
+    - https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/security-operations-privileged-accounts#things-to-monitor
+author: Mark Morowczynski '@markmorow', Yochana Henderson, '@Yochana-H'
+date: 2022/08/11
+tags:
+    - attack.persistence
+    - attack.t1078
+logsource:
+    product: azure
+    service: signinlogs
+detection:
+    # You need to tune the rule for your enrivonnement before use
+    selection:
+        Status: Sucess
+        # Countries you DO operate out of e,g GB, use list for mulitple
+        Location: '%LegitCountries%'
+        # outside normal working hours
+        Date: '%ClosingTime%'
+        Initiatied.By: '%ApprovedUserUpn%'
+    condition: selection
+falsepositives:
+     - An admin doing actual work outside of normal business hours
+level: high

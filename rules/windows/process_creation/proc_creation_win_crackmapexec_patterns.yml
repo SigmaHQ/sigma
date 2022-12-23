@@ -1,12 +1,12 @@
 title: CrackMapExec Process Patterns
 id: f26307d8-14cd-47e3-a26b-4b4769f24af6
-description: Detects suspicious process patterns found in logs when CrackMapExec is used
 status: experimental
-author: Florian Roth
+description: Detects suspicious process patterns found in logs when CrackMapExec is used
 references:
     - https://mpgn.gitbook.io/crackmapexec/smb-protocol/obtaining-credentials/dump-lsass
+author: Florian Roth
 date: 2022/03/12
-modified: 2022/05/27
+modified: 2022/11/18
 tags:
     - attack.credential_access
     - attack.t1003.001
@@ -16,9 +16,15 @@ logsource:
 detection:
     selection_lsass_dump1:
         CommandLine|contains|all:
-            - 'cmd.exe /c '
             - 'tasklist /fi '
             - 'Imagename eq lsass.exe'
+        CommandLine|contains:
+            - 'cmd.exe /c '
+            - 'cmd.exe /r '
+            - 'cmd.exe /k '
+            - 'cmd /c '
+            - 'cmd /r '
+            - 'cmd /k '
         User|contains: # covers many language settings
             - 'AUTHORI'
             - 'AUTORI'

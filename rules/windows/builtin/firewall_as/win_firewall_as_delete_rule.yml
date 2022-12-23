@@ -2,11 +2,11 @@ title: Delete Rule in Windows Firewall with Advanced Security
 id: c187c075-bb3e-4c62-b4fa-beae0ffc211f
 status: experimental
 description: A rule has been deleted in the Windows Firewall exception list.
-author: frack113
-date: 2022/02/19
-modified: 2022/02/22
 references:
     - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd364427(v=ws.10)
+author: frack113
+date: 2022/02/19
+modified: 2022/10/18
 logsource:
     product: windows
     service: firewall-as
@@ -21,5 +21,8 @@ detection:
         - ModifyingApplication|startswith:
             - 'C:\Program Files\'
             - 'C:\Program Files (x86)\'
-    condition: selection and not filter
+    filter_msmpeng:
+        ModifyingApplication|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+        ModifyingApplication|endswith: '\MsMpEng.exe'
+    condition: selection and not 1 of filter*
 level: medium
