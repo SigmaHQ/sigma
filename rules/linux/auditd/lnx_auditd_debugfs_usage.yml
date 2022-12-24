@@ -1,0 +1,27 @@
+title: Use of Debugfs to Access a Raw Disk
+id: fb0647d7-371a-4553-8e20-33bbbe122956
+status: experimental
+description: Detects access to a raw disk on a host to evade detection by security products.
+references:
+    - https://twitter.com/0xm1rch/status/1600857731073654784?s=20&t=MdrBPqv4hnBEfAJBayMCZA
+author: Janantha Marasinghe
+date: 2022/12/20
+tags:
+    - attack.defense_evasion
+    - attack.t1006
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection_1:
+        type: 'EXECVE'
+        a0: 'df'
+        a1|contains: '/'
+    selection_2:
+        type: EXECVE
+        a0: 'debugfs'
+    timeframe: 5m
+    condition: selection_1 and selection_2
+falsepositives:
+    - Unknown
+level: medium
