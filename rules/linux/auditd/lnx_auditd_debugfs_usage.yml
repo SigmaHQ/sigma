@@ -4,6 +4,7 @@ status: experimental
 description: Detects access to a raw disk on a host to evade detection by security products.
 references:
     - https://twitter.com/0xm1rch/status/1600857731073654784?s=20&t=MdrBPqv4hnBEfAJBayMCZA
+    - https://github.com/Neo23x0/auditd/blob/master/audit.rules
 author: Janantha Marasinghe
 date: 2022/12/20
 tags:
@@ -15,8 +16,15 @@ logsource:
 detection:
     selection_1:
         type: 'EXECVE'
-        a0: 'df'
-        a1|contains: '/'
+        a0:
+            - 'df'
+            - 'lsblk'
+            - 'pvs'
+            - 'fdisk'
+            - 'blkid'
+            - 'parted'
+            - 'hwinfo'
+            - 'inxi'
     selection_2:
         type: EXECVE
         a0: 'debugfs'
