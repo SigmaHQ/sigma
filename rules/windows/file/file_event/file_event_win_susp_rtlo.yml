@@ -1,0 +1,22 @@
+title: Suspicious RTLO executable - File Event
+id: 73f80296-0eb8-4182-b7e9-70ccf40af581
+related:
+    - id: 3bb0de23-aa31-4837-b93a-c27a4e0da634
+      type: similar
+description: Detects an executable being written to disk or executed where a right-to-left-override character in the file name is written in a way that can mislead users to believe it has a different extension
+status: experimental
+author: ag-michael
+date: 2022/02/06
+tags:
+    - attack.defense_evasion
+    - attack.t1036.002
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename|re: '.*[\w\d]{2,5}\.(exe|bat|js|vbs|hta|vbe|jse|sct|wsf|xsl|cpl|xll)'
+    condition: selection
+falsepositives:
+    - Unknown
+level: low
