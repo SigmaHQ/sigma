@@ -11,7 +11,6 @@ backends:
   - xpack-watcher
   - elastalert
   - elastalert-dsl
-  - elasticsearch-rule
   - ee-outliers
 logsources:
   windows:
@@ -41,7 +40,9 @@ logsources:
     product: windows
     service: powershell
     conditions:
-      winlog.channel: 'Microsoft-Windows-PowerShell/Operational'
+      winlog.channel:
+        - 'Microsoft-Windows-PowerShell/Operational'
+        - 'PowerShellCore/Operational'
   windows-classicpowershell:
     product: windows
     service: powershell-classic
@@ -56,17 +57,17 @@ logsources:
     product: windows
     service: driver-framework
     conditions:
-      winlog.provider_name: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
+      winlog.channel: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
   windows-dhcp:
     product: windows
     service: dhcp
     conditions:
-      winlog.provider_name: 'Microsoft-Windows-DHCP-Server/Operational'
+      winlog.channel: 'Microsoft-Windows-DHCP-Server/Operational'
   windows-ntlm:
     product: windows
     service: ntlm
     conditions:
-      winlog.provider_name: 'Microsoft-Windows-NTLM/Operational'
+      winlog.channel: 'Microsoft-Windows-NTLM/Operational'
   windows-defender:
     product: windows
     service: windefend
@@ -82,6 +83,16 @@ logsources:
     service: printservice-operational
     conditions:
       winlog.channel: 'Microsoft-Windows-PrintService/Operational'
+  windows-terminalservices-localsessionmanager-operational:
+    product: windows
+    service: terminalservices-localsessionmanager
+    conditions:
+      winlog.channel: 'Microsoft-Windows-TerminalServices-LocalSessionManager/Operational'
+  windows-codeintegrity-operational:
+    product: windows
+    service: codeintegrity-operational
+    conditions:
+      winlog.channel: 'Microsoft-Windows-CodeIntegrity/Operational'
   windows-smbclient-security:
     product: windows
     service: smbclient-security
@@ -101,6 +112,48 @@ logsources:
     service: msexchange-management
     conditions:
       winlog.channel: 'MSExchange Management'
+  microsoft-servicebus-client:
+    product: windows
+    service: microsoft-servicebus-client
+    conditions:
+      winlog.channel: 'Microsoft-ServiceBus-Client'
+  windows-firewall-advanced-security:
+    product: windows
+    service: firewall-as
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall'
+  windows-bits-client:
+    product: windows
+    service: bits-client
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Bits-Client/Operational'
+  windows-security-mitigations:
+    product: windows
+    service: security-mitigations
+    conditions:
+      winlog.channel:
+        - 'Microsoft-Windows-Security-Mitigations/Kernel Mode'
+        - 'Microsoft-Windows-Security-Mitigations/User Mode'
+  windows-diagnosis:
+    product: windows
+    service: diagnosis-scripted
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Diagnosis-Scripted/Operational'
+  windows-shell-core:
+    product: windows
+    service: shell-core
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Shell-Core/Operational'
+  windows-openssh:
+    product: windows
+    service: openssh
+    conditions:
+      winlog.channel: 'OpenSSH/Operational'
+  windows-ldap-debug:
+    product: windows
+    service: ldap_debug
+    conditions:
+      winlog.channel: 'Microsoft-Windows-LDAP-Client/Debug'
 defaultindex: winlogbeat-*
 # Extract all field names with yq:
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: winlog.event_data.\1/g'
@@ -109,9 +162,9 @@ fieldmappings:
     EventID: event.code
     Channel: winlog.channel
     #Keywords: from "<System><Keywords>Value</Keywords></System><EventData>" is lost with winlogbeat exist in nxlog
-    provider name: winlog.provider_name
+    Provider_Name: winlog.provider_name
     CallingProcessName: winlog.event_data.CallingProcessName
-    ComputerName: winlog.ComputerName
+    ComputerName: winlog.computer_name
     EventType: winlog.event_data.EventType
     FailureCode: winlog.event_data.FailureCode
     FileName: file.path
@@ -137,9 +190,11 @@ fieldmappings:
     ClassId: winlog.event_data.ClassId
     DeviceDescription: winlog.event_data.DeviceDescription
     # ErrorCode =>  printservice-admin  EventID: 4909 or 808
-    ErrorCode: winlog.event_data.ErrorCode 
+    ErrorCode:
+        service=windefend: winlog.event_data.Error\ Code
+        default: winlog.event_data.ErrorCode
     FilePath: winlog.event_data.FilePath
-    # Filename =>  product: antivirus
+    # Filename =>  category: antivirus
     Filename: winlog.event_data.Filename    
     LDAPDisplayName: winlog.event_data.LDAPDisplayName
     # Level => Source: MSExchange Control Panel EventID: 4
@@ -156,22 +211,25 @@ fieldmappings:
     Image: process.executable
     FileVersion: 
         category=process_creation: process.pe.file_version
-        category=image_load: process.pe.file_version
+        category=image_load: file.pe.file_version
         default: winlog.event_data.FileVersion
     Description:
         category=process_creation: process.pe.description
-        category=image_load: process.pe.description
+        category=image_load: file.pe.description
         category=sysmon_error: winlog.event_data.Description
         default: winlog.event_data.Description
     Product:
         category=process_creation: process.pe.product
-        category=image_load: process.pe.product
+        category=image_load: file.pe.product
         default: winlog.event_data.Product
     Company: 
         category=process_creation: process.pe.company
-        category=image_load: process.pe.company
+        category=image_load: file.pe.company
         default: winlog.event_data.Company
-    OriginalFileName: process.pe.original_file_name
+    OriginalFileName: 
+        category=process_creation: process.pe.original_file_name
+        category=image_load: file.pe.original_file_name
+        default: winlog.event_data.OriginalFileName
     CommandLine: 
         category=process_creation: process.command_line
         service=security: process.command_line
@@ -186,6 +244,9 @@ fieldmappings:
     ParentProcessId: process.parent.pid
     ParentImage: process.parent.executable
     ParentCommandLine: process.parent.command_line
+    ParentUser: winlog.event_data.ParentUser  #Sysmon 13.30
+    SourceUser: winlog.event_data.SourceUser  #Sysmon 13.30
+    TargetUser: winlog.event_data.TargetUser  #Sysmon 13.30
     TargetFilename: file.path
     CreationUtcTime: winlog.event_data.CreationUtcTime
     PreviousCreationUtcTime: winlog.event_data.PreviousCreationUtcTime
@@ -278,6 +339,7 @@ fieldmappings:
     CommandType: powershell.command.type
     EngineVersion: 
         service=powershell-classic: powershell.engine.version
+        service=windefend: winlog.event_data.Engine\ Version
         default: winlog.event_data.EngineVersion
     HostApplication: process.command_line
     HostId: process.entity_id
@@ -387,7 +449,9 @@ fieldmappings:
     NewTargetUserName: winlog.event_data.NewTargetUserName
     NewTime: winlog.event_data.NewTime
     NewUacValue: winlog.event_data.NewUacValue
-    NewValue: winlog.event_data.NewValue
+    NewValue:
+        service=windefend: winlog.event_data.New\ Value
+        default: winlog.event_data.NewValue
     NewValueType: winlog.event_data.NewValueType
     ObjectClass: winlog.event_data.ObjectClass
     ObjectDN: winlog.event_data.ObjectDN
@@ -400,7 +464,9 @@ fieldmappings:
     OldSd: winlog.event_data.OldSd
     OldTargetUserName: winlog.event_data.OldTargetUserName
     OldUacValue: winlog.event_data.OldUacValue
-    OldValue: winlog.event_data.OldValue
+    OldValue:
+        service=windefend: winlog.event_data.Old\ Value
+        default: winlog.event_data.OldValue
     OldValueType: winlog.event_data.OldValueType
     OpCorrelationID: winlog.event_data.OpCorrelationID
     OperationType: winlog.event_data.OperationType
@@ -413,7 +479,9 @@ fieldmappings:
     PreviousTime: winlog.event_data.PreviousTime
     PrimaryGroupId: winlog.event_data.PrimaryGroupId
     PrivilegeList: winlog.event_data.PrivilegeList
-    ProcessName: process.executable
+    ProcessName:
+        service=windefend: winlog.event_data.Process\ Name
+        default: process.executable
     ProfilePath: winlog.event_data.ProfilePath
     Properties: winlog.event_data.Properties
     PuaCount: winlog.event_data.PuaCount
@@ -469,12 +537,8 @@ fieldmappings:
     TargetOutboundUserName: winlog.event_data.TargetOutboundUserName
     TargetServerName: winlog.event_data.TargetServerName
     TargetSid: winlog.event_data.TargetSid
-    TargetUserName:
-        service=security: user.name
-        default: winlog.event_data.TargetUserName
-    TargetUserSid:
-        service=security: user.id
-        default: winlog.event_data.TargetUserSid
+    TargetUserName: winlog.event_data.TargetUserName
+    TargetUserSid: winlog.event_data.TargetUserSid
     TaskContent: winlog.event_data.TaskContent
     TaskName: winlog.event_data.TaskName
     TicketEncryptionType: winlog.event_data.TicketEncryptionType
@@ -508,40 +572,42 @@ fieldmappings:
     #
     # Microsoft-Windows-Windows Defender/Operational
     #
-    Action ID: winlog.event_data.Action\ ID
-    Action Name: winlog.event_data.Action\ Name
-    Additional Actions ID: winlog.event_data.Additional\ Actions\ ID
-    Additional Actions String: winlog.event_data.Additional\ Actions\ String
-    Category ID: winlog.event_data.Category\ ID
-    Category Name: winlog.event_data.Category\ Name
-    Detection ID: winlog.event_data.Detection\ ID
-    Detection Time: winlog.event_data.Detection\ Time
-    Detection User: winlog.event_data.Detection\ User
-    Engine Version: winlog.event_data.Engine\ Version
-    Error Code: winlog.event_data.Error\ Code
-    Error Description: winlog.event_data.Error\ Description
-    Execution ID: winlog.event_data.Execution\ ID
-    Execution Name: winlog.event_data.Execution\ Name
+    ActionID: winlog.event_data.Action\ ID
+    ActionName: winlog.event_data.Action\ Name
+    AdditionalActionsID: winlog.event_data.Additional\ Actions\ ID
+    AdditionalActionsString: winlog.event_data.Additional\ Actions\ String
+    CategoryID: winlog.event_data.Category\ ID
+    CategoryName: winlog.event_data.Category\ Name
+    DetectionID: winlog.event_data.Detection\ ID
+    DetectionTime: winlog.event_data.Detection\ Time
+    DetectionUser: winlog.event_data.Detection\ User
+    ErrorDescription: winlog.event_data.Error\ Description
+    ExecutionID: winlog.event_data.Execution\ ID
+    ExecutionName: winlog.event_data.Execution\ Name
     FWLink: winlog.event_data.FWLink
-    New Value: winlog.event_data.New\ Value
-    Old Value: winlog.event_data.Old\ Value
-    Origin ID: winlog.event_data.Origin\ ID
-    Origin Name: winlog.event_data.Origin\ Name
+    OriginID: winlog.event_data.Origin\ ID
+    OriginName: winlog.event_data.Origin\ Name
     Path: winlog.event_data.Path
-    Post Clean Status: winlog.event_data.Post\ Clean\ Status
-    Pre Execution Status: winlog.event_data.Pre\ Execution\ Status
-    Process Name: winlog.event_data.Process\ Name
-    Product Name: winlog.event_data.Product\ Name
-    Product Version: winlog.event_data.Product\ Version
-    Remediation User: winlog.event_data.Remediation\ User
-    Security intelligence Version: winlog.event_data.Security\ intelligence\ Version
-    Severity ID: winlog.event_data.Severity\ ID
-    Severity Name: winlog.event_data.Severity\ Name
-    Source ID: winlog.event_data.Source\ ID
-    Source Name: winlog.event_data.Source\ Name
-    Status Code: winlog.event_data.Status\ Code
-    Status Description: winlog.event_data.Status\ Description
-    Threat ID: winlog.event_data.Threat\ ID
-    Threat Name: winlog.event_data.Threat\ Name
-    Type ID: winlog.event_data.Type\ ID
-    Type Name: winlog.event_data.Type\ Name
+    PostCleanStatus: winlog.event_data.Post\ Clean\ Status
+    PreExecutionStatus: winlog.event_data.Pre\ Execution\ Status
+    ProductName: winlog.event_data.Product\ Name
+    ProductVersion: winlog.event_data.Product\ Version
+    RemediationUser: winlog.event_data.Remediation\ User
+    SecurityintelligenceVersion: winlog.event_data.Security\ intelligence\ Version
+    SeverityID: winlog.event_data.Severity\ ID
+    SeverityName: winlog.event_data.Severity\ Name
+    SourceID: winlog.event_data.Source\ ID
+    SourceName: winlog.event_data.Source\ Name
+    StatusCode: winlog.event_data.Status\ Code
+    StatusDescription: winlog.event_data.Status\ Description
+    ThreatID: winlog.event_data.Threat\ ID
+    ThreatName: winlog.event_data.Threat\ Name
+    TypeID: winlog.event_data.Type\ ID
+    TypeName: winlog.event_data.Type\ Name
+    #
+    # Microsoft-Windows-Windows Firewall With Advanced Security/Firewall
+    #
+    ApplicationPath: winlog.event_data.ApplicationPath
+    ModifyingApplication: winlog.event_data.ModifyingApplication
+    Action: winlog.event_data.Action
+    

@@ -1,0 +1,37 @@
+title: Image Load of VSS Dll by Uncommon Executable
+id: 37774c23-25a1-4adb-bb6d-8bb9fd59c0f8
+status: experimental
+description: Detects the image load of VSS DLL by uncommon executables
+references:
+    - https://github.com/ORCx41/DeleteShadowCopies
+author: frack113
+date: 2022/10/31
+modified: 2022/12/14
+tags:
+    - attack.defense_evasion
+    - attack.impact
+    - attack.t1490
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith: 
+            - '\vsstrace.dll'
+            - '\vssapi.dll'
+    filter_legit:
+        Image|startswith:
+            - 'C:\Windows\'
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+            # The following filter is required because of many FPs cause by :
+            # C:\ProgramData\Package Cache\{10c6cfdc-27af-43fe-bbd3-bd20aae88451}\dotnet-sdk-3.1.425-win-x64.exe
+            # C:\ProgramData\Package Cache\{b9cfa33e-ace4-49f4-8bb4-82ded940990a}\windowsdesktop-runtime-6.0.11-win-x86.exe
+            # C:\ProgramData\Package Cache\{50264ff2-ad47-4569-abc4-1c350f285fb9}\aspnetcore-runtime-6.0.11-win-x86.exe
+            # C:\ProgramData\Package Cache\{2dcef8c3-1563-4149-a6ec-5b6c98500d7d}\dotnet-sdk-6.0.306-win-x64.exe
+            # etc.
+            - 'C:\ProgramData\Package Cache\'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: high

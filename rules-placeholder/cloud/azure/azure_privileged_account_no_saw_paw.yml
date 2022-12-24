@@ -1,0 +1,32 @@
+title: Privilege Role Elevation Not Occuring on SAW or PAW
+id: 38a5e67b-436a-4e77-9f73-f48a82626890
+status: experimental
+description: Detects failed sign-in from a PAW or SAW device
+references:
+    - https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/security-operations-privileged-accounts#things-to-monitor
+author: Mark Morowczynski '@markmorow', Yochana Henderson, '@Yochana-H'
+date: 2022/08/11
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1078
+logsource:
+    product: azure
+    service: signinlogs
+detection:
+    # You have to tune the rule for your environment before use it
+    selection:
+        properties.message|contains: Add memmber to role completed (PIM aciviation)
+        # Countries you DO operate out of e,g GB, use list for mulitple
+        Location: '%LegitCountries%'
+        IPaddress: '%UnApprovedIp%'
+        # unapproved browser, operating system
+        DeviceInfo: '%UnApprovedDevice%'
+        DeviceDetail.isCompliant: 'false'
+        Status:
+            - Sucess
+            - failure
+    condition: selection
+falsepositives:
+     - Not using a PAW/SAW in the environment
+level: high

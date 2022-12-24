@@ -1,0 +1,52 @@
+title: Conhost Spawned By Suspicious Parent Process
+id: cbb9e3d1-2386-4e59-912e-62f1484f7a89
+status: experimental
+description: Detects when the Console Window Host (conhost.exe) process is spawned by a suspicious parent process, which could be indicative of code injection.
+references:
+    - https://www.elastic.co/guide/en/security/current/conhost-spawned-by-suspicious-parent-process.html
+author: Tim Rauch
+date: 2022/09/28
+modified: 2022/12/02
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\conhost.exe'
+        ParentImage|endswith:
+            - '\svchost.exe'
+            - '\lsass.exe'
+            - '\services.exe'
+            - '\smss.exe'
+            - '\winlogon.exe'
+            - '\explorer.exe'
+            # - '\dllhost.exe'  # FP on clean system from grandparent 'svchost.exe -k DcomLaunch -p'
+            - '\rundll32.exe'
+            - '\regsvr32.exe'
+            - '\userinit.exe'
+            - '\wininit.exe'
+            - '\spoolsv.exe'
+            # - '\wermgr.exe'  # Legitimate parent as seen in EchoTrail https://www.echotrail.io/insights/search/wermgr.exe
+            # - '\csrss.exe'  # Legitimate parent as seen in EchoTrail https://www.echotrail.io/insights/search/csrss.exe
+            # - '\ctfmon.exe'  # Seen several times in a testing environment
+    filter:
+        ParentCommandLine|contains:
+            - '-k apphost -s AppHostSvc'
+            - '-k imgsvc'
+            - '-k localService -p -s RemoteRegistry'
+            - '-k LocalSystemNetworkRestricted -p -s NgcSvc'
+            - '-k NetSvcs -p -s NcaSvc'
+            - '-k netsvcs -p -s NetSetupSvc'
+            - '-k netsvcs -p -s wlidsvc'
+            - '-k NetworkService -p -s DoSvc'
+            - '-k wsappx -p -s AppXSvc'
+            - '-k wsappx -p -s ClipSVC'
+            - 'C:\Program Files (x86)\Dropbox\Client\'
+            - 'C:\Program Files\Dropbox\Client\'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high

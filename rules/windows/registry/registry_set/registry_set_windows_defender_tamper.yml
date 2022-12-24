@@ -1,0 +1,53 @@
+title: Disable Windows Defender Functionalities Via Registry Keys
+id: 0eb46774-f1ab-4a74-8238-1155855f2263
+related:
+    - id: a64e4198-c1c8-46a5-bc9c-324c86455fd4
+      type: obsoletes
+    - id: fd115e64-97c7-491f-951c-fc8da7e042fa
+      type: obsoletes
+status: experimental
+description: Detects when attackers or tools disable Windows Defender functionalities via the windows registry
+references:
+    - https://thedfirreport.com/2021/10/18/icedid-to-xinglocker-ransomware-in-24-hours/
+    - https://gist.github.com/anadr/7465a9fde63d41341136949f14c21105
+    - https://admx.help/?Category=Windows_7_2008R2&Policy=Microsoft.Policies.WindowsDefender::SpyNetReporting
+    - https://symantec-enterprise-blogs.security.com/blogs/threat-intelligence/ransomware-hive-conti-avoslocker
+author: AlertIQ, Ján Trenčanský, frack113, Nasreddine Bencherchali
+date: 2022/08/01
+modified: 2022/12/05
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    root:
+        EventType: SetValue
+        TargetObject|contains: '\SOFTWARE\Microsoft\Windows Defender\'
+    selection_dword_1:
+        TargetObject|endswith:
+            - '\Real-Time Protection\DisableBehaviorMonitoring'
+            - '\Real-Time Protection\DisableIOAVProtection'
+            - '\Real-Time Protection\DisableOnAccessProtection'
+            - '\Real-Time Protection\DisableRealtimeMonitoring'
+            - '\Real-Time Protection\DisableScanOnRealtimeEnable'
+            - '\Reporting\DisableEnhancedNotifications'
+            - '\SpyNet\DisableBlockAtFirstSeen'
+            - '\DisableAntiSpyware'
+            - '\DisableAntiVirus'
+        Details: 'DWORD (0x00000001)'
+    selection_dword_0:
+        TargetObject|endswith:
+            - '\SpyNet\SpynetReporting'
+            - '\SpyNet\SubmitSamplesConsent'
+            - '\MpEngine\MpEnablePus'
+        Details: 'DWORD (0x00000000)'
+    filter_msmpeng:
+        Image|contains|all:
+            - 'C:\ProgramData\Microsoft\Windows Defender\platform\'
+            - '\MsMpEng.exe'
+    condition: ( root and 1 of selection_* ) and not 1 of filter*
+falsepositives:
+    - Administrator actions
+level: high

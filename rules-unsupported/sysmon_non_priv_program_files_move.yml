@@ -1,0 +1,32 @@
+title: Files Dropped to Program Files by Non-Priviledged Process
+id: d6d9f4fb-4c1c-4f53-b306-62a22c7c61e1
+description: Search for dropping of files to Windows/Program Files fodlers by non-priviledged processes
+status: experimental
+author: Teymur Kheirkhabarov (idea), Ryan Plas (rule), oscd.community
+date: 2020/10/17
+modified: 2021/08/14
+references:
+    - https://image.slidesharecdn.com/kheirkhabarovoffzonefinal-181117201458/95/hunting-for-privilege-escalation-in-windows-environment-37-638.jpg
+tags:
+    - attack.persistence
+    - attack.defense_evasion
+    - attack.t1574
+    - attack.t1574.010
+logsource:
+    category: file_event
+    product: windows
+detection:
+    integrity:
+        IntegrityLevel: 'Medium'
+    program_files:
+        TargetFilename|contains:
+            - '\Program Files\'
+            - '\Program Files (x86)\'
+    windows:
+        TargetFilename|startswith: '\Windows\'
+    temp:
+        TargetFilename|contains: 'temp'
+    condition: integrity and (program_files or windows and not temp)
+falsepositives:
+    - Unknown
+level: medium

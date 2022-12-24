@@ -1,0 +1,49 @@
+title: DLL Load By System Process From Suspicious Locations
+id: 9e9a9002-56c4-40fd-9eff-e4b09bfa5f6c
+status: experimental
+description: Detects when a system process (ie located in system32, syswow64...etc) loads a DLL from a suspicious location such as %temp%
+references:
+    - https://github.com/hackerhouse-opensource/iscsicpl_bypassUAC (Idea)
+author: Nasreddine Bencherchali
+date: 2022/07/17
+modified: 2022/12/02
+tags:
+    - attack.defense_evasion
+    - attack.t1070
+logsource:
+    product: windows
+    category: image_load
+detection:
+    selection:
+        Image|startswith: 'C:\Windows\'
+        ImageLoaded|contains:
+            # Add more suspicious paths as you see fit in your env
+            - '\Users\Public\'
+            # - '\Desktop\'  # too many FPs
+            - '\Downloads\'
+            - '\AppData\Local\Temp\'
+            - 'C:\PerfLogs\'
+    filter_generic:
+        - Image|endswith: '\msiexec.exe'
+        - ImageLoaded|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+        - Image:
+            - 'C:\Windows\SysWOW64\rundll32.exe' # Typical for installers and updaters
+            - 'C:\Windows\System32\rundll32.exe' # Typical for installers and updaters
+        - CommandLine|contains|all:
+            - '\AppData\Local\Temp\' # Typical for installers and updaters
+            - '\setup.exe'
+    filter_cleanmgr:
+        # Example CLI that generates this event: C:\WINDOWS\system32\cleanmgr.exe /autocleanstoragesense /d C:
+        # Sometimes the DLL gets loaded from %temp%
+        Image: 'C:\Windows\System32\cleanmgr.exe'
+        ImageLoaded|endswith: '\ssshim.dll'
+    filter_mscorsvw:
+        Image|startswith: 'C:\Windows\Microsoft.NET\Framework\v'
+        Image|endswith: '\mscorsvw.exe'
+        ImageLoaded|contains: '\AppData\Local\Temp\'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: high

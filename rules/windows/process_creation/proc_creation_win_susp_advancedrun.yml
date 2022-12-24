@@ -1,0 +1,29 @@
+title: Suspicious AdvancedRun Execution
+id: d2b749ee-4225-417e-b20e-a8d2193cbb84
+status: experimental
+description: Detects the execution of AdvancedRun utility
+references:
+    - https://twitter.com/splinter_code/status/1483815103279603714
+    - https://medium.com/s2wblog/analysis-of-destructive-malware-whispergate-targeting-ukraine-9d5d158f19f3
+    - https://elastic.github.io/security-research/malware/2022/01/01.operation-bleeding-bear/article/
+    - https://www.winhelponline.com/blog/run-program-as-system-localsystem-account-windows/
+author: Florian Roth
+date: 2022/01/20
+modified: 2022/05/13
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        - OriginalFileName: 'AdvancedRun.exe'
+        - CommandLine|contains|all:
+            - ' /EXEFilename '
+            - ' /Run'
+        - CommandLine|contains|all:
+            - ' /WindowState 0'
+            - ' /RunAs '
+            - ' /CommandLine '
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium

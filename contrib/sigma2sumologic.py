@@ -198,7 +198,7 @@ for file in glob.iglob(globpath, recursive=True):
 
     try:
         # Run query
-        # https://github.com/SumoLogic/sumologic-python-sdk/blob/master/scripts/search-job.py
+        # https://github.com/SumoLogic/sumologic-python-sdk/blob/3ad8033deb028ac45ac4099f11c04785fa426f51/scripts/search-job.py
         sumo = SumoLogic(args.accessid, args.accesskey, args.endpoint)
         toTime = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
         fromTime = datetime.datetime.strptime(toTime, "%Y-%m-%dT%H:%M:%S") - datetime.timedelta(hours=24)

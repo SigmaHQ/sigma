@@ -1,0 +1,32 @@
+title: Suspicious CMD Shell Redirect
+id: 8e0bb260-d4b2-4fff-bb8d-3f82118e6892
+status: experimental
+description: Detects inline windows shell commands redirecting output via the ">" symbol to a suspicious location
+references:
+    - https://thedfirreport.com/2022/07/11/select-xmrig-from-sqlserver/
+author: Nasreddine Bencherchali
+date: 2022/07/12
+modified: 2022/11/11
+tags:
+    - attack.execution
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\cmd.exe'
+        - OriginalFileName: 'Cmd.Exe'
+    selection_cli:
+        CommandLine|contains|all:
+            # Add more suspicious locations as you find them
+            - ' > %USERPROFILE%\'
+            - ' > %APPDATA%\'
+            - ' > \Users\Public\'
+            - ' > C:\Users\Public\'
+            - ' > %TEMP%\'
+            - ' > %TMP%\'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate admin scripts
+level: medium

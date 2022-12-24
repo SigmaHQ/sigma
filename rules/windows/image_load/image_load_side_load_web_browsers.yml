@@ -1,0 +1,30 @@
+title: Web Browsers DLL Sideloading
+id: 72ca7c75-bf85-45cd-aca7-255d360e423c
+status: experimental
+description: Detects DLL sideloading of DLLs that are part of web browsers
+references:
+    - https://hijacklibs.net/ # For list of DLLs that could be sideloaded (search for dlls mentioned here in there)
+author: Nasreddine Bencherchali, Wietze Beukema (project and research)
+date: 2022/08/17
+tags:
+    - attack.defense_evasion
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1574.001
+    - attack.t1574.002
+logsource:
+    category: image_load
+    product: windows
+detection:
+    # Google Chrome
+    selection_chrome:
+        ImageLoaded|endswith: '\chrome_frame_helper.dll'
+    filter_chrome:
+        - ImageLoaded|contains: '\AppData\local\Google\Chrome\Application\'
+        - ImageLoaded|startswith:
+            - 'C:\Program Files\Google\Chrome\Application\'
+            - 'C:\Program Files (x86)\Google\Chrome\Application\'
+    condition: selection_chrome and not filter_chrome
+falsepositives:
+    - Unknown
+level: medium

@@ -1,0 +1,25 @@
+title: WMIC Tamper Windows Defender
+id: 51cbac1e-eee3-4a90-b1b7-358efb81fa0a
+status: experimental
+description: Detects potential tampering with Windows Defender settings such as adding exclusion using wmic
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/5c1e6f1b4fafd01c8d1ece85f510160fc1275fbf/atomics/T1562.001/T1562.001.md
+    - https://www.bleepingcomputer.com/news/security/gootkit-malware-bypasses-windows-defender-by-setting-path-exclusions/
+author: frack113
+date: 2022/12/11
+tags:
+    - attack.credential_access
+    - attack.t1546.008
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        - OriginalFileName: 'wmic.exe'
+        - Image|endswith: '\WMIC.exe'
+    selection_cli:
+        CommandLine|contains: '/Namespace:\\\\root\\Microsoft\\Windows\\Defender'
+    condition: all of selection_* 
+falsepositives:
+    - Unknown
+level: high

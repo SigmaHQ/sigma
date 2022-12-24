@@ -1,0 +1,58 @@
+title: Possible Exfiltration Of Data Via CLI
+id: 7d1aaf3d-4304-425c-b7c3-162055e0b3ab
+status: experimental
+description: Detects the use of various cli utility related to web request exfiltrating data
+references:
+    - https://www.sentinelone.com/blog/living-off-windows-defender-lockbit-ransomware-sideloads-cobalt-strike-through-microsoft-security-tool/
+author: Nasreddine Bencherchali
+date: 2022/08/02
+tags:
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_iwr:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\cmd.exe'
+        CommandLine|contains:
+            - 'Invoke-WebRequest'
+            - 'iwr '
+            - 'wget '
+            - 'curl '
+        CommandLine|contains|all:
+            - ' -ur' # Shortest possible version of the -uri flag
+            - ' -me' # Shortest possible version of the -method flag
+            - ' -b'
+            - ' POST '
+    selection_curl:
+        Image|endswith: '\curl.exe'
+        CommandLine|contains: '--ur' # Shortest possible version of the --uri flag
+    selection_curl_data:
+        CommandLine|contains:
+            - ' -d ' # Shortest possible version of the --data flag
+            - ' --data '
+    payloads:
+        - CommandLine|contains:
+            - 'ToBase64String'
+            - 'whoami'
+            - 'nltest'
+            - 'ifconfig'
+            - 'hostname'
+            - 'net view'
+            - 'qprocess'
+            - 'netstat'
+            - 'systeminfo'
+            - 'tasklist'
+            - 'sc query'
+        - CommandLine|contains|all:
+            - 'type '
+            - ' > '
+            - ' C:\'
+    condition: (selection_iwr or all of selection_curl*) and payloads
+falsepositives:
+    - Unlikely
+level: high

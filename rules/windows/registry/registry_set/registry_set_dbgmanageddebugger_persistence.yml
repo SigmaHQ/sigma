@@ -1,0 +1,26 @@
+title: Potential Registry Persistence Attempt Via DbgManagedDebugger
+id: 9827ae57-3802-418f-994b-d5ecf5cd974b
+status: experimental
+description: Detects the addition of the "Debugger" value to the "DbgManagedDebugger" key in order to achieve persistence. Which will get invoked when an application crashes
+references:
+    - https://www.hexacorn.com/blog/2013/09/19/beyond-good-ol-run-key-part-4/
+    - https://github.com/last-byte/PersistenceSniper
+author: frack113
+date: 2022/08/07
+modified: 2022/12/19
+tags:
+    - attack.persistence
+    - attack.t1574
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|endswith: '\Microsoft\.NETFramework\DbgManagedDebugger'
+    filter:
+        Details: '"C:\Windows\system32\vsjitdebugger.exe" PID %d APPDOM %d EXTEXT "%s" EVTHDL %d'
+    condition: selection and not filter
+falsepositives:
+    - Legitimate use of the key to setup a debugger. Which is often the case on developers machines
+level: medium

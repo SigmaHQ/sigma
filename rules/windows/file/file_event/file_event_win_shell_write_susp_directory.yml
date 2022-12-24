@@ -1,0 +1,48 @@
+title: Windows Shell File Write to Suspicious Folder
+id: 1277f594-a7d1-4f28-a2d3-73af5cbeab43
+status: experimental
+description: Detects a Windows executable that writes files to suspicious folders
+references:
+    - Internal Research
+author: Florian Roth
+date: 2021/11/20
+modified: 2022/07/14
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_shells:
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\sh.exe'
+            - '\bash.exe'
+            - '\msbuild.exe'  # https://github.com/elastic/detection-rules/blob/c76a39796972ecde44cb1da6df47f1b6562c9770/rules/windows/defense_evasion_execution_msbuild_started_by_office_app.toml
+            - '\certutil.exe'
+        TargetFilename|contains:
+            - 'C:\Users\Public'
+            - 'C:\PerfLogs'
+    selection_program:
+        Image|endswith:
+            - '\schtasks.exe'
+            - '\wmic.exe'  # https://app.any.run/tasks/c903e9c8-0350-440c-8688-3881b556b8e0/
+            - '\mshta.exe'
+            # - '\rundll32.exe'
+            - '\forfiles.exe'
+            - '\scriptrunner.exe'
+            - '\certutil.exe'
+        TargetFilename|contains:
+            - 'C:\Users\Public'
+            - 'C:\PerfLogs'
+            - '\AppData\'
+            - 'C:\Windows\Temp'
+    condition: 1 of selection*
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Unknown
+level: high

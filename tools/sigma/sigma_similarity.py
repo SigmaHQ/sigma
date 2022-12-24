@@ -68,15 +68,24 @@ def main():
     if args.primary:
         with open(args.primary, "r") as f:
             primary_paths = { pathname.strip() for pathname in f.readlines() }
-
     parsed = {
-                str(path): SigmaCollectionParser(path.open().read())
+                str(path): SigmaCollectionParser(path.open(encoding='utf-8').read())
                 for path in paths
             }
-    converted = {
-                str(path): list(sigma_collection.generate(backend))
-                for path, sigma_collection in parsed.items()
-            }
+               
+ #   converted = {
+ #               str(path): list(sigma_collection.generate(backend))
+ #               for path, sigma_collection in parsed.items()
+ #           }
+    converted = {}
+    for path, sigma_collection in parsed.items():
+        try:
+            value = list(sigma_collection.generate(backend))
+            key = str(path)
+            converted[key] = value
+        except :
+            continue #when Raise NotImplementedError: Base backend doesn't support multiple conditions
+            
     converted_flat = (
                 (path, i, normalized)
                 for path, nlist in converted.items()

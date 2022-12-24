@@ -8,6 +8,7 @@ from .exceptions import NotSupportedError
 
 
 class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
+    """Converts Sigma rule into sysmon XML configuration"""
     identifier = "sysmon"
     active = True
     andToken = " AND "
@@ -212,11 +213,11 @@ class SysmonConfigBackend(SingleTextQueryBackend, MultiRuleOutputMixin):
             raise NotSupportedError("Not supported condition.")
 
     def createTableFromLogsource(self):
-        if self.logsource.get("product", "") != "windows":
+        if self.logsource.get("product", "") not in ("linux","windows"):
             raise NotSupportedError(
-                "Not supported logsource. Should be product `windows`.")
+                "Not supported logsource. Should be product `linux` or `windows`.")
         for item in self.logsource.values():
-            if item.lower() in self.allowedSource.keys():
+            if str(item).lower() in self.allowedSource.keys():
                 self.table = self.allowedSource.get(item.lower())
                 break
         else:

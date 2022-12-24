@@ -50,6 +50,17 @@ def _mapProcessCreationOperations(node):
 
     return node
 
+def _validateSubrules(elem):
+    # Make sure that all elements in the rules
+    # are actual operators. Otherwise this
+    # indicates the Sigma engine provided us
+    # with partial contextual information we
+    # cannot map to LimaCharlie data with
+    # any certainty.
+    for sub in elem.get( 'rules', [] ):
+        if not isinstance( sub, dict ):
+            raise NotImplementedError("Sub-rule does not contain an operator.")
+
 # We support many different log sources so we keep different mapping depending
 # on the log source and category.
 # The mapping key is product/category/service.
@@ -115,6 +126,7 @@ _allFieldMappings = {
                 "ParentCommandLine": "event/PARENT/COMMAND_LINE",
                 "User": "event/USER_NAME",
                 "OriginalFileName": "event/ORIGINAL_FILE_NAME",
+                "OriginalFilename": "event/ORIGINAL_FILE_NAME",
                 # Custom field names coming from somewhere unknown.
                 "NewProcessName": "event/FILE_PATH",
                 "ProcessCommandLine": "event/COMMAND_LINE",
@@ -226,6 +238,7 @@ _allFieldMappings = {
                 "ParentCommandLine": "event/PARENT/COMMAND_LINE",
                 "User": "event/USER_NAME",
                 "OriginalFileName": "event/ORIGINAL_FILE_NAME",
+                "OriginalFilename": "event/ORIGINAL_FILE_NAME",
                 # Custom field names coming from somewhere unknown.
                 "NewProcessName": "event/FILE_PATH",
                 "ProcessCommandLine": "event/COMMAND_LINE",
@@ -403,6 +416,7 @@ class LimaCharlieBackend(BaseBackend):
                     result,
                 ]
             }
+            _validateSubrules(result)
             if self._postOpMapper is not None:
                 result = self._postOpMapper(result)
         return yaml.safe_dump(result)
@@ -424,6 +438,7 @@ class LimaCharlieBackend(BaseBackend):
             "op": "and",
             "rules": filtered,
         }
+        _validateSubrules(result)
         if self._postOpMapper is not None:
             result = self._postOpMapper(result)
         return result
@@ -445,6 +460,7 @@ class LimaCharlieBackend(BaseBackend):
             "op": "or",
             "rules": filtered,
         }
+        _validateSubrules(result)
         if self._postOpMapper is not None:
             result = self._postOpMapper(result)
         return result
@@ -500,6 +516,9 @@ class LimaCharlieBackend(BaseBackend):
             }
             if op == "matches":
                 newOp["re"] = newVal
+            elif op == "exists":
+                # Exists has no value.
+                newOp.pop( "case sensitive", None )
             else:
                 newOp["value"] = newVal
             if self._postOpMapper is not None:
@@ -518,6 +537,9 @@ class LimaCharlieBackend(BaseBackend):
                 }
                 if op == "matches":
                     newOp["re"] = newVal
+                elif op == "exists":
+                    # Exists has no value.
+                    newOp.pop( "case sensitive", None )
                 else:
                     newOp["value"] = newVal
                 if self._postOpMapper is not None:
@@ -573,6 +595,9 @@ class LimaCharlieBackend(BaseBackend):
         # Is there any wildcard in this string? If not, we can short circuit.
         if "*" not in val and "?" not in val:
             return ("is", val)
+
+        if val == "*":
+            return ("exists", None)
 
         # Now we do a small optimization for the shortcut operators
         # available in LC. We try to see if the wildcards are around
@@ -687,6 +712,9 @@ class LimaCharlieBackend(BaseBackend):
             }
             if op == "matches":
                 newOp["re"] = newVal
+            elif op == "exists":
+                # Exists has no value.
+                pass
             else:
                 newOp["value"] = newVal
             mapped.append(newOp)

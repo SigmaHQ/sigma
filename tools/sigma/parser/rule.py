@@ -16,7 +16,7 @@
 
 import re
 from .exceptions import SigmaParseError
-from .condition import SigmaConditionTokenizer, SigmaConditionParser, ConditionAND, ConditionOR, ConditionNULLValue
+from .condition import SigmaConditionTokenizer, SigmaConditionParser, ConditionAND, ConditionOR, ConditionNULLValue, SigmaSearchValueAsIs
 from .modifiers import apply_modifiers
 
 class SigmaParser:
@@ -167,5 +167,10 @@ class SigmaParser:
                     cond.add(index_cond)
                 else:           # only one index, add directly to AND from above
                     cond.add((index_field, indices[0]))
+
+            # Add free-text search condition, expressed in the configuration as 'search' field.
+            if len(logsource.search) > 0:
+                for item in logsource.search:
+                    cond.add(SigmaSearchValueAsIs(item))
 
             return cond

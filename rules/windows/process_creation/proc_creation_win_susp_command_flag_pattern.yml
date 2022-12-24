@@ -1,0 +1,36 @@
+title: Suspicious RunAs-Like Flag Combination
+id: 50d66fb0-03f8-4da0-8add-84e77d12a020
+status: experimental
+description: Detects suspicious command line flags that let the user set a target user and command as e.g. seen in PsExec-like tools
+references:
+    - https://www.trendmicro.com/en_us/research/22/k/hack-the-real-box-apt41-new-subgroup-earth-longzhi.html
+author: Florian Roth
+date: 2022/11/11
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_user:
+        CommandLine|contains:
+            - ' -u system '
+            - ' --user system '
+            - ' -u NT'
+            - ' -u "NT'
+            - " -u 'NT"
+            - ' --system '
+            - ' -u administrator '
+    selection_command:
+        CommandLine|contains:
+            - ' -c cmd'
+            - ' -c "cmd'
+            - ' -c powershell'
+            - ' -c "powershell'
+            - ' --command cmd'
+            - ' --command powershell'
+            - ' -c whoami'
+            - ' -c wscript'
+            - ' -c cscript'
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: medium

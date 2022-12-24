@@ -1,0 +1,32 @@
+title: Suspicious Xor PowerShell Command Line
+id: 5b572dcf-254b-425c-a8c5-d9af6bea35a6
+related:
+    - id: cdf05894-89e7-4ead-b2b0-0a5f97a90f2f
+      type: similar
+status: test
+description: Detects specific combinations of encoding methods in the PowerShell command lines
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=65
+author: Teymur Kheirkhabarov (idea), Vasiliy Burov (rule), oscd.community, Tim Shelton
+date: 2022/07/06
+modified: 2022/12/02
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        CommandLine|contains|all:
+            - 'ForEach'
+            - 'Xor'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: medium

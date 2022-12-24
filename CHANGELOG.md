@@ -6,6 +6,58 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 from version 0.14.0.
 
+## 0.22.1 - 2022-09-09
+
+### Fixed
+
+* Replaced generic fix for Splunk AND/OR precedence issue with a specific one because the initial fix broke too many
+  backends. Splunk queries now have generally parentheses around AND expressions, sometimes more. Use sigma-cli/pySigma
+  for cleaner Splunk queries.
+
+## 0.22 - 2022-09-08
+
+### Added
+
+* 'windash' modifier
+* DNIF backend
+* Hedera backend
+* StreamAlert backend
+* SQLite backend can handle null values.
+* Support for different Windows log sources.
+
+### Changed
+
+* Various config improvements.
+
+### Fixed
+
+* Wrapping expressions from expanding modifiers into ORed subexpressions.
+* Various mapping fixes.
+
+## 0.21 - 2022-04-08
+
+### Added
+
+* Azure Sentinel backend
+* OpenSearch Monitor backend
+* Hawk backend
+* Datadog backend
+* FortiSIEM backend
+* Lacework agent data support
+* Athena SQL backend
+* Regex support in SQLite backend
+* Additional field mappings
+
+### Changed
+
+* Log source refactoring
+
+### Fixed
+
+* Mapping fixes
+* Various bugfixes
+* Disabled problematic optimization
+
 ## 0.20 - 2021-08-14
 
 ### Added
@@ -23,7 +75,7 @@ from version 0.14.0.
 * Elastic EQL backend
 * Additional conversion selection filters
 * Filter negation
-* Specifiy table in SQL backend
+* Specify table in SQL backend
 * Generic registry event log source
 * Chronicle backend
 

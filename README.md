@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Neo23x0/sigma.svg?branch=master)](https://travis-ci.org/Neo23x0/sigma)
+[![sigma build status](https://github.com/SigmaHQ/sigma/actions/workflows/sigma-test.yml/badge.svg?branch=master)](https://github.com/SigmaHQ/sigma/actions?query=branch%3Amaster)
 
 ![sigma_logo](./images/Sigma_0.3.png)
 
@@ -60,22 +60,22 @@ The current specification is a proposal. Feedback is requested.
 
 ## Rule Creation
 
-Florian wrote a short [rule creation tutorial](https://www.nextron-systems.com/2018/02/10/write-sigma-rules/) that can help you getting started.
+Florian wrote a short [rule creation tutorial](https://www.nextron-systems.com/2018/02/10/write-sigma-rules/) that can help you getting started. Use the [Rule Creation Guide](https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide) in our Wiki for a clear guidance on how to populate the various field in Sigma rules.
 
 ## Rule Usage
 
 1. Download or clone the repository
 2. Check the `./rules` sub directory for an overview on the rule base
 3. Run `python sigmac --help` in folder `./tools` to get a help on the rule converter
-4. Convert a rule of your choice with `sigmac` like `./sigmac -t splunk -c tools/config/generic/sysmon.yml ./rules/windows/process_creation/win_susp_whoami.yml`
+4. Convert a rule of your choice with `sigmac` like `./sigmac -t splunk -c config/generic/sysmon.yml ../rules/windows/process_creation/proc_creation_win_susp_whoami.yml`
 5. Convert a whole rule directory with `python sigmac -t splunk -r ../rules/proxy/`
 6. Check the `./tools/config` folder and the [wiki](https://github.com/Neo23x0/sigma/wiki/Converter-Tool-Sigmac) if you need custom field or log source mappings in your environment
 
 ## Troubles / Troubleshooting / Help
 
-If you need help for a specific supported backend you can use e.g. `sigmac --backend-help elastalert-dsl`. More details on the usage of `sigmac` can be found in the dedicated [README.md](https://github.com/Neo23x0/sigma/blob/master/tools/README.md).
+If you need help for a specific supported backend you can use e.g. `sigmac --backend-help elastalert-dsl`. More details on the usage of `sigmac` can be found in the dedicated [README.md](https://github.com/SigmaHQ/sigma/blob/master/tools/README.md).
 
-Be sure to checkout the [guidance on backend specific settings](https://github.com/Neo23x0/sigma/blob/master/tools/README.md#choosing-the-right-sigmac) for `sigmac`.
+Be sure to checkout the [guidance on backend specific settings](https://github.com/SigmaHQ/sigma/blob/master/tools/README.md#choosing-the-right-sigmac) for `sigmac`.
 
 # Examples
 
@@ -101,6 +101,8 @@ Windows 'Security' Eventlog: Suspicious Number of Failed Logons from a Single So
 Sigmac converts sigma rules into queries or inputs of the supported targets listed below. It acts as a frontend to the
 Sigma library that may be used to integrate Sigma support in other projects. Further, there's `merge_sigma.py` which
 merges multiple YAML documents of a Sigma rule collection into simple Sigma rules.
+
+**WARNING: Do not provide conversion backends for this tool anymore. We'll soon set a date for its deprecation. Since October 2020, we're working on a much more flexible and stable module named [pySigma](https://github.com/SigmaHQ/pySigma) and a command line interface named [sigma-cli](https://github.com/SigmaHQ/sigma-cli) that makes use of pySigma.**
 
 ### Usage
 
@@ -192,7 +194,7 @@ tools/sigmac -t splunk -c ~/my-splunk-mapping.yml -c tools/config/generic/window
 ### Supported Targets
 
 * [Splunk](https://www.splunk.com/) (plainqueries and dashboards)
-* [ElasticSearch Query Strings](https://www.elastic.co/)
+* [ElasticSearch Query Strings](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html)
 * [ElasticSearch Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html)
 * [Kibana](https://www.elastic.co/de/products/kibana)
 * [Elastic X-Pack Watcher](https://www.elastic.co/guide/en/x-pack/current/xpack-alerting.html)
@@ -213,9 +215,9 @@ tools/sigmac -t splunk -c ~/my-splunk-mapping.yml -c tools/config/generic/window
 * [uberAgent ESA](https://uberagent.com/)
 * [Devo](https://devo.com)
 * [LogRhythm](https://logrhythm.com/)
-
-Current work-in-progress
-* [Splunk Data Models](https://docs.splunk.com/Documentation/Splunk/7.1.0/Knowledge/Aboutdatamodels)
+* [Datadog Logs](https://docs.datadoghq.com/logs/explorer/search_syntax/)
+* [FortiSIEM](https://docs.fortinet.com)
+* [HAWK.io MDR](https://hawk.io/)
 
 New targets are continuously developed. You can get a list of supported targets with `sigmac --lists` or `sigmac -l`.
 
@@ -254,18 +256,21 @@ and included with `@filename` as parameter on the command line.
 
 Example:
 *misp.conf*:
-```
+
+```apacheconf
 url https://host
 key foobarfoobarfoobarfoobarfoobarfoobarfoo
 ```
 
 Load Sigma rule into MISP event 1234:
-```
+
+```bash
 sigma2misp @misp.conf --event 1234 sigma_rule.py
 ```
 
 Load Sigma rules in directory sigma_rules/ into one newly created MISP event with info set to *Test Event*:
-```
+
+```bash
 sigma2misp @misp.conf --same-event --info "Test Event" -r sigma_rules/
 ```
 
@@ -278,11 +283,12 @@ sigma2misp @misp.conf --same-event --info "Test Event" -r sigma_rules/
 Generates a [MITRE ATT&CK® Navigator](https://github.com/mitre/attack-navigator/) heatmap from a directory containing sigma rules.
 
 Requirements:
-- Sigma rules tagged with a `attack.tXXXX` tag (e.g.: `attack.t1086`)
+
+* Sigma rules tagged with a `attack.tXXXX` tag (e.g.: `attack.t1086`)
 
 Usage samples:
 
-```
+```bash
 # Use the default "rules" folder
 ./tools/sigma2attack
 
@@ -304,20 +310,20 @@ S2AN was developed to be used as a standalone tool or as part of a CI/CD pipelin
 
 The directory `contrib` contains scripts that were contributed by the community:
 
-* `sigma2elastalert.py`i by David Routin: A script that converts Sigma rules to Elastalert configurations. This tool
+* `sigma2elastalert.py` is by David Routin: A script that converts Sigma rules to Elastalert configurations. This tool
   uses *sigmac* and expects it in its path.
 
 These tools are not part of the main toolchain and maintained separately by their authors.
 
 # Next Steps
 
-* Integration of MITRE ATT&CK® framework identifier to the rule set
-* Integration into Threat Intel Exchanges
-* Attempts to convince others to use the rule format in their reports, threat feeds, blog posts, threat sharing platforms
+* Finalizing and promoting the new [pySigma](https://github.com/SigmaHQ/pySigma) codebase
+* Development of backends for the new converter (in separate github repositories)
 
 # Projects or Products that use Sigma
 
 * [MISP](http://www.misp-project.org/2017/03/26/MISP.2.4.70.released.html) (since version 2.4.70, March 2017)
+* [Atomic Threat Coverage](https://github.com/atc-project/atomic-threat-coverage) (since December 2018)
 * [SOC Prime - Sigma Rule Editor](https://tdm.socprime.com/sigma/)
 * [uncoder.io](https://uncoder.io/) - Online Translator for SIEM Searches
 * [THOR](https://www.nextron-systems.com/2018/06/28/spark-applies-sigma-rules-in-eventlog-scan/) - Scan with Sigma rules on endpoints
@@ -327,6 +333,8 @@ These tools are not part of the main toolchain and maintained separately by thei
 * [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 * [TimeSketch](https://github.com/google/timesketch/commit/0c6c4b65a6c0f2051d074e87bbb2da2424fa6c35)
 * [SIΣGMA](https://github.com/3CORESec/SIEGMA) - SIEM consumable generator that utilizes Sigma for query conversion
+* [Aurora Agent](https://www.nextron-systems.com/2021/11/13/aurora-sigma-based-edr-agent-preview/)
+* [Confluent Sigma](https://github.com/confluentinc/cyber/tree/master/confluent-sigma)
 
 Sigma is available in some Linux distribution repositories:
 
@@ -341,8 +349,9 @@ If you want to contribute, you are more then welcome. There are numerous ways to
 If you use it, let us know what works and what does not work.
 
 E.g.
-- Tell us about false positives (issues section)
-- Try to provide an improved rule (new filter) via [pull request](https://help.github.com/en/articles/editing-files-in-another-users-repository) on that rule
+
+* Tell us about false positives (issues section)
+* Try to provide an improved rule (new filter) via [pull request](https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files#editing-files-in-another-users-repository) on that rule
 
 ## Work on open issues
 
@@ -350,7 +359,7 @@ The github issue tracker is a good place to start tackling some issues others ra
 
 ## Provide Backends / Backend Features / Bugfixes
 
-Various requests for sigmac (sigma converter) backends exist. Some backends are very limited and need features. We are working on a documentation on how to write new backends but our time for this project is currently mostly spent for issue resolutions.
+Please don't provide backends for the old code base (sigmac) anymore. Please use the new [pySigma](https://github.com/SigmaHQ/pySigma). We are working on a documentation on how to write new backends for that new code base. An example backend for Splunk can be found [here](https://github.com/SigmaHQ/pySigma-backend-splunk).
 
 ## Spread the word
 
@@ -360,9 +369,9 @@ Last but not least, the more people use Sigma, the better, so help promote it by
 
 The content of this repository is released under the following licenses:
 
-* The toolchain (everything under `tools/`) is licensed under the [GNU Lesser General Public License](https://www.gnu.org/licenses/lgpl-3.0.en.html).
-* The [Sigma specification](https://github.com/Neo23x0/sigma/wiki) is public domain.
-* Everything else, especially the rules contained in the `rules/` directory is released under the [Detection Rule License (DRL) 1.0](https://github.com/Neo23x0/sigma/blob/master/LICENSE.Detection.Rules.md).
+* The toolchain (everything under tools/) is licensed under the[GNU Lesser General Public License](https://www.gnu.org/licenses/lgpl-3.0.en.html)
+* The [Sigma Specification](https://github.com/SigmaHQ/sigma-specification) and the Sigma logo are public domain
+* The rules contained in the [SigmaHQ repository](https://github.com/SigmaHQ) are released under the [Detection Rule License (DRL) 1.1](https://github.com/SigmaHQ/sigma/blob/master/LICENSE.Detection.Rules.md)
 
 # Credits
 

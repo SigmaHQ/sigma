@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
+import sigma
 from functools import wraps
 from .base import SingleTextQueryBackend
 from .exceptions import NotSupportedError
@@ -83,6 +84,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "ImageLoaded": ("FolderPath", self.default_value_mapping),
                 "LogonType": (self.id_mapping, self.logontype_mapping),
                 "NewProcessName": ("FolderPath", self.default_value_mapping),
+                "OriginalFileName": ("ProcessVersionInfoOriginalFileName", self.default_value_mapping),
                 "ParentCommandLine": ("InitiatingProcessCommandLine", self.default_value_mapping),
                 "ParentName": ("InitiatingProcessFileName", self.default_value_mapping),
                 "ParentProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
@@ -211,6 +213,10 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                     op = "endswith"
                     val = self.cleanValue(val[1:])
 
+        if "\\" in val:
+            val = val.replace("\\\\","\\")
+            return "%s @\"%s\"" % (op, val)
+
         return "%s \"%s\"" % (op, val)
 
     def porttype_mapping(self, val):
@@ -261,6 +267,18 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
         elif (self.category, self.product, self.service) == ("registry_event", "windows", None):
             self.tables.append("DeviceRegistryEvents")
             self.current_table = "DeviceRegistryEvents"
+        elif (self.category, self.product, self.service) == ("registry_add", "windows", None):
+            self.tables.append("DeviceRegistryEvents")
+            self.current_table = "DeviceRegistryEvents"
+        elif (self.category, self.product, self.service) == ("registry_delete", "windows", None):
+            self.tables.append("DeviceRegistryEvents")
+            self.current_table = "DeviceRegistryEvents"
+        elif (self.category, self.product, self.service) == ("registry_set", "windows", None):
+            self.tables.append("DeviceRegistryEvents")
+            self.current_table = "DeviceRegistryEvents"
+        elif (self.category, self.product, self.service) == ("registry_rename", "windows", None):
+            self.tables.append("DeviceRegistryEvents")
+            self.current_table = "DeviceRegistryEvents"    
         elif (self.category, self.service) == ("file_event", None) and self.product in ['windows', 'linux', 'macos']:
             self.tables.append("DeviceFileEvents")
             self.current_table = "DeviceFileEvents"
@@ -415,3 +433,23 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
             return self.generateMapItemTypedNode(mapping[0], value)
 
         return super().generateMapItemNode(node)
+
+    def generateAggregation(self, agg):
+        if agg == None:
+            return ""
+        if agg.aggfunc == sigma.parser.condition.SigmaAggregationParser.AGGFUNC_NEAR:
+            raise NotImplementedError("The 'near' aggregation operator is not yet implemented for this backend")
+        if agg.groupfield == None:
+            if agg.aggfunc_notrans == 'count':
+                if agg.aggfield == None :
+                    return " | summarize val=count() | where val %s %s" % (agg.cond_op, agg.condition)
+                else:
+                    agg.aggfunc_notrans = 'dcount'
+            return " | summarize val=%s(%s) as val | where val %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.cond_op, agg.condition)
+        else:
+            if agg.aggfunc_notrans == 'count':
+                if agg.aggfield == None :
+                    return " | summarize val=count() by %s | where val %s %s" % (agg.groupfield, agg.cond_op, agg.condition)
+                else:
+                    agg.aggfunc_notrans = 'dcount'
+            return " | summarize val=%s(%s) by %s | where val %s %s" % (agg.aggfunc_notrans, agg.aggfield or "", agg.groupfield or "", agg.cond_op, agg.condition)

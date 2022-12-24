@@ -1,0 +1,34 @@
+title: LOLBIN From Abnormal Drive
+id: d4ca7c59-e9e4-42d8-bf57-91a776efcb87
+status: experimental
+description: Detects LOLBINs executing from an abnormal drive such as a mounted ISO.
+author: Christopher Peacock '@securepeacock', SCYTHE '@scythe_io'
+date: 2022/01/25
+modified: 2022/02/14
+references: 
+    - https://thedfirreport.com/2021/12/13/diavol-ransomware/
+    - https://www.scythe.io/library/threat-emulation-qakbot
+tags:
+    - attack.t1218.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+            - '\rundll32.exe'
+            - '\calc.exe'
+            - '\mshta.exe'
+            - '\cscript.exe'
+            - '\wscript.exe'
+            - '\regsvr32.exe'
+            - '\installutil.exe'
+            - '\cmstp.exe'
+    filter_currentdirectory:
+        - CurrentDirectory|contains: 'C:\'
+        - CurrentDirectory: ''
+    filter_null:
+        CurrentDirectory: null
+    condition: selection and not 1 of filter*
+falsepositives:
+    - Rare false positives could occur on servers with multiple drives.
+level: medium

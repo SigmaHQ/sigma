@@ -1,0 +1,33 @@
+title: Invoke-Obfuscation Via Stdin
+id: 9c14c9fa-1a63-4a64-8e57-d19280559490
+status: test
+description: Detects Obfuscated Powershell via Stdin in Scripts
+references:
+    - https://github.com/Neo23x0/sigma/issues/1009 #(Task28)
+author: Nikita Nazarov, oscd.community
+date: 2020/10/12
+modified: 2022/11/16
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        # CommandLine|re: '(?i).*(set).*&&\s?set.*(environment|invoke|\${?input).*&&.*"'
+        # Example 1: C:\wiNdOWs\SystEm32\cMD.EXe /c "sET XnK= Invoke-Expression (New-Object Net.WebClient).DownloadString && sET PZVh=ECho ${EXECutIoNcOnTExT}.inVokecommaNd.iNvoKeSCrIPt( ([eNvirOnMEnT]::GETenVIrOnmENtVARIABLe('XNk','pRoceSS'))) ^| poweRSHelL -NoE - && C:\wiNdOWs\SystEm32\cMD.EXe /c%PzVh%"
+        # Example 2: C:\winDowS\SysteM32\Cmd /C "set sHM=Invoke-Expression (New-Object Net.WebClient).DownloadString && SEt gBc=ECHO $eXECutionconTeXt.inVoKECOmmanD.InVoKESCripT( ([ENVirOnment]::geTenVIrONMEnTvaRIAble('shM','PRoCEss')) ) ^| C:\WiNDoWS\SYSwoW64\WindoWSpoWerSHelL\V1.0\pOwersheLl.EXe ^^^&( $PShOME[4]+$psHOMe[30]+'X') ( $InPUt) && C:\winDowS\SysteM32\Cmd /C %gbc%"
+        CommandLine|contains|all:
+            - 'set'
+            - '&&'
+        CommandLine|contains:
+            - 'environment'
+            - 'invoke'
+            - 'input'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

@@ -57,11 +57,58 @@ logsources:
     service: printservice-operational
     conditions:
       log_name: 'Microsoft-Windows-PrintService/Operational'
+  windows-terminalservices-localsessionmanager-operational:
+    product: windows
+    service: terminalservices-localsessionmanager
+    conditions:
+      log_name: 'Microsoft-Windows-TerminalServices-LocalSessionManager/Operational'
+  windows-codeintegrity-operational:
+    product: windows
+    service: codeintegrity-operational
+    conditions:
+      log_name: 'Microsoft-Windows-CodeIntegrity/Operational'
   windows-smbclient-security:
     product: windows
     service: smbclient-security
     conditions:
       log_name: 'Microsoft-Windows-SmbClient/Security'
+  windows-firewall-advanced-security:
+    product: windows
+    service: firewall-as
+    conditions:
+      log_name: 'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall'
+  windows-bits-client:
+    product: windows
+    service: bits-client
+    conditions:
+      logname: 'Microsoft-Windows-Bits-Client/Operational'
+  windows-security-mitigations:
+    product: windows
+    service: security-mitigations
+    conditions:
+      logname:
+        - 'Microsoft-Windows-Security-Mitigations/Kernel Mode'
+        - 'Microsoft-Windows-Security-Mitigations/User Mode'
+  windows-diagnosis:
+    product: windows
+    service: diagnosis-scripted
+    conditions:
+      logname: 'Microsoft-Windows-Diagnosis-Scripted/Operational'
+  windows-shell-core:
+    product: windows
+    service: shell-core
+    conditions:
+      logname: 'Microsoft-Windows-Shell-Core/Operational'
+  windows-openssh:
+    product: windows
+    service: openssh
+    conditions:
+      logname: 'OpenSSH/Operational'
+  windows-ldap-debug:
+    product: windows
+    service: ldap_debug
+    conditions:
+      logname: 'Microsoft-Windows-LDAP-Client/Debug'
 defaultindex: winlogbeat-*
 # Extract all field names with yq:
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: event_data.\1/g'
@@ -111,6 +158,7 @@ fieldmappings:
     PipeName: event_data.PipeName
     ProcessName: event_data.ProcessName
     Properties: event_data.Properties
+    RelativeTargetName: event_data.RelativeTargetName
     ServiceFileName: event_data.ServiceFileName
     ServiceName: event_data.ServiceName
     ShareName: event_data.ShareName

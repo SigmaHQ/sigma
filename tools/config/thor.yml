@@ -129,6 +129,38 @@ logsources:
     rewrite:
       product: windows
       service: sysmon
+  registry_add:
+    category: registry_add
+    product: windows
+    conditions:
+      EventID: 12
+    rewrite:
+      product: windows
+      service: sysmon
+  registry_delete:
+    category: registry_delete
+    product: windows
+    conditions:
+      EventID: 12
+    rewrite:
+      product: windows
+      service: sysmon
+  registry_set:
+    category: registry_set
+    product: windows
+    conditions:
+      EventID: 13
+    rewrite:
+      product: windows
+      service: sysmon
+  registry_rename:
+    category: registry_rename
+    product: windows
+    conditions:
+      EventID: 14
+    rewrite:
+      product: windows
+      service: sysmon
   create_stream_hash:
     category: create_stream_hash
     product: windows
@@ -193,6 +225,14 @@ logsources:
     rewrite:
       product: windows
       service: sysmon
+  file_block:
+    category: file_block
+    product: windows
+    conditions:
+      EventID: 27
+    rewrite:
+      product: windows
+      service: sysmon
   sysmon_error:
     category: sysmon_error
     product: windows
@@ -201,6 +241,48 @@ logsources:
     rewrite:
       product: windows
       service: sysmon
+  #PowerShell Operational
+  ps_module:
+    category: ps_module
+    product: windows
+    conditions:
+      EventID: 4103
+    rewrite:
+      product: windows
+      service: powershell
+  ps_script:
+    category: ps_script
+    product: windows
+    conditions:
+      EventID: 4104
+    rewrite:
+      product: windows
+      service: powershell
+  #Powershell "classic" channel
+  ps_classic_start:
+    category: ps_classic_start
+    product: windows
+    conditions:
+      EventID: 400
+    rewrite:
+      product: windows
+      service: powershell-classic
+  ps_classic_provider_start:
+    category: ps_classic_provider_start
+    product: windows
+    conditions:
+      EventID: 600
+    rewrite:
+      product: windows
+      service: powershell-classic
+  ps_classic_script:
+    category: ps_classic_script
+    product: windows
+    conditions:
+      EventID: 800
+    rewrite:
+      product: windows
+      service: powershell-classic
   # target system configurations
   windows-application:
     product: windows
@@ -232,6 +314,7 @@ logsources:
     service: powershell
     sources:
       - "WinEventLog:Microsoft-Windows-PowerShell/Operational"
+      - "WinEventLog:PowerShellCore/Operational"
   windows-classicpowershell:
     product: windows
     service: powershell-classic
@@ -267,6 +350,16 @@ logsources:
     service: printservice-operational
     sources:
       - "WinEventLog:Microsoft-Windows-PrintService/Operational"
+  windows-terminalservices-localsessionmanager-operational:
+    product: windows
+    service: terminalservices-localsessionmanager
+    sources:
+      - 'WinEventLog:Microsoft-Windows-TerminalServices-LocalSessionManager/Operational'
+  windows-codeintegrity-operational:
+    product: windows
+    service: codeintegrity-operational
+    sources:
+      - "WinEventLog:Microsoft-Windows-CodeIntegrity/Operational"
   windows-applocker:
     product: windows
     service: applocker
@@ -285,6 +378,42 @@ logsources:
     service: windefend
     sources:
       - 'WinEventLog:Microsoft-Windows-Windows Defender/Operational'
+  windows-firewall-advanced-security:
+    product: windows
+    service: firewall-as
+    sources:
+      - 'WinEventLog:Microsoft-Windows-Windows Firewall With Advanced Security/Firewall'
+  windows-bits-client:
+    product: windows
+    service: bits-client
+    sources:
+      - 'WinEventLog:Microsoft-Windows-Bits-Client/Operational'
+  windows-security-mitigations:
+    product: windows
+    service: security-mitigations
+    sources:
+      - 'WinEventLog:Microsoft-Windows-Security-Mitigations/Kernel Mode'
+      - 'WinEventLog:Microsoft-Windows-Security-Mitigations/User Mode'
+  windows-diagnosis:
+    product: windows
+    service: diagnosis-scripted
+    sources:
+      - 'WinEventLog:Microsoft-Windows-Diagnosis-Scripted/Operational'
+  windows-shell-core:
+    product: windows
+    service: shell-core
+    sources:
+      - 'WinEventLog:Microsoft-Windows-Shell-Core/Operational'
+  windows-openssh:
+    product: windows
+    service: openssh
+    sources:
+      - 'WinEventLog:OpenSSH/Operational'
+  windows-ldap-debug:
+    product: windows
+    service: ldap_debug
+    sources:
+      - 'WinEventLog:Microsoft-Windows-LDAP-Client/Debug'
   apache:
     category: webserver
     sources:

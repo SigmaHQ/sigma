@@ -1,0 +1,46 @@
+title: Important Scheduled Task Deleted/Disabled
+id: 7595ba94-cf3b-4471-aa03-4f6baa9e5fad
+related:
+    - id: dbc1f800-0fe0-4bc0-9c66-292c2abe3f78
+      type: similar
+    - id: 9ac94dc8-9042-493c-ba45-3b5e7c86b980
+      type: similar
+status: experimental
+description: Detects when adversaries stop services or processes by deleting or disabling their respective schdueled tasks in order to conduct data destructive activities
+references:
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4699
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4701
+author: Nasreddine Bencherchali
+date: 2022/12/05
+modified: 2022/12/09
+tags:
+    - attack.execution
+    - attack.privilege_escalation
+    - attack.persistence
+    - attack.t1053.005
+logsource:
+    product: windows
+    service: security
+    definition: 'The Advanced Audit Policy setting Object Access > Audit Other Object Access Events has to be configured to allow this detection. We also recommend extracting the Command field from the embedded XML in the event data.'
+detection:
+    selection:
+        EventID:
+            - 4699 # Task Deleted Event
+            - 4701 # Task Disabled Event
+        TaskName|contains:
+            # Add more important tasks
+            - '\Windows\SystemRestore\SR'
+            - '\Windows\Windows Defender\'
+            - '\Windows\BitLocker'
+            - '\Windows\WindowsBackup\'
+            - '\Windows\WindowsUpdate\'
+            - '\Windows\UpdateOrchestrator\'
+            - '\Windows\ExploitGuard'
+    filter_ac_power_download:
+        Task|contains: '\Windows\UpdateOrchestrator\AC Power Download'
+    filter_sys_username:
+        SubjectUserName|endswith: '$'  # False positives during upgrades of Defender, where its tasks get removed and added
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: high

@@ -1,0 +1,39 @@
+title: Schtasks Creation Or Modification With SYSTEM Privileges
+id: 89ca78fd-b37c-4310-b3d3-81a023f83936
+status: experimental
+description: Detects the creation or update of a scheduled task to run with "NT AUTHORITY\SYSTEM" privileges
+references:
+    - https://www.elastic.co/security-labs/exploring-the-qbot-attack-pattern
+    - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/schtasks
+author: Nasreddine Bencherchali
+date: 2022/07/28
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.t1053.005
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_root:
+        Image|endswith: '\schtasks.exe'
+        CommandLine|contains:
+            - ' /change '
+            - ' /create '
+    selection_run:
+        CommandLine|contains: '/ru '
+    selection_user:
+        CommandLine|contains:
+            - 'NT AUT' # This covers the usual NT AUTHORITY\SYSTEM
+            - ' SYSTEM ' # SYSTEM is a valid value for schtasks hence it gets it's own value with space
+    filter:
+        # FP from test set in SIGMA
+        ParentImage|contains|all:
+            - '\AppData\Local\Temp\'
+            - 'TeamViewer_.exe'
+        Image|endswith: '\schtasks.exe'
+        CommandLine|contains: '/TN TVInstallRestore'
+    condition: all of selection_* and not filter
+falsepositives:
+    - Unknown
+level: high

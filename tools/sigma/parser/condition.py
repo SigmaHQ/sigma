@@ -113,15 +113,15 @@ class SigmaConditionTokenizer:
             (SigmaConditionToken.TOKEN_NEAR,   re.compile("near", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_BY,     re.compile("by", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_EQ,     re.compile("==")),
-            (SigmaConditionToken.TOKEN_LT,     re.compile("<")),
             (SigmaConditionToken.TOKEN_LTE,    re.compile("<=")),
-            (SigmaConditionToken.TOKEN_GT,     re.compile(">")),
+            (SigmaConditionToken.TOKEN_LT,     re.compile("<")),
             (SigmaConditionToken.TOKEN_GTE,    re.compile(">=")),
+            (SigmaConditionToken.TOKEN_GT,     re.compile(">")),
             (SigmaConditionToken.TOKEN_PIPE,   re.compile("\\|")),
             (SigmaConditionToken.TOKEN_AND,    re.compile("and", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_OR,     re.compile("or", re.IGNORECASE)),
             (SigmaConditionToken.TOKEN_NOT,    re.compile("not", re.IGNORECASE)),
-            (SigmaConditionToken.TOKEN_ID,     re.compile("[\\w*]+")),
+            (SigmaConditionToken.TOKEN_ID,     re.compile("[\\w*-.]+")),
             (SigmaConditionToken.TOKEN_LPAR,   re.compile("\\(")),
             (SigmaConditionToken.TOKEN_RPAR,   re.compile("\\)")),
             ]
@@ -191,8 +191,14 @@ class ConditionBase(ParseTreeNode):
     op = COND_NONE
     items = None
 
-    def __init__(self):
-        raise NotImplementedError("ConditionBase is no usable class")
+    def __init__(self, sigma=None, op=None, *args):
+        if type(self) == ConditionBase:
+            raise NotImplementedError("ConditionBase is no usable class")
+
+        if sigma == None and op == None and len(args) == 0:    # no parameters given - initialize empty
+            self.items = list()
+        else:       # called by parser, use given values
+            self.items = args
 
     def add(self, item):
         self.items.append(item)
@@ -204,27 +210,11 @@ class ConditionBase(ParseTreeNode):
         return len(self.items)
 
 
-class ConditionAND(ConditionBase):
-    """AND Condition"""
-    op = COND_AND
-
-    def __init__(self, sigma=None, op=None, *args):
-        if sigma == None and op == None and len(args) == 0:    # no parameters given - initialize empty
-            self.items = list()
-        else:       # called by parser, use given values
-            self.items = args
-
-
-class ConditionOR(ConditionAND):
-    """OR Condition"""
-    op = COND_OR
-
-
-class ConditionNOT(ConditionBase):
-    """NOT Condition"""
-    op = COND_NOT
-
+class ConditionBaseOneItem(ConditionBase):
     def __init__(self, sigma=None, op=None, val=None):
+        if type(self) == ConditionBaseOneItem:
+            raise NotImplementedError("ConditionBaseOneItem is no usable class")
+
         if sigma == None and op == None and val == None:    # no parameters given - initialize empty
             self.items = list()
         else:       # called by parser, use given values
@@ -244,13 +234,30 @@ class ConditionNOT(ConditionBase):
             return None
 
 
-class ConditionNULLValue(ConditionNOT):
+class ConditionAND(ConditionBase):
+    """AND Condition"""
+    op = COND_AND
+
+
+class ConditionOR(ConditionBase):
+    """OR Condition"""
+    op = COND_OR
+
+
+class ConditionNOT(ConditionBaseOneItem):
+    """NOT Condition"""
+    op = COND_NOT
+
+
+class ConditionNULLValue(ConditionBaseOneItem):
     """Condition: Field value is empty or doesn't exists"""
+    op = COND_NULL
     pass
 
 
 class ConditionNotNULLValue(ConditionNULLValue):
     """Condition: Field value is not empty"""
+    op = COND_NULL
     pass
 
 
@@ -260,11 +267,17 @@ class NodeSubexpression(ParseTreeNode):
         self.items = subexpr
 
 
+class SigmaSearchValueAsIs:
+    """The contained value is used as-is in the output."""
+    def __init__(self, value):
+        self.value = value
+
+
 # Parse tree generators: generate parse tree nodes from extended conditions
 def generateXOf(sigma, val, condclass):
     """
     Generic implementation of (1|all) of x expressions.
-        
+
     * condclass across all list items if x is name of definition
     * condclass across all definitions if x is keyword 'them'
     * condclass across all matching definition if x is wildcard expression, e.g. 'selection*'
@@ -390,26 +403,6 @@ class SigmaConditionOptimizer:
                 node.items = newitems
                 return self._optimizeNode(node, changes=True)
 
-            # OR(AND(X, ...), AND(X, ...))  =>  AND(X, OR(AND(...), AND(...)))
-            if type(node) == ConditionOR:
-                othertype = ConditionAND
-            else:
-                othertype = ConditionOR
-            if all(type(child) == othertype for child in node.items):
-                promoted = []
-                for cand in node.items[0]:
-                    if all(cand in child for child in node.items[1:]):
-                        promoted.append(cand)
-                if len(promoted) > 0:
-                    for child in node.items:
-                        for cand in promoted:
-                            if cand in child.items:
-                                child.items.remove(cand)
-                    newnode = othertype()
-                    newnode.items = promoted
-                    newnode.add(node)
-                    return self._optimizeNode(newnode, changes=True)
-
             # fallthrough
 
         elif type(node) == ConditionNOT:
@@ -503,7 +496,7 @@ class SigmaConditionParser:
             self.parsedSearch = self.parseSearch(tokens)
             self.parsedAgg = None
 
-    def parseSearch(self, tokens):
+    def parseSearch(self, tokens, depth=0):
         """
         Iterative parsing of search expression.
         """
@@ -514,7 +507,7 @@ class SigmaConditionParser:
                     open_token was '(' and
                     tokens were ['(', '...', '(', '...', ')', ')']
                     the first '(' should pair with the last ')' instead of the first ')'
-                
+
                 Parameters:
                     tokens: the list of tokens
                     start_index: the start index (included) of the input tokens for finding the close_token
@@ -548,7 +541,7 @@ class SigmaConditionParser:
             if lPos > rPos:
                 raise SigmaParseError("Closing parentheses at position " + str(rTok.pos) + " precedes opening at position " + str(lTok.pos))
 
-            subparsed = self.parseSearch(tokens[lPos + 1:rPos])
+            subparsed = self.parseSearch(tokens[lPos + 1:rPos], depth=depth+1)
             tokens = tokens[:lPos] + NodeSubexpression(subparsed) + tokens[rPos + 1:]   # replace parentheses + expression with group node that contains parsed subexpression
 
         # 2. Iterate over all known operators in given precedence
@@ -577,13 +570,14 @@ class SigmaConditionParser:
             raise ValueError("Parse tree must have exactly one start node!")
         query_cond = tokens[0]
 
-        # 4. Integrate conditions from logsources in configurations
-        ls_cond = self.sigmaParser.get_logsource_condition()
-        if ls_cond is not None:
-            cond = ConditionAND()
-            cond.add(ls_cond)
-            cond.add(query_cond)
-            query_cond = cond
+        # 4. Integrate conditions from logsources in configurations to outermost expression
+        if depth == 0:
+            ls_cond = self.sigmaParser.get_logsource_condition()
+            if ls_cond is not None:
+                cond = ConditionAND()
+                cond.add(ls_cond)
+                cond.add(query_cond)
+                query_cond = cond
 
         return self._optimizer.optimizeTree(query_cond)
 

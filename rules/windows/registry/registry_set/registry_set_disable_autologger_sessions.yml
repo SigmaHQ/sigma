@@ -1,0 +1,34 @@
+title: AutoLogger Sessions Tamper
+id: f37b4bce-49d0-4087-9f5b-58bffda77316
+status: experimental
+description: Detects tampering of autologger trace sessions which is a technique used by attackers to disable logging
+references:
+    - https://twitter.com/MichalKoczwara/status/1553634816016498688
+    - https://thedfirreport.com/2021/10/18/icedid-to-xinglocker-ransomware-in-24-hours/
+    - https://i.blackhat.com/EU-21/Wednesday/EU-21-Teodorescu-Veni-No-Vidi-No-Vici-Attacks-On-ETW-Blind-EDRs.pdf
+author: Nasreddine Bencherchali
+date: 2022/08/01
+modified: 2022/12/09
+tags:
+    - attack.defense_evasion
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\System\CurrentControlSet\Control\WMI\Autologger\'
+    selection_values:
+        EventType: SetValue
+        TargetObject|contains: # We only care about some autologger to avoid FP. Add more if you need
+            - '\EventLog-'
+            - '\Defender'
+        TargetObject|endswith:
+            - '\Enable'
+            - '\Start'
+        Details: DWORD (0x00000000)
+    filter_legitimate:
+        Image: 'C:\Windows\system32\wevtutil.exe'
+    condition: all of selection* and not 1 of filter*
+falsepositives:
+    - Unknown
+level: high

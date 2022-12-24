@@ -1,5 +1,5 @@
 # Setup module for Sigma toolchain
-# derived from example at https://github.com/pypa/sampleproject/blob/master/setup.py
+# derived from example at https://github.com/pypa/sampleproject/blob/918bd331501de42be32666bd5140d04d00b39386/setup.py
 from setuptools import setup, find_packages
 # To use a consistent encoding
 from codecs import open
@@ -14,7 +14,7 @@ with open(path.join(here, 'LONG_DESCRIPTION.md'), encoding='utf-8') as f:
 
 setup(
     name='sigmatools',
-    version='0.20',
+    version='0.22.1',
     description='Tools for the Generic Signature Format for SIEM Systems',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -45,7 +45,7 @@ setup(
     python_requires='~=3.8',
     install_requires=['PyYAML', 'pymisp', 'progressbar2', 'ruamel.yaml'],
     extras_require={
-        'test': ['coverage', 'yamllint'],
+        'test': ['coverage', 'yamllint', 'attackcti'],
     },
     data_files=[
         ('etc/sigma', [ str(p) for p in Path('config/').glob('*.yml') ]),

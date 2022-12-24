@@ -10,6 +10,7 @@ backends:
   - elastalert
   - elastalert-dsl
   - ee-outliers
+  - opensearch-monitor
 logsources:
   windows:
     product: windows
@@ -38,7 +39,9 @@ logsources:
     product: windows
     service: powershell
     conditions:
-      winlog.channel: 'Microsoft-Windows-PowerShell/Operational'
+      winlog.channel:
+        - 'Microsoft-Windows-PowerShell/Operational'
+        - 'PowerShellCore/Operational'
   windows-classicpowershell:
     product: windows
     service: powershell-classic
@@ -79,6 +82,16 @@ logsources:
     service: printservice-operational
     conditions:
       winlog.channel: 'Microsoft-Windows-PrintService/Operational'
+  windows-terminalservices-localsessionmanager-operational:
+    product: windows
+    service: terminalservices-localsessionmanager
+    conditions:
+      winlog.channel: 'Microsoft-Windows-TerminalServices-LocalSessionManager/Operational'
+  windows-codeintegrity-operational:
+    product: windows
+    service: codeintegrity-operational
+    conditions:
+      winlog.channel: 'Microsoft-Windows-CodeIntegrity/Operational'
   windows-smbclient-security:
     product: windows
     service: smbclient-security
@@ -93,6 +106,43 @@ logsources:
         - 'Microsoft-Windows-AppLocker/EXE and DLL'
         - 'Microsoft-Windows-AppLocker/Packaged app-Deployment'
         - 'Microsoft-Windows-AppLocker/Packaged app-Execution'
+  windows-firewall-advanced-security:
+    product: windows
+    service: firewall-as
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall'
+  windows-bits-client:
+    product: windows
+    service: bits-client
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Bits-Client/Operational'
+  windows-security-mitigations:
+    product: windows
+    service: security-mitigations
+    conditions:
+      winlog.channel:
+        - 'Microsoft-Windows-Security-Mitigations/Kernel Mode'
+        - 'Microsoft-Windows-Security-Mitigations/User Mode'
+  windows-diagnosis:
+    product: windows
+    service: diagnosis-scripted
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Diagnosis-Scripted/Operational'
+  windows-shell-core:
+    product: windows
+    service: shell-core
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Shell-Core/Operational'
+  windows-openssh:
+    product: windows
+    service: openssh
+    conditions:
+      winlog.channel: 'OpenSSH/Operational'
+  windows-ldap-debug:
+    product: windows
+    service: ldap_debug
+    conditions:
+      winlog.channel: 'Microsoft-Windows-LDAP-Client/Debug'
 defaultindex: winlogbeat-*
 # Extract all field names with yq:
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: winlog.event_data.\1/g'
@@ -196,6 +246,7 @@ fieldmappings:
     PreviousEngineState: winlog.event_data.PreviousEngineState
     NewProviderState: winlog.event_data.NewProviderState
     ProviderName: winlog.event_data.ProviderName
+    Provider_Name: winlog.provider_name
     HostId: winlog.event_data.HostId
     HostApplication: winlog.event_data.HostApplication
     HostName: winlog.event_data.HostName
@@ -221,7 +272,7 @@ fieldmappings:
     ErrorCode: winlog.event_data.ErrorCode 
     FilePath: winlog.event_data.FilePath
     FileVersion: winlog.event_data.FileVersion
-    # Filename =>  product: antivirus
+    # Filename =>  category: antivirus
     Filename: winlog.event_data.Filename
     Initiated: winlog.event_data.Initiated
     IntegrityLevel: winlog.event_data.IntegrityLevel
@@ -250,7 +301,7 @@ fieldmappings:
     SubjectLogonId: winlog.event_data.SubjectLogonId
     TargetFileName: winlog.event_data.TargetFilename
     TargetProcessAddress: winlog.event_data.TargetProcessAddress
-    TargetServerName: winglog.event_data.TargetServerName
+    TargetServerName: winlog.event_data.TargetServerName
     TargetLogonId: winlog.event_data.TargetLogonId
     TaskName: winlog.event_data.TaskName
     # UserName => smbclient-security  eventid:31017

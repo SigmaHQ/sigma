@@ -1,0 +1,27 @@
+title: Run Whoami as Privileged User
+id: 79ce34ca-af29-4d0e-b832-fc1b377020db
+status: experimental
+description: Detects a whoami.exe executed by privileged accounts that are often misused by threat actors
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-privilege-escalation-in-windows-environment
+    - https://nsudo.m2team.org/en-us/
+author: Florian Roth
+date: 2022/01/28
+modified: 2022/05/13
+tags:
+    - attack.privilege_escalation
+    - attack.discovery
+    - attack.t1033
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_user:
+        User|contains: 'TrustedInstaller'
+    selection_img:
+        - OriginalFileName: 'whoami.exe'
+        - Image|endswith: '\whoami.exe'
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: high

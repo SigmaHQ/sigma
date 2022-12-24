@@ -1,0 +1,25 @@
+title: Local Privilege Escalation Indicator TabTip
+id: bc2e25ed-b92b-4daa-b074-b502bdd1982b
+status: experimental
+description: Detects the invocation of TabTip via CLSID as seen when JuicyPotatoNG is used on a system in brute force mode
+references:
+    - https://github.com/antonioCoco/JuicyPotatoNG
+author: Florian Roth
+date: 2022/10/07
+modified: 2022/12/04
+tags:
+    - attack.execution
+    - attack.t1557.001
+logsource:
+    product: windows
+    service: system
+detection:
+    selection:
+        EventID: 10001
+        param1: 'C:\Program Files\Common Files\microsoft shared\ink\TabTip.exe'  # is the Binary starting/started
+        param2: 2147943140                                                       # is ERROR id
+        param3: '{054AAE20-4BEA-4347-8A35-64A533254A9D}'                         # is DCOM Server
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

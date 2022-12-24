@@ -1,0 +1,34 @@
+title: Usage Of Web Request Commands And Cmdlets
+id: 9fc51a3c-81b3-4fa7-b35f-7c02cf10fd2d
+related:
+    - id: 1139d2e2-84b1-4226-b445-354492eba8ba
+      type: similar
+    - id: f67dbfce-93bc-440d-86ad-a95ae8858c90
+      type: obsoletes
+status: test
+description: Detects the use of various web request commands with commandline tools and Windows PowerShell cmdlets (including aliases)
+references:
+    - https://4sysops.com/archives/use-powershell-to-download-a-file-with-http-https-and-ftp/
+    - https://blog.jourdant.me/post/3-ways-to-download-files-with-powershell
+author: James Pemberton / @4A616D6573
+date: 2019/10/24
+modified: 2022/11/21
+tags:
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:
+            - 'Invoke-WebRequest'
+            - 'iwr '
+            - 'wget '
+            - 'curl '
+            - 'Net.WebClient'
+            - 'Start-BitsTransfer'
+    condition: selection
+falsepositives:
+    - Use of Get-Command and Get-Help modules to reference Invoke-WebRequest and Start-BitsTransfer.
+level: medium

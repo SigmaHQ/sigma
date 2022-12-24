@@ -1,0 +1,27 @@
+title: Privilege Role Sign-In Outside Expected Controls
+id: cf1e5687-84e1-41af-97a9-158094efef53
+status: experimental
+description: Detects failed sign-in due to user not meeting expected controls for adminitrators
+references:
+    - https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/security-operations-privileged-accounts#things-to-monitor
+author: Mark Morowczynski '@markmorow', Yochana Henderson, '@Yochana-H'
+date: 2022/08/11
+tags:
+    - attack.defense_evasion
+    - attack.t1078
+logsource:
+    product: azure
+    service: signinlogs
+detection:
+    # You have to tune the rule for your environment before use it
+    selection:
+        Status: failure
+        # Countries you do NOT operate out of e,g GB, use list for mulitple
+        Location: '%UnLegitCountries%'
+        IPaddress: '%UnApprovedIp%'
+        # unapproved browser, operating system
+        DeviceInfo: '%UnApprovedDevice%'
+    condition: selection
+falsepositives:
+     - A legit admin not following proper processes
+level: high

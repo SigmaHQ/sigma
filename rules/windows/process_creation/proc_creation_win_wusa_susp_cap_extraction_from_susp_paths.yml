@@ -1,0 +1,30 @@
+title: Wusa Extracting Cab Files From Suspicious Paths
+id: c74c0390-3e20-41fd-a69a-128f0275a5ea
+status: experimental
+description: Detects usage of the "wusa.exe" (Windows Update Standalone Installer) utility to extract cab using the "/extract" argument from suspicious paths
+references:
+    - https://web.archive.org/web/20180331144337/https://www.fireeye.com/blog/threat-research/2018/03/sanny-malware-delivery-method-updated-in-recently-observed-attacks.html
+    - https://www.echotrail.io/insights/search/wusa.exe/
+author: Nasreddine Bencherchali
+date: 2022/08/05
+tags:
+    - attack.execution
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_root:
+        Image|endswith: '\wusa.exe'
+        CommandLine|contains: '/extract:'
+    selection_paths:
+        CommandLine|contains:
+            - 'C:\Users\Public\'
+            - '\Desktop\'
+            - '\Downloads\'
+            - '\Appdata\Local\Temp\'
+            - '\Windows\Temp\'
+            - '\PerfLogs\'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
