@@ -1,0 +1,56 @@
+title: Anomalous Activities in mysql/mariadb Database
+id: b09b5a36-8d0b-4439-be6c-f081be68e770
+status: experimental
+description: |
+    Detects non-standard sql activities that are likely related to attacker activities
+    Adapt your context.
+    Easier if Stored Procedures usage is enforced (and can also help for input validation).
+    This does not account for possible obfuscation.
+    If sql statement contains PII, it may be preferable to mask it or not logged it.
+author: '@juju4'
+date: 2021/06/13
+references:
+    - https://dev.mysql.com/doc/refman/5.7/en/query-log.html
+    - https://dev.mysql.com/doc/refman/5.7/en/audit-log-logging-configuration.html
+    - https://docs.microsoft.com/en-us/azure/mysql/concepts-audit-logs
+    - https://github.com/sqlmapproject/sqlmap
+tags:
+    - attack.initial_access
+    - attack.t1190
+    - attack.privilege_escalation
+    - attack.t1505.001
+    - attack.exfiltration
+logsource:
+    category: database
+    product: mysql
+detection:
+    sql_keywords:
+         - drop
+         - truncate
+         - dump
+         - alter
+         - delete
+         - 'select *'
+         - schema
+         - show tables
+         - grant
+         - UNION ALL SELECT
+         - UNION SELECT
+         - sleep
+         # Mysql/Mariadb
+         - DUMPFILE
+         - LOAD_FILE
+         - INTO OUTFILE
+         - version()
+         - dbms()
+         - updatexml()
+    sql_users:
+         - sa
+         - dbo
+    condition: sql_keywords or sql_users
+falsepositives:
+    - Inventory, Monitoring
+    - Penetration testing
+    - Vulnerability scanner
+    - Legitimate application
+level: low

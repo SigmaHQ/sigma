@@ -1,0 +1,28 @@
+title: Admin User Interactive Login
+id: 19375f79-76bf-404b-8e1b-92b6f97528e8
+description: Detect interactive login by Administrator user depending on internal pattern
+references:
+    - https://www.reddit.com/r/sysadmin/comments/1yzjul/restricting_interactive_logon_but_allow_runas/
+status: experimental
+author: juju4
+date: 2017/08/13
+tags:
+    - attack.lateral_movement
+logsource:
+    product: windows
+    service: security
+    description: 'Requirements: Identifiable administrators usernames (pattern or special unique character. ex: "Admin-*"), internal policy mandating use only as
+        secondary account'
+detection:
+    selection:
+        EventID: 4624
+        LogonType: 2
+        LogonProcess:
+            - C:\Windows\System32\winlogon.exe
+            - C:\Windows\System32\lsass.exe
+    filter:
+        NewAccountName: Admin-*
+    condition: selection and filter
+falsepositives:
+    - Legitimate administrative activity
+level: low

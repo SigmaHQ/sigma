@@ -1,0 +1,21 @@
+title: Mass Database Select
+id: 332b404d-1bd0-4939-957c-17b4d76e445e
+status: experimental
+description: Detects high number of select statements that may be part of a discovery or exfiltration attempt. This should be adapted to your environment
+author: '@juju4'
+date: 2021/06/13
+tags:
+    - attack.discovery
+    - attack.exfiltration
+logsource:
+    category: database
+detection:
+    selection:
+        sqlstatement: select
+    timeframe: 5m
+    condition: selection | count(sqlstatement) by src_ip > 100
+falsepositives:
+    - High Load
+    - Vulnerability scans
+    - Penetration testing activity
+level: low
