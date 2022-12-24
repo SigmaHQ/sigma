@@ -1,0 +1,26 @@
+title: Removal of Potential COM Hijacking Registry Keys
+id: 96f697b0-b499-4e5d-9908-a67bec11cdb6
+description: A General detection to trigger for processes removing .*\shell\open\command registry keys. Registry keys that might have been used for COM hijacking activities.
+status: experimental
+date: 2020/05/02
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+tags:
+    - attack.defense_evasion
+    - attack.t1112
+references:
+    - https://github.com/OTRF/detection-hackathon-apt29/issues/7
+    - https://threathunterplaybook.com/evals/apt29/detections/3.C.1_22A46621-7A92-48C1-81BF-B3937EB4FDC3.html
+    - https://docs.microsoft.com/en-us/windows/win32/shell/launch
+    - https://docs.microsoft.com/en-us/windows/win32/api/shobjidl_core/nn-shobjidl_core-iexecutecommand
+    - https://docs.microsoft.com/en-us/windows/win32/shell/shell-and-managed-code
+logsource:
+    product: windows
+    category: registry_event
+detection:
+    selection:
+        EventType: 'DeleteKey'
+        TargetObject|endswith: '\shell\open\command'
+    condition: selection
+falsepositives:
+    - unknown
+level: medium

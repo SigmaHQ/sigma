@@ -1,0 +1,40 @@
+title: Clear Command History
+id: fdc88d25-96fb-4b7c-9633-c0e417fdbd4e
+status: experimental
+description: Clear command history in linux which is used for defense evasion.
+    # Example config for this one (place it in .bash_profile):
+    # (is_empty=false; inotifywait -m .bash_history | while read file; do if [ $(wc -l <.bash_history) -lt 1  ]; then if  [ "$is_empty" = false ]; then logger -i -p local5.info -t empty_bash_history "$USER : ~/.bash_history is empty "; is_empty=true; fi; else is_empty=false;  fi;  done ) &
+    # It monitors the size of .bash_history and log the words "empty_bash_history" whenever a previously not empty bash_history becomes empty
+    # We define an empty file as a document with 0 or 1 lines (it can be a line with only one space character for example)
+    # It has two advantages over the version suggested by Patrick Bareiss  :
+    #   - it is not relative to the exact command used to clear .bash_history : for instance Caldera uses "> .bash_history" to clear the history and this is not one the commands listed here. We can't be exhaustive for all the possibilities !
+    #   - the method suggested by Patrick Bareiss logs all the commands entered directly in a bash shell. therefore it may miss some events (for instance it doesn't log the commands launched from a Caldera agent). Here if .bash_history is cleared, it will always be detected
+author: Patrick Bareiss
+date: 2019/03/24
+modified: 2020/07/13
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1070.003/T1070.003.md
+    - https://attack.mitre.org/techniques/T1070/003/
+    - https://www.hackers-arise.com/single-post/2016/06/20/Covering-your-BASH-Shell-Tracks-AntiForensics
+logsource:
+    product: linux
+detection:
+    keywords:
+        - 'rm *bash_history'
+        - 'echo "" > *bash_history'
+        - 'cat /dev/null > *bash_history'
+        - 'ln -sf /dev/null *bash_history'
+        - 'truncate -s0 *bash_history'
+        # - 'unset HISTFILE'  # prone to false positives
+        - 'export HISTFILESIZE=0'
+        - 'history -c'
+        - 'history -w'
+        - 'shred *bash_history'
+        - 'empty_bash_history'
+    condition: keywords
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1070.003

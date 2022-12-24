@@ -1,0 +1,34 @@
+title: Abusing Print Executable
+id: bafac3d6-7de9-4dd9-8874-4a1194b493ed
+description: Attackers can use print.exe for remote file copy                   
+author: 'Furkan CALISKAN, @caliskanfurkan_, @oscd_initiative'
+status: experimental
+date: 2020/10/05
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OSBinaries/Print.yml
+    - https://twitter.com/Oddvarmoe/status/985518877076541440
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Image|endswith:
+            - \print.exe
+        CommandLine|startswith:
+            - print
+    selection2:
+        CommandLine|contains:
+            - /D
+    exeCondition:
+        CommandLine|contains:
+            - .exe
+    cmdExclude:
+        CommandLine|contains:
+            - print.exe
+    condition: selection1 and selection2 and exeCondition and not cmdExclude
+falsepositives:
+    - Unknown
+level: medium

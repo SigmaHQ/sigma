@@ -1,0 +1,28 @@
+title: Encoded IEX
+id: 88f680b8-070e-402c-ae11-d2914f2257f1
+status: experimental
+description: Detects a base64 encoded IEX command string in a process command line
+author: Florian Roth
+date: 2019/08/23
+modified: 2020/08/29
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1086  # an old one
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|base64offset|contains:
+            - 'IEX (['
+            - 'iex (['
+            - 'iex (New'
+            - 'IEX (New'
+    condition: selection
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - unknown
+level: critical

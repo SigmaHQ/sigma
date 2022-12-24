@@ -16,24 +16,15 @@
 
 from sigma.backends.sql import SQLBackend
 from sigma.parser.condition import NodeSubexpression, ConditionAND, ConditionOR, ConditionNOT
-from sigma.parser.modifiers.type import SigmaRegularExpressionModifier
 import re
+
 
 class SQLiteBackend(SQLBackend):
     """Converts Sigma rule into SQL query for SQLite"""
     identifier = "sqlite"
     active = True
 
-    # Single quoted string literals are preferred in SQlite 
-    # https://www.sqlite.org/quirks.html#double_quoted_string_literals_are_accepted 
-    valueExpression = "\'%s\'" # Expression of values, %s represents value
     mapFullTextSearch = "%s MATCH ('\"%s\"')"
-    mapRegex = "%s REGEXP %s"
-    typedValueExpression = { 
-        SigmaRegularExpressionModifier: "\'%s\'" # Syntax for regular expressions
-    }
-
-    countFTS = 0
 
     def __init__(self, sigmaconfig, table):
         super().__init__(sigmaconfig, table)
@@ -77,30 +68,6 @@ class SQLiteBackend(SQLBackend):
             return self.orToken.join(filtered)
         else:
             return None
-            
-    def cleanValue(self, val):
-        if not isinstance(val, str):
-            return str(val)
-
-        # Escape single quotes in SQLite
-        val = val.replace('\'','\'\'')
-
-        # Single backlashes which are not in front of * or ? are doulbed
-        val = re.sub(r"(?<!\\)\\(?!(\\|\*|\?))", r"\\\\", val)
-
-        # Replace _ with \_ because _ is a sql wildcard
-        val = re.sub(r'_', r'\_', val)
-
-        # Replace % with \% because % is a sql wildcard
-        val = re.sub(r'%', r'\%', val)
-
-        # Replace * with %, if even number of backslashes (or zero) in front of *
-        val = re.sub(r"(?<!\\)(\\\\)*(?!\\)\*", r"\1%", val)
-
-        # Replace ? with _, if even number of backsashes (or zero) in front of ?
-        val = re.sub(r"(?<!\\)(\\\\)*(?!\\)\?", r"\1_", val)
-
-        return val
 
     def generateMapItemNode(self, node):
         try:
@@ -108,30 +75,26 @@ class SQLiteBackend(SQLBackend):
             fieldname, value = node
             transformed_fieldname = self.fieldNameMapping(fieldname, value)
 
-            if value is None: value = '' # Handle null values
-
-            generated_value = self.generateNode(value)
-
             has_wildcard = re.search(
-                r"((\\(\*|\?|\\))|\*|\?|_|%)", generated_value) 
+                r"((\\(\*|\?|\\))|\*|\?|_|%)", self.generateNode(value))
 
-            if "," in generated_value and generated_value[0]=="(" and generated_value[-1]==")" and not has_wildcard:
-                return self.mapMulti % (transformed_fieldname, generated_value)
-            elif type(value) == SigmaRegularExpressionModifier:
-                return self.mapRegex % (transformed_fieldname, generated_value) # regex are mapped "as is"
+            if "," in self.generateNode(value) and not has_wildcard:
+                return self.mapMulti % (transformed_fieldname, self.generateNode(value))
             elif "LENGTH" in transformed_fieldname:
                 return self.mapLength % (transformed_fieldname, value)
             elif type(value) == list:
                 return self.generateMapItemListNode(transformed_fieldname, value)
             elif self.mapListsSpecialHandling == False and type(value) in (str, int, list) or self.mapListsSpecialHandling == True and type(value) in (str, int):
+
                 if has_wildcard:
-                    return self.mapWildcard % (transformed_fieldname, generated_value)
+                    return self.mapWildcard % (transformed_fieldname, self.generateNode(value))
                 else:
-                    return self.mapExpression % (transformed_fieldname, generated_value)
+                    return self.mapExpression % (transformed_fieldname, self.generateNode(value))
+
             elif "sourcetype" in transformed_fieldname:
-                return self.mapSource % (transformed_fieldname, generated_value)
+                return self.mapSource % (transformed_fieldname, self.generateNode(value))
             elif has_wildcard:
-                return self.mapWildcard % (transformed_fieldname, generated_value)
+                return self.mapWildcard % (transformed_fieldname, self.generateNode(value))
             else:
                 raise TypeError(
                     "Backend does not support map values of type " + str(type(value)))
@@ -144,15 +107,17 @@ class SQLiteBackend(SQLBackend):
         else:
             return self.generateFTS(self.cleanValue(str(node)))
 
-    def generateTypedValueNode(self, node):
-        return self.typedValueExpression[type(node)] % (str(node))
-
     def generateQuery(self, parsed):
         self.countFTS = 0
-        return self._generateQueryWithFields(parsed, list("*"))
-
-    def checkFTS(self, parsed, result):
+        result = self.generateNode(parsed.parsedSearch)
         if self.countFTS > 1:
             raise NotImplementedError(
                 "Match operator ({}) is allowed only once in SQLite, parse rule in a different way:\n{}".format(self.countFTS, result))
         self.countFTS = 0
+
+        if parsed.parsedAgg:
+            # Handle aggregation
+            fro, whe = self.generateAggregation(parsed.parsedAgg, result)
+            return "SELECT * FROM {} WHERE {}".format(fro, whe)
+
+        return "SELECT * FROM {} WHERE {}".format(self.table, result)

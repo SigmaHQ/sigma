@@ -1,0 +1,40 @@
+title: Direct Autorun Keys Modification
+id: 24357373-078f-44ed-9ac4-6d334a668a11
+description: Detects direct modification of autostart extensibility point (ASEP) in registry using reg.exe.
+status: experimental
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1547.001/T1547.001.md
+tags:
+    - attack.persistence
+    - attack.t1547.001
+    - attack.t1060      # an old one
+date: 2019/10/25
+modified: 2019/11/10
+author: Victor Sergeev, Daniil Yugoslavskiy, oscd.community
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_1:
+        Image|endswith: '\reg.exe'
+        CommandLine|contains: 'add' # to avoid intersection with discovery tactic rules
+    selection_2:
+        CommandLine|contains:       # need to improve this list, there are plenty of ASEP reg keys
+            - '\software\Microsoft\Windows\CurrentVersion\Run'
+            - '\software\Microsoft\Windows\CurrentVersion\RunOnce'
+            - '\software\Microsoft\Windows\CurrentVersion\RunOnceEx'
+            - '\software\Microsoft\Windows\CurrentVersion\RunServices'
+            - '\software\Microsoft\Windows\CurrentVersion\RunServicesOnce'
+            - '\software\Microsoft\Windows NT\CurrentVersion\Winlogon\Userinit'
+            - '\software\Microsoft\Windows NT\CurrentVersion\Winlogon\Shell'
+            - '\software\Microsoft\Windows NT\CurrentVersion\Windows'
+            - '\software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders'
+            - '\system\CurrentControlSet\Control\SafeBoot\AlternateShell'
+    condition: selection_1 and selection_2
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Legitimate software automatically (mostly, during installation) sets up autorun keys for legitimate reasons.
+    - Legitimate administrator sets up autorun keys for legitimate reasons.
+level: medium

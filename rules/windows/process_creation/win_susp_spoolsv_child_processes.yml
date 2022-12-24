@@ -1,0 +1,80 @@
+title: Suspicious Spool Service Child Process
+id: dcdbc940-0bff-46b2-95f3-2d73f848e33b
+status: stable
+description: Detects suspicious print spool service (spoolsv.exe) child processes.
+references:
+    - https://github.com/microsoft/Microsoft-365-Defender-Hunting-Queries/blob/master/Exploits/Print%20Spooler%20RCE/Suspicious%20Spoolsv%20Child%20Process.md
+tags:
+    - attack.execution
+    - attack.t1203
+    - attack.privilege_escalation
+    - attack.t1068
+author: Justin C. (@endisphotic), @dreadphones (detection), Thomas Patzke (Sigma rule)
+date: 2021/07/11
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    spoolsv:
+        ParentImage|endswith: \\spoolsv.exe
+        IntegrityLevel: System
+    suspicious_unrestricted:
+        Image|endswith:
+            - \gpupdate.exe
+            - \whoami.exe
+            - \nltest.exe
+            - \taskkill.exe
+            - \wmic.exe
+            - \taskmgr.exe
+            - \sc.exe
+            - \findstr.exe
+            - \curl.exe
+            - \wget.exe
+            - \certutil.exe
+            - \bitsadmin.exe
+            - \accesschk.exe
+            - \wevtutil.exe
+            - \bcdedit.exe
+            - \fsutil.exe
+            - \cipher.exe
+            - \schtasks.exe
+            - \write.exe
+            - \wuauclt.exe
+    suspicious_net:
+        Image|endswith: \net.exe
+    suspicious_net_filter:
+        CommandLine|contains: start
+    suspicious_cmd:
+        Image|endswith: \cmd.exe
+    suspicious_cmd_filter:
+        CommandLine|contains:
+            - .spl
+            - route add
+            - program files
+    suspicious_netsh:
+        Image|endswith: \netsh.exe
+    suspicious_netsh_filter:
+        CommandLine|contains:
+            - "add portopening"
+            - "rule name"
+    suspicious_powershell:
+        Image|endswith: \powershell.exe
+    suspicious_powershell_filter:
+        CommandLine|contains: .spl
+    suspicious_rundll32:
+        Image|endswith: \rundll32.exe
+        CommandLine|endswith: rundll32.exe
+    condition: spoolsv and (
+        suspicious_unrestricted
+        or (suspicious_net and not suspicious_net_filter)
+        or (suspicious_cmd and not suspicious_cmd_filter)
+        or (suspicious_netsh and not suspicious_netsh_filter)
+        or (suspicious_powershell and not suspicious_powershell_filter)
+        or suspicious_rundll32
+      )
+fields:
+    - Image
+    - CommandLine
+falsepositives:
+    - None known
+level: high

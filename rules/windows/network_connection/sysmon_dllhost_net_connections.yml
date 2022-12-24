@@ -1,0 +1,47 @@
+title: Dllhost Internet Connection
+id: cfed2f44-16df-4bf3-833a-79405198b277
+status: experimental
+description: Detects Dllhost that communicates with public IP addresses
+references:
+    - https://github.com/Neo23x0/sigma/blob/master/rules/windows/network_connection/sysmon_rundll32_net_connections.yml
+author: bartblaze
+date: 2020/07/13
+modified: 2020/08/24
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+    - attack.execution
+    - attack.t1559.001  
+    - attack.t1175  # an old one  
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\dllhost.exe'
+        Initiated: 'true'
+    filter:
+        DestinationIp|startswith:
+            - '10.'
+            - '192.168.'
+            - '172.16.'
+            - '172.17.'
+            - '172.18.'
+            - '172.19.'
+            - '172.20.'
+            - '172.21.'
+            - '172.22.'
+            - '172.23.'
+            - '172.24.'
+            - '172.25.'
+            - '172.26.'
+            - '172.27.'
+            - '172.28.'
+            - '172.29.'
+            - '172.30.'
+            - '172.31.'
+            - '127.'
+    condition: selection and not filter
+falsepositives:
+    - Communication to other corporate systems that use IP addresses from public address spaces
+level: medium

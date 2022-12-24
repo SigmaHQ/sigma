@@ -1,0 +1,34 @@
+action: global
+title: Empire Monkey
+id: 10152a7b-b566-438f-a33c-390b607d1c8d
+description: Detects EmpireMonkey APT reported Activity
+references:
+    - https://app.any.run/tasks/a4107649-8cb0-41af-ad75-113152d4d57b
+tags:
+    - attack.defense_evasion
+    - attack.t1218.010
+    - attack.t1117  # an old one
+date: 2019/04/02
+modified: 2020/08/27
+author: Markus Neis
+detection:
+    condition: 1 of them
+falsepositives:
+    - Very Unlikely 
+level: critical
+---
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_cutil:
+        CommandLine|endswith: 
+            - '/i:%APPDATA%\logs.txt scrobj.dll'
+        Image|endswith:
+            - '\cutil.exe'
+    selection_regsvr32:
+        CommandLine|endswith: 
+            - '/i:%APPDATA%\logs.txt scrobj.dll'
+        Description: 
+            - Microsoft(C) Registerserver
+        

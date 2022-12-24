@@ -1,0 +1,23 @@
+title: SVCHOST Credential Dump
+id: 174afcfa-6e40-4ae9-af64-496546389294
+description: Detects when a process, such as mimikatz, accesses the memory of svchost to dump credentials
+date: 2021/04/30
+author: Florent Labouyrie
+logsource:
+    product: windows
+    category: process_access
+tags:
+    - attack.t1548
+detection:
+    selection_process:
+        TargetImage|endswith: '\svchost.exe'
+    selection_memory:
+        GrantedAccess: '0x143a'
+    filter_trusted_process_access:
+        SourceImage|endswith: 
+          - '*\services.exe'
+          - '*\msiexec.exe'
+    condition: selection_process and selection_memory and not filter_trusted_process_access
+falsepositives:
+    - Non identified legit exectubale
+level: critical

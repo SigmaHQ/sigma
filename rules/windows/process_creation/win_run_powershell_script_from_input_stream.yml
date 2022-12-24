@@ -1,0 +1,25 @@
+title: Run PowerShell Script from Redirected Input Stream
+id: c83bf4b5-cdf0-437c-90fa-43d734f7c476
+status: experimental
+description: Detects PowerShell script execution via input stream redirect
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/LOLUtilz/OSBinaries/Powershell.yml
+    - https://twitter.com/Moriarty_Meng/status/984380793383370752
+author: Moriarty Meng (idea), Anton Kutepov (rule), oscd.community
+date: 2020/10/17
+tags:
+    - attack.defense_evasion
+    - attack.execution
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    powershell_started:
+        Image|endswith: '\powershell.exe'
+    redirect_to_input_stream:
+        CommandLine|re: '\s-\s*<'
+    condition: powershell_started and redirect_to_input_stream
+falsepositives:
+    - Unknown
+level: high

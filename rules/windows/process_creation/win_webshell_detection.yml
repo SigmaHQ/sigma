@@ -1,0 +1,72 @@
+title: Webshell Detection With Command Line Keywords
+id: bed2a484-9348-4143-8a8a-b801c979301c
+description: Detects certain command line parameters often used during reconnaissance activity via web shells
+author: Florian Roth, Jonhnathan Ribeiro, Anton Kutepov, oscd.community
+references:
+    - https://www.fireeye.com/blog/threat-research/2013/08/breaking-down-the-china-chopper-web-shell-part-ii.html
+    - https://unit42.paloaltonetworks.com/bumblebee-webshell-xhunt-campaign/
+date: 2017/01/01
+modified: 2021/03/02
+tags:
+    - attack.persistence
+    - attack.t1505.003
+    - attack.t1018
+    - attack.t1033
+    - attack.t1087
+    - attack.privilege_escalation       # an old one
+    - attack.t1100      # an old one
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    parent_is_web_server_process:
+        - ParentImage|endswith:
+            - '\w3wp.exe'
+            - '\php-cgi.exe'
+            - '\nginx.exe'
+            - '\httpd.exe'
+        - ParentImage|contains:
+            - '\apache'
+            - '\tomcat'
+    net_utility:
+        Image|endswith:
+            - '\net.exe'
+            - '\net1.exe'
+        CommandLine|contains:
+            - ' user '
+            - ' use '
+            - ' group '
+    ping_utility:
+        Image|endswith: '\ping.exe'
+        CommandLine|contains: ' -n '
+    change_dir:
+        CommandLine|contains:
+            - '&cd&echo'  # china chopper web shell
+            - 'cd /d '  # https://www.computerhope.com/cdhlp.htm
+    wmic_utility:
+        Image|endswith: '\wmic.exe'
+        CommandLine|contains: ' /node:' 
+    misc_discovery_binaries:
+        Image|endswith:
+            - '\whoami.exe'
+            - '\systeminfo.exe'
+            - '\quser.exe'
+            - '\ipconfig.exe' 
+            - '\pathping.exe' 
+            - '\tracert.exe' 
+            - '\netstat.exe' 
+            - '\schtasks.exe' 
+            - '\vssadmin.exe' 
+            - '\wevtutil.exe' 
+            - '\tasklist.exe' 
+    misc_discovery_commands:
+        CommandLine|contains:
+            - ' Test-NetConnection '
+            - 'dir \'  # remote dir: dir \<redacted IP #3>\C$:\windows\temp\*.exe
+    condition: parent_is_web_server_process and (net_utility or ping_utility or change_dir or wmic_utility or misc_discovery_binaries or misc_discovery_commands)
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - unknown
+level: high

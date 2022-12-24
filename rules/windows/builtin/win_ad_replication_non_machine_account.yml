@@ -1,0 +1,35 @@
+title: Active Directory Replication from Non Machine Account
+id: 17d619c1-e020-4347-957e-1d1207455c93
+description: Detects potential abuse of Active Directory Replication Service (ADRS) from a non machine account to request credentials.
+status: experimental
+date: 2019/07/26
+modified: 2020/08/23
+author: Roberto Rodriguez @Cyb3rWard0g
+references:
+    - https://threathunterplaybook.com/notebooks/windows/06_credential_access/WIN-180815210510.html
+tags:
+    - attack.credential_access
+    - attack.t1003          # an old one
+    - attack.t1003.006
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4662
+        AccessMask: '0x100'
+        Properties|contains:
+            - '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2'
+            - '1131f6ad-9c07-11d1-f79f-00c04fc2dcd2'
+            - '89e95b76-444d-4c62-991a-0facbeda640c'
+    filter:
+        - SubjectUserName|endswith: '$'
+        - SubjectUserName|startswith: 'MSOL_' #https://docs.microsoft.com/en-us/azure/active-directory/hybrid/reference-connect-accounts-permissions#ad-ds-connector-account
+    condition: selection and not filter
+fields:
+    - ComputerName
+    - SubjectDomainName
+    - SubjectUserName
+falsepositives:
+    - Unknown
+level: critical

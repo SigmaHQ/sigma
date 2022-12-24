@@ -1,0 +1,63 @@
+title: LSASS Access from Non System Account
+id: 962fe167-e48d-4fd6-9974-11e5b9a5d6d1
+description: Detects potential mimikatz-like tools accessing LSASS from non system account
+status: experimental
+date: 2019/06/20
+modified: 2021/03/17
+author: Roberto Rodriguez @Cyb3rWard0g
+references:
+    - https://threathunterplaybook.com/notebooks/windows/06_credential_access/WIN-170105221010.html
+tags:
+    - attack.credential_access
+    - attack.t1003          # an old one
+    - attack.t1003.001
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID:
+            - 4663
+            - 4656
+        AccessMask:
+            - '0x40'
+            - '0x1400'
+            - '0x1000'
+            - '0x100000'
+            - '0x1410'    # car.2019-04-004
+            - '0x1010'    # car.2019-04-004
+            - '0x1438'    # car.2019-04-004
+            - '0x143a'    # car.2019-04-004
+            - '0x1418'    # car.2019-04-004
+            - '0x1f0fff'
+            - '0x1f1fff'
+            - '0x1f2fff'
+            - '0x1f3fff'
+            - '40'
+            - '1400'
+            - '1000'
+            - '100000'
+            - '1410'    # car.2019-04-004
+            - '1010'    # car.2019-04-004
+            - '1438'    # car.2019-04-004
+            - '143a'    # car.2019-04-004
+            - '1418'    # car.2019-04-004
+            - '1f0fff'
+            - '1f1fff'
+            - '1f2fff'
+            - '1f3fff'
+        ObjectType: 'Process'
+        ObjectName|endswith: '\lsass.exe'
+    filter1:
+        SubjectUserName|endswith: '$'
+    filter2:
+        ProcessName|startswith: 'C:\Program Files'  # too many false positives with legitimate AV and EDR solutions    
+    condition: selection and not filter1 and not filter2
+fields:
+    - ComputerName
+    - ObjectName
+    - SubjectUserName
+    - ProcessName
+falsepositives:
+    - Unknown
+level: critical

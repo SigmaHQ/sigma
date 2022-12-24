@@ -1,0 +1,27 @@
+title: Microsoft Binary Suspicious Communication Endpoint
+id: e0f8ab85-0ac9-423b-a73a-81b3c7b1aa97
+status: experimental
+description: Detects an executable in the Windows folder accessing suspicious domains
+references:
+    - https://twitter.com/M_haggis/status/900741347035889665
+    - https://twitter.com/M_haggis/status/1032799638213066752
+author: Florian Roth
+date: 2018/08/30
+tags:
+    - attack.lateral_movement
+    - attack.t1105
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Initiated: 'true'
+        DestinationHostname|endswith: 
+            - 'dl.dropboxusercontent.com'
+            - '.pastebin.com'
+            - '.githubusercontent.com' # includes both gists and github repositories
+        Image|startswith: 'C:\Windows\'
+    condition: selection
+falsepositives:
+    - 'Unknown'
+level: high

@@ -1,0 +1,28 @@
+title: Dumping Process via Sqldumper.exe
+id: 23ceaf5c-b6f1-4a32-8559-f2ff734be516
+description: Detects process dump via legitimate sqldumper.exe binary
+status: experimental
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OtherMSBinaries/Sqldumper.yml
+    - https://twitter.com/countuponsec/status/910977826853068800
+    - https://twitter.com/countuponsec/status/910969424215232518
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Sqldumper/
+author: Kirill Kiryanov, oscd.community
+date: 2020/10/08
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\sqldumper.exe'
+        CommandLine|contains:
+            - '0x0110'
+            - '0x01100:40'
+    condition: selection
+falsepositives:
+    - Legitimate MSSQL Server actions
+level: medium
+

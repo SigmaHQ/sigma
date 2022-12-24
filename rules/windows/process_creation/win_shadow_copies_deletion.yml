@@ -1,0 +1,47 @@
+title: Shadow Copies Deletion Using Operating Systems Utilities
+id: c947b146-0abc-4c87-9c64-b17e9d7274a2
+status: stable
+description: Shadow Copies deletion using operating systems utilities
+author: Florian Roth, Michael Haag, Teymur Kheirkhabarov, Daniil Yugoslavskiy, oscd.community, Andreas Hunkeler (@Karneades)
+date: 2019/10/22
+modified: 2021/06/02
+references:
+    - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
+    - https://blog.talosintelligence.com/2017/05/wannacry.html
+    - https://securingtomorrow.mcafee.com/other-blogs/mcafee-labs/new-teslacrypt-ransomware-arrives-via-spam/
+    - https://www.bleepingcomputer.com/news/security/why-everyone-should-disable-vssadmin-exe-now/
+    - https://www.hybrid-analysis.com/sample/ed01ebfbc9eb5bbea545af4d01bf5f1071661840480439c6e5babe8e080e41aa?environmentId=100
+    - https://github.com/Neo23x0/Raccine#the-process
+    - https://github.com/Neo23x0/Raccine/blob/main/yara/gen_ransomware_command_lines.yar
+tags:
+    - attack.defense_evasion
+    - attack.impact
+    - attack.t1070
+    - attack.t1490
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\wmic.exe'
+            - '\vssadmin.exe'
+            - '\diskshadow.exe'
+        CommandLine|contains|all:
+            - shadow  # will match "delete shadows" and "shadowcopy delete" and "shadowstorage"
+            - delete
+    selection2:
+        Image|endswith:
+            - '\wbadmin.exe'
+        CommandLine|contains|all:
+            - delete
+            - catalog
+            - quiet # will match -quiet or /quiet
+    condition: 1 of selection*
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Legitimate Administrator deletes Shadow Copies using operating systems utilities for legitimate reason
+level: critical

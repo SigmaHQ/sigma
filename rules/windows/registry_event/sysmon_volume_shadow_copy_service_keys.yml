@@ -1,0 +1,24 @@
+title: Volume Shadow Copy Service Keys
+id: 5aad0995-46ab-41bd-a9ff-724f41114971
+description: Detects the volume shadow copy service initialization and processing. Registry keys such as HKLM\\System\\CurrentControlSet\\Services\\VSS\\Diag\\VolSnap\\Volume are captured.
+status: experimental
+date: 2020/10/20
+modified: 2021/06/02
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+tags:
+    - attack.credential_access
+    - attack.t1003.002
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1003.002/T1003.002.md#atomic-test-3---esentutlexe-sam-copy
+logsource:
+    category: registry_event
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: 'System\CurrentControlSet\Services\VSS'
+    filter:
+        TargetObject|contains: 'System\CurrentControlSet\Services\VSS\Start'
+    condition: selection and not filter
+falsepositives:
+    - Other services accessing that key or sub keys
+level: high

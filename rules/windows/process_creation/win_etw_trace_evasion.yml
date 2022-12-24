@@ -1,0 +1,57 @@
+title: Disable of ETW Trace
+id: a238b5d0-ce2d-4414-a676-7a531b3d13d6
+description: Detects a command that clears or disables any ETW trace log which could indicate a logging evasion.
+status: experimental
+references:
+    - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/wevtutil
+    - https://abuse.io/lockergoga.txt
+    - https://medium.com/palantir/tampering-with-windows-event-tracing-background-offense-and-defense-4be7ac62ac63
+author: '@neu5ron, Florian Roth, Jonhnathan Ribeiro, oscd.community'
+date: 2019/03/22
+tags:
+    - attack.defense_evasion
+    - attack.t1070
+    - attack.t1562.006
+    - car.2016-04-002
+level: high
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_clear_1:
+        CommandLine|contains|all: 
+          - 'cl'
+          - '/Trace'
+    selection_clear_2:
+        CommandLine|contains|all: 
+          - 'clear-log'
+          - '/Trace'
+    selection_disable_1:
+        CommandLine|contains|all: 
+          - 'sl'
+          - '/e:false'
+    selection_disable_2:
+        CommandLine|contains|all: 
+          - 'set-log'
+          - '/e:false'
+    selection_disable_3: #Autologger provider removal
+        CommandLine|contains|all:
+          - 'Remove-EtwTraceProvider'
+          - 'EventLog-Microsoft-Windows-WMI-Activity-Trace'
+          - '{1418ef04-b0b4-4623-bf7e-d74ab47bbdaa}'
+    selection_disable_4: #Provider “Enable” property modification
+        CommandLine|contains|all:
+          - 'Set-EtwTraceProvider'
+          - '{1418ef04-b0b4-4623-bf7e-d74ab47bbdaa}'
+          - 'EventLog-Microsoft-Windows-WMI-Activity-Trace'
+          - '0x11'
+    selection_disable_5: #ETW provider removal from a trace session
+        CommandLine|contains|all:
+          - "logman" 
+          - "update" 
+          - "trace" 
+          - "--p"
+          - "-ets"
+    condition: 1 of them
+falsepositives:
+    - Unknown

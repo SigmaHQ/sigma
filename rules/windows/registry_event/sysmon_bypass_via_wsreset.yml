@@ -1,0 +1,29 @@
+title: UAC Bypass Via Wsreset
+id: 6ea3bf32-9680-422d-9f50-e90716b12a66
+status: experimental
+description: Unfixed method for UAC bypass from windows 10. WSReset.exe file associated with the Windows Store. It will run a binary file contained in a low-privilege registry.
+references:
+    - https://www.bleepingcomputer.com/news/security/trickbot-uses-a-new-windows-10-uac-bypass-to-launch-quietly
+    - https://lolbas-project.github.io/lolbas/Binaries/Wsreset
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1548.002
+author: oscd.community, Dmitry Uchakin
+date: 2020/10/07
+logsource:
+    category: registry_event
+    product: windows
+detection:
+    selection:
+        TargetObject|endswith:
+            - '\AppX82a6gwre4fdg3bt635tn5ctqjf8msdd2\Shell\open\command'
+    condition: selection
+fields:
+    - ComputerName
+    - Image
+    - EventType
+    - TargetObject
+falsepositives:
+    - unknown
+level: high

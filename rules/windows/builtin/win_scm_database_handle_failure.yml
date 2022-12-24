@@ -1,0 +1,25 @@
+title: SCM Database Handle Failure
+id: 13addce7-47b2-4ca0-a98f-1de964d1d669
+description: Detects non-system users failing to get a handle of the SCM database.
+status: experimental
+date: 2019/08/12
+author: Roberto Rodriguez @Cyb3rWard0g
+references:
+    - https://threathunterplaybook.com/notebooks/windows/07_discovery/WIN-190826010110.html
+tags:
+    - attack.discovery
+logsource:
+    product: windows
+    service: security
+detection:
+    selection: 
+        EventID: 4656
+        ObjectType: 'SC_MANAGER OBJECT'
+        ObjectName: 'servicesactive'
+        Keywords: "Audit Failure"
+    filter:
+        SubjectLogonId: "0x3e4"
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: critical

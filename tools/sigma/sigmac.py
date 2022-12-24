@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # A Sigma to SIEM converter
 # Copyright 2016-2017 Thomas Patzke, Florian Roth
+
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -21,7 +22,7 @@ import ruamel.yaml
 import json
 import pathlib
 import itertools
-import logging, traceback
+import logging
 from sigma.parser.collection import SigmaCollectionParser
 from sigma.parser.exceptions import SigmaCollectionParseError, SigmaParseError
 from sigma.configuration import SigmaConfiguration, SigmaConfigurationChain
@@ -34,9 +35,6 @@ from sigma.backends.exceptions import BackendError, NotSupportedError, PartialMa
 from sigma.parser.modifiers import modifiers
 import codecs
 import copy
-import time
-import datetime
-from termcolor import colored
 
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
 
@@ -63,12 +61,6 @@ ERR_FULL_FIELD_MATCH    = 90
 
 # Allowed fields in output
 allowed_fields = ["title", "id", "status", "description", "author", "references", "fields", "falsepositives", "level", "tags", "filename"]
-
-deprecation_warning_message = colored("Sigmac will be deprecated by the end of 2022",
-                                      "red") + " in favour of sigma-cli and pySigma. Please " +  colored("stop contributing backends", "red") + \
-                                               " to this tool. Limited support is offered until the end of 2023, " \
-                                               "especially for backends that haven't been migrated yet.\n "
-
 
 def alliter(path):
     for sub in path.iterdir():
@@ -102,32 +94,27 @@ class ActionBackendHelp(argparse.Action):
 def set_argparser():
     """Sets up and parses the command line arguments for Sigmac.
     Returns the argparser"""
-    argparser = argparse.ArgumentParser(description="Convert Sigma rules into SIEM signatures.\n" + deprecation_warning_message, formatter_class=argparse.RawTextHelpFormatter)
+    argparser = argparse.ArgumentParser(description="Convert Sigma rules into SIEM signatures.")
     argparser.add_argument("--recurse", "-r", action="store_true", help="Use directory as input (recurse into subdirectories is not implemented yet)")
     argparser.add_argument("--filter", "-f", help="""
     Define comma-separated filters that must match (AND-linked) to rule to be processed.
-    Valid filters: level<=x, level>=x, level=x, status=y, logsource=z, tag=t, target=o.
+    Valid filters: level<=x, level>=x, level=x, status=y, logsource=z, tag=t.
     x is one of: low, medium, high, critical.
     y is one of: experimental, testing, stable.
     z is a word appearing in an arbitrary log source attribute.
     t is a tag that must appear in the rules tag list, case-insensitive matching.
-    o is a target that must appear in the rules target list, case-insensitive matching.
     Multiple log source specifications are AND linked.
-    Special filter:
-    inlastday=X rule create or modified in the last X days period
-    tlp=valid_tlp if rule have no tlp set to WHITE
             """)
     argparser.add_argument("--target", "-t", choices=backends.getBackendDict().keys(), help="Output target format")
     argparser.add_argument("--lists", "-l", action="store_true", help="List available output target formats and configurations")
-    argparser.add_argument("--lists-files-after-date", "-L",help="List yml files  which is modified/created after the date (Example of the date: 2022/02/01).")
     argparser.add_argument("--config", "-c", action="append", help="Configurations with field name and index mapping for target environment. Multiple configurations are merged into one. Last config is authoritative in case of conflicts.")
     argparser.add_argument("--output", "-o", default=None, help="Output file or filename prefix (if end with a '_','/' or '\\')")
-    argparser.add_argument("--output-fields", "-of", help="""Enhance your output with additional fields from the Sigma rule (not only the converted rule itself).
+    argparser.add_argument("--output-fields", "-of", help="""Enhance your output with additional fields from the Sigma rule (not only the converted rule itself). 
     Select the fields you want by providing their list delimited with commas (no space). Only work with the '--output-format' option and with 'json' or 'yaml' value.
     available additional fields : title, id, status, description, author, references, fields, falsepositives, level, tags.
     This option do not have any effect for backends that already format output : elastalert, kibana, splukxml etc. """)
     argparser.add_argument("--output-format", "-oF", choices=["json", "yaml"], help="Use only if you want to have JSON or YAML output (default is raw text)")
-    argparser.add_argument("--output-extention", "-e", default=None, help="Extension of Output file for filename prefix use")
+    argparser.add_argument("--output-extention", "-e", default=None, help="Extention of Output file for filename prefix use")
     argparser.add_argument("--print0", action="store_true", help="Delimit results by NUL-character")
     argparser.add_argument("--backend-option", "-O", action="append", help="Options and switches that are passed to the backend")
     argparser.add_argument("--backend-config", "-C", help="Configuration file (YAML format) containing options to pass to the backend")
@@ -138,7 +125,7 @@ def set_argparser():
     argparser.add_argument("--verbose", "-v", action="store_true", help="Be verbose")
     argparser.add_argument("--debug", "-D", action="store_true", help="Debugging output")
     argparser.add_argument("inputs", nargs="*", help="Sigma input files ('-' for stdin)")
-
+    
     return argparser
 
 def list_backends(debug):
@@ -157,32 +144,6 @@ def list_modifiers(modifiers):
     for modifier_id, modifier in modifiers.items():
         print("{:>10} : {}".format(modifier_id, modifier.__doc__))
 
-def get_fileName_after_date(inputs, recurse, date):
-    #date: 2021/05/06
-    #modified: 2021/11/30
-    dateTime = time.mktime(datetime.datetime.strptime(date, "%Y/%m/%d").timetuple())
-    for sigmafile in get_inputs(inputs, recurse):
-        f = sigmafile.open(encoding='utf-8')
-        yamls = yaml.safe_load_all(f)
-        datestr = None
-        modifiedstr = None
-        for data in yamls:
-            modifiedstr = data.get("modified", None)
-            datestr = data.get("date", None)
-            if not modifiedstr and not datestr:
-                continue;
-
-        if not modifiedstr and not datestr:
-            print("%s, No date" % sigmafile)
-            continue
-
-        if not modifiedstr:
-            modifiedstr = datestr
-
-        modified = time.mktime(datetime.datetime.strptime(modifiedstr, "%Y/%m/%d").timetuple())
-        if modified > dateTime:
-            print("%s, Updated" % sigmafile)
-
 def main():
     argparser = set_argparser()
     cmdargs = argparser.parse_args()
@@ -190,7 +151,6 @@ def main():
 
     logger = logging.getLogger(__name__)
     if cmdargs.debug:   # pragma: no cover
-        logging.basicConfig(filename='sigmac.log', filemode='w', level=logging.DEBUG)
         logger.setLevel(logging.DEBUG)
 
     if cmdargs.lists:
@@ -207,20 +167,13 @@ def main():
         sys.exit(0)
     elif len(cmdargs.inputs) == 0:
         print("Nothing to do!")
-        print(deprecation_warning_message)
         argparser.print_usage()
-        sys.exit(0)
-
-    if cmdargs.lists_files_after_date is not None:
-        get_fileName_after_date(cmdargs.inputs, cmdargs.recurse, cmdargs.lists_files_after_date)
         sys.exit(0)
 
     if cmdargs.target is None:
         print("No target selected, select one with -t/--target")
         argparser.print_usage()
         sys.exit(ERR_NO_TARGET)
-
-    logger.debug("* Target selected %s" % (cmdargs.target))
 
     rulefilter = None
     if cmdargs.filter:
@@ -271,7 +224,7 @@ def main():
                 exit(ERR_CONFIG_PARSING)
 
     if cmdargs.output_fields:
-        if cmdargs.output_format:
+        if cmdargs.output_format: 
             output_fields_rejected = [field for field in cmdargs.output_fields.split(",") if field not in allowed_fields] # Not allowed fields
             if output_fields_rejected:
                     print("These fields are not allowed (check help for allow field list) : %s" % (", ".join(output_fields_rejected)), file=sys.stderr)
@@ -284,7 +237,7 @@ def main():
 
     backend_options = BackendOptions(cmdargs.backend_option, cmdargs.backend_config)
     backend = backend_class(sigmaconfigs, backend_options)
-
+    
     filename_ext = cmdargs.output_extention
     filename = cmdargs.output
     fileprefix = None
@@ -296,7 +249,7 @@ def main():
                 filename_ext = '.' + filename_ext
         else:
             filename_ext = '.rule'
-
+    
         if filename[-1:] in ['_','/','\\']:
             fileprefix = filename
         else:
@@ -310,25 +263,19 @@ def main():
 
     error = 0
     output_array = []
-    result = backend.initialize()
-    if result:
-        print(result, file=out)
-
     for sigmafile in get_inputs(cmdargs.inputs, cmdargs.recurse):
         logger.debug("* Processing Sigma input %s" % (sigmafile))
-        success = True
         try:
             if cmdargs.inputs == ['-']:
                 f = sigmafile
             else:
                 f = sigmafile.open(encoding='utf-8')
             parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter, sigmafile)
-            backend.setYmlFileName(str(sigmafile))
             results = parser.generate(backend)
 
             nb_result = len(list(copy.deepcopy(results)))
             inc_filenane = None if nb_result < 2 else 0
-
+            
             newline_separator = '\0' if cmdargs.print0 else '\n'
 
             results = list(results) # Since results is an iterator and used twice we convert it a list
@@ -345,7 +292,7 @@ def main():
                 elif  not fileprefix == None and inc_filenane == None: # a simple yml
                     try:
                         filename = fileprefix + str(sigmafile.name)
-                        filename = filename.replace('.yml',filename_ext)
+                        filename = filename.replace('.yml',filename_ext) 
                         out = open(filename, "w", encoding='utf-8')
                     except (IOError, OSError) as e:
                         print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
@@ -362,10 +309,9 @@ def main():
                         if k in output_fields_filtered:
                             output[k] = v
                 output['rule'] = [result for result in results]
-                if len(output['rule']) > 0: # avoid printing empty rules
-                    if "filename" in output_fields_filtered:
-                        output['filename'] = str(sigmafile.name)
-                    output_array.append(output)
+                if "filename" in output_fields_filtered:
+                    output['filename'] = str(sigmafile.name)
+                output_array.append(output)
 
             if nb_result == 0: # backend get only 1 output
                 if not fileprefix == None: # want a prefix anyway
@@ -375,81 +321,61 @@ def main():
                         fileprefix = None  # no need to open the same file many time
                     except (IOError, OSError) as e:
                         print("Failed to open output file '%s': %s" % (filename, str(e)), file=sys.stderr)
-                        exit(ERR_OUTPUT)
+                        exit(ERR_OUTPUT) 
 
         except OSError as e:
             print("Failed to open Sigma file %s: %s" % (sigmafile, str(e)), file=sys.stderr)
-            logger.debug("* Convertion Sigma input %s FAILURE" % (sigmafile))
-            success = False
             error = ERR_OPEN_SIGMA_RULE
         except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
             print("Error: Sigma file %s is no valid YAML: %s" % (sigmafile, str(e)), file=sys.stderr)
-            logger.debug("* Convertion Sigma input %s FAILURE" % (sigmafile))
-            success = False
             error = ERR_INVALID_YAML
             if not cmdargs.defer_abort:
                 sys.exit(error)
         except (SigmaParseError, SigmaCollectionParseError) as e:
             print("Error: Sigma parse error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
-            logger.debug("* Convertion Sigma input %s FAILURE" % (sigmafile))
-            success = False
             error = ERR_SIGMA_PARSING
             if not cmdargs.defer_abort:
                 sys.exit(error)
         except NotSupportedError as e:
             print("Error: The Sigma rule requires a feature that is not supported by the target system: " + str(e), file=sys.stderr)
-            logger.debug("* Convertion Sigma input %s FAILURE" % (sigmafile))
-            success = False
             if not cmdargs.ignore_backend_errors:
                 error = ERR_NOT_SUPPORTED
                 if not cmdargs.defer_abort:
                     sys.exit(error)
         except BackendError as e:
             print("Error: Backend error in %s: %s" % (sigmafile, str(e)), file=sys.stderr)
-            logger.debug("* Convertion Sigma input %s FAILURE" % (sigmafile))
-            success = False
             if not cmdargs.ignore_backend_errors:
                 error = ERR_BACKEND
                 if not cmdargs.defer_abort:
                     sys.exit(error)
         except (NotImplementedError, TypeError) as e:
             print("An unsupported feature is required for this Sigma rule (%s): " % (sigmafile) + str(e), file=sys.stderr)
-            # traceback.print_exc()
-            logger.debug("* Convertion Sigma input %s FAILURE" % (sigmafile))
-            success = False
             if not cmdargs.ignore_backend_errors:
                 error = ERR_NOT_IMPLEMENTED
                 if not cmdargs.defer_abort:
                     sys.exit(error)
         except PartialMatchError as e:
             print("Error: Partial field match error: %s" % str(e), file=sys.stderr)
-            logger.debug("* Convertion Sigma input %s FAILURE" % (sigmafile))
-            success = False
             if not cmdargs.ignore_backend_errors:
                 error = ERR_PARTIAL_FIELD_MATCH
                 if not cmdargs.defer_abort:
                     sys.exit(error)
         except FullMatchError as e:
             print("Error: Full field match error", file=sys.stderr)
-            logger.debug("* Convertion Sigma input %s FAILURE" % (sigmafile))
-            success = False
             if not cmdargs.ignore_backend_errors:
                 error = ERR_FULL_FIELD_MATCH
                 if not cmdargs.defer_abort:
-                    sys.exit(error)
+                    sys.exit(error)                
         finally:
             try:
                 f.close()
             except:
                 pass
-
-        if success :
-            logger.debug("* Convertion Sigma input %s SUCCESS" % (sigmafile))
-
+    
     result = backend.finalize()
     if result:
         print(result, file=out)
-
+    
     if cmdargs.output_fields:
         if cmdargs.output_format == 'json':
             print(json.dumps(output_array, indent=4, ensure_ascii=False), file=out)

@@ -1,0 +1,33 @@
+title: 'Binary Padding'
+id: 95361ce5-c891-4b0a-87ca-e24607884a96
+status: experimental
+description: 'Adversaries may use binary padding to add junk data and change the on-disk representation of malware. This rule detect using dd and truncate to add a junk data to file.'
+    # For this rule to work you must enable audit of process execution in OpenBSM, see
+    # https://osquery.readthedocs.io/en/stable/deployment/process-auditing/#macos-process-socket-auditing
+author: 'Igor Fits, Mikhail Larin, oscd.community'
+date: 2020/10/19
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1027.001/T1027.001.md
+logsource:
+    product: macos
+    category: process_creation
+detection:
+    selection1:
+        Image|endswith:
+             - '/truncate'
+        CommandLine|contains:
+             - '-s'
+    selection2:
+        Image|endswith:
+             - '/dd'
+        CommandLine|contains:
+             - 'if='
+    filter:
+        CommandLine|contains: 'of='
+    condition: selection1 or (selection2 and not filter)
+falsepositives:
+    - 'Legitimate script work'
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1027.001

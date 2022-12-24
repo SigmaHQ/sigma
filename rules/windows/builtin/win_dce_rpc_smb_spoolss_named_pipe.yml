@@ -1,0 +1,25 @@
+title: DCERPC SMB Spoolss Named Pipe
+id: 214e8f95-100a-4e04-bb31-ef6cba8ce07e
+description: Detects the use of the spoolss named pipe over SMB. This can be used to trigger the authentication via NTLM of any machine that has the spoolservice enabled. 
+status: experimental
+references:
+    - https://posts.specterops.io/hunting-in-active-directory-unconstrained-delegation-forests-trusts-71f2b33688e1
+    - https://dirkjanm.io/a-different-way-of-abusing-zerologon/
+    - https://twitter.com/_dirkjan/status/1309214379003588608
+tags:
+    - attack.lateral_movement
+    - attack.t1021.002
+date: 2018/11/28
+author: OTR (Open Threat Research)
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 5145
+        ShareName: \\*\IPC$
+        RelativeTargetName: spoolss
+    condition: selection
+falsepositives:
+    - 'Domain Controllers acting as printer servers too? :)'
+level: medium

@@ -1,0 +1,26 @@
+title: PowerShell as a Service in Registry
+id: 4a5f5a5e-ac01-474b-9b4e-d61298c9df1d
+description: Detects that a powershell code is written to the registry as a service.
+status: experimental
+author: oscd.community, Natalia Shornikova
+date: 2020/10/06
+modified: 2021/05/21
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse
+tags:
+    - attack.execution
+    - attack.t1569.002
+logsource:
+    category: registry_event
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\Services\'
+        TargetObject|endswith: '\ImagePath'
+        Details|contains:
+          - 'powershell'
+          - 'pwsh'
+    condition: selection
+falsepositives: 
+ - Unknown
+level: high

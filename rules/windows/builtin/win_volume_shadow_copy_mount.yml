@@ -1,0 +1,23 @@
+title: Volume Shadow Copy Mount
+id: f512acbf-e662-4903-843e-97ce4652b740
+description: Detects volume shadow copy mount
+status: experimental
+date: 2020/10/20
+author: Roberto Rodriguez @Cyb3rWard0g, Open Threat Research (OTR)
+tags:
+    - attack.credential_access
+    - attack.t1003.002
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1003.002/T1003.002.md#atomic-test-3---esentutlexe-sam-copy
+logsource:
+    product: windows
+    service: system
+detection:
+    selection: 
+        Source: Microsoft-Windows-Ntfs
+        EventID: 98
+        DeviceName|contains: HarddiskVolumeShadowCopy
+    condition: selection
+falsepositives:
+    - Legitimate use of volume shadow copy mounts (backups maybe).
+level: medium

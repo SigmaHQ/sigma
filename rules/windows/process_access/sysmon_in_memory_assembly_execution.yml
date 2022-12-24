@@ -1,0 +1,59 @@
+title: Suspicious In-Memory Module Execution
+id: 5f113a8f-8b61-41ca-b90f-d374fa7e4a39
+description: Detects the access to processes by other suspicious processes which have reflectively loaded libraries in their memory space. An example is SilentTrinity
+    C2 behaviour. Generally speaking, when Sysmon EventID 10 cannot reference a stack call to a dll loaded from disk (the standard way), it will display "UNKNOWN"
+    as the module name. Usually this means the stack call points to a module that was reflectively loaded in memory. Adding to this, it is not common to see such
+    few calls in the stack (ntdll.dll --> kernelbase.dll --> unknown) which essentially means that most of the functions required by the process to execute certain
+    routines are already present in memory, not requiring any calls to external libraries. The latter should also be considered suspicious.
+status: experimental
+date: 2019/10/27
+modified: 2021/05/16
+author: Perez Diego (@darkquassar), oscd.community, Jonhnathan Ribeiro
+references:
+    - https://azure.microsoft.com/en-ca/blog/detecting-in-memory-attacks-with-sysmon-and-azure-security-center/
+tags:
+    - attack.privilege_escalation
+    - attack.defense_evasion
+    - attack.t1055.001
+    - attack.t1055.002
+    - attack.t1055 # an old one
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection1:
+        CallTrace|contains|all:
+              - 'C:\\Windows\\SYSTEM32\\ntdll.dll+'
+              - '|C:\\Windows\\System32\\KERNELBASE.dll+'
+              - '|UNKNOWN('
+              - ')'
+    selection2:
+        CallTrace|contains|all:
+              - "UNKNOWN("
+              - ")|UNKNOWN("
+        CallTrace|endswith: ")"
+    selection3:
+        CallTrace|contains: "UNKNOWN"
+    granted_access:
+        GrantedAccess:
+            - "0x1F0FFF"
+            - "0x1F1FFF"
+            - "0x143A"
+            - "0x1410"
+            - "0x1010"
+            - "0x1F2FFF"
+            - "0x1F3FFF"
+            - "0x1FFFFF"
+    filter:
+        SourceImage|endswith:
+            - '\Windows\System32\sdiagnhost.exe'
+    condition: (selection1 or selection2) or (selection3 and granted_access) and not filter
+fields:
+    - ComputerName
+    - User
+    - SourceImage
+    - TargetImage
+    - CallTrace
+level: critical
+falsepositives:
+    - Low

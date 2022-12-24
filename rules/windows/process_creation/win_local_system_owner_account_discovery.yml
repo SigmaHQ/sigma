@@ -1,0 +1,65 @@
+title: Local Accounts Discovery
+id: 502b42de-4306-40b4-9596-6f590c81f073
+status: experimental
+description: Local accounts, System Owner/User discovery using operating systems utilities
+author: Timur Zinniatullin, Daniil Yugoslavskiy, oscd.community
+date: 2019/10/21
+modified: 2020/09/01
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1033/T1033.md
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_1:
+      - Image|endswith: '\whoami.exe'
+      - Image|endswith: '\wmic.exe'
+        CommandLine|contains|all:
+            - 'useraccount'
+            - 'get'
+      - Image|endswith: 
+            - '\quser.exe'
+            - '\qwinsta.exe'
+      - Image|endswith: '\cmdkey.exe'
+        CommandLine|contains: '/list'
+      - Image|endswith: '\cmd.exe'
+        CommandLine|contains|all: 
+            - '/c'
+            - 'dir '
+            - '\Users\'
+    filter_1:
+        CommandLine|contains:
+            - ' rmdir '       # don't match on 'dir'   "C:\Windows\System32\cmd.exe" /q /c rmdir /s /q "C:\Users\XX\AppData\Local\Microsoft\OneDrive\19.232.1124.0005"
+    selection_2:
+        Image|endswith:
+            - '\net.exe'
+            - '\net1.exe'
+        CommandLine|contains: 'user'
+    filter_2:
+        CommandLine|contains:
+            - '/domain'       # local account discovery only
+            - '/add'          # discovery only
+            - '/delete'       # discovery only
+            - '/active'       # discovery only
+            - '/expires'      # discovery only
+            - '/passwordreq'  # discovery only
+            - '/scriptpath'   # discovery only
+            - '/times'        # discovery only
+            - '/workstations' # discovery only
+    condition: (selection_1 and not filter_1) or (selection_2 and not filter_2)
+fields:
+    - Image
+    - CommandLine
+    - User
+    - LogonGuid
+    - Hashes
+    - ParentProcessGuid
+    - ParentCommandLine
+falsepositives:
+     - Legitimate administrator or user enumerates local users for legitimate reason
+level: low
+tags:
+    - attack.discovery
+    - attack.t1033
+    - attack.t1087.001
+    - attack.t1087  # an old one

@@ -1,0 +1,27 @@
+title: XSL Script Processing
+id: 05c36dd6-79d6-4a9a-97da-3db20298ab2d
+status: experimental
+description: Extensible Stylesheet Language (XSL) files are commonly used to describe the processing and rendering of data within XML files. Rule detects when adversaries
+    abuse this functionality to execute arbitrary files while potentially bypassing application whitelisting defenses.
+author: Timur Zinniatullin, oscd.community
+date: 2019/10/21
+modified: 2019/11/04
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1220/T1220.md
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+      - Image|endswith: '\wmic.exe'
+        CommandLine|contains: '/format' # wmic process list /FORMAT /?
+      - Image|endswith: '\msxsl.exe'
+    condition: selection
+falsepositives:
+    - WMIC.exe FP depend on scripts and administrative methods used in the monitored environment.
+    - msxsl.exe is not installed by default, so unlikely.
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1220
+    - attack.execution # an old one

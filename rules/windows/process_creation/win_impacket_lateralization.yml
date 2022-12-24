@@ -1,0 +1,69 @@
+title: Impacket Lateralization Detection
+id: 10c14723-61c7-4c75-92ca-9af245723ad2
+status: experimental
+description: Detects wmiexec/dcomexec/atexec/smbexec from Impacket framework
+references:
+    - https://github.com/SecureAuthCorp/impacket/blob/master/examples/wmiexec.py
+    - https://github.com/SecureAuthCorp/impacket/blob/master/examples/atexec.py
+    - https://github.com/SecureAuthCorp/impacket/blob/master/examples/smbexec.py
+    - https://github.com/SecureAuthCorp/impacket/blob/master/examples/dcomexec.py
+author: Ecco, oscd.community, Jonhnathan Ribeiro
+date: 2019/09/03
+modified: 2020/09/01
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_other:
+        # *** wmiexec.py 
+        #    parent is wmiprvse.exe
+        #    examples:
+        #       cmd.exe /Q /c whoami 1> \\127.0.0.1\ADMIN$\__1567439113.54 2>&1
+        #       cmd.exe /Q /c cd  1> \\127.0.0.1\ADMIN$\__1567439113.54 2>&1
+        # *** dcomexec.py -object MMC20 
+        #   parent is mmc.exe
+        #   example:
+        #       "C:\Windows\System32\cmd.exe" /Q /c cd  1> \\127.0.0.1\ADMIN$\__1567442499.05 2>&1
+        # *** dcomexec.py -object ShellBrowserWindow
+        #  runs %SystemRoot%\System32\rundll32.exe shell32.dll,SHCreateLocalServerRunDll {c08afd90-f2a1-11d1-8455-00a0c91f3880} but parent command is explorer.exe
+        #  example:
+        #   "C:\Windows\System32\cmd.exe" /Q /c cd \ 1> \\127.0.0.1\ADMIN$\__1567520103.71 2>&1
+        # *** smbexec.py
+        #   parent is services.exe
+        #   example:
+        #       C:\Windows\system32\cmd.exe /Q /c echo tasklist ^> \\127.0.0.1\C$\__output 2^>^&1 > C:\Windows\TEMP\execute.bat & C:\Windows\system32\cmd.exe /Q /c C:\Windows\TEMP\execute.bat & del C:\Windows\TEMP\execute.bat
+        ParentImage|endswith:
+            - '\wmiprvse.exe'  # wmiexec
+            - '\mmc.exe'  # dcomexec MMC
+            - '\explorer.exe'  # dcomexec ShellBrowserWindow
+            - '\services.exe'  # smbexec
+        CommandLine|contains|all:
+            - 'cmd.exe'
+            - '/Q'
+            - '/c'
+            - '\\\\127.0.0.1\'
+            - '&1'
+    selection_atexec:
+        ParentCommandLine|contains:
+            - 'svchost.exe -k netsvcs' # atexec on win10 (parent is "C:\Windows\system32\svchost.exe -k netsvcs")
+            - 'taskeng.exe' # atexec on win7 (parent is "taskeng.exe {AFA79333-694C-4BEE-910E-E57D9A3518F6} S-1-5-18:NT AUTHORITY\System:Service:")
+        # cmd.exe /C tasklist /m > C:\Windows\Temp\bAJrYQtL.tmp 2>&1
+        CommandLine|contains|all:
+            - 'cmd.exe'
+            - '/C'
+            - 'Windows\Temp\'
+            - '&1'
+    condition: (1 of selection_*)
+fields:
+    - CommandLine
+    - ParentCommandLine
+tags:
+    - attack.execution
+    - attack.t1047
+    - attack.lateral_movement
+    - attack.t1175  # an old one
+    - attack.t1021.003
+    - attack.t1021  # an old one
+falsepositives:
+    - pentesters
+level: critical

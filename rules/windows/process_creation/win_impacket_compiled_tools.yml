@@ -1,0 +1,72 @@
+title: Impacket Tool Execution
+status: experimental
+id: 4627c6ae-6899-46e2-aa0c-6ebcb1becd19
+description: Detects the execution of different compiled Windows binaries of the impacket toolset (based on names or part of their names - could lead to false positives)
+author: Florian Roth
+date: 2021/07/24
+references:
+    - https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries
+tags:
+    - attack.execution
+    - attack.t1557.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|contains: 
+            - '\goldenPac'
+            - '\karmaSMB'
+            - '\kintercept'
+            - '\ntlmrelayx'
+            - '\rpcdump'
+            - '\samrdump'
+            - '\secretsdump'
+            - '\smbexec'
+            - '\smbrelayx'
+            - '\wmiexec'
+            - '\wmipersist'
+        - Image|endswith: 
+            # - '\addcomputer_windows.exe'
+            - '\atexec_windows.exe'
+            - '\dcomexec_windows.exe'
+            - '\dpapi_windows.exe'
+            # - '\esentutl_windows.exe'
+            - '\findDelegation_windows.exe'
+            - '\GetADUsers_windows.exe'
+            # - '\getArch_windows.exe'
+            - '\GetNPUsers_windows.exe'
+            - '\getPac_windows.exe'
+            - '\getST_windows.exe'
+            - '\getTGT_windows.exe'
+            - '\GetUserSPNs_windows.exe'
+            - '\ifmap_windows.exe'
+            # - '\lookupsid_windows.exe'
+            - '\mimikatz_windows.exe'
+            # - '\mqtt_check_windows.exe'
+            # - '\mssqlclient_windows.exe'
+            # - '\mssqlinstance_windows.exe'
+            - '\netview_windows.exe'
+            - '\nmapAnswerMachine_windows.exe'
+            #- '\ntfs-read_windows.exe'
+            - '\opdump_windows.exe'
+            # - '\ping6_windows.exe'
+            # - '\ping_windows.exe'
+            - '\psexec_windows.exe'
+            # - '\raiseChild_windows.exe'
+            - '\rdp_check_windows.exe'
+            #- '\registry-read_windows.exe'
+            #- '\reg_windows.exe'
+            - '\sambaPipe_windows.exe'
+            # - '\services_windows.exe'
+            - '\smbclient_windows.exe'
+            - '\smbserver_windows.exe'
+            - '\sniffer_windows.exe'
+            - '\sniff_windows.exe'
+            - '\split_windows.exe'
+            - '\ticketer_windows.exe'
+            # - '\wmiquery_windows.exe'
+    condition: selection
+falsepositives:
+    - Legitimate use of the impacket tools
+level: high

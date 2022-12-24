@@ -1,0 +1,31 @@
+title: Data Compressed
+id: a3b5e3e9-1b49-4119-8b8e-0344a01f21ee
+status: experimental
+description: An adversary may compress data (e.g., sensitive documents) that is collected prior to exfiltration in order to make it portable and minimize the amount of data sent over the network.
+author: Timur Zinniatullin, oscd.community
+date: 2019/10/21
+modified: 2019/11/04
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1560.001/T1560.001.md
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection1:
+        type: 'execve'
+        a0: 'zip'
+    selection2:
+        type: 'execve'
+        a0: 'gzip'
+        a1: '-f'
+    selection3:
+        type: 'execve'
+        a0: 'tar'
+        a1|contains: '-c'
+    condition: 1 of them
+falsepositives:
+    - Legitimate use of archiving tools by legitimate user.
+level: low
+tags:
+    - attack.exfiltration
+    - attack.t1560.001

@@ -1,0 +1,52 @@
+title: Net.exe Execution
+id: 183e7ea8-ac4b-4c23-9aec-b3dac4e401ac
+status: experimental
+description: Detects execution of Net.exe, whether suspicious or benign.
+references:
+    - https://pentest.blog/windows-privilege-escalation-methods-for-pentesters/
+    - https://eqllib.readthedocs.io/en/latest/analytics/4d2e7fc1-af0b-4915-89aa-03d25ba7805e.html
+    - https://eqllib.readthedocs.io/en/latest/analytics/e61f557c-a9d0-4c25-ab5b-bbc46bb24deb.html
+    - https://eqllib.readthedocs.io/en/latest/analytics/9b3dd402-891c-4c4d-a662-28947168ce61.html
+author: Michael Haag, Mark Woan (improvements), James Pemberton / @4A616D6573 / oscd.community (improvements)
+date: 2019/01/16
+modified: 2020/11/28
+tags:
+    - attack.discovery
+    - attack.t1049
+    - attack.t1018
+    - attack.t1135
+    - attack.t1201
+    - attack.t1069.001
+    - attack.t1069.002
+    - attack.t1087.001
+    - attack.t1087.002
+    - attack.lateral_movement    
+    - attack.t1021.002
+    - attack.t1077      # an old one
+    - attack.s0039
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\net.exe'
+            - '\net1.exe'
+    cmdline:
+        CommandLine|contains:
+            - ' group'
+            - ' localgroup'
+            - ' user'
+            - ' view'
+            - ' share'
+            - ' accounts'
+            - ' stop '
+    condition: selection and cmdline
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Will need to be tuned. If using Splunk, I recommend | stats count by Computer,CommandLine following the search for easy hunting by computer/CommandLine.
+level: low

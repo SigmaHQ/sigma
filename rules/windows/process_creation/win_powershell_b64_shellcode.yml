@@ -1,0 +1,26 @@
+title: PowerShell Base64 Encoded Shellcode
+id: 2d117e49-e626-4c7c-bd1f-c3c0147774c8
+description: Detects Base64 encoded Shellcode
+status: experimental
+references:
+    - https://twitter.com/cyb3rops/status/1063072865992523776
+author: Florian Roth
+date: 2018/11/17
+modified: 2020/09/01
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        CommandLine|contains: 'AAAAYInlM'
+    selection2:
+        CommandLine|contains:
+            - 'OiCAAAAYInlM'
+            - 'OiJAAAAYInlM'
+    condition: selection1 and selection2
+falsepositives:
+    - Unknown
+level: critical

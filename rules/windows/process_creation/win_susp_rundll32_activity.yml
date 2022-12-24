@@ -1,0 +1,78 @@
+title: Suspicious Rundll32 Activity
+id: e593cf51-88db-4ee1-b920-37e89012a3c9
+description: Detects suspicious process related to rundll32 based on arguments
+status: experimental
+references:
+    - http://www.hexacorn.com/blog/2017/05/01/running-programs-via-proxy-jumping-on-a-edr-bypass-trampoline/
+    - https://twitter.com/Hexacorn/status/885258886428725250
+    - https://gist.github.com/ryhanson/227229866af52e2d963cf941af135a52
+tags:
+    - attack.defense_evasion
+    - attack.execution  # an old one 
+    - attack.t1218.011
+    - attack.t1085      # an old one 
+author: juju4, Jonhnathan Ribeiro, oscd.community
+date: 2019/01/16
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - CommandLine|contains:
+            - 'javascript:'
+            - '.RegisterXLL'
+        - CommandLine|contains|all:
+            - 'url.dll'
+            - 'OpenURL'
+        - CommandLine|contains|all:
+            - 'url.dll'
+            - 'OpenURLA'
+        - CommandLine|contains|all:
+            - 'url.dll'
+            - 'FileProtocolHandler'
+        - CommandLine|contains|all:
+            - 'zipfldr.dll'
+            - 'RouteTheCall'
+        - CommandLine|contains|all:
+            - 'shell32.dll'
+            - 'Control_RunDLL'
+        - CommandLine|contains|all:
+            - 'shell32.dll'
+            - 'ShellExec_RunDLL'
+        - CommandLine|contains|all:
+            - 'mshtml.dll'
+            - 'PrintHTML'
+        - CommandLine|contains|all:
+            - 'advpack.dll'
+            - 'LaunchINFSection'
+        - CommandLine|contains|all:
+            - 'advpack.dll'
+            - 'RegisterOCX'
+        - CommandLine|contains|all:
+            - 'ieadvpack.dll'
+            - 'LaunchINFSection'
+        - CommandLine|contains|all:
+            - 'ieadvpack.dll'
+            - 'RegisterOCX'
+        - CommandLine|contains|all:
+            - 'ieframe.dll'
+            - 'OpenURL'
+        - CommandLine|contains|all:
+            - 'shdocvw.dll'
+            - 'OpenURL'
+        - CommandLine|contains|all:
+            - 'syssetup.dll'
+            - SetupInfObjectInstallAction'
+        - CommandLine|contains|all:
+            - 'setupapi.dll'
+            - 'InstallHinfSection'
+        - CommandLine|contains|all:
+            - 'pcwutl.dll'
+            - 'LaunchApplication'
+        - CommandLine|contains|all:
+            - 'dfshim.dll'
+            - 'ShOpenVerbApplication'
+    condition: selection
+falsepositives:
+    - False positives depend on scripts and administrative tools used in the monitored environment
+level: medium

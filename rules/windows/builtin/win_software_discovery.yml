@@ -1,0 +1,41 @@
+action: global
+title: Detected Windows Software Discovery
+id: 2650dd1a-eb2a-412d-ac36-83f06c4f2282
+description: Adversaries may attempt to enumerate software for a variety of reasons, such as figuring out what security measures are present or if the compromised system has a version of software that is vulnerable.
+status: experimental
+author: Nikita Nazarov, oscd.community
+date: 2020/10/16
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1518/T1518.md
+tags:
+    - attack.discovery
+    - attack.t1518
+level: medium
+falsepositives:
+    - Legitimate administration activities
+detection:
+    condition: 1 of them
+---
+logsource:
+    product: windows
+    service: powershell
+detection:
+    selection:
+        EventID: 4104
+        ScriptBlockText|contains|all:    # Example: Get-ItemProperty HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | Format-Table -Autosize
+          - 'get-itemProperty'
+          - '\software\'
+          - 'select-object'
+          - 'format-table'
+---
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\reg.exe'    # Example: reg query "HKEY_LOCAL_MACHINE\Software\Microsoft\Internet Explorer" /v svcVersion
+        CommandLine|contains|all:
+            - 'query'
+            - '\software\'
+            - '/v'
+            - 'svcversion'

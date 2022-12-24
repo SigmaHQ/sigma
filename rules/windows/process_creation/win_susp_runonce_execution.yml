@@ -1,0 +1,29 @@
+title: Run Once Task Execution as Configured in Registry
+id: 198effb6-6c98-4d0c-9ea3-451fa143c45c
+description: This rule detects the execution of Run Once task as configured in the registry
+author: 'Avneet Singh @v3t0_, oscd.community'
+status: experimental
+date: 2020/10/18
+references:
+    - https://twitter.com/pabraeken/status/990717080805789697
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OSBinaries/Runonce.yml
+tags:
+    - attack.defense_evasion
+    - attack.t1112
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    process_name:
+        Image|endswith:
+            - '\runonce.exe'
+    process_description:
+        Description:
+            - 'Run Once Wrapper'
+    command_line:
+        CommandLine|contains:
+            - ' /AlternateShellStartup'
+    condition: (process_name or process_description) and command_line
+falsepositives:
+    - Unknown
+level: low

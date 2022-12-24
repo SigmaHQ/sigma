@@ -19,7 +19,7 @@ description: 'PoC rule to detect malicious activity - following the principle: i
 status: experimental
 author: Florian Roth
 date: 2019/12/22
-modified: 2022/08/04
+modified: 2020/05/18
 level: high
 action: global
 ---
@@ -33,7 +33,7 @@ detection:
             - ' -NoP '  # Often used in malicious PowerShell commands
             - ' -W Hidden '  # Often used in malicious PowerShell commands
             - ' -decode '  # Used with certutil
-            - ' /decode '  # Used with certutil
+            - ' /decode '  # Used with certutil 
             - ' -e* JAB'  # PowerShell encoded commands
             - ' -e* SUVYI'  # PowerShell encoded commands
             - ' -e* SQBFAFgA'  # PowerShell encoded commands
@@ -49,17 +49,11 @@ detection:
             - '.downloadfile('  # PowerShell download command
             - ' /ticket:'  # Rubeus
             - ' sekurlsa'  # Mimikatz
-            - ' p::d '  # Mimikatz
+            - ' p::d '  # Mimikatz 
             - ';iex('  # PowerShell IEX
             - 'schtasks* /create *AppData'  # Scheduled task creation pointing to AppData
             - ' comsvcs.dll,MiniDump'  # Process dumping method apart from procdump
             - ' comsvcs.dll,#24'  # Process dumping method apart from procdump
-            - ' comsvcs.dll MiniDump'  # Process dumping method apart from procdump
-            - ' comsvcs.dll #24'  # Process dumping method apart from procdump
-            - ' comsvcs `#'  # Process dumping method apart from procdump
-            - ' comsvcs #'  # Process dumping method apart from procdump
-            - ' comsvcs MiniDump'  # Process dumping method apart from procdump
-            - '.dmp full'  # Process dumping method apart from procdump
     selection_parent_child:
         ParentImage|contains:
             # Office Dropper Detection
@@ -72,7 +66,6 @@ detection:
         Image|contains:
             - '\cmd.exe'
             - '\powershell.exe'
-            - '\pwsh.exe'
             - '\wscript.exe'
             - '\cscript.exe'
             - '\schtasks.exe'
@@ -102,9 +95,7 @@ detection:
     # Running whoami as LOCAL_SYSTEM (usually after privilege escalation)
     selection_whoami:
         Image|contains: '\whoami.exe'
-        User|contains: 
-            - 'AUTHORI'
-            - 'AUTORI'
+        User: 'NT AUTHORITY\SYSTEM' 
     condition: 1 of them
 ---
 logsource:
@@ -113,7 +104,7 @@ logsource:
 detection:
     selection_file_creation:
         EventID: 11
-        TargetFilename|contains:
+        TargetFilename|contains: 
             - '.dmp'  # dump process memory
             - 'Desktop\how'  # Ransomware
             - 'Desktop\decrypt'  # Ransomware
@@ -121,14 +112,14 @@ detection:
         EventID:
             - 12
             - 13
-        TargetObject|contains:
+        TargetObject|contains: 
             - 'UserInitMprLogonScript'  # persistence
             - '\CurrentVersion\Image File Execution Options\'  # persistence
     selection_registry_run:
         EventID:
             - 12
             - 13
-        TargetObject|contains:
+        TargetObject|contains: 
             - '\Microsoft\Windows\CurrentVersion\Run\'  # persistence
             - '\Microsoft\Windows\CurrentVersion\RunOnce\'   # persistence
         Details|contains:
@@ -147,7 +138,7 @@ detection:
     # Malicious service installs
     selection:
         EventID: 7045
-        ServiceName|contains:
+        ServiceName|contains: 
             - 'WCESERVICE'
             - 'WCE SERVICE'
             - 'winexesvc'

@@ -1,0 +1,31 @@
+title: Stealthy VSTO Persistence
+id: 9d15044a-7cfe-4d23-8085-6ebc11df7685
+status: experimental
+description: Detects persistence via Visual Studio Tools for Office (VSTO) add-ins in Office applications.
+references:
+    - https://twitter.com/_vivami/status/1347925307643355138
+    - https://vanmieghem.io/stealth-outlook-persistence/
+tags:
+    - attack.t1137.006
+    - attack.persistence
+author: Bhabesh Raj
+date: 2021/01/10
+modified: 2021/07/27
+logsource:
+    category: registry_event
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|contains:
+        - '\Software\Microsoft\Office\Outlook\Addins\'
+        - '\Software\Microsoft\Office\Word\Addins\'
+        - '\Software\Microsoft\Office\Excel\Addins\'
+        - '\Software\Microsoft\Office\Powerpoint\Addins\'
+        - '\Software\Microsoft\VSTO\Security\Inclusion\'
+    filter:
+        Image|endswith: '\msiexec.exe'
+    condition: selection and not filter
+falsepositives:
+  - Unknown
+level: high

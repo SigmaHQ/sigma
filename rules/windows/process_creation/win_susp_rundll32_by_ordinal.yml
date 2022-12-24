@@ -1,0 +1,33 @@
+title: Suspicious Call by Ordinal
+id: e79a9e79-eb72-4e78-a628-0e7e8f59e89c
+description: Detects suspicious calls of DLLs in rundll32.dll exports by ordinal
+status: stable
+references:
+    - https://techtalk.pcmatic.com/2017/11/30/running-dll-files-malware-analysis/
+    - https://github.com/Neo23x0/DLLRunner
+    - https://twitter.com/cyb3rops/status/1186631731543236608
+tags:
+    - attack.defense_evasion
+    - attack.execution  # an old one
+    - attack.t1218.011
+    - attack.t1085      # an old one
+author: Florian Roth
+date: 2019/10/22
+modified: 2021/04/29
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains|all:
+            - '\rundll32.exe'
+            - ',#'
+    filter:
+        CommandLine|contains|all:
+            - 'EDGEHTML.dll'
+            - '#141'
+    condition: selection and not filter
+falsepositives:
+    - False positives depend on scripts and administrative tools used in the monitored environment
+    - Windows control panel elements have been identified as source (mmc)
+level: high

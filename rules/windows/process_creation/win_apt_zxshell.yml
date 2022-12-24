@@ -1,0 +1,34 @@
+title: ZxShell Malware
+id: f0b70adb-0075-43b0-9745-e82a1c608fcc
+description: Detects a ZxShell start by the called and well-known function name
+author: Florian Roth, oscd.community, Jonhnathan Ribeiro
+date: 2017/07/20
+modified: 2020/08/26
+references:
+    - https://www.hybrid-analysis.com/sample/5d2a4cde9fa7c2fdbf39b2e2ffd23378d0c50701a3095d1e91e3cf922d7b0b16?environmentId=100
+tags:
+    - attack.execution
+    - attack.t1059.003
+    - attack.t1059  # an old one
+    - attack.defense_evasion
+    - attack.t1218.011
+    - attack.t1085  # an old one
+    - attack.s0412
+    - attack.g0001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\rundll32.exe'
+        CommandLine|contains:
+            - 'zxFunction'
+            - 'RemoteDiskXXXXX'
+    condition: selection
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Unlikely
+level: critical

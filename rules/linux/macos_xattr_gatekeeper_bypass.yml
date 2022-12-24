@@ -1,0 +1,24 @@
+title: Gatekeeper Bypass via Xattr
+id: f5141b6d-9f42-41c6-a7bf-2a780678b29b
+status: experimental
+description: Detects macOS Gatekeeper bypass via xattr utility
+author: Daniil Yugoslavskiy, oscd.community
+date: 2020/10/19
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1553.001/T1553.001.md
+logsource:
+  category: process_creation
+  product: macos
+detection:
+  selection:
+    Image|endswith: '/xattr'
+    CommandLine|contains|all: 
+      - '-r'
+      - 'com.apple.quarantine'
+  condition: selection
+falsepositives:
+  - Legitimate activities
+level: low
+tags:
+  - attack.defense_evasion
+  - attack.t1553.001

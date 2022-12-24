@@ -1,0 +1,34 @@
+title: Net.exe User Account Creation
+id: cd219ff3-fa99-45d4-8380-a7d15116c6dc
+status: experimental
+description: Identifies creation of local users via the net.exe command.
+references:
+    - https://eqllib.readthedocs.io/en/latest/analytics/014c3f51-89c6-40f1-ac9c-5688f26090ab.html
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1136.001/T1136.001.md
+author: Endgame, JHasenbusch (adapted to Sigma for oscd.community)
+date: 2018/10/30
+modified: 2020/09/01
+tags:
+    - attack.persistence
+    - attack.t1136          # an old one
+    - attack.t1136.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: 
+            - '\net.exe'
+            - '\net1.exe'
+        CommandLine|contains|all: 
+            - 'user'
+            - 'add'
+    condition: selection
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+falsepositives:
+    - Legitimate user creation.
+    - Better use event IDs for user creation rather than command line rules.
+level: medium

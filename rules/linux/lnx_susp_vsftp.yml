@@ -1,0 +1,37 @@
+title: Suspicious VSFTPD Error Messages
+id: 377f33a1-4b36-4ee1-acee-1dbe4b43cfbe
+status: experimental
+description: Detects suspicious VSFTPD error messages that indicate a fatal or suspicious error that could be caused by exploiting attempts
+author: Florian Roth
+date: 2017/07/05
+references:
+    - https://github.com/dagwieers/vsftpd/
+logsource:
+    product: linux
+    service: vsftpd
+detection:
+    keywords:
+        - 'Connection refused: too many sessions for this address.'
+        - 'Connection refused: tcp_wrappers denial.'
+        - 'Bad HTTP verb.'
+        - 'port and pasv both active'
+        - 'pasv and port both active'
+        - 'Transfer done (but failed to open directory).'
+        - 'Could not set file modification time.'
+        - 'bug: pid active in ptrace_sandbox_free'
+        - 'PTRACE_SETOPTIONS failure'
+        - 'weird status:'
+        - "couldn't handle sandbox event"
+        - 'syscall * out of bounds'
+        - 'syscall not permitted:'
+        - 'syscall validate failed:'
+        - 'Input line too long.'
+        - 'poor buffer accounting in str_netfd_alloc'
+        - 'vsf_sysutil_read_loop'
+    condition: keywords
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.initial_access
+    - attack.t1190

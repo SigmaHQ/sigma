@@ -1,0 +1,24 @@
+title: Setuid and Setgid
+id: c21c4eaa-ba2e-419a-92b2-8371703cbe21
+status: experimental
+description: Detects suspicious change of file privileges with chown and chmod commands
+author: Ömer Günal
+date: 2020/06/16
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1166/T1166.md
+    - https://attack.mitre.org/techniques/T1166/
+logsource:
+    product: linux
+detection:
+    selection1:
+        - '*chown root*'    
+    selection2:
+        - '* chmod u+s*'
+    selection3:
+        - '* chmod g+s*'
+    condition: (selection1 and selection2) or (selection1 and selection3)
+falsepositives:
+    - Legitimate administration activities
+level: low
+tags:
+    - attack.persistence

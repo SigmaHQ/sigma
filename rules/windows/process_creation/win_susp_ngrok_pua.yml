@@ -1,0 +1,45 @@
+title: Ngrok Usage
+id: ee37eb7c-a4e7-4cd5-8fa4-efa27f1c3f31
+description: Detects the use of Ngrok, a utility used for port forwarding and tunneling, often used by threat actors to make local protected services publicly available. Involved domains are bin.equinox.io for download and *.ngrok.io for connections.
+status: experimental
+references:
+    - https://ngrok.com/docs
+    - https://www.fireeye.com/blog/threat-research/2021/05/shining-a-light-on-darkside-ransomware-operations.html
+    - https://stackoverflow.com/questions/42442320/ssh-tunnel-to-ngrok-and-initiate-rdp
+    - https://www.virustotal.com/gui/file/58d21840d915aaf4040ceb89522396124c82f325282f805d1085527e1e2ccfa1/detection
+    - https://cybleinc.com/2021/02/15/ngrok-platform-abused-by-hackers-to-deliver-a-new-wave-of-phishing-attacks/.
+author: Florian Roth
+date: 2021/05/14
+modified: 2021/06/07
+tags:
+    - attack.command_and_control
+    - attack.t1572
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        CommandLine|contains:
+            - ' tcp 139'
+            - ' tcp 445'
+            - ' tcp 3389'
+            - ' tcp 5985'
+            - ' tcp 5986'
+    selection2:
+        CommandLine|contains|all:
+            - ' start '
+            - '--all'
+            - '--config'
+            - '.yml'
+    selection3:
+        Image|endswith:
+            - 'ngrok.exe'
+        CommandLine|contains:
+            - ' tcp '
+            - ' http '
+            - ' authtoken '
+    condition: 1 of them
+falsepositives:
+    - Another tool that uses the command line switches of Ngrok
+    - ngrok http 3978 (https://docs.microsoft.com/en-us/azure/bot-service/bot-service-debug-channel-ngrok?view=azure-bot-service-4.0)
+level: high

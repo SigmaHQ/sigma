@@ -1,0 +1,43 @@
+title: Suspicious WMI Execution
+id: 526be59f-a573-4eea-b5f7-f0973207634d
+status: experimental
+description: Detects WMI executing suspicious commands
+references:
+    - https://digital-forensics.sans.org/blog/2010/06/04/wmic-draft/
+    - https://www.hybrid-analysis.com/sample/4be06ecd234e2110bd615649fe4a6fa95403979acf889d7e45a78985eb50acf9?environmentId=1
+    - https://blog.malwarebytes.com/threat-analysis/2016/04/rokku-ransomware/
+author: Michael Haag, Florian Roth, juju4, oscd.community
+date: 2019/01/16
+modified: 2020/11/28
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\wmic.exe'
+    selection2:
+        CommandLine|contains|all:
+            - 'process'
+            - 'call'
+            - 'create '
+    recon_part1:
+        CommandLine|contains: ' path '
+    recon_part2:
+        CommandLine|contains:
+            - 'AntiVirus'
+            - 'Firewall'
+        CommandLine|contains|all:
+            - 'Product'
+            - ' get '
+    condition: (selection and selection2) or
+               (selection and recon_part1 and recon_part2)
+fields:
+    - CommandLine
+    - ParentCommandLine
+tags:
+    - attack.execution
+    - attack.t1047
+    - car.2016-03-002
+falsepositives:
+    - If using Splunk, we recommend | stats count by Computer,CommandLine following for easy hunting by Computer/CommandLine
+level: medium

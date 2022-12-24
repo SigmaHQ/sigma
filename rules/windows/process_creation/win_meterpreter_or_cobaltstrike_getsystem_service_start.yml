@@ -1,0 +1,55 @@
+title: Meterpreter or Cobalt Strike Getsystem Service Start
+id: 15619216-e993-4721-b590-4c520615a67d
+description: Detects the use of getsystem Meterpreter/Cobalt Strike command by detecting a specific service starting
+author: Teymur Kheirkhabarov, Ecco, Florian Roth
+date: 2019/10/26
+modified: 2021/05/20
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-privilege-escalation-in-windows-environment
+    - https://blog.cobaltstrike.com/2014/04/02/what-happens-when-i-type-getsystem/
+tags:
+    - attack.privilege_escalation
+    - attack.t1134          # an old one
+    - attack.t1134.001
+    - attack.t1134.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_1:
+        ParentImage|endswith: '\services.exe'
+    selection_2:    
+        # meterpreter getsystem technique 1: cmd.exe /c echo 559891bb017 > \\.\pipe\5e120a
+        - CommandLine|contains|all:
+            - 'cmd'
+            - '/c'
+            - 'echo'
+            - '\pipe\'
+        # cobaltstrike getsystem technique 1: %COMSPEC% /c echo 559891bb017 > \\.\pipe\5e120a
+        - CommandLine|contains|all:
+            - '%COMSPEC%'
+            - '/c'
+            - 'echo'
+            - '\pipe\'
+        # cobaltstrike getsystem technique 1b (expanded env var): %COMSPEC% /c echo 559891bb017 > \\.\pipe\5e120a
+        - CommandLine|contains|all:
+            - 'cmd.exe'
+            - '/c'
+            - 'echo'
+            - '\pipe\'
+        # meterpreter getsystem technique 2: rundll32.exe C:\Users\test\AppData\Local\Temp\tmexsn.dll,a /p:tmexsn
+        - CommandLine|contains|all:
+            - 'rundll32'
+            - '.dll,a'
+            - '/p:'
+    filter1:
+        CommandLine|contains: 'MpCmdRun'
+    condition: selection_1 and selection_2 and not filter1
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+falsepositives:
+    - Commandlines containing components like cmd accidentally
+    - Jobs and services started with cmd
+level: high

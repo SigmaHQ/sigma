@@ -1,0 +1,29 @@
+title: Verclsid.exe Runs COM Object
+id: d06be4b9-8045-428b-a567-740a26d9db25
+status: experimental
+description: Detects when verclsid.exe is used to run COM object via GUID
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OSBinaries/Verclsid.yml
+    - https://gist.github.com/NickTyrer/0598b60112eaafe6d07789f7964290d5
+    - https://bohops.com/2018/08/18/abusing-the-com-registry-structure-part-2-loading-techniques-for-evasion-and-persistence/
+author: Victor Sergeev, oscd.community
+date: 2020/10/09
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    image_path:
+        Image|endswith: '\verclsid.exe'
+    cmd_s:
+        CommandLine|contains: '/S'
+    cmd_c:
+         CommandLine|contains: '/C'
+    condition: image_path and cmd_c and cmd_s
+fields:
+    - CommandLine
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1218

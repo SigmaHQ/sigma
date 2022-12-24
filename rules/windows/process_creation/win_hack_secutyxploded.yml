@@ -1,0 +1,28 @@
+title: SecurityXploded Tool
+id: 7679d464-4f74-45e2-9e01-ac66c5eb041a
+description: Detects the execution of SecurityXploded Tools
+author: Florian Roth
+references:
+    - https://securityxploded.com/
+    - https://cyberx-labs.com/blog/gangnam-industrial-style-apt-campaign-targets-korean-industrial-companies/
+date: 2018/12/19
+modified: 2021/05/11
+tags:
+    - attack.credential_access
+    - attack.t1555
+    - attack.t1003  # an old one
+    - attack.t1503  # an old one
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Company: SecurityXploded
+    selection2:
+        Image|endswith: 'PasswordDump.exe'
+    selection3:
+        OriginalFileName|endswith: 'PasswordDump.exe'
+    condition: 1 of them
+falsepositives:
+    - unlikely
+level: critical

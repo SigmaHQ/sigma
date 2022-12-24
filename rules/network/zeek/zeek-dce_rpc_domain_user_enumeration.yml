@@ -1,0 +1,36 @@
+title: Domain User Enumeration Network Recon 01
+description: Domain user and group enumeration via network reconnaissance. Seen in APT 29 and other common tactics and actors. Detects a set of RPC (remote procedure calls) used to enumerate a domain controller. The rule was created based off the datasets and hackathon from https://github.com/OTRF/detection-hackathon-apt29
+id: 66a0bdc6-ee04-441a-9125-99d2eb547942
+references:
+    - "https://github.com/OTRF/detection-hackathon-apt29"
+    - "https://github.com/OTRF/detection-hackathon-apt29/issues/37"
+author: 'Nate Guagenti (@neu5ron), Open Threat Research (OTR)'
+date: 2020/05/03
+modified: 2020/09/02
+tags:
+    - attack.discovery
+    - attack.t1087 # an old one
+    - attack.t1087.002
+    - attack.t1082
+logsource:
+    product: zeek
+    service: dce_rpc
+detection:
+    selection:
+        operation:
+            #- LsarEnumerateTrustedDomains #potentially too many FPs, removing. caused by netlogon
+            #- SamrEnumerateDomainsInSamServer #potentially too many FPs, removing. #method obtains a listing of all domains hosted by the server side of this protocol. This value is a cookie that the server can use to continue an enumeration on a subsequent call
+            - LsarLookupNames3 #method translates a batch of security principal names to their SID form  
+            - LsarLookupSids3 #translates a batch of security principal SIDs to their name forms
+            - SamrGetGroupsForUser #obtains a listing of groups that a user is a member of
+            - SamrLookupIdsInDomain #method translates a set of RIDs into account names
+            - SamrLookupNamesInDomain #method translates a set of account names into a set of RIDs
+            - SamrQuerySecurityObject #method queries the access control on a server, domain, user, group, or alias object
+            - SamrQueryInformationGroup #obtains attributes from a group object
+    timeframe: 30s
+    condition: selection | count(operation) by src_ip > 4
+falsepositives:
+    - Devices that may do authentication like a VPN or a firewall that looksup IPs to username
+    - False positives depend on scripts and administrative tools used in the monitored environment
+level: medium
+status: experimental

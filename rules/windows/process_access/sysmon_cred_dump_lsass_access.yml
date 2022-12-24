@@ -1,0 +1,58 @@
+title: Credentials Dumping Tools Accessing LSASS Memory
+id: 32d0d3e2-e58d-4d41-926b-18b520b2b32d
+status: experimental
+description: Detects process access LSASS memory which is typical for credentials dumping tools
+author: Florian Roth, Roberto Rodriguez, Dimitrios Slamaris, Mark Russinovich, Thomas Patzke, Teymur Kheirkhabarov, Sherif Eldeeb, James Dickenson, Aleksey Potapov,
+    oscd.community (update)
+date: 2017/02/16
+modified: 2021/05/16
+references:
+    - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
+    - https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
+    - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
+    - http://security-research.dyndns.org/pub/slides/FIRST2017/FIRST-2017_Tom-Ueltschi_Sysmon_FINAL_notes.pdf
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+    - attack.t1003  # an old one
+    - attack.s0002
+    - car.2019-04-004
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        TargetImage|endswith: '\lsass.exe'
+        GrantedAccess|contains:
+            - '0x40'
+            - '0x1000'
+            - '0x1400'
+            - '0x100000'
+            - '0x1410'    # car.2019-04-004
+            - '0x1010'    # car.2019-04-004
+            - '0x1438'    # car.2019-04-004
+            - '0x143a'    # car.2019-04-004
+            - '0x1418'    # car.2019-04-004
+            - '0x1f0fff'
+            - '0x1f1fff'
+            - '0x1f2fff'
+            - '0x1f3fff'
+    filter:
+        ProcessName|endswith: # easy to bypass. need to implement supportive rule to detect bypass attempts
+            - '\wmiprvse.exe'
+            - '\taskmgr.exe'
+            - '\procexp64.exe'
+            - '\procexp.exe'
+            - '\lsm.exe'
+            - '\MsMpEng.exe'
+            - '\csrss.exe'
+            - '\wininit.exe'
+            - '\vmtoolsd.exe'
+    condition: selection and not filter
+fields:
+    - ComputerName
+    - User
+    - SourceImage
+falsepositives:
+    - Legitimate software accessing LSASS process for legitimate reason; update the whitelist with it
+level: high

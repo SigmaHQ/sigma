@@ -1,0 +1,61 @@
+title: Netsh Program Allowed with Suspcious Location
+id: a35f5a72-f347-4e36-8895-9869b0d5fc6d 
+description: Detects Netsh commands that allows a suspcious application location on Windows Firewall
+references:
+    - https://www.virusradar.com/en/Win32_Kasidet.AD/description
+    - https://www.hybrid-analysis.com/sample/07e789f4f2f3259e7559fdccb36e96814c2dbff872a21e1fa03de9ee377d581f?environmentId=100
+date: 2020/05/25
+modified: 2020/11/28
+tags:
+    - attack.defense_evasion
+    - attack.t1089          # an old one
+    - attack.t1562.004
+status: experimental
+author: Sander Wiebing, Jonhnathan Ribeiro, Daniil Yugoslavskiy, oscd.community
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Image|endswith: '\netsh.exe'
+        CommandLine|contains|all:
+            - 'firewall'
+            - 'add'
+            - 'allowedprogram'
+    selection2:
+        Image|endswith: '\netsh.exe'
+        CommandLine|contains|all:
+            - 'advfirewall'
+            - 'firewall'
+            - 'add'
+            - 'rule'
+            - 'action=allow'
+            - 'program='
+    susp_image:
+        - CommandLine|contains:
+            - '%TEMP%'
+            - ':\RECYCLER\'
+            - 'C:\$Recycle.bin\'
+            - ':\SystemVolumeInformation\'
+            - 'C:\Windows\Temp\'
+            - 'C:\Temp\'
+            - 'C:\Users\Public\'
+            - 'C:\Users\Default\'
+            - 'C:\Users\Desktop\'
+            - '\Downloads\'
+            - '\Temporary Internet Files\Content.Outlook\'
+            - '\Local Settings\Temporary Internet Files\'
+        - CommandLine|startswith:
+            - 'C:\Windows\Tasks\'
+            - 'C:\Windows\debug\'
+            - 'C:\Windows\fonts\'
+            - 'C:\Windows\help\'
+            - 'C:\Windows\drivers\'
+            - 'C:\Windows\addins\'
+            - 'C:\Windows\cursors\'
+            - 'C:\Windows\system32\tasks\'
+            - '%Public%\'
+    condition: (selection1 or selection2) and susp_image
+falsepositives:
+    - Legitimate administration
+level: high

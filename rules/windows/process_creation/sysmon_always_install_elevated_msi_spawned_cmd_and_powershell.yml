@@ -1,0 +1,32 @@
+title: Always Install Elevated MSI Spawned Cmd And Powershell
+id: 1e53dd56-8d83-4eb4-a43e-b790a05510aa
+description: This rule will looks for Windows Installer service (msiexec.exe) spawned command line and/or powershell
+status: experimental
+author: Teymur Kheirkhabarov (idea), Mangatas Tondang (rule), oscd.community
+date: 2020/10/13
+references:
+    - https://image.slidesharecdn.com/kheirkhabarovoffzonefinal-181117201458/95/hunting-for-privilege-escalation-in-windows-environment-50-638.jpg
+tags:
+    - attack.privilege_escalation
+    - attack.t1548.002
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    image:
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+    parent_image:
+        ParentImage|contains|all:
+            - '\Windows\Installer\'
+            - 'msi'
+        ParentImage|endswith:
+            - 'tmp'
+    condition: image and parent_image
+fields:
+    - Image
+    - ParentImage
+falsepositives:
+    - Penetration test
+level: medium

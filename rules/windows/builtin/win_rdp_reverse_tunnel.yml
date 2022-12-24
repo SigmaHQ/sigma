@@ -1,0 +1,40 @@
+title: RDP over Reverse SSH Tunnel WFP
+id: 5bed80b6-b3e8-428e-a3ae-d3c757589e41
+status: experimental
+description: Detects svchost hosting RDP termsvcs communicating with the loopback address
+references:
+    - https://twitter.com/SBousseaden/status/1096148422984384514
+    - https://github.com/sbousseaden/EVTX-ATTACK-SAMPLES/blob/master/Command%20and%20Control/DE_RDP_Tunnel_5156.evtx
+author: Samir Bousseaden
+date: 2019/02/16
+modified: 2021/07/06
+tags:
+    - attack.defense_evasion
+    - attack.command_and_control
+    - attack.lateral_movement
+    - attack.t1076          # an old one
+    - attack.t1090          # an old one
+    - attack.t1090.001
+    - attack.t1090.002
+    - attack.t1021.001
+    - car.2013-07-002
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 5156
+    sourceRDP:
+        SourcePort: 3389
+        DestAddress:
+            - '127.*'
+            - '::1'
+    destinationRDP:
+        DestPort: 3389
+        SourceAddress:
+            - '127.*'
+            - '::1'
+    condition: selection and ( sourceRDP or destinationRDP )
+falsepositives:
+    - unknown
+level: high

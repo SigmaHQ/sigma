@@ -1,0 +1,29 @@
+title: Powerview Add-DomainObjectAcl DCSync AD Extend Right
+id: 2c99737c-585d-4431-b61a-c911d86ff32f
+description: backdooring domain object to grant the rights associated with DCSync to a regular user or machine account using Powerview\Add-DomainObjectAcl DCSync
+    Extended Right cmdlet, will allow to re-obtain the pwd hashes of any user/computer
+status: experimental
+date: 2019/04/03
+modified: 2021/07/09
+author: Samir Bousseaden; Roberto Rodriguez @Cyb3rWard0g; oscd.community
+references:
+    - https://twitter.com/menasec1/status/1111556090137903104
+    - https://www.specterops.io/assets/resources/an_ace_up_the_sleeve.pdf
+tags:
+    - attack.persistence
+    - attack.t1098
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 5136
+        AttributeLDAPDisplayName: 'ntSecurityDescriptor'
+        AttributeValue|contains: 
+         - '1131f6ad-9c07-11d1-f79f-00c04fc2dcd2'
+         - '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2'
+         - '89e95b76-444d-4c62-991a-0facbeda640c'
+    condition: selection
+falsepositives:
+    - New Domain Controller computer account, check user SIDs within the value attribute of event 5136 and verify if it's a regular user or DC computer account.
+level: critical

@@ -1,0 +1,26 @@
+title: Removal Amsi Provider Reg Key
+id: 41d1058a-aea7-4952-9293-29eaaf516465
+description: Remove the AMSI Provider registry key in HKLM\Software\Microsoft\AMSI to disable AMSI inspection
+status: experimental
+date: 2021/06/07
+author: frack113
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1562.001/T1562.001.md
+    - https://seclists.org/fulldisclosure/2020/Mar/45
+logsource:
+    product: windows
+    category: registry_event
+    definition: key must be add to the sysmon configuration to works
+detection:
+    selection:
+        EventType: DeleteKey
+        TargetObject|endswith:
+            - '{2781761E-28E0-4109-99FE-B9D127C57AFE}'
+            - '{A7C452EF-8E9F-42EB-9F2B-245613CA0DC9}'
+    condition: selection
+falsepositives:
+    - unknown
+level: high

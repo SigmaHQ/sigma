@@ -1,0 +1,26 @@
+title: System Network Connections Discovery
+id: 4c519226-f0cd-4471-bd2f-6fbb2bb68a79
+status: experimental
+description: Detects usage of system utilities to discover system network connections
+author: Daniil Yugoslavskiy, oscd.community
+date: 2020/10/19
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1049/T1049.md
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection:
+    Image|endswith: 
+      - '/who'
+      - '/w'
+      - '/last'
+      - '/lsof'
+      - '/netstat'
+  condition: selection
+falsepositives:
+  - Legitimate activities
+level: low
+tags:
+  - attack.discovery
+  - attack.t1049

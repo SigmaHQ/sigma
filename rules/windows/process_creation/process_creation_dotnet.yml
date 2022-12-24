@@ -1,0 +1,33 @@
+title: Dotnet.exe Exec Dll and Execute Unsigned Code LOLBIN
+status: experimental
+id: d80d5c81-04ba-45b4-84e4-92eba40e0ad3
+author: Beyu Denis, oscd.community
+date: 2020/10/18
+description: dotnet.exe will execute any DLL and execute unsigned code
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OtherMSBinaries/Dotnet.yml
+    - https://twitter.com/_felamos/status/1204705548668555264
+    - https://bohops.com/2019/08/19/dotnet-core-a-vector-for-awl-bypass-defense-evasion/
+tags:
+    - attack.execution
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|endswith:
+            - '.dll'
+            - '.csproj'
+        Image|endswith:
+            - '\dotnet.exe'
+    condition: selection
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - System administrator Usage
+    - Penetration test
+level: medium

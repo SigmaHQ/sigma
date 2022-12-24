@@ -1,0 +1,25 @@
+title: LSASS Access Detected via Attack Surface Reduction
+id: a0a278fe-2c0e-4de2-ac3c-c68b08a9ba98
+description: Detects Access to LSASS Process
+status: experimental
+references:
+    - https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-exploit-guard/attack-surface-reduction-exploit-guard?WT.mc_id=twitter
+author: Markus Neis
+date: 2018/08/26
+tags:
+    - attack.credential_access
+    - attack.t1003          # an old one
+# Defender Attack Surface Reduction
+    - attack.t1003.001
+logsource:
+    product: windows_defender
+    definition: 'Requirements:Enabled Block credential stealing from the Windows local security authority subsystem (lsass.exe) from Attack Surface Reduction (GUID: 9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2)'
+detection:
+    selection:
+        EventID: 1121
+        Path|endswith: '\lsass.exe'
+    condition: selection
+falsepositives:
+    - Google Chrome GoogleUpdate.exe
+    - Some Taskmgr.exe related activity
+level: high

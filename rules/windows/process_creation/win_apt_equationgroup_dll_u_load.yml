@@ -1,0 +1,28 @@
+title: Equation Group DLL_U Load
+id: d465d1d8-27a2-4cca-9621-a800f37cf72e
+author: Florian Roth
+date: 2019/03/04
+modified: 2020/08/27
+description: Detects a specific tool and export used by EquationGroup
+references:
+    - https://github.com/adamcaudill/EquationGroupLeak/search?utf8=%E2%9C%93&q=dll_u&type=
+    - https://securelist.com/apt-slingshot/84312/
+    - https://twitter.com/cyb3rops/status/972186477512839170
+tags:
+    - attack.g0020
+    - attack.defense_evasion
+    - attack.t1085 # an old one
+    - attack.t1218.011
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Image|endswith: '\rundll32.exe'
+        CommandLine|endswith: ',dll_u'
+    selection2:
+        CommandLine|contains: ' -export dll_u '
+    condition: 1 of them
+falsepositives:
+    - Unknown
+level: critical

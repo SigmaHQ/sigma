@@ -1,0 +1,28 @@
+title: 'Credentials In Files'
+id: 53b1b378-9b06-4992-b972-dde6e423d2b4
+status: experimental
+description: 'Detecting attempts to extract passwords with grep and laZagne'
+    # For this rule to work you must enable audit of process execution in OpenBSM, see
+    # https://osquery.readthedocs.io/en/stable/deployment/process-auditing/#macos-process-socket-auditing
+author: 'Igor Fits, Mikhail Larin, oscd.community'
+date: 2020/10/19
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1552.001/T1552.001.md
+logsource:
+    product: macos
+    category: process_creation
+detection:
+    selection1:
+        Image|endswith:
+          - '/grep'
+        CommandLine|contains:
+          - 'password'
+    selection2:
+        CommandLine|contains: 'laZagne'
+    condition: selection1 or selection2
+falsepositives:
+    - 'Unknown'
+level: high
+tags:
+    - attack.credential_access
+    - attack.t1552.001

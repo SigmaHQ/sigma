@@ -1,28 +1,30 @@
 title: Flash Player Update from Suspicious Location
 id: 4922a5dd-6743-4fc2-8e81-144374280997
-status: test
+status: experimental
 description: Detects a flashplayer update from an unofficial location
-references:
-    - https://gist.github.com/roycewilliams/a723aaf8a6ac3ba4f817847610935cfb
 author: Florian Roth
 date: 2017/10/25
-modified: 2022/08/08
+modified: 2020/11/28
+references:
+    - https://gist.github.com/roycewilliams/a723aaf8a6ac3ba4f817847610935cfb
+logsource:
+    category: proxy
+detection:
+    selection:
+        - c-uri-query|contains: '/flash_install.php'
+        - c-uri-query|endswith: '/install_flash_player.exe'
+    filter:
+        c-uri-stem|contains: '.adobe.com/'
+    condition: selection and not filter
+falsepositives:
+    - Unknown flash download locations
+level: high
 tags:
     - attack.initial_access
     - attack.t1189
     - attack.execution
     - attack.t1204.002
+    - attack.t1204  # an old one
     - attack.defense_evasion
     - attack.t1036.005
-logsource:
-    category: proxy
-detection:
-    selection:
-        - c-uri|contains: '/flash_install.php'
-        - c-uri|endswith: '/install_flash_player.exe'
-    filter:
-        cs-host|endswith: '.adobe.com'
-    condition: selection and not filter
-falsepositives:
-    - Unknown flash download locations
-level: high
+    - attack.t1036  # an old one

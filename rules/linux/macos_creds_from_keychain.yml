@@ -1,0 +1,29 @@
+title: Credentials from Password Stores - Keychain
+id: b120b587-a4c2-4b94-875d-99c9807d6955
+status: experimental
+description: Detects passwords dumps from Keychain
+author: Tim Ismilyaev, oscd.community, Florian Roth
+date: 2020/10/19
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1555.001/T1555.001.md
+    - https://gist.github.com/Capybara/6228955
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection1:
+        Image: '/usr/bin/security'
+        CommandLine|contains:
+            - 'find-certificate'
+            - ' export '
+    selection2:
+        CommandLine|contains:
+            - ' dump-keychain '
+            - ' login-keychain '
+    condition: 1 of them
+falsepositives:
+    - Legitimate administration activities
+level: medium
+tags:
+    - attack.credential_access
+    - attack.t1555.001

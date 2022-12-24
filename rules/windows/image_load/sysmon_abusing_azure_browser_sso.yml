@@ -1,0 +1,30 @@
+title: Abusing Azure Browser SSO
+id: 50f852e6-af22-4c78-9ede-42ef36aa3453
+description: Detects abusing Azure Browser SSO by requesting OAuth 2.0 refresh tokens for an Azure-AD-authenticated Windows user (i.e. the machine is joined to Azure AD and a user logs in with their Azure AD account) wanting to perform SSO authentication in the browser. An attacker can use this to authenticate to Azure AD in a browser as that user.
+author: Den Iuzvyk
+references:
+   - https://posts.specterops.io/requesting-azure-ad-request-tokens-on-azure-ad-joined-machines-for-browser-sso-2b0409caad30
+date: 2020/07/15
+modified: 2020/12/23
+logsource:
+   category: image_load
+   product: windows
+status: experimental
+tags:
+   - attack.defense_evasion
+   - attack.privilege_escalation
+   - attack.t1073          # an old one
+   - attack.t1574.002
+detection:
+   condition: selection_dll and not filter_legit
+   selection_dll:
+      ImageLoaded|endswith: MicrosoftAccountTokenProvider.dll
+   filter_legit:
+      Image|endswith:
+         - BackgroundTaskHost.exe
+         - devenv.exe
+         - iexplore.exe
+         - MicrosoftEdge.exe
+falsepositives:
+   - unknown
+level: high

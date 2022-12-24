@@ -1,0 +1,59 @@
+title: Suspicious Activity in Shell Commands
+id: 2aa1440c-9ae9-4d92-84a7-a9e5f5e31695
+status: experimental
+description: Detects suspicious shell commands used in various exploit codes (see references)
+author: Florian Roth
+date: 2017/08/21
+modified: 2019/02/05
+references:
+    - http://www.threatgeek.com/2017/03/widespread-exploitation-attempts-using-cve-2017-5638.html
+    - https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/multi/http/struts_code_exec_exception_delegator.rb#L121
+    - http://pastebin.com/FtygZ1cg
+    - https://artkond.com/2017/03/23/pivoting-guide/
+logsource:
+    product: linux
+detection:
+    keywords:
+        # Generic suspicious commands
+        - 'wget * - http* | perl'
+        - 'wget * - http* | sh'
+        - 'wget * - http* | bash'
+        - 'python -m SimpleHTTPServer'
+        - '-m http.server'  # Python 3
+        - 'import pty; pty.spawn*'
+        - 'socat exec:*'
+        - 'socat -O /tmp/*'
+        - 'socat tcp-connect*'
+        - '*echo binary >>*'
+        # Malware
+        - '*wget *; chmod +x*'
+        - '*wget *; chmod 777 *'
+        - '*cd /tmp || cd /var/run || cd /mnt*'
+        # Apache Struts in-the-wild exploit codes
+        - '*stop;service iptables stop;*'
+        - '*stop;SuSEfirewall2 stop;*'
+        - 'chmod 777 2020*'
+        - '*>>/etc/rc.local'
+        # Metasploit framework exploit codes
+        - '*base64 -d /tmp/*'
+        - '* | base64 -d *'
+        - '*/chmod u+s *'
+        - '*chmod +s /tmp/*'
+        - '*chmod u+s /tmp/*'
+        - '* /tmp/haxhax*'
+        - '* /tmp/ns_sploit*'
+        - 'nc -l -p *'
+        - 'cp /bin/ksh *'
+        - 'cp /bin/sh *'
+        - '* /tmp/*.b64 *'
+        - '*/tmp/ysocereal.jar*'
+        - '*/tmp/x *'
+        - '*; chmod +x /tmp/*'
+        - '*;chmod +x /tmp/*'
+    condition: keywords
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.execution
+    - attack.t1059.004

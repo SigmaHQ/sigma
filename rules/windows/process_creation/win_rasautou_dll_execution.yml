@@ -1,0 +1,30 @@
+title: DLL Execution via Rasautou.exe
+id: cd3d1298-eb3b-476c-ac67-12847de55813
+description: Detects using Rasautou.exe for loading arbitrary .DLL specified in -d option and executes the export specified in -p. 
+status: experimental
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Rasautou/
+    - https://github.com/fireeye/DueDLLigence
+    - https://www.fireeye.com/blog/threat-research/2019/10/staying-hidden-on-the-endpoint-evading-detection-with-shellcode.html
+author: Julia Fomina, oscd.community
+date: 2020/10/09
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+logsource:
+    product: windows
+    category: process_creation
+    definition: Since options '-d' and '-p' were removed in Windows 10 this rule is relevant only for Windows before 10. And as Windows 7 doesn't log command line in 4688 by default, to detect this attack you need Sysmon 1 configured or KB3004375 installed for command-line auditing (https://support.microsoft.com/en-au/help/3004375/microsoft-security-advisory-update-to-improve-windows-command-line-aud)
+detection:
+    use_rasautou:
+        Image|endswith: '\rasautou.exe'
+    remaned_rasautou:
+        OriginalFileName: 'rasdlui.exe'
+    special_keys:
+        CommandLine|contains|all: 
+            - '-d'
+            - '-p'
+    condition: (use_rasautou or remaned_rasautou) and special_keys
+level: medium
+falsepositives:
+    - Unlikely

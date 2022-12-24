@@ -1,0 +1,27 @@
+title: AD Object WriteDAC Access
+id: 028c7842-4243-41cd-be6f-12f3cf1a26c7
+description: Detects WRITE_DAC access to a domain object
+status: experimental
+date: 2019/09/12
+author: Roberto Rodriguez @Cyb3rWard0g
+references:
+    - https://threathunterplaybook.com/notebooks/windows/05_defense_evasion/WIN-190101151110.html
+tags:
+    - attack.defense_evasion
+    - attack.t1222          # an old one
+    - attack.t1222.001
+logsource:
+    product: windows
+    service: security
+detection:
+    selection: 
+        EventID: 4662
+        ObjectServer: 'DS'
+        AccessMask: '0x40000'
+        ObjectType:
+            - '19195a5b-6da0-11d0-afd3-00c04fd930c9'
+            - 'domainDNS'
+    condition: selection
+falsepositives:
+    - Unknown
+level: critical

@@ -1,0 +1,41 @@
+title: CrackMapExec Command Execution
+id: 058f4380-962d-40a5-afce-50207d36d7e2
+status: stable
+description: Detect various execution methods of the CrackMapExec pentesting framework
+references:
+    - https://github.com/byt3bl33d3r/CrackMapExec
+tags:
+    - attack.execution
+    - attack.t1047
+    - attack.t1053
+    - attack.t1059.003
+    - attack.t1059.001
+    - attack.s0106
+    - attack.t1086      # an old one
+author: Thomas Patzke
+date: 2020/05/22
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|endswith:
+            # cme/protocols/smb/wmiexec.py (generalized execute_remote and execute_fileless)
+            - 'cmd.exe /Q /c * 1> \\\\*\\*\\* 2>&1'
+            # cme/protocols/smb/atexec.py:109 (fileless output via share)
+            - 'cmd.exe /C * > \\\\*\\*\\* 2>&1'
+            # cme/protocols/smb/atexec.py:111 (fileless output via share)
+            - 'cmd.exe /C * > *\\Temp\\* 2>&1'
+        CommandLine|contains:
+            # cme/helpers/powershell.py:139 (PowerShell execution with obfuscation)
+            - 'powershell.exe -exec bypass -noni -nop -w 1 -C "'
+            # cme/helpers/powershell.py:149 (PowerShell execution without obfuscation)
+            - 'powershell.exe -noni -nop -w 1 -enc '
+    condition: selection
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+falsepositives:
+    - Unknown
+level: high

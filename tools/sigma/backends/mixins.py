@@ -27,8 +27,6 @@ class QuoteCharMixin:
     reClear = None                      # match characters that are cleaned out completely
 
     def cleanValue(self, val):
-        if type(val) == int:
-            return val
         if self.reEscape:
             val = self.reEscape.sub(self.escapeSubst, val)
         if self.reClear:

@@ -1,0 +1,40 @@
+title: Silence.Downloader V3
+id: 170901d1-de11-4de7-bccb-8fa13678d857
+status: experimental
+description: Detects Silence downloader. These commands are hardcoded into the binary.
+author: Alina Stepchenkova, Roman Rezvukhin, Group-IB, oscd.community
+date: 2019/11/01
+modified: 2020/09/01
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_recon:
+        Image|endswith:
+            - '\tasklist.exe'
+            - '\qwinsta.exe'
+            - '\ipconfig.exe'
+            - '\hostname.exe'
+        CommandLine|contains: '>>'
+        CommandLine|endswith: 'temps.dat'
+    selection_persistence:
+        CommandLine|contains: '/C REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v "WinNetworkSecurity" /t REG_SZ /d'
+    condition: selection_recon | near selection_persistence # requires both
+fields:
+    - ComputerName
+    - User
+    - Image
+    - CommandLine
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.persistence
+    - attack.t1547.001
+    - attack.t1060  # an old one
+    - attack.discovery
+    - attack.t1057
+    - attack.t1082
+    - attack.t1016
+    - attack.t1033
+    - attack.g0091

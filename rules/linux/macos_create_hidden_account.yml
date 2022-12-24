@@ -1,0 +1,33 @@
+title: Hidden User Creation
+id: b22a5b36-2431-493a-8be1-0bae56c28ef3
+status: experimental
+description: Detects creation of a hidden user account on macOS (UserID < 500) or with IsHidden option
+author: Daniil Yugoslavskiy, oscd.community
+date: 2020/10/10
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1564.002/T1564.002.md
+logsource:
+  category: process_creation
+  product: macos
+detection:
+  dscl_create:
+    Image|endswith: '/dscl'
+    CommandLine|contains: 'create'
+  id_below_500:
+    CommandLine|contains: UniqueID
+    CommandLine|re: '([0-9]|[1-9][0-9]|[1-4][0-9]{2})'
+  ishidden_option_declaration:
+    CommandLine|contains: 'IsHidden'
+  ishidden_option_confirmation:
+    CommandLine|contains:
+      - 'true'
+      - 'yes'
+      - '1'
+  condition: dscl_create and id_below_500 or
+             dscl_create and (ishidden_option_declaration and ishidden_option_confirmation)
+falsepositives:
+  - Legitimate administration activities
+level: medium
+tags:
+  - attack.defense_evasion
+  - attack.t1564.002

@@ -1,0 +1,25 @@
+title: VSSAudit Security Event Source Registration
+id: e9faba72-4974-4ab2-a4c5-46e25ad59e9b
+description: Detects the registration of the security event source VSSAudit. It would usually trigger when volume shadow copy operations happen.
+status: experimental
+date: 2020/10/20
+author: Roberto Rodriguez @Cyb3rWard0g, Open Threat Research (OTR)
+tags:
+    - attack.credential_access
+    - attack.t1003.002
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1003.002/T1003.002.md#atomic-test-3---esentutlexe-sam-copy
+logsource:
+    product: windows
+    service: security
+detection:
+    selection_one: 
+        EventID: 4904
+        AuditSourceName: VSSAudit
+    selection_two: 
+        EventID: 4905
+        AuditSourceName: VSSAudit
+    condition: selection_one or selection_two
+falsepositives:
+    - Legitimate use of VSSVC. Maybe backup operations. It would usually be done by C:\Windows\System32\VSSVC.exe.
+level: medium

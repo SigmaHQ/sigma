@@ -1,0 +1,33 @@
+title: Using SettingSyncHost.exe as LOLBin
+description: Detects using SettingSyncHost.exe to run hijacked binary
+id: b2ddd389-f676-4ac4-845a-e00781a48e5f
+status: experimental
+references:
+    - https://www.hexacorn.com/blog/2020/02/02/settingsynchost-exe-as-a-lolbin
+tags:
+    - attack.execution
+    - attack.defense_evasion
+    - attack.t1574.008
+author: Anton Kutepov, oscd.community
+date: 2020/02/05
+modified: 2020/10/10
+level: high
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    system_utility:
+        Image|startswith: 
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+    parent_is_settingsynchost:
+        ParentCommandLine|contains|all:
+            - 'cmd.exe /c'
+            - 'RoamDiag.cmd'
+            - '-outputpath'
+    condition: not system_utility and parent_is_settingsynchost
+fields:
+    - TargetFilename
+    - Image
+falsepositives:
+    - unknown

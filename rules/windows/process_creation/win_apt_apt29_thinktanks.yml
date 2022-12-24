@@ -1,0 +1,29 @@
+title: APT29
+id: 033fe7d6-66d1-4240-ac6b-28908009c71f
+description: This method detects a suspicious PowerShell command line combination as used by APT29 in a campaign against U.S. think tanks.
+references:
+    - https://www.microsoft.com/security/blog/2018/12/03/analysis-of-cyberattack-on-u-s-think-tanks-non-profits-public-sector-by-unidentified-attackers/
+    - https://www.fireeye.com/blog/threat-research/2018/11/not-so-cozy-an-uncomfortable-examination-of-a-suspected-apt29-phishing-campaign.html
+tags:
+    - attack.execution
+    - attack.g0016
+    - attack.t1086 # an old one
+    - attack.t1059 # an old one
+    - attack.t1059.001
+author: Florian Roth
+date: 2018/12/04
+modified: 2020/08/26
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains|all: 
+            - '-noni' 
+            - '-ep'
+            - 'bypass'
+            - '$'
+    condition: selection
+falsepositives:
+    - unknown
+level: critical

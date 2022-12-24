@@ -1,0 +1,26 @@
+title: MsiExec Web Install
+id: f7b5f842-a6af-4da5-9e95-e32478f3cd2f
+status: experimental
+description: Detects suspicious msiexec process starts with web addresses as parameter
+references:
+    - https://blog.trendmicro.com/trendlabs-security-intelligence/attack-using-windows-installer-msiexec-exe-leads-lokibot/
+tags:
+    - attack.defense_evasion
+    - attack.t1218.007
+    - attack.command_and_control
+    - attack.t1105
+author: Florian Roth
+date: 2018/02/09
+modified: 2020/11/28
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains|all:
+            - ' msiexec'
+            - '://'
+    condition: selection
+falsepositives:
+    - False positives depend on scripts and administrative tools used in the monitored environment
+level: medium

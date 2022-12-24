@@ -1,0 +1,25 @@
+title: MSTSC Shadowing
+id: 6ba5a05f-b095-4f0a-8654-b825f4f16334
+description: Detects RDP session hijacking by using MSTSC shadowing
+status: experimental
+author: Florian Roth
+date: 2020/01/24
+modified: 2020/09/06
+references:
+    - https://twitter.com/kmkz_security/status/1220694202301976576
+    - https://github.com/kmkz/Pentesting/blob/master/Post-Exploitation-Cheat-Sheet
+tags:
+    - attack.lateral_movement
+    - attack.t1563.002    
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains|all: 
+            - 'noconsentprompt'
+            - 'shadow:'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

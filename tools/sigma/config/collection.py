@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from collections.abc import Iterable
+from collections import Iterable
 from pathlib import Path
 import sys
 import re

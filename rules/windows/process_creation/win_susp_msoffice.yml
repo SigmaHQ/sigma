@@ -1,0 +1,28 @@
+title: Malicious Payload Download via Office Binaries
+id: 0c79148b-118e-472b-bdb7-9b57b444cc19
+status: experimental
+description: Downloads payload from remote server
+references:
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/master/yml/OtherMSBinaries/Powerpnt.yml
+    - https://medium.com/@reegun/unsanitized-file-validation-leads-to-malicious-payload-download-via-office-binaries-202d02db7191
+    - Reegun J (OCBC Bank)
+author: Beyu Denis, oscd.community
+date: 2019/10/26
+modified: 2019/11/04
+tags:
+    - attack.command_and_control
+    - attack.t1105
+level: high
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\powerpnt.exe'
+            - '\winword.exe'
+            - '\excel.exe'
+        CommandLine|contains: 'http'
+    condition: selection
+falsepositives:
+    - Unknown

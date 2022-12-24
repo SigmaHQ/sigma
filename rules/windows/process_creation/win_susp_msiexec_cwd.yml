@@ -1,0 +1,27 @@
+title: Suspicious MsiExec Directory
+id: e22a6eb2-f8a5-44b5-8b44-a2dbd47b1144
+status: experimental
+description: Detects suspicious msiexec process starts in an uncommon directory
+references:
+    - https://twitter.com/200_okay_/status/1194765831911215104
+tags:
+    - attack.defense_evasion
+    - attack.t1036.005
+    - attack.t1036      # an old one
+author: Florian Roth
+date: 2019/11/14
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\msiexec.exe'
+    filter:
+        Image|startswith: 
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\WinSxS\' 
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high

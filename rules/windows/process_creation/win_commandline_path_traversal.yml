@@ -1,0 +1,26 @@
+title: Cmd.exe CommandLine Path Traversal
+id: 087790e3-3287-436c-bccf-cbd0184a7db1
+description: detects the usage of path traversal in cmd.exe indicating possible command/argument confusion/hijacking
+status: experimental
+date: 2020/06/11
+author: xknow @xknow_infosec
+references:
+    - https://hackingiscool.pl/cmdhijack-command-argument-confusion-with-path-traversal-in-cmd-exe/
+    - https://twitter.com/Oddvarmoe/status/1270633613449723905
+tags:
+    - attack.execution
+    - attack.t1059.003
+    - attack.t1059  # an old one
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentCommandLine|contains|all: 
+            - 'cmd'
+            - '/c'
+        CommandLine|contains: '/../../'
+    condition: selection
+falsepositives:
+    - (not much) some benign Java tools may product false-positive commandlines for loading libraries
+level: high

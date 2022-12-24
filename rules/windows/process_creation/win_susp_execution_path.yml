@@ -1,0 +1,48 @@
+title: Execution from Suspicious Folder
+id: 3dfd06d2-eaf4-4532-9555-68aca59f57c4
+status: experimental
+description: Detects a suspicious execution from an uncommon folder
+author: Florian Roth
+date: 2019/01/16
+modified: 2021/03/31
+references:
+    - https://github.com/mbevilacqua/appcompatprocessor/blob/master/AppCompatSearch.txt
+    - https://www.secureworks.com/research/bronze-butler-targets-japanese-businesses
+    - https://www.crowdstrike.com/resources/reports/2019-crowdstrike-global-threat-report/
+    - https://github.com/ThreatHuntingProject/ThreatHunting/blob/master/hunts/suspicious_process_creation_via_windows_event_logs.md
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|contains:
+            - '\$Recycle.bin\'
+            - '\config\systemprofile\'
+            - '\Intel\Logs\'
+            - '\RSA\MachineKeys\'
+            - '\Users\All Users\'
+            - '\Users\Default\'
+            - '\Users\NetworkService\'
+            - '\Users\Public\'
+            - '\Windows\addins\'
+            - '\Windows\debug\'
+            - '\Windows\Fonts\'
+            - '\Windows\Help\'
+            - '\Windows\IME\'
+            - '\Windows\Media\'
+            - '\Windows\repair\'
+            - '\Windows\security\'
+            - '\Windows\system32\config\systemprofile\'
+            - '\Windows\System32\Tasks\'
+            - '\Windows\Tasks\'
+        - Image|startswith: 'C:\Perflogs\'
+    condition: selection
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Unknown
+level: high

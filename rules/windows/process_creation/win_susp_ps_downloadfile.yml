@@ -1,0 +1,28 @@
+title: PowerShell DownloadFile
+id: 8f70ac5f-1f6f-4f8e-b454-db19561216c5
+status: experimental
+description: Detects the execution of powershell, a WebClient object creation and the invocation of DownloadFile in a single command line
+references:
+    - https://www.fireeye.com/blog/threat-research/2020/03/apt41-initiates-global-intrusion-campaign-using-multiple-exploits.html
+author: Florian Roth
+date: 2020/08/28
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1086      # an old one     
+    - attack.command_and_control
+    - attack.t1104
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains|all:
+            - 'powershell'
+            - '.DownloadFile'
+            - 'System.Net.WebClient'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

@@ -1,0 +1,43 @@
+title: AdFind Usage Detection
+id: 9a132afa-654e-11eb-ae93-0242ac130002
+description: AdFind continues to be seen across majority of breaches. It is used to domain trust discovery to plan out subsequent steps in the attack chain.
+author: Janantha Marasinghe (https://github.com/blueteam0ps)
+references:
+    - https://thedfirreport.com/2020/05/08/adfind-recon/
+    - https://thedfirreport.com/2021/01/11/trickbot-still-alive-and-well/
+    - https://www.microsoft.com/security/blog/2021/01/20/deep-dive-into-the-solorigate-second-stage-activation-from-sunburst-to-teardrop-and-raindrop/
+date: 2021/02/02
+modified: 2021/02/02
+tags:
+    - attack.discovery
+    - attack.t1482
+    - attack.t1018
+level: high
+status: experimental
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:  
+            - 'domainlist'
+            - 'trustdmp'
+            - 'dcmodes'
+            - 'adinfo'
+            - ' dclist '
+            - 'computer_pwdnotreqd'
+            - 'objectcategory='
+            - '-subnets -f'
+            - 'name="Domain Admins"'
+            - '-sc u:'
+            - 'domainncs'
+            - 'dompol'
+            - ' oudmp '
+            - 'subnetdmp'
+            - 'gpodmp'
+            - 'fspdmp'
+            - 'users_noexpire'
+            - 'computers_active'
+    condition: selection
+falsepositives:
+    - Admin activity

@@ -40,7 +40,7 @@ class DevoBackend(SingleTextQueryBackend):
     mapMulti = "has(%s, %s)"                      # Syntax for field/value conditions. First %s is fieldname, second is value
     mapWildcard = "matches(%s, nameglob(%s))"     # Syntax for globbing conditions
     mapRe = "matches(%s, %s)"                     # Syntax for regex conditions that already were transformed by SigmaRegularExpressionModifier
-    mapContains = "toktains(%s, %s, true, true)"  # Syntax for token value searches
+    mapContains = "toktains(%s, %s, true, true)"  # Systax for token value searches
     mapListValueExpression = "%s or %s"           # Syntax for field/value condititons where map value is a list
     mapFullTextSearch = "weaktoktains(raw, \"%s\", true, true)"  # Expression for full text searches
     typedValueExpression = {
@@ -179,6 +179,7 @@ class DevoBackend(SingleTextQueryBackend):
     def generateAggregation(self, agg, where_clause):
         if not agg:
             return self.table, where_clause
+
         # Near operator not supported yet
         if agg.aggfunc == SigmaAggregationParser.AGGFUNC_NEAR:
             raise NotImplementedError("The 'near' aggregation operator is not implemented for the %s backend" % self.identifier)
@@ -188,16 +189,11 @@ class DevoBackend(SingleTextQueryBackend):
                 agg.aggfunc == SigmaAggregationParser.AGGFUNC_SUM or
                 agg.aggfunc == SigmaAggregationParser.AGGFUNC_AVG):
 
-            if agg.groupfield and self.timeframe == None:
+            if agg.groupfield:
                 if self.hasMulticondition:
                     group_by = " group every - by subquery_link,{0}".format(self.fieldNameMapping(agg.groupfield, None))
                 else:
                     group_by = " group by {0}".format(self.fieldNameMapping(agg.groupfield, None))
-            elif agg.groupfield and self.timeframe != None:
-                if self.hasMulticondition:
-                    group_by = " group every {} by subquery_link,{0}".format(self.timeframe,self.fieldNameMapping(agg.groupfield, None))
-                else:
-                    group_by = " group by {} every {}".format(self.fieldNameMapping(agg.groupfield, None), self.timeframe)
             else:
                 group_by = ""
 
@@ -255,12 +251,6 @@ class DevoBackend(SingleTextQueryBackend):
         else:
             self.table = "sourcetable"
 
-        try:
-            self.timeframe = sigmaparser.parsedyaml['detection']['timeframe']
-        except:
-            self.timeframe = None
-            pass
-        
         if len(sigmaparser.condparsed) > 1:
             self.hasMulticondition = True
         else:

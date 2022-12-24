@@ -1,0 +1,33 @@
+title: 'Suspicious History File Operations'
+id: 508a9374-ad52-4789-b568-fc358def2c65
+status: experimental
+description: 'Detects commandline operations on shell history files'
+    # Rule detects presence of various shell history files in process commandline
+    # Normally user expected to view own history with dedicated 'history' command and not some other tools
+    # There is a possibility for rule to trigger, when T1070.003 techinuque is used (history file cleared)
+    # For this rule to work you must enable audit of process execution in OpenBSM, see
+    # https://osquery.readthedocs.io/en/stable/deployment/process-auditing/#macos-process-socket-auditing
+author: 'Mikhail Larin, oscd.community'
+date: 2020/10/17
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1552.003/T1552.003.md
+logsource:
+    product: macos
+    category: process_creation
+detection:
+    selection:
+        CommandLine|contains:
+            - '.bash_history'
+            - '.zsh_history'
+            - '.zhistory'
+            - '.history'
+            - '.sh_history'
+            - 'fish_history'
+    condition: selection
+falsepositives:
+    - 'Legitimate administrative activity'
+    - 'Ligitimate software, cleaning hist file'
+level: medium
+tags:
+    - attack.credential_access
+    - attack.t1552.003

@@ -1,0 +1,26 @@
+title: Suspicious DNS Query for IPify API
+id: ec82e2a5-81ea-4211-a1f8-37a0286df2c2
+description: Detects DNS queries for api.ipify.org not originating from a browser process.
+status: experimental
+date: 2021/07/08
+author: Brandon George (blog post), Thomas Patzke (rule)
+references:
+    - https://www.binarydefense.com/analysis-of-hancitor-when-boring-begets-beacon
+tags:
+    - attack.reconnaissance
+    - attack.t1590
+falsepositives:
+    - Legitimate usage of ipify API
+level: medium
+logsource:
+    product: windows
+    category: dns_query
+detection:
+    dns_request:
+        QueryName: api.ipify.org
+    browser_process:
+        Image|endswith:
+            - \chrome.exe
+            - \iexplore.exe
+            - \firefox.exe
+    condition: dns_request and not browser_process

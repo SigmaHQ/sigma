@@ -1,0 +1,26 @@
+title: Service Execution
+id: 2a072a96-a086-49fa-bcb5-15cc5a619093
+status: experimental
+description: Detects manual service execution (start) via system utilities.
+author: Timur Zinniatullin, Daniil Yugoslavskiy, oscd.community
+date: 2019/10/21
+modified: 2019/11/04
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1569.002/T1569.002.md
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\net.exe'
+            - '\net1.exe'
+        CommandLine|contains: ' start ' # space character after the 'start' keyword indicates that a service name follows, in contrast to `net start` discovery expression 
+    condition: selection
+falsepositives:
+    - Legitimate administrator or user executes a service for legitimate reasons.
+level: low
+tags:
+    - attack.execution
+    - attack.t1035 # an old one
+    - attack.t1569.002

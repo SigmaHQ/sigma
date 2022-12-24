@@ -1,0 +1,27 @@
+title: Suspicious Auditpol Usage 
+id: 0a13e132-651d-11eb-ae93-0242ac130002
+description: Threat actors can use auditpol binary to change audit policy configuration to impair detection capability. This can be carried out by selectively disabling/removing certain audit policies as well as restoring a custom policy owned by the threat actor. 
+author: Janantha Marasinghe (https://github.com/blueteam0ps)
+references:
+    - https://www.microsoft.com/security/blog/2021/01/20/deep-dive-into-the-solorigate-second-stage-activation-from-sunburst-to-teardrop-and-raindrop/
+date: 2021/02/02
+modified: 2021/02/02
+tags:
+    - attack.defense_evasion
+    - attack.t1562.002
+level: high
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_auditpol_binary:
+        Image|endswith: '\auditpol.exe'
+    selection_auditpol_command:
+        CommandLine|contains:  
+            - 'disable' # disables a specific audit policy
+            - 'clear'   # delete or clears audit policy
+            - 'remove'  # removes an audit policy
+            - 'restore' # restores an audit policy
+    condition: selection_auditpol_binary and selection_auditpol_command
+falsepositives:
+    - Admin activity

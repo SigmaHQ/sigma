@@ -1,0 +1,48 @@
+title: Windows Processes Suspicious Parent Directory
+id: 96036718-71cc-4027-a538-d1587e0006a7
+status: experimental
+description: Detect suspicious parent processes of well-known Windows processes
+author: vburov
+references:
+    - https://securitybytes.io/blue-team-fundamentals-part-two-windows-processes-759fe15965e2
+    - https://www.carbonblack.com/2014/06/10/screenshot-demo-hunt-evil-faster-than-ever-with-carbon-black/
+    - https://www.13cubed.com/downloads/windows_process_genealogy_v2.pdf
+    - https://attack.mitre.org/techniques/T1036/
+date: 2019/02/23
+modified: 2020/11/28
+tags:
+    - attack.defense_evasion
+    - attack.t1036 # an old one
+    - attack.t1036.003
+    - attack.t1036.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\svchost.exe'
+            - '\taskhost.exe'
+            - '\lsm.exe'
+            - '\lsass.exe'
+            - '\services.exe'
+            - '\lsaiso.exe'
+            - '\csrss.exe'
+            - '\wininit.exe'
+            - '\winlogon.exe'
+    filter1:
+        - ParentImage|endswith: '\SavService.exe'
+        - ParentImage|contains:
+            - '\System32\'
+            - '\SysWOW64\'
+    filter2:
+        ParentImage|contains:
+            - '\Windows Defender\'
+            - '\Microsoft Security Client\'
+        ParentImage|endswith: '\MsMpEng.exe'
+    filter_null:
+        ParentImage: null
+    condition: selection and not filter1 and not filter2 and not filter_null
+falsepositives:
+    - Some security products seem to spawn these
+level: low

@@ -117,11 +117,7 @@ default_datamodels = {
                     "vendor_product": []
                 },
                 "mapping": {
-                    "category": "registry_event",
-                    "category": "registry_add",
-                    "category": "registry_delete",
-                    "category": "registry_set",
-                    "category": "registry_rename"
+                    "category": "registry_event"
                 }
             }
         }

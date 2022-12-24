@@ -1,0 +1,37 @@
+title: Shells Spawned by Web Servers
+id: 8202070f-edeb-4d31-a010-a26c72ac5600
+status: experimental
+description: Web servers that spawn shell processes could be the result of a successfully placed web shell or an other attack
+author: Thomas Patzke
+date: 2019/01/16
+modified: 2020/03/25
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith:
+            - '\w3wp.exe'
+            - '\httpd.exe'
+            - '\nginx.exe'
+            - '\php-cgi.exe'
+            - '\tomcat.exe'
+            - '\UMWorkerProcess.exe'  # https://www.fireeye.com/blog/threat-research/2021/03/detection-response-to-exploitation-of-microsoft-exchange-zero-day-vulnerabilities.html
+        Image|endswith:
+            - '\cmd.exe'
+            - '\sh.exe'
+            - '\bash.exe'
+            - '\powershell.exe'
+            - '\bitsadmin.exe'
+    condition: selection
+fields:
+    - CommandLine
+    - ParentCommandLine
+tags:
+    - attack.persistence
+    - attack.t1505.003
+    - attack.privilege_escalation       # an old one
+    - attack.t1190
+falsepositives:
+    - Particular web applications may spawn a shell process legitimately
+level: high

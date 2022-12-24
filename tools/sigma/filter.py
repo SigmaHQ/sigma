@@ -24,18 +24,12 @@ class SigmaRuleFilter:
             "high"     : 2,
             "critical" : 3
             }
-    STATES = [
-              "unsupported",
-              "deprecated",
-              "experimental",
-              "test",
-              "stable"]
+    STATES = ["experimental", "testing", "stable"]
 
     def __init__(self, expr):
         self.minlevel      = None
         self.maxlevel      = None
         self.status        = None
-        self.notstatus     = None
         self.tlp           = None
         self.target        = None
         self.logsources    = list()
@@ -70,12 +64,8 @@ class SigmaRuleFilter:
                 self.status = cond[cond.index("=") + 1:]
                 if self.status not in self.STATES:
                     raise SigmaRuleFilterParseException("Unknown status '%s' in condition '%s'" % (self.status, cond))
-            elif cond.startswith("status!="):
-                self.notstatus = cond[cond.index("=") + 1:]
-                if self.notstatus not in self.STATES:
-                    raise SigmaRuleFilterParseException("Unknown status '%s' in condition '%s'" % (self.notstatus, cond))
             elif cond.startswith("tlp="):
-                self.tlp = cond[cond.index("=") + 1:].upper()  #tlp is always uppercase
+                self.tlp = cond[cond.index("=") + 1:].upper()  #tlp is allways uppercase
             elif cond.startswith("target="):
                 self.target = cond[cond.index("=") + 1:].lower() # lower to make caseinsensitive
             elif cond.startswith("logsource="):
@@ -125,15 +115,6 @@ class SigmaRuleFilter:
                 return False    # User wants status restriction, but it's not possible here
             if status != self.status:
                 return False
-
-        if self.notstatus is not None:
-            try:
-                status = yamldoc['status']
-            except KeyError:    # missing status
-                return False    # User wants status restriction, but it's not possible here
-            if status == self.notstatus:
-                return False
-
 
         # Tlp
         if self.tlp is not None:

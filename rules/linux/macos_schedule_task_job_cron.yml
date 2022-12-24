@@ -1,0 +1,26 @@
+title: Scheduled Cron Task/Job
+id: 7c3b43d8-d794-47d2-800a-d277715aa460
+status: experimental
+description: Detects abuse of the cron utility to perform task scheduling for initial or recurring execution of malicious code. Detection will focus on crontab jobs uploaded from the tmp folder.
+author: Alejandro Ortuno, oscd.community
+date: 2020/10/06
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1053.003/T1053.003.md
+logsource:
+  category: process_creation
+  product: macos
+detection:
+  selection:
+    Image|endswith:
+      - '/crontab'
+    CommandLine|contains:
+      - '/tmp/'
+  condition: selection
+falsepositives:
+    - Legitimate administration activities
+level: medium
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1053.003

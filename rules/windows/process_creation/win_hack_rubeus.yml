@@ -1,0 +1,37 @@
+title: Rubeus Hack Tool
+id: 7ec2c172-dceb-4c10-92c9-87c1881b7e18
+description: Detects command line parameters used by Rubeus hack tool
+author: Florian Roth
+references:
+    - https://www.harmj0y.net/blog/redteaming/from-kekeo-to-rubeus/
+date: 2018/12/19
+tags:
+    - attack.credential_access
+    - attack.t1003
+    - attack.t1558.003
+    - attack.t1558  # an old one
+    - attack.lateral_movement 
+    - attack.t1550.003
+    - attack.t1097  # an old one
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:
+            - ' asreproast '
+            - ' dump /service:krbtgt '
+            - ' kerberoast '
+            - ' createnetonly /program:'
+            - ' ptt /ticket:'
+            - ' /impersonateuser:'
+            - ' renew /ticket:'
+            - ' asktgt /user:'
+            - ' harvest /interval:'
+            - ' s4u /user:'
+            - ' s4u /ticket:'
+            - ' hash /password:'
+    condition: selection
+falsepositives:
+    - unlikely
+level: critical

@@ -1,0 +1,32 @@
+title: WSF/JSE/JS/VBA/VBE File Execution
+id: 1e33157c-53b1-41ad-bbcc-780b80b58288
+status: experimental
+description: Detects suspicious file execution by wscript and cscript
+author: Michael Haag
+date: 2019/01/16
+modified: 2020/08/28
+tags:
+    - attack.execution
+    - attack.t1059.005
+    - attack.t1059.007
+    - attack.t1064      # an old one     
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\wscript.exe'
+            - '\cscript.exe'
+        CommandLine|contains:
+            - '.jse'
+            - '.vbe'
+            - '.js'
+            - '.vba'
+    condition: selection
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Will need to be tuned. I recommend adding the user profile path in CommandLine if it is getting too noisy.
+level: medium

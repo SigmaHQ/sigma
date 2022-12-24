@@ -1,0 +1,29 @@
+title: Powershell Profile.ps1 Modification
+id: b5b78988-486d-4a80-b991-930eff3ff8bf
+status: experimental
+description: Detects a change in profile.ps1 of the Powershell profile
+references:
+    - https://www.welivesecurity.com/2019/05/29/turla-powershell-usage/
+author: HieuTT35
+date: 2019/10/24
+modified: 2020/08/24
+logsource:
+    product: windows
+    category: file_event
+detection:
+    target1:
+        TargetFilename|contains|all: 
+            - '\My Documents\PowerShell\'
+            - '\profile.ps1'
+    target2:
+        TargetFilename|contains|all: 
+            - 'C:\Windows\System32\WindowsPowerShell\v1.0\'
+            - '\profile.ps1'
+    condition: target1 or target2
+falsepositives:
+    - System administrator create Powershell profile manually
+level: high
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1546.013

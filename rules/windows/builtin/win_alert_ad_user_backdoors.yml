@@ -1,0 +1,39 @@
+title: Active Directory User Backdoors
+id: 300bac00-e041-4ee2-9c36-e262656a6ecc
+description: Detects scenarios where one can control another users or computers account without having to use their credentials.
+references:
+    - https://msdn.microsoft.com/en-us/library/cc220234.aspx
+    - https://adsecurity.org/?p=3466
+    - https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/
+author: '@neu5ron'
+date: 2017/04/13
+modified: 2020/08/23
+tags:
+    - attack.t1098
+    - attack.persistence
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: Audit Policy : Account Management > Audit User Account Management, Group Policy : Computer Configuration\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies\Account Management\Audit User Account Management, 
+        DS Access > Audit Directory Service Changes, Group Policy : Computer Configuration\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies\DS Access\Audit Directory Service Changes'
+detection:
+    selection1:
+        EventID: 4738
+    filter_null:
+        AllowedToDelegateTo: null
+    filter1:
+        AllowedToDelegateTo: '-'
+    selection2:
+        EventID: 5136
+        AttributeLDAPDisplayName: 'msDS-AllowedToDelegateTo'
+    selection3:
+        EventID: 5136
+        ObjectClass: 'user'
+        AttributeLDAPDisplayName: 'servicePrincipalName'
+    selection4:
+        EventID: 5136
+        AttributeLDAPDisplayName: 'msDS-AllowedToActOnBehalfOfOtherIdentity'
+    condition: (selection1 and not filter1 and not filter_null) or selection2 or selection3 or selection4
+falsepositives:
+    - Unknown
+level: high

@@ -1,9 +1,9 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Sigma Rule Tests
+name: Sigma Tools and Rule Tests
 
-on: # yamllint disable-line rule:truthy
+on:
   push:
     branches:
       - "*"
@@ -12,141 +12,30 @@ on: # yamllint disable-line rule:truthy
       - master
       - oscd
 
-env:
-  EVTX_BASELINE_VERSION: v0.7
-
 jobs:
   test-sigma:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-      with:
-        submodules: true
-    - name: Set up Python 3.11
+    - name: Set up Python 3.8
       uses: actions/setup-python@v1
       with:
-        python-version: 3.11
+        python-version: 3.8
     - name: Install dependencies
       run: |
-        pip install sigma-cli~=0.5.3
-    - name: Test Sigma Rule Syntax
+        python -m pip install --upgrade pip
+        pip install pipenv
+        pipenv lock
+        pipenv install --dev --deploy
+    - name: Test Sigma Tools and Rules
       run: |
-        sigma check rules
-    - name: Test Sigma Rules
+        pipenv run make test
+    - name: Test SQL(ite) Backend
       run: |
-        pip install PyYAML attackcti colorama
-        python tests/test_rules.py
+        pipenv run make test-backend-sql
   yamllint:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: yaml-lint
       uses: ibiqlik/action-yamllint@v3
-  check-baseline-win7:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Download evtx-sigma-checker
-      run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
-    - name: Download and extract Windows 7 32-bit baseline
-      run: |
-        wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win7-x86.tgz
-        tar xzf win7-x86.tgz
-    - name: Remove deprecated rules
-      run: 'grep -ERl "^status: deprecated" rules | xargs -r rm -v'
-    - name: Check for Sigma matches in baseline
-      run: |
-        chmod +x evtx-sigma-checker
-        ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path win7_x86/ --rule-path rules/windows/ > findings.json
-    - name: Show findings excluding known FPs
-      run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
-  check-baseline-win10:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Download evtx-sigma-checker
-      run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
-    - name: Download and extract Windows 10 baseline
-      run: |
-        wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win10-client.tgz
-        tar xzf win10-client.tgz
-    - name: Remove deprecated rules
-      run: 'grep -ERl "^status: deprecated" rules | xargs -r rm -v'
-    - name: Check for Sigma matches in baseline
-      run: |
-        chmod +x evtx-sigma-checker
-        ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path Logs_Client/ --rule-path rules/windows/ > findings.json
-    - name: Show findings excluding known FPs
-      run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
-  check-baseline-win11:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Download evtx-sigma-checker
-      run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
-    - name: Download and extract Windows 11 baseline
-      run: |
-        wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win11-client.tgz
-        tar xzf win11-client.tgz
-    - name: Remove deprecated rules
-      run: 'grep -ERl "^status: deprecated" rules | xargs -r rm -v'
-    - name: Check for Sigma matches in baseline
-      run: |
-        chmod +x evtx-sigma-checker
-        ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path Logs_Win11/ --rule-path rules/windows/ > findings.json
-    - name: Show findings excluding known FPs
-      run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
-  check-baseline-win2022:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Download evtx-sigma-checker
-      run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
-    - name: Download and extract Windows 2022 baseline
-      run: |
-        wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win2022-evtx.tgz
-        tar xzf win2022-evtx.tgz
-    - name: Remove deprecated rules
-      run: 'grep -ERl "^status: deprecated" rules | xargs -r rm -v'
-    - name: Check for Sigma matches in baseline
-      run: |
-        chmod +x evtx-sigma-checker
-        ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path win2022-evtx/ --rule-path rules/windows/ > findings.json
-    - name: Show findings excluding known FPs
-      run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
-  check-baseline-win2022-domain-controller:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Download evtx-sigma-checker
-      run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
-    - name: Download and extract Windows 2022 baseline
-      run: |
-        wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win2022-ad.tgz
-        tar xzf win2022-ad.tgz
-    - name: Remove deprecated rules
-      run: 'grep -ERl "^status: deprecated" rules | xargs -r rm -v'
-    - name: Check for Sigma matches in baseline
-      run: |
-        chmod +x evtx-sigma-checker
-        ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path Win2022-AD/ --rule-path rules/windows/ > findings.json
-    - name: Show findings excluding known FPs
-      run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
-  check-baseline-win2022-0-20348-azure:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Download evtx-sigma-checker
-      run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
-    - name: Download and extract Windows 2022.0.20348 Azure baseline
-      run: |
-        wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win2022-0-20348-azure.tgz
-        tar xzf win2022-0-20348-azure.tgz
-    - name: Remove deprecated rules
-      run: 'grep -ERl "^status: deprecated" rules | xargs -r rm -v'
-    - name: Check for Sigma matches in baseline
-      run: |
-        chmod +x evtx-sigma-checker
-        ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path win2022-0-20348-azure/ --rule-path rules/windows/ > findings.json
-    - name: Show findings excluding known FPs
-      run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv

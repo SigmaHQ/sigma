@@ -1,0 +1,33 @@
+title: File or Folder Permissions Modifications
+id: 37ae075c-271b-459b-8d7b-55ad5f993dd8
+status: experimental
+description: Detects a file or folder's permissions being modified.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1222.001/T1222.001.md
+author: Jakob Weinzettl, oscd.community
+date: 2019/10/23
+modified: 2019/11/08
+tags:
+    - attack.defense_evasion
+    - attack.t1222.001
+    - attack.t1222  # an old one
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+      - Image|endswith: 
+          - '\takeown.exe'
+          - '\cacls.exe'
+          - '\icacls.exe'
+        CommandLine|contains: '/grant'
+      - Image|endswith: '\attrib.exe'
+        CommandLine|contains: '-r'
+    condition: selection
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+falsepositives:
+    - Users interacting with the files on their own (unlikely unless privileged users).
+level: medium

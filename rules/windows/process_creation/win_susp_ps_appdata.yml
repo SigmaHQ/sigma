@@ -1,0 +1,30 @@
+title: PowerShell Script Run in AppData
+id: ac175779-025a-4f12-98b0-acdaeb77ea85
+status: experimental
+description: Detects a suspicious command line execution that invokes PowerShell with reference to an AppData folder
+references:
+    - https://twitter.com/JohnLaTwC/status/1082851155481288706
+    - https://app.any.run/tasks/f87f1c4e-47e2-4c46-9cf4-31454c06ce03
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1086      # an old one
+author: Florian Roth, Jonhnathan Ribeiro, oscd.community
+date: 2019/01/09
+modified: 2020/11/28
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains|all:
+            - '/c'
+            - 'powershell'
+            - '\AppData\'
+        CommandLine|contains:
+            - 'Local\'
+            - 'Roaming\'
+    condition: selection
+falsepositives:
+    - Administrative scripts
+level: medium

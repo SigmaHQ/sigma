@@ -1,0 +1,29 @@
+title: 'File Time Attribute Change'
+id: 88c0f9d8-30a8-4120-bb6b-ebb54abcf2a0
+status: experimental
+description: 'Detect file time attribute change to hide new or changes to existing files.'
+    # For this rule to work you must enable audit of process execution in OpenBSM, see
+    # https://osquery.readthedocs.io/en/stable/deployment/process-auditing/#macos-process-socket-auditing
+author: 'Igor Fits, Mikhail Larin, oscd.community'
+date: 2020/10/19
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1070.006/T1070.006.md
+logsource:
+    product: macos
+    category: process_creation
+detection:
+    selection1:
+        Image|endswith: '/touch'
+    selection2:
+        CommandLine|contains:
+         - '-t'
+         - '-acmr'
+         - '-d'
+         - '-r'
+    condition: selection1 and selection2
+falsepositives:
+    - 'Unknown'
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1070.006

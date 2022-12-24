@@ -1,0 +1,41 @@
+title: SquiblyTwo
+id: 8d63dadf-b91b-4187-87b6-34a1114577ea
+status: experimental
+description: Detects WMI SquiblyTwo Attack with possible renamed WMI by looking for imphash
+references:
+    - https://subt0x11.blogspot.ch/2018/04/wmicexe-whitelisting-bypass-hacking.html
+    - https://twitter.com/mattifestation/status/986280382042595328
+tags:
+    - attack.defense_evasion
+    - attack.t1047
+    - attack.t1220
+    - attack.execution
+    - attack.t1059.005
+    - attack.t1059.007
+    - attack.t1059  # an old one
+author: Markus Neis / Florian Roth
+date: 2019/01/16
+modified: 2020/08/27
+falsepositives:
+    - Unknown
+level: medium
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Image|endswith:
+            - '\wmic.exe'
+        CommandLine|contains|all:
+            - wmic
+            - format
+            - http
+    selection2:
+        Imphash:
+            - 1B1A3F43BF37B5BFE60751F2EE2F326E
+            - 37777A96245A3C74EB217308F3546F4C
+            - 9D87C9D67CE724033C0B40CC4CA1B206
+        CommandLine|contains|all:
+            - 'format:'
+            - 'http'
+    condition: 1 of them

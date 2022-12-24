@@ -1,33 +1,40 @@
-title: System Shutdown/Reboot - Linux
+title: 'System Shutdown/Reboot'
 id: 4cb57c2f-1f29-41f8-893d-8bed8e1c1d2f
-status: test
-description: Adversaries may shutdown/reboot systems to interrupt access to, or aid in the destruction of, those systems.
-references:
-    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1529/T1529.md
+status: experimental
+description: 'Adversaries may shutdown/reboot systems to interrupt access to, or aid in the destruction of, those systems.'
+  # For this rule to work execve auditing must be configured
+  # Example config (place it at the bottom of audit.rules)
+  # -a always,exit -F arch=b32 -S execve -k execve
+  # -a always,exit -F arch=b64 -S execve -k execve
 author: 'Igor Fits, oscd.community'
 date: 2020/10/15
-modified: 2022/11/26
-tags:
-    - attack.impact
-    - attack.t1529
+references:
+    - hhttps://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1529/T1529.md
 logsource:
     product: linux
     service: auditd
 detection:
-    execve:
+    selection1:
+       type: 'EXECVE'
+       keywords|contains:
+              - 'shutdown'
+              - 'reboot'
+              - 'halt'
+              - 'poweroff'
+    selection2:
+       type: 'EXECVE'
+       keywords|contains:
+              - 'init'
+              - 'telinit'
+    selection3:
         type: 'EXECVE'
-    shutdowncmd:
-        - 'shutdown'
-        - 'reboot'
-        - 'halt'
-        - 'poweroff'
-    init:
-        - 'init'
-        - 'telinit'
-    initselection:
-        - 0
-        - 6
-    condition: execve and (shutdowncmd or (init and initselection))
+        keywords|contains:
+              - '0'
+              - '6'
+    condition: selection1 or (selection2 and selection3)
 falsepositives:
-    - Legitimate administrative activity
+    - 'Legitimate administrative activity'
 level: informational
+tags:
+    - attack.impact
+    - attack.t1529

@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import copy
 import yaml
 from .exceptions import SigmaCollectionParseError
 from .rule import SigmaParser
@@ -62,7 +61,7 @@ class SigmaCollectionParser:
             elif action == "repeat":
                 if prevrule is None:
                     raise SigmaCollectionParseError("action 'repeat' is only applicable after first valid Sigma rule")
-                newrule = copy.deepcopy(prevrule)
+                newrule = prevrule.copy()
                 deep_update_dict(newrule, yamldoc)
                 if rulefilter is None or rulefilter is not None and not rulefilter.match(newrule):
                     self.parsers.append(SigmaParser(newrule, config))

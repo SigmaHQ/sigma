@@ -1,0 +1,34 @@
+title: Account Tampering - Suspicious Failed Logon Reasons
+id: 9eb99343-d336-4020-a3cd-67f3819e68ee
+description: This method uses uncommon error codes on failed logons to determine suspicious activity and tampering with accounts that have been disabled or somehow
+    restricted.
+author: Florian Roth
+date: 2017/02/19
+modified: 2020/08/23
+references:
+    - https://twitter.com/SBousseaden/status/1101431884540710913
+tags:
+    - attack.persistence
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.initial_access
+    - attack.t1078
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID:
+            - 4625
+            - 4776
+        Status:
+            - '0xC0000072'  # User logon to account disabled by administrator
+            - '0xC000006F'  # User logon outside authorized hours
+            - '0xC0000070'  # User logon from unauthorized workstation
+            - '0xC0000413'  # Logon Failure: The machine you are logging onto is protected by an authentication firewall. The specified account is not allowed to authenticate to the machine
+            - '0xC000018C'  # The logon request failed because the trust relationship between the primary domain and the trusted domain failed
+            - '0xC000015B'  # The user has not been granted the requested logon type (aka logon right) at this machine
+    condition: selection
+falsepositives:
+    - User using a disabled account
+level: high

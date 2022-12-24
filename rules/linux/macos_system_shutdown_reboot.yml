@@ -1,0 +1,26 @@
+title: 'System Shutdown/Reboot'
+id: 40b1fbe2-18ea-4ee7-be47-0294285811de
+status: experimental
+description: 'Adversaries may shutdown/reboot systems to interrupt access to, or aid in the destruction of, those systems.'
+    # For this rule to work you must enable audit of process execution in OpenBSM, see
+    # https://osquery.readthedocs.io/en/stable/deployment/process-auditing/#macos-process-socket-auditing
+author: 'Igor Fits, Mikhail Larin, oscd.community'
+date: 2020/10/19
+references:
+    - hhttps://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1529/T1529.md
+logsource:
+    product: macos
+    category: process_creation
+detection:
+    selection:
+        Image|endswith:
+              - '/shutdown'
+              - '/reboot'
+              - '/halt'
+    condition: selection
+falsepositives:
+    - 'Legitimate administrative activity'
+level: informational
+tags:
+    - attack.impact
+    - attack.t1529
