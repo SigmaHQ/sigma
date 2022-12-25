@@ -1,0 +1,23 @@
+title: DotNET Assembly From File
+id: ddcd88cb-7f62-4ce5-86f9-1704190feb0a
+status: experimental
+description: Detects use of Reflection.Assembly to read a file
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=50
+author: frack113
+date: 2022/12/25
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script Block Logging must be enable
+detection:
+    selection_allbyte:
+        ScriptBlockText|contains|all:
+            - '[Reflection.Assembly]::load'
+            - 'ReadAllBytes'
+    selection_loadfile:
+        ScriptBlockText|contains: '[Reflection.Assembly]::loadfile'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate use of the library
+level: medium
