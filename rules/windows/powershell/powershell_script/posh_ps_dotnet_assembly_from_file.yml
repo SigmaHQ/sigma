@@ -1,7 +1,7 @@
-title: DotNET Assembly From File
+title: Potential In-Memory Execution Using Reflection.Assembly
 id: ddcd88cb-7f62-4ce5-86f9-1704190feb0a
 status: experimental
-description: Detects use of Reflection.Assembly to read a file
+description: Detects usage of "Reflection.Assembly" load functions to dynamically load assemblies in memory
 references:
     - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=50
 author: frack113
@@ -11,13 +11,9 @@ logsource:
     category: ps_script
     definition: Script Block Logging must be enable
 detection:
-    selection_allbyte:
-        ScriptBlockText|contains|all:
-            - '[Reflection.Assembly]::load'
-            - 'ReadAllBytes'
-    selection_loadfile:
-        ScriptBlockText|contains: '[Reflection.Assembly]::loadfile'
-    condition: 1 of selection_*
+    selection:
+        ScriptBlockText|contains: '[Reflection.Assembly]::load'
+    condition: selection
 falsepositives:
     - Legitimate use of the library
 level: medium
