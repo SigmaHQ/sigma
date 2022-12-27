@@ -4,7 +4,7 @@ status: experimental
 description: Detects access to a raw disk on a host to evade detection by security products.
 references:
     - https://twitter.com/0xm1rch/status/1600857731073654784?s=20&t=MdrBPqv4hnBEfAJBayMCZA
-    - https://github.com/Neo23x0/auditd/blob/master/audit.rules
+    - https://github.com/Neo23x0/auditd/blob/master/audit.rules # required auditd config
 author: Janantha Marasinghe
 date: 2022/12/20
 tags:
@@ -14,7 +14,10 @@ logsource:
     product: linux
     service: auditd
 detection:
-    selection_1:
+    selection_debugfs:
+        type: 'EXECVE'
+        a0: 'debugfs'
+    selection_tools:
         type: 'EXECVE'
         a0:
             - 'df'
@@ -25,11 +28,8 @@ detection:
             - 'parted'
             - 'hwinfo'
             - 'inxi'
-    selection_2:
-        type: EXECVE
-        a0: 'debugfs'
     timeframe: 5m
-    condition: selection_2 | near selection_1 # requires both
+    condition: selection_debugfs | near selection_tools # requires both
 falsepositives:
     - Unknown
 level: medium
