@@ -7,7 +7,8 @@ status: experimental
 description: Detects execution of the SharpImpersonation tool. Which can be used to manipulate tokens on a Windows computers remotely (PsExec/WmiExec) or interactively
 references:
     - https://s3cur3th1ssh1t.github.io/SharpImpersonation-Introduction/
-author: Sai Prashanth Pulisetti @pulisettis
+    - https://github.com/S3cur3Th1sSh1t/SharpImpersonation
+author: Sai Prashanth Pulisetti @pulisettis, Nasreddine Bencherchali
 date: 2022/12/27
 tags:
     - attack.privilege_escalation
@@ -18,13 +19,20 @@ logsource:
     product: windows
     category: process_creation
 detection:
-    selection_commandline_exe:
-        CommandLine|contains: 'SharpImpersonation.exe'
-    selection_commandline_opt:
-        CommandLine|contains:
-            - 'list'
-            - 'user'
-    condition: all of selection_commandline_*
+    selection_img:
+        - Image|endswith: '\SharpImpersonation.exe'
+        - OriginalFileName: 'SharpImpersonation.exe'
+    selection_cli:
+        - CommandLine|contains|all:
+            - '.exe user:'
+            - ' binary:'
+        - CommandLine|contains|all:
+            - '.exe user:'
+            - ' shellcode:'
+        - CommandLine|contains:
+            - ' technique:CreateProcessAsUserW'
+            - ' technique:ImpersonateLoggedOnuser'
+    condition: 1 of selection_*
 falsepositives:
     - Unknown
-level: medium
+level: high
