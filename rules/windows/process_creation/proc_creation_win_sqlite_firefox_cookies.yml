@@ -6,6 +6,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1539/T1539.md#atomic-test-1---steal-firefox-cookies-windows
 author: frack113
 date: 2022/04/08
+modified: 2022/12/19
 tags:
     - attack.credential_access
     - attack.t1539
@@ -15,7 +16,9 @@ logsource:
 detection:
     selection_sql:
         - Product: SQLite
-        - Image|endswith: '\sqlite.exe'
+        - Image|endswith:
+            - '\sqlite.exe'
+            - '\sqlite3.exe'
     selection_firefox:
         CommandLine|contains: 'cookies.sqlite'
     condition: all of selection_*

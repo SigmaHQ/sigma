@@ -1,0 +1,43 @@
+title: Sideloading Of Non-Existent DLLs From System Folders
+id: 6b98b92b-4f00-4f62-b4fe-4d1920215771
+related:
+    - id: df6ecb8b-7822-4f4b-b412-08f524b4576c
+      type: similar
+status: experimental
+description: Detects DLL sideloading of system dlls that are not present on the system by default. Usualy to achieve techniques such as UAC bypass and privilege escalation
+references:
+    - https://decoded.avast.io/martinchlumecky/png-steganography/
+    - https://posts.specterops.io/lateral-movement-scm-and-dll-hijacking-primer-d2f61e8ab992
+    - https://clement.notin.org/blog/2020/09/12/CVE-2020-7315-McAfee-Agent-DLL-injection/
+    - https://github.com/Wh04m1001/SysmonEoP
+    - https://www.hexacorn.com/blog/2013/12/08/beyond-good-ol-run-key-part-5/
+    - http://remoteawesomethoughts.blogspot.com/2019/05/windows-10-task-schedulerservice.html
+author: Nasreddine Bencherchali
+date: 2022/12/09
+tags:
+    - attack.defense_evasion
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1574.001
+    - attack.t1574.002
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith:
+            # Add other DLLs
+            - 'C:\Windows\System32\WLBSCTRL.dll'
+            - 'C:\Windows\System32\TSMSISrv.dll'
+            - 'C:\Windows\System32\TSVIPSrv.dll'
+            - 'C:\Windows\System32\wow64log.dll'
+            - 'C:\Windows\System32\WptsExtensions.dll'
+            - 'C:\Windows\System32\wbem\wbemcomn.dll'
+    filter_ms_signed:
+        Signed: 'true'
+        # There could be other signatures (please add when found)
+        Signature: 'Microsoft Windows'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: high

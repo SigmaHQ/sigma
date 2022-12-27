@@ -1,0 +1,61 @@
+title: Suspicious Scheduled Task Creation
+id: 3a734d25-df5c-4b99-8034-af1ddb5883a4
+status: experimental
+description: Detects suspicious scheduled task creation events. Based on attributes such as paths, commands line flags, etc.
+references:
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4698
+author: Nasreddine Bencherchali
+date: 2022/12/05
+modified: 2022/12/07
+tags:
+    - attack.execution
+    - attack.privilege_escalation
+    - attack.persistence
+    - attack.t1053.005
+logsource:
+    product: windows
+    service: security
+    definition: 'The Advanced Audit Policy setting Object Access > Audit Other Object Access Events has to be configured to allow this detection. We also recommend extracting the Command field from the embedded XML in the event data.'
+detection:
+    selection_eid:
+        EventID: 4698
+    selection_paths:
+        TaskContent|contains:
+            - '\AppData\Local\Temp\'
+            - '\AppData\Roaming\'
+            - '\Users\Public\'
+            - '\WINDOWS\Temp\'
+            - 'C:\Temp\'
+            - '\Desktop\'
+            - '\Downloads\'
+            - '\Temporary Internet'
+            - 'C:\ProgramData\'
+            - 'C:\Perflogs\'
+    selection_commands:
+        TaskContent|contains:
+            - 'regsvr32'
+            - 'rundll32'
+            - 'cmd.exe</Command>'
+            - 'cmd</Command>'
+            - '<Arguments>/c '
+            - '<Arguments>/k '
+            - '<Arguments>/r '
+            - 'powershell'
+            - 'pwsh'
+            - 'mshta'
+            - 'wscript'
+            - 'cscript'
+            - 'certutil'
+            - 'bitsadmin'
+            - 'bash.exe'
+            - 'bash '
+            - 'scrcons'
+            - 'wmic '
+            - 'wmic.exe'
+            - 'forfiles'
+            - 'scriptrunner'
+            - 'hh.exe'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high

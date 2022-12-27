@@ -12,7 +12,7 @@ references:
     - https://cloud.google.com/kubernetes-engine/docs
 author: Austin Songer @austinsonger
 date: 2021/11/25
-modified: 2021/11/26
+modified: 2022/12/18
 tags:
     - attack.persistence
     - attack.t1078
@@ -23,19 +23,16 @@ logsource:
     product: gcp
     service: gcp.audit
 detection:
-    selection1:
-        gcp.audit.method_name|startswith: 'admissionregistration.k8s.io.v*.mutatingwebhookconfigurations.'
+    selection:
+        gcp.audit.method_name|startswith: 'admissionregistration.k8s.io.v'
+        gcp.audit.method_name|contains:
+            - '.mutatingwebhookconfigurations.'
+            - '.validatingwebhookconfigurations.'
         gcp.audit.method_name|endswith:
             - 'create'
             - 'patch'
             - 'replace'
-    selection2:
-        gcp.audit.method_name|startswith: 'admissionregistration.k8s.io.v*.validatingwebhookconfigurations.'
-        gcp.audit.method_name|endswith:
-            - 'create'
-            - 'patch'
-            - 'replace'
-    condition: selection1 or selection2
+    condition: selection
 falsepositives:
     - Google Cloud Kubernetes Admission Controller may be done by a system administrator.
     - If known behavior is causing false positives, it can be exempted from the rule.
