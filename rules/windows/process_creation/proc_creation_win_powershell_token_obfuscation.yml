@@ -1,10 +1,10 @@
-title: Powershell Tocken Obfuscation - Process Creation
+title: Powershell Token Obfuscation - Process Creation
 id: deb9b646-a508-44ee-b7c9-d8965921c6b6
 related:
     - id: f3a98ce4-6164-4dd4-867c-4d83de7eca51
       type: similar
 status: experimental
-description: Detects TOKEN OBFUSCATION from Invoke-Obfuscation
+description: Detects TOKEN OBFUSCATION technique from Invoke-Obfuscation
 references:
     - https://github.com/danielbohannon/Invoke-Obfuscation
 author: frack113
@@ -15,13 +15,13 @@ tags:
 logsource:
     category: process_creation
     product: windows
-# Example 
-# IN`V`o`Ke-eXp`ResSIOn (Ne`W-ob`ject Net.WebClient).DownloadString
-# &('In'+'voke-Expressi'+'o'+'n') (.('New-Ob'+'jec'+'t') Net.WebClient).DownloadString
-# &("{2}{3}{0}{4}{1}"-f 'e','Expression','I','nvok','-') (&("{0}{1}{2}"-f'N','ew-O','bject') Net.WebClient).DownloadString
-# ${e`Nv:pATh}
 detection:
     selection:
+        # Examples:
+        #   IN`V`o`Ke-eXp`ResSIOn (Ne`W-ob`ject Net.WebClient).DownloadString
+        #   &('In'+'voke-Expressi'+'o'+'n') (.('New-Ob'+'jec'+'t') Net.WebClient).DownloadString
+        #   &("{2}{3}{0}{4}{1}"-f 'e','Expression','I','nvok','-') (&("{0}{1}{2}"-f'N','ew-O','bject') Net.WebClient).DownloadString
+        #   ${e`Nv:pATh}
         - CommandLine|re: '\w+\`(\w+|-|.)\`[\w+|\s]'
         #- CommandLine|re: '\((\'(\w|-|\.)+\'\+)+\'(\w|-|\.)+\'\)'
         - CommandLine|re: '\"({\d})+\"\s*-f'
