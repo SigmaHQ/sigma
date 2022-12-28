@@ -1,12 +1,13 @@
 title: Grafana Path Traversal Exploitation CVE-2021-43798
 id: 7b72b328-5708-414f-9a2a-6a6867c26e16
-status: experimental
+status: test
 description: Detects a successful Grafana path traversal exploitation
 references:
     - https://grafana.com/blog/2021/12/07/grafana-8.3.1-8.2.7-8.1.8-and-8.0.7-released-with-high-severity-security-fix/
     - https://github.com/search?q=CVE-2021-43798
 author: Florian Roth
 date: 2021/12/08
+modified: 2022/12/25
 tags:
     - attack.initial_access
     - attack.t1190
@@ -71,9 +72,9 @@ detection:
             - '/public/plugins/grafana-simple-json-datasource'
             - '/public/plugins/grafana-azure-monitor-datasource'
     condition: all of selection*
+falsepositives:
+    - Vulnerability scanners that scan a host that returns 200 status codes even in cases of a file not found or other error
 fields:
     - c-ip
     - c-dns
-falsepositives:
-    - Vulnerability scanners that scan a host that returns 200 status codes even in cases of a file not found or other error
 level: critical

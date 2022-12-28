@@ -1,0 +1,48 @@
+title: Remote Access Tool Services Have Been Installed - Security
+id: c8b00925-926c-47e3-beea-298fd563728e
+related:
+    - id: 1a31b18a-f00c-4061-9900-f735b96c99fc
+      type: similar
+status: experimental
+description: Detects service installation of different remote access tools software. These software are often abused by threat actors to perform
+references:
+    - https://redcanary.com/blog/misbehaving-rats/
+author: Connor Martin, Nasreddine Bencherchali
+date: 2022/12/23
+tags:
+    - attack.persistence
+    - attack.t1543.003
+    - attack.t1569.002
+logsource:
+    product: windows
+    service: security
+    definition: The 'System Security Extension' audit subcategory need to be enabled to log the EID 4697
+detection:
+    selection:
+        EventID: 4697
+        ServiceFileName|contains:
+            # Based on https://github.com/SigmaHQ/sigma/pull/2841
+            - 'SSUService'
+            - 'SplashtopRemoteService' # https://www.splashtop.com/
+            - 'Atera'
+            - 'LogMeIn' # https://www.logmein.com/
+            - 'LMIGuardianSvc' # https://www.logmein.com/
+            - 'TeamViewer'
+            - 'RPCService' # https://www.remotepc.com/
+            - 'RPCPerformanceService' # https://www.remotepc.com/
+            - 'BASupportExpressStandaloneService' # https://www.systemlookup.com/O23/6839-BASupSrvc_exe.html
+            - 'BASupportExpressSrvcUpdater' # https://www.systemlookup.com/O23/6837-BASupSrvcUpdater_exe.html
+            - 'GoToMyPC' # https://get.gotomypc.com/
+            - 'monblanking'
+            - 'RManService' # https://www.systemlookup.com/O23/7855-rutserv_exe.html
+            - 'GoToAssist' # https://www.goto.com/it-management/resolve
+            - 'AmmyyAdmin' # https://www.ammyy.com/en/
+            - 'vncserver'
+            - 'Parsec'
+            - 'chromoting'
+            - 'Zoho'
+            - 'jumpcloud'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium

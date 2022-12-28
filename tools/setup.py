@@ -18,7 +18,7 @@ setup(
     description='Tools for the Generic Signature Format for SIEM Systems',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url='https://github.com/Neo23x0/sigma',
+    url='https://github.com/SigmaHQ/sigma',
     author='Sigma Project',
     author_email='thomas@patzke.org',
     license='LGPLv3',

@@ -1,10 +1,10 @@
-title: Shellcode Injection
+title: Potential Shellcode Injection
 id: 250ae82f-736e-4844-a68b-0b5e8cc887da
 status: experimental
-description: Detects shellcode injection by Metasploit's migrate and Empire's psinject
+description: Detects potential shellcode injection used by tools such as Metasploit's migrate and Empire's psinject
 author: Bhabesh Raj
 date: 2022/03/11
-modified: 2022/11/01
+modified: 2022/12/20
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
@@ -57,7 +57,12 @@ detection:
         SourceImage|startswith: 'C:\Program Files\Microsoft Visual Studio\'
         SourceImage|endswith: '\MSBuild\Current\Bin\MSBuild.exe'
         TargetImage: C:\Program Files\Dell\DellDataVault\DDVDataCollector.exe
+    filter_wmiprvese:
+        SourceImage: 'C:\Windows\System32\Wbem\Wmiprvse.exe'
+        TargetImage: 'C:\Windows\system32\lsass.exe'
+        CallTrace|startswith: 'C:\Windows\SYSTEM32\ntdll.dll'
+        CallTrace|contains: '\System.ni.dll+'
     condition: selection and not 1 of filter_*
 falsepositives:
-    - Empire's csharp_exe payload uses 0x1f3fff for process enumeration as well
+    - Unknown
 level: high

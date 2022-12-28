@@ -1,0 +1,51 @@
+title: AADInternals PowerShell Cmdlets Execution - PsScript
+id: 91e69562-2426-42ce-a647-711b8152ced6
+related:
+    - id: c86500e9-a645-4680-98d7-f882c70c1ea3
+      type: similar
+status: experimental
+description: Detects ADDInternals Cmdlet execution. A tool for administering Azure AD and Office 365. Which can be abused by threat actors to attack Azure AD or Office 365.
+references:
+    - https://o365blog.com/aadinternals/
+    - https://github.com/Gerenios/AADInternals
+author: Austin Songer (@austinsonger), Nasreddine Bencherchali (update)
+date: 2022/12/23
+tags:
+    - attack.execution
+    - attack.reconnaissance
+    - attack.discovery
+    - attack.credential_access
+    - attack.impact
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script Block Logging must be enable
+detection:
+    selection:
+        ScriptBlockText|contains:
+            # Since most of the cmdlets use a unique enough string which is "-AADInt" we only used that portion. For a complet list please check the references linked above
+            - 'Add-AADInt'
+            - 'ConvertTo-AADInt'
+            - 'Disable-AADInt'
+            - 'Enable-AADInt'
+            - 'Export-AADInt'
+            - 'Get-AADInt'
+            - 'Grant-AADInt'
+            - 'Install-AADInt'
+            - 'Invoke-AADInt'
+            - 'Join-AADInt'
+            - 'New-AADInt'
+            - 'Open-AADInt'
+            - 'Read-AADInt'
+            - 'Register-AADInt'
+            - 'Remove-AADInt'
+            - 'Restore-AADInt'
+            - 'Search-AADInt'
+            - 'Send-AADInt'
+            - 'Set-AADInt'
+            - 'Start-AADInt'
+            - 'Update-AADInt'
+    condition: selection
+falsepositives:
+    - Legitimate use of the library for administrative activity
+level: high

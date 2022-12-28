@@ -14,7 +14,7 @@ Sigma is for log files what [Snort](https://www.snort.org/) is for network traff
 
 This repository contains:
 
-1. Sigma rule specification in the [Wiki](https://github.com/Neo23x0/sigma/wiki/Specification)
+1. Sigma rule specification in the [Sigma-Specification](https://github.com/SigmaHQ/sigma-specification) repository
 2. Open repository for sigma signatures in the `./rules` subfolder
 3. A converter named `sigmac` located in the `./tools/` sub folder that generates search queries for different SIEM systems from Sigma rules
 
@@ -52,7 +52,7 @@ See the first slide deck that I prepared for a private conference in mid January
 
 # Specification
 
-The specifications can be found in the [Wiki](https://github.com/Neo23x0/sigma/wiki/Specification).
+The specifications can be found in the [Sigma-Specification](https://github.com/SigmaHQ/sigma-specification) repository.
 
 The current specification is a proposal. Feedback is requested.
 
@@ -69,7 +69,7 @@ Florian wrote a short [rule creation tutorial](https://www.nextron-systems.com/2
 3. Run `python sigmac --help` in folder `./tools` to get a help on the rule converter
 4. Convert a rule of your choice with `sigmac` like `./sigmac -t splunk -c config/generic/sysmon.yml ../rules/windows/process_creation/proc_creation_win_susp_whoami.yml`
 5. Convert a whole rule directory with `python sigmac -t splunk -r ../rules/proxy/`
-6. Check the `./tools/config` folder and the [wiki](https://github.com/Neo23x0/sigma/wiki/Converter-Tool-Sigmac) if you need custom field or log source mappings in your environment
+6. Check the `./tools/config` folder and the [Sigma-Specification](https://github.com/SigmaHQ/sigma-specification) repository if you need custom field or log source mappings in your environment
 
 ## Troubles / Troubleshooting / Help
 
@@ -256,18 +256,21 @@ and included with `@filename` as parameter on the command line.
 
 Example:
 *misp.conf*:
-```
+
+```apacheconf
 url https://host
 key foobarfoobarfoobarfoobarfoobarfoobarfoo
 ```
 
 Load Sigma rule into MISP event 1234:
-```
+
+```bash
 sigma2misp @misp.conf --event 1234 sigma_rule.py
 ```
 
 Load Sigma rules in directory sigma_rules/ into one newly created MISP event with info set to *Test Event*:
-```
+
+```bash
 sigma2misp @misp.conf --same-event --info "Test Event" -r sigma_rules/
 ```
 
@@ -280,11 +283,12 @@ sigma2misp @misp.conf --same-event --info "Test Event" -r sigma_rules/
 Generates a [MITRE ATT&CK® Navigator](https://github.com/mitre/attack-navigator/) heatmap from a directory containing sigma rules.
 
 Requirements:
-- Sigma rules tagged with a `attack.tXXXX` tag (e.g.: `attack.t1086`)
+
+* Sigma rules tagged with a `attack.tXXXX` tag (e.g.: `attack.t1086`)
 
 Usage samples:
 
-```
+```bash
 # Use the default "rules" folder
 ./tools/sigma2attack
 
@@ -345,8 +349,9 @@ If you want to contribute, you are more then welcome. There are numerous ways to
 If you use it, let us know what works and what does not work.
 
 E.g.
-- Tell us about false positives (issues section)
-- Try to provide an improved rule (new filter) via [pull request](https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files#editing-files-in-another-users-repository) on that rule
+
+* Tell us about false positives (issues section)
+* Try to provide an improved rule (new filter) via [pull request](https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files#editing-files-in-another-users-repository) on that rule
 
 ## Work on open issues
 
@@ -358,15 +363,15 @@ Please don't provide backends for the old code base (sigmac) anymore. Please use
 
 ## Spread the word
 
-Last but not least, the more people use Sigma, the better, so help promote it by sharing it via social media. If you are using it, consider giving a talk about your journey and tell us about it. 
+Last but not least, the more people use Sigma, the better, so help promote it by sharing it via social media. If you are using it, consider giving a talk about your journey and tell us about it.
 
 # Licenses
 
 The content of this repository is released under the following licenses:
 
-* The toolchain (everything under `tools/`) is licensed under the [GNU Lesser General Public License](https://www.gnu.org/licenses/lgpl-3.0.en.html)
-* The [Sigma specification](https://github.com/Neo23x0/sigma/wiki) is public domain
-* The rules contained in the `rules/` directory are released under the [Detection Rule License (DRL) 1.1](https://github.com/SigmaHQ/sigma/blob/master/LICENSE.Detection.Rules.md)
+* The toolchain (everything under tools/) is licensed under the[GNU Lesser General Public License](https://www.gnu.org/licenses/lgpl-3.0.en.html)
+* The [Sigma Specification](https://github.com/SigmaHQ/sigma-specification) and the Sigma logo are public domain
+* The rules contained in the [SigmaHQ repository](https://github.com/SigmaHQ) are released under the [Detection Rule License (DRL) 1.1](https://github.com/SigmaHQ/sigma/blob/master/LICENSE.Detection.Rules.md)
 
 # Credits
 
