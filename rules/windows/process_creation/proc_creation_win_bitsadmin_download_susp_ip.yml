@@ -6,9 +6,10 @@ references:
     - https://blog.netspi.com/15-ways-to-download-a-file/#bitsadmin
     - https://isc.sans.edu/diary/22264
     - https://lolbas-project.github.io/lolbas/Binaries/Bitsadmin/
+    - https://blog.talosintelligence.com/breaking-the-silence-recent-truebot-activity/
 author: Florian Roth
 date: 2022/06/28
-modified: 2022/11/11
+modified: 2022/12/13
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -47,7 +48,11 @@ detection:
             - 'https://7'
             - 'https://8'
             - 'https://9'
-    condition: all of selection_*
+    filter:
+        CommandLine|contains:
+            - 'https://7-' # For https://7-zip.org/
+            - 'http://7-'
+    condition: all of selection_* and not filter
 fields:
     - CommandLine
     - ParentCommandLine
