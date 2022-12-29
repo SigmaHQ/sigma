@@ -1125,6 +1125,9 @@ class TestRules(unittest.TestCase):
                 typos_ = typos + [("Targetobject", "TargetObject"), ("Eventtype", "EventType"), ("Newname", "NewName")]
             elif "process_creation" in logsource:
                 typos_ = typos + [("Parentimage", "ParentImage"), ("Integritylevel", "IntegrityLevel"), ("IntegritiLevel", "IntegrityLevel")]
+            elif "file_access" in logsource:
+                del(typos[1]) # We remove the entry to "TargetFileName" to avoid confusion
+                typos_ = typos + [("TargetFileName", "FileName"), ("TargetFilename","FileName")]
             else:
                 typos_ = typos
             detection = self.get_rule_part(file_path=file, part_name="detection")
