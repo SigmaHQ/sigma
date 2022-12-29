@@ -1127,7 +1127,10 @@ class TestRules(unittest.TestCase):
                 typos_ = typos + [("Parentimage", "ParentImage"), ("Integritylevel", "IntegrityLevel"), ("IntegritiLevel", "IntegrityLevel")]
             elif "file_access" in logsource:
                 typos_ = typos
-                del(typos_[typos_.index(("TargetFileName", "TargetFilename"))]) # We remove the entry to "TargetFileName" to avoid confusion
+                try:
+                    del(typos_[typos_.index(("TargetFileName", "TargetFilename"))]) # We remove the entry to "TargetFileName" to avoid confusion
+                except:
+                    pass
                 typos_ += [("TargetFileName", "FileName"), ("TargetFilename","FileName")]
             else:
                 typos_ = typos
