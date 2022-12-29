@@ -1,0 +1,34 @@
+title: Lolbin Ssh.exe Use As Proxy
+id: 7d6d30b8-5b91-4b90-a891-46cccaf29598
+status: experimental
+description: Detect use of ssh.exe as proxy to launch another program
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Ssh/
+author: frack113
+date: 2022/12/29
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+    - attack.execution
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_ssh_img:
+        - Image|endswith: '\ssh.exe'
+        - ImageFileName: 'ssh.exe'
+    selection_ssh_cmd: 
+        CommandLine|contains: 'localhost'
+        CommandLine|endswith: '.exe'
+    selection_parent:
+        ParentImage: 'C:\Windows\System32\OpenSSH\sshd.exe'
+        #ParentCommandLine: '"C:\Windows\System32\OpenSSH\sshd.exe" -R'
+    condition: all of selection_ssh_* or selection_parent
+fields:
+    - CommandLine
+    - CurrentDirectory 
+    - ParentCommandLine
+    - USer
+falsepositives:
+    - Legit usage of scripts
+level: medium
