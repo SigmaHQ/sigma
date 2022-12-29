@@ -1111,28 +1111,29 @@ class TestRules(unittest.TestCase):
     def test_field_name_typo(self):
         # add "OriginalFilename" after Aurora switched to SourceFilename
         # add "ProviderName" after special case powershell classic is resolved
-        # typos is a list of tuples where each tuple contains ("The typo", "The correct version")
-        typos = [("ServiceFilename", "ServiceFileName"), ("TargetFileName", "TargetFilename"), ("SourceFileName", "OriginalFileName"), ("Commandline", "CommandLine"), ("Targetobject", "TargetObject"), ("OriginalName", "OriginalFileName"), ("ImageFileName", "OriginalFileName")]
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
+            # typos is a list of tuples where each tuple contains ("The typo", "The correct version")
+            typos = [("ServiceFilename", "ServiceFileName"), ("TargetFileName", "TargetFilename"), ("SourceFileName", "OriginalFileName"), ("Commandline", "CommandLine"), ("Targetobject", "TargetObject"), ("OriginalName", "OriginalFileName"), ("ImageFileName", "OriginalFileName")]
             # Some fields exists in certain log sources in different forms than other log sources. We need to handle these as special cases
             # We check first the logsource to handle special cases
             logsource = self.get_rule_part(file_path=file, part_name="logsource").values()
             # add more typos in specific logsources below
             if "windefend" in logsource:
-                typos_ = typos + [("New_Value", "NewValue"), ("Old_Value", "OldValue"), ('Source_Name', 'SourceName'), ("Newvalue", "NewValue"), ("Oldvalue", "OldValue"), ('Sourcename', 'SourceName')]
+                typos += [("New_Value", "NewValue"), ("Old_Value", "OldValue"), ('Source_Name', 'SourceName'), ("Newvalue", "NewValue"), ("Oldvalue", "OldValue"), ('Sourcename', 'SourceName')]
             elif "registry_set" in logsource or "registry_add" in logsource or "registry_event" in logsource:
-                typos_ = typos + [("Targetobject", "TargetObject"), ("Eventtype", "EventType"), ("Newname", "NewName")]
+                typos += [("Targetobject", "TargetObject"), ("Eventtype", "EventType"), ("Newname", "NewName")]
             elif "process_creation" in logsource:
-                typos_ = typos + [("Parentimage", "ParentImage"), ("Integritylevel", "IntegrityLevel"), ("IntegritiLevel", "IntegrityLevel")]
-            else:
-                typos_ = typos
+                typos += [("Parentimage", "ParentImage"), ("Integritylevel", "IntegrityLevel"), ("IntegritiLevel", "IntegrityLevel")]
+            elif "file_access" in logsource:
+                del(typos[typos.index(("TargetFileName", "TargetFilename"))]) # We remove the entry to "TargetFileName" to avoid confusion
+                typos += [("TargetFileName", "FileName"), ("TargetFilename","FileName")]
             detection = self.get_rule_part(file_path=file, part_name="detection")
             if detection:
                 for search_identifier in detection:
                     if isinstance(detection[search_identifier], dict):
                         for field in detection[search_identifier]:
-                            for typo in typos_:
+                            for typo in typos:
                                 if typo[0] in field:
                                     print(Fore.RED + "Rule {} has a common typo ({}) which should be ({}) in selection ({}/{})".format(file, typo[0], typo[1], search_identifier, field))
                                     faulty_rules.append(file)
