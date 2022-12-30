@@ -76,6 +76,38 @@ class TestRules(unittest.TestCase):
     #
     # test functions
     #
+    def test_invalid_logsource_attributes(self):
+        faulty_rules = []
+        valid_logsource = [
+            'category',
+            'product',
+            'service',
+            'definition',
+        ]
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            logsource = self.get_rule_part(
+                file_path=file, part_name="logsource")
+            if not logsource:
+                print(Fore.RED + "Rule {} has no 'logsource'.".format(file))
+                faulty_rules.append(file)
+                continue
+            valid = True
+            for key in logsource:
+                if key.lower() not in valid_logsource:
+                    print(
+                        Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
+                    valid = False
+                elif not isinstance(logsource[key], str):
+                    print(
+                        Fore.RED + "Rule {} has a logsource with an invalid field type ({})".format(file, key))
+                    valid = False
+            if not valid:
+                faulty_rules.append(file)
+
+        self.assertEqual(faulty_rules, [], Fore.RED +
+                         "There are rules with non-conform 'logsource' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#log-source")
+
+
     def test_fieldname_case(self):
         files_with_fieldname_issues = []
         
