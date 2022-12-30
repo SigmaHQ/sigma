@@ -48,6 +48,8 @@ class TestRules(unittest.TestCase):
         "clipboard_capture":["Archived","ClientInfo","Hashes","Image","ProcessGuid","ProcessId","Session","User"],
         "process_tampering":["Image","ProcessGuid","ProcessId","Type","User"],
         "file_block":["Hashes","Image","ProcessGuid","ProcessId","TargetFilename","User"], #SYSMONEVENT_FILE_BLOCK_SHREDDING add IsExecutable
+        "ps_module":["ContextInfo","UserData","Payload"],
+        "ps_script":["MessageNumber","MessageTotal","ScriptBlockText","ScriptBlockId","Path"],
     }
     
     # Calculate once use many times
