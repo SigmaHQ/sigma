@@ -1,7 +1,7 @@
-title: Potential Suspicious Windows Feature Enabled
-id: 55c925c1-7195-426b-a136-a9396800e29b
+title: Potential Suspicious Windows Feature Enabled - ProcCreation
+id: c740d4cf-a1e9-41de-bb16-8a46a4f57918
 related:
-    - id: c740d4cf-a1e9-41de-bb16-8a46a4f57918
+    - id: 55c925c1-7195-426b-a136-a9396800e29b
       type: similar
 status: experimental
 description: |
@@ -11,24 +11,22 @@ references:
     - https://docs.microsoft.com/en-us/powershell/module/dism/enable-windowsoptionalfeature?view=windowsserver2022-ps
     - https://learn.microsoft.com/en-us/windows/win32/projfs/enabling-windows-projected-file-system
     - https://learn.microsoft.com/en-us/windows/wsl/install-on-server
-author: frack113
-date: 2022/09/10
-modified: 2022/12/29
+author: Nasreddine Bencherchali
+date: 2022/12/29
 tags:
     - attack.defense_evasion
 logsource:
+    category: process_creation
     product: windows
-    category: ps_script
-    definition: Script block logging must be enabled
 detection:
     selection_cmd:
-        ScriptBlockText|contains|all:
+        CommandLine|contains|all:
             - 'Enable-WindowsOptionalFeature'
             - '-Online'
             - '-FeatureName'
     selection_feature:
         # Add any unsecure/unusual windows features to your env
-        ScriptBlockText|contains:
+        CommandLine|contains:
             - 'TelnetServer'
             - 'Internet-Explorer-Optional-amd64'
             - 'TFTP'

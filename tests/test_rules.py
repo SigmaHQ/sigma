@@ -1114,7 +1114,7 @@ class TestRules(unittest.TestCase):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             # typos is a list of tuples where each tuple contains ("The typo", "The correct version")
-            typos = [("ServiceFilename", "ServiceFileName"), ("TargetFileName", "TargetFilename"), ("SourceFileName", "OriginalFileName"), ("Commandline", "CommandLine"), ("Targetobject", "TargetObject"), ("OriginalName", "OriginalFileName"), ("ImageFileName", "OriginalFileName")]
+            typos = [("ServiceFilename", "ServiceFileName"), ("TargetFileName", "TargetFilename"), ("SourceFileName", "OriginalFileName"), ("Commandline", "CommandLine"), ("Targetobject", "TargetObject"), ("OriginalName", "OriginalFileName"), ("ImageFileName", "OriginalFileName"), ("details", "Details")]
             # Some fields exists in certain log sources in different forms than other log sources. We need to handle these as special cases
             # We check first the logsource to handle special cases
             logsource = self.get_rule_part(file_path=file, part_name="logsource").values()
