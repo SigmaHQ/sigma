@@ -110,11 +110,18 @@ class TestRules(unittest.TestCase):
 
     def test_fieldname_case(self):
         files_with_fieldname_issues = []
-        
-         # Calculate once use many times
-        windows_category = fieldname_dict["windows"]["category"]
-        windows_category_keys = windows_category.keys()
-        windows_commun = fieldname_dict["windows"]["commun"]
+
+        def check_category(product,category,fieldname) -> bool:
+            valid = True
+
+            if product in fieldname_dict.keys():
+                if category in fieldname_dict[product]['category'].keys():
+                    if  fieldname in fieldname_dict[product]['category'][category]:
+                        pass
+                    else:
+                        valid = False
+            
+            return valid
 
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             logsource = self.get_rule_part(file_path=file, part_name="logsource")
@@ -123,19 +130,17 @@ class TestRules(unittest.TestCase):
             if logsource and detection :
                 full_logsource = self.full_logsource(logsource)
 
-                # Windows check
-                if full_logsource['product'] == "windows":
-                    if full_logsource['category'] in windows_category_keys:
+                #  check the field name
+                if full_logsource['product'] != "":
+                    if full_logsource['category'] != "":
                         for field in self.get_detection_field(detection):
-                            list_field = windows_category[full_logsource['category']] + windows_commun
-                            
-                            if not field in list_field:
+                            if not check_category(full_logsource['product'],full_logsource['category'],field):
                                 print(
                                     Fore.RED + "Rule {} has the invalid field <{}>".format(file, field))
                                 files_with_fieldname_issues.append(file)
                     
         self.assertEqual(files_with_fieldname_issues, [], Fore.RED +
-                         "There are rule files which contains unkown field or with case error")        
+                         "There are rule files which contains unkown field or with cast error")        
 
 def load_fields_json(name:str):
     data = {}
@@ -151,13 +156,16 @@ def load_fields_json(name:str):
         for category in json_dict["addon"][product]["category"]:
             data[product]["category"][category] += json_dict["addon"][product]["category"][category]
 
-    #We use some extracted hash
+    # We use some extracted hash
+    # Add commun field
     for product in data:
         for category in data[product]["category"]:
             if "Hashes" in data[product]["category"][category]:
                 data[product]["category"][category] += ["md5","sha1","sha256","Imphash"]
             if "Hash" in data[product]["category"][category]: # Sysmon 15 create_stream_hash
                 data[product]["category"][category] += ["md5","sha1","sha256","Imphash"]
+            if "commun" in data[product].keys():
+                data[product]["category"][category] += data[product]["commun"]
 
     return data
 
