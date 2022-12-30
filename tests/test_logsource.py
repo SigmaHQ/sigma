@@ -94,13 +94,23 @@ class TestRules(unittest.TestCase):
     def get_detection_field(self,detection: dict):
         data = []
         
+        def get_field_name(selection: dict):
+            name = []
+            for field in selection:
+                if "|" in field:
+                    name.append(field.split('|')[0])
+                else:
+                    name.append(field)
+            return name
+
         for search_identifier in detection:
             if isinstance(detection[search_identifier], dict):
-                for field in detection[search_identifier]:
-                    if "|" in field:
-                        data.append(field.split('|')[0])
-                    else:
-                        data.append(field)
+                data += get_field_name(detection[search_identifier])
+            if isinstance(detection[search_identifier], list):
+               for list_value in detection[search_identifier]:
+                    if isinstance(list_value, dict):
+                        data += get_field_name(list_value)
+
         return data        
 
     def fill_logsource(self,logsource: dict) -> dict:
@@ -115,6 +125,11 @@ class TestRules(unittest.TestCase):
     def add_hash(self):
         for key in self.windows_category_keys:
             if "Hashes" in self.windows_category[key]:
+                self.windows_category[key].append("md5")
+                self.windows_category[key].append("sha1")
+                self.windows_category[key].append("sha256")
+                self.windows_category[key].append("Imphash")
+            if "Hash" in self.windows_category[key]: # Sysmon 15 create_stream_hash
                 self.windows_category[key].append("md5")
                 self.windows_category[key].append("sha1")
                 self.windows_category[key].append("sha256")
