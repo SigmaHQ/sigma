@@ -1,23 +1,25 @@
-title: Disabled Windows Defender Eventlog
-id: fcddca7c-b9c0-4ddf-98da-e1e2d18b0157
-description: Detects the disabling of the Windows Defender eventlog as seen in relation to Lockbit 3.0 infections
+title: Change Path to Evtx
+id: 0CB8D736-995D-4CE7-A31E-1E8D452A1459
+description: Detects change path windows event log
 status: experimental
-date: 2022/07/04
-author: Florian Roth
+date: 2022/12/31
+author: D3F7A5105
 references:
-    - https://twitter.com/WhichbufferArda/status/1543900539280293889/photo/2
+    - not found
 logsource:
     category: registry_set
     product: windows
 detection:
     selection:
         EventType: SetValue
-        TargetObject|contains: '\Microsoft\Windows\CurrentVersion\WINEVT\Channels\Microsoft-Windows-Windows Defender/Operational\Enabled'
-        Details: 'DWORD (0x00000000)'
-    condition: selection
+        TargetObject|contains: 'HKLM\SYSTEM\CurrentControlSet\Services\EventLog\'
+        TargetObject|end: 'File'
+    filter:
+        Details|contains: 'Windows\System32\WinEVT\Logs'
+    condition: selection and not filter
 falsepositives:
-    - Other Antivirus software installations could cause Windows to disable that eventlog (unknown)
+    -  Admin activity
 level: high
 tags:
     - attack.defense_evasion
-    - attack.t1562.001
+    - attack.t1562.002
