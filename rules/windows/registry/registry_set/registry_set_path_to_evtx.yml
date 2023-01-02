@@ -1,0 +1,25 @@
+title: Change Path to Evtx
+id: 0CB8D736-995D-4CE7-A31E-1E8D452A1459
+description: Detects change path windows event log
+status: experimental
+date: 2022/12/31
+author: D3F7A5105
+references:
+    - not found
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|contains: '\SYSTEM\CurrentControlSet\Services\EventLog\'
+        TargetObject|endswith: '\File'
+    filter:
+        Details|contains: 'Windows\System32\Winevt\Logs'
+    condition: selection and not filter
+falsepositives:
+    - Admin activity
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1562.002
