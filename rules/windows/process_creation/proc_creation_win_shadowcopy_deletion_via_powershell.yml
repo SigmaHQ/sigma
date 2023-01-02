@@ -12,6 +12,7 @@ references:
     - https://www.elastic.co/guide/en/security/current/volume-shadow-copy-deletion-via-powershell.html
 author: Tim Rauch
 date: 2022/09/20
+modified: 2022/12/30
 tags:
     - attack.impact
     - attack.t1490
@@ -20,15 +21,15 @@ logsource:
     product: windows
 detection:
     selection_get:
-        ScriptBlockText|contains:
+        CommandLine|contains:
             - 'Get-WmiObject'
             - 'gwmi'
             - 'Get-CimInstance'
             - 'gcim'
     selection_shadowcopy:
-        ScriptBlockText|contains: 'Win32_Shadowcopy'
+        CommandLine|contains: 'Win32_Shadowcopy'
     selection_delete:
-        ScriptBlockText|contains:
+        CommandLine|contains:
             - '.Delete()'
             - 'Remove-WmiObject'
             - 'rwmi'

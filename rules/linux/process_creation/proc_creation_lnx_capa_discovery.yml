@@ -1,0 +1,26 @@
+title: Capabilities Discovery - Linux
+id: d8d97d51-122d-4cdd-9e2f-01b4b4933530
+status: experimental
+description: Detects usage of "getcap" binary. This is often used during recon activity to determine potential binaries that can be abused as GTFOBins or other.
+references:
+    - https://github.com/SaiSathvik1/Linux-Privilege-Escalation-Notes
+    - https://github.com/carlospolop/PEASS-ng
+    - https://github.com/diego-treitos/linux-smart-enumeration
+author: Nasreddine Bencherchali
+date: 2022/12/28
+tags:
+    - attack.discovery
+    - attack.t1083
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith: '/getcap'
+        CommandLine|contains:
+            - ' /r '
+            - ' -r '
+    condition: selection
+falsepositives:
+    - Unknown
+level: low

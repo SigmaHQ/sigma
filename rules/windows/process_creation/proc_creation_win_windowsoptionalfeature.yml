@@ -1,0 +1,39 @@
+title: Potential Suspicious Windows Feature Enabled - ProcCreation
+id: c740d4cf-a1e9-41de-bb16-8a46a4f57918
+related:
+    - id: 55c925c1-7195-426b-a136-a9396800e29b
+      type: similar
+status: experimental
+description: |
+    Detects usage of the built-in PowerShell cmdlet "Enable-WindowsOptionalFeature" used as a Deployment Image Servicing and Management tool.
+    Similar to DISM.exe, this cmdlet is used to enumerate, install, uninstall, configure, and update features and packages in Windows images
+references:
+    - https://docs.microsoft.com/en-us/powershell/module/dism/enable-windowsoptionalfeature?view=windowsserver2022-ps
+    - https://learn.microsoft.com/en-us/windows/win32/projfs/enabling-windows-projected-file-system
+    - https://learn.microsoft.com/en-us/windows/wsl/install-on-server
+author: Nasreddine Bencherchali
+date: 2022/12/29
+tags:
+    - attack.defense_evasion
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_cmd:
+        CommandLine|contains|all:
+            - 'Enable-WindowsOptionalFeature'
+            - '-Online'
+            - '-FeatureName'
+    selection_feature:
+        # Add any unsecure/unusual windows features to your env
+        CommandLine|contains:
+            - 'TelnetServer'
+            - 'Internet-Explorer-Optional-amd64'
+            - 'TFTP'
+            - 'SMB1Protocol'
+            - 'Client-ProjFS'
+            - 'Microsoft-Windows-Subsystem-Linux'
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: medium
