@@ -67,9 +67,9 @@ class TestRules(unittest.TestCase):
     def full_logsource(self,logsource: dict) -> dict:
         data = {}
         
-        data["product"] = logsource["product"] if "product" in logsource.keys() else ""
-        data["category"] = logsource["category"] if "category" in logsource.keys() else ""
-        data["service"] = logsource["service"] if "service" in logsource.keys() else ""
+        data["product"] = logsource["product"] if "product" in logsource.keys() else None
+        data["category"] = logsource["category"] if "category" in logsource.keys() else None
+        data["service"] = logsource["service"] if "service" in logsource.keys() else None
         
         return data
 
@@ -143,20 +143,26 @@ class TestRules(unittest.TestCase):
                 full_logsource = self.full_logsource(logsource)
 
                 #  check the field name
-                if full_logsource['product'] != "":
-                    if full_logsource['category'] != "":
+                if full_logsource['product']:
+                    if full_logsource['category']:
                         for field in self.get_detection_field(detection):
                             if not check_category(full_logsource['product'],full_logsource['category'],field):
                                 print(
-                                    Fore.RED + "Rule {} has the invalid field <{}> forcategory <{}>".format(file, field,full_logsource['category']))
+                                    Fore.RED + "Rule {} has the invalid field <{}> for category <{}>".format(file, field,full_logsource['category']))
                                 files_with_fieldname_issues.append(file)
-                    elif full_logsource['service'] != "":
+                    elif full_logsource['service']:
                         for field in self.get_detection_field(detection):
                             if not check_service(full_logsource['product'],full_logsource['service'],field):
                                 print(
                                     Fore.RED + "Rule {} has the invalid field <{}> for service <{}>".format(file, field,full_logsource['service']))
                                 files_with_fieldname_issues.append(file)                        
-
+                else:
+                    if full_logsource['category']:
+                        for field in self.get_detection_field(detection):
+                            if not check_category("empty",full_logsource['category'],field):
+                                print(
+                                    Fore.RED + "Rule {} has the invalid field <{}> for category <{}>".format(file, field,full_logsource['category']))
+                                files_with_fieldname_issues.append(file)                        
 
         self.assertEqual(files_with_fieldname_issues, [], Fore.RED +
                          "There are rule files which contains unkown field or with cast error")
