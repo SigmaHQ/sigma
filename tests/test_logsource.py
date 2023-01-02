@@ -161,7 +161,7 @@ class TestRules(unittest.TestCase):
                         for field in self.get_detection_field(detection):
                             if not check_category("empty",full_logsource['category'],field):
                                 print(
-                                    Fore.RED + "Rule {} has the invalid field <{}> forcategory <{}>".format(file, field,full_logsource['category']))
+                                    Fore.RED + "Rule {} has the invalid field <{}> for category <{}>".format(file, field,full_logsource['category']))
                                 files_with_fieldname_issues.append(file)                        
 
         self.assertEqual(files_with_fieldname_issues, [], Fore.RED +
