@@ -1,4 +1,4 @@
-title: Python Inline Command Execution Using "-c"
+title: Python Inline Command Execution
 id: 899133d5-4d7c-4a7f-94ee-27355c879d90
 status: experimental
 description: Detects execution of python using the "-c" flag. This is could be used as a way to launch a reverse shell or execute live python code.
@@ -23,7 +23,10 @@ detection:
         - OriginalFileName: 'python.exe'
     selection_cli:
         CommandLine|contains: ' -c'
-    condition: all of selection_*
+    filter_python: # Based on baseline
+        ParentImage|startswith: 'C:\Program Files\Python'
+        ParentImage|endswith: '\python.exe'
+    condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Unknown
 level: medium
