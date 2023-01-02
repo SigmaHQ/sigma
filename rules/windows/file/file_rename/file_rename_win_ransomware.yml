@@ -7,7 +7,7 @@ references:
     - https://blog.cyble.com/2022/08/10/onyx-ransomware-renames-its-leak-site-to-vsop/
 author: frack113
 date: 2022/07/16
-modified: 2022/09/20
+modified: 2023/01/02
 tags:
     - attack.impact
     - attack.t1486
@@ -17,7 +17,7 @@ logsource:
     definition: Use the WinEventLog:Microsoft-Windows-Kernel-File/KERNEL_FILE_KEYWORD_RENAME_SETLINK_PATH ETW source
 detection:
     selection:
-        OriginalFilename|endswith:
+        SourceFilename|endswith:
             - '.lnk'
             - '.rtf'
             - '.pst'
@@ -38,7 +38,7 @@ detection:
             - '.png.'
             - '.pdf.'
     filter_generic:
-        TargetFilename|endswith:
+        SourceFilename|endswith:
             - '.tmp'
             - '.bak'
             - '.old'
@@ -46,8 +46,8 @@ detection:
             - '.backup'
             - '.temp'
     filter_anaconda:
-        TargetFilename|startswith: 'C:\ProgramData\Anaconda3\'
-        TargetFilename|endswith: '.c~'
+        SourceFilename|startswith: 'C:\ProgramData\Anaconda3\'
+        SourceFilename|endswith: '.c~'
     condition: selection and not 1 of filter_*
 falsepositives:
     - Backup software
