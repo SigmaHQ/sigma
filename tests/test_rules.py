@@ -855,6 +855,8 @@ class TestRules(unittest.TestCase):
                                     pattern_prefix = "win_bits_client_"
                                 elif value == "applocker":
                                     pattern_prefix = "win_applocker_"
+                                elif value == "dns-server-analytic":
+                                    pattern_prefix = "win_dns_analytic_"
                         
                     # This value is used to test if we should add the OS infix for certain categories
                     if os_bool:
