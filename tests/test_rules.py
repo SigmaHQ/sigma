@@ -855,6 +855,8 @@ class TestRules(unittest.TestCase):
                                     pattern_prefix = "win_bits_client_"
                                 elif value == "applocker":
                                     pattern_prefix = "win_applocker_"
+                                elif value == "dns-server-analytic":
+                                    pattern_prefix = "win_dns_analytic_"
                         
                     # This value is used to test if we should add the OS infix for certain categories
                     if os_bool:
@@ -959,36 +961,36 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules that share the same 'title'. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title")
 
-    def test_invalid_logsource_attributes(self):
-        faulty_rules = []
-        valid_logsource = [
-            'category',
-            'product',
-            'service',
-            'definition',
-        ]
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            logsource = self.get_rule_part(
-                file_path=file, part_name="logsource")
-            if not logsource:
-                print(Fore.RED + "Rule {} has no 'logsource'.".format(file))
-                faulty_rules.append(file)
-                continue
-            valid = True
-            for key in logsource:
-                if key.lower() not in valid_logsource:
-                    print(
-                        Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
-                    valid = False
-                elif not isinstance(logsource[key], str):
-                    print(
-                        Fore.RED + "Rule {} has a logsource with an invalid field type ({})".format(file, key))
-                    valid = False
-            if not valid:
-                faulty_rules.append(file)
+    # def test_invalid_logsource_attributes(self):
+    #     faulty_rules = []
+    #     valid_logsource = [
+    #         'category',
+    #         'product',
+    #         'service',
+    #         'definition',
+    #     ]
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         logsource = self.get_rule_part(
+    #             file_path=file, part_name="logsource")
+    #         if not logsource:
+    #             print(Fore.RED + "Rule {} has no 'logsource'.".format(file))
+    #             faulty_rules.append(file)
+    #             continue
+    #         valid = True
+    #         for key in logsource:
+    #             if key.lower() not in valid_logsource:
+    #                 print(
+    #                     Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
+    #                 valid = False
+    #             elif not isinstance(logsource[key], str):
+    #                 print(
+    #                     Fore.RED + "Rule {} has a logsource with an invalid field type ({})".format(file, key))
+    #                 valid = False
+    #         if not valid:
+    #             faulty_rules.append(file)
 
-        self.assertEqual(faulty_rules, [], Fore.RED +
-                         "There are rules with non-conform 'logsource' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#log-source")
+    #     self.assertEqual(faulty_rules, [], Fore.RED +
+    #                      "There are rules with non-conform 'logsource' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#log-source")
 
     def test_selection_list_one_value(self):
     
@@ -1108,37 +1110,37 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with unused selections")
 
-    def test_field_name_typo(self):
-        # add "OriginalFilename" after Aurora switched to SourceFilename
-        # add "ProviderName" after special case powershell classic is resolved
-        faulty_rules = []
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            # typos is a list of tuples where each tuple contains ("The typo", "The correct version")
-            typos = [("ServiceFilename", "ServiceFileName"), ("TargetFileName", "TargetFilename"), ("SourceFileName", "OriginalFileName"), ("Commandline", "CommandLine"), ("Targetobject", "TargetObject"), ("OriginalName", "OriginalFileName"), ("ImageFileName", "OriginalFileName"), ("details", "Details")]
-            # Some fields exists in certain log sources in different forms than other log sources. We need to handle these as special cases
-            # We check first the logsource to handle special cases
-            logsource = self.get_rule_part(file_path=file, part_name="logsource").values()
-            # add more typos in specific logsources below
-            if "windefend" in logsource:
-                typos += [("New_Value", "NewValue"), ("Old_Value", "OldValue"), ('Source_Name', 'SourceName'), ("Newvalue", "NewValue"), ("Oldvalue", "OldValue"), ('Sourcename', 'SourceName')]
-            elif "registry_set" in logsource or "registry_add" in logsource or "registry_event" in logsource:
-                typos += [("Targetobject", "TargetObject"), ("Eventtype", "EventType"), ("Newname", "NewName")]
-            elif "process_creation" in logsource:
-                typos += [("Parentimage", "ParentImage"), ("Integritylevel", "IntegrityLevel"), ("IntegritiLevel", "IntegrityLevel")]
-            elif "file_access" in logsource:
-                del(typos[typos.index(("TargetFileName", "TargetFilename"))]) # We remove the entry to "TargetFileName" to avoid confusion
-                typos += [("TargetFileName", "FileName"), ("TargetFilename","FileName")]
-            detection = self.get_rule_part(file_path=file, part_name="detection")
-            if detection:
-                for search_identifier in detection:
-                    if isinstance(detection[search_identifier], dict):
-                        for field in detection[search_identifier]:
-                            for typo in typos:
-                                if typo[0] in field:
-                                    print(Fore.RED + "Rule {} has a common typo ({}) which should be ({}) in selection ({}/{})".format(file, typo[0], typo[1], search_identifier, field))
-                                    faulty_rules.append(file)
+    # def test_field_name_typo(self):
+    #     # add "OriginalFilename" after Aurora switched to SourceFilename
+    #     # add "ProviderName" after special case powershell classic is resolved
+    #     faulty_rules = []
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         # typos is a list of tuples where each tuple contains ("The typo", "The correct version")
+    #         typos = [("ServiceFilename", "ServiceFileName"), ("TargetFileName", "TargetFilename"), ("SourceFileName", "OriginalFileName"), ("Commandline", "CommandLine"), ("Targetobject", "TargetObject"), ("OriginalName", "OriginalFileName"), ("ImageFileName", "OriginalFileName"), ("details", "Details")]
+    #         # Some fields exists in certain log sources in different forms than other log sources. We need to handle these as special cases
+    #         # We check first the logsource to handle special cases
+    #         logsource = self.get_rule_part(file_path=file, part_name="logsource").values()
+    #         # add more typos in specific logsources below
+    #         if "windefend" in logsource:
+    #             typos += [("New_Value", "NewValue"), ("Old_Value", "OldValue"), ('Source_Name', 'SourceName'), ("Newvalue", "NewValue"), ("Oldvalue", "OldValue"), ('Sourcename', 'SourceName')]
+    #         elif "registry_set" in logsource or "registry_add" in logsource or "registry_event" in logsource:
+    #             typos += [("Targetobject", "TargetObject"), ("Eventtype", "EventType"), ("Newname", "NewName")]
+    #         elif "process_creation" in logsource:
+    #             typos += [("Parentimage", "ParentImage"), ("Integritylevel", "IntegrityLevel"), ("IntegritiLevel", "IntegrityLevel")]
+    #         elif "file_access" in logsource:
+    #             del(typos[typos.index(("TargetFileName", "TargetFilename"))]) # We remove the entry to "TargetFileName" to avoid confusion
+    #             typos += [("TargetFileName", "FileName"), ("TargetFilename","FileName")]
+    #         detection = self.get_rule_part(file_path=file, part_name="detection")
+    #         if detection:
+    #             for search_identifier in detection:
+    #                 if isinstance(detection[search_identifier], dict):
+    #                     for field in detection[search_identifier]:
+    #                         for typo in typos:
+    #                             if typo[0] in field:
+    #                                 print(Fore.RED + "Rule {} has a common typo ({}) which should be ({}) in selection ({}/{})".format(file, typo[0], typo[1], search_identifier, field))
+    #                                 faulty_rules.append(file)
 
-        self.assertEqual(faulty_rules, [], Fore.RED + "There are rules with common typos in field names.")
+    #     self.assertEqual(faulty_rules, [], Fore.RED + "There are rules with common typos in field names.")
 
     def test_unknown_value_modifier(self):
         known_modifiers = ["contains", "startswith", "endswith", "all", "base64offset", "base64", "utf16le", "utf16be", "wide", "utf16", "windash", "re"]

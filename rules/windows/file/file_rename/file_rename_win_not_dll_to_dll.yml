@@ -7,7 +7,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1036/T1036.md#atomic-test-1---system-file-copied-to-unusual-location
 author: frack113
 date: 2022/02/19
-modified: 2022/10/15
+modified: 2023/01/02
 logsource:
     product: windows
     category: file_rename
@@ -16,16 +16,16 @@ detection:
     to_dll:
         TargetFilename|endswith: '.dll'
     filter_from_dll:
-        - OriginalFilename|endswith:
+        - SourceFilename|endswith:
             - '.dll'
             - '.tmp'  # VSCode FP
-        - OriginalFilename|contains:
+        - SourceFilename|contains:
             - '.dll.'
             - '\SquirrelTemp\temp'
     filter_empty_source:
-        OriginalFilename: ''
+        SourceFilename: ''
     filter_non_existing_source:
-        OriginalFilename: null
+        SourceFilename: null
     filter_tiworker:
         Image|startswith: 'C:\Windows\WinSxS\'
         Image|endswith: '\TiWorker.exe'
