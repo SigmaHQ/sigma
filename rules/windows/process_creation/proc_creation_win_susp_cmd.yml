@@ -6,7 +6,7 @@ references:
     - https://github.com/Wh04m1001/SysmonEoP
 author: frack113
 date: 2022/12/05
-modified: 2022/12/07
+modified: 2023/01/03
 tags:
     - attack.privilege_escalation
     - attack.defense_evasion
@@ -35,6 +35,19 @@ detection:
         ParentCommandLine|contains: '-m:appraiser.dll -f:DoScheduledTelemetryRun'
         OriginalFileName: 'PowerShell.EXE'
         CommandLine|contains: '-ExecutionPolicy Restricted -Command Write-Host'
+    filter_erl:
+        # Example:
+        #   C:\Program Files\erl-23.2\erts-11.1.4\bin\erl.exe" -service_event ErlSrv_RabbitMQ -nohup -sname rabbit@localhost -s rabbit boot -boot start_sasl +W w +MBas ageffcbf +MHas ageffcbf +MBlmbcs 512 +MHlmbcs 512 +MMmcs 30 +P 1048576 +t 5000000 +stbt db +zdbbl 128000 +sbwt none +sbwtdcpu none +sbwtdio none -kernel inet_dist_listen_min 25672 -kernel inet_dist_listen_max 25672 -lager crash_log false -lager handlers []
+        ParentImage|startswith: 'C:\Program Files\erl-'
+        ParentImage|endswith: '\bin\erl.exe'
+    filter_vmware:
+        ParentImage: 'C:\Windows\System32\CompatTelRunner.exe'
+        CommandLine|contains: 'get-vmswitch '
+    filter_asgard:
+        ParentImage: 'C:\Windows\System32\asgard2-agent\bin\generic.exe'
+        CommandLine|contains|all:
+            - ' -taskid '
+            - ' -name asgard2-agent '
     condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Unknown
