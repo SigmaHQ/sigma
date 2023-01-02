@@ -123,6 +123,18 @@ class TestRules(unittest.TestCase):
             
             return valid
 
+        def check_service(product,service,fieldname) -> bool:
+            valid = True
+
+            if product in fieldname_dict.keys():
+                if service in fieldname_dict[product]['service'].keys():
+                    if  fieldname in fieldname_dict[product]['service'][service]:
+                        pass
+                    else:
+                        valid = False
+            
+            return valid
+
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             logsource = self.get_rule_part(file_path=file, part_name="logsource")
             detection = self.get_rule_part(file_path=file, part_name="detection")
@@ -136,9 +148,16 @@ class TestRules(unittest.TestCase):
                         for field in self.get_detection_field(detection):
                             if not check_category(full_logsource['product'],full_logsource['category'],field):
                                 print(
-                                    Fore.RED + "Rule {} has the invalid field <{}>".format(file, field))
+                                    Fore.RED + "Rule {} has the invalid field <{}> forcategory <{}>".format(file, field,full_logsource['category']))
                                 files_with_fieldname_issues.append(file)
-                    
+                    elif full_logsource['service'] != "":
+                        for field in self.get_detection_field(detection):
+                            if not check_service(full_logsource['product'],full_logsource['service'],field):
+                                print(
+                                    Fore.RED + "Rule {} has the invalid field <{}> for service <{}>".format(file, field,full_logsource['service']))
+                                files_with_fieldname_issues.append(file)                        
+
+
         self.assertEqual(files_with_fieldname_issues, [], Fore.RED +
                          "There are rule files which contains unkown field or with cast error")        
 
