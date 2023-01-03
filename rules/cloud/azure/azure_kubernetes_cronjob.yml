@@ -12,7 +12,7 @@ references:
     - https://www.microsoft.com/security/blog/2020/04/02/attack-matrix-kubernetes/
 author: Austin Songer @austinsonger
 date: 2021/11/22
-modified: 2022/08/23
+modified: 2022/12/18
 tags:
     - attack.persistence
     - attack.privilege_escalation
@@ -21,17 +21,14 @@ logsource:
     product: azure
     service: activitylogs
 detection:
-    selection1:
-        operationName|startswith: 'MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/BATCH'
+    selection:
+        operationName|startswith: 
+            - 'MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/BATCH'
+            - 'MICROSOFT.CONTAINERSERVICE/MANAGEDCLUSTERS/BATCH'
         operationName|endswith:
             - '/CRONJOBS/WRITE'
             - '/JOBS/WRITE'
-    selection2:
-        operationName|startswith: 'MICROSOFT.CONTAINERSERVICE/MANAGEDCLUSTERS/BATCH'
-        operationName|endswith:
-            - '/CRONJOBS/WRITE'
-            - '/JOBS/WRITE'
-    condition: selection1 or selection2
+    condition: selection
 falsepositives:
     - Azure Kubernetes CronJob/Job may be done by a system administrator.
     - If known behavior is causing false positives, it can be exempted from the rule.

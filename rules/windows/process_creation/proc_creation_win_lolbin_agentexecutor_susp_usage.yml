@@ -1,0 +1,44 @@
+title: Suspicious AgentExecutor PowerShell Execution
+id: c0b40568-b1e9-4b03-8d6c-b096da6da9ab
+related:
+    - id: 7efd2c8d-8b18-45b7-947d-adfe9ed04f61
+      type: similar
+status: experimental
+description: Detects execution of the AgentExecutor.exe binary. Which can be abused as a LOLBIN to execute powershell scripts with the ExecutionPolicy "Bypass" or any binary named "powershell.exe" located in the path provided by 6th postiional argument
+author: Nasreddine Bencherchali, memory-shards
+references:
+    - https://twitter.com/lefterispan/status/1286259016436514816
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Agentexecutor/
+    - https://docs.microsoft.com/en-us/mem/intune/apps/intune-management-extension
+    - https://twitter.com/jseerden/status/1247985304667066373/photo/1
+date: 2022/12/24
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\AgentExecutor.exe'
+        - OriginalFileName: 'AgentExecutor.exe'
+    selection_cli:
+        # Example:
+        #   AgentExecutor.exe -powershell [scriptPath] [outputFilePath] [errorFilePath] [timeoutFilePath] [timeoutSeconds] [powershellPath] [enforceSignatureCheck] [runAs32BitOn64]
+        # Note:
+        #   - If [timeoutSeconds] is NULL then it defaults to 60000
+        #   - If [enforceSignatureCheck] is:
+        #       - "NULL" or "1" then a PowerShell instance is spawned with the args: "-NoProfile -executionPolicy allsigned -file "
+        #       - Else a PowerShell instance is spawned with the args: "-NoProfile -executionPolicy bypass -file "
+        #   - [powershellPath] is always concatendated to "powershell.exe"
+        CommandLine|contains:
+            - ' -powershell' # Also covers the "-powershellDetection" flag
+            - ' -remediationScript'
+    filter:
+        CommandLine|contains:
+            - 'C:\Windows\SysWOW64\WindowsPowerShell\v1.0\'
+            - 'C:\Windows\System32\WindowsPowerShell\v1.0\'
+    condition: all of selection_* and not filter
+falsepositives:
+    - Unknown
+level: high

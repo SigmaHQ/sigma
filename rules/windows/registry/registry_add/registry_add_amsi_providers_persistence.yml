@@ -7,6 +7,7 @@ references:
     - https://github.com/gtworek/PSBits/blob/8d767892f3b17eefa4d0668f5d2df78e844f01d8/FakeAMSI/FakeAMSI.c
 author: Nasreddine Bencherchali
 date: 2022/07/21
+modified: 2022/12/19
 tags:
     - attack.persistence
 logsource:
@@ -19,7 +20,10 @@ detection:
             - '\SOFTWARE\Microsoft\AMSI\Providers\'
             - '\SOFTWARE\WOW6432Node\Microsoft\AMSI\Providers\'
     filter:
-        Image|startswith: 'C:\Program Files'
+        Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
     condition: selection and not filter
 falsepositives:
     - Legitimate security products adding their own AMSI providers

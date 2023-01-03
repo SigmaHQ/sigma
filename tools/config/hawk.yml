@@ -166,6 +166,12 @@ logsources:
    conditions:
      product_name: "Sysmon"
      vendor_id: "11"
+ windows-file-change:
+   product: windows
+   category: file_change
+   conditions:
+     product_name: "Sysmon"
+     vendor_id: "2"
  windows-pipe-created:
    product: windows
    category: pipe_created
@@ -235,14 +241,13 @@ logsources:
   conditions:
     vendor_name: "Zeek"
     vendor_type: "IDS"
- zeek-category-firewall:
+ firewall:
   category: firewall
   conditions:
-    vendor_name: "Zeek"
-    vendor_type: "IDS"
-  rewrite:
-    product: zeek
-    service: conn
+    vendor_type:
+      - "Firewall"
+      - "Router"
+      - "WAP"
  zeek-category-dns:
   category: dns
   rewrite:
@@ -800,11 +805,9 @@ fieldmappings:
   CommandLine: command
   ProcessCommandLine: command
   ParentCommandLine: parent_command
-  IMPHASH: file_hash_imphash
   Imphash: file_hash_imphash
-  SHA256: file_hash_sha256
-  MD5: file_hash_md5
-  SHA1: file_hash_sha1
+  sha256: file_hash_sha256
+  md5: file_hash_md5
   sha1: file_hash_sha1
   SubjectUserSid: correlation_session_id
   SubjectSid: correlation_session_id
@@ -852,6 +855,10 @@ fieldmappings:
   DestinationIp: ip_dst
   DestinationHostname: ip_dst_host
   DestinationPort: ip_dport
+  DestAddress: ip_dst
+  DestPort: ip_dport
+  SourceAddress: ip_src
+  SourcePort: ip_sport
   GrantedAccess: access_mask
   StartModule: target_process_name
   TargetProcessAddress: process_address
@@ -876,6 +883,7 @@ fieldmappings:
   cs-agent: http_user_agent
   c-useragent: http_user_agent
   cs-useragent: http_user_agent
+  cs-user-agent: http_user_agent
   c-ip: ip_src
   cs-ip: ip_src
   s-ip: ip_dst

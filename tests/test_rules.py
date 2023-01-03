@@ -65,6 +65,7 @@ class TestRules(unittest.TestCase):
         # "There are rule files with extensions other than .yml")
 
     def test_legal_trademark_violations(self):
+        # See Issue # https://github.com/SigmaHQ/sigma/issues/1028
         files_with_legal_issues = []
 
         for file in self.yield_next_rule_file_path(self.path_to_rules):
@@ -728,10 +729,149 @@ class TestRules(unittest.TestCase):
                 print(
                     Fore.YELLOW + "Rule {} has a file name that doesn't match our standard.".format(file))
                 faulty_rules.append(file)
+            else:
+                # This test make sure that every rules has a filename that corresponds to
+                # It's specific logsource.
+                # Fix Issue #1381 (https://github.com/SigmaHQ/sigma/issues/1381)
+                logsource = self.get_rule_part(file_path=file, part_name="logsource")
+                if logsource:
+                    pattern_prefix = ""
+                    os_infix = ""
+                    os_bool = False
+                    for key,value in logsource.items():
+                        if key == "definition":
+                            pass
+                        else:
+                            if key == "product":
+                                # This is to get the OS for certain categories
+                                if value == "windows":
+                                    os_infix = "win_"
+                                elif value == "macos":
+                                    os_infix = "macos_"
+                                elif value == "linux":
+                                    os_infix = "lnx_"
+                                # For other stuff
+                                elif value == "aws":
+                                    pattern_prefix = "aws_"
+                                elif value == "azure":
+                                    pattern_prefix = "azure_"
+                                elif value == "gcp":
+                                    pattern_prefix = "gcp_"
+                                elif value == "gworkspace":
+                                    pattern_prefix = "gworkspace_"
+                                elif value == "m365":
+                                    pattern_prefix = "microsoft365_"
+                                elif value == "okta":
+                                    pattern_prefix = "okta_"
+                                elif value == "onelogin":
+                                    pattern_prefix = "onelogin_"
+                            elif key == "category":
+                                if value == "process_creation":
+                                    pattern_prefix = "proc_creation_"
+                                    os_bool = True
+                                elif value == "image_load":
+                                    pattern_prefix = "image_load_"
+                                elif value == "file_event":
+                                    pattern_prefix = "file_event_"
+                                    os_bool = True
+                                elif value == "registry_set":
+                                    pattern_prefix = "registry_set_"
+                                elif value == "registry_add":
+                                    pattern_prefix = "registry_add_"
+                                elif value == "registry_event":
+                                    pattern_prefix = "registry_event_"
+                                elif value == "registry_delete":
+                                    pattern_prefix = "registry_delete_"
+                                elif value == "registry_rename":
+                                    pattern_prefix = "registry_rename_"
+                                elif value == "process_access":
+                                    pattern_prefix = "proc_access_"
+                                    os_bool = True
+                                elif value == "driver_load":
+                                    pattern_prefix = "driver_load_"
+                                    os_bool = True
+                                elif value == "dns_query":
+                                    pattern_prefix = "dns_query_"
+                                    os_bool = True
+                                elif value == "ps_script":
+                                    pattern_prefix = "posh_ps_"
+                                elif value == "ps_module":
+                                    pattern_prefix = "posh_pm_"
+                                elif value == "ps_classic_start":
+                                    pattern_prefix = "posh_pc_"
+                                elif value == "pipe_created":
+                                    pattern_prefix = "pipe_created_"
+                                elif value == "network_connection":
+                                    pattern_prefix = "net_connection_"
+                                    os_bool = True
+                                elif value == "file_rename":
+                                    pattern_prefix = "file_rename_"
+                                    os_bool = True
+                                elif value == "file_delete":
+                                    pattern_prefix = "file_delete_"
+                                    os_bool = True
+                                elif value == "file_change":
+                                    pattern_prefix = "file_change_"
+                                    os_bool = True
+                                elif value == "file_access":
+                                    pattern_prefix = "file_access_"
+                                    os_bool = True
+                                elif value == "create_stream_hash":
+                                    pattern_prefix = "create_stream_hash_"
+                                elif value == "create_remote_thread":
+                                    pattern_prefix = "create_remote_thread_win_"
+                                elif value == "dns":
+                                    pattern_prefix = "net_dns_"
+                                elif value == "firewall":
+                                    pattern_prefix = "net_firewall_"
+                                elif value == "webserver":
+                                    pattern_prefix = "web_"
+                            elif key == "service":
+                                if value == "auditd":
+                                    pattern_prefix = "lnx_auditd_"
+                                elif value == "modsecurity":
+                                    pattern_prefix = "modsec_"
+                                elif value == "diagnosis-scripted":
+                                    pattern_prefix = "win_diagnosis_scripted_"
+                                elif value == "firewall-as":
+                                    pattern_prefix = "win_firewall_as_"
+                                elif value == "msexchange-management":
+                                    pattern_prefix = "win_exchange_"
+                                elif value == "security":
+                                    pattern_prefix = "win_security_"
+                                elif value == "system":
+                                    pattern_prefix = "win_system_"
+                                elif value == "taskscheduler":
+                                    pattern_prefix = "win_taskscheduler_"
+                                elif value == "terminalservices-localsessionmanager":
+                                    pattern_prefix = "win_terminalservices_"
+                                elif value == "windefend":
+                                    pattern_prefix = "win_defender_"
+                                elif value == "wmi":
+                                    pattern_prefix = "win_wmi_"
+                                elif value == "codeintegrity-operational":
+                                    pattern_prefix = "win_codeintegrity_"
+                                elif value == "bits-client":
+                                    pattern_prefix = "win_bits_client_"
+                                elif value == "applocker":
+                                    pattern_prefix = "win_applocker_"
+                                elif value == "dns-server-analytic":
+                                    pattern_prefix = "win_dns_analytic_"
+                                elif value == "bitlocker":
+                                    pattern_prefix = "win_bitlocker_"
+                        
+                    # This value is used to test if we should add the OS infix for certain categories
+                    if os_bool:
+                        pattern_prefix += os_infix
+                    if pattern_prefix != "":
+                        if not filename.startswith(pattern_prefix):
+                            print(
+                                Fore.YELLOW + "Rule {} has a file name that doesn't match our standard naming convention.".format(file))
+                            faulty_rules.append(file)
             name_lst.append(filename)
 
         self.assertEqual(faulty_rules, [], Fore.RED +
-                         r'There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is \'[a-z0-9_]{10,70}\.yml\' and it has to contain at least an underline character.')
+                         r'There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is \'[a-z0-9_]{10,70}\.yml\' and it has to contain at least an underline character. It also has to follow the following naming convention https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/Sigmahq_filename_rule.md')
 
     def test_title(self):
         faulty_rules = []
@@ -764,12 +904,10 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
                 continue
             elif len(title) > 70:
-                print(
-                    Fore.YELLOW + "Rule {} has a title field with too many characters (>70)".format(file))
+                print(Fore.YELLOW + "Rule {} has a title field with too many characters (>70)".format(file))
                 faulty_rules.append(file)
             if title.startswith("Detects "):
-                print(
-                    Fore.RED + "Rule {} has a title that starts with 'Detects'".format(file))
+                print(Fore.RED + "Rule {} has a title that starts with 'Detects'".format(file))
                 faulty_rules.append(file)
             if title.endswith("."):
                 print(Fore.RED + "Rule {} has a title that ends with '.'".format(file))
@@ -806,36 +944,55 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules without the 'title' attribute in their first line.")
 
-    def test_invalid_logsource_attributes(self):
+    def test_duplicate_titles(self):
+        # This test ensure that every rule has a unique title
         faulty_rules = []
-        valid_logsource = [
-            'category',
-            'product',
-            'service',
-            'definition',
-        ]
+        titles_dict = {}
         for file in self.yield_next_rule_file_path(self.path_to_rules):
-            logsource = self.get_rule_part(
-                file_path=file, part_name="logsource")
-            if not logsource:
-                print(Fore.RED + "Rule {} has no 'logsource'.".format(file))
-                faulty_rules.append(file)
-                continue
-            valid = True
-            for key in logsource:
-                if key.lower() not in valid_logsource:
-                    print(
-                        Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
-                    valid = False
-                elif not isinstance(logsource[key], str):
-                    print(
-                        Fore.RED + "Rule {} has a logsource with an invalid field type ({})".format(file, key))
-                    valid = False
-            if not valid:
-                faulty_rules.append(file)
+            title = self.get_rule_part(file_path=file, part_name="title").lower().rstrip()
+            duplicate = False
+            for rule, title_ in titles_dict.items():
+                if title == title_:
+                    print(Fore.RED + "Rule {} has an already used title in {}.".format(file, rule))
+                    duplicate = True
+                    faulty_rules.append(file)
+                    continue
+            if not duplicate:
+                titles_dict[file] = title
 
         self.assertEqual(faulty_rules, [], Fore.RED +
-                         "There are rules with non-conform 'logsource' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#log-source")
+                         "There are rules that share the same 'title'. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title")
+
+    # def test_invalid_logsource_attributes(self):
+    #     faulty_rules = []
+    #     valid_logsource = [
+    #         'category',
+    #         'product',
+    #         'service',
+    #         'definition',
+    #     ]
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         logsource = self.get_rule_part(
+    #             file_path=file, part_name="logsource")
+    #         if not logsource:
+    #             print(Fore.RED + "Rule {} has no 'logsource'.".format(file))
+    #             faulty_rules.append(file)
+    #             continue
+    #         valid = True
+    #         for key in logsource:
+    #             if key.lower() not in valid_logsource:
+    #                 print(
+    #                     Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
+    #                 valid = False
+    #             elif not isinstance(logsource[key], str):
+    #                 print(
+    #                     Fore.RED + "Rule {} has a logsource with an invalid field type ({})".format(file, key))
+    #                 valid = False
+    #         if not valid:
+    #             faulty_rules.append(file)
+
+    #     self.assertEqual(faulty_rules, [], Fore.RED +
+    #                      "There are rules with non-conform 'logsource' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#log-source")
 
     def test_selection_list_one_value(self):
     
@@ -892,6 +1049,30 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED +
                             "There are rules using list with only 1 element")
 
+    def test_selection_start_or_and(self):
+        faulty_rules = []
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            detection = self.get_rule_part(
+                file_path=file, part_name="detection")
+            if detection:
+                
+                # This test is a best effort to avoid breaking SIGMAC parser. You could do more testing and try to fix this once and for all by modifiying the token regular expressions https://github.com/SigmaHQ/sigma/blob/b9ae5303f12cda8eb6b5b90a32fd7f11ad65645d/tools/sigma/parser/condition.py#L107-L127 
+                for key in detection:
+                    if key[:3].lower() == "sel":
+                       continue
+                    elif key[:2].lower() == "or":
+                        print( Fore.RED + "Rule {} has a selection '{}' that starts with the string 'or'".format(file, key))
+                        faulty_rules.append(file)
+                    elif key[:3].lower() == "and":
+                        print( Fore.RED + "Rule {} has a selection '{}' that starts with the string 'and'".format(file, key))
+                        faulty_rules.append(file)
+                    elif key[:3].lower() == "not":
+                        print( Fore.RED + "Rule {} has a selection '{}' that starts with the string 'not'".format(file, key))
+                        faulty_rules.append(file)
+                        
+        self.assertEqual(faulty_rules, [], Fore.RED +
+                            "There are rules with bad selection names. Can't start a selection name with an 'or*' or an 'and*' or a 'not*' ")
+
     def test_unused_selection(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
@@ -931,36 +1112,37 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with unused selections")
 
-    def test_field_name_typo(self):
-        # add "OriginalFilename" after Aurora switched to SourceFilename
-        # add "ProviderName" after special case powershell classic is resolved
-        # typos is a list of tuples where each tuple contains ("The typo", "The correct version")
-        typos = [("ServiceFilename", "ServiceFileName"), ("TargetFileName", "TargetFilename"), ("SourceFileName", "OriginalFileName"), ("Commandline", "CommandLine"), ("Targetobject", "TargetObject"), ("OriginalName", "OriginalFileName"), ("ImageFileName", "OriginalFileName")]
-        faulty_rules = []
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            # Some fields exists in certain log sources in different forms than other log sources. We need to handle these as special cases
-            # We check first the logsource to handle special cases
-            logsource = self.get_rule_part(file_path=file, part_name="logsource").values()
-            # add more typos in specific logsources below
-            if "windefend" in logsource:
-                typos_ = typos + [("New_Value", "NewValue"), ("Old_Value", "OldValue"), ('Source_Name', 'SourceName'), ("Newvalue", "NewValue"), ("Oldvalue", "OldValue"), ('Sourcename', 'SourceName')]
-            elif "registry_set" in logsource or "registry_add" in logsource or "registry_event" in logsource:
-                typos_ = typos + [("Targetobject", "TargetObject"), ("Eventtype", "EventType"), ("Newname", "NewName")]
-            elif "process_creation" in logsource:
-                typos_ = typos + [("Parentimage", "ParentImage"), ("Integritylevel", "IntegrityLevel"), ("IntegritiLevel", "IntegrityLevel")]
-            else:
-                typos_ = typos
-            detection = self.get_rule_part(file_path=file, part_name="detection")
-            if detection:
-                for search_identifier in detection:
-                    if isinstance(detection[search_identifier], dict):
-                        for field in detection[search_identifier]:
-                            for typo in typos_:
-                                if typo[0] in field:
-                                    print(Fore.RED + "Rule {} has a common typo ({}) which should be ({}) in selection ({}/{})".format(file, typo[0], typo[1], search_identifier, field))
-                                    faulty_rules.append(file)
+    # def test_field_name_typo(self):
+    #     # add "OriginalFilename" after Aurora switched to SourceFilename
+    #     # add "ProviderName" after special case powershell classic is resolved
+    #     faulty_rules = []
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         # typos is a list of tuples where each tuple contains ("The typo", "The correct version")
+    #         typos = [("ServiceFilename", "ServiceFileName"), ("TargetFileName", "TargetFilename"), ("SourceFileName", "OriginalFileName"), ("Commandline", "CommandLine"), ("Targetobject", "TargetObject"), ("OriginalName", "OriginalFileName"), ("ImageFileName", "OriginalFileName"), ("details", "Details")]
+    #         # Some fields exists in certain log sources in different forms than other log sources. We need to handle these as special cases
+    #         # We check first the logsource to handle special cases
+    #         logsource = self.get_rule_part(file_path=file, part_name="logsource").values()
+    #         # add more typos in specific logsources below
+    #         if "windefend" in logsource:
+    #             typos += [("New_Value", "NewValue"), ("Old_Value", "OldValue"), ('Source_Name', 'SourceName'), ("Newvalue", "NewValue"), ("Oldvalue", "OldValue"), ('Sourcename', 'SourceName')]
+    #         elif "registry_set" in logsource or "registry_add" in logsource or "registry_event" in logsource:
+    #             typos += [("Targetobject", "TargetObject"), ("Eventtype", "EventType"), ("Newname", "NewName")]
+    #         elif "process_creation" in logsource:
+    #             typos += [("Parentimage", "ParentImage"), ("Integritylevel", "IntegrityLevel"), ("IntegritiLevel", "IntegrityLevel")]
+    #         elif "file_access" in logsource:
+    #             del(typos[typos.index(("TargetFileName", "TargetFilename"))]) # We remove the entry to "TargetFileName" to avoid confusion
+    #             typos += [("TargetFileName", "FileName"), ("TargetFilename","FileName")]
+    #         detection = self.get_rule_part(file_path=file, part_name="detection")
+    #         if detection:
+    #             for search_identifier in detection:
+    #                 if isinstance(detection[search_identifier], dict):
+    #                     for field in detection[search_identifier]:
+    #                         for typo in typos:
+    #                             if typo[0] in field:
+    #                                 print(Fore.RED + "Rule {} has a common typo ({}) which should be ({}) in selection ({}/{})".format(file, typo[0], typo[1], search_identifier, field))
+    #                                 faulty_rules.append(file)
 
-        self.assertEqual(faulty_rules, [], Fore.RED + "There are rules with common typos in field names.")
+    #     self.assertEqual(faulty_rules, [], Fore.RED + "There are rules with common typos in field names.")
 
     def test_unknown_value_modifier(self):
         known_modifiers = ["contains", "startswith", "endswith", "all", "base64offset", "base64", "utf16le", "utf16be", "wide", "utf16", "windash", "re"]

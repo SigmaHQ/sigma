@@ -271,7 +271,7 @@ def get_parser_properties(sigmaparser):
 
 def write_file_header(f, level):
     f.write("#\n")
-    f.write("# The rules are generated from the Sigma GitHub repository at https://github.com/Neo23x0/sigma\n")
+    f.write("# The rules are generated from the Sigma GitHub repository at https://github.com/SigmaHQ/sigma\n")
     f.write("# Follow these steps to get the latest rules from the repository with Python\n")
     f.write("#    1. Clone the repository locally\n")
     f.write("#    2. Using a commandline, change working directory to the just cloned repository\n")
