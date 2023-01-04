@@ -32,7 +32,8 @@ class TestRules(unittest.TestCase):
     # Don't use trademarks in rules - they require non-ASCII characters to be used on we don't want them in our rules
     TRADE_MARKS = {"MITRE ATT&CK", "ATT&CK"}
 
-    path_to_rules = "rules"
+    path_to_rules = "../rules"
+    path_to_rules = os.path.join(os.path.dirname(os.path.realpath(__file__)), path_to_rules)
 
     # Helper functions
     def yield_next_rule_file_path(self, path_to_rules: str) -> str:
