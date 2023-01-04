@@ -17,6 +17,14 @@ import collections
 
 
 class TestRules(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        print("Calling get_mitre_data()")
+        # Get Current Data from MITRE ATT&CK®
+        cls.MITRE_ALL = get_mitre_data()
+        print("Catched data - starting tests...")
+
     MITRE_TECHNIQUE_NAMES = [
         "process_injection", "signed_binary_proxy_execution", "process_injection"]  # incomplete list
     MITRE_TACTICS = ["initial_access", "execution", "persistence", "privilege_escalation", "defense_evasion", "credential_access",
@@ -101,7 +109,7 @@ class TestRules(unittest.TestCase):
             tags = self.get_rule_part(file_path=file, part_name="tags")
             if tags:
                 for tag in tags:
-                    if tag not in MITRE_ALL and tag.startswith("attack."):
+                    if tag not in self.MITRE_ALL and tag.startswith("attack."):
                         print(
                             Fore.RED + "Rule {} has the following incorrect tag {}".format(file, tag))
                         files_with_incorrect_mitre_tags.append(file)
@@ -1295,7 +1303,5 @@ def get_mitre_data():
 
 if __name__ == "__main__":
     init(autoreset=True)
-    # Get Current Data from MITRE ATT&CK®
-    MITRE_ALL = get_mitre_data()
     # Run the tests
     unittest.main()
