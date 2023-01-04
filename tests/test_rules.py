@@ -1254,7 +1254,9 @@ def get_mitre_data():
     """
     Use Tags from CTI subrepo to get consitant data
     """
-    cti_path = "tests/cti/"
+    cti_path = "cti/"
+    cti_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), cti_path)
+
     # Get ATT&CK information
     lift = attack_client(local_path=cti_path)
     # Techniques
