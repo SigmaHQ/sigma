@@ -17,6 +17,14 @@ import collections
 
 
 class TestRules(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        print("Calling get_mitre_data()")
+        # Get Current Data from MITRE ATT&CK®
+        cls.MITRE_ALL = get_mitre_data()
+        print("Catched data - starting tests...")
+
     MITRE_TECHNIQUE_NAMES = [
         "process_injection", "signed_binary_proxy_execution", "process_injection"]  # incomplete list
     MITRE_TACTICS = ["initial_access", "execution", "persistence", "privilege_escalation", "defense_evasion", "credential_access",
@@ -24,7 +32,8 @@ class TestRules(unittest.TestCase):
     # Don't use trademarks in rules - they require non-ASCII characters to be used on we don't want them in our rules
     TRADE_MARKS = {"MITRE ATT&CK", "ATT&CK"}
 
-    path_to_rules = "rules"
+    path_to_rules = "../rules"
+    path_to_rules = os.path.join(os.path.dirname(os.path.realpath(__file__)), path_to_rules)
 
     # Helper functions
     def yield_next_rule_file_path(self, path_to_rules: str) -> str:
@@ -101,7 +110,7 @@ class TestRules(unittest.TestCase):
             tags = self.get_rule_part(file_path=file, part_name="tags")
             if tags:
                 for tag in tags:
-                    if tag not in MITRE_ALL and tag.startswith("attack."):
+                    if tag not in self.MITRE_ALL and tag.startswith("attack."):
                         print(
                             Fore.RED + "Rule {} has the following incorrect tag {}".format(file, tag))
                         files_with_incorrect_mitre_tags.append(file)
@@ -1246,7 +1255,9 @@ def get_mitre_data():
     """
     Use Tags from CTI subrepo to get consitant data
     """
-    cti_path = "tests/cti/"
+    cti_path = "cti/"
+    cti_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), cti_path)
+
     # Get ATT&CK information
     lift = attack_client(local_path=cti_path)
     # Techniques
@@ -1295,7 +1306,5 @@ def get_mitre_data():
 
 if __name__ == "__main__":
     init(autoreset=True)
-    # Get Current Data from MITRE ATT&CK®
-    MITRE_ALL = get_mitre_data()
     # Run the tests
     unittest.main()
