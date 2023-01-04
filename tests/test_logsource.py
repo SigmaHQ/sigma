@@ -141,7 +141,7 @@ class TestRules(unittest.TestCase):
                 if info == None:
                     faulty_rules.append(file)
                     print(
-                        Fore.RED + "Rule {} has the unkwon logsource product/category/service ({}/{}/{})".format(file,
+                        Fore.RED + "Rule {} has the unknown logsource product/category/service ({}/{}/{})".format(file,
                                                                                                         full_logsource["product"],
                                                                                                         full_logsource["category"],
                                                                                                         full_logsource["service"]
@@ -209,7 +209,7 @@ class TestRules(unittest.TestCase):
                                     files_with_fieldname_issues.append(file)                        
 
         self.assertEqual(files_with_fieldname_issues, [], Fore.RED +
-                         "There are rule files which contains unkown field or with cast error")
+                         "There are rule files which contains unknown field or with cast error")
 
 def load_fields_json(name:str):
     data = {}
