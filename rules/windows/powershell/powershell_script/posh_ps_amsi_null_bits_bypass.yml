@@ -1,0 +1,27 @@
+title: Potential AMSI Bypass Using NULL Bits - ScriptBlockLogging
+id: fa2559c8-1197-471d-9cdd-05a0273d4522
+related:
+    - id: 92a974db-ab84-457f-9ec0-55db83d7a825
+      type: similar
+status: experimental
+description: Detects usage of special strings/null bits in order to potentially bypass AMSI functionalities
+references:
+    - https://github.com/r00t-3xp10it/hacking-material-books/blob/43cb1e1932c16ff1f58b755bc9ab6b096046853f/obfuscation/simple_obfuscation.md#amsi-bypass-using-null-bits-satoshi
+author: Nasreddine Bencherchali
+date: 2023/01/04
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    product: windows
+    service: powershell
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection:
+        ScriptBlockLogging|contains:
+            - "if(0){{{0}}}' -f $(0 -as [char]) +"
+            - "#<NULL>"
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
