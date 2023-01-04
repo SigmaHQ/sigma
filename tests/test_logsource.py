@@ -165,7 +165,7 @@ class TestRules(unittest.TestCase):
                                 files_with_fieldname_issues.append(file)                        
 
         self.assertEqual(files_with_fieldname_issues, [], Fore.RED +
-                         "There are rule files which contains unkown field or with cast error")
+                         "There are rule files which contains unknown field or with cast error")
 
 def load_fields_json(name:str):
     data = {}
