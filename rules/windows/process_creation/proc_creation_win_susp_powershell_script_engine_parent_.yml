@@ -1,12 +1,12 @@
-title: Suspicious PowerShell Invocation Based on Parent Process
+title: Suspicious PowerShell Invocation From Script Engines
 id: 95eadcb2-92e4-4ed1-9031-92547773a6db
 status: test
 description: Detects suspicious powershell invocations from interpreters or unusual programs
 references:
-    - https://www.carbonblack.com/2017/03/15/attackers-leverage-excel-powershell-dns-latest-non-malware-attack/
+    - https://www.securitynewspaper.com/2017/03/20/attackers-leverage-excel-powershell-dns-latest-non-malware-attack/
 author: Florian Roth
 date: 2019/01/16
-modified: 2022/07/14
+modified: 2023/01/05
 tags:
     - attack.execution
     - attack.t1059.001
@@ -21,12 +21,9 @@ detection:
         Image|endswith:
             - '\powershell.exe'
             - '\pwsh.exe'
-    falsepositive:
+    filter_health_service:
         CurrentDirectory|contains: '\Health Service State\'
-    condition: selection and not falsepositive
-fields:
-    - CommandLine
-    - ParentCommandLine
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Microsoft Operations Manager (MOM)
     - Other scripts
