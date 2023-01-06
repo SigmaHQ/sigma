@@ -19,8 +19,8 @@ logsource:
 detection:
     selection_file:
         TargetFilename|endswith: '\ntds.dit'
-    selection_process:
-        - ParentImage|endswith:
+    selection_process_parent:
+        ParentImage|endswith:
             - '\powershell.exe'
             - '\pwsh.exe'
             - '\wscript.exe'
@@ -29,19 +29,21 @@ detection:
             - '\php-cgi.exe'
             - '\nginx.exe'
             - '\httpd.exe'
-        - ParentImage|contains:
+    selection_process_parent_path:
+        ParentImage|contains:
             - '\apache'
             - '\tomcat'
             - '\AppData\'
             - '\Temp\'
             - '\Public\'
             - '\PerfLogs\'
-        - Image|contains:
+    selection_process_child:
+        Image|contains:
             - '\AppData\'
             - '\Temp\'
             - '\Public\'
             - '\PerfLogs\'
-    condition: all of selection_*
+    condition: selection_file and 1 of selection_*
 falsepositives:
     - Unknown
 level: high
