@@ -9,9 +9,9 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
     - https://docs.microsoft.com/en-us/powershell/module/defender/set-mppreference?view=windowsserver2022-ps
     - https://bidouillesecurity.com/disable-windows-defender-in-powershell/
-author: frack113, elhoim
+author: frack113, elhoim, Tim Shelton (fps, alias support)
 date: 2022/01/16
-modified: 2022/08/05
+modified: 2023/01/06
 tags:
     - attack.defense_evasion
     - attack.t1562.001
@@ -52,7 +52,22 @@ detection:
             - LowThreatDefaultAction
             - ModerateThreatDefaultAction
             - HighThreatDefaultAction
-    condition: all of selection_options_disabling* or selection_default_actions_allow
+    selection_use_of_alias:
+        ScriptBlockText|contains:
+            - ltdefac
+            - mtdefac
+            - htdefac
+            - stdefac
+    filter_alias:
+        # powershell use of Get-MpComputerStatus loads ps1 for management
+        # Host Application = C:\Windows\System32\WindowsPowershell\v1.0\powershell.exe -command Get-MpComputerStatus Engine Version = 5.1.17763.3770 Runspace ID = 86662fa7-ad6f-4ead-93a2-267be387d004 Pipeline ID = 6 Command Name = Remove-Variable Command Type = Cmdlet Script Name = Command Path = Sequence Number = 1825 User = HUNT\hawkscan Connected User = Shell ID = Microsoft.PowerShell | Payload=CommandInvocation(Remove-Variable): "Remove-Variable" ParameterBinding(Remove-Variable): name="Scope"; value="local" ParameterBinding(Remove-Variable): name="Confirm"; value="False" ParameterBinding(Remove-Variable): name="Name"; value="PreviousErrCount"
+        ScriptBlockText|contains|all:
+            - "Alias('ltdefac')"
+            - "Alias('mtdefac')"
+            - "Alias('htdefac')"
+            - "Alias('stdefac')"
+
+    condition: all of selection_options_disabling* or selection_default_actions_allow or selection_use_of_alias and not 1 of filter*
 falsepositives:
     - Legitimate PowerShell scripts
 level: high
