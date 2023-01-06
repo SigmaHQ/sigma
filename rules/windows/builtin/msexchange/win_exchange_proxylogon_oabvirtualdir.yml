@@ -6,7 +6,7 @@ references:
     - https://bi-zone.medium.com/hunting-down-ms-exchange-attacks-part-1-proxylogon-cve-2021-26855-26858-27065-26857-6e885c5f197c
 author: Florian Roth
 date: 2021/08/09
-modified: 2022/10/09
+modified: 2023/01/06
 tags:
     - attack.t1587.001
     - attack.resource_development
@@ -14,15 +14,14 @@ logsource:
     product: windows
     service: msexchange-management
 detection:
-    selection_cmdlet:
+    keywords:
         - 'OabVirtualDirectory'
         - ' -ExternalUrl '
-    selection_params:
         - 'eval(request'
         - 'http://f/<script'
         - '"unsafe"};'
         - 'function Page_Load()'
-    condition: all of selection_cmdlet and selection_params
+    condition: all of keywords
 falsepositives:
     - Unlikely
 level: critical
