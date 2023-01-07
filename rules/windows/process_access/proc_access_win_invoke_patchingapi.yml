@@ -1,0 +1,24 @@
+title: Suspect PatchingAPI
+id: b916cba1-b38a-42da-9223-17114d846fd6
+status: experimental
+description: Detects suspect access  such as that used by PatchingAPI
+references:
+    - https://github.com/D1rkMtr/UnhookingPatch
+    - https://twitter.com/D1rkMtr/status/1611471891193298944?s=20
+author: Tim Burrell
+date: 2023/01/07
+tags:
+    - attack.defense_evasion
+    - attack.t1562.002
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        GrantedAccess: '0x1FFFFF'
+        CallTrace|startswith: 'C:\Windows\SYSTEM32\ntdll.dll+'
+        CallTrace|contains: '|UNKNOWN('
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
