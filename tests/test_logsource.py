@@ -73,6 +73,25 @@ class TestRules(unittest.TestCase):
         
         return data
 
+    def exist_logsource(self,logsource:dict) -> bool:
+        #Check New product
+        if logsource["product"]:
+            if logsource["product"] in fieldname_dict.keys():
+                product = logsource["product"]
+            else:
+                return False
+        else:
+            product="empty"
+        
+        if logsource["category"] and logsource["category"] in fieldname_dict[product]['category'].keys():
+            return True
+        elif logsource["service"] and logsource["service"] in fieldname_dict[product]['service'].keys():
+            return True
+        elif logsource["category"] == None and logsource["service"] == None:
+            return True # We known the product but there are no category or service 
+        
+        return False
+
     def get_logsource(self,logsource:dict) -> list:
         data = None
         
@@ -106,6 +125,7 @@ class TestRules(unittest.TestCase):
             'service',
             'definition',
         ]
+
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             logsource = self.get_rule_part(
                 file_path=file, part_name="logsource")
@@ -115,7 +135,7 @@ class TestRules(unittest.TestCase):
                 continue
             valid = True
             for key in logsource:
-                if key.lower() not in valid_logsource:
+                if key not in valid_logsource:
                     print(
                         Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
                     valid = False
@@ -137,8 +157,7 @@ class TestRules(unittest.TestCase):
                 file_path=file, part_name="logsource")
             if logsource:
                 full_logsource = self.full_logsource(logsource)
-                info = self.get_logsource(full_logsource)
-                if info == None:
+                if not self.exist_logsource(full_logsource):
                     faulty_rules.append(file)
                     print(
                         Fore.RED + "Rule {} has the unknown logsource product/category/service ({}/{}/{})".format(file,
@@ -153,60 +172,23 @@ class TestRules(unittest.TestCase):
     def test_fieldname_case(self):
         files_with_fieldname_issues = []
 
-        def check_category(product,category,fieldname) -> bool:
-            valid = True
-
-            if product in fieldname_dict.keys():
-                if category in fieldname_dict[product]['category'].keys():
-                    if  fieldname in fieldname_dict[product]['category'][category]:
-                        pass
-                    else:
-                        valid = False
-            
-            return valid
-
-        def check_service(product,service,fieldname) -> bool:
-            valid = True
-
-            if product in fieldname_dict.keys():
-                if service in fieldname_dict[product]['service'].keys():
-                    if  fieldname in fieldname_dict[product]['service'][service]:
-                        pass
-                    else:
-                        valid = False
-            
-            return valid
-
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             logsource = self.get_rule_part(file_path=file, part_name="logsource")
             detection = self.get_rule_part(file_path=file, part_name="detection")
             
             if logsource and detection :
                 full_logsource = self.full_logsource(logsource)
-                info = self.get_logsource(full_logsource)
+                list_valid = self.get_logsource(full_logsource)
+                fisrt_time = True
 
-                if info != [] and self.not_commun(full_logsource,info):
-                #  check the field name
-                    if full_logsource['product']:
-                        if full_logsource['category']:
-                            for field in self.get_detection_field(detection):
-                                if not check_category(full_logsource['product'],full_logsource['category'],field):
-                                    print(
-                                        Fore.RED + "Rule {} has the invalid field <{}> for category <{}>".format(file, field,full_logsource['category']))
-                                    files_with_fieldname_issues.append(file)
-                        elif full_logsource['service']:
-                            for field in self.get_detection_field(detection):
-                                if not check_service(full_logsource['product'],full_logsource['service'],field):
-                                    print(
-                                        Fore.RED + "Rule {} has the invalid field <{}> for service <{}>".format(file, field,full_logsource['service']))
-                                    files_with_fieldname_issues.append(file)                        
-                    else:
-                        if full_logsource['category']:
-                            for field in self.get_detection_field(detection):
-                                if not check_category("empty",full_logsource['category'],field):
-                                    print(
-                                        Fore.RED + "Rule {} has the invalid field <{}> for category <{}>".format(file, field,full_logsource['category']))
-                                    files_with_fieldname_issues.append(file)                        
+                if list_valid != [] and self.not_commun(full_logsource,list_valid):
+                    for field in self.get_detection_field(detection):
+                        if not field in list_valid:
+                            print(
+                                Fore.RED + "Rule {} has the invalid field <{}>".format(file, field))
+                            if fisrt_time:
+                                files_with_fieldname_issues.append(file)
+                                fisrt_time = False # can be many error in the same rule
 
         self.assertEqual(files_with_fieldname_issues, [], Fore.RED +
                          "There are rule files which contains unknown field or with cast error")
