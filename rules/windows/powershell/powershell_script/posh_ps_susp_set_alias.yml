@@ -1,7 +1,7 @@
-title: Suspicious Powershell Alias
+title: Potential PowerShell Obfuscation Using Alias Cmdlets
 id: 96cd126d-f970-49c4-848a-da3a09f55c55
 status: experimental
-description: Detects Set-Alias or New-Alias that can be use to obfuscate powershell scripts
+description: Detects Set-Alias or New-Alias cmdlet usage. Which can be use as a mean to obfuscate PowerShell scripts
 references:
     - https://github.com/1337Rin/Swag-PSO
 author: frack113
@@ -16,24 +16,11 @@ logsource:
     category: ps_script
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
-    selection_cmdlet:
+    selection:
         ScriptBlockText|contains:
             - 'Set-Alias '
             - 'New-Alias '
-    selection_name:
-        ScriptBlockText|contains:
-            - '-Name '
-            - '-Nam '
-            - '-Na '
-            - '-N '
-    selection_value:
-        ScriptBlockText|contains:
-            - '-Value '
-            - '-Valu '
-            - '-Val '
-            - '-Va '
-            - '-V '
-    condition: all of selection_*
+    condition: selection
 falsepositives:
     - Unknown
 level: low
