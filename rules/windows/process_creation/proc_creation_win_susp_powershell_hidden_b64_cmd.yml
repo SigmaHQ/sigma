@@ -6,7 +6,7 @@ references:
     - http://www.leeholmes.com/blog/2017/09/21/searching-for-content-in-base-64-strings/
 author: John Lambert (rule)
 date: 2019/01/16
-modified: 2021/11/27
+modified: 2023/01/05
 tags:
     - attack.execution
     - attack.t1059.001
@@ -14,12 +14,16 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    encoded:
-        Image|endswith:
+    selection_img:
+        - Image|endswith:
             - '\powershell.exe'
             - '\pwsh.exe'
+        - OriginalFileName:
+            - 'PowerShell.EXE'
+            - 'pwsh.dll'
+    selection_hidden:
         CommandLine|contains: ' hidden '
-    selection:
+    selection_encoded:
         CommandLine|contains:
             - 'AGkAdABzAGEAZABtAGkAbgAgAC8AdAByAGEAbgBzAGYAZQByA'
             - 'aXRzYWRtaW4gL3RyYW5zZmVy'
@@ -69,7 +73,7 @@ detection:
             - 'bQBlAG0AbQBvAHYAZQ'
             - 'bWVtbW92Z'
             - 'ZW1tb3Zl'
-    condition: encoded and selection
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: high

@@ -1,0 +1,41 @@
+title: Suspicious Git Clone - Linux
+id: cfec9d29-64ec-4a0f-9ffe-0fdb856d5446
+status: experimental
+description: Detects execution of "git" in order to clone a remote repository that contain suspicious keywords which might be suspicious
+references:
+    - https://gist.githubusercontent.com/MichaelKoczwara/12faba9c061c12b5814b711166de8c2f/raw/e2068486692897b620c25fde1ea258c8218fe3d3/history.txt
+author: Nasreddine Bencherchali
+date: 2023/01/03
+modified: 2023/01/05
+tags:
+    - attack.reconnaissance
+    - attack.t1593.003
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_img:
+        Image|endswith: '/git'
+        CommandLine|contains: ' clone '
+    selection_keyword:
+        CommandLine|contains:
+            # Add more suspicious keywords
+            - 'exploit'
+            - 'Vulns'
+            - 'vulnerability'
+            - 'RCE'
+            - 'RemoteCodeExecution'
+            - 'Invoke-'
+            - 'CVE-'
+            - 'poc-'
+            - 'ProofOfConcept'
+            # Add more vuln names
+            - 'proxyshell'
+            - 'log4shell'
+            - 'eternalblue'
+            - 'eternal-blue'
+            - 'MS17-'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium

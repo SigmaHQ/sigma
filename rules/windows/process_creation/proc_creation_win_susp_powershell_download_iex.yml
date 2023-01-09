@@ -1,12 +1,12 @@
 title: PowerShell Web Download and Execution
 id: 85b0b087-eddf-4a2b-b033-d771fa2b9775
 status: experimental
-description: Detects suspicious ways to download files or content and execute them using PowerShell
+description: Detects suspicious ways to download files or content and execute them using PowerShell Invoke-Expression
 references:
     - https://github.com/VirtualAlllocEx/Payload-Download-Cradles/blob/88e8eca34464a547c90d9140d70e9866dcbc6a12/Download-Cradles.cmd
 author: Florian Roth
 date: 2022/03/24
-modified: 2022/09/02
+modified: 2023/01/05
 tags:
     - attack.execution
     - attack.t1059
@@ -14,12 +14,13 @@ logsource:
     product: windows
     category: process_creation
 detection:
-    selection:
+    selection_download:
         CommandLine|contains:
             - '.DownloadString('
             - '.DownloadFile('
             - 'Invoke-WebRequest '
-    execution:
+            - 'iwr '
+    selection_iex:
         CommandLine|contains:
             - 'IEX('
             - 'IEX ('
@@ -28,9 +29,9 @@ detection:
             - 'I`E`X'
             - '| IEX'
             - '|IEX '
-            - 'Invoke-Execution'
+            - 'Invoke-Expression'
             - ';iex $'
-    condition: selection and execution
+    condition: all of selection_*
 falsepositives:
     - Scripts or tools that download files and execute them
 level: high

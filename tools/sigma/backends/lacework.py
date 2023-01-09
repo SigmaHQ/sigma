@@ -658,7 +658,7 @@ class LaceworkQuery:
         return title, query_id
 
     @staticmethod
-    def get_query_sources(logsource_name, logsource_config) -> list[str]:
+    def get_query_sources(logsource_name, logsource_config):
         # 4. validate service has a source mapping
         source = safe_get(logsource_config, 'source', str)
         sources = safe_get(logsource_config, 'sources', list)
