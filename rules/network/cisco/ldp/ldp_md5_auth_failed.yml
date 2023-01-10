@@ -1,7 +1,9 @@
-title: Cisco LDP authentication failures
+title: Cisco LDP Authentication Failures
 id: 50e606bf-04ce-4ca7-9d54-3449494bbd4b
 status: experimental
-description: Find LDP failures which may be indicative of brute force attacks to manipulate MPLS labels: https://www.cisco.com/c/en/us/td/docs/ios/12_2sb/12_2sba/feature/guide/sba_md5.html
+description: Detects LDP failures which may be indicative of brute force attacks to manipulate MPLS labels
+references:
+    - https://www.blackhat.com/presentations/bh-usa-03/bh-us-03-convery-franz-v3.pdf
 author: Tim Brown
 date: 2023/01/09
 tags:
@@ -9,24 +11,24 @@ tags:
     - attack.persistence
     - attack.privilege_escalation
     - attack.defense_evasion
-    - attack.T1078
     - attack.credential_access
-    - attack.T1110
     - attack.collection
-    - attack.T1557
+    - attack.t1078
+    - attack.t1110
+    - attack.t1557
 logsource:
     product: cisco
     service: ldp
 detection:
-    protocol:
+    selection_protocol:
         - 'LDP'
-    keywords:
+    selection_keywords:
         - 'SOCKET_TCP_PACKET_MD5_AUTHEN_FAIL'
         - 'TCPMD5AuthenFail'
-    condition: protocol and keywords
+    condition: selection_protocol and selection_keywords
 fields:
     - tcpConnLocalAddress
     - tcpConnRemAddress
-level: low
 falsepositives:
-    - Uncommon except due to misconfigurations
+    - Unlikely. Except due to misconfigurations
+level: low
