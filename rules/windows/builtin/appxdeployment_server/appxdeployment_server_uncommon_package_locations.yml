@@ -1,0 +1,33 @@
+title: Uncommon AppX Package Locations
+id: 5cdeaf3d-1489-477c-95ab-c318559fc051
+status: experimental
+description: Detects an appx package added the pipeline of the "to be processed" packages which is located in uncommon locations
+references:
+    - Internal Research
+    - https://www.sentinelone.com/labs/inside-malicious-windows-apps-for-malware-deployment/
+    - https://learn.microsoft.com/en-us/windows/win32/appxpkg/troubleshooting
+author: Nasreddine Bencherchali
+date: 2023/01/11
+tags:
+    - attack.defense_evasion
+logsource:
+    product: windows
+    service: appxdeployment-server
+detection:
+    selection:
+        EventID: 854
+    filter_generic:
+        Path|contains:
+            # Paths can be written using forward slash if the "file://" protocol is used
+            - 'C:\Program Files\WindowsApps\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\WINDOWS\SystemApps\'
+            - 'x-windowsupdate://'
+            - 'file:///C:/Program%20Files%20(x86)/'
+            - 'file:///C:/Program%20Files%20/'
+    filter_specific:
+        Path|contains: 'https://statics.teams.cdn.office.net/'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: medium

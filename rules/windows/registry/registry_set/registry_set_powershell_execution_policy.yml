@@ -1,0 +1,30 @@
+title: Potential PowerShell Execution Policy Tampering
+id: fad91067-08c5-4d1a-8d8c-d96a21b37814
+status: experimental
+description: Detects changes to the PowerShell execution policy in order to bypass signing requirements for script execution
+references:
+    - https://learn.microsoft.com/de-de/powershell/module/microsoft.powershell.security/set-executionpolicy?view=powershell-7.3
+author: Nasreddine Bencherchali
+date: 2023/01/11
+tags:
+    - attack.defense_evasion
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|endswith:
+            # Note for future readers: For PowerShell 7+ the ExecutionPolicy is handled via a setting file due to the fact that PWSH7 is available for mac and linux
+            # Attackers can create a per-user setting file (powershell.config.json) and set the execution policy there
+            # Learn more here: https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_config?view=powershell-7.3
+            - '\ShellIds\Microsoft.PowerShell\ExecutionPolicy'
+            - '\Policies\Microsoft\Windows\PowerShell\ExecutionPolicy'
+        Details|contains:
+            - 'Bypass'
+            - 'RemoteSigned'
+            - 'Unrestricted'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
