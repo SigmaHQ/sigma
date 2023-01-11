@@ -1,5 +1,12 @@
 title: Potential PowerShell Execution Policy Tampering
 id: fad91067-08c5-4d1a-8d8c-d96a21b37814
+related:
+    - id: cf2e938e-9a3e-4fe8-a347-411642b28a9f # Registry
+      type: similar
+    - id: 87e3c4e8-a6a8-4ad9-bb4f-46e7ff99a180 # ProcCreation Cmdlet
+      type: similar
+    - id: 61d0475c-173f-4844-86f7-f3eebae1c66b # PowerShell ScriptBlock
+      type: similar
 status: experimental
 description: Detects changes to the PowerShell execution policy in order to bypass signing requirements for script execution
 references:
@@ -24,7 +31,9 @@ detection:
             - 'Bypass'
             - 'RemoteSigned'
             - 'Unrestricted'
-    condition: selection
+    filter_svchost:
+        Image: 'C:\Windows\system32\svchost.exe'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown
 level: medium
