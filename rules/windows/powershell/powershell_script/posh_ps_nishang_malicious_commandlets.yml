@@ -6,27 +6,33 @@ references:
     - https://github.com/samratashok/nishang
 author: Alec Costello
 date: 2019/05/16
-modified: 2023/01/02
+modified: 2023/01/09
 tags:
     - attack.execution
     - attack.t1059.001
 logsource:
     product: windows
     category: ps_script
-    definition: Script block logging must be enabled
+    definition: 'Requirements: Script Block Logging must be enabled'
 detection:
     selection:
         ScriptBlockText|contains:
             - 'Add-ConstrainedDelegationBackdoor'
-            - 'Add-Persistence'
+            #- 'Add-Persistence' # Covered in 89819aa4-bbd6-46bc-88ec-c7f7fe30efa6
+            #- 'Add-RegBackdoor' # Covered in 89819aa4-bbd6-46bc-88ec-c7f7fe30efa6
+            #- 'Add-ScrnSaveBackdoor' # Covered in 89819aa4-bbd6-46bc-88ec-c7f7fe30efa6
             - 'Copy-VSS'
             - 'Create-MultipleSessions'
             - 'DataToEncode'
             - 'DNS_TXT_Pwnage'
+            - 'Do-Exfiltration-Dns'
             - 'Download_Execute'
             - 'Download-Execute-PS'
+            - 'DownloadAndExtractFromRemoteRegistry'
             - 'DumpCerts'
             - 'DumpCreds'
+            - 'DumpHashes'
+            - 'Enable-DuplicateToken'
             - 'Enable-Duplication'
             - 'Execute-Command-MSSQL'
             - 'Execute-DNSTXT-Code'
@@ -38,10 +44,14 @@ detection:
             - 'FireBuster'
             - 'FireListener'
             - 'Get-Information'
+            #- 'Get-PassHashes' # Covered in 89819aa4-bbd6-46bc-88ec-c7f7fe30efa6
             - 'Get-PassHints'
             - 'Get-Web-Credentials'
+            - 'Get-WebCredentials'
             - 'Get-WLAN-Keys'
+            #- 'Gupt-Backdoor' # Covered in 89819aa4-bbd6-46bc-88ec-c7f7fe30efa6
             - 'HTTP-Backdoor'
+            #- 'Invoke-ADSBackdoor' # Covered in 89819aa4-bbd6-46bc-88ec-c7f7fe30efa6
             - 'Invoke-AmsiBypass'
             - 'Invoke-BruteForce'
             - 'Invoke-CredentialsPhish'
@@ -52,19 +62,21 @@ detection:
             - 'Invoke-JSRatRundll'
             - 'Invoke-MimikatzWDigestDowngrade'
             - 'Invoke-NetworkRelay'
-            - 'Invoke-PoshRatHttps'
+            #- 'Invoke-PortScan' # Covered in 89819aa4-bbd6-46bc-88ec-c7f7fe30efa6
+            #- 'Invoke-PoshRatHttp' # Covered in 89819aa4-bbd6-46bc-88ec-c7f7fe30efa6
             - 'Invoke-PowerShellIcmp'
             - 'Invoke-PowerShellUdp'
             - 'Invoke-Prasadhak'
             - 'Invoke-PSGcat'
             - 'Invoke-PsGcatAgent'
+            #- 'Invoke-PsUACme' # Covered in 89819aa4-bbd6-46bc-88ec-c7f7fe30efa6
             - 'Invoke-SessionGopher'
             - 'Invoke-SSIDExfil'
             #- Jitter  # Prone to FPs
-            - 'Keylogger'
+            #- 'Keylogger' # Too generic to be linked to Nishang
             - 'LoggedKeys'
             - 'Nishang'
-            - 'NotAllNameSpaces'
+            - 'NotAllNameSpaces' # This is param to "Set-RemoteWMI"
             - 'Out-CHM'
             - 'OUT-DNSTXT'
             - 'Out-HTA'

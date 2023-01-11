@@ -6,7 +6,7 @@ references:
     - Internal Research
 author: Florian Roth
 date: 2021/11/20
-modified: 2022/07/14
+modified: 2023/01/05
 logsource:
     category: file_event
     product: windows
@@ -21,8 +21,7 @@ detection:
             - '\sh.exe'
             - '\bash.exe'
             - '\msbuild.exe'  # https://github.com/elastic/detection-rules/blob/c76a39796972ecde44cb1da6df47f1b6562c9770/rules/windows/defense_evasion_execution_msbuild_started_by_office_app.toml
-            - '\certutil.exe'
-        TargetFilename|contains:
+        TargetFilename|startswith:
             - 'C:\Users\Public'
             - 'C:\PerfLogs'
     selection_program:
@@ -40,9 +39,6 @@ detection:
             - '\AppData\'
             - 'C:\Windows\Temp'
     condition: 1 of selection*
-fields:
-    - CommandLine
-    - ParentCommandLine
 falsepositives:
     - Unknown
 level: high

@@ -1,13 +1,12 @@
-title: Windows Registry Persistence COM Search Order Hijacking
+title: Potential Persistence Via COM Search Order Hijacking
 id: a0ff33d8-79e4-4cef-b4f3-9dc4133ccd12
 status: experimental
 description: Detects potential COM object hijacking leveraging the COM Search Order
 references:
     - https://www.cyberbit.com/blog/endpoint-security/com-hijacking-windows-overlooked-security-vulnerability/
-    - https://attack.mitre.org/techniques/T1546/015/
 author: Maxime Thiebaut (@0xThiebaut), oscd.community, Cédric Hien
 date: 2020/04/14
-modified: 2022/09/20
+modified: 2023/01/10
 tags:
     - attack.persistence
     - attack.t1546.015
@@ -21,29 +20,30 @@ detection:
             - 'HKCR\CLSID\'
             - 'HKCU\Software\Classes\CLSID\'
         TargetObject|endswith: '\InprocServer32\(Default)'
-    filter1:
+    filter_generic:
         Details|contains: # Exclude privileged directories and observed FPs
             - '%%systemroot%%\system32\'
             - '%%systemroot%%\SysWow64\'
-    filterOneDrive:
+    filter_onedrive:
         Details|contains:
+            # Related To OneDrive
             - '\AppData\Local\Microsoft\OneDrive\'
             - '\FileCoAuthLib64.dll'
             - '\FileSyncShell64.dll'
             - '\FileSyncApi64.dll'
     filter_health_service:
         Image: 'C:\WINDOWS\system32\SecurityHealthService.exe'
-    filter2:
+    filter_teams:
         Details|contains|all:
             - '\AppData\Local\Microsoft\TeamsMeetingAddin\'
             - '\Microsoft.Teams.AddinLoader.dll'
-    filter3:
+    filter_dropbox:
         Details|contains|all:
             - '\AppData\Roaming\Dropbox\'
             - '\DropboxExt64.*.dll'
-    filter4:
+    filter_trend_micro:
         Details|endswith: 'TmopIEPlg.dll' #TrendMicro osce
-    filter5:
+    filter_update:
         Image:
             - 'C:\WINDOWS\system32\wuauclt.exe'
             - 'C:\WINDOWS\system32\svchost.exe'
@@ -87,7 +87,7 @@ detection:
             - 'C:\Windows\System32\poqexec.exe'
             - 'C:\Windows\System32\regsvr32.exe'
         TargetObject|endswith: '\InProcServer32\(Default)'
-    condition: selection and not 1 of filter*
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Some installed utilities (i.e. OneDrive) may serve new COM objects at user-level
 level: medium
