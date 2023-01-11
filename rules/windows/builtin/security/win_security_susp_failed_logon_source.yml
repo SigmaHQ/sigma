@@ -4,7 +4,7 @@ status: test
 description: A login from a public IP can indicate a misconfigured firewall or network boundary.
 author: NVISO
 date: 2020/05/06
-modified: 2021/11/27
+modified: 2023/01/11
 tags:
     - attack.initial_access
     - attack.persistence
@@ -17,9 +17,9 @@ logsource:
 detection:
     selection:
         EventID: 4625
-    ip_unknown:
+    filter_ip_unknown:
         IpAddress|contains: '-'
-    ip_privatev4:
+    filter_ip_privatev4:
         IpAddress|startswith:
             - '10.' #10.0.0.0/8
             - '192.168.' #192.168.0.0/16
@@ -41,12 +41,12 @@ detection:
             - '172.31.'
             - '127.' #127.0.0.0/8
             - '169.254.' #169.254.0.0/16
-    ip_privatev6:
-        - IpAddress: '::1' #loopback 
+    filter_ip_privatev6:
+        - IpAddress: '::1' #loopback
         - IpAddress|startswith:
             - 'fe80::' #link-local
             - 'fc00::' #unique local
-    condition: selection and not 1 of ip_*
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Legitimate logon attempts over the internet
     - IPv4-to-IPv6 mapped IPs
