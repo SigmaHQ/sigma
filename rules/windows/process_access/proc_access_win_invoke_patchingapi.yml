@@ -7,7 +7,7 @@ references:
     - https://twitter.com/D1rkMtr/status/1611471891193298944?s=20
 author: frack113
 date: 2023/01/07
-modified: 2023/01/09
+modified: 2023/01/11
 tags:
     - attack.defense_evasion
     - attack.t1562.002
@@ -20,12 +20,20 @@ detection:
         CallTrace|startswith: 'C:\Windows\SYSTEM32\ntdll.dll+'
         CallTrace|contains: '|UNKNOWN('
         CallTrace|endswith: ')'
-    filter_msbuild:
-        SourceImage|startswith: 'C:\Program Files\Microsoft Visual Studio\'
-        SourceImage|endswith:
-            - '\MSBuild\Current\Bin\amd64\MSBuild.exe'
-            - '\MSBuild\Current\Bin\MSBuild.exe'
-        TargetImage|startswith: 'C:\Program Files\Microsoft Visual Studio\'
+    filter_generic:
+        SourceImage|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+        TargetImage|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+    filter_thor:
+        SourceImage|startswith: 'C:\Windows\Temp\asgard2-agent\'
+        SourceImage|endswith: '\thor\thor64.exe'
     condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown
