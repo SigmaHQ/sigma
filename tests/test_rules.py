@@ -1282,7 +1282,7 @@ class TestRules(unittest.TestCase):
             except:
                 pass
 
-        self.assertEqual(Fore.RED + "thor.yml configuration file located in 'tools/config/thor.yml' has a borken log source definition")
+        self.assertEqual("", [], Fore.RED + "thor.yml configuration file located in 'tools/config/thor.yml' has a borken log source definition")
 
 
 def get_mitre_data():
