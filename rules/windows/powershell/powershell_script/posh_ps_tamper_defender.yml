@@ -9,9 +9,9 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
     - https://docs.microsoft.com/en-us/powershell/module/defender/set-mppreference?view=windowsserver2022-ps
     - https://bidouillesecurity.com/disable-windows-defender-in-powershell/
-author: frack113, elhoim
+author: frack113, elhoim, Tim Shelton (fps, alias support)
 date: 2022/01/16
-modified: 2022/08/05
+modified: 2023/01/06
 tags:
     - attack.defense_evasion
     - attack.t1562.001
@@ -52,7 +52,13 @@ detection:
             - LowThreatDefaultAction
             - ModerateThreatDefaultAction
             - HighThreatDefaultAction
-    condition: all of selection_options_disabling* or selection_default_actions_allow
+    selection_use_of_alias:
+        ScriptBlockText|contains:
+            - 'ltdefac '
+            - 'mtdefac '
+            - 'htdefac '
+            - 'stdefac '
+    condition: all of selection_options_disabling* or selection_default_actions_allow or selection_use_of_alias 
 falsepositives:
     - Legitimate PowerShell scripts
 level: high
