@@ -233,6 +233,14 @@ class TestRules(unittest.TestCase):
     def test_duplicate_detections(self):
         def compare_detections(detection1: dict, detection2: dict) -> bool:
 
+            # If they have different log sources. They can't be the same
+            # We first remove any definitions fields (if there are any) in the logsource to avoid typos
+            detection1["logsource"].pop("definition", None)
+            detection2["logsource"].pop("definition", None)
+
+            if detection1["logsource"] != detection2["logsource"]:
+                return False
+
             # detections not the same count can't be the same
             if len(detection1) != len(detection2):
                 return False
@@ -264,8 +272,15 @@ class TestRules(unittest.TestCase):
                     if condition not in detection2[named_condition]:
                         return False
 
-                    condition_value1 = detection1[named_condition][condition]
-                    condition_value2 = detection2[named_condition][condition]
+                    # We add this check in case of keyword rules. Where no field is used. The parser returns a list instead of a dict
+                    # If the 2 list are different that means they aren't the same
+                    if (type(detection2[named_condition]) == list) or (type(detection2[named_condition]) == list):
+                        condition_value1 = detection1[named_condition]
+                        condition_value2 = detection2[named_condition]
+                    else:
+                        condition_value1 = detection1[named_condition][condition]
+                        condition_value2 = detection2[named_condition][condition]
+                    
                     if condition_value1 != condition_value2:
                         return False
 
@@ -1249,6 +1264,25 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules using condition without lowercase operator")
+    
+    def test_broken_thor_logsource_config(self):
+        
+        # This test check of the "thor.yml" config file has a missing "WinEventLog:" prefix in Windows log sources
+        path_to_thor_config = "../tools/config/thor.yml"
+        path_to_thor_config = os.path.join(os.path.dirname(os.path.realpath(__file__)), path_to_thor_config)
+        thor_logsources = self.get_rule_yaml(path_to_thor_config)[0]['logsources']
+    
+        for key, value in thor_logsources.items():
+            try:
+                if value["product"] == "windows":
+                    sources_list = value['sources']
+                    for i in sources_list:
+                        if not i.startswith('WinEventLog:'):
+                            print(Fore.RED + "/tools/config/thor.yml config file has a broken source. Windows Eventlog sources must start with the keyword 'WinEventLog:'")
+            except:
+                pass
+
+        self.assertEqual(Fore.RED + "thor.yml configuration file located in 'tools/config/thor.yml' has a borken log source definition")
 
 
 def get_mitre_data():
