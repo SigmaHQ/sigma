@@ -1,0 +1,27 @@
+title: Restricted Software Restriction Policies
+id: b4c8da4a-1c12-46b0-8a2b-0a8521d03442
+status: experimental
+description: Detects Software Restriction Policies (SRP) restriction message
+references:
+    - https://learn.microsoft.com/en-us/windows-server/identity/software-restriction-policies/software-restriction-policies
+author: frack113
+date: 2023/01/12
+tags:
+    - attack.execution
+    - attack.t1072 
+logsource:
+    product: windows
+    service: application
+detection:
+    selection:
+        Provider_Name: 'Microsoft-Windows-SoftwareRestrictionPolicies'  
+        EventID: 
+            - 865 # Access to %1 has been restricted by your Administrator by the default software restriction policy level
+            - 866 # Access to %1 has been restricted by your Administrator by location with policy rule %2 placed on path %3.
+            - 867 # Access to %1 has been restricted by your Administrator by software publisher policy.
+            - 868 # Access to %1 has been restricted by your Administrator by policy rule %2.
+            - 882 # Access to %1 has been restricted by your Administrator by policy rule %2.
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
