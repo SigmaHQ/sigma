@@ -1266,6 +1266,8 @@ class TestRules(unittest.TestCase):
                          "There are rules using condition without lowercase operator")
     
     def test_broken_thor_logsource_config(self):
+
+        faulty_config = False
         
         # This test check of the "thor.yml" config file has a missing "WinEventLog:" prefix in Windows log sources
         path_to_thor_config = "../tools/config/thor.yml"
@@ -1278,11 +1280,12 @@ class TestRules(unittest.TestCase):
                     sources_list = value['sources']
                     for i in sources_list:
                         if not i.startswith('WinEventLog:'):
+                            faulty_config = True
                             print(Fore.RED + "/tools/config/thor.yml config file has a broken source. Windows Eventlog sources must start with the keyword 'WinEventLog:'")
             except:
                 pass
 
-        self.assertEqual("", [], Fore.RED + "thor.yml configuration file located in 'tools/config/thor.yml' has a borken log source definition")
+        self.assertEqual(faulty_config, False, Fore.RED + "thor.yml configuration file located in 'tools/config/thor.yml' has a borken log source definition")
 
 
 def get_mitre_data():
