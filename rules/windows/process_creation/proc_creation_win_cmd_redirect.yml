@@ -1,12 +1,12 @@
 title: Redirect Output in CommandLine
 id: 4f4eaa9f-5ad4-410c-a4be-bc6132b0175a
 status: experimental
-description: Use ">" to redicrect information in commandline
+description: Detects use of redirection character ">" to redicrect information in commandline
 references:
     - https://ss64.com/nt/syntax-redirection.html
 author: frack113
 date: 2022/01/22
-modified: 2022/11/11
+modified: 2023/01/10
 tags:
     - attack.discovery
     - attack.t1082
@@ -19,7 +19,12 @@ detection:
         - Image|endswith: '\cmd.exe'
     selection_cli:
         CommandLine|contains: '>'
-    condition: all of selection_*
+    filter_idm_extension:
+        CommandLine|contains:
+            - 'C:\Program Files (x86)\Internet Download Manager\IDMMsgHost.exe'
+            - 'chrome-extension://'
+            - '\\.\pipe\chrome.nativeMessaging'
+    condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Internet Download Manager extensions use named pipes and redirection via CLI. Filter it out if you use it in your environment
 level: low

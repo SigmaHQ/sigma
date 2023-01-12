@@ -9,7 +9,7 @@ references:
     - https://github.com/ThreatHuntingProject/ThreatHunting/blob/cb22598bb70651f88e0285abc8d835757d2cb596/hunts/suspicious_process_creation_via_windows_event_logs.md
 author: Florian Roth, Tim Shelton
 date: 2019/01/16
-modified: 2022/05/26
+modified: 2023/01/10
 tags:
     - attack.defense_evasion
     - attack.t1036
@@ -38,9 +38,12 @@ detection:
             - '\Windows\System32\Tasks\'
             - '\Windows\Tasks\'
         - Image|startswith: 'C:\Perflogs\'
-    false_positive:
+    filter_ibm:
         Image|startswith: 'C:\Users\Public\IBM\ClientSolutions\Start_Programs\'
-    condition: selection and not false_positive
+    filter_citrix:
+        Image|startswith: 'C:\Windows\SysWOW64\config\systemprofile\Citrix\UpdaterBinaries\'
+        Image|endswith: '\CitrixReceiverUpdater.exe'
+    condition: selection and not 1 of filter_*
 fields:
     - CommandLine
     - ParentCommandLine
