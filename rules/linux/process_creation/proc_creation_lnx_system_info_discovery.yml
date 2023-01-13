@@ -23,7 +23,19 @@ detection:
             - '/dmidecode'
             - '/lscpu'
             - '/lsmod'
-    condition: selection
+    legit_smartmontools:
+        ParentCommandLine|contains|all:  # "/bin/sh /usr/share/smartmontools/smartd_warning.sh "
+            - '/bin/sh'
+            - '/smartmontools/smartd_warning.sh'
+    legit_motd:
+        ParentCommandLine|contains|all:  # "/bin/sh /etc/update-motd.d/00-header "
+            - '/bin/sh'
+            - '/etc/update-motd.d/'   
+    legit_landscape_sysinfo:
+        ParentCommandLine|contains|all:  # "/usr/bin/python /usr/bin/landscape-sysinfo "
+            - '/usr/bin/python'
+            - '/usr/bin/landscape-sysinfo'   
+    condition: selection and not legit_*
 falsepositives:
     - Legitimate administration activities
 level: informational
