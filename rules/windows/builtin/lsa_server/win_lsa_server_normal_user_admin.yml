@@ -1,7 +1,7 @@
-title: LSA User With Admin Group SID
+title: Standard User In High Privileged Group
 id: 7ac407cc-0f48-4328-aede-de1d2e6fef41
 status: experimental
-description: Detect login of a normal user with a admin group SID
+description: Detect standard users login that are part of high privileged groups such as the Administrator group
 references:
     - https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-identifiers
     - https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection
@@ -17,8 +17,8 @@ logsource:
     definition: 'Requirements: Microsoft-Windows-LSA/Operational ({199FE037-2B82-40A9-82AC-E1D46C792B99}) Event Log must be collected in order to receive the events.'
 detection:
     selection:
-        EventID: 300 
-        TargetUserSid|startswith: 'S-1-5-21-' # normal user
+        EventID: 300
+        TargetUserSid|startswith: 'S-1-5-21-' # standard user
         SidList|contains:
             - 'S-1-5-32-544'    # Local admin
             - '-500}'           # doamin admin
@@ -31,5 +31,6 @@ detection:
             - '-519'           # enterprise admin
     condition: selection and not filter_admin
 falsepositives:
-    - Unknown
+    - Standard domain users who are part of the administrator group.
+      These users shouldn't have these right. But in the case where it's necessary. They should be filtered out using the "TargetUserName" field
 level: high
