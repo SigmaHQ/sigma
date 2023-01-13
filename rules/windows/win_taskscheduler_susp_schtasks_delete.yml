@@ -1,0 +1,26 @@
+title: Suspicious Security Scheduled Tasks Deleted
+id: 9e3cb244-bdb8-4632-8c90-6079c8f4f16d
+related:
+    - id: dbc1f800-0fe0-4bc0-9c66-292c2abe3f78
+      type: similar
+status: experimental
+description: Detects the deletion of Security Scheduled Tasks 
+author: frack113
+date: 2023/01/13
+tags:
+    - attack.impact
+    - attack.t1489
+logsource:
+    product: windows
+    service: taskscheduler
+    definition: 'Requirements: The "Microsoft-Windows-TaskScheduler/Operational" is disabled by default and needs to be enabled in order for this detection to trigger'
+detection:
+    selection:
+        EventID: 141 
+        TaskName|contains: 
+            - '\Microsoft\Windows\Windows Defender\'
+            - '\Microsoft\Windows\WindowsUpdate\'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
