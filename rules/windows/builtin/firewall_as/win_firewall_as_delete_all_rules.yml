@@ -12,5 +12,14 @@ logsource:
 detection:
     selection:
         EventID: 2033 # All rules have been deleted from the Windows Defender Firewall configuration on this computer
-    condition: selection
+    filter_generic:
+        ModifyingApplication|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    filter_svchost:
+        ModifyingApplication: 'C:\Windows\System32\svchost.exe'
+    filter_msmpeng:
+        ModifyingApplication|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+        ModifyingApplication|endswith: '\MsMpEng.exe'
+    condition: selection and not 1 of filter_*
 level: high
