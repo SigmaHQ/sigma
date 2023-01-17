@@ -1,16 +1,16 @@
 title: Elastic Winlogbeat (from 7.x) index pattern and field mapping
 order: 20
 backends:
-  - es-qs
-  - es-dsl
-  - es-rule
-  - kibana
-  - kibana-ndjson
-  - xpack-watcher
-  - elastalert
-  - elastalert-dsl
-  - ee-outliers
-  - opensearch-monitor
+    - es-qs
+    - es-dsl
+    - es-rule
+    - kibana
+    - kibana-ndjson
+    - xpack-watcher
+    - elastalert
+    - elastalert-dsl
+    - ee-outliers
+    - opensearch-monitor
 logsources:
     windows:
         product: windows
@@ -163,6 +163,21 @@ logsources:
         service: lsa-server
         conditions:
             winlog_channel: 'Microsoft-Windows-LSA/Operational'
+    windows-appxpackaging-om:
+        product: windows
+        service: appxpackaging-om
+        conditions:
+            winlog_channel: 'Microsoft-Windows-AppxPackaging/Operational'
+    windows-dns-client:
+        product: windows
+        service: dns-client
+        conditions:
+            winlog_channel: 'Microsoft-Windows-DNS Client Events/Operational'
+    windows-appmodel-runtime:
+        product: windows
+        service: appmodel-runtime
+        conditions:
+            winlog_channel: 'Microsoft-Windows-AppModel-Runtime/Admin'
 defaultindex: winlogbeat-*
 # Extract all field names with yq:
 # yq -r '.detection | del(.condition) | map(keys) | .[][]' $(find sigma/rules/windows -name '*.yml') | sort -u | grep -v ^EventID$ | sed 's/^\(.*\)/    \1: winlog.event_data.\1/g'
