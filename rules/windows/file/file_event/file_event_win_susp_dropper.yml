@@ -6,7 +6,7 @@ references:
     - Malware Sandbox
 author: frack113
 date: 2022/03/09
-modified: 2022/12/07
+modified: 2023/01/18
 tags:
     - attack.resource_development
     - attack.t1587.001
@@ -81,10 +81,16 @@ detection:
         Image|contains: '\AppData\Local\'
         Image|endswith: '\Microsoft VS Code\Code.exe'
         TargetFilename|contains: '\.vscode\extensions\'
+    filter_githubdesktop:
+        Image|endswith: '\AppData\Local\GitHubDesktop\Update.exe'
+        # Example TargetFileName:
+        #   \AppData\Local\SquirrelTemp\tempb\lib\net45\GitHubDesktop_ExecutionStub.exe
+        #   \AppData\Local\SquirrelTemp\tempb\lib\net45\squirrel.exe
+        TargetFilename|contains: '\AppData\Local\SquirrelTemp\'
     condition: selection and not 1 of filter_*
 falsepositives:
+    #Please contribute to FP to increase the level
     - Software installers
     - Update utilities
     - 32bit applications launching their 64bit versions
-#Please contribute to FP to increase the level
 level: low
