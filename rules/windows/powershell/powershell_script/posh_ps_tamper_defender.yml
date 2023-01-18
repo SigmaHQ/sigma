@@ -11,7 +11,7 @@ references:
     - https://bidouillesecurity.com/disable-windows-defender-in-powershell/
 author: frack113, elhoim, Tim Shelton (fps, alias support)
 date: 2022/01/16
-modified: 2023/01/06
+modified: 2023/01/12
 tags:
     - attack.defense_evasion
     - attack.t1562.001
@@ -44,7 +44,7 @@ detection:
             - 'DisableRemovableDriveScanning $true'
             - 'DisableScanningMappedNetworkDrivesForFullScan $true'
             - 'DisableScanningNetworkFiles $true'
-    selection_default_actions_allow:
+    selection_other_default_actions_allow:
         ScriptBlockText|contains|all:
             - 'Set-MpPreference'
             - Allow
@@ -52,13 +52,13 @@ detection:
             - LowThreatDefaultAction
             - ModerateThreatDefaultAction
             - HighThreatDefaultAction
-    selection_use_of_alias:
+    selection_other_use_of_alias:
         ScriptBlockText|contains:
             - 'ltdefac '
             - 'mtdefac '
             - 'htdefac '
             - 'stdefac '
-    condition: all of selection_options_disabling* or selection_default_actions_allow or selection_use_of_alias 
+    condition: all of selection_options_disabling* or 1 of selection_other_*
 falsepositives:
     - Legitimate PowerShell scripts
 level: high

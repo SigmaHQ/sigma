@@ -6,7 +6,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1049/T1049.md
 author: Daniil Yugoslavskiy, oscd.community
 date: 2020/10/19
-modified: 2023/01/13
+modified: 2023/01/17
 tags:
     - attack.discovery
     - attack.t1049
@@ -22,10 +22,9 @@ detection:
             - '/lsof'
             - '/netstat'
     filter_landscape_sysinfo:
-        ParentCommandLine|contains|all:  # "/usr/bin/python /usr/bin/landscape-sysinfo "
-            - '/usr/bin/python'
-            - '/usr/bin/landscape-sysinfo' 
-    condition: selection and not filter_landscape_sysinfo
+        ParentCommandLine|contains: '/usr/bin/landscape-sysinfo'
+        Image|endswith: '/who'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Legitimate activities
 level: low

@@ -9,7 +9,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
 author: frack113
 date: 2021/06/07
-modified: 2022/08/05
+modified: 2023/01/12
 tags:
     - attack.defense_evasion
     - attack.t1562.001
@@ -18,9 +18,9 @@ logsource:
     category: ps_classic_provider_start
     definition: fields have to be extract from event
 detection:
-    tamper_ps_action:
+    selection_tamper_ps_action:
         HostApplication|contains: 'Set-MpPreference'
-    tamper_ps_option:
+    selection_tamper_ps_option:
         HostApplication|contains:
             - 'DisableRealtimeMonitoring 1'
             - 'DisableBehaviorMonitoring 1'
@@ -42,7 +42,7 @@ detection:
             - 'DisableRemovableDriveScanning $true'
             - 'DisableScanningMappedNetworkDrivesForFullScan $true'
             - 'DisableScanningNetworkFiles $true'
-    tamper_default_actions_allow:
+    selection_tamper_other_default_actions_allow:
         HostApplication|contains|all:
             - 'Set-MpPreference'
             - Allow
@@ -50,7 +50,13 @@ detection:
             - LowThreatDefaultAction
             - ModerateThreatDefaultAction
             - HighThreatDefaultAction
-    condition: all of tamper_ps_* or tamper_default_actions_allow
+    selection_tamper_other_alias:
+        HostApplication|contains:
+            - 'ltdefac '
+            - 'mtdefac '
+            - 'htdefac '
+            - 'stdefac '
+    condition: all of selection_tamper_ps_* or 1 of selection_tamper_other_*
 falsepositives:
     - Unknown
 level: high
