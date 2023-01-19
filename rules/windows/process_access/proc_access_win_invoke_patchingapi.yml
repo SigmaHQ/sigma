@@ -7,7 +7,7 @@ references:
     - https://twitter.com/D1rkMtr/status/1611471891193298944?s=20
 author: frack113
 date: 2023/01/07
-modified: 2023/01/11
+modified: 2023/01/18
 tags:
     - attack.defense_evasion
     - attack.t1562.002
@@ -34,6 +34,16 @@ detection:
     filter_thor:
         SourceImage|startswith: 'C:\Windows\Temp\asgard2-agent\'
         SourceImage|endswith: '\thor\thor64.exe'
+    filter_githubdesktop:
+        SourceImage|startswith: 'C:\Users\'
+        SourceImage|contains: '\AppData\Local\GitHubDesktop\app-'
+        SourceImage|endswith: '\GitHubDesktop.exe'
+        TargetImage|startswith: 'C:\Users\'
+        TargetImage|contains: '\AppData\Local\GitHubDesktop\app-'
+    filter_dotnet:
+        SourceImage|startswith: 'C:\Windows\Microsoft.NET\Framework\v'
+        SourceImage|endswith: '\NGenTask.exe'
+        TargetImage: 'C:\Windows\Microsoft.NET\Framework\'
     condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown

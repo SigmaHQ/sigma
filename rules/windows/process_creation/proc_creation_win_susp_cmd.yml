@@ -6,7 +6,7 @@ references:
     - https://github.com/Wh04m1001/SysmonEoP
 author: frack113, Tim Shelton (update fp)
 date: 2022/12/05
-modified: 2023/01/11
+modified: 2023/01/18
 tags:
     - attack.privilege_escalation
     - attack.defense_evasion
@@ -57,6 +57,11 @@ detection:
         ParentImage|endswith: '\python.exe'
         CommandLine: 'C:\WINDOWS\system32\cmd.exe /c "ver"'
         CurrentDirectory|contains: 'C:\WINDOWS\Temp\asgard2-agent\'
+    filter_dell_update:
+        ParentImage|startswith: 'C:\Windows\Temp'
+        ParentImage|endswith: '\invcol.exe'
+        ParentCommandLine|contains: 'C:\ProgramData\Dell\UpdateService\'
+        Image|endswith: '\cmd.exe'
     condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Unknown
