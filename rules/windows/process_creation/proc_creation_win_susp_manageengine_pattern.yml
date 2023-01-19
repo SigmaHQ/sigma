@@ -1,0 +1,47 @@
+title: Manage Engine Java Suspicious Sub Process
+id: cea2b7ea-792b-405f-95a1-b903ea06458f
+status: experimental
+description: Detects suspicious sub processes started by the Manage Engine ServiceDesk Plus Java web service process
+references:
+    - https://www.horizon3.ai/manageengine-cve-2022-47966-technical-deep-dive/
+    - https://github.com/horizon3ai/CVE-2022-47966/blob/3a51c6b72ebbd87392babd955a8fbeaee2090b35/CVE-2022-47966.py
+    - https://blog.viettelcybersecurity.com/saml-show-stopper/
+author: Florian Roth
+date: 2023/01/18
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|contains|all:
+            - '\ManageEngine\ServiceDesk\'
+            - '\java.exe'
+        Image|endswith:
+            - '\powershell.exe'
+            - '\sh.exe'
+            - '\bash.exe'
+            - '\pwsh.exe'
+            - '\schtasks.exe'
+            - '\certutil.exe'
+            - '\whoami.exe'  # Often used in POCs
+            - '\bitsadmin.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\scrcons.exe'
+            # - '\regsvr32.exe'
+            # - '\hh.exe'
+            - '\wmic.exe'
+            - '\mshta.exe'
+            # - '\rundll32.exe'
+            - '\forfiles.exe'
+            # - '\scriptrunner.exe'
+            - '\mftrace.exe'
+            - '\AppVLP.exe'
+            - '\curl.exe'
+            - '\notepad.exe'  # Often used in POCs
+    condition: selection
+fields:
+    - CommandLine
+falsepositives:
+    - Legitimate sub processes started by Manage Engine ServiceDesk Pro
+level: high
