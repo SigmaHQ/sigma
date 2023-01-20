@@ -7,7 +7,7 @@ references:
     - https://tools.thehacker.recipes/mimikatz/modules
 author: Florian Roth (rule), David ANDRE (additional keywords)
 date: 2021/12/20
-modified: 2022/09/27
+modified: 2023/01/19
 logsource:
     category: process_creation
     product: windows
@@ -62,18 +62,24 @@ detection:
             - 'token::'      #Mimikatz
             - 'vault::cred'     #Mimikatz
             - 'vault::list'     #Mimikatz
-            - ' p::d '  # Mimikatz 
+            - ' p::d '  # Mimikatz
             - ';iex('  # PowerShell IEX
             - 'MiniDump'  # Process dumping method apart from procdump
             - 'net user '
-    filter:
+    filter_ping:
         CommandLine: 'ping 127.0.0.1 -n 5'
     filter_vs:
         Image|endswith: '\PING.EXE'
         ParentCommandLine|contains: '\DismFoDInstall.cmd'
     filter_config_mgr:
         ParentImage|startswith: 'C:\Packages\Plugins\Microsoft.GuestConfiguration.ConfigurationforWindows\'
-    condition: all of selection* and not 1 of filter*
+    filter_java:
+        ParentImage|startswith: 'C:\Program Files (x86)\Java\'
+        ParentImage|endswith: '\bin\javaws.exe'
+        Image|startswith: 'C:\Program Files (x86)\Java\'
+        Image|endswith: '\bin\jp2launcher.exe'
+        CommandLine|contains: ' -ma '
+    condition: all of selection* and not 1 of filter_*
 falsepositives:
     - Administrative activity
     - Scripts and administrative tools used in the monitored environment
