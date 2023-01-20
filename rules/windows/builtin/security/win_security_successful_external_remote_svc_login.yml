@@ -22,15 +22,15 @@ detection:
         LogonType:
             - 3 # Network logon such as SMB
             - 10 # RemoteInteractive logon such as RDP
+    filter_username:
+        SubjectUserName: '-'
     filter_src_ip:
         - IpAddress|cidr: 10.0.0.0/8
         - IpAddress|cidr: 172.16.0.0/12
         - IpAddress|cidr: 192.168.0.0/16
         - IpAddress|cidr: 224.0.0.0/4
         - IpAddress|cidr: 127.0.0.0/8
-    filter_username:
-        SubjectUserName: null
-    condition: selection and not all of filter*
+    condition: selection and not filter_username and not filter_src_ip
 falsepositives:
     - Legitimate or intentional inbound connections from public IP addresses on RDP or SMB ports.
 level: medium
