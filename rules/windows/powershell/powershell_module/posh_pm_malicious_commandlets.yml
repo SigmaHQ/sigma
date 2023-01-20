@@ -1,14 +1,10 @@
-title: Malicious PowerShell Commandlets - ScriptBlock
-id: 89819aa4-bbd6-46bc-88ec-c7f7fe30efa6
+title: Malicious PowerShell Commandlets - PoshModule
+id: 7d0d0329-0ef1-4e84-a9f5-49500f9d7c6c
 related:
-    - id: 7d0d0329-0ef1-4e84-a9f5-49500f9d7c6c
+    - id: 89819aa4-bbd6-46bc-88ec-c7f7fe30efa6
       type: similar
     - id: 02030f2f-6199-49ec-b258-ea71b07e03dc
       type: similar
-    - id: 6d3f1399-a81c-4409-aff3-1ecfe9330baf
-      type: obsoletes
-    - id: 83083ac6-1816-4e76-97d7-59af9a9ae46e
-      type: obsoletes
 status: test
 description: Detects Commandlet names from well-known PowerShell exploitation frameworks
 references:
@@ -27,9 +23,8 @@ references:
     - https://github.com/samratashok/nishang
     - https://github.com/DarkCoderSc/PowerRunAsSystem/
     - https://github.com/besimorhino/powercat
-author: Sean Metcalf, Florian Roth, Bartlomiej Czyz @bczyz1, oscd.community, Nasreddine Bencherchali, Tim Shelton, Mustafa Kaan Demir, Georg Lauenstein, Max Altgelt, Tobias Michalski, Austin Songer
-date: 2017/03/05
-modified: 2023/01/20
+author: Nasreddine Bencherchali
+date: 2023/01/20
 tags:
     - attack.execution
     - attack.discovery
@@ -43,11 +38,11 @@ tags:
     - attack.t1059.001
 logsource:
     product: windows
-    category: ps_script
-    definition: 'Requirements: Script Block Logging must be enabled'
+    category: ps_module
+    definition: 'Requirements: PowerShell Module Logging must be enabled'
 detection:
     selection:
-        ScriptBlockText|contains:
+        Payload|contains:
             - 'Add-Exfiltration'
             - 'Add-Persistence'
             - 'Add-RegBackdoor'
@@ -244,13 +239,7 @@ detection:
             - 'Start-CaptureServer'
             - 'Start-WebcamRecorder'
             - 'VolumeShadowCopyTools'
-    filter_1:
-        ScriptBlockText|contains:
-            - Get-SystemDriveInfo  # http://bheltborg.dk/Windows/WinSxS/amd64_microsoft-windows-maintenancediagnostic_31bf3856ad364e35_10.0.10240.16384_none_91ef7543a4514b5e/CL_Utility.ps1
-            - C:\ProgramData\Amazon\EC2-Windows\Launch\Module\  # false positive form Amazon EC2
-    filter_2:
-        ScriptBlockText|startswith: '# Copyright 2016 Amazon.com, Inc. or its affiliates. All Rights Reserved'
-    condition: selection and not 1 of filter_*
+    condition: selection
 falsepositives:
     - Unknown
 level: high
