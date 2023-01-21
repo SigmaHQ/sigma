@@ -5,7 +5,7 @@ description: Detects execution of rundll32 where the DLL being called is stored 
 references:
     - https://lolbas-project.github.io/lolbas/Binaries/Rundll32
 author: Harjot Singh, '@cyb3rjy0t'
-date: 2023/01/11
+date: 2023/01/21
 tags:
     - attack.defense_evasion
     - attack.t1564.004
@@ -15,7 +15,10 @@ logsource:
 detection:
     selection:
         Image|endswith: '\rundll32.exe'
-        CommandLine|re: '[Rr][Uu][Nn][Dd][Ll][Ll]32.+:'
+        # Example:
+        #   rundll32 "C:\ads\file.txt:ADSDLL.dll",DllMain
+        # Note: This doesn't cover the use case where a full path for the DLL isn't used. As it requires a more expensive regex
+        CommandLine|re: '[Rr][Uu][Nn][Dd][Ll][Ll]32.+\w:.+:'
     condition: selection
 falsepositives:
     - Unknown
