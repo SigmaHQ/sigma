@@ -1,0 +1,24 @@
+title: Suspicious Svchost Parent Svchost
+id: 6d5b8176-d87d-4402-8af4-53aee9db7b5d
+status: experimental
+description: Detects a service binary running in a suspicious directory
+references:
+    - https://twitter.com/YanZiShuang/status/1616777483646533632?s=20&t=TQT9tUuPbQJai4v6HtsOQw
+author: Florian Roth
+date: 2023/01/21
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\svchost.exe'
+        ParentImage|endswith: '\svchost.exe'
+        User|contains: # covers many language settings for Network Service. Please expand
+            - 'NETWORK SERVICE'
+            - 'NETZWERKDIENST'
+            - 'SERVIZIO DI RETE'
+            - 'SERVICIO DE RED'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
