@@ -1,453 +1,473 @@
 title: THOR
 order: 20
 backends:
-  - thor
+    - thor
 # this configuration differs from other configurations and can not be used
 # with the sigmac tool. This configuration is used by the ioc scanners THOR and SPARK.
 logsources:
-  # log source configurations for generic sigma rules
-  process_creation_1:
-    category: process_creation
-    product: windows
-    conditions:
-      EventID: 1
-    rewrite:
-      product: windows
-      service: sysmon
-  process_creation_2:
-    category: process_creation
-    product: windows
-    conditions:
-      EventID: 4688
-    rewrite:
-      product: windows
-      service: security
-    fieldmappings:
-      Image: NewProcessName
-      ParentImage: ParentProcessName
-  network_connection:
-    category: network_connection
-    product: windows
-    conditions:
-      EventID: 3
-    rewrite:
-      product: windows
-      service: sysmon
-  sysmon_status1:
-    category: sysmon_status
-    product: windows
-    conditions:
-      EventID: 4
-    rewrite:
-      product: windows
-      service: sysmon
-  sysmon_status2:
-    category: sysmon_status
-    product: windows
-    conditions:
-      EventID: 16
-    rewrite:
-      product: windows
-      service: sysmon
-  process_terminated:
-    category: process_termination
-    product: windows
-    conditions:
-      EventID: 5
-    rewrite:
-      product: windows
-      service: sysmon
-  driver_loaded:
-    category: driver_load
-    product: windows
-    conditions:
-      EventID: 6
-    rewrite:
-      product: windows
-      service: sysmon
-  image_loaded:
-    category: image_load
-    product: windows
-    conditions:
-      EventID: 7
-    rewrite:
-      product: windows
-      service: sysmon
-  create_remote_thread:
-    category: create_remote_thread
-    product: windows
-    conditions:
-      EventID: 8
-    rewrite:
-      product: windows
-      service: sysmon
-  raw_access_thread:
-    category: raw_access_thread
-    product: windows
-    conditions:
-      EventID: 9
-    rewrite:
-      product: windows
-      service: sysmon
-  process_access:
-    category: process_access
-    product: windows
-    conditions:
-      EventID: 10
-    rewrite:
-      product: windows
-      service: sysmon       
-  file_creation:
-    category: file_event
-    product: windows
-    conditions:
-      EventID: 11
-    rewrite:
-      product: windows
-      service: sysmon
-  registry_event1:
-    category: registry_event
-    product: windows
-    conditions:
-      EventID: 12
-    rewrite:
-      product: windows
-      service: sysmon
-  registry_event2:
-    category: registry_event
-    product: windows
-    conditions:
-      EventID: 13
-    rewrite:
-      product: windows
-      service: sysmon
-  registry_event3:
-    category: registry_event
-    product: windows
-    conditions:
-      EventID: 14
-    rewrite:
-      product: windows
-      service: sysmon
-  registry_add:
-    category: registry_add
-    product: windows
-    conditions:
-      EventID: 12
-    rewrite:
-      product: windows
-      service: sysmon
-  registry_delete:
-    category: registry_delete
-    product: windows
-    conditions:
-      EventID: 12
-    rewrite:
-      product: windows
-      service: sysmon
-  registry_set:
-    category: registry_set
-    product: windows
-    conditions:
-      EventID: 13
-    rewrite:
-      product: windows
-      service: sysmon
-  registry_rename:
-    category: registry_rename
-    product: windows
-    conditions:
-      EventID: 14
-    rewrite:
-      product: windows
-      service: sysmon
-  create_stream_hash:
-    category: create_stream_hash
-    product: windows
-    conditions:
-      EventID: 15
-    rewrite:
-      product: windows
-      service: sysmon
-  pipe_created1:
-    category: pipe_created
-    product: windows
-    conditions:
-      EventID: 17
-    rewrite:
-      product: windows
-      service: sysmon
-  pipe_created2:
-    category: pipe_created
-    product: windows
-    conditions:
-      EventID: 18
-    rewrite:
-      product: windows
-      service: sysmon
-  wmi_event1:
-    category: wmi_event
-    product: windows
-    conditions:
-      EventID: 19
-    rewrite:
-      product: windows
-      service: sysmon
-  wmi_event2:
-    category: wmi_event
-    product: windows
-    conditions:
-      EventID: 20
-    rewrite:
-      product: windows
-      service: sysmon
-  wmi_event3:
-    category: wmi_event
-    product: windows
-    conditions:
-      EventID: 21
-    rewrite:
-      product: windows
-      service: sysmon
-  dns_query:
-    category: dns_query
-    product: windows
-    conditions:
-      EventID: 22
-    rewrite:
-      product: windows
-      service: sysmon
-  file_delete:
-    category: file_delete
-    product: windows
-    conditions:
-      EventID: 23
-    rewrite:
-      product: windows
-      service: sysmon
-  file_block:
-    category: file_block
-    product: windows
-    conditions:
-      EventID: 27
-    rewrite:
-      product: windows
-      service: sysmon
-  sysmon_error:
-    category: sysmon_error
-    product: windows
-    conditions:
-      EventID: 255
-    rewrite:
-      product: windows
-      service: sysmon
-  #PowerShell Operational
-  ps_module:
-    category: ps_module
-    product: windows
-    conditions:
-      EventID: 4103
-    rewrite:
-      product: windows
-      service: powershell
-  ps_script:
-    category: ps_script
-    product: windows
-    conditions:
-      EventID: 4104
-    rewrite:
-      product: windows
-      service: powershell
-  #Powershell "classic" channel
-  ps_classic_start:
-    category: ps_classic_start
-    product: windows
-    conditions:
-      EventID: 400
-    rewrite:
-      product: windows
-      service: powershell-classic
-  ps_classic_provider_start:
-    category: ps_classic_provider_start
-    product: windows
-    conditions:
-      EventID: 600
-    rewrite:
-      product: windows
-      service: powershell-classic
-  ps_classic_script:
-    category: ps_classic_script
-    product: windows
-    conditions:
-      EventID: 800
-    rewrite:
-      product: windows
-      service: powershell-classic
-  # target system configurations
-  windows-application:
-    product: windows
-    service: application
-    sources:
-      - "WinEventLog:Application"
-  windows-security:
-    product: windows
-    service: security
-    sources:
-      - "WinEventLog:Security"
-  windows-system:
-    product: windows
-    service: system
-    sources:
-      - "WinEventLog:System"
-  windows-ntlm:
-    product: windows
-    service: ntlm
-    sources:
-      - "WinEventLog:Microsoft-Windows-NTLM/Operational"
-  windows-sysmon:
-    product: windows
-    service: sysmon
-    sources:
-      - "WinEventLog:Microsoft-Windows-Sysmon/Operational"
-  windows-powershell:
-    product: windows
-    service: powershell
-    sources:
-      - "WinEventLog:Microsoft-Windows-PowerShell/Operational"
-      - "WinEventLog:PowerShellCore/Operational"
-  windows-classicpowershell:
-    product: windows
-    service: powershell-classic
-    sources: 
-      - "WinEventLog:Windows PowerShell"
-  windows-taskscheduler:
-    product: windows
-    service: taskscheduler
-    sources:
-      - "WinEventLog:Microsoft-Windows-TaskScheduler/Operational"
-  windows-wmi:
-    product: windows
-    service: wmi
-    sources:
-      - "WinEventLog:Microsoft-Windows-WMI-Activity/Operational"
-  windows-dhcp:
-    product: windows
-    service: dhcp
-    sources:
-      - "WinEventLog:Microsoft-Windows-DHCP-Server/Operational"
-  windows-printservice-admin:
-    product: windows
-    service: printservice-admin
-    sources:
-      - "WinEventLog:Microsoft-Windows-PrintService/Admin"
-  windows-smbclient-security:
-    product: windows
-    service: smbclient-security
-    sources:
-      - "WinEventLog:Microsoft-Windows-SmbClient/Security"
-  windows-printservice-operational:
-    product: windows
-    service: printservice-operational
-    sources:
-      - "WinEventLog:Microsoft-Windows-PrintService/Operational"
-  windows-terminalservices-localsessionmanager-operational:
-    product: windows
-    service: terminalservices-localsessionmanager
-    sources:
-      - 'WinEventLog:Microsoft-Windows-TerminalServices-LocalSessionManager/Operational'
-  windows-codeintegrity-operational:
-    product: windows
-    service: codeintegrity-operational
-    sources:
-      - "WinEventLog:Microsoft-Windows-CodeIntegrity/Operational"
-  windows-applocker:
-    product: windows
-    service: applocker
-    sources:
-      - 'WinEventLog:Microsoft-Windows-AppLocker/MSI and Script'
-      - 'WinEventLog:Microsoft-Windows-AppLocker/EXE and DLL'
-      - 'WinEventLog:Microsoft-Windows-AppLocker/Packaged app-Deployment'
-      - 'WinEventLog:Microsoft-Windows-AppLocker/Packaged app-Execution'
-  windows-msexchange-management:
-    product: windows
-    service: msexchange-management
-    sources:
-      - 'WinEventLog:MSExchange Management'
-  windows-defender:
-    product: windows
-    service: windefend
-    sources:
-      - 'WinEventLog:Microsoft-Windows-Windows Defender/Operational'
-  windows-firewall-advanced-security:
-    product: windows
-    service: firewall-as
-    sources:
-      - 'WinEventLog:Microsoft-Windows-Windows Firewall With Advanced Security/Firewall'
-  windows-bits-client:
-    product: windows
-    service: bits-client
-    sources:
-      - 'WinEventLog:Microsoft-Windows-Bits-Client/Operational'
-  windows-security-mitigations:
-    product: windows
-    service: security-mitigations
-    sources:
-      - 'WinEventLog:Microsoft-Windows-Security-Mitigations/Kernel Mode'
-      - 'WinEventLog:Microsoft-Windows-Security-Mitigations/User Mode'
-  windows-diagnosis:
-    product: windows
-    service: diagnosis-scripted
-    sources:
-      - 'WinEventLog:Microsoft-Windows-Diagnosis-Scripted/Operational'
-  windows-shell-core:
-    product: windows
-    service: shell-core
-    sources:
-      - 'WinEventLog:Microsoft-Windows-Shell-Core/Operational'
-  windows-openssh:
-    product: windows
-    service: openssh
-    sources:
-      - 'WinEventLog:OpenSSH/Operational'
-  windows-ldap-debug:
-    product: windows
-    service: ldap_debug
-    sources:
-      - 'WinEventLog:Microsoft-Windows-LDAP-Client/Debug'
-  windows-bitlocker:
-    product: windows
-    service: bitlocker
-    sources:
-      - 'WinEventLog:Microsoft-Windows-BitLocker/BitLocker Management'
-  windows-vhdmp:
-    product: windows
-    service: vhdmp
-    sources:
-      - 'WinEventLog:Microsoft-Windows-VHDMP/Operational'
-  windows-appxdeployment-server:
-    product: windows
-    service: appxdeployment-server
-    sources:
-      - 'WinEventLog:Microsoft-Windows-AppXDeploymentServer/Operational'
-  apache:
-    category: webserver
-    sources:
-      - "File:/var/log/apache/*.log"
-      - "File:/var/log/apache2/*.log"
-      - "File:/var/log/httpd/*.log"
-  linux-auth:
-    product: linux
-    service: auth
-    sources:
-      - "File:/var/log/auth.log"
-      - "File:/var/log/auth.log.?"
-  linux-syslog:
-    product: linux
-    service: syslog
-    sources:
-      - "File:/var/log/syslog"
-      - "File:/var/log/syslog.?"
-  logfiles:
-    category: logfile
-    sources:
-      - "File:*.log"
+    # log source configurations for generic sigma rules
+    process_creation_1:
+        category: process_creation
+        product: windows
+        conditions:
+            EventID: 1
+        rewrite:
+            product: windows
+            service: sysmon
+    process_creation_2:
+        category: process_creation
+        product: windows
+        conditions:
+            EventID: 4688
+        rewrite:
+            product: windows
+            service: security
+        fieldmappings:
+            Image: NewProcessName
+            ParentImage: ParentProcessName
+    network_connection:
+        category: network_connection
+        product: windows
+        conditions:
+            EventID: 3
+        rewrite:
+            product: windows
+            service: sysmon
+    sysmon_status1:
+        category: sysmon_status
+        product: windows
+        conditions:
+            EventID: 4
+        rewrite:
+            product: windows
+            service: sysmon
+    sysmon_status2:
+        category: sysmon_status
+        product: windows
+        conditions:
+            EventID: 16
+        rewrite:
+            product: windows
+            service: sysmon
+    process_terminated:
+        category: process_termination
+        product: windows
+        conditions:
+            EventID: 5
+        rewrite:
+            product: windows
+            service: sysmon
+    driver_loaded:
+        category: driver_load
+        product: windows
+        conditions:
+            EventID: 6
+        rewrite:
+            product: windows
+            service: sysmon
+    image_loaded:
+        category: image_load
+        product: windows
+        conditions:
+            EventID: 7
+        rewrite:
+            product: windows
+            service: sysmon
+    create_remote_thread:
+        category: create_remote_thread
+        product: windows
+        conditions:
+            EventID: 8
+        rewrite:
+            product: windows
+            service: sysmon
+    raw_access_thread:
+        category: raw_access_thread
+        product: windows
+        conditions:
+            EventID: 9
+        rewrite:
+            product: windows
+            service: sysmon
+    process_access:
+        category: process_access
+        product: windows
+        conditions:
+            EventID: 10
+        rewrite:
+            product: windows
+            service: sysmon
+    file_creation:
+        category: file_event
+        product: windows
+        conditions:
+            EventID: 11
+        rewrite:
+            product: windows
+            service: sysmon
+    registry_event1:
+        category: registry_event
+        product: windows
+        conditions:
+            EventID: 12
+        rewrite:
+            product: windows
+            service: sysmon
+    registry_event2:
+        category: registry_event
+        product: windows
+        conditions:
+            EventID: 13
+        rewrite:
+            product: windows
+            service: sysmon
+    registry_event3:
+        category: registry_event
+        product: windows
+        conditions:
+            EventID: 14
+        rewrite:
+            product: windows
+            service: sysmon
+    registry_add:
+        category: registry_add
+        product: windows
+        conditions:
+            EventID: 12
+        rewrite:
+            product: windows
+            service: sysmon
+    registry_delete:
+        category: registry_delete
+        product: windows
+        conditions:
+            EventID: 12
+        rewrite:
+            product: windows
+            service: sysmon
+    registry_set:
+        category: registry_set
+        product: windows
+        conditions:
+            EventID: 13
+        rewrite:
+            product: windows
+            service: sysmon
+    registry_rename:
+        category: registry_rename
+        product: windows
+        conditions:
+            EventID: 14
+        rewrite:
+            product: windows
+            service: sysmon
+    create_stream_hash:
+        category: create_stream_hash
+        product: windows
+        conditions:
+            EventID: 15
+        rewrite:
+            product: windows
+            service: sysmon
+    pipe_created1:
+        category: pipe_created
+        product: windows
+        conditions:
+            EventID: 17
+        rewrite:
+            product: windows
+            service: sysmon
+    pipe_created2:
+        category: pipe_created
+        product: windows
+        conditions:
+            EventID: 18
+        rewrite:
+            product: windows
+            service: sysmon
+    wmi_event1:
+        category: wmi_event
+        product: windows
+        conditions:
+            EventID: 19
+        rewrite:
+            product: windows
+            service: sysmon
+    wmi_event2:
+        category: wmi_event
+        product: windows
+        conditions:
+            EventID: 20
+        rewrite:
+            product: windows
+            service: sysmon
+    wmi_event3:
+        category: wmi_event
+        product: windows
+        conditions:
+            EventID: 21
+        rewrite:
+            product: windows
+            service: sysmon
+    dns_query:
+        category: dns_query
+        product: windows
+        conditions:
+            EventID: 22
+        rewrite:
+            product: windows
+            service: sysmon
+    file_delete:
+        category: file_delete
+        product: windows
+        conditions:
+            EventID: 23
+        rewrite:
+            product: windows
+            service: sysmon
+    file_block:
+        category: file_block
+        product: windows
+        conditions:
+            EventID: 27
+        rewrite:
+            product: windows
+            service: sysmon
+    sysmon_error:
+        category: sysmon_error
+        product: windows
+        conditions:
+            EventID: 255
+        rewrite:
+            product: windows
+            service: sysmon
+    #PowerShell Operational
+    ps_module:
+        category: ps_module
+        product: windows
+        conditions:
+            EventID: 4103
+        rewrite:
+            product: windows
+            service: powershell
+    ps_script:
+        category: ps_script
+        product: windows
+        conditions:
+            EventID: 4104
+        rewrite:
+            product: windows
+            service: powershell
+    #Powershell "classic" channel
+    ps_classic_start:
+        category: ps_classic_start
+        product: windows
+        conditions:
+            EventID: 400
+        rewrite:
+            product: windows
+            service: powershell-classic
+    ps_classic_provider_start:
+        category: ps_classic_provider_start
+        product: windows
+        conditions:
+            EventID: 600
+        rewrite:
+            product: windows
+            service: powershell-classic
+    ps_classic_script:
+        category: ps_classic_script
+        product: windows
+        conditions:
+            EventID: 800
+        rewrite:
+            product: windows
+            service: powershell-classic
+    # target system configurations
+    windows-application:
+        product: windows
+        service: application
+        sources:
+            - "WinEventLog:Application"
+    windows-security:
+        product: windows
+        service: security
+        sources:
+            - "WinEventLog:Security"
+    windows-system:
+        product: windows
+        service: system
+        sources:
+            - "WinEventLog:System"
+    windows-ntlm:
+        product: windows
+        service: ntlm
+        sources:
+            - "WinEventLog:Microsoft-Windows-NTLM/Operational"
+    windows-sysmon:
+        product: windows
+        service: sysmon
+        sources:
+            - "WinEventLog:Microsoft-Windows-Sysmon/Operational"
+    windows-powershell:
+        product: windows
+        service: powershell
+        sources:
+            - "WinEventLog:Microsoft-Windows-PowerShell/Operational"
+            - "WinEventLog:PowerShellCore/Operational"
+    windows-classicpowershell:
+        product: windows
+        service: powershell-classic
+        sources:
+            - "WinEventLog:Windows PowerShell"
+    windows-taskscheduler:
+        product: windows
+        service: taskscheduler
+        sources:
+            - "WinEventLog:Microsoft-Windows-TaskScheduler/Operational"
+    windows-wmi:
+        product: windows
+        service: wmi
+        sources:
+            - "WinEventLog:Microsoft-Windows-WMI-Activity/Operational"
+    windows-dhcp:
+        product: windows
+        service: dhcp
+        sources:
+            - "WinEventLog:Microsoft-Windows-DHCP-Server/Operational"
+    windows-printservice-admin:
+        product: windows
+        service: printservice-admin
+        sources:
+            - "WinEventLog:Microsoft-Windows-PrintService/Admin"
+    windows-smbclient-security:
+        product: windows
+        service: smbclient-security
+        sources:
+            - "WinEventLog:Microsoft-Windows-SmbClient/Security"
+    windows-printservice-operational:
+        product: windows
+        service: printservice-operational
+        sources:
+            - "WinEventLog:Microsoft-Windows-PrintService/Operational"
+    windows-terminalservices-localsessionmanager-operational:
+        product: windows
+        service: terminalservices-localsessionmanager
+        sources:
+            - 'WinEventLog:Microsoft-Windows-TerminalServices-LocalSessionManager/Operational'
+    windows-codeintegrity-operational:
+        product: windows
+        service: codeintegrity-operational
+        sources:
+            - "WinEventLog:Microsoft-Windows-CodeIntegrity/Operational"
+    windows-applocker:
+        product: windows
+        service: applocker
+        sources:
+            - 'WinEventLog:Microsoft-Windows-AppLocker/MSI and Script'
+            - 'WinEventLog:Microsoft-Windows-AppLocker/EXE and DLL'
+            - 'WinEventLog:Microsoft-Windows-AppLocker/Packaged app-Deployment'
+            - 'WinEventLog:Microsoft-Windows-AppLocker/Packaged app-Execution'
+    windows-msexchange-management:
+        product: windows
+        service: msexchange-management
+        sources:
+            - 'WinEventLog:MSExchange Management'
+    windows-defender:
+        product: windows
+        service: windefend
+        sources:
+            - 'WinEventLog:Microsoft-Windows-Windows Defender/Operational'
+    windows-firewall-advanced-security:
+        product: windows
+        service: firewall-as
+        sources:
+            - 'WinEventLog:Microsoft-Windows-Windows Firewall With Advanced Security/Firewall'
+    windows-bits-client:
+        product: windows
+        service: bits-client
+        sources:
+            - 'WinEventLog:Microsoft-Windows-Bits-Client/Operational'
+    windows-security-mitigations:
+        product: windows
+        service: security-mitigations
+        sources:
+            - 'WinEventLog:Microsoft-Windows-Security-Mitigations/Kernel Mode'
+            - 'WinEventLog:Microsoft-Windows-Security-Mitigations/User Mode'
+    windows-diagnosis:
+        product: windows
+        service: diagnosis-scripted
+        sources:
+            - 'WinEventLog:Microsoft-Windows-Diagnosis-Scripted/Operational'
+    windows-shell-core:
+        product: windows
+        service: shell-core
+        sources:
+            - 'WinEventLog:Microsoft-Windows-Shell-Core/Operational'
+    windows-openssh:
+        product: windows
+        service: openssh
+        sources:
+            - 'WinEventLog:OpenSSH/Operational'
+    windows-ldap-debug:
+        product: windows
+        service: ldap_debug
+        sources:
+            - 'WinEventLog:Microsoft-Windows-LDAP-Client/Debug'
+    windows-bitlocker:
+        product: windows
+        service: bitlocker
+        sources:
+            - 'WinEventLog:Microsoft-Windows-BitLocker/BitLocker Management'
+    windows-vhdmp:
+        product: windows
+        service: vhdmp
+        sources:
+            - 'WinEventLog:Microsoft-Windows-VHDMP/Operational'
+    windows-appxdeployment-server:
+        product: windows
+        service: appxdeployment-server
+        sources:
+            - 'WinEventLog:Microsoft-Windows-AppXDeploymentServer/Operational'
+    windows-lsa-server:
+        product: windows
+        service: lsa-server
+        sources:
+            - 'WinEventLog:Microsoft-Windows-LSA/Operational'
+    windows-appxpackaging-om:
+        product: windows
+        service: appxpackaging-om
+        sources:
+            - 'WinEventLog:Microsoft-Windows-AppxPackaging/Operational'
+    windows-dns-client:
+        product: windows
+        service: dns-client
+        sources:
+            - 'WinEventLog:Microsoft-Windows-DNS Client Events/Operational'
+    windows-appmodel-runtime:
+        product: windows
+        service: appmodel-runtime
+        sources:
+            - 'WinEventLog:Microsoft-Windows-AppModel-Runtime/Admin'
+    apache:
+        category: webserver
+        sources:
+            - "File:/var/log/apache/*.log"
+            - "File:/var/log/apache2/*.log"
+            - "File:/var/log/httpd/*.log"
+    linux-auth:
+        product: linux
+        service: auth
+        sources:
+            - "File:/var/log/auth.log"
+            - "File:/var/log/auth.log.?"
+    linux-syslog:
+        product: linux
+        service: syslog
+        sources:
+            - "File:/var/log/syslog"
+            - "File:/var/log/syslog.?"
+    logfiles:
+        category: logfile
+        sources:
+            - "File:*.log"

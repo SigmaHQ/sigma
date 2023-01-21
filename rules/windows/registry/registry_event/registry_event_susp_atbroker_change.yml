@@ -7,7 +7,7 @@ references:
     - https://lolbas-project.github.io/lolbas/Binaries/Atbroker/
 author: Mateusz Wydra, oscd.community
 date: 2020/10/13
-modified: 2022/09/21
+modified: 2023/01/19
 tags:
     - attack.defense_evasion
     - attack.t1218
@@ -21,11 +21,14 @@ detection:
         TargetObject|contains:
             - 'Software\Microsoft\Windows NT\CurrentVersion\Accessibility\ATs'
             - 'Software\Microsoft\Windows NT\CurrentVersion\Accessibility\Configuration'
-    filter:
+    filter_atbroker:
         Image: 'C:\Windows\system32\atbroker.exe'
         TargetObject|contains: '\Microsoft\Windows NT\CurrentVersion\Accessibility\Configuration'
         Details: '(Empty)'
-    condition: selection and not filter
+    filter_uninstallers:
+        Image|startswith: 'C:\Windows\Installer\MSI'
+        TargetObject|contains: 'Software\Microsoft\Windows NT\CurrentVersion\Accessibility\ATs'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Creation of non-default, legitimate at usage
 level: medium
