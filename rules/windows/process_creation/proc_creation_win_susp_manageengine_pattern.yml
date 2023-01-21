@@ -8,6 +8,7 @@ references:
     - https://blog.viettelcybersecurity.com/saml-show-stopper/
 author: Florian Roth
 date: 2023/01/18
+modified: 2023/01/21
 logsource:
     category: process_creation
     product: windows
@@ -39,7 +40,15 @@ detection:
             - '\AppVLP.exe'
             - '\curl.exe'
             - '\notepad.exe'  # Often used in POCs
-    condition: selection
+            - '\systeminfo.exe'
+            - '\net.exe'
+            - '\net1.exe'
+            - '\reg.exe'
+            - '\query.exe'
+    filter1:
+        Image: '\net.exe'
+        Commandline|contains: ' stop'
+    condition: selection and not 1 of filter*
 fields:
     - CommandLine
 falsepositives:
