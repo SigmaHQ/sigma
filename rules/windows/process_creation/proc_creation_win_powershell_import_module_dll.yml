@@ -1,0 +1,35 @@
+title: Powershell Inport-Module Direct Dll - ProccessCreation
+id: 70bc5215-526f-4477-963c-a47a5c9ebd12
+related:
+    - id: 9e620995-f2d8-4630-8430-4afd89f77604
+      type: similar
+status: experimental
+description: Detects use of Import-Module from a dll
+references:
+    - https://github.com/samratashok/ADModule
+    - https://twitter.com/cyb3rops/status/1617108657166061568?s=20
+author: frack113
+date: 2023/01/22
+tags:
+    - attack.reconnaissance
+    - attack.discovery
+    - attack.impact
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        - Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        - OriginalFileName:
+            - 'PowerShell.Exe'
+            - 'pwsh.dll'
+    selection_cli:
+        CommandLine|contains|all:
+            - 'Import-Module '
+            - '.dll'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use of the library for administrative activity
+level: high
