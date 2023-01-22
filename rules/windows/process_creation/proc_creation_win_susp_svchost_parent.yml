@@ -1,7 +1,7 @@
-title: Suspicious Svchost Parent Svchost
+title: Potential Exploitation Attempt Of Undocumented WindowsServer RCE
 id: 6d5b8176-d87d-4402-8af4-53aee9db7b5d
 status: experimental
-description: Detects a service binary running in a suspicious directory
+description: Detects potential exploitation attempt of undocumented Windows Server Pre Auth Remote Code Execution (RCE)
 references:
     - https://twitter.com/YanZiShuang/status/1616777483646533632?s=20&t=TQT9tUuPbQJai4v6HtsOQw
 author: Florian Roth
@@ -11,9 +11,11 @@ logsource:
     product: windows
 detection:
     selection:
-        Image|endswith: '\svchost.exe'
         ParentImage|endswith: '\svchost.exe'
-        User|contains: # covers many language settings for Network Service. Please expand
+        Image|endswith: '\svchost.exe'
+        ParentCommandLine|contains: '-k DHCPServer'
+        CommandLine|contains: '-k DHCPServer'
+        User|contains: # Covers many language settings for Network Service. Please expand.
             - 'NETWORK SERVICE'
             - 'NETZWERKDIENST'
             - 'SERVIZIO DI RETE'
