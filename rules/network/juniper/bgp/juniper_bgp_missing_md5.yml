@@ -6,6 +6,7 @@ references:
     - https://www.blackhat.com/presentations/bh-usa-03/bh-us-03-convery-franz-v3.pdf
 author: Tim Brown
 date: 2023/01/09
+modified: 2023/01/23
 tags:
     - attack.initial_access
     - attack.persistence
@@ -22,9 +23,10 @@ logsource:
     definition: 'Requirements: juniper bgp logs need to be enabled and ingested'
 detection:
     keywords_bgp_juniper:
-        - ':179' # Protocol
-        - 'missing MD5 digest'
-    condition: all of keywords_bgp_juniper
+        '|all':
+            - ':179' # Protocol
+            - 'missing MD5 digest'
+    condition: keywords_bgp_juniper
 fields:
     - host
 falsepositives:

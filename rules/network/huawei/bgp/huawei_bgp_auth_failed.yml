@@ -6,6 +6,7 @@ references:
     - https://www.blackhat.com/presentations/bh-usa-03/bh-us-03-convery-franz-v3.pdf
 author: Tim Brown
 date: 2023/01/09
+modified: 2023/01/23
 tags:
     - attack.initial_access
     - attack.persistence
@@ -22,9 +23,10 @@ logsource:
     definition: 'Requirements: huawei bgp logs need to be enabled and ingested'
 detection:
     keywords_bgp_huawei:
-        - ':179' # Protocol
-        - 'BGP_AUTH_FAILED'
-    condition: all of keywords_bgp_huawei
+        '|all':
+            - ':179' # Protocol
+            - 'BGP_AUTH_FAILED'
+    condition: keywords_bgp_huawei
 fields:
     - host
     - PeeId
