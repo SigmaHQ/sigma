@@ -7,7 +7,7 @@ references:
     - https://www.microsoft.com/security/blog/2022/07/26/malicious-iis-extensions-quietly-open-persistent-backdoors-into-servers/
 author: Florian Roth
 date: 2019/12/11
-modified: 2022/01/07
+modified: 2023/01/22
 tags:
     - attack.persistence
     - attack.t1505.003
@@ -15,13 +15,19 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\appcmd.exe'
+    selection_img:
+        - Image|endswith: '\appcmd.exe'
+        - OriginalFileName: 'appcmd.exe'
+    selection_cli:
         CommandLine|contains|all:
             - 'install'
             - 'module'
+        CommandLine|contains:
             - '/name:'
-    condition: selection
+            - '-name:'
+    filter_iis_setup:
+        ParentImage: 'C:\Windows\System32\inetsrv\iissetup.exe'
+    condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Unknown as it may vary from organisation to organisation how admins use to install IIS modules
 level: medium
