@@ -6,6 +6,7 @@ references:
     - https://www.blackhat.com/presentations/bh-usa-03/bh-us-03-convery-franz-v3.pdf
 author: Tim Brown
 date: 2023/01/09
+modified: 2023/01/23
 tags:
     - attack.initial_access
     - attack.persistence
@@ -22,9 +23,10 @@ logsource:
     definition: 'Requirements: cisco bgp logs need to be enabled and ingested'
 detection:
     keywords_bgp_cisco:
-        - ':179' # Protocol
-        - 'IP-TCP-3-BADAUTH'
-    condition: all of keywords_bgp_cisco
+        '|all':
+            - ':179' # Protocol
+            - 'IP-TCP-3-BADAUTH'
+    condition: keywords_bgp_cisco
 fields:
     - tcpConnLocalAddress
     - tcpConnRemAddress
