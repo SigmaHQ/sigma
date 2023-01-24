@@ -12,7 +12,7 @@ references:
     - https://oddvar.moe/2018/03/21/persistence-using-runonceex-hidden-from-autoruns-exe/
 author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split)
 date: 2019/10/25
-modified: 2022/12/14
+modified: 2023/01/19
 tags:
     - attack.persistence
     - attack.t1547.001
@@ -20,10 +20,10 @@ logsource:
     category: registry_set
     product: windows
 detection:
-    wow_current_version_base:
+    selection_wow_current_version_base:
         EventType: SetValue
         TargetObject|contains: '\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion'
-    wow_current_version_keys:
+    selection_wow_current_version_keys:
         TargetObject|contains:
             - '\ShellServiceObjectDelayLoad'
             - '\Run\'
@@ -85,7 +85,14 @@ detection:
             - '\windowsdesktop-runtime-'  # C:\WINDOWS\Temp\{751E2E78-46DC-4376-9205-99219CDC34AE}\.be\windowsdesktop-runtime-6.0.12-win-x86.exe
             - '\AspNetCoreSharedFrameworkBundle-'  # "C:\ProgramData\Package Cache\{b52191c1-a9c0-4b34-9a4e-930c2dd8a540}\AspNetCoreSharedFrameworkBundle-x86.exe" /burn.runonce
         Details|endswith: ' /burn.runonce'
-    condition: all of wow_current_version_* and not 1 of filter_*
+    filter_uninstallers:
+        # This image path is linked with different uninstallers when running as admin unfortunately
+        Image|startswith: 'C:\Windows\Installer\MSI'
+        TargetObject|contains: '\Explorer\Browser Helper Objects'
+    filter_msiexec:
+        Image: 'C:\WINDOWS\system32\msiexec.exe'
+        TargetObject|contains: '\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Run\'
+    condition: all of selection_wow_current_version_* and not 1 of filter_*
 fields:
     - SecurityID
     - ObjectName

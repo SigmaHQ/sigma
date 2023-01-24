@@ -8,7 +8,7 @@ references:
     - https://dtm.uk/wuauclt/
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 date: 2020/10/12
-modified: 2022/12/15
+modified: 2023/01/20
 tags:
     - attack.defense_evasion
     - attack.t1218
@@ -17,13 +17,29 @@ logsource:
     product: windows
 detection:
     selection:
-        Image|contains: wuauclt
+        Image|contains: 'wuauclt'
     # "C:\WINDOWS\uus\AMD64\wuauclt.exe" /DeploymentHandlerFullPath \\?\C:\Windows\UUS\AMD64\UpdateDeploy.dll /ClassId aaa256e1-5b21-4993-9188-18f07ccb3b98 /RunHandlerComServer
-    filter_ms_range:  # Sysmon
-        DestinationIp|startswith: '51.10'  # Microsoft Range
+    filter_msrange:  # Sysmon
+        DestinationIp|startswith:
+            # Subnet: 20.184.0.0/13
+            - '20.184.'
+            - '20.185.'
+            - '20.186.'
+            - '20.187.'
+            - '20.188.'
+            - '20.189.'
+            - '20.190.'
+            - '20.191.'
+            - '23.79.'
+            - '51.10.'
+            # Subnet: 51.103.210.0/23
+            - '51.103.'
+            - '51.104.'
+            - '51.105.'
+            - '52.239.'
     filter_cmdline:
         CommandLine|contains: '\UpdateDeploy.dll /ClassId '
-    condition: selection and not 1 of filter*
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Legitimate use of wuauclt.exe over the network.
 level: medium

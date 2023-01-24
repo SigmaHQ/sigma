@@ -8,6 +8,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1485/T1485.md#atomic-test-3---overwrite-deleted-data-on-c-drive
 author: frack113
 date: 2021/12/26
+modified: 2023/01/18
 tags:
     - attack.impact
     - attack.t1485
@@ -15,10 +16,12 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\cipher.exe'
+    selection_img:
+        - OriginalFileName: 'CIPHER.EXE'
+        - Image|endswith: '\cipher.exe'
+    selection_cli:
         CommandLine|contains: ' /w:'
-    condition: selection
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: medium

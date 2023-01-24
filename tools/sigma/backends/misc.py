@@ -19,7 +19,7 @@ from .base import BaseBackend
 from .mixins import QuoteCharMixin
 
 class GrepBackend(BaseBackend, QuoteCharMixin):
-    """Generates Perl compatible regular expressions and puts 'grep -P' around it"""
+    """Generates Perl compatible regular expressions and puts 'grep -P -i' around it"""
     identifier = "grep"
     active = True
     config_required = False
@@ -27,7 +27,7 @@ class GrepBackend(BaseBackend, QuoteCharMixin):
     reEscape = re.compile("([\\|()\[\]{}.^$+])")
 
     def generateQuery(self, parsed):
-        return "grep -P '^%s'" % self.generateNode(parsed.parsedSearch)
+        return "grep -P -i '^%s'" % self.generateNode(parsed.parsedSearch)
 
     def cleanValue(self, val):
         val = super().cleanValue(val)
