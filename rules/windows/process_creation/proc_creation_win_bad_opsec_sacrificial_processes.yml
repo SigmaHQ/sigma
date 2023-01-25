@@ -15,7 +15,7 @@ references:
     - https://docs.microsoft.com/en-us/dotnet/framework/tools/regsvcs-exe-net-services-installation-tool#feedback
 author: Oleg Kolesnikov @securonix invrep_de, oscd.community, Florian Roth, Christian Burkard
 date: 2020/10/23
-modified: 2022/09/07
+modified: 2023/01/25
 tags:
     - attack.defense_evasion
     - attack.t1218.011
@@ -38,7 +38,12 @@ detection:
     selection5:
         Image|endswith: '\regsvr32.exe'
         CommandLine|endswith: 'regsvr32.exe'
-    condition: 1 of selection*
+    filter_edge_update:
+        ParentImage|startswith: 'C:\Users\'
+        ParentImage|contains: '\AppData\Local\Microsoft\EdgeUpdate\Install\{'
+        ParentImage|endswith: '\setup.exe'
+        ParentCommandLine|contains: '\setup.exe" --install-archive="C:\Users\'
+    condition: 1 of selection* and not 1 of filter*
 fields:
     - ParentImage
     - ParentCommandLine
