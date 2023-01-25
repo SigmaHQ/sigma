@@ -6,21 +6,23 @@ references:
     - https://www.microsoft.com/security/blog/2022/07/26/malicious-iis-extensions-quietly-open-persistent-backdoors-into-servers/
 author: Florian Roth (rule), Microsoft (idea)
 date: 2022/08/04
+modified: 2023/01/23
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection_1:
+    selection_parent:
+        ParentImage|endswith: '\w3wp.exe'
+    selection_cli_1:
         CommandLine|contains: 'appcmd.exe add module'
-        ParentImage|endswith: '\w3wp.exe'
-    selection_2:
+    selection_cli_2:
         CommandLine|contains: ' system.enterpriseservices.internal.publish'
-        ParentImage|endswith: '\w3wp.exe'
         Image|endswith: '\powershell.exe'
-    selection_3:
-        CommandLine|contains: ' \\gacutil.exe /I'
-        ParentImage|endswith: '\w3wp.exe'
-    condition: 1 of selection*
+    selection_cli_3:
+        CommandLine|contains|all:
+            - 'gacutil'
+            - ' /I'
+    condition: selection_parent and 1 of selection_cli_*
 falsepositives:
     - Administrative activity
 level: high
