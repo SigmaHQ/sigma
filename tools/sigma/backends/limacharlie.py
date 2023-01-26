@@ -558,7 +558,7 @@ class LimaCharlieBackend(BaseBackend):
                 result = {
                     "op": "matches",
                     "path": fieldname,
-                    "re": re.compile(value),
+                    "re": str(value),
                 }
                 if self._postOpMapper is not None:
                     result = self._postOpMapper(result)
