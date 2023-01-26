@@ -17,17 +17,10 @@ logsource:
     category: ps_script
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
-    selection_img:
-        - Image|endswith:
-            - '\powershell.exe'
-            - '\pwsh.exe'
-        - OriginalFileName:
-            - 'PowerShell.EXE'
-            - 'pwsh.dll'
     selection_cmdlet:
-        CommandLine|contains: 'Add-WindowsCapability'
+        ScriptBlockText|contains: 'Add-WindowsCapability '
     selection_capa:
-        CommandLine|contains: 'OpenSSH.' # For both "OpenSSH.Server" and "OpenSSH.Client"
+        ScriptBlockText|contains: 'OpenSSH.' # For both "OpenSSH.Server" and "OpenSSH.Client"
     condition: all of selection_*
 falsepositives:
     - Legitimate usage of the capabilities by administartors or users. Filter accordingly
