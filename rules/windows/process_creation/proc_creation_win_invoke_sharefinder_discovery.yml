@@ -1,0 +1,26 @@
+title: Invoke-ShareFinder Discovery Activity
+id: 208b13d5-3e9e-48be-b059-a89b311b88de
+status: experimental
+description: Detects the usage of ShareFinder to discover File shares using Windows-Sysmon logsource
+references:
+    - https://thedfirreport.com/2023/01/23/sharefinder-how-threat-actors-discover-file-shares/
+author: Harjot Singh, '@cyb3rjy0t'
+date: 2023/01/26
+tags:
+    - attack.discovery
+    - attack.t1135
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        CommandLine|contains:
+            - Invoke-ShareFinder 
+    selection2:
+        CommandLine|contains:
+            # Invoke-ShareFinder Base64
+            - 'SW52b2tlLVNoYXJlRmluZGVy'
+    condition: selection1 or selection2
+falsepositives:
+    - Unknown
+level: high
