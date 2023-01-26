@@ -250,6 +250,24 @@ _allFieldMappings = {
             postOpMapper = _mapProcessCreationOperations,
             isCaseSensitive = ['event/FILE_PATH']
         ),
+        "macos/file_event/": SigmaLCConfig(
+            topLevelParams = {
+                "events": [
+                    "FILE_CREATE",
+                    "NEW_DOCUMENT",
+                ]
+            },
+            preConditions = {
+                "op": "is mac",
+            },
+            fieldMappings = {
+                "TargetFilename": "event/FILE_PATH",
+            },
+            isAllStringValues = False,
+            keywordField = None,
+            postOpMapper = None,
+            isCaseSensitive = ['event/FILE_PATH']
+        ),
     },
     "artifact": {
         "windows//": SigmaLCConfig(
