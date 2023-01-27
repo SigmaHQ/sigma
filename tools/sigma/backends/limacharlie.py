@@ -138,6 +138,20 @@ _allFieldMappings = {
             postOpMapper = _mapProcessCreationOperations,
             isCaseSensitive = []
         ),
+        "windows/dns_query/": SigmaLCConfig(
+            topLevelParams = {
+                "event": "DNS_REQUEST",
+            },
+            preConditions = None,
+            fieldMappings = {
+                "QueryName": "event/DOMAIN_NAME",
+                "Image": "event/FILE_PATH",
+            },
+            isAllStringValues = False,
+            keywordField = None,
+            postOpMapper = None,
+            isCaseSensitive = []
+        ),
         "dns//": SigmaLCConfig(
             topLevelParams = {
                 "event": "DNS_REQUEST",
@@ -151,7 +165,7 @@ _allFieldMappings = {
             postOpMapper = None,
             isCaseSensitive = []
         ),
-        "linux//": SigmaLCConfig(
+        "linux/process_creation/": SigmaLCConfig(
             topLevelParams = {
                 "events": [
                     "NEW_PROCESS",
@@ -164,9 +178,36 @@ _allFieldMappings = {
             fieldMappings = {
                 "exe": "event/FILE_PATH",
                 "type": None,
+                "CommandLine": "event/COMMAND_LINE",
+                "Image": "event/FILE_PATH",
+                "ParentImage": "event/PARENT/FILE_PATH",
+                "ParentCommandLine": "event/PARENT/COMMAND_LINE",
+                "User": "event/USER_NAME",
+                "OriginalFileName": "event/ORIGINAL_FILE_NAME",
+                "OriginalFilename": "event/ORIGINAL_FILE_NAME",
             },
             isAllStringValues = False,
             keywordField = 'event/COMMAND_LINE',
+            postOpMapper = None,
+            isCaseSensitive = ['event/FILE_PATH']
+        ),
+        "linux/file_event/": SigmaLCConfig(
+            topLevelParams = {
+                "events": [
+                    "FILE_CREATE",
+                    "FILE_DELETE",
+                    "FILE_MODIFIED",
+                    "NEW_DOCUMENT",
+                ]
+            },
+            preConditions = {
+                "op": "is linux",
+            },
+            fieldMappings = {
+                "TargetFilename": "event/FILE_PATH",
+            },
+            isAllStringValues = False,
+            keywordField = None,
             postOpMapper = None,
             isCaseSensitive = ['event/FILE_PATH']
         ),
@@ -254,6 +295,8 @@ _allFieldMappings = {
             topLevelParams = {
                 "events": [
                     "FILE_CREATE",
+                    "FILE_DELETE",
+                    "FILE_MODIFIED",
                     "NEW_DOCUMENT",
                 ]
             },
