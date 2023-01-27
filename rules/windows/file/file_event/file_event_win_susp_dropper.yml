@@ -6,7 +6,7 @@ references:
     - Malware Sandbox
 author: frack113
 date: 2022/03/09
-modified: 2023/01/20
+modified: 2023/01/26
 tags:
     - attack.resource_development
     - attack.t1587.001
@@ -56,13 +56,13 @@ detection:
             - 'C:\Program Files\'
             - 'C:\Program Files (x86)\'
     filter_defender:
-        Image|startswith: 'C:\ProgramData\Microsoft\Windows Defender\'
+        Image|startswith:
+            - 'C:\ProgramData\Microsoft\Windows Defender\'
+            - 'C:\Program Files\Windows Defender\'
     filter_windows_apps:
         TargetFilename|contains: '\Microsoft\WindowsApps\'
     filter_teams:
-        Image|startswith: 'C:\Users\'
         Image|endswith: '\AppData\Local\Microsoft\Teams\Update.exe'
-        TargetFilename|startswith: 'C:\Users\'
         TargetFilename|endswith:
             - '\AppData\Local\Microsoft\Teams\stage\Teams.exe'
             - '\AppData\Local\Microsoft\Teams\stage\Squirrel.exe'
@@ -78,7 +78,6 @@ detection:
         Image|endswith: '\mscorsvw.exe'
         TargetFilename|startswith: 'C:\Windows\assembly\NativeImages_'
     filter_vscode:
-        Image|startswith: 'C:\Users\'
         Image|contains: '\AppData\Local\'
         Image|endswith: '\Microsoft VS Code\Code.exe'
         TargetFilename|contains: '\.vscode\extensions\'
@@ -88,6 +87,8 @@ detection:
         #   \AppData\Local\SquirrelTemp\tempb\lib\net45\GitHubDesktop_ExecutionStub.exe
         #   \AppData\Local\SquirrelTemp\tempb\lib\net45\squirrel.exe
         TargetFilename|contains: '\AppData\Local\SquirrelTemp\'
+    filter_windows_temp:
+        TargetFilename|startswith: 'C:\WINDOWS\TEMP\'
     condition: selection and not 1 of filter_*
 falsepositives:
     #Please contribute to FP to increase the level
