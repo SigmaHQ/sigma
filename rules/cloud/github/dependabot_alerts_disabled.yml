@@ -1,0 +1,39 @@
+title: Dependabot Alerts Disabled
+id: 34e1c7d4-0cd5-419d-9f1b-1dad3f61018d
+status: experimental
+description: |
+    Dependabot performs a scan to detect insecure dependencies, and sends Dependabot alerts.
+    This rule detects when an organization owner disables Dependabot alerts or Dependabot security updates.
+author: Muhammad Faisal
+date: 2023/01/27
+references:
+    - https://docs.github.com/en/code-security/dependabot/dependabot-alerts/about-dependabot-alerts
+    - https://docs.github.com/en/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/managing-security-and-analysis-settings-for-your-organization
+tags:
+    - attack.t1195.001
+    - attack.m1016
+    - attack.t1089
+logsource:
+    product: github
+    service: audit
+detection:
+    selection:
+        action:
+            - 'dependabot_alerts.disable'
+            - 'dependabot_alerts_new_repos.disable'
+            - 'dependabot_security_updates.disable'
+            - 'dependabot_security_updates_new_repos.disable'
+    condition: selection
+fields:
+    - 'action'
+    - 'actor'
+    - 'org'
+    - 'actor_location.country_code'
+    - 'transport_protocol_name'
+    - 'repository'
+    - 'repo'
+    - 'repository_public'
+    - '@timestamp'
+falsepositives:
+    - Approved changes by the Organization owner. Please validate the 'actor' if authorized to make the changes.
+level: high
