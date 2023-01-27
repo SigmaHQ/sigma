@@ -1,0 +1,27 @@
+title: Set PendingFileRenameOperations to Rename File
+id: 4eec988f-7bf0-49f1-8675-1e6a510b3a2a
+status: experimental
+description: Detect use of the PendingFileRenameOperations to rename a file in a suspicious folder.
+references:
+    - https://app.any.run/tasks/64b0ba45-e7ce-423b-9a1d-5b4ea59521e6/
+    - https://devblogs.microsoft.com/scripting/determine-pending-reboot-statuspowershell-style-part-1/
+author: frack113
+date: 2023/01/27
+tags:
+    - attack.defense_evasion
+    - attack.t1036.003 
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: 'SetValue'
+        TargetObject|endswith: '\SYSTEM\ControlSet001\Control\SESSION MANAGER\PendingFileRenameOperations'
+        Details|contains: 
+            - '\AppData\'
+            - '\Users\Public\'
+            - '\Temp\'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
