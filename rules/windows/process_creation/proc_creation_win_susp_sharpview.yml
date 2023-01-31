@@ -1,5 +1,8 @@
-title: Suspicious Execution of SharpView Aka PowerView
+title: Suspicious Execution of SharpView
 id: b2317cfa-4a47-4ead-b3ff-297438c0bc2d
+related:
+    - id: dcd74b95-3f36-4ed9-9598-0490951643aa
+      type: similar
 status: experimental
 description: Adversaries may look for details about the network configuration and settings of systems they access or through information discovery of remote systems
 references:
@@ -8,7 +11,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1049/T1049.md#atomic-test-4---system-discovery-using-sharpview
 author: frack113
 date: 2021/12/10
-modified: 2022/09/27
+modified: 2023/01/30
 tags:
     - attack.discovery
     - attack.t1049
@@ -21,136 +24,117 @@ logsource:
     product: windows
 detection:
     selection:
-        - OriginalFileName: SharpView.exe
+        - OriginalFileName: 'SharpView.exe'
         - Image|endswith: '\SharpView.exe'
         - CommandLine|contains:
-            - Get-DomainGPOUserLocalGroupMapping
-            - Find-GPOLocation
-            - Get-DomainGPOComputerLocalGroupMapping
-            - Find-GPOComputerAdmin
-            - Get-DomainObjectAcl
-            #- Get-ObjectAcl
-            - Add-DomainObjectAcl
-            - Add-ObjectAcl
-            - Remove-DomainObjectAcl
-            - Get-RegLoggedOn
-            - Get-LoggedOnLocal
-            - Get-NetRDPSession
-            - Test-AdminAccess
-            - Invoke-CheckLocalAdminAccess
-            - Get-WMIProcess
-            - Get-NetProcess
-            - Get-WMIRegProxy
-            #- Get-Proxy
-            - Get-WMIRegLastLoggedOn
-            - Get-LastLoggedOn
-            - Get-WMIRegCachedRDPConnection
-            - Get-CachedRDPConnection
-            - Get-WMIRegMountedDrive
-            - Get-RegistryMountedDrive
-            - Find-InterestingDomainAcl
-            - Invoke-ACLScanner
-            - Get-NetShare
-            - Get-NetLoggedon
-            - Get-NetLocalGroup
-            - Get-NetLocalGroupMember
-            - Get-NetSession
-            - Get-PathAcl
-            - ConvertFrom-UACValue
-            - Get-PrincipalContext
-            - New-DomainGroup
-            - New-DomainUser
-            - Add-DomainGroupMember
-            - Set-DomainUserPassword
-            - Invoke-Kerberoast
-            - Export-PowerViewCSV
-            - Find-LocalAdminAccess
-            - Find-DomainLocalGroupMember
-            - Find-DomainShare
-            - Find-DomainUserEvent
-            - Find-DomainProcess
-            - Find-DomainUserLocation
-            - Find-InterestingFile
-            - Find-InterestingDomainShareFile
-            - Find-DomainObjectPropertyOutlier
-            #- TestMethod
-            #- Get-Domain
-            - Get-NetDomain
-            - Get-DomainComputer
-            - Get-NetComputer
-            - Get-DomainController
-            - Get-NetDomainController
-            - Get-DomainFileServer
-            - Get-NetFileServer
-            - Convert-ADName
-            - Get-DomainObject
-            - Get-ADObject
-            - Get-DomainUser
-            - Get-NetUser
-            - Get-DomainGroup
-            #- Get-NetGroup
-            - Get-DomainDFSShare
-            - Get-DFSshare
-            - Get-DomainDNSRecord
-            #- Get-DNSRecord
-            #- Get-DomainDNSZone
-            #- Get-DNSZone
-            - Get-DomainForeignGroupMember
-            - Find-ForeignGroup
-            - Get-DomainForeignUser
-            - Find-ForeignUser
-            - ConvertFrom-SID
-            - Convert-SidToName
-            - Get-DomainGroupMember
-            - Get-NetGroupMember
-            - Get-DomainManagedSecurityGroup
-            - Find-ManagedSecurityGroups
-            - Get-DomainOU
-            - Get-NetOU
-            - Get-DomainSID
-            #- Get-Forest
-            - Get-NetForest
-            - Get-ForestTrust
-            - Get-NetForestTrust
-            - Get-DomainTrust
-            - Get-NetDomainTrust
-            - Get-ForestDomain
-            - Get-NetForestDomain
-            - Get-DomainSite
-            - Get-NetSite
-            - Get-DomainSubnet
-            - Get-NetSubnet
-            - Get-DomainTrustMapping
-            - Invoke-MapDomainTrust
-            - Get-ForestGlobalCatalog
-            - Get-NetForestCatalog
-            - Get-DomainUserEvent
-            #- Get-UserEvent
-            - Get-DomainGUIDMap
-            #- Get-GUIDMap
-            - Resolve-IPAddress
-            #- Get-IPAddress
-            - ConvertTo-SID
-            - Invoke-UserImpersonation
-            #- Invoke-RevertToSelf
-            - Get-DomainSPNTicket
-            - Request-SPNTicket
-            - Get-NetComputerSiteName
-            #- Get-SiteName
-            - Get-DomainGPO
-            - Get-NetGPO
-            - Set-DomainObject
-            #- Set-ADObject
-            - Add-RemoteConnection
-            - Remove-RemoteConnection
-            #- Get-IniContent
-            - Get-GptTmpl
-            - Get-GroupsXML
-            - Get-DomainPolicyData
-            - Get-DomainPolicy
-            - Get-DomainGPOLocalGroup
-            - Get-NetGPOGroup
-            - Invoke-Sharefinder
+            #- 'Add-DomainGroupMember'
+            #- 'Add-DomainObjectAcl'
+            #- 'Add-ObjectAcl'
+            - 'Add-RemoteConnection'
+            - 'Convert-ADName'
+            - 'ConvertFrom-SID'
+            - 'ConvertFrom-UACValue'
+            - 'Convert-SidToName'
+            #- 'ConvertTo-SID'
+            - 'Export-PowerViewCSV'
+            #- 'Find-DomainLocalGroupMember'
+            - 'Find-DomainObjectPropertyOutlier'
+            - 'Find-DomainProcess'
+            - 'Find-DomainShare'
+            - 'Find-DomainUserEvent'
+            - 'Find-DomainUserLocation'
+            - 'Find-ForeignGroup'
+            - 'Find-ForeignUser'
+            - 'Find-GPOComputerAdmin'
+            - 'Find-GPOLocation'
+            - 'Find-Interesting' # 'Find-InterestingDomainAcl', 'Find-InterestingDomainShareFile', 'Find-InterestingFile'
+            - 'Find-LocalAdminAccess'
+            - 'Find-ManagedSecurityGroups'
+            #- 'Get-ADObject'
+            - 'Get-CachedRDPConnection'
+            - 'Get-DFSshare'
+            #- 'Get-DNSRecord'
+            #- 'Get-DNSZone'
+            #- 'Get-Domain'
+            - 'Get-DomainComputer'
+            - 'Get-DomainController'
+            - 'Get-DomainDFSShare'
+            - 'Get-DomainDNSRecord'
+            #- 'Get-DomainDNSZone'
+            - 'Get-DomainFileServer'
+            - 'Get-DomainForeign' # 'Get-DomainForeignGroupMember', 'Get-DomainForeignUser'
+            - 'Get-DomainGPO' # 'Get-DomainGPOComputerLocalGroupMapping', 'Get-DomainGPOLocalGroup', 'Get-DomainGPOUserLocalGroupMapping'
+            - 'Get-DomainGroup' # 'Get-DomainGroupMember'
+            - 'Get-DomainGUIDMap'
+            - 'Get-DomainManagedSecurityGroup'
+            - 'Get-DomainObject' # 'Get-DomainObjectAcl'
+            - 'Get-DomainOU'
+            - 'Get-DomainPolicy' # 'Get-DomainPolicyData'
+            - 'Get-DomainSID'
+            - 'Get-DomainSite'
+            - 'Get-DomainSPNTicket'
+            - 'Get-DomainSubnet'
+            - 'Get-DomainTrust' # 'Get-DomainTrustMapping'
+            #- 'Get-DomainUser'
+            - 'Get-DomainUserEvent'
+            #- 'Get-Forest'
+            - 'Get-ForestDomain'
+            - 'Get-ForestGlobalCatalog'
+            - 'Get-ForestTrust'
+            - 'Get-GptTmpl'
+            - 'Get-GroupsXML'
+            #- 'Get-GUIDMap'
+            #- 'Get-IniContent'
+            #- 'Get-IPAddress'
+            - 'Get-LastLoggedOn'
+            - 'Get-LoggedOnLocal'
+            - 'Get-NetComputer' # 'Get-NetComputerSiteName'
+            - 'Get-NetDomain' # 'Get-NetDomainController', 'Get-NetDomainTrust'
+            - 'Get-NetFileServer'
+            - 'Get-NetForest' # 'Get-NetForestCatalog', 'Get-NetForestDomain', 'Get-NetForestTrust'
+            - 'Get-NetGPO' # 'Get-NetGPOGroup'
+            #- 'Get-NetGroup'
+            - 'Get-NetGroupMember'
+            - 'Get-NetLocalGroup' # 'Get-NetLocalGroupMember'
+            - 'Get-NetLoggedon'
+            - 'Get-NetOU'
+            - 'Get-NetProcess'
+            - 'Get-NetRDPSession'
+            - 'Get-NetSession'
+            - 'Get-NetShare'
+            - 'Get-NetSite'
+            - 'Get-NetSubnet'
+            - 'Get-NetUser'
+            #- 'Get-ObjectAcl'
+            - 'Get-PathAcl'
+            - 'Get-PrincipalContext'
+            #- 'Get-Proxy'
+            - 'Get-RegistryMountedDrive'
+            - 'Get-RegLoggedOn'
+            #- 'Get-SiteName'
+            #- 'Get-UserEvent'
+            #- 'Get-WMIProcess'
+            - 'Get-WMIRegCachedRDPConnection'
+            - 'Get-WMIRegLastLoggedOn'
+            - 'Get-WMIRegMountedDrive'
+            - 'Get-WMIRegProxy'
+            - 'Invoke-ACLScanner'
+            - 'Invoke-CheckLocalAdminAccess'
+            - 'Invoke-Kerberoast'
+            - 'Invoke-MapDomainTrust'
+            - 'Invoke-RevertToSelf'
+            - 'Invoke-Sharefinder'
+            - 'Invoke-UserImpersonation'
+            #- 'New-DomainGroup'
+            #- 'New-DomainUser'
+            - 'Remove-DomainObjectAcl'
+            - 'Remove-RemoteConnection'
+            - 'Request-SPNTicket'
+            #- 'Resolve-IPAddress'
+            #- 'Set-ADObject'
+            - 'Set-DomainObject'
+            #- 'Set-DomainUserPassword'
+            - 'Test-AdminAccess'
     condition: selection
 falsepositives:
     - Unknown
