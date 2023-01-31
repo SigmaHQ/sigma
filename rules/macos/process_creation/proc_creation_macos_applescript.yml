@@ -14,10 +14,13 @@ logsource:
     category: process_creation
     product: macos
 detection:
-    selection:
+    selection_main:
         Image|endswith: '/osascript'
-        CommandLine|contains: '-e'
-    condition: selection
+    selection_parameters:
+        CommandLine|contains: 
+            - '-e'
+            - '.scpt'
+    condition: all of selection_*
 falsepositives:
     - Application installers might contain scripts as part of the installation process.
 level: medium
