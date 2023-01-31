@@ -15,27 +15,25 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_cli_1:
-        CommandLine|contains|all:
+    selection_sc:
+        - CommandLine|contains|all:
             - 'sc '
             - 'config '
             - 'binpath='
-    selection_cli_2:
-        CommandLine|contains|all:
+        - CommandLine|contains|all:
             - 'sc '
             - 'failure'
             - 'command='
-    selection_cmd_1:
-        CommandLine|contains|all:
+    selection_reg_img:
+        - CommandLine|contains|all:
             - 'reg '
             - 'add '
             - 'FailureCommand'
-    selection_cmd_2:
-        CommandLine|contains|all:
+        - CommandLine|contains|all:
             - 'reg '
             - 'add '
             - 'ImagePath'
-    selection_cmdline:
+    selection_reg_ext:
         CommandLine|contains:
             - '.sh'
             - '.exe'
@@ -51,7 +49,7 @@ detection:
             - '.vb'
             - '.jar'
             - '.pl'
-    condition: 1 of selection_cli_* or (selection_cmdline and 1 of selection_cmd_*)
+    condition: selection_sc or all of selection_reg_*
 falsepositives:
     - Unknown
 level: medium
