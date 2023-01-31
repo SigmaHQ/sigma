@@ -10,7 +10,7 @@ references:
     - https://twitter.com/_st0pp3r_/status/1583914515996897281
 author: frack113
 date: 2022/01/16
-modified: 2022/12/08
+modified: 2023/01/31
 tags:
     - attack.defense_evasion
     - attack.t1218.007
@@ -18,26 +18,22 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection_img:
         Image|endswith: '\msiexec.exe'
+    selection_cmd:
         CommandLine|contains:
             - ' /y'
             - ' -y'
     filter_apple:
+        CommandLine|contains: '\MsiExec.exe" '
         CommandLine|contains:
-            - '\MsiExec.exe" /Y "C:\Program Files\Bonjour\mdnsNSP.dll'
-            - '\MsiExec.exe" /Y "C:\Program Files (x86)\Bonjour\mdnsNSP.dll'
-            - '\MsiExec.exe" /Y "C:\Program Files (x86)\Apple Software Update\ScriptingObjectModel.dll'
-            - '\MsiExec.exe" /Y "C:\Program Files (x86)\Apple Software Update\SoftwareUpdateAdmin.dll'
-            - '\MsiExec.exe" /Y "C:\Windows\CCM\'
-            - '\MsiExec.exe" /Y C:\Windows\CCM\' # also need non-quoted execution
-            - '\MsiExec.exe" -Y "C:\Program Files\Bonjour\mdnsNSP.dll'
-            - '\MsiExec.exe" -Y "C:\Program Files (x86)\Bonjour\mdnsNSP.dll'
-            - '\MsiExec.exe" -Y "C:\Program Files (x86)\Apple Software Update\ScriptingObjectModel.dll'
-            - '\MsiExec.exe" -Y "C:\Program Files (x86)\Apple Software Update\SoftwareUpdateAdmin.dll'
-            - '\MsiExec.exe" -Y "C:\Windows\CCM\'
-            - '\MsiExec.exe" -Y C:\Windows\CCM\' #also need non-quoted execution
-    condition: selection and not 1 of filter_*
+            - ' "C:\Program Files\Bonjour\mdnsNSP.dll'
+            - ' "C:\Program Files (x86)\Bonjour\mdnsNSP.dll'
+            - ' "C:\Program Files (x86)\Apple Software Update\ScriptingObjectModel.dll'
+            - ' "C:\Program Files (x86)\Apple Software Update\SoftwareUpdateAdmin.dll'
+            - ' "C:\Windows\CCM\'
+            - ' C:\Windows\CCM\' # also need non-quoted execution
+    condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Legitimate script
 level: medium
