@@ -10,33 +10,22 @@ logsource:
     product: macos 
     category: process_creation 
 detection: 
-'''
-    selection1: #Different possible processes
-        Image|endswith: 
-        - '/osascript' 
-        - '/sh'
-        - '/zsh'
-        - '/bash'
-        - '/curl'
-        - '/python'
-'''
-    selection2:
+    selection1:
         CommandLine|contains: 
         - 'osascript'
-    selection3:
+    selection2:
         CommandLine|contains|all: 
         - '-l'
         - 'JavaScript'
-    selection4:
+    selection3:
         CommandLine|contains: '.js'
-    selection 5:
+    selection4:
         CommandLine|contains|all:
         - '-e'
         - 'eval'
         - 'NSData.dataWithContentsOfURL'
-    condition: '''selection1 and '''(selection2 and (selection3 or selection4) and selection5)
+    condition: selection1 and (selection2 or selection3) and selection4
 fields: 
-#    - Image
     - CommandLine 
 falsepositives: 
     - Unknown
