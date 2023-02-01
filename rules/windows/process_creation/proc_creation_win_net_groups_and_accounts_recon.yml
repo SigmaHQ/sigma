@@ -1,4 +1,4 @@
-title: Suspicious Reconnaissance Activity Using Net
+title: Suspicious Groups And Accounts Reconnaissance Activity Using Net.EXE
 id: d95de845-b83c-4a9a-8a6a-4fc802ebf6c0
 status: experimental
 description: Detects suspicious reconnaissance command line activity on Windows systems using Net.EXE
@@ -6,9 +6,9 @@ references:
     - https://redcanary.com/blog/how-one-hospital-thwarted-a-ryuk-ransomware-outbreak/
     - https://thedfirreport.com/2020/10/18/ryuk-in-5-hours/
     - https://research.nccgroup.com/2022/08/19/back-in-black-unlocking-a-lockbit-3-0-ransomware-attack/
-author: Florian Roth (Nextron Systems), omkar72, @svch0st, Nasreddine Bencherchali
+author: Florian Roth (Nextron Systems), omkar72, @svch0st, Nasreddine Bencherchali (Nextron Systems)
 date: 2019/01/16
-modified: 2022/09/09
+modified: 2023/02/01
 tags:
     - attack.discovery
     - attack.t1087.001
@@ -17,7 +17,7 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    net_img:
+    selection_img:
         - Image|endswith:
             - '\net.exe'
             - '\net1.exe'
@@ -46,7 +46,7 @@ detection:
         CommandLine|contains: ' accounts '
     selection_accounts_flags:
         CommandLine|contains: ' /do' # short for domain
-    condition: net_img and (all of selection_group_* or all of selection_accounts_*)
+    condition: selection_img and (all of selection_group_* or all of selection_accounts_*)
 fields:
     - CommandLine
     - ParentCommandLine

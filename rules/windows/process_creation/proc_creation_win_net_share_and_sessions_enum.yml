@@ -1,13 +1,13 @@
-title: Windows Network Enumeration
+title: Shares And Sessions Enumeration Using Net.EXE
 id: 62510e69-616b-4078-b371-847da438cc03
 status: stable
-description: Identifies attempts to enumerate hosts in a network using the built-in Windows net.exe tool.
+description: Detects attempts to enumerate file Shares, printer shares and sessions using "net.exe" with the "view" flag.
 references:
     - https://eqllib.readthedocs.io/en/latest/analytics/b8a94d2f-dc75-4630-9d73-1edc6bd26fff.html
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1018/T1018.md
 author: Endgame, JHasenbusch (ported for oscd.community)
 date: 2018/10/30
-modified: 2022/08/13
+modified: 2023/02/01
 tags:
     - attack.discovery
     - attack.t1018
@@ -21,7 +21,7 @@ detection:
             - '\net1.exe'
         CommandLine|contains: 'view'
     filter:
-        CommandLine|contains: \\\\
+        CommandLine|contains: '\\\\'
     condition: selection and not filter
 fields:
     - ComputerName
