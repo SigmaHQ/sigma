@@ -1,4 +1,4 @@
-title: Powershell Defender Base64 MpPreference
+title: Powershell Base64 Encoded MpPreference Cmdlet
 id: c6fb44c6-71f5-49e6-9462-1425d328aee3
 status: experimental
 description: Detects base64 encoded "MpPreference" PowerShell cmdlet code that tries to modifies or tamper with Windows Defender AV
@@ -8,7 +8,7 @@ references:
     - https://twitter.com/AdamTheAnalyst/status/1483497517119590403
 author: Florian Roth
 date: 2022/03/04
-modified: 2022/08/05
+modified: 2023/01/30
 tags:
     - attack.defense_evasion
     - attack.t1562.001
@@ -16,13 +16,13 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_encoded:
-        CommandLine|base64offset|contains:
+    selection:
+        - CommandLine|base64offset|contains:
             - 'Add-MpPreference '
             - 'Set-MpPreference '
             - 'add-mppreference '
             - 'set-mppreference '
-        CommandLine|contains:
+        - CommandLine|contains:
             # UTF16-LE
             - 'QQBkAGQALQBNAHAAUAByAGUAZgBlAHIAZQBuAGMAZQAgA'
             - 'EAZABkAC0ATQBwAFAAcgBlAGYAZQByAGUAbgBjAGUAIA'
@@ -36,7 +36,7 @@ detection:
             - 'cwBlAHQALQBtAHAAcAByAGUAZgBlAHIAZQBuAGMAZQAgA'
             - 'MAZQB0AC0AbQBwAHAAcgBlAGYAZQByAGUAbgBjAGUAIA'
             - 'zAGUAdAAtAG0AcABwAHIAZQBmAGUAcgBlAG4AYwBlACAA'
-    condition: selection_encoded
+    condition: selection
 falsepositives:
     - Possible Admin Activity
     - Other Cmdlets that may use the same parameters
