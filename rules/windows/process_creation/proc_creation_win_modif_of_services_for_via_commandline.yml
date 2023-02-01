@@ -6,7 +6,7 @@ references:
     - https://pentestlab.blog/2020/01/22/persistence-modify-existing-service/
 author: Sreeman
 date: 2020/09/29
-modified: 2022/03/06
+modified: 2023/01/31
 tags:
     - attack.persistence
     - attack.t1543.003
@@ -15,41 +15,25 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_cmdline_1:
-        CommandLine|contains|all:
+    selection_sc:
+        - CommandLine|contains|all:
             - 'sc '
             - 'config '
             - 'binpath='
-    selection_cmdline_2:
-        CommandLine|contains|all:
+        - CommandLine|contains|all:
             - 'sc '
             - 'failure'
             - 'command='
-    selection_cmdline_3:
-        CommandLine|contains|all:
+    selection_reg_img:
+        - CommandLine|contains|all:
             - 'reg '
             - 'add '
             - 'FailureCommand'
-        CommandLine|contains:
-            - '.sh'
-            - '.exe'
-            - '.dll'
-            - '.bin$'
-            - '.bat'
-            - '.cmd'
-            - '.js'
-            - '.msh$'
-            - '.reg$'
-            - '.scr'
-            - '.ps'
-            - '.vb'
-            - '.jar'
-            - '.pl'
-    selection_cmdline_4:
-        CommandLine|contains|all:
+        - CommandLine|contains|all:
             - 'reg '
             - 'add '
             - 'ImagePath'
+    selection_reg_ext:
         CommandLine|contains:
             - '.sh'
             - '.exe'
@@ -65,7 +49,7 @@ detection:
             - '.vb'
             - '.jar'
             - '.pl'
-    condition: 1 of selection_cmdline_*
+    condition: selection_sc or all of selection_reg_*
 falsepositives:
     - Unknown
 level: medium

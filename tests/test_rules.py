@@ -1171,7 +1171,7 @@ class TestRules(unittest.TestCase):
     #     self.assertEqual(faulty_rules, [], Fore.RED + "There are rules with common typos in field names.")
 
     def test_unknown_value_modifier(self):
-        known_modifiers = ["contains", "startswith", "endswith", "all", "base64offset", "base64", "utf16le", "utf16be", "wide", "utf16", "windash", "re"]
+        known_modifiers = ["contains", "startswith", "endswith", "all", "base64offset", "base64", "utf16le", "utf16be", "wide", "utf16", "windash", "re", "cidr"]
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             detection = self.get_rule_part(file_path=file, part_name="detection")
