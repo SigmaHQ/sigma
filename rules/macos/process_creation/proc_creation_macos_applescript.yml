@@ -4,6 +4,7 @@ status: test
 description: Detects execution of AppleScript of the macOS scripting language AppleScript.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1059.002/T1059.002.md
+    - https://redcanary.com/blog/applescript/
 author: Alejandro Ortuno, oscd.community
 date: 2020/10/21
 modified: 2023/01/31
@@ -14,13 +15,12 @@ logsource:
     category: process_creation
     product: macos
 detection:
-    selection_main:
+    selection:
         Image|endswith: '/osascript'
-    selection_parameters:
-        CommandLine|contains: 
-            - '-e'
+        CommandLine|contains:
+            - ' -e '
             - '.scpt'
-    condition: all of selection_*
+    condition: selection
 falsepositives:
     - Application installers might contain scripts as part of the installation process.
 level: medium
