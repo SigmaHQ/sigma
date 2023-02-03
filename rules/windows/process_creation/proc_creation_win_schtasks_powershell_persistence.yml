@@ -1,0 +1,35 @@
+title: Potential Persistence Via Powershell Search Order Hijacking - Task
+id: b66474aa-bd92-4333-a16c-298155b120df
+related:
+    - id: 6e8811ee-90ba-441e-8486-5653e68b2299
+      type: similar
+status: experimental
+description: Detects suspicious powershell execution via a schedule task where the command ends with an suspicious flags to hide the powershell instance instead of executeing scripts or commands. This could be a sign of persistence via PowerShell "Get-Variable" technique as seen being used in Colibri Loader
+references:
+    - https://blog.malwarebytes.com/threat-intelligence/2022/04/colibri-loader-combines-task-scheduler-and-powershell-in-clever-persistence-technique/
+author: pH-T (Nextron Systems), Florian Roth (Nextron Systems)
+date: 2022/04/08
+modified: 2023/02/03
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.t1053.005
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        ParentImage: 'C:\WINDOWS\System32\svchost.exe'
+        ParentCommandLine|contains|all:
+            - '-k netsvcs'
+            - '-s Schedule'
+        CommandLine|endswith:
+            - ' -windowstyle hidden'
+            - ' -w hidden'
+            - ' -ep bypass'
+            - ' -noni'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
