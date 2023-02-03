@@ -1,0 +1,27 @@
+title: New Generic Credentials Added Via Cmdkey.EXE
+id: 07f8bdc2-c9b3-472a-9817-5a670b872f53
+status: experimental
+description: Detects usage of cmdkey to add generic credentials. Was seen being used to as a precursor before connecting to an RDP session
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1021.001/T1021.001.md#t1021001---remote-desktop-protocol
+author: frack113, Nasreddine Bencherchali (Nextron Systems)
+date: 2023/02/03
+tags:
+    - attack.credential_access
+    - attack.t1003.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\cmdkey.exe'
+        - OriginalFileName: 'cmdkey.exe'
+    selection_cli:
+        CommandLine|contains|all:
+            - ' /g'
+            - ' /u'
+            - ' /p'
+    condition: all of selection*
+falsepositives:
+    - Legitimate usage for administration purposes
+level: medium
