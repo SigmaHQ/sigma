@@ -18,15 +18,16 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        - CommandLine|contains:
+    selection_1:
+        CommandLine|contains:
             - 'System.Management.Automation.AmsiUtils'
             - 'amsiInitFailed'
-        - CommandLine|contains|all:
+    selection_2:
+        CommandLine|contains|all:
             - '[Ref].Assembly.GetType'
             - 'SetValue($null,$true)'
             - 'NonPublic,Static'
-    condition: selection
+    condition: 1 of selection_*
 falsepositives:
     - Unlikely
 level: high
