@@ -10,6 +10,7 @@ import os
 import unittest
 import yaml
 import re
+import string
 from attackcti import attack_client
 from colorama import init
 from colorama import Fore
@@ -1289,6 +1290,98 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(faulty_config, False, Fore.RED + "thor.yml configuration file located in 'tools/config/thor.yml' has a borken log source definition")
 
+    def test_re_invalid_escapes(self):
+        faulty_rules = []
+        MAX_DEPTH = 3
+
+        def create_escape_allow_list():
+            """
+            Create a list of characters that are allowed to be escaped.
+            1. Based on string.punctuation chars that would already be escaped by re.escape()
+            2. Followed by special chars like '\n', '\t', '\[0-9]' etc.
+            3. Followed by Double- or Single Quote to escape string literals.
+            """
+            allowed_2_be_escaped = []
+            index = 0
+            l = tuple(re.escape(string.punctuation))
+            for c in l:
+                if c == "\\":
+                    allowed_2_be_escaped.append(l[index+1])
+                index += 1
+
+            re_specials = [
+                "A", "b", "B", "d", "D", "f", "n", "r", "s",
+                "S", "t", "v", "w", "W", "Z",
+                # Match Groups
+                "0", "1", "2", "3", "4", "5",
+                "6", "7", "8", "9",
+            ]
+            allowed_2_be_escaped.extend(re_specials)
+
+            allowed_2_be_escaped.extend([
+                '"',
+                '\'',
+            ])
+
+            return allowed_2_be_escaped
+
+        def check_list_or_recurse_on_dict(item, depth: int, special: bool) -> None:
+            """
+            Recursive walk through the detection to find "|re" occurance.
+            Jump to check_item_for_bad_escapes with lists or strings found.
+            """
+            if type(item) == list:
+                pass
+                # check_item_for_bad_escapes(item)
+            elif type(item) == dict and depth <= MAX_DEPTH:
+                for keys, sub_item in item.items():
+                    if "|re" in keys: # Covers both "base64" and "base64offset" modifiers
+                        if type(sub_item) == str or type(sub_item) == list:
+                            check_item_for_bad_escapes(sub_item)
+                        else:
+                            check_list_or_recurse_on_dict(sub_item, depth + 1, True)
+                    else:
+                        check_list_or_recurse_on_dict(sub_item, depth + 1, special)
+
+        def check_item_for_bad_escapes(item):
+            """
+            Check item against bad escaped characters
+            """
+            found_bad_escapes = []
+            to_check = []
+            if type(item) == str:
+                to_check.append(item)
+            else:
+                to_check = item
+            for str_item in to_check:
+                l = tuple(str_item)
+                index = 0
+                for c in l:
+                    if c == "\\":
+                        # 'l[index-1] != "\\"' ---> Allows "\\\\"
+                        # Check if character after \ is not in escape_allow_list and also not already found
+                        if l[index-1] != "\\" and l[index+1] not in escape_allow_list and l[index+1] not in found_bad_escapes:
+                            # Only for debugging:
+                            # print(f"Illegal escape found {c}{l[index+1]}")
+                            found_bad_escapes.append(f"{l[index+1]}")
+                    index += 1
+
+            if len(found_bad_escapes) > 0:
+                print(Fore.RED + "Rule {} has forbidden escapes in |re '{}'".format(file, ",".join(found_bad_escapes)))
+                faulty_rules.append(file)
+
+        # Create escape_allow_list for this test
+        escape_allow_list = create_escape_allow_list()
+
+        # For each rule file, extract detection and dive into recursion
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            detection = self.get_rule_part(
+                file_path=file, part_name="detection")
+            if detection:
+                check_list_or_recurse_on_dict(detection, 1, False)
+
+        self.assertEqual(faulty_rules, [], Fore.RED +
+                         "There are rules using illegal re-escapes")
 
 def get_mitre_data():
     """
