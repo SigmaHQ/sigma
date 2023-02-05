@@ -1,4 +1,4 @@
-title: Wbadmin Delete Systemstatebackup
+title: SystemStateBackup Deleted Using Wbadmin.EXE
 id: 89f75308-5b1b-4390-b2d8-d6b2340efaf8
 status: test
 description: |
@@ -9,7 +9,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1490/T1490.md#atomic-test-5---windows---delete-volume-shadow-copies-via-wmi-with-powershell
 author: frack113
 date: 2021/12/13
-modified: 2022/02/28
+modified: 2023/02/04
 tags:
     - attack.impact
     - attack.t1490
@@ -17,15 +17,15 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    wbadmin_exe:
+    selection_img:
         - Image|endswith: '\wbadmin.exe'
-        - CommandLine|contains: 'wbadmin'
-    wbadmin_cmd:
+        - OriginalFileName: 'WBADMIN.EXE'
+    selection_cli:
         CommandLine|contains|all:
             - 'delete '
             - 'systemstatebackup '
             - '-keepVersions:0'
-    condition: all of wbadmin_*
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: high
