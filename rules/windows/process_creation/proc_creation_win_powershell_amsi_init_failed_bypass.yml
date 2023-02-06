@@ -1,0 +1,24 @@
+title: Powershell AMSI Bypass via .NET Reflection
+id: 30edb182-aa75-42c0-b0a9-e998bb29067c
+status: test
+description: Detects Request to "amsiInitFailed" that can be used to disable AMSI Scanning
+references:
+    - https://s3cur3th1ssh1t.github.io/Bypass_AMSI_by_manual_modification/
+author: Markus Neis
+date: 2018/08/17
+modified: 2022/09/02
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:
+            - 'System.Management.Automation.AmsiUtils'
+            - 'amsiInitFailed'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
