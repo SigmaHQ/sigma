@@ -4,9 +4,9 @@ status: experimental
 description: Detects when a shell program such as the windows Command Prompt or PowerShell is launched with system privileges.
 references:
     - https://github.com/Wh04m1001/SysmonEoP
-author: frack113
+author: frack113, Tim Shelton (update fp)
 date: 2022/12/05
-modified: 2022/12/07
+modified: 2023/01/24
 tags:
     - attack.privilege_escalation
     - attack.defense_evasion
@@ -30,11 +30,40 @@ detection:
             - 'AUTHORI'
             - 'AUTORI'
         LogonId: '0x3e7'
-    filter_compattelrunner:
-        ParentImage: 'C:\Windows\System32\CompatTelRunner.exe'
-        ParentCommandLine|contains: '-m:appraiser.dll -f:DoScheduledTelemetryRun'
-        OriginalFileName: 'PowerShell.EXE'
-        CommandLine|contains: '-ExecutionPolicy Restricted -Command Write-Host'
+    filter_generic:
+        # Example 1:
+        #   C:\Program Files\erl-23.2\erts-11.1.4\bin\erl.exe" -service_event ErlSrv_RabbitMQ -nohup -sname rabbit@localhost -s rabbit boot -boot start_sasl +W w +MBas ageffcbf +MHas ageffcbf +MBlmbcs 512 +MHlmbcs 512 +MMmcs 30 +P 1048576 +t 5000000 +stbt db +zdbbl 128000 +sbwt none +sbwtdcpu none +sbwtdio none -kernel inet_dist_listen_min 25672 -kernel inet_dist_listen_max 25672 -lager crash_log false -lager handlers []
+        # Example 2:
+        #   ParentImage: C:\Program Files (x86)\Varonis\DatAdvantage\GridCollector\VrnsRealTimeAlertsSvc.exe" /appid 000000ad-cb03-500b-9459-c46d000000ad
+        #   CommandLine: C:\Windows\system32\cmd.exe /c C:\Program Files "(x86)\Varonis\DatAdvantage\GridCollector\handle_scopes.cmd C:\Collector" Working Share\VaronisWorkDirectoryCollector
+        ParentImage|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+    filter_manageengine:
+        # Example:
+        #   ParentImage: C:/ManageEngine/ADManager Plus/pgsql/bin/postgres.exe" --forkarch 5380
+        #   CommandLine: C:\Windows\system32\cmd.exe /c "IF EXIST archive.bat (archive.bat pg_wal\000000010000008E000000EA 000000010000008E000000EA)
+        ParentImage: 'C:\ManageEngine\ADManager Plus\pgsql\bin\postgres.exe'
+        Image|endswith: '\cmd.exe'
+    filter_citrix:
+        ParentImage|startswith: 'C:\Windows\SysWOW64\config\systemprofile\Citrix\UpdaterBinaries\'
+        ParentImage|endswith: '\CitrixReceiverUpdater.exe'
+        Image|endswith: '\cmd.exe'
+    filter_thor:
+        ParentImage|endswith: '\python.exe'
+        CommandLine: 'C:\WINDOWS\system32\cmd.exe /c "ver"'
+        CurrentDirectory|contains: 'C:\WINDOWS\Temp\asgard2-agent\'
+    filter_dell_update:
+        ParentImage|startswith: 'C:\Windows\Temp'
+        ParentImage|endswith: '\invcol.exe'
+        ParentCommandLine|contains: 'C:\ProgramData\Dell\UpdateService\'
+        Image|endswith: '\cmd.exe'
+    filter_empty_parent1:  # Most probably SetupHost.exe during Windows updates/upgrades; See comment on rule id: f4bbd493-b796-416e-bbf2-121235348529
+        CommandLine: "powershell.exe -ExecutionPolicy Restricted -Command Write-Host 'Final result: 1';"
     condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Unknown

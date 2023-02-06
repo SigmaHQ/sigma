@@ -7,9 +7,10 @@ references:
     - https://github.com/PowerShellMafia/PowerSploit/blob/d943001a7defb5e0d1657085a77a0e78609be58f/Recon/PowerView.ps1
     - https://github.com/BloodHoundAD/SharpHound3/blob/7d96b991b1887ff50349ce59c80980bc0d95c86a/SharpHound3/LdapBuilder.cs
     - https://medium.com/falconforce/falconfriday-detecting-active-directory-data-collection-0xff21-c22d1a57494c
+    - https://github.com/fox-it/BloodHound.py/blob/d65eb614831cd30f26028ccb072f5e77ca287e0b/bloodhound/ad/domain.py#L427
 author: Adeem Mawani
 date: 2021/06/22
-modified: 2022/12/14
+modified: 2022/12/28
 tags:
     - attack.discovery
     - attack.t1069.002
@@ -18,7 +19,7 @@ tags:
 logsource:
     product: windows
     service: ldap_debug
-    definition: 'Requires Microsoft-Windows-LDAP-Client/Debug ETW logging'
+    definition: 'Requirements: Microsoft-Windows-LDAP-Client/Debug ETW logging'
 detection:
     generic_search:
         EventID: 30
@@ -67,6 +68,7 @@ detection:
             - '!(UserAccountControl:1.2.840.113556.1.4.803:=2)'
             - 'msDS-AllowedToActOnBehalfOfOtherIdentity'
             - 'msDS-AllowedToDelegateTo'
+            - 'msDS-GroupManagedServiceAccount'
             - '(accountExpires=9223372036854775807)'
             - '(accountExpires=0)'
             - '(adminCount=1)'

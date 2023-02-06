@@ -1,0 +1,40 @@
+title: Linux HackTool Execution
+id: a015e032-146d-4717-8944-7a1884122111
+status: experimental
+description: Detects known hacktool execution based on image name
+references:
+    - Internal Research
+    - https://github.com/Gui774ume/ebpfkit
+    - https://github.com/pathtofile/bad-bpf
+    - https://github.com/carlospolop/PEASS-ng
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/01/03
+modified: 2023/01/31
+tags:
+    - attack.execution
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection:
+        - Image|endswith:
+            # Add more as you see fit
+            - '/sqlmap'
+            - '/teamserver'
+            - '/aircrack-ng'
+            - '/john'
+            - '/setoolkit'
+            - '/wpscan'
+            - '/hydra'
+            - '/nikto'
+            # eBPF related malicious tools/poc's
+            - '/ebpfkit'
+            - '/bpfdos'
+            - '/exechijack'
+            - '/pidhide'
+            - '/writeblocker'
+        - Image|contains: '/linpeas'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high

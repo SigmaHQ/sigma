@@ -4,9 +4,9 @@ status: test
 description: Detects a process spawned by the terminal service server process (this could be an indicator for an exploitation of CVE-2019-0708)
 references:
     - https://securingtomorrow.mcafee.com/other-blogs/mcafee-labs/rdp-stands-for-really-do-patch-understanding-the-wormable-rdp-vulnerability-cve-2019-0708/
-author: Florian Roth
+author: Florian Roth (Nextron Systems)
 date: 2019/05/22
-modified: 2022/11/25
+modified: 2023/01/25
 tags:
     - attack.initial_access
     - attack.t1190
@@ -21,14 +21,15 @@ detection:
         ParentCommandLine|contains|all:
             - '\svchost.exe'
             - 'termsvcs'
-    filter:
+    filter_img:
         Image|endswith:
             - '\rdpclip.exe'
             - ':\Windows\System32\csrss.exe'
             - ':\Windows\System32\wininit.exe'
+            - ':\Windows\System32\winlogon.exe'
     filter_null:
         Image: null
-    condition: selection and not 1 of filter*
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown
 level: high

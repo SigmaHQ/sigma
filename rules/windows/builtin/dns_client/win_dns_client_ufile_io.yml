@@ -1,0 +1,26 @@
+title: DNS Query for Ufile.io Upload Domain - DNS Client
+id: 090ffaad-c01a-4879-850c-6d57da98452d
+related:
+    - id: 1cbbeaaf-3c8c-4e4c-9d72-49485b6a176b
+      type: similar
+status: experimental
+description: Detects DNS queries to "ufile.io". Which is often abused by malware for upload and exfiltration
+references:
+    - https://thedfirreport.com/2021/12/13/diavol-ransomware/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/01/16
+tags:
+    - attack.exfiltration
+    - attack.t1567.002
+logsource:
+    product: windows
+    service: dns-client
+    definition: 'Requirements: Microsoft-Windows-DNS Client Events/Operational Event Log must be enabled/collected in order to receive the events.'
+detection:
+    selection:
+        EventID: 3008
+        QueryName|contains: 'ufile.io'
+    condition: selection
+falsepositives:
+    - Legitimate DNS queries and usage of Ufile
+level: high

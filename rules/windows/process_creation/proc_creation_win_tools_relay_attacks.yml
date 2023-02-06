@@ -3,15 +3,15 @@ id: 5589ab4f-a767-433c-961d-c91f3f704db1
 status: test
 description: Detects different hacktools used for relay attacks on Windows for privilege escalation
 references:
-    - https://attack.mitre.org/techniques/T1557/001/
     - https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/
     - https://pentestlab.blog/2017/04/13/hot-potato/
     - https://github.com/ohpe/juicy-potato
     - https://hunter2.gitbook.io/darthsidious/other/war-stories/domain-admin-in-30-minutes
     - https://hunter2.gitbook.io/darthsidious/execution/responder-with-ntlm-relay-and-empire
-author: Florian Roth
+    - https://www.localpotato.com/
+author: Florian Roth (Nextron Systems)
 date: 2021/07/24
-modified: 2022/10/06
+modified: 2023/01/12
 tags:
     - attack.execution
     - attack.t1557.001
@@ -33,6 +33,7 @@ detection:
             - '\Responder.exe'
             - '\smbrelayx'
             - '\ntlmrelayx'
+            - '\LocalPotato'
     selection_script:
         CommandLine|contains:
             - 'Invoke-Tater'
@@ -48,11 +49,8 @@ detection:
     filter_hotpotatoes:  # known goodware https://hotpot.uvic.ca/
         Image|contains:
             - 'HotPotatoes6'
-            - 'HotPotatoes 6'
             - 'HotPotatoes7'
-            - 'HotPotatoes 7'
-            - 'HotPotatoes Help'
-            - 'HotPotatoes Tutorial'
+            - 'HotPotatoes ' # Covers the following: 'HotPotatoes 6', 'HotPotatoes 7', 'HotPotatoes Help', 'HotPotatoes Tutorial'
     condition: 1 of selection_* and not 1 of filter_*
 falsepositives:
     - Legitimate files with these rare hacktool names

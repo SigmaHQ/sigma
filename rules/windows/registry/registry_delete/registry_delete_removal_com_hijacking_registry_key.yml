@@ -10,7 +10,7 @@ references:
     - https://docs.microsoft.com/en-us/windows/win32/shell/shell-and-managed-code
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 date: 2020/05/02
-modified: 2022/10/20
+modified: 2023/01/19
 tags:
     - attack.defense_evasion
     - attack.t1112
@@ -51,6 +51,13 @@ detection:
         Image|endswith: '\Everything.exe'
         # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
         TargetObject|contains: '\Everything.'
+    filter_uninstallers:
+        # This image path is linked with different uninstallers when running as admin unfortunately
+        Image|startswith: 'C:\Windows\Installer\MSI'
+    filter_java:
+        Image|startswith: 'C:\Program Files (x86)\Java\'
+        Image|endswith: '\installer.exe'
+        TargetObject|contains: '\Classes\WOW6432Node\CLSID\{4299124F-F2C3-41b4-9C73-9236B2AD0E8F}'
     condition: selection and not 1 of filter_*
 falsepositives:
     - Legitimate software (un)installations are known to cause some false positives. Please add them as a filter when encountered

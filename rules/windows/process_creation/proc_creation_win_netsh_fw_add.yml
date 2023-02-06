@@ -7,7 +7,7 @@ references:
     - https://www.operationblockbuster.com/wp-content/uploads/2016/02/Operation-Blockbuster-RAT-and-Staging-Report.pdf
 author: Markus Neis, Sander Wiebing
 date: 2019/01/29
-modified: 2022/02/10
+modified: 2023/01/25
 tags:
     - attack.defense_evasion
     - attack.t1562.004
@@ -25,6 +25,10 @@ detection:
         CommandLine|contains:
             - '\netsh.exe advfirewall firewall add rule name=Dropbox dir=in action=allow "program=C:\Program Files (x86)\Dropbox\Client\Dropbox.exe" enable=yes profile=Any'
             - '\netsh.exe advfirewall firewall add rule name=Dropbox dir=in action=allow "program=C:\Program Files\Dropbox\Client\Dropbox.exe" enable=yes profile=Any'
+    filter_thor:
+        ParentImage|startswith: 'C:\Windows\Temp\asgard2-agent\'
+        ParentImage|endswith: '\thor64.exe'
+        CommandLine|contains: 'advfirewall firewall show rule name=all'
     condition: all of selection* and not 1 of filter_*
 falsepositives:
     - Legitimate administration

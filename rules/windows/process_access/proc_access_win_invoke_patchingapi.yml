@@ -1,0 +1,78 @@
+title: Potential NT API Stub Patching
+id: b916cba1-b38a-42da-9223-17114d846fd6
+status: experimental
+description: Detects potential NT API stub patching as seen used by the project PatchingAPI
+references:
+    - https://github.com/D1rkMtr/UnhookingPatch
+    - https://twitter.com/D1rkMtr/status/1611471891193298944?s=20
+author: frack113
+date: 2023/01/07
+modified: 2023/01/25
+tags:
+    - attack.defense_evasion
+    - attack.t1562.002
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        GrantedAccess: '0x1FFFFF'
+        CallTrace|startswith: 'C:\Windows\SYSTEM32\ntdll.dll+'
+        CallTrace|contains: '|UNKNOWN('
+        CallTrace|endswith: ')'
+    filter_generic:
+        # To avoid FP with installed applications. This filter assumes that if an application is located here. The attacker has already achieved admin rights
+        - SourceImage|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+        - TargetImage|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+    filter_thor:
+        SourceImage|startswith: 'C:\Windows\Temp\asgard2-agent\'
+        SourceImage|endswith: '\thor64.exe'
+    filter_githubdesktop:
+        SourceImage|startswith: 'C:\Users\'
+        SourceImage|contains: '\AppData\Local\GitHubDesktop\app-'
+        SourceImage|endswith:
+            - '\GitHubDesktop.exe'
+            - '\resources\app\git\usr\bin\sh.exe'
+        TargetImage|startswith: 'C:\Users\'
+        TargetImage|contains: '\AppData\Local\GitHubDesktop\app-'
+    filter_dotnet:
+        SourceImage|startswith:
+            - 'C:\Windows\Microsoft.NET\Framework\v'
+            - 'C:\Windows\Microsoft.NET\Framework64\v'
+        SourceImage|endswith: '\NGenTask.exe'
+        TargetImage|startswith:
+            - 'C:\Windows\Microsoft.NET\Framework\v'
+            - 'C:\Windows\Microsoft.NET\Framework64\v'
+    filter_taskhost:
+        SourceImage:
+            - 'C:\WINDOWS\system32\taskhostw.exe'
+            - 'C:\Windows\system32\taskhost.exe'
+        TargetImage|startswith:
+            - 'C:\Windows\Microsoft.NET\Framework\v'
+            - 'C:\Windows\Microsoft.NET\Framework64\v'
+        TargetImage|endswith: '\NGenTask.exe'
+    filter_teams_to_update:
+        SourceImage|startswith: 'C:\Users\'
+        SourceImage|endswith: '\AppData\Local\Microsoft\Teams\stage\Teams.exe'
+        TargetImage|startswith: 'C:\Users\'
+        TargetImage|endswith: '\AppData\Local\Microsoft\Teams\Update.exe'
+    filter_teams_update_regsvr32:
+        SourceImage|startswith: 'C:\Users\'
+        SourceImage|endswith: '\AppData\Local\Microsoft\Teams\Update.exe'
+        TargetImage: 'C:\WINDOWS\SysWOW64\regsvr32.exe'
+    filter_teams_update_to_teams:
+        SourceImage|startswith: 'C:\Users\'
+        SourceImage|endswith: '\AppData\Local\Microsoft\Teams\Update.exe'
+        TargetImage|endswith: '\AppData\Local\Microsoft\Teams\stage\Teams.exe'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: medium

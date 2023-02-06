@@ -1,0 +1,36 @@
+title: Unsigned AppX Installation Attempt Using Add-AppxPackage
+id: 37651c2a-42cd-4a69-ae0d-22a4349aa04a
+related:
+    - id: 975b2262-9a49-439d-92a6-0709cccdf0b2
+      type: similar
+status: experimental
+description: Detects usage of the "Add-AppxPackage" or it's alias "Add-AppPackage" to install unsigned AppX packages
+references:
+    - https://learn.microsoft.com/en-us/windows/msix/package/unsigned-package
+    - https://twitter.com/WindowsDocs/status/1620078135080325122
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/01/31
+tags:
+    - attack.persistence
+    - attack.defense_evasion
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        - OriginalFileName:
+            - 'PowerShell.EXE'
+            - 'pwsh.dll'
+    selection_cmdlet:
+        CommandLine|contains:
+            - 'Add-AppPackage '
+            - 'Add-AppxPackage '
+    selection_flag:
+        CommandLine|contains: ' -AllowUnsigned'
+    condition: all of selection_*
+falsepositives:
+    - Installation of unsigned packages for testing purposes
+level: medium

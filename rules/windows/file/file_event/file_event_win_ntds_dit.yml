@@ -7,9 +7,9 @@ references:
     - https://www.n00py.io/2022/03/manipulating-user-passwords-without-mimikatz/
     - https://pentestlab.blog/tag/ntds-dit/
     - https://github.com/samratashok/nishang/blob/414ee1104526d7057f9adaeee196d91ae447283e/Gather/Copy-VSS.ps1
-author: Florian Roth
+author: Florian Roth (Nextron Systems)
 date: 2022/03/11
-modified: 2022/07/14
+modified: 2023/01/05
 tags:
     - attack.credential_access
     - attack.t1003.003
@@ -19,8 +19,8 @@ logsource:
 detection:
     selection_file:
         TargetFilename|endswith: '\ntds.dit'
-    selection_process:
-        - ParentImage|endswith:
+    selection_process_parent:
+        ParentImage|endswith:
             - '\powershell.exe'
             - '\pwsh.exe'
             - '\wscript.exe'
@@ -29,19 +29,21 @@ detection:
             - '\php-cgi.exe'
             - '\nginx.exe'
             - '\httpd.exe'
-        - ParentImage|contains:
+    selection_process_parent_path:
+        ParentImage|contains:
             - '\apache'
             - '\tomcat'
             - '\AppData\'
             - '\Temp\'
             - '\Public\'
             - '\PerfLogs\'
-        - Image|contains:
+    selection_process_child:
+        Image|contains:
             - '\AppData\'
             - '\Temp\'
             - '\Public\'
             - '\PerfLogs\'
-    condition: selection_file and 1 of selection_process*
+    condition: selection_file and 1 of selection_process_*
 falsepositives:
     - Unknown
 level: high

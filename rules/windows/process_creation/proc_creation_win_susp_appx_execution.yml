@@ -1,0 +1,38 @@
+title: Suspicious Windows App Activity
+id: f91ed517-a6ba-471d-9910-b3b4a398c0f3
+status: experimental
+description: Detects suspicious children of application launched from inside the WindowsApps directory. This could be a sign of a rogue ".appx" package installation/execution
+references:
+    - https://news.sophos.com/en-us/2021/11/11/bazarloader-call-me-back-attack-abuses-windows-10-apps-mechanism/
+    - https://www.sentinelone.com/labs/inside-malicious-windows-apps-for-malware-deployment/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/01/12
+tags:
+    - attack.defense_evasion
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_parent:
+        #GrandParentImage|endswith: '\sihost.exe'
+        ParentImage|contains: 'C:\Program Files\WindowsApps\'
+    selection_susp_img:
+        Image|endswith:
+            # You can add more LOLBINs
+            - '\poweshell.exe'
+            - '\pwsh.exe'
+            - '\rundll32.exe'
+            - '\regsvr32.exe'
+            - '\mshta.exe'
+            - '\cscript.exe'
+            - '\wscript.exe'
+    selection_susp_cli:
+        # You can add more suspicious keywords
+        CommandLine|contains:
+            - 'cmd /c'
+            - 'Invoke-'
+            - 'Base64'
+    condition: selection_parent and 1 of selection_susp_*
+falsepositives:
+    - Unknown
+level: high
