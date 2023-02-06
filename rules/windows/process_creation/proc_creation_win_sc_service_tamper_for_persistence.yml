@@ -1,0 +1,55 @@
+title: Potential Persistence Attempt Via Existing Service Tampering
+id: 38879043-7e1e-47a9-8d46-6bec88e201df
+status: test
+description: Detects the modification of an existing service in order to execute an arbitrary payload when the service is started or killed as a potential method for persistence.
+references:
+    - https://pentestlab.blog/2020/01/22/persistence-modify-existing-service/
+author: Sreeman
+date: 2020/09/29
+modified: 2023/02/04
+tags:
+    - attack.persistence
+    - attack.t1543.003
+    - attack.t1574.011
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_sc:
+        - CommandLine|contains|all:
+            - 'sc '
+            - 'config '
+            - 'binpath='
+        - CommandLine|contains|all:
+            - 'sc '
+            - 'failure'
+            - 'command='
+    selection_reg_img:
+        - CommandLine|contains|all:
+            - 'reg '
+            - 'add '
+            - 'FailureCommand'
+        - CommandLine|contains|all:
+            - 'reg '
+            - 'add '
+            - 'ImagePath'
+    selection_reg_ext:
+        CommandLine|contains:
+            - '.sh'
+            - '.exe'
+            - '.dll'
+            - '.bin$'
+            - '.bat'
+            - '.cmd'
+            - '.js'
+            - '.msh$'
+            - '.reg$'
+            - '.scr'
+            - '.ps'
+            - '.vb'
+            - '.jar'
+            - '.pl'
+    condition: selection_sc or all of selection_reg_*
+falsepositives:
+    - Unknown
+level: medium

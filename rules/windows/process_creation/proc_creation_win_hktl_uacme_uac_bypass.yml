@@ -1,10 +1,10 @@
-title: UAC Bypass Tool UACMe Akagi
+title: HackTool - UACMe Akagi Execution
 id: d38d2fa4-98e6-4a24-aff1-410b0c9ad177
 status: experimental
-description: Detects execution of UACMe (a tool used for UAC bypass) via default PE metadata
+description: Detects the execution of UACMe, a tool used for UAC bypasses, via default PE metadata
 references:
     - https://github.com/hfiref0x/UACME
-author: Christian Burkard (Nextron Systems), Florian Roth
+author: Christian Burkard (Nextron Systems), Florian Roth (Nextron Systems)
 date: 2021/08/30
 modified: 2022/11/19
 tags:
@@ -29,11 +29,11 @@ detection:
         - OriginalFileName:
             - 'Akagi.exe'
             - 'Akagi64.exe'
-    selection_exec:
+    selection_img:
         Image|endswith:
             - '\Akagi64.exe'
             - '\Akagi.exe'
-    selection_sysmon:
+    selection_hashes_sysmon:
         Hashes|contains:
             - 'IMPHASH=767637C23BB42CD5D7397CF58B0BE688'
             - 'IMPHASH=14C4E4C72BA075E9069EE67F39188AD8'
@@ -46,7 +46,7 @@ detection:
             - 'IMPHASH=DC7D30B90B2D8ABF664FBED2B1B59894'
             - 'IMPHASH=41923EA1F824FE63EA5BEB84DB7A3E74'
             - 'IMPHASH=3DE09703C8E79ED2CA3F01074719906B'
-    selection_hash:
+    selection_hashes_other:
         Imphash:
             - '767637c23bb42cd5d7397cf58b0be688'
             - '14c4e4c72ba075e9069ee67f39188ad8'
@@ -59,7 +59,7 @@ detection:
             - 'dc7d30b90b2d8abf664fbed2b1b59894'
             - '41923ea1f824fe63ea5beb84db7a3e74'
             - '3de09703c8e79ed2ca3f01074719906b'
-    condition: 1 of selection*
+    condition: 1 of selection_*
 falsepositives:
     - Unknown
 level: high
