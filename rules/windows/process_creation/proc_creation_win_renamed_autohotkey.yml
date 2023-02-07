@@ -1,0 +1,38 @@
+title: Renamed AutoHotkey.EXE Execution
+id: 277a4393-446c-449a-b0ed-7fdc7795244c
+status: test
+description: Detects execution of a renamed autohotkey.exe binary based on PE metadata fields
+references:
+    - https://www.autohotkey.com/download/
+    - https://thedfirreport.com/2023/02/06/collect-exfiltrate-sleep-repeat/
+author: Nasreddine Bencherchali
+date: 2023/02/07
+tags:
+    - attack.defense_evasion
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Product|contains: 'AutoHotkey'
+        - Description|contains: 'AutoHotkey'
+        - OriginalFileName:
+            - 'AutoHotkey.exe'
+            - 'AutoHotkey.rc'
+    filter:
+        Image|endswith:
+            - '\AutoHotkey.exe'
+            - '\AutoHotkey32.exe'
+            - '\AutoHotkey32_UIA.exe'
+            - '\AutoHotkey64.exe'
+            - '\AutoHotkey64_UIA.exe'
+            - '\AutoHotkeyA32.exe'
+            - '\AutoHotkeyA32_UIA.exe'
+            - '\AutoHotkeyU32.exe'
+            - '\AutoHotkeyU32_UIA.exe'
+            - '\AutoHotkeyU64.exe'
+            - '\AutoHotkeyU64_UIA.exe'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: medium
