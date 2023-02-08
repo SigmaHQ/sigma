@@ -6,7 +6,7 @@ references:
     - https://speakerdeck.com/heirhabarov/hunting-for-persistence-via-microsoft-exchange-server-or-outlook?slide=70
 author: Tobias Michalski (Nextron Systems)
 date: 2021/06/10
-modified: 2022/11/26
+modified: 2023/02/08
 tags:
     - attack.persistence
     - attack.t1112
@@ -14,22 +14,22 @@ logsource:
     product: windows
     category: registry_set
 detection:
-    selection1:
+    selection_main:
         EventType: SetValue
         TargetObject|contains|all:
             - 'Software\Microsoft\Office\'
             - '\Outlook\Today\'
-    selectionStamp:
+    selection_value_stamp:
         TargetObject|endswith: 'Stamp'
         Details: 'DWORD (0x00000001)'
-    selectionUserDefined:
+    selection_value_user_defined:
         TargetObject|endswith: 'UserDefinedUrl'
     filter_office:
         Image|startswith:
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
         Image|endswith: '\OfficeClickToRun.exe'
-    condition: selection1 and (selectionStamp or selectionUserDefined) and not 1 of filter_*
+    condition: selection_main and 1 of selection_value_* and not 1 of filter_*
 fields:
     - Details
 falsepositives:
