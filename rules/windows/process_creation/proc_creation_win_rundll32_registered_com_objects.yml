@@ -7,6 +7,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1546.015/T1546.015.md
 author: frack113
 date: 2022/02/13
+modified: 2023/02/08
 tags:
     - attack.privilege_escalation
     - attack.persistence
@@ -15,15 +16,17 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\rundll32.exe'
+    selection_img:
+        - Image|endswith: '\rundll32.exe'
+        - OriginalFileName: 'RUNDLL32.EXE'
+    selection_cli:
         CommandLine|contains:
             - '-sta '
             - '-localserver '
         CommandLine|contains|all:
             - '{'
             - '}'
-    condition: selection
+    condition: all of selection_*
 falsepositives:
     - Legitimate use
 level: high
