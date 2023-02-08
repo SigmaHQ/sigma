@@ -9,7 +9,7 @@ references:
     - https://www.welivesecurity.com/2022/03/01/isaacwiper-hermeticwizard-wiper-worm-targeting-ukraine/
 author: Florian Roth (Nextron Systems)
 date: 2019/10/22
-modified: 2022/12/04
+modified: 2023/02/08
 tags:
     - attack.defense_evasion
     - attack.t1218.011
@@ -17,8 +17,10 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\rundll32.exe'
+    selection_img:
+        - Image|endswith: '\rundll32.exe'
+        - OriginalFileName: 'RUNDLL32.EXE'
+    selection_cli:
         CommandLine|contains:
             - ',#'
             - ', #'
@@ -38,7 +40,7 @@ detection:
             - '\FileTracker32.dll",#1'
             - '\FileTracker64.dll,#1'
             - '\FileTracker64.dll",#1'
-    condition: selection and not 1 of filter*
+    condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - False positives depend on scripts and administrative tools used in the monitored environment
     - Windows control panel elements have been identified as source (mmc)
