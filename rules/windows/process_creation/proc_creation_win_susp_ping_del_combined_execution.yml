@@ -1,4 +1,4 @@
-title: Suspicious Ping And Del Combination 
+title: Suspicious Ping/Del Command Combination
 id: 54786ddc-5b8a-11ed-9b6a-0242ac120002
 status: experimental
 description: Detects a method often used by ransomware. Which combines the "ping" to wait a couple of seconds and then "del" to delete the file in question. Its used to hide the file responsible for the initial infection for example
@@ -9,6 +9,7 @@ references:
     - https://symantec-enterprise-blogs.security.com/blogs/threat-intelligence/blackbyte-exbyte-ransomware
 author: Ilya Krestinichev
 date: 2022/11/03
+modified: 2023/02/07
 tags:
     - attack.defense_evasion
     - attack.t1070.004
@@ -24,10 +25,11 @@ detection:
     selection_nul:
         CommandLine|contains: 'Nul' # Covers "> Nul" and ">Nul "
     selection_del_param:
-        - ' /f '
-        - ' -f '
-        - ' /q '
-        - ' -q '
+        CommandLine|contains:
+            - ' /f '
+            - ' -f '
+            - ' /q '
+            - ' -q '
     selection_all:
         CommandLine|contains|all:
             - 'ping' # Covers "ping" and "ping.exe"
