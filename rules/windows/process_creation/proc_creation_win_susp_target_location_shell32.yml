@@ -6,7 +6,7 @@ references:
     - https://www.group-ib.com/resources/threat-research/red-curl-2.html
 author: Christian Burkard (Nextron Systems)
 date: 2021/11/24
-modified: 2022/09/13
+modified: 2023/02/09
 tags:
     - attack.defense_evasion
     - attack.execution
@@ -15,8 +15,10 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\rundll32.exe'
+    selection_img:
+        - Image|endswith: '\rundll32.exe'
+        - OriginalFileName: 'RUNDLL32.EXE'
+    selection_cli:
         CommandLine|contains|all:
             - 'shell32.dll'
             - 'Control_RunDLL'
@@ -28,7 +30,7 @@ detection:
             - '\AppData\'
             - '\Temp\'
             - '\Users\Public\'
-    condition: selection
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: high
