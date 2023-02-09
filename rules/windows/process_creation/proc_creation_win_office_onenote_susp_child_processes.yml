@@ -1,20 +1,16 @@
----
 title: Suspicious Microsoft OneNote Child Process
 id: c27515df-97a9-4162-8a60-dc0eeb51b775
 related:
     - id: 438025f9-5856-4663-83f7-52f878a70a50 # Generic rule for suspicious office application child processes
       type: derived
 status: experimental
-level: medium
-description: |
-  Detects suspicious child processes of the Microsoft OneNote application.
-  This may indicate an attempt to execute malicious embedded objects from a .one file.
+description: Detects suspicious child processes of the Microsoft OneNote application. This may indicate an attempt to execute malicious embedded objects from a .one file.
 references:
     - https://github.com/elastic/protections-artifacts/commit/746086721fd385d9f5c6647cada1788db4aea95f#diff-e34e43eb5666427602ddf488b2bf3b545bd9aae81af3e6f6c7949f9652abdf18
     - https://micahbabinski.medium.com/detecting-onenote-one-malware-delivery-407e9321ecf0
 author: Tim Rauch (rule), Elastic (idea)
 date: 2022/10/21
-modified: 2023/02/07
+modified: 2023/02/09
 tags:
     - attack.t1566
     - attack.t1566.001
@@ -104,11 +100,14 @@ detection:
             - '\Windows\Tasks\'
             - '\Windows\Temp\'
             - '\Windows\System32\Tasks\'
-    filter_common_childproc:
-      Image|endswith:
-        - 'Teams.exe'
-        - 'FileCoAuth.exe'
-    condition: (selection_parent and 1 of selection_opt*) and not 1 of filter_common_childproc
+    filter_teams:
+        Image|endswith: '\AppData\Local\Microsoft\Teams\current\Teams.exe'
+        CommandLine|endswith: '-Embedding'
+    filter_onedrive:
+        Image|contains: '\AppData\Local\Microsoft\OneDrive\'
+        Image|endswith: '\FileCoAuth.exe'
+        CommandLine|endswith: '-Embedding'
+    condition: selection_parent and 1 of selection_opt_* and not 1 of filter_*
 falsepositives:
     - File located in the AppData folder with trusted signature
 level: high
