@@ -32,6 +32,10 @@ def apply_modifiers(value, modifier_list):
     value: value from Sigma rule
     modifiers: list of modifier names
     """
-    for modifier in modifier_list:      # apply modifiers in given order
-        value = modifiers[modifier](value).apply()
+    for modifier in modifier_list:
+        try:# apply modifiers in given order
+            value = modifiers[modifier](value).apply()
+        except KeyError:
+            return value
     return value
+
