@@ -1,0 +1,24 @@
+title: Userdomain Variable Enumeration
+id: 43311e65-84d8-42a5-b3d4-c94d9b67038f
+status: experimental
+description: Detects suspicious enumeration of the domain the user is associated with.
+references:
+    - https://www.arxiv-vanity.com/papers/2008.04676/
+    - https://thedfirreport.com/2022/11/14/bumblebee-zeros-in-on-meterpreter/
+author: 'Christopher Peacock @SecurePeacock, SCYTHE @scythe_io'
+date: 2023/02/09
+tags:
+    - attack.discovery
+    - attack.T1016
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - CommandLine|contains|all: 
+        - 'echo'
+        - '%userdomain%'
+    condition: selection
+falsepositives:
+    - Certain scripts or applications may leverage this.
+level: low
