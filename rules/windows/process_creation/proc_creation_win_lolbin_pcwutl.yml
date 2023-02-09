@@ -7,7 +7,7 @@ references:
     - https://twitter.com/harr0ey/status/989617817849876488
 author: Julia Fomina, oscd.community
 date: 2020/10/05
-modified: 2021/11/27
+modified: 2023/02/09
 tags:
     - attack.defense_evasion
     - attack.t1218.011
@@ -15,12 +15,14 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\rundll32.exe'
+    selection_img:
+        - Image|endswith: '\rundll32.exe'
+        - OriginalFileName: 'RUNDLL32.EXE'
+    selection_cli:
         CommandLine|contains|all:
             - 'pcwutl'
             - 'LaunchApplication'
-    condition: selection
+    condition: all of selection_*
 falsepositives:
     - Use of Program Compatibility Troubleshooter Helper
 level: medium
