@@ -1,12 +1,12 @@
-title: CLR DLL Loaded Via Office Applications
-id: d13c43f0-f66b-4279-8b2c-5912077c1780
+title: Active Directory Kerberos DLL Loaded Via Office Applications
+id: 7417e29e-c2e7-4cf6-a2e8-767228c64837
 status: test
-description: Detects CLR DLL being loaded by an Office Product
+description: Detects Kerberos DLL being loaded by an Office Product
 references:
     - https://medium.com/threatpunter/detecting-adversary-tradecraft-with-image-load-event-logging-and-eql-8de93338c16
 author: Antonlovesdnb
 date: 2020/02/19
-modified: 2021/11/27
+modified: 2023/02/08
 tags:
     - attack.execution
     - attack.t1204.002
@@ -16,12 +16,13 @@ logsource:
 detection:
     selection:
         Image|endswith:
-            - '\winword.exe'
-            - '\powerpnt.exe'
             - '\excel.exe'
+            - '\mspub.exe'
             - '\outlook.exe'
-        ImageLoaded|contains: '\clr.dll'
+            - '\powerpnt.exe'
+            - '\winword.exe'
+        ImageLoaded|endswith: '\kerberos.dll'
     condition: selection
 falsepositives:
-    - Alerts on legitimate macro usage as well, will need to filter as appropriate
+    - Legitimate macro usage. Add the appropriate filter according to your environment
 level: high

@@ -1,0 +1,37 @@
+title: Potential Reconnaissance Activity Via GatherNetworkInfo.VBS
+id: 575dce0c-8139-4e30-9295-1ee75969f7fe
+related:
+    - id: f92a6f1e-a512-4a15-9735-da09e78d7273 # FileCreate
+      type: similar
+    - id: 07aa184a-870d-413d-893a-157f317f6f58 # ProcCreation Susp
+      type: similar
+status: test
+description: Detects execution of the built-in script located in "C:\Windows\System32\gatherNetworkInfo.vbs". Which can be used to gather information about the target machine
+references:
+    - https://posts.slayerlabs.com/living-off-the-land/#gathernetworkinfovbs
+    - https://www.mandiant.com/resources/blog/trojanized-windows-installers-ukrainian-government
+author: blueteamer8699
+date: 2022/01/03
+modified: 2023/02/08
+tags:
+    - attack.discovery
+    - attack.execution
+    - attack.t1615
+    - attack.t1059.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+            - '\cscript.exe'
+            - '\wscript.exe'
+        - OriginalFileName:
+            - 'cscript.exe'
+            - 'wscript.exe'
+    selection_cli:
+        CommandLine|contains: 'gatherNetworkInfo.vbs'
+    condition: all of selection_*
+falsepositives:
+    - Administrative activity
+level: medium
