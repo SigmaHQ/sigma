@@ -1,5 +1,8 @@
-title: Suspicious File Download from File Sharing Domain
-id: 52182dfb-afb7-41db-b4bc-5336cb29b464
+title: Unusual File Download From File Sharing Websites
+id: ae02ed70-11aa-4a22-b397-c0d0e8f6ea99
+related:
+    - id: 52182dfb-afb7-41db-b4bc-5336cb29b464
+      type: similar
 status: experimental
 description: Detects the download of suspicious file type from a well-known file and paste sharing domain
 references:
@@ -7,7 +10,7 @@ references:
     - https://www.cisa.gov/uscert/ncas/alerts/aa22-321a
 author: Florian Roth (Nextron Systems)
 date: 2022/08/24
-modified: 2023/01/19
+modified: 2023/02/10
 tags:
     - attack.defense_evasion
     - attack.s0139
@@ -19,7 +22,7 @@ logsource:
 detection:
     selection_domain:
         Contents|contains:
-            - 'https://transfer.sh/'
+            - 'transfer.sh'
             - 'raw.githubusercontent.com'
             - 'gist.githubusercontent.com'
             - 'pastebin.com'
@@ -42,13 +45,13 @@ detection:
             - 'paste.ee'
     selection_extension:
         TargetFilename|contains:
-            - '.exe:Zone'
-            - '.vbs:Zone'
-            - '.dll:Zone'
+            - '.ps1:Zone'
+            - '.bat:Zone'
+            - '.cmd:Zone'
     condition: all of selection*
 fields:
     - TargetFilename
     - Image
 falsepositives:
     - Unknown
-level: high
+level: medium

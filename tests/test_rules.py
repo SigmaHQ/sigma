@@ -391,11 +391,15 @@ class TestRules(unittest.TestCase):
                         Fore.YELLOW + "Rule {} has a 'related' field that isn't a list.".format(file))
                     faulty_rules.append(file)
                 else:
-                    # should probably test if we have only 'id' and 'type' ...
                     type_ok = True
                     for ref in related_lst:
-                        id_str = ref['id']
-                        type_str = ref['type']
+                        try:
+                            id_str = ref['id']
+                            type_str = ref['type']
+                        except KeyError:
+                            print(Fore.YELLOW + "Rule {} has an invalid form of 'related/type' value.".format(file))
+                            faulty_rules.append(file)
+                            continue
                         if not type_str in valid_type:
                             type_ok = False
                     # Only add one time if many bad type in the same file
