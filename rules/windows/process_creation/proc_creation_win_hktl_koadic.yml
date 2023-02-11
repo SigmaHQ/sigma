@@ -8,7 +8,7 @@ references:
     - https://blog.f-secure.com/hunting-for-koadic-a-com-based-rootkit/
 author: wagga, Jonhnathan Ribeiro, oscd.community
 date: 2020/01/12
-modified: 2023/02/04
+modified: 2023/02/11
 tags:
     - attack.execution
     - attack.t1059.003
@@ -18,13 +18,15 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\cmd.exe'
+    selection_img:
+        - Image|endswith: '\cmd.exe'
+        - OriginalFileName: 'Cmd.Exe'
+    selection_cli:
         CommandLine|contains|all:
             - '/q'
             - '/c'
             - 'chcp'
-    condition: selection
+    condition: all of selection_*
 fields:
     - CommandLine
     - ParentCommandLine
