@@ -5,19 +5,19 @@ description: Detects potential local file read vulnerability in JVM based apps. 
 references: 
 author: Moti Harmats
 date: 2023/02/11
-modified: 2023/02/11
 tags:
     - attack.initial_access
     - attack.t1190
 logsource:
     category: application
-    product: NodeJS
+    product: JVM
+    definition: 'Requirements: application error logs must be collected (with LOG_LEVEL=ERROR and above)'
 detection:
-    selection:
-        contains:
-            - FileNotFoundException
-            - /../../../
-    condition: all of selection*
+    keywords_local_file_read:
+        '|all':
+            - 'FileNotFoundException'
+            - '/../../..'
+    condition: keywords_local_file_read
 falsepositives:
-    - Application bugs  
-level: critical
+    - Application bugs
+level: high
