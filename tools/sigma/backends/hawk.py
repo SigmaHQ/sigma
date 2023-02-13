@@ -750,7 +750,7 @@ class HAWKBackend(SingleTextQueryBackend):
             "tags" : [ "sigma" ],
             "hawk_id" : sigmaparser.parsedyaml['id']
         }
-        if 'tags' in sigmaparser.parsedyaml:
+        if 'tags' in sigmaparser.parsedyaml and isinstance(sigmaparser.parsedyaml, list):
             mitre_tactics = [ item.replace("attack.", "") for item in sigmaparser.parsedyaml['tags'] ]
             if len(mitre_tactics) > 0:
                 record["tags"] = record['tags'] + mitre_tactics

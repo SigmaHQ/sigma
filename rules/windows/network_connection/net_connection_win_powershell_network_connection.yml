@@ -4,9 +4,9 @@ status: experimental
 description: Detects a Powershell process that opens network connections - check for suspicious target ports and target systems - adjust to your environment (e.g. extend filters with company's ip range')
 references:
     - https://www.youtube.com/watch?v=DLtJTxMWZ2o
-author: Florian Roth
+author: Florian Roth (Nextron Systems)
 date: 2017/03/13
-modified: 2022/07/14
+modified: 2023/01/20
 tags:
     - attack.execution
     - attack.t1059.001
@@ -20,7 +20,7 @@ detection:
             - '\pwsh.exe'
         Initiated: 'true'
         DestinationIsIpv6: 'false'
-    filter:
+    filter_internal_ip:
         DestinationIp|startswith:
             - '10.'
             - '192.168.'
@@ -44,7 +44,32 @@ detection:
         User|contains: # covers many language settings
             - 'AUTHORI'
             - 'AUTORI'
-    condition: selection and not filter
+    filter_ipv6:
+        DestinationIp|startswith:
+            - '::1'  # IPv6 loopback variant
+            - '0:0:0:0:0:0:0:1'  # IPv6 loopback variant
+            - 'fe80:'  # link-local address
+            - 'fc'  # private address range fc00::/7
+            - 'fd'  # private address range fc00::/7
+    filter_msrange:
+        DestinationIp|startswith:
+            # Subnet: 20.184.0.0/13
+            - '20.184.'
+            - '20.185.'
+            - '20.186.'
+            - '20.187.'
+            - '20.188.'
+            - '20.189.'
+            - '20.190.'
+            - '20.191.'
+            - '23.79.'
+            - '51.10.'
+            # Subnet: 51.103.210.0/23
+            - '51.103.'
+            - '51.104.'
+            - '51.105.'
+            - '52.239.'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Administrative scripts
     - Microsoft IP range

@@ -1,0 +1,30 @@
+title: File Download Using ProtocolHandler.exe
+id: 104cdb48-a7a8-4ca7-a453-32942c6e5dcb
+status: experimental
+description: Detects usage of "ProtocolHandler" to download files. Downloaded files will be located in the cache folder (for example - %LOCALAPPDATA%\Microsoft\Windows\INetCache\IE)
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1218/T1218.md
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/ProtocolHandler/
+author: frack113
+date: 2021/07/13
+modified: 2022/12/31
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\protocolhandler.exe'
+        - OriginalFileName: 'ProtocolHandler.exe'
+    selection_cli_1:
+        CommandLine|contains|all:
+            - '"ms-word'
+            - '.docx"'
+    selection_cli_2:
+        CommandLine|contains: ' http' #cover http and https
+    condition: selection_img and 1 of selection_cli_*
+falsepositives:
+    - Unknown
+level: medium

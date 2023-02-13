@@ -1,0 +1,36 @@
+title: Potential Xor Encoded PowerShell Command
+id: 5b572dcf-254b-425c-a8c5-d9af6bea35a6
+related:
+    - id: cdf05894-89e7-4ead-b2b0-0a5f97a90f2f
+      type: similar
+status: deprecated
+description: Detects usage of "xor" or "bxor" in combination of a "foreach" loop. This pattern is often found in encoded powershell code and commands as a way to avoid detection
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=65
+author: Teymur Kheirkhabarov (idea), Vasiliy Burov (rule), oscd.community, Tim Shelton
+date: 2022/07/06
+modified: 2023/01/30
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        - OriginalFileName:
+            - 'PowerShell.exe'
+            - 'pwsh.dll'
+    selection_cli:
+        CommandLine|contains|all:
+            - 'ForEach'
+            - 'Xor'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium

@@ -1,0 +1,27 @@
+title: DriverQuery.EXE Execution
+id: a20def93-0709-4eae-9bd2-31206e21e6b2
+related:
+    - id: 9fc3072c-dc8f-4bf7-b231-18950000fadd
+      type: similar
+status: experimental
+description: Detect usage of the "driverquery" utility. Which can be used to perform reconnaissance on installed drivers
+references:
+    - https://thedfirreport.com/2023/01/09/unwrapping-ursnifs-gifts/
+    - https://www.vmray.com/cyber-security-blog/analyzing-ursnif-behavior-malware-sandbox/
+    - https://www.fireeye.com/blog/threat-research/2020/01/saigon-mysterious-ursnif-fork.html
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/01/19
+modified: 2023/02/04
+tags:
+    - attack.discovery
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|endswith: 'driverquery.exe'
+        - OriginalFileName: 'drvqry.exe'
+    condition: selection
+falsepositives:
+    - Legitimate use by third party tools in order to investigate installed drivers
+level: medium # Level could be reduced to low if this utility is often used in your environment

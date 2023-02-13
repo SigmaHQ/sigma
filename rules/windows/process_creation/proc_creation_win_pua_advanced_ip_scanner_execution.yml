@@ -1,0 +1,34 @@
+title: PUA - Advanced IP Scanner Execution
+id: bef37fa2-f205-4a7b-b484-0759bfd5f86f
+status: experimental
+description: Detects the use of Advanced IP Scanner. Seems to be a popular tool for ransomware groups.
+references:
+    - https://news.sophos.com/en-us/2019/12/09/snatch-ransomware-reboots-pcs-into-safe-mode-to-bypass-protection/
+    - https://www.fireeye.com/blog/threat-research/2020/05/tactics-techniques-procedures-associated-with-maze-ransomware-incidents.html
+    - https://labs.f-secure.com/blog/prelude-to-ransomware-systembc
+    - https://assets.documentcloud.org/documents/20444693/fbi-pin-egregor-ransomware-bc-01062021.pdf
+    - https://thedfirreport.com/2021/01/18/all-that-for-a-coinminer
+    - https://github.com/3CORESec/MAL-CL/tree/master/Descriptors/Other/Advanced%20IP%20Scanner
+author: Nasreddine Bencherchali (Nextron Systems), @ROxPinTeddy
+date: 2020/05/12
+modified: 2023/02/07
+tags:
+    - attack.discovery
+    - attack.t1046
+    - attack.t1135
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|contains: '\advanced_ip_scanner' # Covers also advanced_ip_scanner_console.exe
+        - OriginalFileName|contains: 'advanced_ip_scanner' # Covers also advanced_ip_scanner_console.exe
+        - Description|contains: 'Advanced IP Scanner'
+    selection_cli:
+        CommandLine|contains|all:
+            - '/portable'
+            - '/lng'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate administrative use
+level: medium

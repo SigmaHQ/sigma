@@ -1,0 +1,40 @@
+title: HackTool - SharPersist Execution
+id: 26488ad0-f9fd-4536-876f-52fea846a2e4
+status: experimental
+description: Detects the execution of the hacktool SharPersist - used to deploy various different kinds of persistence mechanisms
+references:
+    - https://www.mandiant.com/resources/blog/sharpersist-windows-persistence-toolkit
+    - https://github.com/mandiant/SharPersist
+author: Florian Roth (Nextron Systems)
+date: 2022/09/15
+modified: 2023/02/04
+tags:
+    - attack.persistence
+    - attack.t1053
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\SharPersist.exe'
+        - Product: 'SharPersist'
+    selection_cli_1:
+        CommandLine|contains:
+            - ' -t schtask -c '
+            - ' -t startupfolder -c '
+    selection_cli_2:
+        CommandLine|contains|all:
+            - ' -t reg -c '
+            - ' -m add'
+    selection_cli_3:
+        CommandLine|contains|all:
+            - ' -t service -c '
+            - ' -m add'
+    selection_cli_4:
+        CommandLine|contains|all:
+            - ' -t schtask -c '
+            - ' -m add'
+    condition: 1 of selection_*
+falsepositives:
+    - Unknown
+level: high

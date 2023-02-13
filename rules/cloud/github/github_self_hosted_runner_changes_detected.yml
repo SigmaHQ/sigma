@@ -1,0 +1,55 @@
+title: Github Self Hosted Runner Changes Detected
+id: f8ed0e8f-7438-4b79-85eb-f358ef2fbebd
+status: experimental
+description: |
+    A self-hosted runner is a system that you deploy and manage to execute jobs from GitHub Actions on GitHub.com.
+    This rule detects changes to self-hosted runners configurations in the environment. The self-hosted runner configuration changes once detected,
+    it should be validated from GitHub UI because the log entry may not provide full context.
+author: Muhammad Faisal
+date: 2023/01/27
+references:
+    - https://docs.github.com/en/actions/hosting-your-own-runners/about-self-hosted-runners#about-self-hosted-runners
+    - https://docs.github.com/en/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/reviewing-the-audit-log-for-your-organization#search-based-on-operation
+tags:
+    - attack.impact
+    - attack.discovery
+    - attack.collection
+    - attack.defense_evasion
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.initial_access
+    - attack.t1526
+    - attack.t1213.003
+    - attack.t1078.004
+logsource:
+    product: github
+    service: audit
+    definition: 'Requirements: The audit log streaming feature must be enabled to be able to receive such logs. You can enable following the documentation here: https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise#setting-up-audit-log-streaming'
+detection:
+    selection:
+        action:
+            - 'org.remove_self_hosted_runner'
+            - 'org.runner_group_created'
+            - 'org.runner_group_removed'
+            - 'org.runner_group_updated'
+            - 'org.runner_group_runners_added'
+            - 'org.runner_group_runner_removed'
+            - 'org.runner_group_runners_updated'
+            - 'repo.register_self_hosted_runner'
+            - 'repo.remove_self_hosted_runner'
+    condition: selection
+fields:
+    - 'action'
+    - 'actor'
+    - 'org'
+    - 'actor_location.country_code'
+    - 'transport_protocol_name'
+    - 'repository'
+    - 'repo'
+    - 'repository_public'
+    - '@timestamp'
+falsepositives:
+    - Allowed self-hosted runners changes in the environment.
+    - A self-hosted runner is automatically removed from GitHub if it has not connected to GitHub Actions for more than 14 days.
+    - An ephemeral self-hosted runner is automatically removed from GitHub if it has not connected to GitHub Actions for more than 1 day.
+level: low

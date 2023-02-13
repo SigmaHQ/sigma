@@ -19,20 +19,20 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection1:
+    selection_img:
         - Image|endswith: '\bitsadmin.exe'
         - OriginalFileName: 'bitsadmin.exe'
-    susp_flag_1:
+    selection_cmd:
         CommandLine|contains: ' /transfer '
-    susp_flag_2:
+    selection_cli_1:
         CommandLine|contains:
             - ' /create '
             - ' /addfile '
-    http_flag:
+    selection_cli_2:
         CommandLine|contains: 'http'
-    selection2:
+    selection_copy:
         CommandLine|contains: 'copy bitsadmin.exe'
-    condition: (selection1 and susp_flag_2 and http_flag) or (selection1 and susp_flag_1) or selection2
+    condition: (selection_img and selection_cmd) or (selection_img and all of selection_cli_*) or selection_copy
 fields:
     - CommandLine
     - ParentCommandLine

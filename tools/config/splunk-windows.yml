@@ -1,175 +1,210 @@
 title: Splunk Windows log source conditions
 order: 20
 backends:
-  - splunk
-  - splunkxml
-  - splunkdm
+    - splunk
+    - splunkxml
+    - splunkdm
 logsources:
-  windows-application:
-    product: windows
-    service: application
-    conditions:
-      source: 'WinEventLog:Application'
-  windows-security:
-    product: windows
-    service: security
-    conditions:
-      source: 'WinEventLog:Security'
-  windows-system:
-    product: windows
-    service: system
-    conditions:
-      source: 'WinEventLog:System'
-  windows-sysmon:
-    product: windows
-    service: sysmon
-    conditions:
-      source: 'WinEventLog:Microsoft-Windows-Sysmon/Operational'
-  windows-process-creation:
-    product: windows
-    service: sysmon
-    category: process_creation
-    # Optimized search for process creation, being dramatically faster in Lispy than just EventCode=1 search, as 'ParentProcessGuid' is more unique than '1' in the raw data.
-    # This also supports custom splunk macros, just like they are written in splunk (i.e. as `macro`), minding that it has to be written inside the string quotes here.
-    search: 'ParentProcessGuid EventCode=1'
-  windows-file-creation:
-    product: windows
-    service: sysmon
-    category: file_creation
-    search: 'TargetFilename EventCode=11'
-  windows-powershell:
-    product: windows
-    service: powershell
-    conditions:
-      source:
-        - 'WinEventLog:Microsoft-Windows-PowerShell/Operational'
-        - 'WinEventLog:PowerShellCore/Operational'
-  windows-classicpowershell:
-    product: windows
-    service: powershell-classic
-    conditions:
-      source: 'WinEventLog:Windows PowerShell'
-  windows-taskscheduler:
-    product: windows
-    service: taskscheduler
-    conditions:
-      source: 'WinEventLog:Microsoft-Windows-TaskScheduler/Operational'
-  windows-wmi:
-    product: windows
-    service: wmi
-    conditions:
-      source: 'WinEventLog:Microsoft-Windows-WMI-Activity/Operational'
-  windows-dns-server:
-    product: windows
-    service: dns-server
-    category: dns
-    conditions:
-      source: 'WinEventLog:DNS Server'
-  windows-dns-server-audit:
-    product: windows
-    service: dns-server-audit
-    conditions:
-      source: 'WinEventLog:Microsoft-Windows-DNS-Server/Audit'
-  windows-driver-framework:
-    product: windows
-    service: driver-framework
-    conditions:
-      source: 'WinEventLog:Microsoft-Windows-DriverFrameworks-UserMode/Operational'
-  windows-ntlm:
-    product: windows
-    service: ntlm
-    conditions:
-      source: 'WinEventLog:Microsoft-Windows-NTLM/Operational'
-  windows-dhcp:
-    product: windows
-    service: dhcp
-    conditions:
-      source: 'WinEventLog:Microsoft-Windows-DHCP-Server/Operational'
-  windows-applocker:
-    product: windows
-    service: applocker
-    conditions:
-      source:
-        - 'WinEventLog:Microsoft-Windows-AppLocker/MSI and Script'
-        - 'WinEventLog:Microsoft-Windows-AppLocker/EXE and DLL'
-        - 'WinEventLog:Microsoft-Windows-AppLocker/Packaged app-Deployment'
-        - 'WinEventLog:Microsoft-Windows-AppLocker/Packaged app-Execution'
-  windows-msexchange-management:
-    product: windows
-    service: msexchange-management
-    conditions:
-      source: 'WinEventLog:MSExchange Management'
-  windows-printservice-admin:
-    product: windows
-    service: printservice-admin
-    conditions:
-      source: 'WinEventLog:Microsoft-Windows-PrintService/Admin'
-  windows-printservice-operational:
-    product: windows
-    service: printservice-operational
-    conditions:
-      source: 'WinEventLog:Microsoft-Windows-PrintService/Operational'
-  windows-terminalservices-localsessionmanager-operational:
-    product: windows
-    service: terminalservices-localsessionmanager
-    conditions:
-      source: 'WinEventLog:Microsoft-Windows-TerminalServices-LocalSessionManager/Operational'
-  windows-codeintegrity-operational:
-    product: windows
-    service: codeintegrity-operational
-    conditions:
-      source: 'WinEventLog:Microsoft-Windows-CodeIntegrity/Operational'
-  windows-smbclient-security:
-    product: windows
-    service: smbclient-security
-    conditions:
-      source: 'WinEventLog:Microsoft-Windows-SmbClient/Security'
-  windows-rpc-firewall:
-    product: rpc_firewall
-    category: application
-    conditions:
-      source: 'WinEventLog:RPCFW'
-  windows-firewall-advanced-security:
-    product: windows
-    service: firewall-as
-    conditions:
-      source: 'WinEventLog:Microsoft-Windows-Windows Firewall With Advanced Security/Firewall'
-  windows-bits-client:
-    product: windows
-    service: bits-client
-    conditions:
-      source: 'WinEventLog:Microsoft-Windows-Bits-Client/Operational'
-  windows-security-mitigations:
-    product: windows
-    service: security-mitigations
-    conditions:
-      source:
-        - 'WinEventLog:Microsoft-Windows-Security-Mitigations/Kernel Mode'
-        - 'WinEventLog:Microsoft-Windows-Security-Mitigations/User Mode'
-  windows-diagnosis:
-    product: windows
-    service: diagnosis-scripted
-    conditions:
-      source: 'WinEventLog:Microsoft-Windows-Diagnosis-Scripted/Operational'
-  windows-shell-core:
-    product: windows
-    service: shell-core
-    conditions:
-      source: 'WinEventLog:Microsoft-Windows-Shell-Core/Operational'
-  windows-openssh:
-    product: windows
-    service: openssh
-    conditions:
-      source: 'WinEventLog:OpenSSH/Operational'
-  windows-ldap-debug:
-    product: windows
-    service: ldap_debug
-    conditions:
-      source: 'WinEventLog:Microsoft-Windows-LDAP-Client/Debug'
-  windows-defender:
-    product: windows
-    service: windefend
-    conditions:
-      source: 'WinEventLog:Microsoft-Windows-Windows Defender/Operational'
+    windows-application:
+        product: windows
+        service: application
+        conditions:
+            source: 'WinEventLog:Application'
+    windows-security:
+        product: windows
+        service: security
+        conditions:
+            source: 'WinEventLog:Security'
+    windows-system:
+        product: windows
+        service: system
+        conditions:
+            source: 'WinEventLog:System'
+    windows-sysmon:
+        product: windows
+        service: sysmon
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-Sysmon/Operational'
+    windows-process-creation:
+        product: windows
+        service: sysmon
+        category: process_creation
+        # Optimized search for process creation, being dramatically faster in Lispy than just EventCode=1 search, as 'ParentProcessGuid' is more unique than '1' in the raw data.
+        # This also supports custom splunk macros, just like they are written in splunk (i.e. as `macro`), minding that it has to be written inside the string quotes here.
+        search: 'ParentProcessGuid EventCode=1'
+    windows-file-creation:
+        product: windows
+        service: sysmon
+        category: file_creation
+        search: 'TargetFilename EventCode=11'
+    windows-powershell:
+        product: windows
+        service: powershell
+        conditions:
+            source:
+                - 'WinEventLog:Microsoft-Windows-PowerShell/Operational'
+                - 'WinEventLog:PowerShellCore/Operational'
+    windows-classicpowershell:
+        product: windows
+        service: powershell-classic
+        conditions:
+            source: 'WinEventLog:Windows PowerShell'
+    windows-taskscheduler:
+        product: windows
+        service: taskscheduler
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-TaskScheduler/Operational'
+    windows-wmi:
+        product: windows
+        service: wmi
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-WMI-Activity/Operational'
+    windows-dns-server:
+        product: windows
+        service: dns-server
+        category: dns
+        conditions:
+            source: 'WinEventLog:DNS Server'
+    windows-dns-server-audit:
+        product: windows
+        service: dns-server-audit
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-DNS-Server/Audit'
+    windows-driver-framework:
+        product: windows
+        service: driver-framework
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-DriverFrameworks-UserMode/Operational'
+    windows-ntlm:
+        product: windows
+        service: ntlm
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-NTLM/Operational'
+    windows-dhcp:
+        product: windows
+        service: dhcp
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-DHCP-Server/Operational'
+    windows-applocker:
+        product: windows
+        service: applocker
+        conditions:
+            source:
+                - 'WinEventLog:Microsoft-Windows-AppLocker/MSI and Script'
+                - 'WinEventLog:Microsoft-Windows-AppLocker/EXE and DLL'
+                - 'WinEventLog:Microsoft-Windows-AppLocker/Packaged app-Deployment'
+                - 'WinEventLog:Microsoft-Windows-AppLocker/Packaged app-Execution'
+    windows-msexchange-management:
+        product: windows
+        service: msexchange-management
+        conditions:
+            source: 'WinEventLog:MSExchange Management'
+    windows-printservice-admin:
+        product: windows
+        service: printservice-admin
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-PrintService/Admin'
+    windows-printservice-operational:
+        product: windows
+        service: printservice-operational
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-PrintService/Operational'
+    windows-terminalservices-localsessionmanager-operational:
+        product: windows
+        service: terminalservices-localsessionmanager
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-TerminalServices-LocalSessionManager/Operational'
+    windows-codeintegrity-operational:
+        product: windows
+        service: codeintegrity-operational
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-CodeIntegrity/Operational'
+    windows-smbclient-security:
+        product: windows
+        service: smbclient-security
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-SmbClient/Security'
+    windows-rpc-firewall:
+        product: rpc_firewall
+        category: application
+        conditions:
+            source: 'WinEventLog:RPCFW'
+    windows-firewall-advanced-security:
+        product: windows
+        service: firewall-as
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-Windows Firewall With Advanced Security/Firewall'
+    windows-bits-client:
+        product: windows
+        service: bits-client
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-Bits-Client/Operational'
+    windows-security-mitigations:
+        product: windows
+        service: security-mitigations
+        conditions:
+            source:
+                - 'WinEventLog:Microsoft-Windows-Security-Mitigations/Kernel Mode'
+                - 'WinEventLog:Microsoft-Windows-Security-Mitigations/User Mode'
+    windows-diagnosis:
+        product: windows
+        service: diagnosis-scripted
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-Diagnosis-Scripted/Operational'
+    windows-shell-core:
+        product: windows
+        service: shell-core
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-Shell-Core/Operational'
+    windows-openssh:
+        product: windows
+        service: openssh
+        conditions:
+            source: 'WinEventLog:OpenSSH/Operational'
+    windows-ldap-debug:
+        product: windows
+        service: ldap_debug
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-LDAP-Client/Debug'
+    windows-bitlocker:
+        product: windows
+        service: bitlocker
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-BitLocker/BitLocker Management'
+    windows-defender:
+        product: windows
+        service: windefend
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-Windows Defender/Operational'
+    windows-vhdmp-operational:
+        product: windows
+        service: vhdmp
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-VHDMP/Operational'
+    windows-appxdeployment-server:
+        product: windows
+        service: appxdeployment-server
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-AppXDeploymentServer/Operational'
+    windows-lsa-server:
+        product: windows
+        service: lsa-server
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-LSA/Operational'
+    windows-appxpackaging-om:
+        product: windows
+        service: appxpackaging-om
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-AppxPackaging/Operational'
+    windows-dns-client:
+        product: windows
+        service: dns-client
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-DNS Client Events/Operational'
+    windows-appmodel-runtime:
+        product: windows
+        service: appmodel-runtime
+        conditions:
+            source: 'WinEventLog:Microsoft-Windows-AppModel-Runtime/Admin'
 fieldmappings:
   EventID: EventCode

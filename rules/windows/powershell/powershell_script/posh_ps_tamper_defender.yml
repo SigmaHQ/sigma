@@ -9,16 +9,16 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
     - https://docs.microsoft.com/en-us/powershell/module/defender/set-mppreference?view=windowsserver2022-ps
     - https://bidouillesecurity.com/disable-windows-defender-in-powershell/
-author: frack113, elhoim
+author: frack113, elhoim, Tim Shelton (fps, alias support)
 date: 2022/01/16
-modified: 2022/08/05
+modified: 2023/01/12
 tags:
     - attack.defense_evasion
     - attack.t1562.001
 logsource:
     product: windows
     category: ps_script
-    definition: Script block logging must be enabled
+    definition: 'Requirements: Script Block Logging must be enabled'
 detection:
     selection_options_disabling_preference:
         ScriptBlockText|contains: 'Set-MpPreference'
@@ -44,7 +44,7 @@ detection:
             - 'DisableRemovableDriveScanning $true'
             - 'DisableScanningMappedNetworkDrivesForFullScan $true'
             - 'DisableScanningNetworkFiles $true'
-    selection_default_actions_allow:
+    selection_other_default_actions_allow:
         ScriptBlockText|contains|all:
             - 'Set-MpPreference'
             - Allow
@@ -52,7 +52,13 @@ detection:
             - LowThreatDefaultAction
             - ModerateThreatDefaultAction
             - HighThreatDefaultAction
-    condition: all of selection_options_disabling* or selection_default_actions_allow
+    selection_other_use_of_alias:
+        ScriptBlockText|contains:
+            - 'ltdefac '
+            - 'mtdefac '
+            - 'htdefac '
+            - 'stdefac '
+    condition: all of selection_options_disabling* or 1 of selection_other_*
 falsepositives:
     - Legitimate PowerShell scripts
 level: high

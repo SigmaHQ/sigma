@@ -5,9 +5,9 @@ description: Detects a Windows program executable started from a suspicious fold
 references:
     - https://twitter.com/GelosSnake/status/934900723426439170
     - https://asec.ahnlab.com/en/39828/
-author: Florian Roth, Patrick Bareiss, Anton Kutepov, oscd.community, Nasreddine Bencherchali
+author: Florian Roth (Nextron Systems), Patrick Bareiss, Anton Kutepov, oscd.community, Nasreddine Bencherchali
 date: 2017/11/27
-modified: 2022/10/13
+modified: 2023/01/10
 tags:
     - attack.defense_evasion
     - attack.t1036
@@ -68,7 +68,7 @@ detection:
             # The below processes were seen used by Lazarus Group - https://asec.ahnlab.com/en/39828/
             - '\wsmprovhost.exe'
             - '\dfrgui.exe'
-    filter:
+    filter_generic:
         - Image|startswith:
             - 'C:\Windows\System32\'
             - 'C:\Windows\SysWOW64\'
@@ -78,7 +78,10 @@ detection:
         - Image:
             - 'C:\Windows\explorer.exe'
             - 'C:\Program Files\PowerShell\7\pwsh.exe'
-    condition: selection and not filter
+    filter_wsl_windowsapps:
+        Image|startswith: 'C:\Program Files\WindowsApps\MicrosoftCorporationII.WindowsSubsystemForLinux'
+        Image|endswith: '\wsl.exe'
+    condition: selection and not 1 of filter_*
 fields:
     - ComputerName
     - User

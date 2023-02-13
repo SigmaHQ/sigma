@@ -15,8 +15,10 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\rundll32.exe'
+    selection_img:
+        - Image|endswith: '\rundll32.exe'
+        - OriginalFileName: 'RUNDLL32.EXE'
+    selection_cli:
         CommandLine|endswith:
             - ',RunDLL'
             - ',Control_RunDLL'
@@ -28,7 +30,7 @@ detection:
             - '.dll'',Control_RunDLL'
     filter_ide:
         ParentImage|endswith: '\tracker.exe' #When Visual Studio compile NodeJS program, it might use MSBuild to create tracker.exe and then, the tracker.exe fork rundll32.exe
-    condition: selection and not filter_ide and not filter_legitimate_dll
+    condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Unknown
 level: critical

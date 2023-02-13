@@ -5,20 +5,22 @@ description: Detects Commandlet that is used to export certificates from the loc
 references:
     - https://us-cert.cisa.gov/ncas/analysis-reports/ar21-112a
     - https://docs.microsoft.com/en-us/powershell/module/pki/export-pfxcertificate
-author: Florian Roth
+author: Florian Roth (Nextron Systems)
 date: 2021/04/23
-modified: 2022/10/09
+modified: 2023/01/24
 tags:
     - attack.credential_access
     - attack.t1552.004
 logsource:
     product: windows
     category: ps_script
-    definition: Script block logging must be enabled
+    definition: 'Requirements: Script Block Logging must be enabled'
 detection:
     selection:
         ScriptBlockText|contains: 'Export-PfxCertificate'
-    condition: selection
+    filter_moduleexport:
+        ScriptBlockText|contains: 'CmdletsToExport = @('
+    condition: selection and not 1 of filter*
 falsepositives:
     - Legitimate certificate exports invoked by administrators or users (depends on processes in the environment - filter if unusable)
 level: high

@@ -3,10 +3,10 @@ id: 96b9f619-aa91-478f-bacb-c3e50f8df575
 status: test
 description: Detects remote PowerShell sessions
 references:
-    - https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190511223310.html
+    - https://threathunterplaybook.com/hunts/windows/190511-RemotePwshExecution/notebook.html
 author: Roberto Rodriguez @Cyb3rWard0g, Tim Shelton
 date: 2019/08/10
-modified: 2022/06/20
+modified: 2023/01/20
 tags:
     - attack.execution
     - attack.t1059.001
@@ -15,15 +15,15 @@ tags:
 logsource:
     product: windows
     category: ps_module
-    definition: PowerShell Module Logging must be enabled
+    definition: 'Requirements: PowerShell Module Logging must be enabled'
 detection:
     selection:
         ContextInfo|contains|all:
-            - ' = ServerRemoteHost ' #  HostName: 'ServerRemoteHost'  french : Nom d’hôte = 
-            - 'wsmprovhost.exe'      #  HostApplication|contains: 'wsmprovhost.exe' french  Application hôte = 
-    false_positive_1:
+            - ' = ServerRemoteHost ' #  HostName: 'ServerRemoteHost'  french : Nom d’hôte =
+            - 'wsmprovhost.exe'      #  HostApplication|contains: 'wsmprovhost.exe' french  Application hôte =
+    filter_pwsh_archive:
         ContextInfo|contains: '\Windows\system32\WindowsPowerShell\v1.0\Modules\Microsoft.PowerShell.Archive\Microsoft.PowerShell.Archive.psm1'
-    condition: selection and not 1 of false_positive*
+    condition: selection and not 1 of filter_*
 
 falsepositives:
     - Legitimate use remote PowerShell sessions

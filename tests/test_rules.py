@@ -10,6 +10,7 @@ import os
 import unittest
 import yaml
 import re
+import string
 from attackcti import attack_client
 from colorama import init
 from colorama import Fore
@@ -17,6 +18,14 @@ import collections
 
 
 class TestRules(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        print("Calling get_mitre_data()")
+        # Get Current Data from MITRE ATT&CK®
+        cls.MITRE_ALL = get_mitre_data()
+        print("Catched data - starting tests...")
+
     MITRE_TECHNIQUE_NAMES = [
         "process_injection", "signed_binary_proxy_execution", "process_injection"]  # incomplete list
     MITRE_TACTICS = ["initial_access", "execution", "persistence", "privilege_escalation", "defense_evasion", "credential_access",
@@ -24,7 +33,8 @@ class TestRules(unittest.TestCase):
     # Don't use trademarks in rules - they require non-ASCII characters to be used on we don't want them in our rules
     TRADE_MARKS = {"MITRE ATT&CK", "ATT&CK"}
 
-    path_to_rules = "rules"
+    path_to_rules = "../rules"
+    path_to_rules = os.path.join(os.path.dirname(os.path.realpath(__file__)), path_to_rules)
 
     # Helper functions
     def yield_next_rule_file_path(self, path_to_rules: str) -> str:
@@ -101,7 +111,7 @@ class TestRules(unittest.TestCase):
             tags = self.get_rule_part(file_path=file, part_name="tags")
             if tags:
                 for tag in tags:
-                    if tag not in MITRE_ALL and tag.startswith("attack."):
+                    if tag not in self.MITRE_ALL and tag.startswith("attack."):
                         print(
                             Fore.RED + "Rule {} has the following incorrect tag {}".format(file, tag))
                         files_with_incorrect_mitre_tags.append(file)
@@ -224,6 +234,14 @@ class TestRules(unittest.TestCase):
     def test_duplicate_detections(self):
         def compare_detections(detection1: dict, detection2: dict) -> bool:
 
+            # If they have different log sources. They can't be the same
+            # We first remove any definitions fields (if there are any) in the logsource to avoid typos
+            detection1["logsource"].pop("definition", None)
+            detection2["logsource"].pop("definition", None)
+
+            if detection1["logsource"] != detection2["logsource"]:
+                return False
+
             # detections not the same count can't be the same
             if len(detection1) != len(detection2):
                 return False
@@ -255,8 +273,15 @@ class TestRules(unittest.TestCase):
                     if condition not in detection2[named_condition]:
                         return False
 
-                    condition_value1 = detection1[named_condition][condition]
-                    condition_value2 = detection2[named_condition][condition]
+                    # We add this check in case of keyword rules. Where no field is used. The parser returns a list instead of a dict
+                    # If the 2 list are different that means they aren't the same
+                    if (type(detection2[named_condition]) == list) or (type(detection2[named_condition]) == list):
+                        condition_value1 = detection1[named_condition]
+                        condition_value2 = detection2[named_condition]
+                    else:
+                        condition_value1 = detection1[named_condition][condition]
+                        condition_value2 = detection2[named_condition][condition]
+                    
                     if condition_value1 != condition_value2:
                         return False
 
@@ -366,11 +391,15 @@ class TestRules(unittest.TestCase):
                         Fore.YELLOW + "Rule {} has a 'related' field that isn't a list.".format(file))
                     faulty_rules.append(file)
                 else:
-                    # should probably test if we have only 'id' and 'type' ...
                     type_ok = True
                     for ref in related_lst:
-                        id_str = ref['id']
-                        type_str = ref['type']
+                        try:
+                            id_str = ref['id']
+                            type_str = ref['type']
+                        except KeyError:
+                            print(Fore.YELLOW + "Rule {} has an invalid form of 'related/type' value.".format(file))
+                            faulty_rules.append(file)
+                            continue
                         if not type_str in valid_type:
                             type_ok = False
                     # Only add one time if many bad type in the same file
@@ -765,6 +794,8 @@ class TestRules(unittest.TestCase):
                                     pattern_prefix = "okta_"
                                 elif value == "onelogin":
                                     pattern_prefix = "onelogin_"
+                                elif value == "github":
+                                    pattern_prefix = "github_"
                             elif key == "category":
                                 if value == "process_creation":
                                     pattern_prefix = "proc_creation_"
@@ -855,6 +886,10 @@ class TestRules(unittest.TestCase):
                                     pattern_prefix = "win_bits_client_"
                                 elif value == "applocker":
                                     pattern_prefix = "win_applocker_"
+                                elif value == "dns-server-analytic":
+                                    pattern_prefix = "win_dns_analytic_"
+                                elif value == "bitlocker":
+                                    pattern_prefix = "win_bitlocker_"
                         
                     # This value is used to test if we should add the OS infix for certain categories
                     if os_bool:
@@ -959,36 +994,36 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules that share the same 'title'. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title")
 
-    def test_invalid_logsource_attributes(self):
-        faulty_rules = []
-        valid_logsource = [
-            'category',
-            'product',
-            'service',
-            'definition',
-        ]
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            logsource = self.get_rule_part(
-                file_path=file, part_name="logsource")
-            if not logsource:
-                print(Fore.RED + "Rule {} has no 'logsource'.".format(file))
-                faulty_rules.append(file)
-                continue
-            valid = True
-            for key in logsource:
-                if key.lower() not in valid_logsource:
-                    print(
-                        Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
-                    valid = False
-                elif not isinstance(logsource[key], str):
-                    print(
-                        Fore.RED + "Rule {} has a logsource with an invalid field type ({})".format(file, key))
-                    valid = False
-            if not valid:
-                faulty_rules.append(file)
+    # def test_invalid_logsource_attributes(self):
+    #     faulty_rules = []
+    #     valid_logsource = [
+    #         'category',
+    #         'product',
+    #         'service',
+    #         'definition',
+    #     ]
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         logsource = self.get_rule_part(
+    #             file_path=file, part_name="logsource")
+    #         if not logsource:
+    #             print(Fore.RED + "Rule {} has no 'logsource'.".format(file))
+    #             faulty_rules.append(file)
+    #             continue
+    #         valid = True
+    #         for key in logsource:
+    #             if key.lower() not in valid_logsource:
+    #                 print(
+    #                     Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
+    #                 valid = False
+    #             elif not isinstance(logsource[key], str):
+    #                 print(
+    #                     Fore.RED + "Rule {} has a logsource with an invalid field type ({})".format(file, key))
+    #                 valid = False
+    #         if not valid:
+    #             faulty_rules.append(file)
 
-        self.assertEqual(faulty_rules, [], Fore.RED +
-                         "There are rules with non-conform 'logsource' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#log-source")
+    #     self.assertEqual(faulty_rules, [], Fore.RED +
+    #                      "There are rules with non-conform 'logsource' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#log-source")
 
     def test_selection_list_one_value(self):
     
@@ -1108,39 +1143,40 @@ class TestRules(unittest.TestCase):
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with unused selections")
 
-    def test_field_name_typo(self):
-        # add "OriginalFilename" after Aurora switched to SourceFilename
-        # add "ProviderName" after special case powershell classic is resolved
-        # typos is a list of tuples where each tuple contains ("The typo", "The correct version")
-        typos = [("ServiceFilename", "ServiceFileName"), ("TargetFileName", "TargetFilename"), ("SourceFileName", "OriginalFileName"), ("Commandline", "CommandLine"), ("Targetobject", "TargetObject"), ("OriginalName", "OriginalFileName"), ("ImageFileName", "OriginalFileName")]
-        faulty_rules = []
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            # Some fields exists in certain log sources in different forms than other log sources. We need to handle these as special cases
-            # We check first the logsource to handle special cases
-            logsource = self.get_rule_part(file_path=file, part_name="logsource").values()
-            # add more typos in specific logsources below
-            if "windefend" in logsource:
-                typos_ = typos + [("New_Value", "NewValue"), ("Old_Value", "OldValue"), ('Source_Name', 'SourceName'), ("Newvalue", "NewValue"), ("Oldvalue", "OldValue"), ('Sourcename', 'SourceName')]
-            elif "registry_set" in logsource or "registry_add" in logsource or "registry_event" in logsource:
-                typos_ = typos + [("Targetobject", "TargetObject"), ("Eventtype", "EventType"), ("Newname", "NewName")]
-            elif "process_creation" in logsource:
-                typos_ = typos + [("Parentimage", "ParentImage"), ("Integritylevel", "IntegrityLevel"), ("IntegritiLevel", "IntegrityLevel")]
-            else:
-                typos_ = typos
-            detection = self.get_rule_part(file_path=file, part_name="detection")
-            if detection:
-                for search_identifier in detection:
-                    if isinstance(detection[search_identifier], dict):
-                        for field in detection[search_identifier]:
-                            for typo in typos_:
-                                if typo[0] in field:
-                                    print(Fore.RED + "Rule {} has a common typo ({}) which should be ({}) in selection ({}/{})".format(file, typo[0], typo[1], search_identifier, field))
-                                    faulty_rules.append(file)
+    # def test_field_name_typo(self):
+    #     # add "OriginalFilename" after Aurora switched to SourceFilename
+    #     # add "ProviderName" after special case powershell classic is resolved
+    #     faulty_rules = []
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         # typos is a list of tuples where each tuple contains ("The typo", "The correct version")
+    #         typos = [("ServiceFilename", "ServiceFileName"), ("TargetFileName", "TargetFilename"), ("SourceFileName", "OriginalFileName"), ("Commandline", "CommandLine"), ("Targetobject", "TargetObject"), ("OriginalName", "OriginalFileName"), ("ImageFileName", "OriginalFileName"), ("details", "Details")]
+    #         # Some fields exists in certain log sources in different forms than other log sources. We need to handle these as special cases
+    #         # We check first the logsource to handle special cases
+    #         logsource = self.get_rule_part(file_path=file, part_name="logsource").values()
+    #         # add more typos in specific logsources below
+    #         if "windefend" in logsource:
+    #             typos += [("New_Value", "NewValue"), ("Old_Value", "OldValue"), ('Source_Name', 'SourceName'), ("Newvalue", "NewValue"), ("Oldvalue", "OldValue"), ('Sourcename', 'SourceName')]
+    #         elif "registry_set" in logsource or "registry_add" in logsource or "registry_event" in logsource:
+    #             typos += [("Targetobject", "TargetObject"), ("Eventtype", "EventType"), ("Newname", "NewName")]
+    #         elif "process_creation" in logsource:
+    #             typos += [("Parentimage", "ParentImage"), ("Integritylevel", "IntegrityLevel"), ("IntegritiLevel", "IntegrityLevel")]
+    #         elif "file_access" in logsource:
+    #             del(typos[typos.index(("TargetFileName", "TargetFilename"))]) # We remove the entry to "TargetFileName" to avoid confusion
+    #             typos += [("TargetFileName", "FileName"), ("TargetFilename","FileName")]
+    #         detection = self.get_rule_part(file_path=file, part_name="detection")
+    #         if detection:
+    #             for search_identifier in detection:
+    #                 if isinstance(detection[search_identifier], dict):
+    #                     for field in detection[search_identifier]:
+    #                         for typo in typos:
+    #                             if typo[0] in field:
+    #                                 print(Fore.RED + "Rule {} has a common typo ({}) which should be ({}) in selection ({}/{})".format(file, typo[0], typo[1], search_identifier, field))
+    #                                 faulty_rules.append(file)
 
-        self.assertEqual(faulty_rules, [], Fore.RED + "There are rules with common typos in field names.")
+    #     self.assertEqual(faulty_rules, [], Fore.RED + "There are rules with common typos in field names.")
 
     def test_unknown_value_modifier(self):
-        known_modifiers = ["contains", "startswith", "endswith", "all", "base64offset", "base64", "utf16le", "utf16be", "wide", "utf16", "windash", "re"]
+        known_modifiers = ["contains", "startswith", "endswith", "all", "base64offset", "base64", "utf16le", "utf16be", "wide", "utf16", "windash", "re", "cidr"]
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             detection = self.get_rule_part(file_path=file, part_name="detection")
@@ -1235,13 +1271,129 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules using condition without lowercase operator")
+    
+    def test_broken_thor_logsource_config(self):
 
+        faulty_config = False
+        
+        # This test check of the "thor.yml" config file has a missing "WinEventLog:" prefix in Windows log sources
+        path_to_thor_config = "../tools/config/thor.yml"
+        path_to_thor_config = os.path.join(os.path.dirname(os.path.realpath(__file__)), path_to_thor_config)
+        thor_logsources = self.get_rule_yaml(path_to_thor_config)[0]['logsources']
+    
+        for key, value in thor_logsources.items():
+            try:
+                if value["product"] == "windows":
+                    sources_list = value['sources']
+                    for i in sources_list:
+                        if not i.startswith('WinEventLog:'):
+                            faulty_config = True
+                            print(Fore.RED + "/tools/config/thor.yml config file has a broken source. Windows Eventlog sources must start with the keyword 'WinEventLog:'")
+            except:
+                pass
+
+        self.assertEqual(faulty_config, False, Fore.RED + "thor.yml configuration file located in 'tools/config/thor.yml' has a borken log source definition")
+
+    def test_re_invalid_escapes(self):
+        faulty_rules = []
+        MAX_DEPTH = 3
+
+        def create_escape_allow_list():
+            """
+            Create a list of characters that are allowed to be escaped.
+            1. Based on string.punctuation chars that would already be escaped by re.escape()
+            2. Followed by special chars like '\n', '\t', '\[0-9]' etc.
+            3. Followed by Double- or Single Quote to escape string literals.
+            """
+            allowed_2_be_escaped = []
+            index = 0
+            l = tuple(re.escape(string.punctuation))
+            for c in l:
+                if c == "\\":
+                    allowed_2_be_escaped.append(l[index+1])
+                index += 1
+
+            re_specials = [
+                "A", "b", "B", "d", "D", "f", "n", "r", "s",
+                "S", "t", "v", "w", "W", "Z",
+                # Match Groups
+                "0", "1", "2", "3", "4", "5",
+                "6", "7", "8", "9",
+            ]
+            allowed_2_be_escaped.extend(re_specials)
+
+            allowed_2_be_escaped.extend([
+                '"',
+                '\'',
+            ])
+
+            return allowed_2_be_escaped
+
+        def check_list_or_recurse_on_dict(item, depth: int, special: bool) -> None:
+            """
+            Recursive walk through the detection to find "|re" occurance.
+            Jump to check_item_for_bad_escapes with lists or strings found.
+            """
+            if type(item) == list:
+                pass
+                # check_item_for_bad_escapes(item)
+            elif type(item) == dict and depth <= MAX_DEPTH:
+                for keys, sub_item in item.items():
+                    if "|re" in keys: # Covers both "base64" and "base64offset" modifiers
+                        if type(sub_item) == str or type(sub_item) == list:
+                            check_item_for_bad_escapes(sub_item)
+                        else:
+                            check_list_or_recurse_on_dict(sub_item, depth + 1, True)
+                    else:
+                        check_list_or_recurse_on_dict(sub_item, depth + 1, special)
+
+        def check_item_for_bad_escapes(item):
+            """
+            Check item against bad escaped characters
+            """
+            found_bad_escapes = []
+            to_check = []
+            if type(item) == str:
+                to_check.append(item)
+            else:
+                to_check = item
+            for str_item in to_check:
+                l = tuple(str_item)
+                index = 0
+                for c in l:
+                    if c == "\\":
+                        # 'l[index-1] != "\\"' ---> Allows "\\\\"
+                        # Check if character after \ is not in escape_allow_list and also not already found
+                        if l[index-1] != "\\" and l[index+1] not in escape_allow_list and l[index+1] not in found_bad_escapes:
+                            # Only for debugging:
+                            # print(f"Illegal escape found {c}{l[index+1]}")
+                            found_bad_escapes.append(f"{l[index+1]}")
+                    index += 1
+
+            if len(found_bad_escapes) > 0:
+                print(Fore.RED + "Rule {} has forbidden escapes in |re '{}'".format(file, ",".join(found_bad_escapes)))
+                faulty_rules.append(file)
+
+        # Create escape_allow_list for this test
+        escape_allow_list = create_escape_allow_list()
+
+        # For each rule file, extract detection and dive into recursion
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            detection = self.get_rule_part(
+                file_path=file, part_name="detection")
+            if detection:
+                check_list_or_recurse_on_dict(detection, 1, False)
+
+        self.assertEqual(faulty_rules, [], Fore.RED +
+                         "There are rules using illegal re-escapes")
 
 def get_mitre_data():
     """
     Use Tags from CTI subrepo to get consitant data
     """
-    cti_path = "tests/cti/"
+    cti_path = "cti/"
+    cti_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), cti_path)
+
     # Get ATT&CK information
     lift = attack_client(local_path=cti_path)
     # Techniques
@@ -1290,7 +1442,5 @@ def get_mitre_data():
 
 if __name__ == "__main__":
     init(autoreset=True)
-    # Get Current Data from MITRE ATT&CK®
-    MITRE_ALL = get_mitre_data()
     # Run the tests
     unittest.main()

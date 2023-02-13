@@ -8,7 +8,7 @@ references:
     - https://github.com/fox-it/LDAPFragger
 author: xknow @xknow_infosec, Tim Shelton
 date: 2019/03/24
-modified: 2022/08/24
+modified: 2023/01/12
 tags:
     - attack.t1001.003
     - attack.command_and_control
@@ -38,7 +38,11 @@ detection:
         Image:
             - 'C:\Windows\system32\efsui.exe'
             - 'C:\Windows\system32\dsac.exe'
-    condition: selection and not 1 of filter*
+    filter_citrix:
+        # Example:
+        #   TargetFilename=C:\Windows\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\SchCache\REDACTED.com.sch
+        Image|endswith: ':\Program Files\Citrix\Receiver StoreFront\Services\DefaultDomainServices\Citrix.DeliveryServices.DomainServices.ServiceHost.exe'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Other legimate tools, which do ADSI (LDAP) operations, e.g. any remoting activity by MMC, Powershell, Windows etc.
 level: high

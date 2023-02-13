@@ -1,12 +1,12 @@
-title: Raw Disk Access Using Illegitimate Tools
+title: Potential Defense Evasion Via Raw Disk Access By Uncommon Tools
 id: db809f10-56ce-4420-8c86-d6a7d793c79c
 status: test
-description: Raw disk access using illegitimate tools, possible defence evasion
+description: Detects raw disk access using uncommon tools, which could indicate possible defense evasion attempts
 references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
 author: Teymur Kheirkhabarov, oscd.community
 date: 2019/10/22
-modified: 2022/11/29
+modified: 2023/01/18
 tags:
     - attack.defense_evasion
     - attack.t1006
@@ -14,23 +14,25 @@ logsource:
     product: windows
     category: raw_access_thread
 detection:
-    filter_1:
+    filter_floppy:
         Device|contains: floppy
-    filter_2:
+    filter_generic:
         Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
             - 'C:\Windows\System32\'
             - 'C:\Windows\SystemApps\'
             - 'C:\Windows\WinSxS\'
             - 'C:\Windows\servicing\'
             - 'C:\Windows\CCM\'
             - 'C:\Windows\uus\'
-    filter_3:
+    filter_system_process:
         ProcessId: 4
     filter_specific:
         Image:
             - 'C:\Windows\UUS\amd64\MoUsoCoreWorker.exe'
             - 'C:\Windows\explorer.exe'
-    filter_system:
+    filter_system_images:
         Image:
             - 'System'
             - 'Registry'
@@ -39,11 +41,7 @@ detection:
     filter_windefender:
         Image|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
         Image|endswith: '\MsMpEng.exe'
-    filter_programfiles:  # this rule causes so many FPs that we have to do this
-        Image|startswith:
-            - 'C:\Program Files\'
-            - 'C:\Program Files (x86)\'
-    filter_appdata:
+    filter_microsoft_appdata:
         Image|contains|all:
             - 'C:\Users\'
             - '\AppData\'
@@ -61,6 +59,15 @@ detection:
         # Related to Windows Upgrade/Update
         Image|startswith: 'C:\Windows\SoftwareDistribution\Download'
         Image|endswith: '\WindowsUpdateBox.exe'
+    filter_github_desktop:
+        Image|startswith: 'C:\Users\'
+        Image|contains: '\AppData\Local\GitHubDesktop\app-'
+        Image|endswith: '\resources\app\git\mingw64\bin\git.exe'
+    filter_ssd_nvme:
+        Image|startswith: 'C:\Windows\Temp\'
+        Image|endswith:
+            - '\HostMetadata\NVMEHostmetadata.exe'
+            - '\Executables\SSDUpdate.exe'
     condition: not 1 of filter_*
 fields:
     - ComputerName
@@ -68,6 +75,6 @@ fields:
     - ProcessID
     - Device
 falsepositives:
+    # Far too many false positives
     - Legitimate Administrator using tool for raw access or ongoing forensic investigation
-# far too many false positives
 level: low

@@ -1,12 +1,12 @@
 title: Suspicious Spool Service Child Process
 id: dcdbc940-0bff-46b2-95f3-2d73f848e33b
-status: stable
+status: test
 description: Detects suspicious print spool service (spoolsv.exe) child processes.
 references:
     - https://github.com/microsoft/Microsoft-365-Defender-Hunting-Queries/blob/efa17a600b43c897b4b7463cc8541daa1987eeb4/Exploits/Print%20Spooler%20RCE/Suspicious%20Spoolsv%20Child%20Process.md
 author: Justin C. (@endisphotic), @dreadphones (detection), Thomas Patzke (Sigma rule)
 date: 2021/07/11
-modified: 2022/07/14
+modified: 2023/02/09
 tags:
     - attack.execution
     - attack.t1203
@@ -41,8 +41,13 @@ detection:
             - '\schtasks.exe'
             - '\write.exe'
             - '\wuauclt.exe'
+            - '\systeminfo.exe'
+            - '\reg.exe'
+            - '\query.exe'
     suspicious_net:
-        Image|endswith: '\net.exe'
+        Image|endswith:
+            - '\net.exe'
+            - '\net1.exe'
     suspicious_net_filter:
         CommandLine|contains: 'start'
     suspicious_cmd:
@@ -64,10 +69,12 @@ detection:
             - '\pwsh.exe'
     suspicious_powershell_filter:
         CommandLine|contains: '.spl'
-    suspicious_rundll32:
-        Image|endswith: '\rundll32.exe'
+    suspicious_rundll32_img:
+        - Image|endswith: '\rundll32.exe'
+        - OriginalFileName: 'RUNDLL32.EXE'
+    suspicious_rundll32_cli:
         CommandLine|endswith: 'rundll32.exe'
-    condition: spoolsv and ( suspicious_unrestricted or (suspicious_net and not suspicious_net_filter) or (suspicious_cmd and not suspicious_cmd_filter) or (suspicious_netsh and not suspicious_netsh_filter) or (suspicious_powershell and not suspicious_powershell_filter) or suspicious_rundll32 )
+    condition: spoolsv and ( suspicious_unrestricted or (suspicious_net and not suspicious_net_filter) or (suspicious_cmd and not suspicious_cmd_filter) or (suspicious_netsh and not suspicious_netsh_filter) or (suspicious_powershell and not suspicious_powershell_filter) or all of suspicious_rundll32_* )
 fields:
     - Image
     - CommandLine

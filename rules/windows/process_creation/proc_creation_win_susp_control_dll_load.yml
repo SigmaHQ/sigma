@@ -4,9 +4,9 @@ status: test
 description: Detects suspicious Rundll32 execution from control.exe as used by Equation Group and Exploit Kits
 references:
     - https://twitter.com/rikvduijn/status/853251879320662017
-author: Florian Roth
+author: Florian Roth (Nextron Systems)
 date: 2017/04/15
-modified: 2021/11/27
+modified: 2023/02/09
 tags:
     - attack.defense_evasion
     - attack.t1218.011
@@ -14,12 +14,14 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection_parent:
         ParentImage|endswith: '\System32\control.exe'
-        Image|endswith: '\rundll32.exe '
+    selection_img:
+        - Image|endswith: '\rundll32.exe'
+        - OriginalFileName: 'RUNDLL32.EXE'
     filter:
         CommandLine|contains: 'Shell32.dll'
-    condition: selection and not filter
+    condition: all of selection_* and not filter
 fields:
     - CommandLine
     - ParentCommandLine

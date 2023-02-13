@@ -1,13 +1,14 @@
-title: Powershell Reverse Shell Connection
+title: Potential Powershell ReverseShell Connection
 id: edc2f8ae-2412-4dfd-b9d5-0c57727e70be
-status: experimental
-description: Detects the Nishang Invoke-PowerShellTcpOneLine reverse shell
+status: stable
+description: Detects usage of the "TcpClient" class. Which can be abused to establish remote connections and reverse-shells. As seen used by the Nishang "Invoke-PowerShellTcpOneLine" reverse shell.
 references:
     - https://www.volexity.com/blog/2021/03/02/active-exploitation-of-microsoft-exchange-zero-day-vulnerabilities/
     - https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers/
+    - https://github.com/samratashok/nishang/blob/414ee1104526d7057f9adaeee196d91ae447283e/Shells/Invoke-PowerShellTcpOneLine.ps1
 author: FPT.EagleEye, wagga
 date: 2021/03/03
-modified: 2022/07/14
+modified: 2023/01/09
 tags:
     - attack.execution
     - attack.t1059.001
@@ -15,15 +16,19 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith:
+    selection_img:
+        - OriginalFileName:
+            - 'PowerShell.EXE'
+            - 'pwsh.dll'
+        - Image|endswith:
             - '\powershell.exe'
             - '\pwsh.exe'
-        CommandLine|contains: 'new-object system.net.sockets.tcpclient'
-    condition: selection
-fields:
-    - CommandLine
-    - ParentCommandLine
+    selection_cli:
+        CommandLine|contains|all:
+            - ' System.Net.Sockets.TCPClient'
+            - '.GetBytes'
+            - '.Write'
+    condition: all of selection_*
 falsepositives:
-    - Administrative might use this function for checking network connectivity
+    - Administrative might use this function to check network connectivity
 level: high

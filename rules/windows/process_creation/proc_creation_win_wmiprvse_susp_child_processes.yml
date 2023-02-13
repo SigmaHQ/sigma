@@ -1,0 +1,51 @@
+title: Suspicious WmiPrvse Child Process Spawned
+id: 8a582fe2-0882-4b89-a82a-da6b2dc32937
+related:
+    - id: 692f0bec-83ba-4d04-af7e-e884a96059b6
+      type: similar
+    - id: d21374ff-f574-44a7-9998-4a8c8bf33d7d
+      type: similar
+status: test
+description: Detects suspicious and uncommon child processes of WmiPrvSE
+references:
+    - https://thedfirreport.com/2021/03/29/sodinokibi-aka-revil-ransomware/
+    - https://github.com/vadim-hunter/Detection-Ideas-Rules/blob/02bcbfc2bfb8b4da601bb30de0344ae453aa1afe/Threat%20Intelligence/The%20DFIR%20Report/20210329_Sodinokibi_(aka_REvil)_Ransomware.yaml
+    - https://blog.osarmor.com/319/onenote-attachment-delivers-asyncrat-malware/
+author: Vadim Khrykov (ThreatIntel), Cyb3rEng
+date: 2021/08/23
+modified: 2023/01/19
+tags:
+    - attack.execution
+    - attack.defense_evasion
+    - attack.t1047
+    - attack.t1204.002
+    - attack.t1218.010
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_parent:
+        ParentImage|endswith: '\wbem\WmiPrvSE.exe'
+    selection_children_1:
+        # TODO: Think to add more LOLBINs or suspicious processes that make sens in your environment
+        Image|endswith:
+            - '\regsvr32.exe'
+            - '\rundll32.exe'
+            - '\msiexec.exe'
+            - '\mshta.exe'
+            - '\verclsid.exe'
+    selection_children_2:
+        # This is in a separate selection due to the nature of FP generated with CMD
+        Image|endswith: '\cmd.exe'
+        CommandLine|contains:
+            - 'powershell'
+            - 'pwsh'
+            - 'mshta'
+            - 'rundll32'
+            - 'regsvr32'
+            - 'wscript'
+            - 'cscript'
+    condition: selection_parent and 1 of selection_children_*
+falsepositives:
+    - Unknown
+level: high

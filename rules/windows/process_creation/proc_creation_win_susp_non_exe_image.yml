@@ -4,9 +4,9 @@ status: experimental
 description: Checks whether the image specified in a process creation event doesn't refer to an .exe file (caused by process ghosting or other unorthodox methods to start a process)
 references:
     - https://pentestlaboratories.com/2021/12/08/process-ghosting/
-author: Max Altgelt
+author: Max Altgelt (Nextron Systems)
 date: 2021/12/09
-modified: 2022/12/14
+modified: 2023/01/25
 tags:
     - attack.defense_evasion
 logsource:
@@ -90,6 +90,8 @@ detection:
     filter_dell_dock:
         ParentImage|startswith: 'C:\Windows\Temp\'
         ParentImage|endswith: '\TBT_Dock_Firmware\GetDockVer32W.exe'
+    filter_firefox_crashreporter:
+        Image|startswith: 'C:\Program Files\Mozilla Firefox\tobedeleted\'
     condition: not known_image_extension and not 1 of filter*
 falsepositives:
     - Unknown

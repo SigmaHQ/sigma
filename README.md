@@ -14,7 +14,7 @@ Sigma is for log files what [Snort](https://www.snort.org/) is for network traff
 
 This repository contains:
 
-1. Sigma rule specification in the [Wiki](https://github.com/Neo23x0/sigma/wiki/Specification)
+1. Sigma rule specification in the [Sigma-Specification](https://github.com/SigmaHQ/sigma-specification) repository
 2. Open repository for sigma signatures in the `./rules` subfolder
 3. A converter named `sigmac` located in the `./tools/` sub folder that generates search queries for different SIEM systems from Sigma rules
 
@@ -52,7 +52,7 @@ See the first slide deck that I prepared for a private conference in mid January
 
 # Specification
 
-The specifications can be found in the [Wiki](https://github.com/Neo23x0/sigma/wiki/Specification).
+The specifications can be found in the [Sigma-Specification](https://github.com/SigmaHQ/sigma-specification) repository.
 
 The current specification is a proposal. Feedback is requested.
 
@@ -69,7 +69,7 @@ Florian wrote a short [rule creation tutorial](https://www.nextron-systems.com/2
 3. Run `python sigmac --help` in folder `./tools` to get a help on the rule converter
 4. Convert a rule of your choice with `sigmac` like `./sigmac -t splunk -c config/generic/sysmon.yml ../rules/windows/process_creation/proc_creation_win_susp_whoami.yml`
 5. Convert a whole rule directory with `python sigmac -t splunk -r ../rules/proxy/`
-6. Check the `./tools/config` folder and the [wiki](https://github.com/Neo23x0/sigma/wiki/Converter-Tool-Sigmac) if you need custom field or log source mappings in your environment
+6. Check the `./tools/config` folder and the [Sigma-Specification](https://github.com/SigmaHQ/sigma-specification) repository if you need custom field or log source mappings in your environment
 
 ## Troubles / Troubleshooting / Help
 
@@ -371,7 +371,7 @@ The content of this repository is released under the following licenses:
 
 * The toolchain (everything under tools/) is licensed under the[GNU Lesser General Public License](https://www.gnu.org/licenses/lgpl-3.0.en.html)
 * The [Sigma Specification](https://github.com/SigmaHQ/sigma-specification) and the Sigma logo are public domain
-* The rules contained in the [SigmaHQ repository](https://github.com/SigmaHQ) are released under the [Detection Rule License (DRL) 1.1](https://github.com/SigmaHQ/sigma/blob/master/LICENSE.Detection.Rules.md)
+* The rules contained in the [SigmaHQ repository](https://github.com/SigmaHQ) are released under the [Detection Rule License (DRL) 1.1](https://github.com/SigmaHQ/Detection-Rule-License)
 
 # Credits
 

@@ -1,0 +1,33 @@
+title: Suspicious OpenSSH Daemon Error
+id: e76b413a-83d0-4b94-8e4c-85db4a5b8bdc
+status: test
+description: Detects suspicious SSH / SSHD error messages that indicate a fatal or suspicious error that could be caused by exploiting attempts
+references:
+    - https://github.com/openssh/openssh-portable/blob/c483a5c0fb8e8b8915fad85c5f6113386a4341ca/ssherr.c
+    - https://github.com/ossec/ossec-hids/blob/1ecffb1b884607cb12e619f9ab3c04f530801083/etc/rules/sshd_rules.xml
+author: Florian Roth (Nextron Systems)
+date: 2017/06/30
+modified: 2021/11/27
+tags:
+    - attack.initial_access
+    - attack.t1190
+logsource:
+    product: linux
+    service: sshd
+detection:
+    keywords:
+        - 'unexpected internal error'
+        - 'unknown or unsupported key type'
+        - 'invalid certificate signing key'
+        - 'invalid elliptic curve value'
+        - 'incorrect signature'
+        - 'error in libcrypto'
+        - 'unexpected bytes remain after decoding'
+        - 'fatal: buffer_get_string: bad string'
+        - 'Local: crc32 compensation attack'
+        - 'bad client public DH value'
+        - 'Corrupted MAC on input'
+    condition: keywords
+falsepositives:
+    - Unknown
+level: medium
