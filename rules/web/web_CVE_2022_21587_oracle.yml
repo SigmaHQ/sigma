@@ -1,0 +1,29 @@
+title: Oracle E-Business Suite Vulnerability
+id: d033cb8a-8669-4a8e-a974-48d4185a8503
+status: experimental
+description: Critical arbitrary file upload vulnerability impacting Oracle E-Business Suite (EBS). The vulnerability also allows code execution. Multiple PoCs available.
+references:
+    - https://www.rapid7.com/blog/post/2023/02/07/etr-cve-2022-21587-rapid7-observed-exploitation-of-oracle-e-business-suite-vulnerability/
+    - https://blog.viettelcybersecurity.com/cve-2022-21587-oracle-e-business-suite-unauth-rce/
+tags:
+    - attack.initial_access
+    - attack.t1190
+    - CVE-2022-21587
+author: Isa Almannaei
+date: 2023/02/13
+logsource:
+    category: webserver
+detection:
+    selection:
+        cs-method: 'POST'
+        cs-uri-query|contains:
+            -  '/OA_HTML/BneViewerXMLService?bne:uueupload=TRUE'
+            -  '/OA_HTML/BneUploaderService?bne:uueupload=TRUE'
+            -  '/OA_HTML/BneDownloadService?bne:uueupload=TRUE'
+            -  '/OA_HTML/BneOfflineLOVService?bne:uueupload=TRUE'
+    condition: selection
+fields:
+    - src_ip
+falsepositives:
+    - Vulnerability Scanners
+level: High
