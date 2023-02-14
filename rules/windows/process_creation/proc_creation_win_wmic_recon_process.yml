@@ -1,13 +1,13 @@
-title: WMI Process Reconnaissance
+title: Process Reconnaissance Via Wmic.EXE
 id: 221b251a-357a-49a9-920a-271802777cc0
 status: experimental
-description: An adversary might use WMI to list Processes running on the compromised host or list installed Software hotfix and patches.
+description: Detects the execution of "wmic" with the "process" flag. Whihc adversary might use to list Processes running on the compromised host or list installed Software hotfix and patches.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1047/T1047.md
     - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/wmic
 author: frack113
 date: 2022/01/01
-modified: 2023/01/03
+modified: 2023/02/14
 tags:
     - attack.execution
     - attack.t1047
@@ -19,12 +19,10 @@ detection:
         - Image|endswith: '\WMIC.exe'
         - OriginalFileName: 'wmic.exe'
     selection_cli:
-        CommandLine|contains:
-            - 'process'
-            - 'qfe'
+        CommandLine|contains: 'process'
     filter:
         CommandLine|contains|all:
-            #rule id 526be59f-a573-4eea-b5f7-f0973207634d for `wmic process call create #{process_to_execute}`
+            # Rule id 526be59f-a573-4eea-b5f7-f0973207634d for `wmic process call create #{process_to_execute}`
             - 'call'
             - 'create'
     condition: all of selection* and not filter

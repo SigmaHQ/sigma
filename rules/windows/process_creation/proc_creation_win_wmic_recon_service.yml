@@ -1,5 +1,5 @@
-title: WMI Reconnaissance List Remote Services
-id: 09af397b-c5eb-4811-b2bb-08b3de464ebf
+title: Service Reconnaissance Via Wmic.EXE
+id: 76f55eaa-d27f-4213-9d45-7b0e4b60bbae
 status: experimental
 description: |
     An adversary might use WMI to check if a certain Remote Service is running on a remote device.
@@ -9,9 +9,8 @@ description: |
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1047/T1047.md
     - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/wmic
-author: frack113
-date: 2022/01/01
-modified: 2022/05/13
+author: frack113, Nasreddine Bencherchali (Nextron Systems)
+date: 2023/02/14
 tags:
     - attack.execution
     - attack.t1047
@@ -23,10 +22,8 @@ detection:
         - Image|endswith: '\WMIC.exe'
         - OriginalFileName: 'wmic.exe'
     selection_cli:
-        CommandLine|contains|all:
-            - '/node:'
-            - 'service'
-    condition: all of selection*
+        CommandLine|contains: 'service'
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: medium
