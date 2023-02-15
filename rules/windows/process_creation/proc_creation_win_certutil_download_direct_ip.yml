@@ -1,0 +1,71 @@
+title: Suspicious File Downloaded From Direct IP Via Certutil.EXE
+id: 13e6fe51-d478-4c7e-b0f2-6da9b400a829
+related:
+    - id: 19b08b1c-861d-4e75-a1ef-ea0c1baf202b # Direct IP download
+      type: similar
+    - id: 42a5f1e7-9603-4f6d-97ae-3f37d130d794 # File sharing download
+      type: similar
+status: experimental
+description: Detects the execution of certutil with certain flags that allow the utility to download files from direct IPs.
+references:
+    - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/certutil
+    - https://forensicitguy.github.io/agenttesla-vba-certutil-download/
+    - https://news.sophos.com/en-us/2021/04/13/compromised-exchange-server-hosting-cryptojacker-targeting-other-exchange-servers/
+    - https://twitter.com/egre55/status/1087685529016193025
+    - https://lolbas-project.github.io/lolbas/Binaries/Certutil/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/02/15
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\certutil.exe'
+        - OriginalFileName: 'CertUtil.exe'
+    selection_flags:
+        CommandLine|contains:
+            - 'urlcache '
+            - 'verifyctl '
+    selection_http:
+        CommandLine|contains:
+            - '://1'
+            - '://2'
+            - '://3'
+            - '://4'
+            - '://5'
+            - '://6'
+            - '://7'
+            - '://8'
+            - '://9'
+    #filter_local_ips:
+    #    # Note: Uncomment this filter if you want to exclude local IPs
+    #    CommandLine|contains:
+    #        - '://10.' #10.0.0.0/8
+    #        - '://192.168.' #192.168.0.0/16
+    #        - '://172.16.' #172.16.0.0/12
+    #        - '://172.17.'
+    #        - '://172.18.'
+    #        - '://172.19.'
+    #        - '://172.20.'
+    #        - '://172.21.'
+    #        - '://172.22.'
+    #        - '://172.23.'
+    #        - '://172.24.'
+    #        - '://172.25.'
+    #        - '://172.26.'
+    #        - '://172.27.'
+    #        - '://172.28.'
+    #        - '://172.29.'
+    #        - '://172.30.'
+    #        - '://172.31.'
+    #        - '://127.' #127.0.0.0/8
+    #        - '://169.254.' #169.254.0.0/16
+    filter_seven_zip:
+        CommandLine|contains: '://7-' # For https://7-zip.org/
+    condition: all of selection_* and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: high
