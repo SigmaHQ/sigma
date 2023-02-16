@@ -1,0 +1,33 @@
+title: Reddit API Access
+id: d7b09985-95a3-44be-8450-b6eadf49833e
+status: test
+description: Detects suspicious requests to Reddit
+references:
+    - https://github.com/kleiton0x00/RedditC2
+    - https://twitter.com/kleiton0x7e/status/1600567316810551296
+    - https://www.linkedin.com/posts/kleiton-kurti_github-kleiton0x00redditc2-abusing-reddit-activity-7009939662462984192-5DbI/?originalSubdomain=al
+author: Gavin Knapp (Bridewell Consulting)
+date: 2023/02/23
+modified: 2021/11/27
+tags:
+    - attack.defense_evasion
+    - attack.command_and_control
+    - attack.t1071.001
+    - attack.t1102.002
+logsource:
+    category: proxy
+detection:
+    selection1:
+        - r-dns: 'reddit.com' # Often used by Bots
+        - c-uri|contains: 'reddit.com/api/' # Often used by Bots
+    selection2:
+        - r-dns: 'reddit.com' # Often used by Bots
+        - c-uri|contains: 'reddit.com/dev/api/' # Often used by Bots
+    condition: selection1 or selection2
+fields:
+    - ClientIP
+    - c-uri
+    - c-useragent
+falsepositives:
+    - Legitimate use of Reddit or Reddit bots in the organisation
+level: low
