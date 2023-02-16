@@ -1,4 +1,4 @@
-title: Bitsadmin Download File from IP
+title: Suspicious Download From Direct IP Via Bitsadmin
 id: 99c840f2-2012-46fd-9141-c761987550ef
 related:
     - id: 90f138c1-f578-4ac3-8c49-eecfd847c8b7
@@ -12,7 +12,7 @@ references:
     - https://blog.talosintelligence.com/breaking-the-silence-recent-truebot-activity/
 author: Florian Roth (Nextron Systems)
 date: 2022/06/28
-modified: 2022/12/13
+modified: 2023/02/15
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -33,29 +33,18 @@ detection:
             - ' /addfile '
     selection_extension:
         CommandLine|contains:
-            - 'http://1'
-            - 'http://2'
-            - 'http://3'
-            - 'http://4'
-            - 'http://5'
-            - 'http://6'
-            - 'http://7'
-            - 'http://8'
-            - 'http://9'
-            - 'https://1'
-            - 'https://2'
-            - 'https://3'
-            - 'https://4'
-            - 'https://5'
-            - 'https://6'
-            - 'https://7'
-            - 'https://8'
-            - 'https://9'
-    filter:
-        CommandLine|contains:
-            - 'https://7-' # For https://7-zip.org/
-            - 'http://7-'
-    condition: all of selection_* and not filter
+            - '://1'
+            - '://2'
+            - '://3'
+            - '://4'
+            - '://5'
+            - '://6'
+            - '://7'
+            - '://8'
+            - '://9'
+    filter_seven_zip:
+        CommandLine|contains: '://7-' # For https://7-zip.org/
+    condition: all of selection_* and not 1 of filter_*
 fields:
     - CommandLine
     - ParentCommandLine
