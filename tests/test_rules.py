@@ -364,13 +364,13 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
             elif id.lower() in dict_id.keys():
                 print(
-                    Fore.YELLOW + "Rule {} has the same 'id' than {} must be unique.".format(file, dict_id[id]))
+                    Fore.YELLOW + "Rule {} has the same 'id' as {}".format(file, dict_id[id]))
                 faulty_rules.append(file)
             else:
                 dict_id[id.lower()] = file
 
         self.assertEqual(faulty_rules, [], Fore.RED +
-                         "There are rules with missing or malformed 'id' fields. Create an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).")
+                         "There are rules with missing or malformed 'id' fields. Generate an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).")
 
     def test_optional_related(self):
         faulty_rules = []
