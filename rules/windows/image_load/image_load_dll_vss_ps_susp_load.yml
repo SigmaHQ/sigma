@@ -1,5 +1,10 @@
-title: Image Load of VSS_PS.dll by Uncommon Executable
+title: Suspicious Volume Shadow Copy VSS_PS.dll Load
 id: 333cdbe8-27bb-4246-bf82-b41a0dca4b70
+related:
+    - id: 48bfd177-7cf2-412b-ad77-baf923489e82 # vsstrace.dll
+      type: similar
+    - id: 37774c23-25a1-4adb-bb6d-8bb9fd59c0f8 # vssapi.dll
+      type: similar
 status: experimental
 description: Detects the image load of vss_ps.dll by uncommon executables
 references:
@@ -7,7 +12,7 @@ references:
     - https://twitter.com/am0nsec/status/1412232114980982787
 author: Markus Neis, @markus_neis
 date: 2021/07/07
-modified: 2022/10/31
+modified: 2023/02/17
 tags:
     - attack.defense_evasion
     - attack.impact
@@ -19,25 +24,26 @@ detection:
     selection:
         ImageLoaded|endswith: '\vss_ps.dll'
     filter_legit:
-        Image|endswith:
-            - '\svchost.exe'
-            - '\msiexec.exe'
-            - '\vssvc.exe'
-            - '\srtasks.exe'
-            - '\tiworker.exe'
-            - '\dllhost.exe'
-            - '\searchindexer.exe'
-            - '\dismhost.exe'
-            - '\taskhostw.exe'
-            - '\clussvc.exe'
-            - '\thor64.exe'
-            - '\thor.exe'
-            - '\rundll32.exe'
-            - '\inetsrv\iissetup.exe'
-            - '\inetsrv\appcmd.exe'
-            - '\WmiPrvSE.exe'
         Image|startswith: 'C:\Windows\'
+        Image|endswith:
+            - '\clussvc.exe'
+            - '\dismhost.exe'
+            - '\dllhost.exe'
+            - '\inetsrv\appcmd.exe'
+            - '\inetsrv\iissetup.exe'
+            - '\msiexec.exe'
+            - '\rundll32.exe'
+            - '\searchindexer.exe'
+            - '\srtasks.exe'
+            - '\svchost.exe'
+            - '\taskhostw.exe'
+            - '\thor.exe'
+            - '\thor64.exe'
+            - '\tiworker.exe'
+            - '\vssvc.exe'
+            - '\WmiPrvSE.exe'
     filter_programfiles:
+        # When using this rule in your environment replace the "Program Files" folder by the exact applications you know use this. Examples would be software such as backup solutions
         Image|startswith:
             - 'C:\Program Files\'
             - 'C:\Program Files (x86)\'

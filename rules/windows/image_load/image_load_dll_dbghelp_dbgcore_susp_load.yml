@@ -1,10 +1,13 @@
-title: Load of dbghelp/dbgcore DLL from Suspicious Process
+title: Load Of Dbghelp/Dbgcore DLL From Suspicious Process
 id: 0e277796-5f23-4e49-a490-483131d4f6e1
+related:
+    - id: bdc64095-d59a-42a2-8588-71fd9c9d9abc # Unsigned Loading
+      type: similar
 status: test
 description: |
-  Detects the load of dbghelp/dbgcore DLL (used to make memory dumps) by suspicious processes.
-  Tools like ProcessHacker and some attacker tradecract use MiniDumpWriteDump API found in dbghelp.dll or dbgcore.dll.
-  As an example, SilentTrynity C2 Framework has a module that leverages this API to dump the contents of Lsass.exe and transfer it over the network back to the attacker's machine.
+    Detects the load of dbghelp/dbgcore DLL (used to make memory dumps) by suspicious processes.
+    Tools like ProcessHacker and some attacker tradecract use MiniDumpWriteDump API found in dbghelp.dll or dbgcore.dll.
+    As an example, SilentTrynity C2 Framework has a module that leverages this API to dump the contents of Lsass.exe and transfer it over the network back to the attacker's machine.
 references:
     - https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/nf-minidumpapiset-minidumpwritedump
     - https://www.pinvoke.net/default.aspx/dbghelp/MiniDumpWriteDump.html
@@ -19,7 +22,7 @@ logsource:
     category: image_load
     product: windows
 detection:
-    signedprocess:
+    selection:
         ImageLoaded|endswith:
             - '\dbghelp.dll'
             - '\dbgcore.dll'
@@ -46,29 +49,11 @@ detection:
             - '\regsvcs.exe'
             - '\sc.exe'
             - '\scriptrunner.exe'
-    unsignedprocess:
-        ImageLoaded|endswith:
-            - '\dbghelp.dll'
-            - '\dbgcore.dll'
-        Signed: 'false'
-    filter1:
-        - Image|contains: 'Visual Studio'
-        - CommandLine|contains:
-            - '-k LocalSystemNetworkRestricted'
-            - '-k UnistackSvcGroup -s WpnUserService'
-    filter2:   # Not available in Sysmon, but in Aurora
-        CommandLine:
-            - 'C:\Windows\system32\svchost.exe -k netsvcs -p -s wuauserv'
-            - 'C:\Windows\System32\svchost.exe -k WerSvcGroup'
-    filter3:
+    filter_tiworker:
+        # CommandLine field added by aurora
         CommandLine|startswith: 'C:\WINDOWS\winsxs\'
         CommandLine|endswith: '\TiWorker.exe -Embedding'
-    condition: (signedprocess or unsignedprocess) and not 1 of filter*
-fields:
-    - ComputerName
-    - User
-    - Image
-    - ImageLoaded
+    condition: selection and not 1 of filter*
 falsepositives:
     - Unknown
 level: high

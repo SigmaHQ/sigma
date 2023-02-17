@@ -1,12 +1,17 @@
 title: Image Load of VSS Dll by Uncommon Executable
 id: 37774c23-25a1-4adb-bb6d-8bb9fd59c0f8
+related:
+    - id: 333cdbe8-27bb-4246-bf82-b41a0dca4b70 # vss_ps.dll
+      type: similar
+    - id: 48bfd177-7cf2-412b-ad77-baf923489e82 # vsstrace.dll
+      type: similar
 status: experimental
 description: Detects the image load of VSS DLL by uncommon executables
 references:
     - https://github.com/ORCx41/DeleteShadowCopies
 author: frack113
 date: 2022/10/31
-modified: 2022/12/14
+modified: 2023/02/17
 tags:
     - attack.defense_evasion
     - attack.impact
@@ -16,14 +21,19 @@ logsource:
     product: windows
 detection:
     selection:
-        ImageLoaded|endswith: 
-            - '\vsstrace.dll'
-            - '\vssapi.dll'
-    filter_legit:
+        ImageLoaded|endswith: '\vssapi.dll'
+    filter_windows:
         Image|startswith:
-            - 'C:\Windows\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\WinSxS\'
+    filter_program_files:
+        # When using this rule in your environment replace the "Program Files" folder by the exact applications you know use this. Examples would be software such as backup solutions
+        Image|startswith:
             - 'C:\Program Files\'
             - 'C:\Program Files (x86)\'
+    filter_programdata_packagecache:
+        Image|startswith:
             # The following filter is required because of many FPs cause by :
             # C:\ProgramData\Package Cache\{10c6cfdc-27af-43fe-bbd3-bd20aae88451}\dotnet-sdk-3.1.425-win-x64.exe
             # C:\ProgramData\Package Cache\{b9cfa33e-ace4-49f4-8bb4-82ded940990a}\windowsdesktop-runtime-6.0.11-win-x86.exe
