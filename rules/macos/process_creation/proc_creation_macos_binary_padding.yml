@@ -16,20 +16,16 @@ logsource:
     product: macos
     category: process_creation
 detection:
-    selection1:
+    selection_truncate:
         Image|endswith: '/truncate'
         CommandLine|contains: '-s +'
-    filter1:
-        CommandLine|contains: 
-            - '-s 0' #truncates to zero, no padding
-            - '-s -' #file size will be reduced, no padding
-    selection2:
+    selection_dd:
         Image|endswith: '/dd'
         CommandLine|contains: 
-            - 'if=/dev/zero' #if input is not /dev/zero, then there is no null padding
-            - 'if=/dev/random' #high-quality random data
-            - 'if=/dev/urandom' #low-quality random data
-    condition: (selection1 and not filter1) or selection2
+            - 'if=/dev/zero' # if input is not /dev/zero, then there is no null padding
+            - 'if=/dev/random' # high-quality random data
+            - 'if=/dev/urandom' # low-quality random data
+    condition: 1 of selection_*
 falsepositives:
     - Legitimate script work
 level: high
