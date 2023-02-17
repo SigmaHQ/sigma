@@ -1,0 +1,39 @@
+title: Suspicious non-browser network communication with Reddit API
+id: d7b09985-95a3-44be-8450-b6eadf49833e
+status: test
+description: Detects an a non-browser process interacting with the Reddit API which could indicate use of a covert C2 (RedditC2)
+references:
+    - https://github.com/kleiton0x00/RedditC2
+    - https://twitter.com/kleiton0x7e/status/1600567316810551296
+    - https://www.linkedin.com/posts/kleiton-kurti_github-kleiton0x00redditc2-abusing-reddit-activity-7009939662462984192-5DbI/?originalSubdomain=al
+author: Gavin Knapp
+date: 2023/02/16
+tags:
+    - attack.command_and_control
+    - attack.t1102
+logsource:
+    product: windows
+    category: network_connection
+    definition: 'Non-browser process communicating with reddit API'
+detection:
+    selection:
+        DestinationHostname|contains:
+            - 'www.reddit.com/api'
+    filter:
+        Image|endswith: #other browsers or apps known to use reddit should be added
+            - "msedge.exe"
+            - "chrome.exe"
+            - "iexplorer.exe"
+            - "brave.exe"
+            - "firefox.exe"
+            - "ExpressConnectNetworkService.exe"
+            - "safari.exe"
+            - "maxthon.exe"
+            - "opera.exe"
+            - "brave.exe"
+            - "vivaldi.exe"
+            - "seamonkey.exe" 
+    condition: selection and not filter
+falsepositives:
+    - Legitimate applications communicating with the Reddit API e.g. web browsers not in exclusion list, app with an RSS  etc.
+level: low
