@@ -17,12 +17,16 @@ detection:
     selection1:
         Image|endswith: '/truncate'
         CommandLine|contains: '-s'
+    filter1:
+        CommandLine|contains: '-s 0' #truncates to zero, no padding
     selection2:
         Image|endswith: '/dd'
-        CommandLine|contains: 'if='
-    filter:
-        CommandLine|contains: 'of='
-    condition: selection1 or (selection2 and not filter)
+        CommandLine|contains: 
+            - 'if=/dev/zero' #if input is not /dev/zero, then there is no null padding
+            - 'if=/dev/random' #high-quality random data
+            - 'if=/dev/urandom' #low-quality random data
+#Discarding the filter, there should either be "of="(output file) or a redirection or append symbol
+    condition: (selection1 and not filter1) or (selection2)
 falsepositives:
     - Legitimate script work
 level: high
