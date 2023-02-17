@@ -4,9 +4,11 @@ status: test
 description: Adversaries may use binary padding to add junk data and change the on-disk representation of malware. This rule detect using dd and truncate to add a junk data to file.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1027.001/T1027.001.md
+    - https://linux.die.net/man/1/truncate
+    - https://linux.die.net/man/1/dd
 author: 'Igor Fits, Mikhail Larin, oscd.community'
 date: 2020/10/19
-modified: 2022/11/26
+modified: 2023/02/17
 tags:
     - attack.defense_evasion
     - attack.t1027.001
@@ -27,8 +29,7 @@ detection:
             - 'if=/dev/zero' #if input is not /dev/zero, then there is no null padding
             - 'if=/dev/random' #high-quality random data
             - 'if=/dev/urandom' #low-quality random data
-#Discarding the filter, there should either be "of="(output file) or a redirection or append symbol
-    condition: (selection1 and not filter1) or (selection2)
+    condition: (selection1 and not filter1) or selection2
 falsepositives:
     - Legitimate script work
 level: high
