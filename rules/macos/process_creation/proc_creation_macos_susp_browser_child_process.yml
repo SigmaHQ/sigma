@@ -1,0 +1,56 @@
+title: Suspicious Browser Child Process
+id: 0250638a-2b28-4541-86fc-ea4c558fa0c6
+status: experimental
+description: Detects suspicious child processes spun from browsers as parent process, as a result of web browser exploitation.
+references:
+    - https://fr.slideshare.net/codeblue_jp/cb19-recent-apt-attack-on-crypto-exchange-employees-by-heungsoo-kang
+    - https://github.com/elastic/detection-rules/blob/4312d8c9583be524578a14fe6295c3370b9a9307/rules/macos/execution_initial_access_suspicious_browser_childproc.toml
+author: Sohan G (D4rkCiph3r)
+date: 2023/02/18
+tags:
+    - attack.t1189
+    - attack.t1203
+    - attack.t1059
+    - attack.initial_access
+    - attack.execution
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection:
+        ParentImage|contains:
+            - 'Google Chrome'
+            - 'Google Chrome Helper'
+            - 'firefox'
+            - 'Opera'
+            - 'Safari'
+            - 'com.apple.WebKit.WebContent'
+            - 'Microsoft Edge'
+            - 'Tor Browser'
+        Image|endswith:
+            - '/sh'
+            - '/bash'
+            - '/dash'
+            - '/ksh'
+            - '/tcsh'
+            - '/zsh'
+            - '/curl'
+            - '/wget'
+            - '/python'
+            - '/perl'
+            - '/php'
+            - '/osascript'
+            - '/pwsh'
+    filter:
+        CommandLine|contains:
+            - '' #avoids alerting for the events which do not have command-line arguments
+            - '--defaults-torrc' #informs tor to use default config file
+            - '/Library/Application Support/Microsoft/MAU*/Microsoft AutoUpdate.app/Contents/MacOS/msupdate' #Microsoft AutoUpdate utility
+            - '/Volumes/Google Chrome/Google Chrome.app/Contents/Frameworks/*/Resources/install.sh' #install the Google Chrome browser
+            - '/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/*/Resources/keystone_promote_preflight.sh' #updates the Google Chrome branding configuration files
+            - '/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/*/Resources/keystone_promote_postflight.sh' #script that performs the post-installation tasks
+            - '/Users/*/Library/Application Support/Google/Chrome/recovery/*/ChromeRecovery'
+    condition: selection and not filter
+falsepositives:
+    - Legitimate browser install, update and recovery scripts
+level: medium
