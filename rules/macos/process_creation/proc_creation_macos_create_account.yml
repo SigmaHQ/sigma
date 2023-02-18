@@ -4,9 +4,10 @@ status: test
 description: Detects the creation of a new user account. Such accounts may be used for persistence that do not require persistent remote access tools to be deployed on the system.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1136.001/T1136.001.md
+    - https://ss64.com/osx/sysadminctl.html
 author: Alejandro Ortuno, oscd.community
 date: 2020/10/06
-modified: 2021/11/27
+modified: 2023/02/18
 tags:
     - attack.t1136.001
     - attack.persistence
@@ -14,10 +15,18 @@ logsource:
     category: process_creation
     product: macos
 detection:
-    selection:
+    selection1:
         Image|endswith: '/dscl'
         CommandLine|contains: 'create'
-    condition: selection
+    selection2:
+        CommandLine|contains|all:
+            - 'sysadminctl'
+            - 'addUser'
+    selection3:
+        CommandLine|contains:
+            - 'sudo'
+            - 'interactive'
+    condition: selection1 or (selection2 and selection3)
 falsepositives:
     - Legitimate administration activities
 level: low
