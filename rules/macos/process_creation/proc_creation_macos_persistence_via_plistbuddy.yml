@@ -1,0 +1,31 @@
+title: Persistence establishment using PlistBuddy
+id: 65d506d3-fcfe-4071-b4b2-bcefe721bbbb
+status: experimental
+description: Detects suspicious persistence achieved using LaunchAgents or LaunchDaemons via PlistBuddy utility
+references:
+    - https://redcanary.com/blog/clipping-silver-sparrows-wings/
+    - https://www.manpagez.com/man/8/PlistBuddy/
+author: Sohan G (D4rkCiph3r)
+date: 2023/02/18
+tags:
+    - attack.t1543.001 
+    - attack.t1543.004
+    - attack.persistence
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection1:
+        Image|endswith: '/PlistBuddy'
+    selection2:
+        CommandLine|contains:
+            - 'LaunchAgents'
+            - 'LaunchDaemons'
+    selection3:
+        CommandLine|contains|all:
+            - 'RunAtLoad'
+            - 'true'
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: high
