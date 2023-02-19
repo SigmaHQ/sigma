@@ -7,7 +7,7 @@ references:
     - https://github.com/SwiftOnSecurity/sysmon-config/pull/92/files
 author: Florian Roth (Nextron Systems)
 date: 2019/10/12
-modified: 2022/03/26
+modified: 2023/02/19
 tags:
     - attack.resource_development
     - attack.t1588.002
@@ -16,16 +16,16 @@ logsource:
     product: windows
     definition: 'Requirements: Sysmon config that monitors \Keyboard Layout\Preload subkey of the HKLU hives - see https://github.com/SwiftOnSecurity/sysmon-config/pull/92/files'
 detection:
-    selection_registry:
-        EventType: SetValue
+    selection:
+        EventType: 'SetValue'
         TargetObject|contains:
             - '\Keyboard Layout\Preload\'
             - '\Keyboard Layout\Substitutes\'
         Details|contains:
-            - 00000429  # Persian (Iran)
-            - 00050429  # Persian (Iran)
-            - 0000042a  # Vietnamese
-    condition: selection_registry
+            - '00000429'  # Persian (Iran)
+            - '00050429'  # Persian (Iran)
+            - '0000042a'  # Vietnamese
+    condition: selection
 falsepositives:
     - Administrators or users that actually use the selected keyboard layouts (heavily depends on the organisation's user base)
 level: medium

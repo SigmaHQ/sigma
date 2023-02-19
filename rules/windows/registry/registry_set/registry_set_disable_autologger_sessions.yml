@@ -8,7 +8,7 @@ references:
     - https://i.blackhat.com/EU-21/Wednesday/EU-21-Teodorescu-Veni-No-Vidi-No-Vici-Attacks-On-ETW-Blind-EDRs.pdf
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/08/01
-modified: 2023/01/18
+modified: 2023/02/19
 tags:
     - attack.defense_evasion
 logsource:
@@ -16,7 +16,7 @@ logsource:
     product: windows
 detection:
     selection_main:
-        EventType: SetValue
+        EventType: 'SetValue'
         TargetObject|contains: '\System\CurrentControlSet\Control\WMI\Autologger\'
     selection_values:
         TargetObject|contains: # We only care about some autologger to avoid FP. Add more if you need
@@ -25,7 +25,7 @@ detection:
         TargetObject|endswith:
             - '\Enable'
             - '\Start'
-        Details: DWORD (0x00000000)
+        Details: 'DWORD (0x00000000)'
     filter_wevtutil:
         Image: 'C:\Windows\system32\wevtutil.exe'
     condition: all of selection_* and not 1 of filter_*

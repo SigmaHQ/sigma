@@ -8,7 +8,7 @@ references:
     - https://jstnk9.github.io/jstnk9/research/InstallScreenSaver-SCR-files
 author: Jose Luis Sanchez Martinez (@Joseliyo_Jstnk)
 date: 2022/05/04
-modified: 2022/05/04
+modified: 2023/02/19
 tags:
     - attack.defense_evasion
     - attack.t1218.011
@@ -17,16 +17,15 @@ logsource:
     category: registry_set
 detection:
     selection:
-        EventType: SetValue
+        EventType: 'SetValue'
         Image|endswith: '\rundll32.exe'
-    registry:
         TargetObject|contains: '\Control Panel\Desktop\SCRNSAVE.EXE'
         Details|endswith: '.scr'
     filter:
         Details|contains:
             - 'C:\Windows\System32\'
             - 'C:\Windows\SysWOW64\'
-    condition: selection and registry and not filter
+    condition: selection and not filter
 falsepositives:
     - Legitimate use of screen saver
 level: medium

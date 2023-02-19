@@ -6,7 +6,7 @@ references:
     - https://researchcenter.paloaltonetworks.com/2018/07/unit42-upatre-continues-evolve-new-anti-analysis-techniques/
 author: Florian Roth (Nextron Systems), oscd.community
 date: 2018/07/18
-modified: 2022/03/26
+modified: 2023/02/19
 tags:
     - attack.persistence
     - attack.t1547.001
@@ -14,10 +14,10 @@ logsource:
     category: registry_set
     product: windows
 detection:
-    selection:
-        EventType: SetValue
+    selection_1:
+        EventType: 'SetValue'
         TargetObject|endswith: '\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run'
-    selection2:
+    selection_2:
         - Details|startswith:
             - 'C:\Windows\Temp\'
             - 'C:\ProgramData\'
@@ -26,7 +26,7 @@ detection:
             - 'C:\Users\Public\'
             - 'C:\Users\Default\'
         - Details|contains: '\AppData\'
-    condition: selection and selection2
+    condition: all of selection_*
 fields:
     - Image
     - ParentImage
