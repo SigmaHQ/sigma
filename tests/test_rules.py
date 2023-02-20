@@ -364,7 +364,7 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
             elif id.lower() in dict_id.keys():
                 print(
-                    Fore.YELLOW + "Rule {} has the same 'id' as {}".format(file, dict_id[id]))
+                    Fore.YELLOW + "Rule {} has the same 'id' as {}. Ids have to be unique.".format(file, dict_id[id]))
                 faulty_rules.append(file)
             else:
                 dict_id[id.lower()] = file
