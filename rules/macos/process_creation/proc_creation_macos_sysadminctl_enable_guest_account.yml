@@ -1,4 +1,4 @@
-title: Enable the Guest Account
+title: Guest Account Enabled Via Sysadminctl
 id: d7329412-13bd-44ba-a072-3387f804a106
 status: experimental
 description: Detects attempts to enable the guest account using the sysadminctl utility
@@ -7,16 +7,19 @@ references:
 author: Sohan G (D4rkCiph3r)
 date: 2023/02/18
 tags:
+    - attack.initial_access
     - attack.t1078
     - attack.t1078.001
-    - attack.initial_access
 logsource:
     category: process_creation
     product: macos
 detection:
     selection:
         Image|endswith: '/sysadminctl'
-        CommandLine|contains: 'guestAccount on' #by default the guest account is not active
+        CommandLine|contains|all:
+            # By default the guest account is not active
+            - ' -guestAccount'
+            - ' on'
     condition: selection
 falsepositives:
     - Unknown
