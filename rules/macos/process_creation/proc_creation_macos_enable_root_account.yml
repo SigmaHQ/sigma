@@ -3,7 +3,7 @@ id: 821bcf4d-46c7-4b87-bc57-9509d3ba7c11
 status: experimental
 description: Detects attempts to enable/add an account to the admin group, thus granting the root privilege
 references:
-    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1078.001/T1078.001.md
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1078.003/T1078.003.md
     - https://github.com/elastic/detection-rules/blob/4312d8c9583be524578a14fe6295c3370b9a9307/rules/macos/persistence_enable_root_account.toml
     - https://ss64.com/osx/dsenableroot.html
     - https://ss64.com/osx/dseditgroup.html
@@ -13,29 +13,29 @@ date: 2023/02/18
 tags:
     - attack.t1078
     - attack.t1078.001
+    - attack.t1078.003
     - attack.initial_access
     - attack.persistence
 logsource:
     category: process_creation
     product: macos
 detection:
-    selection1:
-        Image|endswith:
-            - '/dseditgroup'
-            - '/dscl'
-    selection2:
+    selection_dscl:
+        Image|endswith: '/dscl'
         CommandLine|contains:
+            - '-append' #appends the user
             - '/Groups/admin'
+    selection_dseditgroup:
+        Image|endswith: '/dseditgroup'
+        CommandLine|contains|all:
+            - '-a' #name of the record(username)
+            - '-t' #type of the record(usergroup)
             - 'admin'
-    selection3:
-        CommandLine|contains:
-            - 'append'
-            - ' -a '
-    selection4:
+    selection_dsenableroot:
         Image|endswith: '/dsenableroot'
     filter:
         CommandLine|contains: ' -d '
-    condition: (selection1 and selection2 and selection3) or (selection4 and not filter)
+    condition: (selection_dsenableroot and not filter) or 1 of selection*
 falsepositives:
     - Unknown
 level: medium
