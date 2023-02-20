@@ -2,7 +2,7 @@
 
 [summary]
 
-## Detailed Description of the Pull Request / Additional comments
+## Detailed Description of the Pull Request / Additional Comments
 
 [detailed description]
 
