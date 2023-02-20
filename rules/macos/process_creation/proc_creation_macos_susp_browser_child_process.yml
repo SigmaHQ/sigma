@@ -41,16 +41,23 @@ detection:
             - '/php'
             - '/osascript'
             - '/pwsh'
-    filter:
+    filter_gen:
         CommandLine|contains:
-            - '' #avoids alerting for the events which do not have command-line arguments
             - '--defaults-torrc' #informs tor to use default config file
             - '/Library/Application Support/Microsoft/MAU*/Microsoft AutoUpdate.app/Contents/MacOS/msupdate' #Microsoft AutoUpdate utility
             - '/Volumes/Google Chrome/Google Chrome.app/Contents/Frameworks/*/Resources/install.sh' #install the Google Chrome browser
             - '/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/*/Resources/keystone_promote_preflight.sh' #updates the Google Chrome branding configuration files
             - '/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/*/Resources/keystone_promote_postflight.sh' #script that performs the post-installation tasks
-            - '/Users/*/Library/Application Support/Google/Chrome/recovery/*/ChromeRecovery'
-    condition: selection and not filter
+    filter_chromerecovery:
+        CommandLine|contains|all:
+            - '/Users/'
+            - '/Library/Application Support/Google/Chrome/recovery/'
+            - '/ChromeRecovery'
+    filter_null:
+        #avoids alerting for the events which do not have command-line arguments
+        - CommandLine: null
+        - CommandLine: ''
+    condition: selection and not filter*
 falsepositives:
     - Legitimate browser install, update and recovery scripts
 level: medium
