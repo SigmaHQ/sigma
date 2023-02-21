@@ -1,5 +1,5 @@
 # Output backends for sigmac
-# Copyright 2016-2018 Thomas Patzke, Florian Roth, juju4
+# Copyright 2016-2018 Thomas Patzke, Florian Roth (Nextron Systems), juju4
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by

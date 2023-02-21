@@ -371,7 +371,7 @@ The content of this repository is released under the following licenses:
 
 * The toolchain (everything under tools/) is licensed under the[GNU Lesser General Public License](https://www.gnu.org/licenses/lgpl-3.0.en.html)
 * The [Sigma Specification](https://github.com/SigmaHQ/sigma-specification) and the Sigma logo are public domain
-* The rules contained in the [SigmaHQ repository](https://github.com/SigmaHQ) are released under the [Detection Rule License (DRL) 1.1](https://github.com/SigmaHQ/sigma/blob/master/LICENSE.Detection.Rules.md)
+* The rules contained in the [SigmaHQ repository](https://github.com/SigmaHQ) are released under the [Detection Rule License (DRL) 1.1](https://github.com/SigmaHQ/Detection-Rule-License)
 
 # Credits
 

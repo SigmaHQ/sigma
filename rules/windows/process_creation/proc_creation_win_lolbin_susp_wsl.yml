@@ -1,5 +1,8 @@
 title: Arbitrary Command Execution Using WSL
 id: dec44ca7-61ad-493c-bfd7-8819c5faa09b
+related:
+    - id: 2267fe65-0681-42ad-9a6d-46553d3f3480 # Generic susp child processes rules
+      type: similar
 status: test
 description: Detects Possible usage of Windows Subsystem for Linux (WSL) binary as a LOLBIN to execute arbitrary linux and windows commands
 references:
@@ -30,7 +33,7 @@ detection:
             - ' --user root'
             - ' -u root'
     filter_kill:
-        # This filter is to handle a FP that occures when a process is spawned from WSL and then closed by the user
+        # This filter is to handle a FP that occurs when a process is spawned from WSL and then closed by the user
         # Example would be to open VsCode through it's server extension from WSL
             # GrandparentCommandLine: "C:\Users\XXX\AppData\Local\Programs\Microsoft VS Code\Code.exe" --ms-enable-electron-run-as-node c:\Users\XXX\.vscode\extensions\ms-vscode-remote.remote-wsl-0.72.0\dist\wslDaemon.js
             # ParentCommandLine: C:\WINDOWS\system32\cmd.exe /d /s /c "C:\WINDOWS\System32\wsl.exe -d Ubuntu-20.04 -e kill 1366"
@@ -41,6 +44,6 @@ detection:
             - ' -e kill '
     condition: all of selection_* and not 1 of filter_*
 falsepositives:
-    - Automation and orchestration scripts may use this method execute scripts etc
+    - Automation and orchestration scripts may use this method to execute scripts etc.
     - Legitimate use by Windows to kill processes opened via WSL (example VsCode WSL server)
 level: medium

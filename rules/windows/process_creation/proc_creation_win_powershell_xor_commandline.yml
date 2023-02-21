@@ -1,12 +1,21 @@
-title: Suspicious XOR Encoded PowerShell Command Line
+title: Suspicious XOR Encoded PowerShell Command
 id: bb780e0c-16cf-4383-8383-1e5471db6cf9
+related:
+    - id: 5b572dcf-254b-425c-a8c5-d9af6bea35a6
+      type: obsoletes
 status: test
-description: Detects suspicious powershell process which includes bxor command, alternative obfuscation method to b64 encoded commands.
-author: Sami Ruohonen, Harish Segar (improvement), Tim Shelton
+description: Detects presence of a potentially xor encoded powershell command
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=65
+    - https://redcanary.com/blog/yellow-cockatoo/
+    - https://zero2auto.com/2020/05/19/netwalker-re/
+    - https://mez0.cc/posts/cobaltstrike-powershell-exec/
+author: Sami Ruohonen, Harish Segar, Tim Shelton, Teymur Kheirkhabarov, Vasiliy Burov, oscd.community, Nasreddine Bencherchali
 date: 2018/09/05
-modified: 2022/12/16
+modified: 2023/01/30
 tags:
     - attack.defense_evasion
+    - attack.execution
     - attack.t1059.001
     - attack.t1140
     - attack.t1027
@@ -14,7 +23,7 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_metadata:
+    selection_img:
         - Image|endswith:
             - '\powershell.exe'
             - '\pwsh.exe'
@@ -23,25 +32,20 @@ detection:
             - 'pwsh.dll'
         - Description: 'Windows PowerShell'
         - Product: 'PowerShell Core 6'
-    selection_cli:
+    selection_cli_xor:
+        CommandLine|contains: 'bxor'
+    selection_cli_other:
         CommandLine|contains:
-            - 'bxor'
+            - 'ForEach'
+            - 'for('
+            - 'for '
             - '-join '
-            - '-join'''
+            - "-join'"
             - '-join"'
             - '-join`'
-            - 'char'
-    filter_amazon:
-        ParentImage: 'C:\Program Files\Amazon\SSM\ssm-document-worker.exe'
-    filter_powershell_script:
-        CommandLine|contains|all:
-            # Script part of Amazon SSM worker (But the parent is empty - see example linked below)
-            # Example: https://github.com/SigmaHQ/sigma/pull/3717#issue-1455440560
-            - 'function Convert-GuidToCompressedGuid'
-            - 'ValueFromPipelineByPropertyName'
-            - '::ParseExact('
-            - 'KB[000000-999999]'
-    condition: all of selection_* and not 1 of filter_*
+            - '::Join'
+            - '[char]'
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: medium

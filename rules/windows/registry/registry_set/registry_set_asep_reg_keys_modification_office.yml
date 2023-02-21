@@ -11,7 +11,7 @@ references:
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split)
 date: 2019/10/25
-modified: 2022/06/10
+modified: 2023/02/17
 tags:
     - attack.persistence
     - attack.t1547.001
@@ -35,21 +35,29 @@ detection:
             - 'test\Special\Perf'
     filter_empty:
         Details: '(Empty)'
-    filter_excel:  # known addins for excel
+    filter_known_addins:
+        Image|startswith:
+            - 'C:\Program Files\Microsoft Office\'
+            - 'C:\Program Files (x86)\Microsoft Office\'
+            - 'C:\Windows\System32\msiexec.exe'
+            - 'C:\Windows\System32\regsvr32.exe'
         TargetObject|contains:
+            # Remove any unused addins in your environment from the filter
+            # Known addins for excel
             - '\Excel\Addins\AdHocReportingExcelClientLib.AdHocReportingExcelClientAddIn.1\'
             - '\Excel\Addins\ExcelPlugInShell.PowerMapConnect\'
             - '\Excel\Addins\NativeShim\'
             - '\Excel\Addins\NativeShim.InquireConnector.1\'
             - '\Excel\Addins\PowerPivotExcelClientAddIn.NativeEntry.1\'
-    filter_outlook:  # known addins for outlook
-        TargetObject|contains:
+            # Known addins for outlook
             - '\Outlook\AddIns\AccessAddin.DC\'
             - '\Outlook\AddIns\ColleagueImport.ColleagueImportAddin\'
             - '\Outlook\AddIns\EvernoteCC.EvernoteContactConnector\'
             - '\Outlook\AddIns\EvernoteOLRD.Connect\'
+            #- '\Outlook\Addins\GrammarlyAddIn.Connect' # Uncomment if you use Grammarly
             - '\Outlook\Addins\Microsoft.VbaAddinForOutlook.1\'
             - '\Outlook\Addins\OcOffice.OcForms\'
+            - '\Outlook\Addins\\OneNote.OutlookAddin'
             - '\Outlook\Addins\OscAddin.Connect\'
             - '\Outlook\Addins\OutlookChangeNotifier.Connect\'
             - '\Outlook\Addins\UCAddin.LyncAddin.1'

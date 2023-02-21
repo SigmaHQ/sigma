@@ -1,12 +1,15 @@
 title: Suspicious Outbound Kerberos Connection
 id: e54979bd-c5f9-4d6c-967b-a04b19ac4c74
+related:
+    - id: eca91c7c-9214-47b9-b4c5-cb1d7e4f2350
+      type: similar
 status: test
 description: Detects suspicious outbound network activity via kerberos default port indicating possible lateral movement or first stage PrivEsc via delegation.
 references:
     - https://github.com/GhostPack/Rubeus
 author: Ilyas Ochkov, oscd.community
 date: 2019/10/24
-modified: 2021/12/02
+modified: 2023/01/30
 tags:
     - attack.credential_access
     - attack.t1558
@@ -19,14 +22,16 @@ detection:
     selection:
         DestinationPort: 88
         Initiated: 'true'
-    filter:
-        Image|endswith:
-            - '\lsass.exe'
-            - '\opera.exe'
-            - '\chrome.exe'
-            - '\firefox.exe'
-            - '\tomcat\bin\tomcat8.exe'
-    condition: selection and not filter
+    filter_exact:
+        Image:
+            - 'C:\Windows\System32\lsass.exe'
+            - 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+            - 'C:\Program Files\Mozilla Firefox\firefox.exe'
+    #filter_browsers:
+        #Image|endswith:
+        #    - '\opera.exe'
+        #    - '\tomcat\bin\tomcat8.exe'
+    condition: selection and not 1 of filter_*
 falsepositives:
-    - Other browsers
+    - Web Browsers
 level: high
