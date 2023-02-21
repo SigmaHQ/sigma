@@ -1,4 +1,4 @@
-## Summary of the Pull Request
+## Summary / Title of the Pull Request
 
 [summary]
 
@@ -6,10 +6,10 @@
 
 [detailed description]
 
-## Example Log Event (In Case of FP Fixes)
+## Example Log Event 
 
-**N/A**
+(in case of false positive fixes)
 
-## Relevant Issues (In Case of Issue Fixes)
+## Fixed Issues 
 
-**N/A**
+(in case your commit fixes issues with rules or code)
