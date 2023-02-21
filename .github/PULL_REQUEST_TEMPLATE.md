@@ -1,15 +1,33 @@
-## Summary / Title of the Pull Request
+<!-- 
 
-[summary]
+PLEASE ACKNOWLEDGE THE FOLLOWING BEFORE PROCEEDING:
 
-## Detailed Description of the Pull Request / Additional Comments
+1. If I delete this entire template and go my own path, the core team may close my issue without further explanation or engagement.
+2. If I leave the title incomplete when filing the issue, the core team may close my issue without further explanation or engagement.
 
-[detailed description]
+Thanks for your understanding!
+-->
 
-## Example Log Event 
+# Summary of the Pull Request
 
-(in case of false positive fixes)
+<!--
+A short summary of your pull request
+-->
 
-## Fixed Issues 
+# Detailed Description of the Pull Request / Additional Comments
 
-(in case your commit fixes issues with rules or code)
+<!--
+A detailed description of the pull request and any additional comments or context
+-->
+
+## Example Log Event
+
+<!--
+Fill this in case of false positive fixes
+-->
+
+## Fixed Issues
+
+<!--
+Fill this in case your commit fixes issues with rules or code
+-->
