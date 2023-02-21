@@ -20,22 +20,22 @@ logsource:
     category: process_creation
     product: macos
 detection:
-    selection_dscl:
+    selection_ds_cl:
         Image|endswith: '/dscl'
-        CommandLine|contains:
+        CommandLine|contains|all:
             - '-append' #appends the user
             - '/Groups/admin'
-    selection_dseditgroup:
+    selection_ds_editgroup:
         Image|endswith: '/dseditgroup'
         CommandLine|contains|all:
             - '-a' #name of the record(username)
             - '-t' #type of the record(usergroup)
             - 'admin'
-    selection_dsenableroot:
+    selection_root:
         Image|endswith: '/dsenableroot'
-    filter:
+    filter_root:
         CommandLine|contains: ' -d '
-    condition: (selection_dsenableroot and not filter) or 1 of selection*
+    condition: (selection_root and not filter_root) or 1 of selection_ds_*
 falsepositives:
     - Unknown
 level: medium
