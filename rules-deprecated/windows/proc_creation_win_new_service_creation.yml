@@ -1,0 +1,30 @@
+title: New Service Creation
+id: 7fe71fc9-de3b-432a-8d57-8c809efc10ab
+status: deprecated
+description: Detects creation of a new service.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1543.003/T1543.003.md
+author: Timur Zinniatullin, Daniil Yugoslavskiy, oscd.community
+date: 2019/10/21
+modified: 2023/02/20
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1543.003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_sc:
+        Image|endswith: '\sc.exe'
+        CommandLine|contains|all:
+            - 'create'
+            - 'binPath'
+    selection_posh:
+        CommandLine|contains|all:
+            - 'New-Service'
+            - '-BinaryPathName'
+    condition: 1 of selection*
+falsepositives:
+    - Legitimate administrator or user creates a service for legitimate reasons.
+level: low

@@ -1,4 +1,4 @@
-title: Suspicious Manipulation Of Default Accounts
+title: Suspicious Manipulation Of Default Accounts Via Net.EXE
 id: 5b768e71-86f2-4879-b448-81061cbae951
 status: experimental
 description: Detects suspicious manipulations of default accounts such as 'administrator' and 'guest'. For example 'enable' or 'disable' accounts or change the password...etc
@@ -8,7 +8,7 @@ references:
     - https://www.microsoft.com/security/blog/2022/09/07/profiling-dev-0270-phosphorus-ransomware-operations/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/09/01
-modified: 2022/09/09
+modified: 2023/02/21
 tags:
     - attack.collection
     - attack.t1560.001
@@ -17,9 +17,12 @@ logsource:
     product: windows
 detection:
     selection_img:
-        Image|endswith:
+        - Image|endswith:
             - '\net.exe'
             - '\net1.exe'
+        - OriginalFileName:
+            - 'net.exe'
+            - 'net1.exe'
     selection_user_option:
         CommandLine|contains: ' user '
     selection_username:
