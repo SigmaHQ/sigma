@@ -1,20 +1,11 @@
 ---
-name: "SIGMAC/Backend Issue"
+name: "SIGMAC/Backend"
 about: Report an issue in SIGMAC or one of the Backends
 title: ''
 labels: Backends
 assignees: ''
 
 ---
-
-<!--
-
-PLEASE ACKNOWLEDGE THE FOLLOWING BEFORE PROCEEDING:
-
-If I delete this entire template and go my own path, the core team may close my issue without further explanation or engagement.
-
-Thanks for your understanding!
--->
 
 # Detailed Description of the Issue
 
