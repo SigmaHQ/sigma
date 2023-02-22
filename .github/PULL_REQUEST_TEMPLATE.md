@@ -10,14 +10,18 @@ A short summary of your pull request
 A detailed description of the pull request and any additional comments or context
 -->
 
-## Example Log Event
+# Example Log Event
 
 <!--
 Fill this in case of false positive fixes
 -->
 
-## Fixed Issues
+# Fixed Issues
 
 <!--
 Link the fixed issues here, in case your commit fixes issues with rules or code
 -->
+
+# SigmaHQ Rule Creation Conventions
+
+- If you PR add new rules. Please consider following and applying these [conventions](https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/sigmahq_conventions.md)
