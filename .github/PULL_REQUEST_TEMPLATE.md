@@ -28,5 +28,5 @@ Fill this in case of false positive fixes
 ## Fixed Issues
 
 <!--
-Fill this in case your commit fixes issues with rules or code
+Link the fixed issues here, in case your commit fixes issues with rules or code
 -->
