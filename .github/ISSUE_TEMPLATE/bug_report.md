@@ -43,7 +43,7 @@ A short description of the actual behavior
 # Environment
 
 <!--
-Provide information about the environment such as the OS, Python version...etc.
+Provide information about the environment such as the OS, Python version, etc.
 -->
 
 # Additional Comments
