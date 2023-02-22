@@ -7,37 +7,37 @@ assignees: ''
 
 ---
 
-# Detailed Description of the Issue
+### Detailed Description of the Issue
 
 <!--
 A clear and concise description of what the problem.
 -->
 
-# Steps to Reproduce
+### Steps to Reproduce
 
 <!--
 Clear and concise steps in order to be able reproduce the issue.
 -->
 
-# Expected Behavior
+### Expected Behavior
 
 <!--
 A short description of the expected behavior
 -->
 
-# Actual Behavior
+### Actual Behavior
 
 <!--
 A short description of the actual behavior
 -->
 
-# Environment
+### Environment
 
 <!--
 Provide information about the environment such as the OS, Python version, etc.
 -->
 
-# Additional Comments
+### Additional Comments
 
 <!--
 Fill this if you any additional comments or context you want to provide

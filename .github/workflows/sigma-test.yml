@@ -16,19 +16,43 @@ env:
   EVTX_BASELINE_VERSION: v0.7
 
 jobs:
-  test-sigma:
+  yamllint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3.2.0
+    - uses: actions/checkout@v3.3.0
+    - name: yaml-lint
+      uses: ibiqlik/action-yamllint@v3
+  
+  test-sigma-logsource:
+    runs-on: ubuntu-latest
+    needs: yamllint
+    steps:
+    - uses: actions/checkout@v3.3.0
       with:
         submodules: true
     - name: Set up Python 3.11
-      uses: actions/setup-python@v4.4.0
+      uses: actions/setup-python@v4.5.0
+      with:
+        python-version: 3.11
+    - name: Test Sigma logsource
+      run: |
+        pip install PyYAML colorama
+        python tests/test_logsource.py
+  
+  test-sigma:
+    runs-on: ubuntu-latest
+    needs: test-sigma-logsource
+    steps:
+    - uses: actions/checkout@v3.3.0
+      with:
+        submodules: true
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4.5.0
       with:
         python-version: 3.11
     - name: Install dependencies
       run: |
-        pip install sigma-cli~=0.5.3
+        pip install sigma-cli~=0.7.1
     - name: Test Sigma Rule Syntax
       run: |
         sigma check rules
@@ -36,28 +60,10 @@ jobs:
       run: |
         pip install PyYAML attackcti colorama
         python tests/test_rules.py
-  test-sigma-logsource:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3.2.0
-      with:
-        submodules: true
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v4.4.0
-      with:
-        python-version: 3.11
-    - name: Test Sigma logsource
-      run: |
-        pip install PyYAML colorama
-        python tests/test_logsource.py
-  yamllint:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3.2.0
-    - name: yaml-lint
-      uses: ibiqlik/action-yamllint@v3
+  
   check-baseline-win7:
     runs-on: ubuntu-latest
+    needs: test-sigma-logsource
     steps:
     - uses: actions/checkout@v3.2.0
     - name: Download evtx-sigma-checker
@@ -66,16 +72,16 @@ jobs:
       run: |
         wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win7-x86.tgz
         tar xzf win7-x86.tgz
-    - name: Remove deprecated rules
-      run: 'grep -ERl "^status: deprecated" rules | xargs -r rm -v'
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
         ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path win7_x86/ --rule-path rules/windows/ > findings.json
     - name: Show findings excluding known FPs
       run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
+  
   check-baseline-win10:
     runs-on: ubuntu-latest
+    needs: test-sigma-logsource
     steps:
     - uses: actions/checkout@v3.2.0
     - name: Download evtx-sigma-checker
@@ -84,16 +90,16 @@ jobs:
       run: |
         wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win10-client.tgz
         tar xzf win10-client.tgz
-    - name: Remove deprecated rules
-      run: 'grep -ERl "^status: deprecated" rules | xargs -r rm -v'
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
         ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path Logs_Client/ --rule-path rules/windows/ > findings.json
     - name: Show findings excluding known FPs
       run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
+  
   check-baseline-win11:
     runs-on: ubuntu-latest
+    needs: test-sigma-logsource
     steps:
     - uses: actions/checkout@v3.2.0
     - name: Download evtx-sigma-checker
@@ -102,16 +108,16 @@ jobs:
       run: |
         wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win11-client.tgz
         tar xzf win11-client.tgz
-    - name: Remove deprecated rules
-      run: 'grep -ERl "^status: deprecated" rules | xargs -r rm -v'
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
         ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path Logs_Win11/ --rule-path rules/windows/ > findings.json
     - name: Show findings excluding known FPs
       run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
+  
   check-baseline-win2022:
     runs-on: ubuntu-latest
+    needs: test-sigma-logsource
     steps:
     - uses: actions/checkout@v3.2.0
     - name: Download evtx-sigma-checker
@@ -120,16 +126,16 @@ jobs:
       run: |
         wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win2022-evtx.tgz
         tar xzf win2022-evtx.tgz
-    - name: Remove deprecated rules
-      run: 'grep -ERl "^status: deprecated" rules | xargs -r rm -v'
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
         ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path win2022-evtx/ --rule-path rules/windows/ > findings.json
     - name: Show findings excluding known FPs
       run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
+  
   check-baseline-win2022-domain-controller:
     runs-on: ubuntu-latest
+    needs: test-sigma-logsource
     steps:
     - uses: actions/checkout@v3.2.0
     - name: Download evtx-sigma-checker
@@ -138,16 +144,16 @@ jobs:
       run: |
         wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win2022-ad.tgz
         tar xzf win2022-ad.tgz
-    - name: Remove deprecated rules
-      run: 'grep -ERl "^status: deprecated" rules | xargs -r rm -v'
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
         ./evtx-sigma-checker --log-source tools/config/thor.yml --evtx-path Win2022-AD/ --rule-path rules/windows/ > findings.json
     - name: Show findings excluding known FPs
       run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
+  
   check-baseline-win2022-0-20348-azure:
     runs-on: ubuntu-latest
+    needs: test-sigma-logsource
     steps:
     - uses: actions/checkout@v3.2.0
     - name: Download evtx-sigma-checker
@@ -156,8 +162,6 @@ jobs:
       run: |
         wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win2022-0-20348-azure.tgz
         tar xzf win2022-0-20348-azure.tgz
-    - name: Remove deprecated rules
-      run: 'grep -ERl "^status: deprecated" rules | xargs -r rm -v'
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
