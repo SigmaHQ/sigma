@@ -134,6 +134,7 @@ def set_argparser():
     argparser.add_argument("--backend-help", action=ActionBackendHelp, help="Print backend options")
     argparser.add_argument("--defer-abort", "-d", action="store_true", help="Don't abort on parse or conversion errors, proceed with next rule. The exit code from the last error is returned")
     argparser.add_argument("--ignore-backend-errors", "-I", action="store_true", help="Only return error codes for parse errors and ignore errors for rules that cause backend errors. Useful, when you want to get as much queries as possible.")
+    argparser.add_argument("--ignore-apply-modifier", "-ia", help="Outputs the value as is, ignoring the automatic transformation of the value by the modifier. Multiple values can be specified with commas.")
     argparser.add_argument("--shoot-yourself-in-the-foot", action="store_true", help=argparse.SUPPRESS)
     argparser.add_argument("--verbose", "-v", action="store_true", help="Be verbose")
     argparser.add_argument("--debug", "-D", action="store_true", help="Debugging output")
@@ -322,7 +323,7 @@ def main():
                 f = sigmafile
             else:
                 f = sigmafile.open(encoding='utf-8')
-            parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter, sigmafile)
+            parser = SigmaCollectionParser(f, sigmaconfigs, rulefilter, sigmafile, cmdargs.ignore_apply_modifier)
             backend.setYmlFileName(str(sigmafile))
             results = parser.generate(backend)
 

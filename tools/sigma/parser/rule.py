@@ -21,11 +21,12 @@ from .modifiers import apply_modifiers
 
 class SigmaParser:
     """Parse a Sigma rule (definitions, conditions and aggregations)"""
-    def __init__(self, sigma, config):
+    def __init__(self, sigma, config, ignore_apply_modifier):
         self.definitions = dict()
         self.values = dict()
         self.config = config
         self.parsedyaml = sigma
+        self.ignore_apply_modifier = ignore_apply_modifier
         self.parse_sigma()
 
     def parse_sigma(self):
@@ -81,7 +82,7 @@ class SigmaParser:
         elif type(definition) == dict:      # map
             cond = ConditionAND()
             for key, value in definition.items():
-                if "|" in key:  # field name contains value modifier
+                if "|" in key and not self.ignore_modifier(key):  # field name contains value modifier
                     fieldname, *modifiers = key.split("|")
                     if "cidr" in modifiers: # Add other unsupported modifiers here
                         raise SigmaParseError("Cannot convert the rule. Unsupported new cidr modifier by SIGMAC. Please use the new PySigma/SigmaCLI to be able to convert the rule")
@@ -98,6 +99,12 @@ class SigmaParser:
                     cond.add(mapped)
 
         return cond
+
+    def ignore_modifier(self, key):
+        if not self.ignore_apply_modifier:
+            return False
+        ignore_list = self.ignore_apply_modifier.split(",")
+        return any([modifier in key for modifier in ignore_list])
 
     def extract_values(self, definition):
         """Extract all values from map key:value pairs info self.values"""

@@ -29,13 +29,14 @@ class SigmaCollectionParser:
     * reset: resets global attributes from previous set_global statements
     * repeat: takes attributes from this YAML document, merges into previous rule YAML and regenerates the rule
     """
-    def __init__(self, content, config=None, rulefilter=None, filename=None):
+    def __init__(self, content, config=None, rulefilter=None, filename=None, ignore_apply_modifier=None):
         if config is None:
             from sigma.configuration import SigmaConfiguration
             config = SigmaConfiguration()
         self.yamls = yaml.safe_load_all(content)
         globalyaml = dict()
         self.parsers = list()
+        self.ignore_apply_modifier  = ignore_apply_modifier
         prevrule = None
         if filename:
             try:
@@ -65,12 +66,12 @@ class SigmaCollectionParser:
                 newrule = copy.deepcopy(prevrule)
                 deep_update_dict(newrule, yamldoc)
                 if rulefilter is None or rulefilter is not None and not rulefilter.match(newrule):
-                    self.parsers.append(SigmaParser(newrule, config))
+                    self.parsers.append(SigmaParser(newrule, config, ignore_apply_modifier))
                     prevrule = newrule
             else:
                 deep_update_dict(yamldoc, globalyaml)
                 if rulefilter is None or rulefilter is not None and rulefilter.match(yamldoc):
-                    self.parsers.append(SigmaParser(yamldoc, config))
+                    self.parsers.append(SigmaParser(yamldoc, config, ignore_apply_modifier))
                     prevrule = yamldoc
         self.config = config
 

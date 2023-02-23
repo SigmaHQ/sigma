@@ -93,7 +93,7 @@ class SigmaConfigurationChain(list):
 # Configuration
 class SigmaConfiguration:
     """Sigma converter configuration. Contains field mappings and logsource descriptions"""
-    def __init__(self, configyaml=None):
+    def __init__(self, configyaml=None, ignore_apply_modifier=None):
         if configyaml == None:
             self.config = None
             self.order = None
@@ -122,6 +122,7 @@ class SigmaConfiguration:
 
             self.logsources = list()
             self.backend = None
+            self.ignore_apply_modifier = ignore_apply_modifier
 
     def get_fieldmapping(self, fieldname):
         """Return mapped fieldname if mapping defined or field name given in parameter value"""
@@ -156,6 +157,7 @@ class SigmaConfiguration:
         """Get index condition if index field name is configured"""
         if self.backend is not None:
             return self.backend.index_field
+
 
 class SigmaLogsourceConfiguration:
     """Contains the definition of a log source"""
