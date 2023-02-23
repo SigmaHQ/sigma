@@ -1,0 +1,21 @@
+title: SocGholish C2 DNS Query
+id: 70761fe8-6aa2-4f80-98c1-a57049c08e66
+status: experimental
+description: Detects wscript making a DNS query for domains matching a specific regex pattern that SocGholish uses for its Command and Control traffic
+references:
+    - https://www.virustotal.com/gui/file/d5661009c461a8b20e1ad22f48609cc84dd90aee9182e026659dde4d46aaf25e/behavior
+    - https://www.virustotal.com/gui/file/7d6a0053ce12e394b9c24bc9c4148a73d1662f84fbf0859e48eba0e33e622967/behavior
+author: Dusty Miller
+date: 2023/02/23
+tags:
+    - attack.command_and_control
+    - attack.t1219
+logsource:
+    product: windows
+    category: dns_query
+detection:
+    selection:
+        Image|endswith: '\WScript.exe'
+        QueryName|re: /[a-f0-9]{4,8}\.(?:[a-z0-9\-]+\.){2}[a-z0-9\-]+/
+    condition: selection
+level: critical
