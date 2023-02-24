@@ -10,7 +10,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1136.001/T1136.001.md
 author: Endgame, JHasenbusch (adapted to Sigma for oscd.community)
 date: 2018/10/30
-modified: 2023/02/02
+modified: 2023/02/21
 tags:
     - attack.persistence
     - attack.t1136.001
@@ -18,14 +18,18 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith:
+    selection_img:
+        - Image|endswith:
             - '\net.exe'
             - '\net1.exe'
+        - OriginalFileName:
+            - 'net.exe'
+            - 'net1.exe'
+    selection_cli:
         CommandLine|contains|all:
             - 'user'
             - 'add'
-    condition: selection
+    condition: all of selection_*
 fields:
     - ComputerName
     - User

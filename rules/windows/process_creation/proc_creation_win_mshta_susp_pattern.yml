@@ -1,0 +1,54 @@
+title: Suspicious Mshta.EXE Execution Patterns
+id: e32f92d1-523e-49c3-9374-bdb13b46a3ba
+status: experimental
+description: Detects suspicious mshta process execution patterns
+references:
+    - https://en.wikipedia.org/wiki/HTML_Application
+    - https://www.echotrail.io/insights/search/mshta.exe
+    - https://app.any.run/tasks/34221348-072d-4b70-93f3-aa71f6ebecad/
+author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+date: 2021/07/17
+modified: 2023/02/21
+tags:
+    - attack.execution
+    - attack.t1106
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\mshta.exe'
+        - OriginalFileName: 'MSHTA.EXE'
+    selection_susp:
+        # Suspicious parents
+        ParentImage|endswith:
+            - '\cmd.exe'
+            - '\cscript.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\regsvr32.exe'
+            - '\rundll32.exe'
+            - '\wscript.exe'
+        # Suspicious folders
+        CommandLine|contains:
+            - '\AppData\Local\'
+            - 'C:\ProgramData\'
+            - 'C:\Users\Public\'
+            - 'C:\Windows\Temp\'
+    filter_img:
+        # Filter legit Locations
+        - Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+        # Suspicious extensions
+        - CommandLine|contains:
+            - '.htm'
+            - '.hta'
+        # Filter simple execution
+        - CommandLine|endswith:
+            - 'mshta.exe'
+            - 'mshta'
+    condition: all of selection_* or (selection_img and not filter_img)
+falsepositives:
+    - Unknown
+level: high

@@ -9,7 +9,7 @@ references:
     - https://github.com/danielbohannon/Invoke-Obfuscation
 author: frack113
 date: 2022/12/27
-modified: 2023/01/24
+modified: 2023/02/21
 tags:
     - attack.defense_evasion
     - attack.t1027.009
@@ -29,7 +29,9 @@ detection:
         - ScriptBlockText|re: '"(\{\d\}){2,}"\s*-f'  # trigger on at least two placeholders. One might be used for legitimate string formatting
         - ScriptBlockText|re: '\$\{((e|n|v)*`(e|n|v)*)+:path\}|\$\{((e|n|v)*`(e|n|v)*)+:((p|a|t|h)*`(p|a|t|h)*)+\}|\$\{env:((p|a|t|h)*`(p|a|t|h)*)+\}'
     filter:
-        ScriptBlockText|contains: 'it will return true or false instead'  # Chocolatey install script https://github.com/chocolatey/chocolatey
+        ScriptBlockText|contains:
+            - 'it will return true or false instead'  # Chocolatey install script https://github.com/chocolatey/chocolatey
+            - 'The function also prevents `Get-ItemProperty` from failing' # https://docs.chocolatey.org/en-us/create/functions/get-uninstallregistrykey
     condition: selection and not filter
 falsepositives:
     - Unknown
