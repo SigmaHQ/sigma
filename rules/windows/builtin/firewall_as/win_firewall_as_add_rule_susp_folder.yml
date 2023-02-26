@@ -1,0 +1,25 @@
+title: New Firewall Rule Added For Suspicius Folder
+id: 9e2575e7-2cb9-4da1-adc8-ed94221dca5e
+related:
+    - id: cde0a575-7d3d-4a49-9817-b8004a7bf105
+      type: derived
+status: experimental
+description: Detects when a rule has been added to the Windows Firewall exception list for a suspicius folder
+references:
+    - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd364427(v=ws.10)
+    - https://app.any.run/tasks/7123e948-c91e-49e0-a813-00e8d72ab393/#
+author: frack113
+date: 2023/02/26
+logsource:
+    product: windows
+    service: firewall-as
+detection:
+    selection:
+        EventID: 2004
+        ApplicationPath|contains:
+            - '\AppData\'
+            - '\temp\'
+    filter_block:
+        Action: 2
+    condition: selection and not 1 of filter_*
+level: high
