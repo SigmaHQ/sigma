@@ -15,12 +15,18 @@ logsource:
     service: firewall-as
 detection:
     selection:
-        EventID: 2004
+        EventID: 
+            - 2004 # Windows 10
+            - 2071 # Windows 10 and 11
         ApplicationPath|contains:
             - '\AppData\'
             - '\temp\'
     filter_block:
         Action: 2
+    filter_valid_appdata_app:
+         # Add more
+         ApplicationPath|endswith:
+             - 'AppData\local\microsoft\teams\current\teams.exe'
     condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown
