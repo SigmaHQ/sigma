@@ -8,8 +8,10 @@ references:
     - https://twitter.com/MaD_c4t/status/1623414582382567424
     - https://labs.withsecure.com/publications/detecting-onenote-abuse
     - https://www.trustedsec.com/blog/new-attacks-old-tricks-how-onenote-malware-is-evolving/
+    - https://app.any.run/tasks/17f2d378-6d11-4d6f-8340-954b04f35e83/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023/02/09
+modified: 2023/02/27
 tags:
     - attack.defense_evasion
 logsource:
@@ -21,22 +23,25 @@ detection:
             - '\onenote.exe'
             - '\onenotem.exe'
             - '\onenoteim.exe'
-        TargetFilename|contains|all:
-            - '\AppData\Local\Temp\OneNote\'
-            - '\Exported\'
+        TargetFilename|contains: '\AppData\Local\Temp\OneNote\'
         TargetFilename|endswith:
             # TODO: Add more suspicious extensions
             - '.bat'
+            - '.chm'
             - '.cmd'
+            - '.dll'
             - '.exe'
             - '.hta'
             - '.htm'
             - '.html'
+            - '.js'
             - '.lnk'
             - '.ps1'
             - '.vbe'
             - '.vbs'
+            - '.wsf'
     condition: selection
 falsepositives:
-    - Unknown
+    - False positives should be very low with the extensions list cited. Especially if you don't heavily utilize onenote.
+    - Occasional FP might occur if OneNote is used internally to share different embedded documents
 level: high
