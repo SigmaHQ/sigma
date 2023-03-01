@@ -1,7 +1,7 @@
 title: Suspicious NTDS.DIT Creation
 id: 4e7050dd-e548-483f-b7d6-527ab4fa784d
-status: experimental
-description: Detects suspicious creations of a file named ntds.dit, e.g. by a PowerShell parent or in a suspicious directory or a suspicious one liner
+status: test
+description: Detects suspicious creations of a file named "ntds.dit" (Active Directory Database) by suspicious parent process, directory or a suspicious one liner
 references:
     - https://www.ired.team/offensive-security/credential-access-and-credential-dumping/ntds.dit-enumeration
     - https://www.n00py.io/2022/03/manipulating-user-passwords-without-mimikatz/
@@ -16,10 +16,12 @@ tags:
 logsource:
     product: windows
     category: file_event
+    definition: 'Requirements: The "ParentImage" field is not available by default on EID 11 of Sysmon logs. To be able to use this rule to the full extent you need to enriche the log with additional ParentImage data'
 detection:
     selection_file:
         TargetFilename|endswith: '\ntds.dit'
     selection_process_parent:
+        # Note: ParentImage is a custom field and is not available by default on Sysmon EID 11
         ParentImage|endswith:
             - '\powershell.exe'
             - '\pwsh.exe'
@@ -30,6 +32,7 @@ detection:
             - '\nginx.exe'
             - '\httpd.exe'
     selection_process_parent_path:
+        # Note: ParentImage is a custom field and is not available by default on Sysmon EID 11
         ParentImage|contains:
             - '\apache'
             - '\tomcat'

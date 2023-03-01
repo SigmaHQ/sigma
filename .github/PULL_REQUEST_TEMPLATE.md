@@ -1,15 +1,27 @@
-## Summary / Title of the Pull Request
+### Summary of the Pull Request
 
-[summary]
+<!--
+A short summary of your pull request
+-->
 
-## Detailed Description of the Pull Request / Additional Comments
+### Detailed Description of the Pull Request / Additional Comments
 
-[detailed description]
+<!--
+A detailed description of the pull request and any additional comments or context
+-->
 
-## Example Log Event 
+### Example Log Event
 
-(in case of false positive fixes)
+<!--
+Fill this in case of false positive fixes
+-->
 
-## Fixed Issues 
+### Fixed Issues
 
-(in case your commit fixes issues with rules or code)
+<!--
+Link the fixed issues here, in case your commit fixes issues with rules or code
+-->
+
+### SigmaHQ Rule Creation Conventions
+
+- If your PR adds new rules, please consider following and applying these [conventions](https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/sigmahq_conventions.md)

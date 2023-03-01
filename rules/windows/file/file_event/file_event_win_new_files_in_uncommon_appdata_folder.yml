@@ -1,4 +1,4 @@
-title: Creation Suspicious File In Uncommon AppData Folder
+title: Suspicious File Creation In Uncommon AppData Folder
 id: d7b50671-d1ad-4871-aa60-5aa5b331fe04
 status: experimental
 description: Detects the creation of suspicious files and folders inside the user's AppData folder but not inside any of the common and well known directories (Local, Romaing, LocalLow). This method could be used as a method to bypass detection who exclude the AppData folder in fear of FPs
@@ -6,7 +6,7 @@ references:
     - Internal Research
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/08/05
-modified: 2022/10/28
+modified: 2023/02/23
 tags:
     - attack.defense_evasion
     - attack.execution
@@ -15,24 +15,26 @@ logsource:
     category: file_event
 detection:
     selection:
+        TargetFilename|startswith: 'C:\Users\'
         TargetFilename|contains: '\AppData\'
         TargetFilename|endswith:
             # Add more as needed
-            - '.exe'
-            - '.dll'
             - '.bat'
-            - '.vbe'
-            - '.vbs'
-            - '.msi'
+            - '.cmd'
+            - '.cpl'
+            - '.dll'
+            - '.exe'
+            - '.hta'
             - '.iso'
             - '.lnk'
-            - '.cmd'
+            - '.msi'
             - '.ps1'
             - '.psm1'
-            - '.hta'
-            - '.cpl'
             - '.scr'
+            - '.vbe'
+            - '.vbs'
     filter:
+        TargetFilename|startswith: 'C:\Users\'
         TargetFilename|contains:
             - '\AppData\Local\'
             - '\AppData\LocalLow\'

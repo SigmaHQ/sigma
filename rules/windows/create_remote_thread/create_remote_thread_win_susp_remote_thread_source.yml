@@ -10,7 +10,7 @@ references:
     - https://lolbas-project.github.io
 author: Perez Diego (@darkquassar), oscd.community
 date: 2019/10/27
-modified: 2022/12/14
+modified: 2023/02/28
 tags:
     - attack.privilege_escalation
     - attack.defense_evasion
@@ -23,6 +23,7 @@ detection:
         SourceImage|endswith:
             - '\bash.exe'
             - '\cvtres.exe'
+            - '\cscript.exe'
             - '\defrag.exe'
             - '\dnx.exe'
             - '\esentutl.exe'
@@ -77,6 +78,10 @@ detection:
             - 'C:\Windows\System32\services.exe' # happens on Windows 7
             - 'C:\Windows\System32\wininit.exe' # happens on Windows 7
             - 'C:\Windows\System32\csrss.exe' # multiple OS
+    filter2b:
+        SourceImage: 'C:\Windows\System32\winlogon.exe'
+        TargetParentImage: 'System'
+        TargetParentProcessId: 4
     filter3:
         SourceImage: 'C:\Windows\System32\provtool.exe'
         TargetParentProcessId: 0
