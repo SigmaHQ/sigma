@@ -1,17 +1,17 @@
-title: PsExec/PAExec Escalation to LOCAL SYSTEM
-id: 8834e2f7-6b4b-4f09-8906-d2276470ee23
+title: Potential Privilege Escalation To LOCAL SYSTEM
+id: 207b0396-3689-42d9-8399-4222658efc99
 related:
-    - id: 207b0396-3689-42d9-8399-4222658efc99
+    - id: 8834e2f7-6b4b-4f09-8906-d2276470ee23 # PsExec specific rule
       type: similar
 status: experimental
-description: Detects suspicious flags used by PsExec and PAExec to escalate a command line to LOCAL_SYSTEM rights
+description: Detects unknown program using commandline flags usually used by tools such as PsExec and PAExec to start programs with SYSTEM Privileges
 references:
     - https://docs.microsoft.com/en-us/sysinternals/downloads/psexec
     - https://www.poweradmin.com/paexec/
     - https://www.fireeye.com/blog/threat-research/2020/10/kegtap-and-singlemalt-with-a-ransomware-chaser.html
-author: Florian Roth (Nextron Systems), Nasreddine Bencherchali
-date: 2021/11/23
-modified: 2022/11/18
+author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+date: 2021/05/22
+modified: 2023/02/27
 tags:
     - attack.resource_development
     - attack.t1587.001
@@ -19,7 +19,8 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_sys: # Escalation to LOCAL_SYSTEM
+    selection_flags_1:
+        # Escalation to LOCAL_SYSTEM
         CommandLine|contains:
             # Note that you don't need to add the ".exe" part when using psexec/paexec
             # The "-" can also be replaced with "/"
@@ -57,16 +58,14 @@ detection:
             - ' /i /s powershell'
             - ' -i /s powershell'
             - ' /i -s powershell'
-    selection_other:
+    filter:
+        # This filter exclude strings covered by 8834e2f7-6b4b-4f09-8906-d2276470ee23
         CommandLine|contains:
-            - 'psexec'
             - 'paexec'
+            - 'PsExec'
             - 'accepteula'
-            - 'cmd /c '
-            - 'cmd /k '
-            - 'cmd /r '
-    condition: all of selection_*
+    condition: 1 of selection_flags_* and not filter
 falsepositives:
-    - Admins that use PsExec or PAExec to escalate to the SYSTEM account for maintenance purposes (rare)
-    - Users that debug Microsoft Intune issues using the commands mentioned in the official documentation; see https://learn.microsoft.com/en-us/mem/intune/apps/intune-management-extension
+    - Weird admins that rename their tools
+    - Software companies that bundle PsExec/PAExec with their software and rename it, so that it is less embarrassing
 level: high
