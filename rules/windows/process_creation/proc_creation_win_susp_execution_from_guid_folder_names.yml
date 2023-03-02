@@ -1,12 +1,12 @@
-title: Suspicious CLSID Folder Name In Suspicious Locations
+title: Suspicious Execution From GUID Like Folder Names
 id: 90b63c33-2b97-4631-a011-ceb0f47b77c3
 status: experimental
-description: Detects usage of a CLSID folder name located in a suspicious location from the commandline as seen being used in IcedID
+description: Detects potential suspicious execution of a GUID like folder name located in a suspicious location such as %TEMP% as seen being used in IcedID attacks
 references:
     - https://twitter.com/Kostastsale/status/1565257924204986369
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/09/01
-modified: 2022/12/15
+modified: 2023/03/02
 tags:
     - attack.defense_evasion
     - attack.t1027
@@ -22,8 +22,8 @@ detection:
         CommandLine|contains:
             # Add more suspicious or unexpected paths
             - '\AppData\Roaming\'
-            - '\AppData\Local\Temp\' # This could generate some FP with some installers creating folders with CLSID
-    selection_clsid:
+            - '\AppData\Local\Temp\' # This could generate some FP with some installers creating folders with GUID
+    selection_guid:
         CommandLine|contains|all:
             - '\{'
             - '}\'
@@ -37,5 +37,5 @@ detection:
         Image: 'C:\Windows\System32\drvinst.exe'
     condition: all of selection_* and not 1 of filter*
 falsepositives:
-    - Some FP is expected with some installers
+    - Installers are sometimes known for creating temporary folders with GUID like names. Add apropriate Filters accordingly
 level: medium
