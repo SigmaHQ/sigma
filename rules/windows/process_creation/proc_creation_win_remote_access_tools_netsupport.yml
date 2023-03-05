@@ -1,28 +1,28 @@
-title: Execution of NetSupport RAT From Unusual Location
-id: 37e8d358-6408-4853-82f4-98333fca7014
+title: Remote Access Tool - NetSupport Execution
+id: 758ff488-18d5-4cbe-8ec4-02b6285a434f
 status: experimental
-description: Detects execution of client32.exe (NetSupport RAT) from an unusual location (outside of 'C:\Program Files')
+description: |
+    An adversary may use legitimate desktop support and remote access software, such as Team Viewer, Go2Assist, LogMein, AmmyyAdmin, etc, to establish an interactive command and control channel to target systems within networks.
+    These services are commonly used as legitimate technical support software, and may be allowed by application control within a target environment.
+    Remote access tools like VNC, Ammyy, and Teamviewer are used frequently when compared with other legitimate software commonly used by adversaries. (Citation: Symantec Living off the Land)
 references:
-    - https://redcanary.com/blog/misbehaving-rats/
-author: Nasreddine Bencherchali (Nextron Systems)
-date: 2022/09/19
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1219/T1219.md
+author: frack113
+date: 2022/09/25
+modified: 2023/03/06
 tags:
-    - attack.defense_evasion
+    - attack.command_and_control
+    - attack.t1219
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
-        - Image|endswith: '\client32.exe'
-        - Product|contains: 'NetSupport Remote Control'
-        - OriginalFileName|contains: 'client32.exe'
-        - Imphash: a9d50692e95b79723f3e76fcf70d023e
-        - Hashes|contains: IMPHASH=a9d50692e95b79723f3e76fcf70d023e
-    filter:
-        Image|startswith:
-            - 'C:\Program Files\'
-            - 'C:\Program Files (x86)\'
-    condition: selection and not filter
+        - Description: NetSupport Client Configurator
+        - Product: NetSupport Remote Control
+        - Company: NetSupport Ltd
+        - OriginalFileName: PCICFGUI.EXE
+    condition: selection
 falsepositives:
-    - Unknown
+    - Legitimate use
 level: medium

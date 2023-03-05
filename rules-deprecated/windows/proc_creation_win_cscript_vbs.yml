@@ -1,0 +1,29 @@
+title: Visual Basic Script Execution
+id: 23250293-eed5-4c39-b57a-841c8933a57d
+status: deprecated
+description: Adversaries may abuse Visual Basic (VB) for execution
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1059.005/T1059.005.md
+author: frack113
+date: 2022/01/02
+modified: 2023/03/06
+tags:
+    - attack.execution
+    - attack.t1059.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_exe:
+        - OriginalFileName:
+            - 'cscript.exe'
+            - 'wscript.exe'
+        - Image|endswith:
+            - '\cscript.exe'
+            - '\wscript.exe'
+    selection_script:
+        CommandLine|contains: '.vbs'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium

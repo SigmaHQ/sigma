@@ -1,4 +1,4 @@
-title: Rclone Execution via Command Line or PowerShell
+title: PUA - Rclone Execution
 id: e37db05d-d1f9-49c8-b464-cee1a4b11638
 related:
     - id: a0d63692-a531-4912-ad39-4393325b2a9c
@@ -15,7 +15,7 @@ references:
     - https://www.splunk.com/en_us/blog/security/darkside-ransomware-splunk-threat-update-and-detections.html
 author: Bhabesh Raj, Sittikorn S, Aaron Greetham (@beardofbinary) - NCC Group
 date: 2021/05/10
-modified: 2022/07/14
+modified: 2023/03/05
 tags:
     - attack.exfiltration
     - attack.t1567.002
@@ -23,18 +23,15 @@ logsource:
     product: windows
     category: process_creation
 detection:
-    detect_by_option:
+    selection_specific_options:
         CommandLine|contains|all:
             - '--config '
             - '--no-check-certificate '
             - ' copy '
-    exec_selection:
-        Image|endswith: '\rclone.exe'
-        ParentImage|endswith:
-            - '\PowerShell.exe'
-            - '\pwsh.exe'
-            - '\cmd.exe'
-    command_selection:
+    selection_rclone_img:
+        - Image|endswith: '\rclone.exe'
+        - Description: 'Rsync for cloud storage'
+    selection_rclone_cli:
         CommandLine|contains:
             - 'pass'
             - 'user'
@@ -52,13 +49,11 @@ detection:
             - 'transfers'
             - 'multi-thread-streams'
             - 'no-check-certificate '
-    description_selection:
-        Description: 'Rsync for cloud storage'
-    condition: detect_by_option or command_selection and ( description_selection or exec_selection )
+    condition: selection_specific_options or all of selection_rclone_*
 fields:
     - CommandLine
     - ParentCommandLine
     - Details
 falsepositives:
-    - Legitimate RClone use
+    - Unknown
 level: high
