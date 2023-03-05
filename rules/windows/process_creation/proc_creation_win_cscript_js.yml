@@ -1,0 +1,28 @@
+title: CLI JavaScript Execution
+id: bacd9f26-9d49-41e0-84c2-86669cc2dcdb
+status: experimental
+description: Adversaries may abuse various implementations of JavaScript for execution.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f296668303c29d3f4c07e42bdd2b28d8dd6625f9/atomics/T1059.007/T1059.007.md
+author: frack113
+date: 2023/03/05
+tags:
+    - attack.execution
+    - attack.t1059.007
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_exe:
+        - OriginalFileName:
+            - 'cscript.exe'
+            - 'wscript.exe'
+        - Image|endswith:
+            - '\cscript.exe'
+            - '\wscript.exe'
+    selection_script:
+        CommandLine|contains: '.js'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium
