@@ -3,10 +3,10 @@ id: f34047d9-20d3-4e8b-8672-0a35cc50dc71
 status: test
 description: Detects System Information Discovery commands
 references:
-    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1082/T1082.md
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1082/T1082.md
 author: 'Pawel Mazur'
 date: 2021/09/03
-modified: 2022/12/18
+modified: 2023/03/06
 tags:
     - attack.discovery
     - attack.t1082
@@ -25,6 +25,22 @@ detection:
         a0:
             - uname
             - uptime
+            - lsmod
+            - hostname
+            - env
+    selection_3:
+        type: EXECVE
+        a0: grep
+        a1|contains: 
+                    - vbox
+                    - vm
+                    - xen
+                    - virtio
+                    - hv
+    selection_4:
+        type: EXECVE
+        a0: kmod
+        a1: list
     condition: 1 of selection_*
 falsepositives:
     - Legitimate administrative activity
