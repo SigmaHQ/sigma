@@ -1,0 +1,44 @@
+title: Unix Shell Configuration Modification
+id: 
+status: experimental
+description: Detect unix shell configuration modification. Adversaries may establish persistence through executing malicious commands triggered when a new shell is opened.
+references:
+    - 'MITRE Attack technique T1546.004; https://attack.mitre.org/techniques/T1546/004/'
+author: IAI 
+date: 2023/03/06
+modified: 2023/03/26
+tags:
+    - attack.persistence
+    - attack.t1546.004
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+        type: 'PATH'
+        name:
+            - '/etc/profile'
+            - '/etc/profile.d/*'
+            - '/etc/bash.bashrc'
+            - '/etc/zsh/zprofile'
+            - '/etc/zsh/zshrc'
+            - '/etc/zsh/zlogin'
+            - '/etc/zsh/zlogout'
+            - '/root/.bashrc'
+            - '/root/.bash_profile'
+            - '/root/.profile'
+            - '/root/.zshrc'
+            - '/root/.zprofile'
+            - '/home/*/.bashrc'
+            - '/home/*/.zshrc'
+            - '/home/*/.bash_profile'
+            - '/home/*/.zprofile'
+            - '/home/*/.profile'
+            - '/home/*/.bash_login'
+            - '/home/*/.bash_logout'
+            - '/home/*/.zlogin'
+            - '/home/*/.zlogout'
+    condition: selection
+falsepositives:
+    - Admin or User activity
+level: medium
