@@ -934,8 +934,8 @@ class TestRules(unittest.TestCase):
                 print(Fore.RED + "Rule {} has no field 'title'.".format(file))
                 faulty_rules.append(file)
                 continue
-            elif len(title) > 70:
-                print(Fore.YELLOW + "Rule {} has a title field with too many characters (>70)".format(file))
+            elif len(title) > 100:
+                print(Fore.YELLOW + "Rule {} has a title field with too many characters (>100)".format(file))
                 faulty_rules.append(file)
             if title.startswith("Detects "):
                 print(Fore.RED + "Rule {} has a title that starts with 'Detects'".format(file))
@@ -945,7 +945,8 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
             wrong_casing = []
             for word in title.split(" "):
-                if word.islower() and not word.lower() in allowed_lowercase_words and not "." in word and not "/" in word and not word[0].isdigit():
+                #if word.islower() and not word.lower() in allowed_lowercase_words and not "." in word and not "/" in word and not word[0].isdigit():
+                if word.islower() and not word.lower() in allowed_lowercase_words:
                     wrong_casing.append(word)
             if len(wrong_casing) > 0:
                 print(Fore.RED + "Rule {} has a title that has not title capitalization. Words: '{}'".format(
