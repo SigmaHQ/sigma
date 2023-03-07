@@ -1,4 +1,4 @@
-title: Sticky Key Like Backdoor Usage
+title: Sticky Key Like Backdoor Execution
 id: 2fdefcb3-dbda-401e-ae23-f0db027628bc
 related:
     - id: baca5663-583c-45f9-b5dc-ea96a22ce542
@@ -6,7 +6,7 @@ related:
 status: test
 description: Detects the usage and installation of a backdoor that uses an option to register a malicious debugger for built-in tools that are accessible in the login screen
 references:
-    - https://blogs.technet.microsoft.com/jonathantrull/2016/10/03/detecting-sticky-key-backdoors/
+    - https://learn.microsoft.com/en-us/archive/blogs/jonathantrull/detecting-sticky-key-backdoors
 author: Florian Roth (Nextron Systems), @twjackomo, Jonhnathan Ribeiro, oscd.community
 date: 2018/03/15
 modified: 2021/09/12
@@ -20,9 +20,18 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_process:
+    selection:
         ParentImage|endswith: '\winlogon.exe'
-        Image|endswith: '\cmd.exe'
+        Image|endswith:
+            - '\cmd.exe'
+            - '\cscript.exe'
+            - '\mshta.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\regsvr32.exe'
+            - '\rundll32.exe'
+            - '\wscript.exe'
+            - '\wt.exe'
         CommandLine|contains:
             - 'sethc.exe'
             - 'utilman.exe'
@@ -30,7 +39,7 @@ detection:
             - 'Magnify.exe'
             - 'Narrator.exe'
             - 'DisplaySwitch.exe'
-    condition: selection_process
+    condition: selection
 falsepositives:
     - Unlikely
 level: critical

@@ -1,15 +1,15 @@
-title: Missing Space Characters in Command Lines
+title: Cmd.EXE Missing Space Characters Execution Anomaly
 id: a16980c2-0c56-4de0-9a79-17971979efdd
 status: experimental
 description: |
-  Detects Windows command lines that miss a space before or after the /c flag when running a command using the cmd.exe.
-  This could be a sign of obfuscation of a fat finger problem (typo by the developer).
+    Detects Windows command lines that miss a space before or after the /c flag when running a command using the cmd.exe.
+    This could be a sign of obfuscation of a fat finger problem (typo by the developer).
 references:
     - https://twitter.com/cyb3rops/status/1562072617552678912
     - https://ss64.com/nt/cmd.html
 author: Florian Roth (Nextron Systems)
 date: 2022/08/23
-modified: 2022/11/18
+modified: 2023/03/06
 tags:
     - attack.execution
     - attack.t1059.001
@@ -48,7 +48,7 @@ detection:
             - 'cmd /k'
             - 'cmd.exe /r'
             - 'cmd /r'
-    filter1:
+    filter_generic:
         CommandLine|contains:
             - 'cmd.exe /c '
             - 'cmd /c '
@@ -56,11 +56,11 @@ detection:
             - 'cmd /k '
             - 'cmd.exe /r '
             - 'cmd /r '
-    filter_falsepositives:
+    filter_fp:
         - CommandLine|contains: 'AppData\Local\Programs\Microsoft VS Code\resources\app\node_modules'
         - CommandLine|endswith: 'cmd.exe/c .'
         - CommandLine: 'cmd.exe /c'
-    condition: 1 of selection* and not 1 of filter*
+    condition: 1 of selection* and not 1 of filter_*
 falsepositives:
     - Unknown
 level: high

@@ -13,10 +13,12 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection1:
-        Image|endswith: '\findstr.exe'
+    selection_findstr_img:
+        - Image|endswith: '\findstr.exe'
+        - OriginalFileName: 'FINDSTR.EXE'
+    selection_findstr_cli:
         CommandLine|contains: 'lsass'
-    selection2:
+    selection_special:
         CommandLine|contains:
             - ' /i lsass.exe'
             - ' /i "lsass'
@@ -24,7 +26,7 @@ detection:
             - 'findstr.exe lsass'
             - 'findstr "lsass'
             - 'findstr.exe "lsass'
-    condition: 1 of selection*
+    condition: all of selection_finstr_* or selection_special
 falsepositives:
     - Unknown
 level: high
