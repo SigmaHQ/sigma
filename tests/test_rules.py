@@ -945,8 +945,7 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
             wrong_casing = []
             for word in title.split(" "):
-                #if word.islower() and not word.lower() in allowed_lowercase_words and not "." in word and not "/" in word and not word[0].isdigit():
-                if word.islower() and not word.lower() in allowed_lowercase_words:
+                if word.islower() and not word.lower() in allowed_lowercase_words and not "." in word and not "/" in word and not word[0].isdigit():
                     wrong_casing.append(word)
             if len(wrong_casing) > 0:
                 print(Fore.RED + "Rule {} has a title that has not title capitalization. Words: '{}'".format(
