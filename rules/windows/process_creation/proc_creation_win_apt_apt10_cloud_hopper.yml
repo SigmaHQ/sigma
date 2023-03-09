@@ -1,12 +1,12 @@
-title: WMIExec VBS Script
+title: Potential APT10 Cloud Hopper Activity
 id: 966e4016-627f-44f7-8341-f394905c361f
 status: test
-description: Detects wmiexec vbs version execution by wscript or cscript
+description: Detects potential process and execution activity related to APT10 Cloud Hopper operation
 references:
     - https://web.archive.org/web/20180725233601/https://www.pwc.co.uk/cyber-security/pdf/cloud-hopper-annex-b-final.pdf
 author: Florian Roth (Nextron Systems)
 date: 2017/04/07
-modified: 2022/11/11
+modified: 2023/03/08
 tags:
     - attack.execution
     - attack.g0045
@@ -15,21 +15,14 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_img:
-        - Image|endswith:
-            - '\cscript.exe'
-            - '\wscript.exe'
-        - OriginalFileName:
-            - 'cscript.exe'
-            - 'wscript.exe'
-    selection_cli:
+    selection_cscript:
+        Image|endswith: '\cscript.exe'
+        CommandLine|contains: '.vbs /shell '
+    selection_csvde:
         CommandLine|contains|all:
-            - '.vbs'
-            - '/shell'
-    condition: all of selection_*
-fields:
-    - CommandLine
-    - ParentCommandLine
+            - 'csvde -f C:\windows\web\'
+            - '.log'
+    condition: 1 of selection_*
 falsepositives:
     - Unlikely
 level: high
