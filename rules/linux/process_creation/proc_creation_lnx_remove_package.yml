@@ -1,0 +1,26 @@
+title: Suspicious Beharvior Remove Package
+id: 95d61234-7f56-465c-6f2d-b562c6fedbc4
+status: test
+description: Detects suspicious beharvior remove package by using yum or apt-get
+references:
+    - https://sysdig.com/blog/mitre-defense-evasion-falco/
+    - https://www.tutorialspoint.com/how-to-install-a-software-on-linux-using-yum-command
+    - https://itsfoss.com/apt-remove/
+author: Tuan Le (NCSGroup)
+date: 2023/03/09
+tags:
+    - attack.defense_evasion
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: 
+          - '/yum'
+          - '/apt-get'
+        CommandLine|contains:
+          - 'remove'
+    condition: selection
+falsepositives:
+    - Legitimate administrator activities
+level: medium
