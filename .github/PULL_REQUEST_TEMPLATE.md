@@ -1,3 +1,7 @@
+<!--
+Thanks for your contribution. Please make sure to fill the contents of this template with the necessary information to ease and speed up the review process. PLEASE DO NOT DELETE ANY SECTION OR THE CONTENT OF THE TEMPLATE.
+-->
+
 ### Summary of the Pull Request
 
 <!--
