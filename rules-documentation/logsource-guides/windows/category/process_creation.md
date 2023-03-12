@@ -8,32 +8,36 @@ ID: 2ff912e8-159f-4789-a2ef-761292b32a23
   - [Content](#content)
   - [Description](#description)
   - [Event Source(s)](#event-sources)
-  - [Setup](#setup)
-    - [Source: Microsoft Windows Security Auditing / EventID: 4688](#source-microsoft-windows-security-auditing--eventid-4688)
+  - [Logging Setup](#logging-setup)
+    - [Provider: Microsoft Windows Security Auditing / EventID: 4688](#provider-microsoft-windows-security-auditing--eventid-4688)
       - [Process Creation Logging](#process-creation-logging)
       - [Command-Line Logging](#command-line-logging)
-    - [Source: Microsoft-Windows-Sysmon / EventID: 1](#source-microsoft-windows-sysmon--eventid-1)
+    - [Provider: Microsoft-Windows-Sysmon / EventID: 1](#provider-microsoft-windows-sysmon--eventid-1)
   - [Event Fields](#event-fields)
-    - [Source: Microsoft Windows Security Auditing / EventID: 4688](#source-microsoft-windows-security-auditing--eventid-4688-1)
-    - [Source: Microsoft-Windows-Sysmon / EventID: 1](#source-microsoft-windows-sysmon--eventid-1-1)
+    - [Provider: Microsoft Windows Security Auditing / EventID: 4688](#provider-microsoft-windows-security-auditing--eventid-4688-1)
+    - [Provider: Microsoft-Windows-Sysmon / EventID: 1](#provider-microsoft-windows-sysmon--eventid-1-1)
 
 ## Description
+
+TBD
 
 ## Event Source(s)
 
 ```yml
-Source: Microsoft-Windows-Sysmon
-EventID: 1
-```
-
-```yml
-Source: Microsoft Windows Security Auditing
+Provider: Microsoft Windows Security Auditing
+Channel: Security
 EventID: 4688
 ```
 
-## Setup
+```yml
+Provider: Microsoft-Windows-Sysmon
+Channel: Microsoft-Windows-Sysmon/Operational
+EventID: 1
+```
 
-### Source: Microsoft Windows Security Auditing / EventID: 4688
+## Logging Setup
+
+### Provider: Microsoft Windows Security Auditing / EventID: 4688
 
 #### Process Creation Logging
 
@@ -57,7 +61,7 @@ EventID: 4688
                 - Include Command Line In Process Creation Events
 ```
 
-### Source: Microsoft-Windows-Sysmon / EventID: 1
+### Provider: Microsoft-Windows-Sysmon / EventID: 1
 
 - Download [Sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
 - Install Sysmon using an appropriate configuration. The configuration must include a `<ProcessCreate>` element. We recommend the following configuration [sysmonconfig-export.xml](https://github.com/Neo23x0/sysmon-config/blob/master/sysmonconfig-export.xml).
@@ -68,7 +72,7 @@ sysmon -i /path/to/config
 
 ## Event Fields
 
-### Source: Microsoft Windows Security Auditing / EventID: 4688
+### Provider: Microsoft Windows Security Auditing / EventID: 4688
 
 ```yml
 - SubjectUserSid
@@ -88,7 +92,7 @@ sysmon -i /path/to/config
 - MandatoryLabel
 ```
 
-### Source: Microsoft-Windows-Sysmon / EventID: 1
+### Provider: Microsoft-Windows-Sysmon / EventID: 1
 
 ```yml
 - RuleName
