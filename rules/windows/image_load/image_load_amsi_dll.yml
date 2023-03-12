@@ -1,0 +1,32 @@
+title: Suspicious Antimalware Scan Interface Amsi.dll Load
+id: facd1549-e416-48e0-b8c4-41d7215eedc8
+status: experimental
+description: Detects the image load of Amsi DLL by uncommon executables
+references:
+    - https://infosecwriteups.com/amsi-bypass-new-way-2023-d506345944e9
+author: frack113
+date: 2023/03/12
+tags:
+    - attack.defense_evasion
+    - attack.impact
+    - attack.t1490
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith: '\amsi.dll'
+    filter_windows:
+        - Image: 'C:\Windows\explorer.exe'
+        - Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\WinSxS\'
+    filter_program_files:
+        Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: high
