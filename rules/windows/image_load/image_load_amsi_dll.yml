@@ -17,7 +17,9 @@ detection:
     selection:
         ImageLoaded|endswith: '\amsi.dll'
     filter_windows:
-        - Image: 'C:\Windows\explorer.exe'
+        - Image:
+            - 'C:\Windows\explorer.exe'
+            - 'C:\Windows\Sysmon64.exe'
         - Image|startswith:
             - 'C:\Windows\System32\'
             - 'C:\Windows\SysWOW64\'
@@ -26,7 +28,13 @@ detection:
         Image|startswith:
             - 'C:\Program Files\'
             - 'C:\Program Files (x86)\'
+    filter_defender:
+        Image|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+        Image|endswith: '\MsMpEng.exe'
+    filter_dotnet:
+        Image|startswith: 'C:\Windows\Microsoft.NET\Framework\'
+        Image|endswith: '\ngentask.exe'
     condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown
-level: high
+level: medium
