@@ -1,7 +1,7 @@
-title: Disabled Users Failing To Authenticate From Source Using Kerberos
-id: 4b6fe998-b69c-46d8-901b-13677c9fb663
-status: test
-description: Detects failed logins with multiple disabled domain accounts from a single source system using the Kerberos protocol.
+title: Valid Users Failing to Authenticate From Single Source Using Kerberos
+id: 5d1d946e-32e6-4d9a-a0dc-0ac022c7eb98
+status: unsupported
+description: Detects multiple failed logins with multiple valid domain accounts from a single source system using the Kerberos protocol.
 references:
     - https://docs.splunk.com/Documentation/ESSOC/3.22.0/stories/UseCase#Active_directory_password_spraying
 author: Mauricio Velazco, frack113
@@ -16,12 +16,12 @@ logsource:
     service: security
 detection:
     selection:
-        EventID: 4768
-        Status: '0x12'
+        EventID: 4771
+        Status: '0x18'
     filter_computer:
         TargetUserName|endswith: '$'
     timeframe: 24h
-    condition: 'selection and not filter_computer | count(TargetUserName) by IpAddress > 10'
+    condition: selection and not filter_computer | count(TargetUserName) by IpAddress > 10
 falsepositives:
     - Vulnerability scanners
     - Misconfigured systems
