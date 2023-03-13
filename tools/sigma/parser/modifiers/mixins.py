@@ -28,7 +28,7 @@ class ListOrStringModifierMixin(object):
     * apply_list() calls apply_str(str) for each value and returns list with all results.
     * apply_str(str) returns string without modifications
     """
-    valid_input_types = (list, tuple, str, ConditionBase, NodeSubexpression)
+    valid_input_types = (list, tuple, str, )
     iterable_types = (list, tuple, ConditionBase, NodeSubexpression)
 
     def valid_value_types(self):
