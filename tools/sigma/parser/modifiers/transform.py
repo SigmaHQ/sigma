@@ -75,6 +75,10 @@ class SigmaAllValuesModifier(SigmaTransformModifier):
             cond.add(val)
         return cond
 
+    def validate(self):
+        """Override default validate to avoid checking type recursively"""
+        return any(( isinstance(self.value, t) for t in self.valid_input_types  ))
+
 class SigmaBase64Modifier(ListOrStringModifierMixin, SigmaTransformModifier):
     """Encode strings with Base64"""
     identifier = "base64"

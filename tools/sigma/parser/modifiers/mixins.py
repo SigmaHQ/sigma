@@ -29,9 +29,13 @@ class ListOrStringModifierMixin(object):
     * apply_str(str) returns string without modifications
     """
     valid_input_types = (list, tuple, str, )
+    iterable_types = (list, tuple, ConditionBase, NodeSubexpression)
+
+    def valid_value_types(self):
+        return tuple(t for t in self.valid_input_types if t not in self.iterable_types)
 
     def apply(self):
-        if isinstance(self.value, (list, tuple, ConditionBase, NodeSubexpression)):
+        if isinstance(self.value, self.iterable_types):
             return self.apply_list(self.value)
         else:
             return self.apply_str(self.value)
@@ -41,7 +45,7 @@ class ListOrStringModifierMixin(object):
         if isinstance(l, (list, tuple)):
             l = [
                 self.apply_str(v)
-                if isinstance(v, str)
+                if isinstance(v, self.valid_value_types())
                 else self.apply_list(v)
                 for v in l ]
             rl = list()
