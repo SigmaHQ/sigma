@@ -1,10 +1,9 @@
-title: Multiple Users Failing to Authenticate from Single Process
-id: fe563ab6-ded4-4916-b49f-a3a8445fe280
-status: test
-description: Detects failed logins with multiple accounts from a single process on the system.
+title: Valid Users Failing to Authenticate from Single Source Using NTLM
+id: f88bab7f-b1f4-41bb-bdb1-4b8af35b0470
+status: unsupported
+description: Detects failed logins with multiple valid domain accounts from a single source system using the NTLM protocol.
 references:
     - https://docs.splunk.com/Documentation/ESSOC/3.22.0/stories/UseCase#Active_directory_password_spraying
-    - https://www.trimarcsecurity.com/single-post/2018/05/06/trimarc-research-detecting-password-spraying-with-security-event-auditing
 author: Mauricio Velazco
 date: 2021/06/01
 modified: 2023/03/13
@@ -17,12 +16,12 @@ logsource:
     service: security
 detection:
     selection1:
-        EventID: 4625
-        LogonType: 2
+        EventID: 4776
+        Status: '*0xC000006A' #Account logon with misspelled or bad password.
     filter:
-        ProcessName: '-'
+        TargetUserName: '*$'
     timeframe: 24h
-    condition: 'selection1 and not filter | count(TargetUserName) by ProcessName > 10'
+    condition: selection1 and not filter | count(TargetUserName) by Workstation > 10
 falsepositives:
     - Terminal servers
     - Jump servers
