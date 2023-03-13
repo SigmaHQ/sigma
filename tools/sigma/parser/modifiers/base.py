@@ -49,7 +49,19 @@ class SigmaModifier(object):
 
     def validate(self):
         """Validate if modifier is applicable to value. Expects that value is stored in self.value."""
-        return any(( isinstance(self.value, t) for t in self.valid_input_types ))
+        return any(( self.isinstance_recursive(self.value, t) for t in self.valid_input_types ))
+
+    def isinstance_recursive(self, value: object, value_type: type) -> bool:
+        """Validate values inside of a list or a tuple"""
+        if not isinstance(value, value_type):
+            return False
+
+        if isinstance(value, (list, tuple, )):
+            for val in value:
+                if not any(( self.isinstance_recursive(val, t) for t in self.valid_input_types)):
+                    return False
+
+        return True
 
     def apply(self):
         """
