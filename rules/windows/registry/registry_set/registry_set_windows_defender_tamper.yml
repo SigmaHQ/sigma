@@ -22,7 +22,7 @@ logsource:
     product: windows
     category: registry_set
 detection:
-    root:
+    selection_main:
         EventType: SetValue
         TargetObject|contains: '\SOFTWARE\Microsoft\Windows Defender\'
     selection_dword_1:
@@ -43,7 +43,7 @@ detection:
             - '\SpyNet\SubmitSamplesConsent'
             - '\MpEngine\MpEnablePus'
         Details: 'DWORD (0x00000000)'
-    condition: ( root and 1 of selection_* ) and not 1 of filter*
+    condition: selection_main and 1 of selection_dword_*
 falsepositives:
     - Administrator actions
 level: high
