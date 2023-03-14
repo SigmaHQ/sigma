@@ -6,7 +6,7 @@ references:
     - https://hijacklibs.net/ # For list of DLLs that could be sideloaded (search for dlls mentioned here in there)
 author: Nasreddine Bencherchali (Nextron Systems), Wietze Beukema (project and research)
 date: 2022/08/17
-modified: 2023/01/29
+modified: 2023/03/13
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -62,6 +62,13 @@ detection:
         ImageLoaded|startswith:
             - 'C:\program Files\AVAST Software\Avast\'
             - 'C:\program Files (x86)\AVAST Software\Avast\'
+    # ESET
+    selection_eset_deslock:
+        ImageLoaded|endswith: '\DLPPREM32.dll'
+    filter_eset_deslock:
+        ImageLoaded|startswith:
+            - 'C:\program Files\ESET'
+            - 'C:\program Files (x86)\ESET'
     # Trend Micro Titanium
     selection_titanium:
         ImageLoaded|endswith: '\tmdbglog.dll'
@@ -75,6 +82,7 @@ detection:
                or (selection_cyberark and not filter_cyberark)
                or (selection_avast and not filter_avast)
                or (selection_titanium and not filter_titanium)
+               or (selection_eset_deslock and not filter_eset_deslock)
 falsepositives:
     - Applications that load the same dlls mentioned in the detection section. Investigate them and filter them out if a lot FPs are caused.
     - Dell SARemediation plugin folder (C:\Program Files\Dell\SARemediation\plugin\log.dll) is known to contain the 'log.dll' file.
