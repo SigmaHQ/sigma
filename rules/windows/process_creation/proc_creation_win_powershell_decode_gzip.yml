@@ -1,0 +1,20 @@
+title: Suspicious Decoding Gzip Archive
+id: 98767d61-b2e8-4d71-b661-e36783ee24c1
+status: experimental
+description: Detects attempts of decoding encoded Gzip archive via PowerShell. 
+references:
+    - https://www.zscaler.com/blogs/security-research/onenote-growing-threat-malware-distribution
+author: Hieu Tran
+date: 2023/03/13
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        CommandLine|contains|all:
+            - 'GZipStream'
+            - 'Decompress'
+    condition: selection
+falsepositives:
+    - Legitimate administrative script
+level: medium
