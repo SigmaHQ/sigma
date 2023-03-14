@@ -6,7 +6,7 @@ references:
     - https://twitter.com/mrd0x/status/1481630810495139841?s=12
 author: Tim Shelton, Florian Roth (Nextron Systems), Yassine Oukessou (fix + fp)
 date: 2022/01/13
-modified: 2023/02/09
+modified: 2023/03/13
 logsource:
     category: process_creation
     product: windows
@@ -19,6 +19,8 @@ detection:
     filter_generic:
         - CommandLine|contains: '.dll'
         - CommandLine: ''
+    filter_parent_null:
+        CommandLine: 'C:\Windows\system32\rundll32.exe C:\Windows\system32\inetcpl.cpl,ClearMyTracksByProcess'
     filter_iexplorer:
         ParentImage|endswith: ':\Program Files\Internet Explorer\iexplore.exe'
         CommandLine|contains: '.cpl'
@@ -41,6 +43,12 @@ detection:
         ParentImage|contains: '\AppData\Local\Microsoft\EdgeUpdate\Install\{'
         ParentImage|endswith: '\setup.exe'
         ParentCommandLine|contains: '\setup.exe" --install-archive="C:\Users\'
+    filter_avira:
+        CommandLine|contains|all:
+            - 'C:\Windows\Installer\MSI'
+            - '.tmp'
+            - 'zzzzInvokeManagedCustomActionOutOfProc'
+            - 'Avira.OE.Setup'
     condition: selection and not 1 of filter_*
 fields:
     - Image

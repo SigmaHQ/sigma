@@ -7,7 +7,7 @@ references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
 author: Roberto Rodriguez, Teymur Kheirkhabarov, Dimitrios Slamaris, Mark Russinovich, Aleksey Potapov, oscd.community (update)
 date: 2019/11/01
-modified: 2022/11/13
+modified: 2023/03/13
 tags:
     - attack.credential_access
     - car.2019-04-004
@@ -39,7 +39,7 @@ detection:
         AccessList|contains:
             - '4484'
             - '4416'
-    filter1:
+    filter_specific:
         ProcessName|endswith:
             - '\wmiprvse.exe'
             - '\taskmgr.exe'
@@ -60,30 +60,28 @@ detection:
             - '\MRT.exe'         # MS Malware Removal Tool
             - 'RtkAudUService64' # https://medium.com/falconforce/the-curious-case-of-realtek-and-lsass-33fc0c8482ff
         ProcessName|startswith:
-            - C:\Windows\System32\
-            - C:\Windows\SysWow64\
-            - C:\Windows\SysNative\
-            - C:\Program Files\
-            - C:\Program Files (x86)\
-            - C:\Windows\Temp\asgard2-agent\
-            - C:\ProgramData\Microsoft\Windows Defender\Platform\
-    filter2:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWow64\'
+            - 'C:\Windows\SysNative\'
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Windows\Temp\asgard2-agent\'
+            - 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+    filter_generic:
         ProcessName|startswith: 'C:\Program Files'  # too many false positives with legitimate AV and EDR solutions
-    filter3:
-        ProcessName: 'C:\Windows\CCM\CcmExec.exe'
-    filter4:
+    filter_exact:
         ProcessName:
             - 'C:\Windows\System32\taskhostw.exe'
             - 'C:\Windows\System32\msiexec.exe'
-    filter_games:
-        ProcessName|contains: '\SteamLibrary\steamapps\'
-    condition: 1 of selection_* and not 1 of filter*
-fields:
-    - ComputerName
-    - SubjectDomainName
-    - SubjectUserName
-    - ProcessName
-    - ProcessID
+            - 'C:\Windows\CCM\CcmExec.exe'
+    filter_sysmon:
+        ProcessName: 'C:\Windows\Sysmon64.exe'
+        AccessList: '%%4484'
+    filter_aurora:
+        ProcessName|startswith: 'C:\Windows\Temp\asgard2-agent-sc\aurora\'
+        ProcessName|endswith: '\aurora-agent-64.exe'
+        AccessList: '%%4484'
+    condition: 1 of selection_* and not 1 of filter_*
 falsepositives:
     - Legitimate software accessing LSASS process for legitimate reason; update the whitelist with it
 level: high
