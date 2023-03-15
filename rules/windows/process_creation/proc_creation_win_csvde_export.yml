@@ -1,0 +1,27 @@
+title: Active Directory Structure Export Via Csvde.EXE
+id: e5d36acd-acb4-4c6f-a13f-9eb203d50099
+status: experimental
+description: Detects the execution of "csvde.exe" in order to export organizational Active Directory structure.
+references:
+    - https://www.cybereason.com/blog/research/operation-ghostshell-novel-rat-targets-global-aerospace-and-telecoms-firms
+    - https://web.archive.org/web/20180725233601/https://www.pwc.co.uk/cyber-security/pdf/cloud-hopper-annex-b-final.pdf
+    - https://businessinsights.bitdefender.com/deep-dive-into-a-backdoordiplomacy-attack-a-study-of-an-attackers-toolkit
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/03/14
+tags:
+    - attack.exfiltration
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\csvde.exe'
+        - OriginalFileName: 'csvde.exe'
+    selection_remote:
+        CommandLine|contains: ' -f'
+    filter_import:
+        CommandLine|contains: ' -i'
+    condition: all of selection_* and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: medium
