@@ -72,6 +72,8 @@ sysmon -i /path/to/config
 
 ## Event Fields
 
+Note: For rules using this category in SIGMA. Know that there is a mapping between `Sysmon EID 1` fields and `Microsoft Windows Security Auditing EID: 4688`. While you can use the fields of `EID 4688` it's best to use the Sysmon ones.
+
 ### Provider: Microsoft Windows Security Auditing / EventID: 4688
 
 ```yml

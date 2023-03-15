@@ -9,15 +9,15 @@ ID: 0ad03ef1-f21b-4a79-8ce8-e6900c54b65b
   - [Description](#description)
   - [Event Source(s)](#event-sources)
   - [Logging Setup](#logging-setup)
-    - [Provider: Microsoft-Windows-PowerShell / EventID: 4103](#provider-microsoft-windows-powershell--eventid-4103)
-    - [Provider: PowerShellCore / EventID: 4103](#provider-powershellcore--eventid-4103)
+    - [Provider: Microsoft-Windows-PowerShell / EventID: 4103 (PowerShell 5)](#provider-microsoft-windows-powershell--eventid-4103-powershell-5)
+    - [Provider: PowerShellCore / EventID: 4103 (PowerShell 7)](#provider-powershellcore--eventid-4103-powershell-7)
   - [Event Fields](#event-fields)
-    - [Provider: Microsoft-Windows-PowerShell / EventID: 4103](#provider-microsoft-windows-powershell--eventid-4103-1)
-    - [Provider: PowerShellCore / EventID: 4103](#provider-powershellcore--eventid-4103-1)
+    - [Provider: Microsoft-Windows-PowerShell / EventID: 4103 (PowerShell 5)](#provider-microsoft-windows-powershell--eventid-4103-powershell-5-1)
+    - [Provider: PowerShellCore / EventID: 4103 (PowerShell 7)](#provider-powershellcore--eventid-4103-powershell-7-1)
 
 ## Description
 
-TBD
+This logsource guide describes how to enable the necessary logging to make use of SIGMA rules using the ``ps_module` category
 
 ## Event Source(s)
 
@@ -35,7 +35,9 @@ EventID: 4103
 
 ## Logging Setup
 
-### Provider: Microsoft-Windows-PowerShell / EventID: 4103
+You can enable this locally by using `gpedit.msc` or via `GPO`
+
+### Provider: Microsoft-Windows-PowerShell / EventID: 4103 (PowerShell 5)
 
 ```yml
 - Computer Configuration
@@ -45,7 +47,7 @@ EventID: 4103
                 - Turn On Module Logging
 ```
 
-### Provider: PowerShellCore / EventID: 4103
+### Provider: PowerShellCore / EventID: 4103 (PowerShell 7)
 
 ```yml
 - Computer Configuration
@@ -56,7 +58,7 @@ EventID: 4103
 
 ## Event Fields
 
-### Provider: Microsoft-Windows-PowerShell / EventID: 4103
+### Provider: Microsoft-Windows-PowerShell / EventID: 4103 (PowerShell 5)
 
 ```yml
 - ContextInfo
@@ -64,7 +66,7 @@ EventID: 4103
 - Payload
 ```
 
-### Provider: PowerShellCore / EventID: 4103
+### Provider: PowerShellCore / EventID: 4103 (PowerShell 7)
 
 ```yml
 - ContextInfo

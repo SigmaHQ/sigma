@@ -9,11 +9,11 @@ ID: bade5735-5ab0-4aa7-a642-a11be0e40872
   - [Description](#description)
   - [Event Source(s)](#event-sources)
   - [Logging Setup](#logging-setup)
-    - [Provider: Microsoft-Windows-PowerShell / EventID: 4103](#provider-microsoft-windows-powershell--eventid-4103)
-    - [Provider: PowerShellCore / EventID: 4103](#provider-powershellcore--eventid-4103)
+    - [Provider: Microsoft-Windows-PowerShell / EventID: 4103 (PowerShell 5)](#provider-microsoft-windows-powershell--eventid-4103-powershell-5)
+    - [Provider: PowerShellCore / EventID: 4103 (PowerShell 7)](#provider-powershellcore--eventid-4103-powershell-7)
   - [Event Fields](#event-fields)
-    - [Provider: Microsoft-Windows-PowerShell / EventID: 4103](#provider-microsoft-windows-powershell--eventid-4103-1)
-    - [Provider: PowerShellCore / EventID: 4103](#provider-powershellcore--eventid-4103-1)
+    - [Provider: Microsoft-Windows-PowerShell / EventID: 4103 (PowerShell 5)](#provider-microsoft-windows-powershell--eventid-4103-powershell-5-1)
+    - [Provider: PowerShellCore / EventID: 4103 (PowerShell 7)](#provider-powershellcore--eventid-4103-powershell-7-1)
 
 ## Description
 
@@ -35,7 +35,7 @@ EventID: 4104
 
 ## Logging Setup
 
-### Provider: Microsoft-Windows-PowerShell / EventID: 4103
+### Provider: Microsoft-Windows-PowerShell / EventID: 4103 (PowerShell 5)
 
 ```yml
 - Computer Configuration
@@ -45,7 +45,7 @@ EventID: 4104
                 - Turn On PowerShell Script Block Logging
 ```
 
-### Provider: PowerShellCore / EventID: 4103
+### Provider: PowerShellCore / EventID: 4103 (PowerShell 7)
 
 ```yml
 - Computer Configuration
@@ -56,7 +56,7 @@ EventID: 4104
 
 ## Event Fields
 
-### Provider: Microsoft-Windows-PowerShell / EventID: 4103
+### Provider: Microsoft-Windows-PowerShell / EventID: 4103 (PowerShell 5)
 
 ```yml
 - MessageNumber
@@ -66,7 +66,7 @@ EventID: 4104
 - Path
 ```
 
-### Provider: PowerShellCore / EventID: 4103
+### Provider: PowerShellCore / EventID: 4103 (PowerShell 7)
 
 ```yml
 - MessageNumber
