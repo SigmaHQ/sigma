@@ -9,16 +9,13 @@ references:
     - Internal Research
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/08/12
-modified: 2022/09/27
+modified: 2023/03/14
 logsource:
     category: file_event
     product: windows
 detection:
-    selection:
+    selection_generic:
         Image|endswith:
-            - '\rundll32.exe'
-            #- '\svchost.exe' # Might generate some FP
-            #- '\dllhost.exe' # Too many FPs
             - '\smss.exe'
             - '\RuntimeBroker.exe'
             - '\sihost.exe'
@@ -36,7 +33,19 @@ detection:
             - '.hta'
             - '.iso'
             - '.dll'
-    condition: selection
+    selection_special:
+        Image|endswith:
+            - '\rundll32.exe'
+            - '\svchost.exe'
+            - '\dllhost.exe'
+        TargetFilename|endswith:
+            - '.bat'
+            - '.vbe'
+            - '.vbs'
+            - '.ps1'
+            - '.hta'
+            - '.iso'
+    condition: 1 of selection_*
 falsepositives:
     - Unknown
 level: high
