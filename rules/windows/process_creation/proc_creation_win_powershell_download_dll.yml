@@ -1,7 +1,7 @@
-title: PowerShell Web Download DLL File
+title: Potential DLL File Download Via PowerShell Invoke-WebRequest
 id: 0f0450f3-8b47-441e-a31b-15a91dc243e2
 status: experimental
-description: Detects suspicious ways to download dll using PowerShell
+description: Detects potential dll files download using PowerShell Invoke-WebRequest cmdlet
 references:
     - https://www.zscaler.com/blogs/security-research/onenote-growing-threat-malware-distribution
 author: Florian Roth (Nextron Systems), Hieu Tran
@@ -11,12 +11,14 @@ logsource:
     category: process_creation
 detection:
     selection:
-        CommandLine|contains|all:
+        CommandLine|contains:
             - 'Invoke-WebRequest '
+            - 'IWR '
+        CommandLine|contains|all:
             - 'http'
             - 'OutFile'
-            - 'dll'
+            - '.dll'
     condition: selection
 falsepositives:
-    - Scripts or tools that download files
+    - Unknown
 level: medium
