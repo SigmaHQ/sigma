@@ -19,9 +19,11 @@ ID: 2ff912e8-159f-4789-a2ef-761292b32a23
 
 ## Description
 
-TBD
+This logsource guide describes how to enable the necessary logging to make use of SIGMA rules that leverage the `process_creation` category
 
 ## Event Source(s)
+
+This section describes the event source(s) that are required to be collected in order to receive the events used by the `process_creation` category detection rules
 
 ```yml
 Provider: Microsoft Windows Security Auditing
@@ -37,7 +39,11 @@ EventID: 1
 
 ## Logging Setup
 
+This section described how to setup logging in your environment
+
 ### Provider: Microsoft Windows Security Auditing / EventID: 4688
+
+You can enable the following settings locally by using `gpedit.msc` or via `GPO` if you're in a domain environment
 
 #### Process Creation Logging
 
@@ -76,6 +82,9 @@ Note: For rules using this category in SIGMA. Know that there is a mapping betwe
 
 ### Provider: Microsoft Windows Security Auditing / EventID: 4688
 
+<details>
+    <summary>Expand</summary>
+
 ```yml
 - SubjectUserSid
 - SubjectUserName
@@ -94,7 +103,12 @@ Note: For rules using this category in SIGMA. Know that there is a mapping betwe
 - MandatoryLabel
 ```
 
+</details>
+
 ### Provider: Microsoft-Windows-Sysmon / EventID: 1
+
+<details>
+    <summary>Expand</summary>
 
 ```yml
 - RuleName
@@ -121,3 +135,5 @@ Note: For rules using this category in SIGMA. Know that there is a mapping betwe
 - ParentCommandLine
 - ParentUser
 ```
+
+</details>

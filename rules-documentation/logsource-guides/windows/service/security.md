@@ -82,6 +82,7 @@ ID: dfd8c0f4-e6ad-4e07-b91b-f2fca0ddef64
   - [Event Fields](#event-fields)
     - [Provider: Microsoft Windows Security Auditing / EventID: 4624](#provider-microsoft-windows-security-auditing--eventid-4624)
     - [Provider: Microsoft Windows Security Auditing / EventID: 4627](#provider-microsoft-windows-security-auditing--eventid-4627)
+    - [Provider: Microsoft Windows Security Auditing / EventID: 4663](#provider-microsoft-windows-security-auditing--eventid-4663)
     - [Provider: Microsoft Windows Security Auditing / EventID: 4670](#provider-microsoft-windows-security-auditing--eventid-4670)
     - [Provider: Microsoft Windows Security Auditing / EventID: 4672](#provider-microsoft-windows-security-auditing--eventid-4672)
     - [Provider: Microsoft Windows Security Auditing / EventID: 4673](#provider-microsoft-windows-security-auditing--eventid-4673)
@@ -94,7 +95,7 @@ ID: dfd8c0f4-e6ad-4e07-b91b-f2fca0ddef64
 
 ## Description
 
-TBD
+This logsource guide describes how to enable the necessary logging to make use of SIGMA rules that leverage the `security` service
 
 ## Event Source(s)
 
@@ -1607,6 +1608,29 @@ TBD
 - EventIdx
 - EventCountTotal
 - GroupMembership
+```
+
+</details>
+
+### Provider: Microsoft Windows Security Auditing / EventID: 4663
+
+<details>
+    <summary>Expand</summary>
+
+```yml
+- SubjectUserSid
+- SubjectUserName
+- SubjectDomainName
+- SubjectLogonId
+- ObjectServer
+- ObjectType
+- ObjectName
+- HandleId
+- AccessList
+- AccessMask
+- ProcessId
+- ProcessName
+- ResourceAttributes
 ```
 
 </details>
