@@ -101,6 +101,8 @@ This logsource guide describes how to enable the necessary logging to make use o
 
 ```yml
 Provider: Microsoft Windows Security Auditing
+GUID: {54849625-5478-4994-a5ba-3e3b0328c30d}
+Channel: Security
 ```
 
 ## Logging Setup

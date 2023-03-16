@@ -27,12 +27,14 @@ This section describes the event source(s) that are required to be collected in 
 
 ```yml
 Provider: Microsoft Windows Security Auditing
+GUID: {54849625-5478-4994-a5ba-3e3b0328c30d}
 Channel: Security
 EventID: 4688
 ```
 
 ```yml
 Provider: Microsoft-Windows-Sysmon
+GUID: {5770385f-c22a-43e0-bf4c-06f5698ffbd9}
 Channel: Microsoft-Windows-Sysmon/Operational
 EventID: 1
 ```

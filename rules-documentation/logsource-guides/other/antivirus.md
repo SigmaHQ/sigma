@@ -10,13 +10,13 @@ ID: 0a1bd9a3-812b-4578-95c9-24050fbce814
   - [Event Source(s)](#event-sources)
   - [Logging Setup](#logging-setup)
     - [Microsoft Defender](#microsoft-defender)
-      - [Provider: / EventID:](#provider--eventid)
+      - [Provider: / EventID(s):](#provider--eventids)
     - [Kaspersky Endpoint Security](#kaspersky-endpoint-security)
-      - [Provider: / EventID:](#provider--eventid-1)
+      - [Provider: / EventID(s):](#provider--eventids-1)
     - [Symantec Endpoint Protection](#symantec-endpoint-protection)
-      - [Provider: / EventID:](#provider--eventid-2)
+      - [Provider: / EventID(s):](#provider--eventids-2)
   - [Event Fields](#event-fields)
-    - [Provider: / EventID:](#provider--eventid-3)
+    - [Provider: / EventID:](#provider--eventid)
 
 ## Description
 
@@ -28,7 +28,7 @@ TBD
 
 ### Microsoft Defender
 
-#### Provider: / EventID: 
+#### Provider: / EventID(s): 
 
 ```yml
 
@@ -36,7 +36,7 @@ TBD
 
 ### Kaspersky Endpoint Security
 
-#### Provider: / EventID: 
+#### Provider: / EventID(s): 
 
 ```yml
 
@@ -44,7 +44,7 @@ TBD
 
 ### Symantec Endpoint Protection
 
-#### Provider: / EventID: 
+#### Provider: / EventID(s): 
 
 ```yml
 

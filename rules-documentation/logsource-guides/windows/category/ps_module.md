@@ -27,6 +27,7 @@ This logsource guide describes how to enable the necessary logging to make use o
 
 ```yml
 Provider: Microsoft-Windows-PowerShell
+GUID: {a0c1853b-5c40-4b15-8766-3cf1c58f985a}
 Channel: Microsoft-Windows-PowerShell/Operational
 EventID: 4103
 ```
@@ -35,6 +36,7 @@ EventID: 4103
 
 ```yml
 Provider: PowerShellCore
+GUID: {f90714a8-5509-434a-bf6d-b1624c8a19a2}
 Channel: PowerShellCore/Operational
 EventID: 4103
 ```
