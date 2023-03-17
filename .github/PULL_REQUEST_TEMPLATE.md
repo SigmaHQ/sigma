@@ -5,13 +5,15 @@ Thanks for your contribution. Please make sure to fill the contents of this temp
 ### Summary of the Pull Request
 
 <!--
-A short summary of your pull request
+**Please note that this Section is required and must be filled**
+A short summary of your pull request. 
 -->
 
 ### Detailed Description of the Pull Request / Additional Comments
 
 <!--
-A detailed description of the pull request and any additional comments or context
+**Please note that this Section is required and must be filled**
+A detailed description of the pull request and any additional comments or context.
 -->
 
 ### Example Log Event
