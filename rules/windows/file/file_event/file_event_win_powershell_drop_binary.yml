@@ -1,0 +1,32 @@
+title: Potential Binary Or Script Dropper Via PowerShell.EXE
+id: 7047d730-036f-4f40-b9d8-1c63e36d5e62
+status: experimental
+description: Detects PowerShell writing binary executable or script.
+references:
+    - https://www.zscaler.com/blogs/security-research/onenote-growing-threat-malware-distribution
+author: frack113
+date: 2023/03/17
+tags:
+    - attack.persistence
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        TargetFilename|endswith:
+            - '.com'
+            - '.dll'
+            - '.exe'
+            - '.scr'
+            - '.sys'
+            - '.ocx'
+            - '.bat'
+            - '.ps1'
+            - '.vbs'
+    condition: selection
+falsepositives:
+    - Depending on your environment accepted applications may leverage this at times. It is recommended to search for anomalies inidicative of malware.
+level: high
