@@ -1,0 +1,30 @@
+title: cve-2023-23397
+id: 73c59189-6a6d-4b9f-a748-8f6f9bbed75c
+status: experimental
+description: Detects outlook initiating connection to a webdav or smb share
+author: Robert Lee @quantum_cookie
+date: 2023/03/16
+references:
+    - https://www.trustedsec.com/blog/critical-outlook-vulnerability-in-depth-technical-analysis-and-recommendations-cve-2023-23397/
+
+tags:
+    - attack.credential_access
+    - attack.initial_access
+logsource:
+    service: security
+    product: windows
+detection:
+    regquery:
+        EventID:
+            - 4656
+            - 4663
+        ProcessName|endswith: OUTLOOK.EXE
+        Accesses|contains: 'Query key value'
+        ObjectName|contains:
+            - \REGISTRY\MACHINE\SYSTEM*Services\WebClient\NetworkProvider
+            - \REGISTRY\MACHINE\SYSTEM*Services\LanmanWorkstation\NetworkProvider
+        
+    condition: regquery
+falsepositives:
+     - searchprotocolhost likes to query this if you want to filter out those events before they reach the SIEM
+level: critical
