@@ -1,7 +1,10 @@
 title: Suspicious Regsvr32 Execution With Image Extension
 id: 089fc3d2-71e8-4763-a8a5-c97fbb0a403e
+related:
+    - id: 4aa6040b-3f28-44e3-a769-9208e5feb5ec
+      type: similar
 status: experimental
-description: Detects execution of REGSVR32.exe with DLL masquerading as image files
+description: Detects the execution of REGSVR32.exe with DLL files masquerading as image files
 references:
     - https://thedfirreport.com/2021/11/29/continuing-the-bazar-ransomware-story/
     - https://blog.talosintelligence.com/2021/10/threat-hunting-in-large-datasets-by.html
@@ -21,21 +24,21 @@ detection:
         - OriginalFileName: '\REGSVR32.EXE'
     selection_cli:
         CommandLine|endswith:
-            - '.jpg'
-            # Add more image extension
-            - '.jpeg'
-            - '.gif'
-            - '.png'
-            - '.ico'
+            # Add more image extensions
             - '.bmp'
-            - '.tif'
-            - '.tiff'
-            - '.eps'
-            - '.raw'
             - '.cr2'
+            - '.eps'
+            - '.gif'
+            - '.ico'
+            - '.jpeg'
+            - '.jpg'
             - '.nef'
             - '.orf'
+            - '.png'
+            - '.raw'
             - '.sr2'
+            - '.tif'
+            - '.tiff'
     condition: all of selection_*
 falsepositives:
     - Unknown
