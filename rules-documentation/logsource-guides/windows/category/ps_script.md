@@ -4,6 +4,9 @@ ID: bade5735-5ab0-4aa7-a642-a11be0e40872
 
 ## Content
 
+<details>
+    <summary>Expand</summary>
+
 - [category: ps\_script](#category-ps_script)
   - [Content](#content)
   - [Description](#description)
@@ -16,6 +19,8 @@ ID: bade5735-5ab0-4aa7-a642-a11be0e40872
   - [Event Fields](#event-fields)
     - [Provider: Microsoft-Windows-PowerShell / EventID: 4103 (PowerShell 5)](#provider-microsoft-windows-powershell--eventid-4103-powershell-5-1)
     - [Provider: PowerShellCore / EventID: 4103 (PowerShell 7)](#provider-powershellcore--eventid-4103-powershell-7-1)
+
+</details>
 
 ## Description
 

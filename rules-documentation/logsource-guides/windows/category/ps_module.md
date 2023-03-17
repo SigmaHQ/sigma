@@ -4,6 +4,9 @@ ID: 0ad03ef1-f21b-4a79-8ce8-e6900c54b65b
 
 ## Content
 
+<details>
+    <summary>Expand</summary>
+
 - [category: ps\_module](#category-ps_module)
   - [Content](#content)
   - [Description](#description)
@@ -16,6 +19,8 @@ ID: 0ad03ef1-f21b-4a79-8ce8-e6900c54b65b
   - [Event Fields](#event-fields)
     - [Provider: Microsoft-Windows-PowerShell / EventID: 4103 (PowerShell 5)](#provider-microsoft-windows-powershell--eventid-4103-powershell-5-1)
     - [Provider: PowerShellCore / EventID: 4103 (PowerShell 7)](#provider-powershellcore--eventid-4103-powershell-7-1)
+
+</details>
 
 ## Description
 

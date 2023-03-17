@@ -4,6 +4,9 @@ ID: 2ff912e8-159f-4789-a2ef-761292b32a23
 
 ## Content
 
+<details>
+    <summary>Expand</summary>
+
 - [category: process\_creation](#category-process_creation)
   - [Content](#content)
   - [Description](#description)
@@ -16,6 +19,8 @@ ID: 2ff912e8-159f-4789-a2ef-761292b32a23
   - [Event Fields](#event-fields)
     - [Provider: Microsoft Windows Security Auditing / EventID: 4688](#provider-microsoft-windows-security-auditing--eventid-4688-1)
     - [Provider: Microsoft-Windows-Sysmon / EventID: 1](#provider-microsoft-windows-sysmon--eventid-1-1)
+
+</details>
 
 ## Description
 

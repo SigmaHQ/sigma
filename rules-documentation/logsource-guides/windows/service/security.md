@@ -4,6 +4,9 @@ ID: dfd8c0f4-e6ad-4e07-b91b-f2fca0ddef64
 
 ## Content
 
+<details>
+    <summary>Expand</summary>
+
 - [service: security](#service-security)
   - [Content](#content)
   - [Description](#description)
@@ -92,6 +95,8 @@ ID: dfd8c0f4-e6ad-4e07-b91b-f2fca0ddef64
     - [Provider: Microsoft Windows Security Auditing / EventID: 4703](#provider-microsoft-windows-security-auditing--eventid-4703)
     - [Provider: Microsoft Windows Security Auditing / EventID: 4957](#provider-microsoft-windows-security-auditing--eventid-4957)
     - [Provider: Microsoft Windows Security Auditing / EventID: 5447](#provider-microsoft-windows-security-auditing--eventid-5447)
+
+</details>
 
 ## Description
 
