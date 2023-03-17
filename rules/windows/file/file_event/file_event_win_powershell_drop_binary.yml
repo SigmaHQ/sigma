@@ -26,7 +26,12 @@ detection:
             - '.bat'
             - '.ps1'
             - '.vbs'
-    condition: selection
+    filter_psscriptpolicytest:
+        TargetFilename|contains: '__PSScriptPolicyTest_'
+    filter_appdata:
+        TargetFilename|startswith: 'C:\Users\'
+        TargetFilename|contains: '\AppData\Local\Temp'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Depending on your environment accepted applications may leverage this at times. It is recommended to search for anomalies inidicative of malware.
 level: high
