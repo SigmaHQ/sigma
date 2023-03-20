@@ -120,6 +120,7 @@ Channel: Security
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `High`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `4774`
   - `4775`
@@ -157,6 +158,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `High on Kerberos Key Distribution Center servers`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `4768`
   - `4771`
@@ -193,6 +195,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Very High on Kerberos Key Distribution Center servers`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `4769`
   - `4770`
@@ -229,6 +232,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: TBD
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - TBD
 
@@ -265,6 +269,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: TBD
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `4783`
   - `4784`
@@ -308,6 +313,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Low on domain controllers`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `4741`
   - `4742`
@@ -344,6 +350,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Low on Domain Controllers`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `4749`
   - `4750`
@@ -382,6 +389,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Typically Low on all types of computers`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `4782`
   - `4793`
@@ -417,6 +425,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Low`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `4731`
   - `4732`
@@ -467,6 +476,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Low`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `4720`
   - `4722`
@@ -519,6 +529,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Low`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `4692`
   - `4693`
@@ -556,6 +567,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Varies, depending on how the computer is used. Typically Low.`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `6416`
   - `6419`
@@ -596,6 +608,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `High`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `4688`
   - `4696`
@@ -631,6 +644,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Low to Medium, depending on system usage.`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `4689`
 
@@ -665,6 +679,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: TBD
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `5712`
 
@@ -699,6 +714,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `High`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `4703`
 
@@ -735,6 +751,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `These events can create a very high volume of event data on domain controllers`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `4928`
   - `4929`
@@ -776,6 +793,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `High on servers running AD DS role services.`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `4661`
   - `4662`
@@ -811,6 +829,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `High on Domain Controllers`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `5136`
   - `5137`
@@ -849,6 +868,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Medium on Domain Controllers`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - `4932`
   - `4933`
@@ -886,6 +906,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Low`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4625
 
@@ -922,6 +943,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Event Volume:
   - `Low on a client computer.`
   - `Medium on a domain controller or network servers.`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4626
 
@@ -958,6 +980,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Event Volume:
   - `Low on a client computer.`
   - `Medium on a domain controller or network servers.`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4627
 
@@ -992,6 +1015,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: TBD
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4978
   - 4979
@@ -1032,6 +1056,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: TBD
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4646
   - 4650
@@ -1074,6 +1099,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: TBD
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4977
   - 5451
@@ -1110,6 +1136,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `High`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4634
   - 4647
@@ -1147,6 +1174,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Event Volume:
   - `Low on a client computer.`
   - `Medium on a domain controllers or network servers.`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4624
   - 4625
@@ -1184,6 +1212,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Medium to High on servers that are running Network Policy Server (NPS).`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 6272
   - 6273
@@ -1226,6 +1255,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Low`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4649
   - 4778
@@ -1271,6 +1301,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Event Volume:
   - `Low on a client computer.`
   - `Medium on a domain controllers or network servers.`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4964
   - 4672
@@ -1308,6 +1339,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: TBD
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4665
   - 4666
@@ -1345,6 +1377,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Low to medium on servers that provide AD CS role services`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4868
   - 4869
@@ -1410,6 +1443,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
   - `High on file servers.`
   - `High on domain controllers because of SYSVOL network access required by Group Policy.`
   - `Low on member servers and workstations.`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 5145
 
@@ -1447,6 +1481,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
   - `High on file servers.`
   - `High on domain controllers because of SYSVOL network access required by Group Policy.`
   - `Low on member servers and workstations.`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 5140
   - 5142
@@ -1485,6 +1520,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Varies, depending on how file system SACLs are configured`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4656
   - 4658
@@ -1526,6 +1562,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `High`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 5031
   - 5150
@@ -1568,6 +1605,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `High`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 5152
   - 5153
@@ -1603,6 +1641,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `High`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4658
   - 4690
@@ -1638,6 +1677,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `High`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4656
   - 4658
@@ -1675,6 +1715,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Low`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4671
   - 4691
@@ -1720,6 +1761,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Low to Medium, depending on how registry SACLs are configured.`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4656
   - 4657
@@ -1760,6 +1802,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: TBD
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4656
   - 4658
@@ -1796,6 +1839,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `High on domain controllers`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4661
 
@@ -1830,6 +1874,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `High`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4818
 
@@ -1866,6 +1911,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Low`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4715
   - 4719
@@ -1909,6 +1955,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Low`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4670
   - 4706
@@ -1954,6 +2001,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Medium to High`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4703
   - 4704
@@ -1993,6 +2041,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: TBD
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4709
   - 4710
@@ -2066,6 +2115,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Medium`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4944
   - 4945
@@ -2113,6 +2163,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Low`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4714
   - 4819
@@ -2164,6 +2215,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Very High`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4673
   - 4674
@@ -2200,6 +2252,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: TBD
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4985
 
@@ -2235,6 +2288,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `High`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4673, 4674, 4985
 
@@ -2272,6 +2326,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Medium`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4960
   - 4961
@@ -2316,6 +2371,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Low`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 5024
   - 5025
@@ -2372,6 +2428,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Low`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4608
   - 4616
@@ -2408,6 +2465,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Low`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4610
   - 4611
@@ -2446,6 +2504,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
 - Event Volume: `Low`
+- API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4612
   - 4615
@@ -2525,40 +2584,21 @@ TBD
 - [4653: An IPsec Main Mode negotiation failed.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4653)
 - [4655: An IPsec Main Mode security association ended.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4655)
 - [4656: A handle to an object was requested.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4656)
-- [4656: A handle to an object was requested.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4656)
-- [4656: A handle to an object was requested.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4656)
-- [4656: A handle to an object was requested.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4656)
 - [4657: A registry value was modified.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4657)
 - [4658: The handle to an object was closed.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4658)
-- [4658: The handle to an object was closed.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4658)
-- [4658: The handle to an object was closed.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4658)
-- [4658: The handle to an object was closed.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4658)
-- [4658: The handle to an object was closed.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4658)
-- [4658: The handle to an object was closed.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4658)
 - [4660: An object was deleted.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4660)
-- [4660: An object was deleted.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4660)
-- [4660: An object was deleted.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4660)
-- [4661: A handle to an object was requested.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4661)
 - [4661: A handle to an object was requested.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4661)
 - [4662: An operation was performed on an object.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4662)
-- [4663: An attempt was made to access an object.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4663)
-- [4663: An attempt was made to access an object.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4663)
-- [4663: An attempt was made to access an object.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4663)
 - [4663: An attempt was made to access an object.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4663)
 - [4664: An attempt was made to create a hard link.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4664)
 - [4665: An attempt was made to create an application client context.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4665)
 - [4666: An application attempted an operation.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4666)
 - [4667: An application client context was deleted.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4667)
 - [4668: An application was initialized.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4668)
-- [4670: Permissions on an object were changed](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4670)
-- [4670: Permissions on an object were changed.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4670)
-- [4670: Permissions on an object were changed.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4670)
 - [4670: Permissions on an object were changed.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4670)
 - [4671: An application attempted to access a blocked ordinal through the TBS.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4671)
 - [4672: Special privileges assigned to new logon.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4672)
 - [4673: A privileged service was called.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4673)
-- [4673: A privileged service was called.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4673)
-- [4674: An operation was attempted on a privileged object.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4674)
 - [4674: An operation was attempted on a privileged object.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4674)
 - [4675: SIDs were filtered.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4675)
 - [4688: A new process has been created.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4688)
@@ -2747,8 +2787,8 @@ TBD
 - [4957: Windows Firewall did not apply the following rule:](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4957)
 - [4958: Windows Firewall did not apply the following rule because the rule referred to items not configured on this computer:](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4958)
 - [4960: IPsec dropped an inbound packet that failed an integrity check.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4960)
-- [4961: IPsec dropped an inbound packet that failed a replay check.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4961)
-- [4962: IPsec dropped an inbound packet that failed a replay check.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4962)
+- 4961: IPsec dropped an inbound packet that failed a replay check.
+- 4962: IPsec dropped an inbound packet that failed a replay check.
 - [4963: IPsec dropped an inbound clear text packet that should have been secured.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4963)
 - [4964: Special groups have been assigned to a new logon.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4964)
 - [4965: IPsec received a packet from a remote computer with an incorrect Security Parameter Index (SPI).](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4965)
@@ -2761,9 +2801,6 @@ TBD
 - [4982: IPsec Main Mode and Extended Mode security associations were established.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4982)
 - [4983: An IPsec Extended Mode negotiation failed. The corresponding Main Mode security association has been deleted.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4983)
 - [4984: An IPsec Extended Mode negotiation failed. The corresponding Main Mode security association has been deleted.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4984)
-- [4985: The state of a transaction has changed.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4985)
-- [4985: The state of a transaction has changed.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4985)
-- [4985: The state of a transaction has changed.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4985)
 - [4985: The state of a transaction has changed.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4985)
 - [5024: The Windows Firewall Service has started successfully.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-5024)
 - [5025: The Windows Firewall Service has been stopped.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-5025)
