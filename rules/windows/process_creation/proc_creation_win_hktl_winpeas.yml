@@ -1,13 +1,13 @@
 title: HackTool - winPEAS Execution
 id: 98b53e78-ebaf-46f8-be06-421aafd176d9
-status: experimental
+status: test
 description: WinPEAS is a script that search for possible paths to escalate privileges on Windows hosts. The checks are explained on book.hacktricks.xyz
 references:
     - https://github.com/carlospolop/PEASS-ng
     - https://book.hacktricks.xyz/windows-hardening/windows-local-privilege-escalation
-author: Georg Lauenstein
+author: Georg Lauenstein -- sure[secure]
 date: 2022/09/19
-modified: 2023/02/14
+modified: 2023/03/20
 tags:
     - attack.privilege_escalation
     - attack.t1082
@@ -17,7 +17,7 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_basic:
+    selection_img:
         Image|endswith:
             - '\winPEASany.exe'
             - '\winPEASany_ofs.exe'
@@ -25,17 +25,31 @@ detection:
             - '\winPEASx64_ofs.exe'
             - '\winPEASx86.exe'
             - '\winPEASx86_ofs.exe'
-    selection_pe:
         OriginalFileName: 'winPEAS.exe'
-    selection_option:
-        - CommandLine|endswith:
-            - 'serviceinfo'    # Search services information
-            - 'applicationsinfo' # Search installed applications information
-            - 'windowscreds'  # Search windows credentials
-            - 'browserinfo '  # Search browser information
-            - 'fileanalysis'  # Search specific files that can contains credentials and for regexes inside files
-        - CommandLine|contains: '.exe browserinfo '  # Search browser information
-    condition: 1 of selection*
+    selection_cmd:
+        CommandLine|contains:
+            - ' domain' # Enumerate domain information
+            - ' systeminfo' # Search system information
+            - ' userinfo' # Search user information
+            - ' processinfo' # Search processes information
+            - ' servicesinfo' # Search services information
+            - ' applicationsinfo' # Search installed applications information
+            - ' windowscreds' # Search windows credentials
+            - ' browserinfo' # Search browser information
+            - ' filesinfo' # Search generic files that can contains credentials
+            - ' fileanalysis' # Search specific files that can contains credentials and for regexes inside files
+            - ' eventsinfo' # Display interesting events information
+    selection_wsl:
+         Image|startswith: '\WindowsApps\MicrosoftCorporationII.WindowsSubsystemForLinux_'
+         Image|endswith: '\wsl.exe'
+         OriginalFileName: 'wsl.exe'
+         CommandLine|contains|all:
+            - '"bash"'
+            - '-c'
+            - 'curl'
+            - 'https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh' # use linpeas for WSL with default URL from linpeas.sh
+            - ' ---silent | sh'
+    condition: selection_img or (selection_img and selection_cmd) or selection_wsl
 falsepositives:
-    - Other programs that use the same command line flags
+    - Unknown
 level: high
