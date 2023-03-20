@@ -1,0 +1,31 @@
+title: WScript Spawned By Fodhelper.exe to Inhibit System Recovery
+id: 21f11b04-796d-4043-bfd4-cf707af08314
+status: test
+description: After being spawned by Fodhelper.exe. WMI will run the shellcode to delete shadow copy files and disables backup and recovery features through "bcdedit" and "wbadmin."
+references:
+    - https://www.bleepingcomputer.com/news/security/magniber-ransomware-now-infects-windows-users-via-javascript-files/
+author: FPT.EagleEye
+date: 2023/03/20
+tags:
+    - attack.impact
+    - attack.execution
+    - attack.T1490
+    - attack.T1059.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\fodhelper.exe'
+        Image|endswith: '\wscript.exe'
+        CommandLine|contains|all:
+            - '/B'
+            - '/E'
+    condition: selection
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+falsepositives:
+    - Unknown
+level: high
