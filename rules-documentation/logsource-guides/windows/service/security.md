@@ -13,73 +13,73 @@ ID: dfd8c0f4-e6ad-4e07-b91b-f2fca0ddef64
   - [Event Source(s)](#event-sources)
   - [Logging Setup](#logging-setup)
     - [Account Logon](#account-logon)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4774, 4775, 4776, 4777](#provider-microsoft-windows-security-auditing--eventids-4774-4775-4776-4777)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4768, 4771, 4772](#provider-microsoft-windows-security-auditing--eventids-4768-4771-4772)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4769, 4770, 4773](#provider-microsoft-windows-security-auditing--eventids-4769-4770-4773)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): TBD](#provider-microsoft-windows-security-auditing--eventids-tbd)
+      - [Credential Validation](#credential-validation)
+      - [Kerberos Authentication Service](#kerberos-authentication-service)
+      - [Kerberos Service Ticket Operations](#kerberos-service-ticket-operations)
+      - [Other Account Logon Events](#other-account-logon-events)
     - [Account Management](#account-management)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4783, 4784, 4785, 4786, 4787, 4788, 4789, 4790, 4791, 4792](#provider-microsoft-windows-security-auditing--eventids-4783-4784-4785-4786-4787-4788-4789-4790-4791-4792)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4741, 4742, 4743](#provider-microsoft-windows-security-auditing--eventids-4741-4742-4743)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4749, 4750, 4751, 4752, 4753](#provider-microsoft-windows-security-auditing--eventids-4749-4750-4751-4752-4753)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4782, 4793](#provider-microsoft-windows-security-auditing--eventids-4782-4793)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4731, 4732, 4733, 4734, 4735, 4764, 4799, 4727, 4737, 4728, 4729, 4730, 4754, 4755, 4756, 4757, 4758](#provider-microsoft-windows-security-auditing--eventids-4731-4732-4733-4734-4735-4764-4799-4727-4737-4728-4729-4730-4754-4755-4756-4757-4758)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4720, 4722, 4723, 4724, 4725, 4726, 4738, 4740, 4765, 4766, 4767, 4780, 4781, 4794, 4798, 5376, 5377](#provider-microsoft-windows-security-auditing--eventids-4720-4722-4723-4724-4725-4726-4738-4740-4765-4766-4767-4780-4781-4794-4798-5376-5377)
+      - [Application Group Management](#application-group-management)
+      - [Computer Account Management](#computer-account-management)
+      - [Distribution Group Management](#distribution-group-management)
+      - [Other Account Management Events](#other-account-management-events)
+      - [Security Group Management](#security-group-management)
+      - [User Account Management](#user-account-management)
     - [Detailed Tracking](#detailed-tracking)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4692, 4693, 4694, 4695](#provider-microsoft-windows-security-auditing--eventids-4692-4693-4694-4695)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 6416, 6419, 6420, 6421, 6422, 6423, 6424](#provider-microsoft-windows-security-auditing--eventids-6416-6419-6420-6421-6422-6423-6424)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4688, 4696](#provider-microsoft-windows-security-auditing--eventids-4688-4696)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4689](#provider-microsoft-windows-security-auditing--eventids-4689)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 5712](#provider-microsoft-windows-security-auditing--eventids-5712)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4703](#provider-microsoft-windows-security-auditing--eventids-4703)
+      - [DPAPI Activity](#dpapi-activity)
+      - [PNP Activity](#pnp-activity)
+      - [Process Creation](#process-creation)
+      - [Process Termination](#process-termination)
+      - [RPC Events](#rpc-events)
+      - [Token Right Adjusted](#token-right-adjusted)
     - [DS Access](#ds-access)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4928, 4929, 4930, 4931, 4934, 4935, 4936, 4937](#provider-microsoft-windows-security-auditing--eventids-4928-4929-4930-4931-4934-4935-4936-4937)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4661, 4662](#provider-microsoft-windows-security-auditing--eventids-4661-4662)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 5136, 5137, 5138, 5139, 5141](#provider-microsoft-windows-security-auditing--eventids-5136-5137-5138-5139-5141)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4932, 4933](#provider-microsoft-windows-security-auditing--eventids-4932-4933)
+      - [Detailed Directory Service Replication](#detailed-directory-service-replication)
+      - [Directory Service Access](#directory-service-access)
+      - [Directory Service Changes](#directory-service-changes)
+      - [Directory Service Replication](#directory-service-replication)
     - [Logon/Logoff](#logonlogoff)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4625](#provider-microsoft-windows-security-auditing--eventids-4625)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4626](#provider-microsoft-windows-security-auditing--eventids-4626)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4627](#provider-microsoft-windows-security-auditing--eventids-4627)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4978, 4979, 4980, 4981, 4982, 4983, 4984](#provider-microsoft-windows-security-auditing--eventids-4978-4979-4980-4981-4982-4983-4984)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4646, 4650, 4651, 4652, 4653, 4655, 4976, 5049, 5453](#provider-microsoft-windows-security-auditing--eventids-4646-4650-4651-4652-4653-4655-4976-5049-5453)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4977, 5451, 5452](#provider-microsoft-windows-security-auditing--eventids-4977-5451-5452)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4634, 4647](#provider-microsoft-windows-security-auditing--eventids-4634-4647)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4624, 4625, 4648, 4675](#provider-microsoft-windows-security-auditing--eventids-4624-4625-4648-4675)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 6272, 6273, 6274, 6275, 6276, 6277, 6278, 6279, 6280](#provider-microsoft-windows-security-auditing--eventids-6272-6273-6274-6275-6276-6277-6278-6279-6280)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4649, 4778, 4779, 4800, 4801, 4802, 4803, 5378, 5632, 5633](#provider-microsoft-windows-security-auditing--eventids-4649-4778-4779-4800-4801-4802-4803-5378-5632-5633)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4964, 4672](#provider-microsoft-windows-security-auditing--eventids-4964-4672)
+      - [Account Lockout](#account-lockout)
+      - [User/Device Claims](#userdevice-claims)
+      - [Group Membership](#group-membership)
+      - [IPsec Extended Mode](#ipsec-extended-mode)
+      - [IPsec Main Mode](#ipsec-main-mode)
+      - [IPsec Quick Mode](#ipsec-quick-mode)
+      - [Logoff](#logoff)
+      - [Logon](#logon)
+      - [Network Policy Server](#network-policy-server)
+      - [Other Logon/Logoff Events](#other-logonlogoff-events)
+      - [Special Logon](#special-logon)
     - [Object Access](#object-access)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4665, 4666, 4667, 4668](#provider-microsoft-windows-security-auditing--eventids-4665-4666-4667-4668)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4868, 4869, 4870, 4871, 4872, 4873, 4874, 4875, 4876, 4877, 4878, 4879, 4880, 4881, 4882, 4883, 4884, 4885, 4886, 4887, 4888, 4889, 4890, 4891, 4892, 4893, 4894, 4895, 4896, 4897, 4898](#provider-microsoft-windows-security-auditing--eventids-4868-4869-4870-4871-4872-4873-4874-4875-4876-4877-4878-4879-4880-4881-4882-4883-4884-4885-4886-4887-4888-4889-4890-4891-4892-4893-4894-4895-4896-4897-4898)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 5145](#provider-microsoft-windows-security-auditing--eventids-5145)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 5140, 5142, 5143, 5144, 5168](#provider-microsoft-windows-security-auditing--eventids-5140-5142-5143-5144-5168)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4656, 4658, 4660, 4663, 4664, 4670, 4985, 5051](#provider-microsoft-windows-security-auditing--eventids-4656-4658-4660-4663-4664-4670-4985-5051)
-      - [Provider: Microsoft Windows Security Auditing / EventID: 5031, 5150, 5151, 5154, 5155, 5156, 5157, 5158, 5159](#provider-microsoft-windows-security-auditing--eventid-5031-5150-5151-5154-5155-5156-5157-5158-5159)
-      - [Provider: Microsoft Windows Security Auditing / EventID: 5152, 5153](#provider-microsoft-windows-security-auditing--eventid-5152-5153)
-      - [Provider: Microsoft Windows Security Auditing / EventID: 4658, 4690](#provider-microsoft-windows-security-auditing--eventid-4658-4690)
-      - [Provider: Microsoft Windows Security Auditing / EventID: 4656, 4658, 4660, 4663](#provider-microsoft-windows-security-auditing--eventid-4656-4658-4660-4663)
-      - [Provider: Microsoft Windows Security Auditing / EventID: 4671, 4691, 4698, 4699, 4700, 4701, 4702, 5148 ,5149, 5888, 5889, 5890](#provider-microsoft-windows-security-auditing--eventid-4671-4691-4698-4699-4700-4701-4702-5148-5149-5888-5889-5890)
-      - [Provider: Microsoft Windows Security Auditing / EventID: 4656, 4657, 4658, 4660, 4663, 4670, 5039](#provider-microsoft-windows-security-auditing--eventid-4656-4657-4658-4660-4663-4670-5039)
-      - [Provider: Microsoft Windows Security Auditing / EventID: 4656, 4658, 4663](#provider-microsoft-windows-security-auditing--eventid-4656-4658-4663)
-      - [Provider: Microsoft Windows Security Auditing / EventID: 4661](#provider-microsoft-windows-security-auditing--eventid-4661)
-      - [Provider: Microsoft Windows Security Auditing / EventID: 4818](#provider-microsoft-windows-security-auditing--eventid-4818)
+      - [Application Generated](#application-generated)
+      - [Certification Services](#certification-services)
+      - [Detailed File Share](#detailed-file-share)
+      - [File Share](#file-share)
+      - [File System](#file-system)
+      - [Filtering Platform Connection](#filtering-platform-connection)
+      - [Filtering Platform Packet Drop](#filtering-platform-packet-drop)
+      - [Handle Manipulation](#handle-manipulation)
+      - [Kernel Object](#kernel-object)
+      - [Other Object Access Events](#other-object-access-events)
+      - [Registry](#registry)
+      - [Removable Storage](#removable-storage)
+      - [SAM](#sam)
+      - [Central Access Policy Staging](#central-access-policy-staging)
     - [Policy Change](#policy-change)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4715, 4719, 4817, 4902, 4906, 4907, 4908, 4912, 4904, 4905](#provider-microsoft-windows-security-auditing--eventids-4715-4719-4817-4902-4906-4907-4908-4912-4904-4905)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4670, 4706, 4707, 4716, 4713, 4717, 4718, 4739, 4864, 4865, 4866, 4867](#provider-microsoft-windows-security-auditing--eventids-4670-4706-4707-4716-4713-4717-4718-4739-4864-4865-4866-4867)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4703, 4704, 4705, 4670, 4911, 4913](#provider-microsoft-windows-security-auditing--eventids-4703-4704-4705-4670-4911-4913)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4709, 4710, 4711, 4712, 5040, 5041, 5042, 5043, 5044, 5045, 5046, 5047, 5048, 5440, 5441, 5442, 5443, 5444, 5446, 5448, 5449, 5450, 5456, 5457, 5458, 5459, 5460, 5461, 5462, 5463, 5464, 5465, 5466, 5467, 5468, 5471, 5472, 5473, 5474, 5477](#provider-microsoft-windows-security-auditing--eventids-4709-4710-4711-4712-5040-5041-5042-5043-5044-5045-5046-5047-5048-5440-5441-5442-5443-5444-5446-5448-5449-5450-5456-5457-5458-5459-5460-5461-5462-5463-5464-5465-5466-5467-5468-5471-5472-5473-5474-5477)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4944, 4945, 4946, 4947, 4948, 4949, 4950, 4951, 4952, 4953, 4954, 4956, 4957, 4958](#provider-microsoft-windows-security-auditing--eventids-4944-4945-4946-4947-4948-4949-4950-4951-4952-4953-4954-4956-4957-4958)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4714, 4819, 4826, 4909, 4910, 5063, 5064, 5065, 5066, 5067, 5068, 5069, 5070, 5447, 6144, 6145](#provider-microsoft-windows-security-auditing--eventids-4714-4819-4826-4909-4910-5063-5064-5065-5066-5067-5068-5069-5070-5447-6144-6145)
+      - [Audit Policy Change](#audit-policy-change)
+      - [Authentication Policy Change](#authentication-policy-change)
+      - [Authorization Policy Change](#authorization-policy-change)
+      - [Filtering Platform Policy Change](#filtering-platform-policy-change)
+      - [MPSSVC Rule-Level Policy Change](#mpssvc-rule-level-policy-change)
+      - [Other Policy Change Events](#other-policy-change-events)
     - [Privilege Use](#privilege-use)
-      - [Provider: Microsoft Windows Security Auditing / EventID: 4673, 4674, 4985](#provider-microsoft-windows-security-auditing--eventid-4673-4674-4985)
-      - [Provider: Microsoft Windows Security Auditing / EventID: 4985](#provider-microsoft-windows-security-auditing--eventid-4985)
-      - [Provider: Microsoft Windows Security Auditing / EventID: 4673, 4674, 4985](#provider-microsoft-windows-security-auditing--eventid-4673-4674-4985-1)
+      - [Non Sensitive Privilege Use](#non-sensitive-privilege-use)
+      - [Other Privilege Use Events](#other-privilege-use-events)
+      - [Sensitive Privilege Use](#sensitive-privilege-use)
     - [System](#system)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4960, 4961, 4962, 4963, 4965, 5478, 5479, 5480, 5483, 5484, 5485](#provider-microsoft-windows-security-auditing--eventids-4960-4961-4962-4963-4965-5478-5479-5480-5483-5484-5485)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 5024, 5025, 5027, 5028, 5029, 5030, 5032, 5033, 5034, 5035, 5037, 5058, 5059, 6400, 6401, 6402, 6403, 6404, 6405, 6406, 6407, 6408, 6409](#provider-microsoft-windows-security-auditing--eventids-5024-5025-5027-5028-5029-5030-5032-5033-5034-5035-5037-5058-5059-6400-6401-6402-6403-6404-6405-6406-6407-6408-6409)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4608, 4616, 4621](#provider-microsoft-windows-security-auditing--eventids-4608-4616-4621)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4610, 4611, 4614, 4622, 4697](#provider-microsoft-windows-security-auditing--eventids-4610-4611-4614-4622-4697)
-      - [Provider: Microsoft Windows Security Auditing / EventID(s): 4612, 4615, 4618, 4816, 5038, 5056, 5062, 5057, 5060, 5061, 6281, 6410](#provider-microsoft-windows-security-auditing--eventids-4612-4615-4618-4816-5038-5056-5062-5057-5060-5061-6281-6410)
+      - [IPsec Driver](#ipsec-driver)
+      - [Other System Events](#other-system-events)
+      - [Security State Change](#security-state-change)
+      - [Security System Extension](#security-system-extension)
+      - [System Integrity](#system-integrity)
     - [Global Object Access Auditing](#global-object-access-auditing)
   - [Full Event(s) List](#full-events-list)
   - [Event Fields](#event-fields)
@@ -114,11 +114,19 @@ Channel: Security
 
 ### Account Logon
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4774, 4775, 4776, 4777
+#### Credential Validation
 
-Subcategory GUID: {0CCE923F-69AE-11D9-BED3-505054503030}
+- Subcategory GUID: `{0CCE923F-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `High`
+- EventID(s):
+  - `4774`
+  - `4775`
+  - `4776`
+  - `4777`
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-credential-validation)
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -131,11 +139,30 @@ Subcategory GUID: {0CCE923F-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4768, 4771, 4772
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9242-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE923F-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-kerberos-authentication-service)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE923F-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-credential-validation)
+
+#### Kerberos Authentication Service
+
+- Subcategory GUID: `{0CCE9242-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `High on Kerberos Key Distribution Center servers`
+- EventID(s):
+  - `4768`
+  - `4771`
+  - `4772`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -148,11 +175,30 @@ Subcategory GUID: {0CCE9242-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4769, 4770, 4773
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9240-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9242-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-kerberos-service-ticket-operations)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9242-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-kerberos-authentication-service)
+
+#### Kerberos Service Ticket Operations
+
+- Subcategory GUID: `{0CCE9240-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Very High on Kerberos Key Distribution Center servers`
+- EventID(s):
+  - `4769`
+  - `4770`
+  - `4773`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -165,11 +211,28 @@ Subcategory GUID: {0CCE9240-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): TBD
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9241-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9240-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-account-logon-events)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9240-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-kerberos-service-ticket-operations)
+
+#### Other Account Logon Events
+
+- Subcategory GUID: `{0CCE9241-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: TBD
+- EventID(s):
+  - TBD
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -182,13 +245,39 @@ Subcategory GUID: {0CCE9241-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
+Alternatively you can enable logging via `auditpol` using the following command(s):
+
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9241-69AE-11D9-BED3-505054503030}, /success:enable
+
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9241-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-account-logon-events)
+
 ### Account Management
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4783, 4784, 4785, 4786, 4787, 4788, 4789, 4790, 4791, 4792
+#### Application Group Management
 
-Subcategory GUID: {0CCE9239-69AE-11D9-BED3-505054503030}
+- Subcategory GUID: `{0CCE9239-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: TBD
+- EventID(s):
+  - `4783`
+  - `4784`
+  - `4785`
+  - `4786`
+  - `4787`
+  - `4788`
+  - `4789`
+  - `4790`
+  - `4791`
+  - `4792`
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-application-group-management)
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -201,11 +290,30 @@ Subcategory GUID: {0CCE9239-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4741, 4742, 4743
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9236-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9239-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-computer-account-management)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9239-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-application-group-management)
+
+#### Computer Account Management
+
+- Subcategory GUID: `{0CCE9236-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Low on domain controllers`
+- EventID(s):
+  - `4741`
+  - `4742`
+  - `4743`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -218,11 +326,32 @@ Subcategory GUID: {0CCE9236-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4749, 4750, 4751, 4752, 4753
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9238-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9236-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-distribution-group-management)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9236-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-computer-account-management)
+
+#### Distribution Group Management
+
+- Subcategory GUID: `{0CCE9238-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Low on Domain Controllers`
+- EventID(s):
+  - `4749`
+  - `4750`
+  - `4751`
+  - `4752`
+  - `4753`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -235,11 +364,29 @@ Subcategory GUID: {0CCE9238-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4782, 4793
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE923A-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9238-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-account-management-events)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9238-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-distribution-group-management)
+
+#### Other Account Management Events
+
+- Subcategory GUID: `{0CCE923A-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Typically Low on all types of computers`
+- EventID(s):
+  - `4782`
+  - `4793`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -252,11 +399,44 @@ Subcategory GUID: {0CCE923A-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4731, 4732, 4733, 4734, 4735, 4764, 4799, 4727, 4737, 4728, 4729, 4730, 4754, 4755, 4756, 4757, 4758
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9237-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE923A-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-security-group-management)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE923A-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-account-management-events)
+
+#### Security Group Management
+
+- Subcategory GUID: `{0CCE9237-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Low`
+- EventID(s):
+  - `4731`
+  - `4732`
+  - `4733`
+  - `4734`
+  - `4735`
+  - `4764`
+  - `4799`
+  - `4727`
+  - `4737`
+  - `4728`
+  - `4729`
+  - `4730`
+  - `4754`
+  - `4755`
+  - `4756`
+  - `4757`
+  - `4758`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -269,11 +449,44 @@ Subcategory GUID: {0CCE9237-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4720, 4722, 4723, 4724, 4725, 4726, 4738, 4740, 4765, 4766, 4767, 4780, 4781, 4794, 4798, 5376, 5377
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9235-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9237-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-user-account-management)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9237-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-security-group-management)
+
+#### User Account Management
+
+- Subcategory GUID: `{0CCE9235-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Low`
+- EventID(s):
+  - `4720`
+  - `4722`
+  - `4723`
+  - `4724`
+  - `4725`
+  - `4726`
+  - `4738`
+  - `4740`
+  - `4765`
+  - `4766`
+  - `4767`
+  - `4780`
+  - `4781`
+  - `4794`
+  - `4798`
+  - `5376`
+  - `5377`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -286,13 +499,33 @@ Subcategory GUID: {0CCE9235-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
+Alternatively you can enable logging via `auditpol` using the following command(s):
+
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9235-69AE-11D9-BED3-505054503030}, /success:enable
+
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9235-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-user-account-management)
+
 ### Detailed Tracking
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4692, 4693, 4694, 4695
+#### DPAPI Activity
 
-Subcategory GUID: {0CCE922D-69AE-11D9-BED3-505054503030}
+- Subcategory GUID: `{0CCE922D-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Low`
+- EventID(s):
+  - `4692`
+  - `4693`
+  - `4694`
+  - `4695`
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-dpapi-activity)
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -305,11 +538,34 @@ Subcategory GUID: {0CCE922D-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 6416, 6419, 6420, 6421, 6422, 6423, 6424
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9248-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE922D-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-pnp-activity)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE922D-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-dpapi-activity)
+
+#### PNP Activity
+
+- Subcategory GUID: `{0CCE9248-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Varies, depending on how the computer is used. Typically Low.`
+- EventID(s):
+  - `6416`
+  - `6419`
+  - `6420`
+  - `6421`
+  - `6422`
+  - `6423`
+  - `6424`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -322,11 +578,29 @@ Subcategory GUID: {0CCE9248-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4688, 4696
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE922B-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9248-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-process-creation)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9248-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-pnp-activity)
+
+#### Process Creation
+
+- Subcategory GUID: `{0CCE922B-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `High`
+- EventID(s):
+  - `4688`
+  - `4696`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -339,11 +613,28 @@ Subcategory GUID: {0CCE922B-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4689
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE922C-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE922B-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-process-termination)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE922B-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-process-creation)
+
+#### Process Termination
+
+- Subcategory GUID: `{0CCE922C-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Low to Medium, depending on system usage.`
+- EventID(s):
+  - `4689`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -356,11 +647,28 @@ Subcategory GUID: {0CCE922C-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 5712
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE922E-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE922C-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-rpc-events)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE922C-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-process-termination)
+
+#### RPC Events
+
+- Subcategory GUID: `{0CCE922E-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: TBD
+- EventID(s):
+  - `5712`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -373,11 +681,28 @@ Subcategory GUID: {0CCE922E-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4703
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE924A-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE922E-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-token-right-adjusted)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE922E-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-rpc-events)
+
+#### Token Right Adjusted
+
+- Subcategory GUID: `{0CCE924A-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `High`
+- EventID(s):
+  - `4703`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -390,13 +715,37 @@ Subcategory GUID: {0CCE924A-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
+Alternatively you can enable logging via `auditpol` using the following command(s):
+
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE924A-69AE-11D9-BED3-505054503030}, /success:enable
+
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE924A-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-token-right-adjusted)
+
 ### DS Access
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4928, 4929, 4930, 4931, 4934, 4935, 4936, 4937
+#### Detailed Directory Service Replication
 
-Subcategory GUID: {0CCE923E-69AE-11D9-BED3-505054503030}
+- Subcategory GUID: `{0CCE923E-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `These events can create a very high volume of event data on domain controllers`
+- EventID(s):
+  - `4928`
+  - `4929`
+  - `4930`
+  - `4931`
+  - `4934`
+  - `4935`
+  - `4936`
+  - `4937`
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-detailed-directory-service-replication)
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -409,11 +758,29 @@ Subcategory GUID: {0CCE923E-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4661, 4662
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE923B-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE923E-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-directory-service-access)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE923E-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-detailed-directory-service-replication)
+
+#### Directory Service Access
+
+- Subcategory GUID: `{0CCE923B-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `High on servers running AD DS role services.`
+- EventID(s):
+  - `4661`
+  - `4662`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -426,11 +793,32 @@ Subcategory GUID: {0CCE923B-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 5136, 5137, 5138, 5139, 5141
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE923C-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE923B-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-directory-service-changes)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE923B-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-directory-service-access)
+
+#### Directory Service Changes
+
+- Subcategory GUID: `{0CCE923C-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `High on Domain Controllers`
+- EventID(s):
+  - `5136`
+  - `5137`
+  - `5138`
+  - `5139`
+  - `5141`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -443,11 +831,29 @@ Subcategory GUID: {0CCE923C-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4932, 4933
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE923D-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE923C-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-directory-service-replication)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE923C-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-directory-service-changes)
+
+#### Directory Service Replication
+
+- Subcategory GUID: `{0CCE923D-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Medium on Domain Controllers`
+- EventID(s):
+  - `4932`
+  - `4933`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -460,13 +866,30 @@ Subcategory GUID: {0CCE923D-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
+Alternatively you can enable logging via `auditpol` using the following command(s):
+
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE923D-69AE-11D9-BED3-505054503030}, /success:enable
+
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE923D-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-directory-service-replication)
+
 ### Logon/Logoff
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4625
+#### Account Lockout
 
-Subcategory GUID: {0CCE9217-69AE-11D9-BED3-505054503030}
+- Subcategory GUID: `{0CCE9217-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Low`
+- EventID(s):
+  - 4625
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-account-lockout)
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -479,11 +902,30 @@ Subcategory GUID: {0CCE9217-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4626
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9247-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9217-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-user-device-claims)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9217-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-account-lockout)
+
+#### User/Device Claims
+
+- Subcategory GUID: `{0CCE9247-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume:
+  - `Low on a client computer.`
+  - `Medium on a domain controller or network servers.`
+- EventID(s):
+  - 4626
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -496,11 +938,30 @@ Subcategory GUID: {0CCE9247-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4627
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9249-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9247-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-group-membership)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9247-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-user-device-claims)
+
+#### Group Membership
+
+- Subcategory GUID: `{0CCE9249-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume:
+  - `Low on a client computer.`
+  - `Medium on a domain controller or network servers.`
+- EventID(s):
+  - 4627
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -513,11 +974,34 @@ Subcategory GUID: {0CCE9249-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4978, 4979, 4980, 4981, 4982, 4983, 4984
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE921A-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE923F-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-ipsec-extended-mode)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE923F-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-group-membership)
+
+#### IPsec Extended Mode
+
+- Subcategory GUID: `{0CCE921A-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: TBD
+- EventID(s):
+  - 4978
+  - 4979
+  - 4980
+  - 4981
+  - 4982
+  - 4983
+  - 4984
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -530,11 +1014,36 @@ Subcategory GUID: {0CCE921A-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4646, 4650, 4651, 4652, 4653, 4655, 4976, 5049, 5453
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9218-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE921A-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-ipsec-main-mode)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE921A-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-ipsec-extended-mode)
+
+#### IPsec Main Mode
+
+- Subcategory GUID: `{0CCE9218-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: TBD
+- EventID(s):
+  - 4646
+  - 4650
+  - 4651
+  - 4652
+  - 4653
+  - 4655
+  - 4976
+  - 5049
+  - 5453
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -547,11 +1056,30 @@ Subcategory GUID: {0CCE9218-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4977, 5451, 5452
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9219-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9218-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-ipsec-quick-mode)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9218-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-ipsec-main-mode)
+
+#### IPsec Quick Mode
+
+- Subcategory GUID: `{0CCE9219-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: TBD
+- EventID(s):
+  - 4977
+  - 5451
+  - 5452
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -564,11 +1092,29 @@ Subcategory GUID: {0CCE9219-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4634, 4647
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9216-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9219-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-logoff)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9219-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-ipsec-quick-mode)
+
+#### Logoff
+
+- Subcategory GUID: `{0CCE9216-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `High`
+- EventID(s):
+  - 4634
+  - 4647
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -581,11 +1127,33 @@ Subcategory GUID: {0CCE9216-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4624, 4625, 4648, 4675
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9215-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9216-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-logon)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9216-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-logoff)
+
+#### Logon
+
+- Subcategory GUID: `{0CCE9215-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume:
+  - `Low on a client computer.`
+  - `Medium on a domain controllers or network servers.`
+- EventID(s):
+  - 4624
+  - 4625
+  - 4648
+  - 4675
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -598,11 +1166,36 @@ Subcategory GUID: {0CCE9215-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 6272, 6273, 6274, 6275, 6276, 6277, 6278, 6279, 6280
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9243-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9215-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-network-policy-server)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9215-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-logon)
+
+#### Network Policy Server
+
+- Subcategory GUID: `{0CCE9243-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Medium to High on servers that are running Network Policy Server (NPS).`
+- EventID(s):
+  - 6272
+  - 6273
+  - 6274
+  - 6275
+  - 6276
+  - 6277
+  - 6278
+  - 6279
+  - 6280
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -615,11 +1208,37 @@ Subcategory GUID: {0CCE9243-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4649, 4778, 4779, 4800, 4801, 4802, 4803, 5378, 5632, 5633
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE921C-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9243-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-logonlogoff-events)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9243-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-network-policy-server)
+
+#### Other Logon/Logoff Events
+
+- Subcategory GUID: `{0CCE921C-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Low`
+- EventID(s):
+  - 4649
+  - 4778
+  - 4779
+  - 4800
+  - 4801
+  - 4802
+  - 4803
+  - 5378
+  - 5632
+  - 5633
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -632,11 +1251,31 @@ Subcategory GUID: {0CCE921C-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4964, 4672
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE921B-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE921C-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-special-logon)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE921C-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-logonlogoff-events)
+
+#### Special Logon
+
+- Subcategory GUID: `{0CCE921B-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume:
+  - `Low on a client computer.`
+  - `Medium on a domain controllers or network servers.`
+- EventID(s):
+  - 4964
+  - 4672
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -649,13 +1288,33 @@ Subcategory GUID: {0CCE921B-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
+Alternatively you can enable logging via `auditpol` using the following command(s):
+
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE921B-69AE-11D9-BED3-505054503030}, /success:enable
+
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE921B-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-special-logon)
+
 ### Object Access
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4665, 4666, 4667, 4668
+#### Application Generated
 
-Subcategory GUID: {0CCE9222-69AE-11D9-BED3-505054503030}
+- Subcategory GUID: `{0CCE9222-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: TBD
+- EventID(s):
+  - 4665
+  - 4666
+  - 4667
+  - 4668
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-application-generated)
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -668,11 +1327,56 @@ Subcategory GUID: {0CCE9222-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4868, 4869, 4870, 4871, 4872, 4873, 4874, 4875, 4876, 4877, 4878, 4879, 4880, 4881, 4882, 4883, 4884, 4885, 4886, 4887, 4888, 4889, 4890, 4891, 4892, 4893, 4894, 4895, 4896, 4897, 4898
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9221-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9222-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-certification-services)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9222-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-application-generated)
+
+#### Certification Services
+
+- Subcategory GUID: `{0CCE9221-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Low to medium on servers that provide AD CS role services`
+- EventID(s):
+  - 4868
+  - 4869
+  - 4870
+  - 4871
+  - 4872
+  - 4873
+  - 4874
+  - 4875
+  - 4876
+  - 4877
+  - 4878
+  - 4879
+  - 4880
+  - 4881
+  - 4882
+  - 4883
+  - 4884
+  - 4885
+  - 4886
+  - 4887
+  - 4888
+  - 4889
+  - 4890
+  - 4891
+  - 4892
+  - 4893
+  - 4894
+  - 4895
+  - 4896
+  - 4897
+  - 4898
 
 ```yml
 - Computer Configuration
@@ -685,11 +1389,31 @@ Subcategory GUID: {0CCE9221-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 5145
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9244-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9221-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-detailed-file-share)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9221-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-certification-services)
+
+#### Detailed File Share
+
+- Subcategory GUID: `{0CCE9244-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume:
+  - `High on file servers.`
+  - `High on domain controllers because of SYSVOL network access required by Group Policy.`
+  - `Low on member servers and workstations.`
+- EventID(s):
+  - 5145
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -702,11 +1426,35 @@ Subcategory GUID: {0CCE9244-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 5140, 5142, 5143, 5144, 5168
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9224-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9244-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-file-share)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9244-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-detailed-file-share)
+
+#### File Share
+
+- Subcategory GUID: `{0CCE9224-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume:
+  - `High on file servers.`
+  - `High on domain controllers because of SYSVOL network access required by Group Policy.`
+  - `Low on member servers and workstations.`
+- EventID(s):
+  - 5140
+  - 5142
+  - 5143
+  - 5144
+  - 5168
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -719,11 +1467,35 @@ Subcategory GUID: {0CCE9224-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4656, 4658, 4660, 4663, 4664, 4670, 4985, 5051
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE921D-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9224-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-file-system)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9224-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-file-share)
+
+#### File System
+
+- Subcategory GUID: `{0CCE921D-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Varies, depending on how file system SACLs are configured`
+- EventID(s):
+  - 4656
+  - 4658
+  - 4660
+  - 4663
+  - 4664
+  - 4670
+  - 4985
+  - 5051
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -736,11 +1508,36 @@ Subcategory GUID: {0CCE921D-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID: 5031, 5150, 5151, 5154, 5155, 5156, 5157, 5158, 5159
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9226-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE921D-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-filtering-platform-connection)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE921D-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-file-system)
+
+#### Filtering Platform Connection
+
+- Subcategory GUID: `{0CCE9226-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `High`
+- EventID(s):
+  - 5031
+  - 5150
+  - 5151
+  - 5154
+  - 5155
+  - 5156
+  - 5157
+  - 5158
+  - 5159
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -753,11 +1550,29 @@ Subcategory GUID: {0CCE9226-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID: 5152, 5153
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9225-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9226-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-filtering-platform-packet-drop)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9226-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-filtering-platform-connection)
+
+#### Filtering Platform Packet Drop
+
+- Subcategory GUID: `{0CCE9225-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `High`
+- EventID(s):
+  - 5152
+  - 5153
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -770,11 +1585,29 @@ Subcategory GUID: {0CCE9225-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID: 4658, 4690
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9223-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9225-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-handle-manipulation)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9225-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-filtering-platform-packet-drop)
+
+#### Handle Manipulation
+
+- Subcategory GUID: `{0CCE9223-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `High`
+- EventID(s):
+  - 4658
+  - 4690
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -787,11 +1620,31 @@ Subcategory GUID: {0CCE9223-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID: 4656, 4658, 4660, 4663
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE921F-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9223-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-kernel-object)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9223-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-handle-manipulation)
+
+#### Kernel Object
+
+- Subcategory GUID: `{0CCE921F-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `High`
+- EventID(s):
+  - 4656
+  - 4658
+  - 4660
+  - 4663
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -804,11 +1657,39 @@ Subcategory GUID: {0CCE921F-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID: 4671, 4691, 4698, 4699, 4700, 4701, 4702, 5148 ,5149, 5888, 5889, 5890
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9227-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE921F-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-object-access-events)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE921F-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-kernel-object)
+
+#### Other Object Access Events
+
+- Subcategory GUID: `{0CCE9227-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Low`
+- EventID(s):
+  - 4671
+  - 4691
+  - 4698
+  - 4699
+  - 4700
+  - 4701
+  - 4702
+  - 5148
+  - 5149
+  - 5888
+  - 5889
+  - 5890
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -821,11 +1702,34 @@ Subcategory GUID: {0CCE9227-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID: 4656, 4657, 4658, 4660, 4663, 4670, 5039
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE921E-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9227-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-registry)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9227-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-object-access-events)
+
+#### Registry
+
+- Subcategory GUID: `{0CCE921E-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Low to Medium, depending on how registry SACLs are configured.`
+- EventID(s):
+  - 4656
+  - 4657
+  - 4658
+  - 4660
+  - 4663
+  - 4670
+  - 5039
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -838,11 +1742,30 @@ Subcategory GUID: {0CCE921E-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID: 4656, 4658, 4663
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9245-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE921E-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-removable-storage)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE921E-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-registry)
+
+#### Removable Storage
+
+- Subcategory GUID: `{0CCE9245-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: TBD
+- EventID(s):
+  - 4656
+  - 4658
+  - 4663
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -855,11 +1778,28 @@ Subcategory GUID: {0CCE9245-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID: 4661
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9220-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9245-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-sam)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9245-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-removable-storage)
+
+#### SAM
+
+- Subcategory GUID: `{0CCE9220-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `High on domain controllers`
+- EventID(s):
+  - 4661
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -872,11 +1812,28 @@ Subcategory GUID: {0CCE9220-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID: 4818
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9246-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9220-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-central-access-policy-staging)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9220-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-sam)
+
+#### Central Access Policy Staging
+
+- Subcategory GUID: `{0CCE9246-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `High`
+- EventID(s):
+  - 4818
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -889,13 +1846,39 @@ Subcategory GUID: {0CCE9246-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
+Alternatively you can enable logging via `auditpol` using the following command(s):
+
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9246-69AE-11D9-BED3-505054503030}, /success:enable
+
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9246-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-central-access-policy-staging)
+
 ### Policy Change
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4715, 4719, 4817, 4902, 4906, 4907, 4908, 4912, 4904, 4905
+#### Audit Policy Change
 
-Subcategory GUID: {0CCE922F-69AE-11D9-BED3-505054503030}
+- Subcategory GUID: `{0CCE922F-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Low`
+- EventID(s):
+  - 4715
+  - 4719
+  - 4817
+  - 4902
+  - 4906
+  - 4907
+  - 4908
+  - 4912
+  - 4904
+  - 4905
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-audit-policy-change)
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -908,11 +1891,39 @@ Subcategory GUID: {0CCE922F-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4670, 4706, 4707, 4716, 4713, 4717, 4718, 4739, 4864, 4865, 4866, 4867
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9230-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE922F-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-authentication-policy-change)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE922F-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-audit-policy-change)
+
+#### Authentication Policy Change
+
+- Subcategory GUID: `{0CCE9230-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Low`
+- EventID(s):
+  - 4670
+  - 4706
+  - 4707
+  - 4716
+  - 4713
+  - 4717
+  - 4718
+  - 4739
+  - 4864
+  - 4865
+  - 4866
+  - 4867
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -925,11 +1936,33 @@ Subcategory GUID: {0CCE9230-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4703, 4704, 4705, 4670, 4911, 4913
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9231-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9230-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-authorization-policy-change)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9230-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-authentication-policy-change)
+
+#### Authorization Policy Change
+
+- Subcategory GUID: `{0CCE9231-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Medium to High`
+- EventID(s):
+  - 4703
+  - 4704
+  - 4705
+  - 4670
+  - 4911
+  - 4913
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -942,11 +1975,67 @@ Subcategory GUID: {0CCE9231-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4709, 4710, 4711, 4712, 5040, 5041, 5042, 5043, 5044, 5045, 5046, 5047, 5048, 5440, 5441, 5442, 5443, 5444, 5446, 5448, 5449, 5450, 5456, 5457, 5458, 5459, 5460, 5461, 5462, 5463, 5464, 5465, 5466, 5467, 5468, 5471, 5472, 5473, 5474, 5477
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9233-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9231-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-filtering-platform-policy-change)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9231-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-authorization-policy-change)
+
+#### Filtering Platform Policy Change
+
+- Subcategory GUID: `{0CCE9233-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: TBD
+- EventID(s):
+  - 4709
+  - 4710
+  - 4711
+  - 4712
+  - 5040
+  - 5041
+  - 5042
+  - 5043
+  - 5044
+  - 5045
+  - 5046
+  - 5047
+  - 5048
+  - 5440
+  - 5441
+  - 5442
+  - 5443
+  - 5444
+  - 5446
+  - 5448
+  - 5449
+  - 5450
+  - 5456
+  - 5457
+  - 5458
+  - 5459
+  - 5460
+  - 5461
+  - 5462
+  - 5463
+  - 5464
+  - 5465
+  - 5466
+  - 5467
+  - 5468
+  - 5471
+  - 5472
+  - 5473
+  - 5474
+  - 5477
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -959,11 +2048,41 @@ Subcategory GUID: {0CCE9233-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4944, 4945, 4946, 4947, 4948, 4949, 4950, 4951, 4952, 4953, 4954, 4956, 4957, 4958
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9232-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9233-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-mpssvc-rule-level-policy-change)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9233-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-filtering-platform-policy-change)
+
+#### MPSSVC Rule-Level Policy Change
+
+- Subcategory GUID: `{0CCE9232-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Medium`
+- EventID(s):
+  - 4944
+  - 4945
+  - 4946
+  - 4947
+  - 4948
+  - 4949
+  - 4950
+  - 4951
+  - 4952
+  - 4953
+  - 4954
+  - 4956
+  - 4957
+  - 4958
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -976,11 +2095,43 @@ Subcategory GUID: {0CCE9232-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4714, 4819, 4826, 4909, 4910, 5063, 5064, 5065, 5066, 5067, 5068, 5069, 5070, 5447, 6144, 6145
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9234-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9232-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-policy-change-events)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9232-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-mpssvc-rule-level-policy-change)
+
+#### Other Policy Change Events
+
+- Subcategory GUID: `{0CCE9234-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Low`
+- EventID(s):
+  - 4714
+  - 4819
+  - 4826
+  - 4909
+  - 4910
+  - 5063
+  - 5064
+  - 5065
+  - 5066
+  - 5067
+  - 5068
+  - 5069
+  - 5070
+  - 5447
+  - 6144
+  - 6145
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -993,13 +2144,32 @@ Subcategory GUID: {0CCE9234-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
+Alternatively you can enable logging via `auditpol` using the following command(s):
+
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9234-69AE-11D9-BED3-505054503030}, /success:enable
+
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9234-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-policy-change-events)
+
 ### Privilege Use
 
-#### Provider: Microsoft Windows Security Auditing / EventID: 4673, 4674, 4985
+#### Non Sensitive Privilege Use
 
-Subcategory GUID: {0CCE9229-69AE-11D9-BED3-505054503030}
+- Subcategory GUID: `{0CCE9229-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Very High`
+- EventID(s):
+  - 4673
+  - 4674
+  - 4985
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-non-sensitive-privilege-use)
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -1012,11 +2182,28 @@ Subcategory GUID: {0CCE9229-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID: 4985
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE922A-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9229-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-privilege-use-events)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9229-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-non-sensitive-privilege-use)
+
+#### Other Privilege Use Events
+
+- Subcategory GUID: `{0CCE922A-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: TBD
+- EventID(s):
+  - 4985
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -1030,11 +2217,28 @@ Subcategory GUID: {0CCE922A-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID: 4673, 4674, 4985
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9228-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE922A-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-sensitive-privilege-use)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE922A-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-privilege-use-events)
+
+#### Sensitive Privilege Use
+
+- Subcategory GUID: `{0CCE9228-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `High`
+- EventID(s):
+  - 4673, 4674, 4985
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -1048,13 +2252,40 @@ Subcategory GUID: {0CCE9228-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
+Alternatively you can enable logging via `auditpol` using the following command(s):
+
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9228-69AE-11D9-BED3-505054503030}, /success:enable
+
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9228-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-sensitive-privilege-use)
+
 ### System
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4960, 4961, 4962, 4963, 4965, 5478, 5479, 5480, 5483, 5484, 5485
+#### IPsec Driver
 
-Subcategory GUID: {0CCE9213-69AE-11D9-BED3-505054503030}
+- Subcategory GUID: `{0CCE9213-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Medium`
+- EventID(s):
+  - 4960
+  - 4961
+  - 4962
+  - 4963
+  - 4965
+  - 5478
+  - 5479
+  - 5480
+  - 5483
+  - 5484
+  - 5485
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-ipsec-driver)
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -1067,11 +2298,50 @@ Subcategory GUID: {0CCE9213-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 5024, 5025, 5027, 5028, 5029, 5030, 5032, 5033, 5034, 5035, 5037, 5058, 5059, 6400, 6401, 6402, 6403, 6404, 6405, 6406, 6407, 6408, 6409
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9214-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9213-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-system-events)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9213-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-ipsec-driver)
+
+#### Other System Events
+
+- Subcategory GUID: `{0CCE9214-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Low`
+- EventID(s):
+  - 5024
+  - 5025
+  - 5027
+  - 5028
+  - 5029
+  - 5030
+  - 5032
+  - 5033
+  - 5034
+  - 5035
+  - 5037
+  - 5058
+  - 5059
+  - 6400
+  - 6401
+  - 6402
+  - 6403
+  - 6404
+  - 6405
+  - 6406
+  - 6407
+  - 6408
+  - 6409
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -1084,11 +2354,30 @@ Subcategory GUID: {0CCE9214-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4608, 4616, 4621
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9210-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9214-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-security-state-change)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9214-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-system-events)
+
+#### Security State Change
+
+- Subcategory GUID: `{0CCE9210-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Low`
+- EventID(s):
+  - 4608
+  - 4616
+  - 4621
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -1101,11 +2390,32 @@ Subcategory GUID: {0CCE9210-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4610, 4611, 4614, 4622, 4697
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9211-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9210-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-security-system-extension)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9210-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-security-state-change)
+
+#### Security System Extension
+
+- Subcategory GUID: `{0CCE9211-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Low`
+- EventID(s):
+  - 4610
+  - 4611
+  - 4614
+  - 4622
+  - 4697
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -1118,11 +2428,39 @@ Subcategory GUID: {0CCE9211-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
-#### Provider: Microsoft Windows Security Auditing / EventID(s): 4612, 4615, 4618, 4816, 5038, 5056, 5062, 5057, 5060, 5061, 6281, 6410
+Alternatively you can enable logging via `auditpol` using the following command(s):
 
-Subcategory GUID: {0CCE9212-69AE-11D9-BED3-505054503030}
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9211-69AE-11D9-BED3-505054503030}, /success:enable
 
-[Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-system-integrity)
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9211-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-security-system-extension)
+
+#### System Integrity
+
+- Subcategory GUID: `{0CCE9212-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `Low`
+- EventID(s):
+  - 4612
+  - 4615
+  - 4618
+  - 4816
+  - 5038
+  - 5056
+  - 5062
+  - 5057
+  - 5060
+  - 5061
+  - 6281
+  - 6410
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -1135,6 +2473,18 @@ Subcategory GUID: {0CCE9212-69AE-11D9-BED3-505054503030}
                             - Success and Failure
 ```
 
+Alternatively you can enable logging via `auditpol` using the following command(s):
+
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE9212-69AE-11D9-BED3-505054503030}, /success:enable
+
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE9212-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-system-integrity)
+
 ### Global Object Access Auditing
 
 TBD
@@ -1142,7 +2492,7 @@ TBD
 ## Full Event(s) List
 
 <details>
-    <summary>Expand</summary>
+    <summary>Expand Full List</summary>
 
 - [1100: The event logging service has shut down.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-1100)
 - [1102: The audit log was cleared.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-1102)
@@ -1622,7 +2972,7 @@ TBD
 ### Provider: Microsoft Windows Security Auditing / EventID: 4663
 
 <details>
-    <summary>Expand</summary>
+    <summary>Expand Details</summary>
 
 ```yml
 - SubjectUserSid
