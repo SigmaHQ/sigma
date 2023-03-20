@@ -1,0 +1,25 @@
+title: In-Memory Download And Compile Of Payloads
+id: 13db8d2e-7723-4c2c-93c1-a4d36994f7ef
+status: experimental
+description: Detects suspicious in-memory downloading and compiling of payload applets using osacompile and curl utilities (Ex:XCSSET)
+references:
+    - https://redcanary.com/blog/mac-application-bundles/
+author: Sohan G (D4rkCiph3r), Red Canary (idea)
+date: 2023/03/20
+tags:
+    - attack.t1059.007
+    - attack.t1105
+    - attack.execution
+    - attack.command_and_control
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection:
+        CommandLine|contains|all:
+            - 'osacompile'
+            - 'curl'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
