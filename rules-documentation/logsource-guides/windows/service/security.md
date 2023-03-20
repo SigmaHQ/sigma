@@ -5,7 +5,7 @@ ID: dfd8c0f4-e6ad-4e07-b91b-f2fca0ddef64
 ## Content
 
 <details>
-    <summary>Expand</summary>
+    <summary>Details</summary>
 
 - [service: security](#service-security)
   - [Content](#content)

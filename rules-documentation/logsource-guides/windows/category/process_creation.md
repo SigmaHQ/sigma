@@ -12,13 +12,14 @@ ID: 2ff912e8-159f-4789-a2ef-761292b32a23
   - [Description](#description)
   - [Event Source(s)](#event-sources)
   - [Logging Setup](#logging-setup)
-    - [Provider: Microsoft Windows Security Auditing / EventID: 4688](#provider-microsoft-windows-security-auditing--eventid-4688)
-      - [Process Creation Logging](#process-creation-logging)
-      - [Command-Line Logging](#command-line-logging)
-    - [Provider: Microsoft-Windows-Sysmon / EventID: 1](#provider-microsoft-windows-sysmon--eventid-1)
+    - [Microsoft Windows Security Auditing](#microsoft-windows-security-auditing)
+      - [Process Creation](#process-creation)
+      - [Include Command-Line In Process Creation Events](#include-command-line-in-process-creation-events)
+    - [Microsoft-Windows-Sysmon](#microsoft-windows-sysmon)
+      - [Process Creation](#process-creation-1)
   - [Event Fields](#event-fields)
-    - [Provider: Microsoft Windows Security Auditing / EventID: 4688](#provider-microsoft-windows-security-auditing--eventid-4688-1)
-    - [Provider: Microsoft-Windows-Sysmon / EventID: 1](#provider-microsoft-windows-sysmon--eventid-1-1)
+    - [Provider: Microsoft Windows Security Auditing / EventID: 4688](#provider-microsoft-windows-security-auditing--eventid-4688)
+    - [Provider: Microsoft-Windows-Sysmon / EventID: 1](#provider-microsoft-windows-sysmon--eventid-1)
 
 </details>
 
@@ -48,11 +49,18 @@ EventID: 1
 
 This section described how to setup logging in your environment
 
-### Provider: Microsoft Windows Security Auditing / EventID: 4688
+### Microsoft Windows Security Auditing
 
-You can enable the following settings locally by using `gpedit.msc` or via `GPO` if you're in a domain environment
+#### Process Creation
 
-#### Process Creation Logging
+- Subcategory GUID: `{0CCE922B-69AE-11D9-BED3-505054503030}`
+- Provider: `Microsoft Windows Security Auditing`
+- Channel: `Security`
+- Event Volume: `High`
+- EventID(s):
+  - `4688`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -62,9 +70,24 @@ You can enable the following settings locally by using `gpedit.msc` or via `GPO`
                 - System Audit Policies - Local Group Policy Object
                     - Detailed Tracking
                         - Audit Process Creation
+                            - Success and Failure
 ```
 
-#### Command-Line Logging
+Alternatively you can enable logging via `auditpol` using the following command(s):
+
+```powershell
+# Enable Success audit Only
+auditpol /set /subcategory:{0CCE922B-69AE-11D9-BED3-505054503030}, /success:enable
+
+# Enable both Success and Failure auditing
+auditpol /set /subcategory:{0CCE922B-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+```
+
+If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-process-creation)
+
+#### Include Command-Line In Process Creation Events
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -74,12 +97,22 @@ You can enable the following settings locally by using `gpedit.msc` or via `GPO`
                 - Include Command Line In Process Creation Events
 ```
 
-### Provider: Microsoft-Windows-Sysmon / EventID: 1
+### Microsoft-Windows-Sysmon
+
+#### Process Creation
+
+- Provider: `Microsoft-Windows-Sysmon`
+- Channel: `Microsoft-Windows-Sysmon/Operational`
+- Event Volume: `High`
+- EventID(s):
+  - `1`
+
+To configure Sysmon process creation events you can follow the instructions below
 
 - Download [Sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
 - Install Sysmon using an appropriate configuration. The configuration must include a `<ProcessCreate>` element. We recommend the following configuration [sysmonconfig-export.xml](https://github.com/Neo23x0/sysmon-config/blob/master/sysmonconfig-export.xml).
 
-```cmd
+```powershell
 sysmon -i /path/to/config
 ```
 

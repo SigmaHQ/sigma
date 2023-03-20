@@ -14,11 +14,11 @@ ID: bade5735-5ab0-4aa7-a642-a11be0e40872
     - [PowerShell 5](#powershell-5)
     - [PowerShell 7](#powershell-7)
   - [Logging Setup](#logging-setup)
+    - [Provider: Microsoft-Windows-PowerShell](#provider-microsoft-windows-powershell)
+    - [Provider: PowerShellCore](#provider-powershellcore)
+  - [Event Fields](#event-fields)
     - [Provider: Microsoft-Windows-PowerShell / EventID: 4103 (PowerShell 5)](#provider-microsoft-windows-powershell--eventid-4103-powershell-5)
     - [Provider: PowerShellCore / EventID: 4103 (PowerShell 7)](#provider-powershellcore--eventid-4103-powershell-7)
-  - [Event Fields](#event-fields)
-    - [Provider: Microsoft-Windows-PowerShell / EventID: 4103 (PowerShell 5)](#provider-microsoft-windows-powershell--eventid-4103-powershell-5-1)
-    - [Provider: PowerShellCore / EventID: 4103 (PowerShell 7)](#provider-powershellcore--eventid-4103-powershell-7-1)
 
 </details>
 
@@ -48,9 +48,11 @@ EventID: 4104
 
 ## Logging Setup
 
-You can enable the following settings locally by using `gpedit.msc` or via `GPO` if you're in a domain environment
+### Provider: Microsoft-Windows-PowerShell
 
-### Provider: Microsoft-Windows-PowerShell / EventID: 4103 (PowerShell 5)
+- Event Volume: TBD
+- EventID(s):
+  - `4104`
 
 ```yml
 - Computer Configuration
@@ -60,7 +62,13 @@ You can enable the following settings locally by using `gpedit.msc` or via `GPO`
                 - Turn On PowerShell Script Block Logging
 ```
 
-### Provider: PowerShellCore / EventID: 4103 (PowerShell 7)
+### Provider: PowerShellCore
+
+- Event Volume: TBD
+- EventID(s):
+  - `4104`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -68,6 +76,8 @@ You can enable the following settings locally by using `gpedit.msc` or via `GPO`
         - PowerShell Core
             - Turn On PowerShell Script Block Logging
 ```
+
+> Note: By default when you install PowerShell 7 the logging template isn't available. You can install it by using the PowerShell script available in the installation directory `InstallPSCorePolicyDefinitions.ps1`
 
 ## Event Fields
 

@@ -14,17 +14,17 @@ ID: 0ad03ef1-f21b-4a79-8ce8-e6900c54b65b
     - [PowerShell 5](#powershell-5)
     - [PowerShell 7](#powershell-7)
   - [Logging Setup](#logging-setup)
+    - [Microsoft-Windows-PowerShell](#microsoft-windows-powershell)
+    - [Provider: PowerShellCore](#provider-powershellcore)
+  - [Event Fields](#event-fields)
     - [Provider: Microsoft-Windows-PowerShell / EventID: 4103 (PowerShell 5)](#provider-microsoft-windows-powershell--eventid-4103-powershell-5)
     - [Provider: PowerShellCore / EventID: 4103 (PowerShell 7)](#provider-powershellcore--eventid-4103-powershell-7)
-  - [Event Fields](#event-fields)
-    - [Provider: Microsoft-Windows-PowerShell / EventID: 4103 (PowerShell 5)](#provider-microsoft-windows-powershell--eventid-4103-powershell-5-1)
-    - [Provider: PowerShellCore / EventID: 4103 (PowerShell 7)](#provider-powershellcore--eventid-4103-powershell-7-1)
 
 </details>
 
 ## Description
 
-This logsource guide describes how to enable the necessary logging to make use of SIGMA rules that leverage the `ps_module` category
+This logsource guide describes how to enable the necessary logging to make use of SIGMA rules that leverage the `ps_module` category.
 
 ## Event Source(s)
 
@@ -48,9 +48,13 @@ EventID: 4103
 
 ## Logging Setup
 
-You can enable the following settings locally by using `gpedit.msc` or via `GPO` if you're in a domain environment
+### Microsoft-Windows-PowerShell
 
-### Provider: Microsoft-Windows-PowerShell / EventID: 4103 (PowerShell 5)
+- Event Volume: TBD
+- EventID(s):
+  - `4103`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -60,7 +64,13 @@ You can enable the following settings locally by using `gpedit.msc` or via `GPO`
                 - Turn On Module Logging
 ```
 
-### Provider: PowerShellCore / EventID: 4103 (PowerShell 7)
+### Provider: PowerShellCore
+
+- Event Volume: TBD
+- EventID(s):
+  - `4103`
+
+If you're using `gpedit.msc` or similar you can enable logging for this category by following the structure below
 
 ```yml
 - Computer Configuration
@@ -68,6 +78,8 @@ You can enable the following settings locally by using `gpedit.msc` or via `GPO`
         - PowerShell Core
             - Turn On Module Logging
 ```
+
+> Note: By default when you install PowerShell 7 the logging template isn't available. You can install it by using the PowerShell script available in the installation directory `InstallPSCorePolicyDefinitions.ps1`
 
 ## Event Fields
 
