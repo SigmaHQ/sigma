@@ -1,0 +1,26 @@
+title: Suspicious Applet Behaviour
+id: a753a6af-3126-426d-8bd0-26ebbcb92254
+status: experimental
+description: Detects suspicious applet or command-line OSA behaviour probably dropped by malware into legitimate apps /Contents/MacOS/ directory
+references:
+    - https://redcanary.com/blog/mac-application-bundles/
+author: Sohan G (D4rkCiph3r), Red Canary (idea)
+date: 2023/03/20
+tags:
+    - attack.t1059.002
+    - attack.execution
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection:
+        ParentImage|endswith:
+            - '/applet '
+            - '/osascript '
+    cli:
+        CommandLine|contains:
+            - 'osacompile'
+    condition: selection and cli
+falsepositives:
+    - Unknown
+level: medium
