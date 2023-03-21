@@ -1,6 +1,6 @@
 title: HackTool - winPEAS Execution
 id: 98b53e78-ebaf-46f8-be06-421aafd176d9
-status: test
+status: experimental
 description: WinPEAS is a script that search for possible paths to escalate privileges on Windows hosts. The checks are explained on book.hacktricks.xyz
 references:
     - https://github.com/carlospolop/PEASS-ng
@@ -18,16 +18,18 @@ logsource:
     product: windows
 detection:
     selection_img:
-        Image|endswith:
+        - Image|endswith:
             - '\winPEASany.exe'
             - '\winPEASany_ofs.exe'
             - '\winPEASx64.exe'
             - '\winPEASx64_ofs.exe'
             - '\winPEASx86.exe'
             - '\winPEASx86_ofs.exe'
-        OriginalFileName: 'winPEAS.exe'
+        - OriginalFileName:
+            - 'winPEAS.exe'
     selection_cmd:
         CommandLine|contains:
+        # PS F:\Downloads> .\winPEASx64.exe domain...
             - ' domain' # Enumerate domain information
             - ' systeminfo' # Search system information
             - ' userinfo' # Search user information
@@ -39,17 +41,15 @@ detection:
             - ' filesinfo' # Search generic files that can contains credentials
             - ' fileanalysis' # Search specific files that can contains credentials and for regexes inside files
             - ' eventsinfo' # Display interesting events information
-    selection_wsl:
-         Image|startswith: '\WindowsApps\MicrosoftCorporationII.WindowsSubsystemForLinux_'
-         Image|endswith: '\wsl.exe'
-         OriginalFileName: 'wsl.exe'
-         CommandLine|contains|all:
-            - '"bash"'
-            - '-c'
-            - 'curl'
-            - 'https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh' # use linpeas for WSL with default URL from linpeas.sh
-            - ' ---silent | sh'
-    condition: selection_img or (selection_img and selection_cmd) or selection_wsl
+    selection_linpeas_option:
+           # PS F:\Downloads> .\winPEASx64.exe -linpeas
+           OriginalFileName: 'Bash.exe'
+            # contains due to second option:  -linpeas=[url]
+            # PS F:\Downloads> .\winPEASx64.exe -linpeas=https://otherurl.com/
+           ParentCommandLine|contains: ' -linpeas'
+    selection_default_dl:
+         CommandLine|contains: 'https://github.com/carlospolop/PEASS-ng/releases/latest/download/'
+    condition: selection_img or (selection_img and selection_cmd) or selection_linpeas_option or selection_default_dl
 falsepositives:
     - Unknown
 level: high
