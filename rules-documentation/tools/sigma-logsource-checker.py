@@ -5,6 +5,7 @@ from colorama import init
 from colorama import Fore
 import collections
 import xml.etree.ElementTree as ET
+from collections import defaultdict
 
 SECURITY_EVENT_ID_MAPPING = {
     # Account Logon
@@ -77,9 +78,19 @@ SECURITY_EVENT_ID_MAPPING = {
     "{0CCE9212-69AE-11D9-BED3-505054503030}" : { "EventIDs": [4612, 4615, 4618, 4816, 5038, 5056, 5062, 5057, 5060, 5061, 6281, 6410], "Name": "Audit System Integrity"}
 }
 
-POWERSHELL_EVENT_ID_MAPPING = {
-    '4103': 'Turn On Module Logging',
-    '4104': 'Turn On PowerShell Script Block Logging'
+OTHER_EVENT_ID_MAPPING = {
+    'PowerShell Core': [
+        {'Turn on Module Logging': 'Disabled'},
+        {'Turn on PowerShell Script Block Logging': 'Disabled'},
+        {'Turn on PowerShell Transcription': 'Disabled'}
+        ], 
+    'System/Audit Process Creation': [
+        {'Include command line in process creation events': 'Disabled'}
+        ], 
+    'Windows Components/Windows PowerShell': [
+        {'Turn on Module Logging': 'Disabled'},
+        {'Turn on PowerShell Script Block Logging': 'Disabled'},
+        {'Turn on PowerShell Transcription': 'Disabled'}]
 }
 
 def yield_next_rule_file_path(path_to_rules: str) -> str:
@@ -223,7 +234,8 @@ def parse_gpresult(gpresult):
     """
         Parses GPResult command XML output
     """
-    enabled_log = []
+    enabled_sec_policies = []
+    enabled_other_logs = defaultdict(list)
     
     tree = ET.parse(gpresult)
     root = tree.getroot()
@@ -250,11 +262,26 @@ def parse_gpresult(gpresult):
                         SettingValue = element
                 # If the audit settings is enabled for "Success" or both "Success and Failure". Then it's okay (for V0.1)
                 if SettingValue.text == "1" or SettingValue.text == "3":
-                    enabled_log.append(SubcategoryGuid.text.upper())
-        else:
-            pass
+                    enabled_sec_policies.append(SubcategoryGuid.text.upper())
+        elif "Registry" in ext_type:
+            registrySettings = i[0]
+            for policy in registrySettings:
+                if "}Policy" in policy.tag:
+                    policyName = ""
+                    policyState = ""
+                    policyCategory = ""
+                    for element in policy:
+                        if "Name" in element.tag:
+                            policyName = element
+                        elif "State" in element.tag:
+                            policyState = element
+                        elif "Category" in element.tag:
+                            policyCategory = element
+                    # {"Category": {"Name": "State"}}
+                    tmp = {policyName.text : policyState.text}
+                    enabled_other_logs[policyCategory.text].append(tmp)
     
-    return enabled_log
+    return enabled_sec_policies, enabled_other_logs
     
 
 
@@ -268,9 +295,10 @@ if __name__ == "__main__":
 
     if args.f:
         gpresult = args.f
-        subcategory_id = parse_gpresult(gpresult)
+        subcategory_id, enabled_other_logs = parse_gpresult(gpresult)
     else:
         subcategory_id = []
+        enabled_other_logs = OTHER_EVENT_ID_MAPPING
     
     path_to_rules = args.d
 
@@ -279,7 +307,7 @@ if __name__ == "__main__":
     faulty_rules = test_invalid_logsource_attributes(path_to_rules)
     logsource_dict_list = get_logsource_dict(path_to_rules, faulty_rules)
 
-    print("According to the rules you're using the following audit policies must be configured")
+    print("Checking Audit Policies...")
 
     for logsource in logsource_dict_list:
         if logsource['EventIDs']:
@@ -291,11 +319,28 @@ if __name__ == "__main__":
                                 print(Fore.RED + "  -> Audit Policy '{}' Must Be Enabled".format(value['Name']))
                                 subcategory_id.append(key)
             elif logsource['service'] == "powershell":
-                # TODO: Add check for 'Module Logging  and 'Script Block Logging'
-                pass
+                pwsh5 = "Windows Components/Windows PowerShell"
+                #pwsh7 = "PowerShell Core" # TODO: Add PWSH7 Checks
+                for key, value in enabled_other_logs.items():
+                    for element in value:
+                        for key_, value_ in element.items():
+                            if key_ == pwsh5:
+                                if value_ != "Enabled":
+                                    print(Fore.RED + "  -> PowerShell Policy '{}' Must Be Enabled".format(key_))
         else:
-            if "category" in logsource:
-                if logsource['category'] == 'process_creation':
+            if "service" in logsource:
+                if logsource['service'].lower() == "powershell":
+                    pwsh5 = "Windows Components/Windows PowerShell"
+                    #pwsh7 = "PowerShell Core" # TODO: Add PWSH7 Checks
+                    
+                    for key, value in enabled_other_logs.items():
+                        if key == pwsh5:
+                            for element in value:
+                                for key_, value_ in element.items():
+                                    if value_ != "Enabled":
+                                        print(Fore.RED + "  -> PowerShell Policy '{}' Must Be Enabled".format(key_))
+            elif "category" in logsource:
+                if logsource['category'].lower() == 'process_creation':
                     print("  -> Enable Process Creation")
 
     
