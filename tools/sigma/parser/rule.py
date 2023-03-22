@@ -16,7 +16,7 @@
 
 import re
 from .exceptions import SigmaParseError
-from .condition import SigmaConditionTokenizer, SigmaConditionParser, ConditionAND, ConditionOR, ConditionNULLValue, SigmaSearchValueAsIs
+from .condition import NodeSubexpression, SigmaConditionTokenizer, SigmaConditionParser, ConditionAND, ConditionOR, ConditionNULLValue, SigmaSearchValueAsIs
 from .modifiers import apply_modifiers
 
 class SigmaParser:
@@ -91,6 +91,10 @@ class SigmaParser:
                     fieldname = key
                 mapping = self.config.get_fieldmapping(fieldname)
                 if isinstance(value, (ConditionAND, ConditionOR)):    # value is condition node (by transformation modifier)
+                    value.items = [ mapping.resolve(key, item, self) for item in value.items ]
+                    cond.add(value)
+                elif isinstance(value, NodeSubexpression):
+                    value = value.items
                     value.items = [ mapping.resolve(key, item, self) for item in value.items ]
                     cond.add(value)
                 else:           # plain value or something unexpected (caught by backends)

@@ -617,25 +617,29 @@ class ElasticsearchDSLBackend(DeepFieldMappingMixin, RulenameCommentMixin, Elast
             res = {'bool': {'should': []}}
             for v in value:
                 key_mapped = self.fieldNameMapping(key, v)
-                if self.matchKeyword:   # searches against keyword fields are wildcard searches, phrases otherwise
-                    if self.CaseInSensitiveField:
-                        queryType = 'regexp'
-                        make_ci = self.makeCaseInSensitiveValue(self.reEscape.sub("\\\\\g<1>", str(v)))
-                        value_cleaned = make_ci.get('value')
-                        if not make_ci.get( 'is_regex' ):  # Determine if still should be a regex
-                            queryType = 'wildcard'
-                            value_cleaned = self.escapeSlashes( self.cleanValue( str( v ) ) )
-                    else:
-                        queryType = 'wildcard'
-                        value_cleaned = self.escapeSlashes(self.cleanValue(str(v)))
+                if isinstance(v, NodeSubexpression):
+                    condition = v.items
+                    res['bool']['should'].append(self.generateNode((key_mapped, condition.items)))
                 else:
-                    if self.containsWildcard(str(v)):
-                        queryType = 'wildcard'
-                        value_cleaned = self.escapeSlashes(self.cleanValue(str(v)))
+                    if self.matchKeyword:   # searches against keyword fields are wildcard searches, phrases otherwise
+                        if self.CaseInSensitiveField:
+                            queryType = 'regexp'
+                            make_ci = self.makeCaseInSensitiveValue(self.reEscape.sub("\\\\\g<1>", str(v)))
+                            value_cleaned = make_ci.get('value')
+                            if not make_ci.get( 'is_regex' ):  # Determine if still should be a regex
+                                queryType = 'wildcard'
+                                value_cleaned = self.escapeSlashes( self.cleanValue( str( v ) ) )
+                        else:
+                            queryType = 'wildcard'
+                            value_cleaned = self.escapeSlashes(self.cleanValue(str(v)))
                     else:
-                        queryType = 'match_phrase'
-                        value_cleaned = self.cleanValue(str(v))
-                res['bool']['should'].append({queryType: {key_mapped: value_cleaned}})
+                        if self.containsWildcard(str(v)):
+                            queryType = 'wildcard'
+                            value_cleaned = self.escapeSlashes(self.cleanValue(str(v)))
+                        else:
+                            queryType = 'match_phrase'
+                            value_cleaned = self.cleanValue(str(v))
+                    res['bool']['should'].append({queryType: {key_mapped: value_cleaned}})
             return res
         elif value is None:
             key_mapped = self.fieldNameMapping(key, value)
