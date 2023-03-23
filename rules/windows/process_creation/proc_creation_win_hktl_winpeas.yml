@@ -7,7 +7,7 @@ references:
     - https://book.hacktricks.xyz/windows-hardening/windows-local-privilege-escalation
 author: Georg Lauenstein -- sure[secure]
 date: 2022/09/19
-modified: 2023/03/20
+modified: 2023/03/23
 tags:
     - attack.privilege_escalation
     - attack.t1082
@@ -18,6 +18,7 @@ logsource:
     product: windows
 detection:
     selection_img:
+        - OriginalFileName: 'winPEAS.exe'
         - Image|endswith:
             - '\winPEASany.exe'
             - '\winPEASany_ofs.exe'
@@ -25,30 +26,21 @@ detection:
             - '\winPEASx64_ofs.exe'
             - '\winPEASx86.exe'
             - '\winPEASx86_ofs.exe'
-        - OriginalFileName: 'winPEAS.exe'
-    selection_cmd:
+    selection_cli_option:
         CommandLine|contains:
-        # PS F:\Downloads> .\winPEASx64.exe domain...
-            - ' domain' # Enumerate domain information
-            - ' systeminfo' # Search system information
-            - ' userinfo' # Search user information
+            - ' applicationsinfo' # Search installed applications information
+            - ' browserinfo' # Search browser information
+            - ' eventsinfo' # Display interesting events information
+            - ' fileanalysis' # Search specific files that can contains credentials and for regexes inside files
+            - ' filesinfo' # Search generic files that can contains credentials
             - ' processinfo' # Search processes information
             - ' servicesinfo' # Search services information
-            - ' applicationsinfo' # Search installed applications information
             - ' windowscreds' # Search windows credentials
-            - ' browserinfo' # Search browser information
-            - ' filesinfo' # Search generic files that can contains credentials
-            - ' fileanalysis' # Search specific files that can contains credentials and for regexes inside files
-            - ' eventsinfo' # Display interesting events information
-    selection_linpeas_option:
-           # PS F:\Downloads> .\winPEASx64.exe -linpeas
-           OriginalFileName: 'Bash.exe'
-            # contains due to second option:  -linpeas=[url]
-            # PS F:\Downloads> .\winPEASx64.exe -linpeas=https://otherurl.com/
-           ParentCommandLine|contains: ' -linpeas'
-    selection_default_dl:
-         CommandLine|contains: 'https://github.com/carlospolop/PEASS-ng/releases/latest/download/'
-    condition: selection_img or (selection_img and selection_cmd) or selection_linpeas_option or selection_default_dl
+    selection_cli_dl:
+        CommandLine|contains: 'https://github.com/carlospolop/PEASS-ng/releases/latest/download/'
+    selection_cli_parent:
+           ParentCommandLine|endswith: ' -linpeas'
+    condition: 1 of selection_*
 falsepositives:
-    - Unknown
+    - Unlikely
 level: high
