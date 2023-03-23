@@ -7,7 +7,7 @@ references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
 author: Roberto Rodriguez, Teymur Kheirkhabarov, Dimitrios Slamaris, Mark Russinovich, Aleksey Potapov, oscd.community (update)
 date: 2019/11/01
-modified: 2023/03/21
+modified: 2023/03/23
 tags:
     - attack.credential_access
     - car.2019-04-004
@@ -76,20 +76,20 @@ detection:
             - 'C:\Windows\CCM\CcmExec.exe'
     filter_sysmon:
         ProcessName: 'C:\Windows\Sysmon64.exe'
-        AccessList: '%%4484'
+        AccessList|contains: '%%4484'
     filter_aurora:
         ProcessName|startswith: 'C:\Windows\Temp\asgard2-agent-sc\aurora\'
         ProcessName|endswith: '\aurora-agent-64.exe'
-        AccessList: '%%4484'
+        AccessList|contains: '%%4484'
     filter_scenarioengine:
         # Example: C:\a70de9569c3a5aa22184ef52a890177b\x64\SCENARIOENGINE.EXE
         ProcessName|endswith: '\x64\SCENARIOENGINE.EXE'
-        AccessList: '%%4484'
+        AccessList|contains: '%%4484'
     filter_avira:
         ProcessName|startswith: 'C:\Users\'
         ProcessName|contains: '\AppData\Local\Temp\is-'
         ProcessName|endswith: '\avira_system_speedup.tmp'
-        AccessList: '%%4484'
+        AccessList|contains: '%%4484'
     condition: 1 of selection_* and not 1 of filter_*
 falsepositives:
     - Legitimate software accessing LSASS process for legitimate reason; update the whitelist with it
