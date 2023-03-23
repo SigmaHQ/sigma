@@ -6,12 +6,12 @@ related:
     - id: d21374ff-f574-44a7-9998-4a8c8bf33d7d
       type: similar
 status: stable
-description: Detects Powershell as a child of the WmiPrvSE process. Which could be a signe of remote access via WMI
+description: Detects Powershell as a child of the WmiPrvSE process. Which could be a sign of lateral movement via WMI
 references:
     - https://any.run/report/68bc255f9b0db6a0d30a8f2dadfbee3256acfe12497bf93943bc1eab0735e45e/a2385d6f-34f7-403c-90d3-b1f9d2a90a5e
 author: Markus Neis @Karneades
 date: 2019/04/03
-modified: 2023/01/19
+modified: 2023/03/23
 tags:
     - attack.execution
     - attack.t1047
@@ -21,7 +21,7 @@ logsource:
     product: windows
 detection:
     selection_parent:
-        ParentImage|endswith: '\wmiprvse.exe'
+        ParentImage|endswith: '\WmiPrvSE.exe'
     selection_img:
         - Image|endswith:
             - '\powershell.exe'
@@ -31,8 +31,12 @@ detection:
             - 'pwsh.dll'
     filter_null_1:
         CommandLine: 'null'
-    filter_null_2:  # some backends need the null value in a separate expression
+    filter_null_2:  # Some backends need the null value in a separate expression
         CommandLine: null
+    filter_werfault:
+        Image|endswith: '\WerFault.exe'
+    filter_wmiprvse:
+        Image|endswith: '\WmiPrvSE.exe' # In some legitimate case WmiPrvSE was seen spawning itself
     condition: all of selection* and not 1 of filter_*
 falsepositives:
     - AppvClient
