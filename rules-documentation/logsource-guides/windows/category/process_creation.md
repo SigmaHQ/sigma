@@ -25,7 +25,7 @@ ID: 2ff912e8-159f-4789-a2ef-761292b32a23
 
 ## Description
 
-This logsource guide describes how to enable the necessary logging to make use of SIGMA rules that leverage the `process_creation` category
+This logsource guide describes how to enable the necessary logging to make use of SIGMA rules that leverage the `process_creation` category.
 
 ## Event Source(s)
 
@@ -47,7 +47,7 @@ EventID: 1
 
 ## Logging Setup
 
-This section described how to setup logging in your environment
+This section describes how to setup logging in your environment
 
 ### Microsoft Windows Security Auditing
 
@@ -80,7 +80,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE922B-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE922B-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE922B-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-process-creation)
@@ -118,7 +118,9 @@ sysmon -i /path/to/config
 
 ## Event Fields
 
-Note: For rules using this category in SIGMA. Know that there is a mapping between `Sysmon EID 1` fields and `Microsoft Windows Security Auditing EID: 4688`. While you can use the fields of `EID 4688` it's best to use the Sysmon ones.
+> **Note**
+>
+> For rules using this category in SIGMA. Know that there is a mapping between `Sysmon EID 1` fields and `Microsoft Windows Security Auditing EID: 4688`. While you can use the fields of `EID 4688` it's best to use the Sysmon ones.
 
 ### Provider: Microsoft Windows Security Auditing / EventID: 4688
 

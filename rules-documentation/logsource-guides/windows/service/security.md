@@ -100,7 +100,7 @@ ID: dfd8c0f4-e6ad-4e07-b91b-f2fca0ddef64
 
 ## Description
 
-This logsource guide describes how to enable the necessary logging to make use of SIGMA rules that leverage the `security` service
+This logsource guide describes how to enable the necessary logging to make use of SIGMA rules that leverage the `security` service.
 
 ## Event Source(s)
 
@@ -147,7 +147,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE923F-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE923F-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE923F-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-credential-validation)
@@ -184,7 +184,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9242-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9242-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9242-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-kerberos-authentication-service)
@@ -221,7 +221,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9240-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9240-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9240-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-kerberos-service-ticket-operations)
@@ -256,7 +256,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9241-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9241-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9241-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-account-logon-events)
@@ -302,7 +302,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9239-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9239-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9239-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-application-group-management)
@@ -339,7 +339,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9236-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9236-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9236-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-computer-account-management)
@@ -378,7 +378,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9238-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9238-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9238-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-distribution-group-management)
@@ -414,7 +414,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE923A-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE923A-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE923A-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-account-management-events)
@@ -465,7 +465,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9237-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9237-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9237-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-security-group-management)
@@ -516,7 +516,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9235-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9235-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9235-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-user-account-management)
@@ -556,7 +556,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE922D-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE922D-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE922D-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-dpapi-activity)
@@ -597,7 +597,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9248-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9248-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9248-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-pnp-activity)
@@ -633,7 +633,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE922B-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE922B-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE922B-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-process-creation)
@@ -668,7 +668,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE922C-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE922C-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE922C-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-process-termination)
@@ -703,7 +703,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE922E-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE922E-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE922E-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-rpc-events)
@@ -738,7 +738,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE924A-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE924A-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE924A-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-token-right-adjusted)
@@ -782,7 +782,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE923E-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE923E-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE923E-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-detailed-directory-service-replication)
@@ -818,7 +818,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE923B-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE923B-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE923B-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-directory-service-access)
@@ -857,7 +857,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE923C-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE923C-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE923C-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-directory-service-changes)
@@ -893,7 +893,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE923D-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE923D-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE923D-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-directory-service-replication)
@@ -930,7 +930,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9217-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9217-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9217-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-account-lockout)
@@ -967,7 +967,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9247-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9247-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9247-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-user-device-claims)
@@ -1004,7 +1004,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE923F-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE923F-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE923F-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-group-membership)
@@ -1045,7 +1045,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE921A-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE921A-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE921A-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-ipsec-extended-mode)
@@ -1088,7 +1088,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9218-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9218-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9218-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-ipsec-main-mode)
@@ -1125,7 +1125,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9219-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9219-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9219-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-ipsec-quick-mode)
@@ -1161,7 +1161,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9216-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9216-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9216-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-logoff)
@@ -1201,7 +1201,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9215-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9215-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9215-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-logon)
@@ -1244,7 +1244,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9243-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9243-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9243-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-network-policy-server)
@@ -1288,7 +1288,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE921C-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE921C-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE921C-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-logonlogoff-events)
@@ -1326,7 +1326,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE921B-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE921B-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE921B-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-special-logon)
@@ -1366,7 +1366,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9222-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9222-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9222-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-application-generated)
@@ -1429,7 +1429,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9221-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9221-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9221-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-certification-services)
@@ -1467,7 +1467,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9244-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9244-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9244-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-detailed-file-share)
@@ -1509,7 +1509,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9224-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9224-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9224-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-file-share)
@@ -1551,7 +1551,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE921D-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE921D-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE921D-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-file-system)
@@ -1594,7 +1594,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9226-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9226-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9226-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-filtering-platform-connection)
@@ -1630,7 +1630,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9225-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9225-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9225-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-filtering-platform-packet-drop)
@@ -1666,7 +1666,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9223-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9223-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9223-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-handle-manipulation)
@@ -1704,7 +1704,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE921F-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE921F-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE921F-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-kernel-object)
@@ -1714,7 +1714,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Subcategory GUID: `{0CCE9227-69AE-11D9-BED3-505054503030}`
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
-- Event Volume: `Low`
+- Event Volume: `Medium to High`
 - API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4671
@@ -1750,7 +1750,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9227-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9227-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9227-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-object-access-events)
@@ -1791,7 +1791,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE921E-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE921E-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE921E-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-registry)
@@ -1828,7 +1828,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9245-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9245-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9245-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-removable-storage)
@@ -1863,7 +1863,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9220-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9220-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9220-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-sam)
@@ -1898,7 +1898,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9246-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9246-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9246-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-central-access-policy-staging)
@@ -1944,7 +1944,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE922F-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE922F-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE922F-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-audit-policy-change)
@@ -1990,7 +1990,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9230-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9230-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9230-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-authentication-policy-change)
@@ -2030,7 +2030,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9231-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9231-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9231-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-authorization-policy-change)
@@ -2104,7 +2104,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9233-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9233-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9233-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-filtering-platform-policy-change)
@@ -2152,7 +2152,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9232-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9232-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9232-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-mpssvc-rule-level-policy-change)
@@ -2162,7 +2162,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Subcategory GUID: `{0CCE9234-69AE-11D9-BED3-505054503030}`
 - Provider: `Microsoft Windows Security Auditing`
 - Channel: `Security`
-- Event Volume: `Low`
+- Event Volume: `Medium to High`
 - API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
   - 4714
@@ -2202,7 +2202,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9234-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9234-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9234-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-policy-change-events)
@@ -2241,7 +2241,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9229-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9229-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9229-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-non-sensitive-privilege-use)
@@ -2277,7 +2277,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE922A-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE922A-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE922A-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-privilege-use-events)
@@ -2313,7 +2313,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9228-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9228-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9228-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-sensitive-privilege-use)
@@ -2360,7 +2360,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9213-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9213-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9213-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-ipsec-driver)
@@ -2417,7 +2417,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9214-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9214-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9214-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-other-system-events)
@@ -2454,7 +2454,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9210-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9210-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9210-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-security-state-change)
@@ -2493,7 +2493,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9211-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9211-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9211-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-security-system-extension)
@@ -2539,7 +2539,7 @@ Alternatively you can enable logging via `auditpol` using the following command(
 auditpol /set /subcategory:{0CCE9212-69AE-11D9-BED3-505054503030}, /success:enable
 
 # Enable both Success and Failure auditing
-auditpol /set /subcategory:{0CCE9212-69AE-11D9-BED3-505054503030}, /success:enable /failure:disable
+auditpol /set /subcategory:{0CCE9212-69AE-11D9-BED3-505054503030}, /success:enable /failure:enable
 ```
 
 If you want to learn more about this sub-category. You can do so via MSDN - [Learn More](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-system-integrity)

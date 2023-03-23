@@ -24,7 +24,7 @@ ID: bade5735-5ab0-4aa7-a642-a11be0e40872
 
 ## Description
 
-This logsource guide describes how to enable the necessary logging to make use of SIGMA rules that leverage the `ps_script` category
+This logsource guide describes how to enable the necessary logging to make use of SIGMA rules that leverage the `ps_script` category.
 
 ## Event Source(s)
 
