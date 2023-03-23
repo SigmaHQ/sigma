@@ -77,7 +77,9 @@ If you're using `gpedit.msc` or similar you can enable logging for this category
             - Turn On PowerShell Script Block Logging
 ```
 
-> Note: By default when you install PowerShell 7 the logging template isn't available. You can install it by using the PowerShell script available in the installation directory `InstallPSCorePolicyDefinitions.ps1`
+> **Note**
+>
+> By default when you install PowerShell 7 the logging template isn't available. You can install it by using the PowerShell script available in the installation directory `InstallPSCorePolicyDefinitions.ps1`
 
 ## Event Fields
 

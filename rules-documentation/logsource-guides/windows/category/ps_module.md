@@ -62,6 +62,7 @@ If you're using `gpedit.msc` or similar you can enable logging for this category
         - Windows Components
             - Windows PowerShell
                 - Turn On Module Logging
+                  - Select List Of Modules According To Your Audit Policy (or use '*' to select all modules)
 ```
 
 ### Provider: PowerShellCore
@@ -77,9 +78,12 @@ If you're using `gpedit.msc` or similar you can enable logging for this category
     - Administrative Templates
         - PowerShell Core
             - Turn On Module Logging
+              - Select List Of Modules According To Your Audit Policy (or use '*' to select all modules)
 ```
 
-> Note: By default when you install PowerShell 7 the logging template isn't available. You can install it by using the PowerShell script available in the installation directory `InstallPSCorePolicyDefinitions.ps1`
+> **Note**
+>
+> By default when you install PowerShell 7 the logging template isn't available. You can install it by using the PowerShell script available in the installation directory `InstallPSCorePolicyDefinitions.ps1`
 
 ## Event Fields
 
