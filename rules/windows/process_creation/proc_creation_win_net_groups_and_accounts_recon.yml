@@ -8,7 +8,7 @@ references:
     - https://research.nccgroup.com/2022/08/19/back-in-black-unlocking-a-lockbit-3-0-ransomware-attack/
 author: Florian Roth (Nextron Systems), omkar72, @svch0st, Nasreddine Bencherchali (Nextron Systems)
 date: 2019/01/16
-modified: 2023/02/01
+modified: 2023/03/02
 tags:
     - attack.discovery
     - attack.t1087.001
@@ -41,12 +41,15 @@ detection:
             - 'Utilisateurs du Bureau à distance' # French for "Remote Desktop Users"
             - 'Usuarios de escritorio remoto' # Spanish for "Remote Desktop Users"
             - ' /do' # short for domain
+    filter_group_add:
+        # This filter is added to avoid the potential case where the point is not recon but addition
+        CommandLine|contains: ' /add'
     # Covers 'accounts' flag
     selection_accounts_root:
         CommandLine|contains: ' accounts '
     selection_accounts_flags:
         CommandLine|contains: ' /do' # short for domain
-    condition: selection_img and (all of selection_group_* or all of selection_accounts_*)
+    condition: selection_img and ((all of selection_group_* and not filter_group_add) or all of selection_accounts_*)
 fields:
     - CommandLine
     - ParentCommandLine

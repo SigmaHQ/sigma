@@ -335,6 +335,7 @@ These tools are not part of the main toolchain and maintained separately by thei
 * [SIΣGMA](https://github.com/3CORESec/SIEGMA) - SIEM consumable generator that utilizes Sigma for query conversion
 * [Aurora Agent](https://www.nextron-systems.com/2021/11/13/aurora-sigma-based-edr-agent-preview/)
 * [Confluent Sigma](https://github.com/confluentinc/cyber/tree/master/confluent-sigma)
+* [SEKOIA.IO](https://www.sekoia.io) - XDR supporting Sigma and Sigma Correlation rules languages
 
 Sigma is available in some Linux distribution repositories:
 

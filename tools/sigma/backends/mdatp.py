@@ -89,6 +89,7 @@ class WindowsDefenderATPBackend(SingleTextQueryBackend):
                 "ParentName": ("InitiatingProcessFileName", self.default_value_mapping),
                 "ParentProcessName": ("InitiatingProcessFileName", self.default_value_mapping),
                 "ParentImage": ("InitiatingProcessFolderPath", self.default_value_mapping),
+                "IntegrityLevel": ("ProcessIntegrityLevel", self.default_value_mapping),
                 "SourceImage": ("InitiatingProcessFolderPath", self.default_value_mapping),
                 "TargetImage": ("FolderPath", self.default_value_mapping),
                 "User": (self.decompose_user, ),

@@ -10,6 +10,7 @@ references:
     - https://www.cybereason.com/blog/threat-analysis-report-lockbit-2.0-all-paths-lead-to-ransom
 author: Nasreddine Bencherchali
 date: 2023/02/13
+modified: 2023/03/14
 tags:
     - attack.defense_evasion
     - attack.t1070
@@ -24,7 +25,10 @@ detection:
         - OriginalFileName: 'fltMC.exe'
     selection_cli:
         CommandLine|contains: 'unload'
-    condition: all of selection_*
+    filter_avira:
+        # ParentImage: C:\Users\ciadmin\AppData\Local\Temp\is-URCLK.tmp\endpoint-protection-installer-x64.tmp
+        CommandLine|endswith: 'unload rtp_filesystem_filter'
+    condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Unknown
 level: high

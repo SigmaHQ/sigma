@@ -1,0 +1,30 @@
+title: Suspicious Add Scheduled Task From User AppData Temp
+id: 43f487f0-755f-4c2a-bce7-d6d2eec2fcf8
+status: deprecated
+description: schtasks.exe create task from user AppData\Local\Temp
+references:
+    - malware analyse https://www.joesandbox.com/analysis/514608/0/html#324415FF7D8324231381BAD48A052F85DF04
+author: frack113
+date: 2021/11/03
+modified: 2023/03/14
+tags:
+    - attack.execution
+    - attack.t1053.005
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    schtasks:
+        Image|endswith: '\schtasks.exe'
+    option:
+        CommandLine|contains|all:
+            - '/Create '
+            - '\AppData\Local\Temp'
+    filter_klite_codec:
+        CommandLine|contains|all:
+            - '/Create /TN "klcp_update" /XML '
+            - '\klcp_update_task.xml'
+    condition: schtasks and option and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: high

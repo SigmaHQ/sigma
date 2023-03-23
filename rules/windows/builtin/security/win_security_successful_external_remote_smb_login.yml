@@ -8,9 +8,9 @@ description: Detects successful logon from public IP address via SMB. This can i
 references:
     - https://www.inversecos.com/2020/04/successful-4624-anonymous-logons-to.html
     - https://twitter.com/Purp1eW0lf/status/1616144561965002752
-author: Micah Babinski, @micahbabinski
+author: Micah Babinski (@micahbabinski), Zach Mathis (@yamatosecurity)
 date: 2023/01/19
-modified: 2023/02/23
+modified: 2023/03/16
 tags:
     - attack.initial_access
     - attack.credential_access
@@ -25,23 +25,18 @@ detection:
         EventID: 4624
         LogonType: 3
     filter_ipv4:
-        SubjectUserName: '-'
         IpAddress|cidr:
-            - 10.0.0.0/8
-            - 172.16.0.0/12
-            - 192.168.0.0/16
-            - 224.0.0.0/4
-            - 127.0.0.0/8
+            - '127.0.0.0/8'
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
     filter_ipv6:
-        SubjectUserName: '-'
-        IpAddress|startswith:
-            - '::1'  # IPv6 loopback variant
-            - '0:0:0:0:0:0:0:1'  # IPv6 loopback variant
+        - IpAddress: '::1' # IPv6 loopback
+        - IpAddress|startswith:
             - 'fe80:'  # link-local address
             - 'fc'  # private address range fc00::/7
             - 'fd'  # private address range fc00::/7
     filter_empty:
-        SubjectUserName: '-'
         IpAddress: '-'
     condition: selection and not 1 of filter_*
 falsepositives:

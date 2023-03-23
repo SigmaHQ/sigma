@@ -10,7 +10,7 @@ references:
     - http://security-research.dyndns.org/pub/slides/FIRST2017/FIRST-2017_Tom-Ueltschi_Sysmon_FINAL_notes.pdf
 author: Florian Roth (Nextron Systems)
 date: 2021/11/27
-modified: 2022/11/01
+modified: 2023/03/14
 tags:
     - attack.credential_access
     - attack.t1003.001
@@ -108,6 +108,10 @@ detection:
         SourceImage|startswith: 'C:\Users\'
         SourceImage|endswith: \AppData\Local\Keybase\keybase.exe
         GrantedAccess: '0x1fffff'
+    filter_avira:
+        SourceImage|contains: '\AppData\Local\Temp\is-'
+        SourceImage|endswith: '.tmp\avira_system_speedup.tmp'
+        GrantedAccess: '0x1410'
     condition: selection and not 1 of filter*
 fields:
     - User

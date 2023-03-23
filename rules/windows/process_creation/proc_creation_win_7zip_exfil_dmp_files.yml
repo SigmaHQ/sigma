@@ -1,0 +1,36 @@
+title: 7Zip Compressing Dump Files
+id: ec570e53-4c76-45a9-804d-dc3f355ff7a7
+related:
+    - id: 1ac14d38-3dfc-4635-92c7-e3fd1c5f5bfc
+      type: derived
+status: experimental
+description: Detects a suspicious 7zip execution that involves a file with a ".dmp"/".dump" extension, which could be a step in a process of dump file exfiltration
+references:
+    - https://thedfirreport.com/2022/09/26/bumblebee-round-two/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2022/09/27
+modified: 2023/03/10
+tags:
+    - attack.collection
+    - attack.t1560.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Description|contains: '7-Zip'
+        - Image|endswith:
+            - '\7z.exe'
+            - '\7zr.exe'
+            - '\7za.exe'
+        - OriginalFileName:
+            - '7z.exe'
+            - '7za.exe'
+    selection_extension:
+        CommandLine|contains:
+            - '.dmp'
+            - '.dump'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high

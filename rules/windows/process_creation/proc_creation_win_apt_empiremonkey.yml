@@ -1,12 +1,13 @@
-title: Empire Monkey
+title: Potential EmpireMonkey Activity
 id: 10152a7b-b566-438f-a33c-390b607d1c8d
-status: test
-description: Detects EmpireMonkey APT reported Activity
+status: experimental
+description: Detects potential EmpireMonkey APT activity
 references:
-    - https://app.any.run/tasks/a4107649-8cb0-41af-ad75-113152d4d57b
-author: Markus Neis
+    - https://securelist.com/fin7-5-the-infamous-cybercrime-rig-fin7-continues-its-activities/90703/
+    - https://malpedia.caad.fkie.fraunhofer.de/actor/anthropoid_spider
+author: Markus Neis, Nasreddine Bencherchali (Nextron Systems)
 date: 2019/04/02
-modified: 2021/11/27
+modified: 2023/03/09
 tags:
     - attack.defense_evasion
     - attack.t1218.010
@@ -14,13 +15,11 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_cutil:
-        CommandLine|endswith: '/i:%APPDATA%\logs.txt scrobj.dll'
-        Image|endswith: '\cutil.exe'
-    selection_regsvr32:
-        CommandLine|endswith: '/i:%APPDATA%\logs.txt scrobj.dll'
-        Description: 'Microsoft(C) Registerserver'
-    condition: 1 of selection*
+    selection:
+        CommandLine|contains|all:
+            - '/e:jscript' # This is a guess since the report doesn't mention the method of execution. This assumes that it is achieved via specifying the execution engine
+            - '\Local\Temp\Errors.bat'
+    condition: selection
 falsepositives:
-    - Very Unlikely
-level: critical
+    - Unlikely
+level: high
