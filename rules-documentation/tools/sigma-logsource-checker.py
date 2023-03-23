@@ -148,16 +148,16 @@ def test_invalid_logsource_attributes(path_to_rules):
     for file in yield_next_rule_file_path(path_to_rules):
         logsource = get_rule_part(file_path=file, part_name="logsource")
         if not logsource:
-            print(Fore.RED + "Rule {} has no 'logsource'.".format(file))
+            print("Rule {} has no 'logsource'.".format(file))
             faulty_rules.append(file)
             continue
         valid = True
         for key in logsource:
             if key.lower() not in valid_logsource:
-                print(Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
+                print("Rule {} has a logsource with an invalid field ({})".format(file, key))
                 valid = False
             elif not isinstance(logsource[key], str):
-                print(Fore.RED + "Rule {} has a logsource with an invalid field type ({})".format(file, key))
+                print("Rule {} has a logsource with an invalid field type ({})".format(file, key))
                 valid = False
         if not valid:
             faulty_rules.append(file)
@@ -288,10 +288,17 @@ def parse_gpresult(gpresult):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='SIGMA Logsource Checker')
-    parser.add_argument('-d', help='Path to input directory (SIGMA rules folder)', metavar='sigmafiles')
+    parser.add_argument('-d', help='Path to input directory (SIGMA rules folder)', metavar='sigma-rules-folder', required=True)
     parser.add_argument('-f', help='XML output of the command "gpresult.exe /x [path]"', metavar='gpresult')
-    parser.add_argument('-v', help='Get audit and logging details for every rule', metavar='verbose')
+    #parser.add_argument('-v', help='Get audit and logging details for every rule', metavar='Verbose')
+    #parser.add_argument('-vv', help='Get audit and logging details for every rule', metavar='Very Verbose')
     args = parser.parse_args()
+
+    if os.path.isdir(args.d):
+        path_to_rules = args.d
+    else:
+        print("The path provided isn't a directory")
+        exit()
 
     if args.f:
         gpresult = args.f
@@ -299,15 +306,13 @@ if __name__ == "__main__":
     else:
         subcategory_id = []
         enabled_other_logs = OTHER_EVENT_ID_MAPPING
-    
-    path_to_rules = args.d
 
     print("Finding Used Log Sources...")
     
     faulty_rules = test_invalid_logsource_attributes(path_to_rules)
     logsource_dict_list = get_logsource_dict(path_to_rules, faulty_rules)
 
-    print("Checking Audit Policies...")
+    print("Checking Audit/Logging Policies...")
 
     for logsource in logsource_dict_list:
         if logsource['EventIDs']:
@@ -316,7 +321,7 @@ if __name__ == "__main__":
                     for key, value in SECURITY_EVENT_ID_MAPPING.items():
                         if value['EventIDs']:
                             if ((event in value['EventIDs']) and (key not in subcategory_id)):
-                                print(Fore.RED + "  -> Audit Policy '{}' Must Be Enabled".format(value['Name']))
+                                print("  -> Audit Policy '{}' Must Be Enabled".format(value['Name']))
                                 subcategory_id.append(key)
             elif logsource['service'] == "powershell":
                 pwsh5 = "Windows Components/Windows PowerShell"
@@ -326,7 +331,7 @@ if __name__ == "__main__":
                         for key_, value_ in element.items():
                             if key_ == pwsh5:
                                 if value_ != "Enabled":
-                                    print(Fore.RED + "  -> PowerShell Policy '{}' Must Be Enabled".format(key_))
+                                    print("  -> PowerShell Policy '{}' Must Be Enabled".format(key_))
         else:
             if "service" in logsource:
                 if logsource['service'].lower() == "powershell":
@@ -338,9 +343,9 @@ if __name__ == "__main__":
                             for element in value:
                                 for key_, value_ in element.items():
                                     if value_ != "Enabled":
-                                        print(Fore.RED + "  -> PowerShell Policy '{}' Must Be Enabled".format(key_))
+                                        print("  -> PowerShell Policy '{}' Must Be Enabled".format(key_))
             elif "category" in logsource:
                 if logsource['category'].lower() == 'process_creation':
-                    print("  -> Enable Process Creation")
+                    pass # TODO: Add checks in future version
 
     
