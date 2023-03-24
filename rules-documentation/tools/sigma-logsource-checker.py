@@ -507,4 +507,4 @@ if __name__ == "__main__":
                             print("-> Rules use events generated from audit policy sub-category '{}'. The audit policy '{}' must be enabled".format(key, value['Name']))
                             subcategory_id.append(key)
         
-    print("\nFor more information on how to setup logging, you can visit: https://github.com/sigma/sigma/tree/rules-doc/rules-documentation/logsource-guides") 
+    print("\nFor more information on how to setup logging, you can visit: https://github.com/sigma/sigma/tree/master/rules-documentation/logsource-guides") 
