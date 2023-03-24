@@ -1,0 +1,40 @@
+title: Launching Windows shell From Microsoft Document
+id: 2525
+status: test
+description: Detects a Microsoft word document that has launched another child process and launched a Windows command Line
+references:
+    - https://github.com/SigmaHQ/sigma/tree/master/rules/windows/process_creation
+authors: Laiali Kazalbach & Mohamed Elsayed 
+date: 11/27/2022
+modified: N/A
+tags:
+    - Initial_Access
+    
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selction0:
+        ParentProcess|endswith:
+            - 'WINWORD.EXE'
+    selection1:
+        Process|contains:
+            - 'rundll32.exe'
+            - 'cmd.exe'
+            - 'powershell.exe'
+            
+    selection2:
+        - ProcessPath|contains: 
+            '%APPDATA%\'
+            '%SysWOW64%\'
+            '%programdata%\'
+            '%temp%\'
+    condition: selection0 and (selection1 or selection2)
+fields:
+  - ComputerName
+  - User
+  - CommandLine
+  - ParentCommandLine
+falsepositives:
+    - Unknown
+level: high
