@@ -364,13 +364,13 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
             elif id.lower() in dict_id.keys():
                 print(
-                    Fore.YELLOW + "Rule {} has the same 'id' than {} must be unique.".format(file, dict_id[id]))
+                    Fore.YELLOW + "Rule {} has the same 'id' as {}. Ids have to be unique.".format(file, dict_id[id]))
                 faulty_rules.append(file)
             else:
                 dict_id[id.lower()] = file
 
         self.assertEqual(faulty_rules, [], Fore.RED +
-                         "There are rules with missing or malformed 'id' fields. Create an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).")
+                         "There are rules with missing or malformed 'id' fields. Generate an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).")
 
     def test_optional_related(self):
         faulty_rules = []
@@ -391,11 +391,15 @@ class TestRules(unittest.TestCase):
                         Fore.YELLOW + "Rule {} has a 'related' field that isn't a list.".format(file))
                     faulty_rules.append(file)
                 else:
-                    # should probably test if we have only 'id' and 'type' ...
                     type_ok = True
                     for ref in related_lst:
-                        id_str = ref['id']
-                        type_str = ref['type']
+                        try:
+                            id_str = ref['id']
+                            type_str = ref['type']
+                        except KeyError:
+                            print(Fore.YELLOW + "Rule {} has an invalid form of 'related/type' value.".format(file))
+                            faulty_rules.append(file)
+                            continue
                         if not type_str in valid_type:
                             type_ok = False
                     # Only add one time if many bad type in the same file
@@ -930,8 +934,8 @@ class TestRules(unittest.TestCase):
                 print(Fore.RED + "Rule {} has no field 'title'.".format(file))
                 faulty_rules.append(file)
                 continue
-            elif len(title) > 70:
-                print(Fore.YELLOW + "Rule {} has a title field with too many characters (>70)".format(file))
+            elif len(title) > 100:
+                print(Fore.YELLOW + "Rule {} has a title field with too many characters (>100)".format(file))
                 faulty_rules.append(file)
             if title.startswith("Detects "):
                 print(Fore.RED + "Rule {} has a title that starts with 'Detects'".format(file))

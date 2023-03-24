@@ -1,0 +1,34 @@
+title: WMIC Remote Command Execution
+id: 7773b877-5abb-4a3e-b9c9-fd0369b59b00
+related:
+    - id: e42af9df-d90b-4306-b7fb-05c863847ebd
+      type: obsoletes
+    - id: 09af397b-c5eb-4811-b2bb-08b3de464ebf
+      type: obsoletes
+status: experimental
+description: Detects the execution of WMIC to query information on a remote system
+references:
+    - https://securelist.com/moonbounce-the-dark-side-of-uefi-firmware/105468/
+    - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/wmic
+author: frack113, Nasreddine Bencherchali (Nextron Systems)
+date: 2023/02/14
+tags:
+    - attack.execution
+    - attack.t1047
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\WMIC.exe'
+        - OriginalFileName: 'wmic.exe'
+    selection_cli:
+        CommandLine|contains: '/node:'
+    filter_localhost:
+        CommandLine|contains:
+            - '/node:127.0.0.1 '
+            - '/node:localhost '
+    condition: all of selection_* and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: medium

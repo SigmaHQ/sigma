@@ -1,4 +1,4 @@
-title: NET CLR Binary Execution Usage Log Artifact
+title: Suspicious DotNET CLR Usage Log Artifact
 id: e0b06658-7d1d-4cd3-bf15-03467507ff7c
 related:
     - id: 4508a70e-97ef-4300-b62b-ff27992990ea
@@ -15,14 +15,14 @@ references:
     - https://bohops.com/2021/03/16/investigating-net-clr-usage-log-tampering-techniques-for-edr-evasion/
 author: frack113, omkar72, oscd.community, Wojciech Lesicki
 date: 2022/11/18
-modified: 2023/01/05
+modified: 2023/02/23
 tags:
     - attack.defense_evasion
     - attack.t1218
 logsource:
     category: file_event
     product: windows
-    definition: 'Requirements: UsageLogs folder must be monitored by sysmon configuration'
+    definition: 'Requirements: UsageLogs folder must be monitored by the sysmon configuration'
 detection:
     selection:
         TargetFilename|endswith:
@@ -35,7 +35,15 @@ detection:
             - '\UsageLogs\svchost.exe.log'
             - '\UsageLogs\wscript.exe.log'
             - '\UsageLogs\wmic.exe.log'
-    condition: selection
+    filter_rundll:
+        # This filter requires the event to be enriched by additional information such as ParentImage and CommandLine activity
+        ParentImage|endswith: '\MsiExec.exe'
+        ParentCommandLine|contains: ' -Embedding'
+        Image|endswith: '\rundll32.exe'
+        CommandLine|contains|all:
+            - 'Temp'
+            - 'zzzzInvokeManagedCustomActionOutOfProc'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Rundll32.exe with zzzzInvokeManagedCustomActionOutOfProc in command line and msiexec.exe as parent process - https://twitter.com/SBousseaden/status/1388064061087260675
 level: high

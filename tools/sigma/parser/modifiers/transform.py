@@ -24,6 +24,7 @@ class SigmaContainsModifier(ListOrStringModifierMixin, SigmaTransformModifier):
     """Add *-wildcard before and after all string(s)"""
     identifier = "contains"
     active = True
+    valid_input_types = ListOrStringModifierMixin.valid_input_types + (NodeSubexpression,)
 
     def apply_str(self, val):
         try:

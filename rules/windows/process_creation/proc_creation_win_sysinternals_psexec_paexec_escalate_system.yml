@@ -1,0 +1,69 @@
+title: PsExec/PAExec Escalation to LOCAL SYSTEM
+id: 8834e2f7-6b4b-4f09-8906-d2276470ee23
+related:
+    - id: 207b0396-3689-42d9-8399-4222658efc99 # Generic rule based on similar cli flags
+      type: similar
+status: experimental
+description: Detects suspicious commandline flags used by PsExec and PAExec to escalate a command line to LOCAL_SYSTEM rights
+references:
+    - https://docs.microsoft.com/en-us/sysinternals/downloads/psexec
+    - https://www.poweradmin.com/paexec/
+    - https://www.fireeye.com/blog/threat-research/2020/10/kegtap-and-singlemalt-with-a-ransomware-chaser.html
+author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+date: 2021/11/23
+modified: 2023/02/28
+tags:
+    - attack.resource_development
+    - attack.t1587.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_sys: # Escalation to LOCAL_SYSTEM
+        CommandLine|contains:
+            # Note that you don't need to add the ".exe" part when using psexec/paexec
+            # The "-" can also be replaced with "/"
+            # The order of args isn't important
+            # "cmd" can be replaced by "powershell", "pwsh" or any other console like software
+            - ' -s cmd'
+            - ' /s cmd'
+            - ' -s -i cmd'
+            - ' /s /i cmd'
+            - ' /s -i cmd'
+            - ' -s /i cmd'
+            - ' -i -s cmd'
+            - ' /i /s cmd'
+            - ' -i /s cmd'
+            - ' /i -s cmd'
+            # Pwsh (For PowerShell 7)
+            - ' -s pwsh'
+            - ' /s pwsh'
+            - ' -s -i pwsh'
+            - ' /s /i pwsh'
+            - ' /s -i pwsh'
+            - ' -s /i pwsh'
+            - ' -i -s pwsh'
+            - ' /i /s pwsh'
+            - ' -i /s pwsh'
+            - ' /i -s pwsh'
+            # PowerShell (For PowerShell 5)
+            - ' -s powershell'
+            - ' /s powershell'
+            - ' -s -i powershell'
+            - ' /s /i powershell'
+            - ' /s -i powershell'
+            - ' -s /i powershell'
+            - ' -i -s powershell'
+            - ' /i /s powershell'
+            - ' -i /s powershell'
+            - ' /i -s powershell'
+    selection_other:
+        CommandLine|contains:
+            - 'psexec'
+            - 'paexec'
+            - 'accepteula'
+    condition: all of selection_*
+falsepositives:
+    - Admins that use PsExec or PAExec to escalate to the SYSTEM account for maintenance purposes (rare)
+    - Users that debug Microsoft Intune issues using the commands mentioned in the official documentation; see https://learn.microsoft.com/en-us/mem/intune/apps/intune-management-extension
+level: high

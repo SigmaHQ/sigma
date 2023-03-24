@@ -1,25 +1,26 @@
-title: Renamed PaExec Execution
-id: 7b0666ad-3e38-4e3d-9bab-78b06de85f7b
+title: Renamed PAExec Execution
+id: c4e49831-1496-40cf-8ce1-b53f942b02f9
+related:
+    - id: 7b0666ad-3e38-4e3d-9bab-78b06de85f7b
+      type: obsoletes
 status: test
-description: Detects execution of renamed paexec via imphash and executable product string
+description: Detects execution of renamed version of PAExec. Often used by attackers
 references:
-    - sha256=01a461ad68d11b5b5096f45eb54df9ba62c5af413fa9eb544eacb598373a26bc
+    - https://www.poweradmin.com/paexec/
     - https://summit.fireeye.com/content/dam/fireeye-www/summit/cds-2018/presentations/cds18-technical-s05-att&cking-fin7.pdf
-author: Jason Lynch
-date: 2019/04/17
-modified: 2023/02/03
+author: Florian Roth (Nextron Systems), Jason Lynch
+date: 2021/05/22
+modified: 2023/02/14
 tags:
     - attack.defense_evasion
-    - attack.t1036.003
-    - attack.g0046
-    - car.2013-05-009
-    - attack.execution
-    - attack.t1569.002
+    - attack.t1202
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
+        - Description: 'PAExec Application'
+        - OriginalFileName: 'PAExec.exe'
         - Product|contains: 'PAExec'
         - Imphash:
             - 11D40A7B7876288F919AB819CC2D9802
@@ -32,8 +33,11 @@ detection:
             - IMPHASH=dfd6aa3f7b2b1035b76b718f1ddc689f
             - IMPHASH=1a6cca4d5460b1710a12dea39e4a592c
     filter:
-        Image|contains: 'paexec'
+        - Image|endswith: '\paexec.exe'
+        - Image|startswith: 'C:\Windows\PAExec-'
     condition: selection and not filter
 falsepositives:
-    - Unknown
-level: medium
+    - Weird admins that rename their tools
+    - Software companies that bundle PAExec with their software and rename it, so that it is less embarrassing
+    - When executed with the "-s" flag. PAExec will copy itself to the "C:\Windows\" directory with a different name. Usually like this "PAExec-[XXXXX]-[ComputerName]"
+level: high

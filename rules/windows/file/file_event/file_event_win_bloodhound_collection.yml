@@ -6,7 +6,7 @@ references:
     - https://academy.hackthebox.com/course/preview/active-directory-bloodhound/bloodhound--data-collection
 author: C.J. May
 date: 2022/08/09
-modified: 2022/08/09
+modified: 2023/02/13
 tags:
     - attack.discovery
     - attack.t1087.001
@@ -20,7 +20,7 @@ logsource:
     product: windows
     category: file_event
 detection:
-    selection1:
+    selection_1:
         TargetFilename|endswith:
             - '_BloodHound.zip'
             - '_computers.json'
@@ -30,11 +30,15 @@ detection:
             - '_groups.json'
             - '_ous.json'
             - '_users.json'
-    selection2:
+    selection_2:
         TargetFilename|contains|all:
             - 'BloodHound'
             - '.zip'
-    condition: 1 of selection*
+    filter_ms_winapps:
+        Image|endswith: '\svchost.exe'
+        TargetFilename|startswith: 'C:\Program Files\WindowsApps\Microsoft.'
+        TargetFilename|endswith: '\pocket_containers.json'
+    condition: 1 of selection_* and not 1 of filter_*
 falsepositives:
     - Unknown
 level: high
