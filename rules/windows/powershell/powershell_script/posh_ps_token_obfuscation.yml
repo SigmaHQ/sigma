@@ -9,7 +9,7 @@ references:
     - https://github.com/danielbohannon/Invoke-Obfuscation
 author: frack113
 date: 2022/12/27
-modified: 2023/02/21
+modified: 2023/03/24
 tags:
     - attack.defense_evasion
     - attack.t1027.009
@@ -32,6 +32,10 @@ detection:
         ScriptBlockText|contains:
             - 'it will return true or false instead'  # Chocolatey install script https://github.com/chocolatey/chocolatey
             - 'The function also prevents `Get-ItemProperty` from failing' # https://docs.chocolatey.org/en-us/create/functions/get-uninstallregistrykey
+    filter_exchange:
+        Path|startswith: 'C:\Program Files\Microsoft\Exchange Server\'
+        Path|endswith: '\bin\servicecontrol.ps1'
+        ScriptBlockText|contains: '`r`n'
     condition: selection and not filter
 falsepositives:
     - Unknown
