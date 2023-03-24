@@ -320,15 +320,16 @@ def parse_gpresult(gpresult):
 if __name__ == "__main__":
 
     print(f"""
-       _____ _____ _____ __  __            _                                                 _____ _               _             
-      / ____|_   _/ ____|  \/  |   /\     | |                                               / ____| |             | |            
-     | (___   | || |  __| \  / |  /  \    | |     ___   __ _ ___  ___  _   _ _ __ ___ ___  | |    | |__   ___  ___| | _____ _ __ 
-      \___ \  | || | |_ | |\/| | / /\ \   | |    / _ \ / _` / __|/ _ \| | | | '__/ __/ _ \ | |    | '_ \ / _ \/ __| |/ / _ \ '__|
-      ____) |_| || |__| | |  | |/ ____ \  | |___| (_) | (_| \__ \ (_) | |_| | | | (_|  __/ | |____| | | |  __/ (__|   <  __/ |   
-     |_____/|_____\_____|_|  |_/_/    \_\ |______\___/ \__, |___/\___/ \__,_|_|  \___\___|  \_____|_| |_|\___|\___|_|\_\___|_|  v{__version__} 
-                                                    __/ |                                                                    
-                                                   |___/                                                                     
-                                                                                    by Nasreddine Bencherchali (Nextron Systems)
+       _____ _                                                                                   
+      / ___/(_)___ _____ ___  ____ _                                                             
+      \__ \/ / __ `/ __ `__ \/ __ `/                                                             
+     ___/ / / /_/ / / / / / / /_/ /                                                              
+    /____/_/\__, /_/ /_/ /_/\__,_/                           ________              __            
+       / / /____/  ____ __________  __  _______________     / ____/ /_  ___  _____/ /_____  _____
+      / /   / __ \/ __ `/ ___/ __ \/ / / / ___/ ___/ _ \   / /   / __ \/ _ \/ ___/ //_/ _ \/ ___/
+     / /___/ /_/ / /_/ (__  ) /_/ / /_/ / /  / /__/  __/  / /___/ / / /  __/ /__/ ,< /  __/ /    
+    /_____/\____/\__, /____/\____/\__,_/_/   \___/\___/   \____/_/ /_/\___/\___/_/|_|\___/_/     
+                /____/  by Nasreddine Bencherchali (Nextron Systems), v{__version__}             
     """)
     
     parser = argparse.ArgumentParser(description='SIGMA Logsource Checker')
@@ -347,6 +348,7 @@ if __name__ == "__main__":
 
     if args.gp:
         gpresult = args.gp
+        print("Parsing gpresults file (XML) %s ...\n" % args.gp)
         subcategory_id, enabled_other_logs = parse_gpresult(gpresult)
     else:
         subcategory_id = []
@@ -375,13 +377,13 @@ if __name__ == "__main__":
                         special_fields_security.append(field)
                 
                 if special_fields_sysmon:
-                    print("  -> Rule '{}' uses fields: {} which Requires Microsoft-Windows-Sysmon EID 1 to be enabled".format(os.path.basename(filename), special_fields_sysmon))
+                    print("-> Rule '{}' uses fields: {} which Requires Microsoft-Windows-Sysmon EID 1 to be enabled".format(os.path.basename(filename), special_fields_sysmon))
                 elif special_fields_security:
                     if "{0CCE922B-69AE-11D9-BED3-505054503030}" not in subcategory_id:
-                        print("  -> Rule '{}' uses fields: {} which Requires Microsoft Windows Security Auditing EID 4688 to be enabled".format(os.path.basename(filename), special_fields_security))
+                        print("-> Rule '{}' uses fields: {} which Requires Microsoft Windows Security Auditing EID 4688 to be enabled".format(os.path.basename(filename), special_fields_security))
                 else:
                     if "{0CCE922B-69AE-11D9-BED3-505054503030}" not in subcategory_id:
-                        print("  -> Rule '{}' uses fields: {} which Requires 'Microsoft Windows Security Auditing EID 4688' or 'Microsoft-Windows-Sysmon EID 1' to be enabled".format(os.path.basename(filename), fields))
+                        print("-> Rule '{}' uses fields: {} which Requires 'Microsoft Windows Security Auditing EID 4688' or 'Microsoft-Windows-Sysmon EID 1' to be enabled".format(os.path.basename(filename), fields))
 
         if windows_category_ps_module_dict:
             print(f"\nChecking rules with logsource - 'product: windows / category: ps_module'...")
@@ -394,7 +396,7 @@ if __name__ == "__main__":
 
             for filename, fields in windows_category_ps_module_dict.items():
                 if not pwsh5_ps_module_enabled:
-                    print("  -> Rule '{}' uses fields: {} which Requires Microsoft-Windows-PowerShell EID 4103 to be enabled".format(os.path.basename(filename), fields))
+                    print("-> Rule '{}' uses fields: {} which Requires Microsoft-Windows-PowerShell EID 4103 to be enabled".format(os.path.basename(filename), fields))
         
         if windows_category_ps_script_dict:
             print(f"\nChecking rules with logsource - 'product: windows / category: ps_script'...")
@@ -406,7 +408,7 @@ if __name__ == "__main__":
                     pwsh5_ps_script_enabled = True
             for filename, fields in windows_category_ps_script_dict.items():
                 if not pwsh5_ps_script_enabled:
-                    print("  -> Rule '{}' uses fields: {} which Requires Microsoft-Windows-PowerShell EID 4104 to be enabled".format(os.path.basename(filename), fields))
+                    print("-> Rule '{}' uses fields: {} which Requires Microsoft-Windows-PowerShell EID 4104 to be enabled".format(os.path.basename(filename), fields))
 
         if windows_service_security_dict:
             print(f"\nChecking rules using logsource - 'product: windows / service: security'...")
@@ -425,12 +427,12 @@ if __name__ == "__main__":
                 
                 
                 if len(specific_subcategory) > 1:
-                    print("  -> Rule '{}' uses EventIDs: {} which Requires:".format(os.path.basename(filename), specific_eids))
+                    print("-> Rule '{}' uses EventIDs: {} which Requires:".format(os.path.basename(filename), specific_eids))
                     for i in specific_subcategory:
                         print("      - '{}' / {} to be enabled".format(i[1], i[0]))
                 else:
                     if len(specific_subcategory) != 0:
-                        print("  -> Rule '{}' uses EventIDs: {} which Requires: '{}' / {} to be enabled".format(os.path.basename(filename), specific_eids, specific_subcategory[0][1], specific_subcategory[0][0]))
+                        print("-> Rule '{}' uses EventIDs: {} which Requires: '{}' / {} to be enabled".format(os.path.basename(filename), specific_eids, specific_subcategory[0][1], specific_subcategory[0][0]))
 
 
             
@@ -453,20 +455,20 @@ if __name__ == "__main__":
             for field in WINDOWS_SYSMON_SPECIAL_PROCESS_CREATION_FIELDS:
                 if field in all_process_creation_fields:
                     enable_sysmon = True
-                    print("  -> There are rules in the set using Sysmon EID 1 only fields. A Sysmon configuration monitoring Process Creation is required")
+                    print("-> Rules use Sysmon EID 1 only fields. A Sysmon configuration monitoring Process Creation is required")
                     break
             if not enable_sysmon:
                 for field in WINDOWS_SECURITY_SPECIAL_PROCESS_CREATION_FIELDS:
                     if field in all_process_creation_fields:
                         if "{0CCE922B-69AE-11D9-BED3-505054503030}" not in subcategory_id:
                             enable_4688 = True
-                            print("  -> There are rules in the set using Microsoft-Windows-Security-Auditing EID 4688 only fields. Audit policy sub-category {0CCE922B-69AE-11D9-BED3-505054503030} / 'Process Creation' must be enabled")
+                            print("-> Rules use Microsoft-Windows-Security-Auditing EID 4688 only fields. Audit policy sub-category {0CCE922B-69AE-11D9-BED3-505054503030} / 'Process Creation' must be enabled")
                             break
                         else:
                             print("Audit policy sub-category {0CCE922B-69AE-11D9-BED3-505054503030} / 'Process Creation' is already enabled")
                             break
                 if not enable_4688:
-                    print("  -> Audit policy sub-category {0CCE922B-69AE-11D9-BED3-505054503030} / 'Process Creation' must be enabled")
+                    print("-> Audit policy sub-category {0CCE922B-69AE-11D9-BED3-505054503030} / 'Process Creation' must be enabled")
 
         if windows_category_ps_module_dict:
             print(f"\nChecking rules with logsource - 'product: windows / category: ps_module'...")
@@ -476,9 +478,9 @@ if __name__ == "__main__":
 
             if pwsh5 in enabled_other_logs:
                 if enabled_other_logs[pwsh5][0]['Turn on Module Logging'] != "Enabled":
-                    print("  -> There are rules in the set using Microsoft-Windows-PowerShell EID 4103. Audit policy 'Module Logging' must be enabled")
+                    print("-> Rules use Microsoft-Windows-PowerShell EID 4103. Audit policy 'Module Logging' must be enabled")
                 else:
-                    print("  -> PowerShell 'Module Logging' is Enabled")
+                    print("-> PowerShell 'Module Logging' is Enabled")
         
         if windows_category_ps_script_dict:
             print(f"\nChecking rules with logsource - 'product: windows / category: ps_script'...")
@@ -488,9 +490,9 @@ if __name__ == "__main__":
 
             if pwsh5 in enabled_other_logs:
                 if enabled_other_logs[pwsh5][1]['Turn on PowerShell Script Block Logging'] != "Enabled":
-                    print("  -> There are rules in the set using Microsoft-Windows-PowerShell EID 4104. Audit policy PowerShell 'Script Block Logging' must be enabled")
+                    print("-> Rules use Microsoft-Windows-PowerShell EID 4104. Audit policy PowerShell 'Script Block Logging' must be enabled")
                 else:
-                    print("  -> PowerShell 'Script Block Logging' is Enabled")
+                    print("-> PowerShell 'Script Block Logging' is Enabled")
         
         if windows_service_security_dict:
             print(f"\nChecking rules using logsource - 'product: windows / service: security'...")
@@ -502,7 +504,7 @@ if __name__ == "__main__":
                 for key, value in SECURITY_EVENT_ID_MAPPING.items():
                     if value['EventIDs']:
                         if ((eid in value['EventIDs']) and (key not in subcategory_id)):
-                            print("  ->  There are rules in the set using events generated from Audit policy sub-category '{}'. The audit policy '{}' must be enabled".format(key, value['Name']))
+                            print("-> Rules use events generated from audit policy sub-category '{}'. The audit policy '{}' must be enabled".format(key, value['Name']))
                             subcategory_id.append(key)
         
     print("\nFor more information on how to setup logging, you can visit: https://github.com/sigma/sigma/tree/rules-doc/rules-documentation/logsource-guides") 
