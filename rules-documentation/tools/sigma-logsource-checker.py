@@ -1,3 +1,8 @@
+# Author: Nasreddine Bencherchali (@nas_bench) / Nextron Systems
+
+__version__ = "0.1.0"
+
+from time import sleep
 import yaml
 import os
 import argparse
@@ -93,6 +98,16 @@ OTHER_EVENT_ID_MAPPING = {
         {'Turn on PowerShell Transcription': 'Disabled'}]
 }
 
+WINDOWS_SYSMON_PROCESS_CREATION_FIELDS = ["RuleName", "UtcTime", "ProcessGuid", "ProcessId", "Image", "FileVersion", "Description", "Product", "Company", "OriginalFileName", "CommandLine", "CurrentDirectory", "User", "LogonGuid", "LogonId", "TerminalSessionId", "IntegrityLevel", "Hashes", "ParentProcessGuid", "ParentProcessId", "ParentImage", "ParentCommandLine", "ParentUser"]
+
+# A reduced set of unique fields that only available to Sysmon/1 - Used for testing
+WINDOWS_SYSMON_SPECIAL_PROCESS_CREATION_FIELDS = ["RuleName", "UtcTime", "ProcessGuid", "FileVersion", "Description", "Product", "Company", "OriginalFileName", "CurrentDirectory", "User", "LogonGuid", "LogonId", "TerminalSessionId", "IntegrityLevel", "Hashes", "ParentProcessGuid", "ParentProcessId", "ParentCommandLine", "ParentUser"]
+
+WINDOWS_SECURITY_PROCESS_CREATION_FIELDS = ["SubjectUserSid", "SubjectUserName", "SubjectDomainName", "SubjectLogonId", "NewProcessId", "NewProcessName", "TokenElevationType", "ProcessId", "CommandLine", "TargetUserSid", "TargetUserName", "TargetDomainName", "TargetLogonId", "ParentProcessName", "MandatoryLabel"]
+
+# A reduced set of unique fields that only available to Security/4688 - Used for testing
+WINDOWS_SECURITY_SPECIAL_PROCESS_CREATION_FIELDS = ["SubjectUserSid", "SubjectUserName", "SubjectDomainName", "SubjectLogonId", "NewProcessId", "NewProcessName", "TokenElevationType", "ProcessId", "TargetUserSid", "TargetUserName", "TargetDomainName", "TargetLogonId", "ParentProcessName", "MandatoryLabel"]
+
 def yield_next_rule_file_path(path_to_rules: str) -> str:
     for root, _, files in os.walk(path_to_rules):
         for file in files:
@@ -164,6 +179,25 @@ def test_invalid_logsource_attributes(path_to_rules):
 
     return faulty_rules
 
+def extract_fields(detection):
+
+    list_of_fields = []
+
+    for key, value in detection.items():
+        if type(value) == list:
+            for element in value:
+                if type(element) == dict:
+                    for key_, value_ in element.items():
+                        field = key_.split("|")[0]
+                        if field not in list_of_fields:
+                            list_of_fields.append(field)
+        if type(value) == dict:
+            for key_, value_ in value.items():
+                field = key_.split("|")[0]
+                if field not in list_of_fields:
+                        list_of_fields.append(field)
+    return list_of_fields
+
 def get_logsource_dict(path_to_rules, broken_rules):
     """
         Return a list of dicts of all unique log sources
@@ -171,55 +205,52 @@ def get_logsource_dict(path_to_rules, broken_rules):
     logsource_dict_list_tmp = []
 
     # Add as many specific service log sources we have defined
-    security_service_eids = []
-    powershell_service_eids = []
+    windows_service_security_dict = defaultdict(list)
+    windows_service_powershell_dict = defaultdict(list)
+    windows_category_process_creation_dict = defaultdict(list)
+    windows_category_ps_module_dict = defaultdict(list)
+    windows_category_ps_script_dict = defaultdict(list)
 
-    for file in yield_next_rule_file_path(path_to_rules):
-        if file not in broken_rules:
-            logsource = get_rule_part(file_path=file, part_name="logsource")
-            detection = get_rule_part(file_path=file, part_name="detection")
+    for file_ in yield_next_rule_file_path(path_to_rules):
+        if file_ not in broken_rules:
+            logsource = get_rule_part(file_path=file_, part_name="logsource")
+            detection = get_rule_part(file_path=file_, part_name="detection")
             logsource.pop("definition", None)
 
             if (("product" in logsource.keys()) and (len(logsource) == 1)):
-                # We skip rules that do not specify exact services for V0.1
+                # We skip rules that do not specify exact services for V0.1 // Mainly the generic MIMIKATZ rule
                 continue
             else:
                 if "product" in logsource:
                     # For V0.1 we check for windows logs only
                     if logsource["product"].lower() == "windows":
-                            
-                            # We order the logsource dict to avoid duplicates
-                            ordered_dict = dict(collections.OrderedDict(sorted(logsource.items())))
-                            if  ordered_dict not in logsource_dict_list_tmp:
-                                logsource_dict_list_tmp.append(ordered_dict)
 
-                    if "category" in logsource:
-                        pass
-                    elif "service" in logsource:
+                        if "category" in logsource:
+                            if logsource['category'] == "process_creation":
+                                # {"rule_file_name" : [fields used]}
+                                fields = extract_fields(detection)
+                                windows_category_process_creation_dict[file_] = fields
 
-                        if logsource["service"].lower() == "security":
-                            eid_list = extract_events_ids(detection)
-                            for eid in eid_list:
-                                if eid not in security_service_eids:
-                                    security_service_eids.append(eid)
+                            elif logsource['category'] == "ps_script":
+                                fields = extract_fields(detection)
+                                windows_category_ps_script_dict[file_] = fields
 
-                        elif logsource["service"].lower() == "powershell":
-                            eid_list = extract_events_ids(detection)
-                            for eid in eid_list:
-                                if eid not in powershell_service_eids:
-                                    powershell_service_eids.append(eid)
-        
-    logsource_dict_list = []
-    for i in logsource_dict_list_tmp:
-        i['EventIDs'] = []
-        if 'service' in i:
-            if i['service'].lower() == "security":
-                i['EventIDs'] = security_service_eids
-            elif i['service'].lower() == "powershell":
-                i['EventIDs'] = powershell_service_eids
-        logsource_dict_list.append(i)
+                            elif logsource['category'] == "ps_module":
+                                # {"rule_file_name" : [fields used]}
+                                fields = extract_fields(detection)
+                                windows_category_ps_module_dict[file_] = fields
+                                
+                        elif "service" in logsource:
+                            if logsource["service"].lower() == "security":
+                                eid_list = extract_events_ids(detection)
+                                windows_service_security_dict[file_] = eid_list
+                                
 
-    return logsource_dict_list
+                            elif logsource["service"].lower() == "powershell":
+                                eid_list = extract_events_ids(detection)
+                                windows_service_powershell_dict[file_] = eid_list
+
+    return windows_service_security_dict, windows_service_powershell_dict, windows_category_process_creation_dict, windows_category_ps_module_dict, windows_category_ps_script_dict
 
 def enrich_logsource_dict(logsource_dict_list):
     for logsource in logsource_dict_list:
@@ -287,10 +318,24 @@ def parse_gpresult(gpresult):
 
 
 if __name__ == "__main__":
+
+    print(f"""
+       _____ _____ _____ __  __            _                                                 _____ _               _             
+      / ____|_   _/ ____|  \/  |   /\     | |                                               / ____| |             | |            
+     | (___   | || |  __| \  / |  /  \    | |     ___   __ _ ___  ___  _   _ _ __ ___ ___  | |    | |__   ___  ___| | _____ _ __ 
+      \___ \  | || | |_ | |\/| | / /\ \   | |    / _ \ / _` / __|/ _ \| | | | '__/ __/ _ \ | |    | '_ \ / _ \/ __| |/ / _ \ '__|
+      ____) |_| || |__| | |  | |/ ____ \  | |___| (_) | (_| \__ \ (_) | |_| | | | (_|  __/ | |____| | | |  __/ (__|   <  __/ |   
+     |_____/|_____\_____|_|  |_/_/    \_\ |______\___/ \__, |___/\___/ \__,_|_|  \___\___|  \_____|_| |_|\___|\___|_|\_\___|_|  v{__version__} 
+                                                    __/ |                                                                    
+                                                   |___/                                                                     
+                                                                                    by Nasreddine Bencherchali (Nextron Systems)
+    """)
+    
     parser = argparse.ArgumentParser(description='SIGMA Logsource Checker')
     parser.add_argument('-d', help='Path to input directory (SIGMA rules folder; recursive)', metavar='sigma-rules-folder', required=True)
-    parser.add_argument('-f', help='XML output of the command "gpresult.exe /x [path]"', metavar='gpresult')
-    #parser.add_argument('-v', help='Get audit and logging details for every rule', metavar='Verbose')
+    parser.add_argument('-gp', help='XML output of the command "gpresult.exe /x [path]"', metavar='gpresult')
+    #parser.add_argument('-sysmon', help='Sysmon configuration', metavar='sysmon-config') # TODO: add Sysmon config parser
+    parser.add_argument('-v', help='Get audit and logging details for every rule', action="store_true")
     #parser.add_argument('-vv', help='Get audit and logging details for every rule', metavar='Very Verbose')
     args = parser.parse_args()
 
@@ -300,54 +345,163 @@ if __name__ == "__main__":
         print("The path provided isn't a directory: %s" % args.d)
         exit(1)
 
-    if args.f:
-        gpresult = args.f
+    if args.gp:
+        gpresult = args.gp
         subcategory_id, enabled_other_logs = parse_gpresult(gpresult)
     else:
         subcategory_id = []
         enabled_other_logs = OTHER_EVENT_ID_MAPPING
 
-    print("Discovering used log sources ...")
+    print("Discovering used log sources ...\n")
     
     faulty_rules = test_invalid_logsource_attributes(path_to_rules)
-    logsource_dict_list = get_logsource_dict(path_to_rules, faulty_rules)
+    windows_service_security_dict, windows_service_powershell_dict, windows_category_process_creation_dict, windows_category_ps_module_dict, windows_category_ps_script_dict = get_logsource_dict(path_to_rules, faulty_rules)
 
-    print(logsource_dict_list)
+    if args.v:
 
-    print("Checking audit/logging policies ...")
+        print("Generating detailed logging requirements information for every rule...\n")
+        sleep(1)
 
-    for logsource in logsource_dict_list:
-        if logsource['EventIDs']:
-            if logsource['service'] == "security":
-                for event in logsource['EventIDs']:
+        if windows_category_process_creation_dict:
+            print(f"\nChecking rules with logsource - 'product: windows / category: process_creation'...")
+            # We check special fields. If they exist then we suggest the policy to be enabled
+            for filename, fields in windows_category_process_creation_dict.items():
+                special_fields_sysmon = []
+                special_fields_security = []
+                for field in fields:
+                    if field in WINDOWS_SYSMON_SPECIAL_PROCESS_CREATION_FIELDS:
+                        special_fields_sysmon.append(field)
+                    elif field in WINDOWS_SECURITY_SPECIAL_PROCESS_CREATION_FIELDS:
+                        special_fields_security.append(field)
+                
+                if special_fields_sysmon:
+                    print("  -> Rule '{}' uses fields: {} which Requires Microsoft-Windows-Sysmon EID 1 to be enabled".format(os.path.basename(filename), special_fields_sysmon))
+                elif special_fields_security:
+                    if "{0CCE922B-69AE-11D9-BED3-505054503030}" not in subcategory_id:
+                        print("  -> Rule '{}' uses fields: {} which Requires Microsoft Windows Security Auditing EID 4688 to be enabled".format(os.path.basename(filename), special_fields_security))
+                else:
+                    if "{0CCE922B-69AE-11D9-BED3-505054503030}" not in subcategory_id:
+                        print("  -> Rule '{}' uses fields: {} which Requires 'Microsoft Windows Security Auditing EID 4688' or 'Microsoft-Windows-Sysmon EID 1' to be enabled".format(os.path.basename(filename), fields))
+
+        if windows_category_ps_module_dict:
+            print(f"\nChecking rules with logsource - 'product: windows / category: ps_module'...")
+            pwsh5_ps_module_enabled = False
+            pwsh5 = "Windows Components/Windows PowerShell"
+            #pwsh7 = "PowerShell Core" # TODO: Add PWSH7 Checks
+            if pwsh5 in enabled_other_logs:
+                if enabled_other_logs[pwsh5][0]['Turn on Module Logging'] == "Enabled":
+                    pwsh5_ps_module_enabled = True
+
+            for filename, fields in windows_category_ps_module_dict.items():
+                if not pwsh5_ps_module_enabled:
+                    print("  -> Rule '{}' uses fields: {} which Requires Microsoft-Windows-PowerShell EID 4103 to be enabled".format(os.path.basename(filename), fields))
+        
+        if windows_category_ps_script_dict:
+            print(f"\nChecking rules with logsource - 'product: windows / category: ps_script'...")
+            pwsh5_ps_script_enabled = False
+            pwsh5 = "Windows Components/Windows PowerShell"
+            #pwsh7 = "PowerShell Core" # TODO: Add PWSH7 Checks
+            if pwsh5 in enabled_other_logs:
+                if enabled_other_logs[pwsh5][1]['Turn on PowerShell Script Block Logging'] == "Enabled":
+                    pwsh5_ps_script_enabled = True
+            for filename, fields in windows_category_ps_script_dict.items():
+                if not pwsh5_ps_script_enabled:
+                    print("  -> Rule '{}' uses fields: {} which Requires Microsoft-Windows-PowerShell EID 4104 to be enabled".format(os.path.basename(filename), fields))
+
+        if windows_service_security_dict:
+            print(f"\nChecking rules using logsource - 'product: windows / service: security'...")
+            for filename, eids in windows_service_security_dict.items():
+                specific_eids = set()
+                specific_subcategory = set()
+                for eid in eids:
                     for key, value in SECURITY_EVENT_ID_MAPPING.items():
                         if value['EventIDs']:
-                            if ((event in value['EventIDs']) and (key not in subcategory_id)):
-                                print("  -> Audit policy '{}' must be enabled".format(value['Name']))
-                                subcategory_id.append(key)
-            elif logsource['service'] == "powershell":
-                pwsh5 = "Windows Components/Windows PowerShell"
-                #pwsh7 = "PowerShell Core" # TODO: Add PWSH7 Checks
-                for key, value in enabled_other_logs.items():
-                    for element in value:
-                        for key_, value_ in element.items():
-                            if key_ == pwsh5:
-                                if value_ != "Enabled":
-                                    print("  -> PowerShell policy '{}' must be enabled".format(key_))
-        else:
-            if "service" in logsource:
-                if logsource['service'].lower() == "powershell":
-                    pwsh5 = "Windows Components/Windows PowerShell"
-                    #pwsh7 = "PowerShell Core" # TODO: Add PWSH7 Checks
-                    
-                    for key, value in enabled_other_logs.items():
-                        if key == pwsh5:
-                            for element in value:
-                                for key_, value_ in element.items():
-                                    if value_ != "Enabled":
-                                        print("  -> PowerShell policy '{}' must be enabled".format(key_))
-            elif "category" in logsource:
-                if logsource['category'].lower() == 'process_creation':
-                    pass # TODO: Add checks in future version
+                            if ((eid in value['EventIDs']) and (key not in subcategory_id)):
+                                specific_eids.add(eid)
+                                specific_subcategory.add((key, value['Name']))
+                
+                specific_eids = list(specific_eids)
+                specific_subcategory = list(specific_subcategory)
+                
+                
+                if len(specific_subcategory) > 1:
+                    print("  -> Rule '{}' uses EventIDs: {} which Requires:".format(os.path.basename(filename), specific_eids))
+                    for i in specific_subcategory:
+                        print("      - '{}' / {} to be enabled".format(i[1], i[0]))
+                else:
+                    if len(specific_subcategory) != 0:
+                        print("  -> Rule '{}' uses EventIDs: {} which Requires: '{}' / {} to be enabled".format(os.path.basename(filename), specific_eids, specific_subcategory[0][1], specific_subcategory[0][0]))
 
-    
+
+            
+    else:
+
+        print("Generating generic logging requirements information for the rule set...")
+        sleep(1)
+
+        # If no verbose mode was triggered we generate a generic audit policy suggestion for all rules
+        # Process Creation Rules
+        if windows_category_process_creation_dict:
+            enable_sysmon = False
+            enable_4688 = False
+            print(f"\nChecking rules with logsource - 'product: windows / category: process_creation'...")
+            # We check special fields. If they exist then we suggest the policy to be enabled
+            all_process_creation_fields = []
+            for filename, fields in windows_category_process_creation_dict.items():
+                all_process_creation_fields += fields
+            all_process_creation_fields = list(set(all_process_creation_fields))
+            for field in WINDOWS_SYSMON_SPECIAL_PROCESS_CREATION_FIELDS:
+                if field in all_process_creation_fields:
+                    enable_sysmon = True
+                    print("  -> There are rules in the set using Sysmon EID 1 only fields. A Sysmon configuration monitoring Process Creation is required")
+                    break
+            if not enable_sysmon:
+                for field in WINDOWS_SECURITY_SPECIAL_PROCESS_CREATION_FIELDS:
+                    if field in all_process_creation_fields:
+                        if "{0CCE922B-69AE-11D9-BED3-505054503030}" not in subcategory_id:
+                            enable_4688 = True
+                            print("  -> There are rules in the set using Microsoft-Windows-Security-Auditing EID 4688 only fields. Audit policy sub-category {0CCE922B-69AE-11D9-BED3-505054503030} / 'Process Creation' must be enabled")
+                            break
+                        else:
+                            break
+                if not enable_4688:
+                    print("  -> Audit policy sub-category {0CCE922B-69AE-11D9-BED3-505054503030} / 'Process Creation' must be enabled")
+
+        if windows_category_ps_module_dict:
+            print(f"\nChecking rules with logsource - 'product: windows / category: ps_module'...")
+            
+            pwsh5 = "Windows Components/Windows PowerShell"
+            #pwsh7 = "PowerShell Core" # TODO: Add PWSH7 Checks
+
+            if pwsh5 in enabled_other_logs:
+                if enabled_other_logs[pwsh5][0]['Turn on Module Logging'] != "Enabled":
+                    print("  -> There are rules in the set using Microsoft-Windows-PowerShell EID 4103. Audit policy 'Module Logging' must be enabled")
+                else:
+                    print("  -> PowerShell 'Module Logging' is Enabled")
+        
+        if windows_category_ps_script_dict:
+            print(f"\nChecking rules with logsource - 'product: windows / category: ps_script'...")
+            
+            pwsh5 = "Windows Components/Windows PowerShell"
+            #pwsh7 = "PowerShell Core" # TODO: Add PWSH7 Checks
+
+            if pwsh5 in enabled_other_logs:
+                if enabled_other_logs[pwsh5][1]['Turn on PowerShell Script Block Logging'] != "Enabled":
+                    print("  -> There are rules in the set using Microsoft-Windows-PowerShell EID 4104. Audit policy PowerShell 'Script Block Logging' must be enabled")
+                else:
+                    print("  -> PowerShell 'Script Block Logging' is Enabled")
+        
+        if windows_service_security_dict:
+            print(f"\nChecking rules using logsource - 'product: windows / service: security'...")
+            all_security_eids = []
+            for filename, eids in windows_service_security_dict.items():
+                all_security_eids += eids
+            all_security_eids = list(set(all_security_eids))
+            for eid in all_security_eids:
+                for key, value in SECURITY_EVENT_ID_MAPPING.items():
+                    if value['EventIDs']:
+                        if ((eid in value['EventIDs']) and (key not in subcategory_id)):
+                            print("  ->  There are rules in the set using events generated from Audit policy sub-category '{}'. The audit policy '{}' must be enabled".format(key, value['Name']))
+                            subcategory_id.append(key)
+        
+    print("\nFor more information on how to setup logging, you can visit: https://github.com/sigma/sigma/tree/rules-doc/rules-documentation/logsource-guides") 
