@@ -463,6 +463,7 @@ if __name__ == "__main__":
                             print("  -> There are rules in the set using Microsoft-Windows-Security-Auditing EID 4688 only fields. Audit policy sub-category {0CCE922B-69AE-11D9-BED3-505054503030} / 'Process Creation' must be enabled")
                             break
                         else:
+                            print("Audit policy sub-category {0CCE922B-69AE-11D9-BED3-505054503030} / 'Process Creation' is already enabled")
                             break
                 if not enable_4688:
                     print("  -> Audit policy sub-category {0CCE922B-69AE-11D9-BED3-505054503030} / 'Process Creation' must be enabled")
