@@ -1,0 +1,37 @@
+title: Modify System Firewall
+id: 323ff3f5-0013-4847-bbd4-250b5edb62cc
+related:
+  - id: 53059bc0-1472-438b-956a-7508a94a91f0
+    type: similar
+status: experimental
+description: |
+    Detects the removal of system firewall rules. Adversaries may only delete or modify a specific system firewall rule to bypass controls limiting network usage or access.
+    Detection rules that match only on the disabling of firewalls will miss this.
+references:
+    - https://www.trendmicro.com/en_us/research/22/c/cyclops-blink-sets-sights-on-asus-routers--.html
+    - https://blog.aquasec.com/container-security-tnt-container-attack
+author: IAI
+date: 2023/03/06
+tags:
+    - attack.t1562.004
+    - attack.defense_evasion
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection1:
+        type: 'EXECVE'
+        a0: 'iptables'
+        a1|contains: 'DROP'
+    selection2:
+        type: 'EXECVE'
+        a0: 'firewall-cmd'
+        a1|contains: 'remove'
+    selection3:
+        type: 'EXECVE'
+        a0: 'ufw'
+        a1|contains: 'delete'
+    condition: 1 of selection*
+falsepositives:
+    - Legitimate admin activity
+level: medium
