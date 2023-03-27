@@ -1,4 +1,4 @@
-title: Suspicious Uncommon Download with BITS from Suspicious TLD
+title: BITS Transfer Job With Uncommon Or Suspicious Remote TLD
 id: 6d44fb93-e7d2-475c-9d3d-54c9c1e33427
 status: experimental
 description: Detects a suspicious download using the BITS client from a FQDN that is unusual. Adversaries may abuse BITS jobs to persistently execute or clean up after malicious payloads.
@@ -7,7 +7,7 @@ references:
     - https://twitter.com/malmoeb/status/1535142803075960832
 author: Florian Roth (Nextron Systems)
 date: 2022/06/10
-modified: 2022/11/27
+modified: 2023/03/27
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -18,13 +18,13 @@ logsource:
 detection:
     selection:
         EventID: 16403
-    filter:
+    filter_main_generic:
         RemoteName|contains:
-            - '.com'
-            - '.azureedge.net'
-            - '.sfx.ms'
-            - 'download.mozilla.org' # https://download.mozilla.org/?product=firefox-101.0.1-partial-101.0&amp;os=win64&amp;lang=en-US
-    condition: selection and not filter
+            - '.azureedge.net/'
+            - '.com/'
+            - '.sfx.ms/'
+            - 'download.mozilla.org/' # https://download.mozilla.org/?product=firefox-101.0.1-partial-101.0&amp;os=win64&amp;lang=en-US
+    condition: selection and not 1 of filter_main_*
 falsepositives:
-    - Other legitimate domains used by software updaters
+    - This rule doesn't exclude other known TLDs such as ".org" or ".net". It's recommended to apply additional filters for softwares and scripts that leverage the BITS service
 level: medium

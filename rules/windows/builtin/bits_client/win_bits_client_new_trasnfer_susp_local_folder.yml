@@ -1,14 +1,12 @@
-title: Download with BITS to Suspicious Folder
+title: BITS Transfer Job Download To Potential Suspicious Folder
 id: f8a56cb7-a363-44ed-a82f-5926bb44cd05
 status: experimental
-description: |
-    Adversaries may abuse BITS jobs to persistently execute or clean up after malicious payloads.
-    Windows Background Intelligent Transfer Service (BITS) is a low-bandwidth, asynchronous file transfer mechanism exposed through [Component Object Model](https://attack.mitre.org/techniques/T1559/001)
+description: Detects new BITS transfer job where the LocalName/Saved file is stored in a potentially suspicious location
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1197/T1197.md
 author: Florian Roth (Nextron Systems)
 date: 2022/06/28
-modified: 2023/01/10
+modified: 2023/03/27
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -20,11 +18,11 @@ detection:
     selection:
         EventID: 16403
         LocalName|contains:
-            - 'C:\Users\Public\'
-            - '%public%'
+            # TODO: Add more interesting suspicious paths
             - '\Desktop\'
+            - 'C:\Users\Public\'
             - 'C:\PerfLogs\'
     condition: selection
 falsepositives:
-    - Administrator PowerShell scripts
+    - Unknown
 level: high

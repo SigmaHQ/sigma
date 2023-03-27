@@ -1,10 +1,10 @@
-title: Suspicious Download with BITS from Direct IP
+title: BITS Transfer Job Download From Direct IP
 id: 90f138c1-f578-4ac3-8c49-eecfd847c8b7
 related:
     - id: 99c840f2-2012-46fd-9141-c761987550ef
       type: similar
 status: experimental
-description: Detects a suspicious download using the BITS client from a direct IP. Adversaries may abuse BITS jobs to persistently execute or clean up after malicious payloads.
+description: Detects a BITS transfer job downloading file(s) from a direct IP address.
 references:
     - https://blog.netspi.com/15-ways-to-download-a-file/#bitsadmin
     - https://isc.sans.edu/diary/22264
@@ -12,6 +12,7 @@ references:
     - https://blog.talosintelligence.com/breaking-the-silence-recent-truebot-activity/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023/01/11
+modified: 2023/03/27
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -22,7 +23,7 @@ logsource:
 detection:
     selection:
         EventID: 16403
-        RemoteName|contains:
+        RemoteName|contains: # TODO: Replace with CIDR modifier
             - 'http://1'
             - 'http://2'
             - 'http://3'
@@ -41,7 +42,7 @@ detection:
             - 'https://7'
             - 'https://8'
             - 'https://9'
-    filter_local_networks:
+    filter_optional_local_networks:
         RemoteName|contains:
             - '://10.' #10.0.0.0/8
             - '://192.168.' #192.168.0.0/16
@@ -63,12 +64,12 @@ detection:
             - '://172.31.'
             - '://127.' #127.0.0.0/8
             - '://169.254.' #169.254.0.0/16
-    filter_seven_zip:
+    filter_optional_seven_zip:
         RemoteName|contains:
             # For https://7-zip.org/
             - 'https://7-'
             - 'http://7-'
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high

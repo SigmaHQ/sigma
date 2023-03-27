@@ -1,13 +1,12 @@
-title: Suspicious Task Added by Bitsadmin
+title: New BITS Job Created Via Bitsadmin
 id: 1ff315dc-2a3a-4b71-8dde-873818d25d39
 status: test
-description: |
-    Adversaries may abuse BITS jobs to persistently execute or clean up after malicious payloads.
-    Windows Background Intelligent Transfer Service (BITS) is a low-bandwidth, asynchronous file transfer mechanism exposed through [Component Object Model](https://attack.mitre.org/techniques/T1559/001)
+description: Detects the creation of a new bits job by Bitsadmin
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1197/T1197.md
 author: frack113
 date: 2022/03/01
+modified: 2023/03/27
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -21,5 +20,5 @@ detection:
         processPath|endswith: '\bitsadmin.exe'
     condition: selection
 falsepositives:
-    - Administrator PowerShell scripts
+    - Many legitimate applications or scripts could leverage "bitsadmin". This event is best correlated with EID 16403 via the JobID field
 level: low

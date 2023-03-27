@@ -1,14 +1,12 @@
-title: Suspicious Download File Extension with BITS
+title: BITS Transfer Job Downloading File Potential Suspicious Extension
 id: b85e5894-9b19-4d86-8c87-a2f3b81f0521
 status: experimental
-description: |
-    Adversaries may abuse BITS jobs to persistently execute or clean up after malicious payloads.
-    Windows Background Intelligent Transfer Service (BITS) is a low-bandwidth, asynchronous file transfer mechanism exposed through [Component Object Model](https://attack.mitre.org/techniques/T1559/001)
+description: Detects new BITS transfer job saving local files with potential suspicious extensions
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1197/T1197.md
 author: frack113
 date: 2022/03/01
-modified: 2023/01/10
+modified: 2023/03/27
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -20,17 +18,21 @@ detection:
     selection:
         EventID: 16403
         LocalName|endswith:
+            # TODO: Extend this list with more interesting file extensions
             - '.bat'
             - '.dll'
-            - '.exe'
+            - '.exe' # TODO: Might wanna comment this if it generates tons of FPs
+            - '.hta'
             - '.ps1'
+            - '.psd1'
+            - '.sh'
             - '.vbe'
             - '.vbs'
-    filter:
+    filter_optional_generic:
         # Typical updates: Chrome, Dropbox etc.
         LocalName|contains: '\AppData\'
         RemoteName|contains: '.com'
-    condition: selection and not filter
+    condition: selection and not 1 of filter_optional_
 falsepositives:
-    - Administrator PowerShell scripts
+    - While the file extensions in question can be suspicious at times. It's best to add filters according to your environment to avoid large amount false positives
 level: medium
