@@ -1,0 +1,32 @@
+title: Attempt to Win Authentication with Valid Users
+id: b1e8c0dd-aa66-4685-abb5-ef778f3e86aa
+status: experimental
+description: Detects a certain number of authentication failed logs related to different (valid) users and performed by the same source ip. This could indicate an attempt to non-authorized authentication. This scenario is performed post a user enumeration.
+references:
+      - https://github.com/lefayjey/linWinPwn
+      - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4625
+      - https://social.technet.microsoft.com/Forums/lync/en-US/9eac1798-36da-4b57-8c7e-e01072765bd4/failure-reasons-eg-2313-in-id-4625?forum=winserversecurity
+author: '@d4ns4n_'
+date: 2023/03/27
+tags:
+   - attack.discovery
+   - attack.t1087
+   - attack.credential_access
+   - attack.t1110.003
+   - attack.initial_access
+   - attack.t1078.002      
+logsource:
+   category: authentication_log
+   product: windows
+   service: security
+detection: 
+   selection:
+      EventID: 4625
+      SubjectUserSid: 'S-1-0-0'  # The null/nobody SID (used when SID is unknown)
+      FailureReason: '%%2313'  # Unknown user name or bad password.
+      SubStatus : '0xc000006a'  # user name is correct but the password is wrong
+      Status: '0xc000006d'
+   timeframe: 2m
+   condition: selection | count(UserName) by host_name,src_ip > 3 # The idea is to avoid false positive caused by scripts 
+falsepositives:
+level: high
