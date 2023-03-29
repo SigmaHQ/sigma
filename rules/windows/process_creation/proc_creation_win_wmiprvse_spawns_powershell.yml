@@ -1,4 +1,4 @@
-title: WmiPrvSE Spawned PowerShell
+title: Potential WMI Lateral Movement WmiPrvSE Spawned PowerShell
 id: 692f0bec-83ba-4d04-af7e-e884a96059b6
 related:
     - id: 8a582fe2-0882-4b89-a82a-da6b2dc32937
@@ -6,12 +6,12 @@ related:
     - id: d21374ff-f574-44a7-9998-4a8c8bf33d7d
       type: similar
 status: stable
-description: Detects Powershell as a child of the WmiPrvSE process. Which could be a sign of lateral movement via WMI
+description: Detects Powershell as a child of the WmiPrvSE process. Which could be a sign of WMI lateral movement.
 references:
     - https://any.run/report/68bc255f9b0db6a0d30a8f2dadfbee3256acfe12497bf93943bc1eab0735e45e/a2385d6f-34f7-403c-90d3-b1f9d2a90a5e
 author: Markus Neis @Karneades
 date: 2019/04/03
-modified: 2023/03/23
+modified: 2023/03/29
 tags:
     - attack.execution
     - attack.t1047
@@ -29,16 +29,9 @@ detection:
         - OriginalFileName:
             - 'PowerShell.EXE'
             - 'pwsh.dll'
-    filter_null_1:
-        CommandLine: 'null'
-    filter_null_2:  # Some backends need the null value in a separate expression
-        CommandLine: null
-    filter_werfault:
-        Image|endswith: '\WerFault.exe'
-    filter_wmiprvse:
-        Image|endswith: '\WmiPrvSE.exe' # In some legitimate case WmiPrvSE was seen spawning itself
-    condition: all of selection* and not 1 of filter_*
+    condition: all of selection_*
 falsepositives:
     - AppvClient
     - CCM
-level: high
+    - WinRM
+level: medium
