@@ -162,7 +162,7 @@ class AzureLogAnalyticsBackend(SingleTextQueryBackend):
             self.table = "OfficeActivity"
         elif self.service and self.service.lower() == "azuread":
             self.table = "AuditLogs"
-        elif self.service and self.service.lower() == "azureactivity":
+        elif self.service and (self.service.lower() == "azureactivity" or self.service.lower() == "activitylogs"):
             self.table = "AzureActivity"
         else:
             if self.service:
