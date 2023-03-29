@@ -6,9 +6,9 @@ references:
     - https://www.fireeye.com/blog/threat-research/2019/01/bypassing-network-restrictions-through-rdp-tunneling.html
     - https://adepts.of0x.cc/netsh-portproxy-code/
     - https://www.dfirnotes.net/portproxy_detection/
-author: Florian Roth (Nextron Systems), omkar72, oscd.community
+author: Florian Roth (Nextron Systems), omkar72, oscd.community, Swachchhanda Shrawan Poudel
 date: 2019/01/29
-modified: 2023/02/13
+modified: 2023/03/29
 tags:
     - attack.lateral_movement
     - attack.defense_evasion
@@ -22,12 +22,18 @@ detection:
         - Image|endswith: '\netsh.exe'
         - OriginalFileName: 'netsh.exe'
     selection_cli_1:
-        CommandLine|contains|all:
+        CommandLine|contains|all: //netsh interface portproxy add v4tov4 listenaddress=127.0.0.1 listenport=9000 connectaddress=192.168.0.10 connectport=80
             - 'interface'
             - 'portproxy'
             - 'add'
             - 'v4tov4'
     selection_cli_2:
+        CommandLine|contains|all:
+            - 'i'               //netsh I p a v l=8001 listena=127.0.0.1 connectp=80 c=192.168.1.1
+            - 'p'
+            - 'a'
+            - 'v'
+    selection_cli_3:
         CommandLine|contains|all:
             - 'connectp'
             - 'listena'
