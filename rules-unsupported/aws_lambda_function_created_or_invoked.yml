@@ -1,0 +1,27 @@
+title: AWS Lambda Function Created or Invoked
+id: d914951b-52c8-485f-875e-86abab710c0b
+status: unsupported
+description: Detects when an user creates or invokes a lambda function.
+references:
+    - https://rhinosecuritylabs.com/aws/aws-privilege-escalation-methods-mitigation/
+author: Austin Songer @austinsonger
+date: 2021/10/03
+modified: 2023/03/24
+tags:
+    - attack.privilege_escalation
+    - attack.t1078
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection1:
+        eventSource: lambda.amazonaws.com
+        eventName: CreateFunction
+    selection2:
+        eventSource: lambda.amazonaws.com
+        eventName: Invoke
+    condition: selection1 | near selection2
+falsepositives:
+    - Lambda Function created or invoked may be performed by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment.
+    - If known behavior is causing false positives, it can be exempted from the rule.
+level: low
