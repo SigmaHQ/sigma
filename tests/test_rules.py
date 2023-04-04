@@ -143,7 +143,7 @@ class TestRules(unittest.TestCase):
                 check_if_list_contain_duplicates(item, depth, special)
             elif type(item) == dict and depth <= MAX_DEPTH:
                 for keys, sub_item in item.items():
-                    if "|base64" in keys: # Covers both "base64" and "base64offset" modifiers
+                    if "|base64" in keys or "|re" in keys: # Covers both "base64" and "base64offset" modifiers, and "re" modifier
                         check_list_or_recurse_on_dict(sub_item, depth + 1, True)
                     else:
                         check_list_or_recurse_on_dict(sub_item, depth + 1, special)
@@ -153,6 +153,7 @@ class TestRules(unittest.TestCase):
                 # We use a list comprehension to convert all the element to lowercase. Since we don't care about casing in SIGMA except for the following modifiers
                 #   - "base64offset"
                 #   - "base64"
+                #   - "re"
                 if special:
                     item_ = item
                 else:
