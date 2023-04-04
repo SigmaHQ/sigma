@@ -13,6 +13,7 @@ references:
     - https://twitter.com/luc4m/status/1073181154126254080
 author: Nasreddine Bencherchali (Nextron Systems), frack113
 date: 2022/11/07
+modified: 2023/03/29
 tags:
     - attack.defense_evasion
     - attack.t1036.007
@@ -31,11 +32,20 @@ detection:
             - '.pptx.'
             - '.jpg.'
             - '.pdf.'
-    filter:
+    filter_recent:
         TargetFilename|contains:
             - '\AppData\Roaming\Microsoft\Office\Recent\'
             - '\AppData\Roaming\Microsoft\Windows\Recent\'
-    condition: selection and not filter
+    filter_excel:
+        Image|endswith: '\excel.exe'
+        TargetFilename|contains: '\AppData\Roaming\Microsoft\Excel'
+    filter_powerpoint:
+        Image|endswith: '\powerpnt.exe'
+        TargetFilename|contains: '\AppData\Roaming\Microsoft\PowerPoint'
+    filter_word:
+        Image|endswith: '\winword.exe'
+        TargetFilename|contains: '\AppData\Roaming\Microsoft\Word'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Users creating a shortcut on e.g. desktop
 level: medium
