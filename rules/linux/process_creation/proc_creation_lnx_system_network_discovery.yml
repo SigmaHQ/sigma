@@ -14,8 +14,8 @@ logsource:
     category: process_creation
     product: linux
 detection:
-    selection:
-        - Image|endswith:
+    selection_img:
+        Image|endswith:
             - '/firewall-cmd'
             - '/ufw'
             - '/iptables'
@@ -25,8 +25,9 @@ detection:
             - '/ifconfig'
             - '/systemd-resolve'
             - '/route'
-        - CommandLine|contains: '/etc/resolv.conf'
-    condition: selection
+    selection_cli:
+        CommandLine|contains: '/etc/resolv.conf'
+    condition: 1 of selection_*
 falsepositives:
     - Legitimate administration activities
 level: informational
