@@ -22,7 +22,8 @@ class TestRules(unittest.TestCase):
     def yield_next_rule_file_path(self, path_to_rules: str) -> str:
         for root, _, files in os.walk(path_to_rules):
             for file in files:
-                yield os.path.join(root, file)
+                if file.endswith('.yml'):
+                    yield os.path.join(root, file)
 
     def get_rule_yaml(self, file_path: str) -> dict:
         data = []
