@@ -16,14 +16,18 @@ import json
 
 class TestRules(unittest.TestCase):
 
-    path_to_rules = "rules"
-    
+    path_to_rules_ = ["rules", "rules-emerging-threats", "rules-placeholder", "rules-threat-hunting", "rules-compliance"]
+    path_to_rules = []
+    for path_ in path_to_rules_:
+        path_to_rules.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), path_))
+
     # Helper functions
-    def yield_next_rule_file_path(self, path_to_rules: str) -> str:
-        for root, _, files in os.walk(path_to_rules):
-            for file in files:
-                if file.endswith('.yml'):
-                    yield os.path.join(root, file)
+    def yield_next_rule_file_path(self, path_to_rules: list) -> str:
+        for path_ in path_to_rules:
+            for root, _, files in os.walk(path_):
+                for file in files:
+                    if file.endswith('.yml'):
+                        yield os.path.join(root, file)
 
     def get_rule_yaml(self, file_path: str) -> dict:
         data = []
