@@ -1,0 +1,30 @@
+title: Remote Thread Creation Via PowerShell In Rundll32
+id: 99b97608-3e21-4bfe-8217-2a127c396a0e
+related:
+    - id: eeb2e3dc-c1f4-40dd-9bd5-149ee465ad50
+      type: similar
+status: experimental
+description: Detects the creation of a remote thread from a Powershell process in a rundll32 process
+references:
+    - https://www.fireeye.com/blog/threat-research/2018/06/bring-your-own-land-novel-red-teaming-technique.html
+author: Florian Roth (Nextron Systems)
+date: 2018/06/25
+modified: 2023/03/28
+tags:
+    - attack.defense_evasion
+    - attack.execution
+    - attack.t1218.011
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: create_remote_thread
+detection:
+    selection:
+        SourceImage|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        TargetImage|endswith: '\rundll32.exe'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

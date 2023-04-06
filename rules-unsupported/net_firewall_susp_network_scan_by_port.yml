@@ -1,0 +1,25 @@
+title: Network Scans Count By Destination Port
+id: fab0ddf0-b8a9-4d70-91ce-a20547209afb
+status: unsupported
+description: Detects many failed connection attempts to different ports or hosts
+author: Thomas Patzke
+date: 2017/02/19
+modified: 2023/03/24
+tags:
+    - attack.discovery
+    - attack.t1046
+logsource:
+    category: firewall
+detection:
+    selection:
+        action: denied
+    timeframe: 24h
+    condition: selection | count(dst_port) by src_ip > 10
+fields:
+    - src_ip
+    - dst_ip
+    - dst_port
+falsepositives:
+    - Inventarization systems
+    - Vulnerability scans
+level: medium

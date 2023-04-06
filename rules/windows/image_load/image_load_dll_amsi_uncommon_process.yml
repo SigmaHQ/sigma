@@ -8,6 +8,7 @@ references:
     - https://github.com/surya-dev-singh/AmsiBypass-OpenSession
 author: frack113
 date: 2023/03/12
+modified: 2023/03/24
 tags:
     - attack.defense_evasion
     - attack.impact
@@ -18,11 +19,12 @@ logsource:
 detection:
     selection:
         ImageLoaded|endswith: '\amsi.dll'
-    filter_windows:
-        - Image:
+    filter_exact:
+        Image:
             - 'C:\Windows\explorer.exe'
             - 'C:\Windows\Sysmon64.exe'
-        - Image|startswith:
+    filter_generic:
+        Image|startswith:
             - 'C:\Windows\System32\'
             - 'C:\Windows\SysWOW64\'
             - 'C:\Windows\WinSxS\'
@@ -38,6 +40,10 @@ detection:
             - 'C:\Windows\Microsoft.NET\Framework\'
             - 'C:\Windows\Microsoft.NET\Framework64\'
         Image|endswith: '\ngentask.exe'
+    filter_null:
+        Image: null
+    filter_empty:
+        Image: ''
     condition: selection and not 1 of filter_*
 falsepositives:
     - Likely
