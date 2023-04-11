@@ -11,7 +11,7 @@ references:
     - https://docs.microsoft.com/en-us/windows/win32/wmisdk/mofcomp
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/07/12
-modified: 2023/03/30
+modified: 2023/04/11
 tags:
     - attack.execution
     - attack.t1218
@@ -41,7 +41,11 @@ detection:
         ParentImage: 'C:\Windows\System32\wbem\WmiPrvSE.exe'
         CommandLine|contains: 'C:\Windows\TEMP\'
         CommandLine|endswith: '.mof'
-    condition: all of selection_* and not 1 of filter_main_*
+    filter_optional_null_parent:
+        # Sometimes the parent information isn't available from the Microsoft-Windows-Security-Auditing provder.
+        CommandLine|contains: 'C:\Windows\TEMP\'
+        CommandLine|endswith: '.mof'
+    condition: all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high

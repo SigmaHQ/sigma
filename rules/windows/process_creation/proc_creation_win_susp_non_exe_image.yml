@@ -6,7 +6,7 @@ references:
     - https://pentestlaboratories.com/2021/12/08/process-ghosting/
 author: Max Altgelt (Nextron Systems)
 date: 2021/12/09
-modified: 2023/01/25
+modified: 2023/04/11
 tags:
     - attack.defense_evasion
 logsource:
@@ -17,82 +17,87 @@ detection:
         Image|endswith:
             - '.exe'
             - '.tmp' # sadly many installers use this extension
-    filter_null:
-        Image: null
-    filter_image: # Windows utilities without extension
+            - '.scr'
+    filter_main_image: # Windows utilities without extension
         Image:
             - 'System'
             - 'Registry'
             - 'MemCompression'
             - 'vmmem'
-    filter_empty:
-        Image:
-            - '-'
-            - ''
-    filter_starts:
+    filter_main_msi_installers:
         Image|startswith: 'C:\Windows\Installer\MSI'
-    filter_pstarts:
-        ParentImage|startswith:
-            - 'C:\ProgramData\Avira\'
-            - 'C:\Windows\System32\DriverStore\FileRepository\'
-    filter_screensaver:
-        Image|endswith: '.scr'
-    filter_nvidia:
-        Image|contains: 'NVIDIA\NvBackend\'
-        Image|endswith: '.dat'
-    filter_com:
+    filter_main_driver_store:
+        Image|startswith: 'C:\Windows\System32\DriverStore\FileRepository\'
+    filter_main_msi_rollbackfiles:
+        Image|startswith: 'C:\Config.Msi\'
+        Image|endswith:
+            - '.rbf'
+            - '.rbs'
+    filter_main_windows_helper:
+        ParentImage|startswith: C:\Windows\Temp\
+        Image|startswith: 'C:\Windows\Temp\Helper\'
+    filter_main_com:
         Image|startswith:
             - 'C:\Windows\System32\'
             - 'C:\Windows\SysWOW64\'
         Image|endswith: '.com'
-    filter_winscp:
+    filter_optional_empty:
+        Image:
+            - '-'
+            - ''
+    filter_optional_null:
+        Image: null
+    filter_optional_avira:
+        ParentImage|startswith: 'C:\ProgramData\Avira\'
+    filter_optional_nvidia:
+        Image|contains: 'NVIDIA\NvBackend\'
+        Image|endswith: '.dat'
+    filter_optional_winscp:
         Image|endswith: '\WinSCP.com'
-    filter_vscode:
+    filter_optional_vscode:
         Image|contains|all:
             - 'C:\Users\'
             - '\AppData\'
             - '.tmp'
             - 'CodeSetup'
-    filter_libreoffice:
+    filter_optional_libreoffice:
         Image|endswith: '\program\soffice.bin'
-    filter_emc_networker:
+    filter_optional_emc_networker:
         Image:
             - 'C:\Program Files\EMC NetWorker\Management\GST\apache\cgi-bin\update_jnlp.cgi'
             - 'C:\Program Files (x86)\EMC NetWorker\Management\GST\apache\cgi-bin\update_jnlp.cgi'
-    filter_winpakpro:
+    filter_optional_winpakpro:
         Image|startswith:
             - 'C:\Program Files (x86)\WINPAKPRO\'
             - 'C:\Program Files\WINPAKPRO\'
         Image|endswith: '.ngn'
-    filter_myq_server:
+    filter_optional_myq_server:
         Image:
             - 'C:\Program Files (x86)\MyQ\Server\pcltool.dll'
             - 'C:\Program Files\MyQ\Server\pcltool.dll'
-    filter_visualstudio:
+    filter_optional_visualstudio:
         Image|startswith:
             - 'C:\Program Files\Microsoft Visual Studio\'
             - 'C:\Program Files (x86)\Microsoft Visual Studio'
         Image|endswith: '.com'
-    filter_msi_rollbackfiles:
-        Image|startswith: 'C:\Config.Msi\'
-        Image|endswith:
-            - '.rbf'
-            - '.rbs'
-    filter_wsl:
+    filter_optional_wsl:
         Image|contains|all:
             - '\AppData\Local\Packages\'
             - '\LocalState\rootfs\'
-    filter_lzma_exe:
+    filter_optional_lzma_exe:
         Image|endswith: '\LZMA_EXE'
-    filter_windows_helper:
-        ParentImage|startswith: C:\Windows\Temp\
-        Image|startswith: 'C:\Windows\Temp\Helper\'
-    filter_dell_dock:
+    filter_optional_dell_dock:
         ParentImage|startswith: 'C:\Windows\Temp\'
         ParentImage|endswith: '\TBT_Dock_Firmware\GetDockVer32W.exe'
-    filter_firefox_crashreporter:
+    filter_optional_firefox_crashreporter:
         Image|startswith: 'C:\Program Files\Mozilla Firefox\tobedeleted\'
-    condition: not known_image_extension and not 1 of filter*
+    filter_optional_office_c2r:
+        ParentProcessName: 'C:\Windows\UUS\amd64\MoUsoCoreWorker.exe'
+        Image|startswith: 'C:\$Extend\$Deleted\'
+        CommandLine|contains|all:
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\OfficeC2RClient.exe'
+            - '/update UPDATEORCHESTRATOR displaylevel=False'
+    condition: not known_image_extension and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high
