@@ -8,8 +8,9 @@ description: Detects successful logon from public IP address via RDP. This can i
 references:
     - https://www.inversecos.com/2020/04/successful-4624-anonymous-logons-to.html
     - https://twitter.com/Purp1eW0lf/status/1616144561965002752
-author: Micah Babinski, @micahbabinski
+author: Micah Babinski (@micahbabinski), Zach Mathis (@yamatosecurity)
 date: 2023/01/19
+modified: 2023/03/16
 tags:
     - attack.initial_access
     - attack.credential_access
@@ -23,15 +24,21 @@ detection:
     selection:
         EventID: 4624
         LogonType: 10
-    filter:
-        SubjectUserName: '-'
+    filter_ipv4:
         IpAddress|cidr:
-            - 10.0.0.0/8
-            - 172.16.0.0/12
-            - 192.168.0.0/16
-            - 224.0.0.0/4
-            - 127.0.0.0/8
-    condition: selection and not filter
+            - '127.0.0.0/8'
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+    filter_ipv6:
+        - IpAddress: '::1' # IPv6 loopback
+        - IpAddress|startswith:
+            - 'fe80:'  # link-local address
+            - 'fc'  # private address range fc00::/7
+            - 'fd'  # private address range fc00::/7
+    filter_empty:
+        IpAddress: '-'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Legitimate or intentional inbound connections from public IP addresses on the RDP port.
 level: medium

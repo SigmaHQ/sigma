@@ -6,9 +6,9 @@ references:
     - https://www.volexity.com/blog/2021/03/02/active-exploitation-of-microsoft-exchange-zero-day-vulnerabilities/
     - https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers/
     - https://www.intrinsec.com/apt27-analysis/
-author: FPT.EagleEye, Nasreddine Bencherchali
+author: FPT.EagleEye, Nasreddine Bencherchali (Nextron Systems)
 date: 2021/03/03
-modified: 2022/12/09
+modified: 2023/03/24
 tags:
     - attack.execution
     - attack.t1059.001
@@ -31,10 +31,11 @@ detection:
         CommandLine|contains:
             - 'Microsoft.Exchange.Powershell.Snapin'
             - 'Microsoft.Exchange.Management.PowerShell.SnapIn'
-    condition: all of selection_*
-fields:
-    - CommandLine
-    - ParentCommandLine
+    filter_msiexec:
+        # ParentCommandLine: C:\Windows\System32\MsiExec.exe -Embedding C9138ECE2536CB4821EB5F55D300D88E E Global\MSI0000
+        ParentImage: 'C:\Windows\System32\msiexec.exe'
+        CommandLine|contains: '$exserver=Get-ExchangeServer ([Environment]::MachineName) -ErrorVariable exerr 2> $null'
+    condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Unknown
 level: high

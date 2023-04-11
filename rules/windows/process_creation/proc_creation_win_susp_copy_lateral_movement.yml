@@ -7,9 +7,9 @@ references:
     - https://drive.google.com/file/d/1lKya3_mLnR3UQuCoiYruO3qgu052_iS_/view
     - https://www.elastic.co/guide/en/security/current/remote-file-copy-to-a-hidden-share.html
     - https://www.microsoft.com/en-us/security/blog/2022/10/18/defenders-beware-a-case-for-post-ransomware-investigations/
-author: 'Florian Roth (Nextron Systems), oscd.community, Teymur Kheirkhabarov @HeirhabarovT, Zach Stanford @svch0st, Nasreddine Bencherchali'
+author: Florian Roth (Nextron Systems), oscd.community, Teymur Kheirkhabarov @HeirhabarovT, Zach Stanford @svch0st, Nasreddine Bencherchali
 date: 2019/12/30
-modified: 2023/01/31
+modified: 2023/02/02
 tags:
     - attack.lateral_movement
     - attack.collection
@@ -50,11 +50,12 @@ detection:
             - 'move-item'
             - ' mi '
             - ' mv '
-    target:
-        CommandLine|contains|all:
+    selection_target:
+        - CommandLine|contains|all:
             - '\\\\'
             - '$'
-    condition: target and (selection_other_tools or all of selection_cmd_* or all of selection_pwsh_*)
+        - CommandLine|contains: '\Sysvol\'
+    condition: selection_target and (selection_other_tools or all of selection_cmd_* or all of selection_pwsh_*)
 fields:
     - CommandLine
     - ParentCommandLine

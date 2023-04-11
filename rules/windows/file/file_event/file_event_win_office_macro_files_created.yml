@@ -1,0 +1,31 @@
+title: Office Macro File Creation
+id: 91174a41-dc8f-401b-be89-7bfc140612a0
+related:
+    - id: 0e29e3a7-1ad8-40aa-b691-9f82ecd33d66
+      type: similar
+status: experimental
+description: Detects the creation of a new office macro files on the systems
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1566.001/T1566.001.md
+    - https://docs.microsoft.com/en-us/deployoffice/compat/office-file-format-reference
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2022/01/23
+tags:
+    - attack.initial_access
+    - attack.t1566.001
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|endswith:
+            - '.docm'
+            - '.dotm'
+            - '.xlsm'
+            - '.xltm'
+            - '.potm'
+            - '.pptm'
+    condition: selection
+falsepositives:
+    - Very common in environments that rely heavily on macro documents
+level: low

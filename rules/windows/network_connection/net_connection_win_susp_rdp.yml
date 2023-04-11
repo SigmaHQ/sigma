@@ -6,7 +6,7 @@ references:
     - https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2019-0708
 author: Markus Neis
 date: 2019/05/15
-modified: 2022/09/02
+modified: 2023/03/21
 tags:
     - attack.lateral_movement
     - attack.t1021.001
@@ -18,7 +18,7 @@ detection:
     selection:
         DestinationPort: 3389
         Initiated: 'true'
-    filter:
+    filter_generic:
         - Image|endswith:
             - '\mstsc.exe'
             - '\RTSApp.exe'
@@ -46,7 +46,11 @@ detection:
             - '\Avast\AvastSvc.exe'
         - Image|startswith: 'C:\Program Files\SplunkUniversalForwarder\bin\'
         - Image: 'C:\Program Files\Mozilla Firefox\firefox.exe'
-    condition: selection and not filter
+    filter_null:
+        Image: null
+    filter_empty:
+        Image: ''
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Other Remote Desktop RDP tools
     - Domain controller using dns.exe

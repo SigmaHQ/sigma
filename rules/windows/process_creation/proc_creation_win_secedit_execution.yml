@@ -1,0 +1,51 @@
+title: Potential Suspicious Activity Using SeCEdit
+id: c2c76b77-32be-4d1f-82c9-7e544bdfe0eb
+status: experimental
+description: Detects potential suspicious behaviour using secedit.exe. Such as exporting or modifying the security policy
+references:
+    - https://blueteamops.medium.com/secedit-and-i-know-it-595056dee53d
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/secedit
+author: Janantha Marasinghe
+date: 2022/11/18
+modified: 2022/12/30
+tags:
+    - attack.discovery
+    - attack.persistence
+    - attack.defense_evasion
+    - attack.credential_access
+    - attack.privilege_escalation
+    - attack.t1562.002
+    - attack.t1547.001
+    - attack.t1505.005
+    - attack.t1556.002
+    - attack.t1562
+    - attack.t1574.007
+    - attack.t1564.002
+    - attack.t1546.008
+    - attack.t1546.007
+    - attack.t1547.014
+    - attack.t1547.010
+    - attack.t1547.002
+    - attack.t1557
+    - attack.t1082
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\secedit.exe'
+        - OriginalFileName: 'SeCEdit'
+    selection_flags_discovery:
+        CommandLine|contains|all:
+            - '/export'
+            - '/cfg'
+    selection_flags_configure:
+        CommandLine|contains|all:
+            - '/configure'
+            - '/db'
+    #filter:
+    #    SubjectUserName|endswith: '$'  SubjectUserName is from event ID 4719 in the Windows Security log
+    condition: selection_img and (1 of selection_flags_*)
+falsepositives:
+    - Legitimate administrative use
+level: medium

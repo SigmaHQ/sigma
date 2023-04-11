@@ -7,7 +7,7 @@ references:
     - https://twitter.com/cglyer/status/1182391019633029120
 author: Florian Roth (Nextron Systems)
 date: 2019/10/11
-modified: 2022/03/18
+modified: 2023/02/08
 tags:
     - attack.persistence
     - attack.t1546.003
@@ -17,9 +17,12 @@ logsource:
 detection:
     selection:
         ParentImage|endswith: '\EdgeTransport.exe'
-    filter:
+    filter_conhost:
         Image: 'C:\Windows\System32\conhost.exe'
-    condition: selection and not filter
+    filter_oleconverter:  # FP also documented in https://speakerdeck.com/heirhabarov/hunting-for-persistence-via-microsoft-exchange-server-or-outlook?slide=18
+        Image|startswith: 'C:\Program Files\Microsoft\Exchange Server\'
+        Image|endswith: '\Bin\OleConverter.exe'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown
 level: critical

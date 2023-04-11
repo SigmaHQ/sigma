@@ -10,7 +10,7 @@ references:
     - http://security-research.dyndns.org/pub/slides/FIRST2017/FIRST-2017_Tom-Ueltschi_Sysmon_FINAL_notes.pdf
 author: Florian Roth (Nextron Systems)
 date: 2021/11/27
-modified: 2022/11/01
+modified: 2023/04/11
 tags:
     - attack.credential_access
     - attack.t1003.001
@@ -54,7 +54,7 @@ detection:
             - '\PerfLogs\'
             - '\AppData\'
             - '\Temporary'
-    filter1:
+    filter_optional_generic_appdata:
         SourceImage|startswith: 'C:\Users\'
         SourceImage|contains: '\AppData\Local\'
         SourceImage|endswith:
@@ -66,18 +66,18 @@ detection:
             - '\WebEx\WebexHost.exe'
             - '\JetBrains\Toolbox\bin\jetbrains-toolbox.exe'
         GrantedAccess: '0x410'
-    filter_dropbox1:
+    filter_optional_dropbox_1:
         SourceImage|startswith: 'C:\Windows\Temp\'
         SourceImage|endswith: '.tmp\DropboxUpdate.exe'
         GrantedAccess:
             - '0x410'
             - '0x1410'
-    filter_dropbox2:
+    filter_optional_dropbox_2:
         SourceImage|startswith: 'C:\Users\'
         SourceImage|contains: '\AppData\Local\Temp\'
         SourceImage|endswith: '.tmp\DropboxUpdate.exe'
         GrantedAccess: '0x1410'
-    filter_nextron:
+    filter_optional_nextron:
         SourceImage|startswith:
             - 'C:\Windows\Temp\asgard2-agent\'
             - 'C:\Windows\Temp\asgard2-agent-sc\'
@@ -90,29 +90,37 @@ detection:
             - '0x1fffff'
             - '0x1010'
             - '0x101010'
-    filter_ms_products:
+    filter_optional_ms_products:
         SourceImage|startswith: 'C:\Users\'
         SourceImage|contains|all:
             - '\AppData\Local\Temp\'
             - '\vs_bootstrapper_'
         GrantedAccess: '0x1410'
-    filter_chrome:
+    filter_optional_chrome_update:
         SourceImage|startswith: 'C:\Program Files (x86)\Google\Temp\'
         SourceImage|endswith: '.tmp\GoogleUpdate.exe'
-        GrantedAccess: '0x410'
-    filter_updates_temp:
-        SourceImage|startswith:
-            - 'C:\Program Files (x86)\'
-            - 'C:\Program Files\'
-    filter_keybase:
+        GrantedAccess:
+            - '0x410'
+            - '0x1410'
+    filter_optional_keybase:
         SourceImage|startswith: 'C:\Users\'
         SourceImage|endswith: \AppData\Local\Keybase\keybase.exe
         GrantedAccess: '0x1fffff'
-    condition: selection and not 1 of filter*
+    filter_optional_avira:
+        SourceImage|contains: '\AppData\Local\Temp\is-'
+        SourceImage|endswith: '.tmp\avira_system_speedup.tmp'
+        GrantedAccess: '0x1410'
+    filter_optional_viberpc_updater:
+        SourceImage|startswith: 'C:\Users\'
+        SourceImage|contains: '\AppData\Roaming\ViberPC\'
+        SourceImage|endswith: '\updater.exe'
+        TargetImage|endswith: '\winlogon.exe'
+        GrantedAccess: '0x1fffff'
+    condition: selection and not 1 of filter_optional_*
 fields:
     - User
     - SourceImage
     - GrantedAccess
 falsepositives:
-    - Legitimate software accessing LSASS process for legitimate reason
+    - Updaters and installers are typical false positives. Apply custom filters depending on your environment
 level: high

@@ -1,0 +1,47 @@
+title: Suspicious File Created Via OneNote Application
+id: fcc6d700-68d9-4241-9a1a-06874d621b06
+status: experimental
+description: Detects suspicious files created via the OneNote application. This could indicate a potential malicious ".one"/".onepkg" file was executed as seen being used in malware activity in the wild
+references:
+    - https://www.bleepingcomputer.com/news/security/hackers-now-use-microsoft-onenote-attachments-to-spread-malware/
+    - https://blog.osarmor.com/319/onenote-attachment-delivers-asyncrat-malware/
+    - https://twitter.com/MaD_c4t/status/1623414582382567424
+    - https://labs.withsecure.com/publications/detecting-onenote-abuse
+    - https://www.trustedsec.com/blog/new-attacks-old-tricks-how-onenote-malware-is-evolving/
+    - https://app.any.run/tasks/17f2d378-6d11-4d6f-8340-954b04f35e83/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/02/09
+modified: 2023/02/27
+tags:
+    - attack.defense_evasion
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\onenote.exe'
+            - '\onenotem.exe'
+            - '\onenoteim.exe'
+        TargetFilename|contains: '\AppData\Local\Temp\OneNote\'
+        TargetFilename|endswith:
+            # TODO: Add more suspicious extensions
+            - '.bat'
+            - '.chm'
+            - '.cmd'
+            - '.dll'
+            - '.exe'
+            - '.hta'
+            - '.htm'
+            - '.html'
+            - '.js'
+            - '.lnk'
+            - '.ps1'
+            - '.vbe'
+            - '.vbs'
+            - '.wsf'
+    condition: selection
+falsepositives:
+    - False positives should be very low with the extensions list cited. Especially if you don't heavily utilize OneNote.
+    - Occasional FPs might occur if OneNote is used internally to share different embedded documents
+level: high

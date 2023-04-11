@@ -1,0 +1,30 @@
+title: Execution via MSSQL Xp_cmdshell Stored Procedure
+id: 344482e4-a477-436c-aa70-7536d18a48c7
+related:
+    - id: d08dd86f-681e-4a00-a92c-1db218754417
+      type: derived
+    - id: 7f103213-a04e-4d59-8261-213dddf22314
+      type: derived
+status: deprecated
+description: Detects execution via MSSQL xp_cmdshell stored procedure. Malicious users may attempt to elevate their privileges by using xp_cmdshell, which is disabled by default.
+references:
+    - https://www.elastic.co/guide/en/security/current/execution-via-mssql-xp_cmdshell-stored-procedure.html
+author: Tim Rauch
+date: 2022/09/28
+modified: 2023/03/06
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\cmd.exe'
+        - OriginalFileName: 'Cmd.Exe'
+    selection_parent:
+        ParentImage|endswith: '\sqlservr.exe'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high

@@ -1,0 +1,50 @@
+title: Amsi.DLL Load By Uncommon Process
+id: facd1549-e416-48e0-b8c4-41d7215eedc8
+status: experimental
+description: Detects loading of Amsi.dll by uncommon processes
+references:
+    - https://infosecwriteups.com/amsi-bypass-new-way-2023-d506345944e9
+    - https://github.com/TheD1rkMtr/AMSI_patch
+    - https://github.com/surya-dev-singh/AmsiBypass-OpenSession
+author: frack113
+date: 2023/03/12
+modified: 2023/03/24
+tags:
+    - attack.defense_evasion
+    - attack.impact
+    - attack.t1490
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith: '\amsi.dll'
+    filter_exact:
+        Image:
+            - 'C:\Windows\explorer.exe'
+            - 'C:\Windows\Sysmon64.exe'
+    filter_generic:
+        Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\WinSxS\'
+    filter_program_files:
+        Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    filter_defender:
+        Image|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+        Image|endswith: '\MsMpEng.exe'
+    filter_dotnet:
+        Image|startswith:
+            - 'C:\Windows\Microsoft.NET\Framework\'
+            - 'C:\Windows\Microsoft.NET\Framework64\'
+        Image|endswith: '\ngentask.exe'
+    filter_null:
+        Image: null
+    filter_empty:
+        Image: ''
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Likely
+level: low

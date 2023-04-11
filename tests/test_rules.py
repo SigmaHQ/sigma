@@ -143,7 +143,7 @@ class TestRules(unittest.TestCase):
                 check_if_list_contain_duplicates(item, depth, special)
             elif type(item) == dict and depth <= MAX_DEPTH:
                 for keys, sub_item in item.items():
-                    if "|base64" in keys: # Covers both "base64" and "base64offset" modifiers
+                    if "|base64" in keys or "|re" in keys: # Covers both "base64" and "base64offset" modifiers, and "re" modifier
                         check_list_or_recurse_on_dict(sub_item, depth + 1, True)
                     else:
                         check_list_or_recurse_on_dict(sub_item, depth + 1, special)
@@ -153,6 +153,7 @@ class TestRules(unittest.TestCase):
                 # We use a list comprehension to convert all the element to lowercase. Since we don't care about casing in SIGMA except for the following modifiers
                 #   - "base64offset"
                 #   - "base64"
+                #   - "re"
                 if special:
                     item_ = item
                 else:
@@ -281,7 +282,7 @@ class TestRules(unittest.TestCase):
                     else:
                         condition_value1 = detection1[named_condition][condition]
                         condition_value2 = detection2[named_condition][condition]
-                    
+
                     if condition_value1 != condition_value2:
                         return False
 
@@ -364,13 +365,13 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
             elif id.lower() in dict_id.keys():
                 print(
-                    Fore.YELLOW + "Rule {} has the same 'id' than {} must be unique.".format(file, dict_id[id]))
+                    Fore.YELLOW + "Rule {} has the same 'id' as {}. Ids have to be unique.".format(file, dict_id[id]))
                 faulty_rules.append(file)
             else:
                 dict_id[id.lower()] = file
 
         self.assertEqual(faulty_rules, [], Fore.RED +
-                         "There are rules with missing or malformed 'id' fields. Create an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).")
+                         "There are rules with missing or malformed 'id' fields. Generate an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).")
 
     def test_optional_related(self):
         faulty_rules = []
@@ -391,11 +392,15 @@ class TestRules(unittest.TestCase):
                         Fore.YELLOW + "Rule {} has a 'related' field that isn't a list.".format(file))
                     faulty_rules.append(file)
                 else:
-                    # should probably test if we have only 'id' and 'type' ...
                     type_ok = True
                     for ref in related_lst:
-                        id_str = ref['id']
-                        type_str = ref['type']
+                        try:
+                            id_str = ref['id']
+                            type_str = ref['type']
+                        except KeyError:
+                            print(Fore.YELLOW + "Rule {} has an invalid form of 'related/type' value.".format(file))
+                            faulty_rules.append(file)
+                            continue
                         if not type_str in valid_type:
                             type_ok = False
                     # Only add one time if many bad type in the same file
@@ -886,7 +891,7 @@ class TestRules(unittest.TestCase):
                                     pattern_prefix = "win_dns_analytic_"
                                 elif value == "bitlocker":
                                     pattern_prefix = "win_bitlocker_"
-                        
+
                     # This value is used to test if we should add the OS infix for certain categories
                     if os_bool:
                         pattern_prefix += os_infix
@@ -930,8 +935,8 @@ class TestRules(unittest.TestCase):
                 print(Fore.RED + "Rule {} has no field 'title'.".format(file))
                 faulty_rules.append(file)
                 continue
-            elif len(title) > 70:
-                print(Fore.YELLOW + "Rule {} has a title field with too many characters (>70)".format(file))
+            elif len(title) > 100:
+                print(Fore.YELLOW + "Rule {} has a title field with too many characters (>100)".format(file))
                 faulty_rules.append(file)
             if title.startswith("Detects "):
                 print(Fore.RED + "Rule {} has a title that starts with 'Detects'".format(file))
@@ -1022,7 +1027,7 @@ class TestRules(unittest.TestCase):
     #                      "There are rules with non-conform 'logsource' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#log-source")
 
     def test_selection_list_one_value(self):
-    
+
         def treat_list(file, values, valid_, selection_name):
             # rule with only list of Keywords term
             if len(values) == 1 and not isinstance(values[0], str):
@@ -1060,19 +1065,19 @@ class TestRules(unittest.TestCase):
             detection = self.get_rule_part(
                 file_path=file, part_name="detection")
             if detection:
-                
+
                 valid = True
                 for key in detection:
                     values = detection[key]
                     if isinstance(detection[key], list):
                         valid = treat_list(file, values, valid, key)
-                    
+
                     if isinstance(detection[key], dict):
                         valid = treat_dict(file, values, valid, key)
 
                     if not valid:
                         faulty_rules.append(file)
-                        
+
         self.assertEqual(faulty_rules, [], Fore.RED +
                             "There are rules using list with only 1 element")
 
@@ -1082,8 +1087,8 @@ class TestRules(unittest.TestCase):
             detection = self.get_rule_part(
                 file_path=file, part_name="detection")
             if detection:
-                
-                # This test is a best effort to avoid breaking SIGMAC parser. You could do more testing and try to fix this once and for all by modifiying the token regular expressions https://github.com/SigmaHQ/sigma/blob/b9ae5303f12cda8eb6b5b90a32fd7f11ad65645d/tools/sigma/parser/condition.py#L107-L127 
+
+                # This test is a best effort to avoid breaking SIGMAC parser. You could do more testing and try to fix this once and for all by modifiying the token regular expressions https://github.com/SigmaHQ/sigma/blob/b9ae5303f12cda8eb6b5b90a32fd7f11ad65645d/tools/sigma/parser/condition.py#L107-L127
                 for key in detection:
                     if key[:3].lower() == "sel":
                        continue
@@ -1096,7 +1101,7 @@ class TestRules(unittest.TestCase):
                     elif key[:3].lower() == "not":
                         print( Fore.RED + "Rule {} has a selection '{}' that starts with the string 'not'".format(file, key))
                         faulty_rules.append(file)
-                        
+
         self.assertEqual(faulty_rules, [], Fore.RED +
                             "There are rules with bad selection names. Can't start a selection name with an 'or*' or an 'and*' or a 'not*' ")
 
@@ -1267,16 +1272,16 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules using condition without lowercase operator")
-    
+
     def test_broken_thor_logsource_config(self):
 
         faulty_config = False
-        
+
         # This test check of the "thor.yml" config file has a missing "WinEventLog:" prefix in Windows log sources
-        path_to_thor_config = "../tools/config/thor.yml"
+        path_to_thor_config = "../tests/thor.yml"
         path_to_thor_config = os.path.join(os.path.dirname(os.path.realpath(__file__)), path_to_thor_config)
         thor_logsources = self.get_rule_yaml(path_to_thor_config)[0]['logsources']
-    
+
         for key, value in thor_logsources.items():
             try:
                 if value["product"] == "windows":
@@ -1284,11 +1289,11 @@ class TestRules(unittest.TestCase):
                     for i in sources_list:
                         if not i.startswith('WinEventLog:'):
                             faulty_config = True
-                            print(Fore.RED + "/tools/config/thor.yml config file has a broken source. Windows Eventlog sources must start with the keyword 'WinEventLog:'")
+                            print(Fore.RED + "/tests/thor.yml config file has a broken source. Windows Eventlog sources must start with the keyword 'WinEventLog:'")
             except:
                 pass
 
-        self.assertEqual(faulty_config, False, Fore.RED + "thor.yml configuration file located in 'tools/config/thor.yml' has a borken log source definition")
+        self.assertEqual(faulty_config, False, Fore.RED + "thor.yml configuration file located in 'tests/thor.yml' has a borken log source definition")
 
     def test_re_invalid_escapes(self):
         faulty_rules = []
