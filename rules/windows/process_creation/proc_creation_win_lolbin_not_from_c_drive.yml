@@ -6,12 +6,11 @@ references:
     - https://thedfirreport.com/2021/12/13/diavol-ransomware/
     - https://www.scythe.io/library/threat-emulation-qakbot
     - https://sec-consult.com/blog/detail/bumblebee-hunting-with-a-velociraptor/
-    
 author: Christopher Peacock '@securepeacock', SCYTHE '@scythe_io', Angelo Violetti - SEC Consult '@angelo_violetti'
 date: 2022/01/25
 modified: 2023/04/12
 tags:
-    - attack.t1218.001
+    - attack.defense_evasion
 logsource:
     category: process_creation
     product: windows
@@ -35,12 +34,13 @@ detection:
             - 'REGSVR32.EXE'
             - 'installutil.exe'
             - 'CMSTP.EXE'
-    filter_currentdirectory:
-        - CurrentDirectory|contains: 'C:\'
-        - CurrentDirectory: ''
-    filter_null:
+    filter_main_currentdirectory:
+        CurrentDirectory|contains: 'C:\'
+    filter_main_empty:
+        CurrentDirectory: ''
+    filter_main_null:
         CurrentDirectory: null
-    condition: selection and not 1 of filter*
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Rare false positives could occur on servers with multiple drives.
 level: medium
