@@ -4,13 +4,13 @@ related:
     - id: 2267fe65-0681-42ad-9a6d-46553d3f3480 # Generic susp child processes rules
       type: similar
 status: test
-description: Detects Possible usage of Windows Subsystem for Linux (WSL) binary as a LOLBIN to execute arbitrary linux and windows commands
+description: Detects potential abuse of Windows Subsystem for Linux (WSL) binary as a LOLBIN to execute arbitrary linux and windows commands
 references:
     - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Wsl/
     - https://twitter.com/nas_bench/status/1535431474429808642
-author: 'oscd.community, Zach Stanford @svch0st, Nasreddine Bencherchali'
+author: oscd.community, Zach Stanford @svch0st, Nasreddine Bencherchali (Nextron Systems)
 date: 2020/10/05
-modified: 2023/01/23
+modified: 2023/04/12
 tags:
     - attack.execution
     - attack.defense_evasion
@@ -32,7 +32,8 @@ detection:
             - ' /mnt/c' # Path to mounted "C:\" partition (Indication of running Windows binaries via WSL)
             - ' --user root'
             - ' -u root'
-    filter_kill:
+            - '--debug-shell'
+    filter_main_kill:
         # This filter is to handle a FP that occurs when a process is spawned from WSL and then closed by the user
         # Example would be to open VsCode through it's server extension from WSL
             # GrandparentCommandLine: "C:\Users\XXX\AppData\Local\Programs\Microsoft VS Code\Code.exe" --ms-enable-electron-run-as-node c:\Users\XXX\.vscode\extensions\ms-vscode-remote.remote-wsl-0.72.0\dist\wslDaemon.js
@@ -42,7 +43,7 @@ detection:
         CommandLine|contains|all:
             - ' -d '
             - ' -e kill '
-    condition: all of selection_* and not 1 of filter_*
+    condition: all of selection_* and not 1 of filter_main_*
 falsepositives:
     - Automation and orchestration scripts may use this method to execute scripts etc.
     - Legitimate use by Windows to kill processes opened via WSL (example VsCode WSL server)
