@@ -1,0 +1,41 @@
+title: Suspicious Mail Forwarding
+id: c726e007-2cd0-4a55-abfb-79730fbedee5
+status: experimental
+description: Detects suspicious email forwarding or redirecting.
+references:
+    - https://redcanary.com/blog/email-forwarding-rules/
+author: Harjot Singh @cyb3rjy0t
+date: 2023/04/13
+modified: 2022/10/09
+tags:
+    - attack.exfiltration
+    - attack.t1020
+logsource:
+    product: m365
+    service: audit
+detection:
+    selection1:
+        Operation|contains: 'UpdateInboxRules'
+        OperationProperties.Value|contains: 
+        - 'Forward'
+        - 'Recipients'
+        OperationProperties.Value|contains: 
+        - 'AddMailboxRule'
+        - 'ModifyMailboxRule'
+    selection2:
+        Operation|contains: 'Set-Mailbox'
+        Parameters|contains: 
+            - 'ForwardingSmtpAddress'
+            - 'ForwardingAddress'
+    selection3:
+        Operation|contains: 
+        - 'New-InboxRule'
+        - 'Set-InboxRule'
+        Parameters|contains: 
+            - 'ForwardTo'
+            - 'ForwardAsAttachmentTo'
+            - 'RedirectTo'
+    condition: selection1 or selection2 or selection3
+falsepositives:
+    - Legit Mail Forwarding rules
+level: high
