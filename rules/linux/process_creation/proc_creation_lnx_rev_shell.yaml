@@ -11,46 +11,46 @@ tags:
    - attack.initial_access
    - attack.t1133      
 logsource:
-   category: network_connection
+   category: process_creation
    product: linux
 detection:
     # The selections can easly integrated with others techniques
     selection_bs:
         Image|endswith: 'bin/bash'
-        ProcessArgs: '-i'
+        CommandLine: '-i'
     selection_py:
         Image|contains: 'python'
-        ProcessArgs: '-c'
-        ProcessArgs|contains: 'connect'
+        CommandLine: '-c'
+        CommandLine|contains: 'connect'
     selection_php:
         Image|contains: 'php'
-        ProcessArgs: '-r'
-        ProcessArgs|contains: 'fsockopen'
+        CommandLine: '-r'
+        CommandLine|contains: 'fsockopen'
     selection_nc:
         Image|contains: 'nc'
-        ProcessArgs: 
+        CommandLine: 
             - '-r'
             - '-e'
-        ProcessArgs|contains: '/bin/sh'
+        CommandLine|contains: '/bin/sh'
     selection_pl:
         Image|contains: 'perl'
-        ProcessArgs: '-e'
-        ProcessArgs|contains|all: 
+        CommandLine: '-e'
+        CommandLine|contains|all: 
             - 'Socket'
             - '$p='
-        ProcessArgs|contains:
+        CommandLine|contains:
             - '$i='
             - 'PeerAddr'
     selection_rb:
         Image|contains: 'ruby'
-        ProcessArgs|startswith: '-rsocket -e'
-        ProcessArgs|contains:
+        CommandLine|startswith: '-rsocket -e'
+        CommandLine|contains:
             - 'TCPSocket.new'
             - 'TCPSocket.open'
     selection_xt:
         Image|contains: 'xterm'
-        ProcessArgs|contains: '-display'
-        ProcessArgs|endswith: ':1'
+        CommandLine|contains: '-display'
+        CommandLine|endswith: ':1'
     condition: 1 of selection*
 falsepositives:
     - Legitimate use of these patterns
