@@ -1,0 +1,24 @@
+title: Possible Xterm Reverse Shell
+id: 4e25af4b-246d-44ea-8563-e42aacab006b
+status: experimental
+description: Detects some of most common reverse shell techniques on Linux systems.
+references:
+      - https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
+      - https://www.revshells.com/
+author: '@d4ns4n_'
+date: 2023/04/07
+tags:
+   - attack.initial_access
+   - attack.t1133
+logsource:
+   category: process_creation
+   product: linux
+detection:
+    selection:
+        Image|contains: 'xterm'
+        CommandLine|contains: '-display'
+        CommandLine|endswith: ':1'
+    condition: selection
+falsepositives:
+    - Legitimate use of these patterns
+level: medium
