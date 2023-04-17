@@ -1,0 +1,23 @@
+title: Enable Local Manifest Installation With Winget
+id: fa277e82-9b78-42dd-b05c-05555c7b6015
+status: experimental
+description: Detects changes to the AppInstaller (winget) policy specifically the activation of the local manifest installation. Which allows a user to install new packages via custom manifests.
+references:
+    - https://github.com/nasbench/Misc-Research/tree/54b22564d1b945ac08ee3c93580500a275a8a21f/LOLBINs/Winget
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/04/17
+tags:
+    - attack.defense_evasion
+    - attack.persistence
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|endswith: '\AppInstaller\EnableLocalManifestFiles'
+        Details: 'DWORD (0x00000001)'
+    condition: selection
+falsepositives:
+    - Administrators or developers might enable this for testing purposes or to install custom private packages
+level: medium
