@@ -1,5 +1,8 @@
 title: Microsoft Binary Suspicious Communication Endpoint
 id: e0f8ab85-0ac9-423b-a73a-81b3c7b1aa97
+related:
+    - id: 635dbb88-67b3-4b41-9ea5-a3af2dd88153
+      type: obsoletes
 status: test
 description: Detects an executable in the Windows folder accessing suspicious domains
 references:
@@ -7,9 +10,12 @@ references:
     - https://twitter.com/M_haggis/status/1032799638213066752
     - https://symantec-enterprise-blogs.security.com/blogs/threat-intelligence/ransomware-hive-conti-avoslocker
     - https://www.cisa.gov/uscert/ncas/alerts/aa22-321a
-author: Florian Roth (Nextron Systems)
+    - https://twitter.com/M_haggis/status/900741347035889665
+    - https://twitter.com/M_haggis/status/1032799638213066752
+    - https://github.com/EmpireProject/Empire/blob/e37fb2eef8ff8f5a0a689f1589f424906fe13055/data/module_source/exfil/Invoke-ExfilDataToGitHub.ps1
+author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2018/08/30
-modified: 2023/01/19
+modified: 2023/04/18
 tags:
     - attack.lateral_movement
     - attack.t1105
@@ -17,33 +23,38 @@ logsource:
     category: network_connection
     product: windows
 detection:
-    selection:
+    selection_paths:
+        - Image|startswith:
+            - 'C:\PerfLogs'
+            - 'C:\Temp\'
+            - 'C:\Users\Public\'
+            - 'C:\Windows\'
+        - Image|contains: '\AppData\Temp\'
+    selection_domains:
         Initiated: 'true'
         DestinationHostname|endswith:
-            - 'dl.dropboxusercontent.com'
+            - '.ghostbin.co/'
+            - '.githubusercontent.com'       # Includes both gists and github repositories / Michael Haag (idea)
+            - '.hastebin.com/raw/'
+            - '.paste.ee'
             - '.pastebin.com'
-            - '.githubusercontent.com'       # includes both gists and github repositories
+            - 'anonfiles.com'
             - 'cdn.discordapp.com/attachments/'
+            - 'ddns.net'
+            - 'dl.dropboxusercontent.com'
             - 'mediafire.com'
             - 'mega.nz'
-            - 'ddns.net'
-            - '.paste.ee'
-            - '.hastebin.com/raw/'
-            - '.ghostbin.co/'
-            - 'ufile.io'
-            - 'anonfiles.com'
-            - 'send.exploit.in'
-            - 'transfer.sh'
-            - 'privatlab.net'
-            - 'privatlab.com'
-            - 'sendspace.com'
-            - 'pastetext.net'
-            - 'pastebin.pl'
             - 'paste.ee'
-        Image|startswith:
-            - 'C:\Windows\'
-            - 'C:\Users\Public\'
-    condition: selection
+            - 'pastebin.pl'
+            - 'pastetext.net'
+            - 'privatlab.com'
+            - 'privatlab.net'
+            - 'send.exploit.in'
+            - 'sendspace.com'
+            - 'transfer.sh'
+            - 'ufile.io'
+    condition: all of selection_*
 falsepositives:
     - Unknown
+    - '@subTee in your network'
 level: high
