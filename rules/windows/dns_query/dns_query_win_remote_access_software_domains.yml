@@ -19,7 +19,7 @@ references:
     - https://redcanary.com/blog/misbehaving-rats/
 author: frack113, Connor Martin
 date: 2022/07/11
-modified: 2022/12/23
+modified: 2023/04/18
 tags:
     - attack.command_and_control
     - attack.t1219
@@ -72,21 +72,48 @@ detection:
             - 'relay.kaseya.net'
             - 'license.bomgar.com'
             - '.beyondtrustcloud.com'
-    filter:
-        # Exclude browsers for legitimate visits of the domains mentioned above
-        # Add missing browsers you use and exclude the ones you don't
+    # Exclude browsers for legitimate visits of the domains mentioned above
+    # Add missing browsers you use and exclude the ones you don't
+    filter_optional_brave:
+        Image|endswith: '\brave.exe'
+    filter_optional_chrome:
+        Image:
+            - 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+            - 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
+    filter_optional_firefox:
+        Image:
+            - 'C:\Program Files\Mozilla Firefox\firefox.exe'
+            - 'C:\Program Files (x86)\Mozilla Firefox\firefox.exe'
+    filter_optional_ie:
+        Image:
+            - 'C:\Program Files (x86)\Internet Explorer\iexplore.exe'
+            - 'C:\Program Files\Internet Explorer\iexplore.exe'
+    filter_optional_maxthon:
+        Image|endswith: '\maxthon.exe'
+    filter_optional_edge_1:
+        - Image|startswith: 'C:\Program Files (x86)\Microsoft\EdgeWebView\Application\'
+        - Image|endswith: '\WindowsApps\MicrosoftEdge.exe'
+        - Image:
+            - 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+            - 'C:\Program Files\Microsoft\Edge\Application\msedge.exe'
+    filter_optional_edge_2:
+        Image|startswith:
+            - 'C:\Program Files (x86)\Microsoft\EdgeCore\'
+            - 'C:\Program Files\Microsoft\EdgeCore\'
         Image|endswith:
-            - '\Google\Chrome\Application\chrome.exe'
-            - '\brave.exe'
-            - '\chromium.exe'
-            - '\firefox.exe'
             - '\msedge.exe'
-            - '\opera.exe'
-            - '\microsoftedge.exe'
-            - '\iexplorer.exe'
-            - '\vivaldi.exe'
-            - '\CCleaner Browser\Application\CCleanerBrowser.exe'
-    condition: selection and not filter
+            - '\msedgewebview2.exe'
+    filter_optional_opera:
+        Image|endswith: '\opera.exe'
+    filter_optional_safari:
+        Image|endswith: '\safari.exe'
+    filter_optional_seamonkey:
+        Image|endswith: '\seamonkey.exe'
+    filter_optional_vivaldi:
+        Image|endswith: '\vivaldi.exe'
+    filter_optional_whale:
+        Image|endswith: '\whale.exe'
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
-    - Legitimate usage of the software mentioned above
+    - Likely with other browser software
 level: medium
