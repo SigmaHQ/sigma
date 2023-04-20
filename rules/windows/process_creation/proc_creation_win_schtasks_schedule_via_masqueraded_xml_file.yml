@@ -9,10 +9,11 @@ author: Elastic (author), Swachchhanda Shrawan Poudel
 date: 2023/04/20
 modified: 2023/04/20
 tags:
-    - attack.Defense Evasion
-    - attack.T1036.005
-    - attack.T1053.005
-    - attack.Persistence
+    - attack.defense_evasion
+    - attack.persistence
+    - attack.t1036.005
+    - attack.t1053.005
+    
 logsource:
     product: windows
     category: process_creation
@@ -29,8 +30,7 @@ detection:
             - '/xml'
             - '-xml'
     filter_1:
-        CommandLine|contains:
-            - '.xml'
+        CommandLine|contains: '.xml'
     filter_2:
         IntegrityLevel: 'System'
     filter_3:
@@ -41,10 +41,8 @@ detection:
             - ':\Program Files (x86)\Zemana\AntiMalware\AntiMalware.exe'
             - ':\Program Files\Dell\SupportAssist\pcdrcui.exe'
     filter_4:
-        ParentImage|endswith:
-            - '\rundll32.exe'
-        ParentCommandLine|contains:
-            - ':\WINDOWS\Installer\MSI*.tmp,zzzzInvokeManagedCustomActionOutOfProc'
+        ParentImage|endswith: '\rundll32.exe'
+        ParentCommandLine|contains: ':\WINDOWS\Installer\MSI*.tmp,zzzzInvokeManagedCustomActionOutOfProc'
     condition: (all of selection_*) and not (all of filter_*)
 falsepositives:
     - Unknown
