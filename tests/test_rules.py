@@ -137,6 +137,24 @@ class TestRules(unittest.TestCase):
         self.assertEqual(files_with_incorrect_mitre_tags, [], Fore.RED +
                          "There are rules with duplicate tags")
 
+    def test_duplicate_references(self):
+        files_with_duplicate_references = []
+
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            references = self.get_rule_part(file_path=file, part_name="references")
+            if references:
+                known_references = []
+                for reference in references:
+                    if reference in known_references:
+                        print(
+                            Fore.RED + "Rule {} has the duplicate reference {}".format(file, reference))
+                        files_with_duplicate_references.append(file)
+                    else:
+                        known_references.append(reference)
+
+        self.assertEqual(files_with_duplicate_references, [], Fore.RED +
+                         "There are rules with duplicate references")
+
     def test_look_for_duplicate_filters(self):
         def check_list_or_recurse_on_dict(item, depth: int, special: bool) -> None:
             if type(item) == list:
