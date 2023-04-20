@@ -1,0 +1,52 @@
+title: Suspicious Scheduled Task Creation via Masqueraded XML File
+id: dd2a821e-3b07-4d3b-a9ac-929fe4c6ca0c
+status: experimental
+description: Identifies the creation of a scheduled job by using an XML file without the extension of '.xml'. This behavior is typical of an attacker attempting to develop persistence while remaining undetected.
+references:
+    - https://docs.microsoft.com/en-us/windows/win32/taskschd/daily-trigger-example--xml-
+    - https://github.com/elastic/protections-artifacts/blob/main/behavior/rules/persistence_suspicious_scheduled_task_creation_via_masqueraded_xml_file.toml
+author: Elastic (author), Swachchhanda Shrawan Poudel
+date: 2023/04/20
+modified: 2023/04/20
+tags:
+    - attack.Defense Evasion
+    - attack.T1036.005
+    - attack.T1053.005
+    - attack.Persistence
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_1:
+        - OriginalFileName: 'schtasks.exe'
+        - Image|endswith: '\schtasks.exe'
+    selection_2:
+        CommandLine|contains:
+            - '/create'
+            - '-create'
+    selection_3:
+        CommandLine|contains:
+            - '/xml'
+            - '-xml'
+    filter_1:
+        CommandLine|contains:
+            - '.xml'
+    filter_2:
+        system_integrity:
+            IntegrityLevel: 'System'
+    filter_3:
+        ParentImage|contains:
+            - ':\ProgramData\OEM\UpgradeTool\CareCenter_*\BUnzip\Setup_msi.exe'
+            - ':\Program Files\Axis Communications\AXIS Camera Station\SetupActions.exe'
+            - ':\Program Files\Axis Communications\AXIS Device Manager\AdmSetupActions.exe'
+            - ':\Program Files (x86)\Zemana\AntiMalware\AntiMalware.exe'
+            - ':\Program Files\Dell\SupportAssist\pcdrcui.exe'
+    filter_4:
+        ParentImage|endswith:
+            - '\rundll32.exe'
+        ParentCommandLine|contains:
+            - ':\WINDOWS\Installer\MSI*.tmp,zzzzInvokeManagedCustomActionOutOfProc'
+    condition: (all of selection_*) and not (all of filter_*)
+falsepositives:
+    - Unknown
+level: low
