@@ -1,0 +1,27 @@
+title: Potential AWS Cloud Email Service Abuse
+id: 60b84424-a724-4502-bd0d-cc676e1bc90e
+status: unsupported
+description: Detects when the email sending feature is enabled for an AWS account and the email address verification request is dispatched in quick succession
+references:
+    - https://unit42.paloaltonetworks.com/compromised-cloud-compute-credentials/
+author: Janantha Marasinghe
+date: 2022/12/12
+modified: 2023/03/24
+tags:
+    - attack.t1583.006
+    - attack.resource_development
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection1:
+        eventSource: 'ses.amazonaws.com'
+        eventName: 'UpdateAccountSendingEnabled'
+    selection2:
+        eventSource: 'ses.amazonaws.com'
+        eventName: 'VerifyEmailIdentity'
+    timeframe: 5m
+    condition: selection1 and selection2 # We don't combine them in one selection because we want to correlate both events
+falsepositives:
+    - Legitimate SES configuration activity
+level: medium

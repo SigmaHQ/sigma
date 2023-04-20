@@ -6,7 +6,7 @@ references:
     - https://www.bleepingcomputer.com/news/security/exploited-windows-zero-day-lets-javascript-files-bypass-security-warnings/
 author: frack113
 date: 2022/10/22
-modified: 2022/10/31
+modified: 2023/04/18
 tags:
     - attack.defense_evasion
 logsource:
@@ -33,23 +33,46 @@ detection:
             - '.wsc'
             - '.wsf'
             - '.xlsx'
-    filter:
-        # Add missing browsers you use and exclude the ones you don't
+    filter_optional_brave:
+        Image|endswith: '\brave.exe'
+    filter_optional_chrome:
+        Image:
+            - 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+            - 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
+    filter_optional_firefox:
+        Image:
+            - 'C:\Program Files\Mozilla Firefox\firefox.exe'
+            - 'C:\Program Files (x86)\Mozilla Firefox\firefox.exe'
+    filter_optional_ie:
+        Image:
+            - 'C:\Program Files (x86)\Internet Explorer\iexplore.exe'
+            - 'C:\Program Files\Internet Explorer\iexplore.exe'
+    filter_optional_maxthon:
+        Image|endswith: '\maxthon.exe'
+    filter_optional_edge_1:
+        - Image|startswith: 'C:\Program Files (x86)\Microsoft\EdgeWebView\Application\'
+        - Image|endswith: '\WindowsApps\MicrosoftEdge.exe'
+        - Image:
+            - 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+            - 'C:\Program Files\Microsoft\Edge\Application\msedge.exe'
+    filter_optional_edge_2:
+        Image|startswith:
+            - 'C:\Program Files (x86)\Microsoft\EdgeCore\'
+            - 'C:\Program Files\Microsoft\EdgeCore\'
         Image|endswith:
-            - '\brave.exe'
-            - '\Google\Chrome\Application\chrome.exe'
-            - '\chromium.exe'
-            - '\firefox.exe'
             - '\msedge.exe'
-            - '\opera.exe'
-            - '\microsoftedge.exe'
-            - '\iexplorer.exe'
-            - '\vivaldi.exe'
-            - '\CCleaner Browser\Application\CCleanerBrowser.exe'
-    condition: selection and not filter
-fields:
-    - TargetFilename
-    - Image
+            - '\msedgewebview2.exe'
+    filter_optional_opera:
+        Image|endswith: '\opera.exe'
+    filter_optional_safari:
+        Image|endswith: '\safari.exe'
+    filter_optional_seamonkey:
+        Image|endswith: '\seamonkey.exe'
+    filter_optional_vivaldi:
+        Image|endswith: '\vivaldi.exe'
+    filter_optional_whale:
+        Image|endswith: '\whale.exe'
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Other legitimate browsers not currently included in the filter (please add them)
     - Legitimate downloads via scripting or command-line tools (Investigate to determine if it's legitimate)

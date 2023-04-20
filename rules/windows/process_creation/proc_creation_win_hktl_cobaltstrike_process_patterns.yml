@@ -1,13 +1,13 @@
-title: CobaltStrike Process Patterns
+title: Potential CobaltStrike Process Patterns
 id: f35c5d71-b489-4e22-a115-f003df287317
 status: experimental
-description: Detects process patterns found in Cobalt Strike beacon activity (see reference for more details) and also cases in which a China Chopper like webshell is used to run whoami
+description: Detects potential process patterns related to Cobalt Strike beacon activity
 references:
     - https://hausec.com/2021/07/26/cobalt-strike-and-tradecraft/
     - https://thedfirreport.com/2021/08/29/cobalt-strike-a-defenders-guide/
-author: Florian Roth (Nextron Systems)
+author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2021/07/27
-modified: 2022/11/07
+modified: 2023/03/29
 tags:
     - attack.execution
     - attack.t1059
@@ -15,31 +15,25 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_normal_1:
-        CommandLine|contains: '\cmd.exe /C whoami'
-        ParentImage|startswith: 'C:\Temp'
-    selection_normal_2:
-        CommandLine|contains:
+    selection_generic_1:
+        CommandLine|endswith: 'cmd.exe /C whoami'
+        ParentImage|startswith: 'C:\Temp\'
+    selection_generic_2:
+        ParentImage|endswith:
+            - '\runonce.exe'
+            - '\dllhost.exe'
+        CommandLine|contains|all:
             - 'cmd.exe /c echo'
             - '> \\\\.\\pipe'
-            - '\whoami.exe'
-        ParentImage|endswith: '\dllhost.exe'
-    selection_normal_3:
-        Image|endswith: '\cmd.exe'
-        ParentImage|endswith: '\runonce.exe'
-        ParentCommandLine|endswith: '\runonce.exe'
-    selection_special_conhost:
-        CommandLine|contains: 'conhost.exe 0xffffffff -ForceV1'
-        ParentCommandLine|contains:
-            - '/C whoami'
+    selection_conhost_1:
+        ParentCommandLine|contains|all:
             - 'cmd.exe /C echo'
             - ' > \\\\.\\pipe'
-    filter_internet_download_manager:
-        # Internet Download Manager - Chrome Extension (Remove this filter if you don't use this extension)
-        ParentCommandLine|contains:
-            - 'C:\Program Files (x86)\Internet Download Manager\IDMMsgHost.exe'
-            - 'chrome-extension://'
-    condition: 1 of selection_normal_* or (selection_special_conhost and not filter_internet_download_manager)
+        CommandLine|endswith: 'conhost.exe 0xffffffff -ForceV1'
+    selection_conhost_2:
+        ParentCommandLine|endswith: '/C whoami'
+        CommandLine|endswith: 'conhost.exe 0xffffffff -ForceV1'
+    condition: 1 of selection_*
 falsepositives:
-    - Other programs that cause these patterns (please report)
+    - Unknown
 level: high

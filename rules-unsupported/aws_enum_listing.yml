@@ -1,0 +1,23 @@
+title: Account Enumeration on AWS
+id: e9c14b23-47e2-4a8b-8a63-d36618e33d70
+status: unsupported
+description: Detects enumeration of accounts configuration via api call to list different instances and services within a short period of time.
+author: toffeebr33k
+date: 2020/11/21
+modified: 2023/03/24
+tags:
+    - attack.discovery
+    - attack.t1592
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection_eventname:
+        eventName: list*
+    timeframe: 10m
+    condition: selection_eventname | count() > 50
+fields:
+    - userIdentity.arn
+falsepositives:
+    - AWS Config or other configuration scanning activities
+level: low

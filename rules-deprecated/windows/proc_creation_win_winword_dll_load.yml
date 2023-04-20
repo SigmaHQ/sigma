@@ -1,0 +1,25 @@
+title: Winword.exe Loads Suspicious DLL
+id: 2621b3a6-3840-4810-ac14-a02426086171
+status: deprecated
+description: Detects Winword.exe loading a custom DLL using the /l flag
+author: Victor Sergeev, oscd.community
+references:
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Winword/
+date: 2020/10/09
+modified: 2022/07/25
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\winword.exe'
+        CommandLine|contains: '/l'
+    condition: selection
+fields:
+    - CommandLine
+falsepositives:
+    - Unknown
+level: medium
+tags:
+    - attack.defense_evasion
+    - attack.t1202

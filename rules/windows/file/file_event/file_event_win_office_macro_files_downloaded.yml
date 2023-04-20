@@ -10,6 +10,7 @@ references:
     - https://docs.microsoft.com/en-us/deployoffice/compat/office-file-format-reference
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/01/23
+modified: 2023/04/18
 tags:
     - attack.initial_access
     - attack.t1566.001
@@ -20,18 +21,23 @@ detection:
     selection_processes:
         Image|endswith:
             # Email clients
+            - '\RuntimeBroker.exe' # Windows Email clients uses RuntimeBroker to create the files
             - '\outlook.exe'
             - '\thunderbird.exe'
-            - '\HxOutlook.exe'
             # Browsers
             - '\brave.exe'
             - '\chrome.exe'
             - '\firefox.exe'
-            - '\iexplorer.exe'
-            - '\microsoftedge.exe'
-            - '\microsoftedgecp.exe'
+            - '\iexplore.exe'
+            - '\maxthon.exe'
+            - '\MicrosoftEdge.exe'
             - '\msedge.exe'
+            - '\msedgewebview2.exe'
             - '\opera.exe'
+            - '\safari.exe'
+            - '\seamonkey.exe'
+            - '\vivaldi.exe'
+            - '\whale.exe'
     selection_ext:
         - TargetFilename|endswith:
             - '.docm'
@@ -50,5 +56,5 @@ detection:
     condition: all of selection_*
 falsepositives:
     - Legitimate macro files downloaded from the internet
-    - Legitimate macro files sent as attachemnts via emails
+    - Legitimate macro files sent as attachments via emails
 level: medium
