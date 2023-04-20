@@ -6,16 +6,18 @@ references:
     - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd364427(v=ws.10)
 author: frack113
 date: 2022/02/19
-modified: 2023/01/17
+modified: 2023/04/21
 logsource:
     product: windows
     service: firewall-as
 detection:
     selection:
-        EventID: 2004 # A rule has been added to the Windows Defender Firewall exception list
-    filter_block:
+        EventID:
+            - 2004 # A rule has been added to the Windows Defender Firewall exception list
+            - 2071 # A rule has been added to the Windows Defender Firewall exception list. (Windows 11)
+    filter_main_block:
         Action: 2
-    filter_installations:
+    filter_main_installations:
         - ApplicationPath|startswith:
             - 'C:\Program Files\'
             - 'C:\Program Files (x86)\'
@@ -26,8 +28,8 @@ detection:
             - 'C:\Windows\System32\svchost.exe'
             - 'C:\Windows\System32\dllhost.exe'
             - 'C:\Program Files\Windows Defender\MsMpEng.exe'
-    filter_msmpeng:
+    filter_optional_msmpeng:
         ModifyingApplication|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
         ModifyingApplication|endswith: '\MsMpEng.exe'
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 level: medium
