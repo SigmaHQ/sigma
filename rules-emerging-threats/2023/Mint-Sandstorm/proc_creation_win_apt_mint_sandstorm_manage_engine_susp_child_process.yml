@@ -1,0 +1,122 @@
+title: Mint Sandstorm - ManageEngine Suspicious Process Execution
+id: 58d8341a-5849-44cd-8ac8-8b020413a31b
+status: test
+description: Detects suspicious execution from ManageEngine as seen used by Mint Sandstorm
+references:
+    - https://www.microsoft.com/en-us/security/blog/2023/04/18/nation-state-threat-actor-mint-sandstorm-refines-tradecraft-to-attack-high-value-targets/
+author: Nasreddine Bencherchali (Nextron Systems), MSTIC (idea)
+date: 2023/04/20
+tags:
+    - attack.execution
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent_path:
+        ParentImage|contains:
+            - 'manageengine'
+            - 'ServiceDesk'
+    selection_parent_image:
+        ParentImage|contains: '\java'
+    selection_special_child_powershell_img:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\powershell_ise.exe'
+    selection_special_child_powershell_cli:
+        - CommandLine|contains:
+            - ' echo '
+            - '-dumpmode'
+            - '-ssh'
+            - '.dmp'
+            - 'add-MpPreference'
+            - 'adscredentials'
+            - 'bitsadmin'
+            - 'certutil'
+            - 'csvhost.exe'
+            - 'DownloadFile'
+            - 'DownloadString'
+            - 'dsquery'
+            - 'ekern.exe'
+            - 'FromBase64String'
+            - 'iex '
+            - 'iex('
+            - 'Invoke-Expression'
+            - 'Invoke-WebRequest'
+            - 'localgroup administrators'
+            - 'net group'
+            - 'net user'
+            - 'o365accountconfiguration'
+            - 'query session'
+            - 'samaccountname='
+            - 'set-MpPreference'
+            - 'svhost.exe'
+            - 'System.IO.Compression'
+            - 'System.IO.MemoryStream'
+            - 'usoprivate'
+            - 'usoshared'
+            - 'whoami'
+        - CommandLine|re: '[-/–][Ee^]{1,2}[ncodema^]*\s[A-Za-z0-9+/=]{15,}'
+    selection_special_child_lsass_1:
+        CommandLine|contains: 'lsass'
+    selection_special_child_lsass_2:
+        CommandLine|contains:
+            - 'procdump'
+            - 'tasklist'
+            - 'findstr'
+    selection_child_wget:
+        Image|endswith: '\wget.exe'
+        CommandLine|contains: 'http'
+    selection_child_curl:
+        Image|endswith: '\curl.exe'
+        CommandLine|contains: 'http'
+    selection_child_script:
+        CommandLine|contains:
+            - 'E:jscript'
+            - 'e:vbscript'
+    selection_child_localgroup:
+        CommandLine|contains|all:
+            - 'localgroup Administrators'
+            - '/add'
+    selection_child_net:
+        CommandLine|contains:
+            - 'net' # Covers net1
+        CommandLine|contains|all:
+            - 'user'
+            - '/add'
+    selection_child_reg:
+        - CommandLine|contains|all:
+            - 'reg add'
+            - 'DisableAntiSpyware'
+            - '\Microsoft\Windows Defender'
+        - CommandLine|contains|all:
+            - 'reg add'
+            - 'DisableRestrictedAdmin'
+            - 'CurrentControlSet\Control\Lsa'
+    selection_child_wmic_1:
+        CommandLine|contains|all:
+            - 'wmic'
+            - 'process call create'
+    selection_child_wmic_2:
+        CommandLine|contains|all:
+            - 'wmic'
+            - 'delete'
+            - 'shadowcopy'
+    selection_child_vssadmin:
+        CommandLine|contains|all:
+            - 'vssadmin'
+            - 'delete'
+            - 'shadows'
+    selection_child_wbadmin:
+        CommandLine|contains|all:
+            - 'wbadmin'
+            - 'delete'
+            - 'catalog'
+    filter_main:
+        CommandLine|contains|all:
+            - 'download.microsoft.com'
+            - 'manageengine.com'
+            - 'msiexec'
+    condition: all of selection_parent_path and (all of selection_special_child_powershell_* or all of selection_special_child_lsass_* or 1 of selection_child_*) and not filter_main
+falsepositives:
+    - Unlikely
+level: critical
