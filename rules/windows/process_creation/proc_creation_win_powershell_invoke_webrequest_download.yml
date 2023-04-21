@@ -1,4 +1,4 @@
-title: Suspicious Invoke-WebRequest Usage
+title: Suspicious Invoke-WebRequest Execution
 id: 5e3cc4d8-3e68-43db-8656-eaaeefdec9cc
 related:
     - id: e218595b-bbe7-4ee5-8a96-f32a24ad3468
@@ -9,7 +9,7 @@ references:
     - https://www.sentinelone.com/blog/living-off-windows-defender-lockbit-ransomware-sideloads-cobalt-strike-through-microsoft-security-tool/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/08/02
-modified: 2022/09/13
+modified: 2023/04/21
 tags:
     - attack.command_and_control
     - attack.t1105
@@ -17,16 +17,20 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_iwr:
-        Image|endswith:
+    selection_img:
+        - Image|endswith:
             - '\powershell.exe'
             - '\pwsh.exe'
-            - '\cmd.exe'
+        - OriginalFileName:
+            - 'PowerShell.EXE'
+            - 'pwsh.dll'
+    selection_commands:
         CommandLine|contains:
+            # These are all aliases of Invoke-WebRequest
+            - 'curl '
             - 'Invoke-WebRequest'
             - 'iwr '
             - 'wget '
-            - 'curl '
     selection_flags:
         CommandLine|contains:
             - ' -ur'
@@ -34,13 +38,13 @@ detection:
     selection_susp_locations:
         CommandLine|contains:
             - '\AppData\'
-            - '\Users\Public\'
+            - '\Desktop\'
             - '\Temp\'
+            - '\Users\Public\'
             - '%AppData%'
+            - '%Public%'
             - '%Temp%'
             - '%tmp%'
-            - '%Public%'
-            - '\Desktop\'
             - 'C:\Windows\'
     condition: all of selection_*
 falsepositives:
