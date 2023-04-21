@@ -33,14 +33,18 @@ class TestRules(unittest.TestCase):
     # Don't use trademarks in rules - they require non-ASCII characters to be used on we don't want them in our rules
     TRADE_MARKS = {"MITRE ATT&CK", "ATT&CK"}
 
-    path_to_rules = "../rules"
-    path_to_rules = os.path.join(os.path.dirname(os.path.realpath(__file__)), path_to_rules)
+    path_to_rules_ = ["rules", "rules-emerging-threats", "rules-placeholder", "rules-threat-hunting", "rules-compliance"]
+    path_to_rules = []
+    for path_ in path_to_rules_:
+        path_to_rules.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), path_))
 
     # Helper functions
-    def yield_next_rule_file_path(self, path_to_rules: str) -> str:
-        for root, _, files in os.walk(path_to_rules):
-            for file in files:
-                yield os.path.join(root, file)
+    def yield_next_rule_file_path(self, path_to_rules: list) -> str:
+        for path_ in path_to_rules:
+            for root, _, files in os.walk(path_):
+                for file in files:
+                    if file.endswith('.yml'):
+                        yield os.path.join(root, file)
 
     def get_rule_part(self, file_path: str, part_name: str):
         yaml_dicts = self.get_rule_yaml(file_path)
@@ -59,7 +63,7 @@ class TestRules(unittest.TestCase):
                 data.append(part)
 
         return data
-
+    
     # Tests
     # def test_confirm_extension_is_yml(self):
         # files_with_incorrect_extensions = []
