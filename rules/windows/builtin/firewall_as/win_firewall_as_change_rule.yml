@@ -6,16 +6,18 @@ references:
     - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd364427(v=ws.10)
 author: frack113
 date: 2022/02/19
-modified: 2023/01/17
+modified: 2023/04/21
 logsource:
     product: windows
     service: firewall-as
 detection:
     selection:
-        EventID: 2005 # A rule has been modified in the Windows Defender Firewall exception list
-    filter_generic:
+        EventID:
+            - 2005 # A rule has been modified in the Windows Defender Firewall exception list (Windows 10)
+            - 2073 # A rule has been modified in the Windows Defender Firewall exception list. (Windows 11)
+    filter_main_generic:
         ModifyingApplication|startswith:
             - 'C:\Program Files (x86)\'
             - 'C:\Program Files\'
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_main_*
 level: low
