@@ -1,38 +1,46 @@
-title: HackTool - Certipy
+title: HackTool - Certipy Execution
 id: 6938366d-8954-4ddc-baff-c830b3ba8fcd
 status: experimental
-description: Detects hacktool 'Certipy' - Tool for Active Directory Certificate Services enumeration and abuse
+description: Detects Certipy a tool for Active Directory Certificate Services enumeration and abuse based on PE metadata characteristics and common command line arguments.
 references:
     - https://github.com/ly4k/Certipy
 author: pH-T (Nextron Systems)
 date: 2023/04/17
-modified: 2023/04/17
 tags:
     - attack.discovery
-    - attack.t1590.001
+    - attack.credential_access
+    - attack.t1649
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection_base:
+    selection_img:
         - Image|endswith: '\Certipy.exe'
-        - OriginalFileName: '\Certipy.exe'
-        - Description: 'Certipy'
-    selection_base_cli:
+        - OriginalFileName: 'Certipy.exe'
+        - Description|contains: 'Certipy'
+    selection_cli_commands:
         CommandLine|contains:
-            - ' find '
-            - ' req '
             - ' auth '
-            - ' shadow '
+            - ' find '
             - ' forge '
-    selection_cli:
+            - ' relay '
+            - ' req '
+            - ' shadow '
+    selection_cli_flags:
         CommandLine|contains:
-            - ' -dc-ip '
-            - ' -target'
-            - ' -pfx '
-            - ' -username '
+            - ' -bloodhound'
             - ' -ca-pfx '
-    condition: selection_base or (selection_base_cli and selection_cli)
+            - ' -dc-ip '
+            - ' -kirbi'
+            - ' -old-bloodhound'
+            - ' -pfx '
+            - ' -target'
+            - ' -username '
+            - ' -vulnerable'
+            - 'auth -pfx'
+            - 'shadow auto'
+            - 'shadow list'
+    condition: selection_img or all of selection_cli_*
 falsepositives:
-    - Very unlikely
+    - Unlikely
 level: high
