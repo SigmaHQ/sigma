@@ -33,7 +33,7 @@ class TestRules(unittest.TestCase):
     # Don't use trademarks in rules - they require non-ASCII characters to be used on we don't want them in our rules
     TRADE_MARKS = {"MITRE ATT&CK", "ATT&CK"}
 
-    path_to_rules_ = ["rules", "rules-emerging-threats", "rules-placeholder", "rules-threat-hunting", "rules-compliance"]
+    path_to_rules_ = ["../rules", "../rules-emerging-threats", "../rules-placeholder", "../rules-threat-hunting", "../rules-compliance"]
     path_to_rules = []
     for path_ in path_to_rules_:
         path_to_rules.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), path_))
