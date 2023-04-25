@@ -759,7 +759,7 @@ class TestRules(unittest.TestCase):
     def test_file_names(self):
         faulty_rules = []
         name_lst = []
-        filename_pattern = re.compile(r'[a-z0-9_]{10,70}\.yml')
+        filename_pattern = re.compile(r'[a-z0-9_]{10,80}\.yml')
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             filename = os.path.basename(file)
             if filename in name_lst:
