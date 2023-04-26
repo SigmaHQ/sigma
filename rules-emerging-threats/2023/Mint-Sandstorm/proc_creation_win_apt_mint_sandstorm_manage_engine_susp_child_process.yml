@@ -6,6 +6,7 @@ references:
     - https://www.microsoft.com/en-us/security/blog/2023/04/18/nation-state-threat-actor-mint-sandstorm-refines-tradecraft-to-attack-high-value-targets/
 author: Nasreddine Bencherchali (Nextron Systems), MSTIC (idea)
 date: 2023/04/20
+modified: 2023/04/25
 tags:
     - attack.execution
 logsource:
@@ -78,8 +79,7 @@ detection:
             - 'localgroup Administrators'
             - '/add'
     selection_child_net:
-        CommandLine|contains:
-            - 'net' # Covers net1
+        CommandLine|contains: 'net' # Covers net1
         CommandLine|contains|all:
             - 'user'
             - '/add'
@@ -116,7 +116,7 @@ detection:
             - 'download.microsoft.com'
             - 'manageengine.com'
             - 'msiexec'
-    condition: all of selection_parent_path and (all of selection_special_child_powershell_* or all of selection_special_child_lsass_* or 1 of selection_child_*) and not filter_main
+    condition: all of selection_parent_* and (all of selection_special_child_powershell_* or all of selection_special_child_lsass_* or 1 of selection_child_*) and not filter_main
 falsepositives:
     - Unlikely
 level: critical

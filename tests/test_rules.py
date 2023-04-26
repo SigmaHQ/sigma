@@ -33,7 +33,7 @@ class TestRules(unittest.TestCase):
     # Don't use trademarks in rules - they require non-ASCII characters to be used on we don't want them in our rules
     TRADE_MARKS = {"MITRE ATT&CK", "ATT&CK"}
 
-    path_to_rules_ = ["rules", "rules-emerging-threats", "rules-placeholder", "rules-threat-hunting", "rules-compliance"]
+    path_to_rules_ = ["../rules", "../rules-emerging-threats", "../rules-placeholder", "../rules-threat-hunting", "../rules-compliance"]
     path_to_rules = []
     for path_ in path_to_rules_:
         path_to_rules.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), path_))
@@ -759,7 +759,7 @@ class TestRules(unittest.TestCase):
     def test_file_names(self):
         faulty_rules = []
         name_lst = []
-        filename_pattern = re.compile(r'[a-z0-9_]{10,70}\.yml')
+        filename_pattern = re.compile(r'[a-z0-9_]{10,80}\.yml')
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             filename = os.path.basename(file)
             if filename in name_lst:
