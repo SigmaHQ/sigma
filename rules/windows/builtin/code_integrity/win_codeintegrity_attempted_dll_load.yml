@@ -7,7 +7,7 @@ references:
     - https://twitter.com/SBousseaden/status/1483810148602814466
     - https://github.com/MicrosoftDocs/windows-itpro-docs/blob/40fe118976734578f83e5e839b9c63ae7a4af82d/windows/security/threat-protection/windows-defender-application-control/event-id-explanations.md#windows-codeintegrity-operational-log
 date: 2022/01/20
-modified: 2023/01/25
+modified: 2023/04/27
 tags:
     - attack.execution
 logsource:
@@ -76,15 +76,14 @@ detection:
             - 12
         ValidatedPolicy: 1
     filter_gac:
-        # If other DLLs show up from this process. Filter the path containing this string `\Windows\assembly\GAC\`
-        FileNameBuffer|endswith:
-            - '\stdole.dll'
-            - '\msdatasrc.dll'
-            - '\adodb.dll'
+        # Filtering the path containing this string because of multiple possible DLLs in that location
+        FileNameBuffer|contains: '\Windows\assembly\GAC\'
         ProcessNameBuffer|endswith: '\mscorsvw.exe'
         ProcessNameBuffer|contains: '\Windows\Microsoft.NET\'
         RequestedPolicy: 8
-        ValidatedPolicy: 2
+        ValidatedPolicy:
+            - 1
+            - 2
     filter_google_drive:
         # Example: \Program Files\Google\Drive File Stream\67.0.2.0\crashpad_handler.exe
         FileNameBuffer|contains: '\Program Files\Google\Drive File Stream\'
