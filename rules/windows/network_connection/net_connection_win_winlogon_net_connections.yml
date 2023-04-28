@@ -1,17 +1,17 @@
-title: Winlogon Internet Connection
+title: Outbound Network Connection To Public IPs Via Winlogon
 id: 7610a4ea-c06d-495f-a2ac-0a696abcfd3b
-status: test
-description: Detects a winlogon.exe process that communicates with public IP addresses
+status: experimental
+description: Detects a "winlogon.exe" process that initiate network communications with public IP addresses
 references:
     - https://www.microsoft.com/en-us/security/blog/2023/04/11/guidance-for-investigating-attacks-using-cve-2022-21894-the-blacklotus-campaign/
-author: 'Christopher Peacock @securepeacock, SCYTHE @scythe_io'
+author: Christopher Peacock @securepeacock, SCYTHE @scythe_io
 date: 2017/11/04
 modified: 2023/02/05
 tags:
     - attack.defense_evasion
-    - attack.t1218.011
     - attack.execution
     - attack.command_and_control
+    - attack.t1218.011
 logsource:
     category: network_connection
     product: windows
@@ -19,10 +19,10 @@ detection:
     selection:
         Image|endswith: '\winlogon.exe'
         Initiated: 'true'
-    filter:
-        - DestinationIp|startswith:
+    filter_optional_local_ip:
+        DestinationIp|startswith:
             - '10.'
-            - '192.168.'
+            - '127.'
             - '172.16.'
             - '172.17.'
             - '172.18.'
@@ -39,8 +39,8 @@ detection:
             - '172.29.'
             - '172.30.'
             - '172.31.'
-            - '127.'
-    condition: selection and not filter
+            - '192.168.'
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Communication to other corporate systems that use IP addresses from public address spaces
 level: medium
