@@ -7,55 +7,61 @@ tags:
     - attack.t1059.001
 author: Florian Roth (Nextron Systems), Jonhnathan Ribeiro
 date: 2017/03/05
-modified: 2022/04/11
+modified: 2023/04/30
 logsource:
     product: windows
     service: powershell
     definition: Script block logging must be enabled for 4104, Module Logging must be enabled for 4103
 detection:
     convert_b64:
-        - '-nop'
-        - ' -w '
-        - 'hidden'
-        - ' -c '
-        - '[Convert]::FromBase64String'
+        '|all':
+            - '-nop'
+            - ' -w '
+            - 'hidden'
+            - ' -c '
+            - '[Convert]::FromBase64String'
     iex_selection:
-        - ' -w '
-        - 'hidden'
-        - '-noni'
-        - '-nop'
-        - ' -c '
-        - 'iex'
-        - 'New-Object'
+        '|all':
+            - ' -w '
+            - 'hidden'
+            - '-noni'
+            - '-nop'
+            - ' -c '
+            - 'iex'
+            - 'New-Object'
     enc_selection:
-        - ' -w '
-        - 'hidden'
-        - '-ep'
-        - 'bypass'
-        - '-Enc'
+        '|all':
+            - ' -w '
+            - 'hidden'
+            - '-ep'
+            - 'bypass'
+            - '-Enc'
     reg_selection:
-        - 'powershell'
-        - 'reg'
-        - 'add'
-        - 'HKCU\software\microsoft\windows\currentversion\run'
+        '|all':
+            - 'powershell'
+            - 'reg'
+            - 'add'
+            - 'HKCU\software\microsoft\windows\currentversion\run'
     webclient_selection:
-        - 'bypass'
-        - '-noprofile'
-        - '-windowstyle'
-        - 'hidden'
-        - 'new-object'
-        - 'system.net.webclient'
-        - '.download'
+         '|all':
+            - 'bypass'
+            - '-noprofile'
+            - '-windowstyle'
+            - 'hidden'
+            - 'new-object'
+            - 'system.net.webclient'
+            - '.download'
     iex_webclient:
-        - 'iex'
-        - 'New-Object'
-        - 'Net.WebClient'
-        - '.Download'
+        '|all':
+            - 'iex'
+            - 'New-Object'
+            - 'Net.WebClient'
+            - '.Download'
     filter_chocolatey:
         - "(New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1"
         - "(New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')"
         - 'Write-ChocolateyWarning'
-    condition: (all of convert_b64 or all of iex_selection or all of enc_selection or all of reg_selection or all of webclient_selection or all of iex_webclient) and not 1 of filter_*
+    condition: (convert_b64 or iex_selection or enc_selection or reg_selection or webclient_selection or iex_webclient) and not 1 of filter_*
 falsepositives:
     - Unknown
 level: high
