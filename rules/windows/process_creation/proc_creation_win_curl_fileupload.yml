@@ -7,9 +7,9 @@ references:
     - https://medium.com/@petehouston/upload-files-with-curl-93064dcccc76
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1105/T1105.md#atomic-test-19---curl-upload-file
     - https://curl.se/docs/manpage.html
-author: Florian Roth (Nextron Systems)
+author: Florian Roth (Nextron Systems), Cedric MAURUGEON
 date: 2020/07/03
-modified: 2023/02/21
+modified: 2023/05/02
 tags:
     - attack.exfiltration
     - attack.t1567
@@ -21,16 +21,18 @@ detection:
     selection_img:
         - Image|endswith: '\curl.exe'
         - Product: 'The curl executable'
-    selection_cli:
+   arguments_1:
         CommandLine|contains:
-            - ' -F '
             - ' --form' # Also covers the "--form-string"
-            - ' -T '
             - ' --upload-file '
-            - ' -d '
             - ' --data '
             - ' --data-' # For flags like: "--data-ascii", "--data-binary", "--data-raw", "--data-urlencode"
-    condition: all of selection_*
+    arguments_2:
+        CommandLine|re: '\s-(F|T|d)\s' # Use regex to have an insensitive case detection
+    exclusions:
+        CommandLine|contains:
+            - '://localhost'
+    condition: selection_img and 1 of arguments_* and not exclusions
 fields:
     - CommandLine
     - ParentCommandLine
