@@ -7,7 +7,7 @@ references:
     - https://medium.com/@petehouston/upload-files-with-curl-93064dcccc76
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1105/T1105.md#atomic-test-19---curl-upload-file
     - https://curl.se/docs/manpage.html
-author: Florian Roth (Nextron Systems), Cedric MAURUGEON
+author: Florian Roth (Nextron Systems), Cedric MAURUGEON (Update)
 date: 2020/07/03
 modified: 2023/05/02
 tags:
@@ -21,22 +21,18 @@ detection:
     selection_img:
         - Image|endswith: '\curl.exe'
         - Product: 'The curl executable'
-    arguments_1:
-        CommandLine|contains:
+    selection_cli:
+        - CommandLine|contains:
             - ' --form' # Also covers the "--form-string"
             - ' --upload-file '
             - ' --data '
             - ' --data-' # For flags like: "--data-ascii", "--data-binary", "--data-raw", "--data-urlencode"
-    arguments_2:
-        CommandLine|re: '\s-(F|T|d)\s' # Use regex to have a sensitive case detection
-    exclusions:
+        - CommandLine|re: '\s-(F|T|d)\s' # We use regex to ensure a case sensitive argument detection
+    filter_optional_localhost:
         CommandLine|contains:
             - '://localhost'
             - '://127.0.0.1'
-    condition: selection_img and 1 of arguments_* and not exclusions
-fields:
-    - CommandLine
-    - ParentCommandLine
+    condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Scripts created by developers and admins
 level: medium

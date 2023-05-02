@@ -11,7 +11,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1105/T1105.md#atomic-test-19---curl-upload-file
     - https://curl.se/docs/manpage.html
     - https://www.trendmicro.com/en_us/research/22/i/how-malicious-actors-abuse-native-linux-tools-in-their-attacks.html
-author: Nasreddine Bencherchali (Nextron Systems), Cedric MAURUGEON
+author: Nasreddine Bencherchali (Nextron Systems), Cedric MAURUGEON (Update)
 date: 2022/09/15
 modified: 2023/05/02
 tags:
@@ -24,19 +24,18 @@ logsource:
 detection:
     selection:
         Image|endswith: '/curl'
-    arguments_1:
-        CommandLine|contains:
+    selection_cli:
+        - CommandLine|contains:
             - ' --form' # Also covers the "--form-string"
             - ' --upload-file '
             - ' --data '
             - ' --data-' # For flags like: "--data-ascii", "--data-binary", "--data-raw", "--data-urlencode"
-    arguments_2:
-        CommandLine|re: '\s-(F|T|d)\s' # Use regex to prevent false positive and have a sensitive case detection
-    exclusions:
+        - CommandLine|re: '\s-(F|T|d)\s' # We use regex to ensure a case sensitive argument detection
+    filter_optional_localhost:
         CommandLine|contains:
             - '://localhost'
             - '://127.0.0.1'
-    condition: selection and 1 of arguments_* and not exclusions
+    condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Scripts created by developers and admins
 level: medium
