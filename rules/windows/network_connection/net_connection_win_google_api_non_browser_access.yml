@@ -1,0 +1,78 @@
+title: Suspicious Non-Browser Network Communication With Google API
+id: 7e9cf7b6-e827-11ed-a05b-0242ac120003
+status: experimental
+description: Detects a non-browser process interacting with the Google API which could indicate the use of a covert C2 such as Google Sheet C2 (GC2-sheet)
+references:
+    - https://github.com/looCiprian/GC2-sheet
+    - https://youtu.be/n2dFlSaBBKo
+    - https://services.google.com/fh/files/blogs/gcat_threathorizons_full_apr2023.pdf
+    - https://www.tanium.com/blog/apt41-deploys-google-gc2-for-attacks-cyber-threat-intelligence-roundup/
+    - https://www.bleepingcomputer.com/news/security/hackers-abuse-google-command-and-control-red-team-tool-in-attacks/
+author: Gavin Knapp
+date: 2023/05/01
+tags:
+    - attack.command_and_control
+    - attack.t1102
+logsource:
+    product: windows
+    category: network_connection
+detection:
+    selection:
+        DestinationHostname|contains:  # Other googleapis should be added as the GC2 tool evolves
+            - 'oauth2.googleapis.com'
+            - 'sheets.googleapis.com'
+            - 'drive.googleapis.com'
+            - 'www.googleapis.com'
+    filter_optional_brave:
+        Image|endswith: '\brave.exe'
+    filter_optional_chrome:
+        Image:
+            - 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+            - 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
+    filter_optional_google_drive:
+        Image|startswith:
+            - 'C:\Program Files\Google\Drive File Stream\'
+            - 'C:\Program Files\Google\Drive File Stream\*\GoogleDriveFS.exe'
+    filter_optional_firefox:
+        Image:
+            - 'C:\Program Files\Mozilla Firefox\firefox.exe'
+            - 'C:\Program Files (x86)\Mozilla Firefox\firefox.exe'
+    filter_optional_ie:
+        Image:
+            - 'C:\Program Files (x86)\Internet Explorer\iexplore.exe'
+            - 'C:\Program Files\Internet Explorer\iexplore.exe'
+    filter_optional_maxthon:
+        Image|endswith: '\maxthon.exe'
+    filter_optional_edge_1:
+        - Image|startswith: 'C:\Program Files (x86)\Microsoft\EdgeWebView\Application\'
+        - Image|endswith: '\WindowsApps\MicrosoftEdge.exe'
+        - Image:
+            - 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+            - 'C:\Program Files\Microsoft\Edge\Application\msedge.exe'
+    filter_optional_edge_2:
+        Image|startswith:
+            - 'C:\Program Files (x86)\Microsoft\EdgeCore\'
+            - 'C:\Program Files\Microsoft\EdgeCore\'
+        Image|endswith:
+            - '\msedge.exe'
+            - '\msedgewebview2.exe'
+    filter_optional_opera:
+        Image|endswith: '\opera.exe'
+    filter_optional_safari:
+        Image|endswith: '\safari.exe'
+    filter_optional_seamonkey:
+        Image|endswith: '\seamonkey.exe'
+    filter_optional_vivaldi:
+        Image|endswith: '\vivaldi.exe'
+    filter_optional_whale:
+        Image|endswith: '\whale.exe'
+    filter_optional_googleupdate:
+        Image|endswith: '\GoogleUpdate.exe'
+    filter_optional_outlook.exe:
+        Image|endswith: '\outlook.exe'
+    filter_optional_teams:
+        Image|endswith: '\teams.exe'
+    condition: selection and not 1 of filter_optional_*
+falsepositives:
+    - Legitimate applications communicating with the "googleapis.com" endpoints that are not already in the exclusion list. This is environmental dependent and requires further testing and tuning.
+level: medium
