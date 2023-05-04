@@ -7,20 +7,20 @@ tags:
     - attack.t1059.001
 author: Florian Roth (Nextron Systems), Jonhnathan Ribeiro
 date: 2017/03/05
-modified: 2023/04/30
+modified: 2023/05/04
 logsource:
     product: windows
     service: powershell
     definition: Script block logging must be enabled for 4104, Module Logging must be enabled for 4103
 detection:
-    convert_b64:
+    selection_convert_b64:
         '|all':
             - '-nop'
             - ' -w '
             - 'hidden'
             - ' -c '
             - '[Convert]::FromBase64String'
-    iex_selection:
+    selection_iex:
         '|all':
             - ' -w '
             - 'hidden'
@@ -29,20 +29,20 @@ detection:
             - ' -c '
             - 'iex'
             - 'New-Object'
-    enc_selection:
+    selection_enc:
         '|all':
             - ' -w '
             - 'hidden'
             - '-ep'
             - 'bypass'
             - '-Enc'
-    reg_selection:
+    selection_reg:
         '|all':
             - 'powershell'
             - 'reg'
             - 'add'
             - 'HKCU\software\microsoft\windows\currentversion\run'
-    webclient_selection:
+    selection_webclient:
          '|all':
             - 'bypass'
             - '-noprofile'
@@ -51,7 +51,7 @@ detection:
             - 'new-object'
             - 'system.net.webclient'
             - '.download'
-    iex_webclient:
+    selection_iex_webclient:
         '|all':
             - 'iex'
             - 'New-Object'
@@ -61,7 +61,7 @@ detection:
         - "(New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1"
         - "(New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')"
         - 'Write-ChocolateyWarning'
-    condition: (convert_b64 or iex_selection or enc_selection or reg_selection or webclient_selection or iex_webclient) and not 1 of filter_*
+    condition: 1 of selection_* and not 1 of filter_*
 falsepositives:
     - Unknown
 level: high
