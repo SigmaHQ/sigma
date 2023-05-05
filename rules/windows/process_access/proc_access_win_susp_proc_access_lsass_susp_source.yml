@@ -1,7 +1,7 @@
-title: LSASS Access from Program in Suspicious Folder
+title: LSASS Access From Program in Potential Suspicious Folder
 id: fa34b441-961a-42fa-a100-ecc28c886725
 status: experimental
-description: Detects process access to LSASS memory with suspicious access flags and from a suspicious folder
+description: Detects process access to LSASS memory with suspicious access flags and from a potential suspicious folder
 references:
     - https://docs.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
@@ -10,7 +10,7 @@ references:
     - http://security-research.dyndns.org/pub/slides/FIRST2017/FIRST-2017_Tom-Ueltschi_Sysmon_FINAL_notes.pdf
 author: Florian Roth (Nextron Systems)
 date: 2021/11/27
-modified: 2023/04/26
+modified: 2023/05/05
 tags:
     - attack.credential_access
     - attack.t1003.001
@@ -77,6 +77,12 @@ detection:
         SourceImage|contains: '\AppData\Local\Temp\'
         SourceImage|endswith: '.tmp\DropboxUpdate.exe'
         GrantedAccess: '0x1410'
+    filter_optional_dropbox_3:
+        SourceImage|startswith:
+            - 'C:\Program Files (x86)\Dropbox\'
+            - 'C:\Program Files\Dropbox\'
+        SourceImage|endswith: '\DropboxUpdate.exe'
+        GrantedAccess: '0x1410'
     filter_optional_nextron:
         SourceImage|startswith:
             - 'C:\Windows\Temp\asgard2-agent\'
@@ -129,4 +135,4 @@ fields:
     - GrantedAccess
 falsepositives:
     - Updaters and installers are typical false positives. Apply custom filters depending on your environment
-level: high
+level: medium
