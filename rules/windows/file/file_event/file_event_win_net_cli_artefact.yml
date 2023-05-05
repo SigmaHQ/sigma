@@ -34,7 +34,7 @@ detection:
             - '\UsageLogs\svchost.exe.log'
             - '\UsageLogs\wscript.exe.log'
             - '\UsageLogs\wmic.exe.log'
-    filter_rundll:
+    filter_main_rundll32:
         # This filter requires the event to be enriched by additional information such as ParentImage and CommandLine activity
         ParentImage|endswith: '\MsiExec.exe'
         ParentCommandLine|contains: ' -Embedding'
@@ -42,7 +42,7 @@ detection:
         CommandLine|contains|all:
             - 'Temp'
             - 'zzzzInvokeManagedCustomActionOutOfProc'
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Rundll32.exe with zzzzInvokeManagedCustomActionOutOfProc in command line and msiexec.exe as parent process - https://twitter.com/SBousseaden/status/1388064061087260675
 level: high

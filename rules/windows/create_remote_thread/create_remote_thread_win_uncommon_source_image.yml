@@ -1,16 +1,13 @@
-title: Suspicious Remote Thread Source
+title: Remote Thread Creation By Uncommon Source Image
 id: 66d31e5f-52d6-40a4-9615-002d3789a119
 status: experimental
-description: |
-  Offensive tradecraft is switching away from using APIs like "CreateRemoteThread", however, this is still largely observed in the wild.
-  This rule aims to detect suspicious processes (those we would not expect to behave in this way like winword.exe or outlook.exe) creating remote threads on other processes.
-  It is a generalistic rule, but it should have a low FP ratio due to the selected range of processes.
+description: Detects uncommon processes creating remote threads
 references:
     - Personal research, statistical analysis
     - https://lolbas-project.github.io
 author: Perez Diego (@darkquassar), oscd.community
 date: 2019/10/27
-modified: 2023/03/09
+modified: 2023/05/05
 tags:
     - attack.privilege_escalation
     - attack.defense_evasion
@@ -22,8 +19,8 @@ detection:
     selection:
         SourceImage|endswith:
             - '\bash.exe'
-            - '\cvtres.exe'
             - '\cscript.exe'
+            - '\cvtres.exe'
             - '\defrag.exe'
             - '\dnx.exe'
             - '\esentutl.exe'
@@ -41,7 +38,7 @@ detection:
             - '\lync.exe'
             - '\makecab.exe'
             - '\mDNSResponder.exe'
-            - '\monitoringhost.exe'
+            - '\monitoringhost.exe' # Loads .NET CLR by default and thus a favorite for process injection for .NET in-memory offensive tools.
             - '\msbuild.exe'
             - '\mshta.exe'
             - '\msiexec.exe'
@@ -66,56 +63,42 @@ detection:
             - '\w3wp.exe'
             - '\winlogon.exe'
             - '\winscp.exe'
-            - '\wmic.exe'
             - '\winword.exe'
+            - '\wmic.exe'
             - '\wscript.exe'
     filter_vs:
         - SourceImage|contains: 'Visual Studio'
         - SourceParentImage|contains: '\Programs\Microsoft VS Code\'
-    filter2:
+    filter_main_winlogon_1:
         SourceImage: 'C:\Windows\System32\winlogon.exe'
         TargetImage:
             - 'C:\Windows\System32\services.exe' # happens on Windows 7
             - 'C:\Windows\System32\wininit.exe' # happens on Windows 7
             - 'C:\Windows\System32\csrss.exe' # multiple OS
-    filter2b:
+    filter_main_winlogon_2:
         SourceImage: 'C:\Windows\System32\winlogon.exe'
         TargetParentImage: 'System'
         TargetParentProcessId: 4
-    filter3:
+    filter_main_provtool:
         SourceImage: 'C:\Windows\System32\provtool.exe'
         TargetParentProcessId: 0
-    filter4:
-        SourceImage|endswith: '\git.exe'
-        TargetImage|endswith:
-            - '\git.exe'
-            - 'C:\Windows\System32\conhost.exe'
-    filter5:
+    filter_main_vssvc:
         SourceImage: 'C:\Windows\System32\VSSVC.exe'
         TargetImage: 'System'
-    filter_powershell:
-        SourceParentImage: 'C:\Windows\System32\CompatTelRunner.exe'
-    filter_schtasks_conhost:
+    filter_main_schtasks_conhost:
         SourceImage:
             - 'C:\Windows\System32\schtasks.exe'
             - 'C:\Windows\SysWOW64\schtasks.exe'
         TargetImage: 'C:\Windows\System32\conhost.exe'
-    filter_nvidia:
+    filter_optional_nvidia:
         SourceImage: 'C:\Windows\explorer.exe'
         TargetImage: 'C:\Program Files\NVIDIA Corporation\NVIDIA GeForce Experience\NVIDIA GeForce Experience.exe'
-    #filter_powerpnt:
+    #filter_optional_powerpnt:
     #    # Raised by the following issue: https://github.com/SigmaHQ/sigma/issues/2479
     #    SourceImage|contains: '\Microsoft Office\'
     #    SourceImage|endswith: '\POWERPNT.EXE'
     #    TargetImage: 'C:\Windows\System32\csrss.exe'
-    condition: selection and not 1 of filter*
-fields:
-    - ComputerName
-    - User
-    - SourceImage
-    - TargetImage
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high
-notes:
-    - MonitoringHost.exe is a process that loads .NET CLR by default and thus a favorite for process injection for .NET in-memory offensive tools.
