@@ -1,0 +1,27 @@
+title: Suspicious Process Explorer Driver Drop
+id: de46c52b-0bf8-4936-a327-aace94f94ac6
+status: experimental
+description: Detects Process Explorer drivers dropped to disk by processes other than Process Explorer itself. Hack tools or malware may use the process explorer driver to elevate privileges, drops it to disk for a few moments, runs a service using that driver and removes it afterwards. This rule detects all events in which a process other than process explorer itself drops the driver to disk, which is highly suspicious.
+references:
+    - https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer
+    - https://github.com/Yaxser/Backstab
+    - https://www.elastic.co/security-labs/stopping-vulnerable-driver-attacks
+    - https://news.sophos.com/en-us/2023/04/19/aukill-edr-killer-malware-abuses-process-explorer-driver/
+author: Florian Roth
+date: 2023/05/05
+tags:
+    - attack.persistence
+    - attack.t1546.002
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename|contains: '\PROCEXP' 
+        TargetFilename|endswith: '.sys'
+    filter_generic:
+        Image|contains: '\procexp'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: high
