@@ -1,0 +1,26 @@
+title: TA505 Dropper Load Pattern
+id: 18cf6cf0-39b0-4c22-9593-e244bdc9a2d4
+status: deprecated
+description: Detects mshta loaded by wmiprvse as parent as used by TA505 malicious documents
+references:
+    - https://twitter.com/ForensicITGuy/status/1334734244120309760
+author: Florian Roth (Nextron Systems)
+date: 2020/12/08
+modified: 2023/04/05
+tags:
+    - attack.execution
+    - attack.g0092
+    - attack.t1106
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\wmiprvse.exe'
+    selection_mshta:
+        - Image|endswith: '\mshta.exe'
+        - OriginalFileName: 'mshta.exe'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: critical

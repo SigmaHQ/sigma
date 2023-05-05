@@ -1,4 +1,4 @@
-title: Dead Drop Resolvers
+title: Potential Dead Drop Resolvers
 id: 297ae038-edc2-4b2e-bb3e-7c5fc94dd5c7
 status: test
 description: Detects an executable, which is not an internet browser, making DNS request to legit popular websites, which were seen to be used as dead drop resolvers in previous attacks.
@@ -8,7 +8,7 @@ references:
     - https://blog.bushidotoken.net/2021/04/dead-drop-resolvers-espionage-inspired.html
 author: Sorina Ionescu
 date: 2022/08/17
-modified: 2023/01/19
+modified: 2023/04/18
 tags:
     - attack.command_and_control
     - attack.t1102
@@ -20,43 +20,72 @@ detection:
     selection:
         Initiated: 'true'
         DestinationHostname|endswith:
-            - 'cdn.discordapp.com'
-            - 'pastebin.com'
-            - 'youtube.com'
-            - 'technet.microsoft.com'
-            - 'facebook.com'
             - '.cloudflare.com'
-            - 'docs.google.com'
-            - 'steamcommunity.com'
-            - 'reddit.com'
-            - 'fotolog.com'
-            - 'twitter.com'
-            - 'imgur.com'
-            - 'feeds.rapidfeeds.com'
-            - 'livejournal.com'
             - '.githubusercontent.com'
-            - 'pastetext.net'
-            - 'pastebin.pl'
+            - 'cdn.discordapp.com'
+            - 'docs.google.com'
+            - 'facebook.com'
+            - 'feeds.rapidfeeds.com'
+            - 'fotolog.com'
+            - 'imgur.com'
+            - 'livejournal.com'
             - 'paste.ee'
-    filter_browsers:
+            - 'pastebin.com'
+            - 'pastebin.pl'
+            - 'pastetext.net'
+            - 'reddit.com'
+            - 'steamcommunity.com'
+            - 'technet.microsoft.com'
+            - 'twitter.com'
+            - 'youtube.com'
+    filter_main_brave:
+        Image|endswith: '\brave.exe'
+    filter_main_chrome:
+        Image:
+            - 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+            - 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
+    filter_main_firefox:
+        Image:
+            - 'C:\Program Files\Mozilla Firefox\firefox.exe'
+            - 'C:\Program Files (x86)\Mozilla Firefox\firefox.exe'
+    filter_main_ie:
+        Image:
+            - 'C:\Program Files (x86)\Internet Explorer\iexplore.exe'
+            - 'C:\Program Files\Internet Explorer\iexplore.exe'
+    filter_main_maxthon:
+        Image|endswith: '\maxthon.exe'
+    filter_main_edge_1:
+        - Image|startswith: 'C:\Program Files (x86)\Microsoft\EdgeWebView\Application\'
+        - Image|endswith: '\WindowsApps\MicrosoftEdge.exe'
+        - Image:
+            - 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+            - 'C:\Program Files\Microsoft\Edge\Application\msedge.exe'
+    filter_main_edge_2:
+        Image|startswith:
+            - 'C:\Program Files (x86)\Microsoft\EdgeCore\'
+            - 'C:\Program Files\Microsoft\EdgeCore\'
         Image|endswith:
-            - '\iexplore.exe'
             - '\msedge.exe'
-            - '\edge.exe'
-            - '\opera.exe'
-            - '\brave.exe'
-            - '\vivaldi.exe'
-            - '\whale.exe'
-            - '\chrome.exe'
-            - '\firefox.exe'
-    filter_others:
+            - '\msedgewebview2.exe'
+    filter_main_opera:
+        Image|endswith: '\opera.exe'
+    filter_main_safari:
+        Image|endswith: '\safari.exe'
+    filter_main_seamonkey:
+        Image|endswith: '\seamonkey.exe'
+    filter_main_vivaldi:
+        Image|endswith: '\vivaldi.exe'
+    filter_main_whale:
+        Image|endswith: '\whale.exe'
+    filter_optional_defender:
         Image|endswith:
             - '\MsMpEng.exe' #Microsoft Defender executable
             - '\MsSense.exe' #Windows Defender Advanced Threat Protection Service Executable
-            - '\PRTG Probe.exe' #Paessler's PRTG Network Monitor
-            - '\Engine.exe' #Process from qlik.com app
-            - '\msedgewebview2.exe' # related to Edge browser
-    condition: selection and not 1 of filter*
+    filter_optional_prtg:
+        Image|endswith: '\PRTG Probe.exe' #Paessler's PRTG Network Monitor
+    filter_optional_qlik:
+        Image|endswith: '\Engine.exe' #Process from qlik.com app
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - One might need to exclude other internet browsers found in it's network or other applications like ones mentioned above from Microsoft Defender.
 level: high

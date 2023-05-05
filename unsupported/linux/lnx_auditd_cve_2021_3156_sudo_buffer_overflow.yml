@@ -1,0 +1,37 @@
+title: CVE-2021-3156 Exploitation Attempt
+id: 5ee37487-4eb8-4ac2-9be1-d7d14cdc559f
+status: unsupported
+description: |
+  Detects exploitation attempt of vulnerability described in CVE-2021-3156.
+  Alternative approach might be to look for flooding of auditd logs due to bruteforcing
+  required to trigger the heap-based buffer overflow.
+references:
+    - https://blog.qualys.com/vulnerabilities-research/2021/01/26/cve-2021-3156-heap-based-buffer-overflow-in-sudo-baron-samedit
+author: Bhabesh Raj
+date: 2021/02/01
+modified: 2023/03/24
+tags:
+    - attack.privilege_escalation
+    - attack.t1068
+    - cve.2021.3156
+logsource:
+    product: linux
+    service: auditd
+detection:
+    cmd_base:
+        type: 'EXECVE'
+        a0: '/usr/bin/sudoedit'
+    cmd_s:
+        - a1: '-s'
+        - a2: '-s'
+        - a3: '-s'
+        - a4: '-s'
+    cmd_backslash:
+        - a1: '\'
+        - a2: '\'
+        - a3: '\'
+        - a4: '\'
+    condition: all of cmd_* | count() by host > 50
+falsepositives:
+    - Unknown
+level: high

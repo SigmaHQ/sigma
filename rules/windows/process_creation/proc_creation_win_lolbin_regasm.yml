@@ -8,6 +8,7 @@ references:
     - https://lolbas-project.github.io/lolbas/Binaries/Regsvcs/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/08/25
+modified: 2023/02/13
 tags:
     - attack.defense_evasion
     - attack.t1218.009
@@ -34,7 +35,14 @@ detection:
             - '\Microsoft\Windows\Start Menu\Programs\Startup\'
     filter_dll:
         CommandLine|contains: '.dll'
-    condition: all of selection_* or (selection_img and not filter_dll)
+    filter_no_cli:
+        # For when the CLI just contains the Image
+        CommandLine|endswith:
+            - '\Regasm.exe"'
+            - '\Regasm.exe'
+            - '\Regsvcs.exe"'
+            - '\Regsvcs.exe'
+    condition: all of selection_* or (selection_img and not 1 of filter_*)
 falsepositives:
     - Unknown
 level: high

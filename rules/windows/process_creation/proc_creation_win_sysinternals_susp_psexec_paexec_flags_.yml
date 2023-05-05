@@ -1,0 +1,71 @@
+title: Potential Privilege Escalation To LOCAL SYSTEM
+id: 207b0396-3689-42d9-8399-4222658efc99
+related:
+    - id: 8834e2f7-6b4b-4f09-8906-d2276470ee23 # PsExec specific rule
+      type: similar
+status: experimental
+description: Detects unknown program using commandline flags usually used by tools such as PsExec and PAExec to start programs with SYSTEM Privileges
+references:
+    - https://docs.microsoft.com/en-us/sysinternals/downloads/psexec
+    - https://www.poweradmin.com/paexec/
+    - https://www.fireeye.com/blog/threat-research/2020/10/kegtap-and-singlemalt-with-a-ransomware-chaser.html
+author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+date: 2021/05/22
+modified: 2023/02/27
+tags:
+    - attack.resource_development
+    - attack.t1587.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_flags_1:
+        # Escalation to LOCAL_SYSTEM
+        CommandLine|contains:
+            # Note that you don't need to add the ".exe" part when using psexec/paexec
+            # The "-" can also be replaced with "/"
+            # The order of args isn't important
+            # "cmd" can be replaced by "powershell", "pwsh" or any other console like software
+            - ' -s cmd'
+            - ' /s cmd'
+            - ' -s -i cmd'
+            - ' /s /i cmd'
+            - ' /s -i cmd'
+            - ' -s /i cmd'
+            - ' -i -s cmd'
+            - ' /i /s cmd'
+            - ' -i /s cmd'
+            - ' /i -s cmd'
+            # Pwsh (For PowerShell 7)
+            - ' -s pwsh'
+            - ' /s pwsh'
+            - ' -s -i pwsh'
+            - ' /s /i pwsh'
+            - ' /s -i pwsh'
+            - ' -s /i pwsh'
+            - ' -i -s pwsh'
+            - ' /i /s pwsh'
+            - ' -i /s pwsh'
+            - ' /i -s pwsh'
+            # PowerShell (For PowerShell 5)
+            - ' -s powershell'
+            - ' /s powershell'
+            - ' -s -i powershell'
+            - ' /s /i powershell'
+            - ' /s -i powershell'
+            - ' -s /i powershell'
+            - ' -i -s powershell'
+            - ' /i /s powershell'
+            - ' -i /s powershell'
+            - ' /i -s powershell'
+    filter:
+        # This filter exclude strings covered by 8834e2f7-6b4b-4f09-8906-d2276470ee23
+        CommandLine|contains:
+            - 'paexec'
+            - 'PsExec'
+            - 'accepteula'
+    condition: 1 of selection_flags_* and not filter
+falsepositives:
+    - Weird admins that rename their tools
+    - Software companies that bundle PsExec/PAExec with their software and rename it, so that it is less embarrassing
+level: high

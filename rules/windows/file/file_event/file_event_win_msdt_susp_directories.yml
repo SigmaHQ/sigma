@@ -1,0 +1,30 @@
+title: File Creation In Suspicious Directory By Msdt.EXE
+id: 318557a5-150c-4c8d-b70e-a9910e199857
+status: experimental
+description: Detects msdt.exe creating files in suspicious directories which could be a sign of exploitation of either Follina or Dogwalk vulnerabilities
+references:
+    - https://irsl.medium.com/the-trouble-with-microsofts-troubleshooters-6e32fc80b8bd
+    - https://msrc-blog.microsoft.com/2022/05/30/guidance-for-cve-2022-30190-microsoft-support-diagnostic-tool-vulnerability/
+author: Vadim Varganov, Florian Roth (Nextron Systems)
+date: 2022/08/24
+modified: 2023/02/23
+tags:
+    - attack.persistence
+    - attack.t1547.001
+    - cve.2022.30190
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\msdt.exe'
+        TargetFilename|contains:
+            - '\Desktop\'
+            - '\Start Menu\Programs\Startup\'
+            - 'C:\PerfLogs\'
+            - 'C:\ProgramData\'
+            - 'C:\Users\Public\'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

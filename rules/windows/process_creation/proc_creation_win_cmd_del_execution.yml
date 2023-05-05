@@ -1,0 +1,37 @@
+title: File Deletion Via Del
+id: 379fa130-190e-4c3f-b7bc-6c8e834485f3
+status: experimental
+description: |
+    Detects execution of the builtin "del"/"erase" commands in order to delete files.
+    Adversaries may delete files left behind by the actions of their intrusion activity.
+    Malware, tools, or other non-native files dropped or created on a system by an adversary may leave traces to indicate to what was done within a network and how.
+    Removal of these files can occur during an intrusion, or as part of a post-intrusion process to minimize the adversary's footprint.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.004/T1070.004.md
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/erase
+author: frack113
+date: 2022/01/15
+modified: 2023/03/06
+tags:
+    - attack.defense_evasion
+    - attack.t1070.004
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\cmd.exe'
+        - OriginalFileName: 'Cmd.Exe'
+    selection_del:
+        CommandLine|contains:
+            - 'del '
+            - 'erase '
+    selection_flags:
+        CommandLine|contains:
+            - ' /f' # Force deleting of read-only files.
+            - ' /s' # Delete specified files from all subdirectories.
+            - ' /q' # Quiet mode, do not ask if ok to delete on global wildcard
+    condition: all of selection_*
+falsepositives:
+    - False positives levels will differ Depending on the environment. You can use a combination of ParentImage and other keywords from the CommandLine field to filter legitimate activity
+level: low

@@ -1,19 +1,22 @@
-title: Suspicious WmiPrvse Child Process Spawned
+title: Suspicious WmiPrvSE Child Process
 id: 8a582fe2-0882-4b89-a82a-da6b2dc32937
 related:
     - id: 692f0bec-83ba-4d04-af7e-e884a96059b6
       type: similar
     - id: d21374ff-f574-44a7-9998-4a8c8bf33d7d
       type: similar
+    - id: 18cf6cf0-39b0-4c22-9593-e244bdc9a2d4
+      type: obsoletes
 status: test
 description: Detects suspicious and uncommon child processes of WmiPrvSE
 references:
     - https://thedfirreport.com/2021/03/29/sodinokibi-aka-revil-ransomware/
     - https://github.com/vadim-hunter/Detection-Ideas-Rules/blob/02bcbfc2bfb8b4da601bb30de0344ae453aa1afe/Threat%20Intelligence/The%20DFIR%20Report/20210329_Sodinokibi_(aka_REvil)_Ransomware.yaml
     - https://blog.osarmor.com/319/onenote-attachment-delivers-asyncrat-malware/
-author: Vadim Khrykov (ThreatIntel), Cyb3rEng
+    - https://twitter.com/ForensicITGuy/status/1334734244120309760
+author: Vadim Khrykov (ThreatIntel), Cyb3rEng, Florian Roth (Nextron Systems)
 date: 2021/08/23
-modified: 2023/01/19
+modified: 2023/03/23
 tags:
     - attack.execution
     - attack.defense_evasion
@@ -27,25 +30,32 @@ detection:
     selection_parent:
         ParentImage|endswith: '\wbem\WmiPrvSE.exe'
     selection_children_1:
-        # TODO: Think to add more LOLBINs or suspicious processes that make sens in your environment
+        # TODO: Add more LOLBINs or suspicious processes that make sens in your environment
         Image|endswith:
+            - '\certutil.exe'
+            - '\cscript.exe'
+            - '\mshta.exe'
+            - '\msiexec.exe'
             - '\regsvr32.exe'
             - '\rundll32.exe'
-            - '\msiexec.exe'
-            - '\mshta.exe'
             - '\verclsid.exe'
+            - '\wscript.exe'
     selection_children_2:
-        # This is in a seperate selection due to the nature of FP generated with CMD
+        # This is in a separate selection due to the nature of FP generated with CMD
         Image|endswith: '\cmd.exe'
         CommandLine|contains:
+            - 'cscript'
+            - 'mshta'
             - 'powershell'
             - 'pwsh'
-            - 'mshta'
-            - 'rundll32'
             - 'regsvr32'
+            - 'rundll32'
             - 'wscript'
-            - 'cscript'
-    condition: selection_parent and 1 of selection_children_*
+    filter_werfault:
+        Image|endswith: '\WerFault.exe'
+    filter_wmiprvse:
+        Image|endswith: '\WmiPrvSE.exe' # In some legitimate case WmiPrvSE was seen spawning itself
+    condition: selection_parent and 1 of selection_children_* and not 1 of filter_*
 falsepositives:
     - Unknown
 level: high

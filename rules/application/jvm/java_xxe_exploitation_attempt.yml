@@ -1,0 +1,25 @@
+title: Potential XXE Exploitation Attempt In JVM Based Application
+id: c4e06896-e27c-4583-95ac-91ce2279345d
+status: experimental
+description: Detects XML parsing issues, if the application expects to work with XML make sure that the parser is initialized safely.
+references:
+    - https://rules.sonarsource.com/java/RSPEC-2755
+    - https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing
+    - https://www.wix.engineering/post/threat-and-vulnerability-hunting-with-application-server-error-logs
+author: Moti Harmats
+date: 2023/02/11
+tags:
+    - attack.initial_access
+    - attack.t1190
+logsource:
+    category: application
+    product: jvm
+    definition: 'Requirements: application error logs must be collected (with LOG_LEVEL=ERROR and above)'
+detection:
+    keywords:
+        - 'SAXParseException'
+        - 'DOMException'
+    condition: keywords
+falsepositives:
+    - If the application expects to work with XML there may be parsing issues that don't necessarily mean XXE.
+level: high

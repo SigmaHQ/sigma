@@ -1,0 +1,31 @@
+title: Lazarus Activity Apr21
+id: 4a12fa47-c735-4032-a214-6fab5b120670
+status: deprecated
+description: Detects different process creation events as described in Malwarebytes's threat report on Lazarus group activity
+references:
+    - https://blog.malwarebytes.com/malwarebytes-news/2021/04/lazarus-apt-conceals-malicious-code-within-bmp-file-to-drop-its-rat/
+author: Bhabesh Raj
+date: 2021/04/20
+modified: 2023/03/10
+tags:
+    - attack.g0032
+    - attack.execution
+    - attack.t1106
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_1:
+        CommandLine|contains|all:
+            - 'mshta' # Covered by cc7abbd0-762b-41e3-8a26-57ad50d2eea3
+            - '.zip'
+    selection_2:
+        ParentImage: 'C:\Windows\System32\wbem\wmiprvse.exe' # Covered by 8a582fe2-0882-4b89-a82a-da6b2dc32937
+        Image: 'C:\Windows\System32\mshta.exe'
+    selection_3:
+        ParentImage|contains: ':\Users\Public\'
+        Image: 'C:\Windows\System32\rundll32.exe'
+    condition: 1 of selection_*
+falsepositives:
+    - Should not be any false positives
+level: high

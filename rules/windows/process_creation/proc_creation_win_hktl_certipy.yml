@@ -1,0 +1,46 @@
+title: HackTool - Certipy Execution
+id: 6938366d-8954-4ddc-baff-c830b3ba8fcd
+status: experimental
+description: Detects Certipy a tool for Active Directory Certificate Services enumeration and abuse based on PE metadata characteristics and common command line arguments.
+references:
+    - https://github.com/ly4k/Certipy
+author: pH-T (Nextron Systems)
+date: 2023/04/17
+tags:
+    - attack.discovery
+    - attack.credential_access
+    - attack.t1649
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\Certipy.exe'
+        - OriginalFileName: 'Certipy.exe'
+        - Description|contains: 'Certipy'
+    selection_cli_commands:
+        CommandLine|contains:
+            - ' auth '
+            - ' find '
+            - ' forge '
+            - ' relay '
+            - ' req '
+            - ' shadow '
+    selection_cli_flags:
+        CommandLine|contains:
+            - ' -bloodhound'
+            - ' -ca-pfx '
+            - ' -dc-ip '
+            - ' -kirbi'
+            - ' -old-bloodhound'
+            - ' -pfx '
+            - ' -target'
+            - ' -username '
+            - ' -vulnerable'
+            - 'auth -pfx'
+            - 'shadow auto'
+            - 'shadow list'
+    condition: selection_img or all of selection_cli_*
+falsepositives:
+    - Unlikely
+level: high

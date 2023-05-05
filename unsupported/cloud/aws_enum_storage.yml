@@ -1,0 +1,34 @@
+title: Potential Storage Enumeration on AWS
+id: 4723218f-2048-41f6-bcb0-417f2d784f61
+related:
+    - id: f305fd62-beca-47da-ad95-7690a0620084
+      type: similar
+status: unsupported
+description: Detects potential enumeration activity targeting AWS storage
+references:
+    - https://unit42.paloaltonetworks.com/compromised-cloud-compute-credentials/
+author: Janantha Marasinghe
+date: 2022/12/13
+modified: 2023/03/24
+tags:
+    - attack.discovery
+    - attack.t1619
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: 's3.amazonaws.com'
+        eventName:
+            - 'ListBuckets'
+            - 'GetBucketCors'
+            - 'GetBucketInventoryConfiguration'
+            - 'GetBucketPublicAccessBlock'
+            - 'GetBucketMetricsConfiguration'
+            - 'GetBucketPolicy'
+            - 'GetBucketTagging'
+    timeframe: 10m
+    condition: selection | count() > 5
+falsepositives:
+    - Unknown
+level: medium

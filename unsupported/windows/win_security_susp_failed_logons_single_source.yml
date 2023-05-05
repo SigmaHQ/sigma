@@ -1,0 +1,28 @@
+title: Failed Logins with Different Accounts from Single Source System
+id: e98374a6-e2d9-4076-9b5c-11bdb2569995
+status: unsupported
+description: Detects suspicious failed logins with different user accounts from a single source system
+author: Florian Roth (Nextron Systems)
+date: 2017/01/10
+modified: 2023/02/24
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1078
+logsource:
+    product: windows
+    service: security
+detection:
+    selection1:
+        EventID:
+            - 529
+            - 4625
+        TargetUserName: '*'
+        WorkstationName: '*'
+    condition: selection1 | count(TargetUserName) by WorkstationName > 3
+falsepositives:
+    - Terminal servers
+    - Jump servers
+    - Other multiuser systems like Citrix server farms
+    - Workstations with frequently changing users
+level: medium
