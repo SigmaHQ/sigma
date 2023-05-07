@@ -1,0 +1,75 @@
+title: Potential Homoglyph Attack Using Lookalike Characters
+id: 32e280f1-8ad4-46ef-9e80-910657611fbc
+status: experimental
+description: |
+    Detects the presence of unicode characters which are homoglyphs, or identical in appearance, to ASCII letter characters.
+    This is used as an obfuscation and masquerading techniques. Only "perfect" homoglyphs are included; these are characters that
+    are indistinguishable from ASCII characters and thus may make excellent candidates for homoglyph attack characters.
+references:
+    - https://redcanary.com/threat-detection-report/threats/socgholish/#threat-socgholish
+    - http://www.irongeek.com/homoglyph-attack-generator.php
+author: Micah Babinski, @micahbabinski
+date: 2023/05/07
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+    - attack.t1036.003
+    - attack.t1036.008
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:
+		    - "\u0410" # А/A
+            - "\u0430" # а/a
+            - "\u0412" # В/B
+            - "\u0415" # Е/E
+            - "\u0435" # е/e
+            - "\u041a" # К/K
+            - "\u041c" # М/M
+            - "\u041d" # Н/H
+            - "\u041e" # О/O
+            - "\u043e" # о/o
+            - "\u0420" # Р/P
+            - "\u0440" # р/p
+            - "\u0421" # С/C
+            - "\u0441" # с/c
+            - "\u0422" # Т/T
+            - "\u0425" # Х/X
+            - "\u0445" # х/x
+            - "\u0405" # Ѕ/S
+            - "\u0455" # ѕ/s
+            - "\u0406" # І/I
+            - "\u0456" # і/i
+            - "\u0408" # Ј/J
+            - "\u0458" # ј/j
+            - "\u04ae" # Ү/Y
+            - "\u04bb" # һ/h
+            - "\u04c0" # Ӏ/I
+            - "\u04cf" # ӏ/l
+            - "\u0501" # ԁ/d
+            - "\u050C" # Ԍ/G
+            - "\u051a" # Ԛ/Q
+            - "\u051b" # ԛ/q
+            - "\u051c" # Ԝ/W
+            - "\u051d" # ԝ/w
+            - "\u0391" # Α/A
+            - "\u0392" # Β/B
+            - "\u0395" # Ε/E
+            - "\u0396" # Ζ/Z
+            - "\u0397" # Η/H
+            - "\u0399" # Ι/I
+            - "\u039a" # Κ/K
+            - "\u039c" # Μ/M
+            - "\u039d" # Ν/N
+            - "\u039f" # Ο/O
+            - "\u03bf" # ο/o
+            - "\u03a1" # Ρ/P
+            - "\u03a4" # Τ/T
+            - "\u03a5" # Υ/Y
+            - "\u03a7" # Χ/X
+    condition: selection
+falsepositives:
+    - Commandlines with legitimate Cyrillic text; will likely require tuning (or not be usable) in countries where these alphabets are in use.
+level: medium
