@@ -1,0 +1,28 @@
+title: Dll Execution Using Odbcconf.exe
+id: 1df7c844-0943-48d8-ab42-ff6db5e39299
+status: experimental
+description: DLL execution using  REGSVR flag in ODBCconf binary
+references:
+    - https://medium.com/@cyberjyot/t1218-008-dll-execution-using-odbcconf-exe-803fa9e08dac
+author: Harjot Singh @cyb3rjy0t
+date: 2023/05/07
+tags:
+    - attack.defense_evasion
+    - attack.t1218.011
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\odbcconf.exe'
+        - OriginalFileName: 'ODBCCONF.EXE'
+    selection_cli:
+        CommandLine|contains: 'regsvr'
+    selection_cli_2:
+        CommandLine|contains:
+        - '/A'
+        - '-A'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: critical
