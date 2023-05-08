@@ -19,7 +19,7 @@ class TestRules(unittest.TestCase):
     path_to_rules_ = ["rules", "rules-emerging-threats", "rules-placeholder", "rules-threat-hunting", "rules-compliance"]
     path_to_rules = []
     for path_ in path_to_rules_:
-        path_to_rules.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), path_))
+        path_to_rules.append(os.path.join(os.path.dirname(os.path.realpath(__name__)), path_))
 
     # Helper functions
     def yield_next_rule_file_path(self, path_to_rules: list) -> str:
@@ -53,7 +53,9 @@ class TestRules(unittest.TestCase):
         def get_field_name(selection: dict):
             name = []
             for field in selection:
-                if "|" in field:
+                if field == '|all':
+                    continue
+                elif "|" in field:
                     name.append(field.split('|')[0])
                 else:
                     name.append(field)
