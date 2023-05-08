@@ -16,15 +16,14 @@ logsource:
 detection:
     selection:
         DestinationHostname|contains: 'api.notion.com'
+    filter_main_notion:
+        Image|endswith: '\AppData\Local\Programs\Notion\Notion.exe'
     filter_optional_brave:
         Image|endswith: '\brave.exe'
     filter_optional_chrome:
         Image:
             - 'C:\Program Files\Google\Chrome\Application\chrome.exe'
             - 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
-    filter_optional_notion:
-        Image|endswith:
-            - 'C:\AppData\Local\Programs\Notion\Notion.exe'
     filter_optional_firefox:
         Image:
             - 'C:\Program Files\Mozilla Firefox\firefox.exe'
@@ -58,7 +57,7 @@ detection:
         Image|endswith: '\vivaldi.exe'
     filter_optional_whale:
         Image|endswith: '\whale.exe'
-    condition: selection and not 1 of filter_optional_*
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate applications communicating with the "api.notion.com" endpoint that are not already in the exclusion list. The desktop and browser applications do not appear to be using the API by default unless integrations are configured.
 level: low
