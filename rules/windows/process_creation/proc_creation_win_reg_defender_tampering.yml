@@ -5,9 +5,10 @@ description: Detects the usage of "reg.exe" to tamper with different Windows def
 references:
     - https://thedfirreport.com/2022/03/21/apt35-automates-initial-access-using-proxyshell/
     - https://github.com/swagkarna/Defeat-Defender-V1.2.0
-author: Florian Roth (Nextron Systems)
+    - https://www.elevenforum.com/t/video-guide-how-to-completely-disable-microsoft-defender-antivirus.14608/page-2
+author: Florian Roth (Nextron Systems), Swachchhanda Shrawan Poudel
 date: 2022/03/22
-modified: 2023/02/04
+modified: 2023/05/10
 tags:
     - attack.defense_evasion
     - attack.t1562.001
@@ -22,18 +23,38 @@ detection:
         CommandLine|contains:
             - 'SOFTWARE\Microsoft\Windows Defender\'
             - 'SOFTWARE\Policies\Microsoft\Windows Defender\'
+            - 'SOFTWARE\Policies\Microsoft\Windows Defender Security Center' 
     selection_dword_0:
         CommandLine|contains|all:
             - ' add '
             - ' /d 0'
+            - ' -d 0'
         CommandLine|contains:
-            - 'Real-Time Protection'
+            - 'SpynetReporting'
+            - 'SubmitSamplesConsent'
+            - 'MpEnablePus'
+            - 'PUAProtection'
+            - 'DisallowExploitProtectionOverride'
             - 'TamperProtection'
+            - 'EnableControlledFolderAccess'
     selection_dword_1:
         CommandLine|contains|all:
             - ' add '
             - ' /d 1'
-        CommandLine|contains: 'Notification_Suppress'
+            - ' -d 1'
+        CommandLine|contains: 
+            - 'Notification_Suppress'
+            - 'DisableBehaviorMonitoring'
+            - 'DisableIntrusionPreventionSystem'
+            - 'DisableIOAVProtection'
+            - 'DisableOnAccessProtection'
+            - 'DisableRealtimeMonitoring'
+            - 'DisableScanOnRealtimeEnable'
+            - 'DisableScriptScanning'
+            - 'DisableEnhancedNotifications'
+            - 'DisableBlockAtFirstSeen'
+            - 'DisableAntiSpyware'
+            - 'DisableAntiVirus'
     condition: all of selection_root_* and 1 of selection_dword_*
 falsepositives:
     - Rare legitimate use by administrators to test software (should always be investigated)

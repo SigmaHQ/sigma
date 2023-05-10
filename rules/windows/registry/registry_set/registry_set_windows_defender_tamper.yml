@@ -12,9 +12,12 @@ references:
     - https://gist.github.com/anadr/7465a9fde63d41341136949f14c21105
     - https://admx.help/?Category=Windows_7_2008R2&Policy=Microsoft.Policies.WindowsDefender::SpyNetReporting
     - https://symantec-enterprise-blogs.security.com/blogs/threat-intelligence/ransomware-hive-conti-avoslocker
-author: AlertIQ, Ján Trenčanský, frack113, Nasreddine Bencherchali
+    - https://www.tenforums.com/tutorials/32236-enable-disable-microsoft-defender-pua-protection-windows-10-a.html
+    - https://www.tenforums.com/tutorials/105533-enable-disable-windows-defender-exploit-protection-settings.html
+    - https://www.tenforums.com/tutorials/123792-turn-off-tamper-protection-microsoft-defender-antivirus.html
+author: AlertIQ, Ján Trenčanský, frack113, Nasreddine Bencherchali, Swachchhanda Shrawan Poudel
 date: 2022/08/01
-modified: 2023/03/14
+modified: 2023/05/10
 tags:
     - attack.defense_evasion
     - attack.t1562.001
@@ -24,14 +27,19 @@ logsource:
 detection:
     selection_main:
         EventType: SetValue
-        TargetObject|contains: '\SOFTWARE\Microsoft\Windows Defender\'
+        TargetObject|contains: 
+            - '\SOFTWARE\Microsoft\Windows Defender\'
+            - '\SOFTWARE\Policies\Microsoft\Windows Defender\'
+            - '\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\'
     selection_dword_1:
         TargetObject|endswith:
             - '\Real-Time Protection\DisableBehaviorMonitoring'
+            - '\Real-Time Protection\DisableIntrusionPreventionSystem'
             - '\Real-Time Protection\DisableIOAVProtection'
             - '\Real-Time Protection\DisableOnAccessProtection'
             - '\Real-Time Protection\DisableRealtimeMonitoring'
             - '\Real-Time Protection\DisableScanOnRealtimeEnable'
+            - '\Real-Time Protection\DisableScriptScanning'
             - '\Reporting\DisableEnhancedNotifications'
             - '\SpyNet\DisableBlockAtFirstSeen'
             - '\DisableAntiSpyware'
@@ -42,6 +50,11 @@ detection:
             - '\SpyNet\SpynetReporting'
             - '\SpyNet\SubmitSamplesConsent'
             - '\MpEngine\MpEnablePus'
+            - '\PUAProtection'
+            - '\App and Browser protection\DisallowExploitProtectionOverride'
+           #- '\Features\TamperProtection' #filtering for false positive
+            - '\Windows Defender Exploit Guard\Controlled Folder Access\EnableControlledFolderAccess'
+            - '\Signature Update\ForceUpdateFromMU'
         Details: 'DWORD (0x00000000)'
     condition: selection_main and 1 of selection_dword_*
 falsepositives:
