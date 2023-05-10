@@ -1,0 +1,29 @@
+title: Potential RoboForm.dll Sideloading
+id: f64c9b2d-b0ad-481d-9d03-7fc75020892a
+status: experimental
+description: Detects potential DLL sideloading of "roboform.dll"
+references:
+    - https://twitter.com/StopMalvertisin/status/1648604148848549888
+    - https://twitter.com/t3ft3lb/status/1656194831830401024
+author: X__Junior (Nextron Systems)
+date: 2023/05/10
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1574.001
+    - attack.t1574.002
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith: '\RoboForm.dll'
+    filter:
+        ImageLoaded|startswith:
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
+            - 'C:\Windows\System32\'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high
