@@ -25,9 +25,9 @@ references:
     - https://github.com/elastic/detection-rules/blob/c76a39796972ecde44cb1da6df47f1b6562c9770/rules/windows/defense_evasion_execution_msbuild_started_by_office_app.toml
     - https://www.vmray.com/analyses/2d2fa29185ad/report/overview.html
     - https://app.any.run/tasks/c903e9c8-0350-440c-8688-3881b556b8e0/
-author: Michael Haag, Florian Roth, Markus Neis, Elastic, FPT.EagleEye Team, Vadim Khrykov, Cyb3rEng, Michael Haag, Christopher Peacock @securepeacock, SCYTHE @scythe_io
+author: Florian Roth (Nextron Systems), Markus Neis, FPT.EagleEye Team, Vadim Khrykov, Cyb3rEng, Michael Haag, Christopher Peacock @securepeacock, @scythe_io
 date: 2018/04/06
-modified: 2023/02/10
+modified: 2023/04/24
 tags:
     - attack.defense_evasion
     - attack.execution
@@ -50,7 +50,7 @@ detection:
             - '\WINWORD.EXE'
             - '\wordpad.exe'
             - '\wordview.exe'
-    selection_img:
+    selection_child_processes:
         - OriginalFileName:
             - 'bitsadmin.exe'
             - 'CertOC.exe'
@@ -121,7 +121,15 @@ detection:
             - '\wmic.exe'
             - '\workfolders.exe'
             - '\wscript.exe'
-    condition: all of selection_*
+    selection_child_susp_paths: # Idea: Laiali Kazalbach, Mohamed Elsayed (#4142)
+        Image|contains:
+            - '\AppData\'
+            - '\Users\Public\'
+            - '\ProgramData\'
+            - '\Windows\Tasks\'
+            - '\Windows\Temp\'
+            - '\Windows\System32\Tasks\'
+    condition: selection_parent and 1 of selection_child_*
 falsepositives:
     - Unknown
 level: high

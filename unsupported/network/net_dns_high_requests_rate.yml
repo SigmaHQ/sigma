@@ -1,0 +1,22 @@
+title: High DNS Requests Rate
+id: b4163085-4001-46a3-a79a-55d8bbbc7a3a
+status: unsupported
+description: High DNS requests amount from host per short period of time
+author: Daniil Yugoslavskiy, oscd.community
+date: 2019/10/24
+modified: 2023/03/24
+tags:
+    - attack.exfiltration
+    - attack.t1048.003
+    - attack.command_and_control
+    - attack.t1071.004
+logsource:
+    category: dns
+detection:
+    selection:
+        query: '*'
+    timeframe: 1m
+    condition: selection | count() by src_ip > 1000
+falsepositives:
+    - Legitimate high DNS requests rate to domain name which should be added to whitelist
+level: medium

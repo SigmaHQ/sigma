@@ -12,7 +12,6 @@ references:
     - https://github.com/olafhartong/sysmon-modular/blob/fa1ae53132403d262be2bbd7f17ceea7e15e8c78/11_file_create/include_dotnet.xml
     - https://web.archive.org/web/20221026202428/https://gist.github.com/code-scrap/d7f152ffcdb3e0b02f7f394f5187f008
     - https://blog.menasec.net/2019/07/interesting-difr-traces-of-net-clr.html
-    - https://bohops.com/2021/03/16/investigating-net-clr-usage-log-tampering-techniques-for-edr-evasion/
 author: frack113, omkar72, oscd.community, Wojciech Lesicki
 date: 2022/11/18
 modified: 2023/02/23
@@ -35,7 +34,7 @@ detection:
             - '\UsageLogs\svchost.exe.log'
             - '\UsageLogs\wscript.exe.log'
             - '\UsageLogs\wmic.exe.log'
-    filter_rundll:
+    filter_main_rundll32:
         # This filter requires the event to be enriched by additional information such as ParentImage and CommandLine activity
         ParentImage|endswith: '\MsiExec.exe'
         ParentCommandLine|contains: ' -Embedding'
@@ -43,7 +42,7 @@ detection:
         CommandLine|contains|all:
             - 'Temp'
             - 'zzzzInvokeManagedCustomActionOutOfProc'
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Rundll32.exe with zzzzInvokeManagedCustomActionOutOfProc in command line and msiexec.exe as parent process - https://twitter.com/SBousseaden/status/1388064061087260675
 level: high

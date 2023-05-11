@@ -1,0 +1,66 @@
+title: Group Modification Logging
+id: 9cf01b6c-e723-4841-a868-6d7f8245ca6e
+status: deprecated
+description: |
+  Configure systems to issue a log entry and alert when an account is added to or removed from any group assigned administrative privileges.
+  Sigma detects
+  Event ID 4728 indicates a "Member is added to a Security Group".
+  Event ID 4729 indicates a "Member is removed from a Security enabled-group".
+  Event ID 4730 indicates a "Security Group is deleted".
+  The case is not applicable for Unix OS.
+  Supported OS - Windows 2008 R2 and 7, Windows 2012 R2 and 8.1, Windows 2016 and 10 Windows Server 2019, Windows Server 2000, Windows 2003 and XP.
+references:
+    - https://www.cisecurity.org/controls/cis-controls-list/
+    - https://www.pcisecuritystandards.org/documents/PCI_DSS_v3-2-1.pdf
+    - https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.04162018.pdf
+    - https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=4728
+    - https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=4729
+    - https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=4730
+    - https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=633
+    - https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=632
+    - https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=634
+author: Alexandr Yampolskyi, SOC Prime
+date: 2019/03/26
+modified: 2023/04/26
+# tags:
+    # - CSC4
+    # - CSC4.8
+    # - NIST CSF 1.1 PR.AC-4
+    # - NIST CSF 1.1 PR.AT-2
+    # - NIST CSF 1.1 PR.MA-2
+    # - NIST CSF 1.1 PR.PT-3
+    # - ISO 27002-2013 A.9.1.1
+    # - ISO 27002-2013 A.9.2.2
+    # - ISO 27002-2013 A.9.2.3
+    # - ISO 27002-2013 A.9.2.4
+    # - ISO 27002-2013 A.9.2.5
+    # - ISO 27002-2013 A.9.2.6
+    # - ISO 27002-2013 A.9.3.1
+    # - ISO 27002-2013 A.9.4.1
+    # - ISO 27002-2013 A.9.4.2
+    # - ISO 27002-2013 A.9.4.3
+    # - ISO 27002-2013 A.9.4.4
+    # - PCI DSS 3.2 2.1
+    # - PCI DSS 3.2 7.1
+    # - PCI DSS 3.2 7.2
+    # - PCI DSS 3.2 7.3
+    # - PCI DSS 3.2 8.1
+    # - PCI DSS 3.2 8.2
+    # - PCI DSS 3.2 8.3
+    # - PCI DSS 3.2 8.7
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID:
+            - 4728 # A member was added to a security-enabled global group
+            - 4729 # A member was removed from a security-enabled global group
+            - 4730 # A security-enabled global group was deleted
+            - 633 # Security Enabled Global Group Member Removed
+            - 632 # Security Enabled Global Group Member Added
+            - 634 # Security Enabled Global Group Deleted
+    condition: selection
+falsepositives:
+    - Unknown
+level: low

@@ -1,0 +1,36 @@
+title: Use of Debugfs to Access a Raw Disk
+id: fb0647d7-371a-4553-8e20-33bbbe122956
+status: unsupported
+description: Detects access to a raw disk on a host to evade detection by security products.
+references:
+    - https://twitter.com/0xm1rch/status/1600857731073654784?s=20&t=MdrBPqv4hnBEfAJBayMCZA
+    - https://github.com/Neo23x0/auditd/blob/master/audit.rules # required auditd config
+author: Janantha Marasinghe
+date: 2022/12/20
+modified: 2023/03/24
+tags:
+    - attack.defense_evasion
+    - attack.t1006
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection_debugfs:
+        type: 'EXECVE'
+        a0: 'debugfs'
+    selection_tools:
+        type: 'EXECVE'
+        a0:
+            - 'df'
+            - 'lsblk'
+            - 'pvs'
+            - 'fdisk'
+            - 'blkid'
+            - 'parted'
+            - 'hwinfo'
+            - 'inxi'
+    timeframe: 5m
+    condition: selection_debugfs | near selection_tools # requires both
+falsepositives:
+    - Unknown
+level: medium

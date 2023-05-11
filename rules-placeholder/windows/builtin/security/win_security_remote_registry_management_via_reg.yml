@@ -1,0 +1,30 @@
+title: Remote Registry Management Using Reg Utility
+id: 68fcba0d-73a5-475e-a915-e8b4c576827e
+status: test
+description: Remote registry management using REG utility from non-admin workstation
+references:
+    - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
+author: Teymur Kheirkhabarov, oscd.community
+date: 2019/10/22
+modified: 2023/04/25
+tags:
+    - attack.credential_access
+    - attack.defense_evasion
+    - attack.discovery
+    - attack.s0075
+    - attack.t1012
+    - attack.t1112
+    - attack.t1552.002
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 5145
+        RelativeTargetName|contains: '\winreg'
+    filter_main:
+        IpAddress: '%Admins_Workstations%'
+    condition: selection and not filter_main
+falsepositives:
+    - Legitimate usage of remote registry management by administrator
+level: medium

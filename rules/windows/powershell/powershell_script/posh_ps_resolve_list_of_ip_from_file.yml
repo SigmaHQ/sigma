@@ -1,0 +1,27 @@
+title: PowerShell Script With File Hostname Resolving Capabilities
+id: fbc5e92f-3044-4e73-a5c6-1c4359b539de
+status: experimental
+description: Detects PowerShell scripts that have capabilities to read files, loop through them and resolve DNS host entries.
+references:
+    - https://www.fortypoundhead.com/showcontent.asp?artid=24022
+    - https://labs.withsecure.com/publications/fin7-target-veeam-servers
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/05/05
+tags:
+    - attack.exfiltration
+    - attack.t1020
+logsource:
+    product: windows
+    category: ps_script
+    definition: bade5735-5ab0-4aa7-a642-a11be0e40872
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - 'Get-content '
+            - 'foreach'
+            - '[System.Net.Dns]::GetHostEntry'
+            - 'Out-File'
+    condition: selection
+falsepositives:
+    - The same functionality can be implemented by admin scripts, correlate with name and creator
+level: medium

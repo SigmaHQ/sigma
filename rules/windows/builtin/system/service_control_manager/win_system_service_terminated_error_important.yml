@@ -1,0 +1,43 @@
+title: Important Windows Service Terminated With Error
+id: d6b5520d-3934-48b4-928c-2aa3f92d6963
+related:
+    - id: acfa2210-0d71-4eeb-b477-afab494d596c
+      type: similar
+status: experimental
+description: Detects important or interesting windows services that got terminated for whatever reason
+references:
+    - https://www.microsoft.com/en-us/security/blog/2023/04/11/guidance-for-investigating-attacks-using-cve-2022-21894-the-blacklotus-campaign/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/04/14
+tags:
+    - attack.defense_evasion
+logsource:
+    product: windows
+    service: system
+detection:
+    selection_eid:
+        Provider_Name: 'Service Control Manager'
+        EventID: 7023 # The X Service service terminated with the following error
+    selection_name:
+        - param1|contains:
+            # Note that these names are "Display Names" and are language specific. If you're using a non-english system these can and will be different
+            - ' Antivirus'
+            - ' Firewall'
+            - 'Application Guard'
+            - 'BitLocker Drive Encryption Service'
+            - 'Encrypting File System'
+            - 'Microsoft Defender'
+            - 'Threat Protection'
+            - 'Windows Event Log'
+        # Use this If you collect the binary value provided from this event, which is the wide hex encoded value of the service name.
+        - Binary|contains:
+            - '770069006e0064006500660065006e006400' # windefend (Microsoft Defender Antivirus Service)
+            - '4500760065006e0074004c006f006700' # EventLog
+            - '6d0070007300730076006300' # mpssvc (Windows Defender Firewall)
+            - '530065006e0073006500' # Sense (Windows Defender Advanced Threat Protection Service)
+            - '450046005300' # EFS (Encrypting File System)
+            - '420044004500530056004300' # BDESVC (BitLocker Drive Encryption Service)
+    condition: all of selection_*
+falsepositives:
+    - Rare false positives could occur since service termination could happen due to multiple reasons
+level: high
