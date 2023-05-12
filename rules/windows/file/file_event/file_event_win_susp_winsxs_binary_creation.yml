@@ -1,0 +1,29 @@
+title: WinSxS Executable File Creation By Non-System Process
+id: 34746e8c-5fb8-415a-b135-0abc167e912a
+related:
+    - id: 64827580-e4c3-4c64-97eb-c72325d45399
+      type: derived
+status: experimental
+description: Detects the creation of binaries in the WinSxS folder by non-system processes
+references:
+    - https://media.defense.gov/2023/May/09/2003218554/-1/-1/0/JOINT_CSA_HUNTING_RU_INTEL_SNAKE_MALWARE_20230509.PDF
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/05/11
+tags:
+    - attack.execution
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|startswith: 'C:\Windows\WinSxS\'
+        TargetFilename|endswith: '.exe'
+    filter_main_system_location:
+        Image|startswith:
+            - 'C:\Windows\Systems32\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\WinSxS\'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: medium

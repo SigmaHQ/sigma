@@ -1,5 +1,7 @@
 # 3CX Supply Chain Attack
 
+## Summary
+
 On March 29, 2023 CrowdStrike detected malicious activity, originating from a legitimate, signed binary called 3CXDesktopApp. The binary is part of a softphone system developed by 3CX.
 The observed malicious activity consisted of beaconing to infrastructure controlled by the actors, leading to the deployment of second-stage payloads and in a few cases direct on-keyboard activity from the attackers.
 
