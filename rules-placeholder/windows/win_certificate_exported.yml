@@ -13,13 +13,13 @@ logsource:
     product: windows
     definition: 'The CAPI2/Operational log needs to be enabled as it is disabled by default. Powershell ScriptBlock logging should also be enabled.'
 detection:
-    select_CAPI_log:
+    selection_CAPI_log:
         Channel: Microsoft-Windows-CAPI2/Operational
         EventID: 70 # "Acquire Certificate Private Key"
-    select_CS_client_log:
+    selection_CS_client_log:
         Channel: Microsoft-Windows-CertificateServicesClient-Lifecycle-System/Operational
         EventID: 1007 # "A certificate has been exported"
-    select_PwSh_log:
+    selection_PwSh_log:
         Channel:
             - Microsoft-Windows-PowerShell/Operational
             - PowerShellCore/Operational
@@ -27,7 +27,7 @@ detection:
         ScriptBlockText|contains:
             - 'Export-Certificate'
             - 'Export-PFXCertificate'
-    condition: 1 of selection
+    condition: 1 of selection_*
 falsepositives:
     - A user exporting their certificate.
 level: medium
