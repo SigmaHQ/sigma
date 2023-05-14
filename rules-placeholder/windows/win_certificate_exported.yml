@@ -1,0 +1,36 @@
+title: 'Certificate Exported'
+id: e2b5163d-7deb-4566-9af3-40afea6858c3
+status: experimental
+description: 'Detects when a user or mimikatz exports a certificate (and possibly the private key as well) from the local Windows certificate store.'
+references:
+    - https://www.splunk.com/en_us/blog/security/breaking-the-chain-defending-against-certificate-services-abuse.html
+author: Zach Mathis
+date: 2023/05/13
+modified: 2023/05/13
+tags:
+    - mimikatz
+    - attack.credential_access
+    - attack.t1649
+logsource:
+    product: windows
+    definition: 'The CAPI2/Operational log needs to be enabled as it is disabled by default. Powershell ScriptBlock logging should also be enabled.'
+detection:
+    select_CAPI_log:
+        Channel: 'Microsoft-Windows-CAPI2/Operational'
+        EventID: 70 # "Acquire Certificate Private Key"
+    select_CS_client_log:
+        Channel: Microsoft-Windows-CertificateServicesClient-Lifecycle-System/Operational
+        EventID: 1007 # "A certificate has been exported"
+    select_PwSh_channels:
+        - Microsoft-Windows-PowerShell/Operational
+        - PowerShellCore/Operational
+    select_PwShEID:
+        EventID: 4104
+    select_PwSh_keywords:
+        ScriptBlockText|contains: 
+            - 'Export-Certificate'
+            - 'Export-PFXCertificate'
+    condition: select_CAPI_log or select_CS_client_log or (select_PwSh_channels and select_PwShEID and select_PwSh_keywords)
+falsepositives: 
+    - 'A user exporting their certificate.'
+level: medium
