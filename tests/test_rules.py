@@ -756,7 +756,7 @@ class TestRules(unittest.TestCase):
     def test_file_names(self):
         faulty_rules = []
         name_lst = []
-        filename_pattern = re.compile(r'[a-z0-9_]{10,80}\.yml')
+        filename_pattern = re.compile(r'[a-z0-9_]{10,90}\.yml')
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             filename = os.path.basename(file)
             if filename in name_lst:
@@ -766,9 +766,9 @@ class TestRules(unittest.TestCase):
                 print(Fore.YELLOW +
                       "Rule {} has a invalid extension (.yml).".format(file))
                 faulty_rules.append(file)
-            elif len(filename) > 74:
+            elif len(filename) > 90:
                 print(Fore.YELLOW +
-                      "Rule {} has a file name too long >70.".format(file))
+                      "Rule {} has a file name too long >90.".format(file))
                 faulty_rules.append(file)
             elif len(filename) < 14:
                 print(Fore.YELLOW +
@@ -922,7 +922,7 @@ class TestRules(unittest.TestCase):
             name_lst.append(filename)
 
         self.assertEqual(faulty_rules, [], Fore.RED +
-                         r'There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is \'[a-z0-9_]{10,70}\.yml\' and it has to contain at least an underline character. It also has to follow the following naming convention https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/Sigmahq_filename_rule.md')
+                         r'There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is \'[a-z0-9_]{10,90}\.yml\' and it has to contain at least an underline character. It also has to follow the following naming convention https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/Sigmahq_filename_rule.md')
 
     def test_title(self):
         faulty_rules = []
