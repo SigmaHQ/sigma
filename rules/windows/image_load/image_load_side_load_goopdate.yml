@@ -25,6 +25,18 @@ detection:
     filter_optional_user_paths:
         Image|endswith: '\GoogleUpdate.exe'
         ImageLoaded|contains: '\AppData\Local\Google\Update\'
+    filter_optional_dropbox:
+        Image|endswith: '\DropboxUpdate.exe'
+        ImageLoaded|startswith:
+            - 'C:\Program Files (x86)\Dropbox\Update\'
+            - 'C:\Program Files\Dropbox\Update\'
+    filter_optional_dropbox_installer_temp:
+        Image|contains|all:
+            - '\AppData\Local\Temp\GUM'
+            - '.tmp\DropboxUpdate.exe'
+        ImageLoaded|contains|all:
+            - '\AppData\Local\Temp\GUM'
+            - '.tmp\\goopdate.dll'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - False positives is expected from Google Chrome installations running from user locations (AppData) and other custom locations. Apply additional filters accordingly.
