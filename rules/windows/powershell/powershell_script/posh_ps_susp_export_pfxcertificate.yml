@@ -1,13 +1,14 @@
-title: Suspicious Export-PfxCertificate
+title: Certificate Exported via PowerShell
 id: aa7a3fce-bef5-4311-9cc1-5f04bb8c308c
 status: test
-description: Detects Commandlet that is used to export certificates from the local certificate store and sometimes used by threat actors to steal private keys from compromised machines
+description: Detects commandlets that are used to export certificates from the local certificate store which are sometimes used by threat actors to steal private keys from compromised machines.
 references:
     - https://us-cert.cisa.gov/ncas/analysis-reports/ar21-112a
     - https://docs.microsoft.com/en-us/powershell/module/pki/export-pfxcertificate
+    - https://www.splunk.com/en_us/blog/security/breaking-the-chain-defending-against-certificate-services-abuse.html
 author: Florian Roth (Nextron Systems)
 date: 2021/04/23
-modified: 2023/01/24
+modified: 2023/05/15
 tags:
     - attack.credential_access
     - attack.t1552.004
@@ -17,10 +18,12 @@ logsource:
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
     selection:
-        ScriptBlockText|contains: 'Export-PfxCertificate'
+        ScriptBlockText|contains: 
+            - 'Export-PfxCertificate'
+            - 'Export-Certificate'
     filter_moduleexport:
         ScriptBlockText|contains: 'CmdletsToExport = @('
-    condition: selection and not 1 of filter*
+    condition: selection and not filter_moduleexport
 falsepositives:
     - Legitimate certificate exports invoked by administrators or users (depends on processes in the environment - filter if unusable)
 level: high
