@@ -1,0 +1,27 @@
+title: Internet Explorer DisableFirstRunCustomize Enabled
+id: ab567429-1dfb-4674-b6d2-979fd2f9d125
+status: experimental
+description: |
+    Detect changes to the Internet Explorer "DisableFirstRunCustomize" value, which prevents Internet Explorer from running the First Run wizard the first time a user starts the browser after installing Internet Explorer or Windows.
+references:
+    - https://www.ncsc.gov.uk/static-assets/documents/malware-analysis-reports/devil-bait/NCSC-MAR-Devil-Bait.pdf
+    - https://unit42.paloaltonetworks.com/operation-ke3chang-resurfaces-with-new-tidepool-malware/
+    - https://admx.help/?Category=InternetExplorer&Policy=Microsoft.Policies.InternetExplorer::NoFirstRunCustomise
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/05/16
+tags:
+    - attack.defense_evasion
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|endswith: '\Microsoft\Internet Explorer\Main\DisableFirstRunCustomize'
+        Details:
+            - 'DWORD (0x00000001)' # Home Page
+            - 'DWORD (0x00000002)' # Welcome To IE
+    condition: selection
+falsepositives:
+    - As this is controlled by group policy as well. Administrators could enable this policy which might create a false positives
+level: medium
