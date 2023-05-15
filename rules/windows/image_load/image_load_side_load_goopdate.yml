@@ -1,0 +1,43 @@
+title: Potential Goopdate.DLL Sideloading
+id: b6188d2f-b3c4-4d2c-a17d-9706e0851af0
+status: experimental
+description: Detects potential DLL sideloading of "goopdate.dll", a DLL used by googleupdate.exe
+references:
+    - https://www.ncsc.gov.uk/static-assets/documents/malware-analysis-reports/goofy-guineapig/NCSC-MAR-Goofy-Guineapig.pdf
+author: X__Junior (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+date: 2023/05/15
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1574.001
+    - attack.t1574.002
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith: '\goopdate.dll'
+    filter_main_paths:
+        Image|endswith: '\GoogleUpdate.exe'
+        ImageLoaded|startswith:
+            - 'C:\Program Files (x86)\Google\'
+            - 'C:\Program Files\Google\'
+    filter_optional_user_paths:
+        Image|endswith: '\GoogleUpdate.exe'
+        ImageLoaded|contains: '\AppData\Local\Google\Update\'
+    filter_optional_dropbox:
+        Image|contains: '\Dropbox'
+        ImageLoaded|startswith:
+            - 'C:\Program Files (x86)\Dropbox\Update\'
+            - 'C:\Program Files\Dropbox\Update\'
+    filter_optional_dropbox_installer_temp:
+        Image|contains|all:
+            - '\AppData\Local\Temp\GUM'
+            - '.tmp\Dropbox'
+        ImageLoaded|contains|all:
+            - '\AppData\Local\Temp\GUM'
+            - '.tmp\\goopdate.dll'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - False positives are expected from Google Chrome installations running from user locations (AppData) and other custom locations. Apply additional filters accordingly.
+level: medium

@@ -1,0 +1,51 @@
+title: Potential Binary Or Script Dropper Via PowerShell
+id: 7047d730-036f-4f40-b9d8-1c63e36d5e62
+status: experimental
+description: Detects PowerShell creating a binary executable or a script file.
+references:
+    - https://www.zscaler.com/blogs/security-research/onenote-growing-threat-malware-distribution
+author: frack113, Nasreddine Bencherchali (Nextron Systems)
+date: 2023/03/17
+modified: 2023/05/09
+tags:
+    - attack.persistence
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        TargetFilename|endswith:
+            - '.bat'
+            - '.chm'
+            - '.cmd'
+            - '.com'
+            - '.dll'
+            - '.exe'
+            - '.hta'
+            - '.jar'
+            - '.js'
+            - '.ocx'
+            - '.scr'
+            - '.sys'
+            - '.vbe'
+            - '.vbs'
+            - '.wsf'
+    filter_main_user_temp:
+        TargetFilename|startswith: 'C:\Users\'
+        TargetFilename|contains: '\AppData\Local\Temp\'
+        TargetFilename|endswith:
+            - '.dll'
+            - '.exe'
+    filter_main_admin_temp:
+        # Example: C:\Windows\Temp\0DA9758B-4649-4969-9409-5CBDF193FB53\TransmogProvider.dll
+        TargetFilename|startswith: 'C:\Windows\Temp\'
+        TargetFilename|endswith:
+            - '.dll'
+            - '.exe'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - False positives will differ depending on the environement and scripts used. Apply additional filters accordingly.
+level: medium
