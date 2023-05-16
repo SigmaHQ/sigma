@@ -1,0 +1,28 @@
+title: Malicious HTA File Drop by Foxit
+id: 9cae055f-e1d2-4f81-b8a5-1986a68cdd84
+
+status: experimental
+description: Detects suspicious file type dropped by a Foxit Reader into a Startup folder
+references:
+    - https://github.com/j00sean/SecBugs/tree/main/CVEs/CVE-2023-27363
+author: Gregory
+date: 2023/05/16
+tags:
+    - attack.persistence
+    - attack.t1505.001
+    - cve.2023.27363
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        Image|endswith: '\FoxitPDFReader.exe'
+        TargetFilename|contains:
+            - '\Microsoft\Windows\Start Menu\Programs\StartUp'
+    selection_types:
+        TargetFilename|endswith:
+            - '.hta'
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: high
