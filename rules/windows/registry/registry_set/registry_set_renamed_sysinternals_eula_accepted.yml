@@ -11,6 +11,7 @@ references:
     - Internal Research
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/08/24
+modified: 2023/05/16
 tags:
     - attack.resource_development
     - attack.t1588.002
@@ -30,7 +31,7 @@ detection:
             - '\PsPasswd'
             - '\Active Directory Explorer'
         TargetObject|endswith: '\EulaAccepted'
-    filter:
+    filter_main_image_names:
         Image|endswith:
             - '\PsExec.exe'
             - '\PsExec64.exe'
@@ -48,7 +49,9 @@ detection:
             - '\pspasswd64.exe'
             - '\ADExplorer.exe'
             - '\ADExplorer64.exe'
-    condition: selection and not filter
+    filter_optional_null:
+        Image: null # Race condition with some logging tools
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unlikely
 level: high
