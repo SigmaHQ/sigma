@@ -188,7 +188,7 @@ class TestRules(unittest.TestCase):
                 list_valid = self.get_logsource(full_logsource)
                 fisrt_time = True
 
-                if list_valid != [] and self.not_commun(full_logsource,list_valid):
+                if list_valid != [] and list_valid != None and self.not_commun(full_logsource,list_valid):
                     for field in self.get_detection_field(detection):
                         if not field in list_valid:
                             print(
