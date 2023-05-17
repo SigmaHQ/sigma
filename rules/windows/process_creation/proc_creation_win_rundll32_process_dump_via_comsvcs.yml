@@ -1,4 +1,4 @@
-title: Process Dumping Via Comsvcs.DLL
+title: Process Memory Dump Via Comsvcs.DLL
 id: 646ea171-dded-4578-8a4d-65e9822892e3
 related:
     - id: 09e6d5c0-05b8-4ff8-9eeb-043046ec774c
@@ -12,9 +12,10 @@ references:
     - https://modexp.wordpress.com/2019/08/30/minidumpwritedump-via-com-services-dll/
     - https://twitter.com/SBousseaden/status/1167417096374050817
     - https://twitter.com/Wietze/status/1542107456507203586
+    - https://github.com/Hackndo/lsassy/blob/14d8f8ae596ecf22b449bfe919829173b8a07635/lsassy/dumpmethod/comsvcs.py
 author: Florian Roth (Nextron Systems), Modexp, Nasreddine Bencherchali (Nextron Systems)
 date: 2020/02/18
-modified: 2023/02/05
+modified: 2023/05/16
 tags:
     - attack.defense_evasion
     - attack.credential_access
@@ -29,18 +30,26 @@ detection:
         - Image|endswith: '\rundll32.exe'
         - OriginalFileName: 'RUNDLL32.EXE'
         - CommandLine|contains: 'rundll32'
-    selection_cli:
+    selection_cli_1:
         CommandLine|contains|all:
             - 'comsvcs'
             - 'full'
         CommandLine|contains:
-            - '24 '
+            - '#-'
+            - '#+'
             - '#24'
-            - '#+24'
+            - '24 '
             - 'MiniDump' #Matches MiniDump and MinidumpW
-    unique_selection:
-        CommandLine|contains: '#-4294967272'  # https://twitter.com/Hexacorn/status/1224848930795552769
-    condition: all of selection_* or unique_selection
+    selection_generic:
+        CommandLine|contains|all:
+            - '24'
+            - 'comsvcs'
+            - 'full'
+        CommandLine|contains:
+            - ' #'
+            - ',#'
+            - ', #'
+    condition: (selection_img and 1 of selection_cli_*) or selection_generic
 falsepositives:
-    - Unlikely, because no one should dump the process memory in that way
+    - Unlikely
 level: high
