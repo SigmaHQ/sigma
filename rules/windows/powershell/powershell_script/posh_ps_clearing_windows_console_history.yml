@@ -8,7 +8,7 @@ references:
     - https://community.sophos.com/sophos-labs/b/blog/posts/powershell-command-history-forensics
 author: Austin Songer @austinsonger
 date: 2021/11/25
-modified: 2022/12/25
+modified: 2023/05/19
 tags:
     - attack.defense_evasion
     - attack.t1070
@@ -18,17 +18,17 @@ logsource:
     category: ps_script
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
-    selection1:
-        ScriptBlockText|contains: Clear-History
-    selection2a:
+    selection_1:
+        ScriptBlockText|contains: 'Clear-History'
+    selection_2a:
         ScriptBlockText|contains:
-            - Remove-Item
-            - rm
-    selection2b:
+            - 'Remove-Item'
+            - 'rm'
+    selection_2b:
         ScriptBlockText|contains:
-            - ConsoleHost_history.txt
-            - (Get-PSReadlineOption).HistorySavePath
-    condition: selection1 or selection2a and selection2b
+            - 'ConsoleHost_history.txt'
+            - '(Get-PSReadlineOption).HistorySavePath'
+    condition: selection_1 or all of selection_2*
 falsepositives:
     - Unknown
 level: high
