@@ -9,7 +9,7 @@ references:
     - https://gist.github.com/hook-s3c/7363a856c3cdbadeb71085147f042c1a
 author: Ilyas Ochkov, Jonhnathan Ribeiro, Daniil Yugoslavskiy, oscd.community
 date: 2022/01/25
-modified: 2022/12/02
+modified: 2023/05/19
 tags:
     - attack.defense_evasion
     - attack.t1070.003
@@ -18,24 +18,22 @@ logsource:
     category: ps_script
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
-    selection1a:
+    selection_1a:
         ScriptBlockText|contains:
             - 'del'
             - 'Remove-Item'
             - 'rm'
-    selection1b:
+    selection_1b:
         ScriptBlockText|contains: '(Get-PSReadlineOption).HistorySavePath'
-    selection_2:
+    selection_2a:
         ScriptBlockText|contains|all:
             - 'Set-PSReadlineOption'
-            - '–HistorySaveStyle'  # not sure if the homoglyph –/- is intended, just checking for both
             - 'SaveNothing'
-    selection_3:
-        ScriptBlockText|contains|all:
-            - 'Set-PSReadlineOption'
+    selection_2b:
+        ScriptBlockText|contains: # not sure if the homoglyph –/- is intended, just checking for both
             - '-HistorySaveStyle'
-            - 'SaveNothing'
-    condition: 1 of selection_* or all of selection1*
+            - '–HistorySaveStyle'
+    condition: all of selection_1* or all of selection_2*
 falsepositives:
     - Legitimate PowerShell scripts
 level: medium
