@@ -1,13 +1,13 @@
-title: Regsvr32 Spawning Explorer
+title: Suspicious Child Process Of Regsvr32
 id: 6f0947a4-1c5e-4e0d-8ac7-53159b8f23ca
 status: experimental
-description: Detects "regsvr32.exe" spawning "explorer.exe", which is very uncommon.
+description: Detects suspicious child processes of "regsvr32.exe".
 references:
     - https://redcanary.com/blog/intelligence-insights-april-2022/
     - https://www.echotrail.io/insights/search/regsvr32.exe
-author: elhoim
+author: elhoim, Florian Roth (Nextron Systems)
 date: 2022/05/05
-modified: 2022/07/28
+modified: 2023/05/24
 tags:
     - attack.defense_evasion
     - attack.t1218.010
@@ -17,8 +17,14 @@ logsource:
 detection:
     selection:
         ParentImage|endswith: '\regsvr32.exe'
-        Image|endswith: '\explorer.exe'
+        Image|endswith:
+            - '\calc.exe'
+            - '\cscript.exe'
+            - '\explorer.exe'
+            - '\mshta.exe'
+            - '\notepad.exe'
+            - '\wscript.exe'
     condition: selection
 falsepositives:
-    - Unknown
+    - Unlikely
 level: high

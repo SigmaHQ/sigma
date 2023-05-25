@@ -1,17 +1,17 @@
-title: Suspicious Regsvr32 Execution With Image Extension
+title: Regsvr32 Execution With Suspicious File Extension
 id: 089fc3d2-71e8-4763-a8a5-c97fbb0a403e
 related:
     - id: 4aa6040b-3f28-44e3-a769-9208e5feb5ec
       type: similar
 status: experimental
-description: Detects the execution of REGSVR32.exe with DLL files masquerading as image files
+description: Detects the execution of REGSVR32.exe with DLL files masquerading as other files
 references:
     - https://thedfirreport.com/2021/11/29/continuing-the-bazar-ransomware-story/
     - https://blog.talosintelligence.com/2021/10/threat-hunting-in-large-datasets-by.html
     - https://guides.lib.umich.edu/c.php?g=282942&p=1885348
-author: frack113
+author: Florian Roth (Nextron Systems), frack113
 date: 2021/11/29
-modified: 2022/10/31
+modified: 2023/05/24
 tags:
     - attack.defense_evasion
     - attack.t1218.010
@@ -21,12 +21,15 @@ logsource:
 detection:
     selection_img:
         - Image|endswith: '\regsvr32.exe'
-        - OriginalFileName: '\REGSVR32.EXE'
+        - OriginalFileName: 'REGSVR32.EXE'
     selection_cli:
         CommandLine|endswith:
             # Add more image extensions
+            # https://twitter.com/Max_Mal_/status/1542461200797163522/photo/3
+            - '.bin'
             - '.bmp'
             - '.cr2'
+            - '.dat'
             - '.eps'
             - '.gif'
             - '.ico'
@@ -37,9 +40,12 @@ detection:
             - '.png'
             - '.raw'
             - '.sr2'
+            - '.temp'
             - '.tif'
             - '.tiff'
+            - '.tmp'
+            - '.txt'
     condition: all of selection_*
 falsepositives:
-    - Unknown
+    - Unlikely
 level: high
