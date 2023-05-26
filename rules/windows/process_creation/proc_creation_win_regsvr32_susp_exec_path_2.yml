@@ -16,10 +16,9 @@ detection:
     selection_img:
         - Image|endswith: '\regsvr32.exe'
         - OriginalFileName: 'REGSVR32.EXE'
-    selection_cli:
+    selection_path_1:
         CommandLine|contains:
             - ':\PerfLogs\'
-            - ':\ProgramData\'
             - ':\Temp\'
             - '\Windows\Registration\CRMLog'
             - '\Windows\System32\com\dmp\'
@@ -35,17 +34,30 @@ detection:
             - '\Windows\SysWOW64\Tasks\Microsoft\Windows\PLA\System\'
             - '\Windows\SysWOW64\Tasks\Microsoft\Windows\SyncCenter\'
             - '\Windows\Tasks\'
-            - '\Windows\Temp\'
             - '\Windows\Tracing\'
-    filter_main_exclude_known_dirs:
+    selection_path_2:
+        CommandLine|contains:
+            # This is to avoid collisions with CLI starting with "C:\"
+            - ' "C:\'
+            - ' C:\'
+            - " 'C:\\"
+            - 'D:\'
+    selection_exclude_known_dirs:
         CommandLine|contains:
             # Note: add additional locations that are related to third party applications
-            - ':\Program Files (x86)\'
-            - ':\Program Files\'
-            - ':\ProgramData\'
-            - ':\Users\'
-            - ':\Windows\'
-    condition: all of selection_* or (selection_img and not 1 of filter_main_exclude_*)
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
+            - 'C:\ProgramData\'
+            - 'C:\Users\'
+            # Note: The space added here are to avoid collisions with the "regsvr32" binary full path
+            - ' C:\Windows\'
+            - ' "C:\Windows\'
+            - " 'C:\\Windows\\"
+    filter_main_empty:
+        CommandLine|contains: ''
+    filter_main_null:
+        CommandLine|contains: null
+    condition: selection_img and (selection_path_1 or (selection_path_2 and not selection_exclude_known_dirs)) and not 1 of filter_main_
 falsepositives:
     - Unlikely
 level: high
