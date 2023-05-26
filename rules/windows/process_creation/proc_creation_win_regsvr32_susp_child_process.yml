@@ -1,13 +1,17 @@
-title: Suspicious Child Process Of Regsvr32
+title: Potentially Suspicious Child Process Of Regsvr32
 id: 6f0947a4-1c5e-4e0d-8ac7-53159b8f23ca
+related:
+    - id: 8e2b24c9-4add-46a0-b4bb-0057b4e6187d
+      type: obsoletes
 status: experimental
-description: Detects suspicious child processes of "regsvr32.exe".
+description: Detects potentially suspicious child processes of "regsvr32.exe".
 references:
     - https://redcanary.com/blog/intelligence-insights-april-2022/
     - https://www.echotrail.io/insights/search/regsvr32.exe
-author: elhoim, Florian Roth (Nextron Systems)
+    - https://www.ired.team/offensive-security/code-execution/t1117-regsvr32-aka-squiblydoo
+author: elhoim, Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2022/05/05
-modified: 2023/05/24
+modified: 2023/05/26
 tags:
     - attack.defense_evasion
     - attack.t1218.010
@@ -22,9 +26,20 @@ detection:
             - '\cscript.exe'
             - '\explorer.exe'
             - '\mshta.exe'
+            - '\net.exe'
+            - '\net1.exe'
+            - '\nltest.exe'
             - '\notepad.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\reg.exe'
+            - '\schtasks.exe'
+            - '\werfault.exe'
             - '\wscript.exe'
+    filter_main_werfault:
+        Image|endswith: '\werfault.exe'
+        CommandLine|contains: ' -u -p '
     condition: selection
 falsepositives:
-    - Unlikely
+    - Unlikely, but can rarely occur. Apply additional filters accordingly.
 level: high

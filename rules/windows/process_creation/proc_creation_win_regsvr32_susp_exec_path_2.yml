@@ -1,0 +1,51 @@
+title: Regsvr32 Execution From Highly Suspicious Location
+id: 8e2b24c9-4add-46a0-b4bb-0057b4e6187d
+status: experimental
+description: Detects execution of regsvr32 where the DLL is located in a highly suspicious locations
+references:
+    - Internal Research
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/05/26
+tags:
+    - attack.defense_evasion
+    - attack.t1218.010
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\regsvr32.exe'
+        - OriginalFileName: 'REGSVR32.EXE'
+    selection_cli:
+        CommandLine|contains:
+            - ':\PerfLogs\'
+            - ':\ProgramData\'
+            - ':\Temp\'
+            - '\Windows\Registration\CRMLog'
+            - '\Windows\System32\com\dmp\'
+            - '\Windows\System32\FxsTmp\'
+            - '\Windows\System32\Microsoft\Crypto\RSA\MachineKeys\'
+            - '\Windows\System32\spool\drivers\color\'
+            - '\Windows\System32\spool\PRINTERS\'
+            - '\Windows\System32\spool\SERVERS\'
+            - '\Windows\System32\Tasks_Migrated\'
+            - '\Windows\System32\Tasks\Microsoft\Windows\SyncCenter\'
+            - '\Windows\SysWOW64\com\dmp\'
+            - '\Windows\SysWOW64\FxsTmp\'
+            - '\Windows\SysWOW64\Tasks\Microsoft\Windows\PLA\System\'
+            - '\Windows\SysWOW64\Tasks\Microsoft\Windows\SyncCenter\'
+            - '\Windows\Tasks\'
+            - '\Windows\Temp\'
+            - '\Windows\Tracing\'
+    filter_main_exclude_known_dirs:
+        CommandLine|contains:
+            # Note: add additional locations that are related to third party applications
+            - ':\Program Files (x86)\'
+            - ':\Program Files\'
+            - ':\ProgramData\'
+            - ':\Users\'
+            - ':\Windows\'
+    condition: all of selection_* or (selection_img and not 1 of filter_main_exclude_*)
+falsepositives:
+    - Unlikely
+level: high
