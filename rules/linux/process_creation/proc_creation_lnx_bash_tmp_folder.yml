@@ -1,0 +1,23 @@
+title: Execution of Shell With Tmp Parent Process
+id: 2fade0b6-7423-4835-9d4f-335b39b83867
+status: experimental
+description: Detects suspicious executions of shells with tmp parents
+references:
+    - https://blogs.jpcert.or.jp/en/2023/05/gobrat.html
+    - https://www.virustotal.com/gui/file/60bcd645450e4c846238cf0e7226dc40c84c96eba99f6b2cffcd0ab4a391c8b3/detection
+    - https://www.virustotal.com/gui/file/3e44c807a25a56f4068b5b8186eee5002eed6f26d665a8b791c472ad154585d1/detection
+author: Joseliyo Sanchez, @Joseliyo_Jstnk
+date: 2023/30/05
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection:
+        ParentImage|startswith: '/tmp/'
+        CommandLine|contains: 
+          - '/bin/bash'
+          - '/bin/sh'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

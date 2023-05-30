@@ -1,0 +1,29 @@
+title: Wget Download File To Tmp Folder in Silence Mode
+id: cf610c15-ed71-46e1-bdf8-2bd1a99de6c4
+status: experimental
+description: Detects the use of wget to download content
+references:
+    - https://blogs.jpcert.or.jp/en/2023/05/gobrat.html
+    - https://www.virustotal.com/gui/file/60bcd645450e4c846238cf0e7226dc40c84c96eba99f6b2cffcd0ab4a391c8b3/detection
+    - https://www.virustotal.com/gui/file/3e44c807a25a56f4068b5b8186eee5002eed6f26d665a8b791c472ad154585d1/detection
+author: Joseliyo Sanchez, @Joseliyo_Jstnk
+date: 2023/30/05
+tags:
+    - attack.command_and_control
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith: '/wget'
+        CommandLine|contains|all: 
+            - '-q' # Turn off Wget’s output.
+            - '-O' # output
+            - '/tmp/'
+            #- '--limit-rate' # Limit the download speed
+            #- '--no-check-certificate'
+    condition: selection
+falsepositives:
+    - Legitimate downloads files in tmp folder.
+level: high
