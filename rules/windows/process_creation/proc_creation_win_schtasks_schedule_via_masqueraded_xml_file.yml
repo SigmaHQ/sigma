@@ -1,0 +1,50 @@
+title: Suspicious Scheduled Task Creation via Masqueraded XML File
+id: dd2a821e-3b07-4d3b-a9ac-929fe4c6ca0c
+status: experimental
+description: Detects the creation of a scheduled task using the "-XML" flag with a file without the '.xml' extension. This behavior could be indicative of potential defense evasion attempt during persistence
+references:
+    - https://docs.microsoft.com/en-us/windows/win32/taskschd/daily-trigger-example--xml-
+    - https://github.com/elastic/protections-artifacts/blob/084067123d3328a823b1c3fdde305b694275c794/behavior/rules/persistence_suspicious_scheduled_task_creation_via_masqueraded_xml_file.toml
+author: Swachchhanda Shrawan Poudel, Elastic (idea)
+date: 2023/04/20
+tags:
+    - attack.defense_evasion
+    - attack.persistence
+    - attack.t1036.005
+    - attack.t1053.005
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        - Image|endswith: '\schtasks.exe'
+        - OriginalFileName: 'schtasks.exe'
+    selection_cli_create:
+        CommandLine|contains:
+            - '/create'
+            - '-create'
+    selection_cli_xml:
+        CommandLine|contains:
+            - '/xml'
+            - '-xml'
+    filter_main_extension_xml:
+        CommandLine|contains: '.xml'
+    filter_main_system_process:
+        IntegrityLevel: 'System'
+    filter_main_rundll32:
+        ParentImage|endswith: '\rundll32.exe'
+        ParentCommandLine|contains|all:
+            - ':\WINDOWS\Installer\MSI'
+            - '.tmp,zzzzInvokeManagedCustomActionOutOfProc'
+    filter_optional_third_party:
+        ParentImage|endswith:
+            # Consider removing any tools that you don't use to avoid blind spots
+            - ':\ProgramData\OEM\UpgradeTool\CareCenter_*\BUnzip\Setup_msi.exe'
+            - ':\Program Files\Axis Communications\AXIS Camera Station\SetupActions.exe'
+            - ':\Program Files\Axis Communications\AXIS Device Manager\AdmSetupActions.exe'
+            - ':\Program Files (x86)\Zemana\AntiMalware\AntiMalware.exe'
+            - ':\Program Files\Dell\SupportAssist\pcdrcui.exe'
+    condition: all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Unknown
+level: medium

@@ -1,0 +1,29 @@
+title: Potential CVE-2021-4034 Exploitation Attempt
+id: 40a016ab-4f48-4eee-adde-bbf612695c53
+status: unsupported
+description: Detects exploitation attempt of the vulnerability described in CVE-2021-4034.
+references:
+    - https://github.com/berdav/CVE-2021-4034
+    - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-4034
+    - https://access.redhat.com/security/cve/CVE-2021-4034
+author: Pawel Mazur
+date: 2022/01/27
+modified: 2023/03/24
+tags:
+    - attack.privilege_escalation
+    - attack.t1068
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection_proctitle:
+        type: PROCTITLE
+        proctitle: '(null)'
+    selection_syscall:
+        type: SYSCALL
+        comm: pkexec
+        exe: '/usr/bin/pkexec'
+    condition: selection_proctitle |near selection_syscall
+falsepositives:
+    - Unknown
+level: high

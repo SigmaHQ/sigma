@@ -6,7 +6,7 @@ references:
     - https://github.com/Wh04m1001/SysmonEoP
 author: frack113, Tim Shelton (update fp)
 date: 2022/12/05
-modified: 2023/03/21
+modified: 2023/03/20
 tags:
     - attack.privilege_escalation
     - attack.defense_evasion
@@ -53,15 +53,21 @@ detection:
         ParentImage|startswith: 'C:\Windows\SysWOW64\config\systemprofile\Citrix\UpdaterBinaries\'
         ParentImage|endswith: '\CitrixReceiverUpdater.exe'
         Image|endswith: '\cmd.exe'
-    filter_thor:
-        ParentImage|endswith: '\python.exe'
-        CommandLine: 'C:\WINDOWS\system32\cmd.exe /c "ver"'
+    filter_asgard:
+        CommandLine|startswith: 'C:\WINDOWS\system32\cmd.exe /c "'
         CurrentDirectory|contains: 'C:\WINDOWS\Temp\asgard2-agent\'
     filter_dell_update:
         ParentImage|startswith: 'C:\Windows\Temp'
         ParentImage|endswith: '\invcol.exe'
         ParentCommandLine|contains: 'C:\ProgramData\Dell\UpdateService\'
         Image|endswith: '\cmd.exe'
+    filter_compattelrunner: # seen on Windows 8
+        ParentImage|startswith: 'C:\Windows\WinSxS\'
+        ParentImage|endswith: '\CompatTelRunner.exe'
+        ParentCommandLine|startswith: 'C:\Windows\system32\CompatTelRunner.exe -m:appraiser.dll -f:DoScheduledTelemetryRun'
+    filter_ibm_spectrumprotect:
+        ParentImage|startswith: 'C:\IBM\SpectrumProtect\webserver\scripts\'
+        CommandLine|contains: 'C:\IBM\SpectrumProtect\webserver\scripts\'
     filter_empty_parent_1:
         CommandLine: "powershell.exe -ExecutionPolicy Restricted -Command Write-Host 'Final result: 1';"  # Most probably SetupHost.exe during Windows updates/upgrades; See comment on rule id: f4bbd493-b796-416e-bbf2-121235348529
     filter_empty_parent_2:
@@ -69,7 +75,15 @@ detection:
         CommandLine|contains: '/d /c C:\Windows\system32\silcollector.cmd'
     filter_empty_parent_3:
         Image|endswith: '\cmd.exe'
-        CommandLine|endswith: 'cmd.exe /c btool server list replication_port --no-log'
+        CommandLine|endswith:
+            - 'cmd.exe /c btool server list replication_port --no-log'
+            - 'cmd.exe /c btool server list general --no-log'
+    filter_empty_parent_4: # seen on an SCCM server
+        Image|endswith: '\cmd.exe'
+        CommandLine|contains: 'C:\Windows\system32\reg.exe query hklm\software\microsoft\windows\softwareinventorylogging /v collectionstate /reg:64'
+    filter_empty_parent_5:
+        Image: 'C:\Windows\System32\cmd.exe'
+        CommandLine: 'C:\Windows\system32\cmd.exe /c PAUSE'
     condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Unknown

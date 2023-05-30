@@ -1,0 +1,28 @@
+title: Potential Arbitrary File Download Via MSEdge.EXE
+id: 94771a71-ba41-4b6e-a757-b531372eaab6
+status: test
+description: Detects usage of the "msedge.exe" binary as a LOLBIN to download arbitrary file via the CLI
+references:
+    - https://twitter.com/mrd0x/status/1478116126005641220
+    - https://lolbas-project.github.io/lolbas/Binaries/Msedge/
+author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+date: 2022/01/11
+modified: 2023/04/06
+tags:
+    - attack.command_and_control
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\msedge.exe'
+        - OriginalFileName: 'msedge.exe'
+    selection_cli:
+        CommandLine|contains:
+            - '.exe http'
+            - 'msedge http'
+    condition: all of selection_*
+falsepositives:
+    - Software that uses MsEdge to download components in the background (see ParentImage, ParentCommandLine)
+level: medium

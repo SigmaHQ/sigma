@@ -33,14 +33,15 @@ class TestRules(unittest.TestCase):
     # Don't use trademarks in rules - they require non-ASCII characters to be used on we don't want them in our rules
     TRADE_MARKS = {"MITRE ATT&CK", "ATT&CK"}
 
-    path_to_rules = "../rules"
-    path_to_rules = os.path.join(os.path.dirname(os.path.realpath(__file__)), path_to_rules)
+    path_to_rules = ["rules", "rules-emerging-threats", "rules-placeholder", "rules-threat-hunting", "rules-compliance"]
 
     # Helper functions
-    def yield_next_rule_file_path(self, path_to_rules: str) -> str:
-        for root, _, files in os.walk(path_to_rules):
-            for file in files:
-                yield os.path.join(root, file)
+    def yield_next_rule_file_path(self, path_to_rules: list) -> str:
+        for path_ in path_to_rules:
+            for root, _, files in os.walk(path_):
+                for file in files:
+                    if file.endswith('.yml'):
+                        yield os.path.join(root, file)
 
     def get_rule_part(self, file_path: str, part_name: str):
         yaml_dicts = self.get_rule_yaml(file_path)
@@ -59,7 +60,7 @@ class TestRules(unittest.TestCase):
                 data.append(part)
 
         return data
-
+    
     # Tests
     # def test_confirm_extension_is_yml(self):
         # files_with_incorrect_extensions = []
@@ -137,13 +138,31 @@ class TestRules(unittest.TestCase):
         self.assertEqual(files_with_incorrect_mitre_tags, [], Fore.RED +
                          "There are rules with duplicate tags")
 
+    def test_duplicate_references(self):
+        files_with_duplicate_references = []
+
+        for file in self.yield_next_rule_file_path(self.path_to_rules):
+            references = self.get_rule_part(file_path=file, part_name="references")
+            if references:
+                known_references = []
+                for reference in references:
+                    if reference in known_references:
+                        print(
+                            Fore.RED + "Rule {} has the duplicate reference {}".format(file, reference))
+                        files_with_duplicate_references.append(file)
+                    else:
+                        known_references.append(reference)
+
+        self.assertEqual(files_with_duplicate_references, [], Fore.RED +
+                         "There are rules with duplicate references")
+
     def test_look_for_duplicate_filters(self):
         def check_list_or_recurse_on_dict(item, depth: int, special: bool) -> None:
             if type(item) == list:
                 check_if_list_contain_duplicates(item, depth, special)
             elif type(item) == dict and depth <= MAX_DEPTH:
                 for keys, sub_item in item.items():
-                    if "|base64" in keys: # Covers both "base64" and "base64offset" modifiers
+                    if "|base64" in keys or "|re" in keys: # Covers both "base64" and "base64offset" modifiers, and "re" modifier
                         check_list_or_recurse_on_dict(sub_item, depth + 1, True)
                     else:
                         check_list_or_recurse_on_dict(sub_item, depth + 1, special)
@@ -153,6 +172,7 @@ class TestRules(unittest.TestCase):
                 # We use a list comprehension to convert all the element to lowercase. Since we don't care about casing in SIGMA except for the following modifiers
                 #   - "base64offset"
                 #   - "base64"
+                #   - "re"
                 if special:
                     item_ = item
                 else:
@@ -281,7 +301,7 @@ class TestRules(unittest.TestCase):
                     else:
                         condition_value1 = detection1[named_condition][condition]
                         condition_value2 = detection2[named_condition][condition]
-                    
+
                     if condition_value1 != condition_value2:
                         return False
 
@@ -736,7 +756,7 @@ class TestRules(unittest.TestCase):
     def test_file_names(self):
         faulty_rules = []
         name_lst = []
-        filename_pattern = re.compile(r'[a-z0-9_]{10,70}\.yml')
+        filename_pattern = re.compile(r'[a-z0-9_]{10,90}\.yml')
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             filename = os.path.basename(file)
             if filename in name_lst:
@@ -746,9 +766,9 @@ class TestRules(unittest.TestCase):
                 print(Fore.YELLOW +
                       "Rule {} has a invalid extension (.yml).".format(file))
                 faulty_rules.append(file)
-            elif len(filename) > 74:
+            elif len(filename) > 90:
                 print(Fore.YELLOW +
-                      "Rule {} has a file name too long >70.".format(file))
+                      "Rule {} has a file name too long >90.".format(file))
                 faulty_rules.append(file)
             elif len(filename) < 14:
                 print(Fore.YELLOW +
@@ -890,7 +910,11 @@ class TestRules(unittest.TestCase):
                                     pattern_prefix = "win_dns_analytic_"
                                 elif value == "bitlocker":
                                     pattern_prefix = "win_bitlocker_"
-                        
+                                elif value == "capi2":
+                                    pattern_prefix = "win_capi2_"
+                                elif value == "certificateservicesclient-lifecycle-system":
+                                    pattern_prefix = "win_certificateservicesclient_lifecycle_system_"
+
                     # This value is used to test if we should add the OS infix for certain categories
                     if os_bool:
                         pattern_prefix += os_infix
@@ -902,7 +926,7 @@ class TestRules(unittest.TestCase):
             name_lst.append(filename)
 
         self.assertEqual(faulty_rules, [], Fore.RED +
-                         r'There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is \'[a-z0-9_]{10,70}\.yml\' and it has to contain at least an underline character. It also has to follow the following naming convention https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/Sigmahq_filename_rule.md')
+                         r'There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is \'[a-z0-9_]{10,90}\.yml\' and it has to contain at least an underline character. It also has to follow the following naming convention https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/Sigmahq_filename_rule.md')
 
     def test_title(self):
         faulty_rules = []
@@ -1026,7 +1050,7 @@ class TestRules(unittest.TestCase):
     #                      "There are rules with non-conform 'logsource' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#log-source")
 
     def test_selection_list_one_value(self):
-    
+
         def treat_list(file, values, valid_, selection_name):
             # rule with only list of Keywords term
             if len(values) == 1 and not isinstance(values[0], str):
@@ -1064,19 +1088,19 @@ class TestRules(unittest.TestCase):
             detection = self.get_rule_part(
                 file_path=file, part_name="detection")
             if detection:
-                
+
                 valid = True
                 for key in detection:
                     values = detection[key]
                     if isinstance(detection[key], list):
                         valid = treat_list(file, values, valid, key)
-                    
+
                     if isinstance(detection[key], dict):
                         valid = treat_dict(file, values, valid, key)
 
                     if not valid:
                         faulty_rules.append(file)
-                        
+
         self.assertEqual(faulty_rules, [], Fore.RED +
                             "There are rules using list with only 1 element")
 
@@ -1086,8 +1110,8 @@ class TestRules(unittest.TestCase):
             detection = self.get_rule_part(
                 file_path=file, part_name="detection")
             if detection:
-                
-                # This test is a best effort to avoid breaking SIGMAC parser. You could do more testing and try to fix this once and for all by modifiying the token regular expressions https://github.com/SigmaHQ/sigma/blob/b9ae5303f12cda8eb6b5b90a32fd7f11ad65645d/tools/sigma/parser/condition.py#L107-L127 
+
+                # This test is a best effort to avoid breaking SIGMAC parser. You could do more testing and try to fix this once and for all by modifiying the token regular expressions https://github.com/SigmaHQ/sigma/blob/b9ae5303f12cda8eb6b5b90a32fd7f11ad65645d/tools/sigma/parser/condition.py#L107-L127
                 for key in detection:
                     if key[:3].lower() == "sel":
                        continue
@@ -1100,7 +1124,7 @@ class TestRules(unittest.TestCase):
                     elif key[:3].lower() == "not":
                         print( Fore.RED + "Rule {} has a selection '{}' that starts with the string 'not'".format(file, key))
                         faulty_rules.append(file)
-                        
+
         self.assertEqual(faulty_rules, [], Fore.RED +
                             "There are rules with bad selection names. Can't start a selection name with an 'or*' or an 'and*' or a 'not*' ")
 
@@ -1271,16 +1295,16 @@ class TestRules(unittest.TestCase):
 
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules using condition without lowercase operator")
-    
+
     def test_broken_thor_logsource_config(self):
 
         faulty_config = False
-        
+
         # This test check of the "thor.yml" config file has a missing "WinEventLog:" prefix in Windows log sources
-        path_to_thor_config = "../tools/config/thor.yml"
+        path_to_thor_config = "../tests/thor.yml"
         path_to_thor_config = os.path.join(os.path.dirname(os.path.realpath(__file__)), path_to_thor_config)
         thor_logsources = self.get_rule_yaml(path_to_thor_config)[0]['logsources']
-    
+
         for key, value in thor_logsources.items():
             try:
                 if value["product"] == "windows":
@@ -1288,11 +1312,11 @@ class TestRules(unittest.TestCase):
                     for i in sources_list:
                         if not i.startswith('WinEventLog:'):
                             faulty_config = True
-                            print(Fore.RED + "/tools/config/thor.yml config file has a broken source. Windows Eventlog sources must start with the keyword 'WinEventLog:'")
+                            print(Fore.RED + "/tests/thor.yml config file has a broken source. Windows Eventlog sources must start with the keyword 'WinEventLog:'")
             except:
                 pass
 
-        self.assertEqual(faulty_config, False, Fore.RED + "thor.yml configuration file located in 'tools/config/thor.yml' has a borken log source definition")
+        self.assertEqual(faulty_config, False, Fore.RED + "thor.yml configuration file located in 'tests/thor.yml' has a borken log source definition")
 
     def test_re_invalid_escapes(self):
         faulty_rules = []

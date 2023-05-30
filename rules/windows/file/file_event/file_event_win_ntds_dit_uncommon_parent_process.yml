@@ -1,0 +1,49 @@
+title: NTDS.DIT Creation By Uncommon Parent Process
+id: 4e7050dd-e548-483f-b7d6-527ab4fa784d
+related:
+    - id: 11b1ed55-154d-4e82-8ad7-83739298f720
+      type: similar
+status: test
+description: Detects creation of a file named "ntds.dit" (Active Directory Database) by an uncommon parent process or directory
+references:
+    - https://www.ired.team/offensive-security/credential-access-and-credential-dumping/ntds.dit-enumeration
+    - https://www.n00py.io/2022/03/manipulating-user-passwords-without-mimikatz/
+    - https://pentestlab.blog/tag/ntds-dit/
+    - https://github.com/samratashok/nishang/blob/414ee1104526d7057f9adaeee196d91ae447283e/Gather/Copy-VSS.ps1
+author: Florian Roth (Nextron Systems)
+date: 2022/03/11
+modified: 2023/01/05
+tags:
+    - attack.credential_access
+    - attack.t1003.003
+logsource:
+    product: windows
+    category: file_event
+    definition: 'Requirements: The "ParentImage" field is not available by default on EID 11 of Sysmon logs. To be able to use this rule to the full extent you need to enrich the log with additional ParentImage data'
+detection:
+    selection_file:
+        TargetFilename|endswith: '\ntds.dit'
+    selection_process_parent:
+        # Note: ParentImage is a custom field and is not available by default on Sysmon EID 11
+        ParentImage|endswith:
+            - '\cscript.exe'
+            - '\httpd.exe'
+            - '\nginx.exe'
+            - '\php-cgi.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\w3wp.exe'
+            - '\wscript.exe'
+    selection_process_parent_path:
+        # Note: ParentImage is a custom field and is not available by default on Sysmon EID 11
+        ParentImage|contains:
+            - '\apache'
+            - '\tomcat'
+            - '\AppData\'
+            - '\Temp\'
+            - '\Public\'
+            - '\PerfLogs\'
+    condition: selection_file and 1 of selection_process_*
+falsepositives:
+    - Unknown
+level: high

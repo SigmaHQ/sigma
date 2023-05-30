@@ -6,9 +6,9 @@ description: |
     This rule detect using dd and truncate to add a junk data to file.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1027.001/T1027.001.md
-author: 'Igor Fits, oscd.community'
+author: Igor Fits, oscd.community
 date: 2020/10/13
-modified: 2023/01/06
+modified: 2023/05/03
 tags:
     - attack.defense_evasion
     - attack.t1027.001
@@ -19,14 +19,16 @@ detection:
     selection_execve:
         type: 'EXECVE'
     keywords_truncate:
-        - 'truncate'
-        - '-s'
+        '|all':
+            - 'truncate'
+            - '-s'
     keywords_dd:
-        - 'dd'
-        - 'if='
+        '|all':
+            - 'dd'
+            - 'if='
     keywords_filter:
         - 'of='
-    condition: selection_execve and (all of keywords_truncate or (all of keywords_dd and not keywords_filter))
+    condition: selection_execve and (keywords_truncate or (keywords_dd and not keywords_filter))
 falsepositives:
     - Unknown
 level: high

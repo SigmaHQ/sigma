@@ -6,7 +6,7 @@ references:
     - https://image.slidesharecdn.com/kheirkhabarovoffzonefinal-181117201458/95/hunting-for-privilege-escalation-in-windows-environment-48-638.jpg
 author: Teymur Kheirkhabarov (idea), Mangatas Tondang (rule), oscd.community
 date: 2020/10/13
-modified: 2022/10/20
+modified: 2023/03/23
 tags:
     - attack.privilege_escalation
     - attack.t1548.002
@@ -31,20 +31,21 @@ detection:
     filter_repair:
         - CommandLine|endswith: '\system32\msiexec.exe /V' # ignore "repair option"
         - ParentCommandLine|endswith: '\system32\msiexec.exe /V' # ignore "repair option"
-    filter_autoupdater:
+    filter_sophos:
+        ParentImage|startswith: 'C:\ProgramData\Sophos\'
+    filter_avira:
+        ParentImage|startswith: 'C:\ProgramData\Avira\'
+    filter_avast:
         ParentImage|startswith:
-            - 'C:\ProgramData\Sophos\'
-            - 'C:\ProgramData\Avira\'
             - 'C:\Program Files\Avast Software\'
             - 'C:\Program Files (x86)\Avast Software\'
+    filter_google_update:
+        ParentImage|startswith:
             - 'C:\Program Files\Google\Update\'
             - 'C:\Program Files (x86)\Google\Update\'
-    condition: 1 of selection_image_* and selection_user and not 1 of filter*
-fields:
-    - IntegrityLevel
-    - User
-    - Image
+    condition: 1 of selection_image_* and selection_user and not 1 of filter_*
 falsepositives:
     - System administrator usage
     - Anti virus products
+    - WindowsApps located in "C:\Program Files\WindowsApps\"
 level: medium

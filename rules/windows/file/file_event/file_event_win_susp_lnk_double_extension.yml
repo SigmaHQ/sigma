@@ -1,10 +1,11 @@
-title: Suspicious LNK Double Extension Files
+title: Suspicious LNK Double Extension File
 id: 3215aa19-f060-4332-86d5-5602511f3ca8
 related:
     - id: b4926b47-a9d7-434c-b3a0-adc3fa0bd13e
       type: derived
 status: experimental
-description: Detects dropped files with LNK double extension, which is often used by malware as a method to abuse the fact that windows hide default extensions by default.
+description: |
+    Detects the creation of files with an "LNK" as a second extension. This is sometimes used by malware as a method to abuse the fact that Windows hides the "LNK" extension by default.
 references:
     - https://www.crowdstrike.com/blog/meet-crowdstrikes-adversary-of-the-month-for-june-mustang-panda/
     - https://www.anomali.com/blog/china-based-apt-mustang-panda-targets-minority-groups-public-and-private-sector-organizations
@@ -13,6 +14,7 @@ references:
     - https://twitter.com/luc4m/status/1073181154126254080
 author: Nasreddine Bencherchali (Nextron Systems), frack113
 date: 2022/11/07
+modified: 2023/05/12
 tags:
     - attack.defense_evasion
     - attack.t1036.007
@@ -25,17 +27,31 @@ detection:
         TargetFilename|contains:
             - '.doc.'
             - '.docx.'
-            - '.xls.'
-            - '.xlsx.'
-            - '.ppt.'
-            - '.pptx.'
             - '.jpg.'
             - '.pdf.'
-    filter:
-        TargetFilename|contains:
-            - '\AppData\Roaming\Microsoft\Office\Recent\'
-            - '\AppData\Roaming\Microsoft\Windows\Recent\'
-    condition: selection and not filter
+            - '.ppt.'
+            - '.pptx.'
+            - '.xls.'
+            - '.xlsx.'
+    filter_main_recent:
+        TargetFilename|contains: '\AppData\Roaming\Microsoft\Windows\Recent\'
+    filter_optional_office:
+        Image|endswith:
+            # Note: Some additional office application might need to be added
+            - '\excel.exe'
+            - '\powerpnt.exe'
+            - '\winword.exe'
+        TargetFilename|contains: '\AppData\Roaming\Microsoft\Office\Recent\'
+    filter_optional_excel:
+        Image|endswith: '\excel.exe'
+        TargetFilename|contains: '\AppData\Roaming\Microsoft\Excel'
+    filter_optional_powerpoint:
+        Image|endswith: '\powerpnt.exe'
+        TargetFilename|contains: '\AppData\Roaming\Microsoft\PowerPoint'
+    filter_optional_word:
+        Image|endswith: '\winword.exe'
+        TargetFilename|contains: '\AppData\Roaming\Microsoft\Word'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
-    - Users creating a shortcut on e.g. desktop
+    - Some tuning is required for other general purpose directories of third party apps
 level: medium

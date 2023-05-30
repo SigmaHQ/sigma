@@ -1,0 +1,34 @@
+title: Potential RoboForm.DLL Sideloading
+id: f64c9b2d-b0ad-481d-9d03-7fc75020892a
+status: experimental
+description: Detects potential DLL sideloading of "roboform.dll", a DLL used by RoboForm Password Manager
+references:
+    - https://twitter.com/StopMalvertisin/status/1648604148848549888
+    - https://twitter.com/t3ft3lb/status/1656194831830401024
+    - https://www.roboform.com/
+author: X__Junior (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+date: 2023/05/14
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1574.001
+    - attack.t1574.002
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith:
+            - '\roboform.dll'
+            - '\roboform-x64.dll'
+    filter_main_path:
+        Image|startswith:
+            - ' C:\Program Files (x86)\Siber Systems\AI RoboForm\'
+            - ' C:\Program Files\Siber Systems\AI RoboForm\'
+        Image|endswith:
+            - '\robotaskbaricon.exe'
+            - '\robotaskbaricon-x64.exe'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - If installed on a per-user level, the path would be located in "AppData\Local". Add additional filters to reflect this mode of installation
+level: medium

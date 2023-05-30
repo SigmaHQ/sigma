@@ -5,9 +5,10 @@ description: Detects a "dllhost" process spawning with no commandline arguments 
 references:
     - https://redcanary.com/blog/child-processes/
     - https://nasbench.medium.com/what-is-the-dllhost-exe-process-actually-running-ef9fe4c19c08
+    - https://www.ncsc.gov.uk/static-assets/documents/malware-analysis-reports/goofy-guineapig/NCSC-MAR-Goofy-Guineapig.pdf
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/06/27
-modified: 2023/02/21
+modified: 2023/05/15
 tags:
     - attack.defense_evasion
     - attack.t1055
@@ -16,12 +17,13 @@ logsource:
     product: windows
 detection:
     selection:
-        CommandLine|endswith: 'dllhost.exe'
         Image|endswith: '\dllhost.exe'
-    condition: selection
-fields:
-    - CommandLine
-    - ParentCommandLine
+        CommandLine:
+            - 'dllhost.exe'
+            - 'dllhost'
+    filter_main_null:
+        CommandLine: null
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unlikely
 level: high

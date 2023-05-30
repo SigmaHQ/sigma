@@ -1,7 +1,7 @@
 title: Potential System DLL Sideloading From Non System Locations
 id: 4fc0deee-0057-4998-ab31-d24e46e0aba4
 status: experimental
-description: Detects DLL sideloading of DLLs usually located in system locations (System32, SysWOW64...)
+description: Detects DLL sideloading of DLLs usually located in system locations (System32, SysWOW64, etc.)
 references:
     - https://hijacklibs.net/ # For list of DLLs that could be sideloaded (search for dlls mentioned here in there). Wietze Beukema (project and research)
     - https://blog.cyble.com/2022/07/21/qakbot-resurfaces-with-new-playbook/ # WindowsCodecs.dll
@@ -9,7 +9,7 @@ references:
     - https://github.com/XForceIR/SideLoadHunter/blob/cc7ef2e5d8908279b0c4cee4e8b6f85f7b8eed52/SideLoads/README.md # XForceIR (SideLoadHunter Project), Chris Spehn (research WFH Dridex)
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/08/14
-modified: 2023/03/15
+modified: 2023/05/16
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -440,32 +440,38 @@ detection:
             - '\wow64log.dll'
             - '\WptsExtensions.dll'
             - '\wbemcomn.dll'
-    filter_generic:
+    filter_main_generic:
+        # Note: this filter is generic on purpose to avoid insane amount of FP from legitimate third party applications. A better approach would be to baseline everything and add specific filters to avoid blind spots
         ImageLoaded|startswith:
             - 'C:\Windows\System32\'
             - 'C:\Windows\SysWOW64\'
             - 'C:\Windows\WinSxS\'
             - 'C:\Windows\SoftwareDistribution\'
             - 'C:\Windows\SystemTemp\'
-    filter_appvpolicy:
-        ImageLoaded: 'C:\Program Files\Common Files\microsoft shared\ClickToRun\AppVPolicy.dll'
+            - 'C:\$WINDOWS.~BT\'
+    filter_optional_office_appvpolicy:
         Image: 'C:\Program Files\Common Files\microsoft shared\ClickToRun\OfficeClickToRun.exe'
-    filter_azure:
+        ImageLoaded: 'C:\Program Files\Common Files\microsoft shared\ClickToRun\AppVPolicy.dll'
+    filter_optional_azure:
         ImageLoaded|startswith: 'C:\Packages\Plugins\Microsoft.GuestConfiguration.ConfigurationforWindows\'
-    filter_dell:
+    filter_optional_dell:
         Image|startswith:
             - 'C:\Program Files\WindowsApps\DellInc.DellSupportAssistforPCs'
             - 'C:\Windows\System32\backgroundTaskHost.exe'
         ImageLoaded|startswith: 'C:\Program Files\WindowsApps\DellInc.DellSupportAssistforPCs'
-    filter_cleanmgr:
-        Image: 'C:\Windows\System32\cleanmgr.exe'
-        ImageLoaded|endswith: '\ssshim.dll'
-    filter_upgrade:
-        Image|startswith: 'C:\$WINDOWS.~BT\'
-    filter_dell_wldp:
+    filter_optional_dell_wldp:
         Image|startswith: 'C:\Program Files\WindowsApps\DellInc.DellSupportAssistforPCs'
         Image|endswith: '\wldp.dll'
-    condition: selection and not 1 of filter_*
+    filter_optional_checkpoint:
+        Image|startswith:
+            - 'C:\Program Files\CheckPoint\'
+            - 'C:\Program Files (x86)\CheckPoint\'
+        Image|endswith: '\SmartConsole.exe'
+        ImageLoaded|startswith:
+            - 'C:\Program Files\CheckPoint\'
+            - 'C:\Program Files (x86)\CheckPoint\'
+        ImageLoaded|endswith: '\PolicyManager.dll'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate applications loading their own versions of the DLLs mentioned in this rule
 level: high

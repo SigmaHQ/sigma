@@ -1,0 +1,24 @@
+title: LiveKD Driver Creation
+id: 16fe46bb-4f64-46aa-817d-ff7bec4a2352
+status: experimental
+description: Detects the creation of the LiveKD driver, which is used for live kernel debugging
+references:
+    - Internal Research
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/05/16
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename: 'C:\Windows\System32\drivers\LiveKdD.SYS'
+        Image|endswith:
+            - '\livekd.exe'
+            - '\livek64.exe'
+    condition: selection
+falsepositives:
+    - Legitimate usage of LiveKD for debugging purposes will also trigger this
+level: medium

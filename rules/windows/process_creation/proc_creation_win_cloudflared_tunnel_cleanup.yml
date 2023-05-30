@@ -1,0 +1,29 @@
+title: Cloudflared Tunnel Connections Cleanup
+id: 7050bba1-1aed-454e-8f73-3f46f09ce56a
+status: experimental
+description: Detects execution of the "cloudflared" tool with the tunnel "cleanup" flag in order to cleanup tunnel connections.
+references:
+    - https://github.com/cloudflare/cloudflared
+    - https://developers.cloudflare.com/cloudflare-one/connections/connect-apps
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/05/17
+tags:
+    - attack.command_and_control
+    - attack.t1102
+    - attack.t1090
+    - attack.t1572
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains|all:
+            - ' tunnel '
+            - 'cleanup '
+        CommandLine|contains:
+            - ' --config '
+            - ' --connector-id '
+    condition: selection
+falsepositives:
+    - Legitimate usage of Cloudflared.
+level: medium

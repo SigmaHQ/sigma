@@ -1,0 +1,98 @@
+title: Suspicious Network Connection to IP Lookup Service APIs
+id: edf3485d-dac4-4d50-90e4-b0e5813f7e60
+related:
+    - id: ec82e2a5-81ea-4211-a1f8-37a0286df2c2
+      type: derived
+status: experimental
+description: Detects external IP address lookups by non-browser processes via services such as "api.ipify.org". This could be indicative of potential post compromise internet test activity.
+references:
+    - https://github.com/rsp/scripts/blob/c8bb272d68164a9836e4f273d8f924927f39b8c6/externalip-benchmark.md
+    - https://www.cisa.gov/news-events/cybersecurity-advisories/aa20-302a
+    - https://thedfirreport.com/2022/11/28/emotet-strikes-again-lnk-file-leads-to-domain-wide-ransomware/
+    - https://www.trendmicro.com/en_us/research/23/e/managed-xdr-investigation-of-ducktail-in-trend-micro-vision-one.html
+author: Janantha Marasinghe, Nasreddine Bencherchali (Nextron Systems)
+date: 2023/04/24
+modified: 2023/05/12
+tags:
+    - attack.discovery
+    - attack.t1016
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        DestinationHostname|contains:
+            - 'api.2ip.ua'
+            - 'api.ipify.org'
+            - 'bot.whatismyipaddress.com'
+            - 'canireachthe.net'
+            - 'checkip.amazonaws.com'
+            - 'checkip.dyndns.org'
+            - 'curlmyip.com'
+            - 'edns.ip-api.com'
+            - 'eth0.me'
+            - 'freegeoip.app'
+            - 'geoipy.com'
+            - 'getip.pro'
+            - 'icanhazip.com'
+            - 'ident.me'
+            - 'ifconfig.io'
+            - 'ifconfig.me'
+            - 'ip-api.com'
+            - 'ip.anysrc.net'
+            - 'ip.tyk.nu'
+            - 'ipaddressworld.com'
+            - 'ipecho.net'
+            - 'ipinfo.io'
+            - 'ipof.in'
+            - 'ipv4.icanhazip.com'
+            - 'ipv4bot.whatismyipaddress.com'
+            - 'ipwho.is'
+            - 'l2.io'
+            - 'myexternalip.com'
+            - 'wgetip.com'
+            - 'whatismyip.akamai.com'
+            - 'wtfismyip.com'
+    filter_optional_brave:
+        Image|endswith: '\brave.exe'
+    filter_optional_chrome:
+        Image:
+            - 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+            - 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
+    filter_optional_firefox:
+        Image:
+            - 'C:\Program Files\Mozilla Firefox\firefox.exe'
+            - 'C:\Program Files (x86)\Mozilla Firefox\firefox.exe'
+    filter_optional_ie:
+        Image:
+            - 'C:\Program Files (x86)\Internet Explorer\iexplore.exe'
+            - 'C:\Program Files\Internet Explorer\iexplore.exe'
+    filter_optional_maxthon:
+        Image|endswith: '\maxthon.exe'
+    filter_optional_edge_1:
+        - Image|startswith: 'C:\Program Files (x86)\Microsoft\EdgeWebView\Application\'
+        - Image|endswith: '\WindowsApps\MicrosoftEdge.exe'
+        - Image:
+            - 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+            - 'C:\Program Files\Microsoft\Edge\Application\msedge.exe'
+    filter_optional_edge_2:
+        Image|startswith:
+            - 'C:\Program Files (x86)\Microsoft\EdgeCore\'
+            - 'C:\Program Files\Microsoft\EdgeCore\'
+        Image|endswith:
+            - '\msedge.exe'
+            - '\msedgewebview2.exe'
+    filter_optional_opera:
+        Image|endswith: '\opera.exe'
+    filter_optional_safari:
+        Image|endswith: '\safari.exe'
+    filter_optional_seamonkey:
+        Image|endswith: '\seamonkey.exe'
+    filter_optional_vivaldi:
+        Image|endswith: '\vivaldi.exe'
+    filter_optional_whale:
+        Image|endswith: '\whale.exe'
+    condition: selection and not 1 of filter_optional_*
+falsepositives:
+    - Legitimate use of the external websites for troubleshooting or network monitoring
+level: medium
