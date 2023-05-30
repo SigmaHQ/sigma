@@ -1,11 +1,11 @@
-title: File Integrity Linux
-id: 7405066c-2b5e-44d7-93fa-7ca6c4660ad9
-status: test
-description: Detects the changes of sensitive and critical files. Monitors files that you don't expect to change without planning on Linux system. 
+title: Potential Suspicious Change To Sensitive/Critical Files
+id: 86157017-c2b1-4d4a-8c33-93b8e67e4af4
+status: experimental
+description: Detects changes of sensitive and critical files. Monitors files that you don't expect to change without planning on Linux system.
 references:
     - https://docs.microsoft.com/en-us/azure/defender-for-cloud/file-integrity-monitoring-overview#which-files-should-i-monitor
 author: '@d4ns4n_ (Wuerth-Phoenix)'
-date: 2023/05/24
+date: 2023/05/30
 tags:
     - attack.impact
     - attack.t1565.001
@@ -13,47 +13,38 @@ logsource:
     category: process_creation
     product: linux
 detection:
-    selection_1:
+    selection_img_1:
         Image|endswith:
-            - 'echo'
             - '/cat'
-            - 'grep'
+            - '/echo'
+            - '/grep'
             - '/head'
-            - '/tail'
             - '/more'
-        CommandLine|contains: 
-            - ' >'
-            - ' >>'
-    selection_2:
+            - '/tail'
+        CommandLine|contains: '>'
+    selection_img_2:
         Image|endswith:
-            - '/nano'
-            - '/vim'
-            - '/vi'
-            - '/sed'
             - '/emacs'
-    selection_args:
+            - '/nano'
+            - '/sed'
+            - '/vi'
+            - '/vim'
+    selection_paths:
         CommandLine|contains:
-            - ' /etc/sudoers'
-            - ' /etc/hosts'
-            - ' /bin/login'
-            - ' /bin/passwd'
-            - ' /etc/*.conf'
-            - ' /usr/bin'
-            - ' /usr/sbin'
-            - ' /bin'
-            - ' /sbin'
-            - ' /boot'
-            - ' /usr/local/bin'
-            - ' /usr/local/sbin'
-            - ' /opt/bin'
-            - ' /opt/sbin'
-            - ' /etc/crontab'
-            - ' /etc/init.d'
-            - ' /etc/cron.hourly'
-            - ' /etc/cron.daily'
-            - ' /etc/cron.weekly'
-            - ' /etc/cron.monthly'
-    condition: 1 of selection_* and selection_args
+            - '/bin/login'
+            - '/bin/passwd'
+            - '/boot/'
+            - '/etc/*.conf'
+            - '/etc/cron.' # Covers different cron config files "daily", "hourly", etc.
+            - '/etc/crontab'
+            - '/etc/hosts'
+            - '/etc/init.d'
+            - '/etc/sudoers'
+            - '/opt/bin/'
+            - '/sbin' # Covers: '/opt/sbin', '/usr/local/sbin/', '/usr/sbin/'
+            - '/usr/bin/'
+            - '/usr/local/bin/'
+    condition: 1 of selection_img_* and selection_paths
 falsepositives:
-    - Legitimate administration activities
+    - Some false positives are to be expected on user or administrator machines. Apply additional filters as needed.
 level: medium
