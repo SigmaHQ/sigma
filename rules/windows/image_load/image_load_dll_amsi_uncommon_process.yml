@@ -19,32 +19,30 @@ logsource:
 detection:
     selection:
         ImageLoaded|endswith: '\amsi.dll'
-    filter_exact:
+    filter_main_exact:
         Image:
             - 'C:\Windows\explorer.exe'
             - 'C:\Windows\Sysmon64.exe'
-    filter_generic:
+    filter_main_generic:
         Image|startswith:
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
             - 'C:\Windows\System32\'
             - 'C:\Windows\SysWOW64\'
             - 'C:\Windows\WinSxS\'
-    filter_program_files:
-        Image|startswith:
-            - 'C:\Program Files\'
-            - 'C:\Program Files (x86)\'
-    filter_defender:
+    filter_optional_defender:
         Image|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
         Image|endswith: '\MsMpEng.exe'
-    filter_dotnet:
+    filter_main_dotnet:
         Image|startswith:
             - 'C:\Windows\Microsoft.NET\Framework\'
             - 'C:\Windows\Microsoft.NET\Framework64\'
         Image|endswith: '\ngentask.exe'
-    filter_null:
+    filter_main_null:
         Image: null
-    filter_empty:
+    filter_main_empty:
         Image: ''
     condition: selection and not 1 of filter_*
 falsepositives:
     - Legitimate third party apps installed in "ProgramData" and "AppData" might generate some false positives. Apply additional filters accordingly
-level: medium
+level: low
