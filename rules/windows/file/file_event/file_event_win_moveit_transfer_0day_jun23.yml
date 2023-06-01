@@ -5,6 +5,7 @@ description: Detects the creation of files with unexpected extensions in the roo
 references:
     - https://www.bleepingcomputer.com/news/security/new-moveit-transfer-zero-day-mass-exploited-in-data-theft-attacks/
     - https://community.progress.com/s/article/MOVEit-Transfer-Critical-Vulnerability-31May2023
+    - https://www.rapid7.com/blog/post/2023/06/01/rapid7-observed-exploitation-of-critical-moveit-transfer-vulnerability/
 author: Florian Roth
 date: 2023/06/01
 tags:
@@ -13,9 +14,11 @@ logsource:
     category: file_event
     product: windows
 detection:
-    selection:
+    selection_re:
         TargetFilename|re: '\\MOVEit Transfer\\wwwroot\\[^\\]{1,40}\.(zip|rar|7z|exe|ps1|bat)'
-    condition: selection
+    selection_known_ioc:
+        TargetFilename|contains: '\MOVEit Transfer\wwwroot\human2.aspx'
+    condition: 1 of selection
 falsepositives:
     - Unknown
 level: high
