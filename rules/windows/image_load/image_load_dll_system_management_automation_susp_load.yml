@@ -3,12 +3,14 @@ id: 092bc4b9-3d1d-43b4-a6b4-8c8acd83522f
 related:
     - id: 867613fb-fa60-4497-a017-a82df74a172c
       type: obsoletes
+    - id: fe6e002f-f244-4278-9263-20e4b593827f
+      type: obsoletes
 status: experimental
 description: Detects loading of essential DLLs used by PowerShell, but not by the process powershell.exe. Detects behaviour similar to meterpreter's "load powershell" extension.
 references:
     - https://adsecurity.org/?p=2921
     - https://github.com/p3nt4/PowerShdll
-author: Tom Kern, oscd.community, Natalia Shornikova, Tim Shelton
+author: Tom Kern, oscd.community, Natalia Shornikova, Tim Shelton, Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 date: 2019/11/14
 modified: 2023/05/31
 tags:
@@ -19,14 +21,16 @@ logsource:
     product: windows
 detection:
     selection:
-        ImageLoaded|endswith:
-            - '\System.Management.Automation.Dll'
-            - '\System.Management.Automation.ni.Dll'
+        - Description: 'System.Management.Automation'
+        - OriginalFileName: 'System.Management.Automation.dll'
+        - ImageLoaded|endswith:
+            - '\System.Management.Automation.dll'
+            - '\System.Management.Automation.ni.dll'
     filter_main_generic:
         Image|endswith:
-            - ':\Program Files\PowerShell\7\pwsh.exe' #PowerShell 7
+            - ':\Program Files\PowerShell\7\pwsh.exe' # PowerShell 7
             - ':\Windows\System32\dsac.exe'
-            - ':\WINDOWS\System32\RemoteFXvGPUDisablement.exe'  # on win10
+            - ':\WINDOWS\System32\RemoteFXvGPUDisablement.exe'
             - ':\Windows\System32\runscripthelper.exe'
             - ':\WINDOWS\System32\sdiagnhost.exe'
             - ':\Windows\System32\ServerManager.exe'
@@ -43,7 +47,7 @@ detection:
         Image|contains:
             - ':\Windows\Microsoft.NET\Framework\'
             - ':\Windows\Microsoft.NET\Framework64\'
-        Image|endswith: '\mscorsw.exe'
+        Image|endswith: '\mscorsvw.exe'
     filter_optional_sql_server_mgmt:
         Image|contains:
             - ':\Program Files (x86)\Microsoft SQL Server Management Studio'
@@ -65,11 +69,11 @@ detection:
         Image|endswith:
             - '\thor64.exe'
             - '\thor.exe'
-       # User: 'NT AUTHORITY\SYSTEM'   # if set, matches all powershell processes not launched by SYSTEM
+       #User: 'NT AUTHORITY\SYSTEM'   # if set, matches all powershell processes not launched by SYSTEM
     filter_optional_aurora:
         # This filter is to avoid a race condition FP with this specific ETW provider in aurora
         Image: null
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Used by some .NET binaries, minimal on user workstation.
     - Used by Microsoft SQL Server Management Studio
