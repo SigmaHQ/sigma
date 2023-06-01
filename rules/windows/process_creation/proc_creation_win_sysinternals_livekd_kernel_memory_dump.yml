@@ -1,0 +1,29 @@
+title: Kernel Memory Dump Via LiveKD
+id: c7746f1c-47d3-43d6-8c45-cd1e54b6b0a2
+status: experimental
+description: Detects execution of LiveKD with the "-m" flag to potentially dump the kernel memory
+references:
+    - https://learn.microsoft.com/en-us/sysinternals/downloads/livekd
+    - https://4sysops.com/archives/creating-a-complete-memory-dump-without-a-blue-screen/
+    - https://kb.acronis.com/content/60892
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/05/16
+tags:
+    - attack.defense_evasion
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+            - '\livekd.exe'
+            - '\livekd64.exe'
+        - OriginalFileName: 'livekd.exe'
+    selection_cli:
+        CommandLine|contains|all:
+            - ' /m'
+            - ' -m'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely in production environement
+level: high

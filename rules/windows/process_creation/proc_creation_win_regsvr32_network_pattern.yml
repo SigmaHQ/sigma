@@ -1,0 +1,36 @@
+title: Potentially Suspicious Regsvr32 HTTP/FTP Pattern
+id: 867356ee-9352-41c9-a8f2-1be690d78216
+related:
+    - id: 8e2b24c9-4add-46a0-b4bb-0057b4e6187d
+      type: obsoletes
+status: experimental
+description: Detects regsvr32 execution to download/install/register new DLLs that are hosted on Web or FTP servers.
+references:
+    - https://twitter.com/mrd0x/status/1461041276514623491
+    - https://twitter.com/tccontre18/status/1480950986650832903
+    - https://lolbas-project.github.io/lolbas/Binaries/Regsvr32/
+author: Florian Roth (Nextron Systems)
+date: 2023/05/24
+modified: 2023/05/26
+tags:
+    - attack.defense_evasion
+    - attack.t1218.010
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\regsvr32.exe'
+        - OriginalFileName: 'REGSVR32.EXE'
+    selection_flag:
+        CommandLine|contains:
+            - ' /i'
+            - ' -i'
+    selection_protocol:
+        CommandLine|contains:
+            - 'ftp'
+            - 'http'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium
