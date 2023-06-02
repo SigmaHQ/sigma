@@ -1,28 +1,22 @@
-title: Discovery Information About Files Created by GobRAT
-id: e34cfa0c-0a50-4210-9cb3-5632d08eb041
+title: Potential Suspicious Execution From Tmp Folder
+id: 312b42b1-bded-4441-8b58-163a3af58775
 status: experimental
-description: Detects the use of grep to discover specific files created by GobRAT
+description: Detects a potential suspicious execution from a process located in the '/tmp/' folder by a process located in the '/usr/' directory
 references:
     - https://blogs.jpcert.or.jp/en/2023/05/gobrat.html
+    - https://jstnk9.github.io/jstnk9/research/GobRAT-Malware/
     - https://www.virustotal.com/gui/file/60bcd645450e4c846238cf0e7226dc40c84c96eba99f6b2cffcd0ab4a391c8b3/detection
     - https://www.virustotal.com/gui/file/3e44c807a25a56f4068b5b8186eee5002eed6f26d665a8b791c472ad154585d1/detection
 author: Joseliyo Sanchez, @Joseliyo_Jstnk
-date: 2023/30/05
-tags:
-    - attack.discovery
-    - attack.t1082
+date: 2023/06/02
 logsource:
-    category: process_creation
     product: linux
+    category: process_creation
 detection:
     selection:
-        Image|endswith: '/grep'
-        CommandLine|contains:
-            - 'apached'
-            - 'sshd.sh'
-            - 'zone.arm'
-            - 'frpc'
+        ParentImage|startswith: '/usr/'
+        Image|startswith: '/tmp/'
     condition: selection
 falsepositives:
-    - Unkwnon 
+    - Unknown
 level: high

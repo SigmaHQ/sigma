@@ -1,13 +1,15 @@
-title: Discovery Information About Operantig System in Silent Mode
+title: OS Architecture Discovery Via Grep
 id: d27ab432-2199-483f-a297-03633c05bae6
 status: experimental
-description: Detects the use of grep to identify information about the system using the parameter -q to do it in silent mode
+description: |
+    Detects the use of grep to identify information about the operating system architecture. Often combined beforehand with the execution of "uname" or "cat /proc/cpuinfo"
 references:
     - https://blogs.jpcert.or.jp/en/2023/05/gobrat.html
+    - https://jstnk9.github.io/jstnk9/research/GobRAT-Malware/
     - https://www.virustotal.com/gui/file/60bcd645450e4c846238cf0e7226dc40c84c96eba99f6b2cffcd0ab4a391c8b3/detection
     - https://www.virustotal.com/gui/file/3e44c807a25a56f4068b5b8186eee5002eed6f26d665a8b791c472ad154585d1/detection
 author: Joseliyo Sanchez, @Joseliyo_Jstnk
-date: 2023/30/05
+date: 2023/06/02
 tags:
     - attack.discovery
     - attack.t1082
@@ -17,23 +19,15 @@ logsource:
 detection:
     selection_process:
         Image|endswith: '/grep'
-        CommandLine|contains: '-iq'
+        CommandLine|contains: ' -i'
     selection_architecture:
-        CommandLine|contains:
+        CommandLine|endswith:
             - 'aarch64'
-            - 'armv7'
-            - 'x86_64'
-            - 'arm*'
-            - 'mips*'
+            - 'arm'
             - 'i386'
             - 'i686'
-            - 'AArch64'
-            - 'ARMv7'
-            - 'arm'
             - 'mips'
-            - 'mipsel'
-            - 'mips64'
-            - 'mips64el'
+            - 'x86_64'
     condition: all of selection_*
 falsepositives:
     - Unknown
