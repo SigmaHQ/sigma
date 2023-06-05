@@ -1,0 +1,40 @@
+title: Renamed AutoIt Execution
+id: f4264e47-f522-4c38-a420-04525d5b880f
+status: experimental
+description: |
+    Detects the execution of a renamed AutoIt2.exe or AutoIt3.exe.
+    AutoIt is a scripting language and automation tool for Windows systems. While primarily used for legitimate automation tasks, it can be misused in cyber attacks.
+    Attackers can leverage AutoIt to create and distribute malware, including keyloggers, spyware, and botnets. A renamed AutoIt executable is particularly suspicious.
+references:
+    - https://twitter.com/malmoeb/status/1665463817130725378?s=12&t=C0_T_re0wRP_NfKa27Xw9w
+    - https://www.autoitscript.com/site/
+author: Florian Roth (Nextron Systems)
+date: 2023/06/04
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_1:
+        CommandLine|contains:
+            - ' /AutoIt3ExecuteScript'
+            - ' /ErrorStdOut'
+    selection_2:
+        - Imphash:
+            - fdc554b3a8683918d731685855683ddf  # AutoIt v2 - doesn't cover all binaries
+            - cd30a61b60b3d60cecdb034c8c83c290  # AutoIt v2 - doesn't cover all binaries
+        - Hashes|contains:
+            - 'IMPHASH=FDC554B3A8683918D731685855683DDF'  # AutoIt v2 - doesn't cover all binaries
+            - 'IMPHASH=CD30A61B60B3D60CECDB034C8C83C290'  # AutoIt v2 - doesn't cover all binaries
+    selection_3:
+        OriginalFileName:
+            - 'AutoIt3.exe'
+            - 'AutoIt2.exe'
+    filter_main_legit_name:
+        Image|contains: 'AutoIt'
+    condition: 1 of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high
