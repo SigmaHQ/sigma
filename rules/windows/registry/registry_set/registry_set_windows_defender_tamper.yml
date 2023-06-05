@@ -27,12 +27,14 @@ logsource:
 detection:
     selection_main:
         EventType: SetValue
-        TargetObject|contains: 
+        TargetObject|contains:
             - '\SOFTWARE\Microsoft\Windows Defender\'
-            - '\SOFTWARE\Policies\Microsoft\Windows Defender\'
             - '\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\'
+            - '\SOFTWARE\Policies\Microsoft\Windows Defender\'
     selection_dword_1:
         TargetObject|endswith:
+            - '\DisableAntiSpyware'
+            - '\DisableAntiVirus'
             - '\Real-Time Protection\DisableBehaviorMonitoring'
             - '\Real-Time Protection\DisableIntrusionPreventionSystem'
             - '\Real-Time Protection\DisableIOAVProtection'
@@ -42,21 +44,19 @@ detection:
             - '\Real-Time Protection\DisableScriptScanning'
             - '\Reporting\DisableEnhancedNotifications'
             - '\SpyNet\DisableBlockAtFirstSeen'
-            - '\DisableAntiSpyware'
-            - '\DisableAntiVirus'
         Details: 'DWORD (0x00000001)'
     selection_dword_0:
         TargetObject|endswith:
-            - '\SpyNet\SpynetReporting'
-            - '\SpyNet\SubmitSamplesConsent'
+            - '\App and Browser protection\DisallowExploitProtectionOverride'
+            - '\Features\TamperProtection'
             - '\MpEngine\MpEnablePus'
             - '\PUAProtection'
-            - '\App and Browser protection\DisallowExploitProtectionOverride'
-           #- '\Features\TamperProtection' #filtering for false positive
-            - '\Windows Defender Exploit Guard\Controlled Folder Access\EnableControlledFolderAccess'
             - '\Signature Update\ForceUpdateFromMU'
+            - '\SpyNet\SpynetReporting'
+            - '\SpyNet\SubmitSamplesConsent'
+            - '\Windows Defender Exploit Guard\Controlled Folder Access\EnableControlledFolderAccess'
         Details: 'DWORD (0x00000000)'
     condition: selection_main and 1 of selection_dword_*
 falsepositives:
-    - Administrator actions
+    - Administrator actions via the Windows Defender interface
 level: high

@@ -11,7 +11,7 @@ references:
     - https://bidouillesecurity.com/disable-windows-defender-in-powershell/
 author: frack113, elhoim, Tim Shelton (fps, alias support), Swachchhanda Shrawan Poudel
 date: 2022/01/16
-modified: 2023/05/10
+modified: 2023/06/05
 tags:
     - attack.defense_evasion
     - attack.t1562.001
@@ -24,45 +24,44 @@ detection:
         ScriptBlockText|contains: 'Set-MpPreference'
     selection_options_disabling_value:
         ScriptBlockText|contains:
-            - '1'
+            - ' 1 '
             - '$true'
     selection_options_disabling_function:
         ScriptBlockText|contains:
-            - 'DisableRealtimeMonitoring'
-            - 'DisableBehaviorMonitoring'
-            - 'DisableScriptScanning'
+            - 'dbaf'
+            - 'dbm'
+            - 'dips'
             - 'DisableArchiveScanning'
+            - 'DisableBehaviorMonitoring'
             - 'DisableBlockAtFirstSeen'
-            - 'DisableIOAVProtection'
             - 'DisableIntrusionPreventionSystem'
+            - 'DisableIOAVProtection'
+            - 'DisableRealtimeMonitoring'
             - 'DisableRemovableDriveScanning'
             - 'DisableScanningMappedNetworkDrivesForFullScan'
             - 'DisableScanningNetworkFiles'
+            - 'DisableScriptScanning'
+            - 'drdsc'
             - 'drtm'
-            - 'dbm'
-            - 'dss'
-            - 'dbaf'
-            - 'dip'
-            - 'dips'
-            - 'drds'
             - 'dscrptsc'
             - 'dsmndf'
             - 'dsnf'
+            - 'dss'
     selection_other_default_actions_allow:
         ScriptBlockText|contains|all:
             - 'Set-MpPreference'
-            - Allow
+            - 'Allow'
         ScriptBlockText|contains:
-            - LowThreatDefaultAction
-            - ModerateThreatDefaultAction
-            - HighThreatDefaultAction
+            - 'LowThreatDefaultAction'
+            - 'ModerateThreatDefaultAction'
+            - 'HighThreatDefaultAction'
     selection_other_use_of_alias:
         ScriptBlockText|contains:
             - 'ltdefac '
             - 'mtdefac '
             - 'htdefac '
             - 'stdefac '
-    condition: all of selection_options_disabling* or 1 of selection_other_*
+    condition: all of selection_options_disabling_* or 1 of selection_other_*
 falsepositives:
     - Legitimate PowerShell scripts
 level: high
