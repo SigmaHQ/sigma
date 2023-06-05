@@ -9,9 +9,9 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
     - https://docs.microsoft.com/en-us/powershell/module/defender/set-mppreference?view=windowsserver2022-ps
     - https://bidouillesecurity.com/disable-windows-defender-in-powershell/
-author: frack113, elhoim, Tim Shelton (fps, alias support)
+author: frack113, elhoim, Tim Shelton (fps, alias support), Swachchhanda Shrawan Poudel
 date: 2022/01/16
-modified: 2023/01/12
+modified: 2023/06/05
 tags:
     - attack.defense_evasion
     - attack.t1562.001
@@ -22,43 +22,46 @@ logsource:
 detection:
     selection_options_disabling_preference:
         ScriptBlockText|contains: 'Set-MpPreference'
+    selection_options_disabling_value:
+        ScriptBlockText|contains:
+            - ' 1 '
+            - '$true'
     selection_options_disabling_function:
         ScriptBlockText|contains:
-            - 'DisableRealtimeMonitoring 1'
-            - 'DisableBehaviorMonitoring 1'
-            - 'DisableScriptScanning 1'
-            - 'DisableArchiveScanning 1'
-            - 'DisableBlockAtFirstSeen 1'
-            - 'DisableIOAVProtection 1'
-            - 'DisableIntrusionPreventionSystem 1'
-            - 'DisableRemovableDriveScanning 1'
-            - 'DisableScanningMappedNetworkDrivesForFullScan 1'
-            - 'DisableScanningNetworkFiles 1'
-            - 'DisableRealtimeMonitoring $true'
-            - 'DisableBehaviorMonitoring $true'
-            - 'DisableScriptScanning $true'
-            - 'DisableArchiveScanning $true'
-            - 'DisableBlockAtFirstSeen $true'
-            - 'DisableIOAVProtection $true'
-            - 'DisableIntrusionPreventionSystem $true'
-            - 'DisableRemovableDriveScanning $true'
-            - 'DisableScanningMappedNetworkDrivesForFullScan $true'
-            - 'DisableScanningNetworkFiles $true'
+            - 'dbaf'
+            - 'dbm'
+            - 'dips'
+            - 'DisableArchiveScanning'
+            - 'DisableBehaviorMonitoring'
+            - 'DisableBlockAtFirstSeen'
+            - 'DisableIntrusionPreventionSystem'
+            - 'DisableIOAVProtection'
+            - 'DisableRealtimeMonitoring'
+            - 'DisableRemovableDriveScanning'
+            - 'DisableScanningMappedNetworkDrivesForFullScan'
+            - 'DisableScanningNetworkFiles'
+            - 'DisableScriptScanning'
+            - 'drdsc'
+            - 'drtm'
+            - 'dscrptsc'
+            - 'dsmndf'
+            - 'dsnf'
+            - 'dss'
     selection_other_default_actions_allow:
         ScriptBlockText|contains|all:
             - 'Set-MpPreference'
-            - Allow
+            - 'Allow'
         ScriptBlockText|contains:
-            - LowThreatDefaultAction
-            - ModerateThreatDefaultAction
-            - HighThreatDefaultAction
+            - 'LowThreatDefaultAction'
+            - 'ModerateThreatDefaultAction'
+            - 'HighThreatDefaultAction'
     selection_other_use_of_alias:
         ScriptBlockText|contains:
             - 'ltdefac '
             - 'mtdefac '
             - 'htdefac '
             - 'stdefac '
-    condition: all of selection_options_disabling* or 1 of selection_other_*
+    condition: all of selection_options_disabling_* or 1 of selection_other_*
 falsepositives:
     - Legitimate PowerShell scripts
 level: high
