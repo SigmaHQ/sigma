@@ -4,33 +4,36 @@ status: test
 description: Detects Trojan loader activity as used by APT28
 references:
     - https://researchcenter.paloaltonetworks.com/2018/02/unit42-sofacy-attacks-multiple-government-entities/
-    - https://www.reverse.it/sample/e3399d4802f9e6d6d539e3ae57e7ea9a54610a7c4155a6541df8e94d67af086e?environmentId=100
+    - https://www.hybrid-analysis.com/sample/ff808d0a12676bfac88fd26f955154f8884f2bb7c534b9936510fd6296c543e8?environmentId=110
     - https://twitter.com/ClearskySec/status/960924755355369472
 author: Florian Roth (Nextron Systems), Jonhnathan Ribeiro, oscd.community
 date: 2018/03/01
-modified: 2022/07/07
+modified: 2023/05/31
 tags:
-    - attack.g0007
-    - attack.execution
-    - attack.t1059.003
     - attack.defense_evasion
-    - car.2013-10-002
+    - attack.execution
+    - attack.g0007
+    - attack.t1059.003
     - attack.t1218.011
+    - car.2013-10-002
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection_cli_1:
-        CommandLine|contains|all:
-            - 'rundll32.exe'
-            - '%APPDATA%\'
-    selection_cli_2:
+    selection_path:
+        Image|endswith: '\rundll32.exe'
+        CommandLine|contains:
+            - '%LOCALAPPDATA%'
+            - '\AppData\Local\'
+    selection_extensions:
         - CommandLine|contains: '.dat",'
         - CommandLine|endswith:
-            - '.dll",#1'
             - '.dll #1'
             - '.dll" #1'
-    condition: all of selection_*
+            - '.dll",#1'
+    filter_main_exclude_temp:
+        CommandLine|contains: '\AppData\Local\Temp\'
+    condition: all of selection_* and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high
