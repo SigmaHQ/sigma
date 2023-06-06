@@ -15,10 +15,13 @@ logsource:
     product: okta
     service: okta
 detection:
-    selection:
-        eventtype: 
-        okta.debug_context.debug_data.factor: 
-    condition: selection
+    selection_1:
+        action: system.push.send_factor_verify_push
+    selection_2:
+        action: user.authentication.auth_via_mfa
+        okta.debug_context.debug_data.factor: OKTA_VERIFY_PUSH
+    timeframe: 10m
+    condition: selection_1 | near selection_2
 falsepositives:
     - Unlikely
 level: high
