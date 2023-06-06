@@ -1,0 +1,33 @@
+title: AWS IAM S3Browser Templated S3 Bucket Policy Creation
+id: db014773-7375-4f4e-b83b-133337c0ffee
+status: experimental
+description: Detects S3 Browser utility creating Inline IAM Policy containing default S3 bucket name placeholder value of <YOUR-BUCKET-NAME>.
+references:
+    - https://permiso.io/blog/s/unmasking-guivil-new-cloud-threat-actor
+author: daniel.bohannon@permiso.io (@danielhbohannon)
+date: 2023/05/17
+modified: 2023/05/17
+tags:
+    - attack.execution
+    - attack.t1059.009
+    - attack.persistence
+    - attack.t1078.004
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection_source:
+        eventSource: iam.amazonaws.com
+        eventName: PutUserPolicy
+    filter_tooling:
+        userAgent|contains: 'S3 Browser'
+    filter_policy_resource:
+        requestParameters|contains: '"arn:aws:s3:::<YOUR-BUCKET-NAME>/*"'
+    filter_policy_action:
+        requestParameters|contains: '"s3:GetObject"'
+    filter_policy_effect:
+        requestParameters|contains: '"Allow"'
+    condition: selection_source and filter_tooling and filter_policy_resource and filter_policy_action and filter_policy_effect
+falsepositives:
+    - Valid usage of S3 Browser with accidental creation of default Inline IAM Policy without changing default S3 bucket name placeholder value
+level: high
