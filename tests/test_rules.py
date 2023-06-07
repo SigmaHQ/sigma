@@ -427,6 +427,19 @@ class TestRules(unittest.TestCase):
                         print(
                             Fore.YELLOW + "Rule {} has a 'related/type' invalid value.".format(file))
                         faulty_rules.append(file)
+            else:
+                typo_list = []
+                # Add more typos
+                typo_list.append(self.get_rule_part(file_path=file, part_name="realted"))
+                typo_list.append(self.get_rule_part(file_path=file, part_name="relatde"))
+                typo_list.append(self.get_rule_part(file_path=file, part_name="relted"))
+                typo_list.append(self.get_rule_part(file_path=file, part_name="rlated"))
+
+                for i in typo_list:
+                    if i != None:
+                        print(
+                            Fore.YELLOW + "Rule {} has a typo in it's 'related' field.".format(file))
+                        faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED +
                          "There are rules with malformed optional 'related' fields. (check https://github.com/SigmaHQ/sigma-specification)")
