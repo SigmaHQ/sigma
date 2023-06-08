@@ -1,0 +1,24 @@
+title: Unsigned Module Loaded by ClickOnce Application
+id: 060d5ad4-3153-47bb-8382-43e5e29eda92
+status: experimental
+description: Detects unsigned module load by ClickOnce application.
+references:
+    - https://posts.specterops.io/less-smartscreen-more-caffeine-ab-using-clickonce-for-trusted-code-execution-1446ea8051c5
+author: '@SerkinValery'
+date: 2023/06/08
+tags:
+    - attack.execution
+    - attack.t1073
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        Image|contains: '\AppData\Local\Apps\2.0\'
+    options:
+        - Signed: 'false'
+        - SignatureStatus: 'Expired'
+    condition: selection and options
+falsepositives:
+    - Unikely
+level: medium
