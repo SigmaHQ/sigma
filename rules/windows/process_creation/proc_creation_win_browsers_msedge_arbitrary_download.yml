@@ -7,7 +7,7 @@ references:
     - https://lolbas-project.github.io/lolbas/Binaries/Msedge/
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2022/01/11
-modified: 2023/04/06
+modified: 2023/06/09
 tags:
     - attack.command_and_control
     - attack.t1105
@@ -18,11 +18,15 @@ detection:
     selection_img:
         - Image|endswith: '\msedge.exe'
         - OriginalFileName: 'msedge.exe'
-    selection_cli:
+    selection_cli_1:
         CommandLine|contains:
             - '.exe http'
             - 'msedge http'
-    condition: all of selection_*
+    selection_cli_2:
+        CommandLine|contains|all:
+            - '--headless'
+            - '--dump-dom'
+    condition: selection_img and 1 of selection_cli*
 falsepositives:
     - Software that uses MsEdge to download components in the background (see ParentImage, ParentCommandLine)
 level: medium
