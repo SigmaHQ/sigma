@@ -1,0 +1,24 @@
+title: Okta MFA Fatigue
+id: 8afc33e0-97bd-4b67-a873-3db11a2cd967
+status: experimental
+description: MFA Fatigue for an Okta user. This rule detects a certain number of push requests over a given timeframe
+references: 
+  - https://www.okta.com/blog/2022/09/mfa-fatigue-growing-security-concern/
+  - https://developer.okta.com/docs/reference/api/event-types/
+  - https://developer.okta.com/docs/reference/api/system-log/
+author: Kael Oosterbaan 
+date: '2023/06/06'
+modified: '2023/06/06'
+tags: 
+  - attack.initial_access
+logsource: 
+  product: okta
+  service: okta
+detection:
+  selection:
+    eventtype: system.push.send_factor_verify_push
+  timeframe: 10m
+  condition: selection | count(actor.alternateid) by eventtype > 20
+false_positives: 
+  - Trusted user has logged into an Okta service that promts for MFA 20 times in under 10 minutes
+level: low
