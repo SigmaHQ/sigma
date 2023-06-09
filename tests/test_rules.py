@@ -429,7 +429,7 @@ class TestRules(unittest.TestCase):
                         faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED +
-                         "There are rules with malformed optional 'related' fields. (check https://github.com/SigmaHQ/sigma/wiki/Specification)")
+                         "There are rules with malformed optional 'related' fields. (check https://github.com/SigmaHQ/sigma-specification)")
 
     def test_sysmon_rule_without_eventid(self):
         faulty_rules = []
@@ -537,9 +537,13 @@ class TestRules(unittest.TestCase):
                     print(
                         Fore.YELLOW + "Rule {} has the unsupported 'status', can not be in rules directory".format(file))
                     faulty_rules.append(file)
+            else:
+                print(
+                        Fore.YELLOW + "Rule {} is missing the 'status' field".format(file))
+                faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED +
-                         "There are rules with malformed 'status' fields. (check https://github.com/SigmaHQ/sigma/wiki/Specification)")
+                         "There are rules with malformed or missing 'status' fields. (check https://github.com/SigmaHQ/sigma-specification)")
 
     def test_level(self):
         faulty_rules = []
@@ -561,7 +565,7 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
 
         self.assertEqual(faulty_rules, [], Fore.RED +
-                         "There are rules with missing or malformed 'level' fields. (check https://github.com/SigmaHQ/sigma/wiki/Specification)")
+                         "There are rules with missing or malformed 'level' fields. (check https://github.com/SigmaHQ/sigma-specification)")
 
     def test_optional_fields(self):
         faulty_rules = []
