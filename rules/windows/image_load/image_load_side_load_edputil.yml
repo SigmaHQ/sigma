@@ -16,17 +16,18 @@ logsource:
     product: windows
 detection:
     selection:
-        ImageLoaded|endswith:
-            - '\edputil.dll'
-    filter_main_legit_path:
-        Image:
-            - 'C:\Program Files\windows NT\Accessories\wordpad.exe'
-            - 'C:\Program Files (x86)\Windows NT\Accessories\wordpad.exe'
+        ImageLoaded|endswith: '\edputil.dll'
+    filter_main_generic:
+        Image|startswith:
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
         ImageLoaded|startswith:
             - 'C:\Windows\System32\'
             - 'C:\Windows\SysWOW64\'
             - 'C\Windows\WinSxS\'
     condition: selection and not 1 of filter_main_*
 falsepositives:
-    - Unlikely
+    - Legitimate third party applications located in the "AppData" directory. Apply additional filters as needed.
 level: high
