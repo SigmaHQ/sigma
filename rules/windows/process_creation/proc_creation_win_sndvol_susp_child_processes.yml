@@ -8,14 +8,16 @@ author: X__Junior (Nextron Systems)
 date: 2023/06/09
 tags:
     - attack.execution
-    - attack.t1059
 logsource:
     product: windows
     category: process_creation
 detection:
     selection:
         ParentImage|endswith: '\SndVol.exe'
-    condition: selection
+    filter_main_rundll32:
+        Image|endswith: '\rundll32.exe'
+        CommandLine|contains: ' shell32.dll,Control_RunDLL '
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: medium
