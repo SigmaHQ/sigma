@@ -1,0 +1,27 @@
+title: Dfsvc.EXE Network Connection To Uncommon Ports
+id: 4c5fba4a-9ef6-4f16-823d-606246054741
+status: experimental
+description: Detects network connections from "dfsvc.exe" used to handled ClickOnce applications to uncommon ports
+references:
+    - https://posts.specterops.io/less-smartscreen-more-caffeine-ab-using-clickonce-for-trusted-code-execution-1446ea8051c5
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/06/12
+tags:
+    - attack.execution
+    - attack.t1203
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\dfsvc.exe'
+        Initiated: 'true'
+    filter_main_known_ports:
+        DestinationPort:
+            - 80
+            - 443
+            - 445
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: medium
