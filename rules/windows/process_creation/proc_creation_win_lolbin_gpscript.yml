@@ -7,6 +7,7 @@ references:
     - https://lolbas-project.github.io/lolbas/Binaries/Gpscript/
 author: frack113
 date: 2022/05/16
+modified: 2023/06/14
 tags:
     - attack.defense_evasion
     - attack.t1218
@@ -21,7 +22,9 @@ detection:
         CommandLine|contains:
             - ' /logon'
             - ' /startup'
-    condition: all of selection*
+    filter_svchost:
+        ParentCommandLine: 'C:\windows\system32\svchost.exe -k netsvcs -p -s gpsvc'
+    condition: all of selection* and not 1 of filter_*
 falsepositives:
     - Legitimate uses of logon scripts distributed via group policy
 level: medium
