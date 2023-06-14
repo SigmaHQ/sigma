@@ -1,0 +1,34 @@
+title: Suspicious Electron Application CommandLine
+id: 378a05d8-963c-46c9-bcce-13c7657eac99
+related:
+    - id: f26eb764-fd89-464b-85e2-dc4a8e6e77b8
+      type: similar
+status: experimental
+description: |
+  Detects suspicious CommandLine of electron apps (teams, discord, slack...).
+  This could be a argument injection vulnerability in the URI handler.
+references:
+    - https://positive.security/blog/ms-officecmd-rce
+author: frack113
+date: 2023/06/14
+tags:
+    - attack.execution
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            # Add more electron based app to the list
+            - '\Teams.exe'
+            - '\slack.exe'
+            - '\discord.exe'
+        CommandLine|contains: '--gpu-launcher'
+    condition: selection
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Unknown
+# Increase the level once FP rate is known better (see status)
+level: medium
