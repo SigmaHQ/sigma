@@ -6,7 +6,7 @@ references:
     - https://www.bleepingcomputer.com/news/security/exploited-windows-zero-day-lets-javascript-files-bypass-security-warnings/
 author: frack113
 date: 2022/10/22
-modified: 2023/04/18
+modified: 2023/06/12
 tags:
     - attack.defense_evasion
 logsource:
@@ -72,6 +72,14 @@ detection:
         Image|endswith: '\vivaldi.exe'
     filter_optional_whale:
         Image|endswith: '\whale.exe'
+    filter_optional_snipping_tool:
+        Image|startswith: 'C:\Program Files\WindowsApps\Microsoft.ScreenSketch_'
+        Image|endswith: '\SnippingTool\SnippingTool.exe'
+        TargetFilename|startswith: 'C:\Users\'
+        TargetFilename|contains|all:
+            - '\AppData\Local\Packages\Microsoft.ScreenSketch_'
+            - '\TempState\Screenshot '
+        TargetFilename|endswith: '.png:Zone.Identifier'
     condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Other legitimate browsers not currently included in the filter (please add them)
