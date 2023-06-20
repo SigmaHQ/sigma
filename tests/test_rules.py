@@ -92,7 +92,7 @@ class TestRules(unittest.TestCase):
     def test_optional_tags(self):
         files_with_incorrect_tags = []
         tags_pattern = re.compile(
-            r"cve\.\d+\.\d+|attack\.(t\d{4}\.\d{3}|[gts]\d{4})$|attack\.[a-z_]+|car\.\d{4}-\d{2}-\d{3}")
+            r"cve\.\d+\.\d+|attack\.(t\d{4}\.\d{3}|[gts]\d{4})$|attack\.[a-z_]+|car\.\d{4}-\d{2}-\d{3}|detection\.\w+")
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             tags = self.get_rule_part(file_path=file, part_name="tags")
             if tags:
@@ -103,7 +103,7 @@ class TestRules(unittest.TestCase):
                         files_with_incorrect_tags.append(file)
 
         self.assertEqual(files_with_incorrect_tags, [], Fore.RED +
-                         "There are rules with incorrect/unknown MITRE Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://attack.mitre.org/ ")
+                         "There are rules with incorrect/unknown  Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://github.com/SigmaHQ/sigma-specification/blob/main/Tags_specification.md ")
 
     def test_confirm_correct_mitre_tags(self):
         files_with_incorrect_mitre_tags = []
@@ -114,7 +114,7 @@ class TestRules(unittest.TestCase):
                 for tag in tags:
                     if tag not in self.MITRE_ALL and tag.startswith("attack."):
                         print(
-                            Fore.RED + "Rule {} has the following incorrect tag {}".format(file, tag))
+                            Fore.RED + "Rule {} has the following incorrect MITRE tag {}".format(file, tag))
                         files_with_incorrect_mitre_tags.append(file)
 
         self.assertEqual(files_with_incorrect_mitre_tags, [], Fore.RED +
