@@ -103,7 +103,7 @@ class TestRules(unittest.TestCase):
                         files_with_incorrect_tags.append(file)
 
         self.assertEqual(files_with_incorrect_tags, [], Fore.RED +
-                         "There are rules with incorrect/unknown  Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://github.com/SigmaHQ/sigma-specification/blob/main/Tags_specification.md ")
+                         "There are rules with incorrect/unknown Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://github.com/SigmaHQ/sigma-specification/blob/main/Tags_specification.md ")
 
     def test_confirm_correct_mitre_tags(self):
         files_with_incorrect_mitre_tags = []
@@ -112,7 +112,7 @@ class TestRules(unittest.TestCase):
             tags = self.get_rule_part(file_path=file, part_name="tags")
             if tags:
                 for tag in tags:
-                    if tag not in self.MITRE_ALL and tag.startswith("attack."):
+                    if tag.startswith("attack.") and tag not in self.MITRE_ALL:
                         print(
                             Fore.RED + "Rule {} has the following incorrect MITRE tag {}".format(file, tag))
                         files_with_incorrect_mitre_tags.append(file)
