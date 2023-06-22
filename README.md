@@ -102,6 +102,7 @@ Windows 'Security' Eventlog: Suspicious Number of Failed Logons from a Single So
 * [Aurora Agent](https://www.nextron-systems.com/2021/11/13/aurora-sigma-based-edr-agent-preview/)
 * [Confluent Sigma](https://github.com/confluentinc/cyber/tree/master/confluent-sigma)
 * [SEKOIA.IO](https://www.sekoia.io) - XDR supporting Sigma and Sigma Correlation rules languages
+* [alterix](https://github.com/mtnmunuklu/alterix) - Converts sigma rules to query language of the crypttech next generation siem product.
 
 Sigma is available in some Linux distribution repositories:
 
