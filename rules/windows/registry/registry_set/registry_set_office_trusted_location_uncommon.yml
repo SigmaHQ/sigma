@@ -1,0 +1,35 @@
+title: Uncommon Microsoft Office Trusted Location Added
+id: f742bde7-9528-42e5-bd82-84f51a8387d2
+related:
+    - id: a0bed973-45fa-4625-adb5-6ecdf9be70ac
+      type: derived
+status: experimental
+description: Detects changes to the registry keys related to "Trusted Location" of Microsoft Office where the path is set to something uncommon. Attacker might add additional trusted locations to avoid macro security restrictions.
+references:
+    - Internal Research
+    - https://admx.help/?Category=Office2016&Policy=excel16.Office.Microsoft.Policies.Windows::L_TrustedLoc01
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/06/21
+tags:
+    - attack.defense_evasion
+    - attack.t1112
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_value:
+        EventType: Setvalue
+        TargetObject|contains: 'Security\Trusted Locations\Location'
+        TargetObject|endswith: '\Path'
+    filter_main_known_paths:
+        Details|startswith:
+            - '%APPDATA%\Microsoft\Templates'
+            - '%APPDATA%\Microsoft\Word\Startup'
+            - 'C:\Program Files (x86)\Microsoft Office\root\Templates\'
+            - 'C:\Program Files\Microsoft Office (x86)\Templates'
+            - 'C:\Program Files\Microsoft Office\root\Templates\'
+            - 'C:\Program Files\Microsoft Office\Templates\'
+    condition: all of selection_*
+falsepositives:
+    - Other unknown legit or custom paths needs to be filtered to avoid false positives
+level: high
