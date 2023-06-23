@@ -21,7 +21,7 @@ detection:
         EventType: Setvalue
         TargetObject|contains: 'Security\Trusted Locations\Location'
         TargetObject|endswith: '\Path'
-    filter_main_known_paths:
+    filter_exclude_known_paths:
         Details|startswith:
             - '%APPDATA%\Microsoft\Templates'
             - '%APPDATA%\Microsoft\Word\Startup'
@@ -29,7 +29,10 @@ detection:
             - 'C:\Program Files\Microsoft Office (x86)\Templates'
             - 'C:\Program Files\Microsoft Office\root\Templates\'
             - 'C:\Program Files\Microsoft Office\Templates\'
-    condition: selection and not 1 of filter_main_*
+    filter_main_office_click_to_run:
+        Image|startswith: 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\\OfficeClickToRun.exe'
+        Image|endswith: '\OfficeClickToRun.exe'
+    condition: (selection and not 1 of filter_exclude_*) and not 1 of filter_main_*
 falsepositives:
     - Other unknown legit or custom paths needs to be filtered to avoid false positives
 level: high

@@ -23,7 +23,7 @@ detection:
             - '\Office'
             - '\Program Files'
             - '\STARTUP'
-    filter_main_word_ext:
+    filter_exclude_word_ext:
         TargetFilename|endswith:
             - '.docb' # Word binary document introduced in Microsoft Office 2007
             - '.docm' # Word macro-enabled document; same as docx, but may contain macros and scripts
@@ -38,7 +38,7 @@ detection:
             - '\Office'
             - '\Program Files'
             - '\XLSTART'
-    filter_main_excel_ext:
+    filter_exclude_excel_ext:
         TargetFilename|endswith:
             - '.xls'
             - '.xlsm'
@@ -47,7 +47,10 @@ detection:
             - '.xltm'
             - '.xll'
             - '.xlw'
-    condition: (selection_word_paths and not filter_main_word_ext) or (selection_excel_paths and not filter_main_excel_ext)
+    filter_main_office_click_to_run:
+        Image|startswith: 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\\OfficeClickToRun.exe'
+        Image|endswith: '\OfficeClickToRun.exe'
+    condition: (selection_word_paths and not filter_exclude_word_ext) or (selection_excel_paths and not filter_exclude_excel_ext) and not 1 of filter_main_*
 falsepositives:
     - Other legitimate extensions used by either excel or word
 level: high

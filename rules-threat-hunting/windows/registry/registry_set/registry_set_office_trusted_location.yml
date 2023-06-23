@@ -13,15 +13,16 @@ date: 2023/06/21
 tags:
     - attack.defense_evasion
     - attack.t1112
+    - detection.threat_hunting
 logsource:
     category: registry_set
     product: windows
 detection:
-    selection_value:
+    selection:
         EventType: Setvalue
         TargetObject|contains: 'Security\Trusted Locations\Location'
         TargetObject|endswith: '\Path'
-    condition: all of selection_*
+    condition: selection
 falsepositives:
-    - Unknown
+    - During office installations or setup, trusted locations are added, which will trigger this rule.
 level: medium
