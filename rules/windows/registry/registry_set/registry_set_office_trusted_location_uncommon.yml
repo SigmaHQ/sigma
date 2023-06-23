@@ -34,7 +34,14 @@ detection:
     filter_main_office_click_to_run:
         Image|startswith: 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
         Image|endswith: '\OfficeClickToRun.exe'
-    condition: (selection and not 1 of filter_exclude_*) and not 1 of filter_main_*
+    filter_main_office_apps:
+        Image|startswith:
+            - 'C:\Program Files\Microsoft Office\'
+            - 'C:\Program Files (x86)\Microsoft Office\'
+        Image|endswith:
+            - '\winword.exe'
+            - '\excel.exe'
+    condition: (selection and (not 1 of filter_main_* and not 1 filter_exclude_*))
 falsepositives:
     - Other unknown legit or custom paths needs to be filtered to avoid false positives
 level: high
