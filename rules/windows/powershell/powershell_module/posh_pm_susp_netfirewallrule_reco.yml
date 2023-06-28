@@ -1,0 +1,27 @@
+title: Suspicious Local Firewall Enumeration
+id: ea207a23-b441-4a17-9f76-ad5be47d51d3
+status: experimental
+description: Adversaries may leverage Get-NetFirewallRule or Show-NetFirewallRule to enumerate the local firewall rules on a host.
+references:
+    - https://learn.microsoft.com/en-us/powershell/module/netsecurity/get-netfirewallrule?view=windowsserver2022-ps
+    - https://learn.microsoft.com/en-us/powershell/module/netsecurity/show-netfirewallrule?view=windowsserver2022-ps
+author: 'Christopher Peacock @SecurePeacock, SCYTHE @scythe_io'
+date: 2023/06/28
+tags:
+    - attack.discovery
+    - attack.t1518.001
+    - attack.t1016
+logsource:
+    product: windows
+    category: ps_module
+    definition: 0ad03ef1-f21b-4a79-8ce8-e6900c54b65b
+detection:
+    selection:
+        - Payload|contains: Get-NetFirewallRule
+        - ContextInfo|contains: Get-NetFirewallRule
+        - Payload|contains: Show-NetFirewallRule
+        - ContextInfo|contains: Show-NetFirewallRule
+    condition: selection
+falsepositives:
+    - Administrator script
+level: low
