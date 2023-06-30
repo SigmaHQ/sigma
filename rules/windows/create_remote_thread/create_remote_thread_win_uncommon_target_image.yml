@@ -9,7 +9,7 @@ references:
     - https://blog.redbluepurple.io/offensive-research/bypassing-injection-detection
 author: Florian Roth (Nextron Systems)
 date: 2022/03/16
-modified: 2023/05/05
+modified: 2023/06/30
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
@@ -30,13 +30,16 @@ detection:
             - '\spoolsv.exe'
             - '\wordpad.exe'
             - '\write.exe'
+    filter_main_spoolsv:
+        SourceImage: 'C:\Windows\System32\csrss.exe'
+        TargetImage: 'C:\Windows\System32\spoolsv.exe'
     filter_optional_aurora_1:
         StartFunction: 'EtwpNotificationThread'
     filter_optional_aurora_2:
         SourceImage|contains: 'unknown process'
-    filter_main_spoolsv:
+    filter_optional_csrss_ping:
         SourceImage: 'C:\Windows\System32\csrss.exe'
-        TargetImage: 'C:\Windows\System32\spoolsv.exe'
+        TargetImage: 'C:\Windows\System32\ping.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
