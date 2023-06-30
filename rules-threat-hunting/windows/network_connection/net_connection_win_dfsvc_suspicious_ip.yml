@@ -1,0 +1,51 @@
+title: Dfsvc.EXE Network Connection To Non-Local IPs
+id: 3c21219b-49b5-4268-bce6-c914ed50f09c
+status: experimental
+description: Detects network connections from "dfsvc.exe" used to handled ClickOnce applications to non-local IPs
+references:
+    - https://posts.specterops.io/less-smartscreen-more-caffeine-ab-using-clickonce-for-trusted-code-execution-1446ea8051c5
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/06/12
+tags:
+    - attack.execution
+    - attack.t1203
+    - detection.threat_hunting
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\dfsvc.exe'
+        Initiated: 'true'
+    filter_main_local_ipv4:
+        DestinationIp|startswith:
+            - '10.'
+            - '127.0.0.1'
+            - '172.16.'
+            - '172.17.'
+            - '172.18.'
+            - '172.19.'
+            - '172.20.'
+            - '172.21.'
+            - '172.22.'
+            - '172.23.'
+            - '172.24.'
+            - '172.25.'
+            - '172.26.'
+            - '172.27.'
+            - '172.28.'
+            - '172.29.'
+            - '172.30.'
+            - '172.31.'
+            - '192.168.'
+    filter_main_local_ipv6:
+        DestinationIp|startswith:
+            - '::1'  # IPv6 loopback variant
+            - '0:0:0:0:0:0:0:1'  # IPv6 loopback variant
+            - 'fc'  # private address range fc00::/7
+            - 'fd'  # private address range fc00::/7
+            - 'fe80:'  # link-local address
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - False positives are expected from ClickOnce manifests hosted on public IPs and domains. Apply additional filters for the accepted IPs in your environement as necessary
+level: medium

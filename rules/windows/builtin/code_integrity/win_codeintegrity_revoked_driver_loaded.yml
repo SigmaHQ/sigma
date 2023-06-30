@@ -1,0 +1,24 @@
+title: CodeIntegrity - Revoked Kernel Driver Loaded
+id: 320fccbf-5e32-4101-82b8-2679c5f007c6
+status: experimental
+description: Detects the load of a revoked kernel driver
+references:
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/event-id-explanations
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/event-tag-explanations
+    - Internal Research
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/06/06
+tags:
+    - attack.privilege_escalation
+logsource:
+    product: windows
+    service: codeintegrity-operational
+detection:
+    selection:
+        EventID:
+            - 3021 # Code Integrity determined a revoked kernel module %2 is loaded into the system.  Check with the publisher to see if a new signed version of the kernel module is available.
+            - 3022 # Code Integrity determined a revoked kernel module %2 is loaded into the system. The image is allowed to load because kernel mode debugger is attached.
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
