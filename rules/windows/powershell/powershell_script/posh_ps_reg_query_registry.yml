@@ -1,0 +1,38 @@
+title: Potential Configuration And Service Reconnaissance Via Powershell
+id: 064060aa-09fb-4636-817f-020a32aa7e9e
+related:
+    - id: 970007b7-ce32-49d0-a4a4-fbef016950bd
+      type: similar
+status: experimental
+description: Detects the usage of Powershell in order to query reconnaissance information from the registry. Adversaries may interact with the Windows registry to gather information about credentials, the system, configuration, and installed software.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1012/T1012.md
+author: frack113
+date: 2023/07/02
+tags:
+    - attack.discovery
+    - attack.t1012
+    - attack.t1007
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_cmdlet:
+        ScriptBlockText|contains:
+            - 'Get-Item'
+            - 'Get-ChildItem'
+    selection_flag:
+        ScriptBlockText|contains: '-Path'
+    selection_key:
+        ScriptBlockText|contains:
+            - 'CurrentVersion\Windows'
+            - 'winlogon\'
+            - 'CurrentVersion\ShellServiceObjectDelayLoad'
+            - 'CurrentVersion\Run' # Also covers the strings "RunOnce", "RunOnceEx" and "runServicesOnce"
+            - 'CurrentVersion\Policies\Explorer\Run'
+            - 'currentcontrolset\services'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium
