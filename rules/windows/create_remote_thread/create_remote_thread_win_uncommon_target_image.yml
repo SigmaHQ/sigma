@@ -9,7 +9,7 @@ references:
     - https://blog.redbluepurple.io/offensive-research/bypassing-injection-detection
 author: Florian Roth (Nextron Systems)
 date: 2022/03/16
-modified: 2023/05/05
+modified: 2023/07/05
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
@@ -34,6 +34,15 @@ detection:
         StartFunction: 'EtwpNotificationThread'
     filter_optional_aurora_2:
         SourceImage|contains: 'unknown process'
+    filter_optional_vmtoolsd:
+        SourceImage|endswith: 'C:\Program Files\VMware\VMware Tools\vmtoolsd.exe'
+        StartFunction: 'GetCommandLineW'
+    filter_optional_rundll32:
+        SourceImage: 'C:\Windows\System32\rundll32.exe'
+        TargetImage: 'C:\Windows\explorer.exe'
+        StartFunction:
+            -  'LoadLibraryW'
+            -  'FreeLibrary'
     filter_main_spoolsv:
         SourceImage: 'C:\Windows\System32\csrss.exe'
         TargetImage: 'C:\Windows\System32\spoolsv.exe'
