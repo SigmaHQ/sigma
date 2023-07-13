@@ -11,7 +11,7 @@ references:
     - https://learn.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/event-id-explanations
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2022/01/20
-modified: 2023/06/06
+modified: 2023/06/20
 tags:
     - attack.execution
 logsource:
@@ -95,6 +95,10 @@ detection:
         FileNameBuffer|contains: '\Program Files\Google\Drive File Stream\'
         FileNameBuffer|endswith: '\crashpad_handler.exe'
         ProcessNameBuffer|endswith: '\Windows\ImmersiveControlPanel\SystemSettings.exe'
+        RequestedPolicy: 8
+        ValidatedPolicy: 1
+    filter_optional_trend_micro:
+        FileNameBuffer|endswith: '\Trend Micro\Client Server Security Agent\perficrcperfmonmgr.dll'
         RequestedPolicy: 8
         ValidatedPolicy: 1
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
