@@ -1,10 +1,10 @@
-title: Potential Configuration And Service Reconnaissance Via Powershell
+title: Potential Registry Reconnaissance Via Powershell Script
 id: 064060aa-09fb-4636-817f-020a32aa7e9e
 related:
     - id: 970007b7-ce32-49d0-a4a4-fbef016950bd
       type: similar
 status: experimental
-description: Detects the usage of Powershell in order to query reconnaissance information from the registry. Adversaries may interact with the Windows registry to gather information about credentials, the system, configuration, and installed software.
+description: Detects PowerShell script with potential registry reconnaissance capabilities. Adversaries may interact with the Windows registry to gather information about the system credentials, configuration, and installed software.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1012/T1012.md
 author: frack113
@@ -27,13 +27,13 @@ detection:
         ScriptBlockText|contains: '-Path'
     selection_key:
         ScriptBlockText|contains:
+            - 'currentcontrolset\services'
+            - 'CurrentVersion\Policies\Explorer\Run'
+            - 'CurrentVersion\Run' # Also covers the strings "RunOnce", "RunOnceEx" and "runServicesOnce"
+            - 'CurrentVersion\ShellServiceObjectDelayLoad'
             - 'CurrentVersion\Windows'
             - 'winlogon\'
-            - 'CurrentVersion\ShellServiceObjectDelayLoad'
-            - 'CurrentVersion\Run' # Also covers the strings "RunOnce", "RunOnceEx" and "runServicesOnce"
-            - 'CurrentVersion\Policies\Explorer\Run'
-            - 'currentcontrolset\services'
     condition: all of selection_*
 falsepositives:
-    - Unknown
+    - Due to the nature of the script block, the matching of the string could sometimes result in a false positive. Use this rule to hunt for potential malicious or suspicious scripts.
 level: medium
