@@ -120,8 +120,8 @@ E.g.
 * Tell us about false positives (issues section)
 * Try to provide an improved rule (new filter) via [pull request](https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files#editing-files-in-another-users-repository) on that rule
 
-To help you, we may ask you for a return.
-The PR will be tagged with "Author Input Required", however without a response it will have to be closed after 1 month of inactivity.
+In order to enhance or fix some issues with a specific PR we might ask the author for some additional input.
+In such cases, the PR will be tagged with "Author Input Required". If the author of the PR does not respond in a timely manner the PR will automatically be closed after 1 month of inactivity.
 
 ## Work on open issues
 
