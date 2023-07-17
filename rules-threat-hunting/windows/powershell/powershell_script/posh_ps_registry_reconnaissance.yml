@@ -19,21 +19,9 @@ logsource:
     category: ps_script
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
-    selection_cmdlet:
-        ScriptBlockText|contains:
-            - 'Get-Item'
-            - 'Get-ChildItem'
-    selection_flag:
-        ScriptBlockText|contains: '-Path'
-    selection_key:
-        ScriptBlockText|contains:
-            - 'currentcontrolset\services'
-            - 'CurrentVersion\Policies\Explorer\Run'
-            - 'CurrentVersion\Run' # Also covers the strings "RunOnce", "RunOnceEx" and "runServicesOnce"
-            - 'CurrentVersion\ShellServiceObjectDelayLoad'
-            - 'CurrentVersion\Windows'
-            - 'winlogon\'
-    condition: all of selection_*
+    selection:
+        ScriptBlockText|re: '(Get-Item|gci|Get-ChildItem).{1,64}-Path.{1,64}\\(currentcontrolset\\services|CurrentVersion\\Policies\\Explorer\\Run|CurrentVersion\\Run|CurrentVersion\\ShellServiceObjectDelayLoad|CurrentVersion\\Windows\winlogon)\\'
+    condition: selection
 falsepositives:
     - Due to the nature of the script block, the matching of the string could sometimes result in a false positive. Use this rule to hunt for potential malicious or suspicious scripts.
 level: medium
