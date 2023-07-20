@@ -1,14 +1,12 @@
-title: Scheduled Task Executing Payload from Registry
-id: 86588b36-c6d3-465f-9cee-8f9093e07798
-related:
-    - id: c4eeeeae-89f4-43a7-8b48-8d1bdfa66c78
-      type: derived
-status: experimental
-description: Detects the creation of a schtasks that potentially executes a payload stored in the Windows Registry using PowerShell.
+title: Scheduled Task Executing Encoded Payload from Registry
+id: c4eeeeae-89f4-43a7-8b48-8d1bdfa66c78
+status: test
+description: Detects the creation of a schtask that potentially executes a base64 encoded payload stored in the Windows Registry using PowerShell.
 references:
     - https://thedfirreport.com/2022/02/21/qbot-and-zerologon-lead-to-full-domain-compromise/
-author: X__Junior (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
-date: 2023/07/18
+author: pH-T (Nextron Systems), @Kostastsale, @TheDFIRReport, X__Junior (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+date: 2022/02/12
+modified: 2023/02/04
 tags:
     - attack.execution
     - attack.persistence
@@ -24,6 +22,10 @@ detection:
         - OriginalFileName: 'schtasks.exe'
     selection_cli_create:
         CommandLine|contains: '/Create'
+    selection_cli_encoding:
+        CommandLine|contains:
+            - 'FromBase64String'
+            - 'encodedcommand'
     selection_cli_get:
         CommandLine|contains:
             - 'Get-ItemProperty'
@@ -34,11 +36,7 @@ detection:
             - 'HKLM:'
             - 'registry::'
             - 'HKEY_'
-    filter_main_encoding:
-        CommandLine|contains:
-            - 'FromBase64String'
-            - 'encodedcommand'
-    condition: all of selection_* and not 1 of filter_*
+    condition: all of selection_*
 falsepositives:
-    - Unknown
-level: medium
+    - Unlikely
+level: high
