@@ -1,0 +1,28 @@
+title: Potential Registry Reconnaissance Via PowerShell Script
+id: 064060aa-09fb-4636-817f-020a32aa7e9e
+related:
+    - id: 970007b7-ce32-49d0-a4a4-fbef016950bd
+      type: similar
+status: experimental
+description: Detects PowerShell scripts with potential registry reconnaissance capabilities. Adversaries may interact with the Windows registry to gather information about the system credentials, configuration, and installed software.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1012/T1012.md
+author: frack113
+date: 2023/07/02
+tags:
+    - attack.discovery
+    - attack.t1012
+    - attack.t1007
+    - detection.threat_hunting
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection:
+        # TODO: switch to |re|i: after sigma specification v2 is released
+        ScriptBlockText|re: '(Get-Item|gci|Get-ChildItem).{1,64}-Path.{1,64}\\(currentcontrolset\\services|CurrentVersion\\Policies\\Explorer\\Run|CurrentVersion\\Run|CurrentVersion\\ShellServiceObjectDelayLoad|CurrentVersion\\Windows\winlogon)\\'
+    condition: selection
+falsepositives:
+    - Due to the nature of the script block, the matching of the string could sometimes result in a false positive. Use this rule to hunt for potential malicious or suspicious scripts.
+level: medium

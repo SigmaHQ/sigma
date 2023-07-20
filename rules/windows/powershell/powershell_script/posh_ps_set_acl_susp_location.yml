@@ -1,0 +1,49 @@
+title: PowerShell Set-Acl On Windows Folder - PsScript
+id: 3bf1d859-3a7e-44cb-8809-a99e066d3478
+related:
+    - id: cae80281-ef23-44c5-873b-fd48d2666f49 # PsScript Low
+      type: derived
+    - id: 0944e002-e3f6-4eb5-bf69-3a3067b53d73 # ProcCreation Susp
+      type: derived
+    - id: bdeb2cff-af74-4094-8426-724dc937f20a # ProcCreation Low
+      type: derived
+status: experimental
+description: Detects PowerShell scripts to set the ACL to a file in the Windows folder
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/74438b0237d141ee9c99747976447dc884cb1a39/atomics/T1505.005/T1505.005.md
+    - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-acl?view=powershell-5.1
+author: frack113, Nasreddine Bencherchali (Nextron Systems)
+date: 2023/07/18
+tags:
+    - attack.defense_evasion
+    - attack.t1222
+logsource:
+    product: windows
+    category: ps_script
+    definition: bade5735-5ab0-4aa7-a642-a11be0e40872
+detection:
+    selection_cmdlet:
+        ScriptBlockText|contains|all:
+            - 'Set-Acl '
+            - '-AclObject '
+    selection_paths:
+        # Note: Add more suspicious paths
+        ScriptBlockText|contains:
+            - '-Path "C:\Windows'
+            - '-Path "C:/Windows'
+            - "-Path 'C:\\Windows"
+            - "-Path 'C:/Windows"
+            - '-Path C:\\Windows'
+            - '-Path C:/Windows'
+            - '-Path $env:windir'
+            - '-Path "$env:windir'
+            - "-Path '$env:windir"
+    selection_permissions:
+        # Note: Add more suspicious permissions
+        ScriptBlockText|contains:
+            - 'FullControl'
+            - 'Allow'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
