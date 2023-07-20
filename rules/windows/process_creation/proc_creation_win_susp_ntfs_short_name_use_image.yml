@@ -11,7 +11,7 @@ references:
     - https://twitter.com/jonasLyk/status/1555914501802921984
 author: frack113, Nasreddine Bencherchali (Nextron Systems)
 date: 2022/08/06
-modified: 2023/07/05
+modified: 2023/07/20
 tags:
     - attack.defense_evasion
     - attack.t1564.004
@@ -21,34 +21,42 @@ logsource:
 detection:
     selection:
         Image|contains:
-            - '~1.exe'
             - '~1.bat'
+            - '~1.dll'
+            - '~1.exe'
+            - '~1.hta'
+            - '~1.js'
             - '~1.msi'
+            - '~1.ps1'
+            - '~1.tmp'
             - '~1.vbe'
             - '~1.vbs'
-            - '~1.dll'
-            - '~1.ps1'
-            - '~1.js'
-            - '~1.hta'
-            - '~2.exe'
             - '~2.bat'
+            - '~2.dll'
+            - '~2.exe'
+            - '~2.hta'
+            - '~2.js'
             - '~2.msi'
+            - '~2.ps1'
+            - '~2.tmp'
             - '~2.vbe'
             - '~2.vbs'
-            - '~2.dll'
-            - '~2.ps1'
-            - '~2.js'
-            - '~2.hta'
-    filter:
-        - ParentImage: 'C:\Windows\explorer.exe'
-        - ParentImage|endswith:
-            - '\WebEx\WebexHost.exe'
-            - '\thor\thor64.exe'
-            - '-installer.exe'  # e.g. C:\Users\neo\Downloads\xampp-windows-x64-8.1.6-0-VS16-installer.exe
-        - Image: 'C:\PROGRA~1\WinZip\WZPREL~1.EXE'
-        - Image|contains: '\vcredi'
-    condition: selection and not filter
+    filter_main_generic_parent:
+        ParentImage: 'C:\Windows\explorer.exe'
+    filter_optional_webex:
+        ParentImage|endswith: '\WebEx\WebexHost.exe'
+    filter_optional_thor:
+        ParentImage|endswith: '\thor\thor64.exe'
+    filter_optional_winzip:
+        Image: 'C:\PROGRA~1\WinZip\WZPREL~1.EXE'
+    filter_optional_vstudio:
+        Image|startswith:
+            - 'C:\Program Files (x86)\Microsoft Visual Studio\'
+            - 'C:\Program Files\Microsoft Visual Studio\'
+        Image|endswith:
+            - '\vcredist_x64.exe'
+            - '\vcredist_x86.exe'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
-    - Unknown
-level: high
-enhance filter
+    - Software Installers
+level: medium
