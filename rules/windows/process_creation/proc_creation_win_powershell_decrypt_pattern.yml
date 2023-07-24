@@ -1,0 +1,43 @@
+title: PowerShell Execution With Potential Decryption Capabilities
+id: 434c08ba-8406-4d15-8b24-782cb071a691
+status: experimental
+description: Detects PowerShell commands that decrypt an ".LNK" "file to drop the next stage of the malware.
+references:
+    - https://research.checkpoint.com/2023/chinese-threat-actors-targeting-europe-in-smugx-campaign/
+author: X__Junior (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+date: 2023/06/30
+tags:
+    - attack.execution
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        OriginalFileName:
+            - 'PowerShell.EXE'
+            - 'pwsh.dll'
+    selection_cli_dir:
+        CommandLine|contains:
+            - "Get-ChildItem "
+            - "dir "
+            - "gci "
+            - "ls "
+    selection_cli_gc:
+        CommandLine|contains:
+            - "Get-Content "
+            - "gc "
+            - 'cat '
+            - 'type '
+    selection_cli_specific:
+        CommandLine|contains|all:
+            - ' ^| '
+            - '\*.lnk'
+            - '-Recurse'
+            - '-Skip '
+    condition: all of selection_*
+falsepositives:
+    - Unlikely
+level: high
