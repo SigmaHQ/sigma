@@ -7,7 +7,7 @@ references:
     - https://user-images.githubusercontent.com/61026070/136518004-b68cce7d-f9b8-4e9a-9b7b-53b1568a9a94.png
 author: bohops, Bhabesh Raj
 date: 2021/10/08
-modified: 2022/07/14
+modified: 2023/07/25
 tags:
     - attack.execution
     - attack.persistence
@@ -44,6 +44,12 @@ detection:
             - '\VMware\VMware Tools\poweroff-vm-default.bat'
             - '\VMware\VMware Tools\resume-vm-default.bat'
             - '\VMware\VMware Tools\suspend-vm-default.bat'
+    filter_main_empty:
+        Image|endswith: '\cmd.exe'
+        CommandLine: ''
+    filter_main_null:
+        Image|endswith: '\cmd.exe'
+        CommandLine: null
     condition: all of selection* and not 1 of filter_main_*
 falsepositives:
     - Legitimate use by VM administrator
