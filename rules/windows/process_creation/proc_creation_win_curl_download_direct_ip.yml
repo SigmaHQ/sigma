@@ -1,13 +1,12 @@
-title: Suspicious File Download From File Sharing Domain Via Curl.EXE
-id: 56454143-524f-49fb-b1c6-3fb8b1ad41fb
+title: Suspicious File Download From Direct IP Via Curl.EXE
+id: 5cb299fc-5fb1-4d07-b989-0644c68b6043
 status: experimental
-description: Detects potential suspicious file download from file sharing domains using curl.exe
+description: Detects potential suspicious file download from direct ip domains using curl.exe
 references:
     - https://labs.withsecure.com/publications/fin7-target-veeam-servers
     - https://github.com/WithSecureLabs/iocs/blob/344203de742bb7e68bd56618f66d34be95a9f9fc/FIN7VEEAM/iocs.csv
 author: Nasreddine Bencherchali (Nextron Systems)
-date: 2023/05/05
-modified: 2023/07/24
+date: 2023/07/27
 tags:
     - attack.execution
 logsource:
@@ -17,30 +16,8 @@ detection:
     selection_img:
         - Image|endswith: '\curl.exe'
         - OriginalFileName: 'curl.exe'
-    selection_websites:
-        CommandLine|contains:
-            - 'anonfiles.com'
-            - 'cdn.discordapp.com/attachments/'
-            - 'ddns.net'
-            - 'ghostbin.co/'
-            - 'gist.githubusercontent.com'
-            - 'gofile.io'
-            - 'hastebin.com'
-            - 'mediafire.com'
-            - 'mega.nz'
-            - 'paste.ee'
-            - 'pastebin.com'
-            - 'pastebin.pl'
-            - 'pastetext.net'
-            - 'privatlab.com'
-            - 'privatlab.net'
-            - 'raw.githubusercontent.com'
-            - 'send.exploit.in'
-            - 'sendspace.com'
-            - 'storage.googleapis.com'
-            - 'temp.sh'
-            - 'transfer.sh'
-            - 'ufile.io'
+    selection_ip:
+        CommandLine|re: '://[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'
     selection_http:
         CommandLine|contains: 'http'
     selection_flag:

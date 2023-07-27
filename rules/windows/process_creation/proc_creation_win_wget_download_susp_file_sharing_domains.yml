@@ -1,7 +1,7 @@
-title: Suspicious File Download From File Sharing Domain Via Curl.EXE
+title: Suspicious File Download From File Sharing Domain Via Wget.EXE
 id: 56454143-524f-49fb-b1c6-3fb8b1ad41fb
 status: experimental
-description: Detects potential suspicious file download from file sharing domains using curl.exe
+description: Detects potential suspicious file download from file sharing domains using wget.exe
 references:
     - https://labs.withsecure.com/publications/fin7-target-veeam-servers
     - https://github.com/WithSecureLabs/iocs/blob/344203de742bb7e68bd56618f66d34be95a9f9fc/FIN7VEEAM/iocs.csv
@@ -15,8 +15,8 @@ logsource:
     product: windows
 detection:
     selection_img:
-        - Image|endswith: '\curl.exe'
-        - OriginalFileName: 'curl.exe'
+        - Image|endswith: '\wget.exe'
+        - OriginalFileName: 'wget.exe'
     selection_websites:
         CommandLine|contains:
             - 'anonfiles.com'
@@ -44,10 +44,8 @@ detection:
     selection_http:
         CommandLine|contains: 'http'
     selection_flag:
-        CommandLine|contains:
-            - ' -O'  # covers the alias for --remote-name and --output
-            - '--remote-name'
-            - '--output'
+        - CommandLine|re: '\s-O\s'
+        - CommandLine|contains: '--output-document'
     selection_ext:
         CommandLine|endswith:
             - ".ps1"

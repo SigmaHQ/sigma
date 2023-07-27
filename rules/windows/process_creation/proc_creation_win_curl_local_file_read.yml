@@ -1,11 +1,11 @@
-title: Insecure Transfer Via Curl.EXE
-id: cb9cc1d1-e84e-4bdc-b7ad-c31b1b7908ec
+title: Local File Read Using Curl.EXE
+id: aa6f6ea6-0676-40dd-b510-6e46f02d8867
 status: experimental
-description: Detects execution of "curl.exe" with the "--insecure" flag.
+description: Detects execution of "curl.exe" with the "file://" protocol handler in order to read local files.
 references:
     - https://curl.se/docs/manpage.html
-author: X__Junior (Nextron Systems)
-date: 2023/06/30
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/07/27
 tags:
     - attack.execution
 logsource:
@@ -16,9 +16,8 @@ detection:
         - Image|endswith: '\curl.exe'
         - OriginalFileName: 'curl.exe'
     selection_cli:
-        - CommandLine|re: '\s-k\s'
-        - CommandLine|contains: '--insecure'
+        CommandLine|contains: 'file:///'
     condition: all of selection_*
 falsepositives:
-    - Access to badly maintained internal or development systems
+    - Unknown
 level: medium
