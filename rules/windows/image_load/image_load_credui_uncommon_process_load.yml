@@ -1,14 +1,15 @@
-title: UIPromptForCredentials DLLs
+title: CredUI.DLL Load By Uncommon Process
 id: 9ae01559-cf7e-4f8e-8e14-4c290a1b4784
 status: experimental
-description: Detects potential use of UIPromptForCredentials functions by looking for some of the DLLs needed for it.
+description: Detects load of "credui.dll" and related DLLs by an uncommon process. Attackers might leverage this DLL for potential use of "CredUIPromptForCredentials" or "CredUnPackAuthenticationBufferW".
 references:
     - https://securitydatasets.com/notebooks/atomic/windows/credential_access/SDWIN-201020013208.html
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1056.002/T1056.002.md#atomic-test-2---powershell---prompt-user-for-password
     - https://docs.microsoft.com/en-us/windows/win32/api/wincred/nf-wincred-creduipromptforcredentialsa
+    - https://github.com/S12cybersecurity/RDPCredentialStealer
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 date: 2020/10/20
-modified: 2023/01/20
+modified: 2023/07/28
 tags:
     - attack.credential_access
     - attack.collection
@@ -24,37 +25,31 @@ detection:
         - OriginalFileName:
             - 'credui.dll'
             - 'wincredui.dll'
-    filter_start:
+    filter_main_generic:
         Image|startswith:
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
             - 'C:\Windows\System32\'
             - 'C:\Windows\SysWOW64\'
-            - 'C:\Program Files\'
-            - 'C:\Program Files (x86)\'
-    filter_end:
+    filter_main_full:
+        Image:
+            - 'C:\Windows\explorer.exe'
+            - 'C:\Windows\ImmersiveControlPanel\SystemSettings.exe'
+            - 'C:\Windows\regedit.exe' # This FP is triggered for example when choosing the "Connect Network Registry" from the menu
+    filter_optional_opera:
+        Image|endswith: '\opera_autoupdate.exe'
+    filter_optional_process_explorer:
         Image|endswith:
-            - '\opera_autoupdate.exe'
             - '\procexp64.exe'
             - '\procexp.exe'
-    filter_full:
-        Image:
-            - 'C:\Windows\ImmersiveControlPanel\SystemSettings.exe'
-            - 'C:\Windows\explorer.exe'
-    filter_user:
+    filter_optional_teams:
         Image|startswith: 'C:\Users\'
-        Image|endswith:
-            - '\AppData\Roaming\Spotify\Spotify.exe'
-            - '\AppData\Local\Microsoft\Teams\current\Teams.exe'
-            - '\AppData\Local\Microsoft\Teams\stage\Teams.exe'
-    filter_contains:
+        Image|contains: '\AppData\Local\Microsoft\Teams\'
+        Image|endswith: '\Teams.exe'
+    filter_optional_onedrive:
         Image|startswith: 'C:\Users\'
         Image|contains: '\AppData\Local\Microsoft\OneDrive\'
-    filter_regedit:
-        # This FP is triggered for example when choosing the "Connect Network Registry" from the menu
-        Image: 'C:\Windows\regedit.exe'
-    filter_spotify_aurora:
-        Provider_Name: 'Microsoft-Windows-Kernel-Process'
-        CommandLine|contains: 'C:\Program Files\WindowsApps\SpotifyAB.SpotifyMusic_'
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Other legitimate processes loading those DLLs in your environment.
 level: medium
