@@ -1,11 +1,11 @@
-title: Insecure Transfer Via Curl.EXE
-id: cb9cc1d1-e84e-4bdc-b7ad-c31b1b7908ec
+title: Potential Cookies Session Hijacking
+id: 5a6e1e16-07de-48d8-8aae-faa766c05e88
 status: experimental
-description: Detects execution of "curl.exe" with the "--insecure" flag.
+description: Detects execution of "curl.exe" with the "-c" flag in order to save cookie data.
 references:
     - https://curl.se/docs/manpage.html
-author: X__Junior (Nextron Systems)
-date: 2023/06/30
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/07/27
 tags:
     - attack.execution
 logsource:
@@ -16,9 +16,9 @@ detection:
         - Image|endswith: '\curl.exe'
         - OriginalFileName: 'curl.exe'
     selection_cli:
-        - CommandLine|re: '\s-k\s'
-        - CommandLine|contains: '--insecure'
+        - CommandLine|re: '\s-c\s'
+        - CommandLine|contains: '--cookie-jar'
     condition: all of selection_*
 falsepositives:
-    - Access to badly maintained internal or development systems
+    - Unknown
 level: medium
