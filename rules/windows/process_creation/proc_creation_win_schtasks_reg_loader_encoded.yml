@@ -1,0 +1,42 @@
+title: Scheduled Task Executing Encoded Payload from Registry
+id: c4eeeeae-89f4-43a7-8b48-8d1bdfa66c78
+status: test
+description: Detects the creation of a schtask that potentially executes a base64 encoded payload stored in the Windows Registry using PowerShell.
+references:
+    - https://thedfirreport.com/2022/02/21/qbot-and-zerologon-lead-to-full-domain-compromise/
+author: pH-T (Nextron Systems), @Kostastsale, @TheDFIRReport, X__Junior (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+date: 2022/02/12
+modified: 2023/02/04
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.t1053.005
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        # schtasks.exe /Create /F /TN "{97F2F70B-10D1-4447-A2F3-9B070C86E261}" /TR "cmd /c start /min \"\" powershell.exe -Command IEX([System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String((Get-ItemProperty -Path HKCU:\SOFTWARE\Pvoeooxf).yzbbvhhdypa))) " /SC MINUTE /MO 30
+        - Image|endswith: '\schtasks.exe'
+        - OriginalFileName: 'schtasks.exe'
+    selection_cli_create:
+        CommandLine|contains: '/Create'
+    selection_cli_encoding:
+        CommandLine|contains:
+            - 'FromBase64String'
+            - 'encodedcommand'
+    selection_cli_get:
+        CommandLine|contains:
+            - 'Get-ItemProperty'
+            - ' gp ' # Alias
+    selection_cli_hive:
+        CommandLine|contains:
+            - 'HKCU:'
+            - 'HKLM:'
+            - 'registry::'
+            - 'HKEY_'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely
+level: high
