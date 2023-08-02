@@ -10,5 +10,5 @@ then
 fi
 
 # Validate all the Sigma rules in the current directory
-echo "Validating Sigma rules against schema.json"
+echo "Validating Sigma rules against sigma-schema.json"
 check-jsonschema --schemafile sigma-schema.json $(find ./rules ./rules-compliance ./rules-dfir ./rules-emerging-threats ./rules-placeholder ./rules-threat-hunting -type f -name "*.yml")
