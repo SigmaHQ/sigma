@@ -1,0 +1,48 @@
+title: Potential WinAPI Calls Via PowerShell Scripts
+id: 03d83090-8cba-44a0-b02f-0b756a050306
+related:
+    - id: ba3f5c1b-6272-4119-9dbd-0bc8d21c2702
+      type: similar
+status: experimental
+description: Detects use of WinAPI functions in PowerShell scripts
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse
+author: Nasreddine Bencherchali (Nextron Systems), Nikita Nazarov, oscd.community
+date: 2020/10/06
+modified: 2023/06/20
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1106
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    # Note: Add more suspicious combinations in the form of different selections
+    selection_injection:
+        ScriptBlockText|contains|all:
+            - 'VirtualAlloc'
+            - 'OpenProcess'
+            - 'WriteProcessMemory'
+            - 'CreateRemoteThread'
+    selection_token_steal:
+        ScriptBlockText|contains|all:
+            - 'OpenProcessToken'
+            - 'LookupPrivilegeValue'
+            - 'AdjustTokenPrivileges'
+    selection_duplicate_token:
+        ScriptBlockText|contains|all:
+            - 'OpenProcessToken'
+            - 'DuplicateTokenEx'
+            - 'CloseHandle'
+    selection_process_write_read:
+        ScriptBlockText|contains|all:
+            - 'WriteProcessMemory'
+            - 'VirtualAlloc'
+            - 'ReadProcessMemory'
+            - 'VirtualFree'
+    condition: 1 of selection_*
+falsepositives:
+    - Unknown
+level: high

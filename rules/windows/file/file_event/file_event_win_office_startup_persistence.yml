@@ -1,0 +1,53 @@
+title: Potential Persistence Via Microsoft Office Startup Folder
+id: 0e20c89d-2264-44ae-8238-aeeaba609ece
+status: test
+description: Detects creation of Microsoft Office files inside of one of the default startup folders in order to achieve persistence.
+references:
+    - https://insight-jp.nttsecurity.com/post/102hojk/operation-restylink-apt-campaign-targeting-japanese-companies
+    - https://learn.microsoft.com/en-us/office/troubleshoot/excel/use-startup-folders
+author: Max Altgelt (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+date: 2022/06/02
+modified: 2023/06/22
+tags:
+    - attack.persistence
+    - attack.t1137
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_word_paths:
+        - TargetFilename|contains: '\Microsoft\Word\STARTUP'
+        - TargetFilename|contains|all:
+            - '\Office'
+            - '\Program Files'
+            - '\STARTUP'
+    selection_word_extension:
+        TargetFilename|endswith:
+            - '.doc'
+            - '.docm'
+            - '.docx'
+            - '.dot'
+            - '.dotm'
+            - '.rtf'
+    selection_excel_paths:
+        - TargetFilename|contains: '\Microsoft\Excel\XLSTART'
+        - TargetFilename|contains|all:
+            - '\Office'
+            - '\Program Files'
+            - '\XLSTART'
+    selection_excel_extension:
+        TargetFilename|endswith:
+            - '.xls'
+            - '.xlsm'
+            - '.xlsx'
+            - '.xlt'
+            - '.xltm'
+    filter_main_office:
+        Image|endswith:
+            - '\WINWORD.exe'
+            - '\EXCEL.exe'
+    condition: (all of selection_word_* or all of selection_excel_*) and not filter_main_office
+falsepositives:
+    - Loading a user environment from a backup or a domain controller
+    - Synchronization of templates
+level: high

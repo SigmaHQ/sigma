@@ -1,0 +1,69 @@
+title: WinAPI Function Calls Via PowerShell Scripts
+id: 9f22ccd5-a435-453b-af96-bf99cbb594d4
+related:
+    - id: ba3f5c1b-6272-4119-9dbd-0bc8d21c2702
+      type: similar
+    - id: 03d83090-8cba-44a0-b02f-0b756a050306
+      type: similar
+    - id: 19d65a1c-8540-4140-8062-8eb00db0bba5
+      type: similar
+status: experimental
+description: Detects calls to WinAPI functions from PowerShell scripts. Attackers can often leverage these APIs to avoid detection based on typical PowerShell function calls. Use this rule as a basis to hunt for interesting scripts.
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse
+author: Nikita Nazarov, oscd.community, Nasreddine Bencherchali (Nextron Systems)
+date: 2023/07/21
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1106
+    - detection.threat_hunting
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection:
+        ScriptBlockText|contains:
+            - 'AddSecurityPackage'
+            - 'AdjustTokenPrivileges'
+            - 'CloseHandle'
+            - 'CreateProcessWithToken'
+            - 'CreateRemoteThread'
+            - 'CreateThread'
+            - 'CreateUserThread'
+            - 'DangerousGetHandle'
+            - 'DuplicateTokenEx'
+            - 'EnumerateSecurityPackages'
+            - 'FreeLibrary'
+            - 'GetDelegateForFunctionPointer'
+            - 'GetLogonSessionData'
+            - 'GetModuleHandle'
+            - 'GetProcAddress'
+            - 'GetProcessHandle'
+            - 'GetTokenInformation'
+            - 'ImpersonateLoggedOnUser'
+            - 'LoadLibrary'
+            - 'memcpy'
+            - 'MiniDumpWriteDump'
+            - 'OpenDesktop'
+            - 'OpenProcess'
+            - 'OpenProcessToken'
+            - 'OpenThreadToken'
+            - 'OpenWindowStation'
+            - 'QueueUserApc'
+            - 'ReadProcessMemory'
+            - 'RevertToSelf'
+            - 'RtlCreateUserThread'
+            - 'SetThreadToken'
+            - 'VirtualAlloc'
+            - 'VirtualFree'
+            - 'VirtualProtect'
+            - 'WaitForSingleObject'
+            - 'WriteInt32'
+            - 'WriteProcessMemory'
+            - 'ZeroFreeGlobalAllocUnicode'
+    condition: selection
+falsepositives:
+    - This rule is mainly used for hunting and will generate quite a lot of false positives when applied in production. It's best combined with other fields such as the path of execution, the parent process, etc.
+level: medium

@@ -1,0 +1,33 @@
+title: SMB over QUIC Via Net.EXE
+id: 2238d337-42fb-4971-9a68-63570f2aede4
+related:
+    - id: 6df07c3b-8456-4f8b-87bb-fe31ec964cae
+      type: similar
+status: experimental
+description: Detects the mounting of Windows SMB shares over QUIC, which can be an unexpected event in some enterprise environments.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/74438b0237d141ee9c99747976447dc884cb1a39/atomics/T1570/T1570.md
+    - https://www.trustedsec.com/blog/making-smb-accessible-with-ntlmquic/
+author: frack113
+date: 2023/07/21
+tags:
+    - attack.lateral_movement
+    - attack.t1570
+    - detection.threat_hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+            - '\net.exe'
+            - '\net1.exe'
+        - OriginalFileName:
+            - 'net.exe'
+            - 'net1.exe'
+    selection_cli:
+        CommandLine|contains: '/TRANSPORT:QUIC'
+    condition: all of selection_*
+falsepositives:
+    - Administrative activity
+level: medium
