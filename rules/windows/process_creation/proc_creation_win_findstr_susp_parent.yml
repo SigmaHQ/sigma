@@ -1,0 +1,31 @@
+title: Potentially Suspicious Findstr.EXE Execution
+id: ccb5742c-c248-4982-8c5c-5571b9275ad3
+related:
+    - id: fe63010f-8823-4864-a96b-a7b4a0f7b929
+      type: derived
+status: experimental
+description: Detects execution of "findstr" as a child process of potentially suspicious parent command lines. This is often the case when "findstr" is used to filter out the results of certain reconnaissance commands such as "tasklist" or "ipconfig /all"
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/02cb591f75064ffe1e0df9ac3ed5972a2e491c97/atomics/T1057/T1057.md#atomic-test-6---discover-specific-process---tasklist
+author: frack113
+date: 2023/07/06
+modified: 2023/07/13
+tags:
+    - attack.discovery
+    - attack.t1057
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\findstr.exe'
+        - OriginalFileName: 'FINDSTR.EXE'
+    selection_parent_cli:
+        ParentCommandLine|contains:
+            # Note: Add additional CLI to increase and enhance coverage
+            - 'ipconfig '
+            - 'tasklist'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium
