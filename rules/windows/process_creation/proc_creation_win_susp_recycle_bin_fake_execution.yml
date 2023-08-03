@@ -1,0 +1,27 @@
+title: Suspicious Process Execution From Fake Recycle.Bin Folder
+id: 5ce0f04e-3efc-42af-839d-5b3a543b76c0
+related:
+    - id: cd8b36ac-8e4a-4c2f-a402-a29b8fbd5bca
+      type: derived
+status: experimental
+description: Detects process execution from a fake recycle bin folder, often used to avoid security solution.
+references:
+    - https://www.mandiant.com/resources/blog/infected-usb-steal-secrets
+author: X__Junior (Nextron Systems)
+date: 2023/07/12
+tags:
+    - attack.persistence
+    - attack.defense_evasion
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|contains:
+            - ':\RECYCLERS.BIN\'
+            - ':\RECYCLER.BIN\'
+            - ':\RECYCLE.BIN\'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

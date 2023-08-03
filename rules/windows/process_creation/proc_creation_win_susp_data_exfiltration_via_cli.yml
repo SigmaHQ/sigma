@@ -6,7 +6,7 @@ references:
     - https://www.sentinelone.com/blog/living-off-windows-defender-lockbit-ransomware-sideloads-cobalt-strike-through-microsoft-security-tool/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/08/02
-modified: 2023/02/02
+modified: 2023/07/27
 tags:
     - attack.execution
     - attack.t1059.001
@@ -36,24 +36,32 @@ detection:
         CommandLine|contains:
             - ' -d ' # Shortest possible version of the --data flag
             - ' --data '
+    selection_wget:
+        Image|endswith: '\wget.exe'
+        CommandLine|contains:
+            - '--post-data'
+            - '--post-file'
     payloads:
         - CommandLine|contains:
-            - 'ToBase64String'
-            - 'whoami'
-            - 'nltest'
-            - 'ifconfig'
+            - 'Get-Content'
+            - 'GetBytes'
             - 'hostname'
+            - 'ifconfig'
+            - 'ipconfig'
             - 'net view'
-            - 'qprocess'
             - 'netstat'
+            - 'nltest'
+            - 'qprocess'
+            - 'sc query'
             - 'systeminfo'
             - 'tasklist'
-            - 'sc query'
+            - 'ToBase64String'
+            - 'whoami'
         - CommandLine|contains|all:
             - 'type '
             - ' > '
             - ' C:\'
-    condition: (selection_iwr or all of selection_curl*) and payloads
+    condition: (selection_iwr or all of selection_curl* or selection_wget) and payloads
 falsepositives:
     - Unlikely
 level: high

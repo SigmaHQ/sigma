@@ -6,7 +6,7 @@ references:
     - https://pentestlaboratories.com/2021/12/08/process-ghosting/
 author: Max Altgelt (Nextron Systems)
 date: 2021/12/09
-modified: 2023/06/07
+modified: 2023/06/15
 tags:
     - attack.defense_evasion
 logsource:
@@ -99,6 +99,9 @@ detection:
         CommandLine|contains|all:
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\OfficeC2RClient.exe'
             - '/update UPDATEORCHESTRATOR displaylevel=False'
+    filter_optional_docker:
+        ParentImage: 'C:\Windows\System32\services.exe'
+        Image|endswith: 'com.docker.service'
     condition: not known_image_extension and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
