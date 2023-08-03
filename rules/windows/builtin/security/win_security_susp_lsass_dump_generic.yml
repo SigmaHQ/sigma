@@ -7,7 +7,7 @@ references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
 author: Roberto Rodriguez, Teymur Kheirkhabarov, Dimitrios Slamaris, Mark Russinovich, Aleksey Potapov, oscd.community (update)
 date: 2019/11/01
-modified: 2023/07/31
+modified: 2023/08/03
 tags:
     - attack.credential_access
     - car.2019-04-004
@@ -41,32 +41,33 @@ detection:
             - '4416'
     filter_specific:
         ProcessName|endswith:
-            - '\wmiprvse.exe'
-            - '\taskmgr.exe'
-            - '\procexp64.exe'
-            - '\procexp.exe'
-            - '\lsm.exe'
             - '\csrss.exe'
-            - '\wininit.exe'
-            - '\vmtoolsd.exe'
+            - '\GamingServices.exe'
+            - '\lsm.exe'
+            - '\MicrosoftEdgeUpdate.exe'
             - '\minionhost.exe'  # Cyberreason
-            - '\VsTskMgr.exe'    # McAfee Enterprise
+            - '\MRT.exe'         # MS Malware Removal Tool
+            - '\MsMpEng.exe'     # Defender
+            - '\perfmon.exe'
+            - '\procexp.exe'
+            - '\procexp64.exe'
+            - '\svchost.exe'
+            - '\taskmgr.exe'
             - '\thor.exe'        # THOR
             - '\thor64.exe'      # THOR
-            - '\MicrosoftEdgeUpdate.exe'
-            - '\GamingServices.exe'
-            - '\svchost.exe'
-            - '\MsMpEng.exe'     # Defender
-            - '\MRT.exe'         # MS Malware Removal Tool
+            - '\vmtoolsd.exe'
+            - '\VsTskMgr.exe'    # McAfee Enterprise
+            - '\wininit.exe'
+            - '\wmiprvse.exe'
             - 'RtkAudUService64' # https://medium.com/falconforce/the-curious-case-of-realtek-and-lsass-33fc0c8482ff
         ProcessName|startswith:
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
+            - 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+            - 'C:\Windows\SysNative\'
             - 'C:\Windows\System32\'
             - 'C:\Windows\SysWow64\'
-            - 'C:\Windows\SysNative\'
-            - 'C:\Program Files\'
-            - 'C:\Program Files (x86)\'
             - 'C:\Windows\Temp\asgard2-agent\'
-            - 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
     filter_generic:
         ProcessName|startswith: 'C:\Program Files'  # too many false positives with legitimate AV and EDR solutions
     filter_exact:
