@@ -1,0 +1,31 @@
+title: Suspicious Ping/Copy Command Combination
+id: ded2b07a-d12f-4284-9b76-653e37b6c8b0
+status: experimental
+description: Detects uncommon one-liner command having ping and copy at the same time, which is usually used by malware.
+references:
+    - Internal Research
+author: X__Junior (Nextron Systems)
+date: 2023/07/18
+tags:
+    - attack.defense_evasion
+    - attack.t1070.004
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    # Note: In the case of sysmon and similar logging utilities, see this discussion https://github.com/SigmaHQ/sigma/discussions/4277
+    selection_cmd:
+        - Image|endswith: '\cmd.exe'
+        - OriginalFileName: 'Cmd.Exe'
+    selection_cli:
+        CommandLine|contains: # Count
+            - ' -n '
+            - ' /n '
+        CommandLine|contains|all:
+            - 'ping' # Covers "ping" and "ping.exe"
+            - 'copy '
+            - ' /y '
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium

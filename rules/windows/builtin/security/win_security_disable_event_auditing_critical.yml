@@ -1,0 +1,49 @@
+title: Important Windows Event Auditing Disabled
+id: ab4561b1-6c7e-48a7-ad08-087cfb9ce8f1
+related:
+    - id: 69aeb277-f15f-4d2d-b32a-55e883609563
+      type: derived
+status: test
+description: Detects scenarios where system auditing for important events such as "Process Creation" or "Logon" events is disabled.
+references:
+    - https://docs.google.com/presentation/d/1dkrldTTlN3La-OjWtkWJBb4hVk6vfsSMBFBERs6R8zA/edit
+    - https://github.com/SigmaHQ/sigma/blob/master/documentation/logsource-guides/windows/service/security.md
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/06/20
+tags:
+    - attack.defense_evasion
+    - attack.t1562.002
+logsource:
+    product: windows
+    service: security
+    definition: dfd8c0f4-e6ad-4e07-b91b-f2fca0ddef64
+detection:
+    selection_state_success_and_failure:
+        EventID: 4719
+        SubcategoryGuid:
+            # Note: Add or remove GUID as you see fit in your env
+            - '{0CCE9215-69AE-11D9-BED3-505054503030}' # Audit Logon
+            - '{0CCE922B-69AE-11D9-BED3-505054503030}' # Audit Process Creation
+            - '{0CCE9240-69AE-11D9-BED3-505054503030}' # Audit Kerberos Service Ticket Operations
+            - '{0CCE9210-69AE-11D9-BED3-505054503030}' # Audit Security State Change
+            - '{0CCE9211-69AE-11D9-BED3-505054503030}' # Audit Security System Extension
+            - '{0CCE9212-69AE-11D9-BED3-505054503030}' # Audit System Integrity
+            - '{0CCE921B-69AE-11D9-BED3-505054503030}' # Audit Special Logon
+            - '{0CCE922F-69AE-11D9-BED3-505054503030}' # Audit Audit Policy Change
+            - '{0CCE9230-69AE-11D9-BED3-505054503030}' # Audit Authentication Policy Change
+            - '{0CCE9235-69AE-11D9-BED3-505054503030}' # Audit User Account Management
+            - '{0CCE9236-69AE-11D9-BED3-505054503030}' # Audit Computer Account Management
+            - '{0CCE9237-69AE-11D9-BED3-505054503030}' # Audit Security Group Management
+            - '{0CCE923F-69AE-11D9-BED3-505054503030}' # Audit Credential Validation
+            - '{0CCE9242-69AE-11D9-BED3-505054503030}' # Audit Kerberos Authentication Service
+        AuditPolicyChanges|contains:
+            - '%%8448' # This is "Success removed"
+            - '%%8450' # This is "Failure removed"
+    selection_state_success_only:
+        EventID: 4719
+        SubcategoryGuid: '{0CCE9217-69AE-11D9-BED3-505054503030}' # Audit Account Lockout
+        AuditPolicyChanges|contains: '%%8448'
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely
+level: high

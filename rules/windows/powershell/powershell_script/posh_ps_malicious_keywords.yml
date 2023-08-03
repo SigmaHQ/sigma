@@ -6,7 +6,7 @@ references:
     - https://adsecurity.org/?p=2921
 author: Sean Metcalf (source), Florian Roth (Nextron Systems)
 date: 2017/03/05
-modified: 2022/12/25
+modified: 2023/06/20
 tags:
     - attack.execution
     - attack.t1059.001
@@ -19,12 +19,14 @@ detection:
         ScriptBlockText|contains:
             - 'AdjustTokenPrivileges'
             - 'IMAGE_NT_OPTIONAL_HDR64_MAGIC'
+            #- 'LSA_UNICODE_STRING'
+            - 'Metasploit'
             - 'Microsoft.Win32.UnsafeNativeMethods'
-            - 'ReadProcessMemory.Invoke'
-            - 'SE_PRIVILEGE_ENABLED'
-            - 'LSA_UNICODE_STRING'
+            - 'Mimikatz'
             - 'MiniDumpWriteDump'
             - 'PAGE_EXECUTE_READ'
+            - 'ReadProcessMemory.Invoke'
+            - 'SE_PRIVILEGE_ENABLED'
             - 'SECURITY_DELEGATION'
             - 'TOKEN_ADJUST_PRIVILEGES'
             - 'TOKEN_ALL_ACCESS'
@@ -35,9 +37,7 @@ detection:
             - 'TOKEN_INFORMATION_CLASS'
             - 'TOKEN_PRIVILEGES'
             - 'TOKEN_QUERY'
-            - 'Metasploit'
-            - 'Mimikatz'
     condition: selection
 falsepositives:
-    - Unknown
-level: high
+    - Depending on the scripts, this rule might require some initial tunning to fit the environment
+level: medium
