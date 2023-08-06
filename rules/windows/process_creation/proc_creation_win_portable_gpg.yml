@@ -1,0 +1,24 @@
+title: Gpg.exe Portable Use
+id: 77df53a5-1d78-4f32-bc5a-0e7465bd8f41
+status: experimental
+description: Detects the use of gpg.exe as a portable tool. May indicate ransomware activity like CrypVault or Qwerty.
+references:
+    - https://www.trendmicro.com/vinfo/vn/threat-encyclopedia/malware/ransom.bat.zarlock.a
+    - https://securelist.com/locked-out/68960/
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1486/T1486.md
+author: frack113
+date: 2023/08/06
+tags:
+    - attack.impact
+    - attack.t1486
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - OriginalFileName: 'gpg.exe'
+        - Description: 'GnuPG’s OpenPGP tool'
+    filter_legit:
+        Image: 'C:\Program Files (x86)\GnuPG\bin\gpg.exe'
+    condition: selection and not filter_legit
+level: high
