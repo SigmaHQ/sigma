@@ -1,0 +1,22 @@
+title: Potential Web Shell
+id: 28a884fe-84b0-4e13-a42b-154c3853c7c1
+status: experimental
+description: 'Detects potential web shell by searching URL query in HTTP requests for command keyword.'
+references:
+    - https://medium.com/@p.matkovski/detection-of-php-web-shells-with-access-log-waf-and-audit-deamon-e798d4c95ec
+author: 'Chance Johnson (@chancej715)'
+date: 2023/08/05
+tags:
+    - attack.t1190
+    - attack.initial_access
+logsource:
+    service: apache
+    definition: 'Requirements: Must be able to collect the access.log file.'
+detection:
+    selection:
+        uri_query|contains: '=whoami'
+    condition: selection
+falsepositives:
+    - 'Web resources which contain the string "=whoami" in URL.'
+    - 'User searching for "=whoami" in search input field on web page.'
+level: high
