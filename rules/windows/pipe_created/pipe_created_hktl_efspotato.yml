@@ -1,13 +1,13 @@
-title: EfsPotato Named Pipe
+title: HackTool - EfsPotato Named Pipe Creation
 id: 637f689e-b4a5-4a86-be0e-0100a0a33ba2
 status: experimental
-description: Detects the pattern of a pipe name as used by the tool EfsPotato
+description: Detects the pattern of a pipe name as used by the hacktool EfsPotato
 references:
     - https://twitter.com/SBousseaden/status/1429530155291193354?s=20
     - https://github.com/zcgonvh/EfsPotato
 author: Florian Roth (Nextron Systems)
 date: 2021/08/23
-modified: 2022/06/20
+modified: 2023/08/07
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
@@ -20,10 +20,10 @@ detection:
     selection:
         PipeName|contains:
             - '\pipe\'
-            - '\pipe\srvsvc'  # more specific version (use only this one of the other causes too many false positives)
-    filter:
+            - '\pipe\srvsvc'  # more specific version (use only this one if the other causes too many false positives)
+    filter_optional_ctx:
         PipeName|contains: '\CtxShare'
-    condition: selection and not filter
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high

@@ -1,0 +1,27 @@
+title: RemCom Service Installation
+id: 9e36ed87-4986-482e-8e3b-5c23ffff11bf
+status: experimental
+description: Detects RemCom service installation and execution events
+references:
+    - https://github.com/kavika13/RemCom/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/08/07
+tags:
+    - attack.execution
+    - attack.t1569.002
+logsource:
+    product: windows
+    service: system
+detection:
+    selection_service_installation:
+        Provider_Name: 'Service Control Manager'
+        EventID: 7045
+        ServiceName: 'RemComSvc'
+        ImagePath|endswith: '\RemComSvc.exe'
+    selection_service_execution:
+        EventID: 7036
+        ServiceName: 'RemComSvc'
+    condition: 1 of selection_*
+falsepositives:
+    - Unknown
+level: medium

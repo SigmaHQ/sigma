@@ -1,5 +1,10 @@
 title: CobaltStrike Named Pipe Patterns
 id: 85adeb13-4fc9-4e68-8a4a-c7cb2c336eb7
+related:
+    - id: 0e7163d4-9e19-4fa7-9be6-000c61aad77a # Regex
+      type: similar
+    - id: d5601f8c-b26f-4ab0-9035-69e11a8d4ad2 # Generic
+      type: similar
 status: test
 description: Detects the creation of a named pipe with a pattern found in CobaltStrike malleable C2 profiles
 references:
@@ -7,7 +12,7 @@ references:
     - https://gist.github.com/MHaggis/6c600e524045a6d49c35291a21e10752
 author: Florian Roth (Nextron Systems), Christian Burkard (Nextron Systems)
 date: 2021/07/30
-modified: 2022/10/09
+modified: 2023/08/07
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
@@ -17,35 +22,35 @@ logsource:
     category: pipe_created
     definition: 'Note that you have to configure logging for Named Pipe Events in Sysmon config (Event ID 17 and Event ID 18). The basic configuration is in popular sysmon configuration (https://github.com/SwiftOnSecurity/sysmon-config), but it is worth verifying. You can also use other repo, e.g. https://github.com/Neo23x0/sysmon-config, https://github.com/olafhartong/sysmon-modular You can also use other repo, e.g. https://github.com/Neo23x0/sysmon-config, https://github.com/olafhartong/sysmon-modular. How to test detection? You can always use Cobalt Strike, but also you can check powershell script from this site https://svch0st.medium.com/guide-to-named-pipes-and-hunting-for-cobalt-strike-pipes-dc46b2c5f575'
 detection:
-    selection_malleable_profiles:
+    selection_malleable_profiles_generic:
         - PipeName|startswith:
+            - '\DserNamePipe'
+            - '\f4c3'
+            - '\f53f'
+            - '\fullduplex_'
             - '\mojo.5688.8052.183894939787088877'
             - '\mojo.5688.8052.35780273329370473'
+            - '\MsFteWds'
+            - '\msrpc_'
             - '\mypipe-f'
             - '\mypipe-h'
             - '\ntsvcs'
-            - '\scerpc'
-            - '\win_svc'
-            - '\spoolss'
-            - '\msrpc_'
-            - '\win\msrpc_'
-            - '\wkssvc'
-            - '\f53f'
-            - '\windows.update.manager'
-            - '\SearchTextHarvester'
-            - '\DserNamePipe'
             - '\PGMessagePipe'
-            - '\MsFteWds'
-            - '\f4c3'
-            - '\fullduplex_'
             - '\rpc_'
+            - '\scerpc'
+            - '\SearchTextHarvester'
+            - '\spoolss'
+            - '\win_svc'
+            - '\win\msrpc_'
+            - '\windows.update.manager'
+            - '\wkssvc'
         - PipeName:
             - '\demoagent_11'
             - '\demoagent_22'
-    selection_malleable_profile_CatalogChangeListener:
+    selection_malleable_profile_catalog_change_listener:
         PipeName|startswith: '\Winsock2\CatalogChangeListener-'
         PipeName|endswith: '-0,'
-    filter:
+    filter_main_generic:
         PipeName:
             - '\wkssvc'
             - '\spoolss'
@@ -54,7 +59,7 @@ detection:
             - '\SearchTextHarvester'
             - '\PGMessagePipe'
             - '\MsFteWds'
-    condition: 1 of selection_malleable_profile* and not filter
+    condition: 1 of selection_malleable_profile_* and not 1 of filter_main_*
 falsepositives:
-    - Chrome instances using the exact same pipe name "mojo.something"
+    - Chrome instances using the exact same pipe name "mojo.xxx"
 level: high
