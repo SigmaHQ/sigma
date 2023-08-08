@@ -16,15 +16,13 @@ logsource:
     product: windows
     service: system
 detection:
-    selection_service_installation:
+    selection_eid:
         Provider_Name: 'Service Control Manager'
         EventID: 7045
-        ServiceName: 'PSEXESVC'
-        ImagePath|endswith: '\PSEXESVC.exe'
-    selection_service_execution:
-        EventID: 7036
-        ServiceName: 'PSEXESVC'
-    condition: 1 of selection_*
+    selection_service:
+        - ServiceName: 'PSEXESVC'
+        - ImagePath|endswith: '\PSEXESVC.exe'
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: medium

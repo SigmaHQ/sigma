@@ -1,5 +1,5 @@
 title: CSExec Service Installation
-id: 9e36ed87-4986-482e-8e3b-5c23ffff11bf
+id: a27e5fa9-c35e-4e3d-b7e0-1ce2af66ad12
 status: experimental
 description: Detects CSExec service installation and execution events
 references:
@@ -13,15 +13,13 @@ logsource:
     product: windows
     service: system
 detection:
-    selection_service_installation:
+    selection_eid:
         Provider_Name: 'Service Control Manager'
         EventID: 7045
-        ServiceName: 'csexecsvc'
-        ImagePath|endswith: '\csexecsvc.exe'
-    selection_service_execution:
-        EventID: 7036
-        ServiceName: 'csexecsvc'
-    condition: 1 of selection_*
+    selection_service:
+        - ServiceName: 'csexecsvc'
+        - ImagePath|endswith: '\csexecsvc.exe'
+    condition: selection
 falsepositives:
     - Unknown
 level: medium
