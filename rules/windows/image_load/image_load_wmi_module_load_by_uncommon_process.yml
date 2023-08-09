@@ -1,0 +1,85 @@
+title: WMI Module Loaded By Non Uncommon Process
+id: 671bb7e3-a020-4824-a00e-2ee5b55f385e
+status: test
+description: Detects a WMI modules being loaded by an uncommon process
+references:
+    - https://threathunterplaybook.com/hunts/windows/190811-WMIModuleLoad/notebook.html
+author: Roberto Rodriguez @Cyb3rWard0g
+date: 2019/08/10
+modified: 2023/08/08
+tags:
+    - attack.execution
+    - attack.t1047
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith:
+            - '\fastprox.dll'
+            - '\wbemcomn.dll'
+            - '\wbemprox.dll'
+            - '\wbemsvc.dll'
+            - '\WmiApRpl.dll'
+            - '\wmiclnt.dll'
+            - '\WMINet_Utils.dll'
+            - '\wmiprov.dll'
+            - '\wmiutils.dll'
+    filter_optional_generic:
+        Image|contains:
+            - ':\Microsoft\Teams\current\Teams.exe'
+            - ':\Microsoft\Teams\Update.exe'
+            - ':\Windows\\explorer.exe'
+            - ':\Windows\Sysmon.exe'
+            - ':\Windows\Sysmon64.exe'
+            - ':\Windows\System32\CompatTelRunner.exe'
+            - ':\Windows\System32\DeviceCensus.exe'
+            - ':\Windows\System32\dfsrs.exe'
+            - ':\Windows\System32\dispdiag.exe'
+            - ':\Windows\System32\dxdiag.exe'
+            - ':\Windows\System32\gpresult.exe'
+            - ':\Windows\System32\logman.exe'
+            - ':\Windows\System32\MoUsoCoreWorker.exe'  # c:\windows\System32\MoUsoCoreWorker.exe on win10 20H04 at least
+            - ':\Windows\System32\sdiagnhost.exe'
+            - ':\Windows\System32\SecurityHealthService.exe'
+            - ':\Windows\System32\ServerManager.exe'
+            - ':\Windows\System32\SIHClient.exe'
+            - ':\Windows\System32\svchost.exe'
+            - ':\Windows\System32\systeminfo.exe'
+            - ':\Windows\System32\taskhostw.exe'  # c:\windows\system32\taskhostw.exe
+            - ':\Windows\System32\tasklist.exe'
+            - ':\Windows\System32\vds.exe'
+            - ':\Windows\System32\wbem\unsecapp.exe'
+            - ':\Windows\System32\wbem\WMIADAP.exe'  # https://github.com/SigmaHQ/sigma/issues/1871
+            - ':\Windows\System32\wbem\WmiApSrv.exe'
+            - ':\Windows\System32\wbem\WMIC.exe'
+            - ':\Windows\System32\wbem\WmiPrvSE.exe'
+            - ':\Windows\SysWOW64\explorer.exe'
+            - ':\Windows\SysWOW64\logman.exe'
+            - ':\Windows\SysWOW64\sdiagnhost.exe'
+            - ':\Windows\SysWOW64\svchost.exe'
+            - ':\Windows\SysWOW64\systeminfo.exe'
+            - ':\Windows\SysWOW64\wbem\WmiPrvSE.exe'
+    filter_optional_other:
+        Image|endswith:
+            - '\WindowsAzureGuestAgent.exe'
+            - '\WaAppAgent.exe'
+    filter_optional_thor:
+        Image|endswith:
+            - '\thor.exe'
+            - '\thor64.exe'
+    filter_optional_defender:
+        Image|endswith: '\MsMpEng.exe'
+    filter_optional_dotnet:
+        Image|contains:
+            - ':\Windows\Microsoft.NET\Framework\'
+            - ':\Windows\Microsoft.NET\Framework64\'
+        Image|endswith: '\ngentask.exe'
+    filter_optional_programfiles:
+        Image|contains:
+            - ':\Program Files\'
+            - ':\Program Files (x86)\'
+    condition: selection and not 1 of filter_optional_*
+falsepositives:
+    - Unknown
+level: low
