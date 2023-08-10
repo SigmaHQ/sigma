@@ -1,18 +1,17 @@
-title: Cred Dump-Tools Named Pipes
-id: 961d0ba2-3eea-4303-a930-2cf78bbfcc5e
-status: test
-description: Detects well-known credential dumping tools execution via specific named pipes
+title: HackTool - Koh Default Named Pipe
+id: 0adc67e0-a68f-4ffd-9c43-28905aad5d6a
+status: experimental
+description: Detects creation of default named pipes used by the Koh tool
 references:
-    - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
-author: Teymur Kheirkhabarov, oscd.community
-date: 2019/11/01
-modified: 2021/11/27
+    - https://github.com/GhostPack/Koh/blob/0283d9f3f91cf74732ad377821986cfcb088e20a/Clients/BOF/KohClient.c#L12
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2022/07/08
+modified: 2023/08/07
 tags:
+    - attack.privilege_escalation
     - attack.credential_access
-    - attack.t1003.001
-    - attack.t1003.002
-    - attack.t1003.004
-    - attack.t1003.005
+    - attack.t1528
+    - attack.t1134.001
 logsource:
     product: windows
     category: pipe_created
@@ -20,10 +19,9 @@ logsource:
 detection:
     selection:
         PipeName|contains:
-            - '\lsadump'
-            - '\cachedump'
-            - '\wceservicepipe'
+            - '\imposecost'
+            - '\imposingcost'
     condition: selection
 falsepositives:
-    - Legitimate Administrator using tool for password recovery
+    - Unlikely
 level: critical
