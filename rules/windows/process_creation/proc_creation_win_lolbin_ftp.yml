@@ -4,7 +4,7 @@ status: test
 description: Detects execution of ftp.exe script execution with the "-s" or "/s" flag and any child processes ran by ftp.exe
 references:
     - https://lolbas-project.github.io/lolbas/Binaries/Ftp/
-author: Victor Sergeev, oscd.community, Swachchhanda Shrawan Poudel
+author: Victor Sergeev, oscd.community
 date: 2020/10/09
 modified: 2023/08/11
 tags:
@@ -22,12 +22,10 @@ detection:
         - Image|endswith: '\ftp.exe'
         - OriginalFileName: 'ftp.exe'
     selection_ftp_cli:
-        - CommandLine|contains: '-s:'
-        - CommandLine|contains: '/s:'
+        CommandLine|contains:
+            - '-s:'
+            - '/s:'
     condition: selection_parent or all of selection_ftp_*
-fields:
-    - CommandLine
-    - ParentImage
 falsepositives:
     - Unknown
 level: medium
