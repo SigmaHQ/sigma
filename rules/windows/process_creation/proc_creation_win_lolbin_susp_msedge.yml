@@ -1,0 +1,29 @@
+title: Indirect Command Execution by Microsoft Edge Browser
+id: d6947e89-2a7f-4c91-bad6-8e5c3b0f78a2
+status: experimental
+description: Detects indirect command execution via Microsoft Edge browser
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Msedge/
+author: Swachchhanda Shrawan Poudel
+date: 2023/08/11
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\msedge.exe'
+        - OriginalFileName: 'msedge.exe'
+    selection_cmd:
+        - CommandLine|contains|all:
+            - '--gpu-launcher='
+            - '&&'
+        - ParentCommandLine|contains|all:
+            - '--gpu-launcher='
+            - '&&'
+    condition: selection_img and selection_cmd
+falsepositives:
+    - Unlikely
+level: high
