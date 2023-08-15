@@ -1,0 +1,26 @@
+title: CSExec Service Installation
+id: a27e5fa9-c35e-4e3d-b7e0-1ce2af66ad12
+status: experimental
+description: Detects CSExec service installation and execution events
+references:
+    - https://github.com/malcomvetter/CSExec
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/08/07
+tags:
+    - attack.execution
+    - attack.t1569.002
+logsource:
+    product: windows
+    service: system
+detection:
+    selection_eid:
+        Provider_Name: 'Service Control Manager'
+        EventID: 7045
+    selection_service:
+        - ServiceName: 'csexecsvc'
+        - ImagePath|endswith: '\csexecsvc.exe'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium
+

@@ -1,0 +1,30 @@
+title: Portable Gpg.EXE Execution
+id: 77df53a5-1d78-4f32-bc5a-0e7465bd8f41
+status: experimental
+description: Detects the execution of "gpg.exe" from uncommon location. Often used by ransomware and loaders to decrypt/encrypt data.
+references:
+    - https://www.trendmicro.com/vinfo/vn/threat-encyclopedia/malware/ransom.bat.zarlock.a
+    - https://securelist.com/locked-out/68960/
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1486/T1486.md
+author: frack113, Nasreddine Bencherchali (Nextron Systems)
+date: 2023/08/06
+tags:
+    - attack.impact
+    - attack.t1486
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|endswith:
+            - '\gpg.exe'
+            - '\gpg2.exe'
+        - OriginalFileName: 'gpg.exe'
+        - Description: 'GnuPG’s OpenPGP tool'
+    filter_main_legit_location:
+        Image|contains:
+            - ':\Program Files (x86)\GnuPG\bin\'
+            - ':\Program Files (x86)\GNU\GnuPG\bin\'
+            - ':\Program Files (x86)\Gpg4win\bin\'
+    condition: selection and not 1 of filter_main_*
+level: high
