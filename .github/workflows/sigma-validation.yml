@@ -1,0 +1,25 @@
+name: Validate Sigma rules
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  validate-sigma-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: pip install check-jsonschema
+      - name: Validate Sigma rules
+        run: tests/validate-sigma-schema/validate.sh
