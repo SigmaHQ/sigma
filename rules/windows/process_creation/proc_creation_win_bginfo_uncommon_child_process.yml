@@ -1,13 +1,16 @@
-title: Application Whitelisting Bypass via Bginfo
+title: Uncommon Child Process Of BgInfo.EXE
 id: aaf46cdc-934e-4284-b329-34aa701e3771
+related:
+    - id: 811f459f-9231-45d4-959a-0266c6311987
+      type: similar
 status: test
-description: Execute VBscript code that is referenced within the *.bgi file.
+description: Detects uncommon child processes of "BgInfo.exe" which could be a sign of potential abuse of the binary to proxy execution via external VBScript
 references:
     - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Bginfo/
     - https://oddvar.moe/2017/05/18/bypassing-application-whitelisting-with-bginfo/
-author: Beyu Denis, oscd.community
+author: Nasreddine Bencherchali (Nextron Systems), Beyu Denis, oscd.community
 date: 2019/10/26
-modified: 2021/11/27
+modified: 2023/08/16
 tags:
     - attack.execution
     - attack.t1059.005
@@ -19,10 +22,9 @@ logsource:
     product: windows
 detection:
     selection:
-        Image|endswith: '\bginfo.exe'
-        CommandLine|contains|all:
-            - '/popup'
-            - '/nolicprompt'
+        ParentImage|endswith:
+            - '\bginfo.exe'
+            - '\bginfo64.exe'
     condition: selection
 falsepositives:
     - Unknown
