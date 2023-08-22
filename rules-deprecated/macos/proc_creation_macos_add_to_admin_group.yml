@@ -1,6 +1,6 @@
 title: User Added To Admin Group - MacOS
 id: 0c1ffcf9-efa9-436e-ab68-23a9496ebf5b
-status: experimental
+status: deprecated
 description: Detects attempts to create and/or add an account to the admin group, thus granting admin privileges.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1078.003/T1078.003.md#atomic-test-3---create-local-account-with-admin-privileges-using-sysadminctl-utility---macos
@@ -8,7 +8,7 @@ references:
     - https://ss64.com/osx/sysadminctl.html
 author: Sohan G (D4rkCiph3r)
 date: 2023/03/19
-modified: 2023/03/30
+modified: 2023/08/22
 tags:
     - attack.t1078.003
     - attack.initial_access
@@ -28,13 +28,6 @@ detection:
             - ' -append '
             - ' /Groups/admin '
             - ' GroupMembership '
-    selection_dseditgroup:
-        Image|endswith: '/dseditgroup'
-        CommandLine|contains|all:
-            - ' -o edit ' #edit operation
-            - ' -a ' #name of the record(username)
-            - ' -t ' #type of the record(usergroup)
-            - 'admin'
     condition: 1 of selection_*
 falsepositives:
     - Legitimate administration activities
