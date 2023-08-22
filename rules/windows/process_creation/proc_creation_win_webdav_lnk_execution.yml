@@ -1,0 +1,34 @@
+title: Potentially Suspicious WebDAV LNK Execution
+id: 1412aa78-a24c-4abd-83df-767dfb2c5bbe
+related:
+  - id: f0507c0f-a3a2-40f5-acc6-7f543c334993
+    type: similar
+status: experimental
+description: Detects possible execution via LNK file accessed on a WebDAV server.
+references:
+    - https://www.trellix.com/en-us/about/newsroom/stories/research/beyond-file-search-a-novel-method.html
+    - https://micahbabinski.medium.com/search-ms-webdav-and-chill-99c5b23ac462
+author: Micah Babinski
+date: 2023/08/21
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1204
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\explorer.exe'
+        Image|endswith:
+            - '\cmd.exe'
+            - '\cscript.exe'
+            - '\mshta.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\wscript.exe'
+        CommandLine|contains: '\DavWWWRoot\'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
