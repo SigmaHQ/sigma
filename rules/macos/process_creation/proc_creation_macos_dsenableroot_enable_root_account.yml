@@ -1,16 +1,13 @@
-title: Enable the Root Account
+title: Root Account Enable Via Dsenableroot
 id: 821bcf4d-46c7-4b87-bc57-9509d3ba7c11
 status: experimental
-description: Detects attempts to enable/add an account to the admin group, thus granting the root privilege
+description: Detects attempts to enable the root account via "dsenableroot"
 references:
-    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1078.003/T1078.003.md
+    - https://github.com/redcanaryco/atomic-red-team/blob/b27a3cb25025161d49ac861cb216db68c46a3537/atomics/T1078.003/T1078.003.md
     - https://github.com/elastic/detection-rules/blob/4312d8c9583be524578a14fe6295c3370b9a9307/rules/macos/persistence_enable_root_account.toml
     - https://ss64.com/osx/dsenableroot.html
-    - https://ss64.com/osx/dseditgroup.html
-    - https://ss64.com/osx/dscl.html
 author: Sohan G (D4rkCiph3r)
-date: 2023/02/18
-modified: 2023/03/30
+date: 2023/08/22
 tags:
     - attack.t1078
     - attack.t1078.001
@@ -21,11 +18,11 @@ logsource:
     category: process_creation
     product: macos
 detection:
-    selection_root:
+    selection:
         Image|endswith: '/dsenableroot'
-    filter_root:
+    filter_main_disable:
         CommandLine|contains: ' -d '
-    condition: selection_root and not filter_root
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: medium
