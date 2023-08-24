@@ -1,0 +1,35 @@
+title: WebDAV Temporary Local File Creation
+id: 4c55738d-72d8-490e-a2db-7969654e375f
+status: experimental
+description: Detects the creation of WebDAV temporary files with potentially suspicious extensions
+references:
+    - https://www.trellix.com/en-us/about/newsroom/stories/research/beyond-file-search-a-novel-method.html
+    - https://micahbabinski.medium.com/search-ms-webdav-and-chill-99c5b23ac462
+author: Micah Babinski
+date: 2023/08/21
+tags:
+    - attack.initial_access
+    - attack.t1584
+    - attack.t1566
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename|contains: '\AppData\Local\Temp\TfsStore\Tfs_DAV\'
+        TargetFilename|endswith:
+            - '.7z'
+            - '.bat'
+            - '.dat'
+            - '.ico'
+            - '.js'
+            - '.lnk'
+            - '.ps1'
+            - '.rar'
+            - '.vbe'
+            - '.vbs'
+            - '.zip'
+    condition: selection
+falsepositives:
+    - Legitimate use of WebDAV in an environment
+level: medium
