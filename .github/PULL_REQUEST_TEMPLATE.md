@@ -16,16 +16,16 @@ A short summary of your pull request.
 <!--
 ** Don't remove this comment **
 You need to add one line for every changed file of the PR and prefix one of the following tags:
-- new:	<title>
-- update:	<title> - <optional comment>
-- fix:	<title> - <optional comment>
-- chore: for non-detection related changes (e.g. dates/titles) and changes on workflow
+new:	<title>
+update:	<title> - <optional comment>
+fix:	<title> - <optional comment>
+chore: for non-detection related changes (e.g. dates/titles) and changes on workflow
 
 e.g.
-- new: Brute-Force Attacks on Azure Admin Account
-- update: Suspicious Microsoft Office Child Process - add MSPUB.EXE
-- fix: Malware User Agent - remove legitimate Firefox UA
-- chore: workflow - update checkout version
+new: Brute-Force Attacks on Azure Admin Account
+update: Suspicious Microsoft Office Child Process - add MSPUB.EXE
+fix: Malware User Agent - remove legitimate Firefox UA
+chore: workflow - update checkout version
 -->
 
 ### Example Log Event
