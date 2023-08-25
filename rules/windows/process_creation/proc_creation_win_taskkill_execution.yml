@@ -6,7 +6,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1489/T1489.md#atomic-test-3---windows---stop-service-by-killing-process
 author: frack113
 date: 2021/12/26
-modified: 2022/05/17
+modified: 2023/08/23
 tags:
     - attack.impact
     - attack.t1489
@@ -21,7 +21,11 @@ detection:
         CommandLine|contains|all:
             - ' /f'
             - ' /im '
-    condition: all of selection*
+    filter_defender:
+        ParentImage|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform'
+        ParentImage|endswith: '\MsMpEng.exe'
+        IntegrityLevel: 'System'
+    condition: all of selection* and not 1 of filter_*
 falsepositives:
     - Expected FP with some processes using this techniques to terminate one of their processes during installations and updates
 level: low
