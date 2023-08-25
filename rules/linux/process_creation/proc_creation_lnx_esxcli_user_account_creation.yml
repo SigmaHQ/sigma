@@ -1,0 +1,24 @@
+title: Suspicious user account creation on ESXi system
+id: b28e4eb3-8bbc-4f0c-819f-edfe8e2f25db
+status: experimental
+description: Detect suspicious user account creation on ESXi system
+references:
+    - https://developer.vmware.com/docs/11743/esxi-7-0-esxcli-command-reference/namespace/esxcli_system.html
+tags:
+    - attack.persistence
+    - attack.t1136
+author: Cedric Maurugeon
+date: 2023/08/22
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_img:
+        Image|endswith: 'esxcli'
+    filter_args:
+        - CommandLine|contains:
+            - 'system'
+            - 'account'
+            - 'add'
+    condition: selection_img and all of filter_args 
+level: high
