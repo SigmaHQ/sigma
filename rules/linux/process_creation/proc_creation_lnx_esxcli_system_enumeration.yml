@@ -1,0 +1,30 @@
+title: Suspicious ESXi system enumeration with esxcli
+id: fdcbe210-68a3-4ee9-8645-657cc09ee9d3
+status: experimental
+description: Detect ESXi system enumeration with esxcli command. 
+references:
+    - https://www.crowdstrike.com/blog/hypervisor-jackpotting-ecrime-actors-increase-targeting-of-esxi-servers/
+tags:
+    - attack.discovery
+    - attack.t1033
+    - attack.t1007
+author: Cedric Maurugeon
+date: 2023/08/22
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_img:
+        Image|endswith: 'esxcli'
+    filter_configuration_args:
+        - CommandLine|contains:
+            - 'network'
+            - 'system'
+            - 'vm'
+    filter_action_args:
+        - CommandLine|contains:
+            - 'get'
+            - 'list'
+    condition: selection_img and 1 of filter_configuration_args and 1 of filter_action_args
+level: medium
+
