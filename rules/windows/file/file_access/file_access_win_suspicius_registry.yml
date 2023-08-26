@@ -1,0 +1,32 @@
+title: Create File With Commun Registry Extention
+id: 337a31c6-46c4-46be-886a-260d7aa78cac
+status: experimental
+description: |
+  Detects the creation of a commun registry export file extention.
+  Adversaries may interact with the Windows Registry to gather information about the system, configuration, and installed software.
+references:
+    - https://github.com/tccontre/Reg-Restore-Persistence-Mole
+author: frack113
+date: 2023/08/26
+tags:
+    - attack.t1012 
+    - attack.discovery
+logsource:
+    category: file_access
+    product: windows
+    definition: 'Requirements: Microsoft-Windows-Kernel-File ETW provider'
+detection:
+    selection:
+        FileName|endswith:
+            - '.hive'
+            - '.reg'
+    filter_system_folders:
+        Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Windows\system32\'
+            - 'C:\Windows\SysWOW64\'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Legitimate software may create these files (for any reason).
+level: medium
