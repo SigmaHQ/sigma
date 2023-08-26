@@ -1,0 +1,26 @@
+title: Hidden directory via $index_allocation 
+id: a8f866e1-bdd4-425e-a27a-37619238d9c7
+status: test
+description: |
+  Detects the creation of hidden folders (and file) via ...$.......::$index_allocation 
+  Reveal by doing "dir /A /Q /R" you" you will see a directory called "..."
+references:
+    - https://twitter.com/pfiatde/status/1681977680688738305
+    - https://soroush.me/blog/2010/12/a-dotty-salty-directory-a-secret-place-in-ntfs-for-secret-files/
+    - https://sec-consult.com/blog/detail/pentesters-windows-ntfs-tricks-collection/
+author: Scoubi (@ScoubiMtl)
+date: 2023/08/26
+modified: 2023/08/26
+tags:
+    - attack.T1564.004 
+    - attack.defense_evasion
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename|contains: '::$index_allocation'
+    condition: selection 
+falsepositives:
+    - None known
+level: medium
