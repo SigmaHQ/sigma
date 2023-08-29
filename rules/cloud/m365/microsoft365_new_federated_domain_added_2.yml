@@ -1,0 +1,26 @@
+title: New Federation Domain Added 
+id: 58f88172-a73d-442b-94c9-95eaed3cbb36
+status: experimental
+description: Detects addition of new Federated Domain using O365 Audit logs.
+references:
+    - https://research.splunk.com/cloud/e155876a-6048-11eb-ae93-0242ac130002/
+    - https://o365blog.com/post/aadbackdoor/
+author: Harjot Singh @cyb3rjy0t
+date: 2023/08/28
+tags:
+    - attack.persistance
+    - attack.t1136
+logsource:
+    service: audit
+    product: m365
+detection:
+    selection1:
+        Operation|contains: 'domain'
+    selection2:
+        Operation|contains: 
+            - 'add'
+            - 'new'
+    condition: selection1 and selection2
+falsepositives:
+    - Legit domain addition
+level: medium
