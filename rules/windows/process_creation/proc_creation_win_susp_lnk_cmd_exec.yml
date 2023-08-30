@@ -1,4 +1,4 @@
-title: Potential Suspicious LNK Execution
+title: Potential Suspicious CMD LNK Execution
 id: c7bab145-36bd-4089-9964-b14b7cc5d121
 status: experimental
 description: Detects
@@ -15,11 +15,14 @@ logsource:
 detection:
     selection_parent:
         ParentImage|endswith: '\explorer.exe'
-    selection_child_cmd:
+    selection_child_cmd_img:
         Image|endswith: '\cmd.exe'
-        CommandLine|contains|all:
+    selection_child_cmd_cli:
+        - CommandLine|contains|all:
             - '/c'
             - '..\'
+        - CommandLine|contains|all:
+            - ''
     condition: selection
 falsepositives:
     - Unlikely

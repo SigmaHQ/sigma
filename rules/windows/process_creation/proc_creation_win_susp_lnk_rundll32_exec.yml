@@ -1,0 +1,29 @@
+title: Potential Suspicious Rundll32 LNK Execution
+id: 0df19151-8179-41bc-997b-c1f2c2652009
+status: experimental
+description: Detects
+references:
+    - https://thedfirreport.com/2023/08/28/html-smuggling-leads-to-domain-wide-ransomware/
+    - Internal Research
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/08/29
+tags:
+    - attack.execution
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\explorer.exe'
+    selection_child_cmd_img:
+        Image|endswith: '\rundll32.exe'
+    selection_child_cmd_cli:
+        - CommandLine|contains|all:
+            - '/c'
+            - '..\'
+        - CommandLine|contains|all:
+            - ''
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
