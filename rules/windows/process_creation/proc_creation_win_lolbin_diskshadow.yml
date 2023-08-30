@@ -5,7 +5,7 @@ description: Detects using Diskshadow.exe to execute arbitrary code in text file
 references:
     - https://bohops.com/2018/03/26/diskshadow-the-return-of-vss-evasion-persistence-and-active-directory-database-extraction/
     - https://www.ired.team/offensive-security/credential-access-and-credential-dumping/ntds.dit-enumeration
-	- https://medium.com/@cyberjyot/lolbin-execution-via-diskshadow-f6ff681a27a4
+    - https://medium.com/@cyberjyot/lolbin-execution-via-diskshadow-f6ff681a27a4
 author: Ivan Dyachkov, oscd.community, Harjot Singh @cyb3rjy0t
 date: 2020/10/07
 modified: 2023/08/29
@@ -16,17 +16,17 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection_cli:
         Image|endswith: '\diskshadow.exe'
         CommandLine|contains:
             - '/s'
             - '-s'
-	selection2:
-		ParentImage|endswith: '\diskshadow.exe'
-    condition: selection1 or selection2
+    selection_parent:
+        ParentImage|endswith: '\diskshadow.exe'
+    condition: 1 of selection_*
 fields:
     - CommandLine
 falsepositives:
     - False postitve can be if administrators use diskshadow tool in their infrastructure as a main backup tool with scripts.
-	- Legit use of Diskshadow in Interpreter mode.
+    - Legit use of Diskshadow in Interpreter mode.
 level: high
