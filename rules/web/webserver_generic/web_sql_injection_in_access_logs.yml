@@ -9,7 +9,7 @@ references:
     - https://github.com/payloadbox/sql-injection-payload-list
 author: Saw Win Naung, Nasreddine Bencherchali (Nextron Systems)
 date: 2020/02/22
-modified: 2022/07/25
+modified: 2023/09/01
 tags:
     - attack.initial_access
     - attack.t1190
@@ -41,6 +41,11 @@ detection:
         - 'select%20*%20'
         - 'or 1=1#'
         - 'or%201=1#'
+        - 'concat_ws('
+        - 'select database()'
+        - 'select version()'
+        - 'select%20database()'
+        - 'select%20version()'
     filter:
         sc-status: 404
     condition: select_method and keywords and not 1 of filter*
