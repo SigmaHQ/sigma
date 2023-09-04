@@ -1,0 +1,26 @@
+title: vSphere Syslog configuration modified
+id: 38eb1dbb-011f-40b1-a126-cf03a0210563
+status: experimental
+description: Detects all modification about syslog configuration
+references:
+    - https://support.solarwinds.com/SuccessCenter/s/article/Configure-ESXi-Syslog-to-LEM?language=en_US
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+    - attack.t1562.003
+author: Cedric Maurugeon
+date: 2023/09/04
+logsource:                      
+    category: process_creation
+    product: linux 
+detection:
+    selection_img:
+        Image|endswith: '/esxcli'
+        CommandLine|contains|all: 
+            - 'system'
+            - 'syslog' 
+            - 'config'
+    selection_cli:
+        CommandLine|contains: ' set'
+    condition: all of selection_*
+level: high
