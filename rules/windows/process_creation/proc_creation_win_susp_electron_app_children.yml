@@ -11,6 +11,9 @@ references:
     - https://github.com/mttaggart/quasar
     - https://positive.security/blog/ms-officecmd-rce
     - https://lolbas-project.github.io/lolbas/Binaries/Msedge/
+    - https://lolbas-project.github.io/lolbas/Binaries/Teams/
+    - https://lolbas-project.github.io/lolbas/Binaries/msedgewebview2/
+    - - https://medium.com/@MalFuzzer/one-electron-to-rule-them-all-dc2e9b263daf
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/10/21
 modified: 2023/09/05
@@ -23,6 +26,7 @@ detection:
     selection_parent:
         ParentImage|endswith:
             # Add more electron based app to the list
+            - '\chrome.exe' # Might require additional tuning
             #- '\code.exe' # Requires additional baseline
             - '\discord.exe'
             - '\GitHubDesktop.exe'
@@ -49,6 +53,9 @@ detection:
             - '\Users\Public\'
             - '\Windows\Temp\'
             - ':\Temp\'
+    filter_main_chrome:
+        ParentImage|endswith: '\chrome.exe'
+        Image|endswith: '\chrome.exe'
     #filter_main_code_1:
     #    ParentImage|endswith: '\code.exe'
     #    Image|endswith: '\code.exe'
