@@ -1,43 +1,103 @@
 title: Suspicious Electron Application Child Processes
 id: f26eb764-fd89-464b-85e2-dc4a8e6e77b8
+related:
+    - id: 378a05d8-963c-46c9-bcce-13c7657eac99
+      type: similar
 status: experimental
 description: |
-  Detects suspicious child processes of electron apps (teams, discord, slack...).
-  This could be a potential sign of ".asar" file tampering (See reference section for more information)
+    Detects suspicious child processes of electron apps (teams, discord, slack, etc.). This could be a potential sign of ".asar" file tampering (See reference section for more information) or binary execution proxy through specific CLI arguments (see related rule)
 references:
     - https://taggart-tech.com/quasar-electron/
     - https://github.com/mttaggart/quasar
+    - https://positive.security/blog/ms-officecmd-rce
+    - https://lolbas-project.github.io/lolbas/Binaries/Msedge/
+    - https://lolbas-project.github.io/lolbas/Binaries/Teams/
+    - https://lolbas-project.github.io/lolbas/Binaries/msedgewebview2/
+    - https://medium.com/@MalFuzzer/one-electron-to-rule-them-all-dc2e9b263daf
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/10/21
-modified: 2022/11/09
+modified: 2023/09/05
 tags:
     - attack.execution
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection_parent:
         ParentImage|endswith:
             # Add more electron based app to the list
-            - '\Teams.exe'
-            - '\slack.exe'
+            - '\chrome.exe' # Might require additional tuning
+            #- '\code.exe' # Requires additional baseline
             - '\discord.exe'
+            - '\GitHubDesktop.exe'
+            - '\keybase.exe'
+            - '\msedge.exe'
+            - '\msedgewebview2.exe'
+            - '\msteams.exe'
+            - '\slack.exe'
+            - '\Teams.exe'
+    selection_child_image:
         Image|endswith:
             # Add more suspicious/unexpected paths
             - '\cmd.exe'
+            - '\cscript.exe'
+            - '\mshta.exe'
             - '\powershell.exe'
             - '\pwsh.exe'
-            - '\cscript.exe'
+            - '\regsvr32.exe'
             - '\wscript.exe'
-            - '\mshta.exe'
-    filter:
+    selection_child_paths:
+        Image|contains:
+            # Add more suspicious/unexpected paths
+            - '\AppData\Local\Temp\'
+            - '\Users\Public\'
+            - '\Windows\Temp\'
+            - ':\Temp\'
+    filter_main_chrome:
+        ParentImage|endswith: '\chrome.exe'
+        Image|endswith: '\chrome.exe'
+    #filter_main_code_1:
+    #    ParentImage|endswith: '\code.exe'
+    #    Image|endswith: '\code.exe'
+    #filter_main_code_2:
+    #    # Note: As code allows many other programs its best to baseline this
+    #    ParentImage|endswith: '\code.exe'
+    #    Image|endswith:
+    #        - '\cmd.exe'
+    #        - '\powershell.exe'
+    filter_main_discord:
+        ParentImage|endswith: '\discord.exe'
+        Image|endswith: '\discord.exe'
+    filter_main_githubdesktop:
+        ParentImage|endswith: '\GitHubDesktop.exe'
+        Image|endswith: '\GitHubDesktop.exe'
+    filter_main_keybase:
+        ParentImage|endswith: '\keybase.exe'
+        Image|endswith: '\keybase.exe'
+    filter_main_msedge:
+        ParentImage|endswith: '\msedge.exe'
+        Image|endswith: '\msedge.exe'
+    filter_main_msedgewebview:
+        ParentImage|endswith: '\msedgewebview2.exe'
+        Image|endswith: '\msedgewebview2.exe'
+    filter_main_msteams:
+        ParentImage|endswith: '\msteams.exe'
+        Image|endswith: '\msteams.exe'
+    filter_main_slack:
+        ParentImage|endswith: '\slack.exe'
+        Image|endswith: '\slack.exe'
+    filter_main_teams:
+        ParentImage|endswith: '\teams.exe'
+        Image|endswith: '\teams.exe'
+    filter_main_werfault:
+        Image:
+            - 'C:\Windows\SysWOW64\WerFault.exe'
+            - 'C:\Windows\System32\WerFault.exe'
+    filter_optional_discord:
         ParentImage|endswith: '\Discord.exe'
         CommandLine|contains: '\NVSMI\nvidia-smi.exe'
-    condition: selection and not filter
-fields:
-    - CommandLine
-    - ParentCommandLine
+    condition: selection_parent and 1 of selection_child_* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
-    - Unknown
+    - Legitimate child processes can occur in cases of debugging
 # Increase the level once FP rate is known better (see status)
 level: medium

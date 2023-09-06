@@ -1,59 +1,58 @@
-title: SQL Injection Strings
+title: SQL Injection Strings In URI
 id: 5513deaf-f49a-46c2-a6c8-3f111b5cb453
 status: test
-description: Detects SQL Injection attempts via GET requests in access logs
+description: Detects potential SQL injection attempts via GET requests in access logs.
 references:
     - https://www.acunetix.com/blog/articles/exploiting-sql-injection-example/
     - https://www.acunetix.com/blog/articles/using-logs-to-investigate-a-web-application-attack/
     - https://brightsec.com/blog/sql-injection-payloads/
     - https://github.com/payloadbox/sql-injection-payload-list
-author: Saw Win Naung, Nasreddine Bencherchali (Nextron Systems)
+    - https://book.hacktricks.xyz/pentesting-web/sql-injection/mysql-injection
+author: Saw Win Naung, Nasreddine Bencherchali (Nextron Systems), Thurein Oo (Yoma Bank)
 date: 2020/02/22
-modified: 2023/09/01
+modified: 2023/09/04
 tags:
     - attack.initial_access
     - attack.t1190
 logsource:
     category: webserver
 detection:
-    select_method:
+    selection:
         cs-method: 'GET'
     keywords:
-        - '=select '
-        - '=select%20'
-        - '=select('
-        - 'UNION SELECT'
-        - 'UNION%20SELECT'
-        - 'UNION ALL SELECT'
-        - 'UNION%20ALL%20SELECT'
-        - 'CONCAT(0x'
-        - 'order by '
-        - 'order%20by%20'
-        - 'information_schema.tables'
-        - 'group_concat('
-        - 'table_schema'
-        - 'select%28sleep%2810%29'
         - '@@version'
-        - "'1'='1"
         - '%271%27%3D%271'
-        - 'SELECTCHAR('
-        - 'select * '
-        - 'select%20*%20'
+        - '=select '
+        - '=select('
+        - '=select%20'
+        - 'concat_ws('
+        - 'CONCAT(0x'
+        - 'from mysql.innodb_table_stats'
+        - 'from%20mysql.innodb_table_stats'
+        - 'group_concat('
+        - 'information_schema.tables'
+        - 'json_arrayagg('
         - 'or 1=1#'
         - 'or%201=1#'
-        - 'concat_ws('
+        - 'order by '
+        - 'order%20by%20'
+        - 'select * '
         - 'select database()'
         - 'select version()'
+        - 'select%20*%20'
         - 'select%20database()'
         - 'select%20version()'
-    filter:
+        - 'select%28sleep%2810%29'
+        - 'SELECTCHAR('
+        - 'table_schema'
+        - 'UNION ALL SELECT'
+        - 'UNION SELECT'
+        - 'UNION%20ALL%20SELECT'
+        - 'UNION%20SELECT'
+        - "'1'='1"
+    filter_main_status:
         sc-status: 404
-    condition: select_method and keywords and not 1 of filter*
-fields:
-    - client_ip
-    - vhost
-    - url
-    - response
+    condition: selection and keywords and not 1 of filter_main_*
 falsepositives:
     - Java scripts and CSS Files
     - User searches in search boxes of the respective website
