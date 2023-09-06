@@ -1,0 +1,45 @@
+title: Potentially Suspicious Electron Application CommandLine
+id: 378a05d8-963c-46c9-bcce-13c7657eac99
+related:
+    - id: f26eb764-fd89-464b-85e2-dc4a8e6e77b8
+      type: similar
+status: experimental
+description: Detects potentially suspicious CommandLine of electron apps (teams, discord, slack, etc.). This could be a sign of abuse to proxy execution through a signed binary.
+references:
+    - https://positive.security/blog/ms-officecmd-rce
+    - https://lolbas-project.github.io/lolbas/Binaries/Teams/
+    - https://lolbas-project.github.io/lolbas/Binaries/Msedge/
+    - https://lolbas-project.github.io/lolbas/Binaries/msedgewebview2/
+    - https://medium.com/@MalFuzzer/one-electron-to-rule-them-all-dc2e9b263daf
+    - https://chromium.googlesource.com/chromium/chromium/+/master/content/public/common/content_switches.cc
+author: frack113, Nasreddine Bencherchali (Nextron Systems)
+date: 2023/09/05
+tags:
+    - attack.execution
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            # Add more electron based app to the list
+            - '\chrome.exe'
+            - '\code.exe'
+            - '\discord.exe'
+            - '\GitHubDesktop.exe'
+            - '\keybase.exe'
+            - '\msedge.exe'
+            - '\msedgewebview2.exe'
+            - '\msteams.exe'
+            - '\slack.exe'
+            - '\Teams.exe'
+        CommandLine|contains:
+            - '--browser-subprocess-path'
+            - '--gpu-launcher'
+            - '--renderer-cmd-prefix'
+            - '--utility-cmd-prefix'
+    condition: selection
+falsepositives:
+    - Legitimate usage for debugging purposes
+# Increase the level once FP rate is known better (see status)
+level: medium
