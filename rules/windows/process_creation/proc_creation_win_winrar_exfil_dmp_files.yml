@@ -4,12 +4,12 @@ related:
     - id: ec570e53-4c76-45a9-804d-dc3f355ff7a7
       type: similar
 status: experimental
-description: Detects a suspicious winrar execution that involves a file with a ".dmp"/".dump" extension, which could be a step in a process of dump file exfiltration
+description: Detects execution of WinRAR in order to compress a file with a ".dmp"/".dump" extension, which could be a step in a process of dump file exfiltration.
 references:
     - https://www.crowdstrike.com/blog/overwatch-exposes-aquatic-panda-in-possession-of-log-4-shell-exploit-tools/
 author: Florian Roth (Nextron Systems)
 date: 2022/01/04
-modified: 2023/03/10
+modified: 2023/09/07
 tags:
     - attack.collection
     - attack.t1560.001
@@ -28,5 +28,6 @@ detection:
             - '.dump'
     condition: all of selection_*
 falsepositives:
-    - Legitimate use of WinRAR with a command line in which .dmp appears accidentally
-level: high
+    - Legitimate use of WinRAR with a command line in which ".dmp" or ".dump" appears accidentally
+    - Legitimate use of WinRAR to compress WER ".dmp" files for troubleshooting
+level: medium
