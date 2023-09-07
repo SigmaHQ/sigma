@@ -1,0 +1,23 @@
+title: Suspicious PowerShell RDP Port
+id: d2fc097a-3bbc-45f2-92a4-182dc5ad64d3
+status: experimental
+description: Detects use suspicious PowerShell command to check Remote Desktop Port
+references:
+  - https://learn.microsoft.com/en-us/windows-server/remote/remote-desktop-services/clients/change-listening-port
+tags:
+  - attack.execution
+  - attack.t1059.001
+author: tuan.le
+date: 2023/09/07
+logsource:
+  product: windows
+  category: ps_classic_script
+detection:
+  selection:
+    CommandLine|contains|all:
+      - 'Get-ItemProperty -Path'
+      - 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp'
+  condition: selection
+falsepositives:
+  - Legitimate actions from administrators
+level: medium
