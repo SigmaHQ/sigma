@@ -1,14 +1,17 @@
-title: LOLBIN From Abnormal Drive
+title: LOLBIN Execution From Abnormal Drive
 id: d4ca7c59-e9e4-42d8-bf57-91a776efcb87
+related:
+    - id: 5b80cf53-3a46-4adc-960b-05ec19348d74
+      type: similar
 status: test
-description: Detects LOLBINs executing from an abnormal drive such as a mounted ISO.
+description: Detects LOLBINs executing from an abnormal or uncommon drive such as a mounted ISO.
 references:
     - https://thedfirreport.com/2021/12/13/diavol-ransomware/
     - https://www.scythe.io/library/threat-emulation-qakbot
     - https://sec-consult.com/blog/detail/bumblebee-hunting-with-a-velociraptor/
-author: Christopher Peacock '@securepeacock', SCYTHE '@scythe_io', Angelo Violetti - SEC Consult '@angelo_violetti'
+author: Christopher Peacock '@securepeacock', SCYTHE '@scythe_io', Angelo Violetti - SEC Consult '@angelo_violetti', Aaron Herman
 date: 2022/01/25
-modified: 2023/04/12
+modified: 2023/08/29
 tags:
     - attack.defense_evasion
 logsource:
@@ -16,24 +19,27 @@ logsource:
     product: windows
 detection:
     selection:
+        # Note: add more lolbins for additional coverage
         - Image|endswith:
-            - '\rundll32.exe'
             - '\calc.exe'
-            - '\mshta.exe'
-            - '\cscript.exe'
-            - '\wscript.exe'
-            - '\regsvr32.exe'
-            - '\installutil.exe'
+            - '\certutil.exe'
             - '\cmstp.exe'
+            - '\cscript.exe'
+            - '\installutil.exe'
+            - '\mshta.exe'
+            - '\regsvr32.exe'
+            - '\rundll32.exe'
+            - '\wscript.exe'
         - OriginalFileName:
-            - 'RUNDLL32.EXE'
             - 'CALC.EXE'
-            - 'MSHTA.EXE'
-            - 'cscript.exe'
-            - 'wscript.exe'
-            - 'REGSVR32.EXE'
-            - 'installutil.exe'
+            - 'CertUtil.exe'
             - 'CMSTP.EXE'
+            - 'cscript.exe'
+            - 'installutil.exe'
+            - 'MSHTA.EXE'
+            - 'REGSVR32.EXE'
+            - 'RUNDLL32.EXE'
+            - 'wscript.exe'
     filter_main_currentdirectory:
         CurrentDirectory|contains: 'C:\'
     filter_main_empty:
