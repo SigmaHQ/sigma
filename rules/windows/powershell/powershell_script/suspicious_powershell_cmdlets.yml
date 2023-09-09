@@ -1,0 +1,26 @@
+title: Suspicious PowerShell cmdlets
+id: dec520d9-638f-4646-89dc-f60f0900390b
+status: experimental
+description: detection analytics look for cmdlets, methods, and switches that may indicate malicious activity
+author: linhnvhdev
+date: 2023/08/29
+references:
+    - https://redcanary.com/threat-detection-report/techniques/powershell/
+tags:
+    - attack.t1059.001
+logsource:
+    product: windows
+detection:
+    selection:
+        Image|endswith: 'powershell.exe'
+        CommandLine|contains:
+            - '-nop'
+            - 'noni'
+            - 'invoke-expression'
+            - 'iex'
+            - '.downloadstring'
+            - 'downloadfile'
+    condition: selection
+falsepositives:
+     - Unknown
+level: critical
