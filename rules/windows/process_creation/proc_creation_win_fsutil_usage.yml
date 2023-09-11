@@ -8,12 +8,16 @@ references:
     - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/fsutil-usn
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070/T1070.md
     - https://eqllib.readthedocs.io/en/latest/analytics/c91f422a-5214-4b17-8664-c5fcf115c0a2.html
+    - https://github.com/albertzsigovits/malware-notes/blob/558898932c1579ff589290092a2c8febefc3a4c9/Ransomware/Lockbit.md
+    - https://blog.cluster25.duskrise.com/2023/05/22/back-in-black-blackbyte-nt
 author: Ecco, E.M. Anhaus, oscd.community
 date: 2019/09/26
-modified: 2022/07/11
+modified: 2023/09/09
 tags:
     - attack.defense_evasion
+    - attack.impact
     - attack.t1070
+    - attack.t1485
 logsource:
     category: process_creation
     product: windows
@@ -25,6 +29,7 @@ detection:
         CommandLine|contains:
             - 'deletejournal'        # usn deletejournal ==> generally ransomware or attacker
             - 'createjournal'        # usn createjournal ==> can modify config to set it to a tiny size
+            - 'setZeroData'          # file setZeroData  ==> empties a file with zeroes
     condition: all of selection_*
 falsepositives:
     - Admin activity

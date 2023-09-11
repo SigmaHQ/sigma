@@ -1,0 +1,25 @@
+title: Okta New Admin Console Behaviours
+id: a0b38b70-3cb5-484b-a4eb-c4d8e7bcc0a9
+status: experimental
+description: Detects when Okta identifies new activity in the Admin Console.
+references:
+    - https://developer.okta.com/docs/reference/api/system-log/
+    - https://sec.okta.com/articles/2023/08/cross-tenant-impersonation-prevention-and-detection
+author: kelnage
+date: 2023/09/07
+tags:
+    - attack.initial_access
+    - attack.t1078.004
+logsource:
+    product: okta
+    service: okta
+detection:
+    selection:
+        eventtype: 'policy.evaluate_sign_on'
+        target.displayname: 'Okta Admin Console'
+        debugcontext_debugdata_behaviors: 'POSITIVE'
+        debugcontext_debugdata_logonlysecuritydata: 'POSITIVE'
+    condition: selection
+falsepositives:
+    - Whenever an admin starts using new features of the admin console.
+level: low
