@@ -17,9 +17,10 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1219/T1219.md#atomic-test-3---logmein-files-detected-test-on-windows
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1219/T1219.md#atomic-test-6---ammyy-admin-software-execution
     - https://redcanary.com/blog/misbehaving-rats/
+    - https://techcommunity.microsoft.com/t5/microsoft-sentinel-blog/hunting-for-omi-vulnerability-exploitation-with-azure-sentinel/ba-p/2764093
 author: frack113, Connor Martin
 date: 2022/07/11
-modified: 2023/06/14
+modified: 2023/09/12
 tags:
     - attack.command_and_control
     - attack.t1219
@@ -27,52 +28,53 @@ logsource:
     product: windows
     category: dns_query
 detection:
-    selection_name:
+    selection_generic:
         QueryName|endswith:
-            - '.getgo.com'
-            - '.logmein.com'
-            - '.ammyy.com'
-            - '.netsupportsoftware.com' # For NetSupport Manager RAT
-            - 'remoteutilities.com' # Usage of Remote Utilities RAT
-            - '.net.anydesk.com'
-            - 'api.playanext.com'
-            - '.relay.splashtop.com'
-            - '.api.splashtop.com'
-            - 'app.atera.com'
-            - '.agentreporting.atera.com'
-            - '.pubsub.atera.com'
-            - 'logmeincdn.http.internapcdn.net'
-            - 'logmein-gateway.com'
-            - 'client.teamviewer.com'
-            - 'integratedchat.teamviewer.com'
-            - 'static.remotepc.com'
-            - '.n-able.com'
-            - 'comserver.corporate.beanywhere.com'
-            - '.swi-rc.com'
-            - '.swi-tc.com'
-            - 'telemetry.servers.qetqo.com'
-            - 'relay.screenconnect.com'
-            - 'control.connectwise.com'
-            - 'express.gotoassist.com'
-            - 'authentication.logmeininc.com'
-            - '.services.vnc.com'
-            - '.tmate.io'
-            - 'api.parsec.app'
-            - 'parsecusercontent.com'
-            - 'remotedesktop-pa.googleapis.com'
-            - '.logmein-gateway.com'
-            - 'secure.logmeinrescue.com'
-            - 'join.zoho.com'
-            - 'assist.zoho.com'
-            - '.zohoassist.com'
-            - 'downloads.zohocdn.com'
             - 'agent.jumpcloud.com'
-            - 'kickstart.jumpcloud.com'
+            - 'agentreporting.atera.com'
+            - 'ammyy.com'
+            - 'api.parsec.app'
+            - 'api.playanext.com'
+            - 'api.splashtop.com'
+            - 'app.atera.com'
+            - 'assist.zoho.com'
+            - 'authentication.logmeininc.com'
+            - 'beyondtrustcloud.com'
             - 'cdn.kaseya.net'
-            - 'relay.kaseya.net'
+            - 'client.teamviewer.com'
+            - 'comserver.corporate.beanywhere.com'
+            - 'control.connectwise.com'
+            - 'downloads.zohocdn.com'
+            - 'dwservice.net'
+            - 'express.gotoassist.com'
+            - 'getgo.com'
+            - 'integratedchat.teamviewer.com'
+            - 'join.zoho.com'
+            - 'kickstart.jumpcloud.com'
             - 'license.bomgar.com'
-            - '.beyondtrustcloud.com'
-    selection_rustdesk:  # https://twitter.com/malmoeb/status/1668504345132822531?s=20 and https://www.adamsdesk.com/posts/rustdesk-not-connecting/ mention this pattern 
+            - 'logmein-gateway.com'
+            - 'logmein-gateway.com'
+            - 'logmein.com'
+            - 'logmeincdn.http.internapcdn.net'
+            - 'n-able.com'
+            - 'net.anydesk.com'
+            - 'netsupportsoftware.com' # For NetSupport Manager RAT
+            - 'parsecusercontent.com'
+            - 'pubsub.atera.com'
+            - 'relay.kaseya.net'
+            - 'relay.screenconnect.com'
+            - 'relay.splashtop.com'
+            - 'remotedesktop-pa.googleapis.com'
+            - 'remoteutilities.com' # Usage of Remote Utilities RAT
+            - 'secure.logmeinrescue.com'
+            - 'services.vnc.com'
+            - 'static.remotepc.com'
+            - 'swi-rc.com'
+            - 'swi-tc.com'
+            - 'telemetry.servers.qetqo.com'
+            - 'tmate.io'
+            - 'zohoassist.com'
+    selection_rustdesk:  # https://twitter.com/malmoeb/status/1668504345132822531?s=20 and https://www.adamsdesk.com/posts/rustdesk-not-connecting/ mention this pattern
         QueryName|endswith: '.rustdesk.com'
         QueryName|startswith: 'rs-'
     # Exclude browsers for legitimate visits of the domains mentioned above
@@ -118,5 +120,5 @@ detection:
         Image|endswith: '\whale.exe'
     condition: 1 of selection_* and not 1 of filter_optional_*
 falsepositives:
-    - Likely with other browser software
+    - Likely with other browser software. Apply additional filters for any other browsers you might use.
 level: medium
