@@ -6,7 +6,7 @@ references:
     - https://github.com/Wh04m1001/SysmonEoP
 author: frack113, Tim Shelton (update fp)
 date: 2022/12/05
-modified: 2023/09/08
+modified: 2023/09/12
 tags:
     - attack.privilege_escalation
     - attack.defense_evasion
@@ -91,6 +91,10 @@ detection:
     filter_empty_parent_5:
         Image: 'C:\Windows\System32\cmd.exe'
         CommandLine: 'C:\Windows\system32\cmd.exe /c PAUSE'
+    filter_empty_parent_6:
+        Image|endswith: '\powershell.exe'
+        CommandLine|contains: "powershell.exe -ExecutionPolicy Restricted -Command $Res = 0;"
+        CommandLine|endswith: "{ $Res = 1; break; } } Write-Host 'Final result:', $Res;"
     condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Unknown
