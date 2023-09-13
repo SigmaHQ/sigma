@@ -1,0 +1,28 @@
+title: ESXi Syslog Configuration Change Via ESXCLI
+id: 38eb1dbb-011f-40b1-a126-cf03a0210563
+status: experimental
+description: Detects changes to the ESXi syslog configuration via "esxcli"
+references:
+    - https://support.solarwinds.com/SuccessCenter/s/article/Configure-ESXi-Syslog-to-LEM?language=en_US
+    - https://developer.vmware.com/docs/11743/esxi-7-0-esxcli-command-reference/namespace/esxcli_system.html
+author: Cedric Maurugeon
+date: 2023/09/04
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+    - attack.t1562.003
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith: '/esxcli'
+        CommandLine|contains|all:
+            - 'system'
+            - 'syslog'
+            - 'config'
+        CommandLine|contains: ' set'
+    condition: selection
+falsepositives:
+    - Legitimate administrative activities
+level: medium
