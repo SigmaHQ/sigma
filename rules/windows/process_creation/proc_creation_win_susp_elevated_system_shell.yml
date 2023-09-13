@@ -6,7 +6,7 @@ references:
     - https://github.com/Wh04m1001/SysmonEoP
 author: frack113, Tim Shelton (update fp)
 date: 2022/12/05
-modified: 2023/09/12
+modified: 2023/09/13
 tags:
     - attack.privilege_escalation
     - attack.defense_evasion
@@ -61,8 +61,10 @@ detection:
         ParentImage|endswith: '\invcol.exe'
         ParentCommandLine|contains: 'C:\ProgramData\Dell\UpdateService\'
         Image|endswith: '\cmd.exe'
-    filter_compattelrunner: # seen on Windows 8
-        ParentImage|startswith: 'C:\Windows\WinSxS\'
+    filter_compattelrunner:
+        ParentImage|startswith:
+            - 'C:\Windows\System32'
+            - 'C:\Windows\WinSxS\'
         ParentImage|endswith: '\CompatTelRunner.exe'
         ParentCommandLine|startswith: 'C:\Windows\system32\CompatTelRunner.exe -m:appraiser.dll -f:DoScheduledTelemetryRun'
     filter_ibm_spectrumprotect:
@@ -72,11 +74,16 @@ detection:
         ParentImage: 'C:\Windows\SysWOW64\msiexec.exe'
         ParentCommandLine|startswith: 'C:\Windows\syswow64\MsiExec.exe -Embedding'
         CommandLine|contains: '\RegisterMicrosoftUpdate.ps1'
-    filter_empty_parent_1a:
-        CommandLine: "powershell.exe -ExecutionPolicy Restricted -Command Write-Host 'Final result: 1';"  # Most probably SetupHost.exe during Windows updates/upgrades; See comment on rule id: f4bbd493-b796-416e-bbf2-121235348529
-    filter_empty_parent_2b:  # https://answers.microsoft.com/en-us/windows/forum/all/res-and-inf-powershell-commands/793736ee-94bd-424f-811c-35a425e28832
-        CommandLine|startswith: 'powershell.exe -ExecutionPolicy Restricted -Command $Res = 0;'
-        CommandLine|endswith: "Write-Host 'Final result:', $Res;"
+    filter_empty_parent_1:
+        # https://answers.microsoft.com/en-us/windows/forum/all/res-and-inf-powershell-commands/793736ee-94bd-424f-811c-35a425e28832
+        # Most probably SetupHost.exe during Windows updates/upgrades; See comment on rule id: f4bbd493-b796-416e-bbf2-121235348529
+        CommandLine|startswith:
+            - 'powershell.exe -ExecutionPolicy Restricted -Command $res = 0; '
+            - 'powershell.exe -ExecutionPolicy Restricted -Command Write-Host '
+        CommandLine|endswith:
+            - "Write-Host 'Final result:', $Res;"
+            - 'Write-Host "Final result:", $res'
+            - "Write-Host 'Final result: 1';"
     filter_empty_parent_2:
         Image|endswith: '\cmd.exe'
         CommandLine|contains: '/d /c C:\Windows\system32\silcollector.cmd'
@@ -91,10 +98,6 @@ detection:
     filter_empty_parent_5:
         Image: 'C:\Windows\System32\cmd.exe'
         CommandLine: 'C:\Windows\system32\cmd.exe /c PAUSE'
-    filter_empty_parent_6:
-        Image|endswith: '\powershell.exe'
-        CommandLine|contains: "powershell.exe -ExecutionPolicy Restricted -Command $Res = 0;"
-        CommandLine|endswith: "{ $Res = 1; break; } } Write-Host 'Final result:', $Res;"
     condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Unknown
