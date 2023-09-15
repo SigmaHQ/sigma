@@ -1,0 +1,41 @@
+title: Diskshadow Script Mode Execution
+id: 0c2f8629-7129-4a8a-9897-7e0768f13ff2
+related:
+    - id: fa1a7e52-3d02-435b-81b8-00da14dd66c1 # Diskshadow Script Mode - Execution From Potential Suspicious Location
+      type: similar
+    - id: 1dde5376-a648-492e-9e54-4241dd9b0c7f # Diskshadow Script Mode - Uncommon Script Extension Execution
+      type: similar
+    - id: 9f546b25-5f12-4c8d-8532-5893dcb1e4b8 # Potentially Suspicious Child Process Of DiskShadow.EXE
+      type: similar
+    - id: 56b1dde8-b274-435f-a73a-fb75eb81262a # Diskshadow Child Process Spawned
+      type: similar
+status: test
+description: |
+    Detects execution of "Diskshadow.exe" in script mode using the "/s" flag. Attackers often abuse "diskshadow" to execute scripts that deleted the shadow copies on the systems. Investigate the content of the scripts and its location.
+references:
+    - https://bohops.com/2018/03/26/diskshadow-the-return-of-vss-evasion-persistence-and-active-directory-database-extraction/
+    - https://www.ired.team/offensive-security/credential-access-and-credential-dumping/ntds.dit-enumeration
+    - https://medium.com/@cyberjyot/lolbin-execution-via-diskshadow-f6ff681a27a4
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/diskshadow
+author: Ivan Dyachkov, oscd.community
+date: 2020/10/07
+modified: 2023/09/14
+tags:
+    - attack.execution
+    - attack.t1218
+    - detection.threat_hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - OriginalFileName: 'diskshadow.exe'
+        - Image|endswith: '\diskshadow.exe'
+    selection_cli:
+        CommandLine|contains:
+            - '/s '
+            - '-s '
+    condition: all of selection_*
+falsepositives:
+    - Likely from legitimate backup scripts
+level: medium
