@@ -1,0 +1,55 @@
+title: Potential Process Hollowing Activity
+id: c4b890e5-8d8c-4496-8c66-c805753817cd
+status: experimental
+description: Detects when a memory process image does not match the disk image, indicative of process hollowing.
+references:
+    - https://twitter.com/SecurePeacock/status/1486054048390332423?s=20
+    - https://www.bleepingcomputer.com/news/microsoft/microsoft-sysmon-now-detects-malware-process-tampering-attempts/
+author: Christopher Peacock '@securepeacock', SCYTHE '@scythe_io', Sittikorn S
+date: 2022/01/25
+modified: 2023/09/16
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1055.012
+logsource:
+    product: windows
+    category: process_tampering
+detection:
+    selection:
+        Type: 'Image is replaced'
+    filter_main_generic_1:
+        Image|contains:
+            - ':\Program Files\'
+            - ':\Program Files (x86)'
+    filter_main_generic_2:
+        Image:
+            - ':\Windows\System32\wbem\WMIADAP.exe'
+            - ':\Windows\SysWOW64\wbem\WMIADAP.exe'
+    filter_optional_opera:
+        Image|contains: '\AppData\Local\Programs\Opera\'
+        Image|endswith: '\opera.exe'
+    filter_optional_chrome:
+        Image:
+            - 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+            - 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
+    filter_optional_firefox:
+        Image:
+            - 'C:\Program Files\Mozilla Firefox\firefox.exe'
+            - 'C:\Program Files (x86)\Mozilla Firefox\firefox.exe'
+    filter_optional_edge_1:
+        - Image|endswith: '\WindowsApps\MicrosoftEdge.exe'
+        - Image:
+            - 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+            - 'C:\Program Files\Microsoft\Edge\Application\msedge.exe'
+    filter_optional_edge_2:
+        Image|startswith:
+            - 'C:\Program Files (x86)\Microsoft\EdgeCore\'
+            - 'C:\Program Files\Microsoft\EdgeCore\'
+        Image|endswith:
+            - '\msedge.exe'
+            - '\msedgewebview2.exe'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Unknown
+level: medium
