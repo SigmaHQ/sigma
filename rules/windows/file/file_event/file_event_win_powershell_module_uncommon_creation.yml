@@ -7,6 +7,7 @@ references:
     - https://learn.microsoft.com/en-us/powershell/scripting/developer/module/understanding-a-windows-powershell-module?view=powershell-7.3
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023/05/09
+modified: 2023/09/18
 tags:
     - attack.persistence
 logsource:
@@ -19,9 +20,13 @@ detection:
             - '\PowerShell\7\Modules\'
     filter_main_pwsh:
         Image|endswith:
-            - '\powerShell_ise.exe'
-            - '\powershell.exe'
-            - '\pwsh.exe'
+            - ':\Program Files\PowerShell\7\pwsh.exe'
+            - ':\Windows\System32\poqexec.exe' # https://github.com/SigmaHQ/sigma/issues/4448
+            - ':\Windows\System32\WindowsPowerShell\v1.0\powershell_ise.exe'
+            - ':\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
+            - ':\Windows\SysWOW64\poqexec.exe' # https://github.com/SigmaHQ/sigma/issues/4448
+            - ':\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell_ise.exe'
+            - ':\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell.exe'
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
