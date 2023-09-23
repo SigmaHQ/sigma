@@ -4,9 +4,10 @@ status: test
 description: Possible webshell file creation on a static web site
 references:
     - PT ESC rule and personal experience
-author: Beyu Denis, oscd.community, Tim Shelton
+    - 'https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Upload%20Insecure%20Files/README.md'
+author: Beyu Denis, oscd.community, Tim Shelton, Thurein Oo
 date: 2019/10/22
-modified: 2022/09/18
+modified: 2023/09/23
 tags:
     - attack.persistence
     - attack.t1505.003
@@ -19,6 +20,13 @@ detection:
     selection_ext1:
         TargetFilename|contains:
             - '.asp'
+            - '.aspx'
+            - '.soap'
+            - '.jsp'
+            - '.jspx'
+            - '.jsw'
+            - '.jspf'
+            - '.jsv'
             - '.ashx'
             - '.ph'
     selection_static:
@@ -27,7 +35,13 @@ detection:
             - '\htdocs\'
             - '\html\'
     selection_ext2:
-        TargetFilename|contains: '.ph'
+        TargetFilename|contains: 
+            - '.ph'
+            - '.php'
+            - '.php3'
+            - '.php4'
+            - '.php5'
+            - '.php7'
     false_positive1:  # false positives when unpacking some executables in $TEMP
         TargetFilename|contains:
             - '\AppData\Local\Temp\'
