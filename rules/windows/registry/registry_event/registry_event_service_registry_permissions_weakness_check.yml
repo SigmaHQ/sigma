@@ -1,0 +1,29 @@
+title: Hijack Execution Flow: Services Registry Permissions Weakness
+status: Experimental
+description: Adversaries may execute their own malicious payloads by hijacking the Registry entries used by services. Adversaries may use flaws in the permissions for Registry keys related 
+to services to redirect from the originally specified executable to one that they control, in order to launch their own code when a service starts. This is Detected using an audit rule set on the Services
+registry key that will generate a log any time the registry key is accessed.
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1574.011/T1574.011.md#atomic-test-1---service-registry-permissions-weakness
+  - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4663
+  - https://github.com/SigmaHQ/sigma/blob/master/rules/windows/powershell/powershell_script/posh_ps_get_acl_service.yml
+author: MITRE Engenuity Center for Threat Informed Defense (CTID) Summiting the Pyramid Team
+date: 2023/08/30
+tags:
+  - attack.T1574.011
+  - attack.Privilege Escalation
+logsource:
+  product: windows
+  category: File_Event
+detection:
+  selection:
+    EventID: 
+        -4663
+    TargetObject: 
+        - 'REGISTRY::HKLM\SYSTEM\CurrentControlSet\Services\*'
+
+  condition: selection
+falsepositives:
+    - Normal user activity
+    - Filtering on the Accesses field for the value READ_CONTROL (0x20000) will provide more precise results.
+level: medium

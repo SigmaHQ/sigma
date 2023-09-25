@@ -1,0 +1,31 @@
+title: Scheduled Task Creation
+status: Experimental
+description: Detects the creation of scheduled tasks in user session.
+references: 
+  - https://posts.specterops.io/abstracting-scheduled-tasks-3b6451f6a1c5
+  - https://github.com/SigmaHQ/sigma/blob/c0332a9d96f6c7804fcc85dd706caed889446a62/rules/windows/process_creation/proc_creation_win_schtasks_creation.yml
+  - https://github.com/OTRF/OSSEM
+  - https://github.com/jsecurity101/TelemetrySource
+author: Center for Threat Informed Defense (CTID) Summiting the Pyramid Team
+date: 2023/08/30
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1053.005
+    - attack.s0111
+    - car.2013-08-001
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    EventID: 
+        -11
+    TargetFileName|contains:
+        - “C:\Windows\System32\Tasks”
+        - “C:\Windows\SYSWOW64\Tasks”
+  condition: selection
+falsepositives:
+    - Legitimate task creation.
+level: medium
