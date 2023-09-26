@@ -70,6 +70,7 @@ cd "${TMP}"
 echo
 echo "Copy rules from ${SIGMA} to ${TMP}"
 cp -r "${RULES}"/windows .
+cp -r "${SIGMA}"/rules-emerging-threats .
 echo
 echo "Remove deprecated rules"
 grep -ERl "^status: deprecated" windows | xargs -r rm -v
@@ -92,7 +93,7 @@ OS="Windows 7 32-bit"
     wget --quiet https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win7-x86.tgz
     tar xzf win7-x86.tgz
     echo "  Checking for Sigma matches in $OS baseline"
-    ./evtx-sigma-checker --log-source "${SIGMA}"/tests/thor.yml --evtx-path win7_x86/ --rule-path windows/ > findings-win7.json
+    ./evtx-sigma-checker --log-source "${SIGMA}"/tests/thor.yml --evtx-path win7_x86/ --rule-path windows/ --rule-path rules-emerging-threats/ > findings-win7.json
     echo "  Finished Checking for Sigma matches in $OS baseline"
 }&
 pids+=($!)
@@ -104,7 +105,7 @@ OS="Windows 2022"
     wget --quiet https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win2022-evtx.tgz
     tar xzf win2022-evtx.tgz
     echo "  Checking for Sigma matches in $OS baseline (this takes around 1 minute)"
-    ./evtx-sigma-checker --log-source "${SIGMA}"/tests/thor.yml --evtx-path win2022-evtx/ --rule-path windows/ > findings-win2022.json
+    ./evtx-sigma-checker --log-source "${SIGMA}"/tests/thor.yml --evtx-path win2022-evtx/ --rule-path windows/ --rule-path rules-emerging-threats/ > findings-win2022.json
     echo "  Finished Checking for Sigma matches in $OS baseline"
 }&
 pids+=($!)
@@ -117,7 +118,7 @@ OS="Windows 10"
     wget --quiet https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win10-client.tgz
     tar xzf win10-client.tgz
     echo "  Checking for Sigma matches in $OS baseline (this takes around 2 minutes)"
-    ./evtx-sigma-checker --log-source "${SIGMA}"/tests/thor.yml --evtx-path Logs_Client/ --rule-path windows/ > findings-win10.json
+    ./evtx-sigma-checker --log-source "${SIGMA}"/tests/thor.yml --evtx-path Logs_Client/ --rule-path windows/ --rule-path rules-emerging-threats/ > findings-win10.json
     echo "  Finished Checking for Sigma matches in $OS baseline"
 }&
 pids+=($!)
@@ -130,7 +131,7 @@ OS="Windows 2022 AD"
     wget --quiet https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win2022-ad.tgz
     tar xzf win2022-ad.tgz
     echo "  Checking for Sigma matches in $OS baseline (this takes around 2 minutes)"
-    ./evtx-sigma-checker --log-source "${SIGMA}"/tests/thor.yml --evtx-path Win2022-AD/ --rule-path windows/ > findings-win2022-ad.json
+    ./evtx-sigma-checker --log-source "${SIGMA}"/tests/thor.yml --evtx-path Win2022-AD/ --rule-path windows/ --rule-path rules-emerging-threats/ > findings-win2022-ad.json
     echo "  Finished Checking for Sigma matches in $OS baseline"
 }&
 pids+=($!)
@@ -143,7 +144,7 @@ OS="Windows 11"
     wget --quiet https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win11-client.tgz
     tar xzf win11-client.tgz
     echo "  Checking for Sigma matches in $OS baseline (this takes around 3 minutes)"
-    ./evtx-sigma-checker --log-source "${SIGMA}"/tests/thor.yml --evtx-path Logs_Win11/ --rule-path windows/ > findings-win11.json
+    ./evtx-sigma-checker --log-source "${SIGMA}"/tests/thor.yml --evtx-path Logs_Win11/ --rule-path windows/ --rule-path rules-emerging-threats/ > findings-win11.json
     echo "  Finished Checking for Sigma matches in $OS baseline"
 }&
 pids+=($!)
@@ -156,7 +157,7 @@ OS="Windows 2022.0.20348 Azure"
     wget --quiet https://github.com/NextronSystems/evtx-baseline/releases/latest/download/win2022-0-20348-azure.tgz
     tar xzf win2022-0-20348-azure.tgz
     echo "  Checking for Sigma matches in $OS baseline (this takes around 3 minutes)"
-    ./evtx-sigma-checker --log-source "${SIGMA}"/tests/thor.yml --evtx-path win2022-0-20348-azure/ --rule-path windows/ > findings-win2022-0-20348-azure.json
+    ./evtx-sigma-checker --log-source "${SIGMA}"/tests/thor.yml --evtx-path win2022-0-20348-azure/ --rule-path windows/ --rule-path rules-emerging-threats/ > findings-win2022-0-20348-azure.json
     echo "  Finished Checking for Sigma matches in $OS baseline"
 }&
 pids+=($!)
