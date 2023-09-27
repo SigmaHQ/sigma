@@ -1,24 +1,24 @@
 title: AddinUtil.exe Execution from Suspicious Directory
-id: 74e16e48-667d-4540-893d-e0f100cafc27 
+id: 6120ac2a-a34b-42c0-a9bd-1fb9f459f348
 status: experimental
 description: Detects execution of the Add-In deployment cache updating utility (AddInutil.exe) from a non-standard directory. 
 references:
     - https://www.blue-prints.blog/content/blog/posts/lolbin/addinutil-lolbas.html
 tags:
-    - attack.defense_evasion  
-    - attack.t1218   
+    - attack.defense_evasion
+    - attack.t1218
 author: Michael McKinley (@McKinleyMike), Tony Latteri (@TheLatteri)
 date: 2023/09/18
-logsource:                      
-    category: process_creation  
-    product: windows           
+logsource:
+    category: process_creation
+    product: windows
 detection:
     selection:
         Image|endswith: '\addinutil.exe'
-    filter_64bit:
-        Image|startswith: 'C:\Windows\Microsoft.NET\Framework64\'
-    filter_32bit:
-        Image|startswith: 'C:\Windows\Microsoft.NET\Framework\'
+    filter:
+        Image|contains:
+            - ':\Windows\Microsoft.NET\Framework64\'
+            - ':\Windows\Microsoft.NET\Framework\'
     condition: selection and not 1 of filter*
 falsepositives:
     - Unknown

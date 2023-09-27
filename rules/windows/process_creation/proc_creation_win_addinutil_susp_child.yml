@@ -1,27 +1,26 @@
 title: AddinUtil.exe with Suspicious Child Process
-id: 42e3ad54-a382-4e50-a297-4ee84777bddf
+id: b5746143-59d6-4603-8d06-acbd60e166ee
 status: experimental
 description: Detects suspicious child process of the Add-In deployment cache updating utility (AddInutil.exe) which could be a sign of potential abuse of the binary to proxy execution via a custom Addins.Store payload.
 references:
     - https://www.blue-prints.blog/content/blog/posts/lolbin/addinutil-lolbas.html
 tags:
-    - attack.defense_evasion  
-    - attack.t1218   
+    - attack.defense_evasion
+    - attack.t1218
 author: Michael McKinley (@McKinleyMike), Tony Latteri (@TheLatteri)
 date: 2023/09/18
-logsource:                      
-    category: process_creation  
-    product: windows           
+logsource:
+    category: process_creation
+    product: windows
 detection:
     selection:
         ParentImage|endswith: '\addinutil.exe'
-    filter_werfault_32bit:
-        Image|endswith: '\Windows\System32\werfault.exe'
-    filter_werfault_64bit:
-        Image|endswith: '\Windows\SysWOW64\werfault.exe'
-    filter_conhost:
-        Image|endswith: '\Windows\System32\conhost.exe'
-    condition: selection and not 1 of filter*
+    filter_main_werfault:
+        Image|endswith:
+            - ':\Windows\System32\werfault.exe'
+            - ':\Windows\SysWOW64\werfault.exe'
+            - ':\Windows\System32\conhost.exe'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: medium
