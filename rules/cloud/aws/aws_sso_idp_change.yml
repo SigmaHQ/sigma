@@ -1,0 +1,28 @@
+title: AWS Identity Center Identity Provider Change
+id: 
+status: test
+description: |
+  Detects a change in the AWS Identity Center (FKA AWS SSO) identity provider.
+  A change in identity provider allows an attacker to establish persistent access or escalate privileges via user impersonation.
+author: Michael McIntyre @wtfender
+date: 2023/09/27
+tags:
+    - attack.persistence
+    - attack.t1556
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: 
+            - 'sso.amazonaws.com'
+            - 'sso-directory.amazonaws.com'
+        eventName:      
+            - 'AssociateDirectory'
+            - 'DisassociateDirectory'
+            - 'EnableExternalIdPConfigurationForDirectory'
+            - 'DisableExternalIdPConfigurationForDirectory'
+    condition: selection
+falsepositives:
+    - Authorized changes to the AWS account's identity provider
+level: high
