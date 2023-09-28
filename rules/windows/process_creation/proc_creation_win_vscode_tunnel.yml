@@ -1,0 +1,24 @@
+title: Suspicious Visual Studio Code Tunnel
+id: c565ef1e-ee14-49f2-b9dd-4a8e00bac268
+status: experimental
+description: Detects Visual Studio Code tunnel that can be used as a reverse shell 
+references:
+    - https://ipfyx.fr/post/visual-studio-code-tunnel/
+    - https://badoption.eu/blog/2023/01/31/code_c2.html
+    - https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/security
+tags:
+    - attack.command_and_control
+    - attack.T1071.001
+author: ipfyx (blog post),citron_ninja (rule)
+date: 2023/09/28
+logsource:                 
+    category: process_creation 
+    product: windows            
+detection:
+    selection:
+        CommandLine|contains: 
+            - '.exe tunnel'
+    condition: selection
+falsepositives:
+    - legitimate use of Visual Studio Code tunnel
+level: medium
