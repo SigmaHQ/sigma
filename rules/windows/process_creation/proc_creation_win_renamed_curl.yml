@@ -1,0 +1,28 @@
+title: Renamed Curl Execution
+id: 77b2c64f-5390-4a71-9d8d-a0488a920e42
+status: experimental
+description: Detects the execution of a renamed curl.exe binary, a technique often used by attackers to bypass security controls. Monitoring for such activity aids in quickly detecting potential unauthorized or malicious actions involving data transfer.
+references:
+    - https://curl.se/
+author: Florian Roth (Nextron Systems)
+date: 2023/09/29
+tags:
+    - attack.t1105
+    - attack.t1570
+    - attack.t1048
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - OriginalFileName: 'curl.exe'
+        - Description: 'The curl executable'  # there are case-varied versions of this but Sigma is case-insensitive
+        - Company:
+            - 'curl, https://curl.se/'  # there are case-varied versions of this but Sigma is case-insensitive
+            - 'curl, https://curl.haxx.se/'  # there are case-varied versions of this but Sigma is case-insensitive
+    filter:
+        Image|contains: '\curl'
+    condition: selection and not filter
+falsepositives:
+    - It's common for certain software to rename and use curl for legitimate purposes, so this can occasionally lead to false positives
+level: medium
