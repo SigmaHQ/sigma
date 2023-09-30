@@ -8,22 +8,27 @@ references:
     - https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/security
 tags:
     - attack.command_and_control
-    - attack.T1071.001
+    - attack.t1071.001
 author: ipfyx (blog post),citron_ninja (rule)
 date: 2023/09/28
 logsource:                 
     category: process_creation 
     product: windows            
 detection:
-    selection_exe:
+    selection_exe_null:
         Company: null
         Description: null
         OriginalFileName: null
         Product: null
+    selection_exe_sysmon:
+        Company: "-"
+        Description: "-"
+        OriginalFileName: "-"
+        Product: "-"
     selection_cli:
         CommandLine|contains: '.exe '
         CommandLine|endswith: ' tunnel'
-    condition: all of selection_*
+    condition: 1 of selection_exe_* and selection_cli
 falsepositives:
     - legitimate use of Visual Studio Code tunnel
 level: medium
