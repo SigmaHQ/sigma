@@ -1,0 +1,63 @@
+on:
+  push:
+    tags:
+      - 'r*'
+
+name: Create Release
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Generate Changelog
+        run: |
+          prev_tag=$(git for-each-ref --sort=creatordate --format '%(refname:lstrip=2)' refs/tags | grep ^r | tail -2 | head -1)
+          curr_tag=$(git for-each-ref --sort=creatordate --format '%(refname:lstrip=2)' refs/tags | grep ^r | tail -1)
+          echo "Previous tag: ${prev_tag}"
+          echo "Current tag: ${curr_tag}"
+          echo "#### New rules:" > changes.txt
+          git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*new: ' | sort | sed -e 's%^% - %' >> changes.txt
+          echo "#### Changed rules:" >> changes.txt
+          git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*change: ' | sort | sed -e 's%^% - %' >> changes.txt
+          echo "#### Rules with fixes:" >> changes.txt
+          git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*fix: ' | sort | sed -e 's%^% - %' >> changes.txt
+          git log --pretty=%B ${prev_tag}..${curr_tag} | grep -oP 'Merge PR #\d+ from \K(@\S+)' | sort -u > authors_raw.txt
+          git log --pretty=%B ${prev_tag}..${curr_tag} | grep -oP "Co-authored-by: \K.*(?= <)" | sort -u | sed -e 's%^%@%' >> authors_raw.txt
+          LC_ALL=en_US.UTF-8 sort -u authors_raw.txt | grep -v 'dependabot\[bot\]' > authors.txt
+          echo "### Changes in this release:" > changelog.txt
+          cat changes.txt >> changelog.txt
+          echo "" >> changelog.txt
+          echo "Thanks to $(perl -pe 's%\n%, %' authors.txt | sed 's%, $%%')" >> changelog.txt
+          echo "" >> changelog.txt
+          echo "" >> changelog.txt
+          echo "#### Which Sigma rule package should I use?" >> changelog.txt
+          echo "A detailed explanation can be found in the [Releases.md](Releases.md) file. If you are new to Sigma, we recommend starting with the \"Core\" ruleset." >> changelog.txt
+          cat changelog.txt
+      - name: Build all release packages
+        run: |
+          python3 tests/sigma-package-release.py --min-status test --min-level high --rule-types generic --outfile sigma-core-${{ github.ref_name }}.zip
+          python3 tests/sigma-package-release.py --min-status test --min-level medium --rule-types generic --outfile sigma-core+-${{ github.ref_name }}.zip
+          python3 tests/sigma-package-release.py --min-status experimental --min-level medium --rule-types generic --outfile sigma-core++-${{ github.ref_name }}.zip
+          python3 tests/sigma-package-release.py --min-status experimental --min-level high --rule-types et --outfile sigma-et-addon-${{ github.ref_name }}.zip
+          python3 tests/sigma-package-release.py --min-status experimental --min-level high --rule-types generic et --outfile sigma-all-rules-${{ github.ref_name }}.zip
+      - name: Create Release with Assets
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          name: Release ${{ github.ref_name }}
+          body_path: changelog.txt
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: false
+          prerelease: false
+          files: |
+            sigma-core-${{ github.ref_name }}.zip
+            sigma-core+-${{ github.ref_name }}.zip
+            sigma-core++-${{ github.ref_name }}.zip
+            sigma-et-addon-${{ github.ref_name }}.zip
+            sigma-all-rules-${{ github.ref_name }}.zip
