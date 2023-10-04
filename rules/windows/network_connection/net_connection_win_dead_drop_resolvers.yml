@@ -8,7 +8,7 @@ references:
     - https://blog.bushidotoken.net/2021/04/dead-drop-resolvers-espionage-inspired.html
 author: Sorina Ionescu, X__Junior (Nextron Systems)
 date: 2022/08/17
-modified: 2023/09/07
+modified: 2023/09/12
 tags:
     - attack.command_and_control
     - attack.t1102
@@ -20,13 +20,13 @@ detection:
     selection:
         Initiated: 'true'
         DestinationHostname|endswith:
-            - '.cloudflare.com'
-            - '.githubusercontent.com'
+            - '.t.me'
             - '4shared.com'
             - 'anonfiles.com'
             - 'cdn.discordapp.com'
+            - 'cloudflare.com'
             - 'ddns.net'
-            - 'discord.com/api/webhooks/'
+            - 'discord.com'
             - 'docs.google.com'
             - 'drive.google.com'
             - 'dropbox.com'
@@ -35,6 +35,7 @@ detection:
             - 'feeds.rapidfeeds.com'
             - 'fotolog.com'
             - 'ghostbin.co/'
+            - 'githubusercontent.com'
             - 'gofile.io'
             - 'hastebin.com'
             - 'imgur.com'
@@ -53,7 +54,6 @@ detection:
             - 'sendspace.com'
             - 'steamcommunity.com'
             - 'storage.googleapis.com'
-            - 't.me'
             - 'technet.microsoft.com'
             - 'temp.sh'
             - 'transfer.sh'
@@ -62,7 +62,8 @@ detection:
             - 'vimeo.com'
             - 'wetransfer.com'
             - 'youtube.com'
-    # Note: Add/Remove browsers that you don't use or those that have custom install locations
+    # Note: Add/Remove browsers/applications that you don't use or those that have custom install locations
+    # Note: To avoid complex conditions the filters for some apps are genric by name only. A custom tuning is recommended for best results
     filter_main_chrome:
         Image:
             - 'C:\Program Files\Google\Chrome\Application\chrome.exe'
@@ -96,14 +97,15 @@ detection:
             - '\msedgewebview2.exe'
     filter_main_safari:
         Image|endswith: '\safari.exe'
-    filter_optional_defender:
+    filter_main_defender:
         Image|endswith:
             - '\MsMpEng.exe' #Microsoft Defender executable
             - '\MsSense.exe' #Windows Defender Advanced Threat Protection Service Executable
-    filter_optional_prtg:
-        Image|endswith: '\PRTG Probe.exe' #Paessler's PRTG Network Monitor
-    filter_optional_qlik:
-        Image|endswith: '\Engine.exe' #Process from qlik.com app
+    filter_main_prtg:
+        #Paessler's PRTG Network Monitor
+        Image|endswith:
+            - 'C:\Program Files (x86)\PRTG Network Monitor\PRTG Probe.exe'
+            - 'C:\Program Files\PRTG Network Monitor\PRTG Probe.exe'
     filter_main_brave:
         Image|endswith: '\brave.exe'
         Image|startswith: 'C:\Program Files\BraveSoftware\'
@@ -170,26 +172,36 @@ detection:
     filter_main_telegram:
         Image|contains: '\AppData\Roaming\Telegram Desktop\'
         Image|endswith: '\Telegram.exe'
+        DestinationHostname|endswith: '.t.me'
     filter_main_onedrive:
         Image|contains: '\AppData\Local\Microsoft\OneDrive\'
         Image|endswith: '\OneDrive.exe'
+        DestinationHostname|endswith: 'onedrive.com'
     filter_main_dropbox:
         Image|startswith:
             - 'C:\Program Files (x86)\Dropbox\Client\'
             - 'C:\Program Files\Dropbox\Client\'
         Image|endswith: '\Dropbox.exe'
+        DestinationHostname|endswith: 'dropbox.com'
     filter_main_mega:
         Image|contains: '\AppData\Local\MEGAsync\'
         Image|endswith: 'MEGAsync.exe'
+        DestinationHostname|endswith: 'mega.nz'
     filter_main_googledrive:
         Image|startswith:
             - 'C:\Program Files\Google\Drive File Stream\'
             - 'C:\Program Files (x86)\Google\Drive File Stream\'
         Image|endswith: 'GoogleDriveFS.exe'
+        DestinationHostname|endswith: 'drive.google.com'
     filter_main_discord:
             Image|contains: '\AppData\Local\Discord\'
             Image|endswith: '\Discord.exe'
-    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+            DestinationHostname|endswith:
+                - 'discord.com'
+                - 'cdn.discordapp.com'
+    #filter_optional_qlik:
+    #    Image|endswith: '\Engine.exe' #Process from qlik.com app
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - One might need to exclude other internet browsers found in it's network or other applications like ones mentioned above from Microsoft Defender.
 level: high

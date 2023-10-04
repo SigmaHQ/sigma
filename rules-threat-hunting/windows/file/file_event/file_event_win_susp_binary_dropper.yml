@@ -6,7 +6,7 @@ references:
     - Malware Sandbox
 author: frack113
 date: 2022/03/09
-modified: 2023/01/26
+modified: 2023/09/06
 tags:
     - attack.resource_development
     - attack.t1587.001
@@ -17,7 +17,7 @@ detection:
     selection:
         Image|endswith: '.exe'
         TargetFilename|endswith: '.exe'
-    filter_whitelist:
+    filter_main_generic_1:
         Image:
             - 'C:\Windows\System32\msiexec.exe'
             - 'C:\Windows\system32\cleanmgr.exe'
@@ -25,13 +25,13 @@ detection:
             - 'C:\WINDOWS\system32\dxgiadaptercache.exe'
             - 'C:\WINDOWS\system32\Dism.exe'
             - 'C:\Windows\System32\wuauclt.exe'
-    filter_update:
+    filter_main_update:
         # Security_UserID: S-1-5-18
         # Example:
         #   TargetFilename: C:\Windows\SoftwareDistribution\Download\803d1df4c931df4f3e50a022cda56e88\WindowsUpdateBox.exe
         Image: 'C:\WINDOWS\system32\svchost.exe'
         TargetFilename|startswith: 'C:\Windows\SoftwareDistribution\Download\'
-    filter_upgrade:
+    filter_main_upgrade:
         Image: 'C:\Windows\system32\svchost.exe'
         TargetFilename|contains|all:
             # Example:
@@ -45,29 +45,29 @@ detection:
         Image|startswith: 'C:\WINDOWS\SoftwareDistribution\Download\'
         Image|endswith: '\WindowsUpdateBox.Exe'
         TargetFilename|startswith: 'C:\$WINDOWS.~BT\Sources\'
-    filter_tiworker:
+    filter_main_tiworker:
         Image|startswith: 'C:\Windows\WinSxS\'
         Image|endswith: '\TiWorker.exe'
-    filter_programfiles:
+    filter_main_programfiles:
         - Image|startswith:
             - 'C:\Program Files\'
             - 'C:\Program Files (x86)\'
         - TargetFilename|startswith:
             - 'C:\Program Files\'
             - 'C:\Program Files (x86)\'
-    filter_defender:
+    filter_main_defender:
         Image|startswith:
             - 'C:\ProgramData\Microsoft\Windows Defender\'
             - 'C:\Program Files\Windows Defender\'
-    filter_windows_apps:
-        TargetFilename|contains: '\Microsoft\WindowsApps\'
-    filter_teams:
+    filter_main_windows_apps:
+        TargetFilename|contains: '\AppData\Local\Microsoft\WindowsApps\'
+    filter_main_teams:
         Image|endswith: '\AppData\Local\Microsoft\Teams\Update.exe'
         TargetFilename|endswith:
             - '\AppData\Local\Microsoft\Teams\stage\Teams.exe'
             - '\AppData\Local\Microsoft\Teams\stage\Squirrel.exe'
             - '\AppData\Local\Microsoft\SquirrelTemp\tempb\'
-    filter_mscorsvw:
+    filter_main_mscorsvw:
         # Example:
         #   ParentCommandLine: "C:\Windows\Microsoft.NET\Framework\v4.0.30319\ngen.exe" ExecuteQueuedItems /LegacyServiceBehavior
         #   Image: C:\Windows\Microsoft.NET\Framework64\v4.0.30319\mscorsvw.exe
@@ -77,17 +77,17 @@ detection:
         Image|startswith: 'C:\Windows\Microsoft.NET\Framework\'
         Image|endswith: '\mscorsvw.exe'
         TargetFilename|startswith: 'C:\Windows\assembly\NativeImages_'
-    filter_vscode:
+    filter_main_vscode:
         Image|contains: '\AppData\Local\'
         Image|endswith: '\Microsoft VS Code\Code.exe'
         TargetFilename|contains: '\.vscode\extensions\'
-    filter_githubdesktop:
+    filter_main_githubdesktop:
         Image|endswith: '\AppData\Local\GitHubDesktop\Update.exe'
         # Example TargetFileName:
         #   \AppData\Local\SquirrelTemp\tempb\lib\net45\GitHubDesktop_ExecutionStub.exe
         #   \AppData\Local\SquirrelTemp\tempb\lib\net45\squirrel.exe
         TargetFilename|contains: '\AppData\Local\SquirrelTemp\'
-    filter_windows_temp:
+    filter_main_windows_temp:
         TargetFilename|startswith: 'C:\WINDOWS\TEMP\'
     condition: selection and not 1 of filter_*
 falsepositives:

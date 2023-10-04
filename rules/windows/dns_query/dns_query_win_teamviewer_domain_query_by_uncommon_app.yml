@@ -1,4 +1,4 @@
-title: Suspicious TeamViewer Domain Access
+title: TeamViewer Domain Query By Non-TeamViewer Application
 id: 778ba9a8-45e4-4b80-8e3e-34a419f0b85e
 status: test
 description: Detects DNS queries to a TeamViewer domain only resolved by a TeamViewer client by an image that isn't named TeamViewer (sometimes used by threat actors for obfuscation)
@@ -6,7 +6,7 @@ references:
     - https://www.teamviewer.com/en-us/
 author: Florian Roth (Nextron Systems)
 date: 2022/01/30
-modified: 2022/02/08
+modified: 2023/09/18
 tags:
     - attack.command_and_control
     - attack.t1219
@@ -14,14 +14,15 @@ logsource:
     product: windows
     category: dns_query
 detection:
-    dns_request:
+    selection:
         QueryName:
             - 'taf.teamviewer.com'
             - 'udp.ping.teamviewer.com'
-    filter:
+    filter_main_teamviewer:
+        # Note: To avoid evasion based on similar names. Best add full install location of TeamViewer
         Image|contains: 'TeamViewer'
-    condition: dns_request and not filter
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown binary names of TeamViewer
-    - Other programs that also lookup the observed domain
+    - Depending on the environment the rule might require some initial tuning before usage to avoid FP with third party applications
 level: medium

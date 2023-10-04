@@ -6,7 +6,7 @@ references:
     - https://www.microsoft.com/security/blog/2022/07/27/untangling-knotweed-european-private-sector-offensive-actor-using-0-day-exploits/ (idea)
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/07/28
-modified: 2023/08/17
+modified: 2023/09/28
 tags:
     - attack.persistence
     - attack.t1546.015
@@ -15,25 +15,21 @@ logsource:
     product: windows
 detection:
     selection:
-        TargetObject|startswith:
-            - 'HKCR\CLSID\'
-            - 'HKEY_CLASSES_ROOT\CLSID\'
-            - 'HKCU\Software\Classes\CLSID\'
-            - 'HKEY_CURRENT_USER\Software\Classes\CLSID\'
+        TargetObject|contains: '\CLSID\'
         TargetObject|endswith:
             - '\InprocServer32\(Default)'
             - '\LocalServer32\(Default)'
         Details|contains: # Add more suspicious paths and locations
-            - '\Users\Public\'
-            - '\Desktop\'
             - '\AppData\Local\Temp\'
+            - '\Desktop\'
             - '\Downloads\'
-            - '\Windows\Temp\'
             - '\Microsoft\Windows\Start Menu\Programs\Startup\'
             - '\System32\spool\drivers\color\' # as seen in the knotweed blog
+            - '\Users\Public\'
+            - '\Windows\Temp\'
+            - '%appdata%'
             - '%temp%'
             - '%tmp%'
-            - '%appdata%'
     condition: selection
 falsepositives:
     - Probable legitimate applications. If you find these please add them to an exclusion list

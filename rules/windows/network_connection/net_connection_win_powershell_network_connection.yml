@@ -1,12 +1,12 @@
-title: PowerShell Network Connections
+title: PowerShell Initiated Network Connection
 id: 1f21ec3f-810d-4b0e-8045-322202e22b4b
 status: experimental
-description: Detects a Powershell process that opens network connections - check for suspicious target ports and target systems - adjust to your environment (e.g. extend filters with company's ip range')
+description: Detects a PowerShell process that initiates network connections. Check for suspicious target ports and target systems.
 references:
     - https://www.youtube.com/watch?v=DLtJTxMWZ2o
 author: Florian Roth (Nextron Systems)
 date: 2017/03/13
-modified: 2023/01/20
+modified: 2023/09/07
 tags:
     - attack.execution
     - attack.t1059.001
@@ -19,8 +19,7 @@ detection:
             - '\powershell.exe'
             - '\pwsh.exe'
         Initiated: 'true'
-        DestinationIsIpv6: 'false'
-    filter_internal_ip:
+    filter_main_local_ipv4:
         DestinationIp|startswith:
             - '10.'
             - '192.168.'
@@ -44,14 +43,14 @@ detection:
         User|contains: # covers many language settings
             - 'AUTHORI'
             - 'AUTORI'
-    filter_ipv6:
+    filter_main_local_ipv6:
         DestinationIp|startswith:
             - '::1'  # IPv6 loopback variant
             - '0:0:0:0:0:0:0:1'  # IPv6 loopback variant
             - 'fe80:'  # link-local address
             - 'fc'  # private address range fc00::/7
             - 'fd'  # private address range fc00::/7
-    filter_msrange:
+    filter_main_msrange:
         DestinationIp|startswith:
             # Subnet: 20.184.0.0/13
             - '20.184.'
@@ -69,8 +68,9 @@ detection:
             - '51.104.'
             - '51.105.'
             - '52.239.'
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Administrative scripts
     - Microsoft IP range
+    - Additional filters are required. Adjust to your environment (e.g. extend filters with company's ip range')
 level: low

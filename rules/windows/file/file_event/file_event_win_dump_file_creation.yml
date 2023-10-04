@@ -1,0 +1,23 @@
+title: DMP/HDMP File Creation
+id: 3a525307-d100-48ae-b3b9-0964699d7f97
+status: experimental
+description: Detects the creation of a file with the ".dmp"/".hdmp" extension. Often created by software during a crash. Memory dumps can sometimes contain sensitive information such as credentials. It's best to determin the source of the crash.
+references:
+    - https://learn.microsoft.com/en-us/windows/win32/wer/collecting-user-mode-dumps
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/09/07
+tags:
+    - attack.defense_evasion
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|endswith:
+            - '.dmp'
+            - '.dump'
+            - '.hdmp'
+    condition: selection
+falsepositives:
+    - Likely during crashes of software
+level: low

@@ -11,6 +11,7 @@ references:
     - https://www.fireeye.com/blog/threat-research/2020/01/saigon-mysterious-ursnif-fork.html
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023/01/19
+modified: 2023/09/29
 tags:
     - attack.discovery
 logsource:
@@ -22,17 +23,16 @@ detection:
         - OriginalFileName: 'drvqry.exe'
     selection_parent:
         - ParentImage|endswith:
-            - '\cmd.exe'
-            - '\powershell.exe'
-            - '\pwsh.exe'
-            - '\wscript.exe'
             - '\cscript.exe'
             - '\mshta.exe'
+            - '\regsvr32.exe'
+            - '\rundll32.exe'
+            - '\wscript.exe'
         - ParentImage|contains:
             - '\AppData\Local\'
             - '\Users\Public\'
             - '\Windows\Temp\'
     condition: all of selection_*
 falsepositives:
-    - Unknown
+    - Legitimate usage by some scripts might trigger this as well
 level: high

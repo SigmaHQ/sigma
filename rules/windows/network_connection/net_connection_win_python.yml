@@ -1,13 +1,13 @@
 title: Python Initiated Connection
 id: bef0bc5a-b9ae-425d-85c6-7b2d705980c6
 status: experimental
-description: Adversaries may attempt to get a listing of services running on remote hosts, including those that may be vulnerable to remote software exploitation
+description: Detects a Python process initiating a network connection. While this often relates to package installation, it can also indicate a potential malicious script communicating with a C&C server.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1046/T1046.md#atomic-test-4---port-scan-using-python
     - https://pypi.org/project/scapy/
 author: frack113
 date: 2021/12/10
-modified: 2022/09/20
+modified: 2023/09/07
 tags:
     - attack.discovery
     - attack.t1046
@@ -17,24 +17,24 @@ logsource:
 detection:
     selection:
         Initiated: 'true'
-        Image|contains: python
-    filter_conda:
+        Image|contains: 'python'
+    filter_optional_conda:
         # Related to anaconda updates. Command example: "conda update conda"
         # This filter will only work with aurora agent enriched data as Sysmon EID 3 doesn't contain CommandLine nor ParentImage
         ParentImage: C:\ProgramData\Anaconda3\Scripts\conda.exe
         CommandLine|contains|all:
-            - 'C:\ProgramData\Anaconda3\Scripts\conda-script.py'
+            - ':\ProgramData\Anaconda3\Scripts\conda-script.py'
             - 'update'
-    filter_conda_jupyter_notebook:
+    filter_optional_conda_jupyter_notebook:
         # Related to anaconda opening an instance of Jupyter Notebook
         # This filter will only work with aurora agent enriched data as Sysmon EID 3 doesn't contain CommandLine nor ParentImage
         ParentImage: C:\ProgramData\Anaconda3\python.exe
         CommandLine|contains: 'C:\ProgramData\Anaconda3\Scripts\jupyter-notebook-script.py'
-    filter_local_communication:
+    filter_main_local_communication:
         # This could be caused when launching an instance of Jupyter Notebook locally for example but can also be caused by other instances of python opening sockets locally etc. So comment this out if you want to monitor for those instances
         DestinationIp: 127.0.0.1
         SourceIp: 127.0.0.1
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate python script
 level: medium

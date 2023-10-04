@@ -6,7 +6,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1222.001/T1222.001.md
     - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/hh750728(v=ws.11)
     - https://github.com/swagkarna/Defeat-Defender-V1.2.0
-author: Jakob Weinzettl, oscd.community, Nasreddine Bencherchali
+author: Jakob Weinzettl, oscd.community, Nasreddine Bencherchali (Nextron Systems)
 date: 2019/10/23
 modified: 2022/11/18
 tags:
@@ -16,7 +16,7 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection1:
+    selection_1:
         Image|endswith:
             - '\cacls.exe'
             - '\icacls.exe'
@@ -26,25 +26,21 @@ detection:
             - '/grant'
             - '/setowner'
             - '/inheritance:r' # Remove all inherited ACEs
-    selection2:
+    selection_2:
         Image|endswith: '\attrib.exe'
         CommandLine|contains: '-r'
-    selection3:
+    selection_3:
         Image|endswith: '\takeown.exe' # If this generates FP in your environment. Comment it out or add more suspicious flags and locations
-    filter_reset:
+    filter_optional_dynatrace_1:
         CommandLine|endswith: 'ICACLS C:\ProgramData\dynatrace\gateway\config\connectivity.history /reset'
-    filter_grant:
+    filter_optional_dynatrace_2:
         CommandLine|contains|all:
             - 'ICACLS C:\ProgramData\dynatrace\gateway\config\config.properties /grant :r '
             - 'S-1-5-19:F'
-    filter_programs:
+    filter_optional_vscode:
         - CommandLine|contains: '\AppData\Local\Programs\Microsoft VS Code'
         - ParentImage|endswith: '\Microsoft VS Code\Code.exe'
-    condition: 1 of selection* and not 1 of filter*
-fields:
-    - ComputerName
-    - User
-    - CommandLine
+    condition: 1 of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Users interacting with the files on their own (unlikely unless privileged users).
     - Dynatrace app
