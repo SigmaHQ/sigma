@@ -20,11 +20,11 @@ jobs:
           curr_tag=$(git for-each-ref --sort=creatordate --format '%(refname:lstrip=2)' refs/tags | grep ^r | tail -1)
           echo "Previous tag: ${prev_tag}"
           echo "Current tag: ${curr_tag}"
-          echo "### New Rules" > changes.txt
+          if [[ $(git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*new: ' -c) -gt 0 ]]; then echo "### New Rules" > changes.txt; fi
           git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*new: ' | sort | sed -e 's%^% - %' >> changes.txt
-          echo "### Updated Rules" >> changes.txt
+          if [[ $(git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*change: ' -c) -gt 0 ]]; then echo "### Updated Rules" >> changes.txt; fi
           git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*change: ' | sort | sed -e 's%^% - %' >> changes.txt
-          echo "### Fixed Rules" >> changes.txt
+          if [[ $(git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*fix: ' -c) -gt 0 ]]; then echo "### Fixed Rules" >> changes.txt; fi
           git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*fix: ' | sort | sed -e 's%^% - %' >> changes.txt
           git log --pretty=%B ${prev_tag}..${curr_tag} | grep -oP 'Merge PR #\d+ from \K(@\S+)' | sort -u > authors_raw.txt
           git log --pretty=%B ${prev_tag}..${curr_tag} | grep -oP "Co-authored-by: \K.*(?= <)" | sort -u | sed -e 's%^%@%' >> authors_raw.txt
