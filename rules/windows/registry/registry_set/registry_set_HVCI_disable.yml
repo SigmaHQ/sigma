@@ -1,0 +1,25 @@
+title: Disable Hypervisor-Protected Code Integrity
+id: 944e8941-f6f6-4ee8-ac05-1c224e923c11
+status: experimental
+description: |
+    Adversaries disable HVCI to gain unrestricted access to the kernel and execute malicious code with elevated privileges.
+references:
+    - https://www.welivesecurity.com/2023/03/01/blacklotus-uefi-bootkit-myth-confirmed/
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1562.001/T1562.001.md
+author: Anish Bogati
+date: 2023/10/0
+modified: 
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|endswith: '\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity\Enabled'
+        Details: 'DWORD (0x00000000)'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
