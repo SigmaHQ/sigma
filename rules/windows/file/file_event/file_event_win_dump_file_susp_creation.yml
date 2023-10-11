@@ -1,0 +1,33 @@
+title: Potentially Suspicious DMP/HDMP File Creation
+id: aba15bdd-657f-422a-bab3-ac2d2a0d6f1c
+related:
+    - id: 3a525307-d100-48ae-b3b9-0964699d7f97
+      type: similar
+status: experimental
+description: Detects the creation of a file with the ".dmp"/".hdmp" extension by a shell or scripting application such as "cmd", "powershell", etc. Often created by software during a crash. Memory dumps can sometimes contain sensitive information such as credentials. It's best to determine the source of the crash.
+references:
+    - https://learn.microsoft.com/en-us/windows/win32/wer/collecting-user-mode-dumps
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/09/07
+tags:
+    - attack.defense_evasion
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\cmd.exe'
+            - '\cscript.exe'
+            - '\mshta.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\wscript.exe'
+        TargetFilename|endswith:
+            - '.dmp'
+            - '.dump'
+            - '.hdmp'
+    condition: selection
+falsepositives:
+    - Some administrative PowerShell or VB scripts might have the ability to collect dumps and move them to other folders which might trigger a false positive.
+level: medium

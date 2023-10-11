@@ -6,7 +6,7 @@ references:
     - https://web.archive.org/web/20200925032237/https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190410151110.html
 author: Roberto Rodriguez @Cyb3rWard0g (rule), oscd.community (improvements)
 date: 2019/09/12
-modified: 2023/05/12
+modified: 2023/09/07
 tags:
     - attack.execution
     - attack.t1059.001
@@ -23,17 +23,19 @@ detection:
             - 'pwsh.dll'
     filter_main_generic:
         ParentImage|endswith:
-            - 'C:\Windows\explorer.exe'
-            - 'C:\Windows\System32\CompatTelRunner.exe'
-            - 'C:\Windows\SysWOW64\explorer.exe'
+            - ':\Windows\explorer.exe'
+            - ':\Windows\System32\CompatTelRunner.exe'
+            - ':\Windows\SysWOW64\explorer.exe'
     filter_main_windows_update:
-        ParentImage: 'C:\$WINDOWS.~BT\Sources\SetupHost.exe' # During Windows updates/upgrades
+        ParentImage: ':\$WINDOWS.~BT\Sources\SetupHost.exe' # During Windows updates/upgrades
         # CommandLine: powershell.exe -ExecutionPolicy Restricted -Command Write-Host 'Final result: 1';
     filter_optional_vscode:
         # Triggered by VsCode when you open a Shell inside the workspace
-        ParentImage|startswith: 'C:\Users\'
         ParentImage|endswith: '\AppData\Local\Programs\Microsoft VS Code\Code.exe'
         ParentCommandLine|contains: ' --ms-enable-electron-run-as-node '
+    filter_optional_terminal:
+        ParentImage|contains: ':\Program Files\WindowsApps\Microsoft.WindowsTerminal_'
+        ParentImage|endswith: '\WindowsTerminal.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Likely. Many admin scripts and tools leverage PowerShell in their BAT or VB scripts which may trigger this rule often. It is best to add additional filters or use this to hunt for anomalies

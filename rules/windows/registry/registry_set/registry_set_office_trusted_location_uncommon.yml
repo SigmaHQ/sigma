@@ -10,7 +10,7 @@ references:
     - https://admx.help/?Category=Office2016&Policy=excel16.Office.Microsoft.Policies.Windows::L_TrustedLoc01
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023/06/21
-modified: 2023/08/17
+modified: 2023/09/29
 tags:
     - attack.defense_evasion
     - attack.t1112
@@ -22,25 +22,22 @@ detection:
         TargetObject|contains: 'Security\Trusted Locations\Location'
         TargetObject|endswith: '\Path'
     filter_exclude_known_paths:
-        Details|startswith:
+        Details|contains:
             - '%APPDATA%\Microsoft\Templates'
             - '%%APPDATA%%\Microsoft\Templates'
             - '%APPDATA%\Microsoft\Word\Startup'
             - '%%APPDATA%%\Microsoft\Word\Startup'
-            - 'C:\Program Files (x86)\Microsoft Office\root\Templates\'
-            - 'C:\Program Files\Microsoft Office (x86)\Templates'
-            - 'C:\Program Files\Microsoft Office\root\Templates\'
-            - 'C:\Program Files\Microsoft Office\Templates\'
+            - ':\Program Files (x86)\Microsoft Office\root\Templates\'
+            - ':\Program Files\Microsoft Office (x86)\Templates'
+            - ':\Program Files\Microsoft Office\root\Templates\'
+            - ':\Program Files\Microsoft Office\Templates\'
     filter_main_office_click_to_run:
-        Image|startswith: 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
+        Image|contains: ':\Program Files\Common Files\Microsoft Shared\ClickToRun\'
         Image|endswith: '\OfficeClickToRun.exe'
     filter_main_office_apps:
-        Image|startswith:
-            - 'C:\Program Files\Microsoft Office\'
-            - 'C:\Program Files (x86)\Microsoft Office\'
-        Image|endswith:
-            - '\winword.exe'
-            - '\excel.exe'
+        Image|contains:
+            - ':\Program Files\Microsoft Office\'
+            - ':\Program Files (x86)\Microsoft Office\'
     condition: selection and not 1 of filter_main_* and not 1 of filter_exclude_*
 falsepositives:
     - Other unknown legitimate or custom paths need to be filtered to avoid false positives

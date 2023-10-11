@@ -7,7 +7,7 @@ references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
 author: Roberto Rodriguez, Teymur Kheirkhabarov, Dimitrios Slamaris, Mark Russinovich, Aleksey Potapov, oscd.community (update)
 date: 2019/11/01
-modified: 2023/08/03
+modified: 2023/10/06
 tags:
     - attack.credential_access
     - car.2019-04-004
@@ -93,6 +93,10 @@ detection:
         AccessList|contains: '%%4484'
     filter_snmp:
         ProcessName: 'C:\Windows\System32\snmp.exe'
+        AccessList|contains: '%%4484'
+    filter_googleupdate:
+        ProcessName|startswith: 'C:\Windows\SystemTemp\'
+        ProcessName|endswith: '\GoogleUpdate.exe'
         AccessList|contains: '%%4484'
     condition: 1 of selection_* and not 1 of filter_*
 falsepositives:

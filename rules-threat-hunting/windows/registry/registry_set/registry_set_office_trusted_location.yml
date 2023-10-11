@@ -21,7 +21,14 @@ detection:
     selection:
         TargetObject|contains: 'Security\Trusted Locations\Location'
         TargetObject|endswith: '\Path'
-    condition: selection
+    filter_main_office_click_to_run:
+        Image|contains: ':\Program Files\Common Files\Microsoft Shared\ClickToRun\'
+        Image|endswith: '\OfficeClickToRun.exe'
+    filter_main_office_apps:
+        Image|contains:
+            - ':\Program Files\Microsoft Office\'
+            - ':\Program Files (x86)\Microsoft Office\'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - During office installations or setup, trusted locations are added, which will trigger this rule.
 level: medium

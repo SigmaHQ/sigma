@@ -1,0 +1,34 @@
+title: Vulnerable AVAST Anti Rootkit Driver Load
+id: 7c676970-af4f-43c8-80af-ec9b49952852
+status: deprecated
+description: Detects the load of a signed and vulnerable AVAST Anti Rootkit driver often used by threat actors or malware for stopping and disabling AV and EDR products
+references:
+    - https://www.aon.com/cyber-solutions/aon_cyber_labs/yours-truly-signed-av-driver-weaponizing-an-antivirus-driver/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2022/07/28
+modified: 2023/09/12
+tags:
+    - attack.privilege_escalation
+    - attack.t1543.003
+logsource:
+    product: windows
+    category: driver_load
+detection:
+    selection_sysmon:
+        Hashes|contains:
+            - 'MD5=a179c4093d05a3e1ee73f6ff07f994aa'
+            - 'SHA1=5d6b9e80e12bfc595d4d26f6afb099b3cb471dd4'
+            - 'SHA256=4b5229b3250c8c08b98cb710d6c056144271de099a57ae09f5d2097fc41bd4f1'
+    selection_other:
+        - md5: 'a179c4093d05a3e1ee73f6ff07f994aa'
+        - sha1: '5d6b9e80e12bfc595d4d26f6afb099b3cb471dd4'
+        - sha256: '4b5229b3250c8c08b98cb710d6c056144271de099a57ae09f5d2097fc41bd4f1'
+    driver_img:
+        ImageLoaded|endswith: '\aswArPot.sys'
+    driver_status:
+        - Signed: 'false'
+        - SignatureStatus: Expired
+    condition: 1 of selection* or all of driver_*
+falsepositives:
+    - Unknown
+level: high
