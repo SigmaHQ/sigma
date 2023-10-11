@@ -6,7 +6,7 @@ references:
     - https://medium.com/falconforce/falconfriday-direct-system-calls-and-cobalt-strike-bofs-0xff14-741fa8e1bdd6
 author: Christian Burkard (Nextron Systems), Tim Shelton
 date: 2021/07/28
-modified: 2023/03/22
+modified: 2023/10/11
 tags:
     - attack.execution
     - attack.t1106
@@ -33,17 +33,19 @@ detection:
         TargetImage|endswith: 'AmazonSSMAgentSetup.exe'
         SourceImage|endswith: 'AmazonSSMAgentSetup.exe'
     falsepositive6:
-        TargetImage|endswith: 'C:\Program Files\Mozilla Firefox\firefox.exe'
-        SourceImage|endswith: 'C:\Program Files\Mozilla Firefox\firefox.exe'
+        TargetImage|endswith: ':\Program Files\Mozilla Firefox\firefox.exe'
+        SourceImage|endswith:
+            - ':\Program Files\Mozilla Firefox\firefox.exe'
+            - ':\Program Files\Mozilla Firefox\plugin-container.exe'
     falsepositive7: # VsCode
         TargetImage|endswith: '\AppData\Local\Programs\Microsoft VS Code\Code.exe'
         SourceImage|endswith: '\AppData\Local\Programs\Microsoft VS Code\Code.exe'
     falsepositive8: # Google Chrome
-        TargetImage|endswith: 'C:\Program Files\Google\Chrome\Application\chrome.exe'
-        SourceImage|endswith: 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+        TargetImage|endswith: ':\Program Files\Google\Chrome\Application\chrome.exe'
+        SourceImage|endswith: ':\Program Files\Google\Chrome\Application\chrome.exe'
     falsepositive9: # Google Chrome Update
-        TargetImage|endswith: 'C:\Program Files (x86)\Google\Update\GoogleUpdate.exe'
-        SourceImage|endswith: 'C:\Program Files (x86)\Google\Update\GoogleUpdate.exe'
+        TargetImage|endswith: ':\Program Files (x86)\Google\Update\GoogleUpdate.exe'
+        SourceImage|endswith: ':\Program Files (x86)\Google\Update\GoogleUpdate.exe'
     falsepositive10: # MS Teams
         TargetImage|endswith: '\AppData\Local\Microsoft\Teams\current\Teams.exe'
         SourceImage|endswith: '\AppData\Local\Microsoft\Teams\current\Teams.exe'
@@ -69,8 +71,12 @@ detection:
         GrantedAccess: '0x1000'
     falsepositive_kerneltrace_edge:  # Cases in which the CallTrace is just e.g. 'UNKNOWN(19290435374)' from Microsoft-Windows-Kernel-Audit-API-Calls provider
         Provider_Name: 'Microsoft-Windows-Kernel-Audit-API-Calls'
-    falsepositives_mixed:
+    falsepositive_mixed:
         TargetImage|endswith: '\Evernote\Evernote.exe'
+    falsepositive_defender:
+        SourceImage: 'C:\Program Files\Microsoft Security Client\MsMpEng.exe'
+        TargetImage: C:\Windows\system32\svchost.exe
+        GrantedAccess: '0x1000'
     condition: selection and not 1 of falsepositive*
 falsepositives:
     - Unknown

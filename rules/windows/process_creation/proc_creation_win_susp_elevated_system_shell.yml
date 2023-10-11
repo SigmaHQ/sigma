@@ -6,7 +6,7 @@ references:
     - https://github.com/Wh04m1001/SysmonEoP
 author: frack113, Tim Shelton (update fp)
 date: 2022/12/05
-modified: 2023/09/14
+modified: 2023/10/11
 tags:
     - attack.privilege_escalation
     - attack.defense_evasion
@@ -68,12 +68,17 @@ detection:
         ParentImage|endswith: '\CompatTelRunner.exe'
         ParentCommandLine|startswith: 'C:\Windows\system32\CompatTelRunner.exe -m:appraiser.dll -f:DoScheduledTelemetryRun'
     filter_ibm_spectrumprotect:
-        ParentImage|startswith: 'C:\IBM\SpectrumProtect\webserver\scripts\'
+        ParentImage|startswith:
+            - 'C:\IBM\SpectrumProtect\webserver\scripts\'
+            - ''
+            - null
         CommandLine|contains: 'C:\IBM\SpectrumProtect\webserver\scripts\'
     filter_msiexec:
         ParentImage: 'C:\Windows\SysWOW64\msiexec.exe'
         ParentCommandLine|startswith: 'C:\Windows\syswow64\MsiExec.exe -Embedding'
         CommandLine|contains: '\RegisterMicrosoftUpdate.ps1'
+    filter_avira_update:
+        CommandLine|startswith: '"C:\Windows\system32\cmd.exe" /C copy "C:\ProgramData\Avira\SystemSpeedup\Update\avira_speedup_setup_update.exe"'
     filter_empty_parent_1:
         # https://answers.microsoft.com/en-us/windows/forum/all/res-and-inf-powershell-commands/793736ee-94bd-424f-811c-35a425e28832
         # Most probably SetupHost.exe during Windows updates/upgrades; See comment on rule id: f4bbd493-b796-416e-bbf2-121235348529

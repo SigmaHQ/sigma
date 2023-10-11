@@ -7,7 +7,7 @@ references:
     - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/schtasks
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/07/28
-modified: 2023/03/14
+modified: 2023/10/11
 tags:
     - attack.execution
     - attack.persistence
@@ -29,11 +29,14 @@ detection:
             - ' SYSTEM ' # SYSTEM is a valid value for schtasks hence it gets it's own value with space
     filter_teamviewer:
         # FP from test set in SIGMA
-        ParentImage|contains|all:
-            - '\AppData\Local\Temp\'
-            - 'TeamViewer_.exe'
+        # Cannot use ParentImage on all OSes for 4688 events
+        # ParentImage|contains|all:
+        #     - '\AppData\Local\Temp\'
+        #     - 'TeamViewer_.exe'
         Image|endswith: '\schtasks.exe'
-        CommandLine|contains: '/TN TVInstallRestore'
+        CommandLine|contains|all:
+            - '/TN TVInstallRestore'
+            - '\TeamViewer_.exe'
     filter_avira:
         CommandLine|contains:
             - '/Create /F /RU System /SC WEEKLY /TN AviraSystemSpeedupVerify /TR '
