@@ -27,7 +27,7 @@ detection:
         CommandLine|contains:
             - 'NT AUT' # This covers the usual NT AUTHORITY\SYSTEM
             - ' SYSTEM ' # SYSTEM is a valid value for schtasks hence it gets it's own value with space
-    filter_teamviewer:
+    filter_optional_teamviewer:
         # FP from test set in SIGMA
         # Cannot use ParentImage on all OSes for 4688 events
         # ParentImage|contains|all:
@@ -37,12 +37,12 @@ detection:
         CommandLine|contains|all:
             - '/TN TVInstallRestore'
             - '\TeamViewer_.exe'
-    filter_avira:
+    filter_optional_avira:
         CommandLine|contains:
             - '/Create /F /RU System /SC WEEKLY /TN AviraSystemSpeedupVerify /TR '
-            - 'C:\Program Files (x86)\Avira\System Speedup\setup\avira_speedup_setup.exe'
+            - ':\Program Files (x86)\Avira\System Speedup\setup\avira_speedup_setup.exe'
             - '/VERIFY /VERYSILENT /NOSTART /NODOTNET /NORESTART" /RL HIGHEST'
-    condition: all of selection_* and not 1 of filter_*
+    condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high
