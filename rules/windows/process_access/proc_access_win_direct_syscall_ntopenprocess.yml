@@ -6,7 +6,7 @@ references:
     - https://medium.com/falconforce/falconfriday-direct-system-calls-and-cobalt-strike-bofs-0xff14-741fa8e1bdd6
 author: Christian Burkard (Nextron Systems), Tim Shelton
 date: 2021/07/28
-modified: 2023/03/22
+modified: 2023/10/11
 tags:
     - attack.execution
     - attack.t1106
@@ -16,50 +16,52 @@ logsource:
 detection:
     selection:
         CallTrace|startswith: 'UNKNOWN'
-    falsepositive1:
-        TargetImage: 'C:\Program Files\Cylance\Desktop\CylanceUI.exe'
-        SourceImage: 'C:\Windows\Explorer.EXE'
-    falsepositive2:
-        TargetImage: 'C:\Program Files (x86)\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe'
-        SourceImage|startswith: 'C:\Program Files (x86)\Microsoft\Temp\'
+    filter_main_1:
+        TargetImage|endswith: ':\Program Files\Cylance\Desktop\CylanceUI.exe'
+        SourceImage|endswith: ':\Windows\Explorer.EXE'
+    filter_main_2:
+        TargetImage|endswith: ':\Program Files (x86)\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe'
+        SourceImage|contains: ':\Program Files (x86)\Microsoft\Temp\'
         SourceImage|endswith: '\MicrosoftEdgeUpdate.exe'
-    falsepositive3:
+    filter_main_3:
         TargetImage|endswith: 'vcredist_x64.exe'
         SourceImage|endswith: 'vcredist_x64.exe'
-    falsepositive4:
-        TargetImage: 'C:\Windows\system32\systeminfo.exe'
+    filter_main_4:
+        TargetImage|endswith: ':\Windows\system32\systeminfo.exe'
         SourceImage|endswith: 'setup64.exe' #vmware
-    falsepositive5:
+    filter_main_5:
         TargetImage|endswith: 'AmazonSSMAgentSetup.exe'
         SourceImage|endswith: 'AmazonSSMAgentSetup.exe'
-    falsepositive6:
-        TargetImage|endswith: 'C:\Program Files\Mozilla Firefox\firefox.exe'
-        SourceImage|endswith: 'C:\Program Files\Mozilla Firefox\firefox.exe'
-    falsepositive7: # VsCode
+    filter_main_6:
+        TargetImage|endswith: ':\Program Files\Mozilla Firefox\firefox.exe'
+        SourceImage|endswith:
+            - ':\Program Files\Mozilla Firefox\firefox.exe'
+            - ':\Program Files\Mozilla Firefox\plugin-container.exe'
+    filter_main_7: # VsCode
         TargetImage|endswith: '\AppData\Local\Programs\Microsoft VS Code\Code.exe'
         SourceImage|endswith: '\AppData\Local\Programs\Microsoft VS Code\Code.exe'
-    falsepositive8: # Google Chrome
-        TargetImage|endswith: 'C:\Program Files\Google\Chrome\Application\chrome.exe'
-        SourceImage|endswith: 'C:\Program Files\Google\Chrome\Application\chrome.exe'
-    falsepositive9: # Google Chrome Update
-        TargetImage|endswith: 'C:\Program Files (x86)\Google\Update\GoogleUpdate.exe'
-        SourceImage|endswith: 'C:\Program Files (x86)\Google\Update\GoogleUpdate.exe'
-    falsepositive10: # MS Teams
+    filter_main_8: # Google Chrome
+        TargetImage|endswith: ':\Program Files\Google\Chrome\Application\chrome.exe'
+        SourceImage|endswith: ':\Program Files\Google\Chrome\Application\chrome.exe'
+    filter_main_9: # Google Chrome Update
+        TargetImage|endswith: ':\Program Files (x86)\Google\Update\GoogleUpdate.exe'
+        SourceImage|endswith: ':\Program Files (x86)\Google\Update\GoogleUpdate.exe'
+    filter_main_10: # MS Teams
         TargetImage|endswith: '\AppData\Local\Microsoft\Teams\current\Teams.exe'
         SourceImage|endswith: '\AppData\Local\Microsoft\Teams\current\Teams.exe'
-    falsepositives11:
+    filter_main_11:
         TargetImage: 'C:\Windows\System32\backgroundTaskHost.exe'
         SourceImage: 'C:\Windows\System32\backgroundTaskHost.exe'
-    falsepositives12:
+    filter_main_12:
         TargetImage: 'C:\Program Files (x86)\CCleaner Browser\Application\CCleanerBrowser.exe'
         SourceImage: 'C:\Program Files (x86)\CCleaner Browser\Application\CCleanerBrowser.exe'
-    falsepositives13: # Discord
+    filter_main_13: # Discord
         TargetImage|startswith: 'C:\Users\'
         TargetImage|contains: '\AppData\Local\Discord\'
         TargetImage|endswith: '\Discord.exe'
-    falsepositives14:
+    filter_main_14:
         TargetImage: 'C:\WINDOWS\system32\AUDIODG.EXE'
-    falsepositives15:
+    filter_main_15:
         SourceImage|startswith: 'C:\Users\'
         SourceImage|contains: '\AppData\Local\yammerdesktop\app-'
         SourceImage|endswith: '\Yammer.exe'
@@ -67,11 +69,16 @@ detection:
         TargetImage|contains: '\AppData\Local\yammerdesktop\app-'
         TargetImage|endswith: '\Yammer.exe'
         GrantedAccess: '0x1000'
-    falsepositive_kerneltrace_edge:  # Cases in which the CallTrace is just e.g. 'UNKNOWN(19290435374)' from Microsoft-Windows-Kernel-Audit-API-Calls provider
+    filter_main_kerneltrace_edge:
+        # Cases in which the CallTrace is just e.g. 'UNKNOWN(19290435374)' from Microsoft-Windows-Kernel-Audit-API-Calls provider
         Provider_Name: 'Microsoft-Windows-Kernel-Audit-API-Calls'
-    falsepositives_mixed:
+    filter_main_mixed:
         TargetImage|endswith: '\Evernote\Evernote.exe'
-    condition: selection and not 1 of falsepositive*
-falsepositives:
+    filter_main_defender:
+        SourceImage: 'C:\Program Files\Microsoft Security Client\MsMpEng.exe'
+        TargetImage: C:\Windows\system32\svchost.exe
+        GrantedAccess: '0x1000'
+    condition: selection and not 1 of filter_main_*
+filter_main_:
     - Unknown
 level: high
