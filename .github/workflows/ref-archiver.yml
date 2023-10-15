@@ -1,0 +1,25 @@
+name: "Reference Archiver"
+on:
+  schedule:
+  - cron: "30 1 1,15 * *"
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3.3.0
+      with:
+        submodules: true
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4.5.0
+      with:
+        python-version: 3.11
+    - name: Test Sigma logsource
+      run: |
+        pip install PyYAML argparse requests
+        python tests/ref-archiver.py -d rules/
+    - uses: JasonEtco/create-an-issue@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        filename: .github/archiver_output.md
