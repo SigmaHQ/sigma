@@ -1,12 +1,13 @@
-title: Windows Webshell Creation
+title: Potential Webshell Creation On Static Website
 id: 39f1f9f2-9636-45de-98f6-a4046aa8e4b9
 status: test
-description: Possible webshell file creation on a static web site
+description: Detects the creation of files with certain extensions on a static web site. This can be indicative of potential uploads of a web shell.
 references:
     - PT ESC rule and personal experience
-author: Beyu Denis, oscd.community, Tim Shelton
+    - https://github.com/swisskyrepo/PayloadsAllTheThings/blob/c95a0a1a2855dc0cd7f7327614545fe30482a636/Upload%20Insecure%20Files/README.md
+author: Beyu Denis, oscd.community, Tim Shelton, Thurein Oo
 date: 2019/10/22
-modified: 2022/09/18
+modified: 2023/10/15
 tags:
     - attack.persistence
     - attack.t1505.003
@@ -14,29 +15,37 @@ logsource:
     product: windows
     category: file_event
 detection:
-    selection_wwwroot:
+    selection_wwwroot_path:
         TargetFilename|contains: '\inetpub\wwwroot\'
-    selection_ext1:
+    selection_wwwroot_ext:
         TargetFilename|contains:
-            - '.asp'
             - '.ashx'
+            - '.asp'
             - '.ph'
-    selection_static:
+            - '.soap'
+    selection_htdocs_path:
         TargetFilename|contains:
             - '\www\'
             - '\htdocs\'
             - '\html\'
-    selection_ext2:
+    selection_htdocs_ext:
         TargetFilename|contains: '.ph'
-    false_positive1:  # false positives when unpacking some executables in $TEMP
+    #selection_tomcat_path:
+    #    TargetFilename|contains: '\webapps\ROOT'
+    #selection_tomcat_ext:
+    #    TargetFilename|contains:
+    #        - '.jsp' # .jspx, .jspf
+    #        - '.jsv'
+    #        - '.jsw'
+    filter_main_temp:  # FP when unpacking some executables in $TEMP
         TargetFilename|contains:
             - '\AppData\Local\Temp\'
             - '\Windows\Temp\'
-    false_positive_system:
-        Image: 'System' # fp : backup/restore from drivers
-    false_positive_legitimate:
+    filter_main_system:
+        Image: 'System' # FP when backup/restore from drivers
+    filter_main_legitimate:
         TargetFilename|contains: '\xampp'
-    condition: ((selection_wwwroot and selection_ext1) or (selection_static and selection_ext2)) and not 1 of false_positive*
+    condition: (all of selection_wwwroot_* or all of selection_htdocs_*) and not 1 of filter_main_*
 falsepositives:
     - Legitimate administrator or developer creating legitimate executable files in a web application folder
-level: high
+level: medium
