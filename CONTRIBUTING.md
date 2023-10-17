@@ -43,8 +43,4 @@ git push origin your-feature-branch
 
 To update or contribute a new rule please make sure to follow the guidelines in the [SigmaHQ conventions document](https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/sigmahq_conventions.md). Consider installing the [VsCode Sigma Extension](https://marketplace.visualstudio.com/items?itemName=humpalum.sigma) for auto completion and quality of life features.
 
-## 📜 Code of Conduct
-
-By participating in this project, you agree to abide by the [Code of Conduct](CODE_OF_CONDUCT.md).
-
 Thank you for contributing to Sigma! 🧙‍♂️
