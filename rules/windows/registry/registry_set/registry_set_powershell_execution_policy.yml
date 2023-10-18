@@ -13,7 +13,7 @@ references:
     - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy?view=powershell-7.3
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023/01/11
-modified: 2023/08/17
+modified: 2023/10/18
 tags:
     - attack.defense_evasion
 logsource:
@@ -31,11 +31,12 @@ detection:
             - 'Bypass'
             - 'RemoteSigned'
             - 'Unrestricted'
-    filter_svchost:
-        Image|startswith:
-            - 'C:\Windows\System32\'
-            - 'C:\Windows\SysWOW64\'
-    condition: selection and not 1 of filter_*
+    filter_main_svchost:
+        # Note: We filter out "svchost" to avoid FP with changes using "gpedit" for example.
+        Image|contains:
+            - ':\Windows\System32\'
+            - ':\Windows\SysWOW64\'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: medium
