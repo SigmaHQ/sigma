@@ -1743,32 +1743,39 @@ class TestRules(unittest.TestCase):
         faulty_config = False
 
         # This test check of the "thor.yml" config file has a missing "WinEventLog:" prefix in Windows log sources
-        path_to_thor_config = "../tests/thor.yml"
-        path_to_thor_config = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), path_to_thor_config
-        )
-        thor_logsources = self.get_rule_yaml(path_to_thor_config)[0]["logsources"]
+        path_to_thor_config = "tests/thor.yml"
+        try:
+            path_to_thor_config = os.path.join(
+                os.path.dirname(os.path.realpath(__file__)), path_to_thor_config
+            )
+            thor_logsources = self.get_rule_yaml(path_to_thor_config)[0]["logsources"]
 
-        for key, value in thor_logsources.items():
-            try:
-                if value["product"] == "windows":
-                    sources_list = value["sources"]
-                    for i in sources_list:
-                        if not i.startswith("WinEventLog:"):
-                            faulty_config = True
-                            print(
-                                Fore.RED
-                                + "/tests/thor.yml config file has a broken source. Windows Eventlog sources must start with the keyword 'WinEventLog:'"
-                            )
-            except:
-                pass
-
-        self.assertEqual(
-            faulty_config,
-            False,
-            Fore.RED
-            + "thor.yml configuration file located in 'tests/thor.yml' has a borken log source definition",
-        )
+            for key, value in thor_logsources.items():
+                try:
+                    if value["product"] == "windows":
+                        sources_list = value["sources"]
+                        for i in sources_list:
+                            if not i.startswith("WinEventLog:"):
+                                faulty_config = True
+                                print(
+                                    Fore.RED
+                                    + "/tests/thor.yml config file has a broken source. Windows Eventlog sources must start with the keyword 'WinEventLog:'"
+                                )
+                except:
+                    pass
+            self.assertEqual(
+                faulty_config,
+                False,
+                Fore.RED
+                + "thor.yml configuration file located in 'tests/thor.yml' has a borken log source definition",
+            )
+        except:
+            self.assertEqual(
+                faulty_config,
+                False,
+                Fore.RED
+                + "thor.yml configuration file was not found. Please make sure to run the script from the root of the sigma folder",
+            )
 
     def test_re_invalid_escapes(self):
         faulty_rules = []
