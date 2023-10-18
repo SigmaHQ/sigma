@@ -4,7 +4,7 @@ status: test
 description: Detects the creation of an executable with a system process name in folders other than the system ones (System32, SysWOW64...etc).
 author: Sander Wiebing, Tim Shelton, Nasreddine Bencherchali (Nextron Systems)
 date: 2020/05/26
-modified: 2023/10/08
+modified: 2023/10/18
 tags:
     - attack.defense_evasion
     - attack.t1036.005
@@ -115,7 +115,9 @@ detection:
         # This filter handles system processes who are updated/installed using misexec.
         Image|endswith: ':\WINDOWS\system32\msiexec.exe'
         # Add more processes if you find them or simply filter msiexec on its own. If the list grows big
-        TargetFilename|endswith: ':\Program Files\PowerShell\7\pwsh.exe'
+        TargetFilename|endswith:
+            - ':\Program Files\PowerShell\7\pwsh.exe'
+            - ':\Program Files\PowerShell\7-preview\pwsh.exe'
     filter_main_healtray:
         TargetFilename|contains: ':\Windows\System32\SecurityHealth\'
         TargetFilename|endswith: '\SecurityHealthSystray.exe'
