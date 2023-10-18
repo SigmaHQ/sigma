@@ -1,0 +1,22 @@
+title: "Suspicious Registry Key Modification to Turn on Script Execution (via registry_event)"
+id: 590ab290-7f07-44aa-a914-45a78062aa9b
+description: "Detect when registry modification are made to Turn on Script Execution so that any script could be run."
+author: Thurein Oo
+references: 'https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.PowerShell::EnableScripts'
+status: "stable"
+logsource:
+  product: "windows"
+  category: "registry_event"
+detection:
+  selection:
+    TargetObject|contains: 'Software\Policies\Microsoft\Windows\PowerShell'
+    TargetObject|endswith: 
+    - '\EnableScripts'
+    Details: '1'
+  condition: "selection"
+falsepositives:
+- "Legit administrators' activity"
+level: "medium"
+tags:
+- attack.execution
+- attack.t1059
