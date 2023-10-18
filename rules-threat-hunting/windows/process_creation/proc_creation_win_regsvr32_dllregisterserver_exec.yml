@@ -1,0 +1,54 @@
+title: Regsvr32.EXE Calling of DllRegisterServer Export Function Implicitly
+id: ce2c44b5-a6ac-412a-afba-9e89326fa972
+related:
+    - id: 0ba1da6d-b6ce-4366-828c-18826c9de23e
+      type: similar
+status: experimental
+description: |
+    Detects execution of regsvr32 with the silent flag and no other flags on a DLL located in an uncommon or potentially suspicious location.
+    When Regsvr32 is called in such a way, it implicitly calls the DLL export function 'DllRegisterServer'.
+references:
+    - https://thedfirreport.com/2023/08/28/html-smuggling-leads-to-domain-wide-ransomware/
+    - https://www.virustotal.com/gui/file/288fc4f954f98d724e6fab32a89477943df5c0e9662cb199a19b90ae0c63aebe/detection
+    - https://learn.microsoft.com/en-us/windows/win32/api/olectl/nf-olectl-dllregisterserver
+    - https://ss64.com/nt/regsvr32.html
+author: Andreas Braathen (mnemonic.io), Nasreddine Bencherchali (Nextron Systems)
+date: 2023/10/17
+tags:
+    - attack.execution
+    - attack.t1218
+    - detection.threat_hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_image:
+        - Image|endswith: '\regsvr32.exe'
+        - OriginalFileName: 'REGSVR32.EXE'
+    selection_cmdline:
+        CommandLine|contains:
+            - ' /s '
+            - ' /e '
+    filter_main_paths:
+        - CommandLine|contains:
+              - ':\Program Files (x86)'
+              - ':\Program Files\'
+              - ':\Windows\System32\'
+              - ':\Windows\SysWOW64\'
+        - CurrentDirectory|contains:
+              - ':\Program Files (x86)'
+              - ':\Program Files\'
+              - ':\Windows\System32\'
+              - ':\Windows\SysWOW64\'
+    filter_main_other_flags:
+        # Note: We filter other flags to keep the logic of the rule
+        CommandLine|contains:
+            - ' /i:'
+            - '/U '
+    filter_main_rpcproxy:
+        ParentCommandLine|endswith: ':\Windows\System32\RpcProxy\RpcProxy.dll'
+        CommandLine: 'regsvr32 /s rpcproxy.dll'
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Legitimate usage as part of application installation, but less likely from e.g. temporary paths.
+level: medium
