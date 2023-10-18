@@ -75,7 +75,7 @@ def get_rules_to_promote():
 def promote_rules(rules_to_promote):
     for file_ in rules_to_promote:
         with open(file_, "r", encoding="utf8") as f:
-            data = f.read().replace("status: experimental", "status: test")
+            data = f.read().replace("\nstatus: experimental", "\nstatus: test")
 
         with open(file_, "w", encoding="utf8") as f:
             f.write(data)
