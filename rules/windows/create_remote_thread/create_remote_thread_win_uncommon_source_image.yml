@@ -67,37 +67,32 @@ detection:
             - '\wmic.exe'
             - '\wscript.exe'
     filter_main_winlogon_1:
-        SourceImage: 'C:\Windows\System32\winlogon.exe'
-        TargetImage:
-            - 'C:\Windows\System32\services.exe' # happens on Windows 7
-            - 'C:\Windows\System32\wininit.exe' # happens on Windows 7
-            - 'C:\Windows\System32\csrss.exe' # multiple OS
+        SourceImage|endswith: ':\Windows\System32\winlogon.exe'
+        TargetImage|endswith:
+            - ':\Windows\System32\services.exe' # happens on Windows 7
+            - ':\Windows\System32\wininit.exe' # happens on Windows 7
+            - ':\Windows\System32\csrss.exe' # multiple OS
     filter_main_winlogon_2:
         SourceImage: 'C:\Windows\System32\winlogon.exe'
         TargetParentImage: 'System'
         TargetParentProcessId: 4
-    filter_main_provtool:
-        SourceImage: 'C:\Windows\System32\provtool.exe'
-        TargetParentProcessId: 0
-    filter_main_vssvc:
-        SourceImage: 'C:\Windows\System32\VSSVC.exe'
-        TargetImage: 'System'
     filter_main_schtasks_conhost:
-        SourceImage:
-            - 'C:\Windows\System32\schtasks.exe'
-            - 'C:\Windows\SysWOW64\schtasks.exe'
-        TargetImage: 'C:\Windows\System32\conhost.exe'
-    filter_main_mmc:
-        SourceImage: 'C:\Windows\explorer.exe'
-        TargetImage: 'C:\Windows\System32\mmc.exe'
-    filter_optional_nvidia:
-        SourceImage: 'C:\Windows\explorer.exe'
-        TargetImage: 'C:\Program Files\NVIDIA Corporation\NVIDIA GeForce Experience\NVIDIA GeForce Experience.exe'
-    # filter_optional_powerpnt:
-    #     # Raised by the following issue: https://github.com/SigmaHQ/sigma/issues/2479
-    #     SourceImage|contains: '\Microsoft Office\'
-    #     SourceImage|endswith: '\POWERPNT.EXE'
-    #     TargetImage: 'C:\Windows\System32\csrss.exe'
+        SourceImage|endswith:
+            - ':\Windows\System32\schtasks.exe'
+            - ':\Windows\SysWOW64\schtasks.exe'
+        TargetImage|endswith: ':\Windows\System32\conhost.exe'
+    filter_main_explorer:
+        SourceImage|endswith: ':\Windows\explorer.exe'
+        TargetImage|endswith:
+            - ':\Windows\System32\mmc.exe'
+            - ':\Program Files\NVIDIA Corporation\NVIDIA GeForce Experience\NVIDIA GeForce Experience.exe'
+    filter_main_system:
+        TargetImage: 'System'
+    filter_optional_powerpnt:
+        # Raised by the following issue: https://github.com/SigmaHQ/sigma/issues/2479
+        SourceImage|contains: '\Microsoft Office\'
+        SourceImage|endswith: '\POWERPNT.EXE'
+        TargetImage|endswith: ':\Windows\System32\csrss.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
