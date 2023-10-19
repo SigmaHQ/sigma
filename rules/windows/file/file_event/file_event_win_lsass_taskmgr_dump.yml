@@ -1,0 +1,25 @@
+title: TaskManager LSASS Process Memory Dump
+id: 69ca12af-119d-44ed-b50f-a47af0ebc364
+status: experimental
+description: Detects manual dumping of LSASS.exe memory using Windows Task Manager
+author: Swachchhanda Shrawan Poudel
+date: 2023/10/19
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1003.001/T1003.001.md#atomic-test-5---dump-lsassexe-memory-using-windows-task-manager
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        Image: C:\Windows\system32\taskmgr.exe
+        TargetFilename|contains|all:
+            - '\AppData\Local\Temp\'
+            - 'lsass'
+            - '.DMP'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
