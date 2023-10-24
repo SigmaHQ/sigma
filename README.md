@@ -1,6 +1,10 @@
 [![sigma build status](https://github.com/SigmaHQ/sigma/actions/workflows/sigma-test.yml/badge.svg?branch=master)](https://github.com/SigmaHQ/sigma/actions?query=branch%3Amaster)
 
-![sigma_logo](./images/sigma_logo_dark.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./images/sigma_logo_dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="./images/sigma_logo_light.png">
+  <img alt="Shows an illustrated sun in light mode and a moon with stars in dark mode." src="./images/sigma_logo_dark.png">
+</picture>
 
 # Sigma
 
