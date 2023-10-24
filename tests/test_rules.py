@@ -25,6 +25,12 @@ class TestRules(unittest.TestCase):
         cls.MITRE_ALL = get_mitre_data()
         print("Catched data - starting tests...")
 
+    # Prepare Workflow Output
+    workflow_error_counter = 0
+    workflow_results = open("tests/output.md", "w")
+
+    workflow_results.write("## SIGMA Test Workflow Output \n\n")
+
     MITRE_TECHNIQUE_NAMES = [
         "process_injection",
         "signed_binary_proxy_execution",
@@ -107,6 +113,17 @@ class TestRules(unittest.TestCase):
                     if tm in file_data:
                         files_with_legal_issues.append(file)
 
+        if files_with_legal_issues:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Legal Trademark Violation Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rule files which contains a trademark or reference that doesn't comply with the respective trademark requirements - please remove the trademark to avoid legal issues\n"
+            )
+            for file in files_with_legal_issues:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             files_with_legal_issues,
             [],
@@ -129,6 +146,15 @@ class TestRules(unittest.TestCase):
                             + "Rule {} has the invalid tag <{}>".format(file, tag)
                         )
                         files_with_incorrect_tags.append(file)
+
+        if files_with_incorrect_tags:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ Tags Field Test Failed \n\n")
+            self.workflow_results.write(
+                "There are rules with incorrect/unknown Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://github.com/SigmaHQ/sigma-specification/blob/main/Tags_specification.md\n"
+            )
+            for file in files_with_incorrect_tags:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             files_with_incorrect_tags,
@@ -153,6 +179,15 @@ class TestRules(unittest.TestCase):
                         )
                         files_with_incorrect_mitre_tags.append(file)
 
+        if files_with_incorrect_mitre_tags:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ ATT&CK Tags Test Failed \n\n")
+            self.workflow_results.write(
+                "There are rules with incorrect/unknown MITRE ATT&CK tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://attack.mitre.org/\n"
+            )
+            for file in files_with_incorrect_mitre_tags:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             files_with_incorrect_mitre_tags,
             [],
@@ -161,7 +196,7 @@ class TestRules(unittest.TestCase):
         )
 
     def test_duplicate_tags(self):
-        files_with_incorrect_mitre_tags = []
+        files_with_duplicate_tags = []
 
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             tags = self.get_rule_part(file_path=file, part_name="tags")
@@ -173,12 +208,19 @@ class TestRules(unittest.TestCase):
                             Fore.RED
                             + "Rule {} has the duplicate tag {}".format(file, tag)
                         )
-                        files_with_incorrect_mitre_tags.append(file)
+                        files_with_duplicate_tags.append(file)
                     else:
                         known_tags.append(tag)
 
+        if files_with_duplicate_tags:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ Duplicate Tags Test Failed \n\n")
+            self.workflow_results.write("There are rules with duplicate tags\n")
+            for file in files_with_duplicate_tags:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
-            files_with_incorrect_mitre_tags,
+            files_with_duplicate_tags,
             [],
             Fore.RED + "There are rules with duplicate tags",
         )
@@ -201,6 +243,13 @@ class TestRules(unittest.TestCase):
                         files_with_duplicate_references.append(file)
                     else:
                         known_references.append(reference)
+
+        if files_with_duplicate_references:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ Duplicate Reference Test Failed \n\n")
+            self.workflow_results.write("There are rules with duplicate references\n")
+            for file in files_with_duplicate_references:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             files_with_duplicate_references,
@@ -258,6 +307,13 @@ class TestRules(unittest.TestCase):
             detection = self.get_rule_part(file_path=file, part_name="detection")
             check_list_or_recurse_on_dict(detection, 1, False)
 
+        if files_with_duplicate_filters:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ Duplicate Filters Test Failed \n\n")
+            self.workflow_results.write("There are rules with duplicate filters\n")
+            for file in files_with_duplicate_filters:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             files_with_duplicate_filters,
             [],
@@ -280,6 +336,15 @@ class TestRules(unittest.TestCase):
         for file in self.yield_next_rule_file_path(self.path_to_rules):
             detection = self.get_rule_part(file_path=file, part_name="detection")
             key_iterator(detection, faulty_fieldnames)
+
+        if faulty_fieldnames:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ Space In Field Name Test Failed \n\n")
+            self.workflow_results.write(
+                "There are rules with an unsupported field name. Spaces are not allowed. (Replace space with an underscore character '_' )\n"
+            )
+            for file in faulty_fieldnames:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             faulty_fieldnames,
@@ -306,6 +371,15 @@ class TestRules(unittest.TestCase):
             ):
                 faulty_detections.append(file)
 
+        if faulty_detections:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ `1/all of them` Usage Test Failed \n\n")
+            self.workflow_results.write(
+                "There are rules using '1/all of them' style conditions but only have one condition\n"
+            )
+            for file in faulty_detections:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_detections,
             [],
@@ -321,6 +395,15 @@ class TestRules(unittest.TestCase):
 
             if "all of them" in detection["condition"]:
                 faulty_detections.append(file)
+
+        if faulty_detections:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ `all of them` Usage Test Failed \n\n")
+            self.workflow_results.write(
+                "There are rules using 'all of them'. Better use e.g. 'all of selection*' instead (and use the 'selection_' prefix as search-identifier).\n"
+            )
+            for file in faulty_detections:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             faulty_detections,
@@ -406,6 +489,15 @@ class TestRules(unittest.TestCase):
 
             files_and_their_detections[file] = detection
 
+        if faulty_detections:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ Duplicate Detections Test Failed \n\n")
+            self.workflow_results.write(
+                "There are rule files with exactly the same detection logic.\n"
+            )
+            for file in faulty_detections:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_detections,
             [],
@@ -420,6 +512,17 @@ class TestRules(unittest.TestCase):
             detection_str = str(detection).lower()
             if "'source': 'eventlog'" in detection_str:
                 faulty_detections.append(file)
+
+        if faulty_detections:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ `Eventlog Source` Keyword Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are detections with 'Source: Eventlog'. This does not add value to the detection.\n"
+            )
+            for file in faulty_detections:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             faulty_detections,
@@ -481,6 +584,17 @@ class TestRules(unittest.TestCase):
                                                     if file not in faulty_detections:
                                                         faulty_detections.append(file)
 
+        if faulty_detections:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ EventID Use Instead Of Process Creation Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rules still using Sysmon 1 or Event ID 4688. Please migrate to the process_creation category.\n"
+            )
+            for file in faulty_detections:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_detections,
             [],
@@ -512,6 +626,15 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
             else:
                 dict_id[id.lower()] = file
+
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ Missing Id Field Test Failed \n\n")
+            self.workflow_results.write(
+                "There are rules with missing or malformed 'id' fields. Generate an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             faulty_rules,
@@ -579,6 +702,15 @@ class TestRules(unittest.TestCase):
                         )
                         faulty_rules.append(file)
 
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ Optional Field Test Failed \n\n")
+            self.workflow_results.write(
+                "There are rules with malformed optional 'related' fields. (check https://github.com/SigmaHQ/sigma-specification)\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_rules,
             [],
@@ -602,6 +734,17 @@ class TestRules(unittest.TestCase):
                                 break
                         if not found:
                             faulty_rules.append(file)
+
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Sysmon Rule Without EventID Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rules using sysmon events but with no EventID specified\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             faulty_rules,
@@ -642,6 +785,17 @@ class TestRules(unittest.TestCase):
                 )
                 faulty_rules.append(file)
 
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Missing Or Malformed Date Field Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rules with missing or malformed 'date' fields. (create one, e.g. date: 2019/01/14)\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_rules,
             [],
@@ -675,11 +829,22 @@ class TestRules(unittest.TestCase):
                 )
                 faulty_rules.append(file)
 
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Missing Or Malformed Description Field Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rules with missing or malformed 'description' field. (create one, e.g. description: Detects the suspicious behavior of process XY doing YZ)\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_rules,
             [],
             Fore.RED
-            + "There are rules with missing or malformed 'description' field. (create one, e.g. description: Detects the suspicious behaviour of process XY doing YZ)",
+            + "There are rules with missing or malformed 'description' field. (create one, e.g. description: Detects the suspicious behavior of process XY doing YZ)",
         )
 
     def test_optional_date_modified(self):
@@ -711,6 +876,17 @@ class TestRules(unittest.TestCase):
                         )
                     )
                     faulty_rules.append(file)
+
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Malformed Modified Field Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rules with malformed 'modified' fields. (create one, e.g. date: 2019/01/14)\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             faulty_rules,
@@ -745,6 +921,17 @@ class TestRules(unittest.TestCase):
                 )
                 faulty_rules.append(file)
 
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Missing Or Malformed Optional Field Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rules with malformed or missing 'status' fields. (check https://github.com/SigmaHQ/sigma-specification)\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_rules,
             [],
@@ -773,6 +960,17 @@ class TestRules(unittest.TestCase):
                 )
                 faulty_rules.append(file)
 
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Missing Or Malformed Level Field Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rules with missing or malformed 'level' fields. (check https://github.com/SigmaHQ/sigma-specification)\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_rules,
             [],
@@ -792,6 +990,17 @@ class TestRules(unittest.TestCase):
                         + "Rule {} has a 'fields' field that isn't a list.".format(file)
                     )
                     faulty_rules.append(file)
+
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Missing Or Malformed Fields Field Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rules with malformed optional 'fields' fields. (has to be a list of values even if it contains only a single value)\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             faulty_rules,
@@ -816,6 +1025,17 @@ class TestRules(unittest.TestCase):
                         )
                     )
                     faulty_rules.append(file)
+
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Malformed Falsepositives Field Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rules with malformed optional 'falsepositives' fields. (has to be a list of values even if it contains only a single value)\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             faulty_rules,
@@ -844,6 +1064,17 @@ class TestRules(unittest.TestCase):
                         print("TypeError Exception for rule {}".format(file))
                         print("Error: {}".format(err))
                         print("Maybe you created an empty falsepositive item?")
+
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Falsepositives Capital Letter Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rules with false positives that don't start with a capital letter (e.g. 'unknown' should be 'Unknown')\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             faulty_rules,
@@ -879,6 +1110,17 @@ class TestRules(unittest.TestCase):
                             )
                             faulty_rules.append(file)
 
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Invalid Falsepositives Value Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rules with invalid false positive definitions (e.g. Pentest, None or common typos)\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_rules,
             [],
@@ -902,6 +1144,15 @@ class TestRules(unittest.TestCase):
                     )
                     faulty_rules.append(file)
 
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ Malformed Author Field Test Failed \n\n")
+            self.workflow_results.write(
+                "There are rules with malformed 'author' fields. (has to be a string even if it contains many author)\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_rules,
             [],
@@ -922,6 +1173,17 @@ class TestRules(unittest.TestCase):
                         )
                     )
                     faulty_rules.append(file)
+
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Malformed License Field Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rules with malformed 'license' fields. (has to be a string )\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             faulty_rules,
@@ -955,6 +1217,15 @@ class TestRules(unittest.TestCase):
                     )
                     faulty_rules.append(file)
 
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ Malformed TLP Field Test Failed \n\n")
+            self.workflow_results.write(
+                "There are rules with malformed optional 'tlp' fields. (https://www.cisa.gov/tlp)\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_rules,
             [],
@@ -974,6 +1245,15 @@ class TestRules(unittest.TestCase):
                         + "Rule {} has a 'target' field that isn't a list.".format(file)
                     )
                     faulty_rules.append(file)
+
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ Malformed Target Field Test Failed \n\n")
+            self.workflow_results.write(
+                "There are rules with malformed 'target' fields. (has to be a list of values even if it contains only a single value)\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             faulty_rules,
@@ -1000,6 +1280,17 @@ class TestRules(unittest.TestCase):
                         )
                     )
                     faulty_rules.append(file)
+
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Malformed References Field Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rules with malformed 'references' fields. (has to be a list of values even if it contains only a single value)\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             faulty_rules,
@@ -1033,6 +1324,17 @@ class TestRules(unittest.TestCase):
                             )
                             faulty_rules.append(file)
 
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Malformed Description Field Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rules with malformed 'description' fields. (links and external references have to be in a seperate field named 'references'. see specification https://github.com/SigmaHQ/sigma-specification)\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_rules,
             [],
@@ -1047,6 +1349,15 @@ class TestRules(unittest.TestCase):
             if reference:
                 # it exists but in singular form
                 faulty_rules.append(file)
+
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Malformed References Field Test Failed \n\n"
+            )
+            self.workflow_results.write("\n")
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             faulty_rules,
@@ -1241,6 +1552,15 @@ class TestRules(unittest.TestCase):
                             faulty_rules.append(file)
             name_lst.append(filename)
 
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ Rule Filename Test Failed \n\n")
+            self.workflow_results.write(
+                r"There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is \'[a-z0-9_]{10,90}\.yml\' and it has to contain at least an underline character. It also has to follow the following naming convention https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/Sigmahq_filename_rule.md\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_rules,
             [],
@@ -1314,6 +1634,15 @@ class TestRules(unittest.TestCase):
                 )
                 faulty_rules.append(file)
 
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ Title Field Test Failed \n\n")
+            self.workflow_results.write(
+                "There are rules with non-conform 'title' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_rules,
             [],
@@ -1342,11 +1671,20 @@ class TestRules(unittest.TestCase):
                 )
                 faulty_rules.append(file)
 
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ Title Field First Test Failed \n\n")
+            self.workflow_results.write(
+                "There are rules without the 'title' attribute in their first line. All rules must start with the title field\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_rules,
             [],
             Fore.RED
-            + "There are rules without the 'title' attribute in their first line.",
+            + "There are rules without the 'title' attribute in their first line. All rules must start with the title field",
         )
 
     def test_duplicate_titles(self):
@@ -1369,6 +1707,15 @@ class TestRules(unittest.TestCase):
                     continue
             if not duplicate:
                 titles_dict[file] = title
+
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ Duplicate Titles Test Failed \n\n")
+            self.workflow_results.write(
+                "There are rules that share the same 'title'. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             faulty_rules,
@@ -1466,6 +1813,15 @@ class TestRules(unittest.TestCase):
                     if not valid:
                         faulty_rules.append(file)
 
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ Single Element Lists Test Failed \n\n")
+            self.workflow_results.write(
+                "There are rules using list (selections) with only 1 element\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_rules,
             [],
@@ -1505,6 +1861,17 @@ class TestRules(unittest.TestCase):
                             )
                         )
                         faulty_rules.append(file)
+
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Incorrect Selection Names Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rules with bad selection names. Can't start a selection name with an 'or*' or an 'and*' or a 'not*' \n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             faulty_rules,
@@ -1561,6 +1928,13 @@ class TestRules(unittest.TestCase):
                         + "Rule {} has an unused selection '{}'".format(file, selection)
                     )
                     faulty_rules.append(file)
+
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ Unused Selection Test Failed \n\n")
+            self.workflow_results.write("There are rules with unused selections\n")
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             faulty_rules, [], Fore.RED + "There are rules with unused selections"
@@ -1636,6 +2010,15 @@ class TestRules(unittest.TestCase):
                                         )
                                         faulty_rules.append(file)
 
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write("### ❌ Unknown Value Modifier Test Failed \n\n")
+            self.workflow_results.write(
+                "There are rules with unknown value modifiers. Most often it is just a typo.\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_rules,
             [],
@@ -1661,6 +2044,20 @@ class TestRules(unittest.TestCase):
                                     )
                                 )
                                 faulty_rules.append(file)
+
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ `|all` Modifier Used With Single Item Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rules with |all modifier only having one item. \n"
+            )
+            self.workflow_results.write(
+                "Single item values are not allowed to have an all modifier as some back-ends cannot support it. If you use it as a workaround to duplicate a field in a selection, use a new selection instead.\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             faulty_rules,
@@ -1696,6 +2093,22 @@ class TestRules(unittest.TestCase):
                     # multiple item selection
                     for item in sel_value:
                         checkUser(faulty_rules, item)
+
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Localized User Accounts Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rules that match using localized user accounts. Better employ a generic version such as:\n"
+            )
+            self.workflow_results.write(
+                "```yml\nUser|contains: # covers many language settings\n"
+            )
+            self.workflow_results.write("    - 'AUTHORI'\n")
+            self.workflow_results.write("    - 'AUTORI'```\n\n")
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
 
         self.assertEqual(
             faulty_rules,
@@ -1733,6 +2146,17 @@ class TestRules(unittest.TestCase):
                         )
                         faulty_rules.append(file)
 
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Case Insensitive Condition Operator Test Failed \n\n"
+            )
+            self.workflow_results.write(
+                "There are rules using condition without lowercase operator\n"
+            )
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_rules,
             [],
@@ -1763,6 +2187,16 @@ class TestRules(unittest.TestCase):
                                 )
                 except:
                     pass
+
+            if faulty_config:
+                self.workflow_error_counter += 1
+                self.workflow_results.write(
+                    "### ❌ Thor Logsource Config Test Failed \n\n"
+                )
+                self.workflow_results.write(
+                    "thor.yml configuration file located in 'tests/thor.yml' has a borken log source definition\n"
+                )
+
             self.assertEqual(
                 faulty_config,
                 False,
@@ -1770,6 +2204,15 @@ class TestRules(unittest.TestCase):
                 + "thor.yml configuration file located in 'tests/thor.yml' has a borken log source definition",
             )
         except:
+            if faulty_config:
+                self.workflow_error_counter += 1
+                self.workflow_results.write(
+                    "### ❌ Thor Logsource Config Test Failed \n\n"
+                )
+                self.workflow_results.write(
+                    "thor.yml configuration file was not found. Please make sure to run the script from the root of the sigma folder\n"
+                )
+
             self.assertEqual(
                 faulty_config,
                 False,
@@ -1900,9 +2343,23 @@ class TestRules(unittest.TestCase):
             if detection:
                 check_list_or_recurse_on_dict(detection, 1, False)
 
+        if faulty_rules:
+            self.workflow_error_counter += 1
+            self.workflow_results.write(
+                "### ❌ Illegal Regular Expression Escapes Test Failed \n\n"
+            )
+            self.workflow_results.write("There are rules using illegal re-escapes\n")
+            for file in faulty_rules:
+                self.workflow_results.write(f"- {file}\n")
+
         self.assertEqual(
             faulty_rules, [], Fore.RED + "There are rules using illegal re-escapes"
         )
+
+    if workflow_error_counter == 0:
+        workflow_results.write("✅ All Sigma Tests Passed Successfully")
+
+    workflow_results.close()
 
 
 def get_mitre_data():
