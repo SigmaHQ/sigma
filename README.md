@@ -28,19 +28,15 @@ Today, everyone collects log data for analysis. People start working on their ow
 
 Others provide excellent analyses, include IOCs and YARA rules to detect the malicious files and network connections, but have no way to describe a specific or generic detection method in log events. Sigma is meant to be an open standard in which such detection mechanisms can be defined, shared and collected in order to improve the detection capabilities for everyone.
 
-### Key Features
+### 🌟 Key Features
 
 * A continuously growing list of detection and hunting rules, peer reviewed by a community of professional Detection Engineers.
 * Vendor agnostic detection rules.
-* Describe your detection method in Sigma to make it shareable
-* Easily shareable 
-* Share the signature in the appendix of your analysis along with IOCs and YARA rules
-* Share the signature in threat intel communities - e.g. via MISP
-* Provide Sigma signatures for malicious behavior in your own application
+* Easily shareable across communities and reports
 
 ## Getting Started
 
-### Rule Creation
+### 🏗️ Rule Creation
 
 To start writing Sigma rules please check the following guides:
 
@@ -64,6 +60,12 @@ You can download the latest rule packages from the [release page](https://github
 ## 🚨 Reporting False Positives or New Rule Ideas
 
 If you find a false positive or would like to propose a new detection rule idea but do not have the time to create one, please create a new issue on the [GitHub repository](https://github.com/SigmaHQ/sigma/issues/new/choose) by selecting one of the available templates.
+
+## 📚 Resources & Further Reading
+
+* [Hack.lu 2017 Sigma - Generic Signatures for Log Events by Thomas Patzke](https://www.youtube.com/watch?v=OheVuE9Ifhs)
+* [MITRE ATT&CK® and Sigma Alerting SANS Webcast Recording](https://www.sans.org/webcasts/mitre-att-ck-sigma-alerting-110010 "MITRE ATT&CK® and Sigma Alerting")
+* [Sigma - Generic Signatures for SIEM Systems by Florian Roth](https://www.slideshare.net/secret/gvgxeXoKblXRcA)
 
 ## Projects or Products that use or integrate Sigma rules
 
