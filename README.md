@@ -34,9 +34,7 @@ Others provide excellent analyses, include IOCs and YARA rules to detect the mal
 * Vendor agnostic detection rules.
 * Easily shareable across communities and reports
 
-## Getting Started
-
-### 🏗️ Rule Creation
+## 🏗️ Rule Creation
 
 To start writing Sigma rules please check the following guides:
 
@@ -47,11 +45,11 @@ To start writing Sigma rules please check the following guides:
 
 Please refer to the [CONTRIBUTING](./CONTRIBUTING.md) guide for detailed instructions on how you can start contributing new rules.
 
-### Rule Packages
+## 📦 Rule Packages
 
 You can download the latest rule packages from the [release page](https://github.com/SigmaHQ/sigma/releases/latest) and start leveraging Sigma rules today.
 
-### 🧬 Rule Usage and Conversion
+## 🧬 Rule Usage and Conversion
 
 * You can start converting Sigma rules today using [Sigma CLI](https://github.com/SigmaHQ/sigma-cli) or [sigconverter.io](https://sigconverter.io) the GUI interface
 
