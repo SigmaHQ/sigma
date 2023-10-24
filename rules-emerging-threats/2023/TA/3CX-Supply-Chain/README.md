@@ -13,3 +13,14 @@ You can find more information on the threat in the following articles:
 - [Using THOR Lite to scan for indicators of Lazarus activity related to the 3CX compromise - By Nextron Systems](https://www.nextron-systems.com/2023/03/31/using-thor-lite-to-scan-for-indicators-of-lazarus-activity-related-to-the-3cx-compromise/)
 - [Not just an infostealer: Gopuram backdoor deployed through 3CX supply chain attack - By Kaspersky](https://securelist.com/gopuram-backdoor-deployed-through-3cx-supply-chain-attack/109344/)
 - [Elastic users protected from SUDDENICON’s supply chain attack - By Elastic](https://www.elastic.co/security-labs/elastic-users-protected-from-suddenicon-supply-chain-attack)
+
+## Rules
+
+- [Potential Compromised 3CXDesktopApp Beaconing Activity - DNS](./dns_query_win_malware_3cx_compromise.yml)
+- [Malicious DLL Load By Compromised 3CXDesktopApp](./image_load_malware_3cx_compromise_susp_dll.yml)
+- [Potential Compromised 3CXDesktopApp Beaconing Activity - Netcon](./net_connection_win_malware_3cx_compromise_beaconing_activity.yml)
+- [Potential Compromised 3CXDesktopApp Execution](./proc_creation_win_malware_3cx_compromise_execution.yml)
+- [Potential Suspicious Child Process Of 3CXDesktopApp](./proc_creation_win_malware_3cx_compromise_susp_children.yml)
+- [Potential Compromised 3CXDesktopApp Update Activity](./proc_creation_win_malware_3cx_compromise_susp_update.yml)
+- [Potential Compromised 3CXDesktopApp Beaconing Activity - Proxy](./proxy_malware_3cx_compromise_c2_beacon_activity.yml)
+- [Potential Compromised 3CXDesktopApp ICO C2 File Download](./proxy_malware_3cx_compromise_susp_ico_requests.yml)
