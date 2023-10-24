@@ -14,20 +14,20 @@ If you find a false positive or would like to propose a new detection rule idea 
 
 2. Create a new branch for your changes:
 
-```
+```bash
 git checkout -b your-feature-branch
 ```
 
 3. Make your changes and commit them to your branch:
 
-```
+```bash
 git add .
 git commit -m "Your commit message"
 ```
 
 4. Push your changes to your fork:
 
-```
+```bash
 git push origin your-feature-branch
 ```
 
