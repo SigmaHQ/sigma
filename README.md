@@ -12,6 +12,14 @@
 <img style="width: 282px; height: 56px" src="https://opensourcesecurityindex.io/badge.svg" alt="Open Source Security Index - Fastest Growing Open Source Security Projects" width="282" height="56" />
 </a>
 
+Welcome to the Sigma main rule repository. The place where detection engineers, threat hunters and all defensive security practitioners collaborate on detection rules. The repository offers more than 3000 detection rules of different type and aims to make reliable detections accessible to all at no cost.
+
+Currently the repository offers three types of rules:
+
+* [Generic Detection Rules](./rules/) - Are threat agnostic, their aim is to detect a behavior or an implementation of a technique or procedure that was, can or will be used by a potential threat actor.
+* [Threat Hunting Rules](./rules-threat-hunting/) - Are broader in scope and are meant to give the analyst a starting point to hunt for potential suspicious or malicious activity
+* [Emerging Threat Rules](./rules-emerging-threats/) - Are rules that cover specific threats, that are timely and relevant for certain periods of time. These threats include specific APT campaigns, exploitation of Zero-Day vulnerabilities, specific malware used during an attack,...etc.
+
 ## Explore Sigma
 
 To start exploring the Sigma ecosystem, please visit the official website [sigmahq.io](https://sigmahq.io)
@@ -42,8 +50,8 @@ Others provide excellent analyses, include IOCs and YARA rules to detect the mal
 
 To start writing Sigma rules please check the following guides:
 
-* [How to Write Sigma Rules - Nextron Systems](https://www.nextron-systems.com/2018/02/10/write-sigma-rules/)
 * [Rule Creation Guide](https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide)
+* [How to Write Sigma Rules - Nextron Systems](https://www.nextron-systems.com/2018/02/10/write-sigma-rules/)
 
 ## 🔎 Contributing & Making PRs
 
@@ -88,11 +96,11 @@ If you find a false positive or would like to propose a new detection rule idea 
 
 ## 📜 Maintainers
 
-* [Nasreddine Bencherchali](https://twitter.com/nas_bench)
-* [Florian Roth](https://twitter.com/cyb3rops)
-* [Christian Burkard](https://twitter.com/phantinuss)
-* [Frack113](https://twitter.com/frack113)
-* [Thomas Patzke](https://twitter.com/blubbfiction)
+* [Nasreddine Bencherchali (@nas_bench)](https://twitter.com/nas_bench)
+* [Florian Roth (@cyb3rops)](https://twitter.com/cyb3rops)
+* [Christian Burkard (@phantinuss)](https://twitter.com/phantinuss)
+* [François Hubaut (@frack113)](https://twitter.com/frack113)
+* [Thomas Patzke (@blubbfiction)](https://twitter.com/blubbfiction)
 
 ## Credits
 
