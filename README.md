@@ -8,6 +8,10 @@
   <img alt="Shows an illustrated sun in light mode and a moon with stars in dark mode." src="./images/sigma_logo_dark.png">
 </picture>
 
+<a href="https://opensourcesecurityindex.io/" target="_blank" rel="noopener">
+<img style="width: 282px; height: 56px" src="https://opensourcesecurityindex.io/badge.svg" alt="Open Source Security Index - Fastest Growing Open Source Security Projects" width="282" height="56" />
+</a>
+
 ## Explore Sigma
 
 To start exploring the Sigma ecosystem, please visit the official website [sigmahq.io](https://sigmahq.io)
