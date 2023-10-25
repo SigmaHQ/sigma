@@ -1,40 +1,98 @@
-title: Linux HackTool Execution
+title: Suspicious Execution of HackTools
 id: a015e032-146d-4717-8944-7a1884122111
 status: experimental
 description: Detects known hacktool execution based on image name
 references:
     - Internal Research
+    # some references for further just use your favorite search engine
     - https://github.com/Gui774ume/ebpfkit
     - https://github.com/pathtofile/bad-bpf
     - https://github.com/carlospolop/PEASS-ng
-author: Nasreddine Bencherchali (Nextron Systems)
+    - https://github.com/t3l3machus/hoaxshell
+    - https://github.com/t3l3machus/Villain
+    - https://github.com/HavocFramework/Havoc
+    - https://github.com/1N3/Sn1per
+    - https://github.com/Ne0nd0g/merlin
+author: Nasreddine Bencherchali (Nextron Systems), Georg Lauenstein (sure[secure])
 date: 2023/01/03
-modified: 2023/01/31
+modified: 2023/10/25
 tags:
     - attack.execution
 logsource:
     product: linux
     category: process_creation
 detection:
-    selection:
+    selection_c2_frameworks:
         - Image|endswith:
-              # Add more as you see fit
-              - '/sqlmap'
-              - '/teamserver'
-              - '/aircrack-ng'
-              - '/john'
-              - '/setoolkit'
-              - '/wpscan'
-              - '/hydra'
+              - '/crackmapexec'
+              - '/havoc'
+              - '/merlinServer-Linux-x64'
+              - '/merlin-agent'
+              - '/msfconsole'
+              - '/msfvenom'
+              - '/ps-empire server'
+              - '/ps-empire'
+              - '/sliver-client'
+              - '/sliver-server'
+              - '/Villain.py'
+    selection_c2_framework_cobaltstrike:
+      - Image|contains:
+            - '/teamserver'
+            - '/cobaltstrike'
+    selection_scanners:
+        - Image|endswith:
+              - '/autorecon'
+              - '/httpx'
+              - '/legion'
+              - '/nuclei'
+              - '/recon-ng'
+              - '/netdiscover'
+              - '/nmap'
+              - '/naabu'
+              - '/zenmap'
+    selection_scanners_sniper:
+        - Image|contains:
+              - '/sniper'
+    selection_web_enum:
+        - Image|endswith:
+              - '/dirbuster'
+              - '/dirb'
+              - '/eyewitness'
+              - '/feroxbuster'
+              - '/ffuf'
+              - '/gobuster'
+              - '/wfuzz'
+              - '/whatweb'
+    selection_web_vuln:
+        - Image|endswith:
+              - '/joomscan'
               - '/nikto'
-              # eBPF related malicious tools/poc's
-              - '/ebpfkit'
+              - '/wpscan'
+    selection_exploit_tools:
+        - Image|endswith:
+              - '/aircrack-ng'
               - '/bpfdos'
-              - '/exechijack'
+              - '/ebpfki'
+              - '/evil-winrm'
+              - '/bloodhound-python'
+              - '/hashcat'
+              - '/hydra'
+              - '/hoaxshell.py'
+              - '/john'
+              - '/ncrack'
               - '/pidhide'
+              - '/pspy32'
+              - '/pspy32s'
+              - '/pspy64'
+              - '/pspy64s'
+              - '/setoolkit'
+              - '/sqlmap'
               - '/writeblocker'
-        - Image|contains: '/linpeas'
-    condition: selection
+    selection_linpeas:
+        - Image|contains:
+        # covers: all linux versions listed here: https://github.com/carlospolop/PEASS-ng/releases
+              - '/linpeas'
+    condition: 1 of selection_*
 falsepositives:
     - Unlikely
 level: high
