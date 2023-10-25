@@ -1,0 +1,26 @@
+title: Okta 2023 Breach Indicator Of Compromise
+id: 00a8e92a-776b-425f-80f2-82d8f8fab2e5
+status: experimental
+description: |
+    Detects new user account creation or activation with specific names related to the Okta Support System 2023 breach.
+    This rule can be enhanced by filtering out known and legitimate username used in your environnement.
+author: Muhammad Faisal (@faisalusuf)
+date: 2023/10/25
+references:
+    - https://www.beyondtrust.com/blog/entry/okta-support-unit-breach
+    - https://developer.okta.com/docs/reference/api/event-types/
+tags:
+    - attack.credential_access
+logsource:
+    service: okta
+    product: okta
+detection:
+    selection:
+        eventtype:
+            - 'user.lifecycle.create'
+            - 'user.lifecycle.activate'
+        target.user.display.name|contains: 'svc_network_backup'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
