@@ -132,10 +132,22 @@ def select_rules(args: dict) -> list:
                 continue
 
             rule = rule_yaml[0]
-            if rule["level"] in args.levels and rule["status"] in args.statuses:
-                logsource = rule["logsource"]
-                if len(args.logsource_products) == 0 or (("product" in logsource) and logsource["product"] in args.logsource_products):
-                    selected_rules.append(file)
+
+            # Base filter: Include rule if level and status matches.
+            include = rule["level"] in args.levels and rule["status"] in args.statuses
+
+            # Filter rules if filtering for logsource products are used.
+            # Either we filter for a specific logsource product or we filter that the product is not defined in a rule.
+            logsource = rule["logsource"]
+            if len(args.logsource_products) >= 1 and args.logsource_products == ["None"]:
+                # Include if product is missing in logsource
+                include = include and ("product" not in logsource)
+            else:
+                # Include if product is present in logsource
+                include = include and ("product" in logsource) and logsource["product"] in args.logsource_products
+
+            if include:
+                selected_rules.append(file)
 
     return selected_rules
 
