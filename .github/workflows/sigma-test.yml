@@ -4,9 +4,21 @@
 name: Sigma Rule Tests
 
 on: # yamllint disable-line rule:truthy
-  pull_request_target:
+  push:
     branches:
       - "*"
+    # paths:
+    #   - "deprecated/**.yml"
+    #   - "rules-compliance/**.yml"
+    #   - "rules-dfir/**.yml"
+    #   - "rules-emerging-threats/**.yml"
+    #   - "rules-placeholder/**.yml"
+    #   - "rules-threat-hunting/**.yml"
+    #   - "rules/**.yml"
+    #   - "unsupported/**.yml"
+  pull_request:
+    branches:
+      - "master"
     # paths:
     #   - "deprecated/**.yml"
     #   - "rules-compliance/**.yml"
@@ -33,7 +45,7 @@ jobs:
 
   test-sigma-logsource:
     runs-on: ubuntu-latest
-    #needs: yamllint
+    needs: yamllint
     steps:
     - uses: actions/checkout@v3.3.0
       with:
@@ -49,7 +61,7 @@ jobs:
 
   test-sigma:
     runs-on: ubuntu-latest
-    #needs: test-sigma-logsource
+    needs: test-sigma-logsource
     steps:
     - uses: actions/checkout@v3.3.0
       with:
@@ -70,11 +82,12 @@ jobs:
         pip install PyYAML attackcti colorama
         python tests/test_rules.py
     - name: PR Comment
-      if: github.event_name == 'pull_request'
+      if: always()
       uses: thollander/actions-comment-pull-request@v2
       with:
         filePath: tests/output.md
         #pr_number: ${{ fromJson(steps.get_pr_data.outputs.result).number }}
+        pr_number: 4504
         comment_tag: execution
         mode: recreate
 
