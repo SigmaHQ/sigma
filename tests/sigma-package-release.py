@@ -139,7 +139,7 @@ def select_rules(args: dict) -> list:
             # Filter rules if filtering for logsource products are used.
             # Either we filter for a specific logsource product or we filter that the product is not defined in a rule.
             logsource = rule["logsource"]
-            if len(args.logsource_products) >= 1 and args.logsource_products == ["None"]:
+            if len(args.logsource_products) == 1 and args.logsource_products == ["None"]:
                 # Include if product is missing in logsource
                 include = include and ("product" not in logsource)
             else:
