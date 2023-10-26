@@ -4,18 +4,6 @@
 name: Sigma Rule Tests
 
 on: # yamllint disable-line rule:truthy
-  push:
-    branches:
-      - "*"
-    # paths:
-    #   - "deprecated/**.yml"
-    #   - "rules-compliance/**.yml"
-    #   - "rules-dfir/**.yml"
-    #   - "rules-emerging-threats/**.yml"
-    #   - "rules-placeholder/**.yml"
-    #   - "rules-threat-hunting/**.yml"
-    #   - "rules/**.yml"
-    #   - "unsupported/**.yml"
   pull_request_target:
     branches:
       - "*"
@@ -82,7 +70,7 @@ jobs:
         pip install PyYAML attackcti colorama
         python tests/test_rules.py
     - name: PR Comment
-      if: always()
+      if: github.event_name == 'pull_request'
       uses: thollander/actions-comment-pull-request@v2
       with:
         filePath: tests/output.md
