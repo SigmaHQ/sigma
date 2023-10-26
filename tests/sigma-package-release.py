@@ -66,6 +66,9 @@ def init_arguments(arguments: list) -> list:
     parser.add_argument(
         "-r", "--rule-types", choices=RULES, nargs="*", help="Select type of rules"
     )
+    parser.add_argument(
+        "-p", "--logsource-products", nargs="*", help="Select logsource product(s) of rules"
+    )
     args = parser.parse_args(arguments)
 
     if not args.outfile.endswith(".zip"):
@@ -82,6 +85,10 @@ def init_arguments(arguments: list) -> list:
     if args.rule_types == None:
         args.rule_types = ["generic"]
         print('[I] -r/--rule-types not defined: Using "generic" by default')
+
+    if args.logsource_products == None:
+        args.logsource_products = []
+        print("[I] -p/--logsource-products not defined: Using all by default")
 
     if args.min_level != None:
         i = LEVEL.index(args.min_level)
@@ -126,7 +133,9 @@ def select_rules(args: dict) -> list:
 
             rule = rule_yaml[0]
             if rule["level"] in args.levels and rule["status"] in args.statuses:
-                selected_rules.append(file)
+                logsource = rule["logsource"]
+                if len(args.logsource_products) == 0 or (("product" in logsource) and logsource["product"] in args.logsource_products):
+                    selected_rules.append(file)
 
     return selected_rules
 
