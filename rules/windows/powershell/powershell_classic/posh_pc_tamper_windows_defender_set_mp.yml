@@ -9,19 +9,19 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
 author: frack113, Nasreddine Bencherchali (Nextron Systems)
 date: 2021/06/07
-modified: 2023/07/13
+modified: 2023/10/27
 tags:
     - attack.defense_evasion
     - attack.t1562.001
 logsource:
     product: windows
     category: ps_classic_provider_start
-    definition: fields have to be extracted from the event
+    definition: No need to extract fields from the event
 detection:
     selection_options_disabling_preference:
-        HostApplication|contains: 'Set-MpPreference'
+        Data: '*HostApplication=*Set-MpPreference*'
     selection_options_disabling_function:
-        HostApplication|contains:
+        Data|contains:
             - '-dbaf $true'
             - '-dbaf 1'
             - '-dbm $true'
@@ -61,9 +61,9 @@ detection:
             - '-dss $true'
             - '-dss 1'
     selection_other_default_actions_allow:
-        HostApplication|contains: 'Set-MpPreference'
+        Data: '*HostApplication=*Set-MpPreference*'
     selection_other_default_actions_func:
-        HostApplication|contains:
+        Data|contains:
             - 'HighThreatDefaultAction Allow'
             - 'htdefac Allow'
             - 'LowThreatDefaultAction Allow'

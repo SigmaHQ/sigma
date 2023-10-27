@@ -6,21 +6,21 @@ references:
     - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse
 author: Harish Segar, frack113
 date: 2020/06/29
-modified: 2021/10/16
+modified: 2023/10/27
 tags:
     - attack.execution
     - attack.t1059.001
 logsource:
     product: windows
     category: ps_classic_start
-    definition: fields have to be extract from event
+    definition: No need to extract fields from the event
 detection:
     selection:
-        HostName: ConsoleHost
+        Data|contains: 'HostName=ConsoleHost'
     filter:
-        HostApplication|startswith:
-            - powershell.exe
-            - C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+        Data|contains:
+            - 'HostApplication=powershell.exe'
+            - 'HostApplication=C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe'
     condition: selection and not filter
 falsepositives:
     - Unknown

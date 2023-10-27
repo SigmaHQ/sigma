@@ -7,23 +7,22 @@ references:
     - https://www.fortinet.com/blog/threat-research/stomping-shadow-copies-a-second-look-into-deletion-methods
 author: frack113
 date: 2021/06/03
-modified: 2021/10/16
+modified: 2023/10/27
 tags:
     - attack.impact
     - attack.t1490
 logsource:
     product: windows
     category: ps_classic_start
-    definition: fields have to be extract from event
+    definition: No need to extract fields from the event
 detection:
-    selection:
-        HostApplication|contains|all:
-            - 'Get-WmiObject'
-            - ' Win32_Shadowcopy'
-        HostApplication|contains:
-            - 'Delete()'
+    selection_wmi:
+        Data: '*HostApplication=*Get-WmiObject*Win32_Shadowcopy*'
+    selection_cmd:
+        Data|contains:
             - 'Remove-WmiObject'
-    condition: selection
+            - 'Delete()'
+    condition: selection_wmi and selection_cmd
 fields:
     - HostApplication
 falsepositives:
