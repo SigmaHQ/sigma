@@ -18,28 +18,29 @@ detection:
         Image|endswith:
             - '\ping.exe'
             - '\arp.exe'
-    selection_ip:
-        - CommandLine|contains:
+    selection_ip_1:
+        CommandLine|contains:
               - '//0x'
               - '.0x'
               - '.00x'
-        - CommandLine|contains|all:
+    selection_ip_2:
+        CommandLine|contains|all:
               - 'http://%'
               - '%2e'
-        - CommandLine|re:
-            # http://81.4.31754
-              - 'https?\/\/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,5}(?!.)'
-            # http://81.293898
-              - 'https?\/\/[0-9]{1,3}\.[0-9]{1,8}(?!.)'
-            # http://1359248394
-              - 'https?\/\/[0-9]{1,10}(?!.)'
-            # http://0121.04.0174.012
-              - 'https?\/\/(0[0-9]{1,11}\.){3}0[0-9]{1,11}'
-            # http://012101076012
-              - 'https?\/\/0[0-9]{1,11}(?!.)'
-            # For octal format
-              - ' [0-9]{7,13}'
-    condition: all of selection*
+    selection_ip_3:
+        # http://81.4.31754
+        - CommandLine|re: 'https?\/\/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,5}(?!.)'
+        # http://81.293898
+        - CommandLine|re: 'https?\/\/[0-9]{1,3}\.[0-9]{1,8}(?!.)'
+        # http://1359248394
+        - CommandLine|re: 'https?\/\/[0-9]{1,10}(?!.)'
+        # http://0121.04.0174.012
+        - CommandLine|re: 'https?\/\/(0[0-9]{1,11}\.){3}0[0-9]{1,11}'
+        # http://012101076012
+        - CommandLine|re: 'https?\/\/0[0-9]{1,11}(?!.)'
+        # For octal format
+        - CommandLine|re: ' [0-9]{7,13}'
+    condition: selection_img and 1 of selection_ip_*
 falsepositives:
     - Unknown
 level: medium
