@@ -20,9 +20,15 @@ logsource:
 detection:
     selection:
         Data|contains: 'ProviderName=WSMan'
-    filter:
-        Data: '*HostApplication=*powershell*'
-    condition: selection and not filter
+    filter_main_ps:
+        Data|contains:
+            - 'HostApplication=powershell'
+            - 'HostApplication=C:\Windows\System32\WindowsPowerShell\v1.0\powershell'
+            - 'HostApplication=C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell'
+            # In some cases powershell was invoked with inverted slashes
+            - 'HostApplication=C:/Windows/System32/WindowsPowerShell/v1.0/powershell'
+            - 'HostApplication=C:/Windows/SysWOW64/WindowsPowerShell/v1.0/powershell'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: medium

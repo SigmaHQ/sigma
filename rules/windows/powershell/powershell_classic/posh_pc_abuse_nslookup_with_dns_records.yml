@@ -4,7 +4,7 @@ related:
     - id: 1b3b01c7-84e9-4072-86e5-fc285a41ff23
       type: similar
 status: test
-description: Detects suspicious powershell download cradle using nslookup. This cradle uses nslookup to extract payloads from DNS records
+description: Detects a powershell download cradle using nslookup. This cradle uses nslookup to extract payloads from DNS records.
 references:
     - https://twitter.com/Alh4zr3d/status/1566489367232651264
 author: Sai Prashanth Pulisetti @pulisettis, Aishwarya Singam
@@ -17,13 +17,15 @@ logsource:
     product: windows
     category: ps_classic_start
 detection:
-    selection_ps:
-        Data: '*HostApplication=*powershell*nslookup*'
-    selection_param:
+    selection:
+        Data|contains|all:
+            - 'powershell'
+            - 'nslookup'
+            - '[1]'
         Data|contains:
-            - '-q=txt'
-            - '-querytype=txt'
-    condition: selection_ps or selection_param
+            - '-q=txt http'
+            - '-querytype=txt http'
+    condition: selection
 falsepositives:
     - Unknown
 level: medium

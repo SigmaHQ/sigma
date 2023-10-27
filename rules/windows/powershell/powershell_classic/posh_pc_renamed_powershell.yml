@@ -16,11 +16,16 @@ logsource:
 detection:
     selection:
         Data|contains: 'HostName=ConsoleHost'
-    filter:
+    # Note: Powershell Logging Data is localized. Meaning that "HostApplication" field will be translated to a different field on a non english layout. This rule doesn't take this into account due to the sheer ammount of possibilities. It's up to the user to add these cases.
+    filter_main_ps:
         Data|contains:
-            - 'HostApplication=powershell.exe'
-            - 'HostApplication=C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe'
-    condition: selection and not filter
+            - 'HostApplication=powershell'
+            - 'HostApplication=C:\Windows\System32\WindowsPowerShell\v1.0\powershell'
+            - 'HostApplication=C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell'
+            # In some cases powershell was invoked with inverted slashes
+            - 'HostApplication=C:/Windows/System32/WindowsPowerShell/v1.0/powershell'
+            - 'HostApplication=C:/Windows/SysWOW64/WindowsPowerShell/v1.0/powershell'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: low

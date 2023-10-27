@@ -15,15 +15,14 @@ logsource:
     product: windows
     category: ps_classic_start
 detection:
-    selection_wmi:
-        Data: '*HostApplication=*Get-WmiObject*Win32_Shadowcopy*'
-    selection_cmd:
+    selection:
+        Data|contains|all:
+            - 'Get-WmiObject'
+            - 'Win32_Shadowcopy'
         Data|contains:
-            - 'Remove-WmiObject'
             - 'Delete()'
-    condition: selection_wmi and selection_cmd
-fields:
-    - HostApplication
+            - 'Remove-WmiObject'
+    condition: selection
 falsepositives:
     - Legitimate Administrator deletes Shadow Copies using operating systems utilities for legitimate reason
 level: high
