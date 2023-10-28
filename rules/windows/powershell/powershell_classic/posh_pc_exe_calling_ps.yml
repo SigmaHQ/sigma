@@ -6,7 +6,7 @@ references:
     - https://adsecurity.org/?p=2921
 author: Sean Metcalf (source), Florian Roth (Nextron Systems)
 date: 2017/03/05
-modified: 2022/12/25
+modified: 2023/10/27
 tags:
     - attack.defense_evasion
     - attack.execution
@@ -14,15 +14,15 @@ tags:
 logsource:
     product: windows
     category: ps_classic_start
-    definition: fields have to be extract from event
 detection:
-    selection1:
-        EngineVersion|startswith:
-            - '2.'
-            - '4.'
-            - '5.'
-        HostVersion|startswith: '3.'
-    condition: selection1
+    selection_engine:
+        Data|contains:
+            - 'EngineVersion=2.'
+            - 'EngineVersion=4.'
+            - 'EngineVersion=5.'
+    selection_host:
+        Data|contains: 'HostVersion=3.'
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: high

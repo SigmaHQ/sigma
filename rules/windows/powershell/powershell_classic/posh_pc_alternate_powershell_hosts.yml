@@ -1,4 +1,4 @@
-title: Alternate PowerShell Hosts
+title: Uncommon PowerShell Hosts
 id: d7326048-328b-4d5e-98af-86e84b17c765
 related:
     - id: 64e8e417-c19a-475a-8d19-98ea705394cc
@@ -9,24 +9,28 @@ references:
     - https://threathunterplaybook.com/hunts/windows/190815-RemoteServiceInstallation/notebook.html
 author: Roberto Rodriguez @Cyb3rWard0g
 date: 2019/08/11
-modified: 2023/04/12
+modified: 2023/10/27
 tags:
     - attack.execution
     - attack.t1059.001
 logsource:
     product: windows
     category: ps_classic_start
-    definition: fields have to be extract from event
 detection:
     selection:
-        HostApplication|contains: '*'
-    filter:
-        # If you extracted the fields from this event. Use the filter list described in 64e8e417-c19a-475a-8d19-98ea705394cc to filter FPs
-        - HostApplication|startswith:
-              - 'powershell'
-              - 'C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe'
-        - ContextInfo|contains: 'Citrix\ConfigSync\ConfigSync.ps1'
-    condition: selection and not filter
+        Data|contains: 'HostApplication='
+    # Note: Powershell Logging Data is localized. Meaning that "HostApplication" field will be translated to a different field on a non english layout. This rule doesn't take this into account due to the sheer ammount of possibilities. It's up to the user to add these cases.
+    filter_main_ps:
+        Data|contains:
+            - 'HostApplication=powershell'
+            - 'HostApplication=C:\Windows\System32\WindowsPowerShell\v1.0\powershell'
+            - 'HostApplication=C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell'
+            # In some cases powershell was invoked with inverted slashes
+            - 'HostApplication=C:/Windows/System32/WindowsPowerShell/v1.0/powershell'
+            - 'HostApplication=C:/Windows/SysWOW64/WindowsPowerShell/v1.0/powershell'
+    filter_optional_citrix:
+        Data|contains: 'Citrix\ConfigSync\ConfigSync.ps1*'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Programs using PowerShell directly without invocation of a dedicated interpreter
     - MSP Detection Searcher
