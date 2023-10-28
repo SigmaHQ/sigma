@@ -1,0 +1,49 @@
+title: Recon Command Output Piped To Findstr.EXE
+id: ccb5742c-c248-4982-8c5c-5571b9275ad3
+related:
+    - id: fe63010f-8823-4864-a96b-a7b4a0f7b929
+      type: derived
+status: experimental
+description: |
+    Detects the excution of a potential recon command where the results are piped to "findstr". This is meant to trigger on inline calls of "cmd.exe" via the "/c" or "/k" for example. Attackers often time use this to extract specific information they require in their chain.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/02cb591f75064ffe1e0df9ac3ed5972a2e491c97/atomics/T1057/T1057.md#atomic-test-6---discover-specific-process---tasklist
+    - https://www.hhs.gov/sites/default/files/manage-engine-vulnerability-sector-alert-tlpclear.pdf
+    - https://www.trendmicro.com/en_us/research/22/d/spring4shell-exploited-to-deploy-cryptocurrency-miners.html
+author: Nasreddine Bencherchali (Nextron Systems), frack113
+date: 2023/07/06
+modified: 2023/10/20
+tags:
+    - attack.discovery
+    - attack.t1057
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:
+            # Note: Add additional CLI to increase and enhance coverage
+            - 'ipconfig /all | findstr '
+            - 'ipconfig | findstr '
+            - 'ipconfig.exe /all | findstr '
+            - 'ipconfig.exe | findstr '
+            - 'net start | findstr'
+            - 'net.exe start | findstr'
+            - 'net1 start | findstr'
+            - 'net1.exe start | findstr'
+            - 'netstat -ano | findstr'
+            - 'netstat | findstr'
+            - 'netstat.exe -ano | findstr'
+            - 'netstat.exe | findstr'
+            - 'ping | findstr'
+            - 'ping.exe | findstr'
+            - 'systeminfo | findstr '
+            - 'systeminfo.exe | findstr '
+            - 'tasklist | findstr '
+            - 'tasklist.exe | findstr '
+            - 'whoami /all | findstr '
+            - 'whoami.exe /all | findstr '
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
