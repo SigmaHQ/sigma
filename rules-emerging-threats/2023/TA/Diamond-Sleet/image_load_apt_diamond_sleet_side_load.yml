@@ -1,0 +1,26 @@
+title: Diamond Sleet APT DLL Sideloading Indicators
+id: d1b65d98-37d7-4ff6-b139-2d87c1af3042
+status: experimental
+description: Detects DLL sideloading activity seen used by Diamond Sleet APT
+references:
+    - https://www.microsoft.com/en-us/security/blog/2023/10/18/multiple-north-korean-threat-actors-exploiting-the-teamcity-cve-2023-42793-vulnerability/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/10/24
+tags:
+    - attack.defense_evasion
+    - attack.t1574.002
+    - detection.emerging_threats
+logsource:
+    product: windows
+    category: image_load
+detection:
+    selection_1:
+        Image|endswith: ':\ProgramData\clip.exe'
+        ImageLoaded|endswith: ':\ProgramData\Version.dll'
+    selection_2:
+        Image|endswith: ':\ProgramData\wsmprovhost.exe'
+        ImageLoaded|endswith: ':\ProgramData\DSROLE.dll'
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely
+level: high
