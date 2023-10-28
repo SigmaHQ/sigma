@@ -1,16 +1,24 @@
 # Sigma - Generic Signature Format for SIEM Systems
 
-[![sigma build status](https://github.com/SigmaHQ/sigma/actions/workflows/sigma-test.yml/badge.svg?branch=master)](https://github.com/SigmaHQ/sigma/actions?query=branch%3Amaster)
-
+<a href="https://sigmahq.io/">
+<p align="center">
+<br />
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./images/sigma_logo_dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="./images/sigma_logo_light.png">
-  <img alt="Shows an illustrated sun in light mode and a moon with stars in dark mode." src="./images/sigma_logo_dark.png">
+  <img height="135" alt="Sigma Logo" src="./images/sigma_logo_light.png">
 </picture>
-
-<a href="https://opensourcesecurityindex.io/" target="_blank" rel="noopener">
-<img style="width: 282px; height: 56px" src="https://opensourcesecurityindex.io/badge.svg" alt="Open Source Security Index - Fastest Growing Open Source Security Projects" width="282" height="56" />
+</p>
 </a>
+<br />
+
+<p align="center">
+<a href="https://github.com/SigmaHQ/sigma/actions?query=branch%3Amaster"><img src="https://github.com/SigmaHQ/sigma/actions/workflows/sigma-test.yml/badge.svg?branch=master" alt="Sigma Build Status"></a> <a href="https://sigmahq.io/"><img src="https://cdn.jsdelivr.net/gh/SigmaHQ/sigmahq.github.io@master/images/Sigma%20Official%20Badge.svg" alt="Sigma Official Badge"></a> <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/SigmaHQ/sigma">
+<img alt="GitHub all releases" src="https://img.shields.io/github/downloads/SigmaHq/Sigma/total">
+<br />
+<a href="https://opensourcesecurityindex.io/" target="_blank" rel="noopener">
+<img style="width: 170px;" src="https://opensourcesecurityindex.io/badge.svg" alt="Open Source Security Index - Fastest Growing Open Source Security Projects" width="170" />
+</a>
+</p>
 
 Welcome to the Sigma main rule repository. The place where detection engineers, threat hunters and all defensive security practitioners collaborate on detection rules. The repository offers more than 3000 detection rules of different type and aims to make reliable detections accessible to all at no cost.
 
