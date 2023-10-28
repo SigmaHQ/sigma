@@ -14,24 +14,31 @@ If you find a false positive or would like to propose a new detection rule idea 
 
 2. Create a new branch for your changes:
 
-```
+```bash
 git checkout -b your-feature-branch
 ```
 
-3. Make your changes and commit them to your branch:
+3. Make your changes, and test them:
 
+```bash
+python tests/test_logsource.py
+python tests/test_rules.py
 ```
+
+4. Once the test is successful, commit the changes to your branch:
+
+```bash
 git add .
 git commit -m "Your commit message"
 ```
 
-4. Push your changes to your fork:
+5. Push your changes to your fork:
 
-```
+```bash
 git push origin your-feature-branch
 ```
 
-5. Create a new Pull Request (PR) against the upstream repository:
+6. Create a new Pull Request (PR) against the upstream repository:
 
 * Go to the [Sigma repository](https://github.com/SigmaHQ/sigma) on GitHub
 * Click the "New Pull Request" button
