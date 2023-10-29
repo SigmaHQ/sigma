@@ -5,7 +5,7 @@
 <br />
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./images/sigma_logo_dark.png">
-  <img height="135" alt="Sigma Logo" src="./images/sigma_logo_light.png">
+  <img width="454" alt="Sigma Logo" src="./images/sigma_logo_light.png">
 </picture>
 </p>
 </a>
@@ -40,7 +40,10 @@ The main purpose of this project is to provide a structured form in which resear
 
 Sigma is for log files what [Snort](https://www.snort.org/) is for network traffic and [YARA](https://github.com/VirusTotal/yara) is for files.
 
-![sigma_description](./images/Sigma-description.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./images/Sigma_description_dark.png">
+  <img alt="Sigma Description - A diagram showing Yaml Files (Sigma Rules) moving through a Sigma Convertor, and coming out as many SIEM logos, showing how Sigma rules can be converted to many different available SIEM query languages" src="./images/Sigma_description_light.png">
+</picture>
 
 ### Why Sigma
 
@@ -116,4 +119,4 @@ This project would've never reached this hight without the help of the hundreds 
 
 ## Licenses
 
-The content of this repository is released under the [Detection Rule License (DRL) 1.1](https://github.com/SigmaHQ/Detection-Rule-License)
+The content of this repository is released under the [Detection Rule License (DRL) 1.1](https://github.com/SigmaHQ/Detection-Rule-License).
