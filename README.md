@@ -5,7 +5,7 @@
 <br />
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./images/sigma_logo_dark.png">
-  <img height="135" alt="Sigma Logo" src="./images/sigma_logo_light.png">
+  <img width="454" alt="Sigma Logo" src="./images/sigma_logo_light.png">
 </picture>
 </p>
 </a>
