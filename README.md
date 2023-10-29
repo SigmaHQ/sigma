@@ -119,4 +119,4 @@ This project would've never reached this hight without the help of the hundreds 
 
 ## Licenses
 
-The content of this repository is released under the [Detection Rule License (DRL) 1.1](https://github.com/SigmaHQ/Detection-Rule-License)
+The content of this repository is released under the [Detection Rule License (DRL) 1.1](https://github.com/SigmaHQ/Detection-Rule-License).
