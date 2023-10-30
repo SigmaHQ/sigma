@@ -1,0 +1,29 @@
+title: Computer Name Impersonation
+id: db821bd8-4f82-436b-841a-c6999a7da671
+status: experimental
+description: Detects LDAP Add operations of computer accounts without a trailing '$', which could indicate Name Impersonation for sAMAccountName spoofing
+references:
+    - https://www.thehacker.recipes/a-d/movement/kerberos/samaccountname-spoofing
+    - https://exploit.ph/cve-2021-42287-cve-2021-42278-weaponisation.html
+    - https://github.com/zeronetworks/ldapfw
+    - https://zeronetworks.com/blog/ldap-firewall-level-up-your-dc-security/
+author: Dekel Paz, Sagie Dulce
+date: 2023/10/30
+modified: 2023/10/30
+tags:
+    - attack.privilege_escalation
+    - attack.t1134
+    - attack.t1134.001
+logsource:
+    product: ldap_firewall
+    category: application
+    definition: 'Requirements: install and apply the LDAP Firewall to all Domain Controllers in audit mode'
+detection:
+    selection:
+        EventLog: LDAPFW
+        EventID: 259
+        DN|re: 'sAMAccountName:\w+[,][\s]'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
