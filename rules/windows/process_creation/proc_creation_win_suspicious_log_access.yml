@@ -1,0 +1,26 @@
+title: Suspicious Logs Access
+id: 9cd55b6c-430a-4fa9-96f4-7cadf5229e9f
+status: experimental
+description: Detect any attempts to inspect logs using command line tools which could be an attempt to search for credentials
+references:
+    - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.diagnostics/get-winevent?view=powershell-7.3
+    - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-eventlog?view=powershell-5.1
+author: Ali Alwashali
+date: 2023/10/30
+tags:
+    - attack.t1552
+    - attack.credential_access
+logsource:
+    product: windows
+    service: windows
+    category: process_creation
+detection:
+    selection:
+        CommandLine|contains:
+            - 'wmic ntevent'
+            - 'Get-WinEvent'
+            - 'get-eventlog'
+    condition: selection
+falsepositives:
+    - Legitimate log access by admin or troubleshooting tools
+level: medium
