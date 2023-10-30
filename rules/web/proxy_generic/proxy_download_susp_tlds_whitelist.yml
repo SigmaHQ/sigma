@@ -1,0 +1,67 @@
+title: Download From Suspicious TLD - Whitelist
+id: b5de2919-b74a-4805-91a7-5049accbaefe
+related:
+    - id: 00d0b5ab-1f55-4120-8e83-487c0a7baf19
+      type: similar
+status: test
+description: Detects executable downloads from suspicious remote systems
+author: Florian Roth (Nextron Systems)
+date: 2017/03/13
+modified: 2023/05/18
+tags:
+    - attack.initial_access
+    - attack.t1566
+    - attack.execution
+    - attack.t1203
+    - attack.t1204.002
+logsource:
+    category: proxy
+detection:
+    selection:
+        c-uri-extension:
+            - 'exe'
+            - 'vbs'
+            - 'bat'
+            - 'rar'
+            - 'ps1'
+            - 'doc'
+            - 'docm'
+            - 'xls'
+            - 'xlsm'
+            - 'pptm'
+            - 'rtf'
+            - 'hta'
+            - 'dll'
+            - 'ws'
+            - 'wsf'
+            - 'sct'
+            - 'zip'
+            # If you want to add more extensions - see https://docs.google.com/spreadsheets/d/1TWS238xacAto-fLKh1n5uTsdijWdCEsGIM0Y0Hvmc5g/
+    filter:
+        cs-host|endswith:
+            - '.com'
+            - '.org'
+            - '.net'
+            - '.edu'
+            - '.gov'
+            - '.uk'
+            - '.ca'
+            - '.de'
+            - '.jp'
+            - '.fr'
+            - '.au'
+            - '.us'
+            - '.ch'
+            - '.it'
+            - '.nl'
+            - '.se'
+            - '.no'
+            - '.es'
+            # Extend this list as needed
+    condition: selection and not filter
+fields:
+    - ClientIP
+    - c-uri
+falsepositives:
+    - All kind of software downloads
+level: low

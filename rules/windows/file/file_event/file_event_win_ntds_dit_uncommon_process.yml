@@ -1,0 +1,46 @@
+title: NTDS.DIT Creation By Uncommon Process
+id: 11b1ed55-154d-4e82-8ad7-83739298f720
+related:
+    - id: 4e7050dd-e548-483f-b7d6-527ab4fa784d
+      type: similar
+status: test
+description: Detects creation of a file named "ntds.dit" (Active Directory Database) by an uncommon process or a process located in a suspicious directory
+references:
+    - https://stealthbits.com/blog/extracting-password-hashes-from-the-ntds-dit-file/
+    - https://adsecurity.org/?p=2398
+author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+date: 2022/01/11
+modified: 2022/07/14
+tags:
+    - attack.credential_access
+    - attack.t1003.002
+    - attack.t1003.003
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection_ntds:
+        TargetFilename|endswith: '\ntds.dit'
+    selection_process_img:
+        Image|endswith:
+            # Add more suspicious processes as you see fit
+            - '\cmd.exe'
+            - '\cscript.exe'
+            - '\mshta.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\regsvr32.exe'
+            - '\rundll32.exe'
+            - '\wscript.exe'
+            - '\wsl.exe'
+            - '\wt.exe'
+    selection_process_paths:
+        Image|contains:
+            - '\AppData\'
+            - '\Temp\'
+            - '\Public\'
+            - '\PerfLogs\'
+    condition: selection_ntds and 1 of selection_process_*
+falsepositives:
+    - Unknown
+level: high

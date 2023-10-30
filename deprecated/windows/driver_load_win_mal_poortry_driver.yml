@@ -1,0 +1,70 @@
+title: Usage Of Malicious POORTRY Signed Driver
+id: 91bc09e7-674d-4cf5-8d86-ed5d8bdb95a6
+status: deprecated
+description: Detects the load of the signed poortry driver used by UNC3944 as reported by Mandiant and Sentinel One.
+references:
+    - https://www.mandiant.com/resources/blog/hunting-attestation-signed-malware
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2022/12/16
+modified: 2023/09/13
+tags:
+    - attack.privilege_escalation
+    - attack.t1543
+    - attack.t1068
+logsource:
+    category: driver_load
+    product: windows
+detection:
+    selection_image:
+        ImageLoaded|contains:
+            - '\prokiller64.sys'
+            - '\gftkyj64.sys'
+            - '\KApcHelper_x64.sys'
+            - '\NodeDriver.sys'
+            - '\LcTkA.sys'
+    selection_sysmon:
+        Hashes|contains:
+            - 'SHA256=0440ef40c46fdd2b5d86e7feef8577a8591de862cfd7928cdbcc8f47b8fa3ffc'
+            - 'SHA256=9b1b15a3aacb0e786a608726c3abfc94968915cedcbd239ddf903c4a54bfcf0c'
+            - 'SHA256=8e035beb02a411f8a9e92d4cf184ad34f52bbd0a81a50c222cdd4706e4e45104'
+            - 'SHA256=d7c81b0f3c14844f6424e8bdd31a128e773cb96cccef6d05cbff473f0ccb9f9c'
+            - 'SHA256=05b146a48a69dd62a02759487e769bd30d39f16374bc76c86453b4ae59e7ffa4'
+            - 'SHA256=c8f9e1ad7b8cce62fba349a00bc168c849d42cfb2ca5b2c6cc4b51d054e0c497'
+            - 'SHA1=31cc8718894d6e6ce8c132f68b8caaba39b5ba7a'
+            - 'SHA1=a804ebec7e341b4d98d9e94f6e4860a55ea1638d'
+            - 'SHA1=6debce728bcff73d9d1d334df0c6b1c3735e295c'
+            - 'SHA1=cc65bf60600b64feece5575f21ab89e03a728332'
+            - 'SHA1=3ef30c95e40a854cc4ded94fc503d0c3dc3e620e'
+            - 'SHA1=b2f955b3e6107f831ebe67997f8586d4fe9f3e98'
+            - 'MD5=10f3679384a03cb487bda9621ceb5f90'
+            - 'MD5=04a88f5974caa621cee18f34300fc08a'
+            - 'MD5=6fcf56f6ca3210ec397e55f727353c4a'
+            - 'MD5=0f16a43f7989034641fd2de3eb268bf1'
+            - 'MD5=ee6b1a79cb6641aa44c762ee90786fe0'
+            - 'MD5=909f3fc221acbe999483c87d9ead024a'
+    selection_hash:
+        - sha256:
+            - '0440ef40c46fdd2b5d86e7feef8577a8591de862cfd7928cdbcc8f47b8fa3ffc'
+            - '9b1b15a3aacb0e786a608726c3abfc94968915cedcbd239ddf903c4a54bfcf0c'
+            - '8e035beb02a411f8a9e92d4cf184ad34f52bbd0a81a50c222cdd4706e4e45104'
+            - 'd7c81b0f3c14844f6424e8bdd31a128e773cb96cccef6d05cbff473f0ccb9f9c'
+            - '05b146a48a69dd62a02759487e769bd30d39f16374bc76c86453b4ae59e7ffa4'
+            - 'c8f9e1ad7b8cce62fba349a00bc168c849d42cfb2ca5b2c6cc4b51d054e0c497'
+        - sha1:
+            - '31cc8718894d6e6ce8c132f68b8caaba39b5ba7a'
+            - 'a804ebec7e341b4d98d9e94f6e4860a55ea1638d'
+            - '6debce728bcff73d9d1d334df0c6b1c3735e295c'
+            - 'cc65bf60600b64feece5575f21ab89e03a728332'
+            - '3ef30c95e40a854cc4ded94fc503d0c3dc3e620e'
+            - 'b2f955b3e6107f831ebe67997f8586d4fe9f3e98'
+        - md5:
+            - '10f3679384a03cb487bda9621ceb5f90'
+            - '04a88f5974caa621cee18f34300fc08a'
+            - '6fcf56f6ca3210ec397e55f727353c4a'
+            - '0f16a43f7989034641fd2de3eb268bf1'
+            - 'ee6b1a79cb6641aa44c762ee90786fe0'
+            - '909f3fc221acbe999483c87d9ead024a'
+    condition: 1 of selection*
+falsepositives:
+    - Legitimate BIOS driver updates (should be rare)
+level: high

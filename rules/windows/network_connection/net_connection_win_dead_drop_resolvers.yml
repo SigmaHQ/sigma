@@ -1,0 +1,207 @@
+title: Potential Dead Drop Resolvers
+id: 297ae038-edc2-4b2e-bb3e-7c5fc94dd5c7
+status: test
+description: Detects an executable, which is not an internet browser, making DNS request to legit popular websites, which were seen to be used as dead drop resolvers in previous attacks.
+references:
+    - https://content.fireeye.com/apt-41/rpt-apt41
+    - https://securelist.com/the-tetrade-brazilian-banking-malware/97779/
+    - https://blog.bushidotoken.net/2021/04/dead-drop-resolvers-espionage-inspired.html
+author: Sorina Ionescu, X__Junior (Nextron Systems)
+date: 2022/08/17
+modified: 2023/09/12
+tags:
+    - attack.command_and_control
+    - attack.t1102
+    - attack.t1102.001
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Initiated: 'true'
+        DestinationHostname|endswith:
+            - '.t.me'
+            - '4shared.com'
+            - 'anonfiles.com'
+            - 'cdn.discordapp.com'
+            - 'cloudflare.com'
+            - 'ddns.net'
+            - 'discord.com'
+            - 'docs.google.com'
+            - 'drive.google.com'
+            - 'dropbox.com'
+            - 'dropmefiles.com'
+            - 'facebook.com'
+            - 'feeds.rapidfeeds.com'
+            - 'fotolog.com'
+            - 'ghostbin.co/'
+            - 'githubusercontent.com'
+            - 'gofile.io'
+            - 'hastebin.com'
+            - 'imgur.com'
+            - 'livejournal.com'
+            - 'mediafire.com'
+            - 'mega.nz'
+            - 'onedrive.com'
+            - 'paste.ee'
+            - 'pastebin.com'
+            - 'pastebin.pl'
+            - 'pastetext.net'
+            - 'privatlab.com'
+            - 'privatlab.net'
+            - 'reddit.com'
+            - 'send.exploit.in'
+            - 'sendspace.com'
+            - 'steamcommunity.com'
+            - 'storage.googleapis.com'
+            - 'technet.microsoft.com'
+            - 'temp.sh'
+            - 'transfer.sh'
+            - 'twitter.com'
+            - 'ufile.io'
+            - 'vimeo.com'
+            - 'wetransfer.com'
+            - 'youtube.com'
+    # Note: Add/Remove browsers/applications that you don't use or those that have custom install locations
+    # Note: To avoid complex conditions the filters for some apps are generic by name only. A custom tuning is recommended for best results
+    filter_main_chrome:
+        Image:
+            - 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+            - 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
+    filter_main_chrome_appdata:
+        Image|startswith: 'C:\Users\'
+        Image|endswith: '\AppData\Local\Google\Chrome\Application\chrome.exe'
+    filter_main_firefox:
+        Image:
+            - 'C:\Program Files\Mozilla Firefox\firefox.exe'
+            - 'C:\Program Files (x86)\Mozilla Firefox\firefox.exe'
+    filter_main_firefox_appdata:
+        Image|startswith: 'C:\Users\'
+        Image|endswith: '\AppData\Local\Mozilla Firefox\firefox.exe'
+    filter_main_ie:
+        Image:
+            - 'C:\Program Files (x86)\Internet Explorer\iexplore.exe'
+            - 'C:\Program Files\Internet Explorer\iexplore.exe'
+    filter_main_edge_1:
+        - Image|startswith: 'C:\Program Files (x86)\Microsoft\EdgeWebView\Application\'
+        - Image|endswith: '\WindowsApps\MicrosoftEdge.exe'
+        - Image:
+              - 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+              - 'C:\Program Files\Microsoft\Edge\Application\msedge.exe'
+    filter_main_edge_2:
+        Image|startswith:
+            - 'C:\Program Files (x86)\Microsoft\EdgeCore\'
+            - 'C:\Program Files\Microsoft\EdgeCore\'
+        Image|endswith:
+            - '\msedge.exe'
+            - '\msedgewebview2.exe'
+    filter_main_safari:
+        Image|endswith: '\safari.exe'
+    filter_main_defender:
+        Image|endswith:
+            - '\MsMpEng.exe' # Microsoft Defender executable
+            - '\MsSense.exe' # Windows Defender Advanced Threat Protection Service Executable
+    filter_main_prtg:
+        # Paessler's PRTG Network Monitor
+        Image|endswith:
+            - 'C:\Program Files (x86)\PRTG Network Monitor\PRTG Probe.exe'
+            - 'C:\Program Files\PRTG Network Monitor\PRTG Probe.exe'
+    filter_main_brave:
+        Image|endswith: '\brave.exe'
+        Image|startswith: 'C:\Program Files\BraveSoftware\'
+    filter_main_maxthon:
+        Image|contains: '\AppData\Local\Maxthon\'
+        Image|endswith: '\maxthon.exe'
+    filter_main_opera:
+        Image|contains: '\AppData\Local\Programs\Opera\'
+        Image|endswith: '\opera.exe'
+    filter_main_seamonkey:
+        Image|startswith:
+            - 'C:\Program Files\SeaMonkey\'
+            - 'C:\Program Files (x86)\SeaMonkey\'
+        Image|endswith: '\seamonkey.exe'
+    filter_main_vivaldi:
+        Image|contains: '\AppData\Local\Vivaldi\'
+        Image|endswith: '\vivaldi.exe'
+    filter_main_whale:
+        Image|startswith:
+            - 'C:\Program Files\Naver\Naver Whale\'
+            - 'C:\Program Files (x86)\Naver\Naver Whale\'
+        Image|endswith: '\whale.exe'
+    filter_main_tor:
+        Image|contains: '\Tor Browser\'
+    filter_main_whaterfox:
+        Image|startswith:
+            - 'C:\Program Files\Waterfox\'
+            - 'C:\Program Files (x86)\Waterfox\'
+        Image|endswith: '\Waterfox.exe'
+    filter_main_midori:
+        Image|contains: '\AppData\Local\Programs\midori-ng\'
+        Image|endswith: '\Midori Next Generation.exe'
+    filter_main_slimbrowser:
+        Image|startswith:
+            - 'C:\Program Files\SlimBrowser\'
+            - 'C:\Program Files (x86)\SlimBrowser\'
+        Image|endswith: '\slimbrowser.exe'
+    filter_main_flock:
+        Image|contains: '\AppData\Local\Flock\'
+        Image|endswith: '\Flock.exe'
+    filter_main_phoebe:
+        Image|contains: '\AppData\Local\Phoebe\'
+        Image|endswith: '\Phoebe.exe'
+    filter_main_falkon:
+        Image|startswith:
+            - 'C:\Program Files\Falkon\'
+            - 'C:\Program Files (x86)\Falkon\'
+        Image|endswith: '\falkon.exe'
+    filter_main_qtweb:
+        Image|startswith:
+            - 'C:\Program Files (x86)\QtWeb\'
+            - 'C:\Program Files\QtWeb\'
+        Image|endswith: '\QtWeb.exe'
+    filter_main_avant:
+        Image|startswith:
+            - 'C:\Program Files (x86)\Avant Browser\'
+            - 'C:\Program Files\Avant Browser\'
+        Image|endswith: '\avant.exe'
+    filter_main_whatsapp:
+        Image|startswith:
+            - 'C:\Program Files (x86)\WindowsApps\'
+            - 'C:\Program Files\WindowsApps\'
+        Image|endswith: 'WhatsApp.exe'
+    filter_main_telegram:
+        Image|contains: '\AppData\Roaming\Telegram Desktop\'
+        Image|endswith: '\Telegram.exe'
+        DestinationHostname|endswith: '.t.me'
+    filter_main_onedrive:
+        Image|contains: '\AppData\Local\Microsoft\OneDrive\'
+        Image|endswith: '\OneDrive.exe'
+        DestinationHostname|endswith: 'onedrive.com'
+    filter_main_dropbox:
+        Image|startswith:
+            - 'C:\Program Files (x86)\Dropbox\Client\'
+            - 'C:\Program Files\Dropbox\Client\'
+        Image|endswith: '\Dropbox.exe'
+        DestinationHostname|endswith: 'dropbox.com'
+    filter_main_mega:
+        Image|contains: '\AppData\Local\MEGAsync\'
+        Image|endswith: 'MEGAsync.exe'
+        DestinationHostname|endswith: 'mega.nz'
+    filter_main_googledrive:
+        Image|startswith:
+            - 'C:\Program Files\Google\Drive File Stream\'
+            - 'C:\Program Files (x86)\Google\Drive File Stream\'
+        Image|endswith: 'GoogleDriveFS.exe'
+        DestinationHostname|endswith: 'drive.google.com'
+    filter_main_discord:
+        Image|contains: '\AppData\Local\Discord\'
+        Image|endswith: '\Discord.exe'
+        DestinationHostname|endswith:
+            - 'discord.com'
+            - 'cdn.discordapp.com'
+    # filter_optional_qlik:
+    #     Image|endswith: '\Engine.exe' # Process from qlik.com app
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - One might need to exclude other internet browsers found in it's network or other applications like ones mentioned above from Microsoft Defender.
+level: high

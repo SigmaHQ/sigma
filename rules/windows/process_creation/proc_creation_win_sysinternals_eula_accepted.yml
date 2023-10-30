@@ -1,0 +1,28 @@
+title: Potential Execution of Sysinternals Tools
+id: 7cccd811-7ae9-4ebe-9afd-cb5c406b824b
+related:
+    - id: 25ffa65d-76d8-4da5-a832-3f2b0136e133
+      type: derived
+status: experimental
+description: Detects command lines that contain the 'accepteula' flag which could be a sign of execution of one of the Sysinternals tools
+references:
+    - https://twitter.com/Moti_B/status/1008587936735035392
+author: Markus Neis
+date: 2017/08/28
+modified: 2023/02/24
+tags:
+    - attack.resource_development
+    - attack.t1588.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:
+            - ' -accepteula'
+            - ' /accepteula'
+    condition: selection
+falsepositives:
+    - Legitimate use of SysInternals tools
+    - Programs that use the same command line flag
+level: low

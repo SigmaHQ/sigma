@@ -1,0 +1,26 @@
+title: Hidden Executable In NTFS Alternate Data Stream
+id: b69888d4-380c-45ce-9cf9-d9ce46e67821
+status: test
+description: Detects the creation of an ADS (Alternate Data Stream) that contains an executable by looking at a non-empty Imphash
+references:
+    - https://twitter.com/0xrawsec/status/1002478725605273600?s=21
+author: Florian Roth (Nextron Systems), @0xrawsec
+date: 2018/06/03
+modified: 2023/02/10
+tags:
+    - attack.defense_evasion
+    - attack.s0139
+    - attack.t1564.004
+logsource:
+    product: windows
+    category: create_stream_hash
+    definition: 'Requirements: Sysmon or equivalent configured with Imphash logging'
+detection:
+    selection:
+        Hash|contains: 'IMPHASH='
+    filter_main_null:
+        Hash|contains: 'IMPHASH=00000000000000000000000000000000'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - This rule isn't looking for any particular binary characteristics. As legitimate installers and programs were seen embedding hidden binaries in their ADS. Some false positives are expected from browser processes and similar.
+level: medium

@@ -1,0 +1,29 @@
+title: Suspicious X509Enrollment - Ps Script
+id: 504d63cb-0dba-4d02-8531-e72981aace2c
+related:
+    - id: 114de787-4eb2-48cc-abdb-c0b449f93ea4
+      type: similar
+status: experimental
+description: Detect use of X509Enrollment
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=42
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=41
+    - https://learn.microsoft.com/en-us/dotnet/api/microsoft.hpc.scheduler.store.cx509enrollmentwebclassfactoryclass?view=hpc-sdk-5.1.6115
+author: frack113
+date: 2022/12/23
+tags:
+    - attack.defense_evasion
+    - attack.t1553.004
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection:
+        ScriptBlockText|contains:
+            - 'X509Enrollment.CBinaryConverter'
+            - '884e2002-217d-11da-b2a4-000e7bbb2b09'
+    condition: selection
+falsepositives:
+    - Legitimate administrative script
+level: medium

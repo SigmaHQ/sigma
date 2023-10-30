@@ -1,0 +1,34 @@
+title: Privileged User Has Been Created
+id: 0ac15ec3-d24f-4246-aa2a-3077bb1cf90e
+status: test
+description: Detects the addition of a new user to a privileged group such as "root" or "sudo"
+references:
+    - https://digital.nhs.uk/cyber-alerts/2018/cc-2825
+    - https://linux.die.net/man/8/useradd
+    - https://github.com/redcanaryco/atomic-red-team/blob/25acadc0b43a07125a8a5b599b28bbc1a91ffb06/atomics/T1136.001/T1136.001.md#atomic-test-5---create-a-new-user-in-linux-with-root-uid-and-gid
+author: Pawel Mazur
+date: 2022/12/21
+tags:
+    - attack.persistence
+    - attack.t1136.001
+    - attack.t1098
+logsource:
+    product: linux
+    definition: '/var/log/secure on REHL systems or /var/log/auth.log on debian like Systems needs to be collected in order for this detection to work'
+detection:
+    # Example of the events that could be observed when matching these would be as follow
+    #   Dec 21 16:42:19 testserver useradd[1337]: new user: name=butter1, UID=1000, GID=0, home=/root, shell=/bin/bash
+    #   Dec 21 17:13:54 testserver useradd[1337]: new user: name=john, UID=0, GID=0, home=/home/john, shell=/bin/bash
+    #   Dec 21 17:24:40 testserver useradd[1337]: new user: name=butter3, UID=1000, GID=10, home=/home/butter3, shell=/bin/bash
+    #   Dec 21 17:30:22 testserver useradd[1337]: new user: name=butter4, UID=1000, GID=27, home=/home/butter4, shell=/bin/bash
+    selection_new_user:
+        - 'new user'
+    selection_uids_gids:
+        - 'GID=0' # root group
+        - 'UID=0' # root UID
+        - 'GID=10' # wheel group
+        - 'GID=27' # sudo group
+    condition: all of selection_*
+falsepositives:
+    - Administrative activity
+level: high

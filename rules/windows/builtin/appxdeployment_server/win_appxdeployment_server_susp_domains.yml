@@ -1,0 +1,49 @@
+title: Suspicious Remote AppX Package Locations
+id: 8b48ad89-10d8-4382-a546-50588c410f0d
+status: experimental
+description: Detects an appx package added the pipeline of the "to be processed" packages which is downloaded from a suspicious domain
+references:
+    - Internal Research
+    - https://www.sentinelone.com/labs/inside-malicious-windows-apps-for-malware-deployment/
+    - https://learn.microsoft.com/en-us/windows/win32/appxpkg/troubleshooting
+    - https://news.sophos.com/en-us/2021/11/11/bazarloader-call-me-back-attack-abuses-windows-10-apps-mechanism/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/01/11
+modified: 2023/08/17
+tags:
+    - attack.defense_evasion
+logsource:
+    product: windows
+    service: appxdeployment-server
+detection:
+    selection:
+        EventID: 854
+        Path|contains:
+            - '.githubusercontent.com'       # Includes both gists and github repositories / Michael Haag (idea)
+            - 'anonfiles.com'
+            - 'cdn.discordapp.com'
+            - 'cdn.discordapp.com/attachments/'
+            - 'ddns.net'
+            - 'dl.dropboxusercontent.com'
+            - 'ghostbin.co'
+            - 'gofile.io'
+            - 'hastebin.com'
+            - 'mediafire.com'
+            - 'mega.nz'
+            - 'paste.ee'
+            - 'pastebin.com'
+            - 'pastebin.pl'
+            - 'pastetext.net'
+            - 'privatlab.com'
+            - 'privatlab.net'
+            - 'send.exploit.in'
+            - 'sendspace.com'
+            - 'storage.googleapis.com'
+            - 'storjshare.io'
+            - 'temp.sh'
+            - 'transfer.sh'
+            - 'ufile.io'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

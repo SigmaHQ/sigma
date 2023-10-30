@@ -1,0 +1,35 @@
+title: Powershell Sensitive File Discovery
+id: 7d416556-6502-45b2-9bad-9d2f05f38997
+related:
+    - id: d23f2ba5-9da0-4463-8908-8ee47f614bb9
+      type: derived
+status: test
+description: Detect adversaries enumerate sensitive files
+references:
+    - https://twitter.com/malmoeb/status/1570814999370801158
+author: frack113
+date: 2022/09/16
+tags:
+    - attack.discovery
+    - attack.t1083
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_action:
+        ScriptBlockText|contains:
+            - ls
+            - get-childitem
+            - gci
+    selection_recurse:
+        ScriptBlockText|contains: '-recurse'
+    selection_file:
+        ScriptBlockText|contains:
+            - '.pass'
+            - '.kdbx'
+            - '.kdb'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium

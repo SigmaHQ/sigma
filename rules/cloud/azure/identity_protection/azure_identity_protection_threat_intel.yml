@@ -1,0 +1,26 @@
+title: Azure AD Threat Intelligence
+id: a2cb56ff-4f46-437a-a0fa-ffa4d1303cba
+status: experimental
+description: Indicates user activity that is unusual for the user or consistent with known attack patterns.
+references:
+    - https://learn.microsoft.com/en-us/azure/active-directory/identity-protection/concept-identity-protection-risks#azure-ad-threat-intelligence-sign-in
+    - https://learn.microsoft.com/en-us/azure/active-directory/identity-protection/concept-identity-protection-risks#azure-ad-threat-intelligence-user
+    - https://learn.microsoft.com/en-us/azure/active-directory/architecture/security-operations-user-accounts#unusual-sign-ins
+author: Mark Morowczynski '@markmorow', Gloria Lee, '@gleeiamglo'
+date: 2023/09/07
+tags:
+    - attack.t1078
+    - attack.persistence
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.initial_access
+logsource:
+    product: azure
+    service: riskdetection
+detection:
+    selection:
+        riskEventType: 'investigationsThreatIntelligence'
+    condition: selection
+falsepositives:
+    - We recommend investigating the sessions flagged by this detection in the context of other sign-ins from the user.
+level: high

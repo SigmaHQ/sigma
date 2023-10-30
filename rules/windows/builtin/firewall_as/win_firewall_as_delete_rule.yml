@@ -1,0 +1,35 @@
+title: A Rule Has Been Deleted From The Windows Firewall Exception List
+id: c187c075-bb3e-4c62-b4fa-beae0ffc211f
+status: experimental
+description: Detects when a single rules or all of the rules have been deleted from the Windows Defender Firewall
+references:
+    - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd364427(v=ws.10)
+author: frack113
+date: 2022/02/19
+modified: 2023/06/12
+tags:
+    - attack.defense_evasion
+    - attack.t1562.004
+logsource:
+    product: windows
+    service: firewall-as
+detection:
+    selection:
+        EventID:
+            - 2006 # A rule has been deleted in the Windows Defender Firewall exception list
+            - 2052 # A rule has been deleted in the Windows Defender Firewall exception list. (Windows 11)
+    filter_main_generic:
+        ModifyingApplication|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    filter_main_svchost:
+        ModifyingApplication: 'C:\Windows\System32\svchost.exe'
+    filter_optional_msmpeng:
+        ModifyingApplication|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+        ModifyingApplication|endswith: '\MsMpEng.exe'
+    filter_main_null:
+        ModifyingApplication: null
+    filter_main_empty:
+        ModifyingApplication: ''
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+level: medium

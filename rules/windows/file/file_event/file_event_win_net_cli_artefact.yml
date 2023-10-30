@@ -1,0 +1,48 @@
+title: Suspicious DotNET CLR Usage Log Artifact
+id: e0b06658-7d1d-4cd3-bf15-03467507ff7c
+related:
+    - id: 4508a70e-97ef-4300-b62b-ff27992990ea
+      type: derived
+    - id: e4b63079-6198-405c-abd7-3fe8b0ce3263
+      type: obsoletes
+status: experimental
+description: Detects the creation of Usage Log files by the CLR (clr.dll). These files are named after the executing process once the assembly is finished executing for the first time in the (user) session context.
+references:
+    - https://bohops.com/2021/03/16/investigating-net-clr-usage-log-tampering-techniques-for-edr-evasion/
+    - https://github.com/olafhartong/sysmon-modular/blob/fa1ae53132403d262be2bbd7f17ceea7e15e8c78/11_file_create/include_dotnet.xml
+    - https://web.archive.org/web/20221026202428/https://gist.github.com/code-scrap/d7f152ffcdb3e0b02f7f394f5187f008
+    - https://blog.menasec.net/2019/07/interesting-difr-traces-of-net-clr.html
+author: frack113, omkar72, oscd.community, Wojciech Lesicki
+date: 2022/11/18
+modified: 2023/02/23
+tags:
+    - attack.defense_evasion
+    - attack.t1218
+logsource:
+    category: file_event
+    product: windows
+    definition: 'Requirements: UsageLogs folder must be monitored by the sysmon configuration'
+detection:
+    selection:
+        TargetFilename|endswith:
+            - '\UsageLogs\cmstp.exe.log'
+            - '\UsageLogs\cscript.exe.log'
+            - '\UsageLogs\mshta.exe.log'
+            - '\UsageLogs\msxsl.exe.log'
+            - '\UsageLogs\regsvr32.exe.log'
+            - '\UsageLogs\rundll32.exe.log'
+            - '\UsageLogs\svchost.exe.log'
+            - '\UsageLogs\wscript.exe.log'
+            - '\UsageLogs\wmic.exe.log'
+    filter_main_rundll32:
+        # This filter requires the event to be enriched by additional information such as ParentImage and CommandLine activity
+        ParentImage|endswith: '\MsiExec.exe'
+        ParentCommandLine|contains: ' -Embedding'
+        Image|endswith: '\rundll32.exe'
+        CommandLine|contains|all:
+            - 'Temp'
+            - 'zzzzInvokeManagedCustomActionOutOfProc'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Rundll32.exe with zzzzInvokeManagedCustomActionOutOfProc in command line and msiexec.exe as parent process - https://twitter.com/SBousseaden/status/1388064061087260675
+level: high

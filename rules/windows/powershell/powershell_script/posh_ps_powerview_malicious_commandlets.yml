@@ -1,0 +1,128 @@
+title: Malicious PowerView PowerShell Commandlets
+id: dcd74b95-3f36-4ed9-9598-0490951643aa
+related:
+    - id: b2317cfa-4a47-4ead-b3ff-297438c0bc2d
+      type: similar
+status: test
+description: Detects Commandlet names from PowerView of PowerSploit exploitation framework.
+references:
+    - https://powersploit.readthedocs.io/en/stable/Recon/README
+    - https://github.com/PowerShellMafia/PowerSploit/tree/master/Recon
+    - https://thedfirreport.com/2020/10/08/ryuks-return
+    - https://adsecurity.org/?p=2277
+author: Bhabesh Raj
+date: 2021/05/18
+modified: 2023/04/20
+tags:
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection:
+        ScriptBlockText|contains:
+            - 'Add-DomainGroupMember'
+            - 'Add-DomainObjectAcl'
+            - 'Add-ObjectAcl'
+            - 'Add-RemoteConnection'
+            - 'Convert-ADName'
+            - 'ConvertFrom-UACValue'
+            - 'Convert-NameToSid'
+            - 'ConvertTo-SID'
+            - 'Export-PowerViewCSV'
+            - 'Find-DomainLocalGroupMember'
+            - 'Find-DomainObjectPropertyOutlier'
+            - 'Find-DomainProcess'
+            - 'Find-DomainShare'
+            - 'Find-DomainUserEvent'
+            - 'Find-DomainUserLocation'
+            - 'Find-ForeignGroup'
+            - 'Find-ForeignUser'
+            - 'Find-GPOComputerAdmin'
+            - 'Find-GPOLocation'
+            - 'Find-InterestingDomain' # Covers: Find-InterestingDomainAcl, Find-InterestingDomainShareFile
+            - 'Find-InterestingFile'
+            - 'Find-LocalAdminAccess'
+            - 'Find-ManagedSecurityGroups'
+            # - 'Get-ADObject'  # prone to FPs
+            - 'Get-CachedRDPConnection'
+            - 'Get-DFSshare'
+            - 'Get-DNSRecord'
+            - 'Get-DNSZone'
+            # - 'Get-Domain'  # too many FPs  # Covers Cmdlets like: DomainComputer, DomainController, DomainDFSShare, DomainDNSRecord, DomainGPO, etc.
+            - 'Get-DomainComputer'
+            - 'Get-DomainController'
+            - 'Get-DomainDFSShare'
+            - 'Get-DomainDNSRecord'
+            - 'Get-DomainDNSZone'
+            - 'Get-DomainFileServer'
+            - 'Get-DomainGPO'  # Covers also: Get-DomainGPOComputerLocalGroupMapping, Get-DomainGPOLocalGroup, Get-DomainGPOUserLocalGroupMapping
+            - 'Get-DomainGroup'
+            - 'Get-DomainGroupMember'
+            - 'Get-DomainManagedSecurityGroup'
+            - 'Get-DomainObject'
+            - 'Get-DomainObjectAcl'
+            - 'Get-DomainOU'
+            - 'Get-DomainPolicy'
+            - 'Get-DomainSID'
+            - 'Get-DomainSite'
+            - 'Get-DomainSPNTicket'
+            - 'Get-DomainSubnet'
+            - 'Get-DomainUser'
+            - 'Get-DomainUserEvent'
+            - 'Get-Forest' # Covers: Get-ForestDomain, Get-ForestGlobalCatalog, Get-ForestTrust
+            - 'Get-IPAddress'
+            - 'Get-LastLoggedOn'
+            - 'Get-LoggedOnLocal'
+            - 'Get-NetComputer' # Covers: Get-NetComputerSiteName
+            - 'Get-NetDomain' # Covers: Get-NetDomainController, Get-NetDomainTrust
+            - 'Get-NetFileServer'
+            - 'Get-NetForest' # Covers: Get-NetForestCatalog, Get-NetForestDomain, Get-NetForestTrust
+            - 'Get-NetGPO' # Covers: Get-NetGPOGroup
+            - 'Get-NetGroup' # Covers: Get-NetGroupMember
+            - 'Get-NetLocalGroup' # Covers: NetLocalGroupMember
+            - 'Get-NetLoggedon'
+            - 'Get-NetOU'
+            - 'Get-NetProcess'
+            - 'Get-NetRDPSession'
+            - 'Get-NetSession'
+            - 'Get-NetShare'
+            - 'Get-NetSite'
+            - 'Get-NetSubnet'
+            - 'Get-NetUser'
+            - 'Get-ObjectAcl'
+            - 'Get-PathAcl'
+            - 'Get-Proxy'
+            - 'Get-RegistryMountedDrive'
+            - 'Get-RegLoggedOn'
+            - 'Get-SiteName'
+            - 'Get-UserEvent'
+            - 'Get-WMIProcess'
+            - 'Get-WMIReg' # Covers: Get-WMIRegCachedRDPConnection, Get-WMIRegLastLoggedOn, Get-WMIRegMountedDrive, WMIRegProxy
+            - 'Invoke-ACLScanner'
+            - 'Invoke-CheckLocalAdminAccess'
+            - 'Invoke-EnumerateLocalAdmin'
+            - 'Invoke-EventHunter'
+            - 'Invoke-FileFinder'
+            - 'Invoke-Kerberoast'
+            - 'Invoke-MapDomainTrust'
+            - 'Invoke-ProcessHunter'
+            - 'Invoke-RevertToSelf'
+            - 'Invoke-ShareFinder'
+            - 'Invoke-UserHunter'
+            - 'Invoke-UserImpersonation'
+            - 'New-DomainGroup'
+            - 'New-DomainUser'
+            - 'Remove-RemoteConnection'
+            - 'Request-SPNTicket'
+            - 'Resolve-IPAddress'
+            - 'Set-ADObject'
+            - 'Set-DomainObject'
+            - 'Set-DomainUserPassword'
+            - 'Test-AdminAccess'
+    condition: selection
+falsepositives:
+    - Should not be any as administrators do not use this tool
+level: high

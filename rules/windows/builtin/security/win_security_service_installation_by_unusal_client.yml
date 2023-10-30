@@ -1,0 +1,30 @@
+title: Service Installed By Unusual Client - Security
+id: c4e92a97-a9ff-4392-9d2d-7a4c642768ca
+related:
+    - id: 71c276aa-49cd-43d2-b920-2dcd3e6962d5
+      type: similar
+status: experimental
+description: Detects a service installed by a client which has PID 0 or whose parent has PID 0
+references:
+    - https://www.elastic.co/guide/en/security/current/windows-service-installed-via-an-unusual-client.html
+    - https://twitter.com/SBousseaden/status/1490608838701166596
+author: Tim Rauch
+date: 2022/09/15
+modified: 2023/01/04
+tags:
+    - attack.privilege_escalation
+    - attack.t1543
+logsource:
+    service: security
+    product: windows
+    definition: The 'System Security Extension' audit subcategory need to be enabled to log the EID 4697
+detection:
+    selection:
+        EventID: 4697
+    selection_pid:
+        - ClientProcessId: 0
+        - ParentProcessId: 0
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: high

@@ -1,0 +1,25 @@
+title: Atypical Travel
+id: 1a41023f-1e70-4026-921a-4d9341a9038e
+status: experimental
+description: Identifies two sign-ins originating from geographically distant locations, where at least one of the locations may also be atypical for the user, given past behavior.
+references:
+    - https://learn.microsoft.com/en-us/azure/active-directory/identity-protection/concept-identity-protection-risks#atypical-travel
+    - https://learn.microsoft.com/en-us/azure/active-directory/architecture/security-operations-user-accounts#unusual-sign-ins
+author: Mark Morowczynski '@markmorow', Gloria Lee, '@gleeiamglo'
+date: 2023/09/03
+tags:
+    - attack.t1078
+    - attack.persistence
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.initial_access
+logsource:
+    product: azure
+    service: riskdetection
+detection:
+    selection:
+        riskEventType: 'unlikelyTravel'
+    condition: selection
+falsepositives:
+    - We recommend investigating the sessions flagged by this detection in the context of other sign-ins from the user.
+level: high

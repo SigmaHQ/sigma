@@ -1,0 +1,26 @@
+title: Removal Of AMSI Provider Registry Keys
+id: 41d1058a-aea7-4952-9293-29eaaf516465
+status: test
+description: Detects the deletion of AMSI provider registry key entries in HKLM\Software\Microsoft\AMSI. This technique could be used by an attacker in order to disable AMSI inspection.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
+    - https://seclists.org/fulldisclosure/2020/Mar/45
+author: frack113
+date: 2021/06/07
+modified: 2023/02/08
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    product: windows
+    category: registry_delete
+detection:
+    selection:
+        EventType: DeleteKey
+        TargetObject|endswith:
+            - '{2781761E-28E0-4109-99FE-B9D127C57AFE}' # IOfficeAntiVirus
+            - '{A7C452EF-8E9F-42EB-9F2B-245613CA0DC9}' # ProtectionManagement.dll
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high

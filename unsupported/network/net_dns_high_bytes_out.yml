@@ -1,0 +1,20 @@
+title: High DNS Bytes Out
+id: 0f6c1bf5-70a5-4963-aef9-aab1eefb50bd
+status: unsupported
+description: High DNS queries bytes amount from host per short period of time
+author: Daniil Yugoslavskiy, oscd.community
+date: 2019/10/24
+modified: 2023/03/24
+tags:
+    - attack.exfiltration
+    - attack.t1048.003
+logsource:
+    category: dns
+detection:
+    selection:
+        query: '*'
+    timeframe: 1m
+    condition: selection | sum(question_length) by src_ip > 300000
+falsepositives:
+    - Legitimate high DNS bytes out rate to domain name which should be added to whitelist
+level: medium

@@ -1,0 +1,37 @@
+title: Standard User In High Privileged Group
+id: 7ac407cc-0f48-4328-aede-de1d2e6fef41
+status: experimental
+description: Detect standard users login that are part of high privileged groups such as the Administrator group
+references:
+    - https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-identifiers
+    - https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection
+    - https://github.com/nasbench/EVTX-ETW-Resources/blob/7a806a148b3d9d381193d4a80356016e6e8b1ee8/ETWProvidersManifests/Windows11/22H2/W11_22H2_Pro_20221220_22621.963/WEPExplorer/LsaSrv.xml
+author: frack113
+date: 2023/01/13
+modified: 2023/05/05
+tags:
+    - attack.credential_access
+    - attack.privilege_escalation
+logsource:
+    product: windows
+    service: lsa-server
+    definition: 'Requirements: Microsoft-Windows-LSA/Operational ({199FE037-2B82-40A9-82AC-E1D46C792B99}) Event Log must be collected in order to receive the events.'
+detection:
+    selection:
+        EventID: 300
+        TargetUserSid|startswith: 'S-1-5-21-' # Standard user
+        SidList|contains:
+            - 'S-1-5-32-544'    # Local admin
+            - '-500}'           # Domain admin
+            - '-518}'           # Schema admin
+            - '-519}'           # Enterprise admin
+    filter_admin:
+        TargetUserSid|endswith:
+            - '-500'           # Domain admin
+            - '-518'           # Schema admin
+            - '-519'           # Enterprise admin
+    condition: selection and not filter_admin
+falsepositives:
+    - Standard domain users who are part of the administrator group.
+      These users shouldn't have these right. But in the case where it's necessary. They should be filtered out using the "TargetUserName" field
+level: medium

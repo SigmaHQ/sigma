@@ -1,0 +1,61 @@
+title: Disable Windows Defender Functionalities Via Registry Keys
+id: 0eb46774-f1ab-4a74-8238-1155855f2263
+related:
+    - id: a64e4198-c1c8-46a5-bc9c-324c86455fd4
+      type: obsoletes
+    - id: fd115e64-97c7-491f-951c-fc8da7e042fa
+      type: obsoletes
+status: experimental
+description: Detects when attackers or tools disable Windows Defender functionalities via the Windows registry
+references:
+    - https://thedfirreport.com/2021/10/18/icedid-to-xinglocker-ransomware-in-24-hours/
+    - https://gist.github.com/anadr/7465a9fde63d41341136949f14c21105
+    - https://admx.help/?Category=Windows_7_2008R2&Policy=Microsoft.Policies.WindowsDefender::SpyNetReporting
+    - https://symantec-enterprise-blogs.security.com/blogs/threat-intelligence/ransomware-hive-conti-avoslocker
+    - https://www.tenforums.com/tutorials/32236-enable-disable-microsoft-defender-pua-protection-windows-10-a.html
+    - https://www.tenforums.com/tutorials/105533-enable-disable-windows-defender-exploit-protection-settings.html
+    - https://www.tenforums.com/tutorials/123792-turn-off-tamper-protection-microsoft-defender-antivirus.html
+author: AlertIQ, Ján Trenčanský, frack113, Nasreddine Bencherchali, Swachchhanda Shrawan Poudel
+date: 2022/08/01
+modified: 2023/08/17
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection_main:
+        TargetObject|contains:
+            - '\SOFTWARE\Microsoft\Windows Defender\'
+            - '\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\'
+            - '\SOFTWARE\Policies\Microsoft\Windows Defender\'
+    selection_dword_1:
+        TargetObject|endswith:
+            - '\DisableAntiSpyware'
+            - '\DisableAntiVirus'
+            - '\Real-Time Protection\DisableBehaviorMonitoring'
+            - '\Real-Time Protection\DisableIntrusionPreventionSystem'
+            - '\Real-Time Protection\DisableIOAVProtection'
+            - '\Real-Time Protection\DisableOnAccessProtection'
+            - '\Real-Time Protection\DisableRealtimeMonitoring'
+            - '\Real-Time Protection\DisableScanOnRealtimeEnable'
+            - '\Real-Time Protection\DisableScriptScanning'
+            - '\Reporting\DisableEnhancedNotifications'
+            - '\SpyNet\DisableBlockAtFirstSeen'
+        Details: 'DWORD (0x00000001)'
+    selection_dword_0:
+        TargetObject|endswith:
+            - '\App and Browser protection\DisallowExploitProtectionOverride'
+            - '\Features\TamperProtection'
+            - '\MpEngine\MpEnablePus'
+            - '\PUAProtection'
+            - '\Signature Update\ForceUpdateFromMU'
+            - '\SpyNet\SpynetReporting'
+            - '\SpyNet\SubmitSamplesConsent'
+            - '\Windows Defender Exploit Guard\Controlled Folder Access\EnableControlledFolderAccess'
+        Details: 'DWORD (0x00000000)'
+    condition: selection_main and 1 of selection_dword_*
+falsepositives:
+    - Administrator actions via the Windows Defender interface
+level: high

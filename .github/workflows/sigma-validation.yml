@@ -1,0 +1,46 @@
+name: Validate Sigma rules
+
+on:
+  push:
+    branches:
+      - "*"
+    paths:
+      - "deprecated/**.yml"
+      - "rules-compliance/**.yml"
+      - "rules-dfir/**.yml"
+      - "rules-emerging-threats/**.yml"
+      - "rules-placeholder/**.yml"
+      - "rules-threat-hunting/**.yml"
+      - "rules/**.yml"
+      - "unsupported/**.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "deprecated/**.yml"
+      - "rules-compliance/**.yml"
+      - "rules-dfir/**.yml"
+      - "rules-emerging-threats/**.yml"
+      - "rules-placeholder/**.yml"
+      - "rules-threat-hunting/**.yml"
+      - "rules/**.yml"
+      - "unsupported/**.yml"
+  
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  validate-sigma-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: pip install check-jsonschema
+      - name: Validate Sigma rules
+        run: tests/validate-sigma-schema/validate.sh

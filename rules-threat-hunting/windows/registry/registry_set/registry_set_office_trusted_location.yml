@@ -1,0 +1,34 @@
+title: Microsoft Office Trusted Location Updated
+id: a0bed973-45fa-4625-adb5-6ecdf9be70ac
+related:
+    - id: f742bde7-9528-42e5-bd82-84f51a8387d2
+      type: similar
+status: experimental
+description: Detects changes to the registry keys related to "Trusted Location" of Microsoft Office. Attackers might add additional trusted locations to avoid macro security restrictions.
+references:
+    - https://admx.help/?Category=Office2016&Policy=excel16.Office.Microsoft.Policies.Windows::L_TrustedLoc01
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/06/21
+modified: 2023/08/17
+tags:
+    - attack.defense_evasion
+    - attack.t1112
+    - detection.threat_hunting
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: 'Security\Trusted Locations\Location'
+        TargetObject|endswith: '\Path'
+    filter_main_office_click_to_run:
+        Image|contains: ':\Program Files\Common Files\Microsoft Shared\ClickToRun\'
+        Image|endswith: '\OfficeClickToRun.exe'
+    filter_main_office_apps:
+        Image|contains:
+            - ':\Program Files\Microsoft Office\'
+            - ':\Program Files (x86)\Microsoft Office\'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - During office installations or setup, trusted locations are added, which will trigger this rule.
+level: medium

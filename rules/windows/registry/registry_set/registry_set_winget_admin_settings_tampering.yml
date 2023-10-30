@@ -1,0 +1,25 @@
+title: Winget Admin Settings Modification
+id: 6db5eaf9-88f7-4ed9-af7d-9ef2ad12f236
+status: experimental
+description: Detects changes to the AppInstaller (winget) admin settings. Such as enabling local manifest installations or disabling installer hash checks
+references:
+    - https://github.com/nasbench/Misc-Research/tree/b9596e8109dcdb16ec353f316678927e507a5b8d/LOLBINs/Winget
+    - https://github.com/microsoft/winget-cli/blob/02d2f93807c9851d73eaacb4d8811a76b64b7b01/src/AppInstallerCommonCore/Public/winget/AdminSettings.h#L13
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/04/17
+modified: 2023/08/17
+tags:
+    - attack.defense_evasion
+    - attack.persistence
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection:
+        Image|endswith: '\winget.exe'
+        TargetObject|startswith: '\REGISTRY\A\'
+        TargetObject|endswith: '\LocalState\admin_settings'
+    condition: selection
+falsepositives:
+    - The event doesn't contain information about the type of change. False positives are expected with legitimate changes
+level: low

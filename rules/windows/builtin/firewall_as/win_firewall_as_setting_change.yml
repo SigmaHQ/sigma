@@ -1,0 +1,26 @@
+title: Windows Firewall Settings Have Been Changed
+id: 00bb5bd5-1379-4fcf-a965-a5b6f7478064
+status: experimental
+description: Detects activity when the settings of the Windows firewall have been changed
+references:
+    - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd364427(v=ws.10)
+author: frack113, Nasreddine Bencherchali (Nextron Systems)
+date: 2022/02/19
+modified: 2023/04/21
+tags:
+    - attack.defense_evasion
+    - attack.t1562.004
+logsource:
+    product: windows
+    service: firewall-as
+detection:
+    selection:
+        EventID:
+            - 2002 # A Windows Defender Firewall setting has changed.
+            - 2083 # A Windows Defender Firewall setting has changed. (Windows 11)
+            - 2003 # A Windows Firewall setting in the profile has changed
+            - 2082 # A Windows Defender Firewall setting in the %1 profile has changed. (Windows 11)
+            - 2008  # Windows Firewall Group Policy settings have changed. The new settings have been applied
+            # - 2010  # Network profile changed on an interface.
+    condition: selection
+level: low

@@ -1,0 +1,63 @@
+title: Uncommon Child Process Of Conhost.EXE
+id: 7dc2dedd-7603-461a-bc13-15803d132355
+status: experimental
+description: Detects uncommon "conhost" child processes. This could be a sign of "conhost" usage as a LOLBIN or potential process injection activity.
+references:
+    - http://www.hexacorn.com/blog/2020/05/25/how-to-con-your-host/
+author: omkar72
+date: 2020/10/25
+modified: 2023/06/01
+tags:
+    - attack.defense_evasion
+    - attack.t1202
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\conhost.exe'
+    filter_optional_provider:
+        Provider_Name: 'SystemTraceProvider-Process'  # FPs with Aurora
+    # Note that some of these git events occur because of a spoofed parent image
+    filter_optional_git:
+        # Example FP:
+        #   ParentCommandLine: "C:\Program Files\Git\cmd\git.exe" show --textconv :path/to/file
+        #   ParentCommandLine: "C:\Program Files\Git\cmd\git.exe" cat-file -s 4ca60c8a054f7eaa05f0438a8292762f2015d228
+        Provider_Name: 'Microsoft-Windows-Kernel-Process'
+        Image|endswith: '\git.exe'
+        ParentCommandLine|contains:
+            - ' show --textconv '
+            - ' cat-file -s '
+    filter_optional_git_show:
+        # Example FP:
+        #   GrandparentCommandLine: git.exe cat-file -s 4ca60c8a054f7eaa05f0438a8292762f2015d258
+        #   ParentCommandLine: \??\C:\WINDOWS\system32\conhost.exe 0x4
+        #   ParentImage: C:\Windows\System32\conhost.exe
+        #   CommandLine: git.exe show --textconv :path/to/file
+        ParentCommandLine|contains: 'C:\WINDOWS\system32\conhost.exe 0x4'
+        CommandLine|contains:
+            - ' show --textconv '
+            - ' cat-file -s '
+    filter_optional_image_conhost:
+        # Example FP:
+        #   ParentCommandLine: "C:\Program Files\Git\cmd\git.exe" cat-file -s 4ca60c8a054f7eaa05f0438a8292762f2015d228
+        Provider_Name: 'Microsoft-Windows-Kernel-Process'
+        ParentCommandLine|contains:
+            - ' cat-file -s '
+            - 'show --textconv'
+        Image: 'C:\Windows\System32\conhost.exe'
+    filter_optional_image_conhost2:
+        ParentCommandLine:
+            # The "?" needs to be escaped as it is considered as a special characters in SIGMA (https://github.com/SigmaHQ/sigma-specification)
+            - '\\\?\?\\C:\\WINDOWS\\system32\\conhost.exe 0x4'
+            - '\\\?\?\\C:\\WINDOWS\\system32\\conhost.exe 0xffffffff -ForceV1'
+        Image: 'C:\Windows\System32\conhost.exe'
+    filter_optional_image_git:
+        ParentCommandLine:
+            - \\\?\?\\C:\\WINDOWS\\system32\\conhost.exe 0xffffffff -ForceV1'
+            - \\\?\?\\C:\\WINDOWS\\system32\\conhost.exe 0x4'
+        Image: 'C:\Program Files\Git\mingw64\bin\git.exe'
+    condition: selection and not 1 of filter_optional_*
+falsepositives:
+    - Unknown
+level: medium

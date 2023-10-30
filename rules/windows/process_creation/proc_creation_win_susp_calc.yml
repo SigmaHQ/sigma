@@ -1,0 +1,29 @@
+title: Suspicious Calculator Usage
+id: 737e618a-a410-49b5-bec3-9e55ff7fbc15
+status: test
+description: Detects suspicious use of 'calc.exe' with command line parameters or in a suspicious directory, which is likely caused by some PoC or detection evasion
+references:
+    - https://twitter.com/ItsReallyNick/status/1094080242686312448
+author: Florian Roth (Nextron Systems)
+date: 2019/02/09
+modified: 2022/11/07
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_1:
+        CommandLine|contains: '\calc.exe '
+    selection_2:
+        Image|endswith: '\calc.exe'
+    filter_2:
+        Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\WinSxS\'
+    condition: selection_1 or ( selection_2 and not filter_2 )
+falsepositives:
+    - Unknown
+level: high

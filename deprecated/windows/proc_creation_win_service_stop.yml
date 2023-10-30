@@ -1,0 +1,45 @@
+title: Stop Windows Service
+id: eb87818d-db5d-49cc-a987-d5da331fbd90
+status: deprecated
+description: Detects a Windows service to be stopped
+author: Jakob Weinzettl, oscd.community, Nasreddine Bencherchali
+date: 2019/10/23
+modified: 2023/03/05
+tags:
+    - attack.impact
+    - attack.t1489
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_sc_net_img:
+        - OriginalFileName:
+            - 'sc.exe'
+            - 'net.exe'
+            - 'net1.exe'
+        - Image|endswith:
+            - '\sc.exe'
+            - '\net.exe'
+            - '\net1.exe'
+    selection_sc_net_cli:
+        CommandLine|contains: ' stop '
+    selection_pwsh:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        CommandLine|contains: 'Stop-Service '
+    filter:
+        CommandLine:
+             - 'sc  stop KSCWebConsoleMessageQueue' # kaspersky Security Center Web Console double space between sc and stop
+             - 'sc  stop LGHUBUpdaterService' # Logitech LGHUB Updater Service
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
+    condition: (all of selection_sc_net* and not filter) or selection_pwsh
+fields:
+    - ComputerName
+    - User
+    - CommandLine
+falsepositives:
+    - Administrator shutting down the service due to upgrade or removal purposes
+level: low

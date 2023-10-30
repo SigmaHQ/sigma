@@ -1,0 +1,42 @@
+title: Potential SquiblyTwo Technique Execution
+id: 8d63dadf-b91b-4187-87b6-34a1114577ea
+status: test
+description: Detects potential SquiblyTwo attack technique with possible renamed WMIC via Imphash and OriginalFileName fields
+references:
+    - https://web.archive.org/web/20190209154607/https://subt0x11.blogspot.com/2018/04/wmicexe-whitelisting-bypass-hacking.html
+    - https://twitter.com/mattifestation/status/986280382042595328 # Deleted
+    - https://atomicredteam.io/defense-evasion/T1220/
+    - https://lolbas-project.github.io/lolbas/Binaries/Wmic/
+author: Markus Neis, Florian Roth
+date: 2019/01/16
+modified: 2023/02/15
+tags:
+    - attack.defense_evasion
+    - attack.t1047
+    - attack.t1220
+    - attack.execution
+    - attack.t1059.005
+    - attack.t1059.007
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_pe:
+        - Image|endswith: '\wmic.exe'
+        - OriginalFileName: 'wmic.exe'
+        - Imphash:
+              - 1B1A3F43BF37B5BFE60751F2EE2F326E
+              - 37777A96245A3C74EB217308F3546F4C
+              - 9D87C9D67CE724033C0B40CC4CA1B206
+        - Hashes|contains:  # Sysmon field hashes contains all types
+              - IMPHASH=1B1A3F43BF37B5BFE60751F2EE2F326E
+              - IMPHASH=37777A96245A3C74EB217308F3546F4C
+              - IMPHASH=9D87C9D67CE724033C0B40CC4CA1B206
+    selection_cli:
+        CommandLine|contains|all:
+            - 'format:'
+            - 'http'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium

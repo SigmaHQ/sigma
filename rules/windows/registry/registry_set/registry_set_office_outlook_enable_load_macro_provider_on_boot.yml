@@ -1,0 +1,27 @@
+title: Potential Persistence Via Outlook LoadMacroProviderOnBoot Setting
+id: 396ae3eb-4174-4b9b-880e-dc0364d78a19
+status: experimental
+description: Detects the modification of Outlook setting "LoadMacroProviderOnBoot" which if enabled allows the automatic loading of any configured VBA project/module
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-persistence-via-microsoft-exchange-server-or-outlook?slide=53
+    - https://www.linkedin.com/pulse/outlook-backdoor-using-vba-samir-b-/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2021/04/05
+modified: 2023/08/17
+tags:
+    - attack.persistence
+    - attack.command_and_control
+    - attack.t1137
+    - attack.t1008
+    - attack.t1546
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|endswith: '\Outlook\LoadMacroProviderOnBoot'
+        Details|contains: '0x00000001'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

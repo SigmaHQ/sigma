@@ -1,0 +1,48 @@
+title: Alternate PowerShell Hosts - PowerShell Module
+id: 64e8e417-c19a-475a-8d19-98ea705394cc
+status: test
+description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
+references:
+    - https://threathunterplaybook.com/hunts/windows/190610-PwshAlternateHosts/notebook.html
+author: Roberto Rodriguez @Cyb3rWard0g
+date: 2019/08/11
+modified: 2022/12/13
+tags:
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: ps_module
+    definition: 0ad03ef1-f21b-4a79-8ce8-e6900c54b65b
+detection:
+    selection:
+        ContextInfo|contains: '*'
+    filter_powershell:
+        # This filter covers the following use cases
+        #   - When powershell is called directly from commandline via keyword powershell or powershell.exe
+        #   - Or called via path but not with full "".exe". Example: C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell
+        ContextInfo|contains:
+            - '= powershell' # Host Application=...powershell.exe or Application hote=...powershell.exe in French Win10 event
+            - '= C:\Windows\System32\WindowsPowerShell\v1.0\powershell'
+            - '= C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell'
+            # In some cases powershell was invoked with inverted slashes
+            - '= C:/Windows/System32/WindowsPowerShell/v1.0/powershell'
+            - '= C:/Windows/SysWOW64/WindowsPowerShell/v1.0/powershell'
+    filter_sdiagnhost:
+        ContextInfo|contains: '= C:\WINDOWS\System32\sdiagnhost.exe -Embedding' # When MSDT is launched for example
+    filter_citrix:
+        ContextInfo|contains: 'ConfigSyncRun.exe'
+    filter_adace:  # Active Directory Administrative Center Enhancements
+        ContextInfo|contains: 'C:\Windows\system32\dsac.exe'
+    filter_winrm:
+        ContextInfo|contains: 'C:\Windows\system32\wsmprovhost.exe -Embedding'
+    filter_help_update:
+        Payload|contains:
+            - 'Update-Help'
+            - 'Failed to update Help for the module'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Programs using PowerShell directly without invocation of a dedicated interpreter
+    - MSP Detection Searcher
+    - Citrix ConfigSync.ps1
+level: medium

@@ -1,0 +1,57 @@
+title: VMToolsd Suspicious Child Process
+id: 5687f942-867b-4578-ade7-1e341c46e99a
+status: experimental
+description: Detects suspicious child process creations of VMware Tools process which may indicate persistence setup
+references:
+    - https://bohops.com/2021/10/08/analyzing-and-detecting-a-vmtools-persistence-technique/
+    - https://user-images.githubusercontent.com/61026070/136518004-b68cce7d-f9b8-4e9a-9b7b-53b1568a9a94.png
+    - https://github.com/vmware/open-vm-tools/blob/master/open-vm-tools/tools.conf
+author: bohops, Bhabesh Raj
+date: 2021/10/08
+modified: 2023/07/25
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\vmtoolsd.exe'
+    selection_img:
+        - Image|endswith:
+              - '\cmd.exe'
+              - '\cscript.exe'
+              - '\mshta.exe'
+              - '\powershell.exe'
+              - '\pwsh.exe'
+              - '\regsvr32.exe'
+              - '\rundll32.exe'
+              - '\wscript.exe'
+        - OriginalFileName:
+              - 'Cmd.Exe'
+              - 'cscript.exe'
+              - 'MSHTA.EXE'
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+              - 'REGSVR32.EXE'
+              - 'RUNDLL32.EXE'
+              - 'wscript.exe'
+    filter_main_vmwaretools_script:
+        Image|endswith: '\cmd.exe'
+        CommandLine|contains:
+            - '\VMware\VMware Tools\poweron-vm-default.bat'
+            - '\VMware\VMware Tools\poweroff-vm-default.bat'
+            - '\VMware\VMware Tools\resume-vm-default.bat'
+            - '\VMware\VMware Tools\suspend-vm-default.bat'
+    filter_main_empty:
+        Image|endswith: '\cmd.exe'
+        CommandLine: ''
+    filter_main_null:
+        Image|endswith: '\cmd.exe'
+        CommandLine: null
+    condition: all of selection* and not 1 of filter_main_*
+falsepositives:
+    - Legitimate use by VM administrator
+level: high

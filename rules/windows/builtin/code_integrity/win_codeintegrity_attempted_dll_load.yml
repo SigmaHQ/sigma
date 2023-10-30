@@ -1,0 +1,103 @@
+title: CodeIntegrity - Unmet Signing Level Requirements By File Under Validation
+id: f8931561-97f5-4c46-907f-0a4a592e47a7
+status: experimental
+description: |
+    Detects attempted file load events that did not meet the signing level requirements. It often means the file's signature is revoked or a signature with the Lifetime Signing EKU has expired.
+    This event is best correlated with EID 3089 to determine the error of the validation.
+references:
+    - https://twitter.com/SBousseaden/status/1483810148602814466
+    - https://github.com/MicrosoftDocs/windows-itpro-docs/blob/40fe118976734578f83e5e839b9c63ae7a4af82d/windows/security/threat-protection/windows-defender-application-control/event-id-explanations.md#windows-codeintegrity-operational-log
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/event-tag-explanations
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/event-id-explanations
+author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+date: 2022/01/20
+modified: 2023/07/25
+tags:
+    - attack.execution
+logsource:
+    product: windows
+    service: codeintegrity-operational
+detection:
+    selection:
+        EventID:
+            - 3033 # Code Integrity determined that a process (%4) attempted to load %2 that did not meet the %5 signing level requirements.
+            - 3034 # Code Integrity determined that a process (%4) attempted to load %2 that did not meet the %5 signing level requirements or violated code integrity policy. However, due to code integrity auditing policy, the image was allowed to load.
+    filter_optional_dtrace:
+        # Example: Code Integrity determined that a process (\Device\HarddiskVolume5\Windows\System32\svchost.exe) attempted to load \Device\HarddiskVolume5\Program Files\DTrace\dtrace.dll that did not meet the Windows signing level requirements.
+        FileNameBuffer|endswith: '\Program Files\DTrace\dtrace.dll'
+        ProcessNameBuffer|endswith: '\Windows\System32\svchost.exe'
+        RequestedPolicy: 12
+    filter_optional_av_generic:
+        # Example: Code Integrity determined that a process (\Device\HarddiskVolume5\ProgramData\Microsoft\Windows Defender\Platform\4.18.2207.7-0\MsMpEng.exe) attempted to load \Device\HarddiskVolume5\Windows\System32\DriverStore\FileRepository\iigd_dch.inf_amd64_36fb67bd6dbd887d\igd10iumd64.dll that did not meet the Custom 3 / Antimalware signing level requirements.
+        FileNameBuffer|contains: '\Windows\System32\DriverStore\FileRepository\'
+        FileNameBuffer|endswith: '\igd10iumd64.dll'
+        # ProcessNameBuffer is AV products
+        RequestedPolicy: 7
+    filter_optional_electron_based_app:
+        # Example: Code Integrity determined that a process (\Device\HarddiskVolume5\Users\user\AppData\Local\Keybase\Gui\Keybase.exe) attempted to load \Device\HarddiskVolume5\Windows\System32\nvspcap64.dll that did not meet the Microsoft signing level requirements.
+        FileNameBuffer|endswith: '\Windows\System32\nvspcap64.dll'
+        ProcessNameBuffer|endswith:
+            - '\AppData\Local\Keybase\Gui\Keybase.exe'
+            - '\Microsoft\Teams\stage\Teams.exe'
+        RequestedPolicy: 8
+    filter_optional_bonjour:
+        FileNameBuffer|endswith: '\Program Files\Bonjour\mdnsNSP.dll'
+        ProcessNameBuffer|endswith:
+            - '\Windows\System32\svchost.exe'
+            - '\Windows\System32\SIHClient.exe'
+        RequestedPolicy:
+            - 8
+            - 12
+    filter_optional_msoffice:
+        FileNameBuffer|contains: '\Microsoft Office\root\vfs\ProgramFilesCommonX64\Microsoft Shared\OFFICE'
+        FileNameBuffer|endswith: '\MSOXMLMF.DLL'
+        # ProcessNameBuffer is AV products
+        RequestedPolicy: 7
+    filter_optional_slack:
+        # Example: https://user-images.githubusercontent.com/112784902/197407680-96d4b662-8a59-4289-a483-b24d630ac2a9.png
+        # Even though it's the same DLL as the one used in the electron based app filter. We need to do a separate selection due to slack's folder naming convention with the version number :)
+        FileNameBuffer|endswith: '\Windows\System32\nvspcap64.dll'
+        ProcessNameBuffer|contains: '\AppData\Local\slack\app-'
+        ProcessNameBuffer|endswith: '\slack.exe'
+        RequestedPolicy: 8
+    filter_optional_firefox:
+        # Example: https://user-images.githubusercontent.com/62423083/197451483-70e89010-ed96-4357-8079-b5a061a239d6.png
+        FileNameBuffer|endswith:
+            - '\Mozilla Firefox\mozavcodec.dll'
+            - '\Mozilla Firefox\mozavutil.dll'
+        ProcessNameBuffer|endswith: '\Mozilla Firefox\firefox.exe'
+        RequestedPolicy: 8
+    filter_optional_avast:
+        FileNameBuffer|endswith:
+            - '\Program Files\Avast Software\Avast\aswAMSI.dll'
+            - '\Program Files (x86)\Avast Software\Avast\aswAMSI.dll'
+        RequestedPolicy:
+            - 8
+            - 12
+    filter_main_gac:
+        # Filtering the path containing this string because of multiple possible DLLs in that location
+        FileNameBuffer|contains: '\Windows\assembly\GAC\'
+        ProcessNameBuffer|endswith: '\mscorsvw.exe'
+        ProcessNameBuffer|contains: '\Windows\Microsoft.NET\'
+        RequestedPolicy: 8
+    filter_optional_google_drive:
+        # Example: \Program Files\Google\Drive File Stream\67.0.2.0\crashpad_handler.exe
+        FileNameBuffer|contains: '\Program Files\Google\Drive File Stream\'
+        FileNameBuffer|endswith: '\crashpad_handler.exe'
+        ProcessNameBuffer|endswith: '\Windows\ImmersiveControlPanel\SystemSettings.exe'
+        RequestedPolicy: 8
+    filter_optional_trend_micro:
+        FileNameBuffer|endswith: '\Trend Micro\Client Server Security Agent\perficrcperfmonmgr.dll'
+        RequestedPolicy: 8
+    filter_optional_mdns_responder:
+        FileNameBuffer|endswith: '\Program Files\National Instruments\Shared\mDNS Responder\nimdnsNSP.dll '
+    filter_optional_mcafee:
+        FileNameBuffer|endswith:
+            - '\Program Files\McAfee\Endpoint Security\Threat Prevention\MfeAmsiProvider.dll'
+            - '\Program Files\McAfee\MfeAV\AMSIExt.dll'
+    filter_optional_eset:
+        FileNameBuffer|endswith: '\Program Files\ESET\ESET Security\eamsi.dll'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Antivirus and other third party products are known to trigger this rule quite a lot. Initial filters and tuning is required before using this rule.
+level: medium

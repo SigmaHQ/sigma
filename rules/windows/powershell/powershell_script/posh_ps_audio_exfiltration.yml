@@ -1,0 +1,36 @@
+title: Potential Data Exfiltration Via Audio File
+id: e4f93c99-396f-47c8-bb0f-201b1fa69034
+status: experimental
+description: Detects potential exfiltration attempt via audio file using PowerShell
+references:
+    - https://github.com/gtworek/PSBits/blob/e97cbbb173b31cbc4d37244d3412de0a114dacfb/NoDLP/bin2wav.ps1
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/01/16
+tags:
+    - attack.exfiltration
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_main:
+        ScriptBlockText|contains|all:
+            - '[System.Math]::'
+            - '[IO.FileMode]::'
+            - 'BinaryWriter'
+    selection_header_wav:
+        ScriptBlockText|contains|all:
+            # Byte chunks from the WAV header used in the example POC
+            # You can extend this for different audio formats by adding different selections
+            - '0x52'
+            - '0x49'
+            - '0x46'
+            - '0x57'
+            - '0x41'
+            - '0x56'
+            - '0x45'
+            - '0xAC'
+    condition: selection_main and 1 of selection_header_*
+falsepositives:
+    - Unknown
+level: medium

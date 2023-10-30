@@ -1,0 +1,34 @@
+title: Suspicious Non PowerShell WSMAN COM Provider
+id: df9a0e0e-fedb-4d6c-8668-d765dfc92aa7
+status: test
+description: Detects suspicious use of the WSMAN provider without PowerShell.exe as the host application.
+references:
+    - https://twitter.com/chadtilbury/status/1275851297770610688
+    - https://bohops.com/2020/05/12/ws-management-com-another-approach-for-winrm-lateral-movement/
+    - https://github.com/bohops/WSMan-WinRM
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+date: 2020/06/24
+modified: 2023/10/27
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.lateral_movement
+    - attack.t1021.003
+logsource:
+    product: windows
+    service: powershell-classic
+detection:
+    selection:
+        Data|contains: 'ProviderName=WSMan'
+    filter_main_ps:
+        Data|contains:
+            - 'HostApplication=powershell'
+            - 'HostApplication=C:\Windows\System32\WindowsPowerShell\v1.0\powershell'
+            - 'HostApplication=C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell'
+            # In some cases powershell was invoked with inverted slashes
+            - 'HostApplication=C:/Windows/System32/WindowsPowerShell/v1.0/powershell'
+            - 'HostApplication=C:/Windows/SysWOW64/WindowsPowerShell/v1.0/powershell'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: medium

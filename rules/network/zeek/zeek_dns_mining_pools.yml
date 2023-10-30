@@ -1,20 +1,20 @@
 title: DNS Events Related To Mining Pools
 id: bf74135c-18e8-4a72-a926-0e4f47888c19
+status: test
 description: Identifies clients that may be performing DNS lookups associated with common currency mining pools.
-status: experimental
 references:
-  - https://github.com/Azure/Azure-Sentinel/blob/master/Detections/ASimDNS/imDNS_Miners.yaml
-date: 2021/08/19
-modified: 2021/08/23
+    - https://github.com/Azure/Azure-Sentinel/blob/fa0411f9424b6c47b4d5a20165e4f1b168c1f103/Detections/ASimDNS/imDNS_Miners.yaml
 author: Saw Winn Naung, Azure-Sentinel, @neu5ron
-level: low
+date: 2021/08/19
+modified: 2022/07/07
+tags:
+    - attack.execution
+    - attack.t1569.002
+    - attack.impact
+    - attack.t1496
 logsource:
     service: dns
     product: zeek
-tags:
-  - attack.t1035 # an old one
-  - attack.t1569.002
-  - attack.t1496
 detection:
     selection:
         query|endswith:
@@ -94,9 +94,7 @@ detection:
             - '0.0.0.0'
     exclude_rejected:
         rejected: 'true'
-    condition: selection and not (exclude_answers or exclude_rejected)
-falsepositives:
-    - A DNS lookup does not necessarily  mean a successful attempt, verify a) if there was a response using the zeek answers field, if there was then verify the connections (conn.log) to those IPs. b) verify if HTTP, SSL, or TLS activity to the domain that was queried. http.log field is 'host' and ssl/tls is 'server_name'.
+    condition: selection and not 1 of exclude_*
 fields:
     - id.orig_h
     - id.resp_h
@@ -104,3 +102,6 @@ fields:
     - answers
     - qtype_name
     - rcode_name
+falsepositives:
+    - A DNS lookup does not necessarily  mean a successful attempt, verify a) if there was a response using the zeek answers field, if there was then verify the connections (conn.log) to those IPs. b) verify if HTTP, SSL, or TLS activity to the domain that was queried. http.log field is 'host' and ssl/tls is 'server_name'.
+level: low

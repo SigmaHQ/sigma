@@ -1,0 +1,52 @@
+title: Set Suspicious Files as System Files Using Attrib.EXE
+id: efec536f-72e8-4656-8960-5e85d091345b
+related:
+    - id: bb19e94c-59ae-4c15-8c12-c563d23fe52b
+      type: derived
+status: experimental
+description: |
+    Detects the usage of attrib with the "+s" option to set scripts or executables located in suspicious locations as system files to hide them from users and make them unable to be deleted with simple rights. The rule limits the search to specific extensions and directories to avoid FPs
+references:
+    - https://app.any.run/tasks/c28cabc8-a19f-40f3-a78b-cae506a5c0d4
+    - https://app.any.run/tasks/cfc8870b-ccd7-4210-88cf-a8087476a6d0
+    - https://unit42.paloaltonetworks.com/unit42-sure-ill-take-new-combojack-malware-alters-clipboards-steal-cryptocurrency/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2022/06/28
+modified: 2023/03/14
+tags:
+    - attack.defense_evasion
+    - attack.t1564.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\attrib.exe'
+        - OriginalFileName: 'ATTRIB.EXE'
+    selection_cli:
+        CommandLine|contains: ' +s'
+    selection_paths:
+        CommandLine|contains:
+            - ' %' # Custom Environment variable
+            - '\Users\Public\'
+            - '\AppData\Local\'
+            - '\ProgramData\'
+            - '\Downloads\'
+            - '\Windows\Temp\'
+    selection_ext:
+        CommandLine|contains:
+            - '.bat'
+            - '.dll'
+            - '.exe'
+            - '.hta'
+            - '.ps1'
+            - '.vbe'
+            - '.vbs'
+    filter:
+        CommandLine|contains|all:
+            - '\Windows\TEMP\'
+            - '.exe'
+    condition: all of selection* and not filter
+falsepositives:
+    - Unknown
+level: high

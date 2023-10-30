@@ -1,0 +1,45 @@
+title: Potential System Information Discovery Via Wmic.EXE
+id: 9d5a1274-922a-49d0-87f3-8c653483b909
+status: experimental
+description: |
+    Detects the use of the WMI command-line (WMIC) utility to identify and display various system information,
+    including OS, CPU, GPU, and disk drive names; memory capacity; display resolution; and baseboard, BIOS,
+    and GPU driver products/versions.
+    Some of these commands were used by Aurora Stealer in late 2022/early 2023.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/a2ccd19c37d0278b4ffa8583add3cf52060a5418/atomics/T1082/T1082.md#atomic-test-25---system-information-discovery-with-wmic
+    - https://nwgat.ninja/getting-system-information-with-wmic-on-windows/
+    - https://blog.sekoia.io/aurora-a-rising-stealer-flying-under-the-radar
+    - https://blog.cyble.com/2023/01/18/aurora-a-stealer-using-shapeshifting-tactics/
+    - https://app.any.run/tasks/a6aa0057-82ec-451f-8f99-55650ca537da/
+author: TropChaud
+date: 2023/01/26
+modified: 2023/05/05
+tags:
+    - attack.discovery
+    - attack.t1082
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_wmic:
+        - Description: 'WMI Commandline Utility'
+        - OriginalFileName: 'wmic.exe'
+        - Image|endswith: '\WMIC.exe'
+    selection_commands:
+        CommandLine|contains:
+            - 'baseboard get product'
+            - 'baseboard get version'
+            - 'bios get SMBIOSBIOSVersion'
+            - 'cpu get name'
+            - 'DISKDRIVE get Caption'
+            - 'LOGICALDISK get Name,Size,FreeSpace'
+            - 'MEMPHYSICAL get MaxCapacity'
+            - 'OS get Caption,OSArchitecture,Version'
+            - 'path win32_VideoController get DriverVersion'
+            - 'path win32_VideoController get name'
+            - 'path win32_VideoController get VideoModeDescription'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium

@@ -1,0 +1,32 @@
+title: Driver/DLL Installation Via Odbcconf.EXE
+id: 3f5491e2-8db8-496b-9e95-1029fce852d4
+related:
+    - id: cb0fe7c5-f3a3-484d-aa25-d350a7912729
+      type: similar
+status: experimental
+description: Detects execution of "odbcconf" with "INSTALLDRIVER" which installs a new ODBC driver. Attackers abuse this to install and run malicious DLLs.
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Odbcconf/
+    - https://web.archive.org/web/20191023232753/https://twitter.com/Hexacorn/status/1187143326673330176
+    - https://www.hexacorn.com/blog/2020/08/23/odbcconf-lolbin-trifecta/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/05/22
+tags:
+    - attack.defense_evasion
+    - attack.t1218.008
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\odbcconf.exe'
+        - OriginalFileName: 'odbcconf.exe'
+    selection_cli:
+        # Note: The "/A" flag is not required to call a specific action
+        CommandLine|contains|all:
+            - 'INSTALLDRIVER '
+            - '.dll'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate driver DLLs being registered via "odbcconf" will generate false positives. Investigate the path of the DLL and its contents to determine if the action is authorized.
+level: medium

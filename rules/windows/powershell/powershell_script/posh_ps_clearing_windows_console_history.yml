@@ -1,0 +1,34 @@
+title: Clearing Windows Console History
+id: bde47d4b-9987-405c-94c7-b080410e8ea7
+status: test
+description: Identifies when a user attempts to clear console history. An adversary may clear the command history of a compromised account to conceal the actions undertaken during an intrusion.
+references:
+    - https://stefanos.cloud/blog/kb/how-to-clear-the-powershell-command-history/
+    - https://www.shellhacks.com/clear-history-powershell/
+    - https://community.sophos.com/sophos-labs/b/blog/posts/powershell-command-history-forensics
+author: Austin Songer @austinsonger
+date: 2021/11/25
+modified: 2022/12/25
+tags:
+    - attack.defense_evasion
+    - attack.t1070
+    - attack.t1070.003
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection1:
+        ScriptBlockText|contains: Clear-History
+    selection2a:
+        ScriptBlockText|contains:
+            - Remove-Item
+            - rm
+    selection2b:
+        ScriptBlockText|contains:
+            - ConsoleHost_history.txt
+            - (Get-PSReadlineOption).HistorySavePath
+    condition: selection1 or selection2a and selection2b
+falsepositives:
+    - Unknown
+level: high

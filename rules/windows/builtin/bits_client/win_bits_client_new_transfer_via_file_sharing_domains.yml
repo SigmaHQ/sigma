@@ -1,0 +1,50 @@
+title: BITS Transfer Job Download From File Sharing Domains
+id: d635249d-86b5-4dad-a8c7-d7272b788586
+status: experimental
+description: Detects BITS transfer job downloading files from a file sharing domain.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1197/T1197.md
+    - https://twitter.com/malmoeb/status/1535142803075960832
+    - https://symantec-enterprise-blogs.security.com/blogs/threat-intelligence/ransomware-hive-conti-avoslocker
+author: Florian Roth (Nextron Systems)
+date: 2022/06/28
+modified: 2023/08/17
+tags:
+    - attack.defense_evasion
+    - attack.persistence
+    - attack.t1197
+logsource:
+    product: windows
+    service: bits-client
+detection:
+    selection:
+        EventID: 16403
+        RemoteName|contains:
+            - '.githubusercontent.com'       # Includes both gists and github repositories / Michael Haag (idea)
+            - 'anonfiles.com'
+            - 'cdn.discordapp.com'
+            - 'cdn.discordapp.com/attachments/'
+            - 'ddns.net'
+            - 'dl.dropboxusercontent.com'
+            - 'ghostbin.co'
+            - 'gofile.io'
+            - 'hastebin.com'
+            - 'mediafire.com'
+            - 'mega.nz'
+            - 'paste.ee'
+            - 'pastebin.com'
+            - 'pastebin.pl'
+            - 'pastetext.net'
+            - 'privatlab.com'
+            - 'privatlab.net'
+            - 'send.exploit.in'
+            - 'sendspace.com'
+            - 'storage.googleapis.com'
+            - 'storjshare.io'
+            - 'temp.sh'
+            - 'transfer.sh'
+            - 'ufile.io'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

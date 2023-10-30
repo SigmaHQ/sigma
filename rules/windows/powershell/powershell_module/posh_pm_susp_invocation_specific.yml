@@ -1,0 +1,74 @@
+title: Suspicious PowerShell Invocations - Specific - PowerShell Module
+id: 8ff28fdd-e2fa-4dfa-aeda-ef3d61c62090
+related:
+    - id: fce5f582-cc00-41e1-941a-c6fabf0fdb8c
+      type: derived
+    - id: ae7fbf8e-f3cb-49fd-8db4-5f3bed522c71
+      type: similar
+    - id: 536e2947-3729-478c-9903-745aaffe60d2
+      type: similar
+status: experimental
+description: Detects suspicious PowerShell invocation command parameters
+author: Florian Roth (Nextron Systems), Jonhnathan Ribeiro
+date: 2017/03/05
+modified: 2023/01/05
+tags:
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: ps_module
+    definition: 0ad03ef1-f21b-4a79-8ce8-e6900c54b65b
+detection:
+    selection_convert_b64:
+        ContextInfo|contains|all:
+            - '-nop'
+            - ' -w '
+            - 'hidden'
+            - ' -c '
+            - '[Convert]::FromBase64String'
+    selection_iex:
+        ContextInfo|contains|all:
+            - ' -w '
+            - 'hidden'
+            - '-noni'
+            - '-nop'
+            - ' -c '
+            - 'iex'
+            - 'New-Object'
+    selection_enc:
+        ContextInfo|contains|all:
+            - ' -w '
+            - 'hidden'
+            - '-ep'
+            - 'bypass'
+            - '-Enc'
+    selection_reg:
+        ContextInfo|contains|all:
+            - 'powershell'
+            - 'reg'
+            - 'add'
+            - 'HKCU\software\microsoft\windows\currentversion\run'
+    selection_webclient:
+        ContextInfo|contains|all:
+            - 'bypass'
+            - '-noprofile'
+            - '-windowstyle'
+            - 'hidden'
+            - 'new-object'
+            - 'system.net.webclient'
+            - '.download'
+    selection_iex_webclient:
+        ContextInfo|contains|all:
+            - 'iex'
+            - 'New-Object'
+            - 'Net.WebClient'
+            - '.Download'
+    filter_chocolatey:
+        ContextInfo|contains:
+            - "(New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1"
+            - 'Write-ChocolateyWarning'
+    condition: 1 of selection_* and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: high

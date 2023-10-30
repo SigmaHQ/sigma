@@ -1,0 +1,35 @@
+title: Macro Enabled In A Potentially Suspicious Document
+id: a166f74e-bf44-409d-b9ba-ea4b2dd8b3cd
+related:
+    - id: 295a59c1-7b79-4b47-a930-df12c15fc9c2
+      type: derived
+status: experimental
+description: Detects registry changes to Office trust records where the path is located in a potentially suspicious location
+references:
+    - https://twitter.com/inversecos/status/1494174785621819397
+    - Internal Research
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/06/21
+modified: 2023/08/17
+tags:
+    - attack.defense_evasion
+    - attack.t1112
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_value:
+        TargetObject|contains: '\Security\Trusted Documents\TrustRecords'
+    selection_paths:
+        TargetObject|contains:
+            # Note: add more locations where you don't expect a user to executed macro enabled docs
+            - '/AppData/Local/Microsoft/Windows/INetCache/'
+            - '/AppData/Local/Temp/'
+            - '/PerfLogs/'
+            - 'C:/Users/Public/'
+            - 'file:///D:/'
+            - 'file:///E:/'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely
+level: high

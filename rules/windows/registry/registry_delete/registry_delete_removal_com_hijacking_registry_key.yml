@@ -1,0 +1,66 @@
+title: Removal of Potential COM Hijacking Registry Keys
+id: 96f697b0-b499-4e5d-9908-a67bec11cdb6
+status: test
+description: |
+    Detects any deletion of entries in ".*\shell\open\command" registry keys.
+    These registry keys might have been used for COM hijacking activities by a threat actor or an attacker and the deletion could indicate steps to remove its tracks.
+references:
+    - https://github.com/OTRF/detection-hackathon-apt29/issues/7
+    - https://github.com/OTRF/ThreatHunter-Playbook/blob/2d4257f630f4c9770f78d0c1df059f891ffc3fec/docs/evals/apt29/detections/3.C.1_22A46621-7A92-48C1-81BF-B3937EB4FDC3.md
+    - https://docs.microsoft.com/en-us/windows/win32/shell/launch
+    - https://docs.microsoft.com/en-us/windows/win32/api/shobjidl_core/nn-shobjidl_core-iexecutecommand
+    - https://docs.microsoft.com/en-us/windows/win32/shell/shell-and-managed-code
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+date: 2020/05/02
+modified: 2023/01/19
+tags:
+    - attack.defense_evasion
+    - attack.t1112
+logsource:
+    product: windows
+    category: registry_delete
+detection:
+    selection:
+        EventType: 'DeleteKey'
+        TargetObject|endswith: '\shell\open\command'
+    filter_svchost:
+        Image: 'C:\Windows\system32\svchost.exe'
+    filter_office:
+        Image|startswith:
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
+        Image|endswith: '\OfficeClickToRun.exe'
+    filter_integrator:
+        Image: 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
+    filter_dropbox:
+        Image|endswith: '\Dropbox.exe'
+        # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
+        TargetObject|contains: '\Dropbox.'
+    filter_wireshark:
+        Image|endswith: '\AppData\Local\Temp\Wireshark_uninstaller.exe'
+        # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
+        TargetObject|contains: '\wireshark-capture-file\'
+    filter_opera:
+        Image|startswith:
+            - 'C:\Program Files\Opera\'
+            - 'C:\Program Files (x86)\Opera\'
+        Image|endswith: '\installer.exe'
+    filter_peazip:
+        Image|contains: 'peazip'
+        # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
+        TargetObject|contains: '\PeaZip.'
+    filter_everything:
+        Image|endswith: '\Everything.exe'
+        # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
+        TargetObject|contains: '\Everything.'
+    filter_uninstallers:
+        # This image path is linked with different uninstallers when running as admin unfortunately
+        Image|startswith: 'C:\Windows\Installer\MSI'
+    filter_java:
+        Image|startswith: 'C:\Program Files (x86)\Java\'
+        Image|endswith: '\installer.exe'
+        TargetObject|contains: '\Classes\WOW6432Node\CLSID\{4299124F-F2C3-41b4-9C73-9236B2AD0E8F}'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Legitimate software (un)installations are known to cause some false positives. Please add them as a filter when encountered
+level: medium

@@ -1,0 +1,24 @@
+title: SilentProcessExit Monitor Registration
+id: c81fe886-cac0-4913-a511-2822d72ff505
+status: deprecated
+description: Detects changes to the Registry in which a monitor program gets registered to monitor the exit of another process
+references:
+    - https://oddvar.moe/2018/04/10/persistence-using-globalflags-in-image-file-execution-options-hidden-from-autoruns-exe/
+    - https://www.deepinstinct.com/2021/02/16/lsass-memory-dumps-are-stealthier-than-ever-before-part-2/
+author: Florian Roth (Nextron Systems)
+date: 2021/02/26
+modified: 2023/08/17
+tags:
+    - attack.persistence
+    - attack.t1546.012
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: 'Microsoft\Windows NT\CurrentVersion\SilentProcessExit'
+        Details|contains: 'MonitorProcess'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

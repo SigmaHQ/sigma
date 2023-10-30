@@ -1,0 +1,49 @@
+action: global
+title: Defense evasion via process reimaging
+id: 7fa4f550-850e-4117-b543-428c86ebb849
+description: Detects process reimaging defense evasion technique
+# where
+#             selection1: ImageFileName != selection1: OriginalFileName
+#             selection1: ParentProcessGuid = selection2: ProcessGuid
+#             selection1: Image = selection2: TargetFilename
+# and new field ImageFileName is coming from enrichment
+#             selection1: Image = ^.+\\<ImageFileName>$
+# Rule must trigger if selection1 and selection2 both occurs in timeframe of 120 sec.
+# Rule logic is currently not supported by SIGMA.
+# Sysmon v.10.0 or newer is required for proper detection.
+status: unsupported
+author: Alexey Balandin, oscd.community
+references:
+    - https://securingtomorrow.mcafee.com/other-blogs/mcafee-labs/in-ntdll-i-trust-process-reimaging-and-endpoint-security-solution-bypass/
+tags:
+    - attack.defense_evasion
+date: 2019/10/25
+modified: 2021/12/02
+detection:
+    condition: all of selection*
+falsepositives:
+    - Unknown
+level: high
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection1:
+        category: process_creation
+fields:
+    - Image
+    - OriginalFileName
+    - ParentProcessGuid
+new_fields:
+    - ImageFileName
+---
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection2:
+        EventID: 11
+fields:
+    - ProcessGuid
+    - TargetFilename

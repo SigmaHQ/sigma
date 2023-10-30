@@ -1,17 +1,24 @@
 title: Webshell Remote Command Execution
 id: c0d3734d-330f-4a03-aae2-65dacc6a8222
-status: experimental
+status: test
 description: Detects possible command execution by web application/web shell
+references:
+    - Personal Experience of the Author
 author: Ilyas Ochkov, Beyu Denis, oscd.community
 date: 2019/10/12
-modified: 2021/11/11
-references:
-    - personal experience
+modified: 2022/12/25
+tags:
+    - attack.persistence
+    - attack.t1505.003
 logsource:
     product: linux
     service: auditd
 detection:
     selection:
+        # You need to add to the following rules to your auditd.conf config:
+        #   -a always,exit -F arch=b32 -S execve -F euid=33 -k detect_execve_www
+        #   -a always,exit -F arch=b64 -S execve -F euid=33 -k detect_execve_www
+        # Change the number "33" to the ID of your WebServer user. Default: www-data:x:33:33
         type: 'SYSCALL'
         syscall: 'execve'
         key: 'detect_execve_www'
@@ -20,6 +27,3 @@ falsepositives:
     - Admin activity
     - Crazy web applications
 level: critical
-tags:
-    - attack.persistence
-    - attack.t1505.003

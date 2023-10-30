@@ -1,0 +1,64 @@
+title: Suspicious Download From File-Sharing Website Via Bitsadmin
+id: 8518ed3d-f7c9-4601-a26c-f361a4256a0c
+status: experimental
+description: Detects usage of bitsadmin downloading a file from a suspicious domain
+references:
+    - https://blog.netspi.com/15-ways-to-download-a-file/#bitsadmin
+    - https://isc.sans.edu/diary/22264
+    - https://lolbas-project.github.io/lolbas/Binaries/Bitsadmin/
+    - https://symantec-enterprise-blogs.security.com/blogs/threat-intelligence/ransomware-hive-conti-avoslocker
+    - https://www.cisa.gov/uscert/ncas/alerts/aa22-321a
+author: Florian Roth (Nextron Systems)
+date: 2022/06/28
+modified: 2023/08/17
+tags:
+    - attack.defense_evasion
+    - attack.persistence
+    - attack.t1197
+    - attack.s0190
+    - attack.t1036.003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\bitsadmin.exe'
+        - OriginalFileName: 'bitsadmin.exe'
+    selection_flags:
+        CommandLine|contains:
+            - ' /transfer '
+            - ' /create '
+            - ' /addfile '
+    selection_domain:
+        CommandLine|contains:
+            - '.githubusercontent.com'       # Includes both gists and github repositories / Michael Haag (idea)
+            - 'anonfiles.com'
+            - 'cdn.discordapp.com'
+            - 'cdn.discordapp.com/attachments/'
+            - 'ddns.net'
+            - 'dl.dropboxusercontent.com'
+            - 'ghostbin.co'
+            - 'gofile.io'
+            - 'hastebin.com'
+            - 'mediafire.com'
+            - 'mega.nz'
+            - 'paste.ee'
+            - 'pastebin.com'
+            - 'pastebin.pl'
+            - 'pastetext.net'
+            - 'privatlab.com'
+            - 'privatlab.net'
+            - 'send.exploit.in'
+            - 'sendspace.com'
+            - 'storage.googleapis.com'
+            - 'storjshare.io'
+            - 'temp.sh'
+            - 'transfer.sh'
+            - 'ufile.io'
+    condition: all of selection_*
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Some legitimate apps use this, but limited.
+level: high

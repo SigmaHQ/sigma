@@ -1,0 +1,25 @@
+title: Rare Scheduled Task Creations
+id: b20f6158-9438-41be-83da-a5a16ac90c2b
+status: unsupported
+description: This rule detects rare scheduled task creations. Typically software gets installed on multiple systems and not only on a few. The aggregation and count function selects tasks with rare names.
+author: Florian Roth (Nextron Systems)
+date: 2017/03/17
+modified: 2023/02/24
+tags:
+    - attack.persistence
+    - attack.s0111
+    - attack.t1053.005
+logsource:
+    product: windows
+    service: taskscheduler
+    definition: the "Microsoft-Windows-TaskScheduler/Operational" is disabled by default and should be enabled in order for this detection to work
+detection:
+    selection:
+        EventID: 106
+    filter1:
+        TaskName: \Microsoft\Windows\Windows Defender\Windows Defender Scheduled Scan
+    timeframe: 7d
+    condition: selection and not 1 of filter* | count() by TaskName < 5
+falsepositives:
+    - Software installation
+level: low

@@ -1,0 +1,43 @@
+title: Change PowerShell Policies to an Insecure Level - PowerShell
+id: 61d0475c-173f-4844-86f7-f3eebae1c66b
+related:
+    - id: cf2e938e-9a3e-4fe8-a347-411642b28a9f # ProcCreation Registry
+      type: similar
+    - id: 87e3c4e8-a6a8-4ad9-bb4f-46e7ff99a180 # ProcCreation Cmdlet
+      type: similar
+    - id: fad91067-08c5-4d1a-8d8c-d96a21b37814 # Registry
+      type: similar
+status: experimental
+description: Detects use of Set-ExecutionPolicy to set insecure policies
+references:
+    - https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy?view=powershell-7.1
+    - https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.1
+    - https://adsecurity.org/?p=2604
+author: frack113
+date: 2021/10/20
+modified: 2022/12/30
+tags:
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    cmdlet:
+        ScriptBlockText|contains: 'Set-ExecutionPolicy'
+    option:
+        ScriptBlockText|contains:
+            - 'Unrestricted'
+            - 'bypass'
+            - 'RemoteSigned'
+    filter:
+        # - ParentImage: 'C:\ProgramData\chocolatey\choco.exe' Powershell event id 4104 do not have ParentImage
+        ScriptBlockText|contains:
+            - "(New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')"
+            - "(New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')"
+            - '\AppData\Roaming\Code\'
+    condition: cmdlet and option and not filter
+falsepositives:
+    - Administrator script
+level: medium

@@ -1,0 +1,33 @@
+title: Suspicious PowerShell Mailbox Export to Share - PS
+id: 4a241dea-235b-4a7e-8d76-50d817b146c4
+related:
+    - id: 889719ef-dd62-43df-86c3-768fb08dc7c0
+      type: derived
+status: test
+description: Detects usage of the powerShell New-MailboxExportRequest Cmdlet to exports a mailbox to a remote or local share, as used in ProxyShell exploitations
+references:
+    - https://youtu.be/5mqid-7zp8k?t=2481
+    - https://blog.orange.tw/2021/08/proxylogon-a-new-attack-surface-on-ms-exchange-part-1.html
+    - https://peterjson.medium.com/reproducing-the-proxyshell-pwn2own-exploit-49743a4ea9a1
+    - https://m365internals.com/2022/10/07/hunting-in-on-premises-exchange-server-logs/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2022/10/26
+tags:
+    - attack.exfiltration
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - 'New-MailboxExportRequest'
+            - ' -Mailbox '
+            - ' -FilePath \\\\'
+    condition: selection
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - Unknown
+level: critical

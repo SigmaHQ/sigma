@@ -1,0 +1,54 @@
+title: Suspicious Appended Extension
+id: e3f673b3-65d1-4d80-9146-466f8b63fa99
+status: experimental
+description: Detects file renames where the target filename uses an uncommon double extension. Could indicate potential ransomware activity renaming files and adding a custom extension to the encrypted files, such as ".jpg.crypted", ".docx.locky", etc.
+references:
+    - https://app.any.run/tasks/d66ead5a-faf4-4437-93aa-65785afaf9e5/
+    - https://blog.cyble.com/2022/08/10/onyx-ransomware-renames-its-leak-site-to-vsop/
+author: frack113
+date: 2022/07/16
+modified: 2023/01/02
+tags:
+    - attack.impact
+    - attack.t1486
+logsource:
+    product: windows
+    category: file_rename
+    definition: 'Requirements: Microsoft-Windows-Kernel-File Provider with at least the KERNEL_FILE_KEYWORD_RENAME_SETLINK_PATH keyword'
+detection:
+    selection:
+        SourceFilename|endswith:
+            - '.lnk'
+            - '.rtf'
+            - '.pst'
+            - '.docx'
+            - '.xlsx'
+            - '.jpg'
+            - '.jpeg'
+            - '.png'
+            - '.pdf'
+        TargetFilename|contains:
+            - '.lnk.'
+            - '.rtf.'
+            - '.pst.'
+            - '.docx.'
+            - '.xlsx.'
+            - '.jpg.'
+            - '.jpeg.'
+            - '.png.'
+            - '.pdf.'
+    filter_main_generic:
+        TargetFilename|endswith:
+            - '.tmp'
+            - '.bak'
+            - '.old'
+            - '.orig'
+            - '.backup'
+            - '.temp'
+    filter_optional_anaconda:
+        TargetFilename|startswith: 'C:\ProgramData\Anaconda3\'
+        TargetFilename|endswith: '.c~'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Backup software
+level: medium

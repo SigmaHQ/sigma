@@ -1,0 +1,29 @@
+title: Startup Folder File Write
+id: 2aa0a6b4-a865-495b-ab51-c28249537b75
+related:
+    - id: 28208707-fe31-437f-9a7f-4b1108b94d2e
+      type: similar
+status: test
+description: A General detection for files being created in the Windows startup directory. This could be an indicator of persistence.
+references:
+    - https://github.com/OTRF/detection-hackathon-apt29/issues/12
+    - https://github.com/OTRF/ThreatHunter-Playbook/blob/2d4257f630f4c9770f78d0c1df059f891ffc3fec/docs/evals/apt29/detections/5.B.1_611FCA99-97D0-4873-9E51-1C1BA2DBB40D.md
+author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
+date: 2020/05/02
+modified: 2022/10/07
+tags:
+    - attack.persistence
+    - attack.t1547.001
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename|contains: '\Microsoft\Windows\Start Menu\Programs\StartUp'
+    filter_update:
+        - Image: 'C:\Windows\System32\wuauclt.exe'
+        - TargetFilename|startswith: 'C:\$WINDOWS.~BT\NewOS\'
+    condition: selection and not filter_update
+falsepositives:
+    - FP could be caused by legitimate application writing shortcuts for example. This folder should always be inspected to make sure that all the files in there are legitimate
+level: medium

@@ -1,0 +1,29 @@
+title: Potential PowerShell Obfuscation Using Alias Cmdlets
+id: 96cd126d-f970-49c4-848a-da3a09f55c55
+related:
+    - id: e8314f79-564d-4f79-bc13-fbc0bf2660d8
+      type: derived
+status: experimental
+description: Detects Set-Alias or New-Alias cmdlet usage. Which can be use as a mean to obfuscate PowerShell scripts
+references:
+    - https://github.com/1337Rin/Swag-PSO
+author: frack113
+date: 2023/01/08
+tags:
+    - attack.defense_evasion
+    - attack.execution
+    - attack.t1027
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection:
+        ScriptBlockText|contains:
+            - 'Set-Alias '
+            - 'New-Alias '
+    condition: selection
+falsepositives:
+    - Unknown
+level: low

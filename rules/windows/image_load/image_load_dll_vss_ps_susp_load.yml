@@ -1,0 +1,59 @@
+title: Suspicious Volume Shadow Copy VSS_PS.dll Load
+id: 333cdbe8-27bb-4246-bf82-b41a0dca4b70
+related:
+    - id: 48bfd177-7cf2-412b-ad77-baf923489e82 # vsstrace.dll
+      type: similar
+    - id: 37774c23-25a1-4adb-bb6d-8bb9fd59c0f8 # vssapi.dll
+      type: similar
+status: experimental
+description: Detects the image load of vss_ps.dll by uncommon executables
+references:
+    - https://www.virustotal.com/gui/file/ba88ca45589fae0139a40ca27738a8fc2dfbe1be5a64a9558f4e0f52b35c5add
+    - https://twitter.com/am0nsec/status/1412232114980982787
+author: Markus Neis, @markus_neis
+date: 2021/07/07
+modified: 2023/05/23
+tags:
+    - attack.defense_evasion
+    - attack.impact
+    - attack.t1490
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith: '\vss_ps.dll'
+    filter_legit:
+        Image|startswith: 'C:\Windows\'
+        Image|endswith:
+            - '\clussvc.exe'
+            - '\dismhost.exe'
+            - '\dllhost.exe'
+            - '\inetsrv\appcmd.exe'
+            - '\inetsrv\iissetup.exe'
+            - '\msiexec.exe'
+            - '\rundll32.exe'
+            - '\searchindexer.exe'
+            - '\srtasks.exe'
+            - '\svchost.exe'
+            - '\taskhostw.exe'
+            - '\thor.exe'
+            - '\thor64.exe'
+            - '\tiworker.exe'
+            - '\vssvc.exe'
+            - '\WmiPrvSE.exe'
+            - '\System32\SystemPropertiesAdvanced.exe'
+    filter_programfiles:
+        # When using this rule in your environment replace the "Program Files" folder by the exact applications you know use this. Examples would be software such as backup solutions
+        Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    filter_update:
+        CommandLine|startswith: 'C:\$WinREAgent\Scratch\'
+        CommandLine|contains: '\dismhost.exe {'
+    filter_image_null:
+        Image: null
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: high

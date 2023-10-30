@@ -1,0 +1,28 @@
+title: Potential Persistence Via Shim Database In Uncommon Location
+id: 6b6976a3-b0e6-4723-ac24-ae38a737af41
+status: experimental
+description: Detects the installation of a new shim database where the file is located in a non-default location
+references:
+    - https://www.fireeye.com/blog/threat-research/2017/05/fin7-shim-databases-persistence.html
+    - https://andreafortuna.org/2018/11/12/process-injection-and-persistence-using-application-shimming/
+    - https://www.blackhat.com/docs/asia-14/materials/Erickson/Asia-14-Erickson-Persist-It-Using-And-Abusing-Microsofts-Fix-It-Patches.pdf
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/08/01
+modified: 2023/08/17
+tags:
+    - attack.persistence
+    - attack.t1546.011
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains|all:
+            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\InstalledSDB\'
+            - '\DatabasePath'
+    filter_main_known_locations:
+        Details|contains: ':\Windows\AppPatch\Custom'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high

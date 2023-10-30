@@ -1,0 +1,35 @@
+title: Powershell XML Execute Command
+id: 6c6c6282-7671-4fe9-a0ce-a2dcebdc342b
+status: experimental
+description: |
+    Adversaries may abuse PowerShell commands and scripts for execution.
+    PowerShell is a powerful interactive command-line interface and scripting environment included in the Windows operating system. (Citation: TechNet PowerShell)
+    Adversaries can use PowerShell to perform a number of actions, including discovery of information and execution of code
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1059.001/T1059.001.md#atomic-test-8---powershell-xml-requests
+author: frack113
+date: 2022/01/19
+modified: 2023/01/19
+tags:
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_xml:
+        ScriptBlockText|contains|all:
+            - 'New-Object'
+            - 'System.Xml.XmlDocument'
+            - '.Load'
+    selection_exec:
+        ScriptBlockText|contains:
+            - 'IEX '
+            - 'Invoke-Expression '
+            - 'Invoke-Command '
+            - 'ICM -'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate administrative script
+level: medium

@@ -1,0 +1,94 @@
+title: Suspicious DNS Query for IP Lookup Service APIs
+id: ec82e2a5-81ea-4211-a1f8-37a0286df2c2
+status: test
+description: Detects DNS queries for IP lookup services such as "api.ipify.org" originating from a non browser process.
+references:
+    - https://www.binarydefense.com/analysis-of-hancitor-when-boring-begets-beacon
+    - https://twitter.com/neonprimetime/status/1436376497980428318
+    - https://www.trendmicro.com/en_us/research/23/e/managed-xdr-investigation-of-ducktail-in-trend-micro-vision-one.html
+author: Brandon George (blog post), Thomas Patzke
+date: 2021/07/08
+modified: 2023/05/12
+tags:
+    - attack.reconnaissance
+    - attack.t1590
+logsource:
+    product: windows
+    category: dns_query
+detection:
+    selection:
+        QueryName|contains:
+            - 'api.2ip.ua'
+            - 'api.ipify.org'
+            - 'bot.whatismyipaddress.com'
+            - 'canireachthe.net'
+            - 'checkip.amazonaws.com'
+            - 'checkip.dyndns.org'
+            - 'curlmyip.com'
+            - 'edns.ip-api.com'
+            - 'eth0.me'
+            - 'freegeoip.app'
+            - 'geoipy.com'
+            - 'getip.pro'
+            - 'icanhazip.com'
+            - 'ident.me'
+            - 'ifconfig.io'
+            - 'ifconfig.me'
+            - 'ip-api.com'
+            - 'ip.anysrc.net'
+            - 'ip.tyk.nu'
+            - 'ipaddressworld.com'
+            - 'ipecho.net'
+            - 'ipinfo.io'
+            - 'ipof.in'
+            - 'ipv4.icanhazip.com'
+            - 'ipv4bot.whatismyipaddress.com'
+            - 'ipwho.is'
+            - 'l2.io'
+            - 'myexternalip.com'
+            - 'wgetip.com'
+            - 'whatismyip.akamai.com'
+            - 'wtfismyip.com'
+    filter_optional_brave:
+        Image|endswith: '\brave.exe'
+    filter_optional_chrome:
+        Image:
+            - 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+            - 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
+    filter_optional_firefox:
+        Image:
+            - 'C:\Program Files\Mozilla Firefox\firefox.exe'
+            - 'C:\Program Files (x86)\Mozilla Firefox\firefox.exe'
+    filter_optional_ie:
+        Image:
+            - 'C:\Program Files (x86)\Internet Explorer\iexplore.exe'
+            - 'C:\Program Files\Internet Explorer\iexplore.exe'
+    filter_optional_maxthon:
+        Image|endswith: '\maxthon.exe'
+    filter_optional_edge_1:
+        - Image|startswith: 'C:\Program Files (x86)\Microsoft\EdgeWebView\Application\'
+        - Image|endswith: '\WindowsApps\MicrosoftEdge.exe'
+        - Image:
+              - 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+              - 'C:\Program Files\Microsoft\Edge\Application\msedge.exe'
+    filter_optional_edge_2:
+        Image|startswith:
+            - 'C:\Program Files (x86)\Microsoft\EdgeCore\'
+            - 'C:\Program Files\Microsoft\EdgeCore\'
+        Image|endswith:
+            - '\msedge.exe'
+            - '\msedgewebview2.exe'
+    filter_optional_opera:
+        Image|endswith: '\opera.exe'
+    filter_optional_safari:
+        Image|endswith: '\safari.exe'
+    filter_optional_seamonkey:
+        Image|endswith: '\seamonkey.exe'
+    filter_optional_vivaldi:
+        Image|endswith: '\vivaldi.exe'
+    filter_optional_whale:
+        Image|endswith: '\whale.exe'
+    condition: selection and not 1 of filter_optional_*
+falsepositives:
+    - Legitimate usage of IP lookup services such as ipify API
+level: medium

@@ -1,0 +1,67 @@
+title: Csc.EXE Execution Form Potentially Suspicious Parent
+id: b730a276-6b63-41b8-bcf8-55930c8fc6ee
+status: test
+description: Detects a potentially suspicious parent of "csc.exe", which could be a sign of payload delivery.
+references:
+    - https://www.uptycs.com/blog/warzonerat-can-now-evade-with-process-hollowing
+    - https://reaqta.com/2017/11/short-journey-darkvnc/
+author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+date: 2019/02/11
+modified: 2023/08/02
+tags:
+    - attack.execution
+    - attack.t1059.005
+    - attack.t1059.007
+    - attack.defense_evasion
+    - attack.t1218.005
+    - attack.t1027.004
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\csc.exe'
+        - OriginalFileName: 'csc.exe'
+    selection_parent_generic:
+        ParentImage|endswith:
+            - '\cscript.exe'
+            - '\mshta.exe'
+            - '\winword.exe'
+            - '\wscript.exe'
+    selection_parent_powershell:
+        ParentImage|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        ParentCommandLine|contains:
+            - '-Encoded '
+            - 'FromBase64String'
+    selection_parent_susp_location:
+        - ParentCommandLine|re: '([Pp]rogram[Dd]ata|%([Ll]ocal)?[Aa]pp[Dd]ata%|\\[Aa]pp[Dd]ata\\([Ll]ocal(Ll]ow)?|[Rr]oaming))\\[^\\]{1,256}$'
+        - ParentCommandLine|contains:
+              - ':\Users\Public\'
+              - ':\PerfLogs\'
+              - '\Temporary Internet'
+        - ParentCommandLine|contains|all:
+              - ':\Users\'
+              - '\Favorites\'
+        - ParentCommandLine|contains|all:
+              - ':\Users\'
+              - '\Favourites\'
+        - ParentCommandLine|contains|all:
+              - ':\Users\'
+              - '\Contacts\'
+        - ParentCommandLine|contains|all:
+              - ':\Users\'
+              - '\Pictures\'
+    filter_optional_ansible:
+        # Note: As ansible is widely used we exclude it with this generic filter.
+        # A better option would be to filter based on script content basis or other marker while hunting
+        ParentCommandLine|contains:
+            # '{"failed":true,"msg":"Ansible requires PowerShell v3.0 or newer"}'
+            - 'JwB7ACIAZgBhAGkAbABlAGQAIgA6AHQAcgB1AGUALAAiAG0AcwBnACIAOgAiAEEAbgBzAGkAYgBsAGUAIAByAGUAcQB1AGkAcgBlAHMAIABQAG8AdwBlAHIAUwBoAGUAbABsACAAdgAzAC4AMAAgAG8AcgAgAG4AZQB3AGUAcgAiAH0AJw'
+            - 'cAewAiAGYAYQBpAGwAZQBkACIAOgB0AHIAdQBlACwAIgBtAHMAZwAiADoAIgBBAG4AcwBpAGIAbABlACAAcgBlAHEAdQBpAHIAZQBzACAAUABvAHcAZQByAFMAaABlAGwAbAAgAHYAMwAuADAAIABvAHIAIABuAGUAdwBlAHIAIgB9ACcA'
+            - 'nAHsAIgBmAGEAaQBsAGUAZAAiADoAdAByAHUAZQAsACIAbQBzAGcAIgA6ACIAQQBuAHMAaQBiAGwAZQAgAHIAZQBxAHUAaQByAGUAcwAgAFAAbwB3AGUAcgBTAGgAZQBsAGwAIAB2ADMALgAwACAAbwByACAAbgBlAHcAZQByACIAfQAnA'
+    condition: selection_img and 1 of selection_parent_* and not 1 of filter_optional_*
+falsepositives:
+    - Unknown
+level: high

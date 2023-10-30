@@ -1,0 +1,75 @@
+title: Tamper Windows Defender - PSClassic
+id: ec19ebab-72dc-40e1-9728-4c0b805d722c
+related:
+    - id: 14c71865-6cd3-44ae-adaa-1db923fae5f2
+      type: similar
+status: experimental
+description: Attempting to disable scheduled scanning and other parts of Windows Defender ATP or set default actions to allow.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
+author: frack113, Nasreddine Bencherchali (Nextron Systems)
+date: 2021/06/07
+modified: 2023/10/27
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    product: windows
+    category: ps_classic_provider_start
+detection:
+    selection_set_mppreference:
+        Data|contains: 'Set-MpPreference'
+    selection_options_bool_allow:
+        Data|contains:
+            - '-dbaf $true'
+            - '-dbaf 1'
+            - '-dbm $true'
+            - '-dbm 1'
+            - '-dips $true'
+            - '-dips 1'
+            - '-DisableArchiveScanning $true'
+            - '-DisableArchiveScanning 1'
+            - '-DisableBehaviorMonitoring $true'
+            - '-DisableBehaviorMonitoring 1'
+            - '-DisableBlockAtFirstSeen $true'
+            - '-DisableBlockAtFirstSeen 1'
+            - '-DisableIntrusionPreventionSystem $true'
+            - '-DisableIntrusionPreventionSystem 1'
+            - '-DisableIOAVProtection $true'
+            - '-DisableIOAVProtection 1'
+            - '-DisableRealtimeMonitoring $true'
+            - '-DisableRealtimeMonitoring 1'
+            - '-DisableRemovableDriveScanning $true'
+            - '-DisableRemovableDriveScanning 1'
+            - '-DisableScanningMappedNetworkDrivesForFullScan $true'
+            - '-DisableScanningMappedNetworkDrivesForFullScan 1'
+            - '-DisableScanningNetworkFiles $true'
+            - '-DisableScanningNetworkFiles 1'
+            - '-DisableScriptScanning $true'
+            - '-DisableScriptScanning 1'
+            - '-drdsc $true'
+            - '-drdsc 1'
+            - '-drtm $true'
+            - '-drtm 1'
+            - '-dscrptsc $true'
+            - '-dscrptsc 1'
+            - '-dsmndf $true'
+            - '-dsmndf 1'
+            - '-dsnf $true'
+            - '-dsnf 1'
+            - '-dss $true'
+            - '-dss 1'
+    selection_options_actions_func:
+        Data|contains:
+            - 'HighThreatDefaultAction Allow'
+            - 'htdefac Allow'
+            - 'LowThreatDefaultAction Allow'
+            - 'ltdefac Allow'
+            - 'ModerateThreatDefaultAction Allow'
+            - 'mtdefac Allow'
+            - 'SevereThreatDefaultAction Allow'
+            - 'stdefac Allow'
+    condition: selection_set_mppreference and 1 of selection_options_*
+falsepositives:
+    - Legitimate PowerShell scripts that disable Windows Defender for troubleshooting purposes. Must be investigated.
+level: high

@@ -1,0 +1,63 @@
+title: Suspicious File Download From File Sharing Websites
+id: 52182dfb-afb7-41db-b4bc-5336cb29b464
+related:
+    - id: ae02ed70-11aa-4a22-b397-c0d0e8f6ea99
+      type: similar
+status: experimental
+description: Detects the download of suspicious file type from a well-known file and paste sharing domain
+references:
+    - https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventid=90015
+    - https://www.cisa.gov/uscert/ncas/alerts/aa22-321a
+    - https://fabian-voith.de/2020/06/25/sysmon-v11-1-reads-alternate-data-streams/
+author: Florian Roth (Nextron Systems)
+date: 2022/08/24
+modified: 2023/08/17
+tags:
+    - attack.defense_evasion
+    - attack.s0139
+    - attack.t1564.004
+logsource:
+    product: windows
+    category: create_stream_hash
+detection:
+    selection_domain:
+        Contents|contains:
+            - '.githubusercontent.com'       # Includes both gists and github repositories / Michael Haag (idea)
+            - 'anonfiles.com'
+            - 'cdn.discordapp.com'
+            - 'cdn.discordapp.com/attachments/'
+            - 'ddns.net'
+            - 'dl.dropboxusercontent.com'
+            - 'ghostbin.co'
+            - 'gofile.io'
+            - 'hastebin.com'
+            - 'mediafire.com'
+            - 'mega.nz'
+            - 'paste.ee'
+            - 'pastebin.com'
+            - 'pastebin.pl'
+            - 'pastetext.net'
+            - 'privatlab.com'
+            - 'privatlab.net'
+            - 'send.exploit.in'
+            - 'sendspace.com'
+            - 'storage.googleapis.com'
+            - 'storjshare.io'
+            - 'temp.sh'
+            - 'transfer.sh'
+            - 'ufile.io'
+    selection_extension:
+        TargetFilename|contains:
+            - '.exe:Zone'
+            - '.vbs:Zone'
+            - '.vbe:Zone'
+            - '.dll:Zone'
+            - '.one:Zone'
+            - '.hta:Zone'
+            - '.lnk:Zone'
+            - '.xll:Zone'
+            - '.cpl:Zone'
+    condition: all of selection*
+falsepositives:
+    - Some false positives might occur with binaries download via Github
+level: high

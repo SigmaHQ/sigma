@@ -1,0 +1,28 @@
+title: Suspicious PowerShell Download - PoshModule
+id: de41232e-12e8-49fa-86bc-c05c7e722df9
+related:
+    - id: 65531a81-a694-4e31-ae04-f8ba5bc33759
+      type: derived
+status: experimental
+description: Detects suspicious PowerShell download command
+author: Florian Roth (Nextron Systems)
+date: 2017/03/05
+modified: 2023/01/20
+tags:
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: ps_module
+    definition: 0ad03ef1-f21b-4a79-8ce8-e6900c54b65b
+detection:
+    selection_webclient_:
+        ContextInfo|contains: 'System.Net.WebClient'
+    selection_function:
+        ContextInfo|contains:
+            - '.DownloadFile('
+            - '.DownloadString('
+    condition: all of selection_*
+falsepositives:
+    - PowerShell scripts that download content from the Internet
+level: medium

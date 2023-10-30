@@ -1,0 +1,37 @@
+title: Bitsadmin to Uncommon TLD
+id: 9eb68894-7476-4cd6-8752-23b51f5883a7
+status: experimental
+description: Detects Bitsadmin connections to domains with uncommon TLDs
+references:
+    - https://twitter.com/jhencinski/status/1102695118455349248
+    - https://isc.sans.edu/forums/diary/Investigating+Microsoft+BITS+Activity/23281/
+author: Florian Roth (Nextron Systems), Tim Shelton
+date: 2019/03/07
+modified: 2023/05/17
+tags:
+    - attack.command_and_control
+    - attack.t1071.001
+    - attack.defense_evasion
+    - attack.persistence
+    - attack.t1197
+    - attack.s0190
+logsource:
+    category: proxy
+detection:
+    selection:
+        c-useragent|startswith: 'Microsoft BITS/'
+    falsepositives:
+        cs-host|endswith:
+            - '.com'
+            - '.net'
+            - '.org'
+            - '.scdn.co' # spotify streaming
+            - '.sfx.ms' # Microsoft domain, example request: https://oneclient.sfx.ms/PreSignInSettings/Prod/2022-08-15-21-xx-xx/PreSignInSettingsConfig.json
+    condition: selection and not falsepositives
+fields:
+    - ClientIP
+    - c-uri
+    - c-useragent
+falsepositives:
+    - Rare programs that use Bitsadmin and update from regional TLDs e.g. .uk or .ca
+level: high

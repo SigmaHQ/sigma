@@ -1,0 +1,64 @@
+title: Potential PowerShell Obfuscation Via Reversed Commands
+id: b6b49cd1-34d6-4ead-b1bf-176e9edba9a4
+status: test
+description: Detects the presence of reversed PowerShell commands in the CommandLine. This is often used as a method of obfuscation by attackers
+references:
+    - https://2019.offzone.moscow/ru/report/hunting-for-powershell-abuses/
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=66
+author: Teymur Kheirkhabarov (idea), Vasiliy Burov (rule), oscd.community, Tim Shelton
+date: 2020/10/11
+modified: 2023/05/31
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+    selection_cli:
+        CommandLine|contains:
+            - 'hctac'
+            - 'kaerb'
+            - 'dnammoc'
+            - 'ekovn' # Also covers 'ekovni'
+            - 'eliFd'
+            - 'rahc'
+            - 'etirw'
+            - 'golon'
+            - 'tninon'
+            - 'eddih'
+            - 'tpircS'
+            - 'ssecorp'
+            - 'llehsrewop'
+            - 'esnopser'
+            - 'daolnwod'
+            - 'tneilCbeW'
+            - 'tneilc'
+            - 'ptth'
+            - 'elifotevas'
+            - '46esab'
+            - 'htaPpmeTteG'
+            - 'tcejbO'
+            - 'maerts'
+            - 'hcaerof'
+            - 'retupmoc'
+    filter_main_encoded_keyword:
+        # We exclude usage of encoded commands as they might generate FPs as shown here:
+        #   https://github.com/SigmaHQ/sigma/pull/2720
+        #   https://github.com/SigmaHQ/sigma/issues/4270
+        CommandLine|contains:
+            - ' -EncodedCommand '
+            - ' -enc '
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Unlikely
+level: high

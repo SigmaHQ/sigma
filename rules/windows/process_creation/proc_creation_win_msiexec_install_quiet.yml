@@ -1,0 +1,52 @@
+title: Msiexec Quiet Installation
+id: 79a87aa6-e4bd-42fc-a5bb-5e6fbdcd62f5
+status: experimental
+description: |
+    Adversaries may abuse msiexec.exe to proxy execution of malicious payloads.
+    Msiexec.exe is the command-line utility for the Windows Installer and is thus commonly associated with executing installation packages (.msi)
+references:
+    - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/msiexec
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1218.007/T1218.007.md
+    - https://twitter.com/_st0pp3r_/status/1583914244344799235
+author: frack113
+date: 2022/01/16
+modified: 2023/03/23
+tags:
+    - attack.defense_evasion
+    - attack.t1218.007
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\msiexec.exe'
+        - OriginalFileName: 'msiexec.exe'
+    selection_cli:
+        # Note that there is no space before and after the arguments because it's possible to write a commandline as such
+        # Example: msiexec -q/i [MSI Package]
+        CommandLine|contains:
+            - '/i'
+            - '-i'
+            - '/package'
+            - '-package'
+            - '/a'
+            - '-a'
+            - '/j'
+            - '-j'
+    selection_quiet:
+        CommandLine|contains:
+            - '/q'
+            - '-q'
+    filter_user_temp:
+        # The %temp% is a very common location for installers
+        ParentImage|startswith: 'C:\Users\'
+        ParentImage|contains: '\AppData\Local\Temp\'
+    filter_system_temp:
+        ParentImage|startswith: 'C:\Windows\Temp\'
+    filter_ccm:
+        ParentImage: 'C:\Windows\CCM\Ccm32BitLauncher.exe'
+        IntegrityLevel: 'System'
+    condition: all of selection_* and not 1 of filter_*
+falsepositives:
+    - WindowsApps installing updates via the quiet flag
+level: medium

@@ -1,0 +1,36 @@
+title: Potential Persistence Via Outlook Today Pages
+id: 487bb375-12ef-41f6-baae-c6a1572b4dd1
+status: experimental
+description: Detects potential persistence activity via outlook today pages. An attacker can set a custom page to execute arbitrary code and link to it via the registry key "UserDefinedUrl".
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-persistence-via-microsoft-exchange-server-or-outlook?slide=74
+author: Tobias Michalski (Nextron Systems)
+date: 2021/06/10
+modified: 2023/08/17
+tags:
+    - attack.persistence
+    - attack.t1112
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection_main:
+        TargetObject|contains|all:
+            - 'Software\Microsoft\Office\'
+            - '\Outlook\Today\'
+    selection_value_stamp:
+        TargetObject|endswith: 'Stamp'
+        Details: 'DWORD (0x00000001)'
+    selection_value_user_defined:
+        TargetObject|endswith: 'UserDefinedUrl'
+    filter_office:
+        Image|startswith:
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
+        Image|endswith: '\OfficeClickToRun.exe'
+    condition: selection_main and 1 of selection_value_* and not 1 of filter_*
+fields:
+    - Details
+falsepositives:
+    - Unknown
+level: high

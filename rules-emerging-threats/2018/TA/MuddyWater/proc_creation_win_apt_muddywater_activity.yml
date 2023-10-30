@@ -1,0 +1,40 @@
+title: Potential MuddyWater APT Activity
+id: 36222790-0d43-4fe8-86e4-674b27809543
+status: test
+description: Detects potential Muddywater APT activity
+references:
+    - https://www.mandiant.com/resources/blog/iranian-threat-group-updates-ttps-in-spear-phishing-campaign
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/03/10
+tags:
+    - attack.defense_evasion
+    - attack.execution
+    - attack.g0069
+    - detection.emerging_threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_mshta:
+        CommandLine|contains|all:
+            - 'vbscript:Close(Execute("CreateObject('
+            - 'powershell'
+            - '-w 1 -exec Bypass'
+            - '\ProgramData\'
+    selection_survey:
+        CommandLine|contains|all:
+            - 'Win32_OperatingSystem'
+            - 'Win32_NetworkAdapterConfiguration'
+            - 'root\SecurityCenter2'
+            - '[System.Net.DNS]'
+    selection_pwsh_backdoor:
+        CommandLine|contains|all:
+            - '[Convert]::ToBase64String'
+            - '[System.Text.Encoding]::UTF8.GetString]'
+            - 'GetResponse().GetResponseStream()'
+            - '[System.Net.HttpWebRequest]::Create('
+            - '-bxor '
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely
+level: high

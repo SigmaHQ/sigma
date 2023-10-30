@@ -1,0 +1,42 @@
+title: Vulnerable GIGABYTE Driver Load
+id: 7bcfeece-e5ed-4ff3-a5fb-2640d8cc8647
+status: deprecated
+description: Detects the load of a signed and vulnerable GIGABYTE driver often used by threat actors or malware for privilege escalation
+references:
+    - https://medium.com/@fsx30/weaponizing-vulnerable-driver-for-privilege-escalation-gigabyte-edition-e73ee523598b
+    - https://twitter.com/malmoeb/status/1551449425842786306
+    - https://github.com/fengjixuchui/gdrv-loader
+    - https://www.virustotal.com/gui/file/31f4cfb4c71da44120752721103a16512444c13c2ac2d857a7e6f13cb679b427/details
+    - https://www.virustotal.com/gui/file/cfc5c585dd4e592dd1a08887ded28b92d9a5820587b6f4f8fa4f56d60289259b/details
+author: Florian Roth (Nextron Systems)
+date: 2022/07/25
+modified: 2023/09/12
+tags:
+    - attack.privilege_escalation
+    - attack.t1543.003
+logsource:
+    product: windows
+    category: driver_load
+detection:
+    selection_sysmon:
+        Hashes|contains:
+            - 'MD5=9AB9F3B75A2EB87FAFB1B7361BE9DFB3'
+            - 'MD5=C832A4313FF082258240B61B88EFA025'
+            - 'SHA1=FE10018AF723986DB50701C8532DF5ED98B17C39'
+            - 'SHA1=1F1CE28C10453ACBC9D3844B4604C59C0AB0AD46'
+            - 'SHA256=31F4CFB4C71DA44120752721103A16512444C13C2AC2D857A7E6F13CB679B427'
+            - 'SHA256=CFC5C585DD4E592DD1A08887DED28B92D9A5820587B6F4F8FA4F56D60289259B'
+    selection_other:
+        - md5:
+            - '9ab9f3b75a2eb87fafb1b7361be9dfb3'
+            - 'c832a4313ff082258240b61b88efa025'
+        - sha1:
+            - 'fe10018af723986db50701c8532df5ed98b17c39'
+            - '1f1ce28c10453acbc9d3844b4604c59c0ab0ad46'
+        - sha256:
+            - '31f4cfb4c71da44120752721103a16512444c13c2ac2d857a7e6f13cb679b427'
+            - 'cfc5c585dd4e592dd1a08887ded28b92d9a5820587b6f4f8fa4f56d60289259b'
+    condition: 1 of selection*
+falsepositives:
+    - Unknown
+level: high

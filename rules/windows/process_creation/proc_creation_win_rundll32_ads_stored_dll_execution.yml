@@ -1,0 +1,28 @@
+title: Potential Rundll32 Execution With DLL Stored In ADS
+id: 9248c7e1-2bf3-4661-a22c-600a8040b446
+status: experimental
+description: Detects execution of rundll32 where the DLL being called is stored in an Alternate Data Stream (ADS).
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Rundll32
+author: Harjot Singh, '@cyb3rjy0t'
+date: 2023/01/21
+modified: 2023/02/08
+tags:
+    - attack.defense_evasion
+    - attack.t1564.004
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\rundll32.exe'
+        - OriginalFileName: 'RUNDLL32.EXE'
+    selection_cli:
+        # Example:
+        #   rundll32 "C:\ads\file.txt:ADSDLL.dll",DllMain
+        # Note: This doesn't cover the use case where a full path for the DLL isn't used. As it requires a more expensive regex
+        CommandLine|re: '[Rr][Uu][Nn][Dd][Ll][Ll]32(\.[Ee][Xx][Ee])? \S+?\w:\S+?:'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high

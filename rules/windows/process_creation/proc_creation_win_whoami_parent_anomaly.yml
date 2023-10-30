@@ -1,0 +1,41 @@
+title: Whoami.EXE Execution Anomaly
+id: 8de1cbe8-d6f5-496d-8237-5f44a721c7a0
+status: experimental
+description: Detects the execution of whoami.exe with suspicious parent processes.
+references:
+    - https://brica.de/alerts/alert/public/1247926/agent-tesla-keylogger-delivered-inside-a-power-iso-daa-archive/
+    - https://app.any.run/tasks/7eaba74e-c1ea-400f-9c17-5e30eee89906/
+    - https://www.youtube.com/watch?v=DsJ9ByX84o4&t=6s
+author: Florian Roth (Nextron Systems)
+date: 2021/08/12
+modified: 2023/02/28
+tags:
+    - attack.discovery
+    - attack.t1033
+    - car.2016-03-001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|endswith: '\whoami.exe'
+        - OriginalFileName: 'whoami.exe'
+    filter_generic:
+        # This list can be any legitimate shell or application that you expect whoami to run from
+        ParentImage|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\powershell_ise.exe'
+    filter_ms_monitoring_agent:
+        ParentImage: 'C:\Program Files\Microsoft Monitoring Agent\Agent\MonitoringHost.exe'
+    filter_parent_null:
+        ParentImage: null
+    filter_parent_empty:
+        ParentImage: ''
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Admin activity
+    - Scripts and administrative tools used in the monitored environment
+    - Monitoring activity
+level: high

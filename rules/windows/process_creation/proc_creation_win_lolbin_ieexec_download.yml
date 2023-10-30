@@ -1,0 +1,26 @@
+title: Abusing IEExec To Download Payloads
+id: 9801abb8-e297-4dbf-9fbd-57dde0e830ad
+status: test
+description: Detects execution of the IEExec utility to download payloads
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Ieexec/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2022/05/16
+tags:
+    - attack.command_and_control
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    lolbas:
+        - Image|endswith: '\IEExec.exe'
+        - OriginalFileName: 'IEExec.exe'
+    remote:
+        CommandLine|contains:
+            - 'https://'
+            - 'http://'
+    condition: lolbas and remote
+falsepositives:
+    - Unknown
+level: high

@@ -1,0 +1,71 @@
+title: Register New IFiltre For Persistence
+id: b23818c7-e575-4d13-8012-332075ec0a2b
+status: experimental
+description: Detects when an attacker register a new IFilter for an extension. Microsoft Windows Search uses filters to extract the content of items for inclusion in a full-text index. You can extend Windows Search to index new or proprietary file types by writing filters to extract the content, and property handlers to extract the properties of files
+references:
+    - https://persistence-info.github.io/Data/ifilters.html
+    - https://twitter.com/0gtweet/status/1468548924600459267
+    - https://github.com/gtworek/PSBits/tree/master/IFilter
+    - https://github.com/gtworek/PSBits/blob/8d767892f3b17eefa4d0668f5d2df78e844f01d8/IFilter/Dll.cpp#L281-L308
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2022/07/21
+modified: 2023/08/17
+tags:
+    - attack.persistence
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_ext:
+        TargetObject|startswith:
+            - 'HKLM\SOFTWARE\Classes\.'
+            - 'HKEY_LOCAL_MACHINE\SOFTWARE\Classes\.'
+        TargetObject|contains: '\PersistentHandler'
+    selection_clsid:
+        TargetObject|startswith:
+            - 'HKLM\SOFTWARE\Classes\CLSID'
+            - 'HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID'
+        TargetObject|contains: '\PersistentAddinsRegistered\{89BCB740-6119-101A-BCB7-00DD010655AF}'
+    filter_default_targets:
+        TargetObject|contains:
+            # TODO: Add the default extension PersistentHandler.
+            # Note this could also offer blindspot as the attacker could use on of these and hijack them
+            - '\CLSID\{4F46F75F-199F-4C63-8B7D-86D48FE7970C}\' # Office Open XML Format PowerPoint Persistent Handler
+            - '\CLSID\{4887767F-7ADC-4983-B576-88FB643D6F79}\' # Office Open XML Format Excel Persistent Handler
+            - '\CLSID\{D3B41FA1-01E3-49AF-AA25-1D0D824275AE}\' # Office Open XML Format Word Persistent Handler
+            - '\CLSID\{72773E1A-B711-4d8d-81FA-B9A43B0650DD}\' # Microsoft OneNote Windows Desktop Search IFilter Persistent handler
+            - '\CLSID\{098f2470-bae0-11cd-b579-08002b30bfeb}\' # Null persistent handler
+            - '\CLSID\{1AA9BF05-9A97-48c1-BA28-D9DCE795E93C}\' # PDF Persistent Handler
+            - '\CLSID\{2e2294a9-50d7-4fe7-a09f-e6492e185884}\' # rtf persistent handler
+            - '\CLSID\{34CEAC8D-CBC0-4f77-B7B1-8A60CB6DA0F7}\' # Open Document Format ODT Persistent Handler
+            - '\CLSID\{3B224B11-9363-407e-850F-C9E1FFACD8FB}\' # Zip Persistent Handler
+            - '\CLSID\{3DDEB7A4-8ABF-4D82-B9EE-E1F4552E95BE}\' # Open Document Format ODS Persistent Handler
+            - '\CLSID\{5645C8C1-E277-11CF-8FDA-00AA00A14F93}\' # Related to MIME Filter
+            - '\CLSID\{5645C8C4-E277-11CF-8FDA-00AA00A14F93}\' # Related to MIME Filter
+            - '\CLSID\{58A9EBF6-5755-4554-A67E-A2467AD1447B}\' # Setting Content File Persistent Handler
+            - '\CLSID\{5e941d80-bf96-11cd-b579-08002b30bfeb}\' # Plain Text persistent handler
+            - '\CLSID\{698A4FFC-63A3-4E70-8F00-376AD29363FB}\' # Wordpad OOXML Document Filter
+            - '\CLSID\{7E9D8D44-6926-426F-AA2B-217A819A5CCE}\' # XML File Persistent Handler
+            - '\CLSID\{8CD34779-9F10-4f9b-ADFB-B3FAEABDAB5A}\' # .url File Persistent Handler
+            - '\CLSID\{9694E38A-E081-46ac-99A0-8743C909ACB6}\' # html persistent handler for mapi email
+            - '\CLSID\{98de59a0-d175-11cd-a7bd-00006b827d94}\' # Microsoft Office Persistent Handler
+            - '\CLSID\{AA10385A-F5AA-4EFF-B3DF-71B701E25E18}\' # Wordpad ODT Document Filter
+            - '\CLSID\{B4132098-7A03-423D-9463-163CB07C151F}\' # Office Open XML Format Excel Persistent Handler
+            - '\CLSID\{d044309b-5da6-4633-b085-4ed02522e5a5}\' # App Content File Persistent Handler
+            - '\CLSID\{D169C14A-5148-4322-92C8-754FC9D018D8}\' # rtf persistent handler for mapi email
+            - '\CLSID\{DD75716E-B42E-4978-BB60-1497B92E30C4}\' # text persistent handler for mapi email
+            - '\CLSID\{E2F83EED-62DE-4A9F-9CD0-A1D40DCD13B6}\' # Open Document Format ODP Persistent Handler
+            - '\CLSID\{E772CEB3-E203-4828-ADF1-765713D981B8}\' # Microsoft OneNote Section persistent handler
+            - '\CLSID\{eec97550-47a9-11cf-b952-00aa0051fe20}' # HTML File persistent handler
+            # - '\CLSID\{F6F00E65-9CAF-43BB-809A-38AA4621BCF2}' # XMind Persistent Handler (not present by default)
+            - '\CLSID\{FB10BD80-A331-4e9e-9EB7-00279903AD99}\' # Office Outlook MSG Persistent Handler
+    filter_generic_paths:
+        Image|startswith:
+            # We assume if an attacker has access to one of these directories. Then he already has admin.
+            - 'C:\Windows\System32\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
+    condition: 1 of selection_* and not 1 of filter_*
+falsepositives:
+    - Legitimate registration of IFilters by the OS or software
+level: medium

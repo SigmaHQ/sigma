@@ -1,0 +1,132 @@
+title: Files With System Process Name In Unsuspected Locations
+id: d5866ddf-ce8f-4aea-b28e-d96485a20d3d
+status: test
+description: Detects the creation of an executable with a system process name in folders other than the system ones (System32, SysWOW64...etc).
+author: Sander Wiebing, Tim Shelton, Nasreddine Bencherchali (Nextron Systems)
+date: 2020/05/26
+modified: 2023/10/18
+tags:
+    - attack.defense_evasion
+    - attack.t1036.005
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|endswith:
+            - '\AtBroker.exe'
+            - '\audiodg.exe'
+            - '\backgroundTaskHost.exe'
+            - '\bcdedit.exe'
+            - '\bitsadmin.exe'
+            - '\cmdl32.exe'
+            - '\cmstp.exe'
+            - '\conhost.exe'
+            - '\csrss.exe'
+            - '\dasHost.exe'
+            - '\dfrgui.exe'
+            - '\dllhost.exe'
+            - '\dwm.exe'
+            - '\eventcreate.exe'
+            - '\eventvwr.exe'
+            - '\explorer.exe'
+            - '\extrac32.exe'
+            - '\fontdrvhost.exe'
+            - '\ipconfig.exe'
+            - '\iscsicli.exe'
+            - '\iscsicpl.exe'
+            - '\logman.exe'
+            - '\LogonUI.exe'
+            - '\LsaIso.exe'
+            - '\lsass.exe'
+            - '\lsm.exe'
+            - '\msiexec.exe'
+            - '\msinfo32.exe'
+            - '\mstsc.exe'
+            - '\nbtstat.exe'
+            - '\odbcconf.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\regini.exe'
+            - '\regsvr32.exe'
+            - '\rundll32.exe'
+            - '\RuntimeBroker.exe'
+            - '\schtasks.exe'
+            - '\SearchFilterHost.exe'
+            - '\SearchIndexer.exe'
+            - '\SearchProtocolHost.exe'
+            - '\SecurityHealthService.exe'
+            - '\SecurityHealthSystray.exe'
+            - '\services.exe'
+            - '\ShellAppRuntime.exe'
+            - '\sihost.exe'
+            - '\smartscreen.exe'
+            - '\smss.exe'
+            - '\spoolsv.exe'
+            - '\svchost.exe'
+            - '\SystemSettingsBroker.exe'
+            - '\taskhost.exe'
+            - '\taskhostw.exe'
+            - '\Taskmgr.exe'
+            - '\TiWorker.exe'
+            - '\vssadmin.exe'
+            - '\w32tm.exe'
+            - '\WerFault.exe'
+            - '\WerFaultSecure.exe'
+            - '\wermgr.exe'
+            - '\wevtutil.exe'
+            - '\wininit.exe'
+            - '\winlogon.exe'
+            - '\winrshost.exe'
+            - '\WinRTNetMUAHostServer.exe'
+            - '\wlanext.exe'
+            - '\wlrmdr.exe'
+            - '\WmiPrvSE.exe'
+            - '\wslhost.exe'
+            - '\WSReset.exe'
+            - '\WUDFHost.exe'
+            - '\WWAHost.exe'
+    filter_main_dism_tiworker:
+        TargetFilename|contains:
+            - ':\Windows\SoftwareDistribution\'
+            - ':\Windows\System32\'
+            - ':\Windows\SysWOW64\'
+            - ':\Windows\WinSxS\'
+            - '\SystemRoot\System32\'
+        Image|endswith:
+            - '\Windows\System32\dism.exe'
+            - '\TiWorker.exe'
+    filter_main_setuphost:
+        TargetFilename|contains: ':\$WINDOWS.~BT\'
+        Image|endswith: ':\$WINDOWS.~BT\Sources\SetupHost.exe'
+    filter_main_wbengine:
+        TargetFilename|endswith: '\RuntimeBroker.exe'
+        Image|endswith: ':\Windows\system32\wbengine.exe'
+    filter_main_svchost:
+        Image|endswith: ':\Windows\system32\svchost.exe'
+        TargetFilename|contains:
+            - ':\Windows\SoftwareDistribution\Download\'
+            - ':\Program Files\WindowsApps\'
+    filter_main_wuauclt:
+        Image|endswith: ':\Windows\System32\wuauclt.exe'
+    filter_main_explorer:
+        TargetFilename|endswith: ':\Windows\explorer.exe'
+    filter_main_msiexec:
+        # This filter handles system processes who are updated/installed using misexec.
+        Image|endswith: ':\WINDOWS\system32\msiexec.exe'
+        # Add more processes if you find them or simply filter msiexec on its own. If the list grows big
+        TargetFilename|endswith:
+            - ':\Program Files\PowerShell\7\pwsh.exe'
+            - ':\Program Files\PowerShell\7-preview\pwsh.exe'
+    filter_main_healtray:
+        TargetFilename|contains: ':\Windows\System32\SecurityHealth\'
+        TargetFilename|endswith: '\SecurityHealthSystray.exe'
+        Image|endswith: '\SecurityHealthSetup.exe'
+    filter_main_wuaucltcore:
+        Image|endswith: ':\Windows\uus\AMD64\wuaucltcore.exe'
+        TargetFilename|contains: ':\$WinREAgent\'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - System processes copied outside their default folders for testing purposes
+    - Third party software naming their software with the same names as the processes mentioned here
+level: high

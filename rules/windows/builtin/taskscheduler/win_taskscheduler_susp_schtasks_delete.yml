@@ -1,0 +1,38 @@
+title: Important Scheduled Task Deleted
+id: 9e3cb244-bdb8-4632-8c90-6079c8f4f16d
+related:
+    - id: dbc1f800-0fe0-4bc0-9c66-292c2abe3f78 # ProcCreation schtasks delete
+      type: similar
+    - id: 7595ba94-cf3b-4471-aa03-4f6baa9e5fad # Security-Audting Eventlog
+      type: similar
+status: experimental
+description: Detects when adversaries try to stop system services or processes by deleting their respective scheduled tasks in order to conduct data destructive activities
+author: frack113
+date: 2023/01/13
+modified: 2023/02/07
+tags:
+    - attack.impact
+    - attack.t1489
+logsource:
+    product: windows
+    service: taskscheduler
+    definition: 'Requirements: The "Microsoft-Windows-TaskScheduler/Operational" is disabled by default and needs to be enabled in order for this detection to trigger'
+detection:
+    selection:
+        EventID: 141
+        TaskName|contains:
+            - '\Windows\SystemRestore\SR'
+            - '\Windows\Windows Defender\'
+            - '\Windows\BitLocker'
+            - '\Windows\WindowsBackup\'
+            - '\Windows\WindowsUpdate\'
+            - '\Windows\UpdateOrchestrator\'
+            - '\Windows\ExploitGuard'
+    filter:
+        UserName|contains:
+            - 'AUTHORI'
+            - 'AUTORI'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high

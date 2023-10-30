@@ -1,0 +1,29 @@
+title: CodeIntegrity - Unmet WHQL Requirements For Loaded Kernel Module
+id: 2f8cd7a0-9d5a-4f62-9f8b-2c951aa0dd1f
+status: experimental
+description: Detects loaded kernel modules that did not meet the WHQL signing requirements.
+references:
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/event-id-explanations
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/event-tag-explanations
+    - Internal Research
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/06/06
+modified: 2023/06/14
+tags:
+    - attack.privilege_escalation
+logsource:
+    product: windows
+    service: codeintegrity-operational
+detection:
+    selection:
+        EventID:
+            - 3082 # Code Integrity determined kernel module %2 that did not meet the WHQL requirements is loaded into the system. However, due to code integrity auditing policy, the image was allowed to load
+            - 3083 # Code Integrity determined kernel module %2 that did not meet the WHQL requirements is loaded into the system. Check with the publisher to see if a WHQL compliant kernel module is available
+    filter_optional_vmware:
+        FileNameBuffer:
+            - 'system32\drivers\vsock.sys'
+            - 'System32\drivers\vmci.sys'
+    condition: selection and not 1 of filter_optional_*
+falsepositives:
+    - Unlikely
+level: high

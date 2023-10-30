@@ -1,0 +1,39 @@
+title: Usage Of Web Request Commands And Cmdlets - ScriptBlock
+id: 1139d2e2-84b1-4226-b445-354492eba8ba
+related:
+    - id: 9fc51a3c-81b3-4fa7-b35f-7c02cf10fd2d
+      type: derived
+status: experimental
+description: Detects the use of various web request commands with commandline tools and Windows PowerShell cmdlets (including aliases) via PowerShell scriptblock logs
+references:
+    - https://4sysops.com/archives/use-powershell-to-download-a-file-with-http-https-and-ftp/
+    - https://blog.jourdant.me/post/3-ways-to-download-files-with-powershell
+author: James Pemberton / @4A616D6573
+date: 2019/10/24
+modified: 2023/01/10
+tags:
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection:
+        ScriptBlockText|contains:
+            - '[System.Net.WebRequest]::create'
+            - 'curl '
+            - 'Invoke-RestMethod'
+            - 'Invoke-WebRequest'
+            - 'iwr '
+            - 'Net.WebClient'
+            - 'Resume-BitsTransfer'
+            - 'Start-BitsTransfer'
+            - 'wget '
+            - 'WinHttp.WinHttpRequest'
+    filter:
+        Path|startswith: 'C:\Packages\Plugins\Microsoft.GuestConfiguration.ConfigurationforWindows\'
+    condition: selection and not filter
+falsepositives:
+    - Use of Get-Command and Get-Help modules to reference Invoke-WebRequest and Start-BitsTransfer.
+level: medium

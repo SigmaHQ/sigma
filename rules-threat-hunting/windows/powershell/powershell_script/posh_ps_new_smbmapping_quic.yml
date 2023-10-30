@@ -1,0 +1,30 @@
+title: SMB over QUIC Via PowerShell Script
+id: 6df07c3b-8456-4f8b-87bb-fe31ec964cae
+related:
+    - id: 2238d337-42fb-4971-9a68-63570f2aede4
+      type: similar
+status: experimental
+description: Detects the mounting of Windows SMB shares over QUIC, which can be an unexpected event in some enterprise environments
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/74438b0237d141ee9c99747976447dc884cb1a39/atomics/T1570/T1570.md
+    - https://learn.microsoft.com/en-us/powershell/module/smbshare/new-smbmapping?view=windowsserver2022-ps
+    - https://www.trustedsec.com/blog/making-smb-accessible-with-ntlmquic/
+author: frack113
+date: 2023/07/21
+tags:
+    - attack.lateral_movement
+    - attack.t1570
+    - detection.threat_hunting
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - 'New-SmbMapping'
+            - '-TransportType QUIC'
+    condition: selection
+falsepositives:
+    - Due to the nature of the script block, the matching of the string could sometimes result in a false positive. Use this rule to hunt for potential malicious or suspicious scripts.
+level: medium

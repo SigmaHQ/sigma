@@ -1,0 +1,32 @@
+title: Potential PowerShell Obfuscation Using Character Join
+id: e8314f79-564d-4f79-bc13-fbc0bf2660d8
+related:
+    - id: 96cd126d-f970-49c4-848a-da3a09f55c55
+      type: derived
+status: experimental
+description: Detects specific techniques often seen used inside of PowerShell scripts to obfscuate Alias creation
+references:
+    - Internal Research
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/01/09
+tags:
+    - attack.defense_evasion
+    - attack.execution
+    - attack.t1027
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection:
+        # Example:
+        #   Set-Alias -Name Y -Value (-join("Ne","w-O","bje","ct"))
+        #   Set-Alias -Name X -Value (-join("Inv","oke","-","Exp","ression"))
+        ScriptBlockText|contains|all:
+            - '-Alias' # For both "New-Alias" and "Set-Alias"
+            - ' -Value (-join('
+    condition: selection
+falsepositives:
+    - Unknown
+level: low
