@@ -1,0 +1,29 @@
+title:  VulnScan - Pingcastle AD Connection
+id: 7fb65ce4-35eb-4d5a-a9d2-64b7ad4fb5e7
+status: experimental
+description: Detects use of pingcastle,Ping Castle is a tool designed to assess quickly the Active Directory security level.
+references:
+    - https://github.com/vletoux/pingcastle
+    - https://thedfirreport.com/2023/10/30/netsupport-intrusion-results-in-domain-compromise/
+author: frack113
+date: 2023/10/30
+tags:
+    - attack.reconnaissance
+    - attack.t1595
+logsource:
+    product: windows
+    category: network_connection
+detection:
+    selection:
+        DestinationPort:
+            - 389
+            - 445
+            - 9389
+    filter:
+        Image|contains:
+            - ':\Program Files\'
+            - ':\Program Files (x86)\'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: medium
