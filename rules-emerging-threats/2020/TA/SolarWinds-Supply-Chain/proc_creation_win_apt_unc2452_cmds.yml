@@ -6,7 +6,7 @@ references:
     - https://www.microsoft.com/security/blog/2021/01/20/deep-dive-into-the-solorigate-second-stage-activation-from-sunburst-to-teardrop-and-raindrop/
 author: Florian Roth (Nextron Systems)
 date: 2021/01/22
-modified: 2022/12/18
+modified: 2023/09/12
 tags:
     - attack.execution
     - attack.t1059.001
@@ -17,9 +17,22 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_1:
-        CommandLine|contains: '7z.exe a -v500m -mx9 -r0 -p'
-    selection_2:
+    # To avoid writing complex condition. "selection_generic_1" and "selection_generic_2" are the same except for the extension used.
+    selection_generic_1:
+        CommandLine|contains:
+            - '7z.exe a -v500m -mx9 -r0 -p'
+            - '7z.exe a -mx9 -r0 -p'
+        CommandLine|contains|all:
+            - '.zip'
+            - '.txt'
+    selection_generic_2:
+        CommandLine|contains:
+            - '7z.exe a -v500m -mx9 -r0 -p'
+            - '7z.exe a -mx9 -r0 -p'
+        CommandLine|contains|all:
+            - '.zip'
+            - '.log'
+    selection_generic_3:
         ParentCommandLine|contains|all:
             - 'wscript.exe'
             - '.vbs'
@@ -27,22 +40,17 @@ detection:
             - 'rundll32.exe'
             - 'C:\Windows'
             - '.dll,Tk_'
-    selection_3:
+    selection_generic_4:
         ParentImage|endswith: '\rundll32.exe'
-        ParentCommandLine|contains: 'C:\Windows'
+        ParentCommandLine|contains:
+            - 'C:\Windows'
+            - '.dll'
         CommandLine|contains: 'cmd.exe /C '
-    selection_4:
-        CommandLine|contains|all:
-            - 'rundll32 c:\windows\'
-            - '.dll '
-    specific1:
+    selection_generic_5:
         ParentImage|endswith: '\rundll32.exe'
         Image|endswith: '\dllhost.exe'
-    filter1:
-        CommandLine:
-            - ' '
-            - ''
-    condition: 1 of selection_* or ( specific1 and not filter1 )
+        CommandLine: ''
+    condition: 1 of selection_generic_*
 falsepositives:
     - Unknown
 level: high

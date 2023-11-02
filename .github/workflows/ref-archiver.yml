@@ -1,0 +1,33 @@
+name: "Reference Archiver"
+
+on:
+  #push:
+  #  branches:
+  #      - "*"
+  schedule:
+    - cron: "30 1 1,15 * *" # At 01:30 on day-of-month 1 and 15.
+  
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3.3.0
+      with:
+        submodules: true
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4.5.0
+      with:
+        python-version: 3.11
+    - name: Execute Reference Archiver
+      run: |
+        pip install PyYAML argparse requests
+        python tests/reference-archiver.py
+    - name: Post Results
+      uses: JasonEtco/create-an-issue@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        filename: .github/archiver_output.md

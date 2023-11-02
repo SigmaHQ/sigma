@@ -1,0 +1,25 @@
+title: Diamond Sleet APT Scheduled Task Creation - Registry
+id: 9f9f92ba-5300-43a4-b435-87d1ee571688
+status: experimental
+description: |
+    Detects registry event related to the creation of a scheduled task used by Diamond Sleet APT during exploitation of Team City CVE-2023-42793 vulnerability
+references:
+    - https://www.microsoft.com/en-us/security/blog/2023/10/18/multiple-north-korean-threat-actors-exploiting-the-teamcity-cve-2023-42793-vulnerability/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/10/24
+tags:
+    - attack.defense_evasion
+    - attack.t1562
+    - detection.emerging_threats
+logsource:
+    product: windows
+    category: registry_event
+detection:
+    selection:
+        TargetObject|contains|all:
+            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\'
+            - 'Windows TeamCity Settings User Interface'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

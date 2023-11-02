@@ -1,11 +1,12 @@
-title: Hacktool Service Registration or Execution
+title: HackTool Service Registration or Execution
 id: d26ce60c-2151-403c-9a42-49420d87b5e4
 status: test
-description: Detects PsExec service installation and execution events (service and Sysmon)
+description: Detects installation or execution of services
 references:
     - Internal Research
 author: Florian Roth (Nextron Systems)
 date: 2022/03/21
+modified: 2023/08/07
 tags:
     - attack.execution
     - attack.t1569.002
@@ -14,22 +15,24 @@ logsource:
     product: windows
     service: system
 detection:
-    service:
+    selection_eid:
         Provider_Name: 'Service Control Manager'
         EventID:
             - 7045
             - 7036
-    selection:
-        - ServiceName|contains:
-            - 'WCESERVICE'
-            - 'WCE SERVICE'
-            - 'winexesvc'
-            - 'DumpSvc'
-            - 'pwdump'
-            - 'gsecdump'
+    selection_service_name:
+        ServiceName|contains:
             - 'cachedump'
-        - ImagePath|contains: 'bypass' # https://gist.github.com/tyranid/c24cfd1bd141d14d4925043ee7e03c82#file-scmuacbypass-cpp-L159
-    condition: service and selection
+            - 'DumpSvc'
+            - 'gsecdump'
+            - 'pwdump'
+            - 'UACBypassedService'
+            - 'WCE SERVICE'
+            - 'WCESERVICE'
+            - 'winexesvc'
+    selection_service_image:
+        ImagePath|contains: 'bypass' # https://gist.github.com/tyranid/c24cfd1bd141d14d4925043ee7e03c82#file-scmuacbypass-cpp-L159
+    condition: selection_eid and 1 of selection_service_*
 falsepositives:
     - Unknown
 level: high

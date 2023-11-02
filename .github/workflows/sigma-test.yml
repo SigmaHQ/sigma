@@ -7,10 +7,30 @@ on: # yamllint disable-line rule:truthy
   push:
     branches:
       - "*"
+    # paths:
+    #   - "deprecated/**.yml"
+    #   - "rules-compliance/**.yml"
+    #   - "rules-dfir/**.yml"
+    #   - "rules-emerging-threats/**.yml"
+    #   - "rules-placeholder/**.yml"
+    #   - "rules-threat-hunting/**.yml"
+    #   - "rules/**.yml"
+    #   - "unsupported/**.yml"
   pull_request:
     branches:
       - master
-      - oscd
+    # paths:
+    #   - "deprecated/**.yml"
+    #   - "rules-compliance/**.yml"
+    #   - "rules-dfir/**.yml"
+    #   - "rules-emerging-threats/**.yml"
+    #   - "rules-placeholder/**.yml"
+    #   - "rules-threat-hunting/**.yml"
+    #   - "rules/**.yml"
+    #   - "unsupported/**.yml"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 env:
   EVTX_BASELINE_VERSION: v0.7
@@ -52,10 +72,11 @@ jobs:
         python-version: 3.11
     - name: Install dependencies
       run: |
-        pip install sigma-cli~=0.7.1
+        # pip install sigma-cli~=0.7.1
+        pip install sigma-cli
     - name: Test Sigma Rule Syntax
       run: |
-        sigma check rules
+        sigma check rules*
     - name: Test Sigma Rules
       run: |
         pip install PyYAML attackcti colorama
@@ -75,7 +96,7 @@ jobs:
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
-        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path win7_x86/ --rule-path rules/windows/ > findings.json
+        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path win7_x86/ --rule-path rules/windows/ --rule-path rules-emerging-threats/ --rule-path rules-threat-hunting/ > findings.json
     - name: Show findings excluding known FPs
       run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
 
@@ -93,7 +114,7 @@ jobs:
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
-        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path Logs_Client/ --rule-path rules/windows/ > findings.json
+        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path Logs_Client/ --rule-path rules/windows/ --rule-path rules-emerging-threats/ --rule-path rules-threat-hunting/ > findings.json
     - name: Show findings excluding known FPs
       run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
 
@@ -111,7 +132,7 @@ jobs:
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
-        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path Logs_Win11/ --rule-path rules/windows/ > findings.json
+        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path Logs_Win11/ --rule-path rules/windows/ --rule-path rules-emerging-threats/ --rule-path rules-threat-hunting/ > findings.json
     - name: Show findings excluding known FPs
       run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
 
@@ -129,7 +150,7 @@ jobs:
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
-        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path win2022-evtx/ --rule-path rules/windows/ > findings.json
+        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path win2022-evtx/ --rule-path rules/windows/ --rule-path rules-emerging-threats/ --rule-path rules-threat-hunting/ > findings.json
     - name: Show findings excluding known FPs
       run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
 
@@ -147,7 +168,7 @@ jobs:
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
-        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path Win2022-AD/ --rule-path rules/windows/ > findings.json
+        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path Win2022-AD/ --rule-path rules/windows/ --rule-path rules-emerging-threats/ --rule-path rules-threat-hunting/ > findings.json
     - name: Show findings excluding known FPs
       run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
 
@@ -165,6 +186,6 @@ jobs:
     - name: Check for Sigma matches in baseline
       run: |
         chmod +x evtx-sigma-checker
-        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path win2022-0-20348-azure/ --rule-path rules/windows/ > findings.json
+        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path win2022-0-20348-azure/ --rule-path rules/windows/ --rule-path rules-emerging-threats/ --rule-path rules-threat-hunting/ > findings.json
     - name: Show findings excluding known FPs
       run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv

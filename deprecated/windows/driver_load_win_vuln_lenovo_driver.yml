@@ -1,0 +1,31 @@
+title: Vulnerable Lenovo Driver Load
+id: ac683a42-877b-4ff8-91ac-69e94b0f70b4
+status: deprecated
+description: Detects the load of the vulnerable Lenovo driver as reported in CVE-2022-3699 which can be used to escalate privileges
+references:
+    - https://support.lenovo.com/de/en/product_security/ps500533-lenovo-diagnostics-vulnerabilities
+    - https://github.com/alfarom256/CVE-2022-3699/
+author: Florian Roth (Nextron Systems)
+date: 2022/11/10
+modified: 2023/09/12
+tags:
+    - attack.privilege_escalation
+    - cve.2021.21551
+    - attack.t1543
+logsource:
+    category: driver_load
+    product: windows
+detection:
+    selection_sysmon:
+        Hashes|contains:
+            - 'SHA256=F05B1EE9E2F6AB704B8919D5071BECBCE6F9D0F9D0BA32A460C41D5272134ABE'
+            - 'SHA1=B89A8EEF5AEAE806AF5BA212A8068845CAFDAB6F'
+            - 'MD5=B941C8364308990EE4CC6EADF7214E0F'
+    selection_hash:
+        - sha256: 'f05b1ee9e2f6ab704b8919d5071becbce6f9d0f9d0ba32a460c41d5272134abe'
+        - sha1: 'b89a8eef5aeae806af5ba212a8068845cafdab6f'
+        - md5: 'b941c8364308990ee4cc6eadf7214e0f'
+    condition: 1 of selection*
+falsepositives:
+    - Legitimate driver loads (old driver that didn't receive an update)
+level: high

@@ -10,7 +10,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
 author: Ján Trenčanský, frack113
 date: 2020/07/28
-modified: 2022/08/01
+modified: 2023/08/08
 tags:
     - attack.defense_evasion
     - attack.t1562.001
@@ -21,12 +21,15 @@ detection:
     selection:
         EventID: 7036
         Provider_Name: 'Service Control Manager'
+        # Note: The service name and messages are localized
         param1:
             - 'Windows Defender Antivirus Service'
-            - 'Service antivirus Microsoft Defender' #French OS
-        param2: 'stopped'
+            - 'Service antivirus Microsoft Defender' # French OS
+        param2:
+            - 'stopped'
+            - 'arrêté'
     condition: selection
 falsepositives:
     - Administrator actions
     - Auto updates of Windows Defender causes restarts
-level: low
+level: medium

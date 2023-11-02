@@ -1,0 +1,41 @@
+title: Wscript Execution from Non C Drive
+id: 5b80cf53-3a46-4adc-960b-05ec19348d74
+status: deprecated
+description: Detects Wscript or Cscript executing from a drive other than C. This has been observed with Qakbot executing from within a mounted ISO file.
+references:
+    - https://github.com/pr0xylife/Qakbot/blob/main/Qakbot_BB_30.09.2022.txt
+    - https://app.any.run/tasks/4985c746-601e-401a-9ccf-ae350ac2e887/
+author: Aaron Herman
+date: 2022/10/01
+modified: 2023/08/29
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_lolbin:
+        Image|endswith:
+            - '\wscript.exe'
+            - '\cscript.exe'
+    selection_exetensions:
+        CommandLine|contains:
+            - '.js'
+            - '.vbs'
+            - '.vbe'
+    selection_drive_path:
+        CommandLine|contains: ':\'
+    filter_drive_path:
+        CommandLine|contains:
+            - ' C:\\'
+            - " 'C:\\"
+            - ' "C:\\'
+    filter_env_vars:
+        CommandLine|contains: '%'
+    filter_unc_paths:
+        CommandLine|contains: ' \\\\'
+    condition: all of selection_* and not 1 of filter_*
+falsepositives:
+    - Legitimate scripts located on other partitions such as "D:"
+level: medium
