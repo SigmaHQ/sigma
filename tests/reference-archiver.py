@@ -129,7 +129,7 @@ if __name__ == "__main__":
         f.write(
             f"title: '\"Reference Archiver Results - {{ date | date('dddd, MMMM Do') }}\"'\n"
         )
-        f.write("assignees: 'nasbench'\n\n")
+        f.write("assignees: 'nasbench'\n")
         f.write("---\n\n")
         f.write("### Archiver Script Results\n\n")
 
