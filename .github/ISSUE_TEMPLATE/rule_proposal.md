@@ -3,7 +3,8 @@ name: "Rule Proposal"
 about: Rule Idea Proposal
 title: ''
 labels: Rule
-assignees: ''
+assignees:
+  - nasbench
 
 ---
 
