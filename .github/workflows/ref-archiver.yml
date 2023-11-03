@@ -25,9 +25,30 @@ jobs:
       run: |
         pip install PyYAML argparse requests
         python tests/reference-archiver.py
-    - name: Post Results
-      uses: JasonEtco/create-an-issue@v2
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
       with:
-        filename: .github/archiver_output.md
+        reviewers: nasbench, frack113, phantinuss
+        delete-branch: true
+        commit-message: 'chore: archive new rule references and update cache file'
+        title: 'Archive New Rule References'
+        body: |
+          ### Summary of the Pull Request
+
+          This PR update the cache file used to save already archived references with newly archived results
+
+          ### Changelog
+
+          chore: archive new rule references and update cache file
+
+          ### Example Log Event
+
+          N/A
+
+          ### Fixed Issues
+
+          N/A
+
+          ### SigmaHQ Rule Creation Conventions
+          
+          - If your PR adds new rules, please consider following and applying these [conventions](https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/sigmahq_conventions.md)

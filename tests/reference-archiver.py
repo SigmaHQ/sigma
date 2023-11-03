@@ -124,7 +124,7 @@ if __name__ == "__main__":
             f.write("\n")
 
     # Write markdown output to open the issue
-    with open(".github/archiver_output.md", "w") as f:
+    with open(".github/latest_archiver_output.md", "w") as f:
         f.write("---\n")
         f.write(
             f"title: '\"Reference Archiver Results - {{ date | date('dddd, MMMM Do') }}\"'\n"
