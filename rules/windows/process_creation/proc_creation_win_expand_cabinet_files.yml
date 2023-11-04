@@ -5,9 +5,9 @@ description: Adversaries can use the built-in expand utility to decompress cab f
 references:
     - https://labs.sentinelone.com/meteorexpress-mysterious-wiper-paralyzes-iranian-trains-with-epic-troll
     - https://blog.malwarebytes.com/threat-intelligence/2021/08/new-variant-of-konni-malware-used-in-campaign-targetting-russia/
-author: Bhabesh Raj
+author: Bhabesh Raj, X__Junior (Nextron Systems)
 date: 2021/07/30
-modified: 2023/02/07
+modified: 2023/11/02
 tags:
     - attack.execution
     - attack.t1218
@@ -15,16 +15,30 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection_img:
         Image|endswith: '\expand.exe'
         CommandLine|contains:
-            - '.cab'
             - '/F:'
             - '-F:'
-            - 'C:\ProgramData\' # Suspicious paths to curb FPs if any
-            - 'C:\Public\'
-            - '\AppData\Local\Temp\'
-            - '\AppData\Roaming\Temp\'
+    selection_folders_1:
+        CommandLine|contains:
+            - ':\Perflogs\'
+            - ':\Users\Public\'
+            - '\Temporary Internet'
+            - 'C:\ProgramData'
+            - '\AppData\Local\Temp'
+            - '\AppData\Roaming\Temp'
+            - '\Windows\Temp'
+    selection_folders_2:
+        - CommandLine|contains|all:
+            - ':\Users\'
+            - '\Favorites\'
+        - CommandLine|contains|all:
+            - ':\Users\'
+            - '\Favourites\'
+        - CommandLine|contains|all:
+            - ':\Users\'
+            - '\Contacts\'
     filter_dell:
         # Launched by Dell ServiceShell.exe
         ParentImage: 'C:\Program Files (x86)\Dell\UpdateService\ServiceShell.exe'

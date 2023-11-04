@@ -1,0 +1,38 @@
+title: Domain Controller Lateral Movement
+id: ea3b25cc-189c-4969-a7c9-bf1329f34552
+status: experimental
+description: Detects commands executed such as directory traversal, host discovery, and execution of tools on the domain controller on the network
+references:
+    - https://thedfirreport.com/2023/10/30/netsupport-intrusion-results-in-domain-compromise/#lateral-movement
+author: X__Junior (Nextron Systems)
+date: 2023/11/02
+tags:
+    - attack.execution
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_cli_1:
+        CommandLine|contains:
+            - ' net '
+            - ' net1 '
+            - ' ls '
+            - ' cd '
+            - ' dir '
+            - ' whoami '
+            - ' cmdkey '
+            - ' systeminfo '
+            - ' quser '
+            - ' qwinsta '
+    selection_cli_2:
+        CommandLine|contains|all:
+            - 'useraccount'
+            - 'get'
+            - ' wmic '
+    selection_path:
+        CommandLine|contains: '> \\\\*\\*\\* 2>&1'
+    condition: 1 of selection_cli_* and selection_path
+falsepositives:
+    - System administrator Usage
+level: high
