@@ -1,12 +1,12 @@
-title: Port Forwarding Attempt Via SSH
+title: Port Forwarding Activity Via SSH.EXE
 id: 327f48c1-a6db-4eb8-875a-f6981f1b0183
 status: experimental
-description: Detects suspicious SSH tunnel port forwarding to a local port
+description: Detects port forwarding activity via SSH.exe
 references:
     - https://www.absolomb.com/2018-01-26-Windows-Privilege-Escalation-Guide/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/10/12
-modified: 2023/01/25
+modified: 2023/11/06
 tags:
     - attack.command_and_control
     - attack.lateral_movement
@@ -19,8 +19,10 @@ logsource:
 detection:
     selection:
         Image|endswith: '\ssh.exe'
-        CommandLine|contains: ' -R '
+        CommandLine|contains:
+            - ' -R '
+            - ' /R '
     condition: selection
 falsepositives:
     - Administrative activity using a remote port forwarding to a local port
-level: high
+level: medium

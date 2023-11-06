@@ -8,6 +8,7 @@ import time
 import requests
 import yaml
 import os
+from datetime import datetime
 
 
 WEB_ARCHIVE_SAVE_URL = "https://web.archive.org/save/"
@@ -124,15 +125,10 @@ if __name__ == "__main__":
             f.write("\n")
 
     # Write markdown output to open the issue
-    with open(".github/archiver_output.md", "w") as f:
-        f.write("---\n")
-        f.write(
-            f"title: '\"Reference Archiver Results - {{ date | date('dddd, MMMM Do') }}\"'\n"
-        )
-        f.write("assignees: 'nasbench'\n\n")
-        f.write("---\n\n")
+    with open(".github/latest_archiver_output.md", "w") as f:
+        f.write(f"# Reference Archiver Results\n\n")
+        f.write(f"Last Execution: {datetime.today().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
         f.write("### Archiver Script Results\n\n")
-
         f.write("\n#### Newly Archived References\n\n")
         if newly_archived_references:
             for ref in newly_archived_references:

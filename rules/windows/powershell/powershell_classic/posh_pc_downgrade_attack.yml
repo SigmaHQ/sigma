@@ -6,7 +6,7 @@ references:
     - http://www.leeholmes.com/blog/2017/03/17/detecting-and-preventing-powershell-downgrade-attacks/
 author: Florian Roth (Nextron Systems), Lee Holmes (idea), Harish Segar (improvements)
 date: 2017/03/22
-modified: 2022/12/02
+modified: 2023/10/27
 tags:
     - attack.defense_evasion
     - attack.execution
@@ -14,13 +14,12 @@ tags:
 logsource:
     product: windows
     category: ps_classic_start
-    definition: fields have to be extract from event
 detection:
     selection:
-        EngineVersion|startswith: '2.'
-    filter:
-        HostVersion|startswith: '2.'
-    condition: selection and not filter
+        Data|contains: 'EngineVersion=2.'
+    filter_main:
+        Data|contains: 'HostVersion=2.'
+    condition: selection and not filter_main
 falsepositives:
     - Unknown
 level: medium

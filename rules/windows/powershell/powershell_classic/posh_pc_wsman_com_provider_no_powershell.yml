@@ -8,7 +8,7 @@ references:
     - https://github.com/bohops/WSMan-WinRM
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 date: 2020/06/24
-modified: 2022/10/09
+modified: 2023/10/27
 tags:
     - attack.execution
     - attack.t1059.001
@@ -17,13 +17,18 @@ tags:
 logsource:
     product: windows
     service: powershell-classic
-    definition: fields have to be extract from event
 detection:
     selection:
-        ProviderName: WSMan
-    filter:
-        HostApplication|contains: powershell
-    condition: selection and not filter
+        Data|contains: 'ProviderName=WSMan'
+    filter_main_ps:
+        Data|contains:
+            - 'HostApplication=powershell'
+            - 'HostApplication=C:\Windows\System32\WindowsPowerShell\v1.0\powershell'
+            - 'HostApplication=C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell'
+            # In some cases powershell was invoked with inverted slashes
+            - 'HostApplication=C:/Windows/System32/WindowsPowerShell/v1.0/powershell'
+            - 'HostApplication=C:/Windows/SysWOW64/WindowsPowerShell/v1.0/powershell'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: medium

@@ -1,7 +1,7 @@
 title: Tamper Windows Defender - PSClassic
 id: ec19ebab-72dc-40e1-9728-4c0b805d722c
 related:
-    - id: ec19ebab-72dc-40e1-9728-4c0b805d722c
+    - id: 14c71865-6cd3-44ae-adaa-1db923fae5f2
       type: similar
 status: experimental
 description: Attempting to disable scheduled scanning and other parts of Windows Defender ATP or set default actions to allow.
@@ -9,19 +9,18 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
 author: frack113, Nasreddine Bencherchali (Nextron Systems)
 date: 2021/06/07
-modified: 2023/07/13
+modified: 2023/10/27
 tags:
     - attack.defense_evasion
     - attack.t1562.001
 logsource:
     product: windows
     category: ps_classic_provider_start
-    definition: fields have to be extracted from the event
 detection:
-    selection_options_disabling_preference:
-        HostApplication|contains: 'Set-MpPreference'
-    selection_options_disabling_function:
-        HostApplication|contains:
+    selection_set_mppreference:
+        Data|contains: 'Set-MpPreference'
+    selection_options_bool_allow:
+        Data|contains:
             - '-dbaf $true'
             - '-dbaf 1'
             - '-dbm $true'
@@ -60,10 +59,8 @@ detection:
             - '-dsnf 1'
             - '-dss $true'
             - '-dss 1'
-    selection_other_default_actions_allow:
-        HostApplication|contains: 'Set-MpPreference'
-    selection_other_default_actions_func:
-        HostApplication|contains:
+    selection_options_actions_func:
+        Data|contains:
             - 'HighThreatDefaultAction Allow'
             - 'htdefac Allow'
             - 'LowThreatDefaultAction Allow'
@@ -72,7 +69,7 @@ detection:
             - 'mtdefac Allow'
             - 'SevereThreatDefaultAction Allow'
             - 'stdefac Allow'
-    condition: all of selection_options_disabling_* or 1 of selection_other_*
+    condition: selection_set_mppreference and 1 of selection_options_*
 falsepositives:
     - Legitimate PowerShell scripts that disable Windows Defender for troubleshooting purposes. Must be investigated.
 level: high
