@@ -160,28 +160,29 @@ class TestRules(unittest.TestCase):
             + "There are rules with incorrect/unknown MITRE Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://attack.mitre.org/ ",
         )
 
-    def test_duplicate_tags(self):
-        files_with_incorrect_mitre_tags = []
+    # sigma validators duplicate_tag
+    # def test_duplicate_tags(self):
+    #     files_with_incorrect_mitre_tags = []
 
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            tags = self.get_rule_part(file_path=file, part_name="tags")
-            if tags:
-                known_tags = []
-                for tag in tags:
-                    if tag in known_tags:
-                        print(
-                            Fore.RED
-                            + "Rule {} has the duplicate tag {}".format(file, tag)
-                        )
-                        files_with_incorrect_mitre_tags.append(file)
-                    else:
-                        known_tags.append(tag)
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         tags = self.get_rule_part(file_path=file, part_name="tags")
+    #         if tags:
+    #             known_tags = []
+    #             for tag in tags:
+    #                 if tag in known_tags:
+    #                     print(
+    #                         Fore.RED
+    #                         + "Rule {} has the duplicate tag {}".format(file, tag)
+    #                     )
+    #                     files_with_incorrect_mitre_tags.append(file)
+    #                 else:
+    #                     known_tags.append(tag)
 
-        self.assertEqual(
-            files_with_incorrect_mitre_tags,
-            [],
-            Fore.RED + "There are rules with duplicate tags",
-        )
+    #     self.assertEqual(
+    #         files_with_incorrect_mitre_tags,
+    #         [],
+    #         Fore.RED + "There are rules with duplicate tags",
+    #     )
 
     def test_duplicate_references(self):
         files_with_duplicate_references = []
@@ -313,21 +314,22 @@ class TestRules(unittest.TestCase):
             + "There are rules using '1/all of them' style conditions but only have one condition",
         )
 
-    def test_all_of_them_condition(self):
-        faulty_detections = []
+    # Sigma validator all_of_them_condition 
+    # def test_all_of_them_condition(self):
+    #     faulty_detections = []
 
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            detection = self.get_rule_part(file_path=file, part_name="detection")
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         detection = self.get_rule_part(file_path=file, part_name="detection")
 
-            if "all of them" in detection["condition"]:
-                faulty_detections.append(file)
+    #         if "all of them" in detection["condition"]:
+    #             faulty_detections.append(file)
 
-        self.assertEqual(
-            faulty_detections,
-            [],
-            Fore.RED
-            + "There are rules using 'all of them'. Better use e.g. 'all of selection*' instead (and use the 'selection_' prefix as search-identifier).",
-        )
+    #     self.assertEqual(
+    #         faulty_detections,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules using 'all of them'. Better use e.g. 'all of selection*' instead (and use the 'selection_' prefix as search-identifier).",
+    #     )
 
     def test_duplicate_detections(self):
         def compare_detections(detection1: dict, detection2: dict) -> bool:
@@ -488,37 +490,38 @@ class TestRules(unittest.TestCase):
             + "There are rules still using Sysmon 1 or Event ID 4688. Please migrate to the process_creation category.",
         )
 
-    def test_missing_id(self):
-        faulty_rules = []
-        dict_id = {}
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            id = self.get_rule_part(file_path=file, part_name="id")
-            if not id:
-                print(Fore.YELLOW + "Rule {} has no field 'id'.".format(file))
-                faulty_rules.append(file)
-            elif len(id) != 36:
-                print(
-                    Fore.YELLOW
-                    + "Rule {} has a malformed 'id' (not 36 chars).".format(file)
-                )
-                faulty_rules.append(file)
-            elif id.lower() in dict_id.keys():
-                print(
-                    Fore.YELLOW
-                    + "Rule {} has the same 'id' as {}. Ids have to be unique.".format(
-                        file, dict_id[id]
-                    )
-                )
-                faulty_rules.append(file)
-            else:
-                dict_id[id.lower()] = file
+    # sigma validator identifier_existence identifier_uniqueness
+    # def test_missing_id(self):
+    #     faulty_rules = []
+    #     dict_id = {}
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         id = self.get_rule_part(file_path=file, part_name="id")
+    #         if not id:
+    #             print(Fore.YELLOW + "Rule {} has no field 'id'.".format(file))
+    #             faulty_rules.append(file)
+    #         elif len(id) != 36:
+    #             print(
+    #                 Fore.YELLOW
+    #                 + "Rule {} has a malformed 'id' (not 36 chars).".format(file)
+    #             )
+    #             faulty_rules.append(file)
+    #         elif id.lower() in dict_id.keys():
+    #             print(
+    #                 Fore.YELLOW
+    #                 + "Rule {} has the same 'id' as {}. Ids have to be unique.".format(
+    #                     file, dict_id[id]
+    #                 )
+    #             )
+    #             faulty_rules.append(file)
+    #         else:
+    #             dict_id[id.lower()] = file
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules with missing or malformed 'id' fields. Generate an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with missing or malformed 'id' fields. Generate an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).",
+    #     )
 
     def test_optional_related(self):
         faulty_rules = []
@@ -1349,33 +1352,34 @@ class TestRules(unittest.TestCase):
             + "There are rules without the 'title' attribute in their first line.",
         )
 
-    def test_duplicate_titles(self):
-        # This test ensure that every rule has a unique title
-        faulty_rules = []
-        titles_dict = {}
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            title = (
-                self.get_rule_part(file_path=file, part_name="title").lower().rstrip()
-            )
-            duplicate = False
-            for rule, title_ in titles_dict.items():
-                if title == title_:
-                    print(
-                        Fore.RED
-                        + "Rule {} has an already used title in {}.".format(file, rule)
-                    )
-                    duplicate = True
-                    faulty_rules.append(file)
-                    continue
-            if not duplicate:
-                titles_dict[file] = title
+    # sigma validators duplicate_title
+    # def test_duplicate_titles(self):
+    #     # This test ensure that every rule has a unique title
+    #     faulty_rules = []
+    #     titles_dict = {}
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         title = (
+    #             self.get_rule_part(file_path=file, part_name="title").lower().rstrip()
+    #         )
+    #         duplicate = False
+    #         for rule, title_ in titles_dict.items():
+    #             if title == title_:
+    #                 print(
+    #                     Fore.RED
+    #                     + "Rule {} has an already used title in {}.".format(file, rule)
+    #                 )
+    #                 duplicate = True
+    #                 faulty_rules.append(file)
+    #                 continue
+    #         if not duplicate:
+    #             titles_dict[file] = title
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules that share the same 'title'. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules that share the same 'title'. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title",
+    #     )
 
     # def test_invalid_logsource_attributes(self):
     #     faulty_rules = []
@@ -1598,50 +1602,51 @@ class TestRules(unittest.TestCase):
 
     #     self.assertEqual(faulty_rules, [], Fore.RED + "There are rules with common typos in field names.")
 
-    def test_unknown_value_modifier(self):
-        known_modifiers = [
-            "contains",
-            "startswith",
-            "endswith",
-            "all",
-            "base64offset",
-            "base64",
-            "utf16le",
-            "utf16be",
-            "wide",
-            "utf16",
-            "windash",
-            "re",
-            "cidr",
-        ]
-        faulty_rules = []
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            detection = self.get_rule_part(file_path=file, part_name="detection")
-            if detection:
-                for search_identifier in detection:
-                    if isinstance(detection[search_identifier], dict):
-                        for field in detection[search_identifier]:
-                            if "|" in field:
-                                for current_modifier in field.split("|")[1:]:
-                                    found = False
-                                    for target_modifier in known_modifiers:
-                                        if current_modifier == target_modifier:
-                                            found = True
-                                    if not found:
-                                        print(
-                                            Fore.RED
-                                            + "Rule {} uses an unknown field modifier ({}/{})".format(
-                                                file, search_identifier, field
-                                            )
-                                        )
-                                        faulty_rules.append(file)
+    # Sigma error validator SigmaModifierError
+    # def test_unknown_value_modifier(self):
+    #     known_modifiers = [
+    #         "contains",
+    #         "startswith",
+    #         "endswith",
+    #         "all",
+    #         "base64offset",
+    #         "base64",
+    #         "utf16le",
+    #         "utf16be",
+    #         "wide",
+    #         "utf16",
+    #         "windash",
+    #         "re",
+    #         "cidr",
+    #     ]
+    #     faulty_rules = []
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         detection = self.get_rule_part(file_path=file, part_name="detection")
+    #         if detection:
+    #             for search_identifier in detection:
+    #                 if isinstance(detection[search_identifier], dict):
+    #                     for field in detection[search_identifier]:
+    #                         if "|" in field:
+    #                             for current_modifier in field.split("|")[1:]:
+    #                                 found = False
+    #                                 for target_modifier in known_modifiers:
+    #                                     if current_modifier == target_modifier:
+    #                                         found = True
+    #                                 if not found:
+    #                                     print(
+    #                                         Fore.RED
+    #                                         + "Rule {} uses an unknown field modifier ({}/{})".format(
+    #                                             file, search_identifier, field
+    #                                         )
+    #                                     )
+    #                                     faulty_rules.append(file)
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules with unknown value modifiers. Most often it is just a typo.",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with unknown value modifiers. Most often it is just a typo.",
+    #     )
 
     def test_all_value_modifier_single_item(self):
         faulty_rules = []
