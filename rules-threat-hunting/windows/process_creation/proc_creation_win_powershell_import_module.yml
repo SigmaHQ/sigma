@@ -7,6 +7,7 @@ references:
     - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/import-module?view=powershell-5.1
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023/05/09
+modified: 2023/11/06
 tags:
     - attack.execution
     - detection.threat_hunting
@@ -25,7 +26,14 @@ detection:
         CommandLine|contains:
             - 'Import-Module '
             - 'ipmo '
-    condition: all of selection_*
+    filter_main_vsstudio:
+        ParentImage|contains:
+            - ':\Program Files\WindowsApps\Microsoft.WindowsTerminal_'
+            - ':\Windows\System32\cmd.exe'
+        CommandLine|contains|all:
+            - ':\Program Files\Microsoft Visual Studio\'
+            - 'Tools\Microsoft.VisualStudio.DevShell.dll'
+    condition: all of selection_* and not all of filter_main_*
 falsepositives:
     - Depending on the environement, many legitimate scripts will import modules inline. This rule is targeted for hunting purposes.
 level: low

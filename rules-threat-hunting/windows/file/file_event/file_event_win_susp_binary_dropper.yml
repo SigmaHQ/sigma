@@ -6,7 +6,7 @@ references:
     - Malware Sandbox
 author: frack113
 date: 2022/03/09
-modified: 2023/09/06
+modified: 2023/11/06
 tags:
     - attack.resource_development
     - attack.t1587.001
@@ -19,47 +19,47 @@ detection:
         Image|endswith: '.exe'
         TargetFilename|endswith: '.exe'
     filter_main_generic_1:
-        Image:
-            - 'C:\Windows\System32\msiexec.exe'
-            - 'C:\Windows\system32\cleanmgr.exe'
-            - 'C:\Windows\explorer.exe'
-            - 'C:\WINDOWS\system32\dxgiadaptercache.exe'
-            - 'C:\WINDOWS\system32\Dism.exe'
-            - 'C:\Windows\System32\wuauclt.exe'
+        Image|endswith:
+            - ':\Windows\System32\msiexec.exe'
+            - ':\Windows\system32\cleanmgr.exe'
+            - ':\Windows\explorer.exe'
+            - ':\WINDOWS\system32\dxgiadaptercache.exe'
+            - ':\WINDOWS\system32\Dism.exe'
+            - ':\Windows\System32\wuauclt.exe'
     filter_main_update:
         # Security_UserID: S-1-5-18
         # Example:
         #   TargetFilename: C:\Windows\SoftwareDistribution\Download\803d1df4c931df4f3e50a022cda56e88\WindowsUpdateBox.exe
-        Image: 'C:\WINDOWS\system32\svchost.exe'
-        TargetFilename|startswith: 'C:\Windows\SoftwareDistribution\Download\'
+        Image|endswith: ':\WINDOWS\system32\svchost.exe'
+        TargetFilename|contains: ':\Windows\SoftwareDistribution\Download\'
     filter_main_upgrade:
-        Image: 'C:\Windows\system32\svchost.exe'
+        Image|endswith: ':\Windows\system32\svchost.exe'
         TargetFilename|contains|all:
             # Example:
             #   This example was seen during windows upgrade
             #   TargetFilename: :\WUDownloadCache\803d1df4c931df4f3e50a022cda56e29\WindowsUpdateBox.exe
             - ':\WUDownloadCache\'
             - '\WindowsUpdateBox.exe'
-    filter_windows_update_box:
+    filter_main_windows_update_box:
         # This FP was seen during Windows Upgrade
         # ParentCommandLine: C:\WINDOWS\system32\svchost.exe -k netsvcs -p -s wuauserv
-        Image|startswith: 'C:\WINDOWS\SoftwareDistribution\Download\'
+        Image|contains: ':\WINDOWS\SoftwareDistribution\Download\'
         Image|endswith: '\WindowsUpdateBox.Exe'
-        TargetFilename|startswith: 'C:\$WINDOWS.~BT\Sources\'
+        TargetFilename|contains: ':\$WINDOWS.~BT\Sources\'
     filter_main_tiworker:
-        Image|startswith: 'C:\Windows\WinSxS\'
+        Image|contains: ':\Windows\WinSxS\'
         Image|endswith: '\TiWorker.exe'
     filter_main_programfiles:
-        - Image|startswith:
-              - 'C:\Program Files\'
-              - 'C:\Program Files (x86)\'
-        - TargetFilename|startswith:
-              - 'C:\Program Files\'
-              - 'C:\Program Files (x86)\'
+        - Image|contains:
+              - ':\Program Files\'
+              - ':\Program Files (x86)\'
+        - TargetFilename|contains:
+              - ':\Program Files\'
+              - ':\Program Files (x86)\'
     filter_main_defender:
-        Image|startswith:
-            - 'C:\ProgramData\Microsoft\Windows Defender\'
-            - 'C:\Program Files\Windows Defender\'
+        Image|contains:
+            - ':\ProgramData\Microsoft\Windows Defender\'
+            - ':\Program Files\Windows Defender\'
     filter_main_windows_apps:
         TargetFilename|contains: '\AppData\Local\Microsoft\WindowsApps\'
     filter_main_teams:
@@ -75,9 +75,9 @@ detection:
         #       TargetFilename: C:\Windows\assembly\NativeImages_v4.0.30319_32\Temp\4f8c-0\MSBuild.exe
         #       TargetFilename: C:\Windows\assembly\NativeImages_v4.0.30319_32\Temp\49bc-0\testhost.net47.x86.exe
         #       TargetFilename: C:\Windows\assembly\NativeImages_v4.0.30319_32\Temp\39d8-0\fsc.exe
-        Image|startswith: 'C:\Windows\Microsoft.NET\Framework\'
+        Image|contains: ':\Windows\Microsoft.NET\Framework\'
         Image|endswith: '\mscorsvw.exe'
-        TargetFilename|startswith: 'C:\Windows\assembly\NativeImages_'
+        TargetFilename|contains: ':\Windows\assembly\NativeImages_'
     filter_main_vscode:
         Image|contains: '\AppData\Local\'
         Image|endswith: '\Microsoft VS Code\Code.exe'
@@ -89,8 +89,28 @@ detection:
         #   \AppData\Local\SquirrelTemp\tempb\lib\net45\squirrel.exe
         TargetFilename|contains: '\AppData\Local\SquirrelTemp\'
     filter_main_windows_temp:
-        TargetFilename|startswith: 'C:\WINDOWS\TEMP\'
-    condition: selection and not 1 of filter_*
+        - Image|contains: ':\WINDOWS\TEMP\'
+        - TargetFilename|contains: ':\WINDOWS\TEMP\'
+    filter_optional_python:
+        Image|contains: '\Python27\python.exe'
+        TargetFilename|contains:
+            - '\Python27\Lib\site-packages\'
+            - '\Python27\Scripts\'
+            - '\AppData\Local\Temp\'
+    filter_optional_squirrel:
+        Image|contains: '\AppData\Local\SquirrelTemp\Update.exe'
+        TargetFilename|contains: '\AppData\Local'
+    filter_main_temp_installers:
+        - Image|contains: '\AppData\Local\Temp\'
+        - TargetFilename|contains: '\AppData\Local\Temp\'
+    filter_optional_chrome:
+        Image|endswith: '\ChromeSetup.exe'
+        TargetFilename|contains: '\Google'
+    filter_main_dot_net:
+        Image|contains: ':\Windows\Microsoft.NET\Framework'
+        Image|endswith: '\mscorsvw.exe'
+        TargetFilename|contains: ':\Windows\assembly'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     # Please contribute to FP to increase the level
     - Software installers
