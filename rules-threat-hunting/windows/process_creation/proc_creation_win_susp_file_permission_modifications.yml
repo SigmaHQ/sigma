@@ -39,8 +39,11 @@ detection:
             - 'ICACLS C:\ProgramData\dynatrace\gateway\config\config.properties /grant :r '
             - 'S-1-5-19:F'
     filter_optional_vscode:
-        - CommandLine|contains: '\AppData\Local\Programs\Microsoft VS Code'
-        - ParentImage|endswith: '\Microsoft VS Code\Code.exe'
+        CommandLine|contains:
+            - '\AppData\Local\Programs\Microsoft VS Code'
+            - ':\Program Files\Microsoft VS Code\'
+    filter_optional_avira:
+        CommandLine|contains: ':\Program Files (x86)\Avira\'
     condition: 1 of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Users interacting with the files on their own (unlikely unless privileged users).
