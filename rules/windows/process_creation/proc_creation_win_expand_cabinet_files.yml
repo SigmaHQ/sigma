@@ -1,7 +1,7 @@
-title: Suspicious Cabinet File Expansion
+title: Potentially Suspicious Cabinet File Expansion
 id: 9f107a84-532c-41af-b005-8d12a607639f
 status: test
-description: Adversaries can use the built-in expand utility to decompress cab files as seen in recent Iranian MeteorExpress attack
+description: Detects the expansion or decompression of cabinet files from potentially suspicious or uncommon locations. As seen in Iranian MeteorExpress related attacks
 references:
     - https://labs.sentinelone.com/meteorexpress-mysterious-wiper-paralyzes-iranian-trains-with-epic-troll
     - https://blog.malwarebytes.com/threat-intelligence/2021/08/new-variant-of-konni-malware-used-in-campaign-targetting-russia/
@@ -39,16 +39,11 @@ detection:
         - CommandLine|contains|all:
               - ':\Users\'
               - '\Contacts\'
-    filter_dell:
+    filter_optional_dell:
         # Launched by Dell ServiceShell.exe
         ParentImage: 'C:\Program Files (x86)\Dell\UpdateService\ServiceShell.exe'
         CommandLine|contains: 'C:\ProgramData\Dell\UpdateService\Temp\'
-    condition: selection_img and 1 of selection_folders_* and not 1 of filter_*
-fields:
-    - ComputerName
-    - User
-    - CommandLine
-    - ParentCommandLine
+    condition: selection_img and 1 of selection_folders_* and not 1 of filter_optional_*
 falsepositives:
     - System administrator Usage
 level: medium
