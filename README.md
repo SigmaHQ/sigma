@@ -104,6 +104,7 @@ If you find a false positive or would like to propose a new detection rule idea 
 * [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 * [TimeSketch](https://github.com/google/timesketch/commit/0c6c4b65a6c0f2051d074e87bbb2da2424fa6c35)
 * [ypsilon](https://github.com/P4T12ICK/ypsilon) - Automated Use Case Testing
+* [alterix](https://github.com/mtnmunuklu/alterix) - Converts Sigma rules to the query language of CRYPTTECH's SIEM
 
 ## 📜 Maintainers
 
