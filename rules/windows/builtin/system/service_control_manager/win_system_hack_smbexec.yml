@@ -19,9 +19,13 @@ detection:
     selection:
         Provider_Name: 'Service Control Manager'
         EventID: 7045
+    selection_SMBExec_in_service:
         ServiceName: 'BTOBTO'
-        ImagePath|endswith: '\execute.bat'
-    condition: selection
+    selection_SMBExec_in_path:
+        ImagePath|contains:
+            - '.bat & del'
+            - '__output 2^>^&1 >'
+    condition: selection and (selection_SMBExec_in_service or selection_SMBExec_in_path)
 falsepositives:
     - Unknown
 level: critical
