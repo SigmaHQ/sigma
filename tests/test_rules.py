@@ -11,40 +11,23 @@ import unittest
 import yaml
 import re
 import string
-from attackcti import attack_client
 from colorama import init
 from colorama import Fore
 import collections
 
+# Old Tests cover by pySigma 0.10.6 and simgma-cli 0.7.8
+# Use sigma check --fail-on-error --fail-on-issues --validation-config tests/sigma_cli_conf.yml rules*
+#
+# def test_duplicate_tags(self): sigma-cli validators duplicate_tag
+# def test_all_of_them_condition(self): sigma-cli validator all_of_them_condition
+# def test_missing_id(self): sigma-cli error & validator identifier_existence identifier_uniqueness
+# def test_duplicate_titles(self): sigma-cli validators duplicate_title
+# def test_unknown_value_modifier(self): sigma-cli error & validator SigmaModifierError
+# def test_confirm_correct_mitre_tags(self): sigma-cli validators attacktag
+# def test_optional_tlp(self): sigma-cli validators tlptag
+
 
 class TestRules(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        print("Calling get_mitre_data()")
-        # Get Current Data from MITRE ATT&CK®
-        cls.MITRE_ALL = get_mitre_data()
-        print("Catched data - starting tests...")
-
-    MITRE_TECHNIQUE_NAMES = [
-        "process_injection",
-        "signed_binary_proxy_execution",
-        "process_injection",
-    ]  # incomplete list
-    MITRE_TACTICS = [
-        "initial_access",
-        "execution",
-        "persistence",
-        "privilege_escalation",
-        "defense_evasion",
-        "credential_access",
-        "discovery",
-        "lateral_movement",
-        "collection",
-        "exfiltration",
-        "command_and_control",
-        "impact",
-        "launch",
-    ]
     # Don't use trademarks in rules - they require non-ASCII characters to be used on we don't want them in our rules
     TRADE_MARKS = {"MITRE ATT&CK", "ATT&CK"}
 
@@ -83,18 +66,7 @@ class TestRules(unittest.TestCase):
         return data
 
     # Tests
-    # def test_confirm_extension_is_yml(self):
-    # files_with_incorrect_extensions = []
-
-    # for file in self.yield_next_rule_file_path(self.path_to_rules):
-    # file_name_and_extension = os.path.splitext(file)
-    # if len(file_name_and_extension) == 2:
-    # extension = file_name_and_extension[1]
-    # if extension != ".yml":
-    # files_with_incorrect_extensions.append(file)
-
-    # self.assertEqual(files_with_incorrect_extensions, [], Fore.RED +
-    # "There are rule files with extensions other than .yml")
+    #
 
     def test_legal_trademark_violations(self):
         # See Issue # https://github.com/SigmaHQ/sigma/issues/1028
@@ -136,53 +108,6 @@ class TestRules(unittest.TestCase):
             Fore.RED
             + "There are rules with incorrect/unknown Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://github.com/SigmaHQ/sigma-specification/blob/main/Tags_specification.md ",
         )
-
-    def test_confirm_correct_mitre_tags(self):
-        files_with_incorrect_mitre_tags = []
-
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            tags = self.get_rule_part(file_path=file, part_name="tags")
-            if tags:
-                for tag in tags:
-                    if tag.startswith("attack.") and tag not in self.MITRE_ALL:
-                        print(
-                            Fore.RED
-                            + "Rule {} has the following incorrect MITRE tag {}".format(
-                                file, tag
-                            )
-                        )
-                        files_with_incorrect_mitre_tags.append(file)
-
-        self.assertEqual(
-            files_with_incorrect_mitre_tags,
-            [],
-            Fore.RED
-            + "There are rules with incorrect/unknown MITRE Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://attack.mitre.org/ ",
-        )
-
-    # sigma validators duplicate_tag
-    # def test_duplicate_tags(self):
-    #     files_with_incorrect_mitre_tags = []
-
-    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
-    #         tags = self.get_rule_part(file_path=file, part_name="tags")
-    #         if tags:
-    #             known_tags = []
-    #             for tag in tags:
-    #                 if tag in known_tags:
-    #                     print(
-    #                         Fore.RED
-    #                         + "Rule {} has the duplicate tag {}".format(file, tag)
-    #                     )
-    #                     files_with_incorrect_mitre_tags.append(file)
-    #                 else:
-    #                     known_tags.append(tag)
-
-    #     self.assertEqual(
-    #         files_with_incorrect_mitre_tags,
-    #         [],
-    #         Fore.RED + "There are rules with duplicate tags",
-    #     )
 
     def test_duplicate_references(self):
         files_with_duplicate_references = []
@@ -313,23 +238,6 @@ class TestRules(unittest.TestCase):
             Fore.RED
             + "There are rules using '1/all of them' style conditions but only have one condition",
         )
-
-    # Sigma validator all_of_them_condition 
-    # def test_all_of_them_condition(self):
-    #     faulty_detections = []
-
-    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
-    #         detection = self.get_rule_part(file_path=file, part_name="detection")
-
-    #         if "all of them" in detection["condition"]:
-    #             faulty_detections.append(file)
-
-    #     self.assertEqual(
-    #         faulty_detections,
-    #         [],
-    #         Fore.RED
-    #         + "There are rules using 'all of them'. Better use e.g. 'all of selection*' instead (and use the 'selection_' prefix as search-identifier).",
-    #     )
 
     def test_duplicate_detections(self):
         def compare_detections(detection1: dict, detection2: dict) -> bool:
@@ -489,39 +397,6 @@ class TestRules(unittest.TestCase):
             Fore.YELLOW
             + "There are rules still using Sysmon 1 or Event ID 4688. Please migrate to the process_creation category.",
         )
-
-    # sigma validator identifier_existence identifier_uniqueness
-    # def test_missing_id(self):
-    #     faulty_rules = []
-    #     dict_id = {}
-    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
-    #         id = self.get_rule_part(file_path=file, part_name="id")
-    #         if not id:
-    #             print(Fore.YELLOW + "Rule {} has no field 'id'.".format(file))
-    #             faulty_rules.append(file)
-    #         elif len(id) != 36:
-    #             print(
-    #                 Fore.YELLOW
-    #                 + "Rule {} has a malformed 'id' (not 36 chars).".format(file)
-    #             )
-    #             faulty_rules.append(file)
-    #         elif id.lower() in dict_id.keys():
-    #             print(
-    #                 Fore.YELLOW
-    #                 + "Rule {} has the same 'id' as {}. Ids have to be unique.".format(
-    #                     file, dict_id[id]
-    #                 )
-    #             )
-    #             faulty_rules.append(file)
-    #         else:
-    #             dict_id[id.lower()] = file
-
-    #     self.assertEqual(
-    #         faulty_rules,
-    #         [],
-    #         Fore.RED
-    #         + "There are rules with missing or malformed 'id' fields. Generate an id (e.g. here: https://www.uuidgenerator.net/version4) and add it to the reported rule(s).",
-    #     )
 
     def test_optional_related(self):
         faulty_rules = []
@@ -933,38 +808,6 @@ class TestRules(unittest.TestCase):
             + "There are rules with malformed 'license' fields. (has to be a string )",
         )
 
-    def test_optional_tlp(self):
-        faulty_rules = []
-        valid_tlp = [
-            "WHITE",
-            "GREEN",
-            "AMBER",
-            "RED",
-        ]
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            tlp_str = self.get_rule_part(file_path=file, part_name="tlp")
-            if tlp_str:
-                # it exists but isn't a string
-                if not isinstance(tlp_str, str):
-                    print(
-                        Fore.YELLOW
-                        + "Rule {} has a 'tlp' field that isn't a string.".format(file)
-                    )
-                    faulty_rules.append(file)
-                elif not tlp_str.upper() in valid_tlp:
-                    print(
-                        Fore.YELLOW
-                        + "Rule {} has a 'tlp' field with not valid value.".format(file)
-                    )
-                    faulty_rules.append(file)
-
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules with malformed optional 'tlp' fields. (https://www.cisa.gov/tlp)",
-        )
-
     def test_optional_target(self):
         faulty_rules = []
         for file in self.yield_next_rule_file_path(self.path_to_rules):
@@ -1352,66 +1195,6 @@ class TestRules(unittest.TestCase):
             + "There are rules without the 'title' attribute in their first line.",
         )
 
-    # sigma validators duplicate_title
-    # def test_duplicate_titles(self):
-    #     # This test ensure that every rule has a unique title
-    #     faulty_rules = []
-    #     titles_dict = {}
-    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
-    #         title = (
-    #             self.get_rule_part(file_path=file, part_name="title").lower().rstrip()
-    #         )
-    #         duplicate = False
-    #         for rule, title_ in titles_dict.items():
-    #             if title == title_:
-    #                 print(
-    #                     Fore.RED
-    #                     + "Rule {} has an already used title in {}.".format(file, rule)
-    #                 )
-    #                 duplicate = True
-    #                 faulty_rules.append(file)
-    #                 continue
-    #         if not duplicate:
-    #             titles_dict[file] = title
-
-    #     self.assertEqual(
-    #         faulty_rules,
-    #         [],
-    #         Fore.RED
-    #         + "There are rules that share the same 'title'. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title",
-    #     )
-
-    # def test_invalid_logsource_attributes(self):
-    #     faulty_rules = []
-    #     valid_logsource = [
-    #         'category',
-    #         'product',
-    #         'service',
-    #         'definition',
-    #     ]
-    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
-    #         logsource = self.get_rule_part(
-    #             file_path=file, part_name="logsource")
-    #         if not logsource:
-    #             print(Fore.RED + "Rule {} has no 'logsource'.".format(file))
-    #             faulty_rules.append(file)
-    #             continue
-    #         valid = True
-    #         for key in logsource:
-    #             if key.lower() not in valid_logsource:
-    #                 print(
-    #                     Fore.RED + "Rule {} has a logsource with an invalid field ({})".format(file, key))
-    #                 valid = False
-    #             elif not isinstance(logsource[key], str):
-    #                 print(
-    #                     Fore.RED + "Rule {} has a logsource with an invalid field type ({})".format(file, key))
-    #                 valid = False
-    #         if not valid:
-    #             faulty_rules.append(file)
-
-    #     self.assertEqual(faulty_rules, [], Fore.RED +
-    #                      "There are rules with non-conform 'logsource' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#log-source")
-
     def test_selection_list_one_value(self):
         def treat_list(file, values, valid_, selection_name):
             # rule with only list of Keywords term
@@ -1601,52 +1384,6 @@ class TestRules(unittest.TestCase):
     #                                 faulty_rules.append(file)
 
     #     self.assertEqual(faulty_rules, [], Fore.RED + "There are rules with common typos in field names.")
-
-    # Sigma error validator SigmaModifierError
-    # def test_unknown_value_modifier(self):
-    #     known_modifiers = [
-    #         "contains",
-    #         "startswith",
-    #         "endswith",
-    #         "all",
-    #         "base64offset",
-    #         "base64",
-    #         "utf16le",
-    #         "utf16be",
-    #         "wide",
-    #         "utf16",
-    #         "windash",
-    #         "re",
-    #         "cidr",
-    #     ]
-    #     faulty_rules = []
-    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
-    #         detection = self.get_rule_part(file_path=file, part_name="detection")
-    #         if detection:
-    #             for search_identifier in detection:
-    #                 if isinstance(detection[search_identifier], dict):
-    #                     for field in detection[search_identifier]:
-    #                         if "|" in field:
-    #                             for current_modifier in field.split("|")[1:]:
-    #                                 found = False
-    #                                 for target_modifier in known_modifiers:
-    #                                     if current_modifier == target_modifier:
-    #                                         found = True
-    #                                 if not found:
-    #                                     print(
-    #                                         Fore.RED
-    #                                         + "Rule {} uses an unknown field modifier ({}/{})".format(
-    #                                             file, search_identifier, field
-    #                                         )
-    #                                     )
-    #                                     faulty_rules.append(file)
-
-    #     self.assertEqual(
-    #         faulty_rules,
-    #         [],
-    #         Fore.RED
-    #         + "There are rules with unknown value modifiers. Most often it is just a typo.",
-    #     )
 
     def test_all_value_modifier_single_item(self):
         faulty_rules = []
@@ -1908,75 +1645,6 @@ class TestRules(unittest.TestCase):
         self.assertEqual(
             faulty_rules, [], Fore.RED + "There are rules using illegal re-escapes"
         )
-
-
-def get_mitre_data():
-    """
-    Use Tags from CTI subrepo to get consitant data
-    """
-    cti_path = "cti/"
-    cti_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), cti_path)
-
-    # Get ATT&CK information
-    lift = attack_client(local_path=cti_path)
-    # Techniques
-    MITRE_TECHNIQUES = []
-    MITRE_TECHNIQUE_NAMES = []
-    MITRE_PHASE_NAMES = set()
-    MITRE_TOOLS = []
-    MITRE_GROUPS = []
-    # Techniques
-    enterprise_techniques = lift.get_enterprise_techniques()
-    for t in enterprise_techniques:
-        MITRE_TECHNIQUE_NAMES.append(
-            t["name"].lower().replace(" ", "_").replace("-", "_")
-        )
-        for r in t.external_references:
-            if "external_id" in r:
-                MITRE_TECHNIQUES.append(r["external_id"].lower())
-        if "kill_chain_phases" in t:
-            for kc in t["kill_chain_phases"]:
-                if "phase_name" in kc:
-                    MITRE_PHASE_NAMES.add(kc["phase_name"].replace("-", "_"))
-    # Tools / Malware
-    enterprise_tools = lift.get_enterprise_tools()
-    for t in enterprise_tools:
-        for r in t.external_references:
-            if "external_id" in r:
-                MITRE_TOOLS.append(r["external_id"].lower())
-    enterprise_malware = lift.get_enterprise_malware()
-    for m in enterprise_malware:
-        for r in m.external_references:
-            if "external_id" in r:
-                MITRE_TOOLS.append(r["external_id"].lower())
-    # Groups
-    enterprise_groups = lift.get_enterprise_groups()
-    for g in enterprise_groups:
-        for r in g.external_references:
-            if "external_id" in r:
-                MITRE_GROUPS.append(r["external_id"].lower())
-
-    # Debugging
-    print(
-        "MITRE ATT&CK LIST LENGTHS: %d %d %d %d %d"
-        % (
-            len(MITRE_TECHNIQUES),
-            len(MITRE_TECHNIQUE_NAMES),
-            len(list(MITRE_PHASE_NAMES)),
-            len(MITRE_GROUPS),
-            len(MITRE_TOOLS),
-        )
-    )
-
-    # Combine all IDs to a big tag list
-    return [
-        "attack." + item
-        for item in MITRE_TECHNIQUES
-        + MITRE_TECHNIQUE_NAMES
-        + list(MITRE_PHASE_NAMES)
-        + MITRE_GROUPS
-        + MITRE_TOOLS
-    ]
 
 
 if __name__ == "__main__":
