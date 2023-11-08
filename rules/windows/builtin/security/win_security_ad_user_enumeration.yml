@@ -23,7 +23,16 @@ detection:
         # Using contains as the data commonly is structured as "%{bf967aba-0de6-11d0-a285-00aa003049e2}"
         # The user class (https://docs.microsoft.com/en-us/windows/win32/adschema/c-user)
         ObjectType|contains: 'bf967aba-0de6-11d0-a285-00aa003049e2'
-        AccessMask: '0x10' # Read Property. Check https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4662
+        AccessMask|endswith:
+            # Note: Since the Access Mask can have more than once permission we need to add all permutations that include the READ property
+            - '1?' # This covers all access masks that are 1 bytes or shorter and the "Read Property" itself
+            - '3?' # Read Property + Write Property
+            - '4?' # Read Property + Delete Tree
+            - '7?' # Read Property + Write Property + Delete Tree
+            - '9?' # Read Property + List Object
+            - 'B?' # Read Property + Write Property + List Object
+            - 'D?' # Read Property + Delete Tree + List Object
+            - 'F?' # Covers usage of all possible 2 bytes permissions with any or none of the single byte permissions
     filter_main_machine_accounts:
         SubjectUserName|endswith: '$' # Exclude machine accounts
     filter_main_msql:
