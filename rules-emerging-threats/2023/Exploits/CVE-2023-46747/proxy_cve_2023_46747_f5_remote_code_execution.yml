@@ -1,0 +1,38 @@
+title: CVE-2023-46747 Exploitation Activity - Proxy
+id: f195b2ff-e542-41bf-8d91-864fb81e5c20
+related:
+    - id: e9928831-ba14-42ea-a4bc-33d352b9929a
+      type: similar
+status: experimental
+description: Detects exploitation activity of CVE-2023-46747 an unauthenticated remote code execution vulnerability in F5 BIG-IP.
+references:
+    - https://github.com/AliBrTab/CVE-2023-46747-POC/tree/main
+    - https://github.com/0xorOne/nuclei-templates/blob/2fef4270ec6e5573d0a1732cb18bcfc4b1580a88/http/cves/2023/CVE-2023-46747.yaml
+    - https://mp.weixin.qq.com/s/wUoBy7ZiqJL2CUOMC-8Wdg
+    - https://www.praetorian.com/blog/refresh-compromising-f5-big-ip-with-request-smuggling-cve-2023-46747/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/11/08
+tags:
+    - attack.initial_access
+    - attack.t1190
+    - detection.emerging_threats
+    - cve.2023.46747
+logsource:
+    category: proxy
+    definition: 'Requirements: The POST request body data must be collected in order to make use of this detection'
+detection:
+    selection:
+        cs-method: 'POST'
+        c-uri|contains: '/mgmt/tm/util/bash'
+    keywords_hex:
+        '|all':
+            - '2f746d75692f436f6e74726f6c2f666f726d' # /tmui/Control/form
+            - '666f726d5f706167653d253266746d756925326673797374656d253266757365722532666372656174652e6a7370' # form_page=%2ftmui%2fsystem%2fuser%2fcreate.jsp
+    keywords_plain:
+        '|all':
+            - '/tmui/Control/form'
+            - 'form_page=%2ftmui%2fsystem%2fuser%2fcreate.jsp'
+    condition: selection and (keywords_hex or keywords_plain)
+falsepositives:
+    - Unlikely
+level: high
