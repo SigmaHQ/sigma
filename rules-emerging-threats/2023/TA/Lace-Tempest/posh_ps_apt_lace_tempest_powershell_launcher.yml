@@ -1,0 +1,28 @@
+title: Lace Tempest PowerShell Launcher - SysAid CVE-2023-47246 Exploitation
+id: 37dc5463-f7e3-4f61-ad76-ba59cd02a651
+status: experimental
+description: |
+    Detects the powershell script used by Lace Tempest APT to launch their malware loader by exploiting CVE-2023-47246 as reported by SysAid Team
+references:
+    - https://www.sysaid.com/blog/service-desk/on-premise-software-security-vulnerability-notification
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/11/09
+tags:
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - '\SysAidServer\tomcat\webapps'
+            - 'Starting user.exe'
+            - '\usersfiles\user.exe'
+            - 'Remove-Item -Force '
+            - '(Sophos).'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high

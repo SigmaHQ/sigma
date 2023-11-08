@@ -1,0 +1,24 @@
+title: Lace Tempest Malware Load File Indicator - SysAid CVE-2023-47246 Exploitation
+id: e94486ea-2650-4548-bf25-88cbd0bb32d7
+status: experimental
+description: Detects PowerShell script file creation with specific name or suffix which was seen being used often by FIN7 PowerShell scripts
+references:
+    - https://www.sysaid.com/blog/service-desk/on-premise-software-security-vulnerability-notification
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/11/09
+tags:
+    - attack.execution
+    - detection.emerging_threats
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        - TargetFilename|endswith:
+            - ':\Program Files\SysAidServer\tomcat\webapps\usersfiles\user.exe'
+            - ':\Program Files\SysAidServer\tomcat\webapps\usersfiles.war'
+        - TargetFilename|contains: ':\Program Files\SysAidServer\tomcat\webapps\user.'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
