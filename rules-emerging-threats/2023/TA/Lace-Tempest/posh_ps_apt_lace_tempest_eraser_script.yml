@@ -1,0 +1,30 @@
+title: Lace Tempest PowerShell Evidence Eraser
+id: b377ddab-502d-4519-9e8c-5590033d2d70
+status: experimental
+description: |
+    Detects the powershell script used by Lace Tempest APT to Used to erase evidence from victim servers by exploiting CVE-2023-47246 as reported by SysAid Team
+references:
+    - https://www.sysaid.com/blog/service-desk/on-premise-software-security-vulnerability-notification
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/11/09
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - detection.emerging_threats
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection:
+        ScriptBlockText|contains|all:
+            - 'cleanLL'
+            - 'usersfiles.war'
+            - 'Remove-Item -Path "$tomcat_dir'
+            - 'SysAidServer'
+            - 'sleep '
+            - 'while(1)'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high

@@ -40,7 +40,7 @@ detection:
         CommandLine|contains:
             - 'catalina.jar'
             - 'CATALINA_HOME'
-    susp_net_utility:
+    selection_susp_net_utility:
         OriginalFileName:
             - 'net.exe'
             - 'net1.exe'
@@ -48,49 +48,55 @@ detection:
             - ' user '
             - ' use '
             - ' group '
-    susp_ping_utility:
+    selection_susp_ping_utility:
         OriginalFileName: 'ping.exe'
         CommandLine|contains: ' -n '
-    susp_change_dir:
+    selection_susp_change_dir:
         CommandLine|contains:
             - '&cd&echo'  # china chopper web shell
             - 'cd /d '  # https://www.computerhope.com/cdhlp.htm
-    susp_wmic_utility:
+    selection_susp_wmic_utility:
         OriginalFileName: 'wmic.exe'
         CommandLine|contains: ' /node:'
-    susp_misc_discovery_binaries:
+    selection_susp_misc_discovery_binaries:
         - Image|endswith:
-              - '\whoami.exe'
-              - '\systeminfo.exe'
-              - '\quser.exe'
+              - '\dsquery.exe'
+              - '\find.exe'
+              - '\findstr.exe'
               - '\ipconfig.exe'
-              - '\pathping.exe'
-              - '\tracert.exe'
               - '\netstat.exe'
+              - '\nslookup.exe'
+              - '\pathping.exe'
+              - '\quser.exe'
               - '\schtasks.exe'
-              - '\vssadmin.exe'
-              - '\wevtutil.exe'
+              - '\systeminfo.exe'
               - '\tasklist.exe'
+              - '\tracert.exe'
+              - '\ver.exe'
+              - '\wevtutil.exe'
+              - '\whoami.exe'
         - OriginalFileName:
-              - 'whoami.exe'
-              - 'sysinfo.exe'
-              - 'quser.exe'
+              - 'dsquery.exe'
+              - 'find.exe'
+              - 'findstr.exe'
               - 'ipconfig.exe'
-              - 'pathping.exe'
-              - 'tracert.exe'
               - 'netstat.exe'
+              - 'nslookup.exe'
+              - 'pathping.exe'
+              - 'quser.exe'
               - 'schtasks.exe'
+              - 'sysinfo.exe'
+              - 'tasklist.exe'
+              - 'tracert.exe'
+              - 'ver.exe'
               - 'VSSADMIN.EXE'
               - 'wevtutil.exe'
-              - 'tasklist.exe'
-    susp_misc_discovery_commands:
+              - 'whoami.exe'
+    selection_susp_misc_discovery_commands:
         CommandLine|contains:
             - ' Test-NetConnection '
             - 'dir \'  # remote dir: dir \<redacted IP #3>\C$:\windows\temp\*.exe
-    condition: 1 of selection* and 1 of susp*
-fields:
-    - CommandLine
-    - ParentCommandLine
+    condition: 1 of selection_webserver_* and 1 of selection_susp_*
 falsepositives:
     - Unknown
 level: high

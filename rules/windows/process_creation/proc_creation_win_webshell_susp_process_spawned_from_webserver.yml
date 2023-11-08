@@ -1,12 +1,13 @@
-title: Shells Spawned by Web Servers
+title: Suspicious Process By Web Server Process
 id: 8202070f-edeb-4d31-a010-a26c72ac5600
 status: test
-description: Detects web servers that spawn shell processes which could be the result of a successfully placed web shell or another attack
+description: |
+    Detects potentially suspicious processes being spawned by a web server process which could be the result of a successfully placed web shell or exploitation
 references:
     - https://media.defense.gov/2020/Jun/09/2002313081/-1/-1/0/CSI-DETECT-AND-PREVENT-WEB-SHELL-MALWARE-20200422.PDF
 author: Thomas Patzke, Florian Roth (Nextron Systems), Zach Stanford @svch0st, Tim Shelton, Nasreddine Bencherchali (Nextron Systems)
 date: 2019/01/16
-modified: 2022/09/19
+modified: 2023/11/09
 tags:
     - attack.persistence
     - attack.t1505.003
@@ -17,15 +18,15 @@ logsource:
 detection:
     selection_webserver_image:
         ParentImage|endswith:
-            - '\w3wp.exe'
-            - '\php.exe'
-            - '\php-cgi.exe'
-            - '\nginx.exe'
-            - '\httpd.exe'
             - '\caddy.exe'
-            - '\ws_TomcatService.exe'
+            - '\httpd.exe'
+            - '\nginx.exe'
+            - '\php-cgi.exe'
+            - '\php.exe'
             - '\tomcat.exe'
             - '\UMWorkerProcess.exe'  # https://www.fireeye.com/blog/threat-research/2021/03/detection-response-to-exploitation-of-microsoft-exchange-zero-day-vulnerabilities.html
+            - '\w3wp.exe'
+            - '\ws_TomcatService.exe'
     selection_webserver_characteristics_tomcat1:
         ParentImage|endswith:
             - '\java.exe'
@@ -38,67 +39,49 @@ detection:
             - '\java.exe'
             - '\javaw.exe'
         ParentCommandLine|contains:
-            - 'catalina.jar'
             - 'CATALINA_HOME'
             - 'catalina.home'
-    anomaly_children:
+            - 'catalina.jar'
+    selection_anomaly_children:
         Image|endswith:
-            - '\cmd.exe'
-            - '\cscript.exe'
-            - '\sh.exe'
-            - '\bash.exe'
-            - '\powershell.exe'
-            - '\powershell_ise.exe'
-            - '\pwsh.exe'
-            - '\bitsadmin.exe'
             - '\arp.exe'
             - '\at.exe'
+            - '\bash.exe'
+            - '\bitsadmin.exe'
             - '\certutil.exe'
+            - '\cmd.exe'
+            - '\cscript.exe'
             - '\dsget.exe'
-            - '\dsquery.exe'
-            - '\find.exe'
-            - '\findstr.exe'
-            - '\fsutil.exe'
             - '\hostname.exe'
-            - '\ipconfig.exe'
             - '\nbtstat.exe'
             - '\net.exe'
             - '\net1.exe'
             - '\netdom.exe'
             - '\netsh.exe'
-            - '\netstat.exe'
             - '\nltest.exe'
-            - '\nslookup.exe'
             - '\ntdutil.exe'
-            - '\pathping.exe'
-            - '\ping.exe'
+            - '\powershell_ise.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
             - '\qprocess.exe'
             - '\query.exe'
             - '\qwinsta.exe'
             - '\reg.exe'
             - '\rundll32.exe'
             - '\sc.exe'
-            - '\schtasks.exe'
-            - '\systeminfo.exe'
-            - '\tasklist.exe'
-            - '\tracert.exe'
-            - '\ver.exe'
-            - '\vssadmin.exe'
-            - '\wevtutil.exe'
-            - '\whoami.exe'
+            - '\sh.exe'
             - '\wmic.exe'
             - '\wscript.exe'
             - '\wusa.exe'
-    false_positive1:
+    filter_main_fp_1:
+        ParentImage|endswith: '\java.exe'
         CommandLine|endswith: 'Windows\system32\cmd.exe /c C:\ManageEngine\ADManager "Plus\ES\bin\elasticsearch.bat -Enode.name=RMP-NODE1 -pelasticsearch-pid.txt'
-    false_positive2:
+    filter_main_fp_2:
+        ParentImage|endswith: '\java.exe'
         CommandLine|contains|all:
             - 'sc query'
             - 'ADManager Plus'
-    condition: 1 of selection* and anomaly_children and not 1 of false_positive*
-fields:
-    - CommandLine
-    - ParentCommandLine
+    condition: 1 of selection_webserver_* and selection_anomaly_children and not 1 of filter_main_**
 falsepositives:
     - Particular web applications may spawn a shell process legitimately
 level: high

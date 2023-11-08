@@ -1,10 +1,13 @@
-title: Suspicious Shells Spawned by Java
+title: Suspicious Processes Spawned by Java.EXE
 id: 0d34ed8b-1c12-4ff2-828c-16fc860b766d
+related:
+    - id: dff1e1cc-d3fd-47c8-bfc2-aeb878a754c0
+      type: similar
 status: experimental
-description: Detects suspicious shell spawned from Java host process (e.g. log4j exploitation)
+description: Detects suspicious processes spawned from a Java host process which could indicate a sign of exploitation (e.g. log4j)
 author: Andreas Hunkeler (@Karneades), Florian Roth
 date: 2021/12/17
-modified: 2023/01/21
+modified: 2023/11/09
 tags:
     - attack.initial_access
     - attack.persistence
@@ -16,32 +19,30 @@ detection:
     selection:
         ParentImage|endswith: '\java.exe'
         Image|endswith:
-            - '\sh.exe'
-            - '\bash.exe'
-            - '\powershell.exe'
-            - '\pwsh.exe'
-            - '\schtasks.exe'
-            - '\certutil.exe'
-            - '\whoami.exe'
-            - '\bitsadmin.exe'
-            - '\wscript.exe'
-            - '\cscript.exe'
-            - '\scrcons.exe'
-            - '\regsvr32.exe'
-            - '\hh.exe'
-            - '\wmic.exe'        # https://app.any.run/tasks/c903e9c8-0350-440c-8688-3881b556b8e0/
-            - '\mshta.exe'
-            - '\rundll32.exe'
-            - '\forfiles.exe'
-            - '\scriptrunner.exe'
-            - '\mftrace.exe'
             - '\AppVLP.exe'
+            - '\bash.exe'
+            - '\bitsadmin.exe'
+            - '\certutil.exe'
+            - '\cscript.exe'
             - '\curl.exe'
-            - '\systeminfo.exe'
+            - '\forfiles.exe'
+            - '\hh.exe'
+            - '\mftrace.exe'
+            - '\mshta.exe'
             - '\net.exe'
             - '\net1.exe'
-            - '\reg.exe'
             - '\query.exe'
+            - '\reg.exe'
+            - '\regsvr32.exe'
+            - '\rundll32.exe'
+            - '\schtasks.exe'
+            - '\scrcons.exe'
+            - '\scriptrunner.exe'
+            - '\sh.exe'
+            - '\systeminfo.exe'
+            - '\whoami.exe'
+            - '\wmic.exe'        # https://app.any.run/tasks/c903e9c8-0350-440c-8688-3881b556b8e0/
+            - '\wscript.exe'
     condition: selection
 falsepositives:
     - Legitimate calls to system binaries
