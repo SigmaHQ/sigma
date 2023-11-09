@@ -4,7 +4,7 @@
 Creates the Sigma release archive packages for different configurations
 
 EXAMPLE
-# python3 sigma-package-release.py --min-status testing --levels high critical --rule-types generic --outfile Sigma-standard.zip
+# python3 sigma-package-release.py --min-status test --levels high critical --rule-types generic --outfile Sigma-standard.zip
 """
 
 import os
@@ -12,7 +12,8 @@ import sys
 import argparse
 import yaml
 import zipfile
-
+import datetime
+import subprocess
 
 STATUS = ["experimental", "test", "stable"]
 LEVEL = ["informational", "low", "medium", "high", "critical"]
@@ -137,6 +138,15 @@ def write_zip(outfile: str, selected_rules: list):
     ) as zip:
         for rule_path in selected_rules:
             zip.write(rule_path)
+
+        # Write version info text file
+        today = datetime.date.today().isoformat()
+        label = subprocess.check_output(["git", "describe", "--always"]).strip()
+        commit_hash = subprocess.check_output(["git", "rev-parse", "HEAD"]).strip()
+        version = "Release Date: {}\nLabel: {}\nCommit-Hash: {}\n".format(
+            today, label.decode(), commit_hash.decode()
+        )
+        zip.writestr("version.txt", version)
     return
 
 

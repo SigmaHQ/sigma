@@ -8,7 +8,7 @@ references:
     - https://github.com/swagkarna/Defeat-Defender-V1.2.0
 author: Jakob Weinzettl, oscd.community, Nasreddine Bencherchali (Nextron Systems)
 date: 2019/10/23
-modified: 2022/11/18
+modified: 2023/11/06
 tags:
     - attack.defense_evasion
     - attack.t1222.001
@@ -39,8 +39,13 @@ detection:
             - 'ICACLS C:\ProgramData\dynatrace\gateway\config\config.properties /grant :r '
             - 'S-1-5-19:F'
     filter_optional_vscode:
-        - CommandLine|contains: '\AppData\Local\Programs\Microsoft VS Code'
-        - ParentImage|endswith: '\Microsoft VS Code\Code.exe'
+        CommandLine|contains:
+            - '\AppData\Local\Programs\Microsoft VS Code'
+            - ':\Program Files\Microsoft VS Code\'
+    filter_optional_avira:
+        CommandLine|contains:
+            - ':\Program Files (x86)\Avira\'
+            - ':\Program Files\Avira\'
     condition: 1 of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Users interacting with the files on their own (unlikely unless privileged users).
