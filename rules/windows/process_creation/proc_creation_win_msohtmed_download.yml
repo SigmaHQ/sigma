@@ -1,12 +1,12 @@
-title: Arbitrary File Download Via MSPUB.EXE
-id: 3b3c7f55-f771-4dd6-8a6e-08d057a17caf
-status: experimental
-description: Detects usage of "MSPUB" (Microsoft Publisher) to download arbitrary files
+title: Arbitrary File Download Via MSOHTMED.EXE
+id: 459f2f98-397b-4a4a-9f47-6a5ec2f1c69d
+status: test
+description: Detects usage of "MSOHTMED" to download arbitrary files
 references:
     - https://github.com/LOLBAS-Project/LOLBAS/pull/238/files
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/08/19
-modified: 2023/02/08
+modified: 2023/11/09
 tags:
     - attack.defense_evasion
     - attack.execution
@@ -16,14 +16,14 @@ logsource:
     product: windows
 detection:
     selection_img:
-        - Image|endswith: '\MSPUB.exe'
-        - OriginalFileName: 'MSPUB.exe'
+        - Image|endswith: '\MSOHTMED.exe'
+        - OriginalFileName: 'MsoHtmEd.exe'
     selection_cli:
         CommandLine|contains:
+            - 'ftp://'
             - 'http://'
             - 'https://'
-            - 'ftp://'
-    condition: all of selection*
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: medium
