@@ -91,7 +91,7 @@ If you find a false positive or would like to propose a new detection rule idea 
 ## Projects or Products that use or integrate Sigma rules
 
 * [Atomic Threat Coverage](https://github.com/atc-project/atomic-threat-coverage) (Since December 2018)
-* [Confluent Sigma](https://github.com/confluentinc/cyber/tree/master/confluent-sigma)
+* [Confluent Sigma](https://github.com/confluentinc/confluent-sigma) - Kafka Streams supported Sigma rules
 * [IBM QRadar](https://community.ibm.com/community/user/security/blogs/gladys-koskas1/2023/08/02/qradar-natively-supports-sigma-for-rules-creation)
 * [Joe Sandbox](https://www.joesecurity.org/blog/8225577975210857708)
 * [MISP](http://www.misp-project.org/2017/03/26/MISP.2.4.70.released.html) (Since Version 2.4.70, March 2017)
