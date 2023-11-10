@@ -1,0 +1,23 @@
+title: Lace Tempest Cobalt Strike Download
+id: aa5b0a40-ed88-46aa-9fdc-0337b379ca9d
+status: experimental
+description: Detects specific command line execution used by Lace Tempest to download Cobalt Strike as reported by SysAid Team
+references:
+    - https://www.sysaid.com/blog/service-desk/on-premise-software-security-vulnerability-notification
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/11/09
+tags:
+    - attack.execution
+    - detection.emerging_threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains|all:
+            - -nop -w hidden -c IEX ((new-object net.webclient).downloadstring(
+            - /a')
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
