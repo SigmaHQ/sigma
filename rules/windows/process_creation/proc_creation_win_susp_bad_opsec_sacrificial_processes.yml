@@ -18,7 +18,7 @@ references:
     - https://docs.microsoft.com/en-us/dotnet/framework/tools/regsvcs-exe-net-services-installation-tool#feedback
 author: Oleg Kolesnikov @securonix invrep_de, oscd.community, Florian Roth (Nextron Systems), Christian Burkard (Nextron Systems)
 date: 2020/10/23
-modified: 2023/01/25
+modified: 2023/11/10
 tags:
     - attack.defense_evasion
     - attack.t1218.011
@@ -26,30 +26,27 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection1:
+    selection_werfault:
         Image|endswith: '\WerFault.exe'
         CommandLine|endswith: 'WerFault.exe'
-    selection2:
+    selection_rundll32:
         Image|endswith: '\rundll32.exe'
         CommandLine|endswith: 'rundll32.exe'
-    selection3:
+    selection_regsvcs:
         Image|endswith: '\regsvcs.exe'
         CommandLine|endswith: 'regsvcs.exe'
-    selection4:
+    selection_regasm:
         Image|endswith: '\regasm.exe'
         CommandLine|endswith: 'regasm.exe'
-    selection5:
+    selection_regsvr32:
         Image|endswith: '\regsvr32.exe'
         CommandLine|endswith: 'regsvr32.exe'
-    filter_edge_update:
-        ParentImage|startswith: 'C:\Users\'
-        ParentImage|contains: '\AppData\Local\Microsoft\EdgeUpdate\Install\{'
+    filter_main_edge_update:
+        ParentImage|contains|all:
+            - ':\Users\'
+            - '\AppData\Local\Microsoft\EdgeUpdate\Install\{'
         ParentImage|endswith: '\setup.exe'
-        ParentCommandLine|contains: '\setup.exe" --install-archive="C:\Users\'
-    condition: 1 of selection* and not 1 of filter*
-fields:
-    - ParentImage
-    - ParentCommandLine
+    condition: 1 of selection_* and not 1 of filter_main_*
 falsepositives:
     - Unlikely
 level: high
