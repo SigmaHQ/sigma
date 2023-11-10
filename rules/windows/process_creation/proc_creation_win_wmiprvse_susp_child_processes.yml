@@ -16,7 +16,7 @@ references:
     - https://twitter.com/ForensicITGuy/status/1334734244120309760
 author: Vadim Khrykov (ThreatIntel), Cyb3rEng, Florian Roth (Nextron Systems)
 date: 2021/08/23
-modified: 2023/03/23
+modified: 2023/11/10
 tags:
     - attack.execution
     - attack.defense_evasion
@@ -51,11 +51,14 @@ detection:
             - 'regsvr32'
             - 'rundll32'
             - 'wscript'
-    filter_werfault:
+    filter_main_werfault:
         Image|endswith: '\WerFault.exe'
-    filter_wmiprvse:
+    filter_main_wmiprvse:
         Image|endswith: '\WmiPrvSE.exe' # In some legitimate case WmiPrvSE was seen spawning itself
-    condition: selection_parent and 1 of selection_children_* and not 1 of filter_*
+    filter_main_msiexec:
+        Image|endswith: '\msiexec.exe'
+        CommandLine|contains: '/i '
+    condition: selection_parent and 1 of selection_children_* and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high
