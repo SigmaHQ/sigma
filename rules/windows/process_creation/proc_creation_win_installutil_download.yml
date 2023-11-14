@@ -1,11 +1,13 @@
-title: Suspicious Execution of InstallUtil To Download
+title: File Download Via InstallUtil.EXE
 id: 75edd216-1939-4c73-8d61-7f3a0d85b5cc
 status: test
-description: Detects the use the .NET InstallUtil.exe application in order to download arbitrary files. The files will be written to %LOCALAPPDATA%\Microsoft\Windows\INetCache\IE\
+description: |
+    Detects use of .NET InstallUtil.exe in order to download arbitrary files. The files will be written to "%LOCALAPPDATA%\Microsoft\Windows\INetCache\IE\"
 references:
     - https://github.com/LOLBAS-Project/LOLBAS/pull/239
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/08/19
+modified: 2023/11/09
 tags:
     - attack.defense_evasion
     - attack.t1218
@@ -18,9 +20,9 @@ detection:
         - OriginalFileName: 'InstallUtil.exe'
     selection_cli:
         CommandLine|contains:
+            - 'ftp://'
             - 'http://'
             - 'https://'
-            - 'ftp://'
     condition: all of selection_*
 falsepositives:
     - Unknown

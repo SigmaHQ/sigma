@@ -1,12 +1,13 @@
-title: Windows Defender Download Activity
+title: File Download Via Windows Defender MpCmpRun.EXE
 id: 46123129-1024-423e-9fae-43af4a0fa9a5
 status: test
-description: Detect the use of Windows Defender to download payloads
+description: Detects the use of Windows Defender MpCmdRun.EXE to download files
 references:
     - https://web.archive.org/web/20200903194959/https://twitter.com/djmtshepana/status/1301608169496612866
     - https://lolbas-project.github.io/lolbas/Binaries/MpCmdRun/
 author: Matthew Matchen
 date: 2020/09/04
+modified: 2023/11/09
 tags:
     - attack.defense_evasion
     - attack.t1218
@@ -16,16 +17,16 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection1:
+    selection_img:
+        - OriginalFileName: 'MpCmdRun.exe'
+        - Image|endswith: '\MpCmdRun.exe'
         - CommandLine|contains: 'MpCmdRun.exe'
         - Description: 'Microsoft Malware Protection Command Line Utility'
-    selection2:
+    selection_cli:
         CommandLine|contains|all:
             - 'DownloadFile'
             - 'url'
-    condition: all of selection*
-fields:
-    - CommandLine
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: high
