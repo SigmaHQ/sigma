@@ -1,0 +1,35 @@
+title: Windows Defender Exclusion Reigstry Key - Write Access Requested
+id: e9c8808f-4cfb-4ba9-97d4-e5f3beaa244d
+related:
+    - id: 46a68649-f218-4f86-aea1-16a759d81820
+      type: derived
+    - id: a33f8808-2812-4373-ae95-8cfb82134978
+      type: derived
+status: test
+description: |
+    Detects write access requests to the Windows Defender exclusions registry keys. This could be an indication of an attacker trying to request a handle or access the object to write new exclusions in order to bypass security.
+references:
+    - https://www.bleepingcomputer.com/news/security/gootkit-malware-bypasses-windows-defender-by-setting-path-exclusions/
+author: '@BarryShooshooga, Nasreddine Bencherchali (Nextron Systems)'
+date: 2019/10/26
+modified: 2023/11/11
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: Audit Policy : Security Settings/Local Policies/Audit Policy, Registry System Access Control (SACL): Auditing/User'
+detection:
+    selection:
+        AccessList|contains:
+            - '%%4417' # WriteData
+            - '%%4418' # AppendData
+        EventID:
+            - 4656 # A handle to an object was requested.
+            - 4663 # An attempt was made to access an object.
+        ObjectName|contains: '\Microsoft\Windows Defender\Exclusions\'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
