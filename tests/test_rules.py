@@ -11,41 +11,52 @@ import unittest
 import yaml
 import re
 import string
-from attackcti import attack_client
+#from attackcti import attack_client
 from colorama import init
 from colorama import Fore
 import collections
 
 
-class TestRules(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        print("Calling get_mitre_data()")
-        # Get Current Data from MITRE ATT&CK®
-        cls.MITRE_ALL = get_mitre_data()
-        print("Catched data - starting tests...")
+# Old Tests cover by pySigma 0.10.6 and simgma-cli 0.7.8
+# Use sigma check --fail-on-error --fail-on-issues --validation-config tests/sigma_cli_conf.yml rules*
+#
+# def test_duplicate_tags(self): sigma-cli validators duplicate_tag
+# def test_all_of_them_condition(self): sigma-cli validator all_of_them_condition
+# def test_missing_id(self): sigma-cli error & validator identifier_existence identifier_uniqueness
+# def test_duplicate_titles(self): sigma-cli validators duplicate_title
+# def test_unknown_value_modifier(self): sigma-cli error & validator SigmaModifierError
+# def test_confirm_correct_mitre_tags(self): sigma-cli validators attacktag
+# def test_optional_tlp(self): sigma-cli validators tlptag
 
-    MITRE_TECHNIQUE_NAMES = [
-        "process_injection",
-        "signed_binary_proxy_execution",
-        "process_injection",
-    ]  # incomplete list
-    MITRE_TACTICS = [
-        "initial_access",
-        "execution",
-        "persistence",
-        "privilege_escalation",
-        "defense_evasion",
-        "credential_access",
-        "discovery",
-        "lateral_movement",
-        "collection",
-        "exfiltration",
-        "command_and_control",
-        "impact",
-        "launch",
-    ]
-    # Don't use trademarks in rules - they require non-ASCII characters to be used on we don't want them in our rules
+class TestRules(unittest.TestCase):
+    # @classmethod
+    # def setUpClass(cls):
+    #     print("Calling get_mitre_data()")
+    #     # Get Current Data from MITRE ATT&CK®
+    #     cls.MITRE_ALL = get_mitre_data()
+    #     print("Catched data - starting tests...")
+
+    # MITRE_TECHNIQUE_NAMES = [
+    #     "process_injection",
+    #     "signed_binary_proxy_execution",
+    #     "process_injection",
+    # ]  # incomplete list
+    # MITRE_TACTICS = [
+    #     "initial_access",
+    #     "execution",
+    #     "persistence",
+    #     "privilege_escalation",
+    #     "defense_evasion",
+    #     "credential_access",
+    #     "discovery",
+    #     "lateral_movement",
+    #     "collection",
+    #     "exfiltration",
+    #     "command_and_control",
+    #     "impact",
+    #     "launch",
+    # ]
+    # # Don't use trademarks in rules - they require non-ASCII characters to be used on we don't want them in our rules
     TRADE_MARKS = {"MITRE ATT&CK", "ATT&CK"}
 
     path_to_rules = [
@@ -137,28 +148,29 @@ class TestRules(unittest.TestCase):
             + "There are rules with incorrect/unknown Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://github.com/SigmaHQ/sigma-specification/blob/main/Tags_specification.md ",
         )
 
-    def test_confirm_correct_mitre_tags(self):
-        files_with_incorrect_mitre_tags = []
+    # sigma-cli validators attacktag
+    # def test_confirm_correct_mitre_tags(self):
+    #     files_with_incorrect_mitre_tags = []
 
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            tags = self.get_rule_part(file_path=file, part_name="tags")
-            if tags:
-                for tag in tags:
-                    if tag.startswith("attack.") and tag not in self.MITRE_ALL:
-                        print(
-                            Fore.RED
-                            + "Rule {} has the following incorrect MITRE tag {}".format(
-                                file, tag
-                            )
-                        )
-                        files_with_incorrect_mitre_tags.append(file)
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         tags = self.get_rule_part(file_path=file, part_name="tags")
+    #         if tags:
+    #             for tag in tags:
+    #                 if tag.startswith("attack.") and tag not in self.MITRE_ALL:
+    #                     print(
+    #                         Fore.RED
+    #                         + "Rule {} has the following incorrect MITRE tag {}".format(
+    #                             file, tag
+    #                         )
+    #                     )
+    #                     files_with_incorrect_mitre_tags.append(file)
 
-        self.assertEqual(
-            files_with_incorrect_mitre_tags,
-            [],
-            Fore.RED
-            + "There are rules with incorrect/unknown MITRE Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://attack.mitre.org/ ",
-        )
+    #     self.assertEqual(
+    #         files_with_incorrect_mitre_tags,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with incorrect/unknown MITRE Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://attack.mitre.org/ ",
+    #     )
 
     # sigma validators duplicate_tag
     # def test_duplicate_tags(self):
@@ -933,37 +945,38 @@ class TestRules(unittest.TestCase):
             + "There are rules with malformed 'license' fields. (has to be a string )",
         )
 
-    def test_optional_tlp(self):
-        faulty_rules = []
-        valid_tlp = [
-            "WHITE",
-            "GREEN",
-            "AMBER",
-            "RED",
-        ]
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            tlp_str = self.get_rule_part(file_path=file, part_name="tlp")
-            if tlp_str:
-                # it exists but isn't a string
-                if not isinstance(tlp_str, str):
-                    print(
-                        Fore.YELLOW
-                        + "Rule {} has a 'tlp' field that isn't a string.".format(file)
-                    )
-                    faulty_rules.append(file)
-                elif not tlp_str.upper() in valid_tlp:
-                    print(
-                        Fore.YELLOW
-                        + "Rule {} has a 'tlp' field with not valid value.".format(file)
-                    )
-                    faulty_rules.append(file)
+    # sigma-cli validators tlptag
+    # def test_optional_tlp(self):
+    #     faulty_rules = []
+    #     valid_tlp = [
+    #         "WHITE",
+    #         "GREEN",
+    #         "AMBER",
+    #         "RED",
+    #     ]
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         tlp_str = self.get_rule_part(file_path=file, part_name="tlp")
+    #         if tlp_str:
+    #             # it exists but isn't a string
+    #             if not isinstance(tlp_str, str):
+    #                 print(
+    #                     Fore.YELLOW
+    #                     + "Rule {} has a 'tlp' field that isn't a string.".format(file)
+    #                 )
+    #                 faulty_rules.append(file)
+    #             elif not tlp_str.upper() in valid_tlp:
+    #                 print(
+    #                     Fore.YELLOW
+    #                     + "Rule {} has a 'tlp' field with not valid value.".format(file)
+    #                 )
+    #                 faulty_rules.append(file)
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules with malformed optional 'tlp' fields. (https://www.cisa.gov/tlp)",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with malformed optional 'tlp' fields. (https://www.cisa.gov/tlp)",
+    #     )
 
     def test_optional_target(self):
         faulty_rules = []
@@ -1602,7 +1615,7 @@ class TestRules(unittest.TestCase):
 
     #     self.assertEqual(faulty_rules, [], Fore.RED + "There are rules with common typos in field names.")
 
-    # Sigma error validator SigmaModifierError
+    # Sigma error SigmaModifierError
     # def test_unknown_value_modifier(self):
     #     known_modifiers = [
     #         "contains",
@@ -1909,74 +1922,74 @@ class TestRules(unittest.TestCase):
             faulty_rules, [], Fore.RED + "There are rules using illegal re-escapes"
         )
 
+# sigma-cli validators attacktag
+# def get_mitre_data():
+#     """
+#     Use Tags from CTI subrepo to get consitant data
+#     """
+#     cti_path = "cti/"
+#     cti_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), cti_path)
 
-def get_mitre_data():
-    """
-    Use Tags from CTI subrepo to get consitant data
-    """
-    cti_path = "cti/"
-    cti_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), cti_path)
+#     # Get ATT&CK information
+#     lift = attack_client(local_path=cti_path)
+#     # Techniques
+#     MITRE_TECHNIQUES = []
+#     MITRE_TECHNIQUE_NAMES = []
+#     MITRE_PHASE_NAMES = set()
+#     MITRE_TOOLS = []
+#     MITRE_GROUPS = []
+#     # Techniques
+#     enterprise_techniques = lift.get_enterprise_techniques()
+#     for t in enterprise_techniques:
+#         MITRE_TECHNIQUE_NAMES.append(
+#             t["name"].lower().replace(" ", "_").replace("-", "_")
+#         )
+#         for r in t.external_references:
+#             if "external_id" in r:
+#                 MITRE_TECHNIQUES.append(r["external_id"].lower())
+#         if "kill_chain_phases" in t:
+#             for kc in t["kill_chain_phases"]:
+#                 if "phase_name" in kc:
+#                     MITRE_PHASE_NAMES.add(kc["phase_name"].replace("-", "_"))
+#     # Tools / Malware
+#     enterprise_tools = lift.get_enterprise_tools()
+#     for t in enterprise_tools:
+#         for r in t.external_references:
+#             if "external_id" in r:
+#                 MITRE_TOOLS.append(r["external_id"].lower())
+#     enterprise_malware = lift.get_enterprise_malware()
+#     for m in enterprise_malware:
+#         for r in m.external_references:
+#             if "external_id" in r:
+#                 MITRE_TOOLS.append(r["external_id"].lower())
+#     # Groups
+#     enterprise_groups = lift.get_enterprise_groups()
+#     for g in enterprise_groups:
+#         for r in g.external_references:
+#             if "external_id" in r:
+#                 MITRE_GROUPS.append(r["external_id"].lower())
 
-    # Get ATT&CK information
-    lift = attack_client(local_path=cti_path)
-    # Techniques
-    MITRE_TECHNIQUES = []
-    MITRE_TECHNIQUE_NAMES = []
-    MITRE_PHASE_NAMES = set()
-    MITRE_TOOLS = []
-    MITRE_GROUPS = []
-    # Techniques
-    enterprise_techniques = lift.get_enterprise_techniques()
-    for t in enterprise_techniques:
-        MITRE_TECHNIQUE_NAMES.append(
-            t["name"].lower().replace(" ", "_").replace("-", "_")
-        )
-        for r in t.external_references:
-            if "external_id" in r:
-                MITRE_TECHNIQUES.append(r["external_id"].lower())
-        if "kill_chain_phases" in t:
-            for kc in t["kill_chain_phases"]:
-                if "phase_name" in kc:
-                    MITRE_PHASE_NAMES.add(kc["phase_name"].replace("-", "_"))
-    # Tools / Malware
-    enterprise_tools = lift.get_enterprise_tools()
-    for t in enterprise_tools:
-        for r in t.external_references:
-            if "external_id" in r:
-                MITRE_TOOLS.append(r["external_id"].lower())
-    enterprise_malware = lift.get_enterprise_malware()
-    for m in enterprise_malware:
-        for r in m.external_references:
-            if "external_id" in r:
-                MITRE_TOOLS.append(r["external_id"].lower())
-    # Groups
-    enterprise_groups = lift.get_enterprise_groups()
-    for g in enterprise_groups:
-        for r in g.external_references:
-            if "external_id" in r:
-                MITRE_GROUPS.append(r["external_id"].lower())
+#     # Debugging
+#     print(
+#         "MITRE ATT&CK LIST LENGTHS: %d %d %d %d %d"
+#         % (
+#             len(MITRE_TECHNIQUES),
+#             len(MITRE_TECHNIQUE_NAMES),
+#             len(list(MITRE_PHASE_NAMES)),
+#             len(MITRE_GROUPS),
+#             len(MITRE_TOOLS),
+#         )
+#     )
 
-    # Debugging
-    print(
-        "MITRE ATT&CK LIST LENGTHS: %d %d %d %d %d"
-        % (
-            len(MITRE_TECHNIQUES),
-            len(MITRE_TECHNIQUE_NAMES),
-            len(list(MITRE_PHASE_NAMES)),
-            len(MITRE_GROUPS),
-            len(MITRE_TOOLS),
-        )
-    )
-
-    # Combine all IDs to a big tag list
-    return [
-        "attack." + item
-        for item in MITRE_TECHNIQUES
-        + MITRE_TECHNIQUE_NAMES
-        + list(MITRE_PHASE_NAMES)
-        + MITRE_GROUPS
-        + MITRE_TOOLS
-    ]
+#     # Combine all IDs to a big tag list
+#     return [
+#         "attack." + item
+#         for item in MITRE_TECHNIQUES
+#         + MITRE_TECHNIQUE_NAMES
+#         + list(MITRE_PHASE_NAMES)
+#         + MITRE_GROUPS
+#         + MITRE_TOOLS
+#     ]
 
 
 if __name__ == "__main__":
