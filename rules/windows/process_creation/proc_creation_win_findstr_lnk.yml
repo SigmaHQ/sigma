@@ -6,7 +6,7 @@ references:
     - https://www.bleepingcomputer.com/news/security/hhsgov-open-redirect-used-by-coronavirus-phishing-to-spread-malware/
 author: Trent Liffick
 date: 2020/05/01
-modified: 2023/03/06
+modified: 2023/11/11
 tags:
     - attack.defense_evasion
     - attack.t1036
@@ -17,8 +17,12 @@ logsource:
     product: windows
 detection:
     selection_img:
-        - Image|endswith: '\findstr.exe'
-        - OriginalFileName: 'FINDSTR.EXE'
+        - Image|endswith:
+              - '\find.exe'
+              - '\findstr.exe'
+        - OriginalFileName:
+              - 'FIND.EXE'
+              - 'FINDSTR.EXE'
     selection_cli:
         CommandLine|endswith: '.lnk'
     condition: all of selection_*

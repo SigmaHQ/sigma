@@ -7,7 +7,7 @@ references:
     - https://blog.cyble.com/2022/08/10/onyx-ransomware-renames-its-leak-site-to-vsop/
 author: frack113
 date: 2022/07/16
-modified: 2023/01/02
+modified: 2023/11/11
 tags:
     - attack.impact
     - attack.t1486
@@ -18,35 +18,40 @@ logsource:
 detection:
     selection:
         SourceFilename|endswith:
-            - '.lnk'
-            - '.rtf'
-            - '.pst'
+            - '.doc'
             - '.docx'
-            - '.xlsx'
-            - '.jpg'
             - '.jpeg'
-            - '.png'
+            - '.jpg'
+            - '.lnk'
             - '.pdf'
+            - '.png'
+            - '.pst'
+            - '.rtf'
+            - '.xls'
+            - '.xlsx'
         TargetFilename|contains:
-            - '.lnk.'
-            - '.rtf.'
-            - '.pst.'
+            - '.doc.'
             - '.docx.'
-            - '.xlsx.'
-            - '.jpg.'
             - '.jpeg.'
-            - '.png.'
+            - '.jpg.'
+            - '.lnk.'
             - '.pdf.'
+            - '.png.'
+            - '.pst.'
+            - '.rtf.'
+            - '.xls.'
+            - '.xlsx.'
     filter_main_generic:
         TargetFilename|endswith:
-            - '.tmp'
+            # Note: Please add more used extensions by backup or recovery software
+            - '.backup'
             - '.bak'
             - '.old'
             - '.orig'
-            - '.backup'
             - '.temp'
+            - '.tmp'
     filter_optional_anaconda:
-        TargetFilename|startswith: 'C:\ProgramData\Anaconda3\'
+        TargetFilename|contains: ':\ProgramData\Anaconda3\'
         TargetFilename|endswith: '.c~'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:

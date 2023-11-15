@@ -116,7 +116,7 @@ If you find a false positive or would like to propose a new detection rule idea 
 
 ## Credits
 
-This project would've never reached this hight without the help of the hundreds of contributors. Thanks to all past and present contributors for their help.
+This project would've never reached this height without the help of the hundreds of contributors. Thanks to all past and present contributors for their help.
 
 ## Licenses
 
