@@ -20,13 +20,6 @@ import collections
 # Old Tests cover by pySigma 0.10.6 and simgma-cli 0.7.8
 # Use sigma check --fail-on-error --fail-on-issues --validation-config tests/sigma_cli_conf.yml rules*
 #
-# def test_duplicate_tags(self): sigma-cli validators duplicate_tag
-# def test_all_of_them_condition(self): sigma-cli validator all_of_them_condition
-# def test_missing_id(self): sigma-cli error & validator identifier_existence identifier_uniqueness
-# def test_duplicate_titles(self): sigma-cli validators duplicate_title
-# def test_unknown_value_modifier(self): sigma-cli error & validator SigmaModifierError
-# def test_confirm_correct_mitre_tags(self): sigma-cli validators attacktag
-# def test_optional_tlp(self): sigma-cli validators tlptag
 
 class TestRules(unittest.TestCase):
     # @classmethod
@@ -196,30 +189,31 @@ class TestRules(unittest.TestCase):
     #         Fore.RED + "There are rules with duplicate tags",
     #     )
 
-    def test_duplicate_references(self):
-        files_with_duplicate_references = []
+    #  sigma validators duplicate_references
+    # def test_duplicate_references(self):
+    #     files_with_duplicate_references = []
 
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            references = self.get_rule_part(file_path=file, part_name="references")
-            if references:
-                known_references = []
-                for reference in references:
-                    if reference in known_references:
-                        print(
-                            Fore.RED
-                            + "Rule {} has the duplicate reference {}".format(
-                                file, reference
-                            )
-                        )
-                        files_with_duplicate_references.append(file)
-                    else:
-                        known_references.append(reference)
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         references = self.get_rule_part(file_path=file, part_name="references")
+    #         if references:
+    #             known_references = []
+    #             for reference in references:
+    #                 if reference in known_references:
+    #                     print(
+    #                         Fore.RED
+    #                         + "Rule {} has the duplicate reference {}".format(
+    #                             file, reference
+    #                         )
+    #                     )
+    #                     files_with_duplicate_references.append(file)
+    #                 else:
+    #                     known_references.append(reference)
 
-        self.assertEqual(
-            files_with_duplicate_references,
-            [],
-            Fore.RED + "There are rules with duplicate references",
-        )
+    #     self.assertEqual(
+    #         files_with_duplicate_references,
+    #         [],
+    #         Fore.RED + "There are rules with duplicate references",
+    #     )
 
     def test_look_for_duplicate_filters(self):
         def check_list_or_recurse_on_dict(item, depth: int, special: bool) -> None:
@@ -697,75 +691,77 @@ class TestRules(unittest.TestCase):
             + "There are rules with missing or malformed 'description' field. (create one, e.g. description: Detects the suspicious behaviour of process XY doing YZ)",
         )
 
-    def test_optional_date_modified(self):
-        faulty_rules = []
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            modifiedfield = self.get_rule_part(file_path=file, part_name="modified")
-            if modifiedfield:
-                if not isinstance(modifiedfield, str):
-                    print(
-                        Fore.YELLOW
-                        + "Rule {} has a malformed 'modified' (should be YYYY/MM/DD).".format(
-                            file
-                        )
-                    )
-                    faulty_rules.append(file)
-                elif len(modifiedfield) != 10:
-                    print(
-                        Fore.YELLOW
-                        + "Rule {} has a malformed 'modified' (not 10 chars, should be YYYY/MM/DD).".format(
-                            file
-                        )
-                    )
-                    faulty_rules.append(file)
-                elif modifiedfield[4] != "/" or modifiedfield[7] != "/":
-                    print(
-                        Fore.YELLOW
-                        + "Rule {} has a malformed 'modified' (should be YYYY/MM/DD).".format(
-                            file
-                        )
-                    )
-                    faulty_rules.append(file)
+    # sigma-cli error
+    # def test_optional_date_modified(self):
+    #     faulty_rules = []
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         modifiedfield = self.get_rule_part(file_path=file, part_name="modified")
+    #         if modifiedfield:
+    #             if not isinstance(modifiedfield, str):
+    #                 print(
+    #                     Fore.YELLOW
+    #                     + "Rule {} has a malformed 'modified' (should be YYYY/MM/DD).".format(
+    #                         file
+    #                     )
+    #                 )
+    #                 faulty_rules.append(file)
+    #             elif len(modifiedfield) != 10:
+    #                 print(
+    #                     Fore.YELLOW
+    #                     + "Rule {} has a malformed 'modified' (not 10 chars, should be YYYY/MM/DD).".format(
+    #                         file
+    #                     )
+    #                 )
+    #                 faulty_rules.append(file)
+    #             elif modifiedfield[4] != "/" or modifiedfield[7] != "/":
+    #                 print(
+    #                     Fore.YELLOW
+    #                     + "Rule {} has a malformed 'modified' (should be YYYY/MM/DD).".format(
+    #                         file
+    #                     )
+    #                 )
+    #                 faulty_rules.append(file)
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules with malformed 'modified' fields. (create one, e.g. date: 2019/01/14)",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with malformed 'modified' fields. (create one, e.g. date: 2019/01/14)",
+    #     )
 
-    def test_optional_status(self):
-        faulty_rules = []
-        valid_status = ["stable", "test", "experimental", "deprecated", "unsupported"]
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            status_str = self.get_rule_part(file_path=file, part_name="status")
-            if status_str:
-                if not status_str in valid_status:
-                    print(
-                        Fore.YELLOW
-                        + "Rule {} has a invalid 'status' (check wiki).".format(file)
-                    )
-                    faulty_rules.append(file)
-                elif status_str == "unsupported":
-                    print(
-                        Fore.YELLOW
-                        + "Rule {} has the unsupported 'status', can not be in rules directory".format(
-                            file
-                        )
-                    )
-                    faulty_rules.append(file)
-            else:
-                print(
-                    Fore.YELLOW + "Rule {} is missing the 'status' field".format(file)
-                )
-                faulty_rules.append(file)
+    # sigma-cli error and validator status_existence status_unsupported
+    # def test_optional_status(self):
+    #     faulty_rules = []
+    #     valid_status = ["stable", "test", "experimental", "deprecated", "unsupported"]
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         status_str = self.get_rule_part(file_path=file, part_name="status")
+    #         if status_str:
+    #             if not status_str in valid_status:
+    #                 print(
+    #                     Fore.YELLOW
+    #                     + "Rule {} has a invalid 'status' (check wiki).".format(file)
+    #                 )
+    #                 faulty_rules.append(file)
+    #             elif status_str == "unsupported":
+    #                 print(
+    #                     Fore.YELLOW
+    #                     + "Rule {} has the unsupported 'status', can not be in rules directory".format(
+    #                         file
+    #                     )
+    #                 )
+    #                 faulty_rules.append(file)
+    #         else:
+    #             print(
+    #                 Fore.YELLOW + "Rule {} is missing the 'status' field".format(file)
+    #             )
+    #             faulty_rules.append(file)
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules with malformed or missing 'status' fields. (check https://github.com/SigmaHQ/sigma-specification)",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with malformed or missing 'status' fields. (check https://github.com/SigmaHQ/sigma-specification)",
+    #     )
 
     def test_level(self):
         faulty_rules = []
@@ -978,25 +974,26 @@ class TestRules(unittest.TestCase):
     #         + "There are rules with malformed optional 'tlp' fields. (https://www.cisa.gov/tlp)",
     #     )
 
-    def test_optional_target(self):
-        faulty_rules = []
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            target = self.get_rule_part(file_path=file, part_name="target")
-            if target:
-                # it exists but isn't a list
-                if not isinstance(target, list):
-                    print(
-                        Fore.YELLOW
-                        + "Rule {} has a 'target' field that isn't a list.".format(file)
-                    )
-                    faulty_rules.append(file)
+    # Not in the specification
+    # def test_optional_target(self):
+    #     faulty_rules = []
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         target = self.get_rule_part(file_path=file, part_name="target")
+    #         if target:
+    #             # it exists but isn't a list
+    #             if not isinstance(target, list):
+    #                 print(
+    #                     Fore.YELLOW
+    #                     + "Rule {} has a 'target' field that isn't a list.".format(file)
+    #                 )
+    #                 faulty_rules.append(file)
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules with malformed 'target' fields. (has to be a list of values even if it contains only a single value)",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with malformed 'target' fields. (has to be a list of values even if it contains only a single value)",
+    #     )
 
     def test_references(self):
         faulty_rules = []
