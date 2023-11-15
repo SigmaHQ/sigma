@@ -1,27 +1,58 @@
-title: Wuauclt Network Connection
+title: Potentially Suspicious Wuauclt Network Connection
 id: c649a6c7-cd8c-4a78-9c04-000fc76df954
 status: test
 description: |
-  Detects the use of the Windows Update Client binary (wuauclt.exe) to proxy execute code and making a network connections.
-  One could easily make the DLL spawn a new process and inject to it to proxy the network connection and bypass this rule.
+    Detects the use of the Windows Update Client binary (wuauclt.exe) to proxy execute code and making network connections.
+    One could easily make the DLL spawn a new process and inject to it to proxy the network connection and bypass this rule.
 references:
     - https://dtm.uk/wuauclt/
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 date: 2020/10/12
-modified: 2023/01/20
+modified: 2023/11/11
 tags:
     - attack.defense_evasion
     - attack.t1218
 logsource:
     category: network_connection
     product: windows
+    definition: 'Requirements: The CommandLine field enrichment is required in order for this rule to be used.'
 detection:
     selection:
         Image|contains: 'wuauclt'
+        CommandLine|contains: ' /RunHandlerComServer'
     # "C:\WINDOWS\uus\AMD64\wuauclt.exe" /DeploymentHandlerFullPath \\?\C:\Windows\UUS\AMD64\UpdateDeploy.dll /ClassId aaa256e1-5b21-4993-9188-18f07ccb3b98 /RunHandlerComServer
-    filter_msrange:  # Sysmon
+    filter_main_ipv4:
+        DestinationIp|startswith: # Ranges excluded based on https://github.com/SigmaHQ/sigma/blob/0f176092326ab9d1e19384d30224e5f29f760d82/rules/windows/network_connection/net_connection_win_dllhost_net_connections.yml
+            - '10.'
+            - '127.'
+            - '169.254.'  # link-local address
+            - '172.16'
+            - '172.17'
+            - '172.18'
+            - '172.19'
+            - '172.20'
+            - '172.21'
+            - '172.22'
+            - '172.23'
+            - '172.24'
+            - '172.25'
+            - '172.26'
+            - '172.27'
+            - '172.28'
+            - '172.29'
+            - '172.30'
+            - '172.31'
+            - '192.168'
+    filter_main_ipv6:
         DestinationIp|startswith:
-            # Subnet: 20.184.0.0/13
+            - '::1'
+            - '0:0:0:0:0:0:0:1'  # IPv6 loopback variant
+            - 'fe80:'  # link-local address
+            - 'fc'  # private address range fc00::/7
+            - 'fd'  # private address range fc00::/7
+    filter_main_msrange:  # Sysmon
+        DestinationIp|startswith:
+            # Subnet: 20.184.0.0/13, 51.103.210.0/23 and others
             - '20.184.'
             - '20.185.'
             - '20.186.'
@@ -30,16 +61,27 @@ detection:
             - '20.189.'
             - '20.190.'
             - '20.191.'
+            - '20.220.'
+            - '20.221.'
             - '23.79.'
             - '51.10.'
-            # Subnet: 51.103.210.0/23
             - '51.103.'
             - '51.104.'
             - '51.105.'
             - '52.239.'
-    filter_cmdline:
-        CommandLine|contains: '\UpdateDeploy.dll /ClassId '
-    condition: selection and not 1 of filter_*
+    filter_main_uus:
+        CommandLine|contains:
+            - ':\Windows\UUS\Packages\Preview\amd64\updatedeploy.dll /ClassId'
+            - ':\Windows\UUS\amd64\UpdateDeploy.dll /ClassId'
+    filter_main_winsxs|all:
+        CommandLine|contains:
+            - ':\Windows\WinSxS\'
+            - '\UpdateDeploy.dll /ClassId '
+    filter_main_cli_null:
+        CommandLine: null
+    filter_main_cli_empty:
+        CommandLine: ''
+    condition: selection and not 1 of filter_main_*
 falsepositives:
-    - Legitimate use of wuauclt.exe over the network.
+    - Unknown
 level: medium
