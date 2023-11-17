@@ -7,10 +7,30 @@ on: # yamllint disable-line rule:truthy
   push:
     branches:
       - "*"
+    # paths:
+    #   - "deprecated/**.yml"
+    #   - "rules-compliance/**.yml"
+    #   - "rules-dfir/**.yml"
+    #   - "rules-emerging-threats/**.yml"
+    #   - "rules-placeholder/**.yml"
+    #   - "rules-threat-hunting/**.yml"
+    #   - "rules/**.yml"
+    #   - "unsupported/**.yml"
   pull_request:
     branches:
       - master
-      - oscd
+    # paths:
+    #   - "deprecated/**.yml"
+    #   - "rules-compliance/**.yml"
+    #   - "rules-dfir/**.yml"
+    #   - "rules-emerging-threats/**.yml"
+    #   - "rules-placeholder/**.yml"
+    #   - "rules-threat-hunting/**.yml"
+    #   - "rules/**.yml"
+    #   - "unsupported/**.yml"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 env:
   EVTX_BASELINE_VERSION: v0.7
@@ -56,7 +76,7 @@ jobs:
         pip install sigma-cli
     - name: Test Sigma Rule Syntax
       run: |
-        sigma check rules*
+        sigma check --fail-on-error --fail-on-issues --validation-config tests/sigma_cli_conf.yml rules*
     - name: Test Sigma Rules
       run: |
         pip install PyYAML attackcti colorama

@@ -7,7 +7,7 @@ references:
     - https://threathunterplaybook.com/hunts/windows/190410-LocalPwshExecution/notebook.html
 author: Roberto Rodriguez @Cyb3rWard0g, Tim Shelton
 date: 2019/09/12
-modified: 2022/10/10
+modified: 2023/10/18
 tags:
     - attack.execution
     - attack.t1059.001
@@ -18,37 +18,30 @@ logsource:
 detection:
     selection:
         PipeName|startswith: '\PSHost'
-    filter1:
-        Image|endswith:
-            - '\powershell.exe'
-            - '\powershell_ise.exe'
-            - '\WINDOWS\System32\sdiagnhost.exe'
-            - '\WINDOWS\System32\wsmprovhost.exe'
-            - '\Windows\system32\dsac.exe'
-            - '\Windows\system32\wbem\wmiprvse.exe'
-            - '\ForefrontActiveDirectoryConnector.exe'
-            - 'c:\windows\system32\inetsrv\w3wp.exe'   # this is sad :,( but it triggers FPs on Exchange servers
-    filter2:
-        Image: null
-    filter3: # Microsoft SQL Server\130\Tools\
+    filter_main_generic:
+        Image|contains:
+            - ':\Program Files\Citrix\'
+            - ':\Program Files\Microsoft\Exchange Server\'
+            - ':\Program Files\PowerShell\7-preview\pwsh.exe' # Powershell 7
+            - ':\Program Files\PowerShell\7\pwsh.exe' # Powershell 7
+            - ':\Windows\system32\dsac.exe'
+            - ':\Windows\system32\inetsrv\w3wp.exe'   # this is sad :,( but it triggers FPs on Exchange servers
+            - ':\Windows\System32\sdiagnhost.exe'
+            - ':\Windows\system32\ServerManager.exe'
+            - ':\Windows\system32\wbem\wmiprvse.exe'
+            - ':\Windows\System32\WindowsPowerShell\v1.0\powershell_ise.exe'
+            - ':\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
+            - ':\Windows\System32\wsmprovhost.exe'
+            - ':\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell_ise.exe'
+            - ':\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell.exe'
+    filter_main_sqlserver: # Microsoft SQL Server\130\Tools\
         Image|contains|all:
             - ':\Program Files'
             - '\Microsoft SQL Server\'
         Image|endswith: '\Tools\Binn\SQLPS.exe'
-    filter4:
-        Image|startswith:
-            - 'C:\Program Files\Citrix\'
-            - 'C:\Program Files\Microsoft\Exchange Server\'
-    filter5:
-        Image:
-            - 'C:\Windows\system32\ServerManager.exe'
-            - 'C:\Program Files\PowerShell\7\pwsh.exe' # Powershell 7
-    condition: selection and not 1 of filter*
-fields:
-    - ComputerName
-    - User
-    - Image
-    - PipeName
+    filter_main_null:
+        Image: null
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Programs using PowerShell directly without invocation of a dedicated interpreter.
 level: medium

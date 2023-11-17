@@ -1,0 +1,102 @@
+title: Webshell Detection With Command Line Keywords
+id: bed2a484-9348-4143-8a8a-b801c979301c
+status: test
+description: Detects certain command line parameters often used during reconnaissance activity via web shells
+references:
+    - https://www.fireeye.com/blog/threat-research/2013/08/breaking-down-the-china-chopper-web-shell-part-ii.html
+    - https://unit42.paloaltonetworks.com/bumblebee-webshell-xhunt-campaign/
+author: Florian Roth (Nextron Systems), Jonhnathan Ribeiro, Anton Kutepov, oscd.community
+date: 2017/01/01
+modified: 2022/05/13
+tags:
+    - attack.persistence
+    - attack.t1505.003
+    - attack.t1018
+    - attack.t1033
+    - attack.t1087
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_webserver_image:
+        ParentImage|endswith:
+            - '\w3wp.exe'
+            - '\php-cgi.exe'
+            - '\nginx.exe'
+            - '\httpd.exe'
+            - '\caddy.exe'
+            - '\ws_tomcatservice.exe'
+    selection_webserver_characteristics_tomcat1:
+        ParentImage|endswith:
+            - '\java.exe'
+            - '\javaw.exe'
+        ParentImage|contains:
+            - '-tomcat-'
+            - '\tomcat'
+    selection_webserver_characteristics_tomcat2:
+        ParentImage|endswith:
+            - '\java.exe'
+            - '\javaw.exe'
+        CommandLine|contains:
+            - 'catalina.jar'
+            - 'CATALINA_HOME'
+    selection_susp_net_utility:
+        OriginalFileName:
+            - 'net.exe'
+            - 'net1.exe'
+        CommandLine|contains:
+            - ' user '
+            - ' use '
+            - ' group '
+    selection_susp_ping_utility:
+        OriginalFileName: 'ping.exe'
+        CommandLine|contains: ' -n '
+    selection_susp_change_dir:
+        CommandLine|contains:
+            - '&cd&echo'  # china chopper web shell
+            - 'cd /d '  # https://www.computerhope.com/cdhlp.htm
+    selection_susp_wmic_utility:
+        OriginalFileName: 'wmic.exe'
+        CommandLine|contains: ' /node:'
+    selection_susp_misc_discovery_binaries:
+        - Image|endswith:
+              - '\dsquery.exe'
+              - '\find.exe'
+              - '\findstr.exe'
+              - '\ipconfig.exe'
+              - '\netstat.exe'
+              - '\nslookup.exe'
+              - '\pathping.exe'
+              - '\quser.exe'
+              - '\schtasks.exe'
+              - '\systeminfo.exe'
+              - '\tasklist.exe'
+              - '\tracert.exe'
+              - '\ver.exe'
+              - '\wevtutil.exe'
+              - '\whoami.exe'
+        - OriginalFileName:
+              - 'dsquery.exe'
+              - 'find.exe'
+              - 'findstr.exe'
+              - 'ipconfig.exe'
+              - 'netstat.exe'
+              - 'nslookup.exe'
+              - 'pathping.exe'
+              - 'quser.exe'
+              - 'schtasks.exe'
+              - 'sysinfo.exe'
+              - 'tasklist.exe'
+              - 'tracert.exe'
+              - 'ver.exe'
+              - 'VSSADMIN.EXE'
+              - 'wevtutil.exe'
+              - 'whoami.exe'
+    selection_susp_misc_discovery_commands:
+        CommandLine|contains:
+            - ' Test-NetConnection '
+            - 'dir \'  # remote dir: dir \<redacted IP #3>\C$:\windows\temp\*.exe
+    condition: 1 of selection_webserver_* and 1 of selection_susp_*
+falsepositives:
+    - Unknown
+level: high

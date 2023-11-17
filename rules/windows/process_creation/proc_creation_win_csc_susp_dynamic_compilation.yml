@@ -8,9 +8,9 @@ references:
     - https://app.any.run/tasks/c6993447-d1d8-414e-b856-675325e5aa09/
     - https://twitter.com/gN3mes1s/status/1206874118282448897
     - https://github.com/redcanaryco/atomic-red-team/blob/b27a3cb25025161d49ac861cb216db68c46a3537/atomics/T1027.004/T1027.004.md#atomic-test-1---compile-after-delivery-using-cscexe
-author: Florian Roth (Nextron Systems)
+author: Florian Roth (Nextron Systems), X__Junior (Nextron Systems)
 date: 2019/08/24
-modified: 2023/08/02
+modified: 2023/10/27
 tags:
     - attack.defense_evasion
     - attack.t1027.004
@@ -18,11 +18,30 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection_img:
         Image|endswith: '\csc.exe'
+    selection_susp_location_1:
         CommandLine|contains:
+            - ':\Perflogs\'
+            - ':\Users\Public\'
             - '\AppData\Local\Temp\' # User execution
+            - '\Temporary Internet'
             - '\Windows\Temp\' # Admin execution
+    selection_susp_location_2:
+        - CommandLine|contains|all:
+              - ':\Users\'
+              - '\Favorites\'
+        - CommandLine|contains|all:
+              - ':\Users\'
+              - '\Favourites\'
+        - CommandLine|contains|all:
+              - ':\Users\'
+              - '\Contacts\'
+        - CommandLine|contains|all:
+              - ':\Users\'
+              - '\Pictures\'
+    selection_susp_location_3:
+        CommandLine|re: '([Pp]rogram[Dd]ata|%([Ll]ocal)?[Aa]pp[Dd]ata%|\\[Aa]pp[Dd]ata\\([Ll]ocal(Ll]ow)?|[Rr]oaming))\\[^\\]{1,256}$'
     filter_main_programfiles:
         # Note: this is a generic filter. You could baseline execution in your env for a more robust rule
         ParentImage|startswith:
@@ -44,7 +63,7 @@ detection:
             - 'JwB7ACIAZgBhAGkAbABlAGQAIgA6AHQAcgB1AGUALAAiAG0AcwBnACIAOgAiAEEAbgBzAGkAYgBsAGUAIAByAGUAcQB1AGkAcgBlAHMAIABQAG8AdwBlAHIAUwBoAGUAbABsACAAdgAzAC4AMAAgAG8AcgAgAG4AZQB3AGUAcgAiAH0AJw'
             - 'cAewAiAGYAYQBpAGwAZQBkACIAOgB0AHIAdQBlACwAIgBtAHMAZwAiADoAIgBBAG4AcwBpAGIAbABlACAAcgBlAHEAdQBpAHIAZQBzACAAUABvAHcAZQByAFMAaABlAGwAbAAgAHYAMwAuADAAIABvAHIAIABuAGUAdwBlAHIAIgB9ACcA'
             - 'nAHsAIgBmAGEAaQBsAGUAZAAiADoAdAByAHUAZQAsACIAbQBzAGcAIgA6ACIAQQBuAHMAaQBiAGwAZQAgAHIAZQBxAHUAaQByAGUAcwAgAFAAbwB3AGUAcgBTAGgAZQBsAGwAIAB2ADMALgAwACAAbwByACAAbgBlAHcAZQByACIAfQAnA'
-    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+    condition: selection_img and 1 of selection_susp_location_* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate software from program files - https://twitter.com/gN3mes1s/status/1206874118282448897
     - Legitimate Microsoft software - https://twitter.com/gabriele_pippi/status/1206907900268072962

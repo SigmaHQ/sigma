@@ -6,7 +6,7 @@ references:
     - https://github.com/byt3bl33d3r/CrackMapExec
 author: Thomas Patzke
 date: 2020/05/22
-modified: 2023/02/22
+modified: 2023/11/06
 tags:
     - attack.execution
     - attack.t1047
@@ -19,23 +19,18 @@ logsource:
     product: windows
 detection:
     selection:
-        CommandLine|endswith:
+        CommandLine|contains:
             # cme/protocols/smb/wmiexec.py (generalized execute_remote and execute_fileless)
             - 'cmd.exe /Q /c * 1> \\\\*\\*\\* 2>&1'
             # cme/protocols/smb/atexec.py:109 (fileless output via share)
             - 'cmd.exe /C * > \\\\*\\*\\* 2>&1'
             # cme/protocols/smb/atexec.py:111 (fileless output via share)
             - 'cmd.exe /C * > *\\Temp\\* 2>&1'
-        CommandLine|contains:
-            # cme/helpers/powershell.py:139 (PowerShell execution with obfuscation)
+            # https://github.com/byt3bl33d3r/CrackMapExec/blob/d8c50c8cbaf36c29329078662473f75e440978d2/cme/helpers/powershell.py#L136 (PowerShell execution with obfuscation)
             - 'powershell.exe -exec bypass -noni -nop -w 1 -C "'
-            # cme/helpers/powershell.py:149 (PowerShell execution without obfuscation)
+            # https://github.com/byt3bl33d3r/CrackMapExec/blob/d8c50c8cbaf36c29329078662473f75e440978d2/cme/helpers/powershell.py#L160 (PowerShell execution without obfuscation)
             - 'powershell.exe -noni -nop -w 1 -enc '
     condition: selection
-fields:
-    - ComputerName
-    - User
-    - CommandLine
 falsepositives:
     - Unknown
 level: high

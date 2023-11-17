@@ -1,0 +1,50 @@
+title: ADSI-Cache File Creation By Uncommon Tool
+id: 75bf09fa-1dd7-4d18-9af9-dd9e492562eb
+status: test
+description: Detects the creation of an "Active Directory Schema Cache File" (.sch) file by an uncommon tool.
+references:
+    - https://medium.com/@ivecodoe/detecting-ldapfragger-a-newly-released-cobalt-strike-beacon-using-ldap-for-c2-communication-c274a7f00961
+    - https://blog.fox-it.com/2020/03/19/ldapfragger-command-and-control-over-ldap-attributes/
+    - https://github.com/fox-it/LDAPFragger
+author: xknow @xknow_infosec, Tim Shelton
+date: 2019/03/24
+modified: 2023/10/18
+tags:
+    - attack.t1001.003
+    - attack.command_and_control
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename|contains: '\Local\Microsoft\Windows\SchCache\'
+        TargetFilename|endswith: '.sch'
+    filter_main_generic:
+        - Image|endswith:
+              - ':\Program Files\Cylance\Desktop\CylanceSvc.exe'
+              - ':\Windows\CCM\CcmExec.exe'
+              - ':\windows\system32\dllhost.exe'
+              - ':\Windows\system32\dsac.exe'
+              - ':\Windows\system32\efsui.exe'
+              - ':\windows\system32\mmc.exe'
+              - ':\windows\system32\svchost.exe'
+              - ':\Windows\System32\wbem\WmiPrvSE.exe'
+              - ':\windows\system32\WindowsPowerShell\v1.0\powershell.exe'
+        - Image|contains:
+              - ':\Windows\ccmsetup\autoupgrade\ccmsetup' # C:\Windows\ccmsetup\autoupgrade\ccmsetup.TMC00002.40.exe
+              - ':\Program Files\SentinelOne\Sentinel Agent' # C:\Program Files\SentinelOne\Sentinel Agent 21.7.7.40005\SentinelAgent.exe
+    filter_main_office:
+        Image|contains|all:
+            - ':\Program Files\'
+            - '\Microsoft Office'
+        Image|endswith: '\OUTLOOK.EXE'
+    filter_optional_ldapwhoami:
+        Image|endswith: '\LANDesk\LDCLient\ldapwhoami.exe'
+    filter_optional_citrix:
+        # Example:
+        #   TargetFilename=C:\Windows\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\SchCache\REDACTED.com.sch
+        Image|endswith: ':\Program Files\Citrix\Receiver StoreFront\Services\DefaultDomainServices\Citrix.DeliveryServices.DomainServices.ServiceHost.exe'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Other legimate tools, which do ADSI (LDAP) operations, e.g. any remoting activity by MMC, Powershell, Windows etc.
+level: medium

@@ -7,7 +7,7 @@ references:
     - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/schtasks
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/07/28
-modified: 2023/03/14
+modified: 2023/10/11
 tags:
     - attack.execution
     - attack.persistence
@@ -27,19 +27,22 @@ detection:
         CommandLine|contains:
             - 'NT AUT' # This covers the usual NT AUTHORITY\SYSTEM
             - ' SYSTEM ' # SYSTEM is a valid value for schtasks hence it gets it's own value with space
-    filter_teamviewer:
+    filter_optional_teamviewer:
         # FP from test set in SIGMA
-        ParentImage|contains|all:
-            - '\AppData\Local\Temp\'
-            - 'TeamViewer_.exe'
+        # Cannot use ParentImage on all OSes for 4688 events
+        # ParentImage|contains|all:
+        #     - '\AppData\Local\Temp\'
+        #     - 'TeamViewer_.exe'
         Image|endswith: '\schtasks.exe'
-        CommandLine|contains: '/TN TVInstallRestore'
-    filter_avira:
+        CommandLine|contains|all:
+            - '/TN TVInstallRestore'
+            - '\TeamViewer_.exe'
+    filter_optional_avira:
         CommandLine|contains:
             - '/Create /F /RU System /SC WEEKLY /TN AviraSystemSpeedupVerify /TR '
-            - 'C:\Program Files (x86)\Avira\System Speedup\setup\avira_speedup_setup.exe'
+            - ':\Program Files (x86)\Avira\System Speedup\setup\avira_speedup_setup.exe'
             - '/VERIFY /VERYSILENT /NOSTART /NODOTNET /NORESTART" /RL HIGHEST'
-    condition: all of selection_* and not 1 of filter_*
+    condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high
