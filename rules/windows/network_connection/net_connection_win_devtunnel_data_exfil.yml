@@ -1,0 +1,29 @@
+title: Communication To Microsoft DevTunnel Domains/Forwarded Ports
+id: 9501f8e6-8e3d-48fc-a8a6-1089dd5d7ef4
+status: test
+description: Detects an executable accessing DevTunnel Domains/Forwarded Ports, which could be a sign of forbidden data exfiltration by malicious actors
+references:
+    - https://cydefops.com/vscode-data-exfiltration
+    - https://cydefops.com/devtunnels-unleashed
+author: Kamran Saifullah
+date: 2023/11/20
+modified: 2023/11/20
+tags:
+    - attack.exfiltration
+    - attack.t1567.001
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Initiated: 'true'
+        DestinationHostname|endswith:
+            - '.devtunnels.ms'
+            - '.euw.devtunnels.ms'
+            - '.usw2.devtunnels.ms'
+            - '.tunnels.api.visualstudio.com'
+            - '.rel.tunnels.api.visualstudio.com'
+    condition: selection
+falsepositives:
+    - Legitimate use of ngrok domains
+level: high
