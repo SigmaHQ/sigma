@@ -1,7 +1,11 @@
-title: Communication To Microsoft DevTunnel Domains/Forwarded Ports
+title: Network Connection To Devtunnels Or VsCode Tunnels
 id: 9501f8e6-8e3d-48fc-a8a6-1089dd5d7ef4
-status: test
-description: Detects an executable accessing DevTunnel Domains/Forwarded Ports, which could be a sign of forbidden data exfiltration by malicious actors
+related:
+    - id: b3e6418f-7c7a-4fad-993a-93b65027a9f1
+      type: similar
+status: experimental
+description: |
+    Detects an executable initiate a network connection to either a devtunnels or Visual Studio Code tunnel domains. Attackers can be abuse these features to establish a reverse shell.
 references:
     - https://cydefops.com/vscode-data-exfiltration
     - https://cydefops.com/devtunnels-unleashed
@@ -18,12 +22,9 @@ detection:
     selection:
         Initiated: 'true'
         DestinationHostname|endswith:
-            - '.devtunnels.ms'
-            - '.euw.devtunnels.ms'
-            - '.usw2.devtunnels.ms'
             - '.tunnels.api.visualstudio.com'
-            - '.rel.tunnels.api.visualstudio.com'
+            - '.devtunnels.ms'
     condition: selection
 falsepositives:
-    - Legitimate use of DevTunnels/Forwarded Ports domains
-level: high
+    - Legitimate use of Devtunnels or Visual Studio Code tunnel will also trigger this
+level: medium
