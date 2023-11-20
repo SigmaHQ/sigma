@@ -24,10 +24,13 @@ jobs:
           git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*new: ' | sort | sed -e 's%^% - %' >> changes.txt
           if [[ $(git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*update: ' -c) -gt 0 ]]; then echo "### Updated Rules" >> changes.txt; fi
           git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*update: ' | sort | sed -e 's%^% - %' >> changes.txt
+          if [[ $(git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*remove: ' -c) -gt 0 ]]; then echo "### Removed / Deprecated Rules" >> changes.txt; fi
+          git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*remove: ' | sort | sed -e 's%^% - %' >> changes.txt
           if [[ $(git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*fix: ' -c) -gt 0 ]]; then echo "### Fixed Rules" >> changes.txt; fi
           git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*fix: ' | sort | sed -e 's%^% - %' >> changes.txt
           git log --pretty=%B ${prev_tag}..${curr_tag} | grep -ioP 'Merge PR #\d+ from \K(@\S+)' | sort -u > authors_raw.txt
           git log --pretty=%B ${prev_tag}..${curr_tag} | grep -oP "Co-authored-by: \K.*(?= <)" | sort -u | sed -e 's%^%@%' >> authors_raw.txt
+          git log --pretty=%B ${prev_tag}..${curr_tag} | grep -ioP "Thanks: \K.*" | sort -u >> authors_raw.txt
           LC_ALL=en_US.UTF-8 sort -u authors_raw.txt | grep -v 'dependabot\[bot\]' > authors.txt
           cat changes.txt >> changelog.txt
           echo "" >> changelog.txt
