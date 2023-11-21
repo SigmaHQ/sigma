@@ -1,0 +1,41 @@
+title: Adding Suspicious Path Value In Ime File
+id: 9d8f9bb8-01af-4e15-a3a2-349071530530
+status: experimental
+description: Detects using of Windows Input Method Editor (IME) keyboard layout feature, which allows an attacker to load a DLL into the process after sending the WM_INPUTLANGCHANGEREQUEST message. Before doing this, the client needs to register the DLL in a special registry key that is assumed to implement this keyboard layout. This registry key should store a value named "Ime File" with a DLL path.
+references:
+    - https://www.linkedin.com/pulse/guntior-story-advanced-bootkit-doesnt-rely-windows-disk-baranov-wue8e/
+author: X__Junior (Nextron Systems)
+date: 2023/11/21
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection_registry:
+        TargetObject|contains:
+            - '\CurrentControlSet\Control\Keyboard Layouts\'
+            - 'Ime File'
+    selection_folders_1:
+        Details|contains:
+            - ':\Perflogs\'
+            - ':\Users\Public\'
+            - '\AppData\Local\Temp'
+            - '\AppData\Roaming\Temp'
+            - '\Temporary Internet'
+            - '\Windows\Temp'
+    selection_folders_2:
+        - Details|contains:
+            - ':\Users\'
+            - '\Favorites\'
+        - Details|contains:
+            - ':\Users\'
+            - '\Favourites\'
+        - Details|contains:
+            - ':\Users\'
+            - '\Contacts\'
+    condition: selection_registry and 1 of selection_folders_*
+falsepositives:
+    - IMEs are essential for languages that have more characters than can be represented on a standard keyboard, such as Chinese, Japanese, and Korean.
+level: high
