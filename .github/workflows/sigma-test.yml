@@ -33,7 +33,7 @@ on: # yamllint disable-line rule:truthy
   workflow_dispatch:
 
 env:
-  EVTX_BASELINE_VERSION: v0.7
+  EVTX_BASELINE_VERSION: v0.8
 
 jobs:
   yamllint:
@@ -133,6 +133,24 @@ jobs:
       run: |
         chmod +x evtx-sigma-checker
         ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path Logs_Win11/ --rule-path rules/windows/ --rule-path rules-emerging-threats/ --rule-path rules-threat-hunting/ > findings.json
+    - name: Show findings excluding known FPs
+      run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
+
+  check-baseline-win11-2023:
+    runs-on: ubuntu-latest
+    needs: test-sigma-logsource
+    steps:
+    - uses: actions/checkout@v3.2.0
+    - name: Download evtx-sigma-checker
+      run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
+    - name: Download and extract Windows 11 baseline
+      run: |
+        wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win11-client-2023.tgz
+        tar xzf win11-client-20023.tgz
+    - name: Check for Sigma matches in baseline
+      run: |
+        chmod +x evtx-sigma-checker
+        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path Logs_Win11_2023/ --rule-path rules/windows/ --rule-path rules-emerging-threats/ --rule-path rules-threat-hunting/ > findings.json
     - name: Show findings excluding known FPs
       run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
 
