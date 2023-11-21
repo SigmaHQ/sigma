@@ -1,0 +1,162 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Goodlog Tests
+
+on:
+  push:
+    branches:
+      - "*"
+    paths:
+      - ".github/workflows/goodlog-tests.yml"
+      - ".github/workflows/known-FPs.csv"
+      - "deprecated/**.yml"
+      - "rules-compliance/**.yml"
+      - "rules-dfir/**.yml"
+      - "rules-emerging-threats/**.yml"
+      - "rules-placeholder/**.yml"
+      - "rules-threat-hunting/**.yml"
+      - "rules/**.yml"
+      - "tests/thor.yml"
+      - "unsupported/**.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/goodlog-tests.yml"
+      - ".github/workflows/known-FPs.csv"
+      - "deprecated/**.yml"
+      - "rules-compliance/**.yml"
+      - "rules-dfir/**.yml"
+      - "rules-emerging-threats/**.yml"
+      - "rules-placeholder/**.yml"
+      - "rules-threat-hunting/**.yml"
+      - "rules/**.yml"
+      - "tests/thor.yml"
+      - "unsupported/**.yml"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  EVTX_BASELINE_VERSION: v0.8
+
+jobs:
+  check-baseline-win7:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3.2.0
+    - name: Download evtx-sigma-checker
+      run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
+    - name: Download and extract Windows 7 32-bit baseline
+      run: |
+        wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win7-x86.tgz
+        tar xzf win7-x86.tgz
+    - name: Check for Sigma matches in baseline
+      run: |
+        chmod +x evtx-sigma-checker
+        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path win7_x86/ --rule-path rules/windows/ --rule-path rules-emerging-threats/ --rule-path rules-threat-hunting/ > findings.json
+    - name: Show findings excluding known FPs
+      run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
+
+  check-baseline-win10:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3.2.0
+    - name: Download evtx-sigma-checker
+      run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
+    - name: Download and extract Windows 10 baseline
+      run: |
+        wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win10-client.tgz
+        tar xzf win10-client.tgz
+    - name: Check for Sigma matches in baseline
+      run: |
+        chmod +x evtx-sigma-checker
+        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path Logs_Client/ --rule-path rules/windows/ --rule-path rules-emerging-threats/ --rule-path rules-threat-hunting/ > findings.json
+    - name: Show findings excluding known FPs
+      run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
+
+  check-baseline-win11:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3.2.0
+    - name: Download evtx-sigma-checker
+      run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
+    - name: Download and extract Windows 11 baseline
+      run: |
+        wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win11-client.tgz
+        tar xzf win11-client.tgz
+    - name: Check for Sigma matches in baseline
+      run: |
+        chmod +x evtx-sigma-checker
+        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path Logs_Win11/ --rule-path rules/windows/ --rule-path rules-emerging-threats/ --rule-path rules-threat-hunting/ > findings.json
+    - name: Show findings excluding known FPs
+      run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
+
+  check-baseline-win11-2023:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3.2.0
+    - name: Download evtx-sigma-checker
+      run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
+    - name: Download and extract Windows 11 baseline
+      run: |
+        wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win11-client-2023.tgz
+        tar xzf win11-client-2023.tgz
+    - name: Check for Sigma matches in baseline
+      run: |
+        chmod +x evtx-sigma-checker
+        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path Logs_Win11_2023/ --rule-path rules/windows/ --rule-path rules-emerging-threats/ --rule-path rules-threat-hunting/ > findings.json
+    - name: Show findings excluding known FPs
+      run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
+
+  check-baseline-win2022:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3.2.0
+    - name: Download evtx-sigma-checker
+      run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
+    - name: Download and extract Windows 2022 baseline
+      run: |
+        wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win2022-evtx.tgz
+        tar xzf win2022-evtx.tgz
+    - name: Check for Sigma matches in baseline
+      run: |
+        chmod +x evtx-sigma-checker
+        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path win2022-evtx/ --rule-path rules/windows/ --rule-path rules-emerging-threats/ --rule-path rules-threat-hunting/ > findings.json
+    - name: Show findings excluding known FPs
+      run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
+
+  check-baseline-win2022-domain-controller:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3.2.0
+    - name: Download evtx-sigma-checker
+      run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
+    - name: Download and extract Windows 2022 baseline
+      run: |
+        wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win2022-ad.tgz
+        tar xzf win2022-ad.tgz
+    - name: Check for Sigma matches in baseline
+      run: |
+        chmod +x evtx-sigma-checker
+        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path Win2022-AD/ --rule-path rules/windows/ --rule-path rules-emerging-threats/ --rule-path rules-threat-hunting/ > findings.json
+    - name: Show findings excluding known FPs
+      run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
+
+  check-baseline-win2022-0-20348-azure:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3.2.0
+    - name: Download evtx-sigma-checker
+      run: wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
+    - name: Download and extract Windows 2022.0.20348 Azure baseline
+      run: |
+        wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/win2022-0-20348-azure.tgz
+        tar xzf win2022-0-20348-azure.tgz
+    - name: Check for Sigma matches in baseline
+      run: |
+        chmod +x evtx-sigma-checker
+        ./evtx-sigma-checker --log-source tests/thor.yml --evtx-path win2022-0-20348-azure/ --rule-path rules/windows/ --rule-path rules-emerging-threats/ --rule-path rules-threat-hunting/ > findings.json
+    - name: Show findings excluding known FPs
+      run: ./.github/workflows/matchgrep.sh findings.json .github/workflows/known-FPs.csv
