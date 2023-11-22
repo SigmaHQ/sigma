@@ -1,7 +1,10 @@
-title: Regasm/Regsvcs Suspicious Execution
+title: Potentially Suspicious Execution Of Regasm/Regsvcs From Uncommon Location
 id: cc368ed0-2411-45dc-a222-510ace303cb2
+related:
+    - id: e9f8f8cc-07cc-4e81-b724-f387db9175e4
+      type: derived
 status: experimental
-description: Detects suspicious execution of Regasm/Regsvcs utilities
+description: Detects potentially suspicious execution of the Regasm/Regsvcs utilities from a potentially suspicious location
 references:
     - https://www.fortiguard.com/threat-signal-report/4718?s=09
     - https://lolbas-project.github.io/lolbas/Binaries/Regasm/
@@ -25,24 +28,15 @@ detection:
               - 'RegAsm.exe'
     selection_dir:
         CommandLine|contains:
-            # Add more suspicious directories
-            - '\Users\Public\'
+            # Note: Add more potentially suspicious directories
             - '\AppData\Local\Temp\'
-            - '\Desktop\'
-            - '\Downloads\'
-            - '\PerfLogs\'
-            - '\Windows\Temp\'
             - '\Microsoft\Windows\Start Menu\Programs\Startup\'
-    filter_main_dll:
-        CommandLine|contains: '.dll'
-    filter_main_no_cli:
-        # For when the CLI just contains the Image
-        CommandLine|endswith:
-            - '\Regasm.exe"'
-            - '\Regasm.exe'
-            - '\Regsvcs.exe"'
-            - '\Regsvcs.exe'
-    condition: all of selection_* or (selection_img and not 1 of filter_main_*)
+            - '\PerfLogs\'
+            - '\Users\Public\'
+            - '\Windows\Temp\'
+            #- '\Desktop\'
+            #- '\Downloads\'
+    condition: all of selection_*
 falsepositives:
     - Unknown
-level: high
+level: medium
