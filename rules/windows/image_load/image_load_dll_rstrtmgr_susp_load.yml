@@ -1,0 +1,54 @@
+title: Load Of RstrtMgr DLL From Suspicious Process
+id: b48492dc-c5ef-4572-8dff-32bc241c15c8
+status: experimental
+description: |
+    Detects the load of RstrtMgr DLL (Restart Manager) by suspicious processes.
+    This librairy has been used during ransomware campaigns to kill processes that would prevent file encryption by locking them (Conti Ransomware, Cactus Ransomware). It has also been seen recently in the BiBi wiper for Windows.
+    It could also be used for anti-analysis purposes by shut downing specific processes.
+references:
+    - https://www.crowdstrike.com/blog/windows-restart-manager-part-2/
+    - https://www.swascan.com/cactus-ransomware-malware-analysis/
+    - https://taiwan.postsen.com/business/88601/Hamas-hackers-use-data-destruction-software-BiBi-which-consumes-a-lot-of-processor-resources-to-wipe-Windows-computer-data--iThome.html
+author: Luc Génaux
+date: 2023/11/22
+modified: 2023/11/22
+tags:
+    - attack.impact
+    - attack.defense_evasion
+    - attack.1486
+    - attack.t1562.001
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith:
+            - '\RstrtMgr.dll'
+        - OriginalFileName:
+              - 'RstrtMgr.dll'
+    filter_explorer:
+        Image: 'C:\Windows\explorer.exe'
+    filter_system32:
+        Image|startswith: 'C:\Windows\System32\'
+        Image|endswith:
+            - '\msiexec.exe'
+            - '\taskhostw.exe'
+    filter_tiworker:
+        Image|startswith:
+            - 'C:\Windows\WinSxS\'
+        Image|endswith:
+            - '\TiWorker.exe'
+    filter_software_installation:
+        Image|startswith: 'C:\Users\'
+        Image|contains: 
+            - '\AppData\Local\Temp\is-'
+            - '.tmp\'
+        Image|endswith: '.tmp'
+    condition: selection and not 1 of filter*
+fields:
+    - Image
+    - ProcessGuid
+falsepositives:
+    - Other legitimate Windows processes not currently listed
+    - Processes related to software installation
+level: medium
