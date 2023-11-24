@@ -1,0 +1,28 @@
+title: Mimikatz Lsass Access for Credential Dumping
+id: d0d2f720-d14f-448d-8242-51ff396a334e
+status: experimental
+description: Detects LSASS process access by mimikatz for credential dumping.
+references:
+    - https://jsecurity101.medium.com/bypassing-access-mask-auditing-strategies-480fb641c158
+    - https://www.splunk.com/en_us/blog/security/you-bet-your-lsass-hunting-lsass-access.html
+author: Swachchhanda Shrawan Poudel
+date: 2023/11/24
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+    - attack.s0002
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        SourceImage|endswith: '\mimikatz.exe'
+        TargetImage|endswith: '\lsass.exe'
+        GrantedAccess: 
+            - '0x1FFFFF'
+            - '0x1010'
+            - '0x40'
+    condition: selection
+falsepositives:
+    - Unknown
+level: critical
