@@ -14,31 +14,47 @@ references:
     - https://chromium.googlesource.com/chromium/chromium/+/master/content/public/common/content_switches.cc
 author: frack113, Nasreddine Bencherchali (Nextron Systems)
 date: 2023/09/05
+modified: 2023/11/09
 tags:
     - attack.execution
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith:
-            # Add more electron based app to the list
-            - '\chrome.exe'
-            - '\code.exe'
-            - '\discord.exe'
-            - '\GitHubDesktop.exe'
-            - '\keybase.exe'
-            - '\msedge.exe'
-            - '\msedgewebview2.exe'
-            - '\msteams.exe'
-            - '\slack.exe'
-            - '\Teams.exe'
+    selection_img:
+        - Image|endswith:
+              # Add more electron based app to the list
+              - '\chrome.exe'
+              - '\code.exe'
+              - '\discord.exe'
+              - '\GitHubDesktop.exe'
+              - '\keybase.exe'
+              - '\msedge_proxy.exe'
+              - '\msedge.exe'
+              - '\msedgewebview2.exe'
+              - '\msteams.exe'
+              - '\slack.exe'
+              - '\Teams.exe'
+        - OriginalFileName:
+              # Add more electron based app to the list
+              - 'chrome.exe'
+              - 'code.exe'
+              - 'discord.exe'
+              - 'GitHubDesktop.exe'
+              - 'keybase.exe'
+              - 'msedge_proxy.exe'
+              - 'msedge.exe'
+              - 'msedgewebview2.exe'
+              - 'msteams.exe'
+              - 'slack.exe'
+              - 'Teams.exe'
+    selection_cli:
         CommandLine|contains:
             - '--browser-subprocess-path'
             - '--gpu-launcher'
             - '--renderer-cmd-prefix'
             - '--utility-cmd-prefix'
-    condition: selection
+    condition: all of selection_*
 falsepositives:
     - Legitimate usage for debugging purposes
 # Increase the level once FP rate is known better (see status)

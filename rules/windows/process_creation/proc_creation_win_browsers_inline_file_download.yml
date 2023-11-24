@@ -1,4 +1,4 @@
-title: File Download From Browser Process Via Inline Link
+title: File Download From Browser Process Via Inline URL
 id: 94771a71-ba41-4b6e-a757-b531372eaab6
 status: test
 description: Detects execution of a browser process with a URL argument pointing to a file with a potentially interesting extension. This can be abused to download arbitrary files or to hide from the user for example by launching the browser in a minimized state.
@@ -7,7 +7,7 @@ references:
     - https://lolbas-project.github.io/lolbas/Binaries/Msedge/
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2022/01/11
-modified: 2023/04/06
+modified: 2023/11/09
 tags:
     - attack.command_and_control
     - attack.t1105
@@ -23,14 +23,16 @@ detection:
             - '\opera.exe'
             - '\vivaldi.exe'
     selection_http:
-        CommandLine|contains: ' http'
-    selection_ext:
-        CommandLine|contains:
+        CommandLine|contains: 'http'
+    selection_extensions:
+        CommandLine|endswith:
+            - '.7z'
             - '.dat'
             - '.dll'
             - '.exe'
             - '.hta'
             - '.ps1'
+            - '.psm1'
             - '.txt'
             - '.vbe'
             - '.vbs'

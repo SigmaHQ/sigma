@@ -6,6 +6,7 @@ references:
     - https://infosec.exchange/@sbousseaden/109542254124022664
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/12/20
+modified: 2023/11/13
 tags:
     - attack.defense_evasion
 logsource:
@@ -16,23 +17,33 @@ detection:
         - OriginalFileName:
               - 'Excel.exe'
               - 'MSACCESS.EXE'
+              - 'MSPUB.EXE'
               - 'OneNote.exe'
+              - 'OneNoteM.exe'
+              - 'OUTLOOK.EXE'
               - 'POWERPNT.EXE'
               - 'WinWord.exe'
         - Description:
               - 'Microsoft Access'
               - 'Microsoft Excel'
               - 'Microsoft OneNote'
+              - 'Microsoft Outlook'
               - 'Microsoft PowerPoint'
+              - 'Microsoft Publisher'
               - 'Microsoft Word'
-    filter:
+              - 'Sent to OneNote Tool'
+    filter_main_legit_names:
         Image|endswith:
             - '\EXCEL.exe'
+            - '\excelcnv.exe'
             - '\MSACCESS.exe'
+            - '\MSPUB.EXE'
             - '\ONENOTE.EXE'
+            - '\ONENOTEM.EXE'
+            - '\OUTLOOK.EXE'
             - '\POWERPNT.EXE'
             - '\WINWORD.exe'
-    condition: selection and not filter
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high

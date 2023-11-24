@@ -1,0 +1,32 @@
+title: DNS Query To Devtunnels Domain
+id: 1cb0c6ce-3d00-44fc-ab9c-6d6d577bf20b
+related:
+    - id: 9501f8e6-8e3d-48fc-a8a6-1089dd5d7ef4 # Net Connection DevTunnels
+      type: similar
+    - id: 4b657234-038e-4ad5-997c-4be42340bce4 # Net Connection VsCode
+      type: similar
+    - id: b3e6418f-7c7a-4fad-993a-93b65027a9f1 # DNS VsCode
+      type: similar
+status: experimental
+description: |
+    Detects DNS query requests to Devtunnels domains. Attackers can abuse that feature to establish a reverse shell or persistence on a machine.
+references:
+    - https://blueteamops.medium.com/detecting-dev-tunnels-16f0994dc3e2
+    - https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/security
+    - https://cydefops.com/devtunnels-unleashed
+author: citron_ninja
+date: 2023/10/25
+modified: 2023/11/20
+tags:
+    - attack.command_and_control
+    - attack.t1071.001
+logsource:
+    category: dns_query
+    product: windows
+detection:
+    selection:
+        QueryName|endswith: '.devtunnels.ms'
+    condition: selection
+falsepositives:
+    - Legitimate use of Devtunnels will also trigger this.
+level: medium

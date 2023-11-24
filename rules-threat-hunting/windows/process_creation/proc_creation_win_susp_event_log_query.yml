@@ -1,0 +1,47 @@
+title: EventLog Query Requests By Builtin Utilities
+id: 9cd55b6c-430a-4fa9-96f4-7cadf5229e9f
+related:
+    - id: beaa66d6-aa1b-4e3c-80f5-e0145369bfaf
+      type: derived
+status: experimental
+description: |
+    Detect attempts to query the contents of the event log using command line utilities. Attackers use this technique in order to look for sensitive information in the logs such as passwords, usernames, IPs, etc.
+references:
+    - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.diagnostics/get-winevent?view=powershell-7.3
+    - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-eventlog?view=powershell-5.1
+    - http://www.solomonson.com/posts/2010-07-09-reading-eventviewer-command-line/
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/wevtutil
+author: Ali Alwashali, Nasreddine Bencherchali (Nextron Systems)
+date: 2023/11/20
+tags:
+    - attack.t1552
+    - attack.credential_access
+    - detection.threat_hunting
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_wmi:
+        CommandLine|contains|all:
+            - 'Select'
+            - 'Win32_NTLogEvent'
+    selection_wevtutil_img:
+        - Image|endswith: '\wevtutil.exe'
+        - OriginalFileName: 'wevtutil.exe'
+    selection_wevtutil_cli:
+        CommandLine|contains:
+            - ' qe '
+            - ' query-events '
+    selection_wmic_img:
+        - Image|endswith: '\wevtutil.exe'
+        - OriginalFileName: 'wevtutil.exe'
+    selection_wmic_cli:
+        CommandLine|contains: ' ntevent'
+    selection_cmdlet:
+        CommandLine|contains:
+            - 'Get-WinEvent '
+            - 'get-eventlog '
+    condition: selection_wmi or all of selection_wevtutil_* or all of selection_wmic_* or selection_cmdlet
+falsepositives:
+    - Legitimate log access by administrators or troubleshooting tools
+level: medium

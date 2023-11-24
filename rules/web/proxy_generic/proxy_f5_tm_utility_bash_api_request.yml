@@ -1,0 +1,26 @@
+title: F5 BIG-IP iControl Rest API Command Execution - Proxy
+id: b59c98c6-95e8-4d65-93ee-f594dfb96b17
+related:
+    - id: 85254a62-22be-4239-b79c-2ec17e566c37
+      type: similar
+status: experimental
+description: Detects POST requests to the F5 BIG-IP iControl Rest API "bash" endpoint, which allows the execution of commands on the BIG-IP
+references:
+    - https://f5-sdk.readthedocs.io/en/latest/apidoc/f5.bigip.tm.util.html#module-f5.bigip.tm.util.bash
+    - https://community.f5.com/t5/technical-forum/icontrolrest-11-5-execute-bash-command/td-p/203029
+    - https://community.f5.com/t5/technical-forum/running-bash-commands-via-rest-api/td-p/272516
+author: Nasreddine Bencherchali (Nextron Systems), Thurein Oo
+date: 2023/11/08
+tags:
+    - attack.initial_access
+    - attack.t1190
+logsource:
+    category: proxy
+detection:
+    selection:
+        cs-method: 'POST'
+        c-uri|endswith: '/mgmt/tm/util/bash'
+    condition: selection
+falsepositives:
+    - Legitimate usage of the BIG IP REST API to execute command for administration purposes
+level: medium

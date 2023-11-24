@@ -6,7 +6,7 @@ references:
     - https://threathunterplaybook.com/hunts/windows/190811-WMIModuleLoad/notebook.html
 author: Roberto Rodriguez @Cyb3rWard0g
 date: 2019/08/10
-modified: 2023/08/08
+modified: 2023/11/07
 tags:
     - attack.execution
     - attack.t1047
@@ -25,41 +25,15 @@ detection:
             - '\WMINet_Utils.dll'
             - '\wmiprov.dll'
             - '\wmiutils.dll'
-    filter_optional_generic:
+    filter_main_generic:
         Image|contains:
             - ':\Microsoft\Teams\current\Teams.exe'
             - ':\Microsoft\Teams\Update.exe'
             - ':\Windows\\explorer.exe'
             - ':\Windows\Sysmon.exe'
             - ':\Windows\Sysmon64.exe'
-            - ':\Windows\System32\CompatTelRunner.exe'
-            - ':\Windows\System32\DeviceCensus.exe'
-            - ':\Windows\System32\dfsrs.exe'
-            - ':\Windows\System32\dispdiag.exe'
-            - ':\Windows\System32\dxdiag.exe'
-            - ':\Windows\System32\gpresult.exe'
-            - ':\Windows\System32\logman.exe'
-            - ':\Windows\System32\MoUsoCoreWorker.exe'  # c:\windows\System32\MoUsoCoreWorker.exe on win10 20H04 at least
-            - ':\Windows\System32\sdiagnhost.exe'
-            - ':\Windows\System32\SecurityHealthService.exe'
-            - ':\Windows\System32\ServerManager.exe'
-            - ':\Windows\System32\SIHClient.exe'
-            - ':\Windows\System32\svchost.exe'
-            - ':\Windows\System32\systeminfo.exe'
-            - ':\Windows\System32\taskhostw.exe'  # c:\windows\system32\taskhostw.exe
-            - ':\Windows\System32\tasklist.exe'
-            - ':\Windows\System32\vds.exe'
-            - ':\Windows\System32\wbem\unsecapp.exe'
-            - ':\Windows\System32\wbem\WMIADAP.exe'  # https://github.com/SigmaHQ/sigma/issues/1871
-            - ':\Windows\System32\wbem\WmiApSrv.exe'
-            - ':\Windows\System32\wbem\WMIC.exe'
-            - ':\Windows\System32\wbem\WmiPrvSE.exe'
-            - ':\Windows\SysWOW64\explorer.exe'
-            - ':\Windows\SysWOW64\logman.exe'
-            - ':\Windows\SysWOW64\sdiagnhost.exe'
-            - ':\Windows\SysWOW64\svchost.exe'
-            - ':\Windows\SysWOW64\systeminfo.exe'
-            - ':\Windows\SysWOW64\wbem\WmiPrvSE.exe'
+            - ':\Windows\System32\'
+            - ':\Windows\SysWOW64\'
     filter_optional_other:
         Image|endswith:
             - '\WindowsAzureGuestAgent.exe'
@@ -79,7 +53,7 @@ detection:
         Image|contains:
             - ':\Program Files\'
             - ':\Program Files (x86)\'
-    condition: selection and not 1 of filter_optional_*
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: low
