@@ -1,0 +1,27 @@
+title: Possible Linux Process Code Injection
+id: 4cad6c64-d6df-42d6-8dae-eb78defdc415
+status: experimental
+description: This rule detects the injetion of code by overwriting the memory map of a linux process using the linux command dd.
+references:
+    - https://www.aon.com/cyber-solutions/aon_cyber_labs/linux-based-inter-process-code-injection-without-ptrace2/
+    - https://github.com/AonCyberLabs/Cexigua/blob/master/overwrite.sh
+    - https://attack.mitre.org/techniques/T1055/009/
+author: Joseph Kamau
+date: 2023/11/25
+tags:
+    - attack.defense_evasion
+    - attack.t1055.009
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '/dd'
+        CommandLine|contains|all:
+            - 'of='
+            - '/proc/'
+            - '/mem'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
