@@ -525,7 +525,7 @@ class TestRules(unittest.TestCase):
     #         Fore.RED
     #         + "There are rules with missing or malformed 'date' fields. (create one, e.g. date: 2019/01/14)",
     #     )
-^
+
     # sigma validators description_existence description_length
     # def test_missing_description(self):
     #     faulty_rules = []
