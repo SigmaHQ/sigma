@@ -1,7 +1,7 @@
 title: Enabling COR Profiler Environment Variables
 id: ad89044a-8f49-4673-9a55-cbd88a1b374f
 status: test
-description: This rule detects .NET Framework CLR and .NET Core CLR cor_enable_profiling and cor_profiler variables being set and configured.
+description: Detects .NET Framework CLR and .NET Core CLR "cor_enable_profiling" and "cor_profiler" variables being set and configured.
 references:
     - https://twitter.com/jamieantisocial/status/1304520651248668673
     - https://www.slideshare.net/JamieWilliams130/started-from-the-bottom-exploiting-data-sources-to-uncover-attck-behaviors
@@ -19,14 +19,12 @@ logsource:
     category: registry_set
     product: windows
 detection:
-    selection1:
+    selection_1:
         TargetObject|endswith:
             - '\COR_ENABLE_PROFILING'
             - '\COR_PROFILER'
-    selection2:
-        TargetObject|endswith:
             - '\CORECLR_ENABLE_PROFILING'
-        TargetObject|contains:
-            - '\CORECLR_PROFILER_PATH'
-    condition: 1 of selection*
-level: high
+    selection_2:
+        TargetObject|contains: '\CORECLR_PROFILER_PATH'
+    condition: 1 of selection_*
+level: medium
