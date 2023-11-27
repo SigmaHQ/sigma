@@ -1,0 +1,39 @@
+title: Executable Exexuting Wusa From Suspicious Paths
+id: ef64fc9c-a45e-43cc-8fd8-7d75d73b4c99
+status: experimental
+description: Detects executable using "wusa.exe" (Windows Update Standalone Installer) utility from suspicious paths
+references:
+    - https://www.fortinet.com/blog/threat-research/konni-campaign-distributed-via-malicious-document
+author: X__Junior (Nextron Systems)
+date: 2023/11/26
+tags:
+    - attack.execution
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: '\wusa.exe'
+    selection_paths_1:
+        ImageLoaded|contains:
+            - ':\Perflogs\'
+            - ':\Users\Public\'
+            - '\Temporary Internet'
+            - '\Windows\Temp\'
+    selection_paths_2:
+        - ImageLoaded|contains|all:
+                - ':\Users\'
+                - '\Favorites\'
+        - ImageLoaded|contains|all:
+                - ':\Users\'
+                - '\Favourites\'
+        - ImageLoaded|contains|all:
+                - ':\Users\'
+                - '\Contacts\'
+        - ImageLoaded|contains|all:
+                - ':\Users\'
+                - '\Pictures\'
+    condition: selection_img and 1 of selection_paths_*
+falsepositives:
+    - Unknown
+level: high
