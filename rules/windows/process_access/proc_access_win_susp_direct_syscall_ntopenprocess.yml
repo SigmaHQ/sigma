@@ -1,0 +1,68 @@
+title: Direct Syscall of NtOpenProcess
+id: 3f3f3506-1895-401b-9cc3-e86b16e630d0
+status: experimental
+description: Detects the usage of the direct syscall of NtOpenProcess which might be done from a CobaltStrike BOF.
+references:
+    - https://medium.com/falconforce/falconfriday-direct-system-calls-and-cobalt-strike-bofs-0xff14-741fa8e1bdd6
+author: Christian Burkard (Nextron Systems), Tim Shelton (FP)
+date: 2021/07/28
+modified: 2023/11/27
+tags:
+    - attack.execution
+    - attack.t1106
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        CallTrace|startswith: 'UNKNOWN'
+    filter_main_vcredist:
+        TargetImage|endswith: 'vcredist_x64.exe'
+        SourceImage|endswith: 'vcredist_x64.exe'
+    filter_main_generic:
+        # Examples include "systeminfo", "backgroundTaskHost", "AUDIODG"
+        SourceImage|contains:
+            - ':\Program Files (x86)\'
+            - ':\Program Files\'
+            - ':\Windows\System32\'
+            - ':\Windows\SysWOW64\'
+            - ':\Windows\WinSxS\'
+        TargetImage|contains:
+            - ':\Program Files (x86)\'
+            - ':\Program Files\'
+            - ':\Windows\System32\'
+            - ':\Windows\SysWOW64\'
+            - ':\Windows\WinSxS\'
+    filter_main_kerneltrace_edge:
+        # Cases in which the CallTrace is just e.g. 'UNKNOWN(19290435374)' from Microsoft-Windows-Kernel-Audit-API-Calls provider
+        Provider_Name: 'Microsoft-Windows-Kernel-Audit-API-Calls'
+    filter_optional_vmware:
+        TargetImage|endswith: ':\Windows\system32\systeminfo.exe'
+        SourceImage|endswith: 'setup64.exe' # vmware
+    filter_optional_cylance:
+        SourceImage|endswith: ':\Windows\Explorer.EXE'
+        TargetImage|endswith: ':\Program Files\Cylance\Desktop\CylanceUI.exe'
+    filter_optional_amazon:
+        SourceImage|endswith: 'AmazonSSMAgentSetup.exe'
+        TargetImage|endswith: 'AmazonSSMAgentSetup.exe'
+    filter_optional_vscode: # VsCode
+        SourceImage|endswith: '\AppData\Local\Programs\Microsoft VS Code\Code.exe'
+        TargetImage|endswith: '\AppData\Local\Programs\Microsoft VS Code\Code.exe'
+    filter_optional_teams: # MS Teams
+        TargetImage|endswith: '\AppData\Local\Microsoft\Teams\current\Teams.exe'
+        SourceImage|endswith: '\AppData\Local\Microsoft\Teams\current\Teams.exe'
+    filter_optional_discord: # Discord
+        TargetImage|contains: '\AppData\Local\Discord\'
+        TargetImage|endswith: '\Discord.exe'
+    filter_optional_yammer:
+        SourceImage|contains: '\AppData\Local\yammerdesktop\app-'
+        SourceImage|endswith: '\Yammer.exe'
+        TargetImage|contains: '\AppData\Local\yammerdesktop\app-'
+        TargetImage|endswith: '\Yammer.exe'
+        GrantedAccess: '0x1000'
+    filter_optional_evernote:
+        TargetImage|endswith: '\Evernote\Evernote.exe'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high

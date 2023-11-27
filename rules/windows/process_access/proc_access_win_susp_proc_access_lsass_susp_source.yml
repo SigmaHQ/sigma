@@ -1,4 +1,4 @@
-title: LSASS Access From Program in Potentially Suspicious Folder
+title: LSASS Access From Program In Potentially Suspicious Folder
 id: fa34b441-961a-42fa-a100-ecc28c886725
 status: experimental
 description: Detects process access to LSASS memory with suspicious access flags and from a potentially suspicious folder
@@ -10,7 +10,7 @@ references:
     - http://security-research.dyndns.org/pub/slides/FIRST2017/FIRST-2017_Tom-Ueltschi_Sysmon_FINAL_notes.pdf
 author: Florian Roth (Nextron Systems)
 date: 2021/11/27
-modified: 2023/05/05
+modified: 2023/11/27
 tags:
     - attack.credential_access
     - attack.t1003.001
@@ -55,8 +55,9 @@ detection:
             - '\AppData\'
             - '\Temporary'
     filter_optional_generic_appdata:
-        SourceImage|startswith: 'C:\Users\'
-        SourceImage|contains: '\AppData\Local\'
+        SourceImage|contains|all:
+            - ':\Users\'
+            - '\AppData\Local\'
         SourceImage|endswith:
             - '\Microsoft VS Code\Code.exe'
             - '\software_reporter_tool.exe'
@@ -67,26 +68,27 @@ detection:
             - '\JetBrains\Toolbox\bin\jetbrains-toolbox.exe'
         GrantedAccess: '0x410'
     filter_optional_dropbox_1:
-        SourceImage|startswith: 'C:\Windows\Temp\'
+        SourceImage|contains: ':\Windows\Temp\'
         SourceImage|endswith: '.tmp\DropboxUpdate.exe'
         GrantedAccess:
             - '0x410'
             - '0x1410'
     filter_optional_dropbox_2:
-        SourceImage|startswith: 'C:\Users\'
-        SourceImage|contains: '\AppData\Local\Temp\'
+        SourceImage|contains|all:
+            - ':\Users\'
+            - '\AppData\Local\Temp\'
         SourceImage|endswith: '.tmp\DropboxUpdate.exe'
         GrantedAccess: '0x1410'
     filter_optional_dropbox_3:
-        SourceImage|startswith:
-            - 'C:\Program Files (x86)\Dropbox\'
-            - 'C:\Program Files\Dropbox\'
+        SourceImage|contains:
+            - ':\Program Files (x86)\Dropbox\'
+            - ':\Program Files\Dropbox\'
         SourceImage|endswith: '\DropboxUpdate.exe'
         GrantedAccess: '0x1410'
     filter_optional_nextron:
-        SourceImage|startswith:
-            - 'C:\Windows\Temp\asgard2-agent\'
-            - 'C:\Windows\Temp\asgard2-agent-sc\'
+        SourceImage|contains:
+            - ':\Windows\Temp\asgard2-agent\'
+            - ':\Windows\Temp\asgard2-agent-sc\'
         SourceImage|endswith:
             - '\thor64.exe'
             - '\thor.exe'
@@ -97,19 +99,19 @@ detection:
             - '0x1010'
             - '0x101010'
     filter_optional_ms_products:
-        SourceImage|startswith: 'C:\Users\'
         SourceImage|contains|all:
+            - ':\Users\'
             - '\AppData\Local\Temp\'
             - '\vs_bootstrapper_'
         GrantedAccess: '0x1410'
     filter_optional_chrome_update:
-        SourceImage|startswith: 'C:\Program Files (x86)\Google\Temp\'
+        SourceImage|contains: ':\Program Files (x86)\Google\Temp\'
         SourceImage|endswith: '.tmp\GoogleUpdate.exe'
         GrantedAccess:
             - '0x410'
             - '0x1410'
     filter_optional_keybase:
-        SourceImage|startswith: 'C:\Users\'
+        SourceImage|contains: ':\Users\'
         SourceImage|endswith: \AppData\Local\Keybase\keybase.exe
         GrantedAccess: '0x1fffff'
     filter_optional_avira:
@@ -117,22 +119,17 @@ detection:
         SourceImage|endswith: '.tmp\avira_system_speedup.tmp'
         GrantedAccess: '0x1410'
     filter_optional_viberpc_updater:
-        SourceImage|startswith: 'C:\Users\'
         SourceImage|contains: '\AppData\Roaming\ViberPC\'
         SourceImage|endswith: '\updater.exe'
         TargetImage|endswith: '\winlogon.exe'
         GrantedAccess: '0x1fffff'
     filter_optional_adobe_arm_helper:
-        SourceImage|startswith:  # Example path: 'C:\Program Files (x86)\Common Files\Adobe\ARM\1.0\Temp\2092867405\AdobeARMHelper.exe'
-            - 'C:\Program Files\Common Files\Adobe\ARM\'
-            - 'C:\Program Files (x86)\Common Files\Adobe\ARM\'
+        SourceImage|contains:  # Example path: 'C:\Program Files (x86)\Common Files\Adobe\ARM\1.0\Temp\2092867405\AdobeARMHelper.exe'
+            - ':\Program Files\Common Files\Adobe\ARM\'
+            - ':\Program Files (x86)\Common Files\Adobe\ARM\'
         SourceImage|endswith: '\AdobeARMHelper.exe'
         GrantedAccess: '0x1410'
     condition: selection and not 1 of filter_optional_*
-fields:
-    - User
-    - SourceImage
-    - GrantedAccess
 falsepositives:
     - Updaters and installers are typical false positives. Apply custom filters depending on your environment
 level: medium
