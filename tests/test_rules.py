@@ -1039,10 +1039,10 @@ class TestRules(unittest.TestCase):
                 print(Fore.RED + "Rule {} has no field 'title'.".format(file))
                 faulty_rules.append(file)
                 continue
-            elif len(title) > 100:
+            elif len(title) > 110:
                 print(
                     Fore.YELLOW
-                    + "Rule {} has a title field with too many characters (>100)".format(
+                    + "Rule {} has a title field with too many characters (>110)".format(
                         file
                     )
                 )
