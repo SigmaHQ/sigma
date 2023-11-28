@@ -1,10 +1,10 @@
-title: Suspicious Chromium Browser Instance Executed With Custom Extension
-id: 27ba3207-dd30-4812-abbf-5d20c57d474e
+title: Chromium Browser Instance Executed With Custom Extension
+id: 88d6e60c-759d-4ac1-a447-c0f1466c2d21
 related:
-    - id: 88d6e60c-759d-4ac1-a447-c0f1466c2d21
+    - id: 27ba3207-dd30-4812-abbf-5d20c57d474e
       type: similar
 status: experimental
-description: Detects a suspicious process spawning a Chromium based browser process with the 'load-extension' flag to start an instance with a custom extension
+description: Detects a Chromium based browser process with the 'load-extension' flag to start a instance with a custom extension
 references:
     - https://redcanary.com/blog/chromeloader/
     - https://emkc.org/s/RJjuLa
@@ -20,15 +20,6 @@ logsource:
     product: windows
 detection:
     selection:
-        ParentImage|endswith:
-            - '\cmd.exe'
-            - '\cscript.exe'
-            - '\mshta.exe'
-            - '\powershell.exe'
-            - '\pwsh.exe'
-            - '\regsvr32.exe'
-            - '\rundll32.exe'
-            - '\wscript.exe'
         Image|endswith:
             - '\brave.exe'
             - '\chrome.exe'
@@ -38,5 +29,5 @@ detection:
         CommandLine|contains: '--load-extension='
     condition: selection
 falsepositives:
-    - Unknown
-level: high
+    - Usage of Chrome Extensions in testing tools such as BurpSuite will trigger this alert
+level: medium
