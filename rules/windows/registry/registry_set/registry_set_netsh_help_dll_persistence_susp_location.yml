@@ -1,0 +1,48 @@
+title: New Netsh Helper DLL Registered From A Suspicious Location
+id: e7b18879-676e-4a0e-ae18-27039185a8e7
+related:
+    - id: 56321594-9087-49d9-bf10-524fe8479452
+      type: similar
+    - id: c90362e0-2df3-4e61-94fe-b37615814cb1
+      type: similar
+status: experimental
+description: |
+    Detects changes to the Netsh registry key to add a new DLL value that is located on a suspicious location. This change might be an indication of a potential persistence attempt by adding a malicious Netsh helper
+references:
+    - https://www.ired.team/offensive-security/persistence/t1128-netsh-helper-dll
+    - https://pentestlab.blog/2019/10/29/persistence-netsh-helper-dll/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/11/28
+tags:
+    - attack.persistence
+    - attack.t1546.007
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_target:
+        TargetObject|contains: '\SOFTWARE\Microsoft\NetSh'
+    selection_folders_1:
+        Details|contains:
+            - ':\Perflogs\'
+            - ':\Users\Public\'
+            - ':\Windows\Temp\'
+            - '\AppData\Local\Temp\'
+            - '\Temporary Internet'
+    selection_folders_2:
+        - Details|contains|all:
+              - ':\Users\'
+              - '\Favorites\'
+        - Details|contains|all:
+              - ':\Users\'
+              - '\Favourites\'
+        - Details|contains|all:
+              - ':\Users\'
+              - '\Contacts\'
+        - Details|contains|all:
+              - ':\Users\'
+              - '\Pictures\'
+    condition: selection_target and 1 of selection_folders_*
+falsepositives:
+    - Unknown
+level: high
