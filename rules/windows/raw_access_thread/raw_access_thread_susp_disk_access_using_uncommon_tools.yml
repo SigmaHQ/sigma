@@ -6,7 +6,7 @@ references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
 author: Teymur Kheirkhabarov, oscd.community
 date: 2019/10/22
-modified: 2023/09/06
+modified: 2023/11/28
 tags:
     - attack.defense_evasion
     - attack.t1006
@@ -17,55 +17,47 @@ detection:
     filter_main_floppy:
         Device|contains: floppy
     filter_main_generic:
-        Image|startswith:
-            - 'C:\Program Files\'
-            - 'C:\Program Files (x86)\'
-            - 'C:\Windows\System32\'
-            - 'C:\Windows\SystemApps\'
-            - 'C:\Windows\WinSxS\'
-            - 'C:\Windows\servicing\'
-            - 'C:\Windows\CCM\'
-            - 'C:\Windows\uus\'
-    filter_main_setuphost:
-        Image: 'C:\$WINDOWS.~BT\Sources\SetupHost.exe' # Related to Windows Upgrade/Update
+        Image|contains:
+            - ':\$WINDOWS.~BT\'
+            - ':\Program Files (x86)\'
+            - ':\Program Files\'
+            - ':\Windows\CCM\'
+            - ':\Windows\explorer.exe'
+            - ':\Windows\servicing\'
+            - ':\Windows\SoftwareDistribution\'
+            - ':\Windows\System32\'
+            - ':\Windows\SystemApps\'
+            - ':\Windows\uus\'
+            - ':\Windows\WinSxS\'
     filter_main_system_images:
         Image:
-            - 'System'
             - 'Registry'
-    filter_main_specific:
-        Image: 'C:\Windows\explorer.exe'
+            - 'System'
     filter_main_windefender:
-        Image|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+        Image|contains: ':\ProgramData\Microsoft\Windows Defender\Platform\'
         Image|endswith: '\MsMpEng.exe'
     filter_main_microsoft_appdata:
         Image|contains|all:
-            - 'C:\Users\'
+            - ':\Users\'
             - '\AppData\'
             - '\Microsoft\'
-    filter_main_windows_update_box:
-        # ParentCommandLine: C:\WINDOWS\system32\svchost.exe -k netsvcs -p -s wuauserv
-        # Related to Windows Upgrade/Update
-        Image|startswith: 'C:\Windows\SoftwareDistribution\Download'
-        Image|endswith: '\WindowsUpdateBox.exe'
     filter_main_ssd_nvme:
-        Image|startswith: 'C:\Windows\Temp\'
+        Image|contains: ':\Windows\Temp\'
         Image|endswith:
-            - '\HostMetadata\NVMEHostmetadata.exe'
             - '\Executables\SSDUpdate.exe'
+            - '\HostMetadata\NVMEHostmetadata.exe'
     filter_main_null:
         Image: null
     filter_main_systemsettings:
-        Image: 'C:\Windows\ImmersiveControlPanel\SystemSettings.exe'
+        Image|endswith: ':\Windows\ImmersiveControlPanel\SystemSettings.exe'
     filter_optional_github_desktop:
-        Image|startswith: 'C:\Users\'
         Image|contains: '\AppData\Local\GitHubDesktop\app-'
         Image|endswith: '\resources\app\git\mingw64\bin\git.exe'
     filter_optional_nextron:
-        Image|startswith: 'C:\Windows\Temp\asgard2-agent\'
+        Image|contains: ':\Windows\Temp\asgard2-agent\'
         Image|endswith: '\thor.exe'
     filter_optional_Keybase:
-        Image|endswith: 'C:\Users\'
-        Image|startswith: '\AppData\Local\Keybase\upd.exe'
+        Image|contains: '\AppData\Local\Keybase\upd.exe'
     condition: not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Likely

@@ -1,12 +1,15 @@
-title: LSASS Memory Access by Tool Named Dump
-id: 9bd012ee-0dff-44d7-84a0-aa698cfd87a3
+title: LSASS Access From Potentially White-Listed Processes
+id: 4be8b654-0c01-4c9d-a10c-6b28467fc651
 status: test
-description: Detects a possible process memory dump based on a keyword in the file name of the accessing process
+description: |
+    Detects a possible process memory dump that uses the white-listed filename like TrolleyExpress.exe as a way to dump the lsass process memory without Microsoft Defender interference
 references:
     - https://twitter.com/_xpn_/status/1491557187168178176
     - https://www.ired.team/offensive-security/credential-access-and-credential-dumping/dump-credentials-from-lsass-process-without-mimikatz
+    - https://twitter.com/mrd0x/status/1460597833917251595
 author: Florian Roth (Nextron Systems)
 date: 2022/02/10
+modified: 2023/11/29
 tags:
     - attack.credential_access
     - attack.t1003.001
@@ -17,7 +20,10 @@ logsource:
 detection:
     selection:
         TargetImage|endswith: '\lsass.exe'
-        SourceImage|contains: 'dump'
+        SourceImage|endswith:
+            - '\TrolleyExpress.exe'  # Citrix
+            - '\ProcessDump.exe'     # Cisco Jabber
+            - '\dump64.exe'          # Visual Studio
         GrantedAccess|endswith:
             - '10'
             - '30'
@@ -47,5 +53,5 @@ detection:
             - 'FF'
     condition: selection
 falsepositives:
-    - Rare programs that contain the word dump in their name and access lsass
+    - Unknown
 level: high

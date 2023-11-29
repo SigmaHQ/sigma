@@ -1,7 +1,9 @@
-title: LSASS Memory Dump
+title: Credential Dumping Activity Via Lsass
 id: 5ef9853e-4d0e-4a70-846f-a9ca37d876da
-status: test
-description: Detects process LSASS memory dump using Mimikatz, NanoDump, Invoke-Mimikatz, Procdump or Taskmgr based on the CallTrace pointing to ntdll.dll, dbghelp.dll or dbgcore.dll for win10, server2016 and up.
+status: experimental
+description: |
+    Detects process access requests to the Lsass process with specific call trace calls and access masks.
+    This behaviour is expressed by many credential dumping tool such as Mimikatz, NanoDump, Invoke-Mimikatz, Procdump and even Taskmgr dumping feature.
 references:
     - https://blog.menasec.net/2019/02/threat-hunting-21-procdump-or-taskmgr.html
     - https://web.archive.org/web/20230208123920/https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
@@ -9,7 +11,7 @@ references:
     - https://research.splunk.com/endpoint/windows_possible_credential_dumping/
 author: Samir Bousseaden, Michael Haag
 date: 2019/04/03
-modified: 2022/09/29
+modified: 2023/11/29
 tags:
     - attack.credential_access
     - attack.t1003.001
@@ -21,28 +23,35 @@ detection:
     selection:
         TargetImage|endswith: '\lsass.exe'
         GrantedAccess|contains:
-            # - '0x1fffff' # Too many false positives
-            # - '0x01000'  # Too many false positives
-            # - '0x1010'   # Too many false positives
             - '0x1038'
-            # - '0x40'   # Too many false positives
-            # - '0x1400'  # Too many false positives
-            # - '0x1410' # Too many false positives
-            - '0x1438'
             - '0x143a'
+            - '0x1438'
+            - '0x1000'
+            - '0x01000'  # Too many false positives
+            - '0x1010'   # Too many false positives
+            - '0x1400'  # Too many false positives
+            - '0x1410' # Too many false positives
+            - '0x1fffff' # Too many false positives
+            - '0x40'   # Too many false positives
         CallTrace|contains:
-            - 'dbghelp.dll'
             - 'dbgcore.dll'
+            - 'dbghelp.dll'
+            - 'kernel32.dll'
+            - 'kernelbase.dll'
             - 'ntdll.dll'
-    filter_thor:
+    filter_main_system_user:
+        SourceUser|contains: # Covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
+    filter_optional_thor:
         CallTrace|contains|all:
-            - '|C:\Windows\Temp\asgard2-agent\'
+            - ':\Windows\Temp\asgard2-agent\'
             - '\thor\thor64.exe+'
             - '|UNKNOWN('
         GrantedAccess: '0x103800'
-    filter_sysmon:
-        SourceImage: 'C:\Windows\Sysmon64.exe'
-    condition: selection and not 1 of filter*
+    filter_optional_sysmon:
+        SourceImage|endswith: ':\Windows\Sysmon64.exe'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
-    - False positives are present when looking for 0x1410. Exclusions may be required.
+    - Unknown
 level: high

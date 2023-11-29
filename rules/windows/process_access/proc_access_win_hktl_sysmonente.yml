@@ -1,4 +1,4 @@
-title: SysmonEnte Usage
+title: HackTool - SysmonEnte Execution
 id: d29ada0f-af45-4f27-8f32-f7b77c3dbc4e
 status: test
 description: Detects the use of SysmonEnte, a tool to attack the integrity of Sysmon
@@ -8,7 +8,7 @@ references:
     - https://github.com/codewhitesec/SysmonEnte/blob/main/screens/1.png
 author: Florian Roth (Nextron Systems)
 date: 2022/09/07
-modified: 2022/09/09
+modified: 2023/11/28
 tags:
     - attack.defense_evasion
     - attack.t1562.002
@@ -16,19 +16,23 @@ logsource:
     category: process_access
     product: windows
 detection:
-    selection_1:
-        TargetImage: 'C:\Windows\Sysmon64.exe'
+    selection_sysmon:
+        TargetImage|contains:
+            - ':\Windows\Sysmon.exe'
+            - ':\Windows\Sysmon64.exe'
         GrantedAccess: '0x1400'
-    filter_1:
-        SourceImage|startswith:
-            - 'C:\Program Files'
-            - 'C:\Windows\System32\'
-    filter_msdefender:
-        SourceImage|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
-        SourceImage|endswith: '\MsMpEng.exe'
     selection_calltrace:
         CallTrace: 'Ente'
-    condition: ( selection_1 and not 1 of filter_* ) or selection_calltrace
+    filter_main_generic:
+        SourceImage|contains:
+            - ':\Program Files (x86)\'
+            - ':\Program Files\'
+            - ':\Windows\System32\'
+            - ':\Windows\SysWOW64\'
+    filter_main_msdefender:
+        SourceImage|contains: ':\ProgramData\Microsoft\Windows Defender\Platform\'
+        SourceImage|endswith: '\MsMpEng.exe'
+    condition: ( selection_sysmon and not 1 of filter_main_* ) or selection_calltrace
 falsepositives:
     - Unknown
 level: high

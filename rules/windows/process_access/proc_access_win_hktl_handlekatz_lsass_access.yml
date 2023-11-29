@@ -1,4 +1,4 @@
-title: HandleKatz Duplicating LSASS Handle
+title: HackTool - HandleKatz Duplicating LSASS Handle
 id: b1bd3a59-c1fd-4860-9f40-4dd161a7d1f5
 status: test
 description: Detects HandleKatz opening LSASS to duplicate its handle to later dump the memory without opening any new handles
@@ -6,6 +6,7 @@ references:
     - https://github.com/codewhitesec/HandleKatz
 author: Bhabesh Raj (rule), @thefLinkk
 date: 2022/06/27
+modified: 2023/11/28
 tags:
     - attack.execution
     - attack.t1106
@@ -18,11 +19,11 @@ detection:
     selection:
         TargetImage|endswith: '\lsass.exe' # Theoretically, can be any benign process holding handle to LSASS
         GrantedAccess: '0x1440' # Only PROCESS_DUP_HANDLE, PROCESS_QUERY_LIMITED_INFORMATION, PROCESS_QUERY_INFORMATION
-    call_trace:  # C:\Windows\SYSTEM32\ntdll.dll+9d234\|UNKNOWN(00000000001C119B)
+        # Example: C:\Windows\SYSTEM32\ntdll.dll+9d234\|UNKNOWN(00000000001C119B)
         CallTrace|startswith: 'C:\Windows\System32\ntdll.dll+'
         CallTrace|contains: '|UNKNOWN('
         CallTrace|endswith: ')'
-    condition: selection and call_trace
+    condition: selection
 falsepositives:
     - Unknown
 level: high

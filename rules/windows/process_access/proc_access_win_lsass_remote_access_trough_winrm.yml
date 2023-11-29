@@ -1,12 +1,12 @@
-title: Mimikatz through Windows Remote Management
+title: Remote Lsass Process Access Through Windows Remote Management
 id: aa35a627-33fb-4d04-a165-d33b4afca3e8
 status: stable
-description: Detects usage of mimikatz through WinRM protocol by monitoring access to lsass process by wsmprovhost.exe.
+description: Detects remote access to the lsass process via WinRM. Could be a sign of credential dumping from tools such as mimikatz.
 references:
     - https://pentestlab.blog/2018/05/15/lateral-movement-winrm/
 author: Patryk Prauze - ING Tech
 date: 2019/05/20
-modified: 2021/06/21
+modified: 2023/11/29
 tags:
     - attack.credential_access
     - attack.execution
@@ -21,10 +21,10 @@ logsource:
 detection:
     selection:
         TargetImage|endswith: '\lsass.exe'
-        SourceImage: 'C:\Windows\system32\wsmprovhost.exe'
-    filter:
+        SourceImage|endswith: ':\Windows\system32\wsmprovhost.exe'
+    filter_main_access:
         GrantedAccess: '0x80000000'
-    condition: selection and not filter
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unlikely
 level: high

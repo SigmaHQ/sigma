@@ -1,10 +1,10 @@
-title: Rare GrantedAccess Flags on LSASS Access
+title: Uncommon GrantedAccess Flags On LSASS
 id: 678dfc63-fefb-47a5-a04c-26bcf8cc9f65
 related:
     - id: 32d0d3e2-e58d-4d41-926b-18b520b2b32d
       type: obsoletes
 status: test
-description: Detects process access to LSASS memory with suspicious access flags 0x410 and 0x01410 (spin-off of similar rule)
+description: Detects process access to LSASS memory with uncommon access flags 0x410 and 0x01410
 references:
     - https://docs.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights
     - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
@@ -13,7 +13,7 @@ references:
     - http://security-research.dyndns.org/pub/slides/FIRST2017/FIRST-2017_Tom-Ueltschi_Sysmon_FINAL_notes.pdf
 author: Florian Roth (Nextron Systems)
 date: 2022/03/13
-modified: 2022/11/13
+modified: 2023/11/30
 tags:
     - attack.credential_access
     - attack.t1003.001
@@ -28,18 +28,18 @@ detection:
     # Absolute paths to programs that cause false positives
     filter1:
         SourceImage:
-            - 'C:\WINDOWS\system32\taskmgr.exe'
-            - 'C:\Program Files\Malwarebytes\Anti-Malware\MBAMService.exe'
-            - 'C:\PROGRAMDATA\MALWAREBYTES\MBAMSERVICE\ctlrupdate\mbupdatr.exe'
-            - 'C:\WINDOWS\system32\taskhostw.exe'
-            - 'C:\Program Files\Windows Defender\MsMpEng.exe'
-            - 'C:\Windows\SysWOW64\msiexec.exe'
-            - 'C:\Windows\System32\msiexec.exe'
-            - 'C:\Windows\System32\lsass.exe'
-            - 'C:\WINDOWS\System32\perfmon.exe'
-            - 'C:\WINDOWS\system32\wbem\wmiprvse.exe'
-            - 'C:\Windows\sysWOW64\wbem\wmiprvse.exe'
             - 'C:\Program Files\Common Files\McAfee\MMSSHost\MMSSHOST.exe'
+            - 'C:\Program Files\Malwarebytes\Anti-Malware\MBAMService.exe'
+            - 'C:\Program Files\Windows Defender\MsMpEng.exe'
+            - 'C:\PROGRAMDATA\MALWAREBYTES\MBAMSERVICE\ctlrupdate\mbupdatr.exe'
+            - 'C:\Windows\System32\lsass.exe'
+            - 'C:\Windows\System32\msiexec.exe'
+            - 'C:\WINDOWS\System32\perfmon.exe'
+            - 'C:\WINDOWS\system32\taskhostw.exe'
+            - 'C:\WINDOWS\system32\taskmgr.exe'
+            - 'C:\WINDOWS\system32\wbem\wmiprvse.exe'
+            - 'C:\Windows\SysWOW64\msiexec.exe'
+            - 'C:\Windows\sysWOW64\wbem\wmiprvse.exe'
     # Windows Defender
     filter2:
         SourceImage|startswith: 'C:\ProgramData\Microsoft\Windows Defender\'
@@ -104,10 +104,6 @@ detection:
             - '0x410'
             - '0x10'
     condition: selection and not 1 of filter*
-fields:
-    - User
-    - SourceImage
-    - GrantedAccess
 falsepositives:
     - Legitimate software accessing LSASS process for legitimate reason
 level: medium
