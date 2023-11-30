@@ -1,8 +1,11 @@
 title: Suspicious Service Installation
 id: 1d61f71d-59d2-479e-9562-4ff5f4ead16b
+related:
+    - id: ca83e9f3-657a-45d0-88d6-c1ac280caf53
+      type: obsoletes
 status: test
 description: Detects suspicious service installation commands
-author: pH-T (Nextron Systems)
+author: pH-T (Nextron Systems), Florian Roth (Nextron Systems)
 date: 2022/03/18
 modified: 2022/11/14
 tags:
@@ -25,28 +28,28 @@ detection:
             - '\Users\Public\'
             - '\Windows\Temp\'
             - '\Perflogs\'
-            # - 'C:\ProgramData\'  # too many FPs (MySQL, McAfee, ...)
             - '\\\\.\\pipe'
             - '\ADMIN$\'
             - 'C:\Temp\'
             - '.downloadstring(' # PowerShell download command
             - '.downloadfile(' # PowerShell download command
+            - '&&'
     suspicious2a:
         ImagePath|contains: ' -e'
     suspicious2b:
         ImagePath|contains:
-            - ' JAB' # PowerShell encoded commands
-            - ' SUVYI' # PowerShell encoded commands
-            - ' SQBFAFgA' # PowerShell encoded commands
+            - ' aQBlAHgA' # PowerShell encoded commands
             - ' aWV4I' # PowerShell encoded commands
             - ' IAB' # PowerShell encoded commands
+            - ' JAB' # PowerShell encoded commands
             - ' PAA' # PowerShell encoded commands
-            - ' aQBlAHgA' # PowerShell encoded commands
-    filter_thor_remote:
-        ImagePath|startswith: 'C:\WINDOWS\TEMP\thor10-remote\thor64.exe'
-    filter_defender_def_updates:
-        ImagePath|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Definition Updates\'
-    condition: selection and ( suspicious1 or all of suspicious2* ) and not 1 of filter_*
+            - ' SQBFAFgA' # PowerShell encoded commands
+            - ' SUVYI' # PowerShell encoded commands
+    filter_optional_thor_remote:
+        ImagePath|startswith: ':\WINDOWS\TEMP\thor10-remote\thor64.exe'
+    filter_main_defender_def_updates:
+        ImagePath|contains: ':\ProgramData\Microsoft\Windows Defender\Definition Updates\'
+    condition: selection and ( suspicious1 or all of suspicious2* ) and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high
