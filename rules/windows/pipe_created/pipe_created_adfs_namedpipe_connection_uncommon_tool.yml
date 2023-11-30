@@ -1,4 +1,4 @@
-title: ADFS Database Named Pipe Connection
+title: ADFS Database Named Pipe Connection By Uncommon Tool
 id: 1ea13e8c-03ea-409b-877d-ce5c3d2c1cb3
 status: test
 description: |
@@ -10,7 +10,7 @@ references:
     - https://github.com/Azure/SimuLand
 author: Roberto Rodriguez @Cyb3rWard0g
 date: 2021/10/08
-modified: 2023/04/20
+modified: 2023/11/30
 tags:
     - attack.collection
     - attack.t1005
@@ -21,18 +21,21 @@ logsource:
 detection:
     selection:
         PipeName: '\MICROSOFT##WID\tsql\query'
-    filter:
+    filter_main_generic:
         Image|endswith:
-            - '\Microsoft.IdentityServer.ServiceHost.exe'
-            - '\Microsoft.Identity.Health.Adfs.PshSurrogate.exe'
+            - ':\Windows\System32\mmc.exe'
+            - ':\Windows\system32\svchost.exe'
+            - ':\Windows\System32\wsmprovhost.exe'
+            - ':\Windows\SysWOW64\mmc.exe'
+            - ':\Windows\SysWOW64\wsmprovhost.exe'
+            - ':\Windows\WID\Binn\sqlwriter.exe'
             - '\AzureADConnect.exe'
+            - '\Microsoft.Identity.Health.Adfs.PshSurrogate.exe'
+            - '\Microsoft.IdentityServer.ServiceHost.exe'
             - '\Microsoft.Tri.Sensor.exe'
-            - '\wsmprovhost.exe'
-            - '\mmc.exe'
             - '\sqlservr.exe'
             - '\tssdis.exe'
-            - 'C:\Windows\system32\svchost.exe'
-    condition: selection and not filter
+    condition: selection and not 1 of filter_main_*
 falsepositives:
-    - Processes in the filter condition
-level: high
+    - Unknown
+level: medium
