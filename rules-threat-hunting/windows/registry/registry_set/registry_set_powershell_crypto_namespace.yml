@@ -1,0 +1,44 @@
+title: Registry Set With Crypto-Classes From The "Cryptography" PowerShell Namespace
+id: 1c2a3268-3881-414a-80af-a5b313b14c0e
+status: experimental
+description: |
+    Detects the setting of a registry inside the "\Shell\Open\Command" value with PowerShell classes from the "System.Security.Cryptography" namespace.
+    The PowerShell namespace "System.Security.Cryptography" provides classes for on-the-fly encryption and decryption.
+    These can be used for example in decrypting malicious payload for defense evasion.
+references:
+    - https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography?view=net-8.0
+    - https://squiblydoo.blog/2023/11/07/october-2023-solarmarker/
+author: Andreas Braathen (mnemonic.io)
+date: 2023/12/01
+tags:
+    - attack.defense_evasion
+    - attack.t1059.001
+    - attack.t1027.010
+    - attack.t1547.001
+    - detection.threat_hunting
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection_key:
+        EventType: SetValue
+        TargetObject|contains: '\Shell\Open\Command'
+    selection_value_img:
+        Details|contains:
+            - 'powershell'
+            - 'pwsh'
+    selection_value_namespace:
+        Details|contains: 'System.Security.Cryptography.'
+    selection_value_classes:
+        Details|contains:
+            - '.AesCryptoServiceProvider'
+            - '.DESCryptoServiceProvider'
+            - '.DSACryptoServiceProvider'
+            - '.RC2CryptoServiceProvider'
+            - '.Rijndael'
+            - '.RSACryptoServiceProvider'
+            - '.TripleDESCryptoServiceProvider'
+    condition: all of selection_*
+falsepositives:
+    - Classes are legitimately used, but less so when e.g. parents with low prevalence or decryption of content in temporary folders.
+level: medium
