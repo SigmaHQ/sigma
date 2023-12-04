@@ -7,7 +7,7 @@ references:
     - https://www.bleepingcomputer.com/news/microsoft/microsoft-sysmon-now-detects-malware-process-tampering-attempts/
 author: Christopher Peacock '@securepeacock', SCYTHE '@scythe_io', Sittikorn S
 date: 2022/01/25
-modified: 2023/09/16
+modified: 2023/11/28
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
@@ -18,37 +18,17 @@ logsource:
 detection:
     selection:
         Type: 'Image is replaced'
-    filter_main_generic_1:
+    filter_main_generic:
         Image|contains:
-            - ':\Program Files\'
             - ':\Program Files (x86)'
-    filter_main_generic_2:
-        Image:
+            - ':\Program Files\'
             - ':\Windows\System32\wbem\WMIADAP.exe'
             - ':\Windows\SysWOW64\wbem\WMIADAP.exe'
     filter_optional_opera:
         Image|contains: '\AppData\Local\Programs\Opera\'
         Image|endswith: '\opera.exe'
-    filter_optional_chrome:
-        Image:
-            - 'C:\Program Files\Google\Chrome\Application\chrome.exe'
-            - 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
-    filter_optional_firefox:
-        Image:
-            - 'C:\Program Files\Mozilla Firefox\firefox.exe'
-            - 'C:\Program Files (x86)\Mozilla Firefox\firefox.exe'
-    filter_optional_edge_1:
-        - Image|endswith: '\WindowsApps\MicrosoftEdge.exe'
-        - Image:
-              - 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
-              - 'C:\Program Files\Microsoft\Edge\Application\msedge.exe'
-    filter_optional_edge_2:
-        Image|startswith:
-            - 'C:\Program Files (x86)\Microsoft\EdgeCore\'
-            - 'C:\Program Files\Microsoft\EdgeCore\'
-        Image|endswith:
-            - '\msedge.exe'
-            - '\msedgewebview2.exe'
+    filter_optional_edge:
+        Image|endswith: '\WindowsApps\MicrosoftEdge.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown

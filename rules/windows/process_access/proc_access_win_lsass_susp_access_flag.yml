@@ -1,0 +1,125 @@
+title: Potentially Suspicious GrantedAccess Flags On LSASS
+id: a18dd26b-6450-46de-8c91-9659150cf088
+related:
+    - id: 32d0d3e2-e58d-4d41-926b-18b520b2b32d
+      type: similar
+status: experimental
+description: Detects process access requests to LSASS process with potentially suspicious access flags
+references:
+    - https://docs.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights
+    - https://onedrive.live.com/view.aspx?resid=D026B4699190F1E6!2843&ithint=file%2cpptx&app=PowerPoint&authkey=!AMvCRTKB_V1J5ow
+    - https://web.archive.org/web/20230208123920/https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
+    - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
+    - http://security-research.dyndns.org/pub/slides/FIRST2017/FIRST-2017_Tom-Ueltschi_Sysmon_FINAL_notes.pdf
+author: Florian Roth, Roberto Rodriguez, Dimitrios Slamaris, Mark Russinovich, Thomas Patzke, Teymur Kheirkhabarov, Sherif Eldeeb, James Dickenson, Aleksey Potapov, oscd.community
+date: 2021/11/22
+modified: 2023/11/29
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+    - attack.s0002
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection_target:
+        TargetImage|endswith: '\lsass.exe'
+    selection_access:
+        - GrantedAccess|endswith:
+              # - '10'  # covered in rule 678dfc63-fefb-47a5-a04c-26bcf8cc9f65
+              - '30'
+              - '50'
+              - '70'
+              - '90'
+              - 'B0'
+              - 'D0'
+              - 'F0'
+              - '18'
+              - '38'
+              - '58'
+              - '78'
+              - '98'
+              - 'B8'
+              - 'D8'
+              - 'F8'
+              - '1A'
+              - '3A'
+              - '5A'
+              - '7A'
+              - '9A'
+              - 'BA'
+              - 'DA'
+              - 'FA'
+              - '0x14C2'  # https://github.com/b4rtik/ATPMiniDump/blob/76304f93b390af3bb66e4f451ca16562a479bdc9/ATPMiniDump/ATPMiniDump.c
+        - GrantedAccess|startswith:
+              - '0x100000'
+              - '0x1418'    # car.2019-04-004
+              - '0x1438'    # car.2019-04-004
+              - '0x143a'    # car.2019-04-004
+              - '0x1f0fff'
+              - '0x1f1fff'
+              - '0x1f2fff'
+              - '0x1f3fff'
+              - '0x40'
+              # - '0x1000'  # minimum access requirements to query basic info from service
+              # - '0x1010'    # car.2019-04-004
+              # - '0x1400'
+              # - '0x1410'    # car.2019-04-004 # Covered by 678dfc63-fefb-47a5-a04c-26bcf8cc9f65
+    filter_main_generic:
+        # When using this rule. Remove this filter and replace it by the path of the specific AV you use
+        SourceImage|contains:
+            - ':\Program Files (x86)\'
+            - ':\Program Files\'
+            - ':\Windows\System32\'
+            - ':\Windows\SysWOW64\'
+    filter_optional_malwarebytes:
+        SourceImage|endswith: ':\ProgramData\MALWAREBYTES\MBAMSERVICE\ctlrupdate\mbupdatr.exe'
+    filter_optional_vscode:
+        SourceImage|endswith: '\AppData\Local\Programs\Microsoft VS Code\Code.exe'
+    filter_main_windefend_1:
+        SourceImage|contains: ':\ProgramData\Microsoft\Windows Defender\'
+        SourceImage|endswith: '\MsMpEng.exe'
+    filter_main_windefend_2:
+        CallTrace|contains|all:
+            - '|?:\ProgramData\Microsoft\Windows Defender\Definition Updates\{'
+            - '}\mpengine.dll+'
+        GrantedAccess: '0x1418'
+    filter_main_windefend_3:
+        CallTrace|contains:
+            - '|c:\program files\windows defender\mprtp.dll'
+            - '|c:\program files\windows defender\MpClient.dll'
+    filter_optional_vmwaretools:
+        SourceImage|contains: ':\ProgramData\VMware\VMware Tools\'
+        SourceImage|endswith: '\vmtoolsd.exe'
+    filter_optional_sysinternals_process_explorer:
+        SourceImage|endswith:
+            - '\PROCEXP64.EXE'
+            - '\PROCEXP.EXE'
+        GrantedAccess: '0x40'
+    filter_optional_mbami:
+        SourceImage|endswith: '\MBAMInstallerService.exe'
+        GrantedAccess: '0x40'
+    filter_optional_nextron:
+        SourceImage|endswith:
+            - '\aurora-agent-64.exe'
+            - '\aurora-agent.exe'
+            - '\thor.exe'
+            - '\thor64.exe'
+        GrantedAccess: '0x40'
+    filter_main_explorer:
+        SourceImage|endswith: '\explorer.exe'
+        GrantedAccess: '0x401'
+    filter_optional_sysinternals_handle:
+        SourceImage|endswith:
+            - '\handle.exe'
+            - '\handle64.exe'
+        GrantedAccess: '0x40'
+    filter_optional_webex:
+        SourceImage|endswith: '\AppData\Local\WebEx\WebexHost.exe'
+        GrantedAccess: '0x401'
+    filter_optional_steam_apps:
+        SourceImage|contains: '\SteamLibrary\steamapps\'
+    condition: all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Legitimate software such as AV and EDR
+level: medium
