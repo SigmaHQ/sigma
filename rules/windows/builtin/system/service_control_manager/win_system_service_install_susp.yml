@@ -3,11 +3,13 @@ id: 1d61f71d-59d2-479e-9562-4ff5f4ead16b
 related:
     - id: ca83e9f3-657a-45d0-88d6-c1ac280caf53
       type: obsoletes
+    - id: 26481afe-db26-4228-b264-25a29fe6efc7
+      type: similar
 status: test
 description: Detects suspicious service installation commands
 author: pH-T (Nextron Systems), Florian Roth (Nextron Systems)
 date: 2022/03/18
-modified: 2022/11/14
+modified: 2023/12/04
 tags:
     - attack.persistence
     - attack.privilege_escalation
@@ -20,36 +22,17 @@ detection:
     selection:
         Provider_Name: 'Service Control Manager'
         EventID: 7045
-    suspicious1:
         ImagePath|contains:
-            - ' -w hidden '
             - ' -nop '
             - ' -sta '
-            - '\Users\Public\'
-            - '\Windows\Temp\'
-            - '\Perflogs\'
-            - '\\\\.\\pipe'
-            - '\ADMIN$\'
-            - 'C:\Temp\'
-            - '.downloadstring(' # PowerShell download command
+            - ' -w hidden '
+            - ':\Temp\'
             - '.downloadfile(' # PowerShell download command
+            - '.downloadstring(' # PowerShell download command
+            - '\ADMIN$\'
+            - '\Perflogs\'
             - '&&'
-    suspicious2a:
-        ImagePath|contains: ' -e'
-    suspicious2b:
-        ImagePath|contains:
-            - ' aQBlAHgA' # PowerShell encoded commands
-            - ' aWV4I' # PowerShell encoded commands
-            - ' IAB' # PowerShell encoded commands
-            - ' JAB' # PowerShell encoded commands
-            - ' PAA' # PowerShell encoded commands
-            - ' SQBFAFgA' # PowerShell encoded commands
-            - ' SUVYI' # PowerShell encoded commands
-    filter_optional_thor_remote:
-        ImagePath|startswith: ':\WINDOWS\TEMP\thor10-remote\thor64.exe'
-    filter_main_defender_def_updates:
-        ImagePath|contains: ':\ProgramData\Microsoft\Windows Defender\Definition Updates\'
-    condition: selection and ( suspicious1 or all of suspicious2* ) and not 1 of filter_main_* and not 1 of filter_optional_*
+    condition: selection
 falsepositives:
     - Unknown
 level: high
