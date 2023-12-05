@@ -1,0 +1,58 @@
+title: Remote Thread Creation In Uncommon Target Image
+id: a1a144b7-5c9b-4853-a559-2172be8d4a03
+related:
+    - id: f016c716-754a-467f-a39e-63c06f773987
+      type: obsoletes
+status: experimental
+description: Detects uncommon target processes for remote thread creation
+references:
+    - https://blog.redbluepurple.io/offensive-research/bypassing-injection-detection
+author: Florian Roth (Nextron Systems)
+date: 2022/03/16
+modified: 2023/10/19
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1055.003
+logsource:
+    product: windows
+    category: create_remote_thread
+detection:
+    selection:
+        TargetImage|endswith:
+            - '\calc.exe'
+            - '\calculator.exe'
+            - '\explorer.exe'
+            - '\mspaint.exe'
+            - '\notepad.exe'
+            - '\ping.exe'
+            - '\sethc.exe'
+            - '\spoolsv.exe'
+            - '\wordpad.exe'
+            - '\write.exe'
+    filter_main_csrss:
+        SourceImage|endswith: ':\Windows\System32\csrss.exe'
+    filter_optional_aurora_1:
+        StartFunction: 'EtwpNotificationThread'
+    filter_optional_aurora_2:
+        SourceImage|contains: 'unknown process'
+    filter_optional_vmtoolsd:
+        SourceImage|endswith: ':\Program Files\VMware\VMware Tools\vmtoolsd.exe'
+        StartFunction: 'GetCommandLineW'
+        TargetImage|endswith:
+            - ':\Windows\explorer.exe'
+            - ':\Windows\System32\notepad.exe'
+            - ':\Windows\System32\spoolsv.exe'
+    filter_main_rundll32:
+        SourceImage|endswith: ':\Windows\System32\rundll32.exe'
+        TargetImage|endswith: ':\Windows\explorer.exe'
+        StartFunction:
+            - 'LoadLibraryW'
+            - 'FreeLibrary'
+    filter_optional_winzip:
+        SourceImage|endswith: ':\Program Files\WinZip\FAHWindow64.exe'
+        TargetImage|endswith: ':\Windows\explorer.exe'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Unknown
+level: high

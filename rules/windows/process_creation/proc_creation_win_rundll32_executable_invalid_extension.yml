@@ -6,7 +6,10 @@ references:
     - https://twitter.com/mrd0x/status/1481630810495139841?s=12
 author: Tim Shelton, Florian Roth (Nextron Systems), Yassine Oukessou (fix + fp)
 date: 2022/01/13
-modified: 2023/03/24
+modified: 2023/11/14
+tags:
+    - attack.defense_evasion
+    - attack.t1218.011
 logsource:
     category: process_creation
     product: windows
@@ -42,13 +45,12 @@ detection:
         ParentImage|startswith: 'C:\Users\'
         ParentImage|contains: '\AppData\Local\Microsoft\EdgeUpdate\Install\{'
         ParentImage|endswith: '\setup.exe'
-        ParentCommandLine|contains: '\setup.exe" --install-archive="C:\Users\'
-    filter_avira:
+        # ParentCommandLine|contains: '\setup.exe" --install-archive="C:\Users\' ## ParentCommandLine not existing for 4688 events
+    filter_zzzzInvokeManagedCustomActionOutOfProc:
         CommandLine|contains|all:
             - 'C:\Windows\Installer\MSI'
             - '.tmp'
             - 'zzzzInvokeManagedCustomActionOutOfProc'
-            - 'Avira.OE.Setup'
     condition: selection and not 1 of filter_*
 fields:
     - Image

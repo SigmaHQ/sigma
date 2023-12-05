@@ -1,0 +1,30 @@
+title: Windows Terminal Profile Settings Modification By Uncommon Process
+id: 9b64de98-9db3-4033-bd7a-f51430105f00
+status: experimental
+description: Detects the creation or modification of the Windows Terminal Profile settings file "settings.json" by an uncommon process.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/74438b0237d141ee9c99747976447dc884cb1a39/atomics/T1547.015/T1547.015.md#atomic-test-1---persistence-by-modifying-windows-terminal-profile
+    - https://twitter.com/nas_bench/status/1550836225652686848
+author: frack113, Nasreddine Bencherchali (Nextron Systems)
+date: 2023/07/22
+tags:
+    - attack.persistence
+    - attack.t1547.015
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        Image|endswith:
+            # Note: Add other potential common applications
+            - '\cmd.exe'
+            - '\cscript.exe'
+            - '\mshta.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\wscript.exe'
+        TargetFilename|endswith: '\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
+    condition: selection
+falsepositives:
+    - Some false positives may occur with admin scripts that set WT settings.
+level: medium

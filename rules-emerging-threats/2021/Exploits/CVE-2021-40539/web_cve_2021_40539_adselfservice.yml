@@ -1,0 +1,26 @@
+title: ADSelfService Exploitation
+id: 6702b13c-e421-44cc-ab33-42cc25570f11
+status: test
+description: Detects suspicious access to URLs that was noticed in cases in which attackers exploitated the ADSelfService vulnerability CVE-2021-40539
+references:
+    - https://us-cert.cisa.gov/ncas/alerts/aa21-259a
+author: Tobias Michalski (Nextron Systems), Max Altgelt (Nextron Systems)
+date: 2021/09/20
+modified: 2023/01/02
+tags:
+    - cve.2021.40539
+    - detection.emerging_threats
+    - attack.initial_access
+    - attack.t1190
+logsource:
+    category: webserver
+detection:
+    selection:
+        cs-uri-query|contains:
+            - '/help/admin-guide/Reports/ReportGenerate.jsp'
+            - '/ServletApi/../RestApi/LogonCustomization'
+            - '/ServletApi/../RestAPI/Connection'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

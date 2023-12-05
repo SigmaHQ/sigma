@@ -6,7 +6,7 @@ references:
     - https://www.absolomb.com/2018-01-26-Windows-Privilege-Escalation-Guide/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/08/12
-modified: 2023/03/05
+modified: 2023/11/11
 tags:
     - attack.credential_access
     - attack.t1552.006
@@ -15,8 +15,12 @@ logsource:
     product: windows
 detection:
     selection_findstr_img:
-        - Image|endswith: '\findstr.exe'
-        - OriginalFileName: 'FINDSTR.EXE'
+        - Image|endswith:
+              - '\find.exe'
+              - '\findstr.exe'
+        - OriginalFileName:
+              - 'FIND.EXE'
+              - 'FINDSTR.EXE'
     selection_findstr_cli:
         CommandLine|contains:
             - '"Everyone"'
@@ -28,6 +32,7 @@ detection:
             # Example CLI would be: icacls "C:\Program Files\*" 2>nul | findstr "(M)" | findstr "Everyone"
             # You could extend it for other groups and users
             #   Example: icacls "C:\Program Files\*" 2>nul | findstr "(M)" | findstr "BUILTIN\Users"
+            # Note: This selection only detects the command when executed from a handler such as a "cmd /c" or "powershell -c"
             - 'icacls '
             - 'findstr '
             - 'Everyone'

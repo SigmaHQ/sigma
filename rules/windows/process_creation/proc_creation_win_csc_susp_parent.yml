@@ -1,12 +1,14 @@
-title: Suspicious Parent of Csc.exe
+title: Csc.EXE Execution Form Potentially Suspicious Parent
 id: b730a276-6b63-41b8-bcf8-55930c8fc6ee
 status: test
-description: Detects a suspicious parent of csc.exe, which could by a sign of payload delivery
+description: Detects a potentially suspicious parent of "csc.exe", which could be a sign of payload delivery.
 references:
-    - https://twitter.com/SBousseaden/status/1094924091256176641
-author: Florian Roth (Nextron Systems)
+    - https://www.uptycs.com/blog/warzonerat-can-now-evade-with-process-hollowing
+    - https://reaqta.com/2017/11/short-journey-darkvnc/
+    - https://www.pwc.com/gx/en/issues/cybersecurity/cyber-threat-intelligence/yellow-liderc-ships-its-scripts-delivers-imaploader-malware.html
+author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems), X__Junior (Nextron Systems)
 date: 2019/02/11
-modified: 2022/01/07
+modified: 2023/10/27
 tags:
     - attack.execution
     - attack.t1059.005
@@ -18,13 +20,67 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\csc.exe'
+    selection_img:
+        - Image|endswith: '\csc.exe'
+        - OriginalFileName: 'csc.exe'
+    selection_parent_generic:
         ParentImage|endswith:
-            - '\wscript.exe'
             - '\cscript.exe'
+            - '\excel.exe'
             - '\mshta.exe'
-    condition: selection
+            - '\onenote.exe'
+            - '\outlook.exe'
+            - '\powerpnt.exe'
+            - '\winword.exe'
+            - '\wscript.exe'
+    selection_parent_powershell:
+        ParentImage|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        ParentCommandLine|contains:
+            - '-Encoded '
+            - 'FromBase64String'
+    selection_parent_susp_location:
+        - ParentCommandLine|re: '([Pp]rogram[Dd]ata|%([Ll]ocal)?[Aa]pp[Dd]ata%|\\[Aa]pp[Dd]ata\\([Ll]ocal(Ll]ow)?|[Rr]oaming))\\[^\\]{1,256}$'
+        - ParentCommandLine|contains:
+              - ':\PerfLogs\'
+              - ':\Users\Public\'
+              - ':\Windows\Temp\'
+              - '\Temporary Internet'
+        - ParentCommandLine|contains|all:
+              - ':\Users\'
+              - '\Favorites\'
+        - ParentCommandLine|contains|all:
+              - ':\Users\'
+              - '\Favourites\'
+        - ParentCommandLine|contains|all:
+              - ':\Users\'
+              - '\Contacts\'
+        - ParentCommandLine|contains|all:
+              - ':\Users\'
+              - '\Pictures\'
+    filter_main_programfiles:
+        # Note: this is a generic filter. You could baseline execution in your env for a more robust rule
+        ParentImage|startswith:
+            - 'C:\Program Files (x86)\' # https://twitter.com/gN3mes1s/status/1206874118282448897
+            - 'C:\Program Files\' # https://twitter.com/gN3mes1s/status/1206874118282448897
+    filter_main_sdiagnhost:
+        ParentImage: 'C:\Windows\System32\sdiagnhost.exe' # https://twitter.com/gN3mes1s/status/1206874118282448897
+    filter_main_w3p:
+        ParentImage: 'C:\Windows\System32\inetsrv\w3wp.exe' # https://twitter.com/gabriele_pippi/status/1206907900268072962
+    filter_optional_chocolatey:
+        ParentImage: 'C:\ProgramData\chocolatey\choco.exe' # Chocolatey https://chocolatey.org/
+    filter_optional_defender:
+        ParentCommandLine|contains: '\ProgramData\Microsoft\Windows Defender Advanced Threat Protection'
+    filter_optional_ansible:
+        # Note: As ansible is widely used we exclude it with this generic filter.
+        # A better option would be to filter based on script content basis or other marker while hunting
+        ParentCommandLine|contains:
+            # '{"failed":true,"msg":"Ansible requires PowerShell v3.0 or newer"}'
+            - 'JwB7ACIAZgBhAGkAbABlAGQAIgA6AHQAcgB1AGUALAAiAG0AcwBnACIAOgAiAEEAbgBzAGkAYgBsAGUAIAByAGUAcQB1AGkAcgBlAHMAIABQAG8AdwBlAHIAUwBoAGUAbABsACAAdgAzAC4AMAAgAG8AcgAgAG4AZQB3AGUAcgAiAH0AJw'
+            - 'cAewAiAGYAYQBpAGwAZQBkACIAOgB0AHIAdQBlACwAIgBtAHMAZwAiADoAIgBBAG4AcwBpAGIAbABlACAAcgBlAHEAdQBpAHIAZQBzACAAUABvAHcAZQByAFMAaABlAGwAbAAgAHYAMwAuADAAIABvAHIAIABuAGUAdwBlAHIAIgB9ACcA'
+            - 'nAHsAIgBmAGEAaQBsAGUAZAAiADoAdAByAHUAZQAsACIAbQBzAGcAIgA6ACIAQQBuAHMAaQBiAGwAZQAgAHIAZQBxAHUAaQByAGUAcwAgAFAAbwB3AGUAcgBTAGgAZQBsAGwAIAB2ADMALgAwACAAbwByACAAbgBlAHcAZQByACIAfQAnA'
+    condition: selection_img and 1 of selection_parent_* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high

@@ -9,6 +9,7 @@ references:
     - https://www.volexity.com/blog/2022/06/02/zero-day-exploitation-of-atlassian-confluence/
 author: Nextron Systems
 date: 2022/06/03
+modified: 2023/06/16
 tags:
     - attack.execution
     - attack.t1059
@@ -17,9 +18,13 @@ logsource:
     product: linux
 detection:
     selection_img:
-        Image|contains:
-            - '/python2.'  # python image is always of the form ../python3.10; ../python is just a symlink
-            - '/python3.'
+        - Image|endswith:
+              - '/python'
+              - '/python2'
+              - '/python3'
+        - Image|contains:
+              - '/python2.'  # python image is always of the form ../python3.10; ../python is just a symlink
+              - '/python3.'
     selection_cli_1:
         CommandLine|contains|all:
             - 'import pty'

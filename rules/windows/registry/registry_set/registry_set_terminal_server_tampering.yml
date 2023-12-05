@@ -21,7 +21,7 @@ references:
     - https://admx.help/HKLM/SOFTWARE/Policies/Microsoft/Windows%20NT/Terminal%20Services # Contain description for most of the keys mentioned here (check it out if you want more information)
 author: Samir Bousseaden, David ANDRE, Roberto Rodriguez @Cyb3rWard0g, Nasreddine Bencherchali
 date: 2022/08/06
-modified: 2022/09/29
+modified: 2023/08/17
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -31,7 +31,6 @@ logsource:
     product: windows
 detection:
     selection_shadow:
-        EventType: SetValue
         TargetObject|contains:
             - 'SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\'
             - '\Control\Terminal Server\'
@@ -42,7 +41,6 @@ detection:
             - 'DWORD (0x00000003)' # View Session with user’s permission
             - 'DWORD (0x00000004)' # View Session without user’s permission
     selection_terminal_services_key:
-        EventType: SetValue
         TargetObject|contains:
             - '\Control\Terminal Server\'
             - 'SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\'
@@ -53,12 +51,11 @@ detection:
         Details: 'DWORD (0x00000001)'
     selection_tamper_only:
         # Any changes to these keys should be suspicious and looked at
-        EventType: SetValue
         TargetObject|contains:
             - '\services\TermService\Parameters\ServiceDll' # RDP hijacking
-            - '\Control\Terminal Server\WinStations\RDP-Tcp\InitialProgram' # This value can be set to pecify a program to run automatically when a user logs on to a remote computer.
-            - '\Control\Terminal Server\InitialProgram' # This value can be set to pecify a program to run automatically when a user logs on to a remote computer.
-            - 'SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\InitialProgram' # This value can be set to pecify a program to run automatically when a user logs on to a remote computer.
+            - '\Control\Terminal Server\WinStations\RDP-Tcp\InitialProgram' # This value can be set to specify a program to run automatically when a user logs on to a remote computer.
+            - '\Control\Terminal Server\InitialProgram' # This value can be set to specify a program to run automatically when a user logs on to a remote computer.
+            - 'SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\InitialProgram' # This value can be set to specify a program to run automatically when a user logs on to a remote computer.
     condition: selection_shadow or (selection_terminal_services_key and selection_terminal_services_values) or selection_tamper_only
 falsepositives:
     - Some of the keys mentioned here could be modified by an administrator while setting group policy (it should be investigated either way)

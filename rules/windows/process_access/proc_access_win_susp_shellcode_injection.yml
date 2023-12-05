@@ -1,0 +1,67 @@
+title: Potential Shellcode Injection
+id: 250ae82f-736e-4844-a68b-0b5e8cc887da
+status: test
+description: Detects potential shellcode injection used by tools such as Metasploit's migrate and Empire's psinject
+author: Bhabesh Raj
+date: 2022/03/11
+modified: 2023/11/29
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1055
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        GrantedAccess:
+            - '0x147a'
+            - '0x1f3fff'
+        CallTrace|contains: 'UNKNOWN'
+    filter_optional_dell_folders:
+        # If dell software is installed we get matches like these
+        # Example 1:
+        #   SourceImage: C:\Program Files\Dell\SupportAssistAgent\bin\SupportAssistAgent.exe
+        #   TargetImage: C:\Program Files\Dell\TechHub\Dell.TechHub.exe
+        #   GrantedAccess: 0x1F3FFF
+        # Example 2:
+        #   SourceImage: C:\Program Files (x86)\Dell\UpdateService\DCF\Dell.DCF.UA.Bradbury.API.SubAgent.exe
+        #   TargetImage: C:\Program Files\Dell\TechHub\Dell.TechHub.exe
+        #   GrantedAccess: 0x1F3FFF
+        # Example 3:
+        #   SourceImage: C:\Program Files\Dell\TechHub\Dell.TechHub.exe
+        #   TargetImage: C:\Program Files (x86)\Dell\UpdateService\DCF\Dell.DCF.UA.Bradbury.API.SubAgent.exe
+        #   GrantedAccess: 0x1F3FFF
+        SourceImage|contains:
+            - ':\Program Files\Dell\'
+            - ':\Program Files (x86)\Dell\'
+        TargetImage|contains:
+            - ':\Program Files\Dell\'
+            - ':\Program Files (x86)\Dell\'
+        GrantedAccess: '0x1F3FFF'
+        CallTrace|startswith: '?:\Windows\System32\ntdll.dll'
+    filter_optional_dell_specifc:
+        SourceImage|endswith: ':\Program Files (x86)\Dell\UpdateService\ServiceShell.exe'
+        TargetImage|endswith: ':\Windows\Explorer.EXE'
+        GrantedAccess: '0x1F3FFF'
+        CallTrace|startswith: '?:\Windows\System32\ntdll.dll'
+    filter_optional_visual_studio:
+        SourceImage|endswith:
+            - ':\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\PerfWatson2.exe'
+            - ':\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\PerfWatson2.exe'
+        TargetImage|endswith:
+            - ':\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\devenv.exe'
+            - ':\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\devenv.exe'
+        CallTrace|startswith: '?:\Windows\System32\ntdll.dll'
+    filter_optional_ddvdatacollector:
+        SourceImage|contains: ':\Program Files\Microsoft Visual Studio\'
+        SourceImage|endswith: '\MSBuild\Current\Bin\MSBuild.exe'
+        TargetImage|endswith: ':\Program Files\Dell\DellDataVault\DDVDataCollector.exe'
+    filter_optional_wmiprvese:
+        SourceImage|endswith: ':\Windows\System32\Wbem\Wmiprvse.exe'
+        TargetImage|endswith: ':\Windows\system32\lsass.exe'
+        CallTrace|startswith: '?:\Windows\SYSTEM32\ntdll.dll'
+    condition: selection and not 1 of filter_optional_*
+falsepositives:
+    - Unknown
+level: high

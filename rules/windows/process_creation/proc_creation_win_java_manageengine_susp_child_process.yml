@@ -1,0 +1,60 @@
+title: Suspicious Child Process Of Manage Engine ServiceDesk
+id: cea2b7ea-792b-405f-95a1-b903ea06458f
+status: experimental
+description: Detects suspicious child processes of the "Manage Engine ServiceDesk Plus" Java web service
+references:
+    - https://www.horizon3.ai/manageengine-cve-2022-47966-technical-deep-dive/
+    - https://github.com/horizon3ai/CVE-2022-47966/blob/3a51c6b72ebbd87392babd955a8fbeaee2090b35/CVE-2022-47966.py
+    - https://blog.viettelcybersecurity.com/saml-show-stopper/
+author: Florian Roth (Nextron Systems)
+date: 2023/01/18
+modified: 2023/08/29
+tags:
+    - attack.command_and_control
+    - attack.t1102
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|contains|all:
+            - '\ManageEngine\ServiceDesk\'
+            - '\java.exe'
+        Image|endswith:
+            - '\AppVLP.exe'
+            - '\bash.exe'
+            - '\bitsadmin.exe'
+            - '\calc.exe'
+            - '\certutil.exe'
+            - '\cscript.exe'
+            - '\curl.exe'
+            - '\forfiles.exe'
+            - '\mftrace.exe'
+            - '\mshta.exe'
+            - '\net.exe'
+            - '\net1.exe'
+            - '\notepad.exe'  # Often used in POCs
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\query.exe'
+            - '\reg.exe'
+            - '\schtasks.exe'
+            - '\scrcons.exe'
+            - '\sh.exe'
+            - '\systeminfo.exe'
+            - '\whoami.exe'  # Often used in POCs
+            - '\wmic.exe'
+            - '\wscript.exe'
+            # - '\hh.exe'
+            # - '\regsvr32.exe'
+            # - '\rundll32.exe'
+            # - '\scriptrunner.exe'
+    filter_main_net:
+        Image|endswith:
+            - '\net.exe'
+            - '\net1.exe'
+        CommandLine|contains: ' stop'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Legitimate sub processes started by Manage Engine ServiceDesk Pro
+level: high

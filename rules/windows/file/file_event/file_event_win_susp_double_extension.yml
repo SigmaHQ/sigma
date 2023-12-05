@@ -5,8 +5,8 @@ related:
       type: derived
     - id: 3215aa19-f060-4332-86d5-5602511f3ca8
       type: similar
-status: experimental
-description: Detects dropped files with double extensions, which is often used by malware as a method to abuse the fact that windows hide default extensions by default.
+status: test
+description: Detects dropped files with double extensions, which is often used by malware as a method to abuse the fact that Windows hide default extensions by default.
 references:
     - https://www.crowdstrike.com/blog/meet-crowdstrikes-adversary-of-the-month-for-june-mustang-panda/
     - https://www.anomali.com/blog/china-based-apt-mustang-panda-targets-minority-groups-public-and-private-sector-organizations
@@ -25,28 +25,29 @@ logsource:
 detection:
     selection_gen:
         TargetFilename|endswith:
-            - '.zip'
-            - '.rar'
-            #- '.lnk'  # legitimate links can happen just anywhere
-            - '.iso'
             - '.exe'
+            - '.iso'
+            # - '.lnk'  # legitimate links can happen just anywhere
+            - '.rar'
+            - '.zip'
         TargetFilename|contains:
             - '.doc.'
             - '.docx.'
-            - '.xls.'
-            - '.xlsx.'
-            - '.ppt.'
-            - '.pptx.'
             - '.jpg.'
             - '.pdf.'
+            - '.ppt.'
+            - '.pptx.'
+            - '.xls.'
+            - '.xlsx.'
     selection_exe:
         TargetFilename|endswith:
-            - '.zip.exe'
             - '.rar.exe'
-    #filter:
-    #    TargetFilename|contains:
-    #        - '\AppData\Roaming\Microsoft\Office\Recent\'
-    #        - '\AppData\Roaming\Microsoft\Windows\Recent\'
+            - '.zip.exe'
+    # Note: If you wanna keep using the ".lnk" extension. You might uncomment this filter and add additional locations
+    # filter_main_lnk:
+    #     TargetFilename|contains:
+    #         - '\AppData\Roaming\Microsoft\Office\Recent\'
+    #         - '\AppData\Roaming\Microsoft\Windows\Recent\'
     condition: 1 of selection_*
 falsepositives:
     - Unlikely

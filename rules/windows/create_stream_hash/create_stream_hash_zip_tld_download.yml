@@ -1,0 +1,42 @@
+title: Potentially Suspicious File Download From ZIP TLD
+id: 0bb4bbeb-fe52-4044-b40c-430a04577ebe
+status: experimental
+description: Detects the download of a file with a potentially suspicious extension from a .zip top level domain.
+references:
+    - https://twitter.com/cyb3rops/status/1659175181695287297
+    - https://fabian-voith.de/2020/06/25/sysmon-v11-1-reads-alternate-data-streams/
+author: Florian Roth (Nextron Systems)
+date: 2023/05/18
+tags:
+    - attack.defense_evasion
+logsource:
+    product: windows
+    category: create_stream_hash
+detection:
+    selection:
+        Contents|contains: '.zip/'
+        TargetFilename|contains:
+            - '.bat:Zone'
+            - '.dat:Zone'
+            - '.dll:Zone'
+            - '.doc:Zone'
+            - '.docm:Zone'
+            - '.exe:Zone'
+            - '.hta:Zone'
+            - '.pptm:Zone'
+            - '.ps1:Zone'
+            - '.rar:Zone'
+            - '.rtf:Zone'
+            - '.sct:Zone'
+            - '.vbe:Zone'
+            - '.vbs:Zone'
+            - '.ws:Zone'
+            - '.wsf:Zone'
+            - '.xll:Zone'
+            - '.xls:Zone'
+            - '.xlsm:Zone'
+            - '.zip:Zone'
+    condition: selection
+falsepositives:
+    - Legitimate file downloads from a websites and web services that uses the ".zip" top level domain.
+level: high

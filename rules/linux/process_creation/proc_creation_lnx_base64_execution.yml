@@ -4,8 +4,10 @@ status: experimental
 description: Detects suspicious process command line that uses base64 encoded input for execution with a shell
 references:
     - https://github.com/arget13/DDexec
+    - https://www.mandiant.com/resources/blog/barracuda-esg-exploited-globally
 author: pH-T (Nextron Systems)
 date: 2022/07/26
+modified: 2023/06/16
 tags:
     - attack.defense_evasion
     - attack.t1140
@@ -14,19 +16,19 @@ logsource:
     category: process_creation
 detection:
     selection_base64:
-        CommandLine|contains: 'base64 -w0 '
+        CommandLine|contains: 'base64 '
     selection_exec:
         - CommandLine|contains:
-            - '| bash '
-            - '| sh '
-            - '|bash '
-            - '|sh '
+              - '| bash '
+              - '| sh '
+              - '|bash '
+              - '|sh '
         - CommandLine|endswith:
-            - '| bash'
-            - '| sh'
-            - '|bash'
-            - ' |sh'
-    condition: selection_base64 and selection_exec
+              - ' |sh'
+              - '| bash'
+              - '| sh'
+              - '|bash'
+    condition: all of selection_*
 falsepositives:
     - Legitimate administration activities
 level: medium

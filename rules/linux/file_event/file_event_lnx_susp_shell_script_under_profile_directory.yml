@@ -1,0 +1,27 @@
+title: Potentially Suspicious Shell Script Creation in Profile Folder
+id: 13f08f54-e705-4498-91fd-cce9d9cee9f1
+status: experimental
+description: Detects the creation of shell scripts under the "profile.d" path.
+references:
+    - https://blogs.jpcert.or.jp/en/2023/05/gobrat.html
+    - https://jstnk9.github.io/jstnk9/research/GobRAT-Malware/
+    - https://www.virustotal.com/gui/file/60bcd645450e4c846238cf0e7226dc40c84c96eba99f6b2cffcd0ab4a391c8b3/detection
+    - https://www.virustotal.com/gui/file/3e44c807a25a56f4068b5b8186eee5002eed6f26d665a8b791c472ad154585d1/detection
+author: Joseliyo Sanchez, @Joseliyo_Jstnk
+date: 2023/06/02
+tags:
+    - attack.persistence
+logsource:
+    product: linux
+    category: file_event
+detection:
+    selection:
+        TargetFilename|contains: '/etc/profile.d/'
+        TargetFilename|endswith:
+            - '.csh'
+            - '.sh'
+    condition: selection
+falsepositives:
+    - Legitimate shell scripts in the "profile.d" directory could be common in your environment. Apply additional filter accordingly via "image", by adding specific filenames you "trust" or by correlating it with other events.
+    - Regular file creation during system update or software installation by the package manager
+level: low # Can be increased to a higher level after some tuning

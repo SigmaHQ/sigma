@@ -1,0 +1,68 @@
+on:
+  push:
+    tags:
+      - 'r*'
+
+name: Create Release
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Generate Changelog
+        run: |
+          prev_tag=$(git for-each-ref --sort=creatordate --format '%(refname:lstrip=2)' refs/tags | grep ^r | tail -2 | head -1)
+          curr_tag=$(git for-each-ref --sort=creatordate --format '%(refname:lstrip=2)' refs/tags | grep ^r | tail -1)
+          echo "Previous tag: ${prev_tag}"
+          echo "Current tag: ${curr_tag}"
+          if [[ $(git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*new: ' -c) -gt 0 ]]; then echo "### New Rules" > changes.txt; fi
+          git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*new: ' | sort -u | sed -e 's%^% - %' >> changes.txt
+          if [[ $(git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*update: ' -c) -gt 0 ]]; then echo "### Updated Rules" >> changes.txt; fi
+          git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*update: ' | sort -u | sed -e 's%^% - %' >> changes.txt
+          if [[ $(git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*remove: ' -c) -gt 0 ]]; then echo "### Removed / Deprecated Rules" >> changes.txt; fi
+          git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*remove: ' | sort -u | sed -e 's%^% - %' >> changes.txt
+          if [[ $(git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*fix: ' -c) -gt 0 ]]; then echo "### Fixed Rules" >> changes.txt; fi
+          git log --pretty=%B ${prev_tag}..${curr_tag} | grep -E '^\s*fix: ' | sort -u | sed -e 's%^% - %' >> changes.txt
+          git log --pretty=%B ${prev_tag}..${curr_tag} | grep -ioP 'Merge PR #\d+ from \K(@\S+)' | sort -u > authors_raw.txt
+          git log --pretty=%B ${prev_tag}..${curr_tag} | grep -oP "Co-authored-by: \K.*(?= <)" | sort -u | sed -e 's%^%@%' >> authors_raw.txt
+          git log --pretty=%B ${prev_tag}..${curr_tag} | grep -ioP "Thanks: \K.*?(?=$| for)" | sort -u >> authors_raw.txt
+          LC_ALL=en_US.UTF-8 sort -u authors_raw.txt | grep -v 'dependabot\[bot\]' > authors.txt
+          cat changes.txt >> changelog.txt
+          echo "" >> changelog.txt
+          echo "### Acknowledgement" >> changelog.txt
+          echo "Thanks to $(perl -pe 's%\n%, %' authors.txt | sed 's%, $%%') for their contribution to this release" >> changelog.txt
+          echo "" >> changelog.txt
+          echo "" >> changelog.txt
+          echo "### Which Sigma rule package should I use?" >> changelog.txt
+          echo "A detailed explanation can be found in the [Releases.md](Releases.md) file. If you are new to Sigma, we recommend starting with the \"Core\" ruleset." >> changelog.txt
+          echo "" >> changelog.txt
+          echo "The [latest release package on GitHub](https://docs.github.com/en/repositories/releasing-projects-on-github/linking-to-releases#linking-to-the-latest-release) can always be found [here](https://github.com/SigmaHQ/sigma/releases/latest)." >> changelog.txt
+          cat changelog.txt
+      - name: Build all release packages
+        run: |
+          python3 tests/sigma-package-release.py --min-status test --min-level high --rule-types generic --outfile sigma_core.zip
+          python3 tests/sigma-package-release.py --min-status test --min-level medium --rule-types generic --outfile sigma_core+.zip
+          python3 tests/sigma-package-release.py --min-status experimental --min-level medium --rule-types generic --outfile sigma_core++.zip
+          python3 tests/sigma-package-release.py --min-status experimental --min-level medium --rule-types et --outfile sigma_emerging_threats_addon.zip
+          python3 tests/sigma-package-release.py --min-status experimental --min-level medium --rule-types generic et --outfile sigma_all_rules.zip
+      - name: Create Release with Assets
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          name: Release ${{ github.ref_name }}
+          body_path: changelog.txt
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: true
+          prerelease: false
+          files: |
+            sigma_core.zip
+            sigma_core+.zip
+            sigma_core++.zip
+            sigma_emerging_threats_addon.zip
+            sigma_all_rules.zip

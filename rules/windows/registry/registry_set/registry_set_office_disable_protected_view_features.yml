@@ -1,0 +1,42 @@
+title: Microsoft Office Protected View Disabled
+id: a5c7a43f-6009-4a8c-80c5-32abf1c53ecc
+related:
+    - id: 7c637634-c95d-4bbf-b26c-a82510874b34
+      type: obsoletes
+status: test
+description: Detects changes to Microsoft Office protected view registry keys with which the attacker disables this feature.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
+    - https://unit42.paloaltonetworks.com/unit42-gorgon-group-slithering-nation-state-cybercrime/
+    - https://yoroi.company/research/cyber-criminal-espionage-operation-insists-on-italian-manufacturing/
+    - https://admx.help/HKCU/software/policies/microsoft/office/16.0/excel/security/protectedview
+author: frack113, Nasreddine Bencherchali (Nextron Systems)
+date: 2021/06/08
+modified: 2023/08/17
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection_path:
+        TargetObject|contains|all:
+            - '\SOFTWARE\Microsoft\Office\'
+            - '\Security\ProtectedView\'
+    selection_values_1:
+        Details: 'DWORD (0x00000001)'
+        TargetObject|endswith:
+            - '\DisableAttachementsInPV' # Turn off Protected View for attachments opened from Outlook
+            - '\DisableInternetFilesInPV' # Turn off Protected View for files downloaded from Internet zone
+            - '\DisableIntranetCheck' # Turn off Protected View for file located in UNC paths
+            - '\DisableUnsafeLocationsInPV' # Turn off Protected View for unsafe locations
+    selection_values_0:
+        Details: 'DWORD (0x00000000)'
+        TargetObject|endswith:
+            - '\enabledatabasefileprotectedview'
+            - '\enableforeigntextfileprotectedview'
+    condition: selection_path and 1 of selection_values_*
+falsepositives:
+    - Unlikely
+level: high

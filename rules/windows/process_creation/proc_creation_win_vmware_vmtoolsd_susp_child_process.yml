@@ -4,9 +4,11 @@ status: experimental
 description: Detects suspicious child process creations of VMware Tools process which may indicate persistence setup
 references:
     - https://bohops.com/2021/10/08/analyzing-and-detecting-a-vmtools-persistence-technique/
-author: behops, Bhabesh Raj
+    - https://user-images.githubusercontent.com/61026070/136518004-b68cce7d-f9b8-4e9a-9b7b-53b1568a9a94.png
+    - https://github.com/vmware/open-vm-tools/blob/master/open-vm-tools/tools.conf
+author: bohops, Bhabesh Raj
 date: 2021/10/08
-modified: 2022/07/14
+modified: 2023/07/25
 tags:
     - attack.execution
     - attack.persistence
@@ -19,32 +21,37 @@ detection:
         ParentImage|endswith: '\vmtoolsd.exe'
     selection_img:
         - Image|endswith:
-            - '\cmd.exe'
-            - '\powershell.exe'
-            - '\pwsh.exe'
-            - '\rundll32.exe'
-            - '\regsvr32.exe'
-            - '\wscript.exe'
-            - '\cscript.exe'
+              - '\cmd.exe'
+              - '\cscript.exe'
+              - '\mshta.exe'
+              - '\powershell.exe'
+              - '\pwsh.exe'
+              - '\regsvr32.exe'
+              - '\rundll32.exe'
+              - '\wscript.exe'
         - OriginalFileName:
-            - 'Cmd.Exe'
-            - 'PowerShell.EXE'
-            - 'pwsh.dll'
-            - 'RUNDLL32.EXE'
-            - 'REGSVR32.EXE'
-            - 'wscript.exe'
-            - 'cscript.exe'
-    filter:
+              - 'Cmd.Exe'
+              - 'cscript.exe'
+              - 'MSHTA.EXE'
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+              - 'REGSVR32.EXE'
+              - 'RUNDLL32.EXE'
+              - 'wscript.exe'
+    filter_main_vmwaretools_script:
+        Image|endswith: '\cmd.exe'
         CommandLine|contains:
             - '\VMware\VMware Tools\poweron-vm-default.bat'
             - '\VMware\VMware Tools\poweroff-vm-default.bat'
             - '\VMware\VMware Tools\resume-vm-default.bat'
             - '\VMware\VMware Tools\suspend-vm-default.bat'
-    condition: all of selection* and not filter
-fields:
-    - CommandLine
-    - ParentCommandLine
-    - Details
+    filter_main_empty:
+        Image|endswith: '\cmd.exe'
+        CommandLine: ''
+    filter_main_null:
+        Image|endswith: '\cmd.exe'
+        CommandLine: null
+    condition: all of selection* and not 1 of filter_main_*
 falsepositives:
-    - Legitimate use by administrator
+    - Legitimate use by VM administrator
 level: high

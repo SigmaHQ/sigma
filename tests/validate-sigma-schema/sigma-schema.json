@@ -1,0 +1,233 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Sigma rule specification V1.0.4 (2023/06/29)",
+  "type": "object",
+  "required": ["title", "logsource", "detection"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "maxLength": 256,
+      "description": "A brief title for the rule that should contain what the rules is supposed to detect"
+    },
+    "id": {
+      "type": "string",
+      "description": "A globally unique identifier for the Sigma rule. This is recommended to be a UUID v4, but not mandatory.",
+      "format": "uuid"
+    },
+    "related": {
+      "type": "array",
+      "description": "A list of related Sigma rules to keep track of the relationships between detections. This can be used to indicate that a rule is derived from another rule, or that a rule has been obsoleted by another rule.",
+      "items": {
+        "type": "object",
+        "required": ["id", "type"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "A globally unique identifier for the Sigma rule. This is recommended to be a UUID v4, but not mandatory.",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "oneOf": [
+              {
+                "const": "derived",
+                "description": "The rule was derived from the referred rule or rules, which may remain active"
+              },
+              {
+                "const": "obsoletes",
+                "description": "The rule obsoletes the referred rule or rules, which aren't used anymore"
+              },
+              {
+                "const": "merged",
+                "description": "The rule was merged from the referred rules. The rules may be still existing and in use"
+              },
+              {
+                "const": "renamed",
+                "description": "The rule had previously the referred identifier or identifiers but was renamed for whatever reason, e.g. from a private naming scheme to UUIDs, to resolve collisions etc. It's not expected that a rule with this id exists anymore"
+              },
+              {
+                "const": "similar",
+                "description": "Use to relate similar rules to each other (e.g. same detection content applied to different log sources, rule that is a modified version of another rule with a different level)"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "oneOf": [
+        {
+          "const": "stable",
+          "description": "The rule didn't produce any obvious false positives in multiple environments over a long period of time"
+        },
+        {
+          "const": "test",
+          "description": "The rule doesn't show any obvious false positives on a limited set of test systems"
+        },
+        {
+          "const": "experimental",
+          "description": "A new rule that hasn't been tested outside of lab environments and could lead to many false positives"
+        },
+        {
+          "const": "deprecated",
+          "description": "The rule was replaced or is now covered by another one. The link between both rules is made via the `related` field"
+        },
+        {
+          "const": "unsupported",
+          "description": "The rule can not be used in its current state (special correlation log, home-made fields, etc.)"
+        }
+      ]
+    },
+    "description": {
+      "type": "string",
+      "description": "A short description of the rule and the malicious activity that can be detected",
+      "maxLength": 65535
+    },
+    "license": {
+      "type": "string",
+      "description": "License of the rule according the SPDX ID specification (https://spdx.dev/ids/)"
+    },
+    "author": {
+      "type": "string",
+      "description": "Creator of the rule. (can be a name, nickname, twitter handle, etc.)"
+    },
+    "references": {
+      "type": "array",
+      "description": "References to the source that the rule was derived from. These could be blog articles, technical papers, presentations or even tweets",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "date": {
+      "type": "string",
+      "description": "Creation date of the rule. Use the format YYYY/MM/DD",
+      "pattern": "^\\d{4}/(0[1-9]|1[012])/(0[1-9]|[12][0-9]|3[01])$"
+    },
+    "modified": {
+      "type": "string",
+      "description": "Last modification date of the rule. Use the format YYYY/MM/DD",
+      "pattern": "^\\d{4}/(0[1-9]|1[012])/(0[1-9]|[12][0-9]|3[01])$"
+    },
+    "logsource": {
+      "type": "object",
+      "description": "The log source that the rule is supposed to detect malicious activity in.",
+      "properties": {
+        "category": {
+          "description": "Group of products, like firewall or process_creation",
+          "type": "string"
+        },
+        "product": {
+          "description": "A certain product, like windows",
+          "type": "string"
+        },
+        "service": {
+          "description": "A subset of a product's logs, like sshd",
+          "type": "string"
+        }
+      }
+    },
+    "detection": {
+      "type": "object",
+      "required": ["condition"],
+      "description": "A set of search-identifiers that represent properties of searches on log data",
+      "additionalProperties": {
+        "description": "A Search Identifier: A definition that can consist of two different data structures - lists and maps.",
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "object",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "object",
+            "items": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "properties": {
+        "condition": {
+          "type": "string",
+          "description": "The relationship between the search identifiers to create the detection logic. Ex: selection1 or selection2"
+        }
+      }
+    },
+    "fields": {
+      "type": "array",
+      "description": "A list of log fields that could be interesting in further analysis of the event and should be displayed to the analyst",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "falsepositives": {
+      "description": "A list of known false positives that may occur",
+      "uniqueItems": true,
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 2
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 2
+          }
+        }
+      ]
+    },
+    "level": {
+      "type": "string",
+      "description": "The criticality of a triggered rule",
+      "oneOf": [
+        {
+          "const": "informational",
+          "description": "Rule is intended for enrichment of events, e.g. by tagging them. No case or alerting should be triggered by such rules because it is expected that a huge amount of events will match these rules"
+        },
+        {
+          "const": "low",
+          "description": "Notable event but rarely an incident. Low rated events can be relevant in high numbers or combination with others. Immediate reaction shouldn't be necessary, but a regular review is recommended"
+        },
+        {
+          "const": "medium",
+          "description": "Relevant event that should be reviewed manually on a more frequent basis"
+        },
+        {
+          "const": "high",
+          "description": "Relevant event that should trigger an internal alert and requires a prompt review"
+        },
+        {
+          "const": "critical",
+          "description": "Highly relevant event that indicates an incident. Critical events should be reviewed immediately. It is used only for cases in which probability borders certainty"
+        }
+      ]
+    },
+    "tags": {
+      "description": "Tags to categorize a Sigma rule.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_-]+\\.[a-z0-9._-]+$"
+      }
+    }
+  }
+}

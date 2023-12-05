@@ -1,0 +1,29 @@
+title: Potential Persistence Via Netsh Helper DLL - Registry
+id: c90362e0-2df3-4e61-94fe-b37615814cb1
+related:
+    - id: 56321594-9087-49d9-bf10-524fe8479452
+      type: similar
+    - id: e7b18879-676e-4a0e-ae18-27039185a8e7
+      type: similar
+status: experimental
+description: |
+    Detects changes to the Netsh registry key to add a new DLL value. This change might be an indication of a potential persistence attempt by adding a malicious Netsh helper
+references:
+    - https://www.ired.team/offensive-security/persistence/t1128-netsh-helper-dll
+    - https://pentestlab.blog/2019/10/29/persistence-netsh-helper-dll/
+author: Anish Bogati
+date: 2023/11/28
+tags:
+    - attack.persistence
+    - attack.t1546.007
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\SOFTWARE\Microsoft\NetSh'
+        Details|contains: '.dll'
+    condition: selection
+falsepositives:
+    - Legitimate helper added by different programs and the OS
+level: medium

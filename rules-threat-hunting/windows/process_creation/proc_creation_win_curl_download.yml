@@ -1,0 +1,36 @@
+title: File Download Via Curl.EXE
+id: 9a517fca-4ba3-4629-9278-a68694697b81
+related:
+    - id: bbeaed61-1990-4773-bf57-b81dbad7db2d # Basic curl execution
+      type: derived
+    - id: e218595b-bbe7-4ee5-8a96-f32a24ad3468 # Suspicious curl execution
+      type: derived
+status: experimental
+description: Detects file download using curl.exe
+references:
+    - https://web.archive.org/web/20200128160046/https://twitter.com/reegun21/status/1222093798009790464
+author: Florian Roth (Nextron Systems)
+date: 2022/07/05
+modified: 2023/02/21
+tags:
+    - attack.command_and_control
+    - attack.t1105
+    - detection.threat_hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\curl.exe'
+        - Product: 'The curl executable'
+    selection_remote:
+        CommandLine|contains:
+            - ' -O'  # covers the alias for --remote-name and --output
+            - '--remote-name'
+            - '--output'
+    condition: all of selection_*
+falsepositives:
+    - Scripts created by developers and admins
+    - Administrative activity
+    - The "\Git\usr\bin\sh.exe" process uses the "--output" flag to download a specific file in the temp directory with the pattern "gfw-httpget-xxxxxxxx.txt "
+level: medium

@@ -6,7 +6,7 @@ references:
     - https://mgreen27.github.io/posts/2018/04/02/DownloadCradle.html
 author: Florian Roth (Nextron Systems), Tim Shelton
 date: 2018/04/06
-modified: 2023/01/19
+modified: 2023/05/23
 tags:
     - attack.execution
     - attack.defense_evasion
@@ -22,7 +22,7 @@ detection:
             - '\mshta.exe'
             - '\powershell.exe'
             - '\pwsh.exe'
-            #- '\cmd.exe'  # too many false positives
+            # - '\cmd.exe'  # too many false positives
             - '\rundll32.exe'
             - '\cscript.exe'
             - '\wscript.exe'
@@ -45,6 +45,18 @@ detection:
             - '\nessus_' # Tenable/Nessus VA Scanner
     filter_nessus:
         CommandLine|contains: '\nessus_' # Tenable/Nessus VA Scanner
+    filter_sccm_install:
+        ParentImage|endswith: '\mshta.exe'
+        Image|endswith: '\mshta.exe'
+        ParentCommandLine|contains|all:
+            - 'C:\MEM_Configmgr_'
+            - '\splash.hta'
+            - '{1E460BD7-F1C3-4B2E-88BF-4E770A288AF5}'
+        CommandLine|contains|all:
+            - 'C:\MEM_Configmgr_'
+            - '\SMSSETUP\BIN\'
+            - '\autorun.hta'
+            - '{1E460BD7-F1C3-4B2E-88BF-4E770A288AF5}'
     condition: selection and not 1 of filter_*
 fields:
     - CommandLine

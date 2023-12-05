@@ -427,6 +427,7 @@ If you want to learn more about this sub-category. You can do so via MSDN - [Lea
 - Event Volume: `Low`
 - API Mapping: [Learn More](https://github.com/jsecurity101/TelemetrySource/tree/main/Microsoft-Windows-Security-Auditing)
 - EventID(s):
+  - `4728`
   - `4731`
   - `4732`
   - `4733`
@@ -2640,6 +2641,7 @@ TBD
 - [4725: A user account was disabled.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4725)
 - [4726: A user account was deleted.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4726)
 - [4727: A security-enabled global group was created.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4727)
+- 4728: A member was added to a security-enabled global group
 - [4729: A member was removed from a security-enabled global group.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4729)
 - [4730: A security-enabled global group was deleted.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4730)
 - [4731: A security-enabled local group was created.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4731)
@@ -2902,7 +2904,7 @@ TBD
 - [5478: IPsec Services has started successfully.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-5478)
 - 5479: IPsec Services has been shut down successfully. The shutdown of IPsec Services can put the computer at greater risk of network attack or expose the computer to potential security risks.
 - 5480: IPsec Services failed to get the complete list of network interfaces on the computer. This poses a potential security risk because some of the network interfaces may not get the protection provided by the applied IPsec filters. Use the IP Security Monitor snap-in to diagnose the problem.
-- 5483: IPsec Services failed to initialize RPC server. IPsec Services could not be started.]
+- 5483: IPsec Services failed to initialize RPC server. IPsec Services could not be started.
 - 5484: IPsec Services has experienced a critical failure and has been shut down. The shutdown of IPsec Services can put the computer at greater risk of network attack or expose the computer to potential security risks.
 - 5485: IPsec Services failed to process some IPsec filters on a plug-and-play event for network interfaces. This poses a potential security risk because some of the network interfaces may not get the protection provided by the applied IPsec filters. Use the IP Security Monitor snap-in to diagnose the problem.
 - [5632: A request was made to authenticate to a wireless network.](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-5632)

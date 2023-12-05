@@ -1,0 +1,39 @@
+title: Import New Module Via PowerShell CommandLine
+id: 4ad74d01-f48c-42d0-b88c-b31efa4d2262
+status: experimental
+description: Detects usage of the "Import-Module" cmdlet in order to add new Cmdlets to the current PowerShell session
+references:
+    - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/import-module?view=powershell-7.3
+    - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/import-module?view=powershell-5.1
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/05/09
+modified: 2023/12/01
+tags:
+    - attack.execution
+    - detection.threat_hunting
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+    selection_cmdlet:
+        CommandLine|contains:
+            - 'Import-Module '
+            - 'ipmo '
+    filter_main_vsstudio:
+        ParentImage|contains:
+            - ':\Program Files\WindowsApps\Microsoft.WindowsTerminal_'
+            - ':\Windows\System32\cmd.exe'
+        CommandLine|contains|all:
+            - ':\Program Files\Microsoft Visual Studio\'
+            - 'Tools\Microsoft.VisualStudio.DevShell.dll'
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Depending on the environement, many legitimate scripts will import modules inline. This rule is targeted for hunting purposes.
+level: low

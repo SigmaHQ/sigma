@@ -12,6 +12,7 @@ references:
     - https://web.archive.org/web/20200128160046/https://twitter.com/reegun21/status/1222093798009790464
     - https://github.com/pr0xylife/Qakbot/blob/4f0795d79dabee5bc9dd69f17a626b48852e7869/Qakbot_AA_23.06.2022.txt
     - https://www.volexity.com/blog/2022/07/28/sharptongue-deploys-clever-mail-stealing-browser-extension-sharpext/
+    - https://github.com/redcanaryco/atomic-red-team/blob/0f229c0e42bfe7ca736a14023836d65baa941ed2/atomics/T1105/T1105.md#atomic-test-18---curl-download-file
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2020/07/03
 modified: 2023/02/21
@@ -50,7 +51,7 @@ detection:
             - '.txt'
             - '.vbe'
             - '.vbs'
-    filter_git_windows:
+    filter_optional_git_windows:
         # Example FP
         #   CommandLine: "C:\Program Files\Git\mingw64\bin\curl.exe" --silent --show-error --output C:/Users/test/AppData/Local/Temp/gfw-httpget-jVOEoxbS.txt --write-out %{http_code} https://gitforwindows.org/latest-tag.txt
         ParentImage: 'C:\Program Files\Git\usr\bin\sh.exe'
@@ -59,10 +60,7 @@ detection:
             - '--silent --show-error --output '
             - 'gfw-httpget-'
             - 'AppData'
-    condition: selection_curl and 1 of selection_susp_* and not 1 of filter_*
-fields:
-    - CommandLine
-    - ParentCommandLine
+    condition: selection_curl and 1 of selection_susp_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high

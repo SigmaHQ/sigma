@@ -6,7 +6,10 @@ references:
     - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd364427(v=ws.10)
 author: frack113
 date: 2022/02/19
-modified: 2023/04/21
+modified: 2023/09/09
+tags:
+    - attack.defense_evasion
+    - attack.t1562.004
 logsource:
     product: windows
     service: firewall-as
@@ -19,15 +22,15 @@ detection:
         Action: 2
     filter_main_installations:
         - ApplicationPath|startswith:
-            - 'C:\Program Files\'
-            - 'C:\Program Files (x86)\'
-        - ModifyingApplication: 'C:\Windows\System32\oobe\Setup.exe'
+              - 'C:\Program Files\'
+              - 'C:\Program Files (x86)\'
         - ModifyingApplication|startswith: 'C:\Windows\WinSxS\'  # TiWorker.exe
         - ModifyingApplication:
-            - 'C:\Windows\SysWOW64\msiexec.exe'
-            - 'C:\Windows\System32\svchost.exe'
-            - 'C:\Windows\System32\dllhost.exe'
-            - 'C:\Program Files\Windows Defender\MsMpEng.exe'
+              - 'C:\Windows\System32\oobe\Setup.exe'
+              - 'C:\Windows\SysWOW64\msiexec.exe'
+              - 'C:\Windows\System32\svchost.exe'
+              - 'C:\Windows\System32\dllhost.exe'
+              - 'C:\Program Files\Windows Defender\MsMpEng.exe'
     filter_optional_msmpeng:
         ModifyingApplication|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
         ModifyingApplication|endswith: '\MsMpEng.exe'

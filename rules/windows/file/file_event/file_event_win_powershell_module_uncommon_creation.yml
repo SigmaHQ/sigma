@@ -1,0 +1,34 @@
+title: PowerShell Module File Created By Non-PowerShell Process
+id: e3845023-ca9a-4024-b2b2-5422156d5527
+status: experimental
+description: Detects the creation of a new PowerShell module ".psm1", ".psd1", ".dll", ".ps1", etc. by a non-PowerShell process
+references:
+    - Internal Research
+    - https://learn.microsoft.com/en-us/powershell/scripting/developer/module/understanding-a-windows-powershell-module?view=powershell-7.3
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/05/09
+modified: 2023/10/18
+tags:
+    - attack.persistence
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|contains:
+            - '\WindowsPowerShell\Modules\'
+            - '\PowerShell\7\Modules\'
+    filter_main_pwsh:
+        Image|endswith:
+            - ':\Program Files\PowerShell\7-preview\pwsh.exe'
+            - ':\Program Files\PowerShell\7\pwsh.exe'
+            - ':\Windows\System32\poqexec.exe' # https://github.com/SigmaHQ/sigma/issues/4448
+            - ':\Windows\System32\WindowsPowerShell\v1.0\powershell_ise.exe'
+            - ':\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
+            - ':\Windows\SysWOW64\poqexec.exe' # https://github.com/SigmaHQ/sigma/issues/4448
+            - ':\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell_ise.exe'
+            - ':\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell.exe'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: medium

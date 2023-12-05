@@ -1,0 +1,41 @@
+title: Suspicious Response File Execution Via Odbcconf.EXE
+id: 2d32dd6f-3196-4093-b9eb-1ad8ab088ca5
+related:
+    - id: 5f03babb-12db-4eec-8c82-7b4cb5580868
+      type: derived
+    - id: 65d2be45-8600-4042-b4c0-577a1ff8a60e
+      type: obsoletes
+status: experimental
+description: Detects execution of "odbcconf" with the "-f" flag in order to load a response file with a non-".rsp" extension.
+references:
+    - https://learn.microsoft.com/en-us/sql/odbc/odbcconf-exe?view=sql-server-ver16
+    - https://lolbas-project.github.io/lolbas/Binaries/Odbcconf/
+    - https://www.trendmicro.com/en_us/research/17/h/backdoor-carrying-emails-set-sights-on-russian-speaking-businesses.html
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/05/22
+modified: 2023/05/31
+tags:
+    - attack.defense_evasion
+    - attack.t1218.008
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\odbcconf.exe'
+        - OriginalFileName: 'odbcconf.exe'
+    selection_cli:
+        CommandLine|contains:
+            - ' -f '
+            - ' /f '
+    filter_main_rsp_ext:
+        CommandLine|contains: '.rsp'
+    filter_main_runonce_odbc:
+        # When odbcconf is run with the "/R" flag, it creates a "runonce" key to run at the next reboot
+        ParentImage: 'C:\Windows\System32\runonce.exe'
+        Image: 'C:\Windows\System32\odbcconf.exe'
+        CommandLine|contains: '.exe /E /F "C:\WINDOWS\system32\odbcconf.tmp"'
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Unlikely
+level: high

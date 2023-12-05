@@ -7,7 +7,7 @@ references:
     - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse?slide=66
 author: Teymur Kheirkhabarov (idea), Vasiliy Burov (rule), oscd.community, Tim Shelton
 date: 2020/10/11
-modified: 2023/01/30
+modified: 2023/05/31
 tags:
     - attack.defense_evasion
     - attack.t1027
@@ -19,11 +19,11 @@ logsource:
 detection:
     selection_img:
         - Image|endswith:
-            - '\powershell.exe'
-            - '\pwsh.exe'
+              - '\powershell.exe'
+              - '\pwsh.exe'
         - OriginalFileName:
-            - 'PowerShell.EXE'
-            - 'pwsh.dll'
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
     selection_cli:
         CommandLine|contains:
             - 'hctac'
@@ -51,13 +51,14 @@ detection:
             - 'maerts'
             - 'hcaerof'
             - 'retupmoc'
-    filter_optional_ansible:
-        # Check FP Example: https://github.com/SigmaHQ/sigma/pull/2720
-        ParentImage: 'C:\Windows\System32\cmd.exe'
-        CommandLine|contains|all:
-            - '-EncodedCommand'
-            - 'rahc'
-    condition: all of selection_* and not 1 of filter_optional_*
+    filter_main_encoded_keyword:
+        # We exclude usage of encoded commands as they might generate FPs as shown here:
+        #   https://github.com/SigmaHQ/sigma/pull/2720
+        #   https://github.com/SigmaHQ/sigma/issues/4270
+        CommandLine|contains:
+            - ' -EncodedCommand '
+            - ' -enc '
+    condition: all of selection_* and not 1 of filter_main_*
 falsepositives:
     - Unlikely
 level: high

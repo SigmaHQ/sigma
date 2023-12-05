@@ -1,0 +1,26 @@
+title: Potential Vivaldi_elf.DLL Sideloading
+id: 2092cacb-d77b-4f98-ab0d-32b32f99a054
+status: experimental
+description: Detects potential DLL sideloading of "vivaldi_elf.dll"
+references:
+    - https://research.checkpoint.com/2023/beyond-the-horizon-traveling-the-world-on-camaro-dragons-usb-flash-drives/
+author: X__Junior (Nextron Systems)
+date: 2023/08/03
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1574.001
+    - attack.t1574.002
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith: '\vivaldi_elf.dll'
+    filter_main_legit_path:
+        Image|endswith: '\Vivaldi\Application\vivaldi.exe'
+        ImageLoaded|contains: '\Vivaldi\Application\'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: medium

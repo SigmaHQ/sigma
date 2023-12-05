@@ -1,0 +1,40 @@
+title: Sofacy Trojan Loader Activity
+id: ba778144-5e3d-40cf-8af9-e28fb1df1e20
+status: test
+description: Detects Trojan loader activity as used by APT28
+references:
+    - https://researchcenter.paloaltonetworks.com/2018/02/unit42-sofacy-attacks-multiple-government-entities/
+    - https://www.hybrid-analysis.com/sample/ff808d0a12676bfac88fd26f955154f8884f2bb7c534b9936510fd6296c543e8?environmentId=110
+    - https://twitter.com/ClearskySec/status/960924755355369472
+author: Florian Roth (Nextron Systems), Jonhnathan Ribeiro, oscd.community
+date: 2018/03/01
+modified: 2023/05/31
+tags:
+    - attack.defense_evasion
+    - attack.execution
+    - attack.g0007
+    - attack.t1059.003
+    - attack.t1218.011
+    - car.2013-10-002
+    - detection.emerging_threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_path:
+        Image|endswith: '\rundll32.exe'
+        CommandLine|contains:
+            - '%LOCALAPPDATA%'
+            - '\AppData\Local\'
+    selection_extensions:
+        - CommandLine|contains: '.dat",'
+        - CommandLine|endswith:
+              - '.dll #1'
+              - '.dll" #1'
+              - '.dll",#1'
+    filter_main_exclude_temp:
+        CommandLine|contains: '\AppData\Local\Temp\'
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high

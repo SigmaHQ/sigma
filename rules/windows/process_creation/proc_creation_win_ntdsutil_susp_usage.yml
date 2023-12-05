@@ -3,7 +3,7 @@ id: a58353df-af43-4753-bad0-cd83ef35eef5
 related:
     - id: 2afafd61-6aae-4df4-baed-139fa1f4c345
       type: derived
-status: experimental
+status: test
 description: Detects execution of ntdsutil.exe to perform different actions such as restoring snapshots...etc.
 references:
     - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc731620(v=ws.11)
@@ -22,15 +22,15 @@ detection:
         - OriginalFileName: 'ntdsutil.exe'
     selection_cli:
         - CommandLine|contains|all:
-            - 'snapshot'
-            - 'mount ' # mounts a specific snapshot - Ex: ntdsutil snapshot "mount c2b3e2c6-1ffb-4625-ba8e-3503c27a9fcb" quit quit
+              - 'snapshot'
+              - 'mount ' # mounts a specific snapshot - Ex: ntdsutil snapshot "mount c2b3e2c6-1ffb-4625-ba8e-3503c27a9fcb" quit quit
         - CommandLine|contains|all:
-            # This offers more coverage to the "selection_oneliner_1" case in rule 8bc64091-6875-4881-aaf9-7bd25b5dda08
-            # The shorest form of "activate" can "ac". But "act", "acti"...etc are also valid forms
-            # Same case with the "instance" flag
-            - 'ac'
-            - ' i'
-            - ' ntds'
+              # This offers more coverage to the "selection_oneliner_1" case in rule 8bc64091-6875-4881-aaf9-7bd25b5dda08
+              # The shorest form of "activate" can "ac". But "act", "acti"...etc are also valid forms
+              # Same case with the "instance" flag
+              - 'ac'
+              - ' i'
+              - ' ntds'
     condition: all of selection_*
 falsepositives:
     - Legitimate usage to restore snapshots
