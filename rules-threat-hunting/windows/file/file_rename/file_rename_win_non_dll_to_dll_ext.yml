@@ -1,0 +1,47 @@
+title: Non-DLL Extension File Renamed With DLL Extension
+id: bbfd974c-248e-4435-8de6-1e938c79c5c1
+status: experimental
+description: |
+    Detects rename operations of files with non-DLL extensions to files with a DLL extension. This is often performed by malware in order to avoid initial detections based on extensions.
+references:
+    - https://twitter.com/ffforward/status/1481672378639912960
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1036/T1036.md#atomic-test-1---system-file-copied-to-unusual-location
+author: frack113
+date: 2022/02/19
+modified: 2023/11/11
+tags:
+    - attack.defense_evasion
+    - attack.t1036.008
+    - detection.threat_hunting
+logsource:
+    product: windows
+    category: file_rename
+    definition: 'Requirements: Microsoft-Windows-Kernel-File Provider with at least the KERNEL_FILE_KEYWORD_RENAME_SETLINK_PATH keyword'
+detection:
+    selection:
+        TargetFilename|endswith: '.dll'
+    filter_main_dll:
+        # Note: To avoid file renames
+        SourceFilename|endswith: '.dll'
+    filter_main_installers:
+        SourceFilename|endswith: '.tmp'
+    filter_main_empty_source:
+        SourceFilename: ''
+    filter_main_null_source:
+        SourceFilename: null
+    filter_main_tiworker:
+        Image|contains: ':\Windows\WinSxS\'
+        Image|endswith: '\TiWorker.exe'
+    filter_main_upgrade:
+        - Image|endswith: ':\Windows\System32\wuauclt.exe'
+        - TargetFilename|contains: ':\$WINDOWS.~BT\Sources\'
+    filter_main_generic:
+        Image|contains:
+            - ':\Program Files (x86)\'
+            - ':\Program Files\'
+    filter_optional_squirrel:
+        SourceFilename|contains: '\SquirrelTemp\temp'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Likely from installers and temporary locations
+level: medium

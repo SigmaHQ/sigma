@@ -4,7 +4,7 @@ status: test
 description: Detects the creation of an executable with a system process name in folders other than the system ones (System32, SysWOW64...etc).
 author: Sander Wiebing, Tim Shelton, Nasreddine Bencherchali (Nextron Systems)
 date: 2020/05/26
-modified: 2023/10/18
+modified: 2023/11/10
 tags:
     - attack.defense_evasion
     - attack.t1036.005
@@ -123,7 +123,8 @@ detection:
         TargetFilename|endswith: '\SecurityHealthSystray.exe'
         Image|endswith: '\SecurityHealthSetup.exe'
     filter_main_wuaucltcore:
-        Image|endswith: ':\Windows\uus\AMD64\wuaucltcore.exe'
+        Image|contains: ':\Windows\uus\'
+        Image|endswith: '\wuaucltcore.exe'
         TargetFilename|contains: ':\$WinREAgent\'
     condition: selection and not 1 of filter_main_*
 falsepositives:

@@ -7,7 +7,7 @@ references:
     - https://lolbas-project.github.io
 author: Perez Diego (@darkquassar), oscd.community
 date: 2019/10/27
-modified: 2023/09/06
+modified: 2023/11/11
 tags:
     - attack.privilege_escalation
     - attack.defense_evasion
@@ -72,9 +72,9 @@ detection:
             - ':\Windows\System32\services.exe' # happens on Windows 7
             - ':\Windows\System32\wininit.exe' # happens on Windows 7
             - ':\Windows\System32\csrss.exe' # multiple OS
+            - ':\Windows\System32\LogonUI.exe' # multiple OS
     filter_main_winlogon_2:
         SourceImage: 'C:\Windows\System32\winlogon.exe'
-        TargetParentImage: 'System'
         TargetParentProcessId: 4
     filter_main_schtasks_conhost:
         SourceImage|endswith:
@@ -84,10 +84,19 @@ detection:
     filter_main_explorer:
         SourceImage|endswith: ':\Windows\explorer.exe'
         TargetImage|endswith:
-            - ':\Windows\System32\mmc.exe'
-            - ':\Program Files\NVIDIA Corporation\NVIDIA GeForce Experience\NVIDIA GeForce Experience.exe'
+            - ':\Program Files (x86)\'
+            - ':\Program Files\'
+            - ':\Windows\System32\'
+            - ':\Windows\SysWOW64\'
     filter_main_system:
         TargetImage: 'System'
+    filter_main_msiexec:
+        # Note: MSI installers will trigger this
+        SourceImage|endswith: '\msiexec.exe'
+        TargetImage|contains:
+            - '\AppData\Local\'
+            - ':\Program Files (x86)\'
+            - ':\Program Files\'
     filter_optional_powerpnt:
         # Raised by the following issue: https://github.com/SigmaHQ/sigma/issues/2479
         SourceImage|contains: '\Microsoft Office\'

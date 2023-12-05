@@ -8,7 +8,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1489/T1489.md#atomic-test-3---windows---stop-service-by-killing-process
 author: frack113
 date: 2021/12/26
-modified: 2023/08/28
+modified: 2023/11/06
 tags:
     - attack.impact
     - attack.t1489
@@ -24,7 +24,12 @@ detection:
         CommandLine|contains|all:
             - ' /f'
             - ' /im '
-    condition: all of selection_*
+    filter_main_installers:
+        ParentImage|contains:
+            - '\AppData\Local\Temp\'
+            - ':\Windows\Temp'
+        ParentImage|endswith: '.tmp'
+    condition: all of selection_* and not 1 of filter_main_*
 falsepositives:
     - Expected FP with some processes using this techniques to terminate one of their processes during installations and updates
 level: low

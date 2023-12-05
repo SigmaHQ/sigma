@@ -1,0 +1,23 @@
+title: Lace Tempest Malware Loader Execution
+id: 745ea50b-9673-4ba7-9426-cb45cf4a8e6d
+status: experimental
+description: Detects execution of a specific binary based on filename and hash used by Lace Tempest to load additional malware as reported by SysAid Team
+references:
+    - https://www.sysaid.com/blog/service-desk/on-premise-software-security-vulnerability-notification
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/11/09
+tags:
+    - attack.execution
+    - detection.emerging_threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: ':\Program Files\SysAidServer\tomcat\webapps\usersfiles\user.exe'
+    selection_hash:
+        Hashes|contains: 'SHA256=B5ACF14CDAC40BE590318DEE95425D0746E85B1B7B1CBD14DA66F21F2522BF4D'
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely
+level: high

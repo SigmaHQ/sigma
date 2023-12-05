@@ -1,12 +1,15 @@
-title: XSL Script Processing
+title: XSL Script Execution Via WMIC.EXE
 id: 05c36dd6-79d6-4a9a-97da-3db20298ab2d
 status: test
-description: Extensible Stylesheet Language (XSL) files are commonly used to describe the processing and rendering of data within XML files. Rule detects when adversaries abuse this functionality to execute arbitrary files while potentially bypassing application whitelisting defenses.
+description: |
+    Detects the execution of WMIC with the "format" flag to potentially load XSL files.
+    Adversaries abuse this functionality to execute arbitrary files while potentially bypassing application whitelisting defenses.
+    Extensible Stylesheet Language (XSL) files are commonly used to describe the processing and rendering of data within XML files.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1220/T1220.md
 author: Timur Zinniatullin, oscd.community, Swachchhanda Shrawan Poudel
 date: 2019/10/21
-modified: 2023/04/21
+modified: 2023/11/09
 tags:
     - attack.defense_evasion
     - attack.t1220
@@ -14,14 +17,12 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_wmic:
+    selection:
         Image|endswith: '\wmic.exe'
         CommandLine|contains:
             - '/format'     # wmic process list /FORMAT /?
             - '-format'     # wmic process list -FORMAT /?
-    selection_msxsl:
-        Image|endswith: '\msxsl.exe'
-    false_positives:
+    filter_main_known_format:
         CommandLine|contains:
             - 'Format:List'
             - 'Format:htable'
@@ -32,9 +33,8 @@ detection:
             - 'Format:rawxml'
             - 'Format:xml'
             - 'Format:csv'
-    condition: (selection_wmic and not false_positives) or selection_msxsl
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - WMIC.exe FP depend on scripts and administrative methods used in the monitored environment.
-    - Msxsl.exe is not installed by default, so unlikely.
     - Static format arguments - https://petri.com/command-line-wmi-part-3
 level: medium

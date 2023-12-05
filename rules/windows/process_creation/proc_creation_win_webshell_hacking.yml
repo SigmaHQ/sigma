@@ -1,12 +1,13 @@
 title: Webshell Hacking Activity Patterns
 id: 4ebc877f-4612-45cb-b3a5-8e3834db36c9
 status: test
-description: Detects certain parent child patterns found in cases in which a webshell is used to perform certain credential dumping or exfiltration activities on a compromised system
+description: |
+    Detects certain parent child patterns found in cases in which a web shell is used to perform certain credential dumping or exfiltration activities on a compromised system
 references:
     - https://youtu.be/7aemGhaE9ds?t=641
 author: Florian Roth (Nextron Systems)
 date: 2022/03/17
-modified: 2022/08/04
+modified: 2023/11/09
 tags:
     - attack.persistence
     - attack.t1505.003
@@ -20,11 +21,11 @@ detection:
    # Webserver
     selection_webserver_image:
         ParentImage|endswith:
-            - '\w3wp.exe'
-            - '\php-cgi.exe'
-            - '\nginx.exe'
-            - '\httpd.exe'
             - '\caddy.exe'
+            - '\httpd.exe'
+            - '\nginx.exe'
+            - '\php-cgi.exe'
+            - '\w3wp.exe'
             - '\ws_tomcatservice.exe'
     selection_webserver_characteristics_tomcat1:
         ParentImage|endswith:
@@ -80,20 +81,20 @@ detection:
     selection_child_6:
         # SUspicious patterns
         CommandLine|contains:
+            - ' -decode '  # Used with certutil
             - ' -NoP '  # Often used in malicious PowerShell commands
             - ' -W Hidden '  # Often used in malicious PowerShell commands
-            - ' -decode '  # Used with certutil
             - ' /decode '  # Used with certutil
-            - 'reg save '  # save registry SAM - syskey extraction
-            - '.downloadstring('  # PowerShell download command
-            - '.downloadfile('  # PowerShell download command
-            - 'FromBase64String' # PowerShell encoded payload
             - ' /ticket:'  # Rubeus
             - ' sekurlsa'  # Mimikatz
             - '.dmp full'  # Process dumping method apart from procdump
+            - '.downloadfile('  # PowerShell download command
+            - '.downloadstring('  # PowerShell download command
+            - 'FromBase64String' # PowerShell encoded payload
             - 'process call create' # WMIC process creation
+            - 'reg save '  # save registry SAM - syskey extraction
             - 'whoami /priv'
-    condition: 1 of selection_webserver* and 1 of selection_child*
+    condition: 1 of selection_webserver_* and 1 of selection_child_*
 falsepositives:
     - Unlikely
 level: high

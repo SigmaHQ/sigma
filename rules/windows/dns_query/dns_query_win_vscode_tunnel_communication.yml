@@ -1,15 +1,22 @@
-title: DNS Query To Devtunnels And VsCode Tunnels
+title: DNS Query To Visual Studio Code Tunnels Domain
 id: b3e6418f-7c7a-4fad-993a-93b65027a9f1
+related:
+    - id: 9501f8e6-8e3d-48fc-a8a6-1089dd5d7ef4 # Net Connection DevTunnels
+      type: similar
+    - id: 4b657234-038e-4ad5-997c-4be42340bce4 # Net Connection VsCode
+      type: similar
+    - id: 1cb0c6ce-3d00-44fc-ab9c-6d6d577bf20b # DNS DevTunnels
+      type: similar
 status: experimental
 description: |
-    Detects DNS query to Devtunnels and Visual Studio Code tunnel domains. Attackers can be abuse these features to establish a reverse shell.
+    Detects DNS query requests to Visual Studio Code tunnel domains. Attackers can abuse that feature to establish a reverse shell or persistence on a machine.
 references:
     - https://ipfyx.fr/post/visual-studio-code-tunnel/
     - https://badoption.eu/blog/2023/01/31/code_c2.html
-    - https://blueteamops.medium.com/detecting-dev-tunnels-16f0994dc3e2
-    - https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/security
+    - https://cydefops.com/vscode-data-exfiltration
 author: citron_ninja
 date: 2023/10/25
+modified: 2023/11/20
 tags:
     - attack.command_and_control
     - attack.t1071.001
@@ -18,10 +25,8 @@ logsource:
     product: windows
 detection:
     selection:
-        QueryName|endswith:
-            - '.tunnels.api.visualstudio.com'
-            - '.devtunnels.ms'
+        QueryName|endswith: '.tunnels.api.visualstudio.com'
     condition: selection
 falsepositives:
-    - Legitimate use of Visual Studio Code tunnel will also trigger this
+    - Legitimate use of Visual Studio Code tunnel will also trigger this.
 level: medium
