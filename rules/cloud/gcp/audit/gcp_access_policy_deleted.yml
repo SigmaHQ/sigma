@@ -1,0 +1,27 @@
+title: GCP Access Policy Deleted
+id: 32438676-1dba-4ac7-bf69-b86cba995e05
+description: Detects when an access policy that is applied to a GCP cloud resource is deleted. An adversary would be able to remove access policies to gain access to a GCP cloud resource.
+references:
+- https://cloud.google.com/access-context-manager/docs/audit-logging
+author: Bryan Lim
+date: 2023/09/12
+status: experimental
+tags:
+- attack.persistence
+- attack.t1098
+logsource:
+  product: gcp
+  service: gcp.audit
+detection:
+  selection:
+    data.protoPayload.authorizationInfo.permission:
+    - accesscontextmanager.accessPolicies.delete
+    - accesscontextmanager.accessPolicies.accessLevels.delete
+    - accesscontextmanager.accessPolicies.accessZones.delete
+    - accesscontextmanager.accessPolicies.authorizedOrgsDescs.delete
+    data.protoPayload.authorizationInfo.granted: true
+    data.protoPayload.serviceName: accesscontextmanager.googleapis.com
+  condition: selection
+falsepositives:
+- Legitimate administrative activities
+level: medium

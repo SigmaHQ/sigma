@@ -1,0 +1,25 @@
+title: GCP Break-glass Container Workload Deployed
+id: 76737c19-66ee-4c07-b65a-a03301d1573d
+description: Detects the deployment of workloads that are deployed by using the break-glass flag to override Binary Authorization controls.
+references:
+  - https://cloud.google.com/binary-authorization
+author: Bryan Lim
+date: 2023/19/12
+status: experimental
+tags:
+- attack.defense_evasion
+- attack.t1548
+logsource:
+  product: gcp
+  service: gcp.audit
+detection:
+  selection_cloud_audit:
+    data.protoPayload.resource.type: "k8s_cluster"
+    data.protoPayload.logName: "cloudaudit.googleapis.com/activity"
+    data.protoPayload.methodName: "io.k8s.core.v1.pods.create"
+  keywords:
+    - "image-policy.k8s.io/break-glass"
+  condition: selection_cloud_audit AND keywords
+falsepositives:
+- unlikely
+level: medium

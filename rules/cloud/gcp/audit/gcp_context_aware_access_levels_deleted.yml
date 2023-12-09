@@ -1,0 +1,24 @@
+title: GCP Context Aware Access Levels Deleted
+id: d8007af7-664a-494e-a1db-848a518611c5
+description: Detects when a context aware access level is deleted. A context aware access level is part of BeyondCorp Enterprise which is Google Workspace's way of enforcing Zero Trust model. An adversay would be able to remove access levels to gain easier access to google workspace resources.
+references:
+    - https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.accessLevels
+    - https://support.google.com/a/answer/12645308
+author: Bryan Lim
+date: 2023/09/12
+status: experimental
+tags:
+  - attack.persistence
+  - attack.t1098.003
+logsource:
+  product: gcp
+  service: gcp.audit
+detection:
+  selection:
+    data.protoPayload.authorizationInfo.permission: accesscontextmanager.accessLevels.delete
+    data.protoPayload.authorizationInfo.granted: true
+    data.protoPayload.serviceName: accesscontextmanager.googleapis.com
+  condition: selection
+falsepositives:
+- Legitimate administrative activities
+level: medium
