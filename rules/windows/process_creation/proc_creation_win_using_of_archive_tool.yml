@@ -1,0 +1,169 @@
+title: Potentially Suspicious Compression Tool Parameters
+id: 64974c1c-272d-42d2-961c-f9f06b609974
+status: test
+description: Monitor for newly constructed processes and/or command-lines that aid in compression or encrypting data that is collected prior to exfiltration, such as 7-Zip, WinRAR, and WinZip. Before Exfiltration that an adversary has Collection, it is very likely that a Archive Collected Data will be created, so that transfer times are minimized and fewer files are transmitted. There is variety between the tools used to compress data, but the command line usage and context of archiving tools, such as ZIP, RAR, and 7ZIP, should be monitored.In addition to looking for RAR or 7z program names, command line usage of 7Zip or RAR can be detected with the flag usage of "* a *". This is helpful, as adversaries may change program names.
+references:
+    - https://attack.mitre.org/techniques/T1560/001/
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1560/T1560.md
+    - https://thedfirreport.com/2022/09/26/bumblebee-round-two/
+    - https://www.trellix.com/en-sg/about/newsroom/stories/threat-labs/lockergoga-ransomware-family-used-in-targeted-attacks.html
+    - https://redacted.com/blog/bianlian-ransomware-gang-gives-it-a-go/
+    - https://www.microsoft.com/security/blog/2022/09/07/profiling-dev-0270-phosphorus-ransomware-operations/
+    - https://eqllib.readthedocs.io/en/latest/analytics/1ec33c93-3d0b-4a28-8014-dbdaae5c60ae.html
+    - https://labs.sentinelone.com/the-anatomy-of-an-apt-attack-and-cobaltstrike-beacons-encoded-configuration/
+    - https://ss64.com/bash/rar.html
+    - https://www.crowdstrike.com/blog/overwatch-exposes-aquatic-panda-in-possession-of-log-4-shell-exploit-tools/
+    - https://twitter.com/cyb3rops/status/1460978167628406785
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1560.001/T1560.001.md
+    - https://www.documentcloud.org/documents/5743766-Global-Threat-Report-2019.html
+    - https://twitter.com/vxunderground/status/1423336151860002816?s=20
+    - https://www.virustotal.com/gui/file/03e9b8c2e86d6db450e5eceec057d7e369ee2389b9daecaf06331a95410aa5f8/detection
+    - https://twitter.com/SBousseaden/status/1184067445612535811
+author: AdmU3
+date: 2023/12/12
+tags:
+    - attack.exfiltration
+    - attack.t1560
+    - attack.collection
+    - attack.t1560.001
+    - detection.emerging_threats
+      #- attack.d0017
+      #- attack.d0009
+logsource:
+    product: windows
+    category: process_creation
+    definition:
+        - 'Requirements: windows Process logging must be enabled and process command line'
+detection:
+    # Note: 7Zip Compressing  with/without password
+    selection_7z_img:
+        - Image|endswith:
+              - '\7z.exe'
+              - '\7zr.exe'
+              - '\7za.exe'
+        - OriginalFileName:
+              - '7z.exe'
+              - '7za.exe'
+    selection_7z_extension:
+        CommandLine|contains:
+            - '.dmp'
+            - '.dump'
+            - '.hdmp'
+    selection_withpassword_7z_action:
+        CommandLine|contains:
+            - ' -p'
+            - ' a '
+            - ' u '
+    selection_extract_7z_password:
+        CommandLine|contains|all:
+            - ' -p'
+            - ' x '
+            - ' -o'
+    # Note: Winrar compressing with/without password 
+    selection_winrar_img:
+        - Image|endswith:
+            - '\rar.exe'
+            - '\winrar.exe'
+    selection_winrar_password:
+        CommandLine|contains: ' -hp'
+    selection_winrar_other:
+        CommandLine|contains:
+            - ' -m'
+            - ' a '
+    selection_rar_extension:
+        CommandLine|contains:
+            - '.dmp'
+            - '.dump'
+            - '.hdmp'     
+    # Note: Winrar/winzip/7zip Execution in Non-Standard Folder
+    selection_main:
+        - Image|endswith:
+            - '\rar.exe'
+            - '\winrar.exe'
+            - '\zip.exe'
+            - '\winzip.exe'
+            - '\7z.exe'
+            - '\7zr.exe'
+            - '\7za.exe'
+    # Note: Compress Data and Lock With Password for Exfiltration With WINZIP
+    selection_winzip:
+        CommandLine|contains:
+            - 'winzip.exe'
+            - 'winzip64.exe'
+    selection_winzip_password:
+        CommandLine|contains: '-s"'
+    selection_winzip_other:
+        CommandLine|contains:
+            - ' -min '
+            - ' -a '
+    # Note: Compress Data using tar        
+    selection_tar_img:
+        - Description|contains: 'tar'
+        - Image|endswith:
+              - '\tar.exe'
+        - OriginalFileName:
+              - 'tar.exe'
+    selection_tar_extension:
+        CommandLine|contains:
+            - 'c'
+            - 'v'
+            - 'z'
+            - 'f'
+    # Note: APT31 Judgement Panda Activity
+    selection_ldifde:
+        CommandLine|contains|all:
+            - 'ldifde'
+            - '-f -n'
+            - 'eprod.ldf'
+    selection_lateral_movement:
+        CommandLine|contains|all:
+            - 'copy \\\\'
+            - 'c$'
+        CommandLine|contains:
+            - '\aaaa\procdump64.exe'
+            - '\aaaa\netsess.exe'
+            - '\aaaa\7za.exe'
+            - '\c$\aaaa\'
+    # Note: Conti NTDS Exfiltration Command
+    selection_conti:
+        CommandLine|contains|all:
+            - '7za.exe'
+            - '\\C$\\temp\\log.zip'
+    # Note: Potentially Suspicious Compression Tool Parameters
+    selection_1:
+        OriginalFileName:
+            - '7z*.exe'
+            - '*rar.exe'
+            - '*Command*Line*RAR*'
+        CommandLine|contains:
+            - ' -p'
+            - ' -ta'
+            - ' -tb'
+            - ' -sdel'
+            - ' -dw'
+            - ' -hp'
+    filter_main_unrar:
+        # Note: we filter unrar as it has the same description as the other utilities, and we're only interested in compression
+        Image|endswith: '\UnRAR.exe'
+    filter_main_path:
+        Image|contains:
+            - ':\Program Files (x86)\WinRAR\'
+            - ':\Program Files\WinRAR\'
+    filter_optional_temp:
+        # Note: in some occasion installers were seen dropping "rar" in TEMP
+        Image|contains: ':\Windows\Temp\'
+    filter_generic:
+        ParentImage|contains:
+            - ':\Program Files\'
+            - ':\Program Files (x86)\'
+    condition:
+        - all of selection_7z* or (all of selection_withpassword* and selection_7z_img ) 
+        - (selection_7z_img and selection_extract_7z_password) or all of selection_winrar*
+        - all of selection_tar* or (selection_winrar_img and selection_rar_extension)
+        - (selection_main and not (1 of filter_main*) and not (1 of filter_optional*)) 
+        - all of selection_winzip* or 1 of selection_l* or selection_conti 
+        - (selection_1 and not (1 of filter_generic))
+falsepositives:
+    - Legitmate use of archiving software
+    - Company should define and whitelist the legitmate use of archive software to detect any anomolies for using unauthorized tool
+level: High
