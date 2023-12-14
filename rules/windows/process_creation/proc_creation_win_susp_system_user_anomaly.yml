@@ -7,7 +7,7 @@ references:
     - https://tools.thehacker.recipes/mimikatz/modules
 author: Florian Roth (Nextron Systems), David ANDRE (additional keywords)
 date: 2021/12/20
-modified: 2023/01/19
+modified: 2023/12/14
 tags:
     - attack.credential_access
     - attack.defense_evasion
@@ -79,11 +79,15 @@ detection:
         Image|endswith: '\PING.EXE'
         ParentCommandLine|contains: '\DismFoDInstall.cmd'
     filter_config_mgr:
-        ParentImage|startswith: 'C:\Packages\Plugins\Microsoft.GuestConfiguration.ConfigurationforWindows\'
+        ParentImage|contains: ':\Packages\Plugins\Microsoft.GuestConfiguration.ConfigurationforWindows\'
     filter_java:
-        ParentImage|startswith: 'C:\Program Files (x86)\Java\'
+        ParentImage|contains:
+            - ':\Program Files (x86)\Java\'
+            - ':\Program Files\Java\'
         ParentImage|endswith: '\bin\javaws.exe'
-        Image|startswith: 'C:\Program Files (x86)\Java\'
+        Image|contains:
+            - ':\Program Files (x86)\Java\'
+            - ':\Program Files\Java\'
         Image|endswith: '\bin\jp2launcher.exe'
         CommandLine|contains: ' -ma '
     condition: all of selection* and not 1 of filter_*
