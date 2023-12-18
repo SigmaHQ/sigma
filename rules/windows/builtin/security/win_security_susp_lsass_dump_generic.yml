@@ -17,7 +17,7 @@ logsource:
     service: security
 detection:
     selection_1:
-        EventID: 4656
+        EventID: 4656 # A handle to an object was requested.
         ObjectName|endswith: '\lsass.exe'
         AccessMask|contains:
             - '0x40'
@@ -34,7 +34,7 @@ detection:
             - '0x1f2fff'
             - '0x1f3fff'
     selection_2:
-        EventID: 4663
+        EventID: 4663 # An attempt was made to access an object
         ObjectName|endswith: '\lsass.exe'
         AccessList|contains:
             - '4484'
@@ -102,6 +102,11 @@ detection:
     filter_main_googleupdate:
         ProcessName|contains: ':\Windows\SystemTemp\'
         ProcessName|endswith: '\GoogleUpdate.exe'
+        AccessList|contains: '%%4484'
+    filter_optional_procmon:
+        ProcessName|endswith:
+            - '\procmon64.exe'
+            - '\procmon.exe'
         AccessList|contains: '%%4484'
     condition: 1 of selection_* and not 1 of filter_main_*
 falsepositives:

@@ -6,7 +6,7 @@ references:
     - https://researchcenter.paloaltonetworks.com/2018/07/unit42-upatre-continues-evolve-new-anti-analysis-techniques/
 author: Florian Roth (Nextron Systems), oscd.community
 date: 2018/07/18
-modified: 2023/08/17
+modified: 2023/12/11
 tags:
     - attack.persistence
     - attack.t1547.001
@@ -16,19 +16,15 @@ logsource:
 detection:
     selection:
         TargetObject|endswith: '\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run'
-    selection2:
-        - Details|startswith:
-              - 'C:\Windows\Temp\'
-              - 'C:\ProgramData\'
-              - 'C:\$Recycle.bin\'
-              - 'C:\Temp\'
-              - 'C:\Users\Public\'
-              - 'C:\Users\Default\'
-        - Details|contains: '\AppData\'
-    condition: selection and selection2
-fields:
-    - Image
-    - ParentImage
+        Details|contains:
+            - ':\$Recycle.bin\'
+            - ':\ProgramData\'
+            - ':\Temp\'
+            - ':\Users\Default\'
+            - ':\Users\Public\'
+            - ':\Windows\Temp\'
+            - '\AppData\Local\Temp\'
+    condition: selection
 falsepositives:
     - Unknown
 level: high

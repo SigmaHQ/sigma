@@ -1,14 +1,14 @@
-title: Suspicious Whoami.EXE Execution
+title: Whoami.EXE Execution With Output Option
 id: c30fb093-1109-4dc8-88a8-b30d11c95a5d
 status: experimental
-description: Detects the execution of "whoami.exe" with the "/all" flag or with redirection options to export the results to a file for later use.
+description: Detects the execution of "whoami.exe" with the "/FO" flag to choose CSV as output format or with redirection options to export the results to a file for later use.
 references:
     - https://brica.de/alerts/alert/public/1247926/agent-tesla-keylogger-delivered-inside-a-power-iso-daa-archive/
     - https://app.any.run/tasks/7eaba74e-c1ea-400f-9c17-5e30eee89906/
     - https://www.youtube.com/watch?v=DsJ9ByX84o4&t=6s
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2023/02/28
-modified: 2023/11/10
+modified: 2023/12/04
 tags:
     - attack.discovery
     - attack.t1033
@@ -22,8 +22,6 @@ detection:
         - OriginalFileName: 'whoami.exe'
     selection_main_cli:
         CommandLine|contains:
-            - ' -all'
-            - ' /all'
             - ' /FO CSV'
             - ' -FO CSV'
     selection_special:
@@ -31,4 +29,4 @@ detection:
     condition: all of selection_main_* or selection_special
 falsepositives:
     - Unknown
-level: high
+level: medium

@@ -10,7 +10,7 @@ references:
     - https://www.joesandbox.com/analysis/514608/0/html#324415FF7D8324231381BAD48A052F85DF04
 author: Florian Roth (Nextron Systems)
 date: 2022/02/21
-modified: 2023/03/14
+modified: 2023/11/30
 tags:
     - attack.execution
     - attack.t1053.005
@@ -23,21 +23,21 @@ detection:
         CommandLine|contains: ' /create '
     selection1_all_folders:
         CommandLine|contains:
-            - '%AppData%'
+            - ':\Perflogs'
+            - ':\Windows\Temp'
             - '\AppData\Local\'
             - '\AppData\Roaming\'
-            - '%Public%'
             - '\Users\Public'
-            - 'C:\Windows\Temp'
-            - 'C:\Perflogs'
+            - '%AppData%'
+            - '%Public%'
     selection2_parent:
         ParentCommandLine|endswith: '\svchost.exe -k netsvcs -p -s Schedule'
     selection2_some_folders:
         CommandLine|contains:
-            - '%Public%'
+            - ':\Perflogs'
+            - ':\Windows\Temp'
             - '\Users\Public'
-            - 'C:\Windows\Temp'
-            - 'C:\Perflogs'
+            - '%Public%'
     filter_mixed:
         - CommandLine|contains:
               - 'update_task.xml'
@@ -70,4 +70,4 @@ detection:
 falsepositives:
     - Benign scheduled tasks creations or executions that happen often during software installations
     - Software that uses the AppData folder and scheduled tasks to update the software in the AppData folders
-level: high
+level: medium

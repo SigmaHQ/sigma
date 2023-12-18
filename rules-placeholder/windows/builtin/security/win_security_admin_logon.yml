@@ -8,7 +8,7 @@ references:
     - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4964
 author: frack113
 date: 2022/10/14
-modified: 2022/10/22
+modified: 2023/12/14
 tags:
     - attack.defense_evasion
     - attack.lateral_movement
@@ -24,12 +24,11 @@ detection:
         EventID:
             - 4672
             - 4964
-    filter:
-        SubjectUserSid: S-1-5-18
-    # Level can be upgrade to medium with a filter
-    # filter_valid_account:
-    #     SubjectUserName: set valid internal naming pattern or a list a valid account
-    condition: selection and not filter
+    filter_main_local_system:
+        SubjectUserSid: 'S-1-5-18'
+    filter_man_valid_account:
+        SubjectUserName: '%Admins_Workstations%' # Set valid internal naming pattern or a list a valid account
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: low

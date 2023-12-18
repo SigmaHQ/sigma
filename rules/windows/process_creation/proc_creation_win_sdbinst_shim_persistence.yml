@@ -11,7 +11,7 @@ references:
     - https://www.mandiant.com/resources/blog/fin7-shim-databases-persistence
 author: Markus Neis
 date: 2019/01/16
-modified: 2023/08/01
+modified: 2023/12/06
 tags:
     - attack.persistence
     - attack.privilege_escalation
@@ -27,7 +27,10 @@ detection:
         CommandLine|contains: '.sdb'
     filter_optional_iis:
         ParentImage|endswith: '\msiexec.exe'
-        CommandLine|contains: 'iisexpressshim.sdb' # Expected behavior for IIS Express (e.g. https://www.hybrid-analysis.com/sample/15d4ff941f77f7bdfc9dfb2399b7b952a0a2c860976ef3e835998ff4796e5e91?environmentId=120)
+        CommandLine|contains:
+            # Expected behavior for IIS Express (e.g. https://www.hybrid-analysis.com/sample/15d4ff941f77f7bdfc9dfb2399b7b952a0a2c860976ef3e835998ff4796e5e91?environmentId=120)
+            - ':\Program Files (x86)\IIS Express\iisexpressshim.sdb'
+            - ':\Program Files\IIS Express\iisexpressshim.sdb'
     condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
