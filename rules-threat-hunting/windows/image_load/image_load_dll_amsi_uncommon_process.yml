@@ -8,11 +8,12 @@ references:
     - https://github.com/surya-dev-singh/AmsiBypass-OpenSession
 author: frack113
 date: 2023/03/12
-modified: 2023/06/01
+modified: 2023/12/18
 tags:
     - attack.defense_evasion
     - attack.impact
     - attack.t1490
+    - detection.threat_hunting
 logsource:
     category: image_load
     product: windows
@@ -20,29 +21,29 @@ detection:
     selection:
         ImageLoaded|endswith: '\amsi.dll'
     filter_main_exact:
-        Image:
-            - 'C:\Windows\explorer.exe'
-            - 'C:\Windows\Sysmon64.exe'
+        Image|endswith:
+            - ':\Windows\explorer.exe'
+            - ':\Windows\Sysmon64.exe'
     filter_main_generic:
-        Image|startswith:
-            - 'C:\Program Files (x86)\'
-            - 'C:\Program Files\'
-            - 'C:\Windows\System32\'
-            - 'C:\Windows\SysWOW64\'
-            - 'C:\Windows\WinSxS\'
+        Image|contains:
+            - ':\Program Files (x86)\'
+            - ':\Program Files\'
+            - ':\Windows\System32\'
+            - ':\Windows\SysWOW64\'
+            - ':\Windows\WinSxS\'
     filter_optional_defender:
-        Image|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+        Image|contains: ':\ProgramData\Microsoft\Windows Defender\Platform\'
         Image|endswith: '\MsMpEng.exe'
     filter_main_dotnet:
-        Image|startswith:
-            - 'C:\Windows\Microsoft.NET\Framework\'
-            - 'C:\Windows\Microsoft.NET\Framework64\'
+        Image|contains:
+            - ':\Windows\Microsoft.NET\Framework\'
+            - ':\Windows\Microsoft.NET\Framework64\'
         Image|endswith: '\ngentask.exe'
     filter_main_null:
         Image: null
     filter_main_empty:
         Image: ''
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate third party apps installed in "ProgramData" and "AppData" might generate some false positives. Apply additional filters accordingly
 level: low

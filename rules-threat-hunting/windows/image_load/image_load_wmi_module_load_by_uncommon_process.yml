@@ -1,4 +1,4 @@
-title: WMI Module Loaded By Non Uncommon Process
+title: WMI Module Loaded By Uncommon Process
 id: 671bb7e3-a020-4824-a00e-2ee5b55f385e
 status: test
 description: Detects a WMI modules being loaded by an uncommon process
@@ -6,10 +6,11 @@ references:
     - https://threathunterplaybook.com/hunts/windows/190811-WMIModuleLoad/notebook.html
 author: Roberto Rodriguez @Cyb3rWard0g
 date: 2019/08/10
-modified: 2023/11/27
+modified: 2023/12/11
 tags:
     - attack.execution
     - attack.t1047
+    - detection.threat_hunting
 logsource:
     category: image_load
     product: windows
@@ -27,13 +28,13 @@ detection:
             - '\wmiutils.dll'
     filter_main_generic:
         Image|contains:
+            - ':\Program Files (x86)\'
+            - ':\Program Files\'
             - ':\Windows\explorer.exe'
-            - ':\Windows\Sysmon.exe'
-            - ':\Windows\Sysmon64.exe'
+            - ':\Windows\Microsoft.NET\Framework\'
+            - ':\Windows\Microsoft.NET\Framework64\'
             - ':\Windows\System32\'
             - ':\Windows\SysWOW64\'
-            - '\Microsoft\Teams\current\Teams.exe'
-            - '\Microsoft\Teams\Update.exe'
     filter_optional_other:
         Image|endswith:
             - '\WindowsAzureGuestAgent.exe'
@@ -44,15 +45,14 @@ detection:
             - '\thor64.exe'
     filter_optional_defender:
         Image|endswith: '\MsMpEng.exe'
-    filter_optional_dotnet:
+    filer_optional_teams:
         Image|contains:
-            - ':\Windows\Microsoft.NET\Framework\'
-            - ':\Windows\Microsoft.NET\Framework64\'
-        Image|endswith: '\ngentask.exe'
-    filter_optional_programfiles:
-        Image|contains:
-            - ':\Program Files\'
-            - ':\Program Files (x86)\'
+            - '\Microsoft\Teams\current\Teams.exe'
+            - '\Microsoft\Teams\Update.exe'
+    filer_optional_sysmon:
+        Image|endswith:
+            - ':\Windows\Sysmon.exe'
+            - ':\Windows\Sysmon64.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown

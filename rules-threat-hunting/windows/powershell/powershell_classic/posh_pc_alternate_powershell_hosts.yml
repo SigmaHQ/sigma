@@ -9,10 +9,11 @@ references:
     - https://threathunterplaybook.com/hunts/windows/190815-RemoteServiceInstallation/notebook.html
 author: Roberto Rodriguez @Cyb3rWard0g
 date: 2019/08/11
-modified: 2023/11/03
+modified: 2023/12/11
 tags:
     - attack.execution
     - attack.t1059.001
+    - detection.threat_hunting
 logsource:
     product: windows
     category: ps_classic_start
@@ -22,12 +23,13 @@ detection:
     # Note: Powershell Logging Data is localized. Meaning that "HostApplication" field will be translated to a different field on a non english layout. This rule doesn't take this into account due to the sheer ammount of possibilities. It's up to the user to add these cases.
     filter_main_ps:
         Data|contains:
+            - 'HostApplication=*:/Windows/System32/WindowsPowerShell/v1.0/powershell' # In some cases powershell was invoked with inverted slashes
+            - 'HostApplication=*:/Windows/SysWOW64/WindowsPowerShell/v1.0/powershell' # In some cases powershell was invoked with inverted slashes
+            - 'HostApplication=*:\Windows\System32\sdiagnhost.exe'
+            - 'HostApplication=*:\Windows\System32\WindowsPowerShell\v1.0\powershell'
+            - 'HostApplication=*:\Windows\SysWOW64\sdiagnhost.exe'
+            - 'HostApplication=*:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell'
             - 'HostApplication=powershell'
-            - 'HostApplication=C:\Windows\System32\WindowsPowerShell\v1.0\powershell'
-            - 'HostApplication=C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell'
-            # In some cases powershell was invoked with inverted slashes
-            - 'HostApplication=C:/Windows/System32/WindowsPowerShell/v1.0/powershell'
-            - 'HostApplication=C:/Windows/SysWOW64/WindowsPowerShell/v1.0/powershell'
     filter_optional_citrix:
         Data|contains: 'Citrix\ConfigSync\ConfigSync.ps1'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
