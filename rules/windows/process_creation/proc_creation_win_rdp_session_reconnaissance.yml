@@ -1,0 +1,25 @@
+title: Detection of RDP Session Reconnaissance Activity
+id: 55bb140e-320a-4a7c-be6e-a2f560e8abce
+status: experimental
+description: Detects RDP session reconnection information gathering Activity
+references:
+    - https://blog.talosintelligence.com/lazarus_new_rats_dlang_and_telegram/
+author: Thurein Oo
+date: 2023/12/20
+tags:
+    - attack.reconnaissance
+    - attack.ta0043
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\cmd.exe'
+        CommandLine|contains|all:
+            - 'wevtutil'
+            - 'qe'
+            - 'Microsoft-Windows-TerminalServices-LocalSessionManager/Operational'
+    condition: selection
+falsepositives:
+    - Unknown
+level: critical
