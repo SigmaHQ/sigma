@@ -1,11 +1,13 @@
-title: Potential System Information Discovery Via Wmic.EXE
-id: 9d5a1274-922a-49d0-87f3-8c653483b909
+title: System Information Discovery Via Wmic.EXE
+id: d85ecdd7-b855-4e6e-af59-d9c78b5b861e
+related:
+    - id: 9d5a1274-922a-49d0-87f3-8c653483b909
+      type: derived
 status: experimental
 description: |
     Detects the use of the WMI command-line (WMIC) utility to identify and display various system information,
     including OS, CPU, GPU, and disk drive names; memory capacity; display resolution; and baseboard, BIOS,
     and GPU driver products/versions.
-    Some of these commands were used by Aurora Stealer in late 2022/early 2023.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/a2ccd19c37d0278b4ffa8583add3cf52060a5418/atomics/T1082/T1082.md#atomic-test-25---system-information-discovery-with-wmic
     - https://nwgat.ninja/getting-system-information-with-wmic-on-windows/
@@ -13,9 +15,8 @@ references:
     - https://blog.cyble.com/2023/01/18/aurora-a-stealer-using-shapeshifting-tactics/
     - https://app.any.run/tasks/a6aa0057-82ec-451f-8f99-55650ca537da/
     - https://www.virustotal.com/gui/file/d6f6bc10ae0e634ed4301d584f61418cee18e5d58ad9af72f8aa552dc4aaeca3/behavior
-author: TropChaud
-date: 2023/01/26
-modified: 2023/12/05
+author: Joseliyo Sanchez, @Joseliyo_Jstnk
+date: 2023/12/19
 tags:
     - attack.discovery
     - attack.t1082
@@ -27,13 +28,35 @@ detection:
         - Description: 'WMI Commandline Utility'
         - OriginalFileName: 'wmic.exe'
         - Image|endswith: '\WMIC.exe'
-    selection_classes:
-        CommandLine|re: '(?i)baseboard|bios|cpu|diskdrive|logicaldisk|memphysical|os|win32_videocontroller|path|startup'
     selection_get:
         CommandLine|contains: 'get'
+    selection_classes:
+        CommandLine|contains:
+            - 'baseboard'
+            - 'bios'
+            - 'cpu'
+            - 'diskdrive'
+            - 'logicaldisk'
+            - 'memphysical'
+            - 'os'
+            - 'path'
+            - 'startup'
+            - 'win32_videocontroller'
     selection_attributes:
-        CommandLine|re: '(?i)name|version|product|caption|size|smbiosbiosversion|driverversion|videomodedescription|maxcapacity|osarchitecture|command'
+        CommandLine|contains:
+            - 'caption'
+            - 'command'
+            - 'driverversion'
+            - 'maxcapacity'
+            - 'name'
+            - 'osarchitecture'
+            - 'product'
+            - 'size'
+            - 'smbiosbiosversion'
+            - 'version'
+            - 'videomodedescription'
     condition: all of selection_*
 falsepositives:
     - Unknown
-level: medium
+# Note: Might be upgraded to medium after some time
+level: low
