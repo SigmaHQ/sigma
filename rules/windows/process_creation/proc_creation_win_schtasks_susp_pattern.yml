@@ -8,7 +8,7 @@ references:
     - https://www.ncsc.gov.uk/static-assets/documents/malware-analysis-reports/devil-bait/NCSC-MAR-Devil-Bait.pdf
 author: Florian Roth (Nextron Systems)
 date: 2022/02/23
-modified: 2023/05/15
+modified: 2023/12/21
 tags:
     - attack.execution
     - attack.t1053.005
@@ -45,20 +45,19 @@ detection:
             - 'FromBase64String'
             - 'mshta http'
             - 'mshta.exe http'
-    selection_anomaly_1:
-        CommandLine|contains|all:
+    selection_anomaly:
+        CommandLine|contains:
             - '\AppData\'
             - '%AppData%'
             - '%Temp%'
             - '%tmp%'
             - 'C:\Windows\Temp\'
-    selection_anomaly_2:
         CommandLine|contains|all:
             - '/xml C:\Users\'
             - 'cscript'
             - 'curl'
             - 'wscript'
-    condition: selection_schtasks and ( all of selection_pattern_* or selection_uncommon or all of selection_anomaly_* )
+    condition: selection_schtasks and ( all of selection_pattern_* or selection_uncommon or selection_anomaly )
 falsepositives:
     - Software installers that run from temporary folders and also install scheduled tasks are expected to generate some false positives
 level: high
