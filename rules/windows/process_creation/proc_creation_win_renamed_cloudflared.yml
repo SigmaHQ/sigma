@@ -1,0 +1,88 @@
+title: Renamed Cloudflared.EXE Execution
+id: e0c69ebd-b54f-4aed-8ae3-e3467843f3f0
+status: experimental
+description: Detects the execution of a renamed "cloudflared" binary.
+references:
+    - https://github.com/cloudflare/cloudflared/releases
+    - https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/
+    - https://github.com/cloudflare/cloudflared
+    - https://www.intrinsec.com/akira_ransomware/
+    - https://www.guidepointsecurity.com/blog/tunnel-vision-cloudflared-abused-in-the-wild/
+tags:
+    - attack.command_and_control
+    - attack.t1090.001
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/12/20
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_cleanup:
+        CommandLine|contains|all:
+            - ' tunnel '
+            - 'cleanup '
+        CommandLine|contains:
+            - '-config '
+            - '-connector-id '
+    selection_tunnel:
+        CommandLine|contains|all:
+            - ' tunnel '
+            - ' run '
+        CommandLine|contains:
+            - '-config '
+            - '-credentials-contents '
+            - '-credentials-file '
+            - '-token '
+    selection_accountless:
+        CommandLine|contains|all:
+            - '-url'
+            - 'tunnel'
+    selection_hashes:
+        Hashes|contains:
+            - 'SHA256=2fb6c04c4f95fb8d158af94c137f90ac820716deaf88d8ebec956254e046cb29'
+            - 'SHA256=b3d21940a10fdef5e415ad70331ce257c24fe3bcf7722262302e0421791f87e8'
+            - 'SHA256=1fbd8362b2d2d2e6a5750ae3db69cd1815e6c1d31da48a98b796450971a8e039'
+            - 'SHA256=0409c9b12f9d0eda86e461ed9bdabeefb00172b26322079681a0bdf48e68dc28'
+            - 'SHA256=7cfb411d04bac42ef93d1f0c93c0a481e38c6f4612b97ae89d4702595988edc7'
+            - 'SHA256=5b3c2d846ab162dc6bc595cce3a49de5731afde5d6060be7066d21b013a28373'
+            - 'SHA256=ce95df7f69664c3df19b76028e115931919a71517b776da7b42d353e2ff4a670'
+            - 'SHA256=1293525a19cfe3bc8296b62fbfe19f083632ed644a1c18c10b045a1d3030d81a'
+            - 'SHA256=af2b9161cfcb654b16408cd6b098afe9d1fb61a037d18d7090a119d4c0c8e0f0'
+            - 'SHA256=39ddceb56a15798826a5fc4892fa2b474c444bb4d7a8bf2fa95e41cab10fa7a1'
+            - 'SHA256=ccd11f2328023a0e7929e845d5b6e7bc783fb4650d65faef3ae090239d4bbce2'
+            - 'SHA256=b6e5c5d2567ae8c69cc012ebcae30e6c9b5359d64a58d17ba75ec89f8bce71ac'
+            - 'SHA256=f813484ea441404f18caad96f28138e8aaf0cb256163c09c2ab8a3acab87f69f'
+            - 'SHA256=fc4a0802ab9c7409b892ca00636bec61e2acfc911bccfdeb9978b8ab5a2f828d'
+            - 'SHA256=083150724b49604c8765c1ba19541fa260b133be0acb0647fcd936d81f054499'
+            - 'SHA256=44303d6572956f28a0f2e4b188934fb9874f2584f5c81fa431a463cfbf28083b'
+            - 'SHA256=5d38c46032a58e28ae5f7d174d8761ec3d64d186677f3ec53af5f51afb9bfd2f'
+            - 'SHA256=e1e70fa42059911bc6685fafef957f9a73fc66f214d0704a9b932683a5204032'
+            - 'SHA256=c01356092a365b84f84f0e66870bd1a05ba3feb53cafd973fa5fea2534bee234'
+            - 'SHA256=b3f9c06151e30ee43d39e788a79cd918a314f24e04fe87f3de8272a2057b624f'
+            - 'SHA256=cd81b2792f0739f473c31c9cb7cf2313154bfa28b839975802b90e8790bb5058'
+            - 'SHA256=9ec7e6c8e1bfd883663d8d9d62c9e4f9ae373b731407181e32491b27a7218a2c'
+            - 'SHA256=c2cfd23fdc6c0e1b1ffa0e545cbe556f18d11b362b4a89ba0713f6ab01c4827f'
+            - 'SHA256=53f8adbd76c0eb16f5e43cadde422474d8a06f9c8f959389c1930042ad8beaa5'
+            - 'SHA256=648c8d2f8001c113d2986dd00b7bbd181593d462bef73522cee212c4f71f95b3'
+            - 'SHA256=ae047e2095e46c3f9c518b2be67ec753f4f0aad23b261a361fcb6144dcdb63b4'
+            - 'SHA256=3153d2baa462978dd22ab33d1c2274ecc88c200225d6a3327f98d5b752d08f5c'
+            - 'SHA256=f49cde976e628012c9db73e1c8d76081944ecf2297cdafeb78bb13290da274c4'
+            - 'SHA256=d2513e58bb03ccc83affde685c6ef987924c37ce6707d8e9857e2524b0d7e90f'
+            - 'SHA256=bb67c7623ba92fe64ffd9816b8d5b3b1ea3013960a30bd4cf6e295b3eb5b1bad'
+            - 'SHA256=b34b3c3a91e3165d1481f0b3ec23eab93a1cfba94345a6cbfe5b18ddbd48eac7'
+            - 'SHA256=f7848034e010d55f15e474ca998f96391e320ff29b00cfcc4c5e536529703e75'
+            - 'SHA256=b6fc9493778cbe3bfc062d73f5cc604bc0ff058bc5e5dc6aac87f3a4008b54b6'
+            - 'SHA256=f5c5e962577e2293c4ad10603816dce7cc273585969615fbf4e4bfa9eaff1688'
+            - 'SHA256=d14c52d9220b606f428a8fe9f7c108b0d6f14cf71e7384749e98e6a95962e68f'
+            - 'SHA256=d3a0e1a79158f3985cd49607ebe0cdfcc49cb9af96b8f43aefd0cdfe2f22e663'
+            - 'SHA256=2fbbfc8299537ff80cadf9d0e27c223fe0ccb9052bf9d8763ad717bbfa521c77'
+            - 'SHA256=19074674c6fbdaa573b3081745e5e26144fdf7a086d14e0e220d1814f1f13078'
+    filter_main_known_names:
+        Image|endswith:
+            - '\cloudflared.exe'
+            - '\cloudflared-windows-386.exe'
+            - '\cloudflared-windows-amd64.exe'
+    condition: 1 of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high
