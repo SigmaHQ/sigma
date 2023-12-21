@@ -1,5 +1,8 @@
-title: Potential System Information Discovery Via Wmic.EXE
+title: Uncommon System Information Discovery Via Wmic.EXE
 id: 9d5a1274-922a-49d0-87f3-8c653483b909
+related:
+    - id: d85ecdd7-b855-4e6e-af59-d9c78b5b861e
+      type: derived
 status: experimental
 description: |
     Detects the use of the WMI command-line (WMIC) utility to identify and display various system information,
@@ -12,9 +15,10 @@ references:
     - https://blog.sekoia.io/aurora-a-rising-stealer-flying-under-the-radar
     - https://blog.cyble.com/2023/01/18/aurora-a-stealer-using-shapeshifting-tactics/
     - https://app.any.run/tasks/a6aa0057-82ec-451f-8f99-55650ca537da/
+    - https://www.virustotal.com/gui/file/d6f6bc10ae0e634ed4301d584f61418cee18e5d58ad9af72f8aa552dc4aaeca3/behavior
 author: TropChaud
 date: 2023/01/26
-modified: 2023/05/05
+modified: 2023/12/19
 tags:
     - attack.discovery
     - attack.t1082
@@ -28,17 +32,8 @@ detection:
         - Image|endswith: '\WMIC.exe'
     selection_commands:
         CommandLine|contains:
-            - 'baseboard get product'
-            - 'baseboard get version'
-            - 'bios get SMBIOSBIOSVersion'
-            - 'cpu get name'
-            - 'DISKDRIVE get Caption'
             - 'LOGICALDISK get Name,Size,FreeSpace'
-            - 'MEMPHYSICAL get MaxCapacity'
-            - 'OS get Caption,OSArchitecture,Version'
-            - 'path win32_VideoController get DriverVersion'
-            - 'path win32_VideoController get name'
-            - 'path win32_VideoController get VideoModeDescription'
+            - 'os get Caption,OSArchitecture,Version'
     condition: all of selection_*
 falsepositives:
     - Unknown
