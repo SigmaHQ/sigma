@@ -1,0 +1,29 @@
+title: Enumerate All Information With Whoami.EXE
+id: c248c896-e412-4279-8c15-1c558067b6fa
+status: experimental
+description: Detects the execution of "whoami.exe" with the "/all" flag
+references:
+    - https://brica.de/alerts/alert/public/1247926/agent-tesla-keylogger-delivered-inside-a-power-iso-daa-archive/
+    - https://app.any.run/tasks/7eaba74e-c1ea-400f-9c17-5e30eee89906/
+    - https://www.youtube.com/watch?v=DsJ9ByX84o4&t=6s
+author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+date: 2023/12/04
+tags:
+    - attack.discovery
+    - attack.t1033
+    - car.2016-03-001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_main_img:
+        - Image|endswith: '\whoami.exe'
+        - OriginalFileName: 'whoami.exe'
+    selection_main_cli:
+        CommandLine|contains:
+            - ' -all'
+            - ' /all'
+    condition: all of selection_main_*
+falsepositives:
+    - Unknown
+level: medium

@@ -22,15 +22,11 @@ detection:
         CommandLine|contains|all:
             - ' firewall '
             - ' add '
-    filter_dropbox:
+    filter_optional_dropbox:
         CommandLine|contains:
-            - '\netsh.exe advfirewall firewall add rule name=Dropbox dir=in action=allow "program=C:\Program Files (x86)\Dropbox\Client\Dropbox.exe" enable=yes profile=Any'
-            - '\netsh.exe advfirewall firewall add rule name=Dropbox dir=in action=allow "program=C:\Program Files\Dropbox\Client\Dropbox.exe" enable=yes profile=Any'
-    filter_thor:
-        ParentImage|startswith: 'C:\Windows\Temp\asgard2-agent\'
-        ParentImage|endswith: '\thor64.exe'
-        CommandLine|contains: 'advfirewall firewall show rule name=all'
-    condition: all of selection_* and not 1 of filter_*
+            - 'advfirewall firewall add rule name=Dropbox dir=in action=allow "program=?:\Program Files (x86)\Dropbox\Client\Dropbox.exe" enable=yes profile=Any'
+            - 'advfirewall firewall add rule name=Dropbox dir=in action=allow "program=?:\Program Files\Dropbox\Client\Dropbox.exe" enable=yes profile=Any'
+    condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate administration activity
     - Software installations

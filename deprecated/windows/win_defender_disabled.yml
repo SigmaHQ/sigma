@@ -1,0 +1,28 @@
+title: Windows Defender Threat Detection Disabled
+id: fe34868f-6e0e-4882-81f6-c43aa8f15b62
+status: deprecated
+description: Detects disabling Windows Defender threat protection
+references:
+    - https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-antivirus/troubleshoot-windows-defender-antivirus
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
+author: Ján Trenčanský, frack113
+date: 2020/07/28
+modified: 2023/11/22
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    product: windows
+    service: windefend
+detection:
+    selection:
+        EventID:
+            - 5001 # Real-time protection is disabled.
+            - 5010 # Scanning for malware and other potentially unwanted software is disabled.
+            - 5012 # Scanning for viruses is disabled.
+            - 5101 # The antimalware platform is expired.
+    condition: selection
+falsepositives:
+    - Administrator actions (should be investigated)
+    - Seen being triggered occasionally during Windows 8 Defender Updates
+level: high

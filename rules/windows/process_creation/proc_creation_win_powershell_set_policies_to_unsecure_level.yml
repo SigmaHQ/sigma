@@ -8,7 +8,7 @@ related:
     - id: fad91067-08c5-4d1a-8d8c-d96a21b37814 # Registry
       type: similar
 status: test
-description: Detects use of executionpolicy option to set insecure policies
+description: Detects changing the PowerShell script execution policy to a potentially insecure level using the "-ExecutionPolicy" flag.
 references:
     - https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy?view=powershell-7.1
     - https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.1
@@ -16,7 +16,7 @@ references:
     - https://thedfirreport.com/2021/11/01/from-zero-to-domain-admin/
 author: frack113
 date: 2021/11/01
-modified: 2022/09/10
+modified: 2023/12/13
 tags:
     - attack.execution
     - attack.t1059.001
@@ -24,22 +24,23 @@ logsource:
     product: windows
     category: process_creation
 detection:
+    selection_img:
+        - OriginalFileName:
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
     selection_option:
         CommandLine|contains:
-            - ' -executionpolicy '
+            - '-executionpolicy '
             - ' -ep '
             - ' -exec '
     selection_level:
         CommandLine|contains:
+            - 'Bypass'
             - 'Unrestricted'
-            - 'bypass'
-            - 'RemoteSigned'
-    filter:
-        CommandLine|contains:
-            - 'C:\Program Files'
-            - 'C:\ProgramData'
-            - '\AppData\Roaming\Code\'
-    condition: all of selection* and not filter
+    condition: all of selection_*
 falsepositives:
-    - Administrator script
+    - Administrator scripts
 level: medium
