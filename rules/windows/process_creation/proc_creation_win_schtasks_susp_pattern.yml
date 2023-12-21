@@ -45,19 +45,19 @@ detection:
             - 'FromBase64String'
             - 'mshta http'
             - 'mshta.exe http'
-    selection_anomaly:
+    selection_anomaly_1:
         CommandLine|contains:
+            - ':\Windows\Temp\'
             - '\AppData\'
             - '%AppData%'
             - '%Temp%'
             - '%tmp%'
-            - 'C:\Windows\Temp\'
-        CommandLine|contains|all:
-            - '/xml C:\Users\'
+    selection_anomaly_2:
+        CommandLine|contains:
             - 'cscript'
             - 'curl'
             - 'wscript'
-    condition: selection_schtasks and ( all of selection_pattern_* or selection_uncommon or selection_anomaly )
+    condition: selection_schtasks and ( all of selection_pattern_* or selection_uncommon or all of selection_anomaly_* )
 falsepositives:
     - Software installers that run from temporary folders and also install scheduled tasks are expected to generate some false positives
 level: high
