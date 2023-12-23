@@ -1,0 +1,29 @@
+title: HackTool - NoFilter PrivEsc Tool Usage
+id: 7b14c76a-c602-4ae6-9717-eff868153fc0
+status: test
+description: Detects usage of the NoFilter tool that is used for abusing the Windows Filtering Platform for privilege escalation. 
+references:
+    - https://github.com/deepinstinct/NoFilter/blob/main/NoFilter/Consts.cpp
+    - https://github.com/deepinstinct/NoFilter
+    - https://www.deepinstinct.com/blog/nofilter-abusing-windows-filtering-platform-for-privilege-escalation
+author: Stamatis Chatzimangou
+date: 2023/11/26
+modified: 2023/11/26
+tags:
+    - attack.privilege_escalation
+    - attack.t1134
+    - attack.t1134.001
+logsource:
+    product: windows
+    service: security
+    # warning: The 'data' field used in the detection section is the container for the event data as a whole. You may have to adapt the rule for your backend accordingly
+detection:
+    selection:
+        EventID:
+            - 5447
+            - 5449
+        Data|contains: 'RonPolicy'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
