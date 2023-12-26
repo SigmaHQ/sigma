@@ -1,0 +1,40 @@
+title: Uncommon PowerShell Hosts
+id: d7326048-328b-4d5e-98af-86e84b17c765
+related:
+    - id: 64e8e417-c19a-475a-8d19-98ea705394cc
+      type: derived
+status: test
+description: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
+references:
+    - https://threathunterplaybook.com/hunts/windows/190815-RemoteServiceInstallation/notebook.html
+author: Roberto Rodriguez @Cyb3rWard0g
+date: 2019/08/11
+modified: 2023/12/11
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - detection.threat_hunting
+logsource:
+    product: windows
+    category: ps_classic_start
+detection:
+    selection:
+        Data|contains: 'HostApplication='
+    # Note: Powershell Logging Data is localized. Meaning that "HostApplication" field will be translated to a different field on a non english layout. This rule doesn't take this into account due to the sheer ammount of possibilities. It's up to the user to add these cases.
+    filter_main_ps:
+        Data|contains:
+            - 'HostApplication=?:/Windows/System32/WindowsPowerShell/v1.0/powershell' # In some cases powershell was invoked with inverted slashes
+            - 'HostApplication=?:/Windows/SysWOW64/WindowsPowerShell/v1.0/powershell' # In some cases powershell was invoked with inverted slashes
+            - 'HostApplication=?:\Windows\System32\sdiagnhost.exe'
+            - 'HostApplication=?:\Windows\System32\WindowsPowerShell\v1.0\powershell'
+            - 'HostApplication=?:\Windows\SysWOW64\sdiagnhost.exe'
+            - 'HostApplication=?:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell'
+            - 'HostApplication=powershell'
+    filter_optional_citrix:
+        Data|contains: 'Citrix\ConfigSync\ConfigSync.ps1'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Programs using PowerShell directly without invocation of a dedicated interpreter
+    - MSP Detection Searcher
+    - Citrix ConfigSync.ps1
+level: medium

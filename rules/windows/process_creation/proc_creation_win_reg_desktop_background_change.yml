@@ -1,0 +1,54 @@
+title: Potentially Suspicious Desktop Background Change Using Reg.EXE
+id: 8cbc9475-8d05-4e27-9c32-df960716c701
+related:
+    - id: 85b88e05-dadc-430b-8a9e-53ff1cd30aae
+      type: similar
+status: experimental
+description: |
+    Detects the execution of "reg.exe" to alter registry keys that would replace the user's desktop background.
+    This is a common technique used by malware to change the desktop background to a ransom note or other image.
+references:
+    - https://www.attackiq.com/2023/09/20/emulating-rhysida/
+    - https://research.checkpoint.com/2023/the-rhysida-ransomware-activity-analysis-and-ties-to-vice-society/
+    - https://www.trendmicro.com/en_us/research/23/h/an-overview-of-the-new-rhysida-ransomware.html
+    - https://www.virustotal.com/gui/file/a864282fea5a536510ae86c77ce46f7827687783628e4f2ceb5bf2c41b8cd3c6/behavior
+    - https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.WindowsDesktop::Wallpaper
+    - https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.ControlPanelDisplay::CPL_Personalization_NoDesktopBackgroundUI
+author: Stephen Lincoln @slincoln-aiq (AttackIQ)
+date: 2023/12/21
+tags:
+    - attack.defense_evasion
+    - attack.impact
+    - attack.t1112
+    - attack.t1491.001
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    # TODO: Improve this to also focus on variation using PowerShell and other CLI tools
+    selection_reg_img:
+        - Image|endswith: '\reg.exe'
+        - OriginalFileName: 'reg.exe'
+    selection_reg_flag:
+        CommandLine|contains: 'add'
+    selection_keys:
+        CommandLine|contains:
+            - 'Control Panel\Desktop'
+            - 'CurrentVersion\Policies\ActiveDesktop'
+            - 'CurrentVersion\Policies\System'
+    selection_cli_reg_1:
+        CommandLine|contains|all:
+            - '/v NoChangingWallpaper'
+            - '/d 1' # Prevent changing desktop background
+    selection_cli_reg_2:
+        CommandLine|contains|all:
+            - '/v Wallpaper'
+            - '/t REG_SZ'
+    selection_cli_reg_3:
+        CommandLine|contains|all:
+            - '/v WallpaperStyle'
+            - '/d 2' # Stretch
+    condition: all of selection_reg_* and selection_keys and 1 of selection_cli_reg_*
+falsepositives:
+    - Administrative scripts that change the desktop background to a company logo or other image.
+level: medium

@@ -14,7 +14,7 @@ references:
     - https://www.hybrid-analysis.com/sample/027cc450ef5f8c5f653329641ec1fed91f694e0d229928963b30f6b0d7d3a745?environmentId=100
 author: Florian Roth (Nextron Systems)
 date: 2017/01/10
-modified: 2023/05/16
+modified: 2023/11/15
 tags:
     - attack.defense_evasion
     - attack.t1070.001
@@ -26,17 +26,16 @@ detection:
     selection:
         EventID: 104
         Provider_Name: 'Microsoft-Windows-Eventlog'
-    filter:
+    filter_main_covered:
         # The channels below are already covered by the rule 100ef69e-3327-481c-8e5c-6d80d9507556
         Channel:
-            - 'Application'
             - 'Microsoft-Windows-PowerShell/Operational'
             - 'Microsoft-Windows-Sysmon/Operational'
             - 'PowerShellCore/Operational'
             - 'Security'
             - 'System'
             - 'Windows PowerShell'
-    condition: selection and not filter
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Rollout of log collection agents (the setup routine often includes a reset of the local Eventlog)
     - System provisioning (system reset before the golden image creation)

@@ -1,4 +1,4 @@
-title: Credential Dumping Activity Via Lsass
+title: Potential Credential Dumping Activity Via LSASS
 id: 5ef9853e-4d0e-4a70-846f-a9ca37d876da
 status: experimental
 description: |
@@ -11,7 +11,7 @@ references:
     - https://research.splunk.com/endpoint/windows_possible_credential_dumping/
 author: Samir Bousseaden, Michael Haag
 date: 2019/04/03
-modified: 2023/11/29
+modified: 2023/12/13
 tags:
     - attack.credential_access
     - attack.t1003.001
@@ -23,16 +23,16 @@ detection:
     selection:
         TargetImage|endswith: '\lsass.exe'
         GrantedAccess|contains:
-            - '0x1038'
-            - '0x143a'
-            - '0x1438'
             - '0x1000'
-            - '0x01000'  # Too many false positives
-            - '0x1010'   # Too many false positives
-            - '0x1400'  # Too many false positives
-            - '0x1410' # Too many false positives
+            - '0x1038'
+            - '0x1438'
+            - '0x143a'
             - '0x1fffff' # Too many false positives
-            - '0x40'   # Too many false positives
+            # - '0x01000'  # Too many false positives
+            # - '0x1010'   # Too many false positives
+            # - '0x1400'  # Too many false positives
+            # - '0x1410' # Too many false positives
+            # - '0x40'   # Too many false positives
         CallTrace|contains:
             - 'dbgcore.dll'
             - 'dbghelp.dll'
@@ -54,4 +54,4 @@ detection:
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
-level: high
+level: medium

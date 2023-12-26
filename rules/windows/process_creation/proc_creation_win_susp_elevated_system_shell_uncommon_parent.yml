@@ -1,0 +1,69 @@
+title: Elevated System Shell Spawned From Uncommon Parent Location
+id: 178e615d-e666-498b-9630-9ed363038101
+related:
+    - id: 61065c72-5d7d-44ef-bf41-6a36684b545f
+      type: similar
+status: experimental
+description: Detects when a shell program such as the Windows command prompt or PowerShell is launched with system privileges from a uncommon parent location.
+references:
+    - https://github.com/Wh04m1001/SysmonEoP
+author: frack113, Tim Shelton (update fp)
+date: 2022/12/05
+modified: 2023/11/23
+tags:
+    - attack.privilege_escalation
+    - attack.defense_evasion
+    - attack.execution
+    - attack.t1059
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_shell:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+              - '\cmd.exe'
+        - OriginalFileName:
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+              - 'Cmd.Exe'
+    selection_user:
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
+        LogonId: '0x3e7'
+    filter_main_generic:
+        # Example 1:
+        #   C:\Program Files\erl-23.2\erts-11.1.4\bin\erl.exe" -service_event ErlSrv_RabbitMQ -nohup -sname rabbit@localhost -s rabbit boot -boot start_sasl +W w +MBas ageffcbf +MHas ageffcbf +MBlmbcs 512 +MHlmbcs 512 +MMmcs 30 +P 1048576 +t 5000000 +stbt db +zdbbl 128000 +sbwt none +sbwtdcpu none +sbwtdio none -kernel inet_dist_listen_min 25672 -kernel inet_dist_listen_max 25672 -lager crash_log false -lager handlers []
+        # Example 2:
+        #   ParentImage: C:\Program Files (x86)\Varonis\DatAdvantage\GridCollector\VrnsRealTimeAlertsSvc.exe" /appid 000000ad-cb03-500b-9459-c46d000000ad
+        #   CommandLine: C:\Windows\system32\cmd.exe /c C:\Program Files "(x86)\Varonis\DatAdvantage\GridCollector\handle_scopes.cmd C:\Collector" Working Share\VaronisWorkDirectoryCollector
+        ParentImage|contains:
+            - ':\Program Files (x86)\'
+            - ':\Program Files\'
+            - ':\ProgramData\'
+            - ':\Windows\System32\'
+            - ':\Windows\SysWOW64\'
+            - ':\Windows\Temp\' # Installers
+            - ':\Windows\WinSxS\'
+    filter_optional_manageengine:
+        # Example:
+        #   ParentImage: C:/ManageEngine/ADManager Plus/pgsql/bin/postgres.exe" --forkarch 5380
+        #   CommandLine: C:\Windows\system32\cmd.exe /c "IF EXIST archive.bat (archive.bat pg_wal\000000010000008E000000EA 000000010000008E000000EA)
+        ParentImage|endswith: ':\ManageEngine\ADManager Plus\pgsql\bin\postgres.exe'
+        Image|endswith: '\cmd.exe'
+    filter_optional_asgard:
+        CommandLine|contains: ':\WINDOWS\system32\cmd.exe /c "'
+        CurrentDirectory|contains: ':\WINDOWS\Temp\asgard2-agent\'
+    filter_optional_ibm_spectrumprotect:
+        ParentImage|contains: ':\IBM\SpectrumProtect\webserver\scripts\'
+        CommandLine|contains: ':\IBM\SpectrumProtect\webserver\scripts\'
+    filter_main_parent_null:
+        ParentImage: null
+    filter_main_parent_empty:
+        ParentImage: ''
+    condition: all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Unknown
+level: medium
