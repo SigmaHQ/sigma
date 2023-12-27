@@ -1,0 +1,64 @@
+title: Potential Defense Evasion Via Raw Disk Access By Uncommon Tools
+id: db809f10-56ce-4420-8c86-d6a7d793c79c
+status: test
+description: Detects raw disk access using uncommon tools or tools that are located in suspicious locations (heavy filtering is required), which could indicate possible defense evasion attempts
+references:
+    - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
+author: Teymur Kheirkhabarov, oscd.community
+date: 2019/10/22
+modified: 2023/11/28
+tags:
+    - attack.defense_evasion
+    - attack.t1006
+logsource:
+    product: windows
+    category: raw_access_thread
+detection:
+    filter_main_floppy:
+        Device|contains: floppy
+    filter_main_generic:
+        Image|contains:
+            - ':\$WINDOWS.~BT\'
+            - ':\Program Files (x86)\'
+            - ':\Program Files\'
+            - ':\Windows\CCM\'
+            - ':\Windows\explorer.exe'
+            - ':\Windows\servicing\'
+            - ':\Windows\SoftwareDistribution\'
+            - ':\Windows\System32\'
+            - ':\Windows\SystemApps\'
+            - ':\Windows\uus\'
+            - ':\Windows\WinSxS\'
+    filter_main_system_images:
+        Image:
+            - 'Registry'
+            - 'System'
+    filter_main_windefender:
+        Image|contains: ':\ProgramData\Microsoft\Windows Defender\Platform\'
+        Image|endswith: '\MsMpEng.exe'
+    filter_main_microsoft_appdata:
+        Image|contains|all:
+            - ':\Users\'
+            - '\AppData\'
+            - '\Microsoft\'
+    filter_main_ssd_nvme:
+        Image|contains: ':\Windows\Temp\'
+        Image|endswith:
+            - '\Executables\SSDUpdate.exe'
+            - '\HostMetadata\NVMEHostmetadata.exe'
+    filter_main_null:
+        Image: null
+    filter_main_systemsettings:
+        Image|endswith: ':\Windows\ImmersiveControlPanel\SystemSettings.exe'
+    filter_optional_github_desktop:
+        Image|contains: '\AppData\Local\GitHubDesktop\app-'
+        Image|endswith: '\resources\app\git\mingw64\bin\git.exe'
+    filter_optional_nextron:
+        Image|contains: ':\Windows\Temp\asgard2-agent\'
+        Image|endswith: '\thor.exe'
+    filter_optional_Keybase:
+        Image|contains: '\AppData\Local\Keybase\upd.exe'
+    condition: not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Likely
+level: low

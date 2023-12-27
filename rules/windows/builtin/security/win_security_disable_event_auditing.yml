@@ -13,7 +13,7 @@ references:
     - https://docs.google.com/presentation/d/1dkrldTTlN3La-OjWtkWJBb4hVk6vfsSMBFBERs6R8zA/edit
 author: '@neu5ron, Nasreddine Bencherchali (Nextron Systems)'
 date: 2017/11/19
-modified: 2021/11/27
+modified: 2023/11/15
 tags:
     - attack.defense_evasion
     - attack.t1562.002
@@ -30,23 +30,22 @@ detection:
     filter_main_guid:
         # Note: We filter these GUID to avoid alert duplication as these are covered by ab4561b1-6c7e-48a7-ad08-087cfb9ce8f1
         SubcategoryGuid:
-            # Note: Add or remove GUID as you see fit in your env
-            - '{0CCE9215-69AE-11D9-BED3-505054503030}' # Audit Logon
-            - '{0CCE922B-69AE-11D9-BED3-505054503030}' # Audit Process Creation
-            - '{0CCE9240-69AE-11D9-BED3-505054503030}' # Audit Kerberos Service Ticket Operations
             - '{0CCE9210-69AE-11D9-BED3-505054503030}' # Audit Security State Change
             - '{0CCE9211-69AE-11D9-BED3-505054503030}' # Audit Security System Extension
             - '{0CCE9212-69AE-11D9-BED3-505054503030}' # Audit System Integrity
+            - '{0CCE9215-69AE-11D9-BED3-505054503030}' # Audit Logon
+            - '{0CCE9217-69AE-11D9-BED3-505054503030}' # Audit Account Lockout
             - '{0CCE921B-69AE-11D9-BED3-505054503030}' # Audit Special Logon
+            - '{0CCE922B-69AE-11D9-BED3-505054503030}' # Audit Process Creation
             - '{0CCE922F-69AE-11D9-BED3-505054503030}' # Audit Audit Policy Change
             - '{0CCE9230-69AE-11D9-BED3-505054503030}' # Audit Authentication Policy Change
             - '{0CCE9235-69AE-11D9-BED3-505054503030}' # Audit User Account Management
             - '{0CCE9236-69AE-11D9-BED3-505054503030}' # Audit Computer Account Management
             - '{0CCE9237-69AE-11D9-BED3-505054503030}' # Audit Security Group Management
             - '{0CCE923F-69AE-11D9-BED3-505054503030}' # Audit Credential Validation
+            - '{0CCE9240-69AE-11D9-BED3-505054503030}' # Audit Kerberos Service Ticket Operations
             - '{0CCE9242-69AE-11D9-BED3-505054503030}' # Audit Kerberos Authentication Service'
-            - '{0CCE9217-69AE-11D9-BED3-505054503030}' # Audit Account Lockout
-    condition: selection and not filter_main_guid
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
-level: medium
+level: low # Increase this after a testing period in your environment

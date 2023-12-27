@@ -1,0 +1,31 @@
+title: Uncommon Extension In Keyboard Layout IME File Registry Value
+id: b888e3f2-224d-4435-b00b-9dd66e9ea1f1
+related:
+    - id: 9d8f9bb8-01af-4e15-a3a2-349071530530
+      type: derived
+status: experimental
+description: |
+    Detects usage of Windows Input Method Editor (IME) keyboard layout feature, which allows an attacker to load a DLL into the process after sending the WM_INPUTLANGCHANGEREQUEST message.
+    Before doing this, the client needs to register the DLL in a special registry key that is assumed to implement this keyboard layout. This registry key should store a value named "Ime File" with a DLL path.
+    IMEs are essential for languages that have more characters than can be represented on a standard keyboard, such as Chinese, Japanese, and Korean.
+references:
+    - https://www.linkedin.com/pulse/guntior-story-advanced-bootkit-doesnt-rely-windows-disk-baranov-wue8e/
+author: X__Junior (Nextron Systems)
+date: 2023/11/21
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection:
+        TargetObject|contains|all:
+            - '\Control\Keyboard Layouts\'
+            - 'Ime File'
+    filter_main_known_extension:
+        Details|endswith: '.ime'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - IMEs are essential for languages that have more characters than can be represented on a standard keyboard, such as Chinese, Japanese, and Korean.
+level: high

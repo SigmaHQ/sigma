@@ -4,7 +4,7 @@ status: test
 description: Well-known TAP software installation. Possible preparation for data exfiltration using tunneling techniques
 author: Daniil Yugoslavskiy, Ian Davis, oscd.community
 date: 2019/10/24
-modified: 2023/02/13
+modified: 2023/12/11
 tags:
     - attack.exfiltration
     - attack.t1048
@@ -14,15 +14,15 @@ logsource:
 detection:
     selection:
         Image|endswith: '\tapinstall.exe'
-    filter_avast:
-        Image:
-            - 'C:\Program Files\Avast Software\SecureLine VPN\tapinstall.exe'
-            - 'C:\Program Files (x86)\Avast Software\SecureLine VPN\tapinstall.exe'
-    filter_openvpn:
-        Image|startswith: 'C:\Program Files\OpenVPN Connect\drivers\tap\'
-    filter_protonvpn:
-        Image|startswith: 'C:\Program Files (x86)\Proton Technologies\ProtonVPNTap\installer\'
-    condition: selection and not 1 of filter_*
+    filter_optional_avast:
+        Image|contains:
+            - ':\Program Files\Avast Software\SecureLine VPN\'
+            - ':\Program Files (x86)\Avast Software\SecureLine VPN\'
+    filter_optional_openvpn:
+        Image|contains: ':\Program Files\OpenVPN Connect\drivers\tap\'
+    filter_optional_protonvpn:
+        Image|contains: ':\Program Files (x86)\Proton Technologies\ProtonVPNTap\installer\'
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Legitimate OpenVPN TAP insntallation
 level: medium

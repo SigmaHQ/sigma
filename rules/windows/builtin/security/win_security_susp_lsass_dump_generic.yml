@@ -7,7 +7,7 @@ references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
 author: Roberto Rodriguez, Teymur Kheirkhabarov, Dimitrios Slamaris, Mark Russinovich, Aleksey Potapov, oscd.community (update)
 date: 2019/11/01
-modified: 2023/10/11
+modified: 2023/12/19
 tags:
     - attack.credential_access
     - car.2019-04-004
@@ -17,7 +17,7 @@ logsource:
     service: security
 detection:
     selection_1:
-        EventID: 4656
+        EventID: 4656 # A handle to an object was requested.
         ObjectName|endswith: '\lsass.exe'
         AccessMask|contains:
             - '0x40'
@@ -34,7 +34,7 @@ detection:
             - '0x1f2fff'
             - '0x1f3fff'
     selection_2:
-        EventID: 4663
+        EventID: 4663 # An attempt was made to access an object
         ObjectName|endswith: '\lsass.exe'
         AccessList|contains:
             - '4484'
@@ -103,7 +103,12 @@ detection:
         ProcessName|contains: ':\Windows\SystemTemp\'
         ProcessName|endswith: '\GoogleUpdate.exe'
         AccessList|contains: '%%4484'
-    condition: 1 of selection_* and not 1 of filter_main_*
+    filter_optional_procmon:
+        ProcessName|endswith:
+            - '\procmon64.exe'
+            - '\procmon.exe'
+        AccessList|contains: '%%4484'
+    condition: 1 of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate software accessing LSASS process for legitimate reason; update the whitelist with it
 level: medium

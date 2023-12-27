@@ -1,15 +1,22 @@
 title: Zip A Folder With PowerShell For Staging In Temp - PowerShell
-id: 71ff406e-b633-4989-96ec-bc49d825a412
+id: 71ff406e-b633-4989-96ec-bc49d825a412 # PowerShell Classic
 related:
-    - id: b7a3c9a3-09ea-4934-8864-6a32cacd98d9
-      type: derived
+    - id: daf7eb81-35fd-410d-9d7a-657837e602bb # PowerShell Module
+      type: similar
+    - id: b7a3c9a3-09ea-4934-8864-6a32cacd98d9 # PowerShell Script
+      type: similar
+    - id: 85a8e5ba-bd03-4bfb-bbfa-a4409a8f8b98 # Process Creation
+      type: similar
 status: test
-description: Use living off the land tools to zip a file and stage it in the Windows temporary folder for later exfiltration
+description: |
+    Detects PowerShell scripts that make use of the "Compress-Archive" Cmdlet in order to compress folders and files where the output is stored in a potentially suspicious location that is used often by malware for exfiltration.
+    An adversary might compress data (e.g., sensitive documents) that is collected prior to exfiltration in order to make it portable and minimize the amount of data sent over the network.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1074.001/T1074.001.md
-author: frack113
+    - https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-347a
+author: Nasreddine Bencherchali (Nextron Systems), frack113
 date: 2021/07/20
-modified: 2023/10/27
+modified: 2023/12/18
 tags:
     - attack.collection
     - attack.t1074.001
@@ -18,11 +25,10 @@ logsource:
     service: powershell-classic
 detection:
     selection:
-        Data|contains|all:
-            - 'Compress-Archive'
-            - ' -Path '
-            - ' -DestinationPath '
-            - '$env:TEMP\'
+        Data|contains:
+            - 'Compress-Archive -Path*-DestinationPath $env:TEMP'
+            - 'Compress-Archive -Path*-DestinationPath*\AppData\Local\Temp\'
+            - 'Compress-Archive -Path*-DestinationPath*:\Windows\Temp\'
     condition: selection
 falsepositives:
     - Unknown

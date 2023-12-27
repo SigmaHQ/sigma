@@ -9,7 +9,7 @@ references:
     - https://en.wikipedia.org/wiki/List_of_Microsoft_Office_filename_extensions
 author: frack113, Nasreddine Bencherchali (Nextron Systems)
 date: 2022/06/05
-modified: 2023/06/23
+modified: 2023/12/13
 tags:
     - attack.resource_development
     - attack.t1587.001
@@ -29,6 +29,8 @@ detection:
             - '.docm' # Word macro-enabled document; same as docx, but may contain macros and scripts
             - '.docx' # Word document
             - '.dotm' # Word macro-enabled template; same as dotx, but may contain macros and scripts
+            - '.mdb' # MS Access DB
+            - '.mdw' # MS Access DB
             - '.pdf' # PDF documents
             - '.wll' # Word add-in
             - '.wwl' # Word add-in
@@ -40,24 +42,24 @@ detection:
               - '\XLSTART'
     filter_exclude_excel_ext:
         TargetFilename|endswith:
+            - '.xll'
             - '.xls'
             - '.xlsm'
             - '.xlsx'
             - '.xlt'
             - '.xltm'
-            - '.xll'
             - '.xlw'
     filter_main_office_click_to_run:
-        Image|startswith: 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
+        Image|contains: ':\Program Files\Common Files\Microsoft Shared\ClickToRun\'
         Image|endswith: '\OfficeClickToRun.exe'
     filter_main_office_apps:
-        Image|startswith:
-            - 'C:\Program Files\Microsoft Office\'
-            - 'C:\Program Files (x86)\Microsoft Office\'
+        Image|contains:
+            - ':\Program Files\Microsoft Office\'
+            - ':\Program Files (x86)\Microsoft Office\'
         Image|endswith:
             - '\winword.exe'
             - '\excel.exe'
     condition: ((selection_word_paths and not filter_exclude_word_ext) or (selection_excel_paths and not filter_exclude_excel_ext)) and not 1 of filter_main_*
 falsepositives:
-    - Other legitimate extensions used by either excel or word
+    - False positive might stem from rare extensions used by other Office utilities.
 level: high

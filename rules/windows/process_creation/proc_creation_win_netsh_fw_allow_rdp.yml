@@ -6,7 +6,7 @@ references:
     - https://labs.sentinelone.com/sarwent-malware-updates-command-detonation/
 author: Sander Wiebing
 date: 2020/05/23
-modified: 2023/02/13
+modified: 2023/12/11
 tags:
     - attack.defense_evasion
     - attack.t1562.004
@@ -17,7 +17,7 @@ detection:
     selection_img:
         - Image|endswith: '\netsh.exe'
         - OriginalFileName: 'netsh.exe'
-    selection_cli_1:
+    selection_cli:
         # Example:
         #   Old: netsh firewall add portopening TCP 3389 "Open Port 3389"
         #   New: netsh advfirewall firewall add rule name= "Open Port 3389" dir=in action=allow protocol=TCP localport=3389
@@ -26,12 +26,9 @@ detection:
             - 'add '
             - 'tcp '
             - '3389'
-    selection_cli_2:
-        - CommandLine|contains: 'portopening'
-        - CommandLine|contains|all:
-              - 'advfirewall'
-              - 'rule'
-              - 'allow'
+        CommandLine|contains:
+            - 'portopening'
+            - 'allow'
     condition: all of selection_*
 falsepositives:
     - Legitimate administration activity

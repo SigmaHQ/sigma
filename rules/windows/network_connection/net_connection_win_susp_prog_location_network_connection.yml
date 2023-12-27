@@ -6,7 +6,7 @@ references:
     - https://docs.google.com/spreadsheets/d/17pSTDNpa0sf6pHeRhusvWG6rThciE8CsXTSlDUAZDyo
 author: Florian Roth (Nextron Systems), Tim Shelton
 date: 2017/03/19
-modified: 2022/05/26
+modified: 2023/12/11
 tags:
     - attack.command_and_control
     - attack.t1105
@@ -16,22 +16,18 @@ logsource:
     definition: 'Use the following config to generate the necessary Event ID 3 Network Connection events'
 detection:
     selection:
-        - Image|contains:
-              # - '\ProgramData\'  # too many false positives, e.g. with Webex for Windows
-              - '\Users\All Users\'
-              - '\Users\Default\'
-              - '\Users\Public\'
-              - '\Users\Contacts\'
-              - '\Users\Searches\'
-              - '\config\systemprofile\'
-              - '\Windows\Fonts\'
-              - '\Windows\IME\'
-              - '\Windows\addins\'
-        - Image|endswith: '\$Recycle.bin'
-        - Image|startswith: 'C:\Perflogs\'
-    false_positive1:
-        Image|startswith: 'C:\Users\Public\IBM\ClientSolutions\Start_Programs\' # IBM Client Solutions Default Location
-    condition: selection and not 1 of false_positive*
+        Image|contains:
+            - ':\$Recycle.bin'
+            - ':\Perflogs\'
+            - ':\Users\Default\'
+            - ':\Users\Public\'
+            - ':\Windows\Fonts\'
+            - ':\Windows\IME\'
+            - '\config\systemprofile\'
+            - '\Windows\addins\'
+    filter_optional_ibm:
+        Image|contains: ':\Users\Public\IBM\ClientSolutions\Start_Programs\' # IBM Client Solutions Default Location
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high

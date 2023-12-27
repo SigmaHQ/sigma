@@ -4,7 +4,7 @@ status: test
 description: Detects interactive console logons to Server Systems
 author: Florian Roth (Nextron Systems)
 date: 2017/03/17
-modified: 2023/04/25
+modified: 2023/12/15
 tags:
     - attack.lateral_movement
     - attack.t1078
@@ -19,12 +19,12 @@ detection:
             - 4624
             - 4625
         LogonType: 2
-        ComputerName:
+        ComputerName|expand:
             - '%ServerSystems%'
             - '%DomainControllers%'
     filter_main:
         LogonProcessName: 'Advapi'
-        ComputerName: '%Workstations%'
+        ComputerName|expand: '%Workstations%'
     condition: selection and not filter_main
 falsepositives:
     - Administrative activity via KVM or ILO board

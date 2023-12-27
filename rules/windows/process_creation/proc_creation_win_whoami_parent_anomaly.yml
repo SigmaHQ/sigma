@@ -8,7 +8,7 @@ references:
     - https://www.youtube.com/watch?v=DsJ9ByX84o4&t=6s
 author: Florian Roth (Nextron Systems)
 date: 2021/08/12
-modified: 2023/02/28
+modified: 2023/12/04
 tags:
     - attack.discovery
     - attack.t1033
@@ -20,22 +20,22 @@ detection:
     selection:
         - Image|endswith: '\whoami.exe'
         - OriginalFileName: 'whoami.exe'
-    filter_generic:
+    filter_main_known_parents:
         # This list can be any legitimate shell or application that you expect whoami to run from
         ParentImage|endswith:
             - '\cmd.exe'
+            - '\powershell_ise.exe'
             - '\powershell.exe'
             - '\pwsh.exe'
-            - '\powershell_ise.exe'
-    filter_ms_monitoring_agent:
-        ParentImage: 'C:\Program Files\Microsoft Monitoring Agent\Agent\MonitoringHost.exe'
-    filter_parent_null:
+    filter_optional_ms_monitoring_agent:
+        ParentImage|endswith: ':\Program Files\Microsoft Monitoring Agent\Agent\MonitoringHost.exe'
+    filter_main_parent_null:
         ParentImage: null
-    filter_parent_empty:
+    filter_main_parent_empty:
         ParentImage: ''
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Admin activity
     - Scripts and administrative tools used in the monitored environment
     - Monitoring activity
-level: high
+level: medium
