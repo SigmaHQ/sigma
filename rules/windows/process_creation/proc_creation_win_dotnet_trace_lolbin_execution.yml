@@ -1,0 +1,27 @@
+title: Lolbin Execution Via Dotnet-Trace.exe
+id: 9257c05b-4a4a-48e5-a670-b7b073cf401b
+status: experimental
+description: Detects cmdline arguments for executing a child process with dotnet-trace.exe
+references:
+    - https://twitter.com/bohops/status/1740022869198037480
+author: Jimmy Bayne (@bohops)
+date: 2023/12/27
+modified: 2023/12/27
+tags:
+    - attack.execution
+    - attack.defense_evasion
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\dotnet-trace.exe'
+        - OriginalFileName: 'dotnet-trace.dll'
+    selection_cli:
+        CommandLine|contains: '--'
+        CommandLine|contains: 'collect'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium
