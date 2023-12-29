@@ -1,0 +1,23 @@
+title: PUA - EDRSilencer Execution
+id: eb2d07d4-49cb-4523-801a-da002df36602
+status: experimental
+description: Detects the execution of the PUA EDRSilencer, which can be abused to impair EDR suites
+references:
+    - https://github.com/netero1010/EDRSilencer
+author: '@gott_cyber'
+date: 2023/12/29
+tags:
+    - attack.impair_defenses
+    - attack.t1562
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|endswith: '\EDRSilencer.exe'
+        - OriginalFileName: 'EDRSilencer.exe'
+        - Description|contains: 'EDRSilencer'
+    condition: selection
+falsepositives:
+    - Low probability 
+level: high
