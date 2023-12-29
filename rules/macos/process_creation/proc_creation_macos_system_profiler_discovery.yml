@@ -1,0 +1,37 @@
+title: System Information Discovery Using System_Profiler
+id: 4809c683-059b-4935-879d-36835986f8cf
+status: experimental
+description: |
+    Detects the use of "system_profiler" which will show system hardware and software configuration information.
+    This process is primarily used for system information discovery. However, "system_profiler" can also be used
+    to determine if virtualization software is being run for defense evasion purposes.
+references:
+    - https://www.trendmicro.com/en_za/research/20/k/new-macos-backdoor-connected-to-oceanlotus-surfaces.html
+    - https://www.sentinelone.com/wp-content/uploads/pdf-gen/1630910064/20-common-tools-techniques-used-by-macos-threat-actors-malware.pdf
+author: Stephen Lincoln `@slincoln_aiq` (AttackIQ)
+date: 2023/12/29
+tags:
+    - attack.discovery
+    - attack.defense_evasion
+    - attack.t1082
+    - attack.t1497.001
+logsource:
+    product: macos
+    category: process_creation
+detection:
+    # Examples:
+    #   system_profiler SPHardwareDataType 2>/dev/null | awk '/Processor / {split($0,line,\":\"); printf(\"%s\",line[2]);}'
+    #   /usr/sbin/system_profiler SPHardwareDataType 2>/dev/null | awk '/Memory/ {split($0,line, \":\"); printf(\"%s\", line[2]);}'
+    #   system_profiler SPUSBDataType | egrep -i "Manufacturer: (parallels|vmware|virtualbox)"
+    selection_img:
+        - Image|endswith: '/system_profiler'
+        - CommandLine|contains: 'system_profiler'
+    selection_cmd:
+        CommandLine|contains:
+            - 'SPHardwareDataType'
+            - 'SPUSBDataType'
+            - 'SPNetworkDataType'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate administrative activities
+level: medium
