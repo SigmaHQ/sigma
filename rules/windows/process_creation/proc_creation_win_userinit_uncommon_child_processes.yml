@@ -10,7 +10,7 @@ references:
     - https://learn.microsoft.com/en-us/windows-server/administration/server-core/server-core-sconfig#powershell-is-the-default-shell-on-server-core
 author: Tom Ueltschi (@c_APT_ure), Tim Shelton
 date: 2019/01/12
-modified: 2023/06/21
+modified: 2023/11/14
 tags:
     - attack.t1037.001
     - attack.persistence
@@ -21,7 +21,7 @@ detection:
     selection:
         ParentImage|endswith: '\userinit.exe'
     filter_main_explorer:
-        Image: 'C:\WINDOWS\explorer.exe'
+        Image|endswith: ':\WINDOWS\explorer.exe'
     filter_optional_logonscripts:
         CommandLine|contains:
             - 'netlogon.bat'
@@ -31,11 +31,18 @@ detection:
         # https://learn.microsoft.com/en-us/windows-server/administration/server-core/server-core-sconfig#powershell-is-the-default-shell-on-server-core
         CommandLine: 'PowerShell.exe'
     filter_optional_proquota:
-        Image:
-            - 'C:\Windows\System32\proquota.exe'
-            - 'C:\Windows\SysWOW64\proquota.exe'
+        Image|endswith:
+            - ':\Windows\System32\proquota.exe'
+            - ':\Windows\SysWOW64\proquota.exe'
     filter_optional_citrix:
-        Image|endswith: '\Citrix\System32\icast.exe'
+        Image|endswith:
+            # As reported by https://github.com/SigmaHQ/sigma/issues/4569
+            - ':\Program Files (x86)\Citrix\HDX\bin\cmstart.exe' # https://support.citrix.com/article/CTX983798/purpose-of-cmstart-command
+            - ':\Program Files (x86)\Citrix\HDX\bin\icast.exe' # https://support.citrix.com/article/CTX983798/purpose-of-cmstart-command
+            - ':\Program Files (x86)\Citrix\System32\icast.exe'
+            - ':\Program Files\Citrix\HDX\bin\cmstart.exe' # https://support.citrix.com/article/CTX983798/purpose-of-cmstart-command
+            - ':\Program Files\Citrix\HDX\bin\icast.exe' # https://support.citrix.com/article/CTX983798/purpose-of-cmstart-command
+            - ':\Program Files\Citrix\System32\icast.exe'
     filter_optional_image_null:
         Image: null
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*

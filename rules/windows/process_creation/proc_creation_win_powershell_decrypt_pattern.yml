@@ -6,6 +6,7 @@ references:
     - https://research.checkpoint.com/2023/chinese-threat-actors-targeting-europe-in-smugx-campaign/
 author: X__Junior (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2023/06/30
+modified: 2023/12/05
 tags:
     - attack.execution
 logsource:
@@ -31,12 +32,18 @@ detection:
             - "gc "
             - 'cat '
             - 'type '
+            - 'ReadAllBytes'
     selection_cli_specific:
-        CommandLine|contains|all:
-            - ' ^| '
-            - '\*.lnk'
-            - '-Recurse'
-            - '-Skip '
+        - CommandLine|contains|all:
+              - ' ^| '
+              - '\*.lnk'
+              - '-Recurse'
+              - '-Skip '
+        - CommandLine|contains|all:
+              - ' -ExpandProperty '
+              - '\*.lnk'
+              - 'WriteAllBytes'
+              - ' .length '
     condition: all of selection_*
 falsepositives:
     - Unlikely

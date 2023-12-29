@@ -6,9 +6,11 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1112/T1112.md
     - https://www.mandiant.com/resources/unc2165-shifts-to-evade-sanctions
     - https://blogs.vmware.com/security/2022/11/batloader-the-evasive-downloader-malware.html
-author: frack113, Nasreddine Bencherchali
+    - https://www.malwarebytes.com/blog/detections/pum-optional-nodispbackgroundpage
+    - https://www.malwarebytes.com/blog/detections/pum-optional-nodispcpl
+author: frack113, Nasreddine Bencherchali (Nextron Systems), CrimpSec
 date: 2022/03/18
-modified: 2023/08/17
+modified: 2023/11/20
 tags:
     - attack.defense_evasion
     - attack.t1112
@@ -18,21 +20,23 @@ logsource:
 detection:
     selection_set_1:
         TargetObject|endswith:
-            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\DisableRegistryTools'
-            - 'SOFTWARE\Policies\Microsoft\Windows\System\DisableCMD'
-            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\DisableTaskmgr'
-            - 'SOFTWARE\Policies\Microsoft\Windows\Explorer\DisableNotificationCenter'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\StartMenuLogOff'
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\DisableChangePassword'
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\DisableLockWorkstation'
-            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\StartMenuLogOff'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\DisableRegistryTools'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\DisableTaskmgr'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\NoDispBackgroundPage'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\NoDispCPL'
+            - 'SOFTWARE\Policies\Microsoft\Windows\Explorer\DisableNotificationCenter'
+            - 'SOFTWARE\Policies\Microsoft\Windows\System\DisableCMD'
         Details: 'DWORD (0x00000001)'
     selection_set_0:
         TargetObject|endswith:
-            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\shutdownwithoutlogon'
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\shutdownwithoutlogon'
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\PushNotifications\ToastEnabled'
-            - '\SYSTEM\CurrentControlSet\Control\Storage\Write Protection'
-            - '\SYSTEM\CurrentControlSet\Control\StorageDevicePolicies\WriteProtect'
+            - 'SYSTEM\CurrentControlSet\Control\Storage\Write Protection'
+            - 'SYSTEM\CurrentControlSet\Control\StorageDevicePolicies\WriteProtect'
         Details: 'DWORD (0x00000000)'
     condition: 1 of selection_set_*
 falsepositives:

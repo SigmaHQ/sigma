@@ -1,0 +1,34 @@
+title: User with Privileges Logon
+id: 94309181-d345-4cbf-b5fe-061769bdf9cb
+status: test
+description: Detects logon with "Special groups" and "Special Privileges" can be thought of as Administrator groups or privileges.
+references:
+    - https://github.com/Yamato-Security/EnableWindowsLogSettings/blob/7f6d755d45ac7cc9fc35b0cbf498e6aa4ef19def/ConfiguringSecurityLogAuditPolicies.md
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4672
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4964
+author: frack113
+date: 2022/10/14
+modified: 2023/12/14
+tags:
+    - attack.defense_evasion
+    - attack.lateral_movement
+    - attack.credential_access
+    - attack.t1558
+    - attack.t1649
+    - attack.t1550
+logsource:
+    service: security
+    product: windows
+detection:
+    selection:
+        EventID:
+            - 4672
+            - 4964
+    filter_main_local_system:
+        SubjectUserSid: 'S-1-5-18'
+    filter_main_valid_account:
+        SubjectUserName|expand: '%Admins_Workstations%' # Set valid internal naming pattern or a list a valid account
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: low

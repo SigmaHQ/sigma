@@ -1,4 +1,5 @@
 {
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Sigma rule specification V1.0.4 (2023/06/29)",
   "type": "object",
   "required": ["title", "logsource", "detection"],
@@ -46,7 +47,7 @@
               },
               {
                 "const": "similar",
-                "description": "TUse to relate similar rules to each other (e.g. same detection content applied to different log sources, rule that is a modified version of another rule with a different level)"
+                "description": "Use to relate similar rules to each other (e.g. same detection content applied to different log sources, rule that is a modified version of another rule with a different level)"
               }
             ]
           }
@@ -70,11 +71,11 @@
         },
         {
           "const": "deprecated",
-          "description": "The rule is to replace or cover another one. The link between both rules is made via the `related` field"
+          "description": "The rule was replaced or is now covered by another one. The link between both rules is made via the `related` field"
         },
         {
           "const": "unsupported",
-          "description": "The rule can not be used in its current state (special correlation log, home-made fields...etc.)"
+          "description": "The rule can not be used in its current state (special correlation log, home-made fields, etc.)"
         }
       ]
     },
@@ -94,6 +95,7 @@
     "references": {
       "type": "array",
       "description": "References to the source that the rule was derived from. These could be blog articles, technical papers, presentations or even tweets",
+      "uniqueItems": true,
       "items": {
         "type": "string"
       }
@@ -111,8 +113,19 @@
     "logsource": {
       "type": "object",
       "description": "The log source that the rule is supposed to detect malicious activity in.",
-      "items": {
-        "type": "string"
+      "properties": {
+        "category": {
+          "description": "Group of products, like firewall or process_creation",
+          "type": "string"
+        },
+        "product": {
+          "description": "A certain product, like windows",
+          "type": "string"
+        },
+        "service": {
+          "description": "A subset of a product's logs, like sshd",
+          "type": "string"
+        }
       }
     },
     "detection": {
@@ -120,6 +133,7 @@
       "required": ["condition"],
       "description": "A set of search-identifiers that represent properties of searches on log data",
       "additionalProperties": {
+        "description": "A Search Identifier: A definition that can consist of two different data structures - lists and maps.",
         "anyOf": [
           {
             "type": "array",
@@ -150,32 +164,22 @@
       },
       "properties": {
         "condition": {
-          "anyOf": [
-            {
-              "type": "string",
-              "description": "A search condition that is applied to the log data. The following format must be used: fieldname : value"
-            },
-            {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "minLength": 2
-              }
-            }
-          ],
-          "description": "A set of search-identifiers that represent properties of searches on log data"
+          "type": "string",
+          "description": "The relationship between the search identifiers to create the detection logic. Ex: selection1 or selection2"
         }
       }
     },
     "fields": {
       "type": "array",
       "description": "A list of log fields that could be interesting in further analysis of the event and should be displayed to the analyst",
+      "uniqueItems": true,
       "items": {
         "type": "string"
       }
     },
     "falsepositives": {
       "description": "A list of known false positives that may occur",
+      "uniqueItems": true,
       "anyOf": [
         {
           "type": "string",
@@ -217,10 +221,12 @@
       ]
     },
     "tags": {
+      "description": "Tags to categorize a Sigma rule.",
       "type": "array",
+      "uniqueItems": true,
       "items": {
         "type": "string",
-        "pattern": "^[a-z0-9_.-]+$"
+        "pattern": "^[a-z0-9_-]+\\.[a-z0-9._-]+$"
       }
     }
   }

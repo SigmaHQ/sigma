@@ -100,6 +100,7 @@ If you find a false positive or would like to propose a new detection rule idea 
 * [RANK VASA](https://globenewswire.com/news-release/2019/03/04/1745907/0/en/RANK-Software-to-Help-MSSPs-Scale-Cybersecurity-Offerings.html)
 * [Sekoia.io XDR](https://www.sekoia.io) - XDR supporting Sigma and Sigma Correlation rules languages
 * [SIΣGMA](https://github.com/3CORESec/SIEGMA) - SIEM consumable generator that utilizes Sigma for query conversion
+* [sigma2stix](https://github.com/signalscorps/sigma2stix) - Converts the entire SigmaHQ Ruleset into STIX 2.1 Objects.
 * [SOC Prime](https://tdm.socprime.com/sigma/)
 * [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 * [TimeSketch](https://github.com/google/timesketch/commit/0c6c4b65a6c0f2051d074e87bbb2da2424fa6c35)
@@ -116,7 +117,7 @@ If you find a false positive or would like to propose a new detection rule idea 
 
 ## Credits
 
-This project would've never reached this hight without the help of the hundreds of contributors. Thanks to all past and present contributors for their help.
+This project would've never reached this height without the help of the hundreds of contributors. Thanks to all past and present contributors for their help.
 
 ## Licenses
 

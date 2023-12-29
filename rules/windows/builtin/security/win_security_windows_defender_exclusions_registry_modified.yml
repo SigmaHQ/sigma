@@ -1,0 +1,30 @@
+title: Windows Defender Exclusion List Modified
+id: 46a68649-f218-4f86-aea1-16a759d81820
+related:
+    - id: e9c8808f-4cfb-4ba9-97d4-e5f3beaa244d
+      type: derived
+    - id: a33f8808-2812-4373-ae95-8cfb82134978
+      type: derived
+status: test
+description: |
+    Detects modifications to the Windows Defender exclusion registry key. This could indicate a potentially suspicious or even malicious activity by an attacker trying to add a new exclusion in order to bypass security.
+references:
+    - https://www.bleepingcomputer.com/news/security/gootkit-malware-bypasses-windows-defender-by-setting-path-exclusions/
+author: '@BarryShooshooga'
+date: 2019/10/26
+modified: 2023/11/11
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: Audit Policy : Security Settings/Local Policies/Audit Policy, Registry System Access Control (SACL): Auditing/User'
+detection:
+    selection:
+        EventID: 4657 # A registry value was modified.
+        ObjectName|contains: '\Microsoft\Windows Defender\Exclusions\'
+    condition: selection
+falsepositives:
+    - Intended exclusions by administrators
+level: medium

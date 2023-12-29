@@ -8,14 +8,14 @@ related:
     - id: fad91067-08c5-4d1a-8d8c-d96a21b37814 # Registry
       type: similar
 status: test
-description: Detects use of Set-ExecutionPolicy to set insecure policies
+description: Detects changing the PowerShell script execution policy to a potentially insecure level using the "Set-ExecutionPolicy" cmdlet.
 references:
     - https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy?view=powershell-7.1
     - https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.1
     - https://adsecurity.org/?p=2604
 author: frack113
 date: 2021/10/20
-modified: 2022/12/30
+modified: 2023/12/14
 tags:
     - attack.execution
     - attack.t1059.001
@@ -24,20 +24,17 @@ logsource:
     category: ps_script
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
-    cmdlet:
+    selection_cmdlet:
         ScriptBlockText|contains: 'Set-ExecutionPolicy'
-    option:
+    selection_option:
         ScriptBlockText|contains:
             - 'Unrestricted'
             - 'bypass'
-            - 'RemoteSigned'
-    filter:
-        # - ParentImage: 'C:\ProgramData\chocolatey\choco.exe' Powershell event id 4104 do not have ParentImage
+    filter_optional_chocolatey:
         ScriptBlockText|contains:
             - "(New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')"
             - "(New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')"
-            - '\AppData\Roaming\Code\'
-    condition: cmdlet and option and not filter
+    condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Administrator script
 level: medium

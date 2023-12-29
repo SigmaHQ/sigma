@@ -6,6 +6,7 @@ references:
     - https://www.microsoft.com/en-us/security/blog/2023/04/18/nation-state-threat-actor-mint-sandstorm-refines-tradecraft-to-attack-high-value-targets/
 author: Nasreddine Bencherchali (Nextron Systems), MSTIC (idea)
 date: 2023/04/20
+modified: 2023/11/29
 tags:
     - attack.execution
     - detection.emerging_threats
@@ -15,8 +16,9 @@ logsource:
 detection:
     selection:
         ParentImage|endswith: '\ws_tomcatservice.exe'
+    filter_main_repadmin:
         Image|endswith: '\repadmin.exe'
-    condition: selection
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high
