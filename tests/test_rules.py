@@ -89,23 +89,25 @@ class TestRules(unittest.TestCase):
         return data
 
     # Tests
-    def test_legal_trademark_violations(self):
-        # See Issue # https://github.com/SigmaHQ/sigma/issues/1028
-        files_with_legal_issues = []
 
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            with open(file, "r", encoding="utf-8") as fh:
-                file_data = fh.read()
-                for tm in self.TRADE_MARKS:
-                    if tm in file_data:
-                        files_with_legal_issues.append(file)
+    # sigma validators sigmahq_legal_trademark
+    # def test_legal_trademark_violations(self):
+    #     # See Issue # https://github.com/SigmaHQ/sigma/issues/1028
+    #     files_with_legal_issues = []
 
-        self.assertEqual(
-            files_with_legal_issues,
-            [],
-            Fore.RED
-            + "There are rule files which contains a trademark or reference that doesn't comply with the respective trademark requirements - please remove the trademark to avoid legal issues",
-        )
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         with open(file, "r", encoding="utf-8") as fh:
+    #             file_data = fh.read()
+    #             for tm in self.TRADE_MARKS:
+    #                 if tm in file_data:
+    #                     files_with_legal_issues.append(file)
+
+    #     self.assertEqual(
+    #         files_with_legal_issues,
+    #         [],
+    #         Fore.RED
+    #         + "There are rule files which contains a trademark or reference that doesn't comply with the respective trademark requirements - please remove the trademark to avoid legal issues",
+    #     )
 
     def test_look_for_duplicate_filters(self):
         def check_list_or_recurse_on_dict(item, depth: int, special: bool) -> None:
@@ -163,29 +165,30 @@ class TestRules(unittest.TestCase):
             Fore.RED + "There are rules with duplicate filters",
         )
 
-    def test_field_name_with_space(self):
-        def key_iterator(fields, faulty):
-            for key, value in fields.items():
-                if " " in key:
-                    faulty.append(key)
-                    print(
-                        Fore.YELLOW
-                        + "Rule {} has a space in field name ({}).".format(file, key)
-                    )
-                if type(value) == dict:
-                    key_iterator(value, faulty)
+    # sigma validator sigmahq_space_fieldname
+    # def test_field_name_with_space(self):
+    #     def key_iterator(fields, faulty):
+    #         for key, value in fields.items():
+    #             if " " in key:
+    #                 faulty.append(key)
+    #                 print(
+    #                     Fore.YELLOW
+    #                     + "Rule {} has a space in field name ({}).".format(file, key)
+    #                 )
+    #             if type(value) == dict:
+    #                 key_iterator(value, faulty)
 
-        faulty_fieldnames = []
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            detection = self.get_rule_part(file_path=file, part_name="detection")
-            key_iterator(detection, faulty_fieldnames)
+    #     faulty_fieldnames = []
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         detection = self.get_rule_part(file_path=file, part_name="detection")
+    #         key_iterator(detection, faulty_fieldnames)
 
-        self.assertEqual(
-            faulty_fieldnames,
-            [],
-            Fore.RED
-            + "There are rules with an unsupported field name. Spaces are not allowed. (Replace space with an underscore character '_' )",
-        )
+    #     self.assertEqual(
+    #         faulty_fieldnames,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with an unsupported field name. Spaces are not allowed. (Replace space with an underscore character '_' )",
+    #     )
 
     def test_single_named_condition_with_x_of_them(self):
         faulty_detections = []
@@ -395,67 +398,69 @@ class TestRules(unittest.TestCase):
             + "There are rules using sysmon events but with no EventID specified",
         )
 
-    def test_optional_falsepositives_capital(self):
-        faulty_rules = []
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            fps = self.get_rule_part(file_path=file, part_name="falsepositives")
-            if fps:
-                for fp in fps:
-                    # first letter should be capital
-                    try:
-                        if fp[0].upper() != fp[0]:
-                            print(
-                                Fore.YELLOW
-                                + "Rule {} defines a falsepositive that does not start with a capital letter: '{}'.".format(
-                                    file, fp
-                                )
-                            )
-                            faulty_rules.append(file)
-                    except TypeError as err:
-                        print("TypeError Exception for rule {}".format(file))
-                        print("Error: {}".format(err))
-                        print("Maybe you created an empty falsepositive item?")
+    # sigma validator sigmahq_falsepositives_capital
+    # def test_optional_falsepositives_capital(self):
+    #     faulty_rules = []
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         fps = self.get_rule_part(file_path=file, part_name="falsepositives")
+    #         if fps:
+    #             for fp in fps:
+    #                 # first letter should be capital
+    #                 try:
+    #                     if fp[0].upper() != fp[0]:
+    #                         print(
+    #                             Fore.YELLOW
+    #                             + "Rule {} defines a falsepositive that does not start with a capital letter: '{}'.".format(
+    #                                 file, fp
+    #                             )
+    #                         )
+    #                         faulty_rules.append(file)
+    #                 except TypeError as err:
+    #                     print("TypeError Exception for rule {}".format(file))
+    #                     print("Error: {}".format(err))
+    #                     print("Maybe you created an empty falsepositive item?")
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules with false positives that don't start with a capital letter (e.g. 'unknown' should be 'Unknown')",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with false positives that don't start with a capital letter (e.g. 'unknown' should be 'Unknown')",
+    #     )
 
-    def test_optional_falsepositives_blocked_content(self):
-        faulty_rules = []
-        banned_words = ["none", "pentest", "penetration test"]
-        common_typos = ["unkown", "ligitimate", "legitim ", "legitimeate"]
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            fps = self.get_rule_part(file_path=file, part_name="falsepositives")
-            if fps:
-                for fp in fps:
-                    for typo in common_typos:
-                        if fp == "Unknow" or typo in fp.lower():
-                            print(
-                                Fore.YELLOW
-                                + "Rule {} defines a falsepositive with a common typo: '{}'.".format(
-                                    file, typo
-                                )
-                            )
-                            faulty_rules.append(file)
-                    for banned_word in banned_words:
-                        if banned_word in fp.lower():
-                            print(
-                                Fore.YELLOW
-                                + "Rule {} defines a falsepositive with an invalid reason: '{}'.".format(
-                                    file, banned_word
-                                )
-                            )
-                            faulty_rules.append(file)
+    # sigma validator sigmahq_falsepositives_typo_word sigmahq_falsepositives_banned_word
+    # def test_optional_falsepositives_blocked_content(self):
+    #     faulty_rules = []
+    #     banned_words = ["none", "pentest", "penetration test"]
+    #     common_typos = ["unkown", "ligitimate", "legitim ", "legitimeate"]
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         fps = self.get_rule_part(file_path=file, part_name="falsepositives")
+    #         if fps:
+    #             for fp in fps:
+    #                 for typo in common_typos:
+    #                     if fp == "Unknow" or typo in fp.lower():
+    #                         print(
+    #                             Fore.YELLOW
+    #                             + "Rule {} defines a falsepositive with a common typo: '{}'.".format(
+    #                                 file, typo
+    #                             )
+    #                         )
+    #                         faulty_rules.append(file)
+    #                 for banned_word in banned_words:
+    #                     if banned_word in fp.lower():
+    #                         print(
+    #                             Fore.YELLOW
+    #                             + "Rule {} defines a falsepositive with an invalid reason: '{}'.".format(
+    #                                 file, banned_word
+    #                             )
+    #                         )
+    #                         faulty_rules.append(file)
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules with invalid false positive definitions (e.g. Pentest, None or common typos)",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with invalid false positive definitions (e.g. Pentest, None or common typos)",
+    #     )
 
     def test_optional_license(self):
         faulty_rules = []
@@ -729,79 +734,80 @@ class TestRules(unittest.TestCase):
             + r"There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is \'[a-z0-9_]{10,90}\.yml\' and it has to contain at least an underline character. It also has to follow the following naming convention https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/Sigmahq_filename_rule.md",
         )
 
-    def test_title(self):
-        faulty_rules = []
-        allowed_lowercase_words = [
-            "the",
-            "for",
-            "in",
-            "with",
-            "via",
-            "on",
-            "to",
-            "without",
-            "of",
-            "through",
-            "from",
-            "by",
-            "as",
-            "a",
-            "or",
-            "at",
-            "and",
-            "an",
-            "over",
-            "new",
-        ]
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            title = self.get_rule_part(file_path=file, part_name="title")
-            if not title:
-                print(Fore.RED + "Rule {} has no field 'title'.".format(file))
-                faulty_rules.append(file)
-                continue
-            elif len(title) > 110:
-                print(
-                    Fore.YELLOW
-                    + "Rule {} has a title field with too many characters (>110)".format(
-                        file
-                    )
-                )
-                faulty_rules.append(file)
-            if title.startswith("Detects "):
-                print(
-                    Fore.RED
-                    + "Rule {} has a title that starts with 'Detects'".format(file)
-                )
-                faulty_rules.append(file)
-            if title.endswith("."):
-                print(Fore.RED + "Rule {} has a title that ends with '.'".format(file))
-                faulty_rules.append(file)
-            wrong_casing = []
-            for word in title.split(" "):
-                if (
-                    word.islower()
-                    and not word.lower() in allowed_lowercase_words
-                    and not "." in word
-                    and not "/" in word
-                    and not "_" in word
-                    and not word[0].isdigit()
-                ):
-                    wrong_casing.append(word)
-            if len(wrong_casing) > 0:
-                print(
-                    Fore.RED
-                    + "Rule {} has a title that has not title capitalization. Words: '{}'".format(
-                        file, ", ".join(wrong_casing)
-                    )
-                )
-                faulty_rules.append(file)
+    # sigma validator sigmahq_title_case sigmahq_title_end sigmahq_title_length sigmahq_title_start
+    # def test_title(self):
+    #     faulty_rules = []
+    #     allowed_lowercase_words = [
+    #         "the",
+    #         "for",
+    #         "in",
+    #         "with",
+    #         "via",
+    #         "on",
+    #         "to",
+    #         "without",
+    #         "of",
+    #         "through",
+    #         "from",
+    #         "by",
+    #         "as",
+    #         "a",
+    #         "or",
+    #         "at",
+    #         "and",
+    #         "an",
+    #         "over",
+    #         "new",
+    #     ]
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         title = self.get_rule_part(file_path=file, part_name="title")
+    #         if not title:
+    #             print(Fore.RED + "Rule {} has no field 'title'.".format(file))
+    #             faulty_rules.append(file)
+    #             continue
+    #         elif len(title) > 110:
+    #             print(
+    #                 Fore.YELLOW
+    #                 + "Rule {} has a title field with too many characters (>110)".format(
+    #                     file
+    #                 )
+    #             )
+    #             faulty_rules.append(file)
+    #         if title.startswith("Detects "):
+    #             print(
+    #                 Fore.RED
+    #                 + "Rule {} has a title that starts with 'Detects'".format(file)
+    #             )
+    #             faulty_rules.append(file)
+    #         if title.endswith("."):
+    #             print(Fore.RED + "Rule {} has a title that ends with '.'".format(file))
+    #             faulty_rules.append(file)
+    #         wrong_casing = []
+    #         for word in title.split(" "):
+    #             if (
+    #                 word.islower()
+    #                 and not word.lower() in allowed_lowercase_words
+    #                 and not "." in word
+    #                 and not "/" in word
+    #                 and not "_" in word
+    #                 and not word[0].isdigit()
+    #             ):
+    #                 wrong_casing.append(word)
+    #         if len(wrong_casing) > 0:
+    #             print(
+    #                 Fore.RED
+    #                 + "Rule {} has a title that has not title capitalization. Words: '{}'".format(
+    #                     file, ", ".join(wrong_casing)
+    #                 )
+    #             )
+    #             faulty_rules.append(file)
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules with non-conform 'title' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with non-conform 'title' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title",
+    #     )
 
     def test_title_in_first_line(self):
         faulty_rules = []
