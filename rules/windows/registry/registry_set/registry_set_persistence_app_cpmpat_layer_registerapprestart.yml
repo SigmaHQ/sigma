@@ -1,0 +1,22 @@
+title: Potential Persistence Via AppCompat RegisterAppRestart Layer
+id: b86852fb-4c77-48f9-8519-eb1b2c308b59
+status: experimental
+description: Detects the installation of a new shim database where the file is located in a non-default location
+references:
+    - https://github.com/nasbench/Misc-Research/blob/d114d6a5e0a437d3818e492ef9864367152543e7/Other/Persistence-Via-RegisterAppRestart-Shim.md
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2024/01/01
+tags:
+    - attack.persistence
+    - attack.t1546.011
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers\'
+        Details|contains: 'REGISTERAPPRESTART'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
