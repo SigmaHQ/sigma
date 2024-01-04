@@ -1,11 +1,11 @@
-title: DLL Sideloading Via RunOnce
+title: Potential DLL Sideloading Of Iernonce.DLL
 id: f53714ec-5077-420e-ad20-907ff9bb2958
 status: experimental
-description: Detects DLL sideloading of "iernonce.dll" via runonce.exe
+description: Detects potential DLL sideloading of "iernonce.dll"
 references:
     - https://www.hexacorn.com/blog/2023/12/26/1-little-known-secret-of-runonce-exe-32-bit/
 author: Anish Bogati
-date: 2023/12/27
+date: 2024/01/04
 modified:
 tags:
     - attack.defense_evasion
@@ -15,16 +15,13 @@ logsource:
     product: windows
 detection:
     selection:
-        Image|endswith: '\runonce.exe'
         ImageLoaded|endswith: '\iernonce.dll'
-    filter:
-        ImageLoaded|startswith:
-            - 'C:\Windows\System32\'
-            - 'C:\Windows\SysWOW64\'
-        Image|startswith:
-            - 'C:\Windows\System32\'
-            - 'C:\Windows\SysWOW64\'
-    condition: selection and not filter
+    filter_main_legit_locations:
+        ImageLoaded|contains:
+            - ':\Windows\System32\'
+            - ':\Windows\SysWOW64\'
+            - ':\Windows\WinSxS\'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: medium
