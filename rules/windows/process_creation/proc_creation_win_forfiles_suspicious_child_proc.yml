@@ -1,0 +1,29 @@
+title: Suspicious Forfiles Child Process
+id: f53714ec-5077-420e-ad20-907ff9bb2958
+status: experimental
+description: Detects the execution of "forfiles" from a non-default location, resulting in the loading of a masquerading "cmd.exe" from the current working directory.
+references: https://www.hexacorn.com/blog/2023/12/31/1-little-known-secret-of-forfiles-exe/
+author: Anish Bogati
+date: 2023/01/04
+modified:
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\forfiles.exe'
+        Image|endswith: '\cmd.exe'
+    filter:
+        ParentImage|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+        Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high
