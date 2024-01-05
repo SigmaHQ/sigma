@@ -1,0 +1,31 @@
+title: HackTool - NoFilter Execution
+id: 7b14c76a-c602-4ae6-9717-eff868153fc0
+status: experimental
+description: |
+    Detects execution of NoFilter, a tool for abusing the Windows Filtering Platform for privilege escalation via hardcoded policy name indicators
+references:
+    - https://github.com/deepinstinct/NoFilter/blob/121d215ab130c5e8e3ad45a7e7fcd56f4de97b4d/NoFilter/Consts.cpp
+    - https://github.com/deepinstinct/NoFilter
+    - https://www.deepinstinct.com/blog/nofilter-abusing-windows-filtering-platform-for-privilege-escalation
+    - https://x.com/_st0pp3r_/status/1742203752361128162?s=20
+author: Stamatis Chatzimangou (st0pp3r)
+date: 2024/01/05
+tags:
+    - attack.privilege_escalation
+    - attack.t1134
+    - attack.t1134.001
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: Audit Filtering Platform Policy Change needs to be enabled'
+detection:
+    selection_5447:
+        EventID: 5447
+        FilterName|contains: 'RonPolicy'
+    selection_5449:
+        EventID: 5449
+        ProviderContextName|contains: 'RonPolicy'
+    condition: 1 of selection_*
+falsepositives:
+    - Unknown
+level: high
