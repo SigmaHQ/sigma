@@ -8,7 +8,7 @@ references:
     - https://www.virustotal.com/gui/search/content%253A%2522Set-MpPreference%2520-Disable%2522/files
 author: Florian Roth (Nextron Systems)
 date: 2022/03/03
-modified: 2022/03/07
+modified: 2024/01/02
 tags:
     - attack.defense_evasion
     - attack.t1562.001
@@ -22,24 +22,34 @@ detection:
             - 'Set-MpPreference '
     selection2:
         CommandLine|contains:
+            - 'DisableArchiveScanning '
             - 'DisableRealtimeMonitoring '
             - 'DisableIOAVProtection '
             - 'DisableBehaviorMonitoring '
             - 'DisableBlockAtFirstSeen '
+            - 'DisableCatchupFullScan '
+            - 'DisableCatchupQuickScan '
     selection3:
         CommandLine|contains:
             - '$true'
             - ' 1 '
     encoded_command:
         CommandLine|base64offset|contains:
+            - 'DisableArchiveScanning '
             - 'DisableRealtimeMonitoring '
             - 'DisableIOAVProtection '
             - 'DisableBehaviorMonitoring '
             - 'DisableBlockAtFirstSeen '
+            - 'DisableCatchupFullScan '
+            - 'DisableCatchupQuickScan '
+            - 'disablearchivescanning '
             - 'disablerealtimemonitoring '
             - 'disableioavprotection '
             - 'disablebehaviormonitoring '
             - 'disableblockatfirstseen '
+            - 'disablecatchupfullscan '
+            - 'disablecatchupquickscan '
+
         CommandLine|contains:
             - 'RABpAHMAYQBiAGwAZQBSAGUAYQBsAHQAaQBtAGUATQBvAG4AaQB0AG8AcgBpAG4AZwAgA'
             - 'QAaQBzAGEAYgBsAGUAUgBlAGEAbAB0AGkAbQBlAE0AbwBuAGkAdABvAHIAaQBuAGcAIA'
@@ -65,6 +75,9 @@ detection:
             - 'ZABpAHMAYQBiAGwAZQBiAGwAbwBjAGsAYQB0AGYAaQByAHMAdABzAGUAZQBuACAA'
             - 'QAaQBzAGEAYgBsAGUAYgBsAG8AYwBrAGEAdABmAGkAcgBzAHQAcwBlAGUAbgAgA'
             - 'kAGkAcwBhAGIAbABlAGIAbABvAGMAawBhAHQAZgBpAHIAcwB0AHMAZQBlAG4AIA'
+            - 'RABpAHMAYQBiAGwAZQBDAGEAdABjAGgAdQBwAEYAdQBsAGwAUwBjAGEAbgA'
+            - 'RABpAHMAYQBiAGwAZQBDAGEAdABjAGgAdQBwAFEAdQBpAGMAawBTAGMAYQBuAA'
+            - 'RABpAHMAYQBiAGwAZQBBAHIAYwBoAGkAdgBlAFMAYwBhAG4AbgBpAG4AZwA'
     condition: all of selection* or encoded_command
 falsepositives:
     - Possible Admin Activity
