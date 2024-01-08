@@ -16,11 +16,11 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection1:
+    selection_cli_cmdlet:
         CommandLine|contains:
             - 'Add-MpPreference '
             - 'Set-MpPreference '
-    selection2:
+    selection2_cli_option:
         CommandLine|contains:
             - 'DisableArchiveScanning '
             - 'DisableRealtimeMonitoring '
@@ -29,11 +29,11 @@ detection:
             - 'DisableBlockAtFirstSeen '
             - 'DisableCatchupFullScan '
             - 'DisableCatchupQuickScan '
-    selection3:
+    selection_cli_value:
         CommandLine|contains:
             - '$true'
             - ' 1 '
-    encoded_command:
+    selection_encoded_modifier:
         CommandLine|base64offset|contains:
             # Note: Since this is calculating offsets casing is important
             - 'disablearchivescanning '
@@ -50,6 +50,7 @@ detection:
             - 'DisableIOAVProtection '
             - 'disablerealtimemonitoring '
             - 'DisableRealtimeMonitoring '
+    selection_encoded_direct:
         CommandLine|contains:
             - 'RABpAHMAYQBiAGwAZQBSAGUAYQBsAHQAaQBtAGUATQBvAG4AaQB0AG8AcgBpAG4AZwAgA'
             - 'QAaQBzAGEAYgBsAGUAUgBlAGEAbAB0AGkAbQBlAE0AbwBuAGkAdABvAHIAaQBuAGcAIA'
@@ -78,7 +79,7 @@ detection:
             - 'RABpAHMAYQBiAGwAZQBDAGEAdABjAGgAdQBwAEYAdQBsAGwAUwBjAGEAbgA'
             - 'RABpAHMAYQBiAGwAZQBDAGEAdABjAGgAdQBwAFEAdQBpAGMAawBTAGMAYQBuAA'
             - 'RABpAHMAYQBiAGwAZQBBAHIAYwBoAGkAdgBlAFMAYwBhAG4AbgBpAG4AZwA'
-    condition: all of selection* or encoded_command
+    condition: all of selection_cli_* or 1 of selection_encoded_*
 falsepositives:
     - Possible Admin Activity
     - Other Cmdlets that may use the same parameters
