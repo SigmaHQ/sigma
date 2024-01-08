@@ -1,0 +1,96 @@
+title: Windows Filtering Platform Blocked Connection From EDR Agent Binary
+id: bacf58c6-e199-4040-a94f-95dea0f1e45a
+status: experimental
+description: |
+    Detects a Windows Filtering Platform (WFP) blocked connection event involving common Endpoint Detection and Response (EDR) agents.
+    Adversaries may use WFP filters to prevent Endpoint Detection and Response (EDR) agents from reporting security events.
+references:
+    - https://github.com/netero1010/EDRSilencer
+    - https://github.com/amjcyber/EDRNoiseMaker
+    - https://ghoulsec.medium.com/misc-series-4-forensics-on-edrsilencer-events-428b20b3f983
+author: '@gott_cyber'
+date: 2024/01/08
+tags:
+    - attack.defense_evasion
+    - attack.t1562
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: Audit Filtering Platform Connection needs to be enabled'
+detection:
+    selection:
+        EventID: 5157
+        Application|endswith:
+            - '\AmSvc.exe' # Cybereason
+            - '\cb.exe' # Carbon Black EDR
+            - '\CETASvc.exe' # TrendMicro Apex One
+            - '\CNTAoSMgr.exe' # TrendMicro Apex One
+            - '\CrAmTray.exe' # Cybereason
+            - '\CrsSvc.exe' # Cybereason
+            - '\CSFalconContainer.exe' # CrowdStrike Falcon
+            - '\CSFalconService.exe' # CrowdStrike Falcon
+            - '\CybereasonAV.exe' # Cybereason
+            - '\CylanceSvc.exe' # Cylance
+            - '\cyserver.exe' # Palo Alto Networks Traps/Cortex XDR
+            - '\CyveraService.exe' # Palo Alto Networks Traps/Cortex XDR
+            - '\CyvrFsFlt.exe' # Palo Alto Networks Traps/Cortex XDR
+            - '\EIConnector.exe' # ESET Inspect
+            - '\elastic-agent.exe' # Elastic EDR
+            - '\elastic-endpoint.exe' # Elastic EDR
+            - '\EndpointBasecamp.exe' # TrendMicro Apex One
+            - '\ExecutionPreventionSvc.exe' # Cybereason
+            - '\filebeat.exe' # Elastic EDR
+            - '\fortiedr.exe' # FortiEDR
+            - '\hmpalert.exe' # Sophos EDR
+            - '\hurukai.exe' # Harfanglab EDR
+            - '\LogProcessorService.exe' # SentinelOne
+            - '\mcsagent.exe' # Sophos EDR
+            - '\mcsclient.exe' # Sophos EDR
+            - '\MsMpEng.exe' # Microsoft Defender for Endpoint and Microsoft Defender Antivirus
+            - '\MsSense.exe' # Microsoft Defender for Endpoint and Microsoft Defender Antivirus
+            - '\Ntrtscan.exe' # TrendMicro Apex One
+            - '\PccNTMon.exe' # TrendMicro Apex One
+            - '\QualysAgent.exe' # Qualys EDR
+            - '\RepMgr.exe' # Carbon Black Cloud
+            - '\RepUtils.exe' # Carbon Black Cloud
+            - '\RepUx.exe' # Carbon Black Cloud
+            - '\RepWAV.exe' # Carbon Black Cloud
+            - '\RepWSC.exe' # Carbon Black Cloud
+            - '\sedservice.exe' # Sophos EDR
+            - '\SenseCncProxy.exe' # Microsoft Defender for Endpoint and Microsoft Defender Antivirus
+            - '\SenseIR.exe' # Microsoft Defender for Endpoint and Microsoft Defender Antivirus
+            - '\SenseNdr.exe' # Microsoft Defender for Endpoint and Microsoft Defender Antivirus
+            - '\SenseSampleUploader.exe' # Microsoft Defender for Endpoint and Microsoft Defender Antivirus
+            - '\SentinelAgent.exe' # SentinelOne
+            - '\SentinelAgentWorker.exe' # SentinelOne
+            - '\SentinelBrowserNativeHost.exe' # SentinelOne
+            - '\SentinelHelperService.exe' # SentinelOne
+            - '\SentinelServiceHost.exe' # SentinelOne
+            - '\SentinelStaticEngine.exe' # SentinelOne
+            - '\SentinelStaticEngineScanner.exe' # SentinelOne
+            - '\sfc.exe' # Cisco Secure Endpoint (Formerly Cisco AMP)
+            - '\sophos ui.exe' # Sophos EDR
+            - '\sophosfilescanner.exe' # Sophos EDR
+            - '\sophosfs.exe' # Sophos EDR
+            - '\sophoshealth.exe' # Sophos EDR
+            - '\sophosips.exe' # Sophos EDR
+            - '\sophosLivequeryservice.exe' # Sophos EDR
+            - '\sophosnetfilter.exe' # Sophos EDR
+            - '\sophosntpservice.exe' # Sophos EDR
+            - '\sophososquery.exe' # Sophos EDR
+            - '\sspservice.exe' # Sophos EDR
+            - '\TaniumClient.exe' # Tanium
+            - '\TaniumCX.exe' # Tanium
+            - '\TaniumDetectEngine.exe' # Tanium
+            - '\TMBMSRV.exe' # TrendMicro Apex One
+            - '\TmCCSF.exe' # TrendMicro Apex One
+            - '\TmListen.exe' # TrendMicro Apex One
+            - '\TmWSCSvc.exe' # TrendMicro Apex One
+            - '\Traps.exe' # Palo Alto Networks Traps/Cortex XDR
+            - '\winlogbeat.exe' # Elastic EDR
+            - '\WSCommunicator.exe' # TrendMicro Apex One
+            - '\xagt.exe' # Trellix EDR
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
