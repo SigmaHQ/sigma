@@ -1,4 +1,4 @@
-title: Use of Forfiles For Execution
+title: Forfiles Command Execution
 id: 9aa5106d-bce3-4b13-86df-3a20f1d5cf0b
 related:
     - id: a85cf4e3-56ee-4e79-adeb-789f8fb209a8
@@ -6,12 +6,16 @@ related:
     - id: fa47597e-90e9-41cd-ab72-c3b74cfb0d02
       type: obsoletes
 status: test
-description: Execute commands and binaries from the context of "forfiles". This is used as a LOLBIN for example to bypass application whitelisting.
+description: |
+    Detects the execution of "forfiles" with the "/c" flag.
+    While this is an expected behavior of the tool, it can be abused in order to proxy execution through it with any binary.
+    Can be used to bypass application whitelisting.
 references:
     - https://lolbas-project.github.io/lolbas/Binaries/Forfiles/
     - https://pentestlab.blog/2020/07/06/indirect-command-execution/
-author: Nasreddine Bencherchali (Nextron Systems)
+author: Tim Rauch, Elastic, E.M. Anhaus (originally from Atomic Blue Detections, Endgame), oscd.community
 date: 2022/06/14
+modified: 2024/01/05
 tags:
     - attack.execution
     - attack.t1059
@@ -22,19 +26,11 @@ detection:
     selection_img:
         - Image|endswith: '\forfiles.exe'
         - OriginalFileName: 'forfiles.exe'
-    selection_cli_p:
-        CommandLine|contains:
-            - ' /p '
-            - ' -p '
-    selection_cli_m:
-        CommandLine|contains:
-            - ' /m '
-            - ' -m '
-    selection_cli_c:
+    selection_cli:
         CommandLine|contains:
             - ' /c '
             - ' -c '
-    condition: all of selection*
+    condition: all of selection_*
 falsepositives:
     - Legitimate use via a batch script or by an administrator.
 level: medium
