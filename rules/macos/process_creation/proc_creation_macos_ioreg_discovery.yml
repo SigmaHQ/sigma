@@ -9,8 +9,10 @@ references:
     - https://www.virustotal.com/gui/file/0373d78db6c3c0f6f6dcc409821bf89e1ad8c165d6f95c5c80ecdce2219627d7/behavior
     - https://www.virustotal.com/gui/file/4ffdc72d1ff1ee8228e31691020fc275afd1baee5a985403a71ca8c7bd36e2e4/behavior
     - https://www.virustotal.com/gui/file/5907d59ec1303cfb5c0a0f4aaca3efc0830707d86c732ba6b9e842b5730b95dc/behavior
+    - https://www.trendmicro.com/en_ph/research/20/k/new-macos-backdoor-connected-to-oceanlotus-surfaces.html
 author: Joseliyo Sanchez, @Joseliyo_Jstnk
 date: 2023/12/20
+modified: 2024/01/02
 tags:
     - attack.discovery
     - attack.t1082
@@ -22,14 +24,18 @@ detection:
     #   /bin/bash /bin/sh -c ioreg -l | grep -e 'VirtualBox' -e 'Oracle' -e 'VMware' -e 'Parallels' | wc -l
     #   /usr/sbin/ioreg ioreg -rd1 -w0 -c AppleAHCIDiskDriver
     #   /bin/bash /bin/sh -c ioreg -l | grep -e 'USB Vendor Name'
+    #   ioreg -rd1 -c IOPlatformExpertDevice | awk '/IOPlatformSerialNumber/ { split($0, line, \"\\\"\"); printf(\"%s\", line[4]); }
     selection_img:
         - Image|endswith: '/ioreg'
-        - CommandLine|contains|all:
-              - 'ioreg'
-              - '-l'
-    selection_cmd:
+        - CommandLine|contains: 'ioreg'
+    selection_cmd1:
+        CommandLine|contains:
+            - '-l'
+            - '-c'
+    selection_cmd2:
         CommandLine|contains:
             - 'AppleAHCIDiskDriver'
+            - 'IOPlatformExpertDevice'
             - 'Oracle'
             - 'Parallels'
             - 'USB Vendor Name'

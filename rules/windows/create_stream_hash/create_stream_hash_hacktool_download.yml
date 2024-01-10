@@ -1,12 +1,22 @@
-title: Hacktool Download
+title: Hacktool Named File Stream Created
 id: 19b041f6-e583-40dc-b842-d6fa8011493f
 status: experimental
-description: Detects the creation of a file on disk that has an imphash of a well-known hack tool
+description: Detects the creation of a named file stream with the imphash of a well-known hack tool
 references:
-    - https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventid=90015
+    - https://github.com/gentilkiwi/mimikatz
+    - https://github.com/topotam/PetitPotam
+    - https://github.com/ohpe/juicy-potato
+    - https://github.com/antonioCoco/RoguePotato
+    - https://www.tarasco.org/security/pwdump_7/
+    - https://github.com/fortra/nanodump
+    - https://github.com/codewhitesec/HandleKatz
+    - https://github.com/xuanxuan0/DripLoader
+    - https://github.com/hfiref0x/UACME
+    - https://github.com/outflanknl/Dumpert
+    - https://github.com/wavestone-cdt/EDRSandblast
 author: Florian Roth (Nextron Systems)
 date: 2022/08/24
-modified: 2023/05/05
+modified: 2024/01/02
 tags:
     - attack.defense_evasion
     - attack.s0139
@@ -14,7 +24,7 @@ tags:
 logsource:
     product: windows
     category: create_stream_hash
-    definition: Requirements Sysmon config with Imphash logging activated
+    definition: 'Requirements: Sysmon config with Imphash logging activated'
 detection:
     selection:
         - Imphash:
@@ -111,6 +121,15 @@ detection:
               - 96df3a3731912449521f6f8d183279b1 # Backstab
               - 7e6cf3ff4576581271ac8a313b2aab46 # Backstab
               - 51791678f351c03a0eb4e2a7b05c6e17 # Backstab
+              - 25ce42b079282632708fc846129e98a5 # Forensia
+              - 021bcca20ba3381b11bdde26b4e62f20 # EDRSandBlast
+              - 59223b5f52d8799d38e0754855cbdf42 # EDRSandBlast
+              - 81e75d8f1d276c156653d3d8813e4a43 # EDRSandBlast
+              - 17244e8b6b8227e57fe709ccad421420 # EDRSandBlast
+              - 5b76da3acdedc8a5cdf23a798b5936b4 # EDRSandBlast
+              - cb2b65bb77d995cc1c0e5df1c860133c # EDRSandBlast
+              - 40445337761d80cf465136fafb1f63e6 # EDRSandBlast
+              - 8a790f401b29fa87bc1e56f7272b3aa6 # EDRSilencer
         - Hash|contains: # Sysmon field hashes contains all types
               - IMPHASH=BCCA3C247B619DCD13C8CDFF5F123932 # PetitPotam
               - IMPHASH=3A19059BD7688CB88E70005F18EFC439 # PetitPotam
@@ -205,10 +224,16 @@ detection:
               - IMPHASH=96DF3A3731912449521F6F8D183279B1 # Backstab
               - IMPHASH=7E6CF3FF4576581271AC8A313B2AAB46 # Backstab
               - IMPHASH=51791678F351C03A0EB4E2A7B05C6E17 # Backstab
+              - IMPHASH=25CE42B079282632708FC846129E98A5 # Forensia
+              - IMPHASH=021BCCA20BA3381B11BDDE26B4E62F20 # EDRSandBlast
+              - IMPHASH=59223B5F52D8799D38E0754855CBDF42 # EDRSandBlast
+              - IMPHASH=81E75D8F1D276C156653D3D8813E4A43 # EDRSandBlast
+              - IMPHASH=17244E8B6B8227E57FE709CCAD421420 # EDRSandBlast
+              - IMPHASH=5B76DA3ACDEDC8A5CDF23A798B5936B4 # EDRSandBlast
+              - IMPHASH=CB2B65BB77D995CC1C0E5DF1C860133C # EDRSandBlast
+              - IMPHASH=40445337761D80CF465136FAFB1F63E6 # EDRSandBlast
+              - IMPHASH=8A790F401B29FA87BC1E56F7272B3AA6 # EDRSilencer
     condition: selection
-fields:
-    - TargetFilename
-    - Image
 falsepositives:
     - Unknown
 level: high
