@@ -7,6 +7,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/04e487c1828d76df3e834621f4f893ea756d5232/atomics/T1562.001/T1562.001.md#atomic-test-43---disable-hypervisor-enforced-code-integrity-hvci
 author: Nasreddine Bencherchali (Nextron Systems), Anish Bogati
 date: 2023/03/14
+modified: 2024/01/10
 tags:
     - attack.defense_evasion
     - attack.t1562.001
@@ -16,7 +17,10 @@ logsource:
 detection:
     selection:
         EventType: SetValue
-        TargetObject|endswith: '\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity\Enabled'
+        TargetObject|endswith:
+            - '\Microsoft\Windows\DeviceGuard\HypervisorEnforcedCodeIntegrity'
+            - '\Control\DeviceGuard\HypervisorEnforcedCodeIntegrity'
+            - '\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity\Enabled'
         Details: 'DWORD (0x00000000)'
     condition: selection
 falsepositives:

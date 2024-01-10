@@ -1,7 +1,7 @@
 title: Potential System DLL Sideloading From Non System Locations
 id: 4fc0deee-0057-4998-ab31-d24e46e0aba4
 status: experimental
-description: Detects DLL sideloading of DLLs usually located in system locations (System32, SysWOW64, etc.)
+description: Detects DLL sideloading of DLLs usually located in system locations (System32, SysWOW64, etc.).
 references:
     - https://hijacklibs.net/ # For list of DLLs that could be sideloaded (search for dlls mentioned here in there). Wietze Beukema (project and research)
     - https://blog.cyble.com/2022/07/21/qakbot-resurfaces-with-new-playbook/ # WindowsCodecs.dll
@@ -10,7 +10,7 @@ references:
     - https://www.hexacorn.com/blog/2023/12/26/1-little-known-secret-of-runonce-exe-32-bit/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/08/14
-modified: 2024/01/04
+modified: 2024/01/10
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -444,13 +444,13 @@ detection:
             - '\wbemcomn.dll'
     filter_main_generic:
         # Note: this filter is generic on purpose to avoid insane amount of FP from legitimate third party applications. A better approach would be to baseline everything and add specific filters to avoid blind spots
-        ImageLoaded|startswith:
-            - 'C:\Windows\System32\'
-            - 'C:\Windows\SysWOW64\'
-            - 'C:\Windows\WinSxS\'
-            - 'C:\Windows\SoftwareDistribution\'
-            - 'C:\Windows\SystemTemp\'
-            - 'C:\$WINDOWS.~BT\'
+        ImageLoaded|contains:
+            - ':\Windows\System32\'
+            - ':\Windows\SysWOW64\'
+            - ':\Windows\WinSxS\'
+            - ':\Windows\SoftwareDistribution\'
+            - ':\Windows\SystemTemp\'
+            - ':\$WINDOWS.~BT\'
     filter_main_defender:
         Image|contains: ':\ProgramData\Microsoft\Windows Defender\Platform\'
         Image|endswith: '\version.dll'
