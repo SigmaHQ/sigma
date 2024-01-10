@@ -111,7 +111,8 @@ WINDOWS_SECURITY_SPECIAL_PROCESS_CREATION_FIELDS = ["SubjectUserSid", "SubjectUs
 def yield_next_rule_file_path(path_to_rules: str) -> str:
     for root, _, files in os.walk(path_to_rules):
         for file in files:
-            yield os.path.join(root, file)
+            if file.endswith(".yml"):
+                yield os.path.join(root, file)
 
 def get_rule_part(file_path: str, part_name: str):
     yaml_dicts = get_rule_yaml(file_path)
@@ -161,23 +162,19 @@ def test_invalid_logsource_attributes(path_to_rules):
     ]
 
     for file in yield_next_rule_file_path(path_to_rules):
-        if not file.endswith(".yml") and not file.endswith(".yaml") :
-            print("File {} is not a YAML file.".format(file))
-            valid = False
-        else:
-            logsource = get_rule_part(file_path=file, part_name="logsource")
-            if not logsource:
-                print("Rule {} has no 'logsource'.".format(file))
-                faulty_rules.append(file)
-                continue
-            valid = True
-            for key in logsource:
-                if key.lower() not in valid_logsource:
-                    print("Rule {} has a logsource with an invalid field ({})".format(file, key))
-                    valid = False
-                elif not isinstance(logsource[key], str):
-                    print("Rule {} has a logsource with an invalid field type ({})".format(file, key))
-                    valid = False
+        logsource = get_rule_part(file_path=file, part_name="logsource")
+        if not logsource:
+            print("Rule {} has no 'logsource'.".format(file))
+            faulty_rules.append(file)
+            continue
+        valid = True
+        for key in logsource:
+            if key.lower() not in valid_logsource:
+                print("Rule {} has a logsource with an invalid field ({})".format(file, key))
+                valid = False
+            elif not isinstance(logsource[key], str):
+                print("Rule {} has a logsource with an invalid field type ({})".format(file, key))
+                valid = False
         if not valid:
             faulty_rules.append(file)
 
