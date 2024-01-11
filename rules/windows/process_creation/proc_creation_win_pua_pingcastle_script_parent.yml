@@ -1,0 +1,85 @@
+title: PUA - PingCastle Execution From Potentially Suspicious Parent
+id: b37998de-a70b-4f33-b219-ec36bf433dc0
+related:
+    - id: b1cb4ab6-ac31-43f4-adf1-d9d08957419c
+      type: derived
+status: experimental
+description: |
+    Detects the execution of PingCastle a tool designed to assess quickly the Active Directory security level via a script located in a potentially suspicious or uncommon location.
+references:
+    - https://github.com/vletoux/pingcastle
+    - https://thedfirreport.com/2023/10/30/netsupport-intrusion-results-in-domain-compromise/
+author: Nasreddine Bencherchali (Nextron Systems), X__Junior (Nextron Systems)
+date: 2024/01/11
+tags:
+    - attack.reconnaissance
+    - attack.t1595
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent_ext:
+        ParentCommandLine|endswith:
+            - '.bat'
+            - '.chm'
+            - '.cmd'
+            - '.hta'
+            - '.htm'
+            - '.html'
+            - '.js'
+            - '.lnk'
+            - '.ps1'
+            - '.vbe'
+            - '.vbs'
+            - '.wsf'
+    selection_parent_path_1:
+        ParentCommandLine|contains:
+            - ':\Perflogs\'
+            - ':\Temp\'
+            - ':\Users\Public\'
+            - ':\Windows\Temp\'
+            - '\AppData\Local\Temp'
+            - '\AppData\Roaming\'
+            - '\Temporary Internet'
+    selection_parent_path_2:
+        - ParentCommandLine|contains|all:
+            - ':\Users\'
+            - '\Favorites\'
+        - ParentCommandLine|contains|all:
+            - ':\Users\'
+            - '\Favourites\'
+        - ParentCommandLine|contains|all:
+            - ':\Users\'
+            - '\Contacts\'
+    selection_cli:
+        - Image|endswith: '\PingCastle.exe'
+        - OriginalFileName: PingCastle.exe
+        - Product: 'Ping Castle'
+        - CommandLine|contains:
+              - '--scanner aclcheck'
+              - '--scanner antivirus'
+              - '--scanner computerversion'
+              - '--scanner foreignusers'
+              - '--scanner laps_bitlocker'
+              - '--scanner localadmin'
+              - '--scanner nullsession'
+              - '--scanner nullsession-trust'
+              - '--scanner oxidbindings'
+              - '--scanner remote'
+              - '--scanner share'
+              - '--scanner smb'
+              - '--scanner smb3querynetwork'
+              - '--scanner spooler'
+              - '--scanner startup'
+              - '--scanner zerologon'
+        - CommandLine|contains: '--no-enum-limit'
+        - CommandLine|contains|all:
+              - '--healthcheck'
+              - '--level Full'
+        - CommandLine|contains|all:
+              - '--healthcheck'
+              - '--server '
+    condition: 1 of selection_parent_* and selection_parent_ext and selection_cli
+falsepositives:
+    - Unknown
+level: high
