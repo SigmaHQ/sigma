@@ -17,10 +17,34 @@ logsource:
     product: windows
 detection:
     selection:
-        OriginalFileName:
-            - 'PingCastleReporting.exe'
-            - 'PingCastleCloud.exe'
-            - 'PingCastle.exe'
+        - OriginalFileName:
+              - 'PingCastleReporting.exe'
+              - 'PingCastleCloud.exe'
+              - 'PingCastle.exe'
+        - CommandLine|contains:
+              - '--scanner aclcheck'
+              - '--scanner antivirus'
+              - '--scanner computerversion'
+              - '--scanner foreignusers'
+              - '--scanner laps_bitlocker'
+              - '--scanner localadmin'
+              - '--scanner nullsession'
+              - '--scanner nullsession-trust'
+              - '--scanner oxidbindings'
+              - '--scanner remote'
+              - '--scanner share'
+              - '--scanner smb'
+              - '--scanner smb3querynetwork'
+              - '--scanner spooler'
+              - '--scanner startup'
+              - '--scanner zerologon'
+        - CommandLine|contains: '--no-enum-limit'
+        - CommandLine|contains|all:
+              - '--healthcheck'
+              - '--level Full'
+        - CommandLine|contains|all:
+              - '--healthcheck'
+              - '--server '
     filter_main_img:
         Image|endswith:
             - '\PingCastleReporting.exe'
