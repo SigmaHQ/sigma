@@ -1,9 +1,11 @@
 title: Hacktool Execution
 id: 9e03e7db-fd74-4762-8e73-d31bd25ceae7
 status: experimental
-description: Detects the execution of various hack tools used to dump credentials, evade defenses or perform attacks. This rule is meant as indicator collection for tools that are not detected by specific rules.
+description: |
+    Detects the execution of various hack tools used to dump credentials, evade defenses or perform malicious attacks based on Imphash.
+    This rule is meant as indicator collection for tools that are not detected by specific rules.
 references:
-    - https://github.com/Neo23x0/sysmon-config/blob/master/sysmonconfig-export.xml#L1441
+    - https://github.com/Neo23x0/sysmon-config/blob/2dc85752385053115fde74f737a03cfed0a4ffdd/sysmonconfig-export.xml#L1441
 author: Florian Roth (Nextron Systems)
 date: 2023/12/29
 tags:
@@ -104,7 +106,7 @@ detection:
               - cb2b65bb77d995cc1c0e5df1c860133c # EDRSandBlast
               - 40445337761d80cf465136fafb1f63e6 # EDRSandBlast
               - 8a790f401b29fa87bc1e56f7272b3aa6 # EDRSilencer
-        - Hash|contains: # Sysmon field hashes contains all types
+        - Hashes|contains: # Sysmon field hashes contains all types
               - IMPHASH=BCCA3C247B619DCD13C8CDFF5F123932 # PetitPotam
               - IMPHASH=3A19059BD7688CB88E70005F18EFC439 # PetitPotam
               - IMPHASH=bf6223a49e45d99094406777eb6004ba # PetitPotam
@@ -193,8 +195,6 @@ detection:
               - IMPHASH=40445337761D80CF465136FAFB1F63E6 # EDRSandBlast
               - IMPHASH=8A790F401B29FA87BC1E56F7272B3AA6 # EDRSilencer
     condition: selection
-fields:
-    - Image
 falsepositives:
     - Unknown
 level: high
