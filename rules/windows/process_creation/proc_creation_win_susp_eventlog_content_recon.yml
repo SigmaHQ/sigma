@@ -5,7 +5,8 @@ related:
       type: derived
 status: experimental
 description: |
-    Detects execution of different log query utilities to search and dump the content of specific event logs or look for specific event IDs.
+    Detects execution of different log query utilities and commands to search and dump the content of specific event logs or look for specific event IDs.
+    This technique is used by threat actors in order to extract sensitive information from events logs such as usernames, IP addresses, hostnames, etc.
 references:
     - http://blog.talosintelligence.com/2022/09/lazarus-three-rats.html
     - https://thedfirreport.com/2023/10/30/netsupport-intrusion-results-in-domain-compromise/
@@ -18,7 +19,7 @@ references:
     - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/wevtutil
 author: Nasreddine Bencherchali (Nextron Systems), X__Junior (Nextron Systems)
 date: 2022/09/09
-modified: 2023/11/20
+modified: 2024/01/02
 tags:
     - attack.credential_access
     - attack.discovery
@@ -39,8 +40,8 @@ detection:
             - ' qe '
             - ' query-events '
     selection_wmic_img:
-        - Image|endswith: '\wevtutil.exe'
-        - OriginalFileName: 'wevtutil.exe'
+        - Image|endswith: '\wmic.exe'
+        - OriginalFileName: 'wmic.exe'
     selection_wmic_cli:
         CommandLine|contains: ' ntevent'
     selection_cmdlet:

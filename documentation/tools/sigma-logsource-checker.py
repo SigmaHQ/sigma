@@ -111,7 +111,8 @@ WINDOWS_SECURITY_SPECIAL_PROCESS_CREATION_FIELDS = ["SubjectUserSid", "SubjectUs
 def yield_next_rule_file_path(path_to_rules: str) -> str:
     for root, _, files in os.walk(path_to_rules):
         for file in files:
-            yield os.path.join(root, file)
+            if file.endswith(".yml"):
+                yield os.path.join(root, file)
 
 def get_rule_part(file_path: str, part_name: str):
     yaml_dicts = get_rule_yaml(file_path)

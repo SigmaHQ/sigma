@@ -1,9 +1,16 @@
-title: Cscript/Wscript Suspicious Child Process
+title: Cscript/Wscript Potentially Suspicious Child Process
 id: b6676963-0353-4f88-90f5-36c20d443c6a
 status: experimental
-description: Detects suspicious child processes of Wscript/Cscript
-author: Nasreddine Bencherchali (Nextron Systems)
+description: |
+    Detects potentially suspicious child processes of Wscript/Cscript. These include processes such as rundll32 with uncommon exports or PowerShell spawning rundll32 or regsvr32.
+    Malware such as Pikabot and Qakbot were seen using similar techniques as well as many others.
+references:
+    - Internal Research
+    - https://github.com/pr0xylife/Pikabot/blob/main/Pikabot_30.10.2023.txt
+    - https://github.com/pr0xylife/Pikabot/blob/main/Pikabot_22.12.2023.txt
+author: Nasreddine Bencherchali (Nextron Systems), Alejandro Houspanossian ('@lekz86')
 date: 2023/05/15
+modified: 2024/01/02
 tags:
     - attack.execution
 logsource:
@@ -29,7 +36,15 @@ detection:
             - 'rundll32'
             - 'regsvr32'
             - 'msiexec'
-    condition: selection_parent and (selection_cli_script_main and 1 of selection_cli_script_option_*)
+    selection_cli_standalone:
+        Image|endswith: '\rundll32.exe'
+    filter_main_rundll32_known_exports:
+        Image|endswith: '\rundll32.exe'
+        CommandLine|contains:
+            - 'UpdatePerUserSystemParameters'
+            - 'PrintUIEntry'
+            - 'ClearMyTracksByProcess'
+    condition: selection_parent and ( selection_cli_standalone or (selection_cli_script_main and 1 of selection_cli_script_option_*) ) and not 1 of filter_main_*
 falsepositives:
     - Some false positives might occur with admin or third party software scripts. Investigate and apply additional filters accordingly.
 level: medium

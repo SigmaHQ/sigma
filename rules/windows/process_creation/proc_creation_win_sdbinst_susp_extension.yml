@@ -9,9 +9,10 @@ description: |
     Adversaries may establish persistence and/or elevate privileges by executing malicious content triggered by application shims
 references:
     - https://www.fireeye.com/blog/threat-research/2017/05/fin7-shim-databases-persistence.html
+    - https://github.com/nasbench/Misc-Research/blob/8ee690e43a379cbce8c9d61107442c36bd9be3d3/Other/Undocumented-Flags-Sdbinst.md
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023/08/01
-modified: 2023/12/13
+modified: 2024/01/10
 tags:
     - attack.persistence
     - attack.privilege_escalation
@@ -27,7 +28,11 @@ detection:
         CommandLine|contains: '.sdb'
     filter_main_svchost:
         # ParentImage|endswith: ':\Windows\System32\svchost.exe'
-        - CommandLine|endswith: ' -mm'
+        - CommandLine|endswith:
+              - ' -c'
+              - ' -f'
+              - ' -mm'
+              - ' -t'
         - CommandLine|contains: ' -m -bg'
     filter_main_null:
         CommandLine: null
