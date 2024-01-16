@@ -1,0 +1,26 @@
+title: Medusa Ransomware Disabling of UAC via Registry Modification
+id: 485cfe7c-8851-47ea-9b14-00bc3ac54e40
+status: stable
+description: Detects the modification of EnableLUA registry key, which is an indication of UAC being disabled - a technique used by Medusa ransomware.
+references:
+    - https://unit42.paloaltonetworks.com/medusa-ransomware-escalation-new-leak-site/?mkt_tok=NTMxLU9DUy0wMTgAAAGQmEAOWitxQGsGmwGZ9UlGpf--Giv3ZOXXjE1KzPbbH_loJKehsnxyX56le55O05-MtN57PQmOJASL516mtkyhsSll-nxQB0pDwrJFf3pdiZiqk4u0YM4
+    - https://attack.mitre.org/techniques/T1088/
+author: Sai Prashanth Pulisetti, @pulisettis
+date: 2024/01/16
+tags:
+    - attack.t1088
+logsource:
+    product: windows
+    service: windows
+    category: registry_set
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject:
+            - '*\Policies\System\EnableLUA'
+        Details: DWORD (0x00000000)
+        Image: '*\Medusa.exe'
+    condition: selection
+falsepositives:
+    - Enter any known false positives
+level: high
