@@ -7,7 +7,7 @@ references:
     - https://lolbas-project.github.io
 author: Perez Diego (@darkquassar), oscd.community
 date: 2019/10/27
-modified: 2023/11/11
+modified: 2024/01/17
 tags:
     - attack.privilege_escalation
     - attack.defense_evasion
@@ -97,6 +97,19 @@ detection:
             - '\AppData\Local\'
             - ':\Program Files (x86)\'
             - ':\Program Files\'
+    filter_optional_smartconsole1:
+        SourceImage|contains: '':\Program Files\internet explorer\iexplore.exe'
+        SourceCommandLine|contains|all:
+            - 'https://'
+            - '.checkpoint.com/documents/'
+            - 'SmartConsole_OLH/'
+            - 'default.htm#cshid='
+    filter_optional_smartconsole2:
+        SourceImage|contains: '':\Program Files\internet explorer\iexplore.exe'
+        SourceParentImage|contains|all:
+            - ':\Program Files'  # x86 and not
+            - '\CheckPoint\SmartConsole\'
+            - '\SmartConsole.exe'
     filter_optional_powerpnt:
         # Raised by the following issue: https://github.com/SigmaHQ/sigma/issues/2479
         SourceImage|contains: '\Microsoft Office\'
