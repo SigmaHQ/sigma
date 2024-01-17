@@ -10,7 +10,7 @@ references:
     - https://app.any.run/tasks/7123e948-c91e-49e0-a813-00e8d72ab393/#
 author: frack113
 date: 2023/02/26
-modified: 2023/05/30
+modified: 2024/01/17
 tags:
     - attack.defense_evasion
     - attack.t1562.004
@@ -34,9 +34,13 @@ detection:
     filter_optional_messenger:
         ApplicationPath|endswith: '\AppData\Local\Programs\Messenger\Messenger.exe'
     filter_optional_opera:
-        ApplicationPath|startswith: 'C:\Users\'
-        ApplicationPath|contains: '\AppData\Local\Programs\Opera\'
+        ApplicationPath|contains|all:
+            - ':\Users\'
+            - '\AppData\Local\Programs\Opera\'
         ApplicationPath|endswith: '\opera.exe'
+    filter_optional_brave:
+        ApplicationPath|contains: ':\Users\'
+        ApplicationPath|endswith: '\AppData\Local\BraveSoftware\Brave-Browser\Application\brave.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Any legitimate application that runs from the AppData user directory
