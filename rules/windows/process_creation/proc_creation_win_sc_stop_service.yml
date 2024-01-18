@@ -4,9 +4,12 @@ related:
     - id: eb87818d-db5d-49cc-a987-d5da331fbd90
       type: obsoletes
 status: test
-description: Detects the stopping of a Windows service
+description: Detects the stopping of a Windows service via the "sc.exe" utility
+references:
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc742107(v=ws.11)
 author: Jakob Weinzettl, oscd.community, Nasreddine Bencherchali (Nextron Systems)
 date: 2023/03/05
+modified: 2024/01/18
 tags:
     - attack.impact
     - attack.t1489
@@ -19,14 +22,7 @@ detection:
         - Image|endswith: '\sc.exe'
     selection_cli:
         CommandLine|contains: ' stop '
-    filter_kaspersky:
-        CommandLine:
-            - 'sc  stop KSCWebConsoleMessageQueue' # kaspersky Security Center Web Console double space between sc and stop
-            - 'sc  stop LGHUBUpdaterService' # Logitech LGHUB Updater Service
-        User|contains: # covers many language settings
-            - 'AUTHORI'
-            - 'AUTORI'
-    condition: all of selection_* and not 1 of filter_*
+    condition: all of selection_*
 falsepositives:
-    - There are many legitimate reasons to stop a service. This rule isn't looking for any suspicious behaviour in particular. Filter legitimate activity accordingly
+    - There are many legitimate reasons to stop a service. This rule isn't looking for any suspicious behavior in particular. Filter legitimate activity accordingly
 level: low
