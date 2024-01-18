@@ -1,10 +1,13 @@
-title: New or Renamed User Account with '$' in Attribute 'SamAccountName'
+title: New or Renamed User Account with '$' Character
 id: cfeed607-6aa4-4bbd-9627-b637deb723c8
 status: test
-description: Detects possible bypass EDR and SIEM via abnormal user account name.
+description: |
+    Detects the creation of a user with the "$" character. This can be used by attackers to hide a user or trick detection system that lack the parsing mechanisms.
+references:
+    - https://twitter.com/SBousseaden/status/1387743867663958021
 author: Ilyas Ochkov, oscd.community
 date: 2019/10/25
-modified: 2022/11/22
+modified: 2024/01/16
 tags:
     - attack.defense_evasion
     - attack.t1036
@@ -18,7 +21,10 @@ detection:
     selection_rename:
         EventID: 4781 # rename user
         NewTargetUserName|contains: '$'
-    condition: 1 of selection_*
+    filter_main_homegroup:
+        EventID: 4720
+        TargetUserName: 'HomeGroupUser$'
+    condition: 1 of selection_* and not 1 of filter_main_*
 falsepositives:
     - Unknown
-level: high
+level: medium
