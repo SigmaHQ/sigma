@@ -1,0 +1,36 @@
+title: CodePage Modification Via MODE.COM
+id: d48c5ffa-3b02-4c0f-9a9e-3c275650dd0e
+related:
+    - id: 12fbff88-16b5-4b42-9754-cd001a789fb3
+      type: derived
+status: experimental
+description: |
+    Detects a CodePage modification using the "mode.com" utility.
+    This behavior has been used by threat actors behind Dharma ransomware.
+references:
+    - https://learn.microsoft.com/en-us/windows/win32/intl/code-page-identifiers
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/mode
+    - https://strontic.github.io/xcyclopedia/library/mode.com-59D1ED51ACB8C3D50F1306FD75F20E99.html
+    - https://www.virustotal.com/gui/file/5e75ef02517afd6e8ba6462b19217dc4a5a574abb33d10eb0f2bab49d8d48c22/behavior
+author: Nasreddine Bencherchali (Nextron Systems), Joseliyo Sanchez, @Joseliyo_Jstnk
+date: 2024/01/19
+tags:
+    - attack.defense_evasion
+    - attack.t1036
+    - detection.threat_hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\mode.com'
+        - OriginalFileName: 'MODE.COM'
+    selection_cli:
+        CommandLine|contains|all:
+            - ' con '
+            - ' cp '
+            - ' select='
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: low
