@@ -6,7 +6,7 @@ references:
     - https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2019-0708
 author: Markus Neis
 date: 2019/05/15
-modified: 2023/04/20
+modified: 2024/01/22
 tags:
     - attack.lateral_movement
     - attack.t1021.001
@@ -19,12 +19,12 @@ detection:
         DestinationPort: 3389
         Initiated: 'true'
     filter_main_mstsc:
-        Image:
-            - 'C:\Windows\System32\mstsc.exe'
-            - 'C:\Windows\SysWOW64\mstsc.exe'
+        Image|endswith:
+            - ':\Windows\System32\mstsc.exe'
+            - ':\Windows\SysWOW64\mstsc.exe'
     filter_optional_dns:
         # https://github.com/SigmaHQ/sigma/pull/2249
-        Image: 'C:\Windows\System32\dns.exe'
+        Image|endswith: ':\Windows\System32\dns.exe'
         SourcePort: 53
         Protocol: 'udp'
     filter_optional_avast:
@@ -34,7 +34,7 @@ detection:
     filter_optional_sysinternals_rdcman:
         Image|endswith: '\RDCMan.exe'
     filter_optional_chrome:
-        Image: 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+        Image|endswith: ':\Program Files\Google\Chrome\Application\chrome.exe'
     filter_optional_third_party:
         - '\FSAssessment.exe'
         - '\FSDiscovery.exe'
@@ -61,6 +61,10 @@ detection:
         Image|endswith: '\Ranger\SentinelRanger.exe'
     filter_optional_firefox:
         Image: 'C:\Program Files\Mozilla Firefox\firefox.exe'
+    filter_optional_tsplus:  # Some RAS
+        Image|endswith:
+            - ':\Program Files\TSplus\Java\bin\HTML5service.exe'
+            - ':\Program Files (x86)\TSplus\Java\bin\HTML5service.exe'
     filter_optional_null:
         Image: null
     filter_optional_empty:

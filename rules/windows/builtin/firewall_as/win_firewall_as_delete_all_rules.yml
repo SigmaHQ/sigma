@@ -6,7 +6,7 @@ references:
     - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd364427(v=ws.10)
 author: frack113, Nasreddine Bencherchali (Nextron Systems)
 date: 2023/01/17
-modified: 2023/04/21
+modified: 2024/01/22
 tags:
     - attack.defense_evasion
     - attack.t1562.004
@@ -18,14 +18,11 @@ detection:
         EventID:
             - 2033 # All rules have been deleted from the Windows Defender Firewall configuration on this computer
             - 2059 # All rules have been deleted from the Windows Defender Firewall configuration on this computer. (Windows 11)
-    filter_main_generic:
-        ModifyingApplication|startswith:
-            - 'C:\Program Files\'
-            - 'C:\Program Files (x86)\'
     filter_main_svchost:
-        ModifyingApplication: 'C:\Windows\System32\svchost.exe'
+        ModifyingApplication|endswith: ':\Windows\System32\svchost.exe'
     filter_optional_msmpeng:
-        ModifyingApplication|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
-        ModifyingApplication|endswith: '\MsMpEng.exe'
+        ModifyingApplication|contains|all:
+            - ':\ProgramData\Microsoft\Windows Defender\Platform\'
+            - '\MsMpEng.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 level: high

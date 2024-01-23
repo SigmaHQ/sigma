@@ -6,10 +6,11 @@ references:
     - https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd364427(v=ws.10)
 author: frack113
 date: 2022/02/19
-modified: 2023/04/21
+modified: 2024/01/22
 tags:
     - attack.defense_evasion
     - attack.t1562.004
+    - detection.threat_hunting
 logsource:
     product: windows
     service: firewall-as
@@ -18,9 +19,20 @@ detection:
         EventID:
             - 2005 # A rule has been modified in the Windows Defender Firewall exception list (Windows 10)
             - 2073 # A rule has been modified in the Windows Defender Firewall exception list. (Windows 11)
-    filter_main_generic:
-        ModifyingApplication|startswith:
-            - 'C:\Program Files (x86)\'
-            - 'C:\Program Files\'
-    condition: selection and not 1 of filter_main_*
+    filter_optional_teams:
+        ApplicationPath|endswith: '\AppData\local\microsoft\teams\current\teams.exe'
+    filter_optional_keybase:
+        ApplicationPath|endswith: '\AppData\Local\Keybase\keybase.exe'
+    filter_optional_messenger:
+        ApplicationPath|endswith: '\AppData\Local\Programs\Messenger\Messenger.exe'
+    filter_optional_opera:
+        ApplicationPath|contains|all:
+            - ':\Users\'
+            - '\AppData\Local\Programs\Opera\'
+            - '\opera.exe'
+    filter_optional_brave:
+        ApplicationPath|contains|all:
+            - ':\Users\'
+            - '\AppData\Local\BraveSoftware\Brave-Browser\Application\brave.exe'
+    condition: selection and not 1 of filter_optional_*
 level: low
