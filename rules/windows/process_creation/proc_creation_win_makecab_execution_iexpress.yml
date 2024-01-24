@@ -1,0 +1,28 @@
+title: Makecab.exe execution through iexpress.exe
+id: c2b478fc-09bf-40b2-8768-ab3ec8d61c9a
+status: experimental
+description: |
+    Detects the execution of makecab.exe through iexpress.exe.
+    This execution is usually when a iexpress.exe execution was made to create a .CAB file instead of a PE.
+references:
+    - https://strontic.github.io/xcyclopedia/library/iexpress.exe-D594B2A33EFAFD0EABF09E3FDC05FCEA.html
+    - https://en.wikipedia.org/wiki/IExpress
+    - https://www.virustotal.com/gui/file/602f4ae507fa8de57ada079adff25a6c2a899bd25cd092d0af7e62cdb619c93c/behavior
+author: Joseliyo Sanchez, @Joseliyo_Jstnk
+date: 2024/01/24
+tags:
+    - attack.execution
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection: 
+    selection_img:
+        - Image|endswith: '\makecab.exe'
+        - OriginalFileName: 'makecab.exe'
+    selection_parent:
+        ParentImage|endswith: '\iexpress.exe'
+    condition: all of selection_*
+falsepositives:
+    - Administrators building packages using iexpress.exe
+level: medium
