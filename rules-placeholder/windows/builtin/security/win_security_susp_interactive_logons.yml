@@ -2,6 +2,8 @@ title: Interactive Logon to Server Systems
 id: 3ff152b2-1388-4984-9cd9-a323323fdadf
 status: test
 description: Detects interactive console logons to Server Systems
+references:
+    - Internal Research
 author: Florian Roth (Nextron Systems)
 date: 2017/03/17
 modified: 2023/12/15
@@ -22,10 +24,10 @@ detection:
         ComputerName|expand:
             - '%ServerSystems%'
             - '%DomainControllers%'
-    filter_main:
+    filter_main_advapi:
         LogonProcessName: 'Advapi'
         ComputerName|expand: '%Workstations%'
-    condition: selection and not filter_main
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Administrative activity via KVM or ILO board
 level: medium
