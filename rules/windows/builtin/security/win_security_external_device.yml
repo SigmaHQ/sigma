@@ -1,10 +1,12 @@
-title: External Disk Drive Or USB Storage Device
+title: External Disk Drive Or USB Storage Device Was Recognized By The System
 id: f69a87ea-955e-4fb4-adb2-bb9fd6685632
 status: test
 description: Detects external diskdrives or plugged in USB devices, EventID 6416 on Windows 10 or later
+references:
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-6416
 author: Keith Wright
 date: 2019/11/20
-modified: 2022/10/09
+modified: 2024/01/16
 tags:
     - attack.t1091
     - attack.t1200
@@ -14,12 +16,12 @@ logsource:
     product: windows
     service: security
 detection:
-    selection:
+    selection_disk:
         EventID: 6416
         ClassName: 'DiskDrive'
-    selection2:
+    selection_usb:
         DeviceDescription: 'USB Mass Storage Device'
-    condition: selection or selection2
+    condition: 1 of selection_*
 falsepositives:
-    - Legitimate administrative activity
+    - Likely
 level: low

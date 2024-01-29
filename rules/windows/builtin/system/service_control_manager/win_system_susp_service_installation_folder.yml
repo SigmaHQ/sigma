@@ -3,8 +3,10 @@ id: 5e993621-67d4-488a-b9ae-b420d08b96cb
 status: test
 description: Detects service installation in suspicious folder appdata
 author: pH-T (Nextron Systems)
+references:
+    - Internal Research
 date: 2022/03/18
-modified: 2022/10/12
+modified: 2024/01/18
 tags:
     - attack.persistence
     - attack.privilege_escalation
@@ -17,15 +19,14 @@ detection:
     selection:
         Provider_Name: 'Service Control Manager'
         EventID: 7045
-    selection_suspicious1:
         ImagePath|contains:
             - '\AppData\'
             - '\\\\127.0.0.1'
             - '\\\\localhost'
-    filter_zoom:
+    filter_optional_zoom:
         ServiceName: 'Zoom Sharing Service'
-        ImagePath|startswith: '"C:\Program Files\Common Files\Zoom\Support\CptService.exe'
-    condition: all of selection* and not 1 of filter*
+        ImagePath|contains: ':\Program Files\Common Files\Zoom\Support\CptService.exe'
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: medium
