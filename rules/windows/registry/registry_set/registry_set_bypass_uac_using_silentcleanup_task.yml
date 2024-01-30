@@ -1,13 +1,17 @@
 title: Bypass UAC Using SilentCleanup Task
 id: 724ea201-6514-4f38-9739-e5973c34f49a
 status: test
-description: There is an auto-elevated task called SilentCleanup located in %windir%\system32\cleanmgr.exe This can be abused to elevate any file with Administrator privileges without prompting UAC
+description: |
+    Detects the setting of the environement variable "windir" to a non default value.
+    Attackers often abuse this variable in order to trigger a UAC bypass via the "SilentCleanup" task.
+    The SilentCleanup task located in %windir%\system32\cleanmgr.exe is an auto-elevated task that can be abused to elevate any file with administrator privileges without prompting UAC.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1548.002/T1548.002.md#atomic-test-9---bypass-uac-using-silentcleanup-task
     - https://www.reddit.com/r/hacking/comments/ajtrws/bypassing_highest_uac_level_windows_810/
-author: frack113
+    - https://www.fortinet.com/blog/threat-research/enter-the-darkgate-new-cryptocurrency-mining-and-ransomware-campaign
+author: frack113, Nextron Systems
 date: 2022/01/06
-modified: 2023/08/17
+modified: 2024/01/30
 tags:
     - attack.privilege_escalation
     - attack.defense_evasion
@@ -18,8 +22,9 @@ logsource:
 detection:
     selection:
         TargetObject|endswith: '\Environment\windir'
-        Details|contains: '&REM'
-    condition: selection
+    filter_main_default:
+        Details: '%SystemRoot%'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high
