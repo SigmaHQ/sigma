@@ -1,0 +1,26 @@
+title: Discovery of Terminal Service Hosted by Svchost Process
+id: e83e8899-c9b2-483b-b355-5decc942b959
+status: experimental
+description: Detects the enumeration of terminal service hosted by svchost.exe process to extract plaintext RDP credentials by enumerating its process ID and dumping memory via "sc.exe" utility.
+references:
+    - https://www.n00py.io/2021/05/dumping-plaintext-rdp-credentials-from-svchost-exe/
+    - https://pentestlab.blog/tag/svchost/
+author: Swachchhanda Shrawan Poudel
+date: 2024/01/31
+tags:
+    - attack.t1003
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        - Image|endswith: '\sc.exe'
+        - OriginalFileName: 'sc.exe'
+    selection_cmd:
+        CommandLine|contains|all:
+            - 'queryex'
+            - 'termservice'
+    condition: all of selection_*
+falsepositives:
+    - Any legitimate process attempting to enumerate of terminal service hosted by svchost.exe process.
+level: informational
