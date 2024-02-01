@@ -1,13 +1,16 @@
 title: Remote Thread Creation By Uncommon Source Image
 id: 66d31e5f-52d6-40a4-9615-002d3789a119
+related:
+    - id: 02d1d718-dd13-41af-989d-ea85c7fab93f
+      type: derived
 status: experimental
-description: Detects uncommon processes creating remote threads
+description: Detects uncommon processes creating remote threads.
 references:
     - Personal research, statistical analysis
     - https://lolbas-project.github.io
 author: Perez Diego (@darkquassar), oscd.community
 date: 2019/10/27
-modified: 2023/11/11
+modified: 2024/01/17
 tags:
     - attack.privilege_escalation
     - attack.defense_evasion
@@ -18,54 +21,12 @@ logsource:
 detection:
     selection:
         SourceImage|endswith:
-            - '\bash.exe'
-            - '\cscript.exe'
-            - '\cvtres.exe'
-            - '\defrag.exe'
-            - '\dnx.exe'
-            - '\esentutl.exe'
-            - '\excel.exe'
-            - '\expand.exe'
             - '\explorer.exe'
-            - '\find.exe'
-            - '\findstr.exe'
-            - '\forfiles.exe'
-            # - '\git.exe'
-            - '\gpupdate.exe'
-            - '\hh.exe'
             - '\iexplore.exe'
-            - '\installutil.exe'
-            - '\lync.exe'
-            - '\makecab.exe'
-            - '\mDNSResponder.exe'
-            - '\monitoringhost.exe' # Loads .NET CLR by default and thus a favorite for process injection for .NET in-memory offensive tools.
-            - '\msbuild.exe'
-            - '\mshta.exe'
             - '\msiexec.exe'
-            - '\mspaint.exe'
-            - '\outlook.exe'
-            - '\ping.exe'
             - '\powerpnt.exe'
-            - '\provtool.exe'
-            - '\python.exe'
-            - '\regsvr32.exe'
-            - '\robocopy.exe'
-            - '\runonce.exe'
-            - '\sapcimc.exe'
             - '\schtasks.exe'
-            - '\smartscreen.exe'
-            - '\spoolsv.exe'
-            # - '\taskhost.exe'  # disabled due to false positives
-            - '\tstheme.exe'
-            - '\userinit.exe'
-            - '\vssadmin.exe'
-            - '\vssvc.exe'
-            - '\w3wp.exe'
             - '\winlogon.exe'
-            - '\winscp.exe'
-            - '\winword.exe'
-            - '\wmic.exe'
-            - '\wscript.exe'
     filter_main_winlogon_1:
         SourceImage|endswith: ':\Windows\System32\winlogon.exe'
         TargetImage|endswith:
@@ -74,7 +35,7 @@ detection:
             - ':\Windows\System32\csrss.exe' # multiple OS
             - ':\Windows\System32\LogonUI.exe' # multiple OS
     filter_main_winlogon_2:
-        SourceImage: 'C:\Windows\System32\winlogon.exe'
+        SourceImage|contains: ':\Windows\System32\winlogon.exe'
         TargetParentProcessId: 4
     filter_main_schtasks_conhost:
         SourceImage|endswith:
@@ -97,6 +58,19 @@ detection:
             - '\AppData\Local\'
             - ':\Program Files (x86)\'
             - ':\Program Files\'
+    filter_optional_aurora_smartconsole1:
+        SourceImage|contains: ':\Program Files\internet explorer\iexplore.exe'
+        SourceCommandLine|contains|all:
+            - 'https://'
+            - '.checkpoint.com/documents/'
+            - 'SmartConsole_OLH/'
+            - 'default.htm#cshid='
+    filter_optional_aurora_smartconsole2:
+        SourceImage|contains: ':\Program Files\internet explorer\iexplore.exe'
+        SourceParentImage|contains|all:
+            - ':\Program Files'  # x86 and not
+            - '\CheckPoint\SmartConsole\'
+            - '\SmartConsole.exe'
     filter_optional_powerpnt:
         # Raised by the following issue: https://github.com/SigmaHQ/sigma/issues/2479
         SourceImage|contains: '\Microsoft Office\'
@@ -104,5 +78,5 @@ detection:
         TargetImage|endswith: ':\Windows\System32\csrss.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
-    - Unknown
-level: high
+    - This rule is best put in testing first in order to create a baseline that reflects the data in your environment.
+level: medium

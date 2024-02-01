@@ -4,7 +4,10 @@ related:
     - id: 8e4cf0e5-aa5d-4dc3-beff-dc26917744a9
       type: derived
 status: test
-description: Well-known TAP software installation. Possible preparation for data exfiltration using tunnelling techniques
+description: |
+    Detects the installation of a well-known TAP driver service. This could be a sign of potential preparation for data exfiltration using tunnelling techniques.
+references:
+    - https://community.openvpn.net/openvpn/wiki/ManagingWindowsTAPDrivers
 author: Daniil Yugoslavskiy, Ian Davis, oscd.community
 date: 2019/10/24
 modified: 2022/11/29
@@ -14,12 +17,12 @@ tags:
 logsource:
     product: windows
     service: security
-    definition: The 'System Security Extension' audit subcategory need to be enabled to log the EID 4697
+    definition: 'Requirements: The System Security Extension audit subcategory need to be enabled to log the EID 4697'
 detection:
     selection:
         EventID: 4697
         ServiceFileName|contains: 'tap0901'
     condition: selection
 falsepositives:
-    - Legitimate OpenVPN TAP insntallation
-level: medium
+    - Legitimate OpenVPN TAP installation
+level: low

@@ -1,7 +1,9 @@
 title: Failed Logon From Public IP
 id: f88e112a-21aa-44bd-9b01-6ee2a2bbbed1
 status: test
-description: A login from a public IP can indicate a misconfigured firewall or network boundary.
+description: Detects a failed logon attempt from a public IP. A login from a public IP can indicate a misconfigured firewall or network boundary.
+references:
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4625
 author: NVISO
 date: 2020/05/06
 modified: 2023/01/11
@@ -17,9 +19,9 @@ logsource:
 detection:
     selection:
         EventID: 4625
-    filter_ip_unknown:
+    filter_main_ip_unknown:
         IpAddress|contains: '-'
-    filter_ip_privatev4:
+    filter_main_ip_privatev4:
         IpAddress|startswith:
             - '10.' # 10.0.0.0/8
             - '192.168.' # 192.168.0.0/16
@@ -41,12 +43,12 @@ detection:
             - '172.31.'
             - '127.' # 127.0.0.0/8
             - '169.254.' # 169.254.0.0/16
-    filter_ip_privatev6:
+    filter_main_ip_privatev6:
         - IpAddress: '::1' # loopback
         - IpAddress|startswith:
               - 'fe80::' # link-local
               - 'fc00::' # unique local
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Legitimate logon attempts over the internet
     - IPv4-to-IPv6 mapped IPs

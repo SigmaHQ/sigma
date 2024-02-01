@@ -1,27 +1,30 @@
-title: Exfiltration and Tunneling Tools Execution
+title: Tunneling Tool Execution
 id: c75309a3-59f8-4a8d-9c2c-4c927ad50555
 status: test
-description: Execution of well known tools for data exfiltration and tunneling
+description: Detects the execution of well known tools that can be abused for data exfiltration and tunneling.
 author: Daniil Yugoslavskiy, oscd.community
+references:
+    - https://www.microsoft.com/en-us/security/blog/2022/07/26/malicious-iis-extensions-quietly-open-persistent-backdoors-into-servers/
 date: 2019/10/24
-modified: 2021/11/27
+modified: 2024/01/18
 tags:
     - attack.exfiltration
     - attack.command_and_control
     - attack.t1041
     - attack.t1572
     - attack.t1071.001
+    - detection.threat_hunting
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
         Image|endswith:
+            - '\httptunnel.exe'
             - '\plink.exe'
             - '\socat.exe'
             - '\stunnel.exe'
-            - '\httptunnel.exe'
     condition: selection
 falsepositives:
-    - Legitimate Administrator using tools
+    - Legitimate administrators using one of these tools
 level: medium

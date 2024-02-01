@@ -6,7 +6,7 @@ references:
     - https://twitter.com/mrd0x/status/1481630810495139841?s=12
 author: Tim Shelton, Florian Roth (Nextron Systems), Yassine Oukessou
 date: 2022/01/13
-modified: 2023/12/13
+modified: 2024/01/26
 tags:
     - attack.defense_evasion
     - attack.t1218.011
@@ -22,15 +22,29 @@ detection:
     filter_main_empty:
         CommandLine: ''
     filter_main_known_extension:
-        CommandLine|contains:
-            - '.cpl'
-            - '.dll'
-            - '.inf'
+        - CommandLine|contains:
+              - '.cpl '
+              - '.cpl,'
+              - '.dll '
+              - '.dll,'
+              - '.inf '
+              - '.inf,'
+        - CommandLine|endswith:
+              - '.cpl'
+              - '.cpl"'
+              - '.dll'
+              - '.dll"'
+              - '.inf'
+              - '.inf"'
+              - ".cpl'"
+              - ".dll'"
+              - ".inf'"
     filter_main_localserver:
         CommandLine|contains: ' -localserver '
     filter_main_zzzzInvokeManagedCustomActionOutOfProc:
+        ParentImage|endswith: '\msiexec.exe'
         CommandLine|contains|all:
-            - 'C:\Windows\Installer\MSI'
+            - ':\Windows\Installer\'
             - '.tmp'
             - 'zzzzInvokeManagedCustomActionOutOfProc'
     condition: selection and not 1 of filter_main_*

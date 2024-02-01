@@ -17,9 +17,11 @@ references:
     - https://www.virustotal.com/gui/file/d6f6bc10ae0e634ed4301d584f61418cee18e5d58ad9af72f8aa552dc4aaeca3/behavior
 author: Joseliyo Sanchez, @Joseliyo_Jstnk
 date: 2023/12/19
+updated: 2024/01/15
 tags:
     - attack.discovery
     - attack.t1082
+    - detection.threat_hunting
 logsource:
     category: process_creation
     product: windows
@@ -55,8 +57,10 @@ detection:
             - 'smbiosbiosversion'
             - 'version'
             - 'videomodedescription'
-    condition: all of selection_*
+    filter_optional_vmtools:
+        ParentCommandLine|contains: '\VMware\VMware Tools\serviceDiscovery\scripts\'
+    condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
-    - Unknown
-# Note: Might be upgraded to medium after some time
+    - VMWare Tools serviceDiscovery scripts
+# Note: Might be upgraded to a medium detection rules after some time
 level: low

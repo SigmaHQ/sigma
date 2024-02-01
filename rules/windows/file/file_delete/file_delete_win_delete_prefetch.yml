@@ -2,9 +2,12 @@ title: Prefetch File Deleted
 id: 0a1f9d29-6465-4776-b091-7f43b26e4c89
 status: test
 description: Detects the deletion of a prefetch file which may indicate an attempt to destroy forensic evidence
+references:
+    - Internal Research
+    - https://www.group-ib.com/blog/hunting-for-ttps-with-prefetch-files/
 author: Cedric MAURUGEON
 date: 2021/09/29
-modified: 2023/02/15
+modified: 2024/01/25
 tags:
     - attack.defense_evasion
     - attack.t1070.004
@@ -13,14 +16,14 @@ logsource:
     category: file_delete
 detection:
     selection:
-        TargetFilename|startswith: 'C:\Windows\Prefetch\'
+        TargetFilename|contains: ':\Windows\Prefetch\'
         TargetFilename|endswith: '.pf'
-    filter:
-        Image: 'C:\windows\system32\svchost.exe'
+    filter_main_svchost:
+        Image|endswith: ':\windows\system32\svchost.exe'
         User|contains: # covers many language settings
             - 'AUTHORI'
             - 'AUTORI'
-    condition: selection and not filter
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high

@@ -9,7 +9,7 @@ references:
     - https://blog.redbluepurple.io/offensive-research/bypassing-injection-detection
 author: Florian Roth (Nextron Systems)
 date: 2022/03/16
-modified: 2023/10/19
+modified: 2024/01/22
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
@@ -22,7 +22,6 @@ detection:
         TargetImage|endswith:
             - '\calc.exe'
             - '\calculator.exe'
-            - '\explorer.exe'
             - '\mspaint.exe'
             - '\notepad.exe'
             - '\ping.exe'
@@ -40,19 +39,9 @@ detection:
         SourceImage|endswith: ':\Program Files\VMware\VMware Tools\vmtoolsd.exe'
         StartFunction: 'GetCommandLineW'
         TargetImage|endswith:
-            - ':\Windows\explorer.exe'
             - ':\Windows\System32\notepad.exe'
             - ':\Windows\System32\spoolsv.exe'
-    filter_main_rundll32:
-        SourceImage|endswith: ':\Windows\System32\rundll32.exe'
-        TargetImage|endswith: ':\Windows\explorer.exe'
-        StartFunction:
-            - 'LoadLibraryW'
-            - 'FreeLibrary'
-    filter_optional_winzip:
-        SourceImage|endswith: ':\Program Files\WinZip\FAHWindow64.exe'
-        TargetImage|endswith: ':\Windows\explorer.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
-level: high
+level: medium
