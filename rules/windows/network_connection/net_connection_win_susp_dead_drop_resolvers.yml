@@ -1,7 +1,9 @@
 title: Potential Dead Drop Resolvers
 id: 297ae038-edc2-4b2e-bb3e-7c5fc94dd5c7
 status: test
-description: Detects an executable, which is not an internet browser, making DNS request to legit popular websites, which were seen to be used as dead drop resolvers in previous attacks.
+description: |
+    Detects an executable, which is not an internet browser or known application, initiating network connections to legit popular websites, which were seen to be used as dead drop resolvers in previous attacks.
+    In this context attackers leverage known websites such as "facebook", "youtube", etc. In order to pass through undetected.
 references:
     - https://content.fireeye.com/apt-41/rpt-apt41
     - https://securelist.com/the-tetrade-brazilian-banking-malware/97779/
@@ -182,7 +184,9 @@ detection:
         Image|startswith:
             - 'C:\Program Files (x86)\Dropbox\Client\'
             - 'C:\Program Files\Dropbox\Client\'
-        Image|endswith: '\Dropbox.exe'
+        Image|endswith:
+            - '\Dropbox.exe'
+            - '\DropboxInstaller.exe'
         DestinationHostname|endswith: 'dropbox.com'
     filter_main_mega:
         Image|contains: '\AppData\Local\MEGAsync\'
@@ -205,4 +209,5 @@ detection:
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - One might need to exclude other internet browsers found in it's network or other applications like ones mentioned above from Microsoft Defender.
+    - Ninite contacting githubusercontent.com
 level: high

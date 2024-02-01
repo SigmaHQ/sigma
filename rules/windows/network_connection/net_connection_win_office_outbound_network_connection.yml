@@ -1,24 +1,28 @@
-title: Dllhost.EXE Initiated Network Connection With Public IP Address
-id: cfed2f44-16df-4bf3-833a-79405198b277
+title: Office Application Initiated Network Connection
+id: 75e33ce3-ae32-4dcc-9aa8-a2a3029d6f84
 status: test
-description: Detects dllhost initiating a network communication with a public IP address
+description: |
+    Detects an office application (Word, Excel, PowerPoint)  that initiate a network connection to a non-private IP addresses.
+    This rule aims to detect traffic similar to one seen exploited in CVE-2021-42292.
+    This rule will require an initial baseline and tuning that is specific to your organization.
 references:
-    - https://redcanary.com/blog/child-processes/
-    - https://nasbench.medium.com/what-is-the-dllhost-exe-process-actually-running-ef9fe4c19c08
-author: bartblaze
-date: 2020/07/13
+    - https://corelight.com/blog/detecting-cve-2021-42292
+author: Christopher Peacock '@securepeacock', SCYTHE '@scythe_io', Florian Roth (Nextron Systems), Tim Shelton
+date: 2021/11/10
 modified: 2024/01/31
 tags:
-    - attack.defense_evasion
-    - attack.t1218
     - attack.execution
-    - attack.t1559.001
+    - attack.t1203
 logsource:
     category: network_connection
     product: windows
 detection:
     selection:
-        Image|endswith: '\dllhost.exe'
+        Image|endswith:
+            - '\excel.exe'
+            - '\powerpnt.exe'
+            - '\winword.exe'
+            - '\wordview.exe'
         Initiated: 'true'
     filter_main_ipv4:
         DestinationIp|startswith:
@@ -40,8 +44,7 @@ detection:
             - '172.29.'
             - '172.30.'
             - '172.31.'
-            - '169.254.'  # link-local address
-            - '127.'  # loopback address
+            - '127.0.0.1'
     filter_main_ipv6:
         DestinationIp|startswith:
             - '::1'  # IPv6 loopback variant
@@ -67,7 +70,9 @@ detection:
             - '51.105.'
             - '52.239.'
             - '204.79.197'
-    condition: selection and not 1 of filter_main_*
+    condition: selection and not filter
 falsepositives:
-    - Communication to other corporate systems that use IP addresses from public address spaces
+    - You may have to tune certain domains out that Excel may call out to, such as microsoft or other business use case domains.
+    - Office documents commonly have templates that refer to external addresses, like "sharepoint.ourcompany.com" may have to be tuned.
+    - It is highly recommended to baseline your activity and tune out common business use cases.
 level: medium

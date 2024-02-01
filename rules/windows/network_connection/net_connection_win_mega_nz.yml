@@ -1,13 +1,15 @@
 title: Communication To Mega.nz
 id: fdeebdf0-9f3f-4d08-84a6-4c4d13e39fe4
 status: test
-description: Detects an executable accessing mega.co.nz, which could be a sign of forbidden file sharing use of data exfiltration by malicious actors
+description: |
+    Detects an executable other than MEGA initiating a network connection to "api.mega.co.nz".
+    Attackers were seen abusing file sharing websites similar to "mega.nz" in order to upload/download additional payloads.
 references:
     - https://megatools.megous.com/
     - https://www.mandiant.com/resources/russian-targeting-gov-business
 author: Florian Roth (Nextron Systems)
 date: 2021/12/06
-modified: 2022/12/25
+modified: 2024/02/01
 tags:
     - attack.exfiltration
     - attack.t1567.001
@@ -18,7 +20,16 @@ detection:
     selection:
         Initiated: 'true'
         DestinationHostname|endswith: 'api.mega.co.nz'
-    condition: selection
+    filter_main_mega:
+        Image|endswith:
+            # Note: This is a basic/best effort filter in order to avoid FP with the MEGA installer and executable.
+            #       In practice please apply exact path to avoid basic path bypass techniques.
+            - '\MEGAsync.exe'
+            - '\MEGAsyncSetup32_*RC.exe' # Beta versions
+            - '\MEGAsyncSetup32.exe' # Installers 32bit
+            - '\MEGAsyncSetup64.exe' # Installers 64bit
+            - '\MEGAupdater.exe'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Legitimate use of mega.nz uploaders and tools
 level: high
