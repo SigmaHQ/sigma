@@ -43,6 +43,7 @@ detection:
             - 'imgur.com'
             - 'livejournal.com'
             - 'mediafire.com'
+            - 'mega.co.nz'
             - 'mega.nz'
             - 'onedrive.com'
             - 'paste.ee'
@@ -99,8 +100,15 @@ detection:
             - '\msedge.exe'
             - '\msedgewebview2.exe'
     filter_main_safari:
+        Image|contains:
+            - 'C:\Program Files (x86)\Safari\'
+            - 'C:\Program Files\Safari\'
         Image|endswith: '\safari.exe'
     filter_main_defender:
+        Image|contains:
+            - 'C:\Program Files\Windows Defender Advanced Threat Protection\'
+            - 'C:\Program Files\Windows Defender\'
+            - 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
         Image|endswith:
             - '\MsMpEng.exe' # Microsoft Defender executable
             - '\MsSense.exe' # Windows Defender Advanced Threat Protection Service Executable
@@ -110,8 +118,8 @@ detection:
             - 'C:\Program Files (x86)\PRTG Network Monitor\PRTG Probe.exe'
             - 'C:\Program Files\PRTG Network Monitor\PRTG Probe.exe'
     filter_main_brave:
-        Image|endswith: '\brave.exe'
         Image|startswith: 'C:\Program Files\BraveSoftware\'
+        Image|endswith: '\brave.exe'
     filter_main_maxthon:
         Image|contains: '\AppData\Local\Maxthon\'
         Image|endswith: '\maxthon.exe'
@@ -131,8 +139,9 @@ detection:
             - 'C:\Program Files\Naver\Naver Whale\'
             - 'C:\Program Files (x86)\Naver\Naver Whale\'
         Image|endswith: '\whale.exe'
-    filter_main_tor:
-        Image|contains: '\Tor Browser\'
+    # Note: The TOR browser shouldn't be something you allow in your corporate network.
+    # filter_main_tor:
+    #     Image|contains: '\Tor Browser\'
     filter_main_whaterfox:
         Image|startswith:
             - 'C:\Program Files\Waterfox\'
@@ -171,7 +180,8 @@ detection:
         Image|startswith:
             - 'C:\Program Files (x86)\WindowsApps\'
             - 'C:\Program Files\WindowsApps\'
-        Image|endswith: 'WhatsApp.exe'
+        Image|endswith: '\WhatsApp.exe'
+        DestinationHostname|endswith: 'facebook.com'
     filter_main_telegram:
         Image|contains: '\AppData\Roaming\Telegram Desktop\'
         Image|endswith: '\Telegram.exe'
@@ -189,11 +199,19 @@ detection:
             - '\DropboxInstaller.exe'
         DestinationHostname|endswith: 'dropbox.com'
     filter_main_mega:
-        Image|contains: '\AppData\Local\MEGAsync\'
-        Image|endswith: 'MEGAsync.exe'
-        DestinationHostname|endswith: 'mega.nz'
+        Image|endswith:
+            # Note: This is a basic/best effort filter in order to avoid FP with the MEGA installer and executable.
+            #       In practice please apply exact path to avoid basic path bypass techniques.
+            - '\MEGAsync.exe'
+            - '\MEGAsyncSetup32_*RC.exe' # Beta versions
+            - '\MEGAsyncSetup32.exe' # Installers 32bit
+            - '\MEGAsyncSetup64.exe' # Installers 64bit
+            - '\MEGAupdater.exe'
+        DestinationHostname|endswith:
+            - 'mega.co.nz'
+            - 'mega.nz'
     filter_main_googledrive:
-        Image|startswith:
+        Image|contains:
             - 'C:\Program Files\Google\Drive File Stream\'
             - 'C:\Program Files (x86)\Google\Drive File Stream\'
         Image|endswith: 'GoogleDriveFS.exe'
