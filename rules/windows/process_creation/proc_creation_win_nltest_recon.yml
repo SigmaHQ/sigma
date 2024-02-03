@@ -20,7 +20,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/5360c9d9ffa3b25f6495f7a16e267b719eba2c37/atomics/T1482/T1482.md#atomic-test-2---windows---discover-domain-trusts-with-nltest
 author: Craig Young, oscd.community, Georg Lauenstein
 date: 2021/07/24
-modified: 2023/02/04
+modified: 2023/12/15
 tags:
     - attack.discovery
     - attack.t1016
@@ -32,24 +32,20 @@ detection:
     selection_nltest:
         - Image|endswith: '\nltest.exe'
         - OriginalFileName: 'nltestrk.exe'
-    selection_recon1:
-        CommandLine|contains|all:
-            - '/server'
-            - '/query'
-    selection_recon2:
-        CommandLine|contains:
-            - '/dclist:'
-            - '/parentdomain'
-            - '/domain_trusts'
-            - '/all_trusts' # Flag for /domain_trusts
-            - '/trusted_domains'
-            - '/user'
-    condition: selection_nltest and 1 of selection_recon*
-fields:
-    - Image
-    - User
-    - CommandLine
-    - ParentCommandLine
+    selection_recon:
+        - CommandLine|contains|all:
+              - 'server'
+              - 'query'
+        - CommandLine|contains:
+              - '/user'
+              - 'all_trusts' # Flag for /domain_trusts
+              - 'dclist:'
+              - 'dnsgetdc:'
+              - 'domain_trusts'
+              - 'dsgetdc:'
+              - 'parentdomain'
+              - 'trusted_domains'
+    condition: all of selection_*
 falsepositives:
     - Legitimate administration use but user and host must be investigated
-level: high
+level: medium

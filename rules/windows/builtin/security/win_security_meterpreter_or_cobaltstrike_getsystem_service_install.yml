@@ -8,9 +8,9 @@ description: Detects the use of getsystem Meterpreter/Cobalt Strike command by d
 references:
     - https://speakerdeck.com/heirhabarov/hunting-for-privilege-escalation-in-windows-environment
     - https://blog.cobaltstrike.com/2014/04/02/what-happens-when-i-type-getsystem/
-author: Teymur Kheirkhabarov, Ecco, Florian Roth
+author: Teymur Kheirkhabarov, Ecco, Florian Roth (Nextron Systems)
 date: 2019/10/26
-modified: 2022/11/29
+modified: 2023/11/15
 tags:
     - attack.privilege_escalation
     - attack.t1134.001
@@ -20,38 +20,28 @@ logsource:
     service: security
     definition: The 'System Security Extension' audit subcategory need to be enabled to log the EID 4697
 detection:
-    selection_id:
+    selection_eid:
         EventID: 4697
-    selection:
+    selection_cli_cmd:
         # meterpreter getsystem technique 1: cmd.exe /c echo 559891bb017 > \\.\pipe\5e120a
-        - ServiceFileName|contains|all:
-              - 'cmd'
-              - '/c'
-              - 'echo'
-              - '\pipe\'
         # cobaltstrike getsystem technique 1: %COMSPEC% /c echo 559891bb017 > \\.\pipe\5e120a
-        - ServiceFileName|contains|all:
-              - '%COMSPEC%'
-              - '/c'
-              - 'echo'
-              - '\pipe\'
         # cobaltstrike getsystem technique 1b (expanded %COMSPEC%): %COMSPEC% /c echo 559891bb017 > \\.\pipe\5e120a
-        - ServiceFileName|contains|all:
-              - 'cmd.exe'
-              - '/c'
-              - 'echo'
-              - '\pipe\'
+        ServiceFileName|contains|all:
+            - '/c'
+            - 'echo'
+            - '\pipe\'
+        ServiceFileName|contains:
+            - 'cmd'
+            - '%COMSPEC%'
+    selection_cli_rundll:
         # meterpreter getsystem technique 2: rundll32.exe C:\Users\test\AppData\Local\Temp\tmexsn.dll,a /p:tmexsn
-        - ServiceFileName|contains|all:
-              - 'rundll32'
-              - '.dll,a'
-              - '/p:'
-    condition: selection_id and selection
-fields:
-    - ComputerName
-    - SubjectDomainName
-    - SubjectUserName
-    - ServiceFileName
+        ServiceFileName|contains|all:
+            - 'rundll32'
+            - '.dll,a'
+            - '/p:'
+    selection_cli_share:
+        ServiceFileName|startswith: '\\\\127.0.0.1\\ADMIN$\'  # https://twitter.com/svch0st/status/1413688851877416960?lang=en
+    condition: selection_eid and 1 of selection_cli_*
 falsepositives:
-    - Highly unlikely
-level: critical
+    - Unlikely
+level: high

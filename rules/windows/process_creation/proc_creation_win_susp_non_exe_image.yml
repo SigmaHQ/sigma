@@ -1,12 +1,14 @@
 title: Execution of Suspicious File Type Extension
 id: c09dad97-1c78-4f71-b127-7edb2b8e491a
 status: experimental
-description: Checks whether the image specified in a process creation event doesn't refer to an .exe file (caused by process ghosting or other unorthodox methods to start a process)
+description: |
+    Detects whether the image specified in a process creation event doesn't refer to an ".exe" (or other known executable extension) file. This can be caused by process ghosting or other unorthodox methods to start a process.
+    This rule might require some initial baselining to align with some third party tooling in the user environment.
 references:
     - https://pentestlaboratories.com/2021/12/08/process-ghosting/
 author: Max Altgelt (Nextron Systems)
 date: 2021/12/09
-modified: 2023/10/10
+modified: 2023/11/23
 tags:
     - attack.defense_evasion
 logsource:
@@ -15,9 +17,12 @@ logsource:
 detection:
     known_image_extension:
         Image|endswith:
+            - '.bin'
+            - '.cgi'
+            - '.com'
             - '.exe'
-            - '.tmp' # sadly many installers use this extension
             - '.scr'
+            - '.tmp' # sadly many installers use this extension
     filter_main_image: # Windows utilities without extension
         Image:
             - 'System'
@@ -25,86 +30,51 @@ detection:
             - 'MemCompression'
             - 'vmmem'
     filter_main_msi_installers:
-        Image|startswith: 'C:\Windows\Installer\MSI'
+        Image|contains: ':\Windows\Installer\MSI'
     filter_main_driver_store:
-        Image|startswith: 'C:\Windows\System32\DriverStore\FileRepository\'
+        Image|contains: ':\Windows\System32\DriverStore\FileRepository\'
     filter_main_msi_rollbackfiles:
-        Image|startswith: 'C:\Config.Msi\'
+        Image|contains: ':\Config.Msi\'
         Image|endswith:
             - '.rbf'
             - '.rbs'
-    filter_main_windows_helper:
-        ParentImage|startswith: C:\Windows\Temp\
-        Image|startswith: 'C:\Windows\Temp\Helper\'
-    filter_main_com:
-        Image|startswith:
-            - 'C:\Windows\System32\'
-            - 'C:\Windows\SysWOW64\'
-        Image|endswith: '.com'
+    filter_main_windows_temp:
+        - ParentImage|contains: ':\Windows\Temp\'
+        - Image|contains: ':\Windows\Temp\'
     filter_main_deleted:
-        Image|startswith: 'C:\$Extend\$Deleted\'
-    filter_optional_empty:
+        Image|contains: ':\$Extend\$Deleted\'
+    filter_main_empty:
         Image:
             - '-'
             - ''
-    filter_optional_null:
+    filter_main_null:
         Image: null
     filter_optional_avira:
-        ParentImage|startswith: 'C:\ProgramData\Avira\'
+        ParentImage|contains: ':\ProgramData\Avira\'
     filter_optional_nvidia:
         Image|contains: 'NVIDIA\NvBackend\'
         Image|endswith: '.dat'
-    filter_optional_winscp:
-        Image|endswith: '\WinSCP.com'
-    filter_optional_vscode:
-        Image|contains|all:
-            - 'C:\Users\'
-            - '\AppData\'
-            - '.tmp'
-            - 'CodeSetup'
-    filter_optional_libreoffice:
-        Image|endswith: '\program\soffice.bin'
-    filter_optional_openoffice:
-        Image|endswith: '\program\unopkg.bin'
-    filter_optional_emc_networker:
-        Image:
-            - 'C:\Program Files\EMC NetWorker\Management\GST\apache\cgi-bin\update_jnlp.cgi'
-            - 'C:\Program Files (x86)\EMC NetWorker\Management\GST\apache\cgi-bin\update_jnlp.cgi'
     filter_optional_winpakpro:
-        Image|startswith:
-            - 'C:\Program Files (x86)\WINPAKPRO\'
-            - 'C:\Program Files\WINPAKPRO\'
+        Image|contains:
+            - ':\Program Files (x86)\WINPAKPRO\'
+            - ':\Program Files\WINPAKPRO\'
         Image|endswith: '.ngn'
     filter_optional_myq_server:
-        Image:
-            - 'C:\Program Files (x86)\MyQ\Server\pcltool.dll'
-            - 'C:\Program Files\MyQ\Server\pcltool.dll'
-    filter_optional_visualstudio:
-        Image|startswith:
-            - 'C:\Program Files\Microsoft Visual Studio\'
-            - 'C:\Program Files (x86)\Microsoft Visual Studio'
-        Image|endswith: '.com'
+        Image|endswith:
+            - ':\Program Files (x86)\MyQ\Server\pcltool.dll'
+            - ':\Program Files\MyQ\Server\pcltool.dll'
     filter_optional_wsl:
         Image|contains|all:
             - '\AppData\Local\Packages\'
             - '\LocalState\rootfs\'
     filter_optional_lzma_exe:
         Image|endswith: '\LZMA_EXE'
-    filter_optional_dell_dock:
-        ParentImage|startswith: 'C:\Windows\Temp\'
-        ParentImage|endswith: '\TBT_Dock_Firmware\GetDockVer32W.exe'
-    filter_optional_firefox_crashreporter:
-        Image|startswith: 'C:\Program Files\Mozilla Firefox\tobedeleted\'
-    filter_optional_office_c2r:
-        ParentImage: 'C:\Windows\UUS\amd64\MoUsoCoreWorker.exe'
-        Image|startswith: 'C:\$Extend\$Deleted\'
-        CommandLine|contains|all:
-            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\OfficeC2RClient.exe'
-            - '/update UPDATEORCHESTRATOR displaylevel=False'
+    filter_optional_firefox:
+        Image|contains: ':\Program Files\Mozilla Firefox\'
     filter_optional_docker:
         ParentImage: 'C:\Windows\System32\services.exe'
         Image|endswith: 'com.docker.service'
     condition: not known_image_extension and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
-level: high
+level: medium

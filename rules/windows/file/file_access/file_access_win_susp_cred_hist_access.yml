@@ -9,7 +9,7 @@ references:
     - https://www.passcape.com/windows_password_recovery_dpapi_credhist
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/10/17
-modified: 2023/09/15
+modified: 2023/12/18
 tags:
     - attack.credential_access
     - attack.t1555.004
@@ -20,15 +20,15 @@ logsource:
 detection:
     selection:
         FileName|endswith: '\Microsoft\Protect\CREDHIST'
-    filter_system_folders:
-        Image|startswith:
-            - 'C:\Program Files\'
-            - 'C:\Program Files (x86)\'
-            - 'C:\Windows\system32\'
-            - 'C:\Windows\SysWOW64\'
-    filter_processes:
-        Image: 'C:\Windows\explorer.exe'
-    condition: selection and not 1 of filter_*
+    filter_main_system_folders:
+        Image|contains:
+            - ':\Program Files\'
+            - ':\Program Files (x86)\'
+            - ':\Windows\system32\'
+            - ':\Windows\SysWOW64\'
+    filter_main_explorer:
+        Image|endswith: ':\Windows\explorer.exe'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 # Increase level after false positives filters are good enough

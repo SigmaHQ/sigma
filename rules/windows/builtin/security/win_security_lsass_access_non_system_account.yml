@@ -1,4 +1,4 @@
-title: LSASS Access from Non System Account
+title: LSASS Access From Non System Account
 id: 962fe167-e48d-4fd6-9974-11e5b9a5d6d1
 status: test
 description: Detects potential mimikatz-like tools accessing LSASS from non system account
@@ -6,7 +6,7 @@ references:
     - https://threathunterplaybook.com/hunts/windows/170105-LSASSMemoryReadAccess/notebook.html
 author: Roberto Rodriguez @Cyb3rWard0g
 date: 2019/06/20
-modified: 2022/11/13
+modified: 2023/12/11
 tags:
     - attack.credential_access
     - attack.t1003.001
@@ -19,49 +19,39 @@ detection:
             - 4663
             - 4656
         AccessMask:
-            - '0x40'
-            - '0x1400'
-            # - '0x1000'  # minimum access requirements to query basic info from service
             - '0x100000'
-            - '0x1410'    # car.2019-04-004
             - '0x1010'    # car.2019-04-004
+            - '0x1400'
+            - '0x1410'    # car.2019-04-004
+            - '0x1418'    # car.2019-04-004
             - '0x1438'    # car.2019-04-004
             - '0x143a'    # car.2019-04-004
-            - '0x1418'    # car.2019-04-004
             - '0x1f0fff'
             - '0x1f1fff'
             - '0x1f2fff'
             - '0x1f3fff'
-            - 40
-            - 1400
-            - 1000
-            - 100000
-            - 1410    # car.2019-04-004
-            - 1010    # car.2019-04-004
-            - 1438    # car.2019-04-004
+            - '0x40'
             - '143a'    # car.2019-04-004
-            - 1418    # car.2019-04-004
             - '1f0fff'
             - '1f1fff'
             - '1f2fff'
             - '1f3fff'
+            # - '0x1000'  # minimum access requirements to query basic info from service
         ObjectType: 'Process'
         ObjectName|endswith: '\lsass.exe'
-    filter1:
+    filter_main_service_account:
         SubjectUserName|endswith: '$'
-    filter2:
-        ProcessName|startswith: 'C:\Program Files'  # too many false positives with legitimate AV and EDR solutions
-    filter3:
+    filter_main_generic:
+        ProcessName|contains:
+            # Legitimate AV and EDR solutions
+            - ':\Program Files\'
+            - ':\Program Files (x86)\'
+    filter_main_wmiprvse:
         ProcessName: 'C:\Windows\System32\wbem\WmiPrvSE.exe'
         AccessMask: '0x1410'
-    filter_games:
+    filter_optional_steam:
         ProcessName|contains: '\SteamLibrary\steamapps\'
-    condition: selection and not 1 of filter*
-fields:
-    - ComputerName
-    - ObjectName
-    - SubjectUserName
-    - ProcessName
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
-level: high
+level: medium

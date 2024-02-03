@@ -1,12 +1,12 @@
 title: Powershell Install a DLL in System Directory
 id: 63bf8794-9917-45bc-88dd-e1b5abc0ecfd
 status: test
-description: Uses PowerShell to install/copy a a file into a system directory such as "System32" or "SysWOW64"
+description: Uses PowerShell to install/copy a file into a system directory such as "System32" or "SysWOW64"
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1556.002/T1556.002.md#atomic-test-1---install-and-register-password-filter-dll
-author: frack113, Nasreddine Bencherchali
+author: frack113, Nasreddine Bencherchali (Nextron Systems)
 date: 2021/12/27
-modified: 2022/10/20
+modified: 2024/01/22
 tags:
     - attack.credential_access
     - attack.t1556.002
@@ -15,15 +15,9 @@ logsource:
     category: ps_script
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
-    selection_copy:
-        ScriptBlockText|contains|all:
-            - 'Copy-Item '
-            - '-Destination '
-    selection_paths:
-        ScriptBlockText|contains:
-            - '\Windows\System32'
-            - '\Windows\SysWOW64'
-    condition: all of selection*
+    selection:
+        ScriptBlockText|re: '(Copy-Item|cpi) .{2,128} -Destination .{1,32}\\Windows\\(System32|SysWOW64)'
+    condition: selection
 falsepositives:
     - Unknown
 level: high

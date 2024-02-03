@@ -1,0 +1,26 @@
+title: Cloudflared Tunnels Related DNS Requests
+id: a1d9eec5-33b2-4177-8d24-27fe754d0812
+status: experimental
+description: Detects DNS query requests to Cloudflared tunnels domains.
+references:
+    - https://www.guidepointsecurity.com/blog/tunnel-vision-cloudflared-abused-in-the-wild/
+    - Internal Research
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/12/20
+tags:
+    - attack.command_and_control
+    - attack.t1071.001
+logsource:
+    category: dns_query
+    product: windows
+detection:
+    selection:
+        QueryName|endswith:
+            - '.v2.argotunnel.com'
+            - 'protocol-v2.argotunnel.com'
+            - 'trycloudflare.com'
+            - 'update.argotunnel.com'
+    condition: selection
+falsepositives:
+    - Legitimate use of cloudflare tunnels will also trigger this.
+level: medium

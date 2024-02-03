@@ -5,6 +5,9 @@ related:
       type: derived
 status: test
 description: Detects suspicious PowerShell download command
+references:
+    - https://learn.microsoft.com/en-us/dotnet/api/system.net.webclient.downloadstring?view=net-8.0
+    - https://learn.microsoft.com/en-us/dotnet/api/system.net.webclient.downloadfile?view=net-8.0
 author: Florian Roth (Nextron Systems)
 date: 2017/03/05
 modified: 2022/12/02
@@ -21,7 +24,9 @@ detection:
     download:
         ScriptBlockText|contains:
             - '.DownloadFile('
+            - '.DownloadFileAsync('
             - '.DownloadString('
+            - '.DownloadStringAsync('
     condition: webclient and download
 falsepositives:
     - PowerShell scripts that download content from the Internet

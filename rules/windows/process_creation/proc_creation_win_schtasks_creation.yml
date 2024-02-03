@@ -1,10 +1,12 @@
-title: Scheduled Task Creation
+title: Scheduled Task Creation Via Schtasks.EXE
 id: 92626ddd-662c-49e3-ac59-f6535f12d189
 status: test
-description: Detects the creation of scheduled tasks in user session
+description: Detects the creation of scheduled tasks by user accounts via the "schtasks" utility.
+references:
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/schtasks-create
 author: Florian Roth (Nextron Systems)
 date: 2019/01/16
-modified: 2022/10/09
+modified: 2024/01/18
 tags:
     - attack.execution
     - attack.persistence
@@ -20,14 +22,11 @@ detection:
     selection:
         Image|endswith: '\schtasks.exe'
         CommandLine|contains: ' /create '
-    filter:
+    filter_main_system_user:
         User|contains: # covers many language settings
             - 'AUTHORI'
             - 'AUTORI'
-    condition: selection and not filter
-fields:
-    - CommandLine
-    - ParentCommandLine
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Administrative activity
     - Software installation

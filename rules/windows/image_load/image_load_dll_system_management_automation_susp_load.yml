@@ -6,13 +6,15 @@ related:
     - id: fe6e002f-f244-4278-9263-20e4b593827f
       type: obsoletes
 status: experimental
-description: Detects loading of essential DLLs used by PowerShell, but not by the process powershell.exe. Detects behaviour similar to meterpreter's "load powershell" extension.
+description: |
+    Detects loading of essential DLLs used by PowerShell by non-PowerShell process.
+    Detects behavior similar to meterpreter's "load powershell" extension.
 references:
     - https://adsecurity.org/?p=2921
     - https://github.com/p3nt4/PowerShdll
 author: Tom Kern, oscd.community, Natalia Shornikova, Tim Shelton, Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 date: 2019/11/14
-modified: 2023/05/31
+modified: 2024/01/17
 tags:
     - attack.t1059.001
     - attack.execution
@@ -61,11 +63,13 @@ detection:
     filter_optional_citrix:
         Image|endswith: '\Citrix\ConfigSync\ConfigSyncRun.exe'
     filter_optional_vs:
-        Image|startswith:
-            - 'C:\Program Files (x86)\Microsoft Visual Studio\'
-            - 'C:\Program Files\Microsoft Visual Studio\'
+        Image|contains:
+            - ':\Program Files (x86)\Microsoft Visual Studio\'
+            - ':\Program Files\Microsoft Visual Studio\'
+    filter_optional_chocolatey:
+        Image|contains: ':\ProgramData\chocolatey\choco.exe'
     filter_optional_nextron:
-        Image|startswith: 'C:\Windows\Temp\asgard2-agent\'
+        Image|contains: ':\Windows\Temp\asgard2-agent\'
         Image|endswith:
             - '\thor64.exe'
             - '\thor.exe'

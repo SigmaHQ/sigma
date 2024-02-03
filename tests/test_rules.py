@@ -783,6 +783,7 @@ class TestRules(unittest.TestCase):
                     and not word.lower() in allowed_lowercase_words
                     and not "." in word
                     and not "/" in word
+                    and not "_" in word
                     and not word[0].isdigit()
                 ):
                     wrong_casing.append(word)

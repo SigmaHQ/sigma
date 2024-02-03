@@ -1,7 +1,10 @@
-title: User Added to Local Administrators
+title: User Added to Local Administrator Group
 id: c265cf08-3f99-46c1-8d59-328247057d57
 status: stable
-description: This rule triggers on user accounts that are added to the local Administrators group, which could be legitimate activity or a sign of privilege escalation activity
+description: Detects the addition of a new member to the local administrator group, which could be legitimate activity or a sign of privilege escalation activity
+references:
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4732
+    - https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-identifiers
 author: Florian Roth (Nextron Systems)
 date: 2017/03/14
 modified: 2021/01/17
@@ -14,15 +17,14 @@ logsource:
     product: windows
     service: security
 detection:
-    selection:
+    selection_eid:
         EventID: 4732
-    selection_group1:
-        TargetUserName|startswith: 'Administr'
-    selection_group2:
-        TargetSid: 'S-1-5-32-544'
-    filter:
+    selection_group:
+        - TargetUserName|startswith: 'Administr'
+        - TargetSid: 'S-1-5-32-544'
+    filter_main_computer_accounts:
         SubjectUserName|endswith: '$'
-    condition: selection and (1 of selection_group*) and not filter
+    condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Legitimate administrative activity
 level: medium
