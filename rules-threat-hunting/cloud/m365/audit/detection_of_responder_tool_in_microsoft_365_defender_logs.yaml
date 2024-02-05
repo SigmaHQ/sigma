@@ -1,0 +1,26 @@
+title: Detection of Responder Tool in Microsoft 365 Defender Logs
+id: 3f845e8c-3070-4dcc-9064-2f09e1ab8333
+status: stable
+description: Responder is a network takeover tool that exploits weaknesses in the network protocol. Its detection is crucial as it can be used for credential harvesting through LLMNR, NBT-NS, and MDNS poisoning. While it's a legitimate tool for security assessments, its presence in an operational network is a red flag and could signify an ongoing attack or a severe security lapse.
+references:
+    - https://www.codelivly.com/llmnr-poisoning-attacks-understanding-the-threat-and-securing-your-network
+author: Sai Prashanth Pulisetti
+date: 2024/02/05
+tags:
+    - attack.lateral_movement
+    - detection.threat_hunting
+logsource:
+    product: m365
+    service: windows
+detection:
+    detection:
+        selection:
+            Event.Module: m365_defender
+            Message: Responder tool detected on local network on one endpoint
+        condition: selection
+        fields:
+            - Event.Module
+            - Message
+falsepositives:
+    - Unknown
+level: high
