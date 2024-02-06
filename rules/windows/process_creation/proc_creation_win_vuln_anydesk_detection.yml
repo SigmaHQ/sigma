@@ -1,23 +1,25 @@
 title: Vulnerable AnyDesk Application Detection
-status: experimental
-id: 64f9bcb1-0a98-4419-b744-ea254d97d164
-description: 'This use case is designed to detect the presence and usage of the AnyDesk application with version less than 8.0.8 in your environment. AnyDesk is a remote desktop software that allows users to connect to computers remotely. While it has legitimate uses, it can also be exploited for malicious activities such as unauthorized access or data exfiltration.'
+id: d99713be-839a-4812-b79f-3918b36a24a8
+status: stable
+description: This use case is designed to detect the presence and usage of the AnyDesk application with version less than 8.0.8 in your environment. AnyDesk is a remote desktop software that allows users to connect to computers remotely. While it has legitimate uses, it can also be exploited for malicious activities such as unauthorized access or data exfiltration.
+references:
+    - https://www.bleepingcomputer.com/news/security/anydesk-says-hackers-breached-its-production-servers-reset-passwords/
 author: Sai Prashanth Pulisetti
 date: 2024/02/06
-references:
-  - https://www.bleepingcomputer.com/news/security/anydesk-says-hackers-breached-its-production-servers-reset-passwords/
+tags:
+    - attack. execution
+    - attack.initial_access
 logsource:
-  category: process_creation
-  product: windows
+    product: windows
+    category: process_creation
 detection:
-  selection:
-    Image|endswith: 'anydesk.exe'
-    ProductVersion|startswith: '7.'
-  filter1:
-    CommandLine|contains: '--uninstall'
-  filter2:
-    Image|endswith: 'AnyDeskUninst*.exe'
-  condition: selection and not filter1 and not filter2
+    selection:
+        Image|endswith: anydesk.exe
+        ProductVersion|startswith: '7.'
+    filter1:
+        CommandLine|contains: --uninstall
+        Image|endswith: AnyDeskUninst*.exe
+    condition: selection and not filter1 and not filter2
 falsepositives:
-  - Administrator usage
+    - Administrative Usage
 level: medium
