@@ -1,0 +1,39 @@
+title: Self Extracting Package Creation Via Iexpress.EXE From Potentially Suspicious Location
+id: b2b048b0-7857-4380-b0fb-d3f0ab820b71
+status: experimental
+description: |
+    Detects the use of iexpress.exe to create binaries via Self Extraction Directive (SED) files located in potentially suspicious locations.
+    This behavior has been observed in-the-wild by different threat actors.
+references:
+    - https://strontic.github.io/xcyclopedia/library/iexpress.exe-D594B2A33EFAFD0EABF09E3FDC05FCEA.html
+    - https://en.wikipedia.org/wiki/IExpress
+    - https://decoded.avast.io/janvojtesek/raspberry-robins-roshtyak-a-little-lesson-in-trickery/
+    - https://www.virustotal.com/gui/file/602f4ae507fa8de57ada079adff25a6c2a899bd25cd092d0af7e62cdb619c93c/behavior
+author: Joseliyo Sanchez, @Joseliyo_Jstnk, Nasreddine Bencherchali (Nextron Systems)
+date: 2024/02/05
+tags:
+    - attack.execution
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    # VT Query: behavior_processes:"iexpress.exe" and behavior_processes:"/n /q /m" and behavior_processes:"*.sed*" and p:5+
+    selection_img:
+        - Image|endswith: '\iexpress.exe'
+        - OriginalFileName: 'IEXPRESS.exe'
+    selection_cli:
+        CommandLine|contains: ' /n '
+    selection_paths:
+        CommandLine|contains:
+            # Note: Add more uncommon paths that fit your organizational needs.
+            - ':\ProgramData\'
+            - ':\Temp\'
+            - ':\Windows\System32\Tasks\'
+            - ':\Windows\Tasks\'
+            - ':\Windows\Temp\'
+            - '\AppData\Local\Temp\'
+    condition: all of selection_*
+falsepositives:
+    - Administrators building packages using iexpress.exe
+level: high

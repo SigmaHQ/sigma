@@ -1,13 +1,14 @@
-title: Self Extraction Directive File Created In Potentially Suspicious Location
-id: 760e75d8-c3b5-409b-a9bf-6130b4c4603f
+title: Potentially Suspicious Self Extraction Directive File Created
+id: ab90dab8-c7da-4010-9193-563528cfa347
 related:
-    - id: ab90dab8-c7da-4010-9193-563528cfa347
+    - id: 760e75d8-c3b5-409b-a9bf-6130b4c4603f
       type: derived
 status: experimental
 description: |
-    Detects the creation of Self Extraction Directive files (.sed) in a potentially suspicious location.
+    Detects the creation of a binary file with the ".sed" extension. The ".sed" extension stand for Self Extraction Directive files.
     These files are used by the "iexpress.exe" utility in order to create self extracting packages.
     Attackers were seen abusing this utility and creating PE files with embedded ".sed" entries.
+    Usually ".sed" files are simple ini files and not PE binaries.
 references:
     - https://strontic.github.io/xcyclopedia/library/iexpress.exe-D594B2A33EFAFD0EABF09E3FDC05FCEA.html
     - https://en.wikipedia.org/wiki/IExpress
@@ -18,17 +19,10 @@ tags:
     - attack.execution
     - attack.t1218
 logsource:
-    category: file_event
     product: windows
+    category: file_executable_detected
 detection:
     selection:
-        TargetFilename|contains:
-            - ':\ProgramData\'
-            - ':\Temp\'
-            - ':\Windows\System32\Tasks\'
-            - ':\Windows\Tasks\'
-            - ':\Windows\Temp\'
-            - '\AppData\Local\Temp\'
         TargetFilename|endswith: '.sed'
     condition: selection
 falsepositives:
