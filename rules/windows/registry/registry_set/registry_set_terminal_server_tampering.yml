@@ -19,9 +19,12 @@ references:
     - https://bazaar.abuse.ch/sample/6f3aa9362d72e806490a8abce245331030d1ab5ac77e400dd475748236a6cc81/
     - http://etutorials.org/Microsoft+Products/microsoft+windows+server+2003+terminal+services/Chapter+6+Registry/Registry+Keys+for+Terminal+Services/ # Contain description for most of the keys mentioned here (check it out if you want more information
     - https://admx.help/HKLM/SOFTWARE/Policies/Microsoft/Windows%20NT/Terminal%20Services # Contain description for most of the keys mentioned here (check it out if you want more information)
+    - https://blog.sekoia.io/darkgate-internals/
+    - https://github.com/redcanaryco/atomic-red-team/blob/02c7d02fe1f1feb0fc7944550408ea8224273994/atomics/T1112/T1112.md#atomic-test-63---disable-remote-desktop-anti-alias-setting-through-registry
+    - https://github.com/redcanaryco/atomic-red-team/blob/02c7d02fe1f1feb0fc7944550408ea8224273994/atomics/T1112/T1112.md#atomic-test-64---disable-remote-desktop-security-settings-through-registry
 author: Samir Bousseaden, David ANDRE, Roberto Rodriguez @Cyb3rWard0g, Nasreddine Bencherchali
 date: 2022/08/06
-modified: 2023/08/17
+modified: 2024/02/08
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -32,8 +35,8 @@ logsource:
 detection:
     selection_shadow:
         TargetObject|contains:
-            - 'SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\'
             - '\Control\Terminal Server\'
+            - '\Windows NT\Terminal Services\'
         TargetObject|endswith: '\Shadow'
         Details:
             - 'DWORD (0x00000001)' # Full Control with user’s permission
@@ -43,20 +46,21 @@ detection:
     selection_terminal_services_key:
         TargetObject|contains:
             - '\Control\Terminal Server\'
-            - 'SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\'
-    selection_terminal_services_values:
+            - '\Windows NT\Terminal Services\'
         TargetObject|endswith:
+            - '\DisableRemoteDesktopAntiAlias' # Disable anti-aliasing for remote desktop (DarkGate malware)
+            - '\DisableSecuritySettings' # Disable security settings, allowing access to programs/entire desktop (DarkGate malware)
             - '\fAllowUnsolicited' # Allow unsolicited remote assistance offers
             - '\fAllowUnsolicitedFullControl'
         Details: 'DWORD (0x00000001)'
     selection_tamper_only:
         # Any changes to these keys should be suspicious and looked at
         TargetObject|contains:
-            - '\services\TermService\Parameters\ServiceDll' # RDP hijacking
-            - '\Control\Terminal Server\WinStations\RDP-Tcp\InitialProgram' # This value can be set to specify a program to run automatically when a user logs on to a remote computer.
             - '\Control\Terminal Server\InitialProgram' # This value can be set to specify a program to run automatically when a user logs on to a remote computer.
-            - 'SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\InitialProgram' # This value can be set to specify a program to run automatically when a user logs on to a remote computer.
-    condition: selection_shadow or (selection_terminal_services_key and selection_terminal_services_values) or selection_tamper_only
+            - '\Control\Terminal Server\WinStations\RDP-Tcp\InitialProgram' # This value can be set to specify a program to run automatically when a user logs on to a remote computer.
+            - '\services\TermService\Parameters\ServiceDll' # RDP hijacking
+            - '\Windows NT\Terminal Services\InitialProgram' # This value can be set to specify a program to run automatically when a user logs on to a remote computer.
+    condition: selection_shadow or selection_terminal_services_key or selection_tamper_only
 falsepositives:
     - Some of the keys mentioned here could be modified by an administrator while setting group policy (it should be investigated either way)
 level: high
