@@ -1,0 +1,30 @@
+title: Interesting Service Enumeration Via Sc.EXE
+id: e83e8899-c9b2-483b-b355-5decc942b959
+status: experimental
+description: |
+    Detects the enumeration and query of interesting and in some cases sensitive services on the system via "sc.exe".
+    Attackers often try to enumerate the services currently running on a system in order to find different attack vectors.
+references:
+    - https://www.n00py.io/2021/05/dumping-plaintext-rdp-credentials-from-svchost-exe/
+    - https://pentestlab.blog/tag/svchost/
+author: Swachchhanda Shrawan Poudel
+date: 2024/02/12
+tags:
+    - attack.t1003
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        - Image|endswith: '\sc.exe'
+        - OriginalFileName: 'sc.exe'
+    selection_cli:
+        CommandLine|contains: 'query'
+    selection_cmd:
+        # Note: add more interesting services
+        CommandLine|contains: 'termservice'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+# Note: can be upgraded to medium after an initial baseline
+level: low

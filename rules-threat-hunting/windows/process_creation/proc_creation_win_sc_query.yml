@@ -6,20 +6,23 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1007/T1007.md#atomic-test-1---system-service-discovery
 author: frack113
 date: 2021/12/06
-modified: 2022/11/10
+modified: 2024/02/08
 tags:
     - attack.discovery
     - attack.t1007
+    - detection.threat_hunting
 logsource:
     category: process_creation
     product: windows
 detection:
     selection_img:
         Image|endswith: '\sc.exe'
-        OriginalFileName|endswith: 'sc.exe'
+        OriginalFileName: 'sc.exe'
     selection_cli:
         CommandLine|contains: ' query'
-    condition: all of selection_*
+    filter_optional_keybase:
+        CommandLine: 'sc query dokan1'
+    condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate query of a service by an administrator to get more information such as the state or PID
     - Keybase process "kbfsdokan.exe" query the dokan1 service with the following commandline "sc query dokan1"
