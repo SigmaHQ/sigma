@@ -1,14 +1,15 @@
-title: Msiexec Initiated Connection
+title: Msiexec.EXE Initiated Network Connection Over HTTP
 id: 8e5e38e4-5350-4c0b-895a-e872ce0dd54f
 status: test
 description: |
-    Adversaries may abuse msiexec.exe to proxy execution of malicious payloads.
-    Msiexec.exe is the command-line utility for the Windows Installer and is thus commonly associated with executing installation packages (.msi)
+    Detects an initiated network connection by "Msiexec.exe" over port 80 or 443.
+    Adversaries might abuse "msiexec.exe" to install and execute remotely hosted packages.
 references:
     - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/msiexec
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1218.007/T1218.007.md
 author: frack113
 date: 2022/01/16
+modified: 2024/02/01
 tags:
     - attack.defense_evasion
     - attack.t1218.007
@@ -19,7 +20,10 @@ detection:
     selection:
         Initiated: 'true'
         Image|endswith: '\msiexec.exe'
+        DestinationPort:
+            - 80
+            - 443
     condition: selection
 falsepositives:
-    - Legitimate msiexec over networks
-level: medium
+    - Some rare installers were seen communicating with external servers for additional information. While its a very rare occurrence in some environments an initial baseline might be required.
+level: high

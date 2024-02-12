@@ -6,7 +6,7 @@ references:
     - https://twitter.com/mrd0x/status/1481630810495139841?s=12
 author: Tim Shelton, Florian Roth (Nextron Systems), Yassine Oukessou
 date: 2022/01/13
-modified: 2024/02/08
+modified: 2024/02/09
 tags:
     - attack.defense_evasion
     - attack.t1218.011
@@ -22,20 +22,25 @@ detection:
     filter_main_empty:
         CommandLine: ''
     filter_main_known_extension:
-        CommandLine|contains:
-            # Note: This aims to cover: single and double quotes in addition to spaces and comma "," usage.
-            - '.cpl '
-            - '.cpl,'
-            - '.cpl"'
-            - ".cpl'"
-            - '.dll '
-            - '.dll,'
-            - '.dll"'
-            - ".dll'"
-            - '.inf '
-            - '.inf,'
-            - '.inf"'
-            - ".inf'"
+        - CommandLine|contains:
+              # Note: This aims to cover: single and double quotes in addition to spaces and comma "," usage.
+              - '.cpl '
+              - '.cpl,'
+              - '.cpl"'
+              - ".cpl'"
+              - '.dll '
+              - '.dll,'
+              - '.dll"'
+              - ".dll'"
+              - '.inf '
+              - '.inf,'
+              - '.inf"'
+              - ".inf'"
+        - CommandLine|endswith:
+              # Note: This aims to cover: single and double quotes in addition to spaces and comma "," usage.
+              - '.cpl'
+              - '.dll'
+              - '.inf'
     filter_main_localserver:
         CommandLine|contains: ' -localserver '
     filter_main_zzzzInvokeManagedCustomActionOutOfProc:

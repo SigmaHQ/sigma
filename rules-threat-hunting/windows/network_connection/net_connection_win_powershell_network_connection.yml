@@ -1,26 +1,29 @@
-title: Dllhost Internet Connection
-id: cfed2f44-16df-4bf3-833a-79405198b277
-status: test
-description: Detects Dllhost that communicates with public IP addresses
+title: Network Connection Initiated By PowerShell Process
+id: 1f21ec3f-810d-4b0e-8045-322202e22b4b
+status: experimental
+description: |
+    Detects a network connection that was initiated from a PowerShell process.
+    Often times malicious powershell scripts download additional payloads or communicate back to command and control channels via uncommon ports or IPs.
+    Use this rule as a basis for hunting for anomalies.
 references:
-    - https://redcanary.com/blog/child-processes/
-    - https://nasbench.medium.com/what-is-the-dllhost-exe-process-actually-running-ef9fe4c19c08
-author: bartblaze
-date: 2020/07/13
-modified: 2023/01/20
+    - https://www.youtube.com/watch?v=DLtJTxMWZ2o
+author: Florian Roth (Nextron Systems)
+date: 2017/03/13
+modified: 2023/09/07
 tags:
-    - attack.defense_evasion
-    - attack.t1218
     - attack.execution
-    - attack.t1559.001
+    - attack.t1059.001
+    - detection.threat_hunting
 logsource:
     category: network_connection
     product: windows
 detection:
     selection:
-        Image|endswith: '\dllhost.exe'
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
         Initiated: 'true'
-    filter_ipv4:
+    filter_main_local_ipv4:
         DestinationIp|startswith:
             - '10.'
             - '192.168.'
@@ -40,16 +43,18 @@ detection:
             - '172.29.'
             - '172.30.'
             - '172.31.'
-            - '169.254.'  # link-local address
-            - '127.'  # loopback address
-    filter_ipv6:
+            - '127.0.0.1'
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
+    filter_main_local_ipv6:
         DestinationIp|startswith:
             - '::1'  # IPv6 loopback variant
             - '0:0:0:0:0:0:0:1'  # IPv6 loopback variant
             - 'fe80:'  # link-local address
             - 'fc'  # private address range fc00::/7
             - 'fd'  # private address range fc00::/7
-    filter_msrange:
+    filter_main_msrange:
         DestinationIp|startswith:
             # Subnet: 20.184.0.0/13
             - '20.184.'
@@ -67,7 +72,9 @@ detection:
             - '51.104.'
             - '51.105.'
             - '52.239.'
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_main_*
 falsepositives:
-    - Communication to other corporate systems that use IP addresses from public address spaces
-level: medium
+    - Administrative scripts
+    - Microsoft IP range
+    - Additional filters are required. Adjust to your environment (e.g. extend filters with company's ip range')
+level: low
