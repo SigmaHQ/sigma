@@ -43,9 +43,11 @@ jobs:
         with:
           python-version: "3.10"
       - name: Install dependencies
-        run: pip install requests==2.31.0 check-jsonschema==0.28.0
+        run: pip install requests check-jsonschema
       - name: Validate Sigma rules
-        run: tests/validate-sigma-schema/validate.sh
+        run: |
+          echo "Validating Sigma rules against sigma-schema.json"
+          check-jsonschema --schemafile $(python tests/validate-sigma-schema/validate.py schema) $(python tests/validate-sigma-schema/validate.py rules)
         env:
           SIGMA_RULES_PATH: |-
             ./rules

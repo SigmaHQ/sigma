@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 import os
-from pathlib import Path
 import sys
-from typing import Any, Dict, Iterator, List, NoReturn
+import requests
 import warnings
 
-import requests
+from pathlib import Path
+from typing import Any, Dict, Iterator, List, NoReturn
 
 
 def get_envs() -> Dict[str, Any]:
