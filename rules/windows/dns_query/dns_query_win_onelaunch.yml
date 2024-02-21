@@ -1,0 +1,27 @@
+title: Network Traffic to OneLaunch Update Service
+id: df68f791-ad95-447f-a271-640a0dab9cf8
+status: experimental
+description: When OneLaunch, an adware application, is installed it will attempt to get updates from update.onelaunch.com.
+author: Josh Nickels
+date: 2024/02/21
+references:
+    - https://www.malwarebytes.com/blog/detections/pup-optional-onelaunch-silentcf
+    - https://www.myantispyware.com/2020/12/14/how-to-uninstall-onelaunch-browser-removal-guide/
+    - https://malware.guide/browser-hijacker/remove-onelaunch-virus/
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    timeframe: 10m
+    condition: all of selection_*
+    selection_query:
+        QueryName: 'update.onelaunch.com'
+        Initiated: 'true'
+    selection_image:
+        Image|contains: 'onelaunch'
+falsepositives:
+    - Unlikely
+level: low
+tags:
+    - attack.collection
+    - attack.t1056
