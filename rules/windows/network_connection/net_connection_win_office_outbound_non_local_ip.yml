@@ -1,25 +1,30 @@
-title: PowerShell Initiated Network Connection
-id: 1f21ec3f-810d-4b0e-8045-322202e22b4b
-status: experimental
-description: Detects a PowerShell process that initiates network connections. Check for suspicious target ports and target systems.
+title: Office Application Initiated Network Connection To Non-Local IP
+id: 75e33ce3-ae32-4dcc-9aa8-a2a3029d6f84
+status: test
+description: |
+    Detects an office application (Word, Excel, PowerPoint)  that initiate a network connection to a non-private IP addresses.
+    This rule aims to detect traffic similar to one seen exploited in CVE-2021-42292.
+    This rule will require an initial baseline and tuning that is specific to your organization.
 references:
-    - https://www.youtube.com/watch?v=DLtJTxMWZ2o
-author: Florian Roth (Nextron Systems)
-date: 2017/03/13
-modified: 2023/09/07
+    - https://corelight.com/blog/detecting-cve-2021-42292
+author: Christopher Peacock '@securepeacock', SCYTHE '@scythe_io', Florian Roth (Nextron Systems), Tim Shelton
+date: 2021/11/10
+modified: 2024/01/31
 tags:
     - attack.execution
-    - attack.t1059.001
+    - attack.t1203
 logsource:
     category: network_connection
     product: windows
 detection:
     selection:
         Image|endswith:
-            - '\powershell.exe'
-            - '\pwsh.exe'
+            - '\excel.exe'
+            - '\powerpnt.exe'
+            - '\winword.exe'
+            - '\wordview.exe'
         Initiated: 'true'
-    filter_main_local_ipv4:
+    filter_main_ipv4:
         DestinationIp|startswith:
             - '10.'
             - '192.168.'
@@ -40,10 +45,7 @@ detection:
             - '172.30.'
             - '172.31.'
             - '127.0.0.1'
-        User|contains: # covers many language settings
-            - 'AUTHORI'
-            - 'AUTORI'
-    filter_main_local_ipv6:
+    filter_main_ipv6:
         DestinationIp|startswith:
             - '::1'  # IPv6 loopback variant
             - '0:0:0:0:0:0:0:1'  # IPv6 loopback variant
@@ -52,7 +54,6 @@ detection:
             - 'fd'  # private address range fc00::/7
     filter_main_msrange:
         DestinationIp|startswith:
-            # Subnet: 20.184.0.0/13
             - '20.184.'
             - '20.185.'
             - '20.186.'
@@ -61,16 +62,17 @@ detection:
             - '20.189.'
             - '20.190.'
             - '20.191.'
+            - '20.223.'
             - '23.79.'
             - '51.10.'
-            # Subnet: 51.103.210.0/23
             - '51.103.'
             - '51.104.'
             - '51.105.'
             - '52.239.'
+            - '204.79.197'
     condition: selection and not 1 of filter_main_*
 falsepositives:
-    - Administrative scripts
-    - Microsoft IP range
-    - Additional filters are required. Adjust to your environment (e.g. extend filters with company's ip range')
-level: low
+    - You may have to tune certain domains out that Excel may call out to, such as microsoft or other business use case domains.
+    - Office documents commonly have templates that refer to external addresses, like "sharepoint.ourcompany.com" may have to be tuned.
+    - It is highly recommended to baseline your activity and tune out common business use cases.
+level: medium

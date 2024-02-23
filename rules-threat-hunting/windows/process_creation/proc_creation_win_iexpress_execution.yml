@@ -1,0 +1,36 @@
+title: New Self Extracting Package Created Via IExpress.EXE
+id: c2b478fc-09bf-40b2-8768-ab3ec8d61c9a
+status: experimental
+description: |
+    Detects the "iexpress.exe" utility creating self-extracting packages.
+    Attackers where seen leveraging "iexpress" to compile packages on the fly via ".sed" files.
+    Investigate the command line options provided to "iexpress" and in case of a ".sed" file, check the contents and legitimacy of it.
+references:
+    - https://strontic.github.io/xcyclopedia/library/iexpress.exe-D594B2A33EFAFD0EABF09E3FDC05FCEA.html
+    - https://en.wikipedia.org/wiki/IExpress
+    - https://decoded.avast.io/janvojtesek/raspberry-robins-roshtyak-a-little-lesson-in-trickery/
+    - https://www.virustotal.com/gui/file/602f4ae507fa8de57ada079adff25a6c2a899bd25cd092d0af7e62cdb619c93c/behavior
+author: Joseliyo Sanchez, @Joseliyo_Jstnk
+date: 2024/02/05
+tags:
+    - attack.execution
+    - attack.t1218
+    - detection.threat_hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_1_parent:
+        ParentImage|endswith: '\iexpress.exe'
+    selection_1_img:
+        - Image|endswith: '\makecab.exe'
+        - OriginalFileName: 'makecab.exe'
+    selection_2_img:
+        - Image|endswith: '\iexpress.exe'
+        - OriginalFileName: 'IEXPRESS.exe'
+    selection_2_cli:
+        CommandLine|contains: ' /n '
+    condition: all of selection_1_* or all of selection_2_*
+falsepositives:
+    - Administrators building packages using iexpress.exe
+level: medium

@@ -4,7 +4,7 @@ related:
     - id: 635dbb88-67b3-4b41-9ea5-a3af2dd88153
       type: obsoletes
 status: test
-description: Detects an executable in the Windows folder accessing suspicious domains
+description: Detects executables located in potentially suspicious directories initiating network connections towards file sharing domains.
 references:
     - https://twitter.com/M_haggis/status/900741347035889665
     - https://twitter.com/M_haggis/status/1032799638213066752
@@ -13,7 +13,7 @@ references:
     - https://github.com/EmpireProject/Empire/blob/e37fb2eef8ff8f5a0a689f1589f424906fe13055/data/module_source/exfil/Invoke-ExfilDataToGitHub.ps1
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2018/08/30
-modified: 2023/08/17
+modified: 2024/02/09
 tags:
     - attack.lateral_movement
     - attack.t1105
@@ -22,12 +22,14 @@ logsource:
     product: windows
 detection:
     selection_paths:
-        - Image|startswith:
-              - 'C:\PerfLogs'
-              - 'C:\Temp\'
-              - 'C:\Users\Public\'
-              - 'C:\Windows\'
-        - Image|contains: '\AppData\Temp\'
+        Image|contains:
+            - ':\PerfLogs\'
+            - ':\Temp\'
+            - ':\Users\Public\'
+            - ':\Windows\System32\Tasks\'
+            - ':\Windows\Tasks\'
+            - ':\Windows\Temp\'
+            - '\AppData\Temp\'
     selection_domains:
         Initiated: 'true'
         DestinationHostname|endswith:
@@ -38,10 +40,13 @@ detection:
             - 'ddns.net'
             - 'dl.dropboxusercontent.com'
             - 'ghostbin.co'
+            - 'glitch.me'
             - 'gofile.io'
             - 'hastebin.com'
             - 'mediafire.com'
+            - 'mega.co.nz'
             - 'mega.nz'
+            - 'onrender.com'
             - 'paste.ee'
             - 'pastebin.com'
             - 'pastebin.pl'
@@ -52,11 +57,11 @@ detection:
             - 'sendspace.com'
             - 'storage.googleapis.com'
             - 'storjshare.io'
+            - 'supabase.co'
             - 'temp.sh'
             - 'transfer.sh'
             - 'ufile.io'
     condition: all of selection_*
 falsepositives:
-    - Unknown
-    - '@subTee in your network'
+    - Some installers located in the temp directory might communicate with the Github domains in order to download additional software. Baseline these cases or move the github domain to a lower level hunting rule.
 level: high

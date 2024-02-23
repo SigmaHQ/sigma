@@ -1,10 +1,11 @@
-title: HH.EXE Network Connections
+title: HH.EXE Initiated HTTP Network Connection
 id: 468a8cea-2920-4909-a593-0cbe1d96674a
 related:
     - id: f57c58b3-ee69-4ef5-9041-455bf39aaa89
       type: derived
 status: test
-description: Detects network connections made by the "hh.exe" process, which could indicate the execution/download of remotely hosted .chm files
+description: |
+    Detects a network connection initiated by the "hh.exe" process to HTTP destination ports, which could indicate the execution/download of remotely hosted .chm files.
 references:
     - https://www.splunk.com/en_us/blog/security/follina-for-protocol-handlers.html
     - https://github.com/redcanaryco/atomic-red-team/blob/1cf4dd51f83dcb0ebe6ade902d6157ad2dbc6ac8/atomics/T1218.001/T1218.001.md
@@ -13,6 +14,7 @@ date: 2022/10/05
 tags:
     - attack.defense_evasion
     - attack.t1218.001
+    - detection.threat_hunting
 logsource:
     category: network_connection
     product: windows
@@ -23,9 +25,7 @@ detection:
         DestinationPort:
             - 80
             - 443
-            - 135
-            - 445
     condition: selection
 falsepositives:
-    - Unknown
+    - False positive is expected from launching "hh.exe" for the first time on a machine in a while or simply from help files containing reference to external sources. Best correlate this with process creation and file events.
 level: medium
