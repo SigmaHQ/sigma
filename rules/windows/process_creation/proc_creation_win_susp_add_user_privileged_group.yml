@@ -1,17 +1,16 @@
-title: User Added to Local Administrators Group
-id: ad720b90-25ad-43ff-9b5e-5c841facc8e5
+title: User Added To Highly Privileged Group
+id: 10fb649c-3600-4d37-b1e6-56ea90bb7e09 # Privileged groups
 related:
     - id: ffa28e60-bdb1-46e0-9f82-05f7a61cc06e # Remote Desktop groups
       type: similar
-    - id: 10fb649c-3600-4d37-b1e6-56ea90bb7e09 # Privileged groups
+    - id: ad720b90-25ad-43ff-9b5e-5c841facc8e5 # Admin groups
       type: similar
 status: test
-description: Detects addition of users to the local administrator group via "Net" or "Add-LocalGroupMember".
+description: Detects addition of users to highly privileged groups via "Net" or "Add-LocalGroupMember".
 references:
-    - https://blog.talosintelligence.com/2022/08/recent-cyber-attack.html?m=1
-author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
-date: 2022/08/12
-modified: 2023/03/02
+    - https://www.huntress.com/blog/slashandgrab-screen-connect-post-exploitation-in-the-wild-cve-2024-1709-cve-2024-1708
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2024/02/23
 tags:
     - attack.persistence
     - attack.t1098
@@ -30,9 +29,9 @@ detection:
               - ' -Group '
     selection_group:
         CommandLine|contains:
-            - ' administrators '
-            - ' administrateur' # Typo without an 'S' so we catch both
+            - 'Group Policy Creator Owners'
+            - 'Schema Admins'
     condition: all of selection_*
 falsepositives:
-    - Administrative activity
-level: medium
+    - Administrative activity that must be investigated
+level: high

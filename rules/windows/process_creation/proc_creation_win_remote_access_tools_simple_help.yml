@@ -1,0 +1,27 @@
+title: Remote Access Tool - Simple Help Execution
+id: 95e60a2b-4705-444b-b7da-ba0ea81a3ee2
+status: experimental
+description: |
+    An adversary may use legitimate desktop support and remote access software, such as Team Viewer, Go2Assist, LogMein, AmmyyAdmin, etc, to establish an interactive command and control channel to target systems within networks.
+    These services are commonly used as legitimate technical support software, and may be allowed by application control within a target environment.
+    Remote access tools like VNC, Ammyy, and Teamviewer are used frequently when compared with other legitimate software commonly used by adversaries. (Citation: Symantec Living off the Land)
+references:
+    - https://www.huntress.com/blog/slashandgrab-screen-connect-post-exploitation-in-the-wild-cve-2024-1709-cve-2024-1708
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2024/02/23
+tags:
+    - attack.command_and_control
+    - attack.t1219
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|contains:
+            - '\JWrapper-Remote Access\'
+            - '\JWrapper-Remote Support\'
+        Image|endswith: '\SimpleService.exe'
+    condition: selection
+falsepositives:
+    - Legitimate usage of the tool
+level: medium
