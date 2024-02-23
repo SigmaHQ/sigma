@@ -1,0 +1,24 @@
+title: "Outlook opening a file hosted on an SMB Share "
+id: e5305252-1ee0-426a-81ec-9ca43c4dd3a7
+description: "Detects when threat actors attempt to bypass outlook security warning by sharing links of malware hosted on SMB shares.This has been detected in Pikabot campaigns"
+author: Joseph Kamau
+date: 2024/02/23
+status: experimental
+tags:
+- attack.defense_evasion
+- attack.t1021.002
+references: https://app.any.run/tasks/478732bb-b180-4d14-9a93-5e424c44a97e?utm_source=twitter&utm_medium=post&utm_campaign=pikabot&utm_content=linktoservice&utm_term=210224/
+logsource:
+  product: "windows"
+  category: "file_event"
+detection:
+  selection:
+    Image|endswith: '\outlook.exe'
+    TargetFilename|endswith: '\PIPE\srvsvc'
+  condition: "selection"
+fields:
+- "Image"
+- "TargetFilename"
+falsepositives:
+- "unlikely"
+level: "high"
