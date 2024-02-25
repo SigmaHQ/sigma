@@ -1,0 +1,23 @@
+title: Bitbucket User Login Failure Via Ssh Detected
+id: d3f90469-fb05-42ce-b67d-0fded91bbef3
+status: experimental
+description: Detects SSH user login access failures. The required log level is "Advance" for these audit events. This rules can be noisy and is recommended to use with correlation based on "author.name" field.
+references:
+    - https://confluence.atlassian.com/bitbucketserver/view-and-configure-the-audit-log-776640417.html
+    - https://confluence.atlassian.com/bitbucketserver/enable-ssh-access-to-git-repositories-776640358.html
+author: Muhammad Faisal (@faisalusuf)
+date: 2024/02/25
+tags:
+    - attack.t1021.004
+    - attack.t1110
+logsource:
+    product: bitbucket
+    service: audit
+detection:
+    selection:
+        auditType.category: 'Authentication'
+        auditType.action: 'User login failed(SSH)'
+    condition: selection
+falsepositives:
+    - Legitimate user wrong password attempts.
+level: high

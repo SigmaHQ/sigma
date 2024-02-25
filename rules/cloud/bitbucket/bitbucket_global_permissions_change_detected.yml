@@ -1,0 +1,26 @@
+title: Bitbucket Global Permissions Change Detected
+id: aac6c4f4-87c7-4961-96ac-c3fd3a42c310
+status: experimental
+description: Detects global permissions change activities. The required log level is "Advance" for these audit events.
+references:
+    - https://confluence.atlassian.com/bitbucketserver/audit-log-events-776640423.html
+    - https://confluence.atlassian.com/bitbucketserver/global-permissions-776640369.html
+author: Muhammad Faisal (@faisalusuf)
+date: 2024/02/25
+tags:
+    - attack.t1098
+logsource:
+    product: bitbucket
+    service: audit
+detection:
+    selection:
+        auditType.category: 'Permissions'
+        auditType.action:
+            - 'Global permission remove request'
+            - 'Global permission removed'
+            - 'Global permission granted'
+            - 'Global permission requested'
+    condition: selection
+falsepositives:
+    - Legitimate user activity.
+level: medium
