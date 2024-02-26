@@ -8,7 +8,7 @@ references:
     - https://blog.harmj0y.net/redteaming/another-word-on-delegation/
 author: '@neu5ron'
 date: 2017/04/13
-modified: 2021/11/27
+modified: 2024/02/26
 tags:
     - attack.t1098
     - attack.persistence
@@ -19,9 +19,12 @@ logsource:
 detection:
     selection1:
         EventID: 4738
+    filter_empty:
+        AllowedToDelegateTo:
+            - ''
+            - '-'
     filter_null:
-        - AllowedToDelegateTo: '-'
-        - AllowedToDelegateTo:
+        AllowedToDelegateTo: null
     selection_5136_1:
         EventID: 5136
         AttributeLDAPDisplayName: 'msDS-AllowedToDelegateTo'
@@ -32,7 +35,7 @@ detection:
     selection_5136_3:
         EventID: 5136
         AttributeLDAPDisplayName: 'msDS-AllowedToActOnBehalfOfOtherIdentity'
-    condition: (selection1 and not filter_null) or 1 of selection_5136_*
+    condition: (selection1 and not 1 of filter_*) or 1 of selection_5136_*
 falsepositives:
     - Unknown
 level: high
