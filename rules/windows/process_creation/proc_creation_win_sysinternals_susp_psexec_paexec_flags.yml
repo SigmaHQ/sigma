@@ -19,7 +19,7 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_flags_1:
+    selection:
         # Escalation to LOCAL_SYSTEM
         CommandLine|contains:
             # Note that you don't need to add the ".exe" part when using psexec/paexec
@@ -58,13 +58,13 @@ detection:
             - ' /i /s powershell'
             - ' -i /s powershell'
             - ' /i -s powershell'
-    filter:
+    filter_main_exclude_coverage:
         # This filter exclude strings covered by 8834e2f7-6b4b-4f09-8906-d2276470ee23
         CommandLine|contains:
             - 'paexec'
             - 'PsExec'
             - 'accepteula'
-    condition: 1 of selection_flags_* and not filter
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Weird admins that rename their tools
     - Software companies that bundle PsExec/PAExec with their software and rename it, so that it is less embarrassing
