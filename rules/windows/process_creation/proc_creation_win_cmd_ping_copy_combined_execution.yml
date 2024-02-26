@@ -6,7 +6,7 @@ references:
     - Internal Research
 author: X__Junior (Nextron Systems)
 date: 2023/07/18
-modified: 2024/02/17
+modified: 2024/02/26
 tags:
     - attack.defense_evasion
     - attack.t1070.004
@@ -18,13 +18,14 @@ detection:
     selection_cmd:
         - Image|endswith: '\cmd.exe'
         - OriginalFileName: 'Cmd.Exe'
+    selection_action:
+        CommandLine|contains|all:
+            - 'ping' # Covers "ping" and "ping.exe"
+            - 'copy '
     selection_cli_1:
         CommandLine|contains: # Count
             - ' -n '
             - ' /n '
-        CommandLine|contains|all:
-            - 'ping' # Covers "ping" and "ping.exe"
-            - 'copy '
     selection_cli_2:
         CommandLine|contains:
             - ' /y '
