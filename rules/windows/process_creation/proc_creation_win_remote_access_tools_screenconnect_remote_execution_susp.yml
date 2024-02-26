@@ -1,0 +1,36 @@
+title: Remote Access Tool - ScreenConnect Potential Suspicious Remote Command Execution
+id: 7b582f1a-b318-4c6a-bf4e-66fe49bf55a5
+related:
+    - id: d1a401ab-8c47-4e86-a7d8-2460b6a53e4a
+      type: derived
+status: test
+description: |
+    Detects potentially suspicious child processes launched via the ScreenConnect client service.
+references:
+    - https://www.mandiant.com/resources/telegram-malware-iranian-espionage
+    - https://docs.connectwise.com/ConnectWise_Control_Documentation/Get_started/Host_client/View_menu/Backstage_mode
+    - https://www.huntress.com/blog/slashandgrab-screen-connect-post-exploitation-in-the-wild-cve-2024-1709-cve-2024-1708
+author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems), @Kostastsale
+date: 2022/02/25
+modified: 2024/02/26
+tags:
+    - attack.command_and_control
+    - attack.t1219
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        ParentCommandLine|contains|all:
+            - ':\Windows\TEMP\ScreenConnect\'
+            - 'run.cmd'
+        Image|endswith:
+            - '\cmd.exe'
+            - '\curl.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\wevtutil.exe'
+    condition: selection
+falsepositives:
+    - If the script being executed make use of any of the utilities mentioned in the detection then they should filtered out or allowed.
+level: medium
