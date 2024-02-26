@@ -6,7 +6,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1217/T1217.md
 author: frack113
 date: 2021/12/13
-modified: 2023/03/07
+modified: 2024/02/17
 tags:
     - attack.discovery
     - attack.t1217
@@ -14,12 +14,17 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        CommandLine|contains|all:
-            - 'dir '
+    selection_dir:
+        CommandLine|contains: 'dir '
+    selection_cli_1:
+        CommandLine|contains:
             - ' /s'
+            - ' -s'
+    selection_cli_2:
+        CommandLine|contains:
             - ' /b'
-    condition: selection
+            - ' -b'
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: low

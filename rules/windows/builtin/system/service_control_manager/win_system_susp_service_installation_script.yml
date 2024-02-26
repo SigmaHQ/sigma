@@ -6,7 +6,7 @@ references:
     - Internal Research
 author: pH-T (Nextron Systems)
 date: 2022/03/18
-modified: 2022/11/18
+modified: 2024/02/23
 tags:
     - attack.persistence
     - attack.privilege_escalation
@@ -16,24 +16,27 @@ logsource:
     product: windows
     service: system
 detection:
-    selection:
+    selection_eid:
         Provider_Name: 'Service Control Manager'
         EventID: 7045
-    suspicious1:
+    selection_cmd_flags:
         ImagePath|contains:
             - ' /c '
+            - ' -c '
             - ' /r '
+            - ' -r '
             - ' /k '
-    suspicious2:
+            - ' -k '
+    selection_binaries:
         ImagePath|contains:
-            - 'powershell'
-            - 'pwsh'
-            - 'wscript'
             - 'cscript'
             - 'mshta'
-            - 'rundll32'
+            - 'powershell'
+            - 'pwsh'
             - 'regsvr32'
-    condition: selection and all of suspicious*
+            - 'rundll32'
+            - 'wscript'
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: high
