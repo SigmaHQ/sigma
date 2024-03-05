@@ -9,7 +9,7 @@ references:
     - https://symantec-enterprise-blogs.security.com/blogs/threat-intelligence/blackbyte-exbyte-ransomware
 author: Ilya Krestinichev
 date: 2022/11/03
-modified: 2023/02/07
+modified: 2024/03/05
 tags:
     - attack.defense_evasion
     - attack.t1070.004
@@ -20,16 +20,12 @@ detection:
     # Note: In the case of sysmon and similar logging utilities, see this discussion https://github.com/SigmaHQ/sigma/discussions/4277
     # Example: "C:\Windows\System32\cmd.exe"  /C ping 127.0.0.7 -n 3 > Nul & fsutil file setZeroData offset=0 length=524288 "C:\Users\User\Desktop\lockbit\lockbit.exe" & Del /f /q "C:\Users\User\Desktop\lockbit\lockbit.exe".
     selection_count:
-        CommandLine|contains:
-            - ' -n '
-            - ' /n '
+        CommandLine|contains|windash: ' -n '
     selection_nul:
         CommandLine|contains: 'Nul' # Covers "> Nul" and ">Nul "
     selection_del_param:
-        CommandLine|contains:
-            - ' /f '
+        CommandLine|contains|windash:
             - ' -f '
-            - ' /q '
             - ' -q '
     selection_all:
         CommandLine|contains|all:
