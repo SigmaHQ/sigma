@@ -1,12 +1,14 @@
 title: Potential PowerShell Execution Via DLL
 id: 6812a10b-60ea-420c-832f-dfcc33b646ba
 status: test
-description: Detects potential PowerShell execution from a DLL instead of the usual PowerShell process as seen used in PowerShdll
+description: |
+    Detects potential PowerShell execution from a DLL instead of the usual PowerShell process as seen used in PowerShdll.
+    This detection assumes that PowerShell commands are passed via the CommandLine.
 references:
     - https://github.com/p3nt4/PowerShdll/blob/62cfa172fb4e1f7f4ac00ca942685baeb88ff356/README.md
-author: Markus Neis, Nasreddine Bencherchali
+author: Markus Neis, Nasreddine Bencherchali (Nextron Systems)
 date: 2018/08/25
-modified: 2023/01/26
+modified: 2024/03/07
 tags:
     - attack.defense_evasion
     - attack.t1218.011
@@ -16,24 +18,26 @@ logsource:
 detection:
     selection_img:
         - Image|endswith:
-              - '\rundll32.exe'
-              - '\regsvcs.exe'
               - '\InstallUtil.exe'
-              - '\regasm.exe'
+              - '\RegAsm.exe'
+              - '\RegSvcs.exe'
+              - '\regsvr32.exe'
+              - '\rundll32.exe'
         - OriginalFileName:
-              - 'RUNDLL32.EXE'
-              - 'RegSvcs.exe'
               - 'InstallUtil.exe'
               - 'RegAsm.exe'
+              - 'RegSvcs.exe'
+              - 'REGSVR32.EXE'
+              - 'RUNDLL32.EXE'
     selection_cli:
         CommandLine|contains:
             - 'Default.GetString'
+            - 'DownloadString'
             - 'FromBase64String'
-            - 'Invoke-Expression'
+            - 'ICM '
             - 'IEX '
             - 'Invoke-Command'
-            - 'ICM '
-            - 'DownloadString'
+            - 'Invoke-Expression'
     condition: all of selection_*
 falsepositives:
     - Unknown
