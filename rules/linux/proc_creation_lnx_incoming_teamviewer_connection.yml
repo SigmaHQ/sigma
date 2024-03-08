@@ -1,0 +1,25 @@
+title: Team Viewer Session Started
+id: 1f6b8cd4-3e60-47cc-b282-5aa1cbc9182d
+status: experimental
+description: Detects the command line executed when TeamViewer starts a session started by a remote host. 
+    Once a connection has been started, an investigator can verify the connection details by viewing the incoming_connections.txt
+    log file in the TeamViewer folder.
+references:
+    - Independent research
+author: Josh Nickels + Qi Nan
+date: 2024/03/08
+tags:
+    - attack.initial_access
+    - attack.t1133
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image: 'TeamViewer_Desktop.exe'
+        ParentImage: 'TeamViewer_Service.exe'
+        CommandLine|endswith: 'TeamViewer_Desktop.exe --IPCport 5939 --Module 1'
+    condition: selection
+falsepositives:
+    - legitimate usage of TeamViewer
+level: low
