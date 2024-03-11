@@ -11,7 +11,7 @@ references:
     - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/erase
 author: frack113
 date: 2022/01/15
-modified: 2024/02/17
+modified: 2024/03/05
 tags:
     - attack.defense_evasion
     - attack.t1070.004
@@ -27,13 +27,10 @@ detection:
             - 'del '
             - 'erase '
     selection_flags:
-        CommandLine|contains:
-            - ' /f' # Force deleting of read-only files.
-            - ' -f'
-            - ' /s' # Delete specified files from all subdirectories.
-            - ' -s'
-            - ' /q' # Quiet mode, do not ask if ok to delete on global wildcard
-            - ' -q'
+        CommandLine|contains|windash:
+            - ' -f' # Force deleting of read-only files.
+            - ' -s' # Delete specified files from all subdirectories.
+            - ' -q' # Quiet mode, do not ask if ok to delete on global wildcard
     condition: all of selection_*
 falsepositives:
     - False positives levels will differ Depending on the environment. You can use a combination of ParentImage and other keywords from the CommandLine field to filter legitimate activity
