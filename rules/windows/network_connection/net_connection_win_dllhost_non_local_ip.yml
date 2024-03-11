@@ -10,7 +10,7 @@ references:
     - https://nasbench.medium.com/what-is-the-dllhost-exe-process-actually-running-ef9fe4c19c08
 author: bartblaze
 date: 2020/07/13
-modified: 2024/01/31
+modified: 2024/03/11
 tags:
     - attack.defense_evasion
     - attack.t1218
@@ -23,35 +23,16 @@ detection:
     selection:
         Image|endswith: '\dllhost.exe'
         Initiated: 'true'
-    filter_main_ipv4:
-        DestinationIp|startswith:
-            - '10.'
-            - '192.168.'
-            - '172.16.'
-            - '172.17.'
-            - '172.18.'
-            - '172.19.'
-            - '172.20.'
-            - '172.21.'
-            - '172.22.'
-            - '172.23.'
-            - '172.24.'
-            - '172.25.'
-            - '172.26.'
-            - '172.27.'
-            - '172.28.'
-            - '172.29.'
-            - '172.30.'
-            - '172.31.'
-            - '169.254.'  # link-local address
-            - '127.'  # loopback address
-    filter_main_ipv6:
-        DestinationIp|startswith:
-            - '::1'  # IPv6 loopback variant
-            - '0:0:0:0:0:0:0:1'  # IPv6 loopback variant
-            - 'fe80:'  # link-local address
-            - 'fc'  # private address range fc00::/7
-            - 'fd'  # private address range fc00::/7
+    filter_main_local_ranges:
+        DestinationIp|cidr:
+            - '::1/128'  # IPv6 loopback
+            - '10.0.0.0/8'
+            - '127.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+            - '169.254.0.0/16'
+            - 'fc00::/7'  # IPv6 private addresses
+            - 'fe80::/10'  # IPv6 link-local addresses
     filter_main_msrange:
         DestinationIp|startswith:
             - '20.184.'
