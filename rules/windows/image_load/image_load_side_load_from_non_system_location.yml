@@ -10,7 +10,7 @@ references:
     - https://www.hexacorn.com/blog/2023/12/26/1-little-known-secret-of-runonce-exe-32-bit/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/08/14
-modified: 2024/01/10
+modified: 2024/03/11
 tags:
     - attack.defense_evasion
     - attack.persistence
@@ -445,36 +445,48 @@ detection:
     filter_main_generic:
         # Note: this filter is generic on purpose to avoid insane amount of FP from legitimate third party applications. A better approach would be to baseline everything and add specific filters to avoid blind spots
         ImageLoaded|contains:
-            - ':\Windows\System32\'
-            - ':\Windows\SysWOW64\'
-            - ':\Windows\WinSxS\'
-            - ':\Windows\SoftwareDistribution\'
-            - ':\Windows\SystemTemp\'
-            - ':\$WINDOWS.~BT\'
+            - 'C:\$WINDOWS.~BT\'
+            - 'C:\$WinREAgent\'
+            - 'C:\Windows\SoftwareDistribution\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SystemTemp\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\WinSxS\'
+    filter_main_dot_net:
+        ImageLoaded|startswith: 'C:\Windows\Microsoft.NET\'
+        ImageLoaded|endswith: '\cscui.dll'
     filter_main_defender:
-        Image|contains: ':\ProgramData\Microsoft\Windows Defender\Platform\'
-        Image|endswith: '\version.dll'
+        ImageLoaded|contains: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+        ImageLoaded|endswith: '\version.dll'
+    filter_optional_exchange:
+        ImageLoaded|contains: 'C:\Program Files\Microsoft\Exchange Server\'
+        ImageLoaded|endswith: '\mswb7.dll'
+    filter_optional_arsenal_image_mounter:
+        ImageLoaded|contains: 'C:\Program Files\Arsenal-Image-Mounter-'
+        ImageLoaded|endswith:
+            - '\mi.dll'
+            - '\miutils.dl'
     filter_optional_office_appvpolicy:
-        Image|endswith: ':\Program Files\Common Files\microsoft shared\ClickToRun\OfficeClickToRun.exe'
-        ImageLoaded|endswith: ':\Program Files\Common Files\microsoft shared\ClickToRun\AppVPolicy.dll'
+        Image|endswith: 'C:\Program Files\Common Files\microsoft shared\ClickToRun\OfficeClickToRun.exe'
+        ImageLoaded|endswith: 'C:\Program Files\Common Files\microsoft shared\ClickToRun\AppVPolicy.dll'
     filter_optional_azure:
-        ImageLoaded|contains: ':\Packages\Plugins\Microsoft.GuestConfiguration.ConfigurationforWindows\'
+        ImageLoaded|contains: 'C:\Packages\Plugins\Microsoft.GuestConfiguration.ConfigurationforWindows\'
     filter_optional_dell:
         Image|contains:
-            - ':\Program Files\WindowsApps\DellInc.DellSupportAssistforPCs'
-            - ':\Windows\System32\backgroundTaskHost.exe'
+            - 'C:\Program Files\WindowsApps\DellInc.DellSupportAssistforPCs'
+            - 'C:\Windows\System32\backgroundTaskHost.exe'
         ImageLoaded|contains: ':\Program Files\WindowsApps\DellInc.DellSupportAssistforPCs'
     filter_optional_dell_wldp:
-        Image|contains: ':\Program Files\WindowsApps\DellInc.DellSupportAssistforPCs'
+        Image|contains: 'C:\Program Files\WindowsApps\DellInc.DellSupportAssistforPCs'
         Image|endswith: '\wldp.dll'
     filter_optional_checkpoint:
         Image|contains:
-            - ':\Program Files\CheckPoint\'
-            - ':\Program Files (x86)\CheckPoint\'
+            - 'C:\Program Files\CheckPoint\'
+            - 'C:\Program Files (x86)\CheckPoint\'
         Image|endswith: '\SmartConsole.exe'
         ImageLoaded|contains:
-            - ':\Program Files\CheckPoint\'
-            - ':\Program Files (x86)\CheckPoint\'
+            - 'C:\Program Files\CheckPoint\'
+            - 'C:\Program Files (x86)\CheckPoint\'
         ImageLoaded|endswith: '\PolicyManager.dll'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
