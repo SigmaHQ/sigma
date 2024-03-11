@@ -6,7 +6,7 @@ references:
     - https://www.hybrid-analysis.com/sample/759fb4c0091a78c5ee035715afe3084686a8493f39014aea72dae36869de9ff6?environmentId=100
 author: Florian Roth (Nextron Systems)
 date: 2017/11/04
-modified: 2023/02/05
+modified: 2024/03/11
 tags:
     - attack.defense_evasion
     - attack.t1218.011
@@ -18,37 +18,30 @@ detection:
     selection:
         Image|endswith: '\rundll32.exe'
         Initiated: 'true'
-    filter:
-        - DestinationIp|startswith:
-              - '10.'
-              - '192.168.'
-              - '172.16.'
-              - '172.17.'
-              - '172.18.'
-              - '172.19.'
-              - '172.20.'
-              - '172.21.'
-              - '172.22.'
-              - '172.23.'
-              - '172.24.'
-              - '172.25.'
-              - '172.26.'
-              - '172.27.'
-              - '172.28.'
-              - '172.29.'
-              - '172.30.'
-              - '172.31.'
-              - '127.'
-              - '20.' # Microsoft range, caused some FPs
-              - '51.103.' # Microsoft range, caused some FPs
-              - '51.104.' # Microsoft range, caused some FPs
-              - '51.105.' # Microsoft range, caused some FPs
-        - CommandLine|contains: 'PcaSvc.dll,PcaPatchSdbTask'
-        - SourceHostname|endswith: '.internal.cloudapp.net'
-    filter_update_processes:
+    filter_main_local_ranges:
+        DestinationIp|cidr:
+            - '127.0.0.0/8'
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+            - '::1/128'  # IPv6 loopback
+            - 'fe80::/10'  # IPv6 link-local addresses
+            - 'fc00::/7'  # IPv6 private addresses
+    filter_main_ms_ranges:
+        DestinationIp|cidr:
+            - '20.0.0.0/8' # Microsoft range, caused some FPs
+            - '51.103.0.0/16' # Microsoft AS8075 range, caused some FPs
+            - '51.104.0.0/16' # Microsoft AS8075 range, caused some FPs
+            - '51.105.0.0/16' # Microsoft AS8075 range, caused some FPs
+    filter_main_app_sdb:
+        CommandLine|endswith: '\system32\PcaSvc.dll,PcaPatchSdbTask'
+    filter_main_azure_managed:
+        SourceHostname|endswith: '.internal.cloudapp.net'
+    filter_main_svchost_update_processes:
+        # Note: This require "ParentImage" data enrichment.
         ParentImage: 'C:\Windows\System32\svchost.exe'
         DestinationPort: 443
-    condition: selection and not 1 of filter*
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Communication to other corporate systems that use IP addresses from public address spaces
 level: medium

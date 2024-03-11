@@ -6,7 +6,7 @@ references:
     - https://redcanary.com/blog/intelligence-insights-november-2021/
 author: elhoim
 date: 2022/04/28
-modified: 2022/06/02
+modified: 2024/03/11
 tags:
     - attack.t1055
     - attack.t1218
@@ -16,30 +16,18 @@ logsource:
     product: windows
     category: network_connection
 detection:
-    selection_mobsync:
+    selection:
         Image|endswith: '\mobsync.exe'
-    filter:
-        DestinationIp|startswith:
-            - '10.'
-            - '192.168.'
-            - '172.16.'
-            - '172.17.'
-            - '172.18.'
-            - '172.19.'
-            - '172.20.'
-            - '172.21.'
-            - '172.22.'
-            - '172.23.'
-            - '172.24.'
-            - '172.25.'
-            - '172.26.'
-            - '172.27.'
-            - '172.28.'
-            - '172.29.'
-            - '172.30.'
-            - '172.31.'
-        DestinationIsIpv6: 'false'
-    condition: selection_mobsync and not filter
+    filter_main_local_ranges:
+        DestinationIp|cidr:
+            - '127.0.0.0/8'
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+            - '::1/128'  # IPv6 loopback
+            - 'fe80::/10'  # IPv6 link-local addresses
+            - 'fc00::/7'  # IPv6 private addresses
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: medium
