@@ -35,14 +35,25 @@ jobs:
   validate-sigma-rules:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Set up Python 3.10
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
       - name: Install dependencies
-        run: pip install check-jsonschema
+        run: pip install requests check-jsonschema
       - name: Validate Sigma rules
-        run: tests/validate-sigma-schema/validate.sh
+        run: |
+          echo "Validating Sigma rules against sigma-schema.json"
+          check-jsonschema --schemafile $(python tests/validate-sigma-schema/validate.py schema) $(python tests/validate-sigma-schema/validate.py rules)
+        env:
+          SIGMA_RULES_PATH: |-
+            ./rules
+            ./rules-compliance
+            ./rules-dfir
+            ./rules-emerging-threats
+            ./rules-placeholder
+            ./rules-threat-hunting
+          SIGMA_SCHEMA_FILE: ${{ github.workspace }}/tests/validate-sigma-schema/sigma-schema.json
