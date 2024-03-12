@@ -8,7 +8,7 @@ references:
     - https://dtm.uk/wuauclt/
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 date: 2020/10/12
-modified: 2023/11/17
+modified: 2024/03/12
 tags:
     - attack.defense_evasion
     - attack.t1218
@@ -21,54 +21,25 @@ detection:
         Image|contains: 'wuauclt'
         CommandLine|contains: ' /RunHandlerComServer'
     # "C:\WINDOWS\uus\AMD64\wuauclt.exe" /DeploymentHandlerFullPath \\?\C:\Windows\UUS\AMD64\UpdateDeploy.dll /ClassId aaa256e1-5b21-4993-9188-18f07ccb3b98 /RunHandlerComServer
-    filter_main_ipv4:
-        DestinationIp|startswith: # Ranges excluded based on https://github.com/SigmaHQ/sigma/blob/0f176092326ab9d1e19384d30224e5f29f760d82/rules/windows/network_connection/net_connection_win_dllhost_net_connections.yml
-            - '10.'
-            - '127.'
-            - '169.254.'  # link-local address
-            - '172.16'
-            - '172.17'
-            - '172.18'
-            - '172.19'
-            - '172.20'
-            - '172.21'
-            - '172.22'
-            - '172.23'
-            - '172.24'
-            - '172.25'
-            - '172.26'
-            - '172.27'
-            - '172.28'
-            - '172.29'
-            - '172.30'
-            - '172.31'
-            - '192.168'
-    filter_main_ipv6:
-        DestinationIp|startswith:
-            - '::1'
-            - '0:0:0:0:0:0:0:1'  # IPv6 loopback variant
-            - 'fe80:'  # link-local address
-            - 'fc'  # private address range fc00::/7
-            - 'fd'  # private address range fc00::/7
+    filter_main_ip:
+        DestinationIp|cidr: # Ranges excluded based on https://github.com/SigmaHQ/sigma/blob/0f176092326ab9d1e19384d30224e5f29f760d82/rules/windows/network_connection/net_connection_win_dllhost_net_connections.yml
+            - '127.0.0.0/8'
+            - '10.0.0.0/8'
+            - '169.254.0.0/16'  # link-local address
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+            - '::1/128'  # IPv6 loopback
+            - 'fe80::/10'  # IPv6 link-local addresses
+            - 'fc00::/7'  # IPv6 private addresses
     filter_main_msrange:  # Sysmon
-        DestinationIp|startswith:
-            # Subnet: 20.184.0.0/13, 51.103.210.0/23 and others
-            - '20.184.'
-            - '20.185.'
-            - '20.186.'
-            - '20.187.'
-            - '20.188.'
-            - '20.189.'
-            - '20.190.'
-            - '20.191.'
-            - '20.220.'
-            - '20.221.'
-            - '23.79.'
-            - '51.10.'
-            - '51.103.'
-            - '51.104.'
-            - '51.105.'
-            - '52.239.'
+        DestinationIp|cidr:
+            - '20.184.0.0/13' #Microsoft Corporation
+            - '20.192.0.0/10' #Microsoft Corporation
+            - '23.79.0.0/16' #Microsoft Corporation
+            - '51.10.0.0/15'
+            - '51.103.0.0/16' #Microsoft Corporation
+            - '51.104.0.0/15' #Microsoft Corporation
+            - '52.224.0.0/11' #Microsoft Corporation
     filter_main_uus:
         CommandLine|contains:
             - ':\Windows\UUS\Packages\Preview\amd64\updatedeploy.dll /ClassId'
