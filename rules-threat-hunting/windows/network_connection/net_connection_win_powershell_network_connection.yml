@@ -9,7 +9,7 @@ references:
     - https://www.youtube.com/watch?v=DLtJTxMWZ2o
 author: Florian Roth (Nextron Systems)
 date: 2017/03/13
-modified: 2023/09/07
+modified: 2024/03/13
 tags:
     - attack.execution
     - attack.t1059.001
@@ -23,55 +23,23 @@ detection:
             - '\powershell.exe'
             - '\pwsh.exe'
         Initiated: 'true'
-    filter_main_local_ipv4:
-        DestinationIp|startswith:
-            - '10.'
-            - '192.168.'
-            - '172.16.'
-            - '172.17.'
-            - '172.18.'
-            - '172.19.'
-            - '172.20.'
-            - '172.21.'
-            - '172.22.'
-            - '172.23.'
-            - '172.24.'
-            - '172.25.'
-            - '172.26.'
-            - '172.27.'
-            - '172.28.'
-            - '172.29.'
-            - '172.30.'
-            - '172.31.'
-            - '127.0.0.1'
+    filter_main_local_ip:
+        DestinationIp|cidr:
+            - '127.0.0.0/8'
+            - '10.0.0.0/8'
+            - '169.254.0.0/16'  # link-local address
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+            - '::1/128'  # IPv6 loopback
+            - 'fe80::/10'  # IPv6 link-local addresses
+            - 'fc00::/7'  # IPv6 private addresses
         User|contains: # covers many language settings
             - 'AUTHORI'
             - 'AUTORI'
-    filter_main_local_ipv6:
-        DestinationIp|startswith:
-            - '::1'  # IPv6 loopback variant
-            - '0:0:0:0:0:0:0:1'  # IPv6 loopback variant
-            - 'fe80:'  # link-local address
-            - 'fc'  # private address range fc00::/7
-            - 'fd'  # private address range fc00::/7
     filter_main_msrange:
-        DestinationIp|startswith:
-            # Subnet: 20.184.0.0/13
-            - '20.184.'
-            - '20.185.'
-            - '20.186.'
-            - '20.187.'
-            - '20.188.'
-            - '20.189.'
-            - '20.190.'
-            - '20.191.'
-            - '23.79.'
-            - '51.10.'
-            # Subnet: 51.103.210.0/23
-            - '51.103.'
-            - '51.104.'
-            - '51.105.'
-            - '52.239.'
+        DestinationIp|cidr:
+            - '20.184.0.0/13'
+            - '51.103.210.0/23'
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Administrative scripts

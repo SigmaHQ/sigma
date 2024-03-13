@@ -10,7 +10,7 @@ references:
     - https://nasbench.medium.com/what-is-the-dllhost-exe-process-actually-running-ef9fe4c19c08
 author: bartblaze
 date: 2020/07/13
-modified: 2024/03/11
+modified: 2024/03/12
 tags:
     - attack.defense_evasion
     - attack.t1218
@@ -34,23 +34,15 @@ detection:
             - 'fc00::/7'  # IPv6 private addresses
             - 'fe80::/10'  # IPv6 link-local addresses
     filter_main_msrange:
-        DestinationIp|startswith:
-            - '20.184.'
-            - '20.185.'
-            - '20.186.'
-            - '20.187.'
-            - '20.188.'
-            - '20.189.'
-            - '20.190.'
-            - '20.191.'
-            - '20.223.'
-            - '23.79.'
-            - '51.10.'
-            - '51.103.'
-            - '51.104.'
-            - '51.105.'
-            - '52.239.'
-            - '204.79.197'
+        DestinationIp|cidr:
+            - '20.184.0.0/13' # Microsoft Corporation
+            - '20.192.0.0/10' # Microsoft Corporation
+            - '23.72.0.0/13'  # Akamai International B.V.
+            - '51.10.0.0/15'  # Microsoft Corporation
+            - '51.103.0.0/16' # Microsoft Corporation
+            - '51.104.0.0/15' # Microsoft Corporation
+            - '52.224.0.0/11'  # Microsoft Corporation
+            - '204.79.197.0/24' # Microsoft Corporation'
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Communication to other corporate systems that use IP addresses from public address spaces

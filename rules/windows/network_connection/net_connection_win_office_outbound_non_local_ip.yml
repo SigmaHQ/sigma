@@ -9,7 +9,7 @@ references:
     - https://corelight.com/blog/detecting-cve-2021-42292
 author: Christopher Peacock '@securepeacock', SCYTHE '@scythe_io', Florian Roth (Nextron Systems), Tim Shelton
 date: 2021/11/10
-modified: 2024/03/07
+modified: 2024/03/13
 tags:
     - attack.execution
     - attack.t1203
@@ -30,27 +30,19 @@ detection:
             - '10.0.0.0/8'
             - '172.16.0.0/12'
             - '192.168.0.0/16'
+            - '169.254.0.0/16'
             - '::1/128'  # IPv6 loopback
             - 'fe80::/10'  # IPv6 link-local addresses
             - 'fc00::/7'  # IPv6 private addresses
     filter_main_msrange:
-        DestinationIp|startswith:
-            - '20.184.'
-            - '20.185.'
-            - '20.186.'
-            - '20.187.'
-            - '20.188.'
-            - '20.189.'
-            - '20.190.'
-            - '20.191.'
-            - '20.223.'
-            - '23.79.'
-            - '51.10.'
-            - '51.103.'
-            - '51.104.'
-            - '51.105.'
-            - '52.239.'
-            - '204.79.197'
+        DestinationIp|cidr:
+            - '20.184.0.0/13' # Microsoft Corporation
+            - '20.192.0.0/10' # Microsoft Corporation
+            - '23.72.0.0/13'  # Akamai International B.V.
+            - '51.10.0.0/15'  # Microsoft Corporation
+            - '51.103.0.0/16' # Microsoft Corporation
+            - '51.104.0.0/15' # Microsoft Corporation
+            - '204.79.197.0/24' # Microsoft Corporation
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - You may have to tune certain domains out that Excel may call out to, such as microsoft or other business use case domains.
