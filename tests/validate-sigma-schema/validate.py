@@ -25,16 +25,13 @@ def get_envs() -> Dict[str, Any]:
 
     sigma_rules_path = os.environ.get("SIGMA_RULES_PATH")
 
-    # Check first if the script is running inside an action and not a workspace
-    root_dir = github_action_path if github_action_path else github_workspace
-
     # If SIGMA_RULES_PATH is not set, use GITHUB_WORKSPACE as a fallback
     if not sigma_rules_path:
         sigma_rules_path = [github_workspace]
     else:
         # Split the SIGMA_RULES_PATH by newlines and remove empty strings
         sigma_rules_path = [
-            root_dir / Path(path.strip())
+            github_workspace / Path(path.strip())
             for path in sigma_rules_path.splitlines(True)
             if path
         ]
@@ -53,7 +50,6 @@ def get_envs() -> Dict[str, Any]:
         "SIGMA_RULES_PATH": sigma_rules_path,
         "SIGMA_SCHEMA_FILE": sigma_schema_file,
         "SIGMA_SCHEMA_URL": sigma_schema_url,
-        "ROOT_DIR": root_dir,
     }
 
 
@@ -142,7 +138,7 @@ def download_schema_file(envs: Dict[str, Any]) -> Path | NoReturn:
                 f"Failed to download schema file {schema_file}, skipping validation"
             )
             os._exit(-1)
-    return (envs["ROOT_DIR"] / schema_file).absolute()
+    return (envs["GITHUB_WORKSPACE"] / schema_file).absolute()
 
 
 def help() -> None:
