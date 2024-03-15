@@ -73,7 +73,16 @@ def generate_all_files(
     """
 
     for path in root.rglob("*"):
-        if not path.is_file() or any([path.match(ex) for ex in excludes]):
+        # NOTE: path.is_file() is used to skip directories, however it will also
+        # skip symlinks to files and these symlinked files might reside in inaccessible
+        # directories, hence it'll raise a PermissionError. This is why it is run
+        # using sudo in the action.yml file. If running as sudo is not an option,
+        # the code can be modified to catch the PermissionError and skip the file.
+        try:
+            if not path.is_file() or any([path.match(ex) for ex in excludes]):
+                continue
+        except PermissionError:
+            warnings.warn(f"PermissionError: Could not access {path}, skipping file")
             continue
 
         if path.suffix in extensions:
