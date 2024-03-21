@@ -97,10 +97,10 @@ If you find a false positive or would like to propose a new detection rule idea 
 * [IBM QRadar](https://community.ibm.com/community/user/security/blogs/gladys-koskas1/2023/08/02/qradar-natively-supports-sigma-for-rules-creation)
 * [Impede Detection Platform](https://impede.ai/)
 * [Joe Sandbox](https://www.joesecurity.org/blog/8225577975210857708)
-* [LimaCharlie](https://docs.limacharlie.io/docs/sigma-rules)
+* [LimaCharlie](https://limacharlie.io/)
 * [MISP](http://www.misp-project.org/2017/03/26/MISP.2.4.70.released.html) (Since Version 2.4.70, March 2017)
-* [Nextron's Aurora Agent](https://www.nextron-systems.com/2021/11/13/aurora-sigma-based-edr-agent-preview/)
-* [Nextron's THOR Scanner](https://www.nextron-systems.com/2018/06/28/spark-applies-sigma-rules-in-eventlog-scan/) - Scan with Sigma rules on endpoints
+* [Nextron's Aurora Agent](https://www.nextron-systems.com/aurora/)
+* [Nextron's THOR Scanner](https://www.nextron-systems.com/thor/) - Scan with Sigma rules on endpoints
 * [RANK VASA](https://globenewswire.com/news-release/2019/03/04/1745907/0/en/RANK-Software-to-Help-MSSPs-Scale-Cybersecurity-Offerings.html)
 * [Sekoia.io XDR](https://www.sekoia.io) - XDR supporting Sigma and Sigma Correlation rules languages
 * [sigma2stix](https://github.com/signalscorps/sigma2stix) - Converts the entire SigmaHQ Ruleset into STIX 2.1 Objects.
