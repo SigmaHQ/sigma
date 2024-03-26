@@ -1,14 +1,14 @@
-title: Change Winevt Event Access Permission Via Registry
+title: Change Winevt Channel Access Permission Via Registry
 id: 7d9263bd-dc47-4a58-bc92-5474abab390c
 status: experimental
-description: Detects tampering with the "ChannelAccess" registry key in order to change access to Windows event channel
+description: Detects tampering with the "ChannelAccess" registry key in order to change access to Windows event channel.
 references:
     - https://app.any.run/tasks/77b2e328-8f36-46b2-b2e2-8a80398217ab/
     - https://learn.microsoft.com/en-us/windows/win32/api/winevt/
     - https://itconnect.uw.edu/tools-services-support/it-systems-infrastructure/msinf/other-help/understanding-sddl-syntax/
 author: frack113
 date: 2022/09/17
-modified: 2023/08/17
+modified: 2024/03/25
 tags:
     - attack.defense_evasion
     - attack.t1562.002
@@ -17,18 +17,19 @@ logsource:
     product: windows
 detection:
     selection:
-        TargetObject|startswith: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\'
+        TargetObject|contains: '\Microsoft\Windows\CurrentVersion\WINEVT\Channels\'
         TargetObject|endswith: '\ChannelAccess'
         # Add more interesting combinations if you found them
         Details|contains:
+            - '(A;;0x1;;;LA)' # Local administrator having GENERIC ALL
             - '(A;;0x1;;;SY)' # Local System having GENERIC ALL
             - '(A;;0x5;;;BA)' # Built-in administrators having GENERIC ALL and  GENERIC WRITE
-            - '(A;;0x1;;;LA)' # Local administrator having GENERIC ALL
-    filter_trustedinstaller:
+    filter_main_trustedinstaller:
         Image: 'C:\Windows\servicing\TrustedInstaller.exe'
-    filter_ti_worker:
+    filter_main_tiworker:
+        Image|startswith: 'C:\Windows\WinSxS\'
         Image|endswith: '\TiWorker.exe'
-    condition: selection and not 1 of filter*
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high

@@ -7,7 +7,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1112/T1112.md#atomic-test-34---windows-add-registry-value-to-load-service-in-safe-mode-with-network
 author: frack113
 date: 2022/04/04
-modified: 2023/10/27
+modified: 2024/03/25
 tags:
     - attack.defense_evasion
     - attack.t1564.001
@@ -16,17 +16,17 @@ logsource:
     product: windows
 detection:
     selection:
-        TargetObject|startswith:
-            - 'HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot\Minimal\'
-            - 'HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot\Network\'
+        TargetObject|contains:
+            - '\Control\SafeBoot\Minimal\'
+            - '\Control\SafeBoot\Network\'
         TargetObject|endswith: '\(Default)'
-        Details: Service
-    filter_sophos:
+        Details: 'Service'
+    filter_optional_sophos:
         Image: 'C:\WINDOWS\system32\msiexec.exe'
-        TargetObject:
-            - 'HKLM\System\CurrentControlSet\Control\SafeBoot\Minimal\SAVService\(Default)'
-            - 'HKLM\System\CurrentControlSet\Control\SafeBoot\Network\SAVService\(Default)'
-    condition: selection and not 1 of filter_*
+        TargetObject|endswith:
+            - '\Control\SafeBoot\Minimal\SAVService\(Default)'
+            - '\Control\SafeBoot\Network\SAVService\(Default)'
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high

@@ -7,7 +7,7 @@ references:
     - https://lolbas-project.github.io/lolbas/Binaries/Runonce/
 author: 'Avneet Singh @v3t0_, oscd.community'
 date: 2020/11/15
-modified: 2022/04/04
+modified: 2024/03/25
 tags:
     - attack.defense_evasion
     - attack.t1112
@@ -16,17 +16,18 @@ logsource:
     category: registry_event
 detection:
     selection:
-        TargetObject|startswith: 'HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components'
+        TargetObject|contains: '\Microsoft\Active Setup\Installed Components'
         TargetObject|endswith: '\StubPath'
-    filter_chrome:
-        Details|startswith: '"C:\Program Files\Google\Chrome\Application\'
-        Details|contains: '\Installer\chrmstp.exe" --configure-user-settings --verbose-logging --system-level' # In some cases the Details will contain an additional flag called "--channel=stable" at the end
-    filter_edge:
-        Details|startswith:
-            - '"C:\Program Files (x86)\Microsoft\Edge\Application\'
-            - '"C:\Program Files\Microsoft\Edge\Application\'
+    filter_optional_chrome:
+        Details|contains|all:
+            - 'C:\Program Files\Google\Chrome\Application\'
+            - '\Installer\chrmstp.exe" --configure-user-settings --verbose-logging --system-level' # In some cases the Details will contain an additional flag called "--channel=stable" at the end
+    filter_optional_edge:
+        Details|contains:
+            - 'C:\Program Files (x86)\Microsoft\Edge\Application\'
+            - 'C:\Program Files\Microsoft\Edge\Application\'
         Details|endswith: '\Installer\setup.exe" --configure-user-settings --verbose-logging --system-level --msedge --channel=stable'
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Legitimate modification of the registry key by legitimate program
 level: medium

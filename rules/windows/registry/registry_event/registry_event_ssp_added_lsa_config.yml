@@ -1,9 +1,11 @@
 title: Security Support Provider (SSP) Added to LSA Configuration
 id: eeb30123-9fbd-4ee8-aaa0-2e545bbed6dc
 status: test
-description: Detects the addition of a SSP to the registry. Upon a reboot or API call, SSP DLLs gain access to encrypted and plaintext passwords stored in Windows.
+description: |
+    Detects the addition of a SSP to the registry. Upon a reboot or API call, SSP DLLs gain access to encrypted and plaintext passwords stored in Windows.
 references:
     - https://powersploit.readthedocs.io/en/latest/Persistence/Install-SSP/
+    - https://github.com/EmpireProject/Empire/blob/08cbd274bef78243d7a8ed6443b8364acd1fc48b/data/module_source/persistence/Install-SSP.ps1#L157
 author: iwillkeepwatch
 date: 2019/01/18
 modified: 2022/08/09
@@ -14,15 +16,15 @@ logsource:
     category: registry_event
     product: windows
 detection:
-    selection_registry:
-        TargetObject:
-            - 'HKLM\System\CurrentControlSet\Control\Lsa\Security Packages'
-            - 'HKLM\System\CurrentControlSet\Control\Lsa\OSConfig\Security Packages'
-    exclusion_images:
+    selection:
+        TargetObject|endswith:
+            - '\Control\Lsa\Security Packages'
+            - '\Control\Lsa\OSConfig\Security Packages'
+    filter_main_msiexec:
         Image:
             - 'C:\Windows\system32\msiexec.exe'
             - 'C:\Windows\syswow64\MsiExec.exe'
-    condition: selection_registry and not exclusion_images
+    condition: selection and not 1 of filter_main_*
 falsepositives:
-    - Unlikely
-level: critical
+    - Unknown
+level: high
