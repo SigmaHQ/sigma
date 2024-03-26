@@ -31,9 +31,17 @@ detection:
             - '\AppData\Local\'
             - '\AppData\Roaming\'
     filter_optional_zoom:
-        TargetObject|contains: 'Services\ZoomCptService'
+        TargetObject|contains: '\Services\ZoomCptService'
         Details|contains: 'C:\Program Files\Common Files\Zoom\Support\CptService.exe'
-    condition: selection and not 1 of filter_main_*
+    filter_optional_mbami:
+        TargetObject|contains: '\Services\MBAMInstallerService'
+        Details|contains|all:
+            - 'C:\Users\'
+            - 'AppData\Local\Temp\MBAMInstallerService.exe'
+    filter_main_windefend:
+        TargetObject|contains: '\Services\WinDefend\'
+        Details|contains: 'C:\ProgramData\Microsoft\Windows Defender\'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: medium
