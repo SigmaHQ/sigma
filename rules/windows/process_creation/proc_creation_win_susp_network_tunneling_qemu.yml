@@ -1,0 +1,28 @@
+title: Suspicious Network Tunneling with QEMU
+id: c7f1975e-d6d0-4c49-a898-8ad328b76706
+status: experimental
+description: Detects potentially suspicious network tunneling activities initiated through QEMU virtual machine instances on Windows systems.
+references:
+    - https://securelist.com/network-tunneling-with-qemu/111803/
+    - https://www.qemu.org/docs/master/system/invocation.html#hxtool-5
+author: Hunter Juhan (@threatHNTR)
+date: 2024/03/13
+tags:
+    - attack.command_and_control
+    - attack.t1572
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        Image|contains: \qemu-system-
+    selection_cli:
+        CommandLine|contains|all:
+            - '-netdev'
+            - 'socket'
+            - 'id='
+            - 'connect='
+    condition: selection_img and selection_cli
+falsepositives:
+    - Legitimate QEMU usage
+level: medium
