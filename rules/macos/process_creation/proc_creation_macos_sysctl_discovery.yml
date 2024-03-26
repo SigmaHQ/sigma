@@ -1,0 +1,34 @@
+title: MacOS System Discovery Using Sysctl
+id: 6ff08e55-ea53-4f27-94a1-eff92e6d9d5c
+status: experimental
+description: |
+    Detects the execution of "sysctl" with specific arguments that have been used by threat actors and malware. It provides system hardware information.
+    This process is primarily used to detect and avoid virtualization and analysis environments.
+references:
+    - https://www.loobins.io/binaries/sysctl/#
+    - https://evasions.checkpoint.com/techniques/macos.html
+    - https://www.welivesecurity.com/2019/04/09/oceanlotus-macos-malware-update/
+    - https://www.sentinelone.com/labs/20-common-tools-techniques-used-by-macos-threat-actors-malware/
+author: Pratinav Chandra
+date: 2024/03/26
+tags:
+    - attack.defense_evasion
+    - attack.t1497.001
+    - attack.discovery
+    - attack.t1082
+logsource:
+    product: macos
+    category: process_creation
+detection:
+    sysctl_selection_img:
+        - Image|endswith: '/sysctl'
+        - CommandLine|contains: 'sysctl'
+    sysctl_selection_cmd:
+        CommandLine|contains:
+          - 'hw.'
+          - 'machdep.'
+          - 'kern.'
+    condition: all of sysctl_selection_*
+falsepositives:
+    - Legitimate administrative activities
+level: medium
