@@ -1,7 +1,9 @@
 title: Register New IFiltre For Persistence
 id: b23818c7-e575-4d13-8012-332075ec0a2b
 status: experimental
-description: Detects when an attacker register a new IFilter for an extension. Microsoft Windows Search uses filters to extract the content of items for inclusion in a full-text index. You can extend Windows Search to index new or proprietary file types by writing filters to extract the content, and property handlers to extract the properties of files
+description: |
+    Detects when an attacker registers a new IFilter for an extension. Microsoft Windows Search uses filters to extract the content of items for inclusion in a full-text index.
+    You can extend Windows Search to index new or proprietary file types by writing filters to extract the content, and property handlers to extract the properties of files.
 references:
     - https://persistence-info.github.io/Data/ifilters.html
     - https://twitter.com/0gtweet/status/1468548924600459267
@@ -9,7 +11,7 @@ references:
     - https://github.com/gtworek/PSBits/blob/8d767892f3b17eefa4d0668f5d2df78e844f01d8/IFilter/Dll.cpp#L281-L308
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/07/21
-modified: 2023/08/17
+modified: 2024/03/26
 tags:
     - attack.persistence
 logsource:
@@ -17,15 +19,13 @@ logsource:
     product: windows
 detection:
     selection_ext:
-        TargetObject|startswith:
-            - 'HKLM\SOFTWARE\Classes\.'
-            - 'HKEY_LOCAL_MACHINE\SOFTWARE\Classes\.'
-        TargetObject|contains: '\PersistentHandler'
+        TargetObject|contains|all:
+            - '\SOFTWARE\Classes\.'
+            - '\PersistentHandler'
     selection_clsid:
-        TargetObject|startswith:
-            - 'HKLM\SOFTWARE\Classes\CLSID'
-            - 'HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID'
-        TargetObject|contains: '\PersistentAddinsRegistered\{89BCB740-6119-101A-BCB7-00DD010655AF}'
+        TargetObject|contains|all:
+            - '\SOFTWARE\Classes\CLSID'
+            - '\PersistentAddinsRegistered\{89BCB740-6119-101A-BCB7-00DD010655AF}'
     filter_default_targets:
         TargetObject|contains:
             # TODO: Add the default extension PersistentHandler.
@@ -61,7 +61,7 @@ detection:
             - '\CLSID\{FB10BD80-A331-4e9e-9EB7-00279903AD99}\' # Office Outlook MSG Persistent Handler
     filter_generic_paths:
         Image|startswith:
-            # We assume if an attacker has access to one of these directories. Then he already has admin.
+            # Note: We assume if an attacker has access to one of these directories. Then he already has admin.
             - 'C:\Windows\System32\'
             - 'C:\Program Files (x86)\'
             - 'C:\Program Files\'
