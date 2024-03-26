@@ -1,0 +1,36 @@
+title: Service Binary in User Controlled Folder
+id: 277dc340-0540-42e7-8efb-5ff460045e07
+related:
+    - id: 277dc340-0540-42e7-8efb-5ff460045e07
+      type: obsoletes
+status: experimental
+description: |
+    Detect the setting of the "ImagePath" value of a service registry key to a path controlled by a non administrator user such as "\AppData\" or "\ProgramData\".
+    Attackers often use such directories for staging purposes.
+    This rule might also trigger on badly written software, where if an attacker can control an auto starting service, he might achieve persistence or privilege escalation.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
+author: Nasreddine Bencherchali (Nextron Systems), Florian Roth (Nextron Systems)
+date: 2022/05/02
+modified: 2024/03/25
+tags:
+    - attack.defense_evasion
+    - attack.t1112
+    - detection.threat_hunting
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains|all:
+            - 'ControlSet'
+            - '\Services\'
+        TargetObject|endswith: '\ImagePath'
+        Details|contains:
+            - ':\ProgramData\'
+            - '\AppData\Local\'
+            - '\AppData\Roaming\'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium

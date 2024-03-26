@@ -8,7 +8,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1547.010/T1547.010.md
 author: frack113
 date: 2021/12/30
-modified: 2023/08/17
+modified: 2024/03/25
 tags:
     - attack.persistence
     - attack.t1547.010
@@ -17,23 +17,23 @@ logsource:
     product: windows
 detection:
     selection:
-        TargetObject|startswith: 'HKLM\System\CurrentControlSet\Control\Print\Monitors\'
+        TargetObject|contains: '\Control\Print\Monitors\'
         Details|endswith: '.dll'
-    filter_cutepdf:
+    filter_optional_cutepdf:
         Image: 'C:\Windows\System32\spoolsv.exe'
-        TargetObject|contains: '\System\CurrentControlSet\Control\Print\Monitors\CutePDF Writer Monitor v4.0\Driver'
+        TargetObject|contains: '\Control\Print\Monitors\CutePDF Writer Monitor v4.0\Driver'
         Details: 'cpwmon64_v40.dll'
         User|contains: # covers many language settings
             - 'AUTHORI'
             - 'AUTORI'
-    filter_leg1:
-        TargetObject|contains: 'Control\Print\Monitors\MONVNC\Driver'
-    filter_leg2:
+    filter_optional_monvnc:
+        TargetObject|contains: '\Control\Print\Monitors\MONVNC\Driver'
+    filter_optional_vnc:
         TargetObject|contains|all:
             - 'Control\Print\Environments\'
             - '\Drivers\'
             - '\VNC Printer'
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Unknown
-level: high
+level: medium
