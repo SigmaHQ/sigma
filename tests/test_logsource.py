@@ -235,7 +235,7 @@ class TestRules(unittest.TestCase):
             if logsource and detection:
                 full_logsource = self.full_logsource(logsource)
                 list_valid = self.get_logsource(full_logsource)
-                fisrt_time = True
+                first_time = True
 
                 if list_valid and self.not_commun(full_logsource, list_valid):
                     for field in self.get_detection_field(detection):
@@ -246,9 +246,9 @@ class TestRules(unittest.TestCase):
                                     file, field
                                 )
                             )
-                            if fisrt_time:
+                            if first_time:
                                 files_with_fieldname_issues.append(file)
-                                fisrt_time = False  # can be many error in the same rule
+                                first_time = False  # can be many error in the same rule
 
         self.assertEqual(
             files_with_fieldname_issues,
