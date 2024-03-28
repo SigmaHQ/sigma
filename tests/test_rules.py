@@ -255,7 +255,7 @@ class TestRules(unittest.TestCase):
 
                     # We add this check in case of keyword rules. Where no field is used. The parser returns a list instead of a dict
                     # If the 2 list are different that means they aren't the same
-                    if (type(detection2[named_condition]) == list) or (
+                    if (type(detection1[named_condition]) == list) or (
                         type(detection2[named_condition]) == list
                     ):
                         condition_value1 = detection1[named_condition]
