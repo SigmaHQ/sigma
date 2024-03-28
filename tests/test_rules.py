@@ -557,7 +557,7 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
             elif len(filename) < 14:
                 print(
-                    Fore.YELLOW + "Rule {} has a file name too short <10.".format(file)
+                    Fore.YELLOW + "Rule {} has a file name too short <14.".format(file)
                 )
                 faulty_rules.append(file)
             elif filename_pattern.match(filename) == None or not "_" in filename:
@@ -838,7 +838,7 @@ class TestRules(unittest.TestCase):
                 print(
                     Fore.RED
                     + "Rule {} has the selection ({}) with a list of only 1 element in detection".format(
-                        file, key
+                        file, selection_name
                     )
                 )
                 valid_ = False
