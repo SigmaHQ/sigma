@@ -1,0 +1,31 @@
+title: CVE-2024-3094 SSHD backdoor in XZ Utils
+id: 99f0342f-c632-46a8-8039-3c6d57733ba2
+status: test
+description: This rule detects a version of the liblzma library infected with a backdoor loaded by SSHD. Affected versions 5.6.0, 5.6.1 .
+references:
+    - https://sysdig.com/blog/cve-2024-3094-detecting-the-sshd-backdoor-in-xz-utils/
+author: d4ns4n_ (Wuerth Phoenix)
+date: 2024/02/04
+tags:
+    - attack.persistence
+    - attack.execution
+    - attack.lateral_movement
+    - attack.t1210
+logsource:
+    product: linux
+    service: sshd
+detection:
+    selection_1:
+        Image|endswith: '/sshd'
+        CommandLine|contains:
+            - 'liblzma.so.5.6.0'
+            - 'liblzma.so.5.6.1'
+    selection_2:
+        ParentImage|endswith: '/sshd'
+        ParentCommandLine|contains:
+            - 'liblzma.so.5.6.0'
+            - 'liblzma.so.5.6.1'
+    condition: 1 of selection*
+falsepositives:
+    - Unknown
+level: critical
