@@ -4,12 +4,12 @@ related:
     - id: 1277f594-a7d1-4f28-a2d3-73af5cbeab43
       type: derived
 status: test
-description: Detects Windows executables that writes files with suspicious extensions
+description: Detects Windows executables that write files with suspicious extensions
 references:
     - Internal Research
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/08/12
-modified: 2023/03/14
+modified: 2024/04/03
 tags:
     - attack.defense_evasion
     - attack.t1036
@@ -48,7 +48,13 @@ detection:
             - '.ps1'
             - '.hta'
             - '.iso'
-    condition: 1 of selection_*
+    filter_main_AppLockerPolicyTest:
+        Image: 'C:\Windows\System32\dllhost.exe'
+        TargetFilename|contains:
+            - ':\Users\'
+            - '\AppData\Local\Temp\__PSScriptPolicyTest_'
+        TargetFilename|endswith: '.ps1'
+    condition: 1 of selection_* and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high
