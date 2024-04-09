@@ -1,0 +1,40 @@
+title: Potential KeyScrambler.exe DLL Sideloading
+id: d2451be2-b582-4e15-8701-4196ac180260
+status: experimental
+description: Detects potential DLL side loading of KeyScramblerIE.dll by KeyScrambler.exe. Various threat actors and malware have been found sideloading the masqueraded KeyScramblerIE.dll through KeyScrambler.exe.
+references:
+    - https://thehackernews.com/2024/03/two-chinese-apt-groups-ramp-up-cyber.html
+    - https://csirt-cti.net/2024/02/01/stately-taurus-continued-new-information-on-cyberespionage-attacks-against-myanmar-military-junta/
+    - https://bazaar.abuse.ch/sample/5cb9876681f78d3ee8a01a5aaa5d38b05ec81edc48b09e3865b75c49a2187831/
+    - https://twitter.com/Max_Mal_/status/1775222576639291859
+    - https://twitter.com/DTCERT/status/1712785426895839339
+author: Swachchhanda Shrawan Poudel
+date: 2024/04/05
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1574.001
+    - attack.t1574.002
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection_image:
+        Image|endswith:
+            - '\KeyScrambler.exe'
+            - '\KeyScramblerLogon.exe'
+    selection_image_loaded:
+        ImageLoaded|endswith: '\KeyScramblerIE.dll'
+    filter_legitimate_path:
+        - Image|contains:
+              - '\Program Files (x86)\KeyScrambler\'
+              - '\Program Files\keyscrambler\'
+        - ImageLoaded|contains:
+              - '\Program Files (x86)\KeyScrambler\'
+              - '\Program Files\keyscrambler\'
+    filter_signature:
+        Signature: 'QFX Software Corporation'
+    condition: all of selection_* and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: high
