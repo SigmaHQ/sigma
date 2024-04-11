@@ -9,7 +9,7 @@ references:
     - Internal Research
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/08/12
-modified: 2024/04/04
+modified: 2024/04/11
 tags:
     - attack.defense_evasion
     - attack.t1036
@@ -54,6 +54,16 @@ detection:
             - ':\Users\'
             - '\AppData\Local\Temp\__PSScriptPolicyTest_'
         TargetFilename|endswith: '.ps1'
+    filter_main_script_gpo_machine:
+        Image: 'C:\Windows\system32\svchost.exe'
+        TargetFilename|contains|all:
+            - ':\Windows\System32\GroupPolicy\DataStore\'
+            - '\sysvol\'
+            - '\Policies\'
+            - '\Machine\Scripts\Startup\'
+        TargetFilename|endswith: 
+            - '.ps1'
+            - '.bat'
     condition: 1 of selection_* and not 1 of filter_main_*
 falsepositives:
     - Unknown
