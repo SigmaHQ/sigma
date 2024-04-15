@@ -9,7 +9,7 @@ references:
     - Internal Research
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/08/12
-modified: 2024/04/04
+modified: 2024/04/15
 tags:
     - attack.defense_evasion
     - attack.t1036
@@ -19,41 +19,51 @@ logsource:
 detection:
     selection_generic:
         Image|endswith:
-            - '\smss.exe'
+            - '\csrss.exe'
+            - '\lsass.exe'
             - '\RuntimeBroker.exe'
             - '\sihost.exe'
-            - '\lsass.exe'
-            - '\csrss.exe'
-            - '\winlogon.exe'
+            - '\smss.exe'
             - '\wininit.exe'
+            - '\winlogon.exe'
         TargetFilename|endswith:
             - '.bat'
-            - '.vbe'
-            - '.txt'
-            - '.vbs'
+            - '.dll'
             - '.exe'
-            - '.ps1'
             - '.hta'
             - '.iso'
-            - '.dll'
+            - '.ps1'
+            - '.txt'
+            - '.vbe'
+            - '.vbs'
     selection_special:
         Image|endswith:
+            - '\dllhost.exe'
             - '\rundll32.exe'
             - '\svchost.exe'
-            - '\dllhost.exe'
         TargetFilename|endswith:
             - '.bat'
-            - '.vbe'
-            - '.vbs'
-            - '.ps1'
             - '.hta'
             - '.iso'
+            - '.ps1'
+            - '.vbe'
+            - '.vbs'
     filter_main_AppLockerPolicyTest:
         Image: 'C:\Windows\System32\dllhost.exe'
         TargetFilename|contains|all:
             - ':\Users\'
             - '\AppData\Local\Temp\__PSScriptPolicyTest_'
         TargetFilename|endswith: '.ps1'
+    filter_main_script_gpo_machine:
+        Image: 'C:\Windows\system32\svchost.exe'
+        TargetFilename|contains|all:
+            - 'C:\Windows\System32\GroupPolicy\DataStore\'
+            - '\sysvol\'
+            - '\Policies\'
+            - '\Machine\Scripts\Startup\'
+        TargetFilename|endswith:
+            - '.ps1'
+            - '.bat'
     condition: 1 of selection_* and not 1 of filter_main_*
 falsepositives:
     - Unknown
