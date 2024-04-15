@@ -9,7 +9,7 @@ references:
     - Internal Research
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/08/12
-modified: 2024/04/11
+modified: 2024/04/15
 tags:
     - attack.defense_evasion
     - attack.t1036
@@ -19,35 +19,35 @@ logsource:
 detection:
     selection_generic:
         Image|endswith:
-            - '\smss.exe'
+            - '\csrss.exe'
+            - '\lsass.exe'
             - '\RuntimeBroker.exe'
             - '\sihost.exe'
-            - '\lsass.exe'
-            - '\csrss.exe'
-            - '\winlogon.exe'
+            - '\smss.exe'
             - '\wininit.exe'
+            - '\winlogon.exe'
         TargetFilename|endswith:
             - '.bat'
-            - '.vbe'
-            - '.txt'
-            - '.vbs'
+            - '.dll'
             - '.exe'
-            - '.ps1'
             - '.hta'
             - '.iso'
-            - '.dll'
+            - '.ps1'
+            - '.txt'
+            - '.vbe'
+            - '.vbs'
     selection_special:
         Image|endswith:
+            - '\dllhost.exe'
             - '\rundll32.exe'
             - '\svchost.exe'
-            - '\dllhost.exe'
         TargetFilename|endswith:
             - '.bat'
-            - '.vbe'
-            - '.vbs'
-            - '.ps1'
             - '.hta'
             - '.iso'
+            - '.ps1'
+            - '.vbe'
+            - '.vbs'
     filter_main_AppLockerPolicyTest:
         Image: 'C:\Windows\System32\dllhost.exe'
         TargetFilename|contains|all:
@@ -57,7 +57,7 @@ detection:
     filter_main_script_gpo_machine:
         Image: 'C:\Windows\system32\svchost.exe'
         TargetFilename|contains|all:
-            - ':\Windows\System32\GroupPolicy\DataStore\'
+            - 'C:\Windows\System32\GroupPolicy\DataStore\'
             - '\sysvol\'
             - '\Policies\'
             - '\Machine\Scripts\Startup\'
