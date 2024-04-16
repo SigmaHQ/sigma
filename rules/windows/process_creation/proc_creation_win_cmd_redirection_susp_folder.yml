@@ -1,4 +1,4 @@
-title: Suspicious CMD Shell Output Redirect
+title: Potentially Suspicious CMD Shell Output Redirect
 id: 8e0bb260-d4b2-4fff-bb8d-3f82118e6892
 related:
     - id: aa2efee7-34dd-446e-8a37-40790a66efd7
@@ -6,12 +6,14 @@ related:
     - id: 4f4eaa9f-5ad4-410c-a4be-bc6132b0175a
       type: similar
 status: experimental
-description: Detects inline Windows shell commands redirecting output via the ">" symbol to a suspicious location
+description: |
+    Detects inline Windows shell commands redirecting output via the ">" symbol to a suspicious location.
+    This technique is sometimes used by malicious actors in order to redirect the output of reconnaissance commands such as "hostname" and "dir" to files for future exfiltration.
 references:
     - https://thedfirreport.com/2022/07/11/select-xmrig-from-sqlserver/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/07/12
-modified: 2023/05/15
+modified: 2024/03/19
 tags:
     - attack.defense_evasion
     - attack.t1218
@@ -24,24 +26,18 @@ detection:
         - OriginalFileName: 'Cmd.Exe'
     selection_cli_1:
         CommandLine|contains:
-            # Add more suspicious locations as you find them
-            # The space from the start is missing to cover append operations ">>"
-            - '> \Users\Public\'
-            - '> %APPDATA%\'
-            - '> %TEMP%\'
-            - '> %TMP%\'
-            - '> %USERPROFILE%\'
-            - '> C:\Temp\'
-            - '> C:\Users\Public\'
-            - '> C:\Windows\Temp\'
-            - '>\Users\Public\'
-            - '>%APPDATA%\'
-            - '>%TEMP%\'
-            - '>%TMP%\'
-            - '>%USERPROFILE%\'
-            - '>C:\Temp\'
-            - '>C:\Users\Public\'
-            - '>C:\Windows\Temp\'
+            # Note: Add more suspicious locations as you find them
+            # Note: The space from the start is missing to cover append operations ">>"
+            # Note: We use the "?" to account for both a single and a double quote
+            # Note: If you want to account for more spaces which is still a valid bypass option. Use a regex with "\s"
+            - '>?%APPDATA%\'
+            - '>?%TEMP%\'
+            - '>?%TMP%\'
+            - '>?%USERPROFILE%\'
+            - '>?C:\ProgramData\'
+            - '>?C:\Temp\'
+            - '>?C:\Users\Public\'
+            - '>?C:\Windows\Temp\'
     selection_cli_2:
         CommandLine|contains:
             - ' >'

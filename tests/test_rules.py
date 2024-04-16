@@ -255,7 +255,7 @@ class TestRules(unittest.TestCase):
 
                     # We add this check in case of keyword rules. Where no field is used. The parser returns a list instead of a dict
                     # If the 2 list are different that means they aren't the same
-                    if (type(detection2[named_condition]) == list) or (
+                    if (type(detection1[named_condition]) == list) or (
                         type(detection2[named_condition]) == list
                     ):
                         condition_value1 = detection1[named_condition]
@@ -557,7 +557,7 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
             elif len(filename) < 14:
                 print(
-                    Fore.YELLOW + "Rule {} has a file name too short <10.".format(file)
+                    Fore.YELLOW + "Rule {} has a file name too short <14.".format(file)
                 )
                 faulty_rules.append(file)
             elif filename_pattern.match(filename) == None or not "_" in filename:
@@ -838,7 +838,7 @@ class TestRules(unittest.TestCase):
                 print(
                     Fore.RED
                     + "Rule {} has the selection ({}) with a list of only 1 element in detection".format(
-                        file, key
+                        file, selection_name
                     )
                 )
                 valid_ = False

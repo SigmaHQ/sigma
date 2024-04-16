@@ -1,15 +1,13 @@
-title: CobaltStrike Service Installations in Registry
+title: Potential CobaltStrike Service Installations - Registry
 id: 61a7697c-cb79-42a8-a2ff-5f0cdfae0130
 status: test
 description: |
     Detects known malicious service installs that appear in cases in which a Cobalt Strike beacon elevates privileges or lateral movement.
-    We can also catch this by system log 7045 (https://github.com/SigmaHQ/sigma/blob/master/rules/windows/builtin/win_cobaltstrike_service_installs.yml)
-    In some SIEM you can catch those events also in HKLM\System\ControlSet001\Services or HKLM\System\ControlSet002\Services, however, this rule is based on a regular sysmon's events.
 references:
     - https://www.sans.org/webcasts/tech-tuesday-workshop-cobalt-strike-detection-log-analysis-119395
 author: Wojciech Lesicki
 date: 2021/06/29
-modified: 2023/08/17
+modified: 2024/03/25
 tags:
     - attack.execution
     - attack.privilege_escalation
@@ -21,18 +19,20 @@ logsource:
     category: registry_set
     product: windows
 detection:
-    main:
-        TargetObject|contains: 'HKLM\System\CurrentControlSet\Services'
-    selection_1:
-        Details|contains|all:
-            - 'ADMIN$'
-            - '.exe'
-    selection_2:
-        Details|contains|all:
-            - '%COMSPEC%'
-            - 'start'
-            - 'powershell'
-    condition: main and 1 of selection_*
+    selection_key:
+        - TargetObject|contains: '\System\CurrentControlSet\Services'
+        - TargetObject|contains|all:
+              - '\System\ControlSet'
+              - '\Services'
+    selection_details:
+        - Details|contains|all:
+              - 'ADMIN$'
+              - '.exe'
+        - Details|contains|all:
+              - '%COMSPEC%'
+              - 'start'
+              - 'powershell'
+    condition: all of selection_*
 falsepositives:
-    - Unknown
-level: critical
+    - Unlikely
+level: high

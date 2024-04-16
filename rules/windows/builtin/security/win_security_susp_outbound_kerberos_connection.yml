@@ -1,15 +1,16 @@
-title: Suspicious Outbound Kerberos Connection - Security
+title: Uncommon Outbound Kerberos Connection - Security
 id: eca91c7c-9214-47b9-b4c5-cb1d7e4f2350
 related:
     - id: e54979bd-c5f9-4d6c-967b-a04b19ac4c74
       type: similar
 status: test
-description: Detects suspicious outbound network activity via kerberos default port indicating possible lateral movement or first stage PrivEsc via delegation.
+description: |
+    Detects uncommon outbound network activity via Kerberos default port indicating possible lateral movement or first stage PrivEsc via delegation.
 references:
     - https://github.com/GhostPack/Rubeus
 author: Ilyas Ochkov, oscd.community
 date: 2019/10/24
-modified: 2023/01/30
+modified: 2024/03/15
 tags:
     - attack.lateral_movement
     - attack.t1558.003
@@ -20,18 +21,28 @@ detection:
     selection:
         EventID: 5156
         DestPort: 88
-    filter_exact:
-        Application:
-            - 'C:\Windows\System32\lsass.exe'
-            - 'C:\Program Files\Google\Chrome\Application\chrome.exe'
-            - 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
-            - 'C:\Program Files\Mozilla Firefox\firefox.exe'
-            - 'C:\Program Files (x86)\Mozilla Firefox\firefox.exe'
-    # filter_browsers:
-        # Application|endswith:
-        #     - '\opera.exe'
-        #     - '\tomcat\bin\tomcat8.exe'
-    condition: selection and not 1 of filter_*
+    filter_main_lsass:
+        Application|startswith:
+            - '\device\harddiskvolume'
+            - 'C:'
+        Application|endswith: '\Windows\System32\lsass.exe'
+    filter_optional_chrome:
+        Application|startswith:
+            - '\device\harddiskvolume'
+            - 'C:'
+        Application|endswith:
+            - '\Program Files (x86)\Google\Chrome\Application\chrome.exe'
+            - '\Program Files\Google\Chrome\Application\chrome.exe'
+    filter_optional_firefox:
+        Application|startswith:
+            - '\device\harddiskvolume'
+            - 'C:'
+        Application|endswith:
+            - '\Program Files (x86)\Mozilla Firefox\firefox.exe'
+            - '\Program Files\Mozilla Firefox\firefox.exe'
+    filter_optional_tomcat:
+        Application|endswith: '\tomcat\bin\tomcat8.exe'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
-    - Web Browsers
-level: high
+    - Web Browsers and third party application might generate similar activity. An initial baseline is required.
+level: medium

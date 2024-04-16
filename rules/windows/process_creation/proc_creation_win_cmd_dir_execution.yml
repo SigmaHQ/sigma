@@ -1,4 +1,4 @@
-title: File Enumeration Via Dir Command
+title: File And SubFolder Enumeration Via Dir Command
 id: 7c9340a9-e2ee-4e43-94c5-c54ebbea1006
 status: test
 description: |
@@ -7,7 +7,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1217/T1217.md
 author: frack113
 date: 2021/12/13
-modified: 2024/03/06
+modified: 2024/04/14
 tags:
     - attack.discovery
     - attack.t1217
@@ -15,9 +15,12 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection_cmd:
+        - Image|endswith: '\cmd.exe'
+        - OriginalFileName: Cmd.Exe
+    selection_cli:
         CommandLine|contains|windash: 'dir*-s'
-    condition: selection
+    condition: all of selection_*
 falsepositives:
     - Likely
 level: low
