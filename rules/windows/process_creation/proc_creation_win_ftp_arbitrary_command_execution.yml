@@ -1,12 +1,12 @@
-title: LOLBIN Execution Of The FTP.EXE Binary
+title: Potential Arbitrary Command Execution Via FTP.EXE
 id: 06b401f4-107c-4ff9-947f-9ec1e7649f1e
 status: test
-description: Detects execution of ftp.exe script execution with the "-s" or "/s" flag and any child processes ran by ftp.exe
+description: Detects execution of "ftp.exe" script with the "-s" or "/s" flag and any child processes ran by "ftp.exe".
 references:
     - https://lolbas-project.github.io/lolbas/Binaries/Ftp/
 author: Victor Sergeev, oscd.community
 date: 2020/10/09
-modified: 2023/08/11
+modified: 2024/04/23
 tags:
     - attack.execution
     - attack.t1059
@@ -18,14 +18,12 @@ logsource:
 detection:
     selection_parent:
         ParentImage|endswith: '\ftp.exe'
-    selection_ftp_img:
+    selection_child_img:
         - Image|endswith: '\ftp.exe'
         - OriginalFileName: 'ftp.exe'
-    selection_ftp_cli:
-        CommandLine|contains:
-            - '-s:'
-            - '/s:'
-    condition: selection_parent or all of selection_ftp_*
+    selection_child_cli:
+        CommandLine|contains|windash: '-s:'
+    condition: selection_parent or all of selection_child_*
 falsepositives:
     - Unknown
 level: medium
