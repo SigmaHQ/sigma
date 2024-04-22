@@ -1,0 +1,34 @@
+title: Kapeka Backdoor Execution via RunDLL32
+id: e98f741c-6a5b-4c83-bc2a-1f4e58d07b12
+status: experimental
+description: |
+  Detects kapeka backdoor process execution pattern, where the dropper launch the backdoor binary by calling rundll32 and passing the backdoor's first export ordinal (#1) with a “-d” argument. 
+references:
+    - https://labs.withsecure.com/publications/kapeka
+    - https://app.any.run/tasks/1efb3ed4-cc0f-4690-a0ed-24516809bc72/
+author: Swachchhanda Shrawan Poudel
+date: 2023/04/18
+tags:
+    - attack.defense_evasion
+    - attack.t1218.011
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image: '\rundll32.exe'
+        - OriginalFileName: 'RUNDLL32.EXE'
+    # Example: "C:\WINDOWS\system32\rundll32.exe" "C:\Users\admin\AppData\Local\Microsoft\cujuni.wll", #1 -d
+    selection_backdoor_path:
+        CommandLine|contains:
+            - 'C:\ProgramData'
+            - '\AppData\Local'
+    selection_file_and_ordinal:
+        CommandLine|contains|all:
+            - '.wll'
+            - '#'
+            - '-d'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium

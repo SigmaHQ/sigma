@@ -1,0 +1,39 @@
+title: Kapeka Backdoor Persistence through Schtasks
+id: af7e2e2a-81ec-4fd6-ae06-d490b032fb14
+related:
+    - id: 6c130acd-0adb-4545-bcc4-2e85d0883c9a
+      type: similar
+status: experimental
+description: Detects usage of schtasks by Kapeka backdoor for persistence.
+references:
+    - https://labs.withsecure.com/publications/kapeka
+    - https://app.any.run/tasks/1efb3ed4-cc0f-4690-a0ed-24516809bc72/
+    - https://www.virustotal.com/gui/file/bd07fb1e9b4768e7202de6cc454c78c6891270af02085c51fce5539db1386c3f/behavior
+author: Swachchhanda Shrawan Poudel
+date: 2023/04/19
+tags:
+    - attack.persistence
+    - attack.t1053.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_command:
+        CommandLine|contains|all:
+        # "C:\Windows\system32\cmd.exe" /c schtasks /create /sc ONSTART /tn "Sens Api" /f /np /tr "C:\Windows\system32\rundll32.exe \"C:\ProgramData\Microsoft\cogyce.wll\", #1"
+            - 'schtasks'
+            - 'create'
+            - 'ONSTART'
+            - 'rundll32'
+            - '.wll'
+    selection_task_name:
+        CommandLine|contains:
+            - 'Sens Api'
+            - 'OneDrive' # The scheduled task was called “OneDrive” instead of “Sens Api” in some cases
+    condition: selection
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - unknown
+level: medium

@@ -1,0 +1,27 @@
+title: Kapeka Backdoor Configuration Persistence
+id: cbaa3ef3-07a9-4c8e-82d1-9e40578da7fd
+status: experimental
+description: Detects when kapeka backdoor register a new SIP provider for backdoor configuration persistence.
+references:
+   - https://labs.withsecure.com/publications/kapeka
+   - https://app.any.run/tasks/1efb3ed4-cc0f-4690-a0ed-24516809bc72/
+author: Swachchhanda Shrawan Poudel
+date: 2023/04/19
+tags:
+    - attack.persistence
+    - attack.defense_evasion
+    - attack.t1553.003
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_base:
+        TargetObject|contains: '\SOFTWARE\Microsoft\Cryptography\Providers\'
+    selection_key:
+        TargetObject|contains: 'Seed'
+    filter_details:
+        Details|contains: '(Empty)'
+    condition: all of selection_* and not filter
+falsepositives:
+    - unknown
+level: medium

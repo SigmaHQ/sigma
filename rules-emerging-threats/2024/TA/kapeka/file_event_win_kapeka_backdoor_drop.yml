@@ -1,0 +1,28 @@
+title: Suspicious Backdoor Dropped by Kapeka Loader
+id: 4fd6a3d8-812a-4b5f-af7c-e2910cfb8f0d
+status: experimental
+description: |
+  Detects the presence of the decrypted backdoor binary dropped by the Kapeka Dropper, 
+  which disguises itself as a hidden file under a folder named "Microsoft" within CSIDL_COMMON_APPDATA or CSIDL_LOCAL_APPDATA, depending on the process privileges. 
+  The file, typically 5-6 characters long with a random combination of consonants and vowels followed by a ".wll" extension, 
+  poses as a legitimate word to evade detection.
+references:
+    - https://labs.withsecure.com/publications/kapeka
+    - https://app.any.run/tasks/1efb3ed4-cc0f-4690-a0ed-24516809bc72/
+author: Swachchhanda Shrawan Poudel
+date: 2023/04/19
+tags:
+    - attack.defense_evasion
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|contains:
+            - '\ProgramData\'
+            - '\AppData\Local\'
+        TargetFilename|endswith: '.wll'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium

@@ -1,0 +1,36 @@
+title: Kapeka Backdoor Autorun Persistence
+id: b9c5a847-1e0d-4d26-9f5a-273ec8f25b3a
+related:
+    - id: cbaa3ef3-07a9-4c8e-82d1-9e40578da7fd
+      type: similar
+status: experimental
+description: Detects direct modification of autorun in registry using reg.exe by Kapeka backdoor for persistence.
+references:
+    - https://labs.withsecure.com/publications/kapeka
+    - https://app.any.run/tasks/1efb3ed4-cc0f-4690-a0ed-24516809bc72/
+author: Swachchhanda Shrawan Poudel
+date: 2023/04/19
+tags:
+    - attack.persistence
+    - attack.t1547.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_1:
+        Image|endswith: '\reg.exe'
+        CommandLine|contains: 'add'
+    selection_2:
+        CommandLine|contains|all:
+        # "C:\WINDOWS\system32\cmd.exe" /c REG ADD HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run /v "Sens Api" /t REG_SZ /d "C:\WINDOWS\system32\rundll32.exe \"C:\Users\admin\AppData\Local\Microsoft\cujuni.wll\", #1" /f          
+            - '\software\Microsoft\Windows\CurrentVersion\Run'
+            - 'Sens Api'
+            - 'rundll32'
+            - '.wll'
+    condition: all of selection_*
+fields:
+    - CommandLine
+    - ParentCommandLine
+falsepositives:
+    - unknown
+level: medium
