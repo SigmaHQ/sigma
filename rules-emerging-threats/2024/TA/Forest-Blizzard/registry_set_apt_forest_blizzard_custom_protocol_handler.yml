@@ -1,0 +1,24 @@
+title: Forest Blizzard APT - Custom Protocol Handler Creation
+id: 5cdeb555-65de-4767-99fe-e26807465148
+status: experimental
+description: |
+    Detects the setting of a custom protocol handler with the name "rogue".
+    Seen being created by Forest Blizzard APT as reported by MSFT.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2024/04/22/analyzing-forest-blizzards-custom-post-compromise-tool-for-exploiting-cve-2022-38028-to-obtain-credentials/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2024/04/23
+tags:
+    - attack.persistence
+    - attack.t1547.001
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\PROTOCOLS\\Handler\rogue\CLSID'
+        Details: '{026CC6D7-34B2-33D5-B551-CA31EB6CE345}'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
