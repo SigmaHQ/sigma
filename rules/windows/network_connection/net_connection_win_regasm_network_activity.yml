@@ -5,8 +5,9 @@ description: Detects a network connection initiated by "RegAsm.exe"
 references:
     - https://app.any.run/tasks/ec207948-4916-47eb-a0f4-4c6abb2e7668/
     - https://research.splunk.com/endpoint/07921114-6db4-4e2e-ae58-3ea8a52ae93f/
+    - https://lolbas-project.github.io/lolbas/Binaries/Regasm/
 author: frack113
-date: 2024/04/18
+date: 2024/04/25
 tags:
     - attack.defense_evasion
     - attack.t1218.009
@@ -17,7 +18,6 @@ detection:
     selection:
         Initiated: 'true'
         Image|endswith: '\regasm.exe'
-        DestinationPort: 587 # SMTP
     filter_main_local_ranges:
         DestinationIp|cidr:
             - '127.0.0.0/8'
@@ -31,4 +31,4 @@ detection:
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
-level: high
+level: medium
