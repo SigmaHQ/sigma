@@ -1,0 +1,33 @@
+title: Suspicious Browser Launch Indicative of a Possible Phishing Link
+id: 1193d960-2369-499f-a158-7b50a31df682
+status: stable
+description: 'Detects when a browser or browser tab is launched from an application that handles document files and connects to a web application over http(s), this could indicate possible phishing.
+
+    '
+references:
+    - ' https://app.any.run/tasks/69c5abaa-92ad-45ba-8c53-c11e23e05d04/ # PDF Document'
+    - ' https://app.any.run/tasks/64043a79-165f-4052-bcba-e6e49f847ec1/ #Office Document'
+author: Joseph Kamau
+date: 2024/04/25
+tags:
+    - attack.execution
+    - attack.t1204.002
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        ParentImage|contains:
+            - Microsoft Office
+            - Acrobat Reader
+            - PDF Reader
+        Image|endswith:
+            - \msedge.exe
+            - \chrome.exe
+            - \firefox.exe
+            - \brave.exe
+        CommandLine|contains: http
+    condition: selection
+falsepositives:
+    - Unlikely, further investigations should be done in the commandline to determine the context of the url acccessed
+level: medium
