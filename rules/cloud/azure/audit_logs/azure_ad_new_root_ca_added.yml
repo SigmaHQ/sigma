@@ -1,0 +1,24 @@
+title: New Root Certificate Authority Added
+id: 4bb80281-3756-4ec8-a88e-523c5a6fda9e
+status: test
+description: Detects newly added root certificate authority to an AzureAD tenant to support certificate based authentication.
+references:
+    - https://posts.specterops.io/passwordless-persistence-and-privilege-escalation-in-azure-98a01310be3f
+    - https://goodworkaround.com/2022/02/15/digging-into-azure-ad-certificate-based-authentication/
+author: Harjot Shah Singh, '@cyb3rjy0t'
+date: 2024/03/26
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1556
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection:
+        OperationName: 'Set Company Information'
+        TargetResources.modifiedProperties.newValue|contains: 'TrustedCAsForPasswordlessAuth'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium

@@ -1,0 +1,28 @@
+title: RBAC Permission Enumeration Attempt
+id: 84b777bd-c946-4d17-aa2e-c39f5a454325
+status: experimental
+description: |
+    Detects identities attempting to enumerate their Kubernetes RBAC permissions.
+    In the early stages of a breach, attackers will aim to list the permissions they have within the compromised environment.
+    In a Kubernetes cluster, this can be achieved by interacting with the API server, and querying the SelfSubjectAccessReview API via e.g. a "kubectl auth can-i --list" command.
+    This will enumerate the Role-Based Access Controls (RBAC) rules defining the compromised user's authorization.
+references:
+    - https://www.elastic.co/guide/en/security/current/kubernetes-suspicious-self-subject-review.html
+author: Leo Tsaousis (@laripping)
+date: 2024/03/26
+tags:
+    - attack.t1069.003
+    - attack.t1087.004
+logsource:
+    category: application
+    product: kubernetes
+    service: audit
+detection:
+    selection:
+        verb: 'create'
+        apiGroup: 'authorization.k8s.io'
+        objectRef.resource: 'selfsubjectrulesreviews'
+    condition: selection
+falsepositives:
+    - Unknown
+level: low

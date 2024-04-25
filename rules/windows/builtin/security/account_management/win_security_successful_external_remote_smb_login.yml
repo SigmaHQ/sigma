@@ -10,7 +10,7 @@ references:
     - https://twitter.com/Purp1eW0lf/status/1616144561965002752
 author: Micah Babinski (@micahbabinski), Zach Mathis (@yamatosecurity)
 date: 2023/01/19
-modified: 2023/03/16
+modified: 2024/03/11
 tags:
     - attack.initial_access
     - attack.credential_access
@@ -24,21 +24,19 @@ detection:
     selection:
         EventID: 4624
         LogonType: 3
-    filter_ipv4:
+    filter_main_local_ranges:
         IpAddress|cidr:
-            - '127.0.0.0/8'
+            - '::1/128'  # IPv6 loopback
             - '10.0.0.0/8'
+            - '127.0.0.0/8'
             - '172.16.0.0/12'
             - '192.168.0.0/16'
-    filter_ipv6:
-        - IpAddress: '::1' # IPv6 loopback
-        - IpAddress|startswith:
-              - 'fe80:'  # link-local address
-              - 'fc'  # private address range fc00::/7
-              - 'fd'  # private address range fc00::/7
-    filter_empty:
+            - '169.254.0.0/16'
+            - 'fc00::/7'  # IPv6 private addresses
+            - 'fe80::/10'  # IPv6 link-local addresses
+    filter_main_empty:
         IpAddress: '-'
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Legitimate or intentional inbound connections from public IP addresses on the SMB port.
 level: high

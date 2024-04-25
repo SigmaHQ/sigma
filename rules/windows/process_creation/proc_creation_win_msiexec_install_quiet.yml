@@ -10,7 +10,7 @@ references:
     - https://twitter.com/_st0pp3r_/status/1583914244344799235
 author: frack113
 date: 2022/01/16
-modified: 2023/03/23
+modified: 2024/03/13
 tags:
     - attack.defense_evasion
     - attack.t1218.007
@@ -24,19 +24,13 @@ detection:
     selection_cli:
         # Note that there is no space before and after the arguments because it's possible to write a commandline as such
         # Example: msiexec -q/i [MSI Package]
-        CommandLine|contains:
-            - '/i'
+        CommandLine|contains|windash:
             - '-i'
-            - '/package'
             - '-package'
-            - '/a'
             - '-a'
-            - '/j'
             - '-j'
     selection_quiet:
-        CommandLine|contains:
-            - '/q'
-            - '-q'
+        CommandLine|contains|windash: '-q'
     filter_user_temp:
         # The %temp% is a very common location for installers
         ParentImage|startswith: 'C:\Users\'

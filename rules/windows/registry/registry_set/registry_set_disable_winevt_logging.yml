@@ -7,7 +7,7 @@ references:
     - https://github.com/DebugPrivilege/CPP/blob/c39d365617dbfbcb01fffad200d52b6239b2918c/Windows%20Defender/RestoreDefenderConfig.cpp
 author: frack113, Nasreddine Bencherchali (Nextron Systems)
 date: 2022/07/04
-modified: 2023/08/17
+modified: 2024/03/25
 tags:
     - attack.defense_evasion
     - attack.t1562.002
@@ -16,11 +16,11 @@ logsource:
     product: windows
 detection:
     selection:
-        TargetObject|startswith: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\'
+        TargetObject|contains: '\Microsoft\Windows\CurrentVersion\WINEVT\Channels\'
         TargetObject|endswith: '\Enabled'
         Details: 'DWORD (0x00000000)'
     filter_main_wevutil:
-        Image|endswith: '\Windows\system32\wevtutil.exe' # FP generated during installation of manifests via wevtutil
+        Image: 'C:\Windows\system32\wevtutil.exe' # FP generated during installation of manifests via wevtutil
     filter_main_iis:
         Image|startswith: 'C:\Windows\winsxs\'
         Image|endswith: '\TiWorker.exe'  # Many different TargetObjects

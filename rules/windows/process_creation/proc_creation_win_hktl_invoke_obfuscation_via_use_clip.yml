@@ -6,7 +6,7 @@ references:
     - https://github.com/SigmaHQ/sigma/issues/1009 # (Task29)
 author: Nikita Nazarov, oscd.community
 date: 2020/10/09
-modified: 2022/11/16
+modified: 2024/04/15
 tags:
     - attack.defense_evasion
     - attack.t1027
@@ -17,22 +17,9 @@ logsource:
     product: windows
 detection:
     selection:
-        # CommandLine|re: '(?i).*?echo.*clip.*&&.*(Clipboard|i`?n`?v`?o`?k`?e`?).*'
         # Example 1: C:\WINdoWS\sySteM32\CMd /c " ECho\Invoke-Expression (New-Object Net.WebClient).DownloadString|Clip.Exe&&C:\WINdoWS\sySteM32\CMd /c pOWerSheLl -STa . ( \"{2}{0}{1}\"-f'dd-',(\"{0}{1}\" -f 'T','ype' ),'A' ) -Assembly ( \"{4}{1}{3}{0}{2}\"-f (\"{0}{1}\" -f 'nd','ow'),( \"{1}{0}\"-f'.W','stem' ),( \"{2}{1}{0}\" -f 'rms','Fo','s.'),'i','Sy') ; ${exeCUtIOnCONTeXT}.\"INV`oKECOM`m`ANd\".\"INV`ok`ESCriPT\"( ( [sYSteM.wiNDoWS.forMs.ClIPboaRD]::( \"{2}{0}{1}\" -f'Ex','t',(\"{0}{1}\" -f'Get','t' ) ).\"iNvo`Ke\"( )) ) ; [System.Windows.Forms.Clipboard]::(\"{1}{0}\" -f 'ar','Cle' ).\"in`V`oKE\"( )"
         # Example 2: C:\WINDowS\sYsTEM32\CmD.eXE /C" echo\Invoke-Expression (New-Object Net.WebClient).DownloadString| C:\WIndOWs\SYSteM32\CLip &&C:\WINDowS\sYsTEM32\CmD.eXE /C POWERSHeLL -sT -noL [Void][System.Reflection.Assembly]::( \"{0}{3}{4}{1}{2}\" -f( \"{0}{1}\"-f'Lo','adW' ),( \"{0}{1}\"-f 'Par','t'),( \"{0}{1}{2}\"-f 'ial','N','ame'),'it','h' ).\"in`VO`KE\"( ( \"{3}{1}{4}{5}{2}{0}\"-f'rms','ystem.Windo','Fo','S','w','s.' )) ; ( [wIndows.fOrms.cLIPBOArD]::( \"{1}{0}\"-f'T',( \"{1}{0}\" -f'tEX','gET' )).\"i`Nvoke\"( ) ) ^^^| ^^^& ( ( ^^^& ( \"{2}{1}{0}\"-f 'e',( \"{2}{1}{0}\"-f'IABl','aR','v' ),( \"{0}{1}\"-f'Get','-' ) ) ( \"{1}{0}\"-f'*','*MDr' )).\"n`Ame\"[3,11,2]-jOin'') ; [Windows.Forms.Clipboard]::( \"{0}{1}\" -f (\"{1}{0}\"-f'tT','Se' ),'ext').\"in`VoKe\"(' ' )"
-        CommandLine|contains|all:
-            - 'echo'
-            - 'clip'
-            - '&&'
-        CommandLine|contains:
-            - 'clipboard'
-            - 'invoke'
-            - 'i`'
-            - 'n`'
-            - 'v`'
-            - 'o`'
-            - 'k`'
-            - 'e`'
+        CommandLine|re: '(?i)echo.*clip.*&&.*(Clipboard|i`?n`?v`?o`?k`?e`?)'
     condition: selection
 falsepositives:
     - Unknown

@@ -1,13 +1,16 @@
-title: Clear Command History
+title: Linux Command History Tampering
 id: fdc88d25-96fb-4b7c-9633-c0e417fdbd4e
 status: test
-description: Clear command history in linux which is used for defense evasion.
+description: |
+    Detects commands that try to clear or tamper with the Linux command history.
+    This technique is used by threat actors in order to evade defenses and execute commands without them being recorded in files such as "bash_history" or "zsh_history".
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.003/T1070.003.md
     - https://www.hackers-arise.com/post/2016/06/20/covering-your-bash-shell-tracks-antiforensics
+    - https://www.cadosecurity.com/spinning-yarn-a-new-linux-malware-campaign-targets-docker-apache-hadoop-redis-and-confluence/
 author: Patrick Bareiss
 date: 2019/03/24
-modified: 2022/12/25
+modified: 2024/04/17
 tags:
     - attack.defense_evasion
     - attack.t1070.003
@@ -22,20 +25,22 @@ logsource:
     product: linux
 detection:
     keywords:
-        - 'rm *bash_history'
-        - 'echo "" > *bash_history'
-        - 'cat /dev/null > *bash_history'
-        - 'cat /dev/zero > *bash_history'
-        - 'ln -sf /dev/null *bash_history'
-        - 'ln -sf /dev/zero *bash_history'
-        - 'truncate -s0 *bash_history'
-        # - 'unset HISTFILE'  # prone to false positives
+        - 'cat /dev/null >*sh_history'
+        - 'cat /dev/zero >*sh_history'
+        - 'chattr +i*sh_history'
+        - 'echo "" >*sh_history'
+        - 'empty_bash_history'
         - 'export HISTFILESIZE=0'
         - 'history -c'
         - 'history -w'
-        - 'shred *bash_history'
-        - 'empty_bash_history'
-        - 'chattr +i *bash_history'
+        - 'ln -sf /dev/null *sh_history'
+        - 'ln -sf /dev/zero *sh_history'
+        - 'rm *sh_history'
+        - 'shopt -ou history'
+        - 'shopt -uo history'
+        - 'shred *sh_history'
+        - 'truncate -s0 *sh_history'
+        # - 'unset HISTFILE'  # prone to false positives
     condition: keywords
 falsepositives:
     - Unknown

@@ -6,6 +6,7 @@ references:
     - https://posts.specterops.io/less-smartscreen-more-caffeine-ab-using-clickonce-for-trusted-code-execution-1446ea8051c5
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023/06/12
+modified: 2024/03/12
 tags:
     - attack.execution
     - attack.t1203
@@ -17,34 +18,16 @@ detection:
     selection:
         Image|endswith: '\dfsvc.exe'
         Initiated: 'true'
-    filter_main_local_ipv4:
-        DestinationIp|startswith:
-            - '10.'
-            - '127.0.0.1'
-            - '172.16.'
-            - '172.17.'
-            - '172.18.'
-            - '172.19.'
-            - '172.20.'
-            - '172.21.'
-            - '172.22.'
-            - '172.23.'
-            - '172.24.'
-            - '172.25.'
-            - '172.26.'
-            - '172.27.'
-            - '172.28.'
-            - '172.29.'
-            - '172.30.'
-            - '172.31.'
-            - '192.168.'
-    filter_main_local_ipv6:
-        DestinationIp|startswith:
-            - '::1'  # IPv6 loopback variant
-            - '0:0:0:0:0:0:0:1'  # IPv6 loopback variant
-            - 'fc'  # private address range fc00::/7
-            - 'fd'  # private address range fc00::/7
-            - 'fe80:'  # link-local address
+    filter_main_local_ip:
+        DestinationIp|cidr: # Ranges excluded based on https://github.com/SigmaHQ/sigma/blob/0f176092326ab9d1e19384d30224e5f29f760d82/rules/windows/network_connection/net_connection_win_dllhost_net_connections.yml
+            - '127.0.0.0/8'
+            - '10.0.0.0/8'
+            - '169.254.0.0/16'  # link-local address
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+            - '::1/128'  # IPv6 loopback
+            - 'fe80::/10'  # IPv6 link-local addresses
+            - 'fc00::/7'  # IPv6 private addresses
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - False positives are expected from ClickOnce manifests hosted on public IPs and domains. Apply additional filters for the accepted IPs in your environement as necessary

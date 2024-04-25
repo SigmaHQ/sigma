@@ -1,0 +1,74 @@
+title: Dbghelp/Dbgcore DLL Loaded By Uncommon/Suspicious Process
+id: 0e277796-5f23-4e49-a490-483131d4f6e1
+related:
+    - id: bdc64095-d59a-42a2-8588-71fd9c9d9abc # Unsigned Loading
+      type: similar
+status: test
+description: |
+    Detects the load of dbghelp/dbgcore DLL by a potentially uncommon or potentially suspicious process.
+    The Dbghelp and Dbgcore DLLs export functions that allow for the dump of process memory. Tools like ProcessHacker, Task Manager and some attacker tradecraft use the MiniDumpWriteDump API found in dbghelp.dll or dbgcore.dll.
+    As an example, SilentTrynity C2 Framework has a module that leverages this API to dump the contents of Lsass.exe and transfer it over the network back to the attacker's machine.
+    Keep in mind that many legitimate Windows processes and services might load the aforementioned DLLs for debugging or other related purposes. Investigate the CommandLine and the Image location of the process loading the DLL.
+references:
+    - https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/nf-minidumpapiset-minidumpwritedump
+    - https://www.pinvoke.net/default.aspx/dbghelp/MiniDumpWriteDump.html
+    - https://medium.com/@fsx30/bypass-edrs-memory-protection-introduction-to-hooking-2efb21acffd6
+author: Perez Diego (@darkquassar), oscd.community, Ecco
+date: 2019/10/27
+modified: 2024/03/01
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+    - detection.threat_hunting
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith:
+            - '\dbghelp.dll'
+            - '\dbgcore.dll'
+        Image|endswith:
+            - '\bash.exe'
+            - '\cmd.exe'
+            - '\cscript.exe'
+            - '\dnx.exe'
+            - '\excel.exe'
+            - '\monitoringhost.exe'
+            - '\msbuild.exe'
+            - '\mshta.exe'
+            - '\outlook.exe'
+            - '\powerpnt.exe'
+            - '\regsvcs.exe'
+            - '\rundll32.exe'
+            - '\sc.exe'
+            - '\scriptrunner.exe'
+            - '\winword.exe'
+            - '\wmic.exe'
+            - '\wscript.exe'
+            # - '\powershell.exe' # Note: Triggered by installing common software
+            # - '\regsvr32.exe'  # Note: triggered by installing common software
+            # - '\schtasks.exe'  # Note: triggered by installing software
+            # - '\svchost.exe'  # Note: triggered by some services
+    filter_main_tiworker:
+        # Note: This filter requires "CommandLine" field enrichment
+        CommandLine|startswith: 'C:\WINDOWS\WinSxS\'
+        CommandLine|endswith: '\TiWorker.exe -Embedding'
+    filter_main_generic:
+        # Note: This filter requires "CommandLine" field enrichment
+        Image|endswith: '\svchost.exe'
+        CommandLine|endswith:
+            - '-k LocalServiceNetworkRestricted'
+            - '-k WerSvcGroup'
+    filter_main_rundll32:
+        # Note: This filter requires "CommandLine" field enrichment
+        Image|endswith: '\rundll32.exe'
+        CommandLine|contains:
+            - '/d srrstr.dll,ExecuteScheduledSPPCreation'
+            - 'aepdu.dll,AePduRunUpdate'
+            - 'shell32.dll,OpenAs_RunDL'
+            - 'Windows.Storage.ApplicationData.dll,CleanupTemporaryState'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Debugging scripts might leverage this DLL in order to dump process memory for further analysis.
+level: medium

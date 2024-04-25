@@ -1,4 +1,4 @@
-title: Set TimeProviders DllName
+title: New TimeProviders Registered With Uncommon DLL Name
 id: e88a6ddc-74f7-463b-9b26-f69fc0d2ce85
 status: experimental
 description: |
@@ -9,7 +9,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1547.003/T1547.003.md
 author: frack113
 date: 2022/06/19
-modified: 2023/08/17
+modified: 2024/03/26
 tags:
     - attack.persistence
     - attack.privilege_escalation
@@ -19,11 +19,14 @@ logsource:
     product: windows
 detection:
     selection:
-        TargetObject|startswith: 'HKLM\System\CurrentControlSet\Services\W32Time\TimeProviders'
-        TargetObject|endswith: 'DllName'
-    filter:
-        Details: 'C:\Windows\SYSTEM32\w32time.DLL'
-    condition: selection and not filter
+        TargetObject|contains: '\Services\W32Time\TimeProviders'
+        TargetObject|endswith: '\DllName'
+    filter_main_w32time:
+        Details:
+            - '%SystemRoot%\System32\vmictimeprovider.dll'
+            - '%systemroot%\system32\w32time.dll'
+            - 'C:\Windows\SYSTEM32\w32time.DLL'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high

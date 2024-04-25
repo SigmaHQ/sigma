@@ -1,12 +1,15 @@
 title: EVTX Created In Uncommon Location
 id: 65236ec7-ace0-4f0c-82fd-737b04fd4dcb
 status: experimental
-description: Detects the creation of new files with the ".evtx" extension in non-common locations. Which could indicate tampering with default evtx locations in order to evade security controls
+description: |
+    Detects the creation of new files with the ".evtx" extension in non-common or non-standard location.
+    This could indicate tampering with default EVTX locations in order to evade security controls or simply exfiltration of event log to search for sensitive information within.
+    Note that backup software and legitimate administrator might perform similar actions during troubleshooting.
 references:
     - https://learn.microsoft.com/en-us/windows/win32/eventlog/eventlog-key
 author: D3F7A5105
 date: 2023/01/02
-modified: 2023/07/13
+modified: 2024/03/26
 tags:
     - attack.defense_evasion
     - attack.t1562.002
@@ -18,15 +21,12 @@ detection:
     selection:
         TargetFilename|endswith: '.evtx'
     filter_main_path:
-        TargetFilename|contains: ':\Windows\System32\winevt\Logs\'
+        TargetFilename|startswith: 'C:\Windows\System32\winevt\Logs\'
     filter_main_baseimage:
-        TargetFilename|contains: ':\ProgramData\Microsoft\Windows\Containers\BaseImages\'
+        TargetFilename|startswith: 'C:\ProgramData\Microsoft\Windows\Containers\BaseImages\'
         TargetFilename|endswith: '\Windows\System32\winevt\Logs\'
-    filter_main_generic_img:
-        Image|endswith:
-            - ':\Windows\explorer.exe'
-            - ':\Windows\system32\dllhost.exe'
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Administrator or backup activity
-level: high
+    - An unknown bug seems to trigger the Windows "svchost" process to drop EVTX files in the "C:\Windows\Temp" directory in the form "<log_name">_<uuid>.evtx". See https://superuser.com/questions/1371229/low-disk-space-after-filling-up-c-windows-temp-with-evtx-and-txt-files
+level: medium

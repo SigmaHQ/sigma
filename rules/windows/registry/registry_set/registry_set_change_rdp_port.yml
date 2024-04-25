@@ -1,15 +1,15 @@
-title: Changing RDP Port to Non Standard Number
+title: Default RDP Port Changed to Non Standard Port
 id: 509e84b9-a71a-40e0-834f-05470369bd1e
 status: test
 description: |
-    Remote desktop is a common feature in operating systems.
-    It allows a user to log into an interactive session with a system desktop graphical user interface on a remote system.
+    Detects changes to the default RDP port.
+    Remote desktop is a common feature in operating systems. It allows a user to log into a remote system using an interactive session with a graphical user interface.
     Microsoft refers to its implementation of the Remote Desktop Protocol (RDP) as Remote Desktop Services (RDS).
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1021.001/T1021.001.md#atomic-test-1---rdp-to-domaincontroller
 author: frack113
 date: 2022/01/01
-modified: 2023/08/17
+modified: 2024/03/25
 tags:
     - attack.persistence
     - attack.t1547.010
@@ -18,10 +18,10 @@ logsource:
     product: windows
 detection:
     selection:
-        TargetObject: HKLM\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp\PortNumber
-    filter:
-        Details: DWORD (0x00000d3d)
-    condition: selection and not filter
+        TargetObject|endswith: '\Control\Terminal Server\WinStations\RDP-Tcp\PortNumber'
+    filter_main_port:
+        Details: DWORD (0x00000d3d) # 3389
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high
