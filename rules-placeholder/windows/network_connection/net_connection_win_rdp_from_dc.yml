@@ -4,6 +4,8 @@ status: experimental
 description: Detects a RDP connection originating from a domain controller
 author: Josh Nickels
 date: 2024/04/30
+references:
+    - internal research
 logsource:
     product: windows
     service: network_connection
@@ -13,7 +15,7 @@ detection:
     selection_hosts:
         host|expand: '%domain_controller_hostnames%'
     filter_app:
-        Image: "Microsoft.Tri.Sensor.exe"
+        Image: "Microsoft.Tri.Sensor.exe" ## Microsoft Defender for Identity service makes port 3389 connections to hosts
     condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Unknown
