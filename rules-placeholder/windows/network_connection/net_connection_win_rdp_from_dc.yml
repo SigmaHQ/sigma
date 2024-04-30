@@ -1,0 +1,23 @@
+title: RDP Originating From Domain Controller
+id: fda34293-718e-4b36-b018-38caab0d1209
+status: experimental
+description: Detects a RDP connection originating from a domain controller
+author: Josh Nickels
+date: 2024/04/30
+logsource:
+    product: windows
+    service: network_connection
+detection:
+    selection_port:
+        DestinationPort: 3389
+    selection_hosts:
+        host|expand: '%domain_controller_hostnames%'
+    filter_app:
+        Image: "Microsoft.Tri.Sensor.exe"
+    condition: all of selection_* and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: high
+tags:
+    - attack.lateral_movement
+    - attack.t1021
