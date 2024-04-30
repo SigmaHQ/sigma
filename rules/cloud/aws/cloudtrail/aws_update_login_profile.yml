@@ -2,13 +2,13 @@ title: AWS User Login Profile Was Modified
 id: 055fb148-60f8-462d-ad16-26926ce050f1
 status: test
 description: |
-    An attacker with the iam:UpdateLoginProfile permission on other users can change the password used to login to the AWS console on any user that already has a login profile setup.
-    With this alert, it is used to detect anyone is changing password on behalf of other users.
+    Detects activity when someone is changing passwords on behalf of other users.
+    An attacker with the "iam:UpdateLoginProfile" permission on other users can change the password used to login to the AWS console on any user that already has a login profile setup.
 references:
     - https://github.com/RhinoSecurityLabs/AWS-IAM-Privilege-Escalation
 author: toffeebr33k
 date: 2021/08/09
-modified: 2022/10/09
+modified: 2024/04/26
 tags:
     - attack.persistence
     - attack.t1098
@@ -16,17 +16,12 @@ logsource:
     product: aws
     service: cloudtrail
 detection:
-    selection_source:
-        eventSource: iam.amazonaws.com
-        eventName: UpdateLoginProfile
-    filter:
-        userIdentity.arn|contains: requestParameters.userName
-    condition: selection_source and not filter
-fields:
-    - userIdentity.arn
-    - requestParameters.userName
-    - errorCode
-    - errorMessage
+    selection:
+        eventSource: 'iam.amazonaws.com'
+        eventName: 'UpdateLoginProfile'
+    filter_main_user_identity:
+        userIdentity.arn|fieldref: requestParameters.userName
+    condition: selection and not 1 of filter_main_*
 falsepositives:
-    - Legit User Account Administration
+    - Legitimate user account administration
 level: high

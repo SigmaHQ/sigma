@@ -1,0 +1,36 @@
+title: ManageEngine Endpoint Central Dctask64.EXE Potential Abuse
+id: 6345b048-8441-43a7-9bed-541133633d7a
+status: test
+description: |
+    Detects the execution of "dctask64.exe", a signed binary by ZOHO Corporation part of ManageEngine Endpoint Central.
+    This binary can be abused for DLL injection, arbitrary command and process execution.
+references:
+    - https://twitter.com/gN3mes1s/status/1222088214581825540
+    - https://twitter.com/gN3mes1s/status/1222095963789111296
+    - https://twitter.com/gN3mes1s/status/1222095371175911424
+author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+date: 2020/01/28
+modified: 2024/04/22
+tags:
+    - attack.defense_evasion
+    - attack.t1055.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\dctask64.exe'
+        - Hashes|contains:
+              - '6834B1B94E49701D77CCB3C0895E1AFD' # Imphash
+              - '1BB6F93B129F398C7C4A76BB97450BBA' # Imphash
+              - 'FAA2AC19875FADE461C8D89DCF2710A3' # Imphash
+              - 'F1039CED4B91572AB7847D26032E6BBF' # Imphash
+    selection_cli:
+        CommandLine|contains:
+            - ' executecmd64 '
+            - ' invokeexe '
+            - ' injectDll '
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high

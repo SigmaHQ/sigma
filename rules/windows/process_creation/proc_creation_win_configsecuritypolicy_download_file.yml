@@ -1,7 +1,10 @@
-title: Suspicious ConfigSecurityPolicy Execution
+title: Arbitrary File Download Via ConfigSecurityPolicy.EXE
 id: 1f0f6176-6482-4027-b151-00071af39d7e
 status: test
-description: Upload file, credentials or data exfiltration with Binary part of Windows Defender
+description: |
+    Detects the execution of "ConfigSecurityPolicy.EXE", a binary part of Windows Defender used to manage settings in Windows Defender.
+    Users can configure different pilot collections for each of the co-management workloads.
+    It can be abused by attackers in order to upload or download files.
 references:
     - https://lolbas-project.github.io/lolbas/Binaries/ConfigSecurityPolicy/
 author: frack113
@@ -14,16 +17,16 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    lolbas:
+    selection_img:
         - CommandLine|contains: ConfigSecurityPolicy.exe
         - Image|endswith: '\ConfigSecurityPolicy.exe'
         - OriginalFileName: 'ConfigSecurityPolicy.exe'
-    remote:
+    selection_url:
         CommandLine|contains:
-            - 'https://'
-            - 'http://'
             - 'ftp://'
-    condition: lolbas and remote
+            - 'http://'
+            - 'https://'
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: medium
