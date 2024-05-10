@@ -149,7 +149,7 @@ class TestRules(unittest.TestCase):
             else "empty"
         )
 
-        if fieldname_dict[product]["commun"] == data:
+        if fieldname_dict[product]["common"] == data:
             return False
         else:
             return True
@@ -279,7 +279,7 @@ def load_fields_json(name: str):
             ]
 
     # We use some extracted hash
-    # Add commun field
+    # Add common field
     for product in data:
         for category in data[product]["category"]:
             if "Hashes" in data[product]["category"][category]:
@@ -298,11 +298,11 @@ def load_fields_json(name: str):
                     "sha256",
                     "Imphash",
                 ]
-            if "commun" in data[product].keys():
-                data[product]["category"][category] += data[product]["commun"]
+            if "common" in data[product].keys():
+                data[product]["category"][category] += data[product]["common"]
         for service in data[product]["service"]:
-            if "commun" in data[product].keys():
-                data[product]["service"][service] += data[product]["commun"]
+            if "common" in data[product].keys():
+                data[product]["service"][service] += data[product]["common"]
 
     return data
 

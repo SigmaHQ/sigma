@@ -1,0 +1,26 @@
+title: New RDP Connection Initiated From Domain Controller
+id: fda34293-718e-4b36-b018-38caab0d1209
+status: experimental
+description: Detects an RDP connection originating from a domain controller.
+references:
+    - Internal Research
+author: Josh Nickels
+date: 2024/05/10
+tags:
+    - attack.lateral_movement
+    - attack.t1021
+logsource:
+    product: windows
+    category: network_connection
+detection:
+    selection_connection:
+        Initiated: 'True'
+        DestinationPort: 3389
+    selection_hosts:
+        Computer|expand: '%domain_controller_hostnames%'
+    filter_optional_defender_identity:
+        Image|endswith: '\Microsoft.Tri.Sensor.exe' # Microsoft Defender for Identity service makes port 3389 connections to hosts
+    condition: all of selection_* and not 1 of filter_*
+falsepositives:
+    - Legitimate administration activity
+level: high
