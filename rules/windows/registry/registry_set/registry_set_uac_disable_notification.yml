@@ -1,0 +1,32 @@
+title: UAC Notification Disabled
+id: c5f6a85d-b647-40f7-bbad-c10b66bab038
+related:
+    - id: 0d7ceeef-3539-4392-8953-3dc664912714
+      type: similar
+    - id: 48437c39-9e5f-47fb-af95-3d663c3f2919
+      type: similar
+status: experimental
+description: |
+    Detects when an attacker tries to disable User Account Control (UAC) notification by tampering with the "UACDisableNotify" value.
+    UAC is a critical security feature in Windows that prevents unauthorized changes to the operating system. It prompts the user for permission or an administrator password before allowing actions that could affect the system's operation or change settings that affect other users.
+    When "UACDisableNotify" is set to 1, UAC prompts are suppressed.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/7e11e9b79583545f208a6dc3fa062f2ed443d999/atomics/T1548.002/T1548.002.md
+    - https://securityintelligence.com/x-force/x-force-hive0129-targeting-financial-institutions-latam-banking-trojan/
+author: frack113, Nasreddine Bencherchali (Nextron Systems)
+date: 2024/05/10
+tags:
+    - attack.privilege_escalation
+    - attack.defense_evasion
+    - attack.t1548.002
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\Microsoft\Security Center\UACDisableNotify'
+        Details: 'DWORD (0x00000001)'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
