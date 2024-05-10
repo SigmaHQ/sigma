@@ -1,0 +1,30 @@
+title: New Firewall Rule Added In Windows Firewall Exception List Via WmiPrvSE.EXE
+id: eca81e8d-09e1-4d04-8614-c91f44fd0519
+status: experimental
+description: |
+    Detects the addition of a new "Allow" firewall rule by the WMI process (WmiPrvSE.EXE).
+    This can occur if an attacker leverages PowerShell cmdlets such as "New-NetFirewallRule", or directly uses WMI CIM classes such as "MSFT_NetFirewallRule".
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1562.004/T1562.004.md#atomic-test-24---set-a-firewall-rule-using-new-netfirewallrule
+    - https://malware.news/t/the-rhysida-ransomware-activity-analysis-and-ties-to-vice-society/72170
+    - https://cybersecuritynews.com/rhysida-ransomware-attacking-windows/
+author: frack113, Nasreddine Bencherchali (Nextron Systems)
+date: 2024/05/10
+tags:
+    - attack.defense_evasion
+    - attack.t1562.004
+logsource:
+    product: windows
+    service: firewall-as
+detection:
+    selection:
+        EventID:
+            - 2004 # A rule has been added to the Windows Defender Firewall exception list
+            - 2071 # A rule has been added to the Windows Defender Firewall exception list. (Windows 11)
+            - 2097
+        Action: 3 # Allow
+        ModifyingApplication|endswith: ':\Windows\System32\wbem\WmiPrvSE.exe'
+    condition: selection
+falsepositives:
+    - Administrator scripts or activity.
+level: medium
