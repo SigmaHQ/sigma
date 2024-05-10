@@ -1,0 +1,29 @@
+title: New Windows Firewall Rule Added Via New-NetFirewallRule Cmdlet - ScriptBlock
+id: 8d31dd2e-b582-48ca-826e-dcaa2c1ca264
+related:
+    - id: 51483085-0cba-46a8-837e-4416496d6971
+      type: similar
+status: experimental
+description: |
+    Detects when a powershell script contains calls to the "New-NetFirewallRule" cmdlet in order to add a new firewall rule with an "Allow" action.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1562.004/T1562.004.md#atomic-test-24---set-a-firewall-rule-using-new-netfirewallrule
+    - https://malware.news/t/the-rhysida-ransomware-activity-analysis-and-ties-to-vice-society/72170
+    - https://cybersecuritynews.com/rhysida-ransomware-attacking-windows/
+author: frack113
+date: 2024/05/10
+tags:
+    - attack.defense_evasion
+    - attack.t1562.004
+    - detection.threat_hunting
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection:
+        ScriptBlockText|contains: 'New-NetFirewallRule*-Action*Allow'
+    condition: selection
+falsepositives:
+    - Administrator script
+level: low
