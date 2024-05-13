@@ -1,0 +1,39 @@
+title: All Backups Deleted Via Wbadmin.EXE
+id: 639c9081-f482-47d3-a0bd-ddee3d4ecd76
+related:
+    - id: 89f75308-5b1b-4390-b2d8-d6b2340efaf8
+      type: derived
+status: test
+description: |
+    Detects the deletion of all backups or system state backups via "wbadmin.exe".
+    This technique is used by numerous ransomware families and actors.
+    This may only be successful on server platforms that have Windows Backup enabled.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1490/T1490.md#atomic-test-5---windows---delete-volume-shadow-copies-via-wmi-with-powershell
+    - https://github.com/albertzsigovits/malware-notes/blob/558898932c1579ff589290092a2c8febefc3a4c9/Ransomware/Lockbit.md
+    - https://www.sentinelone.com/labs/ranzy-ransomware-better-encryption-among-new-features-of-thunderx-derivative/
+    - https://www.trendmicro.com/vinfo/us/security/news/cybercrime-and-digital-threats/ransomware-report-avaddon-and-new-techniques-emerge-industrial-sector-targeted
+    - https://www.trendmicro.com/content/dam/trendmicro/global/en/research/24/b/lockbit-attempts-to-stay-afloat-with-a-new-version/technical-appendix-lockbit-ng-dev-analysis.pdf
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/wbadmin-delete-systemstatebackup
+author: frack113, Nasreddine Bencherchali (Nextron Systems)
+date: 2021/12/13
+modified: 2024/05/10
+tags:
+    - attack.impact
+    - attack.t1490
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\wbadmin.exe'
+        - OriginalFileName: 'WBADMIN.EXE'
+    selection_cli:
+        CommandLine|contains|all:
+            - 'delete'
+            - 'backup' # Also covers "SYSTEMSTATEBACKUP"
+        CommandLine|contains: 'keepVersions:0'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
