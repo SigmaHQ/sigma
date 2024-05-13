@@ -19,7 +19,7 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    schtasks_exe:
+    selection:
         Image|endswith: '\schtasks.exe'
         CommandLine|contains|all:
             - '/Change'
@@ -27,14 +27,14 @@ detection:
             - '/disable'
         CommandLine|contains:
             # Add more important tasks
-            - '\Windows\SystemRestore\SR'
-            - '\Windows\Windows Defender\'
             - '\Windows\BitLocker'
+            - '\Windows\ExploitGuard'
+            - '\Windows\SystemRestore\SR'
+            - '\Windows\UpdateOrchestrator\'
+            - '\Windows\Windows Defender\'
             - '\Windows\WindowsBackup\'
             - '\Windows\WindowsUpdate\'
-            - '\Windows\UpdateOrchestrator\'
-            - '\Windows\ExploitGuard'
-    condition: all of schtasks_*
+    condition: selection
 falsepositives:
     - Unknown
 level: high

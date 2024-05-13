@@ -1,7 +1,9 @@
 title: Suspicious Executable File Creation
 id: 74babdd6-a758-4549-9632-26535279e654
 status: test
-description: Detect creation of suspicious executable file name. Some strings look for suspicious file extensions, others look for filenames that exploit unquoted service paths.
+description: |
+    Detect creation of suspicious executable file names.
+    Some strings look for suspicious file extensions, others look for filenames that exploit unquoted service paths.
 references:
     - https://medium.com/@SumitVerma101/windows-privilege-escalation-part-1-unquoted-service-path-c7a011a8d8ae
     - https://app.any.run/tasks/76c69e2d-01e8-49d9-9aea-fb7cc0c4d3ad/
@@ -15,7 +17,7 @@ logsource:
     product: windows
     category: file_event
 detection:
-    selection_double:
+    selection:
         TargetFilename|endswith:
             - ':\$Recycle.Bin.exe'
             - ':\Documents and Settings.exe'
@@ -24,7 +26,7 @@ detection:
             - ':\Recovery.exe'
             - '.bat.exe'
             - '.sys.exe'
-    condition: 1 of selection_*
+    condition: selection
 falsepositives:
     - Unknown
 level: high

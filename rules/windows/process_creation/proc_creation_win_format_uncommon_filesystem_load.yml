@@ -1,12 +1,14 @@
-title: Format.com FileSystem LOLBIN
+title: Uncommon FileSystem Load Attempt By Format.com
 id: 9fb6b26e-7f9e-4517-a48b-8cac4a1b6c60
 status: test
-description: Detects the execution of format.com with a suspicious filesystem selection that could indicate a defense evasion activity in which format.com is used to load malicious DLL files or other programs
+description: |
+    Detects the execution of format.com with an uncommon filesystem selection that could indicate a defense evasion activity in which "format.com" is used to load malicious DLL files or other programs.
 references:
     - https://twitter.com/0gtweet/status/1477925112561209344
     - https://twitter.com/wdormann/status/1478011052130459653?s=20
 author: Florian Roth (Nextron Systems)
 date: 2022/01/04
+modified: 2024/05/13
 tags:
     - attack.defense_evasion
 logsource:
@@ -16,14 +18,14 @@ detection:
     selection:
         Image|endswith: '\format.com'
         CommandLine|contains: '/fs:'
-    filter:
+    filter_main_known_fs:
         CommandLine|contains:
-            - '/fs:FAT'
             - '/fs:exFAT'
+            - '/fs:FAT'
             - '/fs:NTFS'
-            - '/fs:UDF'
             - '/fs:ReFS'
-    condition: selection and not 1 of filter*
+            - '/fs:UDF'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high
