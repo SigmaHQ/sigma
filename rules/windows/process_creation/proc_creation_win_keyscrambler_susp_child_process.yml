@@ -1,0 +1,47 @@
+title: Potentially Suspicious Child Process of KeyScrambler.exe
+id: ca5583e9-8f80-46ac-ab91-7f314d13b984
+related:
+    - id: d2451be2-b582-4e15-8701-4196ac180260
+      type: similar
+status: experimental
+description: Detects potentially suspicious child processes of KeyScrambler.exe
+references:
+    - https://twitter.com/DTCERT/status/1712785421845790799
+author: Swachchhanda Shrawan Poudel
+date: 2024/05/13
+tags:
+    - attack.execution
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1203
+    - attack.t1574.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\KeyScrambler.exe'
+    selection_binaries:
+        # Note: add additional binaries that the attacker might use
+        - Image|endswith:
+              - '\cmd.exe'
+              - '\cscript.exe'
+              - '\mshta.exe'
+              - '\powershell.exe'
+              - '\pwsh.exe'
+              - '\regsvr32.exe'
+              - '\rundll32.exe'
+              - '\wscript.exe'
+        - OriginalFileName:
+              - 'Cmd.Exe'
+              - 'cscript.exe'
+              - 'mshta.exe'
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+              - 'regsvr32.exe'
+              - 'RUNDLL32.EXE'
+              - 'wscript.exe'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium
