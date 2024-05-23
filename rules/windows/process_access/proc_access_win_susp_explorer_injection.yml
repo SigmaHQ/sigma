@@ -1,0 +1,25 @@
+title: Potential Explorer Injection
+id: 57b1e9ea-9818-4642-908e-f97fd9751bc7
+status: experimental
+description: Detects potential Explorer.exe injection 
+references:
+    - https://learn.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights
+author: frack113
+date: 2024/05/23
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1055.011
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        TargetImage|endswith: ':\Windows\Explorer.EXE'
+        GrantedAccess: '0x1FFFFF' # All possible access rights for a process object.
+    filter_system32:
+        SourceImage|contains: ':\Windows\System32\'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: medium
