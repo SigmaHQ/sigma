@@ -1,14 +1,14 @@
-title: Mysql Daemon Creating Executable Files
+title: Uncommon File Creation By Mysql Daemon Process
 id: c61daa90-3c1e-4f18-af62-8f288b5c9aaf
 status: experimental
-description: 'Detects the creation of executable files by Mysql daemon which could be an indicator of User Defined Functions abuse to download malware.
-
-    '
+description: |
+    Detects the creation of files with scripting or executable extensions by Mysql daemon.
+    Which could be an indicator of "User Defined Functions" abuse to download malware.
 references:
     - https://asec.ahnlab.com/en/58878/
     - https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/honeypot-recon-mysql-malware-infection-via-user-defined-functions-udf/
 author: Joseph Kamau
-date: 2024/02/03
+date: 2024/05/27
 tags:
     - attack.defense_evasion
 logsource:
@@ -20,10 +20,14 @@ detection:
             - \mysqld.exe
             - \mysqld-nt.exe
         TargetFilename|endswith:
-            - .exe
-            - .dll
-            - .ps1
-            - .bat
+            - '.bat'
+            - '.dat'
+            - '.dll'
+            - '.exe'
+            - '.ps1'
+            - '.psm1'
+            - '.vbe'
+            - '.vbs'
     condition: selection
 falsepositives:
     - Unknown
