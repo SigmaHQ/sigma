@@ -1,4 +1,4 @@
-title: MacOS System Discovery Using Sysctl
+title: System Information Discovery Via Sysctl - MacOS
 id: 6ff08e55-ea53-4f27-94a1-eff92e6d9d5c
 status: experimental
 description: |
@@ -9,8 +9,11 @@ references:
     - https://evasions.checkpoint.com/techniques/macos.html
     - https://www.welivesecurity.com/2019/04/09/oceanlotus-macos-malware-update/
     - https://www.sentinelone.com/labs/20-common-tools-techniques-used-by-macos-threat-actors-malware/
+    - https://objective-see.org/blog/blog_0x1E.html
+    - https://www.virustotal.com/gui/file/1c547a064494a35d6b5e6b459de183ab2720a22725e082bed6f6629211f7abc1/behavior
+    - https://www.virustotal.com/gui/file/b4b1fc65f87b3dcfa35e2dbe8e0a34ad9d8a400bec332025c0a2e200671038aa/behavior
 author: Pratinav Chandra
-date: 2024/03/26
+date: 2024/05/27
 tags:
     - attack.defense_evasion
     - attack.t1497.001
@@ -20,15 +23,15 @@ logsource:
     product: macos
     category: process_creation
 detection:
-    sysctl_selection_img:
+    selection_img:
         - Image|endswith: '/sysctl'
         - CommandLine|contains: 'sysctl'
-    sysctl_selection_cmd:
+    selection_cmd:
         CommandLine|contains:
           - 'hw.'
-          - 'machdep.'
           - 'kern.'
-    condition: all of sysctl_selection_*
+          - 'machdep.'
+    condition: all of selection_*
 falsepositives:
     - Legitimate administrative activities
 level: medium
