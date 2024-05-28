@@ -1,0 +1,26 @@
+title: Time Machine Backup Tampering - MacOS
+id: 9acf45ed-3a26-4062-bf08-56857613eb52
+status: experimental
+description: Detects tampering with Time Machine backups on macOS
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1490/T1490.md#atomic-test-12---disable-time-machine
+    - https://www.loobins.io/binaries/tmutil/
+author: Pratinav Chandra
+date: 2024/05/27
+tags:
+    - attack.impact
+    - attack.T1490
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection_img:
+        - Image|endswith: '/tmutil'
+        - CommandLine|contains: 'tmutil'
+    selection_cmd:
+        - CommandLine|contains: 'disable'
+        - CommandLine|contains: 'delete'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate activities
+level: medium
