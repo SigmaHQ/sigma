@@ -1,0 +1,28 @@
+title: Network Connection Initiated To Mega.nz
+id: fdeebdf0-9f3f-4d08-84a6-4c4d13e39fe4
+status: test
+description: |
+    Detects a network connection initiated by a binary to "api.mega.co.nz".
+    Attackers were seen abusing file sharing websites similar to "mega.nz" in order to upload/download additional payloads.
+references:
+    - https://megatools.megous.com/
+    - https://www.mandiant.com/resources/russian-targeting-gov-business
+author: Florian Roth (Nextron Systems)
+date: 2021/12/06
+modified: 2024/02/01
+tags:
+    - attack.exfiltration
+    - attack.t1567.001
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Initiated: 'true'
+        DestinationHostname|endswith:
+            - 'mega.co.nz'
+            - 'mega.nz'
+    condition: selection
+falsepositives:
+    - Legitimate MEGA installers and utilities are expected to communicate with this domain. Exclude hosts that are known to be allowed to use this tool.
+level: medium

@@ -1,0 +1,35 @@
+title: System Disk And Volume Reconnaissance Via Wmic.EXE
+id: c79da740-5030-45ec-a2e0-479e824a562c
+related:
+    - id: d85ecdd7-b855-4e6e-af59-d9c78b5b861e
+      type: similar
+status: experimental
+description: |
+    An adversary might use WMI to discover information about the system, such as the volume name, size,
+    free space, and other disk information. This can be done using the `wmic` command-line utility and has been
+    observed being used by threat actors such as Volt Typhoon.
+references:
+    - https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-144a
+    - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/wmic
+author: Stephen Lincoln `@slincoln-aiq`(AttackIQ)
+date: 2024/02/02
+tags:
+    - attack.execution
+    - attack.discovery
+    - attack.t1047
+    - attack.t1082
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\WMIC.exe'
+        - OriginalFileName: 'wmic.exe'
+    selection_cli:
+        CommandLine|contains:
+            - 'volume'
+            - 'path win32_logicaldisk'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium

@@ -1,0 +1,27 @@
+title: Bitbucket User Login Failure
+id: 70ed1d26-0050-4b38-a599-92c53d57d45a
+status: experimental
+description: |
+    Detects user authentication failure events.
+    Please note that this rule can be noisy and it is recommended to use with correlation based on "author.name" field.
+references:
+    - https://confluence.atlassian.com/bitbucketserver/audit-log-events-776640423.html
+author: Muhammad Faisal (@faisalusuf)
+date: 2024/02/25
+tags:
+    - attack.defense_evasion
+    - attack.credential_access
+    - attack.t1078.004
+    - attack.t1110
+logsource:
+    product: bitbucket
+    service: audit
+    definition: 'Requirements: "Advance" log level is required to receive these audit events.'
+detection:
+    selection:
+        auditType.category: 'Authentication'
+        auditType.action: 'User login failed'
+    condition: selection
+falsepositives:
+    - Legitimate user wrong password attempts.
+level: medium

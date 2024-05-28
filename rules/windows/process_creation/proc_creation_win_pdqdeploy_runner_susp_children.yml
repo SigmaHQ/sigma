@@ -1,4 +1,4 @@
-title: Suspicious Execution Of PDQDeployRunner
+title: Potentially Suspicious Execution Of PDQDeployRunner
 id: 12b8e9f5-96b2-41e1-9a42-8c6779a5c184
 related:
     - id: d679950c-abb7-43a6-80fb-2a480c4fc450
@@ -9,6 +9,7 @@ references:
     - https://twitter.com/malmoeb/status/1550483085472432128
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/07/22
+modified: 2024/05/02
 tags:
     - attack.execution
 logsource:
@@ -16,39 +17,40 @@ logsource:
     product: windows
 detection:
     selection_parent:
-        ParentImage|contains: 'PDQDeployRunner-'
-    selection_susp:
+        ParentImage|contains: '\PDQDeployRunner-'
+    selection_child:
         # Improve this section by adding other suspicious processes, commandlines or paths
         - Image|endswith:
               # If you use any of the following processes legitimately comment them out
-              - '\wscript.exe'
-              - '\cscript.exe'
-              - '\rundll32.exe'
-              - '\regsvr32.exe'
-              - '\wmic.exe'
-              - '\msiexec.exe'
-              - '\mshta.exe'
-              - '\csc.exe'
-              - '\dllhost.exe'
-              - '\certutil.exe'
-              - '\scriptrunner.exe'
               - '\bash.exe'
+              - '\certutil.exe'
+              - '\cmd.exe'
+              - '\csc.exe'
+              - '\cscript.exe'
+              - '\dllhost.exe'
+              - '\mshta.exe'
+              - '\msiexec.exe'
+              - '\regsvr32.exe'
+              - '\rundll32.exe'
+              - '\scriptrunner.exe'
+              - '\wmic.exe'
+              - '\wscript.exe'
               - '\wsl.exe'
         - Image|contains:
-              - 'C:\Users\Public\'
-              - 'C:\ProgramData\'
-              - 'C:\Windows\TEMP\'
+              - ':\ProgramData\'
+              - ':\Users\Public\'
+              - ':\Windows\TEMP\'
               - '\AppData\Local\Temp'
         - CommandLine|contains:
-              - 'iex '
-              - 'Invoke-'
-              - 'DownloadString'
-              - 'http'
+              - ' -decode '
               - ' -enc '
               - ' -encodedcommand '
-              - 'FromBase64String'
-              - ' -decode '
               - ' -w hidden'
+              - 'DownloadString'
+              - 'FromBase64String'
+              - 'http'
+              - 'iex '
+              - 'Invoke-'
     condition: all of selection_*
 falsepositives:
     - Legitimate use of the PDQDeploy tool to execute these commands

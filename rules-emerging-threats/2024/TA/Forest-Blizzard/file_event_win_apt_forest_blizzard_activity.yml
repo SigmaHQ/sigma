@@ -1,0 +1,48 @@
+title: Forest Blizzard APT - File Creation Activity
+id: b92d1d19-f5c9-4ed6-bbd5-7476709dc389
+status: experimental
+description: |
+    Detects the creation of specific files inside of ProgramData directory.
+    These files were seen being created by Forest Blizzard as described by MSFT.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2024/04/22/analyzing-forest-blizzards-custom-post-compromise-tool-for-exploiting-cve-2022-38028-to-obtain-credentials/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2024/04/23
+tags:
+    - attack.defense_evasion
+    - attack.t1562.002
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_programdata_driver_store:
+        TargetFilename|startswith:
+            - 'C:\ProgramData\Microsoft\v'
+            - 'C:\ProgramData\Adobe\v'
+            - 'C:\ProgramData\Comms\v'
+            - 'C:\ProgramData\Intel\v'
+            - 'C:\ProgramData\Kaspersky Lab\v'
+            - 'C:\ProgramData\Bitdefender\v'
+            - 'C:\ProgramData\ESET\v'
+            - 'C:\ProgramData\NVIDIA\v'
+            - 'C:\ProgramData\UbiSoft\v'
+            - 'C:\ProgramData\Steam\v'
+        TargetFilename|contains:
+            - '\pnms003.inf_'
+            - '\pnms009.inf_'
+    selection_programdata_main:
+        TargetFilename|startswith: 'C:\ProgramData\'
+    selection_programdata_files_1:
+        TargetFilename|endswith:
+            - '.save'
+            - '\doit.bat'
+            - '\execute.bat'
+            - '\servtask.bat'
+        # Hashes|contains: '7d51e5cc51c43da5deae5fbc2dce9b85c0656c465bb25ab6bd063a503c1806a9' # Uncommon this if you collect hash information inf file events
+    selection_programdata_files_2:
+        TargetFilename|contains: '\wayzgoose'
+        TargetFilename|endswith: '.dll'
+    condition: selection_programdata_driver_store or (selection_programdata_main and 1 of selection_programdata_files_*)
+falsepositives:
+    - Unlikely
+level: high

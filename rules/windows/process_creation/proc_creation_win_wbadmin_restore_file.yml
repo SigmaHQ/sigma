@@ -1,0 +1,33 @@
+title: File Recovery From Backup Via Wbadmin.EXE
+id: 6fe4aa1e-0531-4510-8be2-782154b73b48
+related:
+    - id: 84972c80-251c-4c3a-9079-4f00aad93938
+      type: derived
+status: experimental
+description: |
+    Detects the recovery of files from backups via "wbadmin.exe".
+    Attackers can restore sensitive files such as NTDS.DIT or Registry Hives from backups in order to potentially extract credentials.
+references:
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/wbadmin-start-recovery
+    - https://lolbas-project.github.io/lolbas/Binaries/Wbadmin/
+author: Nasreddine Bencherchali (Nextron Systems), frack113
+date: 2024/05/10
+tags:
+    - attack.impact
+    - attack.t1490
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\wbadmin.exe'
+        - OriginalFileName: 'WBADMIN.EXE'
+    selection_cli:
+        CommandLine|contains|all:
+            - ' recovery'
+            - 'recoveryTarget'
+            - 'itemtype:File'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium

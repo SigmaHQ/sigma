@@ -1,0 +1,65 @@
+title: Suspicious Non-Browser Network Communication With Reddit API
+id: d7b09985-95a3-44be-8450-b6eadf49833e
+status: deprecated # In favour of 297ae038-edc2-4b2e-bb3e-7c5fc94dd5c7
+description: Detects an a non-browser process interacting with the Reddit API which could indicate use of a covert C2 such as RedditC2
+references:
+    - https://github.com/kleiton0x00/RedditC2
+    - https://twitter.com/kleiton0x7e/status/1600567316810551296
+    - https://www.linkedin.com/posts/kleiton-kurti_github-kleiton0x00redditc2-abusing-reddit-activity-7009939662462984192-5DbI/?originalSubdomain=al
+author: Gavin Knapp
+date: 2023/02/16
+modified: 2024/02/02
+tags:
+    - attack.command_and_control
+    - attack.t1102
+logsource:
+    product: windows
+    category: network_connection
+detection:
+    selection:
+        DestinationHostname|contains: 'reddit.com' # Match with Reddit API when you can
+    # Other browsers or apps known to use reddit should be added
+    # TODO: Add full paths for default install locations
+    filter_optional_brave:
+        Image|endswith: '\brave.exe'
+    filter_optional_chrome:
+        Image:
+            - 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+            - 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
+    filter_optional_firefox:
+        Image:
+            - 'C:\Program Files\Mozilla Firefox\firefox.exe'
+            - 'C:\Program Files (x86)\Mozilla Firefox\firefox.exe'
+    filter_optional_ie:
+        Image:
+            - 'C:\Program Files (x86)\Internet Explorer\iexplore.exe'
+            - 'C:\Program Files\Internet Explorer\iexplore.exe'
+    filter_optional_maxthon:
+        Image|endswith: '\maxthon.exe'
+    filter_optional_edge_1:
+        - Image|startswith: 'C:\Program Files (x86)\Microsoft\EdgeWebView\Application\'
+        - Image|endswith: '\WindowsApps\MicrosoftEdge.exe'
+        - Image:
+              - 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+              - 'C:\Program Files\Microsoft\Edge\Application\msedge.exe'
+    filter_optional_edge_2:
+        Image|startswith:
+            - 'C:\Program Files (x86)\Microsoft\EdgeCore\'
+            - 'C:\Program Files\Microsoft\EdgeCore\'
+        Image|endswith:
+            - '\msedge.exe'
+            - '\msedgewebview2.exe'
+    filter_optional_opera:
+        Image|endswith: '\opera.exe'
+    filter_optional_safari:
+        Image|endswith: '\safari.exe'
+    filter_optional_seamonkey:
+        Image|endswith: '\seamonkey.exe'
+    filter_optional_vivaldi:
+        Image|endswith: '\vivaldi.exe'
+    filter_optional_whale:
+        Image|endswith: '\whale.exe'
+    condition: selection and not 1 of filter_optional_*
+falsepositives:
+    - Legitimate applications communicating with the Reddit API e.g. web browsers not in the exclusion list, app with an RSS  etc.
+level: medium

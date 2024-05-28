@@ -1,0 +1,35 @@
+title: Suspicious Wordpad Outbound Connections
+id: 786cdae8-fefb-4eb2-9227-04e34060db01
+status: experimental
+description: |
+    Detects a network connection initiated by "wordpad.exe" over uncommon destination ports.
+    This might indicate potential process injection activity from a beacon or similar mechanisms.
+references:
+    - https://blogs.blackberry.com/en/2023/07/romcom-targets-ukraine-nato-membership-talks-at-nato-summit
+author: X__Junior (Nextron Systems)
+date: 2023/07/12
+modified: 2023/12/15
+tags:
+    - attack.defense_evasion
+    - attack.command_and_control
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Initiated: 'true'
+        Image|endswith: '\wordpad.exe'
+    filter_main_ports:
+        DestinationPort:
+            - 80
+            - 139
+            - 443
+            - 445
+            - 465
+            - 587
+            - 993
+            - 995
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Other ports can be used, apply additional filters accordingly
+level: medium

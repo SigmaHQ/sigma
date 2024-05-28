@@ -1,0 +1,43 @@
+title: Office Application Initiated Network Connection Over Uncommon Ports
+id: 3b5ba899-9842-4bc2-acc2-12308498bf42
+status: experimental
+description: Detects an office suit application (Word, Excel, PowerPoint, Outlook) communicating to target systems over uncommon ports.
+references:
+    - https://blogs.blackberry.com/en/2023/07/romcom-targets-ukraine-nato-membership-talks-at-nato-summit
+author: X__Junior (Nextron Systems)
+date: 2023/07/12
+modified: 2024/01/31
+tags:
+    - attack.defense_evasion
+    - attack.command_and_control
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Initiated: 'true'
+        Image|endswith:
+            - '\excel.exe'
+            - '\outlook.exe'
+            - '\powerpnt.exe'
+            - '\winword.exe'
+            - '\wordview.exe'
+    filter_main_common_ports:
+        DestinationPort:
+            - 53 # DNS
+            - 80 # HTTP
+            - 139 # NETBIOS
+            - 443 # HTTPS
+            - 445 # SMB
+    filter_main_outlook_ports:
+        Image|contains: ':\Program Files\Microsoft Office\'
+        Image|endswith: '\OUTLOOK.EXE'
+        DestinationPort:
+            - 465 # SMTP
+            - 587 # SMTP
+            - 993 # IMAP
+            - 995 # POP3
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Other ports can be used, apply additional filters accordingly
+level: medium

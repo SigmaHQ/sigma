@@ -1,0 +1,34 @@
+title: Dfsvc.EXE Network Connection To Non-Local IPs
+id: 3c21219b-49b5-4268-bce6-c914ed50f09c
+status: experimental
+description: Detects network connections from "dfsvc.exe" used to handled ClickOnce applications to non-local IPs
+references:
+    - https://posts.specterops.io/less-smartscreen-more-caffeine-ab-using-clickonce-for-trusted-code-execution-1446ea8051c5
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2023/06/12
+modified: 2024/03/12
+tags:
+    - attack.execution
+    - attack.t1203
+    - detection.threat_hunting
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\dfsvc.exe'
+        Initiated: 'true'
+    filter_main_local_ip:
+        DestinationIp|cidr: # Ranges excluded based on https://github.com/SigmaHQ/sigma/blob/0f176092326ab9d1e19384d30224e5f29f760d82/rules/windows/network_connection/net_connection_win_dllhost_net_connections.yml
+            - '127.0.0.0/8'
+            - '10.0.0.0/8'
+            - '169.254.0.0/16'  # link-local address
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+            - '::1/128'  # IPv6 loopback
+            - 'fe80::/10'  # IPv6 link-local addresses
+            - 'fc00::/7'  # IPv6 private addresses
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - False positives are expected from ClickOnce manifests hosted on public IPs and domains. Apply additional filters for the accepted IPs in your environement as necessary
+level: medium

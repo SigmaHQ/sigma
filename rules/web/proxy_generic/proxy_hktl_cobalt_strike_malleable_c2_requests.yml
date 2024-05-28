@@ -1,0 +1,60 @@
+title: HackTool - CobaltStrike Malleable Profile Patterns - Proxy
+id: f3f21ce1-cdef-4bfc-8328-ed2e826f5fac
+related:
+    - id: 953b895e-5cc9-454b-b183-7f3db555452e
+      type: obsoletes
+    - id: 41b42a36-f62c-4c34-bd40-8cb804a34ad8
+      type: obsoletes
+    - id: 37325383-740a-403d-b1a2-b2b4ab7992e7
+      type: obsoletes
+    - id: c9b33401-cc6a-4cf6-83bb-57ddcb2407fc
+      type: obsoletes
+status: test
+description: Detects cobalt strike malleable profiles patterns (URI, User-Agents, Methods).
+references:
+    - https://github.com/rsmudge/Malleable-C2-Profiles/blob/26323784672913923d20c5a638c6ca79459e8529/normal/amazon.profile
+    - https://www.hybrid-analysis.com/sample/ee5eca8648e45e2fea9dac0d920ef1a1792d8690c41ee7f20343de1927cc88b9?environmentId=100
+    - https://github.com/rsmudge/Malleable-C2-Profiles/blob/26323784672913923d20c5a638c6ca79459e8529/normal/ocsp.profile
+    - https://github.com/yeyintminthuhtut/Malleable-C2-Profiles-Collection/
+    - https://github.com/rsmudge/Malleable-C2-Profiles/blob/26323784672913923d20c5a638c6ca79459e8529/normal/onedrive_getonly.profile
+author: Markus Neis, Florian Roth (Nextron Systems)
+date: 2024/02/15
+tags:
+    - attack.defense_evasion
+    - attack.command_and_control
+    - attack.t1071.001
+logsource:
+    category: proxy
+detection:
+    selection_amazon_1:
+        c-useragent: 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'
+        cs-method: 'GET'
+        c-uri: '/s/ref=nb_sb_noss_1/167-3294888-0262949/field-keywords=books'
+        cs-host: 'www.amazon.com'
+        cs-cookie|endswith: '=csm-hit=s-24KU11BB82RZSYGJ3BDK|1419899012996'
+    selection_amazon_2:
+        c-useragent: 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'
+        cs-method: 'POST'
+        c-uri: '/N4215/adj/amzn.us.sr.aps'
+        cs-host: 'www.amazon.com'
+    selection_generic_1:
+        c-useragent:
+            - 'Mozilla/4.0 (compatible; MSIE 6.0;Windows NT 5.1)'
+            - 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; WOW64; Trident/4.0; SLCC2; .NET CLR 3.0.30729; .NET4.0C; .NET4.0E )'
+            - 'Mozilla/5.0 (Windows; U; MSIE 7.0; Windows NT 5.2) Java/1.5.0_08'
+    selection_generic_2:
+        c-useragent|endswith: '; MANM; MANM)'
+    selection_oscp:
+        c-uri|contains: '/oscp/'
+        cs-host: 'ocsp.verisign.com'
+    selection_onedrive:
+        cs-method: 'GET'
+        c-uri|endswith: '\?manifest=wac'
+        cs-host: 'onedrive.live.com'
+    filter_main_onedrive:
+        c-uri|startswith: 'http'
+        c-uri|contains: '://onedrive.live.com/'
+    condition: 1 of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high

@@ -1,0 +1,51 @@
+title: Office Application Initiated Network Connection To Non-Local IP
+id: 75e33ce3-ae32-4dcc-9aa8-a2a3029d6f84
+status: test
+description: |
+    Detects an office application (Word, Excel, PowerPoint)  that initiate a network connection to a non-private IP addresses.
+    This rule aims to detect traffic similar to one seen exploited in CVE-2021-42292.
+    This rule will require an initial baseline and tuning that is specific to your organization.
+references:
+    - https://corelight.com/blog/detecting-cve-2021-42292
+author: Christopher Peacock '@securepeacock', SCYTHE '@scythe_io', Florian Roth (Nextron Systems), Tim Shelton
+date: 2021/11/10
+modified: 2024/03/13
+tags:
+    - attack.execution
+    - attack.t1203
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\excel.exe'
+            - '\powerpnt.exe'
+            - '\winword.exe'
+            - '\wordview.exe'
+        Initiated: 'true'
+    filter_main_local_ranges:
+        DestinationIp|cidr:
+            - '127.0.0.0/8'
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+            - '169.254.0.0/16'
+            - '::1/128'  # IPv6 loopback
+            - 'fe80::/10'  # IPv6 link-local addresses
+            - 'fc00::/7'  # IPv6 private addresses
+    filter_main_msrange:
+        DestinationIp|cidr:
+            - '20.184.0.0/13' # Microsoft Corporation
+            - '20.192.0.0/10' # Microsoft Corporation
+            - '23.72.0.0/13'  # Akamai International B.V.
+            - '51.10.0.0/15'  # Microsoft Corporation
+            - '51.103.0.0/16' # Microsoft Corporation
+            - '51.104.0.0/15' # Microsoft Corporation
+            - '204.79.197.0/24' # Microsoft Corporation
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - You may have to tune certain domains out that Excel may call out to, such as microsoft or other business use case domains.
+    - Office documents commonly have templates that refer to external addresses, like "sharepoint.ourcompany.com" may have to be tuned.
+    - It is highly recommended to baseline your activity and tune out common business use cases.
+level: medium

@@ -9,7 +9,7 @@ references:
     - https://blog.redbluepurple.io/offensive-research/bypassing-injection-detection
 author: Florian Roth (Nextron Systems)
 date: 2022/03/16
-modified: 2024/01/22
+modified: 2024/03/06
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
@@ -41,6 +41,10 @@ detection:
         TargetImage|endswith:
             - ':\Windows\System32\notepad.exe'
             - ':\Windows\System32\spoolsv.exe'
+    filter_optional_xerox_pjems:
+        SourceImage: 'C:\Program Files\Xerox\XeroxPrintExperience\CommonFiles\XeroxPrintJobEventManagerService.exe'
+        StartFunction: 'LoadLibraryW'
+        TargetImage: 'C:\Windows\System32\spoolsv.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown

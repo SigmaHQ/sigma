@@ -3,11 +3,12 @@ id: d5866ddf-ce8f-4aea-b28e-d96485a20d3d
 status: test
 description: |
     Detects the creation of an executable with a system process name in folders other than the system ones (System32, SysWOW64, etc.).
+    It is highly recommended to perform an initial baseline before using this rule in production.
 references:
     - Internal Research
 author: Sander Wiebing, Tim Shelton, Nasreddine Bencherchali (Nextron Systems)
 date: 2020/05/26
-modified: 2023/11/10
+modified: 2024/03/18
 tags:
     - attack.defense_evasion
     - attack.t1036.005
@@ -89,48 +90,38 @@ detection:
             - '\WSReset.exe'
             - '\WUDFHost.exe'
             - '\WWAHost.exe'
-    filter_main_dism_tiworker:
+    filter_main_generic:
+        # Note: It is recommended to use a more robust filter instead of this generic one, to avoid false negatives.
         TargetFilename|contains:
-            - ':\Windows\SoftwareDistribution\'
-            - ':\Windows\System32\'
-            - ':\Windows\SysWOW64\'
-            - ':\Windows\WinSxS\'
             - '\SystemRoot\System32\'
-        Image|endswith:
-            - '\Windows\System32\dism.exe'
-            - '\TiWorker.exe'
-    filter_main_setuphost:
-        TargetFilename|contains: ':\$WINDOWS.~BT\'
-        Image|endswith: ':\$WINDOWS.~BT\Sources\SetupHost.exe'
-    filter_main_wbengine:
-        TargetFilename|endswith: '\RuntimeBroker.exe'
-        Image|endswith: ':\Windows\system32\wbengine.exe'
+            - 'C:\$WINDOWS.~BT\'
+            - 'C:\$WinREAgent\'
+            - 'C:\Windows\SoftwareDistribution\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\WinSxS\'
+            - 'C:\Windows\uus\'
     filter_main_svchost:
-        Image|endswith: ':\Windows\system32\svchost.exe'
-        TargetFilename|contains:
-            - ':\Windows\SoftwareDistribution\Download\'
-            - ':\Program Files\WindowsApps\'
+        Image|endswith: 'C:\Windows\system32\svchost.exe'
+        TargetFilename|contains: 'C:\Program Files\WindowsApps\'
     filter_main_wuauclt:
-        Image|endswith: ':\Windows\System32\wuauclt.exe'
+        Image|endswith: 'C:\Windows\System32\wuauclt.exe'
     filter_main_explorer:
-        TargetFilename|endswith: ':\Windows\explorer.exe'
+        TargetFilename|endswith: 'C:\Windows\explorer.exe'
     filter_main_msiexec:
         # This filter handles system processes who are updated/installed using misexec.
-        Image|endswith: ':\WINDOWS\system32\msiexec.exe'
+        Image|endswith: 'C:\WINDOWS\system32\msiexec.exe'
         # Add more processes if you find them or simply filter msiexec on its own. If the list grows big
         TargetFilename|endswith:
-            - ':\Program Files\PowerShell\7\pwsh.exe'
-            - ':\Program Files\PowerShell\7-preview\pwsh.exe'
+            - 'C:\Program Files\PowerShell\7\pwsh.exe'
+            - 'C:\Program Files\PowerShell\7-preview\pwsh.exe'
     filter_main_healtray:
-        TargetFilename|contains: ':\Windows\System32\SecurityHealth\'
+        TargetFilename|contains: 'C:\Windows\System32\SecurityHealth\'
         TargetFilename|endswith: '\SecurityHealthSystray.exe'
         Image|endswith: '\SecurityHealthSetup.exe'
-    filter_main_wuaucltcore:
-        Image|contains: ':\Windows\uus\'
-        Image|endswith: '\wuaucltcore.exe'
-        TargetFilename|contains: ':\$WinREAgent\'
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - System processes copied outside their default folders for testing purposes
     - Third party software naming their software with the same names as the processes mentioned here
-level: high
+# Note: Upgrade to high after an initial baseline to your environement.
+level: medium

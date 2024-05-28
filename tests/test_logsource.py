@@ -149,7 +149,7 @@ class TestRules(unittest.TestCase):
             else "empty"
         )
 
-        if fieldname_dict[product]["commun"] == data:
+        if fieldname_dict[product]["common"] == data:
             return False
         else:
             return True
@@ -235,7 +235,7 @@ class TestRules(unittest.TestCase):
             if logsource and detection:
                 full_logsource = self.full_logsource(logsource)
                 list_valid = self.get_logsource(full_logsource)
-                fisrt_time = True
+                first_time = True
 
                 if list_valid and self.not_commun(full_logsource, list_valid):
                     for field in self.get_detection_field(detection):
@@ -246,9 +246,9 @@ class TestRules(unittest.TestCase):
                                     file, field
                                 )
                             )
-                            if fisrt_time:
+                            if first_time:
                                 files_with_fieldname_issues.append(file)
-                                fisrt_time = False  # can be many error in the same rule
+                                first_time = False  # can be many error in the same rule
 
         self.assertEqual(
             files_with_fieldname_issues,
@@ -279,7 +279,7 @@ def load_fields_json(name: str):
             ]
 
     # We use some extracted hash
-    # Add commun field
+    # Add common field
     for product in data:
         for category in data[product]["category"]:
             if "Hashes" in data[product]["category"][category]:
@@ -298,11 +298,11 @@ def load_fields_json(name: str):
                     "sha256",
                     "Imphash",
                 ]
-            if "commun" in data[product].keys():
-                data[product]["category"][category] += data[product]["commun"]
+            if "common" in data[product].keys():
+                data[product]["category"][category] += data[product]["common"]
         for service in data[product]["service"]:
-            if "commun" in data[product].keys():
-                data[product]["service"][service] += data[product]["commun"]
+            if "common" in data[product].keys():
+                data[product]["service"][service] += data[product]["common"]
 
     return data
 

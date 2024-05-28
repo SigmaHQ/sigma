@@ -1,0 +1,54 @@
+title: Suspicious External WebDAV Execution
+id: 1ae64f96-72b6-48b3-ad3d-e71dff6c6398
+related:
+    - id: 4c55738d-72d8-490e-a2db-7969654e375f
+      type: similar
+status: experimental
+description: |
+    Detects executables launched from external WebDAV shares using the WebDAV Explorer integration, commonly seen in initial access campaigns.
+references:
+    - https://dear-territory-023.notion.site/WebDav-Share-Testing-e4950fa0c00149c3aa430d779b9b1d0f?pvs=4
+    - https://micahbabinski.medium.com/search-ms-webdav-and-chill-99c5b23ac462
+    - https://www.trendmicro.com/en_no/research/24/b/cve202421412-water-hydra-targets-traders-with-windows-defender-s.html
+    - https://www.trellix.com/en-us/about/newsroom/stories/research/beyond-file-search-a-novel-method.html
+author: Ahmed Farouk
+date: 2024/05/10
+tags:
+    - attack.initial_access
+    - attack.t1584
+    - attack.t1566
+logsource:
+    category: proxy
+detection:
+    selection_webdav:
+        c-useragent|startswith: 'Microsoft-WebDAV-MiniRedir/'
+        cs-method: 'GET'
+    selection_execution:
+        c-uri|endswith:
+            - '.7z'
+            - '.bat'
+            - '.dat'
+            - '.cmd'
+            - '.exe'
+            - '.js'
+            - '.lnk'
+            - '.ps1'
+            - '.rar'
+            - '.url'
+            - '.vbe'
+            - '.vbs'
+            - '.zip'
+    filter_main_local_ips:
+        dst_ip|cidr:
+            - '127.0.0.0/8'
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+            - '169.254.0.0/16'
+            - '::1/128'  # IPv6 loopback
+            - 'fe80::/10'  # IPv6 link-local addresses
+            - 'fc00::/7'  # IPv6 private addresses
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high

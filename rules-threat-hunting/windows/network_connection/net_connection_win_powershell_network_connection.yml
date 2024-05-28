@@ -1,0 +1,48 @@
+title: Network Connection Initiated By PowerShell Process
+id: 1f21ec3f-810d-4b0e-8045-322202e22b4b
+status: experimental
+description: |
+    Detects a network connection that was initiated from a PowerShell process.
+    Often times malicious powershell scripts download additional payloads or communicate back to command and control channels via uncommon ports or IPs.
+    Use this rule as a basis for hunting for anomalies.
+references:
+    - https://www.youtube.com/watch?v=DLtJTxMWZ2o
+author: Florian Roth (Nextron Systems)
+date: 2017/03/13
+modified: 2024/03/13
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - detection.threat_hunting
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        Initiated: 'true'
+    filter_main_local_ip:
+        DestinationIp|cidr:
+            - '127.0.0.0/8'
+            - '10.0.0.0/8'
+            - '169.254.0.0/16'  # link-local address
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+            - '::1/128'  # IPv6 loopback
+            - 'fe80::/10'  # IPv6 link-local addresses
+            - 'fc00::/7'  # IPv6 private addresses
+        User|contains: # covers many language settings
+            - 'AUTHORI'
+            - 'AUTORI'
+    filter_main_msrange:
+        DestinationIp|cidr:
+            - '20.184.0.0/13'
+            - '51.103.210.0/23'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Administrative scripts
+    - Microsoft IP range
+    - Additional filters are required. Adjust to your environment (e.g. extend filters with company's ip range')
+level: low

@@ -10,7 +10,7 @@ references:
     - https://app.any.run/tasks/7123e948-c91e-49e0-a813-00e8d72ab393/#
 author: frack113
 date: 2023/02/26
-modified: 2024/01/22
+modified: 2024/05/10
 tags:
     - attack.defense_evasion
     - attack.t1562.004
@@ -22,15 +22,17 @@ detection:
         EventID:
             - 2004 # A rule has been added to the Windows Defender Firewall exception list. (Windows 10)
             - 2071 # A rule has been added to the Windows Defender Firewall exception list. (Windows 11)
+            - 2097
         ApplicationPath|contains:
             - ':\PerfLogs\'
             - ':\Temp\'
+            - ':\Tmp\'
             - ':\Users\Public\'
             - ':\Windows\Tasks\'
             - ':\Windows\Temp\'
             - '\AppData\Local\Temp\'
     filter_main_block:
-        Action: 2
+        Action: 2 # Block
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown

@@ -10,7 +10,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/b27a3cb25025161d49ac861cb216db68c46a3537/atomics/T1027.004/T1027.004.md#atomic-test-1---compile-after-delivery-using-cscexe
 author: Florian Roth (Nextron Systems), X__Junior (Nextron Systems)
 date: 2019/08/24
-modified: 2023/10/27
+modified: 2024/05/27
 tags:
     - attack.defense_evasion
     - attack.t1027.004
@@ -41,7 +41,7 @@ detection:
               - ':\Users\'
               - '\Pictures\'
     selection_susp_location_3:
-        CommandLine|re: '([Pp]rogram[Dd]ata|%([Ll]ocal)?[Aa]pp[Dd]ata%|\\[Aa]pp[Dd]ata\\([Ll]ocal(Ll]ow)?|[Rr]oaming))\\[^\\]{1,256}$'
+        CommandLine|re: '([Pp]rogram[Dd]ata|%([Ll]ocal)?[Aa]pp[Dd]ata%|\\[Aa]pp[Dd]ata\\([Ll]ocal([Ll]ow)?|[Rr]oaming))\\[^\\]{1,256}$'
     filter_main_programfiles:
         # Note: this is a generic filter. You could baseline execution in your env for a more robust rule
         ParentImage|startswith:
@@ -52,7 +52,9 @@ detection:
     filter_main_w3p:
         ParentImage: 'C:\Windows\System32\inetsrv\w3wp.exe' # https://twitter.com/gabriele_pippi/status/1206907900268072962
     filter_optional_chocolatey:
-        ParentImage: 'C:\ProgramData\chocolatey\choco.exe' # Chocolatey https://chocolatey.org/
+        ParentImage: # Chocolatey https://chocolatey.org/
+            - 'C:\ProgramData\chocolatey\choco.exe'
+            - 'C:\ProgramData\chocolatey\tools\shimgen.exe'
     filter_optional_defender:
         ParentCommandLine|contains: '\ProgramData\Microsoft\Windows Defender Advanced Threat Protection'
     filter_optional_ansible:

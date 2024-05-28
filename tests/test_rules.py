@@ -255,7 +255,7 @@ class TestRules(unittest.TestCase):
 
                     # We add this check in case of keyword rules. Where no field is used. The parser returns a list instead of a dict
                     # If the 2 list are different that means they aren't the same
-                    if (type(detection2[named_condition]) == list) or (
+                    if (type(detection1[named_condition]) == list) or (
                         type(detection2[named_condition]) == list
                     ):
                         condition_value1 = detection1[named_condition]
@@ -395,67 +395,69 @@ class TestRules(unittest.TestCase):
             + "There are rules using sysmon events but with no EventID specified",
         )
 
-    def test_optional_falsepositives_capital(self):
-        faulty_rules = []
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            fps = self.get_rule_part(file_path=file, part_name="falsepositives")
-            if fps:
-                for fp in fps:
-                    # first letter should be capital
-                    try:
-                        if fp[0].upper() != fp[0]:
-                            print(
-                                Fore.YELLOW
-                                + "Rule {} defines a falsepositive that does not start with a capital letter: '{}'.".format(
-                                    file, fp
-                                )
-                            )
-                            faulty_rules.append(file)
-                    except TypeError as err:
-                        print("TypeError Exception for rule {}".format(file))
-                        print("Error: {}".format(err))
-                        print("Maybe you created an empty falsepositive item?")
+    # sigma cli SigmahqFalsepositivesCapitalIssue
+    # def test_optional_falsepositives_capital(self):
+    #     faulty_rules = []
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         fps = self.get_rule_part(file_path=file, part_name="falsepositives")
+    #         if fps:
+    #             for fp in fps:
+    #                 # first letter should be capital
+    #                 try:
+    #                     if fp[0].upper() != fp[0]:
+    #                         print(
+    #                             Fore.YELLOW
+    #                             + "Rule {} defines a falsepositive that does not start with a capital letter: '{}'.".format(
+    #                                 file, fp
+    #                             )
+    #                         )
+    #                         faulty_rules.append(file)
+    #                 except TypeError as err:
+    #                     print("TypeError Exception for rule {}".format(file))
+    #                     print("Error: {}".format(err))
+    #                     print("Maybe you created an empty falsepositive item?")
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules with false positives that don't start with a capital letter (e.g. 'unknown' should be 'Unknown')",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with false positives that don't start with a capital letter (e.g. 'unknown' should be 'Unknown')",
+    #     )
 
-    def test_optional_falsepositives_blocked_content(self):
-        faulty_rules = []
-        banned_words = ["none", "pentest", "penetration test"]
-        common_typos = ["unkown", "ligitimate", "legitim ", "legitimeate"]
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            fps = self.get_rule_part(file_path=file, part_name="falsepositives")
-            if fps:
-                for fp in fps:
-                    for typo in common_typos:
-                        if fp == "Unknow" or typo in fp.lower():
-                            print(
-                                Fore.YELLOW
-                                + "Rule {} defines a falsepositive with a common typo: '{}'.".format(
-                                    file, typo
-                                )
-                            )
-                            faulty_rules.append(file)
-                    for banned_word in banned_words:
-                        if banned_word in fp.lower():
-                            print(
-                                Fore.YELLOW
-                                + "Rule {} defines a falsepositive with an invalid reason: '{}'.".format(
-                                    file, banned_word
-                                )
-                            )
-                            faulty_rules.append(file)
+    # sigma cli SigmahqFalsepositivesBannedWordIssue
+    # def test_optional_falsepositives_blocked_content(self):
+    #     faulty_rules = []
+    #     banned_words = ["none", "pentest", "penetration test"]
+    #     common_typos = ["unkown", "ligitimate", "legitim ", "legitimeate"]
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         fps = self.get_rule_part(file_path=file, part_name="falsepositives")
+    #         if fps:
+    #             for fp in fps:
+    #                 for typo in common_typos:
+    #                     if fp == "Unknow" or typo in fp.lower():
+    #                         print(
+    #                             Fore.YELLOW
+    #                             + "Rule {} defines a falsepositive with a common typo: '{}'.".format(
+    #                                 file, typo
+    #                             )
+    #                         )
+    #                         faulty_rules.append(file)
+    #                 for banned_word in banned_words:
+    #                     if banned_word in fp.lower():
+    #                         print(
+    #                             Fore.YELLOW
+    #                             + "Rule {} defines a falsepositive with an invalid reason: '{}'.".format(
+    #                                 file, banned_word
+    #                             )
+    #                         )
+    #                         faulty_rules.append(file)
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules with invalid false positive definitions (e.g. Pentest, None or common typos)",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with invalid false positive definitions (e.g. Pentest, None or common typos)",
+    #     )
 
     def test_optional_license(self):
         faulty_rules = []
@@ -478,63 +480,65 @@ class TestRules(unittest.TestCase):
             + "There are rules with malformed 'license' fields. (has to be a string )",
         )
 
-    def test_references(self):
-        faulty_rules = []
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            references = self.get_rule_part(file_path=file, part_name="references")
-            # Reference field doesn't exist
-            # if not references:
-            # print(Fore.YELLOW + "Rule {} has no field 'references'.".format(file))
-            # faulty_rules.append(file)
-            if references:
-                # it exists but isn't a list
-                if not isinstance(references, list):
-                    print(
-                        Fore.YELLOW
-                        + "Rule {} has a references field that isn't a list.".format(
-                            file
-                        )
-                    )
-                    faulty_rules.append(file)
+    # sigma cli SigmaReferencesError
+    # def test_references(self):
+    #     faulty_rules = []
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         references = self.get_rule_part(file_path=file, part_name="references")
+    #         # Reference field doesn't exist
+    #         # if not references:
+    #         # print(Fore.YELLOW + "Rule {} has no field 'references'.".format(file))
+    #         # faulty_rules.append(file)
+    #         if references:
+    #             # it exists but isn't a list
+    #             if not isinstance(references, list):
+    #                 print(
+    #                     Fore.YELLOW
+    #                     + "Rule {} has a references field that isn't a list.".format(
+    #                         file
+    #                     )
+    #                 )
+    #                 faulty_rules.append(file)
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules with malformed 'references' fields. (has to be a list of values even if it contains only a single value)",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with malformed 'references' fields. (has to be a list of values even if it contains only a single value)",
+    #     )
 
-    def test_references_in_description(self):
-        # This test checks for the presence of a links and special keywords in the "description" field while there is no "references" field.
-        faulty_rules = []
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            references = self.get_rule_part(file_path=file, part_name="references")
-            # Reference field doesn't exist
-            if not references:
-                descriptionfield = self.get_rule_part(
-                    file_path=file, part_name="description"
-                )
-                if descriptionfield:
-                    for i in [
-                        "http://",
-                        "https://",
-                        "internal research",
-                    ]:  # Extends the list with other common references starters
-                        if i in descriptionfield.lower():
-                            print(
-                                Fore.RED
-                                + "Rule {} has a field that contains references to external links but no references set. Add a 'references' key and add URLs as list items.".format(
-                                    file
-                                )
-                            )
-                            faulty_rules.append(file)
+    # sigme cli SigmahqLinkDescriptionIssue
+    # def test_references_in_description(self):
+    #     # This test checks for the presence of a links and special keywords in the "description" field while there is no "references" field.
+    #     faulty_rules = []
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         references = self.get_rule_part(file_path=file, part_name="references")
+    #         # Reference field doesn't exist
+    #         if not references:
+    #             descriptionfield = self.get_rule_part(
+    #                 file_path=file, part_name="description"
+    #             )
+    #             if descriptionfield:
+    #                 for i in [
+    #                     "http://",
+    #                     "https://",
+    #                     "internal research",
+    #                 ]:  # Extends the list with other common references starters
+    #                     if i in descriptionfield.lower():
+    #                         print(
+    #                             Fore.RED
+    #                             + "Rule {} has a field that contains references to external links but no references set. Add a 'references' key and add URLs as list items.".format(
+    #                                 file
+    #                             )
+    #                         )
+    #                         faulty_rules.append(file)
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules with malformed 'description' fields. (links and external references have to be in a seperate field named 'references'. see specification https://github.com/SigmaHQ/sigma-specification)",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with malformed 'description' fields. (links and external references have to be in a seperate field named 'references'. see specification https://github.com/SigmaHQ/sigma-specification)",
+    #     )
 
     def test_file_names(self):
         faulty_rules = []
@@ -557,7 +561,7 @@ class TestRules(unittest.TestCase):
                 faulty_rules.append(file)
             elif len(filename) < 14:
                 print(
-                    Fore.YELLOW + "Rule {} has a file name too short <10.".format(file)
+                    Fore.YELLOW + "Rule {} has a file name too short <14.".format(file)
                 )
                 faulty_rules.append(file)
             elif filename_pattern.match(filename) == None or not "_" in filename:
@@ -838,7 +842,7 @@ class TestRules(unittest.TestCase):
                 print(
                     Fore.RED
                     + "Rule {} has the selection ({}) with a list of only 1 element in detection".format(
-                        file, key
+                        file, selection_name
                     )
                 )
                 valid_ = False
@@ -990,33 +994,34 @@ class TestRules(unittest.TestCase):
     #         faulty_rules, [], Fore.RED + "There are rules with unused selections"
     #     )
 
-    def test_all_value_modifier_single_item(self):
-        faulty_rules = []
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            detection = self.get_rule_part(file_path=file, part_name="detection")
-            if detection:
-                for search_identifier in detection:
-                    if isinstance(detection[search_identifier], dict):
-                        for field in detection[search_identifier]:
-                            if "|all" in field and not isinstance(
-                                detection[search_identifier][field], list
-                            ):
-                                print(
-                                    Fore.RED
-                                    + "Rule {} uses the 'all' modifier on a single item in selection ({}/{})".format(
-                                        file, search_identifier, field
-                                    )
-                                )
-                                faulty_rules.append(file)
+    # sigma cli SigmahqInvalidAllModifierIssue
+    # def test_all_value_modifier_single_item(self):
+    #     faulty_rules = []
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         detection = self.get_rule_part(file_path=file, part_name="detection")
+    #         if detection:
+    #             for search_identifier in detection:
+    #                 if isinstance(detection[search_identifier], dict):
+    #                     for field in detection[search_identifier]:
+    #                         if "|all" in field and not isinstance(
+    #                             detection[search_identifier][field], list
+    #                         ):
+    #                             print(
+    #                                 Fore.RED
+    #                                 + "Rule {} uses the 'all' modifier on a single item in selection ({}/{})".format(
+    #                                     file, search_identifier, field
+    #                                 )
+    #                             )
+    #                             faulty_rules.append(file)
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules with |all modifier only having one item. "
-            + "Single item values are not allowed to have an all modifier as some back-ends cannot support it. "
-            + "If you use it as a workaround to duplicate a field in a selection, use a new selection instead.",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with |all modifier only having one item. "
+    #         + "Single item values are not allowed to have an all modifier as some back-ends cannot support it. "
+    #         + "If you use it as a workaround to duplicate a field in a selection, use a new selection instead.",
+    #     )
 
     def test_field_user_localization(self):
         def checkUser(faulty_rules, dict):
@@ -1054,37 +1059,38 @@ class TestRules(unittest.TestCase):
             + "    - 'AUTORI'",
         )
 
-    def test_condition_operator_casesensitive(self):
-        faulty_rules = []
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            detection = self.get_rule_part(file_path=file, part_name="detection")
-            if detection:
-                valid = True
-                if isinstance(detection["condition"], str):
-                    param = detection["condition"].split(" ")
-                    for item in param:
-                        if item.lower() == "or" and not item == "or":
-                            valid = False
-                        elif item.lower() == "and" and not item == "and":
-                            valid = False
-                        elif item.lower() == "not" and not item == "not":
-                            valid = False
-                        elif item.lower() == "of" and not item == "of":
-                            valid = False
-                    if not valid:
-                        print(
-                            Fore.RED
-                            + "Rule {} has a invalid condition '{}' : 'or','and','not','of' are lowercase".format(
-                                file, detection["condition"]
-                            )
-                        )
-                        faulty_rules.append(file)
+    # sigma condition error
+    # def test_condition_operator_casesensitive(self):
+    #     faulty_rules = []
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         detection = self.get_rule_part(file_path=file, part_name="detection")
+    #         if detection:
+    #             valid = True
+    #             if isinstance(detection["condition"], str):
+    #                 param = detection["condition"].split(" ")
+    #                 for item in param:
+    #                     if item.lower() == "or" and not item == "or":
+    #                         valid = False
+    #                     elif item.lower() == "and" and not item == "and":
+    #                         valid = False
+    #                     elif item.lower() == "not" and not item == "not":
+    #                         valid = False
+    #                     elif item.lower() == "of" and not item == "of":
+    #                         valid = False
+    #                 if not valid:
+    #                     print(
+    #                         Fore.RED
+    #                         + "Rule {} has a invalid condition '{}' : 'or','and','not','of' are lowercase".format(
+    #                             file, detection["condition"]
+    #                         )
+    #                     )
+    #                     faulty_rules.append(file)
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED + "There are rules using condition without lowercase operator",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED + "There are rules using condition without lowercase operator",
+    #     )
 
     def test_broken_thor_logsource_config(self):
         faulty_config = False

@@ -1,0 +1,31 @@
+title: CrackMapExec File Indicators
+id: 736ffa74-5f6f-44ca-94ef-1c0df4f51d2a
+related:
+    - id: 9433ff9c-5d3f-4269-99f8-95fc826ea489
+      type: obsoletes
+status: experimental
+description: Detects file creation events with filename patterns used by CrackMapExec.
+references:
+    - https://github.com/byt3bl33d3r/CrackMapExec/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2024/03/11
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection_path:
+        TargetFilename|startswith: 'C:\Windows\Temp\' # The disk extension is hardcoded in the tool.
+    selection_names_str:
+        TargetFilename|endswith:
+            - '\temp.ps1' # https://github.com/byt3bl33d3r/CrackMapExec/blob/3c3e412193cb6d3237abe90c543e5d995bfa4447/cme/modules/keepass_trigger.py#L42C41-L42C68
+            - '\msol.ps1' # https://github.com/byt3bl33d3r/CrackMapExec/blob/3c3e412193cb6d3237abe90c543e5d995bfa4447/cme/modules/msol.py#L48C98-L48C106
+    selection_names_re:
+        - TargetFilename|re: '\\[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.txt$' # https://github.com/byt3bl33d3r/CrackMapExec/blob/3c3e412193cb6d3237abe90c543e5d995bfa4447/cme/protocols/wmi/wmiexec.py#L86
+        - TargetFilename|re: '\\[a-zA-Z]{8}\.tmp$' # https://github.com/byt3bl33d3r/CrackMapExec/blob/3c3e412193cb6d3237abe90c543e5d995bfa4447/cme/protocols/smb/atexec.py#L145C19-L146
+    condition: selection_path and 1 of selection_names_*
+falsepositives:
+    - Unknown
+level: high

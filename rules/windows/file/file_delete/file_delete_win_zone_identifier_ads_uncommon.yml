@@ -10,7 +10,7 @@ references:
     - Internal Research
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023/09/04
-modified: 2023/10/18
+modified: 2024/04/26
 tags:
     - attack.defense_evasion
     - attack.t1070.004
@@ -22,14 +22,22 @@ detection:
         TargetFilename|endswith: ':Zone.Identifier'
     filter_main_generic:
         # Note: in some envs this activity might be performed by other software. Apply additional filters as necessary
-        Image|endswith:
-            - ':\Program Files\PowerShell\7-preview\pwsh.exe'
-            - ':\Program Files\PowerShell\7\pwsh.exe'
-            - ':\Windows\explorer.exe'
-            - ':\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
-            - ':\Windows\SysWOW64\explorer.exe'
-            - ':\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell.exe'
-    condition: selection and not 1 of filter_main_*
+        Image:
+            - 'C:\Program Files\PowerShell\7-preview\pwsh.exe'
+            - 'C:\Program Files\PowerShell\7\pwsh.exe'
+            - 'C:\Windows\explorer.exe'
+            - 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
+            - 'C:\Windows\SysWOW64\explorer.exe'
+            - 'C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell.exe'
+    filter_optional_browsers_chrome:
+        Image:
+            - 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
+            - 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+    filter_optional_browsers_firefox:
+        Image:
+            - 'C:\Program Files (x86)\Mozilla Firefox\firefox.exe'
+            - 'C:\Program Files\Mozilla Firefox\firefox.exe'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Other third party applications not listed.
 level: medium

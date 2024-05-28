@@ -1,15 +1,16 @@
-title: Unsigned DLL Loaded by RunDLL32/RegSvr32
+title: Unsigned DLL Loaded by Windows Utility
 id: b5de0c9a-6f19-43e0-af4e-55ad01f550af
 status: experimental
 description: |
-    Detects RunDLL32/RegSvr32 loading an unsigned or untrusted DLL.
+    Detects windows utilities loading an unsigned or untrusted DLL.
     Adversaries often abuse those programs to proxy execution of malicious code.
 references:
     - https://www.elastic.co/security-labs/Hunting-for-Suspicious-Windows-Libraries-for-Execution-and-Evasion
     - https://akhere.hashnode.dev/hunting-unsigned-dlls-using-kql
     - https://unit42.paloaltonetworks.com/unsigned-dlls/?web_view=true
 author: Swachchhanda Shrawan Poudel
-date: 2024/01/22
+date: 2024/02/28
+modified: 2024/03/07
 tags:
     - attack.t1218.011
     - attack.t1218.010
@@ -21,15 +22,31 @@ detection:
     selection:
         Image|endswith:
             # Note: Add additional utilities that allow the loading of DLLs
+            - '\InstallUtil.exe'
+            - '\RegAsm.exe'
+            - '\RegSvcs.exe'
             - '\regsvr32.exe'
             - '\rundll32.exe'
     filter_main_signed:
-        - Signed: 'true'
-        - SignatureStatus:
-              - 'errorChaining'
-              - 'errorCode_endpoint'
-              - 'errorExpired'
-              - 'trusted'
+        Signed: 'true'
+    filter_main_sig_status:
+        SignatureStatus:
+            - 'errorChaining'
+            - 'errorCode_endpoint'
+            - 'errorExpired'
+            - 'trusted'
+    filter_main_signed_null:
+        Signed: null
+    filter_main_signed_empty:
+        Signed:
+            - ''
+            - '-'
+    filter_main_sig_status_null:
+        SignatureStatus: null
+    filter_main_sig_status_empty:
+        SignatureStatus:
+            - ''
+            - '-'
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown

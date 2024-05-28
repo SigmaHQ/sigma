@@ -20,13 +20,13 @@ detection:
         - OriginalFileName: 'ATTRIB.EXE'
     selection_cli:
         CommandLine|contains: ' +h '
-    filter_msiexec:
+    filter_main_msiexec:
         CommandLine|contains: '\desktop.ini '
-    filter_intel:
+    filter_optional_intel:
         ParentImage|endswith: '\cmd.exe'
         CommandLine: '+R +H +S +A \\\*.cui'
         ParentCommandLine: 'C:\\WINDOWS\\system32\\\*.bat'
-    condition: all of selection_* and not 1 of filter_*
+    condition: all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - IgfxCUIService.exe hiding *.cui files via .bat script (attrib.exe a child of cmd.exe and igfxCUIService.exe is the parent of the cmd.exe)
     - Msiexec.exe hiding desktop.ini

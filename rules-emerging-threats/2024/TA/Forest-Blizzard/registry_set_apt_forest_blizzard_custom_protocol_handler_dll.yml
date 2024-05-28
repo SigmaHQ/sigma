@@ -1,0 +1,24 @@
+title: Forest Blizzard APT - Custom Protocol Handler DLL Registry Set
+id: d807056b-0e00-4cec-b7f8-b8b7518e382b
+status: experimental
+description: |
+    Detects the setting of the DLL that handles the custom protocol handler.
+    Seen being created by Forest Blizzard APT as reported by MSFT.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2024/04/22/analyzing-forest-blizzards-custom-post-compromise-tool-for-exploiting-cve-2022-38028-to-obtain-credentials/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2024/04/23
+tags:
+    - attack.persistence
+    - attack.t1547.001
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\CLSID\{026CC6D7-34B2-33D5-B551-CA31EB6CE345}\Server'
+        Details|endswith: '.dll'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
