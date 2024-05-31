@@ -1,0 +1,39 @@
+title: Local Network Connection Initiated By Script Interpreter
+id: 08249dc0-a28d-4555-8ba5-9255a198e08c
+related:
+    - id: 992a6cae-db6a-43c8-9cec-76d7195c96fc
+      type: derived
+status: test
+description: |
+    Detects a script interpreter (Wscript/Cscript) initiating a local network connection to download or execute a script hosted on a shared folder.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/28d190330fe44de6ff4767fc400cc10fa7cd6540/atomics/T1105/T1105.md
+author: frack113
+date: 2022/08/28
+modified: 2024/05/31
+tags:
+    - attack.command_and_control
+    - attack.t1105
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Initiated: 'true'
+        Image|endswith:
+            - '\wscript.exe'
+            - '\cscript.exe'
+        # Note: This list is added to avoid duplicate alerting with 992a6cae-db6a-43c8-9cec-76d7195c96fc
+        DestinationIp|cidr:
+            - '127.0.0.0/8'
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+            - '169.254.0.0/16'
+            - '::1/128'  # IPv6 loopback
+            - 'fe80::/10'  # IPv6 link-local addresses
+            - 'fc00::/7'  # IPv6 private addresses
+    condition: selection
+falsepositives:
+    - Legitimate scripts
+level: medium

@@ -1,0 +1,36 @@
+title: Outbound Network Connection Initiated By Cmstp.EXE
+id: efafe0bf-4238-479e-af8f-797bd3490d2d
+status: test
+description: |
+    Detects a network connection initiated by Cmstp.EXE
+    Its uncommon for "cmstp.exe" to initiate an outbound network connection. Investigate the source of such requests to determine if they are malicious.
+references:
+    - https://web.archive.org/web/20190720093911/http://www.endurant.io/cmstp/detecting-cmstp-enabled-code-execution-and-uac-bypass-with-sysmon/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2022/08/30
+modified: 2024/05/31
+tags:
+    - attack.defense_evasion
+    - attack.t1218.003
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\cmstp.exe'
+        Initiated: 'true'
+    filter_main_local_ranges:
+        DestinationIp|cidr:
+            - '127.0.0.0/8'
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+            - '169.254.0.0/16'
+            - '::1/128'  # IPv6 loopback
+            - 'fe80::/10'  # IPv6 link-local addresses
+            - 'fc00::/7'  # IPv6 private addresses
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+# Note: Please report any false positive seen in the wild to help tune the rule.
+level: high
