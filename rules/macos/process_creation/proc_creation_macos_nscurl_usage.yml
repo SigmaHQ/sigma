@@ -1,0 +1,32 @@
+title: File Download Via Nscurl - MacOS
+id: 6d8a7cf1-8085-423b-b87d-7e880faabbdf
+status: experimental
+description: Detects the execution of the nscurl utility in order to download files.
+references:
+    - https://www.loobins.io/binaries/nscurl/
+    - https://www.agnosticdev.com/content/how-diagnose-app-transport-security-issues-using-nscurl-and-openssl
+    - https://gist.github.com/nasbench/ca6ef95db04ae04ffd1e0b1ce709cadd
+author: Daniel Cortez
+date: 2024/06/04
+tags:
+    - attack.defense_evasion
+    - attack.command_and_control
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection:
+        Image|endswith: '/nscurl'
+        CommandLine|contains:
+            - '--download '
+            - '--download-directory '
+            - '--output '
+            - '-dir '
+            - '-dl '
+            - '-ld'
+            - '-o '
+    condition: selection
+falsepositives:
+    - Legitimate usage of nscurl by administrators and users.
+level: medium
