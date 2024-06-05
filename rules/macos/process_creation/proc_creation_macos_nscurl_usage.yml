@@ -1,12 +1,13 @@
-title: Suspicious File Download With Nscurl
+title: File Download Via Nscurl - MacOS
 id: 6d8a7cf1-8085-423b-b87d-7e880faabbdf
 status: experimental
-description: Detects execution of the LOOBin nscurl to download files
+description: Detects the execution of the nscurl utility in order to download files.
 references:
     - https://www.loobins.io/binaries/nscurl/
     - https://www.agnosticdev.com/content/how-diagnose-app-transport-security-issues-using-nscurl-and-openssl
+    - https://gist.github.com/nasbench/ca6ef95db04ae04ffd1e0b1ce709cadd
 author: Daniel Cortez
-date: 2024/03/15
+date: 2024/06/04
 tags:
     - attack.defense_evasion
     - attack.command_and_control
@@ -18,11 +19,14 @@ detection:
     selection:
         Image|endswith: '/nscurl'
         CommandLine|contains:
-            - '-dl'
+            - '--download '
+            - '--download-directory '
+            - '--output '
+            - '-dir '
+            - '-dl '
             - '-ld'
-            - '-dir'
-            - '-o'
+            - '-o '
     condition: selection
 falsepositives:
-    - Unlikely
+    - Legitimate usage of nscurl by administrators and users.
 level: medium
