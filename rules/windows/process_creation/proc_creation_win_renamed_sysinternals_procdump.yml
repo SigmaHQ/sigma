@@ -19,17 +19,16 @@ logsource:
     product: windows
     category: process_creation
 detection:
-    selection_org:
-        OriginalFileName: 'procdump'
-    selection_args:
-        CommandLine|contains|windash:
-            - ' -ma ' # Full Dump
-            - ' -mp ' # Mini Plus
+    selection:
+        - OriginalFileName: 'procdump'
+        - CommandLine|contains|windash:
+              - ' -ma ' # Full Dump
+              - ' -mp ' # Mini Plus
     filter_main_known_names:
         Image|endswith:
             - '\procdump.exe'
             - '\procdump64.exe'
-    condition: (selection_org or all of selection_args_*) and not 1 of filter_main_*
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Procdump illegally bundled with legitimate software.
     - Administrators who rename binaries (should be investigated).
