@@ -1,12 +1,14 @@
 title: MSSQL XPCmdshell Option Change
 id: d08dd86f-681e-4a00-a92c-1db218754417
 status: test
-description: Detects when the MSSQL "xp_cmdshell" stored procedure setting is changed
+description: |
+    Detects when the MSSQL "xp_cmdshell" stored procedure setting is changed.
 references:
     - https://www.netspi.com/blog/technical/network-penetration-testing/sql-server-persistence-part-1-startup-stored-procedures/
     - https://thedfirreport.com/2022/07/11/select-xmrig-from-sqlserver/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/07/12
+modified: 2024/06/26
 tags:
     - attack.execution
 logsource:
@@ -15,7 +17,7 @@ logsource:
     # warning: The 'data' field used in the detection section is the container for the event data as a whole. You may have to adapt the rule for your backend accordingly
 detection:
     selection:
-        Provider_Name: 'MSSQLSERVER'
+        Provider_Name|contains: 'MSSQL' # Note: We use contains to account for other third party providers - See https://github.com/SigmaHQ/sigma/issues/4876
         EventID: 15457
         Data|contains: 'xp_cmdshell'
     condition: selection
