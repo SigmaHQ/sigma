@@ -8,16 +8,17 @@ references:
     - https://learn.microsoft.com/en-us/sql/t-sql/statements/alter-server-audit-transact-sql?view=sql-server-ver16
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/07/13
+modified: 2024/06/26
 tags:
     - attack.defense_evasion
 logsource:
     product: windows
     service: application
-    definition: MSSQL audit policy must be enabled in order to receive this event in the application log
+    definition: 'Requirements: MSSQL audit policy must be enabled in order to receive this event in the application log'
     # warning: The 'data' field used in the detection section is the container for the event data as a whole. You may have to adapt the rule for your backend accordingly
 detection:
     selection:
-        Provider_Name: 'MSSQLSERVER'
+        Provider_Name|contains: 'MSSQL' # Note: We use contains to account for other third party providers - See https://github.com/SigmaHQ/sigma/issues/4876
         EventID: 33205
         Data|contains:
             - 'statement:ALTER SERVER AUDIT'
