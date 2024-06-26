@@ -7,7 +7,7 @@ references:
     - https://sec.okta.com/articles/2023/08/cross-tenant-impersonation-prevention-and-detection
 author: kelnage
 date: 2023/09/07
-modified: 2023/10/25
+modified: 2024/06/26
 tags:
     - attack.initial_access
     - attack.t1078.004
@@ -15,12 +15,13 @@ logsource:
     product: okta
     service: okta
 detection:
-    selection:
+    selection_event:
         eventtype: 'policy.evaluate_sign_on'
         target.displayname: 'Okta Admin Console'
-        debugcontext.debugdata.behaviors: 'POSITIVE'
-        debugcontext.debugdata.logonlysecuritydata: 'POSITIVE'
-    condition: selection
+    selection_positive:
+        - debugcontext.debugdata.behaviors|contains: 'POSITIVE'
+        - debugcontext.debugdata.logonlysecuritydata|contains: 'POSITIVE'
+    condition: all of selection_*
 falsepositives:
-    - Whenever an admin starts using new features of the admin console.
-level: low
+    - When an admin begins using the Admin Console and one of Okta's heuristics incorrectly identifies the behavior as being unusual.
+level: high
