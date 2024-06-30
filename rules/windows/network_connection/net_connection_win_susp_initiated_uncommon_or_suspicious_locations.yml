@@ -1,0 +1,66 @@
+title: Network Connection Initiated From Process Located In Potentially Suspicious Or Uncommon Location
+id: 7b434893-c57d-4f41-908d-6a17bf1ae98f
+status: test
+description: |
+    Detects a network connection initiated by programs or processes running from suspicious or uncommon files system locations.
+references:
+    - https://docs.google.com/spreadsheets/d/17pSTDNpa0sf6pHeRhusvWG6rThciE8CsXTSlDUAZDyo
+author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+date: 2017/03/19
+modified: 2024/05/31
+tags:
+    - attack.command_and_control
+    - attack.t1105
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Initiated: 'true'
+        Image|contains:
+            - ':\$Recycle.bin'
+            - ':\Perflogs\'
+            - ':\Temp\'
+            - ':\Users\Default\'
+            - ':\Windows\Fonts\'
+            - ':\Windows\IME\'
+            - ':\Windows\System32\Tasks\'
+            - ':\Windows\Tasks\'
+            - '\config\systemprofile\'
+            - '\Windows\addins\'
+    filter_main_domains:
+        # Note: We exclude these domains to avoid duplicate filtering from e0f8ab85-0ac9-423b-a73a-81b3c7b1aa97
+        DestinationHostname|endswith:
+            - '.githubusercontent.com'       # Includes both gists and github repositories / Michael Haag (idea)
+            - 'anonfiles.com'
+            - 'cdn.discordapp.com'
+            - 'cdn.discordapp.com/attachments/'
+            - 'ddns.net'
+            - 'dl.dropboxusercontent.com'
+            - 'ghostbin.co'
+            - 'glitch.me'
+            - 'gofile.io'
+            - 'hastebin.com'
+            - 'mediafire.com'
+            - 'mega.co.nz'
+            - 'mega.nz'
+            - 'onrender.com'
+            - 'paste.ee'
+            - 'pastebin.com'
+            - 'pastebin.pl'
+            - 'pastetext.net'
+            - 'portmap.io'  # https://pro.twitter.com/JaromirHorejsi/status/1795001037746761892/photo/2
+            - 'privatlab.com'
+            - 'privatlab.net'
+            - 'send.exploit.in'
+            - 'sendspace.com'
+            - 'storage.googleapis.com'
+            - 'storjshare.io'
+            - 'supabase.co'
+            - 'temp.sh'
+            - 'transfer.sh'
+            - 'ufile.io'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high

@@ -1,4 +1,4 @@
-title: Microsoft Binary Suspicious Communication Endpoint
+title: Network Communication Initiated To File Sharing Domains From Process Located In Suspicious Folder
 id: e0f8ab85-0ac9-423b-a73a-81b3c7b1aa97
 related:
     - id: 635dbb88-67b3-4b41-9ea5-a3af2dd88153
@@ -13,7 +13,7 @@ references:
     - https://github.com/EmpireProject/Empire/blob/e37fb2eef8ff8f5a0a689f1589f424906fe13055/data/module_source/exfil/Invoke-ExfilDataToGitHub.ps1
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2018/08/30
-modified: 2024/02/09
+modified: 2024/05/31
 tags:
     - attack.command_and_control
     - attack.t1105
@@ -23,13 +23,19 @@ logsource:
 detection:
     selection_paths:
         Image|contains:
-            - ':\PerfLogs\'
+            - ':\$Recycle.bin'
+            - ':\Perflogs\'
             - ':\Temp\'
+            - ':\Users\Default\'
             - ':\Users\Public\'
+            - ':\Windows\Fonts\'
+            - ':\Windows\IME\'
             - ':\Windows\System32\Tasks\'
             - ':\Windows\Tasks\'
             - ':\Windows\Temp\'
             - '\AppData\Temp\'
+            - '\config\systemprofile\'
+            - '\Windows\addins\'
     selection_domains:
         Initiated: 'true'
         DestinationHostname|endswith:
