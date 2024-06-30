@@ -2,7 +2,7 @@
 
 This folder contains all rules whose status has been set to deprecated.
 
-It's better not to use them any more
+It is preferable not to use them any more
 
 the file [deprecated.csv](deprecated.csv) is a summary
 

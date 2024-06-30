@@ -8,6 +8,8 @@ Run using the command
 """
 
 from sigma.collection import SigmaCollection
+from sigma.rule import SigmaStatus,SigmaLevel
+import datetime
 import csv
 
 path_to_rules = [
@@ -18,12 +20,27 @@ name_csv_export = "./deprecated/deprecated.csv"
 
 def save_csv(rules):
     with open(name_csv_export, encoding="UTF-8", mode="w", newline="") as csv_file:
-        writer = csv.writer(csv_file)
-        info = []
-        info.append(["Rule ID", "Title", "Date", "Modified"])
+        fieldnames = ["id", "title", "date", "modified","level"]
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        writer.writeheader()
+
+        raw_info = []
         for rule in rules:
-            info.append([rule.id, rule.title, rule.date, rule.modified])
-        writer.writerows(info)
+            if rule.status is SigmaStatus.DEPRECATED:
+                modified = rule.modified if rule.modified else datetime.date.today()
+                level = rule.level if rule.status else SigmaLevel.MEDIUM
+                raw_info.append(
+                    {
+                        "id": rule.id,
+                        "title": rule.title,
+                        "date": rule.date,
+                        "modified": modified,
+                        "level": level
+                    }
+                )
+        
+        sort_info = sorted(raw_info, key=lambda d: d['modified'])
+        writer.writerows(sort_info)
 
 
 if __name__ == "__main__":
