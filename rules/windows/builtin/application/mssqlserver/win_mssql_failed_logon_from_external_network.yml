@@ -5,11 +5,12 @@ related:
       type: similar
 status: experimental
 description: Detects failed logon attempts from clients with external network IP to an MSSQL server. This can be a sign of a bruteforce attack.
-author: j4son
-date: 2023/10/11
 references:
     - https://cybersecthreat.com/2020/07/08/enable-mssql-authentication-log-to-eventlog/
     - https://www.experts-exchange.com/questions/27800944/EventID-18456-Failed-to-open-the-explicitly-specified-database.html
+author: j4son
+date: 2023/10/11
+modified: 2024/06/26
 tags:
     - attack.credential_access
     - attack.t1110
@@ -19,7 +20,7 @@ logsource:
     definition: 'Requirements: Must enable MSSQL authentication.'
 detection:
     selection:
-        Provider_Name: 'MSSQLSERVER'
+        Provider_Name|contains: 'MSSQL' # Note: We use contains to account for other third party providers - See https://github.com/SigmaHQ/sigma/issues/4876
         EventID: 18456
     filter_main_local_ips:
         Data|contains:
