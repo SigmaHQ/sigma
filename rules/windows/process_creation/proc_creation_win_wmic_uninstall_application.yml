@@ -4,12 +4,12 @@ related:
     - id: 847d5ff3-8a31-4737-a970-aeae8fe21765 # Uninstall Security Products
       type: derived
 status: test
-description: Uninstall an application with wmic
+description: Detects the removal or uninstallation of an application via "Wmic.EXE".
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1047/T1047.md#atomic-test-10---application-uninstall-using-wmic
 author: frack113
 date: 2022/01/28
-modified: 2023/02/14
+modified: 2024/07/02
 tags:
     - attack.execution
     - attack.t1047
@@ -21,7 +21,7 @@ detection:
         - Image|endswith: '\WMIC.exe'
         - OriginalFileName: 'wmic.exe'
     selection_cli:
-        CommandLine|contains:
+        CommandLine|contains|all:
             - 'call'
             - 'uninstall'
     condition: all of selection_*
