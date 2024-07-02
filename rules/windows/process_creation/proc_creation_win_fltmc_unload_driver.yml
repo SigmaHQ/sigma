@@ -8,9 +8,9 @@ description: Detect filter driver unloading activity via fltmc.exe
 references:
     - https://www.darkoperator.com/blog/2018/10/5/operating-offensively-against-sysmon
     - https://www.cybereason.com/blog/threat-analysis-report-lockbit-2.0-all-paths-lead-to-ransom
-author: Nasreddine Bencherchali
+author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023/02/13
-modified: 2023/03/14
+modified: 2024/06/24
 tags:
     - attack.defense_evasion
     - attack.t1070
@@ -25,10 +25,15 @@ detection:
         - OriginalFileName: 'fltMC.exe'
     selection_cli:
         CommandLine|contains: 'unload'
-    filter_avira:
-        # ParentImage: C:\Users\ciadmin\AppData\Local\Temp\is-URCLK.tmp\endpoint-protection-installer-x64.tmp
+    filter_optional_avira:
+        ParentImage|startswith: 'C:\Users\'
+        ParentImage|contains: '\AppData\Local\Temp\'
+        ParentImage|endswith: '\endpoint-protection-installer-x64.tmp'
         CommandLine|endswith: 'unload rtp_filesystem_filter'
-    condition: all of selection_* and not 1 of filter_*
+    filter_optional_manageengine:
+        ParentImage: 'C:\Program Files (x86)\ManageEngine\uems_agent\bin\dcfaservice64.exe'
+        CommandLine|endswith: 'unload DFMFilter'
+    condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
-level: high
+level: medium

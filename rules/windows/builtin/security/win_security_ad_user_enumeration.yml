@@ -5,8 +5,8 @@ description: Detects read access to a domain user from a non-machine account
 references:
     - https://www.specterops.io/assets/resources/an_ace_up_the_sleeve.pdf
     - http://www.stuffithoughtiknew.com/2019/02/detecting-bloodhound.html
-    - https://docs.microsoft.com/en-us/windows/win32/adschema/attributes-all # For further investigation of the accessed properties
-    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4662
+    - https://learn.microsoft.com/en-us/windows/win32/adschema/attributes-all # For further investigation of the accessed properties
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4662
 author: Maxime Thiebaut (@0xThiebaut)
 date: 2020/03/30
 modified: 2022/11/08
@@ -21,7 +21,7 @@ detection:
     selection:
         EventID: 4662
         # Using contains as the data commonly is structured as "%{bf967aba-0de6-11d0-a285-00aa003049e2}"
-        # The user class (https://docs.microsoft.com/en-us/windows/win32/adschema/c-user)
+        # The user class (https://learn.microsoft.com/en-us/windows/win32/adschema/c-user)
         ObjectType|contains: 'bf967aba-0de6-11d0-a285-00aa003049e2'
         AccessMask|endswith:
             # Note: Since the Access Mask can have more than once permission we need to add all permutations that include the READ property
@@ -36,7 +36,7 @@ detection:
     filter_main_machine_accounts:
         SubjectUserName|endswith: '$' # Exclude machine accounts
     filter_main_msql:
-        SubjectUserName|startswith: 'MSOL_' # https://docs.microsoft.com/en-us/azure/active-directory/hybrid/reference-connect-accounts-permissions#ad-ds-connector-account
+        SubjectUserName|startswith: 'MSOL_' # https://learn.microsoft.com/en-us/azure/active-directory/hybrid/reference-connect-accounts-permissions#ad-ds-connector-account
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Administrators configuring new users.
