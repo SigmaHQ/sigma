@@ -1,0 +1,54 @@
+title: Detect Suspicious Child Processes or Commands of SSH/SSHD
+id: da5fbf66-b903-48a5-b12e-4b80132d7e1a
+description: Detects suspicious child processes of SSH/SSHD or commands executed by SSH/SSHD which may indicate potential abuse using commonly abused Linux attack tools or networking binaries.
+status: experimental
+author: David Burkett, @signalblur
+tags:
+    - attack.t1071.001 # Application Layer Protocol - Web Protocols
+    - attack.t1071.003 # Application Layer Protocol - Email Protocols
+    - attack.t1105 # Ingress Tool Transfer
+    - attack.t1219 # Remote Access Tools
+    - attack.t1021.004 # Remote Services - SSH
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_process:
+        ParentImage:
+            - '/usr/bin/ssh'
+            - '/usr/sbin/sshd'
+        Image:
+            - '/usr/bin/curl'
+            - '/usr/bin/wget'
+            - '/usr/bin/nmap'
+            - '/usr/bin/nc'
+            - '/usr/bin/socat'
+            - '/usr/bin/nc.traditional'
+            - '/usr/bin/nc.openbsd'
+            - '/usr/bin/openssl'
+            - '/usr/bin/nc6'
+            - '/usr/bin/msfconsole'
+    selection_commandline:
+        ParentImage:
+            - '/usr/bin/ssh'
+            - '/usr/sbin/sshd'
+        CommandLine|contains:
+            - 'nmap'
+            - 'chisel'
+            - 'zenmap'
+            - 'xenmap'
+            - 'john'
+            - 'hydra'
+            - 'sqlmap'
+            - 'dirbuster'
+            - 'nikto'
+            - 'gobuster'
+            - 'feroxbuster'
+            - 'masscan'
+            - 'metasploit'
+            - 'empire'
+    condition: selection_process or selection_commandline
+falsepositives:
+    - Expected administrative activity
+    - Regular user behavior with legitimate use cases
+level: medium
