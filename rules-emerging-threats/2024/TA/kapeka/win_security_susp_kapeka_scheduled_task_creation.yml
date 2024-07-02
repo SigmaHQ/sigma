@@ -1,0 +1,44 @@
+title: Kapeka Backdoor Scheduled Task Creation
+id: 6c130acd-0adb-4545-bcc4-2e85d0883c9a
+related:
+    - id: af7e2e2a-81ec-4fd6-ae06-d490b032fb14
+      type: similar
+status: experimental
+description: Detects Kapeka backdoor suspicious scheduled task creation event. Based on attributes such as paths, commands line flags, etc.
+references:
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4698
+    - https://labs.withsecure.com/publications/kapeka
+    - https://app.any.run/tasks/1efb3ed4-cc0f-4690-a0ed-24516809bc72/
+    - https://www.virustotal.com/gui/file/bd07fb1e9b4768e7202de6cc454c78c6891270af02085c51fce5539db1386c3f/behavior
+author: Swachchhanda Shrawan Poudel
+date: 2023/04/19
+tags:
+    - attack.execution
+    - attack.privilege_escalation
+    - attack.persistence
+    - attack.t1053.005
+logsource:
+    product: windows
+    service: security
+    definition: 'The Advanced Audit Policy setting Object Access > Audit Other Object Access Events has to be configured to allow this detection.'
+detection:
+    selection_eid:
+        EventID: 4698
+    selection_paths:
+        TaskContent|contains:
+            - '\AppData\Local\'
+            - 'C:\ProgramData\'
+    selection_commands:
+            # "C:\Windows\system32\cmd.exe" /c schtasks /create /sc ONSTART /tn "Sens Api" /f /np /tr "C:\Windows\system32\rundll32.exe \"C:\ProgramData\Microsoft\cogyce.wll\", #1"
+        TaskContent|contains|all:
+            - 'rundll32'
+            - '.wll'
+            - '#1'
+    selection_taskname:
+        TaskContent|contains:
+            - 'Sens Api'
+            - 'OneDrive' # The scheduled task was called “OneDrive” instead of “Sens Api” in some cases
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
