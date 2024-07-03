@@ -17,7 +17,7 @@ references:
     - https://www.tenforums.com/tutorials/123792-turn-off-tamper-protection-microsoft-defender-antivirus.html
 author: AlertIQ, Ján Trenčanský, frack113, Nasreddine Bencherchali, Swachchhanda Shrawan Poudel
 date: 2022/08/01
-modified: 2023/08/17
+modified: 2024/07/03
 tags:
     - attack.defense_evasion
     - attack.t1562.001
@@ -55,7 +55,11 @@ detection:
             - '\SpyNet\SubmitSamplesConsent'
             - '\Windows Defender Exploit Guard\Controlled Folder Access\EnableControlledFolderAccess'
         Details: 'DWORD (0x00000000)'
-    condition: selection_main and 1 of selection_dword_*
+    filter_optional_symantec:
+        Image|startswith: 'C:\Program Files\Symantec\Symantec Endpoint Protection\'
+        Image|endswith: '\sepWscSvc64.exe'
+    condition: selection_main and 1 of selection_dword_* and not 1 of filter_optional_*
 falsepositives:
     - Administrator actions via the Windows Defender interface
+    - Third party Antivirus
 level: high
