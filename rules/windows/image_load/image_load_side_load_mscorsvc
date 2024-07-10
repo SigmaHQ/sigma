@@ -1,0 +1,26 @@
+title: Possible DLL Hijacking of mscorsvc.dll
+id: 4602001b-4150-48a3-8413-5b9ff8132122
+status: experimental
+description: Detects possible DLL hijacking of mscorsvc.dll by looking for suspicious image loads, loading this DLL from unexpected locations.
+references:
+    - https://hijacklibs.net/entries/microsoft/built-in/mscorsvc.html
+author: "Wietze Beukema"
+date: 2023-04-04
+tags:
+    - attack.defense_evasion
+    - attack.T1574.001
+    - attack.T1574.002
+logsource:
+    product: windows
+    category: image_load
+detection:
+    selection:
+        ImageLoaded|endswith: '\mscorsvc.dll'
+    filter:
+        ImageLoaded|startswith:
+            - 'c:\windows\Microsoft.NET\Framework\'
+            - 'c:\windows\Microsoft.NET\Framework64\'
+
+    condition: selection and not filter
+falsepositives:
+    - Unknown
