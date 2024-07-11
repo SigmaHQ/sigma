@@ -5,11 +5,12 @@ related:
       type: similar
 status: experimental
 description: |
-  Detects when a Kubernetes Rolebinding is created or modified.
+    Detects when a Kubernetes Rolebinding is created or modified.
 references:
     - https://kubernetes.io/docs/reference/config-api/apiserver-audit.v1/
     - https://medium.com/@seifeddinerajhi/kubernetes-rbac-privilege-escalation-exploits-and-mitigations-26c07629eeab
-date: 2024/03/28
+author: kelnage
+date: 2024/07/11
 tags:
     - attack.privilege_escalation
 logsource:
@@ -17,19 +18,18 @@ logsource:
     service: audit
 detection:
     selection:
-        objectRef.apiGroup: rbac.authorization.k8s.io
+        objectRef.apiGroup: 'rbac.authorization.k8s.io'
         objectRef.resource:
-            - clusterrolebindings
-            - rolebindings
+            - 'clusterrolebindings'
+            - 'rolebindings'
         verb:
-            - create
-            - delete
-            - patch
-            - replace
-            - update
+            - 'create'
+            - 'delete'
+            - 'patch'
+            - 'replace'
+            - 'update'
     condition: selection
 falsepositives:
     - Modifying a Kubernetes Rolebinding may need to be done by a system administrator.
     - Automated processes may need to take these actions and may need to be filtered.
 level: medium
-

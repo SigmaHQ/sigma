@@ -5,13 +5,12 @@ related:
       type: similar
 status: experimental
 description: |
-  Detects when a modification (create, update or replace) action is taken that
-  affects mutating or validating webhook configurations, as they can be used by
-  an adversary to achieve perisistence or exfiltrate access credentials.
+    Detects when a modification (create, update or replace) action is taken that affects mutating or validating webhook configurations, as they can be used by an adversary to achieve persistence or exfiltrate access credentials.
 references:
     - https://kubernetes.io/docs/reference/config-api/apiserver-audit.v1/
     - https://security.padok.fr/en/blog/kubernetes-webhook-attackers
-date: 2024/03/27
+author: kelnage
+date: 2024/07/11
 tags:
     - attack.persistence
     - attack.t1078
@@ -23,19 +22,18 @@ logsource:
     service: audit
 detection:
     selection:
-        objectRef.apiGroup: admissionregistration.k8s.io
+        objectRef.apiGroup: 'admissionregistration.k8s.io'
         objectRef.resource:
-            - mutatingwebhookconfigurations
-            - validatingwebhookconfigurations
+            - 'mutatingwebhookconfigurations'
+            - 'validatingwebhookconfigurations'
         verb:
-            - create
-            - delete
-            - patch
-            - replace
-            - update
+            - 'create'
+            - 'delete'
+            - 'patch'
+            - 'replace'
+            - 'update'
     condition: selection
 falsepositives:
     - Modifying the Kubernetes Admission Controller may need to be done by a system administrator.
     - Automated processes may need to take these actions and may need to be filtered.
 level: medium
-
