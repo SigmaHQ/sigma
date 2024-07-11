@@ -9,8 +9,7 @@ references:
     - https://ermetic.com/blog/aws/aws-ec2-imds-what-you-need-to-know/
     - https://www.packetmischief.ca/2023/07/31/amazon-ec2-credential-exfiltration-how-it-happens-and-how-to-mitigate-it/#lifting-credentials-from-imds-this-is-why-we-cant-have-nice-things
 author: jamesc-grafana
-date: 2024/03/28
-modified: 2024/03/28
+date: 2024/07/11
 tags:
     - attack.privilege_escalation
     - attack.defense_evasion
@@ -21,12 +20,12 @@ logsource:
     service: cloudtrail
 detection:
     selection:
-        userIdentity.arn|re: ".+:assumed-role/aws:.+"
-    filter_main:
-        - eventSource: ssm.amazonaws.com
-        - eventName: RegisterManagedInstance
-        - sourceIPAddress: AWS Internal
-    condition: selection and not filter_main
+        userIdentity.arn|re: '.+:assumed-role/aws:.+'
+    filter_main_generic:
+        - eventSource: 'ssm.amazonaws.com'
+        - eventName: 'RegisterManagedInstance'
+        - sourceIPAddress: 'AWS Internal'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - A team has configured an EC2 instance to use instance profiles that grant the option for the EC2 instance to talk to other AWS Services
 level: high
