@@ -17,19 +17,19 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection_main:
         Image|endswith: '\node.exe'
         CommandLine|contains:
             - ' -e '
             - ' --eval '
     # Add more pattern of abuse as actions
-    action_reverse_shell:
+    selection_action_reverse_shell:
         CommandLine|contains|all:
             - '.exec('
             - 'net.socket'
             - '.connect'
             - 'child_process'
-    condition: selection and 1 of action_*
+    condition: selection_main and 1 of selection_action_*
 falsepositives:
     - Unlikely
 level: high
