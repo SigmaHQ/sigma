@@ -9,7 +9,7 @@ references:
     - https://blog.redbluepurple.io/offensive-research/bypassing-injection-detection
 author: Florian Roth (Nextron Systems)
 date: 2022/03/16
-modified: 2024/03/06
+modified: 2024/07/15
 tags:
     - attack.defense_evasion
     - attack.privilege_escalation
@@ -30,17 +30,17 @@ detection:
             - '\wordpad.exe'
             - '\write.exe'
     filter_main_csrss:
-        SourceImage|endswith: ':\Windows\System32\csrss.exe'
+        SourceImage: 'C:\Windows\System32\csrss.exe'
     filter_optional_aurora_1:
         StartFunction: 'EtwpNotificationThread'
     filter_optional_aurora_2:
         SourceImage|contains: 'unknown process'
     filter_optional_vmtoolsd:
-        SourceImage|endswith: ':\Program Files\VMware\VMware Tools\vmtoolsd.exe'
+        SourceImage: 'C:\Program Files\VMware\VMware Tools\vmtoolsd.exe'
         StartFunction: 'GetCommandLineW'
-        TargetImage|endswith:
-            - ':\Windows\System32\notepad.exe'
-            - ':\Windows\System32\spoolsv.exe'
+        TargetImage:
+            - 'C:\Windows\System32\notepad.exe'
+            - 'C:\Windows\System32\spoolsv.exe'
     filter_optional_xerox_pjems:
         SourceImage: 'C:\Program Files\Xerox\XeroxPrintExperience\CommonFiles\XeroxPrintJobEventManagerService.exe'
         StartFunction: 'LoadLibraryW'
