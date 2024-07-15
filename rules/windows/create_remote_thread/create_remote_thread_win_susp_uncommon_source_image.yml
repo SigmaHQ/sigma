@@ -10,7 +10,7 @@ references:
     - https://lolbas-project.github.io
 author: Perez Diego (@darkquassar), oscd.community
 date: 2019/10/27
-modified: 2024/01/17
+modified: 2024/07/15
 tags:
     - attack.privilege_escalation
     - attack.defense_evasion
@@ -28,27 +28,27 @@ detection:
             - '\schtasks.exe'
             - '\winlogon.exe'
     filter_main_winlogon_1:
-        SourceImage|endswith: ':\Windows\System32\winlogon.exe'
-        TargetImage|endswith:
-            - ':\Windows\System32\services.exe' # happens on Windows 7
-            - ':\Windows\System32\wininit.exe' # happens on Windows 7
-            - ':\Windows\System32\csrss.exe' # multiple OS
-            - ':\Windows\System32\LogonUI.exe' # multiple OS
+        SourceImage: 'C:\Windows\System32\winlogon.exe'
+        TargetImage:
+            - 'C:\Windows\System32\services.exe' # happens on Windows 7
+            - 'C:\Windows\System32\wininit.exe' # happens on Windows 7
+            - 'C:\Windows\System32\csrss.exe' # multiple OS
+            - 'C:\Windows\System32\LogonUI.exe' # multiple OS
     filter_main_winlogon_2:
-        SourceImage|contains: ':\Windows\System32\winlogon.exe'
+        SourceImage: 'C:\Windows\System32\winlogon.exe'
         TargetParentProcessId: 4
     filter_main_schtasks_conhost:
-        SourceImage|endswith:
-            - ':\Windows\System32\schtasks.exe'
-            - ':\Windows\SysWOW64\schtasks.exe'
-        TargetImage|endswith: ':\Windows\System32\conhost.exe'
+        SourceImage:
+            - 'C:\Windows\System32\schtasks.exe'
+            - 'C:\Windows\SysWOW64\schtasks.exe'
+        TargetImage: 'C:\Windows\System32\conhost.exe'
     filter_main_explorer:
-        SourceImage|endswith: ':\Windows\explorer.exe'
-        TargetImage|endswith:
-            - ':\Program Files (x86)\'
-            - ':\Program Files\'
-            - ':\Windows\System32\'
-            - ':\Windows\SysWOW64\'
+        SourceImage: 'C:\Windows\explorer.exe'
+        TargetImage|startswith:
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
     filter_main_system:
         TargetImage: 'System'
     filter_main_msiexec:
@@ -56,26 +56,32 @@ detection:
         SourceImage|endswith: '\msiexec.exe'
         TargetImage|contains:
             - '\AppData\Local\'
-            - ':\Program Files (x86)\'
-            - ':\Program Files\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
     filter_optional_aurora_smartconsole1:
-        SourceImage|contains: ':\Program Files\internet explorer\iexplore.exe'
+        SourceImage: 'C:\Program Files\internet explorer\iexplore.exe'
         SourceCommandLine|contains|all:
             - 'https://'
             - '.checkpoint.com/documents/'
             - 'SmartConsole_OLH/'
             - 'default.htm#cshid='
     filter_optional_aurora_smartconsole2:
-        SourceImage|contains: ':\Program Files\internet explorer\iexplore.exe'
+        SourceImage: 'C:\Program Files\internet explorer\iexplore.exe'
+        SourceParentImage|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
         SourceParentImage|contains|all:
-            - ':\Program Files'  # x86 and not
             - '\CheckPoint\SmartConsole\'
             - '\SmartConsole.exe'
     filter_optional_powerpnt:
         # Raised by the following issue: https://github.com/SigmaHQ/sigma/issues/2479
         SourceImage|contains: '\Microsoft Office\'
         SourceImage|endswith: '\POWERPNT.EXE'
-        TargetImage|endswith: ':\Windows\System32\csrss.exe'
+        TargetImage: 'C:\Windows\System32\csrss.exe'
+    filter_main_null:
+        TargetImage: null
+    filter_main_empty:
+        TargetImage: ''
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - This rule is best put in testing first in order to create a baseline that reflects the data in your environment.
