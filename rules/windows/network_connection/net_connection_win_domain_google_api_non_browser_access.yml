@@ -11,7 +11,7 @@ references:
     - https://www.bleepingcomputer.com/news/security/hackers-abuse-google-command-and-control-red-team-tool-in-attacks/
 author: Gavin Knapp
 date: 2023/05/01
-modified: 2023/11/03
+modified: 2024/07/16
 tags:
     - attack.command_and_control
     - attack.t1102
@@ -72,9 +72,11 @@ detection:
         Image|endswith: '\GoogleUpdate.exe'
     filter_optional_outlook.exe:
         Image|endswith: '\outlook.exe'
-    filter_optional_teams:
-        Image|endswith: '\teams.exe'
-    condition: selection and not 1 of filter_optional_*
+    filter_main_null:
+        Image: null
+    filter_main_empty:
+        Image: ''
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate applications communicating with the "googleapis.com" endpoints that are not already in the exclusion list. This is environmental dependent and requires further testing and tuning.
 level: medium

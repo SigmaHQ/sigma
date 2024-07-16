@@ -1,7 +1,7 @@
-title: Suspicious Call by Ordinal
+title: DLL Call by Ordinal Via Rundll32.EXE
 id: e79a9e79-eb72-4e78-a628-0e7e8f59e89c
 status: stable
-description: Detects suspicious calls of DLLs in rundll32.dll exports by ordinal
+description: Detects calls of DLLs exports by ordinal numbers via rundll32.dll.
 references:
     - https://techtalk.pcmatic.com/2017/11/30/running-dll-files-malware-analysis/
     - https://github.com/Neo23x0/DLLRunner
@@ -9,10 +9,11 @@ references:
     - https://www.welivesecurity.com/2022/03/01/isaacwiper-hermeticwizard-wiper-worm-targeting-ukraine/
 author: Florian Roth (Nextron Systems)
 date: 2019/10/22
-modified: 2023/02/09
+modified: 2024/07/16
 tags:
     - attack.defense_evasion
     - attack.t1218.011
+    - detection.threat_hunting
 logsource:
     category: process_creation
     product: windows
@@ -26,11 +27,11 @@ detection:
             - ', #'
             - '.dll #'  # Sysmon removes , in its log
             - '.ocx #'  # HermeticWizard
-    filter_edge:
+    filter_optional_edge:
         CommandLine|contains|all:
             - 'EDGEHTML.dll'
             - '#141'
-    filter_vsbuild_dll:
+    filter_optional_vsbuild_dll:
         ParentImage|contains:
             - '\Msbuild\Current\Bin\'
             - '\VC\Tools\MSVC\'
@@ -40,8 +41,8 @@ detection:
             - '\FileTracker32.dll",#1'
             - '\FileTracker64.dll,#1'
             - '\FileTracker64.dll",#1'
-    condition: all of selection_* and not 1 of filter_*
+    condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
-    - False positives depend on scripts and administrative tools used in the monitored environment
-    - Windows control panel elements have been identified as source (mmc)
-level: high
+    - False positives depend on scripts and administrative tools used in the monitored environment.
+    - Windows control panel elements have been identified as source (mmc).
+level: medium

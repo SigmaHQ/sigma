@@ -1,13 +1,14 @@
 title: System File Execution Location Anomaly
 id: e4a6b256-3e47-40fc-89d2-7a477edd6915
 status: experimental
-description: Detects a Windows program executable started from a suspicious folder
+description: |
+    Detects the execution of a Windows system binary that is usually located in the system folder from an uncommon location.
 references:
     - https://twitter.com/GelosSnake/status/934900723426439170
     - https://asec.ahnlab.com/en/39828/
-author: Florian Roth (Nextron Systems), Patrick Bareiss, Anton Kutepov, oscd.community, Nasreddine Bencherchali
+author: Florian Roth (Nextron Systems), Patrick Bareiss, Anton Kutepov, oscd.community, Nasreddine Bencherchali (Nextron Systems)
 date: 2017/11/27
-modified: 2023/10/18
+modified: 2024/07/16
 tags:
     - attack.defense_evasion
     - attack.t1036
@@ -17,76 +18,75 @@ logsource:
 detection:
     selection:
         Image|endswith:
-            - '\svchost.exe'
-            - '\rundll32.exe'
-            - '\services.exe'
-            - '\powershell.exe'
+            - '\atbroker.exe'
+            - '\audiodg.exe'
+            - '\bcdedit.exe'
+            - '\bitsadmin.exe'
+            - '\certreq.exe'
+            - '\certutil.exe'
+            - '\cmstp.exe'
+            - '\conhost.exe'
+            - '\consent.exe'
+            - '\cscript.exe'
+            - '\csrss.exe'
+            - '\dashost.exe'
+            - '\defrag.exe'
+            - '\dfrgui.exe' # Was seen used by Lazarus Group - https://asec.ahnlab.com/en/39828/
+            - '\dism.exe'
+            - '\dllhost.exe'
+            - '\dllhst3g.exe'
+            - '\dwm.exe'
+            - '\eventvwr.exe'
+            - '\logonui.exe'
+            - '\LsaIso.exe'
+            - '\lsass.exe'
+            - '\lsm.exe'
+            - '\msiexec.exe'
+            - '\ntoskrnl.exe'
             - '\powershell_ise.exe'
+            - '\powershell.exe'
             - '\pwsh.exe'
             - '\regsvr32.exe'
-            - '\spoolsv.exe'
-            - '\lsass.exe'
+            - '\rundll32.exe'
+            - '\runonce.exe'
+            - '\RuntimeBroker.exe'
+            - '\schtasks.exe'
+            - '\services.exe'
+            - '\sihost.exe'
+            - '\smartscreen.exe'
             - '\smss.exe'
-            - '\csrss.exe'
-            - '\conhost.exe'
-            - '\wininit.exe'
-            - '\lsm.exe'
-            - '\winlogon.exe'
-            - '\explorer.exe'
+            - '\spoolsv.exe'
+            - '\svchost.exe'
             - '\taskhost.exe'
             - '\Taskmgr.exe'
-            - '\sihost.exe'
-            - '\RuntimeBroker.exe'
-            - '\smartscreen.exe'
-            - '\dllhost.exe'
-            - '\audiodg.exe'
+            - '\userinit.exe'
+            - '\wininit.exe'
+            - '\winlogon.exe'
+            - '\winver.exe'
             - '\wlanext.exe'
-            - '\dashost.exe'
-            - '\schtasks.exe'
-            - '\cscript.exe'
             - '\wscript.exe'
             - '\wsl.exe'
-            - '\bitsadmin.exe'
-            - '\atbroker.exe'
-            - '\bcdedit.exe'
-            - '\certutil.exe'
-            - '\certreq.exe'
-            - '\cmstp.exe'
-            - '\consent.exe'
-            - '\defrag.exe'
-            - '\dism.exe'
-            - '\dllhst3g.exe'
-            - '\eventvwr.exe'
-            - '\msiexec.exe'
-            - '\runonce.exe'
-            - '\winver.exe'
-            - '\logonui.exe'
-            - '\userinit.exe'
-            - '\dwm.exe'
-            - '\LsaIso.exe'
-            - '\ntoskrnl.exe'
-            # The below processes were seen used by Lazarus Group - https://asec.ahnlab.com/en/39828/
-            - '\wsmprovhost.exe'
-            - '\dfrgui.exe'
-    filter_generic:
-        - Image|startswith:
-              - 'C:\Windows\System32\'
-              - 'C:\Windows\SysWOW64\'
-              - 'C:\Windows\WinSxS\'
-              # - 'C:\avast! sandbox'
-        - Image|contains: '\SystemRoot\System32\'
-        - Image:
-              - 'C:\Windows\explorer.exe'
-              - 'C:\Program Files\PowerShell\7\pwsh.exe'
-              - 'C:\Program Files\PowerShell\7-preview\pwsh.exe'
-    filter_wsl_windowsapps:
+            - '\wsmprovhost.exe' # Was seen used by Lazarus Group - https://asec.ahnlab.com/en/39828/
+    filter_main_generic:
+        Image|startswith:
+            - 'C:\$WINDOWS.~BT\'
+            - 'C:\$WinREAgent\'
+            - 'C:\Windows\SoftwareDistribution\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SystemTemp\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\uus\'
+            - 'C:\Windows\WinSxS\'
+    filter_optional_system32:
+        Image|contains: '\SystemRoot\System32\'
+    filter_main_powershell:
+        Image:
+            - 'C:\Program Files\PowerShell\7\pwsh.exe'
+            - 'C:\Program Files\PowerShell\7-preview\pwsh.exe'
+    filter_main_wsl_windowsapps:
         Image|startswith: 'C:\Program Files\WindowsApps\MicrosoftCorporationII.WindowsSubsystemForLinux'
         Image|endswith: '\wsl.exe'
-    condition: selection and not 1 of filter_*
-fields:
-    - ComputerName
-    - User
-    - Image
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
-    - Exotic software
+    - Unknown
 level: high
