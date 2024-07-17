@@ -6,10 +6,10 @@ description: |
     Adversaries may use valid accounts to log into a computer using the Remote Desktop Protocol (RDP). The adversary may then perform actions as the logged-on user.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1021.001/T1021.001.md#t1021001---remote-desktop-protocol
-    - https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/mstsc
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/mstsc
 author: frack113
 date: 2022/01/07
-modified: 2023/02/03
+modified: 2024/06/04
 tags:
     - attack.lateral_movement
     - attack.t1021.001
@@ -21,7 +21,7 @@ detection:
         - Image|endswith: '\mstsc.exe'
         - OriginalFileName: 'mstsc.exe'
     selection_cli:
-        CommandLine|contains: ' /v:'
+        CommandLine|contains|windash: ' /v:'
     filter_optional_wsl:
         # Example: mstsc.exe /v:XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX /hvsocketserviceid:XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX /silent /wslg /plugin:WSLDVC /wslgsharedmemorypath:WSL\XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX\wslg C:\ProgramData\Microsoft\WSL\wslg.rdp
         ParentImage: 'C:\Windows\System32\lxss\wslhost.exe'

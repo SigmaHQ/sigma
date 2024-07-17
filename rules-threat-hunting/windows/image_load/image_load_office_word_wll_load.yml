@@ -1,0 +1,25 @@
+title: Microsoft Word Add-In Loaded
+id: 1337afba-d17d-4d23-bd55-29b927603b30
+status: experimental
+description: |
+    Detects Microsoft Word loading an Add-In (.wll) file which can be used by threat actors for initial access or persistence.
+references:
+    - https://labs.withsecure.com/publications/add-in-opportunities-for-office-persistence
+    - https://nored0x.github.io/red-teaming/office-persistence/#what-is-a-wll-file
+author: Steffen Rogge (dr0pd34d)
+date: 2024/07/10
+tags:
+    - attack.execution
+    - attack.t1204.002
+    - detection.threat_hunting
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\winword.exe'
+        ImageLoaded|endswith: '.wll'
+    condition: selection
+falsepositives:
+    - The rules is only looking for ".wll" loads. So some false positives are expected with legitimate and allowed WLLs.
+level: low
