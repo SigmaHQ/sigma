@@ -13,6 +13,7 @@ references:
     - https://intezer.com/blog/research/how-we-escaped-docker-in-azure-functions/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2024/06/24
+modified: 2024/07/16
 tags:
     - attack.command_and_control
     - attack.t1102
@@ -134,10 +135,13 @@ detection:
     filter_main_discord:
         Image|contains: '\AppData\Local\Discord\'
         Image|endswith: '\Discord.exe'
+    filter_main_null:
+        Image: null
+    filter_main_empty:
+        Image: ''
     # filter_optional_qlik:
     #     Image|endswith: '\Engine.exe' # Process from qlik.com app
     condition: selection and not 1 of filter_main_*
 falsepositives:
-    - One might need to exclude other internet browsers found in it's network or other applications like ones mentioned above from Microsoft Defender.
-    - Ninite contacting githubusercontent.com
-level: high
+    - Unknown
+level: medium

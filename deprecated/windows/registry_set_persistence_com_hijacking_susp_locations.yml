@@ -1,0 +1,36 @@
+title: Potential Persistence Via COM Hijacking From Suspicious Locations
+id: 3d968d17-ffa4-4bc0-bfdc-f139de76ce77
+status: deprecated
+description: Detects potential COM object hijacking where the "Server" (In/Out) is pointing to a suspicious or unusual location.
+references:
+    - https://www.microsoft.com/security/blog/2022/07/27/untangling-knotweed-european-private-sector-offensive-actor-using-0-day-exploits/ (idea)
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2022/07/28
+modified: 2024/07/16
+tags:
+    - attack.persistence
+    - attack.t1546.015
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\CLSID\'
+        TargetObject|endswith:
+            - '\InprocServer32\(Default)'
+            - '\LocalServer32\(Default)'
+        Details|contains: # Add more suspicious paths and locations
+            - '\AppData\Local\Temp\'
+            - '\Desktop\'
+            - '\Downloads\'
+            - '\Microsoft\Windows\Start Menu\Programs\Startup\'
+            - '\System32\spool\drivers\color\' # as seen in the knotweed blog
+            - '\Users\Public\'
+            - '\Windows\Temp\'
+            - '%appdata%'
+            - '%temp%'
+            - '%tmp%'
+    condition: selection
+falsepositives:
+    - Probable legitimate applications. If you find these please add them to an exclusion list
+level: high

@@ -1,12 +1,13 @@
-title: Parent in Public Folder Suspicious Process
+title: Potentially Suspicious Execution From Parent Process In Public Folder
 id: 69bd9b97-2be2-41b6-9816-fb08757a4d1a
 status: test
-description: This rule detects suspicious processes with parent images located in the C:\Users\Public folder
+description: |
+    Detects a potentially suspicious execution of a parent process located in the "\Users\Public" folder executing a child process containing references to shell or scripting binaries and commandlines.
 references:
     - https://redcanary.com/blog/blackbyte-ransomware/
-author: Florian Roth (Nextron Systems)
+author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2022/02/25
-modified: 2022/11/18
+modified: 2024/07/12
 tags:
     - attack.defense_evasion
     - attack.execution
@@ -16,26 +17,30 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        ParentImage|startswith: 'C:\Users\Public\'
-        CommandLine|contains:
-            - 'powershell'
-            - 'cmd.exe /c '
-            - 'cmd.exe /r '
-            - 'cmd.exe /k '
-            - 'cmd /c '
-            - 'cmd /r '
-            - 'cmd /k '
-            - 'wscript.exe'
-            - 'cscript.exe'
-            - 'bitsadmin'
-            - 'certutil'
-            - 'mshta.exe'
-    condition: selection
-fields:
-    - ComputerName
-    - User
-    - CommandLine
+    selection_parent:
+        ParentImage|contains: ':\Users\Public\'
+    selection_child:
+        - Image|endswith:
+              - '\bitsadmin.exe'
+              - '\certutil.exe'
+              - '\cmd.exe'
+              - '\cscript.exe'
+              - '\mshta.exe'
+              - '\powershell.exe'
+              - '\pwsh.exe'
+              - '\regsvr32.exe'
+              - '\rundll32.exe'
+              - '\wscript.exe'
+        - CommandLine|contains:
+              - 'bitsadmin'
+              - 'certutil'
+              - 'cscript'
+              - 'mshta'
+              - 'powershell'
+              - 'regsvr32'
+              - 'rundll32'
+              - 'wscript'
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: high

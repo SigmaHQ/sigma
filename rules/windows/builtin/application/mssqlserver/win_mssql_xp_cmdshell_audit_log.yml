@@ -7,16 +7,17 @@ references:
     - https://thedfirreport.com/2022/07/11/select-xmrig-from-sqlserver/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/07/12
+modified: 2024/06/26
 tags:
     - attack.execution
 logsource:
     product: windows
     service: application
-    definition: MSSQL audit policy to monitor for 'xp_cmdshell' must be enabled in order to receive this event in the application log (Follow this tutorial https://dba.stackexchange.com/questions/103183/is-there-any-way-to-monitor-execution-of-xp-cmdshell-in-sql-server-2012)
+    definition: 'Requirements: MSSQL audit policy to monitor for "xp_cmdshell" must be enabled in order to receive this event in the application log (Follow this tutorial https://dba.stackexchange.com/questions/103183/is-there-any-way-to-monitor-execution-of-xp-cmdshell-in-sql-server-2012)'
     # warning: The 'data' field used in the detection section is the container for the event data as a whole. You may have to adapt the rule for your backend accordingly
 detection:
     selection:
-        Provider_Name: 'MSSQLSERVER'
+        Provider_Name|contains: 'MSSQL' # Note: We use contains to account for other third party providers - See https://github.com/SigmaHQ/sigma/issues/4876
         EventID: 33205
         Data|contains|all:
             # You can modify this to include specific commands

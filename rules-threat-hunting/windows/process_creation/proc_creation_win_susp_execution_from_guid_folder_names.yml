@@ -1,7 +1,9 @@
-title: Suspicious Execution From GUID Like Folder Names
+title: Potential Suspicious Execution From GUID Like Folder Names
 id: 90b63c33-2b97-4631-a011-ceb0f47b77c3
 status: test
-description: Detects potential suspicious execution of a GUID like folder name located in a suspicious location such as %TEMP% as seen being used in IcedID attacks
+description: |
+    Detects potential suspicious execution of a GUID like folder name located in a suspicious location such as %TEMP% as seen being used in IcedID attacks.
+    Use this rule to hunt for potentially suspicious activity stemming from uncommon folders.
 references:
     - https://twitter.com/Kostastsale/status/1565257924204986369
 author: Nasreddine Bencherchali (Nextron Systems)
@@ -10,6 +12,7 @@ modified: 2023/03/02
 tags:
     - attack.defense_evasion
     - attack.t1027
+    - detection.threat_hunting
 logsource:
     category: process_creation
     product: windows
@@ -27,15 +30,19 @@ detection:
         CommandLine|contains|all:
             - '\{'
             - '}\'
-    filter:
+    filter_main_image_guid:
         Image|contains|all:
             - '\{'
             - '}\'
-    filter_null:
+    filter_main_null:
         Image: null
-    filter_driver_inst:  # DrvInst.exe "4" "0" "C:\Users\venom\AppData\Local\Temp\{a0753cc2-fcea-4d49-a787-2290b564b06f}\nvvhci.inf" "9" "43a2fa8e7" "00000000000001C0" "WinSta0\Default" "00000000000001C4" "208" "c:\program files\nvidia corporation\installer2\nvvhci.{eb7b4460-7ec9-42d6-b73f-d487d4550526}"
+    filter_main_driver_inst:  # DrvInst.exe "4" "0" "C:\Users\venom\AppData\Local\Temp\{a0753cc2-fcea-4d49-a787-2290b564b06f}\nvvhci.inf" "9" "43a2fa8e7" "00000000000001C0" "WinSta0\Default" "00000000000001C4" "208" "c:\program files\nvidia corporation\installer2\nvvhci.{eb7b4460-7ec9-42d6-b73f-d487d4550526}"
         Image: 'C:\Windows\System32\drvinst.exe'
+    filter_main_msiexec:
+        Image:
+            - 'C:\Windows\System32\msiexec.exe'
+            - 'C:\Windows\SysWOW64\msiexec.exe'
     condition: all of selection_* and not 1 of filter*
 falsepositives:
     - Installers are sometimes known for creating temporary folders with GUID like names. Add appropriate filters accordingly
-level: medium
+level: low
