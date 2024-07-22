@@ -2,12 +2,14 @@ title: Github High Risk Configuration Disabled
 id: 8622c92d-c00e-463c-b09d-fd06166f6794
 status: test
 description: Detects when a user disables a critical security feature for an organization.
-author: Muhammad Faisal (@faisalusuf)
-date: 2023/01/29
 references:
     - https://docs.github.com/en/organizations/managing-oauth-access-to-your-organizations-data/disabling-oauth-app-access-restrictions-for-your-organization
     - https://docs.github.com/en/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/reviewing-the-audit-log-for-your-organization#dependabot_alerts-category-actions
     - https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-security-and-analysis-settings-for-your-repository
+    - https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/audit-log-events-for-your-enterprise
+author: Muhammad Faisal (@faisalusuf)
+date: 2023/01/29
+modified: 2024/07/22
 tags:
     - attack.credential_access
     - attack.defense_evasion
@@ -20,6 +22,12 @@ logsource:
 detection:
     selection:
         action:
+            - 'business_advanced_security.disabled_for_new_repos'
+            - 'business_advanced_security.disabled_for_new_user_namespace_repos'
+            - 'business_advanced_security.disabled'
+            - 'business_advanced_security.user_namespace_repos_disabled'
+            - 'org.advanced_security_disabled_for_new_repos'
+            - 'org.advanced_security_disabled_on_all_repos'
             - 'org.advanced_security_policy_selected_member_disabled'
             - 'org.disable_oauth_app_restrictions'
             - 'org.disable_two_factor_requirement'
