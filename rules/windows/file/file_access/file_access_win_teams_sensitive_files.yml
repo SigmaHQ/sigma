@@ -1,12 +1,14 @@
-title: Suspicious File Event With Teams Objects
+title: Microsoft Teams Sensitive File Access By Uncommon Process
 id: 6902955a-01b7-432c-b32a-6f5f81d8f624
-status: test
-description: Detects an access to authentication tokens and accounts of Microsoft Teams desktop application.
+status: experimental
+description: |
+    Detects file access attempts to sensitive Microsoft teams files (leveldb, cookies) by an uncommon process.
 references:
     - https://www.bleepingcomputer.com/news/security/microsoft-teams-stores-auth-tokens-as-cleartext-in-windows-linux-macs/
-    - https://www.vectra.ai/blogpost/undermining-microsoft-teams-security-by-mining-tokens
+    - https://www.vectra.ai/blog/undermining-microsoft-teams-security-by-mining-tokens
 author: '@SerkinValery'
 date: 2022/09/16
+modified: 2024/07/22
 tags:
     - attack.credential_access
     - attack.t1528
@@ -19,9 +21,10 @@ detection:
         FileName|contains:
             - '\Microsoft\Teams\Cookies'
             - '\Microsoft\Teams\Local Storage\leveldb'
-    filter:
-        Image|contains: '\Microsoft\Teams\current\Teams.exe'
-    condition: selection and not filter
+    filter_main_legit_location:
+        # Note: its best to filter the full path to avoid false negatives
+        Image|endswith: '\Microsoft\Teams\current\Teams.exe'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
-level: high
+level: medium
