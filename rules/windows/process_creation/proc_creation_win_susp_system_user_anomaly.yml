@@ -7,7 +7,7 @@ references:
     - https://tools.thehacker.recipes/mimikatz/modules
 author: Florian Roth (Nextron Systems), David ANDRE (additional keywords)
 date: 2021/12/20
-modified: 2023/12/14
+modified: 2024/07/22
 tags:
     - attack.credential_access
     - attack.defense_evasion
@@ -27,12 +27,12 @@ detection:
     selection_special:
         - Image|endswith:
               - '\calc.exe'
-              - '\wscript.exe'
               - '\cscript.exe'
+              - '\forfiles.exe'
               - '\hh.exe'
               - '\mshta.exe'
-              - '\forfiles.exe'
               - '\ping.exe'
+              - '\wscript.exe'
         - CommandLine|contains:
               # - 'sc stop ' # stops a system service # causes FPs
               - ' -NoP '  # Often used in malicious PowerShell commands
@@ -73,8 +73,8 @@ detection:
               - ';iex('  # PowerShell IEX
               - 'MiniDump'  # Process dumping method apart from procdump
               - 'net user '
-    filter_ping:
-        CommandLine: 'ping 127.0.0.1 -n 5'
+    filter_main_ping:
+        CommandLine|contains: 'ping 127.0.0.1 -n'
     filter_vs:
         Image|endswith: '\PING.EXE'
         ParentCommandLine|contains: '\DismFoDInstall.cmd'
