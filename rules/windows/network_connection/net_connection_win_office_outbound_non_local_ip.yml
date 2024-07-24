@@ -7,9 +7,10 @@ description: |
     This rule will require an initial baseline and tuning that is specific to your organization.
 references:
     - https://corelight.com/blog/detecting-cve-2021-42292
-author: Christopher Peacock '@securepeacock', SCYTHE '@scythe_io', Florian Roth (Nextron Systems), Tim Shelton
+    - https://learn.microsoft.com/de-de/microsoft-365/enterprise/urls-and-ip-address-ranges?view=o365-worldwide
+author: Christopher Peacock '@securepeacock', SCYTHE '@scythe_io', Florian Roth (Nextron Systems), Tim Shelton, Nasreddine Bencherchali (Nextron Systems)
 date: 2021/11/10
-modified: 2024/03/13
+modified: 2024/07/02
 tags:
     - attack.execution
     - attack.t1203
@@ -20,6 +21,7 @@ detection:
     selection:
         Image|endswith:
             - '\excel.exe'
+            - '\outlook.exe'
             - '\powerpnt.exe'
             - '\winword.exe'
             - '\wordview.exe'
@@ -34,15 +36,245 @@ detection:
             - '::1/128'  # IPv6 loopback
             - 'fe80::/10'  # IPv6 link-local addresses
             - 'fc00::/7'  # IPv6 private addresses
-    filter_main_msrange:
+    filter_main_msrange_generic:
         DestinationIp|cidr:
             - '20.184.0.0/13' # Microsoft Corporation
             - '20.192.0.0/10' # Microsoft Corporation
-            - '23.72.0.0/13'  # Akamai International B.V.
-            - '51.10.0.0/15'  # Microsoft Corporation
+            - '23.72.0.0/13' # Akamai International B.V.
+            - '40.76.0.0/14' # Microsoft Corporation
+            - '51.10.0.0/15' # Microsoft Corporation
             - '51.103.0.0/16' # Microsoft Corporation
             - '51.104.0.0/15' # Microsoft Corporation
+            - '51.142.136.0/22' # Microsoft Corporation - https://ipinfo.io/AS8075/51.140.0.0/14-51.142.136.0/22
+            - '52.160.0.0/11' # Microsoft Corporation - https://ipinfo.io/AS8075/52.160.0.0/11
             - '204.79.197.0/24' # Microsoft Corporation
+    filter_main_msrange_exchange_1:
+        # Exchange Online
+        # "urls": [
+        #       "outlook.cloud.microsoft",
+        #       "outlook.office.com",
+        #       "outlook.office365.com"
+        # ]
+        DestinationIp|cidr:
+            - '13.107.6.152/31'
+            - '13.107.18.10/31'
+            - '13.107.128.0/22'
+            - '23.103.160.0/20'
+            - '40.96.0.0/13'
+            - '40.104.0.0/15'
+            - '52.96.0.0/14'
+            - '131.253.33.215/32'
+            - '132.245.0.0/16'
+            - '150.171.32.0/22'
+            - '204.79.197.215/32'
+            - '2603:1006::/40'
+            - '2603:1016::/36'
+            - '2603:1026::/36'
+            - '2603:1036::/36'
+            - '2603:1046::/36'
+            - '2603:1056::/36'
+            - '2620:1ec:4::152/128'
+            - '2620:1ec:4::153/128'
+            - '2620:1ec:c::10/128'
+            - '2620:1ec:c::11/128'
+            - '2620:1ec:d::10/128'
+            - '2620:1ec:d::11/128'
+            - '2620:1ec:8f0::/46'
+            - '2620:1ec:900::/46'
+            - '2620:1ec:a92::152/128'
+            - '2620:1ec:a92::153/128'
+        DestinationPort:
+            - 80
+            - 443
+    filter_main_msrange_exchange_2:
+        # Exchange Online
+        # "urls": [
+        #       "outlook.office365.com",
+        #       "smtp.office365.com"
+        # ]
+        DestinationIp|cidr:
+            - '13.107.6.152/31'
+            - '13.107.18.10/31'
+            - '13.107.128.0/22'
+            - '23.103.160.0/20'
+            - '40.96.0.0/13'
+            - '40.104.0.0/15'
+            - '52.96.0.0/14'
+            - '131.253.33.215/32'
+            - '132.245.0.0/16'
+            - '150.171.32.0/22'
+            - '204.79.197.215/32'
+            - '2603:1006::/40'
+            - '2603:1016::/36'
+            - '2603:1026::/36'
+            - '2603:1036::/36'
+            - '2603:1046::/36'
+            - '2603:1056::/36'
+            - '2620:1ec:4::152/128'
+            - '2620:1ec:4::153/128'
+            - '2620:1ec:c::10/128'
+            - '2620:1ec:c::11/128'
+            - '2620:1ec:d::10/128'
+            - '2620:1ec:d::11/128'
+            - '2620:1ec:8f0::/46'
+            - '2620:1ec:900::/46'
+            - '2620:1ec:a92::152/128'
+            - '2620:1ec:a92::153/128'
+        DestinationPort:
+            - 143
+            - 587
+            - 993
+            - 995
+        Protocol: 'tcp'
+    filter_main_msrange_exchange_3:
+        # Exchange Online
+        # "urls": [
+        #       "*.protection.outlook.com"
+        #  ]
+        DestinationIp|cidr:
+            - '40.92.0.0/15'
+            - '40.107.0.0/16'
+            - '52.100.0.0/14'
+            - '52.238.78.88/32'
+            - '104.47.0.0/17'
+            - '2a01:111:f400::/48'
+            - '2a01:111:f403::/48'
+        DestinationPort: 443
+    filter_main_msrange_exchange_4:
+        # Exchange Online
+        # "urls": [
+        #       "*.mail.protection.outlook.com",
+        #       "*.mx.microsoft"
+        #  ]
+        DestinationIp|cidr:
+            - '40.92.0.0/15'
+            - '40.107.0.0/16'
+            - '52.100.0.0/14'
+            - '52.238.78.88/32'
+            - '104.47.0.0/17'
+            - '2a01:111:f400::/48'
+            - '2a01:111:f403::/48'
+        DestinationPort: 25
+    filter_main_msrange_sharepoint_1:
+        # SharePoint Online and OneDrive for Business",
+        # "urls": [
+        #       "*.sharepoint.com"
+        # ]
+        DestinationIp|cidr:
+            - '13.107.136.0/22'
+            - '40.108.128.0/17'
+            - '52.104.0.0/14'
+            - '104.146.128.0/17'
+            - '150.171.40.0/22'
+            - '2603:1061:1300::/40'
+            - '2620:1ec:8f8::/46'
+            - '2620:1ec:908::/46'
+            - '2a01:111:f402::/48'
+        DestinationPort:
+            - 80
+            - 443
+        Protocol: 'tcp'
+    filter_main_msrange_office_1:
+        # Microsoft 365 Common and Office Online",
+        # "urls": [
+        #       "*.officeapps.live.com",
+        #       "*.online.office.com",
+        #       "office.live.com"
+        # ],
+        DestinationIp|cidr:
+            - '13.107.6.171/32'
+            - '13.107.18.15/32'
+            - '13.107.140.6/32'
+            - '52.108.0.0/14'
+            - '52.244.37.168/32'
+            - '2603:1006:1400::/40'
+            - '2603:1016:2400::/40'
+            - '2603:1026:2400::/40'
+            - '2603:1036:2400::/40'
+            - '2603:1046:1400::/40'
+            - '2603:1056:1400::/40'
+            - '2603:1063:2000::/38'
+            - '2620:1ec:c::15/128'
+            - '2620:1ec:8fc::6/128'
+            - '2620:1ec:a92::171/128'
+            - '2a01:111:f100:2000::a83e:3019/128'
+            - '2a01:111:f100:2002::8975:2d79/128'
+            - '2a01:111:f100:2002::8975:2da8/128'
+            - '2a01:111:f100:7000::6fdd:6cd5/128'
+            - '2a01:111:f100:a004::bfeb:88cf/128'
+        DestinationPort:
+            - 80
+            - 443
+        Protocol: 'tcp'
+    filter_main_msrange_office_2:
+        # Microsoft 365 Common and Office Online
+        # "urls": [
+        #       "*.auth.microsoft.com",
+        #       "*.msftidentity.com",
+        #       "*.msidentity.com",
+        #       "account.activedirectory.windowsazure.com",
+        #       "accounts.accesscontrol.windows.net",
+        #       "adminwebservice.microsoftonline.com",
+        #       "api.passwordreset.microsoftonline.com",
+        #       "autologon.microsoftazuread-sso.com",
+        #       "becws.microsoftonline.com",
+        #       "ccs.login.microsoftonline.com",
+        #       "clientconfig.microsoftonline-p.net",
+        #       "companymanager.microsoftonline.com",
+        #       "device.login.microsoftonline.com",
+        #       "graph.microsoft.com",
+        #       "graph.windows.net",
+        #       "login-us.microsoftonline.com",
+        #       "login.microsoft.com",
+        #       "login.microsoftonline-p.com",
+        #       "login.microsoftonline.com",
+        #       "login.windows.net",
+        #       "logincert.microsoftonline.com",
+        #       "loginex.microsoftonline.com",
+        #       "nexus.microsoftonline-p.com",
+        #       "passwordreset.microsoftonline.com",
+        #       "provisioningapi.microsoftonline.com"
+        # ]
+        DestinationIp|cidr:
+            - '20.20.32.0/19'
+            - '20.190.128.0/18'
+            - '20.231.128.0/19'
+            - '40.126.0.0/18'
+            - '2603:1006:2000::/48'
+            - '2603:1007:200::/48'
+            - '2603:1016:1400::/48'
+            - '2603:1017::/48'
+            - '2603:1026:3000::/48'
+            - '2603:1027:1::/48'
+            - '2603:1036:3000::/48'
+            - '2603:1037:1::/48'
+            - '2603:1046:2000::/48'
+            - '2603:1047:1::/48'
+            - '2603:1056:2000::/48'
+            - '2603:1057:2::/48'
+        DestinationPort:
+            - 80
+            - 443
+        Protocol: 'tcp'
+    filter_main_msrange_office_3:
+        # Microsoft 365 Common and Office Online
+        #  "urls": [
+        #       "*.compliance.microsoft.com",
+        #       "*.protection.office.com",
+        #       "*.security.microsoft.com",
+        #       "compliance.microsoft.com",
+        #       "defender.microsoft.com",
+        #       "protection.office.com",
+        #       "security.microsoft.com"
+        #  ]
+        DestinationIp|cidr:
+            - '13.107.6.192/32'
+            - '13.107.9.192/32'
+            - '52.108.0.0/14'
+            - '2620:1ec:4::192/128'
+            - '2620:1ec:a92::192/128'
+        DestinationPort: 443
+        Protocol: 'tcp'
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - You may have to tune certain domains out that Excel may call out to, such as microsoft or other business use case domains.

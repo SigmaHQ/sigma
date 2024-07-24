@@ -1,0 +1,48 @@
+title: DLL Call by Ordinal Via Rundll32.EXE
+id: e79a9e79-eb72-4e78-a628-0e7e8f59e89c
+status: stable
+description: Detects calls of DLLs exports by ordinal numbers via rundll32.dll.
+references:
+    - https://techtalk.pcmatic.com/2017/11/30/running-dll-files-malware-analysis/
+    - https://github.com/Neo23x0/DLLRunner
+    - https://twitter.com/cyb3rops/status/1186631731543236608
+    - https://www.welivesecurity.com/2022/03/01/isaacwiper-hermeticwizard-wiper-worm-targeting-ukraine/
+author: Florian Roth (Nextron Systems)
+date: 2019/10/22
+modified: 2024/07/16
+tags:
+    - attack.defense_evasion
+    - attack.t1218.011
+    - detection.threat_hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\rundll32.exe'
+        - OriginalFileName: 'RUNDLL32.EXE'
+    selection_cli:
+        CommandLine|contains:
+            - ',#'
+            - ', #'
+            - '.dll #'  # Sysmon removes , in its log
+            - '.ocx #'  # HermeticWizard
+    filter_optional_edge:
+        CommandLine|contains|all:
+            - 'EDGEHTML.dll'
+            - '#141'
+    filter_optional_vsbuild_dll:
+        ParentImage|contains:
+            - '\Msbuild\Current\Bin\'
+            - '\VC\Tools\MSVC\'
+            - '\Tracker.exe'
+        CommandLine|contains:
+            - '\FileTracker32.dll,#1'
+            - '\FileTracker32.dll",#1'
+            - '\FileTracker64.dll,#1'
+            - '\FileTracker64.dll",#1'
+    condition: all of selection_* and not 1 of filter_optional_*
+falsepositives:
+    - False positives depend on scripts and administrative tools used in the monitored environment.
+    - Windows control panel elements have been identified as source (mmc).
+level: medium

@@ -4,12 +4,14 @@ related:
     - id: 03795938-1387-481b-9f4c-3f6241e604fe
       type: obsoletes
 status: test
-description: Detects the execution of a renamed ProcDump executable often used by attackers or malware
+description: |
+    Detects the execution of a renamed ProcDump executable.
+    This often done by attackers or malware in order to evade defensive mechanisms.
 references:
-    - https://docs.microsoft.com/en-us/sysinternals/downloads/procdump
-author: Florian Roth (Nextron Systems)
+    - https://learn.microsoft.com/en-us/sysinternals/downloads/procdump
+author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2019/11/18
-modified: 2022/12/08
+modified: 2024/06/25
 tags:
     - attack.defense_evasion
     - attack.t1036.003
@@ -17,22 +19,21 @@ logsource:
     product: windows
     category: process_creation
 detection:
-    selection_org:
+    selection_ofn:
         OriginalFileName: 'procdump'
-    selection_args_ma:
-        CommandLine|contains:
-            - ' -ma '
-            - ' /ma '
-    selection_args_other:
-        CommandLine|contains:
-            - ' -accepteula '
-            - ' /accepteula '
-    filter:
+    selection_cli_dump_flag:
+        CommandLine|contains|windash:
+            - ' -ma ' # Full Dump
+            - ' -mp ' # Mini Plus
+    selection_cli_eula_flag:
+        # Note: Even though the "accepteula" flag isn't required. We add it to avoid collision with similar utilities.
+        CommandLine|contains|windash: ' /accepteula'
+    filter_main_known_names:
         Image|endswith:
             - '\procdump.exe'
             - '\procdump64.exe'
-    condition: (selection_org or all of selection_args_*) and not filter
+    condition: (selection_ofn or all of selection_cli_*) and not 1 of filter_main_*
 falsepositives:
-    - Procdump illegaly bundled with legitimate software
-    - Administrators who rename binaries (should be investigated)
+    - Procdump illegally bundled with legitimate software.
+    - Administrators who rename binaries (should be investigated).
 level: high

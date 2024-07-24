@@ -1,12 +1,12 @@
 title: Antivirus Relevant File Paths Alerts
 id: c9a88268-0047-4824-ba6e-4d81ce0b907c
 status: test
-description: Detects an Antivirus alert in a highly relevant file path or with a relevant file name
+description: Detects an Antivirus alert in a highly relevant file path or with a relevant file name.
 references:
     - https://www.nextron-systems.com/?s=antivirus
 author: Florian Roth (Nextron Systems), Arnim Rupp
 date: 2018/09/09
-modified: 2023/10/23
+modified: 2024/07/17
 tags:
     - attack.resource_development
     - attack.t1588
@@ -15,20 +15,18 @@ logsource:
 detection:
     selection_path:
         Filename|contains:
-            # could be startswith, if there is a better backend handling
-            - ':\Windows\'
-            - ':\Temp\'
             - ':\PerfLogs\'
-            - ':\Users\Public\'
+            - ':\Temp\'
             - ':\Users\Default\'
-            # true 'contains' matches:
-            - '\Client\'
-            - '\tsclient\'
-            - '\inetpub\'
+            - ':\Users\Public\'
+            - ':\Windows\'
             - '/www/'
+            - '\Client\'
+            - '\inetpub\'
+            - '\tsclient\'
             - 'apache'
-            - 'tomcat'
             - 'nginx'
+            - 'tomcat'
             - 'weblogic'
     selection_ext:
         Filename|endswith:
@@ -51,6 +49,7 @@ detection:
             - '.jsp'
             - '.jspx'
             - '.lnk'
+            - '.msc'
             - '.php'
             - '.pl'
             - '.png'
@@ -67,13 +66,12 @@ detection:
             - '.vbe'
             - '.vbs'
             - '.war'
+            - '.wll'
             - '.wsf'
             - '.wsh'
+            - '.xll'
             - '.xml'
     condition: 1 of selection_*
-fields:
-    - Signature
-    - User
 falsepositives:
     - Unlikely
 level: high

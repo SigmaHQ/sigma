@@ -1,0 +1,37 @@
+title: Potential Suspicious Browser Launch From Document Reader Process
+id: 1193d960-2369-499f-a158-7b50a31df682
+status: experimental
+description: |
+    Detects when a browser process or browser tab is launched from an application that handles document files such as Adobe, Microsoft Office, etc. And connects to a web application over http(s), this could indicate a possible phishing attempt.
+references:
+    - https://app.any.run/tasks/69c5abaa-92ad-45ba-8c53-c11e23e05d04/ # PDF Document
+    - https://app.any.run/tasks/64043a79-165f-4052-bcba-e6e49f847ec1/ # Office Document
+author: Joseph Kamau
+date: 2024/05/27
+tags:
+    - attack.execution
+    - attack.t1204.002
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        ParentImage|contains:
+            - 'Acrobat Reader'
+            - 'Microsoft Office'
+            - 'PDF Reader'
+        Image|endswith:
+            - '\brave.exe'
+            - '\chrome.exe'
+            - '\firefox.exe'
+            - '\msedge.exe'
+            - '\opera.exe'
+            - '\maxthon.exe'
+            - '\seamonkey.exe'
+            - '\vivaldi.exe'
+            - ''
+        CommandLine|contains: 'http'
+    condition: selection
+falsepositives:
+    - Unlikely in most cases, further investigation should be done in the commandline of the browser process to determine the context of the URL accessed.
+level: medium

@@ -1,0 +1,45 @@
+title: COM Object Hijacking Via Modification Of Default System CLSID Default Value
+id: 790317c0-0a36-4a6a-a105-6e576bf99a14
+status: experimental
+description: Detects potential COM object hijacking via modification of default system CLSID.
+references:
+    - https://www.microsoft.com/security/blog/2022/07/27/untangling-knotweed-european-private-sector-offensive-actor-using-0-day-exploits/ (idea)
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2024/07/16
+tags:
+    - attack.persistence
+    - attack.t1546.015
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_target:
+        TargetObject|contains: '\CLSID\'
+        TargetObject|endswith:
+            - '\InprocServer32\(Default)'
+            - '\LocalServer32\(Default)'
+    selection_builtin_clsid:
+        TargetObject|contains:
+            # Note: Add other legitimate CLSID
+            - '\{ddc05a5a-351a-4e06-8eaf-54ec1bc2dcea}\'
+            - '\{1f486a52-3cb1-48fd-8f50-b8dc300d9f9d}\'
+            - '\{4590f811-1d3a-11d0-891f-00aa004b2e24}\'
+            - '\{4de225bf-cf59-4cfc-85f7-68b90f185355}\'
+            - '\{F56F6FDD-AA9D-4618-A949-C1B91AF43B1A}\'
+    selection_locations:
+        Details|contains:
+            # Note: Add more suspicious paths and locations
+            - '\AppData\Local\Temp\'
+            - '\Desktop\'
+            - '\Downloads\'
+            - '\Microsoft\Windows\Start Menu\Programs\Startup\'
+            - '\System32\spool\drivers\color\' # as seen in the knotweed blog
+            - '\Users\Public\'
+            - '\Windows\Temp\'
+            - '%appdata%'
+            - '%temp%'
+            - '%tmp%'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely
+level: high

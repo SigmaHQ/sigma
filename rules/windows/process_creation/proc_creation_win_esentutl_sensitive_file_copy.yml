@@ -6,9 +6,10 @@ references:
     - https://room362.com/post/2013/2013-06-10-volume-shadow-copy-ntdsdit-domain-hashes-remotely-part-1/
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
     - https://dfironthemountain.wordpress.com/2018/12/06/locked-file-access-using-esentutl-exe/
+    - https://github.com/LOLBAS-Project/LOLBAS/blob/2cc01b01132b5c304027a658c698ae09dd6a92bf/yml/OSBinaries/Esentutl.yml
 author: Teymur Kheirkhabarov, Daniil Yugoslavskiy, oscd.community
 date: 2019/10/22
-modified: 2022/11/11
+modified: 2024/06/04
 tags:
     - attack.credential_access
     - attack.t1003.002
@@ -23,23 +24,23 @@ detection:
         - Image|endswith: '\esentutl.exe'
         - OriginalFileName: '\esentutl.exe'
     selection_esent_cli:
-        CommandLine|contains:
+        CommandLine|contains|windash:
             - 'vss'
             - ' /m '
             - ' /y '
     selection_susp_paths:
         CommandLine|contains:
-            - '\windows\ntds\ntds.dit'
+            - '\config\RegBack\sam'
+            - '\config\RegBack\security'
+            - '\config\RegBack\system'
             - '\config\sam'
             - '\config\security'
             - '\config\system '        # space needed to avoid false positives with \config\systemprofile\
             - '\repair\sam'
-            - '\repair\system'
             - '\repair\security'
-            - '\config\RegBack\sam'
-            - '\config\RegBack\system'
-            - '\config\RegBack\security'
+            - '\repair\system'
+            - '\windows\ntds\ntds.dit'
     condition: all of selection_esent_* or selection_susp_paths
 falsepositives:
-    - Copying sensitive files for legitimate use (eg. backup) or forensic investigation by legitimate incident responder or forensic invetigator
+    - Copying sensitive files for legitimate use (eg. backup) or forensic investigation by legitimate incident responder or forensic investigator.
 level: high

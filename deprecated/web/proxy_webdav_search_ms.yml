@@ -1,0 +1,43 @@
+title: Search-ms and WebDAV Suspicious Indicators in URL
+id: 5039f3d2-406a-4c1a-9350-7a5a85dc84c2
+status: deprecated # See https://github.com/SigmaHQ/sigma/pull/4845
+description: Detects URL pattern used by search(-ms)/WebDAV initial access campaigns.
+references:
+    - https://www.trellix.com/en-us/about/newsroom/stories/research/beyond-file-search-a-novel-method.html
+    - https://micahbabinski.medium.com/search-ms-webdav-and-chill-99c5b23ac462
+author: Micah Babinski
+date: 2023/08/21
+modified: 2024/05/10
+tags:
+    - attack.initial_access
+    - attack.t1584
+    - attack.t1566
+logsource:
+    category: proxy
+detection:
+    selection_search_ms:
+        c-uri|contains|all:
+            - 'search' # Matches on search:query= or search-ms:query=
+            - ':query='
+            - 'webdav'
+    selection_search_term:
+        c-uri|contains:
+            # Note: Add additional keywords for additional coverage
+            - 'agreement'
+            - 'invoice'
+            - 'notice'
+            - 'payment'
+    filter_main_local_ips:
+        dst_ip|cidr:
+            - '127.0.0.0/8'
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+            - '169.254.0.0/16'
+            - '::1/128'  # IPv6 loopback
+            - 'fe80::/10'  # IPv6 link-local addresses
+            - 'fc00::/7'  # IPv6 private addresses
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high

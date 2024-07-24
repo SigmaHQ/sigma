@@ -1,0 +1,31 @@
+title: UAC Secure Desktop Prompt Disabled
+id: 0d7ceeef-3539-4392-8953-3dc664912714
+related:
+    - id: c5f6a85d-b647-40f7-bbad-c10b66bab038
+      type: similar
+    - id: 48437c39-9e5f-47fb-af95-3d663c3f2919
+      type: similar
+status: experimental
+description: |
+    Detects when an attacker tries to change User Account Control (UAC) elevation request destination via the "PromptOnSecureDesktop" value.
+    The "PromptOnSecureDesktop" setting specifically determines whether UAC prompts are displayed on the secure desktop. The secure desktop is a separate desktop environment that's isolated from other processes running on the system. It's designed to prevent malicious software from intercepting or tampering with UAC prompts.
+    When "PromptOnSecureDesktop" is set to 0, UAC prompts are displayed on the user's current desktop instead of the secure desktop. This reduces the level of security because it potentially exposes the prompts to manipulation by malicious software.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/7e11e9b79583545f208a6dc3fa062f2ed443d999/atomics/T1548.002/T1548.002.md
+author: frack113
+date: 2024/05/10
+tags:
+    - attack.privilege_escalation
+    - attack.defense_evasion
+    - attack.t1548.002
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\Microsoft\Windows\CurrentVersion\Policies\System\PromptOnSecureDesktop'
+        Details: 'DWORD (0x00000000)'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium

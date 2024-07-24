@@ -6,7 +6,7 @@ references:
     - https://www.fireeye.com/blog/threat-research/2018/08/fin7-pursuing-an-enigmatic-and-evasive-global-criminal-operation.html
 author: Florian Roth (Nextron Systems), Markus Neis, Sander Wiebing
 date: 2018/08/25
-modified: 2024/03/18
+modified: 2024/07/16
 tags:
     - attack.persistence
     - attack.t1547.001
@@ -34,9 +34,13 @@ detection:
               - 'wscript'
               - 'cscript'
     filter_main_windows_update:
+        TargetObject|contains: '\Microsoft\Windows\CurrentVersion\RunOnce\'
         Image|startswith: 'C:\Windows\SoftwareDistribution\Download\'
         Details|contains|all:
-            - 'rundll32.exe C:\WINDOWS\system32\advpack.dll,DelNodeRunDLL32'
+            - 'rundll32.exe '
+            - 'C:\WINDOWS\system32\advpack.dll,DelNodeRunDLL32'
+        Details|contains:
+            - '\AppData\Local\Temp\'
             - 'C:\Windows\Temp\'
     condition: all of selection_* and not 1 of filter_main_*
 falsepositives:

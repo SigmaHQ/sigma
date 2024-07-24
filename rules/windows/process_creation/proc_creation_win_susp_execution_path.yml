@@ -1,7 +1,7 @@
-title: Execution from Suspicious Folder
+title: Process Execution From A Potentially Suspicious Folder
 id: 3dfd06d2-eaf4-4532-9555-68aca59f57c4
 status: test
-description: Detects a suspicious execution from an uncommon folder
+description: Detects a potentially suspicious execution from an uncommon folder.
 references:
     - https://github.com/mbevilacqua/appcompatprocessor/blob/6c847937c5a836e2ce2fe2b915f213c345a3c389/AppCompatSearch.txt
     - https://www.secureworks.com/research/bronze-butler-targets-japanese-businesses
@@ -9,7 +9,7 @@ references:
     - https://github.com/ThreatHuntingProject/ThreatHunting/blob/cb22598bb70651f88e0285abc8d835757d2cb596/hunts/suspicious_process_creation_via_windows_event_logs.md
 author: Florian Roth (Nextron Systems), Tim Shelton
 date: 2019/01/16
-modified: 2023/01/10
+modified: 2024/07/12
 tags:
     - attack.defense_evasion
     - attack.t1036
@@ -18,35 +18,31 @@ logsource:
     product: windows
 detection:
     selection:
-        - Image|contains:
-              - '\$Recycle.bin\'
-              - '\config\systemprofile\'
-              - '\Intel\Logs\'
-              - '\RSA\MachineKeys\'
-              - '\Users\All Users\'
-              - '\Users\Default\'
-              - '\Users\NetworkService\'
-              - '\Users\Public\'
-              - '\Windows\addins\'
-              - '\Windows\debug\'
-              - '\Windows\Fonts\'
-              - '\Windows\Help\'
-              - '\Windows\IME\'
-              - '\Windows\Media\'
-              - '\Windows\repair\'
-              - '\Windows\security\'
-              - '\Windows\System32\Tasks\'
-              - '\Windows\Tasks\'
-        - Image|startswith: 'C:\Perflogs\'
-    filter_ibm:
+        Image|contains:
+            - ':\Perflogs\'
+            - ':\Users\All Users\'
+            - ':\Users\Default\'
+            - ':\Users\NetworkService\'
+            - ':\Windows\addins\'
+            - ':\Windows\debug\'
+            - ':\Windows\Fonts\'
+            - ':\Windows\Help\'
+            - ':\Windows\IME\'
+            - ':\Windows\Media\'
+            - ':\Windows\repair\'
+            - ':\Windows\security\'
+            - ':\Windows\System32\Tasks\'
+            - ':\Windows\Tasks\'
+            - '$Recycle.bin'
+            - '\config\systemprofile\'
+            - '\Intel\Logs\'
+            - '\RSA\MachineKeys\'
+    filter_optional_ibm:
         Image|startswith: 'C:\Users\Public\IBM\ClientSolutions\Start_Programs\'
-    filter_citrix:
+    filter_optional_citrix:
         Image|startswith: 'C:\Windows\SysWOW64\config\systemprofile\Citrix\UpdaterBinaries\'
         Image|endswith: '\CitrixReceiverUpdater.exe'
-    condition: selection and not 1 of filter_*
-fields:
-    - CommandLine
-    - ParentCommandLine
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high

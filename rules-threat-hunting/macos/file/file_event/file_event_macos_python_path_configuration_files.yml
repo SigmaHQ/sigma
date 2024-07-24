@@ -1,0 +1,33 @@
+title: Python Path Configuration File Creation - MacOS
+id: 4f394635-13ef-4599-b677-3353e0f84f55
+related:
+    - id: e3652ba3-0ad8-4010-a957-b7ba369e7bac # Windows
+      type: similar
+    - id: fb96c26c-9f85-4ae7-af0d-ed1ed1f1f5ce # Linux
+      type: similar
+status: experimental
+description: |
+    Detects creation of a Python path configuration file (.pth) in Python library folders, which can be maliciously abused for code execution and persistence.
+    Modules referenced by these files are run at every Python startup (v3.5+), regardless of whether the module is imported by the calling script.
+    Default paths are '\lib\site-packages\*.pth' (Windows) and '/lib/pythonX.Y/site-packages/*.pth' (Unix and macOS).
+references:
+    - https://www.volexity.com/blog/2024/04/12/zero-day-exploitation-of-unauthenticated-remote-code-execution-vulnerability-in-globalprotect-cve-2024-3400/
+    - https://www.virustotal.com/gui/file/3de2a4392b8715bad070b2ae12243f166ead37830f7c6d24e778985927f9caac
+    - https://docs.python.org/3/library/site.html
+author: Andreas Braathen (mnemonic.io)
+date: 2024/04/25
+tags:
+    - attack.execution
+    - attack.t1059.006
+    - detection.threat_hunting
+logsource:
+    product: macos
+    category: file_event
+detection:
+    selection:
+        TargetFilename|re: '(?i)/lib/python3\.([5-9]|[0-9]{2})/site-packages/' # Unix and macOS
+        TargetFilename|endswith: '.pth'
+    condition: selection
+falsepositives:
+    - Although .pth files are discouraged due to potential security implications, these are legitimate files by specification.
+level: medium

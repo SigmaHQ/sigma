@@ -1,0 +1,34 @@
+title: Network Connection Initiated To Cloudflared Tunnels Domains
+id: 7cd1dcdc-6edf-4896-86dc-d1f19ad64903
+related:
+    - id: a1d9eec5-33b2-4177-8d24-27fe754d0812
+      type: derived
+status: experimental
+description: |
+    Detects network connections to Cloudflared tunnels domains initiated by a process on the system.
+    Attackers can abuse that feature to establish a reverse shell or persistence on a machine.
+references:
+    - https://defr0ggy.github.io/research/Abusing-Cloudflared-A-Proxy-Service-To-Host-Share-Applications/
+    - https://www.guidepointsecurity.com/blog/tunnel-vision-cloudflared-abused-in-the-wild/
+    - Internal Research
+author: Kamran Saifullah, Nasreddine Bencherchali (Nextron Systems)
+date: 2024/05/27
+tags:
+    - attack.exfiltration
+    - attack.command_and_control
+    - attack.t1567.001
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Initiated: 'true'
+        DestinationHostname|endswith:
+            - '.v2.argotunnel.com'
+            - 'protocol-v2.argotunnel.com'
+            - 'trycloudflare.com'
+            - 'update.argotunnel.com'
+    condition: selection
+falsepositives:
+    - Legitimate use of cloudflare tunnels will also trigger this.
+level: medium
