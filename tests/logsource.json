@@ -1,122 +1,132 @@
 {
     "title": "Field name by logsource",
-    "version": "20230113",
-    "legit":{
+    "version": "20240725",
+    "sigma":{
         "windows":{
             "common": ["EventID", "Provider_Name","Channel","Computer","Security_UserID"],
-            "empty": [],
-            "category":{
-                "process_creation": ["CommandLine", "Company", "CurrentDirectory", "Description", "FileVersion",
+            "addon":{
+                    "process_creation§none": ["GrandparentCommandLine"],
+                    "network_connection§none": ["CommandLine", "ParentImage"],
+                    "create_remote_thread§none": ["User", "SourceCommandLine", "SourceParentProcessId", "SourceParentImage",
+                                            "SourceParentCommandLine", "TargetCommandLine", "TargetParentProcessId", "TargetParentImage", "TargetParentCommandLine",
+                                            "IsInitialThread", "RemoteCreation"],
+                    "file_delete§none": ["CommandLine", "ParentImage", "ParentCommandLine"],
+                    "file_event§none": ["CommandLine", "ParentImage", "ParentCommandLine", "MagicHeader"],
+                    "image_load§none": ["CommandLine"],
+                    "process_access§none": ["SourceCommandLine", "CallTraceExtended"],
+                    "file_access§none":["Image", "CommandLine", "ParentImage", "ParentCommandLine", "User", "TargetFilename"],
+                    "file_rename§none":["Image", "CommandLine", "ParentImage", "ParentCommandLine", "User", "OriginalFileName", "SourceFilename", "TargetFilename", "MagicHeader"]
+                },
+            "specific": {
+                "none§none": [],
+                "process_creation§none": ["CommandLine", "Company", "CurrentDirectory", "Description", "FileVersion",
                                     "Hashes", "Image", "IntegrityLevel", "LogonGuid", "LogonId", "OriginalFileName",
                                     "ParentCommandLine", "ParentImage", "ParentProcessGuid", "ParentProcessId",
                                     "ParentUser", "ProcessGuid", "ProcessId", "Product", "TerminalSessionId", "User", "GrandParentImage"],
-                "file_change": ["CreationUtcTime", "Image", "PreviousCreationUtcTime", "ProcessGuid", "ProcessId", "TargetFilename", "User"],
-                "network_connection": ["DestinationHostname", "DestinationIp", "DestinationIsIpv6", "DestinationPort",
+                "file_change§none": ["CreationUtcTime", "Image", "PreviousCreationUtcTime", "ProcessGuid", "ProcessId", "TargetFilename", "User"],
+                "network_connection§none": ["DestinationHostname", "DestinationIp", "DestinationIsIpv6", "DestinationPort",
                                     "DestinationPortName", "Image", "Initiated", "ProcessGuid", "ProcessId", "Protocol", "SourceHostname",
                                     "SourceIp", "SourceIsIpv6", "SourcePort", "SourcePortName", "User", "ParentImage"],
-                "sysmon_status": ["Configuration", "ConfigurationFileHash", "SchemaVersion", "State", "Version"],
-                "process_termination":["Image", "ProcessGuid", "ProcessId", "User"],
-                "driver_load":["Hashes", "ImageLoaded", "Signature", "SignatureStatus", "Signed"],
-                "image_load":["Company", "Description", "FileVersion", "Hashes", "Image", "ImageLoaded", "OriginalFileName", "ProcessGuid",
-                            "ProcessId", "Product", "Signature", "SignatureStatus", "Signed", "User"],
-                "create_remote_thread":["NewThreadId", "SourceImage", "SourceProcessGuid", "SourceProcessId", "SourceUser", "StartAddress",
+                "sysmon_status§none": ["Configuration", "ConfigurationFileHash", "SchemaVersion", "State", "Version"],
+                "process_termination§none":["Image", "ProcessGuid", "ProcessId", "User"],
+                "driver_load§none":["Hashes", "ImageLoaded", "Signature", "SignatureStatus", "Signed"],
+                "image_load§none":["Company", "Description", "FileVersion", "Hashes", "Image", "ImageLoaded", "OriginalFileName", "ProcessGuid",
+                                    "ProcessId", "Product", "Signature", "SignatureStatus", "Signed", "User"],
+                "create_remote_thread§none":["NewThreadId", "SourceImage", "SourceProcessGuid", "SourceProcessId", "SourceUser", "StartAddress",
                                         "StartFunction", "StartModule", "TargetImage", "TargetProcessGuid", "TargetProcessId", "TargetUser"],
-                "raw_access_thread":["Device", "Image", "ProcessGuid", "ProcessId", "User"],
-                "process_access":["CallTrace", "GrantedAccess", "SourceImage", "SourceProcessGUID", "SourceProcessId", "SourceThreadId",
-                                "SourceUser", "TargetImage", "TargetProcessGUID", "TargetProcessId", "TargetUser"],
-                "raw_access_read":["CreationUtcTime", "Image", "ProcessGuid", "ProcessId", "TargetFilename", "User"],
-                "file_event":["ProcessGuid", "ProcessId", "Image", "TargetFilename", "CreationUtcTime", "User"],
-                "file_executable_detected":["ProcessGuid", "ProcessId", "Image", "TargetFilename", "Hashes", "User"],
-                "registry_add":["EventType", "ProcessGuid", "ProcessId", "Image", "TargetObject", "User"],
-                "registry_delete":["Details", "EventType", "Image", "ProcessGuid", "ProcessId", "TargetObject"],
-                "registry_set":["Details", "EventType", "Image", "ProcessGuid", "ProcessId", "TargetObject", "User"],
-                "registry_rename":["EventType", "Image", "NewName", "ProcessGuid", "ProcessId", "TargetObject", "User"],
-                "registry_event":["Details", "EventType", "Image", "NewName", "ProcessGuid", "ProcessId", "TargetObject", "User"],
-                "create_stream_hash":["Contents", "CreationUtcTime", "Hash", "Image", "ProcessGuid", "ProcessId", "TargetFilename", "User"],
-                "pipe_created":["EventType", "Image", "PipeName", "ProcessGuid", "ProcessId", "User"],
-                "wmi_event":["Consumer", "Destination", "EventNamespace", "EventType", "Filter", "Name", "Operation", "Query", "Type", "User"],
-                "dns_query":["Image", "ProcessGuid", "ProcessId", "QueryName", "QueryResults", "QueryStatus", "User"],
-                "file_delete":["Archived", "Hashes", "Image", "IsExecutable", "ProcessGuid", "ProcessId", "TargetFilename", "User"],
-                "clipboard_capture":["Archived", "ClientInfo", "Hashes", "Image", "ProcessGuid", "ProcessId", "Session", "User"],
-                "process_tampering":["Image", "ProcessGuid", "ProcessId", "Type", "User"],
-                "file_block":["Hashes", "Image", "ProcessGuid", "ProcessId", "TargetFilename", "User"],
-                "ps_module":["ContextInfo", "UserData", "Payload"],
-                "ps_script":["MessageNumber", "MessageTotal", "ScriptBlockText", "ScriptBlockId", "Path"],
-                "file_access":["Irp", "FileObject", "IssuingThreadId", "CreateOptions", "CreateAttributes", "ShareAccess", "FileName"],
-                "file_rename":["Irp", "FileObject", "FileKey", "ExtraInformation", "IssuingThreadId", "InfoClass", "FilePath"],
-                "ps_classic_start":[],
-                "ps_classic_provider_start":[],
-                "sysmon_error":[]
-            },
-            "service":{
-                "bitlocker": ["VolumeName", "VolumeMountPoint", "ProtectorGUID", "ProtectorType"],
-                "bits-client":["RemoteName", "LocalName", "processPath", "processId"],
-                "codeintegrity-operational":["FileNameLength", "FileNameBuffer", "ProcessNameLength", "ProcessNameBuffer",
+                "raw_access_thread§none":["Device", "Image", "ProcessGuid", "ProcessId", "User"],
+                "process_access§none":["CallTrace", "GrantedAccess", "SourceImage", "SourceProcessGUID", "SourceProcessId", "SourceThreadId",
+                                    "SourceUser", "TargetImage", "TargetProcessGUID", "TargetProcessId", "TargetUser"],
+                "raw_access_read§none":["CreationUtcTime", "Image", "ProcessGuid", "ProcessId", "TargetFilename", "User"],
+                "file_event§none":["ProcessGuid", "ProcessId", "Image", "TargetFilename", "CreationUtcTime", "User"],
+                "file_executable_detected§none":["ProcessGuid", "ProcessId", "Image", "TargetFilename", "Hashes", "User"],
+                "registry_add§none":["EventType", "ProcessGuid", "ProcessId", "Image", "TargetObject", "User"],
+                "registry_delete§none":["Details", "EventType", "Image", "ProcessGuid", "ProcessId", "TargetObject"],
+                "registry_set§none":["Details", "EventType", "Image", "ProcessGuid", "ProcessId", "TargetObject", "User"],
+                "registry_rename§none":["EventType", "Image", "NewName", "ProcessGuid", "ProcessId", "TargetObject", "User"],
+                "registry_event§none":["Details", "EventType", "Image", "NewName", "ProcessGuid", "ProcessId", "TargetObject", "User"],
+                "create_stream_hash§none":["Contents", "CreationUtcTime", "Hash", "Image", "ProcessGuid", "ProcessId", "TargetFilename", "User"],
+                "pipe_created§none":["EventType", "Image", "PipeName", "ProcessGuid", "ProcessId", "User"],
+                "wmi_event§none":["Consumer", "Destination", "EventNamespace", "EventType", "Filter", "Name", "Operation", "Query", "Type", "User"],
+                "dns_query§none":["Image", "ProcessGuid", "ProcessId", "QueryName", "QueryResults", "QueryStatus", "User"],
+                "file_delete§none":["Archived", "Hashes", "Image", "IsExecutable", "ProcessGuid", "ProcessId", "TargetFilename", "User"],
+                "clipboard_capture§none":["Archived", "ClientInfo", "Hashes", "Image", "ProcessGuid", "ProcessId", "Session", "User"],
+                "process_tampering§none":["Image", "ProcessGuid", "ProcessId", "Type", "User"],
+                "file_block§none":["Hashes", "Image", "ProcessGuid", "ProcessId", "TargetFilename", "User"],
+                "ps_module§none":["ContextInfo", "UserData", "Payload"],
+                "ps_script§none":["MessageNumber", "MessageTotal", "ScriptBlockText", "ScriptBlockId", "Path"],
+                "file_access§none":["Irp", "FileObject", "IssuingThreadId", "CreateOptions", "CreateAttributes", "ShareAccess", "FileName"],
+                "file_rename§none":["Irp", "FileObject", "FileKey", "ExtraInformation", "IssuingThreadId", "InfoClass", "FilePath"],
+                "ps_classic_start§none":[],
+                "ps_classic_provider_start§none":[],
+                "sysmon_error§none":[],
+                "none§bitlocker": ["VolumeName", "VolumeMountPoint", "ProtectorGUID", "ProtectorType"],
+                "none§bits-client":["RemoteName", "LocalName", "processPath", "processId"],
+                "none§codeintegrity-operational":["FileNameLength", "FileNameBuffer", "ProcessNameLength", "ProcessNameBuffer",
                                             "RequestedPolicy", "ValidatedPolicy", "Status"],
-                "diagnosis-scripted": ["PackagePath", "PackageId"],
-                "firewall-as":["Action", "ApplicationPath", "ModifyingApplication"],
-                "ldap":["ScopeOfSearch", "SearchFilter", "DistinguishedName", "AttributeList", "ProcessId"],
-                "ntlm":["CallerPID", "ClientDomainName", "ClientLUID", "ClientUserName", "DomainName", "MechanismOID",
+                "none§diagnosis-scripted": ["PackagePath", "PackageId"],
+                "none§firewall-as":["Action", "ApplicationPath", "ModifyingApplication"],
+                "none§ldap":["ScopeOfSearch", "SearchFilter", "DistinguishedName", "AttributeList", "ProcessId"],
+                "none§ntlm":["CallerPID", "ClientDomainName", "ClientLUID", "ClientUserName", "DomainName", "MechanismOID",
                         "ProcessName", "SChannelName", "SChannelType", "TargetName", "UserName", "WorkstationName"],
-                "openssh":["process", "payload"],
-                "security-mitigations":["ProcessPathLength", "ProcessPath", "ProcessCommandLineLength", "ProcessCommandLine",
+                "none§openssh":["process", "payload"],
+                "none§security-mitigations":["ProcessPathLength", "ProcessPath", "ProcessCommandLineLength", "ProcessCommandLine",
                                         "ProcessId", "ProcessCreateTime", "ProcessStartKey", "ProcessSignatureLevel",
                                         "ProcessSectionSignatureLevel", "ProcessProtection", "TargetThreadId", "TargetThreadCreateTime",
                                         "RequiredSignatureLevel", "SignatureLevel", "ImageNameLength", "ImageName"],
-                "shell-core":["Name", "AppID", "Flags"],
-                "smbclient-security":["Reason", "Status", "ShareNameLength", "ShareName", "ObjectNameLength", "ObjectName",
+                "none§shell-core":["Name", "AppID", "Flags"],
+                "none§smbclient-security":["Reason", "Status", "ShareNameLength", "ShareName", "ObjectNameLength", "ObjectName",
                                     "UserNameLength", "UserName", "ServerNameLength", "ServerName"],
-                "smbclient-connectivity":[],
-                "taskscheduler":["TaskName", "UserContext", "Path", "ProcessID", "Priority", "UserName"],
-                "terminalservices-localsessionmanager":["User", "SessionID", "Address"],
-                "iis":["date", "time", "c-ip", "cs-username", "s-sitename", "s-computername", "s-ip", "cs-method",
+                "none§smbclient-connectivity":[],
+                "none§taskscheduler":["TaskName", "UserContext", "Path", "ProcessID", "Priority", "UserName"],
+                "none§terminalservices-localsessionmanager":["User", "SessionID", "Address"],
+                "none§iis":["date", "time", "c-ip", "cs-username", "s-sitename", "s-computername", "s-ip", "cs-method",
                         "cs-uri-stem", "cs-uri-query", "s-port", "cs-method", "sc-status", "sc-win32-status",
                         "sc-bytes", "cs-bytes", "time-taken", "cs-version", "cs-host", "cs-user-agent",
                         "cs-referer", "cs-cookie"],
-                "application":[],
-                "sysmon":[],
-                "powershell":[],
-                "powershell-classic":[],
-                "security":[],
-                "system":[],
-                "windefend":[],
-                "wmi":[],
-                "microsoft-servicebus-client":[],
-                "printservice-operational":[],
-                "driver-framework":[],
-                "dns-server-analytic":[],
-                "dns-server":[],
-                "printservice-admin":[],
-                "msexchange-management":[],
-                "applocker":[],
-                "vhdmp":[],
-                "appxdeployment-server":["Path", "AppId", "FilePath", "ErrorCode", "DeploymentOperation", "PackageFullName", "PackageSourceUri", "PackageDisplayName", "CallingProcess"],
-                "appxpackaging-om":["subjectName"],
-                "lsa-server":["TargetUserSid", "TargetUserName", "TargetDomainName", "TargetLogonId", "TargetLogonGuid", "EventOrginal", "EventCountTotal", "SidList"],
-                "dns-client":["QueryName", "QueryType", "QueryOptions", "QueryStatus", "QueryResults", "NetworkIndex", "InterfaceIndex", "Status", "ClientPID", "QueryBlob", "DnsServerIpAddress", "ResponseStatus", "SendBlob", "SendBlobContext", "AddressLength", "Address"],
-                "appmodel-runtime":["ProcessID", "PackageName", "ImageName", "ApplicationName", "Message"],
-                "capi2":[],
-                "certificateservicesclient-lifecycle-system":[]
+                "none§application":[],
+                "none§sysmon":[],
+                "none§powershell":[],
+                "none§powershell-classic":[],
+                "none§security":[],
+                "none§system":[],
+                "none§windefend":[],
+                "none§wmi":[],
+                "none§microsoft-servicebus-client":[],
+                "none§printservice-operational":[],
+                "none§driver-framework":[],
+                "none§dns-server-analytic":[],
+                "none§dns-server":[],
+                "none§printservice-admin":[],
+                "none§msexchange-management":[],
+                "none§applocker":[],
+                "none§vhdmp":[],
+                "none§appxdeployment-server":["Path", "AppId", "FilePath", "ErrorCode", "DeploymentOperation", "PackageFullName", "PackageSourceUri", "PackageDisplayName", "CallingProcess"],
+                "none§appxpackaging-om":["subjectName"],
+                "none§lsa-server":["TargetUserSid", "TargetUserName", "TargetDomainName", "TargetLogonId", "TargetLogonGuid", "EventOrginal", "EventCountTotal", "SidList"],
+                "none§dns-client":["QueryName", "QueryType", "QueryOptions", "QueryStatus", "QueryResults", "NetworkIndex", "InterfaceIndex", "Status", "ClientPID", "QueryBlob", "DnsServerIpAddress", "ResponseStatus", "SendBlob", "SendBlobContext", "AddressLength", "Address"],
+                "none§appmodel-runtime":["ProcessID", "PackageName", "ImageName", "ApplicationName", "Message"],
+                "none§capi2":[],
+                "none§certificateservicesclient-lifecycle-system":[]
             }
         },
         "linux":{
             "common": [],
-            "empty": [],
-            "category":{
-                "process_creation": ["ProcessGuid", "ProcessId", "Image", "FileVersion", "Description", "Product", "Company", "OriginalFileName",
+            "addon": {},
+            "specific":{
+                "none§none": [],
+                "process_creation§none": ["ProcessGuid", "ProcessId", "Image", "FileVersion", "Description", "Product", "Company", "OriginalFileName",
                                     "CommandLine", "CurrentDirectory", "User", "LogonGuid", "LogonId", "TerminalSessionId", "IntegrityLevel", "Hashes",
                                     "ParentProcessGuid", "ParentProcessId", "ParentImage", "ParentCommandLine", "ParentUser"],
-                "network_connection": ["ProcessGuid", "ProcessId", "Image", "User", "Protocol", "Initiated", "SourceIsIpv6", "SourceIp", "SourceHostname",
+                "network_connection§none": ["ProcessGuid", "ProcessId", "Image", "User", "Protocol", "Initiated", "SourceIsIpv6", "SourceIp", "SourceHostname",
                                     "SourcePort", "SourcePortName", "DestinationIsIpv6", "DestinationIp", "DestinationHostname", "DestinationPort",
                                     "DestinationPortName"],
-                "process_termination": ["ProcessGuid", "ProcessId", "Image", "User"],
-                "raw_access_read": ["ProcessGuid", "ProcessId", "Image", "Device", "User"],
-                "file_event": ["ProcessGuid", "ProcessId", "Image", "TargetFilename", "CreationUtcTime", "User"],
-                "sysmon_status": ["Configuration", "ConfigurationFileHash"],
-                "file_delete": ["ProcessGuid", "ProcessId", "User", "Image", "TargetFilename", "Hashes", "IsExecutable", "Archived"]
-            },
-            "service":{
-                "auditd": ["a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9",
+                "process_termination§none": ["ProcessGuid", "ProcessId", "Image", "User"],
+                "raw_access_read§none": ["ProcessGuid", "ProcessId", "Image", "Device", "User"],
+                "file_event§none": ["ProcessGuid", "ProcessId", "Image", "TargetFilename", "CreationUtcTime", "User"],
+                "sysmon_status§none": ["Configuration", "ConfigurationFileHash"],
+                "file_delete§none": ["ProcessGuid", "ProcessId", "User", "Image", "TargetFilename", "Hashes", "IsExecutable", "Archived"],
+                "none§auditd": ["a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9",
                     "acct", "acl", "action", "added", "addr", "apparmor", "arch", "argc", "audit_backlog_limit", "audit_backlog_wait_time",
                     "audit_enabled", "audit_failure", "auid", "banners", "bool", "bus", "cap_fe,cap_fi", "cap_fp", "cap_fver", "cap_pa", "cap_pe", "cap_pi",
                     "cap_pp", "capability", "category", "cgroup", "changed", "cipher", "class", "cmd", "code", "comm", "compat", "cwd", "daddr", "data",
@@ -134,314 +144,266 @@
                     "scontext", "selected-context", "seperm", "seperms", "seqno", "seresult", "ses", "seuser", "sgid", "sig", "sigev_signo", "smac", "spid",
                     "sport", "state", "subj", "success", "suid", "syscall", "table", "tclass", "tcontext", "terminal", "tty", "type", "uid", "unit", "uri", "user",
                     "uuid", "val", "val", "ver", "virt", "vm", "vm-ctx", "vm-pid", "watch"],
-                "vsftpd":[],
-                "sshd":[],
-                "syslog":[],
-                "guacamole":[],
-                "auth":[],
-                "clamav":[],
-                "modsecurity":[],
-                "sudo":[],
-                "cron":[]
+                "none§vsftpd":[],
+                "none§sshd":[],
+                "none§syslog":[],
+                "none§guacamole":[],
+                "none§auth":[],
+                "none§clamav":[],
+                "none§modsecurity":[],
+                "none§sudo":[],
+                "none§cron":[]
             }
         },
-        "empty":{
+        "none":{
             "common": [],
-            "empty": ["not_found"],
-            "category":{
-                "proxy":["c-uri", "c-uri-extension", "c-uri-query", "c-uri-stem", "c-useragent", "cs-bytes", "cs-cookie",
+            "addon": {},
+            "specific":{
+                "proxy§none":["c-uri", "c-uri-extension", "c-uri-query", "c-uri-stem", "c-useragent", "cs-bytes", "cs-cookie",
                         "cs-host", "cs-method", "r-dns", "cs-referrer", "cs-version", "sc-bytes", "sc-status", "src_ip", "dst_ip",
                         "cs-uri"],
-                "webserver":["date", "time", "c-ip", "cs-username", "s-sitename", "s-computername", "s-ip", "cs-method",
+                "webserver§none":["date", "time", "c-ip", "cs-username", "s-sitename", "s-computername", "s-ip", "cs-method",
                             "cs-uri-stem", "cs-uri-query", "s-port", "cs-method", "sc-status", "sc-win32-status",
                             "sc-bytes", "cs-bytes", "time-taken", "cs-version", "cs-host", "cs-user-agent",
                             "cs-referer", "cs-cookie"],
-                "antivirus":[],
-                "database":[],
-                "dns":[],
-                "firewall":[]
-            },
-            "service":{
-                "apache":[],
-                "netflow":[],
-                "nginx":[]
+                "antivirus§none":[],
+                "database§none":[],
+                "dns§none":[],
+                "firewall§none":[],
+                "none§apache":[],
+                "none§netflow":[],
+                "none§nginx":[]
             }
         },
         "cisco":{
             "common": [],
-            "empty": [],
-            "category":{},
-            "service":{
-                "aaa":[],
-                "bgp":[],
-                "duo":[],
-                "ldp":[],
-                "syslog":[]
+            "addon":{},
+            "specific":{
+                "none§aaa":[],
+                "none§bgp":[],
+                "none§duo":[],
+                "none§ldp":[],
+                "none§syslog":[]
             }
         },
         "fortios":{
             "common": [],
-            "empty": [],
-            "category":{},
-            "service":{
-                "sslvpnd": []
+            "addon":{},
+            "specific":{
+                "none§sslvpnd": []
             }
         },
         "paloalto":{
             "common": [],
-            "empty": [],
-            "category":{
-                "file_event": []
-            },
-            "service":{
-                "globalprotect": []
+            "addon": {},
+            "specific":{
+                "file_event§none": [],
+                "none§globalprotect": [],
+                "file_event§globalprotect":[],
+                "appliance§globalprotect": []
             }
         },
         "django":{
             "common": [],
-            "empty": [],
-            "category":{
-                "application":[]
-            },
-            "service":{}
+            "addon": {},
+            "specific":{
+                "application§none":[]
+            }
         },
         "kubernetes":{
             "common": [],
-            "empty": [],
-            "category":{
-                "application":[]
-            },
-            "service":{
-                "audit": []
+            "addon": {},
+            "specific":{
+                "application§none":[],
+                "none§audit": [],
+                "application§audit": []
             }
         },
         "python":{
             "common": [],
-            "empty": [],
-            "category":{
-                "application":[]
-            },
-            "service":{}
+            "addon": {},
+            "specific":{
+                "application§none":[]
+            }
         },
         "qualys":{
             "common": [],
-            "empty": [],
-            "category":{
-                "application":[]
-            },
-            "service":{}
+            "addon": {},
+            "specific":{
+                "none§none": [],
+                "application§none":[]
+            }
         },
         "rpc_firewall":{
             "common": [],
-            "empty": [],
-            "category":{
-                "application":[]
-            },
-            "service":{}
+            "addon": {},
+            "specific":{
+                "application§none":[]
+            }
         },
         "ruby_on_rails":{
             "common": [],
-            "empty": [],
-            "category":{
-                "application":[]
-            },
-            "service":{}
+            "addon": {},
+            "specific":{
+                "application§none":[]
+            }
         },
         "modsecurity":{
             "common": [],
-            "empty": [],
-            "category":{
-                "application":[]
-            },
-            "service":{}
+            "addon": {},
+            "specific":{
+                "application§none":[]
+            }
         },
         "spring":{
             "common": [],
-            "empty": [],
-            "category":{
-                "application":[]
-            },
-            "service":{}
+            "addon": {},
+            "specific":{
+                "application§none":[]
+            }
         },
         "sql":{
             "common": [],
-            "empty": [],
-            "category":{
-                "application":[]
-            },
-            "service":{}
+            "addon": {},
+            "specific":{
+                "application§none":[]
+            }
         },
         "jvm":{
             "common": [],
-            "empty": [],
-            "category":{
-                "application":[]
-            },
-            "service":{}
+            "addon": {},
+            "specific":{
+                "application§none":[]
+            }
         },
         "nodejs":{
             "common": [],
-            "empty": [],
-            "category":{
-                "application":[]
-            },
-            "service":{}
+            "addon": {},
+            "specific":{
+                "application§none":[]
+            }
         },
         "opencanary":{
             "common": [],
-            "empty": [],
-            "category":{
-                "application":[]
-            },
-            "service":{}
+            "addon": {},
+            "specific":{
+                "application§none":[]
+            }
         },
         "velocity":{
             "common": [],
-            "empty": [],
-            "category":{
-                "application":[]
-            },
-            "service":{}
+            "addon": {},
+            "specific":{
+                "application§none":[]
+            }
         },
         "aws":{
             "common": [],
-            "empty": [],
-            "category":{},
-            "service":{
-                "cloudtrail":[]
+            "addon": {},
+            "specific":{
+                "none§cloudtrail":[]
             }
         },
         "azure":{
             "common": [],
-            "empty": [],
-            "category":{},
-            "service":{
-                "activitylogs":[],
-                "auditlogs":[],
-				"riskdetection":[],
-				"pim":[],
-                "signinlogs":[]
+            "addon": {},
+            "specific":{
+                "none§activitylogs":[],
+                "none§auditlogs":[],
+				"none§riskdetection":[],
+				"none§pim":[],
+                "none§signinlogs":[]
             }
         },
         "gcp":{
             "common": [],
-            "empty": [],
-            "category":{},
-            "service":{
-                "gcp.audit":[],
-                "google_workspace.admin":[]
+            "addon": {},
+            "specific":{
+                "none§gcp.audit":[],
+                "none§google_workspace.admin":[]
             }
         },
         "github":{
             "common": [],
-            "empty": [],
-            "category":{},
-            "service":{
-                "audit":[]
+            "addon": {},
+            "specific":{
+                "none§audit":[]
             }
         },
         "bitbucket":{
             "common": [],
-            "empty": [],
-            "category":{},
-            "service":{
-                "audit":[]
+            "addon": {},
+            "specific":{
+                "none§audit":[]
             }
         },
         "m365":{
             "common": [],
-            "empty": [],
-            "category":{},
-            "service":{
-                "audit":[],
-                "exchange":[],
-                "threat_detection":[],
-                "threat_management":[]
+            "addon": {},
+            "specific":{
+                "none§audit":[],
+                "none§exchange":[],
+                "none§threat_detection":[],
+                "none§threat_management":[]
             }
         },
         "okta":{
             "common": [],
-            "empty": [],
-            "category":{},
-            "service":{
-                "okta":[]
+            "addon": {},
+            "specific":{
+                "none§okta":[]
             }
         },
         "onelogin":{
             "common": [],
-            "empty": [],
-            "category":{},
-            "service":{
-                "onelogin.events":[]
+            "addon": {},
+            "specific":{
+                "none§onelogin.events":[]
             }
         },
         "huawei":{
             "common": [],
-            "empty": [],
-            "category":{},
-            "service":{
-                "bgp":[]
+            "addon": {},
+            "specific":{
+                "none§bgp":[]
             }
         },
         "juniper":{
             "common": [],
-            "empty": [],
-            "category":{},
-            "service":{
-                "bgp":[]
+            "addon": {},
+            "specific":{
+                "none§bgp":[]
             }
         },
         "zeek":{
             "common": [],
-            "empty": [],
-            "category":{
-            },
-            "service":{
-                "kerberos":[],
-                "smb_files":[],
-                "rdp":[],
-                "http":[],
-                "dns":[],
-                "dce_rpc":[],
-                "x509":[]
+            "addon": {},
+            "specific":{
+                "none§kerberos":[],
+                "none§smb_files":[],
+                "none§rdp":[],
+                "none§http":[],
+                "none§dns":[],
+                "none§dce_rpc":[],
+                "none§x509":[]
             }
         },
         "macos":{
             "common": [],
-            "empty": [],
-            "category":{
-                "process_creation": ["ProcessGuid", "ProcessId", "Image", "FileVersion", "Description", "Product", "Company", "OriginalFileName",
+            "addon": {},
+            "specific":{
+                "process_creation§none": ["ProcessGuid", "ProcessId", "Image", "FileVersion", "Description", "Product", "Company", "OriginalFileName",
                                     "CommandLine", "CurrentDirectory", "User", "LogonGuid", "LogonId", "TerminalSessionId", "IntegrityLevel", "Hashes",
                                     "ParentProcessGuid", "ParentProcessId", "ParentImage", "ParentCommandLine", "ParentUser"],
-                "network_connection": ["ProcessGuid", "ProcessId", "Image", "User", "Protocol", "Initiated", "SourceIsIpv6", "SourceIp", "SourceHostname",
+                "network_connection§none": ["ProcessGuid", "ProcessId", "Image", "User", "Protocol", "Initiated", "SourceIsIpv6", "SourceIp", "SourceHostname",
                                     "SourcePort", "SourcePortName", "DestinationIsIpv6", "DestinationIp", "DestinationHostname", "DestinationPort",
                                     "DestinationPortName"],
-                "process_termination": ["ProcessGuid", "ProcessId", "Image", "User"],
-                "raw_access_read": ["ProcessGuid", "ProcessId", "Image", "Device", "User"],
-                "file_event": ["ProcessGuid", "ProcessId", "Image", "TargetFilename", "CreationUtcTime", "User"],
-                "sysmon_status": ["Configuration", "ConfigurationFileHash"],
-                "file_delete": ["ProcessGuid", "ProcessId", "User", "Image", "TargetFilename", "Hashes", "IsExecutable", "Archived"]
-            },
-            "service":{
+                "process_termination§none": ["ProcessGuid", "ProcessId", "Image", "User"],
+                "raw_access_read§none": ["ProcessGuid", "ProcessId", "Image", "Device", "User"],
+                "file_event§none": ["ProcessGuid", "ProcessId", "Image", "TargetFilename", "CreationUtcTime", "User"],
+                "sysmon_status§none": ["Configuration", "ConfigurationFileHash"],
+                "file_delete§none": ["ProcessGuid", "ProcessId", "User", "Image", "TargetFilename", "Hashes", "IsExecutable", "Archived"]
             }
-        }    
-    },
-    "addon":{
-        "windows":{
-            "category":{
-                "process_creation": ["GrandparentCommandLine"],
-                "network_connection": ["CommandLine", "ParentImage"],
-                "create_remote_thread": ["User", "SourceCommandLine", "SourceParentProcessId", "SourceParentImage",
-                                    "SourceParentCommandLine", "TargetCommandLine", "TargetParentProcessId", "TargetParentImage", "TargetParentCommandLine",
-                                    "IsInitialThread", "RemoteCreation"],
-                "file_delete": ["CommandLine", "ParentImage", "ParentCommandLine"],
-                "file_event": ["CommandLine", "ParentImage", "ParentCommandLine", "MagicHeader"],
-                "image_load": ["CommandLine"],
-                "process_access": ["SourceCommandLine", "CallTraceExtended"],
-                "file_access":["Image", "CommandLine", "ParentImage", "ParentCommandLine", "User", "TargetFilename"],
-                "file_rename":["Image", "CommandLine", "ParentImage", "ParentCommandLine", "User", "OriginalFileName", "SourceFilename", "TargetFilename", "MagicHeader"]
-            },
-            "service":{}
         }
     }
 }
