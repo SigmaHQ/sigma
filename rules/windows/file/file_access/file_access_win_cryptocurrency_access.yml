@@ -1,16 +1,14 @@
-title: Access To Browser Credential Files By Uncommon Application
-id: 91cb43db-302a-47e3-b3c8-7ede481e27bf
+title: Access To Cryptocurrency Files By Uncommon Application
+id: f41b0311-44f9-44f0-816d-dd45e39d4bc8
 status: experimental
 description: |
-    Detects file access requests to browser credential stores by uncommon processes.
-    Could indicate potential attempt of credential stealing.
+    Detects file access requests to cryptocurrency files by uncommon processes.
+    Could indicate potential attempt of cryptocurrency stealing.
     Requires heavy baselining before usage
 references:
-    - https://www.zscaler.com/blogs/security-research/ffdroider-stealer-targeting-social-media-platform-users
-    - https://github.com/lclevy/firepwd
-author: frack113, X__Junior
-date: 2022/04/09
-modified: 2023/12/18
+    -  Internal Research
+author: X__Junior
+date: 2024/07/26
 tags:
     - attack.t1003
     - attack.credential_access
@@ -19,20 +17,19 @@ logsource:
     product: windows
     definition: 'Requirements: Microsoft-Windows-Kernel-File ETW provider'
 detection:
-    selection_ie:
-        FileName|endswith: '\Appdata\Local\Microsoft\Windows\WebCache\WebCacheV01.dat'
-    selection_firefox:
-        FileName|endswith:
-            - '\cookies.sqlite'
-            - 'release\key3.db'  # Firefox
-            - 'release\key4.db'  # Firefox
-            - 'release\logins.json' # Firefox
-            - '\Mozilla\Firefox\Profiles'
-            - '\places.sqlite'
-    selection_chromium:
+    selection_cryptocurrency:
         FileName|contains:
-            - '\User Data\Local State'
-            - '\User Data\Default\Login Data'
+            - '\AppData\Roaming\Bitcoin\wallet.dat'
+            - '\AppData\Roaming\Litecoin\wallet.dat'
+            - '\AppData\Roaming\DogeCoin\wallet.dat'
+            - '\AppData\Roaming\DashCore\wallet.dat'
+            - '\AppData\Roaming\Zcash\wallet.dat'
+            - '\AppData\Roaming\Ripple\wallet.dat'
+            - '\AppData\Roaming\BitcoinABC\wallet.dat'
+            - '\AppData\Roaming\BitcoinSV\wallet.dat'
+            - '\AppData\Roaming\Ethereum\keystore\'
+            - '\AppData\Roaming\EthereumClassic\keystore\'
+            - '\AppData\Roaming\monero\wallets\'
     filter_main_system:
         Image: System
     filter_main_generic:
@@ -47,10 +44,6 @@ detection:
         Image|endswith:
             - '\MpCopyAccelerator.exe'
             - '\MsMpEng.exe'
-    filter_optional_thor:
-        Image|endswith:
-            - '\thor64.exe'
-            - '\thor.exe'
     condition: 1 of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Antivirus, Anti-Spyware, Anti-Malware Software
