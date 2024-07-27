@@ -1,0 +1,26 @@
+title: IIS Remove ETW Logging
+id: a5b40a90-baf5-4bf7-a6f7-373494881d22
+status: experimental
+description: Detects change of the configuration to remove ETW Logging.
+references:
+    - https://learn.microsoft.com/en-us/iis/manage/provisioning-and-managing-iis/configure-logging-in-iis
+    - https://www.microsoft.com/en-us/security/blog/2022/12/12/iis-modules-the-evolution-of-web-shells-and-how-to-detect-them/
+author: frack113
+date: 2024/07/27
+tags:
+    - attack.defense_evasion
+    - attack.t1562.002
+    - attack.t1505.004
+logsource:
+    product: windows
+    service: iis-configuration
+detection:
+    selection:
+        EventID: 29
+        Configuration|endswith: "@logTargetW3C"
+    filter:
+        NewValue|contains: "ETW"
+    condition: selection and not filter
+falsepositives:
+    - Legitimate administrator activity
+level: high

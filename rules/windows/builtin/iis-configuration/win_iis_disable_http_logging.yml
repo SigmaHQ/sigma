@@ -1,0 +1,25 @@
+title: IIS Disable HTTP Logging
+id: e8ebd53a-30c2-45bd-81bb-74befba07bdb
+status: experimental
+description: Detects change of the configuration to remove HTTP Logging
+references:
+    - https://learn.microsoft.com/en-us/iis/manage/provisioning-and-managing-iis/configure-logging-in-iis
+    - https://www.microsoft.com/en-us/security/blog/2022/12/12/iis-modules-the-evolution-of-web-shells-and-how-to-detect-them/
+author: frack113
+date: 2024/07/27
+tags:
+    - attack.defense_evasion
+    - attack.t1562.002
+    - attack.t1505.004
+logsource:
+    product: windows
+    service: iis-configuration
+detection:
+    selection:
+        EventID: 29
+        Configuration: "/system.webServer/httpLogging/@dontLog"
+        NewValue: "true"
+    condition: selection
+falsepositives:
+    - Legitimate administrator activity
+level: high
