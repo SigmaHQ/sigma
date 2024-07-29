@@ -1,4 +1,4 @@
-title: Access To Windows Credential History File By Uncommon Application
+title: Access To Windows Credential History File By Uncommon Applications
 id: 7a2a22ea-a203-4cd3-9abf-20eb1c5c6cd2
 status: experimental
 description: |
@@ -9,7 +9,7 @@ references:
     - https://www.passcape.com/windows_password_recovery_dpapi_credhist
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022/10/17
-modified: 2023/12/18
+modified: 2024/07/29
 tags:
     - attack.credential_access
     - attack.t1555.004
@@ -21,13 +21,13 @@ detection:
     selection:
         FileName|endswith: '\Microsoft\Protect\CREDHIST'
     filter_main_system_folders:
-        Image|contains:
-            - ':\Program Files\'
-            - ':\Program Files (x86)\'
-            - ':\Windows\system32\'
-            - ':\Windows\SysWOW64\'
+        Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Windows\system32\'
+            - 'C:\Windows\SysWOW64\'
     filter_main_explorer:
-        Image|endswith: ':\Windows\explorer.exe'
+        Image: 'C:\Windows\explorer.exe'
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown

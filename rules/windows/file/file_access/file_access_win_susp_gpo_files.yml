@@ -1,4 +1,4 @@
-title: Access To Potentially Sensitive Sysvol Files By Uncommon Application
+title: Access To Potentially Sensitive Sysvol Files By Uncommon Applications
 id: d51694fe-484a-46ac-92d6-969e76d60d10
 related:
     - id: 8344c19f-a023-45ff-ad63-a01c5396aea0
@@ -9,6 +9,7 @@ references:
     - https://github.com/vletoux/pingcastle
 author: frack113
 date: 2023/12/21
+modified: 2024/07/29
 tags:
     - attack.credential_access
     - attack.t1552.006
@@ -34,11 +35,12 @@ detection:
             - 'services.xml'
     filter_main_generic:
         Image|startswith:
-            - ':\Program Files (x86)\'
-            - ':\Program Files\'
-            - ':\Windows\explorer.exe'
-            - ':\Windows\system32\'
-            - ':\Windows\SysWOW64\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
+            - 'C:\Windows\system32\'
+            - 'C:\Windows\SysWOW64\'
+    filter_main_explorer:
+        Image: 'C:\Windows\explorer.exe'
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
