@@ -1,4 +1,4 @@
-title: Winscp CLI Command To Open Connexion
+title: Winscp CLI Command To Open FTP Connexion
 id: c1477deb-37cf-4439-9ffb-44499acb89d0
 status: experimental
 description: Use Winscp command cli option to open a connexion
@@ -9,6 +9,7 @@ date: 2024/07/30
 tags:
     - attack.exfiltration
     - attack.t1048
+    - detection.threat_hunting
 logsource:
     category: process_creation
     product: windows
@@ -18,7 +19,9 @@ detection:
         - OriginalFileName: 'winscp.exe'
     selection_cmd:
         CommandLine|contains|windash: '-command'
-        CommandLine|contains: 'open '
+        CommandLine|contains|all: 
+            - 'open '
+            - 'ftp://' #cover ftp and sftp
     condition: all of selection_*
 falsepositives:
     - Unknown
