@@ -1,0 +1,29 @@
+title: Suspicious Process Masquerading as Svchost
+id: be58d2e2-06c8-4f58-b666-b99f6dc3b6cd
+status: experimental
+description: |
+    This rule identifies any suspicious process that is masquerading as svchost.exe.
+    Adversaries often disguise their malicious binaries by naming them after legitimate system processes like svchost.exe to evade detection.
+references:
+    - https://tria.ge/240731-jh4crsycnb/behavioral2
+    - https://redcanary.com/blog/threat-detection/process-masquerading/
+author: Swachchhanda Shrawan Poudel
+date: 2024/08/03
+tags:
+    - attack.defense_evasion
+    - attack.t1036.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+      Image|endswith: '\svchost.exe'
+    filter:
+      - Image|contains:
+          - '\Windows\System32\' # C:\WINDOWS\system32\random\svchost.exe will evade this logic
+          - '\Windows\SysWOW64\'
+      - OriginalFileName: 'svchost.exe'
+    condition: selection_image and not filter
+falsepositives:
+    - Unknown
+level: critical
