@@ -3,7 +3,9 @@ id: f1eedc32-6e46-4ee0-aab5-29d0a078d409
 status: experimental
 description: Detects registry modification to enable Outlook webview homepage. Red Team technique presented by TrustedSec, used with their Specula framework.
 references:
-    - https://trustedsec.com/blog/specula-turning-outlook-into-a-c2-with-one-registry-change
+    - https://
+trustedsec.com
+/blog/specula-turning-outlook-into-a-c2-with-one-registry-change
 author: David Bertho (@dbertho) & Eirik Sveen (@0xSV1), Storebrand
 date: 2024/07/31
 tags:
@@ -13,14 +15,14 @@ tags:
     - attack.t1133
 logsource:
     product: windows
-    category: registry_event
+    category: registry_set
 detection:
     selection:
-        EventType: CreateKey
+        EventType: SetValue
         TargetObject|contains:
-        - '\Outlook\Today'
-        - '\Outlook\WebView'
+            - '\\Outlook\\Today'
+            - '\\Outlook\\WebView'
         TargetObject|endswith: 'URL'
     condition: selection
-falsepositives: Unlikely, feature rarely used
+falsepositives: Unlikely, possible valid URLs set for the Outlook homepage.
 level: high
