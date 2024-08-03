@@ -1,0 +1,22 @@
+title: DNS Query To Put.io
+id: 0f3b3b7d-4b7b-4b7b-8b7b-7b7b7b7b7b7b
+status: experimental
+description: Detects DNS queries for subdomains related to Put.io sharing website
+references:
+    - https://darkatlas.io/blog/medusa-ransomware-group-opsec-failure
+author: Omar Khaled (@beacon_exe)
+date: 2024/08/03
+logsource:
+    product: windows
+    service: dns-client
+    definition: 'Requirements: Microsoft-Windows-DNS Client Events/Operational Event Log must be enabled/collected in order to receive the events.'
+detection:
+    selection:
+        EventID: 3008
+        QueryName|contains:
+            - 'api.put.io'
+            - 'upload.put.io'
+    condition: selection
+falsepositives:
+    - Legitimate DNS queries and usage of Put.io
+level: medium
