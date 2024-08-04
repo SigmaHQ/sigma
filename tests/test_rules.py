@@ -1257,7 +1257,6 @@ class TestRules(unittest.TestCase):
             faulty_rules, [], Fore.RED + "There are rules using illegal re-escapes"
         )
 
-
     # def test_confirm_extension_is_yml(self):
     # files_with_incorrect_extensions = []
 
@@ -1411,7 +1410,7 @@ class TestRules(unittest.TestCase):
     #         faulty_rules,
     #         [],
     #         Fore.RED
-    #         + "There are rules with malformed 'modified' fields. (create one, e.g. date: 2019/01/14)",
+    #         + "There are rules with malformed 'modified' fields. (create one, e.g. date: 2019-01-14)",
     #     )
 
     # sigma-cli error and validator status_existence status_unsupported
@@ -1654,7 +1653,7 @@ class TestRules(unittest.TestCase):
     #         Fore.RED
     #         + "There are rules with unknown value modifiers. Most often it is just a typo.",
     #     )
-    
+
     # sigma error and validator attacktag,cartag,cvetag,detection_tag,stptag,tlptag
     # def test_optional_tags(self):
     #     files_with_incorrect_tags = []
@@ -1783,7 +1782,7 @@ class TestRules(unittest.TestCase):
     #         faulty_rules,
     #         [],
     #         Fore.RED
-    #         + "There are rules with missing or malformed 'date' fields. (create one, e.g. date: 2019/01/14)",
+    #         + "There are rules with missing or malformed 'date' fields. (create one, e.g. date: 2019-01-14)",
     #     )
 
     # sigma validators description_existence description_length
@@ -1894,7 +1893,6 @@ class TestRules(unittest.TestCase):
     #         Fore.RED
     #         + "There are rules with malformed optional 'falsepositives' fields. (has to be a list of values even if it contains only a single value)",
     #     )
-
 
     # sigma error
     # # Upgrade Detection Rule License  1.1
