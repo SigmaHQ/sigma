@@ -1,0 +1,33 @@
+title: Uncommon Web Browser Parent Process
+id: 7b18de5f-2a17-42d8-8a2a-df6243a7a97d
+status: experimental
+description: Detects when browser process is launched by a script executing process(script host) that rarely launches browser processes.This technique has been spotted in phishing campaigns using double extension email attachments.
+references:
+    - https://app.any.run/tasks/fcdf6d63-0cb8-4047-9966-dc276ed5a640/
+author: Joseph Kamau
+date: 2024/07/12
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        ParentImage|endswith:
+            - \wscript.exe
+            - \cscript.exe
+            - \jscript.exe
+        Image|endswith:
+            - \msedge.exe
+            - \brave.exe
+            - \firefox.exe
+            - \vivaldi.exe
+            - \chrome.exe
+            - \maxthon.exe
+            - \seamonkey.exe
+            - \opera.exe
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
