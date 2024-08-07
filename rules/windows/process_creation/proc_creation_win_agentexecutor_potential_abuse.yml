@@ -20,8 +20,6 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    filter_intune:
-        ParentImage: 'Microsoft.Management.Services.IntuneWindowsAgent.exe'
     selection_img:
         - Image: '\AgentExecutor.exe'
         - OriginalFileName: 'AgentExecutor.exe'
@@ -37,7 +35,9 @@ detection:
         CommandLine|contains:
             - ' -powershell' # Also covers the "-powershellDetection" flag
             - ' -remediationScript'
-    condition: all of selection_* and not filter_intune
+    filter_main_intune:
+        ParentImage|endswith: '\Microsoft.Management.Services.IntuneWindowsAgent.exe'
+    condition: all of selection_* and not 1 of filter_main_*
 falsepositives:
     - Legitimate use via Intune management. You exclude script paths and names to reduce FP rate
 level: medium
