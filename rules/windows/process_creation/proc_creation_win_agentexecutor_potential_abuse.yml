@@ -12,6 +12,7 @@ references:
     - https://learn.microsoft.com/en-us/mem/intune/apps/intune-management-extension
     - https://twitter.com/jseerden/status/1247985304667066373/photo/1
 date: 2022/12/24
+modified: 2024/08/07
 tags:
     - attack.defense_evasion
     - attack.t1218
@@ -19,6 +20,8 @@ logsource:
     category: process_creation
     product: windows
 detection:
+    filter_intune:
+        ParentImage: 'Microsoft.Management.Services.IntuneWindowsAgent.exe'
     selection_img:
         - Image: '\AgentExecutor.exe'
         - OriginalFileName: 'AgentExecutor.exe'
@@ -34,7 +37,7 @@ detection:
         CommandLine|contains:
             - ' -powershell' # Also covers the "-powershellDetection" flag
             - ' -remediationScript'
-    condition: all of selection_*
+    condition: all of selection_* and not filter_intune
 falsepositives:
     - Legitimate use via Intune management. You exclude script paths and names to reduce FP rate
 level: medium
