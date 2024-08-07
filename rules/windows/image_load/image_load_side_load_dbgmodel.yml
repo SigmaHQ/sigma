@@ -6,7 +6,7 @@ references:
     - https://hijacklibs.net/entries/microsoft/built-in/dbgmodel.html
 author: Gary Lobermier
 date: 2024/07/11
-modified: 2024/07/22
+modified: 2024/08/06
 tags:
     - attack.defense_evasion
     - attack.t1574.002
@@ -27,6 +27,8 @@ detection:
         ImageLoaded|startswith:
             - 'C:\Program Files (x86)\Windows Kits\'
             - 'C:\Program Files\Windows Kits\'
+    filter_optional_dell_instrumentation:
+        ImageLoaded|startswith: 'C:\Program Files\Dell\DTP\InstrumentationSubAgent\'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate applications loading their own versions of the DLL mentioned in this rule
