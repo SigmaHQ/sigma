@@ -1,12 +1,18 @@
-title: Potential Persistence Via Outlook Today Pages
+title: Potential Persistence Via Outlook Today Page
 id: 487bb375-12ef-41f6-baae-c6a1572b4dd1
+related:
+    - id: ddd171b5-2cc6-4975-9e78-f0eccd08cc76
+      type: similar
 status: test
-description: Detects potential persistence activity via outlook today pages. An attacker can set a custom page to execute arbitrary code and link to it via the registry key "UserDefinedUrl".
+description: |
+    Detects potential persistence activity via outlook today page.
+    An attacker can set a custom page to execute arbitrary code and link to it via the registry values "URL" and "UserDefinedUrl".
 references:
     - https://speakerdeck.com/heirhabarov/hunting-for-persistence-via-microsoft-exchange-server-or-outlook?slide=74
-author: Tobias Michalski (Nextron Systems)
+    - https://trustedsec.com/blog/specula-turning-outlook-into-a-c2-with-one-registry-change
+author: Tobias Michalski (Nextron Systems), David Bertho (@dbertho) & Eirik Sveen (@0xSV1), Storebrand
 date: 2021/06/10
-modified: 2023/08/17
+modified: 2024/08/07
 tags:
     - attack.persistence
     - attack.t1112
@@ -19,18 +25,18 @@ detection:
             - 'Software\Microsoft\Office\'
             - '\Outlook\Today\'
     selection_value_stamp:
-        TargetObject|endswith: 'Stamp'
+        TargetObject|endswith: '\Stamp'
         Details: 'DWORD (0x00000001)'
-    selection_value_user_defined:
-        TargetObject|endswith: 'UserDefinedUrl'
-    filter_office:
+    selection_value_url:
+        TargetObject|endswith:
+            - '\URL'
+            - '\UserDefinedUrl'
+    filter_main_office:
         Image|startswith:
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
         Image|endswith: '\OfficeClickToRun.exe'
-    condition: selection_main and 1 of selection_value_* and not 1 of filter_*
-fields:
-    - Details
+    condition: selection_main and 1 of selection_value_* and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high
