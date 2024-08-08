@@ -8,10 +8,11 @@ path_to_rules = [
     "rules-threat-hunting",
     "rules-compliance",
 ]
+nb_days = 300
 
 
 def get_rules_to_promote():
-    today = datetime.today().strftime("%Y/%m/%d")
+    today = datetime.now().date()
     rules_to_promote = []
 
     rule_paths = SigmaCollection.resolve_paths(path_to_rules)
@@ -21,12 +22,8 @@ def get_rules_to_promote():
             last_update = (
                 sigmaHQrule.modified if sigmaHQrule.modified else sigmaHQrule.date
             )
-            last_update = last_update.strftime("%Y/%m/%d")
-            difference = (
-                datetime.strptime(today, "%Y/%m/%d")
-                - datetime.strptime(last_update, "%Y/%m/%d")
-            ).days
-            if difference >= 300:
+            difference = (today - last_update).days
+            if difference >= nb_days:
                 rules_to_promote.append(sigmaHQrule.source.path)
 
     return rules_to_promote
