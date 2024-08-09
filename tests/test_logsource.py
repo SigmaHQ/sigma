@@ -98,49 +98,39 @@ class TestRules(unittest.TestCase):
         )
 
 
-def load_fields_json(name: str):
-    data_ng = {}
-    file_path = os.path.abspath(os.path.dirname(__file__)) + "/" + name
+def load_fields_json(json_name: str):
+    field_info = {}
+    common_info={}
+    addon_info= {}
+
+    file_path = os.path.abspath(os.path.dirname(__file__)) + "/" + json_name
     with open(file_path, "r", encoding="UTF-8") as file:
         json_dict = json.load(file)
 
-    # build logsource
-    for product in json_dict["sigma"]:
-        l_product = None if product == "none" else product
-        common = json_dict["sigma"][product]["common"]
-        addon = json_dict["sigma"][product]["addon"]
-        for key in json_dict["sigma"][product]["specific"]:
-            fields = json_dict["sigma"][product]["specific"][key]
-            # need to keep [] to bypass field name test
-            if len(fields) > 0:
-                fields += common
+    for key in json_dict["common"]:
+        info=json_dict["common"][key]
+        logsource = SigmaLogSource(product=info["product"], category=info["category"], service=info["service"])
+        common_info[logsource]= info["data"]
 
-            if key in addon:
-                fields += addon[key]
+    for key in json_dict["addon"]:
+        info=json_dict["addon"][key]
+        logsource = SigmaLogSource(product=info["product"], category=info["category"], service=info["service"])
+        addon_info[logsource]= info["data"]
 
-            if "Hashes" in fields or "Hash" in fields:
-                fields += [
-                    "md5",
-                    "sha1",
-                    "sha256",
-                    "Imphash",
-                ]
+    for key in json_dict["field"]:
+        info=json_dict["field"][key]
+        logsource = SigmaLogSource(product=info["product"], category=info["category"], service=info["service"])
+        field_info[logsource] = info["data"]
 
-            try:
-                category, service = key.split("§")
-            except:
-                print(f"can not split {key}")
-                raise
-
-            l_category = None if category == "none" else category
-            l_service = None if service == "none" else service
-            data_ng[
-                SigmaLogSource(
-                    product=l_product, category=l_category, service=l_service
-                )
-            ] = fields
-
-    return data_ng
+        if len(info["data"]) > 0:
+            if logsource.product and SigmaLogSource(product=logsource.product) in common_info:
+                field_info[logsource] += common_info[ SigmaLogSource(product=logsource.product)]
+            if logsource in addon_info:
+                field_info[logsource] += addon_info[logsource]
+            if "Hashes" in info["data"] or "Hash" in info["data"]:
+                field_info[logsource]+= ["md5","sha1","sha256","Imphash"]
+ 
+    return field_info
 
 
 if __name__ == "__main__":
