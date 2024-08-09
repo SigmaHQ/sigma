@@ -44,4 +44,4 @@ Link the fixed issues here, in case your commit fixes issues with rules or code
 
 ### SigmaHQ Rule Creation Conventions
 
-- If your PR adds new rules, please consider following and applying these [conventions](https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/sigmahq_conventions.md)
+- If your PR adds new rules, please consider following and applying these [conventions](https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/)
