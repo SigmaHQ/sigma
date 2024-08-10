@@ -1,0 +1,40 @@
+title: Raspberry Robin initial execution from external drive
+id: 2c6bea3a-ef58-4f2e-a775-4928f6b7c58a
+description: Detects execution from the external drive using cmd
+status: experimental
+date: 2022/05/6
+author: \@kostastsale
+references:
+    - https://redcanary.com/blog/raspberry-robin/
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        ParentImage|endswith:
+            - '*\cmd.exe'
+        ParentCommandLine|contains:
+            - '/r'
+        Image|endswith:
+            - '*\msiexec.exe'
+        CommandLine|contains:
+            - '/q'
+            - '-q'
+    selection2:
+        CommandLine|contains:
+            - 'http:'
+            - 'https:'
+        ParentCommandLine|endswith:
+            - '.usb'
+            - '.ico'
+            - '.lnk'
+            - '.bin'
+            - '.sv'
+            - '.lo'
+    condition: selection1 and selection2
+falsepositives:
+    - Unlikely
+level: high
+tags:
+    - attack.execution
+    - attack.T1059.001

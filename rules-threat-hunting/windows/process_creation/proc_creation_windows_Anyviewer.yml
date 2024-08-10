@@ -1,0 +1,26 @@
+title: Detection of CMD Execution via AnyViewer RMM
+id: bc533330-fc29-44c0-b245-7dc6e5939c87
+status: experimental
+description: Detects cmd shell execution via AnyViewer RMM agent on remote management sessions.
+references:
+  - https://www.anyviewer.com/help/remote-technical-support.html
+author: '@kostastsale'
+date: 2024/08/03
+tags:
+  - attack.execution
+  - attack.persistence
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith:
+      - '\cmd.exe'
+    ParentImage|endswith:
+      - '\AVCore.exe'
+    ParentCommandLine|contains|all:
+      - 'AVCore.exe" -d'
+  condition: selection
+falsepositives:
+  - Legitimate use for admin activity.
+level: medium

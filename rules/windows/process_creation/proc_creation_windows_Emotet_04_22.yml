@@ -1,0 +1,34 @@
+title: Emotet loader execution via .lnk file
+id: 1f32d820-1d5c-43fe-8fe2-feef0c952eb7
+description: Detects the latest emotet loader as reported by @malware_traffic. The .lnk file was delivered via phishing campaign.
+status: experimental
+date: 2022/04/22
+author: \@kostastsale
+references:
+    - https://twitter.com/malware_traffic/status/1517622327000846338
+    - https://twitter.com/Cryptolaemus1/status/1517634855940632576
+    - https://tria.ge/220422-1pw1pscfdl/
+    - https://tria.ge/220422-1nnmyagdf2/
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        ParentImage: 
+          - '*\cmd.exe'
+          - '*\powershell.exe'
+          - '*\explorer.exe'
+        Image: 
+          - '*\cmd.exe'
+          - '*\powershell.exe'
+        CommandLine|contains|all:
+          - 'findstr'
+          - '.vbs'
+          - '.lnk'
+    condition: selection1
+falsepositives:
+    - Unlikely
+level: high
+tags:
+    - attack.execution
+    - attack.T1059.006

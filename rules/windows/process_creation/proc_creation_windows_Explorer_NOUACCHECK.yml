@@ -1,0 +1,29 @@
+title: Explorer UAC Bypass Via /NOUACCHECK Parameter
+id: c284e98e-a2a6-4917-aeb9-7159c6283e05
+description: Detects possible attempt to circumvent the User Account Control (UAC) by executing Windows Explorer to spawn a command line interpreter process without triggering UAC prompts.
+status: experimental
+date: 2023/07/16
+author: \@kostastsale
+references:
+    - 
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        CommandLine|contains:
+            - ' /nouaccheck '
+        ParentImage|endswith:
+            - '\explorer.exe'
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\powershell_ise.exe'
+            - '\cmd.exe'
+    condition: selection1
+falsepositives:
+    - Unlikely
+level: high
+tags:
+    - attack.privilege_escalation
+    - attack.T1548.002

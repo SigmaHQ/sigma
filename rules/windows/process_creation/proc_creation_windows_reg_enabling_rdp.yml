@@ -1,0 +1,48 @@
+title:  Enabling RDP service via reg.exe command execution
+id: afed5f7a-362a-46c2-8cc3-38a2e96b07b1
+status: Experimental
+description: Detects the execution of reg.exe and subsequent command line arguments for enabling RDP service on the host 
+author: '@Kostastsale, @TheDFIRReport'
+references: 
+  - https://thedfirreport.com/2022/02/21/qbot-and-zerologon-lead-to-full-domain-compromise/
+date: 2022/02/12
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection1:
+    Image|endswith: 
+      - '\reg.exe'
+    CommandLine|contains|all:
+      - 'add'
+      - 'HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server'
+      - 'REG_DWORD'
+  Winstations1:
+    CommandLine|contains:
+      - 'WinStations\RDP-Tcp'
+  Winstations2:
+    CommandLine|contains:
+      - 'MaxInstanceCount'
+      - 'fEnableWinStation'
+  selection2:
+    CommandLine|contains|all:
+      - 'Licensing Core'
+      - 'EnableConcurrentSessions'
+  selection3:
+    CommandLine|contains:
+      - 'TSUserEnabled'
+      - 'TSEnabled'
+      - 'TSAppCompat'
+      - 'IdleWinStationPoolCount'
+      - 'TSAdvertise'
+      - 'AllowTSConnections'
+      - 'fSingleSessionPerUser'
+  condition: selection1 and ((Winstations1 and Winstations2) or (selection2 or selection3))
+falsepositives:
+  - Uknown
+level: high
+tags:
+  - attack.defense_evasion
+  - attack.lateral_movement
+  - attack.t1021.001
+  - attack.t1112

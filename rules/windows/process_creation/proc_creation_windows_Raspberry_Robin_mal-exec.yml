@@ -1,0 +1,42 @@
+title: Raspberry Robin subsequent execution of commands
+id: d52d2e87-eb03-4fac-961d-eb616da79788
+description: Detects raspberry robin subsequent execution of commands from  
+status: experimental
+date: 2022/05/06
+author: \@kostastsale
+references:
+    - https://redcanary.com/blog/raspberry-robin/
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        ParentImage|endswith:
+            - '*\fodhelper.exe'
+        Image|endswith:
+            - '*\rundll32.exe'
+            - '*\regsvr32.exe'
+        CommandLine|contains|all:
+            - 'shellexec_rundll'
+            - 'regsvr'
+            - 'odbcconf.exe'
+    selection2:
+        CommandLine|endswith:
+            - '-a'
+            - '/a'
+            - '-f'
+            - '/f'
+            - '-s'
+            - '/s'
+    selection3:
+        CommandLine|contains:
+            - 'vkipdse'
+            - 'setfiledsndir'
+            - 'installdriver'
+    condition: selection1 and selection2 and selection3
+falsepositives:
+    - Unlikely
+level: high
+tags:
+    - attack.execution
+    - attack.T1059.001

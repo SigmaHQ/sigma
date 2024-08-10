@@ -1,0 +1,33 @@
+title: Onenote execution of malicious embedded scripts
+id: 84b1706c-932a-44c4-ae28-892b28a25b94
+description: Detects the execution of malicious OneNote documents that contain embedded scripts. When a user clicks on a onenote attachment and then on the malicious link inside the .one file, it exports and executes the malicious embedded script from specific directories.
+status: experimental
+date: 2023/02/02
+author: '@kostastsale'
+references:
+  - https://bazaar.abuse.ch/browse/tag/one/
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+      Image|endswith:
+        - '*\powershell.exe'
+        - '*\pwsh.exe'
+        - '*\wscript.exe'
+        - '*\cscript.exe'
+        - '*\cmd.exe'
+        - '*\mshta.exe'
+      ParentImage|endswith:
+        - '*\onenote.exe'
+    selection2:
+      CommandLine|contains:
+        - '\exported\'
+        - '\onenoteofflinecache_files\'
+    condition: selection1 and selection2
+falsepositives:
+    - Unlikely
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.T1218.001

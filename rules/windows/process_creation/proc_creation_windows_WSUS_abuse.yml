@@ -1,0 +1,34 @@
+title: Abuse of the Windows Server Update Services (WSUS) for lateral movement.
+id: b0ce780f-10bd-496d-9067-066d23dc3aa5
+status: Experimental
+description: Windows Server Update Services (WSUS) is a critical component of Windows systems and is frequently configured in a way that allows an attacker to circumvent internal networking limitations. Some tools, such as SharpWSUS and WSUSpendu, support lateral movement through WSUS.This rule covers those two main tools used for that purpose.
+author: \@Kostastsale
+references: 
+  - https://labs.nettitude.com/blog/introducing-sharpwsus/
+  - https://github.com/nettitude/SharpWSUS
+  - https://github.com/AlsidOfficial/WSUSpendu/blob/master/WSUSpendu.ps1
+date: 2022/10/07
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection1:
+    CommandLine|contains:
+      - ' /payload:'
+      - ' -PayloadArgs '
+      - ' /updateid:'
+      - ' -PayloadFile '
+  selection2:
+    CommandLine|contains:
+      - ' create '
+      - ' check '
+      - ' delete '
+      - '-Inject'
+  condition: selection1 and selection2
+falsepositives:
+  - Uknown
+level: high
+tags:
+  - attack.execution
+  - attack.lateral_movement
+  - attack.T1210

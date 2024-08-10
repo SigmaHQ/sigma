@@ -1,0 +1,32 @@
+title: Scheduled task executing powershell encoded payload from registry
+id: 7cd354a2-92f2-4c39-85b5-6b5096366d4e
+status: Experimental
+description: Detects the creation of a schtask that executes a base64 encoded payload stored in the Windows Registry using PowerShell.
+author: '@Kostastsale, @TheDFIRReport'
+references: 
+  - https://thedfirreport.com/2022/02/21/qbot-and-zerologon-lead-to-full-domain-compromise/
+date: 2022/02/12
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection1:
+    Image|endswith: '\schtasks.exe'
+    CommandLine|contains|all:
+      - '/Create'
+      - '/SC'
+  selection2:
+    CommandLine|contains|all:
+      - 'FromBase64String'
+      - 'powershell'
+      - 'Get-ItemProperty'
+      - 'HKCU:'
+  condition: selection1 and selection2
+falsepositives:
+  - Uknown
+level: high
+tags:
+  - attack.execution
+  - attack.persistence
+  - attack.t1053.005
+  - attack.t1059.001

@@ -1,0 +1,31 @@
+title: Disabling Python warnings for executing untrusted code
+id: 023c654f-8f16-44d9-bb2b-00ff36a62af9
+description: Detecting the registry change that would prevent any warnings or alerts when Python functions are about to be executed. Threat actors could run malicious code through the new 
+  Microsoft Excel feature that allows Python to run within the spreadsheet.
+status: experimental
+references:
+  - https://support.microsoft.com/en-us/office/data-security-and-python-in-excel-33cc88a4-4a87-485e-9ff9-f35958278327
+author: '@Kostastsale'
+date: 2023/08/22
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        Image|endswith:
+          - '\reg.exe'
+          - '\powershell.exe'
+        CommandLine|contains|all:
+          - 'software\policies\microsoft\office\*\excel\security'
+          - 'pythonfunctionwarnings*0'
+    selection2:
+        CommandLine|contains:
+          - 'reg*add'
+          - 'Set-ItemProperty'
+    condition: selection1 and selection2
+falsepositives:
+    - Uknown
+level: high
+tags:
+    - attack.Defense-Evansion
+    - attack.T1562.001

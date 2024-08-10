@@ -1,0 +1,59 @@
+title: Arbitrary code execution and remote sessions via Action1 RMM
+id: aa3168fb-d594-4f93-a92d-7a9ba675b766
+hypothesis: Threat actors using Action1 to execute arbitrary code or establish a remote session
+description: >
+    Action1 is a powerful Remote Monitoring and Management tool that enables users to execute commands, scripts, and binaries. Through the web interface of action1,  
+    the administrator must create a new policy or an app to establish remote execution and then points that the agent is installed. 
+
+    Hunting Opportunity 1- Weed Out The Noise
+    ---
+    When threat actors execute a script, a command, or a binary through these new policies and apps, the names of these become visible in the command line during the execution process. 
+    Below is an example of the command line that contains the deployment of a binary through  a policy with name "test_app_1":
+
+    ParentCommandLine: "C:\WINDOWS\Action1\action1_agent.exe schedule:Deploy_App__test_app_1_1681327673425 runaction:0"
+
+    
+    After establishing a baseline, we can split the command to extract the policy name and group all the policy names and inspect the results with a list of frequency occurrences. 
+    An example query of this in Splunk could be: 
+
+    Index="<myindex>" source="<mysource>" Image="*\action1_agent.exe" ParentCommandLine="*runaction:0" | rex field=ParentCommandLine "(?<=Deploy_App__)(?<AppName>.*(?=(\_1)))"
+
+    
+    Hunting Opportunity 2 - Remote Sessions On Out Of Office Hours
+    ----
+    If you have admins within your environment using remote sessions to administer
+    endpoints, you can create a threat-hunting query and modify the time of the
+    initiated sessions looking for abnormal activity. 
+status: experimental
+date: 2023/04/13
+author: '@kostastsale'
+references:
+  - https://twitter.com/Kostastsale/status/1646256901506605063?s=20
+  - https://www.action1.com/documentation/
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    AppDeploymentExec:
+      Image|contains:
+        - '\Windows\Action1\package_downloads\'
+      ParentImage|endswith:
+        - '\action1_agent.exe'
+    CommandExec:
+      ParentImage|endswith:
+        - '\cmd.exe'
+        - '\powershell.exe'
+      ParentCommandLine|contains:
+        - '\Action1\scripts\Run_Command_'
+        - '\Action1\scripts\Run_PowerShell_'
+    RemoteSessionInit:
+      Image|endswith:
+        - '\agent1_remote.exe'
+    condition: AppDeploymentExec or CommandExec or RemoteSessionInit
+falsepositives:
+    - "If Action1 is among the approved software in your environment, you might find that this is a noisy query. 
+      See description for ideas on how to alter this query and start looking for suspicious activities."
+level: medium
+tags:
+    - attack.CommandAndControl
+    - attack.T1219

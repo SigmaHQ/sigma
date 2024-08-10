@@ -1,0 +1,29 @@
+title: KrbRelayUp local privilege escalation.
+id: 3f3e85e9-2fec-4c2f-89cd-6762b5928570
+description: Detecting possible successful exploitation using tools such as KrbRelayUp AD environment 
+status: experimental
+date: 2022/04/26
+author: \@kostastsale
+references:
+    - https://github.com/Dec0ne/KrbRelayUp
+    - https://googleprojectzero.blogspot.com/2021/10/using-kerberos-for-authentication-relay.html
+    - https://github.com/elastic/detection-rules/blob/fb6ee2c69864ffdfe347bf3b050cb931f53067a6/rules/windows/privilege_escalation_krbrelayup_suspicious_logon.toml
+logsource:
+    product: windows
+    service: security
+detection:
+    selection1:
+        EventID: 4624
+        LogonType: '3'
+        AuthenticationPackageName: 'Kerberos'
+        IpAddress: '127.0.0.1'
+        TargetUserSid: 'S-1-5-21-*-500'
+    filter:
+        IpPort: '0'
+    condition: selection1 and not filter
+falsepositives:
+    - Uknown
+level: High
+tags:
+    - attack.privilege_escalation
+    - attack.t1068

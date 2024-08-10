@@ -1,0 +1,46 @@
+title: SamAccountName Spoofing and Domain Controller Impersonation
+id: 74256088-d35f-40e4-91e6-601cfa2e7615
+status: experimental
+author: \@kostastsale
+description:  >
+    'This technique is to detect exploitation chain of CVE-2021-42287 (samAccountName Spoofing) and CVE-2021-42278 (Domain Controller Impersonation). 
+    It is looking into event 4781 for evidence of a new computer account creation and account rename that matches the name of a domain controller account without
+    ending in "$". Computer account names always end with `$` and a change like this is highly unusual. 
+
+    Immediately after the 4781 event, a Kerberos Ticket Granting Ticket (TGT) must be requested on behalf of the newly created and renamed computer account.
+    A computer account name event will occur before this TGT request.
+
+    Putting everything together, we may use events 4781 and 4768 to look for a series of events in which the new computer account on event 4781 matches
+    the requested account on event 4768.
+
+    NOTE-- On selection2, the `TargetUserName` should equal to `NewTargetUserName`. I have left it as a placeholder but this should change dependingon the backend
+    you are translating the query to.
+
+    Splunk Example-- `| eval RenamedComputerAccount = coalesce(New_Account_Name, mvindex(Account_Name,0)) 
+    | transaction RenamedComputerAccount endswith=(EventCode=4781)`'
+
+date: 2022/02/21
+references:
+  - https://exploit.ph/cve-2021-42287-cve-2021-42278-weaponisation.html
+  - https://medium.com/@mvelazco/hunting-for-samaccountname-spoofing-cve-2021-42287-and-domain-controller-impersonation-f704513c8a45
+  - https://www.fortinet.com/blog/threat-research/cve-2021-42278-cve-2021-42287-from-user-to-domain-admin-60-seconds  
+logsource:
+    product: windows
+    service: security
+detection:
+    selection1:
+        EventID: 4781
+        OldTargetUserName|endswith: '$'
+    selection2:
+        EventID: 4768
+        TargetUserName: '%NewTargetUserName%'
+    filter:
+        - NewTargetUserName|endswith: '$'
+        - TargetUserName|endswith: '$'
+    condition: (selection1 and selection2) and not filter
+falsepositives:
+    - Uknown
+level: High
+tags:
+    - attack.privilege_escalation
+    - attack.t1068

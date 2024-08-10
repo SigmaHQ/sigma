@@ -1,0 +1,32 @@
+title: Hiding local user accounts
+id: 9ec9fb1b-e059-4489-9642-f270c207923d
+description: Detects the use reg.exe to hide users from listed in the logon screen. This is possible by changing the registry key value to 0 for a specific user.
+status: experimental
+references:
+    - <Report TBD>
+author: '@Kostastsale, @TheDFIRReport'
+date: 2022/05/14
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        ParentImage|endswith:
+          - '\cmd.exe'
+          - '\powershell.exe'
+        Image|endswith:
+          - '\reg.exe'
+        CommandLine|contains|all:
+          - 'HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\SpecialAccounts\Userlist'
+          - 'add'
+          - '/t'
+          - 'REG_DWORD'
+          - '/v'
+          - '/d 0'
+    condition: selection1
+falsepositives:
+    - System administrator activities
+level: medium
+tags:
+    - attack.hidden.users
+    - attack.T1564.002

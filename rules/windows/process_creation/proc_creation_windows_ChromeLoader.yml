@@ -1,0 +1,35 @@
+title: ChromeLoader Malware Detection
+id: 0a74c5a9-1b71-4475-9af2-7829d320d5c2
+description: Detects execution of ChromeLoader malware via a registered scheduled task
+status: experimental
+date: 2022/01/10
+author: \@kostastsale
+references:
+    - https://github.com/xephora/Threat-Remediation-Scripts/tree/main/Threat-Track/CS_INSTALLER
+    - https://twitter.com/th3_protoCOL/status/1480621526764322817
+    - https://twitter.com/Kostastsale/status/1480716528421011458
+    - https://www.virustotal.com/gui/file/ded20df574b843aaa3c8e977c2040e1498ae17c12924a19868df5b12dee6dfdd
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        ParentCommandLine|contains:
+            - '-ExecutionPolicy Bypass -WindowStyle Hidden -E JAB'
+        ParentImage|endswith:
+            - '*\powershell.exe'
+    selection2:
+        CommandLine|contains:
+            - '--load-extension="*\Appdata\local\chrome"'
+        Image|endswith:
+            - '*\chrome.exe'
+    condition: selection1 and selection2
+falsepositives:
+    - Unlikely
+level: high
+tags:
+    - attack.execution
+    - attack.T1059.001
+    - attack.persistence
+    - attack.T1176
+    - attack.T1053.005

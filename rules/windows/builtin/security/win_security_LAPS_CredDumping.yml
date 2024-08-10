@@ -1,0 +1,40 @@
+title: LAPS Credential Dumping Spoofing and Domain Controller Impersonation
+id: b4019300-4846-4c66-9d3e-62efff5cff51
+status: experimental
+date: 2023/02/21
+author: '@kostastsale'
+description: 'Identify LAPS credential dumping by looking for users accessing objects via Event ID 4662,
+and login authentication events via Event ID 4624. The two events must contain the same LogonID to track
+the same logon session.
+
+NOTE - The TargetLogonId has to match the SubjectLogonId. Not sure how to implement the logic
+using sigma, so I have left it as a placeholder. Make sure to change it depending on the SIEM you are using.'
+references:
+  - https://www.trustedsec.com/blog/a-lapse-in-judgement/?hss_channel=tw-403811306 (Includes Splunk Query)
+  - https://learn.microsoft.com/en-us/defender-for-identity/security-assessment-laps
+logsource:
+    product: windows
+    service: security
+detection:
+    selection1:
+        EventID: 4662
+        AccessMask:
+            - '0x100'
+            - '0x10'
+    selection2:
+        EventID: 4624
+        TargetLogonId: '\%SubjectLogonId\%'
+    filter:
+        EventID: 4662
+        SubjectUserName|endswith:
+            - '$'
+        SubjectUserName:
+            - 'ANONYMOUS LOGON'
+            - 'SYSTEM'
+    condition: (selection1 and selection2) and not filter
+falsepositives:
+    - Uknown
+level: High
+tags:
+    - attack.credential_access
+    - attack.T1003

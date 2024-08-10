@@ -1,0 +1,37 @@
+title: HH.exe LOLBA executing .chm files 
+id: 4dd98986-86b3-44d3-9618-c58e86b5674d
+description: Detecting the execution of hh.exe and the follow up activity for downloading or executing 
+  second stage payloads. This is based malspam activity delivering Remote Access Trojans via initial .chm
+  payloads.
+status: experimental
+references:
+  - https://www.virustotal.com/gui/file/f0c20d4ea2e2cc1d3c9df58b1a4854f9e3b761b7cd0c26860559289c74a8d50f/behavior/C2AE
+  - https://tria.ge/220520-cbrbasebb7/behavioral2
+  - https://www.socinvestigation.com/threat-actors-abuse-microsofts-html-help-file-to-deliver-malware/
+author: '@Kostastsale'
+date: 2022/05/24
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        ParentImage|endswith:
+          - '\hh.exe'
+        ParentCommandLine|endswith:
+          - '.chm'
+    selection2:
+        Image|endswith:
+          - '\cmd.exe'
+        CommandLine|contains:
+          - ' /c '
+    selection3:
+        Image|endswith:
+          - '\pwsh.exe'
+          - '\powershell.exe'
+    condition: selection1 and (selection2 or selection3)
+falsepositives:
+    - Uknown
+level: high
+tags:
+    - attack.Compiled.HTML.File
+    - attack.T1218.001

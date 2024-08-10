@@ -1,0 +1,56 @@
+title: Using Lazagne to dump credentials
+id: 29419560-7c08-46d4-bb2c-531ed2ea0383
+status: Experimental
+description: Detects the use of lazagne looking into the command line execution.
+author: \@Kostastsale, \@TheDFIRReport
+references: 
+  - https://thedfirreport.com/2022/05/09/seo-poisoning-a-gootloader-story/
+  - https://github.com/AlessandroZ/LaZagne/blob/master/Windows/lazagne/config/execute_cmd.py
+date: 2022/05/09
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection1:
+    Image|endswith: 
+      - '\cmd.exe'
+      - '\powershell.exe'
+    CommandLine|contains|all:
+      - '/c'
+      - 'reg.exe'
+      - 'save'
+    ParentCommandLine|contains:
+      - 'all'
+  selection2:
+    ParentCommandLine|contains:
+      - '-oN'
+      - '-oA'
+      - '-oJ'
+      - '-quiet'
+      - '-output'
+    CommandLine|contains:
+      - 'hklm\system'
+      - 'hklm\security'
+      - 'hklm\sam'
+  modules:
+    Image|endswith:
+      - '\lazagne.exe'
+    CommandLine|contains:
+      - 'browsers'
+      - 'chats'
+      - 'databases'
+      - 'games'
+      - 'memory'
+      - 'git'
+      - 'maven'
+      - 'sysadmin'
+      - 'php'
+      - 'svn'
+      - 'multimedia'
+  condition: (selection1 and selection2) or modules
+falsepositives:
+  - Uknown
+level: high
+tags:
+- attack.credential_access
+- attack.t1555

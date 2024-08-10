@@ -1,0 +1,28 @@
+title: Injected Browser Process Spawning Rundll32 
+id: 89e1490f-1a3e-452a-bbb8-b68a5f58072f
+description: Detects the execution of installed GuLoader malware on the host. GuLoader is initiating network connections via the rundll32.exe process that is spawned via a browser parent(injected) process.
+status: experimental
+date: 2023/08/07
+author: \@kostastsale
+references:
+    - 
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        ParentImage|endswith: 
+          - '\msedge.exe'
+          - '\chrome.exe'
+          - '\firefox.exe'
+        Image|endswith: 
+          - '\rundll32.exe'
+        CommandLine|endswith:
+          - '\rundll32.exe'
+    condition: selection1
+falsepositives:
+    - Unlikely
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.T1055

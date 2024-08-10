@@ -1,0 +1,28 @@
+title: Exploitation of Vulnerable VMware Horizon to LOG4J 
+id: 3eb91f0a-0060-424a-a676-59f5fdd75610
+description: Detecting initial exploitation attempt against VMware Horizon deployments running vulnerable versions of Log4j.
+status: experimental
+date: 2022/01/14
+author: \@kostastsale
+references:
+    - https://portswigger.net/daily-swig/vmware-horizon-under-attack-as-china-based-ransomware-group-targets-log4j-vulnerability
+    - https://twitter.com/TheDFIRReport/status/1482078434327244805
+    - https://www.pwndefend.com/2022/01/07/log4shell-exploitation-and-hunting-on-vmware-horizon-cve-2021-44228/
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection1:
+        ParentImage|endswith:
+            - '\ws_TomcatService.exe'
+    filter:
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+    condition: selection1 and filter
+falsepositives:
+    - Unlikely
+level: high
+tags:
+   - attack.initial_access
+   - attack.t1190

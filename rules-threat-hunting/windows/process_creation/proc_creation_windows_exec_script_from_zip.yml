@@ -1,0 +1,68 @@
+title: Manual execution of scripts that exist inside a compressed file
+id: 95724fc1-a258-4674-97db-a30351981c5a
+hypothesis: User double-clicks on a malicious script inside a zip/rar file.
+description: >
+  "This is a threat-hunting query to collect information related to the interactive execution of a script 
+  from inside a compressed file(zip/rar). Windows will automatically run the script using scripting interpreters such
+  as wscript and cscript binaries.
+
+  From the query below, the child process is the script interpreter that will execute the script. The script extension 
+  is also a set of standard extensions that Windows OS recognizes. Selections 1-3 contain three different 
+  execution scenarios. 
+    1. Compressed file opened using 7zip.
+    2. Compressed file opened using WinRar.
+    3. Compressed file opened using native windows File Explorer capabilities. 
+
+  When the malicious script is double-clicked, it will be extracted to the respected directories as signified by the CommandLine
+  on each of the three Selections. It will then be executed using the relevant script interpreter."
+status: experimental
+date: 2023/02/15
+author: '@kostastsale'
+references:
+  - https://app.any.run/tasks/25970bb5-f864-4e9e-9e1b-cc8ff9e6386a (Winrar > Wscript executing .wsf)
+  - https://app.any.run/tasks/fa99cedc-9d2f-4115-a08e-291429ce3692 (Winrar > Wscript executing .wsf)
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    ChildProcess:
+      Image|endswith:
+        - '\wscript.exe'
+        - '\mshta.exe'
+        - '\cscript.exe'
+        - '\powershell.exe'
+    ScriptExtention:
+      CommandLine|endswith:
+        - '.wsf'
+        - '.hta'
+        - '.vbs'
+        - '.js'
+        - '.jse'
+        - '.wsh'
+        - '.vbscript'
+        - '.ps1'
+    Selection1:
+      ParentImage:
+        - '*\7z*.exe'
+      CommandLine:
+      - '*\appdata\local\temp\7z*\*'
+    Selection2:
+      ParentImage|endswith:
+        - '\winrar.exe'
+      CommandLine:
+      - '*\appdata\local\temp\rar*\*'
+    Selection3:
+      ParentImage|endswith:
+        - '\explorer.exe'
+      CommandLine:
+        - '*\appdata\local\temp\*.rar\*'
+        - '*\appdata\local\temp\*.zip\*'
+    condition: ChildProcess and ScriptExtention and (Selection1 OR Selection2 OR Selection3)
+falsepositives:
+    - "During my testing, batch files produced a lot of noise, as many applications appear to bundle them as part of their installation
+process. You should baseline your environment and generate a new query excluding the noisy and expected activity. Some false positives may come up depending on your environment. All results should be investigated thoroughly before
+    filtering out results."
+level: medium
+tags:
+    - attack.execution
+    - attack.T1059

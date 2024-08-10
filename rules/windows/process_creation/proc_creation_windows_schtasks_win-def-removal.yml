@@ -1,0 +1,25 @@
+title: Deleting Windows Defender scheduled tasks
+id: c0d0392c-de50-4a11-9565-a457587e0c9d
+status: Experimental
+description: Detects the deletion of scheduled tasks related to Windows Defender.
+author: \@Kostastsale, \@TheDFIRReport
+references: 
+  - https://thedfirreport.com/2022/05/09/seo-poisoning-a-gootloader-story/
+date: 2022/05/09
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection1:
+    Image|endswith: '\schtasks.exe'
+    CommandLine|contains|all:
+      - '/delete'
+      - '/tn'
+      - 'Windows Defender'
+  condition: selection1
+falsepositives:
+  - Uknown
+level: high
+tags:
+  - attack.defense_evasion
+  - attack.t1562.001

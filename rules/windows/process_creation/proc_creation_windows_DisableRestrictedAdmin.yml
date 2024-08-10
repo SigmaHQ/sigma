@@ -1,0 +1,31 @@
+title: Enabling restricted admin mode
+id: 0e6e820b-f829-472e-9e34-930939778187
+status: Experimental
+description: Detects the registry modification to enable restricted admin mode using reg.exe
+author: \@Kostastsale, \@TheDFIRReport
+references: 
+  - https://thedfirreport.com/2022/05/09/seo-poisoning-a-gootloader-story/
+date: 2022/05/09
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection1:
+    Image|endswith: 
+      - '\powershell.exe'
+      - '\reg.exe'
+    CommandLine|contains|all:
+      - '/add'
+      - 'DisableRestrictedAdmin'
+      - 'hklm\system\currentcontrolset\control\lsa'
+  selection2:
+    CommandLine|contains:
+      - '-Value 0'
+      - '/d 0'
+  condition: selection1 and selection2
+falsepositives:
+  - Uknown
+level: high
+tags:
+  - attack.defense_evasion
+  - attack.t1562.001
