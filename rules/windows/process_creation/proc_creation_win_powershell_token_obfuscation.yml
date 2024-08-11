@@ -22,14 +22,15 @@ detection:
         #   IN`V`o`Ke-eXp`ResSIOn (Ne`W-ob`ject Net.WebClient).DownloadString
         #   &('In'+'voke-Expressi'+'o'+'n') (.('New-Ob'+'jec'+'t') Net.WebClient).DownloadString
         #   &("{2}{3}{0}{4}{1}"-f 'e','Expression','I','nvok','-') (&("{0}{1}{2}"-f'N','ew-O','bject') Net.WebClient).DownloadString
-        #   ${e`Nv:pATh}
         - CommandLine|re: '\w+`(\w+|-|.)`[\w+|\s]'
         # - CommandLine|re: '\((\'(\w|-|\.)+\'\+)+\'(\w|-|\.)+\'\)' TODO: fixme
         - CommandLine|re: '"(\{\d\})+"\s*-f'
     selection_2:
-        CommandLine|contains: '`'
+        #   ${e`Nv:pATh}
         CommandLine|re: '(?i)\$\{`?e`?n`?v`?:`?p`?a`?t`?h`?\}'
-    condition: 1 of selection_*
+    filter_envpath:
+        CommandLine|contains: '${env:path}'
+    condition: 1 of selection_* and not filter_envpath
 falsepositives:
     - Unknown
 level: high
