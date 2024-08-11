@@ -17,7 +17,7 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_1:
+    selection:
         # Examples:
         #   IN`V`o`Ke-eXp`ResSIOn (Ne`W-ob`ject Net.WebClient).DownloadString
         #   &('In'+'voke-Expressi'+'o'+'n') (.('New-Ob'+'jec'+'t') Net.WebClient).DownloadString
@@ -25,12 +25,11 @@ detection:
         - CommandLine|re: '\w+`(\w+|-|.)`[\w+|\s]'
         # - CommandLine|re: '\((\'(\w|-|\.)+\'\+)+\'(\w|-|\.)+\'\)' TODO: fixme
         - CommandLine|re: '"(\{\d\})+"\s*-f'
-    selection_2:
         #   ${e`Nv:pATh}
-        CommandLine|re: '(?i)\$\{`?e`?n`?v`?:`?p`?a`?t`?h`?\}'
-    filter_envpath:
+        - CommandLine|re: '(?i)\$\{`?e`?n`?v`?:`?p`?a`?t`?h`?\}'
+    filter_main_envpath:
         CommandLine|contains: '${env:path}'
-    condition: 1 of selection_* and not filter_envpath
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high

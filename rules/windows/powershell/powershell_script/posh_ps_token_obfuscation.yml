@@ -18,7 +18,7 @@ logsource:
     category: ps_script
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
-    selection_1:
+    selection:
         # Examples:
         #   IN`V`o`Ke-eXp`ResSIOn (Ne`W-ob`ject Net.WebClient).DownloadString
         #   &('In'+'voke-Expressi'+'o'+'n') (.('New-Ob'+'jec'+'t') Net.WebClient).DownloadString
@@ -26,9 +26,8 @@ detection:
         - ScriptBlockText|re: '\w+`(\w+|-|.)`[\w+|\s]'
         # - ScriptBlockText|re: '\((\'(\w|-|\.)+\'\+)+\'(\w|-|\.)+\'\)' TODO: fixme
         - ScriptBlockText|re: '"(\{\d\}){2,}"\s*-f'  # trigger on at least two placeholders. One might be used for legitimate string formatting
-    selection_2:
         #   ${e`Nv:pATh}
-        ScriptBlockText|re: '(?i)\$\{`?e`?n`?v`?:`?p`?a`?t`?h`?\}'
+        - ScriptBlockText|re: '(?i)\$\{`?e`?n`?v`?:`?p`?a`?t`?h`?\}'
     filter_envpath:
         ScriptBlockText|contains: '${env:path}'
     filter_chocolatey:
@@ -39,7 +38,7 @@ detection:
         Path|startswith: 'C:\Program Files\Microsoft\Exchange Server\'
         Path|endswith: '\bin\servicecontrol.ps1'
         ScriptBlockText|contains: '`r`n'
-    condition: 1 of selection_* and not 1 of filter_*
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown
 level: high
