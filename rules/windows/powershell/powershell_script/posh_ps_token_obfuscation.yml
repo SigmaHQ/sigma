@@ -23,11 +23,13 @@ detection:
         #   IN`V`o`Ke-eXp`ResSIOn (Ne`W-ob`ject Net.WebClient).DownloadString
         #   &('In'+'voke-Expressi'+'o'+'n') (.('New-Ob'+'jec'+'t') Net.WebClient).DownloadString
         #   &("{2}{3}{0}{4}{1}"-f 'e','Expression','I','nvok','-') (&("{0}{1}{2}"-f'N','ew-O','bject') Net.WebClient).DownloadString
-        #   ${e`Nv:pATh}
         - ScriptBlockText|re: '\w+`(\w+|-|.)`[\w+|\s]'
         # - ScriptBlockText|re: '\((\'(\w|-|\.)+\'\+)+\'(\w|-|\.)+\'\)' TODO: fixme
         - ScriptBlockText|re: '"(\{\d\}){2,}"\s*-f'  # trigger on at least two placeholders. One might be used for legitimate string formatting
-        - ScriptBlockText|re: '\$\{((e|n|v)*`(e|n|v)*)+:path\}|\$\{((e|n|v)*`(e|n|v)*)+:((p|a|t|h)*`(p|a|t|h)*)+\}|\$\{env:((p|a|t|h)*`(p|a|t|h)*)+\}'
+        #   ${e`Nv:pATh}
+        - ScriptBlockText|re: '(?i)\$\{`?e`?n`?v`?:`?p`?a`?t`?h`?\}'
+    filter_envpath:
+        ScriptBlockText|contains: '${env:path}' # TODO: Fix this. See https://github.com/SigmaHQ/sigma/pull/4964
     filter_chocolatey:
         ScriptBlockText|contains:
             - 'it will return true or false instead'  # Chocolatey install script https://github.com/chocolatey/chocolatey
