@@ -1,0 +1,34 @@
+title: Detect Execution of BCP Utility
+id: fea0100e-6abe-4438-b639-c957f703c258
+status: experimental
+description: |
+  Detects the execution of the bcp utility with 'queryout' or 'out' options in Windows Security Event Log (Event ID 4688). This rule is useful for identifying potential misuse of data copy between an SQL instance to a file
+references:
+    https://news.sophos.com/en-us/2024/08/07/sophos-mdr-hunt-tracks-mimic-ransomware-campaign-against-organizations-in-india/
+    https://learn.microsoft.com/en-us/sql/tools/bcp-utility?view=sql-server-ver16&tabs=windows   
+author: MahirAli Khan (https://www.linkedin.com/in/mahiralikhan)
+date: 2024-08-13
+logsource:
+  category: windows
+  product: windows
+detection:
+  selection:
+    EventID: 4688
+    Image|endswith: 'bcp.exe'
+    CommandLine|contains:
+      - 'queryout'
+      - 'out'
+  condition: selection
+  keywords:
+    - bcp
+    - queryout
+    - out
+fields:
+  - EventID
+  - Image
+  - Creator Process Name
+  - New Process Name
+  - Process Command Line
+tags:
+  - attack.execution
+  - T1059.001  # This tag corresponds to the MITRE ATT&CK technique for Command-Line Interface
