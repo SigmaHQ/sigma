@@ -1,0 +1,29 @@
+title: Env GTFOBin Abuse - Linux
+id: bed978f8-7f3a-432b-82c5-9286a9b3031a
+status: experimental
+description: Detects usage of env as a GTFOBin Linux binary abuse to break out from restricted environments by spawning an interactive system shell. 
+references:
+    - https://gtfobins.github.io/gtfobins/env/#shell
+    - https://www.elastic.co/guide/en/security/current/linux-restricted-shell-breakout-via-linux-binary-s.html
+author: Li Ling, Andy Parkidomo, Robert Rakowski, Blake Hartstein (Bloomberg L.P.)
+date: 2024/08/05
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_img:
+        Image|endswith: '/env'
+    selection_cli:
+        CommandLine|endswith:
+            - '/bin/sh'
+            - '/bin/bash'
+            - '/bin/dash'
+            - '/bin/zsh'
+            - '/bin/fish'
+    condition: all of selection_*
+falsepositives:
+    - Github operations such as ghe-backup
+level: high

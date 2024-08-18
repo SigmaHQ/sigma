@@ -1,0 +1,24 @@
+title: Capsh GTFOBin Abuse - Linux
+id: db1ac3be-f606-4e3a-89e0-9607cbe6b98a
+status: experimental
+description: Detects usage of Capsh as a GTFOBin Linux binary abuse to break out from restricted environments by spawning an interactive system shell. 
+references:
+    - https://gtfobins.github.io/gtfobins/capsh/#shell
+    - https://www.elastic.co/guide/en/security/current/linux-restricted-shell-breakout-via-linux-binary-s.html
+author: Li Ling, Andy Parkidomo, Robert Rakowski, Blake Hartstein (Bloomberg L.P.)
+date: 2024/08/05
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_img:
+        Image|endswith: '/capsh'
+    selection_cli:
+        CommandLine|endswith: ' --'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high

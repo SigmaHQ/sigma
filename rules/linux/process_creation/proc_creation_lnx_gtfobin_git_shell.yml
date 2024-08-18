@@ -1,0 +1,29 @@
+title: Git GTFOBin Abuse - Linux
+id: 47b3bbd4-1bf7-48cc-84ab-995362aaa75a
+status: experimental
+description: Detects usage of git as a GTFOBin Linux binary abuse to break out from restricted environments by spawning an interactive system shell. 
+references:
+    - https://gtfobins.github.io/gtfobins/git/#shell
+author: Li Ling, Andy Parkidomo, Robert Rakowski, Blake Hartstein (Bloomberg L.P.)
+date: 2024/08/05
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_parent:
+        ParentImage|endswith: '/git'
+        ParentCommandLine|contains|all:
+            - ' -p '
+            - 'help'
+    selection_cli:
+        CommandLine|contains:
+            - 'sh 0<&1'
+            - 'bash 0<&1'
+            - 'dash 0<&1'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
