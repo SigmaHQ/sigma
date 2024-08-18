@@ -1,0 +1,36 @@
+title: SSH GTFOBin Abuse - Linux
+id: 8737b7f6-8df3-4bb7-b1da-06019b99b687
+status: experimental
+description: Detects usage of SSH and variants as a GTFOBin Linux binary abuse to break out from restricted environments by spawning an interactive system shell. 
+references:
+    - https://gtfobins.github.io/gtfobins/ssh/
+    - https://www.elastic.co/guide/en/security/current/linux-restricted-shell-breakout-via-linux-binary-s.html
+author: Li Ling, Andy Parkidomo, Robert Rakowski, Blake Hartstein (Bloomberg L.P.)
+date: 2024/08/05
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_img:
+        Image|endswith: '/ssh'
+        CommandLine|contains:
+            - 'ProxyCommand=;'
+            - 'permitlocalcommand=yes'
+            - 'localhost'
+    selection_cli:
+        CommandLine|contains:
+            - 'sh 0<&2 1>&2'
+            - 'bash 0<&2 1>&2'
+            - 'dash 0<&2 1>&2' 
+            - '/bin/sh'
+            - '/bin/bash'
+            - '/bin/dash'
+            - '/bin/zsh'
+            - '/bin/fish'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
