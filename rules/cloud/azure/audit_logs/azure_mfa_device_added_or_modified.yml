@@ -1,0 +1,24 @@
+title: Users Successfully Registered New or Modify MFA Device and Method.
+id: df21ffaf-c830-4ea7-a908-64a212dd792c
+status: test
+description: User succesfully register for Authenticator App with Notification and Code/User started the registration for Mobile Phone SMS/User started the registration for Mobile Phone Call/User started the registration for Email/User started the registration for Alternate Mobile Phone Call method could be an indicator of an attacker adding an auth method to the account so they can have continued access.
+references:
+    - 'https://learn.microsoft.com/en-us/entra/architecture/security-operations-privileged-accounts'
+    - 'https://www.first.org/resources/papers/conf2024/EMAILB-1.PDF/'
+author: Harjot Singh 'cyb3rjy0t'
+date: 2024-08-19
+tags:
+    - attack.persistence
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection:
+        LoggedByService: 'Authentication Methods'
+        Category: 'UserManagement'
+        OperationName: 'User registered security info'
+        OperationType: 'add'
+    condition: selection
+falsepositives:
+    - Legitimate activities  by the users.
+level: low
