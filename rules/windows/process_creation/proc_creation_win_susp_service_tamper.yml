@@ -25,39 +25,32 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_net_img:
+    selection_tools_img:
         - OriginalFileName:
               - 'net.exe'
               - 'net1.exe'
+              - 'PowerShell.EXE'
+              - 'psservice.exe'
+              - 'pwsh.dll'
+              - 'sc.exe'
         - Image|endswith:
               - '\net.exe'
               - '\net1.exe'
-    selection_net_cli:
-        CommandLine|contains: ' stop '
-    selection_sc_img:
-        - OriginalFileName: 'sc.exe'
-        - Image|endswith: '\sc.exe'
-    selection_sc_cli_stop:
-        CommandLine|contains: ' stop '
-    selection_sc_cli_delete:
-        CommandLine|contains: ' delete '
-    selection_sc_cli_pause:
-        CommandLine|contains: ' pause '
-    selection_sc_cli_disable:
-        CommandLine|contains|all:
-            - 'config'
-            - 'start=disabled'
-    selection_pwsh_img:
-        - OriginalFileName:
-              - 'PowerShell.EXE'
-              - 'pwsh.dll'
-        - Image|endswith:
               - '\powershell.exe'
+              - '\PsService.exe'
+              - '\PsService64.exe'
               - '\pwsh.exe'
-    selection_pwsh_cli:
-        CommandLine|contains:
-            - 'Stop-Service '
-            - 'Remove-Service '
+              - '\sc.exe'
+    selection_tools_cli:
+        - CommandLine|contains:
+              - ' delete '
+              - ' pause ' # Covers flags from: PsService and Sc.EXE
+              - ' stop ' # Covers flags from: PsService.EXE, Net.EXE and Sc.EXE
+              - 'Stop-Service '
+              - 'Remove-Service '
+        - CommandLine|contains|all:
+              - 'config'
+              - 'start=disabled'
     selection_services:
         CommandLine|contains:
             - '143Svc'
@@ -283,7 +276,7 @@ detection:
             - 'WRSVC'
             - 'wsbexchange'
             - 'Zoolz 2 Service'
-    condition: selection_services and (all of selection_net_* or all of selection_pwsh_* or ( selection_sc_img and 1 of selection_sc_cli* ) )
+    condition: all of selection_*
 falsepositives:
     - Administrators or tools shutting down the services due to upgrade or removal purposes. If you experience some false positive, please consider adding filters to the parent process launching this command and not removing the entry
 level: high
