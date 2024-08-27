@@ -8,9 +8,10 @@ references:
     - https://github.com/BloodHoundAD/SharpHound3/blob/7d96b991b1887ff50349ce59c80980bc0d95c86a/SharpHound3/LdapBuilder.cs
     - https://medium.com/falconforce/falconfriday-detecting-active-directory-data-collection-0xff21-c22d1a57494c
     - https://github.com/fox-it/BloodHound.py/blob/d65eb614831cd30f26028ccb072f5e77ca287e0b/bloodhound/ad/domain.py#L427
+    - https://ipurple.team/2024/07/15/sharphound-detection/
 author: Adeem Mawani
 date: 2021-06-22
-modified: 2023-11-03
+modified: 2024-08-27
 tags:
     - attack.discovery
     - attack.t1069.002
@@ -55,6 +56,14 @@ detection:
             - 'Domain Admins'
             - 'objectGUID=\*'
             - '(schemaIDGUID=\*)'
+            - 'admincount=1'
+    distinguished_name_enumeration:
+        EventID: 30
+        SearchFilter: '(objectclass=\*)'
+        DistinguishedName|contains:
+            - 'CN=Domain Admins'
+            - 'CN=Enterprise Admins'
+            - 'CN=Group Policy Creator Owners'
     suspicious_flag:
         EventID: 30
         SearchFilter|contains:
@@ -78,5 +87,5 @@ detection:
         SearchFilter|contains:
             - '(domainSid=*)'
             - '(objectSid=*)'
-    condition: (generic_search and not narrow_down_filter) or suspicious_flag
+    condition: (generic_search and not narrow_down_filter) or suspicious_flag or distinguished_name_enumeration
 level: medium
