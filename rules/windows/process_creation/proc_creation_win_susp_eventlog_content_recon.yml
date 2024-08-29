@@ -19,7 +19,7 @@ references:
     - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/wevtutil
 author: Nasreddine Bencherchali (Nextron Systems), X__Junior (Nextron Systems)
 date: 2022-09-09
-modified: 2024-07-12
+modified: 2024-08-15
 tags:
     - attack.credential-access
     - attack.discovery
@@ -64,21 +64,24 @@ detection:
             # Note: We use the "?" to account for both a single and a double quote
             # Note: Please add additional interesting event IDs
             # Note: As this only focuses on EIDs and we know EIDs are not unique across providers. Rare FPs might occur with legit queries to EIDs from different providers.
-            # This covers EID 4624 from Security Log
-            - '-InstanceId 4624'
-            - 'System[EventID=4624]'
-            - 'EventCode=?4624?'
-            - "EventIdentifier=?4624?"
+            # This covers EID 4624 and 4628 from Security Log
+            - '-InstanceId 462?'
+            - '.eventid -eq 462?'
+            - 'EventCode=?462?'
+            - 'EventIdentifier=?462?'
+            - 'System[EventID=462?]'
             # This covers EID 4778 from Security Log
             - '-InstanceId 4778'
+            - '.eventid -eq 4778'
             - 'System[EventID=4778]'
             - 'EventCode=?4778?'
-            - "EventIdentifier=?4778?"
+            - 'EventIdentifier=?4778?'
             # This covers EID 25 from Microsoft-Windows-TerminalServices-LocalSessionManager/Operational log
             - '-InstanceId 25'
+            - '.eventid -eq 25'
             - 'System[EventID=25]'
             - 'EventCode=?25?'
-            - "EventIdentifier=?25?"
+            - 'EventIdentifier=?25?'
     condition: 1 of selection_logs_* and (selection_wmi or all of selection_wevtutil_* or all of selection_wmic_* or selection_cmdlet)
 falsepositives:
     - Legitimate usage of the utility by administrators to query the event log
