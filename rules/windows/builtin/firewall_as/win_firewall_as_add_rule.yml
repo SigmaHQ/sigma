@@ -6,7 +6,7 @@ references:
     - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd364427(v=ws.10)
 author: frack113
 date: 2022-02-19
-modified: 2024-05-10
+modified: 2024-08-29
 tags:
     - attack.defense-evasion
     - attack.t1562.004
@@ -22,25 +22,32 @@ detection:
     filter_main_block:
         Action: 2 # Block
     filter_main_generic:
-        ApplicationPath|contains:
-            - ':\Program Files (x86)\'
-            - ':\Program Files\'
-            - ':\Windows\System32\'
-            - ':\Windows\SysWOW64\'
-            - ':\Windows\WinSxS\'
+        ApplicationPath|startswith:
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\WinSxS\'
     filter_optional_msmpeng:
-        ModifyingApplication|contains|all:
-            - ':\ProgramData\Microsoft\Windows Defender\Platform\'
-            - '\MsMpEng.exe'
+        ModifyingApplication|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+        ModifyingApplication|endswith: '\MsMpEng.exe'
     filter_main_covered_paths:
         # This filter is added to avoid duplicate alerting from 9e2575e7-2cb9-4da1-adc8-ed94221dca5e
         ApplicationPath|contains:
-            - ':\PerfLogs\'
-            - ':\Temp\'
-            - ':\Tmp\'
-            - ':\Users\Public\'
-            - ':\Windows\Tasks\'
-            - ':\Windows\Temp\'
+            - 'C:\PerfLogs\'
+            - 'C:\Temp\'
+            - 'C:\Tmp\'
+            - 'C:\Users\Public\'
+            - 'C:\Windows\Tasks\'
+            - 'C:\Windows\Temp\'
             - '\AppData\Local\Temp\'
+    filter_optional_no_path:
+        # This filter filters a lot of FPs related to Windows Services
+        ModifyingApplication:
+            - 'C:\Windows\System32\svchost.exe'
+            - 'C:\Windows\System32\dllhost.exe'
+        ApplicationPath: ''
+    filter_main_null:
+        ApplicationPath: null
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 level: medium

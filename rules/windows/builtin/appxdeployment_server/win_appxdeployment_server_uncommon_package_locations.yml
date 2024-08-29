@@ -9,6 +9,7 @@ references:
     - https://news.sophos.com/en-us/2021/11/11/bazarloader-call-me-back-attack-abuses-windows-10-apps-mechanism/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023-01-11
+modified: 2024-08-29
 tags:
     - attack.defense-evasion
 logsource:
@@ -17,7 +18,7 @@ logsource:
 detection:
     selection:
         EventID: 854
-    filter_generic:
+    filter_main_generic:
         Path|contains:
             # Paths can be written using forward slash if the "file://" protocol is used
             - 'C:\Program Files\WindowsApps\'
@@ -27,11 +28,12 @@ detection:
             - 'C:\Windows\ImmersiveControlPanel\'
             - 'x-windowsupdate://'
             - 'file:///C:/Program%20Files' # Also covers 'file:///C:/Program%20Files%20(x86)/'
-    filter_specific:
+    filter_main_specific:
         Path|contains:
+            - 'https://statics.teams.cdn.live.net/'
             - 'https://statics.teams.cdn.office.net/'
             - 'microsoft.com' # Example: https://go.microsoft.com/fwlink/?linkid=2160968
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: medium
