@@ -1,7 +1,7 @@
 title: Potential DLL Sideloading Using Coregen.exe
 id: 0fa66f66-e3f6-4a9c-93f8-4f2610b00171
 status: test
-description: Detect usage of DLL "coregen.exe" (Microsoft CoreCLR Native Image Generator) binary to sideload arbitrary DLLs.
+description: Detect usage of the "coregen.exe" (Microsoft CoreCLR Native Image Generator) binary to sideload arbitrary DLLs.
 references:
     - https://lolbas-project.github.io/lolbas/OtherMSBinaries/Coregen/
 author: frack113
@@ -16,13 +16,13 @@ logsource:
 detection:
     selection:
         Image|endswith: '\coregen.exe'
-    filter:
+    filter_main_legit_paths:
         ImageLoaded|startswith:
+            - 'C:\Program Files (x86)\Microsoft Silverlight\'
+            - 'C:\Program Files\Microsoft Silverlight\'
             - 'C:\Windows\System32\'
             - 'C:\Windows\SysWOW64\'
-            - 'C:\Program Files\Microsoft Silverlight\'
-            - 'C:\Program Files (x86)\Microsoft Silverlight\'
-    condition: selection and not filter
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: medium

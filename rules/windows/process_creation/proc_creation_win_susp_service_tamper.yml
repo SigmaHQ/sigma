@@ -8,16 +8,16 @@ related:
     - id: 7fd4bb39-12d0-45ab-bb36-cebabc73dc7b
       type: obsolete
 status: test
-description: Detects the usage of binaries such as 'net', 'sc' or 'powershell' in order to stop, pause or delete critical or important Windows services such as AV, Backup, etc. As seen being used in some ransomware scripts
+description: Detects the usage of binaries such as 'net', 'sc' or 'powershell' in order to stop, pause, disable or delete critical or important Windows services such as AV, Backup, etc. As seen being used in some ransomware scripts
 references:
     - https://www.trendmicro.com/content/dam/trendmicro/global/en/research/22/h/ransomware-actor-abuses-genshin-impact-anti-cheat-driver-to-kill-antivirus/Genshin%20Impact%20Figure%2010.jpg
     - https://www.trellix.com/en-sg/about/newsroom/stories/threat-labs/lockergoga-ransomware-family-used-in-targeted-attacks.html
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
     - https://research.nccgroup.com/2022/08/19/back-in-black-unlocking-a-lockbit-3-0-ransomware-attack/
     - https://www.virustotal.com/gui/file/38283b775552da8981452941ea74191aa0d203edd3f61fb2dee7b0aea3514955
-author: Nasreddine Bencherchali (Nextron Systems), frack113
+author: Nasreddine Bencherchali (Nextron Systems), frack113 , X__Junior
 date: 2022-09-01
-modified: 2023-08-07
+modified: 2024-08-25
 tags:
     - attack.defense-evasion
     - attack.t1489
@@ -25,60 +25,65 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_net_img:
+    selection_tools_img:
         - OriginalFileName:
               - 'net.exe'
               - 'net1.exe'
+              - 'PowerShell.EXE'
+              - 'psservice.exe'
+              - 'pwsh.dll'
+              - 'sc.exe'
         - Image|endswith:
               - '\net.exe'
               - '\net1.exe'
-    selection_net_cli:
-        CommandLine|contains: ' stop '
-    selection_sc_img:
-        - OriginalFileName: 'sc.exe'
-        - Image|endswith: '\sc.exe'
-    selection_sc_cli:
-        CommandLine|contains:
-            - ' stop '
-            - ' delete '
-            - ' pause '
-    selection_pwsh_img:
-        - OriginalFileName:
-              - 'PowerShell.EXE'
-              - 'pwsh.dll'
-        - Image|endswith:
               - '\powershell.exe'
+              - '\PsService.exe'
+              - '\PsService64.exe'
               - '\pwsh.exe'
-    selection_pwsh_cli:
-        CommandLine|contains:
-            - 'Stop-Service '
-            - 'Remove-Service '
+              - '\sc.exe'
+    selection_tools_cli:
+        - CommandLine|contains:
+              - ' delete '
+              - ' pause ' # Covers flags from: PsService and Sc.EXE
+              - ' stop ' # Covers flags from: PsService.EXE, Net.EXE and Sc.EXE
+              - 'Stop-Service '
+              - 'Remove-Service '
+        - CommandLine|contains|all:
+              - 'config'
+              - 'start=disabled'
     selection_services:
         CommandLine|contains:
             - '143Svc'
             - 'Acronis VSS Provider'
             - 'AcronisAgent'
             - 'AcrSch2Svc'
+            - 'AdobeARMservice'
+            - 'AHS Service'
             - 'Antivirus'
+            - 'Apache4'
             - 'ARSM'
             - 'aswBcc'
+            - 'AteraAgent'
             - 'Avast Business Console Client Antivirus Service'
             - 'avast! Antivirus'
             - 'AVG Antivirus'
             - 'avgAdminClient'
             - 'AvgAdminServer'
-            - 'AVP1' # Covers multiple AVP versions
+            - 'AVP1'
             - 'BackupExec'
             - 'bedbg'
             - 'BITS'
             - 'BrokerInfrastructure'
+            - 'CASLicenceServer'
+            - 'CASWebServer'
             - 'Client Agent 7.60'
             - 'Core Browsing Protection'
             - 'Core Mail Protection'
-            - 'Core Scanning Server' # Covers 'Core Scanning ServerEx'
+            - 'Core Scanning Server'
             - 'DCAgent'
-            - 'EhttpSr' # Covers 'EhttpSry', 'EhttpSrv'
-            - 'ekrn' # Covers 'ekrnEpsw'
+            - 'dwmrcs'
+            - 'EhttpSr'
+            - 'ekrn'
             - 'Enterprise Client Service'
             - 'epag'
             - 'EPIntegrationService'
@@ -92,16 +97,23 @@ detection:
             - 'FA_Scheduler'
             - 'FirebirdGuardianDefaultInstance'
             - 'FirebirdServerDefaultInstance'
+            - 'FontCache3.0.0.0'
             - 'HealthTLService'
-            - 'MSSQLFDLauncher$' # Covers 'SHAREPOINT', 'TPS', 'SBSMonitoring', etc.
             - 'hmpalertsvc'
             - 'HMS'
+            - 'HostControllerService'
+            - 'hvdsvc'
+            - 'IAStorDataMgrSvc'
+            - 'IBMHPS'
+            - 'ibmspsvc'
             - 'IISAdmin'
             - 'IMANSVC'
             - 'IMAP4Svc'
+            - 'instance2'
             - 'KAVFS'
             - 'KAVFSGT'
             - 'kavfsslp'
+            - 'KeyIso'
             - 'klbackupdisk'
             - 'klbackupflt'
             - 'klflt'
@@ -135,10 +147,13 @@ detection:
             - 'mfewc'
             - 'MMS'
             - 'mozyprobackup'
+            - 'MSComplianceAudit'
+            - 'MSDTC'
             - 'MsDtsServer'
             - 'MSExchange'
             - 'msftesq1SPROO'
             - 'msftesql$PROD'
+            - 'msftesql$SQLEXPRESS'
             - 'MSOLAP$SQL_2008'
             - 'MSOLAP$SYSTEM_BGC'
             - 'MSOLAP$TPS'
@@ -150,17 +165,30 @@ detection:
             - 'MSSQ0SHAREPOINT'
             - 'MSSQ0SOPHOS'
             - 'MSSQL'
+            - 'MSSQLFDLauncher$'
             - 'MySQL'
             - 'NanoServiceMain'
             - 'NetMsmqActivator'
+            - 'NetPipeActivator'
+            - 'netprofm'
+            - 'NetTcpActivator'
+            - 'NetTcpPortSharing'
             - 'ntrtscan'
+            - 'nvspwmi'
             - 'ofcservice'
             - 'Online Protection System'
             - 'OracleClientCache80'
+            - 'OracleDBConsole'
+            - 'OracleMTSRecoveryService'
+            - 'OracleOraDb11g_home1'
+            - 'OracleService'
+            - 'OracleVssWriter'
+            - 'osppsvc'
             - 'PandaAetherAgent'
             - 'PccNTUpd'
             - 'PDVFSService'
             - 'POP3Svc'
+            - 'postgresql-x64-9.4'
             - 'POVFSService'
             - 'PSUAService'
             - 'Quick Update Service'
@@ -175,6 +203,7 @@ detection:
             - 'SAVService'
             - 'ScSecSvc'
             - 'SDRSVC'
+            - 'SearchExchangeTracing'
             - 'sense'
             - 'SentinelAgent'
             - 'SentinelHelperService'
@@ -190,6 +219,7 @@ detection:
             - 'SQL Backups'
             - 'SQL Server'
             - 'SQLAgent'
+            - 'SQLANYs_Sage_FAS_Fixed_Assets'
             - 'SQLBrowser'
             - 'SQLsafe'
             - 'SQLSERVERAGENT'
@@ -197,12 +227,14 @@ detection:
             - 'SQLWriter'
             - 'SSISTELEMETRY130'
             - 'SstpSvc'
+            - 'storflt'
             - 'svcGenericHost'
             - 'swc_service'
             - 'swi_filter'
             - 'swi_service'
             - 'swi_update'
             - 'Symantec'
+            - 'TeamViewer'
             - 'Telemetryserver'
             - 'ThreatLockerService'
             - 'TMBMServer'
@@ -216,13 +248,20 @@ detection:
             - 'TmProxy'
             - 'TMSmartRelayService'
             - 'tmusa'
+            - 'Tomcat'
             - 'Trend Micro Deep Security Manager'
             - 'TrueKey'
+            - 'UFNet'
             - 'UI0Detect'
+            - 'UniFi'
             - 'UTODetect'
+            - 'vds'
             - 'Veeam'
             - 'VeeamDeploySvc'
             - 'Veritas System Recovery'
+            - 'vmic'
+            - 'VMTools'
+            - 'vmvss'
             - 'VSApiNt'
             - 'VSS'
             - 'W3Svc'
@@ -231,10 +270,13 @@ detection:
             - 'WeanClOudSve'
             - 'Weems JY'
             - 'WinDefend'
+            - 'wmms'
             - 'wozyprobackup'
+            - 'WPFFontCache_v0400'
             - 'WRSVC'
+            - 'wsbexchange'
             - 'Zoolz 2 Service'
-    condition: selection_services and (all of selection_net_* or all of selection_pwsh_* or all of selection_sc_*)
+    condition: all of selection_*
 falsepositives:
     - Administrators or tools shutting down the services due to upgrade or removal purposes. If you experience some false positive, please consider adding filters to the parent process launching this command and not removing the entry
 level: high

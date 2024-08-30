@@ -18,7 +18,7 @@ references:
     - https://learn.microsoft.com/en-us/dotnet/framework/tools/regsvcs-exe-net-services-installation-tool
 author: Oleg Kolesnikov @securonix invrep_de, oscd.community, Florian Roth (Nextron Systems), Christian Burkard (Nextron Systems)
 date: 2020-10-23
-modified: 2023-12-02
+modified: 2024-08-15
 tags:
     - attack.defense-evasion
     - attack.t1218.011
@@ -41,20 +41,20 @@ detection:
     selection_regsvr32:
         Image|endswith: '\regsvr32.exe'
         CommandLine|endswith: 'regsvr32.exe'
-    filter_main_edge_update:
-        ParentImage|contains|all:
-            - ':\Users\'
-            - '\AppData\Local\Microsoft\EdgeUpdate\Install\{'
-    filter_optional_chrome_installer:
-        # As reported in https://github.com/SigmaHQ/sigma/issues/4570
-        ParentImage|contains|all:
-            - ':\Users\'
-            - '\AppData\Local\Google\Chrome\Application\'
-        ParentImage|endswith: '\Installer\setup.exe'
-        ParentCommandLine|contains: '--uninstall --channel=stable'
+    filter_optional_edge_update:
+        ParentImage|contains: '\AppData\Local\Microsoft\EdgeUpdate\Install\{'
         Image|endswith: '\rundll32.exe'
         CommandLine|endswith: 'rundll32.exe'
-    condition: 1 of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
+    filter_optional_chromium_installer:
+        # As reported in https://github.com/SigmaHQ/sigma/issues/4570 and others
+        ParentImage|contains:
+            - '\AppData\Local\BraveSoftware\Brave-Browser\Application\'
+            - '\AppData\Local\Google\Chrome\Application\'
+        ParentImage|endswith: '\Installer\setup.exe'
+        ParentCommandLine|contains: '--uninstall '
+        Image|endswith: '\rundll32.exe'
+        CommandLine|endswith: 'rundll32.exe'
+    condition: 1 of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Unlikely
 level: high

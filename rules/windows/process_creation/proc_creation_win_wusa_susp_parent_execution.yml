@@ -3,10 +3,12 @@ id: ef64fc9c-a45e-43cc-8fd8-7d75d73b4c99
 status: experimental
 description: |
     Detects execution of the "wusa.exe" (Windows Update Standalone Installer) utility by a parent process that is located in a suspicious location.
+    Attackers could instantiate an instance of "wusa.exe" in order to bypass User Account Control (UAC). They can duplicate the access token from "wusa.exe" to gain elevated privileges.
 references:
     - https://www.fortinet.com/blog/threat-research/konni-campaign-distributed-via-malicious-document
 author: X__Junior (Nextron Systems)
 date: 2023-11-26
+modified: 2024-08-15
 tags:
     - attack.execution
 logsource:
@@ -17,6 +19,7 @@ detection:
         Image|endswith: '\wusa.exe'
     selection_paths_1:
         ParentImage|contains:
+            # Note: Add additional suspicious locations to increase coverage
             - ':\Perflogs\'
             - ':\Users\Public\'
             - ':\Windows\Temp\'
@@ -35,7 +38,10 @@ detection:
         - ParentImage|contains|all:
               - ':\Users\'
               - '\Pictures\'
-    condition: selection_img and 1 of selection_paths_*
+    filter_main_msu:
+        # Note: We exclude MSU extension files. A better approach is to baseline installation of updates in your env to avoid false negatives.
+        CommandLine|contains: '.msu'
+    condition: selection_img and 1 of selection_paths_* and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high

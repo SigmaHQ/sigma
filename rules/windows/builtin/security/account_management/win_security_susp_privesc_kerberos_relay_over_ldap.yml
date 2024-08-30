@@ -9,7 +9,7 @@ references:
     - https://github.com/elastic/detection-rules/blob/5fe7833312031a4787e07893e27e4ea7a7665745/rules/_deprecated/privilege_escalation_krbrelayup_suspicious_logon.toml#L38
 author: Elastic, @SBousseaden
 date: 2022-04-27
-modified: 2024-07-02
+modified: 2024-08-13
 tags:
     - attack.privilege-escalation
     - attack.credential-access
@@ -25,7 +25,9 @@ detection:
         IpAddress: '127.0.0.1'
         TargetUserSid|startswith: 'S-1-5-21-'
         TargetUserSid|endswith: '-500'
-    condition: selection
+    filter_main_ip_null:
+        IpPort: '0'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high
