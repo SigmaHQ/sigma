@@ -1,0 +1,25 @@
+title: Remote Access Tool - AnyDesk Incoming Connection
+id: d58ba5c6-0ed7-4b9d-a433-6878379efda9
+status: experimental
+description: |
+    Detects incoming connections to AnyDesk. This could indicate a potential remote attacker trying to connect to a listening instance of AnyDesk and use it as potential command and control channel.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1219/T1219.md#atomic-test-2---anydesk-files-detected-test-on-windows
+    - https://asec.ahnlab.com/en/40263/
+author: '@d4ns4n_ (Wuerth-Phoenix)'
+date: 2024-09-02
+tags:
+    - attack.persistence
+    - attack.command-and-control
+    - attack.t1219
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\AnyDesk.exe'
+        Initiated: 'false' # If the network connection is initiated remotely (incoming), the field is set to false.
+    condition: selection
+falsepositives:
+    - Legitimate incoming connections (e.g. sysadmin activity). Most of the time I would expect outgoing connections (initiated locally).
+level: medium
