@@ -1,11 +1,12 @@
-title: Startup or Logon Script Added to Group Policy Object
+title: Startup/Logon Script Added to Group Policy Object
 id: 123e4e6d-b123-48f8-b261-7214938acaf0
 status: experimental
-description: Detects the modification of Group Policy Objects (GPO) to add a startup/logon script to users or computer objects.
+description: |
+    Detects the modification of Group Policy Objects (GPO) to add a startup/logon script to users or computer objects.
 references:
     - https://www.elastic.co/guide/en/security/current/startup-logon-script-added-to-group-policy-object.html
-author: Josh Nickels, Marius Rothenbücher
-date: 2024-09-04
+author: Elastic, Josh Nickels, Marius Rothenbücher
+date: 2024-09-06
 tags:
     - attack.privilege-escalation
     - attack.t1484.001
@@ -15,12 +16,11 @@ logsource:
     service: security
     definition: 'The advanced audit policy setting "Object Access > Audit Detailed File Share" must be configured for Success/Failure'
 detection:
-    condition: selection_eventid and (all of selection_attributes* or selection_share)
     selection_eventid:
         EventID:
             - 5136
             - 5145
-    selection_attributes:
+    selection_attributes_main:
         AttributeLDAPDisplayName:
             - 'gPCMachineExtensionNames'
             - 'gPCUserExtensionNames'
@@ -35,6 +35,7 @@ detection:
             - '\scripts.ini'
             - '\psscripts.ini'
         AccessList|contains: '%%4417'
+    condition: selection_eventid and (all of selection_attributes_* or selection_share)
 falsepositives:
-    - Legitimate execution by sysadmin
+    - Legitimate execution by system administrators.
 level: medium
