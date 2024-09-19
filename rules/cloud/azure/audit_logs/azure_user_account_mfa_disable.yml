@@ -1,0 +1,28 @@
+title: Multi Factor Authentication Disabled For User Account
+id: b18454c8-0be3-41f7-86bc-9c614611b839
+status: experimental
+description: |
+    Detects changes to the "StrongAuthenticationRequirement" value, where the state is set to "0" or "Disabled".
+    Threat actors were seen disabling multi factor authentication for users in order to maintain or achieve access to the account. Also see in SIM Swap attacks.
+references:
+    - https://www.sans.org/blog/defending-against-scattered-spider-and-the-com-with-cybercrime-intelligence/
+author: Harjot Singh (@cyb3rjy0t)
+date: 2024-08-21
+tags:
+    - attack.credential-access
+    - attack.persistence
+logsource:
+    product: azure
+    service: auditlogs
+    definition: 'Requirements: The TargetResources array needs to be mapped accurately in order for this rule to work'
+detection:
+    selection:
+        LoggedByService: 'Core Directory'
+        Category: 'UserManagement'
+        OperationName: 'Update user'
+        TargetResources.ModifiedProperties.DisplayName: 'StrongAuthenticationRequirement'
+        TargetResources.ModifiedProperties.NewValue|contains: "State\":0"
+    condition: selection
+falsepositives:
+    - Legitimate authorized activity.
+level: medium

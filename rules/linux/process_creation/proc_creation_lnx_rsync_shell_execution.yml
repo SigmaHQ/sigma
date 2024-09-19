@@ -1,0 +1,29 @@
+title: Shell Execution via Rsync - Linux
+id: e2326866-609f-4015-aea9-7ec634e8aa04
+status: experimental
+description: |
+    Detects the use of the "gcc" utility to execute a shell. Such behavior may be associated with privilege escalation, unauthorized command execution, or to break out from restricted environments.
+references:
+    - https://gtfobins.github.io/gtfobins/rsync/#shell
+author: Li Ling, Andy Parkidomo, Robert Rakowski, Blake Hartstein (Bloomberg L.P.)
+date: 2024-09-02
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_img:
+        Image|endswith: '/rsync'
+        CommandLine|contains: ' -e '
+    selection_cli:
+        CommandLine|contains:
+            - 'sh 0<&2 1>&2'
+            - 'sh 1>&2 0<&2'
+    selection_null:
+        CommandLine|contains: '/dev/null'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high

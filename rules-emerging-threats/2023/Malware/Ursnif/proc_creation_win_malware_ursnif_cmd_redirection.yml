@@ -1,0 +1,27 @@
+title: Ursnif Redirection Of Discovery Commands
+id: 7aaa5739-12fc-41aa-b98b-23ec27d42bdf
+status: test
+description: |
+    Detects the redirection of Ursnif discovery commands as part of the initial execution of the malware.
+references:
+    - Internal Research
+author: '@kostastsale'
+date: 2023-07-16
+tags:
+    - attack.execution
+    - attack.t1059
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\explorer.exe'
+        Image|endswith: '\cmd.exe'
+        CommandLine|contains|all:
+            - '/C '
+            - ' >> *\AppData\local\temp\*.bin'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high

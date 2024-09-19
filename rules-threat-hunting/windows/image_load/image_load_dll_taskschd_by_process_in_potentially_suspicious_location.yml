@@ -1,0 +1,35 @@
+title: Task Scheduler DLL Loaded By Application Located In Potentially Suspicious Location
+id: 3b92a1d0-8d4b-4d28-a1b4-1e29d49a6a3e
+status: experimental
+description: |
+    Detects the loading of the "taskschd.dll" module from a process that located in a potentially suspicious or uncommon directory.
+    The loading of this DLL might indicate that the application have the capability to create a scheduled task via the "Schedule.Service" COM object.
+    Investigation of the loading application and its behavior is required to determining if its malicious.
+references:
+    - https://www.logpoint.com/en/blog/shenanigans-of-scheduled-tasks/
+    - https://x.com/Max_Mal_/status/1826179497084739829
+author: Swachchhanda Shrawan Poudel
+date: 2024-09-02
+tags:
+    - attack.persistence
+    - attack.execution
+    - attack.t1053.005
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection_dll:
+        - ImageLoaded|endswith: '\taskschd.dll'
+        - OriginalFileName: 'taskschd.dll'
+    selection_paths:
+        Image|contains:
+            - ':\Temp\'
+            - ':\Users\Public\'
+            - ':\Windows\Temp\'
+            - '\AppData\Local\Temp\'
+            - '\Desktop\'
+            - '\Downloads\'
+    condition: all of selection_*
+falsepositives:
+    - Some installers might generate false positives, apply additional filters accordingly.
+level: low
