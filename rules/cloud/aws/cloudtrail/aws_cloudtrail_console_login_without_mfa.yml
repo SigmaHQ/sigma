@@ -1,0 +1,25 @@
+title: AWS Console Login Without MFA Monitoring
+id: c134e006-5aef-49dd-9386-62675a251585
+status: test
+description: Detects successful AWS console logins where MFA was not used. This alert helps identify potential security risks by monitoring logins that do not utilize multi-factor authentication.
+references:
+    - https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-event-reference-aws-console-sign-in-events.html
+    - https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_lost-or-broken.html
+author: Ivan Saakov
+date: 2024-09-21
+tags:
+    - attack.defense-evasion
+    - attack.t1078
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventName: ConsoleLogin
+        status: success
+        additionalEventData:
+            MFAUsed: "No"
+    condition: selection
+falsepositives:
+    - It is possible when the first login to the account may be without an MFA. It is required to inform the user about the need to configure the MFA.
+level: medium

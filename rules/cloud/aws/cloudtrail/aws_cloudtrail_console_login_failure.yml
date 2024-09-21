@@ -1,0 +1,24 @@
+title: AWS ConsoleLogin Failure Monitoring
+id: 6393e346-1977-46ef-8987-ad414a145fad
+status: test
+description: This search is important for security monitoring and auditing, as failed console login attempts may indicate unauthorized access attempts or misconfigurations. Monitoring these events helps identify potential security threats.
+references:
+   - https://naikordian.github.io/blog/posts/brute-force-aws-console/
+   - https://help.fortinet.com/fsiem/Public_Resource_Access/7_2_1/rules/PH_RULE_AWS_Management_Console_Brute_Force_of_Root_User_Identity.htm
+author: Ivan Saakov
+date: 2024-09-21
+tags:
+    - attack.credential-access
+    - attack.t1110
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventName: ConsoleLogin
+        responseElements:
+            ConsoleLogin: failure
+    condition: selection
+falsepositives:
+    - Legitimate failed login attempts by authorized users
+level: medium

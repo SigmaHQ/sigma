@@ -1,0 +1,26 @@
+title: AWS EnableRegion Command Monitoring
+id: a5ffb6ea-c784-4e01-b30a-deb6e58ca2ab
+status: test
+description: |
+    AWS has 30+ regions, some of them are enabled by default, others must be explicitly enabled in each account separately. 
+    There may be situations where security monitoring does not cover some new AWS regions.
+    With this alert, we are trying to track the creation of a new region to verify that this innovation is reasonable and our instincts support it.
+references:
+   - https://docs.aws.amazon.com/accounts/latest/reference/API_EnableRegion.html
+   - https://docs.aws.amazon.com/accounts/latest/reference/manage-acct-regions.html
+author: Ivan Saakov, Sergey Zelenskiy
+date: 2024-09-21
+tags:
+    - attack.persistence
+    - attack.t1078.004
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventName: EnableRegion
+        eventSource: account.amazonaws.com
+    condition: selection
+falsepositives:
+    - Legitimate use of the EnableRegion command by authorized administrators
+level: medium
