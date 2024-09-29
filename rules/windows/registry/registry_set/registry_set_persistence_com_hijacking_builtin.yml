@@ -9,8 +9,10 @@ status: experimental
 description: Detects potential COM object hijacking via modification of default system CLSID.
 references:
     - https://www.microsoft.com/security/blog/2022/07/27/untangling-knotweed-european-private-sector-offensive-actor-using-0-day-exploits/ (idea)
+    - https://unit42.paloaltonetworks.com/snipbot-romcom-malware-variant/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2024-07-16
+modified: 2024/09/29
 tags:
     - attack.persistence
     - attack.t1546.015
@@ -31,10 +33,11 @@ detection:
             - '\{4590f811-1d3a-11d0-891f-00aa004b2e24}\'
             - '\{4de225bf-cf59-4cfc-85f7-68b90f185355}\'
             - '\{F56F6FDD-AA9D-4618-A949-C1B91AF43B1A}\'
-    selection_locations:
+            - '\{2155fee3-2419-4373-b102-6843707eb41f}\'
+    selection_susp_location_1:
         Details|contains:
             # Note: Add more suspicious paths and locations
-            - '\AppData\Local\Temp\'
+            - '\AppData\Local\'
             - '\Desktop\'
             - '\Downloads\'
             - '\Microsoft\Windows\Start Menu\Programs\Startup\'
@@ -44,7 +47,22 @@ detection:
             - '%appdata%'
             - '%temp%'
             - '%tmp%'
-    condition: all of selection_*
+            - ':\Perflogs\'
+            - '\Temporary Internet'
+    selection_susp_location_2:
+        - CommandLine|contains|all:
+                - ':\Users\'
+                - '\Favorites\'
+        - CommandLine|contains|all:
+                - ':\Users\'
+                - '\Favourites\'
+        - CommandLine|contains|all:
+                - ':\Users\'
+                - '\Contacts\'
+        - CommandLine|contains|all:
+                - ':\Users\'
+                - '\Pictures\'
+    condition: selection_target and selection_builtin_clsid and 1 of selection_susp_location_*
 falsepositives:
     - Unlikely
 level: high
