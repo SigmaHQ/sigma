@@ -2,7 +2,7 @@ title: Potential Python Dll SideLoading
 id: d36f7c12-14a3-4d48-b6b8-774b9c66f44d
 status: experimental
 description: Detects potential DLL sideloading of Python 3 DLL files (e.g., python311.dll, python310.dll, python39.dll).
-references: 
+references:
     - https://www.securonix.com/blog/seolurker-attack-campaign-uses-seo-poisoning-fake-google-ads-to-install-malware/
     - https://thedfirreport.com/2024/09/30/nitrogen-campaign-drops-sliver-and-ends-with-blackcat-ransomware/
     - https://github.com/wietze/HijackLibs/tree/main/yml/3rd_party/python
@@ -12,25 +12,25 @@ tags:
     - attack.defense_evasion
     - attack.t1547.002
 logsource:
-  category: image_load
-  product: windows
+    category: image_load
+    product: windows
 detection:
-  selection:
-      ImageLoaded|endswith: 
-          - '\python311.dll'
-          - '\python310.dll'
-          - '\python39.dll'
-  filter_image_path:
-      ImageLoaded|contains:
-        - 'C:\program files\Python3'
-        - 'C:\program files (x86)\Python3'
-        - 'C:\Users\*\AppData\Local\Programs\Python\Python3'
-  filter_signature_status:
-        Product: 'Python'
-        Signed: 'true'
-        description: 'Python'
-        Company: 'Python Software Foundation'
-  condition: selection and not 1 of filter_*
+    selection:
+        ImageLoaded|endswith:
+            - '\python311.dll'
+            - '\python310.dll'
+            - '\python39.dll'
+        filter_image_path:
+            ImageLoaded|contains:
+                - 'C:\program files\Python3'
+                - 'C:\program files (x86)\Python3'
+                - 'C:\Users\*\AppData\Local\Programs\Python\Python3'
+        filter_signature_status:
+            Product: 'Python'
+            Signed: 'true'
+            description: 'Python'
+            Company: 'Python Software Foundation'
+    condition: selection and not 1 of filter_*
 falsepositives:
   - Legitimate software using Python 3.x DLLs (e.g., Python installations, applications with embedded Python)
 level: high
