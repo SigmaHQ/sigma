@@ -7,9 +7,9 @@ description: |
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1489/T1489.md#atomic-test-3---windows---stop-service-by-killing-process
     - https://unit42.paloaltonetworks.com/snipbot-romcom-malware-variant/
-author: frack113, MalGamy (Nextron Systems)
+author: frack113, MalGamy (Nextron Systems), Nasreddine Bencherchali
 date: 2021-12-26
-modified: 2024-10-03
+modified: 2024-10-06
 tags:
     - attack.impact
     - attack.t1489
@@ -21,10 +21,11 @@ detection:
     selection_img:
         - Image|endswith: '\taskkill.exe'
         - OriginalFileName: 'taskkill.exe'
-    selection_1_cli:
-        CommandLine|contains: ' /f'
-    selection_2_cli:
-        CommandLine|contains:
+    selection_cli_force:
+        - CommandLine|contains|windash: ' /f '
+        - CommandLine|endswith|windash: ' /f'
+    selection_cli_filter_process:
+        CommandLine|contains|windash:
             - ' /im '
             - ' /pid '
     filter_main_installers:
