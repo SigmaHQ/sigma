@@ -1,10 +1,12 @@
 title: Exfiltration Over Alternative Protocol - Linux
 id: 2696bc0f-aa16-4523-93c2-e1784cbbe934
-status: test
-description: Detects exfiltrating data over a symmetrically encrypted network protocol. This information can help adversaries to exfiltration data by scp.
+status: experimental
+description: |
+    Detects data exfiltration over a symmetrically encrypted network protocol.
+    This information can help adversaries to exfiltration data by scp.
 references:
-    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1048/T1048.md
-author: 'Milad Cheraghi'
+    - https://github.com/redcanaryco/atomic-red-team/blob/8218baac095296c1185e38f3678b3bd98eab4441/atomics/T1048/T1048.md
+author: Milad Cheraghi
 date: 2024-06-10
 tags:
     - attack.exfiltration
@@ -14,15 +16,14 @@ logsource:
     product: linux
 detection:
     selection:
-        Image|endswith:
-            - '/ssh'
+        Image|endswith: '/ssh'
         CommandLine|contains:
-            - 'tar'
-            - 'gzip'
+            - 'bunzip2'
             - 'bzip'
             - 'bzip2'
             - 'gunzip'
-            - 'bunzip2'
+            - 'gzip'
+            - 'tar'
             - 'unzip'
     condition: selection
 falsepositives:
