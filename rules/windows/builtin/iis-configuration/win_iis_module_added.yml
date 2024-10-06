@@ -1,12 +1,14 @@
-title: IIS Add Module
+title: New Module Module Added To IIS Server
 id: dd857d3e-0c6e-457b-9b48-e82ae7f86bd7
 status: experimental
-description: Detects adding a new module to the IIS server.
+description: Detects the addition of a new module to an IIS server.
 references:
     - https://learn.microsoft.com/en-us/iis/manage/provisioning-and-managing-iis/configure-logging-in-iis
     - https://www.microsoft.com/en-us/security/blog/2022/12/12/iis-modules-the-evolution-of-web-shells-and-how-to-detect-them/
+    - https://www.microsoft.com/en-us/security/blog/2022/07/26/malicious-iis-extensions-quietly-open-persistent-backdoors-into-servers/
+    - https://learn.microsoft.com/en-us/iis/get-started/introduction-to-iis/iis-modules-overview
 author: frack113
-date: 2024-07-27
+date: 2024-10-06
 tags:
     - attack.defense-evasion
     - attack.persistence
@@ -18,8 +20,8 @@ logsource:
 detection:
     selection:
         EventID: 29
-        Configuration|startswith: '/system.webServer/modules/add'
-    filter_natif:
+        Configuration|contains: '/system.webServer/modules/add'
+    filter_main_builtin:
         NewValue:
             - 'AnonymousAuthenticationModule'
             - 'CustomErrorModule'
@@ -34,9 +36,9 @@ detection:
             - 'StaticFileModule'
             - 'TokenCacheModule'
             - 'UriCacheModule'
-    filter_remove:
+    filter_main_remove:
         NewValue: ''
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Legitimate administrator activity
 level: medium
