@@ -7,11 +7,11 @@ description: |
 references:
     - https://twitter.com/SBousseaden/status/1483810148602814466
     - https://github.com/MicrosoftDocs/windows-itpro-docs/blob/40fe118976734578f83e5e839b9c63ae7a4af82d/windows/security/threat-protection/windows-defender-application-control/event-id-explanations.md#windows-codeintegrity-operational-log
-    - https://learn.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/event-tag-explanations
-    - https://learn.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/event-id-explanations
+    - https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/operations/event-tag-explanations
+    - https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/operations/event-id-explanations
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
-date: 2022/01/20
-modified: 2023/11/15
+date: 2022-01-20
+modified: 2024-08-29
 tags:
     - attack.execution
 logsource:
@@ -97,6 +97,8 @@ detection:
             - '\Program Files\McAfee\MfeAV\AMSIExt.dll'
     filter_optional_eset:
         FileNameBuffer|endswith: '\Program Files\ESET\ESET Security\eamsi.dll'
+    filter_optional_comodo:
+        FileNameBuffer|endswith: '\Program Files\comodo\comodo internet security\amsiprovider_x64.dll'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Antivirus and other third party products are known to trigger this rule quite a lot. Initial filters and tuning is required before using this rule.

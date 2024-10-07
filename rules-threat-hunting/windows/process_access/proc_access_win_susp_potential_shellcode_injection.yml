@@ -1,0 +1,56 @@
+title: Potential Shellcode Injection
+id: 250ae82f-736e-4844-a68b-0b5e8cc887da
+status: test
+description: Detects potential shellcode injection as seen used by tools such as Metasploit's migrate and Empire's psinject.
+references:
+    - https://github.com/EmpireProject/PSInject
+author: Bhabesh Raj
+date: 2022-03-11
+modified: 2024-07-02
+tags:
+    - attack.defense-evasion
+    - attack.privilege-escalation
+    - attack.t1055
+    - detection.threat-hunting
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        GrantedAccess:
+            - '0x147a'
+            - '0x1f3fff'
+        CallTrace|contains: 'UNKNOWN'
+    filter_main_wmiprvse:
+        SourceImage: 'C:\Windows\System32\Wbem\Wmiprvse.exe'
+        TargetImage: 'C:\Windows\system32\lsass.exe'
+    filter_optional_dell_folders:
+        # If dell software is installed we get matches like these
+        # Example 1:
+        #   SourceImage: C:\Program Files\Dell\SupportAssistAgent\bin\SupportAssistAgent.exe
+        #   TargetImage: C:\Program Files\Dell\TechHub\Dell.TechHub.exe
+        #   GrantedAccess: 0x1F3FFF
+        # Example 2:
+        #   SourceImage: C:\Program Files (x86)\Dell\UpdateService\DCF\Dell.DCF.UA.Bradbury.API.SubAgent.exe
+        #   TargetImage: C:\Program Files\Dell\TechHub\Dell.TechHub.exe
+        #   GrantedAccess: 0x1F3FFF
+        # Example 3:
+        #   SourceImage: C:\Program Files\Dell\TechHub\Dell.TechHub.exe
+        #   TargetImage: C:\Program Files (x86)\Dell\UpdateService\DCF\Dell.DCF.UA.Bradbury.API.SubAgent.exe
+        #   GrantedAccess: 0x1F3FFF
+        SourceImage|startswith:
+            - 'C:\Program Files\Dell\'
+            - 'C:\Program Files (x86)\Dell\'
+        TargetImage|startswith:
+            - 'C:\Program Files\Dell\'
+            - 'C:\Program Files (x86)\Dell\'
+    filter_optional_dell_specifc:
+        SourceImage: 'C:\Program Files (x86)\Dell\UpdateService\ServiceShell.exe'
+        TargetImage: 'C:\Windows\Explorer.EXE'
+    filter_optional_visual_studio:
+        SourceImage|startswith: 'C:\Program Files\Microsoft Visual Studio\'
+        TargetImage|startswith: 'C:\Program Files\Microsoft Visual Studio\'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Unknown
+level: medium

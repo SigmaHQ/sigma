@@ -1,0 +1,90 @@
+title: DSInternals Suspicious PowerShell Cmdlets - ScriptBlock
+id: 846c7a87-8e14-4569-9d49-ecfd4276a01c
+related:
+    - id: 43d91656-a9b2-4541-b7e2-6a9bd3a13f4e
+      type: similar
+status: experimental
+description: |
+    Detects execution and usage of the DSInternals PowerShell module. Which can be used to perform what might be considered as suspicious activity such as dumping DPAPI backup keys or manipulating NTDS.DIT files.
+    The DSInternals PowerShell Module exposes several internal features of Active Directory and Azure Active Directory. These include FIDO2 and NGC key auditing, offline ntds.dit file manipulation, password auditing, DC recovery from IFM backups and password hash calculation.
+references:
+    - https://github.com/MichaelGrafnetter/DSInternals/blob/39ee8a69bbdc1cfd12c9afdd7513b4788c4895d4/Src/DSInternals.PowerShell/DSInternals.psd1
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2024-06-26
+tags:
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection:
+        ScriptBlockText|contains:
+            - 'Add-ADDBSidHistory'
+            - 'Add-ADNgcKey'
+            - 'Add-ADReplNgcKey'
+            - 'ConvertFrom-ADManagedPasswordBlob'
+            - 'ConvertFrom-GPPrefPassword'
+            - 'ConvertFrom-ManagedPasswordBlob'
+            - 'ConvertFrom-UnattendXmlPassword'
+            - 'ConvertFrom-UnicodePassword'
+            - 'ConvertTo-AADHash'
+            - 'ConvertTo-GPPrefPassword'
+            - 'ConvertTo-KerberosKey'
+            - 'ConvertTo-LMHash'
+            - 'ConvertTo-MsoPasswordHash'
+            - 'ConvertTo-NTHash'
+            - 'ConvertTo-OrgIdHash'
+            - 'ConvertTo-UnicodePassword'
+            - 'Disable-ADDBAccount'
+            - 'Enable-ADDBAccount'
+            - 'Get-ADDBAccount'
+            - 'Get-ADDBBackupKey'
+            - 'Get-ADDBDomainController'
+            - 'Get-ADDBGroupManagedServiceAccount'
+            - 'Get-ADDBKdsRootKey'
+            - 'Get-ADDBSchemaAttribute'
+            - 'Get-ADDBServiceAccount'
+            - 'Get-ADDefaultPasswordPolicy'
+            - 'Get-ADKeyCredential' # Covers 'Get-ADKeyCredentialLink'
+            - 'Get-ADPasswordPolicy'
+            - 'Get-ADReplAccount'
+            - 'Get-ADReplBackupKey'
+            - 'Get-ADReplicationAccount'
+            - 'Get-ADSIAccount'
+            - 'Get-AzureADUserEx'
+            - 'Get-BootKey'
+            - 'Get-KeyCredential'
+            - 'Get-LsaBackupKey'
+            - 'Get-LsaPolicy' # Covers 'Get-LsaPolicyInformation'
+            - 'Get-SamPasswordPolicy'
+            - 'Get-SysKey'
+            - 'Get-SystemKey'
+            - 'New-ADDBRestoreFromMediaScript'
+            - 'New-ADKeyCredential' # Covers 'New-ADKeyCredentialLink'
+            - 'New-ADNgcKey'
+            - 'New-NTHashSet'
+            - 'Remove-ADDBObject'
+            - 'Save-DPAPIBlob'
+            - 'Set-ADAccountPasswordHash'
+            - 'Set-ADDBAccountPassword' # Covers 'Set-ADDBAccountPasswordHash'
+            - 'Set-ADDBBootKey'
+            - 'Set-ADDBDomainController'
+            - 'Set-ADDBPrimaryGroup'
+            - 'Set-ADDBSysKey'
+            - 'Set-AzureADUserEx'
+            - 'Set-LsaPolicy' # Covers 'Set-LSAPolicyInformation'
+            - 'Set-SamAccountPasswordHash'
+            - 'Set-WinUserPasswordHash'
+            - 'Test-ADDBPasswordQuality'
+            - 'Test-ADPasswordQuality'
+            - 'Test-ADReplPasswordQuality'
+            - 'Test-PasswordQuality'
+            - 'Unlock-ADDBAccount'
+            - 'Write-ADNgcKey'
+            - 'Write-ADReplNgcKey'
+    condition: selection
+falsepositives:
+    - Legitimate usage of DSInternals for administration or audit purpose.
+level: high

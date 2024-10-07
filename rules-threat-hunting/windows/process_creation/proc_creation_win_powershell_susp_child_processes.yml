@@ -1,0 +1,59 @@
+title: Potentially Suspicious PowerShell Child Processes
+id: e4b6d2a7-d8a4-4f19-acbd-943c16d90647
+status: test
+description: |
+    Detects potentially suspicious child processes spawned by PowerShell.
+    Use this rule to hunt for potential anomalies initiating from PowerShell scripts and commands.
+references:
+    - https://twitter.com/ankit_anubhav/status/1518835408502620162
+author: Florian Roth (Nextron Systems), Tim Shelton
+date: 2022-04-26
+modified: 2024-07-16
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - detection.threat-hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith:
+            - '\powershell_ise.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        Image|endswith:
+            - '\bash.exe'
+            - '\bitsadmin.exe'
+            - '\certutil.exe'
+            - '\cscript.exe'
+            - '\forfiles.exe'
+            - '\hh.exe'
+            - '\mshta.exe'
+            - '\regsvr32.exe'
+            - '\rundll32.exe'
+            - '\schtasks.exe'
+            - '\scrcons.exe'
+            - '\scriptrunner.exe'
+            - '\sh.exe'
+            - '\wmic.exe'
+            - '\wscript.exe'
+    filter_optional_amazon:
+        ParentCommandLine|contains: '\Program Files\Amazon\WorkspacesConfig\Scripts\'  # AWS Workspaces
+        CommandLine|contains: '\Program Files\Amazon\WorkspacesConfig\Scripts\'  # AWS Workspaces
+    filter_main_certutil_verify_store:
+        Image|endswith: '\certutil.exe'
+        CommandLine|contains: '-verifystore '
+    filter_main_wmic:
+        Image|endswith: '\wmic.exe'
+        CommandLine|contains:
+            - 'qfe list'
+            - 'diskdrive '
+            - 'csproduct '
+            - 'computersystem '
+            - ' os '
+            - ''
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - False positives are to be expected from PowerShell scripts that might make use of additional binaries such as "mshta", "bitsadmin", etc. Apply additional filters for those scripts.
+level: medium

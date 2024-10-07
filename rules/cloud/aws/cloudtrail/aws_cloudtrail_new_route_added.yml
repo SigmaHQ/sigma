@@ -1,0 +1,24 @@
+title: New Network Route Added
+id: c803b2ce-c4a2-4836-beae-b112010390b1
+status: test
+description: |
+    Detects the addition of a new network route to a route table in AWS.
+references:
+    - https://www.gorillastack.com/blog/real-time-events/important-aws-cloudtrail-security-events-tracking/
+author: jamesc-grafana
+date: 2024-07-11
+tags:
+    - attack.initial-access
+    - attack.t1190
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: 'ec2.amazonaws.com'
+        eventName: 'CreateRoute'
+    condition: selection
+falsepositives:
+    - New VPC Creation requiring setup of a new route table
+    - New subnets added requiring routing setup
+level: medium

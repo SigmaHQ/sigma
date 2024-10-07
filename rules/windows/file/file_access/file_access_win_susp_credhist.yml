@@ -1,0 +1,35 @@
+title: Access To Windows Credential History File By Uncommon Applications
+id: 7a2a22ea-a203-4cd3-9abf-20eb1c5c6cd2
+status: experimental
+description: |
+    Detects file access requests to the Windows Credential History File by an uncommon application.
+    This can be a sign of credential stealing. Example case would be usage of mimikatz "dpapi::credhist" function
+references:
+    - https://tools.thehacker.recipes/mimikatz/modules/dpapi/credhist
+    - https://www.passcape.com/windows_password_recovery_dpapi_credhist
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2022-10-17
+modified: 2024-07-29
+tags:
+    - attack.credential-access
+    - attack.t1555.004
+logsource:
+    category: file_access
+    product: windows
+    definition: 'Requirements: Microsoft-Windows-Kernel-File ETW provider'
+detection:
+    selection:
+        FileName|endswith: '\Microsoft\Protect\CREDHIST'
+    filter_main_system_folders:
+        Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Windows\system32\'
+            - 'C:\Windows\SysWOW64\'
+    filter_main_explorer:
+        Image: 'C:\Windows\explorer.exe'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+# Increase level after false positives filters are good enough
+level: medium
