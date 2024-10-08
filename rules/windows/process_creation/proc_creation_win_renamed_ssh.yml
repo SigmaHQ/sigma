@@ -1,0 +1,26 @@
+title: Renamed SSH Execution
+id: c313b43e-70a6-4183-9bb4-722309f9e45f
+status: experimental
+description: Detect execution of a renamed SSH client on Windows
+references:
+    - https://www.rapid7.com/blog/post/2024/05/10/ongoing-social-engineering-campaign-linked-to-black-basta-ransomware-operators/
+author: Omar Khaled (@beacon_exe)
+date: 2024-08-15
+tags:
+    - attack.defense-evasion
+    - attack.t1036.003
+    - attack.execution
+    - attack.t1569.002
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        Product|contains: 'OpenSSH for Windows'
+        Hashes|contains: "IMPHASH=91C272778494F545A220F3E427777252"
+    filter:
+        Image|contains: 'ssh'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: medium
