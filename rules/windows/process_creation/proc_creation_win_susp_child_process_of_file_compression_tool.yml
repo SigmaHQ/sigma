@@ -1,0 +1,29 @@
+title: Suspicious Child Process of a File Compression Utility
+id: 01874a97-faf4-430a-9632-8270d875ef52
+status: experimental
+description: Detects when a file compression tool spawns a child process(script host) that is used to execute scripts that are malicious.
+references:
+    - ' https://app.any.run/tasks/dd775fc4-ff87-4723-88e2-bb9f2bb4ec96/'
+author: Joseph Kamau
+date: 2024/07/12
+tags:
+    - attack.execution
+    - attack.t1204.002
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        ParentImage|endswith:
+            - \winrar.exe
+            - \rar.exe
+            - \winzip.exe
+            - \7z.exe
+        Image|endswith:
+            - \wscript.exe
+            - \cscript.exe
+            - \jscript.exe
+    condition: selection
+falsepositives:
+    - Unlikely
+level: medium
