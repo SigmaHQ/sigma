@@ -1,0 +1,34 @@
+title: Unconstrained Delegation Discovery
+id: cdfa73b6-3c9d-4bb8-97f8-ddbd8921f5c5
+status: experimental
+description: Detects use of Get-ADComputer to find Unconstrained Delegation host
+references:
+    - https://pentestlab.blog/2022/03/21/unconstrained-delegation/
+    - https://learn.microsoft.com/en-us/powershell/module/activedirectory/get-adcomputer?view=windowsserver2022-ps
+author: frack113
+date: 2024-06-22
+tags:
+    - attack.reconnaissance
+    - attack.discovery
+    - attack.credential-access
+    - attack.t1018
+    - attack.t1558
+    - attack.t1589.002
+logsource:
+    product: windows
+    category: ps_script
+    definition: Script Block Logging must be enable
+detection:
+    selection_cmdlet:
+        ScriptBlockText|contains: 'Get-ADComputer'
+    selection_reco:
+        ScriptBlockText|contains:
+            - 'TrustedForDelegation'
+            - 'TrustedToAuthForDelegation'
+            - 'msDS-AllowedToDelegateTo'
+            - 'PrincipalsAllowedToDelegateToAccount'
+            - '(userAccountControl:1.2.840.113556.1.4.803:=524288)'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use of the library for administrative activity
+level: medium
