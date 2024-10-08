@@ -14,6 +14,8 @@ references:
     - https://www.whiteoaksecurity.com/blog/attacks-defenses-dumping-lsass-no-mimikatz/
     - https://github.com/helpsystems/nanodump
     - https://github.com/CCob/MirrorDump
+    - https://github.com/safedv/RustiveDump/blob/main/src/main.rs#L35
+    - https://github.com/ricardojoserf/NativeDump/blob/01d8cd17f31f51f5955a38e85cd3c83a17596175/NativeDump/Program.cs#L258
 author: Florian Roth (Nextron Systems)
 date: 2021-11-15
 modified: 2024-10-08
@@ -47,7 +49,10 @@ detection:
         TargetFilename|contains: 'SQLDmpr'
         TargetFilename|endswith: '.mdmp'
     selection_5:
-        TargetFilename|startswith: 'nanodump'
+        TargetFilename|contains: '\nanodump'
+        TargetFilename|endswith: '.dmp'
+    selection_6: # NativeDump pattern https://github.com/ricardojoserf/NativeDump/blob/01d8cd17f31f51f5955a38e85cd3c83a17596175/NativeDump/Program.cs#L258
+        TargetFilename|contains: '\proc_'
         TargetFilename|endswith: '.dmp'
     condition: 1 of selection_*
 falsepositives:
