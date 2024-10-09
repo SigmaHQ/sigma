@@ -7,7 +7,7 @@ description: |
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/8218baac095296c1185e38f3678b3bd98eab4441/atomics/T1048/T1048.md
 author: Milad Cheraghi
-date: 2024-06-10
+date: 2024-09-10
 tags:
     - attack.exfiltration
     - attack.t1048.001
@@ -15,7 +15,7 @@ logsource:
     category: process_creation
     product: linux
 detection:
-    selection:
+    selection_img:
         Image|endswith: '/ssh'
         CommandLine|contains:
             - 'bunzip2'
@@ -25,7 +25,12 @@ detection:
             - 'gzip'
             - 'tar'
             - 'unzip'
-    condition: selection
+     selection_path:
+        CommandLine|contains:
+            - 'passwd'
+            - 'shadow'
+            - 'sudoers'       
+    condition: 1 of selection_img and selection_path
 falsepositives:
     - Unknown
 level: medium
