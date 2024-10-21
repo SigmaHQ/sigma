@@ -1,0 +1,41 @@
+title: Suspicious PowerShell Commands in RunMRU key
+id: a7df0e9e-91a5-459a-a003-4cde67c2ff5d
+status: test
+description: |
+    Detects suspicious PowerShell commands in the RunMRU registry key, commonly used by threat actors who deceive users
+    into pasting and executing malicious commands in the Run dialog, often disguised as CAPTCHA verification steps
+references:
+    - https://medium.com/@ahmed.moh.farou2/fake-captcha-campaign-on-arabic-pirated-movie-sites-delivers-lumma-stealer-4f203f7adabf
+    - https://medium.com/@shaherzakaria8/downloading-trojan-lumma-infostealer-through-capatcha-1f25255a0e71
+    - https://www.forensafe.com/blogs/runmrukey.html
+author: Ahmed Farouk
+date: 2024/10/21
+tags:
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection_key:
+        TargetObject|contains: 'Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU'
+
+    selection_pwsh:
+        Details|contains: 'powershell'
+
+    selection_sus_keywords:
+        Details|contains: 
+            - 'http'
+            - 'ftp'
+            - 'Hidden'
+            - 'iex'
+            - ' -e '
+            - ' -en '
+            - ' -enc '
+            - ' -enco'
+            - ' -ec '
+    condition: all of selection_*
+
+falsepositives:
+    - Unknown
+level: high
