@@ -10,6 +10,7 @@ references:
     - https://www.ietf.org/rfc/rfc2821.txt
 author: frack113
 date: 2022-09-26
+modified: 2024-10-15
 tags:
     - attack.exfiltration
     - attack.t1048.003
@@ -19,7 +20,9 @@ logsource:
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
     selection:
-        ScriptBlockText|contains: 'Send-MailMessage'
+        ScriptBlockText|contains|all:
+        - 'Send-MailMessage'
+        - '-Attachments'
     filter:
         ScriptBlockText|contains: 'CmdletsToExport'
     condition: selection and not filter
