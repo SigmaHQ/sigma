@@ -1,0 +1,27 @@
+title: Modify or Delete AWS RDS Cluster
+id: 457cc9ac-d8e6-4d1d-8c0e-251d0f11a74c
+status: experimental
+description: Detects modifications to an RDS cluster or the deletion of an RDS cluster. These actions could be part of a data exfiltration attempt or unauthorized exposure of sensitive data.
+references:
+    - https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_ModifyDBCluster.html
+    - https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_DeleteDBCluster.html
+author: Ivan Saakov
+date: 2024-09-20
+tags:
+    - attack.exfiltration
+    - attack.t1020
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection_modify:
+        eventSource: rds.amazonaws.com
+        eventName: ModifyDBCluster
+    selection_delete:
+        eventSource: rds.amazonaws.com
+        eventName: DeleteDBCluster
+    condition: selection_modify or selection_delete
+falsepositives:
+    - Verify if the modification or deletion was performed by an authorized administrator.
+    - Confirm if the modification or deletion was part of a planned change or maintenance activity.
+level: high
