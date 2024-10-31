@@ -1,20 +1,26 @@
 title: RDP Files Written by Outlook
 id: f748c45a-f8d3-4e6f-b617-fe176f695b8f
 status: experimental
-description: Detects the creation of RDP files by the Outlook process. This can be used to detect spear-phishing campaigns that use RDP files as attachments.
+description: Detects the creation of RDP files by the Outlook process or in the temporary directory that Outlook uses when opening attachments. . This can be used to detect spear-phishing campaigns that use RDP files as attachments.
 references:
     - https://thecyberexpress.com/rogue-rdp-files-used-in-ukraine-cyberattacks/
     - https://www.microsoft.com/en-us/security/blog/2024/10/29/midnight-blizzard-conducts-large-scale-spear-phishing-campaign-using-rdp-files/
 author: Florian Roth
 date: 2024-10-30
+modified: 2024-10-31
 logsource:
     product: windows
     category: file_event
 detection:
-    selection:
+    selection_process:
         TargetFilename|endswith: '.rdp'
         Image|endswith: '\Outlook.exe'
-    condition: selection
+    selection_location:
+        TargetFilename|contains|all:
+            - '\AppData\Local\Microsoft\Windows\'
+            - '\Content.Outlook\'
+        TargetFilename|endswith: '.rdp'
+    condition: 1 of selection_*
 falsepositives:
     - Whenever someone receives an RDP file as an email attachment and decides to save it
 level: high
