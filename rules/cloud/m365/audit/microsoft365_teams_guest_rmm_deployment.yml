@@ -1,0 +1,62 @@
+title: Detection of Potential Malicious Guest Accounts and RMM Tool Deployment via Teams
+id: b5c7ed03-f5cb-4d8e-bb6d-47d9730387b9
+description: Detects potential malicious guest accounts using onmicrosoft.com and deployment of RMM tools via Teams messages.
+status: test
+references:
+  - https://securityaffairs.com/170311/cyber-crime/black-basta-ransomware-microsoft-teams.html
+  - https://www.bleepingcomputer.com/news/security/black-basta-ransomware-poses-as-it-support-on-microsoft-teams-to-breach-networks/
+author: Sai Prashanth Pulisetti (@pulisettis)
+date: 2024-11-01
+tags:
+  - attack.initial_access
+  - attack.t1078
+  - attack.execution
+  - attack.t1059
+  - attack.persistence
+  - attack.t1133
+  - attack.defense_evasion
+  - attack.t1070
+  - attack.collection
+  - attack.t1114
+  - attack.command_and_control
+  - attack.t1071
+logsource:
+  product: o365
+  service: audit
+detection:
+  selection_domain:
+    user.email: '*@*.onmicrosoft.com'
+  selection_extensions:
+    o365.audit.MessageURLs|endswith:
+      - '.exe'
+      - '.msi'
+      - '.js'
+  selection_rmm:
+    o365.audit.MessageURLs:
+      - 'ninjaone.com'
+      - 'atera.com'
+      - 'syncroweb.com'
+      - 'superops.com'
+      - 'n-able.com'
+      - 'gotoremember.com'
+      - 'barracudamsp.com'
+      - 'manageengine.com'
+      - 'site24x7.com'
+      - 'paessler.com'
+      - 'compuware.com'
+      - 'teamviewer.com'
+      - 'rippling.com'
+      - 'msp360.com'
+      - 'pulseway.com'
+      - 'optimtune.com'
+      - 'connectwise.com'
+      - 'domotz.com'
+      - 'anydesk.com'
+  condition: selection_domain and (selection_extensions or selection_rmm)
+fields:
+  - user.email
+  - o365.audit.MessageURLs
+falsepositives:
+  - Legitimate guest users
+  - Valid RMM tool deployments
+level: high
