@@ -10,7 +10,7 @@ references:
     - https://github.com/Azure/Azure-Sentinel/pull/3059
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research), MSTIC
 date: 2021-10-15
-modified: 2022-10-05
+modified: 2024-11-02
 tags:
     - attack.privilege-escalation
     - attack.initial-access
@@ -26,7 +26,14 @@ detection:
         User: root
         LogonId: 0
         CurrentDirectory: '/var/opt/microsoft/scx/tmp'
-        CommandLine|contains: '/bin/sh'
+        CommandLine|contains: 
+            - '/bin/sh'
+            - '/bin/dash'
+            - '/bin/csh'
+            - '/bin/tcsh'
+            - '/bin/ksh'
+            - '/bin/ksh93'
+            - '/bin/bash'
     condition: selection
 falsepositives:
     - Legitimate use of SCX RunAsProvider Invoke_ExecuteShellCommand.
