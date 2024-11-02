@@ -1,0 +1,47 @@
+title: Command Executed Via Run Dialog Box - Registry
+id: f9d091f6-f1c7-4873-a24f-050b4a02b4dd
+related:
+    - id: a7df0e9e-91a5-459a-a003-4cde67c2ff5d
+      type: derived
+status: experimental
+description: |
+    Detects execution of commands via the run dialog box on Windows by checking values of the "RunMRU" registry key.
+    This technique was seen being abused by threat actors to deceive users into pasting and executing malicious commands, often disguised as CAPTCHA verification steps.
+references:
+    - https://www.forensafe.com/blogs/runmrukey.html
+    - https://medium.com/@shaherzakaria8/downloading-trojan-lumma-infostealer-through-capatcha-1f25255a0e71
+    - https://redcanary.com/blog/threat-intelligence/intelligence-insights-october-2024/
+author: Ahmed Farouk, Nasreddine Bencherchali
+date: 2024-11-01
+tags:
+    - detection.threat-hunting
+    - attack.execution
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection:
+        TargetObject|contains: '\Microsoft\Windows\CurrentVersion\Explorer\RunMRU'
+    filter_main_mrulist:
+        TargetObject|endswith: '\MRUList'
+    filter_optional_ping:
+        Details|contains: 'ping'
+    filter_optional_generic:
+        Details:
+            - '%appdata%\1'
+            - '%localappdata%\1'
+            - '%public%\1'
+            - '%temp%\1'
+            - 'calc\1'
+            - 'dxdiag\1'
+            - 'explorer\1'
+            - 'gpedit.msc\1'
+            - 'mmc\1'
+            - 'notepad\1'
+            - 'regedit\1'
+            - 'services.msc\1'
+            - 'winver\1'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Likely
+level: low
