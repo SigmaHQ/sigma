@@ -1,15 +1,17 @@
 title: Renamed Powershell Under Powershell Channel
 id: 30a8cb77-8eb3-4cfb-8e79-ad457c5a4592
 status: test
-description: Detects renamed powershell
+description: |
+    Detects a renamed Powershell execution, which is a common technique used to circumvent security controls and bypass detection logic that's dependent on process names and process paths.
 references:
     - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse
 author: Harish Segar, frack113
 date: 2020-06-29
-modified: 2023-10-27
+modified: 2024-10-08
 tags:
     - attack.execution
     - attack.t1059.001
+    - attack.t1036.003
 logsource:
     product: windows
     category: ps_classic_start
@@ -25,6 +27,10 @@ detection:
             # In some cases powershell was invoked with inverted slashes
             - 'HostApplication=C:/Windows/System32/WindowsPowerShell/v1.0/powershell'
             - 'HostApplication=C:/Windows/SysWOW64/WindowsPowerShell/v1.0/powershell'
+    filter_main_host_application_null:
+        # Note: Since we're using the raw data field to match. There is no easy way to filter out cases where the "HostApplication" field is null (i.e doesn't exist). We're practically forced to use a regex.
+        # If you're already mapping and extracting the field, then obviously use that directly.
+        Data|re: 'HostId=[a-zA-Z0-9-]{36} EngineVersion='
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown

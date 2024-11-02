@@ -10,7 +10,7 @@ references:
     - https://threathunterplaybook.com/hunts/windows/190410-LocalPwshExecution/notebook.html
 author: Roberto Rodriguez @Cyb3rWard0g, Tim Shelton
 date: 2019-09-12
-modified: 2023-10-18
+modified: 2024-10-07
 tags:
     - attack.execution
     - attack.t1059.001
@@ -35,15 +35,20 @@ detection:
             - ':\Windows\System32\wsmprovhost.exe'
             - ':\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell_ise.exe'
             - ':\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell.exe'
-    filter_main_sqlserver: # Microsoft SQL Server\130\Tools\
-        Image|contains|all:
-            - ':\Program Files'
-            - '\Microsoft SQL Server\'
+    filter_optional_sqlserver: # Microsoft SQL Server\130\Tools\
+        Image|startswith:
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
+        Image|contains: '\Microsoft SQL Server\'
         Image|endswith: '\Tools\Binn\SQLPS.exe'
+    filter_optional_azure_connected_machine_agent:
+        # Azure Connected Machine Agent (https://devblogs.microsoft.com/powershell/azure-policy-guest-configuration-client/)
+        Image|startswith: 'C:\Program Files\AzureConnectedMachineAgent\GCArcService'
+        Image|endswith: '\GC\gc_worker.exe'
     filter_optional_citrix:
-        Image|contains: ':\Program Files\Citrix\'
+        Image|startswith: 'C:\Program Files\Citrix\'
     filter_optional_exchange:
-        Image|contains: ':\Program Files\Microsoft\Exchange Server\'
+        Image|startswith: 'C:\Program Files\Microsoft\Exchange Server\'
     filter_main_null:
         Image: null
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
