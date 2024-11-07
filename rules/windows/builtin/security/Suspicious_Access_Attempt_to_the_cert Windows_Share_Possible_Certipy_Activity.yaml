@@ -1,0 +1,25 @@
+title: Suspicious Access Attempt to the cert Windows Share (Possible Certipy Activity)
+id: 078d7118-55c-4912-a836-cc6483a8d151
+status: test
+description: This rule detects attempts to access the Windows share IPC with the specific target name "cert," which could indicate unauthorized certificate requests. This behavior has been linked to tools such as Certipy.
+references:
+    - https://github.com/ly4k/Certipy
+author: @NinnesOtu
+date: 2024-11-01
+modified: 2024-11-07
+tags:
+    - attack.credential_access
+    - attack.t1187
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: The advanced audit policy setting "Object Access > Audit File Share" must be configured for Success/Failure'
+detection:
+    selection:
+        EventID: 5145
+        ShareName|endswith: '\IPC$'
+        RelativeTargetName: cert
+    condition: selection
+falsepositives:
+    - Unknown.
+level: high
