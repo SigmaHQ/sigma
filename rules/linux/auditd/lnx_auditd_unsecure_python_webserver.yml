@@ -1,0 +1,26 @@
+title: Unsecure Python Webserver
+id: 3f0f5957-04f8-4792-ad89-192b0303bde6
+status: experimental
+description: Detects the instant launch of Python web servers via CLI.
+references:
+    - https://www.atomicredteam.io/atomic-red-team/atomics/T1048.003
+    - https://attack.mitre.org/techniques/T1048/003/
+author: Mohamed LAKRI
+date: 2024-11-13
+tags:
+    - attack.exfiltration
+    - attack.T1048.003
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+        type: 'EXECVE'
+        a0|contains: 'python'
+        a1|contains:
+            - 'http.server'
+            - 'SimpleHTTPServer'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
