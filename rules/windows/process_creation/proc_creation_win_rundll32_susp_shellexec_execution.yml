@@ -11,7 +11,7 @@ references:
     - https://github.com/SigmaHQ/sigma/issues/1009
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-09-01
-modified: 2022-12-30
+modified: 2024-11-16
 tags:
     - attack.defense-evasion
 logsource:
@@ -19,7 +19,9 @@ logsource:
     product: windows
 detection:
     selection_openasrundll:
-        CommandLine|contains: 'ShellExec_RunDLL'
+        CommandLine|contains:
+            - 'ShellExec_RunDLL' # rundll32 SHELL32.DLL,ShellExec_RunDLL "cmd.exe" "/c calc.exe"
+            - '#572' # rundll32 SHELL32.DLL,#572 "cmd.exe" "/c calc.exe"
     selection_suspcli:
         CommandLine|contains:
             # Add more LOLBINs and Susp Paths
