@@ -1,9 +1,9 @@
 title: ESXi Firewall Default Action Set to Pass
 id: e0f2e697-0352-49a3-b488-11b3dcf1c9fd
 status: experimental
-description: Detects when the ESXi firewall default action is set to PASS instead of DROP
+description: Detects when the ESXi firewall default action is set to PASS instead of DROP.
 references:
-    - 
+    - https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_network.html
 author: Nathan Burns
 date: 2024-11-20
 tags:
@@ -12,9 +12,19 @@ logsource:
     category: process_creation
     product: linux
 detection:
-    selection:
-        
-    condition: selection
+    selection_img:
+        Image|endswith: '/esxcli'
+    selection_cli:
+        CommandLine|contains|all:
+            - 'network'
+            - 'firewall'
+            - 'set'
+            - 'false'
+    selection_default_action_switch:
+        CommandLine|contains:
+            - '--default-action'
+            - '-d'
+    condition: 1 of selection_default* and selection_img and selection_cli
 falsepositives:
-    - Unknown
-level: critical
+    - Legitimate system administration actions
+level: high
