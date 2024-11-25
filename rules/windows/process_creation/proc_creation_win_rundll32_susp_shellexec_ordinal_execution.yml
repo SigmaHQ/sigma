@@ -1,0 +1,65 @@
+title: Suspicous Shell32DLL Shellexec Ordinal Execution
+id: 8823e85d-31d8-473e-b7f4-92da070f0fc6
+related:
+    - id: d87bd452-6da1-456e-8155-7dc988157b7d
+      type: derived
+status: experimental
+description: |
+    Detects suspicious usage of the ShellExec_RunDLL function of SHELL32.DLL through the ordinal number to launch other commands.
+    Adversary might only use the ordinal number in order to bypass existing detection that alert on usage of ShellExec_RunDLL on CommandLine.
+references:
+    - https://redcanary.com/blog/raspberry-robin/
+    - https://www.microsoft.com/en-us/security/blog/2022/10/27/raspberry-robin-worm-part-of-larger-ecosystem-facilitating-pre-ransomware-activity/
+    - https://github.com/SigmaHQ/sigma/issues/1009
+    - https://strontic.github.io/xcyclopedia/library/shell32.dll-65DA072F25DE83D9F83653E3FEA3644D.html
+author: Swachchhanda Shrawan Poudel
+date: 2024-11-25
+tags:
+    - attack.defense-evasion
+    - attack.t1218.011
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent_img:
+        ParentCommandLine|contains: 'SHELL32.DLL'
+    selection_parent_ordinal:
+        ParentCommandLine|contains:
+            - '#568'
+            - '#570'
+            - '#572' # rundll32 SHELL32.DLL,#572 "cmd.exe" "/c calc.exe"
+            - '#576'
+            # The ordinal number may differ according to different versions of the DLL in windows
+    selection_susp_cli:
+        ParentCommandLine|contains:
+            # Add more LOLBINs and Susp Paths
+            - 'regsvr32'
+            - 'msiexec'
+            - '\Users\Public\'
+            - 'odbcconf'
+            - '\Desktop\'
+            - '\Temp\'
+            - 'Invoke-'
+            - 'iex'
+            - 'comspec'
+    selection_susp_child:
+        Image|endswith:
+            - '\cmd.exe'
+            - '\cscript.exe'
+            - '\mshta.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\regsvr32.exe'
+            - '\wscript.exe'
+            - '\msiexec.exe'
+            - '\schtasks.exe'
+            - '\bitsadmin.exe'
+            - '\curl.exe'
+            - '\wmic.exe'
+            - '\odbcconf.exe'
+            - '\msxsl.exe'
+            - '\bash.exe'
+    condition: (all of selection_parent_*) and (1 of selection_susp_*)
+falsepositives:
+    - Unknown
+level: high
