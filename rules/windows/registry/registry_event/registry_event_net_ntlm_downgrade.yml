@@ -20,15 +20,17 @@ detection:
             - 'SYSTEM\'
             - 'ControlSet'
             - '\Control\Lsa'
-        TargetObject|endswith:
-            - '\lmcompatibilitylevel'
-            - '\NtlmMinClientSec'
-            - '\RestrictSendingNTLMTraffic'
+    selection_lmcompatibilitylevel:
+        TargetObject|endswith: '\lmcompatibilitylevel'
         Details:
             - '0'
             - '1'
             - '2'
-    condition: selection
+    selection_ntlmminclientsec:
+        TargetObject|endswith:
+            - '\NtlmMinClientSec'
+            - '\RestrictSendingNTLMTraffic'
+    condition: selection and 1 of selection_*
 falsepositives:
-    - Unknown
+    - Services or tools that set the values to more restrictive values
 level: high
