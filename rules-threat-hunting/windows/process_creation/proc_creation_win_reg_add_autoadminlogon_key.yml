@@ -1,0 +1,29 @@
+title: Detect Modification of AutoAdminLogon
+id: ecd4968d-3cea-4626-a6ef-84e4e50fd415
+status: experimental
+description: Detects the modification of registry values DefaultUserName,DefaultPassword and AutoAdminLogon to enable automatic logon.Attacker use this technique to achieve persistence.
+references:
+    - https://thedfirreport.com/2024/09/30/nitrogen-campaign-drops-sliver-and-ends-with-blackcat-ransomware
+author: MahirAli Khan (in/mahiralikhan)
+date: 2024-10-16
+tags:
+    - attack.persistence
+    - detection.threat-hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_reg:
+        CommandLine|contains|all:
+            - 'reg'
+            - 'add'
+            - 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
+    selection_options:
+        CommandLine|contains:
+            - 'DefaultUserName'
+            - 'DefaultPassword'
+            - 'AutoAdminLogon'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate system administrators modifying registry settings for automatic logon.
+level: medium
