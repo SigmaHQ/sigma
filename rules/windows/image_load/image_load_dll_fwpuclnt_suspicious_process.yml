@@ -1,0 +1,32 @@
+title: FWPUCLNT.DLL Loaded Via Uncommon Process
+id: c6292f94-4f20-4155-ac75-b387ee6562dc
+status: experimental
+description: Detects loading of "FWPUCLNT.dll" by a uncommon process
+references:
+    - Internal Research
+    - https://github.com/netero1010/EDRSilencer/blob/0e73a7037ec65c52894d8208e6f605a7da0a34a6/EDRSilencer.c
+author: Frack113
+date: 2024-12-07
+tags:
+    - attack.defense-evasion
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith: '\FWPUCLNT.DLL'
+    filter_path:
+        Image|startswith: 'C:\Windows\System32\'
+    filter_full:
+        Image: 'C:\Windows\UUS\Packages\Preview\amd64\MoUsoCoreWorker.exe'
+    filter_user:
+        Image|startswith: 'C:\Users\'
+        Image|endswith: '\AppData\Local\Microsoft\OneDrive\OneDriveStandaloneUpdater.exe'
+    filter_firefox:
+        Image:
+            - 'C:\Program Files\Mozilla Firefox\firefox.exe'
+            - 'C:\Program Files\Mozilla Firefox\pingsender.exe'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: medium
