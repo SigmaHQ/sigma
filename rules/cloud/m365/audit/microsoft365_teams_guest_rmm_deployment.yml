@@ -1,0 +1,56 @@
+title: Potential Malicious Guest Accounts and RMM Tool Deployment via Teams
+id: aed9c24f-097a-4505-af85-74b4b83982b0
+status: experimental
+description: Detects potential malicious guest accounts using onmicrosoft.com and deployment of RMM tools via Teams messages.
+references:
+    - https://www.reliaquest.com/blog/black-basta-social-engineering-technique-microsoft-teams/
+    - https://www.rapid7.com/blog/post/2024/05/10/ongoing-social-engineering-campaign-linked-to-black-basta-ransomware-operators/
+author: Saiprashanth Pulisetti ( @pulisettis )
+date: 2024-11-01
+tags:
+    - attack.initial-access
+    - attack.t1078
+    - attack.execution
+    - attack.persistence
+    - attack.t1133
+    - attack.defense-evasion
+    - attack.t1070
+    - attack.collection
+    - attack.t1114
+logsource:
+    product: m365
+    service: audit
+detection:
+    selection_domain:
+        user.email: '*@*.onmicrosoft.com'
+    selection_extensions:
+        MessageURLs|endswith:
+            - .exe
+            - .msi
+            - .js
+    selection_rmm:
+        MessageURLs|contains:
+            - ninjaone.com
+            - atera.com
+            - syncroweb.com
+            - superops.com
+            - n-able.com
+            - gotoremember.com
+            - barracudamsp.com
+            - manageengine.com
+            - site24x7.com
+            - paessler.com
+            - compuware.com
+            - teamviewer.com
+            - rippling.com
+            - msp360.com
+            - pulseway.com
+            - optimtune.com
+            - connectwise.com
+            - domotz.com
+            - anydesk.com
+    condition: selection_domain and (selection_extensions or selection_rmm)
+falsepositives:
+    - Legitimate guest users
+    - Valid RMM tool deployments
+level: high
