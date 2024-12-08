@@ -1,0 +1,26 @@
+title: Detect Device Driver Discovery - Linux
+id: 23654e63-1b3d-4330-8303-fb680a3a4ab8
+status: test
+description: Adversaries may attempt to enumerate local device drivers on a victim host.This rule detects the use of commands such as 'lsmod' and 'modinfo' for device driver discovery on Linux systems. It is specifically looking for auditd logs that indicate the execution of these commands.
+references:
+    - https://attack.mitre.org/techniques/T1652/
+author: CheraghiMilad
+date: 2024-12-08
+tags:
+    - attack.discovery
+    - attack.t1652
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_kmod:
+        Image|endswith: '/kmod'
+        CommandLine|contains:
+            - 'modinfo'
+            - 'lsmod'
+    selection_dmesg:
+        Image|endswith: '/dmesg'
+    condition: 1 of selection_*
+falsepositives:
+    - Administrative tasks such as legitimate system administration involving device driver modules.
+level: medium
