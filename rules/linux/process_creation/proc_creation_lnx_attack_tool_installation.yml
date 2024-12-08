@@ -1,0 +1,49 @@
+title: Detect Linux Package Manager Executing Common Attack Tools
+id: f2673abe-1467-4389-b350-298e514e4bf5
+status: experimental
+description: Detects the use of Linux package managers (apt, yum, apk, dnf) to execute common attack tools like nmap, masscan, socat, ncat, netcat, etc.
+author: David Burkett, @signalblur
+date: 2024/06/21
+tags:
+    - attack.t1059.004
+    - attack.t1072
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith:
+            - /apt
+            - /yum
+            - /apk
+            - /dnf
+            - /rpm
+            - /zypper
+            - /pacman
+            - /snap
+            - /flatpak
+    commandline_contains_attack_tools:
+        CommandLine|contains:
+            - masscan
+            - nmap
+            - socat
+            - ncat
+            - netcat
+            - hydra
+            - john
+            - sqlmap
+            - aircrack-ng
+            - wireshark
+            - ettercap
+            - metasploit
+            - nikto
+            - tcpdump
+            - hping3
+            - zenmap
+    condition: selection and commandline_contains_attack_tools
+fields:
+    - Image
+    - CommandLine
+falsepositives:
+    - Legitimate installation or usage of the listed tools for administrative or testing purposes.
+level: medium
