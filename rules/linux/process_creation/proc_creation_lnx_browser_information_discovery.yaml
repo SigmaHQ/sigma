@@ -1,0 +1,37 @@
+title: Detect Browser Information Discovery - Linux
+id: 53f9703e-abc5-4eff-945e-2ab75c206c63
+status: test
+description: Adversaries may enumerate information about browsers to learn more about compromised environments.
+  Data saved by browsers (such as bookmarks, accounts, and browsing history) may reveal a variety of personal
+  information about users (e.g., banking sites, relationships/interests, social media) and details about internal
+  network resources like servers, tools, dashboards, or other infrastructure.
+references:
+    - https://attack.mitre.org/techniques/T1217/
+author: CheraghiMilad
+date: 2024-12-08
+tags:
+    - attack.discovery
+    - attack.t1217
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection:
+        Image|endswith:
+            - '/cat'
+            - '/ed'
+            - '/head'
+            - '/more'
+            - '/nano'
+            - '/tail'
+            - '/vi'
+            - '/vim'
+            - '/less'
+        CommandLine|contains:
+            - 'cert*.db'
+            - 'places.sqlite'
+            - 'cookies.sqlite'
+            - 'logins.json'
+            - 'prefs.js'
+    condition: selection
+level: medium
