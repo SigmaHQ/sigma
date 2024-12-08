@@ -1,0 +1,36 @@
+title: Exfiltration Over Alternative Protocol - Linux
+id: f6786cc8-beda-4915-a4d6-ac2f193bb988
+status: experimental
+description: |
+    Detects data exfiltration over a symmetrically encrypted network protocol.
+    This information can help adversaries to exfiltrate data by SSH.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/8218baac095296c1185e38f3678b3bd98eab4441/atomics/T1048/T1048.md
+author: Milad Cheraghi
+date: 2024-10-10
+tags:
+    - attack.exfiltration
+    - attack.t1048.001
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_img:
+        Image|endswith: '/ssh'
+        CommandLine|contains:
+            - 'bunzip2'
+            - 'bzip'
+            - 'bzip2'
+            - 'gunzip'
+            - 'gzip'
+            - 'tar'
+            - 'unzip'
+    selection_path:
+        CommandLine|contains:
+            - 'passwd'
+            - 'shadow'
+            - 'sudoers'
+    condition: selection_img and selection_path
+falsepositives:
+    - Unknown
+level: medium
