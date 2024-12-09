@@ -1,0 +1,29 @@
+title: Detect Device Driver Discovery - Linux
+id: 23654e63-1b3d-4330-8303-fb680a3a4ab8
+status: experimental
+description: Adversaries may attempt to enumerate local device drivers on a victim host.
+references:
+    - https://reveng007.github.io/blog/2022/03/08/reveng_rkit_detailed.html
+    - https://xcellerator.github.io/posts/linux_rootkits_02/
+    - https://0x00sec.org/t/kernel-rootkits-getting-your-hands-dirty/1485
+    - https://thomas-byrne.co.uk/projects/makingarootkit/
+author: CheraghiMilad
+date: 2024-12-08
+tags:
+    - attack.discovery
+    - attack.t1652
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_kmod:
+        Image|endswith: '/kmod'
+        CommandLine|contains:
+            - 'modinfo'
+            - 'lsmod'
+    selection_dmesg:
+        Image|endswith: '/dmesg'
+    condition: 1 of selection_*
+falsepositives:
+    - Administrative tasks such as legitimate system administration involving device driver modules.
+level: medium
