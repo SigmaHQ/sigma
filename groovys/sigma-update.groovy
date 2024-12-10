@@ -71,7 +71,7 @@ pipeline {
                         """,
                         recipientProviders: [[$class: 'DevelopersRecipientProvider']],
                         to: "${EMAIL_RECIPIENTS}",
-                        from: '${EMAIL_SENDER}',
+                        from: "${EMAIL_SENDER}",
                         mimeType: 'text/html'
                     )
                 } else {
@@ -88,7 +88,7 @@ pipeline {
                 """,
                 recipientProviders: [[$class: 'CulpritsRecipientProvider']],
                 to: "${EMAIL_RECIPIENTS}",
-                from: '${EMAIL_SENDER}',
+                from: "${EMAIL_SENDER}",
                 mimeType: 'text/html'
             )
         }
