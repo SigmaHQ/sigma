@@ -14,12 +14,10 @@ pipeline {
             }
         }
 
-        stage('Clone Source Repo') {
+        stage('Clone Repository') {
             steps {
-                checkout([$class: 'GitSCM', 
-                    branches: [[name: '*/master']],  // Pull from main branch
-                    userRemoteConfigs: [[url: env.GIT_REPO_URL, credentialsId: 'git-credential-id']]
-                ])
+                // Clone the repository
+                git branch: 'master', url: "$GIT_REPO"
             }
         }
 
@@ -28,30 +26,33 @@ pipeline {
                 script {
                     def techniqueMap = [:] 
 
-                    // Read all rule files in the repository
+                    // List all YAML files in the repository
                     sh '''
                         find "${WORKSPACE}/rules" -name '*.yml' > rule_files.txt
                     '''
-
                     def ruleFiles = readFile('rule_files.txt').split('\n').findAll { it.trim() }
 
-                    // Process each rule file
+                    // Process each YAML file
                     ruleFiles.each { ruleFile ->
-                        def content = readYaml file: ruleFile
-                        def tags = content?.tags?.findAll { it.startsWith('attack.t') } ?: []
-                        tags.each { tag ->
-                            def techniqueID = tag.replace('attack.', '')
-
-                            def fileName = ruleFile.split('/')[-1]
-                            if (!techniqueMap.containsKey(techniqueID)) {
-                                techniqueMap[techniqueID] = [score: 0, comment: []]
+                        try {
+                            echo "Processing file: ${ruleFile}"
+                            def content = readYaml file: ruleFile
+                            def tags = content?.tags?.findAll { it.startsWith('attack.t') } ?: []
+                            tags.each { tag ->
+                                def techniqueID = tag.replace('attack.', '')
+                                def fileName = ruleFile.split('/')[-1]
+                                if (!techniqueMap.containsKey(techniqueID)) {
+                                    techniqueMap[techniqueID] = [score: 0, comment: []]
+                                }
+                                techniqueMap[techniqueID].score += 1
+                                techniqueMap[techniqueID].comment.add(fileName)
                             }
-                            techniqueMap[techniqueID].score += 1
-                            techniqueMap[techniqueID].comment.add(fileName)
+                        } catch (Exception e) {
+                            echo "Error processing file: ${ruleFile} - ${e.message}"
                         }
                     }
 
-                    // Create the JSON structure
+                    // Create JSON output
                     def jsonOutput = [
                         domain: "mitre-enterprise",
                         name: "Sigma rules coverage",
@@ -70,7 +71,6 @@ pipeline {
                         }
                     ]
 
-                    // Write to JSON file
                     writeFile file: env.OUTPUT_JSON, text: groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(jsonOutput))
                     echo "ATT&CK coverage JSON file generated: ${env.OUTPUT_JSON}"
                 }
@@ -81,10 +81,8 @@ pipeline {
             steps {
                 script {
                     def jsonContent = readFile(env.OUTPUT_JSON)
-                    // Replace 't' with 'T' for all technique IDs
+                    // Fix formatting of technique IDs
                     def fixedJsonContent = jsonContent.replaceAll(/"techniqueID": "t/, '"techniqueID": "T')
-
-                    // Write the updated content back to the file
                     writeFile file: env.OUTPUT_JSON, text: fixedJsonContent
                     echo "Technique IDs updated to uppercase in JSON file."
                 }
