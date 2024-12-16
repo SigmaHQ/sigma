@@ -1,0 +1,24 @@
+title: GitHub Repository Archived or Unarchived
+id: 92cff55c-27ab-466e-b6d1-88b3f1bd9c94
+status: experimental
+description: Detects when a GitHub repository is archived or unarchived, which may indicate unauthorized changes to repository status.
+author: Ivan Saakov
+date: 2024-09-20
+references:
+    - https://docs.github.com/en/repositories/archiving-a-github-repository/archiving-repositories
+tags:
+    - attack.persistence
+    - attack.t1108
+logsource:
+    product: github
+    service: audit
+    definition: 'Requirements: The audit log streaming feature must be enabled to be able to receive such logs. You can enable following the documentation here: https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise#setting-up-audit-log-streaming'
+detection:
+    selection:
+        action:
+            - 'archived'
+            - 'unarchived'
+    condition: selection
+falsepositives:
+    - Legitimate unarchived of repositories by authorized users
+level: medium
