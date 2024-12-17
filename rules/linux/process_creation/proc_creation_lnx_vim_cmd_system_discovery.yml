@@ -1,0 +1,23 @@
+title: ESXi System Information Discovery via VIM-CMD
+id: d1270942-f26a-476c-a391-0fa1d25315a8
+status: experimental
+description: Detects when vim-cmd is used to discover information of an ESXi host.
+references:
+    - https://lolesxi-project.github.io/LOLESXi/lolesxi/Binaries/vim-cmd/
+author: Nathan Burns
+date: 2024-11-22
+tags:
+    - attack.t1082
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith: '/vim-cmd'
+        CommandLine|contains:
+            - 'hostsvc/hostsummary'
+            - 'vmsvc/getallvms'
+    condition: selection
+falsepositives:
+    - Legitimate system administration actions
+level: medium
