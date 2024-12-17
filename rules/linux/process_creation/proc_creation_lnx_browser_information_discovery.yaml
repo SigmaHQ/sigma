@@ -1,13 +1,15 @@
 title: Browser Information Discovery - Linux
 id: 53f9703e-abc5-4eff-945e-2ab75c206c63
 status: experimental
-description: Adversaries may enumerate information about browsers to learn more about compromised environments.Data saved by browsers (such as bookmarks, accounts, and browsing history) may reveal a variety of personal information about users (e.g., banking sites, relationships/interests, social media) and details about internal network resources like servers, tools, dashboards, or other infrastructure.
+description: Detects reading of sensitive browser files.
 references:
     - https://medium.com/@jsaxena017/web-browser-forensics-part-2-firefox-browser-3dc6ef104607
     - https://renenyffenegger.ch/notes/development/web/browser/Firefox/profile-folder/index
     - https://medium.com/@s12deff/steal-firefox-passwords-from-windows-linux-9d9a87906c7d
+    - https://www.systutorials.com/how-to-export-google-chrome-password-on-linux/
 author: CheraghiMilad
 date: 2024-12-08
+modified: 2024-12-17
 tags:
     - attack.discovery
     - attack.t1217
@@ -33,5 +35,12 @@ detection:
             - 'cookies.sqlite'
             - 'logins.json'
             - 'prefs.js'
+            - 'google-chrome/*/Bookmarks'
+            - 'google-chrome/*/Login Data'
+            - 'google-chrome/*/Cookies'
+            - 'google-chrome/*/Sessions'
+            - 'google-chrome/*/History'
     condition: selection
+falsepositives:
+    - Since the file names of Chrome are not unique, I had to include the path "google-chrome" in the rule. If an attacker uses "cd google-chrome", the rule related to Chrome will be bypassed.
 level: medium
