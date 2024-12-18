@@ -1,0 +1,29 @@
+title: AD Container WriteOwner
+id: bde92e8e-e311-4bbd-bfd9-c824941d8248
+description: Detects WRITE_OWNER to Container object > possible AdminSDHolder Backdooring
+kind: evtx
+status: experimental
+date: 2023/11/30
+modified: 2024/05/09
+author: Charles BLANC-ROLIN @woundride
+references:
+    - https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence
+    - https://learn.microsoft.com/en-us/windows/win32/secauthz/standard-access-rights
+tags:
+    - attack.defense_evasion
+    - attack.t1222.001
+    - attack.t1098 
+logsource:
+    product: windows
+    service: security
+detection:
+    selection: 
+        EventID: 4662
+        ObjectServer: 'DS'
+        AccessMask: '0xc0000'
+        ObjectType|contains:
+            - 'bf967a8b-0de6-11d0-a285-00aa003049e2'
+    condition: selection
+falsepositives:
+    - Unknown
+level: critical
