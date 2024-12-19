@@ -1,0 +1,28 @@
+title: OS Product Name Discovery via reg.exe
+id: 6c13d616-13ff-41ca-b94f-35fc294feb48
+status: test
+description: This Sigma rule identifies the use of reg.exe to query the Windows registry for the operating system's product name.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1082/T1082.md#atomic-test-39---discover-os-product-name-via-registry
+author: lazarg
+date: 2024-12-19
+tags:
+    - attack.discovery
+    - attack.T1082
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\reg.exe'
+        - OriginalFileName: 'reg.exe'
+    selection_command_line:
+        CommandLine|contains|all:
+            - 'query'
+            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion' 
+            - '/v'
+            - 'ProductName'
+    condition: selection_img and selection_command_line
+falsepositives:
+    - Unlikely
+level: high
