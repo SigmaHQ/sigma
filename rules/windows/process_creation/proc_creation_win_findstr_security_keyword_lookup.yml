@@ -11,9 +11,10 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/987e3ca988ae3cff4b9f6e388c139c05bf44bbb8/atomics/T1518.001/T1518.001.md#atomic-test-1---security-software-discovery
     - https://www.microsoft.com/en-us/security/blog/2023/10/18/multiple-north-korean-threat-actors-exploiting-the-teamcity-cve-2023-42793-vulnerability/
     - https://www.hhs.gov/sites/default/files/manage-engine-vulnerability-sector-alert-tlpclear.pdf
+    - https://app.any.run/tasks/7c46b4ed-162e-41e1-89a7-732a7fe47bae
 author: Nasreddine Bencherchali (Nextron Systems), frack113
 date: 2023-10-20
-modified: 2023-11-14
+modified: 2024-12-24
 tags:
     - attack.discovery
     - attack.t1518.001
@@ -29,34 +30,94 @@ detection:
               - 'FIND.EXE'
               - 'FINDSTR.EXE'
     selection_cli:
-        CommandLine|endswith:
+        CommandLine|contains:
             # Note: Add additional keywords to increase and enhance coverage
             # Note:
-            #   We use the double quote variation because in cases of where the command is executed through cmd for example:
+            #   We use the double quote variation because in cases of where the command is executed through cmd for exampl:
             #       cmd /c "tasklist | findstr virus"
+            #       FINDSTR  /I "Virtual VBOX VMware"
             #   Logging utilties such as Sysmon would capture the end quote as part of findstr execution
-            - ' avira'
-            - ' avira"'
-            - ' cb'
-            - ' cb"'
-            - ' cylance'
-            - ' cylance"'
-            - ' defender'
-            - ' defender"'
-            - ' kaspersky'
-            - ' kaspersky"'
-            - ' kes'
-            - ' kes"'
-            - ' mc'
-            - ' mc"'
-            - ' sec'
-            - ' sec"'
-            - ' sentinel'
-            - ' sentinel"'
-            - ' symantec'
-            - ' symantec"'
-            - ' virus'
-            - ' virus"'
+            - '"vmware '
+            - ' vmware"'
+            - ' vmware '
+            - '"virtualbox '
+            - ' virtualbox"'
+            - ' virtualbox '
+            - '"vbox '
+            - ' vbox"'
+            - ' vbox '
+            - '"hyper-v '
+            - ' hyper-v"'
+            - ' hyper-v '
+            - '"vboxguest '
+            - ' vboxguest"'
+            - ' vboxguest '
+            - '"vboxservice '
+            - ' vboxservice"'
+            - ' vboxservice '
+            - '"qemu '
+            - ' qemu"'
+            - ' qemu '
+            - '"xen '
+            - ' xen"'
+            - ' xen '
+            - '"parallels '
+            - ' parallels"'
+            - ' parallels '
+            - '"vmmem '
+            - ' vmmem"'
+            - ' vmmem '
+            - '"vmsr '
+            - ' vmsr"'
+            - ' vmsr '
+            - '"vmtoolsd '
+            - ' vmtoolsd"'
+            - ' vmtoolsd '
+            - '"vmmemctl '
+            - ' vmmemctl"'
+            - ' vmmemctl '
+            - '"svm '
+            - ' svm"'
+            - ' svm '
+            - '"vmdebug '
+            - ' vmdebug"'
+            - ' vmdebug '
+            - '"vmci '
+            - ' vmci"'
+            - ' vmci '
+            - '"guest additions '
+            - ' guest additions"'
+            - ' guest additions '
+            - '"virtual pc '
+            - ' virtual pc"'
+            - ' virtual pc '
+            - '"vboxdrv '
+            - ' vboxdrv"'
+            - ' vboxdrv '
+            - '"virtualization '
+            - ' virtualization"'
+            - ' virtualization '
+            - '"vmhost '
+            - ' vmhost"'
+            - ' vmhost '
+            - '"virtio '
+            - ' virtio"'
+            - ' virtio '
+            - '"vmguest '
+            - ' vmguest"'
+            - ' vmguest '
+            - '"vmtools '
+            - ' vmtools"'
+            - ' vmtools '
+            - '"vmotion '
+            - ' vmotion"'
+            - ' vmotion '
+            - '"hypervisor '
+            - ' hypervisor"'
+            - ' hypervisor '
+            - '"vmk '
+            - ' vmk"'
+            - ' vmk '
     condition: all of selection_*
 falsepositives:
     - Unknown
