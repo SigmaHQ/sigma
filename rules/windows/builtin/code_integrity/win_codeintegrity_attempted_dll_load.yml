@@ -11,7 +11,7 @@ references:
     - https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/operations/event-id-explanations
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2022-01-20
-modified: 2024-10-08
+modified: 2024-12-25
 tags:
     - attack.execution
 logsource:
@@ -104,6 +104,17 @@ detection:
         - FileNameBuffer|contains: '\Program Files\SentinelOne\Sentinel Agent'
         # Example: Program Files\SentinelOne\Sentinel Agent 23.4.4.223\SentinelAgent.exe
         - ProcessNameBuffer|contains: '\Program Files\SentinelOne\Sentinel Agent'
+    filter_optional_national_instruments:
+        # Example: \device\harddiskvolume3\program files\national instruments\shared\mdns responder\nimdnsnsp.dll
+        FileNameBuffer|contains: '\National Instruments\Shared\mDNS Responder\'
+    filter_optional_kaspersky:
+        # Example: \Program Files (x86)\Kaspersky Lab\Kaspersky Endpoint Security for Windows\x64\antimalware_provider.dll
+        - ProcessNameBuffer|contains|all:
+              - '\Kaspersky Lab\'
+              - '\avp.exe'
+        - FileNameBuffer|contains|all:
+              - '\Kaspersky Lab\'
+              - '\antimalware_provider.dll'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Antivirus and other third party products are known to trigger this rule quite a lot. Initial filters and tuning is required before using this rule.
