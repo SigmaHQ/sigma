@@ -1,0 +1,33 @@
+title: Potential SSH Tunnel Persistance Install Using A Scheduled Task
+id: 2daa93a0-a5fb-41c5-8cd8-3c11294bfd1f
+status: experimental
+description: Detects the creation of new scheduled tasks via commandline, using Schtasks.exe. This rule detects tasks creating that call OpenSSH, which may indicate the creation of Reverse SSH Tunnel to an attackers server.
+references:
+- https://thedfirreport.com/2023/10/30/netsupport-intrusion-results-in-domain-compromise/
+- https://www.kroll.com/en/insights/publications/cyber/cactus-ransomware-prickly-new-variant-evades-detection
+author: Rory Duncan
+date: 2024-12-30
+modified: 2024-12-30
+tags:
+    - attack.persistence
+    - attack.execution
+    - attack.T1053.005
+    - attack.commandandcontrol
+    - attack.T1053.005
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        - Image|endswith: '\schtasks.exe'
+        - OriginalFileName: 'schtasks.exe'
+    selection_create:
+        CommandLine|contains: ' /create '
+    selection_command:
+        CommandLine|contains:
+            - 'ssh.exe'
+            - 'sshd.exe'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
