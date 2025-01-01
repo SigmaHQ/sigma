@@ -1,0 +1,21 @@
+title: ESXi VM Snapshots Deleted via VIM-CMD
+id: c50a1afa-ce52-4ea2-9697-1b6d89e83c9a
+status: experimental
+description: Detects when vim-cmd is used to delete snapshots for an ESXi virtual machine.
+references:
+    - https://lolesxi-project.github.io/LOLESXi/lolesxi/Binaries/vim-cmd/
+author: Nathan Burns
+date: 2024-11-21
+tags:
+    - attack.t1485
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith: '/vim-cmd'
+        CommandLine|contains: 'vmsvc/snapshot.removeall'
+    condition: selection
+falsepositives:
+    - Legitimate system administration actions
+level: high

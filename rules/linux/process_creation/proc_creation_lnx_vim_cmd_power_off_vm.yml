@@ -1,0 +1,21 @@
+title: ESXi VM Powered Off via VIM-CMD
+id: 7e38eb5c-10b6-4853-bb8f-11163776401d
+status: experimental
+description: Detects when vim-cmd is used to power off an ESXi virtual machine.
+references:
+    - https://lolesxi-project.github.io/LOLESXi/lolesxi/Binaries/vim-cmd/
+author: Nathan Burns
+date: 2024-11-22
+tags:
+    - attack.t1529
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith: '/vim-cmd'
+        CommandLine|contains: 'vmsvc/power.off'
+    condition: selection
+falsepositives:
+    - Legitimate system administration actions.
+level: medium
