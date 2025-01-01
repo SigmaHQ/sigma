@@ -13,7 +13,7 @@ references:
     - https://www.crowdstrike.com/blog/falcon-overwatch-report-finds-increase-in-ecrime/
 author: Florian Roth (Nextron Systems)
 date: 2022-10-10
-modified: 2023-12-11
+modified: 2024-11-23
 tags:
     - attack.defense-evasion
     - attack.discovery
@@ -26,7 +26,7 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_image:
+    selection:
         - Image|contains: '\ProcessHacker_'
         - Image|endswith: '\ProcessHacker.exe'
         - OriginalFileName:
@@ -34,30 +34,16 @@ detection:
               - 'Process Hacker'
         - Description: 'Process Hacker'
         - Product: 'Process Hacker'
-    selection_hashes:
-        Hashes|contains:
-            - 'MD5=68F9B52895F4D34E74112F3129B3B00D'
-            - 'MD5=B365AF317AE730A67C936F21432B9C71'
-            - 'SHA1=A0BDFAC3CE1880B32FF9B696458327CE352E3B1D'
-            - 'SHA1=C5E2018BF7C0F314FED4FD7FE7E69FA2E648359E'
-            - 'SHA256=D4A0FE56316A2C45B9BA9AC1005363309A3EDC7ACF9E4DF64D326A0FF273E80F'
-            - 'SHA256=BD2C2CF0631D881ED382817AFCCE2B093F4E412FFB170A719E2762F250ABFEA4'
-            - 'IMPHASH=3695333C60DEDECDCAFF1590409AA462'
-            - 'IMPHASH=04DE0AD9C37EB7BD52043D2ECAC958DF'
-    selection_hash_values:
-        - md5:
-              - '68f9b52895f4d34e74112f3129b3b00d'
-              - 'b365af317ae730a67c936f21432b9c71'
-        - sha1:
-              - 'c5e2018bf7c0f314fed4fd7fe7e69fa2e648359e'
-              - 'a0bdfac3ce1880b32ff9b696458327ce352e3b1d'
-        - sha256:
-              - 'd4a0fe56316a2c45b9ba9ac1005363309a3edc7acf9e4df64d326a0ff273e80f'
-              - 'bd2c2cf0631d881ed382817afcce2b093f4e412ffb170a719e2762f250abfea4'
-        - Imphash:
-              - '04de0ad9c37eb7bd52043d2ecac958df'
-              - '3695333c60dedecdcaff1590409aa462'
-    condition: 1 of selection_*
+        - Hashes|contains:
+              - 'MD5=68F9B52895F4D34E74112F3129B3B00D'
+              - 'MD5=B365AF317AE730A67C936F21432B9C71'
+              - 'SHA1=A0BDFAC3CE1880B32FF9B696458327CE352E3B1D'
+              - 'SHA1=C5E2018BF7C0F314FED4FD7FE7E69FA2E648359E'
+              - 'SHA256=D4A0FE56316A2C45B9BA9AC1005363309A3EDC7ACF9E4DF64D326A0FF273E80F'
+              - 'SHA256=BD2C2CF0631D881ED382817AFCCE2B093F4E412FFB170A719E2762F250ABFEA4'
+              - 'IMPHASH=3695333C60DEDECDCAFF1590409AA462'
+              - 'IMPHASH=04DE0AD9C37EB7BD52043D2ECAC958DF'
+    condition: selection
 falsepositives:
     - While sometimes 'Process Hacker is used by legitimate administrators, the execution of Process Hacker must be investigated and allowed on a case by case basis
 level: medium
