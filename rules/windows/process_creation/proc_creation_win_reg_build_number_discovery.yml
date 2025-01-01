@@ -1,0 +1,28 @@
+title: OS Build Number Discovery via reg.exe
+id: 9c349345-6844-4628-843f-2c8ad5967978
+status: test
+description: This Sigma rule detects the use of reg.exe to query the Windows registry for the operating system's build number. 
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1082/T1082.md#atomic-test-40---discover-os-build-number-via-registry
+author: lazarg
+date: 2024-12-19
+tags:
+    - attack.discovery
+    - attack.T1082
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\reg.exe'
+        - OriginalFileName: 'reg.exe'
+    selection_command_line:
+        CommandLine|contains|all:
+            - 'query'
+            - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion' 
+            - '/v'
+            - 'CurrentBuildNumber'
+    condition: selection_img and selection_command_line
+falsepositives:
+    - Unlikely
+level: high
