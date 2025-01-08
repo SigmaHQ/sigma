@@ -27,32 +27,32 @@ logsource:
     category: file_event
 detection:
     selection_1:
-        TargetFilename|endswith:
-            - '\Andrew.dmp'
-            - '\Coredump.dmp'
-            - '\lsass.dmp'
-            - '\lsass.rar'
-            - '\lsass.zip'
-            - '\NotLSASS.zip'  # https://github.com/CCob/MirrorDump
-            - '\PPLBlade.dmp'  # https://github.com/tastypepperoni/PPLBlade
-            - '\rustive.dmp' # https://github.com/safedv/RustiveDump/blob/main/src/main.rs#L35
+        file.name:
+            - 'Andrew.dmp'
+            - 'Coredump.dmp'
+            - 'lsass.dmp'
+            - 'lsass.rar'
+            - 'lsass.zip'
+            - 'NotLSASS.zip'  # https://github.com/CCob/MirrorDump
+            - 'PPLBlade.dmp'  # https://github.com/tastypepperoni/PPLBlade
+            - 'rustive.dmp' # https://github.com/safedv/RustiveDump/blob/main/src/main.rs#L35
     selection_2:
-        TargetFilename|contains:
-            - '\lsass_2'  # default format of procdump v9.0 is lsass_YYMMDD_HHmmss.dmp
-            - '\lsassdmp'
-            - '\lsassdump'
+        file.name|startswith:
+            - 'lsass_2'  # default format of procdump v9.0 is lsass_YYMMDD_HHmmss.dmp
+            - 'lsassdmp'
+            - 'lsassdump'
     selection_3:
-        TargetFilename|contains|all:
-            - '\lsass'
+        file.name|contains|all:
+            - 'lsass'
             - '.dmp'
     selection_4:
-        TargetFilename|contains: 'SQLDmpr'
-        TargetFilename|endswith: '.mdmp'
+        file.name|contains: 'SQLDmpr'
+        file.name|endswith: '.mdmp'
     selection_5:
-        TargetFilename|contains:
-            - '\nanodump'
-            - '\proc_' # NativeDump pattern https://github.com/ricardojoserf/NativeDump/blob/01d8cd17f31f51f5955a38e85cd3c83a17596175/NativeDump/Program.cs#L258
-        TargetFilename|endswith: '.dmp'
+        file.name|startswith:
+            - 'nanodump'
+            - 'proc_' # NativeDump pattern https://github.com/ricardojoserf/NativeDump/blob/01d8cd17f31f51f5955a38e85cd3c83a17596175/NativeDump/Program.cs#L258
+        file.name|endswith: '.dmp'
     condition: 1 of selection_*
 falsepositives:
     - Unknown
