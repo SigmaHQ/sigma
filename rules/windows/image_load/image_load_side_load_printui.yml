@@ -1,0 +1,26 @@
+title: Potential printui.DLL Sideloading
+id: d7605a99-2218-4894-8fd3-2afb7946514e
+status: test
+description: Detects potential DLL sideloading of "printui.dll". While using "printui.exe" it can be abused to attach to an arbitrary process and force load any DLL named "printui.dll" from the current directory of execution.
+references:
+    - https://www.linkedin.com/pulse/uncovered-lolbas-yasin-g%C3%B6khan-ta%C5%9Fkin-gnpwf/?trackingId=WvE5YmopTtyh%2FuvEPcpyZQ%3D%3D
+    - https://x.com/TaskinYasn/status/1876672639558947213
+author: Yasin Gokhan TASKIN (Ministry Of Interior,Turkiye)
+date: 2025-01-07
+tags:
+    - attack.defense-evasion
+    - attack.privilege-escalation
+    - attack.t1574.001
+    - attack.t1574.002
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith: '\printui.dll'
+    filter_main_legit_path:
+      ImageLoaded|contains: 'C:\Windows \System32\'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unlikely
+level: medium
