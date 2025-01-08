@@ -9,7 +9,7 @@ references:
     - https://processhacker.sourceforge.io/
 author: Florian Roth (Nextron Systems)
 date: 2022-11-16
-modified: 2023-05-08
+modified: 2024-11-23
 tags:
     - attack.privilege-escalation
     - cve.2021-21551
@@ -18,21 +18,14 @@ logsource:
     category: driver_load
     product: windows
 detection:
-    selection_image:
-        ImageLoaded|endswith: '\kprocesshacker.sys'
-    selection_processhack_sysmon:
-        Hashes|contains:
-            - 'IMPHASH=821D74031D3F625BCBD0DF08B70F1E77'
-            - 'IMPHASH=F86759BB4DE4320918615DC06E998A39'
-            - 'IMPHASH=0A64EEB85419257D0CE32BD5D55C3A18'
-            - 'IMPHASH=6E7B34DFC017700B1517B230DF6FF0D0'
-    selection_processhack_hashes:
-        Imphash:
-            - '821D74031D3F625BCBD0DF08B70F1E77'
-            - 'F86759BB4DE4320918615DC06E998A39'
-            - '0A64EEB85419257D0CE32BD5D55C3A18'
-            - '6E7B34DFC017700B1517B230DF6FF0D0'
-    condition: 1 of selection_*
+    selection:
+        - ImageLoaded|endswith: '\kprocesshacker.sys'
+        - Hashes|contains:
+              - 'IMPHASH=821D74031D3F625BCBD0DF08B70F1E77'
+              - 'IMPHASH=F86759BB4DE4320918615DC06E998A39'
+              - 'IMPHASH=0A64EEB85419257D0CE32BD5D55C3A18'
+              - 'IMPHASH=6E7B34DFC017700B1517B230DF6FF0D0'
+    condition: selection
 falsepositives:
     - Legitimate use of process hacker or system informer by developers or system administrators
 level: high
