@@ -1,0 +1,25 @@
+title: ESXi VM Autostart Disabled via VIM-CMD
+id: 28f12744-6c57-4498-bfdc-aa727fbece49
+status: experimental
+description: Detects when vim-cmd is used to disable the autostart of an ESXi virtual machine.
+references:
+    - https://lolesxi-project.github.io/LOLESXi/lolesxi/Binaries/vim-cmd/
+author: Nathan Burns
+date: 2024-11-22
+tags:
+    - attack.t1529
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_img:
+        Image|endswith: '/vim-cmd'
+        CommandLine|contains: 'hostsvc/autostartmanager/enable_autostart'
+    selection_check:
+        CommandLine|contains:
+            - '0'
+            - 'false'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate system administration actions.
+level: high

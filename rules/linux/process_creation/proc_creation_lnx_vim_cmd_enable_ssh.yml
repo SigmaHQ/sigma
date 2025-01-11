@@ -1,0 +1,21 @@
+title: SSH Enable on ESXi Host via VIM-CMD
+id: fefed8a8-1cc0-46b1-9e62-5b5b32df9bb7
+status: experimental
+description: Detects when vim-cmd is used to enable SSH on an ESXi host.
+references:
+    - https://lolesxi-project.github.io/LOLESXi/lolesxi/Binaries/vim-cmd/
+author: Nathan Burns
+date: 2024-11-22
+tags:
+    - attack.t1021.004
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith: '/vim-cmd'
+        CommandLine|contains: 'hostsvc/enable_ssh'
+    condition: selection
+falsepositives:
+    - Legitimate system administration actions
+level: medium

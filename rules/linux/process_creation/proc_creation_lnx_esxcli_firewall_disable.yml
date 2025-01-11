@@ -1,0 +1,30 @@
+title: ESXi Firewall Disabled via ESXCLI
+id: 18fba7a0-8f63-49d3-9fc4-6192fe34793c
+status: experimental
+description: Detects when the ESXi firewall is disabled via esxcli.
+references:
+    - https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_network.html
+    - https://lolesxi-project.github.io/LOLESXi/lolesxi/Binaries/esxcli/
+author: Nathan Burns
+date: 2024-11-20
+tags:
+    - attack.t1562.004
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_img:
+        Image|endswith: '/esxcli'
+        CommandLine|contains|all:
+            - 'network'
+            - 'firewall'
+            - 'set'
+            - 'false'
+    selection_enable_switch:
+        CommandLine|contains:
+            - '--enabled'
+            - '-e'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate system administration actions
+level: high
