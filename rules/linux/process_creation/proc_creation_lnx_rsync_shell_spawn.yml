@@ -16,11 +16,11 @@ logsource:
     category: process_creation
     product: linux
 detection:
-    selection:
+    selection_parent:
         ParentImage|endswith:
             - '/rsync'
             - '/rsyncd'
-    selection_cli:
+    selection_shells:
         Image|endswith:
             - '/ash'
             - '/bash'
@@ -32,7 +32,7 @@ detection:
             - '/zsh'
     filter_expected:
         CommandLine|contains: ' -e '
-    condition: selection and not 1 of filter_*
+    condition: all of selection_* and not 1 of filter_*
 falsepositives:
     - Unknown
 level: high
