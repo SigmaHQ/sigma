@@ -1,4 +1,4 @@
-title: Suspicious Volume Shadow Copy Vsstrace.dll Load
+title: Potentially Suspicious Volume Shadow Copy Vsstrace.dll Load
 id: 48bfd177-7cf2-412b-ad77-baf923489e82
 related:
     - id: 333cdbe8-27bb-4246-bf82-b41a0dca4b70 # vss_ps.dll
@@ -11,7 +11,7 @@ references:
     - https://github.com/ORCx41/DeleteShadowCopies
 author: frack113
 date: 2023-02-17
-modified: 2023-03-28
+modified: 2025-01-19
 tags:
     - attack.defense-evasion
     - attack.impact
@@ -22,7 +22,7 @@ logsource:
 detection:
     selection:
         ImageLoaded|endswith: '\vsstrace.dll'
-    filter_windows:
+    filter_main_windows:
         - Image:
               - 'C:\Windows\explorer.exe'
               - 'C:\Windows\ImmersiveControlPanel\SystemSettings.exe'
@@ -31,7 +31,8 @@ detection:
               - 'C:\Windows\SysWOW64\'
               - 'C:\Windows\Temp\{' # Installers
               - 'C:\Windows\WinSxS\'
-    filter_program_files:
+              - 'C:\ProgramData\Package Cache\{'  # Microsoft Visual Redistributable installer  VC_redist/vcredist EXE
+    filter_optional_program_files:
         # When using this rule in your environment replace the "Program Files" folder by the exact applications you know use this. Examples would be software such as backup solutions
         Image|startswith:
             - 'C:\Program Files\'
@@ -39,4 +40,4 @@ detection:
     condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown
-level: high
+level: medium
