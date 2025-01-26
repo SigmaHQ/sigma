@@ -1,0 +1,29 @@
+title: Microsoft Teams Sensitive File Access By Uncommon Applications
+id: 65744385-8541-44a6-8630-ffc824d7d4cc
+status: experimental
+description: |
+    Detects file access attempts to sensitive Microsoft teams files (leveldb, cookies) by an uncommon process.
+references:
+    - https://www.bleepingcomputer.com/news/security/microsoft-teams-stores-auth-tokens-as-cleartext-in-windows-linux-macs/
+    - https://www.vectra.ai/blog/undermining-microsoft-teams-security-by-mining-tokens
+author: '@SerkinValery'
+date: 2024-07-22
+tags:
+    - attack.credential-access
+    - attack.t1528
+logsource:
+    product: windows
+    category: file_access
+    definition: 'Requirements: Microsoft-Windows-Kernel-File ETW provider'
+detection:
+    selection:
+        FileName|contains:
+            - '\Microsoft\Teams\Cookies'
+            - '\Microsoft\Teams\Local Storage\leveldb'
+    filter_main_legit_location:
+        # Note: its best to filter the full path to avoid false negatives
+        Image|endswith: '\Microsoft\Teams\current\Teams.exe'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: medium

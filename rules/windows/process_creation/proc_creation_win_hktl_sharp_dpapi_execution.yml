@@ -1,0 +1,50 @@
+title: HackTool - SharpDPAPI Execution
+id: c7d33b50-f690-4b51-8cfb-0fb912a31e57
+status: experimental
+description: |
+    Detects the execution of the SharpDPAPI tool based on CommandLine flags and PE metadata.
+    SharpDPAPI is a C# port of some DPAPI functionality from the Mimikatz project.
+references:
+    - https://github.com/GhostPack/SharpDPAPI
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2024-06-26
+tags:
+    - attack.privilege-escalation
+    - attack.defense-evasion
+    - attack.t1134.001
+    - attack.t1134.003
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        - Image|endswith: '\SharpDPAPI.exe'
+        - OriginalFileName: 'SharpDPAPI.exe'
+    selection_other_cli:
+        CommandLine|contains:
+            - ' backupkey '
+            - ' blob '
+            - ' certificates '
+            - ' credentials '
+            - ' keepass '
+            - ' masterkeys '
+            - ' rdg '
+            - ' vaults '
+    selection_other_options_guid:
+        CommandLine|contains|all:
+            - ' {'
+            - '}:'
+    selection_other_options_flags:
+        CommandLine|contains:
+            - ' /file:'
+            - ' /machine'
+            - ' /mkfile:'
+            - ' /password:'
+            - ' /pvk:'
+            - ' /server:'
+            - ' /target:'
+            - ' /unprotect'
+    condition: selection_img or (selection_other_cli and 1 of selection_other_options_*)
+falsepositives:
+    - Unknown
+level: high

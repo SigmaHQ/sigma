@@ -1,0 +1,47 @@
+title: Access To Potentially Sensitive Sysvol Files By Uncommon Applications
+id: d51694fe-484a-46ac-92d6-969e76d60d10
+related:
+    - id: 8344c19f-a023-45ff-ad63-a01c5396aea0
+      type: derived
+status: experimental
+description: Detects file access requests to potentially sensitive files hosted on the Windows Sysvol share.
+references:
+    - https://github.com/vletoux/pingcastle
+author: frack113
+date: 2023-12-21
+modified: 2024-07-29
+tags:
+    - attack.credential-access
+    - attack.t1552.006
+logsource:
+    category: file_access
+    product: windows
+    definition: 'Requirements: Microsoft-Windows-Kernel-File ETW provider'
+detection:
+    selection:
+        FileName|startswith: '\\'
+        FileName|contains|all:
+            - '\sysvol\'
+            - '\Policies\'
+        FileName|endswith:
+            - 'audit.csv'
+            - 'Files.xml'
+            - 'GptTmpl.inf'
+            - 'groups.xml'
+            - 'Registry.pol'
+            - 'Registry.xml'
+            - 'scheduledtasks.xml'
+            - 'scripts.ini'
+            - 'services.xml'
+    filter_main_generic:
+        Image|startswith:
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
+            - 'C:\Windows\system32\'
+            - 'C:\Windows\SysWOW64\'
+    filter_main_explorer:
+        Image: 'C:\Windows\explorer.exe'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: medium

@@ -1,0 +1,134 @@
+title: HackTool - LaZagne Execution
+id: c2b86e67-b880-4eec-b045-50bc98ef4844
+status: experimental
+description: |
+    Detects the execution of the LaZagne. A utility used to retrieve multiple types of passwords stored on a local computer.
+    LaZagne has been leveraged multiple times by threat actors in order to dump credentials.
+references:
+    - https://github.com/AlessandroZ/LaZagne/tree/master
+    - https://thedfirreport.com/2022/05/09/seo-poisoning-a-gootloader-story/
+    - https://cloud.google.com/blog/topics/threat-intelligence/alphv-ransomware-backup/
+    - https://securelist.com/defttorero-tactics-techniques-and-procedures/107610/
+    - https://github.com/CyberMonitor/APT_CyberCriminal_Campagin_Collections/raw/800c0e06571993a54e39571cf27fd474dcc5c0bc/2017/2017.11.14.Muddying_the_Water/muddying-the-water-targeted-attacks.pdf
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2024-06-24
+modified: 2024-08-16
+tags:
+    - attack.credential-access
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith: '\lazagne.exe'
+    selection_clionly:
+        # Note: This selection can be prone to FP. An initial baseline is required
+        Image|contains:
+            - ':\PerfLogs\'
+            - ':\ProgramData\'
+            - ':\Temp\'
+            - ':\Tmp\'
+            - ':\Windows\Temp\'
+            - '\AppData\'
+            - '\Downloads\'
+            - '\Users\Public\'
+        CommandLine|endswith:
+            - '.exe all'
+            - '.exe browsers'
+            - '.exe chats'
+            - '.exe databases'
+            - '.exe games'
+            - '.exe git'
+            - '.exe mails'
+            - '.exe maven'
+            - '.exe memory'
+            - '.exe multimedia'
+            # - '.exe php' # Might be prone to FP
+            # - '.exe svn' # Might be prone to FP
+            - '.exe sysadmin'
+            - '.exe unused'
+            - '.exe wifi'
+            - '.exe windows'
+    selection_cli_modules:
+        CommandLine|contains:
+            - 'all '
+            - 'browsers '
+            - 'chats '
+            - 'databases '
+            - 'games '
+            - 'git '
+            - 'mails '
+            - 'maven '
+            - 'memory '
+            - 'multimedia '
+            - 'php '
+            - 'svn '
+            - 'sysadmin '
+            - 'unused '
+            - 'wifi '
+            - 'windows '
+    selection_cli_options:
+        CommandLine|contains:
+            - '-oA'
+            - '-oJ'
+            - '-oN'
+            - '-output'
+            - '-password'
+            - -1Password
+            - '-apachedirectorystudio'
+            - '-autologon'
+            - '-ChromiumBased'
+            - '-composer'
+            - '-coreftp'
+            - '-credfiles'
+            - '-credman'
+            - '-cyberduck'
+            - '-dbvis'
+            - '-EyeCon'
+            - '-filezilla'
+            - '-filezillaserver'
+            - '-ftpnavigator'
+            - '-galconfusion'
+            - '-gitforwindows'
+            - '-hashdump'
+            - '-iisapppool'
+            - '-IISCentralCertP'
+            - '-kalypsomedia'
+            - '-keepass'
+            - '-keepassconfig'
+            - '-lsa_secrets'
+            - '-mavenrepositories'
+            - '-memory_dump'
+            - '-Mozilla'
+            - '-mRemoteNG'
+            - '-mscache'
+            - '-opensshforwindows'
+            - '-openvpn'
+            - '-outlook'
+            - '-pidgin'
+            - '-postgresql'
+            - '-psi-im'
+            - '-puttycm'
+            - '-pypykatz'
+            - '-Rclone'
+            - '-rdpmanager'
+            - '-robomongo'
+            - '-roguestale'
+            - '-skype'
+            - '-SQLDeveloper'
+            - '-squirrel'
+            - '-tortoise'
+            - '-turba'
+            - '-UCBrowser'
+            - '-unattended'
+            - '-vault'
+            - '-vaultfiles'
+            - '-vnc'
+            - '-windows'
+            - '-winscp'
+            - '-wsl'
+    condition: selection_img or selection_clionly or (selection_cli_modules and selection_cli_options)
+falsepositives:
+    - Some false positive is expected from tools with similar command line flags.
+# Note: Increase the level to "high" after an initial baseline
+level: medium

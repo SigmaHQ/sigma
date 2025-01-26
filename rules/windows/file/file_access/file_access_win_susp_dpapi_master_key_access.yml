@@ -1,0 +1,35 @@
+title: Access To Windows DPAPI Master Keys By Uncommon Applications
+id: 46612ae6-86be-4802-bc07-39b59feb1309
+status: experimental
+description: |
+    Detects file access requests to the the Windows Data Protection API Master keys by an uncommon application.
+    This can be a sign of credential stealing. Example case would be usage of mimikatz "dpapi::masterkey" function
+references:
+    - http://blog.harmj0y.net/redteaming/operational-guidance-for-offensive-user-dpapi-abuse/
+    - https://book.hacktricks.xyz/windows-hardening/windows-local-privilege-escalation/dpapi-extracting-passwords
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2022-10-17
+modified: 2024-07-29
+tags:
+    - attack.credential-access
+    - attack.t1555.004
+logsource:
+    category: file_access
+    product: windows
+    definition: 'Requirements: Microsoft-Windows-Kernel-File ETW provider'
+detection:
+    selection:
+        FileName|contains:
+            - '\Microsoft\Protect\S-1-5-18\' # For System32
+            - '\Microsoft\Protect\S-1-5-21-' # For Users
+    filter_system_folders:
+        Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Windows\system32\'
+            - 'C:\Windows\SysWOW64\'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Unknown
+# Increase level after false positives filters are good enough
+level: medium

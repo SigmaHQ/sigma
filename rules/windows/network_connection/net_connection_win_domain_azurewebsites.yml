@@ -1,0 +1,147 @@
+title: Network Connection Initiated To AzureWebsites.NET By Non-Browser Process
+id: 5c80b618-0dbb-46e6-acbb-03d90bcb6d83
+related:
+    - id: e043f529-8514-4205-8ab0-7f7d2927b400
+      type: derived
+status: experimental
+description: |
+    Detects an initiated network connection by a non browser process on the system to "azurewebsites.net". The latter was often used by threat actors as a malware hosting and exfiltration site.
+references:
+    - https://www.sentinelone.com/labs/wip26-espionage-threat-actors-abuse-cloud-infrastructure-in-targeted-telco-attacks/
+    - https://symantec-enterprise-blogs.security.com/threat-intelligence/harvester-new-apt-attacks-asia
+    - https://www.ptsecurity.com/ww-en/analytics/pt-esc-threat-intelligence/higaisa-or-winnti-apt-41-backdoors-old-and-new/
+    - https://intezer.com/blog/research/how-we-escaped-docker-in-azure-functions/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2024-06-24
+modified: 2024-07-16
+tags:
+    - attack.command-and-control
+    - attack.t1102
+    - attack.t1102.001
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Initiated: 'true'
+        DestinationHostname|endswith: 'azurewebsites.net'
+    # Note: Add/Remove browsers/applications that you don't use or those that have custom install locations
+    # Note: To avoid complex conditions the filters for some apps are generic by name only. A custom tuning is recommended for best results
+    filter_main_chrome:
+        Image:
+            - 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+            - 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
+    filter_main_chrome_appdata:
+        Image|startswith: 'C:\Users\'
+        Image|endswith: '\AppData\Local\Google\Chrome\Application\chrome.exe'
+    filter_main_firefox:
+        Image:
+            - 'C:\Program Files\Mozilla Firefox\firefox.exe'
+            - 'C:\Program Files (x86)\Mozilla Firefox\firefox.exe'
+    filter_main_firefox_appdata:
+        Image|startswith: 'C:\Users\'
+        Image|endswith: '\AppData\Local\Mozilla Firefox\firefox.exe'
+    filter_main_ie:
+        Image:
+            - 'C:\Program Files (x86)\Internet Explorer\iexplore.exe'
+            - 'C:\Program Files\Internet Explorer\iexplore.exe'
+    filter_main_edge_1:
+        - Image|startswith: 'C:\Program Files (x86)\Microsoft\EdgeWebView\Application\'
+        - Image|endswith: '\WindowsApps\MicrosoftEdge.exe'
+        - Image:
+              - 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+              - 'C:\Program Files\Microsoft\Edge\Application\msedge.exe'
+    filter_main_edge_2:
+        Image|startswith:
+            - 'C:\Program Files (x86)\Microsoft\EdgeCore\'
+            - 'C:\Program Files\Microsoft\EdgeCore\'
+        Image|endswith:
+            - '\msedge.exe'
+            - '\msedgewebview2.exe'
+    filter_main_safari:
+        Image|contains:
+            - 'C:\Program Files (x86)\Safari\'
+            - 'C:\Program Files\Safari\'
+        Image|endswith: '\safari.exe'
+    filter_main_defender:
+        Image|contains:
+            - 'C:\Program Files\Windows Defender Advanced Threat Protection\'
+            - 'C:\Program Files\Windows Defender\'
+            - 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+        Image|endswith:
+            - '\MsMpEng.exe' # Microsoft Defender executable
+            - '\MsSense.exe' # Windows Defender Advanced Threat Protection Service Executable
+    filter_main_prtg:
+        # Paessler's PRTG Network Monitor
+        Image|endswith:
+            - 'C:\Program Files (x86)\PRTG Network Monitor\PRTG Probe.exe'
+            - 'C:\Program Files\PRTG Network Monitor\PRTG Probe.exe'
+    filter_main_brave:
+        Image|startswith: 'C:\Program Files\BraveSoftware\'
+        Image|endswith: '\brave.exe'
+    filter_main_maxthon:
+        Image|contains: '\AppData\Local\Maxthon\'
+        Image|endswith: '\maxthon.exe'
+    filter_main_opera:
+        Image|contains: '\AppData\Local\Programs\Opera\'
+        Image|endswith: '\opera.exe'
+    filter_main_seamonkey:
+        Image|startswith:
+            - 'C:\Program Files\SeaMonkey\'
+            - 'C:\Program Files (x86)\SeaMonkey\'
+        Image|endswith: '\seamonkey.exe'
+    filter_main_vivaldi:
+        Image|contains: '\AppData\Local\Vivaldi\'
+        Image|endswith: '\vivaldi.exe'
+    filter_main_whale:
+        Image|startswith:
+            - 'C:\Program Files\Naver\Naver Whale\'
+            - 'C:\Program Files (x86)\Naver\Naver Whale\'
+        Image|endswith: '\whale.exe'
+    # Note: The TOR browser shouldn't be something you allow in your corporate network.
+    # filter_main_tor:
+    #     Image|contains: '\Tor Browser\'
+    filter_main_whaterfox:
+        Image|startswith:
+            - 'C:\Program Files\Waterfox\'
+            - 'C:\Program Files (x86)\Waterfox\'
+        Image|endswith: '\Waterfox.exe'
+    filter_main_slimbrowser:
+        Image|startswith:
+            - 'C:\Program Files\SlimBrowser\'
+            - 'C:\Program Files (x86)\SlimBrowser\'
+        Image|endswith: '\slimbrowser.exe'
+    filter_main_flock:
+        Image|contains: '\AppData\Local\Flock\'
+        Image|endswith: '\Flock.exe'
+    filter_main_phoebe:
+        Image|contains: '\AppData\Local\Phoebe\'
+        Image|endswith: '\Phoebe.exe'
+    filter_main_falkon:
+        Image|startswith:
+            - 'C:\Program Files\Falkon\'
+            - 'C:\Program Files (x86)\Falkon\'
+        Image|endswith: '\falkon.exe'
+    filter_main_qtweb:
+        Image|startswith:
+            - 'C:\Program Files (x86)\QtWeb\'
+            - 'C:\Program Files\QtWeb\'
+        Image|endswith: '\QtWeb.exe'
+    filter_main_avant:
+        Image|startswith:
+            - 'C:\Program Files (x86)\Avant Browser\'
+            - 'C:\Program Files\Avant Browser\'
+        Image|endswith: '\avant.exe'
+    filter_main_discord:
+        Image|contains: '\AppData\Local\Discord\'
+        Image|endswith: '\Discord.exe'
+    filter_main_null:
+        Image: null
+    filter_main_empty:
+        Image: ''
+    # filter_optional_qlik:
+    #     Image|endswith: '\Engine.exe' # Process from qlik.com app
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: medium

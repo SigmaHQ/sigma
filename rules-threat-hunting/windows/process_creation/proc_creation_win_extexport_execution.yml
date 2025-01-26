@@ -1,0 +1,32 @@
+title: Potential DLL Sideloading Activity Via ExtExport.EXE
+id: fb0b815b-f5f6-4f50-970f-ffe21f253f7a
+status: test
+description: |
+    Detects the execution of "Extexport.exe".A utility that is part of the Internet Explorer browser and is used to export and import various settings and data, particularly when switching between Internet Explorer and other web browsers like Firefox. It allows users to transfer bookmarks, browsing history, and other preferences from Internet Explorer to Firefox or vice versa.
+    It can be abused as a tool to side load any DLL. If a folder is provided in the command line it'll load any DLL with one of the following names "mozcrt19.dll", "mozsqlite3.dll", or "sqlite.dll".
+    Arbitrary DLLs can also be loaded if a specific number of flags was provided.
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Extexport/
+    - https://www.hexacorn.com/blog/2018/04/24/extexport-yet-another-lolbin/
+    - https://www.microsoft.com/en-us/security/blog/2020/03/23/latest-astaroth-living-off-the-land-attacks-are-even-more-invisible-but-not-less-observable/
+    - https://res.armor.com/resources/threat-intelligence/astaroth-banking-trojan/
+    - https://securelist.com/the-tetrade-brazilian-banking-malware/97779/
+    - https://www.welivesecurity.com/2020/03/05/guildma-devil-drives-electric/
+author: frack113, Nasreddine Bencherchali (Nextron Systems)
+date: 2021-11-26
+modified: 2024-08-26
+tags:
+    - attack.defense-evasion
+    - attack.t1218
+    - detection.threat-hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|endswith: '\Extexport.exe'
+        - OriginalFileName: 'extexport.exe'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium

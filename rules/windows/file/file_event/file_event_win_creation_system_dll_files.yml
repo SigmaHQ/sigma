@@ -1,0 +1,38 @@
+title: Files With System DLL Name In Unsuspected Locations
+id: 13c02350-4177-4e45-ac17-cf7ca628ff5e
+status: test
+description: |
+    Detects the creation of a file with the ".dll" extension that has the name of a System DLL in uncommon or unsuspected locations. (Outisde of "System32", "SysWOW64", etc.).
+    It is highly recommended to perform an initial baseline before using this rule in production.
+references:
+    - Internal Research
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2024-06-24
+tags:
+    - attack.defense-evasion
+    - attack.t1036.005
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|endswith:
+            # Note: Add more System DLL that can be abused for DLL sideloading to increase coverage
+            - '\secur32.dll'
+            - '\tdh.dll'
+    filter_main_generic:
+        # Note: It is recommended to use a more robust filter instead of this generic one, to avoid false negatives.
+        TargetFilename|contains:
+            # - '\SystemRoot\System32\'
+            - 'C:\$WINDOWS.~BT\'
+            - 'C:\$WinREAgent\'
+            - 'C:\Windows\SoftwareDistribution\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\WinSxS\'
+            - 'C:\Windows\uus\'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Third party software might bundle specific versions of system DLLs.
+# Note: Upgrade to high after an initial baseline to your environement.
+level: medium

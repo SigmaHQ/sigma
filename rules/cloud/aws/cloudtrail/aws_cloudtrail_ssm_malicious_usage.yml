@@ -1,0 +1,26 @@
+title: Potential Malicious Usage of CloudTrail System Manager
+id: 38e7f511-3f74-41d4-836e-f57dfa18eead
+status: experimental
+description: |
+    Detect when System Manager successfully executes commands against an instance.
+references:
+    - https://github.com/elastic/detection-rules/blob/main/rules/integrations/aws/initial_access_via_system_manager.toml
+author: jamesc-grafana
+date: 2024-07-11
+tags:
+    - attack.privilege-escalation
+    - attack.t1566
+    - attack.t1566.002
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventName: 'SendCommand'
+        eventSource: 'ssm.amazonaws.com'
+        responseElements.command.status: 'Success'
+    condition: selection
+falsepositives:
+    - There are legitimate uses of SSM to send commands to EC2 instances
+    - Legitimate users may have to use SSM to perform actions against machines in the Cloud to update or maintain them
+level: high

@@ -1,0 +1,75 @@
+title: COM Object Hijacking Via Modification Of Default System CLSID Default Value
+id: 790317c0-0a36-4a6a-a105-6e576bf99a14
+related:
+    - id: 3d968d17-ffa4-4bc0-bfdc-f139de76ce77
+      type: obsolete
+    - id: a0ff33d8-79e4-4cef-b4f3-9dc4133ccd12
+      type: obsolete
+status: experimental
+description: Detects potential COM object hijacking via modification of default system CLSID.
+references:
+    - https://www.microsoft.com/security/blog/2022/07/27/untangling-knotweed-european-private-sector-offensive-actor-using-0-day-exploits/ (idea)
+    - https://unit42.paloaltonetworks.com/snipbot-romcom-malware-variant/
+    - https://blog.talosintelligence.com/uat-5647-romcom/
+    - https://global.ptsecurity.com/analytics/pt-esc-threat-intelligence/darkhotel-a-cluster-of-groups-united-by-common-techniques
+    - https://threatbook.io/blog/Analysis-of-APT-C-60-Attack-on-South-Korea
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2024-07-16
+modified: 2024-12-14
+tags:
+    - attack.persistence
+    - attack.t1546.015
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_target_root:
+        TargetObject|contains: '\CLSID\'
+        TargetObject|endswith:
+            - '\InprocServer32\(Default)'
+            - '\LocalServer32\(Default)'
+    selection_target_builtin_clsid:
+        TargetObject|contains:
+            # Note: Add other legitimate CLSID
+            - '\{1f486a52-3cb1-48fd-8f50-b8dc300d9f9d}\'
+            - '\{2155fee3-2419-4373-b102-6843707eb41f}\'
+            - '\{4590f811-1d3a-11d0-891f-00aa004b2e24}\'
+            - '\{4de225bf-cf59-4cfc-85f7-68b90f185355}\'
+            - '\{ddc05a5a-351a-4e06-8eaf-54ec1bc2dcea}\'
+            - '\{F56F6FDD-AA9D-4618-A949-C1B91AF43B1A}\'
+            - '\{F82B4EF1-93A9-4DDE-8015-F7950A1A6E31}\'
+            - '\{7849596a-48ea-486e-8937-a2a3009f31a9}\'
+            - '\{0b91a74b-ad7c-4a9d-b563-29eef9167172}\'
+            - '\{603D3801-BD81-11d0-A3A5-00C04FD706EC}\'
+    selection_susp_location_1:
+        Details|contains:
+            # Note: Add more suspicious paths and locations
+            - ':\Perflogs\'
+            - '\AppData\Local\'
+            - '\Desktop\'
+            - '\Downloads\'
+            - '\Microsoft\Windows\Start Menu\Programs\Startup\'
+            - '\System32\spool\drivers\color\' # as seen in the knotweed blog
+            - '\Temporary Internet'
+            - '\Users\Public\'
+            - '\Windows\Temp\'
+            - '%appdata%'
+            - '%temp%'
+            - '%tmp%'
+    selection_susp_location_2:
+        - Details|contains|all:
+              - ':\Users\'
+              - '\Favorites\'
+        - Details|contains|all:
+              - ':\Users\'
+              - '\Favourites\'
+        - Details|contains|all:
+              - ':\Users\'
+              - '\Contacts\'
+        - Details|contains|all:
+              - ':\Users\'
+              - '\Pictures\'
+    condition: all of selection_target_* and 1 of selection_susp_location_*
+falsepositives:
+    - Unlikely
+level: high
