@@ -1,0 +1,24 @@
+title: Periodic Backup For System Registry Hives Enabled
+id: 973ef012-8f1a-4c40-93b4-7e659a5cd17f
+status: experimental
+description: |
+    Detects the enabling of the "EnablePeriodicBackup" registry value. Once enabled, The OS will backup System registry hives on restarts to the "C:\Windows\System32\config\RegBack" folder. Windows creates a "RegIdleBackup" task to manage subsequent backups.
+    Registry backup was a default behavior on Windows and was disabled as of "Windows 10, version 1803".
+references:
+    - https://learn.microsoft.com/en-us/troubleshoot/windows-client/installing-updates-features-roles/system-registry-no-backed-up-regback-folder
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2024-07-01
+tags:
+    - attack.collection
+    - attack.t1113
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|endswith: '\Control\Session Manager\Configuration Manager\EnablePeriodicBackup'
+        Details: 'DWORD (0x00000001)'
+    condition: selection
+falsepositives:
+    - Legitimate need for RegBack feature by administrators.
+level: medium

@@ -1,0 +1,24 @@
+title: Network Connection Initiated To BTunnels Domains
+id: 9e02c8ec-02b9-43e8-81eb-34a475ba7965
+status: experimental
+description: |
+    Detects network connections to BTunnels domains initiated by a process on the system.
+    Attackers can abuse that feature to establish a reverse shell or persistence on a machine.
+references:
+    - https://defr0ggy.github.io/research/Utilizing-BTunnel-For-Data-Exfiltration/
+author: Kamran Saifullah
+date: 2024-09-13
+tags:
+    - attack.exfiltration
+    - attack.t1567.001
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Initiated: 'true'
+        DestinationHostname|endswith: '.btunnel.co.in'
+    condition: selection
+falsepositives:
+    - Legitimate use of BTunnels will also trigger this.
+level: medium

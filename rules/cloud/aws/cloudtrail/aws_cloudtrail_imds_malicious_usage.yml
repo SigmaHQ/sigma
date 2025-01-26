@@ -1,0 +1,31 @@
+title: Malicious Usage Of IMDS Credentials Outside Of AWS Infrastructure
+id: 352a918a-34d8-4882-8470-44830c507aa3
+status: experimental
+description: |
+    Detects when an instance identity has taken an action that isn't inside SSM.
+    This can indicate that a compromised EC2 instance is being used as a pivot point.
+references:
+    - https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-identity-roles.html
+    - https://ermetic.com/blog/aws/aws-ec2-imds-what-you-need-to-know/
+    - https://www.packetmischief.ca/2023/07/31/amazon-ec2-credential-exfiltration-how-it-happens-and-how-to-mitigate-it/#lifting-credentials-from-imds-this-is-why-we-cant-have-nice-things
+author: jamesc-grafana
+date: 2024-07-11
+tags:
+    - attack.privilege-escalation
+    - attack.defense-evasion
+    - attack.t1078
+    - attack.t1078.002
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        userIdentity.arn|re: '.+:assumed-role/aws:.+'
+    filter_main_generic:
+        - eventSource: 'ssm.amazonaws.com'
+        - eventName: 'RegisterManagedInstance'
+        - sourceIPAddress: 'AWS Internal'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - A team has configured an EC2 instance to use instance profiles that grant the option for the EC2 instance to talk to other AWS Services
+level: high

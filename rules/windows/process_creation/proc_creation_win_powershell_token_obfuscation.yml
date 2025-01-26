@@ -8,10 +8,10 @@ description: Detects TOKEN OBFUSCATION technique from Invoke-Obfuscation
 references:
     - https://github.com/danielbohannon/Invoke-Obfuscation
 author: frack113
-date: 2022/12/27
-modified: 2022/12/30
+date: 2022-12-27
+modified: 2024-08-11
 tags:
-    - attack.defense_evasion
+    - attack.defense-evasion
     - attack.t1027.009
 logsource:
     category: process_creation
@@ -22,12 +22,14 @@ detection:
         #   IN`V`o`Ke-eXp`ResSIOn (Ne`W-ob`ject Net.WebClient).DownloadString
         #   &('In'+'voke-Expressi'+'o'+'n') (.('New-Ob'+'jec'+'t') Net.WebClient).DownloadString
         #   &("{2}{3}{0}{4}{1}"-f 'e','Expression','I','nvok','-') (&("{0}{1}{2}"-f'N','ew-O','bject') Net.WebClient).DownloadString
-        #   ${e`Nv:pATh}
         - CommandLine|re: '\w+`(\w+|-|.)`[\w+|\s]'
         # - CommandLine|re: '\((\'(\w|-|\.)+\'\+)+\'(\w|-|\.)+\'\)' TODO: fixme
         - CommandLine|re: '"(\{\d\})+"\s*-f'
-        - CommandLine|re: '\$\{((e|n|v)*`(e|n|v)*)+:path\}|\$\{((e|n|v)*`(e|n|v)*)+:((p|a|t|h)*`(p|a|t|h)*)+\}|\$\{env:((p|a|t|h)*`(p|a|t|h)*)+\}'
-    condition: selection
+        #   ${e`Nv:pATh}
+        - CommandLine|re: '(?i)\$\{`?e`?n`?v`?:`?p`?a`?t`?h`?\}'
+    filter_main_envpath:
+        CommandLine|contains: '${env:path}'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high

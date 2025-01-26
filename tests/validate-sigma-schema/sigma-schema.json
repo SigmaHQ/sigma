@@ -1,6 +1,6 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Sigma rule specification V1.0.4 (2023/06/29)",
+  "$schema": "https://json-schema.org/draft/2020-12/schema#",
+  "title": "Sigma rule specification V2.0.0 (2024-08-08)",
   "type": "object",
   "required": ["title", "logsource", "detection"],
   "properties": {
@@ -34,7 +34,7 @@
                 "description": "The rule was derived from the referred rule or rules, which may remain active"
               },
               {
-                "const": "obsoletes",
+                "const": "obsolete",
                 "description": "The rule obsoletes the referred rule or rules, which aren't used anymore"
               },
               {
@@ -53,6 +53,16 @@
           }
         }
       }
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 256,
+      "description": "a unique human-readable name that can be used instead of the id as a reference in correlation rules"
+    },
+    "taxonomy":{
+      "type": "string",
+      "maxLength": 256,
+      "description": "Defines the taxonomy used in the Sigma rule"
     },
     "status": {
       "type": "string",
@@ -102,13 +112,13 @@
     },
     "date": {
       "type": "string",
-      "description": "Creation date of the rule. Use the format YYYY/MM/DD",
-      "pattern": "^\\d{4}/(0[1-9]|1[012])/(0[1-9]|[12][0-9]|3[01])$"
+      "description": "Creation date of the rule. Use the ISO 8601 format YYYY-MM-DD",
+      "pattern": "^\\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$"
     },
     "modified": {
       "type": "string",
-      "description": "Last modification date of the rule. Use the format YYYY/MM/DD",
-      "pattern": "^\\d{4}/(0[1-9]|1[012])/(0[1-9]|[12][0-9]|3[01])$"
+      "description": "Last modification date of the rule. Use the ISO 8601 format YYYY-MM-DD",
+      "pattern": "^\\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$"
     },
     "logsource": {
       "type": "object",
@@ -124,6 +134,10 @@
         },
         "service": {
           "description": "A subset of a product's logs, like sshd",
+          "type": "string"
+        },
+        "definition":{
+          "description": "can be used to describe the log source",
           "type": "string"
         }
       }
@@ -228,6 +242,14 @@
         "type": "string",
         "pattern": "^[a-z0-9_-]+\\.[a-z0-9._-]+$"
       }
+    },
+    "scope":{
+      "description": "A list of intended scope of the rule",
+      "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 2
+          }
     }
   }
 }

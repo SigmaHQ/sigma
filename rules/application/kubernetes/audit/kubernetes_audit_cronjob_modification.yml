@@ -1,0 +1,39 @@
+title: Kubernetes CronJob/Job Modification
+id: 0c9b3bda-41a6-4442-9345-356ae86343dc
+related:
+    - id: cd3a808c-c7b7-4c50-a2f3-f4cfcd436435
+      type: similar
+status: experimental
+description: |
+    Detects when a Kubernetes CronJob or Job is created or modified.
+    A Kubernetes Job creates one or more pods to accomplish a specific task, and a CronJob creates Jobs on a recurring schedule.
+    An adversary can take advantage of this Kubernetes object to schedule Jobs to run containers that execute malicious code within a cluster, allowing them to achieve persistence.
+references:
+    - https://kubernetes.io/docs/reference/config-api/apiserver-audit.v1/
+    - https://www.redhat.com/en/blog/protecting-kubernetes-against-mitre-attck-persistence#technique-33-kubernetes-cronjob
+author: kelnage
+date: 2024-07-11
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.execution
+logsource:
+    product: kubernetes
+    service: audit
+detection:
+    selection:
+        objectRef.apiGroup: 'batch'
+        objectRef.resource:
+            - 'cronjobs'
+            - 'jobs'
+        verb:
+            - 'create'
+            - 'delete'
+            - 'patch'
+            - 'replace'
+            - 'update'
+    condition: selection
+falsepositives:
+    - Modifying a Kubernetes Job or CronJob may need to be done by a system administrator.
+    - Automated processes may need to take these actions and may need to be filtered.
+level: medium

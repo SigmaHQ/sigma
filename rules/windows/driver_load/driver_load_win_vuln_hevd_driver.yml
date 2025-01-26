@@ -5,26 +5,21 @@ description: Detects the load of HackSys Extreme Vulnerable Driver which is an i
 references:
     - https://github.com/hacksysteam/HackSysExtremeVulnerableDriver
 author: Nasreddine Bencherchali (Nextron Systems)
-date: 2022/08/18
-modified: 2022/11/19
+date: 2022-08-18
+modified: 2024-11-23
 tags:
-    - attack.privilege_escalation
+    - attack.privilege-escalation
     - attack.t1543.003
 logsource:
     product: windows
     category: driver_load
 detection:
-    selection_name:
-        ImageLoaded|endswith: '\HEVD.sys'
-    selection_sysmon:
-        Hashes|contains:
-            - 'IMPHASH=f26d0b110873a1c7d8c4f08fbeab89c5' # Version 3.0
-            - 'IMPHASH=c46ea2e651fd5f7f716c8867c6d13594' # Version 3.0
-    selection_other:
-        Imphash:
-            - 'f26d0b110873a1c7d8c4f08fbeab89c5' # Version 3.0
-            - 'c46ea2e651fd5f7f716c8867c6d13594' # Version 3.0
-    condition: 1 of selection*
+    selection:
+        - ImageLoaded|endswith: '\HEVD.sys'
+        - Hashes|contains:
+              - 'IMPHASH=f26d0b110873a1c7d8c4f08fbeab89c5' # Version 3.0
+              - 'IMPHASH=c46ea2e651fd5f7f716c8867c6d13594' # Version 3.0
+    condition: selection
 falsepositives:
     - Unlikely
 level: high

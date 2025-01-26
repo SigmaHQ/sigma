@@ -1,0 +1,33 @@
+title: Potential Privilege Escalation via Local Kerberos Relay over LDAP
+id: 749c9f5e-b353-4b90-a9c1-05243357ca4b
+status: test
+description: |
+    Detects a suspicious local successful logon event where the Logon Package is Kerberos, the remote address is set to localhost, and the target user SID is the built-in local Administrator account.
+    This may indicate an attempt to leverage a Kerberos relay attack variant that can be used to elevate privilege locally from a domain joined limited user to local System privileges.
+references:
+    - https://twitter.com/sbousseaden/status/1518976397364056071?s=12&t=qKO5eKHvWhAP19a50FTZ7g
+    - https://github.com/elastic/detection-rules/blob/5fe7833312031a4787e07893e27e4ea7a7665745/rules/_deprecated/privilege_escalation_krbrelayup_suspicious_logon.toml#L38
+author: Elastic, @SBousseaden
+date: 2022-04-27
+modified: 2024-08-13
+tags:
+    - attack.privilege-escalation
+    - attack.credential-access
+    - attack.t1548
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4624
+        LogonType: 3
+        AuthenticationPackageName: 'Kerberos'
+        IpAddress: '127.0.0.1'
+        TargetUserSid|startswith: 'S-1-5-21-'
+        TargetUserSid|endswith: '-500'
+    filter_main_ip_null:
+        IpPort: '0'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high

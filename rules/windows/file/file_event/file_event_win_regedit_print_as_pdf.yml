@@ -1,0 +1,23 @@
+title: PDF File Created By RegEdit.EXE
+id: 145095eb-e273-443b-83d0-f9b519b7867b
+status: experimental
+description: |
+    Detects the creation of a file with the ".pdf" extension by the "RegEdit.exe" process.
+    This indicates that a user is trying to print/save a registry key as a PDF in order to potentially extract sensitive information and bypass defenses.
+references:
+    - https://sensepost.com/blog/2024/dumping-lsa-secrets-a-story-about-task-decorrelation/
+author: Nasreddine Bencherchali (Nextron Systems)
+date: 2024-07-08
+tags:
+    - attack.defense-evasion
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\regedit.exe'
+        TargetFilename|endswith: '.pdf'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
