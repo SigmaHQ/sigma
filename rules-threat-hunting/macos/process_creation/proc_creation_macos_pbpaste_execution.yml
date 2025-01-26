@@ -1,0 +1,30 @@
+title: Clipboard Data Collection Via Pbpaste
+id: d8af0da1-2959-40f9-a3e4-37a6aa1228b7
+status: experimental
+description: |
+    Detects execution of the "pbpaste" utility, which retrieves the contents of the clipboard (a.k.a. pasteboard) and writes them to the standard output (stdout).
+    The utility is often used for creating new files with the clipboard content or for piping clipboard contents to other commands.
+    It can also be used in shell scripts that may require clipboard content as input.
+    Attackers can abuse this utility in order to collect data from the user clipboard, which may contain passwords or sensitive information.
+    Use this rule to hunt for potential abuse of the utility by looking at the parent process and any potentially suspicious command line content.
+references:
+    - https://www.loobins.io/binaries/pbpaste/
+    - https://medium.com/@NullByteWht/hacking-macos-how-to-dump-1password-keepassx-lastpass-passwords-in-plaintext-723c5b1c311b
+    - https://media.defense.gov/2021/Jul/19/2002805003/-1/-1/1/CSA_CHINESE_STATE-SPONSORED_CYBER_TTPS.PDF
+author: Daniel Cortez
+date: 2024-07-30
+tags:
+    - attack.collection
+    - attack.credential-access
+    - attack.t1115
+    - detection.threat-hunting
+logsource:
+    product: macos
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '/pbpaste'
+    condition: selection
+falsepositives:
+    - Legitimate administration activities
+level: medium

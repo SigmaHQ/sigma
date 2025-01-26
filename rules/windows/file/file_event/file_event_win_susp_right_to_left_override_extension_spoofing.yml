@@ -1,0 +1,34 @@
+title: Potential File Extension Spoofing Using Right-to-Left Override
+id: 979baf41-ca44-4540-9d0c-4fcef3b5a3a4
+related:
+    - id: ad691d92-15f2-4181-9aa4-723c74f9ddc3
+      type: derived
+status: experimental
+description: |
+    Detects suspicious filenames that contain a right-to-left override character and a potentially spoofed file extensions.
+references:
+    - https://redcanary.com/blog/right-to-left-override/
+    - https://www.malwarebytes.com/blog/news/2014/01/the-rtlo-method
+author: Jonathan Peters (Nextron Systems), Florian Roth (Nextron Systems)
+date: 2024-11-17
+tags:
+    - attack.execution
+    - attack.defense-evasion
+    - attack.t1036.002
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_rtlo_unicode:
+        TargetFilename|contains: '\u202e'
+    selection_extensions:
+        TargetFilename|contains:
+            - 'fpd..'
+            - 'nls..'
+            - 'vsc..'
+            - 'xcod.'
+            - 'xslx.'
+    condition: all of selection_*
+falsepositives:
+    - Filenames that contains scriptures such as arabic or hebrew might make use of this character
+level: high

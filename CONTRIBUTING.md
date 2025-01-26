@@ -48,6 +48,6 @@ git push origin your-feature-branch
 
 ## 📚 Adding or Updating Detection Rules
 
-To update or contribute a new rule please make sure to follow the guidelines in the [SigmaHQ conventions document](https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/sigmahq_conventions.md). Consider installing the [VsCode Sigma Extension](https://marketplace.visualstudio.com/items?itemName=humpalum.sigma) for auto completion and quality of life features.
+To update or contribute a new rule please make sure to follow the guidelines in the [SigmaHQ conventions documents](https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq). Consider installing the [VsCode Sigma Extension](https://marketplace.visualstudio.com/items?itemName=humpalum.sigma) for auto completion and quality of life features.
 
 Thank you for contributing to Sigma! 🧙‍♂️

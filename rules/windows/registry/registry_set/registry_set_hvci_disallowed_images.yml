@@ -1,0 +1,28 @@
+title: Driver Added To Disallowed Images In HVCI - Registry
+id: 555155a2-03bf-4fe7-af74-d176b3fdbe16
+related:
+    - id: 44cee399-f6b1-45cc-a87c-ea14c6064d6b
+      type: similar
+status: experimental
+description: |
+    Detects changes to the "HVCIDisallowedImages" registry value to potentially add a driver to the list, in order to prevent it from loading.
+references:
+    - https://github.com/yardenshafir/conference_talks/blob/3de1f5d7c02656c35117f067fbff0a219c304b09/OffensiveCon_2023_Your_Mitigations_are_My_Opportunities.pdf
+    - https://x.com/yarden_shafir/status/1822667605175324787
+author: Nasreddine Bencherchali (Nextron Systems), Omar Khaled (@beacon_exe)
+date: 2023-12-05
+modified: 2024-08-21
+tags:
+    - attack.defense-evasion
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains|all:
+            - '\Control\CI\'
+            - '\HVCIDisallowedImages'
+    condition: selection
+falsepositives:
+    - Legitimate usage of this key would also trigger this. Investigate the driver being added and make sure its intended
+level: high

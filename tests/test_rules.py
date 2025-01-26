@@ -107,110 +107,113 @@ class TestRules(unittest.TestCase):
             + "There are rule files which contains a trademark or reference that doesn't comply with the respective trademark requirements - please remove the trademark to avoid legal issues",
         )
 
-    def test_look_for_duplicate_filters(self):
-        def check_list_or_recurse_on_dict(item, depth: int, special: bool) -> None:
-            if type(item) == list:
-                check_if_list_contain_duplicates(item, depth, special)
-            elif type(item) == dict and depth <= MAX_DEPTH:
-                for keys, sub_item in item.items():
-                    if (
-                        "|base64" in keys or "|re" in keys
-                    ):  # Covers both "base64" and "base64offset" modifiers, and "re" modifier
-                        check_list_or_recurse_on_dict(sub_item, depth + 1, True)
-                    else:
-                        check_list_or_recurse_on_dict(sub_item, depth + 1, special)
+    # sigma cli SigmahqFieldDuplicateValueIssue
+    # def test_look_for_duplicate_filters(self):
+    #     def check_list_or_recurse_on_dict(item, depth: int, special: bool) -> None:
+    #         if type(item) == list:
+    #             check_if_list_contain_duplicates(item, depth, special)
+    #         elif type(item) == dict and depth <= MAX_DEPTH:
+    #             for keys, sub_item in item.items():
+    #                 if (
+    #                     "|base64" in keys or "|re" in keys
+    #                 ):  # Covers both "base64" and "base64offset" modifiers, and "re" modifier
+    #                     check_list_or_recurse_on_dict(sub_item, depth + 1, True)
+    #                 else:
+    #                     check_list_or_recurse_on_dict(sub_item, depth + 1, special)
 
-        def check_if_list_contain_duplicates(
-            item: list, depth: int, special: bool
-        ) -> None:
-            try:
-                # We use a list comprehension to convert all the element to lowercase. Since we don't care about casing in SIGMA except for the following modifiers
-                #   - "base64offset"
-                #   - "base64"
-                #   - "re"
-                if special:
-                    item_ = item
-                else:
-                    item_ = [i.lower() for i in item]
-                if len(item_) != len(set(item_)):
-                    # We find the duplicates and then print them to the user
-                    duplicates = [
-                        i
-                        for i, count in collections.Counter(item_).items()
-                        if count > 1
-                    ]
-                    print(
-                        Fore.RED
-                        + "Rule {} has duplicate filters {}".format(file, duplicates)
-                    )
-                    files_with_duplicate_filters.append(file)
-            except:
-                # unhashable types like dictionaries
-                for sub_item in item:
-                    if type(sub_item) == dict and depth <= MAX_DEPTH:
-                        check_list_or_recurse_on_dict(sub_item, depth + 1, special)
+    #     def check_if_list_contain_duplicates(
+    #         item: list, depth: int, special: bool
+    #     ) -> None:
+    #         try:
+    #             # We use a list comprehension to convert all the element to lowercase. Since we don't care about casing in SIGMA except for the following modifiers
+    #             #   - "base64offset"
+    #             #   - "base64"
+    #             #   - "re"
+    #             if special:
+    #                 item_ = item
+    #             else:
+    #                 item_ = [i.lower() for i in item]
+    #             if len(item_) != len(set(item_)):
+    #                 # We find the duplicates and then print them to the user
+    #                 duplicates = [
+    #                     i
+    #                     for i, count in collections.Counter(item_).items()
+    #                     if count > 1
+    #                 ]
+    #                 print(
+    #                     Fore.RED
+    #                     + "Rule {} has duplicate filters {}".format(file, duplicates)
+    #                 )
+    #                 files_with_duplicate_filters.append(file)
+    #         except:
+    #             # unhashable types like dictionaries
+    #             for sub_item in item:
+    #                 if type(sub_item) == dict and depth <= MAX_DEPTH:
+    #                     check_list_or_recurse_on_dict(sub_item, depth + 1, special)
 
-        MAX_DEPTH = 3
-        files_with_duplicate_filters = []
+    #     MAX_DEPTH = 3
+    #     files_with_duplicate_filters = []
 
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            detection = self.get_rule_part(file_path=file, part_name="detection")
-            check_list_or_recurse_on_dict(detection, 1, False)
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         detection = self.get_rule_part(file_path=file, part_name="detection")
+    #         check_list_or_recurse_on_dict(detection, 1, False)
 
-        self.assertEqual(
-            files_with_duplicate_filters,
-            [],
-            Fore.RED + "There are rules with duplicate filters",
-        )
+    #     self.assertEqual(
+    #         files_with_duplicate_filters,
+    #         [],
+    #         Fore.RED + "There are rules with duplicate filters",
+    #     )
 
-    def test_field_name_with_space(self):
-        def key_iterator(fields, faulty):
-            for key, value in fields.items():
-                if " " in key:
-                    faulty.append(key)
-                    print(
-                        Fore.YELLOW
-                        + "Rule {} has a space in field name ({}).".format(file, key)
-                    )
-                if type(value) == dict:
-                    key_iterator(value, faulty)
+    #sigma cli SigmahqFieldWithSpaceIssue
+    # def test_field_name_with_space(self):
+    #     def key_iterator(fields, faulty):
+    #         for key, value in fields.items():
+    #             if " " in key:
+    #                 faulty.append(key)
+    #                 print(
+    #                     Fore.YELLOW
+    #                     + "Rule {} has a space in field name ({}).".format(file, key)
+    #                 )
+    #             if type(value) == dict:
+    #                 key_iterator(value, faulty)
 
-        faulty_fieldnames = []
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            detection = self.get_rule_part(file_path=file, part_name="detection")
-            key_iterator(detection, faulty_fieldnames)
+    #     faulty_fieldnames = []
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         detection = self.get_rule_part(file_path=file, part_name="detection")
+    #         key_iterator(detection, faulty_fieldnames)
 
-        self.assertEqual(
-            faulty_fieldnames,
-            [],
-            Fore.RED
-            + "There are rules with an unsupported field name. Spaces are not allowed. (Replace space with an underscore character '_' )",
-        )
+    #     self.assertEqual(
+    #         faulty_fieldnames,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with an unsupported field name. Spaces are not allowed. (Replace space with an underscore character '_' )",
+    #     )
 
-    def test_single_named_condition_with_x_of_them(self):
-        faulty_detections = []
+    #sigma cli AllOfThemConditionIssue
+    # def test_single_named_condition_with_x_of_them(self):
+    #     faulty_detections = []
 
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            yaml = self.get_rule_yaml(file_path=file)
-            detection = self.get_rule_part(file_path=file, part_name="detection")
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         yaml = self.get_rule_yaml(file_path=file)
+    #         detection = self.get_rule_part(file_path=file, part_name="detection")
 
-            has_them_in_condition = "them" in detection["condition"]
-            has_only_one_named_condition = len(detection) == 2
-            not_multipart_yaml_file = len(yaml) == 1
+    #         has_them_in_condition = "them" in detection["condition"]
+    #         has_only_one_named_condition = len(detection) == 2
+    #         not_multipart_yaml_file = len(yaml) == 1
 
-            if (
-                has_them_in_condition
-                and has_only_one_named_condition
-                and not_multipart_yaml_file
-            ):
-                faulty_detections.append(file)
+    #         if (
+    #             has_them_in_condition
+    #             and has_only_one_named_condition
+    #             and not_multipart_yaml_file
+    #         ):
+    #             faulty_detections.append(file)
 
-        self.assertEqual(
-            faulty_detections,
-            [],
-            Fore.RED
-            + "There are rules using '1/all of them' style conditions but only have one condition",
-        )
+    #     self.assertEqual(
+    #         faulty_detections,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules using '1/all of them' style conditions but only have one condition",
+    #     )
 
     def test_duplicate_detections(self):
         def compare_detections(detection1: dict, detection2: dict) -> bool:
@@ -733,79 +736,80 @@ class TestRules(unittest.TestCase):
             + r"There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is \'[a-z0-9_]{10,90}\.yml\' and it has to contain at least an underline character. It also has to follow the following naming convention https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/Sigmahq_filename_rule.md",
         )
 
-    def test_title(self):
-        faulty_rules = []
-        allowed_lowercase_words = [
-            "the",
-            "for",
-            "in",
-            "with",
-            "via",
-            "on",
-            "to",
-            "without",
-            "of",
-            "through",
-            "from",
-            "by",
-            "as",
-            "a",
-            "or",
-            "at",
-            "and",
-            "an",
-            "over",
-            "new",
-        ]
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            title = self.get_rule_part(file_path=file, part_name="title")
-            if not title:
-                print(Fore.RED + "Rule {} has no field 'title'.".format(file))
-                faulty_rules.append(file)
-                continue
-            elif len(title) > 110:
-                print(
-                    Fore.YELLOW
-                    + "Rule {} has a title field with too many characters (>110)".format(
-                        file
-                    )
-                )
-                faulty_rules.append(file)
-            if title.startswith("Detects "):
-                print(
-                    Fore.RED
-                    + "Rule {} has a title that starts with 'Detects'".format(file)
-                )
-                faulty_rules.append(file)
-            if title.endswith("."):
-                print(Fore.RED + "Rule {} has a title that ends with '.'".format(file))
-                faulty_rules.append(file)
-            wrong_casing = []
-            for word in title.split(" "):
-                if (
-                    word.islower()
-                    and not word.lower() in allowed_lowercase_words
-                    and not "." in word
-                    and not "/" in word
-                    and not "_" in word
-                    and not word[0].isdigit()
-                ):
-                    wrong_casing.append(word)
-            if len(wrong_casing) > 0:
-                print(
-                    Fore.RED
-                    + "Rule {} has a title that has not title capitalization. Words: '{}'".format(
-                        file, ", ".join(wrong_casing)
-                    )
-                )
-                faulty_rules.append(file)
+    # sigma cli sigmahq_title_caseIssue, sigmahq_title_endIssue, sigmahq_title_lengthIssue, sigmahq_title_startIssue
+    # def test_title(self):
+    #     faulty_rules = []
+    #     allowed_lowercase_words = [
+    #         "the",
+    #         "for",
+    #         "in",
+    #         "with",
+    #         "via",
+    #         "on",
+    #         "to",
+    #         "without",
+    #         "of",
+    #         "through",
+    #         "from",
+    #         "by",
+    #         "as",
+    #         "a",
+    #         "or",
+    #         "at",
+    #         "and",
+    #         "an",
+    #         "over",
+    #         "new",
+    #     ]
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         title = self.get_rule_part(file_path=file, part_name="title")
+    #         if not title:
+    #             print(Fore.RED + "Rule {} has no field 'title'.".format(file))
+    #             faulty_rules.append(file)
+    #             continue
+    #         elif len(title) > 110:
+    #             print(
+    #                 Fore.YELLOW
+    #                 + "Rule {} has a title field with too many characters (>110)".format(
+    #                     file
+    #                 )
+    #             )
+    #             faulty_rules.append(file)
+    #         if title.startswith("Detects "):
+    #             print(
+    #                 Fore.RED
+    #                 + "Rule {} has a title that starts with 'Detects'".format(file)
+    #             )
+    #             faulty_rules.append(file)
+    #         if title.endswith("."):
+    #             print(Fore.RED + "Rule {} has a title that ends with '.'".format(file))
+    #             faulty_rules.append(file)
+    #         wrong_casing = []
+    #         for word in title.split(" "):
+    #             if (
+    #                 word.islower()
+    #                 and not word.lower() in allowed_lowercase_words
+    #                 and not "." in word
+    #                 and not "/" in word
+    #                 and not "_" in word
+    #                 and not word[0].isdigit()
+    #             ):
+    #                 wrong_casing.append(word)
+    #         if len(wrong_casing) > 0:
+    #             print(
+    #                 Fore.RED
+    #                 + "Rule {} has a title that has not title capitalization. Words: '{}'".format(
+    #                     file, ", ".join(wrong_casing)
+    #                 )
+    #             )
+    #             faulty_rules.append(file)
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules with non-conform 'title' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with non-conform 'title' fields. Please check: https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide#title",
+    #     )
 
     def test_title_in_first_line(self):
         faulty_rules = []
@@ -899,46 +903,47 @@ class TestRules(unittest.TestCase):
             Fore.RED + "There are rules using list with only 1 element",
         )
 
-    def test_selection_start_or_and(self):
-        faulty_rules = []
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            detection = self.get_rule_part(file_path=file, part_name="detection")
-            if detection:
-                # This test is a best effort to avoid breaking SIGMAC parser. You could do more testing and try to fix this once and for all by modifiying the token regular expressions https://github.com/SigmaHQ/sigma/blob/b9ae5303f12cda8eb6b5b90a32fd7f11ad65645d/tools/sigma/parser/condition.py#L107-L127
-                for key in detection:
-                    if key[:3].lower() == "sel":
-                        continue
-                    elif key[:2].lower() == "or":
-                        print(
-                            Fore.RED
-                            + "Rule {} has a selection '{}' that starts with the string 'or'".format(
-                                file, key
-                            )
-                        )
-                        faulty_rules.append(file)
-                    elif key[:3].lower() == "and":
-                        print(
-                            Fore.RED
-                            + "Rule {} has a selection '{}' that starts with the string 'and'".format(
-                                file, key
-                            )
-                        )
-                        faulty_rules.append(file)
-                    elif key[:3].lower() == "not":
-                        print(
-                            Fore.RED
-                            + "Rule {} has a selection '{}' that starts with the string 'not'".format(
-                                file, key
-                            )
-                        )
-                        faulty_rules.append(file)
+    # simga cli SigmahqSigmacIssue
+    # def test_selection_start_or_and(self):
+    #     faulty_rules = []
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         detection = self.get_rule_part(file_path=file, part_name="detection")
+    #         if detection:
+    #             # This test is a best effort to avoid breaking SIGMAC parser. You could do more testing and try to fix this once and for all by modifiying the token regular expressions https://github.com/SigmaHQ/sigma/blob/b9ae5303f12cda8eb6b5b90a32fd7f11ad65645d/tools/sigma/parser/condition.py#L107-L127
+    #             for key in detection:
+    #                 if key[:3].lower() == "sel":
+    #                     continue
+    #                 elif key[:2].lower() == "or":
+    #                     print(
+    #                         Fore.RED
+    #                         + "Rule {} has a selection '{}' that starts with the string 'or'".format(
+    #                             file, key
+    #                         )
+    #                     )
+    #                     faulty_rules.append(file)
+    #                 elif key[:3].lower() == "and":
+    #                     print(
+    #                         Fore.RED
+    #                         + "Rule {} has a selection '{}' that starts with the string 'and'".format(
+    #                             file, key
+    #                         )
+    #                     )
+    #                     faulty_rules.append(file)
+    #                 elif key[:3].lower() == "not":
+    #                     print(
+    #                         Fore.RED
+    #                         + "Rule {} has a selection '{}' that starts with the string 'not'".format(
+    #                             file, key
+    #                         )
+    #                     )
+    #                     faulty_rules.append(file)
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules with bad selection names. Can't start a selection name with an 'or*' or an 'and*' or a 'not*' ",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules with bad selection names. Can't start a selection name with an 'or*' or an 'and*' or a 'not*' ",
+    #     )
 
     # sigma validator dangling_detection
     # def test_unused_selection(self):
@@ -1023,41 +1028,42 @@ class TestRules(unittest.TestCase):
     #         + "If you use it as a workaround to duplicate a field in a selection, use a new selection instead.",
     #     )
 
-    def test_field_user_localization(self):
-        def checkUser(faulty_rules, dict):
-            for key, value in dict.items():
-                if "User" in key:
-                    if type(value) == str:
-                        if "AUTORI" in value or "AUTHORI" in value:
-                            print("Localized user name '{}'.".format(value))
-                            faulty_rules.append(file)
+    # sigma cli SigmahqFieldUserIssue
+    # def test_field_user_localization(self):
+    #     def checkUser(faulty_rules, dict):
+    #         for key, value in dict.items():
+    #             if "User" in key:
+    #                 if type(value) == str:
+    #                     if "AUTORI" in value or "AUTHORI" in value:
+    #                         print("Localized user name '{}'.".format(value))
+    #                         faulty_rules.append(file)
 
-        faulty_rules = []
-        for file in self.yield_next_rule_file_path(self.path_to_rules):
-            detection = self.get_rule_part(file_path=file, part_name="detection")
-            for sel_key, sel_value in detection.items():
-                if sel_key == "condition" or sel_key == "timeframe":
-                    continue
-                # single item selection
-                if type(sel_value) == dict:
-                    checkUser(faulty_rules, sel_value)
-                if type(sel_value) == list:
-                    # skip keyword selection
-                    if type(sel_value[0]) != dict:
-                        continue
-                    # multiple item selection
-                    for item in sel_value:
-                        checkUser(faulty_rules, item)
+    #     faulty_rules = []
+    #     for file in self.yield_next_rule_file_path(self.path_to_rules):
+    #         detection = self.get_rule_part(file_path=file, part_name="detection")
+    #         for sel_key, sel_value in detection.items():
+    #             if sel_key == "condition" or sel_key == "timeframe":
+    #                 continue
+    #             # single item selection
+    #             if type(sel_value) == dict:
+    #                 checkUser(faulty_rules, sel_value)
+    #             if type(sel_value) == list:
+    #                 # skip keyword selection
+    #                 if type(sel_value[0]) != dict:
+    #                     continue
+    #                 # multiple item selection
+    #                 for item in sel_value:
+    #                     checkUser(faulty_rules, item)
 
-        self.assertEqual(
-            faulty_rules,
-            [],
-            Fore.RED
-            + "There are rules that match using localized user accounts. Better employ a generic version such as:\n"
-            + "User|contains: # covers many language settings\n"
-            + "    - 'AUTHORI'\n"
-            + "    - 'AUTORI'",
-        )
+    #     self.assertEqual(
+    #         faulty_rules,
+    #         [],
+    #         Fore.RED
+    #         + "There are rules that match using localized user accounts. Better employ a generic version such as:\n"
+    #         + "User|contains: # covers many language settings\n"
+    #         + "    - 'AUTHORI'\n"
+    #         + "    - 'AUTORI'",
+    #     )
 
     # sigma condition error
     # def test_condition_operator_casesensitive(self):
@@ -1257,7 +1263,6 @@ class TestRules(unittest.TestCase):
             faulty_rules, [], Fore.RED + "There are rules using illegal re-escapes"
         )
 
-
     # def test_confirm_extension_is_yml(self):
     # files_with_incorrect_extensions = []
 
@@ -1411,7 +1416,7 @@ class TestRules(unittest.TestCase):
     #         faulty_rules,
     #         [],
     #         Fore.RED
-    #         + "There are rules with malformed 'modified' fields. (create one, e.g. date: 2019/01/14)",
+    #         + "There are rules with malformed 'modified' fields. (create one, e.g. date: 2019-01-14)",
     #     )
 
     # sigma-cli error and validator status_existence status_unsupported
@@ -1654,7 +1659,7 @@ class TestRules(unittest.TestCase):
     #         Fore.RED
     #         + "There are rules with unknown value modifiers. Most often it is just a typo.",
     #     )
-    
+
     # sigma error and validator attacktag,cartag,cvetag,detection_tag,stptag,tlptag
     # def test_optional_tags(self):
     #     files_with_incorrect_tags = []
@@ -1783,7 +1788,7 @@ class TestRules(unittest.TestCase):
     #         faulty_rules,
     #         [],
     #         Fore.RED
-    #         + "There are rules with missing or malformed 'date' fields. (create one, e.g. date: 2019/01/14)",
+    #         + "There are rules with missing or malformed 'date' fields. (create one, e.g. date: 2019-01-14)",
     #     )
 
     # sigma validators description_existence description_length
@@ -1894,7 +1899,6 @@ class TestRules(unittest.TestCase):
     #         Fore.RED
     #         + "There are rules with malformed optional 'falsepositives' fields. (has to be a list of values even if it contains only a single value)",
     #     )
-
 
     # sigma error
     # # Upgrade Detection Rule License  1.1

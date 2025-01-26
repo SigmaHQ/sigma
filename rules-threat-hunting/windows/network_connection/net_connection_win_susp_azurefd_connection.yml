@@ -1,0 +1,48 @@
+title: Potentially Suspicious Azure Front Door Connection
+id: 8cb4d14e-776e-43c2-8fb9-91e7fcea32b4
+status: experimental
+description: |
+    Detects connections with Azure Front Door (known legitimate service that can be leveraged for C2)
+    that fall outside of known benign behavioral baseline (not using common apps or common azurefd.net endpoints)
+references:
+    - https://lots-project.com/site/2a2e617a75726566642e6e6574
+    - https://medium.com/r3d-buck3t/red-teaming-in-cloud-leverage-azure-frontdoor-cdn-for-c2-redirectors-79dd9ca98178
+    - https://www.fortalicesolutions.com/posts/hiding-behind-the-front-door-with-azure-domain-fronting
+author: Isaac Dunham
+date: 2024-11-07
+tags:
+    - attack.t1102.002
+    - attack.t1090.004
+    - detection.threat-hunting
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        DestinationHostname|contains: 'azurefd.net'
+    filter_main_web_browsers:
+        Image|endswith:
+            - 'brave.exe'
+            - 'chrome.exe'
+            - 'chromium.exe'
+            - 'firefox.exe'
+            - 'msedge.exe'
+            - 'msedgewebview2.exe'
+            - 'opera.exe'
+            - 'vivaldi.exe'
+    filter_main_common_talkers:
+        Image|endswith: 'searchapp.exe' # Windows search service uses signifcant amount of Azure FD
+    filter_main_known_benign_domains:
+        DestinationHostname|contains:
+            - 'afdxtest.z01.azurefd.net' # used by Cortana; Cisco Umbrella top 1m
+            - 'fp-afd.azurefd.net' # used by Cortana; Cisco Umbrella top 1m
+            - 'fp-afdx-bpdee4gtg6frejfd.z01.azurefd.net' # used by Cortana; Cisco Umbrella top 1m
+            - 'roxy.azurefd.net' # used by Cortana; Cisco Umbrella top 1m
+            - 'powershellinfraartifacts-gkhedzdeaghdezhr.z01.azurefd.net' # Used by VS Code; Cisco Umbrella top 1m
+            - 'storage-explorer-publishing-feapcgfgbzc2cjek.b01.azurefd.net' # Used by Azure Storage Explorer; Cisco Umbrella top 1m
+            - 'graph.azurefd.net' # MS Graph; Cisco Umbrella top 1m
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Results are not inherently suspicious, but should be investigated during threat hunting for potential cloud C2.
+    - Organization-specific Azure Front Door endpoints
+level: medium

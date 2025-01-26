@@ -1,0 +1,28 @@
+title: ETW Logging/Processing Option Disabled On IIS Server
+id: a5b40a90-baf5-4bf7-a6f7-373494881d22
+status: experimental
+description: Detects changes to of the IIS server configuration in order to disable/remove the ETW logging/processing option.
+references:
+    - https://learn.microsoft.com/en-us/iis/manage/provisioning-and-managing-iis/configure-logging-in-iis
+    - https://www.microsoft.com/en-us/security/blog/2022/12/12/iis-modules-the-evolution-of-web-shells-and-how-to-detect-them/
+    - https://learn.microsoft.com/en-us/iis/configuration/system.applicationhost/sites/sitedefaults/logfile/
+author: frack113, Nasreddine Bencherchali
+date: 2024-10-06
+tags:
+    - attack.defense-evasion
+    - attack.t1562.002
+    - attack.t1505.004
+logsource:
+    product: windows
+    service: iis-configuration
+detection:
+    selection:
+        EventID: 29
+        Configuration|endswith: '@logTargetW3C'
+        OldValue|contains: 'ETW'
+    filter_main_etw_added:
+        NewValue|contains: 'ETW'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Legitimate administrator activity
+level: medium

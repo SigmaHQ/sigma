@@ -1,0 +1,34 @@
+title: Potential File Override/Append Via SET Command
+id: 65e4c134-ee52-4099-9e35-5e17a4b45c62
+status: experimental
+description: |
+    Detects the use of the "SET" internal command of Cmd.EXE with the /p flag followed directly by an "=" sign.
+    Attackers used this technique along with an append redirection operator ">>" in order to update the content of a file indirectly.
+    Ex: cmd /c >> example.txt set /p="test data". This will append "test data" to contents of "example.txt".
+    The typical use case of the "set /p=" command is to prompt the user for input.
+references:
+    - https://news.sophos.com/en-us/2024/08/07/sophos-mdr-hunt-tracks-mimic-ransomware-campaign-against-organizations-in-india/
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/set_1
+    - https://ss64.com/nt/set.html
+author: Nasreddine Bencherchali (Nextron Systems), MahirAli Khan (in/mahiralikhan)
+date: 2024-08-22
+tags:
+    - attack.execution
+    - attack.defense-evasion
+    - detection.threat-hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\cmd.exe'
+        - OriginalFileName: 'Cmd.Exe'
+    selection_cli:
+        CommandLine|contains:
+            - '/c set /p='
+            - '"set /p='
+            - '>>*set /p=' # To catch edge cases where the attacker passes it via a "cmd /c"
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use of the SET with the "/p" flag for user prompting. command in administrative scripts or user-generated scripts.
+level: low

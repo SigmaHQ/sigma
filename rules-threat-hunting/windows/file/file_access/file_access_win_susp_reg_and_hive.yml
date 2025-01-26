@@ -1,0 +1,32 @@
+title: Access To .Reg/.Hive Files By Uncommon Applications
+id: 337a31c6-46c4-46be-886a-260d7aa78cac
+status: experimental
+description: Detects file access requests to files ending with either the ".hive"/".reg" extension, usually associated with Windows Registry backups.
+references:
+    - https://github.com/tccontre/Reg-Restore-Persistence-Mole
+author: frack113
+date: 2023-09-15
+modified: 2024-07-29
+tags:
+    - attack.t1112
+    - attack.defense-evasion
+    - detection.threat-hunting
+logsource:
+    category: file_access
+    product: windows
+    definition: 'Requirements: Microsoft-Windows-Kernel-File ETW provider'
+detection:
+    selection:
+        FileName|endswith:
+            - '.hive'
+            - '.reg'
+    filter_main_generic:
+        Image|startswith:
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Third party software installed in the user context might generate a lot of FPs. Heavy baselining and tuning might be required.
+level: low

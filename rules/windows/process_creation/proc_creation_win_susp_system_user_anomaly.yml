@@ -6,12 +6,12 @@ references:
     - Internal Research
     - https://tools.thehacker.recipes/mimikatz/modules
 author: Florian Roth (Nextron Systems), David ANDRE (additional keywords)
-date: 2021/12/20
-modified: 2024/07/22
+date: 2021-12-20
+modified: 2024-12-01
 tags:
-    - attack.credential_access
-    - attack.defense_evasion
-    - attack.privilege_escalation
+    - attack.credential-access
+    - attack.defense-evasion
+    - attack.privilege-escalation
     - attack.t1134
     - attack.t1003
     - attack.t1027
@@ -20,7 +20,9 @@ logsource:
     product: windows
 detection:
     selection:
-        IntegrityLevel: System
+        IntegrityLevel:
+            - 'System'
+            - 'S-1-16-16384'
         User|contains: # covers many language settings
             - 'AUTHORI'
             - 'AUTORI'
@@ -74,7 +76,10 @@ detection:
               - 'MiniDump'  # Process dumping method apart from procdump
               - 'net user '
     filter_main_ping:
-        CommandLine|contains: 'ping 127.0.0.1 -n'
+        CommandLine|contains|all:
+            - 'ping'
+            - '127.0.0.1'
+            - ' -n '
     filter_vs:
         Image|endswith: '\PING.EXE'
         ParentCommandLine|contains: '\DismFoDInstall.cmd'

@@ -1,0 +1,40 @@
+title: Raspberry Robin Initial Execution From External Drive
+id: 2c6bea3a-ef58-4f2e-a775-4928f6b7c58a
+related:
+    - id: d52d2e87-eb03-4fac-961d-eb616da79788
+      type: similar
+status: test
+description: Detects the initial execution of the Raspberry Robin malware from an external drive using "Cmd.EXE".
+references:
+    - https://redcanary.com/blog/raspberry-robin/
+author: '@kostastsale'
+date: 2022-05-06
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\cmd.exe'
+        ParentCommandLine|contains: '/r'
+        ParentCommandLine|endswith:
+            - '.bin'
+            - '.ico'
+            - '.lnk'
+            - '.lo'
+            - '.sv'
+            - '.usb'
+    selection_child_img:
+        Image|endswith: '\msiexec.exe'
+        CommandLine|contains|windash: '/q'
+    selection_child_http:
+        CommandLine|contains:
+            - 'http:'
+            - 'https:'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely
+level: high

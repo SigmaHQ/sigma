@@ -1,0 +1,28 @@
+title: Previously Installed IIS Module Was Removed
+id: 9e1a1fdf-ee58-40ce-8e15-b66ca5a80e1f
+status: experimental
+description: Detects the removal of a previously installed IIS module.
+references:
+    - https://learn.microsoft.com/en-us/iis/manage/provisioning-and-managing-iis/configure-logging-in-iis
+    - https://www.microsoft.com/en-us/security/blog/2022/12/12/iis-modules-the-evolution-of-web-shells-and-how-to-detect-them/
+    - https://www.microsoft.com/en-us/security/blog/2022/07/26/malicious-iis-extensions-quietly-open-persistent-backdoors-into-servers/
+    - https://learn.microsoft.com/en-us/iis/get-started/introduction-to-iis/iis-modules-overview
+author: Nasreddine Bencherchali
+date: 2024-10-06
+tags:
+    - attack.defense-evasion
+    - attack.persistence
+    - attack.t1562.002
+    - attack.t1505.004
+logsource:
+    product: windows
+    service: iis-configuration
+detection:
+    selection:
+        EventID: 29
+        Configuration|contains: '/system.webServer/modules/remove'
+    condition: selection
+falsepositives:
+    - Legitimate administrator activity
+# Note: Upgrade after an initial baseline
+level: low

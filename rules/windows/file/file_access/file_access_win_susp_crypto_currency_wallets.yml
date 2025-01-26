@@ -1,0 +1,53 @@
+title: Access To Crypto Currency Wallets By Uncommon Applications
+id: f41b0311-44f9-44f0-816d-dd45e39d4bc8
+status: experimental
+description: |
+    Detects file access requests to crypto currency files by uncommon processes.
+    Could indicate potential attempt of crypto currency wallet stealing.
+references:
+    - Internal Research
+author: X__Junior (Nextron Systems)
+date: 2024-07-29
+tags:
+    - attack.t1003
+    - attack.credential-access
+logsource:
+    category: file_access
+    product: windows
+    definition: 'Requirements: Microsoft-Windows-Kernel-File ETW provider'
+detection:
+    selection:
+        - FileName|contains:
+              - '\AppData\Roaming\Ethereum\keystore\'
+              - '\AppData\Roaming\EthereumClassic\keystore\'
+              - '\AppData\Roaming\monero\wallets\'
+        - FileName|endswith:
+              - '\AppData\Roaming\Bitcoin\wallet.dat'
+              - '\AppData\Roaming\BitcoinABC\wallet.dat'
+              - '\AppData\Roaming\BitcoinSV\wallet.dat'
+              - '\AppData\Roaming\DashCore\wallet.dat'
+              - '\AppData\Roaming\DogeCoin\wallet.dat'
+              - '\AppData\Roaming\Litecoin\wallet.dat'
+              - '\AppData\Roaming\Ripple\wallet.dat'
+              - '\AppData\Roaming\Zcash\wallet.dat'
+    filter_main_system:
+        Image: System
+    filter_main_generic:
+        # This filter is added to avoid large amount of FP with 3rd party software. You should remove this in favour of specific filter per-application
+        Image|startswith:
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
+            - 'C:\Windows\system32\'
+            - 'C:\Windows\SysWOW64\'
+    filter_optional_defender:
+        Image|startswith: 'C:\ProgramData\Microsoft\Windows Defender\'
+        Image|endswith:
+            - '\MpCopyAccelerator.exe'
+            - '\MsMpEng.exe'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Antivirus, Anti-Spyware, Anti-Malware Software
+    - Backup software
+    - Legitimate software installed on partitions other than "C:\"
+    - Searching software such as "everything.exe"
+level: medium

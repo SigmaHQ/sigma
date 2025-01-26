@@ -1,0 +1,42 @@
+title: DNS Request From Windows Script Host
+id: 12310575-e8b1-475c-a976-57ed540b349c
+status: experimental
+description: |
+    Detects unusual domain resolutions originating from CScript/WScript that can identify malicious javascript files executing in an environment, often as a result from a phishing or watering hole attack.
+author: Josh Nickels, Marius Rothenbücher
+references:
+    - Internal Research
+date: 2024-09-06
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    product: windows
+    category: dns_query
+detection:
+    selection:
+        Image|endswith:
+            - '\wscript.exe'
+            - '\cscript.exe'
+        QueryName|contains: '.' # Ensures that lookups are for external hosts
+    filter_main_internal_domains: # Populate this placeholder with known and expected internal domains
+        QueryName|expand: '%internal_domains%'
+    filter_optional_trusted_domains: # Mostly certificate distribution domains
+        - QueryName:
+              - 'crl.starfieldtech.com'
+              - 'ocsp.usertrust.com'
+              - 'officecdn.microsoft.com'
+              - 'oneocsp.microsoft.com'
+              - 'oscp.comodoca.com'
+              - 'oscp.sectigo.com'
+              - 'oscp.starfieldtech.com'
+              - 'www.python.org'
+        - QueryName|endswith:
+              - '.digicert.com'
+              - '.entrust.net'
+              - '.globalsign.net'
+              - '.verisign.com'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Script files making expected domain requests
+level: low

@@ -1,0 +1,27 @@
+title: Group Policy Abuse for Privilege Addition
+id: 1c480e10-7ee1-46d4-8ed2-85f9789e3ce4
+status: experimental
+description: |
+    Detects the first occurrence of a modification to Group Policy Object Attributes to add privileges to user accounts or use them to add users as local admins.
+author: Elastic, Josh Nickels, Marius Rothenbücher
+references:
+    - https://www.elastic.co/guide/en/security/current/group-policy-abuse-for-privilege-addition.html#_setup_275
+date: 2024-09-04
+tags:
+    - attack.privilege-escalation
+    - attack.t1484.001
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: The "Audit Directory Service Changes" logging policy must be configured in order to receive events.'
+detection:
+    selection:
+        EventID: 5136
+        AttributeLDAPDisplayName: 'gPCMachineExtensionNames'
+        AttributeValue|contains:
+            - '827D319E-6EAC-11D2-A4EA-00C04F79F83A'
+            - '803E14A0-B4FB-11D0-A0D0-00A0C90F574B'
+    condition: selection
+falsepositives:
+    - Users allowed to perform these modifications (user found in field SubjectUserName)
+level: medium

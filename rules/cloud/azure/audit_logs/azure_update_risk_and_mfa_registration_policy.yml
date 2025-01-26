@@ -1,0 +1,25 @@
+title: User Risk and MFA Registration Policy Updated
+id: d4c7758e-9417-4f2e-9109-6125d66dabef
+status: experimental
+description: |
+    Detects changes and updates to the user risk and MFA registration policy.
+    Attackers can modified the policies to Bypass MFA, weaken security thresholds, facilitate further attacks, maintain persistence.
+references:
+    - https://learn.microsoft.com/en-us/entra/id-protection/howto-identity-protection-configure-mfa-policy
+    - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities
+author: Harjot Singh (@cyb3rjy0t)
+date: 2024-08-13
+tags:
+    - attack.persistence
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection:
+        LoggedByService: 'AAD Management UX'
+        Category: 'Policy'
+        OperationName: 'Update User Risk and MFA Registration Policy'
+    condition: selection
+falsepositives:
+    - Known updates by administrators.
+level: high

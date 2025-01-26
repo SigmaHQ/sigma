@@ -1,0 +1,28 @@
+title: Azure Login Bypassing Conditional Access Policies
+id: 13f2d3f5-6497-44a7-bf5f-dc13ffafe5dc
+status: experimental
+description: |
+    Detects a successful login to the Microsoft Intune Company Portal which could allow bypassing Conditional Access Policies and InTune device trust using a tool like TokenSmith.
+author: Josh Nickels, Marius Rothenbücher
+references:
+    - https://labs.jumpsec.com/tokensmith-bypassing-intune-compliant-device-conditional-access/
+    - https://github.com/JumpsecLabs/TokenSmith
+date: 2025-01-08
+tags:
+    - attack.defense-evasion
+    - attack.t1078
+logsource:
+    service: audit
+    product: m365
+detection:
+    selection:
+        Operation: 'UserLoggedIn'
+        ApplicationId: '9ba1a5c7-f17a-4de9-a1f1-6178c8d51223'
+        ResultStatus: 'Success'
+        RequestType: 'Cmsi:Cmsi'
+    filter_main_bjectid:
+        ObjectId: '0000000a-0000-0000-c000-000000000000' # Microsoft Intune seen when mobile devices are enrolled
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high
