@@ -1,0 +1,23 @@
+title: Add Exceptions to Microsoft Defender Firewall via Registry
+id: 6648f900-4a7d-47e3-bad6-952b313a1c0e
+status: experimental
+description: Adversaries may add system execptions to  system firewalls security
+references:
+    - https://www.virustotal.com/gui/file/da209017000b9812e8bc5f4e8db6499430ee2aadc72ef896964cffdfd896f143/behavior
+    - https://app.any.run/tasks/8d4113a8-5403-4367-a79f-4ce4978d9bdb
+author: frack113
+date: 2025-01-26
+tags:
+    - attack.defense-evasion
+    - attack.t1562.004
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\System\CurrentControlSet\Services\SharedAccess\Parameters\FirewallPolicy\StandardProfile\AuthorizedApplications\List'
+        Details|contains: ':Enabled:'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
