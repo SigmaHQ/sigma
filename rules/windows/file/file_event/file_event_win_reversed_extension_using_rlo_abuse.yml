@@ -1,0 +1,38 @@
+title: File Creation with Reversed Extensions Using RTLO Abuse
+id: 4b1c5e8b-92c5-4bc4-8f78-927eb5d9f21b
+status: experimental
+description: Detects file creation events where filenames use Right-to-Left Override (RLO) to disguise malicious extensions (e.g., `.msc` or `.exe`) as document formats (e.g., `.pdf`, `.docx`).
+references:
+    - https://www.unicode.org/versions/Unicode5.2.0/ch02.pdf
+    - https://en.wikipedia.org/wiki/Right-to-left_override
+    - https://tria.ge/241015-l98snsyeje/behavioral2
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-02-05
+tags:
+    - attack.execution
+    - attack.defense-evasion
+    - attack.t1036.002
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_rlo_abuse:
+        TargetFilename|contains:
+            - '\u202e'  # Unicode RTLO character
+            - '???' # In some case Unicode cannot be represented in unicode
+    selection_reversed_extensions:
+        TargetFilename|contains:
+            - 'fdp.'  # Reversed `.pdf`
+            - 'xcod.'  # Reversed `.docx`
+            - 'cod.'  # Reversed `.doc`
+            - 'xtpp.'  # Reversed `.pptx`
+            - 'xslx.'  # Reversed `.xlsx`
+            - 'slx.'  # Reversed `.xls`
+            - 'ftr.'  # Reversed `.rtf`
+            - 'tdo.'  # Reversed `.odt`
+            - 'lmth.'  # Reversed `.html`
+    condition: all of selection_*
+falsepositives:
+    - Files legitimately created with reversed extensions or using the RLO character for non-malicious purposes.
+    - Applications or tools using unconventional naming formats that include Unicode characters.
+level: high

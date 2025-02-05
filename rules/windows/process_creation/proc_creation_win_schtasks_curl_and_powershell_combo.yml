@@ -1,0 +1,36 @@
+title: Schtasks Curl Download and Powershell Execution Combination
+id: 1d174d38-8fda-4081-a9b6-56d9763c0cd8
+status: test
+description: |
+    Detects the creation of a scheduled task using schtasks.exe, potentially in combination with curl for downloading payloads and PowerShell for executing them.
+    Its clever way of executing malicious payload or connecting with C&C server persistently without dropping the malware sample on host.
+references:
+    - https://tria.ge/241015-l98snsyeje/behavioral2
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-02-05
+tags:
+    - attack.persistence
+    - attack.t1053.005
+    - attack.defense-evasion
+    - attack.t1218
+    - attack.command-and-control
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: '\schtasks.exe'
+        CommandLine|contains|windash: ' /create '
+    selection_curl:
+        CommandLine|contains|all:
+            - 'curl '
+            - 'http'
+            - '-o'
+    selection_powershell:
+        CommandLine|contains: 'powershell'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use of schtasks for administrative purposes.
+    - Automation scripts combining curl and PowerShell in controlled environments.
+level: high
