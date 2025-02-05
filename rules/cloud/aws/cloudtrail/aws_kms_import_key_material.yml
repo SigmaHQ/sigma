@@ -1,0 +1,30 @@
+title: KMS Imported Key Material Usage
+id: 1279262f-1464-422f-ac0d-5b545320c526
+status: experimental
+description: |
+    Detects the use of imported key material to encrypt AWS objects. This is a ransomware method
+    for AWS. This rule detects the initial import or the deletion of the key material. This should be so uncommon
+    of an activity to provide high certainty signal.
+references:
+    - https://www.chrisfarris.com/post/effective-aws-ransomware/
+author: toopricey
+date: 2025-02-06
+tags:
+    - attack.impact
+    - attack.t1486
+    - attack.resource_development
+    - attack.t1608.003
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: 'kms.amazonaws.com'
+        eventName:
+            - 'ImportKeyMaterial'
+            - 'DeleteImportedKeyMaterial'
+    condition: selection
+falsepositives: |
+    A user intentionally using imported key material. This is unlikely, and even if it is in your workflow,
+    it is likely not going to occur often enough to add significant noise.
+level: high
