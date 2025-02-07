@@ -11,13 +11,48 @@ date: 2025-02-04
 tags:
     - attack.defense-evasion
     - attack.t1055
+    - detection.threat-hunting
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
         Image|fieldref: ParentImage
-    condition: selection
+    filter_path:
+        Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    filter_original:
+        OriginalFileName: 
+            - 'Cmd.Exe'
+            - 'CompatTelRunner.exe'
+            - 'Discord.exe'
+            - 'electron.exe' # Vs Code
+            - 'EXPLORER.EXE'
+            - 'httpd.exe'
+            - 'IE4UINIT.EXE'
+            - 'mmc.exe'
+            - 'MpCmdRun.exe'
+            - 'mscorsvw.exe'
+            - 'msiexec.exe'
+            - 'NGenTask.exe'
+            - 'OneDriveSetup.exe'
+            - 'PowerShell.EXE'
+            - 'REGSVR32.EXE'
+            - 'smss.exe'
+            - 'Spotify.exe'
+            - 'WerMgr'
+    filter_product:
+        Product: 
+            - 'Avira'
+            - 'Evernote'
+            - 'Firefox'
+            - 'Microsoft Office'
+            - 'Ninite'
+            - 'Opera Browser Assistant Installer'
+            - 'Opera Installer'
+            - 'Sysinternals Sysmon'
+    condition: selection and not 1 of filter_*
 falsepositives:
     - Unknown
 level: medium
