@@ -1,0 +1,90 @@
+title: Suspicious Certutil Decoding
+id: 769c780a-396f-41de-afa9-4dd054942a04
+related:
+    - id: cc9cbe82-7bc0-4ef5-bc23-bbfb83947be7
+      type: derived
+status: experimental
+description: Detects potential malicious decoding of files using certutil
+references:
+    - https://attack.mitre.org/techniques/T1140/
+    - https://ezprotect.io/what-are-high-risk-file-types-and-how-to-block-users-from-accessing-them-in-salesforce/?
+    - https://cloud.google.com/blog/topics/threat-intelligence/targeted-attack-in-middle-east-by-apt34/
+    - https://lolbas-project.github.io/lolbas/Binaries/Certutil/
+    - https://news.sophos.com/en-us/2021/04/13/compromised-exchange-server-hosting-cryptojacker-targeting-other-exchange-servers/
+author: Peter Daniel
+date: 2025-02-04
+tags:
+    - attack.defense-evasion
+    - attack.t1140
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\certutil.exe'
+        - OriginalFileName: 'CertUtil.exe'
+    selection_cli:
+        CommandLine|contains:
+            - '-decode'
+            - '/decode'
+            - '-decodehex'
+            - '/decodehex'
+    selection_extensions:
+        CommandLine|contains:
+              # Program files
+              - '.exe'
+              - '.dll'
+              - '.scr'
+              # Batch files
+              - '.bat'
+              - '.cmd'
+              # Script files
+              - '.ps1'
+              - '.vbs'
+              - '.js'
+              - '.jse'
+              - '.py'
+              - '.rb'
+              - '.php'
+              - '.asp'
+              - '.aspx'
+              # Archive files
+              - '.zip'
+              - '.rar'
+              - '.7z'
+              - '.cab'
+              - '.tar'
+              - '.gz'
+              # Encoded/encrypted files
+              - '.b64'
+              - '.dat'
+              - '.enc'
+              - '.bin'
+              # Shortcut/system files
+              - '.lnk'
+              - '.url'
+              - '.inf'
+              - '.hta'
+              - '.dmp'
+              # Disk images/virtual disk files
+              - '.iso'
+              - '.img'
+              - '.vhd'
+              - '.vhdx'
+              # Macro-enabled document files
+              - '.docm'
+              - '.xlsm'
+              - '.pptm'
+              # Windows Registry files
+              - '.reg'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
+
+
+
+
+
+
+
