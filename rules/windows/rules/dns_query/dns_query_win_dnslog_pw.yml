@@ -1,0 +1,26 @@
+title: Detect DNS Queries to DNS Logging Tools DNSLog.pw and eyes.sh
+id: 3319158e-3a97-40b9-b416-740b12940118
+status: experimental
+description: |
+  Detects DNS queries initiated to the DNS logging tools DNSLog.pw and eyes.sh, which attackers may use for data exfiltration.
+references:
+  - https://github.com/BugScanTeam/DNSLog
+  - https://github.com/lijiejie/eyes.sh
+  - https://unit42.paloaltonetworks.com/espionage-campaign-targets-south-asian-entities/
+author: MahirAli Khan (in/mahiralikhan)
+date: 2025-02-11
+tags:
+  - attack.exfiltration
+  - attack.t1048.003
+logsource:
+  category: dns_query
+  product: windows
+detection:
+  selection:
+    QueryName|contains:
+      - 'dnslog.pw'
+      - 'eyes.sh'
+  condition: selection
+falsepositives:
+  - Legitimate use of these domains for testing purposes.
+level: high
