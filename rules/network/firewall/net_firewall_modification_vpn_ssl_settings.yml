@@ -1,0 +1,24 @@
+title: Potential Remote Services Abuse via Modification of VPN SSL Settings - Fortinet Fortigate Firewall
+id: 8b5dacf2-aeb7-459d-b133-678eb696d410
+status: experimental
+description: |
+    Detects the modification of VPN SSL Settings (for example, the modification of authentication rules).
+    This behavior was observed in pair with Potential Remote Services Abuse via Addition of VPN SSL Web Portal - Fortinet Fortigate Firewall (sigma rule)
+references:
+    - https://www.fortiguard.com/psirt/FG-IR-24-535
+author: Marco Pedrinazzi @pedrinazziM (InTheCyber)
+date: 2025/02/14
+tags:
+    - attack.persistence
+    - attack.initial-access
+    - attack.T1133 
+logsource:
+    category: firewall
+detection:
+    selection_action:
+        fortinet.firewall.action: "Edit"
+    selection_path:
+        fortinet.firewall.cfgpath: "vpn.ssl.settings"
+    condition: all of selection*
+falsepositives: VPN SSL settings can be changed for legitimate purposes
+level: medium
