@@ -7,7 +7,7 @@ references:
     - https://pypi.org/project/scapy/
 author: frack113
 date: 2021-12-10
-modified: 2023-09-07
+modified: 2025-01-20
 tags:
     - attack.discovery
     - attack.t1046
@@ -35,6 +35,10 @@ detection:
         # This could be caused when launching an instance of Jupyter Notebook locally for example but can also be caused by other instances of python opening sockets locally etc. So comment this out if you want to monitor for those instances
         DestinationIp: 127.0.0.1
         SourceIp: 127.0.0.1
+    filter_main_pip:
+        CommandLine|contains|all:
+            - 'pip.exe'
+            - 'install'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate python scripts using the socket library or similar will trigger this. Apply additional filters and perform an initial baseline before deploying.

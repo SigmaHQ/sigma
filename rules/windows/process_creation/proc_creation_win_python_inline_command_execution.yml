@@ -8,7 +8,7 @@ references:
     - https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023-01-02
-modified: 2023-02-17
+modified: 2025-01-20
 tags:
     - attack.execution
     - attack.t1059
@@ -24,13 +24,17 @@ detection:
               - 'python2.exe'
     selection_cli:
         CommandLine|contains: ' -c'
-    filter_python: # Based on baseline
+    filter_main_python: # Based on baseline
         ParentImage|startswith: 'C:\Program Files\Python'
         ParentImage|endswith: '\python.exe'
         ParentCommandLine|contains: '-E -s -m ensurepip -U --default-pip'
-    filter_vscode:
+    filter_optional_vscode:
         ParentImage|endswith: '\AppData\Local\Programs\Microsoft VS Code\Code.exe'
-    condition: all of selection_* and not 1 of filter_*
+    filter_optional_pip:
+        CommandLine|contains|all:
+            - '<pip-setuptools-caller>'
+            - 'exec(compile('
+    condition: all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Python libraries that use a flag starting with "-c". Filter according to your environment
 level: medium
