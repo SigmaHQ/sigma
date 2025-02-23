@@ -15,9 +15,9 @@ references:
     - https://social.technet.microsoft.com/wiki/contents/articles/7535.adfind-command-examples.aspx
     - https://github.com/center-for-threat-informed-defense/adversary_emulation_library/blob/bf62ece1c679b07b5fb49c4bae947fe24c81811f/fin6/Emulation_Plan/Phase1.md
     - https://github.com/redcanaryco/atomic-red-team/blob/0f229c0e42bfe7ca736a14023836d65baa941ed2/atomics/T1087.002/T1087.002.md#atomic-test-7---adfind---enumerate-active-directory-user-objects
-author: Janantha Marasinghe (https://github.com/blueteam0ps), FPT.EagleEye Team, omkar72, oscd.community
+author: Janantha Marasinghe (https://github.com/blueteam0ps), FPT.EagleEye Team, omkar72, oscd.community, Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2021-02-02
-modified: 2023-03-05
+modified: 2025-02-23
 tags:
     - attack.discovery
     - attack.t1018
@@ -29,7 +29,20 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection_imag:
+        - Image|endswith: '\AdFind.exe'
+        - OriginalFileName: 'AdFind.exe'
+    selection_imphash:
+        Hashes|contains:
+            - 'IMPHASH=d144de8117df2beceaba2201ad304764'
+            - 'IMPHASH=12ce1c0f3f5837ecc18a3782408fa975'
+            - 'IMPHASH=bca5675746d13a1f246e2da3c2217492'
+            - 'IMPHASH=4fbf3f084fbbb2470b80b2013134df35'
+            - 'IMPHASH=49b639b4acbecc49d72a01f357aa4930'
+            - 'IMPHASH=53e117a96057eaf19c41380d0e87f1c2'
+            - 'IMPHASH=680dad9e300346e05a85023965867201'
+            - 'IMPHASH=21aa085d54992511b9f115355e468782'
+    selection_cmd:
         CommandLine|contains:
             - 'domainlist'
             - 'trustdmp'
@@ -50,7 +63,7 @@ detection:
             - 'users_noexpire'
             - 'computers_active'
             - 'computers_pwdnotreqd'
-    condition: selection
+    condition: 1 of selection_*
 falsepositives:
     - Legitimate admin activity
 level: high
