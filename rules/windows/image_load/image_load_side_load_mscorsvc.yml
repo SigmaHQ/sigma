@@ -6,6 +6,7 @@ references:
     - https://hijacklibs.net/entries/microsoft/built-in/mscorsvc.html
 author: Wietze Beukema
 date: 2024-07-11
+modified: 2025-02-24
 tags:
     - attack.defense-evasion
     - attack.t1574.002
@@ -16,10 +17,12 @@ detection:
     selection:
         ImageLoaded|endswith: '\mscorsvc.dll'
     filter_main_generic:
-        ImageLoaded|startswith:
-            - 'C:\Windows\Microsoft.NET\Framework\'
-            - 'C:\Windows\Microsoft.NET\Framework64\'
-            - 'C:\Windows\WinSxS\'
+        ImageLoaded|contains:
+            - ':\Windows\Microsoft.NET\Framework\'
+            - ':\Windows\Microsoft.NET\Framework64\'
+            - ':\Windows\Microsoft.NET\FrameworkArm\'
+            - ':\Windows\Microsoft.NET\FrameworkArm64\'
+            - ':\Windows\WinSxS\'
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Legitimate applications loading their own versions of the DLL mentioned in this rule.
