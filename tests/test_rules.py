@@ -611,6 +611,8 @@ class TestRules(unittest.TestCase):
                                     pattern_prefix = "onelogin_"
                                 elif value == "github":
                                     pattern_prefix = "github_"
+                                elif value == "fortinet":
+                                    pattern_prefix = "fortinet_"
                             elif key == "category":
                                 if value == "process_creation":
                                     pattern_prefix = "proc_creation_"
