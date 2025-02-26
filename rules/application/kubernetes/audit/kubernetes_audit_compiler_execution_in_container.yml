@@ -1,0 +1,45 @@
+title: Compiler Execution Within Kubernetes Containers
+id: e6dc178a-a6f8-40b6-9244-8ecdb2845ff8
+description: |
+  Best practice dictates that changes to containers should be done within the build pipeline
+  and not post deployment as they should be immutable. With this in mind, it should be rare
+  that a compiler should need to legitimately executed within a container.
+references:
+    - https://docs.datadoghq.com/security/default_rules/compiler_in_container/
+status: experimental
+author: David Burkett, @signalblur
+date: 2024/06/16
+logsource:
+    category: application
+    product: kubernetes
+    service: audit
+tags:
+    - attack.t1027.004
+detection:
+    selection:
+        file_path|contains:
+            - '-gcc-'
+            - '_gcc_'
+            - ' gcc '
+            - '-clang-'
+            - '_clang_'
+            - ' clang '
+            - '-g++-'
+            - '_g++_'
+            - ' g++ '
+            - '-make-'
+            - '_make_'
+            - ' make '
+            - '-nasm-'
+            - '_nasm_'
+            - ' nasm '
+            - '-yasm-'
+            - '_yasm_'
+            - ' yasm '
+            - '-javac-'
+            - '_javac_'
+            - ' javac '
+    condition: selection
+falsepositives:
+    - Legitimate software development activities within containers
+level: low

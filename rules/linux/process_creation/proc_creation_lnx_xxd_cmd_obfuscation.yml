@@ -1,0 +1,29 @@
+title: XXD Command Obfuscation
+id: b5bffdcb-2539-40f5-89c1-7933b85deb4b
+status: experimental
+description: |
+    xxd is a command-line utility in Unix and Unix-like operating systems
+    used for creating a hex dump of a given file or standard input.
+    It can also convert a hex dump back to its original binary form,
+    making it useful for Obfuscation.
+references:
+    - https://daniel-ellis.medium.com/obfuscating-human-readable-text-by-using-hexadecimal-views-bb16341b8cb2
+author: David Burkett, @signalblur
+date: 2024/06/16
+tags:
+    - attack.defense_evasion
+    - attack.t1059.004
+    - attack.t1132.001
+    - attack.t1027.010
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        CommandLine|contains:
+            - 'xxd -r -p'
+            - 'xxd -p -r'
+    condition: selection
+falsepositives:
+    - Applications that may legitimately interact with and convert hex dumps.
+level: high
