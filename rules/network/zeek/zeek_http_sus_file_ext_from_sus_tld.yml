@@ -66,7 +66,21 @@ detection:
             - '.dylib'
             - '.lnk'
             - '.wsf'
-    condition: suspicious_tld and malicious_ext
+    malicious_mime:
+        resp_mime_types:
+            - 'application/x-dosexec'
+            - 'application/x-msdownload'
+            - 'application/x-msdos-program'
+            - 'application/vnd.microsoft.portable-executable'
+            - 'application/x-sh'
+            - 'application/x-python-code'
+            - 'application/x-bat'
+            - 'application/x-ms-shortcut'
+            - 'application/x-iso9660-image'
+            - 'application/x-java-archive'
+            - 'application/x-elf'
+
+    condition: suspicious_tld and (malicious_ext or malicious_mime)
 fields:
     - ts
     - uid
@@ -78,6 +92,7 @@ fields:
     - method
     - status_code
     - user_agent
+    - resp_mime_types
 falsepositives:
     - Rare legitimate software downloads or newly registered domains under .xyz/.top/.ru etc
 level: medium
