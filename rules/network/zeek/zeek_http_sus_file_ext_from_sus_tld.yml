@@ -1,0 +1,82 @@
+title: HTTP Request to Low Reputation TLD or Suspicious File Extension
+id: 68c2c604-92ad-468b-bf4a-aac49adad08c
+status: test
+description: Detects HTTP requests to low reputation TLDs (e.g. .xyz, .top, .ru) or ending in suspicious file extensions (.exe, .dll, .hta), which may indicate malicious activity.
+references:
+    - https://www.corelight.com/
+author: '@signalblur, Corelight'
+date: 2025-02-26
+modified: 2025-02-26
+tags:
+    - attack.initial-access
+    - attack.command-and-control
+logsource:
+    product: zeek
+    service: http
+detection:
+    # Suspicious TLD in the 'host' field OR malicious file extension in the 'uri' field.
+    suspicious_tld:
+        host|endswith:
+            - '.xyz'
+            - '.top'
+            - '.ru'
+            - '.su'
+            - '.pw'
+            - '.ml'
+            - '.ga'
+            - '.cf'
+            - '.tk'
+            - '.gq'
+            - '.bid'
+            - '.work'
+            - '.party'
+            - '.click'
+            - '.loan'
+            - '.kp'
+            - '.by'
+            - '.mm'
+            - '.ir'
+            - '.sy'
+            - '.ve'
+            - '.cm'
+            - '.tv'
+    malicious_ext:
+        uri|endswith:
+            - '.exe'
+            - '.dll'
+            - '.hta'
+            - '.bat'
+            - '.cmd'
+            - '.vbs'
+            - '.js'
+            - '.ps1'
+            - '.jar'
+            - '.scr'
+            - '.pif'
+            - '.iso'
+            - '.reg'
+            - '.cpl'
+            - '.bin'
+            - '.msi'
+            - '.elf'
+            - '.py'
+            - '.sh'
+            - '.so'
+            - '.dylib'
+            - '.lnk'
+            - '.wsf'
+    condition: suspicious_tld and malicious_ext
+fields:
+    - ts
+    - uid
+    - id.orig_h
+    - id.resp_h
+    - id.resp_p
+    - host
+    - uri
+    - method
+    - status_code
+    - user_agent
+falsepositives:
+    - Rare legitimate software downloads or newly registered domains under .xyz/.top/.ru etc
+level: medium
