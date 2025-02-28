@@ -17,14 +17,13 @@ logsource:
     product: windows
     definition: 'Requirements: By default the file_event log source might not contain the IntegrityLevel of the Process. It should be collected in order to use this rule'
 detection:
-    selection_file:
+    selection:
         TargetFilename|contains: ':\Windows\System32\CodeIntegrity\'
         TargetFilename|endswith:
             - '.cip'
             - '.p7b'
-    selection_integrity:
         IntegrityLevel: 'High'
-    condition: all of selection_*
+    condition: selection
 falsepositives:
     - May occur legitimately as part of admin activity, but rarely with interactive elevation.
 level: medium
