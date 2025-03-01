@@ -1,0 +1,28 @@
+title: proc_creation_win_powershell_fake_captcha
+id: d487ed4a-fd24-436d-a0b2-f4e95f7b2635
+status: experimental
+description: Detects PowerShell executions launching fake captcha (recaptcha-phish) payloads
+references:
+    - https://github.com/JohnHammond/recaptcha-phish
+    - https://www.zscaler.com/blogs/security-research/deepseek-lure-using-captchas-spread-malware
+    - https://www.threatdown.com/blog/clipboard-hijacker-tries-to-install-a-trojan/
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - car.2014-04-003
+author: montysecurity
+date: 2025/02/28
+logsource:
+    category: process_creation
+    product: windows          
+detection:
+    selection:
+        ParentImage|endswith: '\explorer.exe'
+        Image|endswith: '\powershell.exe'
+        CommandLine|contains: 'I am not a robot - reCAPTCHA Verification ID:'
+    condition: selection
+fields:
+    - CommandLine
+falsepositives:
+    - unknown
+level: medium
