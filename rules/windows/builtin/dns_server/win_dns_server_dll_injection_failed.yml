@@ -1,0 +1,29 @@
+title: Remote DLL injection failed on DNS server
+id: b1a0f90c-cde2-4aea-9535-d2cbd9f87236
+description: Detects Remote DLL injection failed on DNS server
+kind: evtx
+status: experimental
+date: 2024/03/06
+author: Charles BLANC-ROLIN @woundride
+references:
+    - https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/from-dnsadmins-to-system-to-domain-compromise
+    - https://phackt.com/dnsadmins-group-exploitation-write-permissions
+    - https://attack.mitre.org/techniques/T1055/
+tags:
+    - attack.defense_evasion
+    - attack.privilege_escalation
+    - attack.t1055.001
+logsource:
+    product: windows
+    service: dns-server
+detection:
+    selection: 
+        EventID: 150
+        param1|startwith:
+            - '\\'
+        param1|endswith:
+            - '.dll'
+    condition: selection
+falsepositives:
+    - Unknown
+level: critical
