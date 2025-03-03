@@ -1,0 +1,33 @@
+title: File Access Of Signal Desktops Sensitive Data
+id: 5d6c375a-18ae-4952-b4f6-8b803f6c8555
+status: experimental
+description: |
+    The db.sqlite file in Signal Desktop stores all locally saved messages in an encrypted SQLite database, while config.json contains the decryption key needed to access that data. Since the key is stored in plain text, a threat actor who gains access to both files can decrypt and read sensitive messages without needing the user’s credentials.
+references:
+    - https://cloud.google.com/blog/topics/threat-intelligence/russia-targeting-signal-messenger/
+    - https://vmois.dev/query-signal-desktop-messages-sqlite/
+author: Andreas Braathen (mnemonic.io)
+date: 2025-03-03
+tags:
+    - attack.credential-access
+    - attack.t1003
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: System Access Control List (SACL) policy with attributes List folder/read data on Objects'
+detection:
+    selection:
+        EventID: 4663
+        ObjectType: 'File'
+        ObjectName|contains: '\AppData\Roaming\Signal\'
+        ObjectName|endswith:
+            - '\config.json'
+            - '\db.sqlite'
+    filter_signal_process:
+        ProcessName|endswith:
+            - '\signal.exe'
+            - '\signal-portable.exe'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Unknown
+level: medium
