@@ -1,11 +1,12 @@
 # Deprecated folder
 
-This folder contains all rules whose status has been set to deprecated.
+This folder contains all rules that have been marked as deprecated.
 
-It is preferable not to use them any more
+It is recommended to avoid using these rules, as they are no longer maintained or supported.
 
-the file [deprecated.csv](deprecated.csv) is a summary
+For a summary, refer to the file [deprecated.csv](./deprecated.csv)
+
 
 # references
 
-https://github.com/SigmaHQ/sigma-specification/blob/main/Sigma_specification.md#status-optional
+https://github.com/SigmaHQ/sigma-specification/blob/main/specification/sigma-rules-specification.md#status
