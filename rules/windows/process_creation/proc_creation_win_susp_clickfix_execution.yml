@@ -1,0 +1,33 @@
+title: ClickFix Execution Pattern
+id: d487ed4a-fd24-436d-a0b2-f4e95f7b2635
+status: experimental
+description: |
+    Detects potential ClickFix execution patterns leveraging social engineering techniques where users are tricked into running malicious commands via clipboard manipulation.
+    This attack starts with users visiting malicious websites, often impersonating legitimate news or service platforms.
+    These websites display fake CAPTCHA challenges labeled as "I am not a robot - reCAPTCHA Verification," instructing users to press Windows + R, paste clipboard contents into the Run dialog, and execute the command.
+    The clipboard content typically contains mshta.exe or powershell.exe commands that download and execute malware, such as Lumma Stealer or other information stealers.
+    This technique exploits user trust and bypasses traditional malware defenses by relying on user interaction.
+references:
+    - https://github.com/JohnHammond/recaptcha-phish
+    - https://www.zscaler.com/blogs/security-research/deepseek-lure-using-captchas-spread-malware
+    - https://www.threatdown.com/blog/clipboard-hijacker-tries-to-install-a-trojan/
+    - https://app.any.run/tasks/5c16b4db-4b36-4039-a0ed-9b09abff8be2
+    - https://www.esentire.com/security-advisories/netsupport-rat-clickfix-distribution
+author: montysecurity, Swachchhanda Shrawan Poudel(Nextron Systems)
+date: 2025-03-04
+tags:
+    - attack.execution
+    - attack.t1204.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\explorer.exe'
+        CommandLine|contains:
+            - 'I am not a robot - reCAPTCHA Verification'
+            - 'Verify you are human - Ray Verification ID:'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
