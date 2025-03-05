@@ -4,12 +4,16 @@ status: test
 description: Detects enumeration of local system groups. Adversaries may attempt to find local system groups and permission settings
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1069.001/T1069.001.md
-author: Ömer Günal, Alejandro Ortuno, oscd.community
+    - https://www.warp.dev/terminus/linux-list-users
+    - https://medium.com/@shalinpatel./list-all-groups-in-linux-ec1372309d6f
+    - https://cloudzy.com/blog/linux-netstat-command/
+author: Ömer Günal, Alejandro Ortuno, oscd.community, CheraghiMilad
 date: 2020-10-11
-modified: 2022-11-27
+modified: 2024-12-09
 tags:
     - attack.discovery
     - attack.t1069.001
+    - detection.threat-hunting
 logsource:
     category: process_creation
     product: linux
@@ -19,11 +23,26 @@ detection:
     selection_2:
         Image|endswith:
             - '/cat'
+            - '/ed'
+            - '/emacs'
             - '/head'
-            - '/tail'
+            - '/less'
             - '/more'
+            - '/nano'
+            - '/tail'
+            - '/vi'
+            - '/vim'
         CommandLine|contains: '/etc/group'
-    condition: 1 of selection*
+    selection_3:
+        Image|endswith: '/getent'
+        CommandLine|contains: 'group'
+    selection_4:
+        Image|endswith: '/netstat'
+        CommandLine|contains: 'localgroup'
+    selection_5:
+        Image|endswith: '/id'
+        CommandLine|contains: '-Gn'
+    condition: 1 of selection_*
 falsepositives:
     - Legitimate administration activities
 level: low
