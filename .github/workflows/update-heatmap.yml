@@ -1,0 +1,34 @@
+name: Generate Updated Heatmap
+run-name: Generating heatmap for commit ${{ github.sha }}
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  generate-heatmap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          submodules: true
+
+      - name: Install Sigma
+        run: pipx install sigma-cli
+
+      - name: Update Heatmap
+        run: sigma analyze attack count ./other/sigma_attack_nav_coverage.json rule*
+
+      - name: Commit and Push Changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ./other/sigma_attack_nav_coverage.json
+          git add ./other/sigma_attack_nav_coverage.png
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Generated heatmap for commit ${{ github.sha }}"
+            git push origin $GITHUB_REF_NAME
+          fi
