@@ -3,12 +3,13 @@ id: 6d3a3952-6530-44a3-8554-cf17c116c615
 status: test
 description: |
     Detects possible search for JWT tokens via CLI by looking for the string "eyJ0eX" or "eyJhbG".
-    This string is used as an anchor to look for the start of the JWT token used by microsoft office and similar apps.
+    This string is used as an anchor to look for the start of the JWT token used by Microsoft Office and similar apps.
+    Updated to exclude false positives from common CLI searches like "findstr /i eyJ0eX".
 references:
     - https://mrd0x.com/stealing-tokens-from-office-applications/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-10-25
-modified: 2024-10-06
+modified: 2025-02-24
 tags:
     - attack.credential-access
     - attack.t1528
@@ -17,15 +18,9 @@ logsource:
     product: windows
 detection:
     selection:
-        CommandLine|contains:
-            - 'eyJ0eXAiOi' # {"typ":
-            - 'eyJhbGciOi' # {"alg":
-            - ' eyJ0eX'
-            - ' "eyJ0eX"'
-            - " 'eyJ0eX'"
-            - ' eyJhbG'
-            - ' "eyJhbG"'
-            - " 'eyJhbG'"
+        CommandLine|regex:
+            - '(?i)findstr.*(?i)eyJhbG[a-zA-Z0-9]*'
+            - '(?i)findstr.*(?i)eyJ0eX[a-zA-Z0-9]*'
     condition: selection
 falsepositives:
     - Unknown
