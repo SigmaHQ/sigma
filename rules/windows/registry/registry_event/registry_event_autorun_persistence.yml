@@ -1,0 +1,30 @@
+title: Persistence via CommandProcessor AutoRun Registry Key
+id: e66fc0d7-b85e-477d-978f-51643fa837b1
+description: Detects modifications to the HKLM\Software\Microsoft\Command Processor\AutoRun registry key, which can be used for persistence by modifying the AutoRun registry ValueData
+status: experimental
+date: 2025-02-22
+author: Yousef M.Helmy
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1546/T1546.md#atomic-test-2---hklm---persistence-using-commandprocessor-autorun-key-with-elevation
+tags:
+  - attack.persistence
+  - attack.t1546
+  - attack.t1059.001
+logsource:
+  category: registry_event
+  product: windows
+
+detection:
+  sysmon_event:
+    EventID: 13
+    Image|endswith: '\powershell.exe'
+    TargetObject: 'HKLM\SOFTWARE\Microsoft\Command Processor\AutoRun'
+  windows_eventlog:
+    EventID: 4657
+    TargetObject: 'HKLM\SOFTWARE\Microsoft\Command Processor\AutoRun'
+  condition: sysmon_event or windows_eventlog
+
+falsepositives:
+  - Legitimate administrative activity
+  - Software installation or configuration
+level: high
