@@ -10,9 +10,9 @@ references:
     - https://cloud.google.com/blog/topics/threat-intelligence/alphv-ransomware-backup/
     - https://securelist.com/defttorero-tactics-techniques-and-procedures/107610/
     - https://github.com/CyberMonitor/APT_CyberCriminal_Campagin_Collections/raw/800c0e06571993a54e39571cf27fd474dcc5c0bc/2017/2017.11.14.Muddying_the_Water/muddying-the-water-targeted-attacks.pdf
-author: Nasreddine Bencherchali (Nextron Systems)
+author: Nasreddine Bencherchali (Nextron Systems), Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2024-06-24
-modified: 2024-08-16
+modified: 2025-03-06
 tags:
     - attack.credential-access
 logsource:
@@ -28,10 +28,26 @@ detection:
             - ':\ProgramData\'
             - ':\Temp\'
             - ':\Tmp\'
+            - ':\Users\Public\'
             - ':\Windows\Temp\'
+            - '\$Recycle.bin'
             - '\AppData\'
+            - '\Desktop\'
             - '\Downloads\'
-            - '\Users\Public\'
+            - '\Favorites\'
+            - '\Links\'
+            - '\Music\'
+            - '\Photos\'
+            - '\Pictures\'
+            - '\Saved Games\'
+            - '\Searches\'
+            - '\Users\Contacts\'
+            - '\Users\Default\'
+            - '\Users\Searches\'
+            - '\Videos\'
+            - '\Windows\addins\'
+            - '\Windows\Fonts\'
+            - '\Windows\IME\'
         CommandLine|endswith:
             - '.exe all'
             - '.exe browsers'
@@ -127,7 +143,13 @@ detection:
             - '-windows'
             - '-winscp'
             - '-wsl'
-    condition: selection_img or selection_clionly or (selection_cli_modules and selection_cli_options)
+    filter_climodules_legitpath:
+        Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    condition: selection_img or selection_clionly or (selection_cli_modules and selection_cli_options and not filter_climodules_legitpath)
 falsepositives:
     - Some false positive is expected from tools with similar command line flags.
 # Note: Increase the level to "high" after an initial baseline
