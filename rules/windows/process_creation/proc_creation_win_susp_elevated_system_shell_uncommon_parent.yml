@@ -7,9 +7,9 @@ status: test
 description: Detects when a shell program such as the Windows command prompt or PowerShell is launched with system privileges from a uncommon parent location.
 references:
     - https://github.com/Wh04m1001/SysmonEoP
-author: frack113, Tim Shelton (update fp)
+author: frack113, Tim Shelton (update fp), Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2022-12-05
-modified: 2023-11-23
+modified: 2025-03-06
 tags:
     - attack.privilege-escalation
     - attack.defense-evasion
@@ -22,10 +22,12 @@ detection:
     selection_shell:
         - Image|endswith:
               - '\powershell.exe'
+              - '\powershell_ise.exe'
               - '\pwsh.exe'
               - '\cmd.exe'
         - OriginalFileName:
               - 'PowerShell.EXE'
+              - 'powershell_ise.EXE'
               - 'pwsh.dll'
               - 'Cmd.Exe'
     selection_user:
@@ -59,6 +61,13 @@ detection:
     filter_optional_ibm_spectrumprotect:
         ParentImage|contains: ':\IBM\SpectrumProtect\webserver\scripts\'
         CommandLine|contains: ':\IBM\SpectrumProtect\webserver\scripts\'
+    filter_optional_vmwaretools:
+        # Example:
+        #   CommanddLine: C:\WINDOWS\system32\cmd.exe /c ""C:\Program Files (x86)\VMware\VMware Tools\suspend-vm-default.bat""
+        Image|endswith: '\cmd.exe'
+        CommandLine|contains:
+            - 'C:\Program Files\VMware\VMware Tools\'
+            - 'C:\Program Files (x86)\VMware\VMware Tools\'
     filter_main_parent_null:
         ParentImage: null
     filter_main_parent_empty:
