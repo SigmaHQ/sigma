@@ -7,11 +7,13 @@ description: |
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1098/T1098.md#atomic-test-1---admin-account-manipulate
     - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.localaccounts/?view=powershell-5.1
-author: frack113
+author: frack113, Hannes Widéen
 date: 2021-12-28
+modified: 2025-03-06
 tags:
     - attack.persistence
     - attack.t1098
+    - attack.t1136.001
 logsource:
     product: windows
     category: ps_script
@@ -20,12 +22,19 @@ detection:
     selection:
         ScriptBlockText|contains:
             - 'Disable-LocalUser'
+            - 'dlu'
             - 'Enable-LocalUser'
+            - 'elu'
             - 'Get-LocalUser'
+            - 'glu'
             - 'Set-LocalUser'
+            - 'slu'
             - 'New-LocalUser'
+            - 'nlu'
             - 'Rename-LocalUser'
+            - 'rnlu'
             - 'Remove-LocalUser'
+            - 'rlu'
     condition: selection
 falsepositives:
     - Legitimate administrative script
