@@ -61,18 +61,13 @@ detection:
     filter_optional_ibm_spectrumprotect:
         ParentImage|contains: ':\IBM\SpectrumProtect\webserver\scripts\'
         CommandLine|contains: ':\IBM\SpectrumProtect\webserver\scripts\'
-    filter_optional_vmwaretools:
-        # Example:
-        #   CommanddLine: C:\WINDOWS\system32\cmd.exe /c ""C:\Program Files (x86)\VMware\VMware Tools\suspend-vm-default.bat""
-        Image|endswith: '\cmd.exe'
-        CommandLine|contains:
-            - 'C:\Program Files\VMware\VMware Tools\'
-            - 'C:\Program Files (x86)\VMware\VMware Tools\'
     filter_main_parent_null:
         ParentImage: null
     filter_main_parent_empty:
-        ParentImage: ''
+        ParentImage:
+            - ''
+            - '-'
     condition: all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
-    - Unknown
+    - Some legitimate applications may spawn shells from uncommon parent locations. Apply additional filters and perform an initial baseline before deploying.
 level: medium
