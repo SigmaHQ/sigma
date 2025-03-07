@@ -10,7 +10,7 @@ references:
     - https://lolbas-project.github.io
 author: Perez Diego (@darkquassar), oscd.community
 date: 2019-10-27
-modified: 2025-03-03
+modified: 2025-03-07
 tags:
     - attack.privilege-escalation
     - attack.defense-evasion
@@ -62,20 +62,20 @@ detection:
             - '\winword.exe'
             - '\wmic.exe'
             - '\wscript.exe'
-    filter_explorer_vmtools:
-        SourceImage|endswith: '\explorer.exe'
+    filter_optional_explorer_vmtools:
+        SourceImage|endswith:
+            - 'C:\Windows\explorer.exe'
+            - 'C:\Windows\SysWOW64\explorer.exe'
         TargetImage:
             - 'C:\Program Files (x86)\VMware\VMware Tools\vmtoolsd.exe'
             - 'C:\Program Files\VMware\VMware Tools\vmtoolsd.exe'
-    filter_defrag_conhost:
-        SourceImage|endswith: '\defrag.exe'
+    filter_main_defrag_conhost:
+        SourceImage: 'C:\Windows\System32\Defrag.exe'
         TargetImage: 'C:\Windows\System32\conhost.exe'
-        TargetCommandLine|contains: 'C:\WINDOWS\system32\conhost.exe 0x4'
-    filter_provtol_svchost:
-        SourceImage|endswith: '\provtool.exe'
-        SourceCommandLine|endswith: '/turn 5 /source LogonIdleTask'
+    filter_main_provtol_svchost:
+        SourceImage: 'C:\Windows\System32\provtool.exe'
         TargetImage: 'C:\Windows\System32\svchost.exe'
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - This rule is best put in testing first in order to create a baseline that reflects the data in your environment.
 level: high
