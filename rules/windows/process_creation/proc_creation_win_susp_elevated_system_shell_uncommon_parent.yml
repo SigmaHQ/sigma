@@ -9,7 +9,7 @@ references:
     - https://github.com/Wh04m1001/SysmonEoP
 author: frack113, Tim Shelton (update fp)
 date: 2022-12-05
-modified: 2023-11-23
+modified: 2025-03-06
 tags:
     - attack.privilege-escalation
     - attack.defense-evasion
@@ -22,10 +22,12 @@ detection:
     selection_shell:
         - Image|endswith:
               - '\powershell.exe'
+              - '\powershell_ise.exe'
               - '\pwsh.exe'
               - '\cmd.exe'
         - OriginalFileName:
               - 'PowerShell.EXE'
+              - 'powershell_ise.EXE'
               - 'pwsh.dll'
               - 'Cmd.Exe'
     selection_user:
@@ -62,8 +64,10 @@ detection:
     filter_main_parent_null:
         ParentImage: null
     filter_main_parent_empty:
-        ParentImage: ''
+        ParentImage:
+            - ''
+            - '-'
     condition: all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
-    - Unknown
+    - Some legitimate applications may spawn shells from uncommon parent locations. Apply additional filters and perform an initial baseline before deploying.
 level: medium
