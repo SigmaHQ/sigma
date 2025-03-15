@@ -1,0 +1,22 @@
+title: Suspicious Sign-In with Cross-Tenant B2B Collaboration
+id: 601acb6f-bf56-4029-80fd-02bacff2b5c4
+description: Detects sign-in activity by external users with a CrossTenant B2B Collaboration context, which could indicate lateral movement using a newly provisioned account.
+status: test
+author: Arda Buyukkaya (EclecticIQ)
+date: 2025-03-15
+references:
+  - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities
+  - https://blog.eclecticiq.com/ransomware-in-the-cloud-scattered-spider-targeting-insurance-and-financial-industries
+  - https://www.xintra.org/blog/lateral-movement-entraid-cross-tenant-synchronization
+tags:
+  - attack.lateral-movement
+logsource:
+  product: azure
+  service: signinlogs
+detection:
+  selection:
+    CrossTenantAccessType: "b2bCollaboration"
+  condition: selection
+falsepositives:
+  - Legitimate external partner sign-ins
+level: medium
