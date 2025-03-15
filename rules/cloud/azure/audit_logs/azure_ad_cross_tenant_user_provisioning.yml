@@ -1,0 +1,27 @@
+title: Potential Malicious Cross-Tenant Provisioning
+id: e0f68c52-d942-4ae3-8ada-bb8c1923f52b
+description: >
+  Detects external user provisioning activities that might indicate
+  attacker abuse of cross-tenant synchronization to create backdoor accounts.
+status: test
+references:
+  - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities
+  - https://blog.eclecticiq.com/ransomware-in-the-cloud-scattered-spider-targeting-insurance-and-financial-industries
+  - https://www.xintra.org/blog/lateral-movement-entraid-cross-tenant-synchronization
+tags:
+  - attack.persistence
+  - attack.lateral-movement
+logsource:
+  product: azure
+  service: audit
+detection:
+  selection:
+    Category: "UserManagement"
+    ActivityDisplayName|contains|all:
+      - "Invite external user"
+      - "Redeem external user invite"
+      - "Update User"
+  condition: selection
+falsepositives:
+  - Legitimate invites to external partners or employees
+level: medium
