@@ -1,11 +1,16 @@
 title: Buffer Overflow Attempts
 id: 18b042f0-2ecd-4b6e-9f8d-aa7a7e7de781
-status: stable
+status: test
 description: Detects buffer overflow attempts in Unix system log files
 references:
-    - https://github.com/ossec/ossec-hids/blob/1ecffb1b884607cb12e619f9ab3c04f530801083/etc/rules/attack_rules.xml
+    - https://github.com/ossec/ossec-hids/blob/1ecffb1b88/etc/rules/attack_rules.xml  # OSSEC attack detection rules&#8203;:contentReference[oaicite:6]{index=6}&#8203;:contentReference[oaicite:7]{index=7}
+    - https://docs.oracle.com/cd/E19683-01/816-4883/6mb2joatd/index.html  # Exec stack syslog message (noexec_user_stack)&#8203;:contentReference[oaicite:8]{index=8}
+    - https://www.giac.org/paper/gcih/266/review-ftp-protocol-cyber-defense-initiative/102802  # WU-FTPD exploit "0bin0sh" analysis&#8203;:contentReference[oaicite:9]{index=9}
+    - https://blu.org/mhonarc/discuss/2001/04/msg00285.php  # RPC.statd exploit attempt log example&#8203;:contentReference[oaicite:10]{index=10}
+    - https://rapid7.com/blog/post/2019/02/19/stack-based-buffer-overflow-attacks-what-you-need-to-know/  # Stack smashing protector alert example&#8203;:contentReference[oaicite:11]{index=11}
 author: Florian Roth (Nextron Systems)
 date: 2017-03-01
+modified: 2025-03-17
 tags:
     - attack.t1068
     - attack.privilege-escalation
@@ -14,10 +19,11 @@ logsource:
 detection:
     keywords:
         - 'attempt to execute code on stack by'
-        - 'FTP LOGIN FROM .* 0bin0sh'
-        - 'rpc.statd[\d+]: gethostbyname error for'
-        - 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        - '0bin0sh1'
+        # - 'rpc.statd[\d+]: gethostbyname error for'  # it's an expensive regex and produces questionable results
+        - 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'  # this can cause false positives in Base64 encoded data
+        - 'stack smashing detected'
     condition: keywords
 falsepositives:
-    - Unknown
+    - Base64 encoded data in log entries
 level: high
