@@ -1,17 +1,22 @@
 title: Potential Product Class Reconnaissance Via Wmic.EXE
 id: e568650b-5dcd-4658-8f34-ded0b1e13992
 status: test
-description: Detects the execution of WMIC in order to get a list of firewall and antivirus products
+description: |
+    Detects the execution of WMIC in order to get a list of firewall, antivirus and antispywware products.
+    Adversaries often enumerate security products installed on a system to identify security controls and potential ways to evade detection or disable protection mechanisms.
+    This information helps them plan their next attack steps and choose appropriate techniques to bypass security measures.
 references:
     - https://github.com/albertzsigovits/malware-notes/blob/c820c7fea76cf76a861b28ebc77e06100e20ec29/Ransomware/Maze.md
     - https://www.hybrid-analysis.com/sample/4be06ecd234e2110bd615649fe4a6fa95403979acf889d7e45a78985eb50acf9?environmentId=1
-author: Michael Haag, Florian Roth (Nextron Systems), juju4, oscd.community
+    - https://www.trendmicro.com/en_us/research/25/c/socgholishs-intrusion-techniques-facilitate-distribution-of-rans.html
+author: Michael Haag, Florian Roth (Nextron Systems), juju4, oscd.community, Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2023-02-14
-modified: 2023-03-07
+modified: 2025-03-17
 tags:
     - attack.execution
     - attack.t1047
-    - car.2016-03-002
+    - attack.discovery
+    - attack.t1082
 logsource:
     category: process_creation
     product: windows
@@ -20,10 +25,12 @@ detection:
         - Image|endswith: '\wmic.exe'
         - OriginalFileName: 'wmic.exe'
     selection_cli:
+        # Example: wmic.exe /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List
         CommandLine|contains:
             - 'AntiVirusProduct'
+            - 'AntiSpywareProduct'
             - 'FirewallProduct'
     condition: all of selection_*
 falsepositives:
-    - Unknown
+    - Legitimate use of wmic.exe for reconnaissance of firewall, antivirus and antispywware products.
 level: medium
