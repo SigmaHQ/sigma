@@ -60,7 +60,7 @@ detection:
             - '\pwsh.exe'
             - '\wmic.exe'
         CommandLine|contains: 'ClearEventLog'
-    filter_msiexec:
+    filter_main_msiexec:
         # Example seen during office update/installation:
         #   ParentImage: C:\Windows\SysWOW64\msiexec.exe
         #   CommandLine: "C:\WINDOWS\system32\wevtutil.exe" sl Microsoft-RMS-MSIPC/Debug /q:true /e:true /l:4 /rt:false
@@ -68,7 +68,7 @@ detection:
             - 'C:\Windows\SysWOW64\msiexec.exe'
             - 'C:\Windows\System32\msiexec.exe'
         CommandLine|contains: ' sl '
-    condition: (all of selection_wevtutil_*) or (all of selection_other_ps_*) or (selection_other_wmi) and not 1 of filter_*
+    condition: (all of selection_wevtutil_*) or (all of selection_other_ps_*) or (selection_other_wmi) and not 1 of filter_main_*
 falsepositives:
     - Admin activity
     - Scripts and administrative tools used in the monitored environment
