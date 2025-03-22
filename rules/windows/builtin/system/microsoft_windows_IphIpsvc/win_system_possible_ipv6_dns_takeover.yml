@@ -1,0 +1,29 @@
+title: Possible IPV6 DNS Takeover
+id: d22df9cd-2aee-4089-93c7-9dc4eae77f2c
+status: test
+description: New ISATAP router was set successfully
+references:
+    - https://www.blackhillsinfosec.com/mitm6-strikes-again-the-dark-side-of-ipv6/
+    - https://redfoxsec.com/blog/ipv6-dns-takeover/
+    - https://www.securityhq.com/blog/malicious-isatap-tunneling-unearthed-on-windows-server/
+author: hamid
+date: 2024-04-02
+tags:
+    - attack.initial-access
+    - attack.privilege-escalation
+    - attack.execution
+    - attack.t1557
+    - attack.t1565.002
+logsource:
+    product: windows
+    service: system
+detection:
+    selection:
+        EventID: 4100
+        Provider_Name: 'Microsoft-Windows-Iphlpsvc'
+    filter:
+        IsatapRouter|contains: '127.0.0.1'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high
