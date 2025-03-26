@@ -4,9 +4,9 @@ status: test
 description: Detects the execution of a cat /etc/sudoers to list all users that have sudo rights
 references:
     - https://github.com/sleventyeleven/linuxprivchecker/
-author: Florian Roth (Nextron Systems)
+author: Florian Roth (Nextron Systems), CheraghiMilad
 date: 2022-06-20
-modified: 2022-09-15
+modified: 2024-12-10
 tags:
     - attack.reconnaissance
     - attack.t1592.004
@@ -14,15 +14,23 @@ logsource:
     category: process_creation
     product: linux
 detection:
-    selection:
+    selection_1:
+        Image|endswith: '/visudo'
+    selection_2:
         Image|endswith:
+            - '/grep'
             - '/cat'
-            - 'grep'
+            - '/ed'
             - '/head'
-            - '/tail'
             - '/more'
+            - '/nano'
+            - '/tail'
+            - '/less'
+            - '/vi'
+            - '/vim'
+            - '/emacs'
         CommandLine|contains: ' /etc/sudoers'
-    condition: selection
+    condition: 1 of selection_*
 falsepositives:
     - Legitimate administration activities
 level: medium
