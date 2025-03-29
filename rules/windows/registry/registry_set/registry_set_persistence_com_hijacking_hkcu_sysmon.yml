@@ -1,0 +1,29 @@
+title: Potential HKCU CLSID COM Hijacking - Sysmon
+id: 75cfcdfc-eb43-4e66-939a-5fe7af137ae6
+related:
+    - id: 790317c0-0a36-4a6a-a105-6e576bf99a14
+      type: derived
+status: experimental
+description: Detects potential COM object hijacking via modification of HKCU.
+references:
+    - https://hexastrike.com/resources/blog/dfir/com-hijacking-from-a-defenders-perspective/
+    - https://attack.mitre.org/techniques/T1546/015/
+    - https://unit42.paloaltonetworks.com/snipbot-romcom-malware-variant/
+    - https://blog.talosintelligence.com/uat-5647-romcom/
+    - https://www.trendmicro.com/en_us/research/23/e/void-rabisu-s-use-of-romcom-backdoor-shows-a-growing-shift-in-th.html
+    - https://securelist.com/wirtes-campaign-in-the-middle-east-living-off-the-land-since-at-least-2019/105044/
+author: Maurice Fielenbach (Hexastrike Cybersecurity)
+date: 2025-03-25
+tags:
+    - attack.persistence
+    - attack.t1546.015
+logsource:
+    category: registry_set
+    product: windows
+    service: sysmon
+detection:
+    TargetObject|regex: 'HKU\\.*CLSID\\.*(InprocServer|LocalServer)(32)?\\\(Default\)'
+    EventID: 13
+falsepositives:
+    - Installation of new applications.
+level: medium
