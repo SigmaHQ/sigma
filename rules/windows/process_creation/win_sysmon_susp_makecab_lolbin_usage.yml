@@ -1,0 +1,39 @@
+title: Suspicious Makecab Usage Against Known LOLBins
+id: 14fdd486-8a7d-4772-a0b2-be7335f3c008
+status: experimental
+description: |
+    Detects usage of makecab.exe to compress known LOLBins (regsvr32, rundll32, mshta, certreq).
+    Attackers often use this technique for staging and defense evasion.
+    This rule specifically looks for makecab.exe referencing these binaries in its command line,
+    which is typically uncommon in normal environments.
+references:
+    - https://lolbas-project.github.io
+    - https://attack.mitre.org/techniques/T1560/001
+    - https://car.mitre.org/analytics/CAR-2020-05-003
+author: alexegorov1
+date: 2025-04-04
+tags:
+    - attack.execution
+    - attack.defense-evasion
+    - attack.t1218
+logsource:
+    product: windows
+    category: process_creation
+    service: sysmon
+detection:
+    selection_makecab_lolbins:
+        Image|contains: 'makecab.exe'
+        CommandLine|contains:
+            - 'regsvr32.exe'
+            - 'certreq.exe'
+            - 'rundll32.exe'
+            - 'mshta.exe'
+    condition: selection_makecab_lolbins
+fields:
+    - CommandLine
+    - ParentImage
+    - ParentCommandLine
+    - CurrentDirectory
+falsepositives:
+    - Rare legitimate packaging scenarios involving these tools
+level: medium
