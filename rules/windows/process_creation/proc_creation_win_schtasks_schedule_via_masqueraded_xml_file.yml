@@ -7,6 +7,7 @@ references:
     - https://github.com/elastic/protections-artifacts/blob/084067123d3328a823b1c3fdde305b694275c794/behavior/rules/persistence_suspicious_scheduled_task_creation_via_masqueraded_xml_file.toml
 author: Swachchhanda Shrawan Poudel, Elastic (idea)
 date: 2023-04-20
+modified: 2024-12-01
 tags:
     - attack.defense-evasion
     - attack.persistence
@@ -30,7 +31,9 @@ detection:
     filter_main_extension_xml:
         CommandLine|contains: '.xml'
     filter_main_system_process:
-        IntegrityLevel: 'System'
+        IntegrityLevel:
+            - 'System'
+            - 'S-1-16-16384'
     filter_main_rundll32:
         ParentImage|endswith: '\rundll32.exe'
         ParentCommandLine|contains|all:

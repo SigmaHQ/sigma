@@ -1,0 +1,55 @@
+name: "Create deprecated summary"
+
+on:
+  #push:
+  #  branches:
+  #      - "*"
+  schedule:
+    - cron: "0 0 1 * *" # At 00:00 on day-of-month 1.
+  
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  pull-master:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4.5.0
+      with:
+        python-version: 3.11
+    - name: Execute deprecated csv Script
+      run: |
+        pip install pySigma
+        python tests/deprecated_rules.py
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        reviewers: nasbench, frack113, phantinuss
+        delete-branch: true
+        commit-message: 'chore: update deprecated csv'
+        branch: 'create-pull-request/rule-deprecated'
+        title: 'Update deprecated.csv'
+        body: |
+          ### Summary of the Pull Request
+
+          This PR updates the deprecated summary file `deprecated.csv`
+
+          ### Changelog
+
+          chore: update deprecated.csv 
+
+          ### Example Log Event
+
+          N/A
+
+          ### Fixed Issues
+
+          N/A
+
+          ### SigmaHQ Rule Creation Conventions
+          
+          - If your PR adds new rules, please consider following and applying these [conventions](https://github.com/SigmaHQ/sigma-specification/tree/main/sigmahq)

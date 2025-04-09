@@ -1,0 +1,38 @@
+title: Windows Event Log Access Tampering Via Registry
+id: ba226dcf-d390-4642-b9af-b534872f1156
+status: experimental
+description: |
+    Detects changes to the Windows EventLog channel permission values. It focuses on changes to the Security Descriptor Definition Language (SDDL) string, as modifications to these values can restrict access to specific users or groups, potentially aiding in defense evasion by controlling who can view or modify a event log channel. Upon execution, the user shouldn't be able to access the event log channel via the event viewer or via utilities such as "Get-EventLog" or "wevtutil".
+references:
+    - https://www.atomicredteam.io/atomic-red-team/atomics/T1562.002#atomic-test-8---modify-event-log-channel-access-permissions-via-registry---powershell
+    - https://www.youtube.com/watch?v=uSYvHUVU8xY
+    - https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language
+author: X__Junior
+date: 2025-01-16
+modified: 2025-02-05
+tags:
+    - attack.t1547.001
+    - attack.t1112
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    # O:SYG:SYD:(D;;0x1;;;WD)
+    # O:BAG:SYD:(A;;0x2;;;S-1-15-2-1)(D;;0x1;;;WD)
+    selection_key_1:
+        TargetObject|contains: '\SYSTEM\CurrentControlSet\Services\EventLog\'
+        TargetObject|endswith: '\CustomSD'
+    selection_key_2:
+        TargetObject|contains:
+            - '\Policies\Microsoft\Windows\EventLog\'
+            - '\Microsoft\Windows\CurrentVersion\WINEVT\Channels'
+        TargetObject|endswith: '\ChannelAccess'
+    selection_details:
+        - Details|contains: 'D:(D;'
+        - Details|contains|all:
+              - 'D:('
+              - ')(D;'
+    condition: 1 of selection_key_* and selection_details
+falsepositives:
+    - Administrative activity, still unlikely
+level: high
