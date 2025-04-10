@@ -1,0 +1,27 @@
+title: Suspicious BLF File Creation Outside System Directories
+id: 7b1d5d21-a3b1-4e63-8eb7-797c8e368595
+status: experimental
+description: |
+    Detects the creation of base log (.blf) files outside of Windows system directories, which is suspicious behavior.
+    Such behaviour have been observed in the exploitation of CVE-2025-29824, a privilege escalation vulnerability in the Windows Common Log File System (CLFS) driver.
+    If you observe this behavior, it is recommended to investigate the process that created the file and its parent process to determine if it is malicious.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2025/04/08/exploitation-of-clfs-zero-day-leads-to-ransomware-activity/
+author: Swachhanda Shrawan Poudel (Nextron Systems)
+date: 2025-04-10
+tags:
+    - attack.privilege_escalation
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename|endswith: '.blf'
+    filter:
+        TargetFilename|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+    condition: selection and not filter
+falsepositives:
+    - Legitimate software creating .blf files in non-system directories for some reason.
+level: medium
