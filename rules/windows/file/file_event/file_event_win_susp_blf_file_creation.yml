@@ -15,13 +15,37 @@ logsource:
     product: windows
     category: file_event
 detection:
-    selection:
+    selection_blf:
         TargetFilename|endswith: '.blf'
-    filter:
-        TargetFilename|startswith:
-            - 'C:\Windows\System32\'
-            - 'C:\Windows\SysWOW64\'
-    condition: selection and not filter
+    selection_suspicious_paths_1:
+        TargetFilename|contains:
+             - ':\$Recycle.bin'
+             - ':\Perflogs'
+             - ':\ProgramData'
+             - ':\Temp'
+             - ':\Users\Default'
+             - ':\Users\public'
+             - ':\Windows\Temp'
+             - ':\Windows\addins'
+             - ':\Windows\Fonts'
+             - ':\Windows\IME'
+             - ':\Windows\System32\Tasks'
+             - ':\Windows\Tasks'
+             - '\config\systemprofile'
+             - '\AppData\Local\Temp'
+             - '\AppData\Roaming'
+    selection_suspicious_paths_user_1:
+         TargetFilename|contains: ':\Users\'
+    selection_suspicious_paths_user_2:
+         TargetFilename|contains:
+            - '\Contacts\'
+            - '\Documents\'
+            - '\Favorites\'
+            - '\Favourites\'
+            - '\Music\'
+            - '\Photos\'
+            - '\Pictures\'
+    condition: selection_blf and (selection_suspicious_paths_1 or (all of selection_suspicious_paths_user_* ))
 falsepositives:
     - Legitimate software creating .blf files in non-system directories for some reason.
 level: medium
