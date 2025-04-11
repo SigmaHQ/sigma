@@ -1,19 +1,13 @@
 title: Disable Security Events Logging Adding Reg Key MiniNt
 id: 919f2ef0-be2d-4a7a-b635-eb2b41fde044
-related:
-    - id: 1a4bd6af-99ac-4466-b5b2-7b72b4a05462 # Security Event Logging Disabled Via MiniNt Registry Key
-      type: similar
 status: test
-description: |
-    Detects the addition of a key 'MiniNt' to the registry. Upon a reboot, Windows Event Log service will stopped write events.
-    Windows Event Log is a service that collects and stores event logs from the operating system and applications. It is an important component of Windows security and auditing.
-    Adversary may want to disable this service to disable logging of security events which could be used to detect their activities.
+description: Detects the addition of a key 'MiniNt' to the registry. Upon a reboot, Windows Event Log service will stopped write events.
 references:
     - https://twitter.com/0gtweet/status/1182516740955226112
     - https://www.hackingarticles.in/defense-evasion-windows-event-logging-t1562-002/
-author: Ilyas Ochkov, oscd.community, Swachchhanda Shrawan Poudel (Nextron Systems)
+author: Ilyas Ochkov, oscd.community
 date: 2019-10-25
-modified: 2025-04-09
+modified: 2021-11-27
 tags:
     - attack.defense-evasion
     - attack.t1562.002
@@ -23,22 +17,18 @@ logsource:
     category: registry_event
     product: windows
 detection:
-    selection_cond_1:
+    selection:
     # Sysmon gives us HKLM\SYSTEM\CurrentControlSet\.. if ControlSetXX is the selected one
         - TargetObject: 'HKLM\SYSTEM\CurrentControlSet\Control\MiniNt'
           EventType: 'CreateKey'    # we don't want deletekey
     # key rename
         - NewName: 'HKLM\SYSTEM\CurrentControlSet\Control\MiniNt'
-    selection_cond_2:
-        TargetObject: 'HKLM\System\CurrentControlSet\Control\MiniNt\(Default)'
-        EventType: 'SetValue'
-        Details: '(Empty)'
-    condition: 1 of selection_cond_*
+    condition: selection
 fields:
     - EventID
     - Image
     - TargetObject
     - NewName
 falsepositives:
-    - Highly Unlikely
+    - Unknown
 level: high
