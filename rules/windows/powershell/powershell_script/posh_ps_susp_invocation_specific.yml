@@ -11,9 +11,10 @@ status: test
 description: Detects suspicious PowerShell invocation command parameters
 references:
     - Internal Research
+    - https://github.com/HackTricks-wiki/hacktricks/blob/e4c7b21b8f36c97c35b7c622732b38a189ce18f7/src/windows-hardening/windows-local-privilege-escalation/privilege-escalation-with-autorun-binaries.md
 author: Florian Roth (Nextron Systems), Jonhnathan Ribeiro
 date: 2017-03-05
-modified: 2023-01-05
+modified: 2025-02-17
 tags:
     - attack.execution
     - attack.t1059.001
@@ -50,7 +51,10 @@ detection:
             - 'powershell'
             - 'reg'
             - 'add'
-            - 'HKCU\software\microsoft\windows\currentversion\run'
+        ScriptBlockText|contains:
+            - '\software\microsoft\windows\currentversion\run'
+            - '\software\wow6432node\microsoft\windows\currentversion\run'
+            - '\software\microsoft\windows\currentversion\policies\explorer\run'
     selection_webclient_selection:
         ScriptBlockText|contains|all:
             - 'bypass'
