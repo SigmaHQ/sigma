@@ -5,27 +5,27 @@ description: Detects unexpected command shell execution (cmd.exe) from w3wp.exe 
 author: Jason Rathbun (Blackpoint Cyber)
 date: 2025-04-11
 logsource:
-  category: process_creation
-  product: windows
+    category: process_creation
+    product: windows
 detection:
-  parent:
-    Image|endswith: '\w3wp.exe'
-    CommandLine|contains: '\portal\portal.config'
-  child:
-    Image|endswith: '\cmd.exe'
-  condition: parent and child
+    parent:
+        Image|endswith: '\w3wp.exe'
+        CommandLine|contains: '\portal\portal.config'
+    child:
+        Image|endswith: '\cmd.exe'
+    condition: parent and child
 fields:
-  - Image
-  - ParentImage
-  - CommandLine
-  - ParentCommandLine
-  - ProcessId
-  - ParentProcessId
+    - Image
+    - ParentImage
+    - CommandLine
+    - ParentCommandLine
+    - ProcessId
+    - ParentProcessId
 falsepositives:
-  - Potentially if other portal services run on w3wp with a apppool\portal\portal.config, if you want to increase scope you could add user IIS APPPOOL\portal
+    - Potentially if other portal services run on w3wp with a apppool\portal\portal.config, if you want to increase scope you could add user IIS APPPOOL\portal
 level: high
 tags:
-  - attack.execution
-  - attack.t1059.003
-  - attack.t1505.003
-  - cve.2025-30406
+    - attack.execution
+    - attack.t1059.003
+    - attack.t1505.003
+    - cve.2025-30406
