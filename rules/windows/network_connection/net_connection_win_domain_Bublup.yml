@@ -1,0 +1,23 @@
+title: Potential Data Exfiltration to Bublup.com
+id: 61b9d488-49f6-44e5-a9fa-d0a4dfdbfd85
+status: experimental
+description: Detects network connections to bublup.com, a legitimate cloud storage platform abused by threat actors (e.g., BlackSuit ransomware) for data exfiltration.
+references:
+  - https://thedfirreport.com/2025/03/31/fake-zoom-ends-in-blacksuit-ransomware/
+  - https://unit42.paloaltonetworks.com/threat-assessment-blacksuit-ransomware-ignoble-scorpius/
+author: 0xAnalyst
+date: 2025/04/09
+logsource:
+  category: network_connection
+  product: windows
+detection:
+    selection:
+        Initiated: 'true'
+        DestinationHostname|endswith: '.bublup.com'
+    condition: selection
+falsepositives:
+  - Legitimate use of bublup.com for personal or approved business activity
+level: high
+tags:
+  - attack.exfiltration
+  - attack.t1567.002
