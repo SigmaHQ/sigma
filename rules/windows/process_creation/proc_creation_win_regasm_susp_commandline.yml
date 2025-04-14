@@ -1,0 +1,30 @@
+title: RegAsm.exe Without Commandline
+id: 651f87f7-12db-47f9-84c5-f27b081b94b6
+status: experimental
+description: |
+    Start Regasm without a commandline for process injection.
+    Regasm.exe should be use with a ddl file.
+references:
+    - https://www.mcafee.com/blogs/other-blogs/mcafee-labs/agent-teslas-unique-approach-vbs-and-steganography-for-delivery-and-intrusion/
+    - https://www.zscaler.fr/blogs/security-research/threat-actors-exploit-cve-2017-11882-deliver-agent-tesla
+    - https://learn.microsoft.com/en-us/dotnet/framework/tools/regasm-exe-assembly-registration-tool
+    - https://app.any.run/tasks/ea944b89-69d8-49c8-ac1f-5c76ad300db2
+    - https://www.joesandbox.com/analysis/1467354/0/html
+author: frack113
+date: 2024-07-05
+tags:
+    - attack.defense-evasion
+    - attack.t1218.009
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        - Image|endswith: '\Regasm.exe'
+        - OriginalFileName: 'RegAsm.exe'
+    filter_commandline:
+        CommandLine|contains: '.dll'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Legitimate use of Regasm by developers.
+level: medium
