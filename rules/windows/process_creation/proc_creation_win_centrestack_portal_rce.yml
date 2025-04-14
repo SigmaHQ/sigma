@@ -3,6 +3,11 @@ id: 2d79e371-2a27-42de-87a4-b4213fc72a6a
 status: experimental
 description: Detects unexpected command shell execution (cmd.exe) from w3wp.exe when tied to CentreStack's portal.config, indicating potential exploitation (e.g., CVE-2025-30406)
 author: Jason Rathbun (Blackpoint Cyber)
+references:
+    - https://nvd.nist.gov/vuln/detail/CVE-2025-30406
+    - https://blackpointcyber.com/blog/racing-to-exploit-centrestacks-cve-2025-30406/
+    - https://gladinetsupport.s3.us-east-1.amazonaws.com/gladinet/securityadvisory-cve-2005.pdf
+    - https://www.bleepingcomputer.com/news/security/centrestack-rce-exploited-as-zero-day-to-breach-file-sharing-servers/
 date: 2025-04-11
 logsource:
     category: process_creation
@@ -14,15 +19,9 @@ detection:
     child:
         Image|endswith: '\cmd.exe'
     condition: parent and child
-fields:
-    - Image
-    - ParentImage
-    - CommandLine
-    - ParentCommandLine
-    - ProcessId
-    - ParentProcessId
+
 falsepositives:
-    - Potentially if other portal services run on w3wp with a apppool\portal\portal.config, if you want to increase scope you could add user IIS APPPOOL\portal
+    - Potentially if other portal services run on w3wp with a apppool\portal\portal.config, if you want to increase scope you could add user IIS APPPOOL\portal. As of 4/14, no false positives yet observed by Blackpoint Cyber. Cmd seems atypical from this service.
 level: high
 tags:
     - attack.execution
