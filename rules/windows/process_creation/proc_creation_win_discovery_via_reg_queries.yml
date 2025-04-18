@@ -15,11 +15,11 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_reg:
+    selection_cmd_reg:
         Image|endswith: '\reg.exe'
         CommandLine|contains: 'query'
         CommandLine|contains|windash: '-v'
-    selection_powershell:
+    selection_cmd_powershell:
         Image|endswith:
             - '\powershell.exe'
             - '\pwsh.exe'
@@ -35,7 +35,7 @@ detection:
             - '\SOFTWARE\Microsoft\Windows Defender' # Details about defender state
             - '\SYSTEM\CurrentControlSet\Services' # Details about existing services
             - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tasks' # Details about existing scheduled tasks
-    condition: (selection_reg or selection_powershell) and selection_keys
+    condition: 1 of selection_cmd_* and selection_keys
 falsepositives:
     - Unlikely
 level: low
