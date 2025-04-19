@@ -1,0 +1,33 @@
+title: Suspicious NTLM Logon Failure Without WorkstationName - Possible Impacket
+id: 34ada765-b724-442e-9739-08a8cddd5a3d
+status: experimental
+description: Detects failed NTLM logons (Event ID 4625) with specific attributes and no workstation name, which could indicate malicious activity such as Impacket authentication attempted.
+author: Charles BLANC-ROLIN @woundride
+date: 2025/04/19
+logsource:
+  product: windows
+  service: security
+  category: logon
+detection:
+  selection:
+    EventID: 4625
+    LogonType: 3
+    KeyLength: 0
+    TargetUserSid: S-1-0-0
+    WorkstationName: '-'
+  condition: selection
+fields:
+  - SubjectUserName
+  - IpAddress
+  - LogonProcessName
+  - WorkstationName
+  - TargetUserSid
+falsepositives:
+  - Some legitimate system processes or misconfigured clients may lack workstationName
+level: high
+tags:
+  - attack.credential_access
+  - attack.t1110
+  - windows
+  - ntlm
+
