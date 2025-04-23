@@ -1,0 +1,33 @@
+title: Detect VHD/VHDX Mount (Potential CVE-2025-24985 Exploit)
+id: c4ce1282-7b53-4f7a-914d-ee48cfa0288b
+status: experimental
+description: |
+  Detects mounting of .VHD or .VHDX files via the Windows Fast FAT driver,
+  a behavior used to trigger the integer-overflow vulnerability CVE-2025-24985.
+references:
+  - https://nvd.nist.gov/vuln/detail/CVE-2025-24985
+  - https://www.hecfblog.com/2018/09/daily-blog-481-event-logs-for-vhds.html
+author: Douglas Rose
+date: 2025/04/23
+logsource:
+  product: windows
+  service: vhdmp        # Microsoft-Windows-VHDMP/Operational channel
+detection:
+  selection:
+    EventID: 
+      - 1    # VHD attach start
+      - 12   # VHD attach complete
+    EventData.VhdFileName|endswith:
+      - '.vhd'
+      - '.vhdx'
+  # you can narrow further by path regex, e.g. only user-profile paths:
+  #    EventData.VhdFileName|match: '^C:\\Users\\.*\\Downloads\\.*\.(vhd|vhdx)$'
+  condition: selection
+falsepositives:
+  - Legitimate mounting of corporate VHDs (backups, snapshots, virtualization)
+level: high
+tags:
+  - attack.execution
+  - attack.persistence
+  - attack.t1203        # Exploitation for Client Execution
+  - attack.t1547        # Boot or Logon Autostart Execution
