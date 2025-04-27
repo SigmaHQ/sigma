@@ -1,0 +1,35 @@
+title: Steganography Embed or Extract Files with Steghide - Process Creation
+id: 42c32a80-eb08-4732-90d8-2547e5c137eb
+related:
+    - id: ce446a9e-30b9-4483-8e38-d2c9ad0a2280
+      type: derived
+    - id: a5a827d9-1bbe-4952-9293-c59d897eb41b
+      type: derived
+status: experimental
+description: Detects embedding of files with usage of steghide binary, the adversaries may use this technique to prevent the detection of hidden information.
+references:
+    - https://vitux.com/how-to-hide-confidential-files-in-images-on-debian-using-steganography/
+author: 'Pawel Mazur'
+date: 2024-10-27
+tags:
+    - attack.defense-evasion
+    - attack.t1027.003
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_image:
+        Image|endswith: 'steghide'
+    parameters_embed:
+        CommandLine|contains|all:
+            - 'embed'
+            - '-cf'
+            - '-ef'
+    parameters_extract:
+        CommandLine|contains|all:
+            - 'extract'
+            - '-sf'
+    condition: selection_image and 1 of parameters_*
+falsepositives:
+    - Unknown
+level: medium
