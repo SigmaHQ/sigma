@@ -1,0 +1,22 @@
+title: Exfiltration data using the WinScp tool - (SFTP File Transfer)
+id: 8ea5903c-815e-465b-a697-016902988414
+status: experimental
+description: The attacker may use the WinScp tool to exfiltrate data from the victim's system. This rule helps to identify data being exfiltrated through the SFTP protocol. (When using the WinScp tool, the SFTP protocol is used in the background to transfer data.)
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1048/T1048.md
+author: CheraghiMilad
+date: 2024-11-29
+tags:
+    - attack.exfiltration
+    - attack.t1048.001
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|contains: 'openssh/sftp-server'
+        TargetFileName|endswith: '.filepart'
+    condition: selection
+falsepositives:
+    - Legitimate use of the commands by administrators or system processes (excluding Wazuh)
+level: high
