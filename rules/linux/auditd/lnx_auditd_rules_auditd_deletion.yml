@@ -1,0 +1,24 @@
+title: Deletion of Auditd Rules
+id: bed26dea-4525-47f4-b24a-76e30e44ffb0
+status: test
+description: Detects the execution of the "auditctl -D" command in auditd logs, which deletes existing audit rules.
+references:
+    - https://www.atomicredteam.io/atomic-red-team/atomics/T1562.012
+author: Mohamed LAKRI
+date: 2024-11-12
+
+tags:
+    - attack.defense-evasion
+    - attack.T1562.012
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+        type: 'EXECVE'
+        a0: 'auditctl'
+        a1: '-D'
+    condition: selection
+falsepositives:
+    - An administrator troubleshooting
+level: medium
