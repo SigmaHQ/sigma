@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Create the summary of all the deprecated rules in the deprecated.csv file
+Create the summary of all the deprecated rules in deprecated.csv or deprecated.json
 
 Run using the command
-# python deprecated_rules.py
+# python deprecated_rules.py -f {json, csv}
 """
 
 from sigma.collection import SigmaCollection
@@ -13,9 +13,10 @@ from sigma.rule import SigmaStatus,SigmaLevel
 import argparse
 import datetime
 import csv
+import json
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-f',  '--format', choices=['csv'], default='csv')
+parser.add_argument('-f',  '--format', choices=['csv', 'json'], default='csv')
 args = parser.parse_args()
 
 path_to_rules = [
@@ -37,22 +38,25 @@ def format_rule(rule):
         "level": str(get_level(rule))
     }
 
-def save_csv(rules):
+def save_file(rules, _format):
     is_rule_deprecated = lambda rule: rule.status is SigmaStatus.DEPRECATED
-    name_csv_export = f"./deprecated/deprecated.{args.format}"
+    filename_export = f"./deprecated/deprecated.{_format}"
 
     raw_info = map(format_rule, filter(is_rule_deprecated, rules))
     sort_info = sorted(raw_info, key=lambda d: d['modified'])
 
-    with open(name_csv_export, encoding="UTF-8", mode="w", newline="") as csv_file:
-        if args.format == "csv":
+    with open(filename_export, encoding="UTF-8", mode="w", newline="") as _file:
+        if _format == "csv":
             fieldnames = ["id", "title", "date", "modified","level"]
-            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+            writer = csv.DictWriter(_file, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(sort_info)
+        elif _format == "json":
+            json.dump(sort_info, _file, indent=4)
+
 
 if __name__ == "__main__":
 
     rule_paths = SigmaCollection.resolve_paths(path_to_rules)
     rule_collection = SigmaCollection.load_ruleset(rule_paths, collect_errors=True)
-    save_csv(rule_collection)
+    save_file(rule_collection, args.format)
