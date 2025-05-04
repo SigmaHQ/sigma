@@ -1,0 +1,41 @@
+title: Unusual Mount Tree Activity
+id: 6ee3ea09-f9da-406a-9339-35c4b919658a
+status: experimental
+description: |
+    By invoking the move_mount and open_tree syscalls, I was able to clone and mount the /proc filesystem onto the /tmp directory.
+    The operation works by first using open_tree to open the /proc directory tree and then utilizing move_mount to move or mount it onto /tmp/proc.
+    This action is typically used to hide system information, manipulate /proc data, or evade detection by monitoring tools.
+references:
+    - https://lore.kernel.org/all/153313705821.13253.15519769348603350410.stgit@warthog.procyon.org.uk/
+    - https://github.com/CheraghiMilad/bypass-Neo23x0-auditd-config/blob/main/open-tree-move_mount_syscall/README.md
+author: Milad Cheraghi
+date: 2025-04-30
+tags:
+    - attack.t1564.005
+    - attack.defense-evasion
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection_open_tree:
+        syscall: 428
+    selection_move_mount:
+        syscall: 429
+    selection:
+        type: 'SYSCALL'
+        auid:
+            - 1000
+            - 1001
+            - 1002
+            - 1003
+            - 1004
+            - 1005
+            - 1006
+            - 1007
+            - 1008
+        euid: 0
+        exe|contains: '/tmp'
+    condition: selection AND (selection_open_tree or selection_move_mount)
+falsepositives:
+    - Legitimate admin activity
+level: medium
