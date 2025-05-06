@@ -1,0 +1,26 @@
+title: Suspicious Deno File Written from Remote Source
+id: 6c0ce3b6-85e2-49d4-9c3f-6e008ce9796e
+status: test
+description: Detects Deno writing a file from a direct HTTP(s) call
+    and writing to the appdata folder or bringing it's own malicious DLL
+references:
+    - https://taggart-tech.com/evildeno/
+author: Josh Nickels, Michael Taggart
+date: 2025-05-06
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_https:
+        TargetFilename|contains:
+            - '\deno\remote\https'
+    selection_dll:
+        TargetFileName|contains:
+            - '\deno\gen'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate usage of deno to request a file or bring a DLL to a host
+level: low
+tags:
+    - attack.initial-access
+    - attack.t1189
