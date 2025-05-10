@@ -1,0 +1,59 @@
+title: Office Macro Initial Access via Phishing
+id: 25ac981f-e70c-463f-ad35-91888e267f93
+status: experimental
+description: Detects a Microsoft Office application (Word, Excel, PowerPoint) spawning a suspicious child process – a behavior often associated with malicious Office macros from phishing attachments executing code on the host.
+author: arjun-tarakesh
+date: 2025/05/10
+references:
+  - 'https://attack.mitre.org/techniques/T1566/001/'
+  - 'https://www.logpoint.com/en/blog/detecting-malicious-macros-is-a-vital-tool-in-the-fight-against-malware/'
+tags:
+  - attack.initial_access
+  - attack.execution
+  - attack.t1566.001
+  - attack.t1204.002
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_parent:
+    ParentImage|endswith:
+      - '\WINWORD.EXE'
+      - '\EXCEL.EXE'
+      - '\POWERPNT.EXE'
+  selection_child_image:
+    Image|endswith:
+      - '\powershell.exe'
+      - '\cmd.exe'
+      - '\wscript.exe'
+      - '\cscript.exe'
+      - '\mshta.exe'
+      - '\bitsadmin.exe'
+      - '\certutil.exe'
+      - '\msiexec.exe'
+      - '\regsvr32.exe'
+      - '\rundll32.exe'
+      - '\wmic.exe'
+      - '\curl.exe'
+      - '\cmstp.exe'
+      - '\schtasks.exe'
+  selection_child_ofn:
+    OriginalFileName:
+      - 'PowerShell.EXE'
+      - 'Cmd.Exe'
+      - 'WScript.exe'
+      - 'cscript.exe'
+      - 'Mshta.exe'
+      - 'bitsadmin.exe'
+      - 'CertUtil.exe'
+      - 'msiexec.exe'
+      - 'RegSvr32.exe'
+      - 'rundll32.exe'
+      - 'wmic.exe'
+      - 'curl.exe'
+      - 'CMSTP.EXE'
+      - 'schtasks.exe'
+  condition: selection_parent and (selection_child_image or selection_child_ofn)
+falsepositives:
+  - Unknown
+level: high
