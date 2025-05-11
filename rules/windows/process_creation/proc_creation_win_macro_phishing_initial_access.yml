@@ -1,17 +1,18 @@
-title: Office Macro Initial Access via Phishing
-id: 25ac981f-e70c-463f-ad35-91888e267f93
+title: Suspicious Office Macro Execution via CLI Arguments
+id: 1b94f66b-46fc-4262-8937-74cfc8d2c8da
 status: experimental
-description: Detects a Microsoft Office application (Word, Excel, PowerPoint) spawning a suspicious child process – a behavior often associated with malicious Office macros from phishing attachments executing code on the host.
+description: Detects Microsoft Office applications (Word, Excel, PowerPoint, etc.) started with suspicious command-line arguments such as /m, .dotm, or macro-related keywords like AutoOpen/AutoClose.
+  These may indicate auto-executing Office macros used in phishing attacks to gain initial access.
+
 author: arjun-tarakesh
-date: 2025/05/10
+date: 2025/05/11
 references:
   - 'https://attack.mitre.org/techniques/T1566/001/'
-  - 'https://www.logpoint.com/en/blog/detecting-malicious-macros-is-a-vital-tool-in-the-fight-against-malware/'
+
 tags:
-  - attack.initial_access
   - attack.execution
   - attack.t1566.001
-  - attack.t1204.002
+  - attack.t1059.001
 logsource:
   category: process_creation
   product: windows
@@ -21,39 +22,25 @@ detection:
       - '\WINWORD.EXE'
       - '\EXCEL.EXE'
       - '\POWERPNT.EXE'
-  selection_child_image:
-    Image|endswith:
-      - '\powershell.exe'
-      - '\cmd.exe'
-      - '\wscript.exe'
-      - '\cscript.exe'
-      - '\mshta.exe'
-      - '\bitsadmin.exe'
-      - '\certutil.exe'
-      - '\msiexec.exe'
-      - '\regsvr32.exe'
-      - '\rundll32.exe'
-      - '\wmic.exe'
-      - '\curl.exe'
-      - '\cmstp.exe'
-      - '\schtasks.exe'
-  selection_child_ofn:
-    OriginalFileName:
-      - 'PowerShell.EXE'
-      - 'Cmd.Exe'
-      - 'WScript.exe'
-      - 'cscript.exe'
-      - 'Mshta.exe'
-      - 'bitsadmin.exe'
-      - 'CertUtil.exe'
-      - 'msiexec.exe'
-      - 'RegSvr32.exe'
-      - 'rundll32.exe'
-      - 'wmic.exe'
-      - 'curl.exe'
-      - 'CMSTP.EXE'
-      - 'schtasks.exe'
-  condition: selection_parent and (selection_child_image or selection_child_ofn)
+      - '\MSPUB.EXE'
+      - '\ONENOTE.EXE'
+      - '\MSACCESS.EXE'
+      - '\VISIO.EXE'
+
+  selection_cmdline:
+    CommandLine|contains:
+      - '/m'
+      - '/t'
+      - '/n'
+      - '.dotm'
+      - 'AutoOpen'
+      - 'AutoClose'
+      - '/q'
+      - '/quiet'
+      - '/h'
+
+  condition: selection_parent and selection_cmdline
+
 falsepositives:
-  - Unknown
-level: high
+  - Legitimate use of Office CLI options in enterprise scripting environments or automation
+level: medium
