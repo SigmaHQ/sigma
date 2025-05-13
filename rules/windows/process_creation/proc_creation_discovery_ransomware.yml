@@ -1,0 +1,74 @@
+### CORRELATION RULE
+title: Correlation - File and Directory Discovery Followed by Suspicious Reg Add BitLocker
+status: test
+description: Detects file and directory discovery followed by suspicious addition to BitLocker related registry keys via the reg.exe utility
+references: https://github.com/SigmaHQ/sigma-specification/blob/main/specification/sigma-correlation-rules-specification.md
+author: Kayla Kraines (MITRE)
+date: 2025-03-25
+correlation:
+    type: temporal_ordered
+    rules:
+        - file_directory_discovery
+        - suspicious-bitlocker-reg-event
+timespan: 60m
+falsepositives:
+    - Unlikely
+level: high
+---
+### BASE RULES
+title: Suspicious Reg Event BitLocker
+status: test
+description: Detects suspicious modification to BitLocker related registry keys
+name: suspicious-bitlocker-reg-event
+references: https://thedfirreport.com/2021/11/15/exchange-exploit-leads-to-domain-wide-ransomware/
+author: MITRE
+date: 2025-03-21
+modified: 2025-03-21
+tags:
+    - attack.impact
+    - attack.t1486
+logsource:
+    category: registry_event
+    product: windows
+detection:
+    selection:
+        TargetObject|contains:
+            - 'EnableBDEWithNoTPM'
+            - 'UseAdvancedStartup'
+            - 'UseTPM'
+            - 'UseTPMKey'
+            - 'UseTPMKeyPIN'
+            - 'RecoveryKeyMessageSource'
+            - 'UseTPMPIN'
+            - 'RecoveryKeyMessage'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
+---
+title: File & Directory Discovery
+status: test
+description: Detects commands that enumerate or display files or directories.
+name: file_directory_discovery
+author: Kayla Kraines (MITRE CTID)
+date: 2025-03-25
+tags:
+    - attack.discovery
+    - attack.t1083
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        - OriginalFileName:
+            - 'ls.exe'
+            - 'dir.exe'
+            - 'tree.exe'
+            - 'cat.exe'
+            - 'find.exe'
+            - 'locate.exe'
+        - CommandLine|contains:
+            - 'Get-ChildItem'
+    condition: 1 of selection
+falsepositives:
+    - Legitimate user activity
