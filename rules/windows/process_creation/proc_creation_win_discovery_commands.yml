@@ -1,0 +1,186 @@
+###CORRELATION
+title: Correlation - Ambiguous Discovery Commands
+status: test
+description: Looks for multiple discovery commands being run in a specified time frame indicative of malicious activity
+author: Robert Shovan (MITRE)
+date: 2025-03-25
+correlation:
+    type: event_count
+    rules:
+        - ambg_domain_account
+        - ambg_domain_group
+        - ambg_process
+        - ambg_sys_net_conn
+        - ambg_sys_info
+        - ambg_remote_system
+    group-by:
+        - CommandLine
+        - User
+        - Computer
+    timespan: 15m
+    condition:
+        gte: 3
+tags:
+    - attack.discovery
+    - attack.t1087.002
+    - attack.t1069.002
+    - attack.t1057
+    - attack.t1049
+    - attack.t1082
+    - attack.t1018
+---
+### BASE RULEs
+title: Ambiguous Discovery - Domain Account
+name: ambg_domain_account
+description: powershell and command prompt domain account discovery
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    filter1087pwsh:
+        CommandLine|contains:
+          - "*powershell*"
+          - "*Get-ADUser*"
+    filter1087cmd:
+        CommandLine|contains:
+          - "*net*"
+          - "*user*"
+          - "*/do*"
+  condition: selection and (filter1087pwsh or filter1087cmd)
+tags:
+    - attack.discovery
+    - attack.t1087.002
+---
+title: Ambiguous Discovery - Domain Group
+name: ambg_domain_group
+description: powershell and command prompt domain group discovery
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    filter1069pwshgadg:
+        CommandLine|contains:
+          - "*powershell*"
+          - "*Get-ADGroup*"
+    filter1069pwshgdg:
+        CommandLine|contains:
+          - "*powershell*"
+          - "*Get-DomainGroup*"
+    filter1069cmd:
+        CommandLine|contains:
+          - "*net*"
+          - "*group*"
+          - "*/do*"
+  condition: selection and (filter1069pwshgadg or filter1069pwshgdg or filter1069cmd)
+tags:
+    - attack.discovery
+    - attack.t1069.002
+---
+title: Ambiguous Discovery - Process
+name: ambg_process
+description: powershell and command prompt process discovery
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    filter1057pwsh:
+        CommandLine|contains:
+          - "*powershell*"
+          - "*Get-Process*"
+    filter1057cmd:
+        CommandLine|contains:
+          - "*tasklist*"
+  condition: selection and (filter1057pwsh or filter1057cmd)
+tags:
+    - attack.discovery
+    - attack.t1057
+---
+title: Ambiguous Discovery - System Network Connections
+name: ambg_sys_net_conn
+description: powershell and command prompt system network connection discovery
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    filter1049pwsh:
+        CommandLine|contains:
+          - "*powershell*"
+          - "*Get-NetTcpConnection*"
+    filter1049cmd:
+        CommandLine|contains:
+          - "*net*"
+          - "*use*"
+    filter1049cmdnot:
+      CommandLine|contains:
+        - "*user*"
+  condition: selection and (filter1049pwsh or (filter1049cmd and not filter1049cmdnot))
+tags:
+    - attack.discovery
+    - attack.t1049
+---
+title: Ambiguous Discovery - System Information
+name: ambg_sys_info
+description: wmic and command prompt system information discovery
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    filter1082wmic:
+        CommandLine|contains:
+          - "*wmic*"
+          - "*qfe*"
+    filter1082cmd:
+        CommandLine|contains:
+          - "*systeminfo*"
+          - "*hostname*"
+  condition: selection and (filter1082wmic or filter1082cmd)
+tags:
+    - attack.discovery
+    - attack.t1082
+---
+title: Ambiguous Discovery - Remote System
+name: ambg_remote_system
+description: powershell and command prompt remote system discovery
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    filter1018pwshgdcm:
+        CommandLine|contains:
+          - "*powershell*"
+          - "*Get-DomainComputer*"
+    filter1018pwshgadc:
+        CommandLine|contains:
+          - "*powershell*"
+          - "*Get-AdComputer*"
+    filter1018pwshgdc:
+        CommandLine|contains:
+          - "*powershell*"
+          - "*Get-DomainController*"
+    filter1018cmddomain:
+        CommandLine|contains:
+          - "*net*"
+          - "*domain*"
+          - "*computers*"
+          - "*/do*"
+    filter1018cmdview:
+      CommandLine|contains:
+        - "*net*"
+        - "*view*"
+        - "*/do*"
+  condition: selection and (filter1018pwshgdcm or filter1018pwshgadc or filter1018pwshgdc or filter1018cmddomain or filter1018cmdview)
+tags:
+    - attack.discovery
+    - attack.t1018
