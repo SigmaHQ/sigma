@@ -1,0 +1,24 @@
+title: Indirect Command Execution via SFTP ProxyCommand
+id: 762bb580-79b4-40f4-8b9e-9349ce1710f4
+status: experimental
+description: |
+    Detects potential abuse of SFTP.exe to execute commands indirectly via ProxyCommand parameter.
+    Threat actors can leverage this legitimate Windows binary to bypass security controls and execute arbitrary commands while evading detection.
+references:
+    - https://news.sophos.com/en-us/2025/05/09/lumma-stealer-coming-and-going/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-05-13
+tags:
+    - attack.defense_evasion
+    - attack.t1202
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\sftp.exe'
+        CommandLine|contains: 'ProxyCommand='
+    condition: selection
+falsepositives:
+    - Legitimate use of SFTP with proxy commands for administration or networking tasks
+level: high
