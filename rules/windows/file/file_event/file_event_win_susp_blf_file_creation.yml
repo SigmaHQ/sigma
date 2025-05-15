@@ -1,0 +1,51 @@
+title: BLF File Creation in Suspicious Paths
+id: 7b1d5d21-a3b1-4e63-8eb7-797c8e368595
+status: experimental
+description: |
+    Detects the creation of base log (.blf) files outside of Windows system directories, which is suspicious behavior.
+    Such behaviour have been observed in the exploitation of CVE-2025-29824, a privilege escalation vulnerability in the Windows Common Log File System (CLFS) driver.
+    If you observe this behavior, it is recommended to investigate the process that created the file and its parent process to determine if it is malicious.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2025/04/08/exploitation-of-clfs-zero-day-leads-to-ransomware-activity/
+author: Swachhanda Shrawan Poudel (Nextron Systems)
+date: 2025-04-10
+tags:
+    - attack.privilege-escalation
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection_blf:
+        TargetFilename|endswith: '.blf'
+    selection_suspicious_paths_1:
+        TargetFilename|contains:
+            - ':\$Recycle.bin'
+            - ':\Perflogs'
+            - ':\ProgramData'
+            - ':\Temp'
+            - ':\Users\Default'
+            - ':\Users\public'
+            - ':\Windows\Temp'
+            - ':\Windows\addins'
+            - ':\Windows\Fonts'
+            - ':\Windows\IME'
+            - ':\Windows\System32\Tasks'
+            - ':\Windows\Tasks'
+            - '\config\systemprofile'
+            - '\AppData\Local\Temp'
+            - '\AppData\Roaming'
+    selection_suspicious_paths_user_1:
+        TargetFilename|contains: ':\Users\'
+    selection_suspicious_paths_user_2:
+        TargetFilename|contains:
+            - '\Contacts\'
+            - '\Documents\'
+            - '\Favorites\'
+            - '\Favourites\'
+            - '\Music\'
+            - '\Photos\'
+            - '\Pictures\'
+    condition: selection_blf and (selection_suspicious_paths_1 or (all of selection_suspicious_paths_user_* ))
+falsepositives:
+    - Legitimate software creating .blf files in non-system directories for some reason.
+level: medium
