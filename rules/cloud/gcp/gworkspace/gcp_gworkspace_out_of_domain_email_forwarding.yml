@@ -1,0 +1,23 @@
+title: Google Workspace Out Of Domain Email Forwarding
+id: 2a0bb2dd-eb5f-4517-8cb9-404f8ba764a5
+status: experimental
+description: Detects automatic email forwarding to external domains in Google Workspace, which may indicate data leakage or misuse.
+references:
+    - https://developers.google.com/workspace/admin/reports/v1/appendix/activity/login#email_forwarding_out_of_domain
+author: Tom kluter
+date: 2025-05-15
+tags:
+    - attack.t1114.003
+    - attack.collection
+logsource:
+    product: gcp
+    service: google_workspace.login
+detection:
+    selection:
+        eventService: login.googleapis.com
+        eventName:
+            - 'email_forwarding_out_of_domain'
+    condition: selection
+falsepositives:
+    - Legitimate forwarding
+level: medium
