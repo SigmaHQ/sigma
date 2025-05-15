@@ -1,0 +1,42 @@
+### CORRELATION
+title: Multiple Archived Files
+status: test
+description: Detects multiple uses of archiving utilities indicative of staging activity
+author: Antonia Feffer (MITRE)
+date: 2025-03-25
+correlation:
+   type: event_count
+   rules:
+      - archiving_utils
+   group-by:
+      - TargetObject
+   timespan: 10m
+   condition:
+      gte: 5
+---
+### BASE RULE
+title: Archiving Data Using Common Utilties
+status: test
+description: An adversary may compress data that is collected prior to exfiltration using 3rd party utilities
+name: archiving_utils
+author: MITRE
+date: 2025-03-25
+tags:
+    - attack.collection
+    - attack.t1560.001
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        - OriginalFileName:
+            - '7z.exe'
+            - '7z*.exe'
+            - 'winzip.exe'
+            - 'winzip64.exe'
+            - 'rar.exe'
+        - CommandLine|contains:
+            - 'Compress-Archive'
+    condition: 1 of selection
+falsepositives:
+    - Legitimate user activity
