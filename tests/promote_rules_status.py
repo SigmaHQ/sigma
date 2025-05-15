@@ -1,4 +1,8 @@
+from collections import defaultdict
 from datetime import datetime
+from functools import reduce
+from json import dumps
+from os import path, sep
 from sigma.collection import SigmaCollection
 from typing import Iterator
 
@@ -35,6 +39,15 @@ def promote_rule(rule: str) -> str:
 
     return rule
 
+def summarize_promotion(summary: dict, rule: str) -> dict:
+    key, *values = rule.split(sep)
+    value = sep.join(values)
+    summary[key].append(value)
+
+    return summary
 
 if __name__ == "__main__":
-    [promote_rule(rule) for rule in get_rules_to_promote()]
+    rules = (str(promote_rule(rule)) for rule in get_rules_to_promote())
+    promotion = reduce(summarize_promotion, rules, defaultdict(list))
+
+    print(dumps(promotion))
