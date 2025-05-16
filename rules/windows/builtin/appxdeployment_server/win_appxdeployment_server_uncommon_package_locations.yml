@@ -9,7 +9,7 @@ references:
     - https://news.sophos.com/en-us/2021/11/11/bazarloader-call-me-back-attack-abuses-windows-10-apps-mechanism/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023-01-11
-modified: 2024-12-25
+modified: 2025-03-07
 tags:
     - attack.defense-evasion
 logsource:
@@ -34,7 +34,9 @@ detection:
             - 'https://statics.teams.cdn.office.net/'
             - 'microsoft.com' # Example: https://go.microsoft.com/fwlink/?linkid=2160968
             - 'https://installer.teams.static.microsoft/'
-    condition: selection and not 1 of filter_main_*
+    filter_optional_onedrive:
+        Path|contains: 'AppData\Local\Microsoft\OneDrive\'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: medium
