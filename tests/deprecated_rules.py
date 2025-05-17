@@ -8,7 +8,7 @@ Run using the command
 """
 
 from sigma.collection import SigmaCollection
-from sigma.rule import SigmaStatus,SigmaLevel
+from sigma.rule import SigmaStatus, SigmaLevel
 
 import argparse
 import datetime
@@ -16,18 +16,21 @@ import csv
 import json
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-f',  '--format', choices=['csv', 'json'], default='csv')
+parser.add_argument("-f", "--format", choices=["csv", "json"], default="csv")
 args = parser.parse_args()
 
 path_to_rules = [
     "deprecated",
 ]
 
+
 def get_level(rule):
     return rule.level if rule.status else SigmaLevel.MEDIUM
 
+
 def get_modified_time(rule):
     return rule.modified if rule.modified else datetime.date.today()
+
 
 def format_rule(rule):
     return {
@@ -35,19 +38,20 @@ def format_rule(rule):
         "title": rule.title,
         "date": str(rule.date),
         "modified": str(get_modified_time(rule)),
-        "level": str(get_level(rule))
+        "level": str(get_level(rule)),
     }
+
 
 def save_file(rules, _format):
     is_rule_deprecated = lambda rule: rule.status is SigmaStatus.DEPRECATED
     filename_export = f"./deprecated/deprecated.{_format}"
 
     raw_info = map(format_rule, filter(is_rule_deprecated, rules))
-    sort_info = sorted(raw_info, key=lambda d: d['modified'])
+    sort_info = sorted(raw_info, key=lambda d: d["modified"])
 
     with open(filename_export, encoding="UTF-8", mode="w", newline="") as _file:
         if _format == "csv":
-            fieldnames = ["id", "title", "date", "modified","level"]
+            fieldnames = ["id", "title", "date", "modified", "level"]
             writer = csv.DictWriter(_file, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(sort_info)
