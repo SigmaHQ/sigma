@@ -1,0 +1,41 @@
+title: Magic System Request Key - Linux
+id: ea61bb82-a5e0-42e6-8537-91d29500f1b9
+status: test
+description: |
+    Adversaries with root or sufficient privileges can exploit the Linux Magic SysRq (System Request) key feature 
+    to silently manipulate or destabilize a system without using standard userland tools, 
+    making detection more difficult. By writing specific commands to /proc/sysrq-trigger, 
+    they can force a system crash (echo c > /proc/sysrq-trigger), sync disks, 
+    kill processes, or even crash the system to trigger a dump or disrupt forensic analysis. 
+    Since these actions bypass standard logging mechanisms, a sophisticated attacker may use them to cover tracks 
+    (e.g., killing logging daemons), sabotage the system, or evade detection after deploying malware. 
+    While powerful for recovery or debugging in legitimate use, in the hands of an attacker, 
+    SysRq is a stealthy post-exploitation tool. (/proc/sys/kernel/sysrq for active it - Or permanently via /etc/sysctl.conf)
+references:
+    - https://www.kernel.org/doc/html/v4.10/_sources/admin-guide/sysrq.txt
+    - https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/4/html/reference_guide/s3-proc-sys-kernel
+author: Milad Cheraghi
+date: 2025-05-23
+modified: 2025-05-23
+tags:
+    - attack.impact
+    - attack.t1529
+    - attack.t1489
+    - attack.t148
+    - attack.t1499
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection_enable:
+        type: 'PATH'
+        name|endswith: 
+            - 'sysrq'
+            - 'sysctl.conf'
+    selection_execute:
+        type: 'PATH'
+        name|endswith: 'sysrq-trigger'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate administrative activity
+level: informational
