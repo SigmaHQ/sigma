@@ -1,6 +1,6 @@
 title: Suspicious Login Activity Classified By Google
 id: 38360161-76c4-4283-842e-efcf997dafc8
-status: test
+status: experimental
 description: Detects Google Workspace login activity that's classified as suspicious by Google.
 references:
     - https://cloud.google.com/logging/docs/audit/gsuite-audit-logging
@@ -9,7 +9,7 @@ references:
     - https://developers.google.com/workspace/admin/reports/v1/appendix/activity/login#suspicious_login_less_secure_app
     - https://developers.google.com/workspace/admin/reports/v1/appendix/activity/login#suspicious_programmatic_login
 author: Tom Kluter
-date: 2025-05-07
+date: 2025-05-22
 tags:
     - attack.initial-access
     - attack.t1078
@@ -18,8 +18,8 @@ logsource:
     service: google_workspace.login
 detection:
     selection:
-        eventService: login.googleapis.com
-        eventName:
+        protoPayload.Servicename: login.googleapis.com
+        protoPayload.metadata.event.eventName:
             - 'suspicious_login'
             - 'suspicious_login_less_secure_app'
             - 'suspicious_programmatic_login'
