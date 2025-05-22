@@ -1,43 +1,61 @@
+from collections import defaultdict
 from datetime import datetime
+from functools import reduce
 from sigma.collection import SigmaCollection
+from typing import Iterator
+import json
+import os
 
-path_to_rules = [
+PATH_TO_RULES = [
     "rules",
     "rules-emerging-threats",
     "rules-placeholder",
     "rules-threat-hunting",
     "rules-compliance",
 ]
-nb_days = 300
+
+NB_DAYS = 300
 
 
-def get_rules_to_promote():
-    today = datetime.now().date()
-    rules_to_promote = []
+def is_experimental_and_older_than_ref(sigmaHQrule: "sigma.rule.SigmaRule") -> bool:
+    last_update = sigmaHQrule.modified if sigmaHQrule.modified else sigmaHQrule.date
 
-    rule_paths = SigmaCollection.resolve_paths(path_to_rules)
+    return (
+        str(sigmaHQrule.status) == "experimental"
+        and (datetime.now().date() - last_update).days >= NB_DAYS
+    )
+
+
+def get_rules_to_promote() -> Iterator[str]:
+    rule_paths = SigmaCollection.resolve_paths(PATH_TO_RULES)
     rule_collection = SigmaCollection.load_ruleset(rule_paths, collect_errors=True)
-    for sigmaHQrule in rule_collection:
-        if str(sigmaHQrule.status) == "experimental":
-            last_update = (
-                sigmaHQrule.modified if sigmaHQrule.modified else sigmaHQrule.date
-            )
-            difference = (today - last_update).days
-            if difference >= nb_days:
-                rules_to_promote.append(sigmaHQrule.source.path)
 
-    return rules_to_promote
+    return (
+        rule.source.path
+        for rule in filter(is_experimental_and_older_than_ref, rule_collection)
+    )
 
 
-def promote_rules(rules_to_promote):
-    for file_ in rules_to_promote:
-        with open(file_, "r", encoding="utf8") as f:
-            data = f.read().replace("\nstatus: experimental", "\nstatus: test")
+def promote_rule(rule: str) -> str:
+    with open(rule, "r", encoding="utf8") as f:
+        data = f.read().replace("\nstatus: experimental", "\nstatus: test")
 
-        with open(file_, "w", encoding="utf8") as f:
-            f.write(data)
+    with open(rule, "w", encoding="utf8") as f:
+        f.write(data)
+
+    return rule
+
+
+def summarize_promotion(summary: dict, rule: str) -> dict:
+    key, *values = rule.split(os.sep)
+    value = os.sep.join(values)
+    summary[key].append(value)
+
+    return summary
 
 
 if __name__ == "__main__":
-    rules_to_promote = get_rules_to_promote()
-    promote_rules(rules_to_promote)
+    rules = (str(promote_rule(rule)) for rule in get_rules_to_promote())
+    promotion = reduce(summarize_promotion, rules, defaultdict(list))
+
+    print(json.dumps(promotion))
