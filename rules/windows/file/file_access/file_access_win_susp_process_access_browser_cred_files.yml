@@ -7,7 +7,7 @@ description: |
     This behavior is often commonly observed in credential stealing malware.
 references:
     - https://github.com/splunk/security_content/blob/7283ba3723551f46b69dfeb23a63b358afb2cb0e/lookups/browser_app_list.csv?plain=1
-author: Swachchhanda Shrawan Poudel (Nextron Systems)
+author: frack113, X__Junior (Nextron Systems), Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2025-05-22
 tags:
     - attack.credential-access
@@ -71,6 +71,7 @@ detection:
               - '\Login Data'
               - '\Cookies'
               - '\EncryptedStorage'
+              - '\WebCache\'
         - FileName|endswith:
               - 'cert9.db'
               - 'cookies.sqlite'
@@ -176,7 +177,19 @@ detection:
             - 'C:\Program Files (x86)\'
             - 'C:\Windows\System32\'
             - 'C:\Windows\SysWOW64\'
-    condition: all of selection_* and not 1 of filter_main_*
+    filter_optional_defender:
+        Image|contains: '\Microsoft\Windows Defender\'
+        Image|endswith:
+            - '\MpCopyAccelerator.exe'
+            - '\MsMpEng.exe'
+    filter_optional_thor:
+        Image|endswith:
+            - '\thor.exe'
+            - '\thor64.exe'
+    condition: all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
+    - Antivirus, Anti-Spyware, Anti-Malware Software
     - Legitimate software accessing browser data for synchronization or backup purposes.
-level: medium
+    - Legitimate software installed on partitions other than "C:\"
+    - Searching software such as "everything.exe"
+level: low
