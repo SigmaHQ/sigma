@@ -1681,7 +1681,7 @@ class TestRules(unittest.TestCase):
     #         files_with_incorrect_tags,
     #         [],
     #         Fore.RED
-    #         + "There are rules with incorrect/unknown Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://github.com/SigmaHQ/sigma-specification/blob/main/specification/sigma-rules-specification.md#tags ",
+    #         + "There are rules with incorrect/unknown Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://github.com/SigmaHQ/sigma-specification/blob/main/specification/sigma-rules-specification.md#tags",
     #     )
 
     # sigma error and validator custom_attributes
