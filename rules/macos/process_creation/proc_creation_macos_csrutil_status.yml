@@ -13,6 +13,9 @@ date: 2024-01-02
 tags:
     - attack.discovery
     - attack.t1518.001
+    - vigilant.exception.item.platform
+    - vigilant.exception.item.application
+    - vigilant.disabled
 logsource:
     product: macos
     category: process_creation
@@ -21,7 +24,9 @@ detection:
     selection:
         Image|endswith: '/csrutil'
         CommandLine|contains: 'status'
-    condition: selection
+    filter_crowdstrike:
+        event.module: 'crowdstrike'
+    condition: selection and not filter_crowdstrike
 falsepositives:
     - Legitimate administration activities
 level: low
