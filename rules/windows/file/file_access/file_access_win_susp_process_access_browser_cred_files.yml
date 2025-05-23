@@ -7,7 +7,8 @@ description: |
     This behavior is often commonly observed in credential stealing malware.
 references:
     - https://github.com/splunk/security_content/blob/7283ba3723551f46b69dfeb23a63b358afb2cb0e/lookups/browser_app_list.csv?plain=1
-author: frack113, X__Junior (Nextron Systems), Swachchhanda Shrawan Poudel (Nextron Systems)
+    - https://fourcore.io/blogs/threat-hunting-browser-credential-stealing
+author: frack113, X__Junior (Nextron Systems), Swachchhanda Shrawan Poudel (Nextron Systems), Parth-FourCore
 date: 2025-05-22
 tags:
     - attack.credential-access
@@ -171,6 +172,9 @@ detection:
             - '\8pecxstudios\'
             - '\FlashPeak\'
             - '\Moonchild Productions\'
+    filter_main_system:
+        Image: System
+        ParentImage: Idle
     filter_main_generic:
         Image|startswith:
             - 'C:\Program Files\'
@@ -186,10 +190,13 @@ detection:
         Image|endswith:
             - '\thor.exe'
             - '\thor64.exe'
+    filter_optional_msiexec:
+        ParentImage: 'C:\Windows\System32\msiexec.exe'
+    filter_optional_other:
+        Image|endswith: '\everything.exe'
     condition: all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Antivirus, Anti-Spyware, Anti-Malware Software
     - Legitimate software accessing browser data for synchronization or backup purposes.
     - Legitimate software installed on partitions other than "C:\"
-    - Searching software such as "everything.exe"
 level: low
