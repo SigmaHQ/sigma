@@ -5,15 +5,15 @@ related:
       type: similar
     - id: 02122374-b74e-495c-b285-9e4da973f3d6 # ScriptBlockText Detection
       type: similar
+status: experimental
 description: |
     Detects the creation of a dMSASvc account using the New-ADServiceAccount cmdlet in certain OUs.
     The fact that the cmdlet is used to create a dMSASvc account in a specific OU is highly suspicious.
     It is a pattern trying to exploit the BadSuccessor privilege escalation vulnerability in Windows Server 2025.
     On top of that, if the user that is creating the dMSASvc account is not a legitimate administrator or does not have the necessary permissions,
-    it is a strong signal of an attempted or successful abuse of the BaDSuccessor vulnerability for privilege escalation within the Windows Server 2025 Active Directory environment. 
+    it is a strong signal of an attempted or successful abuse of the BaDSuccessor vulnerability for privilege escalation within the Windows Server 2025 Active Directory environment.
 references:
     - https://www.akamai.com/blog/security-research/abusing-bad-successor-for-privilege-escalation-in-active-directory
-status: experimental
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2025-05-24
 tags:
@@ -25,14 +25,14 @@ logsource:
     product: windows
 detection:
     selection_img:
-        - Image|endswith: 
-            - '\powershell.exe'
-            - '\pwsh.exe'
-            - '\powershell_ise.exe'
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+              - '\powershell_ise.exe'
         - OriginalFileName:
-            - 'powershell.exe'
-            - 'pwsh.dll'
-            - 'powershell_ise.exe'
+              - 'powershell.exe'
+              - 'pwsh.dll'
+              - 'powershell_ise.exe'
     selection_cli:
         CommandLine|contains|all:
             - 'New-ADServiceAccount'
