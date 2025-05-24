@@ -1,0 +1,36 @@
+title: Creation of New MsDS-DelegatedManagedServiceAccount (DMSA) Object
+id: e15bc294-ae2a-45ad-b7d6-637b33868bde
+status: experimental
+description: |
+    Detects the creation of new msDS-DelegatedManagedServiceAccount objects, which could indicate potential abuse of privilege escalation vulnerabilities in Windows Server 2025.
+    The msDS-DelegatedManagedServiceAccount (DMSA) is a new object class introduced in Windows Server 2025 that allows administrators to delegate the management of service accounts to other users or groups.
+    Attackers may exploit this feature to create unauthorized service accounts with elevated privileges, leading to privilege escalation within the Active Directory environment.
+    It is highly suspicious if an msDS-DelegatedManagedServiceAccount object is created without proper authorization or in an unexpected context, such as by a non-administrative user or outside of normal administrative workflows.
+    So, it's a good idea to look out for accounts that are not typically responsible for service account creation to detect potential abuse of this feature.
+references:
+    - https://www.akamai.com/blog/security-research/abusing-dmsa-for-privilege-escalation-in-active-directory
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-05-24
+tags:
+    - attack.privilege-escalation
+    - attack.t1078.002
+    - attack.t1098
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: Audit Policy : Account Management > Audit User Account Management, Group Policy : Computer Configuration\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies\Account Management\Audit User Account Management, DS Access > Audit Directory Service Changes, Group Policy : Computer Configuration\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies\DS Access\Audit Directory Service Changes'
+detection:
+    selection:
+        EventID: 5137
+        ObjectClass: 'msDS-DelegatedManagedServiceAccount'
+    filter:
+        # Exclude modifications made by the system or legitimate administrative accounts
+        - SubjectAccountName: 'SYSTEM'
+        - SubjectAccountName|contains: 'admin'
+    condition: selection
+fields:
+    - SubjectAccountName # The user who created the msDS-DelegatedManagedServiceAccount object
+    - ObjectDN # The distinguished name of the created msDS-DelegatedManagedServiceAccount object
+falsepositives:
+    - Legitimate creation of msDS-DelegatedManagedServiceAccount objects by authorized administrators.
+level: medium
