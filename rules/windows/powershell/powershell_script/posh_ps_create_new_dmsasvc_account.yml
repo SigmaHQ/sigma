@@ -1,0 +1,35 @@
+title: Creation of DMSA Service Account in Specific OUs - PowerShell
+id: 02122374-b74e-495c-b285-9e4da973f3d6
+related:
+    - id: e15bc294-ae2a-45ad-b7d6-637b33868bde # Windows Security Creation of New MsDS-DelegatedManagedServiceAccount (DMSA) Object
+      type: similar
+    - id: 0ea8db81-2ff6-4525-9448-33bbe7effc13 # Process Creation Detection
+      type: similar
+description: |
+    Detects the creation of a dMSA service account using the New-ADServiceAccount cmdlet in certain OUs.
+    The fact that the cmdlet is used to create a dMSASvc account in a specific OU is highly suspicious.
+    It is a pattern trying to exploit the BadSuccessor privilege escalation vulnerability in Windows Server 2025.
+    On top of that, if the user that is creating the dMSASvc account is not a legitimate administrator or does not have the necessary permissions,
+    it is a strong signal of an attempted or successful abuse of the BaDSuccessor vulnerability for privilege escalation within the Windows Server 2025 Active Directory environment. 
+references:
+    - https://www.akamai.com/blog/security-research/abusing-bad-successor-for-privilege-escalation-in-active-directory
+status: experimental
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-05-24
+tags:
+    - attack.privilege-escalation
+    - attack.t1078.002
+    - attack.t1098
+logsource:
+    category: ps_script
+    product: windows
+detection:
+    selection_cli:
+        ScriptBlockText|contains|all:
+            - 'New-ADServiceAccount'
+            - '-CreateDelegatedServiceAccount'
+            - '-path'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium
