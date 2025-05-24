@@ -1,0 +1,25 @@
+title: BITS Job Dll loaded
+id: e700ff14-1bff-4d1d-9438-738dff5f0466
+status: test
+description: Detects source image loading BitsProxy.dll. Images load this dll when they initialize BITS COM Instance.
+references:
+    - https://unicornofhunt.com/2025/05/22/When-Unicorns-Go-Quiet-BITS-Jobs-and-the-Art-of-Stealthy-Transfers/
+    - https://attack.mitre.org/techniques/T1197/
+    - https://github.com/olafhartong/sysmon-modular/blob/master/7_image_load/include_bitsproxy.xml 
+author: UnicornOfHunt
+date: 2025-05-24
+tags:
+    - attack.defense-evasion
+    - attack.persistence
+    - attack.T1197
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith: '\BitsProxy.dll'
+    condition: selection
+falsepositives:
+    - svchost loading BitsProxy.dll, unless you want to track ANY BITS job
+    - Allowed binaries in the environment
+level: medium
