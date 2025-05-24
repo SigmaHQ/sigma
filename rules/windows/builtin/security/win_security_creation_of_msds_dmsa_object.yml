@@ -23,14 +23,15 @@ detection:
     selection:
         EventID: 5137
         ObjectClass: 'msDS-DelegatedManagedServiceAccount'
-    filter:
+    filter_main_legitimate_accounts:
         # Exclude modifications made by the system or legitimate administrative accounts
         - SubjectAccountName: 'SYSTEM'
         - SubjectAccountName|contains: 'admin'
-    condition: selection
+    condition: selection and not filter_main_legitimate_accounts
 fields:
     - SubjectAccountName # The user who created the msDS-DelegatedManagedServiceAccount object
     - ObjectDN # The distinguished name of the created msDS-DelegatedManagedServiceAccount object
 falsepositives:
     - Legitimate creation of msDS-DelegatedManagedServiceAccount objects by authorized administrators.
-level: medium
+# The level is set to high because of the nature of this vulnerability and we may need to later lower it.
+level: high

@@ -23,14 +23,15 @@ detection:
         EventID: 5136
         ObjectClass: 'msDS-DelegatedManagedServiceAccount'
         AttributeLDAPDisplayName: 'msDS-ManagedAccountPrecededByLink'
-    filter_main_admin:
+    filter_main_legitimate_accounts:
         # Exclude modifications made by the system or legitimate administrative accounts
         - SubjectAccountName: 'SYSTEM'
         - SubjectAccountName|contains: 'admin'
-    condition: selection and not filter_main_admin
+    condition: selection and not filter_main_legitimate_accounts
 fields:
     - SubjectAccountName # The user who modified the msDS-ManagedAccountPrecededByLink attribute
     - ObjectDN # The distinguished name of the object whose attribute was modified
 falsepositives:
     - Legitimate administrative changes to the attribute
+# The level is set to high because of the nature of this vulnerability and we may need to later lower it.
 level: high
