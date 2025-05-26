@@ -18,13 +18,14 @@ logsource:
     category: file_event
     product: windows
 detection:
-    selection_path_https:
-        TargetFilename|contains: '\deno\remote\https'
-    selection_path_dll:
-        TargetFilename|contains: '\deno\gen\'
-    selection_appdata:
-        TargetFilename|contains: '\appdata\'
-    condition: 1 of selection_path_* and selection_appdata
+    selection_path:
+        TargetFilename|contains:
+            - '\deno\gen\'
+            - '\deno\remote\https\'
+        TargetFilename|contains|all:
+            - ':\Users\'
+            - '\AppData\'
+    condition: selection_path
 falsepositives:
     - Legitimate usage of deno to request a file or bring a DLL to a host
 level: low
