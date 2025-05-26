@@ -1,0 +1,43 @@
+title: Remote Access Tool - Suspicious MeshAgent Usage - Windows
+id: b471f462-eb0d-4832-be35-28d94bdb4780
+related:
+    - id: bd3b5eaa-439d-4a42-8f35-a49f5c8a2582
+      type: similar
+    - id: 2fbbe9ff-0afc-470b-bdc0-592198339968
+      type: derived
+status: experimental
+description: |
+    Detects suspicious usage of MeshAgent which is a tool used for remote access.
+    Historical data shows that threat actors rename MeshAgent binary to evade detection.
+    Matching command lines with the '--meshServiceName' argument can indicate that the MeshAgent is being used for remote access.
+references:
+    - https://www.huntress.com/blog/know-thy-enemy-a-novel-november-case-on-persistent-remote-access
+    - https://thecyberexpress.com/ukraine-hit-by-meshagent-malware-campaign/
+    - https://wazuh.com/blog/how-to-detect-meshagent-with-wazuh/
+    - https://www.security.com/threat-intelligence/medusa-ransomware-attacks
+author: Norbert Jaśniewicz (AlphaSOC)
+date: 2025-05-19
+tags:
+    - attack.command-and-control
+    - attack.defense-evasion
+    - attack.t1219.002
+    - attack.t1036
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_1:
+        CommandLine|contains: '--meshServiceName'
+    selection_2:
+        OriginalFileName|contains: 'meshagent'
+    filter:
+        Image|endswith: '\meshagent.exe'
+    condition: 1 of selection_* and not filter
+fields:
+    - CommandLine
+    - ParentImage
+    - Image
+    - OriginalFileName
+falsepositives:
+    - False positives can be found in environments using MeshAgent for remote management, analysis should prioritize the grandparent process, MeshAgent.exe, and scrutinize the resulting child processes triggered by any suspicious interactive commands directed at the target host.
+level: high
