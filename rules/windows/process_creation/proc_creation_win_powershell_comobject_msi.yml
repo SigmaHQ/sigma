@@ -1,0 +1,50 @@
+title: Malicious use of COM Object for unauthorized MSI Installation
+id: 7b6a7418-3afc-11f0-aff4-000d3abf478c
+related:
+    - id: e88967df-278a-49f1-a459-b755df65f6ab
+      type: similar
+status: test
+description: |
+    Detect the usage of the Windows Installer COM object to covertly download
+    and install MSI (Microsoft Installer) files from remote URLs. It targets PowerShell commands that
+    leverage COM object creation and may include obfuscation techniques to hide download URLs,
+    indicating potential evasion tactics by attackers.
+references:
+    - https://informationsecuritybuzz.com/the-real-danger-behind-a-simple-windows-shortcut/
+    - https://redcanary.com/blog/threat-intelligence/intelligence-insights-may-2025/
+author: Meroujan Antonyan (vx3r)
+date: 2025-05-27
+modified: 2025-05-27
+tags:
+    - attack.defense-evasion
+    - attack.execution
+    - attack.t1218.007
+    - attack.t1059.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+    selection_cli:
+        CommandLine|contains|all:
+            - 'New-Object'
+            - 'InstallProduct'
+            - '-ComObject('
+            # Example of obfuscation: The script may use techniques like splitting or modifying strings to hide URLs.
+            # For instance, "$i.InstallProduct($(if($u.StartsWith('htps://')){$u.Insert(2,'t')}else{$u}),'')"
+            # reconstructs "https://" by inserting the missing 't' dynamically, making detection harder.
+            - 'h'
+            - 't'
+            - 'p'
+            - ':'
+            - '/'
+    condition: all of selection*
+falsepositives:
+    - This rule may generate false positives for legitimate scripts that utilize the Windows Installer COM object for standard administrative tasks or software deployment.
+level: high
