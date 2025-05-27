@@ -1,0 +1,39 @@
+title: Clear Journalctl Logs - Linux
+id: 94a2c03a-1128-4990-be12-377995c96018
+status: experimental
+description: |
+    Detects attempts to rotate or delete system logs using `journalctl` 
+    with options like `--rotate`, `--vacuum-time`. These actions can be abused by attackers 
+    to erase forensic evidence after gaining elevated access.
+    This rule focuses on EXECVE events that capture command-line arguments.
+references:
+    - https://man7.org/linux/man-pages/man1/journalctl.1.html
+author: Milad Cheraghi
+date: 2025-05-27
+tags:
+    - attack.defense-evasion
+    - attack.t1070.003
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection_root:
+        type: EXECVE
+        a0: "journalctl"
+        a1|contains:
+            - "--rotate"
+            - "--vacuum-time"
+            - "--vacuum-size"
+    selection_sudo:
+        type: EXECVE
+        a0: "sudo"
+        a1: "journalctl"
+        a2|contains:
+            - "--rotate"
+            - "--vacuum-time"
+            - "--vacuum-size"
+    condition: 1 of selection*
+falsepositives:
+    - Legitimate system maintenance
+    - Log rotation scripts by administrators or automation tools
+level: medium
