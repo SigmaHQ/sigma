@@ -4,9 +4,9 @@ status: test
 description: Adversaries may shutdown/reboot systems to interrupt access to, or aid in the destruction of, those systems.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1529/T1529.md
-author: 'Igor Fits, oscd.community'
+author: 'Igor Fits, oscd.community', Milad Cheraghi
 date: 2020-10-15
-modified: 2022-11-26
+modified: 2025-06-03
 tags:
     - attack.impact
     - attack.t1529
@@ -14,20 +14,22 @@ logsource:
     product: linux
     service: auditd
 detection:
-    execve:
+    selection:
         type: 'EXECVE'
-    shutdowncmd:
-        - 'shutdown'
-        - 'reboot'
-        - 'halt'
-        - 'poweroff'
-    init:
-        - 'init'
-        - 'telinit'
-    initselection:
-        - 0
-        - 6
-    condition: execve and (shutdowncmd or (init and initselection))
+        a0:
+            - 'shutdown'
+            - 'reboot'
+            - 'halt'
+            - 'poweroff'
+    selection_init:
+        type: 'EXECVE'
+        a0:
+            - 'init'
+            - 'telinit'
+        a1:
+            - 0
+            - 6
+    condition: selection or selection_init
 falsepositives:
     - Legitimate administrative activity
 level: informational
