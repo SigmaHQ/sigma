@@ -1,16 +1,21 @@
-title: Disable ASLR Via Personality Syscall - Linux
+title: Disable ASLR via Personality Syscall or Sysctl - Linux
 id: e497a24e-9345-4a62-9803-b06d7d7cb132
 status: experimental
 description: |
-    Detects the use of the `personality` syscall with the ADDR_NO_RANDOMIZE flag (0x0040000),
-    which disables Address Space Layout Randomization (ASLR) in Linux. This is often used by attackers
-    exploit development, or to bypass memory protection mechanisms.
-    A successful use of this flag can reduce the effectiveness of ASLR and make memory corruption
-    attacks more reliable.
+    Detects attempts to disable Address Space Layout Randomization (ASLR) on Linux systems
+    using two common methods:
+    The use of the `personality` syscall with the `ADDR_NO_RANDOMIZE` flag (0x0040000),
+    which directly disables ASLR at the process level.
+    Execution of the `sysctl` command to set `kernel.randomize_va_space=0`, which disables
+    ASLR system-wide via kernel parameter modification.
+    Disabling ASLR can be a precursor to memory corruption attacks such as buffer overflows,
+    making them more reliable by removing memory address randomization. These behaviors
+    are often seen in exploit development, debugging, or by attackers bypassing security mechanisms.
 references:
     - https://github.com/CheraghiMilad/bypass-Neo23x0-auditd-config/blob/f1c478a37911a5447d5ffcd580f22b167bf3df14/personality-syscall/README.md
     - https://man7.org/linux/man-pages/man2/personality.2.html
     - https://manual.cs50.io/2/personality
+    - https://linux-audit.com/linux-aslr-and-kernelrandomize_va_space-setting/
 author: Milad Cheraghi
 date: 2025-05-26
 tags:
@@ -21,11 +26,17 @@ logsource:
     product: linux
     service: auditd
 detection:
-    selection:
+    selection_syscall:
         type: 'SYSCALL'
         syscall: 135
         a0: 40000
-    condition: selection
+    selection_sysctl:
+        type: 'EXECVE'
+        a0: 'sysctl'
+        a1: '-w'
+        a2: 'kernel.randomize_va_space=0'
+    condition: selection_syscall or selection_sysctl
 falsepositives:
-    - Debugging or legitimate software testing
+    - Debugging sessions
+    - Legitimate performance or testing configurations
 level: low
