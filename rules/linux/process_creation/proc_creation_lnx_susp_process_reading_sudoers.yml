@@ -1,12 +1,12 @@
-title: Cat Sudoers
+title: Access of Sudoers File Content
 id: 0f79c4d2-4e1f-4683-9c36-b5469a665e06
 status: test
-description: Detects the execution of a cat /etc/sudoers to list all users that have sudo rights
+description: Detects the execution of a text-based file access or inspection utilities to read the content of /etc/sudoers in order to potentially list all users that have sudo rights.
 references:
     - https://github.com/sleventyeleven/linuxprivchecker/
 author: Florian Roth (Nextron Systems)
 date: 2022-06-20
-modified: 2022-09-15
+modified: 2025-06-04
 tags:
     - attack.reconnaissance
     - attack.t1592.004
@@ -17,10 +17,16 @@ detection:
     selection:
         Image|endswith:
             - '/cat'
-            - 'grep'
+            - '/ed'
+            - '/egrep'
+            - '/emacs'
+            - '/fgrep'
+            - '/grep'
             - '/head'
-            - '/tail'
+            - '/less'
             - '/more'
+            - '/nano'
+            - '/tail'
         CommandLine|contains: ' /etc/sudoers'
     condition: selection
 falsepositives:
