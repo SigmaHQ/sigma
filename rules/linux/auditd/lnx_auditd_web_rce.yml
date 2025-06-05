@@ -14,14 +14,15 @@ tags:
 logsource:
     product: linux
     service: auditd
+    definition: |
+        Required auditd configuration:
+        -a always,exit -F arch=b32 -S execve -F euid=33 -k detect_execve_www
+        -a always,exit -F arch=b64 -S execve -F euid=33 -k detect_execve_www
+        -a always,exit -F arch=b32 -S execveat -F euid=33 -k detect_execve_www
+        -a always,exit -F arch=b64 -S execveat -F euid=33 -k detect_execve_www
+        Change the number "33" to the ID of your WebServer user. Default: www-data:x:33:33
 detection:
     selection:
-        # You need to add to the following rules to your auditd.conf config:
-        #   -a always,exit -F arch=b32 -S execve -F euid=33 -k detect_execve_www
-        #   -a always,exit -F arch=b64 -S execve -F euid=33 -k detect_execve_www
-        #   -a always,exit -F arch=b32 -S execveat -F euid=33 -k detect_execve_www
-        #   -a always,exit -F arch=b64 -S execveat -F euid=33 -k detect_execve_www
-        # Change the number "33" to the ID of your WebServer user. Default: www-data:x:33:33
         type: 'SYSCALL'
         syscall:
             - 'execve'
