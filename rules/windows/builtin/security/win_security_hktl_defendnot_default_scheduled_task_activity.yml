@@ -1,0 +1,33 @@
+title: Hacktool - Defendnot Default Scheduled Task Activity
+id: 015ff932-4156-41ae-9d4c-1443995611fd
+status: experimental
+description: |
+    Detects the default scheduled task activity of hacktool Defendnot, which is used to disable Windows Defender Security.
+    Defendnot is a hacktool that abuses Microsoft undocumented WSC API to register itself as a fake antivirus product, allowing it to disable Windows Defender.
+    During installation, Defendnot creates a scheduled task named 'defendnot' with the argument '--from-autorun' for persistence.
+references:
+    - https://github.com/es3n1n/defendnot
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-06-05
+tags:
+    - attack.persistence
+    - attack.t1053.005
+    - attack.defense-evasion
+    - attack.t1562.001
+logsource:
+    product: windows
+    service: security
+detection:
+    selection_eid:
+        EventID:
+            - 4698
+            - 4702
+    selection_task:
+        - TaskName: '\defendnot'
+        - TaskContent|contains:
+            - 'defendnot'
+            - '<Arguments>--from-autorun</Arguments>'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high

@@ -1,0 +1,29 @@
+title: Microsoft Security Center AV Registry Modification
+id: 9991c683-05aa-47b7-a865-df14dc4b9dc4
+status: experimental
+description: |
+    Detects modification of the Microsoft Security Center AV registry keys, particularly those related with DisplayName, ProductEXE, or ReportingExe.
+    These keys typically store information about antivirus products installed on the system, which is Windows Defender or third-party antivirus software.
+    But, if these keys holds unexpected values or are modified in a suspicious manner, it could indicate an attempt to tamper with the security settings of the system.
+references:
+    - https://www.huntress.com/blog/defendnot-detecting-malicious-security-product-bypass-techniques
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-06-05
+tags:
+    - attack.defense-evasion
+    - attack.t1562.001
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        EventType: SetValue
+        TargetObject|contains: '\Software\Microsoft\Security Center\Provider\Av'
+        TargetObject|endswith:
+            - '\ProductEXE'
+            - '\DisplayName'
+            - '\ReportingExe'
+    condition: selection
+falsepositives:
+    - Legitimate modification by antivirus softwares
+level: medium

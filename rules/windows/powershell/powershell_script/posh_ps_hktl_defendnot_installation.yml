@@ -1,0 +1,26 @@
+title: Hacktool - DefendNot Installation via PowerShell One-Liner
+id: 50b159ba-a147-40f7-9d11-561e724b8a2e
+status: experimental
+description: |
+    Detects execution of DefendNot installation via PowerShell one-liner that downloads and executes the DefendNot script from a remote URL.
+    DefendNot is a hacktool that abuses Microsoft undocumented WSC api to disable Windows Defender by registering itself as a fake antivirus product.
+references:
+    - https://github.com/es3n1n/defendnot?tab=readme-ov-file#one-liner
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-06-05
+tags:
+    - attack.defense-evasion
+    - attack.t1562.001
+logsource:
+    category: ps_script
+    product: windows
+detection:
+    selection::
+        - ScriptBlockText|contains: 'irm https://dnot.sh/'
+        - ScriptBlockText|contains|all:
+            - 'es3n1n/defendnot'
+            - 'github' # covers both api.github.com and raw.githubusercontent.com
+    condition: selection
+falsepositives:
+    - Unlikely in legitimate environments
+level: high
