@@ -10,28 +10,54 @@ references:
     - https://cloud.google.com/blog/topics/threat-intelligence/alphv-ransomware-backup/
     - https://securelist.com/defttorero-tactics-techniques-and-procedures/107610/
     - https://github.com/CyberMonitor/APT_CyberCriminal_Campagin_Collections/raw/800c0e06571993a54e39571cf27fd474dcc5c0bc/2017/2017.11.14.Muddying_the_Water/muddying-the-water-targeted-attacks.pdf
-author: Nasreddine Bencherchali (Nextron Systems)
+author: Nasreddine Bencherchali, Swachchhanda Shrawan Poudel, Nextron Systems
 date: 2024-06-24
-modified: 2024-08-16
+modified: 2025-06-04
 tags:
     - attack.credential-access
 logsource:
     product: windows
     category: process_creation
 detection:
-    selection_img:
-        Image|endswith: '\lazagne.exe'
-    selection_clionly:
+    selection_metadata:
+        - Image|endswith: '\lazagne.exe'
+        - Hashes|contains:
+              - 'IMPHASH=ba5546933531fafa869b1f86a4e2a959'
+              - 'IMPHASH=7aa1951517b3b8d38b12f874b66196c9'
+              - 'IMPHASH=be10bb45cef8dcc6869b921dd20884ae'
+              - 'IMPHASH=4e3e7ce958acceeb80e70eeb7d75870e'
+              - 'IMPHASH=fc40519af20116c903e3ff836e366e39'
+              - 'IMPHASH=1975641ebd67bc0f49282a7b8555b7b2'
+              - 'IMPHASH=468ad8de9dcf3ce7a0becc5916ec6adb'
+              - 'IMPHASH=e5d81cf6a49d9472d6de8c1764efdfb4'
+              - 'IMPHASH=b87afca7a1175b7eb49b7c1eb6d58adf'
+    selection_img_cli:
         # Note: This selection can be prone to FP. An initial baseline is required
         Image|contains:
             - ':\PerfLogs\'
             - ':\ProgramData\'
             - ':\Temp\'
             - ':\Tmp\'
+            - ':\Users\Public\'
             - ':\Windows\Temp\'
+            - '\$Recycle.bin'
             - '\AppData\'
+            - '\Desktop\'
             - '\Downloads\'
-            - '\Users\Public\'
+            - '\Favorites\'
+            - '\Links\'
+            - '\Music\'
+            - '\Photos\'
+            - '\Pictures\'
+            - '\Saved Games\'
+            - '\Searches\'
+            - '\Users\Contacts\'
+            - '\Users\Default\'
+            - '\Users\Searches\'
+            - '\Videos\'
+            - '\Windows\addins\'
+            - '\Windows\Fonts\'
+            - '\Windows\IME\'
         CommandLine|endswith:
             - '.exe all'
             - '.exe browsers'
@@ -56,7 +82,6 @@ detection:
             - 'chats '
             - 'databases '
             - 'games '
-            - 'git '
             - 'mails '
             - 'maven '
             - 'memory '
@@ -66,19 +91,12 @@ detection:
             - 'sysadmin '
             - 'unused '
             - 'wifi '
-            - 'windows '
     selection_cli_options:
         CommandLine|contains:
-            - '-oA'
-            - '-oJ'
-            - '-oN'
-            - '-output'
-            - '-password'
-            - -1Password
+            - '-1Password'
             - '-apachedirectorystudio'
             - '-autologon'
             - '-ChromiumBased'
-            - '-composer'
             - '-coreftp'
             - '-credfiles'
             - '-credman'
@@ -124,10 +142,8 @@ detection:
             - '-vault'
             - '-vaultfiles'
             - '-vnc'
-            - '-windows'
             - '-winscp'
-            - '-wsl'
-    condition: selection_img or selection_clionly or (selection_cli_modules and selection_cli_options)
+    condition: selection_metadata or selection_img_cli or all of selection_cli_*
 falsepositives:
     - Some false positive is expected from tools with similar command line flags.
 # Note: Increase the level to "high" after an initial baseline
