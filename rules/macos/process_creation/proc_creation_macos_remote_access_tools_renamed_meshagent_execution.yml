@@ -1,4 +1,4 @@
-title: Remote Access Tool - Suspicious MeshAgent Usage - MacOS
+title: Remote Access Tool - Renamed MeshAgent Execution
 id: bd3b5eaa-439d-4a42-8f35-a49f5c8a2582
 related:
     - id: b471f462-eb0d-4832-be35-28d94bdb4780
@@ -7,9 +7,9 @@ related:
       type: derived
 status: experimental
 description: |
-    Detects suspicious usage of MeshAgent which is a tool used for remote access.
-    Historical data shows that threat actors rename MeshAgent binary to evade detection.
-    Matching command lines with the '--meshServiceName' argument can indicate that the MeshAgent is being used for remote access.
+    Detects the execution of a renamed instance of the Remote Monitoring and Management (RMM) tool, MeshAgent.
+    RMM tools such as MeshAgent are commonly utilized by IT administrators for legitimate remote support and system management.
+    However, malicious actors may exploit these tools by renaming them to bypass detection mechanisms, enabling unauthorized access and control over compromised systems.
 references:
     - https://www.huntress.com/blog/know-thy-enemy-a-novel-november-case-on-persistent-remote-access
     - https://thecyberexpress.com/ukraine-hit-by-meshagent-malware-campaign/
@@ -21,25 +21,27 @@ tags:
     - attack.command-and-control
     - attack.defense-evasion
     - attack.t1219.002
-    - attack.t1036
+    - attack.t1036.003
 logsource:
     category: process_creation
     product: macos
 detection:
-    selection_1:
+    selection_cmd:
         CommandLine|contains: '--meshServiceName'
-    selection_2:
+    selection_metadata:
         OriginalFileName|contains: 'meshagent'
-    filter:
+    filter_cmd:
+        CommandLine|contains: 'meshagent'
+    filter_img:
         Image|endswith:
             - '/meshagent'
             - '/meshagent_osx64'
-    condition: 1 of selection_* and not filter
+    condition: (selection_cmd and not filter_cmd) or (selection_metadata and not filter_img)
 fields:
     - CommandLine
     - ParentImage
     - Image
     - OriginalFileName
 falsepositives:
-    - False positives can be found in environments using MeshAgent for remote management, analysis should prioritize the grandparent process, MeshAgent.exe, and scrutinize the resulting child processes triggered by any suspicious interactive commands directed at the target host.
+    - Unknown
 level: high
