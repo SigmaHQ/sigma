@@ -26,22 +26,15 @@ logsource:
     category: process_creation
     product: macos
 detection:
-    selection_cmd:
-        CommandLine|contains: '--meshServiceName'
-    selection_metadata:
-        OriginalFileName|contains: 'meshagent'
-    filter_cmd:
-        CommandLine|contains: 'meshagent'
-    filter_img:
-        Image|endswith:
+    selection_meshagent:
+        - CommandLine|contains: '--meshServiceName'
+        - OriginalFileName|contains: 'meshagent'
+    filter_main_legitimate:
+        - CommandLine|contains: 'meshagent'
+        - Image|endswith:
             - '/meshagent'
             - '/meshagent_osx64'
-    condition: (selection_cmd and not filter_cmd) or (selection_metadata and not filter_img)
-fields:
-    - CommandLine
-    - ParentImage
-    - Image
-    - OriginalFileName
+    condition: selection_meshagent and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high

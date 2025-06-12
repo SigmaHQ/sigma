@@ -1,4 +1,4 @@
-title: Remote Access Tool - Renamed MeshAgent Execution
+title: Remote Access Tool - Renamed MeshAgent Execution - Windows
 id: b471f462-eb0d-4832-be35-28d94bdb4780
 related:
     - id: bd3b5eaa-439d-4a42-8f35-a49f5c8a2582
@@ -26,20 +26,13 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_cmd:
-        CommandLine|contains: '--meshServiceName'
-    selection_metadata:
-        OriginalFileName|contains: 'meshagent'
-    filter_cmd:
-        CommandLine|contains: 'meshagent'
-    filter_img:
-        Image|endswith: '\meshagent.exe'
-    condition: (selection_cmd and not filter_cmd) or (selection_metadata and not filter_img)
-fields:
-    - CommandLine
-    - ParentImage
-    - Image
-    - OriginalFileName
+    selection_meshagent:
+        - CommandLine|contains: '--meshServiceName'
+        - OriginalFileName|contains: 'meshagent'
+    filter_main_legitimate:
+        - CommandLine|contains: 'meshagent'
+        - Image|endswith: '\meshagent.exe'
+    condition: selection_meshagent and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high
