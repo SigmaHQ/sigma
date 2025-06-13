@@ -4,14 +4,13 @@
 Create the summary of all the deprecated rules in deprecated.csv or deprecated.json
 
 Run using the command
-# python deprecated_rules.py -f {json, csv}
+# python deprecated_rules.py --format {json, csv}
 """
 
 from sigma.collection import SigmaCollection
 from sigma.rule import SigmaStatus, SigmaLevel
 
 import argparse
-import datetime
 import csv
 import json
 
@@ -29,7 +28,7 @@ def get_level(rule):
 
 
 def get_modified_time(rule):
-    return rule.modified if rule.modified else datetime.date.today()
+    return rule.modified if rule.modified else rule.date
 
 
 def format_rule(rule):
@@ -47,7 +46,8 @@ def save_file(rules, _format):
     filename_export = f"./deprecated/deprecated.{_format}"
 
     raw_info = map(format_rule, filter(is_rule_deprecated, rules))
-    sort_info = sorted(raw_info, key=lambda d: d["modified"])
+    sort_info_secondary = sorted(raw_info, key=lambda d: d["id"])
+    sort_info = sorted(sort_info_secondary, key=lambda d: d["modified"])
 
     with open(filename_export, encoding="UTF-8", mode="w", newline="") as _file:
         if _format == "csv":
