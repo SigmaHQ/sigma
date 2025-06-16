@@ -9,9 +9,11 @@ references:
     - https://www.binarydefense.com/resources/blog/icedid-gziploader-analysis/
 author: Splunk Research Team
 date: 2024-07-29
+modified: 2025-06-16
 tags:
     - attack.defense-evasion
     - attack.t1055
+    - detection.threat-hunting
 logsource:
     product: windows
     category: create_remote_thread
@@ -21,7 +23,13 @@ detection:
             - '\cmd.exe'
             - '\powershell.exe'
             - '\pwsh.exe'
-    condition: selection
+    filter_main_system:
+        SourceImage: 'C:\Windows\System32\csrss.exe'
+    filter_optional_defender:
+        SourceImage|endswith: '\MsMpEng.exe'
+    filter_optional_malwarebytes:
+        SourceImage: 'C:\Program Files\Malwarebytes\Anti-Malware\MBAMService.exe'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: medium
