@@ -1,0 +1,38 @@
+title: Shell Execution of Downloaded Script via Curl or Wget - Linux
+id: a2d9e2f3-0f43-4c7a-bcd9-9acfc0d723aa
+status: test
+description: |
+    Detects the use of "curl" or "wget" to download a file into a temporary directory (e.g., /tmp or /dev/shm) followed by shell execution.
+    This pattern is common in malicious payload delivery, especially in fileless or multi-stage Linux attacks.
+references:
+    - https://gtfobins.github.io/gtfobins/wget/
+    - https://gtfobins.github.io/gtfobins/curl/
+author: Aayush Gupta
+date: 2025-06-17
+tags:
+    - attack.execution
+    - attack.t1059.004
+    - attack.t1203
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    sel_downloader:
+        Image|endswith:
+            - '/curl'
+            - '/wget'
+        CommandLine|contains:
+            - '/tmp/'
+            - '/dev/shm/'
+    sel_exec:
+        CommandLine|contains:
+            - '/tmp/'
+            - '/dev/shm/'
+            - '.sh'
+            - 'bash'
+            - 'sh'
+    condition: sel_downloader and sel_exec
+falsepositives:
+    - System update scripts using temporary files
+    - Installer scripts or automated provisioning tools
+level: high
