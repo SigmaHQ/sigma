@@ -9,8 +9,10 @@ references:
     - https://medium.com/tenable-techblog/uac-bypass-by-mocking-trusted-directories-24a96675f6e
     - https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows
     - https://github.com/netero1010/TrustedPath-UACBypass-BOF
-author: Florian Roth (Nextron Systems)
+    - https://x.com/Wietze/status/1933495426952421843
+author: Florian Roth (Nextron Systems), Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2021-08-27
+modified: 2025-06-17
 tags:
     - attack.defense-evasion
     - attack.t1548.002
@@ -19,9 +21,12 @@ logsource:
     product: windows
 detection:
     selection:
-        Image|contains:
-            - ':\Windows \System32\'
-            - ':\Windows \SysWOW64\'
+        - Image|contains:
+              - ':\Windows \System32\'
+              - ':\Windows \SysWOW64\'
+        - CommandLine|contains:
+              - ':\Windows \System32\' # Could be file copy operation to/from this path
+              - ':\Windows \SysWOW64\'
     condition: selection
 falsepositives:
     - Unknown
