@@ -1,0 +1,24 @@
+title: Suspicious PowerShell Encoded Command
+id: d7b72dc6-e530-4be1-bd28-d168c9caa0e3
+status: experimental
+description: Detects PowerShell processes that use the -EncodedCommand flag
+author: Cade Gray
+date: 2025/06/18
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith: powershell.exe
+    CommandLine|contains: -encodedCommand
+  condition: selection
+fields:
+  - CommandLine
+  - ParentImage
+  - Image
+falsepositives:
+  - Legitimate administrative scripts using encoded commands
+level: high
+tags:
+  - attack.execution
+  - attack.t1059.001
