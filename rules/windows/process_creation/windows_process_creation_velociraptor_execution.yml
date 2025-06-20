@@ -1,0 +1,31 @@
+title: Velociraptor Execution via Command Line
+id: 43a2c6b0-63c2-4b9a-afe3-velociraptor
+status: experimental
+description: Detects execution of Velociraptor binary or artifacts via common command line patterns
+author: vVv-Keys
+date: 2025/06/20
+references:
+  - https://www.velociraptor.app
+  - https://attack.mitre.org/techniques/T1057/
+  - https://attack.mitre.org/techniques/T1082/
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith:
+      - '\velociraptor.exe'
+      - '\velociraptor_x86.exe'
+    CommandLine|contains:
+      - 'artifact'
+      - 'collect'
+      - 'gui'
+  condition: selection
+falsepositives:
+  - Legitimate IR or DFIR analysts using Velociraptor
+  - Approved IT monitoring tasks
+level: medium
+tags:
+  - attack.discovery
+  - attack.t1057
+  - attack.t1082
