@@ -1,0 +1,24 @@
+title: InstallUtil.exe Execution Using Downloaded Assembly
+id: 9d4c6b40-9f0a-11eb-a8b3-0242ac120002
+description: Detects use of InstallUtil.exe to execute a .NET assembly from a non-standard location, indicating potential LOLBin misuse.
+status: experimental
+author: Skyler “Keys” Piatiak (@vVv-Keys)
+date: 2025/06/19
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '\InstallUtil.exe'
+    CommandLine|contains:
+      - '.dll'
+      - '/LogFile='
+      - '/LogToConsole='
+  condition: selection
+falsepositives:
+  - Legitimate .NET assembly installations performed by admins
+level: high
+tags:
+  - attack.execution
+  - attack.t1218.004
+  - sigma-contrib
