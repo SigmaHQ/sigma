@@ -5,33 +5,33 @@ description: Detects attempts to bypass AMSI using PowerShell by patching AmsiSc
 author: 'Skyler "Keys" Piatiak (vVv-Keys)'
 date: 2025-06-21
 logsource:
-  category: process_creation
-  product: windows
+    category: process_creation
+    product: windows
 detection:
-  selection_ps_reflection:
-    Image|endswith: '\powershell.exe'
-    CommandLine|contains:
-      - AmsiUtils
-      - amsiInitFailed
-      - SetValue
-  selection_memory_patch:
-    Image|endswith: '\powershell.exe'
-    CommandLine|contains:
-      - VirtualProtect
-      - '[Byte[]]'
-      - PtrToStructure
-      - 'Marshal::Copy'
-      - GetProcAddress
-  condition: selection_ps_reflection or selection_memory_patch
+    selection_ps_reflection:
+        Image|endswith: '\powershell.exe'
+        CommandLine|contains:
+            - AmsiUtils
+            - amsiInitFailed
+            - SetValue
+    selection_memory_patch:
+        Image|endswith: '\powershell.exe'
+        CommandLine|contains:
+            - VirtualProtect
+            - '[Byte[]]'
+            - PtrToStructure
+            - 'Marshal::Copy'
+            - GetProcAddress
+    condition: selection_ps_reflection or selection_memory_patch
 falsepositives:
-  - Advanced PowerShell developers using memory operations for legitimate .NET loading
-  - Some obfuscated administrative scripts in advanced environments
+    - Advanced PowerShell developers using memory operations for legitimate .NET loading
+    - Some obfuscated administrative scripts in advanced environments
 level: high
 tags:
-  - attack.defense_evasion
-  - attack.t1562.001
-  - detection.emulation.amsi_patch
+    - attack.defense_evasion
+    - attack.t1562.001
+    - detection.emulation.amsi_patch
 references:
-  - https://rastamouse.me/2018/10/patching-amsi-in-dotnet/
-  - https://www.elastic.co/security-labs/detecting-amsi-bypasses
-  - https://github.com/PowerShellMafia/PowerSploit/blob/master/AntivirusBypass/Invoke-Obfuscation.ps1
+    - https://rastamouse.me/2018/10/patching-amsi-in-dotnet/
+    - https://www.elastic.co/security-labs/detecting-amsi-bypasses
+    - https://github.com/PowerShellMafia/PowerSploit/blob/master/AntivirusBypass/Invoke-Obfuscation.ps1
