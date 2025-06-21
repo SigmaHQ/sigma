@@ -1,7 +1,7 @@
 title: UAC Bypass via AppInfo Service Abuse
 id: f9934f26-2c9f-4a49-a7a6-2b5c3a37eb92
 status: experimental
-description: Detects potential UAC bypass via AppInfo service abuse by observing suspicious execution patterns involving auto-elevated binaries and system utilities like eventvwr.exe or sdclt.exe.
+description: Detects potential UAC bypass via AppInfo service abuse by observing suspicious execution patterns involving auto-elevated binaries and system utilities like eventvwr.exe or sdclt.exe that lead to execution of shell commands.
 author: 'Skyler "Keys" Piatiak (vVv-Keys)'
 date: 2025-06-21
 logsource:
@@ -23,22 +23,18 @@ detection:
       - 'regsvr32'
   selection_uac:
     IntegrityLevel: 'High'
-    ElevationRequired: 'true'
   condition: selection_parent and selection_target and selection_uac
 fields:
   - CommandLine
   - Image
   - ParentImage
   - IntegrityLevel
-  - ElevationRequired
 falsepositives:
   - System administrators performing legitimate elevated tasks
   - Custom enterprise automation scripts
 level: high
 tags:
-  - attack.privilege_escalation
   - attack.t1548.002
-  - detection.uac_bypass
 references:
   - https://attack.mitre.org/techniques/T1548/002/
   - https://itm4n.github.io/uac-bypass-sdclt/
