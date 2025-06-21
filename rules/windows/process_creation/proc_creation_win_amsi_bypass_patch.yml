@@ -1,37 +1,35 @@
 title: AMSI Bypass via PowerShell Patch
-id: 9ec902f1-312d-467b-bbd4-0ff646338cc3
+id: 70be0c89-d8c3-4f3d-9d7e-amsi001
 status: experimental
-description: Detects attempts to bypass AMSI using PowerShell by patching AmsiScanBuffer via reflection or memory patching techniques.
+description: Detects PowerShell-based AMSI bypass attempts using memory patching of AmsiScanBuffer or AmsiUtils, commonly used in red team frameworks and malware.
 author: 'Skyler "Keys" Piatiak (vVv-Keys)'
 date: 2025-06-21
 logsource:
-    category: process_creation
-    product: windows
+  product: windows
+  category: process_creation
 detection:
-    selection_ps_reflection:
-        Image|endswith: '\powershell.exe'
-        CommandLine|contains:
-            - AmsiUtils
-            - amsiInitFailed
-            - SetValue
-    selection_memory_patch:
-        Image|endswith: '\powershell.exe'
-        CommandLine|contains:
-            - VirtualProtect
-            - '[Byte[]]'
-            - PtrToStructure
-            - 'Marshal::Copy'
-            - GetProcAddress
-    condition: selection_ps_reflection or selection_memory_patch
+  selection:
+    Image|endswith: '\powershell.exe'
+    CommandLine|contains:
+      - 'AmsiUtils'
+      - 'amsiInitFailed'
+      - 'SetValue'
+      - 'VirtualProtect'
+      - '[Ref]'
+      - 'DllImport'
+      - 'System.Management.Automation'
+  condition: selection
+fields:
+  - CommandLine
+  - Image
 falsepositives:
-    - Advanced PowerShell developers using memory operations for legitimate .NET loading
-    - Some obfuscated administrative scripts in advanced environments
+  - Red team tools or test scripts
+  - Admin tools using AMSI bypass for automation
 level: high
 tags:
-    - attack.defense_evasion
-    - attack.t1562.001
-    - detection.emulation.amsi_patch
+  - attack.t1562.001
+  - sigma.threat_hunting
 references:
-    - https://rastamouse.me/2018/10/patching-amsi-in-dotnet/
-    - https://www.elastic.co/security-labs/detecting-amsi-bypasses
-    - https://github.com/PowerShellMafia/PowerSploit/blob/master/AntivirusBypass/Invoke-Obfuscation.ps1
+  - https://attack.mitre.org/techniques/T1562/001/
+  - https://www.elastic.co/security-labs/antivirus-evasion-via-amsi-bypass
+  - https://gist.github.com/rasta-mouse/0b0f7785d3f6a5d7d1e19db7fe7e41b3
