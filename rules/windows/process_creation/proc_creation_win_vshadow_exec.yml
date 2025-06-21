@@ -17,10 +17,12 @@ logsource:
     product: windows
     category: process_creation
 detection:
-    selection:
-        Image|endswith: '\vshadow.exe'
+    selection_img:
+        - Image|endswith: '\vshadow.exe'
+        - OriginalFileName: 'vshadow.exe'
+    selection_cli:
         CommandLine|contains: '-exec'
-    condition: selection
+    condition: all of selection_*
 falsepositives:
     - System-Backup- or Admin-Tools
     - Legitimate administrative scripts
