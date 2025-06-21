@@ -1,34 +1,37 @@
 title: AMSI Bypass via PowerShell Patch
-id: 42faab9c-6f9b-4f61-93cb-05bb59dc5ec0
+id: 9ec902f1-312d-467b-bbd4-0ff646338cc3
 status: experimental
-description: Detects PowerShell commands attempting to bypass AMSI by patching AmsiScanBuffer.
-author: '(vVv-Keys)'
+description: Detects attempts to bypass AMSI using PowerShell by patching AmsiScanBuffer via reflection or memory patching techniques.
+author: 'Skyler "Keys" Piatiak (vVv-Keys)'
 date: 2025-06-21
 logsource:
-  product: windows
   category: process_creation
+  product: windows
 detection:
-  selection:
+  selection_ps_reflection:
     Image|endswith: '\powershell.exe'
     CommandLine|contains:
-      - 'AmsiScanBuffer'
-      - 'Reflection'
-      - 'Bypass'
+      - 'AmsiUtils'
+      - 'amsiInitFailed'
+      - 'SetValue'
+  selection_memory_patch:
+    Image|endswith: '\powershell.exe'
+    CommandLine|contains:
       - 'VirtualProtect'
-      - 'Add-Type'
-  condition: selection
-fields:
-  - CommandLine
-  - ParentImage
-  - Image
-  - User
+      - '[Byte[]]'
+      - 'PtrToStructure'
+      - 'Marshal::Copy'
+      - 'GetProcAddress'
+  condition: selection_ps_reflection or selection_memory_patch
 falsepositives:
-  - Rare in production; possible in red team simulations or malware analysis labs
+  - Advanced PowerShell developers using memory operations for legitimate .NET loading
+  - Some obfuscated administrative scripts in advanced environments
 level: high
 tags:
-  - attack.defense-evasion
+  - attack.defense_evasion
   - attack.t1562.001
+  - detection.emulation.amis_patch
 references:
-  - https://attack.mitre.org/techniques/T1562/001/
-  - https://posts.specterops.io/bypassing-amsi-and-etw-using-powershell-d05c598d1e4
-  - https://github.com/Rasta-mouse/AmsiScanBufferBypass
+  - https://rastamouse.me/2018/10/patching-amsi-in-dotnet/
+  - https://www.elastic.co/security-labs/detecting-amsi-bypasses
+  - https://github.com/PowerShellMafia/PowerSploit/blob/master/AntivirusBypass/Invoke-Obfuscation.ps1
