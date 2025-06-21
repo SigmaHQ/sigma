@@ -1,13 +1,9 @@
 title: COM Hijacking via CLSID Registry Key
-id: d3c4e5e7-7fbb-42d9-b308-2902349d446b
-description: Detects registry modifications to CLSID keys under HKCU or HKLM that may indicate persistence via COM hijacking. Attackers can configure these registry keys to point to a malicious InprocServer32 DLL for execution during COM object instantiation.
+id: 8c178bc4-89f4-43a3-b9fc-902c683d5050
 status: experimental
-author: '@vVv-Keys'
+description: Detects registry modifications to CLSID keys under HKCU or HKLM that may indicate persistence via COM hijacking.
+author: 'Skyler "Keys" Piatiak (vVv-Keys)'
 date: 2025-06-21
-references:
-    - https://attack.mitre.org/techniques/T1546/015/
-    - https://learn.microsoft.com/en-us/windows/win32/com/component-object-model--com--portal
-    - https://pentestlab.blog/2019/03/04/persistence-com-hijacking/
 logsource:
     product: windows
     category: registry_event
@@ -20,18 +16,16 @@ detection:
         Details|contains:
             - 'InprocServer32'
     condition: selection
-falsepositives:
-    - Software legitimately configuring custom COM components
-    - In-house applications using dynamic COM registration
 fields:
     - TargetObject
     - Details
     - EventType
     - ComputerName
     - UserName
+falsepositives:
+    - Legitimate COM component registration
 level: high
 tags:
-    - attack.persistence
     - attack.t1546.015
-    - category.persistence
-    - attack.execution
+references:
+    - https://attack.mitre.org/techniques/T1546/015/
