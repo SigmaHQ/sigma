@@ -5,33 +5,33 @@ status: experimental
 author: '@vVv-Keys'
 date: 2025-06-21
 references:
-  - https://attack.mitre.org/techniques/T1546/015/
-  - https://learn.microsoft.com/en-us/windows/win32/com/component-object-model--com--portal
-  - https://pentestlab.blog/2019/03/04/persistence-com-hijacking/
+    - https://attack.mitre.org/techniques/T1546/015/
+    - https://learn.microsoft.com/en-us/windows/win32/com/component-object-model--com--portal
+    - https://pentestlab.blog/2019/03/04/persistence-com-hijacking/
 logsource:
-  product: windows
-  category: registry_event
+    product: windows
+    category: registry_event
 detection:
-  selection:
-    EventID: 13
-    TargetObject|contains:
-      - 'HKCU\\Software\\Classes\\CLSID\\'
-      - 'HKLM\\Software\\Classes\\CLSID\\'
-    Details|contains:
-      - 'InprocServer32'
-  condition: selection
+    selection:
+        EventID: 13
+        TargetObject|contains:
+            - 'HKCU\\Software\\Classes\\CLSID\\'
+            - 'HKLM\\Software\\Classes\\CLSID\\'
+        Details|contains:
+            - 'InprocServer32'
+    condition: selection
 falsepositives:
-  - Software legitimately configuring custom COM components
-  - In-house applications using dynamic COM registration
+    - Software legitimately configuring custom COM components
+    - In-house applications using dynamic COM registration
 fields:
-  - TargetObject
-  - Details
-  - EventType
-  - ComputerName
-  - UserName
+    - TargetObject
+    - Details
+    - EventType
+    - ComputerName
+    - UserName
 level: high
 tags:
-  - attack.persistence
-  - attack.t1546.015
-  - contrib.vvv-keys
-  - usecase.redteam
+    - attack.persistence
+    - attack.t1546.015
+    - contrib.vvv-keys
+    - usecase.redteam
