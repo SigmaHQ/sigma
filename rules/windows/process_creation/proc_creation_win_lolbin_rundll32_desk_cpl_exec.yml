@@ -1,0 +1,30 @@
+title: Suspicious Rundll32 Execution of desk.cpl Control Panel Item
+id: 50ac0f87-66e9-42a5-9604-d4e750f476d0
+status: experimental
+description: Detects suspicious usage of rundll32.exe to invoke desk.cpl, a known technique for loading arbitrary payloads (e.g., renamed .scr files) via Control Panel items.
+author: 'Skyler "Keys" Piatiak (vVv-Keys)'
+date: 2025-06-21
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '\rundll32.exe'
+    CommandLine|contains:
+      - 'desk.cpl'
+      - 'InstallScreenSaver'
+  condition: selection
+fields:
+  - CommandLine
+  - ParentImage
+  - Image
+falsepositives:
+  - Rare but possible use of desk.cpl legitimately via Rundll32
+level: high
+tags:
+  - attack.t1218.011
+  - attack.defense_evasion
+references:
+  - https://attack.mitre.org/techniques/T1218/011/
+  - https://lolbas-project.github.io/lolbas/Libraries/Desk/
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1218.011/T1218.011.md
