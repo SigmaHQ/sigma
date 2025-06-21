@@ -5,37 +5,37 @@ description: Detects potential UAC bypass via AppInfo service abuse by observing
 author: 'Skyler "Keys" Piatiak (vVv-Keys)'
 date: 2025-06-21
 logsource:
-  product: windows
-  category: process_creation
+    product: windows
+    category: process_creation
 detection:
-  selection_parent:
-    ParentImage|endswith:
-      - '\explorer.exe'
-  selection_target:
-    Image|endswith:
-      - '\eventvwr.exe'
-      - '\sdclt.exe'
-      - '\computerdefaults.exe'
-    CommandLine|contains:
-      - 'cmd.exe'
-      - 'powershell.exe'
-      - 'reg.exe'
-      - 'regsvr32'
-  selection_uac:
-    IntegrityLevel: 'High'
-  condition: selection_parent and selection_target and selection_uac
+    selection_parent:
+        ParentImage|endswith:
+            - '\explorer.exe'
+    selection_target:
+        Image|endswith:
+            - '\eventvwr.exe'
+            - '\sdclt.exe'
+            - '\computerdefaults.exe'
+        CommandLine|contains:
+            - 'cmd.exe'
+            - 'powershell.exe'
+            - 'reg.exe'
+            - 'regsvr32'
+    selection_uac:
+        IntegrityLevel: 'High'
+    condition: selection_parent and selection_target and selection_uac
 fields:
-  - CommandLine
-  - Image
-  - ParentImage
-  - IntegrityLevel
+    - CommandLine
+    - Image
+    - ParentImage
+    - IntegrityLevel
 falsepositives:
-  - System administrators performing legitimate elevated tasks
-  - Custom enterprise automation scripts
+    - System administrators performing legitimate elevated tasks
+    - Custom enterprise automation scripts
 level: high
 tags:
-  - attack.t1548.002
+    - attack.t1548.002
 references:
-  - https://attack.mitre.org/techniques/T1548/002/
-  - https://itm4n.github.io/uac-bypass-sdclt/
-  - https://posts.specterops.io/uac-bypasses-in-windows-10-8d6f64f39546
+    - https://attack.mitre.org/techniques/T1548/002/
+    - https://itm4n.github.io/uac-bypass-sdclt/
+    - https://posts.specterops.io/uac-bypasses-in-windows-10-8d6f64f39546
