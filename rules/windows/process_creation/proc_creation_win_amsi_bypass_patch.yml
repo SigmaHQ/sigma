@@ -1,35 +1,35 @@
 title: AMSI Bypass via PowerShell Patch
-id: 70be0c89-d8c3-4f3d-9d7e-amsi001
+id: 70be0c89-d8c3-4f3d-9d7e-712fa3a1e012
 status: experimental
 description: Detects PowerShell-based AMSI bypass attempts using memory patching of AmsiScanBuffer or AmsiUtils, commonly used in red team frameworks and malware.
 author: 'Skyler "Keys" Piatiak (vVv-Keys)'
 date: 2025-06-21
 logsource:
-  product: windows
-  category: process_creation
+    product: windows
+    category: process_creation
 detection:
-  selection:
-    Image|endswith: '\powershell.exe'
-    CommandLine|contains:
-      - 'AmsiUtils'
-      - 'amsiInitFailed'
-      - 'SetValue'
-      - 'VirtualProtect'
-      - '[Ref]'
-      - 'DllImport'
-      - 'System.Management.Automation'
-  condition: selection
+    selection:
+        Image|endswith: '\powershell.exe'
+        CommandLine|contains:
+            - 'AmsiUtils'
+            - 'amsiInitFailed'
+            - 'SetValue'
+            - 'VirtualProtect'
+            - '[Ref]'
+            - 'DllImport'
+            - 'System.Management.Automation'
+    condition: selection
 fields:
-  - CommandLine
-  - Image
+    - CommandLine
+    - Image
 falsepositives:
-  - Red team tools or test scripts
-  - Admin tools using AMSI bypass for automation
+    - Red team tools or test scripts
+    - Admin tools using AMSI bypass for automation
 level: high
 tags:
-  - attack.t1562.001
-  - sigma.threat_hunting
+    - attack.t1562.001
+    - sigma.threat_hunting
 references:
-  - https://attack.mitre.org/techniques/T1562/001/
-  - https://www.elastic.co/security-labs/antivirus-evasion-via-amsi-bypass
-  - https://gist.github.com/rasta-mouse/0b0f7785d3f6a5d7d1e19db7fe7e41b3
+    - https://attack.mitre.org/techniques/T1562/001/
+    - https://www.elastic.co/security-labs/antivirus-evasion-via-amsi-bypass
+    - https://gist.github.com/rasta-mouse/0b0f7785d3f6a5d7d1e19db7fe7e41b3
