@@ -1,0 +1,35 @@
+title: UAC Bypass via AppInfo Service Abuse
+id: 9a6e1f21-5dc4-4aa2-a2c6-130c6e7e9a3e
+status: experimental
+description: Detects UAC bypass attempts by abusing the AppInfo service to launch elevated processes without user prompts. This technique is often seen in malware and red team operations leveraging silent COM elevation or elevated DLL hijacking.
+author: 'Skyler "Keys" Piatiak (vVv-Keys)'
+date: 2025-06-21
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith:
+      - '\eventvwr.exe'
+      - '\computerdefaults.exe'
+      - '\sdclt.exe'
+    CommandLine|contains:
+      - 'mmc.exe'
+      - 'comdlg32'
+      - 'Elevation:Administrator!new:{'  # Known AppInfo silent elevation pattern
+  condition: selection
+fields:
+  - CommandLine
+  - ParentImage
+  - Image
+  - User
+falsepositives:
+  - System administrators performing legitimate elevation
+  - Internal tools launching trusted control panel applets
+level: high
+tags:
+  - attack.t1548.002
+references:
+  - https://attack.mitre.org/techniques/T1548/002/
+  - https://posts.specterops.io/abusing-token-privileges-for-uac-bypasses-8b12a3eb96a2
+  - https://www.youtube.com/watch?v=Fv1hKjzUpmQ
