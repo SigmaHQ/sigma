@@ -1,0 +1,30 @@
+title: COM Hijacking via CLSID Registry Key
+id: 8c178bc4-89f4-43a3-b9fc-902c683d5050
+status: experimental
+description: Detects registry modifications to CLSID keys under HKCU or HKLM that may indicate persistence via COM hijacking.
+author: 'Skyler "Keys" Piatiak (vVv-Keys)'
+date: 2025-06-21
+logsource:
+    product: windows
+    category: registry_event
+detection:
+    selection:
+        EventID: 13
+        TargetObject|contains:
+            - 'HKCU\\Software\\Classes\\CLSID\\'
+            - 'HKLM\\Software\\Classes\\CLSID\\'
+        Details|contains: 'InprocServer32'  # <-- FIXED: no single-item list
+    condition: selection
+fields:
+    - TargetObject
+    - Details
+    - EventType
+    - ComputerName
+    - UserName
+falsepositives:
+    - Legitimate COM component registration
+level: high
+tags:
+    - attack.t1546.015
+references:
+    - https://attack.mitre.org/techniques/T1546/015/
