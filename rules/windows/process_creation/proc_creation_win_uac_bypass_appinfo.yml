@@ -1,35 +1,45 @@
 title: UAC Bypass via AppInfo Service Abuse
-id: 9a6e1f21-5dc4-4aa2-a2c6-130c6e7e9a3e
+id: f9934f26-2c9f-4a49-a7a6-2b5c3a37eb92
 status: experimental
-description: Detects UAC bypass attempts by abusing the AppInfo service to launch elevated processes without user prompts. This technique is often seen in malware and red team operations leveraging silent COM elevation or elevated DLL hijacking.
+description: Detects potential UAC bypass via AppInfo service abuse by observing suspicious execution patterns involving auto-elevated binaries and system utilities like eventvwr.exe or sdclt.exe.
 author: 'Skyler "Keys" Piatiak (vVv-Keys)'
 date: 2025-06-21
 logsource:
   product: windows
   category: process_creation
 detection:
-  selection:
+  selection_parent:
+    ParentImage|endswith:
+      - '\explorer.exe'
+  selection_target:
     Image|endswith:
       - '\eventvwr.exe'
-      - '\computerdefaults.exe'
       - '\sdclt.exe'
+      - '\computerdefaults.exe'
     CommandLine|contains:
-      - 'mmc.exe'
-      - 'comdlg32'
-      - 'Elevation:Administrator!new:{'  # Known AppInfo silent elevation pattern
-  condition: selection
+      - 'cmd.exe'
+      - 'powershell.exe'
+      - 'reg.exe'
+      - 'regsvr32'
+  selection_uac:
+    IntegrityLevel: 'High'
+    ElevationRequired: 'true'
+  condition: selection_parent and selection_target and selection_uac
 fields:
   - CommandLine
-  - ParentImage
   - Image
-  - User
+  - ParentImage
+  - IntegrityLevel
+  - ElevationRequired
 falsepositives:
-  - System administrators performing legitimate elevation
-  - Internal tools launching trusted control panel applets
+  - System administrators performing legitimate elevated tasks
+  - Custom enterprise automation scripts
 level: high
 tags:
+  - attack.privilege_escalation
   - attack.t1548.002
+  - detection.uac_bypass
 references:
   - https://attack.mitre.org/techniques/T1548/002/
-  - https://posts.specterops.io/abusing-token-privileges-for-uac-bypasses-8b12a3eb96a2
-  - https://www.youtube.com/watch?v=Fv1hKjzUpmQ
+  - https://itm4n.github.io/uac-bypass-sdclt/
+  - https://posts.specterops.io/uac-bypasses-in-windows-10-8d6f64f39546
