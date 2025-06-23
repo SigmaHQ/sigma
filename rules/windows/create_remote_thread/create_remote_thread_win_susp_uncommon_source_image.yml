@@ -10,7 +10,7 @@ references:
     - https://lolbas-project.github.io
 author: Perez Diego (@darkquassar), oscd.community
 date: 2019-10-27
-modified: 2024-07-15
+modified: 2025-03-07
 tags:
     - attack.privilege-escalation
     - attack.defense-evasion
@@ -34,6 +34,7 @@ detection:
             - 'C:\Windows\System32\wininit.exe' # happens on Windows 7
             - 'C:\Windows\System32\csrss.exe' # multiple OS
             - 'C:\Windows\System32\LogonUI.exe' # multiple OS
+            - 'C:\Windows\System32\wlrmdr.exe'
     filter_main_winlogon_2:
         SourceImage: 'C:\Windows\System32\winlogon.exe'
         TargetParentProcessId: 4
@@ -82,6 +83,9 @@ detection:
         TargetImage: null
     filter_main_empty:
         TargetImage: ''
+    filter_optional_onedrive:
+        SourceImage: 'C:\Windows\explorer.exe'
+        TargetImage|endswith: '\AppData\Local\Microsoft\OneDrive\OneDrive.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - This rule is best put in testing first in order to create a baseline that reflects the data in your environment.
