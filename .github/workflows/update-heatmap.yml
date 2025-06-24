@@ -1,8 +1,8 @@
 name: Generate Updated Heatmap
-run-name: Generating heatmap for commit ${{ github.sha }}
 on:
   schedule:
     - cron: "0 0 1 * *"
+    
   workflow_dispatch:
 
 
@@ -13,7 +13,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          ref: master
           submodules: true
 
       - name: Install Sigma
@@ -22,30 +21,14 @@ jobs:
       - name: Update Heatmap
         run: sigma analyze attack count ./other/sigma_attack_nav_coverage.json rule*
 
-      - name: Commit and Push Changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add ./other/sigma_attack_nav_coverage.json
-          git add ./other/sigma_attack_nav_coverage.png
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-            echo "PR_NEEDED=false" >> $GITHUB_ENV
-          else
-            git commit -m "Generated heatmap for commit ${{ github.sha }}"
-            git checkout -B create-pull-request/update-heatmap
-            git push -u origin create-pull-request/update-heatmap
-          fi
-
       - name: Create Pull Request
-        if: env.PR_NEEDED == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
           reviewers: nasbench, frack113, phantinuss
           delete-branch: true
-          commit-message: 'chore: update heatmap to use current tests'
+          commit-message: 'chore: update att&ck heatmap to use reflect current coverage'
           branch: 'create-pull-request/update-heatmap'
-          title: 'Update Sigma Heatmap'
+          title: 'Update ATT&CK Heatmap Coverage'
           body: |
             ### Summary of the Pull Request
   
@@ -53,7 +36,7 @@ jobs:
   
             ### Changelog
   
-            chore: update heatmap to use current tests
+            chore: update att&ck heatmap to use reflect current coverage
   
             ### Example Log Event
   
