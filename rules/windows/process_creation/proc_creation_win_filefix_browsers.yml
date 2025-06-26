@@ -1,0 +1,37 @@
+title: FileFix - Suspicious Subprocesses Spawned by Web Browsers
+id: 4be03877-d5b6-4520-85c9-a5911c0a656c
+status: experimental
+description: Detects potentially malicious subprocesses such as PowerShell, Regsvr32, or MSHTA being launched from web browsers like Chrome, Edge, Firefox, or Brave. This behavior is indicative of the FileFix social engineering technique, where users are tricked into executing malicious commands via the File Explorer.
+references:
+    - https://mrd0x.com/filefix-clickfix-alternative/
+author: 0xFustang
+date: 2025-06-26
+modified: 2025-06-26
+tags:
+    - attack.execution
+    - attack.t1204.004 
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_child:
+    Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\regsvr32.exe'
+            - '\bitsadmin.exe'
+            - '\certutil.exe'
+            - '\mshta.exe'
+  selection_parent:
+    ParentImage|endswith:
+            - '\chrome.exe'
+            - '\msedge.exe'
+            - '\firefox.exe'
+            - '\brave.exe'
+  selection_comment:
+    CommandLine|contains:
+      - '#'
+  condition: selection_child and selection_parent and selection_comment
+falsepositives:
+    - Legitimate use of PowerShell or other utilities launched from browser extensions or automation tools
+level: high
