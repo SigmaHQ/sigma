@@ -3,7 +3,7 @@ id: 4be03877-d5b6-4520-85c9-a5911c0a656c
 status: experimental
 description: |
     Detects potentially suspicious subprocesses such as LOLBINs spawned by web browsers. This activity could be associated with the "FileFix" social engineering technique,
-    where users are tricked into launching File Explorer via a browser-based phishing page and pasting malicious commands into the address bar.
+    where users are tricked into launching the file explorer via a browser-based phishing page and pasting malicious commands into the address bar.
     The technique abuses clipboard manipulation and disguises command execution as benign file path access, resulting in covert execution of system utilities.
 references:
     - https://mrd0x.com/filefix-clickfix-alternative/
@@ -16,13 +16,12 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_parent:
+    selection:
         ParentImage|endswith:
             - '\chrome.exe'
             - '\msedge.exe'
             - '\firefox.exe'
             - '\brave.exe'
-    selection_child:
         Image|endswith:
             - '\powershell.exe'
             - '\pwsh.exe'
@@ -31,7 +30,7 @@ detection:
             - '\certutil.exe'
             - '\mshta.exe'
         CommandLine|contains: '#'
-    condition: all of selection_*
+    condition: selection
 falsepositives:
     - Legitimate use of PowerShell or other utilities launched from browser extensions or automation tools
 level: high
