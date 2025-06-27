@@ -1,0 +1,34 @@
+title: Suspicious NTFS Symlink Behavior Modification
+id: 0d1a7220-2be0-4bd4-be43-2727bc687f81
+status: experimental
+description: Detects the modification of NTFS symbolic link behavior using fsutil, which could be used to enable remote to local or remote to remote symlinks for potential attacks.
+references:
+    - https://thedfirreport.com/TBD
+    - https://intel.thedfirreport.com/events/view/33490 # Link to our private The DFIR Report Threat Intelligence
+author: "The DFIR Report"
+date: 2025-06-27
+tags:
+    - attack.defense-evasion
+    - attack.t1222
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_fsutil:   # Example command observed:  cmd.exe /c "fsutil behaviour set SymlinkEvaluation"
+        Image|endswith: '\cmd.exe'
+        CommandLine|contains|all:
+            - 'fsutil'
+            - 'behavior'
+            - 'set'
+            - 'SymlinkEvaluation'
+    selection_symlink_params:
+        CommandLine|contains:
+            - 'R2L:1'   # Remote to Local
+            - 'R2R:1'   # Remote to Remote
+            - 'L2L:1'   # Local to Local
+    condition: selection_fsutil and selection_symlink_params
+falsepositives:
+    - Legitimate system administration activities requiring symlink modifications
+    - Application installations that require symlink behavior changes
+    - Development environments that need specific symlink configurations
+level: low
