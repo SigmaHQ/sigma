@@ -13,7 +13,7 @@ references:
     - https://thedfirreport.com/2023/08/28/html-smuggling-leads-to-domain-wide-ransomware/
 author: Florian Roth (Nextron Systems), Markus Neis, Tim Shelton (HAWK.IO), Nasreddine Bencherchali (Nextron Systems)
 date: 2020-07-03
-modified: 2023-08-29
+modified: 2025-06-16
 tags:
     - attack.defense-evasion
     - attack.t1036.003
@@ -27,6 +27,7 @@ detection:
     selection_pwsh:
         Image|endswith:
             - '\powershell.exe'
+            - '\powershell_ise.exe'
             - '\pwsh.exe'
         CommandLine|contains:
             - 'copy-item'
@@ -45,7 +46,13 @@ detection:
             - '\System32'
             - '\SysWOW64'
             - '\WinSxS'
-    condition: 1 of selection_* and target
+    filter_main_cmd:
+        CommandLine|endswith:
+            - 'C:\Windows\System32\xcopy.exe'
+            - 'C:\Windows\SysWOW64\xcopy.exe'
+            - 'C:\Windows\System32\robocopy.exe'
+            - 'C:\Windows\SysWOW64\robocopy.exe'
+    condition: 1 of selection_* and target and not 1 of filter_main_*
 falsepositives:
     - Depend on scripts and administrative tools used in the monitored environment (For example an admin scripts like https://www.itexperience.net/sccm-batch-files-and-32-bits-processes-on-64-bits-os/)
     - When cmd.exe and xcopy.exe are called directly #  C:\Windows\System32\cmd.exe /c copy file1 file2
