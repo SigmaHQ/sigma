@@ -1,0 +1,32 @@
+title: Ping Delay via cmd followed by file deletion
+id: 6c32f124-9a02-4749-87ab-0b2d4fe27cb2
+status: experimental
+description: |
+    Detects a ping delay to 127.0.0.7 via cmd.exe observed with Mamona ransomeware. 
+    The use of 127.0.0.7 instead of the more common 127.0.0.1 helps it bypass detection rules that specifically look for the default loopback address. 
+    The command also issues the command below to delay execution for three seconds and then deletes itself from disk.
+references:
+  - https://wazuh.com/blog/detecting-and-responding-mamona-ransomware-with-wazuh/
+  - https://coralogix.com/blog/mamona-ransomware-raas-offline-commodity-ransomware-with-custom-encryption/
+  - https://www.elastic.co/guide/en/security/8.18/delayed-execution-via-ping.html
+  - https://any.run/report/b6c969551f35c5de1ebc234fd688d7aa11eac01008013914dbc53f3e811c7c77/1d977118-9b28-42be-a68f-65915b5e0217
+author: Joseph A. M.
+date: 2025/07/02
+tags:
+- attack.defense_evasion
+- attack.t1070
+- attack.t1562
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains:
+      - 'cmd.exe /C ping 127.0.0.7 -n 3 > Nul & Del /f /q'
+  condition: selection
+falsepositives:
+  - Unknown
+level: high
+
+
+
