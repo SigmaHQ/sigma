@@ -4,9 +4,9 @@ status: test
 description: 'Detecting attempts to extract passwords with grep'
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1552.001/T1552.001.md
-author: 'Igor Fits, oscd.community'
+author: Igor Fits, oscd.community, Milad Cheraghi
 date: 2020-10-15
-modified: 2023-04-30
+modified: 2025-06-03
 tags:
     - attack.credential-access
     - attack.t1552.001
@@ -16,11 +16,12 @@ logsource:
 detection:
     selection:
         type: 'EXECVE'
-    keywords:
-        '|all':
-            - 'grep'
-            - 'password'
-    condition: selection and keywords
+        a0: 'grep'
+        a1: '--color=auto' # Is Alias
+        a2: '-ri'
+        a3: 'password'
+        a4: '/'
+    condition: selection
 falsepositives:
     - Unknown
-level: high
+level: medium
