@@ -11,7 +11,7 @@ references:
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split)
 date: 2019-10-25
-modified: 2023-08-17
+modified: 2025-07-04
 tags:
     - attack.persistence
     - attack.t1547.001
@@ -19,9 +19,9 @@ logsource:
     category: registry_set
     product: windows
 detection:
-    nt_current_version_base:
+    selection_nt_current_version_base:
         TargetObject|contains: '\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
-    nt_current_version:
+    selection_nt_current_version:
         TargetObject|contains:
             - '\Winlogon\VmApplet'
             - '\Winlogon\Userinit'
@@ -37,29 +37,14 @@ detection:
             - '\Drivers32'
             - '\Windows\Run'
             - '\Windows\Load'
-    filter_empty:
+    filter_main_empty:
         Details: '(Empty)'
-    filter_legitimate_subkey:  # Legitimately used subkeys of \Image File Execution Options, which are not used for persistence (see https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)
+    filter_main_legitimate_subkey:  # Legitimately used subkeys of \Image File Execution Options, which are not used for persistence (see https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)
         TargetObject|contains: '\Image File Execution Options\'
         TargetObject|endswith:
             - '\DisableExceptionChainValidation'
             - '\MitigationOptions'
-    filter_edge:
-        Image|startswith: 'C:\Program Files (x86)\Microsoft\Temp\'
-        Image|endswith: '\MicrosoftEdgeUpdate.exe'
-    filter_msoffice:
-        - TargetObject|contains:
-              - '\ClickToRunStore\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\'
-              - '\ClickToRun\REGISTRY\MACHINE\Software\Microsoft\Windows NT\CurrentVersion\'
-        - Image:
-              - 'C:\Program Files\Microsoft Office\root\integration\integrator.exe'
-              - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
-    filter_officeclicktorun:
-        Image|startswith:
-            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
-            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
-        Image|endswith: '\OfficeClickToRun.exe'
-    filter_security_extension_dc:
+    filter_main_security_extension_dc:
         Image: 'C:\Windows\system32\svchost.exe'
         TargetObject|contains:
             - '\Winlogon\GPExtensions\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\PreviousPolicyAreas'
@@ -67,15 +52,33 @@ detection:
         Details:
             - 'DWORD (0x00000009)'
             - 'DWORD (0x000003c0)'
-    filter_ngen:
+    filter_main_runtimebroker:
+        Image: 'C:\Windows\System32\RuntimeBroker.exe'
+        TargetObject|contains: '\runtimebroker.exe\Microsoft.Windows.ShellExperienceHost'
+    filter_optional_edge:
+        Image|startswith: 'C:\Program Files (x86)\Microsoft\Temp\'
+        Image|endswith: '\MicrosoftEdgeUpdate.exe'
+    filter_optional_msoffice:
+        - TargetObject|contains:
+              - '\ClickToRunStore\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\'
+              - '\ClickToRun\REGISTRY\MACHINE\Software\Microsoft\Windows NT\CurrentVersion\'
+        - Image:
+              - 'C:\Program Files\Microsoft Office\root\integration\integrator.exe'
+              - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
+    filter_optional_officeclicktorun:
+        Image|startswith:
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
+        Image|endswith: '\OfficeClickToRun.exe'
+    filter_optional_ngen:
         Image|startswith: 'C:\Windows\Microsoft.NET\Framework'
         Image|endswith: '\ngen.exe'
-    filter_onedrive:
+    filter_optional_onedrive:
         Image|endswith: '\AppData\Local\Microsoft\OneDrive\StandaloneUpdater\OneDriveSetup.exe'
         TargetObject|endswith: '\Microsoft\Windows\CurrentVersion\RunOnce\Delete Cached Update Binary'
         Details|startswith: 'C:\Windows\system32\cmd.exe /q /c del /q "C:\Users\'
         Details|endswith: '\AppData\Local\Microsoft\OneDrive\Update\OneDriveSetup.exe"'
-    condition: nt_current_version_base and nt_current_version and not 1 of filter_*
+    condition: all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
 fields:
     - SecurityID
     - ObjectName

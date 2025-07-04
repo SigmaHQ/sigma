@@ -6,7 +6,7 @@ references:
     - https://www.zscaler.com/blogs/security-research/onenote-growing-threat-malware-distribution
 author: frack113, Nasreddine Bencherchali (Nextron Systems)
 date: 2023-03-17
-modified: 2025-03-05
+modified: 2025-07-04
 tags:
     - attack.persistence
 logsource:
@@ -16,6 +16,7 @@ detection:
     selection:
         Image|endswith:
             - '\powershell.exe'
+            - '\powershell_ise.exe'
             - '\pwsh.exe'
         TargetFilename|endswith:
             - '.bat'
@@ -47,6 +48,13 @@ detection:
         TargetFilename|endswith:
             - '.dll'
             - '.exe'
+    filter_main_powershell_module:
+        TargetFilename|startswith: 'C:\Users\'
+        TargetFilename|contains: '\WindowsPowerShell\Modules\' # C:\Users\xxxx\Documents\WindowsPowerShell\Modules\powershell-yaml\0.4.12\lib\net47\PowerShellYamlSerializer.dll
+        TargetFilename|endswith: '.dll'
+    filter_main_nuget:
+        TargetFilename|startswith: 'C:\Program Files\PackageManagement\ProviderAssemblies\nuget\'
+        TargetFilename|endswith: '\Microsoft.PackageManagement.NuGetProvider.dll'
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - False positives will differ depending on the environment and scripts used. Apply additional filters accordingly.
