@@ -1,4 +1,37 @@
 title: Obfuscated PowerShell Spawned From Explorer
+id: 7f42d342-cc7a-4b3d-93c7-e317cd9e3b3e
+status: experimental
+description: Detects obfuscated PowerShell execution launched from explorer.exe
+references:
+  - https://attack.mitre.org/techniques/T1059/001/
+  - https://github.com/SigmaHQ/sigma
+author: Leaman Brown
+date: 2025/07/06
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    ParentImage|endswith: '\explorer.exe'
+    Image|endswith: '\powershell.exe'
+    CommandLine|contains:
+      - '-enc'
+      - '-EncodedCommand'
+      - '-nop'
+      - 'frombase64string'
+  condition: selection
+fields:
+  - CommandLine
+  - ParentImage
+  - Image
+level: high
+falsepositives:
+  - Legitimate administrative scripting using obfuscation
+tags:
+  - attack.execution
+  - attack.defense_evasion
+  - attack.t1059.001
+title: Obfuscated PowerShell Spawned From Explorer
 id: b57c66a3-fb14-4f31-bd47-xxxxx  # Generate real UUID
 status: experimental
 description: Detects obfuscated PowerShell execution launched from explorer.exe
