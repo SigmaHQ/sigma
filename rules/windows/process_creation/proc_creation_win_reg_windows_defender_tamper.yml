@@ -1,14 +1,16 @@
 title: Suspicious Windows Defender Registry Key Tampering Via Reg.EXE
 id: 452bce90-6fb0-43cc-97a5-affc283139b3
 status: test
-description: Detects the usage of "reg.exe" to tamper with different Windows Defender registry keys in order to disable some important features related to protection and detection
+description: |
+    Detects the usage of "reg.exe" to tamper with different Windows Defender registry keys in order to disable some important features related to protection and detection
 references:
     - https://thedfirreport.com/2022/03/21/apt35-automates-initial-access-using-proxyshell/
     - https://github.com/swagkarna/Defeat-Defender-V1.2.0
     - https://www.elevenforum.com/t/video-guide-how-to-completely-disable-microsoft-defender-antivirus.14608/page-2
+    - https://tria.ge/241231-j9yatstqbm/behavioral1
 author: Florian Roth (Nextron Systems), Swachchhanda Shrawan Poudel, Nasreddine Bencherchali (Nextron Systems)
 date: 2022-03-22
-modified: 2023-06-05
+modified: 2025-06-04
 tags:
     - attack.defense-evasion
     - attack.t1562.001
@@ -41,22 +43,27 @@ detection:
             - ' add '
             - 'd 1'
         CommandLine|contains:
+            - 'DisableAccess'
             - 'DisableAntiSpyware'
             - 'DisableAntiSpywareRealtimeProtection'
             - 'DisableAntiVirus'
+            - 'DisableAntiVirusSignatures'
             - 'DisableArchiveScanning'
             - 'DisableBehaviorMonitoring'
             - 'DisableBlockAtFirstSeen'
+            - 'DisableCloudProtection'
             - 'DisableConfig'
             - 'DisableEnhancedNotifications'
             - 'DisableIntrusionPreventionSystem'
             - 'DisableIOAVProtection'
+            - 'DisableNetworkProtection'
             - 'DisableOnAccessProtection'
             - 'DisablePrivacyMode'
             - 'DisableRealtimeMonitoring'
             - 'DisableRoutinelyTakingAction'
             - 'DisableScanOnRealtimeEnable'
             - 'DisableScriptScanning'
+            - 'DisableSecurityCenter'
             - 'Notification_Suppress'
             - 'SignatureDisableUpdateOnStartupWithoutEngine'
     condition: all of selection_root_* and 1 of selection_dword_*

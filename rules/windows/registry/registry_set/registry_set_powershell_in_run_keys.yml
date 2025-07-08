@@ -5,9 +5,10 @@ description: Detects potential PowerShell commands or code within registry run k
 references:
     - https://github.com/frack113/atomic-red-team/blob/a9051c38de8a5320b31c7039efcbd3b56cf2d65a/atomics/T1547.001/T1547.001.md#atomic-test-9---systembc-malware-as-a-service-registry
     - https://www.trendmicro.com/en_us/research/22/j/lv-ransomware-exploits-proxyshell-in-attack.html
+    - https://github.com/HackTricks-wiki/hacktricks/blob/e4c7b21b8f36c97c35b7c622732b38a189ce18f7/src/windows-hardening/windows-local-privilege-escalation/privilege-escalation-with-autorun-binaries.md
 author: frack113, Florian Roth (Nextron Systems)
 date: 2022-03-17
-modified: 2023-08-17
+modified: 2025-02-17
 tags:
     - attack.persistence
     - attack.t1547.001
@@ -16,7 +17,10 @@ logsource:
     product: windows
 detection:
     selection:
-        TargetObject|contains: '\Software\Microsoft\Windows\CurrentVersion\Run' # Also covers "RunOnce" and "RunOnceEx"
+        TargetObject|contains:
+            - '\Software\Microsoft\Windows\CurrentVersion\Run' # Also covers "RunOnce" and "RunOnceEx"
+            - '\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Run'
+            - '\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run'
         Details|contains:
             - 'powershell'
             - 'pwsh '

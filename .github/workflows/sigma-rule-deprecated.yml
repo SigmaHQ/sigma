@@ -6,7 +6,7 @@ on:
   #      - "*"
   schedule:
     - cron: "0 0 1 * *" # At 00:00 on day-of-month 1.
-  
+
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -21,10 +21,11 @@ jobs:
       uses: actions/setup-python@v4.5.0
       with:
         python-version: 3.11
-    - name: Execute deprecated csv Script
+    - name: Execute deprecated rules script
       run: |
         pip install pySigma
-        python tests/deprecated_rules.py
+        python tests/deprecated_rules.py --format csv
+        python tests/deprecated_rules.py --format json
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
       with:
@@ -36,11 +37,11 @@ jobs:
         body: |
           ### Summary of the Pull Request
 
-          This PR updates the deprecated summary file `deprecated.csv`
+          This PR updates the deprecated summary file `deprecated.csv` and `deprecated.json`
 
           ### Changelog
 
-          chore: update deprecated.csv 
+          chore: update deprecated.csv and deprecated.json
 
           ### Example Log Event
 
@@ -51,5 +52,5 @@ jobs:
           N/A
 
           ### SigmaHQ Rule Creation Conventions
-          
+
           - If your PR adds new rules, please consider following and applying these [conventions](https://github.com/SigmaHQ/sigma-specification/tree/main/sigmahq)
