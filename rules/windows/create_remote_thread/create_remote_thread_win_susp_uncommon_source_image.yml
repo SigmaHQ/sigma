@@ -10,7 +10,7 @@ references:
     - https://lolbas-project.github.io
 author: Perez Diego (@darkquassar), oscd.community
 date: 2019-10-27
-modified: 2025-03-07
+modified: 2025-07-08
 tags:
     - attack.privilege-escalation
     - attack.defense-evasion
@@ -35,6 +35,10 @@ detection:
             - 'C:\Windows\System32\csrss.exe' # multiple OS
             - 'C:\Windows\System32\LogonUI.exe' # multiple OS
             - 'C:\Windows\System32\wlrmdr.exe'
+            - 'C:\Windows\System32\AtBroker.exe'
+            - 'C:\Windows\System32\dwm.exe'
+            - 'C:\Windows\System32\fontdrvhost.exe'
+            - 'C:\Windows\System32\userinit.exe'
     filter_main_winlogon_2:
         SourceImage: 'C:\Windows\System32\winlogon.exe'
         TargetParentProcessId: 4
@@ -52,13 +56,29 @@ detection:
             - 'C:\Windows\SysWOW64\'
     filter_main_system:
         TargetImage: 'System'
-    filter_main_msiexec:
+    filter_main_msiexec_1:
         # Note: MSI installers will trigger this
         SourceImage|endswith: '\msiexec.exe'
         TargetImage|contains:
             - '\AppData\Local\'
             - 'C:\Program Files (x86)\'
             - 'C:\Program Files\'
+            - 'C:\Windows\Microsoft.NET\Framework64\' # C:\Windows\Microsoft.NET\Framework\v4.0.30319\ngen.exe
+    filter_main_msiexec_2:
+        SourceImage|endswith: '\msiexec.exe'
+        TargetImage:
+            - 'C:\Windows\System32\msiexec.exe'
+            - 'C:\Windows\SysWOW64\msiexec.exe'
+    filter_main_iexplore:
+        SourceImage: 'C:\Program Files\Internet Explorer\iexplore.exe'
+        TargetImage:
+            - 'C:\Program Files (x86)\Internet Explorer\iexplore.exe'
+            - 'C:\Windows\System32\rundll32.exe'
+    filter_main_powerpnt:
+        SourceImage|endswith: '\POWERPNT.EXE'
+        TargetImage|contains:
+            - 'C:\Program Files\Microsoft Office\' # C:\Program Files\Microsoft Office\root\vfs\ProgramFilesCommonX64\Microsoft Shared\Office16\AI\ai.exe
+            - 'C:\Program Files (x86)\Microsoft Office\'
     filter_optional_aurora_smartconsole1:
         SourceImage: 'C:\Program Files\internet explorer\iexplore.exe'
         SourceCommandLine|contains|all:
@@ -86,6 +106,12 @@ detection:
     filter_optional_onedrive:
         SourceImage: 'C:\Windows\explorer.exe'
         TargetImage|endswith: '\AppData\Local\Microsoft\OneDrive\OneDrive.exe'
+    filter_optional_aurora:
+        SourceImage: 'C:\Windows\explorer.exe'
+        TargetImage|endswith: '\aurora-dashboard.exe'
+    filter_optional_officesetup:
+        SourceImage: 'C:\Windows\explorer.exe'
+        TargetImage|endswith: '\OfficeSetup.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - This rule is best put in testing first in order to create a baseline that reflects the data in your environment.

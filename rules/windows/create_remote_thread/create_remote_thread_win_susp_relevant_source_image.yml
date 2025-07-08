@@ -10,7 +10,7 @@ references:
     - https://lolbas-project.github.io
 author: Perez Diego (@darkquassar), oscd.community
 date: 2019-10-27
-modified: 2025-05-13
+modified: 2025-07-08
 tags:
     - attack.privilege-escalation
     - attack.defense-evasion
@@ -62,12 +62,22 @@ detection:
             - '\winword.exe'
             - '\wmic.exe'
             - '\wscript.exe'
-    filter_main_defrag_conhost:
-        SourceImage: 'C:\Windows\System32\Defrag.exe'
+    filter_main_conhost:
+        SourceImage:
+            - 'C:\Windows\System32\Defrag.exe'
+            - 'C:\Windows\System32\makecab.exe'
         TargetImage: 'C:\Windows\System32\conhost.exe'
     filter_main_provtol_svchost:
         SourceImage: 'C:\Windows\System32\provtool.exe'
         TargetImage: 'C:\Windows\System32\svchost.exe'
+    filter_main_userinit:
+        SourceImage: 'C:\Windows\System32\userinit.exe'
+        TargetImage: 'C:\Windows\explorer.exe'
+    filter_main_winword:
+        SourceImage|endswith: '\WINWORD.EXE'
+        TargetImage|startswith:
+            - 'C:\Program Files (x86)\' # C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe
+            - 'C:\Program Files\' # C:\Program Files\Microsoft Office\root\vfs\ProgramFilesCommonX64\Microsoft Shared\Office16\AI\ai.exe
     filter_optional_explorer_vmtools:
         SourceImage|endswith: '\SysWOW64\explorer.exe'
         TargetImage:
