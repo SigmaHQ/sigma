@@ -4,9 +4,10 @@ status: experimental
 description: Detects suspicious new RUN key element pointing to an executable in a suspicious folder
 references:
     - https://www.fireeye.com/blog/threat-research/2018/08/fin7-pursuing-an-enigmatic-and-evasive-global-criminal-operation.html
-author: Florian Roth (Nextron Systems), Markus Neis, Sander Wiebing
+    - https://github.com/HackTricks-wiki/hacktricks/blob/e4c7b21b8f36c97c35b7c622732b38a189ce18f7/src/windows-hardening/windows-local-privilege-escalation/privilege-escalation-with-autorun-binaries.md
+author: Florian Roth (Nextron Systems), Markus Neis, Sander Wiebing, Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2018-08-25
-modified: 2024-07-16
+modified: 2025-02-17
 tags:
     - attack.persistence
     - attack.t1547.001
@@ -16,23 +17,35 @@ logsource:
 detection:
     selection_target:
         TargetObject|contains:
-            - '\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\'
-            - '\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce\'
-    selection_details:
-        - Details|contains:
-              - ':\$Recycle.bin\'
-              - ':\Temp\'
-              - ':\Users\Default\'
-              - ':\Users\Desktop\'
-              - ':\Users\Public\'
-              - ':\Windows\Temp\'
-              - '\AppData\Local\Temp\'
-              - '%temp%\'
-              - '%tmp%\'
-        - Details|startswith:
-              - '%Public%\'
-              - 'wscript'
-              - 'cscript'
+            - '\Software\Microsoft\Windows\CurrentVersion\Run'
+            - '\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Run'
+            - '\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run'
+    selection_suspicious_paths_1:
+        Details|contains:
+            - ':\Perflogs'
+            - :\ProgramData'
+            - ':\Windows\Temp'
+            - ':\Temp'
+            - '\AppData\Local\Temp'
+            - '\AppData\Roaming'
+            - ':\$Recycle.bin'
+            - ':\Users\Default'
+            - ':\Users\public'
+            - '%temp%'
+            - '%tmp%'
+            - '%Public%'
+            - '%AppData%'
+    selection_suspicious_paths_user_1:
+        Details|contains: ':\Users\'
+    selection_suspicious_paths_user_2:
+        Details|contains:
+            - '\Favorites'
+            - '\Favourites'
+            - '\Contacts'
+            - '\Music'
+            - '\Pictures'
+            - '\Documents'
+            - '\Photos'
     filter_main_windows_update:
         TargetObject|contains: '\Microsoft\Windows\CurrentVersion\RunOnce\'
         Image|startswith: 'C:\Windows\SoftwareDistribution\Download\'
@@ -42,7 +55,7 @@ detection:
         Details|contains:
             - '\AppData\Local\Temp\'
             - 'C:\Windows\Temp\'
-    condition: all of selection_* and not 1 of filter_main_*
+    condition: selection_target and (selection_suspicious_paths_1 or (all of selection_suspicious_paths_user_* )) and not 1 of filter_main_*
 falsepositives:
     - Software using weird folders for updates
 level: high

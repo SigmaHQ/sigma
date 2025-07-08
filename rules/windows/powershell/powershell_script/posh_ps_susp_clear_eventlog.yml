@@ -9,8 +9,12 @@ references:
     - https://twitter.com/oroneequalsone/status/1568432028361830402
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.001/T1070.001.md
     - https://eqllib.readthedocs.io/en/latest/analytics/5b223758-07d6-4100-9e11-238cfdd0fe97.html
-author: Nasreddine Bencherchali (Nextron Systems)
+    - https://stackoverflow.com/questions/66011412/how-to-clear-a-event-log-in-powershell-7
+    - https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.eventing.reader.eventlogsession.clearlog?view=windowsdesktop-9.0&viewFallbackFrom=dotnet-plat-ext-5.0#System_Diagnostics_Eventing_Reader_EventLogSession_ClearLog_System_String_
+    - https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.eventlog.clear
+author: Nasreddine Bencherchali (Nextron Systems), Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2022-09-12
+modified: 2025-03-12
 tags:
     - attack.defense-evasion
     - attack.t1070.001
@@ -20,11 +24,17 @@ logsource:
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
     selection:
-        ScriptBlockText|contains:
-            - 'Clear-EventLog '
-            - 'Remove-EventLog '
-            - 'Limit-EventLog '
-            - 'Clear-WinEvent '
+        - ScriptBlockText|contains:
+              - 'Clear-EventLog '
+              - 'Remove-EventLog '
+              - 'Limit-EventLog '
+              - 'Clear-WinEvent '
+        - ScriptBlockText|contains|all:
+              - 'Eventing.Reader.EventLogSession' # [System.Diagnostics.Eventing.Reader.EventLogSession]::GlobalSession.ClearLog($_.LogName)
+              - 'ClearLog'
+        - ScriptBlockText|contains:
+              - 'Diagnostics.EventLog'
+              - 'Clear'
     condition: selection
 falsepositives:
     - Rare need to clear logs before doing something. Sometimes used by installers or cleaner scripts. The script should be investigated to determine if it's legitimate
