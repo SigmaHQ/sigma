@@ -1,30 +1,36 @@
 title: ADExplorer writing complete AD snapshot into .dat file
-id: e6f7c210-1e4a-4b5e-b142-3240b62a43cb
-description: Detects the dual use tool ADExplorer writing a complete AD snapshot into .dat file. This can be used by attackers to extract data for Bloodhound with https://github.com/c3c/ADExplorerSnapshot.py
+id: 0a1255c5-d732-4b62-ac02-b5152d34fb83
+related:
+    - id: 9212f354-7775-4e28-9c9f-8f0a4544e664
+      type: similar
+description: Detects the dual use tool ADExplorer writing a complete AD snapshot into .dat file. This can be used by attackers to extract data for Bloodhound
+references:
+    - https://learn.microsoft.com/de-de/sysinternals/downloads/adexplorer
+    - https://github.com/c3c/ADExplorerSnapshot.py
+    - https://www.packetlabs.net/posts/scattered-spider-is-a-young-ransomware-gang-exploiting-large-corporations/
+    - https://trustedsec.com/blog/adexplorer-on-engagements
 status: experimental
 author: Arnim Rupp (Nextron Systems), Thomas Patzke
 date: 2025-07-09
-logsource:
-  category: file_creation
-  product: windows
-detection:
-  selection:
-    Image|endswith:
-      - '\ADExp.exe'
-      - '\ADExplorer.exe'
-      - '\ADExplorer64.exe'
-      - '\ADExplorer64a.exe'
-    TargetFilename|endswith: '.dat'
-  condition: selection
-fields:
-  - Image
-  - TargetFilename
-  - ProcessId
-  - User
-falsepositives:
-  - Legitimate use of ADExplorer by Administrators creating .dat snapshots
-level: medium
 tags:
-  - attack.collection
-  - attack.t1005
+    - attack.t1589
+    - attack.t1590
+    - attack.t1591
+    - attack.t1592
+logsource:
+    category: file_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\ADExp.exe'
+        - Image|endswith: '\ADExplorer.exe'
+        - Image|endswith: '\ADExplorer64.exe'
+        - Image|endswith: '\ADExplorer64a.exe'
+        - OriginalFileName: 'AdExp'
+    selection_written_file:
+        TargetFilename|endswith: '.dat'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use of ADExplorer by administrators creating .dat snapshots
+level: medium
 
