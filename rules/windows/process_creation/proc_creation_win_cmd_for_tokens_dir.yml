@@ -1,0 +1,26 @@
+title: Suspicious Use of for Loop with Directory Search in CMD
+id: 2782fbd8-b662-4eb5-9962-5bfbfb671e7b
+status: experimental
+description: Detects suspicious usage of the cmd.exe for /f loop combined with the tokens= parameter and a recursive directory listing. This pattern may indicate an attempt to discover and execute system binaries dynamically for example powershell, a technique sometimes used by attackers to evade detections.
+references:
+    - https://www.virustotal.com/gui/file/29837d0d3202758063185828c8f8d9e0b7b42b365c8941cc926d2d7c7bae2fb3
+    - https://www.virustotal.com/gui/search/behavior%253A%2522for%2520%252Ff%2520tokens%253D*%255C%2522%2520%2525a%2520in%2520('dir%2522?type=files # behavior:"for /f tokens=*\" %a in ('dir"
+author: Joseliyo Sanchez, @Joseliyo_Jstnk
+date: 2025-07-10
+tags:
+    - attack.execution
+    - attack.t1059.003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_tokens:
+        CommandLine|contains|all: 
+            - 'for /f'
+            - 'tokens='
+            - 'in ('
+            - 'dir'
+    condition: selection_tokens
+falsepositives:
+    - Unknown
+level: high
