@@ -12,7 +12,7 @@ references:
     - https://learn.microsoft.com/en-us/windows/win32/shell/shell-and-managed-code
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 date: 2020-05-02
-modified: 2023-01-19
+modified: 2025-07-11
 tags:
     - attack.defense-evasion
     - attack.t1112
@@ -31,7 +31,9 @@ detection:
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
         Image|endswith: '\OfficeClickToRun.exe'
     filter_integrator:
-        Image: 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
+        Image:
+            - 'C:\Program Files\Microsoft Office\root\integration\integrator.exe'
+            - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
     filter_dropbox:
         Image|endswith: '\Dropbox.exe'
         # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
@@ -60,6 +62,8 @@ detection:
         Image|startswith: 'C:\Program Files (x86)\Java\'
         Image|endswith: '\installer.exe'
         TargetObject|contains: '\Classes\WOW6432Node\CLSID\{4299124F-F2C3-41b4-9C73-9236B2AD0E8F}'
+    filter_edgeupdate:
+        Image|contains: '\Microsoft\EdgeUpdate\Install'
     condition: selection and not 1 of filter_*
 falsepositives:
     - Legitimate software (un)installations are known to cause some false positives. Please add them as a filter when encountered
