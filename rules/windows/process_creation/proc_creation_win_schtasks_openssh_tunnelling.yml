@@ -19,13 +19,17 @@ detection:
     selection_img:
         - Image|endswith: '\schtasks.exe'
         - OriginalFileName: 'schtasks.exe'
-    selection_create:
-        CommandLine|contains: ' /create '
-    selection_command:
-        CommandLine|contains:
-            - 'ssh.exe'
+    selection_cli_sshd:
+        CommandLine|contains|all:
+            - ' /create '
             - 'sshd.exe'
-    condition: all of selection_*
+            - '-f'
+    selection_cli_ssh:
+        CommandLine|contains|all:
+            - ' /create '
+            - 'ssh.exe'
+            - '-i'
+    condition: selection_img and 1 of selection_cli_*
 falsepositives:
     - Unknown
 level: high
