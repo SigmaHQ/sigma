@@ -1,0 +1,26 @@
+title: Renamed CMD Execution
+id: 9b2c97ff-aada-4cfd-bffb-f5af75724441
+status: experimental
+description: |
+    Detects execution of renamed cmd.exe, which may indicate an attempt to evade detection.
+    Threat actors may rename cmd.exe to bypass defense controls that monitor for cmd.exe execution while maintaining the same functionality.
+references:
+    - https://asec.ahnlab.com/ko/88874/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-07-14
+tags:
+    - attack.defense-evasion
+    - attack.t1036.003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - OriginalFileName: 'Cmd.Exe'
+        - Description: 'Windows Command Processor'
+    filter:
+        Image|endswith: '\cmd.exe'
+    condition: selection and not filter
+falsepositives:
+    - Unlikely
+level: high
