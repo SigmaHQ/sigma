@@ -1,0 +1,35 @@
+title: ADExplorer Writing Complete AD Snapshot Into .dat File
+id: 0a1255c5-d732-4b62-ac02-b5152d34fb83
+related:
+    - id: 9212f354-7775-4e28-9c9f-8f0a4544e664
+      type: similar
+status: experimental
+description: Detects the dual use tool ADExplorer writing a complete AD snapshot into a .dat file. This can be used by attackers to extract data for Bloodhound, usernames for password spraying or use the meta data for social engineering. The snapshot doesn't contain password hashes but there have been cases, where administrators put passwords in the comment field.
+references:
+    - https://learn.microsoft.com/de-de/sysinternals/downloads/adexplorer
+    - https://github.com/c3c/ADExplorerSnapshot.py
+    - https://www.packetlabs.net/posts/scattered-spider-is-a-young-ransomware-gang-exploiting-large-corporations/
+    - https://www.nccgroup.com/us/research-blog/lapsus-recent-techniques-tactics-and-procedures/
+    - https://trustedsec.com/blog/adexplorer-on-engagements
+author: Arnim Rupp (Nextron Systems), Thomas Patzke
+date: 2025-07-09
+tags:
+    - attack.discovery
+    - attack.t1087.002
+    - attack.t1069.002
+    - attack.t1482
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\ADExp.exe'
+            - '\ADExplorer.exe'
+            - '\ADExplorer64.exe'
+            - '\ADExplorer64a.exe'
+        TargetFilename|endswith: '.dat'
+    condition: selection
+falsepositives:
+    - Legitimate use of ADExplorer by administrators creating .dat snapshots
+level: medium
