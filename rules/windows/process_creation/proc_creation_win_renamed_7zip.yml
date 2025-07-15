@@ -1,0 +1,31 @@
+title: Renamed 7-Zip Execution
+id: fe17ee5b-22ae-4d3d-abad-815a78a7e164
+status: experimental
+description: |
+    Detects execution of renamed 7-Zip, a common commandline archiving tool.
+    Adversaries may use utilities like 7-zip to compress and/or encrypt collected data prior to exfiltration.
+    But they may rename the executable to avoid detection by security solutions that monitor for known malicious tools.
+references:
+    - https://www.splunk.com/en_us/blog/security/inno-setup-malware-redline-stealer-campaign.html
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-07-15
+tags:
+    - attack.defense-evasion
+    - attack.t1036.003
+    - attack.collection
+    - attack.t1560.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - OriginalFileName|endswith: '\7z*.exe'
+        - Description: '7-Zip Console'
+    filter:
+        Image|endswith:
+            - '\7z*.exe'
+            - '\7-z*.exe'
+    condition: selection and not filter
+falsepositives:
+    - Unknown
+level: high
