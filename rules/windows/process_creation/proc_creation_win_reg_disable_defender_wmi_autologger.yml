@@ -1,6 +1,6 @@
 title: Disabling Windows Defender WMI Autologger Session via Reg.exe
 id: a1b2c3d4-e5f6-a7b8-c9d0-e1f2a3b4c5d6
-status: testing
+status: experimental
 description: |
     Detects the use of reg.exe to disable the Event Tracing for Windows (ETW) Autologger session for Windows Defender API and Audit events.
     By setting the 'Start' value to '0' for the 'DefenderApiLogger' or 'DefenderAuditLogger' session, an attacker can prevent these critical security events
@@ -26,9 +26,9 @@ detection:
             - 'add'
             - '\SYSTEM\CurrentControlSet\Control\WMI\Autologger\'
             - 'Start'
-        CommandLine|re: '\s['"]?0(x00000000)?' # Matches 0 or 0x00000000 with a leading space and optional leading single or double quote
+        CommandLine|re: '\s[''"]?0(x00000000)?' # Matches 0 or 0x00000000 with a leading space and optional leading single or double quote
     selection_logger:
-        process.command_line|contains:
+        CommandLine|contains:
             - '\DefenderApiLogger'
             - '\DefenderAuditLogger'
     condition: all of selection_*
