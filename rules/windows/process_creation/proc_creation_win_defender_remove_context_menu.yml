@@ -1,11 +1,11 @@
-title: Windows Defender Context Menu Removed via Reg.exe
+title: Windows Defender Context Menu Removed
 id: b9e8c7d6-a5f4-4e3d-8b1a-9f0c8d7e6a5b
 related:
     - id: 72a0369a-2576-4aaf-bfc9-6bb24a574ac6
       type: similar
 status: experimental
 description: |
-    Detects the use of reg.exe to delete the Windows Defender context menu handler registry keys.
+    Detects the use of reg.exe or PowerShell to delete the Windows Defender context menu handler registry keys.
     This action removes the "Scan with Microsoft Defender" option from the right-click menu for files, directories, and drives.
     Attackers may use this technique to hinder manual, on-demand scans and reduce the visibility of the security product.
 references:
@@ -25,11 +25,23 @@ detection:
     selection_img:
         - Image|endswith: '\reg.exe'
         - OriginalFileName: 'reg.exe'
-    selection_cmd:
+        - Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        - OriginalFileName:
+            - 'PowerShell.EXE'
+            - 'pwsh.dll'
+    selection_reg:
         CommandLine|contains|all:
             - ' del'
             - '\shellex\ContextMenuHandlers\EPP'
-    condition: all of selection_*
+    selection_ps_remove:
+        CommandLine|contains:
+            - 'Remove-Item'
+            - 'ri '
+    selection_ps_path:
+        CommandLine|contains: 'shellex\ContextMenuHandlers\EPP'
+    condition: selection_img and (selection_reg or (selection_ps_path and selection_ps_remove))
 falsepositives:
     - May be part of a system customization or "debloating" script, but this is highly unusual in a managed corporate environment.
 level: high
