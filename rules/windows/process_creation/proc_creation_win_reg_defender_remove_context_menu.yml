@@ -19,15 +19,14 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_process:
-        Image|endswith: '\reg.exe'
-        CommandLine|contains: 'delete'
-    selection_paths:
-        CommandLine|contains:
-            - '\\*\shellex\ContextMenuHandlers\EPP'
-            - '\Directory\shellex\ContextMenuHandlers\EPP'
-            - '\Drive\shellex\ContextMenuHandlers\EPP'
-    condition: selection_process and selection_paths
+    selection_img:
+        - Image|endswith: '\reg.exe'
+        - OriginalFileName: 'reg.exe'
+    selection_cmd:
+        CommandLine|contains|all: 
+            - ' del'
+            - '\shellex\ContextMenuHandlers\EPP'
+    condition: all of selection_*
 falsepositives:
     - May be part of a system customization or "debloating" script, but this is highly unusual in a managed corporate environment.
 level: high
