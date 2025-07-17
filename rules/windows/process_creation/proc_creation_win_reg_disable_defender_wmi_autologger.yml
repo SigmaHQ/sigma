@@ -20,18 +20,20 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_base:
-        Image|endswith: '\reg.exe'
+    selection_img:
+        - Image|endswith: '\reg.exe'
+        - OriginalFileName: '\reg.exe'
+    selection_reg_path:
+        CommandLine|contains:
+            - '\Control\WMI\Autologger\DefenderApiLogger\Start'
+            - '\Control\WMI\Autologger\DefenderAuditLogger\Start'
+    selection_reg_add:
         CommandLine|contains|all:
             - 'add'
-            - '\SYSTEM\CurrentControlSet\Control\WMI\Autologger\'
-            - 'Start'
-        CommandLine|re: '\s[''"]?0(x00000000)?' # Matches 0 or 0x00000000 with a leading space and optional leading single or double quote
-    selection_logger:
-        CommandLine|contains:
-            - '\DefenderApiLogger'
-            - '\DefenderAuditLogger'
-    condition: all of selection_*
+            - '0'
+    filter_main_enable:
+        CommandLine|contains: '0x00000001'
+    condition: all of selection_* and not 1 of filter_main_*
 falsepositives:
     - Extremely rare. Legitimate administrators should not be disabling these specific logging sessions as part of standard operations. This is a strong indicator of malicious activity.
 level: high
