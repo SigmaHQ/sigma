@@ -1,0 +1,26 @@
+title: Delete Defender Scan ShellEx Context Menu Registry Key
+id: 72a0369a-2576-4aaf-bfc9-6bb24a574ac6
+related:
+    - id: b9e8c7d6-a5f4-4e3d-8b1a-9f0c8d7e6a5b
+      type: similar
+status: experimental
+description: Detects deletion of registry key that adds 'Scan with Defender' option in context menu. Attackers may use this to make it harder for users to scan files that are suspicious.
+references:
+    - https://research.splunk.com/endpoint/395ed5fe-ad13-4366-9405-a228427bdd91/
+    - https://winaero.com/how-to-delete-scan-with-windows-defender-from-context-menu-in-windows-10/
+    - https://thedfirreport.com/2021/10/18/icedid-to-xinglocker-ransomware-in-24-hours/
+    - https://blog.malwarebytes.com/malwarebytes-news/2021/02/lazyscripter-from-empire-to-double-rat/
+author: 'Matt Anderson (Huntress)'
+date: 2025-07-11
+tags:
+    - attack.defense-evasion
+logsource:
+    category: registry_delete
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: 'shellex\ContextMenuHandlers\EPP'
+    condition: selection
+falsepositives:
+    - Unlikely as this weakens defenses and normally would not be done even if using another AV.
+level: medium
