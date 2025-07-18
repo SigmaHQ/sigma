@@ -23,25 +23,24 @@ logsource:
     product: windows
 detection:
     selection_img:
-        - Image|endswith: '\reg.exe'
-        - OriginalFileName: 'reg.exe'
         - Image|endswith:
+              - '\powershell_ise.exe'
               - '\powershell.exe'
               - '\pwsh.exe'
+              - '\reg.exe'
         - OriginalFileName:
+              - 'powershell_ise.EXE'
               - 'PowerShell.EXE'
               - 'pwsh.dll'
-    selection_reg:
-        CommandLine|contains|all:
-            - ' del'
-            - '\shellex\ContextMenuHandlers\EPP'
-    selection_ps_remove:
-        CommandLine|contains:
+              - 'reg.exe'
+    selection_action:
+        CommandLine|contains
+            - 'del'
             - 'Remove-Item'
             - 'ri '
-    selection_ps_path:
-        CommandLine|contains: 'shellex\ContextMenuHandlers\EPP'
-    condition: selection_img and (selection_reg or (selection_ps_path and selection_ps_remove))
+    selection_reg_path:
+        CommandLine|contains: '\shellex\ContextMenuHandlers\EPP'
+    condition: all of selection_*
 falsepositives:
     - May be part of a system customization or "debloating" script, but this is highly unusual in a managed corporate environment.
 level: high
