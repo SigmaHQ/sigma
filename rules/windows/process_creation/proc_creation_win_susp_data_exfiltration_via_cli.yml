@@ -6,7 +6,7 @@ references:
     - https://www.sentinelone.com/blog/living-off-windows-defender-lockbit-ransomware-sideloads-cobalt-strike-through-microsoft-security-tool/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-08-02
-modified: 2023-07-27
+modified: 2025-07-18
 tags:
     - attack.execution
     - attack.t1059.001
@@ -16,14 +16,17 @@ logsource:
 detection:
     selection_iwr:
         Image|endswith:
+            - '\powershell_ise.exe'
             - '\powershell.exe'
             - '\pwsh.exe'
             - '\cmd.exe'
         CommandLine|contains:
+            - 'curl '
+            - 'Invoke-RestMethod'
             - 'Invoke-WebRequest'
+            - 'irm '
             - 'iwr '
             - 'wget '
-            - 'curl '
         CommandLine|contains|all:
             - ' -ur' # Shortest possible version of the -uri flag
             - ' -me' # Shortest possible version of the -method flag
