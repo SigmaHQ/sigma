@@ -1,0 +1,35 @@
+title: SVG File With Double Extension
+id: 09f7829f-e0c1-48b3-9ec6-f2130757f93f
+status: experimental
+description: |
+    Detects creation of SVG files with suspicious double extensions that may be used in phishing attacks.
+    Malicious actors may use double extensions to disguise SVG files as other file types, such as PDF or DOCX, to trick users into opening them
+    and executing maicious code embedded within the SVG <script> tags.
+references:
+    - https://vipre.com/blog/svg-phishing-attacks-the-new-trick-in-the-cybercriminals-playbook/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-07-22
+tags:
+    - attack.initial-access
+    - attack.t1566.001
+    - attack.defense-evasion
+    - attack.t1036.007
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|endswith:
+            - '.doc.svg'
+            - '.docx.svg'
+            - '.pdf.svg'
+            - '.ppt.svg'
+            - '.pptx.svg'
+            - '.rtf.svg'
+            - '.txt.svg'
+            - '.xls.svg'
+            - '.xlsx.svg'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

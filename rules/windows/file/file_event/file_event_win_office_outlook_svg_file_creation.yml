@@ -1,0 +1,31 @@
+title: SVG File Created by Outlook Process
+id: fabb0e80-030c-4e3e-a104-d09676991ac3
+status: experimental
+description: |
+    Detects the creation of files with the ".svg" extensions in the temporary directory that Outlook uses when opening attachments.
+    This can be used to detect spear-phishing campaigns that use SVG files as attachments, which may contain malicious code.
+references:
+    - https://vipre.com/blog/svg-phishing-attacks-the-new-trick-in-the-cybercriminals-playbook/
+author:  Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-07-22
+tags:
+    - attack.initial-access
+    - attack.t1566.001
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection_extension:
+        TargetFilename|endswith: '.svg'
+    selection_location:
+        - TargetFilename|contains:
+              - '\AppData\Local\Packages\Microsoft.Outlook_' # New Outlook
+              - '\AppData\Local\Microsoft\Olk\Attachments\' # New Outlook
+        - TargetFilename|contains|all:
+              - '\AppData\Local\Microsoft\Windows\'
+              - '\Content.Outlook\'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate SVG files received as email attachments and opened from Outlook
+    - Opening of Headers or footers in email signatures that include SVG images
+level: medium # Kept at medium to avoid false positives from legitimate SVG files
