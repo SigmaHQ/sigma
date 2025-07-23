@@ -1,0 +1,33 @@
+title: Execution of Robocopy to Copy Files to or from File Shares
+id: 9bfab4d7-5f09-4f21-8c5e-6a9f7f5ed6a1
+status: experimental
+description: |
+    Detects the use of Robocopy to copy files to or from File shares, which could indicate data exfiltration or malware download activity.
+    Robocopy is a legitimate robust file copy utility. Since it is living in the system, it can be abused by attackers to transfer files to or from network shares, including WebDAV shares.
+    The usage of Robocopy with network paths is not commonly observed behavior in typical normal user activity, making it a potential indicator of compromise.
+references:
+    - https://x.com/WhichbufferArda/status/1939668867476832300
+    - https://bazaar.abuse.ch/sample/62fce3f773ec3911fe1a20d3aca1fced6c1a5afa4d8f58711e49232b7dc9c111
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-07-23
+tags:
+    - attack.exfiltration
+    - attack.t1048
+    - attack.t1105
+    - attack.command-and-control
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\robocopy.exe'
+        - OriginalFileName: 'robocopy.exe'
+    selection_cli:
+        CommandLine|contains:
+            - ' \\\\'
+            - '\DavWWWROOt\'
+    condition: all of slection_*
+falsepositives:
+    - Legitimate use of Robocopy to copy files to or from network shares
+level: medium
