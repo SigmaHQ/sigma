@@ -41,18 +41,17 @@ detection:
         - OriginalFileName:
               - 'robocopy.exe'
               - 'XCOPY.EXE'
-    target:
-        CommandLine|contains:
-            - '\System32'
-            - '\SysWOW64'
-            - '\WinSxS'
-    filter_main_cmd:
-        CommandLine|endswith:
-            - 'C:\Windows\System32\xcopy.exe'
-            - 'C:\Windows\SysWOW64\xcopy.exe'
-            - 'C:\Windows\System32\robocopy.exe'
-            - 'C:\Windows\SysWOW64\robocopy.exe'
-    condition: 1 of selection_* and target and not 1 of filter_main_*
+    target|contains:
+            - ' C:\Windows\System32'
+            - ' C:\Windows\SysWOW64'
+            - ' C:\Windows\WinSxS'
+            - ' "C:\Windows\System32'
+            - ' "C:\Windows\SysWOW64'
+            - ' "C:\Windows\WinSxS'
+            - " 'C:\Windows\System32"
+            - " 'C:\Windows\SysWOW64"
+            - " 'C:\Windows\WinSxS"
+    condition: 1 of selection_* and target
 falsepositives:
     - Depend on scripts and administrative tools used in the monitored environment (For example an admin scripts like https://www.itexperience.net/sccm-batch-files-and-32-bits-processes-on-64-bits-os/)
     - When cmd.exe and xcopy.exe are called directly #  C:\Windows\System32\cmd.exe /c copy file1 file2
