@@ -8,6 +8,7 @@ references:
     - https://app.any.run/tasks/64043a79-165f-4052-bcba-e6e49f847ec1/ # Office Document
 author: Joseph Kamau
 date: 2024-05-27
+modified: 2025-07-09
 tags:
     - attack.execution
     - attack.t1204.002
@@ -29,9 +30,13 @@ detection:
             - '\maxthon.exe'
             - '\seamonkey.exe'
             - '\vivaldi.exe'
-            - ''
         CommandLine|contains: 'http'
-    condition: selection
+    filter_main_microsoft_page: # filtering out MS office redirection to Microsoft page
+        ParentImage|contains:
+            - 'C:\Program Files\Microsoft Office\'
+            - 'C:\Program Files (x86)\Microsoft Office\'
+        CommandLine|contains: 'https://go.microsoft.com/fwlink/?linkid'
+    condition: selection and 1 of filter_main_*
 falsepositives:
     - Unlikely in most cases, further investigation should be done in the commandline of the browser process to determine the context of the URL accessed.
 level: medium
