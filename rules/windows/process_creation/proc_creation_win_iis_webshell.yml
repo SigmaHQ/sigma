@@ -1,10 +1,10 @@
 title: Suspicious Process Spawning from IIS Worker Process Chain (Webshell Indicator)
 id: b1843456-a9c9-43e2-b83d-d5123f76f7aa
 status: experimental
-description: | 
+description: |
     Detects suspicious processes spawned by IIS worker process (w3wp.exe) either directly or through cmd.exe/powershell.exe intermediary.
     Covers attack chains: w3wp.exe → suspicious_process, w3wp.exe → cmd.exe → suspicious_process, and w3wp.exe → powershell.exe → suspicious_process.
-    This activity pattern is commonly observed in webshell usage, post-exploitation frameworks, or active exploitation 
+    This activity pattern is commonly observed in webshell usage, post-exploitation frameworks, or active exploitation
     of web applications including recent SharePoint RCE vulnerabilities.
 author: TristanInSec
 date: 2025-07-24
@@ -32,15 +32,15 @@ detection:
     # Direct spawning: w3wp.exe → suspicious_process
     selection_exec_from_w3wp:
         ParentImage|endswith: '\w3wp.exe'
-    
+
     # Intermediary spawning: w3wp.exe → cmd.exe/powershell.exe → suspicious_process
     selection_exec_from_shell:
         GrandParentImage|endswith: '\w3wp.exe'
-        ParentImage|endswith: 
+        ParentImage|endswith:
             - '\cmd.exe'
             - '\powershell.exe'
             - '\pwsh.exe'
-    
+
     # PowerShell with suspicious execution patterns
     selection_powershell_suspicious:
         Image|endswith:
@@ -61,7 +61,7 @@ detection:
             - 'Start-Process'
             - 'New-Object'
             - 'Invoke-Command'
-    
+
     # Reconnaissance and system tools
     selection_recon_tools:
         Image|endswith:
@@ -71,7 +71,7 @@ detection:
             - '\query.exe'
             - '\wmic.exe'
             - '\reg.exe'
-    
+
     # Network reconnaissance tools with specific commands
     selection_net_recon:
         Image|endswith: '\net.exe'
@@ -82,7 +82,7 @@ detection:
             - 'share'
             - 'localgroup'
             - 'view'
-    
+
     # Proxy execution binaries
     selection_proxy_execution:
         Image|endswith:
@@ -91,7 +91,7 @@ detection:
             - '\mshta.exe'
             - '\cscript.exe'
             - '\wscript.exe'
-    
+
     # Download and file transfer tools with context
     selection_download_tools:
         Image|endswith:
@@ -106,7 +106,7 @@ detection:
             - '-url'
             - '-urlcache'
             - 'download'
-        
+
     condition: (1 of selection_exec_from_*) and (selection_powershell_suspicious or selection_recon_tools or selection_net_recon or selection_proxy_execution or selection_download_tools)
 falsepositives:
     - Legitimate administrative scripts executed through IIS applications
