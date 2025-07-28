@@ -1,0 +1,44 @@
+title: Windows Installer COM Remote Installation - PowerShell
+id: b8d3f28e-4ad2-447e-b76e-753ac1d2cead
+related:
+    - id: 222720a7-047f-4054-baa5-bab9be757db0
+      type: similar
+status: experimental
+description: |
+    Detects the execution of PowerShell commands that attempt to install MSI packages via the
+    Windows Installer COM object (`WindowsInstaller.Installer`) hosted remotely.
+    This could be indication of malicious software deployment or lateral movement attempts using Windows Installer functionality.
+    And the usage of WindowsInstaller COM object rather than msiexec could be an attempt to bypass the detection.
+references:
+    - https://informationsecuritybuzz.com/the-real-danger-behind-a-simple-windows-shortcut/
+    - https://redcanary.com/blog/threat-intelligence/intelligence-insights-may-2025/
+    - https://www.virustotal.com/gui/file/f9710b0ba4de5fa0e7ec27da462d4d2fc6838eba83a19f23f6617a466bbad457
+author: Meroujan Antonyan (vx3r), Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-07-28
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.defense-evasion
+    - attack.t1218
+    - attack.command-and-control
+    - attack.t1105
+logsource:
+    category: ps_script
+    product: windows
+detection:
+    selection_cli:
+        ScriptBlockText|contains|all:
+            - '-ComObject'
+            - 'InstallProduct('
+    selection_remote:
+        ScriptBlockText|contains:
+            - 'http'
+            - '\\\\'
+    filter_main_localhost:
+         ScriptBlockText|contains:
+            - '://127.0.0.1'
+            - '://localhost'
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Legitimate remote software installation by administrators
+level: medium
