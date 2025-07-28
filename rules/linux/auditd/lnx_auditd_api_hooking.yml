@@ -1,0 +1,48 @@
+---
+title: Detect API Hooking via Auditd Syscalls in Linux
+id: f3b9a7e2-9c4a-4d1b-8b7e-5c2d3f8a1b2c
+status: experimental
+description: |
+  This Sigma rule detects potential API Hooking in Linux via auditd logs.
+  It monitors syscalls (ioctl, epoll_create1, epoll_wait, bpf) from processes
+  not linked to trusted components (e.g., systemd) or agents like Splunk,
+  Elastic, or Wazuh. Such actions may suggest malicious kernel API monitoring
+  for credential theft or other harmful goals.
+author: AAtashGar
+date: '2025-07-29'
+tags:
+  - attack.t1056
+  - attack.t1056.004
+logsource:
+  product: linux
+  service: auditd
+  definition: |
+    Required auditd configuration:
+    -a always,exit -F arch=b64 -S ioctl -S epoll_create1 -S epoll_wait -S bpf
+    -k API_Hooking
+detection:
+  selection:
+    type: SYSCALL
+    syscall:
+      - ioctl
+      - epoll_create1
+      - epoll_wait
+      - bpf
+    key: API_Hooking
+  filter_trusted:
+    exe|startswith:
+      - '/lib/systemd/'
+      - '/usr/lib/systemd/'
+      - '/opt/splunk/'
+      - '/opt/elastic/'
+      - '/opt/wazuh/'
+  condition: selection and not filter_trusted
+fields:
+  - exe
+  - syscall
+  - key
+falsepositives:
+  - Legitimate system tools or monitoring agents using these syscalls
+    for valid purposes.
+  - Custom kernel modules or debugging tools in development environments.
+level: high
