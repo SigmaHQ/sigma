@@ -1,0 +1,30 @@
+title: Scheduled Task Created via Renamed Executable
+id: 3d887d3a-1523-4b93-872c-c8ec5aa970a3
+status: experimental
+description: Detects the creation of a scheduled task by an executable that is likely a renamed or masquerading version of schtasks.exe.
+references:
+    - https://arcticwolf.com/resources/blog/dropping-elephant-apt-group-targets-turkish-defense-industry/
+author: "Daniel Koifman (KoifSec)"
+date: 2025-07-28
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.defense-evasion
+    - attack.t1053.005
+    - attack.t1036.003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_proc:   # Example command simulated:  "C:\Users\User\Desktop\ff.exe" /Create /sc minute /tn NewErrorReport /tr C:\Windows\Tasks\vlc /f 
+        Image|endswith: '.exe'
+        CommandLine|contains|all:
+            - '/create '
+            - '/sc '
+            - '/tn '
+            - '/tr '
+    condition: selection_proc
+falsepositives:
+    - Unlikely
+level: High
