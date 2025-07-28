@@ -1,0 +1,54 @@
+title: Suspicious LDAP Query Detected
+id: a3f8b9c2-7e4d-4f1b-8a3e-5d6f2e9b1c0d
+status: experimental
+description: Detects LDAP queries that contain suspicious filters, which may indicate reconnaissance or malicious activity.
+author: AAtashGar
+date: 2025-07-28
+logsource:
+    product: zeek
+detection:
+    selection:
+        filter|contains:
+            - '(groupType:1.2.840.113556.1.4.803:=2147483648)'
+            - '(groupType:1.2.840.113556.1.4.803:=2147483656)'
+            - '(groupType:1.2.840.113556.1.4.803:=2147483652)'
+            - '(groupType:1.2.840.113556.1.4.803:=2147483650)'
+            - '(sAMAccountType=805306369)'
+            - '(sAMAccountType=805306368)'
+            - '(sAMAccountType=536870913)'
+            - '(sAMAccountType=536870912)'
+            - '(sAMAccountType=268435457)'
+            - '(sAMAccountType=268435456)'
+            - '(objectCategory=groupPolicyContainer)'
+            - '(objectCategory=organizationalUnit)'
+            - '(objectCategory=Computer)'
+            - '(objectCategory=nTDSDSA)'
+            - '(objectCategory=server)'
+            - '(objectCategory=domain)'
+            - '(objectCategory=person)'
+            - '(objectCategory=group)'
+            - '(objectCategory=user)'
+            - '(objectClass=trustedDomain)'
+            - '(objectClass=computer)'
+            - '(objectClass=server)'
+            - '(objectClass=group)'
+            - '(objectClass=user)'
+            - '(primaryGroupID=521)'
+            - '(primaryGroupID=516)'
+            - '(primaryGroupID=515)'
+            - '(primaryGroupID=512)'
+            - 'Domain Admins'
+            - 'objectGUID=*'
+            - '(schemaIDGUID=*)'
+            - 'admincount=1'
+    condition: selection
+fields:
+    - filter
+    - id.orig_h
+    - id.orig_p
+    - id.resp_h
+    - id.resp_p
+    - proto
+falsepositives:
+    - Legitimate administrative activity
+level: low
