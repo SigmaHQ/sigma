@@ -8,7 +8,7 @@ description: |
 references:
     - https://www.akamai.com/blog/security-research/active-exploitation-coyote-malware-first-ui-automation-abuse-in-the-wild#detect
 author: Saiprashanth Pulisetti
-date: 2025/07/29
+date: 2025-07-29
 tags:
     - attack.credential-access
     - attack.t1555
@@ -19,23 +19,22 @@ logsource:
     product: windows
     category: image_load
 detection:
-    detection:
-        selection:
-            ImageLoaded|endswith: \UIAutomationCore.dll
-        filter_legitimate_paths:
-            ImageLoaded|startswith:
-                - C:\Windows\System32\
-                - C:\Windows\SysWOW64\
-        filter_legitimate_processes:
-            Image|endswith:
-                - \narrator.exe
-                - \osk.exe
-                - \magnify.exe
-                - \utilman.exe
-                - \sethc.exe
-                - \AtBroker.exe
-                - \displayswitch.exe
-        condition: selection and not 1 of filter_*
+  selection:
+    ImageLoaded|endswith: '\UIAutomationCore.dll'
+  filter_legitimate_paths:
+    ImageLoaded|startswith:
+      - 'C:\Windows\System32\'
+      - 'C:\Windows\SysWOW64\'
+  filter_legitimate_processes:
+    Image|endswith:
+      - '\narrator.exe'
+      - '\osk.exe'
+      - '\magnify.exe'
+      - '\utilman.exe'
+      - '\sethc.exe'
+      - '\AtBroker.exe'
+      - '\displayswitch.exe'
+  condition: selection and not 1 of filter_*
 falsepositives:
     - Legitimate accessibility applications
     - Screen readers and assistive technology
