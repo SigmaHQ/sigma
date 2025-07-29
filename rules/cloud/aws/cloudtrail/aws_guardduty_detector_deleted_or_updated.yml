@@ -1,11 +1,16 @@
 title: AWS GuardDuty Detector Deleted Or Updated
 id: d2656e78-c069-4571-8220-9e0ab5913f19
 status: experimental
-description: Detects successful deletion or disabling of an AWS GuardDuty detector, possibly by an attacker trying to avoid detection of its malicious activities or could be part of a legitimate security test. Upon deletion, GuardDuty stops monitoring the environment and all existing findings are lost. Verify with the user identity that this activity is legitimate.
+description: |
+    Detects successful deletion or disabling of an AWS GuardDuty detector, possibly by an attacker trying to avoid
+    detection of its malicious activities or could be part of a legitimate security test. Upon deletion, GuardDuty
+    stops monitoring the environment and all existing findings are lost. Verify with the user identity that this
+    activity is legitimate.
 references:
     - https://docs.aws.amazon.com/guardduty/latest/APIReference/API_DeleteDetector.html
     - https://docs.aws.amazon.com/guardduty/latest/APIReference/API_UpdateDetector.html
     - https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_suspend-disable.html
+    - https://docs.datadoghq.com/security/default_rules/719-39f-9cd/
     - https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-general-policies/ensure-aws-guardduty-detector-is-enabled
     - https://docs.stellarcyber.ai/5.2.x/Using/ML/Alert-Rule-Based-Potentially_Malicious_AWS_Activity.html
     - https://github.com/Azure/Azure-Sentinel/blob/master/Solutions/Amazon%20Web%20Services/Analytic%20Rules/AWS_GuardDutyDisabled.yaml
@@ -24,30 +29,19 @@ tags:
 logsource:
     product: aws
     service: cloudtrail
-    category: management
 detection:
     selection_delete:
-        eventSource: "guardduty.amazonaws.com"
-        eventName: "DeleteDetector"
+        eventSource: 'guardduty.amazonaws.com'
+        eventName: 'DeleteDetector'
         errorCode: null
     selection_update:
-        eventSource: "guardduty.amazonaws.com"
-        eventName: "UpdateDetector"
+        eventSource: 'guardduty.amazonaws.com'
+        eventName: 'UpdateDetector'
         errorCode: null
-        requestParameters.enable: "false"
-    condition: selection_delete or selection_update
-fields:
-    - eventTime
-    - userIdentity.type
-    - userIdentity.arn
-    - userIdentity.accountId
-    - sourceIPAddress
-    - awsRegion
-    - requestParameters.detectorId
-    - userAgent
+        requestParameters.enable: 'false'
+    condition: 1 of selection_*
 falsepositives:
     - Legitimate detector deletion by an admin (e.g., during account decommissioning).
     - Temporary disablement for troubleshooting (verify via change management tickets).
     - Automated deployment tools (e.g., Terraform) managing GuardDuty state.
-    - Security testing (e.g., Atomic Red Team T1562.001).
 level: high
