@@ -1,0 +1,30 @@
+title: Defender Threat Allowed via WMIC
+id: 3443efcd-f97f-4d10-8f06-b39f581be182
+status: experimental
+description: This rule detects WMIC commands that modify Defender’s threat response behavior to allow specific threats (via action=6, which means Allow or via action=9, which means NoAction).
+references:
+    - https://learn.microsoft.com/en-us/powershell/module/defender/add-mppreference?view=windowsserver2025-ps#-threatiddefaultaction-actions
+author: "Daniel Koifman (KoifSec)"
+date: 2025-07-29
+tags:
+    - attack.execution
+    - attack.defense-evasion
+    - attack.t1047
+    - attack.t1562.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:   # Example command simulated:  WMIC /NAMESPACE:\\\root\Microsoft\Windows\Defender PATH MSFT_MpPreference call Add ThreatIDDefaultAction_Ids=1 ThreatIDDefaultAction_Actions=6 Force=True
+        Image|endswith: '\wmic.exe'
+        CommandLine|contains|all:
+            - 'msft_mppreference'
+            - 'defender'
+            - 'call'
+            - 'add'
+            - 'ThreatIDDefaultAction_Ids'
+        CommandLine|re: 'ThreatIDDefaultAction_Actions(\s*|)=(\s*|)(6|9)'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
