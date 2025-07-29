@@ -2,7 +2,7 @@ title: Suspicious UI Automation Named Pipe Creation
 id: 5e631c7d-c93e-48f5-a78a-1706d9cda972
 status: experimental
 description: |
-    Detects creation of named pipes with UIA_PIPE_ prefix, which are used by Microsoft''s UI Automation framework.
+    Detects creation of named pipes with UIA_PIPE_ prefix, which are used by Microsoft's UI Automation framework.
     This activity may indicate malicious use of UI Automation for credential theft or unauthorized UI interaction.
     Coyote malware has been observed using UI Automation to extract credentials from banking applications.
 references:
@@ -18,28 +18,27 @@ tags:
     - attack.collection
     - attack.t1113
 logsource:
-  category: pipe_created
-  product: windows
-  definition: Requires Sysmon Event ID 17 (Pipe Created) to be configured in Sysmon
-    configuration
+    category: pipe_created
+    product: windows
+    definition: Requires Sysmon Event ID 17 (Pipe Created) to be configured in Sysmon configuration
 detection:
-  selection:
-    PipeName|startswith: \UIA_PIPE_
-  filter_legitimate_processes:
-    Image|endswith:
-    - \narrator.exe
-    - \osk.exe
-    - \magnify.exe
-    - \utilman.exe
-    - \sethc.exe
-    - \AtBroker.exe
-    - \displayswitch.exe
-    - \dwm.exe
-    - \explorer.exe
-  condition: selection and not filter_legitimate_processes
+    selection:
+        PipeName|startswith: \UIA_PIPE_
+    filter_legitimate_processes:
+        Image|endswith:
+            - \narrator.exe
+            - \osk.exe
+            - \magnify.exe
+            - \utilman.exe
+            - \sethc.exe
+            - \AtBroker.exe
+            - \displayswitch.exe
+            - \dwm.exe
+            - \explorer.exe
+    condition: selection and not filter_legitimate_processes
 falsepositives:
-- Legitimate Windows accessibility applications
-- Screen readers and assistive technology software
-- Legitimate UI automation testing tools
-- Windows system processes using UI Automation
+    - Legitimate Windows accessibility applications
+    - Screen readers and assistive technology software
+    - Legitimate UI automation testing tools
+    - Windows system processes using UI Automation
 level: medium
