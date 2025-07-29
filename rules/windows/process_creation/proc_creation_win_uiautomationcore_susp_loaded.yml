@@ -1,0 +1,50 @@
+title: Suspicious UIAutomationCore.dll Loading by Process
+id: 65b57384-aec3-411a-92e0-2b014368a78e
+status: experimental
+description: |
+  Detects when a process loads UIAutomationCore.dll, which may indicate abuse of Microsoft's UI Automation framework.
+  This technique has been observed in Coyote malware for credential theft from banking applications and cryptocurrency exchanges.
+  The rule monitors for processes that load the UI Automation Core library, which enables automated interaction with UI elements.
+references:
+  - https://www.akamai.com/blog/security-research/active-exploitation-coyote-malware-first-ui-automation-abuse-in-the-wild#detect
+  - https://hijacklibs.net/entries/microsoft/built-in/uiautomationcore.html
+author: Saiprashanth Pulisetti
+date: 2025-07-29
+modified: 2025-07-29
+tags:
+  - attack.credential-access
+  - attack.t1555
+  - attack.t1056.002
+  - attack.collection
+  - attack.t1113
+logsource:
+  category: image_load
+  product: windows
+detection:
+  selection:
+    ImageLoaded|endswith: '\UIAutomationCore.dll'
+  filter_legitimate_paths:
+    ImageLoaded|startswith:
+      - 'C:\Windows\System32\'
+      - 'C:\Windows\SysWOW64\'
+  filter_legitimate_processes:
+    Image|endswith:
+      - '\narrator.exe'
+      - '\osk.exe'
+      - '\magnify.exe'
+      - '\utilman.exe'
+      - '\sethc.exe'
+      - '\AtBroker.exe'
+      - '\displayswitch.exe'
+  condition: selection and not 1 of filter_*
+falsepositives:
+  - Legitimate accessibility applications
+  - Screen readers and assistive technology
+  - Automation tools and testing frameworks
+  - Administrative scripts using UI automation
+level: medium
+fields:
+  - Image
+  - ImageLoaded
+  - ProcessId
+  - User
