@@ -1,0 +1,32 @@
+title: Registry Manipulation via WMI Stdregprov
+id: c453ab7a-1f5c-4716-a3b4-dea8135fb43a
+status: experimental
+description: |
+    Detects when wmic.exe is used to interact with the registry via "Stdregprov".
+references:
+    - https://www.bitdefender.com/en-us/blog/businessinsights/shrinklocker-decryptor-from-friend-to-foe-and-back-again
+    - https://trustedsec.com/blog/command-line-underdog-wmic-in-action
+    - https://trustedsec.com/blog/wmi-for-script-kiddies
+author: "Daniel Koifman (KoifSec)"
+date: 2025-07-30
+tags:
+    - attack.execution
+    - attack.defense-evasion
+    - attack.discovery
+    - attack.t1047
+    - attack.t1112
+    - attack.t1012
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:   # Example command simulated:  WMIC  /NameSpace:\\root\default Class StdRegProv Call CreateKey sSubKeyName=""SOFTWARE\Policies\DeleteMe""
+        Image|endswith: '\wmic.exe'
+        CommandLine|contains|all:
+            - 'call'
+            - 'stdregprov'
+    condition: selection
+falsepositives:
+    - Administrators who perform this action
+    - Scripts or tools that perform this action
+level: medium
