@@ -20,12 +20,14 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:   # Example command simulated:  WMIC  /NameSpace:\\root\default Class StdRegProv Call CreateKey sSubKeyName=""SOFTWARE\Policies\DeleteMe""
-        Image|endswith: '\wmic.exe'
+    selection_img:   # Example command simulated:  WMIC  /NameSpace:\\root\default Class StdRegProv Call CreateKey sSubKeyName=""SOFTWARE\Policies\DeleteMe""
+        - Image|endswith: '\wmic.exe'
+        - OriginalFileName: 'wmic.exe'
+    selection_cli:
         CommandLine|contains|all:
             - 'call'
             - 'stdregprov'
-    condition: selection
+    condition: all of selection_*
 falsepositives:
     - Administrators who perform this action
     - Scripts or tools that perform this action
