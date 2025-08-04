@@ -23,18 +23,22 @@ logsource:
 detection:
     selection:
         PipeName|startswith: '\UIA_PIPE_'
-    filter_legitimate_processes:
+    filter_main_legitimate_processes:
+        Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
         Image|endswith:
-            - \narrator.exe
-            - \osk.exe
-            - \magnify.exe
-            - \utilman.exe
-            - \sethc.exe
-            - \AtBroker.exe
-            - \displayswitch.exe
-            - \dwm.exe
-            - \explorer.exe
-    condition: selection and not filter_legitimate_processes
+            - '\narrator.exe'
+            - '\osk.exe'
+            - '\magnify.exe'
+            - '\utilman.exe'
+            - '\sethc.exe'
+            - '\AtBroker.exe'
+            - '\displayswitch.exe'
+            - '\dwm.exe'
+    filter_main_explorer:
+        Image: 'C:\Windows\explorer.exe'
+    condition: all of selection_* and not 1 of filter_main_*
 falsepositives:
     - Legitimate Windows accessibility applications
     - Screen readers and assistive technology software
