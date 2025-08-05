@@ -1,0 +1,60 @@
+title: HackTool - Potential Recompiled Mimikatz Execution
+id: 9c277cea-ff19-4f34-9ae0-9e6368223417
+status: experimental
+description: |
+    Detects execution of potentially recompiled Mimikatz, a very common and powerful credential dumping tool.
+    Threat actors frequently recompile Mimikatz with different names to evade detection during their operations.
+references:
+    - https://securelist.com/apt41-in-africa/116986/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-08-05
+tags:
+    - attack.credential-access
+    - attack.t1003
+    - attack.t1003.001
+    - attack.t1003.002
+    - attack.t1003.003
+    - attack.t1003.004
+    - attack.t1003.005
+    - attack.t1003.006
+    - attack.s0002
+    - attack.defense-evasion
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:
+            - '::logonpasswords'
+            - 'busylight::'
+            - 'crypto::'
+            - 'dpapi::masterkey'
+            - 'event::clear'
+            - 'event::drop'
+            - 'kerberos::golden'
+            - 'kerberos::list'
+            - 'kerberos::ptc'
+            - 'kerberos::ptt'
+            - 'kerberos::purge'
+            - 'kerberos::tgt'
+            - 'key::export'
+            - 'lsadump::'
+            - 'minesweeper::'
+            - 'misc::printnightmare'
+            - 'misc::shadowcopies'
+            - 'misc::skeleton'
+            - 'sekurlsa::'
+            - 'sid::add'
+            - 'sid::patch'
+            - 'sid:lookup'
+            - 'token::elevate'
+            - 'token::list'
+            - 'token::revert'
+            - 'vault::'
+    filter_main_mimikatz:
+        CommandLine|contains: 'mimikatz'
+        OriginalFileName: 'mimikatz.exe'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unlikely
+level: critical
