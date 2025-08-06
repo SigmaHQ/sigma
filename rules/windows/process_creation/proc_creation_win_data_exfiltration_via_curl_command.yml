@@ -1,0 +1,25 @@
+title: Potential Data Exfiltration Via Curl Command
+id: 2865f507-d5d9-48dc-9047-a8a4d0962350
+status: experimental
+description: Detects the usage of the curl command and a clear text protocol to conduct exfiltration as detected in attacks targeting high level organizations in South China sea countries
+references:
+    - https://blogapp.bitdefender.com/labs/content/files/2024/05/Bitdefender-Report-DeepDive-creat7721-en_EN.pdf?_gl=1*1s0av4k*_ga*NjI0NjA4MDgwLjE3MTYzODg4OTk.*_ga_6M0GWNLLWF*MTcxNjM4ODg5Ni4xLjAuMTcxNjM4ODg5Ni42MC4wLjA.
+    - https://www.bitdefender.com/blog/businessinsights/deep-dive-into-unfading-sea-haze-a-new-threat-actor-in-the-south-china-sea/
+author: Joseph Kamau
+date: 2024/07/12
+tags:
+    - attack.exfiltration
+    - attack.command_and_control
+    - attack.t1071.002
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        CommandLine|contains|all:
+            - curl
+            - ftp://
+    condition: selection
+falsepositives:
+    - Unlikely, any match should be investigated to rule out malicious file transfers since FTP is not allowed in most security conscious organizations
+level: high
