@@ -1,0 +1,24 @@
+title: FunkLocker Ransomware File Creation
+id: 0b9ad457-2554-44c1-82c2-d56a99c42377
+status: test
+description: Detects and logs file creation events triggered by the FunkLocker ransomware executable across all monitored systems, enabling early identification of malicious activity and facilitating rapid incident response.
+references:
+    - https://www.broadcom.com/support/security-center/protection-bulletin/funksec-ransomware
+    - https://www.pcrisk.com/removal-guides/31853-funklocker-funksec-ransomware
+author: Saiprashanth Pulisetti ( @Prashanthblogs)
+date: 2025-08-08
+tags:
+    - attack.t1486
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_readme:
+        TargetFilename|startswith: 'README-'
+        TargetFilename|endswith: '-md'
+    selection_filename:
+        TargetFilename|endswith: .funksec
+    condition: selection_readme or selection_filename
+falsepositives:
+    - Unkown
+level: High
