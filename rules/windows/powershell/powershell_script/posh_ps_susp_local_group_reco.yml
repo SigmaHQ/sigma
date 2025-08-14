@@ -23,38 +23,14 @@ detection:
             - 'get-localgroup '
             - 'get-localgroupmember '
     selection_wmi_module:
-        ScriptBlockText|contains:
-            - 'get-wmiobject'
-            - 'win32_group'
-    test_wmi_win32_group_alias:
-        ScriptBlockText|contains|all:
-            - 'gwmi'
-            - 'win32_group'
-    test_cim_win32_group:
-        ScriptBlockText|contains|all:
-            - 'get-ciminstance'
-            - 'win32_group'
-    test_cim_win32_group_alias:
-        ScriptBlockText|contains|all:
-            - 'gcim'
-            - 'win32_group'
-    test_wmi_groupuser:
-        ScriptBlockText|contains|all:
-            - 'get-wmiobject'
-            - 'win32_groupuser'
-    test_wmi_groupuser_alias:
-        ScriptBlockText|contains|all:
-            - 'gwmi'
-            - 'win32_groupuser'
-    test_cim_groupuser:
-        ScriptBlockText|contains|all:
-            - 'get-ciminstance'
-            - 'win32_groupuser'
-    test_cim_groupuser_alias:
-        ScriptBlockText|contains|all:
-            - 'gcim'
-            - 'win32_groupuser'
-    condition: 1 of test_*
+            - 'get-wmiobject '
+            - 'gwmi '
+            - 'get-ciminstance '
+            - 'gcim '
+    selection_wmi_class:
+        ScriptBlockText|contains: 'win32_group' # Covers both win32_group and win32_groupuser
+    condition: selection_localgroup or all of selection_wmi_*
 falsepositives:
     - Inventory scripts or admin tasks
 level: low
+
