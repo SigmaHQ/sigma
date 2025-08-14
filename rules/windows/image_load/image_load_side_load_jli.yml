@@ -1,0 +1,38 @@
+title: Potential JLI.dll Side-Loading
+id: 7a3b6d1f-4a2b-4f8c-9d7e-e9f8cbf21a35
+status: experimental
+description: |
+    Detects potential DLL side-loading of jli.dll.
+    JLI.dll has been observed being side-loaded by Java processes by various threat actors, including APT41, XWorm,
+    and others in order to load malicious payloads in context of legitimate Java processes.
+references:
+    - https://securelist.com/apt41-in-africa/116986/
+    - https://lab52.io/blog/snake-keylogger-in-geopolitical-affairs-abuse-of-trusted-java-utilities-in-cybercrime-operations/
+    - https://hijacklibs.net/entries/3rd_party/oracle/jli.html
+    - https://www.proofpoint.com/us/blog/threat-insight/phish-china-aligned-espionage-actors-ramp-up-taiwan-semiconductor-targeting
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-07-25
+tags:
+    - attack.defense-evasion
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1574.001
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith: '\jli.dll'
+    filter_main_legitimate_install_paths:
+        ImageLoaded|startswith:
+            # Keeping the paths generic as jli.dll was found inside various directories of installed software
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+        Description: 'OpenJDK Platform binary'
+        OriginalFileName: 'jli.dll'
+        Product|startswith: 'OpenJDK Platform'
+        Signed: 'true'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high
