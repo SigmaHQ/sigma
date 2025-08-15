@@ -7,7 +7,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1112/T1112.md#atomic-test-5---javascript-in-registry
 author: frack113
 date: 2022-01-22
-modified: 2025-07-04
+modified: 2025-08-15
 tags:
     - attack.persistence
     - attack.defense-evasion
@@ -37,7 +37,14 @@ detection:
         TargetObject|contains: '\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Accepted Documents'
     filter_main_runtimebroker:
         Image: 'C:\Windows\System32\RuntimeBroker.exe'
-    condition: selection_domains and not 1 of filter_*
+    filter_optional_office:
+        Image:
+            - 'C:\Program Files\Common Files\microsoft shared\ClickToRun\OfficeC2RClient.exe'
+            - 'C:\Program Files (x86)\Common Files\microsoft shared\ClickToRun\OfficeC2RClient.exe'
+        TargetObject|contains:
+            - '\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\'
+            - '\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Lockdown_Zones\'
+    condition: selection_domains and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: low

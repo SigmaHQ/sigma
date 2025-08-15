@@ -7,7 +7,7 @@ references:
     - https://labs.f-secure.com/blog/scheduled-task-tampering/
 author: Syed Hasan (@syedhasan009)
 date: 2021-06-18
-modified: 2025-07-04
+modified: 2025-08-15
 tags:
     - attack.privilege-escalation
     - attack.execution
@@ -25,6 +25,8 @@ detection:
             - 'Microsoft\Windows\UpdateOrchestrator'
             - 'Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTask\Index'
             - 'Microsoft\Windows\Flighting\OneSettings\RefreshCache\Index'
+    filter_main_mousocoreworker:
+        Image|endswith: 'C:\Windows\System32\MoUsoCoreWorker.exe'
     filter_main_tiworker:
         Image|startswith: 'C:\Windows\'
         Image|endswith: '\TiWorker.exe'
@@ -54,8 +56,10 @@ detection:
             - 'C:\Program Files (x86)\Dropbox\Update\DropboxUpdate.exe'
             - 'C:\Program Files\Dropbox\Update\DropboxUpdate.exe'
     filter_optional_edge:
-        Image|endswith: '\MicrosoftEdgeUpdate.exe'
-    condition: selection and not 1 of filter_*
+        Image|endswith:
+            - 'C:\Program Files (x86)\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe'
+            - 'C:\Program Files\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high
