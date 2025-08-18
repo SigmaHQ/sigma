@@ -7,7 +7,7 @@ references:
     - https://www.virustotal.com/gui/file/54d60fd58d7fa3475fa123985bfc1594df26da25c1f5fbc7dfdba15876dd8ac5/behavior
 author: Max Altgelt (Nextron Systems), Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research), MSTIC
 date: 2021-10-15
-modified: 2024-10-14
+modified: 2025-08-18
 tags:
     - attack.defense-evasion
     - attack.t1070.002
@@ -21,15 +21,32 @@ detection:
             - 'rm -r /var/log/syslog'
             - 'rm -f /var/log/syslog'
             - 'rm -rf /var/log/syslog'
-            - 'unlink /var/log/syslog'
-            - 'unlink -r /var/log/syslog'
-            - 'unlink -f /var/log/syslog'
-            - 'unlink -rf /var/log/syslog'
+            - 'unlink /var/log/syslog' # removed other variants because of potential mixup with rm, unlink doesnt support those flags
             - 'mv /var/log/syslog'
             - ' >/var/log/syslog'
             - ' > /var/log/syslog'
-            - 'journalctl --vacuum'
+            - '>/var/log/syslog'
+            - 'true > /var/log/syslog'
+            - 'echo "" > /var/log/syslog'
+            - 'echo -n > /var/log/syslog'
+            - "printf '' > /var/log/syslog"
+            - 'cat /dev/null > /var/log/syslog'
+            - 'cp /dev/null /var/log/syslog'
+            - 'ln -sf /dev/null /var/log/syslog'   # link command variants
+            - 'ln -sfn /dev/null /var/log/syslog'
+            - 'ln -sfT /dev/null /var/log/syslog'
+            - 'truncate -s 0 /var/log/syslog'    # truncate command variants
+            - 'truncate -c -s 0 /var/log/syslog'
+            - 'truncate --size 0 /var/log/syslog'
+            - 'truncate --size=0 /var/log/syslog'
+            - 'shred -u /var/log/syslog'
+            - ' >| /var/log/syslog'  # redirection empties (spacing, noclobber, quoted path)
+            - ':>/var/log/syslog'
+            - ':> /var/log/syslog'
+            - ': > /var/log/syslog'
+            - 'journalctl --vacuum' 
     condition: selection
 falsepositives:
     - Log rotation.
+    - Maintenance.
 level: high
