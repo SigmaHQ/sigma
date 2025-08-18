@@ -8,6 +8,7 @@ references:
     - https://github.com/wietze/HijackLibs/tree/dc9c9f2f94e6872051dab58fbafb043fdd8b4176/yml/3rd_party/python
 author: Swachchhanda Shrawan Poudel
 date: 2024-10-06
+modified: 2025-08-18
 tags:
     - attack.defense-evasion
     - attack.t1574.001
@@ -25,6 +26,7 @@ detection:
         - ImageLoaded|startswith:
               - 'C:\Program Files\Python3'
               - 'C:\Program Files (x86)\Python3'
+              - 'C:\ProgramData\Anaconda3\' # Comment out if you don't use Anaconda in your environment
         - ImageLoaded|contains: '\AppData\Local\Programs\Python\Python3'
     filter_optional_visual_studio:
         ImageLoaded|startswith: 'C:\Program Files\Microsoft Visual Studio\'
@@ -32,6 +34,10 @@ detection:
         ImageLoaded|contains:
             - '\cpython\externals\'
             - '\cpython\PCbuild\'
+    filter_optional_pyinstaller:
+        # Triggered by programs bundled with PyInstaller
+        ImageLoaded|startswith: 'C:\Users'
+        ImageLoaded|contains: '\AppData\Local\Temp\_MEI'
     filter_main_legit_signature_details:
         Product: 'Python'
         Signed: 'true'
