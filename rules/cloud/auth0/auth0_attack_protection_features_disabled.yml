@@ -1,0 +1,71 @@
+title: Attack protection features manipulation - some attack protection features have been disabled.
+id: e99c27cc-0a13-41b8-a925-458f24824cd8
+status: experimental
+description: |
+    Detects when attack protection features have been disabled in the tenant's settings.
+    This detection covers Suspicious IP Throttling, Breached Password Detection, and Brute-force protection.
+references:
+    - https://auth0.com/docs/secure/attack-protection
+    - https://github.com/auth0/auth0-customer-detections/
+author: Okta
+date: 2025-07-11
+modified: 2025-08-04
+tags:
+    - attack.defense-evasion
+    - attack.t1562
+    - attack.t1562.007
+logsource:
+    product: auth0
+    service: attack_protection
+detection:
+    selection:
+        type: sapi
+        description:
+            - Update Brute-force settings
+            - Create or update the anomaly detection captcha
+            - Update Suspicious IP Throttling settings
+        details.request.body.enabled: 'false'
+    filter:
+        data.details.response.body.enabled:
+            - false
+    condition: selection and filter
+fields:
+    - type
+    - description
+    - details.request.body.enabled
+    - data.details.response.body.enabled
+falsepositives:
+    - Legitimate updates by an administrator during configuration changes
+    - Testing or troubleshooting activities by authorized personnel
+level: medium
+explanation: |
+    The query collects the events indicating modification of settings for the three listed features.
+    When the response body contains 'enabled' set to 'false', this indicates that a corresponding feature has been turned off.
+    The splunk query below lists the attack protection features that has been turned off.
+
+    Splunk Query:
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type=sapi data.description IN ("Update Suspicious IP Throttling settings",
+    "Update Breached Password Detection settings", "Update Brute-force settings")
+    data.details.response.body.enabled=false
+    | eval event_type = case(
+      'data.description'="Update Suspicious IP Throttling settings", "Suspicious IP Throttling has been disabled",
+      'data.description'="Update Breached Password Detection settings", "Breached Password Detection has been disabled",
+      'data.description'="Update Brute-force settings", "Brute-force has been disabled"
+      )
+    | table event_type
+
+    Tenant Logs Query:
+    type: "sapi" AND (description: "Update Suspicious IP Throttling settings"
+    OR description: "Update Breached Password Detection settings"
+    OR description: "Update Brute-force settings")
+
+
+comments:
+    - The splunk query above shall be tuned to reflect a valid tenant name.
+    - Adjust the detection to monitor the attack feature in use.
+    - This rule is designed for threat hunting and to be a starting point for further investigation.
+    - Control tenant admins, i.e. "Admin", as this role has permissions to modify attack protection settings.
+    - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.
+    - Control Management API scopes that allow modification of attack protection features - update:attack_protection.
+    - Control usage of Management API from only trusted IPs by applying Network ACL scoped to "management".
