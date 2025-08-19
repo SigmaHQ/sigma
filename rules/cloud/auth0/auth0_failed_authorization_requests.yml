@@ -1,0 +1,67 @@
+title: Too many failed authorization requests due to wrong parameters
+id: 6ff4eb2e-2d00-4ad1-bdf3-8c711c8b49d9
+status: experimental
+description: |
+    Detects when a request for authorization provides an unregistered redirect URI, audience, client, unsupported response type, or unsupported challenge type.
+    An adversary may try to harvest authorization codes for exchanging them for tokens later, or simply conducting a denial-of-service attack by depleting the rate limit.
+references:
+    - https://auth0.com/docs/secure/attack-protection/bot-detection
+    - https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow
+    - https://github.com/auth0/auth0-customer-detections/tree/main
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.credential-access
+    - attack.t1110
+logsource:
+    product: auth0
+    service: oidc_oauth2
+detection:
+    selection:
+        data.type: f
+        data.description|contains:
+            - 'is not supported by this server'
+            - 'mismatch'
+            - 'Unknown client'
+            - 'Unsupported response type'
+            - 'Service not found'
+    condition: selection
+fields:
+    - data.type
+    - data.description
+    - data.ip
+    - data.client_id
+    - data.user_id
+falsepositives:
+    - Misconfigured applications building a malformed request to the /authorize endpoint
+    - Development or testing activities with incorrect parameters
+    - Integration issues during application setup
+level: medium
+explanation: |
+    The query collects the failed login request entries. It monitors statistics for an unregistered redirect URI, unrecognized audience or client, unsupported response type or challenge type.
+    The splunk query below also provides the malformed values and counts a number of entries for each category. It alerts when the count for any of the categories exceeds a specified threshold.
+
+    Splunk Query:
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type = "f"
+    data.description IN ("*is not supported by this server*", "*mismatch*", "*Unknown client*", "*Unsupported response type*", "*Service not found*")
+    | rex "Callback URL mismatch\. (?<malformed_uri>.+?) is not in the list of allowed callback URLs"
+    | rex "Code challenge type (?<malformed_challenge_type>.+?) is not supported by this server."
+    | rex "\"Unknown client: (?<malformed_client>[^\"]*)\""
+    | rex "\"Unsupported response type: (?<malformed_response_type>[^\"]*)\""
+    | rex "\"Service not found: (?<malformed_audience>[^\"]*)\""
+    | stats values(malformed_uri) as malformed_uri, values(malformed_challenge_type) as malformed_challenge_type, values(malformed_client) as malformed_client, values(malformed_response_type) as malformed_response_type, values(malformed_audience) as malformed_audience
+    | transpose
+    | rename "column" as Field, "row 1" as Value
+    | eval Count=mvcount(Value)
+    | table Field, Value, Count
+    | where Count > {threshold}
+
+    Tenant Logs Query:
+    type:"f" AND description:*mismatch*
+comments:
+    - The splunk query above shall be tuned to reflect a valid tenant name.
+    - The values for threshold should be set based on the customer's environment and expected behavior that should be close to 0 when all applications are configured correctly.
+    - Prevention - Utilize Bot detection to prevent scripted attacks.
+    - Prevention - Onboard a Web Application Firewall (WAF) to prevent malformed requests to prevent injection attacks.
