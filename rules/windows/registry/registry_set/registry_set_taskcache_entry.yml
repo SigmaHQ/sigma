@@ -7,7 +7,7 @@ references:
     - https://labs.f-secure.com/blog/scheduled-task-tampering/
 author: Syed Hasan (@syedhasan009)
 date: 2021-06-18
-modified: 2025-08-15
+modified: 2025-08-19
 tags:
     - attack.privilege-escalation
     - attack.execution
@@ -27,6 +27,8 @@ detection:
             - 'Microsoft\Windows\Flighting\OneSettings\RefreshCache\Index'
     filter_main_mousocoreworker:
         Image|endswith: 'C:\Windows\System32\MoUsoCoreWorker.exe'
+    filter_main_services:
+        Image|endswith: 'C:\Windows\System32\services.exe'
     filter_main_tiworker:
         Image|startswith: 'C:\Windows\'
         Image|endswith: '\TiWorker.exe'
@@ -38,10 +40,12 @@ detection:
         TargetObject|contains:
             - '\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tasks\{B66B135D-DA06-4FC4-95F8-7458E1D10129}'
             - '\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\Microsoft\Windows\.NET Framework\.NET Framework NGEN'
-    filter_main_office_click_to_run:
+    filter_main_office:
         Image:
             - 'C:\Program Files\Microsoft Office\root\Integration\Integrator.exe'
             - 'C:\Program Files (x86)\Microsoft Office\root\Integration\Integrator.exe'
+            - 'C:\Program Files\Common Files\microsoft shared\ClickToRun\OfficeC2RClient.exe'
+            - 'C:\Program Files (x86)\Common Files\microsoft shared\ClickToRun\OfficeC2RClient.exe'
     filter_main_msiexec:
         Image: 'C:\Windows\System32\msiexec.exe'
     filter_main_explorer:
@@ -59,6 +63,10 @@ detection:
         Image|endswith:
             - 'C:\Program Files (x86)\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe'
             - 'C:\Program Files\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe'
+    filter_optional_onedrive:
+        Image|endswith:
+            - 'C:\Program Files (x86)\Microsoft OneDrive\OneDrive.exe'
+            - 'C:\Program Files\Microsoft OneDrive\OneDrive.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
