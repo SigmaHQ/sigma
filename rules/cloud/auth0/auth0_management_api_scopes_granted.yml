@@ -1,0 +1,67 @@
+title: High risk event - grant Management APIs scopes
+id: b275f0fa-3f2d-493f-a741-67e861ef77ed
+status: experimental
+description: |
+    Detects when Management API scopes are granted to applications.
+    Excessive permissions can lead to unauthorized access. Auth0 Management API scopes should be given to trusted applications and monitored.
+references:
+    - https://auth0.com/docs/secure/tokens/access-tokens/management-api-access-tokens
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.defense-evasion
+    - attack.t1548
+logsource:
+    product: auth0
+    service: management_api
+detection:
+    selection:
+        data.type: sapi
+        data.description:
+            - Update client grant
+    filter_1:
+        data.details.response.body.audience:
+            - 'https://{your-tenant-domain}/api/v2/'
+        data.details.request.body.scope{}|startswith:
+            - 'delete:'
+            - 'update:'
+    filter_2:
+        data.details.response.body.client_id:
+            - '{trusted-client_id-1}'
+            - '{trusted-client_id-2}'
+    condition: selection and filter_1 and not filter_2
+fields:
+    - data.type
+    - data.description
+    - data.details.response.body.audience
+    - data.details.request.body.scope{}
+    - data.details.response.body.client_id
+falsepositives:
+    - Legitimate updates by an administrator during configuration changes
+    - Trusted client_id has not been properly listed in filter_2
+    - Testing or troubleshooting activities by authorized personnel
+level: medium
+explanation: |
+    The query collects log entries issued when applications' settings are modified, i.e. "Update client grant".
+    It filters by audience to locate Management API related activities.
+
+    Splunk Query:
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type=sapi data.description="Update client grant"
+    data.details.response.body.audience="https://{your-tenant-domain}/api/v2/"
+    data.details.request.body.scope{} IN ("{mgg-api-scope-1}", "{mgg-api-scope-2}")
+    NOT data.details.response.body.client_id IN ({trusted-client_id-1}, {trusted-client_id-2})
+
+    Tenant Logs Query:
+    type:"sapi" AND description: "Update client grant"
+comments:
+    - The splunk query above shall be tuned to reflect a valid tenant name, audience, monitored Management API scopes, and trusted client_ids.
+    - To reduce a number of alerts, the query can be adjusted to watch for a more critical set of scopes, e.g. focus on "delete:*", but not "read:*", and/or trigger alerts when scopes are granted to applications that are not on the list of trusted clients.
+    - To get a full list of available Management APIs scope and their descriptions, you can go to Applications --> Auth0 Management API --> Permissions.
+    - To get an easier to copy list, you can go to Applications --> Auth0 Management API --> API Explorer --> Copy the token. Then go to Management API documentation (https://auth0.com/docs/api/management/v2), click "Set API Token" and paste the earlier copied token. Now, you see all scopes that are easy to copy and use in the splunk query given above.
+    - This rule is designed for threat hunting and to be a starting point for further investigation.
+    - Prevention - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
+    - Prevention - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.
+    - Prevention - Control Management API scopes that allow modification of grants - *:client_grants
+    - Prevention - Control usage of Management API from only trusted IPs by applying Network ACL scoped to "management".
