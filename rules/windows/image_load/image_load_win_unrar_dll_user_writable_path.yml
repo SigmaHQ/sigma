@@ -1,0 +1,30 @@
+title: UnRAR.dll Loaded From User-Writable Path
+id: 52f471bc-297c-4be5-a433-6d30a4bee785
+status: experimental
+description: Flags UnRAR.dll image loads from AppData/Temp indicating DLL hijack/masquerading
+references:
+  - https://www.schneier.com/blog/archives/2025/08/zero-day-exploit-in-winrar-file.html
+author: Low Country Cyber Solutions
+date: 2025/08/19
+logsource:
+  category: image_load
+  product: windows
+detection:
+  unrar:
+    ImageLoaded|endswith: '\UnRAR.dll'
+  userpaths:
+    ImageLoaded|contains:
+      - '\AppData\Local\'
+      - '\AppData\Local\Temp\'
+  condition: unrar and userpaths
+fields:
+  - ImageLoaded
+  - Image
+  - ProcessGuid
+falsepositives:
+  - Rare; investigate all occurrences
+level: high
+tags:
+  - attack.t1574.001
+  - attack.t1036.005
+  - cve.2025-8088
