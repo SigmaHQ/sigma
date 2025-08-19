@@ -1,0 +1,51 @@
+title: High Risk Actions - copying of the most powerful token through API Explorer
+id: 05661bac-636a-4645-bfbe-4fef86e73e61
+status: experimental
+description: |
+    Detects when the Auth0 Dashboard's special token is accessed through the API Explorer.
+    The Auth0 Dashboard generates automatically a special token that is authorized to use all available Management API scopes (except for newly released scopes that shall be added manually).
+    This token can be copied via Applications --> APIs --> Auth0 Management API --> API Explorer.
+references:
+    - https://auth0.com/docs/secure/tokens/access-tokens/management-api-access-tokens
+    - https://auth0.com/docs/api/management/v2
+    - https://github.com/auth0/auth0-customer-detections/
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.credential-access
+    - attack.t1528
+logsource:
+    product: auth0
+    service: oidc_oauth2
+detection:
+    selection:
+        data.type: seccft
+        data.client_id: "{api_explorer_client_id}"
+    condition: selection
+fields:
+    - data.type
+    - data.client_id
+    - data.user_id
+    - data.user_name
+    - data.ip
+falsepositives:
+    - Legitimate access by an administrator to read the API Explorer token
+    - Authorized developers accessing the token for legitimate API testing
+    - Administrative tasks requiring Management API access
+level: medium
+explanation: |
+    The query simply collects entries issued when such a token is accessed via Dashboard.
+
+    Splunk Query:
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type="seccft" data.client_id="{api_explorer_client_id}"
+    | table data.user_id, data.user_name, data.ip
+
+    Tenant Logs Query:
+    type: "seccft" AND client_id: "{api_explorer_client_id}"
+comments:
+    - The Splunk query above shall be tuned to reflect a valid tenant name and a client_id for the API Explorer application.
+    - Prevention - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
+    - Prevention - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.
+    - Prevention - Control usage of Management API from only trusted IPs by applying Network ACL scoped to "management".
