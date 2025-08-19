@@ -1,0 +1,35 @@
+title: Suspicious Process CommandLine Strings Linked to RomCom and Paper Werewolf Campaigns
+id: 921ce229-8062-4731-8478-a27f6f2c9c7a
+status: experimental
+description: Detects suspicious process command lines containing known malware/toolkit names associated with RomCom and Paper Werewolf (GOFFEE) campaigns exploiting WinRAR CVE-2025-8088/6218.
+references:
+  - https://www.schneier.com/blog/archives/2025/08/zero-day-exploit-in-winrar-file.html
+author: Low Country Cyber Solutions
+date: 2025/08/19
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  campaign_strings:
+    CommandLine|contains:
+      - 'Mythic Agent'
+      - 'SnipBot'
+      - 'RustyClaw'
+      - 'Melting Claw'
+      - 'UnRAR.dll'
+  condition: campaign_strings
+fields:
+  - Image
+  - CommandLine
+  - ParentImage
+falsepositives:
+  - Unlikely, but tools or researchers may use these names in test environments
+level: medium
+tags:
+  - attack.t1105         # Ingress Tool Transfer
+  - attack.t1055         # Process Injection
+  - cve.2025-8088
+  - cve.2025-6218
+  - malware.romcom
+  - malware.paper_werewolf
+  - malware.goffee
