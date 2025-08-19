@@ -22,7 +22,6 @@ detection:
 explanation: >
   Brute-force protection can be bypassed if the `block` shield is removed.
   This detection alerts when the feature is fully turned off or misconfigured.
-
   Splunk logic:
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type=sapi data.description="Update Brute-force settings"
@@ -40,14 +39,12 @@ explanation: >
     | table _time, data.ip, brute_force_enabled, brute_force_only_ip_specific_blocking,
              brute_force_regardless_ip_blocking, brute_force_user_notifications_on,
              brute_force_all_responses_disabled
-
   Tenant logs:
     type: "sapi" AND description: "Update Brute-force settings"
 comments: >
   - Extend detection to monitor the state of user notifications.
   - Use enrichment to validate config changes against change requests or approvals.
   - Combine with attack surface monitoring.
-prevention:
   - Enforce MFA and change control for attack protection features.
   - Log all changes from non-approved IPs or roles.
 falsepositives:
