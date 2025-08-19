@@ -1,0 +1,29 @@
+title: Winrs Local Command Execution
+id: bcfece3d-56fe-4545-9931-3b8e92927db1
+status: experimental
+description: |
+    This rule alerts when winrs.exe is used to execute a local command or process.
+    The command executed process or command will run under winrshost.exe
+references:
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/winrs
+    - Add blogpost link
+
+author: Liran Ravich
+date: 2025-08-19
+tags:
+    - attack.lateral-movement
+    - attack.defense-evasion
+    - attack.t1021.006
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\winrs.exe'
+    filter_cmd:        # Example of command to simulate (winrm needs to be enabled): "c:\Windows\System32\winrs.exe" calc.exe
+        CommandLine|re: '/remote'
+    condition: selection and not filter_cmd
+falsepositives:
+    - Unlikely
+level: high
