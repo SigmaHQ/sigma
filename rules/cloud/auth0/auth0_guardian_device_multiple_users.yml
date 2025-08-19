@@ -1,0 +1,51 @@
+title: Risk for account takeover - same Guardian application device is registered for MFA to multiple users
+id: 64bb0877-2f9a-4ff2-89e6-4b5e12b34516
+status: experimental
+description: |
+    Detects when an adversary registers their own MFA devices, often leveraging the same device for multiple compromised accounts to maintain persistence.
+    Monitors Guardian app enrollment identifiers across users to identify suspicious device reuse patterns.
+references:
+    - https://auth0.com/docs/secure/multi-factor-authentication/guardian
+    - https://github.com/auth0/auth0-customer-detections/
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.persistence
+    - attack.t1098
+logsource:
+    product: auth0
+    service: mfa
+detection:
+    selection:
+        data.type: gd_enrollment_complete
+        data.description: "Guardian - Enrollment complete"
+    condition: selection
+fields:
+    - data.type
+    - data.description
+    - data.user_id
+    - data.ip
+    - data.details.enrollment.identifier
+falsepositives:
+    - Legitimate users using the same device for multiple accounts in family or work environments
+    - Users with multiple accounts in the same tenant across several applications
+    - Shared devices in corporate environments
+level: medium
+explanation: |
+    The detection is tracking Guardian app enrollment identifiers across users. It alerts when more than 1 user has been registered with the same Guardian App - adjust.
+
+    Splunk Query:
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.description="Guardian - Enrollment complete" data.type="gd_enrollment_complete"
+    | stats dc(data.user_id) as users_count values(data.ip) by data.details.enrollment.identifier
+    | where users_count > 1
+
+    Tenant Logs Query:
+    type: "gd_enrollment_complete" AND description: "Guardian - Enrollment complete"
+comments:
+    - The splunk query above shall be tuned to reflect a valid tenant name.
+    - For customer identity, the users can leverage the same MFA for several accounts for legitimate reasons, e.g. a user has several accounts in the same tenant across several applications.
+    - To filter out false positives, look at the users' emails or users' names.
+    - Also, consider adjusting the users_count to decrease sensitivity.
+    - Prevention - Require strong MFA factors.
