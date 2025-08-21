@@ -1,0 +1,34 @@
+title: Suspicious Driver Enumeration via Driverquery
+id: 8f531311-840f-49e6-b767-810b474f5b07
+status: experimental
+description: |
+    Detects the execution of driverquery.exe from uncommon parent processes or locations, which may indicate adversary use for system discovery and vulnerability assessment during reconnaissance.
+author: yxinmiracle
+references:
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/driverquery
+    - https://thedfirreport.com/2023/01/09/unwrapping-ursnifs-gifts
+date: 2025/08/21
+tags:
+    - attack.discovery
+    - attack.t1082
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\driverquery.exe'
+    filter_common_locations:
+        Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+    filter_common_parents:
+        ParentImage|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\explorer.exe'
+    condition: selection and not 1 of filter_*
+fields:
+    - CommandLine
+falsepositives:
+    - Legitimate system administration and troubleshooting scripts run from non-standard consoles or automation tools.
+level: medium
