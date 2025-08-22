@@ -1,0 +1,45 @@
+title: Cowrie - Data Exfiltration with Wget/Curl
+id: 7f0c9588-cf4b-40d5-94e2-d884f058619c
+related:
+  - id: cb39d16b-b3b6-4a7a-8222-1cf24b686ffc
+    type: similar
+status: experimental
+description: |
+    Detects attempts to detect the data exfiltration with Wget/Curl.
+    The adversary can bypass the permission restriction with the misconfigured sudo permission for wget utility which could allow them to read files like /etc/shadow.
+references:
+  - https://linux.die.net/man/1/wget
+  - https://gtfobins.github.io/gtfobins/wget/
+  - https://curl.se/docs/manpage.html
+author: Saravanan Palanisamy
+date: 2025-08-22
+modified: 2025-08-22
+tags:
+  - attack.exfiltration
+  - attack.t1048.003
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection_wget1:
+    input|contains|all:
+      - "wget"
+      - "--post-file="
+  selection_wget2:
+    input|contains|all:
+      - "wget"
+      - "--body-file="
+  selection_curl1:
+    input|contains: "curl"
+  selection_curl2:
+    input|contains:
+      - " --form"
+      - " --upload-file "
+      - " --data "
+      - " --data-"
+  selection_curl3:
+    input|re: "\\s-[FTd]\\s"
+  condition: selection_wget1 or selection_wget2 or (selection_curl1 and (selection_curl2 or selection_curl3))
+falsepositives:
+  - Unlikely
+level: medium

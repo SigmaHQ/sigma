@@ -1,0 +1,31 @@
+title: Cowrie - Overwriting the File with Dev Zero or Null
+id: c63a050c-ba60-4d46-bac6-948074848b60
+related:
+  - id: 37222991-11e9-4b6d-8bdf-60fbe48f753e
+    type: similar
+status: experimental
+description: Detects potential overwriting and deletion of a file using DD.
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1485/T1485.md#atomic-test-2---macoslinux---overwrite-file-with-dd
+author: Saravanan Palanisamy
+date: 2025-08-22
+modified: 2025-08-22
+tags:
+  - attack.impact
+  - attack.t1485
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection_dd_of:
+    input|contains|all:
+      - "dd"
+      - "of="
+  selection_if:
+    input|contains:
+      - "if=/dev/zero"
+      - "if=/dev/null"
+  condition: selection_dd_of and selection_if
+falsepositives:
+  - Unlikely
+level: low

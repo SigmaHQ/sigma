@@ -1,0 +1,33 @@
+title: Cowrie - Credentials In Files
+id: f1876a87-6794-48cf-b293-d31b57143fb6
+related:
+  - id: df3fcaea-2715-4214-99c5-0056ea59eb35
+    type: similar
+status: experimental
+description: Detecting attempts to extract passwords with grep
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1552.001/T1552.001.md
+  - https://raw.githubusercontent.com/SigmaHQ/sigma/refs/heads/master/rules/linux/auditd/lnx_auditd_find_cred_in_files.yml
+author: Saravanan Palanisamy
+date: 2025-08-22
+modified: 2025-08-22
+tags:
+  - attack.credential-access
+  - attack.t1552.001
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains: "grep"
+  selection2:
+    input|contains:
+      - "password"
+      - "passwd"
+      - "secret"
+      - "token"
+      - "apikey"
+  condition: selection1 and selection2
+falsepositives:
+  - Unlikely
+level: high

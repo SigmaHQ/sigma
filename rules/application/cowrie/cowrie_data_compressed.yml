@@ -1,0 +1,35 @@
+title: Cowrie - Data Compressed
+id: 1c0cc596-89e0-4eb7-a3de-edcdac5c8ec9
+related:
+  - id: a3b5e3e9-1b49-4119-8b8e-0344a01f21ee
+    type: similar
+status: experimental
+description: An adversary may compress data (e.g., sensitive documents) that is collected prior to exfiltration in order to make it portable and minimize the amount of data sent over the network.
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/a78b9ed805ab9ea2e422e1aa7741e9407d82d7b1/atomics/T1560.001/T1560.001.md
+author: Saravanan Palanisamy
+date: 2025-08-22
+modified: 2025-08-22
+tags:
+  - attack.exfiltration
+  - attack.collection
+  - attack.t1560.001
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains: "zip "
+  selection2:
+    input|contains|all:
+      - "gzip"
+      - "-k"
+  selection3:
+    input|re:
+      - "(?i)\\btar\\s+-[a-z]*c[a-z]*\\b"
+      - "(?i)\\btar\\b[^\\n]*\\s-c(\\s|$)"
+      - "(?i)\\btar\\b[^\\n]*\\s--create\\b"
+  condition: 1 of selection*
+falsepositives:
+  - Unlikely
+level: low
