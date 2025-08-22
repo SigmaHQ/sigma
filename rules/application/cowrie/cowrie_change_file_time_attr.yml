@@ -1,0 +1,31 @@
+title: Cowrie - File Time Attribute Change
+id: fa8bbd84-d8c8-4dad-ac91-8a8611e7e1ff
+status: experimental
+description: Detect file time attribute change to hide new or changes to existing files.
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.006/T1070.006.md
+  - https://raw.githubusercontent.com/SigmaHQ/sigma/refs/heads/master/rules/linux/auditd/lnx_auditd_change_file_time_attr.yml
+author: Saravanan Palanisamy
+date: 2025-08-21
+modified: 2025-08-21
+tags:
+  - attack.defense-evasion
+  - attack.t1070.006
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection_cmd:
+    input|contains: "touch"
+  selection_flags:
+    input|contains:
+      - "-t"
+      - "-acmr"
+      - "-d"
+      - "-r"
+  selection_cmd1:
+    input|contains: "tar --mtime="
+  condition: (selection_cmd and selection_flags) or selection_cmd1
+falsepositives:
+  - Unlikely
+level: medium

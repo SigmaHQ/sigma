@@ -1,0 +1,27 @@
+title: Cowrie - BPFDoor Abnormal Process ID or Lock File Accessed
+id: 2ea4613d-f84a-4c60-bab4-f557a81cd384
+status: experimental
+description: Detects BPFDoor .lock and .pid files access in temporary file storage facility
+references:
+  - https://www.sandflysecurity.com/blog/bpfdoor-an-evasive-linux-backdoor-technical-analysis/
+  - https://www.elastic.co/security-labs/a-peek-behind-the-bpfdoor
+author: Saravanan Palanisamy
+date: 2025-08-21
+modified: 2025-08-21
+tags:
+  - attack.execution
+  - attack.t1106
+  - attack.t1059
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection:
+    input|contains:
+      - "/var/run/haldrund.pid"
+      - "/var/run/xinetd.lock"
+      - "/var/run/kdevrund.pid"
+  condition: selection
+falsepositives:
+  - Unlikely
+level: high

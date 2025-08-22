@@ -1,0 +1,41 @@
+title: Cowrie - Linux Command History Tampering
+id: aad50586-8b23-4298-bcb4-86e6e45699d6
+status: experimental
+description: |
+    Detects commands that try to clear or tamper with the Linux command history.
+    This technique is used by threat actors in order to evade defenses and execute commands without them being recorded in files such as "bash_history" or "zsh_history".
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.003/T1070.003.md
+  - https://www.hackers-arise.com/post/2016/06/20/covering-your-bash-shell-tracks-antiforensics
+  - https://www.cadosecurity.com/spinning-yarn-a-new-linux-malware-campaign-targets-docker-apache-hadoop-redis-and-confluence/
+author: Saravanan Palanisamy
+date: 2025-08-21
+modified: 2025-08-21
+tags:
+  - attack.defense-evasion
+  - attack.t1070.003
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection:
+    input|contains:
+      - "history -c"
+      - "history -w"
+      - "export HISTFILESIZE=0"
+      - "shopt -ou history"
+      - "shopt -uo history"
+      - "empty_bash_history"
+  selection_re:
+    input|re:
+      - "(?i)cat\\s+/(dev/(null|zero))\\s*>\\s*.*sh_history"
+      - "(?i)chattr\\s+\\+i.*sh_history"
+      - "(?i)echo\\s+(\"\"|''|\\s*)\\s*>\\s*.*sh_history"
+      - "(?i)ln\\s+-sf\\s+/(dev/(null|zero))\\s+.*sh_history"
+      - "(?i)rm(\\s+-[^\\s]+)*\\s+.*sh_history"
+      - "(?i)shred(\\s+-[^\\s]+)*\\s+.*sh_history"
+      - "(?i)truncate\\s+-s0\\s+.*sh_history"
+  condition: selection or selection_re
+falsepositives:
+  - Unlikely
+level: high
