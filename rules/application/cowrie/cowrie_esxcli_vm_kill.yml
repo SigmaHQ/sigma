@@ -1,0 +1,34 @@
+title: Cowrie - ESXi VM Kill Via ESXCLI
+id: 5e1b7cd7-cfc0-4f2a-8598-1e7b8105885f
+related:
+  - id: 2992ac4d-31e9-4325-99f2-b18a73221bb2
+    type: similar
+status: experimental
+description: Detects execution of the "esxcli" command with the "vm" and "kill" flag in order to kill/shutdown a specific VM.
+references:
+  - https://www.crowdstrike.com/blog/hypervisor-jackpotting-ecrime-actors-increase-targeting-of-esxi-servers/
+  - https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_vm.html
+  - https://www.secuinfra.com/en/techtalk/hide-your-hypervisor-analysis-of-esxiargs-ransomware/
+  - https://www.trendmicro.com/en_us/research/22/e/new-linux-based-ransomware-cheerscrypt-targets-exsi-devices.html
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.execution
+  - attack.impact
+  - attack.t1059.012
+  - attack.t1529
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains: "esxcli"
+  selection2:
+    input|contains: "vm process"
+  selection3:
+    input|contains: "kill"
+  condition: all of selection*
+falsepositives:
+  - Unlikely
+level: medium

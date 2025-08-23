@@ -1,0 +1,42 @@
+title: Cowrie - Atlassian Confluence CVE-2022-26134
+id: 8b82d2a7-72d5-4a1a-b63c-3e4a3a96f25f
+related:
+  - id: 7fb14105-530e-4e2e-8cfb-99f7d8700b66
+    type: similar
+status: experimental
+description: Detects spawning of suspicious child processes by Atlassian Confluence server which may indicate successful exploitation of CVE-2022-26134
+references:
+  - https://www.volexity.com/blog/2022/06/02/zero-day-exploitation-of-atlassian-confluence/
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.initial-access
+  - attack.execution
+  - attack.t1190
+  - attack.t1059
+  - cve.2022-26134
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains|all:
+      - "/opt/atlassian/confluence/"
+      - "/java"
+  selection2:
+    input|contains:
+      - "/bin/sh"
+      - "bash"
+      - "dash"
+      - "ksh"
+      - "zsh"
+      - "csh"
+      - "fish"
+      - "curl"
+      - "wget"
+      - "python"
+  condition: all of selection*
+falsepositives:
+  - Unlikely
+level: high

@@ -1,0 +1,35 @@
+title: Cowrie - Shell Execution via Git
+id: 1c3e4824-f730-4aa1-a238-1f1a2f8fd8d1
+related:
+  - id: 47b3bbd4-1bf7-48cc-84ab-995362aaa75a
+    type: similar
+status: experimental
+description: |
+  Detects the use of the "git" utility to execute a shell. Such behavior may be associated with privilege escalation, unauthorized command execution, or to break out from restricted environments.
+references:
+  - https://gtfobins.github.io/gtfobins/git/#shell
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.execution
+  - attack.t1059
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains: "git"
+  selection2:
+    input|contains|all:
+      - " -p "
+      - "help"
+  selection3:
+    input|contains:
+      - "bash 0<&1"
+      - "dash 0<&1"
+      - "sh 0<&1"
+  condition: all of selection*
+falsepositives:
+  - Unlikely
+level: high

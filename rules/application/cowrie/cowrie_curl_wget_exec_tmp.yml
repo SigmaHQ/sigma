@@ -1,0 +1,39 @@
+title: Cowrie - Suspicious Download and Execute Pattern via Curl/Wget
+id: 9c793d87-f5b4-4a69-bd8b-d90114b2a321
+related:
+  - id: a2d9e2f3-0f43-4c7a-bcd9-9acfc0d723aa
+    type: similar
+status: experimental
+description: |
+    Detects suspicious use of command-line tools such as curl or wget to download remote
+    content - particularly scripts - into temporary directories (e.g., /dev/shm, /tmp), followed by
+    immediate execution, indicating potential malicious activity. This pattern is commonly used
+    by malicious scripts, stagers, or downloaders in fileless or multi-stage Linux attacks.
+references:
+  - https://gtfobins.github.io/gtfobins/wget/
+  - https://gtfobins.github.io/gtfobins/curl/
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.execution
+  - attack.t1059.004
+  - attack.t1203
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains:
+      - "curl"
+      - "wget"
+  selection2:
+    input|contains:
+      - "/tmp/"
+      - "/dev/shm/"
+  selection3:
+    input|contains: "sh -c"
+  condition: all of selection*
+falsepositives:
+  - Unlikely
+level: high

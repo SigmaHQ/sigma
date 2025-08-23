@@ -1,0 +1,30 @@
+title: Cowrie - Copy Passwd Or Shadow From TMP Path
+id: 6b7c3a9f-9d1f-4b2e-8c47-8f1d9f3a2b65
+related:
+  - id: fa4aaed5-4fe0-498d-bbc0-08e3346387ba
+    type: similar
+status: experimental
+description: Detects when the file "passwd" or "shadow" is copied from tmp path
+references:
+  - https://blogs.blackberry.com/
+  - https://twitter.com/Joseliyo_Jstnk/status/1620131033474822144
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.credential-access
+  - attack.t1552.001
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|re: "(?i)\\bcp\\b"
+  selection2:
+    input|contains: "/tmp/"
+  selection3:
+    input|re: "(?i)\\b(passwd|shadow)\\b"
+  condition: selection1 and selection2 and selection3
+falsepositives:
+  - Unlikely
+level: high

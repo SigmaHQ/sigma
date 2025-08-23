@@ -1,0 +1,41 @@
+title: Cowrie - Creation/Use Of Hidden Paths Or Files
+id: f2c7b796-9f47-449a-8733-259e788a8d67
+related:
+  - id: 9e1bef8d-0fff-46f6-8465-9aa54e128c1e
+    type: similar
+status: experimental
+description: Detects calls to hidden files or files located in hidden directories in NIX systems.
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1564.001/T1564.001.md
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.defense-evasion
+  - attack.t1574.001
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection:
+    input|contains: "/."
+  selection_cmds:
+    input|contains:
+      - "mkdir"
+      - "nano"
+      - "touch"
+      - "vi"
+      - "vim"
+  selection_dot_re:
+    input|re:
+      - "(^|/)\\.[^./]"
+  filter:
+    input|contains:
+      - "/.cache/"
+      - "/.config/"
+      - "/.pyenv/"
+      - "/.rustup/toolchains"
+  condition: (selection or (selection_cmds and selection_dot_re)) and not filter
+falsepositives:
+  - Unlikely
+level: low

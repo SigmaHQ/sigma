@@ -1,0 +1,44 @@
+title: Cowrie - Suspicious Invocation of Shell via AWK
+id: 0a6f8b6a-9c9c-4c0a-8f3d-8e2f6a1b3d45
+related:
+  - id: 8c1a5675-cb85-452f-a298-b01b22a51856
+    type: similar
+status: experimental
+description: |
+  Detects the execution of "awk" or sibling commands to invoke a shell using the system() function.
+  This behavior is commonly associated with attempts to execute arbitrary commands or escalate privileges.
+references:
+  - https://gtfobins.github.io/gtfobins/awk/#shell
+  - https://gtfobins.github.io/gtfobins/gawk/#shell
+  - https://gtfobins.github.io/gtfobins/nawk/#shell
+  - https://gtfobins.github.io/gtfobins/mawk/#shell
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.execution
+  - attack.t1059
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains:
+      - "awk "
+      - "gawk "
+      - "mawk "
+      - "nawk "
+  selection2:
+    input|contains:
+      - "BEGIN {system"
+  selection3:
+    input|contains:
+      - "/bin/bash"
+      - "/bin/dash"
+      - "/bin/fish"
+      - "/bin/sh"
+      - "/bin/zsh"
+  condition: all of selection*
+falsepositives:
+  - Unlikely
+level: high

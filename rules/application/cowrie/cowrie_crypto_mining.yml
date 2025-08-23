@@ -1,0 +1,41 @@
+title: Cowrie - Linux Crypto Mining Indicators
+id: 7e4c3f21-3ab2-45e6-8f1f-62c9c3c23e1a
+related:
+  - id: 9069ea3c-b213-4c52-be13-86506a227ab1
+    type: similar
+status: experimental
+description: Detects command line parameters or strings often used by crypto miners
+references:
+  - https://www.poolwatch.io/coin/monero
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.impact
+  - attack.t1496
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection:
+    input|contains:
+      - "--donate-level=0"
+      - " -o pool."
+      - " --nicehash"
+      - " --algo=rx/0 "
+      - "stratum+tcp://"
+      - "stratum+udp://"
+      - "sh -c /sbin/modprobe msr allow_writes=on"
+      - "LS1kb25hdGUtbGV2ZWw9"
+      - "0tZG9uYXRlLWxldmVsP"
+      - "tLWRvbmF0ZS1sZXZlbD"
+      - "c3RyYXR1bSt0Y3A6Ly"
+      - "N0cmF0dW0rdGNwOi8v"
+      - "zdHJhdHVtK3RjcDovL"
+      - "c3RyYXR1bSt1ZHA6Ly"
+      - "N0cmF0dW0rdWRwOi8v"
+      - "zdHJhdHVtK3VkcDovL"
+  condition: selection
+falsepositives:
+  - Unlikely
+level: high

@@ -1,0 +1,31 @@
+title: Cowrie - System Shutdown/Reboot
+id: 0f9f3b3e-5f5f-4d8a-8a9e-3a6e2c4f7b11
+related:
+  - id: 4cb57c2f-1f29-41f8-893d-8bed8e1c1d2f
+    type: similar
+status: experimental
+description: Adversaries may shutdown/reboot systems to interrupt access to, or aid in the destruction of, those systems.
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1529/T1529.md
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.impact
+  - attack.t1529
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains:
+      - "shutdown"
+      - "reboot"
+      - "halt"
+      - "poweroff"
+  selection2:
+    input|re: "(?i)\\b(init|telinit)\\s*[06]\\b"
+  condition: selection1 or selection2
+falsepositives:
+  - Unlikely
+level: informational

@@ -1,0 +1,55 @@
+title: Cowrie - System and Hardware Information Discovery
+id: 7f7d8c1e-2e4d-4b0a-9c2a-2a4c6b7d9f31
+related:
+  - id: f34047d9-20d3-4e8b-8672-0a35cc50dc71
+    type: similar
+  - id: 1f358e2e-cb63-43c3-b575-dfb072a6814f
+    type: similar
+status: experimental
+description: Detects System Information Discovery commands
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f296668303c29d3f4c07e42bdd2b28d8dd6625f9/atomics/T1082/T1082.md
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1082/T1082.md#atomic-test-4---linux-vm-check-via-hardware
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.discovery
+  - attack.t1082
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains:
+      - "/etc/issue"
+      - "/sys/class/dmi/id/bios_version"
+      - "/sys/class/dmi/id/product_name"
+      - "/sys/class/dmi/id/chassis_vendor"
+      - "/proc/scsi/scsi"
+      - "/proc/ide/hd0/model"
+      - "/proc/version"
+  selection2:
+    input|re:
+      - "(?i)/etc/.+(version|release)"
+  selection3:
+    input|contains:
+      - "uname"
+      - "uptime"
+      - "lsmod"
+      - "hostname"
+      - "env"
+      - "lspci"
+      - "dmidecode"
+      - "lscpu"
+      - "dmesg"
+  selection4:
+    input|re: "(?i)\\bgrep\\b[^\\n]*\\b(vbox|vm|xen|virtio|hv|aarch64|arm|i386|i686|mips|x86_64)\\b"
+  selection5:
+    input|contains|all:
+      - "kmod"
+      - "list"
+  condition: 1 of selection*
+falsepositives:
+  - Unlikely
+level: low

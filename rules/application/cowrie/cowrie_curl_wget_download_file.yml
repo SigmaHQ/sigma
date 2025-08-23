@@ -1,0 +1,31 @@
+title: Cowrie - Wget/Curl Creating Files
+id: 6d1df8b1-1c9c-4a2f-9d93-7f1b6f9a8d32
+status: experimental
+description: Detects the use of wget or curl to download content.
+references:
+  - https://linux.die.net/man/1/wget
+  - https://gtfobins.github.io/gtfobins/wget/
+  - https://curl.se/docs/manpage.html
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.command-and-control
+  - attack.t1105
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|re:
+      - "(?i)\\bwget\\b[^\\n]*\\s(-P\\s*/\\S+|\\s-O\\s*/\\S+)"
+  selection2:
+    input|re:
+      - "(?i)\\bcurl\\b[^\\n]*\\s(-o|--output)\\s*/\\S+"
+  selection3:
+    input|re:
+      - "(?i)\\bcurl\\b[^\\n]*--output-dir\\s*/\\S+[^\\n]*\\s-O\\b"
+  condition: 1 of selection*
+falsepositives:
+  - Unlikely
+level: medium

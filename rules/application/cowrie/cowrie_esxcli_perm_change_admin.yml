@@ -1,0 +1,34 @@
+title: Cowrie - ESXi Admin Permission Assigned To Account Via ESXCLI
+id: 6d77e2f5-65bb-4d92-a3aa-21cfcd6f1c46
+related:
+  - id: 9691f58d-92c1-4416-8bf3-2edd753ec9cf
+    type: similar
+status: experimental
+description: Detects execution of the "esxcli" command with the "system" and "permission" flags in order to assign admin permissions to an account.
+references:
+  - https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_system.html
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.execution
+  - attack.privilege-escalation
+  - attack.t1059.012
+  - attack.t1098
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains: "esxcli"
+  selection2:
+    input|contains: "system"
+  selection3:
+    input|contains|all:
+      - " permission "
+      - " set"
+      - "Admin"
+  condition: all of selection*
+falsepositives:
+  - Unlikely
+level: high

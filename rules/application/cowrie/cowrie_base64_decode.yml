@@ -1,0 +1,31 @@
+title: Cowrie - Decode Base64 Encoded Text
+id: 8e8d2a2e-4b3b-4c9e-9e6a-0a1b2c3d4e5f
+related:
+  - id: e2072cab-8c9a-459b-b63c-40ae79e27031
+    type: similar
+status: experimental
+description: Detects usage of base64 utility to decode arbitrary base64-encoded text
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1027/T1027.md
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.defense-evasion
+  - attack.t1027
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains|all:
+      - "base64"
+      - "-d"
+  selection2:
+    input|contains|all:
+      - "base64"
+      - "--decode"
+  condition: 1 of selection*
+falsepositives:
+  - Unlikely
+level: low

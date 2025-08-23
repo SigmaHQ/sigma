@@ -1,0 +1,35 @@
+title: Cowrie - Linux Keylogging with Pam.d
+id: 5c7e2b2d-7a9a-4a99-8c5d-8f3a9d7e1bc4
+related:
+  - id: 49aae26c-450e-448b-911d-b3c13d178dfc
+    type: similar
+status: experimental
+description: Detect attempt to enable auditing of TTY input
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1056.001/T1056.001.md
+  - https://linux.die.net/man/8/pam_tty_audit
+  - https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/security_guide/sec-configuring_pam_for_auditing
+  - https://access.redhat.com/articles/4409591#audit-record-types-2
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.credential-access
+  - attack.t1003
+  - attack.t1056.001
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains:
+      - "/etc/pam.d/system-auth"
+      - "/etc/pam.d/password-auth"
+  selection2:
+    input|contains|all:
+      - "authconfig"
+      - "--enableaudit"
+  condition: selection1 or selection2
+falsepositives:
+  - Unlikely
+level: high

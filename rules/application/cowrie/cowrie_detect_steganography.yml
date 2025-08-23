@@ -1,0 +1,45 @@
+title: Cowrie - Detect Steganography
+id: b7d242b8-b28a-4e74-96af-f441774fdf29
+related:
+  - id: 45810b50-7edc-42ca-813b-bdac02fb946b
+    type: similar
+  - id: ce446a9e-30b9-4483-8e38-d2c9ad0a2280
+    type: similar
+  - id: a5a827d9-1bbe-4952-9293-c59d897eb41b
+    type: similar
+  - id: edd595d7-7895-4fa7-acb3-85a18a8772ca
+    type: similar
+status: experimental
+description: Detects appending of zip file to image as well as embedding and extraction of hidden data using steghide, and unzipping data directly from image files.
+references:
+  - https://zerotoroot.me/steganography-hiding-a-zip-in-a-jpeg-file/
+  - https://vitux.com/how-to-hide-confidential-files-in-images-on-debian-using-steganography/
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.defense-evasion
+  - attack.t1027.003
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|re:
+      - "(?i)\\bcat\\b[^\\n]*\\.(jpg|png)\\b[^\\n]*\\.zip\\b"
+  selection2:
+    input|contains|all:
+      - "steghide"
+      - "embed"
+      - "-cf"
+      - "-ef"
+  selection3:
+    input|re:
+      - "(?i)\\bsteghide\\b[^\\n]*\\bextract\\b[^\\n]*\\s-sf\\s+[^\\n]*\\.(jpg|png)\\b"
+  selection4:
+    input|re:
+      - "(?i)\\bunzip\\b[^\\n]*\\.(jpg|png)\\b"
+  condition: 1 of selection*
+falsepositives:
+  - Unlikely
+level: low

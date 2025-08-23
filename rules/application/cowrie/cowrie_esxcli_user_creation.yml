@@ -1,0 +1,32 @@
+title: Cowrie - ESXi Account Creation Via ESXCLI
+id: 5b3f12e4-8d0e-45cc-8c19-1c5f1e5a8c9d
+related:
+  - id: b28e4eb3-8bbc-4f0c-819f-edfe8e2f25db
+    type: similar
+status: experimental
+description: Detects user account creation on ESXi system via esxcli
+references:
+  - https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_system.html
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.persistence
+  - attack.execution
+  - attack.t1136
+  - attack.t1059.012
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains: "esxcli"
+  selection2:
+    input|contains|all:
+      - "system "
+      - "account "
+      - "add "
+  condition: selection1 and selection2
+falsepositives:
+  - Unlikely
+level: medium

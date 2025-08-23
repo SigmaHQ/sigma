@@ -1,0 +1,32 @@
+title: Cowrie - Clear Linux Logs
+id: 1841f89a-9f7e-4e5e-9f59-942b3bfeae63
+related:
+  - id: 80915f59-9b56-4616-9de0-fd0dea6c12fe
+    type: similar
+status: experimental
+description: Detects attempts to clear logs on the system. Adversaries may clear system logs to hide evidence of an intrusion
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.002/T1070.002.md
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.defense-evasion
+  - attack.t1070.002
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains:
+      - "rm"
+      - "shred"
+      - "unlink"
+  selection2:
+    input|contains:
+      - "/var/log"
+      - "/var/spool/mail"
+  condition: all of selection*
+falsepositives:
+  - Unlikely
+level: medium

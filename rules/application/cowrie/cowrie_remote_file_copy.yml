@@ -1,0 +1,33 @@
+title: Cowrie - Remote File Copy
+id: e3f0a1d2-9c4b-4d3f-bf66-1a2c3e4f5a67
+related:
+  - id: 7a14080d-a048-4de8-ae58-604ce58a795b
+    type: similar
+status: experimental
+description: Detects the use of tools that copy files from or to remote systems
+references:
+  - https://www.cisa.gov/stopransomware/ransomware-guide
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.command-and-control
+  - attack.lateral-movement
+  - attack.t1105
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains:
+      - "scp "
+      - "rsync "
+      - "sftp "
+  selection2:
+    input|contains:
+      - "@"
+      - ":"
+  condition: selection1 and selection2
+falsepositives:
+  - Unlikely
+level: low

@@ -1,0 +1,27 @@
+title: Cowrie - Shell Invocation via Env Command
+id: 2c5dfc54-6e89-4f88-8c25-4d2e3e9ad0d7
+related:
+  - id: bed978f8-7f3a-432b-82c5-9286a9b3031a
+    type: similar
+status: experimental
+description: |
+  Detects the use of the env command to invoke a shell. This may indicate an attempt to bypass restricted environments, escalate privileges, or execute arbitrary commands.
+references:
+  - https://gtfobins.github.io/gtfobins/env/#shell
+  - https://www.elastic.co/guide/en/security/current/linux-restricted-shell-breakout-via-linux-binary-s.html
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.execution
+  - attack.t1059
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection:
+    input|re: "(?i)\\benv\\b[^\\n]*(/bin/(bash|dash|fish|sh|zsh))\\b"
+  condition: selection
+falsepositives:
+  - Unlikely
+level: high

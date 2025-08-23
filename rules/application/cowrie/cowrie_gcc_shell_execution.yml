@@ -1,0 +1,41 @@
+title: Cowrie - Shell Execution via GCC Wrapper
+id: f5ccfd3e-8c3e-4a0d-9888-12b48e66c07d
+related:
+  - id: 9b5de532-a757-4d70-946c-1f3e44f48b4d
+    type: similar
+status: experimental
+description: |
+  Detects the use of the "gcc" utility to execute a shell. Such behavior may be associated with privilege escalation, unauthorized command execution, or to break out from restricted environments.
+references:
+  - https://gtfobins.github.io/gtfobins/gcc/#shell
+  - https://gtfobins.github.io/gtfobins/c89/#shell
+  - https://gtfobins.github.io/gtfobins/c99/#shell
+  - https://www.elastic.co/guide/en/security/current/linux-restricted-shell-breakout-via-linux-binary-s.html
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.discovery
+  - attack.t1083
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains:
+      - "gcc"
+      - "c89"
+      - "c99"
+  selection2:
+    input|contains: "-wrapper"
+  selection3:
+    input|contains:
+      - "/bin/bash,-s"
+      - "/bin/dash,-s"
+      - "/bin/fish,-s"
+      - "/bin/sh,-s"
+      - "/bin/zsh,-s"
+  condition: all of selection*
+falsepositives:
+  - Unlikely
+level: high

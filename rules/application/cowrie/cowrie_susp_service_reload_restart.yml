@@ -1,0 +1,34 @@
+title: Cowrie - Service Reload or Start/Stop
+id: 3a9f0d3b-2a69-4f9a-b5a3-9c13e52b8a92
+related:
+  - id: 2625cc59-0634-40d0-821e-cb67382a3dd7
+    type: similar
+status: experimental
+description: Detects the start, reload or restart of a service.
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1543.002/T1543.002.md
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.persistence
+  - attack.t1543.002
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains:
+      - "systemctl"
+      - "service"
+  selection2:
+    input|contains:
+      - "reload"
+      - "start"
+      - "restart"
+      - "stop"
+      - "disable"
+  condition: selection1 and selection2
+falsepositives:
+  - Unlikely
+level: low

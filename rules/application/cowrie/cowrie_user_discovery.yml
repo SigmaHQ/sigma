@@ -1,0 +1,27 @@
+title: Cowrie - System Owner or User Discovery
+id: 3f6c9d0e-1a72-4b1d-bd6f-0e7e5a2f9c3d
+related:
+  - id: 9a0d8ca0-2385-4020-b6c6-cb6153ca56f3
+    type: similar
+status: experimental
+description: |
+  Detects the execution of host or user discovery utilities such as "whoami", "hostname", "id", etc.
+  Adversaries may use the information from System Owner/User Discovery during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1033/T1033.md
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.discovery
+  - attack.t1033
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection:
+    input|re: "(?i)^\\s*(?:sudo\\s+)?(?:(?:/(?:usr/)?bin/)?(?:busybox\\s+)?)(?:whoami|hostname|uname|users|who|last|id|w)\\b"
+  condition: selection
+falsepositives:
+  - Unlikely
+level: low

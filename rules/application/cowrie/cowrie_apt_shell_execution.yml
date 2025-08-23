@@ -1,0 +1,32 @@
+title: Cowrie - Shell Invocation via Apt
+id: 8b1f1e5d-3f9f-4a27-9f3f-3c6d4f1e8b72
+related:
+  - id: bb382fd5-b454-47ea-a264-1828e4c766d6
+    type: similar
+status: experimental
+description: |
+  Detects the use of the "apt" and "apt-get" commands to execute a shell or proxy commands.
+  Such behavior may be associated with privilege escalation, unauthorized command execution, or to break out from restricted environments.
+references:
+  - https://gtfobins.github.io/gtfobins/apt/
+  - https://gtfobins.github.io/gtfobins/apt-get/
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.discovery
+  - attack.t1083
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains:
+      - "apt"
+      - "apt-get"
+  selection2:
+    input|contains: "APT::Update::Pre-Invoke::="
+  condition: selection1 and selection2
+falsepositives:
+  - Unlikely
+level: medium

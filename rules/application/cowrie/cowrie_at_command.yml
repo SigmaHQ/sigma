@@ -1,0 +1,27 @@
+title: Cowrie - Scheduled Task/Job At
+id: 4d7a2a0c-3f0e-4c8c-8a88-0a3d7a0e2f65
+related:
+  - id: d2d642d7-b393-43fe-bae4-e81ed5915c4b
+    type: similar
+status: experimental
+description: |
+  Detects the use of at/atd which are utilities that are used to schedule tasks.
+  They are often abused by adversaries to maintain persistence or to perform task scheduling for initial or recurring execution of malicious code
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1053.002/T1053.002.md
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.persistence
+  - attack.t1053.002
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection:
+    input|re: "(?i)^\\s*(?:sudo\\s+)?(?:(?:/(?:usr/)?bin/)?(?:busybox\\s+)?)(?:at|atd)\\b"
+  condition: selection
+falsepositives:
+  - Unlikely
+level: low

@@ -1,0 +1,38 @@
+title: Cowrie - Shell Execution via Find
+id: a3bfc789-861e-4a1f-a804-8051ecaeeb97
+related:
+  - id: 6adfbf8f-52be-4444-9bac-81b539624146
+    type: similar
+status: experimental
+description: |
+  Detects the use of the find command to execute a shell. Such behavior may be associated with privilege escalation, unauthorized command execution, or exploitation attempt.
+references:
+  - https://gtfobins.github.io/gtfobins/find/#shell
+  - https://www.elastic.co/guide/en/security/current/linux-restricted-shell-breakout-via-linux-binary-s.html
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.discovery
+  - attack.t1083
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains: "find"
+  selection2:
+    input|contains|all:
+      - " . "
+      - "-exec"
+  selection3:
+    input|contains:
+      - "/bin/bash"
+      - "/bin/dash"
+      - "/bin/fish"
+      - "/bin/sh"
+      - "/bin/zsh"
+  condition: all of selection*
+falsepositives:
+  - Unlikely
+level: high

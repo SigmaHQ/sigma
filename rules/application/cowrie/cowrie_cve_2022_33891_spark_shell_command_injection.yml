@@ -1,0 +1,32 @@
+title: Cowrie - Apache Spark Shell Command Injection
+id: 6d5b67d9-cb89-4f5e-9332-2a9831e23c87
+related:
+  - id: c8a5f584-cdc8-42cc-8cce-0398e4265de3
+    type: similar
+status: experimental
+description: Detects attempts to exploit an apache spark server via CVE-2014-6287 from a commandline perspective
+references:
+  - https://github.com/W01fh4cker/cve-2022-33891/blob/fd973b56e78bca8822caa3a2e3cf1b5aff5d0950/cve_2022_33891_poc.py
+  - https://sumsec.me/2022/CVE-2022-33891%20Apache%20Spark%20shell%20command%20injection.html
+  - https://github.com/apache/spark/pull/36315/files
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.initial-access
+  - attack.t1190
+  - cve.2022-33891
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains: "bash"
+  selection2:
+    input|contains:
+      - "id -Gn '"
+      - "id -Gn `"
+  condition: selection1 and selection2
+falsepositives:
+  - Unlikely
+level: high

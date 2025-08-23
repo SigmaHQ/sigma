@@ -1,0 +1,46 @@
+title: Cowrie - Commands to Clear or Remove the Syslog
+id: 9f2a0e6b-0c42-4a8a-9b1f-2b4c7d9e5f31
+related:
+  - id: e09eb557-96d2-4de9-ba2d-30f712a5afd3
+    type: similar
+  - id: 3fcc9b35-39e4-44c0-a2ad-9e82b6902b31
+    type: similar
+status: experimental
+description: Detects specific commands commonly used to remove or empty the syslog. Adversaries may clear logs to hide activity.
+references:
+  - https://www.virustotal.com/gui/file/fc614fb4bda24ae8ca2c44e812d12c0fab6dd7a097472a35dd12ded053ab8474
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.002/T1070.002.md
+  - https://www.virustotal.com/gui/file/54d60fd58d7fa3475fa123985bfc1594df26da25c1f5fbc7dfdba15876dd8ac5/behavior
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.defense-evasion
+  - attack.t1070.002
+  - attack.impact
+  - attack.t1565.001
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection:
+    input|contains:
+      - "rm /var/log/syslog"
+      - "rm -r /var/log/syslog"
+      - "rm -f /var/log/syslog"
+      - "rm -rf /var/log/syslog"
+      - "unlink /var/log/syslog"
+      - "unlink -r /var/log/syslog"
+      - "unlink -f /var/log/syslog"
+      - "unlink -rf /var/log/syslog"
+      - "mv /var/log/syslog"
+      - " >/var/log/syslog"
+      - " > /var/log/syslog"
+      - "journalctl --vacuum"
+  filter:
+    input|contains:
+      - "/syslog."
+  condition: selection and not filter
+falsepositives:
+  - Unlikely
+level: high

@@ -1,0 +1,45 @@
+title: Cowrie - Unix Shell Configuration Modification
+id: 2f6f0c2b-d2a9-4c1a-93b3-3f3eb6e9c5a1
+related:
+  - id: a94cdd87-6c54-4678-a6cc-2814ffe5a13d
+    type: similar
+status: experimental
+description: Detect unix shell configuration modification. Adversaries may establish persistence through executing malicious commands triggered when a new shell is opened.
+references:
+  - https://objective-see.org/blog/blog_0x68.html
+  - https://web.archive.org/web/20221204161143/https://www.glitch-cat.com/p/green-lambert-and-attack
+  - https://www.anomali.com/blog/pulling-linux-rabbit-rabbot-malware-out-of-a-hat
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.persistence
+  - attack.t1546.004
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains:
+      - "/etc/shells"
+      - "/etc/profile"
+      - "/etc/profile.d/"
+      - "/etc/bash.bashrc"
+      - "/etc/bashrc"
+      - "/etc/zsh/zprofile"
+      - "/etc/zsh/zshrc"
+      - "/etc/zsh/zlogin"
+      - "/etc/zsh/zlogout"
+      - "/etc/csh.cshrc"
+      - "/etc/csh.login"
+      - "/root/.bashrc"
+      - "/root/.bash_profile"
+      - "/root/.profile"
+      - "/root/.zshrc"
+      - "/root/.zprofile"
+  selection2:
+    input|re: "(?i)/home/[^\\s/]+/\\.(bashrc|zshrc|bash_profile|zprofile|profile|bash_login|bash_logout|zlogin|zlogout)\\b"
+  condition: 1 of selection*
+falsepositives:
+  - Unlikely
+level: medium

@@ -1,0 +1,36 @@
+title: Cowrie - File and Directory Discovery
+id: 6d17a0a4-7a7d-48c7-b82f-f0d1d24988bc
+related:
+  - id: d3feb4ee-ff1d-4d3d-bd10-5b28a238cc72
+    type: similar
+status: experimental
+description: |
+    Detects usage of system utilities such as "find", "tree", "findmnt", etc, to discover files, directories and network shares.
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1083/T1083.md
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.discovery
+  - attack.t1083
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|re: "(?i)^file(\\s|$)"
+  selection2:
+    input|re: "(?i)^ls(\\s+.*)?-R(\\s|$)"
+  selection3:
+    input|re: "(?i)^find(\\s|$)"
+  selection4:
+    input|re: "(?i)^tree(\\s|$)"
+  selection5:
+    input|re: "(?i)^findmnt(\\s|$)"
+  selection6:
+    input|re: "(?i)^mlocate(\\s|$)"
+  condition: 1 of selection*
+falsepositives:
+  - Unlikely
+level: informational

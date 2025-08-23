@@ -1,0 +1,43 @@
+title: Cowrie - ESXi Configuration Discovery Via ESXCLI
+id: 9e5a4d4e-8f5f-4f12-a66c-b2a5aab3b9cc
+related:
+  - id: 33e814e0-1f00-4e43-9c34-31fb7ae2b174
+    type: similar
+status: experimental
+description: Detects execution of the "esxcli" command with the multiple flag in order to retrieve information about all the configuration.
+references:
+  - https://www.crowdstrike.com/blog/hypervisor-jackpotting-ecrime-actors-increase-targeting-of-esxi-servers/
+  - https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_network.html
+  - https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_storage.html
+  - https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_vsan.html
+  - https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_system.html
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.discovery
+  - attack.execution
+  - attack.t1033
+  - attack.t1007
+  - attack.t1059.012
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains: "esxcli"
+  selection2:
+    input|contains:
+      - "network"
+      - "storage"
+      - "system"
+      - "vm process"
+      - "vsan"
+  selection3:
+    input|contains:
+      - " get"
+      - " list"
+  condition: all of selection*
+falsepositives:
+  - Unlikely
+level: medium

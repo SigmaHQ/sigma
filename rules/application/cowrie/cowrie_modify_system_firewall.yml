@@ -1,0 +1,40 @@
+title: Cowrie - Modify System Firewall
+id: 7d5d8c83-6b5f-4e3e-9f2f-9a3c2a6c1f6b
+related:
+  - id: 323ff3f5-0013-4847-bbd4-250b5edb62cc
+    type: similar
+  - id: 53059bc0-1472-438b-956a-7508a94a91f0
+    type: similar
+status: experimental
+description: |
+  Detects the removal of system firewall rules. Adversaries may only delete or modify a specific system firewall rule to bypass controls limiting network usage or access.
+  Detection rules that match only on the disabling of firewalls will miss this.
+references:
+  - https://www.trendmicro.com/en_us/research/22/c/cyclops-blink-sets-sights-on-asus-routers--.html
+  - https://blog.aquasec.com/container-security-tnt-container-attack
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.t1562.004
+  - attack.defense-evasion
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains|all:
+      - "iptables"
+      - "DROP"
+  selection2:
+    input|contains|all:
+      - "firewall-cmd"
+      - "remove"
+  selection3:
+    input|contains|all:
+      - "ufw"
+      - "delete"
+  condition: 1 of selection*
+falsepositives:
+  - Unlikely
+level: medium

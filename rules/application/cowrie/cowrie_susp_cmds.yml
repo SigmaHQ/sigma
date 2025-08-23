@@ -1,0 +1,72 @@
+title: Cowrie - Suspicious Commands Linux
+id: 8d9b6f54-1b7f-4d9b-a6f2-6e4a5b2c9d1a
+related:
+  - id: 1543ae20-cbdf-4ec1-8d12-7664d667a825
+    type: similar
+  - id: 2aa1440c-9ae9-4d92-84a7-a9e5f5e31695
+    type: similar
+status: experimental
+description: Detects relevant commands often related to malware or hacking activity
+references:
+  - https://web.archive.org/web/20170319121015/http://www.threatgeek.com/2017/03/widespread-exploitation-attempts-using-cve-2017-5638.html
+  - https://github.com/rapid7/metasploit-framework/blob/eb6535009f5fdafa954525687f09294918b5398d/modules/exploits/multi/http/struts_code_exec_exception_delegator.rb
+  - http://pastebin.com/FtygZ1cg
+  - https://artkond.com/2017/03/23/pivoting-guide/
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.execution
+  - attack.t1059.004
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains|all:
+      - "chmod"
+      - "777"
+  selection2:
+    input|contains|all:
+      - "chmod"
+      - "u+s"
+  selection3:
+    input|re: "(?i)\\bcp\\b[^\\n]*\\s/bin/(ksh|sh)\\b"
+  selection4:
+    input|contains:
+      - "wget * - http* | perl"
+      - "wget * - http* | sh"
+      - "wget * - http* | bash"
+      - "python -m SimpleHTTPServer"
+      - "-m http.server"
+      - "import pty; pty.spawn*"
+      - "socat exec:*"
+      - "socat -O /tmp/*"
+      - "socat tcp-connect*"
+      - "*echo binary >>*"
+      - "*wget *; chmod +x*"
+      - "*wget *; chmod 777 *"
+      - "*cd /tmp || cd /var/run || cd /mnt*"
+      - "*stop;service iptables stop;*"
+      - "*stop;SuSEfirewall2 stop;*"
+      - "chmod 777 2020*"
+      - "*>>/etc/rc.local"
+      - "*base64 -d /tmp/*"
+      - "* | base64 -d *"
+      - "*/chmod u+s *"
+      - "*chmod +s /tmp/*"
+      - "*chmod u+s /tmp/*"
+      - "* /tmp/haxhax*"
+      - "* /tmp/ns_sploit*"
+      - "nc -l -p *"
+      - "cp /bin/ksh *"
+      - "cp /bin/sh *"
+      - "* /tmp/*.b64 *"
+      - "*/tmp/ysocereal.jar*"
+      - "*/tmp/x *"
+      - "*; chmod +x /tmp/*"
+      - "*;chmod +x /tmp/*"
+  condition: 1 of selection*
+falsepositives:
+  - Unlikely
+level: high

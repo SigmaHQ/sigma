@@ -1,0 +1,28 @@
+title: Cowrie - File Deletion
+id: 9b54ff71-b50a-41ed-b252-10b2c3c87231
+related:
+  - id: 30aed7b6-d2c1-4eaf-9382-b6bc43e50c57
+    type: similar
+status: experimental
+description: Detects file deletion using "rm", "shred" or "unlink" commands which are used often by adversaries to delete files left behind by the actions of their intrusion activity
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.004/T1070.004.md
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.defense-evasion
+  - attack.t1070.004
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection:
+    input|re:
+      - "(?i)^rm(\\s|$)"
+      - "(?i)^shred(\\s|$)"
+      - "(?i)^unlink(\\s|$)"
+  condition: selection
+falsepositives:
+  - Unlikely
+level: informational

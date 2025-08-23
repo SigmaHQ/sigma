@@ -1,0 +1,33 @@
+title: Cowrie - Modification of ld.so.preload
+id: 273d5743-3ef8-4329-84b8-71758680360e
+related:
+  - id: 4b3cb710-5e83-4715-8c45-8b2b5b3e5751
+    type: similar
+  - id: 7e3c4651-c347-40c4-b1d4-d48590fdf684
+    type: similar
+status: experimental
+description: |
+  Identifies modification of ld.so.preload for shared object injection. This technique is used by attackers to load arbitrary code into processes.
+  Detects the ld.so preload persistence file. See `man ld.so` for more information.
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1574.006/T1574.006.md
+  - https://eqllib.readthedocs.io/en/latest/analytics/fd9b987a-1101-4ed3-bda6-a70300eaf57e.html
+  - https://man7.org/linux/man-pages/man8/ld.so.8.html
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.defense-evasion
+  - attack.persistence
+  - attack.privilege-escalation
+  - attack.t1574.006
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection:
+    input|contains: "/etc/ld.so.preload"
+  condition: selection
+falsepositives:
+  - Unlikely
+level: high

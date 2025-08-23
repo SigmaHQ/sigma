@@ -1,0 +1,37 @@
+title: Cowrie - Linux Base64 Encoded Pipe to Shell
+id: 1d3f4b0f-9d7c-4c5a-92b6-3a2f1a8b5c7e
+related:
+  - id: ba592c6d-6888-43c3-b8c6-689b8fe47337
+    type: similar
+status: experimental
+description: Detects suspicious process command line that uses base64 encoded input for execution with a shell
+references:
+  - https://github.com/arget13/DDexec
+  - https://www.mandiant.com/resources/blog/barracuda-esg-exploited-globally
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.defense-evasion
+  - attack.t1140
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains:
+      - "base64 "
+  selection2:
+    input|contains:
+      - "| bash "
+      - "| sh "
+      - "|bash "
+      - "|sh "
+      - " |bash"
+      - " |sh"
+      - "|/bin/bash"
+      - "|/bin/sh"
+  condition: selection1 and selection2
+falsepositives:
+  - Unlikely
+level: medium

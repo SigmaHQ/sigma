@@ -1,0 +1,34 @@
+title: Cowrie - Shell Execution via Flock
+id: 2d9e9b5e-49d5-4ed4-a12b-0f8c4f42d5d1
+related:
+  - id: 4b09c71e-4269-4111-9cdd-107d8867f0cc
+    type: similar
+status: experimental
+description: |
+    Detects the use of the "flock" command to execute a shell. Such behavior may be associated with privilege escalation, unauthorized command execution, or to break out from restricted environments.
+references:
+  - https://gtfobins.github.io/gtfobins/flock/#shell
+  - https://www.elastic.co/guide/en/security/current/linux-restricted-shell-breakout-via-linux-binary-s.html
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.execution
+  - attack.t1059
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|re: "(?i)^flock(\\s|$).*\\s-u\\s"
+  selection2:
+    input|contains:
+      - "/bin/bash"
+      - "/bin/dash"
+      - "/bin/fish"
+      - "/bin/sh"
+      - "/bin/zsh"
+  condition: all of selection*
+falsepositives:
+  - Unlikely
+level: high

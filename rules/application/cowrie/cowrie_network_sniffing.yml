@@ -1,0 +1,36 @@
+title: Cowrie - Network Sniffing
+id: 2c1f0d7b-9a6f-4c98-9a8e-0b7b6a1fd3d6
+related:
+  - id: f4d3748a-65d1-4806-bd23-e25728081d01
+    type: similar
+status: experimental
+description: |
+  Network sniffing refers to using the network interface on a system to monitor or capture information sent over a wired or wireless connection.
+  An adversary may place a network interface into promiscuous mode to passively access data in transit over the network, or use span ports to capture a larger amount of data.
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1040/T1040.md
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.credential-access
+  - attack.discovery
+  - attack.t1040
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains|all:
+      - "tcpdump"
+      - "-c"
+      - "-i"
+  selection2:
+    input|contains|all:
+      - "tshark"
+      - "-c"
+      - "-i"
+  condition: 1 of selection*
+falsepositives:
+  - Unlikely
+level: low
