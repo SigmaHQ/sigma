@@ -1,0 +1,78 @@
+title: Named Pipe Backdoor
+description: detecting hidden C2 channels 
+status: experimental 
+date: 20/08/2025
+author: Manish Rawat
+
+logsource:
+  product: windows
+  service: sysmon
+  definition: EventID 17, 18, 23 are used
+
+detection: 
+  selection:
+    EventID:
+      - 17
+      - 18
+      - 23
+    
+  selection_EventID17:
+    EventID: 17
+    PipeName|startswith:
+      - '\\.\pipe\1*'
+      - '\\.\pipe\shell'
+      - '\\.\pipe\admin'
+      - '\\.\pipe\meterpreter'
+      - '\\.\pipe\beacon'
+      - '\\.\pipe\cobalt'
+    Image|exclude:
+      - svchost.exe
+      - lsass.exe
+      - services.exe
+      - sqlservr.exe
+      - chrome.exe
+      - explorer.exe
+      - winword.exe
+      - outlook.exe
+    Image|contains:
+      - *powershell.exe
+      - *wscript.exe
+      - *rundll32.exe
+      - *regsvr32.exe
+  selection_EventID18:
+    EventID: 18
+    PipeName|contains:
+      - '\\.\pipe\postex_*'
+      - '\\.\pipe\msagent_*'
+      - '\\.\pipe\{GUID}'
+      - '\\.\pipe\msf-pipe'
+    Image|contains:
+      - *powershell.exe
+      - *wscript.exe
+      - *rundll32.exe
+      - *regsvr32.exe
+      - *cmd.exe
+  selection_EventID23:
+    EventID: 23
+    FileName|exclude:
+      - "chrome"
+      - "word"
+      - "LOCAL"
+      - "Winsock2"
+      - "PIPE_EVENTROOT"
+  selection_Process:
+    EventID: 1 
+    ParentImage|endswith:
+            - \winword.exe
+            - \excel.exe
+            - \outlook.exe
+            - \wscript.exe
+            - \mshta.exe
+  condition: selection_EventID17 or selection_EventID18 or selection_EventID23 or selection_Process
+
+tags:
+  - T1071.001  # Application Layer Protocol: Named Pipes
+  - T1036.005 # During Operation Wocao, the threat actors renamed some tools and executables to appear as legitimate programs
+  - T1106 # Turla and its RPC backdoors have used APIs calls for executing commands through RPC and/or named pipes.
+  - T1021.002 # Cobalt Strike can use Window admin shares (C$ and ADMIN$) for lateral movement.
+level: medium
