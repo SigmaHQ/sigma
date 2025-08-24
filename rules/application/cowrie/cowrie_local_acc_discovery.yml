@@ -1,0 +1,37 @@
+title: Cowrie - Local System Accounts Discovery
+id: 7b8c2d14-5f1a-4b8a-9f0a-3d2e1c9a5e47
+related:
+  - id: b45e3d6f-42c6-47d8-a478-df6bd6cf534c
+    type: similar
+status: experimental
+description: Detects enumeration of local systeam accounts. This information can help adversaries determine which local accounts exist on a system to aid in follow-on behavior.
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1087.001/T1087.001.md
+  - https://my.f5.com/manage/s/article/K589
+  - https://man.freebsd.org/cgi/man.cgi?pwd_mkdb
+author: Saravanan Palanisamy
+date: 2025-08-24
+modified: 2025-08-24
+tags:
+  - attack.discovery
+  - attack.t1087.001
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|re: "(?i)^\\s*(?:sudo\\s+)?(?:/(?:usr/)?bin/)?lastlog(?:\\s|$)"
+  selection2:
+    input|contains: "x:0:"
+  selection3:
+    input|re: "(?i)^\\s*(?:sudo\\s+)?(?:/(?:usr/)?bin/)?(cat|ed|head|more|nano|tail|vi|vim|less|emacs|sqlite3|makemap)(?:\\s|$)"
+  selection4:
+    input|re: "(?i)/(etc)/(passwd|shadow|sudoers|spwd\\.db|pwd\\.db|master\\.passwd)\\b"
+  selection5:
+    input|re: "(?i)^\\s*(?:sudo\\s+)?(?:/(?:usr/)?bin/)?id(?:\\s|$)"
+  selection6:
+    input|re: "(?i)^\\s*(?:sudo\\s+)?(?:/(?:usr/)?bin/)?lsof\\b.*\\s-u\\b"
+  condition: selection1 or selection2 or (selection3 and selection4) or selection5 or selection6
+falsepositives:
+  - Unlikely
+level: low

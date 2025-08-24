@@ -1,0 +1,37 @@
+title: Cowrie - Security Software Discovery
+id: 17c4c69d-d5a2-4e0b-b51e-1b5d2b6a9b71
+related:
+  - id: c9d8b7fd-78e4-44fe-88f6-599135d46d60
+    type: similar
+status: experimental
+description: Detects usage of system utilities (only grep and egrep for now) to discover security software discovery
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1518.001/T1518.001.md
+author: Saravanan Palanisamy
+date: 2025-08-24
+modified: 2025-08-24
+tags:
+  - attack.discovery
+  - attack.t1518.001
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains:
+      - "grep"
+      - "egrep"
+  selection2:
+    input|contains:
+      - "nessusd"
+      - "td-agent"
+      - "packetbeat"
+      - "filebeat"
+      - "auditbeat"
+      - "osqueryd"
+      - "cbagentd"
+      - "falcond"
+  condition: all of selection*
+falsepositives:
+  - Unlikely
+level: low

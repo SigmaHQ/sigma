@@ -1,0 +1,42 @@
+title: Cowrie - Potential PHP Reverse Shell
+id: 1fbf0b19-6cd4-4d9e-a9d1-43a25242d03d
+related:
+  - id: c6714a24-d7d5-4283-a36b-3ffd091d5f7e
+    type: similar
+status: experimental
+description: |
+  Detects usage of the PHP CLI with the "-r" flag which allows it to run inline PHP code. The rule looks for calls to the "fsockopen" function which allows the creation of sockets.
+  Attackers often leverage this in combination with functions such as "exec" or "fopen" to initiate a reverse shell connection.
+references:
+  - https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
+  - https://www.revshells.com/
+author: Saravanan Palanisamy
+date: 2025-08-24
+modified: 2025-08-24
+tags:
+  - attack.execution
+  - attack.t1059
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains|all:
+      - "php"
+      - " -r "
+      - "fsockopen"
+  selection2:
+    input|contains:
+      - "ash"
+      - "bash"
+      - "bsh"
+      - "csh"
+      - "ksh"
+      - "pdksh"
+      - "sh"
+      - "tcsh"
+      - "zsh"
+  condition: selection1 and selection2
+falsepositives:
+  - Unlikely
+level: high

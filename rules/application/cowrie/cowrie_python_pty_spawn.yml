@@ -1,0 +1,32 @@
+title: Cowrie - Python Spawning Pretty TTY Via PTY Module
+id: 2cb3e3eb-6022-4b4b-a3f5-7c04e413f776
+related:
+  - id: c4042d54-110d-45dd-a0e1-05c47822c937
+    type: similar
+status: experimental
+description: |
+  Detects a python process calling to the PTY module in order to spawn a pretty tty which could be indicative of potential reverse shell activity.
+references:
+  - https://www.volexity.com/blog/2022/06/02/zero-day-exploitation-of-atlassian-confluence/
+author: Saravanan Palanisamy
+date: 2025-08-24
+modified: 2025-08-24
+tags:
+  - attack.execution
+  - attack.t1059
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains: "python"
+  selection2:
+    input|contains:
+      - "import pty"
+      - "from pty"
+  selection3:
+    input|contains: "spawn"
+  condition: all of selection*
+falsepositives:
+  - Unlikely
+level: medium

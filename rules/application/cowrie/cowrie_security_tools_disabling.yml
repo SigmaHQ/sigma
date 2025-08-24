@@ -1,0 +1,63 @@
+title: Cowrie - Disabling Security Tools
+id: 2e3a9d42-71bb-41e0-a6c1-c771cbb6a148
+related:
+  - id: e3a8a052-111f-4606-9aee-f28ebeb76776
+    type: similar
+status: experimental
+description: Detects disabling security tools
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.004/T1562.004.md
+author: Saravanan Palanisamy
+date: 2025-08-24
+modified: 2025-08-24
+tags:
+  - attack.defense-evasion
+  - attack.t1562.004
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains|all:
+      - "iptables"
+      - "stop"
+  selection2:
+    input|contains|all:
+      - "ip6tables"
+      - "stop"
+  selection3:
+    input|contains|all:
+      - "firewalld"
+      - "stop"
+  selection4:
+    input|contains|all:
+      - "firewalld"
+      - "disable"
+  selection5:
+    input|contains|all:
+      - "cbdaemon"
+      - "stop"
+  selection6:
+    input|contains|all:
+      - "cbdaemon"
+      - "off"
+  selection7:
+    input|contains|all:
+      - "cbdaemon"
+      - "disable"
+  selection8:
+    input|contains|all:
+      - "falcon-sensor"
+      - "stop"
+  selection9:
+    input|contains|all:
+      - "falcon-sensor"
+      - "disable"
+  selection10:
+    input|contains|all:
+      - "setenforce"
+      - "0"
+  condition: 1 of selection*
+falsepositives:
+  - Unlikely
+level: medium

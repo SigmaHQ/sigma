@@ -1,0 +1,29 @@
+title: Cowrie - Triple Cross eBPF Rootkit Execve Hijack
+id: 2c05b061-2fc0-465a-a1a4-70ff0a14452a
+related:
+  - id: 0326c3c8-7803-4a0f-8c5c-368f747f7c3e
+    type: similar
+status: experimental
+description: Detects execution of a the file "execve_hijack" which is used by the Triple Cross rootkit as a way to elevate privileges
+references:
+  - https://github.com/h3xduck/TripleCross/blob/1f1c3e0958af8ad9f6ebe10ab442e75de33e91de/src/helpers/execve_hijack.c#L275
+author: Saravanan Palanisamy
+date: 2025-08-24
+modified: 2025-08-24
+tags:
+  - attack.privilege-escalation
+  - attack.t1068
+  - attack.defense-evasion
+  - attack.t1014
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains: "sudo"
+  selection2:
+    input|contains: "execve_hijack"
+  condition: all of selection*
+falsepositives:
+  - Unlikely
+level: high

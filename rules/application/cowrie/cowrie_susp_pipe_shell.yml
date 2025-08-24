@@ -1,0 +1,39 @@
+title: Cowrie - Linux Shell Pipe to Shell
+id: f798fa60-2e69-4cf1-8fbf-6d68f0c94d25
+related:
+  - id: 880973f3-9708-491c-a77b-2a35a1921158
+    type: similar
+status: experimental
+description: Detects suspicious shell pipelines where one shell executes something and pipes into another shell.
+references:
+  - Internal Research
+author: Saravanan Palanisamy
+date: 2025-08-24
+modified: 2025-08-24
+tags:
+  - attack.defense-evasion
+  - attack.t1140
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|startswith:
+      - "sh -c "
+      - "bash -c "
+  selection2:
+    input|contains:
+      - "| bash "
+      - "| sh "
+      - "|bash "
+      - "|sh "
+  selection3:
+    input|endswith:
+      - "| bash"
+      - "| sh"
+      - "|bash"
+      - " |sh"
+  condition: selection1 and (selection2 or selection3)
+falsepositives:
+  - Unlikely
+level: medium

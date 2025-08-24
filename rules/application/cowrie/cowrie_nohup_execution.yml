@@ -1,0 +1,35 @@
+title: Cowrie - Suspicious Nohup Execution
+id: 59b807f0-1c6c-4bdb-8727-b82b064ed1c5
+related:
+  - id: e4ffe466-6ff8-48d4-94bd-e32d1a6061e2
+    type: similar
+  - id: 457df417-8b9d-4912-85f3-9dbda39c3645
+    type: similar
+status: experimental
+description: Detects usage of "nohup", which could be leveraged by attackers to keep a process running or break out from restricted environments. It also covers suspicious usage of "nohup" when executing binaries from temporary directories.
+references:
+  - https://gtfobins.github.io/gtfobins/nohup/
+  - https://en.wikipedia.org/wiki/Nohup
+  - https://www.computerhope.com/unix/unohup.htm
+  - https://blogs.jpcert.or.jp/en/2023/05/gobrat.html
+  - https://jstnk9.github.io/jstnk9/research/GobRAT-Malware/
+  - https://www.virustotal.com/gui/file/60bcd645450e4c846238cf0e7226dc40c84c96eba99f6b2cffcd0ab4a391c8b3/detection
+  - https://www.virustotal.com/gui/file/3e44c807a25a56f4068b5b8186eee5002eed6f26d665a8b791c472ad154585d1/detection
+author: Saravanan Palanisamy
+date: 2025-08-24
+modified: 2025-08-24
+tags:
+  - attack.execution
+  - attack.t1059.004
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|re: "(?i)\\bnohup\\b"
+  selection2:
+    input|contains: "/tmp/"
+  condition: selection1 or (selection1 and selection2)
+falsepositives:
+  - Unlikely
+level: high

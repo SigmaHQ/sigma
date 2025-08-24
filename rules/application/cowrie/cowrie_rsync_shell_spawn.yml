@@ -1,0 +1,42 @@
+title: Cowrie - Suspicious Invocation of Shell via Rsync
+id: 6ec25c0c-4a7c-48a1-a850-d67a1a969c94
+related:
+  - id: 297241f3-8108-4b3a-8c15-2dda9f844594
+    type: similar
+status: experimental
+description: |
+  Detects the execution of a shell as sub process of "rsync" without the expected command line flag "-e" being used, which could be an indication of exploitation as described in CVE-2024-12084.
+references:
+  - https://sysdig.com/blog/detecting-and-mitigating-cve-2024-12084-rsync-remote-code-execution/
+  - https://gist.github.com/Neo23x0/a20436375a1e26524931dd8ea1a3af10
+author: Saravanan Palanisamy
+date: 2025-08-24
+modified: 2025-08-24
+tags:
+  - attack.execution
+  - attack.t1059
+  - attack.t1203
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains:
+      - "rsync"
+      - "rsyncd"
+  selection2:
+    input|contains:
+      - "ash"
+      - "bash"
+      - "csh"
+      - "dash"
+      - "ksh"
+      - "sh"
+      - "tcsh"
+      - "zsh"
+  filter:
+    input|contains: " -e "
+  condition: (selection1 and selection2) and not filter
+falsepositives:
+  - Unlikely
+level: high

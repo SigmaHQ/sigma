@@ -1,0 +1,29 @@
+title: Cowrie - Local Groups Discovery
+id: 3b6a9b3e-2a74-4d73-8fb1-2c1e8f6a9d21
+related:
+  - id: 676381a6-15ca-4d73-a9c8-6a22e970b90d
+    type: similar
+status: experimental
+description: Detects enumeration of local system groups. Adversaries may attempt to find local system groups and permission settings
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1069.001/T1069.001.md
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.discovery
+  - attack.t1069.001
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|re: "(?i)^\\s*(?:sudo\\s+)?(?:/(?:usr/)?bin/)?groups(?:\\s|$)"
+  selection2:
+    input|re: "(?i)^\\s*(?:sudo\\s+)?(?:/(?:usr/)?bin/)?(cat|ed|head|more|nano|tail|vi|vim|less)(?:\\s|$)"
+  selection3:
+    input|contains: "/etc/group"
+  condition: selection1 or (selection2 and selection3)
+falsepositives:
+  - Unlikely
+level: low

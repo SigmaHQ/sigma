@@ -1,0 +1,33 @@
+title: Cowrie - Potential Linux Amazon SSM Agent Hijacking
+id: 7a93c0e8-03f4-4c52-bc39-7896de77b292
+related:
+  - id: f9b3edc5-3322-4fc7-8aa3-245d646cc4b7
+    type: similar
+status: experimental
+description: Detects potential Amazon SSM agent hijack attempts as outlined in the Mitiga research report.
+references:
+  - https://www.mitiga.io/blog/mitiga-security-advisory-abusing-the-ssm-agent-as-a-remote-access-trojan
+  - https://www.bleepingcomputer.com/news/security/amazons-aws-ssm-agent-can-be-used-as-post-exploitation-rat-malware/
+  - https://www.helpnetsecurity.com/2023/08/02/aws-instances-attackers-access/
+author: Saravanan Palanisamy
+date: 2025-08-24
+modified: 2025-08-24
+tags:
+  - attack.command-and-control
+  - attack.persistence
+  - attack.t1219.002
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection:
+    input|contains|all:
+      - "amazon-ssm-agent"
+      - "-register "
+      - "-code "
+      - "-id "
+      - "-region "
+  condition: selection
+falsepositives:
+  - Unlikely
+level: medium

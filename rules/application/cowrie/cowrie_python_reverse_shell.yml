@@ -1,0 +1,33 @@
+title: Cowrie - Python Reverse Shell Execution Via PTY And Socket Modules
+id: 4db8ce5b-4b2c-4b34-9cc4-4eb7889a7e9b
+related:
+  - id: 32e62bc7-3de0-4bb1-90af-532978fe42c0
+    type: similar
+status: experimental
+description: |
+  Detects the execution of python with calls to the socket and pty module in order to connect and spawn a potential reverse shell.
+references:
+  - https://www.revshells.com/
+author: Saravanan Palanisamy
+date: 2025-08-24
+modified: 2025-08-24
+tags:
+  - attack.execution
+  - attack.t1059
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection:
+    input|contains|all:
+      - "python"
+      - " -c "
+      - "import"
+      - "pty"
+      - "socket"
+      - "spawn"
+      - ".connect"
+  condition: selection
+falsepositives:
+  - Unlikely
+level: high

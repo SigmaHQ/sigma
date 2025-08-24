@@ -1,0 +1,32 @@
+title: Cowrie - Potential Container Discovery via Inodes Listing
+id: 1bc1a2a4-46c5-4f6f-9409-d67b3452e44e
+related:
+  - id: 43e26eb5-cd58-48d1-8ce9-a273f5d298d8
+    type: similar
+status: experimental
+description: Detects listing of the inodes of the "/" directory to determine if the we are running inside of a container.
+references:
+  - https://blog.skyplabs.net/posts/container-detection/
+  - https://stackoverflow.com/questions/20010199/how-to-determine-if-a-process-runs-inside-lxc-docker
+author: Saravanan Palanisamy
+date: 2025-08-24
+modified: 2025-08-24
+tags:
+  - attack.discovery
+  - attack.t1082
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains: "ls"
+  selection2:
+    input|contains:
+      - " -*i"
+      - " -*d"
+  selection3:
+    input|endswith: " /"
+  condition: all of selection*
+falsepositives:
+  - Unlikely
+level: low

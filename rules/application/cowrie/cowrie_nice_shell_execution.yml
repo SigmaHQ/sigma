@@ -1,0 +1,34 @@
+title: Cowrie - Shell Execution via Nice
+id: 9726a3ed-bac2-43d4-b3cd-f55e73864a1e
+related:
+  - id: 093d68c7-762a-42f4-9f46-95e79142571a
+    type: similar
+status: experimental
+description: |
+  Detects the use of the "nice" utility to execute a shell. This can indicate privilege escalation, unauthorized shell access, or shell breakout from restricted environments.
+references:
+  - https://gtfobins.github.io/gtfobins/nice/#shell
+  - https://www.elastic.co/guide/en/security/current/linux-restricted-shell-breakout-via-linux-binary-s.html
+author: Saravanan Palanisamy
+date: 2025-08-23
+modified: 2025-08-23
+tags:
+  - attack.discovery
+  - attack.t1083
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection_1:
+    input|contains: 'nice'
+  selection_2:
+    input|contains:
+      - '/bin/bash'
+      - '/bin/dash'
+      - '/bin/fish'
+      - '/bin/sh'
+      - '/bin/zsh'
+  condition: all of selection_*
+falsepositives:
+  - Unlikely
+level: high

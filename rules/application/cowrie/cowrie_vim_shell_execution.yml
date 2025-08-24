@@ -1,0 +1,46 @@
+title: Cowrie - Vim GTFOBin Abuse
+id: a4b663ff-8c70-4cb1-a1fd-0bcf056274f9
+related:
+  - id: 7ab8f73a-fcff-428b-84aa-6a5ff7877dea
+    type: similar
+status: experimental
+description: |
+  Detects the use of "vim" and it's siblings commands to execute a shell or proxy commands.
+  Such behavior may be associated with privilege escalation, unauthorized command execution, or to break out from restricted environments.
+references:
+  - https://gtfobins.github.io/gtfobins/vim/
+  - https://gtfobins.github.io/gtfobins/rvim/
+  - https://gtfobins.github.io/gtfobins/vimdiff/
+author: Saravanan Palanisamy
+date: 2025-08-24
+modified: 2025-08-24
+tags:
+  - attack.discovery
+  - attack.t1083
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains:
+      - "vim"
+      - "rvim"
+      - "vimdiff"
+  selection2:
+    input|contains:
+      - "--cmd"
+      - "-c "
+  selection3:
+    input|contains:
+      - ":!/"
+      - ":lua "
+      - ":py "
+      - "/bin/bash"
+      - "/bin/dash"
+      - "/bin/fish"
+      - "/bin/sh"
+      - "/bin/zsh"
+  condition: all of selection*
+falsepositives:
+  - Unlikely
+level: high

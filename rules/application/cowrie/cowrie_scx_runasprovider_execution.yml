@@ -1,0 +1,30 @@
+title: OMIGOD SCX RunAsProvider ExecuteScript
+id: 88b6d950-c07d-465b-aeef-3a18d13b6d38
+status: experimental
+description: |
+  Detects execution of scripts created by the SCX RunAsProvider using /bin/sh.
+  These scripts typically appear in /etc/opt/microsoft/scx/conf/tmpdir/ with a filename starting with `scx`, 
+  which is a behavior linked to OMIGOD vulnerability exploitation.
+references:
+  - https://www.wiz.io/blog/omigod-critical-vulnerabilities-in-omi-azure
+  - https://github.com/Azure/Azure-Sentinel/pull/3059
+author: Saravanan Palanisamy
+date: 2025-08-24
+modified: 2025-08-24
+tags:
+  - attack.privilege-escalation
+  - attack.initial-access
+  - attack.execution
+  - attack.t1068
+  - attack.t1190
+  - attack.t1203
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection:
+    input|contains: "/etc/opt/microsoft/scx/conf/tmpdir/scx"
+  condition: selection
+falsepositives:
+  - Unlikely
+level: high

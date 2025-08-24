@@ -1,0 +1,33 @@
+title: Cowrie - Triple Cross eBPF Rootkit Install Commands
+id: 82b08b17-8236-4f80-b50f-9e708ee796e0
+related:
+  - id: 22236d75-d5a0-4287-bf06-c93b1770860f
+    type: similar
+status: experimental
+description: Detects default install commands of the Triple Cross eBPF rootkit based on the "deployer.sh" script
+references:
+  - https://github.com/h3xduck/TripleCross/blob/1f1c3e0958af8ad9f6ebe10ab442e75de33e91de/apps/deployer.sh
+author: Saravanan Palanisamy
+date: 2025-08-24
+modified: 2025-08-24
+tags:
+  - attack.defense-evasion
+  - attack.t1014
+logsource:
+  product: cowrie
+  category: application
+detection:
+  selection1:
+    input|contains: "sudo"
+  selection2:
+    input|contains|all:
+      - " tc "
+      - " enp0s3 "
+  selection3:
+    input|contains:
+      - " qdisc "
+      - " filter "
+  condition: all of selection*
+falsepositives:
+  - Unlikely
+level: high
