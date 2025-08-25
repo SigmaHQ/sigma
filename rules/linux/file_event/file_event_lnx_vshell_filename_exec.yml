@@ -1,0 +1,27 @@
+title: Malicious Filename with Embedded Base64 Commands - VShell
+id: 179b3686-6271-4d87-807d-17d843a8af73
+status: experimental
+description: Detects files with maliciously crafted filenames containing embedded Base64-encoded bash commands, associated with VShell malware campaigns
+references:
+    - https://www.trellix.com/blogs/research/the-silent-fileless-threat-of-vshell/
+author: "@kostastsale"
+date: 2025-08-25
+tags:
+    - attack.execution
+    - attack.t1059.004
+    - attack.defense_evasion
+    - attack.t1027
+logsource:
+    product: linux
+    category: file_event
+detection:
+    selection_filename:
+        TargetFilename|contains:
+            - '{echo'
+            - '{base64,-d}'
+    selection_generic_regex:
+        TargetFilename|re: '^.{40,}.*$'
+    condition: selection_filename or selection_generic_regex
+falsepositives:
+    - Legitimate files with similar naming patterns (very unlikely)
+level: high
