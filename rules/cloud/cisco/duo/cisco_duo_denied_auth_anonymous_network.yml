@@ -1,0 +1,23 @@
+title: Duo Authentication from Anonymous Network (Tor/VPN) Blocked
+id: d8d5614d-bde8-4c5f-a9aa-b8e5af97f7b0
+status: experimental
+description: |
+    Flags authentication attempts that Duo **blocked due to use of an anonymous network** (such as Tor exit node or known anonymizing proxy/VPN). Duo policies can deny access from anonymized IP addresses. In the authentication log, this appears as result `"DENY"` or `"FAILURE"` with reason `"anonymous_ip"`. Such events mean an attempted login came from an IP associated with anonymity services and was refused by policy. This often suggests malicious activity — for example, an attacker trying to hide their origin. Any `"anonymous_ip"` denial should be investigated to identify the source and intent.
+references:
+    - https://duo.com/docs/policy#anonymize
+    - https://duo.com/docs/adminapi#logs
+author: Mike Wade
+date: 2025-08-24
+tags:
+    - attack.initial-access
+    - attack.defense-evasion
+logsource:
+    product: cisco
+    service: duo
+detection:
+    selection:
+        event_type: authentication
+        result: denied
+        reason: anonymous_ip
+    condition: selection
+level: medium

@@ -1,0 +1,23 @@
+title: Duo Access Policy Modified to Allow 2FA Bypass
+id: ad26f4ed-747b-4a84-a46a-42eeb6fefd79
+status: experimental
+description: |
+     Detects any Duo access policy creation or update that **permits login without MFA**. For example, an admin might set a policy to “Bypass 2FA” for an application or group, which would be recorded in activity logs (e.g., an action like `"policy_create"` or `"policy_update"` where the details include allowing access without 2FA). Such a change dramatically reduces security, as users under that policy no longer require a second factor. This rule monitors for policy changes that include a bypass of two-factor requirements. Unauthorized changes of this kind could indicate malicious intent or misconfiguration and should be investigated immediately.
+references:
+    - https://duo.com/docs/administration-policies
+author: Mike Wade
+date: 2025-08-24
+tags:
+    - attack.defense-evasion
+logsource:
+    product: cisco
+    service: duo
+detection:
+    selection:
+        action.name:
+        - policy_create
+        - policy_update
+        target.type: policy
+        detail: '*Bypass 2FA*'
+    condition: selection
+level: high

@@ -1,0 +1,23 @@
+title: Cisco Duo MFA Bypass on Trusted Location
+id: 866cae93-43c3-4de8-b23d-08c9ae3c2c11
+status: experimental
+description: |
+    Detects Duo authentications where 2FA was **skipped due to a trusted location** policy. Duo can consider certain geolocation(s) as trusted, bypassing MFA for users in those locations. In the authentication logs, such events appear as successful with reason `"trusted_location"`, meaning the login was allowed based on location trust. This rule flags any login permitted because of trusted location, as an attacker could attempt to exploit location-based policies (e.g. via VPN from allowed regions). Security should confirm that the login from a trusted location was expected for the user.
+references:
+    - https://duo.com/docs/policy#location
+    - https://duo.com/docs/adminapi#logs
+author: Mike Wade
+date: 2025-08-24
+tags:
+    - attack.credential-access
+    - attack.defense-evasion
+logsource:
+    product: cisco
+    service: duo
+detection:
+    selection:
+        event_type: authentication
+        result: success
+        reason: trusted_location
+    condition: selection
+level: low
