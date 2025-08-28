@@ -22,18 +22,11 @@ logsource:
     product: windows
     category: process_creation
 detection:
-    selection_img:
-        - Image|endswith: '\reg.exe'
-        - OriginalFileName: 'reg.exe'
-    selection_reg_path:
+    selection:
         CommandLine|contains|all:
-            - 'add'
             - '\System\CurrentControlSet\Control\Lsa'
             - 'DisableRestrictedAdmin'
-            - '0'
-    filter_main_enable:
-        CommandLine|contains: '0x00000001'
-    condition: all of selection_* and not 1 of filter_main_*
+    condition: selection
 falsepositives:
     - Unknown
 level: high
