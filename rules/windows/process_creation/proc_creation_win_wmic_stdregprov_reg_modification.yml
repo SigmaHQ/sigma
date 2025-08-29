@@ -1,0 +1,35 @@
+title: Registry Manipulation via WMI Stdregprov
+id: c453ab7a-1f5c-4716-a3b4-dea8135fb43a
+status: experimental
+description: |
+    Detects the usage of wmic.exe to manipulate Windows registry via the WMI StdRegProv class.
+    This behaviour could be potentially suspicious because it uses an alternative method to modify registry keys instead of legitimate registry tools like reg.exe or regedit.exe.
+    Attackers specifically choose this technique to evade detection and bypass security monitoring focused on traditional registry modification commands.
+references:
+    - https://www.bitdefender.com/en-us/blog/businessinsights/shrinklocker-decryptor-from-friend-to-foe-and-back-again
+    - https://trustedsec.com/blog/command-line-underdog-wmic-in-action
+    - https://trustedsec.com/blog/wmi-for-script-kiddies
+author: Daniel Koifman (KoifSec)
+date: 2025-07-30
+tags:
+    - attack.execution
+    - attack.defense-evasion
+    - attack.discovery
+    - attack.t1047
+    - attack.t1112
+    - attack.t1012
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:   # Example command simulated:  WMIC  /NameSpace:\\root\default Class StdRegProv Call CreateKey sSubKeyName=""SOFTWARE\Policies\DeleteMe""
+        - Image|endswith: '\wmic.exe'
+        - OriginalFileName: 'wmic.exe'
+    selection_cli:
+        CommandLine|contains|all:
+            - 'call'
+            - 'stdregprov'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate administrative activity
+level: medium
