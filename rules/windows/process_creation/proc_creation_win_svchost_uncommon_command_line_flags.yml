@@ -1,9 +1,9 @@
-title: Unusual Svchost Command Line Parameter
+title: Uncommon Svchost Command Line Parameter
 id: f17211f1-1f24-4d0c-829f-31e28dc93cdd
 status: experimental
 description: |
-    This rule alerts when svchost.exe is executed with unusual command line parameters based on known good patterns.
-    This could point at a file masquerading as svchost or a process injection or hollowing of a legitimate svchost instance.
+    This rule detects instances of svchost.exe running with an unusual or uncommon command line parameter by exlcuding known legitimate or common patterns.
+    This could point at a file masquerading as svchost, a process injection, or hollowing of a legitimate svchost instance.
 references:
     - https://cardinalops.com/blog/the-art-of-anomaly-hunting-patterns-detection/
     - https://www.security.com/threat-intelligence/blackbyte-exbyte-ransomware
@@ -22,10 +22,17 @@ logsource:
     product: windows
 detection:
     selection:
+        # Example of command to simulate: "C:\Windows\System32\svchost.exe" calc.exe
         Image|endswith: '\svchost.exe'
-    filter_cmd:        # Example of command to simulate: "c:\Windows\System32\svchost.exe" calc.exe
+    filter_main_flags:
         CommandLine|re: '.*-k\s\w+((\s?(-p|-s)).*|$)'
-    condition: selection and not filter_cmd
+    filter_optional_defender:
+        ParentImage|endswith: '\MsMpEng.exe'
+        CommandLine: 'svchost.exe'
+    filter_optional_mrt:
+        ParentImage|endswith: '\MRT.exe'
+        CommandLine: 'svchost.exe'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
-    - Unlikely
+    - Unlikely, but rare edge case might show up in large enough environments 
 level: high
