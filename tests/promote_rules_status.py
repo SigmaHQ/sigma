@@ -43,4 +43,4 @@ def promote_rule(rule: str) -> str:
 
 
 if __name__ == "__main__":
-    [promote_rule(rule) for rule in get_rules_to_promote()]
+    print("\n".join(str(promote_rule(rule)) for rule in get_rules_to_promote()))
