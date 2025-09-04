@@ -12,7 +12,7 @@ references:
     - https://oddvar.moe/2018/03/21/persistence-using-runonceex-hidden-from-autoruns-exe/
 author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split)
 date: 2019-10-25
-modified: 2025-06-16
+modified: 2025-08-15
 tags:
     - attack.persistence
     - attack.t1547.001
@@ -100,11 +100,15 @@ detection:
             - '{A8E52322-8734-481D-A7E2-27B309EF8D56}'
             - '{C973DA94-CBDF-4E77-81D1-E5B794FBD146}'
             - '{51EF1569-67EE-4AD6-9646-E726C3FFC8A2}'
-    filter_onedrive:
+    filter_onedrive_1:
         Details|startswith:
             - 'C:\Windows\system32\cmd.exe /q /c rmdir /s /q "C:\Users\'
             - 'C:\Windows\system32\cmd.exe /q /c del /q "C:\Users\'
         Details|contains: '\AppData\Local\Microsoft\OneDrive\'
+    filter_onedrive_2:
+        Image: 'C:\Windows\explorer.exe'
+        TargetObject|startswith: 'Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run\'
+        TargetObject|endswith: 'Microsoft OneDrive\OneDrive.exe'
     filter_python:
         TargetObject|contains: '\Microsoft\Windows\CurrentVersion\RunOnce\{'
         Details|contains|all:
