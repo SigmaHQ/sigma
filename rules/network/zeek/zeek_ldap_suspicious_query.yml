@@ -1,11 +1,15 @@
-title: Suspicious Ldap Query Detected
+title: Potential Active Directory Reconnaissance/Enumeration Via LDAP - Zeek
 id: 2aad82b0-edd0-4d32-8c63-c168b86823b2
+related:
+    - id: 31d68132-4038-47c7-8f8e-635a39a7c174
+      type: similar
 status: experimental
-description: Detects LDAP queries that contain suspicious filters, which may indicate reconnaissance or malicious activity.
+description: Detects LDAP queries that contain suspicious filters, which may indicate potential Active Directory enumeration.
 author: AAtashGar
-date: '2025-07-28'
+date: 2025-07-28
 logsource:
     product: zeek
+    service: ldap_search
 detection:
     selection:
         filter|contains:
@@ -21,34 +25,21 @@ detection:
             - '(sAMAccountType=268435456)'
             - '(objectCategory=groupPolicyContainer)'
             - '(objectCategory=organizationalUnit)'
-            - '(objectCategory=Computer)'
             - '(objectCategory=nTDSDSA)'
             - '(objectCategory=server)'
             - '(objectCategory=domain)'
             - '(objectCategory=person)'
-            - '(objectCategory=group)'
-            - '(objectCategory=user)'
             - '(objectClass=trustedDomain)'
-            - '(objectClass=computer)'
-            - '(objectClass=server)'
-            - '(objectClass=group)'
-            - '(objectClass=user)'
             - '(primaryGroupID=521)'
             - '(primaryGroupID=516)'
             - '(primaryGroupID=515)'
             - '(primaryGroupID=512)'
             - 'Domain Admins'
-            - 'objectGUID=*'
-            - '(schemaIDGUID=*)'
+            - 'objectGUID=\*'
+            - '(schemaIDGUID=\*)'
             - 'admincount=1'
     condition: selection
-fields:
-    - filter
-    - id.orig_h
-    - id.orig_p
-    - id.resp_h
-    - id.resp_p
-    - proto
+
 falsepositives:
     - Legitimate administrative activity
 level: low
