@@ -1,0 +1,33 @@
+title: Suspicious Privilege Addition To Existing Service
+id: ad682e11-8144-4de0-aa39-1cfcd5ebb64e
+related:
+    - id: ad682e11-8144-4de0-aa39-1cfcd5ebb64e
+      type: similar
+status: experimental
+description: |
+    Detects additions of suspicious privileges to the service which could indicate preparation for EDR bypass or kernel driver loading.
+    These elevated privileges enable loading kernel drivers, which can bypass or disable Endpoint Detection and Response (EDR) tools on the compromised system.
+references:
+    - https://blog.fox-it.com/2025/09/01/three-lazarus-rats-coming-for-your-cheese/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-09-08
+tags:
+    - attack.privilege-escalation
+    - attack.persistence
+    - attack.defense-evasion
+    - attack.t1574.011
+    - attack.t1068
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\SYSTEM\CurrentControlSet\Services\'
+        TargetObject|endswith: '\RequiredPrivileges'
+        Details|contains|all:
+            - 'SeLoadDriverPrivilege'
+            - 'SeDebugPrivilege'
+    condition: selection
+falsepositives:
+    - Legitimate service configuration changes by administrators or authorized software.
+level: medium # Keep as medium due to potential for false positives

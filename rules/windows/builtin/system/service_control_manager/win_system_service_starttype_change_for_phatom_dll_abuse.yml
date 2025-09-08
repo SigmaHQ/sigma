@@ -1,0 +1,32 @@
+title: Service StartType Change for Services Vulnerable to Phantom DLL Hijacking
+id: 92eb3dc3-8a47-4c94-b0e2-51cfa9af1aaf
+related:
+    - id: 46fa22de-556f-4355-a8c2-463e1c6ce2b3
+      type: similar
+status: experimental
+description: |
+    Detects changes to service start types for services known to be vulnerable to phantom DLL hijacking.
+    Threat actors may change service configurations to facilitate DLL hijacking attacks by making sure
+    vulnerable services are started automatically or on demand according to their needs.
+references:
+    - https://blog.fox-it.com/2025/09/01/three-lazarus-rats-coming-for-your-cheese/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-09-08
+tags:
+    - attack.defense-evasion
+    - attack.t1574.002
+    - attack.privilege-escalation
+logsource:
+    product: windows
+    service: system
+detection:
+    selection:
+        EventID: 7040
+        Provider_Name: 'Service Control Manager'
+        Param4:
+            - 'SessionEnv'
+            - 'IKEEXT'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium

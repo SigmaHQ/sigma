@@ -1,0 +1,38 @@
+title: Configuration Modification of Suspicious Services via SC.EXE
+id: 46fa22de-556f-4355-a8c2-463e1c6ce2b3
+related:
+    - id: 75c4773e-7b0d-4221-a862-d7c5f5278a7d
+      type: similar
+    - id: 6b98b92b-4f00-4f62-b4fe-4d1920215771
+      type: similar
+    - id: 92eb3dc3-8a47-4c94-b0e2-51cfa9af1aaf
+      type: similar
+status: experimental
+description: |
+    Detects the use of SC.EXE to modify configurations of known services that have been abused by threat actors for phantom dll hijacking.
+    Since, these services load the phatom dlls, threat actors may modify their configurations to load malicious dlls instead at runtime.
+references:
+    - https://blog.fox-it.com/2025/09/01/three-lazarus-rats-coming-for-your-cheese/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-09-08
+tags:
+  - attack.defense-evasion
+  - attack.t1574.002
+  - attack.privilege-escalation
+logsource:
+  category: process_creation
+  product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\SC.EXE'
+        - OriginalFileName: 'SC.EXE'
+    selection_susp_flag:
+        CommandLine|contains: 'config'
+    selection_susp_services:
+        CommandLine|contains:
+            - 'SessionEnv'
+            - 'IKEEXT'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely
+level: high
