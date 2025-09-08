@@ -24,9 +24,13 @@ detection:
     selection:
         EventID: 4100
         Provider_Name: 'Microsoft-Windows-Iphlpsvc'
-    filter:
-        IsatapRouter|contains: '127.0.0.1'
-    condition: selection and not filter
+    filter_main_localhost:
+        IsatapRouter: 
+            - '127.0.0.1'
+            - '::1'
+    filter_optional_null:
+        IsatapRouter: null
+    condition: selection and not 1 of filter_main_* and not 1 of optional_main_*
 falsepositives:
     - Unknown
 level: high
