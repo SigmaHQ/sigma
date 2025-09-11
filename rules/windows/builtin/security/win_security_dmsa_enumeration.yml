@@ -1,0 +1,34 @@
+title: Delegated Managed Service Account (dMSA) Enumeration on Windows System
+id: 54f3cf8f-f577-46d9-b609-2029554e975d
+status: experimental
+description: |
+    Detects read operations performed on an Active Directory object of type msDS-DelegatedManagedServiceAccount (GUID 0feb936f-47b3-49f2-9386-1dedc2c23765), which is used for delegated Managed Service Accounts.
+    Such access may indicate an attempt to gather information and leverage it for a attacks like GoldendMSA.
+references:
+    - https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adsc/2c3e6e0a-134d-47e3-9ed5-edb71145def3
+    - https://ipurple.team/2025/09/02/golden-dmsa/
+    - https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/
+author: Panos Gkatziroulis, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-09-11
+tags:
+    - attack.credential_access
+logsource:
+    product: windows
+    service: security
+    definition: |
+        Requirements: Audit Directory Service Access auditing should be enabled.
+        Auditing should be enabled for the organizational unit that contains the dMSAs for Authenticated Users.
+detection:
+    selection:
+        # This rule should be applied after initial baselining according your environment.
+        EventID: 4662
+        ObjectType|contains: '%{0feb936f-47b3-49f2-9386-1dedc2c23765}'
+        AccessMask: 
+            - '0x100'
+            - '0x10'
+    condition: selection
+fields:
+    - SubjectUserName # Look for An account name that is not a DC
+falsepositives:
+    - Legitimate administrative activities
+level: medium
