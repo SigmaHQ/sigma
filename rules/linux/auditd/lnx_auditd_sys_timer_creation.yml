@@ -11,36 +11,36 @@ description: |
 author: AAtashGar
 date: 2025-09-04
 tags:
-  - attack.persistence
-  - attack.t1053
-  - attack.t1053.006
+    - attack.persistence
+    - attack.t1053
+    - attack.t1053.006
 logsource:
-  product: linux
-  service: auditd
-  definition: |
-    Required auditd configuration:
-    -w /lib/systemd/system/timers.target.wants -p wa -k Hunting_systemTimer
-    -w /etc/systemd/system/timers.target.wants -p wa -k Hunting_systemTimer
+    product: linux
+    service: auditd
+    definition: |
+      Required auditd configuration:
+      -w /lib/systemd/system/timers.target.wants -p wa -k Hunting_systemTimer
+      -w /etc/systemd/system/timers.target.wants -p wa -k Hunting_systemTimer
 detection:
-  selection_sys:
-    type: SYSCALL
-    syscall: 257
-    key: Hunting_systemTimer
-  selection_pth_create:
-    type: PATH
-    nametype: CREATE
-    name|startswith:
-      - '/lib/systemd/system/timers.target.wants/'
-      - '/etc/systemd/system/timers.target.wants/'
-  selection_pth_parent:
-    type: PATH
-    nametype: PARENT
-    name|startswith:
-      - '/lib/systemd/system/timers.target.wants/'
-      - '/etc/systemd/system/timers.target.wants/'
-  condition: selection_sys and selection_pth_create and selection_pth_parent
+    selection_sys:
+        type: SYSCALL
+        syscall: 257
+        key: Hunting_systemTimer
+    selection_pth_create:
+        type: PATH
+        nametype: CREATE
+        name|startswith:
+            - '/lib/systemd/system/timers.target.wants/'
+            - '/etc/systemd/system/timers.target.wants/'
+    selection_pth_parent:
+        type: PATH
+        nametype: PARENT
+        name|startswith:
+            - '/lib/systemd/system/timers.target.wants/'
+            - '/etc/systemd/system/timers.target.wants/'
+    condition: selection_sys and selection_pth_create and selection_pth_parent
 falsepositives:
-  - Legitimate administrative activities creating or modifying system timers.
-  - System updates or package installations that involve timer configurations.
-  - Development or testing environments where timers are frequently created.
+    - Legitimate administrative activities creating or modifying system timers.
+    - System updates or package installations that involve timer configurations.
+    - Development or testing environments where timers are frequently created.
 level: medium
