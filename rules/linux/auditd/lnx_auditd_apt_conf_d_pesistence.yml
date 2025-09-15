@@ -1,0 +1,41 @@
+---
+title: APT Persistence via apt.conf.d Configuration
+id: 8f4e2b3a-1d5f-4e2a-9b1c-7e8d9f0a1b2c
+status: experimental
+description: |
+    Detects persistence via malicious configuration
+    files in /etc/apt/apt.conf.d/ that execute code
+    during apt operations This leverages auditd rules
+    to monitor openat syscalls by /usr/bin/apt
+    on files in the directory.
+author: Ali AtashGar
+date: 2025-09-15
+tags:
+    - attack.persistence
+    - attack.t1546.016
+    - attack.t1197
+references:
+    - https://securityboulevard.com/2024/10/linux-persistence-mechanisms-and-how-to-find-them/
+    - https://matheuzsecurity.github.io/hacking/linux-threat-hunting-persistence/
+    - https://hadess.io/the-art-of-linux-persistence/
+    - https://www.elastic.co/security-labs/sequel-on-persistence-mechanisms
+    - https://systemweakness.com/code-execution-with-apt-update-in-crontab-privesc-in-linux-e6d6ffa8d076
+    - https://github.com/elastic/protections-artifacts/blob/main/behavior/rules/linux/persistence_apt_package_manager_command_execution.toml
+    - https://stmxcsr.com/persistence/persistence-linux.html
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+        - event_id: SYSCALL
+          exe: '/usr/bin/apt'
+          syscall: 257
+          key: 'apt_backdoor'
+        - event_id: PATH
+          name|startswith: '/etc/apt/apt.conf.d/'
+    condition: selection
+falsepositives:
+    - Legitimate APT configurations or updates that create or modify
+     files in /etc/apt/apt.conf.d/. Verify by inspecting file
+     contents for malicious hooks like APT::Update::Pre-Invoke.
+level: high
