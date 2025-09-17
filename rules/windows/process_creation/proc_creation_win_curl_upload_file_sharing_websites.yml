@@ -1,5 +1,10 @@
 title: Curl File Upload To File Sharing Websites
 id: e328cc73-f92a-42fb-b3fa-7c2cffda981a
+related:
+    - id: 00bca14a-df4e-4649-9054-3f2aa676bc04
+      type: derived
+    - id: 7d1aaf3d-4304-425c-b7c3-162055e0b3ab
+      type: similar
 status: experimental
 description: Detects usage of curl to upload files to known file sharing domains, which may indicate data exfiltration.
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
@@ -32,16 +37,15 @@ detection:
             - 'wetransfer.com'
             - 'x0.at'
     selection_cli_flags:
-        CommandLine|contains:
-            - ' -F'
-            - ' --form'
-            - ' -T'
-            - ' --upload-file'
-            - ' -d'
-            - ' --data'
-            - ' -X POST'
-            - ' --request POST '
-            - ' -sT'
+        - CommandLine|contains:
+              - ' --form'
+              - ' --upload-file'
+              - ' --data'
+              - ' -X POST'
+              - ' --request POST '
+        - CommandLine|re:
+              - '\s-[FTd]\s' # We use regex to ensure a case sensitive argument detection
+              - '\s-sT\s'
     condition: all of selection_*
 falsepositives:
     - Legitimate file uploads to these services by administrators or developers
