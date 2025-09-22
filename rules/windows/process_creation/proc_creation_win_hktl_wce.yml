@@ -6,7 +6,7 @@ references:
     - https://www.ampliasecurity.com/research/windows-credentials-editor/
 author: Florian Roth (Nextron Systems)
 date: 2019-12-31
-modified: 2025-07-18
+modified: 2024-11-23
 tags:
     - attack.credential-access
     - attack.t1003.001
@@ -22,13 +22,9 @@ detection:
     selection_2:
         CommandLine|endswith: '.exe -S'
         ParentImage|endswith: '\services.exe'
-    filter_main_clussvc:
+    filter:
         Image|endswith: '\clussvc.exe'
-    filter_optional_atwusb:
-        # Fixes issue raised by https://github.com/SigmaHQ/sigma/issues/5170
-        - Image|endswith: '\atwusb.exe'
-        - CommandLine|contains: 'atwusb.exe -s'
-    condition: 1 of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
+    condition: 1 of selection_* and not filter
 falsepositives:
     - Another service that uses a single -s command line switch
 level: critical
