@@ -4,7 +4,7 @@ status: experimental
 description: Detects files with suspiciously long filenames (40+ characters) that may be associated with VShell malware campaigns or similar obfuscation techniques
 references:
     - https://www.trellix.com/blogs/research/the-silent-fileless-threat-of-vshell/
-author: "@kostastsale"
+author: @kostastsale
 date: 2025-09-18
 tags:
     - attack.execution
@@ -15,11 +15,9 @@ logsource:
     product: linux
     category: file_event
 detection:
-    selection_long_filename:
+    selection:
         TargetFilename|re: '[^\/]{40,}$'
-    condition: selection_long_filename
+    condition: selection
 falsepositives:
-    - Legitimate files with long filenames
-    - Automated backup systems generating long filenames
-    - Package managers creating temporary files with long names
+    - Legitimate files with long filenames - should be very rare
 level: medium
