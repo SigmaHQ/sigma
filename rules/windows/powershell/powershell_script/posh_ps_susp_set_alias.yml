@@ -9,6 +9,7 @@ references:
     - https://github.com/1337Rin/Swag-PSO
 author: frack113
 date: 2023-01-08
+modified: 2025-09-22
 tags:
     - attack.defense-evasion
     - attack.execution
@@ -23,7 +24,22 @@ detection:
         ScriptBlockText|contains:
             - 'Set-Alias '
             - 'New-Alias '
-    condition: selection
+    filter_main:
+        # warning: The 'data' field used in the detection section is the container for the event data as a whole. You may have to adapt the rule for your backend accordingly
+        Data|contains:
+            - ' -Name ncms -Value New-CimSession '
+            - ' -Name gcls -Value Get-CimClass '
+            - ' -Name ncso -Value New-CimSessionOption '
+            - ' -Name gcms -Value Get-CimSession '
+            - ' -Name rcms -Value Remove-cimSession '
+            - ' -Name rcie -Value Register-CimIndicationEvent '
+            - ' -Name gcai -Value Get-CimAssociatedInstance '
+            - ' -Name gcim -Value Get-CimInstance '
+            - ' -Name scim -Value Set-CimInstance '
+            - ' -Name ncim -Value New-CimInstance '
+            - ' -Name rcim -Value Remove-cimInstance '
+            - ' -Name icim -Value Invoke-CimMethod '
+    condition: selection and not 1 of filter_main
 falsepositives:
     - Unknown
 level: low
