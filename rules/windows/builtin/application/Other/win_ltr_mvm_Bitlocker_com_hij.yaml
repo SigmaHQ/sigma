@@ -1,0 +1,61 @@
+---
+title: Remote Registry Service Change (7040)
+name: rr_7040
+logsource: {product: windows, service: system}
+detection:
+  sel:
+    EventID: 7040
+    ServiceName: RemoteRegistry
+  condition: sel
+---
+
+title: New CLSID registry value created (4657)
+name: clsid_new_4657
+logsource: {product: windows, service: security}
+detection:
+  sel:
+    EventID: 4657
+    OperationType: "New registry value created"
+    ObjectName|contains: "CLSID"
+  condition: sel
+---
+
+title: Access/Handle on CLSID path (4663)
+name: clsid_access_4663
+logsource: {product: windows, service: security}
+detection:
+  sel:
+    EventID: 4663
+    ObjectName|contains: "CLSID"
+  condition: sel
+---
+
+title: Suspicious process related to BitLocker COM hijack (4688)
+name: proc_bitlocker_4688
+logsource: {product: windows, service: security}
+detection:
+  s1:
+    EventID: 4688
+    NewProcessName|endswith: '\baaupdate.exe'
+    ParentProcessName|endswith: '\explorer.exe'
+  s2:
+    EventID: 4688
+    NewProcessName|endswith: '\BdeUISrv.exe'
+    ParentProcessName|endswith: '\svchost.exe'
+  condition: s1 or s2
+---
+
+title: Lateral Movement via BitLocker COM Hijacking (temporal)
+status: experimental
+correlation:
+  type: temporal
+  rules:
+    - rr_7040
+    - clsid_new_4657
+    - clsid_access_4663
+    - proc_bitlocker_4688
+  group-by:
+    - ComputerName
+  timespan: 5m
+  condition:
+    gte: 4
