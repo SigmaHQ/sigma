@@ -1,0 +1,28 @@
+title: Process Suspension With WERFaultSecure
+id: 1f0b4cac-9c81-41f4-95d0-8475ff46b3e2
+status: experimental
+description: Detects attempts to freeze a process or EDR agent using WERFaultSecure.exe.
+references:
+    - https://www.zerosalarium.com/2025/09/EDR-Freeze-Puts-EDRs-Antivirus-Into-Coma.html
+    - https://github.com/TwoSevenOneT/EDR-Freeze
+author: Jason (https://github.com/0xbcf)
+date: 2025/09/23
+tags:
+    - attack.defense-evasion
+    - attack.T1562.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: '\werfaultsecure.exe'
+    selection_cli:
+        CommandLine|contains:
+            - '/type 268310'
+            - '/cancel'
+            - '/pid'
+            - '/tid'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate usage of WerFaultSecure for debugging purposes
+level: high
