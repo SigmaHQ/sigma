@@ -1,0 +1,23 @@
+title: Hacktool - EDR-Freeze Artefacts
+id: 217ddbb3-d332-4ebf-b2be-c378035ccb79
+description: |
+    Detects creation of artefacts by EDR-Freeze, a tool that exploits the MiniDumpWriteDump function and WerFaultSecure.exe to suspend EDR and Antivirus processes on Windows.
+references:
+    - https://www.zerosalarium.com/2025/09/EDR-Freeze
+    - https://github.com/TwoSevenOneT/EDR-Freeze/blob/a7f61030b36fbde89871f393488f7075d2aa89f6/EDR-Freeze.cpp#L36
+status: experimental
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-09-24
+tags:
+    - attack.defense-evasion
+    - attack.t1070
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|endswith: '\t.txt' # Output file for the dump, created in same directory
+    condition: selection
+falsepositives:
+    - Creation of txt file named t.txt in legitimate context
+level: medium
