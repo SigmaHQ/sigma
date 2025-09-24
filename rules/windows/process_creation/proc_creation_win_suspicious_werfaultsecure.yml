@@ -1,0 +1,28 @@
+title: Detect Suspicious WerFaultSecure Invocations
+id: 9160cd58-cf22-48ba-9d52-5160841e8bda
+status: test
+description: |
+  This rule searches for suspicious invocations of WerFaultSecure.exe that use command-line parameters to request
+  a minidump of sensitive processes (such as EDR or antivirus processes). Such behavior may indicate the use of offensive
+  techniques like EDR-Freeze, which aim to place antimalware or EDR agents into a temporarily suspended state to evade
+  monitoring and prevent normal response. 
+references:
+  - https://www.zerosalarium.com/2025/09/EDR-Freeze-Puts-EDRs-Antivirus-Into-Coma.html
+author: Milad Cheraghi
+date: 2025-09-24
+tags:
+ 	  - attack.defense-evasion
+ 	  - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|endswith: '\WerFaultSecure.exe'
+        - OriginalFileName: 'WerFaultSecure.exe'
+    selection_cli:
+        CommandLine|contains: 'WerFaultSecure.exe /h /pid'
+condition: selection and selection_cli
+falsepositives:
+    - Unknown
+level: medium
