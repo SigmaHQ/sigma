@@ -15,14 +15,14 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_img:
-        Image|endswith: '\werfaultsecure.exe'
-    selection_cli:
-        CommandLine|contains:
-            - '/type 268310'
-            - '/cancel'
-            - '/pid'
-            - '/tid'
+    selection:
+        Image: 'C:\Windows\System32\WerFaultSecure.exe'
+        CommandLine|contains|all:
+            - 'WerFaultSecure.exe /h /pid' # Antimalware or EDR process pid will be after this line
+            - ' /tid '
+            - ' /encfile '
+            - ' /cancel '
+        CommandLine|endswith: '/type 268310'
     condition: all of selection_*
 falsepositives:
     - Legitimate usage of WerFaultSecure for debugging purposes
