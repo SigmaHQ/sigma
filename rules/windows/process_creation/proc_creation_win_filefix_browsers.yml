@@ -9,7 +9,7 @@ references:
     - https://mrd0x.com/filefix-clickfix-alternative/
 author: 0xFustang
 date: 2025-06-26
-modified: 2025-06-30
+modified: 2025-07-16
 tags:
     - attack.execution
     - attack.t1204.004
@@ -20,9 +20,20 @@ detection:
     selection:
         ParentImage|endswith:
             - '\brave.exe'
+            - '\browser.exe' # Yandex
+            - '\browser_broker.exe'
             - '\chrome.exe'
             - '\firefox.exe'
+            - '\iexplore.exe'
+            - '\microsoftedge.exe'
+            - '\microsoftedgecp.exe'
             - '\msedge.exe'
+            - '\msedgewebview2.exe'
+            - '\opera.exe'
+            - '\palemoon.exe'
+            - '\safari.exe'
+            - '\vivaldi.exe'
+            - '\waterfox.exe'
         Image|endswith:
             - '\bitsadmin.exe'
             - '\certutil.exe'
@@ -31,7 +42,7 @@ detection:
             - '\powershell.exe'
             - '\pwsh.exe'
             - '\regsvr32.exe'
-        CommandLine|contains: '#'
+        CommandLine|re: '^".+".*'
     condition: selection
 falsepositives:
     - Legitimate use of PowerShell or other utilities launched from browser extensions or automation tools
