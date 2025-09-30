@@ -1,0 +1,35 @@
+title: WinRAR Path-Traversal Style Drops (AppData/Temp/Startup)
+id: 7492afa8-c632-49f5-8538-b286c61469b2
+status: experimental
+description: Detects suspicious file creation in user-writable persistence hotpaths
+references:
+  - https://www.schneier.com/blog/archives/2025/08/zero-day-exploit-in-winrar-file.html
+author: Low Country Cyber Solutions
+date: 2025/08/19
+logsource:
+  category: file_event
+  product: windows
+detection:
+  localapp_user:
+    TargetFilename|contains: '\Users\'
+  localapp_appdata:
+    TargetFilename|contains: '\AppData\Local\'
+  temp_user:
+    TargetFilename|contains: '\Users\'
+  temp_path:
+    TargetFilename|contains: '\AppData\Local\Temp\'
+  startup_path:
+    TargetFilename|contains: '\Start Menu\Programs\Startup\'
+  condition: (localapp_user and localapp_appdata) or (temp_user and temp_path) or startup_path
+fields:
+  - TargetFilename
+  - Image
+  - User
+falsepositives:
+  - Updaters/installers writing to Temp/AppData
+level: high
+tags:
+  - attack.t1574.001
+  - attack.t1547.001
+  - cve.2025-8088
+  - cve.2025-6218
