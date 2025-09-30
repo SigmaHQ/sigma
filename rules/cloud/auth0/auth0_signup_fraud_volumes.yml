@@ -1,0 +1,61 @@
+title: Risk of signup fraud - rapid creation of fake accounts
+id: 9ed76f7f-565b-4882-82db-6c7ba3b30aba
+status: experimental
+description: |
+    Detects potential signup fraud by monitoring the following events: surge in a number of registration, excessive failed signups, or too many signup attempts with use of breached passwords.
+    Monitors for anomalous patterns in user registration activities that may indicate fraudulent account creation.
+references:
+    - https://auth0.com/docs/secure/attack-protection
+    - https://auth0.com/docs/manage-users/user-accounts/create-users
+    - https://github.com/auth0/auth0-customer-detections/
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.resource-development
+    - attack.t1136
+logsource:
+    product: auth0
+    service: signup
+detection:
+    selection:
+        data.type:
+            - "fs"
+            - "ss"
+            - "signup_pwd_leak"
+    condition: selection
+fields:
+    - data.type
+    - data.user_name
+    - data.user_id
+    - data.ip
+    - data.client_id
+    - data.client_name
+falsepositives:
+    - Legitimate users signing up with a large number of accounts during promotional events like Black Friday
+    - Marketing campaigns driving increased legitimate registrations
+    - System migrations or bulk user imports
+level: medium
+explanation: |
+    The query alerts when one of the thresholds exceeds - number of successful signups, failed signups, or signups attempts with breached passwords.
+
+    Splunk Query:
+    index=auth0 data.type IN ("fs","ss","signup_pwd_leak")
+    | bin _time span=1h
+    | chart count by _time, data.type
+    | fillnull value=0
+    | rename fs as count_fs, ss as count_ss, signup_pwd_leak as count_signup_pwd_leak
+    | where count_fs >= {thresholds_failed_signups}
+    | where count_ss >= {thresholds_successful_signups}
+    | where count_signup_pwd_leak >= {thresholds_leaked_pwd}
+
+    Tenant Logs Query:
+    type:"fs" OR type:"ss" OR type:"signup_pwd_leak"
+comments:
+    - The Splunk query above shall be tuned to reflect a valid tenant name.
+    - The values for thresholds_failed_signups, thresholds_successful_signups, and thresholds_leaked_pwd should be set based on the customer's environment and expected behavior.
+    - To learn normality, it is recommended to run the query (excluding "where" clauses) for a period of time and calculate the thresholds based on the observed data.
+    - A similar detection (with less details) can be implemented through Security Center and its alerts.
+    - Prevention - Enable Attack protection features
+    - Prevention - Migrate to passwordless authentication
+    - Prevention - Collect attribution of the fraudulent traffic (IPs, ASNs, Geo), and block the obviously malicious sources, e.g. with Tenant ACL.
