@@ -1,0 +1,27 @@
+title: WSL Executed From Unusual Directory
+id: 792eba32-3c95-4144-a7dd-030f4a4cdb8b
+status: experimental
+description: Detects the execution of wsl.exe from an unusual path. This could point to a possible hijack of WSL, intended to make it run a malicious payload upon execution of WSL or Bash.
+references:
+    - Add later
+author: Liran Ravich
+date: 2025-09-30
+tags:
+    - attack.defense-evasion
+    - attack.t1036.005
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\wsl.exe'
+        - OriginalFileName: 'wsl.exe'
+    filter:
+        Image:
+            - 'C:\Windows\System32\wsl.exe'
+            - 'C:\Program Files\WSL\wsl.exe'
+    condition: selection_img and not filter
+falsepositives:
+    - Unlikely
+level: high
