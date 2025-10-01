@@ -16,8 +16,10 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_schtasks:
-        Image|endswith: '\schtasks.exe'
+    selection_img:
+        - Image|endswith: '\schtasks.exe'
+        - OriginalFileName: 'schtasks.exe'
+    selection_cli:
         CommandLine|contains|windash: ' /create '
         CommandLine|contains:
             - ' audiodg'
@@ -37,7 +39,7 @@ detection:
             - ' taskhost'
             - ' wininit'
             - ' winlogon'
-    condition: selection_schtasks
+    condition: all of selection_*
 falsepositives:
     - Legitimate system administration tasks scheduling trusted system processes.
 level: high
