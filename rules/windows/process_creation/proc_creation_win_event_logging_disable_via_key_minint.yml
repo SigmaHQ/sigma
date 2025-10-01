@@ -26,7 +26,7 @@ detection:
         - OriginalFileName: 'reg.exe'
     selection_reg_cmd:
         CommandLine|contains|all:
-            - 'add'
+            - ' add '
             - '\SYSTEM\CurrentControlSet\Control\MiniNt'
     selection_powershell_img:
         - Image|endswith:
@@ -36,10 +36,12 @@ detection:
         - OriginalFileName:
               - 'PowerShell.EXE'
               - 'pwsh.dll'
-    selection_powershell_cmd:
-        CommandLine|contains|all:
-            - 'New-Item'
-            - '\SYSTEM\CurrentControlSet\Control\MiniNt'
+    selection_powershell_cmd1:
+        CommandLine|contains:
+            - 'New-Item '
+            - 'ni '
+    selection_powershell_cmd2:
+        CommandLine|contains: '\SYSTEM\CurrentControlSet\Control\MiniNt'
     condition: all of selection_reg_* or all of selection_powershell_*
 falsepositives:
     - Highly Unlikely
