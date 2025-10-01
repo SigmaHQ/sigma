@@ -8,7 +8,7 @@ description: Detects suspicious child processes related to Windows Shell utiliti
 references:
     - https://tria.ge/241015-l98snsyeje/behavioral2
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
-date: 2024-02-05
+date: 2025-02-05
 tags:
     - attack.t1202
     - attack.defense-evasion
@@ -22,19 +22,21 @@ detection:
     selection_child:
         - Image|endswith:
               - '\cmd.exe'             # Windows Command Prompt
+              - '\cscript.exe'         # Windows Script Host (used for scripting exploits)
+              - '\mshta.exe'           # MSHTA (HTML Application Host, often abused)
+              - '\powershell_ise.exe'  # PowerShell ISE
               - '\powershell.exe'      # Windows PowerShell
               - '\pwsh.exe'            # PowerShell Core
               - '\regsvr32.exe'        # Windows Registry Server (commonly used for exploits)
-              - '\cscript.exe'         # Windows Script Host (used for scripting exploits)
-              - '\mshta.exe'           # MSHTA (HTML Application Host, often abused)
               - '\wscript.exe'         # Windows Script Host (for executing scripts)
         - OriginalFileName:
               - 'cmd.exe'
-              - 'powershell.exe'
-              - 'pwsh.exe'
-              - 'regsvr32.exe'
               - 'cscript.exe'
+              - 'powershell_ise.exe'
               - 'mshta.exe'
+              - 'powershell.exe'
+              - 'pwsh.dll'
+              - 'regsvr32.exe'
               - 'wscript.exe'
     condition: all of selection_*
 falsepositives:
