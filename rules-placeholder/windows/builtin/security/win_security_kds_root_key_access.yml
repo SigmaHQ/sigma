@@ -2,8 +2,8 @@ title: KDS Root Key Access on Windows System
 id: 5f0d5e5a-61d1-44cd-900d-2df14ffe4f82
 status: experimental
 description: |
-    Detects potential retrieval of KDS root key information from Active Directory for the purpose of conducting a Golden dMSA attack.
-    The Golden dMSA technique attempts to read the master root keys by accessing the object type msKds-ProvRootKey.
+    Detects potential retrieval of KDS Root Key information from Active Directory for the purpose of conducting a Golden dMSA attack.
+    The Golden dMSA technique attempts to read the Master Root Keys by accessing the object type msKds-ProvRootKey.
 references:
     - https://learn.microsoft.com/en-us/windows/win32/adschema/c-mskds-provrootkey
     - https://ipurple.team/2025/09/02/golden-dmsa/
@@ -23,13 +23,13 @@ detection:
     selection:
         # This rule should be applied after initial baselining according your environment.
         EventID: 4662
-        ObjectType: '%{aa02fd41-17e0-4f18-8687-b2239649736b}'
+        ObjectType: '%{aa02fd41-17e0-4f18-8687-b2239649736b}' # msKds-ProvRootKey
         AccessMask:
-            - '0x100'
+            - '0x100' # Read Property
             - '0x10'
-    condition: selection
-fields:
-    - SubjectUserName # Look for an account name that is not a DC
+    filter:
+        SubjectUserName|expand: '%Domain_Controller%' # Exclude DC computer accounts who are expected to read this object
+    condition: selection and not filter
 falsepositives:
     - Legitimate administrative activities
 level: medium
