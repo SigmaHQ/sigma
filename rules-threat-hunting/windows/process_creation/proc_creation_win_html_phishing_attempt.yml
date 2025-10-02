@@ -1,0 +1,32 @@
+title: Potential HTML Phishing Attachment Clicked
+id: 538c5851-8c03-4724-8ec4-623bc7aadaea
+status: experimental
+description: Detects When a Potential HTML Phishing Attachment Is Clicked.
+references:
+    - https://app.any.run/tasks/ae3c4ded-fd6a-43ed-8215-ba0ba574ad33
+    - https://app.any.run/tasks/8901e2d5-0c5a-48ba-a8e9-10b5ed7e06f4
+author: Joseph Kamau
+date: 2025/10/02
+tags:
+    - attack.t1598.002
+    - attack.initial-access
+    - detection.threat-hunting
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        Image|endswith:
+            - \msedge.exe
+            - \firefox.exe
+            - \chrome.exe
+            - \brave.exe
+            - \vivaldi.exe
+            - \opera/exe
+        CommandLine|contains|all:
+            - :\users
+            - .htm
+    condition: selection
+falsepositives:
+    - Unlikely each alert should be investigated to determine the content of HTML attachments.
+level: medium
