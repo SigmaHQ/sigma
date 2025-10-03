@@ -27,6 +27,13 @@ detection:
         ParentImage:
             - C:\Windows\System32\Dism.exe
             - C:\Windows\System32\cleanmgr.exe  # Spawns DismHost.exe with a shortened username (if too long)
+    filter_main_installers:
+        - Image|contains|all:
+              - '\AppData\'
+              - '\Temp\'
+        - Image|endswith:
+              - '~1\unzip.exe'
+              - '~1\7zG.exe'
     filter_optional_webex:
         ParentImage|endswith: '\WebEx\WebexHost.exe' # Spawns a shortened version of the CLI and Image processes
     filter_optional_thor:
@@ -35,13 +42,6 @@ detection:
         - Product: 'InstallShield (R)'
         - Description: 'InstallShield (R) Setup Engine'
         - Company: 'InstallShield Software Corporation'
-    filter_main_installers:
-        - Image|contains|all:
-              - '\AppData\'
-              - '\Temp\'
-        - Image|endswith:
-              - '~1\unzip.exe'
-              - '~1\7zG.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Applications could use this notation occasionally which might generate some false positives. In that case Investigate the parent and child process.
