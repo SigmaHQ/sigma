@@ -15,6 +15,7 @@ modified: 2025-10-03
 tags:
     - attack.defense-evasion
     - attack.t1564.004
+    - detection.threat-hunting
 logsource:
     category: process_creation
     product: windows
@@ -30,6 +31,11 @@ detection:
     filter_main_winget:
         - ParentImage|endswith: '\winget.exe'
         - ParentImage|contains: '\AppData\Local\Temp\WinGet\'
+    filter_main_installers:
+        - Image|contains|all:
+              - '\AppData\'
+              - '\Temp\'
+        - CommandLine|contains: '\AppData\Local\Temp\' # sometimes installers spawn other installers from temp folder
     filter_optional_dopus:
         ParentImage: 'C:\Program Files\GPSoftware\Directory Opus\dopus.exe'
     filter_optional_aurora:
