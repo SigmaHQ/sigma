@@ -1,0 +1,26 @@
+title: Suspicious Use of BrowserCore.exe for PRT Extraction
+id: e862850e-cf85-48eb-b47b-db55d5c3d2d6
+status: stable
+description: Detects suspicious execution of BrowserCore.exe potentially used to extract Primary Refresh Tokens (PRTs) for Azure AD SSO abuse.
+references:
+    - https://dirkjanm.io/abusing-azure-ad-sso-with-the-primary-refresh-token/
+author: Eugen Tropmann
+date: 2025-10-02
+modified: 2025-10-02
+tags:
+    - attack.credential-access
+    - attack.t1003
+    - attack.t1550.003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+  selection:
+    Image|endswith: '\BrowserCore.exe'
+    CommandLine|contains: 'chrome-extension://ppnbnpeolgkicgegkbkbjmhlideopiji/'
+  selection_filter:
+    ParentImage|endswith: '\cmd.exe'
+  condition: selection and not selection_filter
+falsepositives:
+    - unknown
+level: high
