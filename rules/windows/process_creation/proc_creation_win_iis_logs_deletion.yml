@@ -8,7 +8,7 @@ description: |
     Detects attempts to delete Internet Information Services (IIS) log files via command line utilities, which is a common defense evasion technique used by attackers to cover their tracks.
     Threat actors often abuse vulnerabilities in web applications hosted on IIS servers to gain initial access and later delete IIS logs to evade detection.
 references:
-    - Internal Research
+    - https://learn.microsoft.com/en-us/iis/manage/provisioning-and-managing-iis/managing-iis-log-file-storage
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2025-09-02
 tags:
@@ -40,5 +40,8 @@ detection:
         CommandLine|contains: '\inetpub\logs\'
     condition: all of selection_*
 falsepositives:
-    - Unknown
+    - Deletion of IIS logs that are older than a certain retention period as part of regular maintenance activities.
+    - Legitimate schedule tasks or scripts that clean up log files regularly.
+    # More Fp cases
+    # https://learn.microsoft.com/en-us/iis/manage/provisioning-and-managing-iis/managing-iis-log-file-storage#02
 level: medium
