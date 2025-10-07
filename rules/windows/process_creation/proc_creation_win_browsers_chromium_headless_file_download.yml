@@ -10,7 +10,7 @@ references:
     - https://www.trendmicro.com/en_us/research/23/e/managed-xdr-investigation-of-ducktail-in-trend-micro-vision-one.html
 author: Sreeman, Florian Roth (Nextron Systems)
 date: 2022-01-04
-modified: 2023-05-12
+modified: 2025-10-07
 tags:
     - attack.command-and-control
     - attack.t1105
@@ -30,7 +30,9 @@ detection:
             - '--headless'
             - 'dump-dom'
             - 'http'
-    condition: selection
+    filter_main_legitimate_cli:
+        CommandLine|contains: '--headless --disable-gpu --disable-extensions --disable-plugins --mute-audio --no-first-run --incognito --aggressive-cache-discard --dump-dom'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high
