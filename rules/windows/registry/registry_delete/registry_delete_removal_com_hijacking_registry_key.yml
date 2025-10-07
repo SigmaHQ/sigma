@@ -12,7 +12,7 @@ references:
     - https://learn.microsoft.com/en-us/windows/win32/shell/shell-and-managed-code
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 date: 2020-05-02
-modified: 2025-07-11
+modified: 2025-10-07
 tags:
     - attack.defense-evasion
     - attack.t1112
@@ -22,6 +22,8 @@ logsource:
 detection:
     selection:
         TargetObject|endswith: '\shell\open\command'
+    filter_main_explorer:
+        Image|endswith: 'C:\Windows\explorer.exe'
     filter_main_svchost:
         Image: 'C:\Windows\system32\svchost.exe'
     filter_main_msiexec:
@@ -32,6 +34,8 @@ detection:
         Image|startswith:
             - 'C:\Program Files\'
             - 'C:\Program Files (x86)\'
+    filter_main_openwith:
+        Image: 'C:\Windows\System32\OpenWith.exe'
     filter_optional_dropbox:
         Image|endswith: '\Dropbox.exe'
         # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
@@ -69,13 +73,23 @@ detection:
               - 'AppData\Local\Temp'
               - '\setup.exe'
         - Image|contains|all:
-              - 'AppData\Local\Temp\is-'
+              - '\Temp\is-'
               - '\target.tmp'
     filter_optional_ninite:
         Image|endswith: '\ninite.exe'
     filter_optional_discord:
         Image|endswith: '\reg.exe'
         TargetObject|endswith: '\Discord\shell\open\command'
+    filter_optional_spotify:
+        Image|endswith: '\Spotify.exe'
+        TargetObject|endswith: '\Spotify\shell\open\command'
+    filter_optional_eclipse:
+        Image|endswith: 'C:\eclipse\eclipse.exe'
+        TargetObject|contains: '_Classes\eclipse+'
+    filter_optional_teamviewer:
+        Image|contains|all:
+            - '\Temp'
+            - '\TeamViewer'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate software (un)installations are known to cause some false positives. Please add them as a filter when encountered
