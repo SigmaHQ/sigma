@@ -11,10 +11,11 @@ references:
     - https://twitter.com/frack113/status/1555830623633375232
 author: frack113, Nasreddine Bencherchali
 date: 2022-08-07
-modified: 2025-07-04
+modified: 2025-10-07
 tags:
     - attack.defense-evasion
     - attack.t1564.004
+    - detection.threat-hunting
 logsource:
     category: process_creation
     product: windows
@@ -23,25 +24,38 @@ detection:
         CommandLine|contains:
             - '~1\'
             - '~2\'
-    filter:
-        - ParentImage:
-              - 'C:\Windows\System32\Dism.exe'
-              - 'C:\Windows\System32\cleanmgr.exe'
-              - 'C:\Program Files\GPSoftware\Directory Opus\dopus.exe'
-        - ParentImage|endswith:
-              - '\WebEx\WebexHost.exe'
-              - '\thor\thor64.exe'
-              - '\veam.backup.shell.exe'
-              - '\winget.exe'
-              - '\Everything\Everything.exe'
-              - '\aurora-agent-64.exe'
-              - '\aurora-agent.exe'
+    filter_main_system_process:
+        ParentImage:
+            - 'C:\Windows\System32\Dism.exe'
+            - 'C:\Windows\System32\cleanmgr.exe'
+    filter_main_winget:
+        - ParentImage|endswith: '\winget.exe'
         - ParentImage|contains: '\AppData\Local\Temp\WinGet\'
-        - CommandLine|contains:
-              - '\appdata\local\webex\webex64\meetings\wbxreport.exe'
-              - 'C:\Program Files\Git\post-install.bat'
-              - 'C:\Program Files\Git\cmd\scalar.exe'
-    condition: selection and not filter
+    filter_main_installers:
+        - Image|contains|all:
+              - '\AppData\'
+              - '\Temp\'
+        - CommandLine|contains: '\AppData\Local\Temp\' # sometimes installers spawn other installers from temp folder
+    filter_optional_dopus:
+        ParentImage: 'C:\Program Files\GPSoftware\Directory Opus\dopus.exe'
+    filter_optional_aurora:
+        ParentImage|endswith:
+            - '\aurora-agent-64.exe'
+            - '\aurora-agent.exe'
+    filter_optional_thor:
+        ParentImage|endswith: '\thor\thor64.exe'
+    filter_optional_git:
+        CommandLine|contains:
+            - 'C:\Program Files\Git\post-install.bat'
+            - 'C:\Program Files\Git\cmd\scalar.exe'
+    filter_optional_webex:
+        - ParentImage|endswith: '\WebEx\webexhost.exe'
+        - CommandLine|contains: '\appdata\local\webex\webex64\meetings\wbxreport.exe'
+    filter_optional_veeam:
+        ParentImage|endswith: '\veeam.backup.shell.exe'
+    filter_optional_everything:
+        ParentImage|endswith: '\Everything\Everything.exe'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Applications could use this notation occasionally which might generate some false positives. In that case investigate the parent and child process.
 level: medium

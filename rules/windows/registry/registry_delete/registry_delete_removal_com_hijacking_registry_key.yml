@@ -24,15 +24,14 @@ detection:
         TargetObject|endswith: '\shell\open\command'
     filter_main_svchost:
         Image: 'C:\Windows\system32\svchost.exe'
-    filter_optional_office:
-        Image|startswith:
-            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
-            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
-        Image|endswith: '\OfficeClickToRun.exe'
-    filter_optional_integrator:
+    filter_main_msiexec:
         Image:
-            - 'C:\Program Files\Microsoft Office\root\integration\integrator.exe'
-            - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
+            - 'C:\Windows\System32\msiexec.exe'
+            - 'C:\Windows\SysWOW64\msiexec.exe'
+    filter_main_generic_prorams:
+        Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
     filter_optional_dropbox:
         Image|endswith: '\Dropbox.exe'
         # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
@@ -41,11 +40,6 @@ detection:
         Image|endswith: '\AppData\Local\Temp\Wireshark_uninstaller.exe'
         # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
         TargetObject|contains: '\wireshark-capture-file\'
-    filter_optional_opera:
-        Image|startswith:
-            - 'C:\Program Files\Opera\'
-            - 'C:\Program Files (x86)\Opera\'
-        Image|endswith: '\installer.exe'
     filter_optional_peazip:
         Image|contains: 'peazip'
         # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
@@ -70,6 +64,18 @@ detection:
         TargetObject|endswith:
             - '\CLSID\{305CA226-D286-468e-B848-2B2E8E697B74}\Shell\Open\Command'
             - '\AntiVir.Keyfile\shell\open\command'
+    filter_optional_installer_temp:
+        - Image|contains|all:
+              - 'AppData\Local\Temp'
+              - '\setup.exe'
+        - Image|contains|all:
+              - 'AppData\Local\Temp\is-'
+              - '\target.tmp'
+    filter_optional_ninite:
+        Image|endswith: '\ninite.exe'
+    filter_optional_discord:
+        Image|endswith: '\reg.exe'
+        TargetObject|endswith: '\Discord\shell\open\command'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate software (un)installations are known to cause some false positives. Please add them as a filter when encountered
