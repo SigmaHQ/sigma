@@ -6,7 +6,7 @@ references:
     - https://thedfirreport.com/2021/08/29/cobalt-strike-a-defenders-guide/
 author: Max Altgelt (Nextron Systems)
 date: 2022-08-23
-modified: 2025-10-06
+modified: 2025-10-08
 tags:
     - attack.defense-evasion
     - attack.privilege-escalation
@@ -26,7 +26,12 @@ detection:
             - 'C:\Windows\Microsoft.NET\FrameworkArm64\v'
         Image|endswith: '\ngen.exe'
         CommandLine|contains: 'install'
-    condition: selection and not 1 of filter_main_*
+    filter_optional_xampp:
+        CommandLine|contains|all:
+            - '"C:\Windows\sysnative\cmd.exe\"'
+            - '\xampp\'
+            - '\catalina_start.bat\'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: medium

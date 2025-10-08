@@ -6,7 +6,7 @@ references:
     - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd364427(v=ws.10)
 author: frack113
 date: 2022-02-19
-modified: 2025-10-06
+modified: 2025-10-08
 tags:
     - attack.defense-evasion
     - attack.t1562.004
@@ -38,6 +38,12 @@ detection:
             - 'C:\Windows\Tasks\'
             - 'C:\Windows\Temp\'
             - '\AppData\Local\Temp\'
+    filter_main_system_rundll32:
+        ApplicationPath: 'System'
+        ModifyingApplication: 'C:\Windows\System32\rundll32.exe'
+    filter_main_tiworker:
+        ModifyingApplication|startswith: 'C:\Windows\WinSxS\'
+        ModifyingApplication|endswith: '\TiWorker.exe'
     filter_main_null:
         ApplicationPath: null
     filter_optional_no_path:
@@ -51,7 +57,9 @@ detection:
               - 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
               - 'C:\Program Files\Windows Defender\'
           ModifyingApplication|endswith: '\MsMpEng.exe'
-        - ApplicationPath|startswith: 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+        - ApplicationPath|startswith:
+              - 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+              - 'C:\Program Files\Windows Defender\'
           ApplicationPath|endswith: '\MsMpEng.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 level: medium
