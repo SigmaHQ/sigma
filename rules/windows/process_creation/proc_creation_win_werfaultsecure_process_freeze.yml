@@ -16,7 +16,6 @@ logsource:
     product: windows
 detection:
     selection:
-        Image: 'C:\Windows\System32\WerFaultSecure.exe'
         CommandLine|contains|all:
             - ' /h '
             - ' /pid ' # Antimalware or EDR process pid will be after this line
@@ -25,7 +24,11 @@ detection:
             - ' /cancel '
             - ' /type '
             - ' 268310'
-    condition: selection
+    selection_1:
+        Image|startswith:
+            - C:\Windows\System32
+            - C:\Windows\SysWOW64
+    condition: selection and not selection_1
 falsepositives:
     - Legitimate usage of WerFaultSecure for debugging purposes
 level: high
