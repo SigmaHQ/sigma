@@ -8,7 +8,7 @@ references:
     - https://bohops.com/2019/08/19/dotnet-core-a-vector-for-awl-bypass-defense-evasion/
 author: Beyu Denis, oscd.community
 date: 2020-10-18
-modified: 2024-04-24
+modified: 2025-10-08
 tags:
     - attack.defense-evasion
     - attack.t1218
@@ -27,7 +27,15 @@ detection:
             - '.dll"'
             - ".csproj'"
             - ".dll'"
-    condition: all of selection_*
+    filter_optional_notepad++:
+        ParentImage:
+            - 'C:\Program Files (x86)\Notepad++\notepad++.exe'
+            - 'C:\Program Files\Notepad++\notepad++.exe'
+        CommandLine|contains|all:
+            - 'C:\ProgramData\CSScriptNpp\'
+            - '-cscs_path:'
+            - '\cs-script\cscs.dll'
+    condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate administrator usage
 level: medium

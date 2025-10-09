@@ -7,7 +7,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1112/T1112.md#atomic-test-34---windows-add-registry-value-to-load-service-in-safe-mode-with-network
 author: frack113
 date: 2022-04-04
-modified: 2024-03-25
+modified: 2025-10-07
 tags:
     - attack.defense-evasion
     - attack.t1564.001
@@ -26,6 +26,10 @@ detection:
         TargetObject|endswith:
             - '\Control\SafeBoot\Minimal\SAVService\(Default)'
             - '\Control\SafeBoot\Network\SAVService\(Default)'
+    filter_optional_mbamservice:
+        Image|endswith: '\MBAMInstallerService.exe'
+        TargetObject|endswith: '\MBAMService\(Default)'
+        Details: 'Service'
     condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Unknown

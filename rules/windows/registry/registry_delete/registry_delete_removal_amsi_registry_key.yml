@@ -7,7 +7,7 @@ references:
     - https://seclists.org/fulldisclosure/2020/Mar/45
 author: frack113
 date: 2021-06-07
-modified: 2023-02-08
+modified: 2025-10-07
 tags:
     - attack.defense-evasion
     - attack.t1562.001
@@ -16,11 +16,16 @@ logsource:
     category: registry_delete
 detection:
     selection:
-        EventType: DeleteKey
         TargetObject|endswith:
             - '{2781761E-28E0-4109-99FE-B9D127C57AFE}' # IOfficeAntiVirus
             - '{A7C452EF-8E9F-42EB-9F2B-245613CA0DC9}' # ProtectionManagement.dll
-    condition: selection
+    filter_main_defender:
+        Image|startswith:
+            - 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+            - 'C:\Program Files\Windows Defender\'
+            - 'C:\Program Files (x86)\Windows Defender\'
+        Image|endswith: '\MsMpEng.exe'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unlikely
 level: high
