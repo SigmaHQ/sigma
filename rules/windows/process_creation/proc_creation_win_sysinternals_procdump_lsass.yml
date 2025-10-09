@@ -6,9 +6,11 @@ description: |
     This way we are also able to catch cases in which the attacker has renamed the procdump executable.
 references:
     - https://learn.microsoft.com/en-us/sysinternals/downloads/procdump
+    - https://research.splunk.com/endpoint/3742ebfe-64c2-11eb-ae93-0242ac130002
+    - https://x.com/wietze/status/1958302556033065292?s=12
 author: Florian Roth (Nextron Systems)
 date: 2018-10-30
-modified: 2024-03-13
+modified: 2025-08-21
 tags:
     - attack.defense-evasion
     - attack.t1036
@@ -20,10 +22,16 @@ logsource:
     product: windows
 detection:
     selection_flags:
-        CommandLine|contains|windash: ' -ma '
+        CommandLine|contains|windash:
+            - ' -ma '
+            - ' -mm ' # Mini dump
+            - ' -mp ' # Miniplus dump
     selection_process:
-        CommandLine|contains: ' ls' # Short for lsass
-    condition: all of selection*
+        CommandLine|contains:
+            - ' ls' # Short for lsass
+            - ' keyiso'
+            - ' samss'
+    condition: all of selection_*
 falsepositives:
     - Unlikely, because no one should dump an lsass process memory
     - Another tool that uses command line flags similar to ProcDump
