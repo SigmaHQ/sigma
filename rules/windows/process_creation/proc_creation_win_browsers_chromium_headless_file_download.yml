@@ -30,9 +30,20 @@ detection:
             - '--headless'
             - 'dump-dom'
             - 'http'
-    filter_main_legitimate_cli:
+    filter_optional_edge:
+        Image|startswith:
+            - 'C:\Program Files\Microsoft\Edge\Application'
+            - 'C:\Program Files (x86)\Microsoft\Edge\Application'
+            - 'C:\Program Files (x86)\Microsoft\EdgeCore\'
+            - 'C:\Program Files\Microsoft\EdgeCore\'
+            - 'C:\Program Files\WindowsApps\'
+            - 'C:\Users\*\AppData\Local\Microsoft\WindowsApps\'
+        Image|endswith:
+            - '\msedge.exe'
+            - '\msedgewebview2.exe'
+            - '\MicrosoftEdge.exe'
         CommandLine|contains: '--headless --disable-gpu --disable-extensions --disable-plugins --mute-audio --no-first-run --incognito --aggressive-cache-discard --dump-dom'
-    condition: selection and not 1 of filter_main_*
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high
