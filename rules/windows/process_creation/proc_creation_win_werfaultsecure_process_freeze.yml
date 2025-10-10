@@ -8,6 +8,7 @@ references:
     - https://github.com/TwoSevenOneT/EDR-Freeze/blob/a7f61030b36fbde89871f393488f7075d2aa89f6/EDR-Freeze.cpp#L53
 author: Jason (https://github.com/0xbcf)
 date: 2025-09-23
+modified: 2025-10-10
 tags:
     - attack.defense-evasion
     - attack.t1562.001
@@ -15,17 +16,19 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image: 'C:\Windows\System32\WerFaultSecure.exe'
+    selection_image:
+        - Image|endswith: '\WerFaultSecure.exe'
+        - OriginalFileName: 'WerFaultSecure.exe'
+    selection_args:
         CommandLine|contains|all:
             - ' /h '
-            - ' /pid ' # Antimalware or EDR process pid will be after this line
+            - ' /pid ' # Antimalware or EDR process pid will be after this flag
             - ' /tid '
             - ' /encfile '
             - ' /cancel '
             - ' /type '
             - ' 268310'
-    condition: selection
+    condition: all of selection_*
 falsepositives:
     - Legitimate usage of WerFaultSecure for debugging purposes
 level: high
