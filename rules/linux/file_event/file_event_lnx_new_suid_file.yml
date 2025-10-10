@@ -8,27 +8,27 @@ author: Sesha Duraiarasan
 date: 2025-10-09
 tags:
     - attack.privilege-escalation
-  - attack.t1548
+    - attack.t1548
 logsource:
     product: linux
-  category: file_event
+category: file_event
 detection:
     selection_chmod:
-      Command|contains:
-        - 'chmod 4755'
-      - 'chmod 4750'
-      - 'chmod 4777'
-      - 'chmod 2755'
-      - 'chmod +s'
-  selection_tmp_paths:
+        Command|contains:
+          - 'chmod 4755'
+          - 'chmod 4750'
+          - 'chmod 4777'
+          - 'chmod 2755'
+          - 'chmod +s'
+selection_tmp_paths:
       TargetFilename|contains:
-        - '/tmp/'
-      - '/usr/local/bin/'
-      - '/opt/'
-      - '/home/'
-  selection_filemode:
+          - '/tmp/'
+          - '/usr/local/bin/'
+          - '/opt/'
+          - '/home/'
+selection_filemode:
       FileMode|contains: 's'
-  condition: selection_chmod or (selection_tmp_paths and selection_filemode)
+condition: selection_chmod or (selection_tmp_paths and selection_filemode)
 falsepositives:
     - Legitimate package installs or administrative tasks that intentionally set SUID/SGID on tools
 level: high
