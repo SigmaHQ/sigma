@@ -4,32 +4,32 @@ id: b6f8d3a2-4c9e-4f1e-9a2b-6e7d8c9f0a1b
 status: experimental
 description: Detects creation or permission changes that set the SUID (set-user-ID) or SGID (set-group-ID) bits on files — commonly used by attackers for privilege escalation or persistence.
 references:
-      - https://attack.mitre.org/techniques/T1548/004/
+    - https://attack.mitre.org/techniques/T1548/004/
 author: Sesha Duraiarasan
 date: 2025-10-09
 tags:
-      - attack.privilege-escalation
-      - attack.t1548
+    - attack.privilege-escalation
+    - attack.t1548
 logsource:
     product: linux
     category: file_event
 detection:
     selection_chmod:
-    Command|contains:
-      - 'chmod 4755'
-      - 'chmod 4750'
-      - 'chmod 4777'
-      - 'chmod 2755'
-      - 'chmod +s'
+        Command|contains:
+            - 'chmod 4755'
+            - 'chmod 4750'
+            - 'chmod 4777'
+            - 'chmod 2755'
+            - 'chmod +s'
     selection_tmp_paths:
-    TargetFilename|contains:
-      - '/tmp/'
-      - '/usr/local/bin/'
-      - '/opt/'
-      - '/home/'
+        TargetFilename|contains:
+            - '/tmp/'
+            - '/usr/local/bin/'
+            - '/opt/'
+            - '/home/'
     selection_filemode:
-    FileMode|contains: 's'
+        FileMode|contains: 's'
     condition: selection_chmod or (selection_tmp_paths and selection_filemode)
 falsepositives:
-      - Legitimate package installs or administrative tasks that intentionally set SUID/SGID on tools
+    - Legitimate package installs or administrative tasks that intentionally set SUID/SGID on tools.
 level: high
