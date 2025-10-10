@@ -15,20 +15,20 @@ logsource:
     category: file_event
 detection:
     selection_chmod:
-        Command|contains:
+        process.command_line|contains:
             - 'chmod 4755'
             - 'chmod 4750'
             - 'chmod 4777'
             - 'chmod 2755'
             - 'chmod +s'
     selection_tmp_paths:
-        TargetFilename|contains:
+        file.path|contains:
             - '/tmp/'
             - '/usr/local/bin/'
             - '/opt/'
             - '/home/'
     selection_filemode:
-        FileMode|contains: 's'
+        file.mode|contains: 's'
     condition: selection_chmod or (selection_tmp_paths and selection_filemode)
 falsepositives:
     - Legitimate package installs or administrative tasks that intentionally set SUID/SGID on tools.
