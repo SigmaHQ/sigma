@@ -1,14 +1,12 @@
 title: Suspicious SMB IPC$ and ADMIN$ Connections Without Signing or Encryption
 id: 8d91f6e4-9f3b-4c21-ae41-2c5b7d9f7a12
-status: test
+status: experimental
 description: Detects suspicious SMB IPC$ or ADMIN$ connections that may indicate lateral movement or C2 activity.
 author: Mohamed Abdelghani
 date: 2025-10-10
-references:
-  - https://attack.mitre.org/techniques/T1021/002/
 tags:
-  - attack.lateral-movement
-  - attack.t1021.002
+    - attack.lateral-movement
+    - attack.t1021.002
 logsource:
   product: windows
   service: smbserver/connectivity
@@ -20,18 +18,18 @@ detection:
     selection:
         EventID: 4000
         ShareName|contains:
-          - "IPC$"
-          - "ADMIN$"
-          - "C$"
+            - "IPC$"
+            - "ADMIN$"
+            - "C$"
         SigningUsed: "false"
         EncyptionUsed: "false"
     out:
-        ClientAddress|contains: 
-          - ::1
-          - 127.0.0.1
+        ClientAddress|contains:
+            - ::1
+            - 127.0.0.1
     condition: smb and selection and not out
 falsepositives:
-  - IPC$ connections may generate some noise in normal environments
-  - Legitimate administrative or monitoring tools
+    - IPC$ connections may generate some noise in normal environments
+    - Legitimate administrative or monitoring tools
 level: medium
 ruletype: Sigma
