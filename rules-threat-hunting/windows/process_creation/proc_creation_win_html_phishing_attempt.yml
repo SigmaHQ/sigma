@@ -1,7 +1,10 @@
 title: Potential HTML Phishing Attachment Clicked
 id: 538c5851-8c03-4724-8ec4-623bc7aadaea
 status: experimental
-description: The rule is Created Based On Observed Phishing Campaigns Where a HTML Attachment Is Delivered To a User It Attempts To Catch Successful Clicks Or Opening Of The Attachment. 
+description: |
+    Detects potential HTML phishing attachment click. Threat actors often use HTML attachments in phishing campaigns to deliver malicious payloads or redirect users to harmful websites.
+    When a user clicks on the HTML attachment, it can lead to the execution of scripts or the download of malware, compromising the user's system.
+    During investigation, analyze the HTML file for embedded scripts or links, check for any subsequent downloads or process executions, and investigate the source of the email or message containing the attachment.
 references:
     - https://app.any.run/tasks/ae3c4ded-fd6a-43ed-8215-ba0ba574ad33
     - https://app.any.run/tasks/8901e2d5-0c5a-48ba-a8e9-10b5ed7e06f4
@@ -17,16 +20,16 @@ logsource:
 detection:
     selection:
         Image|endswith:
-            - \msedge.exe
-            - \firefox.exe
-            - \chrome.exe
-            - \brave.exe
-            - \vivaldi.exe
-            - \opera.exe
+            - '\msedge.exe'
+            - '\firefox.exe'
+            - '\chrome.exe'
+            - '\brave.exe'
+            - '\vivaldi.exe'
+            - '\opera.exe'
         CommandLine|contains|all:
-            - :\users\
-            - .htm
+            - 'C:\users\'
+            - '.htm'
     condition: selection
 falsepositives:
-    -Opening of random HTML files via browsers.
+    - Opening of random HTML files via browsers.
 level: medium
