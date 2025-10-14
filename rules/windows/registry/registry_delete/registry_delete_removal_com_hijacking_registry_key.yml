@@ -12,7 +12,7 @@ references:
     - https://learn.microsoft.com/en-us/windows/win32/shell/shell-and-managed-code
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 date: 2020-05-02
-modified: 2025-07-11
+modified: 2025-10-07
 tags:
     - attack.defense-evasion
     - attack.t1112
@@ -21,50 +21,76 @@ logsource:
     category: registry_delete
 detection:
     selection:
-        EventType: 'DeleteKey'
         TargetObject|endswith: '\shell\open\command'
-    filter_svchost:
+    filter_main_explorer:
+        Image|endswith: 'C:\Windows\explorer.exe'
+    filter_main_svchost:
         Image: 'C:\Windows\system32\svchost.exe'
-    filter_office:
-        Image|startswith:
-            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
-            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
-        Image|endswith: '\OfficeClickToRun.exe'
-    filter_integrator:
+    filter_main_msiexec:
         Image:
-            - 'C:\Program Files\Microsoft Office\root\integration\integrator.exe'
-            - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
-    filter_dropbox:
+            - 'C:\Windows\System32\msiexec.exe'
+            - 'C:\Windows\SysWOW64\msiexec.exe'
+    filter_main_generic_prorams:
+        Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    filter_main_openwith:
+        Image: 'C:\Windows\System32\OpenWith.exe'
+    filter_optional_dropbox:
         Image|endswith: '\Dropbox.exe'
         # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
         TargetObject|contains: '\Dropbox.'
-    filter_wireshark:
+    filter_optional_wireshark:
         Image|endswith: '\AppData\Local\Temp\Wireshark_uninstaller.exe'
         # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
         TargetObject|contains: '\wireshark-capture-file\'
-    filter_opera:
-        Image|startswith:
-            - 'C:\Program Files\Opera\'
-            - 'C:\Program Files (x86)\Opera\'
-        Image|endswith: '\installer.exe'
-    filter_peazip:
+    filter_optional_peazip:
         Image|contains: 'peazip'
         # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
         TargetObject|contains: '\PeaZip.'
-    filter_everything:
+    filter_optional_everything:
         Image|endswith: '\Everything.exe'
         # We don't use the HKCR anchor as it could be logged as a different variation (HKEY_CLASSES_ROOT)
         TargetObject|contains: '\Everything.'
-    filter_uninstallers:
+    filter_optional_uninstallers:
         # This image path is linked with different uninstallers when running as admin unfortunately
         Image|startswith: 'C:\Windows\Installer\MSI'
-    filter_java:
+    filter_optional_java:
         Image|startswith: 'C:\Program Files (x86)\Java\'
         Image|endswith: '\installer.exe'
         TargetObject|contains: '\Classes\WOW6432Node\CLSID\{4299124F-F2C3-41b4-9C73-9236B2AD0E8F}'
-    filter_edgeupdate:
+    filter_optional_edgeupdate:
         Image|contains: '\Microsoft\EdgeUpdate\Install'
-    condition: selection and not 1 of filter_*
+    filter_optional_avira:
+        Image:
+            - 'C:\Program Files (x86)\Avira\Antivirus\'
+            - 'C:\Program Files\Avira\Antivirus\'
+        TargetObject|endswith:
+            - '\CLSID\{305CA226-D286-468e-B848-2B2E8E697B74}\Shell\Open\Command'
+            - '\AntiVir.Keyfile\shell\open\command'
+    filter_optional_installer_temp:
+        - Image|contains|all:
+              - 'AppData\Local\Temp'
+              - '\setup.exe'
+        - Image|contains|all:
+              - '\Temp\is-'
+              - '\target.tmp'
+    filter_optional_ninite:
+        Image|endswith: '\ninite.exe'
+    filter_optional_discord:
+        Image|endswith: '\reg.exe'
+        TargetObject|endswith: '\Discord\shell\open\command'
+    filter_optional_spotify:
+        Image|endswith: '\Spotify.exe'
+        TargetObject|endswith: '\Spotify\shell\open\command'
+    filter_optional_eclipse:
+        Image|endswith: 'C:\eclipse\eclipse.exe'
+        TargetObject|contains: '_Classes\eclipse+'
+    filter_optional_teamviewer:
+        Image|contains|all:
+            - '\Temp'
+            - '\TeamViewer'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
-    - Legitimate software (un)installations are known to cause some false positives. Please add them as a filter when encountered
+    - Legitimate software (un)installations are known to cause false positives. Please add them as a filter when encountered
 level: medium
