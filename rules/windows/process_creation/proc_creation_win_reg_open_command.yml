@@ -5,7 +5,7 @@ related:
       type: similar
 status: test
 description: |
-    Detects registry modifications to the `ms-settings` protocol handler, which is frequently targeted for UAC bypass or persistence.
+    Detects registry modifications to the 'ms-settings' protocol handler, which is frequently targeted for UAC bypass or persistence.
     Attackers can modify this registry to execute malicious code with elevated privileges by hijacking the command execution path.
 references:
     - https://thedfirreport.com/2021/12/13/diavol-ransomware/
@@ -23,20 +23,29 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_img:
+    selection_reg_img:
+        - Image|endswith: '\reg.exe'
+        - OriginalFileName: 'reg.exe'
+    selection_pwsh_img:
         - Image|endswith:
-              - '\reg.exe'
               - '\powershell.exe'
               - '\powershell_ise.exe'
               - '\pwsh.exe'
         - OriginalFileName:
-              - 'reg.exe'
               - 'powershell.exe'
               - 'powershell_ise.exe'
               - 'pwsh.dll'
-    selection_cmd:
+    selection_reg_cli:
+        CommandLine|contains: 'add'
+    selection_pwsh_cli:
+        CommandLine|contains:
+            - 'New-ItemProperty'
+            - 'Set-ItemProperty'
+            - 'ni '
+            - 'sp '
+    selection_cli_key:
         CommandLine|contains: '\ms-settings\shell\open\command'
-    condition: all of selection_*
+    condition: (all of selection_reg_* or all of selection_pwsh_*) and selection_cli_key
 falsepositives:
     - Unknown
 level: medium
