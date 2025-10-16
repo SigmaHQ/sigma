@@ -1,4 +1,4 @@
-title: Suspicious Shellcode Injection into RegSvcs
+title: Suspicious Shellcode Injection into RegSvcs\n
 id: 42833cf3-dd1d-4530-8c87-90c55393ad42
 status: experimental
 description: Detects potential shellcode injection into RegSvcs.exe based on suspicious Windows API calls.
@@ -10,24 +10,20 @@ tags:
     - attack.execution
     - attack.t1055
 logsource:
-  category: process_creation
+    category: process_creation
   product: windows
 detection:
-  selection:
-    Image|endswith: '\RegSvcs.exe'
+    selection:
+      Image|endswith: '\RegSvcs.exe'
     OriginalFileName: 'RegSvcs.exe'
   suspicious_behavior:
-    - CallTrace|contains: 'VirtualAlloc'
-    - CallTrace|contains: 'WriteProcessMemory'
-    - CallTrace|contains: 'CreateRemoteThread'
-    - CallTrace|contains: 'NtProtectVirtualMemory'
+      - CallTrace|contains: 'VirtualAlloc'
+      - CallTrace|contains: 'WriteProcessMemory'
+      - CallTrace|contains: 'CreateRemoteThread'
+      - CallTrace|contains: 'NtProtectVirtualMemory'
   condition: selection and 1 of suspicious_behavior
-fields:
-    - Image
-    - ParentImage
-    - CommandLine
-    - CallTrace
 falsepositives:
     - Known .NET assembly registration
 level: high
+
 
