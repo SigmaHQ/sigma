@@ -12,7 +12,7 @@ references:
     - https://www.splunk.com/en_us/blog/security/inno-setup-malware-redline-stealer-campaign.html
 author: Florian Roth (Nextron Systems), Patrick Bareiss, Anton Kutepov, oscd.community, Nasreddine Bencherchali (Nextron Systems)
 date: 2017-11-27
-modified: 2025-10-07
+modified: 2025-10-13
 tags:
     - attack.defense-evasion
     - attack.t1036
@@ -91,8 +91,14 @@ detection:
             - 'C:\Program Files\WindowsApps\Microsoft.PowerShellPreview'
             - '\AppData\Local\Microsoft\WindowsApps\Microsoft.PowerShellPreview' # pwsh installed from Microsoft Store
         Image|endswith: '\pwsh.exe'
-    filter_main_wsl_windowsapps:
-        Image|startswith: 'C:\Program Files\WindowsApps\MicrosoftCorporationII.WindowsSubsystemForLinux'
+    filter_main_wsl_programfiles:
+        Image|startswith:
+            - 'C:\Program Files\WindowsApps\MicrosoftCorporationII.WindowsSubsystemForLinux'
+            - 'C:\Program Files\WSL\'
+        Image|endswith: '\wsl.exe'
+    filter_main_wsl_appdata:
+        Image|startswith: C:\Users\'
+        Image|contains: '\AppData\Local\Microsoft\WindowsApps\'
         Image|endswith: '\wsl.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
