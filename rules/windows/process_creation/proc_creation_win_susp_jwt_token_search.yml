@@ -9,7 +9,7 @@ references:
     - https://mrd0x.com/stealing-tokens-from-office-applications/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-10-25
-modified: 2025-02-24
+modified: 2025-10-17
 tags:
     - attack.credential-access
     - attack.t1528
@@ -17,11 +17,22 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        CommandLine|regex:
-            - '(?i)findstr.*(?i)eyJhbG[a-zA-Z0-9]*'
-            - '(?i)findstr.*(?i)eyJ0eX[a-zA-Z0-9]*'
-    condition: selection
+    selection_tools:
+        CommandLine|contains:
+            - 'findstr '
+            - 'select-string '
+            - 'strings '
+    selection_jwt_string:
+        CommandLine|contains:
+            - 'eyJ0eXAiOi' # {"typ":
+            - 'eyJhbGciOi' # {"alg":
+            - ' eyJ0eX'
+            - ' "eyJ0eX"'
+            - " 'eyJ0eX'"
+            - ' eyJhbG'
+            - ' "eyJhbG"'
+            - " 'eyJhbG'"
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: medium
