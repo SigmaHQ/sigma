@@ -12,7 +12,7 @@ references:
     - https://oddvar.moe/2018/03/21/persistence-using-runonceex-hidden-from-autoruns-exe/
 author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split)
 date: 2019-10-25
-modified: 2023-08-17
+modified: 2025-10-07
 tags:
     - attack.persistence
     - attack.t1547.001
@@ -35,47 +35,14 @@ detection:
             - '\Explorer\ShellExecuteHooks'
             - '\Explorer\SharedTaskScheduler'
             - '\Explorer\Browser Helper Objects'
-    filter_empty:
+    filter_main_empty:
         Details: '(Empty)'
-    filter_edge:
-        Image|contains|all:
-            - 'C:\Program Files (x86)\Microsoft\EdgeUpdate\Install\{'
-            - '\setup.exe'
-    filter_msoffice1:
-        Image: 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\OfficeClickToRun.exe'
-        TargetObject|contains: '\Office\ClickToRun\REGISTRY\MACHINE\Software\Wow6432Node\'
-    filter_msoffice2:
-        Image:
-            - 'C:\Program Files\Microsoft Office\root\integration\integrator.exe'
-            - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
-        TargetObject|contains: '\Explorer\Browser Helper Objects\{31D09BA0-12F5-4CCE-BE8A-2923E76605DA}\'
-    filter_dropbox:
-        - Details|endswith: '-A251-47B7-93E1-CDD82E34AF8B}'
-        - Details: 'grpconv -o'
-        - Details|contains|all:
-              - 'C:\Program Files'
-              - '\Dropbox\Client\Dropbox.exe'
-              - ' /systemstartup'
-    filter_evernote:
-        TargetObject|endswith: '\Explorer\Browser Helper Objects\{92EF2EAD-A7CE-4424-B0DB-499CF856608E}\NoExplorer'
-    filter_dotnet:
-        Image|contains: '\windowsdesktop-runtime-'
-        TargetObject|endswith:
-            - '\WOW6432Node\Microsoft\Windows\CurrentVersion\RunOnce\{e2d1ae32-dd1d-4ad7-a298-10e42e7840fc}'
-            - '\WOW6432Node\Microsoft\Windows\CurrentVersion\RunOnce\{7037b699-7382-448c-89a7-4765961d2537}'
-        Details|startswith: '"C:\ProgramData\Package Cache\'
-        Details|endswith: '.exe" /burn.runonce'
-    filter_office:
-        Image|startswith:
-            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
-            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
-        Image|endswith: '\OfficeClickToRun.exe'
-    filter_ms_win_desktop_runtime:
+    filter_main_ms_win_desktop_runtime:
         Details|startswith: '"C:\ProgramData\Package Cache\{d21a4f20-968a-4b0c-bf04-a38da5f06e41}\windowsdesktop-runtime-'
-    filter_vcredist:
+    filter_main_vcredist:
         Image|endswith: '\VC_redist.x64.exe'
         Details|endswith: '}\VC_redist.x64.exe" /burn.runonce'
-    filter_upgrades:
+    filter_main_upgrades:
         Image|startswith:
             - 'C:\ProgramData\Package Cache'
             - 'C:\Windows\Temp\'
@@ -84,19 +51,65 @@ detection:
             - '\windowsdesktop-runtime-'  # C:\WINDOWS\Temp\{751E2E78-46DC-4376-9205-99219CDC34AE}\.be\windowsdesktop-runtime-6.0.12-win-x86.exe
             - '\AspNetCoreSharedFrameworkBundle-'  # "C:\ProgramData\Package Cache\{b52191c1-a9c0-4b34-9a4e-930c2dd8a540}\AspNetCoreSharedFrameworkBundle-x86.exe" /burn.runonce
         Details|endswith: ' /burn.runonce'
-    filter_uninstallers:
+    filter_main_uninstallers:
         # This image path is linked with different uninstallers when running as admin unfortunately
         Image|startswith: 'C:\Windows\Installer\MSI'
         TargetObject|contains: '\Explorer\Browser Helper Objects'
-    filter_msiexec:
+    filter_main_msiexec:
         Image: 'C:\WINDOWS\system32\msiexec.exe'
         TargetObject|contains: '\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Run\'
-    condition: all of selection_wow_current_version_* and not 1 of filter_*
-fields:
-    - SecurityID
-    - ObjectName
-    - OldValueType
-    - NewValueType
+    filter_main_edge:
+        Image|contains|all:
+            - 'C:\Program Files (x86)\Microsoft\EdgeUpdate\Install\{'
+            - '\setup.exe'
+    filter_optional_msoffice1:
+        Image: 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\OfficeClickToRun.exe'
+        TargetObject|contains: '\Office\ClickToRun\REGISTRY\MACHINE\Software\Wow6432Node\'
+    filter_optional_msoffice2:
+        Image:
+            - 'C:\Program Files\Microsoft Office\root\integration\integrator.exe'
+            - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
+        TargetObject|contains: '\Explorer\Browser Helper Objects\{31D09BA0-12F5-4CCE-BE8A-2923E76605DA}\'
+    filter_optional_dropbox:
+        - Details|endswith: '-A251-47B7-93E1-CDD82E34AF8B}'
+        - Details: 'grpconv -o'
+        - Details|contains|all:
+              - 'C:\Program Files'
+              - '\Dropbox\Client\Dropbox.exe'
+              - ' /systemstartup'
+    filter_optional_evernote:
+        TargetObject|endswith: '\Explorer\Browser Helper Objects\{92EF2EAD-A7CE-4424-B0DB-499CF856608E}\NoExplorer'
+    filter_optional_dotnet:
+        Image|contains: '\windowsdesktop-runtime-'
+        TargetObject|endswith:
+            - '\WOW6432Node\Microsoft\Windows\CurrentVersion\RunOnce\{e2d1ae32-dd1d-4ad7-a298-10e42e7840fc}'
+            - '\WOW6432Node\Microsoft\Windows\CurrentVersion\RunOnce\{7037b699-7382-448c-89a7-4765961d2537}'
+        Details|startswith: '"C:\ProgramData\Package Cache\'
+        Details|endswith: '.exe" /burn.runonce'
+    filter_optional_office:
+        Image|startswith:
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
+        Image|endswith: '\OfficeClickToRun.exe'
+    filter_optional_discord:
+        TargetObject|endswith: '\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Run\Discord'
+        Details|endswith: 'Discord.exe --checkInstall'
+    filter_optional_avira:
+        Details|endswith: '\Avira.OE.Setup.Bundle.exe" /burn.runonce'
+        Image|endswith: '\Avira.OE.Setup.Bundle.exe'
+    filter_optional_avg_1:
+        Image|endswith: '\instup.exe'
+        TargetObject|endswith: '\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\RunOnce\AvRepair'
+        Details|endswith: 'instup.exe" /instop:repair /wait'
+    filter_optional_avg_2:
+        Image|endswith: '\instup.exe'
+        TargetObject|endswith:
+            - '\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\00avg\(Default)'
+            - '\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\00asw\(Default)'
+        Details:
+            - '{472083B1-C522-11CF-8763-00608CC02F24}'
+            - '{472083B0-C522-11CF-8763-00608CC02F24}'
+    condition: all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate software automatically (mostly, during installation) sets up autorun keys for legitimate reason
     - Legitimate administrator sets up autorun keys for legitimate reason
