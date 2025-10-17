@@ -4,9 +4,11 @@ status: test
 description: Detects enumeration of local systeam accounts. This information can help adversaries determine which local accounts exist on a system to aid in follow-on behavior.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1087.001/T1087.001.md
-author: Alejandro Ortuno, oscd.community
+    - https://my.f5.com/manage/s/article/K589
+    - https://man.freebsd.org/cgi/man.cgi?pwd_mkdb
+author: Alejandro Ortuno, oscd.community, CheraghiMilad
 date: 2020-10-08
-modified: 2024-08-10
+modified: 2024-12-10
 tags:
     - attack.discovery
     - attack.t1087.001
@@ -28,10 +30,17 @@ detection:
             - '/tail'
             - '/vi'
             - '/vim'
+            - '/less'
+            - '/emacs'
+            - '/sqlite3'
+            - '/makemap'
         CommandLine|contains:
             - '/etc/passwd'
             - '/etc/shadow'
             - '/etc/sudoers'
+            - '/etc/spwd.db'
+            - '/etc/pwd.db'
+            - '/etc/master.passwd'
     selection_4:
         Image|endswith: '/id'
     selection_5:
