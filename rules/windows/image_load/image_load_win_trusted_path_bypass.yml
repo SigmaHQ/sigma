@@ -1,0 +1,30 @@
+title: Trusted Path Bypass via Windows Directory Spoofing
+id: 0cbe38c0-270c-41d9-ab79-6e5a9a669290
+related:
+    - id: 4ac47ed3-44c2-4b1f-9d51-bf46e8914126
+      type: similar
+status: experimental
+description: |
+    Detects DLLs loading from a spoofed Windows directory path with an extra space (e.g "C:\Windows \System32") which can bypass Windows trusted path verification.
+    This technique tricks Windows into treating the path as trusted, allowing malicious DLLs to load with high integrity privileges bypassing UAC.
+references:
+    - https://x.com/Wietze/status/1933495426952421843
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-06-17
+tags:
+    - attack.defense-evasion
+    - attack.privilege-escalation
+    - attack.t1574.007
+    - attack.t1548.002
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|contains:
+            - ':\Windows \System32\'  # Note the space between "Windows" and "System32"
+            - ':\Windows \SysWOW64\'  # Note the space between "Windows" and "SysWOW64"
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
