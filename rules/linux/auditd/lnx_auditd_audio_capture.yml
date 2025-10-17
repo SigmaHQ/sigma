@@ -1,13 +1,15 @@
 title: Audio Capture
 id: a7af2487-9c2f-42e4-9bb9-ff961f0561d5
 status: test
-description: Detects attempts to record audio with arecord utility
+description: Detects attempts to record audio using the arecord and ecasound utilities.
 references:
     - https://linux.die.net/man/1/arecord
     - https://linuxconfig.org/how-to-test-microphone-with-audio-linux-sound-architecture-alsa
-author: 'Pawel Mazur'
+    - https://manpages.debian.org/unstable/ecasound/ecasound.1.en.html
+    - https://ecasound.seul.org/ecasound/Documentation/examples.html#fconversions
+author: Pawel Mazur, Milad Cheraghi
 date: 2021-09-04
-modified: 2022-10-09
+modified: 2025-06-05
 tags:
     - attack.collection
     - attack.t1123
@@ -15,12 +17,16 @@ logsource:
     product: linux
     service: auditd
 detection:
-    selection:
+    selection_execve:
         type: EXECVE
         a0: arecord
         a1: '-vv'
         a2: '-fdat'
-    condition: selection
+    selection_syscall_memfd_create:
+        type: SYSCALL
+        exe|endswith: "/ecasound"
+        syscall: 'memfd_create'
+    condition: 1 of selection_*
 falsepositives:
     - Unknown
 level: low
