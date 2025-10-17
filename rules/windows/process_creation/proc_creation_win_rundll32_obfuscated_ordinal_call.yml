@@ -4,10 +4,13 @@ status: test
 description: Detects execution of "rundll32" with potential obfuscated ordinal calls
 references:
     - Internal Research
-author: Nasreddine Bencherchali (Nextron Systems)
+    - https://www.youtube.com/watch?v=52tAmVLg1KM&t=2070s
+author: Nasreddine Bencherchali (Nextron Systems), Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2023-05-17
+modified: 2025-02-23
 tags:
     - attack.defense-evasion
+    - attack.t1027.010
 logsource:
     category: process_creation
     product: windows
@@ -20,6 +23,12 @@ detection:
         CommandLine|contains:
             - '#+'
             - '#-'
+            # ordinal can be represented by adding any number of zeros in front ordinal number, for e.g. 000000024
+            - '#0'
+            # ordinal is 16 bit ordinal, so if you make the number large enough (don't fit in 16 bit space), then it normally wraps around.
+            # for e.g ordinal 24 can be also represented by 65560 (65536+24)
+            - '#655'
+            - '#656'
     condition: all of selection_*
 falsepositives:
     - Unknown

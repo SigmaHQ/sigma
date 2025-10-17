@@ -1,0 +1,33 @@
+title: Hacktool - EDR-Freeze Execution
+id: c598cc0c-9e70-4852-b9eb-8921af79f598
+status: experimental
+description: |
+    Detects execution of EDR-Freeze, a tool that exploits the MiniDumpWriteDump function and WerFaultSecure.exe to suspend EDR and Antivirus processes on Windows.
+    EDR-Freeze leverages a race-condition attack to put security processes into a dormant state by suspending WerFaultSecure at the moment it freezes the target process.
+    This technique does not require kernel-level exploits or BYOVD, but instead abuses user-mode functionality to temporarily disable monitoring by EDR or Antimalware solutions.
+date: 2025-09-24
+references:
+    - https://www.zerosalarium.com/2025/09/EDR-Freeze-Puts-EDRs-Antivirus-Into-Coma.html
+    - https://github.com/TwoSevenOneT/EDR-Freeze
+tags:
+    - attack.defense-evasion
+    - attack.t1562.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|contains: '\EDR-Freeze'
+        Image|endswith: '.exe'
+    selection_imphash:
+        Hashes|contains:
+            - 'IMPHASH=1195F7935954A2CD09157390C33F8E8C'
+            - 'IMPHASH=129F58DE3D687FB7F012BF6C3D679997'
+            - 'IMPHASH=2C617A175D0086251642C6619F7CC8BA'
+            - 'IMPHASH=8828F0B906F7844358FB92A899E9520F'
+            - 'IMPHASH=AF76D95157EC554DC1EF178E4E66D447'
+            - 'IMPHASH=E1B04316B61ACA31DD52ABBEC0A37FD5'
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely
+level: high

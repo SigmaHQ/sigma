@@ -6,7 +6,7 @@ references:
     - https://www.slideshare.net/heirhabarov/hunting-for-credentials-dumping-in-windows-environment
 author: Teymur Kheirkhabarov, oscd.community
 date: 2019-10-22
-modified: 2023-11-28
+modified: 2025-09-01
 tags:
     - attack.defense-evasion
     - attack.t1006
@@ -26,6 +26,7 @@ detection:
             - ':\Windows\servicing\'
             - ':\Windows\SoftwareDistribution\'
             - ':\Windows\System32\'
+            - ':\Windows\SysWOW64\'
             - ':\Windows\SystemApps\'
             - ':\Windows\uus\'
             - ':\Windows\WinSxS\'
@@ -35,7 +36,9 @@ detection:
             - 'System'
     filter_main_windefender:
         Image|contains: ':\ProgramData\Microsoft\Windows Defender\Platform\'
-        Image|endswith: '\MsMpEng.exe'
+        Image|endswith:
+            - '\MsMpEng.exe'
+            - '\MpDefenderCoreService.exe'
     filter_main_microsoft_appdata:
         Image|contains|all:
             - ':\Users\'
