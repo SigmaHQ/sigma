@@ -1,13 +1,13 @@
-title: Potential Executable Run Itself As Scrificial Process
+title: Potential Executable Run Itself As Sacrificial Process
 id: bafd07c6-3ea5-454a-b4be-058fbb073de7
 status: experimental
 description: |
-    Detects an executable that executes himself.
+    Detects an executable that executes itself.
     The most common technique is to launch it in suspend mode so that you can inject into it.
 references:
     - https://www.joesandbox.com/analysis/1605063/0/html
 author: frack113
-date: 2025-02-04
+date: 2025-10-17
 tags:
     - attack.defense-evasion
     - attack.t1055
@@ -18,11 +18,11 @@ logsource:
 detection:
     selection:
         Image|fieldref: ParentImage
-    filter_path:
+    filter_main_path:
         Image|startswith:
             - 'C:\Program Files\'
             - 'C:\Program Files (x86)\'
-    filter_original:
+    filter_main_original_fn:
         OriginalFileName:
             - 'Cmd.Exe'
             - 'CompatTelRunner.exe'
@@ -42,7 +42,7 @@ detection:
             - 'smss.exe'
             - 'Spotify.exe'
             - 'WerMgr'
-    filter_product:
+    filter_main_product:
         Product:
             - 'Avira'
             - 'Evernote'
@@ -54,5 +54,6 @@ detection:
             - 'Sysinternals Sysmon'
     condition: selection and not 1 of filter_*
 falsepositives:
-    - Unknown
-level: medium
+    - Legitimate software that may launch a new instance of itself, especially updaters or installers. Investigate each alert and apply whitelisting as needed.
+# Increase the level after some initial tuning in your environment
+level: low
