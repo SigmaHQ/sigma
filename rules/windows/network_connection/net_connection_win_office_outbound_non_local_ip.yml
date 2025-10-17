@@ -10,7 +10,7 @@ references:
     - https://learn.microsoft.com/de-de/microsoft-365/enterprise/urls-and-ip-address-ranges?view=o365-worldwide
 author: Christopher Peacock '@securepeacock', SCYTHE '@scythe_io', Florian Roth (Nextron Systems), Tim Shelton, Nasreddine Bencherchali (Nextron Systems)
 date: 2021-11-10
-modified: 2025-10-06
+modified: 2025-10-17
 tags:
     - attack.execution
     - attack.t1203
@@ -38,15 +38,22 @@ detection:
             - 'fc00::/7'  # IPv6 private addresses
     filter_main_msrange_generic:
         DestinationIp|cidr:
+            - '2.16.56.0/23' # Akamai International B.V.
+            - '2.17.248.0/21' # Akamai International B.V.
+            - '13.107.240.0/21' # Microsoft Corporation
             - '20.184.0.0/13' # Microsoft Corporation
+            - '23.61.224.0/20' # Akamai-AS
             - '20.192.0.0/10' # Microsoft Corporation
             - '23.72.0.0/13' # Akamai International B.V.
+            - '23.3.88.0/22' # Akamai-AS
+            - '23.216.132.0/22' # Akamai-AS
             - '40.76.0.0/14' # Microsoft Corporation
             - '51.10.0.0/15' # Microsoft Corporation
             - '51.103.0.0/16' # Microsoft Corporation
             - '51.104.0.0/15' # Microsoft Corporation
             - '51.142.136.0/22' # Microsoft Corporation - https://ipinfo.io/AS8075/51.140.0.0/14-51.142.136.0/22
             - '52.160.0.0/11' # Microsoft Corporation - https://ipinfo.io/AS8075/52.160.0.0/11
+            - '95.101.96.0/21' # Akamai-As
             - '204.79.197.0/24' # Microsoft Corporation
     filter_main_msrange_exchange_1:
         # Exchange Online
@@ -184,12 +191,14 @@ detection:
         # "urls": [
         #       "*.officeapps.live.com",
         #       "*.online.office.com",
-        #       "office.live.com"
+        #       "office.live.com",
+        #       "office.com.akadns.net"
         # ],
         DestinationIp|cidr:
             - '13.107.6.171/32'
             - '13.107.18.15/32'
             - '13.107.140.6/32'
+            - '20.64.0.0/10'
             - '52.108.0.0/14'
             - '52.244.37.168/32'
             - '2603:1006:1400::/40'
@@ -225,6 +234,7 @@ detection:
         #       "becws.microsoftonline.com",
         #       "ccs.login.microsoftonline.com",
         #       "clientconfig.microsoftonline-p.net",
+        #       "cloudapp.azure.com",
         #       "companymanager.microsoftonline.com",
         #       "device.login.microsoftonline.com",
         #       "graph.microsoft.com",
@@ -238,13 +248,17 @@ detection:
         #       "loginex.microsoftonline.com",
         #       "nexus.microsoftonline-p.com",
         #       "passwordreset.microsoftonline.com",
-        #       "provisioningapi.microsoftonline.com"
+        #       "provisioningapi.microsoftonline.com",
+        #       "web.core.windows.net",
         # ]
         DestinationIp|cidr:
+            - '172.128.0.0/10'
             - '20.20.32.0/19'
+            - '20.103.156.88/32' # msn.com
             - '20.190.128.0/18'
             - '20.231.128.0/19'
             - '40.126.0.0/18'
+            - '57.150.0.0/15'
             - '2603:1006:2000::/48'
             - '2603:1007:200::/48'
             - '2603:1016:1400::/48'
@@ -265,19 +279,34 @@ detection:
         # Microsoft 365 Common and Office Online
         #  "urls": [
         #       "*.compliance.microsoft.com",
+        #       "*.data.microsoft.com",
         #       "*.protection.office.com",
         #       "*.security.microsoft.com",
         #       "compliance.microsoft.com",
         #       "defender.microsoft.com",
         #       "protection.office.com",
-        #       "security.microsoft.com"
+        #       "security.microsoft.com",
+        #       "teams.microsoft.com",
         #  ]
         DestinationIp|cidr:
+            - '13.64.0.0/11'
             - '13.107.6.192/32'
             - '13.107.9.192/32'
+            - '13.89.179.14/32'
+            - '20.40.0.0/14'
+            - '20.48.0.0/12'
+            - '20.64.0.0/12'
+            - '52.123.0.0/16'
             - '52.108.0.0/14'
+            - '52.136.0.0/13'
+            - '57.150.0.0/15'
+            - '80.239.150.67/32' # Arelion Sweden AB
             - '2620:1ec:4::192/128'
             - '2620:1ec:a92::192/128'
+        DestinationPort: 443
+        Protocol: 'tcp'
+    filter_main_destination_host:
+        DestinationHostname|endswith: '.deploy.static.akamaitechnologies.com'
         DestinationPort: 443
         Protocol: 'tcp'
     condition: selection and not 1 of filter_main_*
