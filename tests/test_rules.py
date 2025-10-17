@@ -733,7 +733,7 @@ class TestRules(unittest.TestCase):
             faulty_rules,
             [],
             Fore.RED
-            + r"There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is \'[a-z0-9_]{10,90}\.yml\' and it has to contain at least an underline character. It also has to follow the following naming convention https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/Sigmahq_filename_rule.md",
+            + r"There are rules with malformed file names (too short, too long, uppercase letters, a minus sign etc.). Please see the file names used in our repository and adjust your file names accordingly. The pattern for a valid file name is \'[a-z0-9_]{10,90}\.yml\' and it has to contain at least an underline character. It also has to follow the following naming convention https://github.com/SigmaHQ/sigma-specification/blob/main/specification/sigma-rules-specification.md#yaml-file",
         )
 
     # sigma cli sigmahq_title_caseIssue, sigmahq_title_endIssue, sigmahq_title_lengthIssue, sigmahq_title_startIssue
@@ -909,7 +909,7 @@ class TestRules(unittest.TestCase):
     #     for file in self.yield_next_rule_file_path(self.path_to_rules):
     #         detection = self.get_rule_part(file_path=file, part_name="detection")
     #         if detection:
-    #             # This test is a best effort to avoid breaking SIGMAC parser. You could do more testing and try to fix this once and for all by modifiying the token regular expressions https://github.com/SigmaHQ/sigma/blob/b9ae5303f12cda8eb6b5b90a32fd7f11ad65645d/tools/sigma/parser/condition.py#L107-L127
+    #             # This test is a best effort to avoid breaking SIGMAC parser. You could do more testing and try to fix this once and for all by modifying the token regular expressions https://github.com/SigmaHQ/sigma/blob/b9ae5303f12cda8eb6b5b90a32fd7f11ad65645d/tools/sigma/parser/condition.py#L107-L127
     #             for key in detection:
     #                 if key[:3].lower() == "sel":
     #                     continue
@@ -1681,7 +1681,7 @@ class TestRules(unittest.TestCase):
     #         files_with_incorrect_tags,
     #         [],
     #         Fore.RED
-    #         + "There are rules with incorrect/unknown Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://github.com/SigmaHQ/sigma-specification/blob/main/Tags_specification.md ",
+    #         + "There are rules with incorrect/unknown Tags. (please inform us about new tags that are not yet supported in our tests) and check the correct tags here: https://github.com/SigmaHQ/sigma-specification/blob/main/specification/sigma-rules-specification.md#tags",
     #     )
 
     # sigma error and validator custom_attributes
