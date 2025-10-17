@@ -13,6 +13,7 @@ references:
     - https://pentestlab.blog/2019/10/29/persistence-netsh-helper-dll/
 author: Anish Bogati
 date: 2023-11-28
+modified: 2025-10-08
 tags:
     - attack.persistence
     - attack.t1546.007
@@ -23,7 +24,13 @@ detection:
     selection:
         TargetObject|contains: '\SOFTWARE\Microsoft\NetSh'
         Details|contains: '.dll'
-    condition: selection
+    filter_main_poqexec:
+        Image: 'C:\Windows\System32\poqexec.exe'
+        Details:
+            - 'ipmontr.dll'
+            - 'iasmontr.dll'
+            - 'ippromon.dll'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Legitimate helper added by different programs and the OS
 level: medium
