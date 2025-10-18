@@ -10,7 +10,7 @@ references:
     - https://www.trendmicro.com/en_us/research/23/e/managed-xdr-investigation-of-ducktail-in-trend-micro-vision-one.html
 author: Sreeman, Florian Roth (Nextron Systems)
 date: 2022-01-04
-modified: 2023-05-12
+modified: 2025-10-07
 tags:
     - attack.command-and-control
     - attack.t1105
@@ -30,7 +30,29 @@ detection:
             - '--headless'
             - 'dump-dom'
             - 'http'
-    condition: selection
+    filter_optional_edge_1:
+        Image|startswith:
+            - 'C:\Program Files (x86)\Microsoft\Edge\Application\'
+            - 'C:\Program Files (x86)\Microsoft\EdgeCore\'
+            - 'C:\Program Files (x86)\Microsoft\EdgeWebView\'
+            - 'C:\Program Files\Microsoft\Edge\Application\'
+            - 'C:\Program Files\Microsoft\EdgeCore\'
+            - 'C:\Program Files\Microsoft\EdgeWebView\'
+            - 'C:\Program Files\WindowsApps\Microsoft.MicrosoftEdge'
+        Image|endswith:
+            - '\msedge.exe'
+            - '\msedgewebview2.exe'
+            - '\MicrosoftEdge.exe'
+        CommandLine|contains: '--headless --disable-gpu --disable-extensions --disable-plugins --mute-audio --no-first-run --incognito --aggressive-cache-discard --dump-dom'
+    filter_optional_edge_2:
+        Image|contains:
+            - '\AppData\Local\Microsoft\WindowsApps\'
+            - '\Windows\SystemApps\Microsoft.MicrosoftEdge'
+        Image|endswith:
+            - '\msedge.exe'
+            - '\MicrosoftEdge.exe'
+        CommandLine|contains: '--headless --disable-gpu --disable-extensions --disable-plugins --mute-audio --no-first-run --incognito --aggressive-cache-discard --dump-dom'
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high
