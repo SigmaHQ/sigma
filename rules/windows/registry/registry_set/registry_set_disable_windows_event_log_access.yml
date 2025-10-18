@@ -9,7 +9,7 @@ references:
     - https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language
 author: X__Junior
 date: 2025-01-16
-modified: 2025-02-05
+modified: 2025-08-16
 tags:
     - attack.defense-evasion
     - attack.t1547.001
@@ -33,7 +33,16 @@ detection:
         - Details|contains|all:
               - 'D:('
               - ')(D;'
-    condition: 1 of selection_key_* and selection_details
+    filter_main_trustedinstaller:
+        Image: 'C:\Windows\servicing\TrustedInstaller.exe'
+    filter_main_tiworker:
+        Image|startswith: 'C:\Windows\WinSxS\'
+        Image|endswith: '\TiWorker.exe'
+    filter_optional_empty:
+        Image: ''
+    filter_optional_null:
+        Image: null
+    condition: 1 of selection_key_* and selection_details and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Administrative activity, still unlikely
 level: high

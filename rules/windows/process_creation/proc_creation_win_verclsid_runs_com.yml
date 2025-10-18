@@ -8,7 +8,7 @@ references:
     - https://bohops.com/2018/08/18/abusing-the-com-registry-structure-part-2-loading-techniques-for-evasion-and-persistence/
 author: Victor Sergeev, oscd.community
 date: 2020-10-09
-modified: 2022-07-11
+modified: 2025-10-07
 tags:
     - attack.defense-evasion
     - attack.t1218
@@ -23,7 +23,12 @@ detection:
         CommandLine|contains|all:
             - '/S'
             - '/C'
-    condition: all of selection_*
+    filter_main_runtimebroker:
+        ParentImage|endswith: 'C:\Windows\System32\RuntimeBroker.exe'
+        CommandLine|contains|all:
+            - 'verclsid.exe" /S /C {'
+            - '} /I {'
+    condition: all of selection_* and not 1 of filter_main_*
 fields:
     - CommandLine
 falsepositives:
