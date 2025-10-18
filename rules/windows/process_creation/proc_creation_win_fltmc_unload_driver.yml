@@ -10,7 +10,7 @@ references:
     - https://www.cybereason.com/blog/threat-analysis-report-lockbit-2.0-all-paths-lead-to-ransom
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023-02-13
-modified: 2024-06-24
+modified: 2025-10-07
 tags:
     - attack.defense-evasion
     - attack.t1070
@@ -26,10 +26,13 @@ detection:
     selection_cli:
         CommandLine|contains: 'unload'
     filter_optional_avira:
-        ParentImage|startswith: 'C:\Users\'
-        ParentImage|contains: '\AppData\Local\Temp\'
+        ParentImage|contains:
+            - '\AppData\Local\Temp\'
+            - ':\Windows\Temp\'
         ParentImage|endswith: '\endpoint-protection-installer-x64.tmp'
-        CommandLine|endswith: 'unload rtp_filesystem_filter'
+        CommandLine|endswith:
+            - 'unload rtp_filesystem_filter'
+            - 'unload rtp_filter'
     filter_optional_manageengine:
         ParentImage: 'C:\Program Files (x86)\ManageEngine\uems_agent\bin\dcfaservice64.exe'
         CommandLine|endswith: 'unload DFMFilter'

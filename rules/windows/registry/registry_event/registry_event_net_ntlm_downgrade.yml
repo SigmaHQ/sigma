@@ -4,9 +4,10 @@ status: test
 description: Detects NetNTLM downgrade attack
 references:
     - https://web.archive.org/web/20171113231705/https://www.optiv.com/blog/post-exploitation-using-netntlm-downgrade-attacks
-author: Florian Roth (Nextron Systems), wagga
+    - https://www.ultimatewindowssecurity.com/wiki/page.aspx?spid=NSrpcservers
+author: Florian Roth (Nextron Systems), wagga, Nasreddine Bencherchali (Splunk STRT)
 date: 2018-03-20
-modified: 2022-11-29
+modified: 2024-12-03
 tags:
     - attack.defense-evasion
     - attack.t1562.001
@@ -15,16 +16,30 @@ logsource:
     product: windows
     category: registry_event
 detection:
-    selection:
+    selection_regkey:
         TargetObject|contains|all:
             - 'SYSTEM\'
             - 'ControlSet'
             - '\Control\Lsa'
-        TargetObject|endswith:
-            - '\lmcompatibilitylevel'
-            - '\NtlmMinClientSec'
-            - '\RestrictSendingNTLMTraffic'
-    condition: selection
+    selection_value_lmcompatibilitylevel:
+        TargetObject|endswith: '\lmcompatibilitylevel'
+        Details:
+            - 'DWORD (0x00000000)'
+            - 'DWORD (0x00000001)'
+            - 'DWORD (0x00000002)'
+    selection_value_ntlmminclientsec:
+        TargetObject|endswith: '\NtlmMinClientSec'
+        Details:
+            - 'DWORD (0x00000000)' # No Security
+            - 'DWORD (0x00000010)' # Only Integrity
+            - 'DWORD (0x00000020)' # Only confidentiality
+            - 'DWORD (0x00000030)' # Both Integrity and confidentiality
+    selection_value_restrictsendingntlmtraffic:
+        # Note: The obvious values with issues are 0x00000000 (allow all) and 0x00000001 (audit).
+        # 0x00000002 can be secure but only if "ClientAllowedNTLMServers" is properly configured
+        # Hence all values should be monitored and investigated
+        TargetObject|endswith: '\RestrictSendingNTLMTraffic'
+    condition: selection_regkey and 1 of selection_value_*
 falsepositives:
-    - Unknown
+    - Services or tools that set the values to more restrictive values
 level: high

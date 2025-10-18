@@ -7,7 +7,7 @@ references:
     - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/schtasks
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-07-28
-modified: 2023-10-11
+modified: 2025-02-15
 tags:
     - attack.execution
     - attack.persistence
@@ -37,6 +37,12 @@ detection:
         CommandLine|contains|all:
             - '/TN TVInstallRestore'
             - '\TeamViewer_.exe'
+    filter_optional_office:
+        CommandLine|contains|all:
+            # https://answers.microsoft.com/en-us/msoffice/forum/all/office-15-subscription-heartbeat-task-created-on/43ab5e53-a9fb-47c6-8c14-44889974b9ff
+            - 'Subscription Heartbeat'
+            - '\HeartbeatConfig.xml'
+            - '\Microsoft Shared\OFFICE'
     filter_optional_avira:
         CommandLine|contains:
             - '/Create /F /RU System /SC WEEKLY /TN AviraSystemSpeedupVerify /TR '
