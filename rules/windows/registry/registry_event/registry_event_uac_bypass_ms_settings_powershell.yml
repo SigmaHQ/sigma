@@ -15,21 +15,21 @@ logsource:
   category: registry_event
   product: windows
 detection:
-  registry_key:
+  selection_registry:
     TargetObject|endswith: '\Software\Classes\ms-settings\shell\open\command'
-  suspicious_values:
+  selection_commands:
     Details|contains|all:
-      - 'cmd.exe'      
-      - 'powershell'   
+      - 'cmd.exe'
+      - 'powershell'
     Details|contains|any:
-      - 'IEX'          # Invoke-Expression, commonly used to execute downloaded code
-      - 'DownloadString' # Download content from remote sources
-      - 'Net.WebClient' # .NET class for web downloads
-      - 'nop'          # -nop shorthand, NoProfile parameter
-      - 'w hidden'     # -w hidden shorthand, WindowStyle Hidden to hide window
-      - 'windowstyle hidden' # Full parameter for hiding window
-      - 'encodedcommand' # Encoded command for obfuscation
-    condition: registry_key and suspicious_values
+      - 'IEX'
+      - 'DownloadString'
+      - 'Net.WebClient'
+      - 'nop'
+      - 'w hidden'
+      - 'windowstyle hidden'
+      - 'encodedcommand'
+  condition: selection_registry and selection_commands
 falsepositives:
   - Unknown
 level: high
