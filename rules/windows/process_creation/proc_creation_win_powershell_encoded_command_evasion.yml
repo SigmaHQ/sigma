@@ -1,0 +1,33 @@
+title: Encoded PowerShell with Suspicious Parameters
+id: a857ed67-45ae-4eca-9967-cce201d8fbeb
+status: experimental
+description: Detects encoded PowerShell execution with common evasion parameters used by malware and threat actors.
+references:
+    - https://thedfirreport.com/2025/09/29/from-a-single-click-how-lunar-spider-enabled-a-near-two-month-intrusion/
+author: yxinmiracle
+date: 2025-10-18
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.defense-evasion
+    - attack.t1027
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith:
+          - '\powershell.exe'
+          - '\pwsh.exe'
+          - '\powershell_ise.exe'
+    encoded_command:
+        CommandLine|contains: '-EncodedCommand'
+    suspicious_params:
+        CommandLine|contains|all:
+          - '-nop'
+          - '-exec'
+          - 'bypass'
+    condition: selection_img and encoded_command and suspicious_params
+falsepositives:
+    - Unknown
+level: high
