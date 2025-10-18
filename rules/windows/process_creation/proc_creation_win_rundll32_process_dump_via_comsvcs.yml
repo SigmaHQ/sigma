@@ -13,9 +13,10 @@ references:
     - https://twitter.com/SBousseaden/status/1167417096374050817
     - https://twitter.com/Wietze/status/1542107456507203586
     - https://github.com/Hackndo/lsassy/blob/14d8f8ae596ecf22b449bfe919829173b8a07635/lsassy/dumpmethod/comsvcs.py
-author: Florian Roth (Nextron Systems), Modexp, Nasreddine Bencherchali (Nextron Systems)
+    - https://www.youtube.com/watch?v=52tAmVLg1KM&t=2070s
+author: Florian Roth (Nextron Systems), Modexp, Nasreddine Bencherchali (Nextron Systems), Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2020-02-18
-modified: 2023-05-16
+modified: 2025-02-23
 tags:
     - attack.defense-evasion
     - attack.credential-access
@@ -40,6 +41,7 @@ detection:
             - '#24'
             - '24 '
             - 'MiniDump' # Matches MiniDump and MinidumpW
+            - '#65560' # ordinal is 16 bit ordinal, so if you make the number large enough (don't fit in 16 bit space), then it normally wraps around.  for e.g ordinal 24 can be also represented by 65560 (65536+24)
     selection_generic:
         CommandLine|contains|all:
             - '24'
@@ -49,6 +51,7 @@ detection:
             - ' #'
             - ',#'
             - ', #'
+            - '"#'
     condition: (selection_img and 1 of selection_cli_*) or selection_generic
 falsepositives:
     - Unlikely
