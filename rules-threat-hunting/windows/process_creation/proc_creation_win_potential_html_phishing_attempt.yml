@@ -1,0 +1,36 @@
+title: Potential HTML Phishing Attachment Clicked
+id: 538c5851-8c03-4724-8ec4-623bc7aadaea
+status: experimental
+description: |
+    Detects potential HTML phishing attachment click. Threat actors often use HTML attachments in phishing campaigns to deliver malicious payloads or redirect users to harmful websites.
+    When a user clicks on the HTML attachment, it can lead to the execution of scripts or the download of malware, compromising the user's system.
+    During investigation, analyze the HTML file for embedded scripts or links, check for any subsequent downloads or process executions, and investigate the source of the email or message containing the attachment.
+references:
+    - https://app.any.run/tasks/ae3c4ded-fd6a-43ed-8215-ba0ba574ad33
+    - https://app.any.run/tasks/8901e2d5-0c5a-48ba-a8e9-10b5ed7e06f4
+author: Joseph Kamau
+date: 2025-10-02
+tags:
+    - attack.t1598.002
+    - attack.initial-access
+    - detection.threat-hunting
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        Image|endswith:
+            - '\msedge.exe'
+            - '\firefox.exe'
+            - '\chrome.exe'
+            - '\brave.exe'
+            - '\vivaldi.exe'
+            - '\opera.exe'
+        CommandLine|contains|all:
+            - 'C:\users\'
+            - '\Downloads\'
+            - '.htm'
+    condition: selection
+falsepositives:
+    - Opening any HTML file located in users directories via a browser process will trigger this.
+level: low
