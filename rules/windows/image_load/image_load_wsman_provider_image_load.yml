@@ -9,7 +9,7 @@ references:
     - https://github.com/bohops/WSMan-WinRM
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 date: 2020-06-24
-modified: 2025-02-26
+modified: 2025-10-17
 tags:
     - attack.execution
     - attack.t1059.001
@@ -32,10 +32,15 @@ detection:
         Image|endswith: '\svchost.exe'
         OriginalFileName: 'WsmWmiPl.dll'
     filter_general:
-        Image|endswith:
-            - '\powershell.exe'
+        Image:
+            - 'C:\Program Files (x86)\PowerShell\6\pwsh.exe'
+            - 'C:\Program Files (x86)\PowerShell\7\pwsh.exe'
+            - 'C:\Program Files\PowerShell\6\pwsh.exe'
+            - 'C:\Program Files\PowerShell\7\pwsh.exe'
             - 'C:\Windows\System32\sdiagnhost.exe'
             - 'C:\Windows\System32\services.exe'
+            - 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell_ise.exe'
+            - 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
     filter_svchost: # not available in Sysmon data, but Aurora logs
         CommandLine|contains:
             - 'svchost.exe -k netsvcs -p -s BITS'
@@ -57,10 +62,10 @@ detection:
         Image|startswith: 'C:\Windows\Temp\asgard2-agent\'
     filter_citrix:
         Image|startswith: 'C:\Program Files\Citrix\'
-    filter_ps_ise:
-        Image|endswith: '\powershell_ise.exe'
     filter_upgrade:
         Image|startswith: 'C:\$WINDOWS.~BT\Sources\'
+    filter_mmc:
+        Image|endswith: '\mmc.exe'
     svchost:
         Image|endswith: '\svchost.exe'
     commandline_null:

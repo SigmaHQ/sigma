@@ -11,7 +11,7 @@ references:
     - https://blog.talosintelligence.com/gophish-powerrat-dcrat/
 author: Florian Roth (Nextron Systems)
 date: 2022-02-21
-modified: 2024-10-28
+modified: 2025-10-07
 tags:
     - attack.execution
     - attack.t1053.005
@@ -21,7 +21,7 @@ logsource:
 detection:
     selection_1_create:
         Image|endswith: '\schtasks.exe'
-        CommandLine|contains: ' /create '
+        CommandLine|contains|windash: ' /create '
     selection_1_all_folders:
         CommandLine|contains:
             - ':\Perflogs'
@@ -49,15 +49,15 @@ detection:
     filter_optional_avira_install:
         # Comment out this filter if you dont use AVIRA
         CommandLine|contains|all:
-            - '/Create /Xml "C:\Users\'
-            - '\AppData\Local\Temp\.CR.'
-            - 'Avira_Security_Installation.xml'
+            - '/Create /Xml '
+            - '\Temp\.CR.'
+            - '\Avira_Security_Installation.xml'
     filter_optional_avira_other:
         # Comment out this filter if you dont use AVIRA
         CommandLine|contains|all:
             - '/Create /F /TN'
             - '/Xml '
-            - '\AppData\Local\Temp\is-'
+            - '\Temp\'
             - 'Avira_'
         CommandLine|contains:
             - '.tmp\UpdateFallbackTask.xml'
@@ -66,7 +66,7 @@ detection:
             - '.tmp\MaintenanceTask.xml'
     filter_optional_klite_codec:
         CommandLine|contains|all:
-            - '\AppData\Local\Temp\'
+            - '\Temp\'
             - '/Create /TN "klcp_update" /XML '
             - '\klcp_update_task.xml'
     condition: ( all of selection_1_* or all of selection_2_* ) and not 1 of filter_optional_*

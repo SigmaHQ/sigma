@@ -7,7 +7,7 @@ references:
     - https://www.sentinelone.com/labs/inside-malicious-windows-apps-for-malware-deployment/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023-01-12
-modified: 2023-08-31
+modified: 2025-10-07
 tags:
     - attack.defense-evasion
 logsource:
@@ -24,6 +24,7 @@ detection:
             - '\cscript.exe'
             - '\mshta.exe'
             - '\powershell.exe'
+            - '\powershell_ise.exe'
             - '\pwsh.exe'
             - '\regsvr32.exe'
             - '\rundll32.exe'
@@ -42,6 +43,9 @@ detection:
             - '\powershell.exe'
             - '\cmd.exe'
             - '\pwsh.exe'
+    filter_optional_sysinternals:
+        ParentImage|startswith: 'C:\Program Files\WindowsApps\Microsoft.SysinternalsSuite'
+        Image|endswith: '\cmd.exe'
     condition: selection_parent and 1 of selection_susp_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate packages that make use of external binaries such as Windows Terminal

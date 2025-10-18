@@ -1,15 +1,17 @@
 title: Suspicious Get Local Groups Information - PowerShell
 id: fa6a5a45-3ee2-4529-aa14-ee5edc9e29cb
+related:
+    - id: cef24b90-dddc-4ae1-a09a-8764872f69fc
+      type: similar
 status: test
 description: |
-    Adversaries may attempt to find local system groups and permission settings.
-    The knowledge of local system permission groups can help adversaries determine which groups exist and which users belong to a particular group.
-    Adversaries may use this information to determine which users have elevated permissions, such as the users found within the local administrators group.
+    Detects the use of PowerShell modules and cmdlets to gather local group information.
+    Adversaries may use local system permission groups to determine which groups exist and which users belong to a particular group such as the local administrators group.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1069.001/T1069.001.md
 author: frack113
 date: 2021-12-12
-modified: 2022-11-25
+modified: 2025-08-22
 tags:
     - attack.discovery
     - attack.t1069.001
@@ -18,15 +20,19 @@ logsource:
     category: ps_script
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
-    test_3:
+    selection_localgroup:
         ScriptBlockText|contains:
-            - 'get-localgroup'
-            - 'Get-LocalGroupMember'
-    test_6:
-        ScriptBlockText|contains|all:
-            - 'Get-WMIObject'
-            - 'Win32_Group'
-    condition: 1 of test_*
+            - 'get-localgroup '
+            - 'get-localgroupmember '
+    selection_wmi_module:
+        ScriptBlockText|contains:
+            - 'get-wmiobject '
+            - 'gwmi '
+            - 'get-ciminstance '
+            - 'gcim '
+    selection_wmi_class:
+        ScriptBlockText|contains: 'win32_group' # Covers both win32_group and win32_groupuser
+    condition: selection_localgroup or all of selection_wmi_*
 falsepositives:
-    - Unknown
+    - Inventory scripts or admin tasks
 level: low
