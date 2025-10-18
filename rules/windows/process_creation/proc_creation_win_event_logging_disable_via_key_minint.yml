@@ -1,0 +1,49 @@
+title: Security Event Logging Disabled via MiniNt Registry Key - Process
+id: 1a4bd6af-99ac-4466-b5b2-7b72b4a05462
+related:
+    - id: 8839e550-52d7-4958-9f2f-e13c1e736838 # Disable Security Events Logging Adding Reg Key MiniNt - Registry Set
+      type: similar
+status: experimental
+description: |
+    Detects attempts to disable security event logging by adding the `MiniNt` registry key.
+    This key is used to disable the Windows Event Log service, which collects and stores event logs from the operating system and applications.
+    Adversaries may want to disable this service to prevent logging of security events that could be used to detect their activities.
+references:
+    - https://www.hackingarticles.in/defense-evasion-windows-event-logging-t1562-002/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-04-09
+tags:
+    - attack.defense-evasion
+    - attack.t1562.002
+    - attack.t1112
+    - car.2022-03-001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_reg_img:
+        # Example: reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\MiniNt"
+        - Image|endswith: '\reg.exe'
+        - OriginalFileName: 'reg.exe'
+    selection_reg_cmd:
+        CommandLine|contains|all:
+            - ' add '
+            - '\SYSTEM\CurrentControlSet\Control\MiniNt'
+    selection_powershell_img:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+              - '\powershell_ise.exe'
+        - OriginalFileName:
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+    selection_powershell_cmd1:
+        CommandLine|contains:
+            - 'New-Item '
+            - 'ni '
+    selection_powershell_cmd2:
+        CommandLine|contains: '\SYSTEM\CurrentControlSet\Control\MiniNt'
+    condition: all of selection_reg_* or all of selection_powershell_*
+falsepositives:
+    - Highly Unlikely
+level: high

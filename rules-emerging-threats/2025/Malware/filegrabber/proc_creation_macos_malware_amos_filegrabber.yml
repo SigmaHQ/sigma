@@ -1,0 +1,25 @@
+title: MacOS FileGrabber Infostealer
+id: e710a880-1f18-4417-b6a0-b5afdf7e305a
+status: experimental
+description: Detects execution of FileGrabber on macOS, which is associated with Amos infostealer campaigns targeting sensitive user files.
+references:
+    - https://www.trendmicro.com/en_us/research/25/i/an-mdr-analysis-of-the-amos-stealer-campaign.html
+    - https://www.jamf.com/blog/infostealers-pose-threat-to-macos/
+author: Jason Phang Vern - Onn (Gen Digital)
+date: 2025-09-12
+tags:
+    - attack.execution
+    - attack.t1059.002
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection:
+        CommandLine|contains|all:
+            - 'FileGrabber'
+            - '/tmp'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
