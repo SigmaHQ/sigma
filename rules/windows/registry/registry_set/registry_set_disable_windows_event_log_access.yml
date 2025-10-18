@@ -9,8 +9,11 @@ references:
     - https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language
 author: X__Junior
 date: 2025-01-16
+modified: 2025-08-16
 tags:
+    - attack.defense-evasion
     - attack.t1547.001
+    - attack.t1112
 logsource:
     category: registry_set
     product: windows
@@ -18,11 +21,11 @@ detection:
     # O:SYG:SYD:(D;;0x1;;;WD)
     # O:BAG:SYD:(A;;0x2;;;S-1-15-2-1)(D;;0x1;;;WD)
     selection_key_1:
-        TargetObject|contains: '\SYSTEM\CurrentControlSet\Services\EventLog\System'
+        TargetObject|contains: '\SYSTEM\CurrentControlSet\Services\EventLog\'
         TargetObject|endswith: '\CustomSD'
     selection_key_2:
         TargetObject|contains:
-            - '\Policies\Microsoft\Windows\EventLog\Setup'
+            - '\Policies\Microsoft\Windows\EventLog\'
             - '\Microsoft\Windows\CurrentVersion\WINEVT\Channels'
         TargetObject|endswith: '\ChannelAccess'
     selection_details:
@@ -30,7 +33,16 @@ detection:
         - Details|contains|all:
               - 'D:('
               - ')(D;'
-    condition: 1 of selection_key_* and selection_details
+    filter_main_trustedinstaller:
+        Image: 'C:\Windows\servicing\TrustedInstaller.exe'
+    filter_main_tiworker:
+        Image|startswith: 'C:\Windows\WinSxS\'
+        Image|endswith: '\TiWorker.exe'
+    filter_optional_empty:
+        Image: ''
+    filter_optional_null:
+        Image: null
+    condition: 1 of selection_key_* and selection_details and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Administrative activity, still unlikely
 level: high
