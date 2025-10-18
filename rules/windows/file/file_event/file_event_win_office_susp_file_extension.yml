@@ -7,7 +7,7 @@ references:
     - https://github.com/vadim-hunter/Detection-Ideas-Rules/blob/02bcbfc2bfb8b4da601bb30de0344ae453aa1afe/Threat%20Intelligence/The%20DFIR%20Report/20210329_Sodinokibi_(aka_REvil)_Ransomware.yaml
 author: Vadim Khrykov (ThreatIntel), Cyb3rEng (Rule), Nasreddine Bencherchali (Nextron Systems)
 date: 2021-08-23
-modified: 2023-06-22
+modified: 2025-10-17
 tags:
     - attack.t1204.002
     - attack.execution
@@ -42,6 +42,9 @@ detection:
             - '.vbs'
             - '.wsf'
             - '.wsh'
+    filter_main_localassembly:
+        TargetFilename|contains: '\AppData\Local\assembly\tmp\'
+        TargetFilename|endswith: '.dll'
     filter_optional_webservicecache: # matches e.g. directory with name *.microsoft.com
         TargetFilename|contains|all:
             - 'C:\Users\'
@@ -54,9 +57,12 @@ detection:
         TargetFilename|endswith:
             - '.dll'
             - '.exe'
-    filter_main_localassembly:
-        TargetFilename|contains: '\AppData\Local\assembly\tmp\'
-        TargetFilename|endswith: '.dll'
+    filter_optional_backstageinappnavcache: # matches e.g. C:\Users\xxxxx\AppData\Local\Microsoft\Office\16.0\BackstageInAppNavCache\ODB-user@domain.com
+        TargetFilename|contains|all:
+            - 'C:\Users\'
+            - '\AppData\Local\Microsoft\Office\'
+            - '\BackstageInAppNavCache\'
+        TargetFilename|endswith: '.com'
     condition: all of selection* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
