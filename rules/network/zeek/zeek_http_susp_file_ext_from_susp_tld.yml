@@ -1,0 +1,85 @@
+title: HTTP Request to Low Reputation TLD or Suspicious File Extension
+id: 68c2c604-92ad-468b-bf4a-aac49adad08c
+status: experimental
+description: |
+    Detects HTTP requests to low reputation TLDs (e.g. .xyz, .top, .ru) or ending in suspicious file extensions (.exe, .dll, .hta), which may indicate malicious activity.
+references:
+    - https://www.howtogeek.com/137270/50-file-extensions-that-are-potentially-dangerous-on-windows
+    - https://www.spamhaus.org/reputation-statistics/cctlds/domains/
+author: '@signalblur, Corelight'
+date: 2025-02-26
+tags:
+    - attack.initial-access
+    - attack.command-and-control
+logsource:
+    product: zeek
+    service: http
+detection:
+    # Suspicious TLD in the 'host' field OR malicious file extension in the 'uri' field.
+    selection_suspicious_tld:
+        host|endswith:
+            - '.bid'
+            - '.by'
+            - '.cf'
+            - '.click'
+            - '.cm'
+            - '.ga'
+            - '.gq'
+            - '.ir'
+            - '.kp'
+            - '.loan'
+            - '.ml'
+            - '.mm'
+            - '.party'
+            - '.pw'
+            - '.ru'
+            - '.su'
+            - '.sy'
+            - '.tk'
+            - '.top'
+            - '.tv'
+            - '.ve'
+            - '.work'
+            - '.xyz'
+    selection_malicious_ext:
+        uri|endswith:
+            - '.bat'
+            - '.bin'
+            - '.cmd'
+            - '.cpl'
+            - '.dll'
+            - '.dylib'
+            - '.elf'
+            - '.exe'
+            - '.hta'
+            - '.iso'
+            - '.jar'
+            - '.js'
+            - '.lnk'
+            - '.msi'
+            - '.pif'
+            - '.ps1'
+            - '.py'
+            - '.reg'
+            - '.scr'
+            - '.sh'
+            - '.so'
+            - '.vbs'
+            - '.wsf'
+    selection_malicious_mime:
+        resp_mime_types:
+            - 'application/vnd.microsoft.portable-executable'
+            - 'application/x-bat'
+            - 'application/x-dosexec'
+            - 'application/x-elf'
+            - 'application/x-iso9660-image'
+            - 'application/x-java-archive'
+            - 'application/x-ms-shortcut'
+            - 'application/x-msdos-program'
+            - 'application/x-msdownload'
+            - 'application/x-python-code'
+            - 'application/x-sh'
+    condition: selection_suspicious_tld and 1 of selection_malicious_*
+falsepositives:
+    - Rare legitimate software downloads from low quality TLDs
+level: medium

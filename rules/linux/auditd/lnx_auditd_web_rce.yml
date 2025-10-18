@@ -4,24 +4,30 @@ status: test
 description: Detects possible command execution by web application/web shell
 references:
     - Personal Experience of the Author
+    - https://www.vaadata.com/blog/what-is-command-injection-exploitations-and-security-best-practices/
 author: Ilyas Ochkov, Beyu Denis, oscd.community
 date: 2019-10-12
-modified: 2022-12-25
+modified: 2025-06-03
 tags:
     - attack.persistence
     - attack.t1505.003
 logsource:
     product: linux
     service: auditd
+    definition: |
+        Required auditd configuration:
+        -a always,exit -F arch=b32 -S execve -F euid=33 -k detect_execve_www
+        -a always,exit -F arch=b64 -S execve -F euid=33 -k detect_execve_www
+        -a always,exit -F arch=b32 -S execveat -F euid=33 -k detect_execve_www
+        -a always,exit -F arch=b64 -S execveat -F euid=33 -k detect_execve_www
+        Change the number "33" to the ID of your WebServer user. Default: www-data:x:33:33
 detection:
     selection:
-        # You need to add to the following rules to your auditd.conf config:
-        #   -a always,exit -F arch=b32 -S execve -F euid=33 -k detect_execve_www
-        #   -a always,exit -F arch=b64 -S execve -F euid=33 -k detect_execve_www
-        # Change the number "33" to the ID of your WebServer user. Default: www-data:x:33:33
         type: 'SYSCALL'
-        syscall: 'execve'
-        key: 'detect_execve_www'
+        syscall:
+            - 'execve'
+            - 'execveat'
+        euid: 33
     condition: selection
 falsepositives:
     - Admin activity

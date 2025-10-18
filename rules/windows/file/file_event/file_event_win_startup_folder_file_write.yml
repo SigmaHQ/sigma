@@ -10,7 +10,7 @@ references:
     - https://github.com/OTRF/ThreatHunter-Playbook/blob/2d4257f630f4c9770f78d0c1df059f891ffc3fec/docs/evals/apt29/detections/5.B.1_611FCA99-97D0-4873-9E51-1C1BA2DBB40D.md
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)
 date: 2020-05-02
-modified: 2022-10-07
+modified: 2025-10-17
 tags:
     - attack.persistence
     - attack.t1547.001
@@ -20,10 +20,13 @@ logsource:
 detection:
     selection:
         TargetFilename|contains: '\Microsoft\Windows\Start Menu\Programs\StartUp'
-    filter_update:
+    filter_main_update:
         - Image: 'C:\Windows\System32\wuauclt.exe'
         - TargetFilename|startswith: 'C:\$WINDOWS.~BT\NewOS\'
-    condition: selection and not filter_update
+    filter_optional_onenote:
+        Image|endswith: '\ONENOTE.EXE'
+        TargetFilename|endswith: '\Send to OneNote.lnk'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - FP could be caused by legitimate application writing shortcuts for example. This folder should always be inspected to make sure that all the files in there are legitimate
 level: medium

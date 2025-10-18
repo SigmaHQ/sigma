@@ -1,11 +1,12 @@
-title: Creation of an WerFault.exe in Unusual Folder
+title: Creation of WerFault.exe/Wer.dll in Unusual Folder
 id: 28a452f3-786c-4fd8-b8f2-bddbe9d616d1
 status: test
-description: Detects WerFault copoed to a suspicious folder, which could be a sign of WerFault DLL hijacking
+description: Detects the creation of a file named "WerFault.exe" or "wer.dll" in an uncommon folder, which could be a sign of WerFault DLL hijacking.
 references:
     - https://www.bleepingcomputer.com/news/security/hackers-are-now-hiding-malware-in-windows-event-logs/
 author: frack113
 date: 2022-05-09
+modified: 2024-11-28
 tags:
     - attack.persistence
     - attack.defense-evasion
@@ -18,12 +19,13 @@ detection:
         TargetFilename|endswith:
             - '\WerFault.exe'
             - '\wer.dll'
-    filter_whitelist:
-        TargetFilename|contains:
-            - '\System32\'
-            - '\SysWOW64\'
-            - '\WinSxS\'
-    condition: selection and not filter_whitelist
+    filter_main_known_locations:
+        TargetFilename|startswith:
+            - 'C:\Windows\SoftwareDistribution\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\WinSxS\'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
-level: high
+level: medium

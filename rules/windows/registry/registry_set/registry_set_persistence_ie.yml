@@ -1,13 +1,13 @@
 title: Modification of IE Registry Settings
 id: d88d0ab2-e696-4d40-a2ed-9790064e66b3
 status: test
-description: Detects modification of the registry settings used for Internet Explorer and other Windows components that use these settings. An attacker can abuse this registry key to add a domain to the trusted sites Zone or insert javascript for persistence
+description: Detects modification of the registry settings used for Internet Explorer and other Windows components that use these settings. An attacker can abuse this registry key to add a domain to the trusted sites Zone or insert JavaScript for persistence
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1112/T1112.md#atomic-test-4---add-domain-to-trusted-sites-zone
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1112/T1112.md#atomic-test-5---javascript-in-registry
 author: frack113
 date: 2022-01-22
-modified: 2023-08-17
+modified: 2025-07-04
 tags:
     - attack.defense-evasion
     - attack.t1112
@@ -17,23 +17,25 @@ logsource:
 detection:
     selection_domains:
         TargetObject|contains: '\Software\Microsoft\Windows\CurrentVersion\Internet Settings'
-    filter_dword:
+    filter_main_dword:
         Details|startswith: 'DWORD'
-    filter_office:
+    filter_main_office:
         Details:
             - 'Cookie:'
             - 'Visited:'
             - '(Empty)'
-    filter_path:
+    filter_main_path:
         TargetObject|contains:
             - '\Cache'
             - '\ZoneMap'
             - '\WpadDecision'
-    filter_binary:
+    filter_main_binary:
         Details: 'Binary Data'
-    filter_accepted_documents:
-        # Spotted during office installations
-        TargetObject|contains: '\Accepted Documents\'
+    filter_main_accepted_documents:
+        # Spotted during Office installations
+        TargetObject|contains: '\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Accepted Documents'
+    filter_main_runtimebroker:
+        Image: 'C:\Windows\System32\RuntimeBroker.exe'
     condition: selection_domains and not 1 of filter_*
 falsepositives:
     - Unknown

@@ -6,7 +6,7 @@ references:
     - https://pentestlab.blog/2022/02/14/persistence-notepad-plugins/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-06-10
-modified: 2023-01-05
+modified: 2025-09-01
 tags:
     - attack.persistence
 logsource:
@@ -25,6 +25,14 @@ detection:
         Image|endswith:
             - '\target.exe'
             - 'Installer.x64.exe'
+    filter_main_installer:
+        Image|contains: '\npp.'
+        Image|endswith: '.exe'
+        TargetFilename:
+            - 'C:\Program Files\Notepad++\plugins\NppExport\NppExport.dll'
+            - 'C:\Program Files\Notepad++\plugins\mimeTools\mimeTools.dll'
+            - 'C:\Program Files\Notepad++\plugins\NppConverter\NppConverter.dll'
+            - 'C:\Program Files\Notepad++\plugins\Config\nppPluginList.dll'
     condition: selection and not 1 of filter_*
 falsepositives:
     - Possible FPs during first installation of Notepad++

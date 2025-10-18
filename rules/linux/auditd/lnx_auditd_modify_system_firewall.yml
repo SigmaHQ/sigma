@@ -10,8 +10,10 @@ description: |
 references:
     - https://www.trendmicro.com/en_us/research/22/c/cyclops-blink-sets-sights-on-asus-routers--.html
     - https://blog.aquasec.com/container-security-tnt-container-attack
+    - https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/configuring_and_managing_networking/getting-started-with-nftables_configuring-and-managing-networking
 author: IAI
 date: 2023-03-06
+modified: 2025-10-12
 tags:
     - attack.t1562.004
     - attack.defense-evasion
@@ -31,6 +33,12 @@ detection:
         type: 'EXECVE'
         a0: 'ufw'
         a1|contains: 'delete'
+    selection4:
+        type: 'EXECVE'
+        a0: 'nft'
+        a1|contains:
+            - 'delete'
+            - 'flush'
     condition: 1 of selection*
 falsepositives:
     - Legitimate admin activity

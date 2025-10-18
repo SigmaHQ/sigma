@@ -1,0 +1,29 @@
+title: PUA - NimScan Execution
+id: 4fd6b1c7-19b8-4488-97f6-00f0924991a3
+status: test
+description: |
+    Detects usage of NimScan, a portscanner utility.
+    In early 2025, adversaries were observed using this utility to scan for open ports on remote hosts in a compromised environment.
+    This rule identifies the execution of NimScan based on the process image name and specific hash values associated with different versions of the tool.
+references:
+    - https://x.com/cyberfeeddigest/status/1887041526397587859
+    - https://github.com/elddy/NimScan
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-02-05
+tags:
+    - attack.discovery
+    - attack.t1046
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        - Image|endswith: '\NimScan.exe' # Other metadata fields such as originalfilename and product were omitted because they were null
+        - Hashes|contains:
+              - 'IMPHASH=41BB1C7571B3A724EB83A1D2B96DBB8C' # v1.0.8
+              - 'IMPHASH=B1B6ADACB172795480179EFD18A29549' # v1.0.6
+              - 'IMPHASH=0D1F896DC7642AD8384F9042F30279C2' # v1.0.4 and v1.0.2
+    condition: selection
+falsepositives:
+    - Legitimate administrator activity
+level: medium

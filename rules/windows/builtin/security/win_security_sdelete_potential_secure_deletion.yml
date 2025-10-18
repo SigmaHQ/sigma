@@ -1,0 +1,36 @@
+title: Potential Secure Deletion with SDelete
+id: 39a80702-d7ca-4a83-b776-525b1f86a36d
+status: test
+description: Detects files that have extensions commonly seen while SDelete is used to wipe files.
+references:
+    - https://jpcertcc.github.io/ToolAnalysisResultSheet/details/sdelete.htm
+    - https://www.jpcert.or.jp/english/pub/sr/ir_research.html
+    - https://learn.microsoft.com/en-gb/sysinternals/downloads/sdelete
+author: Thomas Patzke
+date: 2017-06-14
+modified: 2024-12-13
+tags:
+    - attack.impact
+    - attack.defense-evasion
+    - attack.t1070.004
+    - attack.t1027.005
+    - attack.t1485
+    - attack.t1553.002
+    - attack.s0195
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID:
+            - 4656
+            - 4663
+            - 4658
+        ObjectName|endswith:
+            - '.AAA'
+            - '.ZZZ'
+    condition: selection
+falsepositives:
+    - Legitimate usage of SDelete
+    - Files that are interacted with that have these extensions legitimately
+level: medium

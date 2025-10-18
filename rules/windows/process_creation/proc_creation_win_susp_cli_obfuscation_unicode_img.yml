@@ -16,7 +16,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1027/T1027.md#atomic-test-6---dlp-evasion-via-sensitive-data-in-vba-macro-over-http
 author: frack113, Florian Roth (Nextron Systems), Josh Nickels
 date: 2024-09-02
-modified: 2024-09-05
+modified: 2025-05-30
 tags:
     - attack.defense-evasion
     - attack.t1027
@@ -29,12 +29,14 @@ detection:
             - '\cmd.exe'
             - '\cscript.exe'
             - '\powershell.exe'
+            - '\powershell_ise.exe'
             - '\pwsh.exe'
             - '\wscript.exe'
         OriginalFileName:
             - 'Cmd.EXE'
             - 'cscript.exe'
             - 'PowerShell.EXE'
+            - 'PowerShell_ISE.EXE'
             - 'pwsh.dll'
             - 'wscript.exe'
     selection_special_chars:
@@ -55,6 +57,8 @@ detection:
             - '¯'
             - '®'
             - '¶'
+            # Unicode whitespace characters
+            - '⠀' # Braille Pattern Blank (Unicode: U+2800)
     condition: all of selection_*
 falsepositives:
     - Unknown

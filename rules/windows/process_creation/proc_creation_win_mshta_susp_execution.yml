@@ -1,16 +1,21 @@
-title: MSHTA Suspicious Execution 01
+title: MSHTA Execution with Suspicious File Extensions
 id: cc7abbd0-762b-41e3-8a26-57ad50d2eea3
 status: test
-description: Detection for mshta.exe suspicious execution patterns sometimes involving file polyglotism
+description: |
+    Detects execution of mshta.exe with file types that looks like they do not typically represent HTA (HTML Application) content,
+    such as .png, .jpg, .zip, .pdf, and others, which are often polyglots. MSHTA is a legitimate Windows utility for executing HTML Applications
+    containing VBScript or JScript. Threat actors often abuse this lolbin utility to download and
+    execute malicious scripts disguised as benign files or hosted under misleading extensions to evade detection.
 references:
     - http://blog.sevagas.com/?Hacking-around-HTA-files
     - https://0x00sec.org/t/clientside-exploitation-in-2018-how-pentesting-has-changed/7356
     - https://learn.microsoft.com/en-us/previous-versions/dotnet/framework/data/xml/xslt/xslt-stylesheet-scripting-using-msxsl-script
     - https://medium.com/tsscyber/pentesting-and-hta-bypassing-powershell-constrained-language-mode-53a42856c997
     - https://twitter.com/mattifestation/status/1326228491302563846
-author: Diego Perez (@darkquassar), Markus Neis, Swisscom (Improve Rule)
+    - https://www.virustotal.com/gui/file/c1f27d9795a2eba630db8a043580a0761798f06370fb1317067805f8a845b00c
+author: Diego Perez (@darkquassar), Markus Neis, Swisscom (Improve Rule), Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2019-02-22
-modified: 2022-11-07
+modified: 2025-05-12
 tags:
     - attack.defense-evasion
     - attack.t1140
@@ -22,20 +27,48 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\mshta.exe'
+    selection_img:
+        - Image|endswith: '\mshta.exe'
+        - OriginalFileName: 'mshta.exe'
+    selection_cli:
         CommandLine|contains:
-            - 'vbscript'
-            - '.jpg'
-            - '.png'
-            - '.lnk'
-            # - '.chm'  # could be prone to false positives
-            - '.xls'
-            - '.doc'
-            - '.zip'
+            - '.7z'
+            - '.avi'
+            - '.bat'
+            - '.bmp'
+            - '.conf'
+            - '.csv'
             - '.dll'
+            - '.doc'
+            - '.gif'
+            - '.gz'
+            - '.ini'
+            - '.jpe'
+            - '.jpg'
+            - '.json'
+            - '.lnk'
+            - '.log'
+            - '.mkv'
+            - '.mp3'
+            - '.mp4'
+            - '.pdf'
+            - '.png'
+            - '.ppt'
+            - '.rar'
+            - '.rtf'
+            - '.svg'
+            - '.tar'
+            - '.tmp'
+            - '.txt'
+            - '.xls'
+            - '.xml'
+            - '.yaml'
+            - '.yml'
+            - '.zip'
+            - 'vbscript'
+            # - '.chm'  # could be prone to false positives
             # - '.exe'
-    condition: selection
+    condition: all of selection_*
 falsepositives:
     - False positives depend on scripts and administrative tools used in the monitored environment
 level: high

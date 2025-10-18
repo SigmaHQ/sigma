@@ -1,0 +1,35 @@
+title: PUA - AdFind.EXE Execution
+id: 514e7e3e-b3b4-4a67-af60-be20f139198b
+related:
+    - id: 455b9d50-15a1-4b99-853f-8d37655a4c1b
+      type: similar
+status: experimental
+description: Detects execution of Adfind.exe utility, which can be used for reconnaissance in an Active Directory environment
+references:
+    - https://www.joeware.net/freetools/tools/adfind/
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1087.002/T1087.002.md
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-02-26
+tags:
+    - attack.discovery
+    - attack.t1087.002
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        - Image|endswith: '\AdFind.exe'
+        - OriginalFileName: 'AdFind.exe'
+        - Hashes|contains:
+              - 'IMPHASH=d144de8117df2beceaba2201ad304764'
+              - 'IMPHASH=12ce1c0f3f5837ecc18a3782408fa975'
+              - 'IMPHASH=bca5675746d13a1f246e2da3c2217492'
+              - 'IMPHASH=4fbf3f084fbbb2470b80b2013134df35'
+              - 'IMPHASH=49b639b4acbecc49d72a01f357aa4930'
+              - 'IMPHASH=53e117a96057eaf19c41380d0e87f1c2'
+              - 'IMPHASH=680dad9e300346e05a85023965867201'
+              - 'IMPHASH=21aa085d54992511b9f115355e468782'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium

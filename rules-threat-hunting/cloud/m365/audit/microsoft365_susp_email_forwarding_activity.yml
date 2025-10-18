@@ -4,8 +4,10 @@ status: test
 description: Detects email forwarding or redirecting acitivty in O365 Audit logs.
 references:
     - https://redcanary.com/blog/email-forwarding-rules/
+    - https://github.com/PwC-IR/Business-Email-Compromise-Guide/blob/fe29ce06aef842efe4eb448c26bbe822bf5b895d/PwC-Business_Email_Compromise-Guide.pdf
 author: RedCanary Team (idea), Harjot Singh @cyb3rjy0t
 date: 2023-10-11
+modified: 2024-11-17
 tags:
     - attack.exfiltration
     - attack.t1020
@@ -31,9 +33,12 @@ detection:
             - 'New-InboxRule'
             - 'Set-InboxRule'
         Parameters|contains:
-            - 'ForwardTo'
             - 'ForwardAsAttachmentTo'
+            - 'ForwardingAddress'
+            - 'ForwardingSmtpAddress'
+            - 'ForwardTo'
             - 'RedirectTo'
+            - 'RedirectToRecipients'
     condition: 1 of selection_*
 falsepositives:
     - False positives are expected from legitimate mail forwarding rules. You need organisation specific knowledge. Filter out the domains that are allowed as forwarding targets as well as any additional metadata that you can use for exclusion from trusted sources/targets in order to promote this to a potential detection rule.

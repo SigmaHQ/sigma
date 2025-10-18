@@ -1,0 +1,56 @@
+title: Potential Kerberos Coercion by Spoofing SPNs via DNS Manipulation
+id: b07e58cf-cacc-4135-8473-ccb2eba63dd2
+related:
+    - id: e7a21b5f-d8c4-4ae5-b8d9-93c5d3f28e1c # Suspicious DNS Query Indicating Kerberos Coercion via DNS Object Spoofing
+      type: similar
+    - id: 5588576c-5898-4fac-bcdd-7475a60e8f43 # Suspicious DNS Query Indicating Kerberos Coercion via DNS Object Spoofing - Network
+      type: similar
+    - id: 0ed99dda-6a35-11ef-8c99-0242ac120002 # Kerberos Coercion Via DNS SPN Spoofing Attempt
+      type: similar
+status: experimental
+description: |
+    Detects modifications to DNS records in Active Directory where the Distinguished Name (DN) contains a base64-encoded blob
+    matching the pattern "1UWhRCAAAAA...BAAAA". This pattern corresponds to a marshaled CREDENTIAL_TARGET_INFORMATION structure,
+    commonly used in Kerberos coercion attacks. Adversaries may exploit this to coerce victim systems into authenticating to
+    attacker-controlled hosts by spoofing SPNs via DNS. It is one of the strong indicators of a Kerberos coercion attack,.
+    where adversaries manipulate DNS records to spoof Service Principal Names (SPNs) and redirect authentication requests like CVE-2025-33073.
+    Please investigate the user account that made the changes, as it is likely a low-privileged account that has been compromised.
+references:
+    - https://googleprojectzero.blogspot.com/2021/10/using-kerberos-for-authentication-relay.html
+    - https://www.synacktiv.com/publications/ntlm-reflection-is-dead-long-live-ntlm-reflection-an-in-depth-analysis-of-cve-2025
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-06-20
+tags:
+    - attack.credential-access
+    - attack.t1557.003
+    - attack.persistence
+    - attack.privilege-escalation
+logsource:
+    product: windows
+    service: security
+    definition: |
+      By default these events are not logged by default for MicrosoftDNS objects in Active Directory.
+      To enable detection, configure an AuditRule on the DNS object container with the "CreateChild" permission for the "Everyone" principal.
+      This can be accomplished using tools such as Set-AuditRule (see https://github.com/OTRF/Set-AuditRule).
+detection:
+    selection_directory_service_changes:
+        EventID:
+            - 5136
+            - 5137
+        ObjectClass: 'dnsNode'
+        ObjectDN|contains|all: # ObjectDN">DC=foo-11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA,DC=domain.com,CN=MicrosoftDNS,DC=DomainDnsZones,DC=domain,DC=com</Data>
+            - 'UWhRCA'
+            - 'BAAAA'
+            - 'CN=MicrosoftDNS'
+    selection_directory_service_access:
+        EventID: 4662
+        AdditionalInfo|contains|all: # AdditionalInfo">DC=foo-11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA,DC=domain.com,CN=MicrosoftDNS,DC=DomainDnsZones,DC=domain,DC=com</Data>
+            - 'UWhRCA'
+            - 'BAAAA'
+            - 'CN=MicrosoftDNS'
+    condition: 1 of selection_*
+fields:
+    - SubjectUserName # It is important to check the AccountName field to identify the user, it is likely an low-privileged account that has been compromised.
+falsepositives:
+    - Unknown
+level: high

@@ -1,6 +1,6 @@
 title: Potential System DLL Sideloading From Non System Locations
 id: 4fc0deee-0057-4998-ab31-d24e46e0aba4
-status: experimental
+status: test
 description: Detects DLL sideloading of DLLs usually located in system locations (System32, SysWOW64, etc.).
 references:
     - https://hijacklibs.net/ # For list of DLLs that could be sideloaded (search for dlls mentioned here in there). Wietze Beukema (project and research)
@@ -10,13 +10,12 @@ references:
     - https://www.hexacorn.com/blog/2023/12/26/1-little-known-secret-of-runonce-exe-32-bit/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-08-14
-modified: 2024-07-11
+modified: 2025-02-26
 tags:
     - attack.defense-evasion
     - attack.persistence
     - attack.privilege-escalation
     - attack.t1574.001
-    - attack.t1574.002
 logsource:
     category: image_load
     product: windows
@@ -458,6 +457,7 @@ detection:
             - 'C:\Windows\SystemTemp\'
             - 'C:\Windows\SysWOW64\'
             - 'C:\Windows\WinSxS\'
+            - 'C:\Windows\SyChpe32\' # “hybrid” binaries containing x86-to-ARM stubs to improve the x86 emulation performance
     filter_main_dot_net:
         ImageLoaded|startswith: 'C:\Windows\Microsoft.NET\'
         ImageLoaded|endswith: '\cscui.dll'

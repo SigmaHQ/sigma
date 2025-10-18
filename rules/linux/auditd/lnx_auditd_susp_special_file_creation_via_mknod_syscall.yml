@@ -1,0 +1,29 @@
+title: Special File Creation via Mknod Syscall
+id: 710bdbce-495d-491d-9a8f-7d0d88d2b41e
+status: experimental
+description: |
+    Detects usage of the `mknod` syscall to create special files (e.g., character or block devices).
+    Attackers or malware might use `mknod` to create fake devices, interact with kernel interfaces,
+    or establish covert channels in Linux systems.
+    Monitoring the use of `mknod` is important because this syscall is rarely used by legitimate applications,
+    and it can be abused to bypass file system restrictions or create backdoors.
+references:
+    - https://man7.org/linux/man-pages/man2/mknod.2.html
+    - https://hopeness.medium.com/master-the-linux-mknod-command-a-comprehensive-guide-1c150a546aa8
+author: Milad Cheraghi
+date: 2025-05-31
+tags:
+    - attack.persistence
+    - attack.t1543.003
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+        type: 'SYSCALL'
+        syscall: 'mknod'
+    condition: selection
+falsepositives:
+    - Device creation by legitimate scripts or init systems (udevadm, MAKEDEV)
+    - Container runtimes or security tools during initialization
+level: low

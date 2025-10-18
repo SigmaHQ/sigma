@@ -7,7 +7,7 @@ references:
     - https://www.rapid7.com/blog/post/2021/12/13/driver-based-attacks-past-and-present/
 author: Florian Roth (Nextron Systems)
 date: 2022-07-26
-modified: 2022-11-19
+modified: 2024-11-23
 tags:
     - attack.privilege-escalation
     - attack.t1543.003
@@ -15,18 +15,15 @@ logsource:
     product: windows
     category: driver_load
 detection:
-    selection_name:
-        ImageLoaded|endswith:
-            - '\WinRing0x64.sys'
-            - '\WinRing0.sys'
-            - '\WinRing0.dll'
-            - '\WinRing0x64.dll'
-            - '\winring00x64.sys'
-    selection_sysmon:
-        Hashes|contains: 'IMPHASH=D41FA95D4642DC981F10DE36F4DC8CD7'
-    selection_other:
-        Imphash: 'd41fa95d4642dc981f10de36f4dc8cd7'
-    condition: 1 of selection*
+    selection:
+        - Hashes|contains: 'IMPHASH=D41FA95D4642DC981F10DE36F4DC8CD7'
+        - ImageLoaded|endswith:
+              - '\WinRing0x64.sys'
+              - '\WinRing0.sys'
+              - '\WinRing0.dll'
+              - '\WinRing0x64.dll'
+              - '\winring00x64.sys'
+    condition: selection
 falsepositives:
     - Unknown
 level: high

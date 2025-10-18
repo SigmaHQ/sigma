@@ -1,15 +1,16 @@
-title: Python Spawning Pretty TTY
+title: Python Spawning Pretty TTY Via PTY Module
 id: c4042d54-110d-45dd-a0e1-05c47822c937
 related:
     - id: 32e62bc7-3de0-4bb1-90af-532978fe42c0
       type: similar
 status: test
-description: Detects python spawning a pretty tty which could be indicative of potential reverse shell activity
+description: |
+    Detects a python process calling to the PTY module in order to spawn a pretty tty which could be indicative of potential reverse shell activity.
 references:
     - https://www.volexity.com/blog/2022/06/02/zero-day-exploitation-of-atlassian-confluence/
 author: Nextron Systems
 date: 2022-06-03
-modified: 2023-06-16
+modified: 2024-11-04
 tags:
     - attack.execution
     - attack.t1059
@@ -25,13 +26,13 @@ detection:
         - Image|contains:
               - '/python2.'  # python image is always of the form ../python3.10; ../python is just a symlink
               - '/python3.'
-    selection_cli_1:
-        CommandLine|contains|all:
+    selection_cli_import:
+        CommandLine|contains:
             - 'import pty'
-            - '.spawn('
-    selection_cli_2:
-        CommandLine|contains: 'from pty import spawn'
-    condition: selection_img and 1 of selection_cli_*
+            - 'from pty '
+    selection_cli_spawn:
+        CommandLine|contains: 'spawn'
+    condition: all of selection_*
 falsepositives:
     - Unknown
-level: high
+level: medium

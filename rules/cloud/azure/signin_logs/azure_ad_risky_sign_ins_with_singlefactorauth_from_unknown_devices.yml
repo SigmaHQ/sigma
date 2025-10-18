@@ -6,6 +6,7 @@ references:
     - https://learn.microsoft.com/en-us/entra/architecture/security-operations-devices#non-compliant-device-sign-in
 author: Harjot Singh, '@cyb3rjy0t'
 date: 2023-01-10
+modified: 2025-07-02
 tags:
     - attack.defense-evasion
     - attack.t1078
@@ -13,12 +14,15 @@ logsource:
     product: azure
     service: signinlogs
 detection:
-    selection:
+    selection_main:
         Status: 'Success'
         AuthenticationRequirement: 'singleFactorAuthentication'
-        DeviceDetail.trusttype: ''
         RiskState: 'atRisk'
-    condition: selection
+    selection_empty1:
+        DeviceDetail.trusttype: ''
+    selection_empty2:
+        DeviceDetail.trusttype: null
+    condition: selection_main and 1 of selection_empty*
 falsepositives:
     - Unknown
 level: high

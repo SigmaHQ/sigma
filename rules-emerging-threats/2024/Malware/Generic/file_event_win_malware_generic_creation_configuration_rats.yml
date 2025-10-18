@@ -1,0 +1,35 @@
+title: File Creation Related To RAT Clients
+id: 2f3039c8-e8fe-43a9-b5cf-dcd424a2522d
+status: experimental
+description: |
+    File .conf created related to VenomRAT, AsyncRAT and Lummac samples observed in the wild.
+references:
+    - https://www.virustotal.com/gui/file/c9f9f193409217f73cc976ad078c6f8bf65d3aabcf5fad3e5a47536d47aa6761
+    - https://www.virustotal.com/gui/file/e96a0c1bc5f720d7f0a53f72e5bb424163c943c24a437b1065957a79f5872675
+author: Joseliyo Sanchez, @Joseliyo_Jstnk
+date: 2024-12-19
+tags:
+    - attack.execution
+    - detection.emerging-threats
+logsource:
+    category: file_event
+    product: windows
+detection:
+    # VT Query: behaviour_files:"\\AppData\\Roaming\\DataLogs\\DataLogs.conf"
+    # VT Query: behaviour_files:"DataLogs.conf" or behaviour_files:"hvnc.conf" or behaviour_files:"dcrat.conf"
+    selection_required:
+        TargetFilename|contains: '\AppData\Roaming\'
+    selection_variants:
+        TargetFilename|contains:
+            - '\mydata\'
+            - '\datalogs\'
+            - '\hvnc\'
+            - '\dcrat\'
+        TargetFilename|endswith:
+            - '\datalogs.conf'
+            - '\hvnc.conf'
+            - '\dcrat.conf'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate software creating a file with the same name
+level: high

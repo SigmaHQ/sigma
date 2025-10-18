@@ -1,0 +1,32 @@
+title: Disable ASLR Via Personality Syscall - Linux
+id: e497a24e-9345-4a62-9803-b06d7d7cb132
+status: experimental
+description: |
+    Detects the use of the `personality` syscall with the ADDR_NO_RANDOMIZE flag (0x0040000),
+    which disables Address Space Layout Randomization (ASLR) in Linux. This is often used by attackers
+    exploit development, or to bypass memory protection mechanisms.
+    A successful use of this flag can reduce the effectiveness of ASLR and make memory corruption
+    attacks more reliable.
+references:
+    - https://github.com/CheraghiMilad/bypass-Neo23x0-auditd-config/blob/f1c478a37911a5447d5ffcd580f22b167bf3df14/personality-syscall/README.md
+    - https://man7.org/linux/man-pages/man2/personality.2.html
+    - https://manual.cs50.io/2/personality
+author: Milad Cheraghi
+date: 2025-05-26
+modified: 2025-06-05
+tags:
+    - attack.defense-evasion
+    - attack.t1562.001
+    - attack.t1055.009
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+        type: 'SYSCALL'
+        syscall: 'personality'
+        a0: 40000
+    condition: selection
+falsepositives:
+    - Debugging or legitimate software testing
+level: low
