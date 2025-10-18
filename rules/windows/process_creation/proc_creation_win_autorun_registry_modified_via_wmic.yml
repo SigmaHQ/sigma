@@ -1,0 +1,61 @@
+title: Suspicious Autorun Registry Modified via WMI
+id: c80e66d8-1780-48a9-b412-46663fd21ac0
+status: experimental
+description: |
+    Detects suspicious activity where the WMIC process is used to create an autorun registry entry via reg.exe, which is often indicative of persistence mechanisms employed by malware.
+references:
+    - Internal Research
+    - https://github.com/HackTricks-wiki/hacktricks/blob/e4c7b21b8f36c97c35b7c622732b38a189ce18f7/src/windows-hardening/windows-local-privilege-escalation/privilege-escalation-with-autorun-binaries.md
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-02-17
+tags:
+    - attack.execution
+    - attack.persistence
+    - attack.t1547.001
+    - attack.t1047
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_execution_img:
+        - Image|endswith: '\wmic.exe'
+        - OriginalFileName: 'wmic.exe' # wmic process call create 'reg.exe add HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run /v Desktops /t REG_SZ /d "\"C:\Users\user\AppData\Roaming\Microsoft\tre\Desktops.exe\" random" /f'
+        - ParentImage|endswith: '\wmiprvse.exe'
+    selection_execution_cmd:
+        CommandLine|contains|all:
+            - 'reg'
+            - ' add '
+        CommandLine|contains:
+            - '\Software\Microsoft\Windows\CurrentVersion\Run'
+            - '\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Run'
+            - '\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run'
+    selection_suspicious_paths_1:
+        CommandLine|contains:
+            - ':\Perflogs'
+            - :\ProgramData'
+            - ':\Windows\Temp'
+            - ':\Temp'
+            - '\AppData\Local\Temp'
+            - '\AppData\Roaming'
+            - ':\$Recycle.bin'
+            - ':\Users\Default'
+            - ':\Users\public'
+            - '%temp%'
+            - '%tmp%'
+            - '%Public%'
+            - '%AppData%'
+    selection_suspicious_paths_user_1:
+        CommandLine|contains: ':\Users\'
+    selection_suspicious_paths_user_2:
+        CommandLine|contains:
+            - '\Favorites'
+            - '\Favourites'
+            - '\Contacts'
+            - '\Music'
+            - '\Pictures'
+            - '\Documents'
+            - '\Photos'
+    condition: all of selection_execution_* and (selection_suspicious_paths_1 or (all of selection_suspicious_paths_user_*))
+falsepositives:
+    - Legitimate administrative activity or software installations
+level: high
