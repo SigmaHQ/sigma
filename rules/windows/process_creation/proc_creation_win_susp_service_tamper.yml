@@ -2,7 +2,7 @@ title: Suspicious Windows Service Tampering
 id: ce72ef99-22f1-43d4-8695-419dcb5d9330
 related:
     - id: eb87818d-db5d-49cc-a987-d5da331fbd90
-      type: derived
+      type: obsolete
     - id: 6783aa9e-0dc3-49d4-a94a-8b39c5fd700b
       type: obsolete
     - id: 7fd4bb39-12d0-45ab-bb36-cebabc73dc7b
@@ -16,9 +16,10 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
     - https://research.nccgroup.com/2022/08/19/back-in-black-unlocking-a-lockbit-3-0-ransomware-attack/
     - https://www.virustotal.com/gui/file/38283b775552da8981452941ea74191aa0d203edd3f61fb2dee7b0aea3514955
-author: Nasreddine Bencherchali (Nextron Systems), frack113 , X__Junior
+    - https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/delete-method-in-class-win32-service
+author: Nasreddine Bencherchali (Nextron Systems), frack113 , X__Junior (Nextron Systems)
 date: 2022-09-01
-modified: 2024-12-23
+modified: 2025-08-27
 tags:
     - attack.defense-evasion
     - attack.impact
@@ -32,21 +33,26 @@ detection:
         - OriginalFileName:
               - 'net.exe'
               - 'net1.exe'
+              - 'PowerShell_ISE.EXE'
               - 'PowerShell.EXE'
               - 'psservice.exe'
               - 'pwsh.dll'
               - 'sc.exe'
+              - 'wmic.exe'
         - Image|endswith:
               - '\net.exe'
               - '\net1.exe'
+              - '\PowerShell_ISE.EXE'
               - '\powershell.exe'
               - '\PsService.exe'
               - '\PsService64.exe'
               - '\pwsh.exe'
               - '\sc.exe'
+              - '\wmic.exe' # wmic process call win32_service where name='servicename' delete
     selection_tools_cli:
         - CommandLine|contains:
               - ' delete '
+              - '.delete()' # Get-WmiObject win32_service -Filter "name='$serviceName'" ).delete()
               - ' pause ' # Covers flags from: PsService and Sc.EXE
               - ' stop ' # Covers flags from: PsService.EXE, Net.EXE and Sc.EXE
               - 'Stop-Service '

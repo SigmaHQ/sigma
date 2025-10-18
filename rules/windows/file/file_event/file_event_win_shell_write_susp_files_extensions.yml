@@ -9,7 +9,7 @@ references:
     - Internal Research
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-08-12
-modified: 2025-08-05
+modified: 2025-10-07
 tags:
     - attack.defense-evasion
     - attack.t1036
@@ -69,6 +69,14 @@ detection:
         TargetFilename|contains|all:
             - 'C:\Program Files\WindowsApps\Clipchamp'
             - '.ps1'
+    filter_main_powershell_preview:
+        Image:
+            - 'C:\Windows\system32\svchost.exe'
+            - 'C:\Windows\SysWOW64\svchost.exe'
+        TargetFilename|startswith:
+            - 'C:\Program Files\WindowsApps\Microsoft.PowerShellPreview'
+            - 'C:\Program Files (x86)\WindowsApps\Microsoft.PowerShellPreview'
+        TargetFilename|endswith: '.ps1'
     condition: 1 of selection_* and not 1 of filter_main_*
 falsepositives:
     - Unknown

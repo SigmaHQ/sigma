@@ -10,7 +10,7 @@ references:
     - https://man.openbsd.org/ssh_config#LocalCommand
 author: frack113, Nasreddine Bencherchali
 date: 2022-12-29
-modified: 2025-08-20
+modified: 2025-10-16
 tags:
     - attack.defense-evasion
     - attack.t1218
@@ -37,23 +37,9 @@ detection:
     selection_cli_flags:
         - CommandLine|contains: 'ProxyCommand='
         - CommandLine|contains|all:
-              - 'PermitLocalCommand'
-              - 'LocalCommand'
-    filter_main_scp:
-        ParentImage|startswith: 'C:\Windows\System32\OpenSSH\scp.exe'
-        CommandLine|contains|all:
-            - '-x -oPermitLocalCommand'
-            - '-oClearAllForwardings'
-            - '-oRemoteCommand'
-            - '-oRequestTT'
-    filter_main_sftp:
-        ParentImage|startswith: 'C:\Windows\System32\OpenSSH\sftp.exe'
-        CommandLine|contains|all:
-            - '-oForwardX11'
-            - 'oPermitLocalCommand'
-            - '-oClearAllForwardings'
-            - '-oForwardAgent'
-    condition: selection_parent or (all of selection_cli_* and not 1 of filter_main_*)
+              - 'PermitLocalCommand=yes'
+              - ' LocalCommand'
+    condition: selection_parent or all of selection_cli_*
 falsepositives:
     - Legitimate usage for administration purposes
 level: medium
