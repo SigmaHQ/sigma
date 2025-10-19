@@ -2,8 +2,9 @@ title: ISATAP Router Address Was Set
 id: d22df9cd-2aee-4089-93c7-9dc4eae77f2c
 status: experimental
 description: |
-    Detects the configuration of a new ISATAP router on a Windows host, which could be an indicator of a potential IPv6 DNS Takeover attack using tools like mitm6.
-    In this attack, the adversary's machine advertises itself as a DHCPv6 server and sets itself as the ISATAP router and primary DNS server for IPv6 traffic, enabling man-in-the-middle attacks to intercept credentials.
+    Detects the configuration of a new ISATAP router on a Windows host. While ISATAP is a legitimate Microsoft technology for IPv6 transition, unexpected or unauthorized ISATAP router configurations could indicate a potential IPv6 DNS Takeover attack using tools like mitm6.
+    In such attacks, adversaries advertise themselves as DHCPv6 servers and set malicious ISATAP routers to intercept traffic.
+    This detection should be correlated with network baselines and known legitimate ISATAP deployments in your environment.
 references:
     - https://www.blackhillsinfosec.com/mitm6-strikes-again-the-dark-side-of-ipv6/
     - https://redfoxsec.com/blog/ipv6-dns-takeover/
@@ -32,5 +33,8 @@ detection:
         IsatapRouter: null
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
-    - Unknown
+    - Legitimate ISATAP router configuration in enterprise environments
+    - IPv6 transition projects and network infrastructure changes
+    - Network administrators configuring dual-stack networking
+    - Automatic ISATAP configuration in some Windows deployments
 level: medium
