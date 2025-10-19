@@ -1,0 +1,29 @@
+title: Grixba Malware Network Scanning Patterns
+id: 6eaa380e-83f3-4ef3-a2bd-236d4cc8d4e9
+status: experimental
+description: Detects network scanning patterns associated with Grixba malware, targeting RPC, LDAP ports and generating high volume of DNS queries.
+references:
+    - https://thedfirreport.com/2025/09/08/blurring-the-lines-intrusion-shows-connection-with-three-major-ransomware-gangs/
+author: Security Detection Engineer
+date: 2025-10-19
+tags:
+    - attack.discovery
+    - attack.t1046
+    - attack.command-and-control
+    - attack.t1071.004
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    target_ports:
+        DestinationPort|contains:
+            - '135'  # Microsoft RPC
+            - '389'  # LDAP
+            - '445'  # SMB
+        DestinationPort|re: '^49[0-9]{3}$|^50[0-9]{3}$|^51[0-9]{3}$|^52[0-9]{3}$|^53[0-9]{3}$|^54[0-9]{3}$|^55[0-9]{3}$|^56[0-9]{3}$|^57[0-9]{3}$|^58[0-9]{3}$|^59[0-9]{3}$|^60[0-9]{3}$|^61[0-9]{3}$|^62[0-9]{3}$|^63[0-9]{3}$'
+    process_indicator:
+        Image|endswith: '\GT_NET.exe'
+    condition: target_ports and process_indicator
+falsepositives:
+    - Unknow
+level: medium
