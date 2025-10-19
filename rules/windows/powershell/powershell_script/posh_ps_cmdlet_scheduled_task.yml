@@ -7,6 +7,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1053.005/T1053.005.md#atomic-test-6---wmi-invoke-cimmethod-scheduled-task
 author: frack113
 date: 2021-12-28
+modified: 2025-10-07
 tags:
     - attack.persistence
     - attack.t1053.005
@@ -30,7 +31,12 @@ detection:
             - 'PS_ScheduledTask'
             - '-NameSpace'
             - 'Root\Microsoft\Windows\TaskScheduler'
-    condition: 1 of selection_*
+    filter_main_legitimate_scripts:
+        ScriptBlockText|contains|all:
+            - 'Microsoft.PowerShell.Core\Export-ModuleMember'
+            - 'Microsoft.Management.Infrastructure.CimInstance'
+            - '__cmdletization_methodParameter'
+    condition: 1 of selection_* and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: medium

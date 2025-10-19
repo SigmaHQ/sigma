@@ -1,0 +1,37 @@
+title: FileFix - Command Evidence in TypedPaths from Browser File Upload Abuse
+id: 4fee3d51-8069-4a4c-a0f7-924fcaff2c70
+status: experimental
+description: Detects commonly-used chained commands and strings in the most recent 'url' value of the 'TypedPaths' key, which could be indicative of a user being targeted by the FileFix technique.
+references:
+    - https://x.com/russianpanda9xx/status/1940831134759506029
+    - https://mrd0x.com/filefix-clickfix-alternative/
+author: Alfie Champion (delivr.to)
+date: 2025-07-05
+tags:
+    - attack.execution
+    - attack.t1204.004
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_base:
+        TargetObject|endswith: '\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths\url1'
+        Details|contains: '#'
+        Image|endswith:
+            - '\brave.exe'
+            - '\chrome.exe'
+            - '\firefox.exe'
+            - '\msedge.exe'
+    selection_cmd:
+        Details|contains:
+            - 'cmd'
+            - 'curl'
+            - 'powershell'
+            - 'bitsadmin'
+            - 'certutil'
+            - 'mshta'
+            - 'regsvr32'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
