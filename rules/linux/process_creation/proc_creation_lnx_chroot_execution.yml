@@ -1,0 +1,28 @@
+title: Linux Sudo Chroot Execution
+id: f2bed782-994e-4f40-9cd5-518198cb3fba
+status: experimental
+description: |
+    Detects the execution of 'sudo' command with '--chroot' option, which is used to change the root directory for command execution.
+    Attackers may use this technique to evade detection and execute commands in a modified environment.
+    This can be part of a privilege escalation strategy, as it allows the execution of commands with elevated privileges in a controlled environment as seen in CVE-2025-32463.
+    While investigating, look out for unusual or unexpected use of 'sudo --chroot' in conjunction with other commands or scripts such as execution from temporary directories or unusual user accounts.
+references:
+    - https://github.com/kh4sh3i/CVE-2025-32463/blob/81bb430f84fa2089224733c3ed4bfa434c197ad4/exploit.sh
+author: Swachchhanda Shrawn Poudel (Nextron Systems)
+date: 2025-10-02
+tags:
+    - attack.privilege-escalation
+    - attack.t1068
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith: '/sudo'
+        CommandLine|contains:
+            - ' --chroot '
+            - 'sudo -R '
+    condition: selection
+falsepositives:
+    - Legitimate administrative tasks or scripts that use 'sudo --chroot' for containerization, testing, or system management.
+level: low
