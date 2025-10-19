@@ -9,7 +9,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
 author: Florian Roth (Nextron Systems), frack113
 date: 2022-05-02
-modified: 2023-08-17
+modified: 2025-10-07
 tags:
     - attack.defense-evasion
     - attack.t1112
@@ -17,7 +17,7 @@ logsource:
     category: registry_set
     product: windows
 detection:
-    selection_1:
+    selection_service_start:
         TargetObject|startswith: 'HKLM\System\CurrentControlSet\Services\'
         TargetObject|endswith: '\Start'
         Image|contains:
@@ -30,7 +30,7 @@ detection:
             - 'DWORD (0x00000001)'  # System
             - 'DWORD (0x00000002)'  # Automatic
             # 3 - Manual , 4 - Disabled
-    selection_2:
+    selection_service_imagepath:
         TargetObject|startswith: 'HKLM\System\CurrentControlSet\Services\'
         TargetObject|endswith: '\ImagePath'
         Details|contains:
@@ -38,11 +38,15 @@ detection:
             - '\Perflogs\'
             - '\ADMIN$\'
             - '\Temp\'
-    filter_1:
+    filter_optional_avast:
         Image|contains|all: # Filter FP with Avast software
             - '\Common Files\'
             - '\Temp\'
-    condition: 1 of selection_* and not 1 of filter_*
+    filter_optional_mbamservice:
+        TargetObject|endswith: '\CurrentControlSet\Services\MBAMInstallerService\ImagePath'
+        Details|endswith: '\AppData\Local\Temp\MBAMInstallerService.exe"'
+        Image: 'C:\Windows\system32\services.exe'
+    condition: 1 of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high
