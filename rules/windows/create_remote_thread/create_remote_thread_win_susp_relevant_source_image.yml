@@ -10,7 +10,7 @@ references:
     - https://lolbas-project.github.io
 author: Perez Diego (@darkquassar), oscd.community
 date: 2019-10-27
-modified: 2025-07-08
+modified: 2025-10-18
 tags:
     - attack.privilege-escalation
     - attack.defense-evasion
@@ -78,6 +78,12 @@ detection:
         TargetImage|startswith:
             - 'C:\Program Files (x86)\' # C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe
             - 'C:\Program Files\' # C:\Program Files\Microsoft Office\root\vfs\ProgramFilesCommonX64\Microsoft Shared\Office16\AI\ai.exe
+    filter_main_ms_office:
+        # Raised by following issue: https://github.com/SigmaHQ/sigma/issues/5529
+        SourceImage|startswith:
+            - 'C:\Program Files\Microsoft Office\'
+            - 'C:\Program Files (x86)\Microsoft Office\'
+        TargetImage: 'System'
     filter_optional_explorer_vmtools:
         SourceImage|endswith: '\SysWOW64\explorer.exe'
         TargetImage:
