@@ -12,7 +12,7 @@ references:
     - https://oddvar.moe/2018/03/21/persistence-using-runonceex-hidden-from-autoruns-exe/
 author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split)
 date: 2019-10-25
-modified: 2025-10-07
+modified: 2025-10-17
 tags:
     - attack.persistence
     - attack.t1547.001
@@ -44,7 +44,7 @@ detection:
             - '\Authentication\PLAP Providers'
             - '\Authentication\Credential Providers'
             - '\Authentication\Credential Provider Filters'
-    filter_main_all:
+    filter_main_generic_all:
         - Details: '(Empty)'
         - TargetObject|endswith: '\NgcFirst\ConsecutiveSwitchCount'
         - Image|endswith:
@@ -55,8 +55,11 @@ detection:
               - 'C:\WINDOWS\system32\devicecensus.exe'
               - 'C:\Windows\system32\winsat.exe'
               - 'C:\Program Files\Microsoft OneDrive\StandaloneUpdater\OneDriveSetup.exe'
+              - 'C:\Program Files (x86)\Microsoft OneDrive\StandaloneUpdater\OneDriveSetup.exe'
               - 'C:\Program Files\Microsoft OneDrive\Update\OneDriveSetup.exe'
               - 'C:\Program Files (x86)\Microsoft OneDrive\Update\OneDriveSetup.exe'
+              - 'C:\Program Files\Microsoft Office\root\integration\Addons\OneDriveSetup.exe'
+              - 'C:\Program Files (x86)\Microsoft Office\root\integration\Addons\OneDriveSetup.exe'
               - 'C:\Program Files\KeePass Password Safe 2\ShInstUtil.exe'
               - 'C:\Program Files\Everything\Everything.exe'
               - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
@@ -73,11 +76,6 @@ detection:
             - 'C:\Program Files (x86)\Microsoft\EdgeUpdate\Install\'
             - 'C:\Program Files (x86)\Microsoft\EdgeWebView\'
             - 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
-    filter_main_officeclicktorun:
-        Image|startswith:
-            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
-            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
-        Image|endswith: '\OfficeClickToRun.exe'
     filter_main_defender:
         Image: 'C:\Program Files\Windows Defender\MsMpEng.exe'
     filter_main_teams:
@@ -129,6 +127,14 @@ detection:
             - '\AppData\Local\Package Cache\{'
             - '}\python-'
         Details|endswith: '.exe" /burn.runonce'
+    filter_optional_officeclicktorun:
+        Image|startswith:
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
+            - 'C:\Program Files (x86)\Common Files\Microsoft Shared\ClickToRun\'
+        Image|endswith: '\OfficeClickToRun.exe'
+    filter_optional_teams:
+        Image|endswith: '\Microsoft\Teams\current\Teams.exe'
+        Details|contains: '\Microsoft\Teams\Update.exe --processStart'
     filter_optional_AVG_setup:
         Image|contains:
             - 'C:\Program Files\AVG\Antivirus\Setup\'
