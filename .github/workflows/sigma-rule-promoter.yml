@@ -21,10 +21,19 @@ jobs:
       uses: actions/setup-python@v4.5.0
       with:
         python-version: 3.11
-    - name: Execute Rule Promoter Script
+    - name: Install dependencies
+      run: pip install --force-reinstall pySigma; pip install --force-reinstall sigma-cli
+    - name: Install a compatible backend
       run: |
-        pip install pySigma
-        python tests/promote_rules_status.py
+        BACKEND=`sigma plugin list -t backend -s stable | awk '/\| yes / {print $2}' | xargs shuf -n1 -e`
+        sigma plugin install -f $BACKEND
+    - name: Execute Rule Promoter Script
+      run: python tests/promote_rules_status.py | tee --append promoted_rules
+    - name: Convert artifacts
+      run: |
+        TARGET=`sigma list targets | awk '!/Identifier/ && /\| [a-zA-Z]/ {print $2}' | xargs shuf -n1 -e`
+        PIPELINE=`sigma list pipelines | awk '!/Identifier/ && /\| [a-zA-Z]/ {print $2}' | xargs shuf -n1 -e`
+        cat promoted_rules | xargs -I {} sh -c "echo 'RULE {}, TARGET $TARGET, PIPELINE $PIPELINE'; sigma convert -t $TARGET --pipeline $PIPELINE {}"
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
       with:
