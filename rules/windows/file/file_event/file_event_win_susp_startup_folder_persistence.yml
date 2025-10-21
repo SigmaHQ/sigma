@@ -4,13 +4,20 @@ related:
     - id: 2aa0a6b4-a865-495b-ab51-c28249537b75
       type: similar
 status: test
-description: Detects when a file with a suspicious extension is created in the startup folder
+description: |
+    Detects the creation of potentially malicious script and executable files in Windows startup folders, which is a common persistence technique used by threat actors.
+    These files (.ps1, .vbs, .js, .bat, etc.) are automatically executed when a user logs in, making the Startup folder an attractive target for attackers.
+    This technique is frequently observed in malvertising campaigns and malware distribution where attackers attempt to maintain long-term access to compromised systems.
 references:
     - https://github.com/last-byte/PersistenceSniper
-author: Nasreddine Bencherchali (Nextron Systems)
+    - https://www.microsoft.com/en-us/security/blog/2025/03/06/malvertising-campaign-leads-to-info-stealers-hosted-on-github/
+    - https://github.com/redcanaryco/atomic-red-team/blob/5ede8f21e42ebe37e0a6eff757dba60bcfa85859/atomics/T1547.001/T1547.001.md
+author: Nasreddine Bencherchali (Nextron Systems), Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2022-08-10
-modified: 2023-01-06
+modified: 2025-10-12
 tags:
+    - attack.execution
+    - attack.t1204.002
     - attack.persistence
     - attack.t1547.001
 logsource:
@@ -21,16 +28,23 @@ detection:
         TargetFilename|contains: '\Windows\Start Menu\Programs\Startup\'
         TargetFilename|endswith:
             # Add or remove suspicious extensions according to your env needs
-            - '.vbs'
-            - '.vbe'
             - '.bat'
-            - '.ps1'
-            - '.hta'
-            - '.dll'
-            - '.jar'
-            - '.msi'
-            - '.scr'
             - '.cmd'
+            - '.dll'
+            - '.hta'
+            - '.jar'
+            - '.js'
+            - '.jse'
+            - '.msi'
+            - '.ps1'
+            - '.psd1'
+            - '.psm1'
+            - '.scr'
+            - '.url'
+            - '.vba'
+            - '.vbe'
+            - '.vbs'
+            - '.wsf'
     condition: selection
 falsepositives:
     - Rare legitimate usage of some of the extensions mentioned in the rule
