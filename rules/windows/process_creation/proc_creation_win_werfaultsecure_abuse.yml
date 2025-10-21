@@ -2,8 +2,12 @@ title: Abuse of WerFaultSecure to Dump or Freeze PPL Protected Processes
 id: 1f0b4cac-9c81-41f4-95d0-8475ff46b3e2
 status: experimental
 description: |
-    Detects abuse of WerFaultSecure.exe to dump Protected Process Light (PPL) protected processes such as LSASS or freeze security solutions like EDR/antivirus processes.
-    This behavior is observed in the zerosolarium's tools like EDR-Freeze and WSASS.
+    Detects potential abuse of WerFaultSecure.exe to dump Protected Process Light (PPL) processes like LSASS or to freeze security solutions (EDR/antivirus).
+    This technique is used by tools such as EDR-Freeze and WSASS to bypass PPL protections and access sensitive information or disable security software.
+    Distinct command line patterns help identify the specific tool:
+    - WSASS usage typically shows: "WSASS.exe WerFaultSecure.exe [PID]" in ParentCommandLine
+    - EDR-Freeze usage typically shows: "EDR-Freeze_[version].exe [PID] [timeout]" in ParentCommandLine
+    Legitimate debugging operations using WerFaultSecure are rare in production environments and should be investigated.
 references:
     - https://www.zerosalarium.com/2025/09/EDR-Freeze-Puts-EDRs-Antivirus-Into-Coma.html
     - https://github.com/TwoSevenOneT/EDR-Freeze/blob/a7f61030b36fbde89871f393488f7075d2aa89f6/EDR-Freeze.cpp#L53
@@ -15,6 +19,8 @@ modified: 2025-10-21
 tags:
     - attack.defense-evasion
     - attack.t1562.001
+    - attack.credential-access
+    - attack.t1003.001
 logsource:
     category: process_creation
     product: windows
