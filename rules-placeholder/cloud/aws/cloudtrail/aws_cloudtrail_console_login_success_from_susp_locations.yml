@@ -1,0 +1,29 @@
+title: AWS Console Login Monitoring
+id: 313e72de-0c0d-4d65-8c95-87f4d546eceb
+status: experimental
+description: |
+    Detects AWS console logins from countries and IP addresses that are not recognized as legitimate for the organization.
+    This alert can help identify potential unauthorized access attempts from unusual locations, which may indicate compromised credentials or malicious activity.
+references:
+    - https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-event-reference-aws-console-sign-in-events.html
+author: Ivan Saakov
+date: 2025-10-19
+tags:
+    - attack.privilege-escalation
+    - attack.t1078.004
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventName: 'ConsoleLogin'
+        responseElements.ConsoleLogin: 'Success'
+    filter_main_country:
+        src_country|expand: '%Legitimate_Countries%' # Add legitimate countries here
+    filter_main_ip:
+        src_ip|expand: '%Legitimate_IP_Ranges%' # Add legitimate src_ip ranges here
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Legitimate logins from trusted countries and IP addresses.
+    - Login through services hosted through cloud providers in other regions.
+level: medium
