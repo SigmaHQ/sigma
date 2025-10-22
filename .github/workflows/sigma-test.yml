@@ -3,42 +3,7 @@
 
 name: Sigma Rule Tests
 
-on:
-  push:
-    branches:
-      - "*"
-    paths:
-      - ".github/workflows/sigma-test.yml"
-      - "deprecated/**.yml"
-      - "rules-compliance/**.yml"
-      - "rules-dfir/**.yml"
-      - "rules-emerging-threats/**.yml"
-      - "rules-placeholder/**.yml"
-      - "rules-threat-hunting/**.yml"
-      - "rules/**.yml"
-      - "tests/sigma_cli_conf.yml"
-      - "tests/test_logsource.py"
-      - "tests/test_rules.py"
-      - "unsupported/**.yml"
-  pull_request:
-    branches:
-      - master
-    paths:
-      - ".github/workflows/sigma-test.yml"
-      - "deprecated/**.yml"
-      - "rules-compliance/**.yml"
-      - "rules-dfir/**.yml"
-      - "rules-emerging-threats/**.yml"
-      - "rules-placeholder/**.yml"
-      - "rules-threat-hunting/**.yml"
-      - "rules/**.yml"
-      - "tests/sigma_cli_conf.yml"
-      - "tests/test_logsource.py"
-      - "tests/test_rules.py"
-      - "unsupported/**.yml"
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   yamllint:
@@ -47,6 +12,8 @@ jobs:
     - uses: actions/checkout@v4
     - name: yaml-lint
       uses: ibiqlik/action-yamllint@v3
+      with:
+        strict: true # fail on warnings as well
 
   test-sigma-logsource:
     runs-on: ubuntu-latest
@@ -64,9 +31,25 @@ jobs:
         pip install PyYAML colorama
         python tests/test_logsource.py
 
-  test-sigma:
+  test-sigma-legacy:
     runs-on: ubuntu-latest
-    needs: test-sigma-logsource
+    needs: yamllint
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+    - name: Test Sigma Rules
+      run: |
+        pip install PyYAML colorama
+        python tests/test_rules.py
+
+  sigma-check:
+    runs-on: ubuntu-latest
+    needs: yamllint
     steps:
     - uses: actions/checkout@v4
       with:
@@ -79,11 +62,7 @@ jobs:
       run: |
         pip install pysigma
         pip install sigma-cli
-        pip install pySigma-validators-sigmahq==0.9.*
+        pip install pySigma-validators-sigmahq==0.10.*
     - name: Test Sigma Rule Syntax
       run: |
         sigma check --fail-on-error --fail-on-issues --validation-config tests/sigma_cli_conf.yml rules*
-    - name: Test Sigma Rules
-      run: |
-        pip install PyYAML colorama
-        python tests/test_rules.py

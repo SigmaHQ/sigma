@@ -7,7 +7,7 @@ references:
     - https://github.com/HackTricks-wiki/hacktricks/blob/e4c7b21b8f36c97c35b7c622732b38a189ce18f7/src/windows-hardening/windows-local-privilege-escalation/privilege-escalation-with-autorun-binaries.md
 author: Florian Roth (Nextron Systems), Markus Neis, Sander Wiebing, Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2018-08-25
-modified: 2025-02-17
+modified: 2025-10-06
 tags:
     - attack.persistence
     - attack.t1547.001
@@ -55,7 +55,14 @@ detection:
         Details|contains:
             - '\AppData\Local\Temp\'
             - 'C:\Windows\Temp\'
-    condition: selection_target and (selection_suspicious_paths_1 or (all of selection_suspicious_paths_user_* )) and not 1 of filter_main_*
+    filter_optional_spotify:
+        Image|endswith:
+            - 'C:\Program Files\Spotify\Spotify.exe'
+            - 'C:\Program Files (x86)\Spotify\Spotify.exe'
+            - '\AppData\Roaming\Spotify\Spotify.exe'
+        TargetObject|endswith: 'SOFTWARE\Microsoft\Windows\CurrentVersion\Run\Spotify'
+        Details|endswith: 'Spotify.exe --autostart --minimized'
+    condition: selection_target and (selection_suspicious_paths_1 or (all of selection_suspicious_paths_user_* )) and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Software using weird folders for updates
 level: high
