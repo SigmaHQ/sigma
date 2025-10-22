@@ -1,0 +1,37 @@
+# This workflow validates that Sigma rules correctly detect their test data
+# by running evtx-sigma-checker against the EVTX files specified in the 'tests' section of rules
+
+name: True Positive Tests
+
+on: [push, pull_request, workflow_dispatch]
+
+env:
+  EVTX_BASELINE_VERSION: v0.8.2
+
+jobs:
+  true-positive-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyyaml
+        
+    - name: Download evtx-sigma-checker
+      run: |
+        wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
+        chmod +x evtx-sigma-checker
+        
+    - name: Run true positive tests
+      run: |
+        python tests/true_positive_test.py \
+          --rules-paths "rules/,rules-emerging-threats/,rules-threat-hunting/" \
+          --evtx-checker ./evtx-sigma-checker \
+          --thor-config tests/thor.yml
