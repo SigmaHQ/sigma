@@ -9,44 +9,44 @@ description: |
 author: "@kostastsale"
 date: 2025-10-21
 references:
-  - https://kostas-ts.medium.com/detecting-abuse-of-openedrs-permissive-edr-trial-a-security-researcher-s-perspective-fc55bf53972c
+    - https://kostas-ts.medium.com/detecting-abuse-of-openedrs-permissive-edr-trial-a-security-researcher-s-perspective-fc55bf53972c
 tags:
-  - attack.command_and_control
-  - attack.t1105
-  - attack.lateral_movement
-  - attack.t1570
-  - attack.t1219
+    - attack.command_and_control
+    - attack.t1105
+    - attack.lateral_movement
+    - attack.t1570
+    - attack.t1219
 logsource:
-  product: windows
-  category: file_event
+    product: windows
+    category: file_event
 detection:
-  selection_process:
-    Image|endswith: '\COMODO\Endpoint Manager\ITSMService.exe'
-  selection_suspicious_extensions:
-    TargetFilename|endswith:
-      - '.exe'
-      - '.dll'
-      - '.ps1'
-      - '.bat'
-      - '.cmd'
-      - '.vbs'
-      - '.js'
-      - '.hta'
-      - '.scr'
-      - '.com'
-      - '.pif'
-      - '.zip'
-      - '.rar'
-      - '.7z'
-  condition: selection_process and selection_suspicious_extensions
+    selection_process:
+      Image|endswith: '\COMODO\Endpoint Manager\ITSMService.exe'
+    selection_suspicious_extensions:
+      TargetFilename|endswith:
+        - '.exe'
+        - '.dll'
+        - '.ps1'
+        - '.bat'
+        - '.cmd'
+        - '.vbs'
+        - '.js'
+        - '.hta'
+        - '.scr'
+        - '.com'
+        - '.pif'
+        - '.zip'
+        - '.rar'
+        - '.7z'
+    condition: selection_process and selection_suspicious_extensions
 falsepositives:
-  - Legitimate OpenEDR file management operations
-  - Authorized remote file uploads by IT administrators
-  - Software deployment through OpenEDR console
+    - Legitimate OpenEDR file management operations
+    - Authorized remote file uploads by IT administrators
+    - Software deployment through OpenEDR console
 level: low
 fields:
-  - TargetFilename
-  - Image
-  - User
-  - ProcessId
-  - CreationUtcTime
+    - TargetFilename
+    - Image
+    - User
+    - ProcessId
+    - CreationUtcTime
