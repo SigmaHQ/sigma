@@ -2,21 +2,22 @@ title: Winrshost Command Execution
 id: 79df3f68-dccb-48e9-9171-b75cbc37c51d
 status: experimental
 description: |
-    This rule alerts when WinRM is used to execute a command or process by monitoring winrshost.exe.
+    Detects when WinRM is used to execute a command or process by monitoring winrshost.exe.
 references:
     - https://cardinalops.com/blog/living-off-winrm-abusing-complexity-in-remote-management/
 author: Liran Ravich
-date: 2025-08-19
+date: 2025-10-22
 tags:
     - attack.lateral-movement
     - attack.t1021.006
 logsource:
     category: process_creation
     product: windows
-detection:        # Example of command to simulate (winrm needs to be enabled): "c:\Windows\System32\winrs.exe" powershell
+detection:
     selection:
+        # Note: Example of command to simulate (winrm needs to be enabled): "c:\Windows\System32\winrs.exe" powershell
         ParentImage|endswith: '\winrshost.exe'
     condition: selection
 falsepositives:
-    - Legitimate use of WinRM withih the organziation
-level: high
+    - Legitimate use of WinRM within the organization
+level: medium

@@ -2,13 +2,13 @@ title: Winrs Local Command Execution
 id: bcfece3d-56fe-4545-9931-3b8e92927db1
 status: experimental
 description: |
-    This rule alerts when winrs.exe is used to execute a local command or process.
-    The command executed process or command will run under winrshost.exe
+    Detects the execution of winrs.exe to run a local command or process.
+    The executed command or process will run under winrshost.exe
 references:
     - https://cardinalops.com/blog/living-off-winrm-abusing-complexity-in-remote-management/
     - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/winrs
-author: Liran Ravich
-date: 2025-08-19
+author: Liran Ravich, Nasreddine Bencherchali
+date: 2025-10-22
 tags:
     - attack.lateral-movement
     - attack.defense-evasion
@@ -18,15 +18,23 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\winrs.exe'
-    filter_cmd:        # Example of command to simulate (winrm needs to be enabled): "c:\Windows\System32\winrs.exe" calc.exe
-        CommandLine|contains:
-        - "-r:"
+    selection_img:
+        # Note: Example of command to simulate (winrm needs to be enabled): "c:\Windows\System32\winrs.exe" calc.exe
+        - Image|endswith: '\winrs.exe'
+        - OriginalFileName: 'winrs.exe'
+    selection_local_ip:
+        CommandLine|contains|windash:
+            - '/r:localhost'
+            - '/r:127.0.0.1'
+            - '/r:[::1]'
+            - '/remote:localhost'
+            - '/remote:127.0.0.1'
+            - '/remote:[::1]'
+    filter_main_remote:
+        CommandLine|contains|windash:
         - "/r:"
-        - "-remote"
-        - "/remote"
-    condition: selection and not filter_cmd
+        - "/remote:"
+    condition: all of selection_* or (selection_img and not 1 of filter_main_*)
 falsepositives:
     - Unlikely
 level: high
