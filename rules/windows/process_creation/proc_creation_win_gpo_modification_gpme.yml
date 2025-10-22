@@ -1,0 +1,32 @@
+title: GPO Modification via Group Policy Management Editor (GPME)
+id: dcff7e85-d01f-4eb5-badd-84e2e6be8294
+status: experimental
+description: |
+    Detects changes to default domain Group Policy Objects (GPOs) using Group Policy Management Editor (GPME), a Microsoft Management Console (MMC) snap-in tool.
+    Adversaries could abuse the tool to deploy malicious GPO configurations across the domain.
+references:
+    - https://www.trendmicro.com/en_us/research/25/i/unmasking-the-gentlemen-ransomware.html
+    - https://adsecurity.org/?p=3377
+    - https://sdmsoftware.com/general-stuff/launching-the-new-gp-management-editor-from-the-command-line/
+    - https://www.pentestpartners.com/security-blog/living-off-the-land-gpo-style/
+author: TropChaud
+date: 2025-10-21
+tags:
+    - attack.defense-evasion
+    - attack.t1484.001
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_gpme:
+        CommandLine|contains|all:
+            - 'gpme.msc'
+            - '/gpobject:'
+    selection_default_gpos: # Remove to widen scope
+        CommandLine|contains|all:
+            - '31B2F340-016D-11D2-945F-00C04FB984F9' # Default Domain Policy GUID
+            - '6AC1786C-016F-11D2-945F-00C04FB984F9' # Default Domain Controllers Policy GUID
+    condition: selection_gpme and selection_default_gpos
+falsepositives:
+    - Legitimate use of GPME to modify GPOs
+level: high
