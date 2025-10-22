@@ -1,14 +1,15 @@
-title: AWS IAM User with Console Access Login Without MFA
+title: AWS Successful Console Login Without MFA
 id: 77caf516-34e5-4df9-b4db-20744fea0a60
 status: experimental
 description: |
-    Identifies AWS IAM user authentication to the AWS Management Console without Multi-Factor Authentication (MFA).
-    IAM users who can access the Console but haven't enabled MFA pose a security risk. These accounts could be compromised through credential stuffing, brute force attacks, or social engineering techniques.
+    Detects successful AWS console logins that were performed without Multi-Factor Authentication (MFA).
+    This alert can be used to identify potential unauthorized access attempts, as logging in without MFA can indicate compromised credentials or misconfigured security settings.
 references:
     - https://securitylabs.datadoghq.com/cloud-security-atlas/vulnerabilities/iam-user-without-mfa/
     - https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-event-reference-aws-console-sign-in-events.html
-author: Thuya@Hacktilizer
+author: Thuya@Hacktilizer, Ivan Saakov
 date: 2025-10-18
+modified: 2025-10-21
 tags:
     - attack.initial-access
     - attack.t1078.004
@@ -19,6 +20,7 @@ detection:
     selection:
         eventName: 'ConsoleLogin'
         additionalEventData.MFAUsed: 'NO'
+        responseElements.ConsoleLogin: 'Success'
     condition: selection
 falsepositives:
     - Unlikely
