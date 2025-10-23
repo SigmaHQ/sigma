@@ -181,7 +181,7 @@ def main():
         rule_id = rule_info["id"]
         tests = rule_info["tests"]
 
-        print(f"Testing rule: {rule_id}")
+        print(f"\n\nTesting rule: {rule_id}")
         print(f"  File: {rule_path}")
 
         for i, test_data in enumerate(tests):
@@ -199,7 +199,7 @@ def main():
             if success:
                 passed_tests += 1
                 print(f"    ✓ PASS - Match found for Rule ID: {rule_id}\n")
-                print(f"    Output: {output}")
+                print(f"    Output: {output}\n\n")
             else:
                 failures.append(
                     {
