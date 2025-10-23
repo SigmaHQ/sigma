@@ -11,6 +11,7 @@ references:
     - https://learn.microsoft.com/en-us/windows/win32/secauthz/sid-strings
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023-02-28
+modified: 2025-10-22
 tags:
     - attack.persistence
     - attack.t1543.003
@@ -32,7 +33,9 @@ detection:
             - ';BA' # Built-in administrators
             - ';SY' # Local system
             - ';WD' # Everyone
-    condition: all of selection_*
+    filter_optional_hexnode:
+        ParentImage: 'C:\Hexnode\Hexnode Agent\Current\HexnodeAgent.exe'
+    condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high
