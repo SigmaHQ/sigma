@@ -53,17 +53,15 @@ def find_rules_with_tests(rules_paths: List[str]) -> List[Dict]:
                         print(f"Warning: Could not parse {file_path}: {e}")
 
     return results
-
-
 def run_evtx_checker(
-    rule_path: str, test_data: Dict, evtx_checker_path: str, thor_config: str
-) -> bool:
+    rule_path: str, rule_id: str, test_data: Dict, evtx_checker_path: str, thor_config: str
+) -> tuple[bool, str]:
     """Run evtx-sigma-checker and check if rule ID is in output."""
     evtx_path = test_data["path"]
 
     if not os.path.exists(evtx_path):
         print(f"  Warning: EVTX file {evtx_path} does not exist")
-        return False
+        return False, ""
 
     cmd = [
         evtx_checker_path,
@@ -80,17 +78,33 @@ def run_evtx_checker(
 
         if result.returncode != 0:
             print(f"  Warning: evtx-sigma-checker failed: {result.stderr}")
-            return False
+            return False, ""
 
         # Check if rule ID appears in output
-        return bool(result.stdout and len(result.stdout.strip()) > 0)
+        output_lines = result.stdout.strip().splitlines()
+        found_match = False
+        match_output = ""
+        
+        for line in output_lines:
+            try:
+                json_obj = json.loads(line)
+                if json_obj.get("RuleId") == rule_id:
+                    found_match = True
+                    match_output = line
+                    break
+            except json.JSONDecodeError:
+                # Skip lines that aren't valid JSON
+                print(f"  Warning: Skipping non-JSON line: {line}")
+                continue
+
+        return found_match, match_output
 
     except subprocess.TimeoutExpired:
         print(f"  Timeout: evtx-sigma-checker timed out")
-        return False
+        return False, ""
     except Exception as e:
         print(f"  Error running evtx-sigma-checker: {e}")
-        return False
+        return False, ""
 
 
 def run_test(
@@ -99,16 +113,15 @@ def run_test(
     test_data: Dict,
     evtx_checker_path: str,
     thor_config: str,
-) -> bool:
+) -> tuple[bool, str]:
     """Run a test based on its type."""
     test_type = test_data.get("type", "unknown")
 
     if test_type == "evtx":
-        return run_evtx_checker(rule_path, test_data, evtx_checker_path, thor_config)
+        return run_evtx_checker(rule_path, rule_id, test_data, evtx_checker_path, thor_config)
     else:
         print(f"  Warning: Unknown test type '{test_type}', skipping")
-        return False
-
+        return False, ""
 
 def main():
     parser = argparse.ArgumentParser(
@@ -179,13 +192,14 @@ def main():
             print(f"  {test_name} (type: {test_type}): {test_path}")
             total_tests += 1
 
-            success = run_test(
+            success, output = run_test(
                 rule_path, rule_id, test_data, args.evtx_checker, args.thor_config
             )
 
             if success:
                 passed_tests += 1
-                print(f"    ✓ PASS")
+                print(f"    ✓ PASS - Match found for Rule ID: {rule_id}\n")
+                print(f"    Output: {output}")
             else:
                 failures.append(
                     {
@@ -198,7 +212,6 @@ def main():
                     }
                 )
                 print(f"    ✗ FAIL")
-
         print()
 
     # Print summary
