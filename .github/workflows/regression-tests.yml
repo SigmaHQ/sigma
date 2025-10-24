@@ -1,7 +1,4 @@
-# This workflow validates that Sigma rules correctly detect their test data
-# by running evtx-sigma-checker against the EVTX files specified in the 'tests' section of rules
-
-name: True Positive Tests
+name: Regression Tests
 
 on: [push, pull_request, workflow_dispatch]
 
@@ -29,6 +26,6 @@ jobs:
         wget --no-verbose https://github.com/NextronSystems/evtx-baseline/releases/download/$EVTX_BASELINE_VERSION/evtx-sigma-checker
         chmod +x evtx-sigma-checker
         
-    - name: Run true positive tests
+    - name: Run regression tests
       run: |
-        python tests/true_positive_test.py --rules-paths "rules/,rules-emerging-threats/,rules-threat-hunting/" --evtx-checker ./evtx-sigma-checker --thor-config tests/thor.yml
+        python tests/regression_tests_runner.py --rules-paths "rules/,rules-emerging-threats/,rules-threat-hunting/" --evtx-checker ./evtx-sigma-checker --thor-config tests/thor.yml
