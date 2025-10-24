@@ -4,15 +4,19 @@ related:
     - id: deb9b646-a508-44ee-b7c9-d8965921c6b6
       type: similar
 status: test
-description: Detects TOKEN OBFUSCATION technique from Invoke-Obfuscation
+description: |
+    Detects TOKEN OBFUSCATION technique from Invoke-Obfuscation in Powershell scripts.
+    Use this rule as a threat-hunting baseline to find obfuscated scripts in your environment.
+    Once tested and tuned, consider deploying a production detection rule based on this hunting rule.
 references:
     - https://github.com/danielbohannon/Invoke-Obfuscation
 author: frack113
 date: 2022-12-27
-modified: 2023-03-24
+modified: 2025-10-19
 tags:
     - attack.defense-evasion
     - attack.t1027.009
+    - detection.threat-hunting
 logsource:
     product: windows
     category: ps_script
@@ -40,5 +44,5 @@ detection:
         ScriptBlockText|contains: '`r`n'
     condition: selection and not 1 of filter_*
 falsepositives:
-    - Unknown
-level: high
+    - Edge case might be possible with heavy use of string formatting or obfuscation in legitimate scripts.
+level: medium
