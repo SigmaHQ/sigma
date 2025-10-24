@@ -1,0 +1,24 @@
+title: Possible Unconstrained Delegation rights
+id: cb6c13e5-df1d-4b53-a87a-9c3b09f37cae
+status: experimental
+description: This rule detects the setting of the TRUSTED_FOR_DELEGATION flag, which allows receiving TGT tickets from accounts connecting to the host.
+author: Arthur Shaymardanov, Danil Zagidullin
+date: 2025/10/24
+references:
+  - https://netwrix.com/en/resources/blog/unconstrained-delegation
+  - https://medium.com/r3d-buck3t/attacking-kerberos-unconstrained-delegation-ef77e1fb7203
+tags:
+  - attack.persistence
+  - attack.privilege_escalation
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 5136
+    ComputerName: DC name
+    attributeValue: 528384
+  condition: selection
+falsepositives:
+  - Legitimate administrative activity
+level: high
