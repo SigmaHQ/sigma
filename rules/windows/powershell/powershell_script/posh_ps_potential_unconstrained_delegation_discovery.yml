@@ -1,0 +1,32 @@
+title: Potential Unconstrained Delegation Discovery Via Get-ADComputer - ScriptBlock
+id: cdfa73b6-3c9d-4bb8-97f8-ddbd8921f5c5
+status: experimental
+description: Detects the use of the "Get-ADComputer" cmdlet in order to identify systems which are configured for unconstrained delegation.
+references:
+    - https://pentestlab.blog/2022/03/21/unconstrained-delegation/
+    - https://learn.microsoft.com/en-us/powershell/module/activedirectory/get-adcomputer?view=windowsserver2022-ps
+author: frack113
+date: 2025-03-05
+tags:
+    - attack.reconnaissance
+    - attack.discovery
+    - attack.credential-access
+    - attack.t1018
+    - attack.t1558
+    - attack.t1589.002
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enable'
+detection:
+    selection:
+        ScriptBlockText|contains:
+            - '-Properties*TrustedForDelegation'
+            - '-Properties*TrustedToAuthForDelegation'
+            - '-Properties*msDS-AllowedToDelegateTo'
+            - '-Properties*PrincipalsAllowedToDelegateToAccount'
+            - '-LDAPFilter*(userAccountControl:1.2.840.113556.1.4.803:=524288)'
+    condition: selection
+falsepositives:
+    - Legitimate use of the library for administrative activity
+level: medium

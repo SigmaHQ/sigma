@@ -1,0 +1,30 @@
+title: Windows Defender Exclusion Deleted
+id: a33f8808-2812-4373-ae95-8cfb82134978
+related:
+    - id: e9c8808f-4cfb-4ba9-97d4-e5f3beaa244d
+      type: derived
+    - id: 46a68649-f218-4f86-aea1-16a759d81820
+      type: derived
+status: deprecated
+description: |
+    Detects when a Windows Defender exclusion has been deleted. This could indicate an attacker trying to delete their tracks by removing the added exclusions
+references:
+    - https://www.bleepingcomputer.com/news/security/gootkit-malware-bypasses-windows-defender-by-setting-path-exclusions/
+author: '@BarryShooshooga'
+date: 2019-10-26
+modified: 2025-01-30
+tags:
+    - attack.defense-evasion
+    - attack.t1562.001
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: Audit Policy : Security Settings/Local Policies/Audit Policy, Registry System Access Control (SACL): Auditing/User'
+detection:
+    selection:
+        EventID: 4660 # An object was deleted.
+        ObjectName|contains: '\Microsoft\Windows Defender\Exclusions\'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
