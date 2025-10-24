@@ -1,0 +1,29 @@
+title: Process Execution of Elevated msiexec.exe
+id: 3e1ce5a2-6c4e-473b-8e55-dffcdd1ffc25
+status: test
+description: Execution of elevated msiexec.exe. While not malicious itself, it might be part of a chain of actions leading to privilege escalation due vulnerabilities in the used MSI installer.
+references:
+    - https://r.sec-consult.com/msi
+    - https://msrc.microsoft.com/update-guide/en-US/advisory/CVE-2024-38014
+author: Herbert Bärschneider @SEC Consult
+date: 2024-07-15
+tags:
+    - attack.t1068
+    - cve.2024-38014
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_msiexec:
+        Image|endswith: '\msiexec.exe'
+        CommandLine|contains: '/V' # this is an undocumented parameter, used by the msiexec process that actually runs the MSI actions
+    selection_user:
+        User|contains:
+            - 'AUTHORI'
+            - 'AUTORI'
+        LogonId: '0x3e7'
+    condition: selection_msiexec and selection_user
+falsepositives:
+    - legitimate use of MSI files to repair installed applications by users or administrators
+level: low
+
