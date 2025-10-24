@@ -7,8 +7,13 @@ import yaml
 from typing import Dict, List
 
 
+# This script works with the new Sigma rule format where rules contain a
+# 'regression_tests_path' field pointing to an info.yml file that contains
+# test metadata and EVTX file paths in the 'regression_tests_info' section.
+
+
 def find_rules_with_tests(rules_paths: List[str]) -> List[Dict]:
-    """Find all rules that have a 'tests' attribute with evtx paths."""
+    """Find all rules that have a 'regression_tests_path' attribute pointing to test info files."""
     results = []
 
     for rules_path in rules_paths:
@@ -24,30 +29,77 @@ def find_rules_with_tests(rules_paths: List[str]) -> List[Dict]:
                         with open(file_path, "r", encoding="utf-8") as f:
                             rule_data = yaml.safe_load(f)
 
-                        if rule_data and "tests" in rule_data:
+                        if rule_data and "regression_tests_path" in rule_data:
                             rule_id = rule_data.get("id", "unknown")
-                            tests = rule_data.get("tests", [])
+                            regression_tests_path = rule_data.get("regression_tests_path", "")
+                            
+                            # Convert relative path to absolute path
+                            if not os.path.isabs(regression_tests_path):
+                                # Normalize path separators
+                                regression_tests_path = regression_tests_path.replace('/', os.sep).replace('\\', os.sep)
+                                # Assume path is relative to the workspace root
+                                workspace_root = os.path.dirname(os.path.dirname(file_path))
+                                while not os.path.exists(os.path.join(workspace_root, regression_tests_path)):
+                                    parent = os.path.dirname(workspace_root)
+                                    if parent == workspace_root:  # Reached filesystem root
+                                        break
+                                    workspace_root = parent
+                                regression_tests_path = os.path.join(workspace_root, regression_tests_path)
+                            
+                            if not os.path.exists(regression_tests_path):
+                                print(f"Warning: Regression tests info file not found: {regression_tests_path}")
+                                continue
+                                
+                            # Load the info.yml file
+                            try:
+                                with open(regression_tests_path, "r", encoding="utf-8") as f:
+                                    info_data = yaml.safe_load(f)
+                                
+                                if not info_data or "regression_tests_info" not in info_data:
+                                    print(f"Warning: No regression_tests_info found in {regression_tests_path}")
+                                    continue
+                                
+                                # Extract test data from regression_tests_info
+                                test_data = []
+                                regression_tests = info_data.get("regression_tests_info", [])
+                                
+                                for test in regression_tests:
+                                    if isinstance(test, dict):
+                                        test_path = test.get("path", "")
+                                        
+                                        # Convert relative test path to absolute path
+                                        if not os.path.isabs(test_path):
+                                            # Normalize path separators
+                                            test_path = test_path.replace('/', os.sep).replace('\\', os.sep)
+                                            info_dir = os.path.dirname(regression_tests_path)
+                                            workspace_root = info_dir
+                                            while not os.path.exists(os.path.join(workspace_root, test_path)):
+                                                parent = os.path.dirname(workspace_root)
+                                                if parent == workspace_root:  # Reached filesystem root
+                                                    break
+                                                workspace_root = parent
+                                            test_path = os.path.join(workspace_root, test_path)
+                                        
+                                        test_data.append(
+                                            {
+                                                "type": test.get("type", "unknown"),
+                                                "path": test_path,
+                                                "name": test.get("name", "Unnamed Test"),
+                                                "provider": test.get("provider", ""),
+                                            }
+                                        )
 
-                            test_data = []
-                            for test in tests:
-                                if isinstance(test, dict):
-                                    test_data.append(
+                                if test_data:
+                                    results.append(
                                         {
-                                            "type": test["type"],
-                                            "path": test["path"],
-                                            "name": test.get("name", "Unnamed Test"),
-                                            "provider": test.get("provider", ""),
+                                            "path": file_path,
+                                            "id": rule_id,
+                                            "tests": test_data,
                                         }
                                     )
-
-                            if test_data:
-                                results.append(
-                                    {
-                                        "path": file_path,
-                                        "id": rule_id,
-                                        "tests": test_data,
-                                    }
-                                )
+                                    
+                            except Exception as e:
+                                print(f"Warning: Could not parse info file {regression_tests_path}: {e}")
 
                     except Exception as e:
                         print(f"Warning: Could not parse {file_path}: {e}")
@@ -125,7 +177,7 @@ def run_test(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Run true positive tests for Sigma rules"
+        description="Run true positive tests for Sigma rules with regression_tests_path"
     )
 
     parser.add_argument(
