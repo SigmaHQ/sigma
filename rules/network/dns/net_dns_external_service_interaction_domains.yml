@@ -6,6 +6,7 @@ references:
     - https://twitter.com/breakersall/status/1533493587828260866
 author: Florian Roth (Nextron Systems), Matt Kelly (list of domains)
 date: 2022-06-07
+modified: 2025-10-26
 tags:
     - attack.initial-access
     - attack.t1190
@@ -28,7 +29,15 @@ detection:
             - '.canarytokens.com'
             - '.requestbin.net'
             - '.dnslog.cn'
-    condition: selection
+            - '.ceye.io'
+            - '.ddns.1443.eu.org' # dig.pm
+            - '.ddns.xn--gg8h.eu.org' # dig.pm
+            - '.ddns.bypass.eu.org' # dig.pm
+            - '.dnshook.site' # webhook.site
+    filter_polling:
+        query:
+          - 'polling.oastify.com'
+    condition: selection and not 1 of filter_*
 falsepositives:
-    - Unknown
+    - Legitimate security tooling
 level: high
