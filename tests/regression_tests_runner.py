@@ -7,9 +7,10 @@ import yaml
 from typing import Dict, List
 
 
-def find_rules_with_tests(rules_paths: List[str]) -> List[Dict]:
+def find_rules_with_tests(rules_paths: List[str]) -> tuple[List[Dict], List[Dict]]:
     """Find all rules that have a 'regression_tests_path' attribute pointing to test info files."""
     results = []
+    missing_files = []
 
     for rules_path in rules_paths:
         if not os.path.exists(rules_path):
@@ -54,9 +55,12 @@ def find_rules_with_tests(rules_paths: List[str]) -> List[Dict]:
                                 )
 
                             if not os.path.exists(regression_tests_path):
-                                print(
-                                    f"Warning: Regression tests info file not found: {regression_tests_path}"
-                                )
+                                missing_files.append({
+                                    "rule_path": file_path,
+                                    "rule_id": rule_id,
+                                    "missing_file": regression_tests_path,
+                                    "file_type": "regression_tests_path"
+                                })
                                 continue
 
                             # Load the info.yml file
@@ -108,6 +112,17 @@ def find_rules_with_tests(rules_paths: List[str]) -> List[Dict]:
                                                 workspace_root, test_path
                                             )
 
+                                        # Check if test file exists
+                                        if not os.path.exists(test_path):
+                                            missing_files.append({
+                                                "rule_path": file_path,
+                                                "rule_id": rule_id,
+                                                "missing_file": test_path,
+                                                "file_type": "test_file",
+                                                "test_name": test.get("name", "Unnamed Test"),
+                                                "test_type": test.get("type", "unknown")
+                                            })
+
                                         test_data.append(
                                             {
                                                 "type": test.get("type", "unknown"),
@@ -136,7 +151,7 @@ def find_rules_with_tests(rules_paths: List[str]) -> List[Dict]:
                     except Exception as e:
                         print(f"Warning: Could not parse {file_path}: {e}")
 
-    return results
+    return results, missing_files
 
 
 def run_evtx_checker(
@@ -149,9 +164,8 @@ def run_evtx_checker(
     """Run evtx-sigma-checker and check if rule ID is in output."""
     evtx_path = test_data["path"]
 
-    if not os.path.exists(evtx_path):
-        print(f"  Warning: EVTX file {evtx_path} does not exist")
-        return False, ""
+    # File existence is now checked upfront in find_rules_with_tests
+    # No need to check again here
 
     cmd = [
         evtx_checker_path,
@@ -258,8 +272,40 @@ def main():
 
     # Find rules with tests
     print("Scanning for rules with test data...")
-    rules_with_tests = find_rules_with_tests(rules_paths)
+    rules_with_tests, missing_files = find_rules_with_tests(rules_paths)
     print(f"Found {len(rules_with_tests)} rules with test data")
+    
+    # Check for missing files and fail if any are found
+    if missing_files:
+        print(f"\nERROR: Found {len(missing_files)} missing file(s):")
+        print("=" * 60)
+        
+        regression_test_files = [f for f in missing_files if f["file_type"] == "regression_tests_path"]
+        test_files = [f for f in missing_files if f["file_type"] == "test_file"]
+        
+        if regression_test_files:
+            print(f"\nMISSING REGRESSION TEST INFO FILES ({len(regression_test_files)}):")
+            print("-" * 50)
+            for missing in regression_test_files:
+                print(f"Rule: {missing['rule_id']}")
+                print(f"  File: {missing['rule_path']}")
+                print(f"  Missing: {missing['missing_file']}")
+                print()
+        
+        if test_files:
+            print(f"\nMISSING TEST DATA FILES ({len(test_files)}):")
+            print("-" * 50)
+            for missing in test_files:
+                print(f"Rule: {missing['rule_id']}")
+                print(f"  File: {missing['rule_path']}")
+                print(f"  Test: {missing['test_name']} (type: {missing['test_type']})")
+                print(f"  Missing: {missing['missing_file']}")
+                print()
+        
+        print("=" * 60)
+        print("Please ensure all referenced files exist before running tests.")
+        sys.exit(1)
+    
     print()
 
     if not rules_with_tests:
