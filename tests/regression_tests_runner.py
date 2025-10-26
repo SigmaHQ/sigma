@@ -159,6 +159,8 @@ def run_evtx_checker(
         thor_config,
         "--evtx-path",
         evtx_path,
+        "--rule-level",
+        "informational",
         "--rule-path",
         os.path.dirname(rule_path),
     ]
