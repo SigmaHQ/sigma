@@ -1,0 +1,123 @@
+title: Remote Registry Service Change (7040)
+id: 5c1b0d38-2a2e-4b48-9f3d-2f7f0bc3c7a9
+name: rr_7040
+status: experimental
+description: Detects a change to the RemoteRegistry service state (Event ID 7040).
+author: AAtashGar
+date: 2025/09/23
+references:
+    - https://ipurple.team/2025/08/04/lateral-movement-bitlocker/
+    - https://github.com/rtecCyberSec/BitlockMove
+logsource:
+    product: windows
+    service: system
+detection:
+    sel:
+        EventID: 7040
+        ServiceName: RemoteRegistry
+    condition: sel
+level: medium
+falsepositives:
+    - Admin changes
+
+---
+title: New CLSID Registry Value Created (4657)
+id: 9f6a5f04-4f2c-4b6a-9a42-6f0b9f8e5b1e
+name: clsid_new_4657
+status: experimental
+description: Detects creation of a new registry value in CLSID path.
+author: AAtashGar
+date: 2025/09/23
+references:
+    - https://ipurple.team/2025/08/04/lateral-movement-bitlocker/
+    - https://github.com/rtecCyberSec/BitlockMove
+logsource:
+    product: windows
+    service: security
+detection:
+    sel:
+        EventID: 4657
+        OperationType: "New registry value created"
+        ObjectName|contains: "CLSID"
+    condition: sel
+level: medium
+falsepositives:
+    - Legitimate software installation
+
+---
+title: CLSID Path Access/Handle (4663)
+id: 0a8b8a5b-0a22-4c7c-9f7d-3bdb6d7da8c1
+name: clsid_access_4663
+status: experimental
+description: Detects handle or access to CLSID path.
+author: AAtashGar
+date: 2025/09/23
+references:
+    - https://ipurple.team/2025/08/04/lateral-movement-bitlocker/
+    - https://github.com/rtecCyberSec/BitlockMove
+logsource:
+    product: windows
+    service: security
+detection:
+    sel:
+        EventID: 4663
+        ObjectName|contains: "CLSID"
+    condition: sel
+level: medium
+falsepositives:
+    - Legitimate registry access by system tools
+
+---
+title: Suspicious Process Creation Related to BitLocker COM Hijack (4688)
+id: 6b7b2c2d-1f3e-45d9-8b8e-3e6c1c9a0d55
+name: proc_bitlocker_4688
+status: experimental
+description: Detects creation of specific processes potentially used in BitLocker COM hijack scenario.
+author: AAtashGar
+date: 2025/09/23
+references:
+    - https://ipurple.team/2025/08/04/lateral-movement-bitlocker/
+    - https://github.com/rtecCyberSec/BitlockMove
+logsource:
+    category: process_creation
+detection:
+    s1:
+        EventID: 4688
+        Image|endswith: '\baaupdate.exe'
+        ParentImage|endswith: '\explorer.exe'
+    s2:
+        EventID: 4688
+        Image|endswith: '\BdeUISrv.exe'
+        ParentImage|endswith: '\svchost.exe'
+    condition: s1 or s2
+level: high
+falsepositives:
+    - Rare but possible legitimate executions
+
+---
+title: Lateral Movement via BitLocker COM Hijacking (temporal)
+id: 3f3f6a91-0e6a-4a6e-9a3b-0f6c7e9d2a44
+status: experimental
+description: Correlates service change (7040), registry creation (4657), registry access (4663),
+  and suspicious process creation (4688) within a short timeframe on the same host.
+author: AAtashGar
+date: 2025/09/23
+references:
+    - https://ipurple.team/2025/08/04/lateral-movement-bitlocker/
+    - https://github.com/rtecCyberSec/BitlockMove
+correlation:
+    type: temporal
+    rules:
+        - rr_7040
+        - clsid_new_4657
+        - clsid_access_4663
+        - proc_bitlocker_4688
+    group-by:
+        - ComputerName
+    timespan: 5m
+    condition:
+        gte: 4
+tags:
+    - attack.t1574
+    - attack.t1546
+
