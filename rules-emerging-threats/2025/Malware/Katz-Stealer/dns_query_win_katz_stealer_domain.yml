@@ -1,0 +1,32 @@
+title: DNS Query To Katz Stealer Domains
+id: 9c3d6e32-f4c8-4d73-8b8f-95c3b383a13c
+related:
+    - id: 6b0c762f-0e1b-435f-a829-5943b08fe36a
+      type: similar
+status: experimental
+description: |
+    Detects DNS queries to domains associated with Katz Stealer malware.
+    Katz Stealer is a malware variant that is known to be used for stealing sensitive information from compromised systems.
+    In Enterprise environments, DNS queries to these domains may indicate potential malicious activity or compromise.
+references:
+    - Internal Research
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-05-22
+tags:
+    - attack.command-and-control
+    - attack.t1071.004
+    - detection.emerging-threats
+logsource:
+    product: windows
+    category: dns_query
+detection:
+    selection:
+        QueryName|contains:
+            - 'katz-panel.com'
+            - 'katz-stealer.com'
+            - 'katzstealer.com'
+            - 'twist2katz.com'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
