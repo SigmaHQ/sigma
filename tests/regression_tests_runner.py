@@ -7,10 +7,15 @@ import yaml
 from typing import Dict, List
 
 
-def find_rules_with_tests(rules_paths: List[str]) -> tuple[List[Dict], List[Dict]]:
-    """Find all rules that have a 'regression_tests_path' attribute pointing to test info files."""
+def find_rules_with_tests(rules_paths: List[str]) -> tuple[List[Dict], List[Dict], List[Dict]]:
+    """Find all rules that have a 'regression_tests_path' attribute pointing to test info files.
+    
+    Returns:
+        tuple: (rules_with_tests, missing_files, missing_regression_tests_path)
+    """
     results = []
     missing_files = []
+    missing_regression_tests_path = []
 
     for rules_path in rules_paths:
         if not os.path.exists(rules_path):
@@ -24,6 +29,31 @@ def find_rules_with_tests(rules_paths: List[str]) -> tuple[List[Dict], List[Dict
                     try:
                         with open(file_path, "r", encoding="utf-8") as f:
                             rule_data = yaml.safe_load(f)
+
+                        if not rule_data:
+                            continue
+                            
+                        rule_id = rule_data.get("id", "unknown")
+                        rule_status = rule_data.get("status", "").lower()
+                        
+                        # Check if rule status requires regression tests
+                        requires_regression_tests = rule_status in ["test", "stable"]
+                        
+                        # Check if rule has regression_tests_path
+                        has_regression_tests_path = "regression_tests_path" in rule_data
+                        
+                        # If rule requires regression tests but doesn't have regression_tests_path
+                        if requires_regression_tests and not has_regression_tests_path:
+                            missing_regression_tests_path.append({
+                                "rule_path": file_path,
+                                "rule_id": rule_id,
+                                "status": rule_status,
+                            })
+                            continue
+                            
+                        # Skip rules that don't require regression tests and don't have regression_tests_path
+                        if not requires_regression_tests and not has_regression_tests_path:
+                            continue
 
                         if rule_data and "regression_tests_path" in rule_data:
                             rule_id = rule_data.get("id", "unknown")
@@ -151,7 +181,7 @@ def find_rules_with_tests(rules_paths: List[str]) -> tuple[List[Dict], List[Dict
                     except Exception as e:
                         print(f"Warning: Could not parse {file_path}: {e}")
 
-    return results, missing_files
+    return results, missing_files, missing_regression_tests_path
 
 
 def run_evtx_checker(
@@ -242,11 +272,17 @@ def main():
     )
 
     parser.add_argument(
-        "--evtx-checker", required=True, help="Path to evtx-sigma-checker binary"
+        "--evtx-checker", help="Path to evtx-sigma-checker binary (required unless using --validate-only)"
     )
 
     parser.add_argument(
-        "--thor-config", required=True, help="Path to thor.yml configuration file"
+        "--thor-config", help="Path to thor.yml configuration file (required unless using --validate-only)"
+    )
+    
+    parser.add_argument(
+        "--validate-only", 
+        action="store_true", 
+        help="Only validate rule status requirements without running tests"
     )
 
     args = parser.parse_args()
@@ -254,26 +290,57 @@ def main():
     # Parse comma-separated rules paths
     rules_paths = [path.strip() for path in args.rules_paths.split(",")]
 
-    print("Starting True Positive Tests...")
+    if args.validate_only:
+        print("Starting Rule Status Validation...")
+    else:
+        print("Starting True Positive Tests...")
+        
+        # Check required arguments for test execution
+        if not args.evtx_checker or not args.thor_config:
+            print("Error: --evtx-checker and --thor-config are required unless using --validate-only")
+            sys.exit(1)
+            
+        # Check if evtx-sigma-checker exists
+        if not os.path.exists(args.evtx_checker):
+            print(f"Error: evtx-sigma-checker not found at {args.evtx_checker}")
+            sys.exit(1)
+
+        # Check if thor config exists
+        if not os.path.exists(args.thor_config):
+            print(f"Error: Thor config not found at {args.thor_config}")
+            sys.exit(1)
+
     print(f"Rules paths: {rules_paths}")
-    print(f"EVTX checker: {args.evtx_checker}")
-    print(f"Thor config: {args.thor_config}")
+    if not args.validate_only:
+        print(f"EVTX checker: {args.evtx_checker}")
+        print(f"Thor config: {args.thor_config}")
     print()
-
-    # Check if evtx-sigma-checker exists
-    if not os.path.exists(args.evtx_checker):
-        print(f"Error: evtx-sigma-checker not found at {args.evtx_checker}")
-        sys.exit(1)
-
-    # Check if thor config exists
-    if not os.path.exists(args.thor_config):
-        print(f"Error: Thor config not found at {args.thor_config}")
-        sys.exit(1)
 
     # Find rules with tests
     print("Scanning for rules with test data...")
-    rules_with_tests, missing_files = find_rules_with_tests(rules_paths)
+    rules_with_tests, missing_files, missing_regression_tests_path = find_rules_with_tests(rules_paths)
     print(f"Found {len(rules_with_tests)} rules with test data")
+    
+    # Check for missing regression_tests_path in test/stable rules
+    if missing_regression_tests_path:
+        print(f"\nERROR: Found {len(missing_regression_tests_path)} test/stable rule(s) without regression_tests_path:")
+        print("=" * 70)
+        print("\nRULES MISSING REGRESSION_TESTS_PATH:")
+        print("-" * 50)
+        for missing in missing_regression_tests_path:
+            print(f"Rule: {missing['rule_id']} (status: {missing['status']})")
+            print(f"  File: {missing['rule_path']}")
+            print()
+        print("=" * 70)
+        print("Rules with status 'test' or 'stable' must have a 'regression_tests_path' field.")
+        print("Please add regression tests for these rules or change their status.")
+        sys.exit(1)
+    
+    # If validate-only mode, exit successfully after validation
+    if args.validate_only:
+        print("✅ All rules passed validation!")
+        print(f"Found {len(rules_with_tests)} rules with regression tests configured.")
+        return
     
     # Check for missing files and fail if any are found
     if missing_files:
