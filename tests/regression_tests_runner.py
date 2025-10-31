@@ -284,6 +284,12 @@ def main():
         action="store_true", 
         help="Only validate rule status requirements without running tests"
     )
+    
+    parser.add_argument(
+        "--ignore-validation", 
+        action="store_true", 
+        help="Ignore rule status validation requirements"
+    )
 
     args = parser.parse_args()
 
@@ -322,7 +328,7 @@ def main():
     print(f"Found {len(rules_with_tests)} rules with test data")
     
     # Check for missing regression_tests_path in test/stable rules
-    if missing_regression_tests_path:
+    if missing_regression_tests_path and not args.ignore_validation:
         print(f"\nERROR: Found {len(missing_regression_tests_path)} test/stable rule(s) without regression_tests_path:")
         print("=" * 70)
         print("\nRULES MISSING REGRESSION_TESTS_PATH:")
@@ -335,10 +341,16 @@ def main():
         print("Rules with status 'test' or 'stable' must have a 'regression_tests_path' field.")
         print("Please add regression tests for these rules or change their status.")
         sys.exit(1)
+    elif missing_regression_tests_path and args.ignore_validation:
+        print(f"\nWARNING: Found {len(missing_regression_tests_path)} test/stable rule(s) without regression_tests_path (validation ignored)")
+        print("Consider adding regression tests for these rules or changing their status to 'experimental'.")
     
     # If validate-only mode, exit successfully after validation
     if args.validate_only:
-        print("✅ All rules passed validation!")
+        if args.ignore_validation and missing_regression_tests_path:
+            print("✅ All rules passed validation (validation ignored)!")
+        else:
+            print("✅ All rules passed validation!")
         print(f"Found {len(rules_with_tests)} rules with regression tests configured.")
         return
     
