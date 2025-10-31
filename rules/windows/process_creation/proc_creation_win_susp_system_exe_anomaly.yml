@@ -9,9 +9,10 @@ description: |
 references:
     - https://twitter.com/GelosSnake/status/934900723426439170
     - https://asec.ahnlab.com/en/39828/
+    - https://www.splunk.com/en_us/blog/security/inno-setup-malware-redline-stealer-campaign.html
 author: Florian Roth (Nextron Systems), Patrick Bareiss, Anton Kutepov, oscd.community, Nasreddine Bencherchali (Nextron Systems)
 date: 2017-11-27
-modified: 2024-07-16
+modified: 2025-10-13
 tags:
     - attack.defense-evasion
     - attack.t1036
@@ -61,6 +62,7 @@ detection:
             - '\spoolsv.exe'
             - '\svchost.exe'
             - '\taskhost.exe'
+            - '\taskhostw.exe'
             - '\Taskmgr.exe'
             - '\userinit.exe'
             - '\wininit.exe'
@@ -83,11 +85,20 @@ detection:
     filter_optional_system32:
         Image|contains: '\SystemRoot\System32\'
     filter_main_powershell:
-        Image:
-            - 'C:\Program Files\PowerShell\7\pwsh.exe'
-            - 'C:\Program Files\PowerShell\7-preview\pwsh.exe'
-    filter_main_wsl_windowsapps:
-        Image|startswith: 'C:\Program Files\WindowsApps\MicrosoftCorporationII.WindowsSubsystemForLinux'
+        Image|contains:
+            - 'C:\Program Files\PowerShell\7\'
+            - 'C:\Program Files\PowerShell\7-preview\'
+            - 'C:\Program Files\WindowsApps\Microsoft.PowerShellPreview'
+            - '\AppData\Local\Microsoft\WindowsApps\Microsoft.PowerShellPreview' # pwsh installed from Microsoft Store
+        Image|endswith: '\pwsh.exe'
+    filter_main_wsl_programfiles:
+        Image|startswith:
+            - 'C:\Program Files\WindowsApps\MicrosoftCorporationII.WindowsSubsystemForLinux'
+            - 'C:\Program Files\WSL\'
+        Image|endswith: '\wsl.exe'
+    filter_main_wsl_appdata:
+        Image|startswith: C:\Users\'
+        Image|contains: '\AppData\Local\Microsoft\WindowsApps\'
         Image|endswith: '\wsl.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:

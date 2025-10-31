@@ -89,7 +89,7 @@ If you find a false positive or would like to propose a new detection rule idea 
 * [Sigma - Generic Signatures for SIEM Systems by Florian Roth](https://www.slideshare.net/secret/gvgxeXoKblXRcA)
 
 ## Projects or Products that use or integrate Sigma rules
-
+* [AlphaSOC](https://docs.alphasoc.com/detections_and_findings/sigma_community/) - Leverages Sigma rules to increase coverage across all supported log sources
 * [alterix](https://github.com/mtnmunuklu/alterix) - Converts Sigma rules to the query language of CRYPTTECH's SIEM
 * [AttackIQ](https://www.attackiq.com/2024/01/10/sigmaiq-attackiqs-latest-innovation-for-actionable-detections/) - Sigma Rules integrated in AttackIQ's platform, and [SigmAIQ](https://github.com/AttackIQ/SigmAIQ) for Sigma rule conversion and LLM apps
 * [Atomic Threat Coverage](https://github.com/atc-project/atomic-threat-coverage) (Since December 2018)
