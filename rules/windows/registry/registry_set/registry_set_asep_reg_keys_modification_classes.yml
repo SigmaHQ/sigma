@@ -11,7 +11,7 @@ references:
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split)
 date: 2019-10-25
-modified: 2023-08-17
+modified: 2025-10-22
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -40,22 +40,19 @@ detection:
             - '\.cmd'
             - '\ShellEx\PropertySheetHandlers'
             - '\ShellEx\ContextMenuHandlers'
-    filter_empty:
-        Details: '(Empty)'
-    filter_msoffice:
-        Details: '{807583E5-5146-11D5-A672-00B0D022E945}'
-    filter_drivers:
+    filter_main_drivers:
         Image: 'C:\Windows\System32\drvinst.exe'
-    filter_svchost:
+    filter_main_empty:
+        Details: '(Empty)'
+    filter_main_null:
+        Details: null
+    filter_main_svchost:
         Image: 'C:\Windows\System32\svchost.exe'
         # If more targets are found from "svchost". Please exclude the whole image
         TargetObject|contains: '\lnkfile\shellex\ContextMenuHandlers\'
-    condition: all of selection_* and not 1 of filter_*
-fields:
-    - SecurityID
-    - ObjectName
-    - OldValueType
-    - NewValueType
+    filter_optional_msoffice:
+        Details: '{807583E5-5146-11D5-A672-00B0D022E945}'
+    condition: all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate software automatically (mostly, during installation) sets up autorun keys for legitimate reason
     - Legitimate administrator sets up autorun keys for legitimate reason
