@@ -27,6 +27,8 @@ Currently the repository offers three types of rules:
 * [Generic Detection Rules](./rules/) - Are threat agnostic, their aim is to detect a behavior or an implementation of a technique or procedure that was, can or will be used by a potential threat actor.
 * [Threat Hunting Rules](./rules-threat-hunting/) - Are broader in scope and are meant to give the analyst a starting point to hunt for potential suspicious or malicious activity
 * [Emerging Threat Rules](./rules-emerging-threats/) - Are rules that cover specific threats, that are timely and relevant for certain periods of time. These threats include specific APT campaigns, exploitation of Zero-Day vulnerabilities, specific malware used during an attack,...etc.
+* [Compliance Rules](./rules-compliance/) - Are rules that help you identify compliance violations based on well known security frameworks such as CIS Controls, NIST, ISO 27001,...etc.
+* [Placeholder Rules](./rules-placeholder/) - Are rules that get their final meaning at conversion or usage time of the rule.
 
 ## Explore Sigma
 
