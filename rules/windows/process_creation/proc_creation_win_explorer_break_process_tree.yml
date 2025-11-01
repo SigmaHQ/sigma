@@ -22,13 +22,12 @@ detection:
     # Note: See CLSID_SeparateMultipleProcessExplorerHost in the registry for reference
     selection_factory:
         CommandLine|contains: '/factory,{75dff2b7-6936-4c06-a8bb-676a7b00b24b}' # This will catch, the new explorer spawning which indicates a process/tree break. But you won't be able to catch the executing process. For that you need historical data
-    selection_root_process:
+    selection_root_:
         CommandLine|contains: 'explorer.exe'
-    selection_root_flag:
+        CommandLine|contains|windash: ' /root,'
         # There exists almost infinite possibilities to spawn from explorer. The "/root" flag is just an example
         # It's better to have the ability to look at the process tree and look for explorer processes with "weird" flags to be able to catch this technique.
-        CommandLine|contains|windash: ' /root,'
-    condition: selection_factory or all of selection_root_*
+    condition: 1 of selection_*
 falsepositives:
     - Unknown
 level: medium

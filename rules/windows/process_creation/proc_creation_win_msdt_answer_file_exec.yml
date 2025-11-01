@@ -16,14 +16,13 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_cli:
+    selection:
         Image|endswith: '\msdt.exe'
         CommandLine|contains: '\WINDOWS\diagnostics\index\PCWDiagnostic.xml'
-    selection_answer:
         CommandLine|contains|windash: ' -af '
     filter_main_pcwrun:
         ParentImage|endswith: '\pcwrun.exe'
-    condition: all of selection* and not 1 of filter_main_*
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Possible undocumented parents of "msdt" other than "pcwrun".
 level: high
