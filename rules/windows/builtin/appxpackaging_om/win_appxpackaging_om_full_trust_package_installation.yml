@@ -1,0 +1,24 @@
+title: Windows AppX Deployment Full Trust Package Installation
+id: e54279c7-4910-4e2c-902c-c56a25b549f6
+status: experimental
+description: Detects the installation of MSIX/AppX packages with full trust privileges which run with elevated privileges outside normal AppX container restrictions
+references:
+    - https://www.splunk.com/en_us/blog/security/msix-weaponization-threat-detection-splunk.html
+author: Michael Haag, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-11-03
+tags:
+    - attack.defense-evasion
+    - attack.execution
+    - attack.t1204.002
+    - attack.t1553.005
+logsource:
+    product: windows
+    service: appxpackaging-om
+detection:
+    selection:
+        EventID: 400
+        HasFullTrust: true
+    condition: selection
+falsepositives:
+    - Legitimate full trust AppX package installations by administrators
+level: medium
