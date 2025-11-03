@@ -1,0 +1,28 @@
+title: Windows AppX Deployment Unsigned Package Installation
+id: 9a025188-6f2d-42f8-bb2f-d3a83d24a5af
+related:
+    - id: 5c143b29-7fc5-4025-9b5f-432fe6e66ea2
+      type: similar
+status: experimental
+description: Detects attempts to install unsigned MSIX/AppX packages using the -AllowUnsigned parameter via AppXDeployment-Server events
+references:
+    - https://docs.microsoft.com/en-us/powershell/module/appx/add-appxpackage
+    - https://www.splunk.com/en_us/blog/security/msix-weaponization-threat-detection-splunk.html
+author: Michael Haag, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-11-03
+tags:
+    - attack.defense-evasion
+    - attack.execution
+    - attack.t1204.002
+    - attack.t1553.005
+logsource:
+    product: windows
+    service: appxpackaging-om
+detection:
+    selection:
+        EventID: 603
+        Flags: '8388608'
+    condition: selection
+falsepositives:
+    - Legitimate installation of unsigned packages for legitimate purposes such as development or testing
+level: medium

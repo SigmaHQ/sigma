@@ -1,0 +1,39 @@
+title: PowerShell Unsigned AppX Package Installation
+id: 5c143b29-7fc5-4025-9b5f-432fe6e66ea2
+related:
+  - id: 9a025188-6f2d-42f8-bb2f-d3a83d24a5af
+    type: similar
+status: experimental
+description: |
+    Detects PowerShell execution of Add-AppxPackage cmdlet with the -AllowUnsigned parameter to install unsigned MSIX/AppX packages.
+    Attackers may abuse unsigned MSIX packages as a delivery mechanism for malware, circumventing digital signature verification controls that typically prevent installation of untrusted packages
+references:
+    - https://docs.microsoft.com/en-us/powershell/module/appx/add-appxpackage
+    - https://www.splunk.com/en_us/blog/security/msix-weaponization-threat-detection-splunk.html
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-11-03
+tags:
+    - attack.defense-evasion
+    - attack.execution
+    - attack.t1204.002
+    - attack.t1553.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\powershell_ise.exe'
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+            - 'powershell_ise.exe'
+            - 'powershell.exe'
+            - 'pwsh.dll'
+    selection_cli:
+        CommandLine|contains|all:
+          - 'Add-AppxPackage'
+          - ' -AllowUnsigned'
+falsepositives:
+    - Legitimate installation of unsigned packages for development or testing purposes
+level: medium
