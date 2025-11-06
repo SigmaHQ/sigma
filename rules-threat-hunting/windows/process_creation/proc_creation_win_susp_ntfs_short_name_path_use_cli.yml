@@ -1,0 +1,68 @@
+title: Use Short Name Path in Command Line
+id: 349d891d-fef0-4fe4-bc53-eee623a15969
+related:
+    - id: a96970af-f126-420d-90e1-d37bf25e50e1
+      type: similar
+status: test
+description: |
+    Detects the use of short name paths (8.3 format) in command lines, which can be used to obfuscate paths or access restricted locations.
+    Windows creates short 8.3 filenames (like PROGRA~1) for compatibility with MS-DOS-based or 16-bit Windows programs.
+    When investigating, examine:
+    - Commands using short paths to access sensitive directories or files
+    - Web servers on Windows (especially Apache) where short filenames could bypass security controls
+    - Correlation with other suspicious behaviors
+    - baseline of short name usage in your environment and look for deviations
+references:
+    - https://www.acunetix.com/blog/articles/windows-short-8-3-filenames-web-security-problem/
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-2000-server/cc959352(v=technet.10)
+    - https://twitter.com/frack113/status/1555830623633375232
+author: frack113, Nasreddine Bencherchali
+date: 2022-08-07
+modified: 2025-10-07
+tags:
+    - attack.defense-evasion
+    - attack.t1564.004
+    - detection.threat-hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:
+            - '~1\'
+            - '~2\'
+    filter_main_system_process:
+        ParentImage:
+            - 'C:\Windows\System32\Dism.exe'
+            - 'C:\Windows\System32\cleanmgr.exe'
+    filter_main_winget:
+        - ParentImage|endswith: '\winget.exe'
+        - ParentImage|contains: '\AppData\Local\Temp\WinGet\'
+    filter_main_installers:
+        - Image|contains|all:
+              - '\AppData\'
+              - '\Temp\'
+        - CommandLine|contains: '\AppData\Local\Temp\' # sometimes installers spawn other installers from temp folder
+    filter_optional_dopus:
+        ParentImage: 'C:\Program Files\GPSoftware\Directory Opus\dopus.exe'
+    filter_optional_aurora:
+        ParentImage|endswith:
+            - '\aurora-agent-64.exe'
+            - '\aurora-agent.exe'
+    filter_optional_thor:
+        ParentImage|endswith: '\thor\thor64.exe'
+    filter_optional_git:
+        CommandLine|contains:
+            - 'C:\Program Files\Git\post-install.bat'
+            - 'C:\Program Files\Git\cmd\scalar.exe'
+    filter_optional_webex:
+        - ParentImage|endswith: '\WebEx\webexhost.exe'
+        - CommandLine|contains: '\appdata\local\webex\webex64\meetings\wbxreport.exe'
+    filter_optional_veeam:
+        ParentImage|endswith: '\veeam.backup.shell.exe'
+    filter_optional_everything:
+        ParentImage|endswith: '\Everything\Everything.exe'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Applications could use this notation occasionally which might generate some false positives. In that case investigate the parent and child process.
+level: medium
