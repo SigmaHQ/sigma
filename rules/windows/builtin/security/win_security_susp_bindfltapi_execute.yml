@@ -1,0 +1,41 @@
+title: bindfltapi.dll execute access by suspicious process
+id: 7a3f9c12-0b7e-4d3a-9a8e-0f6c2b45d7e1
+status: test
+description: Detects execute access to bindfltapi.dll via Windows Security 4663 (requires File System auditing + SACL)
+references:
+    - https://www.zerosalarium.com/2025/11/EDR-Redir-V2-Blind-EDR-With-Fake-Program-Files.html
+author: Vladan Sekulic
+logsource:
+  product: windows
+  service: security
+detection:
+  core:
+    EventID: 4663
+    ObjectType: 'File'
+    ObjectName|endswith:
+      - '\Windows\System32\bindfltapi.dll'
+      - '\Windows\SysWOW64\bindfltapi.dll'
+  exec_mask:
+    AccessMask: '0x20'
+  exec_text:
+    AccessList|contains:
+      - 'Execute'
+      - '%%4421'
+  system_images:
+    ProcessName|endswith:
+      - '\svchost.exe'
+      - '\services.exe'
+      - '\lsass.exe'
+      - '\explorer.exe'
+      - '\tiworker.exe'
+      - '\TrustedInstaller.exe'
+      - '\MsMpEng.exe'
+      - '\System'
+      - '\dllhost.exe'
+  condition: core and (exec_mask or exec_text) and not system_images
+level: high
+falsepositives:
+  - Other legitimate system components loading bindfltapi.dll
+tags:
+  - attack.defense-evasion
+  - attack.t1562
