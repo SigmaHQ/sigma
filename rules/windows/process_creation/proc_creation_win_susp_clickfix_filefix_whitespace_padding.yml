@@ -1,0 +1,48 @@
+title: Suspicious Explorer Process with Whitespace Padding - ClickFix/FileFix
+id: 3ae9974a-eb09-4044-8e70-8980a50c12c8
+related:
+    - id: 8f2a5c3d-9e4b-4a7c-8d1f-2e5a6b9c3d7e
+      type: similar
+    - id: 7a1b4c5e-8f3d-4b9a-7c2e-1f4a5b8c6d9e
+      type: similar
+status: experimental
+description: |
+    Detects process creation with suspicious whitespace padding followed by a '#' character, which may indicate ClickFix or FileFix techniques used to conceal malicious commands from visual inspection.
+    ClickFix and FileFix are social engineering attack techniques where adversaries distribute phishing documents or malicious links that deceive users into opening the Windows Run dialog box or File Explorer search bar.
+    The victims are then instructed to paste commands from their clipboard, which contain extensive whitespace padding using various Unicode space characters to push the actual malicious command far to the right, effectively hiding it from immediate view.
+references:
+    - https://expel.com/blog/cache-smuggling-when-a-picture-isnt-a-thousand-words/
+    - https://mrd0x.com/filefix-clickfix-alternative/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-11-04
+tags:
+    - attack.execution
+    - attack.t1204.004
+    - attack.defense-evasion
+    - attack.t1027.010
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_explorer:
+        Image|endswith: '\explorer.exe'
+        CommandLine|contains: '#'
+    selection_space_variation:
+        CommandLine|contains:
+            - '            ' # En Quad (U+2000)
+            - '            ' # Em Quad (U+2001)
+            - '            ' # En Space (U+2002)
+            - '            ' # Em Space (U+2003)
+            - '            ' # Three-Per-Em Space (U+2004)
+            - '            ' # Four-Per-Em Space (U+2005)
+            - '            ' # Six-Per-Em Space (U+2006)
+            - '            ' # Figure Space (U+2007)
+            - '            ' # Punctuation Space (U+2008)
+            - '            ' # Thin Space (U+2009)
+            - '            ' # Hair Space (U+200A)
+            - '            ' # No-Break Space (U+00A0)
+            - '            ' # Normal space (0x20)
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
