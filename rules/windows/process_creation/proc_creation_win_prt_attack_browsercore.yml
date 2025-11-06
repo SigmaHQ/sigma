@@ -8,18 +8,23 @@ author: Eugen Tropmann
 date: 2025-10-02
 tags:
     - attack.credential-access
+    - attack.defense-evasion
+    - attack.lateral-movement
     - attack.t1003
     - attack.t1550.003
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\BrowserCore.exe'
+    selection_img:
+        - Image|endswith: '\BrowserCore.exe'
+        - OriginalFileName: 'BrowserCore.exe'
+    selection_cli:
         CommandLine|contains: 'chrome-extension://ppnbnpeolgkicgegkbkbjmhlideopiji/'
-    selection_filter:
+    filter_main_legit_exec_cmd:
         ParentImage|endswith: '\cmd.exe'
-    condition: selection and not selection_filter
+        ParentCommandLine|contains: '\\\\\.\\pipe\'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: medium
