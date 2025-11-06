@@ -9,33 +9,33 @@ logsource:
   product: windows
   service: security
 detection:
-  core:
-    EventID: 4663
-    ObjectType: 'File'
-    ObjectName|endswith:
-      - '\Windows\System32\bindfltapi.dll'
-      - '\Windows\SysWOW64\bindfltapi.dll'
-  exec_mask:
-    AccessMask: '0x20'
-  exec_text:
-    AccessList|contains:
-      - 'Execute'
-      - '%%4421'
-  system_images:
-    ProcessName|endswith:
-      - '\svchost.exe'
-      - '\services.exe'
-      - '\lsass.exe'
-      - '\explorer.exe'
-      - '\tiworker.exe'
-      - '\TrustedInstaller.exe'
-      - '\MsMpEng.exe'
-      - '\System'
-      - '\dllhost.exe'
-  condition: core and (exec_mask or exec_text) and not system_images
+    core:
+      EventID: 4663
+      ObjectType: 'File'
+      ObjectName|endswith:
+        - '\Windows\System32\bindfltapi.dll'
+        - '\Windows\SysWOW64\bindfltapi.dll'
+    exec_mask:
+      AccessMask: '0x20'
+    exec_text:
+      AccessList|contains:
+        - 'Execute'
+        - '%%4421'
+    system_images:
+      ProcessName|endswith:
+        - '\svchost.exe'
+        - '\services.exe'
+        - '\lsass.exe'
+        - '\explorer.exe'
+        - '\tiworker.exe'
+        - '\TrustedInstaller.exe'
+        - '\MsMpEng.exe'
+        - '\System'
+        - '\dllhost.exe'
+    condition: core and (exec_mask or exec_text) and not system_images
 level: high
 falsepositives:
-  - Other legitimate system components loading bindfltapi.dll
+    - Other legitimate system components loading bindfltapi.dll
 tags:
   - attack.defense-evasion
   - attack.t1562
