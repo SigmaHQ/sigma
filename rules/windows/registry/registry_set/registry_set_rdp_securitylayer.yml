@@ -1,12 +1,13 @@
-title: RDP SecurityLayer Registry Value Tampering
+title: RDP SecurityLayer Registry Value Tampering - Registry
 id: 13bda3c1-5474-4e9b-983e-83e6ede83b08
 related:
     - id: d081deb8-d09a-492d-b32c-6597e68a9b3d # process_creation
       type: similar
 status: experimental
 description: |
-    Detects changes to the "SecurityLayer" RDP registry value, used to enable, weaken, or disable authentication methods on RDP connections.
-    The "SecurityLayer" value specifies how servers and clients authenticate each other before a remote desktop connection is established.
+    Detects changes to the SecurityLayer RDP registry value, used to enable, weaken, or disable authentication methods on RDP connections.
+    The SecurityLayer value specifies how servers and clients authenticate each other before a remote desktop connection is established.
+    Threat actors may modify this value to weaken RDP security settings and facilitate unauthorized access.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/dd526047b8c399c312fee47d1e6fb531164da54d/atomics/T1112/T1112.yaml#L790
     - https://www.trendmicro.com/en_us/research/25/i/unmasking-the-gentlemen-ransomware.html
@@ -23,7 +24,10 @@ logsource:
 detection:
     selection:
         TargetObject|endswith: '\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp\SecurityLayer'
+        Details:
+            - 'DWORD (0x00000000)'  # RDP SecurityLayer set to 0 - RDP Security Layer is disabled
+            - 'DWORD (0x00000001)'  # RDP SecurityLayer set to 1 - RDP Security Layer is set to RDP Security Layer
     condition: selection
 falsepositives:
     - Legitimate changes to the SecurityLayer value setting
-level: high
+level: medium
