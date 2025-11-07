@@ -1,0 +1,26 @@
+title: Suspicious Kerberos Ticket Request - S4U2Proxy
+id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+status: experimental
+description: Detects Kerberos service ticket requests with specific TicketOptions that may indicate suspicious delegation through compromise of s4u2proxy.
+references:
+    - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4769
+    - https://swolfsec.github.io/2023-11-29-Detecting-Resource-Based-Constrained-Delegation/
+author: Louise Lalanne
+date: 2025-11-07
+tags:
+    - attack.credential_access
+    - attack.t1558.003
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4769
+        TicketOptions: '0x40820010'
+    filter_exclude:
+        TransmittedServices: '-'
+    condition: selection and not filter_exclude
+falsepositives:
+    - Legitimate delegation configured in corporate environments
+    - Applications that use Kerberos delegation legitimately
+level: high
