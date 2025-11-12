@@ -1,17 +1,30 @@
-name: Auto message for PR's and Issues
+name: Greet First-Time Contributors
 
-on: [pull_request_target, issues]
+on:
+  pull_request:
+    types:
+      - opened
+  issues:
+    types:
+      - opened
+
+permissions:
+  issues: write
+  pull-requests: write
+  id-token: write
+  contents: read
 
 jobs:
-  build:
-    name: Hello new contributor
+  greeting:
+    name: Greet First-Time Contributors
+    if: github.event_name == 'issues' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository)
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/first-interaction@v3.1
+      - uses: actions/first-interaction@v3
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          issue-message: |-
-            Welcome @${{github.actor}} :wave:
+          issue-message: |
+            Welcome :wave:
 
             It looks like this is your first issue on the Sigma rules repository!
 
@@ -19,16 +32,14 @@ jobs:
 
             If you're reporting an issue related to the pySigma library please consider submitting it [here](https://github.com/SigmaHQ/pySigma)
 
-            If you're reporting an issue related to the deprecated sigmac library please consider submitting it [here](https://github.com/SigmaHQ/legacy-sigmatools)
-
             Thanks for taking the time to open this issue, and welcome to the Sigma community! :smiley:
 
 
-          pr-message: |-
-            Welcome @${{github.actor}} :wave:
+          pr-message: |
+            Welcome :wave:
             
             It looks like this is your first pull request on the Sigma rules repository!
 
-            Please make sure to read the [SigmaHQ conventions](https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/) document to make sure your contribution is adhering to best practices and has all the necessary elements in place for a successful approval.
+            Please make sure to read the [SigmaHQ conventions](https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq/) to make sure your contribution is adhering to best practices and has all the necessary elements in place for a successful approval.
 
             Thanks again, and welcome to the Sigma community! :smiley:
