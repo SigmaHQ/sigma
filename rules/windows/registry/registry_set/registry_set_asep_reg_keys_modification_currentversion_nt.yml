@@ -11,8 +11,9 @@ references:
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split)
 date: 2019-10-25
-modified: 2025-07-04
+modified: 2025-10-17
 tags:
+    - attack.privilege-escalation
     - attack.persistence
     - attack.t1547.001
 logsource:
@@ -50,11 +51,23 @@ detection:
             - '\Winlogon\GPExtensions\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\PreviousPolicyAreas'
             - '\Winlogon\GPExtensions\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\MaxNoGPOListChangesInterval'
         Details:
+            - 'DWORD (0x00000001)'
             - 'DWORD (0x00000009)'
             - 'DWORD (0x000003c0)'
     filter_main_runtimebroker:
         Image: 'C:\Windows\System32\RuntimeBroker.exe'
         TargetObject|contains: '\runtimebroker.exe\Microsoft.Windows.ShellExperienceHost'
+    filter_optional_avguard:
+        Image|startswith:
+            - 'C:\Program Files (x86)\Avira\Antivirus\avguard.exe'
+            - 'C:\Program Files\Avira\Antivirus\avguard.exe'
+        TargetObject|contains: 'SOFTWARE\WOW6432Node\Avira\Antivirus\Overwrite_Keys\HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\'
+        TargetObject|endswith:
+            - '\userinit\UseAsDefault'
+            - '\shell\UseAsDefault'
+        Details:
+            - 'explorer.exe'
+            - 'C:\Windows\system32\userinit.exe,'
     filter_optional_edge:
         Image|startswith: 'C:\Program Files (x86)\Microsoft\Temp\'
         Image|endswith: '\MicrosoftEdgeUpdate.exe'
