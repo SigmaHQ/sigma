@@ -111,7 +111,7 @@ If you find a false positive or would like to propose a new detection rule idea 
 * [sigma2stix](https://github.com/muchdogesec/sigma2stix) - Converts the entire SigmaHQ Ruleset into STIX 2.1 Objects.
   * A versioned archive of sigma2stix STIX 2.1 data is also available to [download here](https://github.com/muchdogesec/cti_knowledge_base_store/tree/main/sigma-rules).
 * [SIΣGMA](https://github.com/3CORESec/SIEGMA) - SIEM consumable generator that utilizes Sigma for query conversion
-* [SOC Prime](https://tdm.socprime.com/sigma/)
+* [SOC Prime](https://my.socprime.com/sigma/)
 * [TA-Sigma-Searches](https://github.com/dstaulcu/TA-Sigma-Searches) (Splunk App)
 * [TimeSketch](https://github.com/google/timesketch/commit/0c6c4b65a6c0f2051d074e87bbb2da2424fa6c35)
 * [ypsilon](https://github.com/P4T12ICK/ypsilon) - Automated Use Case Testing
