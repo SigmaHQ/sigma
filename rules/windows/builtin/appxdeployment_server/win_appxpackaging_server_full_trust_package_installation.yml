@@ -24,9 +24,17 @@ detection:
             - 'file:///C:/Program%20Files%20(x86)/'
     filter_main_microsoft:
         - PackageSourceUri|startswith: 'https://go.microsoft.com/fwlink/?linkid'
-        - PackageSourceUri|contains: '.cdn.microsoft.com'
+        - PackageSourceUri|contains:
+            - '.cdn.microsoft.com'
+            - '.cdn.office.net/'
+    filter_main_callerprocess:
+        CallingProcess|startswith:
+            - 'sysprep.exe'
+            - 'svchost.exe,AppReadiness'
     filter_optional_x_update:
         PackageSourceUri|startswith: 'x-windowsupdate://'
+    filter_optional_microsoftclient:
+        PackageFullName|startswith: 'MicrosoftWindows.Client.'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Some legitimate applications installation which have been missed from filtering can generate fps, thus baselining and tuning is recommended before deploying to production
