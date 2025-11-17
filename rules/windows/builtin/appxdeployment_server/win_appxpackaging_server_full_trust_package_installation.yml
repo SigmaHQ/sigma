@@ -22,7 +22,12 @@ detection:
         PackageSourceUri|startswith:
             - 'file:///C:/Program%20Files/'
             - 'file:///C:/Program%20Files%20(x86)/'
-    condition: selection and not 1 of filter_main_*
+    filter_main_microsoft:
+        - PackageSourceUri|startswith: 'https://go.microsoft.com/fwlink/?linkid'
+        - PackageSourceUri|contains: '.cdn.microsoft.com'
+    filter_optional_x_update:
+        PackageSourceUri|startswith: 'x-windowsupdate://'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
-    - Legitimate full trust AppX package installations by administrators
+    - Some legitimate applications installation which have been missed from filtering can generate fps, thus baselining and tuning is recommended before deploying to production
 level: medium
