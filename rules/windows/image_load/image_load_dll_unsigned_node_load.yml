@@ -1,0 +1,37 @@
+title: Unsigned .node File Load
+id: e5f5c693-52d7-4de5-88ae-afbfbce85595
+status: experimental
+description: |
+    Detects loading unsigned .node files into electron applications.
+    Adversaries may abuse a lack of .node integrity checking to execute arbitrary code inside of trusted applications such as Slack
+references:
+    - https://www.coreycburton.com/blog/driploader-case-study
+    - https://github.com/CoreyCBurton/DripLoaderNG
+    - https://www.electronjs.org/docs/latest/tutorial/native-code-and-electron
+author: Jonathan Beierle (@hullabrian)
+date: 2025/11/17
+tags:
+    - attack.execution
+    - attack.t1129
+    - attack.t1574.001
+    - attack.t1036.005
+    - detection.threat-hunting
+logsource:
+    category: image_load
+    service: sysmon
+    product: windows
+detection:
+    node_path:
+        ImageLoaded|contains: 'app.asar.unpacked\node_modules'  # Common to electron application sctructures
+        ImageLoaded|endswith: '.node'
+    signed:
+        Signed: 'false'
+    valid_signature:
+        SignatureStatus: "Unavailable"
+    condition: node_path and (signed or valid_signature)
+fields:
+    - ProcessId
+    - Image
+falsepositives:
+    - Unknown
+level: low
