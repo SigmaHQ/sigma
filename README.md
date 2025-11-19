@@ -61,10 +61,10 @@ Others provide excellent analyses, include IOCs and YARA rules to detect the mal
 
 ## 🏗️ Rule Creation
 
-To start writing Sigma rules please check the following guides:
+To start writing Sigma rules please check the following high level guide along with the sigma specification:
 
-* [Rule Creation Guide](https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide)
-* [How to Write Sigma Rules - Nextron Systems](https://www.nextron-systems.com/2018/02/10/write-sigma-rules/)
+* [Rule Creation High‐Level Guide]([https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide](https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-High%E2%80%90Level-Guide))
+* [Sigma Specification](https://github.com/SigmaHQ/sigma-specification)
 
 ## 🔎 Contributing & Making PRs
 
