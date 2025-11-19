@@ -21,6 +21,8 @@ logsource:
     service: sysmon
     product: windows
 detection:
+    event_id:
+        EventID: 7
     node_path:
         ImageLoaded|contains: 'app.asar.unpacked\node_modules'  # Common to electron application sctructures
         ImageLoaded|endswith: '.node'
@@ -28,7 +30,7 @@ detection:
         Signed: 'false'
     valid_signature:
         SignatureStatus: "Unavailable"
-    condition: node_path and (signed or valid_signature)
+    condition: event_id and node_path and (signed or valid_signature)
 fields:
     - ProcessId
     - Image
