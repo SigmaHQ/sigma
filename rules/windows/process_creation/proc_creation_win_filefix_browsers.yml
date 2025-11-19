@@ -1,15 +1,22 @@
-title: FileFix - Suspicious Child Process from Browser File Upload Abuse
+title: Suspicious FileFix Execution Pattern
 id: 4be03877-d5b6-4520-85c9-a5911c0a656c
+related:
+    - id: 4fee3d51-8069-4a4c-a0f7-924fcaff2c70
+      type: similar
 status: experimental
 description: |
-    Detects potentially suspicious subprocesses such as LOLBINs spawned by web browsers. This activity could be associated with the "FileFix" social engineering technique,
-    where users are tricked into launching the file explorer via a browser-based phishing page and pasting malicious commands into the address bar.
-    The technique abuses clipboard manipulation and disguises command execution as benign file path access, resulting in covert execution of system utilities.
+    Detects suspicious FileFix execution patterns where users are tricked into running malicious commands through browser file upload dialog manipulation or
+    phishing lures that prompt them to open file explorer and paste clipboard content using CTRL+L.
+    This attack typically begins when users visit malicious websites impersonating legitimate services or news platforms,
+    which may display fake CAPTCHA challenges or direct instructions to open file explorer and paste clipboard content.
+    The clipboard content usually contains commands that download and execute malware, such as information stealing tools.
 references:
     - https://mrd0x.com/filefix-clickfix-alternative/
-author: 0xFustang
+    - https://expel.com/blog/cache-smuggling-when-a-picture-isnt-a-thousand-words/ # phishing lure directly asking users to open file explorer and paste command
+    - https://blog.checkpoint.com/research/filefix-the-new-social-engineering-attack-building-on-clickfix-tested-in-the-wild/
+author: 0xFustang, Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2025-06-26
-modified: 2025-06-30
+modified: 2025-11-19
 tags:
     - attack.execution
     - attack.t1204.004
@@ -17,22 +24,59 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
+    selection_exec_parent:
+        # This is case where phishing pages trick users to paste commands in browser file upload dialog
         ParentImage|endswith:
             - '\brave.exe'
             - '\chrome.exe'
             - '\firefox.exe'
             - '\msedge.exe'
-        Image|endswith:
-            - '\bitsadmin.exe'
-            - '\certutil.exe'
-            - '\cmd.exe'
-            - '\mshta.exe'
-            - '\powershell.exe'
-            - '\pwsh.exe'
-            - '\regsvr32.exe'
         CommandLine|contains: '#'
-    condition: selection
+    selection_exec_child:
+        # This is case where users are tricked to open file explorer and paste commands using CTRL+L
+        # This should cover above scenario as well but keeping both for clarity and this specific pattern particularly to avoid false positives
+        Image|endswith: '\explorer.exe'
+        CommandLine|contains|all:
+            - '#'
+            - 'http'
+    selection_cli_lolbin:
+        CommandLine|contains:
+            - 'bitsadmin'
+            - 'certutil'
+            - 'cmd'
+            - 'cscript'
+            - 'curl'
+            - 'finger'
+            - 'mshta'
+            - 'powershell'
+            - 'pwsh'
+            - 'regsvr32'
+            - 'rundll32'
+            - 'schtasks'
+            - 'wget'
+            - 'wscript'
+    selection_cli_captcha:
+        CommandLine|contains:
+            - 'account'
+            - 'anti-bot'
+            - 'botcheck'
+            - 'captcha'
+            - 'challenge'
+            - 'confirmation'
+            - 'fraud'
+            - 'human'
+            - 'identification'
+            - 'identificator'
+            - 'identity'
+            - 'robot'
+            - 'validation'
+            - 'verification'
+            - 'verify'
+    selection_cli_conhost:
+        CommandLine|contains|all:
+            - 'conhost'
+            - '--headless'
+    condition: 1 of selection_exec_* and 1 of selection_cli_*
 falsepositives:
     - Legitimate use of PowerShell or other utilities launched from browser extensions or automation tools
 level: high
