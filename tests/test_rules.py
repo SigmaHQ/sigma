@@ -722,10 +722,12 @@ class TestRules(unittest.TestCase):
                         pattern_prefix += os_infix
                     if pattern_prefix != "":
                         if not filename.startswith(pattern_prefix):
+                            source_type = "category" if logsource.get("category") else "service"
+                            source_value = logsource.get("category", "") if source_type == "category" else logsource.get("service", "")
                             print(
                                 Fore.YELLOW
-                                + "Rule {} has a file name that doesn't match our standard naming convention.".format(
-                                    file
+                                + "Rule {} has inconsistency between filename '{}' and logsource ({}: '{}'):".format(
+                                    file, filename, source_type, source_value
                                 )
                             )
                             faulty_rules.append(file)
