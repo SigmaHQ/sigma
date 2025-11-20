@@ -12,20 +12,17 @@ author: Jonathan Beierle (@hullabrian)
 date: 2025-11-18
 tags:
     - attack.execution
-    - attack.privilege_escalation
+    - attack.privilege-escalation
     - attack.persistence
-    - attack.defense_evasion
+    - attack.defense-evasion
     - attack.t1129
     - attack.t1574.001
     - attack.t1036.005
     - detection.threat-hunting
 logsource:
     category: image_load
-    service: sysmon
     product: windows
 detection:
-    event_id:
-        EventID: 7
     node_path:
         ImageLoaded|contains: 'app.asar.unpacked\node_modules'  # Common to electron application sctructures
         ImageLoaded|endswith: '.node'
@@ -33,7 +30,7 @@ detection:
         Signed: 'false'
     valid_signature:
         SignatureStatus: "Unavailable"
-    condition: event_id and node_path and (signed or valid_signature)
+    condition: node_path and (signed or valid_signature)
 fields:
     - ProcessId
     - Image
