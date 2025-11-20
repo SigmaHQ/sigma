@@ -10,6 +10,7 @@ tags:
     - attack.t1082
 author: Seth Hanford
 date: 2023-08-23
+modified: 2025-11-20
 logsource:
     category: process_creation
     product: linux
@@ -17,11 +18,22 @@ detection:
     selection:
         # inode outside containers low, inside high
         Image|endswith: '/ls'
-        CommandLine|contains|all:
-            - ' -*i'              # -i finds inode number
-            - ' -*d'              # -d gets directory itself, not contents
         CommandLine|endswith: ' /'
-    condition: selection
+    re_inode:
+        Commandline|re: '\s-[^-\s]{0,20}i'  # -i finds inode number
+    re_dir:
+        Commandline|re: '\s-[^-\s]{0,20}d'  # -d gets directory itself, not contents
+    mix1:
+        Commandline|re: '\s-[^-\s]{0,20}i'  # -i finds inode number
+        CommandLine|contains: '--directory '
+    mix2:
+        Commandline|re: '\s-[^-\s]{0,20}d'  # -d gets directory itself, not contents
+        CommandLine|contains: '--inode '
+    mix3:
+        CommandLine|contains|all:
+            - '--inode '
+            - '--directory '
+    condition: (selection and re_inode and re_dir) or selection and 1 of mix*
 falsepositives:
     - Legitimate system administrator usage of these commands
     - Some container tools or deployments may use these techniques natively to determine how they proceed with execution, and will need to be filtered
