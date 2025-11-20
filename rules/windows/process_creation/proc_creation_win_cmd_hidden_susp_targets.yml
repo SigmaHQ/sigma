@@ -1,0 +1,54 @@
+title: Hidden Cmd Launching Suspicious Targets
+id: 5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d
+status: experimental
+description: |
+    Detects "cmd.exe" executing commands with the "start" utility using "/b" (no window) or "/min" (minimized) flags.
+    To reduce false positives from standard background tasks, detection is restricted to scenarios where the target is a known script extension or located in suspicious temporary/public directories.
+    This technique was observed in Chaos, DarkSide, and Emotet malware campaigns.
+references:
+    - https://www.fortinet.com/blog/threat-research/evolution-of-chaos-ransomware-faster-smarter-and-more-dangerous
+    - https://www.fortinet.com/blog/threat-research/newly-discovered-function-in-darkside-ransomware-variant-targets-disk-partitions
+    - https://www.fortinet.com/blog/threat-research/ms-office-files-involved-in-emotet-trojan-campaign-pt-one
+author: Vladan Sekulic, fortinet threat research
+date: 2025-11-20
+tags:
+    - attack.defense_evasion
+    - attack.t1564.003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_process:
+        - Image|endswith: '\cmd.exe'
+        - OriginalFileName: 'Cmd.Exe'
+
+    selection_hidden_start:
+        CommandLine|contains:
+            - 'start /b ' # standard spacing
+            - 'start /b"' # quote after
+            - 'start /min '
+            - 'start /min"'
+            - 'start/b ' # evasion spacing
+            - 'start/min '
+
+    selection_risky_target:
+        CommandLine|contains:
+            - '\AppData\Local\Temp\' # suspicious paths
+            - '\Windows\Temp\'
+            - '\Users\Public\'
+            - '\ProgramData\'
+            - 'powershell' # suspicious extensions
+            - 'pwsh'
+            - '.vbs'
+            - '.js'
+            - '.bat'
+            - '.cmd'
+            - '.hta'
+            - '.cpl'
+            - '.scr'
+
+    condition: selection_process and selection_hidden_start and selection_risky_target
+falsepositives:
+    - Legitimate administrative scripts running from temporary folders.
+    - Niche software updaters utilizing hidden batch files in ProgramData.
+level: high
