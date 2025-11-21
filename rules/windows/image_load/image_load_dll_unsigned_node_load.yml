@@ -23,17 +23,14 @@ logsource:
     category: image_load
     product: windows
 detection:
-    node_path:
-        ImageLoaded|contains: 'app.asar.unpacked\node_modules'  # Common to electron application sctructures
+    selection_node_path:
+        ImageLoaded|contains: 'app.asar.unpacked\node_modules'  # Common to electron application structures
         ImageLoaded|endswith: '.node'
-    signed:
+    selection_status_signed:
         Signed: 'false'
-    valid_signature:
-        SignatureStatus: "Unavailable"
-    condition: node_path and (signed or valid_signature)
-fields:
-    - ProcessId
-    - Image
+    selection_status_valid_signature:
+        SignatureStatus: 'Unavailable'
+    condition: selection_node_path and 1 of selection_status_*
 falsepositives:
     - Unknown
 level: low
