@@ -1,0 +1,22 @@
+title: Possible Remote BloodHound Usage
+id: 3e185583-0e99-4f65-a9dc-c37bcdd6d26d
+status: experimental
+description: Detects suspicious AD enumeration activity consistent with remote BloodHound usage - EventID 4799 on domain controller where CallerProcessId is 0x0. Correlate with other AD-enumeration events and high query volumes.
+author:
+  - Arthur Shaymardanov
+  - Danil Zagidullin
+tags:
+  - attack.discovery
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4799
+    ComputerName: DNS server name/IP
+    CallerProcessId: "0x0"
+  condition: selection
+falsepositives:
+  - Legitimate administrative enumeration run from system context or scheduled system tasks on the domain controller.
+  - AD management/backup tools that invoke system-level LDAP/AD queries from the DC itself.
+level: high
