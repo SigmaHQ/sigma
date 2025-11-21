@@ -7,7 +7,7 @@ references:
     - https://lolbas-project.github.io/lolbas/Binaries/Msedge/
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2022-01-11
-modified: 2023-11-09
+modified: 2025-10-27
 tags:
     - attack.command-and-control
     - attack.t1105
@@ -25,19 +25,31 @@ detection:
     selection_http:
         CommandLine|contains: 'http'
     selection_extensions:
-        CommandLine|endswith:
-            - '.7z'
-            - '.dat'
-            - '.dll'
-            - '.exe'
-            - '.hta'
-            - '.ps1'
-            - '.psm1'
-            - '.txt'
-            - '.vbe'
-            - '.vbs'
-            - '.zip'
+        - CommandLine|endswith:
+              - '.7z'
+              - '.dat'
+              - '.dll'
+              - '.exe'
+              - '.hta'
+              - '.ps1'
+              - '.psm1'
+              - '.txt'
+              - '.vbe'
+              - '.vbs'
+              - '.zip'
+        - CommandLine|contains:
+              - '.7z"'
+              - '.dat"'
+              - '.dll"'
+              - '.hta"'
+              - '.ps1"'
+              - '.psm1"'
+              - '.txt"'
+              - '.vbe"'
+              - '.vbs"'
+              - '.zip"'
     condition: all of selection_*
 falsepositives:
     - Unknown
 level: medium
+regression_tests_path: regression_data/windows/process_creation/proc_creation_win_browsers_inline_file_download/info.yml
