@@ -66,3 +66,15 @@ jobs:
     - name: Test Sigma Rule Syntax
       run: |
         sigma check --fail-on-error --fail-on-issues --validation-config tests/sigma_cli_conf.yml rules*
+
+  duplicate-id-check:
+    runs-on: ubuntu-latest
+    needs: yamllint
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        submodules: true
+    - name: Check for duplicate IDs
+      shell: /usr/bin/bash {0}  # Use bash without -e to enable exit code manipulation
+      run: |
+        grep -rh "^id: " rules* deprecated unsupported | sort | uniq -c | grep -vE "^\s+1 id: "; exit $(( $? ^ 1 ))
