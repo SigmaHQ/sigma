@@ -61,10 +61,10 @@ Others provide excellent analyses, include IOCs and YARA rules to detect the mal
 
 ## 🏗️ Rule Creation
 
-To start writing Sigma rules please check the following guides:
+To start writing Sigma rules please check the following high level guide along with the sigma specification:
 
-* [Rule Creation Guide](https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide)
-* [How to Write Sigma Rules - Nextron Systems](https://www.nextron-systems.com/2018/02/10/write-sigma-rules/)
+* [Rule Creation High‐Level Guide]([https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide](https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-High%E2%80%90Level-Guide))
+* [Sigma Specification](https://github.com/SigmaHQ/sigma-specification)
 
 ## 🔎 Contributing & Making PRs
 
@@ -106,6 +106,7 @@ If you find a false positive or would like to propose a new detection rule idea 
 * [Nextron's Aurora Agent](https://www.nextron-systems.com/aurora/)
 * [Nextron's THOR Scanner](https://www.nextron-systems.com/thor/) - Scan with Sigma rules on endpoints
 * [RANK VASA](https://globenewswire.com/news-release/2019/03/04/1745907/0/en/RANK-Software-to-Help-MSSPs-Scale-Cybersecurity-Offerings.html)
+* [Saeros](https://github.com/Saeros-Security/Saeros)
 * [Security Onion](https://docs.securityonion.net/en/latest/sigma.html)
 * [Sekoia.io XDR](https://www.sekoia.io) - XDR supporting Sigma and Sigma Correlation rules languages
 * [sigma2stix](https://github.com/muchdogesec/sigma2stix) - Converts the entire SigmaHQ Ruleset into STIX 2.1 Objects.
