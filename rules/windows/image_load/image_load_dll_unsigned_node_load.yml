@@ -11,7 +11,7 @@ references:
     - https://github.com/CoreyCBurton/DripLoaderNG
     - https://www.electronjs.org/docs/latest/tutorial/native-code-and-electron
 author: Jonathan Beierle (@hullabrian)
-date: 2025-11-18
+date: 2025-11-22
 tags:
     - attack.execution
     - attack.privilege-escalation
@@ -29,7 +29,11 @@ detection:
     selection_status:
         - Signed: 'false'
         - SignatureStatus: 'Unavailable'
-    condition: all of selection_*
+    filter_optional_vscode_jupyter:
+        Image|endswith: '\Code.exe'
+        ImageLoaded|contains: '.vscode\\extensions\\ms-toolsai.jupyter-'
+        ImageLoaded|endswith: '\electron.napi.node'
+    condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
-    - Rare but legitimate use of unsigned .node files by trusted applications. These should be investigated on a case-by-case basis, and whitelisted if determined to be benign.
+    - VsCode extensions or similar legitimate tools might use unsigned .node files. These should be investigated on a case-by-case basis, and whitelisted if determined to be benign.
 level: medium
