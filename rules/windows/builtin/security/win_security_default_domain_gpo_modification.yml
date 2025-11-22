@@ -1,0 +1,38 @@
+title: Windows Default Domain GPO Modification
+id: e5ac86dd-2da1-454b-be74-05d26c769d7d
+related:
+    - id: dcff7e85-d01f-4eb5-badd-84e2e6be8294
+      type: similar
+status: experimental
+description: |
+    Detects modifications to Default Domain or Default Domain Controllers Group Policy Objects (GPOs).
+    Adversaries may modify these default GPOs to deploy malicious configurations across the domain.
+references:
+    - https://www.trendmicro.com/en_us/research/25/i/unmasking-the-gentlemen-ransomware.html
+    - https://adsecurity.org/?p=3377
+    - https://www.pentestpartners.com/security-blog/living-off-the-land-gpo-style/
+    - https://jgspiers.com/audit-group-policy-changes/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-11-22
+tags:
+    - attack.defense-evasion
+    - attack.privilege-escalation
+    - attack.t1484.001
+logsource:
+    product: windows
+    service: security
+    definition: |
+        Enable 'Audit Directory Service Changes' in the Default Domain Controllers Policy under:
+        Computer Configuration -> Policies -> Windows Settings -> Security Settings -> Advanced Audit Policy Configuration -> Audit Policies -> DS Access -> Audit Directory Service Changes (Success).
+        Additionally, proper SACL needs to be configured on the 'CN=Policies,CN=System,DC=<domain>,DC=<tld>' container in Active Directory to capture changes to Group Policy Objects.
+detection:
+    selection:
+        EventID: 5136
+        ObjectClass: 'groupPolicyContainer'
+        ObjectDN|startswith:
+            - 'CN={31B2F340-016D-11D2-945F-00C04FB984F9},CN=POLICIES,CN=SYSTEM' # Default Domain Policy
+            - 'CN={6AC1786C-016F-11D2-945F-00C04FB984F9},CN=POLICIES,CN=SYSTEM' # Default Domain Controllers Policy
+    condition: selection
+falsepositives:
+    - Legitimate modifications to Default Domain or Default Domain Controllers GPOs
+level: medium

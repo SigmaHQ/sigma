@@ -1,0 +1,40 @@
+title: Windows Default Domain GPO Modification via GPME
+id: dcff7e85-d01f-4eb5-badd-84e2e6be8294
+related:
+    - id: e5ac86dd-2da1-454b-be74-05d26c769d7d
+      type: similar
+status: experimental
+description: |
+    Detects the use of the Group Policy Management Editor (GPME) to modify Default Domain or Default Domain Controllers Group Policy Objects (GPOs).
+    Adversaries may leverage GPME to make stealthy changes in these default GPOs to deploy malicious GPOs configurations across the domain without raising suspicion.
+references:
+    - https://www.trendmicro.com/en_us/research/25/i/unmasking-the-gentlemen-ransomware.html
+    - https://adsecurity.org/?p=3377
+    - https://sdmsoftware.com/general-stuff/launching-the-new-gp-management-editor-from-the-command-line/
+    - https://www.pentestpartners.com/security-blog/living-off-the-land-gpo-style/
+author: TropChaud
+date: 2025-11-22
+tags:
+    - attack.defense-evasion
+    - attack.privilege-escalation
+    - attack.t1484.001
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    # "C:\Windows\System32\gpme.msc" /s /gpobject:"LDAP://<REDACTED>/cn<REDACTED>,cnpolicies,cnsystem,DC<REDACTED>,DClocal"
+    selection_mmc:
+        - Image|endswith: '\mmc.exe'
+        - OriginalFileName: 'MMC.exe'
+    selection_gpme:
+        CommandLine|contains|all:
+            - 'gpme.msc'
+            - 'gpobject:'
+    selection_default_gpos:
+        CommandLine|contains:
+            - '31B2F340-016D-11D2-945F-00C04FB984F9' # Default Domain Policy GUID
+            - '6AC1786C-016F-11D2-945F-00C04FB984F9' # Default Domain Controllers Policy GUID
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use of GPME to modify GPOs
+level: medium
