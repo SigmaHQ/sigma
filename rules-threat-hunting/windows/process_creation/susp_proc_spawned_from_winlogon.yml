@@ -1,0 +1,36 @@
+title: Suspicious Process Spawned from Winlogon
+id: 9c7f4d2e-3b6a-4f18-9e2d-2a7f8b6c4f1a
+status: test
+description: Detects cmd.exe launched where the initiating/parent process is winlogon.exe and the initiating account is 'SYSTEM' or 'NETWORK', excluding target accounts containing those same substrings. This pattern can detect instances where a device has been compromised, drive decrypted, and had normally benign binaries that execute as SYSTEM like sticky keys, utilman, and such replaced with a more useful binary for exploitation by a threat actor. I wrote the original detection in KQL leveraging the Microsoft Defender for Endpoint table DeviceProcessEvents. The logic of the detection only detects a replacement of benign binaries with cmd.exe, but cmd.exe could be replaced with powershell, or a compiled exploit. Though a compiled exploit would probably be poor opsec from the TA.
+references:
+  - https://medium.com/@enyel.salas84/exploiting-sticky-keys-via-sethc-exe-for-privilege-escalation-on-windows-03a15f2fd560
+author: Kaden Butt (Kaiber)
+date: 2025-11-22
+modified: 2025-11-22
+tags:
+  - attack.execution
+  - attack.t1059
+  - microsoft.defender
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_mde:
+    InitiatingProcessAccountName|contains:
+      - "system"
+      - "network"
+    InitiatingProcessFolderPath|endswith: '\windows\system32\winlogon.exe'
+    ProcessAVersioninfoOriginalFileName|iexact: 'cmd.exe'
+  exclude_target_account:
+    AccountName|contains:
+      - "system"
+      - "network"
+  condition: all of selection_mde and not 1 of exclude_target_account
+
+falsepositives:
+  - Custom shells configured to cmd.exe for certain users via (HKCU\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\Shell or policy).
+  - Legitimate system or network accounts launching administrative commands during maintenance or automated processes.
+  - Mis-mapped/normalized fields between different EDR schemas (field names may vary).
+  - Automated kiosk-like workflows.
+
+level: high
