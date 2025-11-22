@@ -1,9 +1,11 @@
-title: Unsigned .node File Load
+title: Unsigned .node File Loaded
 id: e5f5c693-52d7-4de5-88ae-afbfbce85595
 status: experimental
 description: |
-    Detects loading unsigned .node files into electron applications.
-    Adversaries may abuse a lack of .node integrity checking to execute arbitrary code inside of trusted applications such as Slack
+    Detects the loading of unsigned .node files.
+    Adversaries may abuse a lack of .node integrity checking to execute arbitrary code inside of trusted applications such as Slack.
+    .node files are native add-ons for Electron-based applications, which are commonly used for desktop applications like Slack, Discord, and Visual Studio Code.
+    This technique has been observed in the DripLoader malware, which uses unsigned .node files to load malicious native code into Electron applications.
 references:
     - https://www.coreycburton.com/blog/driploader-case-study
     - https://github.com/CoreyCBurton/DripLoaderNG
@@ -18,19 +20,16 @@ tags:
     - attack.t1129
     - attack.t1574.001
     - attack.t1036.005
-    - detection.threat-hunting
 logsource:
     category: image_load
     product: windows
 detection:
-    selection_node_path:
-        ImageLoaded|contains: 'app.asar.unpacked\node_modules'  # Common to electron application structures
+    selection_node_extension:
         ImageLoaded|endswith: '.node'
-    selection_status_signed:
-        Signed: 'false'
-    selection_status_valid_signature:
-        SignatureStatus: 'Unavailable'
-    condition: selection_node_path and 1 of selection_status_*
+    selection_status:
+        - Signed: 'false'
+        - SignatureStatus: 'Unavailable'
+    condition: all of selection_*
 falsepositives:
-    - Unknown
+    - Rare but legitimate use of unsigned .node files by trusted applications. These should be investigated on a case-by-case basis, and whitelisted if determined to be benign.
 level: medium
