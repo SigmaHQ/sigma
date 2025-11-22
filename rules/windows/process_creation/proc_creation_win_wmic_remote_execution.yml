@@ -12,6 +12,7 @@ references:
     - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/wmic
 author: frack113, Nasreddine Bencherchali (Nextron Systems)
 date: 2023-02-14
+modified: 2025-10-22
 tags:
     - attack.execution
     - attack.t1047
@@ -23,12 +24,12 @@ detection:
         - Image|endswith: '\WMIC.exe'
         - OriginalFileName: 'wmic.exe'
     selection_cli:
-        CommandLine|contains: '/node:'
-    filter_localhost:
+        CommandLine|contains|windash: '/node:'
+    filter_main_localhost:
         CommandLine|contains:
-            - '/node:127.0.0.1 '
-            - '/node:localhost '
-    condition: all of selection_* and not 1 of filter_*
+            - 'localhost'
+            - '127.0.0.1'
+    condition: all of selection_* and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: medium
