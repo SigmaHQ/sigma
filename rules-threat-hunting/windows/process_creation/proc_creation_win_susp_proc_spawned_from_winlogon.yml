@@ -1,0 +1,41 @@
+title: Suspicious Process Spawned from Winlogon
+id: 9c7f4d2e-3b6a-4f18-9e2d-2a7f8b6c4f1a
+status: experimental
+description: |
+  Detects cmd.exe launched where the initiating process is winlogon.exe and the initiating account is SYSTEM or NETWORK.
+  This behaviour may indicate replacement of benign accessibility executables (such as StickyKeys or Utilman) with cmd.exe to gain elevated access during or after system compromise.
+
+references:
+  - https://medium.com/@enyel.salas84/exploiting-sticky-keys-via-sethc-exe-for-privilege-escalation-on-windows-03a15f2fd560
+author: Kaden Butt (Kaiber)
+date: 2025-11-22
+modified: 2025-11-22
+tags:
+  - attack.t1059
+  - attack.t1546.008
+  - product.mde
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_parent:
+    InitiatingProcessFolderPath|endswith: '\windows\system32\winlogon.exe'
+  selection_original_filename:
+    ProcessVersionInfoOriginalFileName|iexact: 'cmd.exe'
+  selection_initiating_account:
+    InitiatingProcessAccountName|contains:
+      - SYSTEM
+      - NETWORK
+  filter_target_account:
+    AccountName|contains:
+      - SYSTEM
+      - NETWORK
+  condition: all of selection_* and not 1 of filter_target_account
+
+falsepositives:
+  - Custom shells configured to cmd.exe for certain users via (HKCU\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\Shell or policy).
+  - Legitimate system or network accounts launching administrative commands during maintenance or automated processes.
+  - Mis-mapped/normalized fields between different EDR schemas (field names may vary).
+  - Automated kiosk-like workflows.
+
+level: high
