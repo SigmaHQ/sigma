@@ -6,13 +6,14 @@ related:
 status: test
 description: |
     An adversary might use WMI to discover information about the system, such as the volume name, size,
-    free space, and other disk information. This can be done using the `wmic` command-line utility and has been
+    free space, and other disk information. This can be done using the 'wmic' command-line utility and has been
     observed being used by threat actors such as Volt Typhoon.
 references:
     - https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-144a
     - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/wmic
-author: Stephen Lincoln `@slincoln-aiq`(AttackIQ)
+author: Stephen Lincoln '@slincoln-aiq' (AttackIQ)
 date: 2024-02-02
+modified: 2025-10-20
 tags:
     - attack.execution
     - attack.discovery
@@ -26,9 +27,15 @@ detection:
         - Image|endswith: '\WMIC.exe'
         - OriginalFileName: 'wmic.exe'
     selection_cli:
-        CommandLine|contains:
-            - 'volume'
-            - 'path win32_logicaldisk'
+        - CommandLine|contains:
+              - ' volumename'
+              - ' logicaldisk'
+        - CommandLine|contains|all:
+              - 'path'
+              - 'win32_logicaldisk'
+        - CommandLine|contains|all:
+              - ' volume'
+              - ' list '
     condition: all of selection_*
 falsepositives:
     - Unknown

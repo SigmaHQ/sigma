@@ -12,6 +12,7 @@ references:
     - https://www.proofpoint.com/us/blog/threat-insight/phish-china-aligned-espionage-actors-ramp-up-taiwan-semiconductor-targeting
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2025-07-25
+modified: 2025-10-06
 tags:
     - attack.defense-evasion
     - attack.persistence
@@ -32,7 +33,9 @@ detection:
         OriginalFileName: 'jli.dll'
         Product|startswith: 'OpenJDK Platform'
         Signed: 'true'
-    condition: selection and not 1 of filter_main_*
+    filter_optional_eclipse:
+        ImageLoaded|startswith: 'C:\eclipse\plugins\'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high

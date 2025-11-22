@@ -12,7 +12,7 @@ references:
     - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4673
 author: xknow (@xknow_infosec), xorxes (@xor_xes)
 date: 2019-04-08
-modified: 2023-01-20
+modified: 2025-10-07
 tags:
     - attack.defense-evasion
     - attack.t1562.001
@@ -24,7 +24,7 @@ detection:
         EventID: 4673
         PrivilegeList: 'SeLoadDriverPrivilege'
         Service: '-'
-    filter_exact:
+    filter_main_exact:
         ProcessName:
             - 'C:\Windows\System32\Dism.exe'
             - 'C:\Windows\System32\rundll32.exe'
@@ -36,7 +36,7 @@ detection:
             - 'C:\Windows\System32\RuntimeBroker.exe'
             - 'C:\Windows\System32\SystemSettingsBroker.exe'
             - 'C:\Windows\explorer.exe'
-    filter_endswith:
+    filter_optional_others:
         ProcessName|endswith:
             - '\procexp64.exe'
             - '\procexp.exe'
@@ -44,9 +44,14 @@ detection:
             - '\procmon.exe'
             - '\Google\Chrome\Application\chrome.exe'
             - '\AppData\Local\Microsoft\Teams\current\Teams.exe'
-    filter_startswith:
+    filter_main_startswith:
         ProcessName|startswith: 'C:\Program Files\WindowsApps\Microsoft'
-    condition: selection_1 and not 1 of filter_*
+    filter_optional_dropbox:
+        ProcessName|startswith:
+            - 'C:\Program Files (x86)\Dropbox\'
+            - 'C:\Program Files\Dropbox\'
+        ProcessName|endswith: '\Dropbox.exe'
+    condition: selection_1 and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Other legimate tools loading drivers. Including but not limited to, Sysinternals, CPU-Z, AVs etc. A baseline needs to be created according to the used products and allowed tools. A good thing to do is to try and exclude users who are allowed to load drivers.
 level: medium

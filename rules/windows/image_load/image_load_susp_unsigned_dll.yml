@@ -10,7 +10,7 @@ references:
     - https://unit42.paloaltonetworks.com/unsigned-dlls/?web_view=true
 author: Swachchhanda Shrawan Poudel
 date: 2024-02-28
-modified: 2025-07-15
+modified: 2025-10-07
 tags:
     - attack.t1218.011
     - attack.t1218.010
@@ -48,7 +48,30 @@ detection:
         SignatureStatus:
             - ''
             - '-'
-    condition: selection and not 1 of filter_main_*
+    filter_main_windows_installer:
+        Image:
+            - 'C:\Windows\SysWOW64\rundll32.exe'
+            - 'C:\Windows\System32\rundll32.exe'
+        ImageLoaded|startswith: 'C:\Windows\Installer\'
+        ImageLoaded|endswith:
+            - '.tmp-\Microsoft.Deployment.WindowsInstaller.dll'
+            - '.tmp-\Avira.OE.Setup.CustomActions.dll'
+    filter_main_assembly:
+        Image|startswith:
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\Microsoft.NET\Framework64'
+        Image|endswith: '\RegAsm.exe'
+        ImageLoaded|endswith: '.dll'
+        ImageLoaded|startswith: 'C:\Windows\assembly\NativeImages'
+    filter_optional_klite_codec:
+        Image:
+            - 'C:\Windows\SysWOW64\regsvr32.exe'
+            - 'C:\Windows\System32\regsvr32.exe'
+        ImageLoaded|startswith:
+            - 'C:\Program Files (x86)\K-Lite Codec Pack\'
+            - 'C:\Program Files\K-Lite Codec Pack\'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: medium

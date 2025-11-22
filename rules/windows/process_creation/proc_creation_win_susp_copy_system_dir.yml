@@ -13,7 +13,7 @@ references:
     - https://thedfirreport.com/2023/08/28/html-smuggling-leads-to-domain-wide-ransomware/
 author: Florian Roth (Nextron Systems), Markus Neis, Tim Shelton (HAWK.IO), Nasreddine Bencherchali (Nextron Systems)
 date: 2020-07-03
-modified: 2023-08-29
+modified: 2025-10-07
 tags:
     - attack.defense-evasion
     - attack.t1036.003
@@ -21,11 +21,12 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_cmd:
+    selection_img_cmd:
         Image|endswith: '\cmd.exe'
         CommandLine|contains: 'copy '
-    selection_pwsh:
+    selection_img_pwsh:
         Image|endswith:
+            - '\powershell_ise.exe'
             - '\powershell.exe'
             - '\pwsh.exe'
         CommandLine|contains:
@@ -33,19 +34,28 @@ detection:
             - ' copy '
             - 'cpi '
             - ' cp '
-    selection_other:
+    selection_img_other:
         - Image|endswith:
               - '\robocopy.exe'
               - '\xcopy.exe'
         - OriginalFileName:
               - 'robocopy.exe'
               - 'XCOPY.EXE'
-    target:
+    selection_target:
         CommandLine|contains:
             - '\System32'
             - '\SysWOW64'
             - '\WinSxS'
-    condition: 1 of selection_* and target
+    filter_optional_avira:
+        Image|endswith: '\cmd.exe'
+        CommandLine|contains|all:
+            - '/c copy'
+            - '\Temp\'
+            - '\avira_system_speedup.exe'
+        CommandLine|contains:
+            - 'C:\Program Files\Avira\'
+            - 'C:\Program Files (x86)\Avira\'
+    condition: 1 of selection_img_* and selection_target and not 1 of filter_optional_*
 falsepositives:
     - Depend on scripts and administrative tools used in the monitored environment (For example an admin scripts like https://www.itexperience.net/sccm-batch-files-and-32-bits-processes-on-64-bits-os/)
     - When cmd.exe and xcopy.exe are called directly #  C:\Windows\System32\cmd.exe /c copy file1 file2
