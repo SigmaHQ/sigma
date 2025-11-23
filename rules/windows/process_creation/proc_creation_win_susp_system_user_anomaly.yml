@@ -7,7 +7,7 @@ references:
     - https://tools.thehacker.recipes/mimikatz/modules
 author: Florian Roth (Nextron Systems), David ANDRE (additional keywords)
 date: 2021-12-20
-modified: 2024-12-01
+modified: 2025-10-19
 tags:
     - attack.credential-access
     - attack.defense-evasion
@@ -35,6 +35,7 @@ detection:
               - '\mshta.exe'
               - '\ping.exe'
               - '\wscript.exe'
+        - CommandLine|re: 'net\s+user\s+'
         - CommandLine|contains:
               # - 'sc stop ' # stops a system service # causes FPs
               - ' -NoP '  # Often used in malicious PowerShell commands
@@ -74,7 +75,6 @@ detection:
               - ' p::d '  # Mimikatz
               - ';iex('  # PowerShell IEX
               - 'MiniDump'  # Process dumping method apart from procdump
-              - 'net user '
     filter_main_ping:
         CommandLine|contains|all:
             - 'ping'
