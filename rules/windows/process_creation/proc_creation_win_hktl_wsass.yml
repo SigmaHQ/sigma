@@ -1,0 +1,31 @@
+title: HackTool - WSASS Execution
+id: 589ac73f-8e12-409c-964e-31a2f5775ae2
+status: experimental
+description: |
+    Detects execution of WSASS, a tool used to dump LSASS memory on Windows systems by leveraging WER's
+    (Windows Error Reporting) WerFaultSecure.EXE to bypass PPL (Protected Process Light) protections.
+references:
+    - https://github.com/TwoSevenOneT/WSASS
+    - https://www.zerosalarium.com/2025/09/Dumping-LSASS-With-WER-On-Modern-Windows-11.html
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-11-23
+tags:
+    - attack.credential-access
+    - attack.t1003.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: '\wsass.exe'
+    selection_hash:
+        Hashes|contains: 'IMPHASH=32F5095C9BBDCACF28FD4060EB4DFC42'
+    selection_cli:
+        # change to |re|i after Sigma v2.0 release
+        # plain string without quotation marks as it has to match for both ' and "
+        CommandLine|re: (?i)\.exe[\"\']?\s+.{12,64}[\"\']?\s+\d{2,10} # wsass.exe "path to werfaultsecure" lsass_pid
+        CommandLine|contains: 'werfaultsecure'
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely
+level: high
