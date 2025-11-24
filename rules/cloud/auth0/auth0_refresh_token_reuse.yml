@@ -1,0 +1,63 @@
+title: Refresh Token Reuse Detection
+id: 5e61f9b7-eae5-40d2-b00d-0b00b9e3f80c
+status: experimental
+description: |
+    Detects when a refresh token is reused in an unsuccessful exchange attempt.
+    Reusing refresh tokens can indicate an attempt to exploit the token or a misconfiguration in the application.
+    This detection requires that the token rotation is enabled for an application.
+references:
+    - https://auth0.com/docs/secure/tokens/refresh-tokens/configure-refresh-token-rotation
+    - https://github.com/auth0/auth0-customer-detections/
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.credential-access
+    - attack.persistence
+    - attack.t1550.001
+    - attack.t1078
+logsource:
+    product: auth0
+    service: oidc_oauth2
+detection:
+    selection:
+        data.type: ferrt
+        data.description: "Unsuccessful Refresh Token exchange, reused refresh token detected"
+    condition: selection
+fields:
+    - data.type
+    - data.description
+    - data.user_id
+    - data.ip
+    - data.client_id
+falsepositives:
+    - Misconfigured applications that are caching refresh tokens
+    - Network issues causing token exchange retries
+    - Application bugs leading to unintentional token reuse
+level: medium
+explanation: |
+    The query collects events issued when reuse is detected, i.e. ferrt.
+    The splunk query below also collects the number of affected users and total amount of violations.
+    The alert is triggered when two criteria are met - 1. excessive number of violations is observed; 2. reuse is detected for too many users.
+    It displays affected users.
+
+    Splunk Query:
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type="ferrt"
+    data.description="Unsuccessful Refresh Token exchange, reused refresh token detected"
+    | stats count as detected_reuse_counter by data.user_id
+    | where detected_reuse_counter > {excessive_reuse_threshold}
+    | eventstats dc(data.user_id) as affected_users_total_count
+    | where affected_users_total_count > {effected_users_threshold}
+    | table data.user_id
+
+    Tenant Logs Query:
+    type: "ferrt" AND description: "Unsuccessful Refresh Token exchange, reused refresh token detected"
+comments:
+    - The splunk query above shall be tuned to reflect a valid tenant name, and two thresholds.
+    - The excessive_reuse_threshold is the number of reuse events for a single user that should trigger an alert.
+    - The effected_users_threshold is the number of users that should be affected by the reuse to trigger an alert.
+    - Prevention - Ensure that the application uses refresh tokens correctly to exclude misconfiguration as a cause of the reuse.
+    - Prevention - When tokens are requested by a frontend application, i.e. SPA, ensure that the application is not vulnerable to XSS that leads to token theft.
+    - Prevention - Terminate sessions for affected users to pause the attack, however, it might come back when the user logs in again.
+    - Prevention - Deploy a post-login action that will compare IP/ASN of initial issuing of a refresh token and IP/ASN of the current refresh token. If they are different, terminate the session and revoke all refresh tokens.
