@@ -10,14 +10,14 @@ tags:
     - attack.t1082
 author: Seth Hanford
 date: 2023-08-23
-modified: 2025-11-20
+modified: 2025-11-24
 logsource:
     category: process_creation
     product: linux
 detection:
-    selection_img:
+    selection_ls_img:
         Image|endswith: '/ls'    # inode outside containers low, inside high
-    selection_cmd:
+    selection_ls_cmd:
         - CommandLine|endswith: ' /'
         - CommandLine|contains: ' / '
     selection_regex_inode:
@@ -34,7 +34,7 @@ detection:
         CommandLine|contains|all:
             - '--inode '
             - '--directory '
-    condition: selection_img and selection_cmd and (all of selection_regex_* or 1 of selection_mix_*)
+    condition: all of selection_ls_* and (all of selection_regex_* or 1 of selection_mix_*)
 falsepositives:
     - Legitimate system administrator usage of these commands
     - Some container tools or deployments may use these techniques natively to determine how they proceed with execution, and will need to be filtered
