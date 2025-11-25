@@ -10,6 +10,155 @@ from typing import Dict, List
 import yaml
 
 
+def get_absolute_path(base_path: str, relative_path: str) -> str:
+    """Convert a relative path to an absolute path based on a base path."""
+    if os.path.isabs(relative_path):
+        return relative_path
+
+    # Normalize path separators
+    relative_path = relative_path.replace("/", os.sep).replace("\\", os.sep)
+    workspace_root = base_path
+    while not os.path.exists(os.path.join(workspace_root, relative_path)):
+        parent = os.path.dirname(workspace_root)
+        if parent == workspace_root:  # Reached filesystem root
+            break
+        workspace_root = parent
+    return os.path.join(workspace_root, relative_path)
+
+
+def load_info_yaml(
+    regression_tests_path: str, rule_id: str, file_path: str
+) -> tuple[List[Dict], List[Dict]]:
+    """Load and parse the regression test info YAML file."""
+    results = []
+    missing_files = []
+
+    if not os.path.exists(regression_tests_path):
+        missing_files.append(
+            {
+                "rule_path": file_path,
+                "rule_id": rule_id,
+                "missing_file": regression_tests_path,
+                "file_type": "regression_tests_path",
+            }
+        )
+        return results, missing_files
+
+    try:
+        with open(regression_tests_path, "r", encoding="utf-8") as f:
+            info_data = yaml.safe_load(f)
+
+        if not info_data or "regression_tests_info" not in info_data:
+            print(f"Warning: No regression_tests_info found in {regression_tests_path}")
+            return results, missing_files
+
+        # Extract test data from regression_tests_info
+        test_data = []
+        regression_tests = info_data.get("regression_tests_info", [])
+
+        for test in regression_tests:
+            if not isinstance(test, dict):
+                continue
+
+            test_path = get_absolute_path(
+                os.path.dirname(file_path), test.get("path", "")
+            )
+
+            # Check if test file exists
+            if not os.path.exists(test_path):
+                missing_files.append(
+                    {
+                        "rule_path": file_path,
+                        "rule_id": rule_id,
+                        "missing_file": test_path,
+                        "file_type": "test_file",
+                        "test_name": test.get("name", "Unnamed Test"),
+                        "test_type": test.get("type", "unknown"),
+                    }
+                )
+
+            test_data.append(
+                {
+                    "type": test.get("type", "unknown"),
+                    "path": test_path,
+                    "name": test.get("name", "Unnamed Test"),
+                    "provider": test.get("provider", ""),
+                }
+            )
+
+        if test_data:
+            results.append(
+                {
+                    "path": file_path,
+                    "id": rule_id,
+                    "tests": test_data,
+                }
+            )
+
+    except yaml.YAMLError as e:
+        print(f"Warning: Could not parse info file {regression_tests_path}: {e}")
+
+    return results, missing_files
+
+
+def find_rule_missing_test(rule_data: Dict, file_path: str) -> tuple[bool, List[Dict]]:
+    """Find missing test files for a single rule based on its data.
+
+    Returns:
+        skip: True if the rule should be skipped, False otherwise
+        missing_regression_tests_path: List of dicts with missing regression_tests_path info
+
+    """
+    missing_regression_tests_path = []
+    rule_id = rule_data.get("id", "unknown")
+    rule_status = rule_data.get("status", "").lower()
+
+    # Check if rule status requires regression tests
+    requires_regression_tests = rule_status in ["test", "stable"]
+
+    # Check if rule has regression_tests_path
+    has_regression_tests_path = "regression_tests_path" in rule_data
+
+    # If rule requires regression tests but doesn't have regression_tests_path
+    if requires_regression_tests and not has_regression_tests_path:
+        missing_regression_tests_path.append(
+            {
+                "rule_path": file_path,
+                "rule_id": rule_id,
+                "status": rule_status,
+            }
+        )
+        return True, missing_regression_tests_path
+
+    # Skip rules that don't require regression tests
+    # and don't have regression_tests_path
+    if not requires_regression_tests and not has_regression_tests_path:
+        return True, missing_regression_tests_path
+    return False, missing_regression_tests_path
+
+
+def find_rule_tests(rule_data: Dict, file_path: str) -> tuple[List[Dict], List[Dict]]:
+    """Find regression tests and missing files for a single rule based on its data."""
+    results = []
+    missing_files = []
+    rule_id = rule_data.get("id", "unknown")
+
+    if rule_data and "regression_tests_path" in rule_data:
+        regression_tests_path = get_absolute_path(
+            os.path.dirname(file_path),
+            rule_data.get("regression_tests_path", ""),
+        )
+
+        # Load the info.yml file
+        yml_result, yml_missing_files = load_info_yaml(
+            regression_tests_path, rule_id, file_path
+        )
+        results.extend(yml_result)
+        missing_files.extend(yml_missing_files)
+    return results, missing_files
+
+
+# pylint: disable=too-many-locals
 def find_rules_with_tests(
     rules_paths: List[str],
 ) -> tuple[List[Dict], List[Dict], List[Dict]]:
@@ -29,176 +178,33 @@ def find_rules_with_tests(
 
         for root, _, files in os.walk(rules_path):
             for file in files:
-                if file.endswith(".yml"):
-                    file_path = os.path.join(root, file)
-                    try:
-                        with open(file_path, "r", encoding="utf-8") as f:
-                            rule_data = yaml.safe_load(f)
+                if not file.endswith(".yml"):
+                    continue
 
-                        if not rule_data:
-                            continue
+                file_path = os.path.join(root, file)
+                try:
+                    with open(file_path, "r", encoding="utf-8") as f:
+                        rule_data = yaml.safe_load(f)
 
-                        rule_id = rule_data.get("id", "unknown")
-                        rule_status = rule_data.get("status", "").lower()
+                    if not rule_data:
+                        continue
 
-                        # Check if rule status requires regression tests
-                        requires_regression_tests = rule_status in ["test", "stable"]
+                    # Check for missing regression_tests_path
+                    skip, missing_test = find_rule_missing_test(rule_data, file_path)
+                    missing_regression_tests_path.extend(missing_test)
+                    if skip:
+                        continue
 
-                        # Check if rule has regression_tests_path
-                        has_regression_tests_path = "regression_tests_path" in rule_data
+                    # Find tests for the rule
+                    (
+                        result,
+                        missing_file,
+                    ) = find_rule_tests(rule_data, file_path)
+                    results.extend(result)
+                    missing_files.extend(missing_file)
 
-                        # If rule requires regression tests but doesn't have regression_tests_path
-                        if requires_regression_tests and not has_regression_tests_path:
-                            missing_regression_tests_path.append(
-                                {
-                                    "rule_path": file_path,
-                                    "rule_id": rule_id,
-                                    "status": rule_status,
-                                }
-                            )
-                            continue
-
-                        # Skip rules that don't require regression tests
-                        # and don't have regression_tests_path
-                        if (
-                            not requires_regression_tests
-                            and not has_regression_tests_path
-                        ):
-                            continue
-
-                        if rule_data and "regression_tests_path" in rule_data:
-                            rule_id = rule_data.get("id", "unknown")
-                            regression_tests_path = rule_data.get(
-                                "regression_tests_path", ""
-                            )
-
-                            # Convert relative path to absolute path
-                            if not os.path.isabs(regression_tests_path):
-                                # Normalize path separators
-                                regression_tests_path = regression_tests_path.replace(
-                                    "/", os.sep
-                                ).replace("\\", os.sep)
-                                # Assume path is relative to the workspace root
-                                workspace_root = os.path.dirname(
-                                    os.path.dirname(file_path)
-                                )
-                                while not os.path.exists(
-                                    os.path.join(workspace_root, regression_tests_path)
-                                ):
-                                    parent = os.path.dirname(workspace_root)
-                                    if (
-                                        parent == workspace_root
-                                    ):  # Reached filesystem root
-                                        break
-                                    workspace_root = parent
-                                regression_tests_path = os.path.join(
-                                    workspace_root, regression_tests_path
-                                )
-
-                            if not os.path.exists(regression_tests_path):
-                                missing_files.append(
-                                    {
-                                        "rule_path": file_path,
-                                        "rule_id": rule_id,
-                                        "missing_file": regression_tests_path,
-                                        "file_type": "regression_tests_path",
-                                    }
-                                )
-                                continue
-
-                            # Load the info.yml file
-                            try:
-                                with open(
-                                    regression_tests_path, "r", encoding="utf-8"
-                                ) as f:
-                                    info_data = yaml.safe_load(f)
-
-                                if (
-                                    not info_data
-                                    or "regression_tests_info" not in info_data
-                                ):
-                                    print(
-                                        f"Warning: No regression_tests_info found in {regression_tests_path}"
-                                    )
-                                    continue
-
-                                # Extract test data from regression_tests_info
-                                test_data = []
-                                regression_tests = info_data.get(
-                                    "regression_tests_info", []
-                                )
-
-                                for test in regression_tests:
-                                    if isinstance(test, dict):
-                                        test_path = test.get("path", "")
-
-                                        # Convert relative test path to absolute path
-                                        if not os.path.isabs(test_path):
-                                            # Normalize path separators
-                                            test_path = test_path.replace(
-                                                "/", os.sep
-                                            ).replace("\\", os.sep)
-                                            info_dir = os.path.dirname(
-                                                regression_tests_path
-                                            )
-                                            workspace_root = info_dir
-                                            while not os.path.exists(
-                                                os.path.join(workspace_root, test_path)
-                                            ):
-                                                parent = os.path.dirname(workspace_root)
-                                                if (
-                                                    parent == workspace_root
-                                                ):  # Reached filesystem root
-                                                    break
-                                                workspace_root = parent
-                                            test_path = os.path.join(
-                                                workspace_root, test_path
-                                            )
-
-                                        # Check if test file exists
-                                        if not os.path.exists(test_path):
-                                            missing_files.append(
-                                                {
-                                                    "rule_path": file_path,
-                                                    "rule_id": rule_id,
-                                                    "missing_file": test_path,
-                                                    "file_type": "test_file",
-                                                    "test_name": test.get(
-                                                        "name", "Unnamed Test"
-                                                    ),
-                                                    "test_type": test.get(
-                                                        "type", "unknown"
-                                                    ),
-                                                }
-                                            )
-
-                                        test_data.append(
-                                            {
-                                                "type": test.get("type", "unknown"),
-                                                "path": test_path,
-                                                "name": test.get(
-                                                    "name", "Unnamed Test"
-                                                ),
-                                                "provider": test.get("provider", ""),
-                                            }
-                                        )
-
-                                if test_data:
-                                    results.append(
-                                        {
-                                            "path": file_path,
-                                            "id": rule_id,
-                                            "tests": test_data,
-                                        }
-                                    )
-
-                            except Exception as e:
-                                print(
-                                    f"Warning: Could not parse info file {regression_tests_path}: {e}"
-                                )
-
-                    except Exception as e:
-                        print(f"Warning: Could not parse {file_path}: {e}")
+                except yaml.YAMLError as e:
+                    print(f"Warning: Could not parse {file_path}: {e}")
 
     return results, missing_files, missing_regression_tests_path
 
@@ -289,7 +295,11 @@ def parse_arguments() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--rules-paths", required=True, help="Comma-separated paths to rule directories"
+        "--rules-paths",
+        required=True,
+        action="extend",
+        nargs="+",
+        help="Comma-separated paths to rule directories",
     )
 
     parser.add_argument(
@@ -340,29 +350,68 @@ def init_checks(args: argparse.Namespace) -> None:
         if not os.path.exists(args.thor_config):
             print(f"Error: Thor config not found at {args.thor_config}")
             sys.exit(1)
+        print(f"Rules paths: {args.rules_paths}")
 
-
-def main():
-    """Main function to run regression tests for Sigma rules."""
-    args = parse_arguments()
-
-    # Parse comma-separated rules paths
-    rules_paths = [path.strip() for path in args.rules_paths.split(",")]
-
-    init_checks(args)
-
-    print(f"Rules paths: {rules_paths}")
     if not args.validate_only:
         print(f"EVTX checker: {args.evtx_checker}")
         print(f"Thor config: {args.thor_config}")
     print()
 
-    # Find rules with tests
-    print("Scanning for rules with test data...")
-    rules_with_tests, missing_files, missing_regression_tests_path = (
-        find_rules_with_tests(rules_paths)
-    )
-    print(f"Found {len(rules_with_tests)} rules with test data")
+
+# pylint: disable=too-many-locals
+def run_tests(
+    args: argparse.Namespace, rules_with_tests
+) -> tuple[int, int, List[Dict]]:
+    """Run tests for all rules with test data."""
+    total_tests = 0
+    passed_tests = 0
+    failures = []
+    for rule_info in rules_with_tests:
+        rule_path = rule_info["path"]
+        rule_id = rule_info["id"]
+        tests = rule_info["tests"]
+
+        print(f"\nTesting rule: {rule_id}")
+        print(f"  File: {rule_path}")
+
+        for i, test_data in enumerate(tests):
+            test_name = test_data.get("name", f"Test {i+1}")
+            test_type = test_data.get("type", "unknown")
+            test_path = test_data.get("path", "unknown")
+
+            print(f"  {test_name} (type: {test_type}): {test_path}")
+            total_tests += 1
+
+            success, output = run_test(
+                rule_path, rule_id, test_data, args.evtx_checker, args.thor_config
+            )
+
+            if success:
+                passed_tests += 1
+                print(f"    ✓ PASS - Match found for Rule ID: {rule_id}\n")
+                print(f"    Output: {output}")
+            else:
+                failures.append(
+                    {
+                        "rule_id": rule_id,
+                        "rule_path": rule_path,
+                        "test_name": test_name,
+                        "test_type": test_type,
+                        "test_path": test_path,
+                        "test_number": i + 1,
+                    }
+                )
+                print("    ✗ FAIL")
+        print()
+    return total_tests, passed_tests, failures
+
+
+def validate_missing_tests(
+    args: argparse.Namespace,
+    rules_with_tests: List[Dict],
+    missing_regression_tests_path: List[Dict],
+) -> None:
+    """Print rules missing regression_tests_path and handle validation."""
 
     # Check for missing regression_tests_path in test/stable rules
     if missing_regression_tests_path and not args.ignore_validation:
@@ -400,93 +449,48 @@ def main():
         else:
             print("✅ All rules passed validation!")
         print(f"Found {len(rules_with_tests)} rules with regression tests configured.")
+        sys.exit(0)
+
+
+def check_missing_test_files(missing_files: List[Dict]) -> None:
+    """Check for missing test files and print errors if any are found."""
+    if not missing_files:
         return
 
-    # Check for missing files and fail if any are found
-    if missing_files:
-        print(f"\nERROR: Found {len(missing_files)} missing file(s):")
-        print("=" * 60)
+    print(f"\nERROR: Found {len(missing_files)} missing file(s):")
+    print("=" * 60)
 
-        regression_test_files = [
-            f for f in missing_files if f["file_type"] == "regression_tests_path"
-        ]
-        test_files = [f for f in missing_files if f["file_type"] == "test_file"]
+    regression_test_files = [
+        f for f in missing_files if f["file_type"] == "regression_tests_path"
+    ]
+    test_files = [f for f in missing_files if f["file_type"] == "test_file"]
 
-        if regression_test_files:
-            print(
-                f"\nMISSING REGRESSION TEST INFO FILES ({len(regression_test_files)}):"
-            )
-            print("-" * 50)
-            for missing in regression_test_files:
-                print(f"Rule: {missing['rule_id']}")
-                print(f"  File: {missing['rule_path']}")
-                print(f"  Missing: {missing['missing_file']}")
-                print()
+    if regression_test_files:
+        print(f"\nMISSING REGRESSION TEST INFO FILES ({len(regression_test_files)}):")
+        print("-" * 50)
+        for missing in regression_test_files:
+            print(f"Rule: {missing['rule_id']}")
+            print(f"  File: {missing['rule_path']}")
+            print(f"  Missing: {missing['missing_file']}")
+            print()
 
-        if test_files:
-            print(f"\nMISSING TEST DATA FILES ({len(test_files)}):")
-            print("-" * 50)
-            for missing in test_files:
-                print(f"Rule: {missing['rule_id']}")
-                print(f"  File: {missing['rule_path']}")
-                print(f"  Test: {missing['test_name']} (type: {missing['test_type']})")
-                print(f"  Missing: {missing['missing_file']}")
-                print()
+    if test_files:
+        print(f"\nMISSING TEST DATA FILES ({len(test_files)}):")
+        print("-" * 50)
+        for missing in test_files:
+            print(f"Rule: {missing['rule_id']}")
+            print(f"  File: {missing['rule_path']}")
+            print(f"  Test: {missing['test_name']} (type: {missing['test_type']})")
+            print(f"  Missing: {missing['missing_file']}")
+            print()
 
-        print("=" * 60)
-        print("Please ensure all referenced files exist before running tests.")
-        sys.exit(1)
+    print("=" * 60)
+    print("Please ensure all referenced files exist before running tests.")
+    sys.exit(1)
 
-    print()
 
-    if not rules_with_tests:
-        print("No rules with test data found")
-        return
-
-    # Test each rule
-    total_tests = 0
-    passed_tests = 0
-    failures = []
-
-    for rule_info in rules_with_tests:
-        rule_path = rule_info["path"]
-        rule_id = rule_info["id"]
-        tests = rule_info["tests"]
-
-        print(f"\n\nTesting rule: {rule_id}")
-        print(f"  File: {rule_path}")
-
-        for i, test_data in enumerate(tests):
-            test_name = test_data.get("name", f"Test {i+1}")
-            test_type = test_data.get("type", "unknown")
-            test_path = test_data.get("path", "unknown")
-
-            print(f"  {test_name} (type: {test_type}): {test_path}")
-            total_tests += 1
-
-            success, output = run_test(
-                rule_path, rule_id, test_data, args.evtx_checker, args.thor_config
-            )
-
-            if success:
-                passed_tests += 1
-                print(f"    ✓ PASS - Match found for Rule ID: {rule_id}\n")
-                print(f"    Output: {output}\n\n")
-            else:
-                failures.append(
-                    {
-                        "rule_id": rule_id,
-                        "rule_path": rule_path,
-                        "test_name": test_name,
-                        "test_type": test_type,
-                        "test_path": test_path,
-                        "test_number": i + 1,
-                    }
-                )
-                print("    ✗ FAIL")
-        print()
-
-    # Print summary
+def print_summary(total_tests: int, passed_tests: int, failures: List[Dict]) -> None:
+    """Print a summary of the test results."""
     print("=" * 60)
     print("TRUE POSITIVE TEST SUMMARY")
     print("=" * 60)
@@ -510,6 +514,32 @@ def main():
             print()
 
     print("=" * 60)
+
+
+def main():
+    """Main function to run regression tests for Sigma rules."""
+    args = parse_arguments()
+    init_checks(args)
+
+    # Find rules with tests
+    print("Scanning for rules with test data...")
+    rules_with_tests, missing_files, missing_regression_tests_path = (
+        find_rules_with_tests(args.rules_paths)
+    )
+    print(f"Found {len(rules_with_tests)} rules with test data")
+
+    validate_missing_tests(args, rules_with_tests, missing_regression_tests_path)
+    check_missing_test_files(missing_files)
+    print()
+
+    if not rules_with_tests:
+        print("No rules with test data found")
+        sys.exit(1)
+
+    # Test each rule
+    total_tests, passed_tests, failures = run_tests(args, rules_with_tests)
+
+    print_summary(total_tests, passed_tests, failures)
 
     # Exit with error code if any tests failed
     if failures:
