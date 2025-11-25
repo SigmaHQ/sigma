@@ -1,0 +1,34 @@
+title: Linux Setuid Capability Set On A Binary Via Setcap Utility - Auditd
+id: 596611de-85e7-4135-bffd-3738ae291965
+related:
+    - id: ed447910-bc30-4575-a598-3a2e49516a7a
+      type: derived
+status: test
+description: |
+  Detects the usage of setcap utility to a set the setuid capability (cap_setuid) on a binary file.
+  This capability allows a non privileged process to make arbitrary manipulations of user IDs (UIDs), including setting the UID to a value that would otherwise be restricted (i.e. UID 0, the root user).
+  This behavior can be used by adversaries to backdoor a binary in order to escalate privileges again in the future if needed.
+references:
+    - https://man7.org/linux/man-pages/man8/setcap.8.html
+    - https://dfir.ch/posts/linux_capabilities/
+    - https://juggernaut-sec.com/capabilities/#cap_setuid
+author: Luc Génaux
+date: 2025-11-25
+tags:
+    - attack.privilege-escalation
+    - attack.defense-evasion
+    - attack.persistence
+    - attack.t1548
+    - attack.t1554
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+        type: EXECVE
+        a0: setcap
+    keyword: cap_setuid 
+    condition: selection and keyword
+falsepositives:
+    - Unknown
+level: low
