@@ -291,7 +291,7 @@ def run_test(
 def parse_arguments() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Run true positive tests for Sigma rules with regression_tests_path"
+        description="Run regression tests for Sigma rules with regression_tests_path"
     )
 
     parser.add_argument(
@@ -327,7 +327,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--verbose",
         action="store_true",
-        help="Enable verbose output, showing positive test results as well",
+        help="Enable verbose output, showing successful test results as well",
     )
 
     return parser.parse_args()
@@ -338,7 +338,7 @@ def init_checks(args: argparse.Namespace) -> None:
     if args.validate_only:
         print("Starting Rule Status Validation...")
     else:
-        print("Starting True Positive Tests...")
+        print("Starting Regression Tests...")
 
         # Check required arguments for test execution
         if not args.evtx_checker or not args.thor_config:
@@ -507,7 +507,7 @@ def check_missing_test_files(missing_files: List[Dict]) -> None:
 def print_summary(total_tests: int, passed_tests: int, failures: List[Dict]) -> None:
     """Print a summary of the test results."""
     print("=" * 60)
-    print("TRUE POSITIVE TEST SUMMARY")
+    print("REGRESSION TEST SUMMARY")
     print("=" * 60)
     print(f"Total tests run: {total_tests}")
     print(f"Passed: {passed_tests}")
