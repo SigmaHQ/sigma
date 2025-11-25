@@ -6,7 +6,7 @@ references:
     - https://twitter.com/SBousseaden/status/1387530414185664538
 author: Christian Burkard (Nextron Systems)
 date: 2021-05-03
-modified: 2022-08-05
+modified: 2025-10-31
 tags:
     - attack.persistence
     - attack.t1136.001
@@ -16,9 +16,15 @@ logsource:
 detection:
     selection:
         TargetObject|contains: '\SAM\SAM\Domains\Account\Users\Names\'
-        TargetObject|endswith: '$'
+        TargetObject|endswith: '$\(Default)'
         Image|endswith: '\lsass.exe'
     condition: selection
 falsepositives:
     - Unknown
 level: high
+regression_tests_path: regression_data/windows/registry/registry_event/registry_event_add_local_hidden_user/info.yml
+simulation:
+    - type: atomic-red-team
+      name: Create Hidden User in Registry
+      technique: T1564.002
+      atomic_guid: 173126b7-afe4-45eb-8680-fa9f6400431c
