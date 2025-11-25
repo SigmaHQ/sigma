@@ -415,12 +415,9 @@ def validate_missing_tests(
 
     # Check for missing regression_tests_path in test/stable rules
     if missing_regression_tests_path and not args.ignore_validation:
-        print(
-            f"\nERROR: Found {len(missing_regression_tests_path)} "
-            "test/stable rule(s) without regression_tests_path:"
-        )
-        print("=" * 70)
-        print("\nRULES MISSING REGRESSION_TESTS_PATH:")
+        print()
+        print("-" * 50)
+        print("RULES MISSING REGRESSION_TESTS_PATH:")
         print("-" * 50)
         for missing in missing_regression_tests_path:
             print(f"Rule: {missing['rule_id']} (status: {missing['status']})")
@@ -431,6 +428,12 @@ def validate_missing_tests(
             "Rules with status 'test' or 'stable' must have a 'regression_tests_path' field."
         )
         print("Please add regression tests for these rules or change their status.")
+        print("=" * 70)
+        print(
+            f"\nERROR: Found {len(missing_regression_tests_path)} "
+            "test/stable rule(s) without regression_tests_path."
+        )
+
         sys.exit(1)
     elif missing_regression_tests_path and args.ignore_validation:
         print(
