@@ -324,6 +324,12 @@ def parse_arguments() -> argparse.Namespace:
         help="Ignore rule status validation requirements",
     )
 
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable verbose output, showing positive test results as well",
+    )
+
     return parser.parse_args()
 
 
@@ -371,15 +377,17 @@ def run_tests(
         rule_id = rule_info["id"]
         tests = rule_info["tests"]
 
-        print(f"\nTesting rule: {rule_id}")
-        print(f"  File: {rule_path}")
+        if args.verbose:
+            print(f"\nTesting rule: {rule_id}")
+            print(f"  File: {rule_path}")
 
         for i, test_data in enumerate(tests):
             test_name = test_data.get("name", f"Test {i+1}")
             test_type = test_data.get("type", "unknown")
             test_path = test_data.get("path", "unknown")
 
-            print(f"  {test_name} (type: {test_type}): {test_path}")
+            if args.verbose:
+                print(f"  {test_name} (type: {test_type}): {test_path}")
             total_tests += 1
 
             success, output = run_test(
@@ -388,8 +396,9 @@ def run_tests(
 
             if success:
                 passed_tests += 1
-                print(f"    ✓ PASS - Match found for Rule ID: {rule_id}\n")
-                print(f"    Output: {output}")
+                if args.verbose:
+                    print(f"    ✓ PASS - Match found for Rule ID: {rule_id}\n")
+                    print(f"    Output: {output}")
             else:
                 failures.append(
                     {
@@ -401,8 +410,11 @@ def run_tests(
                         "test_number": i + 1,
                     }
                 )
-                print("    ✗ FAIL")
-        print()
+                if args.verbose:
+                    print("    ✗ FAIL")
+
+        if args.verbose:
+            print()
     return total_tests, passed_tests, failures
 
 
@@ -540,6 +552,7 @@ def main():
         sys.exit(1)
 
     # Test each rule
+    print("Running tests...\n")
     total_tests, passed_tests, failures = run_tests(args, rules_with_tests)
 
     print_summary(total_tests, passed_tests, failures)
