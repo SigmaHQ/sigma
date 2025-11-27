@@ -6,7 +6,7 @@ references:
     - https://isc.sans.edu/forums/diary/Desktopini+as+a+postexploitation+tool/25912/
 author: Maxime Thiebaut (@0xThiebaut), Tim Shelton (HAWK.IO)
 date: 2020-03-19
-modified: 2022-10-07
+modified: 2025-11-27
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -17,16 +17,19 @@ logsource:
 detection:
     selection:
         TargetFilename|endswith: '\desktop.ini'
-    filter_generic:
+    filter_main_generic:
         Image|startswith:
             - 'C:\Windows\'
             - 'C:\Program Files\'
             - 'C:\Program Files (x86)\'
-    filter_jetbrains:
+    filter_main_upgrade:
+        TargetFilename|startswith: 'C:\$WINDOWS.~BT\NewOS\'
+    filter_optional_jetbrains:
         Image|endswith: '\AppData\Local\JetBrains\Toolbox\bin\7z.exe'
         TargetFilename|contains: '\JetBrains\apps\'
-    filter_upgrade:
-        TargetFilename|startswith: 'C:\$WINDOWS.~BT\NewOS\'
+    filter_optional_onedrive:
+        Image|contains: '\AppData\Local\Microsoft\OneDrive\OneDrive.exe'
+        TargetFilename|contains: '\OneDrive\Desktop\'
     condition: selection and not 1 of filter_*
 falsepositives:
     - Operations performed through Windows SCCM or equivalent
