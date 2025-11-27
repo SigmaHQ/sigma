@@ -6,7 +6,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.005/T1070.005.md
 author: 'oscd.community, @redcanary, Zach Stanford @svch0st'
 date: 2020-10-08
-modified: 2022-12-25
+modified: 2025-10-07
 tags:
     - attack.defense-evasion
     - attack.t1070.005
@@ -19,7 +19,14 @@ detection:
         ScriptBlockText|contains:
             - 'Remove-SmbShare'
             - 'Remove-FileShare'
-    condition: selection
+    filter_main_module_load:
+        ScriptBlockText|contains|all:
+            - 'FileShare.cdxml'
+            - 'Microsoft.PowerShell.Core\Export-ModuleMember'
+            - 'ROOT/Microsoft/Windows/Storage/MSFT_FileShare'
+            - 'ObjectModelWrapper'
+            - 'Cmdletization.MethodParameter'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Administrators or Power users may remove their shares via cmd line
 level: medium

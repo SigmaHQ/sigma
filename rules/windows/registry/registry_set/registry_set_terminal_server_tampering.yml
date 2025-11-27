@@ -10,21 +10,36 @@ related:
 status: test
 description: |
     Detects tampering of RDP Terminal Service/Server sensitive settings.
-    Such as allowing unauthorized users access to a system via the 'fAllowUnsolicited' or enabling RDP via 'fDenyTSConnections'...etc
+    Such as allowing unauthorized users access to a system via the 'fAllowUnsolicited' or enabling RDP via 'fDenyTSConnections', etc.
+
+    Below is a list of registry keys/values that are monitored by this rule:
+
+    - Shadow: Used to enable Remote Desktop shadowing, which allows an administrator to view or control a user's session.
+    - DisableRemoteDesktopAntiAlias: Disables anti-aliasing for remote desktop sessions.
+    - DisableSecuritySettings: Disables certain security settings for Remote Desktop connections.
+    - fAllowUnsolicited: Allows unsolicited remote assistance offers.
+    - fAllowUnsolicitedFullControl: Allows unsolicited remote assistance offers with full control.
+    - InitialProgram: Specifies a program to run automatically when a user logs on to a remote computer.
+    - ServiceDll: Used in RDP hijacking techniques to specify a custom DLL to be loaded by the Terminal Services service.
+    - SecurityLayer: Specifies the security layer used for RDP connections.
 references:
-    - https://web.archive.org/web/20200929062532/https://blog.menasec.net/2019/02/threat-hunting-rdp-hijacking-via.html # Related to RDP hijacking via the "ServiceDll" key
+    - http://etutorials.org/Microsoft+Products/microsoft+windows+server+2003+terminal+services/Chapter+6+Registry/Registry+Keys+for+Terminal+Services/ # Contains description for most of the keys mentioned here (check it out if you want more information)
     - http://woshub.com/rds-shadow-how-to-connect-to-a-user-session-in-windows-server-2012-r2/ # Related to the Shadow RPD technique
-    - https://twitter.com/SagieSec/status/1469001618863624194?t=HRf0eA0W1YYzkTSHb-Ky1A&s=03 # Related to the Shadow RPD technique
-    - https://threathunterplaybook.com/hunts/windows/190407-RegModEnableRDPConnections/notebook.html
+    - https://admx.help/HKLM/SOFTWARE/Policies/Microsoft/Windows%20NT/Terminal%20Services # Contains description for most of the keys mentioned here (check it out if you want more information)
     - https://bazaar.abuse.ch/sample/6f3aa9362d72e806490a8abce245331030d1ab5ac77e400dd475748236a6cc81/
-    - http://etutorials.org/Microsoft+Products/microsoft+windows+server+2003+terminal+services/Chapter+6+Registry/Registry+Keys+for+Terminal+Services/ # Contain description for most of the keys mentioned here (check it out if you want more information
-    - https://admx.help/HKLM/SOFTWARE/Policies/Microsoft/Windows%20NT/Terminal%20Services # Contain description for most of the keys mentioned here (check it out if you want more information)
     - https://blog.sekoia.io/darkgate-internals/
+    - https://blog.talosintelligence.com/understanding-the-phobos-affiliate-structure/
     - https://github.com/redcanaryco/atomic-red-team/blob/02c7d02fe1f1feb0fc7944550408ea8224273994/atomics/T1112/T1112.md#atomic-test-63---disable-remote-desktop-anti-alias-setting-through-registry
     - https://github.com/redcanaryco/atomic-red-team/blob/02c7d02fe1f1feb0fc7944550408ea8224273994/atomics/T1112/T1112.md#atomic-test-64---disable-remote-desktop-security-settings-through-registry
+    - https://github.com/redcanaryco/atomic-red-team/blob/dd526047b8c399c312fee47d1e6fb531164da54d/atomics/T1112/T1112.yaml#L790
+    - https://learn.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/microsoft-windows-terminalservices-rdp-winstationextensions-securitylayer
+    - https://threathunterplaybook.com/hunts/windows/190407-RegModEnableRDPConnections/notebook.html
+    - https://twitter.com/SagieSec/status/1469001618863624194?t=HRf0eA0W1YYzkTSHb-Ky1A&s=03 # Related to the Shadow RPD technique
+    - https://web.archive.org/web/20200929062532/https://blog.menasec.net/2019/02/threat-hunting-rdp-hijacking-via.html # Related to RDP hijacking via the "ServiceDll" key
+    - https://www.trendmicro.com/en_us/research/25/i/unmasking-the-gentlemen-ransomware.html
 author: Samir Bousseaden, David ANDRE, Roberto Rodriguez @Cyb3rWard0g, Nasreddine Bencherchali
 date: 2022-08-06
-modified: 2024-02-08
+modified: 2025-11-22
 tags:
     - attack.defense-evasion
     - attack.persistence
@@ -59,8 +74,12 @@ detection:
             - '\Control\Terminal Server\InitialProgram' # This value can be set to specify a program to run automatically when a user logs on to a remote computer.
             - '\Control\Terminal Server\WinStations\RDP-Tcp\InitialProgram' # This value can be set to specify a program to run automatically when a user logs on to a remote computer.
             - '\services\TermService\Parameters\ServiceDll' # RDP hijacking
+            - '\Terminal Server\WinStations\RDP-Tcp\SecurityLayer'
             - '\Windows NT\Terminal Services\InitialProgram' # This value can be set to specify a program to run automatically when a user logs on to a remote computer.
-    condition: selection_shadow or selection_terminal_services_key or selection_tamper_only
+    filter_main_securitylayer_tls:
+        TargetObject|endswith: '\SecurityLayer'
+        Details: 'DWORD (0x00000002)' # TLS Enabled
+    condition: (selection_shadow or selection_terminal_services_key or selection_tamper_only) and not 1 of filter_main_*
 falsepositives:
     - Some of the keys mentioned here could be modified by an administrator while setting group policy (it should be investigated either way)
 level: high

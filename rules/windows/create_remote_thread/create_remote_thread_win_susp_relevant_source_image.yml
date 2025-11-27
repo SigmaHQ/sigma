@@ -10,7 +10,7 @@ references:
     - https://lolbas-project.github.io
 author: Perez Diego (@darkquassar), oscd.community
 date: 2019-10-27
-modified: 2024-07-15
+modified: 2025-10-18
 tags:
     - attack.privilege-escalation
     - attack.defense-evasion
@@ -62,7 +62,34 @@ detection:
             - '\winword.exe'
             - '\wmic.exe'
             - '\wscript.exe'
-    condition: selection
+    filter_main_conhost:
+        SourceImage:
+            - 'C:\Windows\System32\Defrag.exe'
+            - 'C:\Windows\System32\makecab.exe'
+        TargetImage: 'C:\Windows\System32\conhost.exe'
+    filter_main_provtol_svchost:
+        SourceImage: 'C:\Windows\System32\provtool.exe'
+        TargetImage: 'C:\Windows\System32\svchost.exe'
+    filter_main_userinit:
+        SourceImage: 'C:\Windows\System32\userinit.exe'
+        TargetImage: 'C:\Windows\explorer.exe'
+    filter_main_winword:
+        SourceImage|endswith: '\WINWORD.EXE'
+        TargetImage|startswith:
+            - 'C:\Program Files (x86)\' # C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe
+            - 'C:\Program Files\' # C:\Program Files\Microsoft Office\root\vfs\ProgramFilesCommonX64\Microsoft Shared\Office16\AI\ai.exe
+    filter_main_ms_office:
+        # Raised by following issue: https://github.com/SigmaHQ/sigma/issues/5529
+        SourceImage|startswith:
+            - 'C:\Program Files\Microsoft Office\'
+            - 'C:\Program Files (x86)\Microsoft Office\'
+        TargetImage: 'System'
+    filter_optional_explorer_vmtools:
+        SourceImage|endswith: '\SysWOW64\explorer.exe'
+        TargetImage:
+            - 'C:\Program Files (x86)\VMware\VMware Tools\vmtoolsd.exe'
+            - 'C:\Program Files\VMware\VMware Tools\vmtoolsd.exe'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - This rule is best put in testing first in order to create a baseline that reflects the data in your environment.
 level: high
