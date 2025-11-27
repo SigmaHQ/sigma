@@ -1,0 +1,29 @@
+title: WDAC Policy File Creation In CodeIntegrity Folder
+id: 121b25f7-b9d6-4b37-afa0-cba317ec52f3
+status: experimental
+description: |
+    Attackers can craft a custom Windows Defender Application Control (WDAC) policy that blocks Endpoint Detection and Response (EDR) components while allowing their own malicious code. The policy is placed in the privileged Windows Code Integrity folder (C:\Windows\System32\CodeIntegrity\). Upon reboot, the policy prevents EDR drivers from loading, effectively bypassing security measures and may further enable undetected lateral movement within an Active Directory environment.
+references:
+    - https://beierle.win/2024-12-20-Weaponizing-WDAC-Killing-the-Dreams-of-EDR/
+    - https://www.virustotal.com/gui/file/d2a4f52a9923336f119a52e531bbb1e66f18322fd8efa9af1a64b94f4d36dc97
+author: Andreas Braathen (mnemonic.io)
+date: 2025-01-30
+tags:
+    - attack.defense-evasion
+    - attack.t1562.001
+    - detection.threat-hunting
+logsource:
+    category: file_event
+    product: windows
+    definition: 'Requirements: By default the file_event log source might not contain the IntegrityLevel of the Process. It should be collected in order to use this rule'
+detection:
+    selection:
+        TargetFilename|contains: ':\Windows\System32\CodeIntegrity\'
+        TargetFilename|endswith:
+            - '.cip'
+            - '.p7b'
+        IntegrityLevel: 'High'
+    condition: selection
+falsepositives:
+    - May occur legitimately as part of admin activity, but rarely with interactive elevation.
+level: medium
