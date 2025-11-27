@@ -2,10 +2,9 @@ title: AWS GuardDuty Detector Deleted Or Updated
 id: d2656e78-c069-4571-8220-9e0ab5913f19
 status: experimental
 description: |
-    Detects successful deletion or disabling of an AWS GuardDuty detector, possibly by an attacker trying to avoid
-    detection of its malicious activities or could be part of a legitimate security test. Upon deletion, GuardDuty
-    stops monitoring the environment and all existing findings are lost. Verify with the user identity that this
-    activity is legitimate.
+    Detects successful deletion or disabling of an AWS GuardDuty detector, possibly by an attacker trying to avoid detection of its malicious activities or could be part of a legitimate security test.
+    Upon deletion, GuardDuty stops monitoring the environment and all existing findings are lost.
+    Verify with the user identity that this activity is legitimate.
 references:
     - https://docs.aws.amazon.com/guardduty/latest/APIReference/API_DeleteDetector.html
     - https://docs.aws.amazon.com/guardduty/latest/APIReference/API_UpdateDetector.html
@@ -20,8 +19,7 @@ references:
     - https://suktech24.com/2025/07/17/aws-threat-detection-rule-guardduty-detector-disabled-or-suspended/
     - https://www.atomicredteam.io/atomic-red-team/atomics/T156001#atomic-test-46---aws---guardduty-suspension-or-deletion
 author: suktech24
-date: 2025-07-20
-modified: 2025-07-20
+date: 2025-11-27
 tags:
     - attack.defense-evasion
     - attack.t1562.001
@@ -30,16 +28,18 @@ logsource:
     product: aws
     service: cloudtrail
 detection:
-    selection_delete:
+    selection_event_source:
         eventSource: 'guardduty.amazonaws.com'
+    selection_action_delete:
         eventName: 'DeleteDetector'
-        errorCode: null
-    selection_update:
-        eventSource: 'guardduty.amazonaws.com'
+    selection_action_update:
         eventName: 'UpdateDetector'
-        errorCode: null
         requestParameters.enable: 'false'
-    condition: 1 of selection_*
+    selection_status_success:
+        errorCode: 'Success'
+    selection_status_null:
+        errorCode: null
+    condition: selection_event_source and 1 of selection_action_* and 1 of selection_status_*
 falsepositives:
     - Legitimate detector deletion by an admin (e.g., during account decommissioning).
     - Temporary disablement for troubleshooting (verify via change management tickets).
