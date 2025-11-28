@@ -22,21 +22,18 @@ detection:
     selection:
         ParentImage|endswith: '\ArcSOC.exe'
         Image|endswith:
-            - '\rundll32.exe'
-            - '\regsvr32.exe'
-            - '\wscript.exe'
-            - '\cscript.exe'
-            - '\powershell.exe'
             - '\cmd.exe'
+            - '\cscript.exe'
             - '\mshta.exe'
-    filter_cmd:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\regsvr32.exe'
+            - '\rundll32.exe'
+            - '\wscript.exe'
+    filter_main_cmd:
         Image|endswith: '\cmd.exe'
         CommandLine: 'cmd.exe /c "ver"'
-    filter_werfault:
-        Image|endswith: '\werfault.exe'
-    filter_esri_report_writer:
-        Image|endswith: '\ESRIErrorReportWriter.exe'
-    condition: selection and not 1 of filter_*
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
-level: low
+level: high
