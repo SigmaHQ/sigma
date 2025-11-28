@@ -1,12 +1,13 @@
 title: Persistence Via Cron Files
 id: 6c4e2f43-d94d-4ead-b64d-97e53fa2bd05
 status: test
-description: Detects creation of cron file or files in Cron directories which could indicates potential persistence.
+description: |
+    Detects the creation of cron file or files in Cron directories which could indicates potential persistence.
 references:
     - https://github.com/microsoft/MSTIC-Sysmon/blob/f1477c0512b0747c1455283069c21faec758e29d/linux/configs/attack-based/persistence/T1053.003_Cron_Activity.xml
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research), MSTIC
 date: 2021-10-15
-modified: 2022-12-31
+modified: 2025-11-28
 tags:
     - attack.privilege-escalation
     - attack.execution
@@ -16,7 +17,7 @@ logsource:
     product: linux
     category: file_event
 detection:
-    selection1:
+    selection_1:
         TargetFilename|startswith:
             - '/etc/cron.d/'
             - '/etc/cron.daily/'
@@ -24,12 +25,19 @@ detection:
             - '/etc/cron.monthly/'
             - '/etc/cron.weekly/'
             - '/var/spool/cron/crontabs/'
-    selection2:
+    selection_2:
         TargetFilename|contains:
             - '/etc/cron.allow'
             - '/etc/cron.deny'
             - '/etc/crontab'
-    condition: 1 of selection*
+    filter_optional_legit_cron_names:
+        # Note: FPs on docker images: golang, postgres, python, redis, ruby
+        TargetFilename:
+            - '/etc/cron.daily/apt'
+            - '/etc/cron.daily/dpkg'
+            - '/etc/cron.daily/passwd'
+            - '/etc/crontabs/root'
+    condition: 1 of selection* and not 1 of filter_optional_*
 falsepositives:
     - Any legitimate cron file.
 level: medium
