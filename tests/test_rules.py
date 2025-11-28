@@ -722,13 +722,16 @@ class TestRules(unittest.TestCase):
                         pattern_prefix += os_infix
                     if pattern_prefix != "":
                         if not filename.startswith(pattern_prefix):
-                            print(
-                                Fore.YELLOW
-                                + "Rule {} has a file name that doesn't match our standard naming convention.".format(
-                                    file
-                                )
-                            )
-                            faulty_rules.append(file)
+                            for key, value in logsource.items():
+                                if key in ["category", "service", "product"]:
+                                    print(
+                                        Fore.YELLOW
+                                        + "Rule {} has inconsistency between filename '{}' and logsource ({}: '{}'):".format(
+                                            file, filename, key, value
+                                        )
+                                    )
+                            if file not in faulty_rules:
+                                faulty_rules.append(file)
             name_lst.append(filename)
 
         self.assertEqual(
