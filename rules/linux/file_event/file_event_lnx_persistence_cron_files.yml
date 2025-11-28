@@ -29,7 +29,17 @@ detection:
             - '/etc/cron.allow'
             - '/etc/cron.deny'
             - '/etc/crontab'
-    condition: 1 of selection*
+    # FPs on docker images: golang, postgres, python, redis, ruby
+    filter_legit_crons:
+        TargetFilename|contains:
+            - '/etc/cron.daily/apt'
+            - '/etc/cron.daily/dpkg'
+            - '/etc/cron.daily/passwd'
+            - '/etc/crontabs/root'
+    filter_legit_crontab:
+        TargetFilename:
+            - '/etc/crontab'
+    condition: 1 of selection* and not filter_legit_crons and not filter_legit_crontab
 falsepositives:
     - Any legitimate cron file.
 level: medium
