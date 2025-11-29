@@ -2,7 +2,7 @@ title: Github Self-Hosted Runner Created/Used
 id: 5bac7a56-da88-4c27-922e-c81e113b20cb
 status: experimental
 description: |
-    Detects the useage of "Runner.Listener.exe" or "Runner.Worker.exe" with specific command lines, which is indicative of a GitHub self-hosted runner installation or activation.
+    Detects the usage of "Runner.Listener.exe" or "Runner.Worker.exe" with specific command lines, which is indicative of a GitHub self-hosted runner installation or activation.
 references:
     - https://about.gitlab.com/blog/gitlab-discovers-widespread-npm-supply-chain-attack/
     - https://securitylabs.datadoghq.com/articles/shai-hulud-2.0-npm-worm/
@@ -17,22 +17,22 @@ logsource:
     product: windows
 detection:
     selection_img_worker:  # Example command C:\Users\Lab\actions-runner\bin\Runner.Worker.exe spawnclient 1288 1252
-        - Image|endswith: 
-             - '\Runner.Worker.exe'
-        - OriginalFileName:
-             - 'Runner.Worker.dll'
+        Image|endswith:
+            - '\Runner.Worker.exe'
+        OriginalFileName:
+            - 'Runner.Worker.dll'
     selection_img_listener: # Example command C:\Users\Lab\actions-runner\bin\Runner.Listener.exe  configure --url https://github.com/ABC/ABC --token 123123
-        - Image|endswith: 
-             - '\Runner.Listener.exe'
-        - OriginalFileName:
-             - 'Runner.Listener.dll'
+        Image|endswith:
+            - '\Runner.Listener.exe'
+        OriginalFileName:
+            - 'Runner.Listener.dll'
     selection_cli_worker:
         CommandLine|contains:
-             - 'spawnclient'
+            - 'spawnclient'
     selection_cli_listener:
         CommandLine|contains:
-             - 'run'
-             - 'configure'
+            - 'run'
+            - 'configure'
     condition: (selection_img_worker and selection_cli_worker) or (selection_img_listener and selection_cli_listener)
 falsepositives:
     - Legitimate usage of GitHub self-hosted runners
