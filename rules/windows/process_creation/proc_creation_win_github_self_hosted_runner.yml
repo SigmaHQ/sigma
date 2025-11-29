@@ -2,7 +2,9 @@ title: Github Self-Hosted Runner Execution
 id: 5bac7a56-da88-4c27-922e-c81e113b20cb
 status: experimental
 description: |
-    Detects the usage of "Runner.Listener.exe" or "Runner.Worker.exe" with specific command lines, which is indicative of a GitHub self-hosted runner installation or activation.
+    GitHub self-hosted runners execute workflows on local infrastructure and are abused for persistence and code execution. 
+    Shai-Hulud 2.0 installs runners on compromised systems to maintain access after credential theft, leveraging their access to secrets and internal networks. 
+    This rule detects the execution of "Runner.Listener.exe" or "Runner.Worker.exe" with specific command lines, which is indicative of a GitHub self-hosted runner usage as seen by the Shai-Hulud worm.
 references:
     - https://about.gitlab.com/blog/gitlab-discovers-widespread-npm-supply-chain-attack/
     - https://securitylabs.datadoghq.com/articles/shai-hulud-2.0-npm-worm/
@@ -30,5 +32,9 @@ detection:
             - 'configure'
     condition: (selection_img_worker and selection_cli_worker) or (selection_img_listener and selection_cli_listener)
 falsepositives:
-    - Legitimate usage of GitHub self-hosted runners
+    - Legitimate GitHub self-hosted runner installations on designated CI/CD infrastructure
+    - Authorized runner deployments by DevOps/Platform teams following change management
+    - Scheduled runner updates or reconfigurations on existing build agents
+    - Self-hosted runners that follow expected/known naming patterns
+    - Installation via expected/known configuration management tools (reflected mostly as parent process name)
 level: medium
