@@ -1,0 +1,40 @@
+title: Atomic MacOS Stealer - FileGrabber Activity
+id: e710a880-1f18-4417-b6a0-b5afdf7e33da
+related:
+    - id: e710a880-1f18-4417-b6a0-b5afdf7e305a
+      type: obsolete
+status: experimental
+description: |
+    Detects suspicious activity associated with Atomic MacOS Stealer (Amos) campaigns, including execution of FileGrabber and curl-based POST requests used for data exfiltration. The rule identifies either the execution of FileGrabber targeting /tmp or the use of curl to POST sensitive user data (including files such as /tmp/out.zip) to remote servers, which are key indicators of Amos infostealer activity.
+references:
+    - https://www.trendmicro.com/en_us/research/25/i/an-mdr-analysis-of-the-amos-stealer-campaign.html
+    - https://hunt.io/blog/macos-clickfix-applescript-terminal-phishing
+    - https://github.com/bobby-tablez/TTP-Threat-Feeds/blob/45398914e631f8372c3a9fbcd339ff65ffff1b17/results/2025/10/20251001-161956-trendmicro-atomic-macos-stealer-(amos).yml#L36
+    - https://www.jamf.com/blog/infostealers-pose-threat-to-macos/
+author: Jason Phang Vern - Onn, Robbin Ooi Zhen Heng (Gen Digital)
+date: 2025-11-22
+tags:
+    - attack.execution
+    - attack.t1059.002
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: macos
+detection:
+    selection_curl_post:
+        CommandLine|contains|all:
+            - 'curl'
+            - 'POST'
+            - 'user:'
+            - '-H '
+            - 'BuildID'
+            - 'file=@/tmp/out.zip'
+            - 'cl: 0'
+    selection_filegrabber_exec:
+        CommandLine|contains|all:
+            - 'FileGrabber'
+            - '/tmp'
+    condition: 1 of selection_*
+falsepositives:
+    - Unknown
+level: high
