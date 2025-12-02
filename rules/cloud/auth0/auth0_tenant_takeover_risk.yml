@@ -1,0 +1,101 @@
+title: Risk of Tenant Takeover
+id: 53514138-c980-4662-ace7-20daa34a0fc6
+status: experimental
+description: |
+    Detects potential tenant takeover risks by monitoring if a new tenant admin has been invited followed by rapid deletion of other Tenant Admins.
+    Monitors for suspicious administrative activities that could indicate an account takeover attempt.
+references:
+    - https://auth0.com/docs/get-started/auth0-overview/manage-dashboard-access
+    - https://auth0.com/docs/manage-users/access-control/configure-core-authorization
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.persistence
+    - attack.t1098
+    - attack.t1136
+logsource:
+    product: auth0
+    service: admin
+detection:
+    selection:
+        data.type: sapi
+        data.description:
+            - "Delete tenant member"
+            - "Create tenant invitations for a given client"
+        data.details.request.body.roles{}: owner
+    condition: selection
+fields:
+    - data.type
+    - data.description
+    - data.details.request.auth.user.email
+    - data.details.request.body.owners{}
+    - data.details.request.body.roles{}
+    - data.tenant_name
+    - data.client_id
+falsepositives:
+    - Legitimate admin activity when a new admin is invited to replace an existing one
+    - Planned administrative restructuring or role changes
+    - Emergency administrative changes during security incidents
+level: medium
+explanation: |
+    The query below monitors events issued when a new admin is invited, i.e., "Create tenant invitations for a given client", as owner
+    followed by rapid deletion of other admins, i.e. "Delete tenant member".
+    In the splunk query below the observed window is set to 1h - adjust according to your needs.
+    This query also implements other indicators to limit false positives.
+    1. Used the invited admin a personal account instead of a corporate?
+    2. How many admins have been deleted (set to more than 2)?
+    3. Has deletion happened rapidly (set to 10 mins)?
+    3. Was a just invited admin, the one deleting all other admins?
+
+    Splunk Query:
+    index=auth0 "data.tenant_name"="{your-tenant-name}"
+    AND "data.description"="Delete tenant member" OR ("data.description"="Create tenant invitations for a given client" AND "data.details.request.body.roles{}"="owner")
+    | eval original_time = _time
+    ```Set the timespan to consider - adjust to fit your environment```
+    | bucket _time span=1h
+    | eval event_type = case(
+        'data.description'="Delete tenant member", "delete",
+        'data.description'="Create tenant invitations for a given client", "create"
+        )
+    ```Collect user_ids for invited users and users who is started deleting existing admins```
+    |rename data.details.request.auth.user.email as deleting_user
+    |rename data.details.request.body.owners{} as invited_user
+    |eval correlated_id = case(
+        event_type="delete", deleting_user,
+        event_type="create", invited_user
+        )
+    ```Calculated additional indicators```
+    |stats count(eval(event_type="delete")) as delete_event_count,
+            min(original_time) as window_start_time,
+            max(original_time) as window_end_time,
+            values(eval(if(event_type="delete", correlated_id, null()))) as all_deleting_users,
+            values(eval(if(event_type="create", correlated_id, null()))) as all_invited_users
+            by _time, data.tenant_name, data.client_id
+    ```Check if there are more then 2 admin accounts that have been deleted - adjust to fit your environment```
+    | eval has_more_than_X_deletes = if(delete_event_count > 1, "true", "false")
+    ```Check if inviting and deletion of admins happened rapidly, e.g. 10 mins - adjust to fit your environment```
+    | eval window_duration_seconds = window_end_time - window_start_time
+    | eval window_duration_mins = window_duration_seconds/60
+    | eval all_events_within_X_min = if(window_duration_mins <= 10, "true", "false")
+    ```Check if the invited admin has a personal email, alternatively, check if non-corporate email is used - adjust to fit your environment```
+    | eval has_personal_invited_email = if(mvcount(mvfilter(match(all_invited_users, "@gmail.com|@yahoo.com|@hotmail.com|@outlook.com|@aol.com|@icloud.com|@live.com"))) > 0, "true", "false")
+    ``` Alternatively, check if non-corporate email is used```
+    ```| eval has_noncorporate_invited_email = if(mvcount(mvfilter(match(all_invited_users, "@[your-corporate-domain]"))) < mvcount(all_invited_users), "true", "false")```
+    ```Check an admin that conducts mass deletion of existing admins is the one who was just invited```
+    | eval deleting_among_invited = if(isnotnull(mvfind(all_invited_users, all_deleting_users)), "true", "false")
+    ``` Now, when all criteria are collected, we can do the final filtering, alternatively, enable reporting```
+    | where has_more_than_X_deletes="true"
+        AND all_events_within_X_min="true"
+        AND has_personal_invited_email="true"
+        ``` AND has_noncorporate_invited_email = "true" ```
+        AND deleting_among_invited="false"
+
+    Tenant Logs Query:
+    type:"sapi" AND (description:"Delete tenant member" OR description:"Create tenant invitations for a given client")
+comments:
+    - The splunk query above shall be tuned to reflect a valid tenant name.
+    - When Auth0 Teams is used all admin related logs are removed from the tenant audit logs.
+    - The events of inviting an admin into the Team and assigning this user to a tenant (and deleting events) are recorded in the Team Activity dashboard.
+    - However, log streaming and search are not supported for Teams as of time of writing.
+    - Prevention - Enforce SSO for admins via Teams.

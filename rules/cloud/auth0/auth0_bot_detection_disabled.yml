@@ -1,0 +1,74 @@
+title: Bot detection - the feature is turned off completely or some policies.
+id: 39b930d2-8ada-4325-832e-0beda0d3c79f
+status: experimental
+description: |
+    Detects when the Bot detection feature is not enforcing the protection.
+    Monitors for changes that disable bot detection policies for password login, passwordless login, or password reset flows.
+references:
+    - https://auth0.com/docs/secure/attack-protection/bot-detection
+    - https://github.com/auth0/auth0-customer-detections/
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.defense-evasion
+    - attack.t1562
+    - attack.t1562.007
+logsource:
+    product: auth0
+    service: attack_protection
+detection:
+    selection:
+        data.type: sapi
+        data.description:
+            - Create or update the anomaly detection captcha
+        data.details.response.statusCode:
+            - 200
+    filter_1:
+        data.details.response.body.password_reset_policy: 'off'
+    filter_2:
+        data.details.response.body.passwordless_policy: 'off'
+    filter_3:
+        data.details.response.body.policy: 'off'
+    condition: selection and (filter_1 or filter_2 or filter_3)
+fields:
+    - data.type
+    - data.description
+    - data.ip
+    - data.details.response.body.policy
+    - data.details.response.body.password_reset_policy
+    - data.details.response.body.passwordless_policy
+    - data.details.response.statusCode
+falsepositives:
+    - Legitimate updates by an administrator during configuration changes
+    - Testing or troubleshooting activities by authorized personnel
+    - Temporary disabling for maintenance purposes
+level: medium
+explanation: |
+    The query collects the events indicating modification of settings for the Bot Detection.
+    When the response body contains "policy", "passwordless_policy", or "password_reset_policy" set to "off",
+    this indicates that a protection is turned off for the respective flow, i.e. password login, passwordless login, or password reset.
+    The splunk query provides details about IPs, where the change was done from, and values for the listed policies.
+
+    Splunk Query:
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type=sapi
+    data.description="Create or update the anomaly detection captcha"
+    (data.details.response.body.password_reset_policy=off OR
+    data.details.response.body.passwordless_policy=off OR
+    data.details.response.body.policy=off)
+    data.details.response.statusCode=200
+    | table data.ip, data.details.response.body.policy, data.details.response.body.password_reset_policy,
+    data.details.response.body.passwordless_policy
+
+    Tenant Logs Query:
+    type:"sapi" AND description: "Create or update the anomaly detection captcha"
+comments:
+    - The splunk query above shall be tuned to reflect a valid tenant name.
+    - Limit the detection to actions conducted from not white-listed IPs and/or particular users.
+    - A possible extension of this detection is to monitor if CAPTCHA changes from, e.g. Auth Challenge, to a simple one.
+    - This rule is designed for threat hunting and to be a starting point for further investigation.
+    - Prevention - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
+    - Prevention - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.
+    - Prevention - Control Management API scopes that allow modification of attack protection features - update:attack_protection.
+    - Prevention - Control usage of Management API from only trusted IPs by applying Network ACL scoped to "management".
