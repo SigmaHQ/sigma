@@ -1,0 +1,35 @@
+title: SSH Multiple Authentication Failures
+id: f3b9c89d-4e5b-4d7d-8f37-9c6c3b1e9d34
+status: experimental
+description: Detects repeated SSH failed authentication attempts which may indicate brute-force activity.
+author: LB89-code
+date: 2025/12/03
+
+references:
+  - https://attack.mitre.org/techniques/T1110/001/
+
+logsource:
+  product: linux
+  service: sshd
+  category: authentication
+
+detection:
+  failed_event:
+    message|contains:
+      - "Failed password"
+      - "authentication failure"
+  condition: failed_event
+
+fields:
+  - src_ip
+  - user
+  - message
+
+falsepositives:
+  - Users mistyping passwords
+  - Vulnerability scanners
+  - Automation tools using wrong credentials
+
+level: medium
+
+tags: []
