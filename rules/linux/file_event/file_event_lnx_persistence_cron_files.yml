@@ -1,13 +1,21 @@
-title: Persistence Via Cron Files
+title: Creation of New Cron Files
 id: 6c4e2f43-d94d-4ead-b64d-97e53fa2bd05
 status: test
 description: |
-    Detects the creation of cron file or files in Cron directories which could indicates potential persistence.
+    Detects the creation of cron files in Cron directories, which could indicate potential persistence mechanisms being established by an attacker.
+    Note that not all cron file creations are malicious - legitimate system administration activities and software installations may also create cron files.
+    This detection should be investigated in context, considering factors such as the user creating the file, the timing of creation, and the contents of the cron job.
+    Focus investigation on unexpected cron files created by non-administrative users or during suspicious timeframes.
+    Additionally, it is recommended to review the contents of the newly created cron files to assess their intent.
+    Furthermore, it is suggested to baseline normal cron file creation and apply additional filters to reduce false positives based on the specific environment.
 references:
     - https://github.com/microsoft/MSTIC-Sysmon/blob/f1477c0512b0747c1455283069c21faec758e29d/linux/configs/attack-based/persistence/T1053.003_Cron_Activity.xml
+    - https://pberba.github.io/security/2022/01/30/linux-threat-hunting-for-persistence-systemd-timers-cron/
+    - https://www.elastic.co/security-labs/primer-on-persistence-mechanisms
+    - https://snehbavarva.medium.com/privilege-escalation-techniques-series-linux-cron-jobs-a5b797b424b4
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research), MSTIC
 date: 2021-10-15
-modified: 2025-11-28
+modified: 2025-12-05
 tags:
     - attack.privilege-escalation
     - attack.execution
@@ -17,26 +25,136 @@ logsource:
     product: linux
     category: file_event
 detection:
-    selection_1:
+    selection_cron_dirs:
         TargetFilename|startswith:
             - '/etc/cron.d/'
             - '/etc/cron.daily/'
             - '/etc/cron.hourly/'
             - '/etc/cron.monthly/'
             - '/etc/cron.weekly/'
+            - '/var/spool/anacron/'
             - '/var/spool/cron/crontabs/'
-    selection_2:
+            - '/var/spool/cron/root'
+    selection_cron_special_files:
         TargetFilename|contains:
             - '/etc/cron.allow'
             - '/etc/cron.deny'
             - '/etc/crontab'
-    filter_optional_legit_cron_names:
+    filter_optional_package_managers:
+        Image:
+            - '/bin/dpkg'
+            - '/usr/bin/dpkg'
+            - '/bin/microdnf'
+            - '/usr/bin/microdnf'
+            - '/bin/rpm'
+            - '/usr/bin/rpm'
+            - '/bin/yum'
+            - '/usr/bin/yum'
+            - '/bin/dnf'
+            - '/usr/bin/dnf'
+            - '/bin/dnf-automatic'
+            - '/usr/bin/dnf-automatic'
+            - '/bin/pacman'
+            - '/usr/bin/pacman'
+            - '/usr/bin/dpkg-divert'
+            - '/bin/dpkg-divert'
+            - '/sbin/apk'
+            - '/usr/sbin/apk'
+            - '/usr/local/sbin/apk'
+            - '/usr/bin/apt'
+            - '/usr/sbin/pacman'
+            - '/usr/bin/pamac-daemon'
+            - '/bin/pamac-daemon'
+    filter_optional_containers:
+        Image:
+            - '/bin/dockerd'
+            - '/usr/bin/dockerd'
+            - '/usr/sbin/dockerd'
+            - '/usr/local/bin/dockerd'
+            - '/bin/snapd'
+            - '/usr/bin/snapd'
+            - '/bin/podman'
+            - '/usr/bin/podman'
+            - '/kaniko/kaniko-executor'
+    filter_optional_config_management:
+        Image:
+            - '/usr/bin/puppet'
+            - '/bin/puppet'
+            - '/opt/puppetlabs/puppet/bin/puppet'
+            - '/opt/puppetlabs/puppet/bin/ruby'
+            - '/usr/bin/chef-client'
+            - '/bin/chef-client'
+    filter_optional_cloud_agents:
+        Image:
+            - '/opt/elasticbeanstalk/bin/platform-engine'
+            - '/usr/bin/pvedaemon'
+    filter_optional_system_services:
+        Image:
+            - '/usr/libexec/platform-python'
+            - '/usr/lib/systemd/systemd'
+            - '/usr/sbin/anacron'
+    filter_optional_security_tools:
+        Image:
+            - '/opt/imunify360/venv/bin/python3'
+            - '/opt/eset/efs/lib/utild'
+    filter_optional_cpanel:
+        Image:
+            - '/bin/autossl_check'
+            - '/usr/bin/autossl_check'
+    filter_optional_special_paths:
+        Image|startswith:
+            - '/nix/store/'
+            - '/var/lib/dpkg/'
+            - '/tmp/vmis.'
+            - '/snap/'
+            - '/dev/fd/'
+            - '/usr/libexec/platform-python'
+            - '/var/lib/waagent/Microsoft'
+    filter_optional_special_files:
+        TargetFilename|contains:
+            - '/var/spool/cron/crontabs/tmp.'
+            - '/etc/cron.d/jumpcloud-updater'
+    filter_optional_extensions:
+        TargetFilename|endswith:
+            - '.swp'
+            - '.swpx'
+            - '.swx'
+            - '.dpkg-remove'
+            - '.dpkg-new'
+    filter_optional_legit_cron:
         # Note: FPs on docker images: golang, postgres, python, redis, ruby
         TargetFilename:
             - '/etc/cron.daily/apt'
             - '/etc/cron.daily/dpkg'
             - '/etc/cron.daily/passwd'
             - '/etc/crontabs/root'
+    filter_optional_automation_tools:
+        Image|endswith:
+            - '/executor'
+            - '/cf-agent'
+            - '/schedd'
+    filter_optional_system_agents:
+        Image|endswith:
+            - '/droplet-agent.postinst'
+            - '/jumpcloud-agent'
+            - '/crio'
+    filter_optional_security_processes:
+        Image|endswith:
+            - '/imunify-notifier'
+            - '/utild'
+    filter_optional_package_operations:
+        Image|endswith: '/dnf_install'
+    filter_optional_editor_temp:
+        Image|endswith: '/sed'
+        TargetFilename|startswith: 'sed'
+    filter_optional_perl_temp:
+        Image|endswith: '/perl'
+        TargetFilename|startswith: 'e2scrub_all.tmp'
+    filter_optional_vi_backup:
+        Image|endswith:
+            - '/vi'
+            - '/vim'
+        TargetFilename|endswith: '~'
     condition: 1 of selection* and not 1 of filter_optional_*
 falsepositives:
     - Any legitimate cron file.
