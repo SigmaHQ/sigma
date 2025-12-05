@@ -1,15 +1,16 @@
-title: Potential HTML Phishing Attachment Clicked
+title: HTML File Opened From Download Folder
 id: 538c5851-8c03-4724-8ec4-623bc7aadaea
 status: experimental
 description: |
-    Detects potential HTML phishing attachment click. Threat actors often use HTML attachments in phishing campaigns to deliver malicious payloads or redirect users to harmful websites.
-    When a user clicks on the HTML attachment, it can lead to the execution of scripts or the download of malware, compromising the user's system.
+    Detects web browser process opening an HTML file from a user's Downloads folder.
+    This behavior is could be associated with phishing attacks where threat actors send HTML attachments to users.
+    When a user opens such an attachment, it can lead to the execution of malicious scripts or the download of malware.
     During investigation, analyze the HTML file for embedded scripts or links, check for any subsequent downloads or process executions, and investigate the source of the email or message containing the attachment.
 references:
     - https://app.any.run/tasks/ae3c4ded-fd6a-43ed-8215-ba0ba574ad33
     - https://app.any.run/tasks/8901e2d5-0c5a-48ba-a8e9-10b5ed7e06f4
 author: Joseph Kamau
-date: 2025-10-02
+date: 2025-12-05
 tags:
     - attack.t1598.002
     - attack.t1566.001
@@ -22,14 +23,14 @@ logsource:
 detection:
     selection:
         Image|endswith:
-            - '\msedge.exe'
-            - '\firefox.exe'
-            - '\chrome.exe'
             - '\brave.exe'
-            - '\vivaldi.exe'
+            - '\chrome.exe'
+            - '\firefox.exe'
+            - '\msedge.exe'
             - '\opera.exe'
+            - '\vivaldi.exe'
         CommandLine|contains|all:
-            - 'C:\users\'
+            - ':\users\'
             - '\Downloads\'
             - '.htm'
     condition: selection
