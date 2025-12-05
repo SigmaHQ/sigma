@@ -7,7 +7,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1112/T1112.md#atomic-test-5---javascript-in-registry
 author: frack113
 date: 2022-01-22
-modified: 2025-07-04
+modified: 2025-10-22
 tags:
     - attack.persistence
     - attack.defense-evasion
@@ -20,6 +20,8 @@ detection:
         TargetObject|contains: '\Software\Microsoft\Windows\CurrentVersion\Internet Settings'
     filter_main_dword:
         Details|startswith: 'DWORD'
+    filter_main_null:
+        Details: null
     filter_main_office:
         Details:
             - 'Cookie:'
@@ -32,12 +34,10 @@ detection:
             - '\WpadDecision'
     filter_main_binary:
         Details: 'Binary Data'
-    filter_main_accepted_documents:
+    filter_optional_accepted_documents:
         # Spotted during Office installations
         TargetObject|contains: '\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Accepted Documents'
-    filter_main_runtimebroker:
-        Image: 'C:\Windows\System32\RuntimeBroker.exe'
-    condition: selection_domains and not 1 of filter_*
+    condition: selection_domains and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: low
