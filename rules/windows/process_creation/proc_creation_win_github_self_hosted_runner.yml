@@ -1,0 +1,41 @@
+title: Github Self-Hosted Runner Execution
+id: 5bac7a56-da88-4c27-922e-c81e113b20cb
+status: test
+description: |
+    Detects GitHub self-hosted runners executing workflows on local infrastructure that could be abused for persistence and code execution.
+    Shai-Hulud is an npm supply chain worm targeting CI/CD environments.
+    It installs runners on compromised systems to maintain access after credential theft, leveraging their access to secrets and internal networks.
+references:
+    - https://about.gitlab.com/blog/gitlab-discovers-widespread-npm-supply-chain-attack/
+    - https://securitylabs.datadoghq.com/articles/shai-hulud-2.0-npm-worm/
+author: Daniel Koifman (KoifSec)
+date: 2025-11-29
+tags:
+    - attack.command-and-control
+    - attack.t1102.002
+    - attack.t1071
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_worker_img:  # Example command C:\Users\Lab\actions-runner\bin\Runner.Worker.exe spawnclient 1288 1252
+        - Image|endswith: '\Runner.Worker.exe'
+        - OriginalFileName: 'Runner.Worker.dll'
+    selection_worker_cli:
+        CommandLine|contains: 'spawnclient'
+    selection_listener_img: # Example command C:\Users\Lab\actions-runner\bin\Runner.Listener.exe  configure --url https://github.com/ABC/ABC --token 123123
+        - Image|endswith: '\Runner.Listener.exe'
+        - OriginalFileName: 'Runner.Listener.dll'
+    selection_listener_cli:
+        CommandLine|contains:
+            - 'run'
+            - 'configure'
+    condition: all of selection_worker_* or all of selection_listener_*
+falsepositives:
+    - Legitimate GitHub self-hosted runner installations on designated CI/CD infrastructure
+    - Authorized runner deployments by DevOps/Platform teams following change management
+    - Scheduled runner updates or reconfigurations on existing build agents
+    - Self-hosted runners that follow expected/known naming patterns
+    - Installation via expected/known configuration management tools (reflected mostly as parent process name)
+level: medium
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_github_self_hosted_runner/info.yml
