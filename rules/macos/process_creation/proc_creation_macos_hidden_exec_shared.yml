@@ -1,0 +1,25 @@
+title: Hidden Executable In Shared
+id: b76c049c-9fc2-11f0-9c29-fe36320b3fa5
+status: test
+description: |
+  Hidden executables, which are identified via having a period to start their name can be 
+  masquerading. Running out of Shared is additionally more signs of potential compromise.
+author: Stuart Ashenbrenner
+references:
+  - https://www.huntress.com/blog/inside-bluenoroff-web3-intrusion-analysis
+  - https://atomicredteam.io/execution/T1569.001/
+  - https://attack.mitre.org/techniques/T1569/001/
+date: 2025/09/30
+logsource:
+  category: process_creation
+  product: macos
+detection:
+  selection1:
+    Image|re: '^/Users/Shared.*(/\.[a-zA-Z0-9]{1,255}$)'
+  condition: selection0
+falsepositives:
+  - None observed
+level: medium
+tags:
+  - attack.execution
+  - attack.t1059
