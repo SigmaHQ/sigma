@@ -1,0 +1,34 @@
+title: CVE-2025-49666 Windows SBEC Service Exploitation Detection
+id: a8d5c4e1-7b2f-4c3d-9e8a-1f5d6c7b8e9f
+status: experimental
+description: Detects exploitation attempts of CVE-2025-49666, a heap buffer overflow in Windows Setup and Boot Event Collection (SBEC) service that allows remote code execution
+references:
+  - https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-49666
+author: Patrick Maksimczuk
+date: 2025-12-06
+tags:
+  - attack.initial_access
+  - attack.t1190
+  - attack.execution
+  - attack.t1203
+  - cve.2025.49666
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  suspicious_child_process:
+    ParentImage|endswith: '\svchost.exe'
+    Image|endswith:
+      - '\cmd.exe'
+      - '\powershell.exe'
+      - '\wscript.exe'
+      - '\cscript.exe'
+    CommandLine|contains: 'sbsvc'
+  sbec_crash:
+    Image|endswith: '\WerFault.exe'
+    CommandLine|contains: 'sbsvc'
+  condition: suspicious_child_process or sbec_crash
+falsepositives:
+  - Windows updates and maintenance
+  - Some false positives may come up depending on your environment. All results should be investigated thoroughly before filtering out results.
+level: high
