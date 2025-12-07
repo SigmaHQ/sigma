@@ -3,7 +3,7 @@ id: f3b9c89d-4e5b-4d7d-8f37-9c6c3b1e9d34
 status: experimental
 description: Detects repeated SSH failed authentication attempts which may indicate brute-force activity.
 author: LB89-code
-date: 2025/12/03
+date: 2025-12-03
 
 references:
   - https://attack.mitre.org/techniques/T1110/001/
@@ -11,14 +11,13 @@ references:
 logsource:
   product: linux
   service: sshd
-  category: authentication
 
 detection:
-  failed_event:
+  selection:
     message|contains:
       - "Failed password"
       - "authentication failure"
-  condition: failed_event
+  condition: selection
 
 fields:
   - src_ip
@@ -32,4 +31,7 @@ falsepositives:
 
 level: medium
 
-tags: []
+tags:
+  - attack.credential-access
+  - attack.t1110
+  - attack.t1110.001
