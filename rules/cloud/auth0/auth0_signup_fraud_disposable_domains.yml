@@ -1,0 +1,68 @@
+title: Risk of signup fraud - rapid creation of fake accounts with disposable email domains
+id: 076804ab-2118-4e8a-9523-d5906bb26f1e
+status: experimental
+description: |
+    Detects potential signup fraud by monitoring the use of disposable emails.
+    Monitors for suspicious registration patterns using temporary email services.
+references:
+    - https://auth0.com/docs/manage-users/user-accounts/create-users
+    - https://github.com/auth0/auth0-customer-detections/
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.resource-development
+    - attack.t1136
+logsource:
+    product: auth0
+    service: signup
+detection:
+    selection:
+        data.type: "ss"
+        data.user_name|endswith:
+            - "@mailinator.com"
+            - "@yopmail.com"
+            - "@10minutemail.com"
+            - "@guerrillamail.com"
+            - "@temp-mail.org"
+            - "@disposable.com"
+            - "@mailnesia.com"
+            - "@sharklasers.com"
+            - "@getnada.com"
+            - "@mohmal.com"
+    condition: selection
+fields:
+    - data.type
+    - data.user_name
+    - data.user_id
+    - data.ip
+    - data.client_id
+falsepositives:
+    - Legitimate users using disposable email addresses for privacy reasons
+    - Testing or development activities using temporary emails
+    - Users avoiding spam by using disposable emails
+level: medium
+explanation: |
+    The query monitors successful signups events within a selected time window and validates if a disposable email has been used.
+    It alerts when the number of users with disposable emails exceeds a threshold.
+
+    Splunk Query:
+    index=auth0 data.type = "ss"
+    | bin _time span=1h
+    | search data.user_name IN ("*@mailinator.com", "*@yopmail.com", "*@10minutemail.com",
+    "*@guerrillamail.com", "*@temp-mail.org", "*@disposable.com", "*@mailnesia.com",
+    "*@sharklasers.com", "*@getnada.com", "*@mohmal.com")
+    | stats dc(data.user_name) as user_count values(data.user_name) as user_names
+    values(data.user_id) as user_ids by _time, data.type
+    | where user_count > {thresholds_disposable_emails}
+
+    Tenant Logs Query:
+    type:"fs" OR type:"ss" OR type:"signup_pwd_leak"
+comments:
+    - The Splunk query above shall be tuned to reflect a valid tenant name.
+    - The value for thresholds_disposable_emails should be set based on the customer's environment and expected behavior.
+    - To learn normality, it is recommended to run the query (excluding "where" clauses) for a period of time and calculate the thresholds based on the observed data.
+    - The query can be adjusted to account for a longer public blocklist, e.g. available on github, using a lookup table.
+    - Prevention - Use pre-registration actions to block any registration with disposable emails.
+    - Prevention - Force email validation built-in feature of a Database connection on signup.
+    - Prevention - Block or delete the created fraudulent accounts (terminating the sessions and revoking tokens).
