@@ -1,0 +1,28 @@
+title: Linux Security Capability Set Via Setfattr Utility
+id: 768cc7c9-b039-44f2-8ac3-3c370e58b03f
+status: experimental
+description: |
+    Detects the use of setfattr utility to modify security capabilities of a file.
+    The capability feature in Linux allows executable files to obtain specific permissions without needing traditional root privileges, which can be exploited for unauthorized access, privileges escalation or bypass security controls.
+    Unlike the standard setcap utility, the use of setfattr is not common in normal operations and could indicate stealthy and suspicious activity.
+references:
+    - https://man7.org/linux/man-pages/man1/setfattr.1.html
+author: Luc Génaux
+date: 2025-12-08
+tags:
+    - attack.privilege-escalation
+    - attack.defense-evasion
+    - attack.persistence
+    - attack.t1548
+    - attack.t1554
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '/setfattr'
+        CommandLine|contains: 'security.capability'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
