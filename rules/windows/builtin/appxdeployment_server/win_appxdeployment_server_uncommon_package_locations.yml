@@ -9,7 +9,7 @@ references:
     - https://news.sophos.com/en-us/2021/11/11/bazarloader-call-me-back-attack-abuses-windows-10-apps-mechanism/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023-01-11
-modified: 2025-10-17
+modified: 2025-12-03
 tags:
     - attack.defense-evasion
 logsource:
@@ -21,14 +21,15 @@ detection:
     filter_main_generic:
         Path|contains:
             # Paths can be written using forward slash if the "file://" protocol is used
-            - 'C:\Program Files\WindowsApps\'
             - 'C:\Program Files (x86)\'
-            - 'C:\Windows\SystemApps\'
-            - 'C:\Windows\PrintDialog\'
+            - 'C:\Program Files\'
+            - 'C:\Program Files\WindowsApps\'
             - 'C:\Windows\ImmersiveControlPanel\'
-            - 'x-windowsupdate://'
-            - 'file:///C:/Program%20Files' # Also covers 'file:///C:/Program%20Files%20(x86)/'
-            - 'AppData/Local/Temp/WinGet/Microsoft.Winget.Source'
+            - 'C:\Windows\PrintDialog\'
+            - 'C:\Windows\SystemApps\'
+            - 'file:///C:/Program%20Files/'
+            - 'file:///C:/Program%20Files%20(x86)/'
+            - 'file:///C:/Windows/System32/'
     filter_main_specific:
         Path|contains:
             - 'https://statics.teams.cdn.live.net/'
@@ -38,6 +39,12 @@ detection:
             - 'https://res.cdn.office.net' # Example https://res.cdn.office.net/nativehost/5mttl/installer/v2/1.2025.617.100/Microsoft.OutlookForWindows_x64.msix
     filter_optional_onedrive:
         Path|contains: 'AppData\Local\Microsoft\OneDrive\'
+    filter_optional_winget:
+        Path|contains:
+            - 'AppData/Local/Temp/WinGet/Microsoft.Winget.Source'
+            - 'AppData\Local\Temp\WinGet\Microsoft.Winget.Source'
+    filter_optional_x_windowsupdate:
+        Path|contains: 'x-windowsupdate://'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
