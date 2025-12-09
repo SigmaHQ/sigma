@@ -1,0 +1,28 @@
+title: Suspicious DNS Exfiltration via Invoke-DNSExfiltrator
+id: 3f5b2c1e-9d4a-4e2b-8c3a-1e2f4b5c6d7e
+status: experimental
+description: |
+  Detects potential DNS-based data exfiltration using the Invoke-DNSExfiltrator
+  PowerShell function, which requires the mandatory parameters -i, -d, and -p.
+author: Adept Adept
+date: 2025-12-09
+references:
+  - https://github.com/Arno0x/DNSExfiltrator/blob/24e8d0844c72e957dea8e0de70e6c7478a3f5af8/DNSExfiltrator.ps1
+tags:
+  - attack.exfiltration
+  - attack.t1048.003
+logsource:
+  product: windows
+  category: ps_script
+detection:
+  selection_cmdlet:
+    ScriptBlockText|contains: "Invoke-DNSExfiltrator"
+  selection_flags:
+    ScriptBlockText|contains|all:
+      - " -i "
+      - " -d "
+      - " -p "
+  condition: selection_cmdlet and selection_flags
+falsepositives:
+  - Unknown
+level: high
