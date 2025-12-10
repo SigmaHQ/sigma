@@ -25,9 +25,11 @@ detection:
     selection_lsass_calltrace:
         TargetImage|endswith: '\lsass.exe'
         CallTrace|contains:
-            - '\dbgcore.dll'
-            - '\dbghelp.dll'
-    # Uncomment below if this rule is generating too many false positives
+            - 'dbgcore.dll'
+            - 'dbghelp.dll'
+    # The following selection is commented out and not enabled by default because any access to LSASS with dbgcore.dll or dbghelp.dll in the call trace from uncommon locations is assumed to be suspicious,
+    # but it may reduce false positives if the rule is too noisy. These GrantedAccess bits are commonly used for dumping LSASS memory.
+    # Uncomment if you observe false positives with the default rule.
     # selection_granted_access:
     #     GrantedAccess|contains:
     #         - '0x1fffff'
