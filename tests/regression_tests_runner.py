@@ -575,7 +575,8 @@ def check_rule_id_consistency(rules_with_tests: List[Dict]) -> List[Dict]:
                     "issue": "rule_vs_info_metadata_mismatch",
                     "expected": rule_id,
                     "actual": info_metadata_rule_id,
-                    "message": f"Rule ID '{rule_id}' in rule file does not match info.yml rule_metadata[0].id '{info_metadata_rule_id}'",
+                    "message": f"Rule ID '{rule_id}' in rule file does not match "
+                    f"info.yml rule_metadata[0].id '{info_metadata_rule_id}'",
                 }
             )
 
@@ -601,7 +602,8 @@ def check_rule_id_consistency(rules_with_tests: List[Dict]) -> List[Dict]:
                             "issue": "rule_vs_testfile_mismatch",
                             "expected": expected_filename,
                             "actual": filename,
-                            "message": f"Rule ID '{rule_id}' does not match test file name '{name_without_ext}' (expected: {rule_id}{file_ext})",
+                            "message": f"Rule ID '{rule_id}' does not match test file"
+                            f"name '{name_without_ext}' (expected: {rule_id}{file_ext})",
                         }
                     )
 
