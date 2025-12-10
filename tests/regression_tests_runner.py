@@ -623,7 +623,6 @@ def check_rule_id_consistency(rules_with_tests: List[Dict]) -> List[Dict]:
         print("1. Rule files ID and their info.yml rule_metadata[0].id")
         print("2. Rule files ID and their test file names (EVTX/JSON files)")
         print("   Note: JSON files are optional conversions of EVTX files")
-        sys.exit(1)
     return inconsistent_rules
 
 def main():
@@ -640,8 +639,10 @@ def main():
     print(f"Found {len(rules_with_tests)} rule(s) with regression tests configured.\n")
 
     print("Checking for rule ID consistency...")
-    check_rule_id_consistency(rules_with_tests)
     print()
+    inconsistent_rules = check_rule_id_consistency(rules_with_tests)
+    if inconsistent_rules:
+        sys.exit(1)
 
     validate_missing_tests(args, rules_with_tests, missing_regression_tests_path)
     check_missing_test_files(missing_files)
