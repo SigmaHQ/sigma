@@ -87,12 +87,12 @@ def load_info_yaml(
                 }
             )
         info_metadata_rule_id = None
-        for rules in rule_metadata:
-            if not isinstance(rules, dict):
+        for metadata_entry in rule_metadata:
+            if not isinstance(metadata_entry, dict):
                 continue
-            info_metadata_rule_id = rules.get("id", "")
+            info_metadata_rule_id = metadata_entry.get("id", "")
 
-        if test_data and info_metadata_rule_id:
+        if test_data:
             results.append(
                 {
                     "path": file_path,
@@ -553,7 +553,17 @@ def check_rule_id_consistency(rules_with_tests: List[Dict]) -> List[Dict]:
         tests = rule_info.get("tests", [])
         
         # Check rule ID vs info.yml rule_metadata[0].id consistency
-        if rule_id != info_metadata_rule_id:
+        if not info_metadata_rule_id:
+            inconsistent_rules.append({
+                "rule_id": rule_id,
+                "info_metadata_rule_id": info_metadata_rule_id,
+                "rule_path": rule_path,
+                "issue": "missing_info_metadata_rule_id",
+                "expected": rule_id,
+                "actual": info_metadata_rule_id,
+                "message": "info.yml is missing rule_metadata or rule_metadata[0].id"
+            })
+        elif rule_id != info_metadata_rule_id:
             inconsistent_rules.append({
                 "rule_id": rule_id,
                 "info_metadata_rule_id": info_metadata_rule_id,
