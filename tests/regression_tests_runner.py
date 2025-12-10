@@ -98,7 +98,7 @@ def load_info_yaml(
                     "path": file_path,
                     "id": rule_id,
                     "tests": test_data,
-                    "info_metadata_rule_id": info_metadata_rule_id
+                    "info_metadata_rule_id": info_metadata_rule_id,
                 }
             )
 
@@ -537,43 +537,48 @@ def print_summary(total_tests: int, passed_tests: int, failures: List[Dict]) -> 
 
     print("=" * 60)
 
+
 def check_rule_id_consistency(rules_with_tests: List[Dict]) -> List[Dict]:
     """Check if rule IDs are consistent between rule files and their info.yml files.
     Also checks if rule IDs match the test file names.
-    
+
     Returns:
         List of dicts containing information about inconsistent rule IDs
     """
     inconsistent_rules = []
-    
+
     for rule_info in rules_with_tests:
         rule_id = rule_info["id"]
         info_metadata_rule_id = rule_info.get("info_metadata_rule_id", "")
         rule_path = rule_info["path"]
         tests = rule_info.get("tests", [])
-        
+
         # Check rule ID vs info.yml rule_metadata[0].id consistency
         if not info_metadata_rule_id:
-            inconsistent_rules.append({
-                "rule_id": rule_id,
-                "info_metadata_rule_id": info_metadata_rule_id,
-                "rule_path": rule_path,
-                "issue": "missing_info_metadata_rule_id",
-                "expected": rule_id,
-                "actual": info_metadata_rule_id,
-                "message": "info.yml is missing rule_metadata or rule_metadata[0].id"
-            })
+            inconsistent_rules.append(
+                {
+                    "rule_id": rule_id,
+                    "info_metadata_rule_id": info_metadata_rule_id,
+                    "rule_path": rule_path,
+                    "issue": "missing_info_metadata_rule_id",
+                    "expected": rule_id,
+                    "actual": info_metadata_rule_id,
+                    "message": "info.yml is missing rule_metadata or rule_metadata[0].id",
+                }
+            )
         elif rule_id != info_metadata_rule_id:
-            inconsistent_rules.append({
-                "rule_id": rule_id,
-                "info_metadata_rule_id": info_metadata_rule_id,
-                "rule_path": rule_path,
-                "issue": "rule_vs_info_metadata_mismatch",
-                "expected": rule_id,
-                "actual": info_metadata_rule_id,
-                "message": f"Rule ID '{rule_id}' in rule file does not match info.yml rule_metadata[0].id '{info_metadata_rule_id}'"
-            })
-        
+            inconsistent_rules.append(
+                {
+                    "rule_id": rule_id,
+                    "info_metadata_rule_id": info_metadata_rule_id,
+                    "rule_path": rule_path,
+                    "issue": "rule_vs_info_metadata_mismatch",
+                    "expected": rule_id,
+                    "actual": info_metadata_rule_id,
+                    "message": f"Rule ID '{rule_id}' in rule file does not match info.yml rule_metadata[0].id '{info_metadata_rule_id}'",
+                }
+            )
+
         # Check rule ID vs test file name consistency
         for test in tests:
             test_path = test.get("path", "")
@@ -582,44 +587,57 @@ def check_rule_id_consistency(rules_with_tests: List[Dict]) -> List[Dict]:
                 filename = os.path.basename(test_path)
                 name_without_ext = os.path.splitext(filename)[0]
                 file_ext = os.path.splitext(filename)[1].lower()
-                
+
                 # Check if the filename (without extension) matches the rule ID
                 # Only check for .evtx and .json files (.json is optional conversion of .evtx)
-                if file_ext in ['.evtx', '.json'] and name_without_ext != rule_id:
+                if file_ext in [".evtx", ".json"] and name_without_ext != rule_id:
                     expected_filename = f"{rule_id}{file_ext}"
-                    inconsistent_rules.append({
-                        "rule_id": rule_id,
-                        "test_filename": filename,
-                        "rule_path": rule_path,
-                        "test_path": test_path,
-                        "issue": "rule_vs_testfile_mismatch",
-                        "expected": expected_filename,
-                        "actual": filename,
-                        "message": f"Rule ID '{rule_id}' does not match test file name '{name_without_ext}' (expected: {rule_id}{file_ext})"
-                    })
-    
+                    inconsistent_rules.append(
+                        {
+                            "rule_id": rule_id,
+                            "test_filename": filename,
+                            "rule_path": rule_path,
+                            "test_path": test_path,
+                            "issue": "rule_vs_testfile_mismatch",
+                            "expected": expected_filename,
+                            "actual": filename,
+                            "message": f"Rule ID '{rule_id}' does not match test file name '{name_without_ext}' (expected: {rule_id}{file_ext})",
+                        }
+                    )
+
     if inconsistent_rules:
         print("\nERROR: Found rule ID inconsistencies:")
         print("=" * 60)
         print()
-        
+
         # Group by issue type for better readability
-        rule_vs_info_issues = [r for r in inconsistent_rules if r.get("issue") in ["rule_vs_info_metadata_mismatch", "missing_info_metadata_rule_id"]]
-        rule_vs_testfile_issues = [r for r in inconsistent_rules if r.get("issue") == "rule_vs_testfile_mismatch"]
-        
+        rule_vs_info_issues = [
+            r
+            for r in inconsistent_rules
+            if r.get("issue")
+            in ["rule_vs_info_metadata_mismatch", "missing_info_metadata_rule_id"]
+        ]
+        rule_vs_testfile_issues = [
+            r
+            for r in inconsistent_rules
+            if r.get("issue") == "rule_vs_testfile_mismatch"
+        ]
+
         if rule_vs_info_issues:
             print("RULE ID vs INFO.YML RULE_METADATA[0].ID MISMATCHES:")
             print("-" * 50)
             for inconsistent in rule_vs_info_issues:
                 print(f"Rule file ID: {inconsistent['rule_id']}")
-                print(f"Info.yml rule_metadata[0].id: {inconsistent['info_metadata_rule_id']}")
+                print(
+                    f"Info.yml rule_metadata[0].id: {inconsistent['info_metadata_rule_id']}"
+                )
                 print(f"Expected: {inconsistent['expected']}")
                 print(f"Actual: {inconsistent['actual']}")
                 print(f"Rule file: {inconsistent['rule_path']}")
                 print(f"Message: {inconsistent['message']}")
                 print("-" * 50)
                 print()
-        
+
         if rule_vs_testfile_issues:
             print("RULE ID vs TEST FILE NAME MISMATCHES:")
             print("-" * 40)
@@ -631,13 +649,14 @@ def check_rule_id_consistency(rules_with_tests: List[Dict]) -> List[Dict]:
                 print(f"Test file: {inconsistent['test_path']}")
                 print(f"{inconsistent['message']}")
                 print()
-        
+
         print("<=>" * 20)
         print("Rule IDs must match between:")
         print("1. Rule files ID and their info.yml rule_metadata[0].id")
         print("2. Rule files ID and their test file names (EVTX/JSON files)")
         print("   Note: JSON files are optional conversions of EVTX files")
     return inconsistent_rules
+
 
 def main():
     """Main function to run regression tests for Sigma rules."""
