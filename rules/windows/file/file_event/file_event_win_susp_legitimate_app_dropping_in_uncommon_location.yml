@@ -1,0 +1,68 @@
+title: Legitimate Application Writing Files In Uncommon Location
+id: 2bc87b93-1e23-49af-af3e-13a571791b84
+status: experimental
+description: Detects programs on a Windows system that should not write executables to disk in uncommon locations
+references:
+    - https://lolbas-project.github.io/#/download
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-12-10
+tags:
+    - attack.defense-evasion
+    - attack.t1218
+    - attack.command-and-control
+    - attack.t1105
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection_img:
+        Image|endswith:
+            # Microsoft Office Programs Dropping Executables / Rest of the apps are covered in: c7a74c80-ba5a-486e-9974-ab9e682bc5e4
+            - '\eqnedt32.exe'
+            - '\wordpad.exe'
+            - '\wordview.exe'
+            # LOLBINs that can be used to download executables
+            - '\cmdl32.exe'
+            - '\certutil.exe'
+            - '\certoc.exe'
+            - '\CertReq.exe'
+            - '\bitsadmin.exe'
+            - '\Desktopimgdownldr.exe'
+            - '\esentutl.exe'
+            - '\expand.exe'
+            - '\extrac32.exe'
+            - '\replace.exe'
+            - '\squirrel.exe'
+            - '\mshta.exe'
+            - '\ftp.exe'
+            - '\Ldifde.exe'
+            # Executables that should never drop an executable to disk (but may after a previous process injection or if it's malware that uses a legitimate name)
+            - '\AcroRd32.exe'
+            - '\RdrCEF.exe'
+            - '\hh.exe'
+            - '\finger.exe'
+            - '\findstr.exe'
+    selection_locations:
+        TargetFilename|contains:
+            - ':\Perflogs'
+            - ':\ProgramData\'
+            - ':\Temp\'
+            - ':\Users\Public\'
+            - ':\Windows\'
+            - '\$Recycle.Bin\'
+            - '\AppData\Local\'
+            - '\AppData\Roaming\'
+            - '\Contacts\'
+            - '\Desktop\'
+            - '\Favorites\'
+            - '\Favourites\'
+            - '\inetpub\wwwroot\'
+            - '\Music\'
+            - '\Pictures\'
+            - '\Start Menu\Programs\Startup\'
+            - '\Users\Default\'
+            - '\Videos\'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
