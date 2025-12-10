@@ -8,7 +8,7 @@ references:
     - Internal Research
 author: Sander Wiebing, Tim Shelton, Nasreddine Bencherchali (Nextron Systems)
 date: 2020-05-26
-modified: 2025-10-07
+modified: 2025-12-03
 tags:
     - attack.defense-evasion
     - attack.t1036.005
@@ -101,6 +101,11 @@ detection:
             - 'C:\Windows\SysWOW64\'
             - 'C:\Windows\WinSxS\'
             - 'C:\Windows\uus\'
+    filter_main_tiworker:
+        Image|endswith:
+            - '\TiWorker.exe'
+            - '\wuaucltcore.exe'
+        TargetFilename|startswith: 'C:\Windows\Temp\'
     filter_main_svchost:
         Image|endswith:
             - 'C:\Windows\system32\svchost.exe'
@@ -110,9 +115,10 @@ detection:
             - 'C:\Program Files (x86)\WindowsApps\'
             - '\AppData\Local\Microsoft\WindowsApps\'
     filter_main_wuauclt:
-        Image|endswith:
+        Image:
             - 'C:\Windows\System32\wuauclt.exe'
             - 'C:\Windows\SysWOW64\wuauclt.exe'
+            - 'C:\Windows\UUS\arm64\wuaucltcore.exe'
     filter_main_explorer:
         TargetFilename|endswith: 'C:\Windows\explorer.exe'
     filter_main_msiexec:
