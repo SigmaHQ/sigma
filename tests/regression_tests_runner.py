@@ -570,7 +570,8 @@ def check_rule_id_consistency(rules_with_tests: List[Dict]) -> List[Dict]:
                 "rule_path": rule_path,
                 "issue": "rule_vs_info_metadata_mismatch",
                 "expected": rule_id,
-                "actual": info_metadata_rule_id
+                "actual": info_metadata_rule_id,
+                "message": f"Rule ID '{rule_id}' in rule file does not match info.yml rule_metadata[0].id '{info_metadata_rule_id}'"
             })
         
         # Check rule ID vs test file name consistency
@@ -593,7 +594,8 @@ def check_rule_id_consistency(rules_with_tests: List[Dict]) -> List[Dict]:
                         "test_path": test_path,
                         "issue": "rule_vs_testfile_mismatch",
                         "expected": expected_filename,
-                        "actual": filename
+                        "actual": filename,
+                        "message": f"Rule ID '{rule_id}' does not match test file name '{name_without_ext}' (expected: {rule_id}{file_ext})"
                     })
     
     if inconsistent_rules:
@@ -602,7 +604,7 @@ def check_rule_id_consistency(rules_with_tests: List[Dict]) -> List[Dict]:
         print()
         
         # Group by issue type for better readability
-        rule_vs_info_issues = [r for r in inconsistent_rules if r.get("issue") == "rule_vs_info_metadata_mismatch"]
+        rule_vs_info_issues = [r for r in inconsistent_rules if r.get("issue") in ["rule_vs_info_metadata_mismatch", "missing_info_metadata_rule_id"]]
         rule_vs_testfile_issues = [r for r in inconsistent_rules if r.get("issue") == "rule_vs_testfile_mismatch"]
         
         if rule_vs_info_issues:
@@ -614,6 +616,7 @@ def check_rule_id_consistency(rules_with_tests: List[Dict]) -> List[Dict]:
                 print(f"Expected: {inconsistent['expected']}")
                 print(f"Actual: {inconsistent['actual']}")
                 print(f"Rule file: {inconsistent['rule_path']}")
+                print(f"Message: {inconsistent['message']}")
                 print("-" * 50)
                 print()
         
@@ -626,6 +629,7 @@ def check_rule_id_consistency(rules_with_tests: List[Dict]) -> List[Dict]:
                 print(f"Actual filename: {inconsistent['actual']}")
                 print(f"Rule file: {inconsistent['rule_path']}")
                 print(f"Test file: {inconsistent['test_path']}")
+                print(f"{inconsistent['message']}")
                 print()
         
         print("<=>" * 20)
