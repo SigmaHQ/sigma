@@ -1,0 +1,41 @@
+title: Windows AppX Deployment Full Trust Package Installation
+id: e54279c7-4910-4e2c-902c-c56a25b549f6
+status: experimental
+description: Detects the installation of MSIX/AppX packages with full trust privileges which run with elevated privileges outside normal AppX container restrictions
+references:
+    - https://www.splunk.com/en_us/blog/security/msix-weaponization-threat-detection-splunk.html
+author: Michael Haag, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-11-03
+tags:
+    - attack.defense-evasion
+    - attack.execution
+    - attack.t1204.002
+    - attack.t1553.005
+logsource:
+    product: windows
+    service: appxdeployment-server
+detection:
+    selection:
+        EventID: 400
+        HasFullTrust: true
+    filter_main_legitpath:
+        PackageSourceUri|startswith:
+            - 'file:///C:/Program%20Files/'
+            - 'file:///C:/Program%20Files%20(x86)/'
+    filter_main_microsoft:
+        - PackageSourceUri|startswith: 'https://go.microsoft.com/fwlink/?linkid'
+        - PackageSourceUri|contains:
+              - '.cdn.microsoft.com'
+              - '.cdn.office.net/'
+    filter_main_callerprocess:
+        CallingProcess|startswith:
+            - 'sysprep.exe'
+            - 'svchost.exe,AppReadiness'
+    filter_optional_x_update:
+        PackageSourceUri|startswith: 'x-windowsupdate://'
+    filter_optional_microsoftclient:
+        PackageFullName|startswith: 'MicrosoftWindows.Client.'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Some legitimate applications installation which have been missed from filtering can generate fps, thus baselining and tuning is recommended before deploying to production
+level: medium
