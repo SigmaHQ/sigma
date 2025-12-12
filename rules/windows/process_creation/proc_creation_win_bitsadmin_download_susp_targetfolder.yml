@@ -1,5 +1,10 @@
 title: File Download Via Bitsadmin To A Suspicious Target Folder
 id: 2ddef153-167b-4e89-86b6-757a9e65dcac
+related:
+    - id: 6e30c82f-a9f8-4aab-b79c-7c12bce6f248
+      type: obsolete
+    - id: 1cf465a1-2609-4c15-9b66-c32dbe4bfd67
+      type: similar
 status: test
 description: Detects usage of bitsadmin downloading a file to a suspicious target folder
 references:
@@ -9,13 +14,15 @@ references:
     - https://blog.talosintelligence.com/breaking-the-silence-recent-truebot-activity/
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2022-06-28
-modified: 2023-05-30
+modified: 2025-12-10
 tags:
     - attack.defense-evasion
     - attack.persistence
     - attack.t1197
     - attack.s0190
     - attack.t1036.003
+    - attack.command-and-control
+    - attack.t1105
 logsource:
     category: process_creation
     product: windows
@@ -35,12 +42,30 @@ detection:
             - ':\Temp\'
             - ':\Users\Public\'
             - ':\Windows\'
-            - '\AppData\Local\Temp\'
+            - '\$Recycle.Bin\'
+            - '\AppData\Local\'
             - '\AppData\Roaming\'
+            - '\Contacts\'
             - '\Desktop\'
+            - '\Favorites\'
+            - '\Favourites\'
+            - '\inetpub\wwwroot\'
+            - '\Music\'
+            - '\Pictures\'
+            - '\Start Menu\Programs\Startup\'
+            - '\Users\Default\'
+            - '\Videos\'
             - '%ProgramData%'
             - '%public%'
+            - '%temp%'
+            - '%tmp%'
     condition: all of selection_*
 falsepositives:
     - Unknown
 level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_bitsadmin_download_susp_targetfolder/info.yml
+simulation:
+    - type: atomic-red-team
+      name: Windows - BITSAdmin BITS Download
+      technique: T1105
+      atomic_guid: a1921cd3-9a2d-47d5-a891-f1d0f2a7a31b
