@@ -18,7 +18,7 @@ references:
     - https://www.virustotal.com/gui/file/d6f6bc10ae0e634ed4301d584f61418cee18e5d58ad9af72f8aa552dc4aaeca3/behavior
 author: TropChaud
 date: 2023-01-26
-modified: 2023-12-19
+modified: 2025-12-15
 tags:
     - attack.discovery
     - attack.t1082
@@ -26,15 +26,31 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_wmic:
+    selection_img:
         - Description: 'WMI Commandline Utility'
         - OriginalFileName: 'wmic.exe'
         - Image|endswith: '\WMIC.exe'
-    selection_commands:
+    selection_cli_logicaldisk:
         CommandLine|contains:
-            - 'LOGICALDISK get Name,Size,FreeSpace'
-            - 'os get Caption,OSArchitecture,Version'
-    condition: all of selection_*
+            - ' LOGICALDISK '
+            - ' get '
+            - 'Name'
+            - 'Size'
+            - 'FreeSpace'
+    selection_cli_os:
+        CommandLine|contains:
+            - ' os '
+            - ' get '
+            - 'Caption'
+            - 'OSArchitecture'
+            - 'Version'
+    condition: selection_img and 1 of selection_cli_*
 falsepositives:
     - Unknown
 level: medium
+simulation:
+    - type: atomic-red-team
+      name: System Information Discovery with WMIC
+      technique: T1082
+      atomic_guid: 8851b73a-3624-4bf7-8704-aa312411565c
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_wmic_recon_system_info_uncommon/info.yml

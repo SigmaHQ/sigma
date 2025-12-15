@@ -13,7 +13,7 @@ references:
     - https://www.absolomb.com/2018-01-26-Windows-Privilege-Escalation-Guide/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-06-20
-modified: 2023-09-11
+modified: 2025-12-15
 tags:
     - attack.execution
     - attack.t1047
@@ -26,9 +26,14 @@ detection:
         - Image|endswith: '\WMIC.exe'
     selection_cli:
         CommandLine|contains|all:
-            - ' service get '
-            - 'name,displayname,pathname,startmode'
-    condition: all of selection*
+            - ' service '
+            - ' get '
+            - 'name'
+            - 'displayname'
+            - 'pathname'
+            - 'startmode'
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: medium
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_wmic_recon_unquoted_service_search/info.yml

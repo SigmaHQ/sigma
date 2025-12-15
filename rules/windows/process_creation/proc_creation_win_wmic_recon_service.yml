@@ -14,6 +14,7 @@ references:
     - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/wmic
 author: frack113, Nasreddine Bencherchali (Nextron Systems)
 date: 2023-02-14
+modified: 2025-12-15
 tags:
     - attack.execution
     - attack.t1047
@@ -26,7 +27,18 @@ detection:
         - OriginalFileName: 'wmic.exe'
     selection_cli:
         CommandLine|contains: 'service'
-    condition: all of selection_*
+    filter_main_manipulation:
+        # Duplicate with 0b7163dc-7eee-4960-af17-c0cd517f92da
+        CommandLine|contains::
+            - 'stopservice'
+            - 'startservice'
+    condition: all of selection_* and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: medium
+simulation:
+    - type: atomic-red-team
+      name: WMI Reconnaissance List Remote Services
+      technique: T1047
+      atomic_guid: 0fd48ef7-d890-4e93-a533-f7dedd5191d3
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_wmic_recon_service/info.yml
