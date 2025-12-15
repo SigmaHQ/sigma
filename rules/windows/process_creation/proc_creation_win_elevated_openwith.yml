@@ -1,0 +1,25 @@
+title: Process Execution of Elevated OpenWith.exe
+id: bd759006-f077-429e-819c-1cba0b3a13bb
+status: test
+description: Detects the use of OpenWith.exe with elevated privileges. While not malicious itself, it might be part of a chain of actions leading to privilege escalation, as subsequent process executions might lead to an interactive shell with elevated privileges.
+references:
+    - https://r.sec-consult.com/msi
+    - https://msrc.microsoft.com/update-guide/en-US/advisory/CVE-2024-38014
+author: Herbert Bärschneider @SEC Consult
+date: 2024-07-15
+tags:
+    - cve.2024-38014
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_openwith:
+        Image|endswith: '\OpenWith.exe'
+    selection_user:
+        User|contains:
+            - 'AUTHORI'
+            - 'AUTORI'
+        LogonId: '0x3e7'
+    condition: selection_openwith and selection_user
+level: medium
+
