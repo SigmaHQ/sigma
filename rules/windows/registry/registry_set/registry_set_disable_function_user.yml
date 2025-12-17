@@ -1,17 +1,23 @@
 title: Disable Internal Tools or Feature in Registry
 id: e2482f8d-3443-4237-b906-cc145d87a076
+related:
+    - id: 1c3121ed-041b-4d97-a075-07f54f20fb4a
+      type: obsolete
+    - id: ccc946a3-f65a-432a-bb6f-efc6acc1fd27
+      type: similar
 status: test
 description: Detects registry modifications that change features of internal Windows tools (malware like Agent Tesla uses this technique)
 references:
-    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1112/T1112.md
-    - https://www.mandiant.com/resources/unc2165-shifts-to-evade-sanctions
+    - https://bazaar.abuse.ch/sample/7bde840c7e8c36dce4c3bac937bcf39f36a6f118001b406bfbbc25451ce44fb4/
     - https://blogs.vmware.com/security/2022/11/batloader-the-evasive-downloader-malware.html
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1112/T1112.md
     - https://www.malwarebytes.com/blog/detections/pum-optional-nodispbackgroundpage
     - https://www.malwarebytes.com/blog/detections/pum-optional-nodispcpl
-    - https://bazaar.abuse.ch/sample/7bde840c7e8c36dce4c3bac937bcf39f36a6f118001b406bfbbc25451ce44fb4/
+    - https://www.mandiant.com/resources/unc2165-shifts-to-evade-sanctions
+    - https://www.sentinelone.com/blog/cybervolk-returns-flawed-volklocker-brings-new-features-with-growing-pains/
 author: frack113, Nasreddine Bencherchali (Nextron Systems), CrimpSec
 date: 2022-03-18
-modified: 2025-06-04
+modified: 2025-12-17
 tags:
     - attack.persistence
     - attack.defense-evasion
@@ -23,8 +29,20 @@ detection:
     selection_set_1:
         TargetObject|endswith:
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisableCMD'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\HideSCAHealth'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\HideSCANetwork'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\HideSCAVolume'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoClose'
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoControlPanel'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoDesktop'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoDrives'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoFileMenu'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoFind'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoLogOff'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoPropertiesMyDocuments'
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoRun'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoSetTaskbar'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoTrayContextMenu'
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\StartMenuLogOff'
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\DisableChangePassword'
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\DisableLockWorkstation'
@@ -35,10 +53,13 @@ detection:
             - 'SOFTWARE\Policies\Microsoft\Windows\Explorer\DisableNotificationCenter'
             - 'SOFTWARE\Policies\Microsoft\Windows\System\DisableCMD'
         Details: 'DWORD (0x00000001)'
+    selection_set_2:
+        TargetObject|endswith: 'SOFTWARE\Policies\Microsoft\Windows\System\DisableCMD'
+        Details: 'DWORD (0x00000002)'
     selection_set_0:
         TargetObject|endswith:
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin'
-            - 'Software\Microsoft\Windows\CurrentVersion\Policies\System\InactivityTimeoutSecs'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\InactivityTimeoutSecs'
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\shutdownwithoutlogon'
             - 'SOFTWARE\Microsoft\Windows\CurrentVersion\PushNotifications\ToastEnabled'
             - 'SYSTEM\CurrentControlSet\Control\Storage\Write Protection'

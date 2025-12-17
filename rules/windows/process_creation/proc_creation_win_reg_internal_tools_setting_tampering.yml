@@ -1,0 +1,67 @@
+title: Registry Tampering Of Internal Tools Settings
+id: ccc946a3-f65a-432a-bb6f-efc6acc1fd27
+related:
+    - id: e2482f8d-3443-4237-b906-cc145d87a076
+      type: similar
+status: test
+description: Detects registry modifications that tamper with internal Windows tools settings, commonly used by malware to disable security features or system tools
+references:
+    - https://bazaar.abuse.ch/sample/7bde840c7e8c36dce4c3bac937bcf39f36a6f118001b406bfbbc25451ce44fb4/
+    - https://blogs.vmware.com/security/2022/11/batloader-the-evasive-downloader-malware.html
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1112/T1112.md
+    - https://www.mandiant.com/resources/unc2165-shifts-to-evade-sanctions
+    - https://www.sentinelone.com/blog/cybervolk-returns-flawed-volklocker-brings-new-features-with-growing-pains/
+author: frack113, Nasreddine Bencherchali (Nextron Systems), CrimpSec, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2022-03-18
+modified: 2025-12-17
+tags:
+    - attack.persistence
+    - attack.defense-evasion
+    - attack.t1112
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_reg_img:
+        - Image|endswith: '\reg.exe'
+        - OriginalFileName: 'reg.exe'
+    selection_reg_cli:
+        CommandLine|contains: 'add'
+    selection_currentversion_explorer_system_root:
+        CommandLine|contains:
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer'
+            - 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
+            - 'SOFTWARE\Policies\Microsoft\Windows\Explorer'
+            - 'SOFTWARE\Policies\Microsoft\Windows\System'
+    selection_currentversion_explorer_system_key:
+        CommandLine|contains:
+            - 'DisableCMD'
+            - 'HideSCAHealth'
+            - 'HideSCANetwork'
+            - 'HideSCAVolume'
+            - 'NoClose'
+            - 'NoControlPanel'
+            - 'NoDesktop'
+            - 'NoDrives'
+            - 'NoFileMenu'
+            - 'NoFind'
+            - 'NoLogOff'
+            - 'NoPropertiesMyDocuments'
+            - 'NoRun'
+            - 'NoSetTaskbar'
+            - 'NoTrayContextMenu'
+            - 'StartMenuLogOff'
+            - 'DisableChangePassword'
+            - 'DisableLockWorkstation'
+            - 'DisableRegistryTools'
+            - 'DisableTaskmgr'
+            - 'NoDispBackgroundPage'
+            - 'NoDispCPL'
+            - 'DisableNotificationCenter'    
+            - 'ConsentPromptBehaviorAdmin'
+            - 'InactivityTimeoutSecs'
+            - 'shutdownwithoutlogon'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use of reg.exe to change system settings
+level: medium
