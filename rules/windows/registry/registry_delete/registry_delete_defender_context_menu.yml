@@ -12,6 +12,7 @@ references:
     - https://blog.malwarebytes.com/malwarebytes-news/2021/02/lazyscripter-from-empire-to-double-rat/
 author: 'Matt Anderson (Huntress)'
 date: 2025-07-11
+modified: 2025-10-07
 tags:
     - attack.defense-evasion
 logsource:
@@ -20,7 +21,13 @@ logsource:
 detection:
     selection:
         TargetObject|contains: 'shellex\ContextMenuHandlers\EPP'
-    condition: selection
+    filter_main_defender:
+        Image|startswith:
+            - 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+            - 'C:\Program Files\Windows Defender\'
+            - 'C:\Program Files (x86)\Windows Defender\'
+        Image|endswith: '\MsMpEng.exe'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unlikely as this weakens defenses and normally would not be done even if using another AV.
 level: medium

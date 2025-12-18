@@ -1,0 +1,30 @@
+title: Active Directory Kerberos DLL Loaded Via Office Application
+id: 7417e29e-c2e7-4cf6-a2e8-767228c64837
+status: deprecated # In the AD Environment, kerberos.dll is loaded everytime an Office application is launched, so this rule is not useful.
+description: Detects Kerberos DLL being loaded by an Office Product
+references:
+    - https://medium.com/threatpunter/detecting-adversary-tradecraft-with-image-load-event-logging-and-eql-8de93338c16
+author: Antonlovesdnb
+date: 2020-02-19
+modified: 2025-10-22
+tags:
+    - attack.execution
+    - attack.t1204.002
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\excel.exe'
+            - '\mspub.exe'
+            - '\onenote.exe'
+            - '\onenoteim.exe' # Just in case
+            - '\outlook.exe'
+            - '\powerpnt.exe'
+            - '\winword.exe'
+        ImageLoaded|endswith: '\kerberos.dll'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
