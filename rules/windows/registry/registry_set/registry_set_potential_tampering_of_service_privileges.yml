@@ -1,12 +1,13 @@
-title: Suspicious Privilege Addition To Existing Service
+title: Potential Tampering of Service Privileges in Registry
 id: ad682e11-8144-4de0-aa39-1cfcd5ebb64e
 related:
     - id: 75c4773e-7b0d-4221-a862-d7c5f5278a7d
       type: similar
 status: experimental
 description: |
-    Detects additions of suspicious privileges to the service which could indicate preparation for EDR bypass or kernel driver loading.
+    Detects potentially suspicious modifications to the Windows Registry that add suspicious privileges to services, potentially indicating preparation for EDR bypass or kernel driver loading.
     These elevated privileges enable loading kernel drivers, which can bypass or disable Endpoint Detection and Response (EDR) tools on the compromised system.
+    If privileges like 'SeLoadDriverPrivilege' or 'SeDebugPrivilege' are added to a service, it may indicate malicious intent to escalate privileges or evade security measures.
 references:
     - https://blog.fox-it.com/2025/09/01/three-lazarus-rats-coming-for-your-cheese/
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
@@ -22,12 +23,17 @@ logsource:
     product: windows
 detection:
     selection:
+        Image|endswith:
+            - '\reg.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
         TargetObject|contains: '\SYSTEM\CurrentControlSet\Services\'
         TargetObject|endswith: '\RequiredPrivileges'
-        Details|contains|all:
-            - 'SeLoadDriverPrivilege'
-            - 'SeDebugPrivilege'
+        Details: 'Binary Data'
     condition: selection
 falsepositives:
     - Legitimate service configuration changes by administrators or authorized software.
+    - Some binaries like reg.exe may be used by installers or system management tools, thus use baselining to reduce false positives before pushing to production.
 level: medium # Keep as medium due to potential for false positives
