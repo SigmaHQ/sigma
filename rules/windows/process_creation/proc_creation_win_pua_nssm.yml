@@ -1,0 +1,41 @@
+title: PUA - NSSM Execution
+id: 5ded8ee2-26b0-4702-be05-29e32694a5e0
+related:
+    - id: 42cfbb02-230b-431e-b352-4ec7876ca03b
+      type: similar
+status: experimental
+description: |
+    Detects execution of PUA 'NSSM' (the Non-Sucking Service Manager) which a legitimate tool for managing Windows services,
+    but is often abused by threat actors to maintain persistence by installing malicious payloads as system services.
+references:
+    - https://www.sophos.com/en-us/blog/sharpening-the-knife-gold-blades-strategic-evolution
+    - https://thedfirreport.com/2020/04/20/sqlserver-or-the-miner-in-the-basement/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-12-19
+tags:
+    - attack.persistence
+    - attack.t1543.003
+    - attack.execution
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\nssm.exe'
+        - Description: 'The non-sucking service manager'
+        - OriginalFileName: 'nssm.exe'
+    selection_cli:
+        CommandLine|contains:
+            - 'install'
+            - 'start'
+            - 'stop'
+            - 'restart'
+    filter_main_legit_path:
+        # NSSM comes pre-installed with some legitimate software suites or is found legitimately in program files folder
+        Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - NSSM is legitimately used by several applications and administrators to manage Windows services. Thus, it is recommended to baseline in your environment before deploying in production.
+level: medium

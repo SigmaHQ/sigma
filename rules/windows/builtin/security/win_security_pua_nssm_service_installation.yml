@@ -1,0 +1,37 @@
+title: PUA - NSSM Service Installation
+id: 42cfbb02-230b-431e-b352-4ec7876ca03b
+related:
+    - id: 5ded8ee2-26b0-4702-be05-29e32694a5e0
+      type: similar
+status: experimental
+description: |
+    Detects potentially suspicious service installations using NSSM (Non-Sucking Service Manager). NSSM is a legitimate tool for managing Windows services.
+    However, it is often abused by threat actors to maintain persistence by installing malicious payloads as system services.
+references:
+    - https://www.sophos.com/en-us/blog/sharpening-the-knife-gold-blades-strategic-evolution
+    - https://thedfirreport.com/2020/04/20/sqlserver-or-the-miner-in-the-basement/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-12-19
+tags:
+    - attack.persistence
+    - attack.t1543.003
+    - attack.execution
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4697
+        ServiceFileName|endswith: '\nssm.exe'
+    filter_main_legit_path:
+        - ServiceFileName|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+        - ServiceFileName|contains:
+            - '%ProgramFiles%'
+            - '%ProgramFiles(x86)%'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Administrators using NSSM for legitimate service management
+    - Legitimate software installations that utilize NSSM for service management can generate fp. It is recommended to baseline in your environment before deploying in production.
+level: medium
