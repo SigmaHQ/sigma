@@ -18,7 +18,7 @@ references:
     - https://www.virustotal.com/gui/file/d6f6bc10ae0e634ed4301d584f61418cee18e5d58ad9af72f8aa552dc4aaeca3/behavior
 author: TropChaud
 date: 2023-01-26
-modified: 2025-12-15
+modified: 2023-12-19
 tags:
     - attack.discovery
     - attack.t1082
@@ -26,25 +26,15 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_img:
+    selection_wmic:
         - Description: 'WMI Commandline Utility'
         - OriginalFileName: 'wmic.exe'
         - Image|endswith: '\WMIC.exe'
-    selection_cli_logicaldisk:
-        CommandLine|contains|all:
-            - ' LOGICALDISK '
-            - ' get '
-            - 'Name'
-            - 'Size'
-            - 'FreeSpace'
-    selection_cli_os:
-        CommandLine|contains|all:
-            - ' os '
-            - ' get '
-            - 'Caption'
-            - 'OSArchitecture'
-            - 'Version'
-    condition: selection_img and 1 of selection_cli_*
+    selection_commands:
+        CommandLine|contains:
+            - 'LOGICALDISK get Name,Size,FreeSpace'
+            - 'os get Caption,OSArchitecture,Version'
+    condition: all of selection_*
 falsepositives:
     - Unknown
 level: medium
