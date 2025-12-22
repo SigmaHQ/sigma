@@ -1,0 +1,38 @@
+title: Hypervisor-protected Code Integrity (HVCI) Disabled via REG.EXE
+id: 6225c53a-a96e-4235-b28f-8d7997cd96eb
+related:
+    - id: 1821ea92-e34c-4cad-8e12-07091a75c6c4
+      type: similar
+status: experimental
+description: |
+    Detects the disabling of Hypervisor-protected Code Integrity (HVCI) via the use of the REG.EXE command-line utility.
+    HVCI helps protect the kernel and system processes from tampering by malicious code.
+    Disabling HVCI could allow attackers to execute unsigned kernel-mode code, potentially leading to kernel-level rootkits or EDR bypass techniques.
+references:
+    - https://www.sophos.com/en-us/blog/sharpening-the-knife-gold-blades-strategic-evolution
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-12-22
+tags:
+    - attack.defense-evasion
+    - attack.t1112
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\reg.exe'
+        - OriginalFileName: 'reg.exe'
+    selection_cli:
+        CommandLine|contains|all:
+            - 'SYSTEM\CurrentControlSet'
+            - '\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity'
+            - 'Enabled'
+            - '0'
+    filter_main_enable:
+        CommandLine|contains: 
+            - '0x000000001'  # Legitimate enabling of HVCI
+            - '0x1'
+    condition: all of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high

@@ -1,0 +1,30 @@
+title: Vulnerable Driver Blocklist Disabled
+id: d526c60a-e236-4011-b165-831ffa52ab70
+related:
+    - id: 22154f0e-5132-4a54-aa78-cc62f6def531
+      type: similar
+description: |
+    Detects when the Windows Vulnerable Driver Blocklist is disabled. This setting is crucial for preventing the loading of known vulnerable drivers,
+    and its modification may indicate an attempt to bypass security controls. It is often targeted by threat actors to facilitate the installation of malicious or vulnerable drivers,
+    particularly in scenarios involving Endpoint Detection and Response (EDR) bypass techniques.
+    This rule applies to systems that support the Vulnerable Driver Blocklist feature, including Windows 10 version 1903 and later, and Windows Server 2022 and later.
+references:
+    - https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/microsoft-recommended-driver-block-rules
+    - https://www.sophos.com/en-us/blog/sharpening-the-knife-gold-blades-strategic-evolution
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-12-22
+tags:
+    - attack.defense-evasion
+    - attack.t1562.001
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\SYSTEM\CurrentControlSet'
+        TargetObject|endswith: '\Control\CI\Config\VulnerableDriverBlocklistEnable'
+        Details: 'DWORD (0x00000000)'
+    condition: selection
+falsepositives:
+    - Software installations that temporarily disable driver blocking
+level: high

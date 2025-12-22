@@ -1,0 +1,40 @@
+title: Vulnerable Driver Blocklist Disabled via REG.EXE
+id: 22154f0e-5132-4a54-aa78-cc62f6def531
+related:
+    - id: d526c60a-e236-4011-b165-831ffa52ab70
+      type: similar
+status: experimental
+description: |
+    Detects attempts to disable Windows vulnerable driver blocklist via registry modification using reg.exe.
+    The Vulnerable Driver Blocklist is a security feature that helps prevent the loading of known vulnerable drivers.
+    Disabling this feature may indicate an attempt to bypass security controls, often targeted by threat actors
+    to facilitate the installation of malicious or vulnerable drivers, particularly in scenarios involving Endpoint Detection and Response
+references:
+    - https://www.sophos.com/en-us/blog/sharpening-the-knife-gold-blades-strategic-evolution
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-12-22
+tags:
+    - attack.defense-evasion
+    - attack.t1112
+    - attack.t1562.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\reg.exe'
+        - OriginalFileName: 'reg.exe'
+    selection_cli:
+        CommandLine|contains|all:
+          - '\SYSTEM\CurrentControlSet\
+          - '\Control\CI\Config'
+          - 'VulnerableDriverBlocklistEnable'
+          - '0'
+    filter_main_enable:
+        CommandLine|contains: 
+            - '0x000000001'  # Legitimate enabling of Vulnerable Driver Blocklist
+            - '0x1'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
