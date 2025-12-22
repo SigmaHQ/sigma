@@ -1,7 +1,7 @@
 title: Hypervisor-protected Code Integrity (HVCI) Disabled via REG.EXE
 id: 6225c53a-a96e-4235-b28f-8d7997cd96eb
 related:
-    - id: 1821ea92-e34c-4cad-8e12-07091a75c6c4
+    - id: 8b7273a4-ba5d-4d8a-b04f-11f2900d043a
       type: similar
 status: experimental
 description: |
@@ -22,11 +22,19 @@ detection:
     selection_img:
         - Image|endswith: '\reg.exe'
         - OriginalFileName: 'reg.exe'
-    selection_cli:
+    selection_cli_key:
+        - CommandLine|contains|all:
+              - '\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity'
+              - 'Enabled'
+        - CommandLine|contains|all:
+              - '\Control\DeviceGuard\'
+              - 'EnableVirtualizationBasedSecurity'
+        - CommandLine|contains|all:
+              - '\Microsoft\Windows\DeviceGuard\'
+              - 'HypervisorEnforcedCodeIntegrity'
+    selection_cli_value:
         CommandLine|contains|all:
-            - 'SYSTEM\CurrentControlSet'
-            - '\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity'
-            - 'Enabled'
+            - 'add'
             - '0'
     filter_main_enable:
         CommandLine|contains:
