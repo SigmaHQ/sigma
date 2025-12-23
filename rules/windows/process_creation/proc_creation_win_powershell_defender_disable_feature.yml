@@ -6,9 +6,9 @@ references:
     - https://learn.microsoft.com/en-us/powershell/module/defender/set-mppreference?view=windowsserver2022-ps
     - https://www.virustotal.com/gui/file/d609799091731d83d75ec5d1f030571af20c45efeeb94840b67ea09a3283ab65/behavior/C2AE
     - https://www.virustotal.com/gui/search/content%253A%2522Set-MpPreference%2520-Disable%2522/files
-author: Florian Roth (Nextron Systems)
+author: Florian Roth (Nextron Systems), Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2022-03-03
-modified: 2024-01-02
+modified: 2025-12-23
 tags:
     - attack.defense-evasion
     - attack.t1562.001
@@ -23,16 +23,23 @@ detection:
     selection_cli_option:
         CommandLine|contains:
             - 'DisableArchiveScanning '
-            - 'DisableRealtimeMonitoring '
-            - 'DisableIOAVProtection '
             - 'DisableBehaviorMonitoring '
             - 'DisableBlockAtFirstSeen '
             - 'DisableCatchupFullScan '
             - 'DisableCatchupQuickScan '
+            - 'DisableIOAVProtection '
+            - 'DisableRealtimeMonitoring '
+            - '-darchsc '
+            - '-dbaf '
+            - '-dbm '
+            - '-dcfsc '
+            - '-dcqsc'
+            - '-dioavp '
+            - '-drtm '
     selection_cli_value:
         CommandLine|contains:
             - '$true'
-            - ' 1 '
+            - ' 1'
     selection_encoded_modifier:
         CommandLine|base64offset|contains:
             # Note: Since this is calculating offsets casing is important
@@ -50,7 +57,15 @@ detection:
             - 'DisableIOAVProtection '
             - 'disablerealtimemonitoring '
             - 'DisableRealtimeMonitoring '
+            - '-darchsc '
+            - '-dbaf '
+            - '-dbm '
+            - '-dcfsc '
+            - '-dcqsc'
+            - '-dioavp '
+            - '-drtm '
     selection_encoded_direct:
+        # UTF16-LE
         CommandLine|contains:
             - 'RABpAHMAYQBiAGwAZQBSAGUAYQBsAHQAaQBtAGUATQBvAG4AaQB0AG8AcgBpAG4AZwAgA'
             - 'QAaQBzAGEAYgBsAGUAUgBlAGEAbAB0AGkAbQBlAE0AbwBuAGkAdABvAHIAaQBuAGcAIA'
@@ -79,8 +94,16 @@ detection:
             - 'RABpAHMAYQBiAGwAZQBDAGEAdABjAGgAdQBwAEYAdQBsAGwAUwBjAGEAbgA'
             - 'RABpAHMAYQBiAGwAZQBDAGEAdABjAGgAdQBwAFEAdQBpAGMAawBTAGMAYQBuAA'
             - 'RABpAHMAYQBiAGwAZQBBAHIAYwBoAGkAdgBlAFMAYwBhAG4AbgBpAG4AZwA'
+            - 'LQBkAGEAcgBjAGgAcwBjACAA'
+            - 'LQBkAGIAYQBmACAA'
+            - 'LQBkAGIAbQAgA'
+            - 'LQBkAGMAZgBzAGMAIA'
+            - 'LQBkAGMAcQBzAGMA'
+            - 'LQBkAGkAbwBhAHYAcAAgA'
+            - 'LQBkAHIAdABtACAA'
     condition: all of selection_cli_* or 1 of selection_encoded_*
 falsepositives:
     - Possible administrative activity
     - Other Cmdlets that may use the same parameters
 level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_powershell_defender_disable_feature/info.yml

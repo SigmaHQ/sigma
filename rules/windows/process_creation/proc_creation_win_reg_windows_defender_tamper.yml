@@ -10,7 +10,7 @@ references:
     - https://tria.ge/241231-j9yatstqbm/behavioral1
 author: Florian Roth (Nextron Systems), Swachchhanda Shrawan Poudel, Nasreddine Bencherchali (Nextron Systems)
 date: 2022-03-22
-modified: 2025-06-04
+modified: 2025-12-18
 tags:
     - attack.defense-evasion
     - attack.t1562.001
@@ -26,10 +26,7 @@ detection:
             - 'SOFTWARE\Microsoft\Windows Defender\'
             - 'SOFTWARE\Policies\Microsoft\Windows Defender Security Center'
             - 'SOFTWARE\Policies\Microsoft\Windows Defender\'
-    selection_dword_0:
-        CommandLine|contains|all:
-            - ' add '
-            - 'd 0'
+    selection_dword_0_key:
         CommandLine|contains:
             - 'DisallowExploitProtectionOverride'
             - 'EnableControlledFolderAccess'
@@ -38,10 +35,14 @@ detection:
             - 'SpynetReporting'
             - 'SubmitSamplesConsent'
             - 'TamperProtection'
-    selection_dword_1:
         CommandLine|contains|all:
-            - ' add '
-            - 'd 1'
+            - 'add'
+            - '0'
+    filter_main_enable:
+        CommandLine|contains:
+            - '0x1'
+            - '0x000000001'  # Legitimate enabling of Defender features
+    selection_dword_1_key:
         CommandLine|contains:
             - 'DisableAccess'
             - 'DisableAntiSpyware'
@@ -66,7 +67,17 @@ detection:
             - 'DisableSecurityCenter'
             - 'Notification_Suppress'
             - 'SignatureDisableUpdateOnStartupWithoutEngine'
-    condition: all of selection_root_* and 1 of selection_dword_*
+        CommandLine|contains|all:
+            - 'add'
+            - '1'
+    filter_main_disable:
+        CommandLine|contains:
+            - '0x0 '
+            - '0x0"'
+            - "0x0'"
+            - '0x000000000'  # Legitimate disabling of Defender features
+    condition: all of selection_root_* and ((selection_dword_0_key and not filter_main_enable) or (selection_dword_1_key and not filter_main_disable))
 falsepositives:
     - Rare legitimate use by administrators to test software (should always be investigated)
 level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_reg_windows_defender_tamper/info.yml
