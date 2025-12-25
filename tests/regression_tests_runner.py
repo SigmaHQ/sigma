@@ -379,6 +379,11 @@ def run_tests(
     total_tests = 0
     passed_tests = 0
     failures = []
+
+    # Calculate total test count for progress tracking
+    total_test_count = sum(len(rule_info["tests"]) for rule_info in rules_with_tests)
+    current_test = 0
+
     for rule_info in rules_with_tests:
         rule_path = rule_info["path"]
         rule_id = rule_info["id"]
@@ -393,9 +398,18 @@ def run_tests(
             test_type = test_data.get("type", "unknown")
             test_path = test_data.get("path", "unknown")
 
+            current_test += 1
+
             if args.verbose:
                 print(f"  {test_name} (type: {test_type}): {test_path}")
-            total_tests += 1
+            else:
+                # Show progress percentage when not in verbose mode
+                percentage = (current_test / total_test_count) * 100
+                print(
+                    f"\rProgress: {current_test}/{total_test_count} ({percentage:.1f}%) - Testing rule: {rule_id}",
+                    end="",
+                    flush=True,
+                )
 
             success, output = run_test(
                 rule_path, rule_id, test_data, args.evtx_checker, args.thor_config
@@ -422,7 +436,12 @@ def run_tests(
 
         if args.verbose:
             print()
-    return total_tests, passed_tests, failures
+
+    # Clear the progress line when done
+    if not args.verbose:
+        print()  # Move to new line after progress
+
+    return total_test_count, passed_tests, failures
 
 
 def validate_missing_tests(
