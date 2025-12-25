@@ -1,0 +1,53 @@
+title: Windows AMSI Disabled
+id: 7dbbcac2-57a0-45ac-b306-ff30a8bd2981
+related:
+    - id: aa37cbb0-da36-42cb-a90f-fdf216fc7467 # AMSI Disabled via Registry Modification
+      type: similar
+status: experimental
+description: |
+    Detects attempts to disable Windows Antimalware Scan Interface (AMSI) by modifying the AmsiEnable registry value to 0.
+    AMSI provides a generic interface for applications and services to integrate with antimalware products.
+    Adversaries may disable AMSI to evade detection of malicious scripts and code execution.
+references:
+    - https://attack.mitre.org/techniques/T1562.001/
+    - https://learn.microsoft.com/en-us/windows/win32/amsi/antimalware-scan-interface-portal
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-12-25
+tags:
+    - attack.defense-evasion
+    - attack.t1562.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_key:
+        CommandLine|contains|all:
+          - '\Software\Microsoft\Windows Script\Settings'
+          - 'AmsiEnable'
+          - 'DWORD'
+          - '0'
+    selection_reg_img:
+        - Image|endswith: '\reg.exe'
+        - OriginalFileName: 'reg.exe'
+    selection_reg_cmd:
+        CommandLine|contains: 'add'
+    selection_powershell_img:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+               - 'PowerShell.EXE'
+               - 'pwsh.dll'
+    selection_powershell_cmd:
+        CommandLine|contains:
+            - 'Set-ItemProperty'
+            - 'New-ItemProperty'
+            - 'sp '
+    filter_main_enable:
+        CommandLine|contains:
+            - '01'
+            - '0x1'
+    condition: selection_key and (all of selection_powershell_* or all of selection_reg_*) and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high
