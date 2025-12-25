@@ -7,7 +7,7 @@ references:
     - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/wmic
 author: frack113
 date: 2022-01-01
-modified: 2023-02-14
+modified: 2025-12-15
 tags:
     - attack.execution
     - attack.t1047
@@ -25,7 +25,18 @@ detection:
             # Rule id 526be59f-a573-4eea-b5f7-f0973207634d for `wmic process call create #{process_to_execute}`
             - 'call'
             - 'create'
-    condition: all of selection* and not 1 of filter_*
+    filter_main_terminate:
+        CommandLine|contains|all:
+            # Rule id 9d9671b-0a0a-4c09-8280-d215bfd30662 for `wmic process where "name='#{process_name}'" call terminate`
+            - 'call'
+            - 'terminate'
+    condition: all of selection* and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: medium
+simulation:
+    - type: atomic-red-team
+      name: WMI Reconnaissance Processes
+      technique: T1047
+      atomic_guid: 5750aa16-0e59-4410-8b9a-8a47ca2788e2
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_wmic_recon_process/info.yml
