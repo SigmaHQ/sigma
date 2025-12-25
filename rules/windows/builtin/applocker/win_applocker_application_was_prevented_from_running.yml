@@ -1,0 +1,34 @@
+title: AppLocker Prevented Application or Script from Running
+id: 401e5d00-b944-11ea-8f9a-00163ecd60ae
+status: test
+description: |
+    Detects when AppLocker prevents the execution of an Application, DLL, Script, MSI, or Packaged-App from running.
+references:
+    - https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/applocker/what-is-applocker
+    - https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/applocker/using-event-viewer-with-applocker
+    - https://nxlog.co/documentation/nxlog-user-guide/applocker.html
+author: Pushkarev Dmitry
+date: 2020-06-28
+modified: 2025-12-03
+tags:
+    - attack.execution
+    - attack.t1204.002
+    - attack.t1059.001
+    - attack.t1059.003
+    - attack.t1059.005
+    - attack.t1059.006
+    - attack.t1059.007
+logsource:
+    product: windows
+    service: applocker
+detection:
+    selection:
+        EventID:
+            - 8004 # EXE and DLL
+            - 8007 # MSI and Script
+            - 8022 # Packaged app execution
+            - 8025 # Packaged app deployment
+    condition: selection
+falsepositives:
+    - Unlikely, since this event notifies about blocked application execution. Tune your applocker rules to avoid blocking legitimate applications.
+level: medium

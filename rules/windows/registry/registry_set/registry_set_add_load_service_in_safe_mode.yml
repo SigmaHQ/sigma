@@ -7,7 +7,7 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1112/T1112.md#atomic-test-34---windows-add-registry-value-to-load-service-in-safe-mode-with-network
 author: frack113
 date: 2022-04-04
-modified: 2025-10-07
+modified: 2025-10-22
 tags:
     - attack.defense-evasion
     - attack.t1564.001
@@ -30,7 +30,25 @@ detection:
         Image|endswith: '\MBAMInstallerService.exe'
         TargetObject|endswith: '\MBAMService\(Default)'
         Details: 'Service'
+    filter_optional_hexnode:
+        Image: 'C:\Hexnode\Hexnode Agent\Current\HexnodeAgent.exe'
+        TargetObject|endswith:
+            - '\Control\SafeBoot\Minimal\Hexnode Updater\(Default)'
+            - '\Control\SafeBoot\Network\Hexnode Updater\(Default)'
+            - '\Control\SafeBoot\Minimal\Hexnode Agent\(Default)'
+            - '\Control\SafeBoot\Network\Hexnode Agent\(Default)'
+        Details: 'Service'
     condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: high
+regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_add_load_service_in_safe_mode/info.yml
+simulation:
+    - type: atomic-red-team
+      name: Windows Add Registry Value to Load Service in Safe Mode without Network
+      technique: T1112
+      atomic_guid: 1dd59fb3-1cb3-4828-805d-cf80b4c3bbb5
+    - type: atomic-red-team
+      name: Windows Add Registry Value to Load Service in Safe Mode with Network
+      technique: T1112
+      atomic_guid: c173c948-65e5-499c-afbe-433722ed5bd4
