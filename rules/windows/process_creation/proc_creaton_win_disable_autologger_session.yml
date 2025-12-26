@@ -1,0 +1,58 @@
+title: Windows EventLog Autologger Session Disabled
+id: d7b81144-b866-48a4-9bcc-275dc69d870e
+related:
+    - id: f37b4bce-49d0-4087-9f5b-58bffda77316
+      type: similar
+status: experimental
+description: |
+    Detects attempts to disable Windows EventLog autologger sessions via registry modification.
+    The AutoLogger event tracing session records events that occur early in the operating system boot process.
+    Applications and device drivers can use the AutoLogger session to capture traces before the user logs in.
+    Adversaries may disable these sessions to evade detection and prevent security monitoring of early boot activities and system events.
+references:
+    - https://learn.microsoft.com/en-us/windows/win32/etw/configuring-and-starting-an-autologger-session
+    - https://ptylu.github.io/content/report/report.html?report=25
+    - https://blog.palantir.com/tampering-with-windows-event-tracing-background-offense-and-defense-4be7ac62ac63
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-12-25
+tags:
+    - attack.defense-evasion
+    - attack.t1562.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\reg.exe'
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+              - 'reg.exe'
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+    selection_cli_action:
+        CommandLine|contains|all:
+            - 'add'
+            - 'Set-ItemProperty'
+            - 'New-ItemProperty'
+            - 'si ' # Set-ItemProperty alias
+    selection_cli_key:
+        CommandLine|contains|all:
+            - '\SYSTEM\CurrentControlSet\Control\WMI\Autologger\EventLog-'
+            - 'DWORD'
+        CommandLine|contains:
+            - 'Start'
+            - 'Enabled'
+    selection_cli_disable:
+        - CommandLine|endswith: ' 0'
+        - CommandLine|contains:
+              - ' 0 '
+              - ' 0x0 '
+              - '0x0"'
+              - '0"'
+              - '0x00000000'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium

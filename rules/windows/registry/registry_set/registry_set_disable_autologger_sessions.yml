@@ -1,14 +1,23 @@
 title: Potential AutoLogger Sessions Tampering
 id: f37b4bce-49d0-4087-9f5b-58bffda77316
+related:
+    - id: d7b81144-b866-48a4-9bcc-275dc69d870e
+      type: similar
 status: test
-description: Detects tampering with autologger trace sessions which is a technique used by attackers to disable logging
+description: |
+    Detects tampering with autologger trace sessions which is a technique used by attackers to disable logging.
+    The AutoLogger event tracing session records events up that occur early in the operating system boot process.
+    Applications and device drivers can use the AutoLogger session to capture traces before the user logs in, and also used by security solutions as telemetry source.
+    Adversaries may disable these sessions to evade detection and prevent security monitoring of early boot activities and system events.
 references:
     - https://twitter.com/MichalKoczwara/status/1553634816016498688
     - https://thedfirreport.com/2021/10/18/icedid-to-xinglocker-ransomware-in-24-hours/
     - https://i.blackhat.com/EU-21/Wednesday/EU-21-Teodorescu-Veni-No-Vidi-No-Vici-Attacks-On-ETW-Blind-EDRs.pdf
+    - https://learn.microsoft.com/en-us/windows/win32/etw/configuring-and-starting-an-autologger-session
+    - https://blog.palantir.com/tampering-with-windows-event-tracing-background-offense-and-defense-4be7ac62ac63
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-08-01
-modified: 2025-10-07
+modified: 2025-12-26
 tags:
     - attack.defense-evasion
 logsource:
@@ -22,7 +31,7 @@ detection:
             - '\EventLog-'
             - '\Defender'
         TargetObject|endswith:
-            - '\Enable'
+            - '\Enabled'
             - '\Start'
         Details: DWORD (0x00000000)
     filter_main_wevtutil:
