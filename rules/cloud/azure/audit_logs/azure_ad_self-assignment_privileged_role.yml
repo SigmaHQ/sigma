@@ -1,0 +1,45 @@
+title: PIM Privileged Role Self-Assignment
+id: 4e9d5c4a-6a3e-4f1e-b1c1-9f2d1e6c4a8d
+status: stable
+description: |
+    Detects when a user assigns themselves an active or eligible PIM role. 
+    This is a high-risk activity where a user with "Privileged Role Administrator" 
+    capabilities grants themselves additional roles, bypassing the "four-eyes" principle.
+references:
+    - learn.microsoft.com
+    - learn.microsoft.com
+author: Rogier Dijkman (azurekid)
+date: 2025/12/30
+logsource:
+    category: user_management
+    product: azure
+    service: entra_id
+detection:
+    selection_operation:
+        # Focuses on the administrative assignment, not the JIT activation
+        OperationName|contains:
+            - 'Add eligible member to role in PIM completed'
+            - 'Add member to role in PIM completed'
+    filter_activations:
+        # Explicitly exclude standard JIT activations
+        OperationName|contains: 'PIM activation'
+    filter_self_assignment:
+        # Logical comparison: The Actor ID matches the Target ID
+        # In ASIM/Sentinel these map to InitiatedBy_user_id and TargetResources_id
+        ActorUserId: '$TargetUserId' 
+    condition: selection_operation and not filter_activations and filter_self_assignment
+fields:
+    - TimeGenerated
+    - ActorUsername
+    - TargetUsername
+    - GroupName
+    - AssignmentType
+falsepositives:
+    - Emergency "Break-glass" account operations (should be documented).
+    - Initial setup of a tenant where only one Global Admin exists.
+level: critical
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1098 # Account Manipulation
+    - attack.t1098.003 # Role Manipulation
