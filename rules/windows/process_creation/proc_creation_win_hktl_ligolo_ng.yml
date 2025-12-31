@@ -1,0 +1,34 @@
+title: Ligolo-ng Tunneling Tool Execution
+id: 0074da8e-5b3f-456b-9bf9-70beaf4bfb0d
+status: experimental
+description: Detects execution of Ligolo-ng agent or proxy, a tunneling tool commonly used for network pivoting in penetration testing and by threat actors
+references:
+    - https://github.com/nicocha30/ligolo-ng
+    - https://attack.mitre.org/techniques/T1572/
+author: MAB
+date: 2025/12/31
+tags:
+    - attack.command_and_control
+    - attack.t1572
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+            - '\agent.exe'
+            - '\proxy.exe'
+            - '\ligolo-agent.exe'
+            - '\ligolo-proxy.exe'
+        - OriginalFileName|contains: 'ligolo'
+    selection_cli:
+        CommandLine|contains:
+            - '-connect'
+            - '-ignore-cert'
+            - '-selfcert'
+            - 'ligolo'
+    condition: selection_img or selection_cli
+falsepositives:
+    - Legitimate penetration testing activities
+    - Red team exercises
+level: high
