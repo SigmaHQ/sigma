@@ -1,4 +1,4 @@
-title: Windows EventLog Autologger Session Disabled
+title: Windows EventLog Autologger Session Registry Modification Via CommandLine
 id: d7b81144-b866-48a4-9bcc-275dc69d870e
 related:
     - id: f37b4bce-49d0-4087-9f5b-58bffda77316
@@ -37,26 +37,17 @@ detection:
             - 'Set-ItemProperty'
             - 'New-ItemProperty'
             - 'si ' # Set-ItemProperty alias
+    selection_cli_base:
+        CommandLine|contains: '\Control\WMI\Autologger\'
     selection_cli_key:
-        CommandLine|contains|all:
-            - '\SYSTEM\CurrentControlSet\Control\WMI\Autologger\'
-            - 'DWORD'
         CommandLine|contains:
             - 'Start' # Key used to disable specific autologger session like EventLog-Application, EventLog-System etc.
             - 'Enabled' # Key used to disable specific provider of autologger session
-    selection_cli_disable:
-        - CommandLine|endswith: ' 0'
-        - CommandLine|contains:
-              - ' 0 '
-              - ' 0x0 '
-              - '0x0"'
-              - '0"'
-              - '0x00000000'
     condition: all of selection_*
 falsepositives:
     - Unknown
-level: medium
-regression_tests_path: regression_data/rules/windows/process_creation/proc_creaton_win_disable_autologger_session/info.yml
+level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_autologger_session_registry_modification/info.yml
 simulation:
     - type: atomic-red-team
       name: Disable EventLog-Application Auto Logger Session Via Registry - Cmd
@@ -74,4 +65,3 @@ simulation:
       name: Disable EventLog-Application ETW Provider Via Registry - PowerShell
       technique: T1562.001
       atomic_guid: 8f907648-1ebf-4276-b0f0-e2678ca474f0
-
