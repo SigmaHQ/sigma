@@ -2,31 +2,31 @@ title: Remoted Spawning Shell
 id: 9c5dec68-9fb0-11f0-bbeb-fe36320b3fa5
 status: test
 description: |
-  The binary remoted is a binary masquerading by living in the Library directory. This was proported
-  by TA444. This looks for remoted spawning shell or osascript in order to execute an AppleScript payload.
+    The binary remoted is a binary masquerading by living in the Library directory. This was proported
+    by TA444. This looks for remoted spawning shell or osascript in order to execute an AppleScript payload.
 author: Stuart Ashenbrenner
 references:
-  - https://www.huntress.com/blog/inside-bluenoroff-web3-intrusion-analysis
-  - https://atomicredteam.io/execution/T1569.001/
-  - https://attack.mitre.org/techniques/T1569/001/
+    - https://www.huntress.com/blog/inside-bluenoroff-web3-intrusion-analysis
+    - https://atomicredteam.io/execution/T1569.001/
+    - https://attack.mitre.org/techniques/T1569/001/
 date: 2025/09/30
 logsource:
-  category: process_creation
-  product: macos
+    category: process_creation
+    product: macos
 detection:
-  parent_process:
-    ParentImage|endswith: 'remoted'
-    ParentImage|startswith: '/Library/WebServer'
-  process:
-    Image|endswith:
-      - 'sh'
-      - 'bash'
-      - 'zsh'
-      - 'osascript'
-  condition: parent_process and process
+    parent_process:
+      ParentImage|endswith: 'remoted'
+      ParentImage|startswith: '/Library/WebServer'
+    process:
+      Image|endswith:
+        - 'sh'
+        - 'bash'
+        - 'zsh'
+        - 'osascript'
+    condition: parent_process and process
 falsepositives:
-  - None observed
+    - None observed
 level: high
 tags:
-  - attack.execution
-  - attack.t1059
+    - attack.execution
+    - attack.t1059
