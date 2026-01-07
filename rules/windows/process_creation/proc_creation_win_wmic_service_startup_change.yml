@@ -1,0 +1,33 @@
+title: Service Startup Type Change Via WMIC
+id: c0514f28-fdae-42df-b886-06e2b2bc5b37
+status: experimental
+description: |
+    Detects changes to service startup type to 'disabled' or 'manual' using WMIC command-line utility.
+    Attackers may change service startup types to evade detection or maintain persistence.
+references:
+    - https://blog.talosintelligence.com/uncovering-qilin-attack-methods-exposed-through-multiple-cases/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-01-07
+tags:
+    - attack.execution
+    - attack.t1047
+    - attack.defense-evasion
+    - attack.t1562.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\WMIC.exe'
+        - OriginalFileName: 'wmic.exe'
+    selection_cli:
+        CommandLine|contains|all:
+            - ' service '
+            - 'ChangeStartMode'
+        CommandLine|contains:
+            - 'Manual'
+            - 'Disabled'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate administrative changes to service startup types using WMIC, investigate accordingly.
+level: medium
