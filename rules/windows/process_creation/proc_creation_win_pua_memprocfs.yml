@@ -1,0 +1,34 @@
+title: PUA - MemProcFS Execution for Credential Access
+id: 8a1b2c3d-4e5f-6789-abcd-ef1234567890
+status: experimental
+description: |
+    Detects execution of MemProcFS, a memory forensics tool that can be misused by attackers for credential access.
+    MemProcFS mounts physical memory as a virtual file system, allowing direct access to process memory and system structures.
+    Threat actors may abuse this tool to dump memory contents from processes like LSASS or extract registry hives to obtain credentials, LSA secrets, SAM data, and cached domain credentials.
+    MemProcFS usage that is not part of authorized forensic analysis should be treated as suspicious and warrants further investigation.
+references:
+    - https://github.com/ufrisk/MemProcFS
+    - https://0xdf.gitlab.io/2024/10/05/htb-freelancer.html#
+    - https://www.huntress.com/blog/curling-for-data-a-dive-into-a-threat-actors-malicious-ttps
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-01-08
+tags:
+    - attack.credential-access
+    - attack.t1003
+    - attack.t1003.001
+    - attack.t1003.004
+    - attack.t1003.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\MemProcFS.exe'
+        - OriginalFileName: 'MemProcFS.exe'
+        - Description: 'MemProcFS'
+    selection_cli:
+        CommandLine|contains: '-device'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use during memory forensics; if not part of authorized analysis, warrants urgent investigation
+level: high
