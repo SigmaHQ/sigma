@@ -23,12 +23,11 @@ logsource:
     product: okta
 detection:
     selection:
-        debugContext.debugData.requestUri|contains: 'admin'
         eventType: 'user.session.impersonation.grant'
-    filter:
-        alternateId|contains:
-            - 'system@okta.com'
-            - '@company_domain.com'
+    filter_main_okta:
+        actor.alternateId|contains: 'system@okta.com'
+    filter_main_company:
+        actor.alternateId|contains: %Legit_Ids%
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - The only legitimate use case here is an Okta support engineer actively working with an internal Okta Admin.
