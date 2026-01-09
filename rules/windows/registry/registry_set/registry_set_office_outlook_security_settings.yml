@@ -10,7 +10,7 @@ references:
     - https://learn.microsoft.com/en-us/outlook/troubleshoot/security/information-about-email-security-settings
 author: frack113
 date: 2021-12-28
-modified: 2023-08-17
+modified: 2026-01-09
 tags:
     - attack.persistence
     - attack.t1137
@@ -22,7 +22,12 @@ detection:
         TargetObject|contains|all:
             - '\SOFTWARE\Microsoft\Office\'
             - '\Outlook\Security\'
-    condition: selection
+    filter_main_outlook:
+        Image|startsWith:
+            - 'C:\Program Files\Microsoft Office\'
+            - 'C:\Program Files (x86)\Microsoft Office\'
+        Image|endsWith: '\OUTLOOK.EXE'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Administrative activity
 level: medium

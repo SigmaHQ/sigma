@@ -6,7 +6,7 @@ references:
     - https://www.microsoft.com/security/blog/2021/07/13/microsoft-discovers-threat-actor-targeting-solarwinds-serv-u-software-with-0-day-exploit/
 author: Florian Roth (Nextron Systems), Max Altgelt (Nextron Systems), Tim Shelton
 date: 2021-07-14
-modified: 2022-10-05
+modified: 2026-01-09
 tags:
     - attack.execution
     - attack.t1059
@@ -29,14 +29,25 @@ detection:
             - '%TEMP%'
             - '%TMP%'
             - '%LocalAppData%\Temp'
-    filter:
+    filter_optional_vscode:
+        CommandLine|contains: '-WindowStyle hidden -Verb runAs'
+    filter_optional_amazon_ec2:
+        CommandLine|contains: '\Windows\system32\config\systemprofile\AppData\Local\Temp\Amazon\EC2-Windows\'
+    filter_optional_generic:
         CommandLine|contains:
             - ' >'
             - 'Out-File'
             - 'ConvertTo-Json'
-            - '-WindowStyle hidden -Verb runAs'  # VSCode behaviour if file cannot be written as current user
-            - '\Windows\system32\config\systemprofile\AppData\Local\Temp\Amazon\EC2-Windows\' # EC2 AWS
-    condition: selection and not filter
+    filter_optional_chocolatey_installer:
+        ParentImage:
+            - 'C:\Windows\System32\Msiexec.exe'
+            - 'C:\Windows\SysWOW64\Msiexec.exe'
+        Image|endswith: '\powershell.exe'
+        CommandLine|contains|all:
+            - '-NoProfile -ExecutionPolicy Bypass -Command'
+            - 'AppData\Local\Temp\'
+            - 'Install-Chocolatey.ps1'
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
-    - Administrative scripts
+    - Various legitimate software have been observed to use similar techniques for installation or update purposes;thus, it is recommended to review and tune filters for your environment to reduce false positives before deploying to production.
 level: high

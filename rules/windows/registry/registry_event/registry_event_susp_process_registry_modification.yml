@@ -15,6 +15,7 @@ references:
     - https://www.linkedin.com/posts/mauricefielenbach_livingofftheland-redteam-persistence-activity-7344801774182051843-TE00/
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2025-08-13
+modified: 2026-01-09
 tags:
     - attack.defense-evasion
     - attack.persistence
@@ -31,7 +32,19 @@ detection:
             - '\mshta.exe'
             - '\wscript.exe'
             - '\cscript.exe'
-    condition: selection
+    filter_main_binary_data:
+        Details: 'Binary Data'
+    filter_main_null:
+        Details: null
+    filter_main_wscript_legit_1:
+        Image|endswith: '\wscript.exe'
+        TargetObject|contains:
+            - 'Services\bam\State\UserSettings\'
+            - '\Microsoft\Windows NT\CurrentVersion\Notifications\Data\'
+    filter_main_wscript_legit_2:
+        Image|endswith: '\wscript.exe'
+        TargetObject|contains: '\wscript.exe'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Some legitimate admin or install scripts may use these processes for registry modifications.
 level: medium

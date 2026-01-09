@@ -10,6 +10,7 @@ references:
     - https://learn.microsoft.com/en-us/deployoffice/compat/office-file-format-reference
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-01-23
+modified: 2026-01-09
 tags:
     - attack.initial-access
     - attack.t1566.001
@@ -25,7 +26,16 @@ detection:
             - '.xltm'
             - '.potm'
             - '.pptm'
-    condition: selection
+    filter_main_office:
+        Image|startsWith:
+            - 'C:\Program Files\Microsoft Office\'
+            - 'C:\Program Files (x86)\Microsoft Office\'
+        Image|endsWith:
+            - '\WINWORD.EXE'
+            - '\EXCEL.EXE'
+            - '\POWERPNT.EXE'
+        TargetFilename|contains: '\~$' # Temporary files created by Office applications
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Very common in environments that rely heavily on macro documents
 level: low
