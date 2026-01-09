@@ -1,0 +1,32 @@
+title: Kernel Driver Utility Execution
+id: e76ca062-4de0-4d79-8d90-160a0d335eca
+status: experimental
+description: |
+  Detects execution of the Kernel Driver Utility (KDU) tool. KDU can be used to bypass driver signature enforcement and load unsigned or malicious drivers into the Windows kernel, potentially allowing for privilege escalation, persistence, or evasion of security controls.
+author: Matt Anderson, Dray Agha, Anna Pham (Huntress)
+date: 2026/01/02
+references:
+  - https://github.com/h4rmy/KDU
+  - https://huntress.com/blog/esxi-vm-escape-exploit
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_img:
+    - Image|endswith: '\kdu.exe'
+    - OriginalFileName: 'hamakaze.exe'
+  selection_cli_suspicious:
+    CommandLine|contains:
+      - '-map ' # map driver to the kernel and execute it entry point
+      - '-prv ' # optional, select vulnerability driver provider
+      - '-dse ' # write user defined value to the system DSE state flags; dse=0(disable),dse=1(enable)
+      - '-ps ' #  modify process object of given ProcessID;
+
+  condition: selection_img and selection_cli_suspicious
+falsepositives:
+  - Legitimate driver development, testing, or administrative troubleshooting (e.g., enabling/disabling hardware)
+level: high
+tags:
+    - defense_evasion
+    - persistence
+    - t1543.003  # Create or Modify System Process: Windows Service
