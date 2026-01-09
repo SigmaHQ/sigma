@@ -9,6 +9,7 @@ references:
     - https://www.zerosalarium.com/2025/09/Dumping-LSASS-With-WER-On-Modern-Windows-11.html
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2025-11-23
+modified: 2026-01-09
 tags:
     - attack.credential-access
     - attack.t1003.001
@@ -23,8 +24,7 @@ detection:
     selection_cli:
         # change to |re|i after Sigma v2.0 release
         # plain string without quotation marks as it has to match for both ' and "
-        CommandLine|re: (?i)\.exe[\"\']?\s+.{12,64}[\"\']?\s+\d{2,10} # wsass.exe "path to werfaultsecure" lsass_pid
-        CommandLine|contains: 'werfaultsecure'
+        CommandLine|re: (?i)\.exe[\"\']?\s+[^\"]{,64}werfaultsecure\.exe[\"\']?\s+\d{2,10} # wsass.exe "path to werfaultsecure" lsass_pid
     condition: 1 of selection_*
 falsepositives:
     - Unlikely
