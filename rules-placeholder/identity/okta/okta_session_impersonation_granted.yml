@@ -1,0 +1,36 @@
+title: Okta Session Impersonation Grant
+id: fe04b26b-0ac4-45d7-9404-4b9f16a440a9
+status: experimental
+description: |
+    Detects Okta session impersonation grant event where a user is granted the ability to impersonate another user's session.
+    This event type "user.session.impersonation.grant" signifies that someone has been given temporary access to act on behalf of another user account.
+    Threat actors may abuse this functionality to escalate privileges, access sensitive resources, or perform unauthorized actions while appearing to be the impersonated user.
+    Legitimate use cases are typically limited to Okta support scenarios or authorized administrative troubleshooting.
+references:
+    - https://developer.okta.com/docs/reference/system-log-query/
+    - https://sec.okta.com/articles/2023/08/cross-tenant-impersonation-prevention-and-detection
+    - https://support.okta.com/help/s/article/What-is-the-systemoktacom-Account-in-Syslog-Used-For
+author: zendannyy
+date: 2025-12-24
+tags:
+    - attack.privilege-escalation
+    - attack.defense-evasion
+    - attack.t1484.002
+    - attack.initial-access
+    - attack.t1199
+logsource:
+    service: okta
+    product: okta
+detection:
+    selection:
+        eventType: 'user.session.impersonation.grant'
+    filter_main_okta:
+        actor.alternateId|contains: 'system@okta.com'
+    filter_main_company:
+        actor.alternateId|contains: %Legit_Ids%
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - The only legitimate use case here is an Okta support engineer actively working with an internal Okta Admin.
+    - This access is temporary and should be revoked once done with the support case.
+    - Apply additional filters if necessary
+level: medium
