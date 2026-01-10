@@ -1,7 +1,7 @@
 title: Sysmon Configuration Change
 id: 8ac03a65-6c84-4116-acad-dc1558ff7a77
 status: test
-description: Detects a Sysmon configuration change, which could be the result of a legitimate reconfiguration or someone trying manipulate the configuration
+description: Detects a Sysmon configuration change (Event ID 16), which may result from legitimate administrative reconfiguration or from attempts to weaken endpoint visibility by modifying Sysmon rules.
 references:
     - https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon
 author: frack113
@@ -20,6 +20,8 @@ detection:
     # condition: selection and not filter
     condition: selection
 falsepositives:
-    - Legitimate administrative action
+    - Legitimate administrative reconfiguration of Sysmon (e.g., updating rules as part of hardening or troubleshooting)
+    - Deployment of updated Sysmon configurations via centralized management workflows (e.g., GPO, Intune, SCCM)
+
 level: medium
 regression_tests_path: regression_data/rules/windows/sysmon/sysmon_config_modification/info.yml
