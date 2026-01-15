@@ -5,11 +5,12 @@ description: |
     Detects execution of EDR-Freeze, a tool that exploits the MiniDumpWriteDump function and WerFaultSecure.exe to suspend EDR and Antivirus processes on Windows.
     EDR-Freeze leverages a race-condition attack to put security processes into a dormant state by suspending WerFaultSecure at the moment it freezes the target process.
     This technique does not require kernel-level exploits or BYOVD, but instead abuses user-mode functionality to temporarily disable monitoring by EDR or Antimalware solutions.
-date: 2025-09-24
 references:
     - https://www.zerosalarium.com/2025/09/EDR-Freeze-Puts-EDRs-Antivirus-Into-Coma.html
     - https://github.com/TwoSevenOneT/EDR-Freeze
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-09-24
+modified: 2025-11-27
 tags:
     - attack.defense-evasion
     - attack.t1562.001
@@ -18,7 +19,9 @@ logsource:
     product: windows
 detection:
     selection_img:
-        Image|contains: '\EDR-Freeze'
+        Image|contains:
+            - '\EDR-Freeze'
+            - '\EDRFreeze'
         Image|endswith: '.exe'
     selection_imphash:
         Hashes|contains:
@@ -28,7 +31,10 @@ detection:
             - 'IMPHASH=8828F0B906F7844358FB92A899E9520F'
             - 'IMPHASH=AF76D95157EC554DC1EF178E4E66D447'
             - 'IMPHASH=E1B04316B61ACA31DD52ABBEC0A37FD5'
+            - 'IMPHASH=8B2D5B54AFCFEC60D54F6B31D80ED4A0'
+            - 'IMPHASH=AB8BB31EDD91D2A05FE7B62A535E9EB7'
     condition: 1 of selection_*
 falsepositives:
     - Unlikely
 level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_hktl_edr_freeze/info.yml
