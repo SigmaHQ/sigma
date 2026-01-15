@@ -1,0 +1,25 @@
+
+title: System Language Discovery via reg.exe
+id: c43a5405-e8e1-4221-9ac9-dbe3fa14e886
+status: experimental
+description: Detects the use of reg to detect system language
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1614.001/T1614.001.md
+author: Marco Pedrinazzi (@pedrinazziM) (InTheCyber)
+date: 2026-01-09
+tags:
+    - attack.discovery
+    - attack.t1614.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\reg.exe'
+        CommandLine|contains|all:
+            - 'query'
+            - 'CurrentControlSet\Control\Nls\Language'
+    condition: selection
+falsepositives:
+    - Legitimate administration activities
+level: medium
