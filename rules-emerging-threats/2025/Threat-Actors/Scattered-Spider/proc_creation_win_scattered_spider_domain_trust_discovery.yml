@@ -1,0 +1,41 @@
+title: Scattered Spider Domain Trust Discovery Via Nltest
+id: f8b6d0e5-2c7a-4d3f-ae9b-3g1c2d4e5f6a
+status: experimental
+description: |
+    Detects the use of nltest.exe to enumerate domain trusts, a technique commonly
+    used by the Scattered Spider threat actor during reconnaissance after initial access.
+    Scattered Spider is known for targeting large enterprises with social engineering
+    and leveraging this information for lateral movement to cloud environments.
+references:
+    - https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-320a
+    - https://www.rapid7.com/blog/post/inside-the-ransomware-economy-in-2025-q2-trends-key-insights-you-need-to-know/
+    - https://attack.mitre.org/techniques/T1482/
+author: iojini
+date: 2026/01/16
+tags:
+    - attack.discovery
+    - attack.t1482
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_nltest:
+        Image|endswith: '\nltest.exe'
+        CommandLine|contains:
+            - '/domain_trusts'
+            - '/dclist:'
+            - '/dsgetdc:'
+            - '/trusted_domains'
+    selection_net_domain:
+        Image|endswith:
+            - '\net.exe'
+            - '\net1.exe'
+        CommandLine|contains:
+            - 'view /domain'
+            - 'group "Domain Admins"'
+            - 'group "Enterprise Admins"'
+    condition: selection_nltest or selection_net_domain
+falsepositives:
+    - Legitimate domain administration activities
+    - IT inventory scripts
+level: medium
