@@ -8,7 +8,7 @@ references:
     - https://www.inversecos.com/2022/04/defence-evasion-technique-timestomping.html
 author: frack113, Florian Roth (Nextron Systems)
 date: 2022-08-12
-modified: 2022-10-25
+modified: 2026-01-20
 tags:
     - attack.t1070.006
     - attack.defense-evasion
@@ -16,15 +16,11 @@ logsource:
     category: file_change
     product: windows
 detection:
-    selection1:
-        PreviousCreationUtcTime|startswith: '2022'
-    filter1:
-        CreationUtcTime|startswith: '2022'
-    selection2:
+    selection:
         PreviousCreationUtcTime|startswith: '202'
-    filter2:
+    filter_main_creation_time:
         CreationUtcTime|startswith: '202'
-    gen_filter_updates:
+    filter_optional_updates:
         - Image:
               - 'C:\Windows\system32\ProvTool.exe'
               - 'C:\Windows\System32\usocoreworker.exe'
@@ -33,11 +29,11 @@ detection:
         - TargetFilename|endswith:
               - '.tmp'
               - '.temp'
-    gen_filter_tiworker:
+    filter_optional_tiworker:
         Image|startswith: 'C:\WINDOWS\'
         Image|endswith: '\TiWorker.exe'
         TargetFilename|endswith: '.cab'
-    condition: (( selection1 and not filter1 ) or ( selection2 and not filter2 )) and not 1 of gen_filter*
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Changes made to or by the local NTP service
 level: high
