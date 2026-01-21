@@ -1,0 +1,65 @@
+title: Insecure OAuth2.x flows have been enabled for some applications
+id: 655f4e60-b10f-4ba7-a3ab-9a87cedabb07
+status: experimental
+description: |
+    Detects when applications' configurations have been updated with insecure grant types, e.g. implicit and resource owner password grant.
+    According to the recent update OAuth2.1 and RFC 9700, these flows shall be avoided.
+references:
+    - https://auth0.com/docs/get-started/applications/application-grant-types
+    - https://datatracker.ietf.org/doc/html/rfc9700
+    - https://github.com/auth0/auth0-customer-detections/
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.defense-evasion
+    - attack.t1562
+    - attack.t1562.007
+logsource:
+    product: auth0
+    service: oidc_oauth2
+detection:
+    selection:
+        data.type: sapi
+        data.description:
+            - Update a client
+        data.details.response.statusCode: 200
+    filter:
+        data.details.response.body.grant_types{}:
+            - 'implicit'
+            - 'password'
+    condition: selection and filter
+fields:
+    - data.type
+    - data.description
+    - data.ip
+    - data.details.response.body.client_id
+    - data.details.response.body.grant_types{}
+    - data.details.response.statusCode
+falsepositives:
+    - Legitimate updates by an administrator during configuration changes
+    - An exempted application has been updated with insecure grant types (still not recommended)
+    - Legacy applications requiring specific grant types for compatibility
+level: medium
+explanation: |
+    The query collects log records issued when any of the configurations for an application are updated.
+    It filters for grant types if it contains implicit and/or password (Resource Owner Password Grant).
+    The splunk query below displays modifying IP and modified client_id where insecure grants have been enabled.
+
+    Splunk Query:
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type="sapi" data.description="Update a client"
+    data.details.response.statusCode=200
+    data.details.response.body.grant_types{} IN ("implicit", "password")
+    |table data.ip, data.details.response.body.client_id, data.details.response.body.grant_types{}
+
+    Tenant Logs Query:
+    type:"sapi" AND description: "Update a client"
+comments:
+    - The splunk query above shall be tuned to reflect a valid tenant name.
+    - Limit this detection to monitoring a critical set of applications.
+    - Prevention - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
+    - Prevention - Control Management API scopes that allow modification of attack protection features - update:clients.
+    - Prevention - Control usage of Management API from only trusted IPs by applying Network ACL scoped to "management".
+    - Prevention - If you have an edge case where the implicit flow is necessary, consider the form_post response mode and/or request access token in a combination with an id token.
+    - Prevention - Default to the Authorization Code grant with PKCE even for regular web applications enforcing PKCE with a post-login action.
