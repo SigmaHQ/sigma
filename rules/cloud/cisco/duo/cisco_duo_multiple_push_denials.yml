@@ -1,0 +1,23 @@
+title: Cisco Duo Multiple Consecutive Push Denials
+id: b2f51e30-b476-42e9-b9df-0de986f3b6ee
+status: experimental
+description: |
+    Detects patterns of **repeated Duo push authentication failures** in a short period, which may indicate a targeted “MFA bombing” or push harassment. Duo may classify such scenarios with a failure reason of `"frequent_attempts"`, reflecting a pattern of rapid, repeated pushes. An adversary might be sending numerous 2FA requests hoping the user will eventually approve one (fatigue technique). This rule triggers when Duo logs an authentication attempt with result `"FAILURE"` and reason `"frequent_attempts"`. This signals Duo itself identified an unusual burst of failed pushes.
+references:
+    - https://duo.com/docs/risk-based-auth
+    - https://duo.com/docs/adminapi#logs
+author: Mike Wade
+date: 2025-08-24
+tags:
+    - attack.credential-access
+    - attack.persistence
+logsource:
+    product: cisco
+    service: duo
+detection:
+    selection:
+        event_type: authentication
+        result: failure
+        reason: frequent_attempts
+    condition: selection
+level: high
