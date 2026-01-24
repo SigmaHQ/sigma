@@ -1,7 +1,13 @@
 title: Deployment Of The AppX Package Was Blocked By The Policy
 id: e021bbb5-407f-41f5-9dc9-1864c45a7a51
 status: test
-description: Detects an appx package deployment that was blocked by the local computer policy
+description: |
+    Detects an appx package deployment that was blocked by the local computer policy.
+    The following events indicate that an AppX package deployment was blocked by a policy:
+    - Event ID 441: The package deployment operation is blocked by the "Allow deployment operations in special profiles" policy
+    - Event ID 442: Deployments to non-system volumes are blocked by the "Disable deployment of Windows Store apps to non-system volumes" policy."
+    - Event ID 453: Package blocked by a platform policy.
+    - Event ID 454: Package blocked by a platform policy.
 references:
     - https://learn.microsoft.com/en-us/windows/win32/appxpkg/troubleshooting
     - https://github.com/nasbench/EVTX-ETW-Resources/blob/7a806a148b3d9d381193d4a80356016e6e8b1ee8/ETWEventsList/CSV/Windows11/22H2/W11_22H2_Pro_20220920_22621.382/Providers/Microsoft-Windows-AppXDeployment-Server.csv
@@ -15,11 +21,11 @@ logsource:
 detection:
     selection:
         EventID:
-            - 441
-            - 442
-            - 453
-            - 454
+            - 441 # The package deployment operation is blocked by the "Allow deployment operations in special profiles" policy
+            - 442 # Deployments to non-system volumes are blocked by the "Disable deployment of Windows Store apps to non-system volumes" policy."
+            - 453 # Package blocked by a platform policy
+            - 454 # Package blocked by a platform policy
     condition: selection
 falsepositives:
-    - Unknown
+    - Unlikely, since this event notifies about blocked application deployment. Tune your applocker rules to avoid blocking legitimate applications.
 level: medium
