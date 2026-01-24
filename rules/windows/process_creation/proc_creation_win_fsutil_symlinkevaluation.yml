@@ -1,31 +1,46 @@
-title: Fsutil Behavior Set SymlinkEvaluation
+title: Potentially Suspicious NTFS Symlink Behavior Modification
 id: c0b2768a-dd06-4671-8339-b16ca8d1f27f
 status: test
 description: |
-    A symbolic link is a type of file that contains a reference to another file.
-    This is probably done to make sure that the ransomware is able to follow shortcuts on the machine in order to find the original file to encrypt
+    Detects the modification of NTFS symbolic link behavior using fsutil, which could be used to enable remote to local or remote to remote symlinks for potential attacks.
 references:
     - https://www.cybereason.com/blog/cybereason-vs.-blackcat-ransomware
     - https://learn.microsoft.com/fr-fr/windows-server/administration/windows-commands/fsutil-behavior
-author: frack113
+    - https://thedfirreport.com/2025/06/30/hide-your-rdp-password-spray-leads-to-ransomhub-deployment/
+author: frack113, The DFIR Report
 date: 2022-03-02
-modified: 2023-01-19
+modified: 2025-11-13
 tags:
     - attack.execution
     - attack.t1059
+    - attack.defense-evasion
+    - attack.t1222.001
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection_img:
-        - Image|endswith: '\fsutil.exe'
-        - OriginalFileName: 'fsutil.exe'
-    selection_cli:
+    selection_img_proxy:
+        # Note: Example command observed:  cmd.exe /c "fsutil behaviour set SymlinkEvaluation"
+        - Image|endswith:
+              - '\cmd.exe'
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+              - 'Cmd.Exe'
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+    selection_fsutil_cli:
         CommandLine|contains|all:
-            - 'behavior '
-            - 'set '
+            - 'fsutil'
+            - 'behavior'
+            - 'set'
             - 'SymlinkEvaluation'
+    selection_symlink_params:
+        CommandLine|contains:
+            - 'R2L:1' # Remote to Local
+            - 'R2R:1' # Remote to Remote
+            - 'L2L:1' # Local to Local
     condition: all of selection_*
 falsepositives:
-    - Legitimate use
+    - Legitimate usage, investigate the parent process and context to determine if benign.
 level: medium

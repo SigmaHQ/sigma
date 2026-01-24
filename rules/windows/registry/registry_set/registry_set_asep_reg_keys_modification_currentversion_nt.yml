@@ -11,7 +11,7 @@ references:
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split)
 date: 2019-10-25
-modified: 2025-10-17
+modified: 2025-10-22
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -40,6 +40,10 @@ detection:
             - '\Windows\Load'
     filter_main_empty:
         Details: '(Empty)'
+    filter_main_null:
+        Details: null
+    filter_main_poqexec:
+        Image: 'C:\Windows\System32\poqexec.exe'
     filter_main_legitimate_subkey:  # Legitimately used subkeys of \Image File Execution Options, which are not used for persistence (see https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)
         TargetObject|contains: '\Image File Execution Options\'
         TargetObject|endswith:
@@ -57,6 +61,9 @@ detection:
     filter_main_runtimebroker:
         Image: 'C:\Windows\System32\RuntimeBroker.exe'
         TargetObject|contains: '\runtimebroker.exe\Microsoft.Windows.ShellExperienceHost'
+    filter_optional_edge:
+        Image|startswith: 'C:\Program Files (x86)\Microsoft\Temp\'
+        Image|endswith: '\MicrosoftEdgeUpdate.exe'
     filter_optional_avguard:
         Image|startswith:
             - 'C:\Program Files (x86)\Avira\Antivirus\avguard.exe'
@@ -68,9 +75,6 @@ detection:
         Details:
             - 'explorer.exe'
             - 'C:\Windows\system32\userinit.exe,'
-    filter_optional_edge:
-        Image|startswith: 'C:\Program Files (x86)\Microsoft\Temp\'
-        Image|endswith: '\MicrosoftEdgeUpdate.exe'
     filter_optional_msoffice:
         - TargetObject|contains:
               - '\ClickToRunStore\HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\'
@@ -92,11 +96,6 @@ detection:
         Details|startswith: 'C:\Windows\system32\cmd.exe /q /c del /q "C:\Users\'
         Details|endswith: '\AppData\Local\Microsoft\OneDrive\Update\OneDriveSetup.exe"'
     condition: all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
-fields:
-    - SecurityID
-    - ObjectName
-    - OldValueType
-    - NewValueType
 falsepositives:
     - Legitimate software automatically (mostly, during installation) sets up autorun keys for legitimate reason
     - Legitimate administrator sets up autorun keys for legitimate reason

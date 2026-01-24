@@ -1,0 +1,44 @@
+title: Suspicious Space Characters in RunMRU Registry Path - ClickFix
+id: 7a1b4c5e-8f3d-4b9a-7c2e-1f4a5b8c6d9e
+related:
+    - id: 3ae9974a-eb09-4044-8e70-8980a50c12c8
+      type: similar
+status: experimental
+description: |
+    Detects the occurrence of numerous space characters in RunMRU registry paths, which may indicate execution via phishing lures using clickfix techniques to hide malicious commands in the Windows Run dialog box from naked eyes.
+references:
+    - https://expel.com/blog/cache-smuggling-when-a-picture-isnt-a-thousand-words/
+    - https://github.com/JohnHammond/recaptcha-phish
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-11-04
+tags:
+    - attack.execution
+    - attack.t1204.004
+    - attack.defense-evasion
+    - attack.t1027.010
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_key:
+        TargetObject|contains: '\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU\'
+        Details|contains: '#'
+    selection_space_variation:
+        Details|contains:
+            - '            ' # En Quad (U+2000)
+            - '            ' # Em Quad (U+2001)
+            - '            ' # En Space (U+2002)
+            - '            ' # Em Space (U+2003)
+            - '            ' # Three-Per-Em Space (U+2004)
+            - '            ' # Four-Per-Em Space (U+2005)
+            - '            ' # Six-Per-Em Space (U+2006)
+            - '            ' # Figure Space (U+2007)
+            - '            ' # Punctuation Space (U+2008)
+            - '            ' # Thin Space (U+2009)
+            - '            ' # Hair Space (U+200A)
+            - '            ' # No-Break Space (U+00A0)
+            - '            ' # Normal space
+    condition: all of selection_*
+falsepositives:
+    - Unlikely
+level: high

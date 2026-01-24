@@ -11,7 +11,7 @@ references:
     - https://securityboulevard.com/2019/09/deobfuscating-ostap-trickbots-34000-line-javascript-downloader/
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems), @gott_cyber
 date: 2019-06-29
-modified: 2024-06-04
+modified: 2025-10-31
 tags:
     - attack.defense-evasion
     - attack.t1036
@@ -19,15 +19,15 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        # See CLSID_SeparateMultipleProcessExplorerHost in the registry for reference
-        - CommandLine|contains: '/factory,{75dff2b7-6936-4c06-a8bb-676a7b00b24b}' # This will catch, the new explorer spawning which indicates a process/tree break. But you won't be able to catch the executing process. For that you need historical data
+    # Note: See CLSID_SeparateMultipleProcessExplorerHost in the registry for reference
+    selection_factory:
+        CommandLine|contains: '/factory,{75dff2b7-6936-4c06-a8bb-676a7b00b24b}' # This will catch, the new explorer spawning which indicates a process/tree break. But you won't be able to catch the executing process. For that you need historical data
+    selection_root:
+        CommandLine|contains: 'explorer.exe'
+        CommandLine|contains|windash: ' /root,'
         # There exists almost infinite possibilities to spawn from explorer. The "/root" flag is just an example
         # It's better to have the ability to look at the process tree and look for explorer processes with "weird" flags to be able to catch this technique.
-        - CommandLine|contains|all|windash:
-              - 'explorer.exe'
-              - ' /root,'
-    condition: selection
+    condition: 1 of selection_*
 falsepositives:
     - Unknown
 level: medium

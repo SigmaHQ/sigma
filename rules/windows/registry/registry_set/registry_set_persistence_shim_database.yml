@@ -10,7 +10,7 @@ references:
     - https://andreafortuna.org/2018/11/12/process-injection-and-persistence-using-application-shimming/
 author: frack113
 date: 2021-12-30
-modified: 2023-08-17
+modified: 2025-10-22
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -23,8 +23,12 @@ detection:
         TargetObject|contains:
             - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\InstalledSDB\'
             - '\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Custom\'
-    filter_main_empty:
+    filter_main_empty_string:
         Details: ''
+    filter_main_empty_value:
+        Details: '(Empty)'
+    filter_main_null:
+        Details: null
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Legitimate custom SHIM installations will also trigger this rule

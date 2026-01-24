@@ -1,0 +1,28 @@
+title: FortiGate - VPN SSL Settings Modified
+id: 8b5dacf2-aeb7-459d-b133-678eb696d410
+status: experimental
+description: |
+    Detects the modification of VPN SSL Settings (for example, the modification of authentication rules).
+    This behavior was observed in pair with the addition of a VPN SSL Web Portal.
+references:
+    - https://www.fortiguard.com/psirt/FG-IR-24-535
+    - https://docs.fortinet.com/document/fortigate/7.6.4/fortios-log-message-reference/398/event
+    - https://docs.fortinet.com/document/fortigate/7.6.4/cli-reference/114404382/config-vpn-ssl-settings
+    - https://docs.fortinet.com/document/fortigate/7.6.4/fortios-log-message-reference/44546/44546-logid-event-config-attr
+author: Marco Pedrinazzi @pedrinazziM (InTheCyber)
+date: 2025-11-01
+tags:
+    - attack.persistence
+    - attack.initial-access
+    - attack.t1133
+logsource:
+    product: fortigate
+    service: event
+detection:
+    selection:
+        action: 'Edit'
+        cfgpath: 'vpn.ssl.settings'
+    condition: selection
+falsepositives:
+    - VPN SSL settings can be changed for legitimate purposes.
+level: medium

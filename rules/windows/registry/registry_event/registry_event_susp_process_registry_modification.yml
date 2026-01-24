@@ -1,0 +1,37 @@
+title: Registry Tampering by Potentially Suspicious Processes
+id: 7f4c43f9-b1a5-4c7d-b24a-b41bf3a3ebf2
+related:
+    - id: 2a0a169d-cc66-43ce-9ae2-6e678e54e46a
+      type: similar
+    - id: 921aa10f-2e74-4cca-9498-98f9ca4d6fdf
+      type: similar
+status: experimental
+description: |
+    Detects suspicious registry modifications made by suspicious processes such as script engine processes such as WScript, or CScript etc.
+    These processes are rarely used for legitimate registry modifications, and their activity may indicate an attempt to modify the registry
+    without using standard tools like regedit.exe or reg.exe, potentially for evasion and persistence.
+references:
+    - https://www.nextron-systems.com/2025/07/29/detecting-the-most-popular-mitre-persistence-method-registry-run-keys-startup-folder/
+    - https://www.linkedin.com/posts/mauricefielenbach_livingofftheland-redteam-persistence-activity-7344801774182051843-TE00/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-08-13
+tags:
+    - attack.defense-evasion
+    - attack.persistence
+    - attack.execution
+    - attack.t1112
+    - attack.t1059.005
+logsource:
+    category: registry_event
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            # Add more suspicious processes
+            - '\mshta.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+    condition: selection
+falsepositives:
+    - Some legitimate admin or install scripts may use these processes for registry modifications.
+level: medium

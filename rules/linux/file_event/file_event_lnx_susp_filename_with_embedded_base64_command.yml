@@ -1,0 +1,27 @@
+title: Suspicious Filename with Embedded Base64 Commands
+id: 179b3686-6271-4d87-807d-17d843a8af73
+status: experimental
+description: |
+    Detects files with specially crafted filenames that embed Base64-encoded bash payloads designed to execute when processed by shell scripts.
+    These filenames exploit shell interpretation quirks to trigger hidden commands, a technique observed in VShell malware campaigns.
+references:
+    - https://www.trellix.com/blogs/research/the-silent-fileless-threat-of-vshell/
+author: '@kostastsale'
+date: 2025-11-22
+tags:
+    - attack.execution
+    - attack.t1059.004
+    - attack.defense-evasion
+    - attack.t1027
+logsource:
+    product: linux
+    category: file_event
+detection:
+    selection:
+        TargetFilename|contains:
+            - '{echo'
+            - '{base64,-d}'
+    condition: selection
+falsepositives:
+    - Legitimate files with similar naming patterns (very unlikely).
+level: high

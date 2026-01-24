@@ -1,12 +1,18 @@
-title: FileFix - Command Evidence in TypedPaths from Browser File Upload Abuse
+title: FileFix - Command Evidence in TypedPaths
 id: 4fee3d51-8069-4a4c-a0f7-924fcaff2c70
+related:
+    - id: 4be03877-d5b6-4520-85c9-a5911c0a656c
+      type: similar
 status: experimental
-description: Detects commonly-used chained commands and strings in the most recent 'url' value of the 'TypedPaths' key, which could be indicative of a user being targeted by the FileFix technique.
+description: |
+    Detects commonly-used chained commands and strings in the most recent 'url' value of the 'TypedPaths' key, which could be indicative of a user being targeted by the FileFix technique.
 references:
     - https://x.com/russianpanda9xx/status/1940831134759506029
     - https://mrd0x.com/filefix-clickfix-alternative/
-author: Alfie Champion (delivr.to)
+    - https://www.scpx.com.au/2025/11/16/decades-old-finger-protocol-abused-in-clickfix-malware-attacks/
+author: Alfie Champion (delivr.to), Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2025-07-05
+modified: 2025-11-19
 tags:
     - attack.execution
     - attack.t1204.004
@@ -16,21 +22,43 @@ logsource:
 detection:
     selection_base:
         TargetObject|endswith: '\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths\url1'
-        Details|contains: '#'
-        Image|endswith:
-            - '\brave.exe'
-            - '\chrome.exe'
-            - '\firefox.exe'
-            - '\msedge.exe'
+        Details|contains|all:
+            - '#'
+            - 'http'
     selection_cmd:
-        Details|contains:
-            - 'cmd'
-            - 'curl'
-            - 'powershell'
-            - 'bitsadmin'
-            - 'certutil'
-            - 'mshta'
-            - 'regsvr32'
+        - Details|contains:
+              # Add more suspicious keywords
+              - 'account'
+              - 'anti-bot'
+              - 'botcheck'
+              - 'captcha'
+              - 'challenge'
+              - 'confirmation'
+              - 'fraud'
+              - 'human'
+              - 'identification'
+              - 'identificator'
+              - 'identity'
+              - 'robot'
+              - 'validation'
+              - 'verification'
+              - 'verify'
+        - Details|contains:
+              - '%comspec%'
+              - 'bitsadmin'
+              - 'certutil'
+              - 'cmd'
+              - 'cscript'
+              - 'curl'
+              - 'finger'
+              - 'mshta'
+              - 'powershell'
+              - 'pwsh'
+              - 'regsvr32'
+              - 'rundll32'
+              - 'schtasks'
+              - 'wget'
+              - 'wscript'
     condition: all of selection_*
 falsepositives:
     - Unknown

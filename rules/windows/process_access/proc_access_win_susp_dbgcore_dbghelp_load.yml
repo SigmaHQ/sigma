@@ -1,0 +1,64 @@
+title: Suspicious Process Access to LSASS with Dbgcore/Dbghelp DLLs
+id: 9f5c1d59-33be-4e60-bcab-85d2f566effd
+related:
+    - id: 416bc4a2-7217-4519-8dc7-c3271817f1d5
+      type: similar
+status: experimental
+description: |
+    Detects suspicious process access to LSASS.exe from processes located in uncommon locations with dbgcore.dll or dbghelp.dll in the call trace.
+    These DLLs contain functions like MiniDumpWriteDump that can be abused for credential dumping purposes. While modern tools like Mimikatz have moved to using ntdll.dll,
+    dbgcore.dll and dbghelp.dll are still used by basic credential dumping utilities and legacy tools for LSASS memory access and process suspension techniques.
+references:
+    - https://www.splunk.com/en_us/blog/security/you-bet-your-lsass-hunting-lsass-access.html
+    - https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/nf-minidumpwritedump
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-11-27
+tags:
+    - attack.credential-access
+    - attack.t1003.001
+    - attack.defense-evasion
+    - attack.t1562.001
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection_lsass_calltrace:
+        TargetImage|endswith: '\lsass.exe'
+        CallTrace|contains:
+            - 'dbgcore.dll'
+            - 'dbghelp.dll'
+    # The following selection is commented out and not enabled by default because any access to LSASS with dbgcore.dll or dbghelp.dll in the call trace from uncommon locations is assumed to be suspicious,
+    # but it may reduce false positives if the rule is too noisy. These GrantedAccess bits are commonly used for dumping LSASS memory.
+    # Uncomment if you observe false positives with the default rule.
+    # selection_granted_access:
+    #     GrantedAccess|contains:
+    #         - '0x1fffff'
+    #         - '0x10'
+    #         - '0x1010'
+    #         - '0x1410'
+    #         - '0x1438'
+    selection_susp_location:
+        SourceImage|contains:
+            - ':\Perflogs\'
+            - ':\Temp\'
+            - ':\Users\Public\'
+            - '\$Recycle.Bin\'
+            - '\AppData\Roaming\'
+            - '\Contacts\'
+            - '\Desktop\'
+            - '\Documents\'
+            - '\Downloads\'
+            - '\Favorites\'
+            - '\Favourites\'
+            - '\inetpub\wwwroot\'
+            - '\Music\'
+            - '\Pictures\'
+            - '\Start Menu\Programs\Startup\'
+            - '\Users\Default\'
+            - '\Videos\'
+            - '\Windows\Temp\'
+    condition: all of selection_*
+falsepositives:
+    - Possibly during software installation or update processes
+level: high
+regression_tests_path: regression_data/rules/windows/process_access/proc_access_win_susp_dbgcore_dbghelp_load/info.yml
