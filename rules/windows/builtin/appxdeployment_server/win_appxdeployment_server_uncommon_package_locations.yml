@@ -1,7 +1,8 @@
-title: Uncommon AppX Package Locations
+title: AppX Located in Uncommon Directory Added to Deployment Pipeline
 id: c977cb50-3dff-4a9f-b873-9290f56132f1
 status: test
-description: Detects an appx package added the pipeline of the "to be processed" packages which is located in uncommon locations
+description: |
+    Detects an appx package that was added to the pipeline of the "to be processed" packages that is located in uncommon locations.
 references:
     - Internal Research
     - https://www.sentinelone.com/labs/inside-malicious-windows-apps-for-malware-deployment/
@@ -9,7 +10,7 @@ references:
     - https://news.sophos.com/en-us/2021/11/11/bazarloader-call-me-back-attack-abuses-windows-10-apps-mechanism/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023-01-11
-modified: 2025-10-17
+modified: 2025-12-03
 tags:
     - attack.defense-evasion
 logsource:
@@ -21,23 +22,30 @@ detection:
     filter_main_generic:
         Path|contains:
             # Paths can be written using forward slash if the "file://" protocol is used
-            - 'C:\Program Files\WindowsApps\'
-            - 'C:\Program Files (x86)\'
-            - 'C:\Windows\SystemApps\'
-            - 'C:\Windows\PrintDialog\'
-            - 'C:\Windows\ImmersiveControlPanel\'
-            - 'x-windowsupdate://'
-            - 'file:///C:/Program%20Files' # Also covers 'file:///C:/Program%20Files%20(x86)/'
+            - ':/Program%20Files' # Also covers 'file:///C:/Program%20Files%20(x86)/'
+            - ':/Windows/System32/'
+            - ':\Program Files (x86)\'
+            - ':\Program Files\'
+            - ':\Windows\ImmersiveControlPanel\'
+            - ':\Windows\PrintDialog\'
+            - ':\Windows\SystemApps\'
             - 'AppData/Local/Temp/WinGet/Microsoft.Winget.Source'
+            - 'x-windowsupdate://'
     filter_main_specific:
         Path|contains:
+            - 'https://installer.teams.static.microsoft/'
+            - 'https://res.cdn.office.net' # Example https://res.cdn.office.net/nativehost/5mttl/installer/v2/1.2025.617.100/Microsoft.OutlookForWindows_x64.msix
             - 'https://statics.teams.cdn.live.net/'
             - 'https://statics.teams.cdn.office.net/'
             - 'microsoft.com' # Example: https://go.microsoft.com/fwlink/?linkid=2160968
-            - 'https://installer.teams.static.microsoft/'
-            - 'https://res.cdn.office.net' # Example https://res.cdn.office.net/nativehost/5mttl/installer/v2/1.2025.617.100/Microsoft.OutlookForWindows_x64.msix
     filter_optional_onedrive:
         Path|contains: 'AppData\Local\Microsoft\OneDrive\'
+    filter_optional_winget:
+        Path|contains:
+            - 'AppData/Local/Temp/WinGet/Microsoft.Winget.Source'
+            - 'AppData\Local\Temp\WinGet\Microsoft.Winget.Source'
+    filter_optional_x_windowsupdate:
+        Path|contains: 'x-windowsupdate://'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
