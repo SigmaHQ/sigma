@@ -1,0 +1,49 @@
+title: Renamed Schtasks Execution
+id: f91e51c9-f344-4b32-969b-0b6f6b8537d4
+status: experimental
+description: |
+    Detects the execution of renamed schtasks.exe binary, which is a legitimate Windows utility used for scheduling tasks.
+    One of the very common persistence techniques is schedule malicious tasks using schtasks.exe.
+    Since, it is heavily abused, it is also heavily monitored by security products. To evade detection, threat actors may rename the schtasks.exe binary to schedule their malicious tasks.
+references:
+    - https://x.com/JangPr0/status/1932034543026065833
+    - https://ss64.com/nt/schtasks.html
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-11-27
+tags:
+    - attack.defense-evasion
+    - attack.execution
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1036.003
+    - attack.t1053.005
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_cmd_operation:
+        CommandLine|contains|windash:
+            - ' /create '
+            - ' /delete '
+            - ' /query '
+            - ' /change '
+            - ' /run '
+            - ' /end '
+    selection_cmd_flags:
+        CommandLine|contains|windash:
+            - ' /tn '
+            - ' /tr '
+            - ' /sc '
+            - ' /st '
+            - ' /ru '
+            - ' /fo '
+    selection_pe:
+        OriginalFileName: 'schtasks.exe'
+    filter_main_cmd:
+        CommandLine|contains: 'schtasks'
+    filter_main_img:
+        Image|endswith: '\schtasks.exe'
+    condition: (all of selection_cmd_* and not filter_main_cmd) or (selection_pe and not filter_main_img)
+falsepositives:
+    - Unlikely
+level: high

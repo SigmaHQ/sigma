@@ -1,0 +1,41 @@
+title: Unsigned .node File Loaded
+id: e5f5c693-52d7-4de5-88ae-afbfbce85595
+status: experimental
+description: |
+    Detects the loading of unsigned .node files.
+    Adversaries may abuse a lack of .node integrity checking to execute arbitrary code inside of trusted applications such as Slack.
+    .node files are native add-ons for Electron-based applications, which are commonly used for desktop applications like Slack, Discord, and Visual Studio Code.
+    This technique has been observed in the DripLoader malware, which uses unsigned .node files to load malicious native code into Electron applications.
+references:
+    - https://www.coreycburton.com/blog/driploader-case-study
+    - https://github.com/CoreyCBurton/DripLoaderNG
+    - https://www.electronjs.org/docs/latest/tutorial/native-code-and-electron
+author: Jonathan Beierle (@hullabrian)
+date: 2025-11-22
+tags:
+    - attack.execution
+    - attack.privilege-escalation
+    - attack.persistence
+    - attack.defense-evasion
+    - attack.t1129
+    - attack.t1574.001
+    - attack.t1036.005
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection_node_extension:
+        ImageLoaded|endswith: '.node'
+    selection_status:
+        - Signed: 'false'
+        - SignatureStatus: 'Unavailable'
+    filter_optional_vscode_jupyter:
+        Image|endswith: '\Code.exe'
+        ImageLoaded|contains: '.vscode\extensions\ms-toolsai.jupyter-'
+        ImageLoaded|endswith:
+            - '\electron.napi.node'
+            - '\node.napi.glibc.node'
+    condition: all of selection_* and not 1 of filter_optional_*
+falsepositives:
+    - VsCode extensions or similar legitimate tools might use unsigned .node files. These should be investigated on a case-by-case basis, and whitelisted if determined to be benign.
+level: medium

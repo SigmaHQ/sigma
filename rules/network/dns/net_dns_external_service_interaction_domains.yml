@@ -1,11 +1,15 @@
 title: DNS Query to External Service Interaction Domains
 id: aff715fa-4dd5-497a-8db3-910bea555566
 status: test
-description: Detects suspicious DNS queries to external service interaction domains often used for out-of-band interactions after successful RCE
+description: |
+    Detects suspicious DNS queries to external service interaction domains often used for out-of-band interactions after successful RCE
 references:
     - https://twitter.com/breakersall/status/1533493587828260866
+    - https://www.bitdefender.com/en-us/blog/businessinsights/bitdefender-advisory-critical-unauthenticated-rce-windows-server-update-services-cve-2025-59287
+    - https://github.com/SigmaHQ/sigma/pull/5724#issuecomment-3466382234
 author: Florian Roth (Nextron Systems), Matt Kelly (list of domains)
 date: 2022-06-07
+modified: 2025-11-22
 tags:
     - attack.initial-access
     - attack.t1190
@@ -16,19 +20,34 @@ logsource:
 detection:
     selection:
         query|contains:
-            - '.interact.sh'
-            - '.oast.pro'
-            - '.oast.live'
-            - '.oast.site'
-            - '.oast.online'
-            - '.oast.fun'
-            - '.oast.me'
             - '.burpcollaborator.net'
-            - '.oastify.com'
             - '.canarytokens.com'
-            - '.requestbin.net'
+            - '.ceye.io'
+            - '.ddns.1443.eu.org' # dig.pm
+            - '.ddns.bypass.eu.org' # dig.pm
+            - '.ddns.xn--gg8h.eu.org' # dig.pm
+            - '.dns.su18.org' # javaweb.org
+            - '.dnshook.site' # webhook.site
             - '.dnslog.cn'
-    condition: selection
+            - '.dnslog.ink' # dnslog.ink
+            - '.interact.sh'
+            - '.log.dnslog.pp.ua' # dnslog.org
+            - '.log.dnslog.qzz.io' # dnslog.org
+            - '.log.dnslogs.dpdns.org' # dnslog.org
+            - '.log.javaweb.org' # javaweb.org
+            - '.log.nat.cloudns.ph' # dnslog.org
+            - '.oast.fun'
+            - '.oast.live'
+            - '.oast.me'
+            - '.oast.online'
+            - '.oast.pro'
+            - '.oast.site'
+            - '.oastify.com'
+            - '.p8.lol' # javaweb.org
+            - '.requestbin.net'
+    filter_main_polling:
+        query|contains: 'polling.oastify.com'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
-    - Unknown
+    - Legitimate security scanning.
 level: high

@@ -13,7 +13,7 @@ references:
     - https://thedfirreport.com/2023/08/28/html-smuggling-leads-to-domain-wide-ransomware/
 author: Florian Roth (Nextron Systems), Markus Neis, Tim Shelton (HAWK.IO), Nasreddine Bencherchali (Nextron Systems)
 date: 2020-07-03
-modified: 2025-10-07
+modified: 2025-11-27
 tags:
     - attack.defense-evasion
     - attack.t1036.003
@@ -26,7 +26,6 @@ detection:
         CommandLine|contains: 'copy '
     selection_img_pwsh:
         Image|endswith:
-            - '\powershell_ise.exe'
             - '\powershell.exe'
             - '\pwsh.exe'
         CommandLine|contains:
@@ -42,10 +41,7 @@ detection:
               - 'robocopy.exe'
               - 'XCOPY.EXE'
     selection_target:
-        CommandLine|contains:
-            - '\System32'
-            - '\SysWOW64'
-            - '\WinSxS'
+        CommandLine|re|i: \s['"]?C:\\Windows\\(System32|SysWOW64|WinSxS)
     filter_optional_avira:
         Image|endswith: '\cmd.exe'
         CommandLine|contains|all:

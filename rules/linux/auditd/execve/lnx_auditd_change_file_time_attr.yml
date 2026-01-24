@@ -1,0 +1,42 @@
+title: File Time Attribute Change - Linux
+id: b3cec4e7-6901-4b0d-a02d-8ab2d8eb818b
+status: test
+description: Detect file time attribute change to hide new or changes to existing files.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.006/T1070.006.md
+author: 'Igor Fits, oscd.community'
+date: 2020-10-15
+modified: 2022-11-28
+tags:
+    - attack.defense-evasion
+    - attack.t1070.006
+logsource:
+    product: linux
+    service: auditd
+detection:
+    execve:
+        type: 'EXECVE'
+    touch:
+        - 'touch'
+    selection2:
+        - '-t'
+        - '-acmr'
+        - '-d'
+        - '-r'
+    condition: execve and touch and selection2
+falsepositives:
+    - Unknown
+level: medium
+simulation:
+    - type: atomic-red-team
+      name: Set a file's access timestamp
+      technique: T1070.006
+      atomic_guid: 5f9113d5-ed75-47ed-ba23-ea3573d05810
+    - type: atomic-red-team
+      name: Set a file's modification timestamp
+      technique: T1070.006
+      atomic_guid: 20ef1523-8758-4898-b5a2-d026cc3d2c52
+    - type: atomic-red-team
+      name: Modify file timestamps using reference file
+      technique: T1070.006
+      atomic_guid: 631ea661-d661-44b0-abdb-7a7f3fc08e50
