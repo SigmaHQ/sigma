@@ -1,0 +1,34 @@
+title: Windows MSIX Package Support Framework AI_STUBS Execution
+id: af5732ed-764e-489d-826d-0447c8b36242
+status: experimental
+description: |
+    Detects execution of Advanced Installer MSIX Package Support Framework (PSF) components, specifically AI_STUBS executables with original filename 'popupwrapper.exe'.
+    This activity may indicate malicious MSIX packages build with Advanced Installer leveraging the Package Support Framework to bypass application control restrictions.
+references:
+    - https://redcanary.com/blog/threat-intelligence/msix-installers/
+    - https://redcanary.com/threat-detection-report/techniques/installer-packages/
+    - https://learn.microsoft.com/en-us/windows/msix/package/package-support-framework
+    - https://www.splunk.com/en_us/blog/security/msix-weaponization-threat-detection-splunk.html
+author: Michael Haag, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-11-03
+tags:
+    - attack.defense-evasion
+    - attack.execution
+    - attack.t1218
+    - attack.t1553.005
+    - attack.t1204.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\AI_STUBS\AiStubX64Elevated.exe'
+            - '\AI_STUBS\AiStubX86Elevated.exe'
+            - '\AI_STUBS\AiStubX64.exe'
+            - '\AI_STUBS\AiStubX86.exe'
+        OriginalFileName: 'popupwrapper.exe'
+    condition: selection
+falsepositives:
+    - Legitimate applications packaged with Advanced Installer using Package Support Framework
+level: low
