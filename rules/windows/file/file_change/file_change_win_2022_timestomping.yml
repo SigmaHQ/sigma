@@ -20,6 +20,13 @@ detection:
         PreviousCreationUtcTime|startswith: '202'
     filter_main_creation_time:
         CreationUtcTime|startswith: '202'
+    filter_main_program_files:
+        - TargetFilename|startswith:
+              - 'C:\Program Files\'
+              - 'C:\Program Files (x86)\'
+        - Image|startswith:
+              - 'C:\Program Files\'
+              - 'C:\Program Files (x86)\'
     filter_optional_updates:
         - Image:
               - 'C:\Windows\system32\ProvTool.exe'
@@ -29,11 +36,14 @@ detection:
         - TargetFilename|endswith:
               - '.tmp'
               - '.temp'
-    filter_optional_tiworker:
-        Image|startswith: 'C:\WINDOWS\'
-        Image|endswith: '\TiWorker.exe'
+    filter_optional_cab:
+        Image|startswith: 'C:\WINDOWS\System32\'
+        Image|endswith:
+            - '\TiWorker.exe'
+            - '\svchost.exe'
         TargetFilename|endswith: '.cab'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Changes made to or by the local NTP service
-level: high
+    - Software installations and updates
+level: low
