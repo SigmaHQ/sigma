@@ -1,15 +1,27 @@
-title: Potential SquiblyTwo Technique Execution
+title: Potential Remote SquiblyTwo Technique Execution
 id: 8d63dadf-b91b-4187-87b6-34a1114577ea
+related:
+    - id: 06ce37c2-61ab-4f05-9ff5-b1a96d18ae32
+      type: similar
+    - id: 05c36dd6-79d6-4a9a-97da-3db20298ab2d
+      type: similar
 status: test
-description: Detects potential SquiblyTwo attack technique with possible renamed WMIC via Imphash and OriginalFileName fields
+description: |
+    Detects potential execution of the SquiblyTwo technique that leverages Windows Management Instrumentation (WMI)
+    to execute malicious code remotely. This technique bypasses application whitelisting by using wmic.exe to process
+    malicious XSL (eXtensible Stylesheet Language) scripts that can contain embedded JScript or VBScript.
+    The attack typically works by fetching XSL content from a remote source (using HTTP/HTTPS) and executing it
+    with full trust privileges directly in memory, avoiding disk-based detection mechanisms. This is a common
+    LOLBin (Living Off The Land Binary) technique used for defense evasion and code execution.
 references:
     - https://web.archive.org/web/20190209154607/https://subt0x11.blogspot.com/2018/04/wmicexe-whitelisting-bypass-hacking.html
     - https://twitter.com/mattifestation/status/986280382042595328 # Deleted
     - https://atomicredteam.io/defense-evasion/T1220/
     - https://lolbas-project.github.io/lolbas/Binaries/Wmic/
-author: Markus Neis, Florian Roth
+    - https://x.com/byrne_emmy12099/status/1932346420226658668
+author: Markus Neis, Florian Roth, Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2019-01-16
-modified: 2024-11-23
+modified: 2026-01-24
 tags:
     - attack.defense-evasion
     - attack.t1047
@@ -25,14 +37,17 @@ detection:
         - Image|endswith: '\wmic.exe'
         - OriginalFileName: 'wmic.exe'
         - Hashes|contains:  # Sysmon field hashes contains all types
-              - IMPHASH=1B1A3F43BF37B5BFE60751F2EE2F326E
-              - IMPHASH=37777A96245A3C74EB217308F3546F4C
-              - IMPHASH=9D87C9D67CE724033C0B40CC4CA1B206
+              - 'IMPHASH=1B1A3F43BF37B5BFE60751F2EE2F326E'
+              - 'IMPHASH=37777A96245A3C74EB217308F3546F4C'
+              - 'IMPHASH=9D87C9D67CE724033C0B40CC4CA1B206'
+              - 'IMPHASH=B12619881D79C3ACADF45E752A58554A'
+              - 'IMPHASH=16A48C3CABF98A9DC1BF02C07FE1EA00'
     selection_cli:
-        CommandLine|contains|all:
-            - 'format:'
-            - 'http'
+        CommandLine|contains|windash: '/format:'
+        CommandLine|contains:
+            - '://'
+            - '\\\\'
     condition: all of selection_*
 falsepositives:
     - Unknown
-level: medium
+level: high
