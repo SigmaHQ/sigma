@@ -1,7 +1,9 @@
 title: Suspicious Email Delivered In Microsoft 365
 id: 3569aefd-e535-4391-8c18-24bd01a21eaf
 status: experimental
-description: Detects emails classified as suspicious by Microsoft Defender for Office 365 that got delivered
+description: |
+     Detects instances where an email, identified as malicious or suspicious by the Microsoft Defender for Office 365 (formerly ATP) engine, was delivered to a user's Inbox or Junk folder.
+    It might indicate that a potential threat, such as a spearphishing attachment or links, has bypassed initial blocking mechanisms and reached an end-user, requiring further investigation and potential remediation.
 references:
     - https://learn.microsoft.com/en-us/defender-office-365/threat-explorer-real-time-detections-about
     - https://research.splunk.com/cloud/605cc93a-70e4-4ee3-9a3d-1a62e8c9b6c2/
@@ -9,8 +11,9 @@ references:
 author: Marco Pedrinazzi (@pedrinazziM) (InTheCyber)
 date: 2026-01-27
 tags:
-    - attack.t1566
     - attack.initial-access
+    - attack.t1566.001
+    - attack.t1566.002
 logsource:
     service: audit
     product: m365
@@ -18,11 +21,10 @@ detection:
     selection:
         Workload: 'ThreatIntelligence'
         Operation: 'TIMailData'
-        DeliveryAction:
-            - 'Delivered'
-            - 'Junked'
         Directionality: 'Inbound'
-    condition: selection
+    filter_main_blocked:
+        DeliveryAction: 'Blocked'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unlikely
 level: medium
