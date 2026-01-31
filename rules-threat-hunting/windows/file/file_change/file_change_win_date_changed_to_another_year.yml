@@ -1,0 +1,60 @@
+title: File Creation Date Changed to Another Year
+id: 558eebe5-f2ba-4104-b339-36f7902bcc1a
+status: test
+description: |
+    Detects when the file creation time is changed to a year before 2020.
+    Attackers may change the file creation time of a backdoor to make it look like it was installed with the operating system.
+    Note that many processes legitimately change the creation time of a file; it does not necessarily indicate malicious activity.
+    In order to use this rule in production, it is recommended first baseline normal behavior in your environment and then tune the rule accordingly.
+    Hunting Recommendation: Focus on files with creation times set to years significantly before the current date, especially those in user-writable directories.
+    Correlate with process execution logs to identify the source of the modification and investigate any unsigned or suspicious binaries involved.
+references:
+    - https://www.inversecos.com/2022/04/defence-evasion-technique-timestomping.html
+author: frack113, Florian Roth (Nextron Systems)
+date: 2022-08-12
+modified: 2026-01-20
+tags:
+    - attack.t1070.006
+    - attack.defense-evasion
+    - detection.threat-hunting
+logsource:
+    category: file_change
+    product: windows
+detection:
+    selection:
+        PreviousCreationUtcTime|startswith: '202'
+    filter_main_creation_time:
+        CreationUtcTime|startswith: '202'
+    filter_main_program_files:
+        - TargetFilename|startswith:
+              - 'C:\Program Files\'
+              - 'C:\Program Files (x86)\'
+        - Image|startswith:
+              - 'C:\Program Files\'
+              - 'C:\Program Files (x86)\'
+    filter_optional_updates:
+        - Image:
+              - 'C:\Windows\system32\ProvTool.exe'
+              - 'C:\Windows\System32\usocoreworker.exe'
+              - 'C:\Windows\ImmersiveControlPanel\SystemSettings.exe'
+        - TargetFilename|startswith: 'C:\ProgramData\USOPrivate\UpdateStore\'
+        - TargetFilename|endswith:
+              - '.tmp'
+              - '.temp'
+    filter_optional_cab:
+        Image|startswith: 'C:\WINDOWS\System32\'
+        Image|endswith:
+            - '\TiWorker.exe'
+            - '\svchost.exe'
+            - '\sihclient.exe'
+        TargetFilename|endswith: '.cab'
+    filter_optional_msiexec:
+        Image: 'C:\Windows\system32\msiexec.exe'
+    filter_optional_vcredist:
+        Image|startswith: 'C:\Windows\Temp\'
+        Image|endswith: '\VCREDI~1.EXE'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Changes made to or by the local NTP service
+    - Software installations and updates
+level: low
