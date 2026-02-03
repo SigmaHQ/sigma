@@ -19,14 +19,12 @@ logsource:
     product: windows
     category: process_creation
 detection:
-    selection_file:
+    selection:
         Image|endswith: 'node.exe'
-        CommandLine|contains: 'npx-cli.js'
-    selection_action:
-        CommandLine|contains:
+        CommandLine|contains|all: 
+            - 'npx-cli.js'
             - 'skills add'
-            - 'skills find'
-    condition: selection_file and selection_action
+    condition: selection
 falsepositives:
     - This rule will be triggered when a new agent skill is installed regardless if it is benign or malicious.
 level: medium
