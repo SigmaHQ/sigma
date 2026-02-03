@@ -1,0 +1,34 @@
+title: Notepad++ Updater DNS Query to Unknown Domains
+id: 2074e137-1b73-4e2d-88ba-5a3407dbdce0
+status: experimental
+description: |
+    Detects when the Notepad++ updater (gup.exe) makes DNS queries to unknown domains which are not part of the legitimate update infrastructure.
+    This may indicate a supply chain attack where the Notepad++ update mechanism was hijacked to deliver malicious payloads.
+    In early 2026, it was discovered that WinGUp (the Notepad++ updater) traffic was hijacked and redirected to malicious servers, allowing attackers to deliver and execute arbitrary binaries on target systems.
+    This is due to a weakness in the updater's validation of update file integrity and authenticity which was fixed in later versions of Notepad++ after v8.8.9.
+    Attackers able to intercept updater traffic could exploit this to execute unwanted binaries or malware on target systems.
+references:
+    - https://notepad-plus-plus.org/news/v889-released/
+    - https://www.heise.de/en/news/Notepad-updater-installed-malware-11109726.html
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-02-02
+tags:
+    - attack.collection
+    - attack.credential-access
+    - attack.t1195.002
+    - attack.initial-access
+    - attack.t1557
+logsource:
+    category: dns_query
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\gup.exe'
+    filter_main_legit_domain:
+        query|contains: 'notepad-plus-plus.org'
+        # Add other known legitimate domains if any
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Some legitimate network misconfigurations or proxy issues causing unexpected DNS queries.
+    - Other legitimate query to official domains not listed in the filter, needing tuning.
+level: medium # can be upgraded to high after tuning with known legitimate DNS queries
