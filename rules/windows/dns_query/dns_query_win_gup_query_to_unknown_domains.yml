@@ -24,10 +24,17 @@ logsource:
 detection:
     selection:
         Image|endswith: '\gup.exe'
-    filter_main_legit_domain:
+    filter_main_notepad_legit_domain:
         QueryName: 'notepad-plus-plus.org'
+    filter_optional_sourceforge_legit_domain:
+        QueryName|endswith: '.sourceforge.net'
         # Add other known legitimate domains if any
-    condition: selection and not 1 of filter_main_*
+    filter_optional_github_legit_domain:
+        - QueryName|endswith: '.githubusercontent.com'
+        - QueryName: 'github.com'
+    filter_optional_google_storage_legit_domain:
+        QueryName|endswith: '.googleapis.com'
+    condition: selection and not 1 of filter_main_* and not filter_optional_*
 falsepositives:
     - Some legitimate network misconfigurations or proxy issues causing unexpected DNS queries.
     - Other legitimate query to official domains not listed in the filter, needing tuning.
