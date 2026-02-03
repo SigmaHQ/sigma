@@ -4,7 +4,11 @@ related:
     - id: e3a8a052-111f-4606-9aee-f28ebeb76776
       type: derived
 status: test
-description: Detects disabling security tools
+description: >
+  Detects attempts to stop or disable common Linux security services such as
+  firewalls and endpoint protection agents via system log messages. Adversaries
+  may disable security tooling to evade detection and maintain persistence.
+
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.004/T1562.004.md
 author: Ömer Günal, Alejandro Ortuno, oscd.community
@@ -23,7 +27,11 @@ detection:
         - 'stopping firewalld'
         - 'stopping cbdaemon'
         - 'stopping falcon-sensor'
+        - 'stopping ufw'
     condition: keywords
 falsepositives:
-    - Legitimate administration activities
+    - Legitimate system administration or maintenance activities
+    - Automated configuration management tools stopping services
+    - Security software upgrades or system reconfiguration
+
 level: medium
