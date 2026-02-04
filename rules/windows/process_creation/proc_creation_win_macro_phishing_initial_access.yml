@@ -1,0 +1,46 @@
+title: Suspicious Office Macro Execution via CLI Arguments
+id: 1b94f66b-46fc-4262-8937-74cfc8d2c8da
+status: experimental
+description: Detects Microsoft Office applications (Word, Excel, PowerPoint, etc.) started with suspicious command-line arguments such as /m, .dotm, or macro-related keywords like AutoOpen/AutoClose.
+  These may indicate auto-executing Office macros used in phishing attacks to gain initial access.
+
+author: arjun-tarakesh
+date: 2025/05/11
+references:
+  - 'https://attack.mitre.org/techniques/T1566/001/'
+
+tags:
+  - attack.execution
+  - attack.t1566.001
+  - attack.t1059.001
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_parent:
+    ParentImage|endswith:
+      - '\WINWORD.EXE'
+      - '\EXCEL.EXE'
+      - '\POWERPNT.EXE'
+      - '\MSPUB.EXE'
+      - '\ONENOTE.EXE'
+      - '\MSACCESS.EXE'
+      - '\VISIO.EXE'
+
+  selection_cmdline:
+    CommandLine|contains:
+      - '/m'
+      - '/t'
+      - '/n'
+      - '.dotm'
+      - 'AutoOpen'
+      - 'AutoClose'
+      - '/q'
+      - '/quiet'
+      - '/h'
+
+  condition: selection_parent and selection_cmdline
+
+falsepositives:
+  - Legitimate use of Office CLI options in enterprise scripting environments or automation
+level: medium
