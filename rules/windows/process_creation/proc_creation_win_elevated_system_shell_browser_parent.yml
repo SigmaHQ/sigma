@@ -1,0 +1,45 @@
+title: Elevated System Shell Spawned From Browser
+id: d3c850ab-f715-4a72-a8b0-3223f51c0773
+status: test
+description: Detects elevated system shells spawned through a browser process. This might be part of a local privilege escalation using vulnerable MSI packages.
+references:
+    - https://r.sec-consult.com/msi
+    - https://msrc.microsoft.com/update-guide/en-US/advisory/CVE-2024-38014
+author: Herbert Bärschneider @SEC Consult
+date: 2024-07-15
+tags:
+    - attack.t1068
+    - cve.2024-38014
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_shell:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+              - '\cmd.exe'
+        - OriginalFileName:
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+              - 'Cmd.Exe'
+    selection_user:
+        User|contains:
+            - 'AUTHORI'
+            - 'AUTORI'
+        LogonId: '0x3e7'
+    selection_browser_parent:
+        ParentImage|contains:
+            - '\brave.exe'
+            - '\chrome.exe'
+            - '\chromium.exe'
+            - '\firefox.exe'
+            - '\iexplore.exe'
+            - '\msedge.exe'
+            - '\opera.exe'
+            - '\safari.exe'
+            - '\tor.exe'
+            - '\vivaldi.exe'
+    condition: selection_shell and selection_user and selection_browser_parent
+level: high
+
