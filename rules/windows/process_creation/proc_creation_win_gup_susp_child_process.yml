@@ -2,13 +2,14 @@ title: Suspicious Child Process of Notepad++ Updater - GUP.Exe
 id: bb0e87ce-c89f-4857-84fa-095e4483e9cb
 status: experimental
 description: |
-    Detects suspicious child process creation by the Notepad++ updater process (gup.exe) which may indicate a supply chain attack involving hijacking of the update mechanism.
-    In late 2025, it was discovered that WinGUp (the Notepad++ updater) traffic were hijacked and redirected to malicious servers, allowing attackers to deliver and execute arbitrary binaries on target systems.
-    This is due to a weakness in the updater's validation of update file integrity and authenticity which was fixed in later versions of Notepad++ after v8.8.9.
-    Attackers able to intercept updater traffic could exploit this to execute unwanted binaries or malware on target systems.
+    Detects suspicious child process creation by the Notepad++ updater process (gup.exe).
+    This could indicate potential exploitation of the updater component to deliver unwanted malware.
 references:
     - https://notepad-plus-plus.org/news/v889-released/
     - https://www.heise.de/en/news/Notepad-updater-installed-malware-11109726.html
+    - https://www.rapid7.com/blog/post/tr-chrysalis-backdoor-dive-into-lotus-blossoms-toolkit/
+    - https://www.validin.com/blog/exploring_notepad_plus_plus_network_indicators/
+    - https://securelist.com/notepad-supply-chain-attack/118708/
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2026-02-03
 tags:
@@ -27,22 +28,21 @@ detection:
         Image|endswith:
             - '\cmd.exe'
             - '\powershell.exe'
-            - '\powershell_ise.exe'
             - '\pwsh.exe'
             - '\cscript.exe'
             - '\wscript.exe'
             - '\mshta.exe'
     selection_child_cli:
         CommandLine|contains:
-            - 'certutil'
             - 'bitsadmin'
+            - 'certutil'
             - 'curl'
-            - 'wget'
-            - 'forfiles'
             - 'finger'
+            - 'forfiles'
             - 'regsvr32'
             - 'rundll32'
+            - 'wget'
     condition: selection_parent and 1 of selection_child_*
 falsepositives:
-    - Unknown
+    - Unlikely
 level: high
