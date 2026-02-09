@@ -1,0 +1,37 @@
+title: Visual Studio Code/DevTunnel Abuse Detection
+id: 12345678-1234-5678-9123-456789abcdef
+status: experimental
+description: |
+    Detects suspicious usage of Visual Studio Code's tunneling features, often abused in espionage campaigns.
+References:
+    - https://unit42.paloaltonetworks.com/stately-taurus-abuses-vscode-southeast-asian-espionage/
+author: 0xAnalyst
+date: 2024-08-14
+tags:
+    - attack.persistence
+    - attack.t1071
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_cli:
+        Image|endswith: 'code.exe'
+        CommandLine|contains: 'tunnel'
+    selection_temporary:
+        CommandLine|contains|all:
+            - 'host'
+            - 'allow-anonymous'
+    selection_persistent:
+        CommandLine|contains|all:
+            - 'port'
+            - 'create'
+            - '-p'
+    condition: 1 of selection_*
+fields:
+    - CommandLine
+    - Image
+    - ParentImage
+    - User
+falsepositives:
+    - Legitimate usage of Visual Studio Code's tunneling feature for development purposes
+level: high
