@@ -1,28 +1,38 @@
 title: Potential AutoLogger Sessions Tampering
 id: f37b4bce-49d0-4087-9f5b-58bffda77316
+related:
+    - id: d7b81144-b866-48a4-9bcc-275dc69d870e
+      type: similar
 status: test
-description: Detects tampering with autologger trace sessions which is a technique used by attackers to disable logging
+description: |
+    Detects tampering with autologger trace sessions which is a technique used by attackers to disable logging.
+    The AutoLogger event tracing session records events up that occur early in the operating system boot process.
+    Applications and device drivers can use the AutoLogger session to capture traces before the user logs in, and also used by security solutions as telemetry source.
+    Adversaries may disable these sessions to evade detection and prevent security monitoring of early boot activities and system events.
 references:
     - https://twitter.com/MichalKoczwara/status/1553634816016498688
     - https://thedfirreport.com/2021/10/18/icedid-to-xinglocker-ransomware-in-24-hours/
     - https://i.blackhat.com/EU-21/Wednesday/EU-21-Teodorescu-Veni-No-Vidi-No-Vici-Attacks-On-ETW-Blind-EDRs.pdf
+    - https://learn.microsoft.com/en-us/windows/win32/etw/configuring-and-starting-an-autologger-session
+    - https://blog.palantir.com/tampering-with-windows-event-tracing-background-offense-and-defense-4be7ac62ac63
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-08-01
-modified: 2025-10-07
+modified: 2025-12-26
 tags:
     - attack.defense-evasion
+    - attack.t1562.002
 logsource:
     category: registry_set
     product: windows
 detection:
     selection_main:
-        TargetObject|contains: '\System\CurrentControlSet\Control\WMI\Autologger\'
+        TargetObject|contains: '\Control\WMI\Autologger\'
     selection_values:
         TargetObject|contains: # We only care about some autologger to avoid FP. Add more if you need
             - '\EventLog-'
             - '\Defender'
         TargetObject|endswith:
-            - '\Enable'
+            - '\Enabled'
             - '\Start'
         Details: DWORD (0x00000000)
     filter_main_wevtutil:
@@ -40,3 +50,21 @@ detection:
 falsepositives:
     - Unknown
 level: high
+regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_disable_autologger_sessions/info.yml
+simulation:
+    - type: atomic-red-team
+      name: Disable EventLog-Application Auto Logger Session Via Registry - Cmd
+      technique: T1562.001
+      atomic_guid: 653c6e17-14a2-4849-851d-f1c0cc8ea9ab
+    - type: atomic-red-team
+      name: Disable EventLog-Application Auto Logger Session Via Registry - PowerShell
+      technique: T1562.001
+      atomic_guid: da86f239-9bd3-4e85-92ed-4a94ef111a1c
+    - type: atomic-red-team
+      name: Disable EventLog-Application ETW Provider Via Registry - Cmd
+      technique: T1562.001
+      atomic_guid: 1cac9b54-810e-495c-8aac-989e0076583b
+    - type: atomic-red-team
+      name: Disable EventLog-Application ETW Provider Via Registry - PowerShell
+      technique: T1562.001
+      atomic_guid: 8f907648-1ebf-4276-b0f0-e2678ca474f0
