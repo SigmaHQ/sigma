@@ -1,0 +1,36 @@
+title: BloodHound Collector
+id: 43f5e083-333c-494a-964c-6f80478a89e9
+status: experimental
+description: Detects BloodHound data collection
+references:
+    - https://bloodhound.readthedocs.io/en/latest/index.html
+    - https://github.com/zeronetworks/ldapfw
+    - https://zeronetworks.com/blog/ldap-firewall-level-up-your-dc-security/
+author: Dekel Paz, Sagie Dulce
+date: 2023/10/30
+modified: 2023/10/30
+tags:
+    - attack.discovery
+    - attack.t1087
+    - attack.t1482
+    - attack.t1615
+    - attack.t1201
+    - attack.t1069
+    - attack.t1018
+    - attack.t1033
+logsource:
+    product: ldap_firewall
+    category: application
+    definition: 'Requirements: install and apply the LDAP Firewall to all Domain Controllers in audit mode'
+detection:
+    selection:
+        EventLog: LDAPFW
+        EventID: 263
+        DN|contains:
+            - admincount
+            - userpassword
+            - msds-allowedToDelegateTo
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
