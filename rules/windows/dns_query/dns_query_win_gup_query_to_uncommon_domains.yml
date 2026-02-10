@@ -1,0 +1,41 @@
+title: Notepad++ Updater DNS Query to Uncommon Domains
+id: 2074e137-1b73-4e2d-88ba-5a3407dbdce0
+status: experimental
+description: |
+    Detects when the Notepad++ updater (gup.exe) makes DNS queries to domains that are not part of the known legitimate update infrastructure.
+    This could indicate potential exploitation of the updater mechanism or suspicious network activity that warrants further investigation.
+references:
+    - https://notepad-plus-plus.org/news/v889-released/
+    - https://www.heise.de/en/news/Notepad-updater-installed-malware-11109726.html
+    - https://www.rapid7.com/blog/post/tr-chrysalis-backdoor-dive-into-lotus-blossoms-toolkit/
+    - https://www.validin.com/blog/exploring_notepad_plus_plus_network_indicators/
+    - https://securelist.com/notepad-supply-chain-attack/118708/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-02-02
+tags:
+    - attack.collection
+    - attack.credential-access
+    - attack.t1195.002
+    - attack.initial-access
+    - attack.t1557
+logsource:
+    category: dns_query
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\gup.exe'
+    filter_main_notepad_legit_domain:
+        QueryName: 'notepad-plus-plus.org'
+    filter_optional_sourceforge_legit_domain:
+        QueryName|endswith: '.sourceforge.net'
+    filter_optional_github_legit_domain:
+        - QueryName|endswith: '.githubusercontent.com'
+        - QueryName: 'github.com'
+    filter_optional_google_storage_legit_domain:
+        QueryName|endswith: '.googleapis.com'
+    # Add other known legitimate domains if any
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Some legitimate network misconfigurations or proxy issues causing unexpected DNS queries.
+    - Other legitimate query to official domains not listed in the filter, needing tuning.
+level: medium # can be upgraded to high after tuning with known legitimate DNS queries

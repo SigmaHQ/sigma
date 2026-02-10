@@ -1,0 +1,34 @@
+title: Registry Modification for OCI DLL Redirection
+id: c0e0bdec-3e3d-47aa-9974-05539c999c89
+status: experimental
+description: |
+    Detects registry modifications related to 'OracleOciLib' and 'OracleOciLibPath' under 'MSDTC' settings.
+    Threat actors may modify these registry keys to redirect the loading of 'oci.dll' to a malicious DLL, facilitating phantom DLL hijacking via the MSDTC service.
+references:
+    - https://www.crowdstrike.com/en-us/blog/4-ways-adversaries-hijack-dlls/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-01-24
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.defense-evasion
+    - attack.t1112
+    - attack.t1574.001
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_ocilib:
+        TargetObject|endswith: '\SOFTWARE\Microsoft\MSDTC\MTxOCI\OracleOciLib'
+    filter_main_ocilib_file:
+        # it is looking when oci.dll name is changed to something else like evil.dll
+        Details|contains: 'oci.dll'
+    selection_ocilibpath:
+        TargetObject|endswith: '\SOFTWARE\Microsoft\MSDTC\MTxOCI\OracleOciLibPath'
+    filter_main_ocilibpath:
+        # it is looking when oci.dll path is changed to something else like 'C:\Windows\Temp\'
+        Details|contains: '%SystemRoot%\System32\'
+    condition: (selection_ocilib and not filter_main_ocilib_file) or (selection_ocilibpath and not filter_main_ocilibpath)
+falsepositives:
+    - Unlikely
+level: high
