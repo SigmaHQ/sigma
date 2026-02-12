@@ -1,0 +1,50 @@
+title: Registry Modification of MS-settings Protocol Handler
+id: dd3ee8cc-f751-41c9-ba53-5a32ed47e563
+related:
+    - id: 152f3630-77c1-4284-bcc0-4cc68ab2f6e7
+      type: similar
+status: test
+description: |
+    Detects registry modifications to the 'ms-settings' protocol handler, which is frequently targeted for UAC bypass or persistence.
+    Attackers can modify this registry to execute malicious code with elevated privileges by hijacking the command execution path.
+references:
+    - https://thedfirreport.com/2021/12/13/diavol-ransomware/
+    - https://www.trendmicro.com/en_us/research/25/f/water-curse.html
+author: frack113, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2021-12-20
+modified: 2026-01-24
+tags:
+    - attack.defense-evasion
+    - attack.privilege-escalation
+    - attack.persistence
+    - attack.t1548.002
+    - attack.t1546.001
+    - attack.t1112
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_reg_img:
+        - Image|endswith: '\reg.exe'
+        - OriginalFileName: 'reg.exe'
+    selection_pwsh_img:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+              - 'powershell.exe'
+              - 'pwsh.dll'
+    selection_reg_cli:
+        CommandLine|contains: 'add'
+    selection_pwsh_cli:
+        CommandLine|contains:
+            - 'New-ItemProperty'
+            - 'Set-ItemProperty'
+            - 'ni '
+            - 'sp '
+    selection_cli_key:
+        CommandLine|contains: '\ms-settings\shell\open\command'
+    condition: (all of selection_reg_* or all of selection_pwsh_*) and selection_cli_key
+falsepositives:
+    - Unknown
+level: medium

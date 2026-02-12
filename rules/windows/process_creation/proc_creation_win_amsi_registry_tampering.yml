@@ -1,0 +1,55 @@
+title: Windows AMSI Related Registry Tampering Via CommandLine
+id: 7dbbcac2-57a0-45ac-b306-ff30a8bd2981
+related:
+    - id: aa37cbb0-da36-42cb-a90f-fdf216fc7467 # AMSI Disabled via Registry Modification
+      type: similar
+status: experimental
+description: |
+    Detects tampering of AMSI (Anti-Malware Scan Interface) related registry values via command line tools such as reg.exe or PowerShell.
+    AMSI provides a generic interface for applications and services to integrate with antimalware products.
+    Adversaries may disable AMSI to evade detection of malicious scripts and code execution.
+references:
+    - https://github.com/arttoolkit/arttoolkit.github.io/blob/16d6230d009e58fd6f773f5317fd4d14c1f26004/_wadcoms/AMSI-Bypass-Jscript_amsienable.md
+    - https://mostafayahiax.medium.com/hunting-for-amsi-bypassing-methods-9886dda0bf9d
+    - https://www.mdsec.co.uk/2019/02/macros-and-more-with-sharpshooter-v2-0/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-12-25
+tags:
+    - attack.defense-evasion
+    - attack.t1562.001
+    - attack.t1562.006
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_key:
+        CommandLine|contains|all:
+            - '\Software\Microsoft\Windows Script\Settings'
+            - 'AmsiEnable'
+    selection_reg_img:
+        - Image|endswith: '\reg.exe'
+        - OriginalFileName: 'reg.exe'
+    selection_reg_cmd:
+        CommandLine|contains: 'add'
+    selection_powershell_img:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+    selection_powershell_cmd:
+        CommandLine|contains:
+            - 'Set-ItemProperty'
+            - 'New-ItemProperty'
+            - 'sp '
+    condition: selection_key and (all of selection_powershell_* or all of selection_reg_*)
+falsepositives:
+    - Unknown
+level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_amsi_registry_tampering/info.yml
+simulation:
+    - type: atomic-red-team
+      name: AMSI Bypass - Create AMSIEnable Reg Key
+      technique: T1562.001
+      atomic_guid: 728eca7b-0444-4f6f-ac36-437e3d751dc0
