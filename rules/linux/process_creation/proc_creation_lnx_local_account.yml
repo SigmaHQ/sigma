@@ -6,9 +6,10 @@ references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1087.001/T1087.001.md
     - https://my.f5.com/manage/s/article/K589
     - https://man.freebsd.org/cgi/man.cgi?pwd_mkdb
+    - https://medium.com/@linuxrootroom/what-is-the-getent-passwd-command-in-linux-90abb27ab723
 author: Alejandro Ortuno, oscd.community, CheraghiMilad
 date: 2020-10-08
-modified: 2024-12-10
+modified: 2026-01-30
 tags:
     - attack.discovery
     - attack.t1087.001
@@ -16,11 +17,11 @@ logsource:
     category: process_creation
     product: linux
 detection:
-    selection_1:
+    selection_lastlog:
         Image|endswith: '/lastlog'
-    selection_2:
+    selection_root:
         CommandLine|contains: '''x:0:'''
-    selection_3:
+    selection_read_passwd:
         Image|endswith:
             - '/cat'
             - '/ed'
@@ -41,11 +42,15 @@ detection:
             - '/etc/spwd.db'
             - '/etc/pwd.db'
             - '/etc/master.passwd'
-    selection_4:
+    selection_id:
         Image|endswith: '/id'
-    selection_5:
+    selection_lsof:
         Image|endswith: '/lsof'
         CommandLine|contains: '-u'
+    selection_getent:
+        CommandLine|contains|all:
+            - 'getent '
+            - 'passwd'
     condition: 1 of selection*
 falsepositives:
     - Legitimate administration activities
