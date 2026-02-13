@@ -1,0 +1,29 @@
+title: Microsoft Defender For Office Suspicious Lateral Email
+id: 56d25a6c-9426-4556-912c-423521367012
+status: experimental
+description: |
+    Detects emails flagged as Suspicious that are sent internally (Intra-Org) within Microsoft 365.
+    Since the direction is Intraorg, this indicates a potential compromised internal account attempting to phish or spread malware laterally.
+references:
+    - https://learn.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema#microsoft-defender-for-office-365-and-threat-investigation-and-response-schema
+    - https://learn.microsoft.com/en-us/defender-office-365/anti-phishing-protection-about
+author: Tom Kluter
+date: 2026-01-31
+tags:
+    - attack.initial-access
+    - attack.t1566
+    - attack.lateral-movement
+    - attack.t1534
+logsource:
+    product: m365
+    service: audit
+detection:
+    selection:
+        Workload: 'ThreatIntelligence'
+        Operation: 'TIMailData'
+        Directionality: 'Intraorg'
+    condition: selection
+falsepositives:
+    - Internal phishing simulations (Phishing drills) failing to bypass filter headers correctly.
+    - False positives from Microsoft filtering engine regarding internal newsletters or automated reports.
+level: high
