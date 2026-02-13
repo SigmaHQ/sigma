@@ -1,0 +1,36 @@
+title: Potential Bthprops.Cpl Sideloading
+id: 81909c5c-7cc6-4e0b-aea7-e1d4ab7abf0f
+status: experimental
+description: |
+    Detects potential DLL sideloading of bthprops.cpl, which can be abused by fsquirt.exe (Bluetooth File Transfer Wizard) to load a malicious DLL from a non-standard location.
+references:
+    - https://github.com/mhaskar/FsquirtCPLPoC
+    - https://securelist.com/sidewinder-apt/114089/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-02-04
+tags:
+    - attack.defense-evasion
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1574.001
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        ImageLoaded|endswith: '\bthprops.cpl'
+    filter_main_legitimate_paths:
+        ImageLoaded|startswith:
+            - 'C:\Windows\Prefetch\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\WinSxS\'
+    filter_main_legit_signed:
+        OriginalFileName: bluetooth.cpl
+        Signature: Microsoft Windows
+        Signed: true
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unlikely
+level: high
+regression_tests_path: regression_data/rules/windows/image_load/image_load_side_load_bthprops_cpl/info.yml
