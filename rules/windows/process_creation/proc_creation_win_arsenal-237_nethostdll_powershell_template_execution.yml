@@ -1,0 +1,31 @@
+title: Arsenal-237 nethost.dll PowerShell Template Execution
+id: 6f806cc9-8644-4b89-b905-eaf68a34861c
+status: test
+description: Detects PowerShell execution with known malware command templates
+author: The Hunters Ledger
+references:
+- https://pixelatedcontinuum.github.io/Threat-Intel-Reports/hunting-detections/arsenal-237-nethost-dll/
+date: 2025/01/01
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  powershell_execution:
+    Image|endswith: powershell.exe
+  malware_templates:
+    CommandLine|contains:
+    - Get-Service|?{$_.Status -eq
+    - Invoke-WebRequest -Uri
+    - Select Name,Status|FT
+  suspicious_parent:
+    ParentImage|endswith:
+    - rundll32.exe
+    - regsvcs.exe
+    - explorer.exe
+    - svchost.exe
+  condition: powershell_execution and malware_templates and suspicious_parent
+falsepositives:
+- Legitimate system administration scripts
+level: high
+tags:
+- attack.execution

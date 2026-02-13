@@ -1,0 +1,37 @@
+title: Arsenal-237 ChaCha20-Poly1305 Cryptographic Operations
+id: f68f96b3-d873-42a5-b668-460f358b78cd
+status: test
+description: Detects ChaCha20-Poly1305 AEAD cryptographic operations consistent with
+  Arsenal-237 tools
+author: The Hunters Ledger
+references:
+- https://github.com/The-Hunters-Ledger/Threat-Intel-Reports
+date: 2026/01/26
+tags: []
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection_modules:
+    ImageLoaded|contains:
+    - chacha20
+    - poly1305
+    - aead
+  selection_process:
+    ParentImage|endswith:
+    - cmd.exe
+    - powershell.exe
+    - explorer.exe
+  filter_system:
+    Image|contains:
+    - System32
+    - Windows
+  condition: selection_modules and selection_process and not filter_system
+falsepositives:
+- Legitimate cryptographic applications
+- Development environments using cryptographic libraries
+- Security tools performing encryption/decryption
+level: low
+severity: low
+comment: Generic cryptographic indicator with high false positive rate. Most valuable
+  in incident response context.

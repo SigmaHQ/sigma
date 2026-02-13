@@ -1,0 +1,32 @@
+title: Arsenal-237 rootkit.dll PowerShell Integration
+id: bd46e6c5-8f53-4fe0-8dc0-7a3d106a9b08
+status: test
+description: Detects PowerShell execution initiated from rootkit.dll context
+references:
+- Arsenal-237 PowerShell Integration
+author: The Hunters Ledger
+date: 2026/01/26
+tags:
+- attack.execution
+- attack.defense-evasion
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_powershell:
+    Image|endswith:
+    - \powershell.exe
+    - \pwsh.exe
+  selection_parent:
+    ParentCommandLine|contains: rootkit.dll
+  selection_suspicious:
+    CommandLine|contains:
+    - -enc
+    - -EncodedCommand
+    - -w hidden
+    - -WindowStyle Hidden
+    - bypass
+  condition: selection_powershell and (selection_parent or selection_suspicious)
+falsepositives:
+- Legitimate PowerShell scripts executed by system processes
+level: high

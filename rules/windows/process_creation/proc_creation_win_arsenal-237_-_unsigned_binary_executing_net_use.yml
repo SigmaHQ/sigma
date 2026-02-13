@@ -1,0 +1,37 @@
+title: Arsenal-237 - Unsigned Binary Executing net use
+id: 152a1e91-2d74-48bd-996e-c82ea8af3015
+status: test
+description: Arsenal-237 - Unsigned Binary Executing net use
+date: 2026/01/27
+author: The Hunters Ledger
+references:
+- https://github.com/The-Hunters-Ledger/Threat-Intel-Reports
+logsource:
+  category: process_creation
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    CommandLine|contains: net use
+    Image|notin:
+    - C:\Windows\*
+    - C:\Program Files*
+    SignedStatus|endswith: unsigned
+  filter_admin:
+    User|contains: SYSTEM
+    ParentImage|endswith:
+    - svchost.exe
+    - lsass.exe
+  condition: selection and not filter_admin
+fields:
+- EventID
+- CommandLine
+- Image
+- User
+- ParentImage
+- TargetObject
+falsepositives:
+- Administrative tools
+- Batch scripts
+level: high

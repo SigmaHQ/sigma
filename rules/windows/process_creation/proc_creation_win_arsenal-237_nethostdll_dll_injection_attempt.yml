@@ -1,0 +1,36 @@
+title: Arsenal-237 nethost.dll DLL Injection Attempt
+id: 1665b9fd-5f9f-4c75-900f-15510a8ff36c
+status: test
+description: Detects DLL injection of nethost.dll or similar network modules
+author: The Hunters Ledger
+references:
+- https://pixelatedcontinuum.github.io/Threat-Intel-Reports/hunting-detections/arsenal-237-nethost-dll/
+date: 2025/01/01
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  dll_injection:
+    CommandLine|contains:
+    - LoadLibrary*nethost.dll
+    - GetProcAddress*WSASocket
+    - inject*nethost
+  suspicious_loader:
+    ParentImage|endswith:
+    - explorer.exe
+    - svchost.exe
+    - rundll32.exe
+    - regsvcs.exe
+    - regasm.exe
+  suspicious_dll_path:
+    Image|contains:
+    - \Temp\
+    - \AppData\
+    - \Users\Public
+  condition: (dll_injection or suspicious_loader) and suspicious_dll_path
+falsepositives:
+- Legitimate software installation procedures
+level: high
+tags:
+- attack.defense-evasion
+- attack.privilege-escalation

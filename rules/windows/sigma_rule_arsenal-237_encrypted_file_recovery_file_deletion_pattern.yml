@@ -1,0 +1,32 @@
+title: Arsenal-237 Encrypted File Recovery (File Deletion Pattern)
+id: 72d00bca-bede-490b-85ab-3ee0f2914ee6
+status: test
+description: Detects Arsenal-237 encrypted file recovery pattern - readme.txt deletion
+  after file operations
+author: The Hunters Ledger
+references:
+- https://github.com/The-Hunters-Ledger/Threat-Intel-Reports
+date: 2026/01/26
+tags: []
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection_cleanup:
+    EventType: FileDelete
+    TargetFilename|endswith: readme.txt
+  selection_context:
+    Image|endswith:
+    - dec_fixed.exe
+    - powershell.exe
+    - cmd.exe
+  timespan: 5m
+  condition: selection_cleanup and selection_context
+falsepositives:
+- Manual cleanup of ransom notes by IT teams
+- Cleanup scripts deleting readme.txt files (common filename)
+- Standard application installations deleting readme files
+level: low
+severity: low
+comment: Low confidence indicator due to generic nature of readme.txt deletion. Use
+  in conjunction with other indicators.

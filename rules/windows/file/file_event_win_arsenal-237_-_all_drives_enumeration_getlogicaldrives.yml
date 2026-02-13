@@ -1,0 +1,40 @@
+title: Arsenal-237 - All Drives Enumeration (GetLogicalDrives)
+id: 9e4313f3-aefd-4c53-9959-ef0656f6d365
+status: test
+description: Detects file operations across multiple drive letters by non-system processes,
+  indicating potential drive enumeration behavior used by Arsenal-237 ransomware to
+  discover encryption targets
+date: 2026/01/27
+author: The Hunters Ledger
+tags:
+- attack.discovery
+references:
+- https://pixelatedcontinuum.github.io/Threat-Intel-Reports/hunting-detections/arsenal-237-full_test_enc-exe/
+logsource:
+  category: file_event
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 11
+    TargetFilename|contains:
+    - A:\
+    - B:\
+    - C:\
+    - D:\
+    - E:\
+  filter:
+    Image|startswith:
+    - C:\Windows\
+    - C:\Program Files
+  condition: selection and not filter
+fields:
+- EventID
+- Image
+- TargetFilename
+- User
+falsepositives:
+- Legitimate backup software scanning multiple drives
+- System inventory and monitoring tools
+- Disk management utilities
+level: high

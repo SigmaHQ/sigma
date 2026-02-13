@@ -1,0 +1,30 @@
+title: Arsenal-237 rootkit.dll File System Stealth Operations
+id: fab53e8f-e464-4572-a241-bc94e8d12e80
+status: test
+description: Detects Unicode-based file hiding operations from rootkit.dll
+references:
+- Arsenal-237 File System Stealth Technique
+author: The Hunters Ledger
+date: 2026/01/26
+tags:
+- attack.defense-evasion
+logsource:
+  product: windows
+  category: file_event
+detection:
+  selection_dll:
+    Image|endswith: \rootkit.dll
+  selection_operations:
+    EventID:
+    - 11
+    - 23
+    - 26
+  selection_unicode:
+    TargetFilename|contains:
+    - \u
+    - '%u'
+    - \x
+  condition: selection_dll and selection_operations and selection_unicode
+falsepositives:
+- Legitimate applications using Unicode file names
+level: high

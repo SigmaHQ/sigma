@@ -1,0 +1,28 @@
+title: enc_c2.exe Process Execution - Ransomware
+id: 33e428af-d842-43ad-b863-2eb0509fd74f
+status: test
+description: Detects execution of enc_c2.exe ransomware executable
+author: The Hunters Ledger
+references:
+- https://github.com/The-Hunters-Ledger/Threat-Intel-Reports
+date: 2025/01/01
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_filename:
+  - Image|endswith: enc_c2.exe
+  - OriginalFileName: enc_c2.exe
+  selection_commandline:
+    CommandLine|contains:
+    - enc_c2.exe
+    - --folder
+    - --c2
+    - --bid
+  condition: selection_filename or selection_commandline
+falsepositives:
+- None expected
+level: critical
+tags:
+- attack.execution
+- attack.impact

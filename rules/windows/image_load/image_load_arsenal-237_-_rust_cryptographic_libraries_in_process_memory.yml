@@ -1,0 +1,34 @@
+title: Arsenal-237 - Rust Cryptographic Libraries in Process Memory
+id: 2d900ba8-3aaf-4942-9744-81e3d2db5eed
+status: test
+description: Arsenal-237 - Rust Cryptographic Libraries in Process Memory
+date: 2026/01/27
+author: The Hunters Ledger
+references:
+- https://github.com/The-Hunters-Ledger/Threat-Intel-Reports
+logsource:
+  category: image_load
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 7
+    ImageLoaded|contains:
+    - chacha20
+    - rsa
+    - aead
+    - rayon
+  filter:
+    Image|endswith:
+    - .exe
+    Signed: 'false'
+  condition: selection and filter
+fields:
+- EventID
+- Image
+- ImageLoaded
+- ProcessId
+falsepositives:
+- Legitimate software with similar behavior
+- Security tools and penetration testing
+level: high

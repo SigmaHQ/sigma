@@ -1,0 +1,35 @@
+title: Arsenal-237 nethost.dll C2 Connection Attempt
+id: b4bf6b60-b610-4abe-8ce1-2892e9a7fc6b
+status: test
+description: Detects network connections to known Arsenal-237 C2 infrastructure
+author: The Hunters Ledger
+references:
+- https://pixelatedcontinuum.github.io/Threat-Intel-Reports/hunting-detections/arsenal-237-nethost-dll/
+date: 2025/01/01
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  c2_connection:
+    DestinationIp:
+    - 8.8.8.8
+    - 127.0.0.1
+    DestinationPort: 53
+    Protocol: tcp
+  process_filter:
+    Image|endswith:
+    - nethost.dll
+    - explorer.exe
+    - svchost.exe
+    - rundll32.exe
+    - powershell.exe
+  filter_legitimate:
+    DestinationIp: 8.8.8.8
+    Protocol: udp
+  condition: c2_connection and process_filter and not filter_legitimate
+falsepositives:
+- Legitimate DNS queries to Google Public DNS
+- System DNS resolution to 8.8.8.8 via UDP (legitimate; TCP is suspicious)
+level: critical
+tags:
+- attack.command-and-control
