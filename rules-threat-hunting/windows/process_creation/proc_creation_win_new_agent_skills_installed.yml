@@ -1,0 +1,30 @@
+title: Possible Malicious New Agent Skill Installed Via Npx Skills
+id: afa71271-6a97-4e47-810f-83120fb1a4ce
+status: experimental
+description: |
+    Detects installation of agent skills via npx skills command. Agent skills can be abused by attackers by inserting malicious commands that the agent will perform.
+    Npx skills is able to install an agent skill for multiple agents. Analyst should investigate the installed agent skill and verify its contents.
+references:
+    - https://blog.lukaszolejnik.com/supply-chain-risk-of-agentic-ai-infecting-infrastructures-via-skill-worms/
+    - https://github.com/vercel-labs/skills/blob/1f7fbc8d0e49c4e0601d364696bd1bdd15e80967/README.md
+    - https://opensourcemalware.com/blog/clawdbot-skills-ganked-your-crypto
+    - https://promptintel.novahunting.ai/molt
+author: Marco Pedrinazzi (@pedrinazziM) (InTheCyber)
+date: 2026-02-03
+tags:
+    - attack.execution
+    - attack.t1059.007
+    - detection.threat-hunting
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: 'node.exe'
+        CommandLine|contains|all:
+            - 'npx-cli.js'
+            - 'skills add'
+    condition: selection
+falsepositives:
+    - This rule will be triggered when a new agent skill is installed regardless if it is benign or malicious.
+level: medium
