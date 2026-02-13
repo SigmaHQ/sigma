@@ -1,0 +1,40 @@
+title: Modification of msDS-ManagedAccountPrecededByLink Attribute
+id: 6c9eb492-e477-4df9-b0f4-571fc9db29cd
+related:
+    - id: 9b111d8e-92e0-4153-88bc-daefc1333aba
+      type: similar
+status: experimental
+description: |
+    Detects modifications to the msDS-ManagedAccountPrecededByLink attribute, which may indicate an attempted or successful abuse of the BaD-Successor msDS-DelegatedManagedServiceAccount (DMSA) vulnerability.
+    The DMSA is a new object class introduced in Windows Server 2025 that allows administrators to delegate the management of service accounts to other users or groups.
+    Changes to this attribute by suspicious accounts or outside of normal administrative workflows are a strong signal of an attempted or successful abuse.
+    If it is indeed modified by an account that is not typically responsible for such changes, it could indicate an attempt to exploit the BaD-Successor vulnerability for privilege escalation within the Windows Server 2025 Active Directory environment.
+references:
+    - https://www.akamai.com/blog/security-research/abusing-bad-successor-for-privilege-escalation-in-active-directory
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-05-24
+tags:
+    - attack.privilege-escalation
+    - attack.t1078.002
+    - attack.t1098
+logsource:
+    product: windows
+    service: security
+    definition: 'Requirements: Audit Policy : Account Management > Audit User Account Management, Group Policy : Computer Configuration\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies\Account Management\Audit User Account Management, DS Access > Audit Directory Service Changes, Group Policy : Computer Configuration\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies\DS Access\Audit Directory Service Changes'
+detection:
+    selection:
+        EventID: 5136
+        ObjectClass: 'msDS-DelegatedManagedServiceAccount'
+        AttributeLDAPDisplayName: 'msDS-ManagedAccountPrecededByLink'
+    filter_main_legitimate_accounts:
+        # Exclude modifications made by the system or legitimate administrative accounts
+        - SubjectAccountName: 'SYSTEM'
+        - SubjectAccountName|expand: '%Administrators%' # Add all members of the Administrators group to this placeholder
+    condition: selection and not 1 of filter_main_*
+fields:
+    - SubjectAccountName # The user who modified the msDS-ManagedAccountPrecededByLink attribute
+    - ObjectDN # The distinguished name of the object whose attribute was modified
+falsepositives:
+    - Unknown
+# The level is set to medium because while this is a significant event, it may not always indicate malicious activity. It requires further investigation to determine the context and intent behind the modification.
+level: medium
