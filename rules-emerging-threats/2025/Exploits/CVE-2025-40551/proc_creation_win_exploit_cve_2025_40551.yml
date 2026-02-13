@@ -1,0 +1,49 @@
+title: Suspicious Child Process of SolarWinds WebHelpDesk
+id: 8c7f4a2d-3b9e-4f1c-9a6d-2e8f5c3d9a1b
+status: experimental
+description: |
+    Detects suspicious child processes spawned by SolarWinds WebHelpDesk (WHD) application, which may indicate exploitation activity leveraging RCE vulnerabilities such as CVE-2025-40551, CVE-2025-40536, or CVE-2025-26399
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/02/06/active-exploitation-solarwinds-web-help-desk/
+    - https://www.huntress.com/blog/active-exploitation-solarwinds-web-help-desk-cve-2025-26399
+    - https://documentation.solarwinds.com/en/success_center/whd/content/release_notes/whd_2026-1_release_notes.htm
+author: Huntress Team, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-02-11
+tags:
+    - attack.initial-access
+    - attack.t1190
+    - cve.2025-26399
+    - cve.2025-40536
+    - cve.2025-40551
+    - detection.emerging-threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|contains: '\WebHelpDesk\bin\'
+        ParentImage|endswith:
+            - '\java.exe'
+            - '\javaw.exe'
+        ParentCommandLine|contains: 'tomcat'
+    selection_suspicious_child:
+        CommandLine|contains:
+            - '-enc'
+            - 'base64'
+            - 'bitsadmin'
+            - 'certutil'
+            - 'curl'
+            - 'Invoke-RestMethod'
+            - 'Invoke-WebRequest'
+            - 'irm '
+            - 'iwr '
+            - 'mshta'
+            - 'msiexec'
+            - 'Net.WebClient'
+            - 'Start-BitsTransfer'
+            - 'wget'
+            - 'wmic'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
