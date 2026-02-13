@@ -1,0 +1,26 @@
+title: enc/dec ChaCha20 Cryptographic Operations
+id: 9bc751be-f09b-4b46-8a44-7e9e17789cea
+status: test
+description: Detects processes loading or executing ChaCha20 cryptographic operations
+author: The Hunters Ledger
+references:
+- https://pixelatedcontinuum.github.io/Threat-Intel-Reports/hunting-detections/enc-dec-ransomware-family/
+date: 2026/01/18
+tags:
+- attack.impact
+logsource:
+  category: process_access
+  product: windows
+detection:
+  selection_strings:
+  - Strings|contains: expand 32-byte k
+  - Strings|contains: chacha20
+  selection_memory:
+    MemoryAllocation|gt: 100MB
+    CPUUsage|gt: 80
+  condition: selection_strings and selection_memory
+falsepositives:
+- Legitimate encryption software
+- VPN clients using ChaCha20
+- Secure messaging applications (Signal, Wire, etc.)
+level: medium

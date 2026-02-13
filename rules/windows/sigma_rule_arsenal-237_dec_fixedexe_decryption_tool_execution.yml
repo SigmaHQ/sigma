@@ -1,0 +1,29 @@
+title: Arsenal-237 dec_fixed.exe Decryption Tool Execution
+id: e6241012-3b2c-448b-9d85-f7fca34cb5f2
+status: test
+description: Detects execution of Arsenal-237 dec_fixed.exe ransomware decryption
+  tool. This is a recovery tool used by victims for decryption, detection helps identify
+  affected systems for incident response.
+author: The Hunters Ledger
+references:
+- https://pixelatedcontinuum.github.io/Threat-Intel-Reports/hunting-detections/arsenal-237-dec_fixed-exe/
+date: 2026/01/26
+tags:
+- attack.impact
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection_process:
+    Image|endswith: dec_fixed.exe
+    CommandLine|contains: --folder-a
+  selection_hash:
+    Hashes|contains:
+    - SHA256=D73C4F127C5C0A7F9BF0F398E95DD55C7E8F6F6A5783C8CB314BD99C2D1C9802
+    - MD5=7C5493A0A5DF52682A5C2BA433634601
+    - SHA1=29014D4D6FC42219CD9CDC130B868382CF2C14C2
+  condition: selection_process or selection_hash
+falsepositives:
+- Legitimate victim decryption operations (low probability)
+- Manual testing of recovered decryptor samples
+level: medium

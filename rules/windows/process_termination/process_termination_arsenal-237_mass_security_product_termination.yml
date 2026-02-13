@@ -1,0 +1,35 @@
+title: Arsenal-237 Mass Security Product Termination
+id: a98c732a-dba6-472c-8f3f-8ae41c450fa6
+status: test
+description: Detects termination of security product processes including Windows Defender,
+  CrowdStrike, or third-party AV/EDR solutions, indicating Arsenal-237 rootkit.dll
+  defense evasion activity
+references:
+- https://pixelatedcontinuum.github.io/Threat-Intel-Reports/hunting-detections/arsenal-237-rootkit-dll/
+author: The Hunters Ledger
+date: 2026/01/26
+tags:
+- attack.defense-evasion
+logsource:
+  product: windows
+  category: process_termination
+detection:
+  selection:
+    TargetImage|endswith:
+    - \MsMpEng.exe
+    - \MpCmdRun.exe
+    - \NisSrv.exe
+    - \SecurityHealthService.exe
+    - \CSFalconService.exe
+    - \CSFalconContainer.exe
+    - \CSAgent.exe
+    - \ekrn.exe
+    - \avp.exe
+    - \MBAMService.exe
+    - \ccSvcHst.exe
+    - \SophosHealth.exe
+  condition: selection
+falsepositives:
+- Legitimate security product updates or uninstallations
+- System administrator maintenance activities
+level: critical

@@ -1,0 +1,28 @@
+title: enc/dec Ransomware Multi-Drive Enumeration
+id: e80ff219-d95c-4ccb-b3ec-9cde121af505
+status: test
+description: Detects file access operations across multiple drive letters, characteristic
+  of enc/dec ransomware drive enumeration behavior before encryption
+author: The Hunters Ledger
+references:
+- https://pixelatedcontinuum.github.io/Threat-Intel-Reports/hunting-detections/enc-dec-ransomware-family/
+date: 2026/01/18
+tags:
+- attack.discovery
+logsource:
+  category: file_event
+  product: windows
+detection:
+  selection:
+    EventID: 11
+    TargetFilename|re: ^[A-Z]:\\
+  filter:
+    Image|startswith:
+    - C:\Windows\
+    - C:\Program Files\
+  condition: selection and not filter
+falsepositives:
+- Backup software
+- System inventory tools
+- Legitimate file search utilities
+level: high

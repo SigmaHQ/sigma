@@ -1,0 +1,39 @@
+title: Arsenal-237 System Reconnaissance Commands
+id: d626ec4a-5ca6-454a-a188-937bfc49ca06
+status: test
+description: Detects execution of reconnaissance commands (sysinfo, services, processes)
+author: The Hunters Ledger
+references:
+- https://github.com/The-Hunters-Ledger/Threat-Intel-Reports
+date: 2025/01/01
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  recon_commands:
+    Image|endswith:
+    - cmd.exe
+    - powershell.exe
+    CommandLine|contains:
+    - Get-Service
+    - Get-Process
+    - systeminfo
+    - tasklist
+    - net user
+    - wmic os get
+    - ipconfig
+  suspicious_parent:
+    ParentImage|endswith:
+    - rundll32.exe
+    - regsvcs.exe
+    - explorer.exe
+    - svchost.exe
+  sequential_execution:
+    selection: recon_commands and suspicious_parent
+  condition: sequential_execution
+falsepositives:
+- Legitimate system administration
+- Help desk scripts
+level: medium
+tags:
+- attack.discovery

@@ -1,0 +1,36 @@
+title: Arsenal-237 rootkit.dll API Hooking Activity
+id: f3b518e1-172e-4fca-b0c2-ea59e3db9bfd
+status: test
+description: Detects API hooking operations from rootkit.dll via DLL injection
+references:
+- Arsenal-237 API Hooking Technique
+author: The Hunters Ledger
+date: 2026/01/26
+tags:
+- attack.defense-evasion
+- attack.privilege-escalation
+logsource:
+  product: windows
+  category: process_access
+detection:
+  selection_source:
+    SourceImage|endswith: \rootkit.dll
+  selection_target_security:
+    TargetImage|endswith:
+    - \MsMpEng.exe
+    - \CSFalconService.exe
+    - \ekrn.exe
+    - \avp.exe
+  selection_access:
+    GrantedAccess:
+    - '0x1F0FFF'
+    - '0x1FFFFF'
+    - '0x1010'
+  selection_sysmon:
+    EventID: 10
+  condition: selection_sysmon and selection_source and selection_target_security and
+    selection_access
+falsepositives:
+- Security software cross-process monitoring
+- Legitimate debugging activities
+level: critical

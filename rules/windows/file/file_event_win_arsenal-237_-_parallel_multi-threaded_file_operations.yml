@@ -1,0 +1,36 @@
+title: Arsenal-237 - Parallel Multi-threaded File Operations
+id: 5af860fb-e4d4-40a2-bf86-f5a353ad89b3
+status: test
+description: Detects file creation operations by non-system, non-standard processes.
+  Arsenal-237 ransomware uses Rayon parallel processing library for multi-threaded
+  file encryption operations.
+date: 2026/01/27
+author: The Hunters Ledger
+tags:
+- attack.impact
+references:
+- https://pixelatedcontinuum.github.io/Threat-Intel-Reports/hunting-detections/arsenal-237-full_test_enc-exe/
+logsource:
+  category: file_event
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 11
+  filter_path:
+    Image|startswith:
+    - C:\Program Files\
+    - C:\Windows\
+  filter_system:
+    User: SYSTEM
+  condition: selection and not filter_path and not filter_system
+fields:
+- EventID
+- Image
+- TargetFilename
+- User
+- Computer
+falsepositives:
+- Legitimate backup software
+- Database maintenance operations
+level: critical

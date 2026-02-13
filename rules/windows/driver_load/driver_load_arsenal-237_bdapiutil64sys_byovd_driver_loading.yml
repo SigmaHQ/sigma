@@ -1,0 +1,32 @@
+title: Arsenal-237 BdApiUtil64.sys BYOVD Driver Loading
+id: a8c9d4e1-2f3b-4c5d-8e9f-1a2b3c4d5e6f
+status: test
+description: Detects loading of BdApiUtil64.sys vulnerable Baidu driver used in Bring
+  Your Own Vulnerable Driver (BYOVD) attacks by Arsenal-237 toolkit for kernel-level
+  defense evasion and security product termination
+references:
+- https://pixelatedcontinuum.github.io/Threat-Intel-Reports/hunting-detections/arsenal-237-BdApiUtil64-sys/
+author: The Hunters Ledger
+date: 2026/01/26
+tags:
+- attack.privilege-escalation
+- attack.defense-evasion
+logsource:
+  product: windows
+  category: driver_load
+detection:
+  selection_driver_name:
+    ImageLoaded|contains:
+    - BdApiUtil64.sys
+    - BdApiUtil.sys
+  selection_driver_hash:
+    Hashes|contains:
+    - MD5=CED47B89212F3260EBEB41682A4B95EC
+    - SHA1=148C0CDE4F2EF807AEA77D7368F00F4C519F47EF
+    - SHA256=47EC51B5F0EDE1E70BD66F3F0152F9EB536D534565DBB7FCC3A05F542DBE4428
+  selection_sysmon:
+    EventID: 6
+  condition: selection_sysmon and (selection_driver_name or selection_driver_hash)
+falsepositives:
+- Legitimate Baidu software installations (rare in enterprise environments)
+level: critical

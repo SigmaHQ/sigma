@@ -1,0 +1,56 @@
+title: Arsenal-237 A-Z Directory Enumeration Pattern
+id: 6d20e5ab-fd74-4feb-a95e-049a5ab38384
+status: test
+description: Detects Arsenal-237 characteristic A-Z subdirectory enumeration for encrypted
+  file discovery
+author: The Hunters Ledger
+references:
+- https://github.com/The-Hunters-Ledger/Threat-Intel-Reports
+date: 2026/01/26
+tags: []
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection_files:
+    TargetFilename|contains:
+    - :\A\
+    - :\B\
+    - :\C\
+    - :\D\
+    - :\E\
+    - :\F\
+    - :\G\
+    - :\H\
+    - :\I\
+    - :\J\
+    - :\K\
+    - :\L\
+    - :\M\
+    - :\N\
+    - :\O\
+    - :\P\
+    - :\Q\
+    - :\R\
+    - :\S\
+    - :\T\
+    - :\U\
+    - :\V\
+    - :\W\
+    - :\X\
+    - :\Y\
+    - :\Z\
+    EventType: CreateFile
+  filter_system:
+    Image|contains:
+    - System32
+    - Windows
+  condition: selection_files and not filter_system
+falsepositives:
+- Batch file operations with organized directory structures
+- Backup software using A-Z organization
+- Development tools with systematic directory access
+level: medium
+severity: low
+comment: Ransomware-specific directory organization pattern, but low false positive
+  threshold given legitimate uses.
