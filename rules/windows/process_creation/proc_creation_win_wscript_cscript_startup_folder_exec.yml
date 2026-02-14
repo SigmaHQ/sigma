@@ -1,0 +1,52 @@
+title: Script Execution From Startup Folder Via WScript/CScript
+id: 7a3d2f1e-9b4c-4e8a-b5d6-3c7f0e2a1d9b
+related:
+    - id: 28208707-fe31-437f-9a7f-4b1108b94d2e
+      type: similar
+    - id: cea72823-df4d-4567-950c-0b579eaf0846
+      type: similar
+status: experimental
+description: |
+    Detects the execution of scripts located in user or system Startup folders via WScript or CScript.
+    While file-event based rules detect the initial drop of scripts into Startup folders, this process creation rule
+    detects the actual runtime execution that occurs at user logon.
+    This pattern has been observed in AgentTesla campaigns where a VBS dropper is placed in the Startup folder
+    to launch a staged payload from AppData on each logon.
+references:
+    - https://www.joesandbox.com/analysis/1864127/0/html
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1547.001/T1547.001.md
+    - https://www.microsoft.com/en-us/security/blog/2025/03/06/malvertising-campaign-leads-to-info-stealers-hosted-on-github/
+author: Dave Johnson
+date: 2026-02-05
+tags:
+    - attack.persistence
+    - attack.t1547.001
+    - attack.execution
+    - attack.t1059.005
+    - attack.t1059.007
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\wscript.exe'
+              - '\cscript.exe'
+        - OriginalFileName:
+              - 'wscript.exe'
+              - 'cscript.exe'
+    selection_startup:
+        CommandLine|contains: '\Start Menu\Programs\Startup\'
+    selection_ext:
+        CommandLine|contains:
+            - '.vbs'
+            - '.vbe'
+            - '.js'
+            - '.jse'
+            - '.wsf'
+            - '.wsh'
+    condition: selection_img and selection_startup and selection_ext
+falsepositives:
+    - Legitimate enterprise software that uses VBS/JS scripts in Startup folders for logon tasks
+    - Legacy login scripts deployed via Startup folder by IT administrators
+level: high
