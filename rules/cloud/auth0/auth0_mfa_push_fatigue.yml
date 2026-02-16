@@ -1,0 +1,57 @@
+title: MFA Push Fatigue - detects when a user is repeatedly prompted for MFA push.
+id: 86c33ec8-af3e-483a-9686-d61d601081b8
+status: experimental
+description: |
+    Detects when an adversary with access to compromised passwords tries to push bomb the victim.
+    There is a chance that the victim will accept an MFA prompt to stop irritation.
+    Monitors for excessive MFA push notifications sent to users within a short time window.
+references:
+    - https://auth0.com/docs/secure/multi-factor-authentication/guardian
+    - https://auth0.com/docs/secure/multi-factor-authentication/configure-push-notifications
+    - https://github.com/auth0/auth0-customer-detections/
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.credential-access
+    - attack.t1621
+logsource:
+    product: auth0
+    service: mfa
+detection:
+    selection:
+        data.type: gd_send_pn
+        data.description: "Guardian - Second factor notification sent"
+    condition: selection
+fields:
+    - data.type
+    - data.description
+    - data.user_id
+    - data.ip
+    - data.client_id
+    - data.client_name
+falsepositives:
+    - Legitimate users who are trying to log in and are repeatedly prompted for MFA due to network issues or other problems
+    - Users experiencing application connectivity issues causing multiple authentication attempts
+    - Legitimate repeated login attempts during troubleshooting sessions
+level: medium
+explanation: |
+    The query below filters events capturing sending push notifications.
+    The splunk query looks up additional statistics, i.e. time window, number of pushes per notification. The alert is created when selected thresholds have been exceeded.
+    It displays the IPs, number of affected users, and time window.
+
+    Splunk Query:
+    index=auth0 data.tenant_name="{your_tenant_name}"
+    data.type="gd_send_pn"
+    | stats min(_time) as window_start_time, max(_time) as window_end_time, count as count_pushes_per_user by data.user_id
+    | eval window_duration_seconds = window_end_time - window_start_time
+    | eval window_duration_mins = window_duration_seconds/60
+    | where window_duration_mins<={time_window_threshold} AND count_pushes_per_user > {count_pushes_per_user_threshold}
+    | table count_pushes_per_user, window_duration_mins, data.user_id, data.ip
+
+    Tenant Logs Query:
+    type:"gd_send_pn" AND description: "Guardian - Second factor notification sent"
+comments:
+    - The Splunk query above shall be tuned to reflect a valid tenant name, how quick were seen push notifications were sent, i.e {time_window_threshold}, and how many push notifications have been sent per user ({count_pushes_per_user_threshold}). A similar detection (with less details) can be implemented through Security Center and its alerts.
+    - Prevention - Enforcing strong MFA authenticators such as phishing-resistance with FIDO2 WebAuthn.
+    - Prevention - Implement passwordless authentication to reduce the risk for initial password compromise.
