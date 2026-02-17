@@ -8,7 +8,7 @@ references:
     - https://learn.microsoft.com/en-us/windows/win32/shell/csidl
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2022-02-08
-modified: 2023-06-16
+modified: 2026-02-17
 tags:
     - attack.execution
     - attack.t1059
@@ -42,6 +42,10 @@ detection:
             - '\AppData\Roaming\Temp'
             - '\Temporary Internet'
             - '\Windows\Temp'
+            - '\Start Menu\Programs\Startup\'
+            - '%TEMP%'
+            - '%TMP%'
+            - '%LocalAppData%\Temp'
     selection_folders_2:
         - CommandLine|contains|all:
               - ':\Users\'
@@ -52,6 +56,18 @@ detection:
         - CommandLine|contains|all:
               - ':\Users\'
               - '\Contacts\'
+        - CommandLine|contains|all:
+              - ':\Users\'
+              - '\Documents\'
+        - CommandLine|contains|all:
+              - ':\Users\'
+              - '\Music\'
+        - CommandLine|contains|all:
+              - ':\Users\'
+              - '\Pictures\'
+        - CommandLine|contains|all:
+              - ':\Users\'
+              - '\Videos\'
     condition: 1 of selection_proc_* and 1 of selection_folders_*
 falsepositives:
     - Unknown
