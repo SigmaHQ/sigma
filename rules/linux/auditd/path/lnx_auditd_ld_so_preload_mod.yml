@@ -1,13 +1,16 @@
 title: Modification of ld.so.preload
 id: 4b3cb710-5e83-4715-8c45-8b2b5b3e5751
-status: test
-description: Identifies modification of ld.so.preload for shared object injection. This technique is used by attackers to load arbitrary code into processes.
+status: experimental
+description: >
+    Detects modification of /etc/ld.so.preload via auditd monitoring.
+    The ld.so.preload file allows loading shared objects into every new
+    process and is commonly abused by adversaries for privilege escalation,
+    persistence, or rootkit deployment.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1574.006/T1574.006.md
-    - https://eqllib.readthedocs.io/en/latest/analytics/fd9b987a-1101-4ed3-bda6-a70300eaf57e.html
-author: E.M. Anhaus (originally from Atomic Blue Detections, Tony Lambert), oscd.community
+author: E.M. Anhaus (original author), Aadith C H
 date: 2019-10-24
-modified: 2021-11-27
+modified: 2026-02-18
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -20,7 +23,10 @@ detection:
     selection:
         type: 'PATH'
         name: '/etc/ld.so.preload'
+        perm:
+            - 'wa'
     condition: selection
 falsepositives:
-    - Unknown
+    - Legitimate package installation (e.g., glibc updates)
+    - Authorized system configuration or security tooling
 level: high
