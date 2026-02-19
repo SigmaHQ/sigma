@@ -1,25 +1,42 @@
 title: XSL Script Execution Via WMIC.EXE
 id: 05c36dd6-79d6-4a9a-97da-3db20298ab2d
+related:
+    - id: 06ce37c2-61ab-4f05-9ff5-b1a96d18ae32
+      type: similar
+    - id: 8d63dadf-b91b-4187-87b6-34a1114577ea
+      type: similar
 status: test
 description: |
-    Detects the execution of WMIC with the "format" flag to potentially load XSL files.
+    Detects the execution of WMIC with the "format" flag to potentially load local XSL files.
     Adversaries abuse this functionality to execute arbitrary files while potentially bypassing application whitelisting defenses.
     Extensible Stylesheet Language (XSL) files are commonly used to describe the processing and rendering of data within XML files.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1220/T1220.md
 author: Timur Zinniatullin, oscd.community, Swachchhanda Shrawan Poudel
 date: 2019-10-21
-modified: 2024-03-05
+modified: 2026-01-24
 tags:
     - attack.defense-evasion
+    - attack.t1047
     - attack.t1220
+    - attack.execution
+    - attack.t1059.005
+    - attack.t1059.007
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\wmic.exe'
-        CommandLine|contains|windash: '-format'     # wmic process list -FORMAT /? or wmic process list /FORMAT /?
+    selection_img:
+        - Image|endswith: '\wmic.exe'
+        - OriginalFileName: 'wmic.exe'
+        - Hashes|contains:  # Sysmon field hashes contains all types
+              - 'IMPHASH=1B1A3F43BF37B5BFE60751F2EE2F326E'
+              - 'IMPHASH=37777A96245A3C74EB217308F3546F4C'
+              - 'IMPHASH=9D87C9D67CE724033C0B40CC4CA1B206'
+              - 'IMPHASH=B12619881D79C3ACADF45E752A58554A'
+              - 'IMPHASH=16A48C3CABF98A9DC1BF02C07FE1EA00'
+    selection_cmd:
+        CommandLine|contains|windash: '-format:'     # wmic process list -FORMAT /? or wmic process list /FORMAT /?
     filter_main_known_format:
         CommandLine|contains:
             - 'Format:List'
@@ -31,7 +48,11 @@ detection:
             - 'Format:rawxml'
             - 'Format:xml'
             - 'Format:csv'
-    condition: selection and not 1 of filter_main_*
+    filter_main_remote_operation: # Covered by 8d63dadf-b91b-4187-87b6-34a1114577ea
+        CommandLine|contains:
+            - '://'
+            - '\\\\'
+    condition: all of selection_* and not 1 of filter_main_*
 falsepositives:
     - WMIC.exe FP depend on scripts and administrative methods used in the monitored environment.
     - Static format arguments - https://petri.com/command-line-wmi-part-3
