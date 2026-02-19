@@ -4,9 +4,23 @@ status: test
 description: Detects the execution of "reg.exe" for enabling/disabling the RDP service on the host by tampering with the 'CurrentControlSet\Control\Terminal Server' values
 references:
     - https://thedfirreport.com/2022/02/21/qbot-and-zerologon-lead-to-full-domain-compromise/
+    - http://etutorials.org/Microsoft+Products/microsoft+windows+server+2003+terminal+services/Chapter+6+Registry/Registry+Keys+for+Terminal+Services/ # Contain description for most of the keys mentioned here (check it out if you want more information
+    - http://woshub.com/rds-shadow-how-to-connect-to-a-user-session-in-windows-server-2012-r2/ # Related to the Shadow RPD technique
+    - https://admx.help/HKLM/SOFTWARE/Policies/Microsoft/Windows%20NT/Terminal%20Services # Contain description for most of the keys mentioned here (check it out if you want more information)
+    - https://bazaar.abuse.ch/sample/6f3aa9362d72e806490a8abce245331030d1ab5ac77e400dd475748236a6cc81/
+    - https://blog.sekoia.io/darkgate-internals/
+    - https://blog.talosintelligence.com/understanding-the-phobos-affiliate-structure/
+    - https://github.com/redcanaryco/atomic-red-team/blob/02c7d02fe1f1feb0fc7944550408ea8224273994/atomics/T1112/T1112.md#atomic-test-63---disable-remote-desktop-anti-alias-setting-through-registry
+    - https://github.com/redcanaryco/atomic-red-team/blob/02c7d02fe1f1feb0fc7944550408ea8224273994/atomics/T1112/T1112.md#atomic-test-64---disable-remote-desktop-security-settings-through-registry
+    - https://github.com/redcanaryco/atomic-red-team/blob/dd526047b8c399c312fee47d1e6fb531164da54d/atomics/T1112/T1112.yaml#L790
+    - https://learn.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/microsoft-windows-terminalservices-rdp-winstationextensions-securitylayer
+    - https://threathunterplaybook.com/hunts/windows/190407-RegModEnableRDPConnections/notebook.html
+    - https://twitter.com/SagieSec/status/1469001618863624194?t=HRf0eA0W1YYzkTSHb-Ky1A&s=03 # Related to the Shadow RPD technique
+    - https://web.archive.org/web/20200929062532/https://blog.menasec.net/2019/02/threat-hunting-rdp-hijacking-via.html # Related to RDP hijacking via the "ServiceDll" key
+    - https://www.trendmicro.com/en_us/research/25/i/unmasking-the-gentlemen-ransomware.html
 author: pH-T (Nextron Systems), @Kostastsale, TheDFIRReport
 date: 2022-02-12
-modified: 2023-02-05
+modified: 2025-11-22
 tags:
     - attack.persistence
     - attack.defense-evasion
@@ -32,18 +46,23 @@ detection:
             - 'EnableConcurrentSessions'
     selection_values_2:
         CommandLine|contains:
-            - 'WinStations\RDP-Tcp'
-            - 'MaxInstanceCount'
-            - 'fEnableWinStation'
-            - 'TSUserEnabled'
-            - 'TSEnabled'
-            - 'TSAppCompat'
-            - 'IdleWinStationPoolCount'
-            - 'TSAdvertise'
             - 'AllowTSConnections'
-            - 'fSingleSessionPerUser'
             - 'fDenyTSConnections'
-    condition: all of selection_main_* and 1 of selection_values_*
+            - 'fEnableWinStation'
+            - 'fSingleSessionPerUser'
+            - 'IdleWinStationPoolCount'
+            - 'MaxInstanceCount'
+            - 'SecurityLayer'
+            - 'TSAdvertise'
+            - 'TSAppCompat'
+            - 'TSEnabled'
+            - 'TSUserEnabled'
+            - 'WinStations\RDP-Tcp'
+    filter_main_values_tls:
+        CommandLine|contains|all:
+            - 'SecurityLayer'
+            - '02'  # TLS Enabled
+    condition: all of selection_main_* and 1 of selection_values_* and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high

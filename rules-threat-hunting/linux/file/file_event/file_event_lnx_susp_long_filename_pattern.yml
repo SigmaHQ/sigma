@@ -1,0 +1,32 @@
+title: Potentially Suspicious Long Filename Pattern - Linux
+id: 11629c4d-0fe6-465b-be62-b39a1c442aad
+status: experimental
+description: |
+    Detects the creation of files with unusually long filenames (100 or more characters), which may indicate obfuscation techniques used by malware such as VShell.
+    This is a hunting rule to identify potential threats that use long filenames to evade detection. Keep in mind that on a legitimate system, such long filenames can and are common. Run this detection in the context of threat hunting rather than alerting.
+    Adjust the threshold of filename length as needed based on your environment.
+references:
+    - https://www.trellix.com/blogs/research/the-silent-fileless-threat-of-vshell/
+author: '@kostastsale'
+date: 2025-11-22
+tags:
+    - attack.execution
+    - attack.t1059.004
+    - attack.defense-evasion
+    - attack.t1027
+    - detection.threat-hunting
+logsource:
+    product: linux
+    category: file_event
+detection:
+    selection:
+        TargetFilename|re: '[^/]{100,}$'
+    filter_optional_known_good:
+        TargetFilename|startswith:
+            - '/run/systemd/units/invocation:systemd-fsck@'
+            - '/sys/firmware/'
+            - '/var/log/journal/'
+    condition: selection and not 1 of filter_optional_*
+falsepositives:
+    - Legitimate files with long filenames.
+level: low
