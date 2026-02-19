@@ -1,51 +1,30 @@
 title: HackTool - Ligolo-ng Tunneling Tool Execution
 id: 0074da8e-5b3f-456b-9bf9-70beaf4bfb0d
 status: experimental
-description: Detects execution of Ligolo-ng tunneling agent or proxy used for network pivoting
+description: |
+    Detects execution of Ligolo-ng tunneling agent or proxy used for network pivoting. Ligolo-ng is a tool that allows attackers to create encrypted tunnels for command-and-control communication or lateral movement.
+    Threat actors may use Ligolo-ng to bypass network segmentation and access internal resources on compromised networks.
 references:
     - https://github.com/nicocha30/ligolo-ng
-    - https://www.kali.org/tools/ligolo-ng/
-author: MAB
-date: 2025-01-26
+    - https://docs.ligolo.ng/
+author: MAB, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-02-19
+
 tags:
-    - attack.command_and_control
+    - attack.command-and-control
     - attack.t1572
     - attack.t1090.001
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection_agent_img:
-        - Image|endswith: '\agent.exe'
-        - OriginalFileName|endswith: 'agent.exe'
-    selection_agent_cli:
-        CommandLine|contains:
-            - ' -connect '
-            - ' --connect '
-            - ' -ignore-cert'
-            - ' --ignore-cert'
-    selection_proxy_img:
-        - Image|endswith: '\proxy.exe'
-        - OriginalFileName|endswith: 'proxy.exe'
-    selection_proxy_cli:
-        CommandLine|contains:
-            - ' -selfcert'
-            - ' --selfcert'
-            - ' -laddr '
-            - ' --laddr '
-            - ' -autocert'
-            - ' --autocert'
-    selection_keyword:
-        - Image|contains: 'ligolo'
-        - CommandLine|contains: 'ligolo'
-    selection_keyword_cli:
-        CommandLine|contains:
-            - ' -connect '
-            - ' -ignore-cert'
-            - ' -selfcert'
-            - ' -laddr '
-            - ' -autocert'
-    condition: (selection_agent_img and selection_agent_cli) or (selection_proxy_img and selection_proxy_cli) or (selection_keyword and selection_keyword_cli)
+    selection:
+        - Image|contains: 'ligolo-ng'
+        - CommandLine|contains: 'ligolo-ng'
+        - Hashes|contains:
+            - 'IMPHASH=B196866F0BF37F1F128FA153413B744'
+            - 'IMPHASH=C984D366A3CC28220C89AB860AB9FD47'
+    condition: selection
 falsepositives:
-    - Legitimate penetration testing activities
+    - Legitimate use of Ligolo-ng for remote management; should be rare in enterprise environments
 level: high
