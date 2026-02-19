@@ -1,6 +1,6 @@
 title: Wlrmdr.EXE Uncommon Argument Or Child Process
 id: 9cfc00b6-bfb7-49ce-9781-ef78503154bb
-status: test
+status: experimental
 description: |
     Detects the execution of "Wlrmdr.exe" with the "-u" command line flag which allows anything passed to it to be an argument of the ShellExecute API, which would allow an attacker to execute arbitrary binaries.
     This detection also focuses on any uncommon child processes spawned from "Wlrmdr.exe" as a supplement for those that posses "ParentImage" telemetry.
@@ -9,7 +9,7 @@ references:
     - https://lolbas-project.github.io/lolbas/Binaries/Wlrmdr/
 author: frack113, manasmbellani
 date: 2022-02-16
-modified: 2024-03-06
+modified: 2025-10-31
 tags:
     - attack.defense-evasion
     - attack.t1218
@@ -22,14 +22,18 @@ detection:
     selection_child_img:
         - Image|endswith: '\wlrmdr.exe'
         - OriginalFileName: 'WLRMNDR.EXE'
-    selection_child_cli:
-        CommandLine|contains|all|windash:
-            - '-s '
-            - '-f '
-            - '-t '
-            - '-m '
-            - '-a '
-            - '-u '
+    selection_child_cli_flags_s:
+        CommandLine|contains|windash: '-s '
+    selection_child_cli_flags_f:
+        CommandLine|contains|windash: '-f '
+    selection_child_cli_flags_t:
+        CommandLine|contains|windash: '-t '
+    selection_child_cli_flags_m:
+        CommandLine|contains|windash: '-m '
+    selection_child_cli_flags_a:
+        CommandLine|contains|windash: '-a '
+    selection_child_cli_flags_u:
+        CommandLine|contains|windash: '-u '
     filter_main_winlogon:
         ParentImage: 'C:\Windows\System32\winlogon.exe'
     filter_main_empty:
