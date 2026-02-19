@@ -7,7 +7,7 @@ description: |
 references:
     - https://github.com/nicocha30/ligolo-ng
     - https://docs.ligolo.ng/
-author: MAB, Swachchhanda Shrawan Poudel (Nextron Systems)
+author: MAB
 date: 2026-02-19
 
 tags:
@@ -18,13 +18,21 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        - Image|contains: 'ligolo-ng'
-        - CommandLine|contains: 'ligolo-ng'
-        - Hashes|contains:
-              - 'IMPHASH=B196866F0BF37F1F128FA153413B744'
-              - 'IMPHASH=C984D366A3CC28220C89AB860AB9FD47'
-    condition: selection
+    selection_img:
+        - Image|contains: '\ligolo'
+        - CommandLine|contains: '\ligolo'
+    selection_agent:
+        Image|endswith: '\agent.exe'
+        CommandLine|contains|all:
+            - '-connect'
+            - '-ignore-cert'
+            - '-retry'
+    selection_proxy:
+        Image|endswith: '\proxy.exe'
+        CommandLine|contains:
+            - '-selfcert'
+            - '-laddr'
+    condition: 1 of selection_*
 falsepositives:
     - Legitimate use of Ligolo-ng for remote management; should be rare in enterprise environments
 level: high
