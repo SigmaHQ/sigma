@@ -1,11 +1,10 @@
-title: File Created via OpenEDR Response Features
+title: Potentially Suspicious File Creation by OpenEDR's ITSMService
 id: 9e4b7d3a-6f2c-4e9a-8d1b-3c5e7a9f2b4d
 status: experimental
 description: |
-  Detects suspicious file creation by OpenEDR's ITSMService.exe in unusual locations.
-  The ITSMService is responsible for remote management operations and can be used to upload/create files
-  on the system through the Process Explorer or file management features. While legitimate for IT operations,
-  this activity could indicate unauthorized file uploads, data staging, or malicious file deployment.
+    Detects the creation of potentially suspicious files by OpenEDR's ITSMService process.
+    The ITSMService is responsible for remote management operations and can create files on the system through the Process Explorer or file management features.
+    While legitimate for IT operations, creation of executable or script files could indicate unauthorized file uploads, data staging, or malicious file deployment.
 author: "@kostastsale"
 date: 2025-10-21
 references:
@@ -38,15 +37,9 @@ detection:
             - '.zip'
             - '.rar'
             - '.7z'
-    condition: selection_process and selection_suspicious_extensions
+    condition: all of selection_*
 falsepositives:
     - Legitimate OpenEDR file management operations
     - Authorized remote file uploads by IT administrators
     - Software deployment through OpenEDR console
 level: low
-fields:
-    - TargetFilename
-    - Image
-    - User
-    - ProcessId
-    - CreationUtcTime

@@ -2,10 +2,11 @@ title: OpenEDR Spawning Command Shell
 id: 7f3a9c2d-4e8b-4a7f-9d3e-5c6f8a9b2e1d
 status: experimental
 description: |
-  Detects the OpenEDR ssh-shellhost.exe spawning a command shell (cmd.exe) or PowerShell with PTY (pseudo-terminal)
-  capabilities. This may indicate remote command execution through OpenEDR's remote management features, which could be
-  legitimate administrative activity or potential abuse of the remote access tool.
-author: "@kostastsale"
+description: |
+    Detects the OpenEDR ssh-shellhost.exe spawning a command shell (cmd.exe) or PowerShell with PTY (pseudo-terminal) capabilities.
+    This may indicate remote command execution through OpenEDR's remote management features, which could be legitimate administrative activity or potential abuse of the remote access tool.
+    Threat actors may leverage OpenEDR's remote shell capabilities to execute commands on compromised systems, facilitating lateral movement or other command-and-control operations.
+author: '@kostastsale'
 date: 2025-10-21
 references:
     - https://kostas-ts.medium.com/detecting-abuse-of-openedrs-permissive-edr-trial-a-security-researcher-s-perspective-fc55bf53972c
@@ -20,27 +21,17 @@ logsource:
     product: windows
     category: process_creation
 detection:
-    selection_image:
-        Image|endswith: '\ssh-shellhost.exe'
-    selection_cmdline_cmd:
-        CommandLine|contains|all:
-            - '--pty'
-            - 'cmd'
-    selection_cmdline_powershell:
-        CommandLine|contains|all:
-            - '--pty'
-            - 'powershell'
-    selection_parent:
+    selection_img:
         ParentImage|endswith: '\ITSMService.exe'
-    condition: selection_image and (selection_cmdline_cmd or selection_cmdline_powershell) and selection_parent
+        Image|endswith: '\ssh-shellhost.exe'
+        CommandLine|contains: '--pty'
+    selection_cli_shell:
+        CommandLine|contains:
+            - 'cmd'
+            - 'powershell'
+            - 'pwsh'
+            - 'bash'
+    condition: all of selection_*
 falsepositives:
-    - Legitimate OpenEDR remote administration sessions
-    - Authorized IT support using OpenEDR remote shell features
-    - Scheduled maintenance tasks via OpenEDR console
-level: low
-fields:
-    - CommandLine
-    - User
-    - ParentCommandLine
-    - ProcessId
-    - ParentProcessId
+    - Legitimate use of OpenEDR for remote command execution
+level: medium
