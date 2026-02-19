@@ -1,0 +1,55 @@
+title: User Shell Folders Registry Modification via CommandLine
+id: 8f3ab69a-aa22-4943-aa58-e0a52fdf6818
+related:
+    - id: 9c226817-8dc9-46c2-a58d-66655aafd7dc
+      type: similar
+status: experimental
+description: |
+    Detects modifications to User Shell Folders registry values via reg.exe or PowerShell, which could indicate persistence attempts.
+    Attackers may modify User Shell Folders registry values to point to malicious executables or scripts that will be executed during startup.
+    This technique is often used to maintain persistence on a compromised system by ensuring that malicious payloads are executed automatically.
+references:
+    - https://www.welivesecurity.com/en/eset-research/muddywater-snakes-riverbank/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-01-05
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1547.001
+    - attack.defense-evasion
+    - attack.t1112
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+              - '\reg.exe'
+        - OriginalFileName:
+              - 'powershell.exe'
+              - 'pwsh.dll'
+              - 'reg.exe'
+    selection_cli_action:
+        CommandLine|contains:
+            - ' add ' # reg.exe modification
+            - 'New-ItemProperty'
+            - 'Set-ItemProperty'
+            - 'si ' # short for Set-ItemProperty
+    selection_cli_paths_root:
+        CommandLine|contains:
+            - '\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
+            - '\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders'
+    selection_cli_paths_suffix:
+        CommandLine|contains: 'Startup' # covers both 'Startup' and 'Common Startup'
+    condition: all of selection_*
+falsepositives:
+    - Usage of reg.exe or PowerShell to modify User Shell Folders for legitimate purposes; but rare.
+level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_user_shell_folders_registry_modification/info.yml
+simulation:
+    - type: atomic-red-team
+      name: Change Startup Folder - HKLM Modify User Shell Folders Common Startup Value
+      technique: T1547.001
+      atomic_guid: acfef903-7662-447e-a391-9c91c2f00f7b
