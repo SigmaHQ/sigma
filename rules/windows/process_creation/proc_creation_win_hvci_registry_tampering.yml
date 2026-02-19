@@ -1,0 +1,53 @@
+title: Hypervisor-protected Code Integrity (HVCI) Related Registry Tampering Via CommandLine
+id: 6225c53a-a96e-4235-b28f-8d7997cd96eb
+related:
+    - id: 8b7273a4-ba5d-4d8a-b04f-11f2900d043a
+      type: similar
+status: experimental
+description: |
+    Detects the tampering of Hypervisor-protected Code Integrity (HVCI) related registry values via command line tool reg.exe.
+    HVCI uses virtualization-based security to protect code integrity by ensuring that only trusted code can run in kernel mode.
+    Adversaries may tamper with HVCI to load malicious or unsigned drivers, which can be used to escalate privileges, maintain persistence, or evade security mechanisms.
+references:
+    - https://www.sophos.com/en-us/blog/sharpening-the-knife-gold-blades-strategic-evolution
+    - https://learn.microsoft.com/en-us/windows/security/hardware-security/enable-virtualization-based-protection-of-code-integrity
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-01-26
+tags:
+    - attack.defense-evasion
+    - attack.t1562.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+              - '\reg.exe'
+        - OriginalFileName:
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+              - 'reg.exe'
+    selection_cli:
+        CommandLine|contains:
+            - 'add '
+            - 'New-ItemProperty '
+            - 'Set-ItemProperty '
+            - 'si '  # SetItem Alias
+    selection_cli_base:
+        CommandLine|contains: '\DeviceGuard'
+    selection_cli_key:
+        CommandLine|contains:
+            - 'EnableVirtualizationBasedSecurity'
+            - 'HypervisorEnforcedCodeIntegrity'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate system administration tasks that require disabling HVCI for troubleshooting purposes when certain drivers or applications are incompatible with it.
+level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_hvci_registry_tampering/info.yml
+simulation:
+    - type: atomic-red-team
+      name: Disable Hypervisor-Enforced Code Integrity (HVCI)
+      technique: T1562.001
+      atomic_guid: 70bd71e6-eba4-4e00-92f7-617911dbe020

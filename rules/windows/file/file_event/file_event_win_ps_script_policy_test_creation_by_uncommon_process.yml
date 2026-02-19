@@ -6,7 +6,7 @@ references:
     - https://www.paloaltonetworks.com/blog/security-operations/stopping-powershell-without-powershell/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023-06-01
-modified: 2023-12-11
+modified: 2025-10-07
 tags:
     - attack.defense-evasion
 logsource:
@@ -15,19 +15,26 @@ logsource:
 detection:
     selection:
         TargetFilename|contains: '__PSScriptPolicyTest_'
+    filter_main_powershell:
+        Image:
+            - 'C:\Program Files\PowerShell\7-preview\pwsh.exe'
+            - 'C:\Program Files\PowerShell\7\pwsh.exe'
+            - 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell_ise.exe'
+            - 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
+            - 'C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell_ise.exe'
+            - 'C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell.exe'
+    filter_main_pwsh_preview:
+        Image|contains:
+            - 'C:\Program Files\WindowsApps\Microsoft.PowerShellPreview'
+            - '\AppData\Local\Microsoft\WindowsApps\Microsoft.PowerShellPreview'
+        Image|endswith: '\pwsh.exe'
     filter_main_generic:
-        Image|endswith:
-            - ':\Program Files\PowerShell\7-preview\pwsh.exe'
-            - ':\Program Files\PowerShell\7\pwsh.exe'
-            - ':\Windows\System32\dsac.exe'
-            - ':\Windows\System32\sdiagnhost.exe'
-            - ':\Windows\System32\ServerManager.exe'
-            - ':\Windows\System32\WindowsPowerShell\v1.0\powershell_ise.exe'
-            - ':\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
-            - ':\Windows\System32\wsmprovhost.exe'
-            - ':\Windows\SysWOW64\sdiagnhost.exe'
-            - ':\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell_ise.exe'
-            - ':\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell.exe'
+        Image:
+            - 'C:\Windows\System32\dsac.exe'
+            - 'C:\Windows\System32\sdiagnhost.exe'
+            - 'C:\Windows\System32\ServerManager.exe'
+            - 'C:\Windows\System32\wsmprovhost.exe'
+            - 'C:\Windows\SysWOW64\sdiagnhost.exe'
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown

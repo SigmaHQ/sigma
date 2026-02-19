@@ -1,0 +1,27 @@
+title: GitHub Repository Archive Status Changed
+id: dca8991c-cb16-4128-abf8-6b11e5cd156f
+status: experimental
+description: |
+    Detects when a GitHub repository is archived or unarchived, which may indicate unauthorized changes to repository status.
+references:
+    - https://docs.github.com/en/repositories/archiving-a-github-repository/archiving-repositories
+    - https://www.sentinelone.com/blog/exploiting-repos-6-ways-threat-actors-abuse-github-other-devops-platforms
+    - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/security-log-events
+author: Ivan Saakov
+date: 2025-10-18
+tags:
+    - attack.persistence
+    - attack.defense-evasion
+    - attack.impact
+logsource:
+    product: github
+    service: audit
+detection:
+    selection:
+        action:
+            - 'repo.archived'
+            - 'repo.unarchived'
+    condition: selection
+falsepositives:
+    - Archiving or unarchiving a repository is often legitimate. Investigate this action to determine if it was authorized.
+level: low
