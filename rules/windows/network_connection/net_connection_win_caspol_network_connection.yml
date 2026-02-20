@@ -1,0 +1,31 @@
+title: CasPol.EXE Initiated Network Connection
+id: 0ac949d8-8460-4c67-818e-f1e5c4b125b1
+status: experimental
+description: |
+    Detects network connections initiated by CasPol.exe (Code Access Security Policy tool).
+    CasPol.exe is a .NET Framework utility with no legitimate reason to make network connections.
+    Threat actors abuse CasPol.exe as a process hollowing target due to its status as a signed Microsoft binary
+    located in a predictable .NET Framework path. 
+    Observed in an XWorm v5.6 campaign targeting Brazilian businesses (Feb 2026) where the RAT payload
+    was injected into CasPol.exe via process hollowing and used it to establish C2 communications.
+references:
+    - https://any.run/cybersecurity-blog/xworm-latam-campaign/
+    - https://lolbas-project.github.io/lolbas/Binaries/Caspol/
+author: Dave Johnson
+date: 2026-02-20
+tags:
+    - attack.defense-evasion
+    - attack.t1218
+    - attack.command-and-control
+    - attack.t1071.001
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Initiated: 'true'
+        Image|endswith: '\CasPol.exe'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
