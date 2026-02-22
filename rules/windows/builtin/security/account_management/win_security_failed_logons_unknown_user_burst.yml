@@ -1,0 +1,46 @@
+title: Multiple Failed Logons With Unknown Username From Single Source
+id: 19f47a62-4d4f-4d4e-90e4-90cb306962c8
+status: test
+description: |
+  Detects multiple Windows failed logon events where the username does not exist,
+  originating from the same source IP in a short period. This is a practical signal
+  for username enumeration and early brute-force activity against Windows systems.
+references:
+  - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4625
+author: Tom3306
+date: 2026-02-22
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4625
+    Status:
+      - '0xC0000064'   # User name does not exist
+    LogonType:
+      - 2              # Interactive
+      - 3              # Network
+      - 10             # RemoteInteractive (RDP)
+  filter_local_or_unknown_ip:
+    IpAddress:
+      - '127.0.0.1'
+      - '::1'
+      - '-'
+  timeframe: 10m
+  condition: selection and not filter_local_or_unknown_ip | count(TargetUserName) by IpAddress > 5
+falsepositives:
+  - Vulnerability scanners or audit tools testing invalid credentials at scale
+  - Misconfigured scripts repeatedly attempting to authenticate with wrong usernames
+  - Penetration testing / red-team activity
+level: medium
+tags:
+  - attack.credential-access
+  - attack.t1110
+  - attack.t1110.003
+fields:
+  - IpAddress
+  - WorkstationName
+  - TargetUserName
+  - SubjectUserName
+  - LogonType
+  - Status
