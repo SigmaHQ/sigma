@@ -1,0 +1,34 @@
+title: Suspicious File Dump Via Print.EXE
+id: 2fcda7e2-8c57-4904-86ac-37fc3157e09d
+status: experimental
+description: |
+    Detects the dump of highly sensitive files such as "NTDS.DIT" and "SECURITY" hive.
+    Attackers can leverage the "print" utility in order to dump sensitive files that might contain credential or sensitive information.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/02/06/active-exploitation-solarwinds-web-help-desk/
+    - https://www.huntress.com/blog/credential-theft-expanding-your-reach-pt-2
+author: Ayush Anand (Securityinbits)
+date: 2026-02-09
+tags:
+    - attack.credential-access
+    - attack.t1003.003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\print.exe'
+        - OriginalFileName: 'print.exe'
+    selection_cmdline:
+        CommandLine|startswith: 'print'
+        CommandLine|contains: '/D'
+    selection_path:
+        CommandLine|contains:
+            - '\config\SAM'
+            - '\config\SECURITY'
+            - '\config\SYSTEM'
+            - '\Windows\NTDS\NTDS.dit'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely
+level: high
