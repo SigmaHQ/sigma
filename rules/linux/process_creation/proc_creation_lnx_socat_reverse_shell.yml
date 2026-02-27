@@ -1,0 +1,57 @@
+title: Potential Socat Reverse Shell Execution
+id: 004985ba-4624-41ce-8d59-52b0fa8f9518
+status: experimental
+description: |
+    Detects execution of socat with parameters commonly associated with establishing a reverse shell.
+    Socat is a multipurpose relay tool that can be abused to create encrypted or unencrypted reverse shells.
+    This rule covers both plain TCP and SSL/TLS encrypted variants.
+references:
+    - https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
+    - https://www.revshells.com/
+    - https://linux.die.net/man/1/socat
+author: nedelcubianca
+date: 2026-02-27
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_img:
+        Image|endswith: '/socat'
+    selection_exec:
+        CommandLine|contains:
+            - 'exec:'
+            - 'EXEC:'
+    selection_shell:
+        CommandLine|contains:
+            - 'bash'
+            - '/bin/sh'
+            - '/bin/bash'
+            - '/bin/zsh'
+            - '/bin/ash'
+            - '/bin/csh'
+            - '/bin/ksh'
+    selection_network:
+        CommandLine|contains:
+            - 'tcp:'
+            - 'tcp-connect:'
+            - 'tcp4:'
+            - 'tcp6:'
+            - 'TCP:'
+            - 'TCP-CONNECT:'
+            - 'TCP4:'
+            - 'TCP6:'
+            - 'ssl:'
+            - 'ssl-connect:'
+            - 'SSL:'
+            - 'SSL-CONNECT:'
+            - 'openssl:'
+            - 'openssl-connect:'
+            - 'OPENSSL:'
+            - 'OPENSSL-CONNECT:'
+    condition: selection_img and selection_exec and selection_shell and selection_network
+falsepositives:
+    - Legitimate use of socat for system administration or debugging purposes
+level: high
