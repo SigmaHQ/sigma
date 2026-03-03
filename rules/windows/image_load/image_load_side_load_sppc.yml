@@ -1,14 +1,14 @@
-title: Potential DLL Sideloading of SSPC.dll
+title: Potential DLL Sideloading of SPPC.dll
 id: 5e7f8a4b-9c3d-4f2e-b1a6-8d7e9f0c2b3a
 status: experimental
-description: Detects potential DLL sideloading of SSPC.dll by identifying instances where the DLL is loaded from a directory other than the legitimate Windows system directories.
+description: Detects potential DLL sideloading of SPPC.dll by identifying instances where the DLL is loaded from a directory other than the legitimate Windows system directories.
 references:
     - https://hijacklibs.net/entries/microsoft/built-in/sppc.html
     - https://arcticwolf.com/resources/blog/sloppylemming-deploys-burrowshell-and-rust-based-rat-to-target-pakistan-and-bangladesh/
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2025-03-03
 tags:
-    - attack.defense_evasion
+    - attack.defense-evasion
     - attack.persistence
     - attack.privilege-escalation
     - attack.t1574.001
@@ -17,7 +17,7 @@ logsource:
     product: windows
 detection:
     selection:
-        ImageLoaded|endswith: '\sspc.dll'
+        ImageLoaded|endswith: '\sppc.dll'
     filter_main_legit_paths:
         ImageLoaded|startswith:
             - 'C:\Windows\System32\'
@@ -25,6 +25,6 @@ detection:
             - 'C:\Windows\WinSxS\'
     condition: selection and not 1 of filter_main_*
 falsepositives:
-    - Legitimate software that may load SSPC.dll from non-standard locations, baselining and further investigation required.
+    - Legitimate software that may load SPPC.dll from non-standard locations, baselining and further investigation required.
 level: medium
-regression_tests_path: regression_data/rules/windows/image_load/image_load_side_load_sspc/info.yml
+regression_tests_path: regression_data/rules/windows/image_load/image_load_side_load_sppc/info.yml
