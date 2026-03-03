@@ -1,0 +1,30 @@
+title: SSH Brute Force Authentication Attempts
+id: 8d9c5b6a-9b42-4d71-9b3f-sshbruteforce01
+status: test
+description: >
+    Detects potential SSH brute-force attacks by identifying multiple
+    failed SSH authentication attempts from the same source IP address
+    within system log messages. Such activity is commonly associated
+    with credential stuffing or password guessing attacks.
+references:
+    - https://attack.mitre.org/techniques/T1110/
+    - https://www.ssh.com/academy/attack/brute-force
+author: Amit Trap (community)
+date: 2026-02-04
+tags:
+    - attack.credential-access
+    - attack.t1110
+logsource:
+    product: linux
+    service: syslog
+detection:
+    ssh_failed_keywords:
+        - 'Failed password'
+        - 'Invalid user'
+        - 'authentication failure'
+        - 'PAM authentication failure'
+    condition: ssh_failed_keywords
+falsepositives:
+    - Misconfigured scripts repeatedly attempting SSH authentication
+    - Vulnerability scanners performing credential checks
+level: medium
