@@ -1,0 +1,29 @@
+title: Microsoft Defender For Office Malicious URL Block Bypassed By User
+id: 4b4d8640-fdec-4d28-a0a0-7272b689d8f8
+status: experimental
+description: |
+    Detects events where a user explicitly overrode a Microsoft Defender
+    Safe Links warning and proceeded to navigate to a malicious URL.
+references:
+    - https://learn.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema#microsoft-defender-for-office-365-and-threat-investigation-and-response-schema
+    - https://learn.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema#urlclickaction
+    - https://learn.microsoft.com/en-us/defender-office-365/safe-links-about
+author: Tom Kluter
+date: 2026-02-18
+tags:
+    - attack.initial-access
+    - attack.t1566
+logsource:
+    product: m365
+    service: audit
+detection:
+    selection:
+        Workload: 'ThreatIntelligence'
+        Operation: 'TIUrlClickData'
+        UrlClickAction:
+            - 4 # BlockPageOverride (User blocked from navigating to the URL by Safe Links, but the user overrode the block to navigate to the URL)
+            - 5 # PendingDetonationPageOverride (User presented with the detonation page by Safe Links, but the user overrode the page to navigate to the URL)
+    condition: selection
+falsepositives:
+    - Controlled Red Team exercises or authorized security researchers.
+level: high
