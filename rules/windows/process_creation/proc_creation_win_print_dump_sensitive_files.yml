@@ -1,0 +1,36 @@
+title: Suspicious File Dump Via Print.EXE
+id: 2fcda7e2-8c57-4904-86ac-37fc3157e09d
+status: experimental
+description: |
+    Detects the abuse of Print.exe for credential harvesting which involves using Print.Exe to copy sensitive files such as ntds.dit, SAM, SECURITY, or SYSTEM from the Windows directory in order to extract credentials, locally or remotely.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/02/06/active-exploitation-solarwinds-web-help-desk/
+    - https://www.huntress.com/blog/credential-theft-expanding-your-reach-pt-2
+    - https://lolbas-project.github.io/lolbas/Binaries/Print/
+author: Ayush Anand (Securityinbits)
+date: 2026-02-09
+tags:
+    - attack.credential-access
+    - attack.t1003.003
+    - attack.t1003.002
+    - attack.defense-evasion
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\print.exe'
+        - OriginalFileName: 'Print.EXE'
+    selection_cli:
+        CommandLine|contains|windash: '/D'
+        CommandLine|contains:
+            - '\config\SAM'
+            - '\config\SECURITY'
+            - '\config\SYSTEM'
+            - '\windows\ntds\ntds.dit'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely
+level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_print_dump_sensitive_files/info.yml
