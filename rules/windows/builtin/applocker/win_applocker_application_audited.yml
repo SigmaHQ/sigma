@@ -1,0 +1,40 @@
+title: AppLocker Audit Mode - Application or Script Would Have Been Blocked
+id: b9d2a75d-a3c8-4b2e-8f1d-9e3c7d4a5b6e
+status: experimental
+description: |
+    Detects when AppLocker audit mode logs that an application, script or DLL
+    would have been blocked if AppLocker was enforced. Useful for identifying
+    potential policy gaps and bypass attempts.
+references:
+    - https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/applocker/what-is-applocker
+    - https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/applocker/using-event-viewer-with-applocker
+author: heyyanu
+date: 2026-02-25
+tags:
+    - attack.execution
+    - attack.defense_evasion
+    - attack.t1204.002
+    - attack.t1059.001
+    - attack.t1059.003
+    - attack.t1059.005
+    - attack.t1562.001
+logsource:
+    product: windows
+    service: applocker
+detection:
+    applocker:
+        Channel:
+            - Microsoft-Windows-AppLocker/MSI and Script
+            - Microsoft-Windows-AppLocker/EXE and DLL
+            - Microsoft-Windows-AppLocker/Packaged app-Deployment
+            - Microsoft-Windows-AppLocker/Packaged app-Execution
+    selection:
+        EventID:
+            - 8003 # EXE and DLL would have been blocked
+            - 8006 # MSI and Script would have been blocked
+            - 8023 # Packaged app execution would have been blocked
+            - 8024 # Packaged app deployment would have been blocked
+    condition: applocker and selection
+falsepositives:
+    - Expected during AppLocker policy testing and audit mode deployments
+level: low
