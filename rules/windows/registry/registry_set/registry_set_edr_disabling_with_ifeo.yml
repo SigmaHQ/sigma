@@ -1,0 +1,82 @@
+title: EDR Disabling through Image File Execution Options
+id: 7c217021-17ef-4208-9f88-3c4cc3d049fb
+status: experimental
+description: Detects the creation of a new key under `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options` with a MitigationOptions value on a specific EDR process. This prevents the targeted process from loading non-Microsoft-signed DLLs, breaking EDR functionality that relies on vendor-signed DLL.
+references:
+    - https://www.orangecyberdefense.com/global/blog/cybersecurity/fairy-law
+author: Chris Barros Henriques (Swiss Post Cybersecurity)
+date: 2026-03-06
+tags:
+    - attack.defense-evasion
+    - attack.t1562.001
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_registry_modification:
+      TargetObject|startswith:
+        - 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options'
+      TargetObject|contains:
+        - 'MitigationOptions'
+        - 'MitigationAuditOptions'
+
+    selection_edr_executable:
+      registry.path|contains:
+        - 'SentinelAgent.exe'
+        - 'SentinelAgentWorker.exe'
+        - 'SentinelCleaner.exe'
+        - 'SentinelCtl.exe'
+        - 'SentinelHelperService.exe'
+        - 'SentinelMemoryScanner.exe'
+        - 'SentinelRemediation.exe'
+        - 'SentinelServiceHost.exe'
+        - 'SentinelStaticEngine.exe'
+        - 'SentinelStaticEngineScanner.exe'
+        - 'SentinelUI.exe'
+        # https://thrive.trellix.com/s/article/KB87791?language=en_US&page=content&id=KB87791&locale=nl_NL&viewlocale=nl_NL
+        - 'mfetp.exe'
+        - 'mfeatp.exe'
+        - 'mfeesp.exe'
+        - 'macomserver.exe'
+        - 'mfemms.exe'
+        - 'mfefire.exe'
+        - 'mfehcs.exe'
+        - 'mcshield.exe'
+        - 'mfevtps.exe'
+        - 'mfewc.exe'
+        # https://support.sophos.com/support/s/article/KBA-000001467?language=en_US
+        - 'HMPAlert.exe'
+        - 'SEDService.exe'
+        - 'SEDTelemetry.exe'
+        - 'SLDService.exe'
+        - 'SNTPService.exe'
+        - 'Sophos UI.exe'
+        - 'SophosMainUI.exe'
+        - 'SophosAMSITelemetryCollector.exe'
+        - 'SophosCleanup.exe'
+        - 'SophosESH.exe'
+        - 'SophosESHTelemetry.exe'
+        - 'SophosFileScanner.exe'
+        - 'SophosFS.exe'
+        - 'Sophos.exe'
+        - 'SophosOSQuery.exe'
+        - 'SSPService.exe'
+        # https://www.bitdefender.com/business/support/en/77209-157497-install-security-agents---standard-procedure.html#id335747
+        - 'BDRedline.exe'
+        - 'EPConsole.exe'
+        - 'EPIntegrationService.exe'
+        - 'EPProtectedService.exe'
+        - 'EPSecurityService.exe'
+        - 'EPUpdateService.exe'
+        - 'EPUpdateServer.exe'
+
+    filter_main:
+      - registry.value:
+          - '-'
+          - '(empty)'
+
+    condition: all of selection_* and not 1 of filter_*
+falsepositives:
+    - Legitimate updates from the AV/EDR itself
+level: high
+regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_edr_disabling_with_ifeo/info.yml
