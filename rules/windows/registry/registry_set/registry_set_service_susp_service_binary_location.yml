@@ -1,0 +1,53 @@
+title: Suspicious Service Binary Location
+id: 1a8af205-1d32-4352-b937-d933ecf5e7d6
+related:
+    - id: a07f0359-4c90-4dc4-a681-8ffea40b4f47
+      type: obsolete
+description: |
+    Detects services with a binary path pointing to a suspicious location.
+    Attackers may create or modify services to point to malicious executables in order to maintain persistence on a compromised system.
+    It could be particularly suspicious if the service binary path points to a directory that is not commonly used for legitimate software, such as user profile directories, temporary folders, or other non-standard locations.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
+author: Florian Roth (Nextron Systems), frack113
+date: 2026-03-09
+tags:
+    - attack.persistence
+    - attack.defense-evasion
+    - attack.t1112
+    - attack.privilege-escalation
+    - attack.t1543.003
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_service_imagepath:
+        TargetObject|startswith: 'HKLM\System\CurrentControlSet\Services\'
+        TargetObject|endswith: '\ImagePath'
+        Details|contains:
+            - '\$Recycle.Bin\'
+            - '\ADMIN$\'
+            - '\Desktop\'
+            - '\Documents\'
+            - '\Downloads\'
+            - '\Favorites\'
+            - '\Favourites\'
+            - '\Music\'
+            - '\Perflogs\'
+            - '\Pictures\'
+            - '\ProgramData\'
+            - '\Temp\'
+            - '\Users\Default\'
+            - '\Users\Public\'
+            - '\Videos\'
+            - '\Windows\Debug\'
+            - '\Windows\Tasks\'
+            - '\Windows\Tracing\'
+    filter_optional_mbamservice:
+        TargetObject|endswith: '\CurrentControlSet\Services\MBAMInstallerService\ImagePath'
+        Details|endswith: '\AppData\Local\Temp\MBAMInstallerService.exe"'
+        Image: 'C:\Windows\system32\services.exe'
+    condition: 1 of selection_* and not 1 of filter_optional_*
+falsepositives:
+    - Unknown
+level: high
