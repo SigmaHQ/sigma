@@ -1,0 +1,59 @@
+title: Service StartType Modification by Process Running from Suspicious Directory
+id: 5def21e6-8927-4ebd-bf20-16f440369564
+related:
+    - id: a07f0359-4c90-4dc4-a681-8ffea40b4f47
+      type: obsolete
+status: test
+description: |
+    Detect the modification of a service start type by a process running from a suspicious directory.
+    If the service start type is set to "Automatic" or "System", the service will be started at boot time, which can be used by attackers to maintain persistence.
+    And it could be particularly suspicious if the modification is performed by a process running from a directory that is not commonly used for legitimate software, such as user profile directories, temporary folders, or other non-standard locations.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
+author: Florian Roth (Nextron Systems), frack113
+date: 2026-03-09
+tags:
+    - attack.persistence
+    - attack.defense-evasion
+    - attack.t1112
+    - attack.privilege-escalation
+    - attack.t1543.003
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|startswith: 'HKLM\System\CurrentControlSet\Services\'
+        TargetObject|endswith: '\Start'
+        Image|contains:
+            - '\$Recycle.Bin\'
+            - '\ADMIN$\'
+            - '\Desktop\'
+            - '\Documents\'
+            - '\Downloads\'
+            - '\Favorites\'
+            - '\Favourites\'
+            - '\Music\'
+            - '\Perflogs\'
+            - '\Pictures\'
+            - '\ProgramData\'
+            - '\Temp\'
+            - '\Users\Default\'
+            - '\Users\Public\'
+            - '\Videos\'
+            - '\Windows\Debug\'
+            - '\Windows\Tasks\'
+            - '\Windows\Tracing\'
+        Details:
+            - 'DWORD (0x00000000)'  # boot
+            - 'DWORD (0x00000001)'  # System
+            - 'DWORD (0x00000002)'  # Automatic
+            # 3 - Manual , 4 - Disabled
+    filter_optional_avast:
+        Image|contains|all: # Filter FP with Avast software
+            - '\Common Files\'
+            - '\Temp\'
+    condition: selection and not 1 of filter_optional_*
+falsepositives:
+    - Unknown
+level: high
