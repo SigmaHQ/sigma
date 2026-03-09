@@ -1,0 +1,62 @@
+title: Service from Suspicious Directory Enabled
+id: 8a3c8f2e-9d7a-4b5f-a1e3-2c6d9f0b4a7e
+related:
+    - id: 5def21e6-8927-4ebd-bf20-16f440369564
+      type: similar
+    - id: 1a8af205-1d32-4352-b937-d933ecf5e7d6
+      type: similar
+status: experimental
+description: |
+    Detects the installation or modification of a service with an ImagePath pointing to a suspicious directory and a start type that would cause the service to be started automatically.
+    Services with automatic or system start types that execute from user-writable or non-standard directories can indicate persistence mechanisms used by attackers.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-03-09
+tags:
+    - attack.persistence
+    - attack.defense-evasion
+    - attack.privilege-escalation
+    - attack.t1543.003
+logsource:
+    product: windows
+    service: system
+detection:
+    selection_event:
+        Provider_Name: 'Service Control Manager'
+        EventID: 7045
+    selection_path:
+        ImagePath|contains:
+            - '\$Recycle.Bin\'
+            - '\ADMIN$\'
+            - '\AppData\'
+            - '\Desktop\'
+            - '\Documents\'
+            - '\Downloads\'
+            - '\Favorites\'
+            - '\Favourites\'
+            - '\Inetpub\'
+            - '\Music\'
+            - '\Perflogs\'
+            - '\Pictures\'
+            - '\Temp\'
+            - '\Users\Default\'
+            - '\Users\Public\'
+            - '\Videos\'
+            - '\Windows\Debug\'
+            - '\Windows\Tasks\'
+            - '\Windows\Tracing\'
+    selection_starttype:
+        StartType:
+            - 'boot start'
+            - 'system start'
+            - 'auto start'
+    filter_optional_avast:
+        ImagePath|contains|all:
+            - '\Common Files\'
+            - '\Temp\'
+    condition: all of selection_* and not 1 of filter_optional_*
+falsepositives:
+    - Unknown
+level: high
+regression_tests_path: regression_data/rules/windows/builtin/system/service_control_manager/win_system_susp_service_startup_modification/info.yml
