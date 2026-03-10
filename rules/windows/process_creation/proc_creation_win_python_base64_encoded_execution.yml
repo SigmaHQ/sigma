@@ -1,0 +1,47 @@
+title: Python Base64 Encoded Inline Command Execution
+id: 50a0aa3d-ab16-4594-a8aa-5145a6e6792b
+related:
+    - id: 899133d5-4d7c-4a7f-94ee-27355c879d90
+      type: similar
+status: test
+description: |
+    Detects Python execution with base64 decoding functions in an inline command.
+    Attackers use base64 encoding to obfuscate reverse shells, droppers, and post-exploitation
+    payloads passed to "python -c" to evade simple string-based detection.
+references:
+    - https://attack.mitre.org/techniques/T1059/006/
+    - https://attack.mitre.org/techniques/T1027/
+    - https://www.revshells.com/
+    - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/reverse-shells/linux.html
+author: Hugh Ryan (HueCodes)
+date: 2026-03-09
+tags:
+    - attack.execution
+    - attack.t1059.006
+    - attack.defense-evasion
+    - attack.t1027
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - OriginalFileName:
+              - 'python.exe'
+              - 'python3.exe'
+        - Image|endswith:
+              - '\python.exe'
+              - '\python3.exe'
+              - '\pythonw.exe'
+    selection_cli:
+        CommandLine|contains: ' -c'
+    selection_base64:
+        CommandLine|contains:
+            - 'b64decode'
+            - 'b64encode'
+            - 'decodebytes'
+            - 'encodebytes'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate scripts that decode base64 configuration data via inline Python commands
+    - CI/CD pipelines using inline Python for encoding tasks
+level: high
