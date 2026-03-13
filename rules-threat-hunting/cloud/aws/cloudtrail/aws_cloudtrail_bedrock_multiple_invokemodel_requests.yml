@@ -1,0 +1,36 @@
+title: AWS Bedrock Multiple InvokeModel Requests From Unusual Principal
+id: e0ace9ec-702e-43a7-9a04-0629230085f9
+status: experimental
+description: |
+    Detects an unusual principal making repeated InvokeModel requests to AWS Bedrock within a short timeframe.
+    This may indicate LLMJacking, where an attacker uses stolen cloud credentials to abuse hosted AI models at the victim's expense.
+    Repeated InvokeModel calls from a principal that does not typically interact with Bedrock services should be investigated.
+references:
+    - https://www.sysdig.com/blog/llmjacking-stolen-cloud-credentials-used-in-new-ai-attack
+    - https://permiso.io/blog/exploiting-hosted-models
+    - https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InvokeModelWithResponseStream.html
+    - https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InvokeModel.html
+author: Marco Pedrinazzi (@pedrinazziM) (InTheCyber)
+date: 2026-03-13
+tags:
+    - attack.impact
+    - attack.t1496.004
+    - detection.threat-hunting
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventName:
+            - 'InvokeModel'
+            - 'InvokeModelWithResponseStream'
+        eventSource: 'bedrock.amazonaws.com'
+    filter_main_error:
+        errorCode: 'AccessDenied'
+    condition: selection and not filter_main_error | count(eventName) by userIdentity.arn > 10
+    timeframe: 5m
+falsepositives:
+    - >-
+        Legitimate applications or services that use Bedrock InvokeModel at high
+        frequency (e.g. chatbots, automated pipelines). Tune the thresholds according to your environment.
+level: medium
