@@ -1,8 +1,8 @@
-title: AWS Bedrock Multiple InvokeModel Requests From Unusual Principal
+title: AWS Bedrock High Volume InvokeModel Requests
 id: e0ace9ec-702e-43a7-9a04-0629230085f9
 status: experimental
 description: |
-    Detects an unusual principal making repeated InvokeModel requests to AWS Bedrock within a short timeframe.
+    Detects a principal making a high volume of InvokeModel requests to AWS Bedrock within a short timeframe.
     This may indicate LLMJacking, where an attacker uses stolen cloud credentials to abuse hosted AI models at the victim's expense.
     Repeated InvokeModel calls from a principal that does not typically interact with Bedrock services should be investigated.
 references:
@@ -26,8 +26,8 @@ detection:
             - 'InvokeModelWithResponseStream'
         eventSource: 'bedrock.amazonaws.com'
     filter_main_error:
-        errorCode: 'AccessDenied'
-    condition: selection and not filter_main_error | count(eventName) by userIdentity.arn > 10
+        errorCode|exists: true
+    condition: selection and not filter_main_error | count(eventName) by userIdentity.arn > 50
     timeframe: 5m
 falsepositives:
     - >-
