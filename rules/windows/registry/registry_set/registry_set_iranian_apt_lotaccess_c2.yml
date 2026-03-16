@@ -1,0 +1,48 @@
+title: Iranian APT LotAccess Registry C2 Configuration Write
+id: c9e5b263-4d8f-5a3b-0f74-9b5c2d1e8a03
+status: experimental
+description: |
+    Detects LotAccess writing C2 IP addresses into AppEx Networks registry keys
+    at runtime (Operation Epic Fury, Iranian campaign 2026).
+
+    Mechanism: LotAccess writes the C2 IPs into the original AppEx VPN registry keys
+    (firstServer / secondServer). The AppEx VPN binary then reads these keys to
+    populate cloudvpn.cfg and contact the C2 via the legitimate AppEx VPN API.
+    This makes C2 traffic indistinguishable from legitimate AppEx VPN traffic.
+
+    Anti-VM note: In sandbox environments, the RDTSC check prevents C2 resolution.
+    Registry values in sandbox = "123456 123456" (placeholder). On physical hardware,
+    values = actual C2 IP addresses (216.45.58.148 / 167.160.187.43).
+
+references:
+    - https://paolocostanzo.github.io/operation-epic-fury-cyber-war-iran/
+    - https://github.com/paolocostanzo/operation-epic-fury-rules
+
+author: Paolo Costanzo - paolocostanzo.github.io
+date: 2026/03/15
+modified: 2026/03/17
+version: 1
+tags:
+    - attack.defense_evasion
+    - attack.persistence
+    - attack.t1112
+    - tlp.white
+
+logsource:
+    category: registry_set
+    product: windows
+
+detection:
+    selection_key:
+        TargetObject|contains: 'Software\AppEx Networks\LotAccess'
+    selection_c2_values:
+        Details|contains:
+            - '216.45.58.148'
+            - '167.160.187.43'
+    condition: selection_key and selection_c2_values
+
+falsepositives:
+    - Legitimate AppEx Networks VPN client with manually configured enterprise servers
+      (verify: if Details does not match known C2 IPs, likely benign)
+
+level: high

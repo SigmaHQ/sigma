@@ -1,0 +1,41 @@
+title: Iranian APT LotAccess Payload Extraction to TEMP Directory
+id: b8d4a152-3c7e-4f2a-9e63-8a4b1c0d7f92
+status: experimental
+description: |
+    Detects the creation of files under %TEMP%\EB93A6\ by LotAccess
+    (trojanized AppEx VPN — Operation Epic Fury, Iranian campaign 2026).
+
+    LotAccess extracts its components to this specific subdirectory before execution:
+      - cloudvpn.cfg  (190 bytes — runtime-written C2 config with IP addresses)
+      - ca.crt        (TianQin VPN CA certificate — legitimizes TLS to C2)
+      - file "152"    (113 KB — original AppEx VPN update module, NOT malicious)
+
+    The EB93A6 directory name is hardcoded in the binary and unique to this family.
+    This rule fires at the earliest stage of infection — before C2 contact.
+
+references:
+    - https://paolocostanzo.github.io/operation-epic-fury-cyber-war-iran/
+    - https://github.com/paolocostanzo/operation-epic-fury-rules
+
+author: Paolo Costanzo - paolocostanzo.github.io
+date: 2026/03/15
+modified: 2026/03/17
+version: 1
+tags:
+    - attack.defense_evasion
+    - attack.t1027
+    - tlp.white
+
+logsource:
+    category: file_event
+    product: windows
+
+detection:
+    selection:
+        TargetFilename|contains: '\Temp\EB93A6\'
+    condition: selection
+
+falsepositives:
+    - Extremely unlikely — directory name EB93A6 is hardcoded and specific to this binary
+
+level: high
