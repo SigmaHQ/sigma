@@ -1,0 +1,49 @@
+title: Uncommon File Created by Notepad++ Updater Gup.EXE
+id: 3b8f4c92-6a51-4d7e-9c3a-8e2d1f5a7b09
+status: experimental
+description: |
+    Detects when the Notepad++ updater (gup.exe) creates files in suspicious or uncommon locations.
+    This could indicate potential exploitation of the updater component to deliver unwanted malware or unwarranted files.
+references:
+    - https://notepad-plus-plus.org/news/v889-released/
+    - https://www.heise.de/en/news/Notepad-updater-installed-malware-11109726.html
+    - https://www.rapid7.com/blog/post/tr-chrysalis-backdoor-dive-into-lotus-blossoms-toolkit/
+    - https://www.validin.com/blog/exploring_notepad_plus_plus_network_indicators/
+    - https://securelist.com/notepad-supply-chain-attack/118708/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-02-03
+tags:
+    - attack.collection
+    - attack.credential-access
+    - attack.t1195.002
+    - attack.initial-access
+    - attack.t1557
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\gup.exe'
+    filter_main_legit_paths:
+        TargetFilename|startswith:
+            - 'C:\Program Files\Notepad++\'
+            - 'C:\Program Files (x86)\Notepad++\'
+    filter_main_temp_update_installer:
+        TargetFilename|startswith: 'C:\Users\'
+        TargetFilename|contains|all:
+            - '\AppData\Local\Temp\'
+            - 'npp.'
+            - '.Installer.'
+            - '.exe'
+    filter_main_temp_generic_zip:
+        TargetFilename|startswith: 'C:\Users\'
+        TargetFilename|contains|all:
+            - '\AppData\Local\Temp\'
+            - '.zip'
+    filter_main_recycle_bin:
+        TargetFilename|startswith: 'C:\$Recycle.Bin\S-1-5-21'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Custom or portable Notepad++ installations in non-standard directories.
+    - Legitimate update processes creating temporary files in unexpected locations.
+level: high
