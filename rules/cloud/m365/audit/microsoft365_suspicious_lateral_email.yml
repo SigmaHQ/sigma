@@ -18,12 +18,15 @@ logsource:
     service: audit
     product: m365
 detection:
-    selection:
-        Workload: 'ThreatIntelligence'
-        Operation: 'TIMailData'
-        Directionality: 'Intraorg'
-    condition: selection
+    detection:
+        selection:
+            Workload: 'ThreatIntelligence'
+            Operation: 'TIMailData'
+            Directionality: 'Intraorg'
+        filter_main_blocked:
+            DeliveryAction: 'Blocked'
+        condition: selection and not 1 of filter_main_*
 falsepositives:
     - Internal phishing simulations (Phishing drills) failing to bypass filter headers correctly.
     - False positives from Microsoft filtering engine regarding internal newsletters or automated reports.
-level: low
+level: high
