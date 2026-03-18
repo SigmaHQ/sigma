@@ -38,7 +38,7 @@ detection:
             - '/bin/login'
             - '/bin/passwd'
             - '/boot/'
-            - '/etc/\*.conf'
+            - '/etc/*.conf'
             - '/etc/cron.' # Covers different cron config files "daily", "hourly", etc.
             - '/etc/crontab'
             - '/etc/hosts'
@@ -48,7 +48,13 @@ detection:
             - '/sbin' # Covers: '/opt/sbin', '/usr/local/sbin/', '/usr/sbin/'
             - '/usr/bin/'
             - '/usr/local/bin/'
-    condition: 1 of selection_img_* and selection_paths
+    filter_main_mdadm.conf:
+        Image|endswith: '/bin/sed'
+        CommandLine|startswith:
+            - 'sed -i /^*'
+            - 'sed -ne s/^'
+        CommandLine|endswith: '/etc/mdadm/mdadm.conf'
+    condition: 1 of selection_img_* and selection_paths and not 1 of filter_main_*
 falsepositives:
     - Some false positives are to be expected on user or administrator machines. Apply additional filters as needed.
 level: medium
