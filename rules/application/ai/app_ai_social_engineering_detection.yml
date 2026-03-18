@@ -1,0 +1,53 @@
+title: Potential Phishing and Social Engineering Patterns in Application Logs
+id: e5f6a7b8-c9d0-4e1f-a2b3-c4d5e6f7a8b9
+status: experimental
+description: |
+  Detects patterns in application logs (such as messaging, email, or chat logs) that are characteristic of phishing or social engineering attempts.
+  These patterns often combine urgency, credential-related lures, and calls to action.
+  While not proof of AI authorship, such patterns are frequently observed in automated or AI-assisted attack campaigns.
+
+references:
+  - https://www.secureworks.com/blog/ai-and-the-next-generation-of-social-engineering
+  - https://attack.mitre.org/techniques/T1566/002/
+
+author: Akande Jamiu
+date: 2026-03-18
+
+tags:
+  - attack.initial-access
+  - attack.t1566.002
+  - ai.phishing
+
+logsource:
+  category: application
+  product: generic
+
+detection:
+  selection_urgency:
+    message|contains:
+      - "urgent action required"
+      - "account will be suspended"
+      - "immediate attention"
+      - "final notice"
+
+  selection_lure:
+    message|contains:
+      - "verify your account"
+      - "confirm your password"
+      - "unauthorized login"
+      - "reset your credentials"
+
+  selection_action:
+    message|contains:
+      - "click the link below"
+      - "sign in to verify"
+      - "follow this link"
+
+  condition: 2 of selection_*
+
+falsepositives:
+  - Legitimate system-generated notifications (e.g., password reset or security alerts)
+  - Customer support or service-related communications
+  - Marketing or notification emails with similar phrasing
+
+level: medium
