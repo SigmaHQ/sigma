@@ -19,14 +19,15 @@ logsource:
     service: syslog
 detection:
     keywords:
-        # xxx port-control force-authorized : disables IEEE 802.1X authentication and causes the port to change to the authorized state without any authentication exchange required
-        # no xxx port-control : causes to fallback to the default setting which is "force-authorized"
+        # xxx port-control force-authorized : disables 802.1X authentication and causes the port to change to the authorized state without any authentication exchange required
+        # no xxx port-control : causes the port to fallback to the default setting which is "force-authorized", thereby disabling 802.1X
         - no access-session port-control # Modern IOS-XE
         - access-session port-control force-authorized # Modern IOS-XE
         - no authentication port-control # Older IOS
         - authentication port-control force-authorized # Older IOS
         - no dot1x port-control # Legacy
         - dot1x port-control force-authorized # Legacy
+        - no dot1x system-auth-control # disables 802.1X globally
     condition: keywords
 falsepositives:
     - Administrator troubleshooting connectivity issues
