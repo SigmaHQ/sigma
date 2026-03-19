@@ -1,0 +1,35 @@
+title: WerFaultSecure Loading DbgCore or DbgHelp - EDR-Freeze
+id: 8a2f4b1c-3d5e-4f7a-9b2c-1e4f6d8a9c2b
+related:
+    - id: 387df17d-3b04-448f-8669-9e7fd5e5fd8c
+      type: similar
+    - id: 1f0b4cac-9c81-41f4-95d0-8475ff46b3e2
+      type: similar
+status: experimental
+description: |
+    Detects WerFaultSecure.exe loading dbgcore.dll or dbghelp.dll which contains the MiniDumpWriteDump function.
+    The MiniDumpWriteDump function creates a minidump of a process by suspending all threads in the target process to ensure a consistent memory snapshot.
+    The EDR-Freeze technique abuses WerFaultSecure.exe running as a Protected Process Light (PPL) with WinTCB protection level to suspend EDR/AV processes.
+    By leveraging MiniDumpWriteDump's thread suspension behavior, edr-freeze allows malicious activity to execute undetected during the suspension period.
+references:
+    - https://github.com/TwoSevenOneT/EDR-Freeze
+    - https://blog.axelarator.net/hunting-for-edr-freeze/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-11-27
+tags:
+    - attack.defense-evasion
+    - attack.t1562.001
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\WerFaultSecure.exe'
+        ImageLoaded|endswith:
+            - '\dbgcore.dll'
+            - '\dbghelp.dll'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
+regression_tests_path: regression_data/rules/windows/image_load/image_load_win_werfaultsecure_dbgcore_dbghelp_load/info.yml
