@@ -1,0 +1,31 @@
+title: Windows Defender Disabled Via SystemSettingsAdminFlows.EXE
+id: da92713f-ca2d-4fab-8320-098013d3f43a
+status: experimental
+description: |
+    Detects the use of SystemSettingsAdminFlows.exe to disable Windows
+    Defender settings. This legitimate Windows binary has been observed
+    being abused by threat actors as a LOLBIN to tamper with security
+    tooling during ransomware intrusions, as documented in a LockBit
+    deployment case by The DFIR Report (February 2026).
+references:
+    - https://thedfirreport.com/2026/02/23/apache-activemq-exploit-leads-to-lockbit-ransomware/
+    - https://lolbas-project.github.io
+tags:
+    - attack.t1562
+    - attack.t1562.001
+author: Chirag Damani (KPMG India)
+date: 2026/03/21
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\SystemSettingsAdminFlows.exe'
+        CommandLine|contains:
+            - 'WindowsDefender'
+            - 'TurnOffWindowsDefender'
+    condition: selection
+falsepositives:
+    - Legitimate administrative configuration of Windows Defender
+      via system management tools
+level: high
