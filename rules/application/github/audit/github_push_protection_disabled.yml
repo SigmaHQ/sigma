@@ -1,0 +1,30 @@
+title: Github Push Protection Disabled
+id: ccd55945-badd-4bae-936b-823a735d37dd
+status: test
+description: Detects if the push protection feature is disabled for an organization, enterprise, repositories or custom pattern rules.
+references:
+    - https://docs.github.com/en/enterprise-cloud@latest/code-security/secret-scanning/push-protection-for-repositories-and-organizations
+    - https://thehackernews.com/2024/03/github-rolls-out-default-secret.html
+author: Muhammad Faisal (@faisalusuf)
+date: 2024-03-07
+tags:
+    - attack.defense-evasion
+    - attack.t1562.001
+logsource:
+    product: github
+    service: audit
+    definition: 'Requirements: The audit log streaming feature must be enabled to be able to receive such logs. You can enable following the documentation here: https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise#setting-up-audit-log-streaming'
+detection:
+    selection:
+        action:
+            - 'business_secret_scanning_custom_pattern_push_protection.disabled'
+            - 'business_secret_scanning_push_protection.disable'
+            - 'business_secret_scanning_push_protection.disabled_for_new_repos'
+            - 'org.secret_scanning_custom_pattern_push_protection_disabled'
+            - 'org.secret_scanning_push_protection_disable'
+            - 'org.secret_scanning_push_protection_new_repos_disable'
+            - 'repository_secret_scanning_custom_pattern_push_protection.disabled'
+    condition: selection
+falsepositives:
+    - Allowed administrative activities.
+level: high

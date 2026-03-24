@@ -10,9 +10,10 @@ references:
     - https://www.crowdstrike.com/blog/overwatch-exposes-aquatic-panda-in-possession-of-log-4-shell-exploit-tools/
     - https://lolbas-project.github.io/lolbas/Binaries/Rdrleakdiag/
     - https://twitter.com/0gtweet/status/1299071304805560321?s=21
+    - https://news.sophos.com/en-us/2024/06/05/operation-crimson-palace-a-technical-deep-dive
 author: Cedric MAURUGEON, Florian Roth (Nextron Systems), Swachchhanda Shrawan Poudel, Nasreddine Bencherchali (Nextron Systems)
 date: 2021-09-24
-modified: 2023-04-24
+modified: 2024-08-15
 tags:
     - attack.credential-access
     - attack.t1003.001
@@ -24,19 +25,14 @@ detection:
         - Image|endswith: '\rdrleakdiag.exe'
         - OriginalFileName: RdrLeakDiag.exe
     selection_cli_dump:
-        CommandLine|contains:
-            - 'fullmemdmp'
+        CommandLine|contains|windash:
             - '/memdmp'
-            - '-memdmp'
-    selection_cli_output:
-        CommandLine|contains:
-            - ' -o '
-            - ' /o '
-    selection_cli_process:
-        CommandLine|contains:
-            - ' -p '
-            - ' /p '
-    condition: all of selection_cli_* or (selection_img and selection_cli_dump)
+            - 'fullmemdmp'
+    selection_cli_output_process:
+        CommandLine|contains|windash:
+            - ' /o ' # Output
+            - ' /p ' # Process
+    condition: all of selection_*
 falsepositives:
-    - Unknown
+    - Unlikely
 level: high

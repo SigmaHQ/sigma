@@ -1,0 +1,26 @@
+title: Cisco Duo Successful MFA Authentication Via Bypass Code
+id: 6f7e1c10-2dc9-4312-adb6-9574ff09a5c8
+status: test
+description: |
+    Detects when a successful MFA authentication occurs due to the use of a bypass code.
+    A bypass code is a temporary passcode created by an administrator for a specific user to access a Duo-protected application. These are generally used as "backup codes," so that enrolled users who are having problems with their mobile devices (e.g., mobile service is disrupted, the device is lost or stolen, etc.) or who temporarily can't use their enrolled devices (on a plane without mobile data services) can still access their Duo-protected systems.
+references:
+    - https://duo.com/docs/adminapi#logs
+    - https://help.duo.com/s/article/6327?language=en_US
+author: Nikita Khalimonenkov
+date: 2024-04-17
+tags:
+    - attack.credential-access
+    - attack.defense-evasion
+    - attack.initial-access
+logsource:
+    product: cisco
+    service: duo
+detection:
+    selection:
+        event_type: authentication
+        reason: bypass_user
+    condition: selection
+falsepositives:
+    - Legitimate user that was assigned on purpose to a bypass group
+level: medium

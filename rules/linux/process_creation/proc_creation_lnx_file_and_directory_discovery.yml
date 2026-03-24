@@ -1,12 +1,13 @@
 title: File and Directory Discovery - Linux
 id: d3feb4ee-ff1d-4d3d-bd10-5b28a238cc72
 status: test
-description: Detects usage of system utilities to discover files and directories
+description: |
+    Detects usage of system utilities such as "find", "tree", "findmnt", etc, to discover files, directories and network shares.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1083/T1083.md
-author: Daniil Yugoslavskiy, oscd.community
+author: Daniil Yugoslavskiy, oscd.community, CheraghiMilad
 date: 2020-10-19
-modified: 2022-11-25
+modified: 2024-12-01
 tags:
     - attack.discovery
     - attack.t1083
@@ -14,17 +15,21 @@ logsource:
     category: process_creation
     product: linux
 detection:
-    select_file_with_asterisk:
+    selection_file_with_asterisk:
         Image|endswith: '/file'
         CommandLine|re: '(.){200,}' # execution of the 'file */* *>> /tmp/output.txt' will produce huge commandline
-    select_recursive_ls:
+    selection_recursive_ls:
         Image|endswith: '/ls'
         CommandLine|contains: '-R'
-    select_find_execution:
+    selection_find_execution:
         Image|endswith: '/find'
-    select_tree_execution:
+    selection_tree_execution:
         Image|endswith: '/tree'
-    condition: 1 of select*
+    selection_findmnt_execution:
+        Image|endswith: '/findmnt'
+    selection_locate_execution:
+        Image|endswith: '/mlocate'
+    condition: 1 of selection_*
 falsepositives:
     - Legitimate activities
 level: informational

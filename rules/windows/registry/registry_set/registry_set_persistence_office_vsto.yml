@@ -7,7 +7,7 @@ references:
     - https://vanmieghem.io/stealth-outlook-persistence/
 author: Bhabesh Raj
 date: 2021-01-10
-modified: 2023-08-28
+modified: 2025-10-07
 tags:
     - attack.t1137.006
     - attack.persistence
@@ -22,24 +22,46 @@ detection:
             - '\Software\Microsoft\Office\Excel\Addins\'
             - '\Software\Microsoft\Office\Powerpoint\Addins\'
             - '\Software\Microsoft\VSTO\Security\Inclusion\'
-    filter_image:
-        Image|endswith:
-            - '\msiexec.exe'
-            - '\regsvr32.exe' # e.g. default Evernote installation
-    # triggered by a default Office 2019 installation
-    filter_office:
+    filter_main_system:
+        Image:
+            - 'C:\Windows\System32\msiexec.exe'
+            - 'C:\Windows\SysWOW64\msiexec.exe'
+            - 'C:\Windows\System32\regsvr32.exe'
+            - 'C:\Windows\SysWOW64\regsvr32.exe' # e.g. default Evernote installation
+    filter_main_office_click_to_run:
+        Image|startswith:
+            - 'C:\Program Files\Common Files (x86)\Microsoft Shared\ClickToRun\'
+            - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
+        Image|endswith: '\OfficeClickToRun.exe'
+    filter_main_integrator:
+        Image:
+            - 'C:\Program Files (x86)\Microsoft Office\root\integration\integrator.exe'
+            - 'C:\Program Files\Microsoft Office\root\integration\integrator.exe'
+    filter_main_office_apps:
+        Image|startswith:
+            - 'C:\Program Files\Microsoft Office\OFFICE'
+            - 'C:\Program Files (x86)\Microsoft Office\OFFICE'
+            - 'C:\Program Files\Microsoft Office\Root\OFFICE'
+            - 'C:\Program Files (x86)\Microsoft Office\Root\OFFICE'
         Image|endswith:
             - '\excel.exe'
-            - '\integrator.exe'
-            - '\OfficeClickToRun.exe'
-            - '\winword.exe'
+            - '\Integrator.exe'
+            - '\outlook.exe'
+            - '\powerpnt.exe'
+            - '\Teams.exe'
             - '\visio.exe'
-    filter_teams:
-        Image|endswith: '\Teams.exe'
-    filter_avg:
-        Image: 'C:\Program Files\AVG\Antivirus\RegSvr.exe'
+            - '\winword.exe'
+    filter_optional_avg:
+        Image:
+            - 'C:\Program Files\AVG\Antivirus\RegSvr.exe'
+            - 'C:\Program Files (x86)\AVG\Antivirus\RegSvr.exe'
         TargetObject|contains: '\Microsoft\Office\Outlook\Addins\Antivirus.AsOutExt\'
-    condition: selection and not 1 of filter_*
+    filter_optional_avast:
+        Image:
+            - 'C:\Program Files\Avast Software\Avast\RegSvr.exe'
+            - 'C:\Program Files (x86)\Avast Software\Avast\RegSvr.exe'
+        TargetObject|contains: '\Microsoft\Office\Outlook\Addins\Avast.AsOutExt\'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Legitimate Addin Installation
 level: medium

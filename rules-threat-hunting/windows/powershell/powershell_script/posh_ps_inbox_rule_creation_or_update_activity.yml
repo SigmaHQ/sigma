@@ -1,0 +1,42 @@
+title: Inbox Rules Creation Or Update Activity Via ExchangePowerShell Cmdlet
+id: 04580eed-e1d6-426b-a570-f6e64a4577f7
+related:
+    - id: d3577be1-42c9-44a7-b56e-2e8de97349d3
+      type: similar
+status: experimental
+description: |
+    Detects inbox rule creation or update via ExchangePowerShell cmdlet, a technique commonly observed in Business Email Compromise (BEC) attacks to hide emails.
+    The usage of inbox rules can be a sign of a compromised mailbox, where an attacker is attempting to evade detections by suppressing or redirecting incoming emails.
+    Analysts should review these rules in context, validate whether they reflect normal user behavior, and correlate with other indicators such as unusual login activity or recent mailbox rule modifications.
+references:
+    - https://redcanary.com/threat-detection-report/techniques/email-hiding-rules/
+    - https://learn.microsoft.com/it-it/powershell/module/exchangepowershell/new-inboxrule?view=exchange-ps
+    - https://learn.microsoft.com/it-it/powershell/module/exchangepowershell/set-inboxrule?view=exchange-ps
+author: Marco Pedrinazzi (@pedrinazziM) (InTheCyber)
+date: 2026-02-10
+tags:
+    - attack.defense-evasion
+    - attack.t1564.008
+    - attack.exfiltration
+    - attack.collection
+    - attack.t1114.003
+    - detection.threat-hunting
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_cmdlet:
+        ScriptBlockText|contains:
+            - 'New-InboxRule'
+            - 'Set-InboxRule'
+    selection_params:
+        ScriptBlockText|contains:
+            - 'DeleteMessage'
+            - 'MarkAsRead'
+            - 'MoveToFolder'
+            - 'SubjectOrBodyContainsWords'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate inbox rules created by users or administrators to manage email flow such as filtering, organizing, or automating email handling.
+level: medium

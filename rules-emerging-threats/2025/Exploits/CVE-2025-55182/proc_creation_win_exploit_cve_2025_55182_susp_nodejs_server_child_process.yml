@@ -1,0 +1,142 @@
+title: Windows Suspicious Child Process from Node.js - React2Shell
+id: 271de298-cc0e-4842-acd8-079a0a99ea65
+related:
+    - id: c70834fa-fb9d-4aa0-9e7d-45ceed36f3f7
+      type: similar
+status: experimental
+description: |
+    Detects suspicious child processes started by Node.js server processes on Windows, which may indicate exploitation of vulnerabilities like CVE-2025-55182 (React2Shell).
+    Attackers can abuse the Node.js 'child_process' module to run system commands or scripts using methods such as spawn(), exec(), execFile(), fork(), or execSync().
+    If execSync() or exec() is used in the exploit, the command line often shows a shell (e.g., cmd.exe /d /s /c ...) running a suspicious command unless other shells are explicitly invoked.
+    For other methods, the spawned process appears directly in the Image field unless a shell is explicitly used.
+references:
+    - https://github.com/msanft/CVE-2025-55182
+    - https://nodejs.org/api/child_process.html#class-childprocess
+    - https://gist.github.com/swachchhanda000/a0228130f86a2dedfbcebb415b47f870
+    - https://github.com/nasbench/Misc-Research/blob/2f651ede832ab34027a7ba005b63bb78f1ade378/Other/React-Next-Child-Processes-Notes.md
+author: Swachchhanda Shrawan Poudel (Nextron Systems), Nasreddine Bencherchali
+date: 2025-12-05
+tags:
+    - attack.execution
+    - attack.t1059
+    - attack.initial-access
+    - attack.t1190
+    - detection.emerging-threats
+    - cve.2025-55182
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\node.exe'
+        ParentCommandLine|contains:
+            - '--experimental-https'
+            - '--experimental-next-config-strip-types'
+            - '\node_modules\next'
+            - 'next dev'
+            - 'next start'
+            - 'next" start'
+            - 'node_modules\\.bin\\\\..\\next' # We escape every backslash to avoid confusion
+            - 'react-scripts start'
+            - 'start-server.js'
+    selection_generic_child_img:
+        # Observed when child_process.spawn(), child_process.exec(), child_process.execFile(), or child_process.fork() method  is used to spawn suspicious processes
+        - Image|endswith:
+              - '\bash.exe'
+              - '\bitsadmin.exe'
+              - '\certutil.exe'
+              - '\cscript.exe'
+              - '\curl.exe'
+              - '\ipconfig.exe'
+              - '\mshta.exe'
+              - '\net.exe'
+              - '\net1.exe'
+              - '\netsh.exe'
+              - '\nslookup.exe'
+              - '\OpenConsole.exe'
+              - '\perl.exe'
+              - '\ping.exe'
+              - '\powershell.exe'
+              - '\pwsh.exe'
+              - '\py.exe'
+              - '\python.exe'
+              - '\pythonw.exe'
+              - '\pyw.exe'
+              - '\reg.exe'
+              - '\regsvr32.exe'
+              - '\rundll32.exe'
+              - '\sc.exe'
+              - '\sh.exe'
+              - '\systeminfo.exe'
+              - '\wget.exe'
+              - '\whoami.exe'
+              - '\wmic.exe'
+              - '\wscript.exe'
+              - '\wt.exe'
+        - Image|contains: '\python'
+    selection_generic_child_cli_susp_pattern:
+        # Observed when child_process.execSync() is used to spawn suspicious processes
+        # Reference: https://nodejs.org/api/child_process.html#child_processexecsynccommand-options
+        # In default, the cli will look something like `C:\WINDOWS\System32\cmd.exe /d /s /c "...susp..cli...."`
+        CommandLine|contains:
+            - '\net'
+            - 'bitsadmin'
+            - 'certutil '
+            - 'conhost --headless'
+            - 'cscript '
+            - 'curl'
+            - 'ipconfig'
+            - 'java'
+            - 'lua'
+            - 'mshta'
+            - 'netsh'
+            - 'nslookup '
+            - 'perl'
+            - 'ping '
+            - 'powershell'
+            - 'pwsh'
+            - 'python'
+            - 'reg '
+            - 'reg.exe'
+            - 'regsvr32'
+            - 'ruby'
+            - 'rundll32'
+            - 'sc.exe'
+            - 'systeminfo'
+            - 'wget'
+            - 'whoami'
+            - 'wmic'
+            - 'wscript'
+    selection_specific_cmd:
+        Image|endswith: '\cmd.exe'
+    selection_specific_cli:
+        CommandLine|contains: '/d /s /c '
+    filter_main_default_shell_flag:
+        CommandLine|contains: '/d /s /c '
+    filter_main_cli_git:
+        CommandLine|contains: 'git config --local --get remote.origin.url'
+    filter_main_cli_netstat:
+        CommandLine|contains|all:
+            - 'netstat -ano | findstr /C:'
+            - ' | findstr LISTENING'
+    filter_main_cli_mkcert_install:
+        CommandLine|contains|all:
+            - '\mkcert\'
+            - ' -install '
+    filter_main_cli_mkcert_caroot:
+        CommandLine|contains|all:
+            - '\mkcert\'
+            - ' -CAROOT'
+    condition:
+        selection_parent and
+        (
+            1 of selection_generic_*
+            or
+            (selection_specific_cmd and not filter_main_default_shell_flag)
+            or
+            (all of selection_specific_* and not 1 of filter_main_cli_*)
+        )
+falsepositives:
+    - Unknown
+level: high
+regression_tests_path: regression_data/rules-emerging-threats/2025/Exploits/CVE-2025-55182/proc_creation_win_exploit_cve_2025_55182_susp_nodejs_server_child_process/info.yml

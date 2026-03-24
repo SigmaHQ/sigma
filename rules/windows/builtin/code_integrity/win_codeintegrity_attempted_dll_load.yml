@@ -11,7 +11,7 @@ references:
     - https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/operations/event-id-explanations
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2022-01-20
-modified: 2023-11-15
+modified: 2025-02-28
 tags:
     - attack.execution
 logsource:
@@ -48,11 +48,15 @@ detection:
         RequestedPolicy:
             - 8
             - 12
-    filter_optional_msoffice:
+    filter_optional_msoffice_1:
         FileNameBuffer|contains: '\Microsoft Office\root\vfs\ProgramFilesCommonX64\Microsoft Shared\OFFICE'
         FileNameBuffer|endswith: '\MSOXMLMF.DLL'
         # ProcessNameBuffer is AV products
         RequestedPolicy: 7
+    filter_optional_msoffice_2:
+        ProcessNameBuffer|contains: '\Program Files\Microsoft Office\root\vfs\ProgramFilesCommonX64\Microsoft Shared\Office'
+        FileNameBuffer|contains: '\Windows\System32\'
+        RequestedPolicy: 8
     filter_optional_slack:
         # Example: https://user-images.githubusercontent.com/112784902/197407680-96d4b662-8a59-4289-a483-b24d630ac2a9.png
         # Even though it's the same DLL as the one used in the electron based app filter. We need to do a separate selection due to slack's folder naming convention with the version number :)
@@ -97,6 +101,24 @@ detection:
             - '\Program Files\McAfee\MfeAV\AMSIExt.dll'
     filter_optional_eset:
         FileNameBuffer|endswith: '\Program Files\ESET\ESET Security\eamsi.dll'
+    filter_optional_comodo:
+        FileNameBuffer|endswith: '\Program Files\comodo\comodo internet security\amsiprovider_x64.dll'
+    filter_optional_sentinel_one:
+        # Example: program files\sentinelone\sentinel agent 23.4.4.223\inprocessclient64.dll
+        - FileNameBuffer|contains: '\Program Files\SentinelOne\Sentinel Agent'
+        # Example: Program Files\SentinelOne\Sentinel Agent 23.4.4.223\SentinelAgent.exe
+        - ProcessNameBuffer|contains: '\Program Files\SentinelOne\Sentinel Agent'
+    filter_optional_national_instruments:
+        # Example: \device\harddiskvolume3\program files\national instruments\shared\mdns responder\nimdnsnsp.dll
+        FileNameBuffer|contains: '\National Instruments\Shared\mDNS Responder\'
+    filter_optional_kaspersky:
+        # Example: \Program Files (x86)\Kaspersky Lab\Kaspersky Endpoint Security for Windows\x64\antimalware_provider.dll
+        - ProcessNameBuffer|contains|all:
+              - '\Kaspersky Lab\'
+              - '\avp.exe'
+        - FileNameBuffer|contains|all:
+              - '\Kaspersky Lab\'
+              - '\antimalware_provider.dll'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Antivirus and other third party products are known to trigger this rule quite a lot. Initial filters and tuning is required before using this rule.

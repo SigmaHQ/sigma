@@ -1,12 +1,17 @@
-title: RDP File Creation From Suspicious Application
+title: .RDP File Created By Uncommon Application
 id: fccfb43e-09a7-4bd2-8b37-a5a7df33386d
+related:
+    - id: f748c45a-f8d3-4e6f-b617-fe176f695b8f
+      type: derived
 status: test
-description: Detects Rclone config file being created
+description: |
+    Detects creation of a file with an ".rdp" extension by an application that doesn't commonly create such files.
 references:
     - https://www.blackhillsinfosec.com/rogue-rdp-revisiting-initial-access-methods/
     - https://web.archive.org/web/20230726144748/https://blog.thickmints.dev/mintsights/detecting-rogue-rdp/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023-04-18
+modified: 2024-11-01
 tags:
     - attack.defense-evasion
 logsource:
@@ -14,6 +19,7 @@ logsource:
     category: file_event
 detection:
     selection:
+        TargetFilename|endswith: '.rdp'
         Image|endswith:
             # Covers browsers
             - '\brave.exe'
@@ -28,6 +34,7 @@ detection:
             - '\Vivaldi.exe'
             - '\Whale.exe'
             # Covers email clients
+            - '\olk.exe' # Outlook
             - '\Outlook.exe'
             - '\RuntimeBroker.exe' # If the windows mail client is used
             - '\Thunderbird.exe'
@@ -37,7 +44,6 @@ detection:
             - '\msteams.exe'
             - '\Slack.exe'
             - '\teams.exe'
-        TargetFilename|contains: '.rdp'
     condition: selection
 falsepositives:
     - Unknown

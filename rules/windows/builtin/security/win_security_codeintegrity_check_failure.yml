@@ -8,7 +8,7 @@ references:
     - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-6281
 author: Thomas Patzke
 date: 2019-12-03
-modified: 2023-12-13
+modified: 2025-01-19
 tags:
     - attack.defense-evasion
     - attack.t1027.001
@@ -20,7 +20,15 @@ detection:
         EventID:
             - 5038
             - 6281
-    condition: selection
+    filter_optional_crowdstrike:
+        param1|contains:
+            - '\CSFalconServiceUninstallTool_'
+            - '\Program Files\CrowdStrike\'
+            - '\System32\drivers\CrowdStrike\'
+            - '\Windows\System32\ScriptControl64_'
+    filter_optional_sophos:
+        param1|contains: '\Program Files\Sophos\'
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Disk device errors
 level: informational

@@ -8,7 +8,7 @@ references:
     - https://i.blackhat.com/EU-21/Wednesday/EU-21-Teodorescu-Veni-No-Vidi-No-Vici-Attacks-On-ETW-Blind-EDRs.pdf
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-08-01
-modified: 2023-08-17
+modified: 2025-10-07
 tags:
     - attack.defense-evasion
 logsource:
@@ -25,9 +25,18 @@ detection:
             - '\Enable'
             - '\Start'
         Details: DWORD (0x00000000)
-    filter_wevtutil:
+    filter_main_wevtutil:
         Image: 'C:\Windows\system32\wevtutil.exe'
-    condition: all of selection_* and not 1 of filter_*
+    filter_main_defender:
+        Image|startswith:
+            - 'C:\ProgramData\Microsoft\Windows Defender\Platform\'
+            - 'C:\Program Files\Windows Defender\'
+            - 'C:\Program Files (x86)\Windows Defender\'
+        Image|endswith: '\MsMpEng.exe'
+        TargetObject|contains:
+            - '\DefenderApiLogger\'
+            - '\DefenderAuditLogger\'
+    condition: all of selection_* and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high

@@ -4,12 +4,13 @@ status: test
 description: Detects sdiagnhost.exe calling a suspicious child process (e.g. used in exploits for Follina / CVE-2022-30190)
 references:
     - https://twitter.com/nao_sec/status/1530196847679401984
+    - https://doublepulsar.com/follina-a-microsoft-office-code-execution-vulnerability-1a47fce5629e
     - https://app.any.run/tasks/713f05d2-fe78-4b9d-a744-f7c133e3fafb/
     - https://app.any.run/tasks/f420d295-0457-4e9b-9b9e-6732be227583/
     - https://app.any.run/tasks/c4117d9a-f463-461a-b90f-4cd258746798/
-author: Nextron Systems
+author: Nextron Systems, @Kostastsale
 date: 2022-06-01
-modified: 2022-10-31
+modified: 2024-08-23
 tags:
     - attack.defense-evasion
     - attack.t1036
@@ -33,7 +34,15 @@ detection:
             - '\rundll32.exe'
             # - '\csc.exe'   # https://app.any.run/tasks/f420d295-0457-4e9b-9b9e-6732be227583/
             - '\calc.exe'  # https://app.any.run/tasks/f420d295-0457-4e9b-9b9e-6732be227583/
-    condition: selection
+    filter_main_cmd_bits:
+        Image|endswith: '\cmd.exe'
+        CommandLine|contains: 'bits'
+    filter_main_powershell_noprofile:
+        Image|endswith: '\powershell.exe'
+        CommandLine|endswith:
+            - '-noprofile -'
+            - '-noprofile'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high

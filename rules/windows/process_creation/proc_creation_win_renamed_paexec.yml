@@ -10,7 +10,7 @@ references:
     - https://summit.fireeye.com/content/dam/fireeye-www/summit/cds-2018/presentations/cds18-technical-s05-att&cking-fin7.pdf
 author: Florian Roth (Nextron Systems), Jason Lynch
 date: 2021-05-22
-modified: 2023-02-14
+modified: 2024-11-23
 tags:
     - attack.defense-evasion
     - attack.t1202
@@ -22,20 +22,15 @@ detection:
         - Description: 'PAExec Application'
         - OriginalFileName: 'PAExec.exe'
         - Product|contains: 'PAExec'
-        - Imphash:
-              - 11D40A7B7876288F919AB819CC2D9802
-              - 6444f8a34e99b8f7d9647de66aabe516
-              - dfd6aa3f7b2b1035b76b718f1ddc689f
-              - 1a6cca4d5460b1710a12dea39e4a592c
         - Hashes|contains:
               - IMPHASH=11D40A7B7876288F919AB819CC2D9802
               - IMPHASH=6444f8a34e99b8f7d9647de66aabe516
               - IMPHASH=dfd6aa3f7b2b1035b76b718f1ddc689f
               - IMPHASH=1a6cca4d5460b1710a12dea39e4a592c
-    filter:
+    filter_main_known_location:
         - Image|endswith: '\paexec.exe'
         - Image|startswith: 'C:\Windows\PAExec-'
-    condition: selection and not filter
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Weird admins that rename their tools
     - Software companies that bundle PAExec with their software and rename it, so that it is less embarrassing

@@ -1,0 +1,33 @@
+title: Potential DLL Injection Via AccCheckConsole
+id: 0f6da907-5854-4be6-859a-e9958747b0aa
+status: test
+description: |
+    Detects the execution "AccCheckConsole" a command-line tool for verifying the accessibility implementation of an application's UI.
+    One of the tests that this checker can run are called "verification routine", which tests for things like Consistency, Navigation, etc.
+    The tool allows a user to provide a DLL that can contain a custom "verification routine". An attacker can build such DLLs and pass it via the CLI, which would then be loaded in the context of the "AccCheckConsole" utility.
+references:
+    - https://gist.github.com/bohops/2444129419c8acf837aedda5f0e7f340
+    - https://twitter.com/bohops/status/1477717351017680899?s=12
+    - https://lolbas-project.github.io/lolbas/OtherMSBinaries/AccCheckConsole/
+author: Florian Roth (Nextron Systems)
+date: 2022-01-06
+modified: 2024-08-29
+tags:
+    - attack.execution
+    - detection.threat-hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\AccCheckConsole.exe'
+        - OriginalFileName: 'AccCheckConsole.exe'
+    selection_cli:
+        CommandLine|contains:
+            - ' -hwnd'
+            - ' -process '
+            - ' -window '
+    condition: all of selection_*
+falsepositives:
+    - Legitimate use of the UI Accessibility Checker
+level: medium

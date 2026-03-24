@@ -1,0 +1,25 @@
+title: Remote Access Tool - Cmd.EXE Execution via AnyViewer
+id: bc533330-fc29-44c0-b245-7dc6e5939c87
+status: test
+description: |
+    Detects execution of "cmd.exe" via the AnyViewer RMM agent on a remote management sessions.
+references:
+    - https://www.anyviewer.com/help/remote-technical-support.html
+author: '@kostastsale'
+date: 2024-08-03
+tags:
+    - attack.execution
+    - attack.persistence
+    - detection.threat-hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\AVCore.exe'
+        ParentCommandLine|contains: 'AVCore.exe" -d'
+        Image|endswith: '\cmd.exe'
+    condition: selection
+falsepositives:
+    - Legitimate use for admin activity.
+level: medium

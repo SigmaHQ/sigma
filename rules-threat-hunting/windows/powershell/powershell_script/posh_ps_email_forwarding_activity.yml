@@ -1,0 +1,43 @@
+title: Mail Forwarding/Redirecting Activity Via ExchangePowerShell Cmdlet
+id: 0c7686d5-c74e-4292-b224-2a08e956ebc4
+related:
+    - id: c726e007-2cd0-4a55-abfb-79730fbedee5
+      type: similar
+    - id: 15b7abbb-8b40-4d01-9ee2-b51994b1d474
+      type: obsolete
+status: experimental
+description: Detects email forwarding or redirecting activity via ExchangePowerShell Cmdlet
+references:
+    - https://redcanary.com/blog/email-forwarding-rules/
+    - https://github.com/PwC-IR/Business-Email-Compromise-Guide/blob/fe29ce06aef842efe4eb448c26bbe822bf5b895d/PwC-Business_Email_Compromise-Guide.pdf
+author: Nasreddine Bencherchali (Nextron Systems), Marco Pedrinazzi (@pedrinazziM) (InTheCyber)
+date: 2026-03-01
+tags:
+    - attack.collection
+    - attack.t1114.003
+    - attack.defense-evasion
+    - attack.t1564.008
+    - attack.exfiltration
+    - attack.t1020
+    - detection.threat-hunting
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_cmdlet:
+        ScriptBlockText|contains:
+            - 'New-InboxRule'
+            - 'Set-InboxRule'
+            - 'Set-Mailbox'
+    selection_params:
+        ScriptBlockText|contains:
+            - 'ForwardAsAttachmentTo'
+            - 'ForwardingAddress'
+            - 'ForwardingSmtpAddress'
+            - 'ForwardTo'
+            - 'RedirectTo' # Also covers "RedirectToRecipients"
+    condition: all of selection_*
+falsepositives:
+    - Legitimate mail forwarding rules created by users or administrators to forward email to designated internal or external recipients for business or operational purposes.
+level: medium

@@ -282,22 +282,22 @@ def load_fields_json(name: str):
     # Add common field
     for product in data:
         for category in data[product]["category"]:
-            if "Hashes" in data[product]["category"][category]:
-                data[product]["category"][category] += [
-                    "md5",
-                    "sha1",
-                    "sha256",
-                    "Imphash",
-                ]
-            if (
-                "Hash" in data[product]["category"][category]
-            ):  # Sysmon 15 create_stream_hash
-                data[product]["category"][category] += [
-                    "md5",
-                    "sha1",
-                    "sha256",
-                    "Imphash",
-                ]
+            # if "Hashes" in data[product]["category"][category]:
+            #     data[product]["category"][category] += [
+            #         "md5",
+            #         "sha1",
+            #         "sha256",
+            #         "Imphash",
+            #     ]
+            # if (
+            #     "Hash" in data[product]["category"][category]
+            # ):  # Sysmon 15 create_stream_hash
+            #     data[product]["category"][category] += [
+            #         "md5",
+            #         "sha1",
+            #         "sha256",
+            #         "Imphash",
+            #     ]
             if "common" in data[product].keys():
                 data[product]["category"][category] += data[product]["common"]
         for service in data[product]["service"]:
