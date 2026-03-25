@@ -1,0 +1,26 @@
+title: Azure Sign-In With Axios User Agent
+id: ea1a07f0-3dac-47a2-aeb4-86f5379ba2b4
+status: experimental
+description: |
+    Detects sign-in attempts in Azure/Entra ID logs where the user agent contains "axios",
+    indicating potential use of automated credential harvesting or AiTM phishing infrastructure.
+    Axios is a Node.js HTTP client abused to intercept and replay stolen credentials and MFA tokens.
+references:
+    - https://thehackernews.com/2025/09/axios-abuse-and-salty-2fa-kits-fuel.html
+    - https://www.proofpoint.com/us/blog/threat-insight/http-client-tools-exploitation-account-takeover-attacks
+author: Marco Pedrinazzi (@pedrinazziM) (InTheCyber)
+date: 2026-03-25
+tags:
+    - attack.credential_access
+    - attack.t1557
+    - detection.threat_hunting
+logsource:
+    service: signinlogs
+    product: azure
+detection:
+    selection:
+        userAgent|contains: 'axios'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
