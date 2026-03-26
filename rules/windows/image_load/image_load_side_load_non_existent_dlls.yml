@@ -7,18 +7,24 @@ related:
       type: obsolete
 status: test
 description: |
-    Detects DLL sideloading of system DLLs that are not present on the system by default (at least not in system directories).
-    Usually this technique is used to achieve UAC bypass or privilege escalation.
+    Detects loading of specific system DLL files that are usually not present on the system (or at least not in system directories) but may be loaded by legitimate processes, potentially indicating phantom DLL hijacking attempts.
+    Phantom DLL hijacking involves placing malicious DLLs with names of non-existent system binaries in locations where legitimate applications may search for them, leading to execution of the malicious DLLs.
 references:
-    - https://decoded.avast.io/martinchlumecky/png-steganography/
-    - https://posts.specterops.io/lateral-movement-scm-and-dll-hijacking-primer-d2f61e8ab992
-    - https://clement.notin.org/blog/2020/09/12/CVE-2020-7315-McAfee-Agent-DLL-injection/
-    - https://github.com/Wh04m1001/SysmonEoP
-    - https://www.hexacorn.com/blog/2013/12/08/beyond-good-ol-run-key-part-5/
     - http://remoteawesomethoughts.blogspot.com/2019/05/windows-10-task-schedulerservice.html
+    - https://clement.notin.org/blog/2020/09/12/CVE-2020-7315-McAfee-Agent-DLL-injection/
+    - https://decoded.avast.io/martinchlumecky/png-steganography/
+    - https://github.com/Wh04m1001/SysmonEoP
+    - https://itm4n.github.io/cdpsvc-dll-hijacking/
+    - https://posts.specterops.io/lateral-movement-scm-and-dll-hijacking-primer-d2f61e8ab992
+    - https://securelist.com/passiveneuron-campaign-with-apt-implants-and-cobalt-strike/117745/
+    - https://www.crowdstrike.com/en-us/blog/4-ways-adversaries-hijack-dlls/
+    - https://www.hexacorn.com/blog/2013/12/08/beyond-good-ol-run-key-part-5/
+    - https://www.hexacorn.com/blog/2025/06/14/wermgr-exe-boot-offdmpsvc-dll-lolbin/
+    - https://www.hexacorn.com/blog/2025/06/14/wpr-exe-boottrace-phantom-dll-axeonoffhelper-dll-lolbin/
+    - https://x.com/0gtweet/status/1564131230941122561
 author: Nasreddine Bencherchali (Nextron Systems), SBousseaden
 date: 2022-12-09
-modified: 2024-01-10
+modified: 2026-01-24
 tags:
     - attack.defense-evasion
     - attack.persistence
@@ -31,6 +37,11 @@ detection:
     selection:
         ImageLoaded|endswith:
             # Add other DLLs
+            - ':\Windows\System32\axeonoffhelper.dll'
+            - ':\Windows\System32\cdpsgshims.dll'
+            - ':\Windows\System32\oci.dll'
+            - ':\Windows\System32\offdmpsvc.dll'
+            - ':\Windows\System32\shellchromeapi.dll'
             - ':\Windows\System32\TSMSISrv.dll'
             - ':\Windows\System32\TSVIPSrv.dll'
             - ':\Windows\System32\wbem\wbemcomn.dll'
