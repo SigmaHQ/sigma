@@ -7,47 +7,47 @@ description: |
   and may also appear in scripts generated or assisted by large language models.
 
 references:
-  - https://www.microsoft.com/en-us/security/blog/2024/02/14/staying-ahead-of-threat-actors-in-the-age-of-ai/
+    - https://www.microsoft.com/en-us/security/blog/2024/02/14/staying-ahead-of-threat-actors-in-the-age-of-ai/
 
 author: Akande Jamiu
 date: 2026-03-18
 
 tags:
-  - attack.execution
-  - attack.t1059.001
-  - attack.defense-evasion
-  - attack.t1027
-  - attack.command-and-control
-  - attack.t1105
-  - ai.behavior
+    - attack.execution
+    - attack.t1059.001
+    - attack.defense-evasion
+    - attack.t1027
+    - attack.command-and-control
+    - attack.t1105
+    - ai.behavior
 
 logsource:
-  product: windows
-  service: powershell
-  definition: "Requirements: Script Block Logging must be enabled (Event ID 4104)"
+    product: windows
+    service: powershell
+    definition: "Requirements: Script Block Logging must be enabled (Event ID 4104)"
 
 detection:
-  selection_obfuscation:
-    ScriptBlockText|contains:
-      - "frombase64string"
-      - "encodedcommand"
+    selection_obfuscation:
+        ScriptBlockText|contains:
+            - "frombase64string"
+            - "encodedcommand"
 
-  selection_execution:
-    ScriptBlockText|contains:
-      - "iex("
-      - "invoke-expression"
+    selection_execution:
+        ScriptBlockText|contains:
+            - "iex("
+            - "invoke-expression"
 
-  selection_download:
-    ScriptBlockText|contains:
-      - "downloadstring"
-      - "net.webclient"
-      - "invoke-webrequest"
+    selection_download:
+        ScriptBlockText|contains:
+            - "downloadstring"
+            - "net.webclient"
+            - "invoke-webrequest"
 
-  condition: selection_obfuscation and (selection_execution or selection_download)
+    condition: selection_obfuscation and (selection_execution or selection_download)
 
 falsepositives:
-  - Legitimate administrative or automation scripts
-  - Software deployment frameworks and package managers
-  - Security tools performing scripted operations
+    - Legitimate administrative or automation scripts
+    - Software deployment frameworks and package managers
+    - Security tools performing scripted operations
 
 level: medium
