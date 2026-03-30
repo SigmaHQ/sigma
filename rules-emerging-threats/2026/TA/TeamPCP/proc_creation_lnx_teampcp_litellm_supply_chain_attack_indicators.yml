@@ -1,0 +1,52 @@
+title: LiteLLM / TeamPCP Supply Chain Attack Indicators
+id: 36603778-030c-43c4-8cbb-cd3c1d1a80c7
+status: experimental
+description: |
+    Detects process executions related to the backdoored versions of LiteLLM (v1.82.7 or v1.82.8).
+    On March of 2026, a supply chain attack was discovered involving the popular open-source LLM framework LiteLLM by Threat Actor TeamPCP.
+    The malicious package harvests every credential on the system, encrypts and exfils them, and installs a persistent C2 backdoor.
+references:
+    - https://novasky.io/hunts/hunting-litellm-supply-chain
+    - https://www.virustotal.com/gui/file/71e35aef03099cd1f2d6446734273025a163597de93912df321ef118bf135238/
+    - https://huskyhacks.io/posts/litellm-cred-stealer/
+    - https://www.wiz.io/blog/threes-a-crowd-teampcp-trojanizes-litellm-in-continuation-of-campaign
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-03-30
+tags:
+    - attack.initial-access
+    - attack.t1195.002
+    - attack.collection
+    - attack.t1560.001
+    - attack.persistence
+    - attack.t1543.002
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_pth_package:
+        # Execution of .pth file
+        Image|contains: '/python3'
+        CommandLine|contains|all:
+            - "exec(base64.b64decode('aW1wb3J0"
+            - "kI2NF9TQ1JJUFQgPSAiYV"
+    selection_tar:
+        Image|endswith: '/tar'
+        CommandLine|contains|all:
+            - 'tpcp.tar.gz'
+            - 'payload.enc'
+            - 'session.key.enc'
+    selection_curl:
+        Image|endswith: '/curl'
+        CommandLine|contains|all:
+            - 'models.litellm.cloud'
+            - 'X-Filename: tpcp.tar.gz'
+    selection_sysmon_service:
+        ParentImage|contains: '/python3'
+        CommandLine|contains|all:
+            - 'systemctl'
+            - '--user'
+            - 'sysmon'
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely
+level: high
