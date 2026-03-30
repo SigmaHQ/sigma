@@ -1,0 +1,24 @@
+title: NetExec SMB Host Enumeration
+id: 7638e5fe-600c-4289-a968-f49dd537ec7d
+status: experimental
+description: Detects execution of NetExec (nxc.exe) with the SMB module for host enumeration. Observed in the Lynx ransomware intrusion (DFIR Report, December 2025) where the threat actor used NetExec to enumerate live SMB hosts before lateral movement and ransomware deployment.
+references:
+    - https://thedfirreport.com/2025/12/17/cats-got-your-files-lynx-ransomware/
+    - https://github.com/Pennyw0rth/NetExec
+author: Chirag Damani
+date: 2026/03/29
+tags:
+    - attack.discovery
+    - attack.t1018
+    - attack.t1021.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\nxc.exe'
+        CommandLine|contains: ' smb '
+    condition: selection
+falsepositives:
+    - Legitimate penetration testers or red team operators using NetExec
+level: high
