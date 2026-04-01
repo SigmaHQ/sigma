@@ -1,12 +1,21 @@
-title: Persistence Via Cron Files
+title: New Cron File Created
 id: 6c4e2f43-d94d-4ead-b64d-97e53fa2bd05
 status: test
-description: Detects creation of cron file or files in Cron directories which could indicates potential persistence.
+description: |
+    Detects the creation of cron files in Cron directories, which could indicate potential persistence mechanisms being established by an attacker.
+    Note that not all cron file creations are malicious - legitimate system administration activities and software installations may also create cron files.
+    This detection should be investigated in context, considering factors such as the user creating the file, the timing of creation, and the contents of the cron job.
+    Focus investigation on unexpected cron files created by non-administrative users or during suspicious timeframes.
+    Additionally, it is recommended to review the contents of the newly created cron files to assess their intent.
+    Furthermore, it is suggested to baseline normal cron file creation and apply additional filters to reduce false positives based on the specific environment.
 references:
     - https://github.com/microsoft/MSTIC-Sysmon/blob/f1477c0512b0747c1455283069c21faec758e29d/linux/configs/attack-based/persistence/T1053.003_Cron_Activity.xml
+    - https://pberba.github.io/security/2022/01/30/linux-threat-hunting-for-persistence-systemd-timers-cron/
+    - https://www.elastic.co/security-labs/primer-on-persistence-mechanisms
+    - https://snehbavarva.medium.com/privilege-escalation-techniques-series-linux-cron-jobs-a5b797b424b4
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research), MSTIC
 date: 2021-10-15
-modified: 2022-12-31
+modified: 2026-03-26
 tags:
     - attack.privilege-escalation
     - attack.execution
@@ -16,7 +25,7 @@ logsource:
     product: linux
     category: file_event
 detection:
-    selection1:
+    selection_cron_dirs:
         TargetFilename|startswith:
             - '/etc/cron.d/'
             - '/etc/cron.daily/'
@@ -24,12 +33,20 @@ detection:
             - '/etc/cron.monthly/'
             - '/etc/cron.weekly/'
             - '/var/spool/cron/crontabs/'
-    selection2:
+            - '/var/spool/cron/root'
+    selection_cron_special_files:
         TargetFilename|contains:
             - '/etc/cron.allow'
             - '/etc/cron.deny'
             - '/etc/crontab'
-    condition: 1 of selection*
+    filter_optional_legit_cron:
+        # Note: FPs on docker images: golang, postgres, python, redis, ruby
+        TargetFilename:
+            - '/etc/cron.daily/apt'
+            - '/etc/cron.daily/dpkg'
+            - '/etc/cron.daily/passwd'
+            - '/etc/crontabs/root'
+    condition: 1 of selection_* and not 1 of filter_optional_*
 falsepositives:
-    - Any legitimate cron file.
+    - Legitimate administrative tasks, package managers, containers, configuration management tools, cloud agents, or system maintenance operations might cause false positives. Apply baselining before deployment.
 level: medium
