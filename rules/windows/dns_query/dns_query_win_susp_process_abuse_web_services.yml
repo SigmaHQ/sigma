@@ -1,0 +1,50 @@
+title: Suspicious Process DNS Query To Known Abused Web Services
+id: a0a3e36d-23e2-4199-a681-1f56b3c75f14
+status: experimental
+description: Detects suspicious processes making DNS queries to known abused web services
+    such as paste sites, messaging platforms and digital distribution services.
+    These services are commonly abused by malware for C2 communication or payload delivery.
+references:
+    - https://www.splunk.com/en_us/blog/security/unveiling-phemedrone-stealer-threat-analysis-and-detections.html
+author: Rohit Jain
+date: 2024-03-01
+modified: 2026-02-25
+tags:
+    - attack.execution
+    - attack.t1059
+    - attack.command-and-control
+    - attack.t1071.001
+logsource:
+    product: windows
+    category: dns_query
+detection:
+    selection_suspicious_process:
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+        QueryName|contains:
+            - 'pastebin'
+            - 'discord'
+            - 'api.telegram'
+            - 't.me'
+    selection_suspicious_path:
+        Image|contains:
+            - '\users\public\'
+            - '\programdata\'
+            - '\temp\'
+            - '\Windows\Tasks\'
+            - '\appdata\'
+            - '\perflogs\'
+        QueryName|contains:
+            - 'pastebin'
+            - 'discord'
+            - 'api.telegram'
+            - 't.me'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate use of Discord or Telegram by installed applications
+    - Developers using pastebin for legitimate purposes
+level: medium
