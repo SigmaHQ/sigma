@@ -1,0 +1,66 @@
+title: AWS CloudTrail General Discovery and Reconnaissance API Calls
+id: 52a27427-d366-4152-b728-f0157aa2ba64
+status: experimental
+description: |
+    Detects a high volume of AWS discovery/reconnaissance API calls from a single
+    user within a short timeframe. Threat actors leverage these actions after gaining
+    unauthorized access via compromised credentials or privilege escalation to enumerate
+    storage, networking, compute, and database resources within an AWS environment.
+references:
+    - https://attack.mitre.org/techniques/T1526/
+    - https://docs.aws.amazon.com/cloudtrail/latest/userguide/cloudtrail-event-reference.html
+author: Lars Ostmann
+date: 2026/04/01
+tags:
+    - attack.discovery
+    - attack.t1526
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventName:
+            - 'ListRoles'
+            - 'ListIdentities'
+            - 'ListAccountAliases'
+            - 'GetUser'
+            - 'GetAccount'
+            - 'DescribeHosts'
+            - 'DescribeInstanceTypes'
+            - 'DescribeInstanceStatus'
+            - 'DescribeLaunchTemplates'
+            - 'DescribeTags'
+            - 'DescribeSnapshots'
+            - 'DescribeVolumes'
+            - 'DescribeVolumeStatus'
+            - 'ListBuckets'
+            - 'GetBucketLocation'
+            - 'DescribeRouteTables'
+            - 'DescribeLoadBalancers'
+            - 'DescribeVpcs'
+            - 'DescribeSubnets'
+            - 'DescribeInternetGateways'
+            - 'DescribeSecurityGroups'
+            - 'DescribeAvailabilityZones'
+            - 'GetHostedZoneCount'
+            - 'ListDomains'
+            - 'DescribeDBInstances'
+            - 'DescribeDBSnapshots'
+            - 'DescribeDBSubnetGroups'
+            - 'DescribeDBEngineVersions'
+            - 'DescribeDBClusters'
+            - 'DescribeGlobalClusters'
+            - 'DescribeAlarms'
+            - 'DescribeAlarmsForMetric'
+            - 'DescribeEvents'
+            - 'GetCostAndUsage'
+            - 'GetCostForecast'
+            - 'GetSendQuota'
+            - 'ListApplications'
+    condition: selection | count(eventName) by userIdentity.arn > 6
+timeframe: 5m
+falsepositives:
+    - Legitimate cloud security posture management tools (e.g. Wiz, CrowdStrike CSPM, Stacklet)
+    - Authorized cloud infrastructure automation and configuration management roles
+    - Security team-initiated cloud environment assessments
+level: low
