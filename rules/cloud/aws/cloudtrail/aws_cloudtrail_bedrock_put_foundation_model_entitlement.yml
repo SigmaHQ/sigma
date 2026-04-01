@@ -1,0 +1,27 @@
+title: AWS Bedrock PutFoundationModelEntitlement From Long Lived Access Key
+id: ee345f90-b5cd-4be3-b6b6-11baf136d741
+status: experimental
+description: |
+    Detects the usage of PutFoundationModelEntitlement from a long lived access key.
+    This API puts thefoundation model entitlement on Amazon Bedrock, which is a step in enabling model
+    access. This is an API meant to be used only via the AWS Web Management Console.
+    Long lived access keys should not be seen interacting with this API.
+references:
+    - https://permiso.io/blog/exploiting-hosted-models
+author: Marco Pedrinazzi (@pedrinazziM) (InTheCyber)
+date: 2026-03-13
+tags:
+    - attack.defense-evasion
+    - attack.t1578.005
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventName: 'PutFoundationModelEntitlement'
+        userIdentity.accessKeyId|startswith: 'AKIA'
+        eventSource: 'bedrock.amazonaws.com'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
