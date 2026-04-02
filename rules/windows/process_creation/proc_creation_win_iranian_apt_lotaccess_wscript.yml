@@ -1,0 +1,45 @@
+title: Iranian APT LotAccess WScript Child Process Execution
+id: e1a7d485-6f0b-7c5d-2b96-1d7e4f3a0c25
+status: experimental
+description: |
+    Detects WScript.exe spawned as a child process of LotAccessUI.EXE
+    (Operation Epic Fury, Iranian campaign 2026).
+
+    LotAccess executes its VPN update module (file "152" = download.js) via
+    WScript.exe as a child process. A VPN client spawning WScript to execute
+    JavaScript is anomalous behavior.
+
+    Note: file "152" (download.js) is the ORIGINAL unmodified AppEx Networks
+    VPN update module — it connects to Akamai CDN (legitimate Microsoft/enterprise
+    infrastructure). It is NOT a malicious payload. Its presence provides
+    legitimate-looking network traffic as cover.
+
+    Status: experimental — verify in your environment before production deployment.
+
+references:
+    - https://paolocostanzo.github.io/operation-epic-fury-cyber-war-iran/
+    - https://github.com/paolocostanzo/operation-epic-fury-rules
+
+author: Paolo Costanzo - paolocostanzo.github.io
+date: 2026/03/15
+modified: 2026/03/17
+version: 1
+tags:
+    - attack.execution
+    - attack.t1059.007
+    - tlp.white
+
+logsource:
+    category: process_creation
+    product: windows
+
+detection:
+    selection:
+        ParentImage|endswith: '\LotAccessUI.EXE'
+        Image|endswith: '\wscript.exe'
+    condition: selection
+
+falsepositives:
+    - Legitimate AppEx Networks VPN 2016 running its update module (extremely rare — software is defunct)
+
+level: medium

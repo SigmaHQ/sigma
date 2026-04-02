@@ -1,0 +1,65 @@
+title: Iranian APT LotAccess Scheduled Task Masquerade
+id: d0f6c374-5e9a-6a4c-1b85-0c6d3e2f9b14
+status: experimental
+description: |
+    Detects LotAccess creating a scheduled task masquerading as the legitimate
+    Windows built-in task "Microsoft-Windows-DiskDiagnosticDataCollector"
+    (Operation Epic Fury, Iranian campaign 2026).
+
+    The legitimate Windows DiskDiagnosticDataCollector task always points to
+    %SystemRoot%\System32\. The malicious variant points to %TEMP%\EB93A6\ or
+    the user-space path of LotAccessUI.EXE.
+
+    CRITICAL FILTER: Do NOT alert on DiskDiagnosticDataCollector tasks that point
+    to %SystemRoot%\System32\ — those are legitimate Windows tasks.
+    Only alert when path contains %TEMP%, \EB93A6\, LotAccessUI, or \AppData\.
+
+references:
+    - https://paolocostanzo.github.io/operation-epic-fury-cyber-war-iran/
+    - https://github.com/paolocostanzo/operation-epic-fury-rules
+
+author: Paolo Costanzo - paolocostanzo.github.io
+date: 2026/03/15
+modified: 2026/03/17
+version: 1
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.defense_evasion
+    - attack.t1053.005
+    - attack.t1036.005
+    - tlp.white
+
+logsource:
+    product: windows
+    category: process_creation
+
+detection:
+    selection_schtasks:
+        CommandLine|contains: 'Microsoft-Windows-DiskDiagnosticDataCollector'
+        Image|endswith:
+            - '\schtasks.exe'
+            - '\taskschd.msc'
+    filter_legitimate:
+        # Legitimate Windows task always points to System32 — exclude it
+        CommandLine|contains: '\System32\DiskDiagnosticDataCollector'
+    selection_malicious_path:
+        CommandLine|contains:
+            - '%TEMP%'
+            - '\EB93A6\'
+            - 'LotAccessUI'
+            - '\AppData\'
+    selection_lotaccess_direct:
+        CommandLine|contains:
+            - 'LotAccessUI.EXE'
+            - 'LotAccessUI.exe'
+        ParentImage|endswith: '\schtasks.exe'
+    condition: >
+        (selection_schtasks and selection_malicious_path and not filter_legitimate)
+        or selection_lotaccess_direct
+
+falsepositives:
+    - Low — the legitimate Windows DiskDiagnosticDataCollector task does NOT
+      reference %TEMP%, EB93A6, or LotAccessUI. Apply filter_legitimate to suppress.
+
+level: high

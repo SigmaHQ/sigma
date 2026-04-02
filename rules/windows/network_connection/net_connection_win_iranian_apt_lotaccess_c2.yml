@@ -1,0 +1,50 @@
+title: Iranian APT LotAccess C2 Network Contact
+id: a3f72e91-8b4c-4d1e-bc52-7f3a9d0e6c81
+status: experimental
+description: |
+    Detects HTTPS connections to the C2 servers of LotAccess (Operation Epic Fury).
+    The trojanized AppEx VPN client contacts C2 on port 443 using the AppEx VPN API
+    path (/cgi-bin/d_device_action.py) — traffic is indistinguishable from legitimate
+    AppEx VPN traffic on the wire.
+
+    CRITICAL NOTE: RDTSC anti-VM evasion (T1497.003) is active in this sample.
+    The C2 is NEVER contacted in sandbox environments. This rule fires only on
+    physical hardware. CrowdStrike Falcon marks this sample CLEAN (2022 analysis).
+
+    Secondary C2 (167.160.187.43 / 9732.5486311.xyz) had 0/94 VirusTotal detections
+    at time of publication — completely unknown to all threat intel platforms.
+
+references:
+    - https://paolocostanzo.github.io/operation-epic-fury-cyber-war-iran/
+    - https://github.com/paolocostanzo/operation-epic-fury-rules
+
+author: Paolo Costanzo - paolocostanzo.github.io
+date: 2026/03/15
+modified: 2026/03/17
+version: 1
+tags:
+    - attack.command_and_control
+    - attack.t1071.001
+    - attack.t1497.003
+    - tlp.white
+
+logsource:
+    category: network_connection
+    product: windows
+
+detection:
+    selection_ip:
+        DestinationIp|contains:
+            - '216.45.58.148'       # primary C2 — documented by Unit 42/CloudSEK
+            - '167.160.187.43'      # secondary C2 — 0/94 VT, undisclosed
+        DestinationPort: 443
+    selection_host:
+        DestinationHostname|contains:
+            - 'ra-backup.com'       # primary C2 domain
+            - '5486311.xyz'         # secondary C2 base domain
+    condition: selection_ip or selection_host
+
+falsepositives:
+    - None expected — IPs and domains are dedicated campaign infrastructure with no known legitimate use
+
+level: critical
