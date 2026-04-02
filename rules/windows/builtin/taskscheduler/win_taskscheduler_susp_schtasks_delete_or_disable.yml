@@ -1,18 +1,20 @@
-title: Important Scheduled Task Deleted
+title: Important Scheduled Task Deleted or Disabled
 id: 9e3cb244-bdb8-4632-8c90-6079c8f4f16d
 related:
     - id: dbc1f800-0fe0-4bc0-9c66-292c2abe3f78 # ProcCreation schtasks delete
       type: similar
     - id: 7595ba94-cf3b-4471-aa03-4f6baa9e5fad # Security-Audting Eventlog
       type: similar
+    - id: 9ac94dc8-9042-493c-ba45-3b5e7c86b980 # ProcCreation schtasks disable
+      type: similar
 status: test
 description: |
-    Detects when adversaries try to stop system services or processes by deleting their respective scheduled tasks in order to conduct data destructive activities
+    Detects when adversaries try to stop system services or processes by deleting or disabling their respective scheduled tasks in order to conduct data destructive activities
 references:
     - https://www.socinvestigation.com/most-common-windows-event-ids-to-hunt-mind-map/
 author: frack113
 date: 2023-01-13
-modified: 2023-02-07
+modified: 2026-03-11
 tags:
     - attack.impact
     - attack.t1489
@@ -22,7 +24,9 @@ logsource:
     definition: 'Requirements: The "Microsoft-Windows-TaskScheduler/Operational" is disabled by default and needs to be enabled in order for this detection to trigger'
 detection:
     selection:
-        EventID: 141
+        EventID:
+            - 141 # Task Deleted
+            - 142 # Task Disabled
         TaskName|contains:
             - '\Windows\SystemRestore\SR'
             - '\Windows\Windows Defender\'
@@ -31,11 +35,17 @@ detection:
             - '\Windows\WindowsUpdate\'
             - '\Windows\UpdateOrchestrator\'
             - '\Windows\ExploitGuard'
-    filter:
+    filter_main_user:
         UserName|contains:
             - 'AUTHORI'
             - 'AUTORI'
-    condition: selection and not filter
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high
+regression_tests_path: regression_data/rules/windows/builtin/taskscheduler/win_taskscheduler_susp_schtasks_delete_or_disable/info.yml
+simulation:
+    - type: atomic-red-team
+      name: Windows - Disable the SR scheduled task
+      technique: T1490
+      atomic_guid: 1c68c68d-83a4-4981-974e-8993055fa034
