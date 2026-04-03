@@ -1,47 +1,44 @@
-title: Python Base64 Encoded Inline Command Execution
+title: Python Oneliners with Base64 Decoding
 id: 50a0aa3d-ab16-4594-a8aa-5145a6e6792b
 related:
     - id: 899133d5-4d7c-4a7f-94ee-27355c879d90
       type: similar
 status: test
 description: |
-    Detects Python execution with base64 decoding functions in an inline command.
-    Attackers use base64 encoding to obfuscate reverse shells, droppers, and post-exploitation
-    payloads passed to "python -c" to evade simple string-based detection.
+    Detects python oneliners that use base64 decoding functions in command-line executions.
+    Malicious scripts or attackers often use python oneliners to decode and execute base64-encoded payloads, which is common technique for obfuscation and evasion.
 references:
-    - https://attack.mitre.org/techniques/T1059/006/
-    - https://attack.mitre.org/techniques/T1027/
-    - https://www.revshells.com/
-    - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/reverse-shells/linux.html
-author: Hugh Ryan (HueCodes)
+    - https://docs.python.org/3/library/base64.html
+    - https://www.virustotal.com/gui/file/bc43e925d7b4b74319f6e74e836a96f1997ba404e14ac566cf12a21e9da463db/behavior
+    - https://cloud.google.com/blog/topics/threat-intelligence/cybercriminals-weaponize-fake-ai-websites
+author: Hugh Ryan (HueCodes), Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2026-03-09
 tags:
     - attack.execution
     - attack.t1059.006
     - attack.defense-evasion
-    - attack.t1027
+    - attack.t1027.010
 logsource:
     category: process_creation
     product: windows
 detection:
     selection_img:
-        - OriginalFileName:
-              - 'python.exe'
-              - 'python3.exe'
-        - Image|endswith:
-              - '\python.exe'
-              - '\python3.exe'
-              - '\pythonw.exe'
+        - Image|contains: '\python'
+        - OriginalFileName|contains: 'python'
     selection_cli:
-        CommandLine|contains: ' -c'
-    selection_base64:
+        CommandLine|contains|all:
+            - 'import'
+            - 'base64'
+            - ' -c '
         CommandLine|contains:
+            - '.decode'
+            - 'b16decode'
+            - 'b32decode'
+            - 'b32hexdecode'
             - 'b64decode'
-            - 'b64encode'
-            - 'decodebytes'
-            - 'encodebytes'
+            - 'b85decode'
+            - 'z85decode'
     condition: all of selection_*
 falsepositives:
-    - Legitimate scripts that decode base64 configuration data via inline Python commands
-    - CI/CD pipelines using inline Python for encoding tasks
+    - Legitimate use of Python for decoding data, which is uncommon in typical enterprise environments but possible in development or data analysis contexts.
 level: high
