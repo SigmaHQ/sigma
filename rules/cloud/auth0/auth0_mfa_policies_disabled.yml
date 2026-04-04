@@ -1,0 +1,68 @@
+title: MFA downgrade - disable MFA policies by modifying the policies
+id: 004bf5b2-0d90-42a9-bf56-196cdd886e92
+status: experimental
+description: |
+    Detects when the MFA policy is turned off by setting it to "Never".
+    Monitors for changes that weaken multi-factor authentication requirements across the tenant.
+references:
+    - https://auth0.com/docs/secure/multi-factor-authentication/configure-mfa-policies
+    - https://github.com/auth0/auth0-customer-detections/
+author: Okta, Austin Songer @austinsonger
+date: 2025-07-11
+modified: 2025-08-19
+tags:
+    - attack.defense-evasion
+    - attack.t1562
+    - attack.t1562.007
+logsource:
+    product: auth0
+    service: mfa
+detection:
+    selection:
+        data.type: sapi
+        data.description:
+            - Update multi-factor authentication policies
+    filter_1:
+        data.details.response.body{}: 'all-applications'
+    filter_2:
+        data.details.response.body{}: 'confidence-score'
+    condition: selection and (filter_1 or filter_2)
+fields:
+    - data.type
+    - data.description
+    - data.details.request.ip
+    - data.user_id
+    - data.details.response.body{}
+    - data.details.request.body{}
+falsepositives:
+    - MFA can be disabled in favour of the custom MFA setup via Actions
+    - Legitimate policy changes during security reviews
+    - Temporary disabling for maintenance or troubleshooting
+level: medium
+explanation: |
+    The query filters for modifications of MFA settings by checking if any policies are enabled either as Always ('all-applications') or When Risky ('confidence-score').
+    It returns records when the response body is empty meaning that no policies are enabled, i.e. Never.
+    The splunk query below returns only the latest policy modification record.
+    If MFA is set to Never, this query returns one record.
+    If MFA is set in Always or Use Adaptive MFA, no record is returned.
+    The splunk query displays the modifying IP and user.
+
+    Splunk Query:
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type="sapi" data.description="Update multi-factor authentication policies"
+    | sort - _time
+    | head 1
+    | rename data.details.response.body{} as mfa_mode
+    | where NOT match(mfa_mode, "^(all-applications|confidence-score)$")
+    |table _time, data.details.request.ip, data.user_id, data.details.request.body{}
+
+    Tenant Logs Query:
+    type: "sapi" AND description: "Update multi-factor authentication policies"
+comments:
+    - The splunk query above shall be tuned to reflect a valid tenant name.
+    - A possible false positive is when MFA policies are applied through Actions.
+    - Limit the detection to actions conducted from not allowlisted IPs and/or particular users.
+    - Prevention - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
+    - Prevention - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.
+    - Prevention - Control Management API scopes that allow modification of attack protection features - update:attack_protection.
+    - Prevention - Control usage of Management API from only trusted IPs by applying Network ACL scoped to "management".
