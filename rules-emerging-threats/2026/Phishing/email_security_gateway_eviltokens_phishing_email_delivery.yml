@@ -1,0 +1,26 @@
+title: EvilTokens PhaaS Kit Phishing Email Bypass Via Email Security Gateway
+id: 0501fb2d-cd14-474e-9de3-576a8a103d4b
+status: experimental
+description: |
+    Detects inbound phishing emails containing URLs matching the EvilTokens
+    Phishing-as-a-Service (PhaaS) kit infrastructure, specifically Cloudflare
+    Workers and Railway.app domains used in OAuth device code authorization
+    phishing attacks. These emails may bypass email security gateways.
+references:
+    - https://blog.sekoia.io/new-widespread-eviltokens-kit-device-code-phishing-as-a-service-part-1/
+author: Lars Ostmann
+date: 2026/04/04
+tags:
+    - attack.initial_access
+    - attack.t1566.002
+logsource:
+    category: email
+detection:
+    selection:
+        url|re: '-[a-z0-9]{3}\.[a-z0-9-]{3,}-s-account\.workers\.dev|\.up\.railway\.app'
+    filter_blocked:
+        action: 'BLOCK'
+    condition: selection and not filter_blocked
+falsepositives:
+    - Legitimate use of Cloudflare Workers or Railway.app domains in emails
+level: high
