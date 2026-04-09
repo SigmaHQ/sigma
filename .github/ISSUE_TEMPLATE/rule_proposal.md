@@ -1,10 +1,9 @@
 ---
-name: "Rule Proposal"
+name: Rule Proposal
 about: Rule Idea Proposal
 title: ''
-labels: Rule
-assignees:
-  - nasbench
+labels: ''
+assignees: ''
 
 ---
 
