@@ -1,0 +1,43 @@
+title: Potential Prompt Injection Attempt in Application Logs
+id: 5b4d7e2a-1c8a-4d2b-9e3f-6a7b8c9d0e1f
+status: experimental
+description: |
+  Detects common prompt injection and LLM manipulation patterns in application logs.
+  Adversaries may use these phrases to bypass safety mechanisms, extract system prompts,
+  or manipulate the behavior of large language models.
+
+references:
+    - https://owasp.org/www-project-top-10-for-large-language-model-applications/
+    - https://learn.microsoft.com/en-us/azure/ai-services/content-safety/concepts/jailbreak-detection
+
+author: Akande Jamiu
+date: 2026-03-18
+
+tags:
+    - attack.execution
+    - attack.t1059
+    - ai.prompt_injection
+
+logsource:
+    category: application
+    product: generic
+
+detection:
+    selection:
+        message|contains:
+            - "ignore previous"
+            - "reveal system prompt"
+            - "developer mode"
+            - "bypass filters"
+            - "disregard instructions"
+            - "forget constraints"
+            - "no safety restrictions"
+            - "output full prompt"
+    condition: selection
+
+falsepositives:
+    - Developers testing LLM behavior
+    - Security research or red teaming activities
+    - Benign user queries containing similar phrasing
+
+level: medium

@@ -1,0 +1,40 @@
+title: Potential AI-Generated Script Artifacts in PowerShell Execution
+id: 9a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d
+status: experimental
+description: |
+  Detects PowerShell script execution containing possible AI-generated artifacts or leftover prompt text.
+  Adversaries using large language models to generate scripts may inadvertently include conversational
+  phrases or instructional text within executed code.
+
+references:
+    - https://www.mandiant.com/resources/blog/adversaries-using-llms-scams-malware
+    - https://attack.mitre.org/techniques/T1059/001/
+
+author: Akande Jamiu
+date: 2026-03-18
+
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - ai.artifact
+
+logsource:
+    product: windows
+    service: powershell
+
+detection:
+    selection:
+        ScriptBlockText|contains:
+            - "as an ai"
+            - "generate a script"
+            - "this script will"
+            - "here is the code"
+            - "the following code"
+    condition: selection
+
+falsepositives:
+    - Developers using AI-assisted coding tools legitimately
+    - Educational scripts or tutorials containing similar phrasing
+    - Documentation or comments embedded in scripts
+
+level: medium
