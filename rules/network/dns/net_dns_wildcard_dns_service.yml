@@ -1,0 +1,32 @@
+title: DNS Query to Wildcard DNS Services
+id: 139ddcb3-ba90-4407-b0b1-1838131ce8e7
+status: experimental
+description: |
+    Detects DNS queries to public wildcard DNS services that dynamically resolve subdomains
+    to IP addresses. These services may be abused for command and control, phishing, or tunneling.
+references:
+    - https://nip.io/
+    - https://sslip.io/
+    - https://traefik.me/
+author: MahirAli Khan (in/mahiralikhan)
+date: 2026-03-24
+tags:
+    - attack.command_and_control
+    - attack.t1071.004
+    - attack.t1102
+logsource:
+    category: dns
+detection:
+    selection_domain:
+        query|endswith:
+            - '.nip.io'
+            - '.sslip.io'
+            - '.traefik.me'
+            - '.backname.io'
+            - '.xip.io'
+    condition: selection_domain
+falsepositives:
+    - Legitimate development and testing activity
+    - Authorized penetration testing
+    - CI/CD pipelines using dynamic DNS services
+level: medium
