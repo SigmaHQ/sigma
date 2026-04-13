@@ -274,6 +274,8 @@ def run_evtx_checker(
         return False, ""
     except subprocess.CalledProcessError as e:
         print(f"  Error running evtx-sigma-checker: {e}")
+        if e.stderr:
+            print(f"  Output: {e.stderr}")
         return False, ""
 
 
