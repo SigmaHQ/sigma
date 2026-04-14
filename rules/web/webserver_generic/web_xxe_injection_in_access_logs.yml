@@ -1,0 +1,39 @@
+title: XXE Injection Attempt in Webservers
+id: ea54e40a-b92f-4a97-bd93-e05073289de5
+status: experimental
+description: Detects XML External Entity (XXE) injection attempts in webserver logs, looking for XXE-specific payloads such as DOCTYPE/ENTITY declarations and file://, php://filter, expect:// protocol handlers commonly used in exploitation.
+references:
+    - https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing
+    - https://portswigger.net/web-security/xxe
+author: Vijay Kishore Asokan (saint_orion)
+date: 2026-04-14
+tags:
+    - attack.initial-access
+    - attack.t1190
+logsource:
+    category: webserver
+detection:
+    keywords:
+        - '<!DOCTYPE'
+        - '<!ENTITY'
+        - '<?xml'
+        - 'SYSTEM "file://'
+        - 'SYSTEM "http://'
+        - '%3C!DOCTYPE'
+        - '%3C%3Fxml'
+        - '%3C!ENTITY'
+        - 'file%3A%2F%2F'
+        - 'php%3A%2F%2Ffilter'
+        - 'file:///etc/passwd'
+        - 'file:///c:/windows/win.ini'
+        - 'php://filter'
+        - 'expect://'
+        - 'data://'
+    filter_main_status:
+        sc-status: 404
+    condition: keywords and not 1 of filter_main_*
+falsepositives:
+    - Security scanners (Nessus, Burp, OWASP ZAP, Acunetix) doing active scans
+    - Developers testing XXE payloads in staging environments
+    - WAF logs that capture the blocked attack string as part of the alert
+level: high
