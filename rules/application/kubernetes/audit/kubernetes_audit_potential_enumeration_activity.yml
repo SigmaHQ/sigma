@@ -1,0 +1,69 @@
+title: Potential Kubernetes Enumeration Activity
+id: 597a7e84-187d-458b-9e4f-2f5a0e676711
+status: experimental
+description: |
+    Detects potential Kubernetes enumeration or attack activity via the audit log.
+    This includes the execution of common shells, utilities, or specialized tools like
+    'Rakkess' (access_matrix) and 'TruffleHog' via Kubernetes API requests.
+    Attackers use these methods to perform reconnaissance (enumeration), secret
+    harvesting, or execute code (exec) within a cluster.
+references:
+    - https://www.nccgroup.com/research/detection-engineering-for-kubernetes-clusters/
+    - https://github.com/trufflesecurity/trufflehog
+    - https://github.com/corneliusweig/rakkess
+author: uniqu3-us3r
+date: 2026/03/19
+modified: 2026/04/01
+tags:
+    - attack.execution
+    - attack.discovery
+    - attack.t1609
+    - attack.t1613
+logsource:
+    product: kubernetes
+    service: audit
+detection:
+    selection_uri_shells_encoded:
+        requestURI|contains:
+            - '%2fbin%2fash'
+            - '%2fbin%2fbash'
+            - '%2fbin%2fbusybox'
+            - '%2fbin%2fdash'
+            - '%2fbin%2fsh'
+            - '%2fbin%2fzsh'
+    selection_uri_shells_plain:
+        requestURI|contains:
+            - '/bin/ash'
+            - '/bin/bash'
+            - '/bin/busybox'
+            - '/bin/dash'
+            - '/bin/sh'
+            - '/bin/zsh'
+    selection_uri_tools_encoded:
+        requestURI|contains:
+            - '%2fusr%2fbin%2fcurl'
+            - '%2fusr%2fbin%2fkubectl'
+            - '%2fusr%2fbin%2fperl'
+            - '%2fusr%2fbin%2fpython'
+            - '%2fusr%2fbin%2fwget'
+    selection_uri_tools_plain:
+        requestURI|contains:
+            - '/usr/bin/curl'
+            - '/usr/bin/kubectl'
+            - '/usr/bin/perl'
+            - '/usr/bin/python'
+            - '/usr/bin/wget'
+    selection_user_agent:
+        userAgent|contains:
+            - 'access_matrix'  # Rakkess
+            - 'trufflehog'     # Secret scanning tool
+            - 'azurehound'     # Azure/Cloud discovery
+            - 'micro-scanner'  # Vulnerability scanning
+    selection_status:
+        responseStatus.code: 'ALLOW'
+    condition: (selection_uri_shells_encoded or selection_uri_shells_plain or selection_uri_tools_encoded or selection_uri_tools_plain or selection_user_agent) and selection_status
+falsepositives:
+    - Authorized administrative maintenance via kubectl
+    - Automated internal infrastructure monitoring and certificate rotation
+    - Security-approved vulnerability or secret scanning in DevSecOps pipelines
+level: medium
