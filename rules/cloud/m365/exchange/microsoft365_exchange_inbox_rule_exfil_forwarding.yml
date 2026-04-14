@@ -1,0 +1,49 @@
+title: Suspicious Exchange Inbox Rule Configured for External Forwarding or Message Suppression
+id: 756232a0-5b3d-4665-86a1-12187c1bd427
+status: experimental
+description: |
+    Detects creation or modification of Exchange Online inbox rules that configure
+    external email forwarding, redirection, or message deletion. This technique is
+    consistently observed as a post-compromise persistence and collection mechanism
+    following successful phishing attacks.
+
+    After gaining access to a victim mailbox, adversaries routinely create inbox rules
+    to silently forward email to attacker-controlled external addresses (T1114.003) and
+    optionally suppress evidence by deleting the originals from the victim inbox. These
+    rules persist across password resets unless explicitly removed, making them a high-value
+    indicator of account compromise.
+references:
+    - https://learn.microsoft.com/en-us/security/operations/incident-response-playbook-phishing
+    - https://attack.mitre.org/techniques/T1114/003/
+    - https://attack.mitre.org/techniques/T1070/008/
+author: Tashnim Asgar (lanceterminal)
+date: 2026/04/08
+tags:
+    - attack.collection
+    - attack.t1114.003
+    - attack.defense_evasion
+    - attack.t1070.008
+logsource:
+    product: m365
+    service: exchange
+detection:
+    selection_operation:
+        Operation:
+            - 'New-InboxRule'
+            - 'Set-InboxRule'
+    selection_forwarding:
+        Parameters|contains:
+            - 'ForwardTo'
+            - 'ForwardAsAttachmentTo'
+            - 'RedirectTo'
+    selection_suppression:
+        Parameters|contains:
+            - 'DeleteMessage'
+            - 'MarkAsRead'
+            - 'MoveToFolder'
+    condition: selection_operation and (selection_forwarding or selection_suppression)
+falsepositives:
+    - Legitimate users configuring email forwarding to a personal or secondary account
+    - IT or compliance-driven forwarding rules for archival or legal hold purposes
+    - Helpdesk-created rules during mailbox migration or consolidation workflows
+level: medium
