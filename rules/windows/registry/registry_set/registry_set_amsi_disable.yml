@@ -1,0 +1,37 @@
+title: AMSI Disabled via Registry Modification
+id: aa37cbb0-da36-42cb-a90f-fdf216fc7467
+related:
+    - id: 7dbbcac2-57a0-45ac-b306-ff30a8bd2981 # Windows AMSI Related Registry Tampering Via CommandLine
+      type: similar
+status: experimental
+description: |
+    Detects attempts to disable AMSI (Anti-Malware Scan Interface) by modifying the AmsiEnable registry value.
+    Anti-Malware Scan Interface (AMSI) is a security feature in Windows that allows applications and services to integrate with anti-malware products for enhanced protection against malicious content.
+    Adversaries may attempt to disable AMSI to evade detection by security software, allowing them to execute malicious scripts or code without being scanned.
+references:
+    - https://mostafayahiax.medium.com/hunting-for-amsi-bypassing-methods-9886dda0bf9d
+    - https://docs.microsoft.com/en-us/windows/win32/amsi/antimalware-scan-interface-portal
+    - https://www.mdsec.co.uk/2019/02/macros-and-more-with-sharpshooter-v2-0/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-12-25
+tags:
+    - attack.defense-evasion
+    - attack.t1562.001
+    - attack.t1562.006
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|endswith: '\Software\Microsoft\Windows Script\Settings\AmsiEnable'
+        Details: 'DWORD (0x00000000)'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
+regression_tests_path: regression_data/rules/windows/registry/registry_set/registry_set_amsi_disable/info.yml
+simulation:
+    - type: atomic-red-team
+      name: AMSI Bypass - Create AMSIEnable Reg Key
+      technique: T1562.001
+      atomic_guid: 728eca7b-0444-4f6f-ac36-437e3d751dc0

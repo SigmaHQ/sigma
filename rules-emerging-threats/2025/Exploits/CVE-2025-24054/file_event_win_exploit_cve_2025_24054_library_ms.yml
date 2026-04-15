@@ -1,0 +1,31 @@
+title: Suspicious Creation of .library-ms File — Potential CVE-2025-24054 Exploit
+id: 5a7132c0-86db-4e6b-95c0-f0e9d7f461aa
+status: experimental
+description: |
+    Detects creation of '.library-ms' files, which may indicate exploitation of CVE-2025-24054. This vulnerability allows an attacker to trigger an automatic outbound SMB or WebDAV authentication request to a remote server upon archive extraction.
+    If the system is unpatched, no user interaction is required beyond extracting a malicious archive—potentially exposing the user's NTLMv2-SSP hash to the attacker.
+references:
+    - https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-24054
+    - https://research.checkpoint.com/2025/cve-2025-24054-ntlm-exploit-in-the-wild/
+author: Gene Kazimiarovich
+date: 2025-04-20
+tags:
+    - detection.emerging-threats
+    - attack.credential-access
+    - attack.t1187   # Forced Authentication
+    - cve.2025-24054
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename|endswith: '.library-ms'
+        Image|endswith:
+            - '\7z.exe'
+            - '\winrar.exe'
+            - '\explorer.exe'
+    condition: selection
+falsepositives:
+    - Legitimate Library shortcuts under %APPDATA%\Microsoft\Windows\Libraries\ (rarely created by end-users)
+    - Custom corporate scripts that programmatically generate .library-ms Files
+level: medium

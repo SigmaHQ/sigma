@@ -8,7 +8,7 @@ references:
     - https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023-01-02
-modified: 2025-01-20
+modified: 2025-10-07
 tags:
     - attack.execution
     - attack.t1059
@@ -24,12 +24,26 @@ detection:
               - 'python2.exe'
     selection_cli:
         CommandLine|contains: ' -c'
-    filter_main_python: # Based on baseline
-        ParentImage|startswith: 'C:\Program Files\Python'
+    filter_main_python_1: # Based on baseline
+        ParentImage|startswith:
+            - 'C:\Program Files\Python'
+            - 'C:\Program Files (x86)\Python'
         ParentImage|endswith: '\python.exe'
         ParentCommandLine|contains: '-E -s -m ensurepip -U --default-pip'
+    filter_main_python_trace: # Based on baseline
+        ParentImage|startswith:
+            - 'C:\Program Files\Python'
+            - 'C:\Program Files (x86)\Python'
+        CommandLine|contains|all:
+            # CommandLine: \"C:\\Program Files\\Python312\\python.exe\" -W ignore::DeprecationWarning -c \"\nimport runpy\nimport sys\nsys.path = ['C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\tmpdakwn6aj\\\\pip-23.2.1-py3-none-any.whl'] + sys.path\nsys.argv[1:] = ['install', '--no-cache-dir', '--no-index', '--find-links', 'C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\tmpdakwn6aj', '--upgrade', 'pip']\nrunpy.run_module(\\\"pip\\\", run_name=\\\"__main__\\\", alter_sys=True)\n\
+            - '-W ignore::DeprecationWarning'
+            - "['install', '--no-cache-dir', '--no-index', '--find-links',"
+            - "'--upgrade', 'pip'"
     filter_optional_vscode:
-        ParentImage|endswith: '\AppData\Local\Programs\Microsoft VS Code\Code.exe'
+        - ParentImage|endswith: '\AppData\Local\Programs\Microsoft VS Code\Code.exe'
+        - ParentImage:
+              - 'C:\Program Files\Microsoft VS Code\Code.exe'
+              - 'C:\Program Files (x86)\Microsoft VS Code\Code.exe'
     filter_optional_pip:
         CommandLine|contains|all:
             - '<pip-setuptools-caller>'

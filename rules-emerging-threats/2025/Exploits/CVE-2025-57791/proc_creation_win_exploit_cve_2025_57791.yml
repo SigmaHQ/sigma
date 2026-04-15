@@ -1,0 +1,30 @@
+title: Commvault QLogin Argument Injection Authentication Bypass (CVE-2025-57791)
+id: ff0225a0-1d9a-4bae-ab26-6038b18bb6d4
+status: experimental
+description: |
+    Detects the use of argument injection in the Commvault qlogin command - potential exploitation for CVE-2025-57791.
+    An attacker can inject the `-localadmin` parameter via the password field to bypass authentication and gain a privileged token.
+references:
+    - https://labs.watchtowr.com/guess-who-would-be-stupid-enough-to-rob-the-same-vault-twice-pre-auth-rce-chains-in-commvault/
+author: X__Junior (Nextron Systems), Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-10-20
+tags:
+    - attack.initial-access
+    - attack.t1190
+    - detection.emerging-threats
+    - cve.2025-57791
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains|all:
+            - 'qlogin'
+            - ' -cs '
+            - ' -localadmin'
+            - ' -clp '
+            - '_localadmin__'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

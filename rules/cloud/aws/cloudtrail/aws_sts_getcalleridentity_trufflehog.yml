@@ -1,0 +1,28 @@
+title: AWS STS GetCallerIdentity Enumeration Via TruffleHog
+id: 9b1b8e9b-0a5d-4af1-9d2f-4c4b6e7c2c9d
+status: experimental
+description: |
+    Detects the use of TruffleHog for AWS credential validation by identifying GetCallerIdentity API calls where the userAgent indicates TruffleHog.
+    Threat actors leverage TruffleHog to enumerate and validate exposed AWS keys.
+    Successful exploitation allows threat actors to confirm the validity of compromised AWS credentials, facilitating further unauthorized access and actions within the AWS environment.
+references:
+    - https://www.rapid7.com/blog/post/tr-crimson-collective-a-new-threat-group-observed-operating-in-the-cloud/
+    - https://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html
+    - https://github.com/trufflesecurity/trufflehog
+author: Adan Alvarez @adanalvarez
+date: 2025-10-12
+tags:
+    - attack.discovery
+    - attack.t1087.004
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: 'sts.amazonaws.com'
+        eventName: 'GetCallerIdentity'
+        userAgent|contains: 'TruffleHog'
+    condition: selection
+falsepositives:
+    - Legitimate internal security scanning or key validation that intentionally uses TruffleHog. Authorize and filter known scanner roles, IP ranges, or assumed roles as needed.
+level: medium
