@@ -1,0 +1,28 @@
+title: AWS Bedrock GetFoundationModelAvailability From Long Lived Access Key
+id: 21d5d6aa-1fc4-452e-bedb-bcdaf63ee648
+status: experimental
+description: |
+    Detects the usage of GetFoundationModelAvailability.
+    This API returns information about the Foundation model availability on Amazon Bedrock.
+    This is an API meant to be used only via the AWS Web Management Console.
+    Long lived access keys should not be seen interacting with this API.
+references:
+    - https://docs.aws.amazon.com/bedrock/latest/APIReference/API_GetFoundationModelAvailability.html
+    - https://permiso.io/blog/exploiting-hosted-models
+author: Marco Pedrinazzi (@pedrinazziM) (InTheCyber)
+date: 2026-03-13
+tags:
+    - attack.discovery
+    - attack.t1580
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventName: 'GetFoundationModelAvailability'
+        userIdentity.accessKeyId|startswith: 'AKIA'
+        eventSource: 'bedrock.amazonaws.com'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
