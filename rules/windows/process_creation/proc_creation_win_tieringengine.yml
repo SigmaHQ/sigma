@@ -1,0 +1,32 @@
+title: TieringEngineService Suspicious Execution
+id: 
+status: experimental
+description: Detects execution or parent-child relationships involving TieringEngineService.exe under SYSTEM context
+references:
+    - https://github.com/Nightmare-Eclipse/RedSun
+author: '@unresolvedhost'
+date: 2026-04-16
+tags:
+  - attack.execution
+  - attack.privilege_escalation
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_sysmon_image:
+    Image|endswith: '\TieringEngineService.exe'
+    User: 'NT AUTHORITY\SYSTEM'
+  selection_sysmon_parent:
+    ParentImage|endswith: '\TieringEngineService.exe'
+    ParentUser: 'NT AUTHORITY\SYSTEM'
+  selection_security_image:
+    NewProcessName|endswith: '\TieringEngineService.exe'
+    TokenElevationType: '%%1936'
+  selection_security_parent:
+    ParentProcessName|endswith: '\TieringEngineService.exe'
+    SubjectUserName|endswith: '$'
+  condition: selection_sysmon_image or selection_sysmon_parent or selection_security_image or selection_security_parent
+level: high
+falsepositives:
+  - N/A
+
