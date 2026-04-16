@@ -13,22 +13,26 @@ logsource:
   product: windows
   category: process_creation
 detection:
-  selection_sysmon_image:
+  selection_sysmon:
+    EventID: 1
     Image|endswith: '\TieringEngineService.exe'
     User: 'NT AUTHORITY\SYSTEM'
-  selection_sysmon_image_original:
+  selection_sysmon_original:
+    EventID: 1
     OriginalFileName: 'TieringEngineService.exe'
     User: 'NT AUTHORITY\SYSTEM'
   selection_sysmon_parent:
+    EventID: 1
     ParentImage|endswith: '\TieringEngineService.exe'
     ParentUser: 'NT AUTHORITY\SYSTEM'
-  selection_security_image:
-    NewProcessName|endswith: '\TieringEngineService.exe'
-    TokenElevationType: '%%1936'
+  selection_security:
+    EventID: 4688
+    Image|endswith: '\TieringEngineService.exe'
   selection_security_parent:
-    ParentProcessName|endswith: '\TieringEngineService.exe'
-    SubjectUserName|endswith: '$'
-  condition: selection_sysmon_image or selection_sysmon_image_original or selection_sysmon_parent or selection_sysmon_parent_original or selection_security_image or selection_security_parent
+    EventID: 4688
+    ParentImage|endswith: '\TieringEngineService.exe'
+    User|endswith: '$'
+  condition: selection_sysmon or selection_sysmon_original or selection_sysmon_parent or selection_security or selection_security_parent
 level: high
 falsepositives:
   - N/A
