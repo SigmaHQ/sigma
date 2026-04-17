@@ -1,0 +1,89 @@
+title: Suspicious DNS Query to Known Exfil Domain or Uncommon TLD
+id: fc103796-cd46-4569-a962-fd14850c50f7
+status: experimental
+description: |
+  Detects DNS requests to known data exfiltration domains or
+  domains with uncommon TLDs indicative of C2 or exfiltration
+  activity
+author: Tashnim Asgar (lanceterminal)
+date: 2026-04-16
+tags:
+    - attack.exfiltration
+    - attack.t1048
+    - attack.command_and_control
+    - attack.t1071.004
+logsource:
+    category: dns
+detection:
+    selection_exfil_domains:
+        dns.question.name|contains:
+            - 'ghostbin.com'
+            - 'pastebin.com'
+            - '0bin.net'
+            - 'privatebin.net'
+            - 'mega.nz'
+            - 'wetransfer.com'
+            - 'sendspace.com'
+            - 'anonfiles.com'
+            - 'file.io'
+            - 'mediafire.com'
+            - 'transfer.sh'
+            - 'gofile.io'
+            - 'pixeldrain.com'
+            - 'ufile.io'
+            - 'temp.sh'
+            - 'bashupload.com'
+            - 'paste.ee'
+            - 'hastebin.com'
+            - 'dpaste.com'
+    selection_suspicious_tlds:
+        dns.question.name|endswith:
+            - '.xyz'
+            - '.top'
+            - '.tk'
+            - '.ml'
+            - '.ga'
+            - '.cf'
+            - '.gq'
+            - '.pw'
+            - '.su'
+            - '.to'
+            - '.bazar'
+            - '.bit'
+            - '.coin'
+            - '.zip'
+            - '.mov'
+            - '.onion'
+    filter_common_tlds:
+        dns.question.name|endswith:
+            - '.com'
+            - '.net'
+            - '.io'
+            - '.co'
+            - '.org'
+            - '.gov'
+            - '.edu'
+            - '.uk'
+            - '.ca'
+            - '.au'
+            - '.de'
+            - '.fr'
+            - '.jp'
+            - '.us'
+            - '.int'
+            - '.mil'
+    condition: selection_exfil_domains or (selection_suspicious_tlds and not filter_common_tlds)
+falsepositives:
+    - Legitimate use of file sharing services
+    - Security researchers
+    - Software using uncommon TLDs (e.g. .dev, .app)
+level: high
+fields:
+    - dns.question.name
+    - dns.resolved_ip
+    - process.name
+    - process.pid
+    - process.command_line
+    - process.parent.name
+    - host.name
+    - user.name
