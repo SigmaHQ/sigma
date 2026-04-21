@@ -1,0 +1,74 @@
+title: Suspicious Child Process of ConfigurationRemotingServer
+id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+status: experimental
+description: >
+  Detects ConfigurationRemotingServer.exe spawning unexpected child processes,
+  indicating abuse of the Windows DSC engine for proxy execution (DSCourier technique).
+references:
+  - https://dylansec.com/DSCourier/
+  - https://github.com/DylanDavis1/DSCourier
+author: Richard Roy (@unresolvedhost)
+date: 2026-04-21
+tags:
+  - attack.defense_evasion
+  - attack.t1218
+  - attack.execution
+  - attack.t1059.001
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  uncommon_child_process:
+    ParentImage|endswith: '\ConfigurationRemotingServer.exe'
+    Image|endswith:
+      - '\whoami.exe'
+      - '\cmd.exe'
+      - '\powershell.exe'
+      - '\pwsh.exe'
+      - '\net.exe'
+      - '\net1.exe'
+      - '\ipconfig.exe'
+      - '\hostname.exe'
+      - '\systeminfo.exe'
+      - '\wmic.exe'
+      - '\nltest.exe'
+      - '\ping.exe'
+      - '\nslookup.exe'
+      - '\certutil.exe'
+      - '\bitsadmin.exe'
+      - '\mshta.exe'
+      - '\wscript.exe'
+      - '\cscript.exe'
+      - '\regsvr32.exe'
+      - '\rundll32.exe'
+  uncommon_child_process_renamed:
+    ParentImage|endswith: '\ConfigurationRemotingServer.exe'
+    OriginalFileName:
+      - 'whoami.exe'
+      - 'cmd.exe'
+      - 'powershell.exe'
+      - 'pwsh.exe'
+      - 'net.exe'
+      - 'net1.exe'
+      - 'ipconfig.exe'
+      - 'hostname.exe'
+      - 'systeminfo.exe'
+      - 'wmic.exe'
+      - 'nltest.exe'
+      - 'ping.exe'
+      - 'nslookup.exe'
+      - 'certutil.exe'
+      - 'bitsadmin.exe'
+      - 'mshta.exe'
+      - 'wscript.exe'
+      - 'cscript.exe'
+      - 'regsvr32.exe'
+      - 'rundll32.exe'
+  suspicious_argument:
+    ParentImage|endswith: '\WindowsPackageManagerServer.exe'
+    Image|endswith: 'ConfigurationRemotingServer.exe'
+    CommandLine|contains: 'pwsh' # PowerShell Desired State Configuration (DSC) only runs with Powershell
+  condition: uncommon_child_process or uncommon_child_process_renamed or suspicious_argument
+falsepositives:
+  - N/A
+level: high
