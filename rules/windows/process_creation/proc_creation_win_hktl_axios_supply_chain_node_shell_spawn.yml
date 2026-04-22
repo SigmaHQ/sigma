@@ -1,0 +1,42 @@
+title: HackTool - Axios Supply Chain npm Postinstall Hook Shell Spawn
+id: 956b95fd-dc5d-4344-beaf-42617be04b0f
+status: experimental
+description: >
+    Detects the execution chain from the Axios npm supply chain compromise (March 2026,
+    UNC1069/DPRK BlueNoroff). The malicious plain-crypto-js postinstall hook executes
+    node setup.js which spawns cmd.exe, cscript.exe or PowerShell to download and run
+    a cross-platform RAT. node.exe spawning interactive shells during package install
+    is anomalous outside of deliberate tooling.
+references:
+    - https://www.huntress.com/blog/supply-chain-compromise-axios-npm-package
+    - https://www.elastic.co/security-labs/axios-one-rat-to-rule-them-all
+    - https://unit42.paloaltonetworks.com/axios-supply-chain-attack/
+    - https://www.crowdstrike.com/en-us/blog/stardust-chollima-likely-compromises-axios-npm-package/
+author: ideabib
+date: 2026-04-22
+modified: 2026-04-22
+tags:
+    - attack.execution
+    - attack.t1059.007
+    - attack.t1059.001
+    - attack.t1195.001
+    - attack.t1072
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\node.exe'
+        ParentCommandLine|contains: 'setup.js'
+    selection_child:
+        Image|endswith:
+            - '\cmd.exe'
+            - '\cscript.exe'
+            - '\wscript.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+    condition: selection_parent and selection_child
+falsepositives:
+    - Legitimate npm packages with postinstall scripts that intentionally spawn shells (audit package name and signing)
+    - Build tooling using node to invoke shell commands as part of CI/CD pipelines
+level: high

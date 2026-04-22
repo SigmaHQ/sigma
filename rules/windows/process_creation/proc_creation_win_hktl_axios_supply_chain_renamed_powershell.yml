@@ -1,0 +1,36 @@
+title: HackTool - Renamed PowerShell Execution Masquerading as wt.exe
+id: dca8d064-9f71-4613-8e9f-fe388fac3224
+status: experimental
+description: >
+    Detects execution of PowerShell under a renamed binary. In the Axios npm supply
+    chain attack (March 2026) the threat actor (UNC1069/DPRK) copied powershell.exe
+    to %PROGRAMDATA%\wt.exe to masquerade as Windows Terminal and evade process-name
+    heuristics. wt.exe is the legitimate Windows Terminal binary name, making this
+    an effective lure for defenders filtering by process name.
+references:
+    - https://www.huntress.com/blog/supply-chain-compromise-axios-npm-package
+    - https://www.elastic.co/security-labs/axios-one-rat-to-rule-them-all
+    - https://attack.mitre.org/techniques/T1036/003/
+author: ideabib
+date: 2026-04-22
+modified: 2026-04-22
+tags:
+    - attack.defense_evasion
+    - attack.t1036.003
+    - attack.execution
+    - attack.t1059.001
+    - attack.t1195.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        OriginalFileName: 'PowerShell.EXE'
+    filter_legitimate:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+    condition: selection and not filter_legitimate
+falsepositives:
+    - Custom PowerShell deployments with non-standard binary names in locked-down environments (extremely rare)
+level: critical

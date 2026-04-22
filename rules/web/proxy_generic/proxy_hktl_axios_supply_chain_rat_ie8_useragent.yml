@@ -1,0 +1,36 @@
+title: HackTool - Axios Supply Chain RAT Hardcoded IE8 WinXP User-Agent
+id: b0f3ee0d-1233-4526-8a9e-d6218daaa08a
+status: experimental
+description: >
+    Detects the hardcoded IE8/Windows XP User-Agent used by all three platform variants
+    (Windows, macOS, Linux) of the RAT deployed in the Axios npm supply chain attack
+    (March 2026). The string is completely anachronistic in 2026 and especially anomalous
+    when originating from macOS or Linux hosts. Every C2 beacon (every 60 seconds) from
+    the WAVESHAPER.V2/ZshBucket RAT uses this identical string in an HTTP POST to port 8000.
+    Attributed to UNC1069 (DPRK BlueNoroff cluster, also tracked as Sapphire Sleet).
+references:
+    - https://www.huntress.com/blog/supply-chain-compromise-axios-npm-package
+    - https://www.elastic.co/security-labs/axios-one-rat-to-rule-them-all
+    - https://www.crowdstrike.com/en-us/blog/stardust-chollima-likely-compromises-axios-npm-package/
+author: ideabib
+date: 2026-04-22
+modified: 2026-04-22
+tags:
+    - attack.command_and_control
+    - attack.t1071.001
+    - attack.t1001.001
+    - attack.t1195.001
+logsource:
+    category: proxy
+    product: windows
+detection:
+    selection:
+        c-useragent|contains|all:
+            - 'msie 8.0'
+            - 'windows nt 5.1'
+            - 'trident/4.0'
+        cs-method: 'POST'
+    condition: selection
+falsepositives:
+    - Legacy IE8 on genuine Windows XP systems - effectively zero in enterprise environments in 2026
+level: critical

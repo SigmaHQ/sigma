@@ -1,0 +1,33 @@
+title: HackTool - Axios Supply Chain Hidden system.bat Dropped in ProgramData
+id: cd331e06-da30-4f24-aab1-4c38d93230e8
+status: experimental
+description: >
+    Detects creation of system.bat inside %PROGRAMDATA% as observed in the Axios npm
+    supply chain attack (March 2026). The Windows RAT payload drops this hidden batch
+    file as a persistent download cradle that re-fetches and executes the PowerShell
+    RAT from C2 (sfrclak[.]com:8000) on each user login via the MicrosoftUpdate run key.
+    Creation of any .bat file named system.bat in ProgramData is highly anomalous.
+    Attributed to UNC1069 (DPRK BlueNoroff cluster).
+references:
+    - https://www.huntress.com/blog/supply-chain-compromise-axios-npm-package
+    - https://www.elastic.co/security-labs/axios-one-rat-to-rule-them-all
+author: ideabib
+date: 2026-04-22
+modified: 2026-04-22
+tags:
+    - attack.persistence
+    - attack.t1547.001
+    - attack.defense_evasion
+    - attack.t1564.001
+    - attack.t1195.001
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|contains: '\ProgramData\'
+        TargetFilename|endswith: '\system.bat'
+    condition: selection
+falsepositives:
+    - Legitimate batch automation in ProgramData named system.bat (validate parent process and file attributes)
+level: high

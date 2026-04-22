@@ -1,0 +1,57 @@
+title: HackTool - Axios Supply Chain Node.js RAT Dropper Outbound C2 Port 8000
+id: 9f9a64e6-22c2-4242-b35c-f16d362085d2
+status: experimental
+description: >
+    Detects outbound network connections from node.exe to external hosts on port 8000,
+    consistent with the Axios supply chain dropper (setup.js) contacting C2
+    sfrclak[.]com:8000 (142.11.206[.]73) to download the cross-platform RAT payload
+    during npm package installation in the March 2026 campaign. node.exe connecting
+    to external hosts on port 8000 is highly unusual during package install operations.
+    Attributed to UNC1069 (DPRK BlueNoroff cluster).
+references:
+    - https://www.huntress.com/blog/supply-chain-compromise-axios-npm-package
+    - https://unit42.paloaltonetworks.com/axios-supply-chain-attack/
+author: ideabib
+date: 2026-04-22
+modified: 2026-04-22
+tags:
+    - attack.command_and_control
+    - attack.t1071.001
+    - attack.t1571
+    - attack.t1195.001
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\node.exe'
+        DestinationPort: 8000
+        Initiated: 'true'
+    filter_local:
+        DestinationIp|startswith:
+            - '127.'
+            - '10.'
+            - '192.168.'
+            - '172.16.'
+            - '172.17.'
+            - '172.18.'
+            - '172.19.'
+            - '172.20.'
+            - '172.21.'
+            - '172.22.'
+            - '172.23.'
+            - '172.24.'
+            - '172.25.'
+            - '172.26.'
+            - '172.27.'
+            - '172.28.'
+            - '172.29.'
+            - '172.30.'
+            - '172.31.'
+            - '::1'
+            - 'fd'
+    condition: selection and not filter_local
+falsepositives:
+    - Development environments running local services on port 8000 that make external callbacks (rare but possible)
+    - React/Vue/Angular dev servers occasionally connecting to external port 8000 dependencies
+level: medium

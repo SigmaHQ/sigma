@@ -1,0 +1,34 @@
+title: HackTool - Axios Supply Chain RAT MicrosoftUpdate Run Key Persistence
+id: a7823db5-c29a-4e46-b910-8e450420e341
+status: experimental
+description: >
+    Detects the exact registry persistence mechanism used by the Windows RAT payload
+    dropped in the Axios npm supply chain attack (March 2026). The RAT creates a run key
+    named 'MicrosoftUpdate' under HKCU pointing to %PROGRAMDATA%\system.bat which
+    re-downloads the PowerShell payload from C2 on every user login. The combination
+    of key name, path, and target filename is unique to this campaign.
+    Attributed to UNC1069 (DPRK BlueNoroff cluster).
+references:
+    - https://www.huntress.com/blog/supply-chain-compromise-axios-npm-package
+    - https://www.elastic.co/security-labs/axios-one-rat-to-rule-them-all
+    - https://attack.mitre.org/techniques/T1547/001/
+author: ideabib
+date: 2026-04-22
+modified: 2026-04-22
+tags:
+    - attack.persistence
+    - attack.t1547.001
+    - attack.t1195.001
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_key:
+        TargetObject|contains: '\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\'
+        TargetObject|endswith: '\MicrosoftUpdate'
+    selection_value:
+        Details|contains: 'system.bat'
+    condition: selection_key and selection_value
+falsepositives:
+    - None expected - this key name and value combination is unique to this campaign
+level: critical
