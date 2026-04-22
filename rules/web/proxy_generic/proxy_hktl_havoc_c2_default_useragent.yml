@@ -1,0 +1,35 @@
+title: HackTool - HavocC2 Demon Agent Default Chrome 96 User-Agent
+id: a014dfd2-4797-4169-ae02-cd50cd274733
+status: experimental
+description: >
+    Detects the Havoc C2 framework Demon agent using its hardcoded default
+    User-Agent string: Chrome 96.0.4664.110 on Windows 7 WOW64. Chrome 96
+    reached end-of-life in January 2022 and is no longer present in legitimate
+    enterprise traffic. The combination of EOL Chrome version and Windows 7
+    WOW64 platform string is a high-confidence indicator of the Havoc Demon
+    agent operating with an unmodified default profile.
+references:
+    - https://havocframework.com/docs/profiles
+    - https://www.immersivelabs.com/resources/c7-blog/havoc-c2-framework-a-defensive-operators-guide
+    - https://github.com/HavocFramework/Havoc
+author: ideabib
+date: 2026-04-21
+modified: 2026-04-21
+tags:
+    - attack.command_and_control
+    - attack.t1071.001
+logsource:
+    category: proxy
+    product: windows
+detection:
+    selection:
+        c-useragent|contains|all:
+            - 'Windows NT 6.1'
+            - 'WOW64'
+            - 'Chrome/96.0.4664.110'
+    filter_edge:
+        c-useragent|contains: 'Edg/'
+    condition: selection and not filter_edge
+falsepositives:
+    - Extremely outdated Chrome 96 installations on genuine Windows 7 systems (verify host OS and patch currency)
+level: high

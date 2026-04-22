@@ -1,0 +1,33 @@
+title: HackTool - AdaptixC2 PowerShell Stager In-Memory Loader
+id: 2f3da1e7-70c9-41b1-ab8e-e3630ae76d51
+status: experimental
+description: >
+    Detects AdaptixC2 PowerShell stager pattern combining VirtualAlloc and
+    GetDelegateForFunctionPointer in a single command line, consistent with
+    the XOR-decode to shellcode execution chain documented by Unit 42 (Sep 2025).
+    AdaptixC2 has been confirmed in use by Russian-nexus ransomware groups since 2024.
+references:
+    - https://unit42.paloaltonetworks.com/adaptixc2-post-exploitation-framework/
+    - https://github.com/Adaptix-Framework/AdaptixC2
+author: ideabib
+date: 2026-04-21
+modified: 2026-04-21
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.defense_evasion
+    - attack.t1620
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\\powershell.exe'
+        CommandLine|contains|all:
+            - 'VirtualAlloc'
+            - 'GetDelegateForFunctionPointer'
+    condition: selection
+falsepositives:
+    - Legitimate security tooling or in-memory loading frameworks during authorized red team exercises
+    - Some obfuscated PowerShell loaders used by legitimate software (verify signing and parent process)
+level: high

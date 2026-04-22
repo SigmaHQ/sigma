@@ -1,0 +1,33 @@
+title: HackTool - AdaptixC2 Loader Persistence via Updater Run Key
+id: 14f23aee-0f21-4c3b-b64f-88677e9b82d2
+status: experimental
+description: >
+    Detects AdaptixC2 loader persistence mechanism that creates a registry run key
+    named exactly 'Updater' under HKCU Software\Microsoft\Windows\CurrentVersion\Run.
+    This specific key name and path combination was documented in Unit 42's analysis
+    of AdaptixC2 deployments by Russian ransomware actors in 2025.
+references:
+    - https://unit42.paloaltonetworks.com/adaptixc2-post-exploitation-framework/
+    - https://attack.mitre.org/techniques/T1547/001/
+author: ideabib
+date: 2026-04-21
+modified: 2026-04-21
+tags:
+    - attack.persistence
+    - attack.t1547.001
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\'
+        Details|contains: 'Updater'
+    filter_legitimate:
+        Details|contains:
+            - 'OneDrive'
+            - 'GoogleUpdate'
+            - 'MicrosoftEdgeUpdate'
+    condition: selection and not filter_legitimate
+falsepositives:
+    - Legitimate software coincidentally naming a run key 'Updater' - validate the binary path and signing status
+level: high

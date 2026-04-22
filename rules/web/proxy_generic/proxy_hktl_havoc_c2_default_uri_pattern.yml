@@ -1,0 +1,30 @@
+title: HackTool - HavocC2 Demon Agent Default Listener URI Pattern
+id: 904af643-c3e9-4c13-8c3d-992d5873b24f
+status: experimental
+description: >
+    Detects Havoc C2 framework Demon agent beacon requests using the hardcoded
+    default URI list defined in the stock Havoc listener profile. The URIs
+    '/funny_cat.gif' and '/helloworld.js' are the framework defaults and are
+    not expected in any legitimate enterprise web traffic.
+references:
+    - https://havocframework.com/docs/profiles
+    - https://www.immersivelabs.com/resources/c7-blog/havoc-c2-framework-a-defensive-operators-guide
+    - https://github.com/HavocFramework/Havoc
+author: ideabib
+date: 2026-04-21
+modified: 2026-04-21
+tags:
+    - attack.command_and_control
+    - attack.t1071.001
+logsource:
+    category: proxy
+    product: windows
+detection:
+    selection:
+        cs-uri-stem|contains:
+            - '/funny_cat.gif'
+            - '/helloworld.js'
+    condition: selection
+falsepositives:
+    - None expected in enterprise environments
+level: critical
