@@ -1,0 +1,77 @@
+title: HackTool - Kerberos Manipulation Tool CLI Patterns
+id: 43b20ff5-48aa-4445-b76a-faea5f3e1c54
+related:
+    - id: 9b3837ba-c296-4e47-996d-34b359b6c7d3
+      type: similar
+status: experimental
+description: |
+    Detects command-line patterns associated with Kerberos manipulation and attack tools such as
+    minikerberos, impacket, krbrelayx, and similar frameworks. Covers TGT/TGS retrieval,
+    Kerberoasting, AS-REP roasting, PKINIT abuse, S4U delegation exploitation, ticket forgery,
+    ccache/kirbi ticket conversion and manipulation, hash decryption, and Kerberos relay attacks.
+references:
+    - https://github.com/skelsec/minikerberos
+    - https://github.com/fortra/impacket
+    - https://github.com/dirkjanm/PKINITtools
+    - https://github.com/dirkjanm/krbrelayx
+    - https://github.com/ShutdownRepo/targetedKerberoast
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-04-21
+tags:
+    - attack.credential-access
+    - attack.t1558
+    - attack.t1558.003
+    - attack.t1558.004
+    - attack.t1649
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection:
+        CommandLine|contains:
+            # TGT / TGS retrieval (impacket getTGT.py / getTGS.py, minikerberos entry points)
+            - 'getTGT'
+            - 'getTGS'
+            - 'asktgt'
+            - 'asktgs'
+            # Service ticket requests (impacket getST.py - S4U2self/proxy, constrained delegation)
+            - 'getST'
+            # Kerberoasting / AS-REP roasting
+            - 'kerberoast'
+            - 'asreproast'
+            - 'GetUserSPNs'
+            - 'GetNPUsers'
+            - 'targetedKerberoast'
+            # PKINIT / NT hash recovery via certificate
+            - 'getNTPKInit'
+            - 'getntkpkinit'
+            # Hash decryption utilities
+            - 'kerb23hashdecrypt'
+            # S4U delegation abuse
+            - 'getS4U2self'
+            - 'getS4U2proxy'
+            # Delegation enumeration and unconstrained delegation abuse
+            - 'findDelegation'
+            - 'tgtdeleg'
+            # Ticket forgery (Golden / Silver / MS14-068 / cross-domain)
+            - 'ticketer'
+            - 'goldenPac'
+            - 'raiseChild'
+            # TGS name substitution
+            - 'tgssub'
+            # PAC retrieval
+            - 'getPac'
+            # Ticket format conversion (impacket ticketConverter.py)
+            - 'ticketConverter'
+            # ccache / kirbi ticket manipulation and conversion
+            - 'ccacheroast'
+            - 'ccache2kirbi'
+            - 'kirbi2ccache'
+            - 'ccacheedit'
+            - ' kirbi '
+            # Kerberos relay attacks
+            - 'krbrelayx'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high

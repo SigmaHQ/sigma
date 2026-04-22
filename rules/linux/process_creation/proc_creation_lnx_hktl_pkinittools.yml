@@ -1,0 +1,35 @@
+title: HackTool - PKINITtools Execution
+id: c9b8a7f6-e5d4-3c2b-1a0f-9e8d7c6b5a4e
+related:
+    - id: 04b81869-15dd-47ce-afbb-d07707141ba0
+      type: similar
+status: experimental
+description: |
+    Detects execution of PKINITtools scripts (gettgtpkinit.py, getnthash.py, gets4uticket.py)
+    used to obtain Kerberos TGTs via PKINIT authentication and recover NT hashes through the
+    UnPAC-the-Hash technique after obtaining an Active Directory certificate.
+references:
+    - https://github.com/dirkjanm/PKINITtools
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-04-21
+tags:
+    - attack.credential-access
+    - attack.t1649
+    - attack.t1558
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_python:
+        - Image|contains: '/python'
+        - OriginalFileName|contains: 'python'
+    selection_cli:
+        CommandLine|contains:
+            - 'gettgtpkinit.py'
+            - 'getnthash.py'
+            - 'gets4uticket.py'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely
+level: high
+``
