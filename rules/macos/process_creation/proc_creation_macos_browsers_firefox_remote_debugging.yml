@@ -1,0 +1,38 @@
+title: Potential Cookie Theft via Firefox Remote Debugging
+    on macOS
+id: a28c80e4-69dc-4236-a872-2ff48ee92225
+related:
+    - id: b3d34dc5-2efd-4ae3-845f-8ec14921f449
+      type: similar
+    - id: fd321cb2-bf96-4e3a-a908-3ea661ec24a3
+      type: similar
+status: experimental
+description: |
+    Detects the use of the Firefox remote debugging argument
+    which can be abused to steal browser cookies, session
+    data, and credentials. An adversary may launch Firefox
+    with -start-debugger-server to open a debugging port
+    and connect via Remote Debugging Protocol to extract
+    sensitive data.
+references:
+    - https://firefox-source-docs.mozilla.org/devtools-user/about_colon_debugging/
+    - https://github.com/wunderwuzzi23/firefox-cookiemonster
+    - https://www.mdsec.co.uk/2022/10/analysing-lastpass-part-1/
+author: PersonalRules
+date: 2026/04/23
+tags:
+    - attack.credential-access
+    - attack.t1539
+logsource:
+    product: macos
+    category: process_creation
+detection:
+    selection:
+        CommandLine|contains: '-start-debugger-server'
+    condition: selection
+falsepositives:
+    - Developers debugging Firefox extensions or web
+      applications
+    - Automated testing frameworks using Firefox remote
+      debugging
+level: medium

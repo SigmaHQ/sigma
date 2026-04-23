@@ -1,0 +1,47 @@
+title: Potential Cookie Theft via Chromium Remote Debugging
+    on macOS
+id: 4b2de598-14c6-4bab-8e40-446d695fc185
+related:
+    - id: 4dee5c6e-8824-4c05-b9f4-f3045af663e2
+      type: similar
+    - id: 8263330b-3689-428b-b1ec-fe363579223a
+      type: similar
+    - id: 027ff9ea-85e7-42e3-99d2-bbb7069e02eb
+      type: similar
+status: experimental
+description: |
+    Detects the use of Chromium remote debugging arguments
+    which can be abused to steal browser cookies, session
+    data, and credentials. An adversary may launch a browser
+    with --remote-debugging-port, --remote-debugging-pipe,
+    or --remote-debugging-targets and connect via Chrome
+    DevTools Protocol to extract sensitive data without
+    requiring any extension or exploit.
+references:
+    - https://chromium.googlesource.com/chromium/src/+/main/docs/debugging_on_mac_os_x.md
+    - https://github.com/defaultnamehere/cookie_crimes
+    - https://github.com/rapid7/metasploit-framework/blob/master/documentation/modules/post/multi/gather/chrome_cookies.md
+    - https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e
+author: PersonalRules
+date: 2026/04/23
+tags:
+    - attack.credential-access
+    - attack.t1539
+logsource:
+    product: macos
+    category: process_creation
+detection:
+    selection:
+        CommandLine|contains:
+            - '--remote-debugging-port='
+            - '--remote-debugging-pipe='
+            - '--remote-debugging-targets='
+    filter_disabled:
+        CommandLine|contains: '--remote-debugging-port=0'
+    condition: selection and not filter_disabled
+falsepositives:
+    - Developers debugging browser extensions or web
+      applications
+    - Automated testing frameworks using remote debugging
+    - CI/CD pipelines running browser automation tests
+level: medium
