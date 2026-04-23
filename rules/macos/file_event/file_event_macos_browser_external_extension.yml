@@ -1,0 +1,46 @@
+title: Potential Suspicious Browser External Extension
+    File Creation on macOS
+id: d7ae9092-5cfd-4276-b74e-0fc910005fc2
+status: experimental
+description: |
+    Detects the creation of External Extensions JSON files
+    in browser-specific directories on macOS. External
+    extensions can be installed from external update URLs
+    without user interaction. Supported by Chrome, Chromium,
+    and Edge. Adversaries may abuse this to silently install
+    malicious browser extensions.
+references:
+    - https://learn.microsoft.com/en-us/microsoft-edge/extensions/developer-guide/alternate-distribution-options
+    - https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_paths.cc
+    - https://github.com/praetorian-inc/ChromeAlone
+author: PersonalRules
+date: 2026/04/23
+tags:
+    - attack.persistence
+    - attack.t1176.001
+logsource:
+    product: macos
+    category: file_event
+detection:
+    selection_chrome_system:
+        TargetFilename|contains:
+            - '/Library/Application Support/Google/Chrome/External Extensions/'
+    selection_chrome_user:
+        TargetFilename|contains:
+            - '/Library/Application Support/Google/Chrome/External Extensions/'
+    selection_chromium_system:
+        TargetFilename|contains:
+            - '/Library/Application Support/Chromium/External Extensions/'
+    selection_edge_system:
+        TargetFilename|contains:
+            - '/Library/Application Support/Microsoft/Edge/External Extensions/'
+    selection_edge_user:
+        TargetFilename|contains:
+            - '/Library/Application Support/Microsoft Edge/External Extensions/'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate software installers registering browser
+      extensions
+    - Enterprise IT administrators deploying browser
+      extensions via External Extensions
+level: medium

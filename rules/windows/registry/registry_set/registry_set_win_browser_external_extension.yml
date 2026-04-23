@@ -1,0 +1,39 @@
+title: Potential Suspicious Browser External Extension
+    Registration on Windows
+id: 51f077e1-9126-4c9a-a834-8998f8a8d93b
+status: experimental
+description: |
+    Detects the creation of registry entries used to register
+    external browser extensions on Windows. External extensions
+    can be installed from external update URLs without user
+    interaction by writing to the Extensions registry key with
+    an update_url value. Adversaries may abuse this to silently
+    install malicious browser extensions across reboots.
+references:
+    - https://learn.microsoft.com/en-us/microsoft-edge/extensions/developer-guide/alternate-distribution-options
+    - https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_paths.cc
+    - https://github.com/praetorian-inc/ChromeAlone
+author: PersonalRules
+date: 2026/04/23
+tags:
+    - attack.persistence
+    - attack.t1176.001
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection_chrome:
+        TargetObject|contains:
+            - '\Software\Google\Chrome\Extensions\'
+        TargetObject|endswith: '\update_url'
+    selection_edge:
+        TargetObject|contains:
+            - '\Software\Microsoft\Edge\Extensions\'
+        TargetObject|endswith: '\update_url'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate software installers registering browser
+      extensions (password managers, screen readers, etc.)
+    - Enterprise IT administrators deploying browser
+      extensions
+level: medium
