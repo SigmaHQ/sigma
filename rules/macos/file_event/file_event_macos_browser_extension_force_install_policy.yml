@@ -1,0 +1,39 @@
+title: Potential Suspicious Browser Extension Force Install
+    via Policy Plist on macOS
+id: 57da49dc-00d7-4c48-8927-9d635ceff932
+status: experimental
+description: |
+    Detects the creation of browser policy plist files on
+    macOS that can force-install extensions. The
+    ExtensionInstallForcelist policy silently installs
+    extensions that users cannot disable or remove.
+    Adversaries may abuse these to persist malicious browser
+    extensions across reboots without user interaction.
+references:
+    - https://chromeenterprise.google/policies/#ExtensionInstallForcelist
+    - https://chromeenterprise.google/policies/#ExtensionSettings
+    - https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies#extensioninstallforcelist
+    - https://learn.microsoft.com/en-us/deployedge/configure-microsoft-edge-on-mac
+    - https://support.google.com/chrome/a/answer/9020077
+    - https://github.com/praetorian-inc/ChromeAlone
+author: PersonalRules
+date: 2026/04/23
+tags:
+    - attack.persistence
+    - attack.t1176.001
+logsource:
+    product: macos
+    category: file_event
+detection:
+    selection_chrome:
+        TargetFilename|endswith:
+            - '/Library/Preferences/com.google.Chrome.plist'
+    selection_edge:
+        TargetFilename|endswith:
+            - '/Library/Preferences/com.microsoft.Edge.plist'
+    condition: 1 of selection_*
+falsepositives:
+    - Enterprise IT administrators deploying browser
+      extensions via policy plist
+    - MDM tools managing browser policies
+level: medium

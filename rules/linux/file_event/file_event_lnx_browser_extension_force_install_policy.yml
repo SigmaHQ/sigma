@@ -1,0 +1,43 @@
+title: Potential Suspicious Browser Extension Force Install
+    via Policy on Linux
+id: 131e1902-093b-4eb7-99f7-17c6e86dfcf5
+status: experimental
+description: |
+    Detects the creation or modification of browser policy
+    JSON files on Linux that can force-install extensions.
+    The ExtensionInstallForcelist and ExtensionSettings
+    policies silently install extensions that users cannot
+    disable or remove. Adversaries may abuse these to persist
+    malicious browser extensions without user interaction.
+references:
+    - https://chromeenterprise.google/policies/#ExtensionInstallForcelist
+    - https://chromeenterprise.google/policies/#ExtensionSettings
+    - https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies#extensioninstallforcelist
+    - https://support.google.com/chrome/a/answer/9027408
+    - https://github.com/praetorian-inc/ChromeAlone
+author: PersonalRules
+date: 2026/04/23
+tags:
+    - attack.persistence
+    - attack.t1176.001
+logsource:
+    product: linux
+    category: file_event
+detection:
+    selection_chrome:
+        TargetFilename|contains:
+            - '/etc/opt/chrome/policies/managed/'
+            - '/etc/opt/chrome/policies/recommended/'
+    selection_chromium:
+        TargetFilename|contains:
+            - '/etc/chromium/policies/managed/'
+            - '/etc/chromium/policies/recommended/'
+    selection_edge:
+        TargetFilename|contains:
+            - '/etc/opt/edge/policies/managed/'
+    condition: 1 of selection_*
+falsepositives:
+    - Enterprise IT administrators deploying browser
+      extensions via policy files
+    - Package managers installing browser policy packages
+level: medium
