@@ -1,0 +1,65 @@
+title: DLL Side-Loading via Legitimate Process
+id: 40523f56-1b47-42f1-9b23-46a8fc8090d3
+status: experimental
+description: Detects potential DLL side-loading attacks where a legitimate process loads a malicious DLL from an unexpected location, such as the same directory as the executable or system directories where the DLL should not normally reside.
+references:
+    - https://attack.mitre.org/techniques/T1574/002/
+    - https://www.mandiant.com/resources/blog/dll-side-loading-a-thorn-in-the-side-of-the-anti-virus-industry
+author: AJ Jeffreys
+date: 2026/04/24
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.defense_evasion
+    - attack.t1574.002
+    - detection.threat_hunting
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection_processes:
+        Image|endswith:
+            - '\\explorer.exe'
+            - '\\svchost.exe'
+            - '\\winlogon.exe'
+            - '\\csrss.exe'
+            - '\\lsass.exe'
+            - '\\services.exe'
+            - '\\spoolsv.exe'
+            - '\\taskhost.exe'
+            - '\\taskhostw.exe'
+            - '\\dwm.exe'
+    selection_dll_locations:
+        ImageLoaded|contains:
+            - '\\Desktop\\'
+            - '\\Downloads\\'
+            - '\\Documents\\'
+            - '\\AppData\\Local\\Temp\\'
+            - '\\Users\\Public\\'
+            - '\\ProgramData\\'
+    selection_suspicious_dlls:
+        ImageLoaded|endswith:
+            - '\\version.dll'
+            - '\\msvcr100.dll'
+            - '\\msvcr110.dll'
+            - '\\msvcr120.dll'
+            - '\\msvcp100.dll'
+            - '\\msvcp110.dll'
+            - '\\msvcp120.dll'
+            - '\\dwmapi.dll'
+            - '\\uxtheme.dll'
+            - '\\winmm.dll'
+            - '\\winspool.drv'
+    filter_legitimate:
+        ImageLoaded|startswith:
+            - 'C:\\Windows\\System32\\'
+            - 'C:\\Windows\\SysWOW64\\'
+            - 'C:\\Program Files\\'
+            - 'C:\\Program Files (x86)\\'
+    condition: selection_processes and (selection_dll_locations or selection_suspicious_dlls) and not filter_legitimate
+falsepositives:
+    - Legitimate software installations that place DLLs in non-standard locations
+    - Portable applications running from user directories
+    - Development environments and testing scenarios
+    - Third-party applications with custom DLL loading behavior
+level: medium
