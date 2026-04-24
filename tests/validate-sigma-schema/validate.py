@@ -41,7 +41,7 @@ def get_envs() -> Dict[str, Any]:
     sigma_schema_file = os.environ.get("SIGMA_SCHEMA_FILE")
     sigma_schema_url = os.environ.get(
         "SIGMA_SCHEMA_URL",
-        "https://raw.githubusercontent.com/SigmaHQ/sigma-specification/refs/heads/main/json-schema/sigma-detection-rule-schema.json",
+        "https://raw.githubusercontent.com/SigmaHQ/sigma-specification/refs/tags/v2.1.0/json-schema/sigma-detection-rule-schema.json",
     )
 
     return {
