@@ -1,0 +1,49 @@
+title: Shell Binary Created Outside Standard Binary Paths
+id: c2a5d8e3-9b47-4f1a-d628-4f1e7c2b9a65
+status: experimental
+description: |
+    Detects creation of shell binary files (bash, sh, dash, zsh, ksh, fish, etc.) in paths outside
+    standard system binary directories. Dropping a shell binary into a writable location such as
+    /tmp, /home, or /dev/shm is a common step in privilege escalation chains — for example, an
+    exploit postinst script creating a SUID bash copy (CVE-2026-41651) or an attacker staging a
+    shell for later execution. This complements the corresponding process_creation rule by catching
+    the file drop before execution occurs.
+references:
+    - https://gtfobins.github.io/gtfobins/bash/#suid
+    - https://github.com/Vozec/CVE-2026-41651
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-04-24
+tags:
+    - attack.privilege-escalation
+    - attack.t1548.001
+    - attack.execution
+    - attack.t1059.004
+logsource:
+    category: file_event
+    product: linux
+detection:
+    selection:
+        TargetFilename|endswith:
+            - '/bash'
+            - '/sh'
+            - '/dash'
+            - '/zsh'
+            - '/ksh'
+            - '/mksh'
+            - '/csh'
+            - '/tcsh'
+            - '/fish'
+    filter_main_standard_paths:
+        TargetFilename|startswith:
+            - '/bin/'
+            - '/usr/bin/'
+            - '/sbin/'
+            - '/usr/sbin/'
+            - '/usr/local/bin/'
+            - '/usr/local/sbin/'
+            - '/mnt/'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Package managers installing shells to custom prefixes (e.g. /opt, /snap, /nix)
+    - Container image builds writing shell binaries to overlay mounts
+level: medium # Can be updated to high after initial baselining and false positive validation
