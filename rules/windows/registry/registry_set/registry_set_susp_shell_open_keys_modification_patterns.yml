@@ -1,0 +1,42 @@
+title: Suspicious Shell Open Command Registry Modification
+id: 9e8894c0-0ae0-11ef-9d85-1f2942bec57c
+status: experimental
+description: |
+    Detects modifications to shell open registry keys that point to suspicious locations typically used by malware for persistence.
+    Generally, modifications to the `*\shell\open\command` registry key can indicate an attempt to change the default action for opening files,
+    and various UAC bypass or persistence techniques involve modifying these keys to execute malicious scripts or binaries.
+references:
+    - https://www.trendmicro.com/en_us/research/25/f/water-curse.html
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-01-24
+tags:
+    - attack.defense-evasion
+    - attack.privilege-escalation
+    - attack.persistence
+    - attack.t1548.002
+    - attack.t1546.001
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\shell\open\command\'
+        Details|contains:
+            - '\$Recycle.Bin\'
+            - '\AppData\Local\Temp\'
+            - '\Contacts\'
+            - '\Music\'
+            - '\PerfLogs\'
+            - '\Photos\'
+            - '\Pictures\'
+            - '\Users\Public\'
+            - '\Videos\'
+            - '\Windows\Temp\'
+            - '%AppData%'
+            - '%LocalAppData%'
+            - '%Temp%'
+            - '%tmp%'
+    condition: selection
+falsepositives:
+    - Legitimate software installations or updates that modify the shell open command registry keys to these locations.
+level: medium
