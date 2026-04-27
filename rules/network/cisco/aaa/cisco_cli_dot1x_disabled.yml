@@ -1,0 +1,38 @@
+title: Cisco Dot1x Disabled
+id: ef0ff092-a24a-4fbc-beea-06c08d53e085
+status: experimental
+description: |
+    Detects the manual disablement of IEEE 802.1X (dot1x) on a Cisco network device interface.
+    Disabling dot1x bypasses Network Access Control (NAC) mechanisms, potentially allowing unauthorized devices to gain access to the internal network.
+    This activity is a common technique used by attackers or malicious insiders to establish persistence or perform lateral movement via rogue devices.
+references:
+    - https://www.cisco.com/en/US/docs/ios-xml/ios/san/command/san-xe-3se-3850-cr-book_chapter_00.html#wp3394428680 # Modern IOS-XE
+    - https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/security/a1/sec-a1-xe-3se-3850-cr-book/sec-a1-xe-3se-3850-cr-book_chapter_010.html#wp3502072400 # Older IOS
+    - https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst2960/software/release/12-2_53_se/command/reference/2960ComRef/cli1.html#47220 # Legacy
+author: Luc Génaux
+date: 2026-04-28
+tags:
+    - attack.defense-evasion
+    - attack.persistence
+    - attack.credential-access
+    - attack.t1562.001
+    - attack.t1556.004
+logsource:
+    product: cisco
+    service: aaa
+detection:
+    keywords:
+        # xxx port-control force-authorized : disables 802.1X authentication and causes the port to change to the authorized state without any authentication exchange required
+        # no xxx port-control : causes the port to fallback to the default setting which is "force-authorized", thereby disabling 802.1X
+        - 'access-session port-control force-authorized' # Modern IOS-XE
+        - 'authentication port-control force-authorized' # Older IOS
+        - 'dot1x port-control force-authorized' # Legacy
+        - 'no access-session port-control' # Modern IOS-XE
+        - 'no authentication port-control' # Older IOS
+        - 'no dot1x port-control' # Legacy
+        - 'no dot1x system-auth-control' # disables 802.1X globally
+    condition: keywords
+falsepositives:
+    - Administrator troubleshooting connectivity issues
+level: medium
+# regression_tests_path: regression_data/rules/cisco/aaa/cisco_cli_dot1x_disabled/info.yml
