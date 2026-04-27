@@ -1,18 +1,22 @@
-title: Suspicious PowerShell Download
+title: PowerShell Download Via Net.WebClient - PowerShell Classic
 id: 3236fcd0-b7e3-4433-b4f8-86ad61a9af2d
 related:
     - id: 65531a81-a694-4e31-ae04-f8ba5bc33759
       type: derived
 status: test
-description: Detects suspicious PowerShell download command
+description: |
+    Detects PowerShell download activity, via the .DownloadFile() or .DownloadString() methods of the Net.WebClient class.
+    This technique is often abused by attackers to download additional payloads.
 references:
     - https://www.trendmicro.com/en_us/research/22/j/lv-ransomware-exploits-proxyshell-in-attack.html
 author: Florian Roth (Nextron Systems)
 date: 2017-03-05
-modified: 2023-10-27
+modified: 2026-04-28
 tags:
     - attack.execution
+    - attack.command-and-control
     - attack.t1059.001
+    - attack.t1105
 logsource:
     product: windows
     category: ps_classic_start
@@ -25,5 +29,5 @@ detection:
             - '.DownloadString('
     condition: all of selection_*
 falsepositives:
-    - PowerShell scripts that download content from the Internet
-level: medium
+    - This activity may be used by legitimate software, such as patch management tools or software updaters. Investigate any such activity and apply the necessary filter.
+level: low
