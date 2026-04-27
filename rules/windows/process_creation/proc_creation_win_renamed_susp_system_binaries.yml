@@ -1,0 +1,38 @@
+title: Suspicious Renamed System Binaries Execution
+id: 88d67e95-c155-43ce-8bb6-4530d488629b
+status: experimental
+description: |
+    Detects execution of system binaries that have been renamed, which is a common technique used by adversaries to evade detection.
+    Attackers often rename legitimate system binaries to bypass security controls and execute malicious payloads without raising suspicion.
+references:
+    - https://arcticwolf.com/resources/blog/sloppylemming-deploys-burrowshell-and-rust-based-rat-to-target-pakistan-and-bangladesh/
+    - https://medium.com/@DCSO_CyTec/shortandmalicious-strelastealer-aims-for-mail-credentials-a4c3e78c8abc
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-03-03
+tags:
+    - attack.defense-evasion
+    - attack.t1036.003
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    # The list below contains binaries that are susceptible to DLL hijacking attacks and have been observed to be renamed by adversaries in the wild. This is not an exhaustive list, and additional binaries may be added based on emerging threats and intelligence.
+    selection:
+        OriginalFileName:
+            - 'msinfo32.exe'
+            - 'netsh.exe'
+            - 'packageinspector.exe'
+            - 'phoneactivate.exe'
+            - 'slui.exe'
+    filter_main_image:
+        Image|endswith:
+            - '\msinfo32.exe'
+            - '\netsh.exe'
+            - '\packageinspector.exe'
+            - '\phoneactivate.exe'
+            - '\slui.exe'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unlikely
+level: high
+regression_tests_path: regression_data/rules/windows/process_creation/proc_creation_win_renamed_susp_system_binaries/info.yml
