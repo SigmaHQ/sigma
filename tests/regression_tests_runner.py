@@ -84,6 +84,7 @@ def load_info_yaml(
                     "path": test_path,
                     "name": test.get("name", "Unnamed Test"),
                     "provider": test.get("provider", ""),
+                    "match_count": test.get("match_count"),
                 }
             )
         info_metadata_rule_id = None
@@ -252,22 +253,35 @@ def run_evtx_checker(
 
         # Check if rule ID appears in output
         output_lines = result.stdout.strip().splitlines()
-        found_match = False
-        match_output = ""
+        match_outputs = []
 
         for line in output_lines:
             try:
                 json_obj = json.loads(line)
                 if json_obj.get("RuleId") == rule_id:
-                    found_match = True
-                    match_output = line
-                    break
+                    match_outputs.append(line)
             except json.JSONDecodeError:
                 # Skip lines that aren't valid JSON
                 print(f"  Warning: Skipping non-JSON line: {line}")
                 continue
 
-        return found_match, match_output
+        match_count = len(match_outputs)
+        all_output = "\n    ".join(match_outputs)
+
+        expected_count = test_data.get("match_count")
+        if expected_count is not None:
+            if match_count < expected_count:
+                print(
+                    f"  Error: {rule_id}: Match count too low: expected {expected_count}, got {match_count}"
+                )
+                return False, all_output
+            if match_count > expected_count:
+                print(
+                    f"  Warning: {rule_id}: Got {match_count} matches but only {expected_count} expected - consider updating match_count in info.yml"
+                )
+            return True, all_output
+
+        return match_count > 0, all_output
 
     except subprocess.TimeoutExpired:
         print("  Timeout: evtx-sigma-checker timed out")
