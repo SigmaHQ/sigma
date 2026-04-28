@@ -1,26 +1,23 @@
-title: EvilTokens PhaaS Kit Phishing Link Click Via Web Proxy
+title: EvilTokens PhaaS Kit Phishing Related Request - Proxy
 id: e0e121d0-be4d-4281-af7e-17abbba4a408
 status: experimental
 description: |
-    Detects outbound web proxy requests to URLs matching the EvilTokens
-    Phishing-as-a-Service (PhaaS) kit infrastructure, specifically Cloudflare
-    Workers and Railway.app domains used in OAuth device code authorization
-    phishing attacks. This indicates a user has clicked a phishing link.
+    Detects outbound web proxy requests to URLs matching the EvilTokens Phishing-as-a-Service (PhaaS) kit infrastructure.
+    Specifically Cloudflare Workers and Railway.app domains used in OAuth device code authorization phishing attacks.
+    This indicates a user has clicked a phishing link.
 references:
     - https://blog.sekoia.io/new-widespread-eviltokens-kit-device-code-phishing-as-a-service-part-1/
 author: uniqu3-us3r
-date: 2026/04/04
+date: 2026-04-28
 tags:
-    - attack.initial_access
+    - attack.initial-access
     - attack.t1566.002
 logsource:
     category: proxy
 detection:
     selection:
-        url|re: '-[a-z0-9]{3}\.[a-z0-9-]{3,}-s-account\.workers\.dev|\.up\.railway\.app'
-    filter_blocked:
-        action: 'BLOCK'
-    condition: selection and not filter_blocked
+        c-uri|re: '-[a-z0-9]{3}\.[a-z0-9-]{3,}-s-account\.workers\.dev|\.up\.railway\.app'
+    condition: selection
 falsepositives:
     - Legitimate use of Cloudflare Workers or Railway.app domains
-level: high
+level: low
