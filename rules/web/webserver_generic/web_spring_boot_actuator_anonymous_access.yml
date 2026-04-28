@@ -1,0 +1,55 @@
+title: Spring Boot Actuator Anonymous Access
+id: 39496e0b-0995-4f33-a56b-286806857b64
+status: experimental
+description: |
+    Detects anonymous (no Authorization header / no session) HTTP GET requests
+    to Spring Boot Actuator endpoints that return HTTP 200. Spring Boot
+    4.0.0-4.0.5 with `spring-boot-actuator-autoconfigure` on the classpath
+    but `spring-boot-health` absent (CVE-2026-40976) silently produces a
+    `SecurityFilterChain` with no `AuthorizationFilter`, allowing every
+    actuator endpoint to be read anonymously regardless of configured
+    authentication. The rule also matches the broader pattern of
+    misconfigured actuator exposure across older Spring Boot versions and
+    custom-chain deployments where the operator has unintentionally
+    permitted anonymous read.
+references:
+    - https://spring.io/security/cve-2026-40976/
+    - https://github.com/spring-projects/spring-boot/commit/874f6294b91da18367b8b5ab7b2fad3fa23cfba6
+    - https://binautopsy.com/research/cve-2026-40976/
+author: Binautopsy Labs
+date: 2026-04-28
+tags:
+    - attack.initial-access
+    - attack.t1190
+    - attack.discovery
+    - attack.t1592.004
+    - cve.2026-40976
+logsource:
+    category: webserver
+detection:
+    selection_path:
+        cs-method: 'GET'
+        cs-uri-stem|startswith:
+            - '/actuator/env'
+            - '/actuator/configprops'
+            - '/actuator/beans'
+            - '/actuator/mappings'
+            - '/actuator/threaddump'
+            - '/actuator/conditions'
+            - '/actuator/info'
+    selection_status:
+        sc-status: 200
+    selection_anonymous:
+        cs-username:
+            - '-'
+            - ''
+            - 'anonymous'
+    condition: all of selection_*
+falsepositives:
+    - Internal monitoring (Prometheus, Datadog, New Relic) scraping actuator
+      endpoints without an Authorization header. Allowlist the scraper
+      source IP at the access-log layer.
+    - Mutual-TLS-terminated clients where the principal is set by the
+      connector and the access log records `cs-username` as `-`. Filter by
+      source IP for known mTLS clients.
+level: high

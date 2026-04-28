@@ -1,0 +1,48 @@
+title: Spring Boot Actuator Write-Side Endpoint Attempt
+id: 51d24181-5409-4b20-bbbe-7df0ae0c25bc
+status: experimental
+description: |
+    Detects POST/PUT/DELETE/PATCH requests to Spring Boot Actuator
+    write-side endpoints (`/actuator/loggers/<name>`, `/actuator/shutdown`,
+    `/actuator/restart`, `/actuator/refresh`). In default Spring Security
+    6.x configuration these requests are blocked by `CsrfFilter` (HTTP
+    403), but the ATTEMPT itself is a strong adversary-presence signal —
+    it is the canonical post-bypass adversary pattern (silence security
+    logs, terminate the JVM) under CVE-2026-40976 and similar actuator
+    authorization bypasses. Applications that explicitly disable CSRF
+    (`http.csrf(c -> c.disable())`, common for stateless REST APIs)
+    convert this signal from "blocked attempt" to "successful tamper" —
+    pair this rule with a check on response status to differentiate.
+references:
+    - https://spring.io/security/cve-2026-40976/
+    - https://docs.spring.io/spring-boot/reference/actuator/endpoints.html
+    - https://binautopsy.com/research/cve-2026-40976/
+author: Binautopsy Labs
+date: 2026-04-28
+tags:
+    - attack.defense-evasion
+    - attack.t1562.002
+    - attack.impact
+    - attack.t1499
+    - cve.2026-40976
+logsource:
+    category: webserver
+detection:
+    selection:
+        cs-method:
+            - 'POST'
+            - 'PUT'
+            - 'DELETE'
+            - 'PATCH'
+        cs-uri-stem|startswith:
+            - '/actuator/loggers/'
+            - '/actuator/shutdown'
+            - '/actuator/restart'
+            - '/actuator/refresh'
+    condition: selection
+falsepositives:
+    - Operator-driven log-level changes via `/actuator/loggers`. Allowlist
+      the operator IP and correlate with a change-management ticket.
+    - Operator-driven application restart via `/actuator/restart`.
+      Same allowlist pattern.
+level: medium
