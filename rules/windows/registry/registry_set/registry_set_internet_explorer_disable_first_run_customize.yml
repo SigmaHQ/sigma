@@ -9,7 +9,7 @@ references:
     - https://admx.help/?Category=InternetExplorer&Policy=Microsoft.Policies.InternetExplorer::NoFirstRunCustomise
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023-05-16
-modified: 2023-08-17
+modified: 2025-10-07
 tags:
     - attack.defense-evasion
 logsource:
@@ -25,7 +25,17 @@ detection:
         Image:
             - 'C:\Windows\explorer.exe'
             - 'C:\Windows\System32\ie4uinit.exe'
-    condition: selection and not 1 of filter_main_*
+    filter_optional_avira:
+        Image|contains|all:
+            - '\Temp\'
+            - '\.cr\avira_'
+        Details|contains: 'DWORD (0x00000001)'
+    filter_optional_foxit:
+        Image:
+            - 'C:\Program Files (x86)\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe'
+            - 'C:\Program Files\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe'
+        Details|contains: 'DWORD (0x00000001)'
+    condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - As this is controlled by group policy as well as user settings. Some false positives may occur.
 level: medium

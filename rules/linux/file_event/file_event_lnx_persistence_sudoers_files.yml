@@ -1,22 +1,30 @@
-title: Persistence Via Sudoers Files
+title: Persistence Via Sudoers.d Files
 id: ddb26b76-4447-4807-871f-1b035b2bfa5d
 status: test
-description: Detects creation of sudoers file or files in "sudoers.d" directory which can be used a potential method to persiste privileges for a specific user.
+description: |
+    Detects the creation or modification of files within the "sudoers.d" directory on Linux systems.
+    Such activity may indicate an attempt to establish or maintain privilege escalation by granting specific users elevated permissions.
+    Unauthorized changes to sudoers files are a common technique used by attackers to persist administrative access.
 references:
     - https://github.com/h3xduck/TripleCross/blob/1f1c3e0958af8ad9f6ebe10ab442e75de33e91de/apps/deployer.sh
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-07-05
-modified: 2022-12-31
+modified: 2026-03-18
 tags:
+    - attack.privilege-escalation
     - attack.persistence
-    - attack.t1053.003
+    - attack.defense-evasion
+    - attack.t1548.003
 logsource:
     product: linux
     category: file_event
 detection:
     selection:
         TargetFilename|startswith: '/etc/sudoers.d/'
-    condition: selection
+    filter_main_dpkg:
+        Image|endswith: '/usr/bin/dpkg'
+        TargetFilename: '/etc/sudoers.d/README.dpkg-new'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
-    - Creation of legitimate files in sudoers.d folder part of administrator work
+    - Creation of legitimate files in sudoers.d folder as part of administrator work
 level: medium

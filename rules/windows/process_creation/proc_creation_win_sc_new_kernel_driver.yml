@@ -6,7 +6,7 @@ references:
     - https://www.aon.com/cyber-solutions/aon_cyber_labs/yours-truly-signed-av-driver-weaponizing-an-antivirus-driver/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-07-14
-modified: 2022-08-08
+modified: 2025-10-07
 tags:
     - attack.persistence
     - attack.privilege-escalation
@@ -24,7 +24,17 @@ detection:
             - 'binPath'
             - 'type'
             - 'kernel'
-    condition: selection
+    filter_optional_avira_driver:
+        - CommandLine|contains|all:
+              - 'create netprotection_network_filter'
+              - 'type= kernel start= '
+              - 'binPath= System32\drivers\netprotection_network_filter'
+              - 'DisplayName= netprotection_network_filter'
+              - 'group= PNP_TDI tag= yes'
+        - CommandLine|contains|all:
+              - 'create avelam binpath=C:\Windows\system32\drivers\avelam.sys'
+              - 'type=kernel start=boot error=critical group=Early-Launch'
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Rare legitimate installation of kernel drivers via sc.exe
 level: medium

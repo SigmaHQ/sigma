@@ -9,7 +9,7 @@ references:
     - https://www.microsoft.com/en-us/security/blog/2022/10/27/raspberry-robin-worm-part-of-larger-ecosystem-facilitating-pre-ransomware-activity/
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2022-10-28
-modified: 2024-03-13
+modified: 2025-10-07
 tags:
     - attack.defense-evasion
     - attack.t1218.007
@@ -34,7 +34,11 @@ detection:
         CommandLine|contains:
             - 'http'
             - '\\\\'
-    condition: all of selection_*
+    filter_optional_openoffice:
+        CommandLine|contains|all:
+            - '\AppData\Local\Temp\OpenOffice'
+            - 'Installation Files\openoffice'
+    condition: all of selection_* and not 1 of filter_optional_*
 falsepositives:
     - Unknown
 level: medium

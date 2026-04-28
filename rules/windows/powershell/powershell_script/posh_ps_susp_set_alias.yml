@@ -9,6 +9,7 @@ references:
     - https://github.com/1337Rin/Swag-PSO
 author: frack113
 date: 2023-01-08
+modified: 2025-10-22
 tags:
     - attack.defense-evasion
     - attack.execution
@@ -23,7 +24,21 @@ detection:
         ScriptBlockText|contains:
             - 'Set-Alias '
             - 'New-Alias '
-    condition: selection
+    filter_main_cim:
+        ScriptBlockText:
+            - 'Set-Alias -Name ncms -Value New-CimSession -Option ReadOnly, AllScope -ErrorAction SilentlyContinue'
+            - 'Set-Alias -Name gcls -Value Get-CimClass -Option ReadOnly, AllScope -ErrorAction SilentlyContinue'
+            - 'Set-Alias -Name ncso -Value New-CimSessionOption -Option ReadOnly, AllScope -ErrorAction SilentlyContinue'
+            - 'Set-Alias -Name gcms -Value Get-CimSession -Option ReadOnly, AllScope -ErrorAction SilentlyContinue'
+            - 'Set-Alias -Name rcms -Value Remove-cimSession -Option ReadOnly, AllScope -ErrorAction SilentlyContinue'
+            - 'Set-Alias -Name rcie -Value Register-CimIndicationEvent -Option ReadOnly, AllScope -ErrorAction SilentlyContinue'
+            - 'Set-Alias -Name gcai -Value Get-CimAssociatedInstance -Option ReadOnly, AllScope -ErrorAction SilentlyContinue'
+            - 'Set-Alias -Name gcim -Value Get-CimInstance -Option ReadOnly, AllScope -ErrorAction SilentlyContinue'
+            - 'Set-Alias -Name scim -Value Set-CimInstance -Option ReadOnly, AllScope -ErrorAction SilentlyContinue'
+            - 'Set-Alias -Name ncim -Value New-CimInstance -Option ReadOnly, AllScope -ErrorAction SilentlyContinue'
+            - 'Set-Alias -Name rcim -Value Remove-cimInstance -Option ReadOnly, AllScope -ErrorAction SilentlyContinue'
+            - 'Set-Alias -Name icim -Value Invoke-CimMethod -Option ReadOnly, AllScope -ErrorAction SilentlyContinue'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: low
