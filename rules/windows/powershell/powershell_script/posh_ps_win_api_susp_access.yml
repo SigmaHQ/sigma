@@ -9,11 +9,12 @@ references:
     - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse
 author: Nasreddine Bencherchali (Nextron Systems), Nikita Nazarov, oscd.community
 date: 2020-10-06
-modified: 2023-06-20
+modified: 2026-04-29
 tags:
     - attack.execution
     - attack.t1059.001
     - attack.t1106
+    - attack.t1620
 logsource:
     product: windows
     category: ps_script
@@ -42,6 +43,11 @@ detection:
             - 'VirtualAlloc'
             - 'ReadProcessMemory'
             - 'VirtualFree'
+    selection_local_shellcode_injection:
+        ScriptBlockText|contains|all:
+            - 'VirtualAlloc'
+            - 'GetDelegateForFunctionPointer'
+            - 'Marshal.Copy'
     condition: 1 of selection_*
 falsepositives:
     - Unknown
