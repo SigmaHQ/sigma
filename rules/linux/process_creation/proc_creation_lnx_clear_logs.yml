@@ -1,15 +1,17 @@
-title: Clear Linux Logs
+title: Linux Logs Clearing Attempts
 id: 80915f59-9b56-4616-9de0-fd0dea6c12fe
 status: stable
-description: Detects attempts to clear logs on the system. Adversaries may clear system logs to hide evidence of an intrusion
+description: |
+    Detects logs clearing attempts on Linux systems via utilities such as 'rm', 'rmdir', 'shred', and 'unlink' targeting log files and directories.
+    Adversaries often try to clear logs to cover their tracks after performing malicious activities.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.002/T1070.002.md
 author: Ömer Günal, oscd.community
 date: 2020-10-07
-modified: 2022-09-15
+modified: 2026-03-18
 tags:
-    - attack.defense-evasion
-    - attack.t1070.002
+    - attack.defense-impairment
+    - attack.t1685.006
 logsource:
     product: linux
     category: process_creation
@@ -17,12 +19,19 @@ detection:
     selection:
         Image|endswith:
             - '/rm'    # covers /rmdir as well
+            - '/rmdir'
             - '/shred'
             - '/unlink'
         CommandLine|contains:
             - '/var/log'
             - '/var/spool/mail'
-    condition: selection
+    filter_main_legit_systat:
+        Image|endswith: '/rm'
+        CommandLine|startswith: 'rm -f /var/log/sysstat/'
+    filter_main_dmseg:
+        Image|endswith: '/rm'
+        CommandLine|startswith: 'rm -f -- /var/log//dmesg' # // before dmesg is not typo
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Legitimate administration activities
 level: medium
