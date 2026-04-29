@@ -4,20 +4,22 @@ status: test
 description: Identifies when a application is deleted in Azure.
 references:
     - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities#application-proxy
+    - https://techcommunity.microsoft.com/blog/microsoft-entra-blog/keeping-track-of-object-deletions-in-microsoft-entra-id/4053415
 author: Austin Songer @austinsonger
 date: 2021-09-03
-modified: 2022-10-09
+modified: 2026-04-30
 tags:
     - attack.impact
     - attack.t1489
 logsource:
     product: azure
-    service: activitylogs
+    service: auditlogs
 detection:
     selection:
-        properties.message:
-            - Delete application
-            - Hard Delete application
+        operationName:
+            - 'Delete application'
+            - 'Hard Delete application'
+            - 'Delete administrative unit'
     condition: selection
 falsepositives:
     - Application being deleted may be performed by a system administrator.

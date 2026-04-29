@@ -3,10 +3,12 @@ id: ebbeb024-5b1d-4e16-9c0c-917f86c708a7
 status: test
 description: User Added to an Administrator's Azure AD Role
 references:
-    - https://m365internals.com/2021/07/13/what-ive-learned-from-doing-a-year-of-cloud-forensics-in-azure-ad/
+    - https://web.archive.org/web/20250904191633/https://m365internals.com/2021/07/13/what-ive-learned-from-doing-a-year-of-cloud-forensics-in-azure-ad/
+    - https://research.splunk.com/cloud/a28f0bc3-3400-4a6e-a2da-89b9e95f0d2a/
+    - https://analyticsrules.exchange/analyticrules/2a09f8cb-deb7-4c40-b08b-9137667f1c0b/
 author: Raphaël CALVET, @MetallicHack
 date: 2021-10-04
-modified: 2022-10-09
+modified: 2026-04-30
 tags:
     - attack.initial-access
     - attack.persistence
@@ -16,15 +18,13 @@ tags:
     - attack.t1078
 logsource:
     product: azure
-    service: activitylogs
+    service: auditlogs
 detection:
     selection:
-        Operation: 'Add member to role.'
-        Workload: 'AzureActiveDirectory'
-        ModifiedProperties{}.NewValue|endswith:
-            - 'Admins'
-            - 'Administrator'
-    condition: selection
+        operationName: 'Add member to role'
+    keywords:
+        - 'admin'
+    condition: selection and keywords
 falsepositives:
     - PIM (Privileged Identity Management) generates this event each time 'eligible role' is enabled.
 level: medium

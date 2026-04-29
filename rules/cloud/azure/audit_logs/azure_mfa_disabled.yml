@@ -4,8 +4,13 @@ status: test
 description: Detection for when multi factor authentication has been disabled, which might indicate a malicious activity to bypass authentication mechanisms.
 references:
     - https://learn.microsoft.com/en-us/azure/active-directory/authentication/howto-mfa-userstates
+    - https://research.splunk.com/cloud/482dd42a-acfa-486b-a0bb-d6fcda27318e/
+    - https://analyticsrules.exchange/analyticrules/65c78944-930b-4cae-bd79-c3664ae30ba7/
+    - https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/auditlogs
+    - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities?source=recommendations#core-directory
 author: '@ionsor'
 date: 2022-02-08
+modified: 2026-04-30
 tags:
     - attack.credential-access
     - attack.persistence
@@ -13,12 +18,11 @@ tags:
     - attack.t1556
 logsource:
     product: azure
-    service: activitylogs
+    service: auditlogs
 detection:
     selection:
-        eventSource: AzureActiveDirectory
-        eventName: 'Disable Strong Authentication.'
-        status: success
+        operationName: 'Disable Strong Authentication'
+        properties.result: 'success'
     condition: selection
 falsepositives:
     - Authorized modification by administrators
