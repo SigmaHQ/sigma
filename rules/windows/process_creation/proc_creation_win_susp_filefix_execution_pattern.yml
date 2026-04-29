@@ -1,0 +1,72 @@
+title: Suspicious FileFix Execution Pattern
+id: b5b29e4e-31fa-4fdf-b058-296e7a1aa0c2
+related:
+    - id: 4fee3d51-8069-4a4c-a0f7-924fcaff2c70
+      type: similar
+    - id: 4be03877-d5b6-4520-85c9-a5911c0a656c
+      type: obsolete
+status: experimental
+description: |
+    Detects suspicious FileFix execution patterns where users are tricked into running malicious commands through browser file upload dialog manipulation.
+    This attack typically begins when users visit malicious websites impersonating legitimate services or news platforms,
+    which may display fake CAPTCHA challenges or direct instructions to open file explorer and paste clipboard content.
+    The clipboard content usually contains commands that download and execute malware, such as information stealing tools.
+references:
+    - https://mrd0x.com/filefix-clickfix-alternative/
+    - https://expel.com/blog/cache-smuggling-when-a-picture-isnt-a-thousand-words/ # phishing lure directly asking users to open file explorer and paste command
+    - https://blog.checkpoint.com/research/filefix-the-new-social-engineering-attack-building-on-clickfix-tested-in-the-wild/
+author: 0xFustang, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-11-24
+tags:
+    - attack.execution
+    - attack.t1204.004
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_exec_parent:
+        # This is case where phishing pages trick users to paste commands in browser file upload dialog
+        ParentImage|endswith:
+            - '\brave.exe'
+            - '\chrome.exe'
+            - '\firefox.exe'
+            - '\msedge.exe'
+        CommandLine|contains: '#'
+    selection_cli_lolbin:
+        CommandLine|contains:
+            - '%comspec%'
+            - 'bitsadmin'
+            - 'certutil'
+            - 'cmd'
+            - 'cscript'
+            - 'curl'
+            - 'finger'
+            - 'mshta'
+            - 'powershell'
+            - 'pwsh'
+            - 'regsvr32'
+            - 'rundll32'
+            - 'schtasks'
+            - 'wget'
+            - 'wscript'
+    selection_cli_captcha:
+        CommandLine|contains:
+            - 'account'
+            - 'anti-bot'
+            - 'botcheck'
+            - 'captcha'
+            - 'challenge'
+            - 'confirmation'
+            - 'fraud'
+            - 'human'
+            - 'identification'
+            - 'identificator'
+            - 'identity'
+            - 'robot'
+            - 'validation'
+            - 'verification'
+            - 'verify'
+    condition: selection_exec_parent and 1 of selection_cli_*
+falsepositives:
+    - Legitimate use of PowerShell or other utilities launched from browser extensions or automation tools
+level: high
