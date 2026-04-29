@@ -4,14 +4,17 @@ related:
     - id: 17f878b8-9968-4578-b814-c4217fc5768c
       type: obsolete
 status: test
-description: Detects modification of autostart extensibility point (ASEP) in registry.
+description: |
+    Detects modification of autostart extensibility point (ASEP) in registry. Adversaries may modify these keys to execute malicious code when Office files are opened.
+    There are various legitimate add-ins that also use these keys and this filter list might not be exhaustive.
+    Thus, it is recommended to review and tune filters for your environment to reduce false positives before deploying to production.
 references:
     - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1547.001/T1547.001.md
     - https://learn.microsoft.com/en-us/sysinternals/downloads/autoruns
     - https://gist.github.com/GlebSukhodolskiy/0fc5fa5f482903064b448890db1eaf9d # a list with registry keys
 author: Victor Sergeev, Daniil Yugoslavskiy, Gleb Sukhodolskiy, Timur Zinniatullin, oscd.community, Tim Shelton, frack113 (split)
 date: 2019-10-25
-modified: 2025-10-17
+modified: 2026-01-09
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -35,12 +38,17 @@ detection:
             - 'test\Special\Perf'
     filter_main_empty:
         Details: '(Empty)'
+    filter_main_null:
+        Details: null
     filter_main_known_addins:
         Image|startswith:
             - 'C:\Program Files\Microsoft Office\'
             - 'C:\Program Files (x86)\Microsoft Office\'
+            - 'C:\PROGRA~2\MICROS~2\Office'
             - 'C:\Windows\System32\msiexec.exe'
+            - 'C:\Windows\SysWOW64\msiexec.exe'
             - 'C:\Windows\System32\regsvr32.exe'
+            - 'C:\Windows\SysWOW64\regsvr32.exe '
         TargetObject|contains:
             # Remove any unused addins in your environment from the filter
             # Known addins for excel
@@ -55,9 +63,11 @@ detection:
             - '\Outlook\AddIns\EvernoteCC.EvernoteContactConnector\'
             - '\Outlook\AddIns\EvernoteOLRD.Connect\'
             # - '\Outlook\Addins\GrammarlyAddIn.Connect' # Uncomment if you use Grammarly
+            - '\Outlook\Addins\\OneNote.OutlookAddin'
+            - '\Outlook\Addins\DriveFSExtensionLib.Connect\' # An Outlook Add-in to talk with Google Drive
+            - '\Outlook\Addins\GoogleAppsSync.Connect\' # Google Apps Sync for Microsoft Outlook
             - '\Outlook\Addins\Microsoft.VbaAddinForOutlook.1\'
             - '\Outlook\Addins\OcOffice.OcForms\'
-            - '\Outlook\Addins\\OneNote.OutlookAddin'
             - '\Outlook\Addins\OscAddin.Connect\'
             - '\Outlook\Addins\OutlookChangeNotifier.Connect\'
             - '\Outlook\Addins\UCAddin.LyncAddin.1'
@@ -69,6 +79,11 @@ detection:
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\'
             - 'C:\Program Files\Common Files\Microsoft Shared\ClickToRun\Updates\'
         Image|endswith: '\OfficeClickToRun.exe'
+    filter_main_vsto:
+        Image|startswith:
+            - 'C:\Program Files\Common Files\Microsoft Shared\VSTO\'
+            - 'C:\Program Files (x86)\Microsoft Shared\VSTO\'
+        Image|endswith: '\VSTOInstaller.exe'
     filter_optional_avg:
         Image:
             - 'C:\Program Files\AVG\Antivirus\RegSvr.exe'
@@ -79,8 +94,9 @@ detection:
             - 'C:\Program Files\Avast Software\Avast\RegSvr.exe'
             - 'C:\Program Files\Avast Software\Avast\x86\RegSvr.exe'
         TargetObject|contains: '\Microsoft\Office\Outlook\Addins\Avast.AsOutExt\'
+    # These filters are not exhaustive, filter can be expanded based on environment
     condition: all of selection_office_* and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
-    - Legitimate software automatically (mostly, during installation) sets up autorun keys for legitimate reason
-    - Legitimate administrator sets up autorun keys for legitimate reason
+    - Legitimate software or add-in installations and administrative configurations
+    - Automatic registry modifications during legitimate software installations
 level: medium
