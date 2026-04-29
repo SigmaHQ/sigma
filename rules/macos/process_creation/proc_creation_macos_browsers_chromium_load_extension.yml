@@ -1,0 +1,37 @@
+title: Potential Malicious Extension Loading via Chromium Flag on macOS
+id: 3300b617-be88-4245-8229-72a071cfede9
+related:
+    - id: 4100c0d0-3cd6-4178-b5e4-1b614b9db77e
+      type: similar
+    - id: 88d6e60c-759d-4ac1-a447-c0f1466c2d21
+      type: similar
+status: experimental
+description: |
+    Detects the use of the '--load-extension' Chromium flag on any
+    process on macOS. This parameter exists in all Chromium-based
+    applications including browsers (Chrome, Edge, Brave, etc.),
+    Electron apps (Discord, Slack, VS Code, Teams, etc.), and CEF
+    framework applications. Threat actors abuse this to load
+    malicious extensions for cookie theft, session hijacking, or
+    persistence.
+references:
+    - https://redcanary.com/blog/chromeloader/
+    - https://cedowens.medium.com/remotely-dumping-chrome-cookies-revisited-b25343257209
+    - https://www.electronjs.org/docs/latest/api/command-line-switches
+author: PersonalRules
+date: 2026-04-21
+tags:
+    - attack.persistence
+    - attack.t1176.001
+logsource:
+    product: macos
+    category: process_creation
+detection:
+    selection:
+        CommandLine|contains: '--load-extension='
+    condition: selection
+falsepositives:
+    - Automated testing frameworks such as Selenium, Cypress, or Playwright
+    - Browser extension development and debugging
+    - Electron app development using remote debugging or custom extensions
+level: medium
