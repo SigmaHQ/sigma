@@ -1,0 +1,37 @@
+title: Suspicious File Write to Webapps Root Directory
+id: 89c42960-f244-4dad-9151-ae9b1a3287a2
+status: experimental
+description: |
+    Detects suspicious file writes to the root directory of web applications, particularly Apache web servers or Tomcat servers.
+    This may indicate an attempt to deploy malicious files such as web shells or other unauthorized scripts.
+references:
+    - https://labs.watchtowr.com/guess-who-would-be-stupid-enough-to-rob-the-same-vault-twice-pre-auth-rce-chains-in-commvault/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-10-20
+tags:
+    - attack.persistence
+    - attack.t1505.003
+    - attack.initial-access
+    - attack.t1190
+logsource:
+    product: windows
+    category: file_event
+detection:
+    # Add more suspicious processes or paths or extensions as needed
+    selection_susp_img:
+        Image|endswith:
+            - '\dotnet.exe'
+            - '\w3wp.exe'
+            - '\java.exe'
+    selection_servers:
+        TargetFilename|contains:
+            - '\apache'
+            - '\tomcat'
+    selection_path:
+        TargetFilename|contains: '\webapps\ROOT\'
+    selection_susp_extensions:
+        TargetFilename|endswith: '.jsp'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium

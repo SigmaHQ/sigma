@@ -9,6 +9,7 @@ import requests
 import yaml
 import os
 from datetime import datetime
+from typing import Generator
 
 
 WEB_ARCHIVE_SAVE_URL = "https://web.archive.org/save/"
@@ -27,7 +28,7 @@ path_to_rules = [
 
 
 # Helper functions
-def yield_next_rule_file_path(path_to_rules: list) -> str:
+def yield_next_rule_file_path(path_to_rules: list) -> Generator[str, None, None]:
     for path_ in path_to_rules:
         for root, _, files in os.walk(path_):
             for file in files:
@@ -103,6 +104,26 @@ def archive_references(ref_list):
     return already_archived, newly_archived_references, error_archiving
 
 
+def sort_references(file_path: str):
+    """Sort the references in the rule-references.txt file alphabetically."""
+    try:
+        with open(file_path, "r") as f:
+            references = [line.strip() for line in f.readlines() if line.strip()]
+        
+        # Sort references alphabetically (case-insensitive)
+        references.sort(key=str.lower)
+        
+        # Write the sorted references back to the file
+        with open(file_path, "w") as f:
+            for ref in references:
+                f.write(ref + "\n")
+        
+        print("References sorted successfully.")
+        
+    except Exception as e:
+        print(f"Error sorting references: {e}")
+
+
 if __name__ == "__main__":
     print("Archiving references ...\n")
 
@@ -123,6 +144,10 @@ if __name__ == "__main__":
         for ref in newly_archived_references:
             f.write(ref)
             f.write("\n")
+
+    # Sort the references alphabetically at the end
+    print("Sorting references...")
+    sort_references("tests/rule-references.txt")
 
     # Write markdown output to open the issue
     with open(".github/latest_archiver_output.md", "w") as f:

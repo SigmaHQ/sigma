@@ -1,0 +1,31 @@
+title: DNS Query To Common Malware Hosting and Shortener Services
+id: f8c1e80b-c73a-476a-ae24-6c72528b1521
+status: experimental
+description: |
+    Detects DNS queries to domains commonly used by threat actors to host malware payloads or redirect through URL shorteners.
+    These include platforms like Cloudflare Workers, TryCloudflare, InfinityFree, and URL shorteners such as tinyurl and lihi.cc.
+    Such DNS activity can indicate potential delivery or command-and-control communication attempts.
+references:
+    - https://cloud.google.com/blog/topics/threat-intelligence/apt41-innovative-tactics
+author: Ahmed Nosir (@egycondor)
+date: 2025-06-02
+tags:
+    - attack.command-and-control
+    - attack.t1071.004
+logsource:
+    product: windows
+    category: dns_query
+detection:
+    selection:
+        QueryName|contains:
+            - 'msapp.workers.dev'
+            - 'trycloudflare.com'
+            - 'infinityfreeapp.com'
+            - 'my5353.com'
+            - 'reurl.cc'
+            - 'lihi.cc'
+            - 'tinyurl.com'
+    condition: selection
+falsepositives:
+    - Legitimate use of these services is possible but rare in enterprise environments
+level: medium

@@ -1,0 +1,50 @@
+title: Potential Exploitation of CVE-2025-4427/4428 Ivanti EPMM Pre-Auth RCE
+id: 41956f7c-7a6b-46d6-b6bb-da6eb2e83fbe
+status: experimental
+description: |
+    Detects potential exploitation of a chained vulnerability attack targeting Ivanti EPMM 12.5.0.0.
+    CVE-2025-4427 allows unauthenticated access to protected API endpoints via an authentication bypass,
+    which can then be leveraged to trigger CVE-2025-4428 — a remote code execution vulnerability through
+    template injection. This sequence enables unauthenticated remote code execution, significantly increasing
+    the impact of exploitation.
+references:
+    - https://labs.watchtowr.com/expression-payloads-meet-mayhem-cve-2025-4427-and-cve-2025-4428/?123
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-05-20
+tags:
+    - attack.initial-access
+    - attack.t1190
+    - attack.execution
+    - attack.t1203
+    - cve.2025-4427
+    - cve.2025-4428
+    - detection.emerging-threats
+logsource:
+    category: webserver
+detection:
+    selection_uri:
+        cs-uri-stem|contains: '/mifs/rs/api/v2/featureusage'
+        cs-uri-query|contains: 'format='
+    selection_exploit_rce:
+        - cs-uri-query|contains|all:
+              - 'java.lang.Runtime'
+              - '.getMethod'
+              - 'getRuntime'
+              - '.exec('
+        - cs-uri-query|contains|all:
+              - 'java%2elang%2eRuntime' # java.lang.Runtime
+              - '%2egetMethod' # .getMethod
+              - '%2eexec%28' # .exec(
+        - cs-uri-query|contains:
+              - '%6a%61%76%61%2e%6c%61%6e%67%2e%52%75%6e%74%69%6d%65%65%28%29' # java.lang.Runtime
+              - '%67%65%74%52%75%6e%74%69%6d%65' # getRuntime
+              - '%2e%65%78%65%63%28' # .exec(
+    selection_exploit_template_injection:
+        cs-uri-query|contains:
+            - '{7*7}'
+            - '%7B7*7%7D'
+            - '%7b7%2a7%7d'
+    condition: selection_uri and 1 of selection_exploit_*
+falsepositives:
+    - Unknown
+level: high

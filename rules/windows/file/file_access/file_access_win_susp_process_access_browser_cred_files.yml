@@ -1,0 +1,202 @@
+title: Suspicious File Access to Browser Credential Storage
+id: a1dfd976-4852-41d4-9507-dc6590a3ccd0
+status: experimental
+description: |
+    Detects file access to browser credential storage paths by non-browser processes, which may indicate credential access attempts.
+    Adversaries may attempt to access browser credential storage to extract sensitive information such as usernames and passwords or cookies.
+    This behavior is often commonly observed in credential stealing malware.
+references:
+    - https://github.com/splunk/security_content/blob/7283ba3723551f46b69dfeb23a63b358afb2cb0e/lookups/browser_app_list.csv?plain=1
+    - https://fourcore.io/blogs/threat-hunting-browser-credential-stealing
+author: frack113, X__Junior (Nextron Systems), Swachchhanda Shrawan Poudel (Nextron Systems), Parth-FourCore
+date: 2025-05-22
+tags:
+    - attack.credential-access
+    - attack.t1555.003
+    - attack.discovery
+    - attack.t1217
+logsource:
+    category: file_access
+    product: windows
+detection:
+    selection_browser_paths:
+        FileName|contains:
+            - '\Sputnik\Sputnik'
+            - '\MapleStudio\ChromePlus'
+            - '\QIP Surf'
+            - '\BlackHawk'
+            - '\7Star\7Star'
+            - '\CatalinaGroup\Citrio'
+            - '\Google\Chrome'
+            - '\Coowon\Coowon'
+            - '\CocCoc\Browser'
+            - '\uCozMedia\Uran'
+            - '\Tencent\QQBrowser'
+            - '\Orbitum'
+            - '\Slimjet'
+            - '\Iridium'
+            - '\Vivaldi'
+            - '\Chromium'
+            - '\GhostBrowser'
+            - '\CentBrowser'
+            - '\Xvast'
+            - '\Chedot'
+            - '\SuperBird'
+            - '\360Browser\Browser'
+            - '\360Chrome\Chrome'
+            - '\Comodo\Dragon'
+            - '\BraveSoftware\Brave-Browser'
+            - '\Torch'
+            - '\UCBrowser\'
+            - '\Blisk'
+            - '\Epic Privacy Browser'
+            - '\Nichrome'
+            - '\Amigo'
+            - '\Kometa'
+            - '\Xpom'
+            - '\Microsoft\Edge'
+            - '\Liebao7Default\EncryptedStorage'
+            - '\AVAST Software\Browser'
+            - '\Kinza'
+            - '\Mozilla\SeaMonkey\'
+            - '\Comodo\IceDragon\'
+            - '\8pecxstudios\Cyberfox\'
+            - '\FlashPeak\SlimBrowser\'
+            - '\Moonchild Productions\Pale Moon\'
+    selection_browser_subpaths:
+        FileName|contains:
+            - '\Profiles\'
+            - '\User Data'
+    selection_cred_files:
+        - FileName|contains:
+              - '\Login Data'
+              - '\Cookies'
+              - '\EncryptedStorage'
+              - '\WebCache\'
+        - FileName|endswith:
+              - 'cert9.db'
+              - 'cookies.sqlite'
+              - 'formhistory.sqlite'
+              - 'key3.db'
+              - 'key4.db'
+              - 'Login Data.sqlite'
+              - 'logins.json'
+              - 'places.sqlite'
+    filter_main_img:
+        Image|endswith:
+            - '\Sputnik.exe'
+            - '\ChromePlus.exe'
+            - '\QIP Surf.exe'
+            - '\BlackHawk.exe'
+            - '\7Star.exe'
+            - '\Sleipnir5.exe'
+            - '\Citrio.exe'
+            - '\Chrome SxS.exe'
+            - '\Chrome.exe'
+            - '\Coowon.exe'
+            - '\CocCocBrowser.exe'
+            - '\Uran.exe'
+            - '\QQBrowser.exe'
+            - '\Orbitum.exe'
+            - '\Slimjet.exe'
+            - '\Iridium.exe'
+            - '\Vivaldi.exe'
+            - '\Chromium.exe'
+            - '\GhostBrowser.exe'
+            - '\CentBrowser.exe'
+            - '\Xvast.exe'
+            - '\Chedot.exe'
+            - '\SuperBird.exe'
+            - '\360Browser.exe'
+            - '\360Chrome.exe'
+            - '\dragon.exe'
+            - '\brave.exe'
+            - '\torch.exe'
+            - '\UCBrowser.exe'
+            - '\BliskBrowser.exe'
+            - '\Epic Privacy Browser.exe'
+            - '\nichrome.exe'
+            - '\AmigoBrowser.exe'
+            - '\KometaBrowser.exe'
+            - '\XpomBrowser.exe'
+            - '\msedge.exe'
+            - '\LiebaoBrowser.exe'
+            - '\AvastBrowser.exe'
+            - '\Kinza.exe'
+            - '\seamonkey.exe'
+            - '\icedragon.exe'
+            - '\cyberfox.exe'
+            - '\SlimBrowser.exe'
+            - '\palemoon.exe'
+    filter_main_path:
+        Image|contains:
+            - '\Sputnik\'
+            - '\MapleStudio\'
+            - '\QIP Surf\'
+            - '\BlackHawk\'
+            - '\7Star\'
+            - '\Fenrir Inc\'
+            - '\CatalinaGroup\'
+            - '\Google\'
+            - '\Coowon\'
+            - '\CocCoc\'
+            - '\uCozMedia\'
+            - '\Tencent\'
+            - '\Orbitum\'
+            - '\Slimjet\'
+            - '\Iridium\'
+            - '\Vivaldi\'
+            - '\Chromium\'
+            - '\GhostBrowser\'
+            - '\CentBrowser\'
+            - '\Xvast\'
+            - '\Chedot\'
+            - '\SuperBird\'
+            - '\360Browser\'
+            - '\360Chrome\'
+            - '\Comodo\'
+            - '\BraveSoftware\'
+            - '\Torch\'
+            - '\UCBrowser\'
+            - '\Blisk\'
+            - '\Epic Privacy Browser\'
+            - '\Nichrome\'
+            - '\Amigo\'
+            - '\Kometa\'
+            - '\Xpom\'
+            - '\Microsoft\'
+            - '\Liebao7\'
+            - '\AVAST Software\'
+            - '\Kinza\'
+            - '\Mozilla\'
+            - '\8pecxstudios\'
+            - '\FlashPeak\'
+            - '\Moonchild Productions\'
+    filter_main_system:
+        Image: System
+        ParentImage: Idle
+    filter_main_generic:
+        Image|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+    filter_optional_defender:
+        Image|contains: '\Microsoft\Windows Defender\'
+        Image|endswith:
+            - '\MpCopyAccelerator.exe'
+            - '\MsMpEng.exe'
+    filter_optional_thor:
+        Image|endswith:
+            - '\thor.exe'
+            - '\thor64.exe'
+    filter_optional_msiexec:
+        ParentImage: 'C:\Windows\System32\msiexec.exe'
+    filter_optional_other:
+        Image|endswith: '\everything.exe'
+    condition: all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*
+falsepositives:
+    - Antivirus, Anti-Spyware, Anti-Malware Software
+    - Legitimate software accessing browser data for synchronization or backup purposes.
+    - Legitimate software installed on partitions other than "C:\"
+level: low

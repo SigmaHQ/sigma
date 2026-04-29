@@ -8,6 +8,7 @@ references:
     - https://www.fireeye.com/blog/threat-research/2020/10/kegtap-and-singlemalt-with-a-ransomware-chaser.html
 author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
 date: 2023-02-28
+modified: 2025-09-01
 tags:
     - attack.resource-development
     - attack.t1587.001
@@ -22,7 +23,11 @@ detection:
             - ' -u '
             - ' -p '
             - ' \\\\'
-    condition: selection
+    filter_main_localhost:
+        CommandLine|contains:
+            - '\\\\localhost'
+            - '\\\\127.'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown
 level: high
