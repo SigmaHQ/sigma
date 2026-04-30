@@ -1,0 +1,41 @@
+title: Su or Sudo Spawning a Bare Shell With No Arguments
+id: 590585fd-ea0b-4baa-b391-7d9a2d45d5ba
+status: experimental
+description: |
+    Detects su or sudo spawning a shell where the parent's CommandLine ends with just "su" or "sudo" and carries no flags or target user.
+    Legitimate su/sudo invocations that open shells always carry arguments (e.g. "-s /bin/bash", "sudo -i", or a username).
+    It could indicate an attacker trying to conduct a privilege-escalation or some form of injection attack.
+references:
+    - https://gtfobins.github.io/
+    - https://xint.io/blog/copy-fail-linux-distributions
+    - https://github.com/theori-io/copy-fail-CVE-2026-31431
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-04-30
+tags:
+    - attack.privilege-escalation
+    - attack.t1068
+    - attack.t1548.001
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_parent_su:
+        ParentImage|endswith: '/su'
+        ParentCommandLine|endswith: 'su'
+    selection_parent_sudo:
+        ParentImage|endswith: '/sudo'
+        ParentCommandLine|endswith: 'sudo'
+    selection_child_shell:
+        Image|endswith:
+            - '/sh'
+            - '/dash'
+            - '/bash'
+            - '/ksh'
+            - '/zsh'
+            - '/ash'
+            - '/tcsh'
+            - '/csh'
+    condition: 1 of selection_parent_* and selection_child_shell
+falsepositives:
+    - Unlikely
+level: high

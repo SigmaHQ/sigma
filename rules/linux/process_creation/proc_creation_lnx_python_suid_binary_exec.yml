@@ -1,0 +1,54 @@
+title: Python Directly Spawning a SUID Binary
+id: 24368a8c-29e8-4b3d-ae18-d275682bb1ca
+status: experimental
+description: |
+    Detects instances where a Python process directly spawns a SUID binary, which is anomalous and may indicate a privilege-escalation or injection attack.
+    It is intended to catch privilege-escalation attacks where a Python script executes a SUID-root binary directly
+    via subprocess.run() or os.execv() instead of the os.system() path (which inserts an intermediate shell).
+    Caused by direct-exec PoC adaptations of page-cache poisoning exploits: after overwriting the SUID
+    binary's page cache with shellcode, the attacker triggers it through a direct exec call so Python becomes
+    the immediate parent of the SUID binary — bypassing the "sh -c <binary>" intermediate hop that
+    os.system()-based detection relies on. The anomalous Python → SUID binary parent-child relationship is
+    the key indicator, as legitimate Python programs rarely need to exec privileged SUID system tools.
+references:
+    - https://xint.io/blog/copy-fail-linux-distributions
+    - https://github.com/theori-io/copy-fail-CVE-2026-31431
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-04-30
+tags:
+    - attack.privilege-escalation
+    - attack.t1068
+    - attack.t1548.001
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        ParentImage|endswith:
+            - '/python'
+            - '/python3'
+            - '/python3.10'
+            - '/python3.11'
+            - '/python3.12'
+            - '/python3.13'
+        Image|endswith:
+            - '/su'
+            - '/sudo'
+            - '/passwd'
+            - '/mount'
+            - '/newgrp'
+            - '/gpasswd'
+            - '/chfn'
+            - '/chsh'
+            - '/ping'
+            - '/newuidmap'
+            - '/newgidmap'
+            - '/pkexec'
+            - '/fusermount'
+            - '/expiry'
+            - '/fusermount3'
+            - '/umount'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high

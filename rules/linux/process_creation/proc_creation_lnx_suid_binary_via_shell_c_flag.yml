@@ -1,0 +1,70 @@
+title: SUID Binary Spawned as Child of Shell Invoked via -c Flag
+id: c165bee3-1f3c-4a2d-9f8c-d9427722dd4f
+status: experimental
+description: |
+    Detects a SUID-root binary spawned as the direct child of a shell that was invoked
+    with "-c <binary>" where the parent shell's CommandLine ends with just the binary
+    name and no flags. This is the artifact of os.system("<binary>") calls used in
+    privilege-escalation exploits that poison the page cache of a SUID binary and
+    trigger its execution via Python's os module.
+references:
+    - https://gtfobins.github.io/
+    - https://xint.io/blog/copy-fail-linux-distributions
+    - https://github.com/theori-io/copy-fail-CVE-2026-31431
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-04-30
+tags:
+    - attack.privilege-escalation
+    - attack.t1068
+    - attack.t1548.001
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        ParentImage|endswith:
+            - '/sh'
+            - '/dash'
+            - '/bash'
+            - '/ksh'
+            - '/zsh'
+            - '/ash'
+            - '/tcsh'
+            - '/csh'
+        ParentCommandLine|contains: '-c '
+        ParentCommandLine|endswith:
+            - 'su'
+            - 'sudo'
+            - 'passwd'
+            - 'mount'
+            - 'newgrp'
+            - 'gpasswd'
+            - 'chfn'
+            - 'chsh'
+            - 'ping'
+            - 'newuidmap'
+            - 'newgidmap'
+            - 'pkexec'
+            - 'fusermount'
+            - 'fusermount3'
+            - 'expiry'
+        Image|endswith:
+            - '/su'
+            - '/sudo'
+            - '/passwd'
+            - '/mount'
+            - '/umount'
+            - '/newgrp'
+            - '/gpasswd'
+            - '/chfn'
+            - '/chsh'
+            - '/newuidmap'
+            - '/newgidmap'
+            - '/pkexec'
+            - '/fusermount'
+            - '/fusermount3'
+            - '/expiry'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high
