@@ -1,0 +1,42 @@
+title: Linux AF_ALG Socket Creation - Kernel Crypto API Exploit Indicator
+id: 474b415a-8b3d-4e6a-9f12-0d5c8a7b6e94
+status: experimental
+description: |
+    Detects creation of AF_ALG (Address Family 38) sockets via the socket() syscall.
+    AF_ALG is the Linux kernel crypto API interface. It is exploited in CVE-2026-31431
+    to achieve local privilege escalation via a buffer overflow in the AF_ALG AEAD splice path
+    that corrupts the page cache of SUID binaries.
+    AF_ALG socket creation has near-zero legitimate usage in production environments.
+references:
+    - https://nvd.nist.gov/vuln/detail/CVE-2026-31431
+    - https://man7.org/linux/man-pages/man2/socket.2.html
+    - https://www.kernel.org/doc/html/latest/crypto/userspace-if.html
+author: Gene Kazimiarovich
+date: 2026-04-30
+tags:
+    - attack.privilege-escalation
+    - attack.t1068
+    - cve.2026-31431
+logsource:
+    product: linux
+    service: auditd
+    definition: 'Requires auditd syscall monitoring: auditctl -a always,exit -F arch=b64 -S socket -k af_alg_detect'
+detection:
+    selection:
+        type: SYSCALL
+        SYSCALL: socket
+        a0: 26
+    filter_legitimate:
+        exe|endswith:
+            - '/cryptsetup'
+            - '/kcapi-speed'
+            - '/kcapi-enc'
+            - '/kcapi-dgst'
+            - '/charon'
+            - '/charon-systemd'
+    condition: selection and not filter_legitimate
+falsepositives:
+    - Disk encryption utilities using kernel crypto offload (cryptsetup with --use-kernel-crypto)
+    - Libkcapi userspace tools for kernel crypto API benchmarking
+    - StrongSwan IKE daemon with kernel-libipsec plugin
+level: critical
