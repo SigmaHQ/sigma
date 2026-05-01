@@ -1,0 +1,103 @@
+title: Suspicious Microsoft 365 Exchange Activity Indicative of BEC
+id: 4ca118f2-3c1d-4e8e-97c8-4d798dff6dcc
+status: experimental
+description: |
+  Detects behavioral indicators of Business Email Compromise (BEC) in Microsoft 365
+  Exchange audit logs including suspicious folder redirection, silent message deletion,
+  external redirects, BEC keyword filtering, external mailbox forwarding, and
+  unauthorized mailbox delegation. Based on Expel SOC research and MITRE ATT&CK
+  detection guidance.
+references:
+  - https://expel.com/blog/seven-ways-to-spot-business-email-compromise-office-365/
+  - https://learn.microsoft.com/en-us/powershell/module/exchange/new-inboxrule
+  - https://learn.microsoft.com/en-us/powershell/module/exchange/set-inboxrule
+  - https://attack.mitre.org/techniques/T1564/008/
+  - https://attack.mitre.org/techniques/T1114/003/
+  - https://attack.mitre.org/detectionstrategies/DET0373/
+  - https://learn.microsoft.com/en-us/defender-office-365/responding-to-a-compromised-email-account
+author: Tashnim Asgar (lanceterminal)
+date: 2026-04-13
+tags:
+  - attack.t1564.008
+  - attack.t1114.003
+  - attack.t1114
+  - attack.t1098.002
+logsource:
+  product: m365
+  service: exchange
+detection:
+
+  # Technique 1 - Rule moves mail to suspicious folders
+  selection_suspicious_folders:
+    Operation:
+      - New-InboxRule
+      - Set-InboxRule
+      - UpdateInboxRules
+    Parameters|contains:
+      - 'RSS Subscriptions'
+      - 'RSS Feeds'
+      - 'Junk Email'
+      - 'Deleted Items'
+      - 'Conversation History'
+
+  # Technique 2 - Rule silently deletes messages
+  selection_delete_rule:
+    Operation:
+      - New-InboxRule
+      - Set-InboxRule
+      - UpdateInboxRules
+    Parameters|contains|all:
+      - 'DeleteMessage'
+      - 'True'
+
+  # Technique 3 - Rule redirects to external address
+  selection_redirect_external:
+    Operation:
+      - New-InboxRule
+      - Set-InboxRule
+      - UpdateInboxRules
+    Parameters|contains: 
+      - 'RedirectTo'
+      - 'ForwardTo'
+
+  # Technique 4 - Rule contains BEC keywords
+  selection_bec_keywords:
+    Operation:
+      - New-InboxRule
+      - Set-InboxRule
+      - UpdateInboxRules
+    Parameters|contains:
+      - 'invoice'
+      - 'payment'
+      - 'wire'
+      - 'payroll'
+      - 'W2'
+      - 'deposit'
+      - 'docusign'
+      - 'WeTransfer'
+      - 'postmaster'
+
+  # Technique 5 - Mailbox forwarding to external address
+  selection_mailbox_forwarding:
+    Operation: 'Set-Mailbox'
+    Parameters|contains:
+      - 'ForwardingSmtpAddress'
+      - 'DeliverToMailboxAndForward'
+
+  # Technique 6 - Full mailbox access delegated
+  selection_mailbox_delegate:
+    Operation: 'Add-MailboxPermission'
+    Parameters|contains: 'FullAccess'
+
+  condition: 1 of selection_*
+
+falsepositives:
+  - Users legitimately forwarding mail to personal accounts
+  - IT admins configuring mailbox delegation for executives
+  - Automated systems creating inbox rules for mail management
+  - Help desk or admin workflows granting mailbox access
+  - Users organizing mail into archive or junk folders via rules
+  - Finance or HR teams with rules filtering payroll or deposit-related emails
+  - Internal email redirects between team mailboxes
+
+level: medium
