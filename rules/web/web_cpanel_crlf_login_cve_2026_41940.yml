@@ -1,0 +1,73 @@
+title: CVE-2026-41940 - cPanel CRLF Injection in Login Request
+id: 77964729-4b1b-49e3-a21d-996d335b85d1
+status: experimental
+description: |
+    Detects CRLF injection attempts exploiting CVE-2026-41940 in cPanel and WHM.
+    The exploit POSTs to /login/?login_only=1 with a crafted Authorization: Basic
+    header whose decoded value contains raw CRLF sequences (%0D%0A) followed by
+    user=root, injecting arbitrary key=value pairs into the cpsrvd session file
+    before sanitization occurs, bypassing authentication entirely.
+
+    Standard Apache/Nginx combined logs do NOT capture request headers — the CRLF
+    in the Authorization header is invisible in default access logs. This rule
+    targets two observable signals that do appear in standard logs: the specific
+    login_only=1 POST pattern (unusual in normal browser flows) and any CRLF
+    sequences that surface in the URI itself (seen in scanner variants).
+
+    For header-level detection pair with the keywords rule
+    (id: ccf6f929-8577-4f37-a4ac-25174621771b) and the process creation rule
+    (id: 984a21f0-4d82-4fdc-a2b7-a0e6a1e51c03).
+references:
+    - https://support.cpanel.net/hc/en-us/articles/40073787579671
+    - https://labs.watchtowr.com/the-internet-is-falling-down-falling-down-falling-down-cpanel-whm-authentication-bypass-cve-2026-41940/
+    - https://www.rapid7.com/blog/post/etr-cve-2026-41940-cpanel-whm-authentication-bypass/
+    - https://nvd.nist.gov/vuln/detail/CVE-2026-41940
+related:
+    - id: 984a21f0-4d82-4fdc-a2b7-a0e6a1e51c03
+      type: similar
+    - id: 7aca0427-7e19-4859-af17-40157e2f1f7d
+      type: similar
+    - id: ccf6f929-8577-4f37-a4ac-25174621771b
+      type: similar
+author: mahmoudswelam
+date: 2026-05-01
+tags:
+    - attack.initial_access
+    - attack.t1190
+    - cve.2026.41940
+logsource:
+    category: webserver
+detection:
+    # Attacker POSTs to /login/?login_only=1 to seed the session cookie.
+    # Normal browser logins do not include the login_only=1 parameter.
+    selection_login_trigger:
+        cs-method: 'POST'
+        cs-uri-stem|contains: '/login/'
+        cs-uri-query|contains: 'login_only=1'
+
+    # URL-encoded CRLF sequences in the URI itself.
+    # The canonical exploit places CRLF in the Authorization header (not visible
+    # in standard logs), but scanner variants and partial encodings surface here.
+    selection_crlf_in_uri:
+        cs-uri|contains:
+            - '%0d%0a'
+            - '%0D%0A'
+            - '%0d%0A'
+            - '%0D%0a'
+
+    # Exclude well-known scanners that probe cPanel endpoints at scale but do not
+    # exploit. Tune this list to your environment.
+    filter_known_scanners:
+        cs-user-agent|contains:
+            - 'Shodan'
+            - 'censys'
+            - 'zgrab'
+            - 'masscan'
+
+    condition: (selection_login_trigger or selection_crlf_in_uri) and not filter_known_scanners
+
+falsepositives:
+    - Legitimate automated cPanel login scripts using login_only=1 parameter
+    - Security scanners performing authorized CVE validation against cPanel instances
+    - URL-encoded sequences coincidentally containing 0d0a in unrelated parameters
+level: high
