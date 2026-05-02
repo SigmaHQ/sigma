@@ -1,0 +1,68 @@
+title: CVE-2026-41940 cPanel CRLF Injection Payload Strings
+id: ccf6f929-8577-4f37-a4ac-25174621771b
+related:
+    - id: 984a21f0-4d82-4fdc-a2b7-a0e6a1e51c03
+      type: derived
+    - id: 7aca0427-7e19-4859-af17-40157e2f1f7d
+      type: derived
+    - id: 77964729-4b1b-49e3-a21d-996d335b85d1
+      type: derived
+status: test
+description: |
+    Detects specific payload strings from CVE-2026-41940 cPanel and WHM CRLF
+    injection exploitation appearing in logs captured by FIM tools (Wazuh, OSSEC,
+    Auditbeat), WAF/proxy logs, or cPanel audit logs.
+
+    The detection groups target distinct observable phases:
+
+    1. INJECTION VECTOR: URL-encoded CRLF sequences immediately preceding privilege
+       tokens as they appear in WAF or proxy logs that capture Authorization header
+       values. The canonical payload is: Basic <b64>%0D%0Auser=root or %0D%0Ahasroot=1.
+       These combined strings are highly specific to this exploit.
+
+    2. SESSION FILE CONTENT: cpsrvd writes attacker-controlled tokens into session
+       files under /var/cpanel/sessions/. FIM tools capturing file content events
+       surface hasroot=1 and tfa_verified=1 as injected key=value pairs.
+
+    Requires logsource that captures file content changes or HTTP request headers.
+    For standard web logs without header capture, pair with rule 77964729-4b1b-49e3-a21d-996d335b85d1.
+references:
+    - https://support.cpanel.net/hc/en-us/articles/40073787579671
+    - https://labs.watchtowr.com/the-internet-is-falling-down-falling-down-falling-down-cpanel-whm-authentication-bypass-cve-2026-41940/
+    - https://www.rapid7.com/blog/post/etr-cve-2026-41940-cpanel-whm-authentication-bypass/
+    - https://nvd.nist.gov/vuln/detail/CVE-2026-41940
+author: MahmoudSwelam
+date: 2026/05/01
+modified: 2026/05/02
+tags:
+    - attack.initial_access
+    - attack.t1190
+    - attack.credential_access
+    - attack.t1556
+    - cve.2026.41940
+logsource:
+    product: linux
+    service: syslog
+    category: webserver
+detection:
+    keywords_injection_vector:
+        - '%0D%0Auser=root'
+        - '%0d%0auser=root'
+        - '%0D%0Ahasroot=1'
+        - '%0d%0ahasroot=1'
+        - '%0D%0Atfa_verified=1'
+        - '%0d%0atfa_verified=1'
+
+    keywords_session_content:
+        - 'hasroot=1'
+        - 'tfa_verified=1'
+
+    condition: keywords_injection_vector or keywords_session_content
+
+falsepositives:
+    - Security research environments running PoC tooling against local test instances
+    - File integrity monitoring tools scanning session files after patch may still surface
+      hasroot=1 if the string was logged before patches sanitized existing sessions
+    - WAF/Proxy logs decoding URL-encoded parameters may create these strings legitimately
+      in other contexts - correlate with URI path being /login/ for higher confidence
+level: high
