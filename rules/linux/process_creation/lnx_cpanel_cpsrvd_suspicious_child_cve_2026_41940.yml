@@ -1,0 +1,112 @@
+title: CVE-2026-41940 cPanel cpsrvd Suspicious Child Process
+id: 984a21f0-4d82-4fdc-a2b7-a0e6a1e51c03
+related:
+    - id: 7aca0427-7e19-4859-af17-40157e2f1f7d
+      type: derived
+    - id: 77964729-4b1b-49e3-a21d-996d335b85d1
+      type: derived
+    - id: ccf6f929-8577-4f37-a4ac-25174621771b
+      type: derived
+status: test
+description: |
+    Detects post-exploitation command execution from CVE-2026-41940, a critical
+    authentication bypass in cPanel and WHM (CVSS 9.8). After bypassing authentication
+    via CRLF injection into cpsrvd session files, attackers execute arbitrary commands
+    through the cpsrvd or cpdavd daemon running as root.
+
+    cpsrvd (cPanel service daemon) and cpdavd (WebDAV daemon) have well-defined child
+    process trees during normal operation. Spawning interactive shells, reconnaissance
+    tools, download utilities, or scripting interpreters as direct children of these
+    daemons is strongly anomalous and indicates successful exploitation.
+references:
+    - https://support.cpanel.net/hc/en-us/articles/40073787579671
+    - https://labs.watchtowr.com/the-internet-is-falling-down-falling-down-falling-down-cpanel-whm-authentication-bypass-cve-2026-41940/
+    - https://www.rapid7.com/blog/post/etr-cve-2026-41940-cpanel-whm-authentication-bypass/
+    - https://nvd.nist.gov/vuln/detail/CVE-2026-41940
+author: MahmoudSwelam
+date: 2026/05/01
+modified: 2026/05/02
+tags:
+    - attack.execution
+    - attack.t1059.004
+    - attack.discovery
+    - attack.t1033
+    - attack.persistence
+    - attack.t1505.003
+    - cve.2026.41940
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_parent:
+        ParentImage|contains:
+            - '/cpsrvd'
+            - '/cpsrvd-ssl'
+            - '/cpdavd'
+            - '/cpdavd-ssl'
+
+    selection_shell:
+        Image|endswith:
+            - '/bash'
+            - '/sh'
+            - '/dash'
+            - '/zsh'
+            - '/ksh'
+            - '/tcsh'
+
+    selection_recon:
+        Image|endswith:
+            - '/whoami'
+            - '/id'
+            - '/uname'
+            - '/hostname'
+            - '/ifconfig'
+            - '/ip'
+            - '/netstat'
+            - '/ss'
+            - '/ps'
+            - '/ls'
+
+    selection_download:
+        Image|endswith:
+            - '/curl'
+            - '/wget'
+            - '/fetch'
+            - '/tftp'
+            - '/ftp'
+
+    selection_interpreter:
+        Image|endswith:
+            - '/python'
+            - '/python2'
+            - '/python3'
+            - '/perl'
+            - '/ruby'
+            - '/php'
+            - '/node'
+
+    selection_restart_abuse:
+        Image|endswith:
+            - '/restartsrv_cpsrvd'
+            - '/restartsrv_cpdavd'
+
+    filter_legitimate_children:
+        Image|endswith:
+            - '/cpsrvd'
+            - '/cpsrvd-ssl'
+            - '/cpdavd'
+            - '/cpdavd-ssl'
+            - '/cpanellogd'
+            - '/tailwatchd'
+            - '/queueprocd'
+            - '/comet'
+            - '/cpsanitycheck'
+
+    condition: selection_parent and (selection_shell or selection_recon or selection_download or selection_interpreter or selection_restart_abuse) and not filter_legitimate_children
+
+falsepositives:
+    - cPanel plugins or custom hooks that legitimately invoke shell scripts as cpsrvd children
+    - Administrative cPanel update processes that temporarily spawn interpreters
+    - Monitoring agents operating under the cPanel process context
+    - Some cPanel backup processes may spawn curl/wget for off-server transfers
+level: critical
