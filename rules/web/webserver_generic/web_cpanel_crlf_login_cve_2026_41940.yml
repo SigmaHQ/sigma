@@ -1,0 +1,62 @@
+title: CVE-2026-41940 cPanel CRLF Injection in Login Request
+id: 77964729-4b1b-49e3-a21d-996d335b85d1
+related:
+    - id: 984a21f0-4d82-4fdc-a2b7-a0e6a1e51c03
+      type: derived
+    - id: 7aca0427-7e19-4859-af17-40157e2f1f7d
+      type: derived
+    - id: ccf6f929-8577-4f37-a4ac-25174621771b
+      type: derived
+status: test
+description: |
+    Detects CRLF injection attempts exploiting CVE-2026-41940 in cPanel and WHM.
+    The exploit POSTs to /login/?login_only=1 with a crafted Authorization: Basic
+    header whose decoded value contains raw CRLF sequences (%0D%0A) followed by
+    user=root, injecting arbitrary key=value pairs into the cpsrvd session file.
+    Standard Apache/Nginx combined logs do NOT capture request headers — the CRLF
+    in the Authorization header is invisible in default access logs. This rule
+    targets two observable signals that do appear in standard logs: the specific
+    login_only=1 POST pattern (unusual in normal browser flows) and URL-encoded
+    CRLF sequences that surface in the URI itself (seen in scanner variants).
+    For header-level detection pair with a WAF rule or the keywords rule
+    (id: ccf6f929-8577-4f37-a4ac-25174621771b).
+references:
+    - https://support.cpanel.net/hc/en-us/articles/40073787579671
+    - https://labs.watchtowr.com/the-internet-is-falling-down-falling-down-falling-down-cpanel-whm-authentication-bypass-cve-2026-41940/
+    - https://www.rapid7.com/blog/post/etr-cve-2026-41940-cpanel-whm-authentication-bypass/
+    - https://nvd.nist.gov/vuln/detail/CVE-2026-41940
+author: MahmoudSwelam
+date: 2026/05/01
+modified: 2026/05/02
+tags:
+    - attack.initial_access
+    - attack.t1190
+    - cve.2026.41940
+logsource:
+    category: webserver
+detection:
+    selection_login_trigger:
+        method: 'POST'
+        cs_uri_stem|contains: '/login/'
+        cs_uri_query|contains: 'login_only=1'
+    selection_crlf_in_uri:
+        cs_uri|contains:
+            - '%0d%0a'
+            - '%0D%0A'
+            - '%0d%0A'
+            - '%0D%0a'
+    filter_known_scanners:
+        user_agent|contains:
+            - 'Shodan'
+            - 'censys'
+            - 'zgrab'
+            - 'masscan'
+            - 'Nmap'
+            - 'Nikto'
+    condition: (selection_login_trigger or selection_crlf_in_uri) and not filter_known_scanners
+falsepositives:
+    - Legitimate automated cPanel login scripts using login_only=1 parameter
+    - Security scanners performing authorized CVE validation against cPanel instances
+    - URL-encoded sequences coincidentally containing 0d0a in unrelated parameters
+    - Some cPanel API clients may use login_only=1 programmatically
+level: high
