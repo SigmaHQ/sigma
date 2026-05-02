@@ -1,0 +1,76 @@
+title: CVE-2026-41940 cPanel Session File Written by Unexpected Process
+id: 7aca0427-7e19-4859-af17-40157e2f1f7d
+related:
+    - id: 984a21f0-4d82-4fdc-a2b7-a0e6a1e51c03
+      type: derived
+    - id: 77964729-4b1b-49e3-a21d-996d335b85d1
+      type: derived
+    - id: ccf6f929-8577-4f37-a4ac-25174621771b
+      type: derived
+status: test
+description: |
+    Detects suspicious writes to cPanel session files by processes other than the
+    legitimate cpsrvd daemon, or session files with malformed names containing
+    URL-encoded CRLF characters as a direct artifact of CVE-2026-41940 exploitation.
+
+    In CVE-2026-41940 the CRLF injection causes cpsrvd itself to write attacker-
+    controlled key=value pairs (user=root, hasroot=1, tfa_verified=1) into session
+    files. The write is performed by the legitimate daemon, so this rule targets:
+
+    1. Writes to /var/cpanel/sessions/ by ANY process other than cpsrvd or cpdavd,
+       indicating an attacker directly manipulating session files post-exploitation.
+    2. Session filenames containing URL-encoded CR/LF characters (%0d, %0a) — a
+       direct artifact of CRLF overflow into the filename field during injection.
+
+    For detection of injected content (hasroot=1, user=root) inside session files,
+    pair with the keywords rule (id: ccf6f929-8577-4f37-a4ac-25174621771b) using
+    a FIM tool (Wazuh, OSSEC, Auditbeat) configured to capture file content events.
+
+    Requires auditd with session directory monitoring or Sysmon for Linux.
+references:
+    - https://support.cpanel.net/hc/en-us/articles/40073787579671
+    - https://labs.watchtowr.com/the-internet-is-falling-down-falling-down-falling-down-cpanel-whm-authentication-bypass-cve-2026-41940/
+    - https://nvd.nist.gov/vuln/detail/CVE-2026-41940
+author: MahmoudSwelam
+date: 2026/05/01
+modified: 2026/05/02
+tags:
+    - attack.initial_access
+    - attack.t1190
+    - attack.defense_evasion
+    - attack.t1550.004
+    - cve.2026.41940
+logsource:
+    product: linux
+    category: file_event
+detection:
+    selection_session_path:
+        TargetFilename|startswith:
+            - '/var/cpanel/sessions/'
+            - '/usr/local/cpanel/sessions/'
+
+    filter_legitimate_writers:
+        Image|endswith:
+            - '/cpsrvd'
+            - '/cpsrvd-ssl'
+            - '/cpdavd'
+            - '/cpdavd-ssl'
+
+    selection_malformed_filename:
+        TargetFilename|startswith:
+            - '/var/cpanel/sessions/'
+            - '/usr/local/cpanel/sessions/'
+        TargetFilename|contains:
+            - '%0d'
+            - '%0a'
+            - '%0D'
+            - '%0A'
+
+    condition: (selection_session_path and not filter_legitimate_writers) or selection_malformed_filename
+
+falsepositives:
+    - cPanel backup or migration tools that copy session directories
+    - FIM agents creating temporary index files in monitored directories
+    - cPanel development or testing environments with custom session handling
+    - Legitimate session filenames may contain hex strings but never URL-encoded CR/LF
+level: high
