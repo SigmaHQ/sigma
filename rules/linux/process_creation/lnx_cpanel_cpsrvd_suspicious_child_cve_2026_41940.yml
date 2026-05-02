@@ -13,7 +13,6 @@ description: |
     authentication bypass in cPanel and WHM (CVSS 9.8). After bypassing authentication
     via CRLF injection into cpsrvd session files, attackers execute arbitrary commands
     through the cpsrvd or cpdavd daemon running as root.
-
     cpsrvd (cPanel service daemon) and cpdavd (WebDAV daemon) have well-defined child
     process trees during normal operation. Spawning interactive shells, reconnaissance
     tools, download utilities, or scripting interpreters as direct children of these
@@ -44,7 +43,6 @@ detection:
             - '/cpsrvd-ssl'
             - '/cpdavd'
             - '/cpdavd-ssl'
-
     selection_shell:
         Image|endswith:
             - '/bash'
@@ -53,7 +51,6 @@ detection:
             - '/zsh'
             - '/ksh'
             - '/tcsh'
-
     selection_recon:
         Image|endswith:
             - '/whoami'
@@ -66,7 +63,6 @@ detection:
             - '/ss'
             - '/ps'
             - '/ls'
-
     selection_download:
         Image|endswith:
             - '/curl'
@@ -74,7 +70,6 @@ detection:
             - '/fetch'
             - '/tftp'
             - '/ftp'
-
     selection_interpreter:
         Image|endswith:
             - '/python'
@@ -84,12 +79,10 @@ detection:
             - '/ruby'
             - '/php'
             - '/node'
-
     selection_restart_abuse:
         Image|endswith:
             - '/restartsrv_cpsrvd'
             - '/restartsrv_cpdavd'
-
     filter_legitimate_children:
         Image|endswith:
             - '/cpsrvd'
@@ -101,9 +94,7 @@ detection:
             - '/queueprocd'
             - '/comet'
             - '/cpsanitycheck'
-
     condition: selection_parent and (selection_shell or selection_recon or selection_download or selection_interpreter or selection_restart_abuse) and not filter_legitimate_children
-
 falsepositives:
     - cPanel plugins or custom hooks that legitimately invoke shell scripts as cpsrvd children
     - Administrative cPanel update processes that temporarily spawn interpreters
