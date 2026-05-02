@@ -12,18 +12,14 @@ description: |
     Detects specific payload strings from CVE-2026-41940 cPanel and WHM CRLF
     injection exploitation appearing in logs captured by FIM tools (Wazuh, OSSEC,
     Auditbeat), WAF/proxy logs, or cPanel audit logs.
-
     The detection groups target distinct observable phases:
-
     1. INJECTION VECTOR: URL-encoded CRLF sequences immediately preceding privilege
        tokens as they appear in WAF or proxy logs that capture Authorization header
        values. The canonical payload is: Basic <b64>%0D%0Auser=root or %0D%0Ahasroot=1.
        These combined strings are highly specific to this exploit.
-
     2. SESSION FILE CONTENT: cpsrvd writes attacker-controlled tokens into session
        files under /var/cpanel/sessions/. FIM tools capturing file content events
        surface hasroot=1 and tfa_verified=1 as injected key=value pairs.
-
     Requires logsource that captures file content changes or HTTP request headers.
     For standard web logs without header capture, pair with rule 77964729-4b1b-49e3-a21d-996d335b85d1.
 references:
@@ -52,13 +48,10 @@ detection:
         - '%0d%0ahasroot=1'
         - '%0D%0Atfa_verified=1'
         - '%0d%0atfa_verified=1'
-
     keywords_session_content:
         - 'hasroot=1'
         - 'tfa_verified=1'
-
     condition: keywords_injection_vector or keywords_session_content
-
 falsepositives:
     - Security research environments running PoC tooling against local test instances
     - File integrity monitoring tools scanning session files after patch may still surface
