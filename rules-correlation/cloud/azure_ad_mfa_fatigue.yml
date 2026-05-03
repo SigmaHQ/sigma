@@ -1,0 +1,31 @@
+title: Azure AD MFA Fatigue Attack
+name: azure_ad_mfa_fatigue
+id: f1a2b3c4-d5e6-7f8a-9b0c-1d2e3f4a5b6c
+status: experimental
+description: >
+    Detects MFA fatigue (MFA push spam) attacks where an adversary floods a target user
+    with repeated MFA push requests to induce approval through frustration or confusion.
+    Scattered Spider and APT29 have both used this technique to bypass MFA and gain
+    access to corporate environments. Ten or more MFA denials within a 10-minute window
+    for a single user is a strong indicator of an active fatigue attempt.
+references:
+    - https://attack.mitre.org/techniques/T1621/
+    - https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-320a
+    - https://www.microsoft.com/en-us/security/blog/2022/10/25/how-to-combat-mfa-fatigue/
+author: Chris Ray
+date: 2026-05-03
+tags:
+    - attack.credential-access
+    - attack.t1621
+type: event_count
+rules:
+    mfa_denied: e40f4962-b02b-4192-9bfe-245f7ece1f99
+group-by:
+    - UserPrincipalName
+timespan: 10m
+condition:
+    gte: 10
+falsepositives:
+    - Legitimate user repeatedly mistyping or dismissing MFA prompts during device setup
+    - Authentication testing or automation during provisioning workflows
+level: high

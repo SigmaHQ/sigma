@@ -1,0 +1,40 @@
+title: Windows LSASS Credential Dump Followed by AWS STS AssumeRole
+name: win_lsass_dump_followed_by_aws_sts_assumerole
+id: c3d4e5f6-a7b8-9c0d-e1f2-a3b4c5d6e7f8
+status: experimental
+description: >
+    Detects a credential theft → cloud pivot chain: LSASS memory access from a
+    non-system account on a Windows endpoint followed within four hours by an AWS
+    STS AssumeRole call from the same user identity. Attackers who dump LSASS to
+    extract credentials on an endpoint frequently pivot to cloud infrastructure using
+    harvested IAM access keys or credentials stored in memory by AWS CLI, tools
+    such as Mimikatz, or credential managers. ALPHV/BlackCat, Scattered Spider, and
+    LAPSUS$ have all combined endpoint credential harvesting with subsequent AWS API
+    access as part of multi-stage intrusions.
+    Note: group-by relies on user identity normalization (ECS user.name or CIM user)
+    across Windows Security and AWS CloudTrail log sources.
+references:
+    - https://attack.mitre.org/techniques/T1003/001/
+    - https://attack.mitre.org/techniques/T1078/004/
+    - https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-320a
+author: Chris Ray
+date: 2026-05-03
+tags:
+    - attack.credential-access
+    - attack.lateral-movement
+    - attack.t1003.001
+    - attack.t1078.004
+type: temporal_ordered
+rules:
+    lsass_access: 962fe167-e48d-4fd6-9974-11e5b9a5d6d1
+    aws_assumerole: 905d389b-b853-46d0-9d3d-dea0d3a3cd49
+group-by:
+    - user.name
+timespan: 4h
+condition:
+    gte: 1
+falsepositives:
+    - Security tooling or EDR performing legitimate LSASS inspection combined with authorized AWS API use
+    - Penetration testing or red team exercises
+    - Incident responders running credential auditing tools while investigating an AWS environment
+level: high

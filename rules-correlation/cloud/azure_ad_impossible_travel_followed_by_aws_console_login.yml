@@ -1,0 +1,39 @@
+title: Azure AD Impossible Travel Followed by AWS Console Login Without MFA
+name: azure_ad_impossible_travel_followed_by_aws_console_login
+id: a1b2c3d4-e5f6-7a8b-9c0d-e1f2a3b4c5d6
+status: experimental
+description: >
+    Detects cross-cloud lateral movement where an Azure AD Identity Protection impossible
+    travel alert for a user is followed within one hour by an AWS console login for the
+    same user without MFA. This sequence indicates a compromised identity being used to
+    pivot from Microsoft to Amazon cloud infrastructure — a pattern observed in attacks
+    targeting organizations with hybrid cloud environments. Actors including APT29 and
+    financially motivated groups have chained compromised Entra ID credentials to AWS
+    access using single-factor authentication paths that bypass MFA requirements.
+    Note: group-by relies on user identity normalization (ECS user.name or CIM user)
+    across both log sources.
+references:
+    - https://attack.mitre.org/techniques/T1078/
+    - https://attack.mitre.org/techniques/T1078/004/
+    - https://www.microsoft.com/en-us/security/blog/2023/07/14/microsoft-mitigates-china-based-threat-actor-storm-0558/
+author: Chris Ray
+date: 2026-05-03
+tags:
+    - attack.initial-access
+    - attack.lateral-movement
+    - attack.t1078
+    - attack.t1078.004
+type: temporal_ordered
+rules:
+    impossible_travel: b2572bf9-e20a-4594-b528-40bde666525a
+    aws_login_no_mfa: 77caf516-34e5-4df9-b4db-20744fea0a60
+group-by:
+    - user.name
+timespan: 1h
+condition:
+    gte: 1
+falsepositives:
+    - Legitimate travel combined with an AWS environment that does not enforce MFA
+    - VPN or proxy use causing false impossible travel detection
+    - Service accounts with shared names across Azure AD and AWS IAM
+level: high
