@@ -1,0 +1,30 @@
+title: Google Cloud Log Sink Disabled or Deleted
+id: f5891a32-9d8c-4fcc-8b2c-6ab7870a3334
+status: experimental
+description: |
+    Detects when a GCP log sink is either deleted or disabled. 
+    Disabling or deleting log sinks is a defense evasion technique used to blind security monitoring.
+references:
+    - https://docs.cloud.google.com/logging/docs/reference/v2/rest/v2/sinks
+author: Fernando Alencar @fernandoshadowbr
+date: 2026-05-02
+tags:
+    - attack.stealth
+    - attack.defense-impairment
+    - attack.t1685
+    - attack.t1685.002
+logsource:
+    product: gcp
+    service: gcp.audit
+detection:
+    selection_delete:
+        gcp.audit.method_name|endswith: '.DeleteSink'
+    selection_disable:
+        gcp.audit.method_name|endswith: '.UpdateSink'
+        gcp.audit.request.sink.disabled: true
+    condition: 1 of selection_*
+falsepositives:
+    - Administrative maintenance where log sinks are temporarily disabled during migration.
+    - Project migration, where log sink deletion will be necessary and expected.
+    - Automated decommissioning of legacy logging infrastructure via Terraform or other IaC tools.
+level: medium
