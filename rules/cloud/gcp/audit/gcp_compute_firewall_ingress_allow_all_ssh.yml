@@ -1,0 +1,33 @@
+title: Google Cloud Compute Firewall Ingress Allow All SSH
+id: d45e2231-1e8c-4fcc-8b2c-6ab7870a4445
+status: experimental
+description: |
+    Detects the creation or modification of a Google Cloud Platform (GCP) compute firewall rule that allows inbound SSH traffic on port 22 from any source IP address (0.0.0.0/0).
+    Adversaries often open this port to facilitate initial access via brute force attacks or to establish remote command and control (C2) over virtual machine instances.
+    This activity may also indicate an unintentional but dangerous misconfiguration by an administrator, significantly increasing the project's attack surface to the public internet
+references:
+    - https://docs.cloud.google.com/compute/docs/reference/rest/v1/firewalls
+    - https://attack.mitre.org/techniques/T1090
+author: Fernando Alencar @fernandoshadowbr
+date: 2026-05-03
+tags:
+    - attack.initial-access
+    - attack.t1090
+logsource:
+    product: gcp
+    service: gcp.audit
+detection:
+    selection_method:
+        gcp.audit.method_name|endswith:
+            - '.firewalls.insert'
+            - '.firewalls.patch'
+            - '.firewalls.update'
+    selection_config:
+        gcp.audit.request.source_ranges: '0.0.0.0/0'
+        gcp.audit.request.alloweds.ports: 22
+        gcp.audit.request.direction: 'INGRESS'
+    condition: all of selection_*
+falsepositives:
+    - Public-facing bastion hosts or jump boxes intentionally configured for global access (though this should be restricted to specific VPN ranges).
+    - Temporary troubleshooting by network engineers (should be strictly time-bound).
+level: medium
