@@ -1,12 +1,21 @@
 title: AWS Snapshot Backup Exfiltration
 id: abae8fec-57bd-4f87-aff6-6e3db989843d
 status: test
-description: Detects the modification of an EC2 snapshot's permissions to enable access from another account
+description: >
+    Detects EC2 EBS snapshot permission modification that grants createVolumePermission
+    to an external account or makes the snapshot publicly accessible. Attackers with
+    ec2:ModifySnapshotAttribute can share any enumerable snapshot to an account they
+    control and mount the volume to extract data without generating network transfer
+    events. Observed in SCARLETEEL and related cloud intrusion campaigns targeting
+    containerized workloads and EC2 instances with sensitive data pipelines.
 references:
     - https://www.justice.gov/file/1080281/download
+    - https://sysdig.com/blog/cloud-breach-terraform-data-theft/
+    - https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-modifying-snapshot-permissions.html
+    - https://attack.mitre.org/techniques/T1537/
 author: Darin Smith
 date: 2021-05-17
-modified: 2021-08-19
+modified: 2026-05-03
 tags:
     - attack.exfiltration
     - attack.t1537
@@ -14,10 +23,13 @@ logsource:
     product: aws
     service: cloudtrail
 detection:
-    selection_source:
+    selection:
         eventSource: ec2.amazonaws.com
         eventName: ModifySnapshotAttribute
-    condition: selection_source
+        requestParameters.attributeType: createVolumePermission
+    condition: selection
 falsepositives:
-    - Valid change to a snapshot's permissions
-level: medium
+    - AWS Backup cross-account snapshot sharing to known DR accounts within an AWS Organization
+    - Authorized snapshot sharing to known partner or subsidiary accounts
+    - Snapshot lifecycle automation (Terraform, Lambda) targeting allowlisted accounts
+level: high
