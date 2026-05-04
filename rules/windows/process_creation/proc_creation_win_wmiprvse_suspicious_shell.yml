@@ -1,0 +1,44 @@
+title: Suspicious PowerShell or CMD Spawned by WMI Provider with Encoded or Recon Commands
+id: 8b3a9f1c-2d7e-4a6f-9c21-1f4b6e2d9a77
+status: experimental
+description: Detects suspicious command shell or PowerShell execution spawned by wmiprvse.exe with encoded or reconnaissance commands. This behavior may indicate WMI-based lateral movement such as Impacket wmiexec where commands are executed remotely without dropping binaries.
+references:
+    - https://attack.mitre.org/techniques/T1047/
+    - https://attack.mitre.org/techniques/T1021/
+author: Aashiq Ahmed
+date: 2026-05-04
+tags:
+    - attack.execution
+    - attack.lateral-movement
+    - attack.t1047
+    - attack.t1021
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_parent:
+        ParentImage|endswith: '\wmiprvse.exe'
+    selection_child:
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+    selection_suspicious_cli:
+        CommandLine|contains:
+            - '/c'
+            - '-enc'
+            - '-encodedcommand'
+            - 'iex'
+            - 'invoke-expression'
+            - 'downloadstring'
+            - 'frombase64string'
+            - 'whoami'
+            - 'net user'
+            - 'net group'
+            - 'ipconfig'
+            - 'systeminfo'
+    condition: selection_parent and selection_child and selection_suspicious_cli
+falsepositives:
+    - Legitimate administrative use of WMI
+    - Software deployment or monitoring tools using WMI
+level: high
