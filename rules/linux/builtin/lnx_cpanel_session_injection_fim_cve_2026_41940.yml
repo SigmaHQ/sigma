@@ -1,0 +1,57 @@
+title: CVE-2026-41940 cPanel Session File Injection Strings via FIM
+id: b8f3a291-6c5d-4e7a-8209-1d4f5e6c7b8a
+related:
+    - id: 984a21f0-4d82-4fdc-a2b7-a0e6a1e51c03
+      type: derived
+    - id: 7aca0427-7e19-4859-af17-40157e2f1f7d
+      type: derived
+    - id: ccf6f929-8577-4f37-a4ac-25174621771b
+      type: derived
+    - id: 77964729-4b1b-49e3-a21d-996d335b85d1
+      type: derived
+status: experimental
+description: |
+    Detects injected privilege tokens written into cPanel session files as a result
+    of CVE-2026-41940 exploitation, surfaced by File Integrity Monitoring (FIM) tools
+    such as Wazuh, OSSEC, or Auditbeat configured to capture file content change events.
+
+    In CVE-2026-41940, the CRLF injection causes cpsrvd to write attacker-controlled
+    key=value pairs directly into session files under /var/cpanel/sessions/:
+      hasroot=1       - grants WHM root-level access
+      tfa_verified=1  - bypasses two-factor authentication checks
+
+    These strings inside session files are direct exploitation artifacts and should
+    never appear in legitimate cPanel session files under normal operating conditions.
+
+    Requires a FIM agent (Wazuh, OSSEC, Auditbeat) configured to monitor
+    /var/cpanel/sessions/ with file content capture enabled, forwarding events
+    through auditd.
+references:
+    - https://support.cpanel.net/hc/en-us/articles/40073787579671
+    - https://labs.watchtowr.com/the-internet-is-falling-down-falling-down-falling-down-cpanel-whm-authentication-bypass-cve-2026-41940/
+    - https://www.rapid7.com/blog/post/etr-cve-2026-41940-cpanel-whm-authentication-bypass/
+    - https://nvd.nist.gov/vuln/detail/CVE-2026-41940
+author: MahmoudSwelam
+date: 2026-05-01
+modified: 2026-05-02
+tags:
+    - attack.credential-access
+    - attack.defense-evasion
+    - attack.persistence
+    - attack.t1556
+logsource:
+    product: linux
+    service: auditd
+detection:
+    keywords:
+        - 'hasroot=1'
+        - 'tfa_verified=1'
+
+    condition: keywords
+
+falsepositives:
+    - Security research environments running PoC tooling against local test instances
+    - File integrity monitoring tools scanning session files after patching may still
+      surface hasroot=1 if the string was logged before patches sanitized existing sessions
+    - Correlate with file path under /var/cpanel/sessions/ in the FIM alert for confidence
+level: high
