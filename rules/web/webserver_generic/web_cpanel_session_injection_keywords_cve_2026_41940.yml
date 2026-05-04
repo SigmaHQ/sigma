@@ -14,16 +14,13 @@ description: |
     Detects URL-encoded CRLF injection payload strings from CVE-2026-41940 appearing
     in WAF, reverse proxy, or web server logs that capture Authorization header values
     or decoded request parameters.
-
     The canonical CVE-2026-41940 injection vector embeds raw CRLF sequences
     (%0d%0a) immediately before privilege tokens in the Basic Authorization header.
     These combined strings are highly specific to this exploit and should not appear
     in legitimate traffic.
-
     Standard Apache and Nginx access logs do NOT capture request headers, so this
     rule requires a WAF, ModSecurity, or proxy such as HAProxy or Nginx with full
     header logging that decodes and logs Authorization header values.
-
     For session file content detection pair with the FIM rule
     (id: b8f3a291-6c5d-4e7a-8209-1d4f5e6c7b8a).
     For network-level URI detection pair with (id: 77964729-4b1b-49e3-a21d-996d335b85d1).
@@ -45,9 +42,7 @@ detection:
         - '%0d%0auser=root'
         - '%0d%0ahasroot=1'
         - '%0d%0atfa_verified=1'
-
     condition: keywords
-
 falsepositives:
     - Security research environments running PoC tooling against local test instances
     - WAF or proxy logs decoding URL-encoded parameters may create these strings in
