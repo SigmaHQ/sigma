@@ -14,19 +14,15 @@ description: |
     Detects suspicious writes to cPanel session files by processes other than the
     legitimate cpsrvd daemon, or session files with malformed names containing
     URL-encoded CRLF characters as a direct artifact of CVE-2026-41940 exploitation.
-
     In CVE-2026-41940 the CRLF injection causes cpsrvd itself to write attacker-
     controlled key=value pairs (user=root, hasroot=1, tfa_verified=1) into session
     files. The write is performed by the legitimate daemon, so this rule targets:
-
     1. Writes to /var/cpanel/sessions/ by ANY process other than cpsrvd or cpdavd,
        indicating an attacker directly manipulating session files post-exploitation.
     2. Session filenames containing URL-encoded CR/LF characters (%0d, %0a) as a
        direct artifact of CRLF overflow into the filename field during injection.
-
     For detection of injected content inside session files pair with the FIM rule
     (id: b8f3a291-6c5d-4e7a-8209-1d4f5e6c7b8a).
-
     Requires auditd with session directory monitoring or Sysmon for Linux.
 references:
     - https://support.cpanel.net/hc/en-us/articles/40073787579671
@@ -34,7 +30,7 @@ references:
     - https://nvd.nist.gov/vuln/detail/CVE-2026-41940
 author: MahmoudSwelam
 date: 2026-05-01
-modified: 2026-05-02
+modified: 2026-05-04
 tags:
     - attack.initial-access
     - attack.t1190
@@ -49,14 +45,12 @@ detection:
         TargetFilename|startswith:
             - '/var/cpanel/sessions/'
             - '/usr/local/cpanel/sessions/'
-
     filter_legitimate_writers:
         Image|endswith:
             - '/cpsrvd'
             - '/cpsrvd-ssl'
             - '/cpdavd'
             - '/cpdavd-ssl'
-
     selection_malformed_filename:
         TargetFilename|startswith:
             - '/var/cpanel/sessions/'
@@ -64,9 +58,7 @@ detection:
         TargetFilename|contains:
             - '%0d'
             - '%0a'
-
     condition: (selection_session_path and not filter_legitimate_writers) or selection_malformed_filename
-
 falsepositives:
     - Administrative backup or migration tools in cPanel that copy session directories
     - FIM agents creating temporary index files in monitored directories
