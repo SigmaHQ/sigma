@@ -15,13 +15,11 @@ description: |
     The exploit POSTs to /login/?login_only=1 with a crafted Authorization: Basic
     header whose decoded value contains raw CRLF sequences (%0d%0a) followed by
     user=root, injecting arbitrary key=value pairs into the cpsrvd session file.
-
     Standard Apache and Nginx combined logs do NOT capture request headers, so the
     CRLF in the Authorization header is invisible in default access logs. This rule
     targets two observable signals that do appear in standard logs: the specific
     login_only=1 POST pattern (unusual in normal browser flows) and URL-encoded
     CRLF sequences that surface in the URI itself (seen in scanner variants).
-
     For header-level detection pair with a WAF rule or the web keywords rule
     (id: ccf6f929-8577-4f37-a4ac-25174621771b).
 references:
@@ -42,10 +40,8 @@ detection:
         cs-method: 'POST'
         c-uri-stem|contains: '/login/'
         c-uri-query|contains: 'login_only=1'
-
     selection_crlf_in_uri:
         c-uri|contains: '%0d%0a'
-
     filter_known_scanners:
         cs-useragent|contains:
             - 'Shodan'
@@ -54,9 +50,7 @@ detection:
             - 'masscan'
             - 'Nmap'
             - 'Nikto'
-
     condition: (selection_login_trigger or selection_crlf_in_uri) and not filter_known_scanners
-
 falsepositives:
     - Legitimate automated cPanel login scripts using the login_only=1 parameter
     - Security scanners performing authorized CVE validation against cPanel instances
