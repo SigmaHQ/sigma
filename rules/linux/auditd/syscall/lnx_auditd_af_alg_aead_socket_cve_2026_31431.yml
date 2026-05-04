@@ -1,0 +1,65 @@
+title: AF_ALG AEAD Socket Bind For Page Cache Mutation - CVE-2026-31431
+id: 7641d707-39a7-4976-ac93-ae095bd713e6
+status: experimental
+description: |
+    Detects creation of an AF_ALG (family 38) SOCK_SEQPACKET socket — the kernel
+    crypto userspace interface — followed by a bind() to an "authencesn(...)"
+    AEAD algorithm. Public Copy Fail PoCs (CVE-2026-31431) bind such a socket
+    and use splice(2) to mutate the page cache of SUID binaries (typically
+    /usr/bin/su) for local privilege escalation to root.
+    The high-fidelity signal is the AEAD algorithm name `authencesn(hmac(...),cbc(aes))`,
+    which all known public PoCs require for the read/write page-aliasing
+    primitive. Legitimate AF_ALG callers (cryptsetup, strongSwan, wpa_supplicant)
+    do not bind to authencesn AEAD modes from non-root contexts.
+references:
+    - https://nvd.nist.gov/vuln/detail/CVE-2026-31431
+    - https://copy.fail
+    - https://github.com/theori-io/copy-fail-CVE-2026-31431
+    - https://github.com/badsectorlabs/copyfail-go
+    - https://github.com/iss4cf0ng/CVE-2026-31431-Linux-Copy-Fail
+    - https://hackerspace.pl/~q3k/alpine.py
+author: PV3M
+date: 2026-05-03
+tags:
+    - attack.privilege-escalation
+    - attack.t1068
+    - cve.2026-31431
+logsource:
+    product: linux
+    service: auditd
+    definition: |
+        Required auditd configuration:
+        -a always,exit -F arch=b64 -S socket -F a0=0x26 -k af_alg_socket
+        -a always,exit -F arch=b32 -S socket -F a0=0x26 -k af_alg_socket
+        -a always,exit -F arch=b64 -S bind                -k af_alg_bind
+        -a always,exit -F arch=b32 -S bind                -k af_alg_bind
+detection:
+    selection_socket:
+        type: 'SYSCALL'
+        SYSCALL: 'socket'
+        a0: 26 # AF_ALG = 38 (0x26 in auditd hex)
+        a1: 5  # SOCK_SEQPACKET
+    selection_bind_authencesn:
+        type: 'SOCKADDR'
+        saddr|contains:
+            - '61757468656e6365736e28'    # raw hex of "authencesn(" in sockaddr_alg.salg_name
+            - 'authencesn('               # ASCII match for pipelines that decode saddr
+    filter_main_legitimate_callers:
+        exe|startswith:
+            - '/usr/lib/systemd/'
+            - '/lib/systemd/'
+            - '/usr/sbin/cryptsetup'
+            - '/sbin/cryptsetup'
+            - '/usr/sbin/strongswan'
+            - '/usr/libexec/strongswan'
+            - '/usr/sbin/charon'
+            - '/usr/sbin/pluto'
+            - '/usr/sbin/wpa_supplicant'
+    filter_main_root_session:
+        auid: 0
+    condition: 1 of selection_* and not 1 of filter_main_*
+falsepositives:
+    - Libkcapi self-tests or openssl-engine kernel-crypto fallback (rare)
+    - Custom applications using AEAD authencesn modes via the kernel crypto API
+    - Dm-crypt or LUKS userland tooling not present on the legitimate-caller list
+level: high

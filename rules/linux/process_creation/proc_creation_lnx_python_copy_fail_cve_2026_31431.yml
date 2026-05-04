@@ -1,0 +1,66 @@
+title: Interpreter Process With Copy Fail PoC Fingerprint - CVE-2026-31431
+id: ff8080d5-3953-4797-a3f2-3be124e0f466
+status: experimental
+description: |
+    Detects an interpreter process whose command line carries the textual
+    fingerprint of public Copy Fail PoCs (CVE-2026-31431): the
+    "authencesn(hmac(sha...),cbc(aes))" AEAD algorithm string, the AF_ALG
+    family literal, the raw socket(38, ...) call, or the os.splice / os.pipe
+    pairing combined with a read-only open of /usr/bin/su.
+    Targets `python -c '...'` one-liners and inline shell snippets where the
+    PoC body is visible in the proctitle. Will not catch base64- or
+    zlib-encoded variants; pair with the auditd companion rule
+    (id: 7641d707-39a7-4976-ac93-ae095bd713e6) for runtime coverage.
+references:
+    - https://nvd.nist.gov/vuln/detail/CVE-2026-31431
+    - https://copy.fail
+    - https://github.com/theori-io/copy-fail-CVE-2026-31431
+    - https://github.com/tgies/copy-fail-c
+    - https://github.com/badsectorlabs/copyfail-go
+    - https://hackerspace.pl/~q3k/alpine.py
+author: PV3M
+date: 2026-05-03
+tags:
+    - attack.privilege-escalation
+    - attack.execution
+    - attack.t1068
+    - attack.t1059.006
+    - cve.2026-31431
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection_interpreter:
+        Image|endswith:
+            - '/python'
+            - '/python3'
+            - '/python2'
+            - '/perl'
+            - '/ruby'
+            - '/bash'
+            - '/sh'
+    selection_indicator_strong:
+        CommandLine|contains:
+            - 'authencesn(hmac(sha256),cbc(aes))'
+            - 'authencesn(hmac(sha512),cbc(aes))'
+            - 'authencesn(hmac(sha1),cbc(aes))'
+            - 'AF_ALG'
+            - 'socket(38,5'
+            - 'socket(38, 5'
+            - 'socket.socket(38'
+    selection_indicator_combo:
+        CommandLine|contains|all:
+            - 'os.splice'
+            - '/usr/bin/su'
+    selection_curl_stage:
+        CommandLine|contains:
+            - 'copy.fail/exp'
+            - 'copy.fail/poc'
+            - 'raw.githubusercontent.com/theori-io/copy-fail'
+            - 'raw.githubusercontent.com/badsectorlabs/copyfail'
+    condition: selection_interpreter and 1 of selection_indicator_* or selection_curl_stage
+falsepositives:
+    - Security research reproducing the public proof-of-concept in a sandbox
+    - Libkcapi reference scripts and kernel-crypto API examples
+    - Authorized red team activity that exercises the public proof-of-concept
+level: high
