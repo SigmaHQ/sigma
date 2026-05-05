@@ -6,10 +6,13 @@ description: |
     A threat actor can create a new AD Health ADFS service and create a fake server to spoof AD FS signing logs.
     The health AD FS service can then be deleted after it is not longer needed via HTTP requests to Azure.
 references:
-    - https://o365blog.com/post/hybridhealthagent/
+    - https://web.archive.org/web/20220619212736/https://o365blog.com/post/hybridhealthagent/
+    - https://aadinternals.com/talks/HelSec%20August%202021.pdf
+    - https://learn.microsoft.com/en-us/azure/role-based-access-control/permissions/identity#microsoftadhybridhealthservice
+    - https://www.inversecos.com/2023/01/detecting-fake-events-in-azure-sign-in.html
 author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research), MSTIC
 date: 2021-08-26
-modified: 2023-10-11
+modified: 2026-05-05
 tags:
     - attack.defense-impairment
     - attack.t1578.003
@@ -18,10 +21,8 @@ logsource:
     service: activitylogs
 detection:
     selection:
-        CategoryValue: 'Administrative'
-        ResourceProviderValue: 'Microsoft.ADHybridHealthService'
-        ResourceId|contains: 'AdFederationService'
-        OperationNameValue: 'Microsoft.ADHybridHealthService/services/delete'
+        category: 'Administrative'
+        operationName: 'MICROSOFT.ADHYBRIDHEALTHSERVICE/SERVICES/DELETE'
     condition: selection
 falsepositives:
     - Legitimate AAD Health AD FS service instances being deleted in a tenant
