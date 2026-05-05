@@ -1,22 +1,38 @@
-title: WSL Binary Modification
+title: WSL Binary Modification from Installed Location
 id: 2f400434-01e1-416b-b52c-bb5bfbb9eb78
 status: experimental
-description: Detects the modification of WSL.exe in program files. When WSL or Bash are exectued in Windows, the respective file in the System32 folder is executed and calls WSL.exe from program files.
+description: |
+    Detects the modification of the wsl.exe binary from its installed location.
+    Attackers can replace the legitimate wsl.exe binary with a malicious payload in its place, which is then executed when the user runs WSL, acting as a proxy execution and defense evasion technique.
 references:
     - https://cardinalops.com/blog/bash-and-switch-hijacking-via-windows-subsystem-for-linux/
-author: Liran Ravich
-date: 2025-10-01
+author: Liran Ravich, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-05-05
 tags:
-    - attack.defense-evasion
+    - attack.stealth
     - attack.t1036.005
     - attack.t1218
 logsource:
     category: file_event
     product: windows
 detection:
-    selection:
-        TargetFilename|contains: 'c:\program files\wsl\wsl.exe'
-    condition: selection
+    selection_wsl_exe:
+        TargetFilename|endswith: '\wsl.exe'
+    selection_wsl_folder:
+        - TargetFilename|contains:
+              - ':\Program files\wsl\'
+              - ':\Program files\WindowsApps\MicrosoftCorporationII.WindowsSubsystemForLinux_'
+        - TargetFilename|contains|all:
+              - ':\Users\'
+              - '\AppData\Local\Microsoft\WindowsApps\'
+    filter_main_msiexec:
+        Image:
+            - 'C:\Windows\System32\msiexec.exe'
+            - 'C:\Windows\SysWOW64\msiexec.exe'
+    filter_main_svchost:
+        Image: 'C:\Windows\System32\svchost.exe'
+        TargetFilename|contains: '\WindowsApps\'
+    condition: all of selection_* and not 1 of filter_main_*
 falsepositives:
-    - When installing WSL for the first time, this file is created by msiexec.exe.
-level: high
+    - Legitimate modification of WSL.exe by the user or by Windows updates.
+level: medium # keeping as medium as there might still be legitimate process that create wsl.exe

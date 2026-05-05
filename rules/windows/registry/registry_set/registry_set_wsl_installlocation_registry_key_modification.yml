@@ -1,13 +1,17 @@
 title: WSL InstallLocation Registry Key Modification
 id: 83475063-b1c8-4774-9568-69bbda71a539
 status: experimental
-description: Detects the modification of the registry key realted to WSL InstallLocation. The key points to a path, in which any file named wsl.exe will be executed upon execution of wsl or bash.
+description: |
+    Detects modifications to the Windows Subsystem for Linux (WSL) InstallLocation registry key.
+    Attackers can modify this registry key to redirect the execution flow of legitimate WSL processes (wsl.exe or bash.exe) to a malicious payload, acting as a proxy execution and defense evasion technique.
 references:
     - https://cardinalops.com/blog/bash-and-switch-hijacking-via-windows-subsystem-for-linux/
-author: Liran Ravich
-date: 2025-10-01
+author: Liran Ravich, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-05-05
 tags:
-    - attack.defense-evasion
+    - attack.stealth
+    - attack.defense-impairment
+    - attack.persistence
     - attack.t1112
     - attack.t1218
 logsource:
@@ -16,7 +20,17 @@ logsource:
 detection:
     selection:
         TargetObject|contains: '\Lxss\MSI\InstallLocation'
-    condition: selection
+    filter_main_legitimate_binary:
+        - Details: 'C:\Program Files\WSL'
+        - Details|contains:
+              - ':\Program Files\WindowsApps\MicrosoftCorporationII.WindowsSubsystemForLinux_'
+              - '\AppData\Local\Microsoft\WindowsApps'
+              - '%ProgramFiles%'
+    filter_main_msiexec:
+        Image:
+            - 'C:\Windows\System32\msiexec.exe'
+            - 'C:\Windows\SysWOW64\msiexec.exe'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unlikely
 level: high

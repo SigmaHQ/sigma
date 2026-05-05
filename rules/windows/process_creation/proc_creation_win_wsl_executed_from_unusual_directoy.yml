@@ -1,13 +1,15 @@
 title: WSL Executed From Unusual Directory
 id: 792eba32-3c95-4144-a7dd-030f4a4cdb8b
 status: experimental
-description: Detects the execution of wsl.exe from an unusual path. This could point to a possible hijack of WSL, intended to make it run a malicious payload upon execution of WSL or Bash.
+description: |
+    Detects the execution of wsl.exe from an unusual path.
+    This could point to a possible hijack of WSL, intended to make it run a malicious payload upon execution of WSL or Bash.
 references:
     - https://cardinalops.com/blog/bash-and-switch-hijacking-via-windows-subsystem-for-linux/
-author: Liran Ravich
-date: 2025-10-01
+author: Liran Ravich, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-05-05
 tags:
-    - attack.defense-evasion
+    - attack.stealth
     - attack.t1036.005
     - attack.t1218
 logsource:
@@ -20,12 +22,15 @@ detection:
         Image:
             - 'C:\Windows\System32\wsl.exe'
             - 'C:\Program Files\WSL\wsl.exe'
+            - 'C:\$windows.~bt\newos\windows\system32\wsl.exe'
     filter_main_legit_paths_2:
         Image|startswith:
             - 'C:\Windows\WinSxS\amd64_microsoft-windows-lxss-wsl_'
             - 'C:\Program Files\WindowsApps\MicrosoftCorporationII.WindowsSubsystemForLinux'
+            - 'C:\ProgramData\Microsoft\Windows\Containers\Layers\'
+            - 'C:\Windows\SoftwareDistribution\Download\'
     filter_main_legit_paths_3:
-        Image|startswith: 'C:\Users'
+        Image|startswith: 'C:\Users\'
         Image|contains: '\AppData\Local\Microsoft\WindowsApps\'
     condition: selection_img and not 1 of filter_main_*
 falsepositives:
