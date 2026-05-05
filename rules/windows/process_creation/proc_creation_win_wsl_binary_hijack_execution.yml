@@ -1,12 +1,14 @@
-title: WSL Executed From Unusual Directory
-id: 792eba32-3c95-4144-a7dd-030f4a4cdb8b
+title: WSL Binary Hijack via Proxy Execution
+id: 88d306e9-8e2d-4025-9768-28757d2732db
 status: experimental
 description: |
-    Detects the execution of wsl.exe from an unusual path.
-    This could point to a possible hijack of WSL, intended to make it run a malicious payload upon execution of WSL or Bash.
+    Detects C:\Windows\System32\wsl.exe spawning a child wsl.exe process from outside the legitimate WSL install locations.
+    When WSL or bash is invoked, the System32 stub (wsl.exe) looks up the InstallLocation registry key and executes the wsl.exe found there.
+    An attacker who modifies InstallLocation to a controlled path causes the stub to transparently proxy execution to a malicious payload,
+    which then appears as a wsl.exe child of the legitimate System32 stub.
 references:
     - https://cardinalops.com/blog/bash-and-switch-hijacking-via-windows-subsystem-for-linux/
-author: Liran Ravich, Swachchhanda Shrawan Poudel (Nextron Systems)
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2026-05-05
 tags:
     - attack.stealth
@@ -16,23 +18,21 @@ logsource:
     category: process_creation
     product: windows
 detection:
-    selection_img:
+    selection:
+        ParentImage: 'C:\Windows\System32\wsl.exe'
         Image|endswith: '\wsl.exe'
     filter_main_legit_paths_1:
         Image:
             - 'C:\Windows\System32\wsl.exe'
             - 'C:\Program Files\WSL\wsl.exe'
-            - 'C:\$windows.~bt\newos\windows\system32\wsl.exe'
     filter_main_legit_paths_2:
         Image|startswith:
             - 'C:\Windows\WinSxS\amd64_microsoft-windows-lxss-wsl_'
             - 'C:\Program Files\WindowsApps\MicrosoftCorporationII.WindowsSubsystemForLinux'
-            - 'C:\ProgramData\Microsoft\Windows\Containers\Layers\'
-            - 'C:\Windows\SoftwareDistribution\Download\'
     filter_main_legit_paths_3:
         Image|startswith: 'C:\Users\'
         Image|contains: '\AppData\Local\Microsoft\WindowsApps\'
-    condition: selection_img and not 1 of filter_main_*
+    condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unlikely
 level: high
