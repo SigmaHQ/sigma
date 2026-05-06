@@ -20,11 +20,13 @@ tags:
 logsource:
     product: linux
     service: auditd
-    definition: 'Requires auditd syscall monitoring: auditctl -a always,exit -F arch=b64 -S socket -k af_alg_detect'
+    definition: |
+        Required auditd configuration:
+        auditctl -a always,exit -F arch=b64 -S socket -k af_alg_detect
 detection:
     selection:
-        type: SYSCALL
-        SYSCALL: socket
+        type: 'SYSCALL'
+        SYSCALL: 'socket'
         a0: 26
     filter_main_legitimate:
         exe|endswith:
