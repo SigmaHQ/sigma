@@ -18,14 +18,14 @@ if [[ ! -f ${fps}  || ! -r ${fps} ]]; then
 fi
 
 # Exclude all rules with level "low"
-findings=$(grep -v '"RuleLevel":"low"' ${infile})
+findings=$(grep -v '"RuleLevel":"low"' "${infile}")
 
 {
-    read # Skip CSV header
-    while IFS=\; read -r id name fpstring; do
+    read -r # Skip CSV header
+    while IFS=\; read -r id _name fpstring; do
         findings=$(echo "${findings}" | grep -iEv "\"RuleId\":\"${id}\".*${fpstring}")
     done
-} < ${fps}
+} < "${fps}"
 
 if [[ -z ${findings} ]]; then
     echo "No matches found."
@@ -34,7 +34,7 @@ else
     echo "${findings}"
     >&2 echo
     >&2 echo "Match overview:"
-    echo ${findings} | jq -c '. | {RuleId, RuleTitle, RuleLevel}' | sort | uniq -c | sort -nr >&2
+    echo "${findings}" | jq -c '. | {RuleId, RuleTitle, RuleLevel}' | sort | uniq -c | sort -nr >&2
     >&2 echo
     >&2 echo "You either need to tune your rule(s) for false positives or add a false positive filter to .github/workflows/known-FPs.csv"
     exit 3
