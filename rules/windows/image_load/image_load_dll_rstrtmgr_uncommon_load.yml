@@ -15,7 +15,7 @@ references:
     - https://taiwan.postsen.com/business/88601/Hamas-hackers-use-data-destruction-software-BiBi-which-consumes-a-lot-of-processor-resources-to-wipe-Windows-computer-data--iThome.html
 author: Luc Génaux
 date: 2023-11-28
-modified: 2025-12-08
+modified: 2026-05-07
 tags:
     - attack.impact
     - attack.defense-impairment
@@ -30,29 +30,35 @@ detection:
         - OriginalFileName: 'RstrtMgr.dll'
     filter_main_generic:
         Image|startswith:
-            - C:\$WINDOWS.~BT\'
-            - C:\$WinREAgent\'
-            - C:\Program Files (x86)\'
-            - C:\Program Files\'
-            - C:\ProgramData\'
-            - C:\Windows\explorer.exe'
-            - C:\Windows\SoftwareDistribution\'
-            - C:\Windows\SysNative\'
-            - C:\Windows\System32\'
-            - C:\Windows\SysWOW64\'
-            - C:\Windows\WinSxS\'
-            - C:\WUDownloadCache\'
+            - 'C:\$WINDOWS.~BT\'
+            - 'C:\$WinREAgent\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Program Files\'
+            - 'C:\ProgramData\'
+            - 'C:\Windows\explorer.exe'
+            - 'C:\Windows\SoftwareDistribution\'
+            - 'C:\Windows\SysNative\'
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Windows\WinSxS\'
+            - 'C:\WUDownloadCache\'
     filter_main_user_software_installations:
-        Image|startswith: C:\Users\'
+        Image|startswith: 'C:\Users\'
         Image|contains|all:
             - '\AppData\Local\Temp\is-'
             - '.tmp\'
         Image|endswith: '.tmp'
     filter_main_admin_software_installations:
-        Image|startswith: C:\Windows\Temp\'
-    filter_optional_onedrive:
+        Image|startswith: 'C:\Windows\Temp\'
+    filter_optional_onedrive_1:
         Image|startswith: 'C:\Users\'
-        Image|endswith: '\AppData\Local\Microsoft\OneDrive\OneDriveStandaloneUpdater.exe'
+        Image|endswith:
+            - '\AppData\Local\Microsoft\OneDrive\OneDrive.exe'
+            - '\AppData\Local\Microsoft\OneDrive\OneDriveStandaloneUpdater.exe'
+    filter_optional_onedrive_2:
+        Image|startswith: 'C:\Users\'
+        Image|contains: '\AppData\Local\Microsoft\OneDrive\' # AppData\Local\Microsoft\OneDrive\26.062.0402.0002\OneDrive.Sync.Service.exe
+        Image|endswith: '\OneDrive.Sync.Service.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Other legitimate Windows processes not currently listed
