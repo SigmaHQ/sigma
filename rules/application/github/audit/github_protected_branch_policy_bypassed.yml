@@ -1,0 +1,31 @@
+title: GitHub Branch Protection Policy Bypassed
+id: aacf2748-ca80-4618-803a-eaa47e57ccc0
+status: experimental
+description: |
+    Detects use of the protected_branch.policy_override audit event which indicates
+    that a user with admin or push privileges bypassed branch protection rules to
+    force-push or merge without required approvals. This is a critical supply chain
+    signal as it means code reached a protected branch without passing mandatory
+    review, status checks, or other configured gates.
+references:
+    - https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches
+    - https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/audit-log-events-for-your-enterprise
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.defense-impairment
+    - attack.initial-access
+    - attack.t1195.002
+    - attack.t1685
+logsource:
+    product: github
+    service: audit
+    definition: 'Requirements: The audit log streaming feature must be enabled to be able to receive such logs. You can enable following the documentation here: https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise#setting-up-audit-log-streaming'
+detection:
+    selection:
+        action: 'protected_branch.policy_override'
+    condition: selection
+falsepositives:
+    - Emergency hotfix deployment by authorized release manager during incident response
+    - Repository administrator performing approved maintenance push
+level: high

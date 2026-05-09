@@ -1,0 +1,32 @@
+title: GitHub Repository Default Branch Changed
+id: 0a1e45f2-0484-40cc-836b-f966559d9f8c
+status: experimental
+description: |
+    Detects changes to a repository's default branch via the
+    repo.update_default_branch audit event. The default branch is the base
+    for pull requests and the branch checked out by default on clone.
+    Changing it can redirect automated deployments, bypass branch protection
+    rules applied to the previous default, or expose a less-reviewed branch
+    as the canonical codebase in a supply chain attack scenario.
+references:
+    - https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-branches-in-your-repository/changing-the-default-branch
+    - https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/audit-log-events-for-your-enterprise
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.defense-impairment
+    - attack.initial-access
+    - attack.t1195.002
+    - attack.t1685
+logsource:
+    product: github
+    service: audit
+    definition: 'Requirements: The audit log streaming feature must be enabled to be able to receive such logs. You can enable following the documentation here: https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise#setting-up-audit-log-streaming'
+detection:
+    selection:
+        action: 'repo.update_default_branch'
+    condition: selection
+falsepositives:
+    - Planned repository migration from master to main or other branch rename convention
+    - Repository restructuring approved via change management process
+level: medium

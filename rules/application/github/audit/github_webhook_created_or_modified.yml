@@ -1,0 +1,32 @@
+title: GitHub Webhook Created or Modified
+id: 1308bbf9-969f-4d4c-8955-7631aaafe776
+status: experimental
+description: |
+    Detects creation, deletion, or configuration changes to GitHub webhooks at
+    the repository or organization level. Webhooks deliver real-time event
+    payloads to external URLs. Attackers can create webhooks to exfiltrate
+    code, secrets exposed in CI pipelines, or pull request contents to an
+    attacker-controlled endpoint without triggering repository access alerts.
+references:
+    - https://docs.github.com/en/webhooks/about-webhooks
+    - https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/audit-log-events-for-your-enterprise
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.exfiltration
+    - attack.t1048.003
+logsource:
+    product: github
+    service: audit
+    definition: 'Requirements: The audit log streaming feature must be enabled to be able to receive such logs. You can enable following the documentation here: https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise#setting-up-audit-log-streaming'
+detection:
+    selection:
+        action:
+            - 'hook.create'
+            - 'hook.destroy'
+            - 'hook.config_changed'
+    condition: selection
+falsepositives:
+    - Legitimate integration setup by developers adding CI/CD or monitoring tools
+    - Infrastructure-as-code managing organization-level webhooks
+level: medium

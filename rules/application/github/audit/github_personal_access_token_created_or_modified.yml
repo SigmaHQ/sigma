@@ -1,0 +1,37 @@
+title: GitHub Personal Access Token Created or Modified
+id: fe52ac15-0d24-449c-ace6-fddc7af9cc52
+status: experimental
+description: |
+    Detects creation, update, or deletion of GitHub Personal Access Tokens (PAT)
+    including classic tokens and fine-grained tokens. PATs provide programmatic
+    access equivalent to user credentials and do not expire by default. Attackers
+    with temporary console access create PATs to establish persistent backdoor
+    access that survives password resets and session termination.
+references:
+    - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens
+    - https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/audit-log-events-for-your-enterprise
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.persistence
+    - attack.credential-access
+    - attack.initial-access
+    - attack.privilege-escalation
+    - attack.stealth
+    - attack.t1078.004
+    - attack.t1552.001
+logsource:
+    product: github
+    service: audit
+    definition: 'Requirements: The audit log streaming feature must be enabled to be able to receive such logs. You can enable following the documentation here: https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise#setting-up-audit-log-streaming'
+detection:
+    selection:
+        action:
+            - 'personal_access_token.create'
+            - 'personal_access_token.update'
+            - 'personal_access_token.delete'
+    condition: selection
+falsepositives:
+    - Developer creating a token for legitimate automation or local tooling
+    - CI/CD pipeline bootstrapping via PAT before switching to GitHub Apps
+level: medium

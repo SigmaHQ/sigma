@@ -1,0 +1,32 @@
+title: GitHub Deploy Key Created or Deleted
+id: 4787b1af-05df-4cbd-8382-d79ded8abb87
+status: experimental
+description: |
+    Detects creation or deletion of GitHub deploy keys. Deploy keys are SSH keys
+    that grant read or write access to a single repository without being tied to
+    a user account. Attackers create deploy keys to establish persistent access
+    to a repository that survives user account deprovisioning or credential
+    rotation, as deploy keys are managed separately from user SSH keys.
+references:
+    - https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys
+    - https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/audit-log-events-for-your-enterprise
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098.004
+logsource:
+    product: github
+    service: audit
+    definition: 'Requirements: The audit log streaming feature must be enabled to be able to receive such logs. You can enable following the documentation here: https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise#setting-up-audit-log-streaming'
+detection:
+    selection:
+        action:
+            - 'deploy_key.create'
+            - 'deploy_key.delete'
+    condition: selection
+falsepositives:
+    - Legitimate CI/CD system adding a deploy key for automated deployments
+    - Infrastructure-as-code rotating deploy keys as part of secret management
+level: medium

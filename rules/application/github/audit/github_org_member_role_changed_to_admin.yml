@@ -1,0 +1,31 @@
+title: GitHub Organization Member Role Changed to Admin
+id: b5763f7f-9f04-467e-887e-bc9d51b5275a
+status: experimental
+description: |
+    Detects when a GitHub organization member's role is changed to owner
+    (admin) via the org.update_member audit event. Organization owners have
+    unrestricted access to all repositories, settings, billing, and members
+    within the organization. Unauthorized privilege escalation to owner level
+    is a critical indicator of account compromise or insider threat activity.
+references:
+    - https://docs.github.com/en/organizations/managing-peoples-access-to-your-organization-with-roles/roles-in-an-organization
+    - https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/audit-log-events-for-your-enterprise
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.privilege-escalation
+    - attack.persistence
+    - attack.t1098.003
+logsource:
+    product: github
+    service: audit
+    definition: 'Requirements: The audit log streaming feature must be enabled to be able to receive such logs. You can enable following the documentation here: https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise#setting-up-audit-log-streaming'
+detection:
+    selection:
+        action: 'org.update_member'
+        permission: 'admin'
+    condition: selection
+falsepositives:
+    - Planned promotion of a team lead to organization owner by authorized admin
+    - Emergency access grant during incident response requiring elevated permissions
+level: high

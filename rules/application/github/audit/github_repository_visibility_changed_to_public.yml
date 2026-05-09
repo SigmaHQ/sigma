@@ -1,0 +1,30 @@
+title: GitHub Repository Visibility Changed to Public
+id: 328fac83-8a48-4649-9010-658a86804f2b
+status: experimental
+description: |
+    Detects when a GitHub repository visibility is changed to public via the
+    repo.change_visibility audit event. Making a previously private or internal
+    repository public immediately exposes all code, commit history, issues,
+    and potentially embedded secrets to the internet. This can constitute
+    accidental or intentional data exfiltration or intellectual property exposure.
+references:
+    - https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/setting-repository-visibility
+    - https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/audit-log-events-for-your-enterprise
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.exfiltration
+    - attack.t1567.001
+logsource:
+    product: github
+    service: audit
+    definition: 'Requirements: The audit log streaming feature must be enabled to be able to receive such logs. You can enable following the documentation here: https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise#setting-up-audit-log-streaming'
+detection:
+    selection:
+        action: 'repo.change_visibility'
+        visibility: 'public'
+    condition: selection
+falsepositives:
+    - Intentional open-source release of an internal project approved via change management
+    - Developer sandbox or demo repositories made public for external sharing
+level: high

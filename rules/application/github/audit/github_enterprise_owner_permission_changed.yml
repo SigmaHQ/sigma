@@ -1,0 +1,33 @@
+title: GitHub Enterprise Owner Added or Removed
+id: 009fa0fd-cd7e-4dd6-af90-fc47b878e876
+status: experimental
+description: |
+    Detects addition, invitation, or removal of GitHub Enterprise owners via
+    the business.add_admin, business.invite_admin, or business.remove_admin
+    audit events. Enterprise owners have unrestricted access to all organizations
+    and repositories in the enterprise. Unauthorized changes to this role
+    represent a critical privilege escalation or persistence mechanism.
+references:
+    - https://docs.github.com/en/enterprise-cloud@latest/admin/managing-accounts-and-repositories/managing-users-in-your-enterprise/inviting-people-to-manage-your-enterprise
+    - https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/audit-log-events-for-your-enterprise
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.privilege-escalation
+    - attack.persistence
+    - attack.t1098.003
+logsource:
+    product: github
+    service: audit
+    definition: 'Requirements: The audit log streaming feature must be enabled to be able to receive such logs. You can enable following the documentation here: https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/streaming-the-audit-log-for-your-enterprise#setting-up-audit-log-streaming'
+detection:
+    selection:
+        action:
+            - 'business.add_admin'
+            - 'business.invite_admin'
+            - 'business.remove_admin'
+    condition: selection
+falsepositives:
+    - Planned enterprise owner rotation during offboarding or org restructuring
+    - Legitimate onboarding of new infrastructure team members
+level: high
