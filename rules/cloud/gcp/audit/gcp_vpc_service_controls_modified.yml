@@ -1,0 +1,32 @@
+title: Google Cloud VPC Service Controls Perimeter Modified
+id: f8f9105a-ba0c-4a70-866b-d6695adc12fd
+status: experimental
+description: |
+    Detects creation, modification, or deletion of VPC Service Controls
+    perimeters. VPC Service Controls restrict API access between GCP projects
+    acting as a firewall for cloud APIs. Modifying or deleting a perimeter
+    removes these restrictions and can allow an attacker to copy data between
+    projects or access protected APIs from unauthorized contexts.
+references:
+    - https://cloud.google.com/security/vpc-service-controls/docs/overview
+    - https://cloud.google.com/logging/docs/audit/understanding-audit-logs
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    product: gcp
+    service: gcp.audit
+detection:
+    selection:
+        gcp.audit.method_name:
+            - 'google.identity.accesscontextmanager.v1.AccessContextManager.CreateServicePerimeter'
+            - 'google.identity.accesscontextmanager.v1.AccessContextManager.UpdateServicePerimeter'
+            - 'google.identity.accesscontextmanager.v1.AccessContextManager.DeleteServicePerimeter'
+            - 'google.identity.accesscontextmanager.v1.AccessContextManager.ReplaceServicePerimeters'
+    condition: selection
+falsepositives:
+    - Planned VPC SC perimeter update by authorized network security team
+    - Infrastructure-as-code managing service perimeter definitions
+level: high

@@ -1,0 +1,34 @@
+title: Google Cloud Function Created or Modified
+id: dd9dac61-b87e-4f96-81bf-c2dd04bcc544
+status: experimental
+description: |
+    Detects creation, modification, or deletion of Google Cloud Functions.
+    Cloud Functions are serverless execution environments that run with attached
+    service account permissions. An attacker with sufficient access can deploy
+    a malicious function to execute arbitrary code, exfiltrate data, modify
+    IAM policies, or establish persistent backdoor access to a GCP project.
+references:
+    - https://cloud.google.com/functions/docs/concepts/overview
+    - https://cloud.google.com/logging/docs/audit/understanding-audit-logs
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.persistence
+    - attack.t1525
+logsource:
+    product: gcp
+    service: gcp.audit
+detection:
+    selection:
+        gcp.audit.method_name:
+            - 'google.cloud.functions.v1.CloudFunctionsService.CreateFunction'
+            - 'google.cloud.functions.v1.CloudFunctionsService.UpdateFunction'
+            - 'google.cloud.functions.v1.CloudFunctionsService.DeleteFunction'
+            - 'google.cloud.functions.v2.FunctionService.CreateFunction'
+            - 'google.cloud.functions.v2.FunctionService.UpdateFunction'
+            - 'google.cloud.functions.v2.FunctionService.DeleteFunction'
+    condition: selection
+falsepositives:
+    - Legitimate developer deploying or updating a Cloud Function as part of normal CI/CD
+    - Infrastructure-as-code pipeline managing serverless function lifecycle
+level: medium

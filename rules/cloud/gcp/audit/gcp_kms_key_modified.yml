@@ -1,0 +1,34 @@
+title: Google Cloud KMS Cryptographic Key Modified or Destroyed
+id: 9f7bb030-2e70-48f0-9311-34a259f883a9
+status: experimental
+description: |
+    Detects creation, modification, or destruction of cryptographic keys in
+    Google Cloud KMS. Cloud KMS keys protect encrypted data at rest. Destroying
+    a key version permanently makes encrypted data inaccessible. Modifying key
+    rotation schedules or primary versions can impact security posture across
+    all services relying on customer-managed encryption keys.
+references:
+    - https://cloud.google.com/kms/docs/key-management-service
+    - https://cloud.google.com/logging/docs/audit/understanding-audit-logs
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.impact
+    - attack.t1485
+logsource:
+    product: gcp
+    service: gcp.audit
+detection:
+    selection:
+        gcp.audit.method_name:
+            - 'google.cloud.kms.v1.KeyManagementService.CreateCryptoKey'
+            - 'google.cloud.kms.v1.KeyManagementService.UpdateCryptoKey'
+            - 'google.cloud.kms.v1.KeyManagementService.DestroyCryptoKeyVersion'
+            - 'google.cloud.kms.v1.KeyManagementService.RestoreCryptoKeyVersion'
+            - 'google.cloud.kms.v1.KeyManagementService.UpdateCryptoKeyPrimaryVersion'
+            - 'google.cloud.kms.v1.KeyManagementService.CreateKeyRing'
+    condition: selection
+falsepositives:
+    - Planned key rotation by authorized security or infrastructure team
+    - Decommissioning of unused encryption keys via IaC pipeline
+level: high

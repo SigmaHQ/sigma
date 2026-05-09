@@ -1,0 +1,30 @@
+title: Google Cloud Storage HMAC Key Created
+id: a1467d4d-4f78-4819-9609-590cc963159d
+status: experimental
+description: |
+    Detects creation of HMAC keys for service accounts in Google Cloud Storage.
+    HMAC keys enable S3-compatible authentication to Cloud Storage and are
+    associated with a service account. Unlike service account JSON keys, HMAC
+    keys are not visible in the standard IAM credential inventory. Attackers
+    create HMAC keys to establish persistent, hard-to-detect storage access
+    that survives service account key rotation.
+references:
+    - https://cloud.google.com/storage/docs/authentication/hmackeys
+    - https://cloud.google.com/logging/docs/audit/understanding-audit-logs
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098.001
+logsource:
+    product: gcp
+    service: gcp.audit
+detection:
+    selection:
+        gcp.audit.method_name: 'google.storage.v1.StorageControl.CreateHmacKey'
+    condition: selection
+falsepositives:
+    - Developer creating an HMAC key for S3-compatible tool integration with Cloud Storage
+    - Automated pipeline bootstrapping storage credentials for a new service
+level: high

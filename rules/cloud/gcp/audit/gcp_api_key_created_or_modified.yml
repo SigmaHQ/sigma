@@ -1,0 +1,32 @@
+title: Google Cloud API Key Created or Modified
+id: ce4e8c7a-f7fe-4d0a-af46-4baa1c88439e
+status: experimental
+description: |
+    Detects creation, modification, or deletion of GCP API keys. API keys
+    provide unrestricted access to enabled GCP services without requiring
+    user authentication. Attackers who gain access to a project may create
+    API keys to establish persistent programmatic access or modify key
+    restrictions to expand the attack surface for service abuse.
+references:
+    - https://cloud.google.com/api-keys/docs/overview
+    - https://cloud.google.com/logging/docs/audit/understanding-audit-logs
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098.001
+logsource:
+    product: gcp
+    service: gcp.audit
+detection:
+    selection:
+        gcp.audit.method_name:
+            - 'google.api.apikeys.v2.ApiKeys.CreateKey'
+            - 'google.api.apikeys.v2.ApiKeys.UpdateKey'
+            - 'google.api.apikeys.v2.ApiKeys.DeleteKey'
+    condition: selection
+falsepositives:
+    - Developer creating an API key for a new service integration
+    - Automated key rotation pipeline updating existing API keys
+level: medium

@@ -1,0 +1,30 @@
+title: Google Cloud API Service Enabled
+id: 23ad6d6b-bd93-4462-a788-01daee0535e5
+status: experimental
+description: |
+    Detects enablement of GCP APIs within a project. Attackers who compromise
+    a GCP project may enable APIs that were previously disabled by security
+    policy in order to access services needed for their attack chain — for
+    example enabling the Compute or Cloud Functions API to spawn new execution
+    environments or enabling IAM API to escalate privileges.
+references:
+    - https://cloud.google.com/service-usage/docs/enable-disable
+    - https://cloud.google.com/logging/docs/audit/understanding-audit-logs
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    product: gcp
+    service: gcp.audit
+detection:
+    selection:
+        gcp.audit.method_name:
+            - 'google.api.serviceusage.v1.ServiceUsage.EnableService'
+            - 'google.api.serviceusage.v1beta1.ServiceUsage.EnableService'
+    condition: selection
+falsepositives:
+    - Developer enabling a new GCP API for a legitimate feature or integration
+    - IaC pipeline enabling required APIs during initial project bootstrap
+level: low

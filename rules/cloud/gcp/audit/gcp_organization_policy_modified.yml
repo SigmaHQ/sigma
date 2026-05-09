@@ -1,0 +1,34 @@
+title: Google Cloud Organization Policy Modified
+id: 4d1eb14d-9979-4bd9-9928-ddea9d3c50bc
+status: experimental
+description: |
+    Detects creation, modification, or deletion of GCP Organization Policies.
+    Organization policies enforce security constraints across an entire GCP
+    organization or folder, such as restricting public Cloud Storage buckets,
+    limiting allowed regions, or enforcing domain-restricted sharing. Attackers
+    with org-level access may modify policies to remove these restrictions and
+    enable data exfiltration or unauthorized resource creation.
+references:
+    - https://cloud.google.com/resource-manager/docs/organization-policy/overview
+    - https://cloud.google.com/logging/docs/audit/understanding-audit-logs
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    product: gcp
+    service: gcp.audit
+detection:
+    selection:
+        gcp.audit.method_name:
+            - 'SetOrgPolicy'
+            - 'ClearOrgPolicy'
+            - 'google.cloud.orgpolicy.v2.OrgPolicy.CreatePolicy'
+            - 'google.cloud.orgpolicy.v2.OrgPolicy.UpdatePolicy'
+            - 'google.cloud.orgpolicy.v2.OrgPolicy.DeletePolicy'
+    condition: selection
+falsepositives:
+    - Planned org policy update by authorized cloud governance team
+    - IaC-driven policy changes during infrastructure provisioning
+level: high

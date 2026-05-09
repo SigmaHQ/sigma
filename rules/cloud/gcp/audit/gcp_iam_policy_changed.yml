@@ -1,0 +1,29 @@
+title: Google Cloud IAM Policy Changed
+id: a738c8ee-3914-4f1f-ac26-034364a29b79
+status: experimental
+description: |
+    Detects changes to IAM policies across GCP resources via the SetIamPolicy
+    method. IAM policy changes can grant or revoke access to GCP resources
+    including projects, storage buckets, BigQuery datasets, and service accounts.
+    Unauthorized IAM changes are a primary privilege escalation and persistence
+    technique in GCP environments.
+references:
+    - https://cloud.google.com/iam/docs/overview
+    - https://cloud.google.com/logging/docs/audit/understanding-audit-logs
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.privilege-escalation
+    - attack.persistence
+    - attack.t1098.003
+logsource:
+    product: gcp
+    service: gcp.audit
+detection:
+    selection:
+        gcp.audit.method_name|endswith: 'SetIamPolicy'
+    condition: selection
+falsepositives:
+    - Legitimate IAM changes performed by authorized administrators
+    - Automated infrastructure-as-code deployments modifying resource permissions
+level: medium

@@ -1,0 +1,32 @@
+title: Google Cloud Logging Sink or Bucket Modified
+id: 11e3de04-f8f1-4394-9477-3f6a983f2272
+status: experimental
+description: |
+    Detects creation, modification, or deletion of Cloud Logging sinks and log
+    buckets. Logging sinks control where audit log data is exported. Deleting
+    or redirecting sinks removes visibility into GCP activity and constitutes a
+    defensive evasion technique that can blind security monitoring.
+references:
+    - https://cloud.google.com/logging/docs/export/configure_export_v2
+    - https://cloud.google.com/logging/docs/audit/understanding-audit-logs
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    product: gcp
+    service: gcp.audit
+detection:
+    selection:
+        gcp.audit.method_name:
+            - 'google.logging.v2.ConfigServiceV2.CreateSink'
+            - 'google.logging.v2.ConfigServiceV2.UpdateSink'
+            - 'google.logging.v2.ConfigServiceV2.DeleteSink'
+            - 'google.logging.v2.ConfigServiceV2.UpdateBucket'
+            - 'google.logging.v2.ConfigServiceV2.DeleteBucket'
+    condition: selection
+falsepositives:
+    - Planned migration of log export destination by infrastructure or security team
+    - Initial setup of log sinks for SIEM ingestion
+level: high

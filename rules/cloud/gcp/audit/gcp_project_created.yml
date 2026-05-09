@@ -1,0 +1,31 @@
+title: Google Cloud Project Created
+id: 3d7c4092-c26e-4bb9-a77c-a4a1e6ae153f
+status: experimental
+description: |
+    Detects the creation of a new GCP project. New projects are independent
+    billing and resource containers that can be used to stage attacker-controlled
+    infrastructure outside of monitored environments. An attacker with
+    resourcemanager.projects.create permission may create shadow projects to
+    exfiltrate data, run cryptomining workloads, or stage lateral movement
+    to other organizations.
+references:
+    - https://cloud.google.com/resource-manager/docs/creating-managing-projects
+    - https://cloud.google.com/logging/docs/audit/understanding-audit-logs
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.persistence
+    - attack.t1136.003
+logsource:
+    product: gcp
+    service: gcp.audit
+detection:
+    selection:
+        gcp.audit.method_name:
+            - 'google.cloudresourcemanager.v3.Projects.CreateProject'
+            - 'google.cloudresourcemanager.v1.Projects.CreateProject'
+    condition: selection
+falsepositives:
+    - Authorized project creation by cloud architects during infrastructure provisioning
+    - Automated project factory tooling creating projects as part of org onboarding
+level: medium

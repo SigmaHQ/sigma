@@ -1,0 +1,31 @@
+title: Google Cloud Run Service Created or Updated
+id: 61e95274-2545-4084-b6c4-eb9d333c00c9
+status: experimental
+description: |
+    Detects creation or modification of Google Cloud Run services. Cloud Run
+    runs containerized workloads with the permissions of an attached service
+    account and can expose HTTP endpoints publicly. Attackers can deploy a
+    malicious container to establish persistent access, create a C2 endpoint,
+    or execute code within the GCP project's network and IAM context.
+references:
+    - https://cloud.google.com/run/docs/overview/what-is-cloud-run
+    - https://cloud.google.com/logging/docs/audit/understanding-audit-logs
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.persistence
+    - attack.t1525
+logsource:
+    product: gcp
+    service: gcp.audit
+detection:
+    selection:
+        gcp.audit.method_name:
+            - 'google.cloud.run.v1.Services.CreateService'
+            - 'google.cloud.run.v2.Services.CreateService'
+            - 'google.cloud.run.v2.Services.UpdateService'
+    condition: selection
+falsepositives:
+    - Legitimate deployment of a containerized microservice via CI/CD pipeline
+    - Developer creating a Cloud Run service for testing or development
+level: medium

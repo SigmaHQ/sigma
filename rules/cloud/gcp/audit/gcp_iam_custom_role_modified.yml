@@ -1,0 +1,34 @@
+title: Google Cloud IAM Custom Role Created or Modified
+id: afa6e59f-12a6-4199-ab95-e47bf68f3956
+status: experimental
+description: |
+    Detects creation, modification, or deletion of custom IAM roles in GCP.
+    Custom roles allow fine-grained permission assignment. An attacker with
+    role management permissions can create a role with a benign-sounding name
+    but elevated permissions (e.g. including iam.serviceAccounts.actAs or
+    resourcemanager.projects.setIamPolicy) and assign it to a controlled
+    principal to achieve persistent privilege escalation.
+references:
+    - https://cloud.google.com/iam/docs/roles-overview
+    - https://cloud.google.com/logging/docs/audit/understanding-audit-logs
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.privilege-escalation
+    - attack.persistence
+    - attack.t1098.003
+logsource:
+    product: gcp
+    service: gcp.audit
+detection:
+    selection:
+        gcp.audit.method_name:
+            - 'google.iam.admin.v1.CreateRole'
+            - 'google.iam.admin.v1.UpdateRole'
+            - 'google.iam.admin.v1.DeleteRole'
+            - 'google.iam.admin.v1.UndeleteRole'
+    condition: selection
+falsepositives:
+    - Authorized cloud administrator creating or updating a custom role via IaC
+    - Security team refining role permissions as part of least-privilege initiative
+level: medium
