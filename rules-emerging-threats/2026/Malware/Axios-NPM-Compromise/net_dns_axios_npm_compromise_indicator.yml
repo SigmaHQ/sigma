@@ -1,0 +1,33 @@
+title: Axios NPM Compromise Malicious C2 Domain DNS Query
+id: 73e5d24f-493f-4092-bd2f-c72cabda40ee
+status: experimental
+description: |
+    Detects DNS queries for the malicious C2 domain associated with the plain-crypto-js/Axios npm package supply chain compromise.
+    On March 30, 2026, malicious versions (1.14.1, 0.30.4) were published to npm, injecting a dependency (plain-crypto-js@4.2.1) that executed a postinstall script as a cross-platform RAT dropper.
+    This detection detects endpoints attempting to resolve the attacker's C2 domain (sfrclak.com) used for command and control communication.
+references:
+    - https://www.stepsecurity.io/blog/axios-compromised-on-npm-malicious-versions-drop-remote-access-trojan
+    - https://www.derp.ca/research/axios-npm-supply-chain-rat/
+    - https://www.trendmicro.com/zh_hk/research/26/c/axios-npm-package-compromised.html
+    - https://www.elastic.co/security-labs/axios-supply-chain-compromise-detections
+    - https://www.virustotal.com/gui/file/e10b1fa84f1d6481625f741b69892780140d4e0e7769e7491e5f4d894c2e0e09
+    - https://www.huntress.com/blog/supply-chain-compromise-axios-npm-package
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-04-01
+tags:
+    - attack.command-and-control
+    - attack.t1071.001
+    - attack.t1568
+    - detection.emerging-threats
+logsource:
+    category: dns
+detection:
+    selection:
+        query:
+            - 'sfrclak.com'
+            - 'calltan.com'
+            - 'callnrwise.com'
+    condition: selection
+falsepositives:
+    - Unlikely
+level: high

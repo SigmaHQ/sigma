@@ -1,0 +1,30 @@
+title: CVE-2024-49113 Exploitation Attempt - LDAP Nightmare
+id: 3f2c93c7-7b2a-4d58-bb8d-6f39422d8148
+status: experimental
+description: |
+    Detects exploitation attempt of CVE-2024-49113 known as LDAP Nightmare, based on "Application Error" log where the faulting application is "lsass.exe" and the faulting module is "WLDAP32.dll".
+references:
+    - https://gist.github.com/travisbgreen/82b68bac499edbe0b17dcbfa0c5c71b7
+    - https://www.linkedin.com/feed/update/urn:li:activity:7282295814792605698/
+author: Samuel Monsempes
+date: 2025-01-08
+tags:
+    - attack.impact
+    - attack.t1499
+    - cve.2024-49113
+    - detection.emerging-threats
+logsource:
+    product: windows
+    service: application
+    # warning: The 'data' field used in the detection section is the container for the event data as a whole. You may have to adapt the rule for your backend accordingly
+detection:
+    selection:
+        Provider_Name: 'Application Error'
+        EventID: 1000
+        Data|contains|all:
+            - 'lsass.exe'
+            - 'WLDAP32.dll'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

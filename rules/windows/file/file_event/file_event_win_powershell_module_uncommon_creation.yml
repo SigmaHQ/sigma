@@ -7,7 +7,7 @@ references:
     - https://learn.microsoft.com/en-us/powershell/scripting/developer/module/understanding-a-windows-powershell-module?view=powershell-7.3
 author: Nasreddine Bencherchali (Nextron Systems)
 date: 2023-05-09
-modified: 2023-10-18
+modified: 2025-10-07
 tags:
     - attack.persistence
 logsource:
@@ -28,6 +28,10 @@ detection:
             - ':\Windows\SysWOW64\poqexec.exe' # https://github.com/SigmaHQ/sigma/issues/4448
             - ':\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell_ise.exe'
             - ':\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell.exe'
+    filter_main_msiexec:
+        Image:
+            - 'C:\Windows\System32\msiexec.exe'
+            - 'C:\Windows\SysWOW64\msiexec.exe'
     condition: selection and not 1 of filter_main_*
 falsepositives:
     - Unknown

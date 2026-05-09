@@ -1,0 +1,43 @@
+title: Suspicious File Created in Outlook Temporary Directory
+id: fabb0e80-030c-4e3e-a104-d09676991ac3
+related:
+    - id: f748c45a-f8d3-4e6f-b617-fe176f695b8f
+      type: obsolete
+status: experimental
+description: |
+    Detects the creation of files with suspicious file extensions in the temporary directory that Outlook uses when opening attachments.
+    This can be used to detect spear-phishing campaigns that use suspicious files as attachments, which may contain malicious code.
+references:
+    - https://vipre.com/blog/svg-phishing-attacks-the-new-trick-in-the-cybercriminals-playbook/
+    - https://thecyberexpress.com/rogue-rdp-files-used-in-ukraine-cyberattacks/
+    - https://www.microsoft.com/en-us/security/blog/2024/10/29/midnight-blizzard-conducts-large-scale-spear-phishing-campaign-using-rdp-files/
+author: Florian Roth (Nextron Systems), Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2025-07-22
+tags:
+    - attack.initial-access
+    - attack.t1566.001
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection_extension:
+        TargetFilename|endswith:
+            - '.cpl'
+            - '.hta'
+            - '.iso'
+            - '.rdp'
+            - '.svg'
+            - '.vba'
+            - '.vbe'
+            - '.vbs'
+    selection_location:
+        - TargetFilename|contains:
+              - '\AppData\Local\Packages\Microsoft.Outlook_'
+              - '\AppData\Local\Microsoft\Olk\Attachments\'
+        - TargetFilename|contains|all:
+              - '\AppData\Local\Microsoft\Windows\'
+              - '\Content.Outlook\'
+    condition: all of selection_*
+falsepositives:
+    - Opening of headers or footers in email signatures that include SVG images or legitimate SVG attachments
+level: high
