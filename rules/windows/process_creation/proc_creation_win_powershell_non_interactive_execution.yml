@@ -6,7 +6,7 @@ references:
     - https://web.archive.org/web/20200925032237/https://threathunterplaybook.com/notebooks/windows/02_execution/WIN-190410151110.html
 author: Roberto Rodriguez @Cyb3rWard0g (rule), oscd.community (improvements)
 date: 2019-09-12
-modified: 2023-09-07
+modified: 2025-02-28
 tags:
     - attack.execution
     - attack.t1059.001
@@ -36,6 +36,8 @@ detection:
     filter_optional_terminal:
         ParentImage|contains: ':\Program Files\WindowsApps\Microsoft.WindowsTerminal_'
         ParentImage|endswith: '\WindowsTerminal.exe'
+    filter_optional_defender:
+        ParentImage|endswith: ':\Program Files\Windows Defender Advanced Threat Protection\SenseIR.exe'
     condition: selection and not 1 of filter_main_* and not 1 of filter_optional_*
 falsepositives:
     - Likely. Many admin scripts and tools leverage PowerShell in their BAT or VB scripts which may trigger this rule often. It is best to add additional filters or use this to hunt for anomalies

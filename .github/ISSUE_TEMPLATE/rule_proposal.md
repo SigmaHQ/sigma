@@ -14,7 +14,7 @@ assignees:
 A clear and concise description of idea of the rule.
 -->
 
-### Public References / Exampel Event Log
+### Public References / Example Event Log
 
 <!--
 Additional references and logs if possible to ease the process of creating the rule
