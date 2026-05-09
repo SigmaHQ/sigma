@@ -1,11 +1,15 @@
 title: DNS Query to External Service Interaction Domains
 id: aff715fa-4dd5-497a-8db3-910bea555566
 status: test
-description: Detects suspicious DNS queries to external service interaction domains often used for out-of-band interactions after successful RCE
+description: |
+    Detects suspicious DNS queries to external service interaction domains often used for out-of-band interactions after successful RCE
 references:
     - https://twitter.com/breakersall/status/1533493587828260866
+    - https://www.bitdefender.com/en-us/blog/businessinsights/bitdefender-advisory-critical-unauthenticated-rce-windows-server-update-services-cve-2025-59287
+    - https://github.com/SigmaHQ/sigma/pull/5724#issuecomment-3466382234
 author: Florian Roth (Nextron Systems), Matt Kelly (list of domains)
 date: 2022-06-07
+modified: 2026-01-24
 tags:
     - attack.initial-access
     - attack.t1190
@@ -15,20 +19,37 @@ logsource:
     category: dns
 detection:
     selection:
-        query|contains:
-            - '.interact.sh'
-            - '.oast.pro'
-            - '.oast.live'
-            - '.oast.site'
-            - '.oast.online'
-            - '.oast.fun'
-            - '.oast.me'
-            - '.burpcollaborator.net'
-            - '.oastify.com'
-            - '.canarytokens.com'
-            - '.requestbin.net'
+        query|endswith:
+            - '.burpcollaborator.net' # Portswigger Burpsuite Collaborator
+            - '.canarytokens.com' # Thinkst Canary Canarytokens
+            - '.ceye.io'
+            - '.ddns.1443.eu.org' # dig.pm
+            - '.ddns.bypass.eu.org' # dig.pm
+            - '.ddns.xn--gg8h.eu.org' # dig.pm
+            - '.digimg.store' # dnslog.ink
+            - '.dns.su18.org' # javaweb.org
+            - '.dnshook.site' # webhook.site
             - '.dnslog.cn'
-    condition: selection
+            - '.dnslog.ink' # dnslog.ink
+            - '.instances.httpworkbench.com' # httpworkbench.com
+            - '.interact.sh' # Project Discovery Interactsh
+            - '.log.dnslog.pp.ua' # dnslog.org
+            - '.log.dnslog.qzz.io' # dnslog.org
+            - '.log.dnslogs.dpdns.org' # dnslog.org
+            - '.log.javaweb.org' # javaweb.org
+            - '.log.nat.cloudns.ph' # dnslog.org
+            - '.oast.fun' # Project Discovery Interactsh
+            - '.oast.live' # Project Discovery Interactsh
+            - '.oast.me' # Project Discovery Interactsh
+            - '.oast.online' # Project Discovery Interactsh
+            - '.oast.pro' # Project Discovery Interactsh
+            - '.oast.site' # Project Discovery Interactsh
+            - '.oastify.com' # Portswigger Burpsuite Collaborator
+            - '.p8.lol' # javaweb.org
+            - '.requestbin.net'
+    filter_main_polling:
+        query|contains: 'polling.oastify.com'
+    condition: selection and not 1 of filter_main_*
 falsepositives:
-    - Unknown
+    - Legitimate security scanning.
 level: high

@@ -9,7 +9,7 @@ references:
     - https://www.microsoft.com/en-us/security/blog/2022/10/18/defenders-beware-a-case-for-post-ransomware-investigations/
 author: Florian Roth (Nextron Systems), oscd.community, Teymur Kheirkhabarov @HeirhabarovT, Zach Stanford @svch0st, Nasreddine Bencherchali
 date: 2019-12-30
-modified: 2023-11-15
+modified: 2025-10-22
 tags:
     - attack.lateral-movement
     - attack.collection
@@ -23,7 +23,7 @@ logsource:
 detection:
     selection_target:
         CommandLine|contains:
-            - '\\\\*$'
+            - '\\\\*\\*$' # example \\SVR_NAME\ADMIN$
             - '\Sysvol\'
     selection_other_tools:
         - Image|endswith:
@@ -39,9 +39,11 @@ detection:
         CommandLine|contains: 'copy'
     selection_pwsh_img:
         - Image|contains:
+              - '\powershell_ise.exe'
               - '\powershell.exe'
               - '\pwsh.exe'
         - OriginalFileName:
+              - 'powershell_ise.exe'
               - 'PowerShell.EXE'
               - 'pwsh.dll'
     selection_pwsh_cli:
@@ -51,7 +53,7 @@ detection:
             - 'cpi '
             - ' cp '
             - 'move '
-            - 'move-item'
+            - ' move-item'
             - ' mi '
             - ' mv '
     condition: selection_target and (selection_other_tools or all of selection_cmd_* or all of selection_pwsh_*)
