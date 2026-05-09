@@ -1,0 +1,45 @@
+title: MCP Tool Name Spoofing or Override Indicators
+id: f930361d-4a09-4216-8d62-742b59690aeb
+status: experimental
+description: |
+    Detects MCP traffic in which a tool name appears to spoof or shadow a well-known built-in tool. Attackers register MCP tools with names that closely match commonly-trusted tools (file read, web fetch, code execution) so that an LLM client invokes the malicious shadow instead of the intended one.
+    The rule looks for non-printable, leading-whitespace, or near-homoglyph variants of common tool names appearing in MCP list_tools and tool registration traffic.
+    Derived from Agent Threat Rules (ATR) ATR-2026-00062.
+references:
+    - https://github.com/Agent-Threat-Rule/agent-threat-rules
+    - https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks
+    - https://modelcontextprotocol.io/
+author: Adam Lin (panguard.ai)
+date: 2026-05-09
+tags:
+    - attack.initial-access
+    - attack.t1036
+    - detection.emerging-threats
+logsource:
+    category: webserver
+detection:
+    selection_method:
+        cs-method:
+            - 'POST'
+            - 'GET'
+    selection_mcp_path:
+        cs-uri-stem|contains:
+            - '/mcp'
+            - '/list_tools'
+            - '/tools/list'
+    keywords:
+        - '"name": " '
+        - '"name":" '
+        - '"name": "_'
+        - '"name":"_'
+        - '"name": "read_file'
+        - '"name":"read_file'
+        - '"name": "execute'
+        - '"name":"execute'
+        - '"name": "fetch'
+        - '"name":"fetch'
+    condition: selection_method and selection_mcp_path and keywords
+falsepositives:
+    - Legitimate MCP tools whose names happen to begin with an underscore or to match common built-in names in unrelated namespaces
+    - Tool registration during development or testing
+level: medium

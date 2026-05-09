@@ -1,0 +1,37 @@
+title: AI Agent Instructed SSRF - file URI Scheme Access
+id: 8d8f1a42-2c7b-4946-9274-e465eb84e67d
+status: experimental
+description: |
+    Detects requests where user input or upstream content instructs an LLM agent to fetch a file:// URI, attempting to coerce the agent's web-fetch or browse tool into reading local files.
+    This is the AI-agent equivalent of classic SSRF and is commonly chained with prompt injection so that the model treats the URL as a benign request.
+    Derived from Agent Threat Rules (ATR) ATR-2026-00081.
+references:
+    - https://github.com/Agent-Threat-Rule/agent-threat-rules
+    - https://owasp.org/www-project-top-10-for-large-language-model-applications/
+author: Adam Lin (panguard.ai)
+date: 2026-05-09
+tags:
+    - attack.discovery
+    - attack.t1083
+    - detection.emerging-threats
+logsource:
+    category: webserver
+detection:
+    selection_method:
+        cs-method:
+            - 'POST'
+            - 'GET'
+    keywords:
+        - 'fetch file://'
+        - 'open file://'
+        - 'read file://'
+        - 'browse file://'
+        - 'download file://'
+        - 'fetch%20file%3A%2F%2F'
+        - 'open%20file%3A%2F%2F'
+        - 'read%20file%3A%2F%2F'
+    condition: selection_method and keywords
+falsepositives:
+    - Documentation requests where users paste examples that include file:// URIs
+    - Authorized red-team or evaluation testing of the agent's URL-fetch boundary
+level: high

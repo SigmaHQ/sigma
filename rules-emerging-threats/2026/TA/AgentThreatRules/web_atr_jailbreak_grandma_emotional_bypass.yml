@@ -1,0 +1,38 @@
+title: AI Agent Jailbreak - Grandma Emotional Bypass
+id: b3e1307c-fa43-4a4b-9907-ac8c1d00490d
+status: experimental
+description: |
+    Detects emotional manipulation jailbreak templates of the "grandma exploit" family, in which the attacker frames a harmful request as a nostalgic story (for example a deceased grandmother who used to recite license keys or hazardous synthesis instructions as a bedtime ritual).
+    The pattern is widely shared in jailbreak prompt libraries and remains effective against under-aligned models.
+    Derived from Agent Threat Rules (ATR) ATR-2026-00033.
+references:
+    - https://github.com/Agent-Threat-Rule/agent-threat-rules
+    - https://learnprompting.org/docs/prompt_hacking/jailbreaking
+author: Adam Lin (panguard.ai)
+date: 2026-05-09
+tags:
+    - attack.stealth
+    - attack.t1027
+    - detection.emerging-threats
+logsource:
+    category: webserver
+detection:
+    selection_method:
+        cs-method:
+            - 'POST'
+            - 'GET'
+    keywords:
+        - 'my deceased grandmother'
+        - 'my late grandmother'
+        - 'my dead grandma'
+        - 'my dead grandmother'
+        - 'my%20deceased%20grandmother'
+        - 'my%20late%20grandmother'
+        - 'my grandma used to read me'
+        - 'grandma used to whisper'
+        - 'pretend to be my deceased'
+    condition: selection_method and keywords
+falsepositives:
+    - Genuine personal storytelling on conversational platforms
+    - Therapeutic or grief-support chat applications
+level: medium
