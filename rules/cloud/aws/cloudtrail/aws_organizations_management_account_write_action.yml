@@ -2,23 +2,21 @@ title: AWS Write Action Executed in Organizations Management Account
 id: 37e1e3d8-3bd8-4f8e-904c-42ac8138c884
 status: experimental
 description: |
-    Detects non-read-only AWS API calls executed in the AWS Organizations
-    management (root) account by a human user or non-pipeline identity, without
-    a Terraform/IaC commit reference in the user-agent string. The management
-    account should be operated exclusively via IaC pipelines. Direct write
-    operations indicate a policy violation or a compromised identity bypassing
-    GitOps controls.
+    Detects non-read-only AWS API calls in the AWS Organizations management
+    account by a human user or non-pipeline identity, without a Terraform or
+    IaC commit reference in the user-agent string. The management account
+    should be operated exclusively via IaC pipelines. Direct write operations
+    indicate a policy violation or a compromised identity bypassing GitOps controls.
 references:
     - https://docs.aws.amazon.com/organizations/latest/userguide/orgs_best-practices.html
-    - https://attack.mitre.org/techniques/T1078/004/
-    - https://attack.mitre.org/techniques/T1562/
 author: Ivan Saakov
 date: 2026-05-09
 tags:
     - attack.defense-evasion
+    - attack.initial-access
+    - attack.persistence
     - attack.privilege-escalation
     - attack.t1078.004
-    - attack.t1562
 logsource:
     product: aws
     service: cloudtrail
@@ -37,10 +35,7 @@ detection:
             - Start
             - Stop
     filter_gitops:
-        userAgent|contains:
-            - terraform
-            - Terraform
-            - HashiCorp
+        userAgent|contains: terraform
     filter_service:
         userIdentity.type: Service
     condition: selection and not 1 of filter_*
