@@ -7,9 +7,13 @@ description: |
     This setting could allow an attacker access to Azure subscriptions in your environment.
 references:
     - https://learn.microsoft.com/en-us/entra/architecture/security-operations-privileged-accounts#assignment-and-elevation
+    - https://learn.microsoft.com/en-us/azure/role-based-access-control/elevate-access-global-admin?tabs=azure-portal%2Centra-audit-logs#view-elevate-access-log-entries
+    - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities#azure-rbac-elevated-access
+    - https://blog.sonnes.cloud/microsoft-azure-elevate-access-to-resources-with-entra-id-audit-logs-now-available/
+    - https://analyticsrules.exchange/analyticrules/132fdff4-c044-4855-a390-c1b71e0f833b/
 author: Austin Songer @austinsonger
 date: 2021-11-26
-modified: 2022-12-25
+modified: 2026-05-09
 tags:
     - attack.privilege-escalation
     - attack.persistence
@@ -21,8 +25,8 @@ logsource:
     service: auditlogs
 detection:
     selection:
-        Category: 'Administrative'
-        OperationName: 'Assigns the caller to user access admin'
+        category: 'AzureRBACRoleManagementElevateAccess'
+        operationName: 'User has elevated their access to User Access Administrator for their Azure Resources'
     condition: selection
 falsepositives:
     - If this was approved by System Administrator.
