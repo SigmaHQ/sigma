@@ -1,0 +1,33 @@
+title: Google Workspace Gmail Custom Route Created or Modified
+id: bea8ff48-3c7d-4e92-b1a5-8f6d2c4e9b70
+status: experimental
+description: |
+    Detects creation or modification of Gmail routing rules including SMTP
+    gateways and email routing settings via admin audit events. Attackers may
+    create or modify email routing rules to silently forward copies of all
+    inbound or outbound email to an external attacker-controlled address,
+    enabling persistent email collection without user awareness.
+references:
+    - https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-email-settings
+    - https://support.google.com/a/answer/2685650
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.collection
+    - attack.t1114.003
+logsource:
+    product: gcp
+    service: google_workspace.admin
+detection:
+    selection:
+        eventService: admin.googleapis.com
+        eventName:
+            - ADD_SMTP_GATEWAY
+            - CHANGE_EMAIL_ROUTING_SETTING
+            - ADD_EMAIL_ROUTE
+            - CHANGE_EMAIL_ROUTE
+    condition: selection
+falsepositives:
+    - Legitimate configuration of email routing for compliance or archiving by IT admin
+    - Migration of email infrastructure approved via change management
+level: high

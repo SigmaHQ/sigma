@@ -1,0 +1,28 @@
+title: Google Workspace Drive File Ownership Transferred
+id: aece877c-6b3d-4f18-e2a9-7c5d1b4f9a30
+status: experimental
+description: |
+    Detects when ownership of a Google Drive file is transferred to another user
+    via the transfer_document_ownership Drive audit event. Transferring ownership
+    gives the recipient full control over the document including the ability to
+    move it outside the organization. This can be used to exfiltrate files by
+    transferring them to an attacker-controlled account.
+references:
+    - https://developers.google.com/admin-sdk/reports/v1/appendix/activity/drive
+    - https://support.google.com/drive/answer/2494892
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.collection
+    - attack.t1530
+logsource:
+    product: gcp
+    service: google_workspace.drive
+detection:
+    selection:
+        protoPayload.metadata.event.eventName: transfer_document_ownership
+    condition: selection
+falsepositives:
+    - Legitimate ownership transfer during employee offboarding process
+    - Document handover as part of a project transition approved by management
+level: medium

@@ -1,0 +1,29 @@
+title: Google Workspace Calendar Sharing Setting Changed
+id: d4b4b2e4-7a3f-4c91-b8e2-5d9c1f6a3b80
+status: experimental
+description: |
+    Detects changes to Google Workspace Calendar sharing settings via the
+    CHANGE_CALENDAR_SETTING admin audit event. Overly permissive calendar
+    sharing can expose internal meeting schedules, attendee lists, and
+    embedded sensitive information to external parties. Attackers may loosen
+    calendar sharing to enable reconnaissance of organizational activity.
+references:
+    - https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-calendar-settings
+    - https://support.google.com/a/answer/60765
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.defense-impairment
+    - attack.t1685
+logsource:
+    product: gcp
+    service: google_workspace.admin
+detection:
+    selection:
+        eventService: admin.googleapis.com
+        eventName: CHANGE_CALENDAR_SETTING
+    condition: selection
+falsepositives:
+    - Legitimate calendar sharing policy adjustment by IT administrator
+    - Organization-wide setting change as part of a collaboration initiative
+level: medium

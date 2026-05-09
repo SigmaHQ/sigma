@@ -1,0 +1,32 @@
+title: Google Workspace Application Added to Domain
+id: 36513077-2d8b-4f53-a9c1-7e4b3d6f1c20
+status: experimental
+description: |
+    Detects when a third-party application is added or installed in Google
+    Workspace via ADD_APPLICATION or related admin audit events. Third-party
+    apps granted OAuth scopes can access user data including email, Drive files,
+    and contacts. Attackers may install a malicious OAuth app to establish
+    persistent data access that survives password resets.
+references:
+    - https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-application-settings
+    - https://support.google.com/a/answer/7281227
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.lateral-movement
+    - attack.t1550.001
+logsource:
+    product: gcp
+    service: google_workspace.admin
+detection:
+    selection:
+        eventService: admin.googleapis.com
+        eventName:
+            - ADD_APPLICATION
+            - INSTALL_APPLICATION
+            - ADD_APPLICATION_TO_WHITELIST
+    condition: selection
+falsepositives:
+    - Legitimate installation of a business application by IT administrator
+    - Approved SaaS tool deployment as part of a rollout plan
+level: medium

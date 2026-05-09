@@ -1,0 +1,30 @@
+title: Google Workspace Trusted Domain Added
+id: 534c2074-1b9e-4d87-a3f2-6c8e5b2d1f40
+status: experimental
+description: |
+    Detects when a new trusted domain is added to the Google Workspace organization
+    via the ADD_TRUSTED_DOMAINS admin audit event. Adding a trusted domain allows
+    users from that domain to share resources and access internal applications.
+    Attackers may add an attacker-controlled domain to gain persistent cross-domain
+    access or facilitate data exfiltration via sharing.
+references:
+    - https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-domain-settings
+    - https://support.google.com/a/answer/6160020
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098.003
+logsource:
+    product: gcp
+    service: google_workspace.admin
+detection:
+    selection:
+        eventService: admin.googleapis.com
+        eventName: ADD_TRUSTED_DOMAINS
+    condition: selection
+falsepositives:
+    - Legitimate addition of a partner or subsidiary domain by IT administrator
+    - Domain consolidation or merger activity approved via change management
+level: high

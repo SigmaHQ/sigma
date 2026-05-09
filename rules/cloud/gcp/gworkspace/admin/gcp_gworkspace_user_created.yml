@@ -1,0 +1,28 @@
+title: Google Workspace User Account Created
+id: f261e386-8b3a-4c21-9f7d-2e5b1a3c8d90
+status: experimental
+description: |
+    Detects the creation of a new user account in Google Workspace via the
+    CREATE_USER admin audit event. Attackers with admin access may create
+    new accounts to establish persistent access that survives credential
+    rotation of the compromised account.
+references:
+    - https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-user-settings
+    - https://workspace.google.com/intl/en/features/admin-console/
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.persistence
+    - attack.t1136.003
+logsource:
+    product: gcp
+    service: google_workspace.admin
+detection:
+    selection:
+        eventService: admin.googleapis.com
+        eventName: CREATE_USER
+    condition: selection
+falsepositives:
+    - Legitimate onboarding of new employees via HR or IT provisioning workflow
+    - Automated user provisioning via SCIM or directory sync
+level: medium

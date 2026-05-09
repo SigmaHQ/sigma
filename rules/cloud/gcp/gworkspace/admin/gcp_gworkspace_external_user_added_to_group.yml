@@ -1,0 +1,31 @@
+title: Google Workspace External User Added to Group
+id: ac73aeb9-5f2e-4b18-c3d7-9e1a6f8b2c50
+status: experimental
+description: |
+    Detects when an external user (outside the organization domain) is added to
+    a Google Workspace group. Groups are commonly used to control access to
+    shared drives, calendar resources, and internal applications. Adding an
+    external user grants them the same resource access as internal members,
+    which may constitute unauthorized privilege escalation or persistent access.
+references:
+    - https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-group-settings
+    - https://support.google.com/a/answer/167101
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098.003
+logsource:
+    product: gcp
+    service: google_workspace.admin
+detection:
+    selection:
+        eventService: admin.googleapis.com
+        eventName: ADD_GROUP_MEMBER
+        member_type: EXTERNAL
+    condition: selection
+falsepositives:
+    - Legitimate addition of a contractor or partner to a shared project group
+    - Vendor access provisioning approved via IT request workflow
+level: medium
