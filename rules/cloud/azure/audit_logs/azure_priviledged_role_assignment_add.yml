@@ -4,9 +4,12 @@ status: test
 description: Detects when a user is added to a privileged role.
 references:
     - https://learn.microsoft.com/en-us/entra/architecture/security-operations-privileged-identity-management#azure-ad-roles-assignment
+    - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities#core-directory
+    - https://analyticsrules.exchange/analyticrules/4d94d4a9-dc96-410a-8dea-4d4d4584188b/
+    - https://research.splunk.com/cloud/a7da845d-6fae-41cf-b823-6c0b8c55814a/
 author: Mark Morowczynski '@markmorow', Yochana Henderson, '@Yochana-H'
 date: 2022-08-06
-modified: 2026-05-09
+modified: 2026-05-10
 tags:
     - attack.persistence
     - attack.initial-access
@@ -18,9 +21,8 @@ logsource:
     service: auditlogs
 detection:
     selection:
-        properties.message:
-            - Add eligible member (permanent)
-            - Add eligible member (eligible)
+        category: 'RoleManagement'
+        operationName: 'Add eligible member to role'
     condition: selection
 falsepositives:
     - Legtimate administrator actions of adding members from a role
