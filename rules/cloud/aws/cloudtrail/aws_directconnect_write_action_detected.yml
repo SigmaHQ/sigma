@@ -1,0 +1,37 @@
+title: AWS Direct Connect Write Action Detected
+id: 7f2c0eca-3a97-42be-a62c-ec0e50de2984
+status: experimental
+description: |
+    Detects non-read-only write operations against AWS Direct Connect resources
+    including connections, virtual interfaces, and link aggregation groups.
+    Direct Connect provides dedicated private connectivity between on-premises
+    infrastructure and AWS. Unauthorized modification or deletion disrupts
+    hybrid cloud connectivity and may redirect or intercept traffic flows.
+references:
+    - https://docs.aws.amazon.com/directconnect/latest/APIReference/API_DeleteConnection.html
+    - https://attack.mitre.org/techniques/T1498/
+    - https://attack.mitre.org/techniques/T1562/
+author: Ivan Saakov
+date: 2026-05-09
+tags:
+    - attack.impact
+    - attack.defense-evasion
+    - attack.t1498
+    - attack.t1562
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: directconnect.amazonaws.com
+    filter_readonly:
+        eventName|startswith:
+            - Get
+            - Describe
+            - List
+    condition: selection and not filter_readonly
+falsepositives:
+    - Planned Direct Connect maintenance or decommissioning
+    - Infrastructure-as-code managing Direct Connect lifecycle
+    - Network team operations during scheduled change windows
+level: high

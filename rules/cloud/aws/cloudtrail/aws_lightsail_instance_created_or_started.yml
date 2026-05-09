@@ -1,0 +1,34 @@
+title: AWS Lightsail Instance Created or Started
+id: 7e1bf11c-02ff-4755-a7e0-73022994e3d1
+status: experimental
+description: |
+    Detects creation or start of AWS Lightsail instances. Lightsail is a
+    simplified VPS service with a separate API surface from EC2 that is
+    frequently overlooked in security monitoring. Attackers use Lightsail
+    to spin up compute for C2 infrastructure, cryptomining, or network
+    pivoting while evading EC2-focused detection rules.
+references:
+    - https://docs.aws.amazon.com/lightsail/2016-11-28/api-reference/API_CreateInstances.html
+    - https://attack.mitre.org/techniques/T1578/002/
+    - https://attack.mitre.org/techniques/T1496/
+author: Ivan Saakov
+date: 2026-05-09
+tags:
+    - attack.defense-evasion
+    - attack.impact
+    - attack.t1578.002
+    - attack.t1496
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: lightsail.amazonaws.com
+        eventName:
+            - CreateInstances
+            - StartInstances
+            - CreateInstancesFromSnapshot
+    condition: selection
+falsepositives:
+    - Legitimate Lightsail usage for simple web hosting or developer sandboxes
+level: medium

@@ -1,0 +1,31 @@
+title: AWS VPC Peering Connection Created with External Account
+id: bd528032-45f4-4c7d-a9c8-8f0c9936d12d
+status: experimental
+description: |
+    Detects creation of a VPC peering connection. While inter-account peering
+    can be legitimate, it is also used by attackers who have compromised one
+    account to establish network-level access to resources in another account,
+    bypassing security group restrictions that assume account isolation.
+references:
+    - https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateVpcPeeringConnection.html
+    - https://attack.mitre.org/techniques/T1563/
+    - https://attack.mitre.org/techniques/T1021/
+author: Ivan Saakov
+date: 2026-05-09
+tags:
+    - attack.lateral-movement
+    - attack.t1563
+    - attack.t1021
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: ec2.amazonaws.com
+        eventName: CreateVpcPeeringConnection
+    condition: selection
+falsepositives:
+    - Approved cross-account VPC peering for multi-account architectures
+    - Terraform-managed peering connections between owned accounts
+    - Peering with vendor or partner accounts via approved change process
+level: medium

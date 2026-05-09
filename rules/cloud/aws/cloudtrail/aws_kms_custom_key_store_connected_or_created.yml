@@ -1,0 +1,34 @@
+title: AWS KMS Custom Key Store Connected or Created
+id: ea8e620a-c463-4fed-8cea-62dc427a8ecf
+status: experimental
+description: |
+    Detects connection or creation of an AWS KMS custom key store backed by
+    AWS CloudHSM or an external key manager. Attackers may connect an external
+    key store to establish a persistent encryption backdoor — controlling the
+    key material allows them to decrypt data even after credential rotation,
+    or to make data permanently inaccessible by disconnecting the key store.
+references:
+    - https://docs.aws.amazon.com/kms/latest/APIReference/API_ConnectCustomKeyStore.html
+    - https://www.chrisfarris.com/post/effective-aws-ransomware/
+    - https://attack.mitre.org/techniques/T1486/
+author: Ivan Saakov
+date: 2026-05-09
+tags:
+    - attack.impact
+    - attack.persistence
+    - attack.t1486
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: kms.amazonaws.com
+        eventName:
+            - ConnectCustomKeyStore
+            - CreateCustomKeyStore
+            - UpdateCustomKeyStore
+    condition: selection
+falsepositives:
+    - Initial setup of HSM-backed KMS key store by security or infrastructure team
+    - Approved CloudHSM cluster maintenance requiring key store reconnection
+level: high

@@ -1,0 +1,34 @@
+title: AWS Bedrock Foundation Model Invoked by Unauthorized Identity
+id: 58137d80-038d-45d6-8bf9-b5dde204a05f
+status: experimental
+description: |
+    Detects API calls invoking AWS Bedrock foundation models. LLMjacking
+    attackers obtain AWS credentials and abuse Bedrock to run expensive
+    inference at the victim's cost or for offensive AI purposes. This rule
+    should be tuned to exclude known legitimate caller ARNs and CI/CD roles.
+references:
+    - https://sysdig.com/blog/llmjacking-stolen-cloud-credentials-used-in-new-ai-attack/
+    - https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InvokeModel.html
+    - https://attack.mitre.org/techniques/T1496/
+author: Ivan Saakov
+date: 2026-05-09
+tags:
+    - attack.impact
+    - attack.t1496
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: bedrock-runtime.amazonaws.com
+        eventName:
+            - InvokeModel
+            - InvokeModelWithResponseStream
+            - Converse
+            - ConverseStream
+    condition: selection
+falsepositives:
+    - Legitimate ML/AI workloads invoking Bedrock models via CI/CD pipelines
+    - Developer testing in sandbox accounts
+    - Approved internal tooling using Bedrock APIs
+level: medium

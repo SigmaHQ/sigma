@@ -1,0 +1,40 @@
+title: AWS STS AssumeRole With Unusually Long Session Duration Requested
+id: 44e4a327-ba02-483e-8969-eae9a4da5449
+status: experimental
+description: |
+    Detects AssumeRole API calls requesting a session duration of 43200
+    seconds (12 hours) or more. Long-lived sessions reduce re-authentication
+    frequency and extend the window of access for compromised credentials.
+    Attackers explicitly request maximum duration sessions to maintain
+    persistence without repeated API calls that might trigger detection.
+references:
+    - https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html
+    - https://attack.mitre.org/techniques/T1550/001/
+    - https://attack.mitre.org/techniques/T1078/004/
+author: Ivan Saakov
+date: 2026-05-09
+tags:
+    - attack.persistence
+    - attack.lateral-movement
+    - attack.t1550.001
+    - attack.t1078.004
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: sts.amazonaws.com
+        eventName:
+            - AssumeRole
+            - AssumeRoleWithWebIdentity
+        requestParameters.durationSeconds|gte: 43200
+    filter_sso:
+        userIdentity.arn|contains: 'aws-reserved/sso.amazonaws.com'
+    filter_service_role:
+        userIdentity.arn|contains: 'aws-service-role'
+    condition: selection and not 1 of filter_*
+falsepositives:
+    - Long-running batch jobs or ETL pipelines requiring extended sessions
+    - AWS SSO-vended credentials configured with long session duration policy
+    - Approved automation roles with max-duration explicitly set
+level: medium

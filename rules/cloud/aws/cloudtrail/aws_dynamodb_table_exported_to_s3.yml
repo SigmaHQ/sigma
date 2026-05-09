@@ -1,0 +1,33 @@
+title: AWS DynamoDB Table Exported to S3
+id: 7c8629e3-2ec1-4b5f-be9c-a3d7cdfe4b5d
+status: experimental
+description: |
+    Detects DynamoDB ExportTableToPointInTime API calls which export a full
+    table snapshot to an S3 bucket. When the target bucket belongs to a
+    different AWS account this constitutes cross-account data exfiltration.
+    The export runs asynchronously and does not impact table performance,
+    making it a low-noise exfiltration path for large datasets.
+references:
+    - https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_ExportTableToPointInTime.html
+    - https://attack.mitre.org/techniques/T1537/
+    - https://attack.mitre.org/techniques/T1005/
+author: Ivan Saakov
+date: 2026-05-09
+tags:
+    - attack.exfiltration
+    - attack.collection
+    - attack.t1537
+    - attack.t1005
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: dynamodb.amazonaws.com
+        eventName: ExportTableToPointInTime
+    condition: selection
+falsepositives:
+    - Legitimate DynamoDB table backup or migration to S3
+    - Analytics pipelines exporting DynamoDB data to data lake
+    - Approved cross-account data sharing workflows
+level: medium

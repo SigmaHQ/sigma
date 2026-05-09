@@ -1,0 +1,32 @@
+title: AWS RDS Snapshot Shared with External Account
+id: 97c282d9-e48d-4121-bb95-490a42325706
+status: experimental
+description: |
+    Detects modification of RDS DB snapshot restore attributes to share with
+    an external AWS account ID. Attackers restore a shared snapshot into their
+    controlled account to access the database contents without needing
+    credentials to the original RDS instance. Commonly used in the Pacu
+    rds__explore_snapshots exploitation module.
+references:
+    - https://github.com/RhinoSecurityLabs/pacu/blob/master/pacu/modules/rds__explore_snapshots/main.py
+    - https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_ModifyDBSnapshotAttribute.html
+    - https://attack.mitre.org/techniques/T1537/
+author: Ivan Saakov
+date: 2026-05-09
+tags:
+    - attack.exfiltration
+    - attack.t1537
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: rds.amazonaws.com
+        eventName: ModifyDBSnapshotAttribute
+        requestParameters.attributeName: restore
+    condition: selection
+falsepositives:
+    - Legitimate cross-account RDS snapshot sharing for database migration
+    - Disaster recovery replication to a secondary AWS account
+    - Approved data sharing with partner or audit accounts
+level: high

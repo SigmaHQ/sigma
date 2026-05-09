@@ -1,0 +1,37 @@
+title: AWS Bedrock Model Customization Job or Entitlement Change
+id: b00ea361-5943-4802-83b5-30f1e1077992
+status: experimental
+description: |
+    Detects creation of Bedrock model customization jobs, inference profiles,
+    or changes to foundation model entitlements. Attackers with limited Bedrock
+    access may abuse these APIs to escalate privileges, exfiltrate training
+    data, or provision persistent inference capacity under the victim's account.
+references:
+    - https://docs.aws.amazon.com/bedrock/latest/APIReference/API_CreateModelCustomizationJob.html
+    - https://docs.aws.amazon.com/bedrock/latest/APIReference/API_CreateInferenceProfile.html
+    - https://attack.mitre.org/techniques/T1548/
+    - https://attack.mitre.org/techniques/T1496/
+author: Ivan Saakov
+date: 2026-05-09
+tags:
+    - attack.privilege-escalation
+    - attack.impact
+    - attack.t1548
+    - attack.t1496
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: bedrock.amazonaws.com
+        eventName:
+            - CreateModelCustomizationJob
+            - CreateInferenceProfile
+            - PutFoundationModelEntitlement
+            - CreateProvisionedModelThroughput
+            - UpdateProvisionedModelThroughput
+    condition: selection
+falsepositives:
+    - Data science teams legitimately fine-tuning models
+    - Approved MLOps pipelines provisioning inference throughput
+level: medium

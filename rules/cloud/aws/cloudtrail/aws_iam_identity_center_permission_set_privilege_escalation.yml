@@ -1,0 +1,43 @@
+title: AWS IAM Identity Center Permission Set Privilege Escalation
+id: 5da5139e-7953-4f0d-b43d-738da17cce5d
+status: experimental
+description: |
+    Detects creation or modification of IAM Identity Center permission sets,
+    managed policy attachments, or account assignments. An attacker with access
+    to the management or delegated admin account can create a new permission set
+    with AdministratorAccess and assign it to a controlled user, achieving full
+    privilege escalation across all AWS organization accounts.
+references:
+    - https://permiso.io/blog/s/unmasking-guivil-new-cloud-threat-actor/
+    - https://docs.aws.amazon.com/singlesignon/latest/APIReference/API_CreatePermissionSet.html
+    - https://attack.mitre.org/techniques/T1548/
+    - https://attack.mitre.org/techniques/T1098/
+author: Ivan Saakov
+date: 2026-05-09
+tags:
+    - attack.privilege-escalation
+    - attack.persistence
+    - attack.t1548
+    - attack.t1098
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource:
+            - sso.amazonaws.com
+            - sso-admin.amazonaws.com
+        eventName:
+            - CreatePermissionSet
+            - UpdatePermissionSet
+            - AttachManagedPolicyToPermissionSet
+            - PutInlinePolicyToPermissionSet
+            - CreateAccountAssignment
+            - ProvisionPermissionSet
+            - AttachCustomerManagedPolicyReferenceToPermissionSet
+    condition: selection
+falsepositives:
+    - IAM Identity Center administration via Terraform or IaC pipelines
+    - Initial SSO onboarding or organizational restructuring
+    - Legitimate role assignments by authorized identity administrators
+level: high

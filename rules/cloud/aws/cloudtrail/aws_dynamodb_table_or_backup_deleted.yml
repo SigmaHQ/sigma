@@ -1,0 +1,34 @@
+title: AWS DynamoDB Table or Backup Deleted
+id: 8cea7c47-a0b5-4121-a66c-e6b8c5426a0f
+status: experimental
+description: |
+    Detects destructive DynamoDB operations including table deletion, backup
+    deletion, or disabling of continuous backups (PITR). Attackers may disable
+    point-in-time recovery before deletion to prevent data restoration.
+references:
+    - https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_DeleteTable.html
+    - https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_UpdateContinuousBackups.html
+    - https://attack.mitre.org/techniques/T1485/
+    - https://attack.mitre.org/techniques/T1490/
+author: Ivan Saakov
+date: 2026-05-09
+tags:
+    - attack.impact
+    - attack.t1485
+    - attack.t1490
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: dynamodb.amazonaws.com
+        eventName:
+            - DeleteTable
+            - DeleteBackup
+            - UpdateContinuousBackups
+    condition: selection
+falsepositives:
+    - Legitimate table cleanup in development or staging environments
+    - Automated DynamoDB lifecycle management
+    - Terraform destroying unused tables during infrastructure refactoring
+level: high
