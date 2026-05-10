@@ -16,13 +16,14 @@ tags:
     - attack.t1530
 logsource:
     product: gcp
-    service: google_workspace.drive
+    service: gcp.audit
 detection:
     selection:
-        protoPayload.metadata.event.eventName: change_acl_editors
+        protoPayload.serviceName: 'drive.googleapis.com'
+        protoPayload.metadata.event.eventName: 'change_acl_editors'
         protoPayload.metadata.event.visibility:
-            - people_with_link
-            - public_on_the_web
+            - 'people_with_link'
+            - 'public_on_the_web'
     condition: selection
 falsepositives:
     - Legitimate sharing of a public-facing document such as a press release or open job posting
