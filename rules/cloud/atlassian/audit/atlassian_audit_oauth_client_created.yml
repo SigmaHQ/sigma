@@ -1,0 +1,28 @@
+title: Atlassian Organization OAuth Client Created
+id: 76ac4b02-7d9d-47f9-a975-1c06c1ed9817
+status: experimental
+description: |
+    Detects creation of a new OAuth client application in the Atlassian organization.
+    OAuth clients can be used to obtain long-lived access tokens that authenticate
+    as a user or service account without requiring a password. An attacker with
+    admin access may create a rogue OAuth client to establish a persistent backdoor
+    that survives password changes and MFA enforcement.
+references:
+    - https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/
+    - https://developer.atlassian.com/cloud/admin/organization/rest/api-group-audit-events/
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.persistence
+    - attack.t1136.003
+logsource:
+    product: atlassian
+    service: audit
+detection:
+    selection:
+        attributes.action: 'oauth_client_created'
+    condition: selection
+falsepositives:
+    - Legitimate integration setup by a developer or IT administrator
+    - New third-party application onboarding approved by the security team
+level: high

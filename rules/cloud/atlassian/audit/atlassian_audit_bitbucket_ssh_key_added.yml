@@ -1,0 +1,30 @@
+title: Atlassian Bitbucket Cloud SSH Key Authorized for User
+id: 95b74a5f-957c-4a38-b004-73c1cff620cc
+status: experimental
+description: |
+    Detects when an SSH key is authorized for a Bitbucket Cloud user account
+    via the Atlassian organization admin audit log. Adding an SSH key grants
+    the holder the ability to clone, push, and pull repositories over SSH
+    without requiring a password or personal access token. An attacker who
+    gains admin access may add their own SSH key to a privileged account
+    to maintain persistent access to source code repositories even after
+    a password reset.
+references:
+    - https://support.atlassian.com/bitbucket-cloud/docs/set-up-an-ssh-key/
+    - https://developer.atlassian.com/cloud/admin/organization/rest/api-group-audit-events/
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.persistence
+    - attack.t1098.004
+logsource:
+    product: atlassian
+    service: audit
+detection:
+    selection:
+        attributes.action: 'bitbucket_cloud_user_ssh_key_authorized'
+    condition: selection
+falsepositives:
+    - Developer adding a new SSH key for a new workstation or CI/CD pipeline
+    - IT administrator setting up SSH access for a new team member
+level: high

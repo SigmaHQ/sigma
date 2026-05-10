@@ -1,0 +1,29 @@
+title: Atlassian Assets Object Schema Deleted
+id: dcf36a86-c3ae-4dca-8d75-f1c54c0b0719
+status: experimental
+description: |
+    Detects deletion of an object schema in Atlassian Assets (formerly Insight).
+    An object schema deletion removes the entire configuration, all object types,
+    attributes, and references defined within it, and may also purge associated
+    asset records. This is a destructive and largely irreversible action. In
+    production environments an Assets schema typically underpins CMDB, hardware
+    inventory, or software asset management workflows, making its deletion a
+    significant operational and forensic impact event.
+references:
+    - https://support.atlassian.com/jira-service-management-cloud/docs/what-is-assets/
+    - https://developer.atlassian.com/cloud/admin/organization/rest/api-group-audit-events/
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.impact
+    - attack.t1485
+logsource:
+    product: atlassian
+    service: audit
+detection:
+    selection:
+        attributes.action: 'assets_object_schema_deleted'
+    condition: selection
+falsepositives:
+    - Authorized decommission of a deprecated or test Assets schema by an admin
+level: high

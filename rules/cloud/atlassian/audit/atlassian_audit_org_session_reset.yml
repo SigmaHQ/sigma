@@ -1,0 +1,29 @@
+title: Atlassian Organization-Wide Session Reset
+id: dc94117b-fffe-4bb5-9408-efd16593f47b
+status: experimental
+description: |
+    Detects a forced organization-wide session reset in Atlassian Cloud, which
+    immediately invalidates all active user sessions across every product in the
+    organization. While this action can be a legitimate security response to a
+    suspected compromise, it can also be used by an attacker with admin access
+    to disrupt operations, lock out active defenders during an incident, or
+    cover tracks by forcing re-authentication that clears session-based audit
+    trails.
+references:
+    - https://support.atlassian.com/security-and-access-policies/docs/reset-all-user-sessions/
+    - https://developer.atlassian.com/cloud/admin/organization/rest/api-group-audit-events/
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.impact
+    - attack.t1531
+logsource:
+    product: atlassian
+    service: audit
+detection:
+    selection:
+        attributes.action: 'auth_policy_reset_sessions'
+    condition: selection
+falsepositives:
+    - Legitimate security response action by an organization admin following a suspected account compromise
+level: high

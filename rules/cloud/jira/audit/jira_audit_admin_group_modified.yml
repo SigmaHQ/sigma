@@ -1,0 +1,30 @@
+title: Jira Admin Group Membership Changed
+id: 4231e524-ea15-44ce-9188-e3658def57bb
+status: experimental
+description: |
+    Detects changes to Jira groups whose name contains "admin", indicating
+    that membership in an administrative group was added or removed. Jira admin
+    groups typically grant project administration, user management, and
+    global configuration rights across Jira projects. Adding an unauthorized
+    account to an admin group is a common privilege escalation path following
+    initial access to a Jira admin account.
+references:
+    - https://support.atlassian.com/jira-cloud-administration/docs/manage-groups/
+    - https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.persistence
+    - attack.privilege-escalation
+    - attack.t1098
+logsource:
+    product: jira
+    service: audit
+detection:
+    selection:
+        objectItem.name|contains: 'admin'
+    condition: selection
+falsepositives:
+    - Legitimate group membership changes performed by a Jira administrator
+    - Automated provisioning updating group membership as part of onboarding
+level: high
