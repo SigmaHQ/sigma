@@ -1,0 +1,37 @@
+title: Connection to Suspicious Wi-Fi Device
+id: 0e823ab7-79f9-4b42-bc68-3310f6ae9a50
+status: experimental
+description: Detects an authentication attempt to a Wi-Fi network where the Access Point's BSSID matches the OUI of devices commonly used for Rogue AP or Evil Twin attacks (Raspberry Pi, Alfa Network).
+references:
+    - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5632
+    - https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventid=5632
+    - https://standards-oui.ieee.org/oui/oui.txt
+author: Vladimir Novikov
+date: 2026-05-10
+tags:
+    - attack.collection
+    - attack.credential-access
+    - attack.t1557.004
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 5632
+        PeerAddress|startswith:
+            # Raspberry Pi
+            - '28:CD:C1'
+            - '2C:CF:67'
+            - '3A:35:41'
+            - '88:A2:9E'
+            - '8C:1F:64'
+            - 'D8:3A:DD'
+            - 'DC:A6:32'
+            - 'E4:5F:01'
+            - 'F0:40:AF'
+            # Alfa Network
+            - '00:C0:CA'
+    condition: selection
+falsepositives:
+    - Legitimate use of Raspberry Pi or Alfa Network adapters as authorized Access Points.
+level: medium
