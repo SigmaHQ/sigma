@@ -1,0 +1,28 @@
+title: Atlassian Organization Group Role Revoked
+id: 6393b6a0-03ae-4259-ba7b-6f809c5e4693
+status: experimental
+description: |
+    Detects revocation of a role from a group in the Atlassian organization.
+    Revoking roles from groups removes access for all members of the affected
+    group simultaneously. An attacker with admin access may revoke roles from
+    security or operations groups to degrade their ability to respond to an
+    ongoing incident, effectively impairing defenses at scale.
+references:
+    - https://support.atlassian.com/user-management/docs/give-users-admin-permissions/
+    - https://developer.atlassian.com/cloud/admin/organization/rest/api-group-audit-events/
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.impact
+    - attack.t1531
+logsource:
+    product: atlassian
+    service: audit
+detection:
+    selection:
+        attributes.action: 'group_revoked_role'
+    condition: selection
+falsepositives:
+    - Legitimate role cleanup or access review by an IT administrator
+    - Planned permission restructuring as part of a security policy update
+level: medium

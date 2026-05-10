@@ -1,0 +1,29 @@
+title: Atlassian Organization API Tokens Exported
+id: d4920455-150f-4a07-bc74-eb06778ea419
+status: experimental
+description: |
+    Detects an export of API tokens from the Atlassian organization admin panel.
+    An API token export produces a file containing active API tokens for user
+    accounts in the organization. These tokens can be used to authenticate
+    against Atlassian APIs as the token owner without requiring a password or
+    MFA, making them high-value credential material for an attacker seeking
+    persistent or lateral access across Jira, Confluence, and Bitbucket.
+references:
+    - https://support.atlassian.com/organization-administration/docs/manage-api-tokens-for-your-organization/
+    - https://developer.atlassian.com/cloud/admin/organization/rest/api-group-audit-events/
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.credential-access
+    - attack.t1528
+logsource:
+    product: atlassian
+    service: audit
+detection:
+    selection:
+        attributes.action: 'export_api_tokens'
+    condition: selection
+falsepositives:
+    - Authorized security audit of active API tokens by an organization admin
+    - Compliance review requiring enumeration of all active authentication tokens
+level: high
