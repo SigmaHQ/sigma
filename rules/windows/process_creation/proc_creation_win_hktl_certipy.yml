@@ -1,11 +1,14 @@
 title: HackTool - Certipy Execution
 id: 6938366d-8954-4ddc-baff-c830b3ba8fcd
 status: test
-description: Detects Certipy a tool for Active Directory Certificate Services enumeration and abuse based on PE metadata characteristics and common command line arguments.
+description: |
+    Detects Certipy execution, a tool for Active Directory Certificate Services enumeration and abuse based on PE metadata characteristics and common command line arguments.
 references:
     - https://github.com/ly4k/Certipy
-author: pH-T (Nextron Systems)
+    - https://research.ifcr.dk/certipy-4-0-esc9-esc10-bloodhound-gui-new-authentication-and-request-methods-and-more-7237d88061f7
+author: pH-T (Nextron Systems), Sittikorn Sangrattanapitak
 date: 2023-04-17
+modified: 2024-10-08
 tags:
     - attack.discovery
     - attack.credential-access
@@ -20,12 +23,17 @@ detection:
         - Description|contains: 'Certipy'
     selection_cli_commands:
         CommandLine|contains:
+            - ' account '
             - ' auth '
+            # - ' ca ' # Too short to be used with just one CLI
+            - ' cert '
             - ' find '
             - ' forge '
+            - ' ptt '
             - ' relay '
             - ' req '
             - ' shadow '
+            - ' template '
     selection_cli_flags:
         CommandLine|contains:
             - ' -bloodhound'
@@ -35,6 +43,7 @@ detection:
             - ' -old-bloodhound'
             - ' -pfx '
             - ' -target'
+            - ' -template'
             - ' -username '
             - ' -vulnerable'
             - 'auth -pfx'

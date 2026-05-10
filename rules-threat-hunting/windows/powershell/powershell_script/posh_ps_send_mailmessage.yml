@@ -1,0 +1,28 @@
+title: Potential Data Exfiltration Over SMTP Via Send-MailMessage Cmdlet
+id: 9a7afa56-4762-43eb-807d-c3dc9ffe211b
+status: test
+description: |
+    Detects the execution of a PowerShell script with a call to the "Send-MailMessage" cmdlet along with the "-Attachments" flag. This could be a potential sign of data exfiltration via Email.
+    Adversaries may steal data by exfiltrating it over an un-encrypted network protocol other than that of the existing command and control channel. The data may also be sent to an alternate network location from the main command and control server.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1048.003/T1048.003.md#atomic-test-5---exfiltration-over-alternative-protocol---smtp
+    - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/send-mailmessage?view=powershell-7.4
+    - https://www.ietf.org/rfc/rfc2821.txt
+author: frack113
+date: 2022-09-26
+modified: 2024-11-01
+tags:
+    - attack.exfiltration
+    - attack.t1048.003
+    - detection.threat-hunting
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection:
+        ScriptBlockText|contains: 'Send-MailMessage*-Attachments'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium

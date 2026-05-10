@@ -1,0 +1,51 @@
+title: Potentially Suspicious Command Executed Via Run Dialog Box - Registry
+id: a7df0e9e-91a5-459a-a003-4cde67c2ff5d
+related:
+    - id: f9d091f6-f1c7-4873-a24f-050b4a02b4dd
+      type: derived
+status: test
+description: |
+    Detects execution of commands via the run dialog box on Windows by checking values of the "RunMRU" registry key.
+    This technique was seen being abused by threat actors to deceive users into pasting and executing malicious commands, often disguised as CAPTCHA verification steps.
+references:
+    - https://medium.com/@ahmed.moh.farou2/fake-captcha-campaign-on-arabic-pirated-movie-sites-delivers-lumma-stealer-4f203f7adabf
+    - https://medium.com/@shaherzakaria8/downloading-trojan-lumma-infostealer-through-capatcha-1f25255a0e71
+    - https://www.forensafe.com/blogs/runmrukey.html
+    - https://redcanary.com/blog/threat-intelligence/intelligence-insights-october-2024/
+author: Ahmed Farouk, Nasreddine Bencherchali
+date: 2024-11-01
+tags:
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection_key:
+        TargetObject|contains: '\Microsoft\Windows\CurrentVersion\Explorer\RunMRU'
+    selection_powershell_command:
+        Details|contains:
+            - 'powershell'
+            - 'pwsh'
+    selection_powershell_susp_keywords:
+        Details|contains:
+            - ' -e '
+            - ' -ec '
+            - ' -en '
+            - ' -enc '
+            - ' -enco'
+            - 'ftp'
+            - 'Hidden'
+            - 'http'
+            - 'iex'
+            - 'Invoke-'
+    selection_wmic_command:
+        Details|contains: 'wmic'
+    selection_wmic_susp_keywords:
+        Details|contains:
+            - 'shadowcopy'
+            - 'process call create'
+    condition: selection_key and (all of selection_powershell_* or all of selection_wmic_*)
+falsepositives:
+    - Unknown
+level: high
