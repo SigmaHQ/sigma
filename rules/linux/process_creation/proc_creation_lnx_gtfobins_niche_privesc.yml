@@ -1,0 +1,65 @@
+title: Linux Privilege Escalation via Niche GTFOBins Binaries
+id: b8e3f6d1-1c7a-4f29-b2d8-9a4e7c3f6b10
+status: experimental
+description: |
+    Detects privilege escalation attempts via niche GTFOBins-listed binaries
+    invoked with sudo. These binaries are not commonly used for privilege
+    escalation and may evade detection rules focused on well-known bins like
+    python or perl. Covered binaries include csvtool, emacs, gem, mysql,
+    composer, cpulimit, and debugfs, each of which can spawn a privileged
+    shell when executed with sudo and specific flags.
+references:
+    - https://gtfobins.github.io/
+    - https://github.com/GTFOBins/GTFOBins.github.io
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.privilege-escalation
+    - attack.defense-evasion
+    - attack.t1548.003
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_csvtool:
+        CommandLine|contains|all:
+            - 'csvtool'
+            - 'call'
+            - 'sudo'
+    selection_emacs:
+        CommandLine|contains|all:
+            - 'emacs'
+            - '--eval'
+            - 'sudo'
+    selection_gem:
+        Image|endswith: '/gem'
+        CommandLine|contains:
+            - 'open -e'
+            - '-c sudo'
+    selection_mysql:
+        Image|endswith: '/mysql'
+        CommandLine|contains|all:
+            - '-e'
+            - 'sudo'
+            - '\!'
+    selection_composer:
+        CommandLine|contains|all:
+            - 'composer'
+            - 'run-script'
+            - 'sudo'
+    selection_cpulimit:
+        CommandLine|contains|all:
+            - 'sudo'
+            - 'cpulimit'
+            - '-l'
+            - '-f'
+    selection_debugfs:
+        Image|endswith: '/debugfs'
+        CommandLine|contains:
+            - '!/bin/sh'
+            - '!/bin/bash'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate administrative use of these binaries with sudo in approved workflows
+    - Authorized penetration testing activities
+level: high

@@ -1,0 +1,46 @@
+title: Linux Network Connection to OAST Domain
+id: d1a5b8f3-3e9c-4b42-d4f1-2c6a9e5b8d30
+status: experimental
+description: |
+    Detects outbound network connections from Linux hosts to known Out-of-Band
+    Application Security Testing (OAST) infrastructure domains such as
+    Burp Collaborator, Interactsh, Canarytokens, and similar callback services.
+    In production environments these connections indicate successful exploitation
+    of a blind vulnerability such as blind RCE, blind SSRF, blind SQLi, or
+    XXE injection, where the attacker injected a payload that forced the server
+    to reach out to an external callback endpoint they control.
+references:
+    - https://portswigger.net/burp/documentation/collaborator
+    - https://github.com/projectdiscovery/interactsh
+    - https://canarytokens.org/
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.command-and-control
+    - attack.t1071.001
+logsource:
+    product: linux
+    category: network_connection
+detection:
+    selection:
+        DestinationHostname|contains:
+            - 'burpcollaborator.net'
+            - 'oastify.com'
+            - 'interact.sh'
+            - 'oast.pro'
+            - 'oast.site'
+            - 'oast.online'
+            - 'oast.fun'
+            - 'oast.me'
+            - 'canarytokens.com'
+            - 'dnslog.cn'
+            - 'ceye.io'
+            - 'requestbin.net'
+            - 'webhook.site'
+            - 'pipedream.net'
+            - 'interactsh.com'
+    condition: selection
+falsepositives:
+    - Authorized penetration testing or red team exercise using OAST infrastructure
+    - Security researchers testing web applications in a non-production environment
+level: high

@@ -1,0 +1,48 @@
+title: Linux Ransomware File Artifact Indicators
+id: d7f3e8b6-9a4c-4d08-e6f7-8b5a1c4d3e70
+status: experimental
+description: |
+    Detects creation or execution of files with extensions or names commonly
+    associated with ransomware payloads and ransom notes. This includes
+    well-known ransomware families such as Akira, LockBit, ALPHV, Babuk,
+    and others. The detection focuses on interpreter-spawned processes that
+    access or create files with these indicators, which is a pattern seen
+    in scripted ransomware deployment during the impact phase of an attack.
+references:
+    - https://www.cisa.gov/stopransomware
+    - https://attack.mitre.org/techniques/T1486/
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.impact
+    - attack.t1486
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_extensions:
+        CommandLine|contains:
+            - '.locked'
+            - '.crypt'
+            - '.akira'
+            - '.lockbit'
+            - '.alphv'
+            - '.babuk'
+            - '.helloKitty'
+            - '.royal_w'
+            - '.elsxir'
+            - '.ROYALS'
+    selection_ransomnotes:
+        CommandLine|contains:
+            - 'HOW_TO_DECRYPT'
+            - 'README_FOR_RESTORE'
+            - 'DECRYPT_INSTRUCTIONS'
+            - 'RESTORE_FILES'
+            - 'RANSOM_NOTE'
+            - 'HOW_TO_BACK_FILES'
+            - 'RECOVER_FILES_README'
+            - 'HELP_DECRYPT'
+    condition: 1 of selection_*
+falsepositives:
+    - Unlikely in production environments; security research or sandbox analysis
+level: critical

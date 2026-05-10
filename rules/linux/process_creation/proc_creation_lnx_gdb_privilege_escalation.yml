@@ -1,0 +1,41 @@
+title: Linux Privilege Escalation via GDB Debugger
+id: f9b5a1d8-2c6e-4f21-a8b9-1d7c3e6f5a90
+status: experimental
+description: |
+    Detects use of the GDB debugger to attach to running processes or execute
+    shell commands, which can be leveraged for privilege escalation. When executed
+    with sudo or against privileged processes via --pid, GDB can inject and
+    execute arbitrary code in the context of that process. This technique allows
+    attackers to spawn root shells by calling system() or execve() within a
+    privileged process without writing files to disk.
+references:
+    - https://gtfobins.github.io/gtfobins/gdb/
+    - https://man7.org/linux/man-pages/man1/gdb.1.html
+author: Ivan Saakov
+date: 2026-05-10
+tags:
+    - attack.privilege-escalation
+    - attack.defense-evasion
+    - attack.t1548.003
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_ptrace:
+        Image|endswith: '/gdb'
+        CommandLine|contains:
+            - '--pid'
+            - ' -p '
+            - '--eval-command'
+            - '-ex '
+            - 'call system'
+            - 'call execve'
+    selection_sudo:
+        CommandLine|contains|all:
+            - 'sudo'
+            - 'gdb'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate developer debugging of processes in a development environment
+    - Security researchers analyzing binaries in an isolated sandbox
+level: high
