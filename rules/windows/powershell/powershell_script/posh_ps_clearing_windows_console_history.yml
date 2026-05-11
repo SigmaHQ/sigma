@@ -6,9 +6,10 @@ references:
     - https://stefanos.cloud/blog/kb/how-to-clear-the-powershell-command-history/
     - https://www.shellhacks.com/clear-history-powershell/
     - https://community.sophos.com/sophos-labs/b/blog/posts/powershell-command-history-forensics
+    - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/remove-item?view=powershell-7.5
 author: Austin Songer @austinsonger
 date: 2021-11-25
-modified: 2026-03-25
+modified: 2026-05-11
 tags:
     - attack.defense-evasion
     - attack.t1070
@@ -18,22 +19,12 @@ logsource:
     category: ps_script
     definition: 'Requirements: Script Block Logging must be enabled'
 detection:
-    selection1:
+    selection_clear_history:
         ScriptBlockText|contains: Clear-History
-    selection2a:
-        ScriptBlockText|contains:
-            - Remove-Item
-            - rm
-            - rmdir
-            - ri
-            - rd
-            - erase
-            - del
-    selection2b:
-        ScriptBlockText|contains:
-            - ConsoleHost_history.txt
-            - (Get-PSReadlineOption).HistorySavePath
-    condition: selection1 or selection2a and selection2b
+    selection_remove_history_file:
+        ScriptBlockText|re: '(?i)(Remove-Item|rmdir|erase|\b(rm|ri|rd|del)\b)[^\r\n;|]{0,100}(ConsoleHost_history\.txt|\(Get-PSReadlineOption\)\.HistorySavePath)'
+    condition: 1 of selection_*
 falsepositives:
-    - Unknown
+    - Legitimate administrative cleanup or scripted log rotation
 level: high
+
