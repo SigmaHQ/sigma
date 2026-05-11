@@ -1,0 +1,45 @@
+title: LSA PPL Protection Setting Modification via CommandLine
+id: 8c0eca51-0f88-4db2-9183-fdfb10c703f9
+status: test
+description: |
+    Detects modification of LSA PPL protection settings via CommandLine.
+    It may indicate an attempt to disable protection and enable credential dumping tools to access LSASS process memory.
+references:
+    - https://thedfirreport.com/2022/03/21/apt35-automates-initial-access-using-proxyshell/
+    - https://github.com/shoober420/windows11-scripts/blob/38d83331738cd713ccb42f2c4557d17a27aefd98/Windows11Tweaks.bat#L1825
+author: Florian Roth (Nextron Systems), Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2022-03-22
+modified: 2026-03-13
+tags:
+    - attack.defense-evasion
+    - attack.t1562.010
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith:
+              - '\reg.exe'
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+              - 'reg.exe'
+              - 'powershell.exe'
+              - 'pwsh.dll'
+    selection_cli_action:
+        CommandLine|contains|all:
+            - 'ControlSet'
+            - '\Control\Lsa'
+        CommandLine|contains:
+            - 'Set-ItemProperty'
+            - 'New-ItemProperty'
+            - ' add '
+    selection_key:
+        CommandLine|contains:
+            - 'IsPplAutoEnabled'
+            - 'RunAsPPL'
+            - 'RunAsPPLBoot'
+    condition: all of selection_*
+falsepositives:
+    - Unlikely
+level: medium
