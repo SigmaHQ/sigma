@@ -1,0 +1,32 @@
+title: Entra ID Named Location Deleted or Modified
+id: d3bd4d0b-fc19-4fd8-a42a-a1b40406a8ae
+status: test
+description: |
+    Detects deletion or modification of Entra ID named locations. Named locations
+    are IP range or country definitions used as conditions in Conditional Access
+    policies. Deleting or modifying a named location can silently neutralize
+    IP-based or country-based access controls while leaving the CA policy intact
+    and appearing enabled.
+references:
+    - https://learn.microsoft.com/en-us/entra/identity/conditional-access/location-condition
+    - https://learn.microsoft.com/en-us/entra/architecture/security-operations-infrastructure#conditional-access
+    - https://attack.mitre.org/techniques/T1562/001/
+author: descambiado
+date: 2026-05-14
+tags:
+    - attack.defense-evasion
+    - attack.t1562.001
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection:
+        Category: Policy
+        OperationName:
+            - 'Delete named location'
+            - 'Update named location'
+    condition: selection
+falsepositives:
+    - Authorized IP range updates to reflect legitimate network changes
+    - Consolidation or renaming of named location objects by administrators
+level: medium
