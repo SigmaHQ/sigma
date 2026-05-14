@@ -1,0 +1,38 @@
+title: Administrator Registered or Modified MFA Method on Behalf of User
+id: bf01ebb6-7dde-40f4-b502-cd22cb121859
+status: test
+description: |
+    Detects when an administrator registers, updates, or deletes an authentication
+    method (MFA) on behalf of another user account. An attacker who has obtained
+    administrator credentials may add a new MFA method to a target account to
+    establish persistent authentication access that survives a password reset on
+    the victim account. Unlike self-service MFA registration, admin-initiated
+    changes to security info are rare in most environments and should be correlated
+    against change management records and help desk tickets. This detection
+    complements azure_change_to_authentication_method, which covers self-service
+    registration, and raises severity because the initiating actor is not the
+    account owner.
+references:
+    - https://learn.microsoft.com/en-us/entra/identity/authentication/howto-mfa-userdevicesettings
+    - https://learn.microsoft.com/en-us/entra/architecture/security-operations-privileged-accounts
+    - https://attack.mitre.org/techniques/T1556/006/
+author: descambiado
+date: 2026-05-13
+tags:
+    - attack.persistence
+    - attack.defense-evasion
+    - attack.t1556.006
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection:
+        OperationName:
+            - 'Admin registered security info'
+            - 'Admin updated security info'
+            - 'Admin deleted security info'
+    condition: selection
+falsepositives:
+    - Help desk teams performing MFA resets on behalf of locked-out users through approved procedures
+    - Automated identity governance workflows that manage authentication methods programmatically
+level: high
