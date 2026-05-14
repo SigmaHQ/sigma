@@ -1,0 +1,44 @@
+title: End User Consent to Application With High-Risk OAuth Permission
+id: b6b198d5-dbe4-473e-8ec4-51b11e9ab22b
+status: test
+description: |
+    Detects when an end user grants consent to an application requesting high-risk
+    OAuth 2.0 delegated permissions. Permissions such as Mail.ReadWrite,
+    Files.ReadWrite.All, and full_access_as_app provide broad access to mailboxes
+    and files and are commonly abused in phishing and illicit consent-grant attacks.
+    An attacker who tricks a user into consenting to a malicious OAuth application
+    gains persistent access to the user's data without requiring credentials after
+    the initial consent event. This rule complements the broader end-user consent
+    rule by raising severity only when the requested scope is considered high risk,
+    reducing noise while surfacing the most dangerous consent grants.
+references:
+    - https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/user-consent-and-permissions
+    - https://learn.microsoft.com/en-us/entra/architecture/security-operations-applications#end-user-consent
+    - https://attack.mitre.org/techniques/T1528/
+author: descambiado
+date: 2026-05-13
+tags:
+    - attack.credential-access
+    - attack.initial-access
+    - attack.t1528
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection_operation:
+        OperationName: 'Consent to application'
+    selection_scope:
+        TargetResources|contains:
+            - 'Mail.ReadWrite'
+            - 'Files.ReadWrite.All'
+            - 'Mail.Send'
+            - 'MailboxSettings.ReadWrite'
+            - 'full_access_as_app'
+            - 'EWS.AccessAsUser.All'
+            - 'Directory.ReadWrite.All'
+            - 'RoleManagement.ReadWrite.Directory'
+    condition: selection_operation and selection_scope
+falsepositives:
+    - Legitimate enterprise applications that require broad mailbox or file access
+    - IT-approved productivity integrations reviewed through a formal application consent review process
+level: high
