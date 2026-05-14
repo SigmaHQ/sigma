@@ -1,0 +1,34 @@
+title: Entra ID Cross-Tenant Access Setting Created or Modified
+id: 9ae9b60b-014b-4b74-87eb-6c5fa3f304e0
+status: test
+description: |
+    Detects creation, modification, or deletion of Entra ID cross-tenant access
+    settings. These settings control B2B trust relationships between tenants,
+    including inbound and outbound access, MFA trust, and device compliance trust.
+    An attacker with Global Administrator privileges can add an attacker-controlled
+    tenant as a trusted partner to enable persistent cross-tenant access that
+    survives credential rotation in the victim tenant.
+references:
+    - https://learn.microsoft.com/en-us/entra/external-id/cross-tenant-access-overview
+    - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities
+    - https://attack.mitre.org/techniques/T1098/
+author: descambiado
+date: 2026-05-14
+tags:
+    - attack.persistence
+    - attack.t1098
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection:
+        OperationName:
+            - 'Create a partner cross-tenant access setting'
+            - 'Update a partner cross-tenant access setting'
+            - 'Delete a partner cross-tenant access setting'
+            - 'Update cross-tenant access settings'
+    condition: selection
+falsepositives:
+    - Authorized configuration of B2B direct connect or cross-tenant synchronization
+    - Tenant restructuring or partner onboarding performed by approved administrators
+level: high
