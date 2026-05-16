@@ -1,0 +1,42 @@
+title: Admin Consent Granted to Application With High-Risk Application Permission
+id: 90a512e7-4c1a-4b62-aeda-09ce9204dadf
+related:
+    - id: b6b198d5-dbe4-473e-8ec4-51b11e9ab22b
+      type: similar
+status: test
+description: |
+    Detects admin consent grants to applications requesting high-risk application
+    permissions such as Application.ReadWrite.All, RoleManagement.ReadWrite.Directory,
+    or AppRoleAssignment.ReadWrite.All. Unlike delegated consent (covered in the related
+    rule), application permissions grant tenant-wide access without a signed-in user
+    context, are not scoped by Conditional Access, and are not visible to the consenting
+    user's manager. These permissions are commonly abused in OAuth phishing campaigns
+    targeting administrators and in post-compromise persistence scenarios.
+references:
+    - https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/grant-admin-consent
+    - https://attack.mitre.org/techniques/T1528/
+    - https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-193a
+author: descambiado
+date: 2026-05-16
+tags:
+    - attack.credential-access
+    - attack.persistence
+    - attack.t1528
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection_operation:
+        properties.message: 'Consent to application'
+    selection_scope:
+        TargetResources|contains:
+            - 'Application.ReadWrite.All'
+            - 'AppRoleAssignment.ReadWrite.All'
+            - 'RoleManagement.ReadWrite.Directory'
+            - 'Directory.ReadWrite.All'
+            - 'User.ReadWrite.All'
+    condition: selection_operation and selection_scope
+falsepositives:
+    - Legitimate enterprise application deployments requiring directory write access reviewed through a formal application governance process
+    - Microsoft first-party applications during tenant onboarding or product activation
+level: high
