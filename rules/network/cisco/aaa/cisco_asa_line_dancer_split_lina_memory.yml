@@ -1,0 +1,32 @@
+title: Cisco ASA LINE DANCER Split lina Memory Anomaly
+id: 1a6b2b5e-5ee5-8fb5-e7fa-rayv1pr0005
+status: experimental
+description: |
+    Detects the LINE DANCER (2024 ArcaneDoor) in-memory implant via the
+    "split lina" memory anomaly. The implant modifies small sections of LINA
+    process memory, creating multiple executable (r-xp) regions, notably one
+    of exactly 0x1000 bytes (one page). Observable via
+    'show memory region | include lina'. LINE VIPER (2025-26) fixed this
+    telltale by modifying the entire .text region starting at cs:0 — this
+    rule covers the LEGACY 2024 implant only.
+references:
+    - https://blog.talosintelligence.com/arcanedoor-new-espionage-focused-campaign-found-targeting-perimeter-network-devices/
+    - https://www.ncsc.gov.uk/static-assets/documents/malware-analysis-reports/RayInitiator-LINE-VIPER/ncsc-mar-rayinitiator-line-viper.pdf
+author: defender-pack-arcanedoor (CC0)
+date: 2026-05-19
+tags:
+    - attack.persistence
+    - attack.defense-evasion
+    - attack.t1014
+logsource:
+    product: cisco
+    service: aaa
+detection:
+    keywords:
+        - 'r-xp 0x1000'
+    selection:
+        - 'lina'
+    condition: keywords and selection
+falsepositives:
+    - Multi-region lina memory layout in some ASA versions during specific runtime states. Investigate any hit.
+level: high

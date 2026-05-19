@@ -1,0 +1,31 @@
+title: Cisco ASA Malicious lina_cs Process Indicating LINE VIPER FIRESTARTER Persistence
+id: 7c2e8e1a-1aa1-4e91-a3b6-rayv1pr0001
+status: experimental
+description: |
+    Detects the malicious lina_cs process name that indicates LINE VIPER or
+    FIRESTARTER user-mode persistence on Cisco ASA / Firepower devices.
+    Observable via 'show kernel process | include lina_cs'. The implant may
+    change the process name, so this is a high-precision but not high-recall
+    rule. Maps to NCSC MAR (Oct 2025) and Cisco PSIRT advisory
+    cisco-sa-asaftd-persist-CISAED25-03 (Apr 2026).
+references:
+    - https://www.ncsc.gov.uk/static-assets/documents/malware-analysis-reports/RayInitiator-LINE-VIPER/ncsc-mar-rayinitiator-line-viper.pdf
+    - https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-asaftd-persist-CISAED25-03
+    - https://blog.talosintelligence.com/uat-4356-firestarter/
+author: defender-pack-arcanedoor (CC0)
+date: 2026-05-19
+tags:
+    - attack.persistence
+    - attack.t1542.003
+    - attack.defense-evasion
+    - attack.t1014
+logsource:
+    product: cisco
+    service: aaa
+detection:
+    keywords:
+        - 'lina_cs'
+    condition: keywords
+falsepositives:
+    - None known. The substring lina_cs should not appear in legitimate ASA process output. The legitimate process name is lina.
+level: critical

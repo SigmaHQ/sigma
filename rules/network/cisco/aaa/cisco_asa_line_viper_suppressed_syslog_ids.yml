@@ -1,0 +1,36 @@
+title: Cisco ASA Suppressed Syslog IDs Indicating LINE VIPER Hook
+id: 8d3f9f2b-2bb2-5fa2-b4c7-rayv1pr0002
+status: experimental
+description: |
+    Detects the LINE VIPER (2025-26 ArcaneDoor) syslog suppression hook by
+    correlating active VPN session indicators with absence of expected
+    connection-built/teardown syslog IDs. LINE VIPER suppresses message IDs
+    302013, 302014, 609002, and 710005. On a healthy ASA with active VPN
+    tunnels these should appear regularly. Sustained absence during
+    observable VPN activity is a strong correlation signal. Tune timeframe
+    and ratio per environment baseline.
+references:
+    - https://www.ncsc.gov.uk/static-assets/documents/malware-analysis-reports/RayInitiator-LINE-VIPER/ncsc-mar-rayinitiator-line-viper.pdf
+author: defender-pack-arcanedoor (CC0)
+date: 2026-05-19
+tags:
+    - attack.defense-evasion
+    - attack.t1562
+logsource:
+    product: cisco
+    service: aaa
+detection:
+    vpn_session:
+        keywords:
+            - 'AnyConnect parent session'
+            - 'WebVPN session'
+    connection_logs:
+        keywords:
+            - 'ASA-6-302013'
+            - 'ASA-6-302014'
+            - 'ASA-6-609002'
+            - 'ASA-7-710005'
+    condition: vpn_session and not connection_logs | count() < 1
+falsepositives:
+    - ASA with VPN-only traffic patterns and aggressive ACL drops may legitimately show low 302013/302014 volume. Tune baseline per device.
+level: medium
