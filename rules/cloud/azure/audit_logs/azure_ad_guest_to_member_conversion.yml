@@ -1,0 +1,33 @@
+title: Entra ID Guest Account Converted to Member
+id: b7b0a939-2bbd-4272-85c0-51a51a41674b
+status: test
+description: |
+    Detects Entra ID user accounts converted from Guest to Member type via
+    the Update user operation. A Guest-to-Member conversion grants the account
+    full directory read access and removes external-identity restrictions, which
+    may indicate an attacker elevating a compromised guest account to persistent
+    tenant access without triggering role assignment alerts.
+references:
+    - https://learn.microsoft.com/en-us/entra/external-id/user-properties
+    - https://attack.mitre.org/techniques/T1098/
+author: descambiado
+date: 2026-05-20
+tags:
+    - attack.persistence
+    - attack.t1098
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection_operation:
+        OperationName: 'Update user'
+    selection_usertype:
+        TargetResources|contains|all:
+            - 'UserType'
+            - 'Guest'
+            - 'Member'
+    condition: selection_operation and selection_usertype
+falsepositives:
+    - B2B collaboration migrations where external users are intentionally promoted to full membership
+    - Organizational restructuring converting former contractors to permanent employees
+level: medium
