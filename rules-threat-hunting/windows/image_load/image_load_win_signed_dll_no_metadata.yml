@@ -1,0 +1,56 @@
+title: Signed DLL Loaded With Missing PE Version Metadata
+id: 2a297820-04ce-41f2-b60d-5afe139aaab3
+status: experimental
+description: |
+    Detects the loading of a digitally signed DLL whose PE version-info resource is entirely missing.
+    Legitimate signed DLLs from reputable vendors often carry populated metadata fields (Description, Company, Product, OriginalFileName, FileVersion).
+    An attacker who signs a purpose-built or hollowed DLL with a stolen, mis-issued, or cheaply purchased code-signing certificate will often omit these fields, producing a valid signature with no accompanying version info.
+    This pattern is observed in DLL side-loading, search-order hijacking, and certificate-abuse campaigns where signing is used purely to satisfy security-product trust checks.
+
+    Hunting Hypothesis:
+        - Investigate the signing certificate (issuer, subject, validity window, thumbprint) for disposable or recently issued CAs and cross-reference against known threat-actor certificates.
+        - Examine the DLL's on-disk path relative to the loading process — paths outside standard system directories or inside application folders susceptible to search-order hijacking are high-priority leads.
+        - Correlate with the parent process context; DLLs loaded into high-value targets such as lsass.exe, svchost.exe, or browser processes warrant immediate escalation.
+references:
+    - Internal Research
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-05-21
+tags:
+    - attack.stealth
+    - attack.execution
+    - attack.t1574.001
+    - attack.t1574.002
+    - detection.threat-hunting
+logsource:
+    category: image_load
+    product: windows
+detection:
+    selection_signed:
+        Signed: true
+        SignatureStatus: 'Valid'
+    selection_metadata_empty:
+        Description:
+            - '-'
+            - ''
+        Company:
+            - '-'
+            - ''
+        Product:
+            - '-'
+            - ''
+        OriginalFileName:
+            - '-'
+            - ''
+        FileVersion:
+            - '-'
+            - ''
+    selection_metadata_null:
+        Description: null
+        Company: null
+        Product: null
+        OriginalFileName: null
+        FileVersion: null
+    condition: selection_signed and 1 of selection_metadata_*
+falsepositives:
+    - Legitimate signed DLLs with incomplete or missing version metadata
+level: medium
