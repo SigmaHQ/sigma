@@ -9,6 +9,7 @@ references:
     - https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/
 author: Sohan G (D4rkCiph3r)
 date: 2023-01-31
+modified: 2026-05-21
 tags:
     - attack.collection
     - attack.execution
@@ -23,7 +24,15 @@ detection:
             - 'osascript'
             - ' -e '
             - 'clipboard'
-    condition: selection
+    filter_opencode:
+        # OpenCode uses osascript to handle copying text from the TUI on MacOS devices. See https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/cli/cmd/tui/util/clipboard.ts for reference.
+        CommandLine|contains|all:
+            - osascript
+            - -e
+            - set
+            - clipboard
+        ParentImage|endswith: 'opencode'
+    condition: selection and not filter_opencode
 falsepositives:
     - Unlikely
 level: high
