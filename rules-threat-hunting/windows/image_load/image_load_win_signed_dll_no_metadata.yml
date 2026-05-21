@@ -50,9 +50,15 @@ detection:
         Product: null
         OriginalFileName: null
         FileVersion: null
-    filter_main_common_signature:
-        Signature: 'Microsoft Windows'
+    filter_main_legitimate_path:
+        ImageLoaded|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+    filter_main_ms_signature:
+        Signature|startswith: 'Microsoft'
     condition: selection_signed and 1 of selection_metadata_* and not 1 of filter_main_*
 falsepositives:
     - Legitimate signed DLLs with incomplete or missing version metadata
-level: medium
+level: low
