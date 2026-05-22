@@ -21,15 +21,15 @@ detection:
             - ' -e '
             - '.scpt'
             - '.js'
-    filter_opencode:
-        # OpenCode uses osascript to handle copying text from the TUI on MacOS devices. See https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/cli/cmd/tui/util/clipboard.ts for reference.
-        CommandLine|contains|all:
-            - osascript
-            - -e
-            - set
-            - clipboard
+    filter_optional_opencode:
+        # OpenCode uses osascript to handle copying text from the TUI on MacOS devices. See https://github.com/anomalyco/opencode/blob/ca723f1cbc6fc4244ae57e61e9de8c4e37380ed4/packages/opencode/src/cli/cmd/tui/util/clipboard.ts#L65 for reference.
         ParentImage|endswith: 'opencode'
-    condition: selection and not filter_opencode
+        CommandLine|contains|all:
+            - 'osascript'
+            - ' -e '
+            - 'set imageData to the clipboard'
+            - 'set fileRef'
+    condition: selection and not 1 of filter_optional_*
 falsepositives:
     - Application installers might contain scripts as part of the installation process.
 level: medium
