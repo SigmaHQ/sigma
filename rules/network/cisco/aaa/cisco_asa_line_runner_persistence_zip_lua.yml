@@ -1,0 +1,35 @@
+title: Cisco ASA LINE RUNNER Persistence ZIP and Lua Artifacts
+id: 2b7c3c6f-6ff6-9fc6-f8ab-rayv1pr0006
+status: experimental
+description: |
+    Detects LINE RUNNER (2024 ArcaneDoor) persistence files on Cisco ASA.
+    LINE RUNNER persists by dropping a ZIP onto disk0: matching
+    ^client_bundle[A-Za-z0-9_-]*\.zip$ that gets auto-extracted at boot via
+    legacy VPN-plugin pre-loading (CVE-2024-20359). The ZIP contains
+    csco_config.lua, csco_config2.lua, hash.txt, index.txt, laecsnw.txt,
+    stgvdr.txt, umtfc.txt. Presence of these filenames or appearance of
+    client_bundle*.zip after a clean reload is high-confidence compromise
+    indicator. Aligned with Cisco's April 2024 detection guidance.
+references:
+    - https://blog.talosintelligence.com/arcanedoor-new-espionage-focused-campaign-found-targeting-perimeter-network-devices/
+author: defender-pack-arcanedoor (CC0)
+date: 2026-05-19
+tags:
+    - attack.persistence
+    - attack.t1542.003
+logsource:
+    product: cisco
+    service: aaa
+detection:
+    keywords:
+        - 'client_bundle'
+        - 'csco_config.lua'
+        - 'csco_config2.lua'
+        - 'laecsnw.txt'
+        - 'stgvdr.txt'
+        - 'umtfc.txt'
+        - 'disk0:/csco_config/97/webcontent/'
+    condition: keywords
+falsepositives:
+    - None known. These filenames do not correspond to legitimate ASA artifacts.
+level: critical

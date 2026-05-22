@@ -1,0 +1,30 @@
+title: Cisco ASA WebVPN config-auth POST Anomalous device-id 32-byte Token
+id: 9e4f0f3c-3cc3-6f93-c5d8-rayv1pr0003
+status: experimental
+description: |
+    Detects LINE VIPER (2025-26 ArcaneDoor) WebVPN tasking via the 32-byte
+    hex victim token at the start of the device-id 'device-type' XML
+    attribute (NCSC MAR Figure 6). Legitimate AnyConnect device-type values
+    are short ASCII identifiers ('win', 'mac-intel', 'linux-64'). A
+    device-id element whose device-type attribute begins with 64 hex
+    characters is a strong LINE VIPER fingerprint. Requires WebVPN body
+    logging or a WAF / reverse-proxy in front of the ASA.
+references:
+    - https://www.ncsc.gov.uk/static-assets/documents/malware-analysis-reports/RayInitiator-LINE-VIPER/ncsc-mar-rayinitiator-line-viper.pdf
+author: defender-pack-arcanedoor (CC0)
+date: 2026-05-19
+tags:
+    - attack.command-and-control
+    - attack.t1071.001
+    - attack.defense-evasion
+    - attack.t1480.001
+logsource:
+    category: webserver
+detection:
+    selection:
+        cs-uri-stem|endswith: '/+CSCOE+/logon.html'
+        request_body|re: 'device-type="[0-9a-fA-F]{64}'
+    condition: selection
+falsepositives:
+    - Legitimate AnyConnect clients do not place hex tokens in device-type. Confirm body-logging integrity before treating low-volume hits as benign.
+level: high

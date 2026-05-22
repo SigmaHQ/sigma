@@ -1,0 +1,31 @@
+title: Cisco ASA Immediate Reboot Without Core Dump LINE VIPER Anti Forensic Hook
+id: 0f5a1a4d-4dd4-7fa4-d6e9-rayv1pr0004
+status: experimental
+description: |
+    Detects the LINE VIPER (2025-26 ArcaneDoor) anti-forensic reboot hook.
+    LINE VIPER hooks the 'copy' command to immediately reboot the device if
+    its argument contains 'system:/text' (with autocompletion tolerance:
+    'tex', 'tex...'). It also modifies the core-dump signal handler so
+    emergency reboot occurs WITHOUT writing a core. An ASA that reboots
+    immediately after admin entry of 'copy system:/...' and produces no
+    core file is highly suspect. Requires correlation across admin CLI
+    commands, device-up/down events, and core file creation.
+references:
+    - https://www.ncsc.gov.uk/static-assets/documents/malware-analysis-reports/RayInitiator-LINE-VIPER/ncsc-mar-rayinitiator-line-viper.pdf
+author: defender-pack-arcanedoor (CC0)
+date: 2026-05-19
+tags:
+    - attack.defense-evasion
+    - attack.t1562
+    - attack.impact
+    - attack.t1529
+logsource:
+    product: cisco
+    service: aaa
+detection:
+    keywords:
+        - 'copy system:/te'
+    condition: keywords
+falsepositives:
+    - Legitimate admin attempts to copy from system: namespace during routine forensic checks. Investigate any hit by correlating with subsequent reboot events and core-dump presence.
+level: high
