@@ -1,0 +1,57 @@
+title: BadUSB PowerShell Execution via Windows Run Dialog
+id: 7a3f1c2e-9b4d-4e8a-bc61-2d5f8e3a7c91
+status: test
+description: Detects PowerShell spawned by explorer.exe with hidden window and execution cradle flags, consistent with HID injection payloads that open the Run dialog via WIN+R and type a PowerShell command.
+references:
+    - https://github.com/descambiado/flipper-purple-team
+    - https://docs.flipper.net/bad-usb
+    - https://attack.mitre.org/techniques/T1059/001/
+    - https://attack.mitre.org/techniques/T1564/003/
+author: descambiado
+date: 2026-05-23
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.defense_evasion
+    - attack.t1564.003
+    - attack.initial_access
+    - attack.t1200
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_process:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+        - OriginalFileName:
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+    selection_parent:
+        ParentImage|endswith: '\explorer.exe'
+    selection_hidden:
+        CommandLine|contains|all:
+            - '-WindowStyle'
+            - 'Hidden'
+    selection_cradle:
+        CommandLine|contains:
+            - '-EncodedCommand'
+            - '-ExecutionPolicy Bypass'
+            - 'DownloadString'
+            - 'IEX'
+            - 'Invoke-Expression'
+            - 'WebClient'
+            - 'Start-Process'
+            - '-NoProfile'
+            - '-NonInteractive'
+    filter_main_installers:
+        # Software installers occasionally invoke PowerShell via the Windows shell
+        ParentCommandLine|contains:
+            - 'setup'
+            - 'install'
+            - 'Update'
+    condition: (selection_process and selection_parent and selection_hidden and selection_cradle) and not 1 of filter_main_*
+falsepositives:
+    - Legitimate software installers that invoke PowerShell through the Windows shell with hidden windows
+    - IT automation tools that chain through explorer.exe (uncommon)
+level: high
