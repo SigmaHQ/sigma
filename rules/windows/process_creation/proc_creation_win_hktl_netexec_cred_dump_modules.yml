@@ -1,0 +1,39 @@
+title: HackTool - NetExec Credential Dumping Modules
+id: c4edc44d-031f-4ddd-bdc9-7f864bd59a99
+status: test
+description: |
+    Detects execution of NetExec (nxc.exe) with credential dumping modules and flags.
+    NetExec is a post-exploitation tool that includes modules for extracting credentials from LSASS memory (lsassy, nanodump, procdump modules), NTDS database (--ntds flag), SAM database (--sam flag), and LSA secrets (--lsa flag).
+    The --ntds flag and -M lsassy module were observed in an April 2026 intrusion attributed to The Gentlemen ransomware operation, as documented by The DFIR Report.
+    This rule detects both the observed modules and other documented NetExec credential dumping capabilities.
+references:
+    - https://thedfirreport.com/2026/05/11/flash-alert-etherrat-and-tuktuk-c2-end-in-the-gentleman-ransomware/
+    - https://www.netexec.wiki/smb-protocol/obtaining-credentials/dump-lsass
+    - https://github.com/Pennyw0rth/NetExec
+author: Hunter Wright
+date: 2026-05-21
+tags:
+    - attack.credential-access
+    - attack.t1003.001
+    - attack.t1003.002
+    - attack.t1003.003
+    - attack.t1003.004
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: '\nxc.exe'
+    selection_cred_modules:
+        CommandLine|contains:
+            - ' --ntds'
+            - ' -M lsassy'
+            - ' --sam'
+            - ' --lsa'
+            - ' -M nanodump'
+            - ' -M procdump'
+    condition: all of selection_*
+falsepositives:
+    - Legitimate penetration testing or red team exercises conducted by authorized security professionals (should be coordinated with security team and whitelisted by user account or source host)
+    - Security research activities in isolated lab environments
+level: high
