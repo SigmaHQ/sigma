@@ -1,0 +1,43 @@
+title: AWS IAM Managed Policy Version Created or Default Version Set
+id: 8b4e6d1c-2f3a-49c5-a1b2-3d4e5f6a7b8c
+status: experimental
+description: |
+    Identifies successful AWS IAM API calls that either create a new customer managed policy version (and set it as default) or roll back the default version to a previous one. 
+    Adversaries abuse policy versioning to introduce permissive policy documents or activate older, insecure versions to escalate privileges without attaching new policies.
+references:
+    - https://rhinosecuritylabs.com/aws/aws-privilege-escalation-methods-mitigation/
+    - https://www.hackingarticles.in/aws-abusing-iam-policy-version/
+    - https://docs.aws.amazon.com/IAM/latest/APIReference/API_SetDefaultPolicyVersion.html
+    - https://docs.aws.amazon.com/IAM/latest/APIReference/API_CreatePolicyVersion.html
+author: Vladimir Novikov
+date: 2026-05-16
+tags:
+    - attack.privilege-escalation
+    - attack.t1098.003
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection_create_version:
+        eventSource: iam.amazonaws.com
+        eventName: CreatePolicyVersion
+        requestParameters.setAsDefault: true
+        requestParameters.policyDocument|contains|all:
+            - '"Effect":"Allow"'
+            - '"Action":"*"'
+            - '"Resource":"*"'
+    selection_rollback:
+        eventSource: iam.amazonaws.com
+        eventName: SetDefaultPolicyVersion
+    filter_aws_internal_service:
+        userIdentity.type: 'AWSService'
+    filter_terraform_arn:
+        userIdentity.arn: 'arn:*/*terraform*'
+    filter_aws_native_automation:
+        sourceIPAddress:
+            - 'cloudformation.amazonaws.com'
+            - 'servicecatalog.amazonaws.com'
+    condition: (selection_create_version or selection_rollback) and not (filter_aws_internal_service or filter_terraform_arn or filter_aws_native_automation)
+falsepositives:
+    - Legitimate administration, change management rollbacks, or CI/CD pipelines (e.g., Terraform) updating policies.
+level: medium
