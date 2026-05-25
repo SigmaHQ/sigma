@@ -2,13 +2,11 @@ title: New Owner Added to Entra ID Service Principal
 id: 566610f0-c115-4677-911d-90ad697b8238
 status: experimental
 description: |
-    Detects additions of new owners to Entra ID service principals. Service
-    principal ownership grants full credential management capability without
-    requiring a tenant-wide admin role. An attacker who adds themselves as
-    SP owner can subsequently add password or certificate credentials and
-    authenticate as the SP, bypassing MFA and Conditional Access. This
-    ownership addition is a documented precursor step in Midnight Blizzard-
-    style persistence chains.
+    Detects additions of new owners to Entra ID service principals. SP ownership
+    grants full credential management without requiring a tenant-wide admin role:
+    an owner can add password or certificate credentials and authenticate as the
+    SP, bypassing MFA and Conditional Access. Documented in the 2024 Midnight
+    Blizzard (APT29) Microsoft tenant compromise.
 references:
     - https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/assign-app-owners
     - https://www.microsoft.com/en-us/security/blog/2024/01/25/midnight-blizzard-guidance-for-responders-on-nation-state-attack/
@@ -26,7 +24,7 @@ detection:
         OperationName: 'Add owner to service principal'
     condition: selection
 falsepositives:
-    - Developers adding team members as co-owners during application onboarding
-    - IT governance ownership transfers between teams
-    - Automated provisioning pipelines that assign SP ownership during deployment
+    - Co-owner assignments during application onboarding
+    - Ownership transfers between teams
+    - Automated provisioning pipelines assigning SP ownership
 level: medium
