@@ -1,0 +1,42 @@
+title: Potential Suspicious Browser External Extension
+    File Creation on Linux
+id: 705caf61-b5ef-4b70-b9f9-5708eb0ee14d
+status: experimental
+description: |
+    Detects the creation of External Extensions JSON files
+    in browser-specific directories on Linux. External
+    extensions can be installed from external update URLs
+    or local CRX files without user interaction. Supported
+    by Chrome, Chromium, and Edge. Adversaries may abuse
+    this to silently install malicious browser extensions.
+references:
+    - https://learn.microsoft.com/en-us/microsoft-edge/extensions/developer-guide/alternate-distribution-options
+    - https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_paths.cc
+    - https://github.com/praetorian-inc/ChromeAlone
+author: PersonalRules
+date: 2026-04-23
+tags:
+    - attack.persistence
+    - attack.t1176.001
+logsource:
+    product: linux
+    category: file_event
+detection:
+    selection_chrome_system:
+        TargetFilename|contains: '/usr/share/google-chrome/extensions/'
+    selection_chrome_user:
+        TargetFilename|contains: '/.config/google-chrome/External Extensions/'
+    selection_chromium_system:
+        TargetFilename|contains: '/usr/share/chromium/extensions/'
+    selection_chromium_user:
+        TargetFilename|contains: '/.config/chromium/External Extensions/'
+    selection_edge_system:
+        TargetFilename|contains: '/usr/share/microsoft-edge/extensions/'
+    selection_edge_user:
+        TargetFilename|contains: '/.config/microsoft-edge/External Extensions/'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate software installers registering browser
+      extensions
+    - Package managers installing browser extension packages
+level: medium
