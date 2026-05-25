@@ -2,13 +2,10 @@ title: Guest User Added to Privileged Entra ID Role
 id: 1f52cd1a-34ee-4f32-852a-4aa3ed62e08b
 status: experimental
 description: |
-    Detects when an external guest user (identified by the '#EXT#' marker in the UPN)
-    is directly assigned to a privileged Entra ID directory role. Attackers who have
-    compromised a privileged account may add guest identities they control to
-    high-privilege roles to establish persistence across tenant boundaries.
-    This technique allows an attacker to maintain access even after the initially
-    compromised internal account is remediated, because the guest identity is
-    anchored in an external tenant that the victim organisation does not control.
+    Detects assignment of an external guest user (identified by the #EXT# marker
+    in the UPN) to a privileged Entra ID directory role. An attacker with admin
+    credentials can use this to establish persistent privileged access anchored in
+    an external tenant outside the victim's control.
 references:
     - https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/manage-roles-portal
     - https://learn.microsoft.com/en-us/entra/architecture/security-operations-privileged-accounts
@@ -28,6 +25,6 @@ detection:
         TargetResources|contains: '#EXT#'
     condition: selection
 falsepositives:
-    - Deliberate cross-tenant collaboration where a guest is legitimately added to a privileged role
-    - Automated provisioning pipelines that use external guest identities for service accounts
+    - Cross-tenant collaboration intentionally granting guests privileged access
+    - Provisioning of external service accounts as guests
 level: high

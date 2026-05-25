@@ -7,16 +7,10 @@ related:
       type: similar
 status: experimental
 description: |
-    Detects when an administrator registers, updates, or deletes an authentication
-    method (MFA) on behalf of another user account. An attacker who has obtained
-    administrator credentials may add a new MFA method to a target account to
-    establish persistent authentication access that survives a password reset on
-    the victim account. Unlike self-service MFA registration, admin-initiated
-    changes to security info are rare in most environments and should be correlated
-    against change management records and help desk tickets. This detection
-    complements azure_change_to_authentication_method, which covers self-service
-    registration, and raises severity because the initiating actor is not the
-    account owner.
+    Detects MFA registration, update, or deletion operations performed by an
+    administrator on behalf of another user account in Entra ID. Admin-initiated
+    changes to security info bypass the account owner and can establish persistent
+    authentication access for an attacker holding admin credentials.
 references:
     - https://learn.microsoft.com/en-us/entra/identity/authentication/howto-mfa-userdevicesettings
     - https://learn.microsoft.com/en-us/entra/architecture/security-operations-privileged-accounts
@@ -38,6 +32,7 @@ detection:
             - 'Admin deleted security info'
     condition: selection
 falsepositives:
-    - Help desk teams performing MFA resets on behalf of locked-out users through approved procedures
-    - Automated identity governance workflows that manage authentication methods programmatically
+    - Help desk MFA resets on behalf of locked-out users
+    - Onboarding workflows registering initial MFA for new hires
+    - Identity governance automation managing security info
 level: high
