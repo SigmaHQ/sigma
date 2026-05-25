@@ -5,13 +5,11 @@ related:
       type: similar
 status: experimental
 description: |
-    Detects admin consent grants to applications requesting high-risk application
-    permissions such as Application.ReadWrite.All, RoleManagement.ReadWrite.Directory,
-    or AppRoleAssignment.ReadWrite.All. Unlike delegated consent (covered in the related
-    rule), application permissions grant tenant-wide access without a signed-in user
-    context, are not scoped by Conditional Access, and are not visible to the consenting
-    user's manager. These permissions are commonly abused in OAuth phishing campaigns
-    targeting administrators and in post-compromise persistence scenarios.
+    Detects admin consent grants to OAuth applications requesting high-risk
+    application permissions (Application.ReadWrite.All, RoleManagement.ReadWrite
+    .Directory, AppRoleAssignment.ReadWrite.All). Application permissions grant
+    tenant-wide access without a signed-in user context and are not scoped by
+    Conditional Access, making them a common post-compromise persistence path.
 references:
     - https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/grant-admin-consent
     - https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-193a
@@ -26,7 +24,7 @@ logsource:
     service: auditlogs
 detection:
     selection_operation:
-        properties.message: 'Consent to application'
+        OperationName: 'Consent to application'
     selection_scope:
         TargetResources|contains:
             - 'Application.ReadWrite.All'
@@ -36,6 +34,6 @@ detection:
             - 'User.ReadWrite.All'
     condition: selection_operation and selection_scope
 falsepositives:
-    - Legitimate enterprise application deployments requiring directory write access reviewed through a formal application governance process
-    - Microsoft first-party applications during tenant onboarding or product activation
+    - Enterprise application deployments reviewed through application governance
+    - Microsoft first-party applications during tenant provisioning
 level: high

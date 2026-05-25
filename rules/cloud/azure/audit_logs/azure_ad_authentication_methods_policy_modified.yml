@@ -2,12 +2,10 @@ title: Entra ID Authentication Methods Policy Modified
 id: eaf4cd5a-f700-46ad-ace6-d8caede30ea7
 status: experimental
 description: |
-    Detects changes to the tenant-wide authentication methods policy, which controls
-    which authentication methods (FIDO2, Microsoft Authenticator, SMS, voice call,
-    software OATH tokens) are enabled or disabled for all users. An attacker with
-    Global Administrator access can weaken tenant-wide authentication by disabling
-    strong methods such as FIDO2 keys or enabling weaker methods susceptible to
-    interception or SIM swapping.
+    Detects modifications to the tenant-wide authentication methods policy in Entra
+    ID. Disabling strong methods (FIDO2, Microsoft Authenticator) or enabling weak
+    methods (SMS, voice) tenant-wide weakens authentication for every user under
+    Global Administrator privileges.
 references:
     - https://learn.microsoft.com/en-us/entra/identity/authentication/concept-authentication-methods-manage
     - https://learn.microsoft.com/en-us/entra/identity/monitoring-health/reference-audit-activities
@@ -27,6 +25,6 @@ detection:
         OperationName: 'Update authentication methods policy'
     condition: selection
 falsepositives:
-    - Authorized changes to authentication methods as part of security hardening
-    - Planned rollout or retirement of authentication methods by identity administrators
+    - Authorized hardening or rollout of new authentication methods
+    - Scheduled retirement of legacy authentication methods
 level: high
