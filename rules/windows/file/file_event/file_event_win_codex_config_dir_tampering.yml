@@ -1,0 +1,40 @@
+title: OpenAI Codex Sandbox Configuration Files Modified By Unexpected Process
+id: a2c6d4e7-1f3b-4a8c-be1f-4b5c6d7e8f9a
+status: experimental
+description: |
+    Detects modification of sensitive OpenAI Codex sandbox configuration files under the .codex directory by codex legitimate processes.
+    The .codex directory contains the sandbox setup marker, encrypted sandbox user credentials (.sandbox-secrets\sandbox_users.json), capability SIDs (cap_sid), and the command runner binary itself.
+    Tampering with these files by an unrelated process may indicate credential harvesting of the DPAPI-encrypted sandbox credentials, persistence via replacement or  attempts to manipulate the capability SID file to weaken workspace isolation.
+
+    Note: Codex does not remove these artifacts on uninstall, so they may be present on systems where Codex has been previously installed.
+references:
+    - https://jonny-johnson.medium.com/a-deep-dive-into-codex-windows-sandbox-a2489bf4ae91
+    - https://openai.com/index/building-codex-windows-sandbox/
+author: Jonathan Johnson,, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-05-26
+tags:
+    - attack.credential-access
+    - attack.persistence
+    - attack.stealth
+    - attack.t1552.001
+    - attack.t1574
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|contains: '\.codex\'
+        TargetFilename|endswith:
+            - '\sandbox_users.json'
+            - '\setup_marker.json'
+            - '\cap_sid'
+            - '\sandbox.log'
+    filter_main_expected_images:
+        Image|endswith:
+            - '\codex.exe'
+            - '\codex-windows-sandbox-setup.exe'
+        Image|contains: '\codex-command-runner-'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Backup software that creates temporary copies of files for backup purposes following similar file directory patterns
+level: medium

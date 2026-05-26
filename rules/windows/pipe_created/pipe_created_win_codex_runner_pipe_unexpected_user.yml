@@ -1,0 +1,35 @@
+title: OpenAI Codex Runner Named Pipe Accessed by Unexpected User
+id: a3c7e2f1-5d8b-4a9e-bc6f-2e1d4f7a8b9c
+status: experimental
+description: |
+    Detects creation or access to the OpenAI Codex runner named pipes (\\.\pipe\codex-runner-*) by a process running under a user account other than the expected dedicated sandbox accounts (CodexSandboxOffline or CodexSandboxOnline).
+    Codex enforces its sandbox boundary by restricting use of the runner IPC pipes to these two restricted local accounts.
+    Access under any other user may indicate a sandbox escape, token impersonation, or an attempt to inject commands into or intercept output from the Codex sandbox via the IPC channel.
+references:
+    - https://jonny-johnson.medium.com/a-deep-dive-into-codex-windows-sandbox-a2489bf4ae91
+    - https://openai.com/index/building-codex-windows-sandbox/
+author: Jonathan Johnson, Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-05-26
+tags:
+    - attack.execution
+    - attack.lateral-movement
+    - attack.stealth
+    - attack.t1559
+    - attack.t1055
+logsource:
+    category: pipe_created
+    product: windows
+detection:
+    selection:
+        PipeName|contains: '\codex-runner-'
+        PipeName|endswith:
+            - '-in'
+            - '-out'
+    filter_main_expected_users:
+        User:
+            - 'CodexSandboxOffline'
+            - 'CodexSandboxOnline'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: medium
