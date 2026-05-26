@@ -1,0 +1,26 @@
+title: AWS Bedrock Model Recon Activity
+id: 15e588cc-4969-46eb-a735-ede929845a96
+status: experimental
+description: |
+    Detects reconnaissance attempts to check if Amazon Bedrock is enabled, based on the error code.
+    Attackers can leverage this to discover the status of Bedrock, and then abuse it if enabled.
+references:
+    - https://www.sysdig.com/blog/llmjacking-stolen-cloud-credentials-used-in-new-ai-attack
+    - https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InvokeModel.html
+author: Marco Pedrinazzi (@pedrinazziM) (InTheCyber), Alessandro Brucato (sysdig) (Original Falco Rule)
+date: 2026-03-13
+tags:
+    - attack.discovery
+    - attack.t1580
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventName: 'InvokeModel'
+        errorCode: 'ValidationException'
+        eventSource: 'bedrock.amazonaws.com'
+    condition: selection
+falsepositives:
+    - Unknown
+level: medium
