@@ -1,0 +1,37 @@
+title: React2Shell Pre-Auth RSC RCE Detection - Linux
+id: c1a06152-f7df-4b98-ae98-75179234857b
+status: experimental
+description: Detects post-exploitation child processes (sh/bash) spawned by Node on Linux, indicating successful exploitation of React2Shell (CVE-2025-55182).
+references:
+  - https://nvd.nist.gov/vuln/detail/CVE-2025-55182
+  - https://github.com/Chocapikk/CVE-2025-55182
+  - https://cloud.google.com/blog/products/identity-security/responding-to-cve-2025-55182
+  - https://www.microsoft.com/en-us/security/blog/2025/12/15/defending-against-the-cve-2025-55182-react2shell-vulnerability-in-react-server-components/
+author: gloambit
+date: 2026/05/26
+tags:
+  - attack.execution
+  - attack.t1190
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection:
+    Image|endswith:
+      - '/sh'
+      - '/bash'
+    ParentImage|endswith:
+      - '/node'
+  filter_npm:
+    CommandLine|contains:
+      - 'npm run '
+      - 'yarn '
+      - 'webpack '
+      - 'next build '
+      # Scope wise, this should be targeting production web servers / containers.
+  condition: selection and not filter_npm
+falsepositives:
+  - Some legacy tools use shells to local utils
+  - CI/CD post-deploy script execution
+  - Some backup scripts/custom scripts written in Node.js execute sys commands
+level: critical
