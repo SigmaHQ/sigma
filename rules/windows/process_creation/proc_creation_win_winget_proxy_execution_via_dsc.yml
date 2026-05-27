@@ -1,0 +1,31 @@
+title: Potential WinGet Proxy Execution via DSC Engine
+id: 3b7e1f2a-d4c9-4e80-b5a3-f9c2e1d08745
+status: experimental
+description: |
+    Detects WindowsPackageManagerServer.exe (WinGet) spawning ConfigurationRemotingServer.exe with PowerShell in the command line.
+    HackTools such as DSCourier abuse WinGet's ability to apply DSC configurations to proxy code execution
+    — a malicious DSC YAML causes WinGet to invoke ConfigurationRemotingServer.exe, which runs PowerShell to process and execute the configuration payload.
+references:
+  - https://dylansec.com/DSCourier/
+  - https://github.com/DylanDavis1/DSCourier
+  - https://eclipsesec.com/posts/DSCourier/
+  - https://www.zerosalarium.com/2024/12/LOLBIN%20WinGet%20execute%20PowerShell%20script.html
+author: Richard Roy (@unresolvedhost)
+date: 2026-04-21
+tags:
+    - attack.stealth
+    - attack.t1218
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\WindowsPackageManagerServer.exe'
+        Image|endswith: '\ConfigurationRemotingServer.exe'
+        CommandLine|contains: 'pwsh'
+    condition: selection
+falsepositives:
+    - Legitimate DSC configurations executed via WinGet
+level: medium

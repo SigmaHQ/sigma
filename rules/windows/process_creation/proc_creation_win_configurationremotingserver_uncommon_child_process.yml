@@ -1,74 +1,49 @@
 title: Suspicious Child Process of ConfigurationRemotingServer
-id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+id: 21de4d86-addc-4299-9e34-47a3616fe676
 status: experimental
-description: >
-  Detects ConfigurationRemotingServer.exe spawning unexpected child processes,
-  indicating abuse of the Windows DSC engine for proxy execution (DSCourier technique).
+description: |
+    Detects suspicious child processes spawned by ConfigurationRemotingServer.exe.
+    Tools such as DSCourier abuse Windows Desired State Configuration (DSC) to execute arbitrary code — once a malicious DSC configuration is processed by ConfigurationRemotingServer.exe,
+    an attacker-controlled PowerShell payload can spawn reconnaissance or post-exploitation tools as child processes.
 references:
   - https://dylansec.com/DSCourier/
   - https://github.com/DylanDavis1/DSCourier
-author: Richard Roy (@unresolvedhost)
+  - https://eclipsesec.com/posts/DSCourier/
+  - https://www.zerosalarium.com/2024/12/LOLBIN%20WinGet%20execute%20PowerShell%20script.html
+author: Richard Roy (@unresolvedhost), Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2026-04-21
 tags:
-  - attack.defense_evasion
-  - attack.t1218
-  - attack.execution
-  - attack.t1059.001
+    - attack.execution
+    - attack.t1059
+    - attack.stealth
+    - attack.t1218
 logsource:
-  category: process_creation
-  product: windows
+    category: process_creation
+    product: windows
 detection:
-    uncommon_child_process:
+    selection:
         ParentImage|endswith: '\ConfigurationRemotingServer.exe'
         Image|endswith:
-            - '\whoami.exe'
+            - '\bitsadmin.exe'
+            - '\certutil.exe'
             - '\cmd.exe'
-            - '\powershell.exe'
-            - '\pwsh.exe'
+            - '\cscript.exe'
+            - '\curl.exe'
+            - '\hostname.exe'
+            - '\ipconfig.exe'
+            - '\msbuild.exe'
+            - '\mshta.exe'
             - '\net.exe'
             - '\net1.exe'
-            - '\ipconfig.exe'
-            - '\hostname.exe'
-            - '\systeminfo.exe'
-            - '\wmic.exe'
-            - '\nltest.exe'
-            - '\ping.exe'
-            - '\nslookup.exe'
-            - '\certutil.exe'
-            - '\bitsadmin.exe'
-            - '\mshta.exe'
-            - '\wscript.exe'
-            - '\cscript.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
             - '\regsvr32.exe'
             - '\rundll32.exe'
-    uncommon_child_process_renamed:
-        ParentImage|endswith: '\ConfigurationRemotingServer.exe'
-        OriginalFileName:
-            - 'whoami.exe'
-            - 'cmd.exe'
-            - 'powershell.exe'
-            - 'pwsh.exe'
-            - 'net.exe'
-            - 'net1.exe'
-            - 'ipconfig.exe'
-            - 'hostname.exe'
-            - 'systeminfo.exe'
-            - 'wmic.exe'
-            - 'nltest.exe'
-            - 'ping.exe'
-            - 'nslookup.exe'
-            - 'certutil.exe'
-            - 'bitsadmin.exe'
-            - 'mshta.exe'
-            - 'wscript.exe'
-            - 'cscript.exe'
-            - 'regsvr32.exe'
-            - 'rundll32.exe'
-    suspicious_argument:
-        ParentImage|endswith: '\WindowsPackageManagerServer.exe'
-        Image|endswith: 'ConfigurationRemotingServer.exe'
-        CommandLine|contains: 'pwsh'  # PowerShell Desired State Configuration (DSC) only runs with Powershell
-    condition: uncommon_child_process or uncommon_child_process_renamed or suspicious_argument
+            - '\systeminfo.exe'
+            - '\whoami.exe'
+            - '\wmic.exe'
+            - '\wscript.exe'
+    condition: selection
 falsepositives:
-  - N/A
+    - Unknown
 level: high
