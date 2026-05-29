@@ -1,0 +1,39 @@
+title: Spring Boot Actuator Heapdump Endpoint Access
+id: 1284caf8-e63a-4789-a71f-f5aeeb9fa4d0
+status: experimental
+description: |
+    Detects HTTP requests to the Spring Boot Actuator `/actuator/heapdump`
+    endpoint, which streams a Java HPROF heap dump containing every live
+    `String` object in process memory (JDBC URLs with embedded credentials,
+    JWT signing keys, Spring Security default user passwords under `{noop}`
+    encoding, BCrypt hashes, and any other in-memory secret). Heapdump
+    access in production is so rare that ANY request warrants
+    investigation, regardless of authentication state. Highest-impact
+    follow-on for CVE-2026-40976 (Spring Boot 4.0.0-4.0.5 actuator
+    authorization bypass) since the 4.0 default Sanitizer that redacts
+    `/actuator/env` values does NOT apply to heap memory.
+references:
+    - https://spring.io/security/cve-2026-40976/
+    - https://docs.spring.io/spring-boot/reference/actuator/endpoints.html#actuator.endpoints.heapdump
+    - https://binautopsy.com/research/cve-2026-40976/
+author: Binautopsy Labs
+date: 2026-04-28
+tags:
+    - attack.credential-access
+    - attack.t1552.001
+    - attack.t1003
+    - cve.2026-40976
+logsource:
+    category: webserver
+detection:
+    selection:
+        cs-method: 'GET'
+        cs-uri-stem|endswith: '/actuator/heapdump'
+    condition: selection
+falsepositives:
+    - Internal SRE manually capturing a heap dump for debugging. Should be
+      infrequent (less than one request per deployment per month);
+      correlate with a known operator IP.
+    - Commercial APMs that automatically pull heap dumps on
+      out-of-memory suspicion. Allowlist by the APM agent's source IP.
+level: high
