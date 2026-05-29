@@ -2,29 +2,45 @@ title: Windows Defender Disabled Via SystemSettingsAdminFlows.EXE
 id: da92713f-ca2d-4fab-8320-098013d3f43a
 status: experimental
 description: |
-    Detects the use of SystemSettingsAdminFlows.exe to disable Windows
-    Defender settings. This legitimate Windows binary has been observed
-    being abused by threat actors as a LOLBIN to tamper with security
-    tooling during ransomware intrusions, as documented in a LockBit
-    deployment case by The DFIR Report (February 2026).
+    Detects the usage of SystemSettingsAdminFlows.exe to disable Windows Defender.
+    SystemSettingsAdminFlows.exe is a legitimate Windows component used for administrative configuration tasks.
+    However, attackers may abuse it to disable Windows Defender as part of their attack chain, especially in the context of ransomware or other malware campaigns.
 references:
     - https://thedfirreport.com/2026/02/23/apache-activemq-exploit-leads-to-lockbit-ransomware/
+    - https://www.huntress.com/blog/lolbin-to-inc-ransomware
 tags:
-    - attack.defense-evasion
+    - attack.defense-impairment
     - attack.t1562.001
-author: Chirag Damani (KPMG India)
+author: Chirag Damani (KPMG India), Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2026-03-21
 logsource:
     category: process_creation
     product: windows
 detection:
-    selection:
-        Image|endswith: '\SystemSettingsAdminFlows.exe'
-        CommandLine|contains:
-            - 'WindowsDefender'
-            - 'TurnOffWindowsDefender'
-    condition: selection
+    selection_ssaf_img:
+        - Image|endswith: '\SystemSettingsAdminFlows.exe'
+        - OriginalFileName: 'SystemSettingsAdminFlows.exe'
+    selection_ssaf_cli:
+        CommandLine|contains: 'defender'
+    selection_cli_enable_opt:
+        - 'RTP '
+        - 'RealTimeProtection '
+        - 'DisableEnhancedNotifications '
+    selection_cli_enable_value:
+        CommandLine|contains: '1'
+    selection_cli_disable_opt:
+        - 'SubmitSamplesConsent '
+        - 'SpyNetReporting '
+        - 'DisableCDPUserAuthPolicy '
+    selection_cli_disable_value:
+        CommandLine|contains: '0'
+    # In Enterprise environments, if defender was disabled via GUI, it would be expected to see the following parent-child process relationship:
+    # Thus, uncomment the below filter to exclude such cases because of high false positives:
+    # filter_main_gui_options:
+    #     Image|endswith:
+    #         - '\SystemSettings.exe'
+    #         - '\Explorer.exe'
+    condition: all of selection_ssaf_* and (all of selection_cli_enable_* or all of selection_cli_disable_*)
 falsepositives:
-    - Legitimate administrative configuration of Windows Defender
-      via system management tools
+    - Legitimate turn off of Windows Defender by the technical users or administrators for troubleshooting or other purposes.
 level: high
