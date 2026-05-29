@@ -1,0 +1,43 @@
+title: AI Agent Prompt Injection - Base64 Encoded Instruction Markers
+id: a814751e-4500-46d7-b5ef-5ac607075b62
+status: experimental
+description: |
+    Detects Base64-encoded prompt injection markers in user input to LLM agents. Attackers Base64-encode injection phrases to evade naive keyword filters, then ask the model to decode and execute the result.
+    The keywords below match Base64 fragments of common injection phrases such as "ignore previous instructions" and "you are now". The fragments are mid-string slices that are stable across leading-whitespace variants.
+    Derived from Agent Threat Rules (ATR) ATR-2026-00051.
+references:
+    - https://github.com/Agent-Threat-Rule/agent-threat-rules
+    - https://kai-greshake.de/posts/inject-my-pdf/
+author: Adam Lin (panguard.ai)
+date: 2026-05-09
+tags:
+    - attack.stealth
+    - attack.t1027
+    - detection.emerging-threats
+logsource:
+    category: webserver
+detection:
+    selection_method:
+        cs-method:
+            - 'POST'
+            - 'GET'
+    keywords:
+        # mid-string slice of "ignore previous instructions" base64
+        - 'aWdub3JlIHByZXZpb3VzIGluc3RydWN0aW9ucw'
+        # mid-string slice of "Ignore previous instructions"
+        - 'SWdub3JlIHByZXZpb3VzIGluc3RydWN0aW9ucw'
+        # mid-string slice of "you are now"
+        - 'eW91IGFyZSBub3c'
+        # mid-string slice of "system prompt"
+        - 'c3lzdGVtIHByb21wdA'
+        # mid-string slice of "disregard prior instructions"
+        - 'ZGlzcmVnYXJkIHByaW9yIGluc3RydWN0aW9ucw'
+    decode_helper:
+        cs-uri-query|contains:
+            - 'base64'
+            - 'decode'
+    condition: selection_method and (keywords or (keywords and decode_helper))
+falsepositives:
+    - Legitimate Base64-encoded payloads that happen to overlap with these mid-string fragments (extremely rare given the slice length)
+    - Authorized red-team or AI safety evaluation traffic
+level: medium

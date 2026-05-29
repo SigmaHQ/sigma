@@ -1,0 +1,38 @@
+title: AI Agent Prompt Injection - System Prompt Override
+id: 2be02c65-d161-44aa-be34-8a7157e1cc82
+status: experimental
+description: |
+    Detects attempts to override an LLM agent's system prompt by injecting a counterfeit role assignment. Phrases like "you are now" followed by a new persona or instruction set are a common pattern for hijacking the agent's behavior.
+    These payloads are typically delivered as user input or in indirect injection vectors such as retrieved documents, web pages, or tool output that is later fed back into the model.
+    Derived from Agent Threat Rules (ATR) ATR-2026-00023.
+references:
+    - https://github.com/Agent-Threat-Rule/agent-threat-rules
+    - https://owasp.org/www-project-top-10-for-large-language-model-applications/
+author: Adam Lin (panguard.ai)
+date: 2026-05-09
+tags:
+    - attack.initial-access
+    - attack.t1190
+    - detection.emerging-threats
+logsource:
+    category: webserver
+detection:
+    selection_method:
+        cs-method:
+            - 'POST'
+            - 'GET'
+    keywords:
+        - 'you are now '
+        - 'you%20are%20now%20'
+        - 'from now on you will'
+        - 'from now on, you will'
+        - 'from%20now%20on%20you%20will'
+        - 'override system prompt'
+        - 'override the system prompt'
+        - 'new system prompt:'
+        - 'new%20system%20prompt'
+    condition: selection_method and keywords
+falsepositives:
+    - Conversational LLM applications where users may legitimately type "you are now" in unrelated dialogue
+    - Documentation or research about LLM jailbreaks
+level: medium

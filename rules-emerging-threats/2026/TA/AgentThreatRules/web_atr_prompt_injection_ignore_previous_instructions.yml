@@ -1,0 +1,38 @@
+title: AI Agent Prompt Injection - Ignore Previous Instructions
+id: 6b48f6b2-c760-4fca-abd1-96313367859d
+status: experimental
+description: |
+    Detects classic prompt injection attempts targeting Large Language Model (LLM) agents and AI applications via the "ignore previous instructions" family of payloads.
+    Payloads in this family attempt to make the model disregard its system prompt or developer instructions, often as a precursor to jailbreak, system prompt extraction, or unsafe tool invocation.
+    Derived from Agent Threat Rules (ATR) ATR-2026-00021. Use with care on any web log source serving an LLM application or AI agent endpoint.
+references:
+    - https://github.com/Agent-Threat-Rule/agent-threat-rules
+    - https://owasp.org/www-project-top-10-for-large-language-model-applications/
+    - https://genai.owasp.org/llmrisk/llm01-prompt-injection/
+author: Adam Lin (panguard.ai)
+date: 2026-05-09
+tags:
+    - attack.initial-access
+    - attack.t1190
+    - detection.emerging-threats
+logsource:
+    category: webserver
+detection:
+    selection_method:
+        cs-method:
+            - 'POST'
+            - 'GET'
+    keywords:
+        - 'ignore previous instructions'
+        - 'ignore the previous instructions'
+        - 'ignore all previous instructions'
+        - 'ignore above instructions'
+        - 'ignore all above instructions'
+        - 'ignore%20previous%20instructions'
+        - 'ignore%20all%20previous%20instructions'
+        - 'ignore%20the%20above%20instructions'
+    condition: selection_method and keywords
+falsepositives:
+    - Security researchers performing authorized red team or evaluation testing against AI applications
+    - Documentation, blog posts, or tutorials about prompt injection submitted via web forms
+level: medium

@@ -1,0 +1,45 @@
+title: MCP Tool Description Poisoning Indicators
+id: eacad162-f913-46d4-bd97-9e07d90f841f
+status: experimental
+description: |
+    Detects indicators of tool description poisoning in Model Context Protocol (MCP) traffic. A malicious or compromised MCP server can embed instructions in the description, parameters, or annotations field of a tool, which an LLM client will then read and follow as if they came from the user or developer.
+    This rule looks for the most common injection markers (system note, ignore-instruction phrases, secret exfiltration cues) appearing inside MCP tool definition responses or list_tools results observed at the web layer.
+    Derived from Agent Threat Rules (ATR) ATR-2026-00061.
+references:
+    - https://github.com/Agent-Threat-Rule/agent-threat-rules
+    - https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks
+    - https://modelcontextprotocol.io/
+author: Adam Lin (panguard.ai)
+date: 2026-05-09
+tags:
+    - attack.initial-access
+    - attack.t1195
+    - detection.emerging-threats
+logsource:
+    category: webserver
+detection:
+    selection_method:
+        cs-method:
+            - 'POST'
+            - 'GET'
+    selection_mcp_path:
+        cs-uri-stem|contains:
+            - '/mcp'
+            - '/list_tools'
+            - '/tools/list'
+            - '/tool/list'
+    keywords:
+        - '<IMPORTANT>'
+        - '<system>'
+        - '</system>'
+        - '(system note:'
+        - '(important:'
+        - 'ignore previous instructions'
+        - 'send the contents of'
+        - 'exfiltrate to'
+        - 'when called, also'
+    condition: selection_method and selection_mcp_path and keywords
+falsepositives:
+    - Tool descriptions that legitimately reference system messages or include the word "important" in unrelated context
+    - Internal MCP server developer documentation served at MCP endpoints
+level: high
