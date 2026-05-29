@@ -19,13 +19,14 @@ logsource:
 detection:
     # You have to tune the rule for your environment before use it
     selection:
-        Status: failure
         # Countries you do NOT operate out of e,g GB, use list for mulitple
-        Location|expand: '%UnLegitCountries%'
-        IPaddress|expand: '%UnApprovedIp%'
+        location|expand: '%UnLegitCountries%'
+        callerIpAddress|expand: '%UnApprovedIp%'
         # unapproved browser, operating system
-        DeviceInfo|expand: '%UnApprovedDevice%'
-    condition: selection
+        properties.deviceDetail.deviceId|expand: '%UnApprovedDevice%'
+    filter_success:
+        resultType: 0
+    condition: selection and not filter_success
 falsepositives:
     - A legit admin not following proper processes
 level: high
