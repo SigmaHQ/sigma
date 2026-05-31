@@ -1,0 +1,41 @@
+title: Run Key Persistence Added By Suspicious Process
+id: 90b04fdf-7d2b-4545-b066-5de3bea5b7d9
+status: experimental
+description: Detects Run or RunOnce registry persistence written by scripting engines, LOLBins, command shells, or Office
+  applications. This is narrower than broad Run key monitoring and focuses on suspicious initiating processes.
+references:
+- https://attack.mitre.org/techniques/T1547/001/
+author: David Sarkisyan
+date: 2026/05/31
+tags:
+- attack.persistence
+- attack.t1547.001
+logsource:
+  product: windows
+  category: registry_set
+detection:
+  selection_key:
+    TargetObject|contains:
+    - \Software\Microsoft\Windows\CurrentVersion\Run
+    - \Software\Microsoft\Windows\CurrentVersion\RunOnce
+  selection_initiator:
+    Image|endswith:
+    - \powershell.exe
+    - \pwsh.exe
+    - \wscript.exe
+    - \cscript.exe
+    - \mshta.exe
+    - \rundll32.exe
+    - \regsvr32.exe
+    - \cmd.exe
+    - \certutil.exe
+    - \bitsadmin.exe
+    - \winword.exe
+    - \excel.exe
+    - \outlook.exe
+  condition: selection_key and selection_initiator
+falsepositives:
+- Legitimate installer wrappers that use cmd.exe or PowerShell
+- Enterprise software deployment scripts creating startup entries
+- User logon helpers deployed by corporate management tooling
+level: high

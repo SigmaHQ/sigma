@@ -1,0 +1,51 @@
+title: Scheduled Task Creation By Non-System Process
+id: 1a971e10-acef-4350-bbcd-a8b3e00f7df9
+status: experimental
+description: Detects scheduled task creation via schtasks.exe from non-system and non-service parents. This focuses on user-context
+  task creation, which is commonly used for persistence and privilege escalation after initial execution.
+references:
+- https://attack.mitre.org/techniques/T1053/005/
+author: David Sarkisyan
+date: 2026/05/31
+tags:
+- attack.persistence
+- attack.privilege-escalation
+- attack.t1053.005
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_img:
+    Image|endswith: \schtasks.exe
+  selection_create:
+    CommandLine|contains:
+    - /create
+    - -create
+  selection_susp_path:
+    CommandLine|contains:
+    - \AppData\\
+    - \Temp\\
+    - \Users\\Public\\
+    - \ProgramData\\
+    - '%TEMP%'
+    - '%APPDATA%'
+    - http://
+    - https://
+  filter_system_user:
+    User|contains:
+    - SYSTEM
+    - LOCAL SERVICE
+    - NETWORK SERVICE
+    - TrustedInstaller
+  filter_service_parent:
+    ParentImage|endswith:
+    - \services.exe
+    - \svchost.exe
+    - \taskhostw.exe
+    - \taskeng.exe
+  condition: all of selection_* and not 1 of filter_*
+falsepositives:
+- Legitimate software installers creating per-user scheduled maintenance tasks
+- Administrator scripts deploying scheduled jobs from user-writable paths
+- Endpoint management agents running task creation from a user context
+level: medium

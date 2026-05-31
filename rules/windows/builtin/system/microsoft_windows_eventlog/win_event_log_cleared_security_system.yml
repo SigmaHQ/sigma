@@ -1,0 +1,27 @@
+title: Security Or System Event Log Cleared
+id: 66afe85e-6b57-415c-9b10-7f409884d83e
+status: experimental
+description: Detects clearing of the Windows Security or System event logs. Log clearing is often used to hide attacker activity
+  and should be rare outside administrator maintenance.
+references:
+- https://attack.mitre.org/techniques/T1070/001/
+author: David Sarkisyan
+date: 2026/05/31
+tags:
+- attack.defense-impairment
+- attack.t1685.005
+logsource:
+  product: windows
+detection:
+  selection_security:
+    EventID: 1102
+    Channel: Security
+  selection_system:
+    EventID: 104
+    Channel: System
+  condition: 1 of selection_*
+falsepositives:
+- Administrator troubleshooting or log maintenance
+- Automated log rotation workflows in lab or kiosk systems
+- System image preparation or reset procedures
+level: high

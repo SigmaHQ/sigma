@@ -1,0 +1,44 @@
+title: LSASS Access With Credential Dumping Access Mask
+id: df322158-d0e9-4c6a-beb0-932efd0570ce
+status: experimental
+description: Detects process access to lsass.exe using access masks commonly associated with credential dumping tools. Known
+  security and troubleshooting tools are filtered to keep the signal focused.
+references:
+- https://attack.mitre.org/techniques/T1003/001/
+author: David Sarkisyan
+date: 2026/05/31
+tags:
+- attack.credential-access
+- attack.t1003.001
+logsource:
+  product: windows
+  category: process_access
+detection:
+  selection_target:
+    TargetImage|endswith: \lsass.exe
+  selection_access:
+    GrantedAccess:
+    - '0x1010'
+    - '0x1410'
+    - '0x10b0'
+    - '0x1fffff'
+    - '0x1f3fff'
+    - '0x143a'
+  filter_security_tools:
+    SourceImage|endswith:
+    - \MsMpEng.exe
+    - \SenseIR.exe
+    - \csagent.exe
+    - \CylanceSvc.exe
+    - \mbam.exe
+    - \procexp.exe
+    - \procexp64.exe
+    - \procmon.exe
+    - \procmon64.exe
+    - \taskmgr.exe
+  condition: all of selection_* and not 1 of filter_*
+falsepositives:
+- Unlisted EDR or antivirus products inspecting LSASS
+- Administrator troubleshooting with Sysinternals tools not covered by filters
+- Memory diagnostics or crash collection tools
+level: high

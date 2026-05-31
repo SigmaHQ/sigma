@@ -1,0 +1,32 @@
+title: Kerberoasting RC4 TGS Request For Non-Machine Account
+id: 947ea8e8-7f35-4711-ad6e-35becf8ac190
+status: experimental
+description: Detects Kerberos service ticket requests using RC4 encryption for non-machine service accounts. In AES-enabled
+  environments, RC4 TGS requests can be a useful Kerberoasting signal.
+references:
+- https://attack.mitre.org/techniques/T1558/003/
+- https://adsecurity.org/?p=3458
+author: David Sarkisyan
+date: 2026/05/31
+tags:
+- attack.credential-access
+- attack.t1558.003
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4769
+    TicketEncryptionType: '0x17'
+  filter_machine:
+    ServiceName|endswith: $
+  filter_krbtgt:
+    ServiceName|contains:
+    - krbtgt
+    - kadmin
+  condition: selection and not 1 of filter_*
+falsepositives:
+- Legacy applications or clients that only support RC4 Kerberos encryption
+- Service accounts intentionally configured for RC4 compatibility
+- Mixed-domain environments during encryption hardening projects
+level: high

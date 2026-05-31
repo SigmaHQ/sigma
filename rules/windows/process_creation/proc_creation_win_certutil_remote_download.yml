@@ -1,0 +1,44 @@
+title: Certutil Remote Download Or Decode Activity
+id: cf8a3723-adf8-4076-8268-55589b5256c4
+status: experimental
+description: Detects certutil.exe used with URL cache, split, decode, or encode options and remote URL indicators. Attackers
+  abuse certutil to download or transform payloads using a trusted Windows binary.
+references:
+- https://attack.mitre.org/techniques/T1105/
+- https://attack.mitre.org/techniques/T1218/003/
+author: David Sarkisyan
+date: 2026/05/31
+tags:
+- attack.command-and-control
+- attack.t1105
+- attack.t1218.003
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_img:
+    Image|endswith: \certutil.exe
+  selection_remote:
+    CommandLine|contains:
+    - http://
+    - https://
+    - ftp://
+  selection_args:
+    CommandLine|contains:
+    - -urlcache
+    - -split
+    - -f
+    - -decode
+    - -decodehex
+    - -encode
+  filter_ms_domains:
+    CommandLine|contains:
+    - download.microsoft.com
+    - ctldl.windowsupdate.com
+    - www.microsoft.com/pki
+  condition: selection_img and selection_remote and selection_args and not filter_ms_domains
+falsepositives:
+- Certificate troubleshooting that downloads CRLs or CA files from non-Microsoft locations
+- Administrative scripts using certutil to retrieve internal PKI artifacts
+- Security testing in controlled environments
+level: high
