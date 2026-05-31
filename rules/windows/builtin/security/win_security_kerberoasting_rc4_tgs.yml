@@ -1,5 +1,10 @@
 title: Kerberoasting RC4 TGS Request For Non-Machine Account
 id: 947ea8e8-7f35-4711-ad6e-35becf8ac190
+related:
+- id: d04ae2b8-ad54-4de0-bd87-4bc1da66aa59
+  type: similar
+- id: 496a0e47-0a33-4dca-b009-9e6ca3591f39
+  type: similar
 status: experimental
 description: Detects Kerberos service ticket requests using RC4 encryption for non-machine service accounts. In AES-enabled
   environments, RC4 TGS requests can be a useful Kerberoasting signal.
@@ -18,12 +23,15 @@ detection:
   selection:
     EventID: 4769
     TicketEncryptionType: '0x17'
+    Status: '0x0'
   filter_machine:
     ServiceName|endswith: $
   filter_krbtgt:
     ServiceName|contains:
     - krbtgt
     - kadmin
+  filter_machine_requester:
+    TargetUserName|contains: $@
   condition: selection and not 1 of filter_*
 falsepositives:
 - Legacy applications or clients that only support RC4 Kerberos encryption

@@ -1,8 +1,13 @@
 title: SMB Admin Share Access From Remote Host
 id: 8703d261-3b23-46bc-a85b-3f5fde5823b0
+related:
+- id: 098d7118-55bc-4912-a836-dc6483a8d150
+  type: similar
+- id: b210394c-ba12-4f89-9117-44a2464b9511
+  type: similar
 status: experimental
-description: Detects access to administrative SMB shares such as ADMIN$ and drive-letter shares via Windows Security EventID
-  5140. This can indicate lateral movement when initiated from unexpected workstations or non-administrative accounts.
+description: Detects remote access to drive-letter administrative SMB shares via Windows Security EventID 5140 from non-machine
+  accounts. This complements existing ADMIN$ and file-creation coverage by focusing on C$, D$, and E$ share access.
 references:
 - https://attack.mitre.org/techniques/T1021/002/
 author: David Sarkisyan
@@ -16,8 +21,7 @@ logsource:
 detection:
   selection:
     EventID: 5140
-    ShareName|contains:
-    - \ADMIN$
+    ShareName|endswith:
     - \C$
     - \D$
     - \E$
@@ -26,7 +30,9 @@ detection:
     - 127.0.0.1
     - ::1
     - '-'
-  condition: selection and not filter_localhost
+  filter_machine_account:
+    SubjectUserName|endswith: $
+  condition: selection and not 1 of filter_*
 falsepositives:
 - Administrators performing legitimate remote administration
 - Backup, patching, or software deployment tools using administrative shares

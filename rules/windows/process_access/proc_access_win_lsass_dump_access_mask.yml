@@ -1,8 +1,14 @@
 title: LSASS Access With Credential Dumping Access Mask
 id: df322158-d0e9-4c6a-beb0-932efd0570ce
+related:
+- id: a18dd26b-6450-46de-8c91-9659150cf088
+  type: similar
+- id: 5ef9853e-4d0e-4a70-846f-a9ca37d876da
+  type: similar
 status: experimental
-description: Detects process access to lsass.exe using access masks commonly associated with credential dumping tools. Known
-  security and troubleshooting tools are filtered to keep the signal focused.
+description: Detects process access to lsass.exe using access masks commonly associated with credential dumping tools when
+  the accessing process is running from a user-writable or temporary location. This complements broad LSASS access-mask rules
+  by focusing on suspicious source image paths.
 references:
 - https://attack.mitre.org/techniques/T1003/001/
 author: David Sarkisyan
@@ -36,9 +42,16 @@ detection:
     - \procmon.exe
     - \procmon64.exe
     - \taskmgr.exe
+  selection_source_path:
+    SourceImage|contains:
+    - \AppData\
+    - \Users\Public\
+    - \Windows\Temp\
+    - \Temp\
+    - \ProgramData\
   condition: all of selection_* and not 1 of filter_*
 falsepositives:
-- Unlisted EDR or antivirus products inspecting LSASS
-- Administrator troubleshooting with Sysinternals tools not covered by filters
-- Memory diagnostics or crash collection tools
+- Portable administrator troubleshooting tools launched from temporary folders
+- Security products using temporary updater or helper binaries
+- Incident response tooling intentionally staged under ProgramData or Public
 level: high

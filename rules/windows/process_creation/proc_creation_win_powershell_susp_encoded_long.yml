@@ -1,8 +1,11 @@
 title: PowerShell Suspicious Long Encoded Command
 id: d142c406-7870-4c22-bb3e-d51f23d01005
+related:
+- id: fb843269-508c-4b76-8b8d-88679db22ce7
+  type: similar
 status: experimental
-description: Detects PowerShell execution with encoded command flags and suspicious execution context. This complements broad
-  encoded-command detections by requiring suspicious parents or common web-delivery strings.
+description: Detects PowerShell execution with encoded command flags from suspicious parent processes or with command-line
+  web delivery indicators. This complements broad encoded-command detections by adding parent-process context.
 references:
 - https://attack.mitre.org/techniques/T1059/001/
 author: David Sarkisyan
@@ -15,9 +18,12 @@ logsource:
   category: process_creation
 detection:
   selection_img:
-    Image|endswith:
+  - Image|endswith:
     - \powershell.exe
     - \pwsh.exe
+  - OriginalFileName:
+    - PowerShell.EXE
+    - pwsh.dll
   selection_encoded:
     CommandLine|contains:
     - ' -enc '

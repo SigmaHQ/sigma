@@ -1,5 +1,8 @@
 title: Scheduled Task Creation By Non-System Process
 id: 1a971e10-acef-4350-bbcd-a8b3e00f7df9
+related:
+- id: 92626ddd-662c-49e3-ac59-f6535f12d189
+  type: similar
 status: experimental
 description: Detects scheduled task creation via schtasks.exe from non-system and non-service parents. This focuses on user-context
   task creation, which is commonly used for persistence and privilege escalation after initial execution.
@@ -16,17 +19,18 @@ logsource:
   category: process_creation
 detection:
   selection_img:
-    Image|endswith: \schtasks.exe
+  - Image|endswith: \schtasks.exe
+  - OriginalFileName: schtasks.exe
   selection_create:
     CommandLine|contains:
     - /create
     - -create
   selection_susp_path:
     CommandLine|contains:
-    - \AppData\\
-    - \Temp\\
-    - \Users\\Public\\
-    - \ProgramData\\
+    - \AppData\
+    - \Temp\
+    - \Users\Public\
+    - \ProgramData\
     - '%TEMP%'
     - '%APPDATA%'
     - http://

@@ -1,8 +1,12 @@
 title: Certutil Remote Download Or Decode Activity
 id: cf8a3723-adf8-4076-8268-55589b5256c4
+related:
+- id: 19b08b1c-861d-4e75-a1ef-ea0c1baf202b
+  type: similar
 status: experimental
-description: Detects certutil.exe used with URL cache, split, decode, or encode options and remote URL indicators. Attackers
-  abuse certutil to download or transform payloads using a trusted Windows binary.
+description: Detects certutil.exe used with remote URL indicators and download or decode options where the command line also
+  references a user-writable or temporary path. This complements broader certutil download rules by focusing on suspicious
+  payload staging locations.
 references:
 - https://attack.mitre.org/techniques/T1105/
 - https://attack.mitre.org/techniques/T1218/003/
@@ -17,7 +21,8 @@ logsource:
   category: process_creation
 detection:
   selection_img:
-    Image|endswith: \certutil.exe
+  - Image|endswith: \certutil.exe
+  - OriginalFileName: CertUtil.exe
   selection_remote:
     CommandLine|contains:
     - http://
@@ -36,9 +41,18 @@ detection:
     - download.microsoft.com
     - ctldl.windowsupdate.com
     - www.microsoft.com/pki
-  condition: selection_img and selection_remote and selection_args and not filter_ms_domains
+  selection_susp_path:
+    CommandLine|contains:
+    - \AppData\
+    - \Users\Public\
+    - \Windows\Temp\
+    - \Temp\
+    - \ProgramData\
+    - '%TEMP%'
+    - '%APPDATA%'
+  condition: all of selection_* and not filter_ms_domains
 falsepositives:
-- Certificate troubleshooting that downloads CRLs or CA files from non-Microsoft locations
-- Administrative scripts using certutil to retrieve internal PKI artifacts
+- Certificate troubleshooting that stages files in temporary locations
+- Administrative scripts using certutil to retrieve internal PKI artifacts into ProgramData
 - Security testing in controlled environments
 level: high
