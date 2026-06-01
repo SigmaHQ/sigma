@@ -1,0 +1,46 @@
+title: HackTool - Gogo Scanner Execution
+id: 02b1996d-2f4b-4f4e-bb6f-ceeb05024bd6
+status: experimental
+description: |
+    Detects execution of "gogo" (chainreactors/gogo), a high-performance open-source automated scanning engine designed for red teams.
+    The tool uses distinctive Gogo-specific port-preset tags (e.g. "top1", "top2", "top3", "win", "db", "docker", "oracle") with the "-p" flag, supersmart scan modes ("-m ss", "-m sc"), and config-listing commands ("-P port", "-P workflow").
+    Cisco Talos documented its use by the China-nexus APT group UAT-8302 in their May 2026 report, where the operators downloaded "gogo_windows_amd64.exe" from the official GitHub releases and used it for internal network reconnaissance.
+references:
+    - https://github.com/chainreactors/gogo
+    - https://blog.talosintelligence.com/uat-8302/
+    - https://chainreactors.github.io/wiki/gogo/
+author: Aryu-RU
+date: 2026-05-30
+tags:
+    - attack.discovery
+    - attack.t1046
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\gogo.exe'
+            - '\gogo_windows_amd64.exe'
+            - '\gogo_windows_386.exe'
+        CommandLine|contains:
+            # Gogo-specific port preset tags (used with the -p flag)
+            - ' -p top1'
+            - ' -p top2'
+            - ' -p top3'
+            - ' -p win'
+            - ' -p db'
+            - ' -p docker'
+            - ' -p oracle'
+            - ' -p dubbo'
+            - ' -p lotus'
+            # Gogo "supersmart" / "smartC" scan modes
+            - ' -m ss'
+            - ' -m sc'
+            # Gogo config-listing commands
+            - ' -P port'
+            - ' -P workflow'
+    condition: selection
+falsepositives:
+    - Legitimate use of gogo by security professionals or system administrators for authorized network assessment.
+level: high
