@@ -1,0 +1,29 @@
+title: AWS SES Account Availability Discovery Via Long-Lived Access Key
+id: 5f75f934-e78a-4653-9d3a-50e799af9edc
+status: experimental
+description: Detects SES GetAccount, ListIdentities, or GetSendQuota API calls made with a long-term AWS access key, which may indicate an attacker using compromised credentials to discover the availability of an SES account.
+references:
+    - https://www.wiz.io/blog/wiz-discovers-cloud-email-abuse-campaign
+    - https://www.datadoghq.com/blog/detect-phishing-activity-amazon-ses/
+    - https://docs.aws.amazon.com/ses/latest/APIReference/API_GetSendQuota.html
+    - https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_GetAccount.html
+    - https://docs.aws.amazon.com/ses/latest/APIReference/API_ListIdentities.html
+author: Marco Pedrinazzi (@pedrinazziM)
+date: 2026-06-02
+tags:
+    - attack.discovery
+    - attack.t1526
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventName:
+            - 'GetSendQuota'
+            - 'GetAccount'
+            - 'ListIdentities'
+        userIdentity.accessKeyId|startswith: 'AKIA'
+    condition: selection
+falsepositives:
+    - Legitimate SES administration monitoring operations
+level: medium
