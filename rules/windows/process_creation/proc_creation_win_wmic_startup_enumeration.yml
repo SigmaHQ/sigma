@@ -1,0 +1,50 @@
+title: Startup Items Enumeration Via WMIC Or PowerShell
+id: 5ddf2c53-4535-4285-a298-e089ddf4c698
+status: experimental
+description: |
+    Detects enumeration of startup items on Windows via WMIC or PowerShell WMI/CIM cmdlets.
+    Startup items are programs configured to run automatically at boot.
+    Attackers may enumerate them during reconnaissance or to verify their own persistence mechanisms have been added successfully.
+references:
+    - https://lolbas-project.github.io/lolbas/Binaries/Wmic/
+    - https://blog.talosintelligence.com/uat-8302/
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-06-02
+tags:
+    - attack.discovery
+    - attack.t1518
+    - attack.t1082
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_wmic_img:
+        - Image|endswith: '\wmic.exe'
+        - OriginalFileName: 'wmic.exe'
+    selection_wmic_cli_startup:
+        CommandLine|contains: ' startup '
+    selection_wmic_cli_get_list:
+        CommandLine|contains:
+            - ' get '
+            - ' list '
+    selection_ps_img:
+        - Image|endswith:
+              - '\powershell.exe'
+              - '\pwsh.exe'
+              - '\powershell_ise.exe'
+        - OriginalFileName:
+              - 'PowerShell.EXE'
+              - 'pwsh.dll'
+    selection_ps_cli_cmdlet:
+        # Get-CimInstance Win32_StartupCommand | Select-Object Name, Command, Location
+        CommandLine|contains:
+            - 'Get-CimInstance'
+            - 'Get-WmiObject'
+            - 'gwmi '
+            - 'gcim '
+    selection_ps_cli_class:
+        CommandLine|contains: 'Win32_StartupCommand'
+    condition: all of selection_wmic_* or all of selection_ps_*
+falsepositives:
+    - Unknown
+level: medium
