@@ -20,10 +20,46 @@ git checkout -b your-feature-branch
 
 3. Make your changes, and test them:
 
-```bash
-python tests/test_logsource.py
-python tests/test_rules.py
-```
+   3.1. **`test_logsource.py`** - validates that all rules reference valid log sources and field names:
+
+   ```bash
+   python tests/test_logsource.py
+   ```
+
+   3.2. **`test_rules.py`** - checks rules for structural issues, noncompliance, and common mistakes:
+
+   ```bash
+   python tests/test_rules.py
+   ```
+
+   3.3. **Sigma CLI validation** - runs schema and validation checks using [Sigma CLI](https://github.com/SigmaHQ/sigma-cli). Run this if you have `sigma` installed:
+
+   ```bash
+   sigma check --fail-on-error --fail-on-issues --validation-config tests/sigma_cli_conf.yml rules/ rules-emerging-threats/ rules-threat-hunting/ rules-compliance/
+   ```
+
+   3.4. **Baseline FP check** *(optional, Windows rules only)* - downloads clean Windows EVTX baseline logs and runs your rules against them to surface false positives. Requires `jq`, `wget`, and `tar`:
+
+   ```bash
+   bash tests/check-baseline-local.sh
+   ```
+
+   3.5. **Regression tests** *(optional, only if you added regression test files to your rule)* - rules with regression test can include a `regression_tests_path` field pointing to EVTX-based test data. To validate the file structure and mappings without any extra tooling:
+
+   ```bash
+   python tests/regression_tests_runner.py \
+     --rules-paths rules/ rules-emerging-threats/ rules-threat-hunting/ \
+     --validate-only
+   ```
+
+   To also run the tests against EVTX files, you first need to download the [`evtx-sigma-checker`](https://github.com/NextronSystems/evtx-baseline) binary according to your operating-system:
+
+   ```bash
+   python tests/regression_tests_runner.py \
+     --rules-paths rules/ rules-emerging-threats/ rules-threat-hunting/ \
+     --evtx-checker /path/to/evtx-sigma-checker \
+     --thor-config tests/thor.yml
+   ```
 
 4. Once the test is successful, commit the changes to your branch:
 
@@ -47,6 +83,23 @@ git push origin your-feature-branch
 * Submit the Pull Request
 
 ## 📚 Adding or Updating Detection Rules
+
+Before writing a new rule, take these steps to align with the project's conventions and avoid duplication:
+
+1. **Review recently merged PRs** - Browse [merged pull requests](https://github.com/SigmaHQ/sigma/pulls?q=is%3Apr+is%3Amerged) to see how rules are structured, titled, and reviewed. Pay attention to reviewer feedback, as it reflects the quality bar the project expects.
+
+2. **Search for related rules in the repository** - Look for existing rules that cover the same log source, technique, or behavior. This helps you understand the established field naming, filter patterns, and detection logic already in use, and ensures you are not duplicating an existing rule.
+
+   ```bash
+   grep -r "your_keyword" rules/
+   ```
+
+   Prefer a web-based search? You have several options:
+   - [GitHub Code Search](https://github.com/search?q=repo%3ASigmaHQ%2Fsigma&type=code) - search across the repository directly on GitHub
+   - [grep.app](https://grep.app/search?f.repo=SigmaHQ%2Fsigma&f.repo.pattern=sigmahq&q=image%7Cendswith) - fast regex search across the repo
+   - [Sigma Search Engine](https://sigmasearchengine.com/) - purpose-built search across the entire Sigma rule set
+
+   For example, if you are writing a rule that targets the Windows `process_creation` log source, browsing existing rules for that log source - using any of the above or directly in the [`rules/`](./rules/) directory - is a good way to understand the patterns and conventions already established.
 
 To update or contribute a new rule please make sure to follow the guidelines in the [SigmaHQ conventions documents](https://github.com/SigmaHQ/sigma-specification/blob/main/sigmahq). Consider installing the [VsCode Sigma Extension](https://marketplace.visualstudio.com/items?itemName=humpalum.sigma) for auto completion and quality of life features.
 
