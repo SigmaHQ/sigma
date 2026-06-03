@@ -73,3 +73,38 @@ e.g.
 ```
 
 You can either give `level` and `status` as a space separated list or using a minimum value. See `--help` for all options
+
+### Machine-Readable Changelog
+
+Every release additionally ships a `changelog.json` asset that lists the rule changes between the previous and current release, keyed by rule UUID (the rule `id`). It is meant to complement the human-readable release notes and gives you a stable, scriptable way to reconcile a locally curated rule library against upstream releases (for example via the [pySigma](https://github.com/SigmaHQ/pySigma) framework).
+
+Because it is keyed on the immutable rule `id`, it is unaffected by rule renames or folder moves — only genuine content changes are reported.
+
+```json
+{
+  "18ddc704-28ad-49d9-8dd9-8e61eb25d2bc": {
+    "title": "DNS Exfiltration",
+    "change_type": "update",
+    "change_reason": "",
+    "authors": ["nasbench", "frack"],
+    "merge_date": "2025-12-02"
+  }
+}
+```
+
+| Field | Description |
+| --- | --- |
+| key | The rule UUID (`id` field). |
+| `title` | The rule title at the time of the change. |
+| `change_type` | One of `new`, `update`, `deprecated`, `unsupported` or `removed`. |
+| `change_reason` | Optional free-text reason (empty by default). |
+| `authors` | GitHub handles that authored the change (commit author and any co-authors). |
+| `merge_date` | ISO 8601 date the change was merged into this release. |
+
+You can also generate the changelog for any two release tags locally using the [sigma-changelog](tests/sigma-changelog.py) script:
+
+```bash
+# python3 tests/sigma-changelog.py --from r2023-12-24 --to r2024-01-15 --outfile changelog.json
+```
+
+When `--from` / `--to` are omitted, the two most recent release tags are used. See `--help` for all options.

@@ -43,6 +43,8 @@ jobs:
           echo "" >> changelog.txt
           echo "The [latest release package on GitHub](https://docs.github.com/en/repositories/releasing-projects-on-github/linking-to-releases#linking-to-the-latest-release) can always be found [here](https://github.com/SigmaHQ/sigma/releases/latest)." >> changelog.txt
           cat changelog.txt
+          echo "Generating machine-readable changelog (changelog.json)"
+          python3 tests/sigma-changelog.py --from ${prev_tag} --to ${curr_tag} --outfile changelog.json
       - name: Build all release packages
         run: |
           python3 tests/sigma-package-release.py --min-status test --min-level high --rule-types generic --outfile sigma_core.zip
@@ -66,3 +68,4 @@ jobs:
             sigma_core++.zip
             sigma_emerging_threats_addon.zip
             sigma_all_rules.zip
+            changelog.json
