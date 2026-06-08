@@ -1,0 +1,43 @@
+title: GitHub Token Access Via GH CLI Spawned By Script Interpreters
+id: 3f8a1c2e-7d4b-4e9f-b2a5-0c6d8e9f1a3b
+status: experimental
+description: |
+    Detects the GitHub CLI (gh) being executed to access stored GitHub authentication tokens, when spawned by build tools such as bun, node, or Python.
+    Malicious packages published to npm, JSR, or PyPI have been observed running these commands during install/postinstall
+    hooks to silently exfiltrate the victim's stored GitHub authentication token.
+references:
+    - https://unit42.paloaltonetworks.com/monitoring-npm-supply-chain-attacks/
+    - https://www.elastic.co/blog/shai-hulud-worm-npm-supply-chain-compromise
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-06-08
+tags:
+    - attack.credential-access
+    - attack.t1528
+    - attack.execution
+    - attack.t1059.007
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent_img:
+        - ParentImage|endswith:
+              - '\bun.exe'
+              - '\node.exe'
+              - '\py.exe'
+              - '\pyw.exe'
+        - ParentImage|contains: '\python'
+    selection_gh_direct:
+        - CommandLine|contains|all:
+              - 'gh '
+              - ' auth '
+              - 'token'
+        - CommandLine|contains|all:
+              # gh config get -h github.com oauth_token
+              - 'gh '
+              - 'config'
+              - ' get'
+              - 'oauth_token'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: high
