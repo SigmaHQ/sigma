@@ -6,12 +6,14 @@ description: |
     Legitimate signed DLLs from reputable vendors often carry populated metadata fields (Description, Company, Product, OriginalFileName, FileVersion).
     An attacker who signs a purpose-built or hollowed DLL with a stolen, mis-issued, or cheaply purchased code-signing certificate will often omit these fields, producing a valid signature with no accompanying version info.
     This pattern is observed in DLL side-loading, search-order hijacking, and certificate-abuse campaigns where signing is used purely to satisfy security-product trust checks.
-
     Hunting Hypothesis:
         - Investigate the signing certificate (issuer, subject, validity window, thumbprint) for disposable or recently issued CAs and cross-reference against known threat-actor certificates.
         - Examine the DLL's on-disk path relative to the loading process — paths outside standard system directories or inside application folders susceptible to search-order hijacking are high-priority leads.
         - Correlate with the parent process context; DLLs loaded into high-value targets such as lsass.exe, svchost.exe, or browser processes warrant immediate escalation.
-references:
+    Note:
+        The "selection_metadata_null" selection matches fields with a null value.
+        Some backends may interpret null field conditions as "field does not exist" rather than "field has a null value", which would change the detection semantics.
+        If your backend does not support or support null-value matching in different ways than expected, you may need to adjust the rule logic accordingly or remove the "selection_metadata_null" condition.
     - Internal Research
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2026-05-21
