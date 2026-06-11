@@ -1,0 +1,41 @@
+title: Potential Cmdlet Invocation Via ExportedCommands Array Index
+id: 4ff4ad3e-9fb5-4a70-9962-d6ea58090318
+status: experimental
+description: |
+    Detects PowerShell scripts that enumerate Microsoft.PowerShell.Utility exported commands
+    and invoke cmdlets indirectly by array index. This can be used to evade detections
+    that look for explicit strings such as Invoke-RestMethod or Invoke-Expression.
+references:
+    - https://www.linkedin.com/posts/mark-o-halloran1_clickfix-defense-evasion-tactic-today-i-ugcPost-7453463467736408064-snrp
+author: Norbert Jaśniewicz (AlphaSOC)
+date: 2026-06-11
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.stealth
+    - attack.t1027.010
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'Requirements: Script Block Logging must be enabled'
+detection:
+    selection_module_export_enum:
+        ScriptBlockText|contains|all:
+            - 'Get-Module'
+            - 'ListAvailable'
+            - 'Microsoft.PowerShell.Utility'
+            - 'ExportedCommands'
+            - 'Values'
+    selection_index_used:
+        ScriptBlockText|contains: '[*]'
+    selection_indirect_invocation:
+        - ScriptBlockText|startswith:
+              - '&'
+              - '.'
+        - ScriptBlockText|contains:
+              - ' &'
+              - ' .'
+    condition: all of selection_*
+falsepositives:
+    - Unknown
+level: medium
