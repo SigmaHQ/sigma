@@ -86,7 +86,7 @@ Because it is keyed on the immutable rule `id`, it is unaffected by rule renames
     "title": "DNS Exfiltration",
     "change_type": "update",
     "change_reason": "",
-    "authors": ["nasbench", "frack"],
+    "authors": ["nasbench", "frack113"],
     "merge_date": "2025-12-02"
   }
 }

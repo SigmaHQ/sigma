@@ -52,7 +52,7 @@ CHANGE_TYPE_ORDER = ["new", "update", "deprecated", "unsupported", "removed"]
 
 # GitHub noreply emails embed the account handle, e.g.
 # "24633258+st0pp3r@users.noreply.github.com" -> "st0pp3r".
-NOREPLY_RE = re.compile(r"(?:\d+\+)?([A-Za-z0-9-]+)@users\.noreply\.github\.com")
+NOREPLY_RE = re.compile(r"(?:\d+\+)?([^@\s]+)@users\.noreply\.github\.com")
 COAUTHOR_RE = re.compile(r"Co-authored-by:\s*(.+?)\s*<([^>]+)>", re.IGNORECASE)
 BOT_AUTHORS = {"copilot", "github-actions[bot]", "dependabot[bot]", "web-flow"}
 
@@ -131,6 +131,11 @@ def is_rule_path(path: str) -> bool:
     )
 
 
+def lifecycle_status_from_path(path: str) -> str:
+    top_level = path.split("/", 1)[0]
+    return top_level if top_level in END_OF_LIFE_STATUS else ""
+
+
 def parse_diff(from_tag: str, to_tag: str) -> list:
     """Return changed rule files as (status, old_path, new_path, score) tuples.
 
@@ -187,7 +192,9 @@ def load_rules_at(tag: str, path: str) -> list:
             if isinstance(doc, dict) and "id" in doc:
                 rules.append(doc)
     except yaml.YAMLError as error:
-        print("[E] Could not parse {} at {}: {}".format(path, tag, error))
+        raise SystemExit(
+            "[E] Could not parse {} at {}: {}".format(path, tag, error)
+        ) from error
     return rules
 
 
@@ -261,6 +268,8 @@ def build_changelog(from_tag: str, to_tag: str) -> dict:
 
     prev_index = {}  # uuid -> summary at from_tag
     curr_index = {}  # uuid -> summary at to_tag
+    prev_lifecycle_paths = {}  # uuid -> lifecycle status implied by old path
+    curr_lifecycle_paths = {}  # uuid -> lifecycle status implied by new path
     content_changed = {}  # uuid -> bool (did the rule body actually change)
     paths = {}  # uuid -> representative path (for merge_date lookup)
 
@@ -268,13 +277,16 @@ def build_changelog(from_tag: str, to_tag: str) -> dict:
         # Old side: rule existed before this release (modified/deleted/renamed).
         if status in ("M", "D", "R", "C"):
             for rule in load_rules_at(from_tag, old_path):
-                prev_index[rule["id"]] = rule_summary(rule)
+                uuid = rule["id"]
+                prev_index[uuid] = rule_summary(rule)
+                prev_lifecycle_paths[uuid] = lifecycle_status_from_path(old_path)
         # New side: rule exists after this release (added/modified/renamed).
         if status in ("M", "A", "R", "C"):
             changed = not (status in ("R", "C") and score == 100)
             for rule in load_rules_at(to_tag, new_path):
                 uuid = rule["id"]
                 curr_index[uuid] = rule_summary(rule)
+                curr_lifecycle_paths[uuid] = lifecycle_status_from_path(new_path)
                 content_changed[uuid] = content_changed.get(uuid, False) or changed
                 paths[uuid] = new_path
         else:
@@ -285,18 +297,28 @@ def build_changelog(from_tag: str, to_tag: str) -> dict:
     for uuid in set(prev_index) | set(curr_index):
         prev = prev_index.get(uuid)
         curr = curr_index.get(uuid)
+        prev_lifecycle = prev_lifecycle_paths.get(uuid, "")
+        curr_lifecycle = curr_lifecycle_paths.get(uuid, "")
+        prev_eol = (
+            prev["status"]
+            if prev and prev["status"] in END_OF_LIFE_STATUS
+            else prev_lifecycle
+        )
+        curr_eol = (
+            curr["status"]
+            if curr and curr["status"] in END_OF_LIFE_STATUS
+            else curr_lifecycle
+        )
 
         if curr and not prev:
             change_type = "new"
         elif prev and not curr:
             change_type = "removed"
-        elif (
-            curr["status"] in END_OF_LIFE_STATUS
-            and prev["status"] not in END_OF_LIFE_STATUS
-        ):
-            # Transitioned out of the active set this release. Report it as the
-            # specific end-of-life status ("deprecated" or "unsupported").
-            change_type = curr["status"]
+        elif curr_eol and curr_eol != prev_eol:
+            # Entered, or moved between, end-of-life states this release (e.g.
+            # active -> deprecated, or deprecated -> unsupported). Report it as
+            # the specific end-of-life status the rule now carries.
+            change_type = curr_eol
         elif content_changed.get(uuid):
             change_type = "update"
         else:
