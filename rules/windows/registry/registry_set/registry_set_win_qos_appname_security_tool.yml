@@ -1,0 +1,114 @@
+title: QoS Policy AppName Set to Security Tool
+id: 3c8f2a1b-5d4e-4f6a-9b0c-1e2d3a4b5c6d
+status: experimental
+description: |
+    Detects registry modifications setting the AppName value under the Windows QoS policy key to known security tool process names.
+    AppName is a QoS policy setting that can be used to target specific processes for QOS related actions, such as throttling their network bandwidth.
+    QOS policies targeting security tools (e.g. EDR agents) are highly suspicious as they may indicate an attempt to throttle network access for those tools, silencing telemetry without terminating the process.
+references:
+    - https://github.com/TwoSevenOneT/EDRChoker/
+    - https://www.zerosalarium.com/2026/06/edrchoker-choking-telemetry-stream-block-edr.html
+author: Swachchhanda Shrawan Poudel (Nextron Systems)
+date: 2026-06-09
+tags:
+    - attack.defense-impairment
+    - attack.t1562.001
+logsource:
+    category: registry_set
+    product: windows
+detection:
+    selection:
+        TargetObject|contains: '\Software\Policies\Microsoft\Windows\QoS\'
+        TargetObject|endswith: '\AppName'
+        Details:
+            # Common EDR/XDR/AV agent process names targeted by EDRChoker
+            # Microsoft Defender / Defender for Endpoint
+            - 'MpDefenderCoreService.exe'
+            - 'MsMpEng.exe'
+            - 'MsSense.exe'
+            - 'NisSrv.exe'
+            - 'SenseCncProxy.exe'
+            - 'SenseIR.exe'
+            - 'SenseNdr.exe'
+            - 'SenseSampleUploader.exe'
+            # Elastic
+            - 'elastic-agent.exe'
+            - 'elastic-endpoint.exe'
+            - 'filebeat.exe'
+            - 'winlogbeat.exe'
+            # FireEye / Trellix
+            - 'xagt.exe'
+            # Qualys
+            - 'QualysAgent.exe'
+            # SentinelOne
+            - 'SentinelAgent.exe'
+            - 'SentinelAgentWorker.exe'
+            - 'SentinelBrowserNativeHost.exe'
+            - 'SentinelHelperService.exe'
+            - 'LogProcessorService.exe'
+            - 'SentinelServiceHost.exe'
+            - 'SentinelStaticEngine.exe'
+            - 'SentinelStaticEngineScanner.exe'
+            # Cylance (BlackBerry)
+            - 'AmSvc.exe'
+            - 'CrAmTray.exe'
+            - 'CrsSvc.exe'
+            - 'CylanceSvc.exe'
+            - 'ExecutionPreventionSvc.exe'
+            # Cybereason
+            - 'CybereasonAV.exe'
+            # VMware Carbon Black
+            - 'cb.exe'
+            - 'CbDefense.exe'
+            # Tanium
+            - 'TaniumClient.exe'
+            - 'TaniumCX.exe'
+            - 'TaniumDetectEngine.exe'
+            # Palo Alto Cortex XDR (Traps)
+            - 'cyserver.exe'
+            - 'CyveraService.exe'
+            - 'CyvrFsFlt.exe'
+            - 'Traps.exe'
+            # Fortinet FortiEDR
+            - 'fortiedr.exe'
+            # Symantec
+            - 'EIConnector.exe'
+            - 'sfc.exe'
+            # ESET
+            - 'ekrn.exe'
+            # HarfangLab
+            - 'hurukai.exe'
+            # WithSecure (F-Secure)
+            - 'CETASvc.exe'
+            - 'EndpointBasecamp.exe'
+            - 'WSCommunicator.exe'
+            # Trend Micro
+            - 'CNTAoSMgr.exe'
+            - 'Ntrtscan.exe'
+            - 'PccNTMon.exe'
+            - 'TMBMSRV.exe'
+            - 'TmCCSF.exe'
+            - 'TmListen.exe'
+            - 'TmWSCSvc.exe'
+            # CrowdStrike
+            - 'CSFalconContainer.exe'
+            - 'CSFalconService.exe'
+            # Deep Instinct
+            - 'ds_agent.exe'
+            # Bitdefender
+            - 'bdredline.exe'
+            # Sophos
+            - 'SavService.exe'
+            # Symantec Endpoint Protection
+            - 'RepMgr.exe'
+            - 'SEPMasterService.exe'
+            # McAfee / Trellix
+            - 'mcshield.exe'
+            # Avast
+            - 'AvastSvc.exe'
+            # SentinelOne (legacy)
+            - 'SentinelOne.exe'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high
