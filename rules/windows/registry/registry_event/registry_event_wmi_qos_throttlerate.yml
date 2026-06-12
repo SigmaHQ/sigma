@@ -4,21 +4,21 @@ status: experimental
 description: Detects when a QoS with ThrottleRate policy is created by Windows Management Instrumentation provider service. This behavior is an indication of EDR suppression where an attacker severs the communication between the agent and the management server for telemetry and alerting.
 author: Tamseel Ahmad
 references:
-  - https://www.zerosalarium.com/2026/06/edrchoker-choking-telemetry-stream-block-edr.html
+    - https://www.zerosalarium.com/2026/06/edrchoker-choking-telemetry-stream-block-edr.html
 date: 2026-06-12
 tags:
-  - attack.defense_evasion
-  - attack.t1562.001
+    - attack.defense_evasion
+    - attack.t1562.001
 logsource:
-  product: windows
-  category: registry_event
+    product: windows
+    category: registry_event
 detection:
-  selection:
-    Image|endswith: '\wmiprvse.exe'
-    TargetObject|contains|all:
-      - '\QoS\'
-      - 'ThrottleRate'
-  condition: selection
+    selection:
+        Image|endswith: '\wmiprvse.exe'
+        TargetObject|contains|all:
+            - '\QoS\'
+            - 'ThrottleRate'
+    condition: selection
 falsepositives:
-  - Legitimate uses of QoS policies
+    - Legitimate uses of QoS policies
 level: medium
