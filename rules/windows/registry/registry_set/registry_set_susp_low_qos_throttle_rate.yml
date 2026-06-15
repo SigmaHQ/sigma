@@ -6,7 +6,7 @@ description: |
     cut off network access for targeted processes. The technique sets a ThrottleRate registry value to an abnormally
     low value under the QoS Group Policy key, causing TCP/UDP connections for matched processes to time out and
     cutting off security agent telemetry. Legitimate QoS policies use human-scale bandwidth values; a throttle rate
-    below 1KB/s (0-1023 bytes/sec) is too low for any real administrative use and is a strong indicator of deliberate
+    at or below 1KB/s (0-1024 bytes/sec) is too low for any real administrative use and is a strong indicator of deliberate
     tampering to starve a process of network access - commonly targeting EDR, AV, or other security services to
     suppress telemetry or block cloud lookups.
 references:
@@ -22,12 +22,12 @@ logsource:
     category: registry_set
     product: windows
 detection:
-    selection_reistry:
+    selection_registry:
         TargetObject|contains: '\Software\Policies\Microsoft\Windows\QoS\'
         TargetObject|endswith: '\ThrottleRate'
     selection_low_rate:
         # Sysmon formats REG_QWORD as two 32-bit halves: QWORD (0x<high>-0x<low>)
-        # High half 0x00000000 + low half prefixes 0x000000-0x000003 catch values 0-1023 (below 1KB/s).
+        # High half 0x00000000 + low half prefixes 0x000000-0x000003 catch values 0-1023 (below 1KB/s); 1024 (1KB/s) is handled explicitly below.
         # Observed EDRChoker value: QWORD (0x00000000-0x00000001)
         - Details|startswith:
               - 'QWORD (0x00000000-0x000000'  # 0-255
