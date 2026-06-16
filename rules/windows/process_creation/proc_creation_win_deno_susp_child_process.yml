@@ -3,34 +3,34 @@ id: d87100fd-60cc-4899-a5d0-10423873eb1d
 status: experimental
 description: Detects suspicious child process execution from the Deno runtime, a behavior useful for MuddyWater/Dindoor-inspired hunting.
 references:
-  - https://www.threathunter.ai/blog/stryker-handala-mois-muddywater-unified-brief-detection-pack-v3
+    - https://www.threathunter.ai/blog/stryker-handala-mois-muddywater-unified-brief-detection-pack-v3
 author: Andrey Pautov
 date: 2026-05-13
 tags:
-  - attack.execution
-  - attack.t1059
+    - attack.execution
+    - attack.t1059
 logsource:
-  product: windows
-  category: process_creation
+    product: windows
+    category: process_creation
 detection:
-  selection_parent:
-    ParentImage|endswith: '\deno.exe'
-  selection_child:
-    Image|endswith:
-      - '\cmd.exe'
-      - '\powershell.exe'
-      - '\pwsh.exe'
-      - '\wscript.exe'
-      - '\cscript.exe'
-      - '\rundll32.exe'
-  condition: selection_parent and selection_child
+    selection_parent:
+        ParentImage|endswith: '\deno.exe'
+    selection_child:
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\rundll32.exe'
+    condition: selection_parent and selection_child
 fields:
-  - UtcTime
-  - Computer
-  - User
-  - ParentImage
-  - Image
-  - CommandLine
+    - UtcTime
+    - Computer
+    - User
+    - ParentImage
+    - Image
+    - CommandLine
 falsepositives:
-  - Developer automation using Deno to orchestrate local shell commands.
+    - Developer automation using Deno to orchestrate local shell commands.
 level: medium

@@ -7,37 +7,37 @@ description: >
   with Imperial Kitten / Yellow Liderc reporting. Tune approved automation and legacy
   mail clients before alerting; this selector is intentionally broad.
 references:
-  - https://www.crowdstrike.com/en-us/blog/imperial-kitten-deploys-novel-malware-families/
-  - https://www.pwc.com/gx/en/issues/cybersecurity/cyber-threat-intelligence/yellow-liderc-ships-its-scripts-delivers-imaploader-malware.html
+    - https://www.crowdstrike.com/en-us/blog/imperial-kitten-deploys-novel-malware-families/
+    - https://www.pwc.com/gx/en/issues/cybersecurity/cyber-threat-intelligence/yellow-liderc-ships-its-scripts-delivers-imaploader-malware.html
 author: Andrey Pautov
 date: 2026-05-14
 tags:
-  - attack.command-and-control
-  - attack.t1071.003
+    - attack.command-and-control
+    - attack.t1071.003
 logsource:
-  product: windows
-  category: network_connection
+    product: windows
+    category: network_connection
 detection:
-  selection_ports:
-    DestinationPort:
-      - 143
-      - 993
-  filter_mail_clients:
-    Image|endswith:
-      - '\OUTLOOK.EXE'
-      - '\outlook.exe'
-      - '\thunderbird.exe'
-      - '\olk.exe'
-  condition: selection_ports and not filter_mail_clients
+    selection_ports:
+        DestinationPort:
+            - 143
+            - 993
+    filter_mail_clients:
+        Image|endswith:
+            - '\OUTLOOK.EXE'
+            - '\outlook.exe'
+            - '\thunderbird.exe'
+            - '\olk.exe'
+    condition: selection_ports and not filter_mail_clients
 fields:
-  - UtcTime
-  - Computer
-  - User
-  - Image
-  - DestinationHostname
-  - DestinationIp
-  - DestinationPort
+    - UtcTime
+    - Computer
+    - User
+    - Image
+    - DestinationHostname
+    - DestinationIp
+    - DestinationPort
 falsepositives:
-  - Approved mail clients not included in the local allowlist.
-  - Legacy mail-collection scripts or monitoring agents that use IMAP.
+    - Approved mail clients not included in the local allowlist.
+    - Legacy mail-collection scripts or monitoring agents that use IMAP.
 level: low
