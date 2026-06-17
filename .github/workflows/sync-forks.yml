@@ -1,0 +1,24 @@
+name: Automatic Fork Sync
+
+on:
+  schedule:
+    # Roda todos os dias às 03:00 UTC (00:00 no horário de Brasília)
+    - cron: '0 3 * * *'
+  workflow_dispatch: # Permite disparar o sync manualmente pelo painel do GitHub
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Necessário para dar push nas alterações de volta para o seu fork
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Sincronizar com o Repositório Original
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Sincroniza a branch principal (ajuste 'main' ou 'master' conforme o seu repositório)
+          gh repo sync ${{ github.repository }} -b main
